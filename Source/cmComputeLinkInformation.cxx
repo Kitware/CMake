@@ -1901,6 +1901,12 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     }
   if(use_build_rpath || use_link_rpath)
     {
+    std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+    const char *stagePath
+                  = this->Makefile->GetSafeDefinition("CMAKE_STAGING_PREFIX");
+    const char *installPrefix
+                  = this->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
+    cmSystemTools::ConvertToUnixSlashes(rootPath);
     std::vector<std::string> const& rdirs = this->GetRuntimeSearchPath();
     for(std::vector<std::string>::const_iterator ri = rdirs.begin();
         ri != rdirs.end(); ++ri)
@@ -1909,9 +1915,22 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       // support or if using the link path as an rpath.
       if(use_build_rpath)
         {
-        if(emitted.insert(*ri).second)
+        std::string d = *ri;
+        if (d.find(rootPath) == 0)
           {
-          runtimeDirs.push_back(*ri);
+          d = d.substr(rootPath.size());
+          }
+        else if (d.find(stagePath) == 0)
+          {
+          std::string suffix = d.substr(strlen(stagePath));
+          d = installPrefix;
+          d += "/";
+          d += suffix;
+          cmSystemTools::ConvertToUnixSlashes(d);
+          }
+        if(emitted.insert(d).second)
+          {
+          runtimeDirs.push_back(d);
           }
         }
       else if(use_link_rpath)
@@ -1924,9 +1943,22 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
            !cmSystemTools::IsSubDirectory(ri->c_str(), topSourceDir) &&
            !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
           {
-          if(emitted.insert(*ri).second)
+          std::string d = *ri;
+          if (d.find(rootPath) == 0)
             {
-            runtimeDirs.push_back(*ri);
+            d = d.substr(rootPath.size());
+            }
+          else if (d.find(stagePath) == 0)
+            {
+            std::string suffix = d.substr(strlen(stagePath));
+            d = installPrefix;
+            d += "/";
+            d += suffix;
+            cmSystemTools::ConvertToUnixSlashes(d);
+            }
+          if(emitted.insert(d).second)
+            {
+            runtimeDirs.push_back(d);
             }
           }
         }

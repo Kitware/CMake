@@ -370,6 +370,20 @@ void cmLocalGenerator::GenerateInstallRules()
     prefix = "/usr/local";
     }
 #endif
+  std::string sysrootted
+                  = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+  if (const char *stagingPrefix
+                  = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX"))
+    {
+    prefix = stagingPrefix;
+    }
+  else if (!sysrootted.empty())
+    {
+    sysrootted += "/";
+    sysrootted += prefix;
+    cmSystemTools::ConvertToUnixSlashes(sysrootted);
+    prefix = sysrootted.c_str();
+    }
 
   // Compute the set of configurations.
   std::vector<std::string> configurationTypes;
@@ -1043,11 +1057,38 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       // If this is the compiler then look for the extra variable
       // _COMPILER_ARG1 which must be the first argument to the compiler
       const char* compilerArg1 = 0;
+      const char* compilerTarget = 0;
+      const char* compilerOptionTarget = 0;
+      const char* compilerExternalToolchain = 0;
+      const char* compilerOptionExternalToolchain = 0;
+      const char* compilerSysroot = 0;
+      const char* compilerOptionSysroot = 0;
       if(actualReplace == "CMAKE_${LANG}_COMPILER")
         {
         std::string arg1 = actualReplace + "_ARG1";
         cmSystemTools::ReplaceString(arg1, "${LANG}", lang);
         compilerArg1 = this->Makefile->GetDefinition(arg1.c_str());
+        compilerTarget
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang + "_COMPILER_TARGET").c_str());
+        compilerOptionTarget
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                                          "_COMPILE_OPTIONS_TARGET").c_str());
+        compilerExternalToolchain
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                                    "_COMPILER_EXTERNAL_TOOLCHAIN").c_str());
+        compilerOptionExternalToolchain
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                              "_COMPILE_OPTIONS_EXTERNAL_TOOLCHAIN").c_str());
+        compilerSysroot
+              = this->Makefile->GetDefinition("CMAKE_SYSROOT");
+        compilerOptionSysroot
+              = this->Makefile->GetDefinition(
+                (std::string("CMAKE_") + lang +
+                              "_COMPILE_OPTIONS_SYSROOT").c_str());
         }
       if(actualReplace.find("${LANG}") != actualReplace.npos)
         {
@@ -1067,6 +1108,24 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             {
             ret += " ";
             ret += compilerArg1;
+            }
+          if (compilerTarget && compilerOptionTarget)
+            {
+            ret += " ";
+            ret += compilerOptionTarget;
+            ret += compilerTarget;
+            }
+          if (compilerExternalToolchain && compilerOptionExternalToolchain)
+            {
+            ret += " ";
+            ret += compilerOptionExternalToolchain;
+            ret += compilerExternalToolchain;
+            }
+          if (compilerSysroot && compilerOptionSysroot)
+            {
+            ret += " ";
+            ret += compilerOptionSysroot;
+            ret += compilerSysroot;
             }
           return ret;
           }
@@ -1462,6 +1521,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     return;
     }
 
+  std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
+
   std::vector<std::string> implicitDirs;
   // Load implicit include directories for this language.
   std::string impDirVar = "CMAKE_";
@@ -1474,7 +1535,9 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     for(std::vector<std::string>::const_iterator i = impDirVec.begin();
         i != impDirVec.end(); ++i)
       {
-      emitted.insert(*i);
+      std::string d = rootPath + *i;
+      cmSystemTools::ConvertToUnixSlashes(d);
+      emitted.insert(d);
       if (!stripImplicitInclDirs)
         {
         implicitDirs.push_back(*i);

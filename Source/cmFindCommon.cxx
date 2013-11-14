@@ -138,16 +138,27 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     {
     return;
     }
+  const char* sysroot =
+    this->Makefile->GetDefinition("CMAKE_SYSROOT");
   const char* rootPath =
     this->Makefile->GetDefinition("CMAKE_FIND_ROOT_PATH");
-  if((rootPath == 0) || (strlen(rootPath) == 0))
+  const bool noSysroot = !sysroot || !*sysroot;
+  const bool noRootPath = !rootPath || !*rootPath;
+  if(noSysroot && noRootPath)
     {
     return;
     }
 
   // Construct the list of path roots with no trailing slashes.
   std::vector<std::string> roots;
-  cmSystemTools::ExpandListArgument(rootPath, roots);
+  if (rootPath)
+    {
+    cmSystemTools::ExpandListArgument(rootPath, roots);
+    }
+  if (sysroot)
+    {
+    roots.push_back(sysroot);
+    }
   for(std::vector<std::string>::iterator ri = roots.begin();
       ri != roots.end(); ++ri)
     {
@@ -428,6 +439,15 @@ void cmFindCommon::ComputeFinalPaths()
 
   // Expand list of paths inside all search roots.
   this->RerootPaths(paths);
+
+  if(const char* stagePrefix =
+      this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX"))
+    {
+    if (!this->Makefile->IsOn("CMAKE_FIND_NO_INSTALL_PREFIX"))
+      {
+      paths.push_back(stagePrefix);
+      }
+    }
 
   // Add a trailing slash to all paths to aid the search process.
   for(std::vector<std::string>::iterator i = paths.begin();
