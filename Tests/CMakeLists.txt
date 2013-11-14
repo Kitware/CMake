@@ -52,7 +52,7 @@ if(BUILD_TESTING)
   endif()
 
   set(MAKE_IS_GNU )
-  if(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
+  if(CMAKE_TEST_MAKEPROGRAM MATCHES make)
     execute_process(COMMAND ${CMAKE_TEST_MAKEPROGRAM} no_such_target --version
       RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
     if("${res}" STREQUAL "0")
@@ -64,8 +64,8 @@ if(BUILD_TESTING)
 
   # some old versions of make simply cannot handle spaces in paths
   if (MAKE_IS_GNU OR
-      "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
-      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode|Borland")
+      CMAKE_TEST_MAKEPROGRAM MATCHES "nmake|gmake|wmake" OR
+      CMAKE_TEST_GENERATOR MATCHES "Visual Studio|XCode|Borland")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
     set(MAKE_SUPPORTS_SPACES 0)
