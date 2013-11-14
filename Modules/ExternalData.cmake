@@ -58,7 +58,7 @@
 #
 # It creates custom commands in the target as necessary to make data
 # files available for each ``DATA{}`` reference previously evaluated by
-# other functions provided by this module.  A list of URL templates must
+# other functions provided by this module.  A list of URL templates may
 # be provided in the variable ``ExternalData_URL_TEMPLATES`` using the
 # placeholders ``%(algo)`` and ``%(hash)`` in each template.  Data fetch
 # rules try each URL template in order by substituting the hash
@@ -202,8 +202,9 @@ function(ExternalData_add_test target)
 endfunction()
 
 function(ExternalData_add_target target)
-  if(NOT ExternalData_URL_TEMPLATES)
-    message(FATAL_ERROR "ExternalData_URL_TEMPLATES is not set!")
+  if(NOT ExternalData_URL_TEMPLATES AND NOT ExternalData_OBJECT_STORES)
+    message(FATAL_ERROR
+      "Neither ExternalData_URL_TEMPLATES nor ExternalData_OBJECT_STORES is set!")
   endif()
   if(NOT ExternalData_OBJECT_STORES)
     set(ExternalData_OBJECT_STORES ${CMAKE_BINARY_DIR}/ExternalData/Objects)
@@ -625,8 +626,9 @@ endif()
 if(ExternalData_CONFIG)
   include(${ExternalData_CONFIG})
 endif()
-if(NOT ExternalData_URL_TEMPLATES)
-  message(FATAL_ERROR "No ExternalData_URL_TEMPLATES set!")
+if(NOT ExternalData_URL_TEMPLATES AND NOT ExternalData_OBJECT_STORES)
+  message(FATAL_ERROR
+    "Neither ExternalData_URL_TEMPLATES nor ExternalData_OBJECT_STORES is set!")
 endif()
 
 function(_ExternalData_link_or_copy src dst)
@@ -754,6 +756,9 @@ function(_ExternalData_download_object name hash algo var_obj)
     set(obj "${staged}")
     message(STATUS "Staged object: \"${obj}\"")
   else()
+    if(NOT tried)
+      set(tried "\n  (No ExternalData_URL_TEMPLATES given)")
+    endif()
     message(FATAL_ERROR "Object ${algo}=${hash} not found at:${tried}")
   endif()
 
