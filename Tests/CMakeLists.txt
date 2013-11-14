@@ -2531,19 +2531,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
 
-  if(UNIX)
-    string(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix"
-      PREFIX_IS_FOR_TEST)
-    if(PREFIX_IS_FOR_TEST)
-      configure_file(
-        ${CMake_SOURCE_DIR}/Tests/TestInstall.sh.in
-        ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestInstall.sh
-        @ONLY
-        )
-      add_test(ShellInstall /bin/sh ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestShellInstall.sh)
-    endif()
-  endif()
-
   if(CMAKE_TEST_PROJECT_CSE_DIR)
     set(script "${CMAKE_TEST_PROJECT_CSE_DIR}/BuildProjectCSE.cmake")
     if(NOT EXISTS "${script}")
