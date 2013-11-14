@@ -46,7 +46,7 @@
 # The cmake CMAKE_PARSE_ARGUMENTS_SKIP_EMPTY (old behaviour) and
 # CMAKE_PARSE_ARGUMENTS_KEEP_EMPTY options decide how empty arguments
 # should be handled. If none of these options is set, for backwards
-# compatibility, if CMAKE_MINIMUM_REQUIRED_VERSION < 2.8.13, the default
+# compatibility, if CMAKE_MINIMUM_REQUIRED_VERSION < 3.0.0, the default
 # behaviour is to skip empty arguments, otherwise the default behaviour
 # is to keep them. Using the CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY
 # directory property the user can explicitly set the default behaviour
@@ -190,7 +190,7 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
     string(REGEX REPLACE "^${CMAKE_MATCH_0}" "" ARGN "x${ARGN}")
   elseif(_defaultSkipEmptySet)
     set(_skipEmpty ${_defaultSkipEmpty})
-  elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.13)
+  elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
     # Keep compatibility with previous releases
     set(_skipEmpty 1)
   else()
