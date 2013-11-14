@@ -62,9 +62,17 @@ bool cmSetCommand
     this->Makefile->RemoveDefinition(args[0].c_str());
     return true;
     }
+  // SET (VAR PARENT_SCOPE) // Removes the definition of VAR
+                            // in the parent scope.
+  else if (args.size() == 2 && args[args.size()-1] == "PARENT_SCOPE")
+    {
+    this->Makefile->RaiseScope(variable, 0);
+    return true;
+    }
 
   // here are the remaining options
   //  SET (VAR value )
+  //  SET (VAR value PARENT_SCOPE)
   //  SET (VAR CACHE TYPE "doc String" [FORCE])
   //  SET (VAR value CACHE TYPE "doc string" [FORCE])
   std::string value;  // optional
@@ -114,15 +122,8 @@ bool cmSetCommand
 
   if (parentScope)
     {
-    if (value.empty())
-      {
-      this->Makefile->RaiseScope(variable, 0);
-      }
-    else
-      {
-      this->Makefile->RaiseScope(variable, value.c_str());
-      }
-      return true;
+    this->Makefile->RaiseScope(variable, value.c_str());
+    return true;
     }
 
 
