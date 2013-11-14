@@ -182,12 +182,12 @@ function(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgName
   get_property(_defaultSkipEmpty    DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY)
 
   if("x${ARGN}" MATCHES "^xCMAKE_PARSE_ARGUMENTS_(SKIP|KEEP)_EMPTY;?")
-    string(REGEX REPLACE "^${CMAKE_MATCH_0}" "" ARGN "x${ARGN}")
     if("${CMAKE_MATCH_1}" STREQUAL "SKIP")
         set(_skipEmpty 1)
     elseif("${CMAKE_MATCH_1}" STREQUAL "KEEP")
         set(_skipEmpty 0)
     endif()
+    string(REGEX REPLACE "^${CMAKE_MATCH_0}" "" ARGN "x${ARGN}")
   elseif(_defaultSkipEmptySet)
     set(_skipEmpty ${_defaultSkipEmpty})
   elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.13)
