@@ -113,10 +113,6 @@ endif()
 # for testing. Simply to improve readability of the main script.
 #-----------------------------------------------------------------------
 macro(CMAKE_SETUP_TESTING)
-  if (NOT DART_ROOT)
-    set(MAKEPROGRAM ${CMAKE_MAKE_PROGRAM})
-  endif ()
-
   if(BUILD_TESTING)
     set(CMAKE_TEST_GENERATOR "" CACHE STRING
       "Generator used when running tests")
@@ -125,7 +121,6 @@ macro(CMAKE_SETUP_TESTING)
     if(NOT CMAKE_TEST_GENERATOR)
       set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
       set(CMAKE_TEST_GENERATOR_TOOLSET "${CMAKE_GENERATOR_TOOLSET}")
-      set(CMAKE_TEST_MAKEPROGRAM "${MAKEPROGRAM}")
     else()
       set(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
       set(CMAKE_TEST_GENERATOR_TOOLSET "")
