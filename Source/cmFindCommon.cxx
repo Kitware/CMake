@@ -165,6 +165,9 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
     cmSystemTools::ConvertToUnixSlashes(*ri);
     }
 
+  const char* stagePrefix =
+      this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
+
   // Copy the original set of unrooted paths.
   std::vector<std::string> unrootedPaths = paths;
   paths.clear();
@@ -179,7 +182,9 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
       // already inside.  Skip the unrooted path if it is relative to
       // a user home directory or is empty.
       std::string rootedDir;
-      if(cmSystemTools::IsSubDirectory(ui->c_str(), ri->c_str()))
+      if(cmSystemTools::IsSubDirectory(ui->c_str(), ri->c_str())
+          || (stagePrefix
+            && cmSystemTools::IsSubDirectory(ui->c_str(), stagePrefix)))
         {
         rootedDir = *ui;
         }
