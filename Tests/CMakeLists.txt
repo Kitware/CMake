@@ -506,8 +506,8 @@ if(BUILD_TESTING)
   endif()
 
   # test for correct sub-project generation
-  # not implemented in VS6 or Xcode
-  if(NOT MSVC60 AND NOT XCODE AND NOT MSVC70)
+  # not implemented in VS 6, VS 7.0, Xcode, or Ninja
+  if(NOT CMAKE_TEST_GENERATOR MATCHES "Visual Studio [67]$|Xcode|Ninja")
     # run cmake and configure all of SubProject
     # but only build the independent executable car
     add_test(SubProject ${CMAKE_CTEST_COMMAND}
@@ -521,24 +521,23 @@ if(BUILD_TESTING)
       --test-command car
       )
 
-    if(${CMAKE_TEST_GENERATOR} MATCHES "Ninja")
-      # The Ninja generator does not create a recursive build system.  Start
-      # from the root directory.
-      set(SubProject_SUBDIR)
-    else()
-      set(SubProject_SUBDIR "/foo")
-    endif()
-
     # For stage 2, do not run cmake again.
     # Then build the foo sub project which should build
     # the bar library which should be referenced because
     # foo links to the static library bar, but bar is not
     # directly in the foo sub project
+    if(CMAKE_TEST_MAKEPROGRAM)
+      set(SubProject-Stage2_BUILD_MAKEPROGRAM
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        )
+    endif()
     add_test(SubProject-Stage2  ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/SubProject${SubProject_SUBDIR}"
-      "${CMake_BINARY_DIR}/Tests/SubProject${SubProject_SUBDIR}"
-      ${build_generator_args}
+      "${CMake_SOURCE_DIR}/Tests/SubProject/foo"
+      "${CMake_BINARY_DIR}/Tests/SubProject/foo"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
+      ${SubProject-Stage2_BUILD_MAKEPROGRAM}
       --build-nocmake
       --build-project foo
       --build-target foo
