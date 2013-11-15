@@ -377,13 +377,6 @@ void cmLocalGenerator::GenerateInstallRules()
     {
     prefix = stagingPrefix;
     }
-  else if (!sysrootted.empty())
-    {
-    sysrootted += "/";
-    sysrootted += prefix;
-    cmSystemTools::ConvertToUnixSlashes(sysrootted);
-    prefix = sysrootted.c_str();
-    }
 
   // Compute the set of configurations.
   std::vector<std::string> configurationTypes;
