@@ -94,7 +94,6 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
   const char* additionalPlatformDefinition)
   : cmGlobalVisualStudio71Generator(platformName)
 {
-  this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
 

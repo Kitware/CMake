@@ -173,6 +173,7 @@ private:
   char* IntelProjectVersion;
   std::string DevEnvCommand;
   bool DevEnvCommandInitialized;
+  virtual std::string GetVSMakeProgram() { return this->GetDevEnvCommand(); }
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

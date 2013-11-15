@@ -82,6 +82,8 @@ public:
   };
   class OrderedTargetDependSet;
 
+  virtual void FindMakeProgram(cmMakefile*);
+
 protected:
   // Does this VS version link targets to each other if there are
   // dependencies in the SLN file?  This was done for VS versions
@@ -107,6 +109,7 @@ protected:
   const char* AdditionalPlatformDefinition;
 
 private:
+  virtual std::string GetVSMakeProgram() = 0;
   void PrintCompilerAdvice(std::ostream&, std::string, const char*) {}
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 

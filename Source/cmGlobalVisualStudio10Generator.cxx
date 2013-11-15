@@ -92,7 +92,6 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   : cmGlobalVisualStudio8Generator(name, platformName,
                                    additionalPlatformDefinition)
 {
-  this->FindMakeProgramFile = "CMakeVS10FindMake.cmake";
   std::string vc10Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
