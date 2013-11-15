@@ -513,23 +513,14 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     {
     this->BuildNoClean = true;
     }
-  if(currentArg.find("--build-options",0) == 0 && idx < allArgs.size() - 1)
+  if(currentArg.find("--build-options",0) == 0)
     {
-    ++idx;
-    bool done = false;
-    while(idx < allArgs.size() && !done)
+    while(idx+1 < allArgs.size() &&
+          allArgs[idx+1] != "--build-target" &&
+          allArgs[idx+1] != "--test-command")
       {
+      ++idx;
       this->BuildOptions.push_back(allArgs[idx]);
-      if(idx+1 < allArgs.size()
-         && (allArgs[idx+1] == "--build-target" ||
-             allArgs[idx+1] == "--test-command"))
-        {
-        done = true;
-        }
-      else
-        {
-        ++idx;
-        }
       }
     }
   if(currentArg.find("--test-command",0) == 0 && idx < allArgs.size() - 1)
