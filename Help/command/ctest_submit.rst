@@ -22,6 +22,7 @@ Valid part names are:
   MemCheck   = ctest_memcheck results, in DynamicAnalysis.xml
   Notes      = Files listed by CTEST_NOTES_FILES, in Notes.xml
   ExtraFiles = Files listed by CTEST_EXTRA_SUBMIT_FILES
+  Upload     = Files prepared for upload by ctest_upload(), in Upload.xml
   Submit     = nothing
 
 The FILES option explicitly lists specific files to be submitted.
