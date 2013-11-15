@@ -20,7 +20,6 @@
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   const char* platformName)
 {
-  this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
 

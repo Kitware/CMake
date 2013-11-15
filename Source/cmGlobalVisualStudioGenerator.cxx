@@ -500,6 +500,19 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
+{
+  // Visual Studio generators know how to lookup their build tool
+  // directly instead of needing a helper module to do it, so we
+  // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
+  if(cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
+    {
+    mf->AddDefinition("CMAKE_MAKE_PROGRAM",
+                      this->GetVSMakeProgram().c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 {
   if(this->AdditionalPlatformDefinition)

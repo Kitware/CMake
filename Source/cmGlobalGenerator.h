@@ -203,7 +203,7 @@ public:
   /*
    * Determine what program to use for building the project.
    */
-  void FindMakeProgram(cmMakefile*);
+  virtual void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const char* project, const char* name,

@@ -118,5 +118,6 @@ private:
   bool MSBuildCommandInitialized;
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
+  virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
 };
 #endif

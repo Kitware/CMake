@@ -92,6 +92,7 @@ public:
 protected:
   virtual const char* GetIDEVersion() { return "6.0"; }
 private:
+  virtual std::string GetVSMakeProgram() { return this->GetMSDevCommand(); }
   void GenerateConfigurations(cmMakefile* mf);
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
