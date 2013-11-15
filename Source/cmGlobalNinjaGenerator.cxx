@@ -549,47 +549,32 @@ bool cmGlobalNinjaGenerator::UsingMinGW = false;
 //   cmGlobalXCodeGenerator
 // Called by:
 //   cmGlobalGenerator::Build()
-std::string cmGlobalNinjaGenerator
-::GenerateBuildCommand(const char* makeProgram,
-                       const char* projectName,
-                       const char* projectDir,
-                       const char* additionalOptions,
+void cmGlobalNinjaGenerator
+::GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                       const char* makeProgram,
+                       const char* /*projectName*/,
+                       const char* /*projectDir*/,
                        const char* targetName,
-                       const char* config,
-                       bool ignoreErrors,
-                       bool fast)
+                       const char* /*config*/,
+                       bool /*fast*/,
+                       std::vector<std::string> const& makeOptions)
 {
-  // Project name & dir and config are not used yet.
-  (void)projectName;
-  (void)projectDir;
-  (void)config;
-  // Ninja does not have -i equivalent option yet.
-  (void)ignoreErrors;
-  // We do not handle fast build yet.
-  (void)fast;
+  makeCommand.push_back(makeProgram);
 
-  std::string makeCommand =
-    cmSystemTools::ConvertToUnixOutputPath(makeProgram);
-
-  if(additionalOptions)
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  if(targetName)
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
+  if(targetName && *targetName)
     {
     if(strcmp(targetName, "clean") == 0)
       {
-      makeCommand += " -t clean";
+      makeCommand.push_back("-t");
+      makeCommand.push_back("clean");
       }
     else
       {
-      makeCommand += " ";
-      makeCommand += targetName;
+      makeCommand.push_back(targetName);
       }
     }
-
-  return makeCommand;
 }
 
 //----------------------------------------------------------------------------

@@ -1574,13 +1574,12 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
                      this->TryCompileTimeout);
 }
 
-std::string cmGlobalGenerator
-::GenerateBuildCommand(const char*, const char*,
-                       const char*, const char*,
-                       const char*, const char*,
-                       bool, bool)
+void cmGlobalGenerator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand, const char*, const char*, const char*,
+  const char*, const char*, bool, std::vector<std::string> const&)
 {
-  return "cmGlobalGenerator::GenerateBuildCommand not implemented";
+  makeCommand.push_back(
+    "cmGlobalGenerator::GenerateBuildCommand not implemented");
 }
 
 int cmGlobalGenerator::Build(
@@ -1592,7 +1591,6 @@ int cmGlobalGenerator::Build(
   bool clean, bool fast,
   double timeout,
   cmSystemTools::OutputOption outputflag,
-  const char* extraOptions,
   std::vector<std::string> const& nativeOptions)
 {
   /**
@@ -1620,17 +1618,17 @@ int cmGlobalGenerator::Build(
   // should we do a clean first?
   if (clean)
     {
-    std::string cleanCommand =
-      this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
-      0, "clean", config, false, fast);
+    std::vector<std::string> cleanCommand;
+    this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
+                               bindir, "clean", config, fast);
     if(output)
       {
       *output += "\nRun Clean Command:";
-      *output += cleanCommand;
+      *output += cmSystemTools::PrintSingleCommand(cleanCommand);
       *output += "\n";
       }
 
-    if (!cmSystemTools::RunSingleCommand(cleanCommand.c_str(), outputPtr,
+    if (!cmSystemTools::RunSingleCommand(cleanCommand, outputPtr,
                                          &retVal, 0, outputflag, timeout))
       {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
@@ -1652,37 +1650,29 @@ int cmGlobalGenerator::Build(
     }
 
   // now build
-  std::string makeCommand =
-    this->GenerateBuildCommand(makeCommandCSTR, projectName, bindir,
-                               extraOptions, target,
-                               config, false, fast);
+  std::vector<std::string> makeCommand;
+  this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName,
+                             bindir, target, config, fast, nativeOptions);
+  std::string makeCommandStr = cmSystemTools::PrintSingleCommand(makeCommand);
   if(output)
     {
     *output += "\nRun Build Command:";
-    *output += makeCommand;
+    *output += makeCommandStr;
     *output += "\n";
     }
 
-  std::vector<cmStdString> command =
-    cmSystemTools::ParseArguments(makeCommand.c_str());
-  for(std::vector<std::string>::const_iterator ni = nativeOptions.begin();
-      ni != nativeOptions.end(); ++ni)
-    {
-    command.push_back(*ni);
-    }
-
-  if (!cmSystemTools::RunSingleCommand(command, outputPtr,
+  if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr,
                                        &retVal, 0, outputflag, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);
     cmSystemTools::Error
       ("Generator: execution of make failed. Make command was: ",
-       makeCommand.c_str());
+       makeCommandStr.c_str());
     if (output)
       {
       *output += *outputPtr;
       *output += "\nGenerator: execution of make failed. Make command was: "
-        + makeCommand + "\n";
+        + makeCommandStr + "\n";
       }
 
     // return to the original directory

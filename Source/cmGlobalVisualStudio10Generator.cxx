@@ -256,49 +256,43 @@ std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
 }
 
 
-std::string cmGlobalVisualStudio10Generator
-::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName, const char *projectDir,
-                       const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors, bool fast)
+void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand,
+  const char* makeProgram,
+  const char* projectName,
+  const char* projectDir,
+  const char* targetName,
+  const char* config,
+  bool fast,
+  std::vector<std::string> const& makeOptions)
 {
   // now build the test
-  std::string makeCommand
-    = cmSystemTools::ConvertToOutputPath(makeProgram);
-  std::string lowerCaseCommand = makeCommand;
+  std::string lowerCaseCommand = makeProgram;
   cmSystemTools::LowerCase(lowerCaseCommand);
 
   // If makeProgram is devenv, parent class knows how to generate command:
   if (lowerCaseCommand.find("devenv") != std::string::npos ||
       lowerCaseCommand.find("VCExpress") != std::string::npos)
     {
-    return cmGlobalVisualStudio7Generator::GenerateBuildCommand(makeProgram,
-      projectName, projectDir, additionalOptions, targetName, config,
-      ignoreErrors, fast);
+    cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+      makeCommand, makeProgram, projectName, projectDir,
+      targetName, config, fast, makeOptions);
+    return;
     }
 
   // Otherwise, assume MSBuild command line, and construct accordingly.
 
-  // if there are spaces in the makeCommand, assume a full path
-  // and convert it to a path with no spaces in it as the
-  // RunSingleCommand does not like spaces
-  if(makeCommand.find(' ') != std::string::npos)
-    {
-    cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
-    }
+  makeCommand.push_back(makeProgram);
+
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
   if(!targetName || strlen(targetName) == 0)
     {
     targetName = "ALL_BUILD";
     }
-  bool clean = false;
   if ( targetName && strcmp(targetName, "clean") == 0 )
     {
-    clean = true;
-    makeCommand += " ";
-    makeCommand += projectName;
-    makeCommand += ".sln ";
-    makeCommand += "/t:Clean ";
+    makeCommand.push_back(std::string(projectName)+".sln");
+    makeCommand.push_back("/t:Clean");
     }
   else
     {
@@ -331,27 +325,22 @@ std::string cmGlobalVisualStudio10Generator
           }
         }
       }
-    makeCommand += " ";
-    makeCommand += targetProject;
-    makeCommand += " ";
+    makeCommand.push_back(targetProject);
     }
-  makeCommand += "/p:Configuration=";
+  std::string configArg = "/p:Configuration=";
   if(config && strlen(config))
     {
-    makeCommand += config;
+    configArg += config;
     }
   else
     {
-    makeCommand += "Debug";
+    configArg += "Debug";
     }
-  makeCommand += " /p:VisualStudioVersion=";
-  makeCommand += this->GetIDEVersion();
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  return makeCommand;
+  makeCommand.push_back(configArg);
+  makeCommand.push_back(std::string("/p:VisualStudioVersion=")+
+                        this->GetIDEVersion());
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
 }
 
 //----------------------------------------------------------------------------

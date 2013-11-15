@@ -637,19 +637,21 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         globalGenerator->FindMakeProgram(this->MakefileMap);
         const char* cmakeMakeProgram
           = this->MakefileMap->GetDefinition("CMAKE_MAKE_PROGRAM");
-        std::string buildCommand
-          = globalGenerator->GenerateBuildCommand(cmakeMakeProgram,
-            installProjectName.c_str(), 0, 0,
+        std::vector<std::string> buildCommand;
+        globalGenerator->GenerateBuildCommand(buildCommand, cmakeMakeProgram,
+            installProjectName.c_str(), installDirectory.c_str(),
             globalGenerator->GetPreinstallTargetName(),
-            buildConfig, false, false);
+            buildConfig, false);
+        std::string buildCommandStr =
+          cmSystemTools::PrintSingleCommand(buildCommand);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
-          "- Install command: " << buildCommand << std::endl);
+          "- Install command: " << buildCommandStr << std::endl);
         cmCPackLogger(cmCPackLog::LOG_OUTPUT,
           "- Run preinstall target for: " << installProjectName << std::endl);
         std::string output;
         int retVal = 1;
         bool resB =
-          cmSystemTools::RunSingleCommand(buildCommand.c_str(),
+          cmSystemTools::RunSingleCommand(buildCommand,
                                           &output,
                                           &retVal,
                                           installDirectory.c_str(),
@@ -659,12 +661,12 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
           tmpFile += "/PreinstallOutput.log";
           cmGeneratedFileStream ofs(tmpFile.c_str());
-          ofs << "# Run command: " << buildCommand.c_str() << std::endl
+          ofs << "# Run command: " << buildCommandStr.c_str() << std::endl
             << "# Directory: " << installDirectory.c_str() << std::endl
             << "# Output:" << std::endl
             << output.c_str() << std::endl;
           cmCPackLogger(cmCPackLog::LOG_ERROR,
-            "Problem running install command: " << buildCommand.c_str()
+            "Problem running install command: " << buildCommandStr.c_str()
             << std::endl
             << "Please check " << tmpFile.c_str() << " for errors"
             << std::endl);

@@ -77,52 +77,41 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     }
 }
 
-std::string cmGlobalVisualStudio6Generator
-::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName,
-                       const char *projectDir,
-                       const char* additionalOptions,
-                       const char *targetName,
-                       const char* config,
-                       bool ignoreErrors,
-                       bool)
+void
+cmGlobalVisualStudio6Generator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand,
+  const char* makeProgram,
+  const char* projectName,
+  const char* /*projectDir*/,
+  const char* targetName,
+  const char* config,
+  bool /*fast*/,
+  std::vector<std::string> const& makeOptions
+  )
 {
-  // Visual studio 6 doesn't need project dir
-  (void) projectDir;
-  // Ingoring errors is not implemented in visual studio 6
-  (void) ignoreErrors;
-
   // now build the test
   std::vector<std::string> mp;
   mp.push_back("[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio"
                "\\6.0\\Setup;VsCommonDir]/MSDev98/Bin");
   cmSystemTools::ExpandRegistryValues(mp[0]);
   std::string originalCommand = makeProgram;
-  std::string makeCommand =
+  std::string makeCommandFound =
     cmSystemTools::FindProgram(makeProgram, mp);
-  if(makeCommand.size() == 0)
+  if(makeCommandFound.size() == 0)
     {
     std::string e = "Generator cannot find Visual Studio 6 msdev program \"";
     e += originalCommand;
     e += "\" specified by CMAKE_MAKE_PROGRAM cache entry.  ";
     e += "Please fix the setting.";
     cmSystemTools::Error(e.c_str());
-    return "";
+    return;
     }
-  makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
 
-  // if there are spaces in the makeCommand, assume a full path
-  // and convert it to a path with no spaces in it as the
-  // RunSingleCommand does not like spaces
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  if(makeCommand.find(' ') != std::string::npos)
-    {
-    cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
-    }
-#endif
-  makeCommand += " ";
-  makeCommand += projectName;
-  makeCommand += ".dsw /MAKE \"";
+  makeCommand.push_back(makeCommandFound);
+
+  makeCommand.push_back(std::string(projectName)+".dsw");
+  makeCommand.push_back("/MAKE");
+  std::string targetArg;
   bool clean = false;
   if ( targetName && strcmp(targetName, "clean") == 0 )
     {
@@ -131,35 +120,32 @@ std::string cmGlobalVisualStudio6Generator
     }
   if (targetName && strlen(targetName))
     {
-    makeCommand += targetName;
+    targetArg += targetName;
     }
   else
     {
-    makeCommand += "ALL_BUILD";
+    targetArg += "ALL_BUILD";
     }
-  makeCommand += " - ";
+  targetArg += " - ";
   if(config && strlen(config))
     {
-    makeCommand += config;
+    targetArg += config;
     }
   else
     {
-    makeCommand += "Debug";
+    targetArg += "Debug";
     }
+  makeCommand.push_back(targetArg);
   if(clean)
     {
-    makeCommand += "\" /CLEAN";
+    makeCommand.push_back("/CLEAN");
     }
   else
     {
-    makeCommand += "\" /BUILD";
+    makeCommand.push_back("/BUILD");
     }
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  return makeCommand;
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
 }
 
 ///! Create a local generator appropriate to this Global Generator

@@ -2682,7 +2682,7 @@ int cmake::Build(const std::string& dir,
                     makeProgram.c_str(),
                     config.c_str(), clean, false, 0,
                     cmSystemTools::OUTPUT_PASSTHROUGH,
-                    0, nativeOptions);
+                    nativeOptions);
 }
 
 void cmake::WatchUnusedCli(const char* var)

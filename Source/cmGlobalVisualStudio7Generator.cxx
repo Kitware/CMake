@@ -110,35 +110,19 @@ void cmGlobalVisualStudio7Generator
 
 }
 
-std::string cmGlobalVisualStudio7Generator
-::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName, const char *projectDir,
-                       const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors, bool)
+void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand,
+  const char* makeProgram,
+  const char* projectName,
+  const char* /*projectDir*/,
+  const char* targetName,
+  const char* config,
+  bool /*fast*/,
+  std::vector<std::string> const& makeOptions)
 {
-  // Visual studio 7 doesn't need project dir
-  (void) projectDir;
-  // Ingoring errors is not implemented in visual studio 6
-  (void) ignoreErrors;
+  makeCommand.push_back(makeProgram);
 
-  // now build the test
-  std::string makeCommand =
-    cmSystemTools::ConvertToOutputPath(makeProgram);
-  std::string lowerCaseCommand = makeCommand;
-  cmSystemTools::LowerCase(lowerCaseCommand);
-
-  // if there are spaces in the makeCommand, assume a full path
-  // and convert it to a path with no spaces in it as the
-  // RunSingleCommand does not like spaces
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  if(makeCommand.find(' ') != std::string::npos)
-    {
-    cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
-    }
-#endif
-  makeCommand += " ";
-  makeCommand += projectName;
-  makeCommand += ".sln ";
+  makeCommand.push_back(std::string(projectName) + ".sln");
   bool clean = false;
   if ( targetName && strcmp(targetName, "clean") == 0 )
     {
@@ -147,37 +131,33 @@ std::string cmGlobalVisualStudio7Generator
     }
   if(clean)
     {
-    makeCommand += "/clean ";
+    makeCommand.push_back("/clean");
     }
   else
     {
-    makeCommand += "/build ";
+    makeCommand.push_back("/build");
     }
 
   if(config && strlen(config))
     {
-    makeCommand += config;
+    makeCommand.push_back(config);
     }
   else
     {
-    makeCommand += "Debug";
+    makeCommand.push_back("Debug");
     }
-  makeCommand += " /project ";
+  makeCommand.push_back("/project");
 
   if (targetName && strlen(targetName))
     {
-    makeCommand += targetName;
+    makeCommand.push_back(targetName);
     }
   else
     {
-    makeCommand += "ALL_BUILD";
+    makeCommand.push_back("ALL_BUILD");
     }
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  return makeCommand;
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
 }
 
 ///! Create a local generator appropriate to this Global Generator
