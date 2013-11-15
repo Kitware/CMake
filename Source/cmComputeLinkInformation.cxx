@@ -1916,11 +1916,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
       if(use_build_rpath)
         {
         std::string d = *ri;
-        if (d.find(rootPath) == 0)
+        if (!rootPath.empty() && d.find(rootPath) == 0)
           {
           d = d.substr(rootPath.size());
           }
-        else if (d.find(stagePath) == 0)
+        else if (stagePath && d.find(stagePath) == 0)
           {
           std::string suffix = d.substr(strlen(stagePath));
           d = installPrefix;
@@ -1944,11 +1944,11 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
            !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
           {
           std::string d = *ri;
-          if (d.find(rootPath) == 0)
+          if (!rootPath.empty() && d.find(rootPath) == 0)
             {
             d = d.substr(rootPath.size());
             }
-          else if (d.find(stagePath) == 0)
+          else if (stagePath && d.find(stagePath) == 0)
             {
             std::string suffix = d.substr(strlen(stagePath));
             d = installPrefix;
