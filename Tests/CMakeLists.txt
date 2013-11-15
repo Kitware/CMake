@@ -10,7 +10,9 @@ macro(ADD_TEST_MACRO NAME COMMAND)
     --build-two-config
     ${build_generator_args}
     --build-project ${proj}
-    ${${NAME}_EXTRA_OPTIONS}
+    ${${NAME}_CTEST_OPTIONS}
+    --build-options
+    ${${NAME}_BUILD_OPTIONS}
     --test-command ${COMMAND} ${ARGN})
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 endmacro()
@@ -782,12 +784,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   endif()
 
   if(CTEST_RUN_CPackComponents)
-    set(CPackComponents_EXTRA_OPTIONS)
+    set(CPackComponents_BUILD_OPTIONS)
     if(APPLE)
-      set(CPackComponents_EXTRA_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
+      set(CPackComponents_BUILD_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
     endif()
     if(NSIS_MAKENSIS_EXECUTABLE)
-      set(CPackComponents_EXTRA_OPTIONS ${CPackComponents_EXTRA_OPTIONS}
+      set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
         -DCPACK_BINARY_NSIS:BOOL=ON)
     endif()
 
@@ -802,7 +804,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-options
         -DCPACK_BINARY_DEB:BOOL=${CPACK_BINARY_DEB}
         -DCPACK_BINARY_RPM:BOOL=${CPACK_BINARY_RPM}
-        ${CPackComponents_EXTRA_OPTIONS}
+        ${CPackComponents_BUILD_OPTIONS}
         --graphviz=CPackComponents.dot
       --test-command ${CMAKE_CMAKE_COMMAND}
         "-DCPackComponents_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponents"
@@ -826,7 +828,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
     # ACTIVE_CPACK_GENERATORS variable
     # now contains the list of 'active generators'
-    set(CPackComponentsForAll_EXTRA_OPTIONS)
+    set(CPackComponentsForAll_BUILD_OPTIONS)
     # set up list of CPack generators
     list(APPEND GENLST "ZIP")
     if(APPLE)
@@ -861,7 +863,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
           --build-options
              -DCPACK_BINARY_${CPackGen}:BOOL=ON
              ${CPackRun_CPackComponentWay}
-             ${CPackComponentsForAll_EXTRA_OPTIONS}
+             ${CPackComponentsForAll_BUILD_OPTIONS}
              --graphviz=CPackComponentsForAll.dot
           --test-command ${CMAKE_CMAKE_COMMAND}
             "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
@@ -2141,7 +2143,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-on-failure -C "\${CTestTest_CONFIG}")
 
   if(NOT BORLAND)
-    set(CTestLimitDashJ_EXTRA_OPTIONS --force-new-ctest-process)
+    set(CTestLimitDashJ_CTEST_OPTIONS --force-new-ctest-process)
     add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
       --output-on-failure -C "\${CTestTest_CONFIG}")
   endif()
@@ -2601,8 +2603,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   endforeach()
 
   if(TEST_CompileCommandOutput)
-    set(CompileCommandOutput_EXTRA_OPTIONS
-      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
+    set(CompileCommandOutput_BUILD_OPTIONS
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
     ADD_TEST_MACRO(CompileCommandOutput
       "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
   endif()
