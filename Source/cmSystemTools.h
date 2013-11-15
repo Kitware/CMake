@@ -239,6 +239,8 @@ public:
                                OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0);
 
+  static std::string PrintSingleCommand(std::vector<std::string> const&);
+
   /**
    * Parse arguments out of a single string command
    */

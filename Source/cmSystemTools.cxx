@@ -795,6 +795,23 @@ bool cmSystemTools::RunSingleCommand(
                                          dir, outputflag, timeout);
 }
 
+std::string
+cmSystemTools::PrintSingleCommand(std::vector<std::string> const& command)
+{
+  std::string commandStr;
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator i = command.begin();
+      i != command.end(); ++i)
+    {
+    commandStr += sep;
+    commandStr += "\"";
+    commandStr += *i;
+    commandStr += "\"";
+    sep = " ";
+    }
+  return commandStr;
+}
+
 bool cmSystemTools::DoesFileExistWithExtensions(
   const char* name,
   const std::vector<std::string>& headerExts)
