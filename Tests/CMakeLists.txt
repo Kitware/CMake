@@ -80,7 +80,6 @@ if(BUILD_TESTING)
 
   set(build_generator_args
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     )
   if(CMAKE_TEST_GENERATOR_TOOLSET)
     list(APPEND build_generator_args
@@ -89,6 +88,9 @@ if(BUILD_TESTING)
   endif()
 
   set(build_options)
+  if(CMAKE_TEST_MAKEPROGRAM)
+    list(APPEND build_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+  endif()
 
   add_subdirectory(CMakeLib)
   add_subdirectory(CMakeOnly)
@@ -254,6 +256,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
+  set(ExportImport_BUILD_OPTIONS -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
@@ -465,7 +468,6 @@ if(BUILD_TESTING)
          --build-two-config
          --build-generator "Eclipse CDT4 - Unix Makefiles"
          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
          --build-options ${build_options}
          --test-command Simple)
@@ -481,7 +483,6 @@ if(BUILD_TESTING)
          --build-two-config
          --build-generator "CodeBlocks - Unix Makefiles"
          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
          --build-options ${build_options}
          --test-command Simple)
@@ -496,7 +497,6 @@ if(BUILD_TESTING)
          --build-two-config
          --build-generator "KDevelop3 - Unix Makefiles"
          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
          --build-options ${build_options}
          --test-command Simple)
@@ -1352,6 +1352,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${build_generator_args}
       --build-project MacRuntimePath
       --build-options ${build_options}
+        -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
       )
   endif()
 
@@ -2504,6 +2505,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-project testf
       --build-two-config
       --build-options ${build_options}
+        -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
       --test-command testf)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
 
