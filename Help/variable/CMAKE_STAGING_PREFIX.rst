@@ -9,5 +9,5 @@ The CMAKE_STAGING_PREFIX location is also used as a search prefix by the ``find_
 commands. This can be controlled by setting the :variable:`CMAKE_FIND_NO_INSTALL_PREFIX`
 variable.
 
-If any -rpath paths passed to the linker contain the CMAKE_STAGING_PREFIX,
+If any RPATH/RUNPATH entries passed to the linker contain the CMAKE_STAGING_PREFIX,
 the matching path fragments are replaced with the :variable:`CMAKE_INSTALL_PREFIX`.
