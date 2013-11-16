@@ -4,7 +4,7 @@ CMAKE_SYSROOT
 Path to pass to the compiler in the --sysroot flag.
 
 The CMAKE_SYSROOT content is passed to the compiler in the --sysroot
-flag, if supported.  The path is also stripped from the RPATH if
+flag, if supported.  The path is also stripped from the RPATH/RUNPATH if
 necessary on installation.  The CMAKE_SYSROOT is also used to prefix
 paths searched by the ``find_*`` commands.
 
