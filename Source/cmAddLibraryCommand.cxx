@@ -135,7 +135,8 @@ bool cmAddLibraryCommand
       cmOStringStream e;
       e << (this->Makefile->GetPolicies()
             ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
-      e << "The target name \"" << libName << "\" is not valid for certain "
+      e << "The target name \"" << libName <<
+          "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
           "in undefined behavior.";
       this->Makefile->IssueMessage(messageType, e.str().c_str());

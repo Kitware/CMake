@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmAddCustomTargetCommand.h"
 
+#include "cmGeneratorExpression.h"
+
 // cmAddCustomTargetCommand
 bool cmAddCustomTargetCommand
 ::InitialPass(std::vector<std::string> const& args,
@@ -22,11 +24,13 @@ bool cmAddCustomTargetCommand
     return false;
     }
 
+  std::string targetName = args[0];
+
   // Check the target name.
-  if(args[0].find_first_of("/\\") != args[0].npos)
+  if(targetName.find_first_of("/\\") != targetName.npos)
     {
     cmOStringStream e;
-    e << "called with invalid target name \"" << args[0]
+    e << "called with invalid target name \"" << targetName
       << "\".  Target names may not contain a slash.  "
       << "Use ADD_CUSTOM_COMMAND to generate files.";
     this->SetError(e.str().c_str());
@@ -138,14 +142,56 @@ bool cmAddCustomTargetCommand
       }
     }
 
-  std::string::size_type pos = args[0].find_first_of("#<>");
-  if(pos != args[0].npos)
+  std::string::size_type pos = targetName.find_first_of("#<>");
+  if(pos != targetName.npos)
     {
     cmOStringStream msg;
-    msg << "called with target name containing a \"" << args[0][pos]
+    msg << "called with target name containing a \"" << targetName[pos]
         << "\".  This character is not allowed.";
     this->SetError(msg.str().c_str());
     return false;
+    }
+
+  // Some requirements on custom target names already exist
+  // and have been checked at this point.
+  // The following restrictions overlap but depend on policy CMP0037.
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(targetName);
+  if (nameOk)
+    {
+    nameOk = targetName.find(":") == std::string::npos;
+    }
+  if (!nameOk)
+    {
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    bool issueMessage = false;
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
+      {
+      case cmPolicies::WARN:
+        issueMessage = true;
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        issueMessage = true;
+        messageType = cmake::FATAL_ERROR;
+      }
+    if (issueMessage)
+      {
+      cmOStringStream e;
+      e << (this->Makefile->GetPolicies()
+           ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
+      e << "The target name \"" << targetName <<
+          "\" is reserved or not valid for certain "
+          "CMake features, such as generator expressions, and may result "
+          "in undefined behavior.";
+      this->Makefile->IssueMessage(messageType, e.str().c_str());
+
+      if (messageType == cmake::FATAL_ERROR)
+        {
+        return false;
+        }
+      }
     }
 
   // Store the last command line finished.
@@ -158,7 +204,7 @@ bool cmAddCustomTargetCommand
   // Enforce name uniqueness.
   {
   std::string msg;
-  if(!this->Makefile->EnforceUniqueName(args[0], msg, true))
+  if(!this->Makefile->EnforceUniqueName(targetName, msg, true))
     {
     this->SetError(msg.c_str());
     return false;
@@ -176,7 +222,7 @@ bool cmAddCustomTargetCommand
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target =
-    this->Makefile->AddUtilityCommand(args[0].c_str(), excludeFromAll,
+    this->Makefile->AddUtilityCommand(targetName.c_str(), excludeFromAll,
                                       working_directory.c_str(), depends,
                                       commandLines, escapeOldStyle, comment);
 
