@@ -109,7 +109,9 @@ bool cmAddLibraryCommand
       }
     }
 
-  bool nameOk = cmGeneratorExpression::IsValidTargetName(libName);
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(libName) &&
+    !cmGlobalGenerator::IsReservedTarget(libName);
+
   if (nameOk && !importTarget && !isAlias)
     {
     nameOk = libName.find(":") == std::string::npos;
@@ -135,7 +137,8 @@ bool cmAddLibraryCommand
       cmOStringStream e;
       e << (this->Makefile->GetPolicies()
             ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
-      e << "The target name \"" << libName << "\" is not valid for certain "
+      e << "The target name \"" << libName <<
+          "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
           "in undefined behavior.";
       this->Makefile->IssueMessage(messageType, e.str().c_str());
