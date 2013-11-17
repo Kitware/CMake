@@ -370,8 +370,6 @@ void cmLocalGenerator::GenerateInstallRules()
     prefix = "/usr/local";
     }
 #endif
-  std::string sysrootted
-                  = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
   if (const char *stagingPrefix
                   = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX"))
     {
@@ -1112,13 +1110,13 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             {
             ret += " ";
             ret += compilerOptionExternalToolchain;
-            ret += compilerExternalToolchain;
+            ret += this->EscapeForShell(compilerExternalToolchain, true);
             }
           if (compilerSysroot && compilerOptionSysroot)
             {
             ret += " ";
             ret += compilerOptionSysroot;
-            ret += compilerSysroot;
+            ret += this->EscapeForShell(compilerSysroot, true);
             }
           return ret;
           }
