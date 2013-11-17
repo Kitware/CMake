@@ -1110,13 +1110,13 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
             {
             ret += " ";
             ret += compilerOptionExternalToolchain;
-            ret += compilerExternalToolchain;
+            ret += this->EscapeForShell(compilerExternalToolchain, true);
             }
           if (compilerSysroot && compilerOptionSysroot)
             {
             ret += " ";
             ret += compilerOptionSysroot;
-            ret += compilerSysroot;
+            ret += this->EscapeForShell(compilerSysroot, true);
             }
           return ret;
           }
