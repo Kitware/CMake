@@ -13,7 +13,7 @@ foreach(_lang C CXX)
 endforeach()
 
 find_package(ZLIB REQUIRED)
-set(CMAKE_CXX_LINK_FLAGS "-L${CMAKE_SYSROOT}/usr/lib/${triple}")
+set(CMAKE_CXX_LINK_FLAGS "-L\"${CMAKE_SYSROOT}/usr/lib/${triple}\"")
 
 add_executable(executable main.cpp)
 target_link_libraries(executable ${ZLIB_LIBRARIES})
