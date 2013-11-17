@@ -1903,7 +1903,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     {
     std::string rootPath = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
     const char *stagePath
-                  = this->Makefile->GetSafeDefinition("CMAKE_STAGING_PREFIX");
+                  = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX");
     const char *installPrefix
                   = this->Makefile->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
     cmSystemTools::ConvertToUnixSlashes(rootPath);
