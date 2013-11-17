@@ -44,6 +44,7 @@ int main(void)
       else
         {
         gotLink = true;
+#ifdef EXPECT_SHORT_LIBS
         if (output.find("libz.so") != std::string::npos)
           {
           std::cout << "Unexpected library name: " << output << std::endl;
@@ -54,6 +55,13 @@ int main(void)
           std::cout << "Expected -lz: " << output << std::endl;
           return -1;
           }
+#else
+        if (output.find("libz.so") == std::string::npos)
+          {
+          std::cout << "Expected library name: " << output << std::endl;
+          return -1;
+          }
+#endif
         }
       }
     else if (output.find("-- Installing: ") != std::string::npos)

@@ -33,6 +33,8 @@ execute_process(COMMAND
 )
 if (NOT CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES MATCHES ${triple})
   set(triple)
+else()
+  add_definitions(-DEXPECT_SHORT_LIBS=1)
 endif()
 
 macro(write_make_script name)
