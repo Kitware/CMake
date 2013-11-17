@@ -44,7 +44,7 @@ int main(void)
       else
         {
         gotLink = true;
-        if (output.find("zlib.so") != std::string::npos)
+        if (output.find("libz.so") != std::string::npos)
           {
           std::cout << "Unexpected library name: " << output << std::endl;
           return -1;
