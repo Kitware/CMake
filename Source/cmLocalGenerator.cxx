@@ -370,8 +370,6 @@ void cmLocalGenerator::GenerateInstallRules()
     prefix = "/usr/local";
     }
 #endif
-  std::string sysrootted
-                  = this->Makefile->GetSafeDefinition("CMAKE_SYSROOT");
   if (const char *stagingPrefix
                   = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX"))
     {
