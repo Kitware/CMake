@@ -12,6 +12,8 @@ foreach(_lang C CXX)
   endforeach()
 endforeach()
 
+message("CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES: ${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}")
+
 find_package(ZLIB REQUIRED)
 set(CMAKE_CXX_LINK_FLAGS "-L\"${CMAKE_SYSROOT}/usr/lib/${triple}\"")
 
