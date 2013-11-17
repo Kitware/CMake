@@ -31,6 +31,9 @@ execute_process(COMMAND
   OUTPUT_VARIABLE triple
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
+if (NOT CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES MATCHES ${triple})
+  set(triple)
+endif()
 
 macro(write_make_script name)
   file(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/Make${name}.sh"
