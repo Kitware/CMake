@@ -24,6 +24,7 @@ int main(void)
       {
       if (output.find("-sysroot") == std::string::npos)
         {
+        std::cout << "Sysroot not used by compiler: " << output << std::endl;
         return -1;
         }
       if (output.find(" -c ") != std::string::npos)
@@ -31,10 +32,12 @@ int main(void)
         gotCompilation = true;
         if (output.find(" -I") != std::string::npos)
           {
+          std::cout << "Unexpected include: " << output << std::endl;
           return -1;
           }
         if (output.find(" -isystem") != std::string::npos)
           {
+          std::cout << "Unexpected include: " << output << std::endl;
           return -1;
           }
         }
@@ -43,10 +46,12 @@ int main(void)
         gotLink = true;
         if (output.find("zlib.so") != std::string::npos)
           {
+          std::cout << "Unexpected library name: " << output << std::endl;
           return -1;
           }
         if (output.find("-lz") == std::string::npos)
           {
+          std::cout << "Expected -lz: " << output << std::endl;
           return -1;
           }
         }
@@ -56,16 +61,29 @@ int main(void)
       gotInstallation = true;
       if (output.find("/stage/") == std::string::npos)
         {
+        std::cout << "Install outside stage: " << output << std::endl;
         return -1;
         }
       if (output.find("InstallationPrefix") != std::string::npos)
         {
+        std::cout << "Install to prefix, not stage: " << output << std::endl;
         return -1;
         }
       }
     }
-  if (!gotCompilation || !gotLink || !gotInstallation)
+  if (!gotCompilation)
     {
+    std::cout << "Compilation step missing." << std::endl;
+    return -1;
+    }
+  if (!gotLink)
+    {
+    std::cout << "Link step missing." << std::endl;
+    return -1;
+    }
+  if (!gotInstallation)
+    {
+    std::cout << "Installation step missing." << std::endl;
     return -1;
     }
   f.close();
