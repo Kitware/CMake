@@ -27,6 +27,7 @@
 #include "cmMakefileLibraryTargetGenerator.h"
 #include "cmMakefileUtilityTargetGenerator.h"
 
+#include <ctype.h>
 
 cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
   : OSXBundleGenerator(0)
@@ -1694,10 +1695,42 @@ void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
     this->Makefile->GetSafeDefinition(removeFlags.c_str());
   std::vector<std::string> removeList;
   cmSystemTools::ExpandListArgument(removeflags, removeList);
+
   for(std::vector<std::string>::iterator i = removeList.begin();
       i != removeList.end(); ++i)
     {
-    cmSystemTools::ReplaceString(linkFlags, i->c_str(), "");
+    std::string tmp;
+    std::string::size_type lastPosition = 0;
+
+    for(;;)
+      {
+      std::string::size_type position = linkFlags.find(*i, lastPosition);
+
+      if(position == std::string::npos)
+        {
+        tmp += linkFlags.substr(lastPosition);
+        break;
+        }
+      else
+        {
+        std::string::size_type prefixLength = position - lastPosition;
+        tmp += linkFlags.substr(lastPosition, prefixLength);
+        lastPosition = position + i->length();
+
+        bool validFlagStart = position == 0 ||
+          isspace(linkFlags[position - 1]);
+
+        bool validFlagEnd = lastPosition == linkFlags.size() ||
+          isspace(linkFlags[lastPosition]);
+
+        if(!validFlagStart || !validFlagEnd)
+          {
+          tmp += *i;
+          }
+        }
+      }
+
+    linkFlags = tmp;
     }
 }
 
