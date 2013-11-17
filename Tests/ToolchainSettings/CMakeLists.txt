@@ -31,7 +31,8 @@ execute_process(COMMAND
   OUTPUT_VARIABLE triple
   OUTPUT_STRIP_TRAILING_WHITESPACE
 )
-if (NOT CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES MATCHES ${triple})
+
+if (triple AND NOT "${CMAKE_CXX_IMPLICIT_LINK_DIRECTORIES}" MATCHES ${triple})
   set(triple)
 else()
   add_definitions(-DEXPECT_SHORT_LIBS=1)
