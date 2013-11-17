@@ -89,7 +89,7 @@ add_custom_command(
    --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
    --build-makeprogram "${CMAKE_BINARY_DIR}/MakeConsumer.sh"
    --build-options
-      -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/Prefix1
+      -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/InstallationPrefix
       -DCMAKE_TOOLCHAIN_FILE=${CMAKE_BINARY_DIR}/${CMAKE_CXX_COMPILER_ID}-Toolchain.cmake
       -Dtriple=${triple}
       -DCMAKE_VERBOSE_MAKEFILE=1

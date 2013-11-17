@@ -15,6 +15,7 @@ int main(void)
 
   bool gotCompilation = false;
   bool gotLink = false;
+  bool gotInstallation = false;
   while (!f.eof())
     {
     std::string output;
@@ -50,8 +51,20 @@ int main(void)
           }
         }
       }
+    else if (output.find("-- Installing: ") != std::string::npos)
+      {
+      gotInstallation = true;
+      if (output.find("/stage/") == std::string::npos)
+        {
+        return -1;
+        }
+      if (output.find("InstallationPrefix") != std::string::npos)
+        {
+        return -1;
+        }
+      }
     }
-  if (!gotCompilation || !gotLink)
+  if (!gotCompilation || !gotLink || !gotInstallation)
     {
     return -1;
     }
