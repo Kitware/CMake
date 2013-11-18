@@ -611,8 +611,8 @@ const char* cmGeneratorTarget::GetCreateRuleVariable() const
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmGeneratorTarget::GetIncludeDirectories(
-                                                          const char *config)
+std::vector<std::string>
+cmGeneratorTarget::GetIncludeDirectories(const char *config) const
 {
   return this->Target->GetIncludeDirectories(config);
 }
