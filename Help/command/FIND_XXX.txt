@@ -94,6 +94,8 @@ If NO_DEFAULT_PATH is not specified, the search process is as follows:
    or in the short-hand version of the command.
    These are typically hard-coded guesses.
 
+7. Search the path specified by the :variable:`CMAKE_STAGING_PREFIX` variable.
+
 .. |FIND_ARGS_XXX| replace:: <VAR> NAMES name
 
 .. include:: FIND_XXX_MAC.txt
