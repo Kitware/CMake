@@ -386,9 +386,6 @@ public:
   /** Get the path for the MSVC /Fd option for this target.  */
   std::string GetCompilePDBPath(const std::string& config="") const;
 
-  /** Whether this library has soname enabled and platform supports it.  */
-  bool HasSOName(const std::string& config) const;
-
   /** Whether this library has \@rpath and platform supports it.  */
   bool HasMacOSXRpathInstallNameDir(const std::string& config) const;
 
