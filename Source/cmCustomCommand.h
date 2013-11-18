@@ -35,8 +35,7 @@ public:
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
-                  const char* workingDirectory,
-                  const char* pool);
+                  const char* workingDirectory);
 
   ~cmCustomCommand();
 
@@ -54,9 +53,6 @@ public:
 
   /** Get the comment string for the command.  */
   const char* GetComment() const;
-
-  /** Get the pool name for the command.  */
-  std::string GetPool() const;
 
   /** Append to the list of command lines.  */
   void AppendCommands(const cmCustomCommandLines& commandLines);
@@ -89,7 +85,6 @@ private:
   bool HaveComment;
   std::string Comment;
   std::string WorkingDirectory;
-  std::string Pool;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;
   cmListFileBacktrace* Backtrace;
