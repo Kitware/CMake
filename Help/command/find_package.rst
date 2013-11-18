@@ -317,6 +317,9 @@ registry on non-Windows platforms.
 9.  Search paths specified by the PATHS option.  These are typically
 hard-coded guesses.
 
+10.  Search the path specified by the :variable:`CMAKE_STAGING_PREFIX`
+variable.
+
 .. |FIND_XXX| replace:: find_package
 .. |FIND_ARGS_XXX| replace:: <package>
 .. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
