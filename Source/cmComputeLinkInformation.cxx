@@ -1920,7 +1920,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
           {
           d = d.substr(rootPath.size());
           }
-        else if (stagePath && d.find(stagePath) == 0)
+        else if (stagePath && *stagePath && d.find(stagePath) == 0)
           {
           std::string suffix = d.substr(strlen(stagePath));
           d = installPrefix;
@@ -1948,7 +1948,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
             {
             d = d.substr(rootPath.size());
             }
-          else if (stagePath && d.find(stagePath) == 0)
+          else if (stagePath && *stagePath && d.find(stagePath) == 0)
             {
             std::string suffix = d.substr(strlen(stagePath));
             d = installPrefix;
