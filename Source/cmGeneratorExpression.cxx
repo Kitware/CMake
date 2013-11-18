@@ -449,39 +449,10 @@ std::string::size_type cmGeneratorExpression::Find(const std::string &input)
 //----------------------------------------------------------------------------
 bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
 {
-  // The following is a list of targets reserved
-  // by one or more of the cmake generators
-  const char* reservedTargets[] =
-  {
-    "all", "ALL_BUILD",
-    "help",
-    "install",
-    "preinstall",
-    "clean",
-    "edit_cache",
-    "rebuild_cache",
-    "test", "RUN_TESTS",
-    "package", "PACKAGE",
-    "package_source",
-    "ZERO_CHECK",
-    0
-  };
-
   cmsys::RegularExpression targetNameValidator;
   // The ':' is supported to allow use with IMPORTED targets. At least
   // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
   targetNameValidator.compile("^[A-Za-z0-9_.:+-]+$");
 
-  if(!targetNameValidator.find(input.c_str()))
-    {
-    return false;
-    }
-
-  for(const char** reservedTarget = reservedTargets;
-    *reservedTarget; ++reservedTarget)
-    {
-    if(input == *reservedTarget) return false;
-    }
-
-  return true;
+  return targetNameValidator.find(input.c_str());
 }

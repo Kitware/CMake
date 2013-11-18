@@ -2466,6 +2466,37 @@ void cmGlobalGenerator::AddTarget(cmTarget* t)
     }
 }
 
+bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
+{
+  // The following is a list of targets reserved
+  // by one or more of the cmake generators.
+
+  // Adding additional targets to this list will require a policy!
+  const char* reservedTargets[] =
+  {
+    "all", "ALL_BUILD",
+    "help",
+    "install", "INSTALL",
+    "preinstall",
+    "clean",
+    "edit_cache",
+    "rebuild_cache",
+    "test", "RUN_TESTS",
+    "package", "PACKAGE",
+    "package_source",
+    "ZERO_CHECK",
+    0
+  };
+
+  for(const char** reservedTarget = reservedTargets;
+    *reservedTarget; ++reservedTarget)
+    {
+    if(name == *reservedTarget) return true;
+    }
+
+  return false;
+}
+
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
                             cmExternalMakefileProjectGenerator *extraGenerator)
 {

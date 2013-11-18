@@ -12,6 +12,7 @@
 #include "cmAddCustomTargetCommand.h"
 
 #include "cmGeneratorExpression.h"
+#include "cmGlobalGenerator.h"
 
 // cmAddCustomTargetCommand
 bool cmAddCustomTargetCommand
@@ -155,7 +156,8 @@ bool cmAddCustomTargetCommand
   // Some requirements on custom target names already exist
   // and have been checked at this point.
   // The following restrictions overlap but depend on policy CMP0037.
-  bool nameOk = cmGeneratorExpression::IsValidTargetName(targetName);
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(targetName) &&
+    !cmGlobalGenerator::IsReservedTarget(targetName);
   if (nameOk)
     {
     nameOk = targetName.find(":") == std::string::npos;
