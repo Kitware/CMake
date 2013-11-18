@@ -1,0 +1,14 @@
+
+#ifndef GENERATED_H
+#define GENERATED_H
+
+#include <QObject>
+
+class Generated : public QObject
+{
+  Q_OBJECT
+public:
+  explicit Generated(QObject *parent = 0);
+};
+
+#endif
