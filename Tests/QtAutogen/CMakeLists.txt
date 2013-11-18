@@ -43,10 +43,19 @@ add_library(codeeditorLib STATIC codeeditor.cpp)
 
 add_library(privateSlot OBJECT private_slot.cpp)
 
+add_custom_target(generate_moc_input
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/generated.h.in" "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_CURRENT_BINARY_DIR}/generated.h.in" "${CMAKE_CURRENT_BINARY_DIR}/generated.h"
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/generated.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}"
+  COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_CURRENT_BINARY_DIR}/generated.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/generated.cpp"
+)
+set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/generated.cpp" PROPERTIES GENERATED TRUE)
+
 add_executable(QtAutogen main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
-               test.qrc resourcetester.cpp
+               test.qrc resourcetester.cpp "${CMAKE_CURRENT_BINARY_DIR}/generated.cpp"
 )
+set_property(TARGET QtAutogen APPEND PROPERTY AUTOGEN_TARGET_DEPENDS generate_moc_input)
 
 set_target_properties(QtAutogen codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
 
