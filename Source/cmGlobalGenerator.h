@@ -244,6 +244,8 @@ public:
 
   void AddTarget(cmTarget* t);
 
+  static bool IsReservedTarget(std::string const& name);
+
   virtual const char* GetAllTargetName()         const { return "ALL_BUILD"; }
   virtual const char* GetInstallTargetName()       const { return "INSTALL"; }
   virtual const char* GetInstallLocalTargetName()  const { return 0; }

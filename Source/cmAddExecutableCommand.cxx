@@ -69,7 +69,9 @@ bool cmAddExecutableCommand
       }
     }
 
-  bool nameOk = cmGeneratorExpression::IsValidTargetName(exename);
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(exename) &&
+    !cmGlobalGenerator::IsReservedTarget(exename);
+
   if (nameOk && !importTarget && !isAlias)
     {
     nameOk = exename.find(":") == std::string::npos;

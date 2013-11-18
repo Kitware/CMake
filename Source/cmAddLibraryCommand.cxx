@@ -109,7 +109,9 @@ bool cmAddLibraryCommand
       }
     }
 
-  bool nameOk = cmGeneratorExpression::IsValidTargetName(libName);
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(libName) &&
+    !cmGlobalGenerator::IsReservedTarget(libName);
+
   if (nameOk && !importTarget && !isAlias)
     {
     nameOk = libName.find(":") == std::string::npos;
