@@ -166,7 +166,8 @@ major[.minor[.patch[.tweak]]]).
   if(DEFINED <variable>)
 
 True if the given variable is defined.  It does not matter if the
-variable is true or false just if it has been set.
+variable is true or false just if it has been set.  (Note macro
+arguments are not variables.)
 
 ::
 

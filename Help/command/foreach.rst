@@ -42,5 +42,6 @@ three types of this iteration:
 
 Iterates over a precise list of items.  The LISTS option names
 list-valued variables to be traversed, including empty elements (an
-empty string is a zero-length list).  The ITEMS option ends argument
+empty string is a zero-length list).  (Note macro
+arguments are not variables.)  The ITEMS option ends argument
 parsing and includes all arguments following it in the iteration.
