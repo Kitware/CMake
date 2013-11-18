@@ -89,9 +89,8 @@ set (FLTK_SRCS
   fltk1.fl
   )
 add_executable(fakefluid fakefluid.cxx)
-get_target_property(FLUID_LOC fakefluid LOCATION)
 set (FLTK_WRAP_UI "On")
-set (FLTK_FLUID_EXECUTABLE "${FLUID_LOC}")
+set (FLTK_FLUID_EXECUTABLE fakefluid)
 fltk_wrap_ui (wraplibFLTK ${FLTK_SRCS})
 add_library(wraplibFLTK ${wraplibFLTK_FLTK_UI_SRCS})
 add_dependencies(wraplibFLTK fakefluid)
