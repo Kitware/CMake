@@ -2659,18 +2659,6 @@ std::string cmTarget::GetPDBName(const char* config) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HasSOName(const char* config) const
-{
-  // soname is supported only for shared libraries and modules,
-  // and then only when the platform supports an soname flag.
-  return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
-           this->GetType() == cmTarget::MODULE_LIBRARY) &&
-          !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config,
-                                                                this)));
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HasMacOSXRpathInstallNameDir(const char* config) const
 {
   bool install_name_is_rpath = false;

@@ -588,7 +588,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.Target = targetOutPathReal.c_str();
   vars.LinkLibraries = linkLibs.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
-  if (this->Target->HasSOName(this->ConfigName))
+  if (this->GeneratorTarget->HasSOName(this->ConfigName))
     {
     vars.SONameFlag = this->Makefile->GetSONameFlag(linkLanguage);
     vars.TargetSOName= targetNameSO.c_str();

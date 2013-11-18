@@ -145,6 +145,9 @@ public:
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
+  /** Whether this library has soname enabled and platform supports it.  */
+  bool HasSOName(const char* config) const;
+
   struct TargetPropertyEntry {
     TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
       const std::string &targetName = std::string())
