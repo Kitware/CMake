@@ -487,7 +487,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   } else {
     vars["ARCH_FLAGS"] = flags;
   }
-  if (this->GetTarget()->HasSOName(this->GetConfigName())) {
+  if (this->GetGeneratorTarget()->HasSOName(this->GetConfigName())) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage);
     vars["SONAME"] = this->TargetNameSO;
