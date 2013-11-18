@@ -204,6 +204,11 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
                                     "", makefile->GetCurrentOutputDirectory());
 
   std::vector<std::string> depends;
+  if (const char *autogenDepends =
+                                target->GetProperty("AUTOGEN_TARGET_DEPENDS"))
+    {
+    cmSystemTools::ExpandListArgument(autogenDepends, depends);
+    }
   std::vector<std::string> toolNames;
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
@@ -442,9 +447,8 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
     std::string absFile = cmsys::SystemTools::GetRealPath(
                                                     sf->GetFullPath().c_str());
     bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOMOC"));
-    bool generated = cmSystemTools::IsOn(sf->GetPropertyForUser("GENERATED"));
 
-    if (!generated)
+    if (absFile.find("_automoc.cpp") == std::string::npos)
       {
       if (skip)
         {
@@ -1327,6 +1331,9 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
                std::ios::out | std::ios::trunc);
   outfile << automocSource;
   outfile.close();
+  cmSourceFile* automocCppSource
+          = makefile->GetOrCreateSource(this->OutMocCppFilename.c_str(), true);
+  automocCppSource->SetProperty("SKIP_AUTOMOC", "1");
 
   return true;
 }
