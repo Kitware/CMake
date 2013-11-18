@@ -370,11 +370,6 @@ void cmLocalGenerator::GenerateInstallRules()
     prefix = "/usr/local";
     }
 #endif
-  if (const char *stagingPrefix
-                  = this->Makefile->GetDefinition("CMAKE_STAGING_PREFIX"))
-    {
-    prefix = stagingPrefix;
-    }
 
   // Compute the set of configurations.
   std::vector<std::string> configurationTypes;

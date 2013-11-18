@@ -110,7 +110,6 @@ Variables that Change Behavior
    /variable/CMAKE_PREFIX_PATH
    /variable/CMAKE_PROGRAM_PATH
    /variable/CMAKE_SKIP_INSTALL_ALL_DEPENDENCY
-   /variable/CMAKE_STAGING_PREFIX
    /variable/CMAKE_SYSTEM_IGNORE_PATH
    /variable/CMAKE_SYSTEM_INCLUDE_PATH
    /variable/CMAKE_SYSTEM_LIBRARY_PATH
