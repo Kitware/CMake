@@ -477,6 +477,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
 
   {"AssemblerListingLocation", "Fa", "ASM List Location", "",
    cmVS7FlagTable::UserValue},
+  {"ProgramDataBaseFileName", "Fd", "Program Database File Name", "",
+   cmVS7FlagTable::UserValue},
 
   // boolean flags
   {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
