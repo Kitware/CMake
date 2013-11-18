@@ -191,14 +191,16 @@ public:
                               bool optional);
 
   /// Overloaded methods. @see cmGlobalGenerator::GenerateBuildCommand()
-  virtual std::string GenerateBuildCommand(const char* makeProgram,
-                                           const char* projectName,
-                                           const char* projectDir,
-                                           const char* additionalOptions,
-                                           const char* targetName,
-                                           const char* config,
-                                           bool ignoreErrors,
-                                           bool fast);
+  virtual void GenerateBuildCommand(
+    std::vector<std::string>& makeCommand,
+    const char* makeProgram,
+    const char* projectName,
+    const char* projectDir,
+    const char* targetName,
+    const char* config,
+    bool fast,
+    std::vector<std::string> const& makeOptions = std::vector<std::string>()
+    );
 
   // Setup target names
   virtual const char* GetAllTargetName()           const { return "all"; }

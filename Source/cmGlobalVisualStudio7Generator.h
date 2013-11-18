@@ -60,14 +60,16 @@ public:
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  virtual std::string GenerateBuildCommand(const char* makeProgram,
-                                           const char *projectName,
-                                           const char *projectDir,
-                                           const char* additionalOptions,
-                                           const char *targetName,
-                                           const char* config,
-                                           bool ignoreErrors,
-                                           bool fast);
+  virtual void GenerateBuildCommand(
+    std::vector<std::string>& makeCommand,
+    const char* makeProgram,
+    const char* projectName,
+    const char* projectDir,
+    const char* targetName,
+    const char* config,
+    bool fast,
+    std::vector<std::string> const& makeOptions = std::vector<std::string>()
+    );
 
   /**
    * Generate the all required files for building this project/tree. This
@@ -107,6 +109,9 @@ public:
 
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
+
+  std::string const& GetDevEnvCommand();
+  virtual std::string FindDevEnvCommand();
 
   static cmIDEFlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root,
@@ -166,6 +171,9 @@ protected:
 
 private:
   char* IntelProjectVersion;
+  std::string DevEnvCommand;
+  bool DevEnvCommandInitialized;
+  virtual std::string GetVSMakeProgram() { return this->GetDevEnvCommand(); }
 };
 
 #define CMAKE_CHECK_BUILD_SYSTEM_TARGET "ZERO_CHECK"

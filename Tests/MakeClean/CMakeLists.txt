@@ -44,14 +44,7 @@ add_executable(check_clean ${MakeClean_BINARY_DIR}/check_clean.c)
 add_custom_command(
   TARGET check_clean
   POST_BUILD
-  COMMAND ${CMAKE_CTEST_COMMAND}
-  ARGS --build-and-test
-       ${MakeClean_SOURCE_DIR}/ToClean
-       ${MakeClean_BINARY_DIR}/ToClean
-       --build-generator ${CMAKE_GENERATOR}
-       --build-project ToClean
-       --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-       --build-noclean
-       --build-target clean
+  COMMAND ${CMAKE_COMMAND} --build ${MakeClean_BINARY_DIR}/ToClean
+          --target clean
   COMMENT "Clean the ToClean Project"
   )

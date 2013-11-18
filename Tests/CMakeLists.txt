@@ -10,7 +10,9 @@ macro(ADD_TEST_MACRO NAME COMMAND)
     --build-two-config
     ${build_generator_args}
     --build-project ${proj}
-    ${${NAME}_EXTRA_OPTIONS}
+    ${${NAME}_CTEST_OPTIONS}
+    --build-options ${build_options}
+    ${${NAME}_BUILD_OPTIONS}
     --test-command ${COMMAND} ${ARGN})
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${dir}")
 endmacro()
@@ -43,12 +45,25 @@ configure_file(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
 
 # Testing
 if(BUILD_TESTING)
+  set(CMAKE_TEST_DEVENV "")
+  if(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
+    if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio")
+      set(CMAKE_TEST_MAKEPROGRAM "")
+    else()
+      set(CMAKE_TEST_MAKEPROGRAM "${CMAKE_MAKE_PROGRAM}")
+    endif()
+    if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio [7-9] " AND
+        NOT CMAKE_MAKE_PROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
+      set(CMAKE_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
+    endif()
+  endif()
+
   if("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles" OR ("${CMAKE_TEST_GENERATOR}" MATCHES Ninja AND NOT WIN32))
     set(TEST_CompileCommandOutput 1)
   endif()
 
   set(MAKE_IS_GNU )
-  if(${CMAKE_TEST_MAKEPROGRAM} MATCHES make)
+  if(CMAKE_TEST_MAKEPROGRAM MATCHES make)
     execute_process(COMMAND ${CMAKE_TEST_MAKEPROGRAM} no_such_target --version
       RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
     if("${res}" STREQUAL "0")
@@ -60,8 +75,8 @@ if(BUILD_TESTING)
 
   # some old versions of make simply cannot handle spaces in paths
   if (MAKE_IS_GNU OR
-      "${CMAKE_TEST_MAKEPROGRAM}" MATCHES "nmake|gmake|wmake" OR
-      "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio|XCode|Borland")
+      CMAKE_TEST_MAKEPROGRAM MATCHES "nmake|gmake|wmake" OR
+      CMAKE_TEST_GENERATOR MATCHES "Visual Studio|XCode|Borland")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
     set(MAKE_SUPPORTS_SPACES 0)
@@ -69,12 +84,16 @@ if(BUILD_TESTING)
 
   set(build_generator_args
     --build-generator ${CMAKE_TEST_GENERATOR}
-    --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
     )
   if(CMAKE_TEST_GENERATOR_TOOLSET)
     list(APPEND build_generator_args
       --build-generator-toolset ${CMAKE_TEST_GENERATOR_TOOLSET}
       )
+  endif()
+
+  set(build_options)
+  if(CMAKE_TEST_MAKEPROGRAM)
+    list(APPEND build_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
   endif()
 
   add_subdirectory(CMakeLib)
@@ -241,6 +260,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
+  set(ExportImport_BUILD_OPTIONS -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
@@ -276,6 +296,7 @@ if(BUILD_TESTING)
       --build-two-config
       ${build_generator_args}
       --build-project InterfaceBuildTargets
+      --build-options ${build_options}
       --test-command ${CMAKE_CMAKE_COMMAND} -E touch_nocreate ${InterfaceBuildTargets_libname}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InterfaceBuildTargets")
@@ -319,6 +340,7 @@ if(BUILD_TESTING)
       "${CMake_BINARY_DIR}/Tests/BundleUtilities"
       ${build_generator_args}
       --build-project BundleUtilities
+      --build-options ${build_options}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleUtilities")
 
@@ -331,7 +353,7 @@ if(BUILD_TESTING)
         "${CMake_BINARY_DIR}/Tests/Qt4Deploy"
         ${build_generator_args}
         --build-project Qt4Deploy
-        --build-options
+        --build-options ${build_options}
         -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
         -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
         )
@@ -370,7 +392,8 @@ if(BUILD_TESTING)
     --build-project ExternalDataTest
     --build-noclean
     --force-new-ctest-process
-    --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
+    --build-options ${build_options}
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES}
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Module/ExternalData")
@@ -403,7 +426,8 @@ if(BUILD_TESTING)
     ${build_generator_args}
     --build-project LinkFlags
     --build-target LinkFlags
-    --build-options -DTEST_CONFIG=\${CTEST_CONFIGURATION_TYPE}
+    --build-options ${build_options}
+      -DTEST_CONFIG=\${CTEST_CONFIGURATION_TYPE}
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LinkFlags")
 
@@ -449,8 +473,8 @@ if(BUILD_TESTING)
          --build-two-config
          --build-generator "Eclipse CDT4 - Unix Makefiles"
          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
+         --build-options ${build_options}
          --test-command Simple)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_EclipseGenerator")
     endif ()
@@ -464,8 +488,8 @@ if(BUILD_TESTING)
          --build-two-config
          --build-generator "CodeBlocks - Unix Makefiles"
          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
+         --build-options ${build_options}
          --test-command Simple)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_CodeBlocksGenerator")
     endif ()
@@ -478,8 +502,8 @@ if(BUILD_TESTING)
          --build-two-config
          --build-generator "KDevelop3 - Unix Makefiles"
          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-         --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
          --build-project Simple
+         --build-options ${build_options}
          --test-command Simple)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_KDevelop3Generator")
     endif ()
@@ -487,8 +511,8 @@ if(BUILD_TESTING)
   endif()
 
   # test for correct sub-project generation
-  # not implemented in VS6 or Xcode
-  if(NOT MSVC60 AND NOT XCODE AND NOT MSVC70)
+  # not implemented in VS 6, VS 7.0, Xcode, or Ninja
+  if(NOT CMAKE_TEST_GENERATOR MATCHES "Visual Studio [67]$|Xcode|Ninja")
     # run cmake and configure all of SubProject
     # but only build the independent executable car
     add_test(SubProject ${CMAKE_CTEST_COMMAND}
@@ -498,31 +522,32 @@ if(BUILD_TESTING)
       --build-project SubProject
       ${build_generator_args}
       --build-target car
+      --build-options ${build_options}
       --test-command car
       )
-
-    if(${CMAKE_TEST_GENERATOR} MATCHES "Ninja")
-      # The Ninja generator does not create a recursive build system.  Start
-      # from the root directory.
-      set(SubProject_SUBDIR)
-    else()
-      set(SubProject_SUBDIR "/foo")
-    endif()
 
     # For stage 2, do not run cmake again.
     # Then build the foo sub project which should build
     # the bar library which should be referenced because
     # foo links to the static library bar, but bar is not
     # directly in the foo sub project
+    if(CMAKE_TEST_MAKEPROGRAM)
+      set(SubProject-Stage2_BUILD_MAKEPROGRAM
+        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        )
+    endif()
     add_test(SubProject-Stage2  ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/SubProject${SubProject_SUBDIR}"
-      "${CMake_BINARY_DIR}/Tests/SubProject${SubProject_SUBDIR}"
-      ${build_generator_args}
+      "${CMake_SOURCE_DIR}/Tests/SubProject/foo"
+      "${CMake_BINARY_DIR}/Tests/SubProject/foo"
+      --build-generator ${CMAKE_TEST_GENERATOR}
+      --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
+      ${SubProject-Stage2_BUILD_MAKEPROGRAM}
       --build-nocmake
       --build-project foo
       --build-target foo
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubProject/foo"
+      --build-options ${build_options}
       --test-command foo
       )
     set_tests_properties ( SubProject-Stage2 PROPERTIES DEPENDS SubProject)
@@ -563,7 +588,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-two-config
     ${build_generator_args}
     --build-project Framework
-    --build-options
+    --build-options ${build_options}
     "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/Framework/Install"
     --test-command bar)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Framework")
@@ -575,6 +600,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-two-config
     ${build_generator_args}
     --build-project TargetName
+    --build-options ${build_options}
     --test-command ${CMAKE_CMAKE_COMMAND} -E compare_files
     ${CMake_SOURCE_DIR}/Tests/TargetName/scripts/hello_world
     ${CMake_BINARY_DIR}/Tests/TargetName/scripts/hello_world)
@@ -588,6 +614,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project LibName
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/LibName/lib"
+    --build-options ${build_options}
     --test-command foobar
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LibName")
@@ -600,6 +627,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project CustComDepend
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustComDepend/bin"
+    --build-options ${build_options}
     --test-command foo bar.c
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustComDepend")
@@ -611,6 +639,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project ArgumentExpansion
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ArgumentExpansion/bin"
+    --build-options ${build_options}
     )
   set_tests_properties(ArgumentExpansion PROPERTIES
     FAIL_REGULAR_EXPRESSION "Unexpected: ")
@@ -622,7 +651,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Tests/GeneratorExpression"
     ${build_generator_args}
     --build-project GeneratorExpression
-    --build-options -DCMAKE_BUILD_TYPE=\${CTEST_CONFIGURATION_TYPE}
+    --build-options ${build_options}
+      -DCMAKE_BUILD_TYPE=\${CTEST_CONFIGURATION_TYPE}
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/GeneratorExpression")
@@ -635,6 +665,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project CustomCommand
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/CustomCommand/bin"
+    --build-options ${build_options}
     --test-command CustomCommand
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommand")
@@ -648,6 +679,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-two-config
     ${build_generator_args}
     --build-project TestWorkingDir
+    --build-options ${build_options}
     --test-command working
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CustomCommandWorkingDirectory")
@@ -659,6 +691,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
    #  ${build_generator_args}
    #  --build-project SimpleExclude
    #  --build-two-config
+   #  --build-options ${build_options}
    #  --test-command t4
    #--test-command "${CMAKE_COMMAND}"
    #"-DCONFIGURATION=\${CTEST_CONFIGURATION_TYPE}"
@@ -672,6 +705,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 #    ${build_generator_args}
 #    --build-project SameName
 #    --build-two-config
+#    --build-options ${build_options}
 #    --test-command
 #    "${CMake_BINARY_DIR}/Tests/SameName/Exe1/mytest2")
 
@@ -682,6 +716,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project OutOfSource
     --build-two-config
+    --build-options ${build_options}
     --test-command
     "${CMake_BINARY_DIR}/Tests/OutOfSource/SubDir/OutOfSourceSubdir/simple")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/OutOfSource")
@@ -694,6 +729,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Tests/BuildDepends"
     ${build_generator_args}
     --build-project BuildDepends
+    --build-options ${build_options}
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BuildDepends")
 
@@ -706,7 +742,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project TestSimpleInstall
     --build-two-config
-    --build-options
+    --build-options ${build_options}
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
     "-DCTEST_TEST_CPACK:BOOL=${CTEST_TEST_CPACK}"
     --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExe)
@@ -718,7 +754,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project TestSimpleInstall
     --build-two-config
-    --build-options
+    --build-options ${build_options}
     "-DCMAKE_INSTALL_PREFIX:PATH=${SimpleInstallInstallDir}"
     "-DSTAGE2:BOOL=1"
     --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExeS2)
@@ -772,6 +808,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
         ${build_generator_args}
         --build-project CPackWiXGenerator
+        --build-options ${build_options}
         --test-command ${CMAKE_CMAKE_COMMAND}
           "-DCPackWiXGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
           -P "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator/RunCPackVerifyResult.cmake")
@@ -779,12 +816,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   endif()
 
   if(CTEST_RUN_CPackComponents)
-    set(CPackComponents_EXTRA_OPTIONS)
+    set(CPackComponents_BUILD_OPTIONS)
     if(APPLE)
-      set(CPackComponents_EXTRA_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
+      set(CPackComponents_BUILD_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
     endif()
     if(NSIS_MAKENSIS_EXECUTABLE)
-      set(CPackComponents_EXTRA_OPTIONS ${CPackComponents_EXTRA_OPTIONS}
+      set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
         -DCPACK_BINARY_NSIS:BOOL=ON)
     endif()
 
@@ -796,10 +833,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-project CPackComponents
       --build-two-config
       --build-target package
-      --build-options
+      --build-options ${build_options}
         -DCPACK_BINARY_DEB:BOOL=${CPACK_BINARY_DEB}
         -DCPACK_BINARY_RPM:BOOL=${CPACK_BINARY_RPM}
-        ${CPackComponents_EXTRA_OPTIONS}
+        ${CPackComponents_BUILD_OPTIONS}
         --graphviz=CPackComponents.dot
       --test-command ${CMAKE_CMAKE_COMMAND}
         "-DCPackComponents_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponents"
@@ -823,7 +860,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
     # ACTIVE_CPACK_GENERATORS variable
     # now contains the list of 'active generators'
-    set(CPackComponentsForAll_EXTRA_OPTIONS)
+    set(CPackComponentsForAll_BUILD_OPTIONS)
     # set up list of CPack generators
     list(APPEND GENLST "ZIP")
     if(APPLE)
@@ -855,10 +892,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
           "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
           ${build_generator_args}
           --build-project CPackComponentsForAll
-          --build-options
+          --build-options ${build_options}
              -DCPACK_BINARY_${CPackGen}:BOOL=ON
              ${CPackRun_CPackComponentWay}
-             ${CPackComponentsForAll_EXTRA_OPTIONS}
+             ${CPackComponentsForAll_BUILD_OPTIONS}
              --graphviz=CPackComponentsForAll.dot
           --test-command ${CMAKE_CMAKE_COMMAND}
             "-DCPackComponentsForAll_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
@@ -892,6 +929,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators"
       ${build_generator_args}
       --build-project CPackTestAllGenerators
+      --build-options ${build_options}
       --test-command
       ${CMAKE_CMAKE_COMMAND}
         -D dir=${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators
@@ -914,6 +952,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project UseX11
     --build-two-config
     ${X11_build_target_arg}
+    --build-options ${build_options}
     --test-command  UseX11)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/X11")
 
@@ -967,6 +1006,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
     ${build_generator_args}
     --build-project LoadCommand
+    --build-options ${build_options}
     --test-command  LoadedCommand
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig")
@@ -980,7 +1020,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project Complex
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Complex/bin"
-    --build-options
+    --build-options ${build_options}
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     --test-command complex
     )
@@ -993,7 +1033,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project Complex
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ComplexOneConfig/bin"
-    --build-options
+    --build-options ${build_options}
     -DCMAKE_BUILD_TYPE:STRING=${CMAKE_BUILD_TYPE}
     --test-command complex)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ComplexOneConfig")
@@ -1007,6 +1047,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project HELLO
     --build-exe-dir "${CMake_BINARY_DIR}/Example/Demo"
+    --build-options ${build_options}
     --test-command helloDemo
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Example")
@@ -1019,6 +1060,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project EnvironmentProj
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Environment"
     --force-new-ctest-process
+    --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Environment")
@@ -1029,7 +1071,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt"
     ${build_generator_args}
     --build-project QtAutomocNoQt
-    --build-options -DCMAKE_BUILD_TYPE=\${CTEST_CONFIGURATION_TYPE}
+    --build-options ${build_options}
+      -DCMAKE_BUILD_TYPE=\${CTEST_CONFIGURATION_TYPE}
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/QtAutomocNoQt")
 
@@ -1052,7 +1095,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-project QtAutogen
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt5Autogen"
       --force-new-ctest-process
-      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=5
+      --build-options ${build_options}
+        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=5
       --test-command ${run_autogen_test}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5Autogen")
@@ -1066,7 +1110,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-project QtAutogen
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Autogen"
       --force-new-ctest-process
-      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=4
+      --build-options ${build_options}
+        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=4
       --test-command ${run_autogen_test}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Autogen")
@@ -1079,7 +1124,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-project Qt4Targets
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4Targets"
       --force-new-ctest-process
-      --build-options -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
+      --build-options ${build_options}
+        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}
       --test-command ${CMAKE_CTEST_COMMAND} -V
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Targets")
@@ -1093,6 +1139,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         --build-project Qt4And5Automoc
         --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5Automoc"
         --force-new-ctest-process
+        --build-options ${build_options}
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5Automoc")
@@ -1112,6 +1159,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project ExternalProjectTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProject"
     --force-new-ctest-process
+    --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProject")
@@ -1126,6 +1174,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project ExternalProjectUpdateTest
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate"
     --force-new-ctest-process
+    --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate")
@@ -1138,7 +1187,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     -DExternalProjectUpdate_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate
     -DCMAKE_TEST_GENERATOR=${CMAKE_TEST_GENERATOR}
     -DCMAKE_TEST_GENERATOR_TOOLSET=${CMAKE_TEST_GENERATOR_TOOLSET}
-    -DCMAKE_TEST_MAKEPROGRAM=${CMAKE_TEST_MAKEPROGRAM}
     -DCMAKE_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
     -P ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate/ExternalProjectUpdateTest.cmake
     )
@@ -1157,6 +1205,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-two-config
       ${build_generator_args}
       --build-project Tutorial
+      --build-options ${build_options}
       --test-command Tutorial 25.0)
   endforeach()
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Tutorial")
@@ -1167,6 +1216,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Tests/Testing"
     ${build_generator_args}
     --build-project Testing
+    --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     )
   set_tests_properties(testing PROPERTIES PASS_REGULAR_EXPRESSION "Passed")
@@ -1179,6 +1229,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project Wrapping
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
+    --build-options ${build_options}
     --test-command wrapping
     )
   add_test(qtwrapping  ${CMAKE_CTEST_COMMAND}
@@ -1188,6 +1239,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-project Wrapping
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
+    --build-options ${build_options}
       --test-command qtwrapping
       )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Wrapping")
@@ -1199,6 +1251,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
+    --build-options ${build_options}
     --test-command TestDriverTest test1
     )
 
@@ -1209,6 +1262,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
+    --build-options ${build_options}
     --test-command TestDriverTest test2
     )
 
@@ -1219,6 +1273,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Wrapping/bin"
     --build-project TestDriverTest
+    --build-options ${build_options}
     --test-command TestDriverTest subdir/test3
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestDriver")
@@ -1230,6 +1285,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/Dependency/Exec"
     ${build_generator_args}
     --build-project Dependency
+    --build-options ${build_options}
     --test-command exec
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Dependency")
@@ -1259,7 +1315,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Executable"
       --build-project Jump
       ${build_generator_args}
-      --build-options
+      --build-options ${build_options}
       -DLIBRARY_OUTPUT_PATH:PATH=${CMake_BINARY_DIR}/Tests/Jump/WithLibOut/Lib
       --test-command jumpExecutable
       )
@@ -1272,6 +1328,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-run-dir "${CMake_BINARY_DIR}/Tests/Jump/NoLibOut/Executable"
       --build-project Jump
       ${build_generator_args}
+      --build-options ${build_options}
       --test-command jumpExecutable
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Jump")
@@ -1283,6 +1340,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${build_generator_args}
       --build-project Plugin
       --build-two-config
+      --build-options ${build_options}
       --test-command bin/example)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Plugin")
 
@@ -1298,6 +1356,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/MacRuntimePath"
       ${build_generator_args}
       --build-project MacRuntimePath
+      --build-options ${build_options}
+        -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
       )
   endif()
 
@@ -1307,6 +1367,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
     ${build_generator_args}
     --build-project LinkLineOrder
+    --build-options ${build_options}
     --test-command Exec1
     )
 
@@ -1316,6 +1377,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     "${CMake_BINARY_DIR}/Tests/LinkLineOrder"
     ${build_generator_args}
     --build-project LinkLineOrder
+    --build-options ${build_options}
     --test-command Exec2
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LinkLineOrder")
@@ -1336,7 +1398,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/LinkStatic"
       ${build_generator_args}
       --build-project LinkStatic
-      --build-options -DMATH_LIBRARY:FILEPATH=/usr/lib/libm.a
+      --build-options ${build_options}
+        -DMATH_LIBRARY:FILEPATH=/usr/lib/libm.a
       --test-command LinkStatic
       )
   endif()
@@ -1348,6 +1411,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/kwsys"
       ${build_generator_args}
       --build-project kwsys
+      --build-options ${build_options}
       --test-command kwsysTestsCxx testIOS
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/kwsys")
@@ -1362,6 +1426,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/Executable Sources"
       ${build_generator_args}
       --build-project SUBDIR
+      --build-options ${build_options}
       --test-command test
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/ShouldBeHere"
       "${CMake_BINARY_DIR}/Tests/SubDirSpaces/testfromsubdir.obj"
@@ -1377,6 +1442,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
       ${build_generator_args}
       --build-project SUBDIR
+      --build-options ${build_options}
       --test-command test
       "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
       "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.obj"
@@ -1389,6 +1455,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-exe-dir "${CMake_BINARY_DIR}/Tests/SubDir/Executable"
       ${build_generator_args}
       --build-project SUBDIR
+      --build-options ${build_options}
       --test-command test
       "${CMake_BINARY_DIR}/Tests/SubDir/ShouldBeHere"
       "${CMake_BINARY_DIR}/Tests/SubDir/testfromsubdir.o"
@@ -1416,6 +1483,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${build_generator_args}
       --build-project MakeClean
       --build-exe-dir "${CMake_BINARY_DIR}/MakeClean"
+      --build-options ${build_options}
       --test-command check_clean
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MakeClean")
@@ -1429,7 +1497,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
       # Look for evidence that this is a VCExpress build. If so, avoid
       # the MFC test by default.
-      string(TOLOWER "${CMAKE_TEST_MAKEPROGRAM}" mkprog)
+      string(TOLOWER "${CMAKE_MAKE_PROGRAM};${CMAKE_TEST_MAKEPROGRAM}" mkprog)
       if(mkprog MATCHES "vcexpress")
         message(STATUS
           "CMAKE_TEST_MAKEPROGRAM indicates vcexpress, avoiding MFC test")
@@ -1520,6 +1588,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-two-config
       ${build_generator_args}
       --build-project mfc_driver
+      --build-options ${build_options}
       --test-command ${CMAKE_CTEST_COMMAND}
         -C \${CTEST_CONFIGURATION_TYPE} -VV)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MFC")
@@ -1542,6 +1611,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-two-config
       ${build_generator_args}
       --build-project VSExternalInclude
+      --build-options ${build_options}
       --test-command VSExternalInclude)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSExternalInclude")
 
@@ -1552,10 +1622,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-two-config
       ${build_generator_args}
       --build-project VSMidl
+      --build-options ${build_options}
       --test-command VSMidl)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSMidl")
 
-    if(NOT MSVC60 AND NOT CMAKE_TEST_MAKEPROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
+    if(CMAKE_TEST_DEVENV)
       # The test (and tested property) works with .sln files, so it's skipped when:
       # * Using VS6, which doesn't use .sln files
       # * cmake --build is set up to use MSBuild, since the MSBuild invocation does not use the .sln file
@@ -1567,7 +1638,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
           "${CMake_BINARY_DIR}/Tests/VSExcludeFromDefaultBuild"
           --build-config ${config}
           --build-two-config
-          ${build_generator_args}
+          --build-generator ${CMAKE_TEST_GENERATOR}
+          --build-makeprogram ${CMAKE_TEST_DEVENV}
+          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
           --build-project VSExcludeFromDefaultBuild
           --test-command ${CMAKE_COMMAND}
              -D "activeConfig=${config}"
@@ -1584,31 +1657,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
 
     if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio ([0-5]|[6-9][0-9])")
-      if(CMAKE_TEST_MAKEPROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
-        set(MSBUILD_EXECUTABLE "${CMAKE_TEST_MAKEPROGRAM}")
-      else()
-        if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio (12)")
-          set(_msbuild_hints "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\${CMAKE_MATCH_1}.0;MSBuildToolsPath]")
-        else()
-          set(_FDIR "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkDir32]")
-          set(_FVER "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\SxS\\VC7;FrameworkVer32]")
-          set(_msbuild_hints ${_FDIR}/${_FVER})
-        endif()
-        find_program(MSBUILD_EXECUTABLE NAMES msbuild HINTS ${_msbuild_hints})
-      endif()
-      if(MSBUILD_EXECUTABLE)
-        add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
-          --build-and-test
-          "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
-          "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
-          --build-two-config
-          --build-generator ${CMAKE_TEST_GENERATOR}
-          --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
-          --build-makeprogram "${MSBUILD_EXECUTABLE}"
-          --build-project VSProjectInSubdir
-          --build-target test)
-        list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
-      endif()
+      # This is Visual Studio 10 or above, so the default build tool is MSBuild.
+      add_test(NAME VSProjectInSubdir COMMAND ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/VSProjectInSubdir"
+        "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
+        --build-two-config
+        --build-generator ${CMAKE_TEST_GENERATOR}
+        --build-generator-toolset "${CMAKE_TEST_GENERATOR_TOOLSET}"
+        --build-project VSProjectInSubdir
+        --build-target test)
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir")
     endif()
   endif()
 
@@ -1625,7 +1684,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         --build-project BundleTest
         --build-target install
 #       --build-target package
-        --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
+        --build-options ${build_options}
+        "-DCMAKE_INSTALL_PREFIX:PATH=${BundleTestInstallDir}"
         "-DCMake_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}"
         --test-command
         ${BundleTestInstallDir}/Applications/SecondBundleExe.app/Contents/MacOS/SecondBundleExe)
@@ -1638,6 +1698,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         --build-two-config
         ${build_generator_args}
         --build-project CFBundleTest
+        --build-options ${build_options}
         --test-command
         ${CMAKE_CMAKE_COMMAND} -DCTEST_CONFIGURATION_TYPE=\${CTEST_CONFIGURATION_TYPE}
         -Ddir=${CMake_BINARY_DIR}/Tests/CFBundleTest
@@ -1658,7 +1719,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${build_generator_args}
       --build-project BundleGeneratorTest
       --build-target package
-      --build-options "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/BundleGeneratorTest/InstallDirectory"
+      --build-options ${build_options}
+        "-DCMAKE_INSTALL_PREFIX:PATH=${CMake_BINARY_DIR}/Tests/BundleGeneratorTest/InstallDirectory"
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BundleGeneratorTest")
   endif()
@@ -1670,7 +1732,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-noclean
     --build-project WarnUnusedUnusedViaSet
-    --build-options "--warn-unused-vars")
+    --build-options ${build_options}
+      "--warn-unused-vars")
   set_tests_properties(WarnUnusedUnusedViaSet PROPERTIES
     PASS_REGULAR_EXPRESSION "unused variable \\(changing definition\\) 'UNUSED_VARIABLE'")
   set_tests_properties(WarnUnusedUnusedViaSet PROPERTIES
@@ -1684,7 +1747,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-noclean
     --build-project WarnUnusedUnusedViaUnset
-    --build-options "--warn-unused-vars")
+    --build-options ${build_options}
+      "--warn-unused-vars")
   set_tests_properties(WarnUnusedUnusedViaUnset PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Warning .*VariableUnusedViaUnset.CMakeLists.txt:7 \\(set\\):")
   set_tests_properties(WarnUnusedUnusedViaUnset PROPERTIES
@@ -1703,7 +1767,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused"
       ${build_generator_args}
       --build-project WarnUnusedCliUnused
-      --build-options "-DUNUSED_CLI_VARIABLE=Unused")
+      --build-options ${build_options}
+        "-DUNUSED_CLI_VARIABLE=Unused")
     set_tests_properties(WarnUnusedCliUnused PROPERTIES
       PASS_REGULAR_EXPRESSION "CMake Warning:.*Manually-specified variables were not used by the project:.*  UNUSED_CLI_VARIABLE")
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedCliUnused")
@@ -1716,7 +1781,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-noclean
     --build-project WarnUnusedCliUsed
-    --build-options "-DUSED_VARIABLE=Usage proven")
+    --build-options ${build_options}
+      "-DUSED_VARIABLE=Usage proven")
   set_tests_properties(WarnUnusedCliUsed PROPERTIES
     PASS_REGULAR_EXPRESSION "Usage proven")
   set_tests_properties(WarnUnusedCliUsed PROPERTIES
@@ -1730,7 +1796,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     ${build_generator_args}
     --build-noclean
     --build-project WarnUninitialized
-    --build-options "--warn-uninitialized")
+    --build-options ${build_options}
+      "--warn-uninitialized")
   set_tests_properties(WarnUninitialized PROPERTIES
     PASS_REGULAR_EXPRESSION "uninitialized variable 'USED_VARIABLE'")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUninitialized")
@@ -1743,6 +1810,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-project TestsWorkingDirectoryProj
     --build-exe-dir "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory"
     --force-new-ctest-process
+    --build-options ${build_options}
     --test-command ${CMAKE_CTEST_COMMAND} -V -C \${CTEST_CONFIGURATION_TYPE}
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory")
@@ -1759,17 +1827,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 #        )
 
   # A test for ctest_build() with targets in subdirectories
+  set(ctest_configure_options)
   if(CMAKE_TEST_GENERATOR_TOOLSET)
-    set(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION "-T;${CMAKE_TEST_GENERATOR_TOOLSET};")
-  else()
-    set(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION)
+    list(APPEND ctest_configure_options -T ${CMAKE_TEST_GENERATOR_TOOLSET})
+  endif()
+  if(CMAKE_TEST_MAKEPROGRAM)
+    list(APPEND ctest_configure_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
   endif()
   configure_file("${CMake_SOURCE_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake.in"
                  "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake" @ONLY)
-  unset(CMAKE_TEST_GENERATOR_TOOLSET_SELECTION)
+  unset(ctest_configure_options)
   add_test(CTest.BuildCommand.ProjectInSubdir
-    ${CMAKE_CTEST_COMMAND} -S "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake"
-                           -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+    ${CMAKE_CTEST_COMMAND} -S "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/Nested")
 
   set(CTEST_TEST_UPDATE 1)
@@ -2139,7 +2208,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-on-failure -C "\${CTestTest_CONFIG}")
 
   if(NOT BORLAND)
-    set(CTestLimitDashJ_EXTRA_OPTIONS --force-new-ctest-process)
+    set(CTestLimitDashJ_CTEST_OPTIONS --force-new-ctest-process)
     add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
       --output-on-failure -C "\${CTestTest_CONFIG}")
   endif()
@@ -2414,16 +2483,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     endif()
   endif()
   if(bootstrap)
-    add_test(BootstrapTest ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      ${CMake_SOURCE_DIR}
-      ${CMake_BINARY_DIR}/Tests/BootstrapTest
-      --build-nocmake
-      --build-noclean
-      --build-makeprogram ${bootstrap}
-      --build-generator "${CMAKE_TEST_GENERATOR}"
-      --test-command
-      ${CMake_BINARY_DIR}/Tests/BootstrapTest/Bootstrap.cmk/cmake)
+    add_test(NAME BootstrapTest
+      COMMAND ${CMAKE_CMAKE_COMMAND}
+        -D "bootstrap=${bootstrap}"
+        -D "bin_dir=${CMake_BINARY_DIR}/Tests/BootstrapTest"
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/BootstrapTest.cmake
+      )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/BootstrapTest")
     # Make this test run early during parallel execution
     set_tests_properties(BootstrapTest PROPERTIES COST 5000)
@@ -2444,6 +2509,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${build_generator_args}
       --build-project testf
       --build-two-config
+      --build-options ${build_options}
+        -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
       --test-command testf)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
 
@@ -2462,6 +2529,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         ${build_generator_args}
         --build-project FortranC
         --build-two-config
+        --build-options ${build_options}
         --test-command CMakeFiles/FortranCInterface/FortranCInterface)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/FortranC")
     endif()
@@ -2485,6 +2553,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
           --build-project hello
           --build-two-config
           --build-run-dir "${CMake_BINARY_DIR}/Tests/Java/"
+          --build-options ${build_options}
           --test-command ${JAVA_RUNTIME} -classpath hello.jar HelloWorld)
         list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Java")
       endif()
@@ -2504,7 +2573,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         "${CMake_BINARY_DIR}/Tests/SimpleCOnly_sdcc"
         ${build_generator_args}
         --build-project SimpleC
-        --build-options
+        --build-options ${build_options}
         "-DCMAKE_SYSTEM_NAME=Generic"
         "-DCMAKE_C_COMPILER=${SDCC_EXECUTABLE}")
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SimpleCOnly_sdcc")
@@ -2522,26 +2591,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         "${CMake_BINARY_DIR}/Tests/Simple_Mingw_Linux2Win"
         ${build_generator_args}
         --build-project Simple
-        --build-options
+        --build-options ${build_options}
         "-DCMAKE_SYSTEM_NAME=Windows"
         "-DCMAKE_C_COMPILER=${MINGW_CC_LINUX2WIN_EXECUTABLE}"
         "-DCMAKE_CXX_COMPILER=${MINGW_CXX_LINUX2WIN_EXECUTABLE}"
         "-DCMAKE_RC_COMPILER=${MINGW_RC_LINUX2WIN_EXECUTABLE}"
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_Mingw_Linux2Win")
-    endif()
-  endif()
-
-  if(UNIX)
-    string(COMPARE EQUAL "${CMAKE_INSTALL_PREFIX}" "${CMake_BINARY_DIR}/Tests/TestShellInstall/Prefix"
-      PREFIX_IS_FOR_TEST)
-    if(PREFIX_IS_FOR_TEST)
-      configure_file(
-        ${CMake_SOURCE_DIR}/Tests/TestInstall.sh.in
-        ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestInstall.sh
-        @ONLY
-        )
-      add_test(ShellInstall /bin/sh ${CMake_BINARY_DIR}/Tests/TestShellInstall/TestShellInstall.sh)
     endif()
   endif()
 
@@ -2616,8 +2672,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   endforeach()
 
   if(TEST_CompileCommandOutput)
-    set(CompileCommandOutput_EXTRA_OPTIONS
-      --build-options -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
+    set(CompileCommandOutput_BUILD_OPTIONS
+      -DMAKE_SUPPORTS_SPACES=${MAKE_SUPPORTS_SPACES})
     ADD_TEST_MACRO(CompileCommandOutput
       "${CMake_BINARY_DIR}/Tests/CMakeLib/runcompilecommands")
   endif()
@@ -2629,6 +2685,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-two-config
     ${build_generator_args}
     --build-project IncludeDirectories
+    --build-options ${build_options}
     --test-command IncludeDirectories)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/IncludeDirectories")
 
@@ -2639,6 +2696,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --build-two-config
     ${build_generator_args}
     --build-project InterfaceLinkLibraries
+    --build-options ${build_options}
     --test-command InterfaceLinkLibraries)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/InterfaceLinkLibraries")
 

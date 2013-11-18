@@ -308,7 +308,7 @@ else()
 endif()
 
 if(CMAKE_CONFIGURATION_TYPES)
-  set(SI_CONFIG -C ${CMAKE_CFG_INTDIR})
+  set(SI_CONFIG --config $<CONFIGURATION>)
 else()
   set(SI_CONFIG)
 endif()
@@ -367,7 +367,9 @@ set(CMAKE_INSTALL_DEBUG_LIBRARIES 1)
 include(InstallRequiredSystemLibraries)
 
 if(CTEST_TEST_CPACK)
-  set(PACKAGE_TARGET --build-target package)
+  set(package_command COMMAND
+    ${CMAKE_COMMAND} --build . --target package ${SI_CONFIG}
+    )
 
   # Avoid settings that require the .zip file command line tools...
   # (just build an NSIS installer without component support)
@@ -375,24 +377,19 @@ if(CTEST_TEST_CPACK)
   set(CPACK_BINARY_ZIP OFF)
   set(CPACK_MONOLITHIC_INSTALL ON)
 else()
-  set(PACKAGE_TARGET)
+  set(package_command)
 endif()
 
 include(CPack)
 
+set(install_command COMMAND
+  ${CMAKE_COMMAND} --build . --target install ${SI_CONFIG}
+  )
+
 add_custom_command(
   TARGET ${install_target}
   POST_BUILD
-  COMMAND ${CMAKE_CTEST_COMMAND}
-  ARGS ${SI_CONFIG}
-  --build-and-test
-  ${CMAKE_SOURCE_DIR}
-  ${CMAKE_BINARY_DIR}
-  --build-generator ${CMAKE_GENERATOR}
-  --build-project ${PROJECT_NAME}
-  --build-makeprogram ${CMAKE_MAKE_PROGRAM}
-  --build-noclean
-  --build-target install
-  ${PACKAGE_TARGET}
+  ${install_command}
+  ${package_command}
   COMMENT "Install Project"
   )

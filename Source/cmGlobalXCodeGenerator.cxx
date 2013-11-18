@@ -257,39 +257,30 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator
-::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName,
-                       const char *projectDir,
-                       const char* additionalOptions,
-                       const char *targetName,
-                       const char* config,
-                       bool ignoreErrors,
-                       bool)
+void
+cmGlobalXCodeGenerator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand,
+  const char* makeProgram,
+  const char* projectName,
+  const char* /*projectDir*/,
+  const char* targetName,
+  const char* config,
+  bool /*fast*/,
+  std::vector<std::string> const& makeOptions)
 {
-  // Config is not used yet
-  (void) ignoreErrors;
-  (void) projectDir;
-
   // now build the test
-  if(makeProgram == 0 || !strlen(makeProgram))
-    {
-    cmSystemTools::Error(
-      "Generator cannot find the appropriate make command.");
-    return "";
-    }
-  std::string makeCommand =
-    cmSystemTools::ConvertToOutputPath(makeProgram);
-  std::string lowerCaseCommand = makeCommand;
-  cmSystemTools::LowerCase(lowerCaseCommand);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram, "xcodebuild")
+    );
 
-  makeCommand += " -project ";
-  makeCommand += projectName;
-  makeCommand += ".xcode";
+  makeCommand.push_back("-project");
+  std::string projectArg = projectName;
+  projectArg += ".xcode";
   if(this->XcodeVersion > 20)
     {
-    makeCommand += "proj";
+    projectArg += "proj";
     }
+  makeCommand.push_back(projectArg);
 
   bool clean = false;
   if ( targetName && strcmp(targetName, "clean") == 0 )
@@ -299,13 +290,13 @@ std::string cmGlobalXCodeGenerator
     }
   if(clean)
     {
-    makeCommand += " clean";
+    makeCommand.push_back("clean");
     }
   else
     {
-    makeCommand += " build";
+    makeCommand.push_back("build");
     }
-  makeCommand += " -target ";
+  makeCommand.push_back("-target");
   // if it is a null string for config don't use it
   if(config && *config == 0)
     {
@@ -313,27 +304,24 @@ std::string cmGlobalXCodeGenerator
     }
   if (targetName && strlen(targetName))
     {
-    makeCommand += targetName;
+    makeCommand.push_back(targetName);
     }
   else
     {
-    makeCommand += "ALL_BUILD";
+    makeCommand.push_back("ALL_BUILD");
     }
   if(this->XcodeVersion == 15)
     {
-    makeCommand += " -buildstyle Development ";
+    makeCommand.push_back("-buildstyle");
+    makeCommand.push_back("Development");
     }
   else
     {
-    makeCommand += " -configuration ";
-    makeCommand += config?config:"Debug";
+    makeCommand.push_back("-configuration");
+    makeCommand.push_back(config?config:"Debug");
     }
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  return makeCommand;
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
 }
 
 //----------------------------------------------------------------------------

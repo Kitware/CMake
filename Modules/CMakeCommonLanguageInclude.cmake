@@ -94,12 +94,10 @@ set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}"
 set (CMAKE_STATIC_LINKER_FLAGS "${CMAKE_STATIC_LINKER_FLAGS_INIT}"
      CACHE STRING "Flags used by the linker during the creation of static libraries.")
 
-set(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM} CACHE INTERNAL
-     "What is the target build tool cmake is generating for.")
-
+# Alias the build tool variable for backward compatibility.
+set(CMAKE_BUILD_TOOL ${CMAKE_MAKE_PROGRAM})
 
 mark_as_advanced(
-CMAKE_BUILD_TOOL
 CMAKE_VERBOSE_MAKEFILE
 
 CMAKE_EXE_LINKER_FLAGS

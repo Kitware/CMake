@@ -69,6 +69,8 @@ public:
 protected:
   virtual const char* GetIDEVersion() { return "8.0"; }
 
+  virtual std::string FindDevEnvCommand();
+
   virtual bool VSLinksDependencies() const { return false; }
 
   bool AddCheckTarget();

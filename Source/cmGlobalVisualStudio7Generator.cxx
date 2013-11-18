@@ -20,8 +20,8 @@
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   const char* platformName)
 {
-  this->FindMakeProgramFile = "CMakeVS7FindMake.cmake";
   this->IntelProjectVersion = 0;
+  this->DevEnvCommandInitialized = false;
 
   if (!platformName)
     {
@@ -110,35 +110,48 @@ void cmGlobalVisualStudio7Generator
 
 }
 
-std::string cmGlobalVisualStudio7Generator
-::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName, const char *projectDir,
-                       const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors, bool)
+//----------------------------------------------------------------------------
+std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
 {
-  // Visual studio 7 doesn't need project dir
-  (void) projectDir;
-  // Ingoring errors is not implemented in visual studio 6
-  (void) ignoreErrors;
-
-  // now build the test
-  std::string makeCommand =
-    cmSystemTools::ConvertToOutputPath(makeProgram);
-  std::string lowerCaseCommand = makeCommand;
-  cmSystemTools::LowerCase(lowerCaseCommand);
-
-  // if there are spaces in the makeCommand, assume a full path
-  // and convert it to a path with no spaces in it as the
-  // RunSingleCommand does not like spaces
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  if(makeCommand.find(' ') != std::string::npos)
+  if(!this->DevEnvCommandInitialized)
     {
-    cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
+    this->DevEnvCommandInitialized = true;
+    this->DevEnvCommand = this->FindDevEnvCommand();
     }
-#endif
-  makeCommand += " ";
-  makeCommand += projectName;
-  makeCommand += ".sln ";
+  return this->DevEnvCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
+{
+  std::string vscmd;
+  std::string vskey = this->GetRegistryBase() + ";InstallDir";
+  if(cmSystemTools::ReadRegistryValue(vskey.c_str(), vscmd,
+                                      cmSystemTools::KeyWOW64_32))
+    {
+    cmSystemTools::ConvertToUnixSlashes(vscmd);
+    vscmd += "/";
+    }
+  vscmd += "devenv.com";
+  return vscmd;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand,
+  const char* makeProgram,
+  const char* projectName,
+  const char* /*projectDir*/,
+  const char* targetName,
+  const char* config,
+  bool /*fast*/,
+  std::vector<std::string> const& makeOptions)
+{
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram, this->GetDevEnvCommand())
+    );
+
+  makeCommand.push_back(std::string(projectName) + ".sln");
   bool clean = false;
   if ( targetName && strcmp(targetName, "clean") == 0 )
     {
@@ -147,37 +160,33 @@ std::string cmGlobalVisualStudio7Generator
     }
   if(clean)
     {
-    makeCommand += "/clean ";
+    makeCommand.push_back("/clean");
     }
   else
     {
-    makeCommand += "/build ";
+    makeCommand.push_back("/build");
     }
 
   if(config && strlen(config))
     {
-    makeCommand += config;
+    makeCommand.push_back(config);
     }
   else
     {
-    makeCommand += "Debug";
+    makeCommand.push_back("Debug");
     }
-  makeCommand += " /project ";
+  makeCommand.push_back("/project");
 
   if (targetName && strlen(targetName))
     {
-    makeCommand += targetName;
+    makeCommand.push_back(targetName);
     }
   else
     {
-    makeCommand += "ALL_BUILD";
+    makeCommand.push_back("ALL_BUILD");
     }
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  return makeCommand;
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
 }
 
 ///! Create a local generator appropriate to this Global Generator

@@ -85,18 +85,7 @@ bool cmBuildCommand
       }
     }
 
-  const char* makeprogram
-    = this->Makefile->GetDefinition("CMAKE_MAKE_PROGRAM");
-  if(!makeprogram)
-    {
-    this->Makefile->IssueMessage(
-      cmake::FATAL_ERROR,
-      "build_command() requires CMAKE_MAKE_PROGRAM to be defined.  "
-      "Call project() or enable_language() first.");
-    return true;
-    }
-
-  // If null/empty CONFIGURATION argument, GenerateBuildCommand uses 'Debug'
+  // If null/empty CONFIGURATION argument, cmake --build uses 'Debug'
   // in the currently implemented multi-configuration global generators...
   // so we put this code here to end up with the same default configuration
   // as the original 2-arg build_command signature:
@@ -110,19 +99,15 @@ bool cmBuildCommand
     configuration = "Release";
     }
 
-  // If null/empty PROJECT_NAME argument, use the Makefile's project name:
-  //
-  if(!project_name || !*project_name)
+  if(project_name && *project_name)
     {
-    project_name = this->Makefile->GetProjectName();
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+      "Ignoring PROJECT_NAME option because it has no effect.");
     }
 
-  // If null/empty TARGET argument, GenerateBuildCommand omits any mention
-  // of a target name on the build command line...
-  //
   std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateBuildCommand
-    (makeprogram, project_name, 0, 0, target, configuration, true, false);
+    ->GetGlobalGenerator()->GenerateCMakeBuildCommand(target, configuration,
+                                                      0, true);
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 
@@ -142,7 +127,6 @@ bool cmBuildCommand
   const char* define = args[0].c_str();
   const char* cacheValue
     = this->Makefile->GetDefinition(define);
-  std::string makeprogram = args[1];
 
   std::string configType = "Release";
   const char* cfg = getenv("CMAKE_CONFIG_TYPE");
@@ -152,9 +136,8 @@ bool cmBuildCommand
     }
 
   std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateBuildCommand
-    (makeprogram.c_str(), this->Makefile->GetProjectName(), 0, 0,
-     0, configType.c_str(), true, false);
+    ->GetGlobalGenerator()->GenerateCMakeBuildCommand(0, configType.c_str(),
+                                                      0, true);
 
   if(cacheValue)
     {

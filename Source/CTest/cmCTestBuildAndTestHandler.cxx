@@ -18,6 +18,7 @@
 #include "cmGlobalGenerator.h"
 #include <cmsys/Process.h>
 #include "cmCTestTestHandler.h"
+#include "cmCacheManager.h"
 
 //----------------------------------------------------------------------
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
@@ -184,14 +185,14 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   cmOStringStream out;
 
   // if the generator and make program are not specified then it is an error
-  if (!this->BuildGenerator.size() || !this->BuildMakeProgram.size())
+  if (!this->BuildGenerator.size())
     {
     if(outstring)
       {
       *outstring =
-        "--build-and-test requires that both the generator and makeprogram "
-        "be provided using the --build-generator and --build-makeprogram "
-        "command line options. ";
+        "--build-and-test requires that the generator "
+        "be provided using the --build-generator "
+        "command line option. ";
       }
     return 1;
     }
@@ -238,9 +239,13 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   if(this->BuildNoCMake)
     {
+    // Make the generator available for the Build call below.
     cm.SetGlobalGenerator(cm.CreateGlobalGenerator(
                             this->BuildGenerator.c_str()));
     cm.SetGeneratorToolset(this->BuildGeneratorToolset);
+
+    // Load the cache to make CMAKE_MAKE_PROGRAM available.
+    cm.GetCacheManager()->LoadCache(this->BinaryDir.c_str());
     }
   else
     {
@@ -508,23 +513,14 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
     {
     this->BuildNoClean = true;
     }
-  if(currentArg.find("--build-options",0) == 0 && idx < allArgs.size() - 1)
+  if(currentArg.find("--build-options",0) == 0)
     {
-    ++idx;
-    bool done = false;
-    while(idx < allArgs.size() && !done)
+    while(idx+1 < allArgs.size() &&
+          allArgs[idx+1] != "--build-target" &&
+          allArgs[idx+1] != "--test-command")
       {
+      ++idx;
       this->BuildOptions.push_back(allArgs[idx]);
-      if(idx+1 < allArgs.size()
-         && (allArgs[idx+1] == "--build-target" ||
-             allArgs[idx+1] == "--test-command"))
-        {
-        done = true;
-        }
-      else
-        {
-        ++idx;
-        }
       }
     }
   if(currentArg.find("--test-command",0) == 0 && idx < allArgs.size() - 1)

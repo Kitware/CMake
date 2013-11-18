@@ -616,8 +616,24 @@ bool cmSystemTools::RunSingleCommand(std::vector<cmStdString>const& command,
                                      OutputOption outputflag ,
                                      double timeout )
 {
+  std::vector<std::string> cmd;
+  for(std::vector<cmStdString>::const_iterator i = command.begin();
+      i != command.end(); ++i)
+    {
+    cmd.push_back(*i);
+    }
+  return cmSystemTools::RunSingleCommand(cmd, output, retVal, dir,
+                                         outputflag, timeout);
+}
+
+bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
+                                     std::string* output ,
+                                     int* retVal , const char* dir ,
+                                     OutputOption outputflag ,
+                                     double timeout )
+{
   std::vector<const char*> argv;
-  for(std::vector<cmStdString>::const_iterator a = command.begin();
+  for(std::vector<std::string>::const_iterator a = command.begin();
       a != command.end(); ++a)
     {
     argv.push_back(a->c_str());
@@ -777,6 +793,23 @@ bool cmSystemTools::RunSingleCommand(
     }
   return cmSystemTools::RunSingleCommand(args, output,retVal,
                                          dir, outputflag, timeout);
+}
+
+std::string
+cmSystemTools::PrintSingleCommand(std::vector<std::string> const& command)
+{
+  std::string commandStr;
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator i = command.begin();
+      i != command.end(); ++i)
+    {
+    commandStr += sep;
+    commandStr += "\"";
+    commandStr += *i;
+    commandStr += "\"";
+    sep = " ";
+    }
+  return commandStr;
 }
 
 bool cmSystemTools::DoesFileExistWithExtensions(
