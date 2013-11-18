@@ -310,8 +310,12 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   bool fast,
   std::vector<std::string> const& makeOptions)
 {
+  // Select the caller- or user-preferred make program, else MSBuild.
+  std::string makeProgramSelected =
+    this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand());
+
   // Check if the caller explicitly requested a devenv tool.
-  std::string makeProgramLower = makeProgram? makeProgram : "";
+  std::string makeProgramLower = makeProgramSelected;
   cmSystemTools::LowerCase(makeProgramLower);
   bool useDevEnv =
     (makeProgramLower.find("devenv") != std::string::npos ||
@@ -342,9 +346,6 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
          proj.substr(proj.size()-7) == ".vfproj")
         {
         useDevEnv = true;
-        // The caller-provided makeProgram did not suggest devenv,
-        // but now we need devenv, so ignore the caller suggestion.
-        makeProgram = 0;
         }
       }
     }
@@ -358,9 +359,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     return;
     }
 
-  makeCommand.push_back(
-    this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand())
-    );
+  makeCommand.push_back(makeProgramSelected);
 
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
   if(!targetName || strlen(targetName) == 0)
