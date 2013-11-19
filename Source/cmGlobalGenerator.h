@@ -207,14 +207,14 @@ public:
 
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const char* project, const char* name,
-                       bool excludeAliases = false);
+                       bool excludeAliases = false) const;
 
   void AddAlias(const char *name, cmTarget *tgt);
   bool IsAlias(const char *name) const;
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
-  bool NameResolvesToFramework(const std::string& libname);
+  bool NameResolvesToFramework(const std::string& libname) const;
 
   /** If check to see if the target is linked to by any other
       target in the project */
