@@ -18,7 +18,7 @@ class cmMakefileLibraryTargetGenerator:
   public cmMakefileTargetGenerator
 {
 public:
-  cmMakefileLibraryTargetGenerator(cmTarget* target);
+  cmMakefileLibraryTargetGenerator(cmGeneratorTarget* target);
   virtual ~cmMakefileLibraryTargetGenerator();
 
   /* the main entry point for this class. Writes the Makefiles associated
