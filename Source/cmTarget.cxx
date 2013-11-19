@@ -769,9 +769,9 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::NameResolvesToFramework(const std::string& libname)
+bool cmTarget::NameResolvesToFramework(const std::string& libname) const
 {
-  return this->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
+  return this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
     NameResolvesToFramework(libname);
 }
 

@@ -197,7 +197,7 @@ public:
   void ClearDependencyInformation(cmMakefile& mf, const char* target);
 
   // Check to see if a library is a framework and treat it different on Mac
-  bool NameResolvesToFramework(const std::string& libname);
+  bool NameResolvesToFramework(const std::string& libname) const;
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib,
                       LinkLibraryType llt);
