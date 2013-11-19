@@ -90,6 +90,13 @@ private:
     cmWIXSourceWriter& featureDefinitions,
     cmCPackComponent const& component);
 
+  bool AddComponentsToFeature(
+    std::string const& rootPath,
+    std::string const& featureId,
+    cmWIXSourceWriter& directoryDefinitions,
+    cmWIXSourceWriter& fileDefinitions,
+    cmWIXSourceWriter& featureDefinitions);
+
   bool CreateStartMenuShortcuts(
     cmWIXSourceWriter& directoryDefinitions,
     cmWIXSourceWriter& fileDefinitions,
