@@ -14,7 +14,9 @@ target_link_libraries(executable ${Bar_LIBRARIES})
 
 install(TARGETS executable DESTINATION bin)
 
-find_path(IGNORED_INCLUDE_DIR ignored.h)
-if (IGNORED_INCLUDE_DIR)
-  message(SEND_ERROR "Should not find this file. The search path should be excluded.")
+if(NOT WIN32)
+  find_path(IGNORED_INCLUDE_DIR ignored.h)
+  if (IGNORED_INCLUDE_DIR)
+    message(SEND_ERROR "Should not find this file. The search path should be excluded.")
+  endif()
 endif()
