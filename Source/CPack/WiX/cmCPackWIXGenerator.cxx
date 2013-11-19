@@ -414,6 +414,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
+  featureDefinitions.AddAttribute("Display", "expand");
   featureDefinitions.AddAttribute("ConfigurableDirectory", "INSTALL_ROOT");
 
   std::string cpackPackageName;
@@ -530,6 +531,11 @@ bool cmCPackWIXGenerator::EmitFeatureForComponentGroup(
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "CM_G_" + group.Name);
 
+  if(group.IsExpandedByDefault)
+    {
+    featureDefinitions.AddAttribute("Display", "expand");
+    }
+
   featureDefinitions.AddAttributeUnlessEmpty(
     "Title", group.DisplayName);
 
@@ -571,6 +577,16 @@ bool cmCPackWIXGenerator::EmitFeatureForComponent(
 
   featureDefinitions.AddAttributeUnlessEmpty(
     "Description", component.Description);
+
+  if(component.IsRequired)
+    {
+    featureDefinitions.AddAttribute("Absent", "disallow");
+    }
+
+  if(component.IsHidden)
+    {
+    featureDefinitions.AddAttribute("Display", "hidden");
+    }
 
   featureDefinitions.EndElement("Feature");
 
