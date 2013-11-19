@@ -63,6 +63,14 @@
 #
 #  If set, this icon is used in place of the default icon.
 #
+# .. variable:: CPACK_WIX_UI_REF
+#
+#  This variable allows you to override the Id of the ``<UIRef>`` element
+#  in the WiX template.
+#
+#  The default is ``WixUI_InstallDir`` in case no CPack components have
+#  been defined and ``WixUI_FeatureTree`` otherwise.
+#
 # .. variable:: CPACK_WIX_UI_BANNER
 #
 #  The bitmap will appear at the top of all installer pages other than the
