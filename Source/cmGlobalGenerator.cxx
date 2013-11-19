@@ -2407,7 +2407,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   // Store the custom command in the target.
   cmCustomCommand cc(0, no_outputs, no_depends, *commandLines, 0,
                      workingDirectory);
-  target.GetPostBuildCommands().push_back(cc);
+  target.AddPostBuildCommand(cc);
   target.SetProperty("EchoString", message);
   std::vector<std::string>::iterator dit;
   for ( dit = depends.begin(); dit != depends.end(); ++ dit )
