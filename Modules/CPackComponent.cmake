@@ -446,7 +446,7 @@ endmacro()
 macro(cpack_add_component_group grpname)
   string(TOUPPER ${grpname} CPACK_ADDGRP_UNAME)
   cpack_parse_arguments(CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}
-    "DISPLAY_NAME;DESCRIPTION"
+    "DISPLAY_NAME;DESCRIPTION;PARENT_GROUP"
     "EXPANDED;BOLD_TITLE"
     ${ARGN}
     )
