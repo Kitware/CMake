@@ -1989,15 +1989,16 @@ bool cmGlobalGenerator::IsAlias(const char *name) const
 //----------------------------------------------------------------------------
 cmTarget*
 cmGlobalGenerator::FindTarget(const char* project, const char* name,
-                              bool excludeAliases)
+                              bool excludeAliases) const
 {
   // if project specific
   if(project)
     {
-    std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
-    for(unsigned int i = 0; i < gens->size(); ++i)
+    std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+      gens = this->ProjectMap.find(project);
+    for(unsigned int i = 0; i < gens->second.size(); ++i)
       {
-      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name,
+      cmTarget* ret = (gens->second)[i]->GetMakefile()->FindTarget(name,
                                                             excludeAliases);
       if(ret)
         {
@@ -2010,14 +2011,14 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name,
     {
     if (!excludeAliases)
       {
-      std::map<cmStdString, cmTarget*>::iterator ai
+      std::map<cmStdString, cmTarget*>::const_iterator ai
                                               = this->AliasTargets.find(name);
       if (ai != this->AliasTargets.end())
         {
         return ai->second;
         }
       }
-    std::map<cmStdString,cmTarget *>::iterator i =
+    std::map<cmStdString,cmTarget *>::const_iterator i =
       this->TotalTargets.find ( name );
     if ( i != this->TotalTargets.end() )
       {
@@ -2033,7 +2034,8 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name,
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::NameResolvesToFramework(const std::string& libname)
+bool
+cmGlobalGenerator::NameResolvesToFramework(const std::string& libname) const
 {
   if(cmSystemTools::IsPathToFramework(libname.c_str()))
     {
