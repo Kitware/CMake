@@ -67,10 +67,12 @@ set_property(
 
 write_make_script(Consumer)
 
-file(WRITE
-  "${CMAKE_BINARY_DIR}/ignored/${CMAKE_BINARY_DIR}/stage/include/ignored.h"
-  "#define IGNORED\n"
-)
+if(NOT WIN32)
+  file(WRITE
+    "${CMAKE_BINARY_DIR}/ignored/${CMAKE_BINARY_DIR}/stage/include/ignored.h"
+    "#define IGNORED\n"
+  )
+endif()
 
 # Build and install the consumer.
 add_custom_command(
