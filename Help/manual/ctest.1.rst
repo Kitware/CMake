@@ -225,8 +225,8 @@ Options
  and or execute a test.  The configure and test steps are optional.
  The arguments to this command line are the source and binary
  directories.  By default this will run CMake on the Source/Bin
- directories specified unless --build-nocmake is specified.  Both
- --build-makeprogram and --build-generator MUST be provided to use
+ directories specified unless --build-nocmake is specified.
+ The --build-generator option *must* be provided to use
  --build-and-test.  If --test-command is specified then that will be
  run after the build is complete.  Other options that affect this
  mode are --build-target --build-nocmake, --build-run-dir,
@@ -265,7 +265,7 @@ Options
  Specify the name of the project to build.
 
 ``--build-makeprogram``
- Specify the make program to use.
+ Override the make program chosen by CTest with a given one.
 
 ``--build-noclean``
  Skip the make clean step.

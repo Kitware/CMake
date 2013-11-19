@@ -101,7 +101,6 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
   : cmGlobalVisualStudio8Generator(name, platformName,
                                    additionalPlatformDefinition)
 {
-  this->FindMakeProgramFile = "CMakeVS9FindMake.cmake";
 }
 
 //----------------------------------------------------------------------------

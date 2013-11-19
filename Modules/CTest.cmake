@@ -244,7 +244,7 @@ if(BUILD_TESTING)
         "${CMAKE_CXX_COMPILER}" ${DART_NAME_COMPONENT})
     else()
       get_filename_component(DART_CXX_NAME
-        "${CMAKE_BUILD_TOOL}" ${DART_NAME_COMPONENT})
+        "${CMAKE_MAKE_PROGRAM}" ${DART_NAME_COMPONENT})
     endif()
     if(DART_CXX_NAME MATCHES "msdev")
       set(DART_CXX_NAME "vs60")

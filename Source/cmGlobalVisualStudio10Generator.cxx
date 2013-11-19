@@ -92,12 +92,12 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   : cmGlobalVisualStudio8Generator(name, platformName,
                                    additionalPlatformDefinition)
 {
-  this->FindMakeProgramFile = "CMakeVS10FindMake.cmake";
   std::string vc10Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
   this->MasmEnabled = false;
+  this->MSBuildCommandInitialized = false;
 }
 
 //----------------------------------------------------------------------------
@@ -255,50 +255,121 @@ std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
   return "Software\\Microsoft\\VisualStudio\\10.0\\vsmacros";
 }
 
-
-std::string cmGlobalVisualStudio10Generator
-::GenerateBuildCommand(const char* makeProgram,
-                       const char *projectName, const char *projectDir,
-                       const char* additionalOptions, const char *targetName,
-                       const char* config, bool ignoreErrors, bool fast)
+//----------------------------------------------------------------------------
+std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
 {
-  // now build the test
-  std::string makeCommand
-    = cmSystemTools::ConvertToOutputPath(makeProgram);
-  std::string lowerCaseCommand = makeCommand;
-  cmSystemTools::LowerCase(lowerCaseCommand);
-
-  // If makeProgram is devenv, parent class knows how to generate command:
-  if (lowerCaseCommand.find("devenv") != std::string::npos ||
-      lowerCaseCommand.find("VCExpress") != std::string::npos)
+  if(!this->MSBuildCommandInitialized)
     {
-    return cmGlobalVisualStudio7Generator::GenerateBuildCommand(makeProgram,
-      projectName, projectDir, additionalOptions, targetName, config,
-      ignoreErrors, fast);
+    this->MSBuildCommandInitialized = true;
+    this->MSBuildCommand = this->FindMSBuildCommand();
+    }
+  return this->MSBuildCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio10Generator::FindMSBuildCommand()
+{
+  std::string msbuild;
+  std::string mskey =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\";
+  mskey += this->GetToolsVersion();
+  mskey += ";MSBuildToolsPath";
+  if(cmSystemTools::ReadRegistryValue(mskey.c_str(), msbuild,
+                                      cmSystemTools::KeyWOW64_32))
+    {
+    cmSystemTools::ConvertToUnixSlashes(msbuild);
+    msbuild += "/";
+    }
+  msbuild += "MSBuild.exe";
+  return msbuild;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
+{
+  if(this->ExpressEdition)
+    {
+    // Visual Studio Express >= 10 do not have "devenv.com" or
+    // "VCExpress.exe" that we can use to build reliably.
+    // Tell the caller it needs to use MSBuild instead.
+    return "";
+    }
+  // Skip over the cmGlobalVisualStudio8Generator implementation because
+  // we expect a real devenv and do not want to look for VCExpress.
+  return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
+  std::vector<std::string>& makeCommand,
+  const char* makeProgram,
+  const char* projectName,
+  const char* projectDir,
+  const char* targetName,
+  const char* config,
+  bool fast,
+  std::vector<std::string> const& makeOptions)
+{
+  // Select the caller- or user-preferred make program, else MSBuild.
+  std::string makeProgramSelected =
+    this->SelectMakeProgram(makeProgram, this->GetMSBuildCommand());
+
+  // Check if the caller explicitly requested a devenv tool.
+  std::string makeProgramLower = makeProgramSelected;
+  cmSystemTools::LowerCase(makeProgramLower);
+  bool useDevEnv =
+    (makeProgramLower.find("devenv") != std::string::npos ||
+     makeProgramLower.find("vcexpress") != std::string::npos);
+
+  // MSBuild is preferred (and required for VS Express), but if the .sln has
+  // an Intel Fortran .vfproj then we have to use devenv. Parse it to find out.
+  cmSlnData slnData;
+  {
+  std::string slnFile;
+  if(projectDir && *projectDir)
+    {
+    slnFile = projectDir;
+    slnFile += "/";
+    }
+  slnFile += projectName;
+  slnFile += ".sln";
+  cmVisualStudioSlnParser parser;
+  if(parser.ParseFile(slnFile, slnData,
+                      cmVisualStudioSlnParser::DataGroupProjects))
+    {
+    std::vector<cmSlnProjectEntry> slnProjects = slnData.GetProjects();
+    for(std::vector<cmSlnProjectEntry>::iterator i = slnProjects.begin();
+        !useDevEnv && i != slnProjects.end(); ++i)
+      {
+      std::string proj = i->GetRelativePath();
+      if(proj.size() > 7 &&
+         proj.substr(proj.size()-7) == ".vfproj")
+        {
+        useDevEnv = true;
+        }
+      }
+    }
+  }
+  if(useDevEnv)
+    {
+    // Use devenv to build solutions containing Intel Fortran projects.
+    cmGlobalVisualStudio7Generator::GenerateBuildCommand(
+      makeCommand, makeProgram, projectName, projectDir,
+      targetName, config, fast, makeOptions);
+    return;
     }
 
-  // Otherwise, assume MSBuild command line, and construct accordingly.
+  makeCommand.push_back(makeProgramSelected);
 
-  // if there are spaces in the makeCommand, assume a full path
-  // and convert it to a path with no spaces in it as the
-  // RunSingleCommand does not like spaces
-  if(makeCommand.find(' ') != std::string::npos)
-    {
-    cmSystemTools::GetShortPath(makeCommand.c_str(), makeCommand);
-    }
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
   if(!targetName || strlen(targetName) == 0)
     {
     targetName = "ALL_BUILD";
     }
-  bool clean = false;
   if ( targetName && strcmp(targetName, "clean") == 0 )
     {
-    clean = true;
-    makeCommand += " ";
-    makeCommand += projectName;
-    makeCommand += ".sln ";
-    makeCommand += "/t:Clean ";
+    makeCommand.push_back(std::string(projectName)+".sln");
+    makeCommand.push_back("/t:Clean");
     }
   else
     {
@@ -307,51 +378,29 @@ std::string cmGlobalVisualStudio10Generator
     if (targetProject.find('/') == std::string::npos)
       {
       // it might be in a subdir
-      cmVisualStudioSlnParser parser;
-      cmSlnData slnData;
-      std::string slnFile;
-      if (projectDir && *projectDir)
+      if (cmSlnProjectEntry const* proj =
+          slnData.GetProjectByName(targetName))
         {
-        slnFile = projectDir;
-        slnFile += '/';
-        slnFile += projectName;
-        }
-      else
-        {
-        slnFile = projectName;
-        }
-      if (parser.ParseFile(slnFile + ".sln", slnData,
-                           cmVisualStudioSlnParser::DataGroupProjects))
-        {
-        if (cmSlnProjectEntry const* proj =
-            slnData.GetProjectByName(targetName))
-          {
-          targetProject = proj->GetRelativePath();
-          cmSystemTools::ConvertToUnixSlashes(targetProject);
-          }
+        targetProject = proj->GetRelativePath();
+        cmSystemTools::ConvertToUnixSlashes(targetProject);
         }
       }
-    makeCommand += " ";
-    makeCommand += targetProject;
-    makeCommand += " ";
+    makeCommand.push_back(targetProject);
     }
-  makeCommand += "/p:Configuration=";
+  std::string configArg = "/p:Configuration=";
   if(config && strlen(config))
     {
-    makeCommand += config;
+    configArg += config;
     }
   else
     {
-    makeCommand += "Debug";
+    configArg += "Debug";
     }
-  makeCommand += " /p:VisualStudioVersion=";
-  makeCommand += this->GetIDEVersion();
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
-  return makeCommand;
+  makeCommand.push_back(configArg);
+  makeCommand.push_back(std::string("/p:VisualStudioVersion=")+
+                        this->GetIDEVersion());
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
 }
 
 //----------------------------------------------------------------------------

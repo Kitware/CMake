@@ -94,7 +94,6 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
   const char* additionalPlatformDefinition)
   : cmGlobalVisualStudio71Generator(platformName)
 {
-  this->FindMakeProgramFile = "CMakeVS8FindMake.cmake";
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
 
@@ -102,6 +101,26 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
     {
     this->AdditionalPlatformDefinition = additionalPlatformDefinition;
     }
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
+{
+  // First look for VCExpress.
+  std::string vsxcmd;
+  std::string vsxkey =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\";
+  vsxkey += this->GetIDEVersion();
+  vsxkey += ";InstallDir";
+  if(cmSystemTools::ReadRegistryValue(vsxkey.c_str(), vsxcmd,
+                                      cmSystemTools::KeyWOW64_32))
+    {
+    cmSystemTools::ConvertToUnixSlashes(vsxcmd);
+    vsxcmd += "/VCExpress.exe";
+    return vsxcmd;
+    }
+  // Now look for devenv.
+  return this->cmGlobalVisualStudio71Generator::FindDevEnvCommand();
 }
 
 //----------------------------------------------------------------------------

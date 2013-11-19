@@ -38,7 +38,6 @@ add_custom_command(
     --build-target install
     --build-generator ${CMAKE_GENERATOR}
     --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-    --build-makeprogram ${CMAKE_MAKE_PROGRAM}
     --build-options -C${MacRuntimePath_BINARY_DIR}/InitialCache.cmake
   VERBATIM
   )
@@ -60,7 +59,6 @@ add_custom_command(
    --build-project MacRuntimePath_B
    --build-generator ${CMAKE_GENERATOR}
    --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-   --build-makeprogram ${CMAKE_MAKE_PROGRAM}
    --build-options -C${MacRuntimePath_BINARY_DIR}/InitialCache.cmake
   VERBATIM
   )

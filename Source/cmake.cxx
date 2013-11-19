@@ -2663,26 +2663,19 @@ int cmake::Build(const std::string& dir,
     this->CreateGlobalGenerator(it.GetValue()));
   std::string output;
   std::string projName;
-  std::string makeProgram;
   if(!it.Find("CMAKE_PROJECT_NAME"))
     {
     std::cerr << "Error: could not find CMAKE_PROJECT_NAME in Cache\n";
     return 1;
     }
   projName = it.GetValue();
-  if(!it.Find("CMAKE_MAKE_PROGRAM"))
-    {
-    std::cerr << "Error: could not find CMAKE_MAKE_PROGRAM in Cache\n";
-    return 1;
-    }
-  makeProgram = it.GetValue();
   return gen->Build(0, dir.c_str(),
                     projName.c_str(), target.c_str(),
                     &output,
-                    makeProgram.c_str(),
+                    0,
                     config.c_str(), clean, false, 0,
                     cmSystemTools::OUTPUT_PASSTHROUGH,
-                    0, nativeOptions);
+                    nativeOptions);
 }
 
 void cmake::WatchUnusedCli(const char* var)

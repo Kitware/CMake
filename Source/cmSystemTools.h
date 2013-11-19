@@ -228,11 +228,18 @@ public:
    * the command to run, and each argument to the command should
    * be in comand[1]...command[command.size()]
    */
+  static bool RunSingleCommand(std::vector<std::string> const& command,
+                               std::string* output = 0,
+                               int* retVal = 0, const char* dir = 0,
+                               OutputOption outputflag = OUTPUT_MERGE,
+                               double timeout = 0.0);
   static bool RunSingleCommand(std::vector<cmStdString> const& command,
                                std::string* output = 0,
                                int* retVal = 0, const char* dir = 0,
                                OutputOption outputflag = OUTPUT_MERGE,
                                double timeout = 0.0);
+
+  static std::string PrintSingleCommand(std::vector<std::string> const&);
 
   /**
    * Parse arguments out of a single string command

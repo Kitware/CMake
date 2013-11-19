@@ -555,36 +555,29 @@ cmGlobalUnixMakefileGenerator3
   this->WriteDirectoryRule2(ruleFileStream, lg, "preinstall", true, true);
 }
 
-
-std::string cmGlobalUnixMakefileGenerator3
-::GenerateBuildCommand(const char* makeProgram, const char *projectName,
-                       const char *projectDir, const char* additionalOptions,
-                       const char *targetName, const char* config,
-                       bool ignoreErrors, bool fast)
+//----------------------------------------------------------------------------
+void cmGlobalUnixMakefileGenerator3
+::GenerateBuildCommand(std::vector<std::string>& makeCommand,
+                       const char* makeProgram,
+                       const char* /*projectName*/,
+                       const char* /*projectDir*/,
+                       const char* targetName,
+                       const char* /*config*/,
+                       bool fast,
+                       std::vector<std::string> const& makeOptions)
 {
-  // Project name & dir and config are not used yet.
-  (void)projectName;
-  (void)projectDir;
-  (void)config;
-
-  std::string makeCommand =
-    cmSystemTools::ConvertToUnixOutputPath(makeProgram);
+  makeCommand.push_back(
+    this->SelectMakeProgram(makeProgram)
+    );
 
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
   if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
     {
-    makeCommand += " /NOLOGO ";
+    makeCommand.push_back("/NOLOGO");
     }
-  if ( ignoreErrors )
-    {
-    makeCommand += " -i";
-    }
-  if ( additionalOptions )
-    {
-    makeCommand += " ";
-    makeCommand += additionalOptions;
-    }
+  makeCommand.insert(makeCommand.end(),
+                     makeOptions.begin(), makeOptions.end());
   if ( targetName && strlen(targetName))
     {
     cmLocalUnixMakefileGenerator3 *lg;
@@ -605,22 +598,19 @@ std::string cmGlobalUnixMakefileGenerator3
       lg->GetMakefile()->MakeStartDirectoriesCurrent();
       }
 
-    makeCommand += " \"";
     std::string tname = targetName;
     if(fast)
       {
       tname += "/fast";
       }
-    tname = lg->Convert(tname.c_str(),cmLocalGenerator::HOME_OUTPUT,
-                        cmLocalGenerator::MAKEFILE);
-    makeCommand += tname.c_str();
-    makeCommand += "\"";
+    tname = lg->Convert(tname.c_str(),cmLocalGenerator::HOME_OUTPUT);
+    cmSystemTools::ConvertToOutputSlashes(tname);
+    makeCommand.push_back(tname);
     if (!this->LocalGenerators.size())
       {
       delete lg;
       }
     }
-  return makeCommand;
 }
 
 //----------------------------------------------------------------------------

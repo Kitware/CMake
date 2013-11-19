@@ -52,14 +52,16 @@ public:
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
    */
-  virtual std::string GenerateBuildCommand(const char* makeProgram,
-                                           const char *projectName,
-                                           const char *projectDir,
-                                           const char* additionalOptions,
-                                           const char *targetName,
-                                           const char* config,
-                                           bool ignoreErrors,
-                                           bool fast);
+  virtual void GenerateBuildCommand(
+    std::vector<std::string>& makeCommand,
+    const char* makeProgram,
+    const char* projectName,
+    const char* projectDir,
+    const char* targetName,
+    const char* config,
+    bool fast,
+    std::vector<std::string> const& makeOptions = std::vector<std::string>()
+    );
 
   /**
    * Generate the all required files for building this project/tree. This
@@ -90,6 +92,7 @@ public:
 protected:
   virtual const char* GetIDEVersion() { return "6.0"; }
 private:
+  virtual std::string GetVSMakeProgram() { return this->GetMSDevCommand(); }
   void GenerateConfigurations(cmMakefile* mf);
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
@@ -100,6 +103,10 @@ private:
                             const std::set<cmStdString>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget* target);
+  std::string MSDevCommand;
+  bool MSDevCommandInitialized;
+  std::string const& GetMSDevCommand();
+  std::string FindMSDevCommand();
 };
 
 #endif

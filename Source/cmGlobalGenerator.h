@@ -123,17 +123,22 @@ public:
             bool clean, bool fast,
             double timeout,
             cmSystemTools::OutputOption outputflag=cmSystemTools::OUTPUT_NONE,
-            const char* extraOptions = 0,
             std::vector<std::string> const& nativeOptions =
             std::vector<std::string>());
 
-  virtual std::string GenerateBuildCommand(
+  virtual void GenerateBuildCommand(
+    std::vector<std::string>& makeCommand,
     const char* makeProgram,
     const char *projectName, const char *projectDir,
-    const char* additionalOptions,
-    const char *targetName, const char* config,
-    bool ignoreErrors, bool fast);
+    const char *targetName, const char* config, bool fast,
+    std::vector<std::string> const& makeOptions = std::vector<std::string>()
+    );
 
+  /** Generate a "cmake --build" call for a given target and config.  */
+  std::string GenerateCMakeBuildCommand(const char* target,
+                                        const char* config,
+                                        const char* native,
+                                        bool ignoreErrors);
 
   ///! Set the CMake instance
   void SetCMakeInstance(cmake *cm);
@@ -198,7 +203,7 @@ public:
   /*
    * Determine what program to use for building the project.
    */
-  void FindMakeProgram(cmMakefile*);
+  virtual void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const char* project, const char* name,
@@ -331,6 +336,8 @@ protected:
   typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > AutogensType;
   void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
 
+  std::string SelectMakeProgram(const char* makeProgram,
+                                std::string makeDefault = "");
 
   // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.
@@ -423,6 +430,8 @@ private:
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void ClearGeneratorMembers();
+
+  virtual const char* GetBuildIgnoreErrorsFlag() const { return 0; }
 
   // Cache directory content and target files to be built.
   struct DirectoryContent: public std::set<cmStdString>

@@ -462,7 +462,7 @@ void cmGlobalKdevelopGenerator
         "      <numberofjobs>1</numberofjobs>\n"
         "      <dontact>false</dontact>\n"
         "      <makebin>" << this->GlobalGenerator->GetLocalGenerators()[0]->
-            GetMakefile()->GetRequiredDefinition("CMAKE_BUILD_TOOL")
+            GetMakefile()->GetRequiredDefinition("CMAKE_MAKE_PROGRAM")
             << " </makebin>\n"
         "      <selectedenvironment>default</selectedenvironment>\n"
         "      <environments>\n"
