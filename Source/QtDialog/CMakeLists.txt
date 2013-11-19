@@ -134,6 +134,10 @@ set(CMAKE_INSTALL_DESTINATION_ARGS
 
 install(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
 
+# Install a copy of the license used by the Qt libraries we link.
+install(FILES ${CMake_SOURCE_DIR}/Licenses/Qt/LICENSE.LGPL
+  DESTINATION ${CMAKE_DATA_DIR}/Licenses/Qt)
+
 if(UNIX)
   # install a desktop file so CMake appears in the application start menu
   # with an icon
