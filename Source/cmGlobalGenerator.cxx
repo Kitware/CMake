@@ -1981,7 +1981,7 @@ void cmGlobalGenerator::AddAlias(const char *name, cmTarget *tgt)
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::IsAlias(const char *name)
+bool cmGlobalGenerator::IsAlias(const char *name) const
 {
   return this->AliasTargets.find(name) != this->AliasTargets.end();
 }
