@@ -43,7 +43,7 @@ macro(write_make_script name)
     )
   endif()
   file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/Make${name}.${scriptExt}"
-    "${CMAKE_MAKE_PROGRAM} install > \"${CMAKE_BINARY_DIR}/make_${name}_output\"\n"
+    "${CMAKE_COMMAND} --build . --target install > \"${CMAKE_BINARY_DIR}/make_${name}_output\"\n"
   )
   file(COPY "${CMAKE_BINARY_DIR}/CMakeFiles/Make${name}.${scriptExt}"
     DESTINATION "${CMAKE_BINARY_DIR}"
