@@ -1810,7 +1810,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommand& command = *i;
+    const cmCustomCommand& command = *i;
     comment += pre;
     comment += lg->ConstructComment(command);
     script += pre;
