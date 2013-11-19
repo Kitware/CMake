@@ -807,10 +807,14 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = tr("CMake %1\n"
-                "Using Qt %2\n"
-                "www.cmake.org");
-
+  QString msg = tr(
+    "CMake %1 (cmake.org).\n"
+    "CMake suite maintained by Kitware, Inc. (kitware.com).\n"
+    "Distributed under terms of the BSD 3-Clause License.\n"
+    "\n"
+    "CMake GUI maintained by csimsoft,\n"
+    "built using Qt %2 (qt-project.org).\n"
+    );
   msg = msg.arg(cmVersion::GetCMakeVersion());
   msg = msg.arg(qVersion());
 
