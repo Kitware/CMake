@@ -269,6 +269,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CompileOptions CompileOptions)
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
   ADD_TEST_MACRO(AliasTarget AliasTarget)
+  ADD_TEST_MACRO(StagingPrefix StagingPrefix)
   ADD_TEST_MACRO(InterfaceLibrary InterfaceLibrary)
   if((CMAKE_CXX_COMPILER_ID STREQUAL GNU
         AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)

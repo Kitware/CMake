@@ -42,6 +42,8 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
   list(APPEND CMAKE_SYSTEM_PREFIX_PATH
     # Project install destination.
     "${CMAKE_INSTALL_PREFIX}"
+    # User-supplied staging prefix.
+    "${CMAKE_STAGING_PREFIX}"
   )
 endif()
 

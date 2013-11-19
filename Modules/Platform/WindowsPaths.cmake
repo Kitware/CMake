@@ -78,6 +78,8 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
   list(APPEND CMAKE_SYSTEM_PREFIX_PATH
     # Project install destination.
     "${CMAKE_INSTALL_PREFIX}"
+    # User-supplied staging prefix.
+    "${CMAKE_STAGING_PREFIX}"
     )
 endif()
 
@@ -93,6 +95,7 @@ list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
 if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
   list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
     "${CMAKE_INSTALL_PREFIX}/bin"
+    "${CMAKE_STAGING_PREFIX}/bin"
   )
 endif()
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
