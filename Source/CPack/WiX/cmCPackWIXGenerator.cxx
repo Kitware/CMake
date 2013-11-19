@@ -198,6 +198,18 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
       << std::endl);
     }
 
+  if(GetOption("CPACK_WIX_UI_REF") == 0)
+    {
+    std::string defaultRef = "WixUI_InstallDir";
+
+    if(Components.size())
+      {
+      defaultRef = "WixUI_FeatureTree";
+      }
+
+    SetOption("CPACK_WIX_UI_REF", defaultRef.c_str());
+    }
+
   CollectExtensions("CPACK_WIX_EXTENSIONS", candleExtensions);
   CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", candleExtensions);
 
@@ -296,6 +308,7 @@ bool cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   SetOptionIfNotSet("CPACK_WIX_PROGRAM_MENU_FOLDER",
     GetOption("CPACK_PACKAGE_NAME"));
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
+  CopyDefinition(includeFile, "CPACK_WIX_UI_REF");
 
   return true;
 }
@@ -401,7 +414,15 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
-  featureDefinitions.AddAttribute("Title", "ProductFeature");
+  featureDefinitions.AddAttribute("ConfigurableDirectory", "INSTALL_ROOT");
+
+  std::string cpackPackageName;
+  if(!RequireOption("CPACK_PACKAGE_NAME", cpackPackageName))
+    {
+    return false;
+    }
+  featureDefinitions.AddAttribute("Title", cpackPackageName);
+
   featureDefinitions.AddAttribute("Level", "1");
 
   CreateFeatureHierarchy(featureDefinitions);
