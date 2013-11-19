@@ -3822,21 +3822,19 @@ const char* cmMakefile::GetFeature(const char* feature, const char* config)
   return 0;
 }
 
-cmTarget* cmMakefile::FindTarget(const char* name, bool excludeAliases)
+cmTarget* cmMakefile::FindTarget(const char* name, bool excludeAliases) const
 {
   if (!excludeAliases)
     {
-    std::map<std::string, cmTarget*>::iterator i
+    std::map<std::string, cmTarget*>::const_iterator i
                                               = this->AliasTargets.find(name);
     if (i != this->AliasTargets.end())
       {
       return i->second;
       }
     }
-  cmTargets& tgts = this->GetTargets();
-
-  cmTargets::iterator i = tgts.find ( name );
-  if ( i != tgts.end() )
+  cmTargets::iterator i = this->Targets.find( name );
+  if ( i != this->Targets.end() )
     {
     return &i->second;
     }
