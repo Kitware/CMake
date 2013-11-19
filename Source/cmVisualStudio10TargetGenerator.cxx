@@ -1794,7 +1794,7 @@ cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
 
 void cmVisualStudio10TargetGenerator::WriteEvent(
   const char* name,
-  std::vector<cmCustomCommand> & commands,
+  std::vector<cmCustomCommand> const& commands,
   std::string const& configName)
 {
   if(commands.size() == 0)
@@ -1807,7 +1807,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   std::string script;
   const char* pre = "";
   std::string comment;
-  for(std::vector<cmCustomCommand>::iterator i = commands.begin();
+  for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
     cmCustomCommand& command = *i;
