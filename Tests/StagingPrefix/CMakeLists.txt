@@ -26,34 +26,6 @@ else()
   endif()
 endif()
 
-if(WIN32)
-  set(scriptExt bat)
-else()
-  set(scriptExt sh)
-endif()
-
-macro(write_make_script name)
-  if(NOT WIN32)
-    file(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/Make${name}.${scriptExt}"
-      "#!/bin/sh\n"
-    )
-  else()
-    file(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/Make${name}.${scriptExt}"
-      "\n"
-    )
-  endif()
-  file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/Make${name}.${scriptExt}"
-    "${CMAKE_COMMAND} --build . --target install > \"${CMAKE_BINARY_DIR}/make_${name}_output\"\n"
-  )
-  file(COPY "${CMAKE_BINARY_DIR}/CMakeFiles/Make${name}.${scriptExt}"
-    DESTINATION "${CMAKE_BINARY_DIR}"
-    FILE_PERMISSIONS
-      OWNER_READ OWNER_EXECUTE
-  )
-endmacro()
-
-write_make_script(Producer)
-
 # Build and install the producer.
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/ProducerProject
@@ -63,9 +35,9 @@ add_custom_command(
     ${CMAKE_BINARY_DIR}/Producer
     --build-noclean
     --build-project Producer
+    --build-target install
     --build-generator ${CMAKE_GENERATOR}
     --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-    --build-makeprogram "${CMAKE_BINARY_DIR}/MakeProducer.${scriptExt}"
     --build-options
       -DCMAKE_VERBOSE_MAKEFILE=1
       "-DCMAKE_STAGING_PREFIX=${CMAKE_BINARY_DIR}/stage"
@@ -79,8 +51,6 @@ set_property(
   SOURCE ${CMAKE_BINARY_DIR}/ProducerProject
   PROPERTY SYMBOLIC 1
   )
-
-write_make_script(Consumer)
 
 if(NOT WIN32)
   file(WRITE
@@ -98,9 +68,9 @@ add_custom_command(
    ${CMAKE_BINARY_DIR}/Consumer
    --build-noclean
    --build-project Consumer
+   --build-target install
    --build-generator ${CMAKE_GENERATOR}
    --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-   --build-makeprogram "${CMAKE_BINARY_DIR}/MakeConsumer.${scriptExt}"
    --build-options
       "-DCMAKE_FIND_ROOT_PATH=${CMAKE_BINARY_DIR}/ignored"
       "-DCMAKE_STAGING_PREFIX=${CMAKE_BINARY_DIR}/stage"
