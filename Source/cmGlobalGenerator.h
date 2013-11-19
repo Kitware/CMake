@@ -210,7 +210,7 @@ public:
                        bool excludeAliases = false);
 
   void AddAlias(const char *name, cmTarget *tgt);
-  bool IsAlias(const char *name);
+  bool IsAlias(const char *name) const;
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
