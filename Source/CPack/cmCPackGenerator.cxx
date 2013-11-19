@@ -580,7 +580,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
        *      (this works at CPack time too)
        */
       if (this->SupportsComponentInstallation() &
-          !(this->IsSet("CPACK_MONOLITHIC_INSTALL")))
+          !(this->IsOn("CPACK_MONOLITHIC_INSTALL")))
         {
         // Determine the installation types for this project (if provided).
         std::string installTypesVar = "CPACK_"
@@ -1532,13 +1532,13 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
       component->DisplayName = component->Name;
       }
     component->IsHidden
-      = this->IsSet((macroPrefix + "_HIDDEN").c_str());
+      = this->IsOn((macroPrefix + "_HIDDEN").c_str());
     component->IsRequired
-      = this->IsSet((macroPrefix + "_REQUIRED").c_str());
+      = this->IsOn((macroPrefix + "_REQUIRED").c_str());
     component->IsDisabledByDefault
-      = this->IsSet((macroPrefix + "_DISABLED").c_str());
+      = this->IsOn((macroPrefix + "_DISABLED").c_str());
     component->IsDownloaded
-      = this->IsSet((macroPrefix + "_DOWNLOADED").c_str())
+      = this->IsOn((macroPrefix + "_DOWNLOADED").c_str())
         || cmSystemTools::IsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
 
     const char* archiveFile = this->GetOption((macroPrefix +
@@ -1635,9 +1635,9 @@ cmCPackGenerator::GetComponentGroup(const char *projectName, const char *name)
       group->Description = description;
       }
     group->IsBold
-      = this->IsSet((macroPrefix + "_BOLD_TITLE").c_str());
+      = this->IsOn((macroPrefix + "_BOLD_TITLE").c_str());
     group->IsExpandedByDefault
-      = this->IsSet((macroPrefix + "_EXPANDED").c_str());
+      = this->IsOn((macroPrefix + "_EXPANDED").c_str());
     const char* parentGroupName
       = this->GetOption((macroPrefix + "_PARENT_GROUP").c_str());
     if (parentGroupName && *parentGroupName)
