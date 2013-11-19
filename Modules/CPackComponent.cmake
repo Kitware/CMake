@@ -375,17 +375,17 @@ endmacro()
 
 # Macro that adds a component to the CPack installer
 macro(cpack_add_component compname)
-  string(TOUPPER ${compname} CPACK_ADDCOMP_UNAME)
-  cpack_parse_arguments(CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}
+  string(TOUPPER ${compname} _CPACK_ADDCOMP_UNAME)
+  cpack_parse_arguments(CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}
     "DISPLAY_NAME;DESCRIPTION;GROUP;DEPENDS;INSTALL_TYPES;ARCHIVE_FILE"
     "HIDDEN;REQUIRED;DISABLED;DOWNLOADED"
     ${ARGN}
     )
 
-  if (CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DOWNLOADED)
-    set(CPACK_ADDCOMP_STR "\n# Configuration for downloaded component \"${compname}\"\n")
+  if (CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_DOWNLOADED)
+    set(_CPACK_ADDCOMP_STR "\n# Configuration for downloaded component \"${compname}\"\n")
   else ()
-    set(CPACK_ADDCOMP_STR "\n# Configuration for component \"${compname}\"\n")
+    set(_CPACK_ADDCOMP_STR "\n# Configuration for component \"${compname}\"\n")
   endif ()
 
   if(NOT CPACK_MONOLITHIC_INSTALL)
@@ -394,51 +394,51 @@ macro(cpack_add_component compname)
     # take care of any components that have been added after the CPack
     # moduled was included.
     if(NOT CPACK_COMPONENTS_ALL_SET_BY_USER)
-      get_cmake_property(CPACK_ADDCOMP_COMPONENTS COMPONENTS)
-      set(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR}\nSET(CPACK_COMPONENTS_ALL")
-      foreach(COMP ${CPACK_ADDCOMP_COMPONENTS})
-       set(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR} ${COMP}")
+      get_cmake_property(_CPACK_ADDCOMP_COMPONENTS COMPONENTS)
+      set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR}\nSET(CPACK_COMPONENTS_ALL")
+      foreach(COMP ${_CPACK_ADDCOMP_COMPONENTS})
+       set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR} ${COMP}")
       endforeach()
-      set(CPACK_ADDCOMP_STR "${CPACK_ADDCOMP_STR})\n")
+      set(_CPACK_ADDCOMP_STR "${_CPACK_ADDCOMP_STR})\n")
     endif()
   endif()
 
   cpack_append_string_variable_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DISPLAY_NAME
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_DISPLAY_NAME
+    _CPACK_ADDCOMP_STR)
   cpack_append_string_variable_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DESCRIPTION
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_DESCRIPTION
+    _CPACK_ADDCOMP_STR)
   cpack_append_variable_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_GROUP
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_GROUP
+    _CPACK_ADDCOMP_STR)
   cpack_append_variable_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DEPENDS
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_DEPENDS
+    _CPACK_ADDCOMP_STR)
   cpack_append_variable_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_INSTALL_TYPES
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_INSTALL_TYPES
+    _CPACK_ADDCOMP_STR)
   cpack_append_string_variable_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_ARCHIVE_FILE
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_ARCHIVE_FILE
+    _CPACK_ADDCOMP_STR)
   cpack_append_option_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_HIDDEN
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_HIDDEN
+    _CPACK_ADDCOMP_STR)
   cpack_append_option_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_REQUIRED
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_REQUIRED
+    _CPACK_ADDCOMP_STR)
   cpack_append_option_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DISABLED
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_DISABLED
+    _CPACK_ADDCOMP_STR)
   cpack_append_option_set_command(
-    CPACK_COMPONENT_${CPACK_ADDCOMP_UNAME}_DOWNLOADED
-    CPACK_ADDCOMP_STR)
+    CPACK_COMPONENT_${_CPACK_ADDCOMP_UNAME}_DOWNLOADED
+    _CPACK_ADDCOMP_STR)
   # Backward compatibility issue.
   # Write to config iff the macros is used after CPack.cmake has been
   # included, other it's not necessary because the variables
   # will be encoded by cpack_encode_variables.
   if(CPack_CMake_INCLUDED)
-    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${CPACK_ADDCOMP_STR}")
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_ADDCOMP_STR}")
   endif()
 endmacro()
 
