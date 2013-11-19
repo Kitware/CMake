@@ -5,7 +5,6 @@ project(ToClean)
 add_executable(toclean toclean.cxx)
 
 # List some build-time-generated files.
-get_target_property(TOCLEAN_FILES toclean LOCATION)
 set(TOCLEAN_FILES ${TOCLEAN_FILES}
   "${ToClean_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/toclean.dir/toclean.cxx${CMAKE_CXX_OUTPUT_EXTENSION}")
 
