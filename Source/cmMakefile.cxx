@@ -903,13 +903,13 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
     switch(type)
       {
       case cmTarget::PRE_BUILD:
-        ti->second.GetPreBuildCommands().push_back(cc);
+        ti->second.AddPreBuildCommand(cc);
         break;
       case cmTarget::PRE_LINK:
-        ti->second.GetPreLinkCommands().push_back(cc);
+        ti->second.AddPreLinkCommand(cc);
         break;
       case cmTarget::POST_BUILD:
-        ti->second.GetPostBuildCommands().push_back(cc);
+        ti->second.AddPostBuildCommand(cc);
         break;
       }
     }

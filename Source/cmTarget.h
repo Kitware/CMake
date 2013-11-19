@@ -114,12 +114,18 @@ public:
   /**
    * Get the list of the custom commands for this target
    */
-  std::vector<cmCustomCommand> &GetPreBuildCommands()
+  std::vector<cmCustomCommand> const &GetPreBuildCommands() const
     {return this->PreBuildCommands;}
-  std::vector<cmCustomCommand> &GetPreLinkCommands()
+  std::vector<cmCustomCommand> const &GetPreLinkCommands() const
     {return this->PreLinkCommands;}
-  std::vector<cmCustomCommand> &GetPostBuildCommands()
+  std::vector<cmCustomCommand> const &GetPostBuildCommands() const
     {return this->PostBuildCommands;}
+  void AddPreBuildCommand(cmCustomCommand const &cmd)
+    {this->PreBuildCommands.push_back(cmd);}
+  void AddPreLinkCommand(cmCustomCommand const &cmd)
+    {this->PreLinkCommands.push_back(cmd);}
+  void AddPostBuildCommand(cmCustomCommand const &cmd)
+    {this->PostBuildCommands.push_back(cmd);}
 
   /**
    * Get the list of the source files used by this target
