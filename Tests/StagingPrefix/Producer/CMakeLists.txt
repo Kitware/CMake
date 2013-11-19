@@ -5,9 +5,9 @@ project(Producer)
 add_library(foo SHARED foo.cpp)
 
 install(TARGETS foo EXPORT fooTargets
+  RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
   INCLUDES DESTINATION include/foo
 )
 install(FILES foo.h DESTINATION include/foo)
@@ -19,8 +19,8 @@ install(EXPORT fooTargets
 
 add_library(bar SHARED bar.cpp)
 install(TARGETS bar
+  RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
 )
 install(FILES bar.h DESTINATION include/bar)
