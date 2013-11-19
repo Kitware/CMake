@@ -4037,7 +4037,7 @@ std::string cmTarget::GetFrameworkVersion() const
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetExportMacro()
+const char* cmTarget::GetExportMacro() const
 {
   // Define the symbol for targets that export symbols.
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||
