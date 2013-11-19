@@ -1,8 +1,9 @@
 
+class
 #ifdef _WIN32
 __declspec(dllexport)
 #endif
-class Bar
+Bar
 {
 public:
   int bar();
