@@ -40,6 +40,9 @@ public:
   void AddAttribute(
     const std::string& key, const std::string& value);
 
+  void AddAttributeUnlessEmpty(
+    const std::string& key, const std::string& value);
+
   static std::string WindowsCodepageToUtf8(const std::string& value);
 
 private:

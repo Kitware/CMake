@@ -401,8 +401,11 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
-  featureDefinitions.AddAttribute("Title", Name);
+  featureDefinitions.AddAttribute("Title", "ProductFeature");
   featureDefinitions.AddAttribute("Level", "1");
+
+  CreateFeatureHierarchy(featureDefinitions);
+
   featureDefinitions.EndElement("Feature");
 
   featureDefinitions.BeginElement("FeatureRef");
@@ -471,6 +474,93 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     }
 
   wixSources.push_back(mainSourceFilePath);
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::CreateFeatureHierarchy(
+  cmWIXSourceWriter& featureDefinitions)
+{
+  for(std::map<std::string, cmCPackComponentGroup>::const_iterator
+    i = ComponentGroups.begin(); i != ComponentGroups.end(); ++i)
+    {
+    cmCPackComponentGroup const& group = i->second;
+    if(group.ParentGroup == 0)
+      {
+      if(!EmitFeatureForComponentGroup(featureDefinitions, group))
+        {
+        return false;
+        }
+      }
+    }
+
+  for(std::map<std::string, cmCPackComponent>::const_iterator
+    i = Components.begin(); i != Components.end(); ++i)
+    {
+    cmCPackComponent const& component = i->second;
+
+    if(!component.Group)
+      {
+      if(!EmitFeatureForComponent(featureDefinitions, component))
+        {
+        return false;
+        }
+      }
+    }
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::EmitFeatureForComponentGroup(
+  cmWIXSourceWriter& featureDefinitions,
+  cmCPackComponentGroup const& group)
+{
+  featureDefinitions.BeginElement("Feature");
+  featureDefinitions.AddAttribute("Id", "CM_G_" + group.Name);
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Title", group.DisplayName);
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Description", group.Description);
+
+  for(std::vector<cmCPackComponentGroup*>::const_iterator
+    i = group.Subgroups.begin(); i != group.Subgroups.end(); ++i)
+    {
+    if(!EmitFeatureForComponentGroup(featureDefinitions, **i))
+      {
+      return false;
+      }
+    }
+
+  for(std::vector<cmCPackComponent*>::const_iterator
+    i = group.Components.begin(); i != group.Components.end(); ++i)
+    {
+    if(!EmitFeatureForComponent(featureDefinitions, **i))
+      {
+      return false;
+      }
+    }
+
+  featureDefinitions.EndElement("Feature");
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::EmitFeatureForComponent(
+  cmWIXSourceWriter& featureDefinitions,
+  cmCPackComponent const& component)
+{
+  featureDefinitions.BeginElement("Feature");
+  featureDefinitions.AddAttribute("Id", "CM_C_" + component.Name);
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Title", component.DisplayName);
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Description", component.Description);
+
+  featureDefinitions.EndElement("Feature");
 
   return true;
 }

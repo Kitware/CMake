@@ -56,7 +56,7 @@ protected:
 
   virtual bool SupportsComponentInstallation() const
     {
-    return false;
+    return true;
     }
 
 private:
@@ -78,6 +78,17 @@ private:
     const std::string& name, const std::string& value);
 
   bool CreateWiXSourceFiles();
+
+  bool CreateFeatureHierarchy(
+    cmWIXSourceWriter& featureDefinitions);
+
+  bool EmitFeatureForComponentGroup(
+    cmWIXSourceWriter& featureDefinitions,
+    cmCPackComponentGroup const& group);
+
+  bool EmitFeatureForComponent(
+    cmWIXSourceWriter& featureDefinitions,
+    cmCPackComponent const& component);
 
   bool CreateStartMenuShortcuts(
     cmWIXSourceWriter& directoryDefinitions,
