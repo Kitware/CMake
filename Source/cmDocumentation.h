@@ -137,7 +137,7 @@ private:
   std::vector<RequestedHelpItem> RequestedHelpItems;
   cmDocumentationFormatter Formatter;
 
-  static void WarnFormFromFilename(RequestedHelpItem& request);
+  static void WarnFormFromFilename(RequestedHelpItem& request, bool& result);
 };
 
 #endif
