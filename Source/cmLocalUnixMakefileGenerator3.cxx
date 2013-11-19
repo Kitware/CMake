@@ -148,7 +148,8 @@ void cmLocalUnixMakefileGenerator3::Generate()
   cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
   cmGlobalUnixMakefileGenerator3* gg =
     static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  for(cmGeneratorTargetsType::iterator t = targets.begin(); t != targets.end(); ++t)
+  for(cmGeneratorTargetsType::iterator t = targets.begin();
+      t != targets.end(); ++t)
     {
       if (t->first->IsImported())
         continue;
@@ -376,7 +377,8 @@ void cmLocalUnixMakefileGenerator3
   // on the target
   cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
   std::string localName;
-  for(cmGeneratorTargetsType::iterator t = targets.begin(); t != targets.end(); ++t)
+  for(cmGeneratorTargetsType::iterator t = targets.begin();
+      t != targets.end(); ++t)
     {
     if((t->second->GetType() == cmTarget::EXECUTABLE) ||
        (t->second->GetType() == cmTarget::STATIC_LIBRARY) ||
@@ -415,7 +417,8 @@ void cmLocalUnixMakefileGenerator3
         }
 
       // Add a fast rule to build the target
-      std::string makefileName = this->GetRelativeTargetDirectory(*t->second->Target);
+      std::string makefileName =
+                         this->GetRelativeTargetDirectory(*t->second->Target);
       makefileName += "/build.make";
       // make sure the makefile name is suitable for a makefile
       std::string makeTargetName =
@@ -435,7 +438,8 @@ void cmLocalUnixMakefileGenerator3
 
       // Add a local name for the rule to relink the target before
       // installation.
-      if(t->second->Target->NeedRelinkBeforeInstall(this->ConfigurationName.c_str()))
+      if(t->second->Target
+                  ->NeedRelinkBeforeInstall(this->ConfigurationName.c_str()))
         {
         makeTargetName = this->GetRelativeTargetDirectory(*t->second->Target);
         makeTargetName += "/preinstall";
