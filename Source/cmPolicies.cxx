@@ -289,7 +289,7 @@ cmPolicies::cmPolicies()
 
   this->DefinePolicy(
     CMP0037, "CMP0037",
-    "Target names should match a validity pattern.",
+    "Target names should not be reserved and should match a validity pattern.",
     3,0,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(

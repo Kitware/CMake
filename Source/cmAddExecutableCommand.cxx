@@ -69,7 +69,9 @@ bool cmAddExecutableCommand
       }
     }
 
-  bool nameOk = cmGeneratorExpression::IsValidTargetName(exename);
+  bool nameOk = cmGeneratorExpression::IsValidTargetName(exename) &&
+    !cmGlobalGenerator::IsReservedTarget(exename);
+
   if (nameOk && !importTarget && !isAlias)
     {
     nameOk = exename.find(":") == std::string::npos;
@@ -95,7 +97,8 @@ bool cmAddExecutableCommand
       cmOStringStream e;
       e << (this->Makefile->GetPolicies()
             ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
-      e << "The target name \"" << exename << "\" is not valid for certain "
+      e << "The target name \"" << exename <<
+          "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
           "in undefined behavior.";
       this->Makefile->IssueMessage(messageType, e.str().c_str());
