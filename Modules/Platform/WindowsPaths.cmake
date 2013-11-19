@@ -78,9 +78,13 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
   list(APPEND CMAKE_SYSTEM_PREFIX_PATH
     # Project install destination.
     "${CMAKE_INSTALL_PREFIX}"
-    # User-supplied staging prefix.
-    "${CMAKE_STAGING_PREFIX}"
     )
+  if (CMAKE_STAGING_PREFIX)
+    list(APPEND CMAKE_SYSTEM_PREFIX_PATH
+      # User-supplied staging prefix.
+      "${CMAKE_STAGING_PREFIX}"
+    )
+  endif()
 endif()
 
 if(CMAKE_CROSSCOMPILING AND NOT CMAKE_HOST_SYSTEM_NAME MATCHES "Windows")
@@ -95,8 +99,12 @@ list(APPEND CMAKE_SYSTEM_INCLUDE_PATH
 if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
   list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
     "${CMAKE_INSTALL_PREFIX}/bin"
-    "${CMAKE_STAGING_PREFIX}/bin"
   )
+  if (CMAKE_STAGING_PREFIX)
+    list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
+      "${CMAKE_STAGING_PREFIX}/bin"
+    )
+  endif()
 endif()
 list(APPEND CMAKE_SYSTEM_LIBRARY_PATH
   "${_CMAKE_INSTALL_DIR}/bin"
