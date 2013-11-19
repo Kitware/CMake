@@ -449,7 +449,7 @@ public:
 
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
-  const char* GetExportMacro();
+  const char* GetExportMacro() const;
 
   void GetCompileDefinitions(std::vector<std::string> &result,
                              const char *config) const;
@@ -678,7 +678,7 @@ private:
   bool HaveInstallRule;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  std::string ExportMacro;
+  mutable std::string ExportMacro;
   std::set<cmStdString> Utilities;
   bool RecordDependencies;
   mutable cmPropertyMap Properties;
