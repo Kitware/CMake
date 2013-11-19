@@ -162,7 +162,8 @@ public:
   /**
    * Get the flags for a given source file as used in this target
    */
-  struct SourceFileFlags GetTargetSourceFileFlags(const cmSourceFile* sf);
+  struct SourceFileFlags
+  GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
   /**
    * Add sources to the target.
@@ -742,7 +743,7 @@ private:
   friend class cmTargetTraceDependencies;
   cmTargetInternalPointer Internal;
 
-  void ConstructSourceFileFlags();
+  void ConstructSourceFileFlags() const;
   void ComputeVersionedName(std::string& vName,
                             std::string const& prefix,
                             std::string const& base,

@@ -91,8 +91,8 @@ public:
     }
   ~cmTargetInternals();
   typedef cmTarget::SourceFileFlags SourceFileFlags;
-  std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
-  bool SourceFileFlagsConstructed;
+  mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
+  mutable bool SourceFileFlagsConstructed;
 
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
@@ -577,7 +577,7 @@ void cmTarget::ProcessSourceExpression(std::string const& expr)
 
 //----------------------------------------------------------------------------
 struct cmTarget::SourceFileFlags
-cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf)
+cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
 {
   struct SourceFileFlags flags;
   this->ConstructSourceFileFlags();
@@ -591,7 +591,7 @@ cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ConstructSourceFileFlags()
+void cmTarget::ConstructSourceFileFlags() const
 {
   if(this->Internal->SourceFileFlagsConstructed)
     {
