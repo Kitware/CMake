@@ -14,10 +14,15 @@ install(TARGETS mylib
   DESTINATION lib
   COMPONENT libraries)
 
-install(TARGETS my-libapp my-other-app
+install(TARGETS my-libapp
   RUNTIME
   DESTINATION bin
   COMPONENT applications)
+
+install(TARGETS my-other-app
+  RUNTIME
+  DESTINATION bin
+  COMPONENT applications2)
 
 install(FILES mylib.h "file with spaces.h"
   DESTINATION include
@@ -56,8 +61,15 @@ cpack_add_component_group(Development
   DESCRIPTION "All of the tools you'll ever need to develop software")
 
 cpack_add_component(applications
+  REQUIRED
   DISPLAY_NAME "MyLib Application"
   DESCRIPTION "An extremely useful application that makes use of MyLib"
+  GROUP Runtime
+  INSTALL_TYPES Full)
+
+cpack_add_component(applications2
+  DISPLAY_NAME "MyLib Extra Application"
+  DESCRIPTION "Another extremely useful application that makes use of MyLib"
   GROUP Runtime
   INSTALL_TYPES Full)
 
