@@ -18,7 +18,8 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 
-cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(cmGeneratorTarget *target)
+cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
+    cmGeneratorTarget *target)
   : cmNinjaTargetGenerator(target->Target) {}
 
 cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() {}
