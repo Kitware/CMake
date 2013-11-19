@@ -91,8 +91,8 @@ public:
     }
   ~cmTargetInternals();
   typedef cmTarget::SourceFileFlags SourceFileFlags;
-  std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
-  bool SourceFileFlagsConstructed;
+  mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
+  mutable bool SourceFileFlagsConstructed;
 
   // The backtrace when the target was created.
   cmListFileBacktrace Backtrace;
@@ -438,7 +438,7 @@ bool cmTarget::IsExecutableWithExports() const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsLinkable()
+bool cmTarget::IsLinkable() const
 {
   return (this->GetType() == cmTarget::STATIC_LIBRARY ||
           this->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -577,7 +577,7 @@ void cmTarget::ProcessSourceExpression(std::string const& expr)
 
 //----------------------------------------------------------------------------
 struct cmTarget::SourceFileFlags
-cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf)
+cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
 {
   struct SourceFileFlags flags;
   this->ConstructSourceFileFlags();
@@ -591,7 +591,7 @@ cmTarget::GetTargetSourceFileFlags(const cmSourceFile* sf)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ConstructSourceFileFlags()
+void cmTarget::ConstructSourceFileFlags() const
 {
   if(this->Internal->SourceFileFlagsConstructed)
     {
@@ -769,9 +769,9 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::NameResolvesToFramework(const std::string& libname)
+bool cmTarget::NameResolvesToFramework(const std::string& libname) const
 {
-  return this->GetMakefile()->GetLocalGenerator()->GetGlobalGenerator()->
+  return this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
     NameResolvesToFramework(libname);
 }
 
@@ -811,7 +811,7 @@ void cmTarget::GetDirectLinkLibraries(const char *config,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetInterfaceLinkLibraries(const char *config,
-                            std::vector<std::string> &libs, cmTarget *head)
+                        std::vector<std::string> &libs, cmTarget *head) const
 {
   const char *prop = this->GetProperty("INTERFACE_LINK_LIBRARIES");
   if (prop)
@@ -834,7 +834,7 @@ void cmTarget::GetInterfaceLinkLibraries(const char *config,
 
 //----------------------------------------------------------------------------
 std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
-                                  cmTarget::LinkLibraryType llt)
+                                  cmTarget::LinkLibraryType llt) const
 {
   if (llt == GENERAL)
     {
@@ -2276,7 +2276,7 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::CheckProperty(const char* prop, cmMakefile* context)
+void cmTarget::CheckProperty(const char* prop, cmMakefile* context) const
 {
   // Certain properties need checking.
   if(strncmp(prop, "LINK_INTERFACE_LIBRARIES", 24) == 0)
@@ -2382,7 +2382,7 @@ std::string cmTarget::GetDirectory(const char* config, bool implib) const
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetPDBDirectory(const char* config)
+std::string cmTarget::GetPDBDirectory(const char* config) const
 {
   if(OutputInfo const* info = this->GetOutputInfo(config))
     {
@@ -2453,7 +2453,7 @@ const char* cmTarget::NormalGetLocation(const char* config) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetTargetVersion(int& major, int& minor)
+void cmTarget::GetTargetVersion(int& major, int& minor) const
 {
   int patch;
   this->GetTargetVersion(false, major, minor, patch);
@@ -2461,7 +2461,7 @@ void cmTarget::GetTargetVersion(int& major, int& minor)
 
 //----------------------------------------------------------------------------
 void cmTarget::GetTargetVersion(bool soversion,
-                                int& major, int& minor, int& patch)
+                                int& major, int& minor, int& patch) const
 {
   // Set the default values.
   major = 0;
@@ -2489,7 +2489,7 @@ void cmTarget::GetTargetVersion(bool soversion,
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetFeature(const char* feature, const char* config)
+const char* cmTarget::GetFeature(const char* feature, const char* config) const
 {
   if(config && *config)
     {
@@ -3145,7 +3145,7 @@ bool cmTarget::HasMacOSXRpath(const char* config) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::IsImportedSharedLibWithoutSOName(const char* config)
+bool cmTarget::IsImportedSharedLibWithoutSOName(const char* config) const
 {
   if(this->IsImported() && this->GetType() == cmTarget::SHARED_LIBRARY)
     {
@@ -3597,14 +3597,14 @@ void cmTarget::GetExecutableNames(std::string& name,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HasImplibGNUtoMS()
+bool cmTarget::HasImplibGNUtoMS() const
 {
   return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
 }
 
 //----------------------------------------------------------------------------
 bool cmTarget::GetImplibGNUtoMS(std::string const& gnuName,
-                                std::string& out, const char* newExt)
+                                std::string& out, const char* newExt) const
 {
   if(this->HasImplibGNUtoMS() &&
      gnuName.size() > 6 && gnuName.substr(gnuName.size()-6) == ".dll.a")
@@ -3976,7 +3976,7 @@ bool cmTarget::ComputePDBOutputDir(const char* config, std::string& out) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::UsesDefaultOutputDir(const char* config, bool implib)
+bool cmTarget::UsesDefaultOutputDir(const char* config, bool implib) const
 {
   std::string dir;
   return this->ComputeOutputDir(config, implib, dir);
@@ -4037,7 +4037,7 @@ std::string cmTarget::GetFrameworkVersion() const
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetExportMacro()
+const char* cmTarget::GetExportMacro() const
 {
   // Define the symbol for targets that export symbols.
   if(this->GetType() == cmTarget::SHARED_LIBRARY ||

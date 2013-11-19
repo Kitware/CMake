@@ -70,7 +70,7 @@ public:
   const char* GetCreateRuleVariable() const;
 
   /** Get the include directories for this target.  */
-  std::vector<std::string> GetIncludeDirectories(const char *config);
+  std::vector<std::string> GetIncludeDirectories(const char *config) const;
 
   bool IsSystemIncludeDirectory(const char *dir, const char *config) const;
 
