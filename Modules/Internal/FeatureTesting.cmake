@@ -3,7 +3,7 @@ macro(record_compiler_features lang compile_flags feature_list)
   include("${CMAKE_ROOT}/Modules/Compiler/${CMAKE_${lang}_COMPILER_ID}-${lang}-FeatureTests.cmake" OPTIONAL)
 
   string(TOLOWER ${lang} lang_lc)
-  file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}")
+  file(REMOVE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin")
   file(WRITE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "
   extern const char features[] = {\"\"\n")
   foreach(feature ${CMAKE_${lang}_KNOWN_FEATURES})
@@ -16,44 +16,28 @@ macro(record_compiler_features lang compile_flags feature_list)
       file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "\"${lang}_FEATURE:\"\n${_feature_condition}\"${feature}\\n\"\n")
     endif()
   endforeach()
-  file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "\n};\n")
+  file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
+    "\n};\n\nint main(int, char **) { return 0; }\n")
 
-  if(CMAKE_GENERATOR MATCHES "Unix Makefiles|Ninja")
-    # Lightweight version.
-    string(REPLACE "<FLAGS>" "${compile_flags}" _compile_object_command "${_CMAKE_${lang}_CREATE_OBJECT_FILE}" )
-    string(REPLACE "<SOURCE>" "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" _compile_object_command "${_compile_object_command}" )
-    execute_process(COMMAND "${CMAKE_${lang}_COMPILER}"
-      ${_compile_object_command}
-      WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/CMakeFiles"
-      ERROR_VARIABLE _error
-      OUTPUT_VARIABLE _output
-      RESULT_VARIABLE _result
+  try_compile(CMAKE_${lang}_FEATURE_TEST
+    ${CMAKE_BINARY_DIR} "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
+    COMPILE_DEFINITIONS "${compile_flags}"
+    OUTPUT_VARIABLE _output
+    COPY_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
+    COPY_FILE_ERROR _copy_error
     )
-    if(_result EQUAL 0)
-      string(REPLACE ";" " " _compile_object_command "${_compile_object_command}")
-      set(_output "${CMAKE_${lang}_COMPILER} ${_compile_object_command}\n${_output}")
-    endif()
+  if(CMAKE_${lang}_FEATURE_TEST AND NOT _copy_error)
+    set(_result 0)
   else()
-    file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}" "int main(int, char **) { return 0; }\n")
-    try_compile(CMAKE_${lang}_FEATURE_TEST
-      ${CMAKE_BINARY_DIR} "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
-      COMPILE_DEFINITIONS "${compile_flags}"
-      OUTPUT_VARIABLE _output
-      COPY_FILE "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}"
-      COPY_FILE_ERROR _copy_error
-      )
-    if(CMAKE_${lang}_FEATURE_TEST AND NOT _copy_error)
-      set(_result 0)
-    else()
-      set(_result 255)
-    endif()
-    unset(CMAKE_${lang}_FEATURE_TEST CACHE)
+    set(_result 255)
   endif()
+  unset(CMAKE_${lang}_FEATURE_TEST CACHE)
+
   if (_result EQUAL 0)
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "\n\nDetecting ${lang} [${compile_flags}] compiler features compiled with the following output:\n${_output}\n\n")
-    if(EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}")
-      file(STRINGS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests${CMAKE_${lang}_OUTPUT_EXTENSION}"
+    if(EXISTS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin")
+      file(STRINGS "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.bin"
         features REGEX "${lang}_FEATURE:.*")
       foreach(info ${features})
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
