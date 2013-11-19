@@ -51,6 +51,29 @@ void cmExtraEclipseCDT4Generator
 }
 
 //----------------------------------------------------------------------------
+void cmExtraEclipseCDT4Generator
+::EnableLanguage(std::vector<std::string> const& languages,
+                 cmMakefile *, bool)
+{
+  for (std::vector<std::string>::const_iterator lit = languages.begin();
+       lit != languages.end(); ++lit)
+    {
+    if (*lit == "CXX")
+      {
+      this->Natures.insert("org.eclipse.cdt.core.ccnature");
+      }
+    else if (*lit == "C")
+      {
+      this->Natures.insert("org.eclipse.cdt.core.cnature");
+      }
+    else if (*lit == "Java")
+      {
+      this->Natures.insert("org.eclipse.jdt.core.javanature");
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator::Generate()
 {
   const cmMakefile* mf
@@ -433,13 +456,28 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
   // set natures for c/c++ projects
   fout <<
     "\t<natures>\n"
-    // TODO: ccnature only if it is c++ ???
-    "\t\t<nature>org.eclipse.cdt.core.ccnature</nature>\n"
     "\t\t<nature>org.eclipse.cdt.make.core.makeNature</nature>\n"
-    "\t\t<nature>org.eclipse.cdt.make.core.ScannerConfigNature</nature>\n"
-    "\t\t<nature>org.eclipse.cdt.core.cnature</nature>\n"
-    "\t</natures>\n"
-    ;
+    "\t\t<nature>org.eclipse.cdt.make.core.ScannerConfigNature</nature>\n";
+
+  for (std::set<std::string>::const_iterator nit=this->Natures.begin();
+       nit != this->Natures.end(); ++nit)
+    {
+    fout << "\t\t<nature>" << *nit << "</nature>\n";
+    }
+
+  if (const char *extraNaturesProp = mf->GetCMakeInstance()->
+        GetProperty("ECLIPSE_EXTRA_NATURES", cmProperty::GLOBAL))
+    {
+    std::vector<std::string> extraNatures;
+    cmSystemTools::ExpandListArgument(extraNaturesProp, extraNatures);
+    for (std::vector<std::string>::const_iterator nit = extraNatures.begin();
+         nit != extraNatures.end(); ++nit)
+      {
+      fout << "\t\t<nature>" << *nit << "</nature>\n";
+      }
+    }
+
+  fout << "\t</natures>\n";
 
   fout << "\t<linkedResources>\n";
   // create linked resources
