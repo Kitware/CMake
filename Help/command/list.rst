@@ -50,7 +50,8 @@ propagation.
 NOTES: A list in cmake is a ; separated group of strings.  To create a
 list the set command can be used.  For example, set(var a b c d e)
 creates a list with a;b;c;d;e, and set(var "a b c d e") creates a
-string or a list with one item in it.
+string or a list with one item in it.   (Note macro arguments are not
+variables, and therefore cannot be used in LIST commands.)
 
 When specifying index values, if <element index> is 0 or greater, it
 is indexed from the beginning of the list, with 0 representing the
