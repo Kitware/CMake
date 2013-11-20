@@ -68,8 +68,10 @@ void cmLocalNinjaGenerator::Generate()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-      if (t->first->IsImported())
-        continue;
+    if (t->second->Target->IsImported())
+      {
+      continue;
+      }
     cmNinjaTargetGenerator* tg = cmNinjaTargetGenerator::New(t->second);
     if(tg)
       {

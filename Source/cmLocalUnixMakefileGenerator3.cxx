@@ -151,8 +151,10 @@ void cmLocalUnixMakefileGenerator3::Generate()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-      if (t->first->IsImported())
-        continue;
+    if (t->second->Target->IsImported())
+      {
+      continue;
+      }
     cmsys::auto_ptr<cmMakefileTargetGenerator> tg(
       cmMakefileTargetGenerator::New(t->second));
     if (tg.get())

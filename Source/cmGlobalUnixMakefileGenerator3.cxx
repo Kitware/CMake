@@ -820,7 +820,7 @@ cmGlobalUnixMakefileGenerator3
           commands.push_back(progCmd.str());
           }
         progressDir = "Built target ";
-        progressDir += t->first->GetName();
+        progressDir += t->second->GetName();
         lg->AppendEcho(commands,progressDir.c_str());
         }
       else
