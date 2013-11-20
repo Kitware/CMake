@@ -74,6 +74,7 @@ All Modules
    /module/FindAVIFile
    /module/FindBISON
    /module/FindBLAS
+   /module/FindBacktrace
    /module/FindBoost
    /module/FindBullet
    /module/FindBZip2
