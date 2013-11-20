@@ -889,34 +889,61 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
-  if(ti != this->Targets.end())
+
+  if(ti == this->Targets.end())
     {
-    if(ti->second.GetType() == cmTarget::OBJECT_LIBRARY)
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    bool issueMessage = false;
+    switch(this->GetPolicyStatus(cmPolicies::CMP0040))
+      {
+      case cmPolicies::WARN:
+        issueMessage = true;
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        issueMessage = true;
+        messageType = cmake::FATAL_ERROR;
+      }
+
+    if(issueMessage)
       {
       cmOStringStream e;
-      e << "Target \"" << target << "\" is an OBJECT library "
-        "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      e << (this->GetPolicies()
+        ->GetPolicyWarning(cmPolicies::CMP0040)) << "\n";
+      e << "The target name \"" << target << "\" is unknown in this context.";
+      IssueMessage(messageType, e.str().c_str());
+      }
+
       return;
-      }
-    // Add the command to the appropriate build step for the target.
-    std::vector<std::string> no_output;
-    cmCustomCommand cc(this, no_output, depends,
-                       commandLines, comment, workingDir);
-    cc.SetEscapeOldStyle(escapeOldStyle);
-    cc.SetEscapeAllowMakeVars(true);
-    switch(type)
-      {
-      case cmTarget::PRE_BUILD:
-        ti->second.AddPreBuildCommand(cc);
-        break;
-      case cmTarget::PRE_LINK:
-        ti->second.AddPreLinkCommand(cc);
-        break;
-      case cmTarget::POST_BUILD:
-        ti->second.AddPostBuildCommand(cc);
-        break;
-      }
+    }
+
+  if(ti->second.GetType() == cmTarget::OBJECT_LIBRARY)
+    {
+    cmOStringStream e;
+    e << "Target \"" << target << "\" is an OBJECT library "
+      "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+    }
+  // Add the command to the appropriate build step for the target.
+  std::vector<std::string> no_output;
+  cmCustomCommand cc(this, no_output, depends,
+                     commandLines, comment, workingDir);
+  cc.SetEscapeOldStyle(escapeOldStyle);
+  cc.SetEscapeAllowMakeVars(true);
+  switch(type)
+    {
+    case cmTarget::PRE_BUILD:
+      ti->second.AddPreBuildCommand(cc);
+      break;
+    case cmTarget::PRE_LINK:
+      ti->second.AddPreLinkCommand(cc);
+      break;
+    case cmTarget::POST_BUILD:
+      ti->second.AddPostBuildCommand(cc);
+      break;
     }
 }
 
