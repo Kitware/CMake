@@ -276,7 +276,7 @@ if(BUILD_TESTING)
     set(runCxxDialectTest 1)
   endif()
   if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
-        AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.9))
+        AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.9)
     if(NOT APPLE OR POLICY CMP0025)
       set(runCxxDialectTest 1)
     endif()
