@@ -28,7 +28,7 @@ static const char* cmVS10GenName(const char* name, std::string& genName)
     return 0;
     }
   const char* p = name + sizeof(vs10generatorName) - 6;
-  if(cmLiteralNCompare(p, " 2010") == 0)
+  if(cmHasLiteralPrefix(p, " 2010") == 0)
     {
     p += 5;
     }
