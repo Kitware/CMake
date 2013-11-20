@@ -34,6 +34,7 @@
 #include "QCMakeCacheView.h"
 #include "AddCacheEntry.h"
 #include "FirstConfigure.h"
+#include "cmSystemTools.h"
 #include "cmVersion.h"
 
 QCMakeThread::QCMakeThread(QObject* p)
@@ -807,12 +808,22 @@ void CMakeSetupDialog::doDeleteCache()
 
 void CMakeSetupDialog::doAbout()
 {
-  QString msg = tr("CMake %1\n"
-                "Using Qt %2\n"
-                "www.cmake.org");
-
+  std::string lgpl = cmSystemTools::GetCMakeRoot()+"/Licenses/Qt/LICENSE.LGPL";
+  QString msg = tr(
+    "CMake %1 (cmake.org).\n"
+    "CMake suite maintained by Kitware, Inc. (kitware.com).\n"
+    "Distributed under terms of the BSD 3-Clause License.\n"
+    "\n"
+    "CMake GUI maintained by csimsoft,\n"
+    "built using Qt %2 (qt-project.org).\n"
+    "\n"
+    "The Qt Toolkit is Copyright (C) Digia Plc and/or its subsidiary(-ies).\n"
+    "Qt is licensed under terms of the GNU LGPLv2.1, available at:\n"
+    " \"%3\""
+    );
   msg = msg.arg(cmVersion::GetCMakeVersion());
   msg = msg.arg(qVersion());
+  msg = msg.arg(lgpl.c_str());
 
   QDialog dialog;
   dialog.setWindowTitle(tr("About"));
