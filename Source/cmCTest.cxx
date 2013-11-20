@@ -1131,11 +1131,11 @@ int cmCTest::GetTestModelFromString(const char* str)
     return cmCTest::EXPERIMENTAL;
     }
   std::string rstr = cmSystemTools::LowerCase(str);
-  if ( cmLiteralNCompare(rstr.c_str(), "cont") == 0 )
+  if ( cmHasLiteralPrefix(rstr.c_str(), "cont") == 0 )
     {
     return cmCTest::CONTINUOUS;
     }
-  if ( cmLiteralNCompare(rstr.c_str(), "nigh") == 0 )
+  if ( cmHasLiteralPrefix(rstr.c_str(), "nigh") == 0 )
     {
     return cmCTest::NIGHTLY;
     }
