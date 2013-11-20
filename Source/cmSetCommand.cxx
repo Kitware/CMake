@@ -23,7 +23,7 @@ bool cmSetCommand
 
   // watch for ENV signatures
   const char* variable = args[0].c_str(); // VAR is always first
-  if (!strncmp(variable,"ENV{",4) && strlen(variable) > 5)
+  if (!cmHasLiteralPrefix(variable, "ENV{") && strlen(variable) > 5)
     {
     // what is the variable name
     char *varName = new char [strlen(variable)];

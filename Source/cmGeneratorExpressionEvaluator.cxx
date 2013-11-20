@@ -902,8 +902,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(POPULATE_INTERFACE_PROPERTY_NAME)
       // Note that the above macro terminates with an else
-    /* else */ if (strncmp(propertyName.c_str(),
-                           "COMPILE_DEFINITIONS_", 20) == 0)
+    /* else */ if (cmHasLiteralPrefix(propertyName.c_str(),
+                           "COMPILE_DEFINITIONS_") == 0)
       {
       interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
       }

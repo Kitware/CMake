@@ -763,7 +763,7 @@ void cmCTestBuildHandler::GenerateXMLLaunchedFragment(std::ostream& os,
 bool cmCTestBuildHandler::IsLaunchedErrorFile(const char* fname)
 {
   // error-{hash}.xml
-  return (strncmp(fname, "error-", 6) == 0 &&
+  return (cmHasLiteralPrefix(fname, "error-") == 0 &&
           strcmp(fname+strlen(fname)-4, ".xml") == 0);
 }
 
@@ -771,7 +771,7 @@ bool cmCTestBuildHandler::IsLaunchedErrorFile(const char* fname)
 bool cmCTestBuildHandler::IsLaunchedWarningFile(const char* fname)
 {
   // warning-{hash}.xml
-  return (strncmp(fname, "warning-", 8) == 0 &&
+  return (cmHasLiteralPrefix(fname, "warning-") == 0 &&
           strcmp(fname+strlen(fname)-4, ".xml") == 0);
 }
 

@@ -81,10 +81,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     os << "# Compute the installation prefix relative to this file.\n"
        << "get_filename_component(_IMPORT_PREFIX"
        << " \"${CMAKE_CURRENT_LIST_FILE}\" PATH)\n";
-    if(strncmp(absDestS.c_str(), "/lib/", 5) == 0 ||
-       strncmp(absDestS.c_str(), "/lib64/", 7) == 0 ||
-       strncmp(absDestS.c_str(), "/usr/lib/", 9) == 0 ||
-       strncmp(absDestS.c_str(), "/usr/lib64/", 11) == 0)
+    if(cmHasLiteralPrefix(absDestS.c_str(), "/lib/") == 0 ||
+       cmHasLiteralPrefix(absDestS.c_str(), "/lib64/") == 0 ||
+       cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib/") == 0 ||
+       cmHasLiteralPrefix(absDestS.c_str(), "/usr/lib64/") == 0)
       {
       // Handle "/usr move" symlinks created by some Linux distros.
       os <<
