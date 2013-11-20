@@ -4484,8 +4484,8 @@ AddRequiredTargetFeature(cmTarget *target, const char *feature) const
     {
     cmOStringStream e;
     e << "The compiler feature \"" << feature
-      << "\" is not known to compiler \""
-      << this->GetDefinition("CMAKE_CXX_COMPILER_ID") << "\" version "
+      << "\" is not known to compiler\n\""
+      << this->GetDefinition("CMAKE_CXX_COMPILER_ID") << "\"\nversion "
       << this->GetDefinition("CMAKE_CXX_COMPILER_VERSION") << ".";
     this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return false;
