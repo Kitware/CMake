@@ -44,7 +44,7 @@ std::string cmTargetCompileDefinitionsCommand
   for(std::vector<std::string>::const_iterator it = content.begin();
     it != content.end(); ++it)
     {
-    if (strncmp(it->c_str(), "-D", 2) == 0)
+    if (cmHasLiteralPrefix(it->c_str(), "-D"))
       {
       defs += sep + it->substr(2);
       }
