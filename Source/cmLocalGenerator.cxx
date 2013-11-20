@@ -541,6 +541,10 @@ void cmLocalGenerator::GenerateTargetManifest()
       t != targets.end(); ++t)
     {
     cmGeneratorTarget& target = *t->second;
+    if (target.Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     if(configNames.empty())
       {
       target.GenerateTargetManifest(0);
@@ -2829,6 +2833,11 @@ cmLocalGenerator
   cmTargets& tgts = this->Makefile->GetTargets();
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); ++l)
     {
+    if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
+
     // Include the user-specified pre-install script for this target.
     if(const char* preinstall = l->second.GetProperty("PRE_INSTALL_SCRIPT"))
       {

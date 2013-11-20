@@ -1309,6 +1309,11 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
       {
       cmTarget* t = &ti->second;
 
+      if (t->GetType() == cmTarget::INTERFACE_LIBRARY)
+        {
+        continue;
+        }
+
       t->AppendBuildInterfaceIncludes();
 
       for (std::vector<cmValueWithOrigin>::const_iterator it
@@ -1461,6 +1466,10 @@ void cmGlobalGenerator::CheckLocalGenerators()
     for (cmTargets::iterator l = targets.begin();
          l != targets.end(); l++)
       {
+      if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+        {
+        continue;
+        }
       const cmTarget::LinkLibraryVectorType& libs =
         l->second.GetOriginalLinkLibraries();
       for(cmTarget::LinkLibraryVectorType::const_iterator lib = libs.begin();

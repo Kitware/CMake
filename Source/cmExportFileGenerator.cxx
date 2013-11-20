@@ -388,14 +388,11 @@ void getCompatibleInterfaceProperties(cmTarget *target,
 
   if (!info)
     {
-    if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
-      {
-      cmMakefile* mf = target->GetMakefile();
-      cmOStringStream e;
-      e << "Exporting the target \"" << target->GetName() << "\" is not "
-          "allowed since its linker language cannot be determined";
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-      }
+    cmMakefile* mf = target->GetMakefile();
+    cmOStringStream e;
+    e << "Exporting the target \"" << target->GetName() << "\" is not "
+        "allowed since its linker language cannot be determined";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
@@ -447,15 +444,18 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
   getPropertyContents(target, "COMPATIBLE_INTERFACE_NUMBER_MAX",
                       ifaceProperties);
 
-  getCompatibleInterfaceProperties(target, ifaceProperties, 0);
-
-  std::vector<std::string> configNames;
-  target->GetMakefile()->GetConfigurations(configNames);
-
-  for (std::vector<std::string>::const_iterator ci = configNames.begin();
-    ci != configNames.end(); ++ci)
+  if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
-    getCompatibleInterfaceProperties(target, ifaceProperties, ci->c_str());
+    getCompatibleInterfaceProperties(target, ifaceProperties, 0);
+
+    std::vector<std::string> configNames;
+    target->GetMakefile()->GetConfigurations(configNames);
+
+    for (std::vector<std::string>::const_iterator ci = configNames.begin();
+      ci != configNames.end(); ++ci)
+      {
+      getCompatibleInterfaceProperties(target, ifaceProperties, ci->c_str());
+      }
     }
 
   for (std::set<std::string>::const_iterator it = ifaceProperties.begin();
