@@ -952,7 +952,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     for (cmGeneratorTargetsType::iterator l = targets.begin();
          l != targets.end(); ++l)
       {
-      if (l->first->IsImported())
+      if (l->second->Target->IsImported())
         {
         continue;
         }

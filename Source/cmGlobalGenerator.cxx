@@ -1346,8 +1346,8 @@ void cmGlobalGenerator::CreateGeneratorTargets()
       {
       cmTarget* t = &ti->second;
       cmGeneratorTarget* gt = new cmGeneratorTarget(t);
-      this->GeneratorTargets[t] = gt;
-      generatorTargets[t] = gt;
+      this->GeneratorTargets[t->GetName()] = gt;
+      generatorTargets[t->GetName()] = gt;
       }
 
     for(std::vector<cmTarget*>::const_iterator
@@ -1355,8 +1355,8 @@ void cmGlobalGenerator::CreateGeneratorTargets()
         j != mf->GetOwnedImportedTargets().end(); ++j)
       {
       cmGeneratorTarget* gt = new cmGeneratorTarget(*j);
-      this->GeneratorTargets[*j] = gt;
-      generatorTargets[*j] = gt;
+      this->GeneratorTargets[(*j)->GetName()] = gt;
+      generatorTargets[(*j)->GetName()] = gt;
       }
 
     mf->SetGeneratorTargets(generatorTargets);
@@ -1429,7 +1429,8 @@ void cmGlobalGenerator::ClearGeneratorMembers()
 //----------------------------------------------------------------------------
 cmGeneratorTarget* cmGlobalGenerator::GetGeneratorTarget(cmTarget* t) const
 {
-  cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
+  cmGeneratorTargetsType::const_iterator ti =
+                                    this->GeneratorTargets.find(t->GetName());
   if(ti == this->GeneratorTargets.end())
     {
     this->CMakeInstance->IssueMessage(

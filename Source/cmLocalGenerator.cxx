@@ -749,7 +749,7 @@ void cmLocalGenerator
   for(cmGeneratorTargetsType::iterator l = tgts.begin();
       l != tgts.end(); l++)
     {
-    if (l->first->IsImported())
+    if (l->second->Target->IsImported())
       {
       continue;
       }
