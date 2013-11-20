@@ -11,13 +11,13 @@ endif()
 add_library(mylibA STATIC mylibA.c)
 set_property(TARGET mylibA PROPERTY
   ARCHIVE_OUTPUT_DIRECTORY "${LinkDirectory_BINARY_DIR}/External/lib")
-get_property(mylibA TARGET mylibA PROPERTY LOCATION)
+# get_property(mylibA TARGET mylibA PROPERTY LOCATION)
 
 # Build a library into our build tree relative to the subproject build tree.
 add_library(mylibB STATIC mylibB.c)
 set_property(TARGET mylibB PROPERTY
   ARCHIVE_OUTPUT_DIRECTORY "${LinkDirectory_BINARY_DIR}/lib")
-get_property(mylibB TARGET mylibB PROPERTY LOCATION)
+# get_property(mylibB TARGET mylibB PROPERTY LOCATION)
 
 # Create a custom target to drive the subproject build.
 include(ExternalProject)
@@ -38,7 +38,7 @@ ExternalProject_Add_Step(ExternalTarget cleanup
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${LinkDirectory_BINARY_DIR}/bin
   DEPENDEES download
   DEPENDERS configure
-  DEPENDS ${mylibA} ${mylibB}
+  DEPENDS mylibA mylibB
     "${LinkDirectory_BINARY_DIR}/External/CMakeLists.txt"
     "${LinkDirectory_BINARY_DIR}/External/myexe.c"
   )

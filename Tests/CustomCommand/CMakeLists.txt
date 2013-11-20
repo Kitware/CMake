@@ -29,9 +29,6 @@ set (EXECUTABLE_OUTPUT_PATH
 # add the executable that will generate the file
 add_executable(generator generator.cxx)
 
-get_target_property(generator_PATH generator LOCATION)
-message("Location ${generator_PATH}")
-
 ################################################################
 #
 #  Test using a wrapper to wrap a header file
@@ -189,7 +186,7 @@ add_executable(CustomCommand
 # generated source in a target.
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
   DEPENDS generator
-  COMMAND ${generator_PATH}
+  COMMAND generator
   ARGS ${PROJECT_BINARY_DIR}/generated.c
   )
 
