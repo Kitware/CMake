@@ -257,7 +257,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
                        workingDirectory.c_str());
     cc.SetEscapeOldStyle(false);
     cc.SetEscapeAllowMakeVars(true);
-    target->GetPreBuildCommands().push_back(cc);
+    target->AddPreBuildCommand(cc);
     }
   else
 #endif
