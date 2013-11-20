@@ -32,7 +32,7 @@ void cmLBDepend::DependWalk(cmDependInformation* info)
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    if(!strncmp(line.c_str(), "#include", 8))
+    if(!cmLiteralNCompare(line.c_str(), "#include"))
       {
       // if it is an include line then create a string class
       std::string currentline = line;
