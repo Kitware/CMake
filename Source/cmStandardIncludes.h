@@ -377,12 +377,29 @@ static thisClass* SafeDownCast(cmObject *c) \
   return 0;\
 }
 
+inline int cmLiteralNCompareImpl(const std::string &str1,
+                                 const char *str2,
+                                 size_t N)
+{
+  return strncmp(str1.c_str(), str2, N);
+}
+
+inline int cmLiteralNCompareImpl(const char* str1,
+                                 const char *str2,
+                                 size_t N)
+{
+  return strncmp(str1, str2, N);
+}
+
 #if defined(_MSC_VER) && _MSC_VER < 1300 \
   || defined(__GNUC__) && __GNUC__ < 3
 
 #define cmArrayBegin(a) a
 #define cmArraySize(a) (sizeof(a)/sizeof(*a))
 #define cmArrayEnd(a) a + cmArraySize(a)
+
+#define cmLiteralNCompare(STR1, STR2) \
+  cmLiteralNCompareImpl(STR1, "" STR2 "", sizeof(STR2) - 1)
 
 #else
 
@@ -392,6 +409,12 @@ template<typename T, size_t N>
 const T* cmArrayEnd(const T (&a)[N]) { return a + N; }
 template<typename T, size_t N>
 size_t cmArraySize(const T (&)[N]) { return N; }
+
+template<typename T, size_t N>
+int cmLiteralNCompare(T str1, const char (&str2)[N])
+{
+  return cmLiteralNCompareImpl(str1, str2, N - 1);
+}
 
 #endif
 
