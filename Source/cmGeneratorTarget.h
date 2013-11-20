@@ -100,6 +100,12 @@ private:
   void operator=(cmGeneratorTarget const&);
 };
 
-typedef std::map<cmTarget*, cmGeneratorTarget*> cmGeneratorTargetsType;
+struct cmStrictTargetComparison {
+  bool operator()(cmTarget *t1, cmTarget *t2) const;
+};
+
+typedef std::map<cmTarget*,
+                 cmGeneratorTarget*,
+                 cmStrictTargetComparison> cmGeneratorTargetsType;
 
 #endif
