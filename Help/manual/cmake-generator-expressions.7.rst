@@ -178,3 +178,7 @@ property is non-empty::
   Content of ``...`` when the property is exported using :command:`export`, or
   when the target is used by another target in the same buildsystem. Expands to
   the empty string otherwise.
+$<LOWER_CASE:...>
+  Content of ``...`` converted to lower case.
+$<MAKE_C_IDENTIFIER:...>
+  Content of ``...`` converted to a C identifier.
