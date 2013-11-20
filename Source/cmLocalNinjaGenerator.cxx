@@ -65,7 +65,8 @@ void cmLocalNinjaGenerator::Generate()
     }
 
   cmGeneratorTargetsType targets = this->GetMakefile()->GetGeneratorTargets();
-  for(cmGeneratorTargetsType::iterator t = targets.begin(); t != targets.end(); ++t)
+  for(cmGeneratorTargetsType::iterator t = targets.begin();
+      t != targets.end(); ++t)
     {
       if (t->first->IsImported())
         continue;
