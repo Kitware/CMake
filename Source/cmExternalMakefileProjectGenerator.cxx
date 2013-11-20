@@ -13,6 +13,12 @@
 
 #include "cmExternalMakefileProjectGenerator.h"
 
+void cmExternalMakefileProjectGenerator
+::EnableLanguage(std::vector<std::string> const&,
+                 cmMakefile *, bool)
+{
+}
+
 std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
                                                    const char* globalGenerator,
                                                    const char* extraGenerator)
