@@ -271,10 +271,17 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(AliasTarget AliasTarget)
   ADD_TEST_MACRO(StagingPrefix StagingPrefix)
   ADD_TEST_MACRO(InterfaceLibrary InterfaceLibrary)
-  if((CMAKE_CXX_COMPILER_ID STREQUAL GNU
-        AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
-      OR (CMAKE_CXX_COMPILER_ID STREQUAL Clang
+  if(CMAKE_CXX_COMPILER_ID STREQUAL GNU
+      AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
+    set(runCxxDialectTest 1)
+  endif()
+  if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
         AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.9))
+    if(NOT APPLE OR POLICY CMP0025)
+      set(runCxxDialectTest 1)
+    endif()
+  endif()
+  if(runCxxDialectTest)
     ADD_TEST_MACRO(CxxDialect CxxDialect)
   endif()
   set_tests_properties(EmptyLibrary PROPERTIES
