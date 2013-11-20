@@ -560,6 +560,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
     "translate",
     "postfix",
     "generator",
+    "include", // Since Qt 5.3
     "g"
   };
   std::vector<std::string> extraOpts;
