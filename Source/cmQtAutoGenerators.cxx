@@ -360,7 +360,6 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
 
   std::map<std::string, std::string> configIncludes;
   std::map<std::string, std::string> configDefines;
-  std::map<std::string, std::string> configUicOptions;
 
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
@@ -369,7 +368,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     }
   if (target->GetPropertyAsBool("AUTOUIC"))
     {
-    this->SetupAutoUicTarget(target, configUicOptions);
+    this->SetupAutoUicTarget(target);
     }
   if (target->GetPropertyAsBool("AUTORCC"))
     {
@@ -384,9 +383,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
   makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
                           false, true, false);
 
-  if (!configDefines.empty()
-      || !configIncludes.empty()
-      || !configUicOptions.empty())
+  if (!configDefines.empty() || !configIncludes.empty())
     {
     std::ofstream infoFile(outputFile.c_str(), std::ios::app);
     if ( !infoFile )
@@ -414,16 +411,6 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
             it != end; ++it)
         {
         infoFile << "set(AM_MOC_INCLUDES_" << it->first <<
-          " " << it->second << ")\n";
-        }
-      }
-    if (!configUicOptions.empty())
-      {
-      for (std::map<std::string, std::string>::iterator
-            it = configUicOptions.begin(), end = configUicOptions.end();
-            it != end; ++it)
-        {
-        infoFile << "set(AM_UIC_TARGET_OPTIONS_" << it->first <<
           " " << it->second << ")\n";
         }
       }
@@ -573,7 +560,6 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
     "translate",
     "postfix",
     "generator",
-    "include", // Since Qt 5.3
     "g"
   };
   std::vector<std::string> extraOpts;
@@ -609,25 +595,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-static void GetUicOpts(cmTarget *target, const char * config,
-                       std::string &optString)
-{
-  std::vector<std::string> opts;
-  target->GetAutoUicOptions(opts, config);
-
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator optIt = opts.begin();
-      optIt != opts.end();
-      ++optIt)
-    {
-    optString += sep;
-    sep = ";";
-    optString += *optIt;
-    }
-}
-
-void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget* target,
-                          std::map<std::string, std::string> &configUicOptions)
+void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget* target)
 {
   cmMakefile *makefile = target->GetMakefile();
 
@@ -676,30 +644,10 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget* target,
 
   const char *qtVersion = makefile->GetDefinition("_target_qt_version");
 
-  std::string _uic_opts;
-  std::vector<std::string> configs;
-  const char *config = makefile->GetConfigurations(configs);
-  GetUicOpts(target, config, _uic_opts);
-
-  if (!_uic_opts.empty())
+  if (const char* opts = target->GetProperty("AUTOUIC_OPTIONS"))
     {
-    _uic_opts = cmLocalGenerator::EscapeForCMake(_uic_opts.c_str());
-    makefile->AddDefinition("_uic_target_options", _uic_opts.c_str());
-    }
-  for (std::vector<std::string>::const_iterator li = configs.begin();
-       li != configs.end(); ++li)
-    {
-    std::string config_uic_opts;
-    GetUicOpts(target, li->c_str(), config_uic_opts);
-    if (config_uic_opts != _uic_opts)
-      {
-      configUicOptions["_uic_target_options_" + *li] =
-                    cmLocalGenerator::EscapeForCMake(config_uic_opts.c_str());
-      if(_uic_opts.empty())
-        {
-        _uic_opts = config_uic_opts;
-        }
-      }
+    makefile->AddDefinition("_uic_target_options",
+                            cmLocalGenerator::EscapeForCMake(opts).c_str());
     }
 
   for(std::vector<cmSourceFile*>::const_iterator fileIt =
@@ -1018,19 +966,9 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   {
   const char *uicOptionsFiles
                         = makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES");
-  std::string uicOptionsPropOrig = "AM_UIC_TARGET_OPTIONS";
-  std::string uicOptionsProp = uicOptionsPropOrig;
-  if(config)
-    {
-    uicOptionsProp += "_";
-    uicOptionsProp += config;
-    }
   const char *uicTargetOptions
-                        = makefile->GetSafeDefinition(uicOptionsProp.c_str());
-  cmSystemTools::ExpandListArgument(
-      uicTargetOptions ? uicTargetOptions
-                       : makefile->GetSafeDefinition(includesPropOrig.c_str()),
-    this->UicTargetOptions);
+                        = makefile->GetSafeDefinition("AM_UIC_TARGET_OPTIONS");
+  cmSystemTools::ExpandListArgument(uicTargetOptions, this->UicTargetOptions);
   const char *uicOptionsOptions
                       = makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS");
   std::vector<std::string> uicFilesVec;
