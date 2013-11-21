@@ -5,10 +5,11 @@ project(StagingPrefix)
 # Wipe out the install tree
 add_custom_command(
   OUTPUT ${CMAKE_BINARY_DIR}/CleanupProject
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/Consumer
-  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/Producer
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/ConsumerBuild
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/ProducerBuild
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/stage
   COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/prefix
+  COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/ignored
   )
 add_custom_target(CleanupTarget ALL DEPENDS ${CMAKE_BINARY_DIR}/CleanupProject)
 set_property(
@@ -32,7 +33,7 @@ add_custom_command(
   COMMAND ${CMAKE_CTEST_COMMAND} ${NESTED_CONFIG_TYPE}
     --build-and-test
     ${CMAKE_SOURCE_DIR}/Producer
-    ${CMAKE_BINARY_DIR}/Producer
+    ${CMAKE_BINARY_DIR}/ProducerBuild
     --build-noclean
     --build-project Producer
     --build-target install
@@ -65,7 +66,7 @@ add_custom_command(
   COMMAND ${CMAKE_CTEST_COMMAND} ${NESTED_CONFIG_TYPE}
    --build-and-test
    ${CMAKE_SOURCE_DIR}/Consumer
-   ${CMAKE_BINARY_DIR}/Consumer
+   ${CMAKE_BINARY_DIR}/ConsumerBuild
    --build-noclean
    --build-project Consumer
    --build-target install
@@ -74,21 +75,15 @@ add_custom_command(
    --build-options
       "-DCMAKE_FIND_ROOT_PATH=${CMAKE_BINARY_DIR}/ignored"
       "-DCMAKE_STAGING_PREFIX=${CMAKE_BINARY_DIR}/stage"
-      "-DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/InstallationPrefix"
       -DCMAKE_VERBOSE_MAKEFILE=1
   VERBATIM
   )
-add_custom_target(StagingPrefixTest ALL DEPENDS ${CMAKE_BINARY_DIR}/ConsumerProject)
-add_dependencies(StagingPrefixTest ProducerTarget)
+add_custom_target(ConsumerTarget ALL DEPENDS ${CMAKE_BINARY_DIR}/ConsumerProject)
+add_dependencies(ConsumerTarget ProducerTarget)
 set_property(
   SOURCE ${CMAKE_BINARY_DIR}/ConsumerProject
   PROPERTY SYMBOLIC 1
   )
 
 add_executable(StagingPrefix main.cpp)
-target_compile_definitions(StagingPrefix
-  PRIVATE
-    "-DMAKE_OUTPUT=\"${CMAKE_BINARY_DIR}/make_Consumer_output\""
-    "-DCOMPILER=\"${CMAKE_CXX_COMPILER}\""
-)
-add_dependencies(StagingPrefix StagingPrefixTest)
+add_dependencies(StagingPrefix ConsumerTarget)
