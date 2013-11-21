@@ -6,6 +6,6 @@ Enables tracing output for target properties.
 This variable can be populated with a list of properties to generate
 debug output for when evaluating target properties.  Currently it can
 only be used when evaluating the INCLUDE_DIRECTORIES,
-COMPILE_DEFINITIONS, COMPILE_OPTIONS and AUTOUIC_OPTIONS target properties.
-In that case, it outputs a backtrace for each entry in the target property.
+COMPILE_DEFINITIONS and COMPILE_OPTIONS target properties.  In that
+case, it outputs a backtrace for each entry in the target property.
 Default is unset.

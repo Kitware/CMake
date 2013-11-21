@@ -31,8 +31,7 @@ private:
                           const std::string &autogenTargetName,
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines);
-  void SetupAutoUicTarget(cmTarget* target,
-                        std::map<std::string, std::string> &configUicOptions);
+  void SetupAutoUicTarget(cmTarget* target);
   void SetupAutoRccTarget(cmTarget* target);
 
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
