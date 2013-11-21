@@ -131,31 +131,29 @@ bool cmTargetPropCommandBase
         || args[i] == "PRIVATE"
         || args[i] == "INTERFACE" )
       {
-      return this->PopulateTargetProperies(scope, content, prepend, system);
+      this->PopulateTargetProperies(scope, content, prepend, system);
+      return true;
       }
     content.push_back(args[i]);
     }
-  return this->PopulateTargetProperies(scope, content, prepend, system);
+  this->PopulateTargetProperies(scope, content, prepend, system);
+  return true;
 }
 
 //----------------------------------------------------------------------------
-bool cmTargetPropCommandBase
+void cmTargetPropCommandBase
 ::PopulateTargetProperies(const std::string &scope,
                           const std::vector<std::string> &content,
                           bool prepend, bool system)
 {
   if (scope == "PRIVATE" || scope == "PUBLIC")
     {
-    if (!this->HandleDirectContent(this->Target, content, prepend, system))
-      {
-      return false;
-      }
+    this->HandleDirectContent(this->Target, content, prepend, system);
     }
   if (scope == "INTERFACE" || scope == "PUBLIC")
     {
     this->HandleInterfaceContent(this->Target, content, prepend, system);
     }
-  return true;
 }
 
 //----------------------------------------------------------------------------

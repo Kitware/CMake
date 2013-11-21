@@ -193,9 +193,6 @@ add_custom_target(check-part3 ALL
     -Dtest_platform_id_Linux=$<PLATFORM_ID:Linux>
     -Dtest_platform_id_Windows=$<PLATFORM_ID:Windows>
     -Dtest_platform_id_Darwin=$<PLATFORM_ID:Darwin>
-    -Dlower_case=$<LOWER_CASE:MiXeD>
-    -Dupper_case=$<UPPER_CASE:MiXeD>
-    -Dmake_c_identifier=$<MAKE_C_IDENTIFIER:4foo:+bar-$>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
   VERBATIM
