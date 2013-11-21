@@ -56,7 +56,7 @@ if(SWIG_EXECUTABLE)
     set(SWIG_DIR SWIG_DIR-NOTFOUND)
     find_path(SWIG_DIR swig.swg PATHS ${SWIG_swiglib_output})
     if(SWIG_DIR)
-      set(SWIG_USE_FILE ${CMAKE_ROOT}/Modules/UseSWIG.cmake)
+      set(SWIG_USE_FILE ${CMAKE_CURRENT_LIST_DIR}/UseSWIG.cmake)
       execute_process(COMMAND ${SWIG_EXECUTABLE} -version
         OUTPUT_VARIABLE SWIG_version_output
         ERROR_VARIABLE SWIG_version_output
