@@ -58,9 +58,10 @@ std::string cmTargetCompileDefinitionsCommand
 }
 
 //----------------------------------------------------------------------------
-void cmTargetCompileDefinitionsCommand
+bool cmTargetCompileDefinitionsCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                                    bool, bool)
 {
   tgt->AppendProperty("COMPILE_DEFINITIONS", this->Join(content).c_str());
+  return true;
 }
