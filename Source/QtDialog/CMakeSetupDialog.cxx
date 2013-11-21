@@ -957,6 +957,7 @@ void CMakeSetupDialog::saveBuildPaths(const QStringList& paths)
 void CMakeSetupDialog::setCacheModified()
 {
   this->CacheModified = true;
+  this->ConfigureNeeded = true;
   this->enterState(ReadyConfigure);
 }
 
