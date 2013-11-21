@@ -101,18 +101,12 @@ find_path(SDL_SOUND_INCLUDE_DIR SDL_sound.h
   PATH_SUFFIXES include/SDL include/SDL12 include/SDL11 include
   )
 
-if(CMAKE_SIZEOF_VOID_P EQUAL 8)
-  set(VC_LIB_PATH_SUFFIX lib/x64)
-else()
-  set(VC_LIB_PATH_SUFFIX lib/x86)
-endif()
-
 find_library(SDL_SOUND_LIBRARY
   NAMES SDL_sound
   HINTS
     ENV SDLSOUNDDIR
     ENV SDLDIR
-  PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
+  PATH_SUFFIXES lib VisualC/win32lib
   )
 
 if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
