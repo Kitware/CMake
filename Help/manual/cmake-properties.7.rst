@@ -97,11 +97,8 @@ Properties on Targets
    /prop_tgt/COMPILE_DEFINITIONS
    /prop_tgt/COMPILE_FLAGS
    /prop_tgt/COMPILE_OPTIONS
-   /prop_tgt/COMPILE_FEATURES
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
-   /prop_tgt/CXX_STANDARD
-   /prop_tgt/CXX_EXTENSIONS
    /prop_tgt/DEBUG_POSTFIX
    /prop_tgt/DEFINE_SYMBOL
    /prop_tgt/EchoString
@@ -142,7 +139,6 @@ Properties on Targets
    /prop_tgt/INSTALL_NAME_DIR
    /prop_tgt/INSTALL_RPATH
    /prop_tgt/INSTALL_RPATH_USE_LINK_PATH
-   /prop_tgt/INTERFACE_AUTOUIC_OPTIONS
    /prop_tgt/INTERFACE_COMPILE_DEFINITIONS
    /prop_tgt/INTERFACE_COMPILE_OPTIONS
    /prop_tgt/INTERFACE_INCLUDE_DIRECTORIES

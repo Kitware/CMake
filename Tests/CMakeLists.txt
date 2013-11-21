@@ -270,19 +270,6 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CompatibleInterface CompatibleInterface)
   ADD_TEST_MACRO(AliasTarget AliasTarget)
   ADD_TEST_MACRO(InterfaceLibrary InterfaceLibrary)
-  if(CMAKE_CXX_COMPILER_ID STREQUAL GNU
-      AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.6)
-    set(runCxxDialectTest 1)
-  endif()
-  if(CMAKE_CXX_COMPILER_ID STREQUAL Clang
-        AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.9)
-    if(NOT APPLE OR POLICY CMP0025)
-      set(runCxxDialectTest 1)
-    endif()
-  endif()
-  if(runCxxDialectTest)
-    ADD_TEST_MACRO(CxxDialect CxxDialect)
-  endif()
   set_tests_properties(EmptyLibrary PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error: CMake can not determine linker language for target: test")
   ADD_TEST_MACRO(CrossCompile CrossCompile)
@@ -1093,10 +1080,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   # on that platform.
   if(WIN32)
     set(run_autogen_test ${CMAKE_CTEST_COMMAND} -V)
-    set(run_autouic_test ${CMAKE_CTEST_COMMAND} -V)
   else()
     set(run_autogen_test QtAutogen)
-    set(run_autouic_test QtAutoUicInterface)
   endif()
 
   find_package(Qt5Widgets QUIET NO_MODULE)
@@ -1114,20 +1099,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --test-command ${run_autogen_test}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5Autogen")
-
-    add_test(Qt5AutoUicInterface ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutoUicInterface"
-      "${CMake_BINARY_DIR}/Tests/Qt5AutoUicInterface"
-      ${build_generator_args}
-      --build-project QtAutoUicInterface
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt5AutoUicInterface"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=5
-      --test-command ${run_autouic_test}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5AutoUicInterface")
   endif()
   if(QT4_WORKS AND QT_QTGUI_FOUND)
     add_test(Qt4Autogen ${CMAKE_CTEST_COMMAND}
@@ -1143,20 +1114,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --test-command ${run_autogen_test}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Autogen")
-
-    add_test(Qt4AutoUicInterface ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/QtAutoUicInterface"
-      "${CMake_BINARY_DIR}/Tests/Qt4AutoUicInterface"
-      ${build_generator_args}
-      --build-project QtAutoUicInterface
-      --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4AutoUicInterface"
-      --force-new-ctest-process
-      --build-options ${build_options}
-        -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=4
-      --test-command ${run_autouic_test}
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4AutoUicInterface")
 
     add_test(Qt4Targets ${CMAKE_CTEST_COMMAND}
       --build-and-test
@@ -2202,8 +2159,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
   ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
   ADD_TEST_MACRO(CMakeCommands.target_compile_options target_compile_options)
-  ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
-  ADD_TEST_MACRO(compile_features compile_features)
 
   configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestCrash/test.cmake.in"
