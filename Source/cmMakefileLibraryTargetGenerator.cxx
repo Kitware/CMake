@@ -21,15 +21,15 @@
 
 //----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
-::cmMakefileLibraryTargetGenerator(cmGeneratorTarget* target):
-  cmMakefileTargetGenerator(target->Target)
+::cmMakefileLibraryTargetGenerator(cmTarget* target):
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
   this->Target->GetLibraryNames(
     this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
     this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
 
-  this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
+  this->OSXBundleGenerator = new cmOSXBundleGenerator(this->Target,
                                                       this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }

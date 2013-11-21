@@ -38,7 +38,7 @@ public:
   virtual ~cmMakefileTargetGenerator();
 
   // construct using this factory call
-  static cmMakefileTargetGenerator *New(cmGeneratorTarget *tgt);
+  static cmMakefileTargetGenerator *New(cmTarget *tgt);
 
   /* the main entry point for this class. Writes the Makefiles associated
      with this target */
