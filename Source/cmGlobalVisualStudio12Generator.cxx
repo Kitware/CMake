@@ -23,7 +23,7 @@ static const char* cmVS12GenName(const char* name, std::string& genName)
     return 0;
     }
   const char* p = name + sizeof(vs12generatorName) - 6;
-  if(cmHasLiteralPrefix(p, " 2013") == 0)
+  if(cmHasLiteralPrefix(p, " 2013"))
     {
     p += 5;
     }

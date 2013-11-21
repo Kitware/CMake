@@ -273,7 +273,7 @@ int do_cmake(int ac, char** av)
       list_all_cached = true;
       list_help = true;
       }
-    else if (cmHasLiteralPrefix(av[i], "-P") == 0)
+    else if (cmHasLiteralPrefix(av[i], "-P"))
       {
       if ( i == ac -1 )
         {
@@ -287,7 +287,7 @@ int do_cmake(int ac, char** av)
         args.push_back(av[i]);
         }
       }
-    else if (cmHasLiteralPrefix(av[i], "--find-package") == 0)
+    else if (cmHasLiteralPrefix(av[i], "--find-package"))
       {
       workingMode = cmake::FIND_PACKAGE_MODE;
       args.push_back(av[i]);

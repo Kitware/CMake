@@ -240,7 +240,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       {
       continue;
       }
-    if (cmHasLiteralPrefix(li->c_str(), "${_IMPORT_PREFIX}") == 0)
+    if (cmHasLiteralPrefix(li->c_str(), "${_IMPORT_PREFIX}"))
       {
       continue;
       }
