@@ -21,7 +21,7 @@ class cmSourceFile;
 class cmNinjaUtilityTargetGenerator : public cmNinjaTargetGenerator
 {
 public:
-  cmNinjaUtilityTargetGenerator(cmGeneratorTarget* target);
+  cmNinjaUtilityTargetGenerator(cmTarget* target);
   ~cmNinjaUtilityTargetGenerator();
 
   void Generate();

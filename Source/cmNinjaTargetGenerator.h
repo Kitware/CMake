@@ -30,7 +30,7 @@ class cmNinjaTargetGenerator
 {
 public:
   /// Create a cmNinjaTargetGenerator according to the @a target's type.
-  static cmNinjaTargetGenerator* New(cmGeneratorTarget* target);
+  static cmNinjaTargetGenerator* New(cmTarget* target);
 
   /// Build a NinjaTargetGenerator.
   cmNinjaTargetGenerator(cmTarget* target);

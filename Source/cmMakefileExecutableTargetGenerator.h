@@ -17,7 +17,7 @@
 class cmMakefileExecutableTargetGenerator: public cmMakefileTargetGenerator
 {
 public:
-  cmMakefileExecutableTargetGenerator(cmGeneratorTarget* target);
+  cmMakefileExecutableTargetGenerator(cmTarget* target);
   virtual ~cmMakefileExecutableTargetGenerator();
 
   /* the main entry point for this class. Writes the Makefiles associated

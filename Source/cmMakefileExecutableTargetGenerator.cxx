@@ -21,15 +21,15 @@
 
 //----------------------------------------------------------------------------
 cmMakefileExecutableTargetGenerator
-::cmMakefileExecutableTargetGenerator(cmGeneratorTarget* target):
-  cmMakefileTargetGenerator(target->Target)
+::cmMakefileExecutableTargetGenerator(cmTarget* target):
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
   this->Target->GetExecutableNames(
     this->TargetNameOut, this->TargetNameReal, this->TargetNameImport,
     this->TargetNamePDB, this->ConfigName);
 
-  this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
+  this->OSXBundleGenerator = new cmOSXBundleGenerator(this->Target,
                                                       this->ConfigName);
   this->OSXBundleGenerator->SetMacContentFolders(&this->MacContentFolders);
 }

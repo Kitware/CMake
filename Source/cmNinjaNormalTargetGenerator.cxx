@@ -17,7 +17,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
-#include "cmGeneratorTarget.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -28,8 +27,8 @@
 
 
 cmNinjaNormalTargetGenerator::
-cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
-  : cmNinjaTargetGenerator(target->Target)
+cmNinjaNormalTargetGenerator(cmTarget* target)
+  : cmNinjaTargetGenerator(target)
   , TargetNameOut()
   , TargetNameSO()
   , TargetNameReal()
@@ -37,16 +36,15 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
   , TargetNamePDB()
   , TargetLinkLanguage(0)
 {
-  this->TargetLinkLanguage = target->Target
-                                   ->GetLinkerLanguage(this->GetConfigName());
+  this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
-    target->Target->GetExecutableNames(this->TargetNameOut,
+    target->GetExecutableNames(this->TargetNameOut,
                                this->TargetNameReal,
                                this->TargetNameImport,
                                this->TargetNamePDB,
                                GetLocalGenerator()->GetConfigName());
   else
-    target->Target->GetLibraryNames(this->TargetNameOut,
+    target->GetLibraryNames(this->TargetNameOut,
                             this->TargetNameSO,
                             this->TargetNameReal,
                             this->TargetNameImport,
@@ -57,7 +55,7 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
     {
     // on Windows the output dir is already needed at compile time
     // ensure the directory exists (OutDir test)
-    EnsureDirectoryExists(target->Target->GetDirectory(this->GetConfigName()));
+    EnsureDirectoryExists(target->GetDirectory(this->GetConfigName()));
     }
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
