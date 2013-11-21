@@ -377,18 +377,18 @@ static thisClass* SafeDownCast(cmObject *c) \
   return 0;\
 }
 
-inline int cmHasLiteralPrefixImpl(const std::string &str1,
+inline bool cmHasLiteralPrefixImpl(const std::string &str1,
                                  const char *str2,
                                  size_t N)
 {
-  return strncmp(str1.c_str(), str2, N);
+  return strncmp(str1.c_str(), str2, N) == 0;
 }
 
-inline int cmHasLiteralPrefixImpl(const char* str1,
+inline bool cmHasLiteralPrefixImpl(const char* str1,
                                  const char *str2,
                                  size_t N)
 {
-  return strncmp(str1, str2, N);
+  return strncmp(str1, str2, N) == 0;
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1300 \
@@ -412,7 +412,7 @@ template<typename T, size_t N>
 size_t cmArraySize(const T (&)[N]) { return N; }
 
 template<typename T, size_t N>
-int cmHasLiteralPrefix(T str1, const char (&str2)[N])
+bool cmHasLiteralPrefix(T str1, const char (&str2)[N])
 {
   return cmHasLiteralPrefixImpl(str1, str2, N - 1);
 }
