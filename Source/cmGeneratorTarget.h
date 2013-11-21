@@ -100,6 +100,6 @@ private:
   void operator=(cmGeneratorTarget const&);
 };
 
-typedef std::map<std::string, cmGeneratorTarget*> cmGeneratorTargetsType;
+typedef std::map<cmTarget*, cmGeneratorTarget*> cmGeneratorTargetsType;
 
 #endif
