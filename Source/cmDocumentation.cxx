@@ -95,8 +95,12 @@ cmDocumentation::~cmDocumentation()
 //----------------------------------------------------------------------------
 bool cmDocumentation::PrintVersion(std::ostream& os)
 {
-  os << this->GetNameString() << " version "
-     << cmVersion::GetCMakeVersion() << "\n";
+  os <<
+    this->GetNameString() <<
+    " version " << cmVersion::GetCMakeVersion() << "\n"
+    "\n"
+    "CMake suite maintained by Kitware, Inc. (kitware.com).\n"
+    ;
   return true;
 }
 
