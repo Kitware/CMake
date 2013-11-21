@@ -695,6 +695,11 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     {
     mf->ReadListFile(0,projectCompatibility.c_str());
     }
+  // Inform any extra generator of the new language.
+  if (this->ExtraGenerator)
+    {
+    this->ExtraGenerator->EnableLanguage(languages, mf, false);
+    }
 
   if(fatalError)
     {
@@ -1981,7 +1986,7 @@ void cmGlobalGenerator::AddAlias(const char *name, cmTarget *tgt)
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::IsAlias(const char *name)
+bool cmGlobalGenerator::IsAlias(const char *name) const
 {
   return this->AliasTargets.find(name) != this->AliasTargets.end();
 }
@@ -1989,15 +1994,16 @@ bool cmGlobalGenerator::IsAlias(const char *name)
 //----------------------------------------------------------------------------
 cmTarget*
 cmGlobalGenerator::FindTarget(const char* project, const char* name,
-                              bool excludeAliases)
+                              bool excludeAliases) const
 {
   // if project specific
   if(project)
     {
-    std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
-    for(unsigned int i = 0; i < gens->size(); ++i)
+    std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+      gens = this->ProjectMap.find(project);
+    for(unsigned int i = 0; i < gens->second.size(); ++i)
       {
-      cmTarget* ret = (*gens)[i]->GetMakefile()->FindTarget(name,
+      cmTarget* ret = (gens->second)[i]->GetMakefile()->FindTarget(name,
                                                             excludeAliases);
       if(ret)
         {
@@ -2010,14 +2016,14 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name,
     {
     if (!excludeAliases)
       {
-      std::map<cmStdString, cmTarget*>::iterator ai
+      std::map<cmStdString, cmTarget*>::const_iterator ai
                                               = this->AliasTargets.find(name);
       if (ai != this->AliasTargets.end())
         {
         return ai->second;
         }
       }
-    std::map<cmStdString,cmTarget *>::iterator i =
+    std::map<cmStdString,cmTarget *>::const_iterator i =
       this->TotalTargets.find ( name );
     if ( i != this->TotalTargets.end() )
       {
@@ -2033,7 +2039,8 @@ cmGlobalGenerator::FindTarget(const char* project, const char* name,
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::NameResolvesToFramework(const std::string& libname)
+bool
+cmGlobalGenerator::NameResolvesToFramework(const std::string& libname) const
 {
   if(cmSystemTools::IsPathToFramework(libname.c_str()))
     {
@@ -2407,7 +2414,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   // Store the custom command in the target.
   cmCustomCommand cc(0, no_outputs, no_depends, *commandLines, 0,
                      workingDirectory);
-  target.GetPostBuildCommands().push_back(cc);
+  target.AddPostBuildCommand(cc);
   target.SetProperty("EchoString", message);
   std::vector<std::string>::iterator dit;
   for ( dit = depends.begin(); dit != depends.end(); ++ dit )

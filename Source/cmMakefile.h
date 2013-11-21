@@ -533,7 +533,7 @@ public:
       this->GeneratorTargets = targets;
     }
 
-  cmTarget* FindTarget(const char* name, bool excludeAliases = false);
+  cmTarget* FindTarget(const char* name, bool excludeAliases = false) const;
 
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */
@@ -904,7 +904,7 @@ protected:
   std::string ProjectName;    // project name
 
   // libraries, classes, and executables
-  cmTargets Targets;
+  mutable cmTargets Targets;
   std::map<std::string, cmTarget*> AliasTargets;
   cmGeneratorTargetsType GeneratorTargets;
   std::vector<cmSourceFile*> SourceFiles;

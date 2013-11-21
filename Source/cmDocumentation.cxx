@@ -195,24 +195,27 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
 
 
 void cmDocumentation::WarnFormFromFilename(
-  cmDocumentation::RequestedHelpItem& request)
+  cmDocumentation::RequestedHelpItem& request, bool& result)
 {
   std::string ext = cmSystemTools::GetFilenameLastExtension(request.Filename);
   ext = cmSystemTools::UpperCase(ext);
   if ((ext == ".HTM") || (ext == ".HTML"))
     {
     request.HelpType = cmDocumentation::None;
+    result = true;
     cmSystemTools::Message("Warning: HTML help format no longer supported");
     }
   else if (ext == ".DOCBOOK")
     {
     request.HelpType = cmDocumentation::None;
+    result = true;
     cmSystemTools::Message("Warning: Docbook help format no longer supported");
     }
   // ".1" to ".9" should be manpages
   else if ((ext.length()==2) && (ext[1] >='1') && (ext[1]<='9'))
     {
     request.HelpType = cmDocumentation::None;
+    result = true;
     cmSystemTools::Message("Warning: Man help format no longer supported");
     }
 }
@@ -300,28 +303,28 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-properties.7";
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-policies") == 0)
       {
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-policies.7";
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-variables") == 0)
       {
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-variables.7";
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-modules") == 0)
       {
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-modules.7";
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-custom-modules") == 0)
       {
@@ -335,7 +338,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       help.HelpType = cmDocumentation::OneManual;
       help.Argument = "cmake-commands.7";
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-compatcommands") == 0)
       {
@@ -368,42 +371,42 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
       help.Argument = cmSystemTools::LowerCase(help.Argument);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-module") == 0)
       {
       help.HelpType = cmDocumentation::OneModule;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-property") == 0)
       {
       help.HelpType = cmDocumentation::OneProperty;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-policy") == 0)
       {
       help.HelpType = cmDocumentation::OnePolicy;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-variable") == 0)
       {
       help.HelpType = cmDocumentation::OneVariable;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-manual") == 0)
       {
       help.HelpType = cmDocumentation::OneManual;
       GET_OPT_ARGUMENT(help.Argument);
       GET_OPT_ARGUMENT(help.Filename);
-      this->WarnFormFromFilename(help);
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-command-list") == 0)
       {

@@ -25,13 +25,11 @@ set_target_properties(shared shared2 framework PROPERTIES
 # testbundleutils1 will load this at runtime
 add_library(module1 MODULE module.cpp module.h)
 set_target_properties(module1 PROPERTIES PREFIX "")
-get_target_property(module_loc module1 LOCATION)
 target_link_libraries(module1 shared2)
 
 # a bundle application
 add_executable(testbundleutils1 MACOSX_BUNDLE testbundleutils1.cpp)
 target_link_libraries(testbundleutils1 shared framework ${CMAKE_DL_LIBS})
-get_target_property(loc testbundleutils1 LOCATION)
 
 set_target_properties(testbundleutils1 module1 PROPERTIES
                       INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/testdir1"
@@ -40,8 +38,8 @@ set_target_properties(testbundleutils1 module1 PROPERTIES
 # add custom target to install and test the app
 add_custom_target(testbundleutils1_test  ALL
   COMMAND ${CMAKE_COMMAND}
-  "-DINPUT=${loc}"
-  "-DMODULE=${module_loc}"
+  "-DINPUT=$<TARGET_FILE:testbundleutils1>"
+  "-DMODULE=$<TARGET_FILE:module1>"
   "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
   "-DOUTPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/testdir1"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"
@@ -58,13 +56,11 @@ add_dependencies(testbundleutils1_test testbundleutils1)
 # testbundleutils2 will load this at runtime
 add_library(module2 MODULE module.cpp module.h)
 set_target_properties(module2 PROPERTIES PREFIX "")
-get_target_property(module_loc module2 LOCATION)
 target_link_libraries(module2 shared2)
 
 # a non-bundle application
 add_executable(testbundleutils2 testbundleutils2.cpp)
 target_link_libraries(testbundleutils2 shared framework ${CMAKE_DL_LIBS})
-get_target_property(loc testbundleutils2 LOCATION)
 
 set_target_properties(testbundleutils2 module2 PROPERTIES
                       INSTALL_RPATH "${CMAKE_CURRENT_BINARY_DIR}/testdir2"
@@ -73,8 +69,8 @@ set_target_properties(testbundleutils2 module2 PROPERTIES
 # add custom target to install and test the app
 add_custom_target(testbundleutils2_test  ALL
   COMMAND ${CMAKE_COMMAND}
-  "-DINPUT=${loc}"
-  "-DMODULE=${module_loc}"
+  "-DINPUT=$<TARGET_FILE:testbundleutils2>"
+  "-DMODULE=$<TARGET_FILE:module2>"
   "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
   "-DOUTPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/testdir2"
   -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"
@@ -106,13 +102,11 @@ if(APPLE AND NOT CMAKE_SYSTEM_VERSION VERSION_LESS 9.0)
   # testbundleutils1 will load this at runtime
   add_library(module3 MODULE module.cpp module.h)
   set_target_properties(module3 PROPERTIES PREFIX "" LINK_FLAGS "-Wl,-rpath,@loader_path/")
-  get_target_property(module_loc module3 LOCATION)
   target_link_libraries(module3 shared2-3)
 
   # a non-bundle application
   add_executable(testbundleutils3 testbundleutils3.cpp)
   target_link_libraries(testbundleutils3 shared-3 framework-3 ${CMAKE_DL_LIBS})
-  get_target_property(loc testbundleutils3 LOCATION)
 
   set_target_properties(testbundleutils3 module3 PROPERTIES
                         LINK_FLAGS "-Wl,-rpath,@loader_path/")
@@ -120,8 +114,8 @@ if(APPLE AND NOT CMAKE_SYSTEM_VERSION VERSION_LESS 9.0)
   # add custom target to install and test the app
   add_custom_target(testbundleutils3_test  ALL
     COMMAND ${CMAKE_COMMAND}
-    "-DINPUT=${loc}"
-    "-DMODULE=${module_loc}"
+    "-DINPUT=$<TARGET_FILE:testbundleutils3>"
+    "-DMODULE=$<TARGET_FILE:module3>"
     "-DINPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_CFG_INTDIR}"
     "-DOUTPUTDIR=${CMAKE_CURRENT_BINARY_DIR}/testdir3"
     -P "${CMAKE_CURRENT_SOURCE_DIR}/bundleutils.cmake"

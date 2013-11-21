@@ -114,12 +114,18 @@ public:
   /**
    * Get the list of the custom commands for this target
    */
-  std::vector<cmCustomCommand> &GetPreBuildCommands()
+  std::vector<cmCustomCommand> const &GetPreBuildCommands() const
     {return this->PreBuildCommands;}
-  std::vector<cmCustomCommand> &GetPreLinkCommands()
+  std::vector<cmCustomCommand> const &GetPreLinkCommands() const
     {return this->PreLinkCommands;}
-  std::vector<cmCustomCommand> &GetPostBuildCommands()
+  std::vector<cmCustomCommand> const &GetPostBuildCommands() const
     {return this->PostBuildCommands;}
+  void AddPreBuildCommand(cmCustomCommand const &cmd)
+    {this->PreBuildCommands.push_back(cmd);}
+  void AddPreLinkCommand(cmCustomCommand const &cmd)
+    {this->PreLinkCommands.push_back(cmd);}
+  void AddPostBuildCommand(cmCustomCommand const &cmd)
+    {this->PostBuildCommands.push_back(cmd);}
 
   /**
    * Get the list of the source files used by this target
@@ -156,7 +162,8 @@ public:
   /**
    * Get the flags for a given source file as used in this target
    */
-  struct SourceFileFlags GetTargetSourceFileFlags(const cmSourceFile* sf);
+  struct SourceFileFlags
+  GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
   /**
    * Add sources to the target.
@@ -179,7 +186,7 @@ public:
                               cmTarget const* head) const;
   void GetInterfaceLinkLibraries(const char *config,
                               std::vector<std::string> &,
-                              cmTarget *head);
+                              cmTarget *head) const;
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config) const;
@@ -190,7 +197,7 @@ public:
   void ClearDependencyInformation(cmMakefile& mf, const char* target);
 
   // Check to see if a library is a framework and treat it different on Mac
-  bool NameResolvesToFramework(const std::string& libname);
+  bool NameResolvesToFramework(const std::string& libname) const;
   void AddLinkLibrary(cmMakefile& mf,
                       const char *target, const char* lib,
                       LinkLibraryType llt);
@@ -212,14 +219,14 @@ public:
    * Set the path where this target should be installed. This is relative to
    * INSTALL_PREFIX
    */
-  std::string GetInstallPath() {return this->InstallPath;}
+  std::string GetInstallPath() const {return this->InstallPath;}
   void SetInstallPath(const char *name) {this->InstallPath = name;}
 
   /**
    * Set the path where this target (if it has a runtime part) should be
    * installed. This is relative to INSTALL_PREFIX
    */
-  std::string GetRuntimeInstallPath() {return this->RuntimeInstallPath;}
+  std::string GetRuntimeInstallPath() const {return this->RuntimeInstallPath;}
   void SetRuntimeInstallPath(const char *name) {
     this->RuntimeInstallPath = name; }
 
@@ -246,9 +253,9 @@ public:
   const char *GetProperty(const char *prop) const;
   const char *GetProperty(const char *prop, cmProperty::ScopeType scope) const;
   bool GetPropertyAsBool(const char *prop) const;
-  void CheckProperty(const char* prop, cmMakefile* context);
+  void CheckProperty(const char* prop, cmMakefile* context) const;
 
-  const char* GetFeature(const char* feature, const char* config);
+  const char* GetFeature(const char* feature, const char* config) const;
 
   bool IsImported() const {return this->IsImportedTarget;}
 
@@ -330,7 +337,7 @@ public:
       If the configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
       pdb output directory is given.  */
-  std::string GetPDBDirectory(const char* config = 0);
+  std::string GetPDBDirectory(const char* config = 0) const;
 
   /** Get the location of the target in the build tree for the given
       configuration.  This location is suitable for use as the LOCATION
@@ -340,12 +347,13 @@ public:
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
       not set or cannot be parsed.  */
-  void GetTargetVersion(int& major, int& minor);
+  void GetTargetVersion(int& major, int& minor) const;
 
   /** Get the target major, minor, and patch version numbers
       interpreted from the VERSION or SOVERSION property.  Version 0
       is returned if the property is not set or cannot be parsed.  */
-  void GetTargetVersion(bool soversion, int& major, int& minor, int& patch);
+  void
+  GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
   /**
    * Make sure the full path to all source files is known.
@@ -377,7 +385,7 @@ public:
 
   /** Test for special case of a third-party shared library that has
       no soname at all.  */
-  bool IsImportedSharedLibWithoutSOName(const char* config);
+  bool IsImportedSharedLibWithoutSOName(const char* config) const;
 
   /** Get the full path to the target according to the settings in its
       makefile and the configuration type.  */
@@ -399,12 +407,12 @@ public:
                           std::string& pdbName, const char* config) const;
 
   /** Does this target have a GNU implib to convert to MS format?  */
-  bool HasImplibGNUtoMS();
+  bool HasImplibGNUtoMS() const;
 
   /** Convert the given GNU import library name (.dll.a) to a name with a new
       extension (.lib or ${CMAKE_IMPORT_LIBRARY_SUFFIX}).  */
   bool GetImplibGNUtoMS(std::string const& gnuName, std::string& out,
-                        const char* newExt = 0);
+                        const char* newExt = 0) const;
 
   /**
    * Compute whether this target must be relinked before installing.
@@ -442,7 +450,7 @@ public:
 
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
-  const char* GetExportMacro();
+  const char* GetExportMacro() const;
 
   void GetCompileDefinitions(std::vector<std::string> &result,
                              const char *config) const;
@@ -459,10 +467,10 @@ public:
   bool IsExecutableWithExports() const;
 
   /** Return whether this target may be used to link another target.  */
-  bool IsLinkable();
+  bool IsLinkable() const;
 
   /** Return whether or not the target is for a DLL platform.  */
-  bool IsDLLPlatform() { return this->DLLPlatform; }
+  bool IsDLLPlatform() const { return this->DLLPlatform; }
 
   /** Return whether or not the target has a DLL import library.  */
   bool HasImportLibrary() const;
@@ -493,7 +501,7 @@ public:
 
   /** Return whether this target uses the default value for its output
       directory.  */
-  bool UsesDefaultOutputDir(const char* config, bool implib);
+  bool UsesDefaultOutputDir(const char* config, bool implib) const;
 
   /** @return the mac content directory for this target. */
   std::string GetMacContentDirectory(const char* config,
@@ -548,7 +556,7 @@ public:
                                                     const char *config) const;
 
   std::string GetDebugGeneratorExpressions(const std::string &value,
-                                  cmTarget::LinkLibraryType llt);
+                                  cmTarget::LinkLibraryType llt) const;
 
   void AddSystemIncludeDirectories(const std::set<cmStdString> &incs);
   void AddSystemIncludeDirectories(const std::vector<std::string> &incs);
@@ -673,7 +681,7 @@ private:
   bool HaveInstallRule;
   std::string InstallPath;
   std::string RuntimeInstallPath;
-  std::string ExportMacro;
+  mutable std::string ExportMacro;
   std::set<cmStdString> Utilities;
   bool RecordDependencies;
   mutable cmPropertyMap Properties;
@@ -739,7 +747,7 @@ private:
   friend class cmTargetTraceDependencies;
   cmTargetInternalPointer Internal;
 
-  void ConstructSourceFileFlags();
+  void ConstructSourceFileFlags() const;
   void ComputeVersionedName(std::string& vName,
                             std::string const& prefix,
                             std::string const& base,

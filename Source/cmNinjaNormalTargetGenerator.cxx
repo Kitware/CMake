@@ -534,7 +534,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
     }
 
-  std::vector<cmCustomCommand> *cmdLists[3] = {
+  const std::vector<cmCustomCommand> *cmdLists[3] = {
     &this->GetTarget()->GetPreBuildCommands(),
     &this->GetTarget()->GetPreLinkCommands(),
     &this->GetTarget()->GetPostBuildCommands()
