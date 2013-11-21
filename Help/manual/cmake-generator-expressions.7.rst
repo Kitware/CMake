@@ -97,8 +97,9 @@ These expressions may also may be combined with logical expressions::
 
   $<$<VERSION_LESS:$<CXX_COMPILER_VERSION>,4.2.0>:OLD_COMPILER>
 
-expands to ``OLD_COMPILER`` if the :variable:`CMAKE_<LANG>_COMPILER_VERSION` is
-less than 4.2.0.
+expands to ``OLD_COMPILER`` if the
+:variable:`CMAKE_CXX_COMPILER_VERSION <CMAKE_<LANG>_COMPILER_VERSION>` is less
+than 4.2.0.
 
 $<CONFIGURATION>
   Configuration name
@@ -140,7 +141,7 @@ $<TARGET_PROPERTY:prop>
   expression is evaluated.
 $<INSTALL_PREFIX>
   Content of the install prefix when the target is exported via
-  :command:`install` (EXPORT) and empty otherwise.
+  :command:`install(EXPORT)` and empty otherwise.
 
 Output expressions
 ------------------
@@ -171,7 +172,7 @@ $<TARGET_NAME:...>
   targets to multiple dependent export sets.  The ``...`` must be a literal
   name of a target- it may not contain generator expressions.
 $<INSTALL_INTERFACE:...>
-  Content of ``...`` when the property is exported using :command:`install` (EXPORT),
+  Content of ``...`` when the property is exported using :command:`install(EXPORT)`,
   and empty otherwise.
 $<BUILD_INTERFACE:...>
   Content of ``...`` when the property is exported using :command:`export`, or
