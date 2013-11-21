@@ -16,6 +16,7 @@ OPENSSL_SSL_LIBRARY:FILEPATH=/Users/kitware/openssl-1.0.1c-install/lib/libssl.a
 CMAKE_SKIP_BOOTSTRAP_TEST:STRING=TRUE
 CPACK_SYSTEM_NAME:STRING=Darwin-universal
 BUILD_QtDialog:BOOL=TRUE
+CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL:BOOL=TRUE
 QT_QMAKE_EXECUTABLE:FILEPATH=/Users/kitware/Support/qt-4.8.0/install/bin/qmake
 ")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
