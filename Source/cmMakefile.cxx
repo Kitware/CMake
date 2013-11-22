@@ -4086,8 +4086,11 @@ bool cmMakefile::IsAlias(const char *name)
 //----------------------------------------------------------------------------
 cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
 {
-  cmTarget *t = this->FindTargetToUse(name);
-  return this->LocalGenerator->GetGlobalGenerator()->GetGeneratorTarget(t);
+  if (cmTarget *t = this->FindTargetToUse(name))
+    {
+    return this->LocalGenerator->GetGlobalGenerator()->GetGeneratorTarget(t);
+    }
+  return 0;
 }
 
 //----------------------------------------------------------------------------
