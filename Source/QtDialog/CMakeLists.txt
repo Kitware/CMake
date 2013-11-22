@@ -102,6 +102,13 @@ if(APPLE)
     MACOSX_PACKAGE_LOCATION Resources)
 endif()
 
+if(CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
+  install(FILES ${CMake_SOURCE_DIR}/Licenses/LGPLv2.1.txt
+    DESTINATION ${CMAKE_DATA_DIR}/Licenses)
+  set_property(SOURCE CMakeSetupDialog.cxx
+    PROPERTY COMPILE_DEFINITIONS CMake_GUI_DISTRIBUTE_WITH_Qt_LGPL)
+endif()
+
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
