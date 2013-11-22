@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8.12)
 cmake_policy(SET CMP0025 NEW)
 project(target_compile_features)
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
     OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
   add_executable(gnuxx_typeof_test gnuxx_typeof_test.cpp)
