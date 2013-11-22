@@ -90,13 +90,19 @@ find_path(SDL_INCLUDE_DIR SDL.h
                 include/SDL include/SDL12 include/SDL11 include
 )
 
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+  set(VC_LIB_PATH_SUFFIX lib/x64)
+else()
+  set(VC_LIB_PATH_SUFFIX lib/x86)
+endif()
+
 # SDL-1.1 is the name used by FreeBSD ports...
 # don't confuse it for the version number.
 find_library(SDL_LIBRARY_TEMP
   NAMES SDL SDL-1.1
   HINTS
     ENV SDLDIR
-  PATH_SUFFIXES lib
+  PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
 )
 
 if(NOT SDL_BUILDING_LIBRARY)
@@ -109,7 +115,7 @@ if(NOT SDL_BUILDING_LIBRARY)
       NAMES SDLmain SDLmain-1.1
       HINTS
         ENV SDLDIR
-      PATH_SUFFIXES lib
+      PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
       PATHS
       /sw
       /opt/local
