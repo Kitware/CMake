@@ -24,7 +24,7 @@ bool cmUnsetCommand::InitialPass(std::vector<std::string> const& args,
   const char* variable = args[0].c_str();
 
   // unset(ENV{VAR})
-  if (!strncmp(variable,"ENV{",4) && strlen(variable) > 5)
+  if (cmHasLiteralPrefix(variable, "ENV{") && strlen(variable) > 5)
     {
     // what is the variable name
     char *envVarName = new char [strlen(variable)];

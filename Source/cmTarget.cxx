@@ -560,7 +560,7 @@ cmSourceFile* cmTarget::AddSource(const char* s)
 //----------------------------------------------------------------------------
 void cmTarget::ProcessSourceExpression(std::string const& expr)
 {
-  if(strncmp(expr.c_str(), "$<TARGET_OBJECTS:", 17) == 0 &&
+  if(cmHasLiteralPrefix(expr.c_str(), "$<TARGET_OBJECTS:") &&
      expr[expr.size()-1] == '>')
     {
     std::string objLibName = expr.substr(17, expr.size()-18);
@@ -2199,11 +2199,11 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 void cmTarget::MaybeInvalidatePropertyCache(const char* prop)
 {
   // Wipe out maps caching information affected by this property.
-  if(this->IsImported() && strncmp(prop, "IMPORTED", 8) == 0)
+  if(this->IsImported() && cmHasLiteralPrefix(prop, "IMPORTED"))
     {
     this->Internal->ImportInfoMap.clear();
     }
-  if(!this->IsImported() && strncmp(prop, "LINK_INTERFACE_", 15) == 0)
+  if(!this->IsImported() && cmHasLiteralPrefix(prop, "LINK_INTERFACE_"))
     {
     this->ClearLinkMaps();
     }
@@ -2279,21 +2279,21 @@ static void cmTargetCheckINTERFACE_LINK_LIBRARIES(const char* value,
 void cmTarget::CheckProperty(const char* prop, cmMakefile* context) const
 {
   // Certain properties need checking.
-  if(strncmp(prop, "LINK_INTERFACE_LIBRARIES", 24) == 0)
+  if(cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES"))
     {
     if(const char* value = this->GetProperty(prop))
       {
       cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, false);
       }
     }
-  if(strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES", 33) == 0)
+  if(cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES"))
     {
     if(const char* value = this->GetProperty(prop))
       {
       cmTargetCheckLINK_INTERFACE_LIBRARIES(prop, value, context, true);
       }
     }
-  if(strncmp(prop, "INTERFACE_LINK_LIBRARIES", 24) == 0)
+  if(cmHasLiteralPrefix(prop, "INTERFACE_LINK_LIBRARIES"))
     {
     if(const char* value = this->GetProperty(prop))
       {
@@ -2595,7 +2595,7 @@ const char *cmTarget::GetProperty(const char* prop,
       }
 
     // Support "LOCATION_<CONFIG>".
-    if(strncmp(prop, "LOCATION_", 9) == 0)
+    if(cmHasLiteralPrefix(prop, "LOCATION_"))
       {
       if (!this->HandleLocationPropertyPolicy())
         {

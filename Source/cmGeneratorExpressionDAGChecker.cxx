@@ -173,8 +173,8 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char *tgt)
   return (strcmp(prop, "LINK_LIBRARIES") == 0
        || strcmp(prop, "LINK_INTERFACE_LIBRARIES") == 0
        || strcmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES") == 0
-       || strncmp(prop, "LINK_INTERFACE_LIBRARIES_", 25) == 0
-       || strncmp(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_", 34) == 0)
+       || cmHasLiteralPrefix(prop, "LINK_INTERFACE_LIBRARIES_")
+       || cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LIBRARIES_"))
        || strcmp(prop, "INTERFACE_LINK_LIBRARIES") == 0;
 }
 
@@ -200,7 +200,7 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions() const
   const char *prop = this->Property.c_str();
   return (strcmp(prop, "COMPILE_DEFINITIONS") == 0
        || strcmp(prop, "INTERFACE_COMPILE_DEFINITIONS") == 0
-       || strncmp(prop, "COMPILE_DEFINITIONS_", 20) == 0);
+       || cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_"));
 }
 
 //----------------------------------------------------------------------------
