@@ -43,6 +43,12 @@ if (NOT CMAKE_FIND_NO_INSTALL_PREFIX)
     # Project install destination.
     "${CMAKE_INSTALL_PREFIX}"
   )
+  if(CMAKE_STAGING_PREFIX)
+    list(APPEND CMAKE_SYSTEM_PREFIX_PATH
+      # User-supplied staging prefix.
+      "${CMAKE_STAGING_PREFIX}"
+    )
+  endif()
 endif()
 
 # List common include file locations not under the common prefixes.
