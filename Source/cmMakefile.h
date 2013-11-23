@@ -190,7 +190,6 @@ public:
     const char* comment, const char* workingDir,
     bool replace = false,
     bool escapeOldStyle = true);
-
   void AddCustomCommandOldStyle(const char* target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
