@@ -136,15 +136,12 @@ protected:
   };
   friend struct MacOSXContentGeneratorType;
 
-
+protected:
   MacOSXContentGeneratorType* MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   cmOSXBundleGenerator* OSXBundleGenerator;
   std::set<cmStdString> MacContentFolders;
 
-  void addPoolNinjaVariable(const char* pool_property,
-                            cmTarget* target,
-                            cmNinjaVars& vars);
 
 private:
   cmTarget* Target;
