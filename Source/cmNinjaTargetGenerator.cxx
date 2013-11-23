@@ -568,12 +568,9 @@ cmNinjaTargetGenerator
   EnsureParentDirectoryExists(objectFileName);
 
   std::string objectDir = cmSystemTools::GetFilenamePath(objectFileName);
-
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                          ConvertToNinjaPath(objectDir.c_str()).c_str(),
                          cmLocalGenerator::SHELL);
-
-  this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetTarget(), vars);
 
   this->SetMsvcTargetPdbVariable(vars);
 
@@ -727,20 +724,4 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
 
   // Add as a dependency of all target so that it gets called.
   this->Generator->GetGlobalGenerator()->AddDependencyToAll(output);
-}
-
-void cmNinjaTargetGenerator::addPoolNinjaVariable(const char* pool_property,
-                                                  cmTarget* target,
-                                                  cmNinjaVars& vars)
-{
-    const char* pool = target->GetProperty(pool_property);
-    if (!pool)
-      {
-      const std::string var = std::string("CMAKE_") + pool_property;
-      pool = this->GetMakefile()->GetDefinition(var.c_str());
-      }
-    if (pool)
-      {
-      vars["pool"] = pool;
-      }
 }
