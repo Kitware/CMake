@@ -53,6 +53,8 @@ void cmLocalNinjaGenerator::Generate()
     {
     this->WriteBuildFileTop();
 
+    this->WritePools(this->GetRulesFileStream());
+
     const std::string showIncludesPrefix = this->GetMakefile()
              ->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
     if (!showIncludesPrefix.empty())
@@ -198,6 +200,32 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
     << "# Configuration: " << this->ConfigName << std::endl
     ;
   cmGlobalNinjaGenerator::WriteDivider(os);
+}
+
+void cmLocalNinjaGenerator::WritePools(std::ostream& os)
+{
+  cmGlobalNinjaGenerator::WriteDivider(os);
+
+  const char* jobpools = this->GetCMakeInstance()
+                               ->GetProperty("JOB_POOLS", cmProperty::GLOBAL);
+  if (jobpools)
+    {
+    cmGlobalNinjaGenerator::WriteComment(os,
+                            "Pools defined by global property JOB_POOLS");
+    std::vector<std::string> pools;
+    cmSystemTools::ExpandListArgument(jobpools, pools);
+    for (size_t i = 0; i < pools.size(); ++i)
+      {
+      const std::string pool = pools[i];
+      std::string::size_type eq = pool.find("=");
+      if (eq != std::string::npos && pool.size() > eq)
+        {
+        os << "pool " << pool.substr(0, eq) << std::endl;
+        os << "  depth = " << pool.substr(eq + 1) << std::endl;
+        os << std::endl;
+        }
+      }
+    }
 }
 
 void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
