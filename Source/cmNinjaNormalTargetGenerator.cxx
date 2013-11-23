@@ -462,6 +462,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                             linkPath,
                                             this->GetGeneratorTarget());
 
+  this->addPoolNinjaVariable("JOB_POOL_LINK", this->GetTarget(), vars);
+
   this->AddModuleDefinitionFlag(vars["LINK_FLAGS"]);
   vars["LINK_FLAGS"] = cmGlobalNinjaGenerator
                         ::EncodeLiteral(vars["LINK_FLAGS"]);
