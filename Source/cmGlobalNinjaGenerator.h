@@ -106,6 +106,7 @@ public:
                                const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
                                const cmNinjaDeps& orderOnly = cmNinjaDeps());
+
   void WriteMacOSXContentBuild(const std::string& input,
                                const std::string& output);
 
