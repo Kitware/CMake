@@ -379,6 +379,12 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     // so ensure that the conditions don't lead to nonsense.
     this->PolicyStatusCMP0022 = cmPolicies::NEW;
     }
+
+  this->SetPropertyDefault("JOB_POOL_COMPILE",
+      this->Makefile->GetDefinition("CMAKE_JOB_POOL_COMPILE"));
+
+  this->SetPropertyDefault("JOB_POOL_LINK",
+      this->Makefile->GetDefinition("CMAKE_JOB_POOL_LINK"));
 }
 
 //----------------------------------------------------------------------------
