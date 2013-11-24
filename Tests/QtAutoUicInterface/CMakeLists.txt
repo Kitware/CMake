@@ -27,6 +27,8 @@ set(CMAKE_AUTOUIC ON)
 
 # BEGIN Upstream
 
+set(CMAKE_VERBOSE_MAKEFILE ON)
+
 add_library(KI18n klocalizedstring.cpp)
 target_link_libraries(KI18n ${QT_CORE_TARGET})
 
