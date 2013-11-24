@@ -18,7 +18,7 @@ public:
   explicit MyWidget(QWidget *parent = 0);
 
 private:
-  std::auto_ptr<Ui::MyWidget> ui;
+  const std::auto_ptr<Ui::MyWidget> ui;
 };
 
 #endif
