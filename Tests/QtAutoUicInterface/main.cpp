@@ -9,6 +9,7 @@ int main(int argc, char **argv)
   f.open(UI_LIBWIDGET_H);
   if (!f.is_open())
     {
+    std::cout << "Could not open \"" UI_LIBWIDGET_H "\"." << std::endl;
     return -1;
     }
 
@@ -41,6 +42,7 @@ int main(int argc, char **argv)
   f.open(UI_MYWIDGET_H);
   if (!f.is_open())
     {
+    std::cout << "Could not open \"" UI_MYWIDGET_H "\"." << std::endl;
     return -1;
     }
 

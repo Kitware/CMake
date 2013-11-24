@@ -3,6 +3,7 @@
 #define MYWIDGET_H
 
 #include <QWidget>
+#include <memory>
 
 #if QT_VERSION < QT_VERSION_CHECK(5, 3, 0)
 #include <klocalizedstring.h>
@@ -17,7 +18,7 @@ public:
   explicit MyWidget(QWidget *parent = 0);
 
 private:
-  QScopedPointer<Ui::MyWidget> ui;
+  std::auto_ptr<Ui::MyWidget> ui;
 };
 
 #endif
