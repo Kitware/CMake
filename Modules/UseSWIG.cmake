@@ -68,6 +68,10 @@ macro(SWIG_MODULE_INITIALIZE name language)
     set(SWIG_MODULE_${name}_REAL_NAME "_${name}")
   elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PERL")
     set(SWIG_MODULE_${name}_EXTRA_FLAGS "-shadow")
+  elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "CSHARP")
+    # This makes sure that the name used in the generated DllImport
+    # matches the library name created by CMake
+    set(SWIG_MODULE_${name}_EXTRA_FLAGS "-dllimport;${name}")
   endif()
 endmacro()
 
