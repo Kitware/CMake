@@ -94,7 +94,6 @@ endmacro()
 #
 macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   set(swig_full_infile ${infile})
-  get_filename_component(swig_source_file_path "${infile}" PATH)
   get_filename_component(swig_source_file_name_we "${infile}" NAME_WE)
   get_source_file_property(swig_source_file_generated ${infile} GENERATED)
   get_source_file_property(swig_source_file_cplusplus ${infile} CPLUSPLUS)
@@ -102,35 +101,8 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
   if("${swig_source_file_flags}" STREQUAL "NOTFOUND")
     set(swig_source_file_flags "")
   endif()
-  set(swig_source_file_fullname "${infile}")
-  if(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_SOURCE_DIR}")
-    string(REGEX REPLACE
-      "^${CMAKE_CURRENT_SOURCE_DIR}" ""
-      swig_source_file_relative_path
-      "${swig_source_file_path}")
-  else()
-    if(${swig_source_file_path} MATCHES "^${CMAKE_CURRENT_BINARY_DIR}")
-      string(REGEX REPLACE
-        "^${CMAKE_CURRENT_BINARY_DIR}" ""
-        swig_source_file_relative_path
-        "${swig_source_file_path}")
-      set(swig_source_file_generated 1)
-    else()
-      set(swig_source_file_relative_path "${swig_source_file_path}")
-      if(swig_source_file_generated)
-        set(swig_source_file_fullname "${CMAKE_CURRENT_BINARY_DIR}/${infile}")
-      else()
-        set(swig_source_file_fullname "${CMAKE_CURRENT_SOURCE_DIR}/${infile}")
-      endif()
-    endif()
-  endif()
+  get_filename_component(swig_source_file_fullname "${infile}" ABSOLUTE)
 
-  set(swig_generated_file_fullname
-    "${CMAKE_CURRENT_BINARY_DIR}")
-  if(swig_source_file_relative_path)
-    set(swig_generated_file_fullname
-      "${swig_generated_file_fullname}/${swig_source_file_relative_path}")
-  endif()
   # If CMAKE_SWIG_OUTDIR was specified then pass it to -outdir
   if(CMAKE_SWIG_OUTDIR)
     set(swig_outdir ${CMAKE_SWIG_OUTDIR})
@@ -142,7 +114,7 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     "${swig_outdir}"
     "${infile}")
   set(swig_generated_file_fullname
-    "${swig_generated_file_fullname}/${swig_source_file_name_we}")
+    "${swig_outdir}/${swig_source_file_name_we}")
   # add the language into the name of the file (i.e. TCL_wrap)
   # this allows for the same .i file to be wrapped into different languages
   set(swig_generated_file_fullname
