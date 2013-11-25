@@ -1384,12 +1384,63 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
+static bool whiteListedInterfaceProperty(const char *prop)
+{
+  if(cmHasLiteralPrefix(prop, "INTERFACE_"))
+    {
+    return true;
+    }
+  static const char* builtIns[] = {
+    // ###: This must remain sorted. It is processed with a binary search.
+    "COMPATIBLE_INTERFACE_BOOL",
+    "COMPATIBLE_INTERFACE_NUMBER_MAX",
+    "COMPATIBLE_INTERFACE_NUMBER_MIN",
+    "COMPATIBLE_INTERFACE_STRING",
+    "EXCLUDE_FROM_ALL",
+    "EXCLUDE_FROM_DEFAULT_BUILD",
+    "EXPORT_NAME",
+    "IMPORTED_LINK_INTERFACE_LANGUAGES",
+    "IMPORTED",
+    "NAME",
+    "TYPE",
+    "VERSION"
+  };
+
+  if (std::binary_search(cmArrayBegin(builtIns),
+                         cmArrayEnd(builtIns),
+                         prop,
+                         cmStrCmp(prop)))
+    {
+    return true;
+    }
+
+  if (cmHasLiteralPrefix(prop, "EXCLUDE_FROM_DEFAULT_BUILD_")
+      || cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LANGUAGES_")
+      || cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_"))
+    {
+    return true;
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::SetProperty(const char* prop, const char* value)
 {
   if (!prop)
     {
     return;
     }
+  if (this->GetType() == INTERFACE_LIBRARY
+      && !whiteListedInterfaceProperty(prop))
+    {
+    cmOStringStream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \"" << prop << "\" is not allowed.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    return;
+    }
+
   if (strcmp(prop, "NAME") == 0)
     {
     cmOStringStream e;
@@ -1457,6 +1508,15 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 {
   if (!prop)
     {
+    return;
+    }
+  if (this->GetType() == INTERFACE_LIBRARY
+      && !whiteListedInterfaceProperty(prop))
+    {
+    cmOStringStream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \"" << prop << "\" is not allowed.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
   if (strcmp(prop, "NAME") == 0)
@@ -2571,6 +2631,16 @@ const char *cmTarget::GetProperty(const char* prop,
 {
   if(!prop)
     {
+    return 0;
+    }
+
+  if (this->GetType() == INTERFACE_LIBRARY
+      && !whiteListedInterfaceProperty(prop))
+    {
+    cmOStringStream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \"" << prop << "\" is not allowed.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return 0;
     }
 
