@@ -41,8 +41,6 @@ Variables that Provide Information
    /variable/CMAKE_HOME_DIRECTORY
    /variable/CMAKE_IMPORT_LIBRARY_PREFIX
    /variable/CMAKE_IMPORT_LIBRARY_SUFFIX
-   /variable/CMAKE_JOB_POOL_COMPILE
-   /variable/CMAKE_JOB_POOL_LINK
    /variable/CMAKE_LINK_LIBRARY_SUFFIX
    /variable/CMAKE_MAJOR_VERSION
    /variable/CMAKE_MAKE_PROGRAM

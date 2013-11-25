@@ -573,8 +573,6 @@ cmNinjaTargetGenerator
                          ConvertToNinjaPath(objectDir.c_str()).c_str(),
                          cmLocalGenerator::SHELL);
 
-  this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetTarget(), vars);
-
   this->SetMsvcTargetPdbVariable(vars);
 
   if(this->Makefile->IsOn("CMAKE_EXPORT_COMPILE_COMMANDS"))
@@ -727,15 +725,4 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
 
   // Add as a dependency of all target so that it gets called.
   this->Generator->GetGlobalGenerator()->AddDependencyToAll(output);
-}
-
-void cmNinjaTargetGenerator::addPoolNinjaVariable(const char* pool_property,
-                                                  cmTarget* target,
-                                                  cmNinjaVars& vars)
-{
-    const char* pool = target->GetProperty(pool_property);
-    if (pool)
-      {
-      vars["pool"] = pool;
-      }
 }
