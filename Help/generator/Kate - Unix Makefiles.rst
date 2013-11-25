@@ -1,5 +1,5 @@
 Kate - Unix Makefiles
--------------------------------
+---------------------
 
 Generates Kate project files.
 
