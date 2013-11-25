@@ -204,6 +204,11 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
                                     "", makefile->GetCurrentOutputDirectory());
 
   std::vector<std::string> depends;
+  if (const char *autogenDepends =
+                                target->GetProperty("AUTOGEN_TARGET_DEPENDS"))
+    {
+    cmSystemTools::ExpandListArgument(autogenDepends, depends);
+    }
   std::vector<std::string> toolNames;
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
