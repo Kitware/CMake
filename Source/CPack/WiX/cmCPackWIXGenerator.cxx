@@ -198,18 +198,6 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
       << std::endl);
     }
 
-  if(GetOption("CPACK_WIX_UI_REF") == 0)
-    {
-    std::string defaultRef = "WixUI_InstallDir";
-
-    if(Components.size())
-      {
-      defaultRef = "WixUI_FeatureTree";
-      }
-
-    SetOption("CPACK_WIX_UI_REF", defaultRef.c_str());
-    }
-
   CollectExtensions("CPACK_WIX_EXTENSIONS", candleExtensions);
   CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", candleExtensions);
 
@@ -308,7 +296,6 @@ bool cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   SetOptionIfNotSet("CPACK_WIX_PROGRAM_MENU_FOLDER",
     GetOption("CPACK_PACKAGE_NAME"));
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
-  CopyDefinition(includeFile, "CPACK_WIX_UI_REF");
 
   return true;
 }
@@ -414,43 +401,40 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
-  featureDefinitions.AddAttribute("Display", "expand");
-  featureDefinitions.AddAttribute("ConfigurableDirectory", "INSTALL_ROOT");
-
-  std::string cpackPackageName;
-  if(!RequireOption("CPACK_PACKAGE_NAME", cpackPackageName))
-    {
-    return false;
-    }
-  featureDefinitions.AddAttribute("Title", cpackPackageName);
-
+  featureDefinitions.AddAttribute("Title", Name);
   featureDefinitions.AddAttribute("Level", "1");
-
-  CreateFeatureHierarchy(featureDefinitions);
-
   featureDefinitions.EndElement("Feature");
 
-  if(Components.empty())
+  featureDefinitions.BeginElement("FeatureRef");
+  featureDefinitions.AddAttribute("Id", "ProductFeature");
+
+  std::vector<std::string> cpackPackageExecutablesList;
+  const char *cpackPackageExecutables = GetOption("CPACK_PACKAGE_EXECUTABLES");
+  if(cpackPackageExecutables)
     {
-    AddComponentsToFeature(toplevel, "ProductFeature",
-      directoryDefinitions, fileDefinitions, featureDefinitions);
-    }
-  else
-    {
-      for(std::map<std::string, cmCPackComponent>::const_iterator
-        i = Components.begin(); i != Components.end(); ++i)
+      cmSystemTools::ExpandListArgument(cpackPackageExecutables,
+        cpackPackageExecutablesList);
+      if(cpackPackageExecutablesList.size() % 2 != 0 )
         {
-        cmCPackComponent const& component = i->second;
-
-        std::string componentPath = toplevel;
-        componentPath += "/";
-        componentPath += component.Name;
-
-        AddComponentsToFeature(componentPath, "CM_C_" + component.Name,
-          directoryDefinitions, fileDefinitions, featureDefinitions);
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
+          "<text label>." << std::endl);
+        return false;
         }
     }
 
+  AddDirectoryAndFileDefinitons(
+    toplevel, "INSTALL_ROOT",
+    directoryDefinitions, fileDefinitions, featureDefinitions,
+    cpackPackageExecutablesList);
+
+  if(!CreateStartMenuShortcuts(
+    directoryDefinitions, fileDefinitions, featureDefinitions))
+    {
+      return false;
+    }
+
+  featureDefinitions.EndElement("FeatureRef");
   featureDefinitions.EndElement("Fragment");
   fileDefinitions.EndElement("Fragment");
 
@@ -487,149 +471,6 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     }
 
   wixSources.push_back(mainSourceFilePath);
-
-  return true;
-}
-
-bool cmCPackWIXGenerator::CreateFeatureHierarchy(
-  cmWIXSourceWriter& featureDefinitions)
-{
-  for(std::map<std::string, cmCPackComponentGroup>::const_iterator
-    i = ComponentGroups.begin(); i != ComponentGroups.end(); ++i)
-    {
-    cmCPackComponentGroup const& group = i->second;
-    if(group.ParentGroup == 0)
-      {
-      if(!EmitFeatureForComponentGroup(featureDefinitions, group))
-        {
-        return false;
-        }
-      }
-    }
-
-  for(std::map<std::string, cmCPackComponent>::const_iterator
-    i = Components.begin(); i != Components.end(); ++i)
-    {
-    cmCPackComponent const& component = i->second;
-
-    if(!component.Group)
-      {
-      if(!EmitFeatureForComponent(featureDefinitions, component))
-        {
-        return false;
-        }
-      }
-    }
-
-  return true;
-}
-
-bool cmCPackWIXGenerator::EmitFeatureForComponentGroup(
-  cmWIXSourceWriter& featureDefinitions,
-  cmCPackComponentGroup const& group)
-{
-  featureDefinitions.BeginElement("Feature");
-  featureDefinitions.AddAttribute("Id", "CM_G_" + group.Name);
-
-  if(group.IsExpandedByDefault)
-    {
-    featureDefinitions.AddAttribute("Display", "expand");
-    }
-
-  featureDefinitions.AddAttributeUnlessEmpty(
-    "Title", group.DisplayName);
-
-  featureDefinitions.AddAttributeUnlessEmpty(
-    "Description", group.Description);
-
-  for(std::vector<cmCPackComponentGroup*>::const_iterator
-    i = group.Subgroups.begin(); i != group.Subgroups.end(); ++i)
-    {
-    if(!EmitFeatureForComponentGroup(featureDefinitions, **i))
-      {
-      return false;
-      }
-    }
-
-  for(std::vector<cmCPackComponent*>::const_iterator
-    i = group.Components.begin(); i != group.Components.end(); ++i)
-    {
-    if(!EmitFeatureForComponent(featureDefinitions, **i))
-      {
-      return false;
-      }
-    }
-
-  featureDefinitions.EndElement("Feature");
-
-  return true;
-}
-
-bool cmCPackWIXGenerator::EmitFeatureForComponent(
-  cmWIXSourceWriter& featureDefinitions,
-  cmCPackComponent const& component)
-{
-  featureDefinitions.BeginElement("Feature");
-  featureDefinitions.AddAttribute("Id", "CM_C_" + component.Name);
-
-  featureDefinitions.AddAttributeUnlessEmpty(
-    "Title", component.DisplayName);
-
-  featureDefinitions.AddAttributeUnlessEmpty(
-    "Description", component.Description);
-
-  if(component.IsRequired)
-    {
-    featureDefinitions.AddAttribute("Absent", "disallow");
-    }
-
-  if(component.IsHidden)
-    {
-    featureDefinitions.AddAttribute("Display", "hidden");
-    }
-
-  featureDefinitions.EndElement("Feature");
-
-  return true;
-}
-
-bool cmCPackWIXGenerator::AddComponentsToFeature(
-  std::string const& rootPath,
-  std::string const& featureId,
-  cmWIXSourceWriter& directoryDefinitions,
-  cmWIXSourceWriter& fileDefinitions,
-  cmWIXSourceWriter& featureDefinitions)
-{
-  featureDefinitions.BeginElement("FeatureRef");
-  featureDefinitions.AddAttribute("Id", featureId);
-
-  std::vector<std::string> cpackPackageExecutablesList;
-  const char *cpackPackageExecutables = GetOption("CPACK_PACKAGE_EXECUTABLES");
-  if(cpackPackageExecutables)
-    {
-      cmSystemTools::ExpandListArgument(cpackPackageExecutables,
-        cpackPackageExecutablesList);
-      if(cpackPackageExecutablesList.size() % 2 != 0 )
-        {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-          "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
-          "<text label>." << std::endl);
-        return false;
-        }
-    }
-
-  AddDirectoryAndFileDefinitons(
-    rootPath, "INSTALL_ROOT",
-    directoryDefinitions, fileDefinitions, featureDefinitions,
-    cpackPackageExecutablesList);
-
-  if(!CreateStartMenuShortcuts(
-    directoryDefinitions, fileDefinitions, featureDefinitions))
-    {
-      return false;
-    }
-
-  featureDefinitions.EndElement("FeatureRef");
 
   return true;
 }
