@@ -674,3 +674,9 @@ int main()
   return a;
 }
 #endif
+
+#ifdef TEST_KWSYS_STL_HAS_WSTRING
+#include <string>
+void f(std ::wstring*) {}
+int main() { return 0; }
+#endif
