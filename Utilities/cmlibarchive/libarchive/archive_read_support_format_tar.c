@@ -2475,20 +2475,16 @@ tar_atol256(const char *_p, size_t char_cnt)
 	upper_limit = INT64_MAX / 256;
 	lower_limit = INT64_MIN / 256;
 
-	/* Pad with 1 or 0 bits, depending on sign. */
+	/* Sign-extend the 7-bit value to 64 bits. */
 	if ((0x40 & *p) == 0x40)
-		l = (int64_t)-1;
+		l = ~((int64_t)0x3f) | *p++;
 	else
-		l = 0;
-	l = (l << 6) | (0x3f & *p++);
+		l = 0x3f & *p++;
 	while (--char_cnt > 0) {
-		if (l > upper_limit) {
-			l = INT64_MAX; /* Truncate on overflow */
-			break;
-		} else if (l < lower_limit) {
-			l = INT64_MIN;
-			break;
-		}
+		if (l > upper_limit)
+			return (INT64_MAX); /* Truncate on overflow */
+		else if (l < lower_limit)
+			return (INT64_MIN);
 		l = (l << 8) | (0xff & (int64_t)*p++);
 	}
 	return (l);
