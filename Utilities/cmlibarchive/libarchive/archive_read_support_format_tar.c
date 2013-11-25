@@ -2412,9 +2412,10 @@ tar_atol(const char *p, size_t char_cnt)
 static int64_t
 tar_atol_base_n(const char *p, size_t char_cnt, int base)
 {
-	int64_t	l, limit, last_digit_limit;
+	int64_t	l, maxval, limit, last_digit_limit;
 	int digit, sign;
 
+	maxval = INT64_MAX;
 	limit = INT64_MAX / base;
 	last_digit_limit = INT64_MAX % base;
 
@@ -2431,6 +2432,10 @@ tar_atol_base_n(const char *p, size_t char_cnt, int base)
 		sign = -1;
 		p++;
 		char_cnt--;
+
+		maxval = INT64_MIN;
+		limit = -(INT64_MIN / base);
+		last_digit_limit = INT64_MIN % base;
 	}
 
 	l = 0;
@@ -2438,8 +2443,7 @@ tar_atol_base_n(const char *p, size_t char_cnt, int base)
 		digit = *p - '0';
 		while (digit >= 0 && digit < base  && char_cnt != 0) {
 			if (l>limit || (l == limit && digit > last_digit_limit)) {
-				l = INT64_MAX; /* Truncate on overflow. */
-				break;
+				return maxval; /* Truncate on overflow. */
 			}
 			l = (l * base) + digit;
 			digit = *++p - '0';
@@ -2462,32 +2466,56 @@ tar_atol10(const char *p, size_t char_cnt)
 }
 
 /*
- * Parse a base-256 integer.  This is just a straight signed binary
- * value in big-endian order, except that the high-order bit is
- * ignored.
+ * Parse a base-256 integer.  This is just a variable-length
+ * twos-complement signed binary value in big-endian order, except
+ * that the high-order bit is ignored.  The values here can be up to
+ * 12 bytes, so we need to be careful about overflowing 64-bit
+ * (8-byte) integers.
+ *
+ * This code unashamedly assumes that the local machine uses 8-bit
+ * bytes and twos-complement arithmetic.
  */
 static int64_t
 tar_atol256(const char *_p, size_t char_cnt)
 {
-	int64_t	l, upper_limit, lower_limit;
+	uint64_t l;
 	const unsigned char *p = (const unsigned char *)_p;
+	unsigned char c, neg;
 
-	upper_limit = INT64_MAX / 256;
-	lower_limit = INT64_MIN / 256;
-
-	/* Sign-extend the 7-bit value to 64 bits. */
-	if ((0x40 & *p) == 0x40)
-		l = ~((int64_t)0x3f) | *p++;
-	else
-		l = 0x3f & *p++;
-	while (--char_cnt > 0) {
-		if (l > upper_limit)
-			return (INT64_MAX); /* Truncate on overflow */
-		else if (l < lower_limit)
-			return (INT64_MIN);
-		l = (l << 8) | (0xff & (int64_t)*p++);
+	/* Extend 7-bit 2s-comp to 8-bit 2s-comp, decide sign. */
+	c = *p;
+	if (c & 0x40) {
+		neg = 0xff;
+		c |= 0x80;
+		l = ~0ULL;
+	} else {
+		neg = 0;
+		c &= 0x7f;
+		l = 0;
 	}
-	return (l);
+
+	/* If more than 8 bytes, check that we can ignore
+	 * high-order bits without overflow. */
+	while (char_cnt > sizeof(int64_t)) {
+		--char_cnt;
+		if (c != neg)
+			return neg ? INT64_MIN : INT64_MAX;
+		c = *++p;
+	}
+
+	/* c is first byte that fits; if sign mismatch, return overflow */
+	if ((c ^ neg) & 0x80) {
+		return neg ? INT64_MIN : INT64_MAX;
+	}
+
+	/* Accumulate remaining bytes. */
+	while (--char_cnt > 0) {
+		l = (l << 8) | c;
+		c = *++p;
+	}
+	l = (l << 8) | c;
+	/* Return signed twos-complement value. */
+	return (int64_t)(l);
 }
 
 /*
