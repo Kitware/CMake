@@ -237,7 +237,15 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     it != configs.end(); ++it)
     {
     std::vector<std::string> tlibs;
-    depender->GetDirectLinkLibraries(it->c_str(), tlibs, depender);
+    if (depender->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      // For INTERFACE_LIBRARY depend on the interface instead.
+      depender->GetInterfaceLinkLibraries(it->c_str(), tlibs, depender);
+      }
+    else
+      {
+      depender->GetDirectLinkLibraries(it->c_str(), tlibs, depender);
+      }
     // A target should not depend on itself.
     emitted.insert(depender->GetName());
     for(std::vector<std::string>::const_iterator lib = tlibs.begin();

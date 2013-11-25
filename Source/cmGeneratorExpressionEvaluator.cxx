@@ -996,7 +996,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
     if (!prop)
       {
-      if (target->IsImported())
+      if (target->IsImported()
+          || target->GetType() == cmTarget::INTERFACE_LIBRARY)
         {
         return linkedTargetsContent;
         }

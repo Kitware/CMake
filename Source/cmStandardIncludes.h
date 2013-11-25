@@ -428,6 +428,12 @@ struct cmStrCmp {
     return strcmp(input, m_test) == 0;
   }
 
+  // For use with binary_search
+  bool operator()(const char *str1, const char *str2)
+  {
+    return strcmp(str1, str2) < 0;
+  }
+
 private:
   const char *m_test;
 };
