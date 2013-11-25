@@ -320,16 +320,32 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
 
   cmOStringStream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
-       li != cmdLines.end(); ++li) {
-    if (li != cmdLines.begin()) {
-      cmd << " && ";
+       li != cmdLines.end(); ++li)
 #ifdef _WIN32
-    } else if (cmdLines.size() > 1) {
-      cmd << "cmd.exe /c ";
-#endif
-    }
+    {
+    if (li != cmdLines.begin())
+      {
+      cmd << " && ";
+      }
+    else if (cmdLines.size() > 1)
+      {
+      cmd << "cmd.exe /C \"";
+      }
     cmd << *li;
-  }
+    }
+  if (cmdLines.size() > 1)
+    {
+    cmd << "\"";
+    }
+#else
+    {
+    if (li != cmdLines.begin())
+      {
+      cmd << " && ";
+      }
+    cmd << *li;
+    }
+#endif
   return cmd.str();
 }
 
