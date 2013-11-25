@@ -24,10 +24,6 @@ All Generators
    /generator/Eclipse CDT4 - Unix Makefiles
    /generator/KDevelop3
    /generator/KDevelop3 - Unix Makefiles
-   /generator/Kate - MinGW Makefiles
-   /generator/Kate - Ninja
-   /generator/Kate - NMake Makefiles
-   /generator/Kate - Unix Makefiles
    /generator/MinGW Makefiles
    /generator/MSYS Makefiles
    /generator/Ninja
