@@ -53,8 +53,6 @@ void cmLocalNinjaGenerator::Generate()
     {
     this->WriteBuildFileTop();
 
-    this->WritePools(this->GetRulesFileStream());
-
     const std::string showIncludesPrefix = this->GetMakefile()
              ->GetSafeDefinition("CMAKE_CL_SHOWINCLUDES_PREFIX");
     if (!showIncludesPrefix.empty())
@@ -200,39 +198,6 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
     << "# Configuration: " << this->ConfigName << std::endl
     ;
   cmGlobalNinjaGenerator::WriteDivider(os);
-}
-
-void cmLocalNinjaGenerator::WritePools(std::ostream& os)
-{
-  cmGlobalNinjaGenerator::WriteDivider(os);
-
-  const char* jobpools = this->GetCMakeInstance()
-                               ->GetProperty("JOB_POOLS", cmProperty::GLOBAL);
-  if (jobpools)
-    {
-    cmGlobalNinjaGenerator::WriteComment(os,
-                            "Pools defined by global property JOB_POOLS");
-    std::vector<std::string> pools;
-    cmSystemTools::ExpandListArgument(jobpools, pools);
-    for (size_t i = 0; i < pools.size(); ++i)
-      {
-      const std::string pool = pools[i];
-      const std::string::size_type eq = pool.find("=");
-      unsigned int jobs;
-      if (eq != std::string::npos &&
-          sscanf(pool.c_str() + eq, "=%u", &jobs) == 1)
-        {
-        os << "pool " << pool.substr(0, eq) << std::endl;
-        os << "  depth = " << jobs << std::endl;
-        os << std::endl;
-        }
-      else
-        {
-        cmSystemTools::Error("Invalid pool defined by property 'JOB_POOLS': ",
-                             pool.c_str());
-        }
-      }
-    }
 }
 
 void cmLocalNinjaGenerator::WriteNinjaFilesInclusion(std::ostream& os)
