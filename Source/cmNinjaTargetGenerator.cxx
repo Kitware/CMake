@@ -360,10 +360,11 @@ cmNinjaTargetGenerator
 
   cmMakefile* mf = this->GetMakefile();
 
-  const bool usingMSVC = std::string("MSVC") ==
-                       (mf->GetDefinition("CMAKE_C_COMPILER_ID") ?
-                    mf->GetSafeDefinition("CMAKE_C_COMPILER_ID") :
-                    mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"));
+  const std::string cId = mf->GetDefinition("CMAKE_C_COMPILER_ID")
+                          ? mf->GetSafeDefinition("CMAKE_C_COMPILER_ID")
+                          : mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
+
+  const bool usingMSVC = (cId == "MSVC" || cId == "Intel");
 
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string deptype;
