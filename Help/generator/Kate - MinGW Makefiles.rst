@@ -1,5 +1,5 @@
-Kate - Unix Makefiles
--------------------------------
+Kate - MinGW Makefiles
+----------------------
 
 Generates Kate project files.
 

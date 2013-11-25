@@ -1,5 +1,5 @@
-Kate - Unix Makefiles
--------------------------------
+Kate - Ninja
+------------
 
 Generates Kate project files.
 
