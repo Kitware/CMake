@@ -312,6 +312,9 @@ inside out, e.g. ``${outer_${inner_variable}_variable}``.
 The `Variables`_ section documents the scope of variable names
 and how their values are set.
 
+An *environment variable reference* has the form ``$ENV{VAR}`` and
+is evaluated in the same contexts as a normal variable reference.
+
 Comments
 --------
 
