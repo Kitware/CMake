@@ -186,13 +186,12 @@ namespace KWSYS_NAMESPACE
 DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname)
 {
   DynamicLoader::LibraryHandle lh;
-#ifdef UNICODE
-  wchar_t libn[MB_CUR_MAX];
-  mbstowcs(libn, libname, MB_CUR_MAX);
-  lh = LoadLibrary(libn);
-#else
-  lh = LoadLibrary(libname);
-#endif
+  int length = MultiByteToWideChar(CP_UTF8, 0, libname, -1, NULL, 0);
+  wchar_t* wchars = new wchar_t[length+1];
+  wchars[0] = '\0';
+  MultiByteToWideChar(CP_UTF8, 0, libname, -1, wchars, length);
+  lh = LoadLibraryW(wchars);
+  delete [] wchars;
   return lh;
 }
 
@@ -238,13 +237,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
 #else
   const char *rsym = sym;
 #endif
-#ifdef UNICODE
-  wchar_t wsym[MB_CUR_MAX];
-  mbstowcs(wsym, rsym, MB_CUR_MAX);
-  result = GetProcAddress(lib, wsym);
-#else
   result = (void*)GetProcAddress(lib, rsym);
-#endif
 #if defined(__BORLANDC__) || defined(__WATCOMC__)
   delete[] rsym;
 #endif
