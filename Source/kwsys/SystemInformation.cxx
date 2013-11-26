@@ -253,7 +253,7 @@ static bool call_cpuid(int select, int result[4])
     _asm {
 #ifdef CPUID_AWARE_COMPILER
       ; we must push/pop the registers <<CPUID>> writes to, as the
-      ; optimiser doesn't know about <<CPUID>>, and so doesn't expect
+      ; optimiser does not know about <<CPUID>>, and so does not expect
       ; these registers to change.
       push eax
       push ebx
@@ -2454,8 +2454,8 @@ bool SystemInformationImplementation::RetrieveCPUClockSpeed()
   if (!retrieved)
     {
     HKEY hKey = NULL;
-    LONG err = RegOpenKeyEx(HKEY_LOCAL_MACHINE,
-      "HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0,
+    LONG err = RegOpenKeyExW(HKEY_LOCAL_MACHINE,
+      L"HARDWARE\\DESCRIPTION\\System\\CentralProcessor\\0", 0,
       KEY_READ, &hKey);
 
     if (ERROR_SUCCESS == err)
@@ -2464,7 +2464,7 @@ bool SystemInformationImplementation::RetrieveCPUClockSpeed()
       DWORD data = 0;
       DWORD dwSize = sizeof(DWORD);
 
-      err = RegQueryValueEx(hKey, "~MHz", 0,
+      err = RegQueryValueExW(hKey, L"~MHz", 0,
         &dwType, (LPBYTE) &data, &dwSize);
 
       if (ERROR_SUCCESS == err)
@@ -5017,19 +5017,19 @@ bool SystemInformationImplementation::QueryOSInformation()
 
   this->OSName = "Windows";
 
-  OSVERSIONINFOEX osvi;
+  OSVERSIONINFOEXW osvi;
   BOOL bIsWindows64Bit;
   BOOL bOsVersionInfoEx;
   char operatingSystem[256];
 
   // Try calling GetVersionEx using the OSVERSIONINFOEX structure.
-  ZeroMemory (&osvi, sizeof (OSVERSIONINFOEX));
-  osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEX);
-  bOsVersionInfoEx = GetVersionEx ((OSVERSIONINFO *) &osvi);
+  ZeroMemory (&osvi, sizeof (OSVERSIONINFOEXW));
+  osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEXW);
+  bOsVersionInfoEx = GetVersionExW ((OSVERSIONINFOW*)&osvi);
   if (!bOsVersionInfoEx)
     {
-    osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFO);
-    if (!GetVersionEx ((OSVERSIONINFO *) &osvi))
+    osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOW);
+    if (!GetVersionExW((OSVERSIONINFOW*)&osvi))
       {
       return false;
       }
@@ -5115,19 +5115,19 @@ bool SystemInformationImplementation::QueryOSInformation()
 #endif        // VER_NT_WORKSTATION
         {
         HKEY hKey;
-        char szProductType[80];
+        wchar_t szProductType[80];
         DWORD dwBufLen;
 
         // Query the registry to retrieve information.
-        RegOpenKeyEx (HKEY_LOCAL_MACHINE, "SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey);
-        RegQueryValueEx (hKey, "ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
+        RegOpenKeyExW(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\ProductOptions", 0, KEY_QUERY_VALUE, &hKey);
+        RegQueryValueExW(hKey, L"ProductType", NULL, NULL, (LPBYTE) szProductType, &dwBufLen);
         RegCloseKey (hKey);
 
-        if (lstrcmpi ("WINNT", szProductType) == 0)
+        if (lstrcmpiW(L"WINNT", szProductType) == 0)
           {
           this->OSRelease += " Professional";
           }
-        if (lstrcmpi ("LANMANNT", szProductType) == 0)
+        if (lstrcmpiW(L"LANMANNT", szProductType) == 0)
           {
           // Decide between Windows 2000 Advanced Server and Windows .NET Enterprise Server.
           if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1)
@@ -5139,7 +5139,7 @@ bool SystemInformationImplementation::QueryOSInformation()
             this->OSRelease += " Server";
             }
           }
-        if (lstrcmpi ("SERVERNT", szProductType) == 0)
+        if (lstrcmpiW(L"SERVERNT", szProductType) == 0)
           {
           // Decide between Windows 2000 Advanced Server and Windows .NET Enterprise Server.
           if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1)
@@ -5172,7 +5172,7 @@ bool SystemInformationImplementation::QueryOSInformation()
         LPFNPROC DLLProc;
 
         // Load the Kernel32 DLL.
-        hKernelDLL = LoadLibrary ("kernel32");
+        hKernelDLL = LoadLibraryW(L"kernel32");
         if (hKernelDLL != NULL)  {
           // Only XP and .NET Server support IsWOW64Process so... Load dynamically!
           DLLProc = (LPFNPROC) GetProcAddress (hKernelDLL, "IsWow64Process");

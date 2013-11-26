@@ -24,6 +24,8 @@
 
 // Required for va_list
 #include <stdarg.h>
+// Required for FILE*
+#include <stdio.h>
 #if @KWSYS_NAMESPACE@_STL_HAVE_STD && !defined(va_list)
 // Some compilers move va_list into the std namespace and there is no way to
 // tell that this has been done. Playing with things being included before or
@@ -41,10 +43,6 @@ namespace @KWSYS_NAMESPACE@
   typedef @KWSYS_NAMESPACE@_VA_LIST::hack_va_list va_list;
 }
 #endif // va_list
-
-#if defined( _MSC_VER )
-typedef unsigned short mode_t;
-#endif
 
 /* Define these macros temporarily to keep the code readable.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
@@ -497,6 +495,11 @@ public:
    */
 
   /**
+   * Open a file considering unicode.
+   */
+  static FILE* Fopen(const char* file, const char* mode);
+
+  /**
    * Make a new directory if it is not there.  This function
    * can make a full path even if none of the directories existed
    * prior to calling this function.  
@@ -683,6 +686,10 @@ public:
    * Return file's creation time (Win32: works only for NTFS, not FAT)
    */
   static long int CreationTime(const char* filename);
+
+  #if defined( _MSC_VER )
+  typedef unsigned short mode_t;
+  #endif
 
   /**
    * Get and set permissions of the file.
