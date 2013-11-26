@@ -228,11 +228,6 @@ void cmInstallCommandIncludesArgument::Parse(
   for ( ; it != args->end(); ++it)
     {
     std::string dir = *it;
-    if (!cmSystemTools::FileIsFullPath(it->c_str())
-        && cmGeneratorExpression::Find(*it) == std::string::npos)
-      {
-      dir = "$<INSTALL_PREFIX>/" + dir;
-      }
     cmSystemTools::ConvertToUnixSlashes(dir);
     this->IncludeDirs.push_back(dir);
     }

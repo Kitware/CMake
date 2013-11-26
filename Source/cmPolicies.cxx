@@ -306,6 +306,11 @@ cmPolicies::cmPolicies()
     CMP0040, "CMP0040",
     "The target in the TARGET signature of add_custom_command() must exist.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0041, "CMP0041",
+    "Error on relative include with generator expression.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

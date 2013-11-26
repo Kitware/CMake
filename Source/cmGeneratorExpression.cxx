@@ -245,7 +245,7 @@ static void prefixItems(const std::string &content, std::string &result,
     result += sep;
     sep = ";";
     if (!cmSystemTools::FileIsFullPath(ei->c_str())
-        && cmGeneratorExpression::Find(*ei) == std::string::npos)
+        && cmGeneratorExpression::Find(*ei) != 0)
       {
       result += prefix;
       }
