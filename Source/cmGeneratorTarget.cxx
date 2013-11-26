@@ -698,8 +698,8 @@ bool cmStrictTargetComparison::operator()(cmTarget *t1, cmTarget *t2) const
   int nameResult = strcmp(t1->GetName(), t2->GetName());
   if (nameResult == 0)
     {
-    return strcmp(t1->GetMakefile()->GetStartDirectory(),
-                  t2->GetMakefile()->GetStartDirectory()) < 0;
+    return strcmp(t1->GetMakefile()->GetStartOutputDirectory(),
+                  t2->GetMakefile()->GetStartOutputDirectory()) < 0;
     }
   return nameResult < 0;
 }
