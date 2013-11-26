@@ -198,6 +198,18 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
       << std::endl);
     }
 
+  if(GetOption("CPACK_WIX_UI_REF") == 0)
+    {
+    std::string defaultRef = "WixUI_InstallDir";
+
+    if(Components.size())
+      {
+      defaultRef = "WixUI_FeatureTree";
+      }
+
+    SetOption("CPACK_WIX_UI_REF", defaultRef.c_str());
+    }
+
   CollectExtensions("CPACK_WIX_EXTENSIONS", candleExtensions);
   CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", candleExtensions);
 
@@ -296,6 +308,7 @@ bool cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
   SetOptionIfNotSet("CPACK_WIX_PROGRAM_MENU_FOLDER",
     GetOption("CPACK_PACKAGE_NAME"));
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
+  CopyDefinition(includeFile, "CPACK_WIX_UI_REF");
 
   return true;
 }
@@ -401,40 +414,78 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.BeginElement("Feature");
   featureDefinitions.AddAttribute("Id", "ProductFeature");
-  featureDefinitions.AddAttribute("Title", Name);
+  featureDefinitions.AddAttribute("Display", "expand");
+  featureDefinitions.AddAttribute("ConfigurableDirectory", "INSTALL_ROOT");
+
+  std::string cpackPackageName;
+  if(!RequireOption("CPACK_PACKAGE_NAME", cpackPackageName))
+    {
+    return false;
+    }
+  featureDefinitions.AddAttribute("Title", cpackPackageName);
+
   featureDefinitions.AddAttribute("Level", "1");
+
+  CreateFeatureHierarchy(featureDefinitions);
+
   featureDefinitions.EndElement("Feature");
 
-  featureDefinitions.BeginElement("FeatureRef");
-  featureDefinitions.AddAttribute("Id", "ProductFeature");
+  bool hasShortcuts = false;
 
-  std::vector<std::string> cpackPackageExecutablesList;
-  const char *cpackPackageExecutables = GetOption("CPACK_PACKAGE_EXECUTABLES");
-  if(cpackPackageExecutables)
+  shortcut_map_t globalShortcuts;
+  if(Components.empty())
     {
-      cmSystemTools::ExpandListArgument(cpackPackageExecutables,
-        cpackPackageExecutablesList);
-      if(cpackPackageExecutablesList.size() % 2 != 0 )
+    AddComponentsToFeature(std::string(), toplevel, "ProductFeature",
+      directoryDefinitions, fileDefinitions, featureDefinitions,
+      globalShortcuts);
+    if(globalShortcuts.size())
+      {
+      hasShortcuts = true;
+      }
+    }
+  else
+    {
+    for(std::map<std::string, cmCPackComponent>::const_iterator
+      i = Components.begin(); i != Components.end(); ++i)
+      {
+      cmCPackComponent const& component = i->second;
+
+      std::string componentPath = toplevel;
+      componentPath += "/";
+      componentPath += component.Name;
+
+      std::string componentFeatureId = "CM_C_" + component.Name;
+
+      shortcut_map_t featureShortcuts;
+      AddComponentsToFeature(component.Name,
+        componentPath, componentFeatureId,
+        directoryDefinitions, fileDefinitions,
+        featureDefinitions, featureShortcuts);
+      if(featureShortcuts.size())
         {
-        cmCPackLogger(cmCPackLog::LOG_ERROR,
-          "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
-          "<text label>." << std::endl);
-        return false;
+        hasShortcuts = true;
         }
+
+      if(featureShortcuts.size())
+        {
+        if(!CreateStartMenuShortcuts(component.Name, componentFeatureId,
+          featureShortcuts, fileDefinitions, featureDefinitions))
+          {
+          return false;
+          }
+        }
+      }
     }
 
-  AddDirectoryAndFileDefinitons(
-    toplevel, "INSTALL_ROOT",
-    directoryDefinitions, fileDefinitions, featureDefinitions,
-    cpackPackageExecutablesList);
-
-  if(!CreateStartMenuShortcuts(
-    directoryDefinitions, fileDefinitions, featureDefinitions))
+  if(hasShortcuts)
     {
+    if(!CreateStartMenuShortcuts(std::string(), "ProductFeature",
+        globalShortcuts, fileDefinitions, featureDefinitions))
+      {
       return false;
+      }
     }
 
-  featureDefinitions.EndElement("FeatureRef");
   featureDefinitions.EndElement("Fragment");
   fileDefinitions.EndElement("Fragment");
 
@@ -444,6 +495,12 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     }
 
   directoryDefinitions.EndElement("Directory");
+
+  if(hasShortcuts)
+    {
+    CreateStartMenuFolder(directoryDefinitions);
+    }
+
   directoryDefinitions.EndElement("Directory");
   directoryDefinitions.EndElement("Fragment");
 
@@ -475,15 +532,154 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   return true;
 }
 
-bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
+bool cmCPackWIXGenerator::CreateFeatureHierarchy(
+  cmWIXSourceWriter& featureDefinitions)
+{
+  for(std::map<std::string, cmCPackComponentGroup>::const_iterator
+    i = ComponentGroups.begin(); i != ComponentGroups.end(); ++i)
+    {
+    cmCPackComponentGroup const& group = i->second;
+    if(group.ParentGroup == 0)
+      {
+      if(!EmitFeatureForComponentGroup(featureDefinitions, group))
+        {
+        return false;
+        }
+      }
+    }
+
+  for(std::map<std::string, cmCPackComponent>::const_iterator
+    i = Components.begin(); i != Components.end(); ++i)
+    {
+    cmCPackComponent const& component = i->second;
+
+    if(!component.Group)
+      {
+      if(!EmitFeatureForComponent(featureDefinitions, component))
+        {
+        return false;
+        }
+      }
+    }
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::EmitFeatureForComponentGroup(
+  cmWIXSourceWriter& featureDefinitions,
+  cmCPackComponentGroup const& group)
+{
+  featureDefinitions.BeginElement("Feature");
+  featureDefinitions.AddAttribute("Id", "CM_G_" + group.Name);
+
+  if(group.IsExpandedByDefault)
+    {
+    featureDefinitions.AddAttribute("Display", "expand");
+    }
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Title", group.DisplayName);
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Description", group.Description);
+
+  for(std::vector<cmCPackComponentGroup*>::const_iterator
+    i = group.Subgroups.begin(); i != group.Subgroups.end(); ++i)
+    {
+    if(!EmitFeatureForComponentGroup(featureDefinitions, **i))
+      {
+      return false;
+      }
+    }
+
+  for(std::vector<cmCPackComponent*>::const_iterator
+    i = group.Components.begin(); i != group.Components.end(); ++i)
+    {
+    if(!EmitFeatureForComponent(featureDefinitions, **i))
+      {
+      return false;
+      }
+    }
+
+  featureDefinitions.EndElement("Feature");
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::EmitFeatureForComponent(
+  cmWIXSourceWriter& featureDefinitions,
+  cmCPackComponent const& component)
+{
+  featureDefinitions.BeginElement("Feature");
+  featureDefinitions.AddAttribute("Id", "CM_C_" + component.Name);
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Title", component.DisplayName);
+
+  featureDefinitions.AddAttributeUnlessEmpty(
+    "Description", component.Description);
+
+  if(component.IsRequired)
+    {
+    featureDefinitions.AddAttribute("Absent", "disallow");
+    }
+
+  if(component.IsHidden)
+    {
+    featureDefinitions.AddAttribute("Display", "hidden");
+    }
+
+  featureDefinitions.EndElement("Feature");
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::AddComponentsToFeature(
+  std::string const& cpackComponentName,
+  std::string const& rootPath,
+  std::string const& featureId,
   cmWIXSourceWriter& directoryDefinitions,
+  cmWIXSourceWriter& fileDefinitions,
+  cmWIXSourceWriter& featureDefinitions,
+  shortcut_map_t& shortcutMap)
+{
+  featureDefinitions.BeginElement("FeatureRef");
+  featureDefinitions.AddAttribute("Id", featureId);
+
+  std::vector<std::string> cpackPackageExecutablesList;
+  const char *cpackPackageExecutables = GetOption("CPACK_PACKAGE_EXECUTABLES");
+  if(cpackPackageExecutables)
+    {
+      cmSystemTools::ExpandListArgument(cpackPackageExecutables,
+        cpackPackageExecutablesList);
+      if(cpackPackageExecutablesList.size() % 2 != 0 )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "CPACK_PACKAGE_EXECUTABLES should contain pairs of <executable> and "
+          "<text label>." << std::endl);
+        return false;
+        }
+    }
+
+  AddDirectoryAndFileDefinitons(
+    rootPath, "INSTALL_ROOT",
+    directoryDefinitions, fileDefinitions, featureDefinitions,
+    cpackPackageExecutablesList, shortcutMap);
+
+  featureDefinitions.EndElement("FeatureRef");
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
+  std::string const& cpackComponentName,
+  std::string const& featureId,
+  shortcut_map_t& shortcutMap,
   cmWIXSourceWriter& fileDefinitions,
   cmWIXSourceWriter& featureDefinitions)
 {
-  if(shortcutMap.empty())
-    {
-      return true;
-    }
+  featureDefinitions.BeginElement("FeatureRef");
+  featureDefinitions.AddAttribute("Id", featureId);
 
   std::string cpackVendor;
   if(!RequireOption("CPACK_PACKAGE_VENDOR", cpackVendor))
@@ -497,10 +693,19 @@ bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
     return false;
     }
 
+  std::string idSuffix;
+  if(!cpackComponentName.empty())
+    {
+      idSuffix += "_";
+      idSuffix += cpackComponentName;
+    }
+
+  std::string componentId = "CM_SHORTCUT" + idSuffix;
+
   fileDefinitions.BeginElement("DirectoryRef");
   fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
   fileDefinitions.BeginElement("Component");
-  fileDefinitions.AddAttribute("Id", "SHORTCUT");
+  fileDefinitions.AddAttribute("Id", componentId);
   fileDefinitions.AddAttribute("Guid", "*");
 
   for(shortcut_map_t::const_iterator
@@ -522,10 +727,13 @@ bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
     fileDefinitions.EndElement("Shortcut");
     }
 
-  CreateUninstallShortcut(cpackPackageName, fileDefinitions);
+  if(cpackComponentName.empty())
+    {
+    CreateUninstallShortcut(cpackPackageName, fileDefinitions);
+    }
 
   fileDefinitions.BeginElement("RemoveFolder");
-  fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+  fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER" + idSuffix);
   fileDefinitions.AddAttribute("On", "uninstall");
   fileDefinitions.EndElement("RemoveFolder");
 
@@ -535,7 +743,15 @@ bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
   fileDefinitions.BeginElement("RegistryValue");
   fileDefinitions.AddAttribute("Root", "HKCU");
   fileDefinitions.AddAttribute("Key", registryKey);
-  fileDefinitions.AddAttribute("Name", "installed");
+
+  std::string valueName;
+  if(!cpackComponentName.empty())
+    {
+      valueName = cpackComponentName + "_";
+    }
+  valueName += "installed";
+
+  fileDefinitions.AddAttribute("Name", valueName);
   fileDefinitions.AddAttribute("Type", "integer");
   fileDefinitions.AddAttribute("Value", "1");
   fileDefinitions.AddAttribute("KeyPath", "yes");
@@ -545,19 +761,10 @@ bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
   fileDefinitions.EndElement("DirectoryRef");
 
   featureDefinitions.BeginElement("ComponentRef");
-  featureDefinitions.AddAttribute("Id", "SHORTCUT");
+  featureDefinitions.AddAttribute("Id", componentId);
   featureDefinitions.EndElement("ComponentRef");
 
-  directoryDefinitions.BeginElement("Directory");
-  directoryDefinitions.AddAttribute("Id", "ProgramMenuFolder");
-
-  directoryDefinitions.BeginElement("Directory");
-  directoryDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
-  const char *startMenuFolder = GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
-  directoryDefinitions.AddAttribute("Name", startMenuFolder);
-  directoryDefinitions.EndElement("Directory");
-
-  directoryDefinitions.EndElement("Directory");
+  featureDefinitions.EndElement("FeatureRef");
 
   return true;
 }
@@ -628,7 +835,8 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmWIXSourceWriter& directoryDefinitions,
   cmWIXSourceWriter& fileDefinitions,
   cmWIXSourceWriter& featureDefinitions,
-  const std::vector<std::string>& packageExecutables)
+  const std::vector<std::string>& packageExecutables,
+  shortcut_map_t& shortcutMap)
 {
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
@@ -662,7 +870,8 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         directoryDefinitions,
         fileDefinitions,
         featureDefinitions,
-        packageExecutables);
+        packageExecutables,
+        shortcutMap);
 
       directoryDefinitions.EndElement("Directory");
       }
@@ -921,4 +1130,19 @@ void cmCPackWIXGenerator::AddCustomFlags(
     {
       stream << " " << QuotePath(*i);
     }
+}
+
+void cmCPackWIXGenerator::CreateStartMenuFolder(
+    cmWIXSourceWriter& directoryDefinitions)
+{
+  directoryDefinitions.BeginElement("Directory");
+  directoryDefinitions.AddAttribute("Id", "ProgramMenuFolder");
+
+  directoryDefinitions.BeginElement("Directory");
+  directoryDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+  const char *startMenuFolder = GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER");
+  directoryDefinitions.AddAttribute("Name", startMenuFolder);
+  directoryDefinitions.EndElement("Directory");
+
+  directoryDefinitions.EndElement("Directory");
 }
