@@ -94,6 +94,7 @@ public:
     CMP0039, ///< Utility targets may not have link dependencies
     CMP0040, ///< The target in the TARGET signature of
     /// add_custom_command() must exist.
+    CMP0041, ///< Error on relative include with generator expression
 
     /** \brief Always the last entry.
      *
