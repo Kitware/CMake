@@ -311,7 +311,9 @@ install(TARGETS testLibRequired
         INCLUDES DESTINATION
           installIncludesTest
           $<INSTALL_PREFIX>/installIncludesTest2
-          )
+          installIncludesTest3/$<TARGET_PROPERTY:NAME>
+          $<TARGET_PROPERTY:NAME>/installIncludesTest4
+)
 install(TARGETS
           testLibIncludeRequired1
           testLibIncludeRequired2
@@ -334,6 +336,10 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.
 
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2/installIncludesTest2.h" "// No content\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibRequired")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibRequired/installIncludesTest3.h" "// No content\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4/installIncludesTest4.h" "// No content\n")
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h"
   DESTINATION installIncludesTest
@@ -341,6 +347,14 @@ install(FILES
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest2/installIncludesTest2.h"
   DESTINATION installIncludesTest2
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibRequired/installIncludesTest3.h"
+  DESTINATION installIncludesTest3/testLibRequired
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4/installIncludesTest4.h"
+  DESTINATION testLibRequired/installIncludesTest4
 )
 
 install(TARGETS testLibDepends testSharedLibDepends EXPORT DependsExp DESTINATION lib )
