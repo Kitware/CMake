@@ -322,7 +322,10 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   cmListFileBacktrace lfbt;
   cmGeneratorExpression ge(lfbt);
 
-  std::string dirs = tei->InterfaceIncludeDirectories;
+  std::string dirs = cmGeneratorExpression::Preprocess(
+                                            tei->InterfaceIncludeDirectories,
+                                            preprocessRule,
+                                            true);
   this->ReplaceInstallPrefix(dirs);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
   std::string exportDirs = cge->Evaluate(target->GetMakefile(), 0,
