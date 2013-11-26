@@ -513,7 +513,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
                                         config_moc_compile_defs);
     if (config_moc_incs != _moc_incs)
       {
-      configIncludes["_moc_incs_" + *li] =
+      configIncludes[*li] =
                     cmLocalGenerator::EscapeForCMake(config_moc_incs.c_str());
       if(_moc_incs.empty())
         {
@@ -522,7 +522,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
       }
     if (config_moc_compile_defs != _moc_compile_defs)
       {
-      configDefines["_moc_compile_defs_" + *li] =
+      configDefines[*li] =
             cmLocalGenerator::EscapeForCMake(config_moc_compile_defs.c_str());
       if(_moc_compile_defs.empty())
         {
