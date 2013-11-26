@@ -59,12 +59,15 @@ macro(SWIG_MODULE_INITIALIZE name language)
   set(SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG "${swig_lowercase_language}")
 
   set(SWIG_MODULE_${name}_REAL_NAME "${name}")
+  if (CMAKE_SWIG_FLAGS MATCHES "-noproxy")
+    set (SWIG_MODULE_${name}_NOPROXY TRUE)
+  endif ()
   if("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "UNKNOWN")
     message(FATAL_ERROR "SWIG Error: Language \"${language}\" not found")
-  elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PYTHON")
-    # when swig is used without the -interface it will produce in the module.py
-    # a 'import _modulename' statement, which implies having a corresponding
-    # _modulename.so (*NIX), _modulename.pyd (Win32).
+  elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PYTHON" AND NOT SWIG_MODULE_${name}_NOPROXY)
+    # swig will produce a module.py containing an 'import _modulename' statement,
+    # which implies having a corresponding _modulename.so (*NIX), _modulename.pyd (Win32),
+    # unless the -noproxy flag is used
     set(SWIG_MODULE_${name}_REAL_NAME "_${name}")
   elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PERL")
     set(SWIG_MODULE_${name}_EXTRA_FLAGS "-shadow")
