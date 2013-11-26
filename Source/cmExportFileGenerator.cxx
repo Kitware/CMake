@@ -286,6 +286,27 @@ static bool checkInterfaceDirs(const std::string &prepro,
 }
 
 //----------------------------------------------------------------------------
+static void prefixItems(std::string &exportDirs)
+{
+  std::vector<std::string> entries;
+  cmGeneratorExpression::Split(exportDirs, entries);
+  exportDirs = "";
+  const char *sep = "";
+  for(std::vector<std::string>::const_iterator ei = entries.begin();
+      ei != entries.end(); ++ei)
+    {
+    exportDirs += sep;
+    sep = ";";
+    if (!cmSystemTools::FileIsFullPath(ei->c_str())
+        && ei->find("${_IMPORT_PREFIX}") == std::string::npos)
+      {
+      exportDirs += "${_IMPORT_PREFIX}/";
+      }
+    exportDirs += *ei;
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
                       cmTargetExport *tei,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
@@ -329,6 +350,8 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
     properties[propName] = "";
     return;
     }
+
+  prefixItems(exportDirs);
 
   std::string includes = (input?input:"");
   const char* sep = input ? ";" : "";

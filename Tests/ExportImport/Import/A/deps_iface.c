@@ -6,6 +6,8 @@
 
 #include "installIncludesTest.h"
 #include "installIncludesTest2.h"
+#include "installIncludesTest3.h"
+#include "installIncludesTest4.h"
 
 #ifndef testLibRequired_IFACE_DEFINE
 #error Expected testLibRequired_IFACE_DEFINE

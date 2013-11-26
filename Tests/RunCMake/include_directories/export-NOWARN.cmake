@@ -48,3 +48,15 @@ install(TARGETS foo EXPORT FooTargets6
   INCLUDES DESTINATION $<INSTALL_INTERFACE:include$<0:>>
 )
 install(EXPORT FooTargets6 DESTINATION lib/cmake)
+
+install(TARGETS foo EXPORT FooTargets7
+  DESTINATION lib
+  INCLUDES DESTINATION include$<0:>
+)
+install(EXPORT FooTargets7 DESTINATION lib/cmake)
+
+install(TARGETS foo EXPORT FooTargets8
+  DESTINATION lib
+  INCLUDES DESTINATION $<0:>include
+)
+install(EXPORT FooTargets8 DESTINATION lib/cmake)
