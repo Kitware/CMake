@@ -313,6 +313,20 @@ install(TARGETS testLibRequired
           $<INSTALL_PREFIX>/installIncludesTest2
           installIncludesTest3/$<TARGET_PROPERTY:NAME>
           $<TARGET_PROPERTY:NAME>/installIncludesTest4
+          $<INSTALL_INTERFACE:installIncludesTest5$<0:>>
+          $<INSTALL_INTERFACE:$<0:>installIncludesTest6>
+          $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/installIncludesTest7>
+)
+
+target_include_directories(testLibRequired INTERFACE
+  # These can't be in the above install(INCLUDES DESTINATION call because
+  # that is only for installed interfaces. These directories are prefixes
+  # in the build dir, which is an error for the installed interface.
+  # We add them here so that we don't have to add conditions in the Import
+  # component of the test.
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5$<0:>>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/$<0:>installIncludesTest6>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7>
 )
 install(TARGETS
           testLibIncludeRequired1
@@ -340,6 +354,12 @@ file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibReq
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest3/testLibRequired/installIncludesTest3.h" "// No content\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4/installIncludesTest4.h" "// No content\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5/installIncludesTest5.h" "// No content\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6/installIncludesTest6.h" "// No content\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7/installIncludesTest7.h" "// No content\n")
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h"
   DESTINATION installIncludesTest
@@ -355,6 +375,18 @@ install(FILES
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/testLibRequired/installIncludesTest4/installIncludesTest4.h"
   DESTINATION testLibRequired/installIncludesTest4
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5/installIncludesTest5.h"
+  DESTINATION installIncludesTest5
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6/installIncludesTest6.h"
+  DESTINATION installIncludesTest6
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7/installIncludesTest7.h"
+  DESTINATION installIncludesTest7
 )
 
 install(TARGETS testLibDepends testSharedLibDepends EXPORT DependsExp DESTINATION lib )
