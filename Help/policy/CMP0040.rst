@@ -8,7 +8,7 @@ the TARGET signature of :command:`add_custom_command`
 if the target is unknown.
 
 The OLD behavior for this policy is to ignore custom commands
-for unknown targets. The NEW behavior for this policy is to report and error
+for unknown targets. The NEW behavior for this policy is to report an error
 if the target referenced in :command:`add_custom_command` is unknown.
 
 This policy was introduced in CMake version 3.0.0.  CMake version
