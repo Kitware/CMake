@@ -64,6 +64,7 @@ Variables that Provide Information
    /variable/CMAKE_STANDARD_LIBRARIES
    /variable/CMAKE_STATIC_LIBRARY_PREFIX
    /variable/CMAKE_STATIC_LIBRARY_SUFFIX
+   /variable/CMAKE_TOOLCHAIN_FILE
    /variable/CMAKE_TWEAK_VERSION
    /variable/CMAKE_VERBOSE_MAKEFILE
    /variable/CMAKE_VERSION
