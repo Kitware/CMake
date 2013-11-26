@@ -273,12 +273,6 @@ std::string
 cmNinjaTargetGenerator
 ::GetObjectFilePath(cmSourceFile* source) const
 {
-  if (source->GetProperty("OBJECT_LOCATION"))
-    {
-    // path is already absolute or HOME_OUTPUT relative
-    return this->GeneratorTarget->Objects[source];
-    }
-
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if(!path.empty())
     path += "/";
@@ -481,14 +475,7 @@ cmNinjaTargetGenerator
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
     {
-    if (const char* path = (*si)->GetProperty("OBJECT_LOCATION"))
-      {
-      this->Objects.push_back(this->ConvertToNinjaPath(path));
-      }
-    else
-      {
-      this->Objects.push_back(this->GetSourceFilePath(*si));
-      }
+    this->Objects.push_back(this->GetSourceFilePath(*si));
     }
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ObjectSources.begin();
@@ -527,10 +514,8 @@ cmNinjaTargetGenerator
   cmNinjaDeps outputs;
   std::string objectFileName = this->GetObjectFilePath(source);
   outputs.push_back(objectFileName);
-
   // Add this object to the list of object files.
-  if (!source->GetPropertyAsBool("EXTERNAL_SOURCE"))
-    this->Objects.push_back(objectFileName);
+  this->Objects.push_back(objectFileName);
 
   cmNinjaDeps explicitDeps;
   std::string sourceFileName;
@@ -656,23 +641,6 @@ cmNinjaTargetGenerator
                                                 "Additional output files.",
                                                 outputList,
                                                 outputs);
-  }
-
-  if(const char* objectLocationStr = source->GetProperty("OBJECT_LOCATION")) {
-    std::string objectLocation =
-            this->GetLocalGenerator()
-                  ->Convert(objectLocationStr, cmLocalGenerator::HOME_OUTPUT);
-    if (std::find(outputs.begin(), outputs.end(), objectLocation)
-            == outputs.end()) {
-      std::vector<std::string> outputList;
-      cmSystemTools::ExpandListArgument(objectLocation, outputList);
-      std::transform(outputList.begin(), outputList.end(), outputList.begin(),
-                     MapToNinjaPath());
-      this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
-                                                  "Location output file.",
-                                                  outputList,
-                                                  outputs);
-    }
   }
 }
 

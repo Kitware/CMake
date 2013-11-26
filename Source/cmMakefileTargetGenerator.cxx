@@ -181,14 +181,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         si = this->GeneratorTarget->ExternalObjects.begin();
       si != this->GeneratorTarget->ExternalObjects.end(); ++si)
     {
-    if (const char* path = (*si)->GetProperty("OBJECT_LOCATION"))
-      {
-      this->Objects.push_back(path);
-      }
-    else
-      {
-      this->ExternalObjects.push_back((*si)->GetFullPath());
-      }
+    this->ExternalObjects.push_back((*si)->GetFullPath());
     }
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->ObjectSources.begin();
@@ -429,19 +422,10 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     }
 
   // Get the full path name of the object file.
-  std::string obj;
-  if (source.GetProperty("OBJECT_LOCATION"))
-    {
-    // path is already absolute or HOME_OUTPUT relative
-    obj = this->GeneratorTarget->Objects[&source];
-    }
-  else
-    {
-    std::string const& objectName = this->GeneratorTarget->Objects[&source];
-    obj = this->LocalGenerator->GetTargetDirectory(*this->Target);
-    obj += "/";
-    obj += objectName;
-    }
+  std::string const& objectName = this->GeneratorTarget->Objects[&source];
+  std::string obj = this->LocalGenerator->GetTargetDirectory(*this->Target);
+  obj += "/";
+  obj += objectName;
 
   // Avoid generating duplicate rules.
   if(this->ObjectFiles.find(obj) == this->ObjectFiles.end())
@@ -467,10 +451,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     (this->LocalGenerator->ConvertToFullPath(dir).c_str());
 
   // Save this in the target's list of object files.
-  if (!source.GetPropertyAsBool("EXTERNAL_SOURCE"))
-    {
-    this->Objects.push_back(obj);
-    }
+  this->Objects.push_back(obj);
   this->CleanFiles.push_back(obj);
 
   // TODO: Remove
@@ -749,27 +730,6 @@ cmMakefileTargetGenerator
 
       // Register this as an extra file to clean.
       this->CleanFiles.push_back(eoi->c_str());
-      }
-    }
-
-  if(const char* object_location_str =
-     source.GetProperty("OBJECT_LOCATION"))
-    {
-    if (relativeObj != object_location_str)
-      {
-      std::vector<std::string> extra_outputs;
-      cmSystemTools::ExpandListArgument(object_location_str, extra_outputs);
-      for(std::vector<std::string>::const_iterator eoi = extra_outputs.begin();
-          eoi != extra_outputs.end(); ++eoi)
-        {
-        // Register this as an extra output for the object file rule.
-        // This will cause the object file to be rebuilt if the extra
-        // output is missing.
-        this->GenerateExtraOutput(eoi->c_str(), relativeObj.c_str(), false);
-
-        // Register this as an extra file to clean.
-        this->CleanFiles.push_back(eoi->c_str());
-        }
       }
     }
 

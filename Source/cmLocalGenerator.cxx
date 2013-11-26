@@ -3074,21 +3074,6 @@ cmLocalGenerator
                                  std::string const& dir_max,
                                  bool* hasSourceExtension)
 {
-  // A specified OBJECT_LOCATION overwrites the generated file name
-  if (const char* location = source.GetProperty("OBJECT_LOCATION"))
-    {
-    std::string fullPath;
-    if (cmSystemTools::FileIsFullPath(location))
-      {
-      fullPath = location;
-      }
-    else
-      {
-      fullPath = this->Convert(location, FULL);
-      }
-    return this->Convert(fullPath.c_str(), HOME_OUTPUT);
-    }
-
   // Construct the object file name using the full path to the source
   // file which is its only unique identification.
   const char* fullPath = source.GetFullPath().c_str();

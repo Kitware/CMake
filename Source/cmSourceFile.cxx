@@ -392,22 +392,3 @@ void cmSourceFile::SetCustomCommand(cmCustomCommand* cc)
   this->CustomCommand = cc;
   delete old;
 }
-
-
-
-/*
-  //TODO
-
-  cm->DefineProperty
-    ("EXTERNAL_SOURCE", cmProperty::SOURCE_FILE,
-     "If set to true then this is a source file.",
-     "If this property is set to true then file is a source file"
-     "and will be compiled but it will not be linked into the target");
-
-
-  cm->DefineProperty
-    ("OBJECT_LOCATION", cmProperty::SOURCE_FILE,
-     "Path to output file name.",
-     "The output will be created at the given path."
-     "A relative path is interpreted as relative to CMAKE_BINARY_DIR.");
-*/
