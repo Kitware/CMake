@@ -28,6 +28,7 @@ Reference Manuals
    /manual/cmake-commands.7
    /manual/cmake-generators.7
    /manual/cmake-modules.7
+   /manual/cmake-packages.7
    /manual/cmake-policies.7
    /manual/cmake-properties.7
    /manual/cmake-variables.7
