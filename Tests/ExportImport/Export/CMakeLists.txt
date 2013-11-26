@@ -327,6 +327,8 @@ target_include_directories(testLibRequired INTERFACE
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest5$<0:>>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/$<0:>installIncludesTest6>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7>
+  $<INSTALL_INTERFACE:installIncludesTest8/$<0:>>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest8$<0:>>
 )
 install(TARGETS
           testLibIncludeRequired1
@@ -360,6 +362,8 @@ file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest6/installIncludesTest6.h" "// No content\n")
 file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7/installIncludesTest7.h" "// No content\n")
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest8")
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest8/installIncludesTest8.h" "// No content\n")
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest/installIncludesTest.h"
   DESTINATION installIncludesTest
@@ -387,6 +391,10 @@ install(FILES
 install(FILES
   "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest7/installIncludesTest7.h"
   DESTINATION installIncludesTest7
+)
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/installIncludesTest8/installIncludesTest8.h"
+  DESTINATION installIncludesTest8
 )
 
 install(TARGETS testLibDepends testSharedLibDepends EXPORT DependsExp DESTINATION lib )
