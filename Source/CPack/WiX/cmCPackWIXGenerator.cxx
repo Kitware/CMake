@@ -435,7 +435,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   shortcut_map_t globalShortcuts;
   if(Components.empty())
     {
-    AddComponentsToFeature(std::string(), toplevel, "ProductFeature",
+    AddComponentsToFeature(toplevel, "ProductFeature",
       directoryDefinitions, fileDefinitions, featureDefinitions,
       globalShortcuts);
     if(globalShortcuts.size())
@@ -457,8 +457,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
       std::string componentFeatureId = "CM_C_" + component.Name;
 
       shortcut_map_t featureShortcuts;
-      AddComponentsToFeature(component.Name,
-        componentPath, componentFeatureId,
+      AddComponentsToFeature(componentPath, componentFeatureId,
         directoryDefinitions, fileDefinitions,
         featureDefinitions, featureShortcuts);
       if(featureShortcuts.size())
@@ -635,7 +634,6 @@ bool cmCPackWIXGenerator::EmitFeatureForComponent(
 }
 
 bool cmCPackWIXGenerator::AddComponentsToFeature(
-  std::string const& cpackComponentName,
   std::string const& rootPath,
   std::string const& featureId,
   cmWIXSourceWriter& directoryDefinitions,

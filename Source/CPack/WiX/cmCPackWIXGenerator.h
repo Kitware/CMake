@@ -91,7 +91,6 @@ private:
     cmCPackComponent const& component);
 
   bool AddComponentsToFeature(
-    std::string const& cpackComponentName,
     std::string const& rootPath,
     std::string const& featureId,
     cmWIXSourceWriter& directoryDefinitions,
