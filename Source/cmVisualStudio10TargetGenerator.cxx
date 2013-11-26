@@ -184,7 +184,8 @@ void cmVisualStudio10TargetGenerator::WriteString(const char* line,
 void cmVisualStudio10TargetGenerator::Generate()
 {
   // do not generate external ms projects
-  if(this->Target->GetProperty("EXTERNAL_MSPROJECT"))
+  if(this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+      || this->Target->GetProperty("EXTERNAL_MSPROJECT"))
     {
     return;
     }

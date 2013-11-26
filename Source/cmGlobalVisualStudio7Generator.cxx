@@ -327,6 +327,10 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
+    if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     const char* expath = target->GetProperty("EXTERNAL_MSPROJECT");
     if(expath)
       {
@@ -364,6 +368,10 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
     cmTarget* target = *tt;
+    if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     bool written = false;
 
     // handle external vc project files

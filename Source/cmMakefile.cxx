@@ -868,6 +868,10 @@ void cmMakefile::ConfigureFinalPass()
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); l++)
     {
+    if (l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     l->second.FinishConfigure();
     }
 }
@@ -2256,6 +2260,10 @@ void cmMakefile::ExpandVariablesCMP0019()
        l != this->Targets.end(); ++l)
     {
     cmTarget &t = l->second;
+    if (t.GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
     includeDirs = t.GetProperty("INCLUDE_DIRECTORIES");
     if(mightExpandVariablesCMP0019(includeDirs))
       {

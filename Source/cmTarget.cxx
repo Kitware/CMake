@@ -255,32 +255,34 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->IsApple = this->Makefile->IsOn("APPLE");
 
   // Setup default property values.
-  this->SetPropertyDefault("INSTALL_NAME_DIR", 0);
-  this->SetPropertyDefault("INSTALL_RPATH", "");
-  this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
-  this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
-  this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
-  this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", 0);
-  this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", 0);
-  this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
-  this->SetPropertyDefault("PDB_OUTPUT_DIRECTORY", 0);
-  this->SetPropertyDefault("Fortran_FORMAT", 0);
-  this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
-  this->SetPropertyDefault("GNUtoMS", 0);
-  this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
-  this->SetPropertyDefault("AUTOMOC", 0);
-  this->SetPropertyDefault("AUTOUIC", 0);
-  this->SetPropertyDefault("AUTORCC", 0);
-  this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
-  this->SetPropertyDefault("AUTOUIC_OPTIONS", 0);
-  this->SetPropertyDefault("AUTORCC_OPTIONS", 0);
-  this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", 0);
-  this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
-  this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
-  this->SetPropertyDefault("MACOSX_BUNDLE", 0);
-  this->SetPropertyDefault("MACOSX_RPATH", 0);
-  this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", 0);
-
+  if (this->GetType() != INTERFACE_LIBRARY)
+    {
+    this->SetPropertyDefault("INSTALL_NAME_DIR", 0);
+    this->SetPropertyDefault("INSTALL_RPATH", "");
+    this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
+    this->SetPropertyDefault("SKIP_BUILD_RPATH", "OFF");
+    this->SetPropertyDefault("BUILD_WITH_INSTALL_RPATH", "OFF");
+    this->SetPropertyDefault("ARCHIVE_OUTPUT_DIRECTORY", 0);
+    this->SetPropertyDefault("LIBRARY_OUTPUT_DIRECTORY", 0);
+    this->SetPropertyDefault("RUNTIME_OUTPUT_DIRECTORY", 0);
+    this->SetPropertyDefault("PDB_OUTPUT_DIRECTORY", 0);
+    this->SetPropertyDefault("Fortran_FORMAT", 0);
+    this->SetPropertyDefault("Fortran_MODULE_DIRECTORY", 0);
+    this->SetPropertyDefault("GNUtoMS", 0);
+    this->SetPropertyDefault("OSX_ARCHITECTURES", 0);
+    this->SetPropertyDefault("AUTOMOC", 0);
+    this->SetPropertyDefault("AUTOUIC", 0);
+    this->SetPropertyDefault("AUTORCC", 0);
+    this->SetPropertyDefault("AUTOMOC_MOC_OPTIONS", 0);
+    this->SetPropertyDefault("AUTOUIC_OPTIONS", 0);
+    this->SetPropertyDefault("AUTORCC_OPTIONS", 0);
+    this->SetPropertyDefault("LINK_DEPENDS_NO_SHARED", 0);
+    this->SetPropertyDefault("LINK_INTERFACE_LIBRARIES", 0);
+    this->SetPropertyDefault("WIN32_EXECUTABLE", 0);
+    this->SetPropertyDefault("MACOSX_BUNDLE", 0);
+    this->SetPropertyDefault("MACOSX_RPATH", 0);
+    this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", 0);
+    }
 
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
@@ -300,6 +302,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     std::string configUpper = cmSystemTools::UpperCase(*ci);
     for(const char** p = configProps; *p; ++p)
       {
+      if (this->TargetTypeValue == INTERFACE_LIBRARY
+          && strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0)
+        {
+        continue;
+        }
       std::string property = *p;
       property += configUpper;
       this->SetPropertyDefault(property.c_str(), 0);
@@ -311,7 +318,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     // did not support this variable.  Projects may still specify the
     // property directly.  TODO: Make this depend on backwards
     // compatibility setting.
-    if(this->TargetTypeValue != cmTarget::EXECUTABLE)
+    if(this->TargetTypeValue != cmTarget::EXECUTABLE
+        && this->TargetTypeValue != cmTarget::INTERFACE_LIBRARY)
       {
       std::string property = cmSystemTools::UpperCase(*ci);
       property += "_POSTFIX";
@@ -352,16 +360,22 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->InsertCompileOption(*it);
     }
 
-  this->SetPropertyDefault("C_VISIBILITY_PRESET", 0);
-  this->SetPropertyDefault("CXX_VISIBILITY_PRESET", 0);
-  this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", 0);
+  if (this->GetType() != INTERFACE_LIBRARY)
+    {
+    this->SetPropertyDefault("C_VISIBILITY_PRESET", 0);
+    this->SetPropertyDefault("CXX_VISIBILITY_PRESET", 0);
+    this->SetPropertyDefault("VISIBILITY_INLINES_HIDDEN", 0);
+    }
 
   if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY
       || this->TargetTypeValue == cmTarget::MODULE_LIBRARY)
     {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
     }
-  this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", 0);
+  if (this->GetType() != INTERFACE_LIBRARY)
+    {
+    this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", 0);
+    }
 
   // Record current policies for later use.
 #define CAPTURE_TARGET_POLICY(POLICY) \
@@ -1370,12 +1384,63 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
+static bool whiteListedInterfaceProperty(const char *prop)
+{
+  if(cmHasLiteralPrefix(prop, "INTERFACE_"))
+    {
+    return true;
+    }
+  static const char* builtIns[] = {
+    // ###: This must remain sorted. It is processed with a binary search.
+    "COMPATIBLE_INTERFACE_BOOL",
+    "COMPATIBLE_INTERFACE_NUMBER_MAX",
+    "COMPATIBLE_INTERFACE_NUMBER_MIN",
+    "COMPATIBLE_INTERFACE_STRING",
+    "EXCLUDE_FROM_ALL",
+    "EXCLUDE_FROM_DEFAULT_BUILD",
+    "EXPORT_NAME",
+    "IMPORTED_LINK_INTERFACE_LANGUAGES",
+    "IMPORTED",
+    "NAME",
+    "TYPE",
+    "VERSION"
+  };
+
+  if (std::binary_search(cmArrayBegin(builtIns),
+                         cmArrayEnd(builtIns),
+                         prop,
+                         cmStrCmp(prop)))
+    {
+    return true;
+    }
+
+  if (cmHasLiteralPrefix(prop, "EXCLUDE_FROM_DEFAULT_BUILD_")
+      || cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LANGUAGES_")
+      || cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_"))
+    {
+    return true;
+    }
+
+  return false;
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::SetProperty(const char* prop, const char* value)
 {
   if (!prop)
     {
     return;
     }
+  if (this->GetType() == INTERFACE_LIBRARY
+      && !whiteListedInterfaceProperty(prop))
+    {
+    cmOStringStream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \"" << prop << "\" is not allowed.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    return;
+    }
+
   if (strcmp(prop, "NAME") == 0)
     {
     cmOStringStream e;
@@ -1443,6 +1508,15 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
 {
   if (!prop)
     {
+    return;
+    }
+  if (this->GetType() == INTERFACE_LIBRARY
+      && !whiteListedInterfaceProperty(prop))
+    {
+    cmOStringStream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \"" << prop << "\" is not allowed.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return;
     }
   if (strcmp(prop, "NAME") == 0)
@@ -2557,6 +2631,16 @@ const char *cmTarget::GetProperty(const char* prop,
 {
   if(!prop)
     {
+    return 0;
+    }
+
+  if (this->GetType() == INTERFACE_LIBRARY
+      && !whiteListedInterfaceProperty(prop))
+    {
+    cmOStringStream e;
+    e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
+         "The property \"" << prop << "\" is not allowed.";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return 0;
     }
 
@@ -4433,7 +4517,8 @@ bool isLinkDependentProperty(cmTarget const* tgt, const std::string &p,
 bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                            const char *config) const
 {
-  if (this->TargetTypeValue == OBJECT_LIBRARY)
+  if (this->TargetTypeValue == OBJECT_LIBRARY
+      || this->TargetTypeValue == INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -4446,7 +4531,8 @@ bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
 bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
                                     const char *config) const
 {
-  if (this->TargetTypeValue == OBJECT_LIBRARY)
+  if (this->TargetTypeValue == OBJECT_LIBRARY
+      || this->TargetTypeValue == INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -4458,7 +4544,8 @@ bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
 bool cmTarget::IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
                                     const char *config) const
 {
-  if (this->TargetTypeValue == OBJECT_LIBRARY)
+  if (this->TargetTypeValue == OBJECT_LIBRARY
+      || this->TargetTypeValue == INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -4470,7 +4557,8 @@ bool cmTarget::IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
 bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
                                     const char *config) const
 {
-  if (this->TargetTypeValue == OBJECT_LIBRARY)
+  if (this->TargetTypeValue == OBJECT_LIBRARY
+      || this->TargetTypeValue == INTERFACE_LIBRARY)
     {
     return false;
     }
@@ -5105,34 +5193,37 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
         {
         emitted.insert(*li);
         }
-      LinkImplementation const* impl = this->GetLinkImplementation(config,
-                                                                headTarget);
-      for(std::vector<std::string>::const_iterator
-            li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
+      if (this->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
-        if(emitted.insert(*li).second)
+        LinkImplementation const* impl = this->GetLinkImplementation(config,
+                                                                  headTarget);
+        for(std::vector<std::string>::const_iterator
+              li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
           {
-          if(cmTarget* tgt = this->Makefile->FindTargetToUse(li->c_str()))
+          if(emitted.insert(*li).second)
             {
-            // This is a runtime dependency on another shared library.
-            if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
+            if(cmTarget* tgt = this->Makefile->FindTargetToUse(li->c_str()))
               {
-              iface.SharedDeps.push_back(*li);
+              // This is a runtime dependency on another shared library.
+              if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
+                {
+                iface.SharedDeps.push_back(*li);
+                }
+              }
+            else
+              {
+              // TODO: Recognize shared library file names.  Perhaps this
+              // should be moved to cmComputeLinkInformation, but that creates
+              // a chicken-and-egg problem since this list is needed for its
+              // construction.
               }
             }
-          else
-            {
-            // TODO: Recognize shared library file names.  Perhaps this
-            // should be moved to cmComputeLinkInformation, but that creates
-            // a chicken-and-egg problem since this list is needed for its
-            // construction.
-            }
           }
-        }
-      if(this->LinkLanguagePropagatesToDependents())
-        {
-        // Targets using this archive need its language runtime libraries.
-        iface.Languages = impl->Languages;
+        if(this->LinkLanguagePropagatesToDependents())
+          {
+          // Targets using this archive need its language runtime libraries.
+          iface.Languages = impl->Languages;
+          }
         }
       }
     }

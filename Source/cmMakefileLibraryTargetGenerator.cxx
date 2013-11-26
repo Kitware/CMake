@@ -25,9 +25,12 @@ cmMakefileLibraryTargetGenerator
   cmMakefileTargetGenerator(target->Target)
 {
   this->CustomCommandDriver = OnDepends;
-  this->Target->GetLibraryNames(
-    this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
-    this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
+  if (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
+    {
+    this->Target->GetLibraryNames(
+      this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
+      this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
+    }
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
                                                       this->ConfigName);

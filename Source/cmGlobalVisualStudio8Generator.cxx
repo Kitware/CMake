@@ -442,7 +442,8 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
     {
     if(cmTarget* depTarget = this->FindTarget(0, ui->c_str()))
       {
-      if(depTarget->GetProperty("EXTERNAL_MSPROJECT"))
+      if(depTarget->GetType() != cmTarget::INTERFACE_LIBRARY
+          && depTarget->GetProperty("EXTERNAL_MSPROJECT"))
         {
         // This utility dependency names an external .vcproj target.
         // We use LinkLibraryDependencies="true" to link to it without
