@@ -27,6 +27,7 @@ Properties of Global Scope
    /prop_gbl/IN_TRY_COMPILE
    /prop_gbl/PACKAGES_FOUND
    /prop_gbl/PACKAGES_NOT_FOUND
+   /prop_gbl/JOB_POOLS
    /prop_gbl/PREDEFINED_TARGETS_FOLDER
    /prop_gbl/ECLIPSE_EXTRA_NATURES
    /prop_gbl/REPORT_UNDEFINED_PROPERTIES
@@ -148,6 +149,8 @@ Properties on Targets
    /prop_tgt/INTERFACE_SYSTEM_INCLUDE_DIRECTORIES
    /prop_tgt/INTERPROCEDURAL_OPTIMIZATION_CONFIG
    /prop_tgt/INTERPROCEDURAL_OPTIMIZATION
+   /prop_tgt/JOB_POOL_COMPILE
+   /prop_tgt/JOB_POOL_LINK
    /prop_tgt/LABELS
    /prop_tgt/LANG_VISIBILITY_PRESET
    /prop_tgt/LIBRARY_OUTPUT_DIRECTORY_CONFIG
