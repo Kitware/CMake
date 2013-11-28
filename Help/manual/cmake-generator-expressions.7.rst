@@ -81,6 +81,8 @@ otherwise expands to nothing.
   else ``0``.  If the policy was not set, the warning message for the policy
   will be emitted. This generator expression only works for a subset of
   policies.
+``$<HAVE_COMPILE_FEATURE:lang,feature>``
+  ``1`` if the ``CMAKE_<lang>_COMPILER`` supports ``feature``, otherwise ``0``.
 
 Informational Expressions
 =========================

@@ -9,8 +9,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
   add_executable(gnuxx_typeof_test gnuxx_typeof_test.cpp)
   target_compile_features(gnuxx_typeof_test PRIVATE gnuxx_typeof)
 endif()
-if ("${CMAKE_CXX_COMPILER}" MATCHES "MSVC"
-      AND NOT MSVC_VERSION VERSION_LESS 1400)
+if (CMAKE_CXX_COMPILER_ID MATCHES MSVC)
   add_executable(msvcxx_sealed_test msvcxx_sealed_test.cpp)
   target_compile_features(msvcxx_sealed_test PRIVATE msvcxx_sealed)
 endif()
@@ -32,3 +31,12 @@ target_compile_features(lib_delegating_constructors
 
 add_executable(lib_user lib_user.cpp)
 target_link_libraries(lib_user lib_delegating_constructors)
+
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU|Clang")
+  add_executable(binary_literals binary_literals.cpp)
+  target_compile_features(binary_literals
+    PRIVATE cxx_binary_literals
+  )
+endif()
+
+add_subdirectory(feature_conditional_link)

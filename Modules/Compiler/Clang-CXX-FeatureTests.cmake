@@ -1,11 +1,10 @@
 
-if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 2.1)
-  # This file is only loaded if Clang >= 2.1
-  message(FATAL_ERROR "This file should not be included for Clang < 2.1.")
-endif()
+set(_cmake_compiler_test_macro __clang__)
 
 set(testable_features
   cxx_delegating_constructors
+  cxx_variadic_templates
+  cxx_binary_literals
 )
 foreach(feature ${testable_features})
   set(_cmake_feature_test_${feature} "__has_extension(${feature})")

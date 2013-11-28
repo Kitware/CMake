@@ -413,6 +413,11 @@ if(BUILD_TESTING)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Module/ExternalData")
 
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
+  if ((CMAKE_CXX_COMPILER_ID STREQUAL GNU AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
+      OR CMAKE_CXX_COMPILER_ID STREQUAL Clang
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL MSVC AND NOT MSVC_VERSION VERSION_LESS 1400))
+    ADD_TEST_MACRO(Module.WriteCompilerDetectionHeader WriteCompilerDetectionHeader)
+  endif()
 
   if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     include(CheckCXXCompilerFlag)
@@ -2204,7 +2209,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ADD_TEST_MACRO(CMakeCommands.target_include_directories target_include_directories)
   ADD_TEST_MACRO(CMakeCommands.target_compile_definitions target_compile_definitions)
   ADD_TEST_MACRO(CMakeCommands.target_compile_options target_compile_options)
-  ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
+
+  if ((CMAKE_CXX_COMPILER_ID STREQUAL GNU AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
+      OR CMAKE_CXX_COMPILER_ID STREQUAL Clang
+      OR (CMAKE_CXX_COMPILER_ID STREQUAL MSVC AND NOT MSVC_VERSION VERSION_LESS 1400))
+    ADD_TEST_MACRO(CMakeCommands.target_compile_features target_compile_features)
+  endif()
   ADD_TEST_MACRO(compile_features compile_features)
 
   configure_file(
