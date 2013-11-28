@@ -3,10 +3,7 @@
 
 #define JOIN_IMPL(A, B) A ## B
 #define JOIN(A, B) JOIN_IMPL(A, B)
-#define CHECK(FEATURE) (defined(TEST_COMPILER_ ## FEATURE) \
-    && defined(EXPECTED_COMPILER_ ## FEATURE) \
-    && JOIN(TEST_COMPILER_, FEATURE) == JOIN(EXPECTED_COMPILER_, FEATURE) \
-  )
+#define CHECK(FEATURE) (JOIN(TEST_COMPILER_, FEATURE) == JOIN(EXPECTED_COMPILER_, FEATURE))
 
 #if !CHECK(CXX_BINARY_LITERALS)
 #error cxx_binary_literals expected availability did not match.

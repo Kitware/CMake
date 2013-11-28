@@ -48,6 +48,10 @@ add_executable(WriteCompilerDetectionHeader main.cpp)
 set_property(TARGET WriteCompilerDetectionHeader PROPERTY CXX_STANDARD 98)
 set_defines(WriteCompilerDetectionHeader "${true_defs}" "${false_defs}")
 
+if(MSVC)
+  return() # MSVC has only one mode.
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
     OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
   list(APPEND true_defs EXPECTED_COMPILER_GNUXX_TYPEOF)
