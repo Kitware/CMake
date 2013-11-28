@@ -2460,7 +2460,8 @@ const char* cmMakefile::GetDefinition(const char* name) const
 #define PP_FEATURE_NAME(F) \
   if (strcmp(name, "CMAKE_PP_NAME_" #F) == 0) \
     { \
-    return ("COMPILER_" + cmSystemTools::UpperCase(#F)).c_str(); \
+    static std::string val = ("COMPILER_" + cmSystemTools::UpperCase(#F)); \
+    return val.c_str(); \
     }
   FOR_EACH_CXX_FEATURE(PP_FEATURE_NAME)
 #undef PP_FEATURE_NAME
