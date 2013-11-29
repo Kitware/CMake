@@ -390,6 +390,11 @@ void cmLocalUnixMakefileGenerator3
        (t->second->GetType() == cmTarget::INTERFACE_LIBRARY) ||
        (t->second->GetType() == cmTarget::UTILITY))
       {
+      if (t->second->Target->IsImported())
+        {
+        continue;
+        }
+
       emitted.insert(t->second->GetName());
 
       // for subdirs add a rule to build this specific target by name.
