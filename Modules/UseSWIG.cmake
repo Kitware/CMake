@@ -200,7 +200,10 @@ macro(SWIG_ADD_MODULE name language)
     ${swig_generated_sources}
     ${swig_other_sources})
   string(TOLOWER "${language}" swig_lowercase_language)
-  if ("${swig_lowercase_language}" STREQUAL "java")
+  if ("${swig_lowercase_language}" STREQUAL "octave")
+    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".oct")
+  elseif ("${swig_lowercase_language}" STREQUAL "java")
     if (APPLE)
         # In java you want:
         #      System.loadLibrary("LIBRARY");
