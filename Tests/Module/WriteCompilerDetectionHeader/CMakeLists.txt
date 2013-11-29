@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-
+cmake_policy(SET CMP0025 NEW)
 project(WriteCompilerDetectionHeader)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
