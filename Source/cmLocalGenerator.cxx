@@ -807,6 +807,7 @@ static const char* ruleReplaceVars[] =
   "CMAKE_CURRENT_BINARY_DIR",
   "CMAKE_RANLIB",
   "CMAKE_LINKER",
+  "CMAKE_CL_SHOWINCLUDES_PREFIX",
   0
 };
 
