@@ -64,7 +64,8 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
                DoingTargetName,
                DoingTargetType,
                DoingBuildDir,
-               DoingCount };
+               DoingCount,
+               DoingFilterPrefix };
   Doing doing = DoingNone;
   int arg0 = 0;
   for(int i=1; !arg0 && i < argc; ++i)
@@ -98,6 +99,10 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
       {
       doing = DoingBuildDir;
       }
+    else if(strcmp(arg, "--filter-prefix") == 0)
+      {
+      doing = DoingFilterPrefix;
+      }
     else if(doing == DoingOutput)
       {
       this->OptionOutput = arg;
@@ -130,6 +135,11 @@ bool cmCTestLaunch::ParseArguments(int argc, const char* const* argv)
     else if(doing == DoingBuildDir)
       {
       this->OptionBuildDir = arg;
+      doing = DoingNone;
+      }
+    else if(doing == DoingFilterPrefix)
+      {
+      this->OptionFilterPrefix = arg;
       doing = DoingNone;
       }
     }
@@ -573,8 +583,15 @@ void cmCTestLaunch::DumpFileToXML(std::ostream& fxml,
 
   std::string line;
   const char* sep = "";
+
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
+    if(OptionFilterPrefix.size() && cmSystemTools::StringStartsWith(
+      line.c_str(), OptionFilterPrefix.c_str()))
+      {
+      continue;
+      }
+
     fxml << sep << cmXMLSafe(line).Quotes(false);
     sep = "\n";
     }
