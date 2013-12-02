@@ -135,6 +135,14 @@ bool cmExportCommand
         return false;
         }
       }
+    else
+      {
+      cmOStringStream e;
+      e << "given target \"" << *currentTarget
+        << "\" which is not built by this project.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
 
   cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
