@@ -268,6 +268,7 @@ public:
     const char* Defines;
     const char* RuleLauncher;
     const char* DependencyFile;
+    const char* FilterPrefix;
   };
 
   /** Set whether to treat conversions to SHELL as a link script shell.  */

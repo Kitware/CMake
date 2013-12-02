@@ -45,6 +45,7 @@ private:
   std::string OptionTargetName;
   std::string OptionTargetType;
   std::string OptionBuildDir;
+  std::string OptionFilterPrefix;
   bool ParseArguments(int argc, const char* const* argv);
 
   // The real command line appearing after launcher arguments.
