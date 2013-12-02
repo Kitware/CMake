@@ -211,7 +211,7 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
   set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT}" CACHE STRING
       "Flags used by the compiler during release minsize builds.")
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
-     "Flags used by the compiler during release builds (/MD /Ob1 /Oi /Ot /Oy /Gs will produce slightly less optimized but smaller files).")
+     "Flags used by the compiler during release builds.")
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
      "Flags used by the compiler during Release with Debug Info builds.")
 
