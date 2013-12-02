@@ -123,6 +123,15 @@ void cmWIXSourceWriter::AddAttribute(
   file << " " << key << "=\"" << EscapeAttributeValue(utf8) << '"';
 }
 
+void cmWIXSourceWriter::AddAttributeUnlessEmpty(
+    const std::string& key, const std::string& value)
+{
+  if(value.size())
+    {
+    AddAttribute(key, value);
+    }
+}
+
 std::string cmWIXSourceWriter::WindowsCodepageToUtf8(const std::string& value)
 {
   if(value.empty())
