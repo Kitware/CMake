@@ -213,8 +213,7 @@ macro(SWIG_ADD_MODULE name language)
         #   Linux  : libLIBRARY.so
         set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".jnilib")
       endif ()
-  endif ()
-  if ("${swig_lowercase_language}" STREQUAL "python")
+  elseif ("${swig_lowercase_language}" STREQUAL "python")
     # this is only needed for the python case where a _modulename.so is generated
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
     # Python extension modules on Windows must have the extension ".pyd"
@@ -228,6 +227,17 @@ macro(SWIG_ADD_MODULE name language)
     if(WIN32 AND NOT CYGWIN)
       set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".pyd")
     endif()
+  elseif ("${swig_lowercase_language}" STREQUAL "ruby")
+    # In ruby you want:
+    #      require 'LIBRARY'
+    # then ruby will look for a library whose name is platform dependent, namely
+    #   MacOS  : LIBRARY.bundle
+    #   Windows: LIBRARY.dll
+    #   Linux  : LIBRARY.so
+    set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
+    if (APPLE)
+      set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".bundle")
+    endif ()
   endif ()
 endmacro()
 
