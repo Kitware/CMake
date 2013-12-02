@@ -96,10 +96,9 @@
 #  License text for the above reference.)
 
 
-if(__CMAKE_PARSE_ARGUMENTS_INCLUDED)
+if(COMMAND cmake_parse_arguments)
   return()
 endif()
-set(__CMAKE_PARSE_ARGUMENTS_INCLUDED TRUE)
 
 
 define_property(DIRECTORY PROPERTY "CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY" INHERITED
