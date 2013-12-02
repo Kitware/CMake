@@ -199,6 +199,48 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
 } strEqualNode;
 
 //----------------------------------------------------------------------------
+static const struct LowerCaseNode : public cmGeneratorExpressionNode
+{
+  LowerCaseNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return cmSystemTools::LowerCase(parameters.front());
+  }
+} lowerCaseNode;
+
+//----------------------------------------------------------------------------
+static const struct UpperCaseNode : public cmGeneratorExpressionNode
+{
+  UpperCaseNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return cmSystemTools::UpperCase(parameters.front());
+  }
+} upperCaseNode;
+
+//----------------------------------------------------------------------------
+static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
+{
+  MakeCIdentifierNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *,
+                       const GeneratorExpressionContent *,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    return cmSystemTools::MakeCidentifier(parameters.front().c_str());
+  }
+} makeCIdentifierNode;
+
+//----------------------------------------------------------------------------
 static const struct Angle_RNode : public cmGeneratorExpressionNode
 {
   Angle_RNode() {}
@@ -1442,6 +1484,12 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &targetSoNameFileDirNode;
   else if (identifier == "STREQUAL")
     return &strEqualNode;
+  else if (identifier == "LOWER_CASE")
+    return &lowerCaseNode;
+  else if (identifier == "UPPER_CASE")
+    return &upperCaseNode;
+  else if (identifier == "MAKE_C_IDENTIFIER")
+    return &makeCIdentifierNode;
   else if (identifier == "BOOL")
     return &boolNode;
   else if (identifier == "ANGLE-R")
