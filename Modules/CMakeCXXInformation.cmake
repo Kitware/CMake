@@ -209,11 +209,11 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG_INIT}" CACHE STRING
      "Flags used by the compiler during debug builds.")
   set (CMAKE_CXX_FLAGS_MINSIZEREL "${CMAKE_CXX_FLAGS_MINSIZEREL_INIT}" CACHE STRING
-      "Flags used by the compiler during release minsize builds.")
+     "Flags used by the compiler during release builds for minimum size.")
   set (CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE_INIT}" CACHE STRING
      "Flags used by the compiler during release builds.")
   set (CMAKE_CXX_FLAGS_RELWITHDEBINFO "${CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT}" CACHE STRING
-     "Flags used by the compiler during Release with Debug Info builds.")
+     "Flags used by the compiler during release builds with debug info.")
 
 endif()
 
