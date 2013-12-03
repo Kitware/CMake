@@ -219,7 +219,7 @@ endif()
 
 if(CMAKE_CXX_STANDARD_LIBRARIES_INIT)
   set(CMAKE_CXX_STANDARD_LIBRARIES "${CMAKE_CXX_STANDARD_LIBRARIES_INIT}"
-    CACHE STRING "Libraries linked by defalut with all C++ applications.")
+    CACHE STRING "Libraries linked by default with all C++ applications.")
   mark_as_advanced(CMAKE_CXX_STANDARD_LIBRARIES)
 endif()
 
