@@ -1,0 +1,70 @@
+include(CMakeParseArguments)
+
+macro(MY_INSTALL)
+    set(options OPTIONAL FAST)
+    set(oneValueArgs DESTINATION RENAME)
+    set(multiValueArgs TARGETS CONFIGURATIONS)
+    cmake_parse_arguments(MY_INSTALL "${options}" "${oneValueArgs}" "${multiValueArgs}" "${ARGN}")
+endmacro()
+
+my_install(TARGETS foo bar DESTINATION bin OPTIONAL)
+
+if(NOT MY_INSTALL_OPTIONAL)
+    message(FATAL_ERROR "NOT MY_INSTALL_OPTIONAL")
+endif()
+
+if(MY_INSTALL_FAST)
+    message(FATAL_ERROR "MY_INSTALL_FAST")
+endif()
+
+if(NOT "${MY_INSTALL_DESTINATION}" STREQUAL "bin")
+    message(FATAL_ERROR "NOT \"\${MY_INSTALL_DESTINATION}\" STREQUAL \"bin\"")
+endif()
+
+if(DEFINED MY_INSTALL_RENAME)
+    message(FATAL_ERROR "DEFINED MY_INSTALL_RENAME")
+endif()
+
+if(NOT "${MY_INSTALL_TARGETS}" STREQUAL "foo;bar")
+    message(FATAL_ERROR "NOT \"\${MY_INSTALL_TARGETS}\" STREQUAL \"foo;bar\"")
+endif()
+
+if(DEFINED MY_INSTALL_CONFIGURATIONS)
+    message(FATAL_ERROR "DEFINED MY_INSTALL_CONFIGURATIONS")
+endif()
+
+if(DEFINED MY_INSTALL_UNPARSED_ARGUMENTS)
+    message(DEFINED MY_INSTALL_UNPARSED_ARGUMENTS)
+endif()
+
+
+
+my_install(TARGETS foo bar DESTINATION bin OPTIONAL blub)
+
+if(NOT MY_INSTALL_OPTIONAL)
+    message(FATAL_ERROR "NOT MY_INSTALL_OPTIONAL")
+endif()
+
+if(MY_INSTALL_FAST)
+    message(FATAL_ERROR "MY_INSTALL_FAST")
+endif()
+
+if(NOT "${MY_INSTALL_DESTINATION}" STREQUAL "bin")
+    message(FATAL_ERROR "NOT \"\${MY_INSTALL_DESTINATION}\" STREQUAL \"bin\"")
+endif()
+
+if(DEFINED MY_INSTALL_RENAME)
+    message(FATAL_ERROR "DEFINED MY_INSTALL_RENAME")
+endif()
+
+if(NOT "${MY_INSTALL_TARGETS}" STREQUAL "foo;bar")
+    message(FATAL_ERROR "NOT \"\${MY_INSTALL_TARGETS}\" STREQUAL \"foo;bar\"")
+endif()
+
+if(DEFINED MY_INSTALL_CONFIGURATIONS)
+    message(FATAL_ERROR "DEFINED MY_INSTALL_CONFIGURATIONS")
+endif()
+
+if(NOT "${MY_INSTALL_UNPARSED_ARGUMENTS}" STREQUAL "blub")
+    message(FATAL_ERROR "NOT \"\${MY_INSTALL_UNPARSED_ARGUMENTS}\" STREQUAL \"blub\"")
+endif()
