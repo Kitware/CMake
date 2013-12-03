@@ -39,6 +39,7 @@ All Modules
    /module/CMakeDependentOption
    /module/CMakeDetermineVSServicePack
    /module/CMakeExpandImportedTargets
+   /module/CMakeFindDependencyMacro
    /module/CMakeFindFrameworks
    /module/CMakeFindPackageMode
    /module/CMakeForceCompiler
