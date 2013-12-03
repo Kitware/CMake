@@ -3031,23 +3031,23 @@ cmXCodeObject* cmGlobalXCodeGenerator
     cmStdString curr_tgt_folder;
     for(std::vector<std::string>::size_type i = 0; i < tgt_folders.size();i++)
       {
+      if (i != 0)
+        {
+        curr_tgt_folder += "/";
+        }
       curr_tgt_folder += tgt_folders[i];
       it = this->TargetGroup.find(curr_tgt_folder);
-      if(it == this->TargetGroup.end())
-        {
-        tgroup = this->CreatePBXGroup(tgroup,tgt_folders[i]);
-        this->TargetGroup[curr_tgt_folder] = tgroup;
-        }
-      else
+      if(it != this->TargetGroup.end())
         {
         tgroup = it->second;
         continue;
         }
+      tgroup = this->CreatePBXGroup(tgroup,tgt_folders[i]);
+      this->TargetGroup[curr_tgt_folder] = tgroup;
       if(i == 0)
         {
         this->SourcesGroupChildren->AddObject(tgroup);
         }
-      curr_tgt_folder += "/";
       }
     }
   this->TargetGroup[target] = tgroup;
