@@ -341,7 +341,9 @@ foreach(_path
     list(APPEND _apps_paths "${_apps}")
   endif()
 endforeach()
-list(REMOVE_DUPLICATES _apps_paths)
+if(_apps_paths)
+  list(REMOVE_DUPLICATES _apps_paths)
+endif()
 set(CMAKE_SYSTEM_APPBUNDLE_PATH
   ${_apps_paths})
 unset(_apps_paths)
