@@ -218,7 +218,7 @@ endif()
 
 if(CMAKE_Fortran_STANDARD_LIBRARIES_INIT)
   set(CMAKE_Fortran_STANDARD_LIBRARIES "${CMAKE_Fortran_STANDARD_LIBRARIES_INIT}"
-    CACHE STRING "Libraries linked by defalut with all Fortran applications.")
+    CACHE STRING "Libraries linked by default with all Fortran applications.")
   mark_as_advanced(CMAKE_Fortran_STANDARD_LIBRARIES)
 endif()
 
