@@ -44,22 +44,14 @@ etc.
 The :prop_gbl:`ENABLED_LANGUAGES` global property contains the languages which
 are currently enabled.
 
-Variables and properties
+Variables and Properties
 ========================
 
 Several variables relate to the language components of a toolchain which are
-enabled. :variable:`CMAKE_<LANG>_COMPILER_LOADED` variables can be tested to
-check if a compiler for a particular language is loaded.
-
-:variable:`CMAKE_<LANG>_COMPILER` is the full path to the compiler used
+enabled. :variable:`CMAKE_<LANG>_COMPILER` is the full path to the compiler used
 for ``<LANG>``. :variable:`CMAKE_<LANG>_COMPILER_ID` is the identifier used
 by CMake for the compiler and :variable:`CMAKE_<LANG>_COMPILER_VERSION` is the
-version of the compiler. It is common for one compiler to have a mode of
-behaving like another compiler. For example, the Intel compiler may behave as
-either the MSVC compiler or the GNU compiler, depending on the platform and the
-flags used. In such cases, the :variable:`CMAKE_<LANG>_SIMULATE_ID` variable
-contains the ID of the compiler being simulated, and
-:variable:`CMAKE_<LANG>_SIMULATE_VERSION` its version.
+version of the compiler.
 
 The :variable:`CMAKE_<LANG>_FLAGS` variables and the configuration-specific
 equivalents contain flags that will be added to the compile command when
@@ -69,10 +61,9 @@ As the linker is invoked by the compiler driver, CMake needs a way to determine
 which compiler to use to invoke the linker. This is calculated by the
 :prop_sf:`LANGUAGE` of source files in the target, and in the case of static
 libraries, the language of the dependent libraries. The choice CMake makes may
-be overridden with the :variable:`CMAKE_<LANG>_LINKER_PREFERENCE` variable and
-the :prop_tgt:`LINKER_LANGUAGE` target property.
+be overridden with the :prop_tgt:`LINKER_LANGUAGE` target property.
 
-Toolchain features
+Toolchain Features
 ==================
 
 CMake provides the :command:`try_compile` command and wrapper macros such as
@@ -89,7 +80,7 @@ the compiler supports that feature. The :prop_tgt:`<LANG>_VISIBILITY_PRESET`
 and :prop_tgt:`VISIBILITY_INLINES_HIDDEN` target properties add flags for
 hidden visibility, if supported by the compiler.
 
-Cross-compiling
+Cross Compiling
 ===============
 
 If :manual:`cmake(1)` is invoked with the command line parameter
