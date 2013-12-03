@@ -585,58 +585,6 @@ static const struct LinkOnlyNode : public cmGeneratorExpressionNode
 } linkOnlyNode;
 
 //----------------------------------------------------------------------------
-static const struct HaveFeatureNode : public cmGeneratorExpressionNode
-{
-  HaveFeatureNode() {}
-
-  virtual int NumExpectedParameters() const { return 2; }
-
-  std::string Evaluate(const std::vector<std::string> &parameters,
-                       cmGeneratorExpressionContext *context,
-                       const GeneratorExpressionContent *content,
-                       cmGeneratorExpressionDAGChecker *) const
-  {
-    if (!context->HeadTarget)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<HAVE_COMPILER_FEATURE:lang,feature> may only be used with "
-          "targets.  It may not be used with add_custom_command.");
-      return std::string();
-      }
-    if (context->HeadTarget->GetType() == cmTarget::INTERFACE_LIBRARY)
-      {
-      return "0";
-      }
-    std::string def = "CMAKE_" + parameters.front() + "_KNOWN_FEATURES";
-    const char *knownFeatures = context->Makefile ?
-                              context->Makefile->GetDefinition(
-                              def.c_str()) : 0;
-    assert(knownFeatures);
-    std::vector<std::string> featuresVec;
-    cmSystemTools::ExpandListArgument(knownFeatures, featuresVec);
-    if (std::find(featuresVec.begin(),
-                     featuresVec.end(),
-                     parameters[1]) == featuresVec.end())
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "Unknown feature!");
-      return std::string();
-      }
-    const char *tgtProp =
-                        context->HeadTarget->GetProperty("COMPILE_FEATURES");
-    if(!tgtProp)
-      {
-      return "0";
-      }
-    featuresVec.clear();
-    cmSystemTools::ExpandListArgument(tgtProp, featuresVec);
-    return std::find(featuresVec.begin(),
-                     featuresVec.end(),
-                     parameters[1]) == featuresVec.end() ? "0" : "1";
-  }
-} haveFeatureNode;
-
-//----------------------------------------------------------------------------
 static const struct ConfigurationNode : public cmGeneratorExpressionNode
 {
   ConfigurationNode() {}
@@ -1566,8 +1514,6 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &joinNode;
   else if (identifier == "LINK_ONLY")
     return &linkOnlyNode;
-  else if (identifier == "HAVE_COMPILER_FEATURE")
-    return &haveFeatureNode;
   return 0;
 
 }

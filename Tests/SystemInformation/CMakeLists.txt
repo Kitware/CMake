@@ -1,5 +1,4 @@
-cmake_minimum_required (VERSION 2.8.12)
-cmake_policy(SET CMP0025 NEW)
+cmake_minimum_required (VERSION 2.6)
 project(SystemInformation)
 
 include_directories("This does not exists")

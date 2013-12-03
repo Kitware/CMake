@@ -218,11 +218,3 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingAutoUicOptions() const
   return (strcmp(prop, "AUTOUIC_OPTIONS") == 0
        || strcmp(prop, "INTERFACE_AUTOUIC_OPTIONS") == 0 );
 }
-
-//----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingCompileFeatures() const
-{
-  const char *prop = this->Property.c_str();
-  return (strcmp(prop, "COMPILE_FEATURES") == 0
-       || strcmp(prop, "INTERFACE_COMPILE_FEATURES") == 0);
-}
