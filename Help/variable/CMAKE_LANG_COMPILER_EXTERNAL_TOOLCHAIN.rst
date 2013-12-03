@@ -10,4 +10,4 @@ may be set to a path to a path to the external toolchain and will be passed
 to the compiler driver if supported.
 
 This variable may only be set in a toolchain file specified by
-the ``CMAKE_TOOLCHAIN_FILE`` variable.
+the :variable:`CMAKE_TOOLCHAIN_FILE` variable.

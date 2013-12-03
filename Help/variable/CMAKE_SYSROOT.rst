@@ -9,4 +9,4 @@ necessary on installation.  The ``CMAKE_SYSROOT`` is also used to prefix
 paths searched by the ``find_*`` commands.
 
 This variable may only be set in a toolchain file specified by
-the ``CMAKE_TOOLCHAIN_FILE`` variable.
+the :variable:`CMAKE_TOOLCHAIN_FILE` variable.
