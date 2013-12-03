@@ -1294,7 +1294,8 @@ int cmcmd::VisualStudioLinkIncremental(std::vector<std::string>& args,
   // to do the final link.  If mt has any value other than 0 or 1090650113
   // then there was some problem with the command itself and there was an
   // error so return the error code back out of cmake so make can report it.
-  if(mtRet != 1090650113)
+  // (when hosted on a posix system the value is 187)
+  if(mtRet != 1090650113 && mtRet != 187)
     {
     return mtRet;
     }
