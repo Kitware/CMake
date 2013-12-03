@@ -698,7 +698,6 @@ private:
   mutable bool DebugIncludesDone;
   mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable bool DebugCompileOptionsDone;
-  mutable bool DebugAutoUicOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;
