@@ -1070,7 +1070,7 @@ void cmTarget::FinalizeSystemIncludeDirectories()
     std::string targetName = cge->Evaluate(this->Makefile, 0,
                                       false, this, 0, 0);
     cmTarget *tgt = this->Makefile->FindTargetToUse(targetName.c_str());
-    if (!tgt)
+    if (!tgt || tgt == this)
       {
       continue;
       }
