@@ -101,7 +101,7 @@ private:
 };
 
 struct cmStrictTargetComparison {
-  bool operator()(cmTarget *t1, cmTarget *t2) const;
+  bool operator()(cmTarget const* t1, cmTarget const* t2) const;
 };
 
 typedef std::map<cmTarget*,

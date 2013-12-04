@@ -693,7 +693,8 @@ void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
     }
 }
 
-bool cmStrictTargetComparison::operator()(cmTarget *t1, cmTarget *t2) const
+bool cmStrictTargetComparison::operator()(cmTarget const* t1,
+                                          cmTarget const* t2) const
 {
   int nameResult = strcmp(t1->GetName(), t2->GetName());
   if (nameResult == 0)
