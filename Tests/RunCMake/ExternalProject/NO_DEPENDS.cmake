@@ -5,10 +5,10 @@ include(ExternalProject RESULT_VARIABLE GOO)
 set_property(DIRECTORY PROPERTY EP_INDEPENDENT_STEP_TARGETS download patch update configure build)
 
 ExternalProject_Add(FOO
-                    GIT_REPOSITORY https://example.org/foo.git)
+                    URL https://example.org/foo.tar.gz)
 
 ExternalProject_Add(BAR
-                    GIT_REPOSITORY https://example.org/bar.git
+                    URL https://example.org/bar.tar.git
                     TEST_COMMAND echo test
                     INDEPENDENT_STEP_TARGETS install)
 # This one should not give a warning
