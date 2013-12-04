@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 2.7.20090711)
 project(ExportImport C CXX)
 
-if (NOT CMAKE_TEST_MAKEPROGRAM)
+if (CMAKE_GENERATOR MATCHES "Makefiles" AND NOT CMAKE_TEST_MAKEPROGRAM)
   message(FATAL_ERROR "You must set CMAKE_TEST_MAKEPROGRAM when running this test")
 endif()
 
