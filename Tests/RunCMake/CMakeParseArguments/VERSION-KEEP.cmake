@@ -3,7 +3,10 @@
 # CMAKE_PARSE_ARGUMENTS_(KEEP|SKIP)_EMPTY    UNSET
 #     => KEEP
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 2.8.12)
+# This is a hack, required to test the behaviour in CMake 3.0.0 before
+# it is actually released
+set(CMAKE_MINIMUM_REQUIRED_VERSION 3.0.0)
 
 include(CMakeParseArguments)
 
