@@ -49,8 +49,8 @@
 # compatibility, if CMAKE_MINIMUM_REQUIRED_VERSION < 3.0.0, the default
 # behaviour is to skip empty arguments, otherwise the default behaviour
 # is to keep them. Using the CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY
-# directory property the user can explicitly set the default behaviour
-# for a folder and its subfolders.
+# variable the user can explicitly set the default behaviour in current
+# scope.
 #
 #
 #
@@ -154,14 +154,6 @@ if(COMMAND cmake_parse_arguments)
 endif()
 
 
-define_property(DIRECTORY PROPERTY "CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY" INHERITED
-  BRIEF_DOCS "Whether empty arguments should be skipped or not by default."
-  FULL_DOCS
-  "See documentation of the cmake_parse_arguments() function in the "
-  "CMakeParseArguments module."
-  )
-
-
 function(_CMAKE_PARSE_ARGUMENTS_INTERNAL prefix _optionNames _singleArgNames _multiArgNames _skipEmpty)
   set(insideValues FALSE)
   set(currentArgName)
@@ -248,9 +240,6 @@ macro(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgNames)
 
   set(${prefix}_UNPARSED_ARGUMENTS)
 
-  get_property(_defaultSkipEmptySet DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY SET)
-  get_property(_defaultSkipEmpty    DIRECTORY PROPERTY CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY)
-
   if("x${ARGN}" MATCHES "^xCMAKE_PARSE_ARGUMENTS_(SKIP|KEEP)_EMPTY;?")
     if("${CMAKE_MATCH_1}" STREQUAL "SKIP")
         set(_skipEmpty 1)
@@ -258,8 +247,8 @@ macro(CMAKE_PARSE_ARGUMENTS prefix _optionNames _singleArgNames _multiArgNames)
         set(_skipEmpty 0)
     endif()
     string(REGEX REPLACE "^${CMAKE_MATCH_0}" "" ARGN "x${ARGN}")
-  elseif(_defaultSkipEmptySet)
-    set(_skipEmpty "${_defaultSkipEmpty}")
+  elseif(DEFINED CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY)
+    set(_skipEmpty "${CMAKE_PARSE_ARGUMENTS_DEFAULT_SKIP_EMPTY}")
   elseif(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
    # Keep compatibility with previous releases
     set(_skipEmpty 1)
