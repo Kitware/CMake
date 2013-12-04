@@ -69,10 +69,9 @@
 #    [LOG_INSTALL 1]             # Wrap install in script to log output
 #   #--Custom targets-------------
 #    [STEP_TARGETS st1 st2 ...]  # Generate custom targets for these steps
-#    [INDEPENDENT_STEP_TARGETS st1 st2 ...]
-#                                # Generate custom targets for these steps that
-#                                # do not depend on other external project even
-#                                # if a dependency is set
+#    [INDEPENDENT_STEP_TARGETS st1 st2 ...] # Generate custom targets for these
+#                                # steps that do not depend on other external
+#                                # project even if a dependency is set
 #    )
 #
 # The ``*_DIR`` options specify directories for the project, with default
@@ -1081,7 +1080,7 @@ function(ExternalProject_Add_StepTargets name)
   endif()
   foreach(step ${steps})
     if(no_deps  AND  "${step}" MATCHES "^(configure|build|install|test)$")
-        message(AUTHOR_WARNING "Using NO_DEPENDS for \"${step}\" step  might break parallel builds")
+      message(AUTHOR_WARNING "Using NO_DEPENDS for \"${step}\" step  might break parallel builds")
     endif()
     _ep_get_step_stampfile(${name} ${step} stamp_file)
     add_custom_target(${name}-${step}
