@@ -51,7 +51,7 @@ endif ()
 # handle the QUIETLY and REQUIRED arguments and set BZip2_FOUND to TRUE if
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2 DEFAULT_MSG
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(BZip2
                                   REQUIRED_VARS BZIP2_LIBRARIES BZIP2_INCLUDE_DIR
                                   VERSION_VAR BZIP2_VERSION_STRING)
 
