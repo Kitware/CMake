@@ -1,6 +1,10 @@
 cmake_minimum_required (VERSION 2.7.20090711)
 project(ExportImport C CXX)
 
+if (NOT CMAKE_TEST_MAKEPROGRAM)
+  message(FATAL_ERROR "You must set CMAKE_TEST_MAKEPROGRAM when running this test")
+endif()
+
 # Wipe out the install tree to make sure the exporter works.
 add_custom_command(
   OUTPUT ${ExportImport_BINARY_DIR}/CleanupProject
