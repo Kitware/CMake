@@ -119,6 +119,7 @@
 #    [DEPENDERS steps...]    # Steps that depend on this step
 #    [DEPENDS files...]      # Files on which this step depends
 #    [ALWAYS 1]              # No stamp file, step always runs
+#    [EXCLUDE_FROM_MAIN 1]   # Main target does not depend on this step
 #    [WORKING_DIRECTORY dir] # Working directory for command
 #    [LOG 1]                 # Wrap step in script to log output
 #    )
@@ -1192,13 +1193,16 @@ function(ExternalProject_Add_Step name step)
   set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
   _ep_get_step_stampfile(${name} ${step} stamp_file)
 
-  add_custom_command(APPEND
-    OUTPUT ${complete_stamp_file}
-    DEPENDS ${stamp_file}
-    )
-
   _ep_parse_arguments(ExternalProject_Add_Step
                       ${name} _EP_${step}_ "${ARGN}")
+
+  get_property(exclude_from_main TARGET ${name} PROPERTY _EP_${step}_EXCLUDE_FROM_MAIN)
+  if(NOT exclude_from_main)
+    add_custom_command(APPEND
+      OUTPUT ${complete_stamp_file}
+      DEPENDS ${stamp_file}
+      )
+  endif()
 
   # Steps depending on this step.
   get_property(dependers TARGET ${name} PROPERTY _EP_${step}_DEPENDERS)
