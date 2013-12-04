@@ -29,6 +29,10 @@ to configure the project:
 * The Visual Studio generators set this to the full path to
   ``MSBuild.exe`` (VS >= 10), ``devenv.com`` (VS 7,8,9),
   ``VCExpress.exe`` (VS Express 8,9), or ``msdev.exe`` (VS 6).
+  (See also variables
+  :variable:`CMAKE_VS_MSBUILD_COMMAND`,
+  :variable:`CMAKE_VS_DEVENV_COMMAND`, and
+  :variable:`CMAKE_VS_MSDEV_COMMAND`.)
 
   These generators prefer to lookup the build tool at build time
   rather than to store ``CMAKE_MAKE_PROGRAM`` in the CMake cache

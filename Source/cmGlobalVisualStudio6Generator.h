@@ -89,6 +89,8 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const { return "$(IntDir)"; }
 
+  virtual void FindMakeProgram(cmMakefile*);
+
 protected:
   virtual const char* GetIDEVersion() { return "6.0"; }
 private:

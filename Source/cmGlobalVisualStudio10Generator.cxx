@@ -256,6 +256,14 @@ std::string cmGlobalVisualStudio10Generator::GetUserMacrosRegKeyBase()
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio10Generator::FindMakeProgram(cmMakefile* mf)
+{
+  this->cmGlobalVisualStudio8Generator::FindMakeProgram(mf);
+  mf->AddDefinition("CMAKE_VS_MSBUILD_COMMAND",
+                    this->GetMSBuildCommand().c_str());
+}
+
+//----------------------------------------------------------------------------
 std::string const& cmGlobalVisualStudio10Generator::GetMSBuildCommand()
 {
   if(!this->MSBuildCommandInitialized)
