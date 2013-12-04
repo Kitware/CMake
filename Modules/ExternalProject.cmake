@@ -1080,7 +1080,7 @@ function(ExternalProject_Add_StepTargets name)
   endif()
   foreach(step ${steps})
     if(no_deps  AND  "${step}" MATCHES "^(configure|build|install|test)$")
-        message(AUTHOR_WARNING "Using NO_DEPENDS for \"${step}\" step  might break parallel builds")
+      message(AUTHOR_WARNING "Using NO_DEPENDS for \"${step}\" step  might break parallel builds")
     endif()
     _ep_get_step_stampfile(${name} ${step} stamp_file)
     add_custom_target(${name}-${step}
