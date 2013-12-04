@@ -91,6 +91,8 @@ public:
 
   virtual const char* GetToolsVersion() { return "4.0"; }
 
+  virtual void FindMakeProgram(cmMakefile*);
+
 protected:
   virtual const char* GetIDEVersion() { return "10.0"; }
 

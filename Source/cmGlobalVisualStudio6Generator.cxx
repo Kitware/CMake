@@ -78,6 +78,14 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio6Generator::FindMakeProgram(cmMakefile* mf)
+{
+  this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf);
+  mf->AddDefinition("CMAKE_VS_MSDEV_COMMAND",
+                    this->GetMSDevCommand().c_str());
+}
+
+//----------------------------------------------------------------------------
 std::string const& cmGlobalVisualStudio6Generator::GetMSDevCommand()
 {
   if(!this->MSDevCommandInitialized)
