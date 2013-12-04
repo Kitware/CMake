@@ -69,10 +69,9 @@
 #    [LOG_INSTALL 1]             # Wrap install in script to log output
 #   #--Custom targets-------------
 #    [STEP_TARGETS st1 st2 ...]  # Generate custom targets for these steps
-#    [INDEPENDENT_STEP_TARGETS st1 st2 ...]
-#                                # Generate custom targets for these steps that
-#                                # do not depend on other external project even
-#                                # if a dependency is set
+#    [INDEPENDENT_STEP_TARGETS st1 st2 ...] # Generate custom targets for these
+#                                # steps that do not depend on other external
+#                                # project even if a dependency is set
 #    )
 #
 # The ``*_DIR`` options specify directories for the project, with default
