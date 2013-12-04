@@ -154,24 +154,33 @@ Id flags: ${testflags}
     else()
       set(id_subsystem 1)
     endif()
-    if("${CMAKE_MAKE_PROGRAM}" MATCHES "[Mm][Ss][Bb][Uu][Ii][Ll][Dd]")
-      set(build /p:Configuration=Debug /p:Platform=@id_platform@ /p:VisualStudioVersion=${vs_version}.0)
-    elseif("${CMAKE_MAKE_PROGRAM}" MATCHES "[Mm][Ss][Dd][Ee][Vv]")
-      set(build /make)
-    else()
-      set(build /build Debug)
-    endif()
     set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
     get_filename_component(id_src "${src}" NAME)
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/VS-${v}.${ext}.in
       ${id_dir}/CompilerId${lang}.${ext} @ONLY)
-    execute_process(
-      COMMAND ${CMAKE_MAKE_PROGRAM} CompilerId${lang}.${ext} ${build}
-      WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
-      OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-      ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
-      RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
-      )
+    if(CMAKE_VS_MSBUILD_COMMAND AND NOT lang STREQUAL "Fortran")
+      set(command "${CMAKE_VS_MSBUILD_COMMAND}" "CompilerId${lang}.${ext}"
+        "/p:Configuration=Debug" "/p:Platform=${id_platform}" "/p:VisualStudioVersion=${vs_version}.0"
+        )
+    elseif(CMAKE_VS_DEVENV_COMMAND)
+      set(command "${CMAKE_VS_DEVENV_COMMAND}" "CompilerId${lang}.${ext}" "/build" "Debug")
+    elseif(CMAKE_VS_MSDEV_COMMAND)
+      set(command "${CMAKE_VS_MSDEV_COMMAND}" "CompilerId${lang}.${ext}" "/make")
+    else()
+      set(command "")
+    endif()
+    if(command)
+      execute_process(
+        COMMAND ${command}
+        WORKING_DIRECTORY ${CMAKE_${lang}_COMPILER_ID_DIR}
+        OUTPUT_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        ERROR_VARIABLE CMAKE_${lang}_COMPILER_ID_OUTPUT
+        RESULT_VARIABLE CMAKE_${lang}_COMPILER_ID_RESULT
+        )
+    else()
+      set(CMAKE_${lang}_COMPILER_ID_RESULT 1)
+      set(CMAKE_${lang}_COMPILER_ID_OUTPUT "VS environment not known to support ${lang}")
+    endif()
     # Match the compiler location line printed out.
     if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "CMAKE_${lang}_COMPILER=([^%\r\n]+)[\r\n]")
       # Strip VS diagnostic output from the end of the line.
