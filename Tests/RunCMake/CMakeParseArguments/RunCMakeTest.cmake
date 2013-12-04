@@ -1,0 +1,10 @@
+include(RunCMake)
+
+run_cmake(Example)
+run_cmake(VERSION-SKIP)
+run_cmake(VERSION-KEEP)
+run_cmake(PROPERTY-SKIP)
+run_cmake(PROPERTY-KEEP)
+run_cmake(ARGUMENT-SKIP)
+run_cmake(ARGUMENT-KEEP)
+run_cmake(DifferentScope)
