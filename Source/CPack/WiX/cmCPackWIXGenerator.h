@@ -56,7 +56,7 @@ protected:
 
   virtual bool SupportsComponentInstallation() const
     {
-    return false;
+    return true;
     }
 
 private:
@@ -79,8 +79,29 @@ private:
 
   bool CreateWiXSourceFiles();
 
-  bool CreateStartMenuShortcuts(
+  bool CreateFeatureHierarchy(
+    cmWIXSourceWriter& featureDefinitions);
+
+  bool EmitFeatureForComponentGroup(
+    cmWIXSourceWriter& featureDefinitions,
+    cmCPackComponentGroup const& group);
+
+  bool EmitFeatureForComponent(
+    cmWIXSourceWriter& featureDefinitions,
+    cmCPackComponent const& component);
+
+  bool AddComponentsToFeature(
+    std::string const& rootPath,
+    std::string const& featureId,
     cmWIXSourceWriter& directoryDefinitions,
+    cmWIXSourceWriter& fileDefinitions,
+    cmWIXSourceWriter& featureDefinitions,
+    shortcut_map_t& shortcutMap);
+
+  bool CreateStartMenuShortcuts(
+    std::string const& cpackComponentName,
+    std::string const& featureId,
+    shortcut_map_t& shortcutMap,
     cmWIXSourceWriter& fileDefinitions,
     cmWIXSourceWriter& featureDefinitions);
 
@@ -106,7 +127,8 @@ private:
     cmWIXSourceWriter& directoryDefinitions,
     cmWIXSourceWriter& fileDefinitions,
     cmWIXSourceWriter& featureDefinitions,
-    const std::vector<std::string>& pkgExecutables);
+    const std::vector<std::string>& pkgExecutables,
+    shortcut_map_t& shortcutMap);
 
   bool RequireOption(const std::string& name, std::string& value) const;
 
@@ -136,10 +158,11 @@ private:
   void AddCustomFlags(
     const std::string& variableName, std::ostream& stream);
 
+  void CreateStartMenuFolder(cmWIXSourceWriter& directoryDefinitions);
+
   std::vector<std::string> wixSources;
   id_map_t pathToIdMap;
   ambiguity_map_t idAmbiguityCounter;
-  shortcut_map_t shortcutMap;
 
   extension_set_t candleExtensions;
   extension_set_t lightExtensions;

@@ -140,6 +140,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                   te,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS",
+                                  te,
+                                  cmGeneratorExpression::InstallInterface,
+                                  properties, missingTargets);
 
     const bool newCMP0022Behavior =
                               te->GetPolicyStatusCMP0022() != cmPolicies::WARN

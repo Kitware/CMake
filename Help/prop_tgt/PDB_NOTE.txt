@@ -1,0 +1,8 @@
+.. note::
+ This property does not apply to STATIC library targets because no linker
+ is invoked to produce them so they have no linker-generated ``.pdb`` file
+ containing debug symbols.
+
+ The compiler-generated program database files specified by the MSVC
+ ``/Fd`` flag are not the same as linker-generated program database
+ files and so are not influenced by this property.

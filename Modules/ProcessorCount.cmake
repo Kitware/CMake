@@ -182,6 +182,20 @@ function(ProcessorCount var)
     endif()
   endif()
 
+  if(NOT count)
+    # Haiku
+    find_program(ProcessorCount_cmd_sysinfo sysinfo)
+    if(ProcessorCount_cmd_sysinfo)
+      execute_process(COMMAND ${ProcessorCount_cmd_sysinfo}
+        ERROR_QUIET
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        OUTPUT_VARIABLE sysinfo_X_output)
+      string(REGEX MATCHALL "\nCPU #[0-9]+:" procs "\n${sysinfo_X_output}")
+      list(LENGTH procs count)
+      #message("ProcessorCount: trying sysinfo '${ProcessorCount_cmd_sysinfo}'")
+    endif()
+  endif()
+
   # Since cygwin builds of CMake do not define WIN32 anymore, but they still
   # run on Windows, and will still have this env var defined:
   #

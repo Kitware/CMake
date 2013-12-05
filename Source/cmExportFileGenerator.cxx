@@ -233,12 +233,35 @@ static bool checkInterfaceDirs(const std::string &prepro,
 
   const bool inSourceBuild = strcmp(topSourceDir, topBinaryDir) == 0;
 
+  bool hadFatalError = false;
+
   for(std::vector<std::string>::iterator li = parts.begin();
       li != parts.end(); ++li)
     {
-    if (cmGeneratorExpression::Find(*li) != std::string::npos)
+    size_t genexPos = cmGeneratorExpression::Find(*li);
+    if (genexPos == 0)
       {
       continue;
+      }
+    cmake::MessageType messageType = cmake::FATAL_ERROR;
+    cmOStringStream e;
+    if (genexPos != std::string::npos)
+      {
+      switch (target->GetPolicyStatusCMP0041())
+        {
+        case cmPolicies::WARN:
+          messageType = cmake::WARNING;
+          e << target->GetMakefile()->GetPolicies()
+                      ->GetPolicyWarning(cmPolicies::CMP0041) << "\n";
+          break;
+        case cmPolicies::OLD:
+          continue;
+        case cmPolicies::REQUIRED_IF_USED:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::NEW:
+          hadFatalError = true;
+          break; // Issue fatal message.
+        }
       }
     if (cmHasLiteralPrefix(li->c_str(), "${_IMPORT_PREFIX}"))
       {
@@ -246,13 +269,10 @@ static bool checkInterfaceDirs(const std::string &prepro,
       }
     if (!cmSystemTools::FileIsFullPath(li->c_str()))
       {
-      cmOStringStream e;
       e << "Target \"" << target->GetName() << "\" "
            "INTERFACE_INCLUDE_DIRECTORIES property contains relative path:\n"
            "  \"" << *li << "\"";
-      target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
-                                          e.str().c_str());
-      return false;
+      target->GetMakefile()->IssueMessage(messageType, e.str().c_str());
       }
     if (isSubDirectory(li->c_str(), installDir))
       {
@@ -260,29 +280,44 @@ static bool checkInterfaceDirs(const std::string &prepro,
       }
     if (isSubDirectory(li->c_str(), topBinaryDir))
       {
-      cmOStringStream e;
       e << "Target \"" << target->GetName() << "\" "
            "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
            "  \"" << *li << "\"\nwhich is prefixed in the build directory.";
-      target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
-                                          e.str().c_str());
-      return false;
+      target->GetMakefile()->IssueMessage(messageType, e.str().c_str());
       }
     if (!inSourceBuild)
       {
       if (isSubDirectory(li->c_str(), topSourceDir))
         {
-        cmOStringStream e;
         e << "Target \"" << target->GetName() << "\" "
             "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
             "  \"" << *li << "\"\nwhich is prefixed in the source directory.";
-        target->GetMakefile()->IssueMessage(cmake::FATAL_ERROR,
-                                            e.str().c_str());
-        return false;
+        target->GetMakefile()->IssueMessage(messageType, e.str().c_str());
         }
       }
     }
-  return true;
+  return !hadFatalError;
+}
+
+//----------------------------------------------------------------------------
+static void prefixItems(std::string &exportDirs)
+{
+  std::vector<std::string> entries;
+  cmGeneratorExpression::Split(exportDirs, entries);
+  exportDirs = "";
+  const char *sep = "";
+  for(std::vector<std::string>::const_iterator ei = entries.begin();
+      ei != entries.end(); ++ei)
+    {
+    exportDirs += sep;
+    sep = ";";
+    if (!cmSystemTools::FileIsFullPath(ei->c_str())
+        && ei->find("${_IMPORT_PREFIX}") == std::string::npos)
+      {
+      exportDirs += "${_IMPORT_PREFIX}/";
+      }
+    exportDirs += *ei;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -301,7 +336,10 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   cmListFileBacktrace lfbt;
   cmGeneratorExpression ge(lfbt);
 
-  std::string dirs = tei->InterfaceIncludeDirectories;
+  std::string dirs = cmGeneratorExpression::Preprocess(
+                                            tei->InterfaceIncludeDirectories,
+                                            preprocessRule,
+                                            true);
   this->ReplaceInstallPrefix(dirs);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
   std::string exportDirs = cge->Evaluate(target->GetMakefile(), 0,
@@ -329,6 +367,8 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
     properties[propName] = "";
     return;
     }
+
+  prefixItems(exportDirs);
 
   std::string includes = (input?input:"");
   const char* sep = input ? ";" : "";

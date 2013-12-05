@@ -320,7 +320,7 @@ hard-coded guesses.
 .. |FIND_XXX| replace:: find_package
 .. |FIND_ARGS_XXX| replace:: <package>
 .. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
-   CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
+   :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
 
 .. include:: FIND_XXX_MAC.txt
 .. include:: FIND_XXX_ROOT.txt

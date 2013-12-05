@@ -25,7 +25,8 @@
   F(CMP0008) \
   F(CMP0020) \
   F(CMP0021) \
-  F(CMP0022)
+  F(CMP0022) \
+  F(CMP0041)
 
 class cmake;
 class cmMakefile;
@@ -532,6 +533,8 @@ public:
 
   void GetCompileOptions(std::vector<std::string> &result,
                          const char *config) const;
+  void GetAutoUicOptions(std::vector<std::string> &result,
+                         const char *config) const;
 
   bool IsNullImpliedByLinkLibraries(const std::string &p) const;
   bool IsLinkInterfaceDependentBoolProperty(const std::string &p,
@@ -689,6 +692,7 @@ private:
   bool IsImportedTarget;
   mutable bool DebugIncludesDone;
   mutable bool DebugCompileOptionsDone;
+  mutable bool DebugAutoUicOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
   bool BuildInterfaceIncludesAppended;

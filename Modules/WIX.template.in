@@ -39,6 +39,6 @@
 
         <FeatureRef Id="ProductFeature"/>
 
-        <UIRef Id="WixUI_InstallDir" />
+        <UIRef Id="$(var.CPACK_WIX_UI_REF)" />
     </Product>
 </Wix>

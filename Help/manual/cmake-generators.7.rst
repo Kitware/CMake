@@ -81,4 +81,5 @@ The following extra generators are known to CMake.
    /generator/CodeBlocks
    /generator/Eclipse CDT4
    /generator/KDevelop3
+   /generator/Kate
    /generator/Sublime Text 2
