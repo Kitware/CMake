@@ -1,5 +1,8 @@
 cmake_minimum_required (VERSION 2.7.20090711)
 project(ExportImport C CXX)
+if(NOT DEFINED CMAKE_TEST_MAKEPROGRAM AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+  set(CMAKE_TEST_MAKEPROGRAM "${CMAKE_MAKE_PROGRAM}")
+endif()
 
 # Wipe out the install tree to make sure the exporter works.
 add_custom_command(
