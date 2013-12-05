@@ -11,6 +11,7 @@ run_cmake(InterfaceString-builtin-prop)
 run_cmake(InterfaceString-Bool-Conflict)
 run_cmake(DebugProperties)
 
-set(RunCMake_TEST_OPTIONS -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE})
-
-run_cmake(AutoUic)
+if (QT_QMAKE_EXECUTABLE})
+  set(RunCMake_TEST_OPTIONS -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE})
+  run_cmake(AutoUic)
+endif()
