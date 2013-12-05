@@ -4385,7 +4385,7 @@ std::string compatibilityAgree(CompatibleType t, bool dominant)
     {
     case BoolType:
     case StringType:
-      return "(Agree)\n";
+      return dominant ? "(Disagree)\n" : "(Agree)\n";
     case NumberMaxType:
     case NumberMinType:
       return dominant ? "(Dominant)\n" : "(Ignored)\n";
@@ -4475,6 +4475,8 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
         {
         PropertyType consistent = consistentProperty(propContent,
                                                      ifacePropContent, t);
+        report += reportEntry;
+        report += compatibilityAgree(t, propContent != consistent);
         if (!consistent)
           {
           cmOStringStream e;
@@ -4487,8 +4489,6 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          report += reportEntry;
-          report += compatibilityAgree(t, propContent != consistent);
           propContent = consistent;
           continue;
           }
@@ -4513,6 +4513,8 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
         {
         PropertyType consistent = consistentProperty(propContent,
                                                      ifacePropContent, t);
+        report += reportEntry;
+        report += compatibilityAgree(t, propContent != consistent);
         if (!consistent)
           {
           cmOStringStream e;
@@ -4526,8 +4528,6 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          report += reportEntry;
-          report += compatibilityAgree(t, propContent != consistent);
           propContent = consistent;
           continue;
           }
@@ -4546,6 +4546,8 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           {
           PropertyType consistent = consistentProperty(propContent,
                                                        ifacePropContent, t);
+          report += reportEntry;
+          report += compatibilityAgree(t, propContent != consistent);
           if (!consistent)
             {
             cmOStringStream e;
@@ -4558,8 +4560,6 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
             }
           else
             {
-            report += reportEntry;
-            report += compatibilityAgree(t, propContent != consistent);
             propContent = consistent;
             continue;
             }
