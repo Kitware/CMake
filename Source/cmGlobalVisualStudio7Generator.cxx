@@ -111,6 +111,14 @@ void cmGlobalVisualStudio7Generator
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio7Generator::FindMakeProgram(cmMakefile* mf)
+{
+  this->cmGlobalVisualStudioGenerator::FindMakeProgram(mf);
+  mf->AddDefinition("CMAKE_VS_DEVENV_COMMAND",
+                    this->GetDevEnvCommand().c_str());
+}
+
+//----------------------------------------------------------------------------
 std::string const& cmGlobalVisualStudio7Generator::GetDevEnvCommand()
 {
   if(!this->DevEnvCommandInitialized)

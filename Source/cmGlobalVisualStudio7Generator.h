@@ -107,6 +107,8 @@ public:
 
   const char* GetIntelProjectVersion();
 
+  virtual void FindMakeProgram(cmMakefile*);
+
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 
