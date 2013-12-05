@@ -569,6 +569,11 @@ public:
   bool LinkLanguagePropagatesToDependents() const
   { return this->TargetTypeValue == STATIC_LIBRARY; }
 
+  void ReportPropertyOrigin(const std::string &p,
+                            const std::string &result,
+                            const std::string &report,
+                            const std::string &compatibilityType) const;
+
 private:
   bool HandleLocationPropertyPolicy() const;
 
@@ -691,6 +696,7 @@ private:
   bool IsApple;
   bool IsImportedTarget;
   mutable bool DebugIncludesDone;
+  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugAutoUicOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
