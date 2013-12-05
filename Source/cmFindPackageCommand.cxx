@@ -13,6 +13,7 @@
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/Encoding.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmVariableWatch.h"
@@ -1245,23 +1246,23 @@ void cmFindPackageCommand::LoadPackageRegistryWinSystem()
 void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
                                                   unsigned int view)
 {
-  std::string key = "Software\\Kitware\\CMake\\Packages\\";
-  key += this->Name;
-  std::set<cmStdString> bad;
+  std::wstring key = L"Software\\Kitware\\CMake\\Packages\\";
+  key += cmsys::Encoding::ToWide(this->Name);
+  std::set<std::wstring> bad;
   HKEY hKey;
-  if(RegOpenKeyEx(user? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE, key.c_str(),
-                  0, KEY_QUERY_VALUE|view, &hKey) == ERROR_SUCCESS)
+  if(RegOpenKeyExW(user? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE, key.c_str(),
+                   0, KEY_QUERY_VALUE|view, &hKey) == ERROR_SUCCESS)
     {
     DWORD valueType = REG_NONE;
-    char name[16384];
-    std::vector<char> data(512);
+    wchar_t name[16383]; // RegEnumValue docs limit name to 32767 _bytes_
+    std::vector<wchar_t> data(512);
     bool done = false;
     DWORD index = 0;
     while(!done)
       {
       DWORD nameSize = static_cast<DWORD>(sizeof(name));
-      DWORD dataSize = static_cast<DWORD>(data.size()-1);
-      switch(RegEnumValue(hKey, index, name, &nameSize,
+      DWORD dataSize = static_cast<DWORD>(data.size()*sizeof(data[0]));
+      switch(RegEnumValueW(hKey, index, name, &nameSize,
                           0, &valueType, (BYTE*)&data[0], &dataSize))
         {
         case ERROR_SUCCESS:
@@ -1269,7 +1270,7 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
           if(valueType == REG_SZ)
             {
             data[dataSize] = 0;
-            cmsys_ios::stringstream ss(&data[0]);
+            cmsys_ios::stringstream ss(cmsys::Encoding::ToNarrow(&data[0]));
             if(!this->CheckPackageRegistryEntry(ss))
               {
               // The entry is invalid.
@@ -1278,7 +1279,7 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
             }
           break;
         case ERROR_MORE_DATA:
-          data.resize(dataSize+1);
+          data.resize((dataSize+sizeof(data[0])-1)/sizeof(data[0]));
           break;
         case ERROR_NO_MORE_ITEMS: default: done = true; break;
         }
@@ -1288,13 +1289,13 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
 
   // Remove bad values if possible.
   if(user && !bad.empty() &&
-     RegOpenKeyEx(HKEY_CURRENT_USER, key.c_str(),
+     RegOpenKeyExW(HKEY_CURRENT_USER, key.c_str(),
                   0, KEY_SET_VALUE|view, &hKey) == ERROR_SUCCESS)
     {
-    for(std::set<cmStdString>::const_iterator vi = bad.begin();
+    for(std::set<std::wstring>::const_iterator vi = bad.begin();
         vi != bad.end(); ++vi)
       {
-      RegDeleteValue(hKey, vi->c_str());
+      RegDeleteValueW(hKey, vi->c_str());
       }
     RegCloseKey(hKey);
     }

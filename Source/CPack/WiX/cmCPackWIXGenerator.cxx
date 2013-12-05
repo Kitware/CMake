@@ -23,6 +23,7 @@
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Directory.hxx>
+#include <cmsys/Encoding.hxx>
 
 #include <rpc.h> // for GUID generation
 
@@ -954,11 +955,12 @@ std::string cmCPackWIXGenerator::GenerateGUID()
   UUID guid;
   UuidCreate(&guid);
 
-  unsigned char *tmp = 0;
-  UuidToString(&guid, &tmp);
+  unsigned short *tmp = 0;
+  UuidToStringW(&guid, &tmp);
 
-  std::string result(reinterpret_cast<char*>(tmp));
-  RpcStringFree(&tmp);
+  std::string result =
+    cmsys::Encoding::ToNarrow(reinterpret_cast<wchar_t*>(tmp));
+  RpcStringFreeW(&tmp);
 
   return cmSystemTools::UpperCase(result);
 }
