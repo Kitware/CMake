@@ -4423,6 +4423,93 @@ const char* impliedValue<const char*>(const char*)
   return "";
 }
 
+
+template<typename PropertyType>
+std::string valueAsString(PropertyType);
+template<>
+std::string valueAsString<bool>(bool value)
+{
+  return value ? "TRUE" : "FALSE";
+}
+template<>
+std::string valueAsString<const char*>(const char* value)
+{
+  return value ? value : "(unset)";
+}
+
+//----------------------------------------------------------------------------
+void
+cmTarget::ReportPropertyOrigin(const std::string &p,
+                               const std::string &result,
+                               const std::string &report,
+                               const std::string &compatibilityType) const
+{
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+          this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugOrigin = !this->DebugCompatiblePropertiesDone[p]
+                    && std::find(debugProperties.begin(),
+                                 debugProperties.end(),
+                                 p)
+                        != debugProperties.end();
+
+  if (this->Makefile->IsGeneratingBuildSystem())
+    {
+    this->DebugCompatiblePropertiesDone[p] = true;
+    }
+  if (!debugOrigin)
+    {
+    return;
+    }
+
+  std::string areport = compatibilityType;
+  areport += std::string(" of property \"") + p + "\" for target \"";
+  areport += std::string(this->GetName());
+  areport += "\" (result: \"";
+  areport += result;
+  areport += "\"):\n" + report;
+
+  cmListFileBacktrace lfbt;
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport, lfbt);
+}
+
+//----------------------------------------------------------------------------
+std::string compatibilityType(CompatibleType t)
+{
+  switch(t)
+    {
+    case BoolType:
+      return "Boolean compatibility";
+    case StringType:
+      return "String compatibility";
+    case NumberMaxType:
+      return "Numeric maximum compatibility";
+    case NumberMinType:
+      return "Numeric minimum compatibility";
+    }
+  assert(!"Unreachable!");
+}
+
+//----------------------------------------------------------------------------
+std::string compatibilityAgree(CompatibleType t, bool dominant)
+{
+  switch(t)
+    {
+    case BoolType:
+    case StringType:
+      return "(Agree)\n";
+    case NumberMaxType:
+    case NumberMinType:
+      return dominant ? "(Dominant)\n" : "(Ignored)\n";
+    }
+  assert(!"Unreachable!");
+}
+
 //----------------------------------------------------------------------------
 template<typename PropertyType>
 PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
@@ -4450,6 +4537,23 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
   bool propInitialized = explicitlySet;
 
+  std::string report = " * Target \"";
+  report += tgt->GetName();
+  if (explicitlySet)
+    {
+    report += "\" has property content \"";
+    report += valueAsString<PropertyType>(propContent);
+    report += "\"\n";
+    }
+  else if (impliedByUse)
+    {
+    report += "\" property is implied by use.\n";
+    }
+  else
+    {
+    report += "\" property not set.\n";
+    }
+
   for(cmComputeLinkInformation::ItemVector::const_iterator li =
       deps.begin();
       li != deps.end(); ++li)
@@ -4471,6 +4575,17 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     PropertyType ifacePropContent =
                     getTypedProperty<PropertyType>(li->Target,
                               ("INTERFACE_" + p).c_str(), 0);
+
+    std::string reportEntry;
+    if (ifacePropContent)
+      {
+      reportEntry += " * Target \"";
+      reportEntry += li->Target->GetName();
+      reportEntry += "\" property value \"";
+      reportEntry += valueAsString<PropertyType>(ifacePropContent);
+      reportEntry += "\" ";
+      }
+
     if (explicitlySet)
       {
       if (ifaceIsSet)
@@ -4489,7 +4604,8 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          // Agree
+          report += reportEntry;
+          report += compatibilityAgree(t, propContent != consistent);
           propContent = consistent;
           continue;
           }
@@ -4503,6 +4619,13 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     else if (impliedByUse)
       {
       propContent = impliedValue<PropertyType>(propContent);
+
+      reportEntry += " * Target \"";
+      reportEntry += li->Target->GetName();
+      reportEntry += "\" property value \"";
+      reportEntry += valueAsString<PropertyType>(propContent);
+      reportEntry += "\" ";
+
       if (ifaceIsSet)
         {
         PropertyType consistent = consistentProperty(propContent,
@@ -4520,7 +4643,8 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          // Agree
+          report += reportEntry;
+          report += compatibilityAgree(t, propContent != consistent);
           propContent = consistent;
           continue;
           }
@@ -4551,13 +4675,15 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
             }
           else
             {
-            // Agree.
+            report += reportEntry;
+            report += compatibilityAgree(t, propContent != consistent);
             propContent = consistent;
             continue;
             }
           }
         else
           {
+          report += reportEntry + "(Interface set)\n";
           propContent = ifacePropContent;
           propInitialized = true;
           }
@@ -4569,6 +4695,9 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
         }
       }
     }
+
+  tgt->ReportPropertyOrigin(p, valueAsString<PropertyType>(propContent),
+                            report, compatibilityType(t));
   return propContent;
 }
 
