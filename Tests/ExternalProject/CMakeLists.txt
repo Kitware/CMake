@@ -309,6 +309,7 @@ if(do_cvs_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalCVSRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "CVS")
 
@@ -324,6 +325,7 @@ if(do_cvs_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalCVSRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "CVS")
 
@@ -344,6 +346,7 @@ if(do_cvs_tests)
     DEPENDS "TutorialStep1-LocalNoDirTGZ"
     DEPENDS "TutorialStep1-CVS-20090626"
     DEPENDS "TutorialStep1-CVS-testtag1"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "CVS")
 endif()
@@ -405,6 +408,7 @@ if(do_svn_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "SVN")
 
@@ -419,6 +423,7 @@ if(do_svn_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "SVN")
 
@@ -431,6 +436,7 @@ if(do_svn_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalSVNRepository"
+    INDEPENDENT_STEP_TARGETS ""
     LOG_DOWNLOAD 1
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "SVN")
@@ -485,6 +491,7 @@ if(do_git_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
@@ -499,6 +506,7 @@ if(do_git_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
@@ -511,6 +519,7 @@ if(do_git_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
+    INDEPENDENT_STEP_TARGETS ""
     LOG_UPDATE 1
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
@@ -551,6 +560,7 @@ if(do_hg_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalHGRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "HG")
 
@@ -565,6 +575,7 @@ if(do_hg_tests)
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalHGRepository"
+    INDEPENDENT_STEP_TARGETS ""
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "HG")
 
@@ -580,6 +591,7 @@ if(do_hg_tests)
       CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
       INSTALL_COMMAND ""
       DEPENDS "SetupLocalHGRepository"
+      INDEPENDENT_STEP_TARGETS ""
       LOG_UPDATE 1
     )
     set_property(TARGET ${proj} PROPERTY FOLDER "HG")
