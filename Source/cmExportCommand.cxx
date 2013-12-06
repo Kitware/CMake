@@ -287,7 +287,7 @@ void cmExportCommand::StorePackageRegistryWin(std::string const& package,
   std::wstring wcontent = cmsys::Encoding::ToWide(content);
   err = RegSetValueExW(hKey, cmsys::Encoding::ToWide(hash).c_str(),
                        0, REG_SZ, (BYTE const*)wcontent.c_str(),
-                       static_cast<DWORD>(wcontent.size()+1) * sizeof(wchar_t));
+                       static_cast<DWORD>(wcontent.size()+1)*sizeof(wchar_t));
   RegCloseKey(hKey);
   if(err != ERROR_SUCCESS)
     {
