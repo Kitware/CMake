@@ -1,5 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
 project(testf C CXX Fortran)
+if(NOT DEFINED CMAKE_TEST_MAKEPROGRAM AND NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+  set(CMAKE_TEST_MAKEPROGRAM "${CMAKE_MAKE_PROGRAM}")
+endif()
+
 message("CTEST_FULL_OUTPUT ")
 set(CMAKE_VERBOSE_MAKEFILE 1)
 message("ENV_FLAGS = $ENV{FFLAGS}")
