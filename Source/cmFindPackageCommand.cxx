@@ -1254,14 +1254,14 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
                    0, KEY_QUERY_VALUE|view, &hKey) == ERROR_SUCCESS)
     {
     DWORD valueType = REG_NONE;
-    wchar_t name[16384];
+    wchar_t name[16383]; // RegEnumValue docs limit name to 32767 _bytes_
     std::vector<wchar_t> data(512);
     bool done = false;
     DWORD index = 0;
     while(!done)
       {
       DWORD nameSize = static_cast<DWORD>(sizeof(name));
-      DWORD dataSize = static_cast<DWORD>(data.size()-1);
+      DWORD dataSize = static_cast<DWORD>(data.size()*sizeof(data[0]));
       switch(RegEnumValueW(hKey, index, name, &nameSize,
                           0, &valueType, (BYTE*)&data[0], &dataSize))
         {
@@ -1279,7 +1279,7 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
             }
           break;
         case ERROR_MORE_DATA:
-          data.resize(dataSize+1);
+          data.resize((dataSize+sizeof(data[0])-1)/sizeof(data[0]));
           break;
         case ERROR_NO_MORE_ITEMS: default: done = true; break;
         }
