@@ -8,7 +8,7 @@ ExternalProject_Add(FOO
                     URL https://example.org/foo.tar.gz)
 
 ExternalProject_Add(BAR
-                    URL https://example.org/bar.tar.git
+                    URL https://example.org/bar.tar.gz
                     TEST_COMMAND echo test
                     INDEPENDENT_STEP_TARGETS install)
 # This one should not give a warning
