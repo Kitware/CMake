@@ -34,13 +34,6 @@ public:
    */
   virtual const char* GetName() const { return "define_property";}
 
-  /**
-   * This determines if the command is invoked when in script mode.
-   * define_property() will have no effect in script mode, but this will
-   * make many of the modules usable in cmake/ctest scripts.
-   */
-  virtual bool IsScriptable() const { return true; }
-
   cmTypeMacro(cmDefinePropertyCommand, cmCommand);
 private:
   std::string PropertyName;
