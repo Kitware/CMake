@@ -16,6 +16,7 @@
 #    [LIST_SEPARATOR sep]        # Sep to be replaced by ; in cmd lines
 #    [TMP_DIR dir]               # Directory to store temporary files
 #    [STAMP_DIR dir]             # Directory to store step timestamps
+#    [EXCLUDE_FROM_ALL 1]        # The "all" target does not depend on this
 #   #--Download step--------------
 #    [DOWNLOAD_NAME fname]       # File name to store (if not end of URL)
 #    [DOWNLOAD_DIR dir]          # Directory to store downloaded files
@@ -1913,12 +1914,21 @@ function(ExternalProject_Add name)
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
   set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
 
+  # The "ALL" option to add_custom_target just tells it to not set the
+  # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
+  # argument was passed, we explicitly set it for the target.
   add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
   set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
   _ep_parse_arguments(ExternalProject_Add ${name} _EP_ "${ARGN}")
   _ep_set_directories(${name})
   _ep_get_step_stampfile(${name} "done" done_stamp_file)
   _ep_get_step_stampfile(${name} "install" install_stamp_file)
+
+  # Set the EXCLUDE_FROM_ALL target property if required.
+  get_property(exclude_from_all TARGET ${name} PROPERTY _EP_EXCLUDE_FROM_ALL)
+  if(exclude_from_all)
+    set_property(TARGET ${name} PROPERTY EXCLUDE_FROM_ALL TRUE)
+  endif()
 
   # The 'complete' step depends on all other steps and creates a
   # 'done' mark.  A dependent external project's 'configure' step
