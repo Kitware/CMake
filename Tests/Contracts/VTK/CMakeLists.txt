@@ -25,7 +25,6 @@ if(NOT DEFINED HOME)
 endif()
 
 set(base_dir "${HOME}/.cmake/Contracts/VTK")
-set(stamp_dir "${base_dir}/stamp")
 
 if(NOT DEFINED SITE)
   site_name(SITE)
@@ -41,7 +40,7 @@ configure_file(
 ExternalProject_Add(${PROJECT_NAME}
   GIT_REPOSITORY "git://vtk.org/VTK.git"
   GIT_TAG "release"
-  STAMP_DIR ${stamp_dir}
+  PREFIX ${base_dir}
   CONFIGURE_COMMAND ""
   BUILD_COMMAND ${CMAKE_CTEST_COMMAND} -S "${base_dir}/Dashboard.cmake"
   INSTALL_COMMAND ""
