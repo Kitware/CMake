@@ -23,6 +23,7 @@
 #include <windows.h>
 #include <sstream>
 #include <cmSystemTools.h>
+#include <cmsys/Encoding.hxx>
 
 // We don't want any wildcard expansion.
 // See http://msdn.microsoft.com/en-us/library/zay8tzh6(v=vs.85).aspx
@@ -100,7 +101,7 @@ static std::string getArg(std::string& cmdline) {
   return ret;
 }
 
-static void parseCommandLine(LPTSTR wincmdline,
+static void parseCommandLine(LPWSTR wincmdline,
                              std::string& lang,
                              std::string& srcfile,
                              std::string& dfile,
@@ -109,7 +110,7 @@ static void parseCommandLine(LPTSTR wincmdline,
                              std::string& clpath,
                              std::string& binpath,
                              std::string& rest) {
-  std::string cmdline(wincmdline);
+  std::string cmdline = cmsys::Encoding::ToNarrow(wincmdline);
   /* self */ getArg(cmdline);
   lang = getArg(cmdline);
   srcfile = getArg(cmdline);
@@ -247,7 +248,7 @@ int main() {
   // the same command line verbatim.
 
   std::string lang, srcfile, dfile, objfile, prefix, cl, binpath, rest;
-  parseCommandLine(GetCommandLine(), lang, srcfile, dfile, objfile,
+  parseCommandLine(GetCommandLineW(), lang, srcfile, dfile, objfile,
                                      prefix, cl, binpath, rest);
 
   // needed to suppress filename output of msvc tools

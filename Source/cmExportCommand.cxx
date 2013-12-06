@@ -16,6 +16,7 @@
 #include "cmake.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/Encoding.hxx>
 
 #include "cmExportBuildFileGenerator.h"
 
@@ -252,14 +253,14 @@ void cmExportCommand::ReportRegistryError(std::string const& msg,
   cmOStringStream e;
   e << msg << "\n"
     << "  HKEY_CURRENT_USER\\" << key << "\n";
-  char winmsg[1024];
-  if(FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
+  wchar_t winmsg[1024];
+  if(FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM |
                    FORMAT_MESSAGE_IGNORE_INSERTS, 0, err,
                    MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                    winmsg, 1024, 0) > 0)
     {
     e << "Windows reported:\n"
-      << "  " << winmsg;
+      << "  " << cmsys::Encoding::ToNarrow(winmsg);
     }
   this->Makefile->IssueMessage(cmake::WARNING, e.str());
 }
@@ -272,8 +273,9 @@ void cmExportCommand::StorePackageRegistryWin(std::string const& package,
   std::string key = "Software\\Kitware\\CMake\\Packages\\";
   key += package;
   HKEY hKey;
-  LONG err = RegCreateKeyEx(HKEY_CURRENT_USER,
-                            key.c_str(), 0, 0, REG_OPTION_NON_VOLATILE,
+  LONG err = RegCreateKeyExW(HKEY_CURRENT_USER,
+                            cmsys::Encoding::ToWide(key).c_str(),
+                            0, 0, REG_OPTION_NON_VOLATILE,
                             KEY_SET_VALUE, 0, &hKey, 0);
   if(err != ERROR_SUCCESS)
     {
@@ -281,8 +283,11 @@ void cmExportCommand::StorePackageRegistryWin(std::string const& package,
       "Cannot create/open registry key", key, err);
     return;
     }
-  err = RegSetValueEx(hKey, hash, 0, REG_SZ, (BYTE const*)content,
-                      static_cast<DWORD>(strlen(content)+1));
+
+  std::wstring wcontent = cmsys::Encoding::ToWide(content);
+  err = RegSetValueExW(hKey, cmsys::Encoding::ToWide(hash).c_str(),
+                       0, REG_SZ, (BYTE const*)wcontent.c_str(),
+                       static_cast<DWORD>(wcontent.size()+1) * sizeof(wchar_t));
   RegCloseKey(hKey);
   if(err != ERROR_SUCCESS)
     {

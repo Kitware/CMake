@@ -25,6 +25,7 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/System.h>
+#include <cmsys/Encoding.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmArchiveWrite.h"
 # include <cm_libarchive.h>
@@ -880,19 +881,23 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
      Try multiple times since we may be racing against another process
      creating/opening the destination file just before our MoveFileEx.  */
   int tries = 5;
-  while(!MoveFileEx(oldname, newname, MOVEFILE_REPLACE_EXISTING) && --tries)
+  while(!MoveFileExW(cmsys::Encoding::ToWide(oldname).c_str(),
+                     cmsys::Encoding::ToWide(newname).c_str(),
+                     MOVEFILE_REPLACE_EXISTING) && --tries)
     {
     // Try again only if failure was due to access permissions.
     if(GetLastError() != ERROR_ACCESS_DENIED)
       {
       return false;
       }
-    DWORD attrs = GetFileAttributes(newname);
+    DWORD attrs =
+      GetFileAttributesW(cmsys::Encoding::ToWide(newname).c_str());
     if((attrs != INVALID_FILE_ATTRIBUTES) &&
        (attrs & FILE_ATTRIBUTE_READONLY))
       {
       // Remove the read-only attribute from the destination file.
-      SetFileAttributes(newname, attrs & ~FILE_ATTRIBUTE_READONLY);
+      SetFileAttributesW(cmsys::Encoding::ToWide(newname).c_str(),
+                         attrs & ~FILE_ATTRIBUTE_READONLY);
       }
     else
       {
@@ -1884,10 +1889,12 @@ bool cmSystemTools::CopyFileTime(const char* fromFile, const char* toFile)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle hFrom =
-    CreateFile(fromFile, GENERIC_READ, FILE_SHARE_READ, 0,
-               OPEN_EXISTING, 0, 0);
+    CreateFileW(cmsys::Encoding::ToWide(fromFile).c_str(),
+                GENERIC_READ, FILE_SHARE_READ, 0,
+                OPEN_EXISTING, 0, 0);
   cmSystemToolsWindowsHandle hTo =
-    CreateFile(toFile, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+    CreateFileW(cmsys::Encoding::ToWide(toFile).c_str(),
+                GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
   if(!hFrom || !hTo)
     {
     return false;
@@ -1938,7 +1945,8 @@ bool cmSystemTools::FileTimeGet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle h =
-    CreateFile(fname, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+    CreateFileW(cmsys::Encoding::ToWide(fname).c_str(),
+                GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
   if(!h)
     {
     return false;
@@ -1964,7 +1972,8 @@ bool cmSystemTools::FileTimeSet(const char* fname, cmSystemToolsFileTime* t)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   cmSystemToolsWindowsHandle h =
-    CreateFile(fname, GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
+    CreateFileW(cmsys::Encoding::ToWide(fname).c_str(),
+                GENERIC_WRITE, 0, 0, OPEN_EXISTING, 0, 0);
   if(!h)
     {
     return false;
@@ -2059,9 +2068,10 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   std::string exe_dir;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   (void)argv0; // ignore this on windows
-  char modulepath[_MAX_PATH];
-  ::GetModuleFileName(NULL, modulepath, sizeof(modulepath));
-  exe_dir = cmSystemTools::GetFilenamePath(modulepath);
+  wchar_t modulepath[_MAX_PATH];
+  ::GetModuleFileNameW(NULL, modulepath, sizeof(modulepath));
+  exe_dir =
+    cmSystemTools::GetFilenamePath(cmsys::Encoding::ToNarrow(modulepath));
 #elif defined(__APPLE__)
   (void)argv0; // ignore this on OS X
 # define CM_EXE_PATH_LOCAL_SIZE 16384

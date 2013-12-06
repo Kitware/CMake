@@ -2224,7 +2224,7 @@ static bool cmLVS6G_IsFAT(const char* dir)
     char volRoot[4] = "_:/";
     volRoot[0] = dir[0];
     char fsName[16];
-    if(GetVolumeInformation(volRoot, 0, 0, 0, 0, 0, fsName, 16) &&
+    if(GetVolumeInformationA(volRoot, 0, 0, 0, 0, 0, fsName, 16) &&
        strstr(fsName, "FAT") != 0)
       {
       return true;

@@ -16,6 +16,7 @@
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
+#include <cmsys/Encoding.hxx>
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   const char* platformName)
@@ -897,11 +898,11 @@ void cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
     }
   std::string ret;
   UUID uid;
-  unsigned char *uidstr;
+  unsigned short *uidstr;
   UuidCreate(&uid);
-  UuidToString(&uid,&uidstr);
-  ret = reinterpret_cast<char*>(uidstr);
-  RpcStringFree(&uidstr);
+  UuidToStringW(&uid,&uidstr);
+  ret = cmsys::Encoding::ToNarrow(reinterpret_cast<wchar_t*>(uidstr));
+  RpcStringFreeW(&uidstr);
   ret = cmSystemTools::UpperCase(ret);
   this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(),
                                      ret.c_str(), "Stored GUID",
