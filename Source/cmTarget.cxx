@@ -4376,6 +4376,7 @@ std::string compatibilityType(CompatibleType t)
       return "Numeric minimum compatibility";
     }
   assert(!"Unreachable!");
+  return "";
 }
 
 //----------------------------------------------------------------------------
@@ -4391,6 +4392,7 @@ std::string compatibilityAgree(CompatibleType t, bool dominant)
       return dominant ? "(Dominant)\n" : "(Ignored)\n";
     }
   assert(!"Unreachable!");
+  return "";
 }
 
 //----------------------------------------------------------------------------
