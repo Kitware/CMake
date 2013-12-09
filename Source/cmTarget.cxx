@@ -1677,32 +1677,6 @@ static void processCompileOptions(cmTarget const* tgt,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetAutoUicOptions(std::vector<std::string> &result,
-                                 const char *config) const
-{
-  const char *prop
-            = this->GetLinkInterfaceDependentStringProperty("AUTOUIC_OPTIONS",
-                                                            config);
-  if (!prop)
-    {
-    return;
-    }
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
-
-  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                      this->GetName(),
-                                      "AUTOUIC_OPTIONS", 0, 0);
-  cmSystemTools::ExpandListArgument(ge.Parse(prop)
-                                      ->Evaluate(this->Makefile,
-                                                config,
-                                                false,
-                                                this,
-                                                &dagChecker),
-                                  result);
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                                  const char *config) const
 {

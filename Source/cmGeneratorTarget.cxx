@@ -593,6 +593,33 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs) const
 }
 
 //----------------------------------------------------------------------------
+void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
+                                 const char *config) const
+{
+  const char *prop
+            = this->Target->
+                    GetLinkInterfaceDependentStringProperty("AUTOUIC_OPTIONS",
+                                                            config);
+  if (!prop)
+    {
+    return;
+    }
+  cmListFileBacktrace lfbt;
+  cmGeneratorExpression ge(lfbt);
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                      this->GetName(),
+                                      "AUTOUIC_OPTIONS", 0, 0);
+  cmSystemTools::ExpandListArgument(ge.Parse(prop)
+                                      ->Evaluate(this->Makefile,
+                                                config,
+                                                false,
+                                                this->Target,
+                                                &dagChecker),
+                                  result);
+}
+
+//----------------------------------------------------------------------------
 class cmTargetTraceDependencies
 {
 public:

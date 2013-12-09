@@ -116,12 +116,14 @@ public:
     const std::string TargetName;
   };
 
+  void GetAutoUicOptions(std::vector<std::string> &result,
+                         const char *config) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
-
   std::vector<cmSourceFile*> CustomCommands;
   std::vector<cmSourceFile*> ExtraSources;
   std::vector<cmSourceFile*> HeaderSources;
