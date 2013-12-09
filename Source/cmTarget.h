@@ -551,12 +551,6 @@ private:
   cmTargetInternalPointer Internal;
 
   void ConstructSourceFileFlags() const;
-  void ComputeVersionedName(std::string& vName,
-                            std::string const& prefix,
-                            std::string const& base,
-                            std::string const& suffix,
-                            std::string const& name,
-                            const char* version) const;
 };
 
 typedef std::map<cmStdString,cmTarget> cmTargets;
