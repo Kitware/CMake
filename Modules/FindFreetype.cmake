@@ -103,8 +103,14 @@ if(FREETYPE_INCLUDE_DIR_ft2build AND FREETYPE_INCLUDE_DIR_freetype2)
 endif()
 set(FREETYPE_LIBRARIES "${FREETYPE_LIBRARY}")
 
-if(FREETYPE_INCLUDE_DIR_freetype2 AND EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
-    file(STRINGS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h" freetype_version_str
+if(EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
+  set(FREETYPE_H "${FREETYPE_INCLUDE_DIR_freetype2}/freetype/freetype.h")
+elseif(EXISTS "${FREETYPE_INCLUDE_DIR_freetype2}/freetype.h")
+  set(FREETYPE_H "${FREETYPE_INCLUDE_DIR_freetype2}/freetype.h")
+endif()
+
+if(FREETYPE_INCLUDE_DIR_freetype2 AND FREETYPE_H)
+    file(STRINGS "${FREETYPE_H}" freetype_version_str
          REGEX "^#[\t ]*define[\t ]+FREETYPE_(MAJOR|MINOR|PATCH)[\t ]+[0-9]+$")
 
     unset(FREETYPE_VERSION_STRING)
