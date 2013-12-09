@@ -623,8 +623,11 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
 static void GetUicOpts(cmTarget const* target, const char * config,
                        std::string &optString)
 {
+  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(target);
   std::vector<std::string> opts;
-  target->GetAutoUicOptions(opts, config);
+  gtgt->GetAutoUicOptions(opts, config);
 
   const char* sep = "";
   for(std::vector<std::string>::const_iterator optIt = opts.begin();
