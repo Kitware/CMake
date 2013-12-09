@@ -16,6 +16,8 @@
 # include <cmsys/hash_map.hxx>
 #endif
 
+#include <cmsys/Encoding.hxx>
+
 // Use a platform-specific API to get file times efficiently.
 #if !defined(_WIN32) || defined(__CYGWIN__)
 #  define cmFileTimeComparison_Type struct stat
@@ -86,7 +88,8 @@ bool cmFileTimeComparisonInternal::Stat(const char* fname,
   // Windows version.  Get the modification time from extended file
   // attributes.
   WIN32_FILE_ATTRIBUTE_DATA fdata;
-  if(!GetFileAttributesEx(fname, GetFileExInfoStandard, &fdata))
+  if(!GetFileAttributesExW(cmsys::Encoding::ToWide(fname).c_str(),
+                           GetFileExInfoStandard, &fdata))
     {
     return false;
     }
