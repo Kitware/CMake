@@ -2454,23 +2454,6 @@ cmTarget::ImportedGetFullPath(const char* config, bool implib) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::ComputeVersionedName(std::string& vName,
-                                    std::string const& prefix,
-                                    std::string const& base,
-                                    std::string const& suffix,
-                                    std::string const& name,
-                                    const char* version) const
-{
-  vName = this->IsApple? (prefix+base) : name;
-  if(version)
-    {
-    vName += ".";
-    vName += version;
-    }
-  vName += this->IsApple? suffix : std::string();
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HasImplibGNUtoMS() const
 {
   return this->HasImportLibrary() && this->GetPropertyAsBool("GNUtoMS");
