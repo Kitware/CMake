@@ -361,6 +361,12 @@ private:
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
 
+  void ComputeVersionedName(std::string& vName,
+                            std::string const& prefix,
+                            std::string const& base,
+                            std::string const& suffix,
+                            std::string const& name,
+                            const char* version) const;
 
   typedef std::map<TargetConfigPair, LinkClosure> LinkClosureMapType;
   mutable LinkClosureMapType LinkClosureMap;
