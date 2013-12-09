@@ -20,6 +20,10 @@
         PRINT *, 'INFO:sizeof_dptr[8]'
 #elif defined(__SIZEOF_POINTER__) && __SIZEOF_POINTER__ == 4
         PRINT *, 'INFO:sizeof_dptr[4]'
+#elif defined(__SIZEOF_SIZE_T__) && __SIZEOF_SIZE_T__ == 8
+        PRINT *, 'INFO:sizeof_dptr[8]'
+#elif defined(__SIZEOF_SIZE_T__) && __SIZEOF_SIZE_T__ == 4
+        PRINT *, 'INFO:sizeof_dptr[4]'
 #endif
 
 #if 0
