@@ -2487,7 +2487,7 @@ tar_atol256(const char *_p, size_t char_cnt)
 	if (c & 0x40) {
 		neg = 0xff;
 		c |= 0x80;
-		l = ~0ULL;
+		l = ~ARCHIVE_LITERAL_ULL(0);
 	} else {
 		neg = 0;
 		c &= 0x7f;
