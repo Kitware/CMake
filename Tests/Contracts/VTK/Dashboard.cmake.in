@@ -1,3 +1,11 @@
+# This submission's role is to test leading edge of cmake development
+# against VTK release
+#
+# Maintainer: Zack Galbreath <zack.galbreath@kitware.com>
+#
+# This file was generated as part of the CMake/VTK Contracts test.
+# See <CMake-src>/Tests/Contracts/VTK/ for more information
+
 set(CTEST_SITE "@SITE@")
 set(CTEST_BUILD_NAME "Contracts.VTK")
 set(CTEST_DASHBOARD_ROOT "@base_dir@")
@@ -6,6 +14,7 @@ set(CTEST_BINARY_DIRECTORY "${CTEST_DASHBOARD_ROOT}/VTK-build")
 
 set(CTEST_CMAKE_GENERATOR "@CMAKE_GENERATOR@")
 set(CTEST_CONFIGURATION_TYPE Debug)
+set(CTEST_NOTES_FILES "${CTEST_SCRIPT_DIRECTORY}/${CTEST_SCRIPT_NAME}")
 
 # Assume a Linux build, with a make that supports -j9. Modify this script if
 # assumption is ever invalid.
