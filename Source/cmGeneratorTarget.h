@@ -191,10 +191,6 @@ public:
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(const char *config) const;
 
-  void GetDirectLinkLibraries(const char *config,
-                              std::vector<std::string> &libs,
-                              cmTarget *head) const;
-
   bool IsSystemIncludeDirectory(const char *dir, const char *config) const;
 
   /** Add the target output files to the global generator manifest.  */
@@ -329,6 +325,13 @@ public:
 
   bool HaveBuildTreeRPATH(const char *config) const;
   bool HaveInstallTreeRPATH() const;
+
+  void GetDirectLinkLibraries(const char *config,
+                              std::vector<std::string> &,
+                              cmTarget const* head) const;
+  void GetInterfaceLinkLibraries(const char *config,
+                              std::vector<std::string> &,
+                              cmTarget *head) const;
 
 private:
   friend class cmTargetTraceDependencies;

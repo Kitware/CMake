@@ -119,13 +119,6 @@ const char *cmGeneratorTarget::GetProperty(const char *prop) const
   return this->Target->GetProperty(prop);
 }
 
-void cmGeneratorTarget::GetDirectLinkLibraries(const char *config,
-                            std::vector<std::string> &libs,
-                            cmTarget *head) const
-{
-  this->Target->GetDirectLinkLibraries(config, libs, head);
-}
-
 //----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const*
 cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
@@ -885,7 +878,7 @@ void cmGeneratorTarget::ComputeLinkImplementation(const char* config,
 
   // Collect libraries directly linked in this configuration.
   std::vector<std::string> llibs;
-  this->Target->GetDirectLinkLibraries(config, llibs, head);
+  this->GetDirectLinkLibraries(config, llibs, head);
   for(std::vector<std::string>::const_iterator li = llibs.begin();
       li != llibs.end(); ++li)
     {
@@ -3796,4 +3789,61 @@ bool cmGeneratorTarget::HaveInstallTreeRPATH() const
   const char* install_rpath = this->GetProperty("INSTALL_RPATH");
   return (install_rpath && *install_rpath) &&
           !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetDirectLinkLibraries(const char *config,
+                            std::vector<std::string> &libs,
+                            cmTarget const* head) const
+{
+  const char *prop = this->GetProperty("LINK_LIBRARIES");
+  if (prop)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        "LINK_LIBRARIES", 0, 0);
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
+                                        config,
+                                        false,
+                                        head,
+                                        &dagChecker),
+                                      libs);
+
+    std::set<cmStdString> seenProps = cge->GetSeenTargetProperties();
+    for (std::set<cmStdString>::const_iterator it = seenProps.begin();
+        it != seenProps.end(); ++it)
+      {
+      if (!this->GetProperty(it->c_str()))
+        {
+        this->Target->LinkImplicitNullProperties.insert(*it);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::GetInterfaceLinkLibraries(const char *config,
+                        std::vector<std::string> &libs, cmTarget *head) const
+{
+  const char *prop = this->GetProperty("INTERFACE_LINK_LIBRARIES");
+  if (prop)
+    {
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpression ge(lfbt);
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        "INTERFACE_LINK_LIBRARIES", 0, 0);
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
+                                        config,
+                                        false,
+                                        head,
+                                        &dagChecker),
+                                      libs);
+    }
 }
