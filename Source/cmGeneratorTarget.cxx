@@ -605,7 +605,7 @@ std::string cmGeneratorTarget::GetCFBundleDirectory(const char* config,
                                            bool contentOnly) const
 {
   std::string fpath;
-  fpath += this->Target->GetOutputName(config, false);
+  fpath += this->GetOutputName(config, false);
   fpath += ".";
   const char *ext = this->GetProperty("BUNDLE_EXTENSION");
   if (!ext)
@@ -649,7 +649,7 @@ std::string cmGeneratorTarget::GetFrameworkDirectory(const char* config,
                                                      bool rootDir) const
 {
   std::string fpath;
-  fpath += this->Target->GetOutputName(config, false);
+  fpath += this->GetOutputName(config, false);
   fpath += ".framework";
   if(!rootDir)
     {
@@ -3539,7 +3539,7 @@ void cmGeneratorTarget::GetFullNameInternal(const char* config,
   std::string fw_prefix;
   if(this->Target->IsFrameworkOnApple())
     {
-    fw_prefix = this->Target->GetOutputName(config, false);
+    fw_prefix = this->GetOutputName(config, false);
     fw_prefix += ".framework/";
     targetPrefix = fw_prefix.c_str();
     targetSuffix = 0;
@@ -3547,7 +3547,7 @@ void cmGeneratorTarget::GetFullNameInternal(const char* config,
 
   if(this->Target->IsCFBundleOnApple())
     {
-    fw_prefix = this->Target->GetOutputName(config, false);
+    fw_prefix = this->GetOutputName(config, false);
     fw_prefix += ".";
     const char *ext = this->GetProperty("BUNDLE_EXTENSION");
     if (!ext)
@@ -3564,7 +3564,7 @@ void cmGeneratorTarget::GetFullNameInternal(const char* config,
   outPrefix = targetPrefix?targetPrefix:"";
 
   // Append the target name or property-specified name.
-  outBase += this->Target->GetOutputName(config, implib);
+  outBase += this->GetOutputName(config, implib);
 
   // Append the per-configuration postfix.
   outBase += configPostfix?configPostfix:"";
@@ -3789,6 +3789,44 @@ bool cmGeneratorTarget::HaveInstallTreeRPATH() const
   const char* install_rpath = this->GetProperty("INSTALL_RPATH");
   return (install_rpath && *install_rpath) &&
           !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetOutputName(const char* config,
+                                             bool implib) const
+{
+  std::vector<std::string> props;
+  std::string type = this->Target->GetOutputTargetType(implib);
+  std::string configUpper = cmSystemTools::UpperCase(config? config : "");
+  if(!type.empty() && !configUpper.empty())
+    {
+    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME_<CONFIG>
+    props.push_back(type + "_OUTPUT_NAME_" + configUpper);
+    }
+  if(!type.empty())
+    {
+    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME
+    props.push_back(type + "_OUTPUT_NAME");
+    }
+  if(!configUpper.empty())
+    {
+    // OUTPUT_NAME_<CONFIG>
+    props.push_back("OUTPUT_NAME_" + configUpper);
+    // <CONFIG>_OUTPUT_NAME
+    props.push_back(configUpper + "_OUTPUT_NAME");
+    }
+  // OUTPUT_NAME
+  props.push_back("OUTPUT_NAME");
+
+  for(std::vector<std::string>::const_iterator i = props.begin();
+      i != props.end(); ++i)
+    {
+    if(const char* outName = this->GetProperty(i->c_str()))
+      {
+      return outName;
+      }
+    }
+  return this->GetName();
 }
 
 //----------------------------------------------------------------------------
