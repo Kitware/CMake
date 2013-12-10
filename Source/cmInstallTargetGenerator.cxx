@@ -328,9 +328,10 @@ cmInstallTargetGenerator::GetInstallFilename(const char* config) const
 }
 
 //----------------------------------------------------------------------------
-std::string cmInstallTargetGenerator::GetInstallFilename(cmTarget* target,
-                                                         const char* config,
-                                                         NameType nameType)
+std::string
+cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
+                                             const char* config,
+                                             NameType nameType)
 {
   std::string fname;
   // Compute the name of the library.
@@ -515,11 +516,12 @@ cmInstallTargetGenerator
   std::map<cmStdString, cmStdString> install_name_remap;
   if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
-    std::set<cmTarget*> const& sharedLibs = cli->GetSharedLibrariesLinked();
-    for(std::set<cmTarget*>::const_iterator j = sharedLibs.begin();
+    std::set<cmTarget const*> const& sharedLibs
+                                            = cli->GetSharedLibrariesLinked();
+    for(std::set<cmTarget const*>::const_iterator j = sharedLibs.begin();
         j != sharedLibs.end(); ++j)
       {
-      cmTarget* tgt = *j;
+      cmTarget const* tgt = *j;
 
       // The install_name of an imported target does not change.
       if(tgt->IsImported())

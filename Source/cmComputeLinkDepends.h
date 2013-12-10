@@ -40,7 +40,7 @@ public:
   struct LinkEntry
   {
     std::string Item;
-    cmTarget* Target;
+    cmTarget const* Target;
     bool IsSharedDep;
     bool IsFlag;
     LinkEntry(): Item(), Target(0), IsSharedDep(false), IsFlag(false) {}
@@ -53,7 +53,7 @@ public:
   EntryVector const& Compute();
 
   void SetOldLinkDirMode(bool b);
-  std::set<cmTarget*> const& GetOldWrongConfigItems() const
+  std::set<cmTarget const*> const& GetOldWrongConfigItems() const
     { return this->OldWrongConfigItems; }
 
 private:
@@ -83,7 +83,7 @@ private:
   void AddDirectLinkEntries();
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
-  cmTarget* FindTargetToLink(int depender_index, const char* name);
+  cmTarget const* FindTargetToLink(int depender_index, const char* name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
@@ -164,7 +164,7 @@ private:
   // Compatibility help.
   bool OldLinkDirMode;
   void CheckWrongConfigItem(int depender_index, std::string const& item);
-  std::set<cmTarget*> OldWrongConfigItems;
+  std::set<cmTarget const*> OldWrongConfigItems;
 };
 
 #endif
