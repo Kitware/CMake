@@ -873,9 +873,6 @@ void cmGeneratorTarget::ComputeLinkImplementation(const char* config,
                                          LinkImplementation& impl,
                                          cmTarget const* head) const
 {
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = this->Target->ComputeLinkType(config);
-
   // Collect libraries directly linked in this configuration.
   std::vector<std::string> llibs;
   this->GetDirectLinkLibraries(config, llibs, head);
@@ -965,23 +962,6 @@ void cmGeneratorTarget::ComputeLinkImplementation(const char* config,
       }
     // The entry is meant for this configuration.
     impl.Libraries.push_back(item);
-    }
-
-  cmTarget::LinkLibraryVectorType const& oldllibs =
-                                    this->Target->GetOriginalLinkLibraries();
-  for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
-      li != oldllibs.end(); ++li)
-    {
-    if(li->second != cmTarget::GENERAL && li->second != linkType)
-      {
-      std::string item = this->Target->CheckCMP0004(li->first);
-      if(item == this->GetName() || item.empty())
-        {
-        continue;
-        }
-      // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.push_back(item);
-      }
     }
 
   // This target needs runtime libraries for its source languages.
@@ -3342,7 +3322,6 @@ bool cmGeneratorTarget::ComputeLinkInterface(const char* config,
                               this->GetLinkImplementation(config, headTarget);
     iface.ImplementationIsInterface = true;
     iface.Libraries = impl->Libraries;
-    iface.WrongConfigLibraries = impl->WrongConfigLibraries;
     if(this->Target->LinkLanguagePropagatesToDependents())
       {
       // Targets using this archive need its language runtime libraries.

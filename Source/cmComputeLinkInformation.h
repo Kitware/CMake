@@ -143,7 +143,7 @@ private:
   void AddTargetItem(std::string const& item, cmTarget const* target);
   void AddFullItem(std::string const& item);
   bool CheckImplicitDirItem(std::string const& item);
-  void AddUserItem(std::string const& item, bool pathNotKnown);
+  void AddUserItem(std::string const& item);
   void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
   void DropDirectoryItem(std::string const& item);
@@ -159,8 +159,6 @@ private:
 
   // Linker search path computation.
   cmOrderDirectories* OrderLinkerSearchPath;
-  bool FinishLinkerSearchDirectories();
-  void PrintLinkPolicyDiagnosis(std::ostream&);
 
   // Implicit link libraries and directories for linker language.
   void LoadImplicitLinkInfo();
@@ -171,12 +169,6 @@ private:
 
   // Additional paths configured by the runtime linker
   std::vector<std::string> RuntimeLinkDirs;
-
-  // Linker search path compatibility mode.
-  std::set<cmStdString> OldLinkDirMask;
-  std::vector<std::string> OldLinkDirItems;
-  std::vector<std::string> OldUserFlagItems;
-  bool OldLinkDirMode;
 
   // Runtime path computation.
   cmOrderDirectories* OrderRuntimeSearchPath;

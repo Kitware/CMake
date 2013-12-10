@@ -219,10 +219,6 @@ public:
     // or more static libraries.
     int Multiplicity;
 
-    // Libraries listed for other configurations.
-    // Needed only for OLD behavior of CMP0003.
-    std::vector<std::string> WrongConfigLibraries;
-
     bool ImplementationIsInterface;
 
     LinkInterface(): Multiplicity(0), ImplementationIsInterface(false) {}
@@ -313,10 +309,6 @@ public:
 
     // Libraries linked directly in this configuration.
     std::vector<std::string> Libraries;
-
-    // Libraries linked directly in other configurations.
-    // Needed only for OLD behavior of CMP0003.
-    std::vector<std::string> WrongConfigLibraries;
   };
   typedef std::map<cmStdString, LinkImplementation> LinkImplMapType;
 
