@@ -2492,26 +2492,6 @@ void cmTarget::SetPropertyDefault(const char* property,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HaveBuildTreeRPATH(const char *config) const
-{
-  if (this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
-    {
-    return false;
-    }
-  std::vector<std::string> libs;
-  this->GetDirectLinkLibraries(config, libs, this);
-  return !libs.empty();
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::HaveInstallTreeRPATH() const
-{
-  const char* install_rpath = this->GetProperty("INSTALL_RPATH");
-  return (install_rpath && *install_rpath) &&
-          !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
-}
-
-//----------------------------------------------------------------------------
 const char* cmTarget::GetOutputTargetType(bool implib) const
 {
   switch(this->GetType())
