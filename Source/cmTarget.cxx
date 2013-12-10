@@ -828,7 +828,8 @@ void cmTarget::GetDirectLinkLibraries(const char *config,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetInterfaceLinkLibraries(const char *config,
-                        std::vector<std::string> &libs, cmTarget *head) const
+                                         std::vector<std::string> &libs,
+                                         cmTarget const* head) const
 {
   const char *prop = this->GetProperty("INTERFACE_LINK_LIBRARIES");
   if (prop)

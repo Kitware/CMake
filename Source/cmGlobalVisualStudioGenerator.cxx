@@ -315,7 +315,7 @@ std::string cmGlobalVisualStudioGenerator::GetUserMacrosRegKeyBase()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget* target,
+void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget const* target,
                                                     TargetSet& linked)
 {
   if(linked.insert(target).second)
@@ -348,7 +348,7 @@ cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmTarget* target)
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::FollowLinkDepends(
-  cmTarget* target, std::set<cmTarget*>& linked)
+  cmTarget const* target, std::set<cmTarget const*>& linked)
 {
   if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
     {
@@ -397,7 +397,7 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
 }
 
 //----------------------------------------------------------------------------
-static bool VSLinkable(cmTarget* t)
+static bool VSLinkable(cmTarget const* t)
 {
   return t->IsLinkable() || t->GetType() == cmTarget::OBJECT_LIBRARY;
 }
@@ -439,7 +439,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
   // Collect implicit link dependencies (target_link_libraries).
   // Static libraries cannot depend on their link implementation
   // due to behavior (2), but they do not really need to.
-  std::set<cmTarget*> linkDepends;
+  std::set<cmTarget const*> linkDepends;
   if(target.GetType() != cmTarget::STATIC_LIBRARY)
     {
     for(TargetDependSet::const_iterator di = depends.begin();
@@ -454,7 +454,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
     }
 
   // Collect explicit util dependencies (add_dependencies).
-  std::set<cmTarget*> utilDepends;
+  std::set<cmTarget const*> utilDepends;
   for(TargetDependSet::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {
@@ -474,18 +474,18 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
     }
 
   // Emit link dependencies.
-  for(std::set<cmTarget*>::iterator di = linkDepends.begin();
+  for(std::set<cmTarget const*>::iterator di = linkDepends.begin();
       di != linkDepends.end(); ++di)
     {
-    cmTarget* dep = *di;
+    cmTarget const* dep = *di;
     vsTargetDepend.insert(dep->GetName());
     }
 
   // Emit util dependencies.  Possibly use intermediate targets.
-  for(std::set<cmTarget*>::iterator di = utilDepends.begin();
+  for(std::set<cmTarget const*>::iterator di = utilDepends.begin();
       di != utilDepends.end(); ++di)
     {
-    cmTarget* dep = *di;
+    cmTarget const* dep = *di;
     if(allowLinkable || !VSLinkable(dep) || linked.count(dep))
       {
       // Direct dependency allowed.
@@ -523,7 +523,8 @@ void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalVisualStudioGenerator::GetUtilityDepend(cmTarget* target)
+std::string
+cmGlobalVisualStudioGenerator::GetUtilityDepend(cmTarget const* target)
 {
   UtilityDependsMap::iterator i = this->UtilityDepends.find(target);
   if(i == this->UtilityDepends.end())
@@ -845,7 +846,8 @@ void RegisterVisualStudioMacros(const std::string& macrosFile,
       }
     }
 }
-bool cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget& target)
+bool
+cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 {
   // check to see if this is a fortran build
   std::set<cmStdString> languages;

@@ -60,7 +60,7 @@ public:
                                      const char* vsSolutionFile = 0);
 
   // return true if target is fortran only
-  bool TargetIsFortranOnly(cmTarget& t);
+  bool TargetIsFortranOnly(cmTarget const& t);
 
   /** Get the top-level registry key for this VS version.  */
   std::string GetRegistryBase();
@@ -75,7 +75,7 @@ public:
   /** Return true if building for Windows CE */
   virtual bool TargetsWindowsCE() const { return false; }
 
-  class TargetSet: public std::set<cmTarget*> {};
+  class TargetSet: public std::set<cmTarget const*> {};
   struct TargetCompare
   {
     bool operator()(cmTarget const* l, cmTarget const* r) const;
@@ -96,15 +96,15 @@ protected:
 
   virtual bool ComputeTargetDepends();
   class VSDependSet: public std::set<cmStdString> {};
-  class VSDependMap: public std::map<cmTarget*, VSDependSet> {};
+  class VSDependMap: public std::map<cmTarget const*, VSDependSet> {};
   VSDependMap VSTargetDepends;
   void ComputeVSTargetDepends(cmTarget&);
 
   bool CheckTargetLinks(cmTarget& target, const char* name);
   std::string GetUtilityForTarget(cmTarget& target, const char*);
-  virtual std::string WriteUtilityDepend(cmTarget*) = 0;
-  std::string GetUtilityDepend(cmTarget* target);
-  typedef std::map<cmTarget*, cmStdString> UtilityDependsMap;
+  virtual std::string WriteUtilityDepend(cmTarget const*) = 0;
+  std::string GetUtilityDepend(cmTarget const* target);
+  typedef std::map<cmTarget const*, cmStdString> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
   const char* AdditionalPlatformDefinition;
 
@@ -113,11 +113,12 @@ private:
   void PrintCompilerAdvice(std::ostream&, std::string, const char*) {}
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
-  void FollowLinkDepends(cmTarget* target, std::set<cmTarget*>& linked);
+  void FollowLinkDepends(cmTarget const* target,
+                         std::set<cmTarget const*>& linked);
 
   class TargetSetMap: public std::map<cmTarget*, TargetSet> {};
   TargetSetMap TargetLinkClosure;
-  void FillLinkClosure(cmTarget* target, TargetSet& linked);
+  void FillLinkClosure(cmTarget const* target, TargetSet& linked);
   TargetSet const& GetTargetLinkClosure(cmTarget* target);
 };
 

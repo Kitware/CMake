@@ -205,7 +205,7 @@ void cmGlobalVisualStudio6Generator
         tt = orderedProjectTargets.begin();
       tt != orderedProjectTargets.end(); ++tt)
     {
-    cmTarget* target = *tt;
+    cmTarget const* target = *tt;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -271,7 +271,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile()
 void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
                                                   const char* dspname,
                                                   const char* dir,
-                                                  cmTarget& target)
+                                                  cmTarget const& target)
 {
   fout << "#########################################################"
     "######################\n\n";
@@ -364,7 +364,7 @@ void cmGlobalVisualStudio6Generator::WriteDSWHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 std::string
-cmGlobalVisualStudio6Generator::WriteUtilityDepend(cmTarget* target)
+cmGlobalVisualStudio6Generator::WriteUtilityDepend(cmTarget const* target)
 {
   std::string pname = target->GetName();
   pname += "_UTILITY";

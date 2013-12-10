@@ -830,7 +830,7 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
 
 void
 cmGlobalNinjaGenerator
-::AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs)
+::AppendTargetOutputs(cmTarget const* target, cmNinjaDeps& outputs)
 {
   const char* configName =
     target->GetMakefile()->GetDefinition("CMAKE_BUILD_TYPE");
@@ -879,7 +879,7 @@ cmGlobalNinjaGenerator
 
 void
 cmGlobalNinjaGenerator
-::AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs)
+::AppendTargetDepends(cmTarget const* target, cmNinjaDeps& outputs)
 {
   if (target->GetType() == cmTarget::GLOBAL_TARGET) {
     // Global targets only depend on other utilities, which may not appear in

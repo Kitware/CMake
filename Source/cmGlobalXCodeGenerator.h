@@ -125,7 +125,7 @@ private:
                                      multipleOutputPairs
                                 );
 
-  cmXCodeObject* FindXCodeTarget(cmTarget*);
+  cmXCodeObject* FindXCodeTarget(cmTarget const*);
   std::string GetOrCreateId(const char* name, const char* id);
 
   // create cmXCodeObject from these functions so that memory can be managed

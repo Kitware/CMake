@@ -335,7 +335,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget* target = *tt;
+    cmTarget const* target = *tt;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -376,7 +376,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget* target = *tt;
+    cmTarget const* target = *tt;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -470,7 +470,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget* target = *tt;
+    cmTarget const* target = *tt;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -619,7 +619,7 @@ cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
                                const char* dspname,
-                               const char* dir, cmTarget& target)
+                               const char* dir, cmTarget const& target)
 {
    // check to see if this is a fortran build
   const char* ext = ".vcproj";
@@ -659,7 +659,7 @@ void
 cmGlobalVisualStudio7Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const char* dspname,
-                      const char*, cmTarget& target)
+                      const char*, cmTarget const& target)
 {
   int depcount = 0;
   std::string dspguid = this->GetGUID(dspname);
@@ -819,7 +819,7 @@ void cmGlobalVisualStudio7Generator::WriteSLNHeader(std::ostream& fout)
 
 //----------------------------------------------------------------------------
 std::string
-cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget* target)
+cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
 {
   std::string pname = target->GetName();
   pname += "_UTILITY";
@@ -940,7 +940,7 @@ cmGlobalVisualStudio7Generator
 
 std::set<std::string>
 cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
-                                                     cmTarget* target)
+                                                     cmTarget const* target)
 {
   std::set<std::string> activeConfigs;
   // if it is a utilitiy target then only make it part of the
