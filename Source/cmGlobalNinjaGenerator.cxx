@@ -893,8 +893,12 @@ cmGlobalNinjaGenerator
     std::set<cmStdString> const& utils = target->GetUtilities();
     std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
+    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                    ->GetGlobalGenerator()
+                                    ->GetGeneratorTarget(target);
+
     cmTargetDependSet const& targetDeps =
-      this->GetTargetDirectDepends(*target);
+      this->GetTargetDirectDepends(*gtgt);
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
          i != targetDeps.end(); ++i)
       {
