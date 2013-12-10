@@ -168,23 +168,13 @@ public:
   typedef std::pair<cmStdString, LinkLibraryType> LibraryID;
 
   typedef std::vector<LibraryID > LinkLibraryVectorType;
-  const LinkLibraryVectorType &GetLinkLibraries() const {
-  return this->LinkLibraries;}
-  const LinkLibraryVectorType &GetOriginalLinkLibraries() const
-    {return this->OriginalLinkLibraries;}
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const char* config) const;
 
-  /**
-   * Clear the dependency information recorded for this target, if any.
-   */
-  void ClearDependencyInformation(cmMakefile& mf, const char* target);
-
   // Check to see if a library is a framework and treat it different on Mac
   bool NameResolvesToFramework(const std::string& libname) const;
-  void AddLinkLibrary(cmMakefile& mf,
-                      const char *target, const char* lib,
+  void AddLinkLibrary(const char *target, const char* lib,
                       LinkLibraryType llt);
   enum TLLSignature {
     KeywordTLLSignature,
@@ -193,7 +183,7 @@ public:
   bool PushTLLCommandTrace(TLLSignature signature);
   void GetTllSignatureTraces(cmOStringStream &s, TLLSignature sig) const;
 
-  void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
+  void MergeLinkLibraries( const char* selfname,
                            const LinkLibraryVectorType& libs );
 
   const std::vector<std::string>& GetLinkDirectories() const;
@@ -440,16 +430,6 @@ private:
              std::set<LibraryID>& visited,
              DependencyList& link_line);
 
-  /**
-   * Finds the dependencies for \a lib and inserts them into \a
-   * dep_map.
-   */
-  void GatherDependencies( const cmMakefile& mf,
-                           const LibraryID& lib,
-                           DependencyMap& dep_map);
-
-  void AnalyzeLibDependencies( const cmMakefile& mf );
-
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
 
@@ -473,9 +453,7 @@ private:
   TargetType TargetTypeValue;
   std::vector<cmSourceFile*> SourceFiles;
   std::vector<std::string> ObjectLibraries;
-  LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
-  bool LinkLibrariesAnalyzed;
   std::vector<std::string> LinkDirectories;
   std::set<cmStdString> LinkDirectoriesEmmitted;
   bool HaveInstallRule;
@@ -485,7 +463,6 @@ private:
   std::set<cmStdString> Utilities;
   bool RecordDependencies;
   mutable cmPropertyMap Properties;
-  LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
   bool IsApple;
   bool IsImportedTarget;
