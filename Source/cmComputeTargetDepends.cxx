@@ -199,6 +199,10 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 {
   // Get the depender.
   cmTarget* depender = this->Targets[depender_index];
+  if (depender->GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    return;
+    }
 
   // Loop over all targets linked directly in all configs.
   // We need to make targets depend on the union of all config-specific
@@ -208,15 +212,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   std::set<cmStdString> emitted;
   {
   std::vector<std::string> tlibs;
-  if (depender->GetType() == cmTarget::INTERFACE_LIBRARY)
-    {
-    // For INTERFACE_LIBRARY depend on the interface instead.
-    depender->GetInterfaceLinkLibraries(0, tlibs, depender);
-    }
-  else
-    {
-    depender->GetDirectLinkLibraries(0, tlibs, depender);
-    }
+  depender->GetDirectLinkLibraries(0, tlibs, depender);
   // A target should not depend on itself.
   emitted.insert(depender->GetName());
   for(std::vector<std::string>::const_iterator lib = tlibs.begin();
@@ -237,15 +233,8 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     it != configs.end(); ++it)
     {
     std::vector<std::string> tlibs;
-    if (depender->GetType() == cmTarget::INTERFACE_LIBRARY)
-      {
-      // For INTERFACE_LIBRARY depend on the interface instead.
-      depender->GetInterfaceLinkLibraries(it->c_str(), tlibs, depender);
-      }
-    else
-      {
-      depender->GetDirectLinkLibraries(it->c_str(), tlibs, depender);
-      }
+    depender->GetDirectLinkLibraries(it->c_str(), tlibs, depender);
+
     // A target should not depend on itself.
     emitted.insert(depender->GetName());
     for(std::vector<std::string>::const_iterator lib = tlibs.begin();

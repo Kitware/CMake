@@ -480,7 +480,6 @@ cmGlobalUnixMakefileGenerator3
        (l->second->GetType() == cmTarget::SHARED_LIBRARY) ||
        (l->second->GetType() == cmTarget::MODULE_LIBRARY) ||
        (l->second->GetType() == cmTarget::OBJECT_LIBRARY) ||
-       (l->second->GetType() == cmTarget::INTERFACE_LIBRARY) ||
        (l->second->GetType() == cmTarget::UTILITY))
       {
       if(l->second->Target->IsImported())
@@ -658,7 +657,6 @@ cmGlobalUnixMakefileGenerator3
           (t->second->GetType() == cmTarget::SHARED_LIBRARY) ||
           (t->second->GetType() == cmTarget::MODULE_LIBRARY) ||
           (t->second->GetType() == cmTarget::OBJECT_LIBRARY) ||
-          (t->second->GetType() == cmTarget::INTERFACE_LIBRARY) ||
           (t->second->GetType() == cmTarget::UTILITY)))
         {
         // Add a rule to build the target by name.
@@ -680,10 +678,6 @@ cmGlobalUnixMakefileGenerator3
                           t->second->GetName(), depends, commands,
                           true);
 
-        if (t->second->GetType() == cmTarget::INTERFACE_LIBRARY)
-          {
-          continue;
-          }
         // Add a fast rule to build the target
         std::string localName =
                           lg->GetRelativeTargetDirectory(*t->second->Target);
@@ -757,7 +751,6 @@ cmGlobalUnixMakefileGenerator3
         || (t->second->GetType() == cmTarget::SHARED_LIBRARY)
         || (t->second->GetType() == cmTarget::MODULE_LIBRARY)
         || (t->second->GetType() == cmTarget::OBJECT_LIBRARY)
-        || (t->second->GetType() == cmTarget::INTERFACE_LIBRARY)
         || (t->second->GetType() == cmTarget::UTILITY)))
       {
       std::string makefileName;
@@ -774,64 +767,53 @@ cmGlobalUnixMakefileGenerator3
         << localName << "\n\n";
 
       commands.clear();
+      makeTargetName = localName;
+      makeTargetName += "/depend";
+      commands.push_back(lg->GetRecursiveMakeCall
+                         (makefileName.c_str(),makeTargetName.c_str()));
 
-      if(t->second->GetType() != cmTarget::INTERFACE_LIBRARY)
+      // add requires if we need it for this generator
+      if (needRequiresStep)
         {
         makeTargetName = localName;
-        makeTargetName += "/depend";
+        makeTargetName += "/requires";
         commands.push_back(lg->GetRecursiveMakeCall
                           (makefileName.c_str(),makeTargetName.c_str()));
-
-        // add requires if we need it for this generator
-        if (needRequiresStep)
-          {
-          makeTargetName = localName;
-          makeTargetName += "/requires";
-          commands.push_back(lg->GetRecursiveMakeCall
-                            (makefileName.c_str(),makeTargetName.c_str()));
-          }
-        makeTargetName = localName;
-        makeTargetName += "/build";
-        commands.push_back(lg->GetRecursiveMakeCall
-                            (makefileName.c_str(),makeTargetName.c_str()));
-
-        // Write the rule.
-        localName += "/all";
-        depends.clear();
-
-        std::string progressDir =
-          lg->GetMakefile()->GetHomeOutputDirectory();
-        progressDir += cmake::GetCMakeFilesDirectory();
-          {
-          cmOStringStream progCmd;
-          progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-          // all target counts
-          progCmd << lg->Convert(progressDir.c_str(),
-                                  cmLocalGenerator::FULL,
-                                  cmLocalGenerator::SHELL);
-          progCmd << " ";
-          std::vector<unsigned long>& progFiles =
-            this->ProgressMap[t->second->Target].Marks;
-          for (std::vector<unsigned long>::iterator i = progFiles.begin();
-                i != progFiles.end(); ++i)
-            {
-            progCmd << " " << *i;
-            }
-          commands.push_back(progCmd.str());
-          }
-        progressDir = "Built target ";
-        progressDir += t->second->GetName();
-        lg->AppendEcho(commands,progressDir.c_str());
         }
-      else
+      makeTargetName = localName;
+      makeTargetName += "/build";
+      commands.push_back(lg->GetRecursiveMakeCall
+                         (makefileName.c_str(),makeTargetName.c_str()));
+
+      // Write the rule.
+      localName += "/all";
+      depends.clear();
+
+      std::string progressDir =
+        lg->GetMakefile()->GetHomeOutputDirectory();
+      progressDir += cmake::GetCMakeFilesDirectory();
         {
-        depends.clear();
+        cmOStringStream progCmd;
+        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
+        // all target counts
+        progCmd << lg->Convert(progressDir.c_str(),
+                                cmLocalGenerator::FULL,
+                                cmLocalGenerator::SHELL);
+        progCmd << " ";
+        std::vector<unsigned long>& progFiles =
+          this->ProgressMap[t->second->Target].Marks;
+        for (std::vector<unsigned long>::iterator i = progFiles.begin();
+              i != progFiles.end(); ++i)
+          {
+          progCmd << " " << *i;
+          }
+        commands.push_back(progCmd.str());
         }
+      progressDir = "Built target ";
+      progressDir += t->second->GetName();
+      lg->AppendEcho(commands,progressDir.c_str());
+
       this->AppendGlobalTargetDepends(depends,*t->second->Target);
-      if(depends.empty() && this->EmptyRuleHackDepends != "")
-        {
-        depends.push_back(this->EmptyRuleHackDepends);
-        }
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands, true);
 
@@ -847,7 +829,7 @@ cmGlobalUnixMakefileGenerator3
 
       // Write the rule.
       commands.clear();
-      std::string progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
+      progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
       progressDir += cmake::GetCMakeFilesDirectory();
 
       {
