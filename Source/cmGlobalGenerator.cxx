@@ -1501,29 +1501,6 @@ void cmGlobalGenerator::CheckLocalGenerators()
         {
         continue;
         }
-      const cmTarget::LinkLibraryVectorType& libs =
-        l->second.GetOriginalLinkLibraries();
-      for(cmTarget::LinkLibraryVectorType::const_iterator lib = libs.begin();
-          lib != libs.end(); ++lib)
-        {
-        if(lib->first.size() > 9 &&
-           cmSystemTools::IsNOTFOUND(lib->first.c_str()))
-          {
-          std::string varName = lib->first.substr(0, lib->first.size()-9);
-          cmCacheManager::CacheIterator it =
-            manager->GetCacheIterator(varName.c_str());
-          if(it.GetPropertyAsBool("ADVANCED"))
-            {
-            varName += " (ADVANCED)";
-            }
-          std::string text = notFoundMap[varName];
-          text += "\n    linked by target \"";
-          text += l->second.GetName();
-          text += "\" in directory ";
-          text+=this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
-          notFoundMap[varName] = text;
-          }
-        }
       std::vector<std::string> incs;
       const char *incDirProp = l->second.GetProperty("INCLUDE_DIRECTORIES");
       if (!incDirProp)
