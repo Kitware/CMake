@@ -1432,7 +1432,8 @@ void cmGlobalGenerator::ClearGeneratorMembers()
 }
 
 //----------------------------------------------------------------------------
-cmGeneratorTarget* cmGlobalGenerator::GetGeneratorTarget(cmTarget* t) const
+cmGeneratorTarget*
+cmGlobalGenerator::GetGeneratorTarget(cmTarget const* t) const
 {
   cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
   if(ti == this->GeneratorTargets.end())
