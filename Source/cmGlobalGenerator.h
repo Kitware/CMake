@@ -334,7 +334,8 @@ protected:
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS();
 
   bool CheckTargets();
-  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > AutogensType;
+  typedef std::vector<std::pair<cmQtAutoGenerators,
+                                cmTarget const*> > AutogensType;
   void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
 
   std::string SelectMakeProgram(const char* makeProgram,
