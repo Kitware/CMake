@@ -5763,7 +5763,8 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-void checkPropertyConsistency(cmTarget const* depender, cmTarget *dependee,
+void checkPropertyConsistency(cmTarget const* depender,
+                              cmTarget const* dependee,
                               const char *propName,
                               std::set<cmStdString> &emitted,
                               const char *config,
