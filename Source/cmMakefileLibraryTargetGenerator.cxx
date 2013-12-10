@@ -85,9 +85,6 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
     case cmTarget::OBJECT_LIBRARY:
       this->WriteObjectLibraryRules();
       break;
-    case cmTarget::INTERFACE_LIBRARY:
-      // Nothing to do.
-      break;
     default:
       // If language is not known, this is an error.
       cmSystemTools::Error("Unknown Library Type");
