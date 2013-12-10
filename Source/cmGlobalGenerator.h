@@ -269,7 +269,7 @@ public:
   TargetDependSet const& GetTargetDirectDepends(cmTarget const& target);
 
   /** Get per-target generator information.  */
-  cmGeneratorTarget* GetGeneratorTarget(cmTarget*) const;
+  cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
