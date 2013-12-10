@@ -2637,43 +2637,6 @@ bool cmTarget::UsesDefaultOutputDir(const char* config, bool implib) const
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetOutputName(const char* config, bool implib) const
-{
-  std::vector<std::string> props;
-  std::string type = this->GetOutputTargetType(implib);
-  std::string configUpper = cmSystemTools::UpperCase(config? config : "");
-  if(!type.empty() && !configUpper.empty())
-    {
-    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME_<CONFIG>
-    props.push_back(type + "_OUTPUT_NAME_" + configUpper);
-    }
-  if(!type.empty())
-    {
-    // <ARCHIVE|LIBRARY|RUNTIME>_OUTPUT_NAME
-    props.push_back(type + "_OUTPUT_NAME");
-    }
-  if(!configUpper.empty())
-    {
-    // OUTPUT_NAME_<CONFIG>
-    props.push_back("OUTPUT_NAME_" + configUpper);
-    // <CONFIG>_OUTPUT_NAME
-    props.push_back(configUpper + "_OUTPUT_NAME");
-    }
-  // OUTPUT_NAME
-  props.push_back("OUTPUT_NAME");
-
-  for(std::vector<std::string>::const_iterator i = props.begin();
-      i != props.end(); ++i)
-    {
-    if(const char* outName = this->GetProperty(i->c_str()))
-      {
-      return outName;
-      }
-    }
-  return this->GetName();
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkVersion() const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
