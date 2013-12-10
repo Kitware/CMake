@@ -327,6 +327,9 @@ public:
   LinkImplementation const* GetLinkImplementation(const char* config,
                                                   cmTarget const* head) const;
 
+  bool HaveBuildTreeRPATH(const char *config) const;
+  bool HaveInstallTreeRPATH() const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
