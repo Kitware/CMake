@@ -46,17 +46,17 @@ private:
                     const std::string&     target,
                     const std::string&     make,
                     const std::string&     makeArgs,
-                    const std::string&     path) const;
+                    const std::string&     path,
+                    const char*            homeOutputDir) const;
 
   std::string GenerateFilesString(const cmMakefile* mf) const;
   std::string GetPathBasename(const std::string& path) const;
   std::string GenerateProjectName(const std::string& name,
                                   const std::string& type,
                                   const std::string& path) const;
-  std::string BuildMakeCommand(const std::string& make,
-                               const char* makefile, const char* target) const;
 
   std::string ProjectName;
+  bool UseNinja;
 };
 
 #endif
