@@ -53,8 +53,6 @@ private:
   std::string GenerateProjectName(const std::string& name,
                                   const std::string& type,
                                   const std::string& path) const;
-  std::string BuildMakeCommand(const std::string& make,
-                               const char* makefile, const char* target) const;
 
   std::string ProjectName;
 };
