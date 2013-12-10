@@ -121,9 +121,11 @@ protected:
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout,
-                            const char* name, const char* path, cmTarget &t);
+                            const char* name, const char* path,
+                            cmTarget const& t);
   virtual void WriteProjectDepends(std::ostream& fout,
-                           const char* name, const char* path, cmTarget &t);
+                           const char* name, const char* path,
+                           cmTarget const&t);
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const char* name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
@@ -132,7 +134,7 @@ protected:
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
   virtual void WriteSLNHeader(std::ostream& fout);
-  virtual std::string WriteUtilityDepend(cmTarget* target);
+  virtual std::string WriteUtilityDepend(cmTarget const* target);
 
   virtual void WriteTargetsToSolution(
     std::ostream& fout,
@@ -158,7 +160,7 @@ protected:
   std::string ConvertToSolutionPath(const char* path);
 
   std::set<std::string> IsPartOfDefaultBuild(const char* project,
-                                             cmTarget* target);
+                                             cmTarget const* target);
   std::vector<std::string> Configurations;
   std::map<cmStdString, cmStdString> GUIDMap;
 

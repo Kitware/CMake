@@ -38,19 +38,21 @@ public:
 
   bool Compute();
 
-  std::vector<cmTarget*> const& GetTargets() const { return this->Targets; }
-  void GetTargetDirectDepends(cmTarget* t, cmTargetDependSet& deps);
+  std::vector<cmTarget const*> const&
+  GetTargets() const { return this->Targets; }
+  void GetTargetDirectDepends(cmTarget const* t, cmTargetDependSet& deps);
 private:
   void CollectTargets();
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
   void AddTargetDepend(int depender_index, const char* dependee_name,
                        bool linking);
-  void AddTargetDepend(int depender_index, cmTarget* dependee, bool linking);
+  void AddTargetDepend(int depender_index, cmTarget const* dependee,
+                       bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index, const char* dependee_name,
                            bool linking, std::set<cmStdString> &emitted);
-  void AddInterfaceDepends(int depender_index, cmTarget* dependee,
+  void AddInterfaceDepends(int depender_index, cmTarget const* dependee,
                            const char *config,
                            std::set<cmStdString> &emitted);
   cmGlobalGenerator* GlobalGenerator;
@@ -58,8 +60,8 @@ private:
   bool NoCycles;
 
   // Collect all targets.
-  std::vector<cmTarget*> Targets;
-  std::map<cmTarget*, int> TargetIndex;
+  std::vector<cmTarget const*> Targets;
+  std::map<cmTarget const*, int> TargetIndex;
 
   // Represent the target dependency graph.  The entry at each
   // top-level index corresponds to a depender whose dependencies are
