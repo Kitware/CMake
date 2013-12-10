@@ -492,8 +492,8 @@ bool cmGeneratorTarget::NeedRelinkBeforeInstall(const char* config) const
   // If either a build or install tree rpath is set then the rpath
   // will likely change between the build tree and install tree and
   // this target must be relinked.
-  return this->Target->HaveBuildTreeRPATH(config)
-      || this->Target->HaveInstallTreeRPATH();
+  return this->HaveBuildTreeRPATH(config)
+      || this->HaveInstallTreeRPATH();
 }
 
 //----------------------------------------------------------------------------
@@ -3776,4 +3776,24 @@ void cmGeneratorTarget::ComputeVersionedName(std::string& vName,
     vName += version;
     }
   vName += apple ? suffix : std::string();
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HaveBuildTreeRPATH(const char *config) const
+{
+  if (this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
+    {
+    return false;
+    }
+  std::vector<std::string> libs;
+  this->GetDirectLinkLibraries(config, libs, this->Target);
+  return !libs.empty();
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HaveInstallTreeRPATH() const
+{
+  const char* install_rpath = this->GetProperty("INSTALL_RPATH");
+  return (install_rpath && *install_rpath) &&
+          !this->Makefile->IsOn("CMAKE_SKIP_INSTALL_RPATH");
 }
