@@ -53,7 +53,8 @@ public:
     NameReal
   };
 
-  static std::string GetInstallFilename(cmTarget*target, const char* config,
+  static std::string GetInstallFilename(cmTarget const* target,
+                                        const char* config,
                                         NameType nameType = NameNormal);
 
   cmTarget* GetTarget() const { return this->Target; }

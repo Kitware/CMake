@@ -477,7 +477,7 @@ std::vector<std::string> const& cmComputeLinkInformation::GetFrameworkPaths()
 }
 
 //----------------------------------------------------------------------------
-std::set<cmTarget*> const&
+std::set<cmTarget const*> const&
 cmComputeLinkInformation::GetSharedLibrariesLinked()
 {
   return this->SharedLibrariesLinked;
@@ -542,11 +542,11 @@ bool cmComputeLinkInformation::Compute()
     // For CMake 2.4 bug-compatibility we need to consider the output
     // directories of targets linked in another configuration as link
     // directories.
-    std::set<cmTarget*> const& wrongItems = cld.GetOldWrongConfigItems();
-    for(std::set<cmTarget*>::const_iterator i = wrongItems.begin();
+    std::set<cmTarget const*> const& wrongItems = cld.GetOldWrongConfigItems();
+    for(std::set<cmTarget const*>::const_iterator i = wrongItems.begin();
         i != wrongItems.end(); ++i)
       {
-      cmTarget* tgt = *i;
+      cmTarget const* tgt = *i;
       bool implib =
         (this->UseImportLibrary &&
          (tgt->GetType() == cmTarget::SHARED_LIBRARY));
@@ -620,7 +620,8 @@ void cmComputeLinkInformation::AddImplicitLinkInfo(std::string const& lang)
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
+void cmComputeLinkInformation::AddItem(std::string const& item,
+                                       cmTarget const* tgt)
 {
   // Compute the proper name to use to link this library.
   const char* config = this->Config;
@@ -700,7 +701,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item, cmTarget* tgt)
 
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
-                                                cmTarget* tgt)
+                                                cmTarget const* tgt)
 {
   // If dropping shared library dependencies, ignore them.
   if(this->SharedDependencyMode == SharedDepModeNone)
@@ -1062,7 +1063,7 @@ void cmComputeLinkInformation::SetCurrentLinkType(LinkType lt)
 
 //----------------------------------------------------------------------------
 void cmComputeLinkInformation::AddTargetItem(std::string const& item,
-                                             cmTarget* target)
+                                             cmTarget const* target)
 {
   // This is called to handle a link item that is a full path to a target.
   // If the target is not a static library make sure the link type is
@@ -1744,7 +1745,7 @@ cmComputeLinkInformation::GetRuntimeSearchPath()
 //----------------------------------------------------------------------------
 void
 cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
-                                                cmTarget* target)
+                                                cmTarget const* target)
 {
   // Ignore targets on Apple where install_name is not @rpath.
   // The dependenty library can be found with other means such as
