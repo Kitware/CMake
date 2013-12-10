@@ -138,14 +138,14 @@ cmQtAutoGenerators::cmQtAutoGenerators()
     }
 }
 
-static std::string getAutogenTargetName(cmTarget *target)
+static std::string getAutogenTargetName(cmTarget const* target)
 {
   std::string autogenTargetName = target->GetName();
   autogenTargetName += "_automoc";
   return autogenTargetName;
 }
 
-static std::string getAutogenTargetDir(cmTarget *target)
+static std::string getAutogenTargetDir(cmTarget const* target)
 {
   cmMakefile* makefile = target->GetMakefile();
   std::string targetDir = makefile->GetCurrentOutputDirectory();
@@ -296,7 +296,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   return true;
 }
 
-static void GetCompileDefinitionsAndDirectories(cmTarget *target,
+static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
                                                 const char * config,
                                                 std::string &incs,
                                                 std::string &defs)
@@ -304,10 +304,12 @@ static void GetCompileDefinitionsAndDirectories(cmTarget *target,
   cmMakefile* makefile = target->GetMakefile();
   cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   std::vector<std::string> includeDirs;
-  cmGeneratorTarget gtgt(target);
+  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                 ->GetGlobalGenerator()
+                                 ->GetGeneratorTarget(target);
   // Get the include dirs for this target, without stripping the implicit
   // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
-  localGen->GetIncludeDirectories(includeDirs, &gtgt, "CXX", config, false);
+  localGen->GetIncludeDirectories(includeDirs, gtgt, "CXX", config, false);
   const char* sep = "";
   incs = "";
   for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
@@ -333,7 +335,7 @@ static void GetCompileDefinitionsAndDirectories(cmTarget *target,
     }
 }
 
-void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
+void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
 {
   cmMakefile* makefile = target->GetMakefile();
 
@@ -436,7 +438,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget* target)
     }
 }
 
-void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget* target,
+void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           const std::string &autogenTargetName,
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines)
@@ -615,7 +617,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-static void GetUicOpts(cmTarget *target, const char * config,
+static void GetUicOpts(cmTarget const* target, const char * config,
                        std::string &optString)
 {
   std::vector<std::string> opts;
@@ -632,7 +634,7 @@ static void GetUicOpts(cmTarget *target, const char * config,
     }
 }
 
-void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget* target,
+void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
                           std::map<std::string, std::string> &configUicOptions)
 {
   cmMakefile *makefile = target->GetMakefile();
@@ -837,7 +839,7 @@ void cmQtAutoGenerators::InitializeAutoRccTarget(cmTarget* target)
     }
 }
 
-void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget* target)
+void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
 {
   std::string _rcc_files;
   const char* sepRccFiles = "";
