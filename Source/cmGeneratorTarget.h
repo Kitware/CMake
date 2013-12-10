@@ -333,6 +333,8 @@ public:
                               std::vector<std::string> &,
                               cmTarget *head) const;
 
+  std::string GetOutputName(const char* config, bool implib) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
