@@ -221,6 +221,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   if (target->GetPropertyAsBool("AUTORCC"))
     {
     toolNames.push_back("rcc");
+    this->InitializeAutoRccTarget(target);
     }
 
   std::string tools = toolNames[0];
@@ -801,13 +802,46 @@ void cmQtAutoGenerators::MergeRccOptions(std::vector<std::string> &opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
+void cmQtAutoGenerators::InitializeAutoRccTarget(cmTarget* target)
+{
+  cmMakefile *makefile = target->GetMakefile();
+
+  const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
+      fileIt != srcFiles.end();
+      ++fileIt)
+    {
+    cmSourceFile* sf = *fileIt;
+    std::string ext = sf->GetExtension();
+    if (ext == "qrc")
+      {
+      std::string absFile = cmsys::SystemTools::GetRealPath(
+                                                  sf->GetFullPath().c_str());
+      bool skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC"));
+
+      if (!skip)
+        {
+        std::string basename = cmsys::SystemTools::
+                                      GetFilenameWithoutLastExtension(absFile);
+
+        std::string rcc_output_file = makefile->GetCurrentOutputDirectory();
+        rcc_output_file += "/qrc_" + basename + ".cpp";
+        makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                                rcc_output_file.c_str(), false);
+        cmSourceFile* rccCppSource
+                = makefile->GetOrCreateSource(rcc_output_file.c_str(), true);
+        target->AddSourceFile(rccCppSource);
+        }
+      }
+    }
+}
+
 void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget* target)
 {
   std::string _rcc_files;
   const char* sepRccFiles = "";
   cmMakefile *makefile = target->GetMakefile();
-
-  std::vector<cmSourceFile*> newFiles;
 
   const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
 
@@ -841,17 +875,6 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget* target)
         _rcc_files += absFile;
         sepRccFiles = ";";
 
-        std::string basename = cmsys::SystemTools::
-                                      GetFilenameWithoutLastExtension(absFile);
-
-        std::string rcc_output_file = makefile->GetCurrentOutputDirectory();
-        rcc_output_file += "/qrc_" + basename + ".cpp";
-        makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
-                                rcc_output_file.c_str(), false);
-        cmSourceFile* rccCppSource
-                = makefile->GetOrCreateSource(rcc_output_file.c_str(), true);
-        newFiles.push_back(rccCppSource);
-
         if (const char *prop = sf->GetProperty("AUTORCC_OPTIONS"))
           {
           std::vector<std::string> optsVec;
@@ -878,13 +901,6 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget* target)
         sep = ";";
         }
       }
-    }
-
-  for(std::vector<cmSourceFile*>::const_iterator fileIt = newFiles.begin();
-      fileIt != newFiles.end();
-      ++fileIt)
-    {
-    target->AddSourceFile(*fileIt);
     }
 
   makefile->AddDefinition("_rcc_files",
