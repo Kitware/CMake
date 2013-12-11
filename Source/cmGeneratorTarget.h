@@ -104,7 +104,7 @@ struct cmStrictTargetComparison {
   bool operator()(cmTarget const* t1, cmTarget const* t2) const;
 };
 
-typedef std::map<cmTarget*,
+typedef std::map<cmTarget const*,
                  cmGeneratorTarget*,
                  cmStrictTargetComparison> cmGeneratorTargetsType;
 

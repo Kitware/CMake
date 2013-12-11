@@ -39,11 +39,11 @@ public:
     Item(): Value(), IsPath(true), Target(0) {}
     Item(Item const& item):
       Value(item.Value), IsPath(item.IsPath), Target(item.Target) {}
-    Item(std::string const& v, bool p, cmTarget* target = 0):
+    Item(std::string const& v, bool p, cmTarget const* target = 0):
       Value(v), IsPath(p), Target(target) {}
     std::string Value;
     bool IsPath;
-    cmTarget* Target;
+    cmTarget const* Target;
   };
   typedef std::vector<Item> ItemVector;
   ItemVector const& GetItems();
@@ -57,13 +57,13 @@ public:
   void GetRPath(std::vector<std::string>& runtimeDirs, bool for_install);
   std::string GetRPathString(bool for_install);
   std::string GetChrpathString();
-  std::set<cmTarget*> const& GetSharedLibrariesLinked();
+  std::set<cmTarget const*> const& GetSharedLibrariesLinked();
 
   std::string const& GetRPathLinkFlag() const { return this->RPathLinkFlag; }
   std::string GetRPathLinkString();
 private:
-  void AddItem(std::string const& item, cmTarget* tgt);
-  void AddSharedDepItem(std::string const& item, cmTarget* tgt);
+  void AddItem(std::string const& item, cmTarget const* tgt);
+  void AddSharedDepItem(std::string const& item, cmTarget const* tgt);
 
   // Output information.
   ItemVector Items;
@@ -71,7 +71,7 @@ private:
   std::vector<std::string> Depends;
   std::vector<std::string> FrameworkPaths;
   std::vector<std::string> RuntimeSearchPath;
-  std::set<cmTarget*> SharedLibrariesLinked;
+  std::set<cmTarget const*> SharedLibrariesLinked;
 
   // Context information.
   cmTarget const* Target;
@@ -139,7 +139,7 @@ private:
   std::string NoCaseExpression(const char* str);
 
   // Handling of link items.
-  void AddTargetItem(std::string const& item, cmTarget* target);
+  void AddTargetItem(std::string const& item, cmTarget const* target);
   void AddFullItem(std::string const& item);
   bool CheckImplicitDirItem(std::string const& item);
   void AddUserItem(std::string const& item, bool pathNotKnown);
@@ -179,7 +179,7 @@ private:
 
   // Runtime path computation.
   cmOrderDirectories* OrderRuntimeSearchPath;
-  void AddLibraryRuntimeInfo(std::string const& fullPath, cmTarget* target);
+  void AddLibraryRuntimeInfo(std::string const& fullPath, cmTarget const* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
 
   // Dependent library path computation.

@@ -218,7 +218,7 @@ public:
 
   /** If check to see if the target is linked to by any other
       target in the project */
-  bool IsDependedOn(const char* project, cmTarget* target);
+  bool IsDependedOn(const char* project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const char* start_dir);
 
@@ -266,10 +266,10 @@ public:
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
-  TargetDependSet const& GetTargetDirectDepends(cmTarget & target);
+  TargetDependSet const& GetTargetDirectDepends(cmTarget const& target);
 
   /** Get per-target generator information.  */
-  cmGeneratorTarget* GetGeneratorTarget(cmTarget*) const;
+  cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
 
   const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
@@ -323,7 +323,8 @@ protected:
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
   virtual bool IsRootOnlyTarget(cmTarget* target);
-  void AddTargetDepends(cmTarget* target, TargetDependSet& projectTargets);
+  void AddTargetDepends(cmTarget const* target,
+                        TargetDependSet& projectTargets);
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
   void FillExtensionToLanguageMap(const char* l, cmMakefile* mf);
@@ -333,7 +334,8 @@ protected:
   virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS();
 
   bool CheckTargets();
-  typedef std::vector<std::pair<cmQtAutoGenerators, cmTarget*> > AutogensType;
+  typedef std::vector<std::pair<cmQtAutoGenerators,
+                                cmTarget const*> > AutogensType;
   void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
 
   std::string SelectMakeProgram(const char* makeProgram,
@@ -362,7 +364,8 @@ protected:
   cmLocalGenerator* CurrentLocalGenerator;
   // map from project name to vector of local generators in that project
   std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
-  std::map<cmLocalGenerator*, std::set<cmTarget *> > LocalGeneratorToTargetMap;
+  std::map<cmLocalGenerator*, std::set<cmTarget const*> >
+                                                    LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
   std::set<cmStdString> InstallComponents;
@@ -420,7 +423,7 @@ private:
   std::vector<std::string> FilesReplacedDuringGenerate;
 
   // Store computed inter-target dependencies.
-  typedef std::map<cmTarget *, TargetDependSet> TargetDependMap;
+  typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 
   // Per-target generator information.

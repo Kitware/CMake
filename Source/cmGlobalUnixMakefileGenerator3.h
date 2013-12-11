@@ -181,13 +181,14 @@ protected:
     std::vector<unsigned long> Marks;
     void WriteProgressVariables(unsigned long total, unsigned long& current);
   };
-  struct ProgressMapCompare { bool operator()(cmTarget*,cmTarget*) const; };
-  typedef std::map<cmTarget*, TargetProgress,
+  struct ProgressMapCompare { bool operator()(cmTarget const*,
+                                              cmTarget const*) const; };
+  typedef std::map<cmTarget const*, TargetProgress,
                    ProgressMapCompare> ProgressMapType;
   ProgressMapType ProgressMap;
 
-  size_t CountProgressMarksInTarget(cmTarget* target,
-                                    std::set<cmTarget*>& emitted);
+  size_t CountProgressMarksInTarget(cmTarget const* target,
+                                    std::set<cmTarget const*>& emitted);
   size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
 
   cmGeneratedFileStream *CommandDatabase;

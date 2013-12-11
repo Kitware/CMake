@@ -99,12 +99,12 @@ private:
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout,
-                    const char* name, const char* path, cmTarget &t);
+                    const char* name, const char* path, cmTarget const& t);
   void WriteExternalProject(std::ostream& fout,
                             const char* name, const char* path,
                             const std::set<cmStdString>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
-  virtual std::string WriteUtilityDepend(cmTarget* target);
+  virtual std::string WriteUtilityDepend(cmTarget const* target);
   std::string MSDevCommand;
   bool MSDevCommandInitialized;
   std::string const& GetMSDevCommand();

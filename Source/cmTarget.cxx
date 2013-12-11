@@ -828,7 +828,8 @@ void cmTarget::GetDirectLinkLibraries(const char *config,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetInterfaceLinkLibraries(const char *config,
-                        std::vector<std::string> &libs, cmTarget *head) const
+                                         std::vector<std::string> &libs,
+                                         cmTarget const* head) const
 {
   const char *prop = this->GetProperty("INTERFACE_LINK_LIBRARIES");
   if (prop)
@@ -5770,7 +5771,8 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-void checkPropertyConsistency(cmTarget const* depender, cmTarget *dependee,
+void checkPropertyConsistency(cmTarget const* depender,
+                              cmTarget const* dependee,
                               const char *propName,
                               std::set<cmStdString> &emitted,
                               const char *config,

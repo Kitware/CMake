@@ -1386,7 +1386,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
-                                             cmTarget* target,
+                                             cmTarget const* target,
                                              const char* config)
 {
   std::vector<std::string> targetDefines;

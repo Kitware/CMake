@@ -950,7 +950,7 @@ void cmGlobalGenerator::ClearEnabledLanguages()
 }
 
 bool cmGlobalGenerator::IsDependedOn(const char* project,
-                                     cmTarget* targetIn)
+                                     cmTarget const* targetIn)
 {
   // Get all local gens for this project
   std::vector<cmLocalGenerator*>* gens = &this->ProjectMap[project];
@@ -1214,8 +1214,8 @@ bool cmGlobalGenerator::ComputeTargetDepends()
     {
     return false;
     }
-  std::vector<cmTarget*> const& targets = ctd.GetTargets();
-  for(std::vector<cmTarget*>::const_iterator ti = targets.begin();
+  std::vector<cmTarget const*> const& targets = ctd.GetTargets();
+  for(std::vector<cmTarget const*>::const_iterator ti = targets.begin();
       ti != targets.end(); ++ti)
     {
     ctd.GetTargetDirectDepends(*ti, this->TargetDependencies[*ti]);
@@ -1432,7 +1432,8 @@ void cmGlobalGenerator::ClearGeneratorMembers()
 }
 
 //----------------------------------------------------------------------------
-cmGeneratorTarget* cmGlobalGenerator::GetGeneratorTarget(cmTarget* t) const
+cmGeneratorTarget*
+cmGlobalGenerator::GetGeneratorTarget(cmTarget const* t) const
 {
   cmGeneratorTargetsType::const_iterator ti = this->GeneratorTargets.find(t);
   if(ti == this->GeneratorTargets.end())
@@ -1954,7 +1955,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
           clg = clg->GetParent())
         {
         // This local generator includes the target.
-        std::set<cmTarget*>& targetSet =
+        std::set<cmTarget const*>& targetSet =
           this->LocalGeneratorToTargetMap[clg];
         targetSet.insert(&target);
 
@@ -1965,7 +1966,8 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
         for(TargetDependSet::const_iterator ti = tgtdeps.begin();
             ti != tgtdeps.end(); ++ti)
           {
-          targetSet.insert(*ti);
+          cmTarget const* ttt = *ti;
+          targetSet.insert(ttt);
           }
         }
       }
@@ -2478,7 +2480,7 @@ void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
 
 //----------------------------------------------------------------------------
 cmGlobalGenerator::TargetDependSet const&
-cmGlobalGenerator::GetTargetDirectDepends(cmTarget & target)
+cmGlobalGenerator::GetTargetDirectDepends(cmTarget const& target)
 {
   return this->TargetDependencies[&target];
 }
@@ -2600,7 +2602,7 @@ bool cmGlobalGenerator::IsRootOnlyTarget(cmTarget* target)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddTargetDepends(cmTarget* target,
+void cmGlobalGenerator::AddTargetDepends(cmTarget const* target,
                                          TargetDependSet& projectTargets)
 {
   // add the target itself
@@ -2611,7 +2613,7 @@ void cmGlobalGenerator::AddTargetDepends(cmTarget* target,
     TargetDependSet const& ts = this->GetTargetDirectDepends(*target);
     for(TargetDependSet::const_iterator i = ts.begin(); i != ts.end(); ++i)
       {
-      cmTarget* dtarget = *i;
+      cmTarget const* dtarget = *i;
       this->AddTargetDepends(dtarget, projectTargets);
       }
     }
