@@ -37,8 +37,8 @@ void compare(const char* refName, const char* testName)
     {
     std::string refLine;
     std::string testLine;
-    getline(ref, refLine);
-    getline(test, testLine);
+    std::getline(ref, refLine);
+    std::getline(test, testLine);
     if (testLine.size() && testLine[testLine.size()-1] == ' ')
       {
       testLine = testLine.substr(0, testLine.size() - 1);
