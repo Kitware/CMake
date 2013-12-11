@@ -1477,27 +1477,6 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     includeBinaryDir = true;
     }
 
-  // Hack for VTK 4.0 - 4.4 which depend on the old behavior but do
-  // not set the backwards compatibility level automatically.
-  const char* vtkSourceDir =
-    this->Makefile->GetDefinition("VTK_SOURCE_DIR");
-  if(vtkSourceDir)
-    {
-    const char* vtk_major =
-      this->Makefile->GetDefinition("VTK_MAJOR_VERSION");
-    const char* vtk_minor =
-      this->Makefile->GetDefinition("VTK_MINOR_VERSION");
-    vtk_major = vtk_major? vtk_major : "4";
-    vtk_minor = vtk_minor? vtk_minor : "4";
-    int vmajor = 0;
-    int vminor = 0;
-    if(sscanf(vtk_major, "%d", &vmajor) &&
-       sscanf(vtk_minor, "%d", &vminor) && vmajor == 4 && vminor <= 4)
-      {
-      includeSourceDir = true;
-      }
-    }
-
   // Do not repeat an include path.
   std::set<cmStdString> emitted;
 
