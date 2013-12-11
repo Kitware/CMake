@@ -179,7 +179,8 @@ private:
 
   // Runtime path computation.
   cmOrderDirectories* OrderRuntimeSearchPath;
-  void AddLibraryRuntimeInfo(std::string const& fullPath, cmTarget const* target);
+  void AddLibraryRuntimeInfo(std::string const& fullPath,
+                             cmTarget const* target);
   void AddLibraryRuntimeInfo(std::string const& fullPath);
 
   // Dependent library path computation.
