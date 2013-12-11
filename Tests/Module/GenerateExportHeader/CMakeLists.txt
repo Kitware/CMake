@@ -197,6 +197,6 @@ else()
 endif()
 target_compile_definitions(GenerateExportHeader
   PRIVATE
-    SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}"
-    BIN_DIR="${CMAKE_CURRENT_BINARY_DIR}"
+    "SRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}"
+    "BIN_DIR=${CMAKE_CURRENT_BINARY_DIR}"
 )
