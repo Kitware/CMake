@@ -195,6 +195,7 @@ elseif(NOT USE_COMPILER_HIDDEN_VISIBILITY)
 else()
   set(_platform UNIX)
 endif()
+message("#### Testing reference: ${_platform}")
 target_compile_definitions(GenerateExportHeader
   PRIVATE
     "SRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}"
