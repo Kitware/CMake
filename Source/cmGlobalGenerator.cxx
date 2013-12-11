@@ -1379,6 +1379,10 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
     for(cmGeneratorTargetsType::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
+      if (ti->second->Target->IsImported())
+        {
+        continue;
+        }
       cmGeneratorTarget* gt = ti->second;
       gt->ClassifySources();
       gt->LookupObjectLibraries();
