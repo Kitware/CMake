@@ -261,7 +261,7 @@ void cmLocalGenerator::TraceDependencies()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (ti->second->Target->IsImported())
+    if (t->second->Target->IsImported())
       {
       continue;
       }
@@ -549,7 +549,7 @@ void cmLocalGenerator::GenerateTargetManifest()
       {
       continue;
       }
-    if (target->Target->IsImported())
+    if (target.Target->IsImported())
       {
       continue;
       }
