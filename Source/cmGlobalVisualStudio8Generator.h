@@ -84,7 +84,7 @@ protected:
     const char* platformMapping = NULL);
   virtual bool ComputeTargetDepends();
   virtual void WriteProjectDepends(std::ostream& fout, const char* name,
-                                   const char* path, cmTarget &t);
+                                   const char* path, cmTarget const& t);
 
   std::string Name;
   std::string WindowsCEVersion;
