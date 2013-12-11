@@ -159,13 +159,11 @@ macro(macro_add_test_library name)
             ${${name}_BINARY_DIR} # For the export header.
   )
   list(APPEND link_libraries ${name})
-  add_subdirectory(${name}test)
 endmacro()
 
 macro_add_test_library(libshared)
 macro_add_test_library(libstatic)
 add_subdirectory(lib_shared_and_static)
-add_subdirectory(lib_shared_and_statictest)
 
 add_subdirectory(override_symbol)
 add_subdirectory(nodeprecated)
@@ -175,7 +173,6 @@ if(NOT BORLAND)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
-  # We deliberately call deprecated methods, and test for that elsewhere.
   # No need to clutter the test output with warnings.
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 endif()
@@ -187,3 +184,13 @@ endif()
 add_executable(GenerateExportHeader exportheader_test.cpp)
 
 target_link_libraries(GenerateExportHeader ${link_libraries})
+if (WIN32)
+  set(_platform Win32)
+else()
+  set(_platform UNIX)
+endif()
+target_compile_definitions(GenerateExportHeader
+  PRIVATE
+    SRC_DIR="${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}"
+    BIN_DIR="${CMAKE_CURRENT_BINARY_DIR}"
+)

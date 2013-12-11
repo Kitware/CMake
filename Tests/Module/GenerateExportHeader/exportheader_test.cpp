@@ -11,6 +11,52 @@
 #define DOES_NOT_BUILD(function) function
 #endif
 
+#include <fstream>
+#include <iostream>
+#include <cstdlib>
+#include <string>
+
+void compare(const char* refName, const char* testName)
+{
+  std::ifstream ref;
+  ref.open(refName);
+  if (!ref.is_open())
+    {
+    std::cout << "Could not open \"" << refName << "\"." << std::endl;
+    std::exit(1);
+    }
+  std::ifstream test;
+  test.open(testName);
+  if (!test.is_open())
+    {
+    std::cout << "Could not open \"" << testName << "\"." << std::endl;
+    exit(1);
+    }
+
+  while (!ref.eof() && !test.eof())
+    {
+    std::string refLine;
+    std::string testLine;
+    getline(ref, refLine);
+    getline(test, testLine);
+    if (testLine.size() && testLine[testLine.size()-1] == ' ')
+      {
+      testLine = testLine.substr(0, testLine.size() - 1);
+      }
+    if (refLine != testLine)
+      {
+      std::cout << "Ref and test are not the same:\n  Ref:  \""
+                          << refLine << "\"\n  Test: \"" << testLine << "\"\n";
+      exit(1);
+      }
+    }
+  if (!ref.eof() || !test.eof())
+    {
+    std::cout << "Ref and test have differing numbers of lines.";
+    exit(1);
+    }
+}
+
 int main()
 {
   {
@@ -77,6 +123,11 @@ int main()
   libstatic_deprecated();
   libstatic_not_exported();
   libstatic_excluded();
+
+  compare(SRC_DIR "/libshared_export.h",
+          BIN_DIR "/libshared/libshared_export.h");
+  compare(SRC_DIR "/libstatic_export.h",
+          BIN_DIR "/libstatic/libstatic_export.h");
 
   return 0;
 }
