@@ -13,7 +13,7 @@
 
 #include <fstream>
 #include <iostream>
-#include <cstdlib>
+#include <stdlib.h>
 #include <string>
 
 void compare(const char* refName, const char* testName)
@@ -23,7 +23,7 @@ void compare(const char* refName, const char* testName)
   if (!ref.is_open())
     {
     std::cout << "Could not open \"" << refName << "\"." << std::endl;
-    std::exit(1);
+    exit(1);
     }
   std::ifstream test;
   test.open(testName);
