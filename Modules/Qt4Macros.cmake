@@ -120,6 +120,7 @@ macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
   string (REPLACE ";" "\n" _moc_parameters "${_moc_parameters}")
 
   if(moc_target)
+    set (_moc_parameters_file ${_moc_parameters_file}$<$<BOOL:$<CONFIGURATION>>:_$<CONFIGURATION>>)
     set(targetincludes "$<TARGET_PROPERTY:${moc_target},INCLUDE_DIRECTORIES>")
     set(targetdefines "$<TARGET_PROPERTY:${moc_target},COMPILE_DEFINITIONS>")
 
