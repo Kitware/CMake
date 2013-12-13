@@ -265,6 +265,7 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
             ${_gtk2_arch_dir}
             /usr/local/lib64
             /usr/local/lib
+            /usr/lib/${CMAKE_LIBRARY_ARCHITECTURE}
             /usr/lib64
             /usr/lib
             /opt/gnome/include
