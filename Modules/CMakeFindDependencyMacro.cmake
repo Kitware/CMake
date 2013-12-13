@@ -1,3 +1,18 @@
+#.rst:
+# CMakeFindDependencyMacro
+# -------------------------
+#
+# ::
+#
+#     find_dependency(<dep> [<version>])
+#
+#
+# ``find_dependency()`` wraps a :command:`find_package` call for a package
+# dependency. It is designed to be used in a <package>Config.cmake file, and it
+# forwards the correct parameters for EXACT, QUIET and REQUIRED which were
+# passed to the original :command:`find_package` call.  It also sets an
+# informative diagnostic message if the dependency could not be found.
+#
 
 #=============================================================================
 # Copyright 2013 Stephen Kelly <steveire@gmail.com>
@@ -32,7 +47,7 @@ macro(find_dependency dep)
 
     find_package(${dep} ${version} ${exact_arg} ${quiet_arg} ${required_arg})
     if (NOT ${dep}_FOUND)
-      set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE \"${CMAKE_FIND_PACKAGE_NAME} could not be found because dependency ${dep} could not be found.\")
+      set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${CMAKE_FIND_PACKAGE_NAME} could not be found because dependency ${dep} could not be found.")
       set(${CMAKE_FIND_PACKAGE_NAME}_FOUND False)
       return()
     endif()
