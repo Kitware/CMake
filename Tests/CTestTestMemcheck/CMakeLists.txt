@@ -1,5 +1,13 @@
 REGEX_ESCAPE_STRING(CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}")
 
+get_filename_component(CTEST_REALPATH_CMAKE_CURRENT_BINARY_DIR
+  "${CMAKE_CURRENT_BINARY_DIR}" REALPATH
+)
+
+REGEX_ESCAPE_STRING(CTEST_ESCAPED_REALPATH_CMAKE_CURRENT_BINARY_DIR
+  "${CTEST_REALPATH_CMAKE_CURRENT_BINARY_DIR}"
+)
+
 foreach (_retval 0 1)
   configure_file("${CMAKE_CURRENT_SOURCE_DIR}/memtester.cxx.in" "${CMAKE_CURRENT_BINARY_DIR}/ret${_retval}.cxx" @ONLY)
 endforeach ()
@@ -180,7 +188,7 @@ set_tests_properties(CTestTestMemcheckDummyBC PROPERTIES
     PASS_REGULAR_EXPRESSION "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n(.*\n)?Error parsing XML in stream at line 1: no element found\n")
 
 set_tests_properties(CTestTestMemcheckDummyValgrindInvalidSupFile PROPERTIES
-    PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
+    PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CTEST_ESCAPED_REALPATH_CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
 
 set_tests_properties(CTestTestMemcheckDummyValgrindCustomOptions PROPERTIES
     PASS_REGULAR_EXPRESSION "\nCannot find memory tester output file: ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/Testing/Temporary/MemoryChecker.1.log\n(.*\n)?Error in read script: ${CMAKE_CURRENT_BINARY_DIR}/DummyValgrindCustomOptions/test.cmake\n")
