@@ -57,7 +57,7 @@ endif()
 
 include(GenerateExportHeader)
 
-add_subdirectory(visibility_preset)
+add_subdirectory(lib_shared_and_static)
 
 add_compiler_export_flags()
 
@@ -79,11 +79,8 @@ endmacro()
 
 macro_add_test_library(libshared)
 macro_add_test_library(libstatic)
-add_subdirectory(lib_shared_and_static)
 
-add_subdirectory(override_symbol)
 add_subdirectory(nodeprecated)
-add_subdirectory(prefix)
 if(NOT BORLAND)
   add_subdirectory(c_identifier)
 endif()
