@@ -201,6 +201,8 @@ static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
   LowerCaseNode() {}
 
+  bool AcceptsArbitraryContentParameter() const { return true; }
+
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *,
                        const GeneratorExpressionContent *,
@@ -215,6 +217,8 @@ static const struct UpperCaseNode : public cmGeneratorExpressionNode
 {
   UpperCaseNode() {}
 
+  bool AcceptsArbitraryContentParameter() const { return true; }
+
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *,
                        const GeneratorExpressionContent *,
@@ -228,6 +232,8 @@ static const struct UpperCaseNode : public cmGeneratorExpressionNode
 static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
 {
   MakeCIdentifierNode() {}
+
+  bool AcceptsArbitraryContentParameter() const { return true; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *,
