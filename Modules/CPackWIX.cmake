@@ -116,6 +116,57 @@
 #  If this variable is not set, the default MSI template included with CMake
 #  will be used.
 #
+# .. variable:: CPACK_WIX_PATCH_FILE
+#
+#  Optional XML file with fragments to be inserted into generated WiX sources
+#
+#  This optional variable can be used to specify an XML file that the
+#  WiX generator will use to inject fragments into its generated
+#  source files.
+#
+#  Patch files understood by the CPack WiX generator
+#  roughly follow this RELAX NG compact schema:
+#
+#  .. code-block:: none
+#
+#     start = CPackWiXPatch
+#
+#     CPackWiXPatch = element CPackWiXPatch { CPackWiXFragment* }
+#
+#     CPackWiXFragment = element CPackWiXFragment
+#     {
+#         attribute Id { string },
+#         fragmentContent*
+#     }
+#
+#     fragmentContent = element * - CPackWiXFragment
+#     {
+#         (attribute * { text } | text | fragmentContent)*
+#     }
+#
+#  Currently fragments can be injected into most
+#  Component, File and Directory elements.
+#
+#  The following example illustrates how this works.
+#
+#  Given that the WiX generator creates the following XML element:
+#
+#  .. code-block:: xml
+#
+#     <Component Id="CM_CP_applications.bin.my_libapp.exe" Guid="*"/>
+#
+#  The following XML patch file may be used to inject an Environment element
+#  into it:
+#
+#  .. code-block:: xml
+#
+#     <CPackWiXPatch>
+#       <CPackWiXFragment Id="CM_CP_applications.bin.my_libapp.exe">
+#         <Environment Id="MyEnvironment" Action="set"
+#           Name="MyVariableName" Value="MyVariableValue"/>
+#       </CPackWiXFragment>
+#     </CPackWiXPatch>
+#
 # .. variable:: CPACK_WIX_EXTRA_SOURCES
 #
 #  Extra WiX source files

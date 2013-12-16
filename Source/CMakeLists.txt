@@ -517,6 +517,7 @@ if(WIN32)
     CPack/WiX/cmCPackWIXGenerator.cxx
     CPack/WiX/cmWIXSourceWriter.cxx
     CPack/WiX/cmWIXRichTextFormatWriter.cxx
+    CPack/WiX/cmWIXPatchParser.cxx
   )
 endif()
 
