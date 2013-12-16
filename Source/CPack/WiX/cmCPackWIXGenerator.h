@@ -13,6 +13,8 @@
 #ifndef cmCPackWIXGenerator_h
 #define cmCPackWIXGenerator_h
 
+#include "cmWIXPatchParser.h"
+
 #include <CPack/cmCPackGenerator.h>
 
 #include <string>
@@ -160,12 +162,21 @@ private:
 
   void CreateStartMenuFolder(cmWIXSourceWriter& directoryDefinitions);
 
+  void LoadPatchFragments(const std::string& patchFilePath);
+
+  void ApplyPatchFragment(const std::string& id, cmWIXSourceWriter& writer);
+
+  void ApplyPatchElement(const cmWIXPatchElement& element,
+    cmWIXSourceWriter& writer);
+
   std::vector<std::string> wixSources;
   id_map_t pathToIdMap;
   ambiguity_map_t idAmbiguityCounter;
 
   extension_set_t candleExtensions;
   extension_set_t lightExtensions;
+
+  cmWIXPatchParser::fragment_map_t fragments;
 };
 
 #endif
