@@ -82,7 +82,6 @@ static const struct ZeroNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    // Unreachable
     return std::string();
   }
 } zeroNode;
@@ -94,13 +93,12 @@ static const struct OneNode : public cmGeneratorExpressionNode
 
   virtual bool AcceptsArbitraryContentParameter() const { return true; }
 
-  std::string Evaluate(const std::vector<std::string> &,
+  std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *,
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    // Unreachable
-    return std::string();
+    return parameters.front();
   }
 } oneNode;
 
@@ -1634,14 +1632,6 @@ std::string GeneratorExpressionContent::Evaluate(
     return std::string();
     }
 
-  if (node->NumExpectedParameters() == 1
-        && node->AcceptsArbitraryContentParameter())
-    {
-    return this->ProcessArbitraryContent(node, identifier, context,
-                                         dagChecker,
-                                         this->ParamChildren.begin());
-    }
-
   std::vector<std::string> parameters;
   this->EvaluateParameters(node, identifier, context, dagChecker, parameters);
   if (context->HadError)
@@ -1669,32 +1659,34 @@ std::string GeneratorExpressionContent::EvaluateParameters(
                                         pend = this->ParamChildren.end();
   const bool acceptsArbitraryContent
                                   = node->AcceptsArbitraryContentParameter();
-  for ( ; pit != pend; ++pit)
+  int counter = 1;
+  for ( ; pit != pend; ++pit, ++counter)
     {
-    std::string parameter;
-    std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
-                                                              pit->begin();
-    const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end =
-                                                              pit->end();
-    for ( ; it != end; ++it)
+    if (acceptsArbitraryContent && counter == numExpected)
       {
-      parameter += (*it)->Evaluate(context, dagChecker);
-      if (context->HadError)
-        {
-        return std::string();
-        }
-      }
-    parameters.push_back(parameter);
-    if (acceptsArbitraryContent
-        && parameters.size() == (unsigned int)numExpected - 1)
-      {
-      assert(pit != pend);
       std::string lastParam = this->ProcessArbitraryContent(node, identifier,
                                                             context,
                                                             dagChecker,
-                                                            pit + 1);
+                                                            pit);
       parameters.push_back(lastParam);
       return std::string();
+      }
+    else
+      {
+      std::string parameter;
+      std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it =
+                                                                pit->begin();
+      const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end =
+                                                                pit->end();
+      for ( ; it != end; ++it)
+        {
+        parameter += (*it)->Evaluate(context, dagChecker);
+        if (context->HadError)
+          {
+          return std::string();
+          }
+        }
+      parameters.push_back(parameter);
       }
     }
   }
