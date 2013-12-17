@@ -45,8 +45,7 @@ public:
 private:
   virtual void StartElement(const char *name, const char **atts);
 
-  void StartFragment(
-    const std::string& name, const char **attributes);
+  void StartFragment(const char **attributes);
 
   virtual void EndElement(const char *name);
   virtual void ReportError(int line, int column, const char* msg);

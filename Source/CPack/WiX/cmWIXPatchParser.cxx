@@ -53,7 +53,7 @@ void cmWIXPatchParser::StartElement(const char *name, const char **atts)
       if(name_str == "CPackWiXFragment")
         {
         state = INSIDE_FRAGMENT;
-        StartFragment(name_str, atts);
+        StartFragment(atts);
         }
       else
         {
@@ -81,8 +81,7 @@ void cmWIXPatchParser::StartElement(const char *name, const char **atts)
     }
 }
 
-void cmWIXPatchParser::StartFragment(const std::string& name,
-  const char **attributes)
+void cmWIXPatchParser::StartFragment(const char **attributes)
 {
   for(size_t i = 0; attributes[i]; i += 2)
     {
