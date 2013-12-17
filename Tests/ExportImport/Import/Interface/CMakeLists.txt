@@ -40,6 +40,23 @@ macro(do_try_compile prefix)
   if(NOT ${prefix}IFACE_TRY_COMPILE)
     message(SEND_ERROR "${prefix} try_compile with IMPORTED INTERFACE target failed!\n\n${OUTPUT}")
   endif()
+
+  if (";${CMAKE_CXX_COMPILE_FEATURES};" MATCHES ";cxx_auto_type;")
+    set(CMAKE_REQUIRED_LIBRARIES ${prefix}::use_auto_type)
+    check_cxx_source_compiles(
+      "
+    int main(int,char**)
+    {
+      auto value = 0;
+      return value;
+    }
+    " ${prefix}IMPORTED_IFACE_CONSTEXPR)
+
+    if(NOT ${prefix}IMPORTED_IFACE_CONSTEXPR)
+      message(SEND_ERROR "${prefix} try_compile with IMPORTED INTERFACE target failed!\n\n${OUTPUT}")
+    endif()
+  endif()
+
 endmacro()
 
 do_try_compile(bld)
