@@ -21,6 +21,7 @@
 #include "cmVersion.h"
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/SystemTools.hxx>
+#include <cmsys/Encoding.hxx>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
@@ -48,12 +49,17 @@ static const char * cmDocumentationOptions[][2] =
 
 int main(int argc, char** argv)
 {
-  cmSystemTools::FindCMakeResources(argv[0]);
+  cmsys::Encoding::CommandLineArguments encoding_args =
+    cmsys::Encoding::CommandLineArguments::Main(argc, argv);
+  int argc2 = encoding_args.argc();
+  char const* const* argv2 = encoding_args.argv();
+
+  cmSystemTools::FindCMakeResources(argv2[0]);
   // check docs first so that X is not need to get docs
   // do docs, if args were given
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
-  if(argc >1 && doc.CheckOptions(argc, argv))
+  if(argc2 >1 && doc.CheckOptions(argc2, argv2))
     {
     // Construct and print requested documentation.
     cmake hcm;
@@ -80,9 +86,9 @@ int main(int argc, char** argv)
     }
 
   // if arg for install
-  for(int i =0; i < argc; i++)
+  for(int i =0; i < argc2; i++)
     {
-    if(strcmp(argv[i], "--mac-install") == 0)
+    if(strcmp(argv2[i], "--mac-install") == 0)
       {
       QMacInstallDialog setupdialog(0);
       setupdialog.exec();
@@ -116,7 +122,7 @@ int main(int argc, char** argv)
   dialog.show();
 
   cmsys::CommandLineArguments arg;
-  arg.Initialize(argc, argv);
+  arg.Initialize(argc2, argv2);
   std::string binaryDirectory;
   std::string sourceDirectory;
   typedef cmsys::CommandLineArguments argT;
