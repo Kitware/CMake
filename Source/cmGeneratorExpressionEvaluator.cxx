@@ -354,6 +354,7 @@ static const struct CCompilerIdNode : public CompilerIdNode
       reportError(context, content->GetOriginalExpression(),
           "$<C_COMPILER_ID> may only be used with targets.  It may not "
           "be used with add_custom_command.");
+      return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
                                       dagChecker, "C");
@@ -381,6 +382,7 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
       reportError(context, content->GetOriginalExpression(),
           "$<CXX_COMPILER_ID> may only be used with targets.  It may not "
           "be used with add_custom_command.");
+      return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
                                       dagChecker, "CXX");
@@ -448,6 +450,7 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
       reportError(context, content->GetOriginalExpression(),
           "$<C_COMPILER_VERSION> may only be used with targets.  It may not "
           "be used with add_custom_command.");
+      return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
                                       dagChecker, "C");
@@ -476,6 +479,7 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
       reportError(context, content->GetOriginalExpression(),
           "$<CXX_COMPILER_VERSION> may only be used with targets.  It may "
           "not be used with add_custom_command.");
+      return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
                                       dagChecker, "CXX");
