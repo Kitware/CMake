@@ -66,7 +66,9 @@ Possible expressions are:
  True if the given name is an existing policy (of the form ``CMP<NNNN>``).
 
 ``if(TARGET target-name)``
- True if the given name is an existing target, built or imported.
+ True if the given name is an existing logical target name such as those
+ created by the :command:`add_executable`, :command:`add_library`, or
+ :command:`add_custom_target` commands.
 
 ``if(EXISTS path-to-file-or-directory)``
  True if the named file or directory exists.  Behavior is well-defined
