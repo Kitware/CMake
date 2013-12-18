@@ -512,7 +512,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
       }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(), platformId) == 0)
+    if (strcmp(parameters.begin()->c_str(), platformId) == 0)
       {
       return "1";
       }
