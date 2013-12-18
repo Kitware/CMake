@@ -24,6 +24,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include <cmsys/Encoding.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------------
@@ -79,7 +80,7 @@ static const char * cmDocumentationOptions[][2] =
 
 #endif
 
-static int do_command(int ac, char** av)
+static int do_command(int ac, char const* const* av)
 {
   std::vector<std::string> args;
   args.push_back(av[0]);
@@ -90,8 +91,8 @@ static int do_command(int ac, char** av)
   return cmcmd::ExecuteCMakeCommand(args);
 }
 
-int do_cmake(int ac, char** av);
-static int do_build(int ac, char** av);
+int do_cmake(int ac, char const* const* av);
+static int do_build(int ac, char const* const* av);
 
 static cmMakefile* cmakemainGetMakefile(void *clientdata)
 {
@@ -159,8 +160,13 @@ static void cmakemainProgressCallback(const char *m, float prog,
 }
 
 
-int main(int ac, char** av)
+int main(int ac, char const* const* av)
 {
+  cmsys::Encoding::CommandLineArguments args =
+    cmsys::Encoding::CommandLineArguments::Main(ac, av);
+  ac = args.argc();
+  av = args.argv();
+
   cmSystemTools::EnableMSVCDebugHook();
   cmSystemTools::FindCMakeResources(av[0]);
   if(ac > 1)
@@ -181,7 +187,7 @@ int main(int ac, char** av)
   return ret;
 }
 
-int do_cmake(int ac, char** av)
+int do_cmake(int ac, char const* const* av)
 {
   if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
     {
@@ -352,7 +358,7 @@ int do_cmake(int ac, char** av)
 }
 
 //----------------------------------------------------------------------------
-static int do_build(int ac, char** av)
+static int do_build(int ac, char const* const* av)
 {
 #ifndef CMAKE_BUILD_WITH_CMAKE
   std::cerr << "This cmake does not support --build\n";
