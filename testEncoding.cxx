@@ -16,14 +16,18 @@
 #endif
 
 #include KWSYS_HEADER(Encoding.hxx)
+#include KWSYS_HEADER(Encoding.h)
 #include KWSYS_HEADER(ios/iostream)
 
 #include <locale.h>
+#include <string.h>
+#include <stdlib.h>
 
 // Work-around CMake dependency scanning limitation.  This must
 // duplicate the above list of headers.
 #if 0
 # include "Encoding.hxx.in"
+# include "Encoding.h.in"
 # include "kwsys_ios_iostream.h.in"
 #endif
 
@@ -68,11 +72,16 @@ static int testHelloWorldEncoding()
     std::cout << str << std::endl;
     std::wstring wstr = kwsys::Encoding::ToWide(str);
     std::string str2 = kwsys::Encoding::ToNarrow(wstr);
-    if(!wstr.empty() && str != str2)
+    wchar_t* c_wstr = kwsysEncoding_DupToWide(str.c_str());
+    char* c_str2 = kwsysEncoding_DupToNarrow(c_wstr);
+    if(!wstr.empty() && (str != str2 || strcmp(c_str2, str.c_str())))
       {
       std::cout << "converted string was different: " << str2 << std::endl;
+      std::cout << "converted string was different: " << c_str2 << std::endl;
       ret++;
       }
+    free(c_wstr);
+    free(c_str2);
     }
   return ret;
 }
