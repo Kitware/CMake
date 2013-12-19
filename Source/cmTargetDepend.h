@@ -20,17 +20,17 @@ class cmTarget;
     It may be marked as a 'link' or 'util' edge or both.  */
 class cmTargetDepend
 {
-  cmTarget* Target;
+  cmTarget const* Target;
 
   // The set order depends only on the Target, so we use
   // mutable members to acheive a map with set syntax.
   mutable bool Link;
   mutable bool Util;
 public:
-  cmTargetDepend(cmTarget* t): Target(t), Link(false), Util(false) {}
-  operator cmTarget*() const { return this->Target; }
-  cmTarget* operator->() const { return this->Target; }
-  cmTarget& operator*() const { return *this->Target; }
+  cmTargetDepend(cmTarget const* t): Target(t), Link(false), Util(false) {}
+  operator cmTarget const*() const { return this->Target; }
+  cmTarget const* operator->() const { return this->Target; }
+  cmTarget const& operator*() const { return *this->Target; }
   friend bool operator < (cmTargetDepend const& l, cmTargetDepend const& r)
     { return l.Target < r.Target; }
   void SetType(bool strong) const

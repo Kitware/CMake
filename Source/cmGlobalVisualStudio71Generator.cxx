@@ -157,7 +157,7 @@ void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
                                               const char* dspname,
                                               const char* dir,
-                                              cmTarget& t)
+                                              cmTarget const& t)
 {
   // check to see if this is a fortran build
   const char* ext = ".vcproj";
@@ -209,7 +209,7 @@ void
 cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
                       const char*,
-                      const char*, cmTarget& target)
+                      const char*, cmTarget const& target)
 {
   VSDependSet const& depends = this->VSTargetDepends[&target];
   for(VSDependSet::const_iterator di = depends.begin();

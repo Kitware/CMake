@@ -2622,7 +2622,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
 }
 
 //----------------------------------------------------------------------------
-cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(cmTarget* t)
+cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(cmTarget const* t)
 {
   if(!t)
     {

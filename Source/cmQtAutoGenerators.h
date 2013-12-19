@@ -24,16 +24,17 @@ public:
   bool Run(const char* targetDirectory, const char *config);
 
   bool InitializeAutogenTarget(cmTarget* target);
-  void SetupAutoGenerateTarget(cmTarget* target);
+  void SetupAutoGenerateTarget(cmTarget const* target);
 
 private:
-  void SetupAutoMocTarget(cmTarget* target,
+  void SetupAutoMocTarget(cmTarget const* target,
                           const std::string &autogenTargetName,
                           std::map<std::string, std::string> &configIncludes,
                           std::map<std::string, std::string> &configDefines);
-  void SetupAutoUicTarget(cmTarget* target,
+  void SetupAutoUicTarget(cmTarget const* target,
                         std::map<std::string, std::string> &configUicOptions);
-  void SetupAutoRccTarget(cmTarget* target);
+  void InitializeAutoRccTarget(cmTarget* target);
+  void SetupAutoRccTarget(cmTarget const* target);
 
   cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
                                            const char* targetDirectory);

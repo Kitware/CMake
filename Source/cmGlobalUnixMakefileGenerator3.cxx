@@ -841,7 +841,7 @@ cmGlobalUnixMakefileGenerator3
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       //
-      std::set<cmTarget *> emitted;
+      std::set<cmTarget const*> emitted;
       progCmd << " "
               << this->CountProgressMarksInTarget(t->second->Target, emitted);
       commands.push_back(progCmd.str());
@@ -919,8 +919,8 @@ cmGlobalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 size_t
 cmGlobalUnixMakefileGenerator3
-::CountProgressMarksInTarget(cmTarget* target,
-                             std::set<cmTarget*>& emitted)
+::CountProgressMarksInTarget(cmTarget const* target,
+                             std::set<cmTarget const*>& emitted)
 {
   size_t count = 0;
   if(emitted.insert(target).second)
@@ -946,9 +946,10 @@ cmGlobalUnixMakefileGenerator3
 ::CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg)
 {
   size_t count = 0;
-  std::set<cmTarget*> emitted;
-  std::set<cmTarget*> const& targets = this->LocalGeneratorToTargetMap[lg];
-  for(std::set<cmTarget*>::const_iterator t = targets.begin();
+  std::set<cmTarget const*> emitted;
+  std::set<cmTarget const*> const& targets
+                                        = this->LocalGeneratorToTargetMap[lg];
+  for(std::set<cmTarget const*>::const_iterator t = targets.begin();
       t != targets.end(); ++t)
     {
     count += this->CountProgressMarksInTarget(*t, emitted);
@@ -969,7 +970,7 @@ cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
 //----------------------------------------------------------------------------
 bool
 cmGlobalUnixMakefileGenerator3::ProgressMapCompare
-::operator()(cmTarget* l, cmTarget* r) const
+::operator()(cmTarget const* l, cmTarget const* r) const
 {
   // Order by target name.
   if(int c = strcmp(l->GetName(), r->GetName()))

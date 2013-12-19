@@ -283,8 +283,8 @@ public:
     ASD.insert(deps.begin(), deps.end());
   }
 
-  void AppendTargetOutputs(cmTarget* target, cmNinjaDeps& outputs);
-  void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
+  void AppendTargetOutputs(cmTarget const* target, cmNinjaDeps& outputs);
+  void AppendTargetDepends(cmTarget const* target, cmNinjaDeps& outputs);
   void AddDependencyToAll(cmTarget* target);
   void AddDependencyToAll(const std::string& input);
 

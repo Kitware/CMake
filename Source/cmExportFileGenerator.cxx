@@ -402,7 +402,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
 
 
 //----------------------------------------------------------------------------
-void getPropertyContents(cmTarget *tgt, const char *prop,
+void getPropertyContents(cmTarget const* tgt, const char *prop,
          std::set<std::string> &ifaceProperties)
 {
   const char *p = tgt->GetProperty(prop);

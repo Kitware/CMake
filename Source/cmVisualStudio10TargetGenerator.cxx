@@ -1841,7 +1841,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
   for( OrderedTargetDependSet::const_iterator i = depends.begin();
        i != depends.end(); ++i)
     {
-    cmTarget* dt = *i;
+    cmTarget const* dt = *i;
     if(dt->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
