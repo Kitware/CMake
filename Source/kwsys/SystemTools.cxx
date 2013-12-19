@@ -2115,10 +2115,10 @@ bool SystemTools::CopyFileAlways(const char* source, const char* destination)
   SystemTools::RemoveFile(destination);
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  kwsys_ios::ofstream fout(destination,
+  kwsys::ofstream fout(destination,
                      kwsys_ios::ios::binary | kwsys_ios::ios::out | kwsys_ios::ios::trunc);
 #else
-  kwsys_ios::ofstream fout(destination,
+  kwsys::ofstream fout(destination,
                      kwsys_ios::ios::out | kwsys_ios::ios::trunc);
 #endif
   if(!fout)
