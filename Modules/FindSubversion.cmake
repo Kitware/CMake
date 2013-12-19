@@ -73,6 +73,8 @@
 #  License text for the above reference.)
 
 find_program(Subversion_SVN_EXECUTABLE svn
+  PATHS
+    [HKEY_LOCAL_MACHINE\\Software\\TortoiseSVN;Directory]/bin
   DOC "subversion command line client")
 mark_as_advanced(Subversion_SVN_EXECUTABLE)
 
