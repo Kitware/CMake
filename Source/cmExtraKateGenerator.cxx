@@ -52,6 +52,8 @@ void cmExtraKateGenerator::Generate()
   this->ProjectName = this->GenerateProjectName(mf->GetProjectName(),
                           mf->GetSafeDefinition("CMAKE_BUILD_TYPE"),
                           this->GetPathBasename(mf->GetHomeOutputDirectory()));
+  this->UseNinja = (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0);
+
   this->CreateKateProjectFile(mf);
   this->CreateDummyKateProjectFile(mf);
 }
@@ -95,11 +97,12 @@ cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string makeArgs = mf->GetSafeDefinition(
                                               "CMAKE_KATE_MAKE_ARGUMENTS");
+  const char* homeOutputDir = mf->GetHomeOutputDirectory();
 
   this->AppendTarget(fout, "all", make, makeArgs,
-                     mf->GetHomeOutputDirectory());
+                     homeOutputDir, homeOutputDir);
   this->AppendTarget(fout, "clean", make, makeArgs,
-                     mf->GetHomeOutputDirectory());
+                     homeOutputDir, homeOutputDir);
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
@@ -143,7 +146,8 @@ cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
             }
           if (insertTarget)
             {
-            this->AppendTarget(fout, ti->first, make, makeArgs, currentDir);
+            this->AppendTarget(fout, ti->first, make, makeArgs,
+                               currentDir, homeOutputDir);
             }
         }
         break;
@@ -158,7 +162,8 @@ cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
               break;
             }
 
-            this->AppendTarget(fout, ti->first, make, makeArgs, currentDir);
+            this->AppendTarget(fout, ti->first, make, makeArgs,
+                               currentDir, homeOutputDir);
           break;
         case cmTarget::EXECUTABLE:
         case cmTarget::STATIC_LIBRARY:
@@ -166,10 +171,12 @@ cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
         case cmTarget::MODULE_LIBRARY:
         case cmTarget::OBJECT_LIBRARY:
         {
-          this->AppendTarget(fout, ti->first, make, makeArgs, currentDir);
+          this->AppendTarget(fout, ti->first, make, makeArgs,
+                             currentDir, homeOutputDir);
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget, make, makeArgs, currentDir);
+          this->AppendTarget(fout, fastTarget, make, makeArgs,
+                             currentDir, homeOutputDir);
 
         }
         break;
@@ -185,7 +192,7 @@ cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
         fit != objectFileTargets.end();
         ++fit)
       {
-      this->AppendTarget(fout, *fit, make, makeArgs, currentDir);
+      this->AppendTarget(fout, *fit, make, makeArgs, currentDir,homeOutputDir);
       }
   }
 
@@ -199,14 +206,18 @@ cmExtraKateGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                    const std::string&     target,
                                    const std::string&     make,
                                    const std::string&     makeArgs,
-                                   const std::string&     path) const
+                                   const std::string&     path,
+                                   const char*            homeOutputDir
+                                  ) const
 {
   static char JsonSep = ' ';
 
   fout <<
     "\t\t\t" << JsonSep << "{\"name\":\"" << target << "\", "
-    "\"build_cmd\":\"" << make << " -C " << path << " " << makeArgs << " "
-                       << target << "\"}\n";
+    "\"build_cmd\":\"" << make
+                   << " -C " << (this->UseNinja ? homeOutputDir : path.c_str())
+                   << " " << makeArgs << " "
+                   << target << "\"}\n";
 
   JsonSep = ',';
 }
@@ -325,48 +336,4 @@ std::string cmExtraKateGenerator::GetPathBasename(const std::string& path)const
     }
 
   return outputBasename;
-}
-
-
-// Create the command line for building the given target using the selected
-// make
-std::string cmExtraKateGenerator::BuildMakeCommand(const std::string& make,
-                                const char* makefile, const char* target) const
-{
-  std::string command = make;
-  if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
-    {
-    std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += " /NOLOGO /f &quot;";
-    command += makefileName;
-    command += "&quot; ";
-    command += " VERBOSE=1 ";
-    command += target;
-    }
-  else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
-    {
-    // no escaping of spaces in this case, see
-    // http://public.kitware.com/Bug/view.php?id=10014
-    std::string makefileName = makefile;
-    command += " -f &quot;";
-    command += makefileName;
-    command += "&quot; ";
-    command += " VERBOSE=1 ";
-    command += target;
-    }
-  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
-    {
-    command += " -v ";
-    command += target;
-    }
-  else
-    {
-    std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += " -f &quot;";
-    command += makefileName;
-    command += "&quot; ";
-    command += " VERBOSE=1 ";
-    command += target;
-    }
-  return command;
 }
