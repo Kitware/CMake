@@ -26,7 +26,8 @@
   F(CMP0020) \
   F(CMP0021) \
   F(CMP0022) \
-  F(CMP0041)
+  F(CMP0041) \
+  F(CMP0042)
 
 class cmake;
 class cmMakefile;
@@ -382,7 +383,10 @@ public:
   std::string GetSOName(const char* config) const;
 
   /** Whether this library has \@rpath and platform supports it.  */
-  bool HasMacOSXRpath(const char* config) const;
+  bool HasMacOSXRpathInstallNameDir(const char* config) const;
+
+  /** Whether this library defaults to \@rpath.  */
+  bool MacOSXRpathInstallNameDirDefault() const;
 
   /** Test for special case of a third-party shared library that has
       no soname at all.  */

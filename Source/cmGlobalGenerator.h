@@ -315,6 +315,8 @@ public:
   bool GenerateImportFile(const std::string &file);
   cmExportBuildFileGenerator*
   GetExportedTargetsFile(const std::string &filename) const;
+  void AddCMP0042WarnTarget(const std::string& target);
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
@@ -446,6 +448,9 @@ private:
 
   // Set of binary directories on disk.
   std::set<cmStdString> BinaryDirectories;
+
+  // track targets to issue CMP0042 warning for.
+  std::set<std::string> CMP0042WarnTargets;
 };
 
 #endif

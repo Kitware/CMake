@@ -75,3 +75,4 @@ All Policies
    /policy/CMP0039
    /policy/CMP0040
    /policy/CMP0041
+   /policy/CMP0042

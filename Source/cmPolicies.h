@@ -95,6 +95,7 @@ public:
     CMP0040, ///< The target in the TARGET signature of
     /// add_custom_command() must exist.
     CMP0041, ///< Error on relative include with generator expression
+    CMP0042, ///< Enable MACOSX_RPATH by default
 
     /** \brief Always the last entry.
      *
