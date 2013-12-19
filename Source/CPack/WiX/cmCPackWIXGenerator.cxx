@@ -218,6 +218,12 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
   CollectExtensions("CPACK_WIX_EXTENSIONS", lightExtensions);
   CollectExtensions("CPACK_WIX_LIGHT_EXTENSIONS", lightExtensions);
 
+  const char* patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
+  if(patchFilePath)
+    {
+    LoadPatchFragments(patchFilePath);
+    }
+
   return true;
 }
 
@@ -528,6 +534,28 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     }
 
   wixSources.push_back(mainSourceFilePath);
+
+  std::string fragmentList;
+  for(cmWIXPatchParser::fragment_map_t::const_iterator
+    i = fragments.begin(); i != fragments.end(); ++i)
+    {
+    if(!fragmentList.empty())
+      {
+      fragmentList += ", ";
+      }
+
+    fragmentList += "'";
+    fragmentList += i->first;
+    fragmentList += "'";
+    }
+
+  if(fragmentList.size())
+    {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Some XML patch fragments did not have matching IDs: " <<
+        fragmentList << std::endl);
+      return false;
+    }
 
   return true;
 }
@@ -872,6 +900,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         packageExecutables,
         shortcutMap);
 
+      ApplyPatchFragment(subDirectoryId, directoryDefinitions);
       directoryDefinitions.EndElement("Directory");
       }
     else
@@ -891,7 +920,10 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       fileDefinitions.AddAttribute("Source", fullPath);
       fileDefinitions.AddAttribute("KeyPath", "yes");
 
+      ApplyPatchFragment(fileId, fileDefinitions);
       fileDefinitions.EndElement("File");
+
+      ApplyPatchFragment(componentId, fileDefinitions);
       fileDefinitions.EndElement("Component");
       fileDefinitions.EndElement("DirectoryRef");
 
@@ -1145,4 +1177,46 @@ void cmCPackWIXGenerator::CreateStartMenuFolder(
   directoryDefinitions.EndElement("Directory");
 
   directoryDefinitions.EndElement("Directory");
+}
+
+void cmCPackWIXGenerator::LoadPatchFragments(const std::string& patchFilePath)
+{
+  cmWIXPatchParser parser(fragments, Logger);
+  parser.ParseFile(patchFilePath.c_str());
+}
+
+void cmCPackWIXGenerator::ApplyPatchFragment(
+  const std::string& id, cmWIXSourceWriter& writer)
+{
+  cmWIXPatchParser::fragment_map_t::iterator i = fragments.find(id);
+  if(i == fragments.end()) return;
+
+  const cmWIXPatchElement& fragment = i->second;
+  for(cmWIXPatchElement::child_list_t::const_iterator
+    j = fragment.children.begin(); j != fragment.children.end(); ++j)
+    {
+    ApplyPatchElement(**j, writer);
+    }
+
+  fragments.erase(i);
+}
+
+void cmCPackWIXGenerator::ApplyPatchElement(
+  const cmWIXPatchElement& element, cmWIXSourceWriter& writer)
+{
+  writer.BeginElement(element.name);
+
+  for(cmWIXPatchElement::attributes_t::const_iterator
+    i = element.attributes.begin(); i != element.attributes.end(); ++i)
+    {
+    writer.AddAttribute(i->first, i->second);
+    }
+
+  for(cmWIXPatchElement::child_list_t::const_iterator
+    i = element.children.begin(); i != element.children.end(); ++i)
+    {
+    ApplyPatchElement(**i, writer);
+    }
+
+  writer.EndElement(element.name);
 }
