@@ -297,16 +297,12 @@ cmExportInstallFileGenerator
     {
     // Collect import properties for this target.
     cmTargetExport const* te = *tei;
+    if (te->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      continue;
+
     ImportPropertyMap properties;
     std::set<std::string> importedLocations;
-    if (!properties.empty()
-        && te->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
-      {
-      this->GenerateImportPropertyCode(os, config, te->Target, properties);
-      this->GenerateImportedFileChecksCode(os, te->Target, properties,
-                                           importedLocations);
-      continue;
-      }
+
     this->SetImportLocationProperty(config, suffix, te->ArchiveGenerator,
                                     properties, importedLocations);
     this->SetImportLocationProperty(config, suffix, te->LibraryGenerator,

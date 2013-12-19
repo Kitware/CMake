@@ -1379,18 +1379,18 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   if (this->RunMocFailed)
     {
-    std::cerr << "moc failed..."<< std::endl;
+    std::cerr << "moc failed..." << std::endl;
     return false;
     }
 
   if (this->RunUicFailed)
     {
-    std::cerr << "uic failed..."<< std::endl;
+    std::cerr << "uic failed..." << std::endl;
     return false;
     }
   if (this->RunRccFailed)
     {
-    std::cerr << "rcc failed..."<< std::endl;
+    std::cerr << "rcc failed..." << std::endl;
     return false;
     }
   outStream.flush();
