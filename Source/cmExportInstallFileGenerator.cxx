@@ -298,7 +298,9 @@ cmExportInstallFileGenerator
     // Collect import properties for this target.
     cmTargetExport const* te = *tei;
     if (te->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
       continue;
+      }
 
     ImportPropertyMap properties;
     std::set<std::string> importedLocations;
