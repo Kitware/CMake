@@ -4860,6 +4860,15 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
                                const char** imp,
                                std::string& suffix) const
 {
+  if (this->GetType() == INTERFACE_LIBRARY)
+    {
+    // This method attempts to find a config-specific LOCATION for the
+    // IMPORTED library. In the case of INTERFACE_LIBRARY, there is no
+    // LOCATION at all, so leaving *loc and *imp unchanged is the appropriate
+    // and valid response.
+    return true;
+    }
+
   // Track the configuration-specific property suffix.
   suffix = "_";
   suffix += desired_config;
@@ -4992,8 +5001,7 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   const char* loc = 0;
   const char* imp = 0;
   std::string suffix;
-  if (this->GetType() != INTERFACE_LIBRARY &&
-      !this->GetMappedConfig(desired_config, &loc, &imp, suffix))
+  if (!this->GetMappedConfig(desired_config, &loc, &imp, suffix))
     {
     return;
     }
