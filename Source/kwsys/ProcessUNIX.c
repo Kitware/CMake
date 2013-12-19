@@ -2449,6 +2449,7 @@ static void kwsysProcessKill(pid_t process_id)
           if(f)
             {
             size_t nread = fread(buffer, 1, KWSYSPE_PIPE_BUFFER_SIZE, f);
+            fclose(f);
             buffer[nread] = '\0';
             if(nread > 0)
               {
@@ -2463,7 +2464,6 @@ static void kwsysProcessKill(pid_t process_id)
                   }
                 }
               }
-            fclose(f);
             }
           }
         }
