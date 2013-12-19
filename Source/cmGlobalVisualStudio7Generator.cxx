@@ -146,6 +146,41 @@ std::string cmGlobalVisualStudio7Generator::FindDevEnvCommand()
 }
 
 //----------------------------------------------------------------------------
+const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
+  const char* location)
+{
+  std::string extension = cmSystemTools::GetFilenameLastExtension(location);
+  if (extension == ".vbproj")
+    {
+    return "F184B08F-C81C-45F6-A57F-5ABD9991F28F";
+    }
+  else if (extension == ".csproj")
+    {
+    return "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC";
+    }
+  else if (extension == ".fsproj")
+    {
+    return "F2A71F9B-5D33-465A-A702-920D77279786";
+    }
+  else if (extension == ".vdproj")
+    {
+    return "54435603-DBB4-11D2-8724-00A0C9A8B90C";
+    }
+  else if (extension == ".dbproj")
+    {
+    return "C8D11400-126E-41CD-887F-60BD40844F9E";
+    }
+  else if (extension == ".wixproj")
+    {
+    return "930C7802-8A8C-48F9-8165-68863BCCD9DD";
+    }
+  else if (extension == ".pyproj")
+    {
+    return "888888A0-9F3D-457C-B088-3A5042F75D52";
+    }
+  return "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942";
+}
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,
@@ -730,7 +765,7 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project("
        << "\"{"
-       << (typeGuid ? typeGuid : "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942")
+       << (typeGuid ? typeGuid : this->ExternalProjectType(location))
        << "}\") = \""
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
