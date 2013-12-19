@@ -1687,10 +1687,15 @@ void cmLocalUnixMakefileGenerator3
                       no_commands, true);
 
   // Help out users that try "gmake target1 target2 -j".
-  std::vector<std::string> no_depends;
-  this->WriteMakeRule(ruleFileStream,
-    "Allow only one \"make -f Makefile2\" at a time, but pass parallelism.",
-    ".NOTPARALLEL", no_depends, no_commands, true);
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  if(gg->AllowNotParallel())
+    {
+    std::vector<std::string> no_depends;
+    this->WriteMakeRule(ruleFileStream,
+      "Allow only one \"make -f Makefile2\" at a time, but pass parallelism.",
+      ".NOTPARALLEL", no_depends, no_commands, true);
+    }
   }
 
   this->WriteSpecialTargetsTop(ruleFileStream);

@@ -43,6 +43,8 @@ public:
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile *, bool optional);
+
+  virtual bool AllowNotParallel() const { return false; }
 };
 
 #endif
