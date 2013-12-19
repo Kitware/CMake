@@ -55,93 +55,9 @@ else()
   endif()
 endif()
 
-set(DEPS
-  libshared
-  libstatic
-  lib_shared_and_static
-)
-
-foreach(DEP ${DEPS})
-  try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/${DEP}_build
-    ${CMAKE_CURRENT_SOURCE_DIR}/${DEP}
-    ${DEP}
-    OUTPUT_VARIABLE Out
-  )
-  if (NOT Result)
-    message("OUTPUT: ${Out}")
-  endif()
-endforeach()
-
-# The _do_build macro is called from a child scope, where
-# the current source and binary dir are different. Save them here
-# for use in the macro.
-set(TEST_TOP_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-set(TEST_TOP_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
-
-
-# We seem to get race conditions is writing this stuff to the same file at least on MinGW
-# So to write to separate source and build directories, we use a count to differentiate.
-set (COUNT 0)
-macro(_do_build Include Library LibrarySource Source)
-
-  math(EXPR COUNT "${COUNT} + 1" )
-
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/src.cpp" "#include \"${Include}\"\n"
-    "int main() { ${Source}; }\n"
-  )
-
-  if ("${Library}" STREQUAL "static_variant")
-    set(CONDITIONAL_STATIC_DEFINE "add_definitions(-DLIBSHARED_AND_STATIC_STATIC_DEFINE)\n")
-  endif()
-
-  file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}/CMakeLists.txt"
-    "cmake_minimum_required(VERSION 2.8)\n"
-
-    "project(compiletest)\n"
-
-    "set(CMAKE_INCLUDE_CURRENT_DIR ON)\n"
-
-    "set(CMAKE_RUNTIME_OUTPUT_DIRECTORY \"\${CMAKE_CURRENT_BINARY_DIR}\")\n"
-
-    "include(GenerateExportHeader)\n"
-
-    "add_compiler_export_flags()\n"
-
-    "if(NOT \"${ERROR_FLAG}\" STREQUAL \"\")\n"
-    "  add_definitions(${ERROR_FLAG})\n"
-    "endif()\n"
-
-    "include(\"${TEST_TOP_BINARY_DIR}/${LibrarySource}_build/Targets.cmake\")\n"
-
-    "include_directories(\"${TEST_TOP_SOURCE_DIR}/${LibrarySource}\"\n"
-    "                    \"${TEST_TOP_BINARY_DIR}/${LibrarySource}_build\")\n"
-
-    "${CONDITIONAL_STATIC_DEFINE}"
-
-    "add_executable(compiletest src.cpp)\n"
-    "target_link_libraries(compiletest ${Library})\n"
-  )
-
-  try_compile(Result ${CMAKE_CURRENT_BINARY_DIR}/fail${COUNT}
-    ${CMAKE_CURRENT_BINARY_DIR}/test${COUNT}
-    compiletest
-    OUTPUT_VARIABLE Out
-  )
-endmacro()
-
-macro(build_fail Include Library LibrarySource Source Message)
-  _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
-  test_fail(Result ${Message})
-endmacro()
-
-macro(build_pass Include Library LibrarySource Source Message)
-  _do_build(${Include} ${Library} ${LibrarySource} "${Source}")
-  test_pass(Result ${Message})
-endmacro()
-
 include(GenerateExportHeader)
 
-add_subdirectory(visibility_preset)
+add_subdirectory(lib_shared_and_static)
 
 add_compiler_export_flags()
 
@@ -159,23 +75,17 @@ macro(macro_add_test_library name)
             ${${name}_BINARY_DIR} # For the export header.
   )
   list(APPEND link_libraries ${name})
-  add_subdirectory(${name}test)
 endmacro()
 
 macro_add_test_library(libshared)
 macro_add_test_library(libstatic)
-add_subdirectory(lib_shared_and_static)
-add_subdirectory(lib_shared_and_statictest)
 
-add_subdirectory(override_symbol)
 add_subdirectory(nodeprecated)
-add_subdirectory(prefix)
 if(NOT BORLAND)
   add_subdirectory(c_identifier)
 endif()
 
 if (CMAKE_COMPILER_IS_GNUCXX OR (${CMAKE_CXX_COMPILER_ID} MATCHES Clang))
-  # We deliberately call deprecated methods, and test for that elsewhere.
   # No need to clutter the test output with warnings.
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-deprecated-declarations")
 endif()
@@ -187,3 +97,24 @@ endif()
 add_executable(GenerateExportHeader exportheader_test.cpp)
 
 target_link_libraries(GenerateExportHeader ${link_libraries})
+if (WIN32)
+  if(MSVC AND COMPILER_HAS_DEPRECATED)
+    set(_platform Win32)
+  elseif(MINGW AND COMPILER_HAS_DEPRECATED)
+    set(_platform MinGW)
+  else()
+    set(_platform WinEmpty)
+  endif()
+elseif(COMPILER_HAS_HIDDEN_VISIBILITY AND USE_COMPILER_HIDDEN_VISIBILITY)
+  set(_platform UNIX)
+elseif(COMPILER_HAS_DEPRECATED)
+  set(_platform UNIX_DeprecatedOnly)
+else()
+  set(_platform Empty)
+endif()
+message("#### Testing reference: ${_platform}")
+target_compile_definitions(GenerateExportHeader
+  PRIVATE
+    "SRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}/reference/${_platform}"
+    "BIN_DIR=${CMAKE_CURRENT_BINARY_DIR}"
+)
