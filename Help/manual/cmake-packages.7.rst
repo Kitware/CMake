@@ -174,13 +174,13 @@ The name of the package version file must match that of the package configuratio
 file but has either ``-version`` or ``Version`` appended to the name before
 the ``.cmake`` extension.  For example, the files::
 
- <prefix>/lib/foo-1.3/foo-config.cmake
- <prefix>/lib/foo-1.3/foo-config-version.cmake
+ <prefix>/lib/cmake/foo-1.3/foo-config.cmake
+ <prefix>/lib/cmake/foo-1.3/foo-config-version.cmake
 
 and::
 
- <prefix>/lib/bar-4.2/BarConfig.cmake
- <prefix>/lib/bar-4.2/BarConfigVersion.cmake
+ <prefix>/lib/cmake/bar-4.2/BarConfig.cmake
+ <prefix>/lib/cmake/bar-4.2/BarConfigVersion.cmake
 
 are each pairs of package configuration files and corresponding package version
 files.
