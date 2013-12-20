@@ -10,13 +10,15 @@ add_library(shared2 SHARED shared.cpp shared.h)
 set_target_properties(shared2 PROPERTIES
   BUILD_WITH_INSTALL_RPATH 1 INSTALL_NAME_DIR "@rpath")
 
+cmake_policy(SET CMP0042 NEW)
+
 # a framework library
 add_library(framework SHARED framework.cpp framework.h)
-set_target_properties(framework PROPERTIES MACOSX_RPATH 1 FRAMEWORK 1)
+set_target_properties(framework PROPERTIES FRAMEWORK 1)
 
 # another framework
 add_library(framework2 SHARED framework2.cpp framework2.h)
-set_target_properties(framework2 PROPERTIES MACOSX_RPATH 1 FRAMEWORK 1)
+set_target_properties(framework2 PROPERTIES FRAMEWORK 1)
 
 # executable to test a shared library dependency with install rpaths
 add_executable(test1 test1.cpp)

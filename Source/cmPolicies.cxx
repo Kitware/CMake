@@ -311,6 +311,11 @@ cmPolicies::cmPolicies()
     CMP0041, "CMP0041",
     "Error on relative include with generator expression.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0042, "CMP0042",
+    "MACOSX_RPATH is enabled by default.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
