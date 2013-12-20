@@ -21,7 +21,21 @@ for a policy, also avoiding the warning.
 The :command:`cmake_minimum_required` command does more than report an
 error if a too-old version of CMake is used to build a project.  It
 also sets all policies introduced in that CMake version or earlier to
-NEW behavior.
+NEW behavior.  To manage policies without increasing the minimum required
+CMake version, the :command:`if(POLICY)` command may be used::
+
+  if(POLICY CMP0990)
+    cmake_policy(SET CMP0990 NEW)
+  endif()
+
+This has the effect of using the NEW behavior with newer CMake releases which
+users may be using and not issuing a compatibility warning.
+
+The setting of a policy is confined in some cases to not propagate to the
+parent scope.  For example, if the files read by the :command:`include` command
+or the :command:`find_package` command contain a use of :command:`cmake_policy`,
+that policy setting will not affect the caller by default.  Both commands accept
+an optional ``NO_POLICY_SCOPE`` keyword to control this behavior.
 
 The :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` variable may also be used
 to determine whether to report an error on use of deprecated macros or
