@@ -81,7 +81,7 @@ namespace @KWSYS_NAMESPACE@
 
     internal_buffer_type *rdbuf() const
     {
-      return buf_.get();
+      return buf_;
     }
 
     ~basic_ifstream()
