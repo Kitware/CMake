@@ -145,6 +145,36 @@ static int testRobustEncoding()
   return ret;
 }
 
+static int testCommandLineArguments()
+{
+  int status = 0;
+
+  char const* argv[2] = {
+    "./app.exe",
+    (char const*)helloWorldStrings[1]
+  };
+
+  kwsys::Encoding::CommandLineArguments args(2, argv);
+  kwsys::Encoding::CommandLineArguments arg2 =
+    kwsys::Encoding::CommandLineArguments(args);
+
+  char const* const* u8_argv = args.argv();
+  for(int i=0; i<args.argc(); i++)
+  {
+    char const* u8_arg = u8_argv[i];
+    if(strcmp(argv[i], u8_arg) != 0)
+    {
+      std::cout << "argv[" << i << "] " << argv[i] << " != "
+                << u8_arg << std::endl;
+      status++;
+    }
+  }
+
+  kwsys::Encoding::CommandLineArguments args3 =
+    kwsys::Encoding::CommandLineArguments::Main(2, argv);
+
+  return status;
+}
 
 //----------------------------------------------------------------------------
 int testEncoding(int, char*[])
@@ -163,6 +193,7 @@ int testEncoding(int, char*[])
 
   ret |= testHelloWorldEncoding();
   ret |= testRobustEncoding();
+  ret |= testCommandLineArguments();
 
   return ret;
 }
