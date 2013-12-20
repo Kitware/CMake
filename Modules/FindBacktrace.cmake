@@ -58,17 +58,20 @@ endif(Backtrace_HEADER)
 find_path(Backtrace_INCLUDE_DIR "${_Backtrace_HEADER_TRY}")
 set(Backtrace_INCLUDE_DIRS ${Backtrace_INCLUDE_DIR})
 
-# First, check if we already have backtrace(), e.g., in libc
-cmake_push_check_state(RESET)
-set(CMAKE_REQUIRED_INCLUDES ${Backtrace_INCLUDE_DIRS})
-check_symbol_exists("backtrace" "${_Backtrace_HEADER_TRY}" _Backtrace_SYM_FOUND)
-cmake_pop_check_state()
+if (NOT DEFINED Backtrace_LIBRARY)
+  # First, check if we already have backtrace(), e.g., in libc
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_INCLUDES ${Backtrace_INCLUDE_DIRS})
+  check_symbol_exists("backtrace" "${_Backtrace_HEADER_TRY}" _Backtrace_SYM_FOUND)
+  cmake_pop_check_state()
+endif()
 
 if(_Backtrace_SYM_FOUND)
-  set(Backtrace_LIBRARY)
-  if(NOT Backtrace_FIND_QUIETLY)
+  # Avoid repeating the message() call below each time CMake is run.
+  if(NOT Backtrace_FIND_QUIETLY AND NOT DEFINED Backtrace_LIBRARY)
     message(STATUS "backtrace facility detected in default set of libraries")
   endif()
+  set(Backtrace_LIBRARY "" CACHE FILEPATH "Library providing backtrace(3), empty for default set of libraries")
 else()
   # Check for external library, for non-glibc systems
   if(Backtrace_INCLUDE_DIR)
