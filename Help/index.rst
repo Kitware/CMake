@@ -26,23 +26,16 @@ Reference Manuals
    :maxdepth: 1
 
    /manual/cmake-commands.7
+   /manual/cmake-developer.7
+   /manual/cmake-generator-expressions.7
    /manual/cmake-generators.7
-   /manual/cmake-toolchains.7
+   /manual/cmake-language.7
    /manual/cmake-modules.7
    /manual/cmake-packages.7
    /manual/cmake-policies.7
    /manual/cmake-properties.7
+   /manual/cmake-toolchains.7
    /manual/cmake-variables.7
-
-Other Manuals
-#############
-
-.. toctree::
-   :maxdepth: 1
-
-   /manual/cmake-developer.7
-   /manual/cmake-generator-expressions.7
-   /manual/cmake-language.7
 
 .. only:: html
 
