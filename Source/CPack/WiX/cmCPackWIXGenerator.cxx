@@ -765,7 +765,7 @@ bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
   fileDefinitions.EndElement("RemoveFolder");
 
   std::string registryKey =
-    std::string("Software/") + cpackVendor + "/" + cpackPackageName;
+    std::string("Software\\") + cpackVendor + "\\" + cpackPackageName;
 
   fileDefinitions.BeginElement("RegistryValue");
   fileDefinitions.AddAttribute("Root", "HKCU");
