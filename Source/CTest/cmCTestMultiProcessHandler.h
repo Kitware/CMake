@@ -72,6 +72,12 @@ protected:
   int SearchByName(std::string name);
 
   void CreateTestCostList();
+
+  void GetAllTestDependencies(int test, TestList& dependencies);
+  void CreateSerialTestCostList();
+
+  void CreateParallelTestCostList();
+
   // Removes the checkpoint file
   void MarkFinished();
   void EraseTest(int index);

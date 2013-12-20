@@ -139,6 +139,13 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   else
     {
+
+    for(TestMap::iterator j = this->Tests.begin();
+      j != this->Tests.end(); ++j)
+      {
+      j->second.erase(test);
+      }
+
     this->UnlockResources(test);
     this->Completed++;
     this->TestFinishMap[test] = true;
@@ -441,6 +448,19 @@ int cmCTestMultiProcessHandler::SearchByName(std::string name)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::CreateTestCostList()
 {
+  if(this->ParallelLevel > 1)
+    {
+    CreateParallelTestCostList();
+    }
+  else
+    {
+    CreateSerialTestCostList();
+    }
+}
+
+//---------------------------------------------------------
+void cmCTestMultiProcessHandler::CreateParallelTestCostList()
+{
   TestSet alreadySortedTests;
 
   std::list<TestSet> priorityStack;
@@ -452,8 +472,7 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
   for(TestMap::const_iterator i = this->Tests.begin();
     i != this->Tests.end(); ++i)
     {
-    if(this->ParallelLevel > 1 &&
-       std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
+    if(std::find(this->LastTestsFailed.begin(), this->LastTestsFailed.end(),
        this->Properties[i->first]->Name) != this->LastTestsFailed.end())
       {
       //If the test failed last time, it should be run first.
@@ -466,8 +485,9 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
       }
     }
 
-  // Repeatedly move dependencies of the tests on the current dependency level
-  // to the next level until no further dependencies exist.
+  // In parallel test runs repeatedly move dependencies of the tests on
+  // the current dependency level to the next level until no
+  // further dependencies exist.
   while(priorityStack.back().size())
     {
     TestSet &previousSet = priorityStack.back();
@@ -522,6 +542,65 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
         alreadySortedTests.insert(*j);
         }
       }
+    }
+}
+
+//---------------------------------------------------------
+void cmCTestMultiProcessHandler::GetAllTestDependencies(
+    int test, TestList& dependencies)
+{
+  TestSet const& dependencySet = this->Tests[test];
+  for(TestSet::const_iterator i = dependencySet.begin();
+    i != dependencySet.end(); ++i)
+    {
+    GetAllTestDependencies(*i, dependencies);
+    dependencies.push_back(*i);
+    }
+}
+
+//---------------------------------------------------------
+void cmCTestMultiProcessHandler::CreateSerialTestCostList()
+{
+  TestList presortedList;
+
+  for(TestMap::iterator i = this->Tests.begin();
+    i != this->Tests.end(); ++i)
+    {
+    presortedList.push_back(i->first);
+    }
+
+  TestComparator comp(this);
+  std::stable_sort(presortedList.begin(), presortedList.end(), comp);
+
+  TestSet alreadySortedTests;
+
+  for(TestList::const_iterator i = presortedList.begin();
+    i != presortedList.end(); ++i)
+    {
+      int test = *i;
+
+      if(alreadySortedTests.find(test) != alreadySortedTests.end())
+        {
+        continue;
+        }
+
+      TestList dependencies;
+      GetAllTestDependencies(test, dependencies);
+
+      for(TestList::const_iterator j = dependencies.begin();
+        j != dependencies.end(); ++j)
+        {
+        int testDependency = *j;
+
+        if(alreadySortedTests.find(testDependency) == alreadySortedTests.end())
+          {
+          alreadySortedTests.insert(testDependency);
+          this->SortedTests.push_back(testDependency);
+          }
+        }
+
+      alreadySortedTests.insert(test);
+      this->SortedTests.push_back(test);
     }
 }
 
