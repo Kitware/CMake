@@ -423,19 +423,19 @@ struct cmStrCmp {
   cmStrCmp(const char *test) : m_test(test) {}
   cmStrCmp(std::string &test) : m_test(test.c_str()) {}
 
-  bool operator()(const char * input)
+  bool operator()(const char * input) const
   {
     return strcmp(input, m_test) == 0;
   }
 
   // For use with binary_search
-  bool operator()(const char *str1, const char *str2)
+  bool operator()(const char *str1, const char *str2) const
   {
     return strcmp(str1, str2) < 0;
   }
 
 private:
-  const char *m_test;
+  const char * const m_test;
 };
 
 #endif

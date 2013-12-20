@@ -5614,7 +5614,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
         {
         e << "Target \"" << this->GetName() << "\" links to target \"" << item
           << "\" but the target was not found.  Perhaps a find_package() "
-          "call is missing for an IMPORTED target, or a ALIAS target is "
+          "call is missing for an IMPORTED target, or an ALIAS target is "
           "missing?";
         this->Makefile->GetCMakeInstance()->IssueMessage(messageType,
                                                       e.str(),

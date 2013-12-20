@@ -229,9 +229,7 @@ cmExportBuildFileGenerator::HandleMissingTarget(
   // Append it with the export namespace.
   link_libs += this->Namespace;
   link_libs += dependee->GetExportName();
-//   if generate time {}
 }
-
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
