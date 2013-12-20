@@ -2,16 +2,18 @@
 # TestCXXAcceptsFlag
 # ------------------
 #
-# Test CXX compiler for a flag
+# Deprecated.  See :module:`CheckCXXCompilerFlag`.
 #
-# Check if the CXX compiler accepts a flag
+# Check if the CXX compiler accepts a flag.
 #
-# ::
+# .. code-block:: cmake
 #
-#   Macro CHECK_CXX_ACCEPTS_FLAG(FLAGS VARIABLE) -
-#      checks if the function exists
-#   FLAGS - the flags to try
-#   VARIABLE - variable to store the result
+#  CHECK_CXX_ACCEPTS_FLAG(<flags> <variable>)
+#
+# ``<flags>``
+#  the flags to try
+# ``<variable>``
+#  variable to store the result
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
