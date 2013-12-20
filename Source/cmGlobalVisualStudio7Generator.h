@@ -115,6 +115,8 @@ protected:
   std::string const& GetDevEnvCommand();
   virtual std::string FindDevEnvCommand();
 
+  static const char* ExternalProjectType(const char* location);
+
   static cmIDEFlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);

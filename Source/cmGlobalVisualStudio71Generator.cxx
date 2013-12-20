@@ -240,7 +240,7 @@ void cmGlobalVisualStudio71Generator
                        const std::set<cmStdString>& depends)
 {
   fout << "Project(\"{"
-       << (typeGuid ? typeGuid : "8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942")
+       << (typeGuid ? typeGuid : this->ExternalProjectType(location))
        << "}\") = \""
        << name << "\", \""
        << this->ConvertToSolutionPath(location) << "\", \"{"
