@@ -139,6 +139,13 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
     }
   else
     {
+
+    for(TestMap::iterator j = this->Tests.begin();
+      j != this->Tests.end(); ++j)
+      {
+      j->second.erase(test);
+      }
+
     this->UnlockResources(test);
     this->Completed++;
     this->TestFinishMap[test] = true;
@@ -466,34 +473,38 @@ void cmCTestMultiProcessHandler::CreateTestCostList()
       }
     }
 
-  // Repeatedly move dependencies of the tests on the current dependency level
-  // to the next level until no further dependencies exist.
-  while(priorityStack.back().size())
+  // In parallel test runs repeatedly move dependencies of the tests on
+  // the current dependency level to the next level until no
+  // further dependencies exist.
+  if(this->ParallelLevel > 1)
     {
-    TestSet &previousSet = priorityStack.back();
-    priorityStack.push_back(TestSet());
-    TestSet &currentSet = priorityStack.back();
-
-    for(TestSet::const_iterator i = previousSet.begin();
-      i != previousSet.end(); ++i)
+    while(priorityStack.back().size())
       {
-      TestSet const& dependencies = this->Tests[*i];
-      for(TestSet::const_iterator j = dependencies.begin();
-        j != dependencies.end(); ++j)
+      TestSet &previousSet = priorityStack.back();
+      priorityStack.push_back(TestSet());
+      TestSet &currentSet = priorityStack.back();
+
+      for(TestSet::const_iterator i = previousSet.begin();
+        i != previousSet.end(); ++i)
         {
-        currentSet.insert(*j);
+        TestSet const& dependencies = this->Tests[*i];
+        for(TestSet::const_iterator j = dependencies.begin();
+          j != dependencies.end(); ++j)
+          {
+          currentSet.insert(*j);
+          }
+        }
+
+      for(TestSet::const_iterator i = currentSet.begin();
+        i != currentSet.end(); ++i)
+        {
+        previousSet.erase(*i);
         }
       }
 
-    for(TestSet::const_iterator i = currentSet.begin();
-      i != currentSet.end(); ++i)
-      {
-      previousSet.erase(*i);
-      }
+    // Remove the empty dependency level
+    priorityStack.pop_back();
     }
-
-  // Remove the empty dependency level
-  priorityStack.pop_back();
 
   // Reverse iterate over the different dependency levels (deepest first).
   // Sort tests within each level by COST and append them to the cost list.
