@@ -18,28 +18,28 @@ a set of variables corresponding to build-relevant information.
 Using Packages
 ==============
 
-CMake provides direct support for two forms of packages, package configuration
-files and find-module packages.  Indirect support for pkg-config
-packages is also provided via the :module:`FindPkgConfig` module.  In all
-cases, the basic form of ``find_package`` is the same:
+CMake provides direct support for two forms of packages,
+`Config-file Packages`_ and `Find-module Packages`_.
+Indirect support for ``pkg-config`` packages is also provided via
+the :module:`FindPkgConfig` module.  In all cases, the basic form
+of :command:`find_package` calls is the same:
 
 .. code-block:: cmake
 
   find_package(Qt4 4.7.0 REQUIRED) # CMake provides a Qt4 find-module
-  find_package(Qt5Core 5.1.0 REQUIRED) # Qt provides a Qt5 package configuration file.
+  find_package(Qt5Core 5.1.0 REQUIRED) # Qt provides a Qt5 package config file.
   find_package(LibXml2 REQUIRED) # Use pkg-config via the LibXml2 find-module
 
 In cases where it is known that a package configuration file is provided by
 upstream, and only that should be used, the ``CONFIG`` keyword may be passed
-to ``find_package``:
+to :command:`find_package`:
 
 .. code-block:: cmake
 
   find_package(Qt5Core 5.1.0 CONFIG REQUIRED)
   find_package(Qt5Gui 5.1.0 CONFIG)
 
-Similarly, the ``MODULE`` keyword requests that only a find-module be searched
-for:
+Similarly, the ``MODULE`` keyword says to use only a find-module:
 
 .. code-block:: cmake
 
@@ -48,20 +48,20 @@ for:
 Specifying the type of package explicitly improves the error message shown to
 the user if it is not found.
 
-Both types of packages also support specifying components of a package, either
-after the REQUIRED keyword:
+Both types of packages also support specifying components of a package,
+either after the ``REQUIRED`` keyword:
 
 .. code-block:: cmake
 
   find_package(Qt5 5.1.0 CONFIG REQUIRED Widgets Xml Sql)
 
-or as a separate COMPONENTS list:
+or as a separate ``COMPONENTS`` list:
 
 .. code-block:: cmake
 
   find_package(Qt5 5.1.0 COMPONENTS Widgets Xml Sql)
 
-or as a separate OPTIONAL_COMPONENTS list:
+or as a separate ``OPTIONAL_COMPONENTS`` list:
 
 .. code-block:: cmake
 
@@ -72,21 +72,21 @@ or as a separate OPTIONAL_COMPONENTS list:
 Handling of ``COMPONENTS`` and ``OPTIONAL_COMPONENTS`` is defined by the
 package.
 
-Package Configuration Files
----------------------------
+Config-file Packages
+--------------------
 
-A set of pacakge configuration files may be provided by upstreams for downstreams
+A config-file package is a set of files provided by upstreams for downstreams
 to use. CMake searches in a number of locations for package configuration files, as
 described in the :command:`find_package` documentation.  The most simple way for
 a CMake user to tell :manual:`cmake(1)` to search in a non-standard prefix for
 a package is to set the ``CMAKE_PREFIX_PATH`` cache variable.
 
-Package configuration files are provided by upstream vendors as part of development
+Config-file packages are provided by upstream vendors as part of development
 packages, that is, they belong with the header files and any other files
 provided to assist downsteams in using the package.
 
 A set of variables which provide package status information are also set
-automatically when using a package configuration file.  The ``<Package>_FOUND``
+automatically when using a config-file package.  The ``<Package>_FOUND``
 variable is set to true or false, depending on whether the package was
 found.  The ``<Package>_DIR`` cache variable is set to the location of the
 package configuration file.
@@ -115,19 +115,18 @@ Find-module files.
 Package Layout
 ==============
 
-Package Configuration Files
----------------------------
+A config-file package consists of a `Package Configuration File`_ and
+optionally a `Package Version File`_ provided with the project distribution.
 
-Consider a project ``Foo`` that installs the following files:
+Package Configuration File
+--------------------------
 
-::
+Consider a project ``Foo`` that installs the following files::
 
   <prefix>/include/foo-1.2/foo.h
   <prefix>/lib/foo-1.2/libfoo.a
 
-It may also provide a CMake package configuration file
-
-::
+It may also provide a CMake package configuration file::
 
   <prefix>/lib/cmake/foo-1.2/FooConfig.cmake
 
@@ -145,35 +144,35 @@ file and load it to get all the information it needs about package content
 locations.  Since the package configuration file is provided by the package
 installation it already knows all the file locations.
 
-The find_package command may be used to search for the configuration file.  This
-command constructs a set of installation prefixes and searches under each prefix
-in several locations.  Given the name ``Foo``, it looks for a file called
-``FooConfig.cmake`` or ``foo-config.cmake``.  The full set of locations is
-specified in the :command:`find_package` command documentation. One place it
-looks is::
+The :command:`find_package` command may be used to search for the package
+configuration file.  This command constructs a set of installation prefixes
+and searches under each prefix in several locations.  Given the name ``Foo``,
+it looks for a file called ``FooConfig.cmake`` or ``foo-config.cmake``.
+The full set of locations is specified in the :command:`find_package` command
+documentation. One place it looks is::
 
  <prefix>/lib/cmake/Foo*/
 
 where ``Foo*`` is a case-insensitive globbing expression.  In our example the
-globbing expression will match ``<prefix>/lib/cmake/foo-1.2`` and the configuration
-file will be found.
+globbing expression will match ``<prefix>/lib/cmake/foo-1.2`` and the package
+configuration file will be found.
 
 Once found, a package configuration file is immediately loaded.  It, together
 with a package version file, contains all the information the project needs to
 use the package.
 
-Package Version Files
----------------------
+Package Version File
+--------------------
 
-When the ``find_package`` command finds a candidate package configuration file it
-looks next to it for a version file. The version file is loaded to test whether
-the package version is an acceptable match for the version requested. If the
-version file claims compatibility the configuration file is accepted. Otherwise
-it is ignored.
+When the :command:`find_package` command finds a candidate package configuration
+file it looks next to it for a version file. The version file is loaded to test
+whether the package version is an acceptable match for the version requested.
+If the version file claims compatibility the configuration file is accepted.
+Otherwise it is ignored.
 
-The name of the version file must match that of the configuration file but has
-either "-version" or "Version" appended to the name before the ".cmake"
-extension.  For example, the files::
+The name of the package version file must match that of the package configuration
+file but has either ``-version`` or ``Version`` appended to the name before
+the ``.cmake`` extension.  For example, the files::
 
  <prefix>/lib/foo-1.3/foo-config.cmake
  <prefix>/lib/foo-1.3/foo-config-version.cmake
@@ -183,47 +182,48 @@ and::
  <prefix>/lib/bar-4.2/BarConfig.cmake
  <prefix>/lib/bar-4.2/BarConfigVersion.cmake
 
-are each pairs of package configuration files and corresponding version files.
+are each pairs of package configuration files and corresponding package version
+files.
 
-When the ``find_package`` command loads a version file it first sets the following
-variables:
+When the :command:`find_package` command loads a version file it first sets the
+following variables:
 
 ``PACKAGE_FIND_NAME``
-    The <package> name
+ The <package> name
 
 ``PACKAGE_FIND_VERSION``
-    Full requested version string
+ Full requested version string
 
 ``PACKAGE_FIND_VERSION_MAJOR``
-    Major version if requested, else 0
+ Major version if requested, else 0
 
 ``PACKAGE_FIND_VERSION_MINOR``
-    Minor version if requested, else 0
+ Minor version if requested, else 0
 
 ``PACKAGE_FIND_VERSION_PATCH``
-    Patch version if requested, else 0
+ Patch version if requested, else 0
 
 ``PACKAGE_FIND_VERSION_TWEAK``
-    Tweak version if requested, else 0
+ Tweak version if requested, else 0
 
 ``PACKAGE_FIND_VERSION_COUNT``
-    Number of version components, 0 to 4
+ Number of version components, 0 to 4
 
 The version file must use these variables to check whether it is compatible or
 an exact match for the requested version and set the following variables with
 results:
 
 ``PACKAGE_VERSION``
-    Full provided version string
+ Full provided version string
 
 ``PACKAGE_VERSION_EXACT``
-    True if version is exact match
+ True if version is exact match
 
 ``PACKAGE_VERSION_COMPATIBLE``
-    True if version is compatible
+ True if version is compatible
 
 ``PACKAGE_VERSION_UNSUITABLE``
-    True if unsuitable as any version
+ True if unsuitable as any version
 
 Version files are loaded in a nested scope so they are free to set any variables
 they wish as part of their computation. The find_package command wipes out the
@@ -233,27 +233,26 @@ requested version the find_package command sets the following variables for
 use by the project:
 
 ``<package>_VERSION``
-    Full provided version string
+ Full provided version string
 
 ``<package>_VERSION_MAJOR``
-    Major version if provided, else 0
+ Major version if provided, else 0
 
 ``<package>_VERSION_MINOR``
-    Minor version if provided, else 0
+ Minor version if provided, else 0
 
 ``<package>_VERSION_PATCH``
-    Patch version if provided, else 0
+ Patch version if provided, else 0
 
 ``<package>_VERSION_TWEAK``
-    Tweak version if provided, else 0
+ Tweak version if provided, else 0
 
 ``<package>_VERSION_COUNT``
-    Number of version components, 0 to 4
+ Number of version components, 0 to 4
 
-
-The variables report the version of the package that was actually found. The
-``<package>`` part of their name matches the argument given to the
-``find_package`` command.
+The variables report the version of the package that was actually found.
+The ``<package>`` part of their name matches the argument given to the
+:command:`find_package` command.
 
 Creating Packages
 =================
