@@ -40,7 +40,7 @@ private:
   void StartGroup();
   void EndGroup();
 
-  std::ofstream file;
+  std::ofstream File;
 };
 
 #endif

@@ -169,14 +169,14 @@ private:
   void ApplyPatchElement(const cmWIXPatchElement& element,
     cmWIXSourceWriter& writer);
 
-  std::vector<std::string> wixSources;
-  id_map_t pathToIdMap;
-  ambiguity_map_t idAmbiguityCounter;
+  std::vector<std::string> WixSources;
+  id_map_t PathToIdMap;
+  ambiguity_map_t IdAmbiguityCounter;
 
-  extension_set_t candleExtensions;
-  extension_set_t lightExtensions;
+  extension_set_t CandleExtensions;
+  extension_set_t LightExtensions;
 
-  cmWIXPatchParser::fragment_map_t fragments;
+  cmWIXPatchParser::fragment_map_t Fragments;
 };
 
 #endif

@@ -16,7 +16,7 @@
 
 cmWIXRichTextFormatWriter::cmWIXRichTextFormatWriter(
   const std::string& filename):
-    file(filename.c_str(), std::ios::binary)
+    File(filename.c_str(), std::ios::binary)
 {
   StartGroup();
   WriteHeader();
@@ -29,8 +29,8 @@ cmWIXRichTextFormatWriter::~cmWIXRichTextFormatWriter()
 
   /* I haven't seen this in the RTF spec but
    *  wordpad terminates its RTF like this */
-  file << "\r\n";
-  file.put(0);
+  File << "\r\n";
+  File.put(0);
 }
 
 void cmWIXRichTextFormatWriter::AddText(const std::string& text)
@@ -44,16 +44,16 @@ void cmWIXRichTextFormatWriter::AddText(const std::string& text)
     switch(c)
       {
     case '\\':
-      file << "\\\\";
+      File << "\\\\";
       break;
     case '{':
-      file << "\\{";
+      File << "\\{";
       break;
     case '}':
-      file << "\\}";
+      File << "\\}";
       break;
     case '\n':
-      file << "\\par\r\n";
+      File << "\\par\r\n";
       break;
     case '\r':
       continue;
@@ -61,11 +61,11 @@ void cmWIXRichTextFormatWriter::AddText(const std::string& text)
         {
         if(c <= 0x7F)
           {
-          file << c;
+          File << c;
           }
         else
           {
-          file << "[NON-ASCII-" << int(c) << "]";
+          File << "[NON-ASCII-" << int(c) << "]";
           }
         }
       break;
@@ -103,7 +103,7 @@ void cmWIXRichTextFormatWriter::WriteGenerator()
 {
   StartGroup();
   NewControlWord("generator");
-  file << " CPack WiX Generator (" << cmVersion::GetCMakeVersion() << ");";
+  File << " CPack WiX Generator (" << cmVersion::GetCMakeVersion() << ");";
   EndGroup();
 }
 
@@ -118,20 +118,20 @@ void cmWIXRichTextFormatWriter::WriteDocumentPrefix()
 
 void cmWIXRichTextFormatWriter::ControlWord(const std::string& keyword)
 {
-  file << "\\" << keyword;
+  File << "\\" << keyword;
 }
 
 void cmWIXRichTextFormatWriter::NewControlWord(const std::string& keyword)
 {
-  file << "\\*\\" << keyword;
+  File << "\\*\\" << keyword;
 }
 
 void cmWIXRichTextFormatWriter::StartGroup()
 {
-  file.put('{');
+  File.put('{');
 }
 
 void cmWIXRichTextFormatWriter::EndGroup()
 {
-  file.put('}');
+  File.put('}');
 }

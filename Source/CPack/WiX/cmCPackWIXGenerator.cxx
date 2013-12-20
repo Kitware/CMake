@@ -85,8 +85,8 @@ bool cmCPackWIXGenerator::RunCandleCommand(
   command << " -arch " << GetArchitecture();
   command << " -out " << QuotePath(objectFile);
 
-  for(extension_set_t::const_iterator i = candleExtensions.begin();
-      i != candleExtensions.end(); ++i)
+  for(extension_set_t::const_iterator i = CandleExtensions.begin();
+      i != CandleExtensions.end(); ++i)
     {
     command << " -ext " << QuotePath(*i);
     }
@@ -111,8 +111,8 @@ bool cmCPackWIXGenerator::RunLightCommand(const std::string& objectFiles)
   command << " -nologo";
   command << " -out " << QuotePath(packageFileNames.at(0));
 
-  for(extension_set_t::const_iterator i = lightExtensions.begin();
-      i != lightExtensions.end(); ++i)
+  for(extension_set_t::const_iterator i = LightExtensions.begin();
+      i != LightExtensions.end(); ++i)
     {
     command << " -ext " << QuotePath(*i);
     }
@@ -211,12 +211,12 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
     SetOption("CPACK_WIX_UI_REF", defaultRef.c_str());
     }
 
-  CollectExtensions("CPACK_WIX_EXTENSIONS", candleExtensions);
-  CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", candleExtensions);
+  CollectExtensions("CPACK_WIX_EXTENSIONS", CandleExtensions);
+  CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", CandleExtensions);
 
-  lightExtensions.insert("WixUIExtension");
-  CollectExtensions("CPACK_WIX_EXTENSIONS", lightExtensions);
-  CollectExtensions("CPACK_WIX_LIGHT_EXTENSIONS", lightExtensions);
+  LightExtensions.insert("WixUIExtension");
+  CollectExtensions("CPACK_WIX_EXTENSIONS", LightExtensions);
+  CollectExtensions("CPACK_WIX_LIGHT_EXTENSIONS", LightExtensions);
 
   const char* patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
   if(patchFilePath)
@@ -247,9 +247,9 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
   AppendUserSuppliedExtraSources();
 
   std::stringstream objectFiles;
-  for(size_t i = 0; i < wixSources.size(); ++i)
+  for(size_t i = 0; i < WixSources.size(); ++i)
     {
-    const std::string& sourceFilename = wixSources[i];
+    const std::string& sourceFilename = WixSources[i];
 
     std::string objectFilename =
       cmSystemTools::GetFilenameWithoutExtension(sourceFilename) + ".wixobj";
@@ -272,7 +272,7 @@ void cmCPackWIXGenerator::AppendUserSuppliedExtraSources()
   const char *cpackWixExtraSources = GetOption("CPACK_WIX_EXTRA_SOURCES");
   if(!cpackWixExtraSources) return;
 
-  cmSystemTools::ExpandListArgument(cpackWixExtraSources, wixSources);
+  cmSystemTools::ExpandListArgument(cpackWixExtraSources, WixSources);
 }
 
 void cmCPackWIXGenerator::AppendUserSuppliedExtraObjects(std::ostream& stream)
@@ -351,7 +351,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   std::string directoryDefinitionsFilename =
     cpackTopLevel + "/directories.wxs";
 
-  wixSources.push_back(directoryDefinitionsFilename);
+  WixSources.push_back(directoryDefinitionsFilename);
 
   cmWIXSourceWriter directoryDefinitions(Logger, directoryDefinitionsFilename);
   directoryDefinitions.BeginElement("Fragment");
@@ -406,7 +406,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   std::string fileDefinitionsFilename =
     cpackTopLevel + "/files.wxs";
 
-  wixSources.push_back(fileDefinitionsFilename);
+  WixSources.push_back(fileDefinitionsFilename);
 
   cmWIXSourceWriter fileDefinitions(Logger, fileDefinitionsFilename);
   fileDefinitions.BeginElement("Fragment");
@@ -414,7 +414,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   std::string featureDefinitionsFilename =
       cpackTopLevel +"/features.wxs";
 
-  wixSources.push_back(featureDefinitionsFilename);
+  WixSources.push_back(featureDefinitionsFilename);
 
   cmWIXSourceWriter featureDefinitions(Logger, featureDefinitionsFilename);
   featureDefinitions.BeginElement("Fragment");
@@ -533,11 +533,11 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     return false;
     }
 
-  wixSources.push_back(mainSourceFilePath);
+  WixSources.push_back(mainSourceFilePath);
 
   std::string fragmentList;
   for(cmWIXPatchParser::fragment_map_t::const_iterator
-    i = fragments.begin(); i != fragments.end(); ++i)
+    i = Fragments.begin(); i != Fragments.end(); ++i)
     {
     if(!fragmentList.empty())
       {
@@ -1018,8 +1018,8 @@ std::string cmCPackWIXGenerator::GetRightmostExtension(
 
 std::string cmCPackWIXGenerator::PathToId(const std::string& path)
 {
-  id_map_t::const_iterator i = pathToIdMap.find(path);
-  if(i != pathToIdMap.end()) return i->second;
+  id_map_t::const_iterator i = PathToIdMap.find(path);
+  if(i != PathToIdMap.end()) return i->second;
 
   std::string id = CreateNewIdForPath(path);
   return id;
@@ -1056,7 +1056,7 @@ std::string cmCPackWIXGenerator::CreateNewIdForPath(const std::string& path)
   std::stringstream result;
   result << idPrefix << "_" << identifier;
 
-  size_t ambiguityCount = ++idAmbiguityCounter[identifier];
+  size_t ambiguityCount = ++IdAmbiguityCounter[identifier];
 
   if(ambiguityCount > 999)
     {
@@ -1073,7 +1073,7 @@ std::string cmCPackWIXGenerator::CreateNewIdForPath(const std::string& path)
 
   std::string resultString = result.str();
 
-  pathToIdMap[path] = resultString;
+  PathToIdMap[path] = resultString;
 
   return resultString;
 }
@@ -1181,15 +1181,15 @@ void cmCPackWIXGenerator::CreateStartMenuFolder(
 
 void cmCPackWIXGenerator::LoadPatchFragments(const std::string& patchFilePath)
 {
-  cmWIXPatchParser parser(fragments, Logger);
+  cmWIXPatchParser parser(Fragments, Logger);
   parser.ParseFile(patchFilePath.c_str());
 }
 
 void cmCPackWIXGenerator::ApplyPatchFragment(
   const std::string& id, cmWIXSourceWriter& writer)
 {
-  cmWIXPatchParser::fragment_map_t::iterator i = fragments.find(id);
-  if(i == fragments.end()) return;
+  cmWIXPatchParser::fragment_map_t::iterator i = Fragments.find(id);
+  if(i == Fragments.end()) return;
 
   const cmWIXPatchElement& fragment = i->second;
   for(cmWIXPatchElement::child_list_t::const_iterator
@@ -1198,7 +1198,7 @@ void cmCPackWIXGenerator::ApplyPatchFragment(
     ApplyPatchElement(**j, writer);
     }
 
-  fragments.erase(i);
+  Fragments.erase(i);
 }
 
 void cmCPackWIXGenerator::ApplyPatchElement(
