@@ -18,19 +18,20 @@ a set of variables corresponding to build-relevant information.
 Using Packages
 ==============
 
-CMake provides direct support for two forms of packages, config-file
-packages and find-module packages.  Indirect support for pkg-config
+CMake provides direct support for two forms of packages, package configuration
+files and find-module packages.  Indirect support for pkg-config
 packages is also provided via the :module:`FindPkgConfig` module.  In all
 cases, the basic form of ``find_package`` is the same:
 
 .. code-block:: cmake
 
   find_package(Qt4 4.7.0 REQUIRED) # CMake provides a Qt4 find-module
-  find_package(Qt5Core 5.1.0 REQUIRED) # Qt provides a Qt5 config-file.
+  find_package(Qt5Core 5.1.0 REQUIRED) # Qt provides a Qt5 package configuration file.
   find_package(LibXml2 REQUIRED) # Use pkg-config via the LibXml2 find-module
 
-In cases where it is known that a Config file is provided by upstream, and only
-that should be used, the ``CONFIG`` keyword may be passed to ``find_package``:
+In cases where it is known that a package configuration file is provided by
+upstream, and only that should be used, the ``CONFIG`` keyword may be passed
+to ``find_package``:
 
 .. code-block:: cmake
 
@@ -71,24 +72,95 @@ or as a separate OPTIONAL_COMPONENTS list:
 Handling of ``COMPONENTS`` and ``OPTIONAL_COMPONENTS`` is defined by the
 package.
 
-Config-file Packages
---------------------
+Package Configuration Files
+---------------------------
 
-A config-file package is a set of files provided by upstreams for downstreams
-to use. CMake searches in a number of locations for config file packages, as
+A set of pacakge configuration files may be provided by upstreams for downstreams
+to use. CMake searches in a number of locations for package configuration files, as
 described in the :command:`find_package` documentation.  The most simple way for
 a CMake user to tell :manual:`cmake(1)` to search in a non-standard prefix for
 a package is to set the ``CMAKE_PREFIX_PATH`` cache variable.
 
-Config-file packages are provided by upstream vendors as part of development
+Package configuration files are provided by upstream vendors as part of development
 packages, that is, they belong with the header files and any other files
 provided to assist downsteams in using the package.
 
 A set of variables which provide package status information are also set
-automatically when using a config-file package.  The ``<Package>_FOUND``
+automatically when using a package configuration file.  The ``<Package>_FOUND``
 variable is set to true or false, depending on whether the package was
 found.  The ``<Package>_DIR`` cache variable is set to the location of the
 package configuration file.
+
+Find-module Packages
+--------------------
+
+A find module is a file with a set of rules for finding the required pieces of
+a dependency, primarily header files and libraries.  Typically, a find module
+is needed when the upstream is not built with CMake, or is not CMake-aware
+enough to otherwise provide a package configuration file.  Unlike a package configuration
+file, it is not shipped with upstream, but is used by downstream to find the
+files by guessing locations of files with platform-specific hints.
+
+Unlike the case of an upstream-provided package configuration file, no single point
+of reference identifies the package as being found, so the ``<Package>_FOUND``
+variable is not automatically set by the :command:`find_package` command.  It
+can still be expected to be set by convention however and should be set by
+the author of the Find-module.  Similarly there is no ``<Package>_DIR`` variable,
+but each of the artifacts such as library locations and header file locations
+provide a separate cache variable.
+
+See the :manual:`cmake-developer(7)` manual for more information about creating
+Find-module files.
+
+Package Layout
+==============
+
+Package Configuration Files
+---------------------------
+
+Consider a project ``Foo`` that installs the following files:
+
+::
+
+  <prefix>/include/foo-1.2/foo.h
+  <prefix>/lib/foo-1.2/libfoo.a
+
+It may also provide a CMake package configuration file
+
+::
+
+  <prefix>/lib/cmake/foo-1.2/FooConfig.cmake
+
+with content defining :prop_tgt:`IMPORTED` targets, or defining variables, such
+as::
+
+  # ...
+  # (compute PREFIX relative to file location)
+  # ...
+  set(Foo_INCLUDE_DIRS ${PREFIX}/include/foo-1.2)
+  set(Foo_LIBRARIES ${PREFIX}/lib/foo-1.2/libfoo.a)
+
+If another project wishes to use ``Foo`` it need only to locate the ``FooConfig.cmake``
+file and load it to get all the information it needs about package content
+locations.  Since the package configuration file is provided by the package
+installation it already knows all the file locations.
+
+The find_package command may be used to search for the configuration file.  This
+command constructs a set of installation prefixes and searches under each prefix
+in several locations.  Given the name ``Foo``, it looks for a file called
+``FooConfig.cmake`` or ``foo-config.cmake``.  The full set of locations is
+specified in the :command:`find_package` command documentation. One place it
+looks is::
+
+ <prefix>/lib/cmake/Foo*/
+
+where ``Foo*`` is a case-insensitive globbing expression.  In our example the
+globbing expression will match ``<prefix>/lib/cmake/foo-1.2`` and the configuration
+file will be found.
+
+Once found, a package configuration file is immediately loaded.  It, together
+with a package version file, contains all the information the project needs to
+use the package.
 
 Package Version Files
 ---------------------
@@ -182,27 +254,6 @@ use by the project:
 The variables report the version of the package that was actually found. The
 ``<package>`` part of their name matches the argument given to the
 ``find_package`` command.
-
-Find-module Packages
---------------------
-
-A find module is a file with a set of rules for finding the required pieces of
-a dependency, primarily header files and libraries.  Typically, a find module
-is needed when the upstream is not built with CMake, or is not CMake-aware
-enough to otherwise provide a config-file package.  Unlike a package configuration
-file, it is not shipped with upstream, but is used by downstream to find the
-files by guessing locations of files with platform-specific hints.
-
-Unlike the case of an upstream-provided config-file, no single point of
-reference identifies the package as being found, so the ``<Package>_FOUND``
-variable is not automatically set by the :command:`find_package` command.  It
-can still be expected to be set by convention however and should be set by
-the author of the Find-module.  Similarly there is no ``<Package>_DIR`` variable,
-but each of the artifacts such as library locations and header file locations
-provide a separate cache variable.
-
-See the :manual:`cmake-developer(7)` manual for more information about creating
-Find-module files.
 
 Creating Packages
 =================
@@ -338,7 +389,7 @@ package can not be used without the ``Stats`` package.
 If ``COMPONENTS`` are specified when the downstream uses :command:`find_package`,
 they are listed in the ``<Package>_FIND_COMPONENTS`` variable. If a particular
 component is non-optional, then the ``<Package>_FIND_REQUIRED_<comp>`` will
-be true. This can be tested with logic in the Config file:
+be true. This can be tested with logic in the package configuration file:
 
 .. code-block:: cmake
 
