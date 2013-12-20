@@ -125,6 +125,9 @@ public:
                             const std::string &workingDirectory,
                             const std::string &compileCommand);
 
+  /** Does the make tool tolerate .NOTPARALLEL? */
+  virtual bool AllowNotParallel() const { return true; }
+
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
