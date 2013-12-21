@@ -1133,6 +1133,11 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
         testEncoding
         )
     ENDIF(KWSYS_STL_HAS_WSTRING)
+    IF(KWSYS_USE_FStream)
+      SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS}
+        testFStream
+        )
+    ENDIF(KWSYS_USE_FStream)
     IF(KWSYS_USE_SystemInformation)
       SET(KWSYS_CXX_TESTS ${KWSYS_CXX_TESTS} testSystemInformation)
     ENDIF(KWSYS_USE_SystemInformation)
