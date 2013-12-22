@@ -14,7 +14,12 @@ import re
 
 from docutils.parsers.rst import Directive, directives
 from docutils.transforms import Transform
-from docutils.utils.error_reporting import SafeString, ErrorString
+try:
+    from docutils.utils.error_reporting import SafeString, ErrorString
+except ImportError:
+    # error_reporting was not in utils before version 0.11:
+    from docutils.error_reporting import SafeString, ErrorString
+
 from docutils import io, nodes
 
 from sphinx.directives import ObjectDescription
