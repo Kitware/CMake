@@ -810,6 +810,8 @@ void cmQtAutoGenerators::InitializeAutoRccTarget(cmTarget* target)
 
   const std::vector<cmSourceFile*>& srcFiles = target->GetSourceFiles();
 
+  std::vector<cmSourceFile*> newFiles;
+
   for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
       fileIt != srcFiles.end();
       ++fileIt)
@@ -833,9 +835,16 @@ void cmQtAutoGenerators::InitializeAutoRccTarget(cmTarget* target)
                                 rcc_output_file.c_str(), false);
         cmSourceFile* rccCppSource
                 = makefile->GetOrCreateSource(rcc_output_file.c_str(), true);
-        target->AddSourceFile(rccCppSource);
+        newFiles.push_back(rccCppSource);
         }
       }
+    }
+
+  for(std::vector<cmSourceFile*>::const_iterator fileIt = newFiles.begin();
+      fileIt != newFiles.end();
+      ++fileIt)
+    {
+    target->AddSourceFile(*fileIt);
     }
 }
 
