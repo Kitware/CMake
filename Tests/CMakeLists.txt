@@ -2225,6 +2225,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Not Run"
   )
 
+  ADD_TEST_MACRO(CTestTestSerialOrder ${CMAKE_CTEST_COMMAND} -j 4
+    --output-on-failure -C "\${CTestTest_CONFIG}")
+
   if(NOT BORLAND)
     set(CTestLimitDashJ_CTEST_OPTIONS --force-new-ctest-process)
     add_test_macro(CTestLimitDashJ ${CMAKE_CTEST_COMMAND} -j 4
