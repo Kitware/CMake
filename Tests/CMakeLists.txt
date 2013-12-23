@@ -2219,13 +2219,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   ADD_TEST_MACRO(CTestTestSerialInDepends ${CMAKE_CTEST_COMMAND} -j 4
     --output-on-failure -C "\${CTestTest_CONFIG}")
 
-  ADD_TEST_MACRO(CTestTestMissingDependsExe ${CMAKE_CTEST_COMMAND} -j 4
+  ADD_TEST_MACRO(CTestTestMissingDependsExe ${CMAKE_CTEST_COMMAND}
     --output-on-failure -C "\${CTestTest_CONFIG}")
   set_tests_properties(CTestTestMissingDependsExe PROPERTIES
     PASS_REGULAR_EXPRESSION "\\*\\*\\*Not Run"
   )
 
-  ADD_TEST_MACRO(CTestTestSerialOrder ${CMAKE_CTEST_COMMAND} -j 4
+  ADD_TEST_MACRO(CTestTestSerialOrder ${CMAKE_CTEST_COMMAND}
     --output-on-failure -C "\${CTestTest_CONFIG}")
 
   if(NOT BORLAND)
