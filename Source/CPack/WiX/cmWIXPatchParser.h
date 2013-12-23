@@ -40,7 +40,7 @@ class cmWIXPatchParser : public cmXMLParser
 public:
   typedef std::map<std::string, cmWIXPatchElement> fragment_map_t;
 
-  cmWIXPatchParser(fragment_map_t& fragments, cmCPackLog* logger);
+  cmWIXPatchParser(fragment_map_t& Fragments, cmCPackLog* logger);
 
 private:
   virtual void StartElement(const char *name, const char **atts);
@@ -63,13 +63,13 @@ private:
     INSIDE_FRAGMENT
   };
 
-  ParserState state;
+  ParserState State;
 
-  bool valid;
+  bool Valid;
 
-  fragment_map_t& fragments;
+  fragment_map_t& Fragments;
 
-  std::list<cmWIXPatchElement*> elementStack;
+  std::list<cmWIXPatchElement*> ElementStack;
 };
 
 #endif

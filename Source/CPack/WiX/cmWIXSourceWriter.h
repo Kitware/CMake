@@ -60,13 +60,13 @@ private:
 
   cmCPackLog* Logger;
 
-  std::ofstream file;
+  std::ofstream File;
 
-  State state;
+  State State;
 
-  std::vector<std::string> elements;
+  std::vector<std::string> Elements;
 
-  std::string sourceFilename;
+  std::string SourceFilename;
 };
 
 #endif
