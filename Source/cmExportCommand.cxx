@@ -30,14 +30,12 @@ cmExportCommand::cmExportCommand()
 ,ArgumentGroup()
 ,Targets(&Helper, "TARGETS")
 ,Append(&Helper, "APPEND", &ArgumentGroup)
+,ExportSetName(&Helper, "EXPORT", &ArgumentGroup)
 ,Namespace(&Helper, "NAMESPACE", &ArgumentGroup)
 ,Filename(&Helper, "FILE", &ArgumentGroup)
 ,ExportOld(&Helper, "EXPORT_LINK_INTERFACE_LIBRARIES", &ArgumentGroup)
 {
-  // at first TARGETS
-  this->Targets.Follows(0);
-  // and after that the other options in any order
-  this->ArgumentGroup.Follows(&this->Targets);
+  this->ExportSet = 0;
 }
 
 
@@ -55,6 +53,16 @@ bool cmExportCommand
     {
     return this->HandlePackage(args);
     }
+  else if (args[0] == "EXPORT")
+    {
+    this->ExportSetName.Follows(0);
+    this->ArgumentGroup.Follows(&this->ExportSetName);
+    }
+  else
+    {
+    this->Targets.Follows(0);
+    this->ArgumentGroup.Follows(&this->Targets);
+    }
 
   std::vector<std::string> unknownArgs;
   this->Helper.Parse(&args, &unknownArgs);
@@ -65,31 +73,32 @@ bool cmExportCommand
     return false;
     }
 
-  if (this->Targets.WasFound() == false)
-    {
-    this->SetError("TARGETS option missing.");
-    return false;
-    }
-
+  std::string fname;
   if(!this->Filename.WasFound())
     {
-    this->SetError("FILE <filename> option missing.");
-    return false;
+    if (args[0] != "EXPORT")
+      {
+      this->SetError("FILE <filename> option missing.");
+      return false;
+      }
+    fname = this->ExportSetName.GetString() + ".cmake";
     }
-
-  // Make sure the file has a .cmake extension.
-  if(cmSystemTools::GetFilenameLastExtension(this->Filename.GetCString())
-     != ".cmake")
+  else
     {
-    cmOStringStream e;
-    e << "FILE option given filename \"" << this->Filename.GetString()
-      << "\" which does not have an extension of \".cmake\".\n";
-    this->SetError(e.str().c_str());
-    return false;
+    // Make sure the file has a .cmake extension.
+    if(cmSystemTools::GetFilenameLastExtension(this->Filename.GetCString())
+      != ".cmake")
+      {
+      cmOStringStream e;
+      e << "FILE option given filename \"" << this->Filename.GetString()
+        << "\" which does not have an extension of \".cmake\".\n";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    fname = this->Filename.GetString();
     }
 
   // Get the file to write.
-  std::string fname = this->Filename.GetString();
   if(cmSystemTools::FileIsFullPath(fname.c_str()))
     {
     if(!this->Makefile->CanIWriteThisFile(fname.c_str()))
@@ -104,57 +113,95 @@ bool cmExportCommand
   else
     {
     // Interpret relative paths with respect to the current build dir.
-    fname = this->Makefile->GetCurrentOutputDirectory();
-    fname += "/";
-    fname += this->Filename.GetString();
+    std::string dir = this->Makefile->GetCurrentOutputDirectory();
+    fname = dir + "/" + fname;
     }
 
-  for(std::vector<std::string>::const_iterator
-      currentTarget = this->Targets.GetVector().begin();
-      currentTarget != this->Targets.GetVector().end();
-      ++currentTarget)
+  std::vector<std::string> targets;
+
+  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
+                                        ->GetGlobalGenerator();
+
+  if(args[0] == "EXPORT")
     {
-    if (this->Makefile->IsAlias(currentTarget->c_str()))
+    if (this->Append.IsEnabled())
       {
       cmOStringStream e;
-      e << "given ALIAS target \"" << *currentTarget
-        << "\" which may not be exported.";
+      e << "EXPORT signature does not recognise the APPEND option.";
       this->SetError(e.str().c_str());
       return false;
       }
 
-    if(cmTarget* target =
-       this->Makefile->GetLocalGenerator()->
-       GetGlobalGenerator()->FindTarget(0, currentTarget->c_str()))
+    if (this->ExportOld.IsEnabled())
       {
-      if(target->GetType() == cmTarget::OBJECT_LIBRARY)
+      cmOStringStream e;
+      e << "EXPORT signature does not recognise the "
+        "EXPORT_LINK_INTERFACE_LIBRARIES option.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
+    cmExportSetMap &setMap = gg->GetExportSets();
+    std::string setName = this->ExportSetName.GetString();
+    if (setMap.find(setName) == setMap.end())
+      {
+      cmOStringStream e;
+      e << "Export set \"" << setName << "\" not found.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    this->ExportSet = setMap[setName];
+    }
+  else if (this->Targets.WasFound())
+    {
+    for(std::vector<std::string>::const_iterator
+        currentTarget = this->Targets.GetVector().begin();
+        currentTarget != this->Targets.GetVector().end();
+        ++currentTarget)
+      {
+      if (this->Makefile->IsAlias(currentTarget->c_str()))
         {
         cmOStringStream e;
-        e << "given OBJECT library \"" << *currentTarget
+        e << "given ALIAS target \"" << *currentTarget
           << "\" which may not be exported.";
         this->SetError(e.str().c_str());
         return false;
         }
+
+      if(cmTarget* target = gg->FindTarget(0, currentTarget->c_str()))
+        {
+        if(target->GetType() == cmTarget::OBJECT_LIBRARY)
+          {
+          cmOStringStream e;
+          e << "given OBJECT library \"" << *currentTarget
+            << "\" which may not be exported.";
+          this->SetError(e.str().c_str());
+          return false;
+          }
+        }
+      else
+        {
+        cmOStringStream e;
+        e << "given target \"" << *currentTarget
+          << "\" which is not built by this project.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      targets.push_back(*currentTarget);
       }
-    else
+    if (this->Append.IsEnabled())
       {
-      cmOStringStream e;
-      e << "given target \"" << *currentTarget
-        << "\" which is not built by this project.";
-      this->SetError(e.str().c_str());
-      return false;
+      if (cmExportBuildFileGenerator *ebfg = gg->GetExportedTargetsFile(fname))
+        {
+        ebfg->AppendTargets(targets);
+        return true;
+        }
       }
     }
-
-  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
-                                        ->GetGlobalGenerator();
-  if (this->Append.IsEnabled())
+  else
     {
-    if (cmExportBuildFileGenerator *ebfg = gg->GetExportedTargetsFile(fname))
-      {
-      ebfg->AppendTargets(this->Targets.GetVector());
-      return true;
-      }
+    this->SetError("EXPORT or TARGETS specifier missing.");
+    return false;
     }
 
   // Setup export file generation.
@@ -162,7 +209,14 @@ bool cmExportCommand
   ebfg->SetExportFile(fname.c_str());
   ebfg->SetNamespace(this->Namespace.GetCString());
   ebfg->SetAppendMode(this->Append.IsEnabled());
-  ebfg->SetTargets(this->Targets.GetVector());
+  if (this->ExportSet)
+    {
+    ebfg->SetExportSet(this->ExportSet);
+    }
+  else
+    {
+    ebfg->SetTargets(targets);
+    }
   ebfg->SetMakefile(this->Makefile);
   ebfg->SetExportOld(this->ExportOld.IsEnabled());
 
