@@ -405,7 +405,7 @@ be true. This can be tested with logic in the package configuration file:
       set(ClimbingStats_FOUND False)
       set(ClimbingStats_NOTFOUND_MESSAGE "Specified unsupported component: ${_comp}")
     endif()
-    include("${CMAKE_CURRENT_LIST_DIR}ClimbingStats${_comp}Targets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStats${_comp}Targets.cmake")
   endforeach()
 
 Here, the ``ClimbingStats_NOTFOUND_MESSAGE`` is set to a diagnosis that the package
