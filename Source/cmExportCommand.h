@@ -15,6 +15,7 @@
 #include "cmCommand.h"
 
 class cmExportBuildFileGenerator;
+class cmExportSet;
 
 /** \class cmExportLibraryDependenciesCommand
  * \brief Add a test to the lists of tests to run.
@@ -52,9 +53,12 @@ private:
   cmCommandArgumentGroup ArgumentGroup;
   cmCAStringVector Targets;
   cmCAEnabler Append;
+  cmCAString ExportSetName;
   cmCAString Namespace;
   cmCAString Filename;
   cmCAEnabler ExportOld;
+
+  cmExportSet *ExportSet;
 
   friend class cmExportBuildFileGenerator;
   std::string ErrorMessage;

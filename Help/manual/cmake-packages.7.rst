@@ -266,6 +266,7 @@ shared library:
   project(UpstreamLib)
 
   set(CMAKE_INCLUDE_CURRENT_DIR ON)
+  set(CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 
   set(Upstream_VERSION 3.4.1)
 
@@ -292,9 +293,18 @@ shared library:
 
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStatsConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStats/ClimbingStatsConfigVersion.cmake"
     VERSION ${Upstream_VERSION}
     COMPATIBILITY AnyNewerVersion
+  )
+
+  export(EXPORT ClimbingStatsTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStats/ClimbingStatsTargets.cmake"
+    NAMESPACE Upstream::
+  )
+  configure_file(cmake/ClimbingStatsConfig.cmake
+    "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStats/ClimbingStatsConfig.cmake"
+    COPY_ONLY
   )
 
   set(ConfigPackageLocation lib/cmake/ClimbingStats)
@@ -309,7 +319,7 @@ shared library:
   install(
     FILES
       cmake/ClimbingStatsConfig.cmake
-      "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStatsConfigVersion.cmake"
+      "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStats/ClimbingStatsConfigVersion.cmake"
     DESTINATION
       ${ConfigPackageLocation}
     COMPONENT
@@ -354,6 +364,14 @@ should be provided by the ``ClimbingStats`` package, they should
 be in a separate file which is installed to the same location as the
 ``ClimbingStatsConfig.cmake`` file, and included from there.
 
+The :command:`export(EXPORT)` command creates an :prop_tgt:`IMPORTED` targets
+definition file which is specific to the build-tree.  This can similiarly be
+used with a suitable package configuration file and package version file to
+define a package for the build tree which may be used without installation.
+Consumers of the build tree can simply ensure that the
+:variable:`CMAKE_PREFIX_PATH` contains the build directory, or set the
+``ClimbingStats_DIR`` to ``<build_dir>/ClimbingStats`` in the cache.
+
 This can also be extended to cover dependencies:
 
 .. code-block:: cmake
@@ -375,7 +393,7 @@ dependencies of a package should be found in the ``Config.cmake`` file:
 
 .. code-block:: cmake
 
-  include(CMakePackageConfigHelpers)
+  include(CMakeFindDependencyMacro)
   find_dependency(Stats 2.6.4)
 
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
@@ -392,7 +410,7 @@ be true. This can be tested with logic in the package configuration file:
 
 .. code-block:: cmake
 
-  include(CMakePackageConfigHelpers)
+  include(CMakeFindDependencyMacro)
   find_dependency(Stats 2.6.4)
 
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
@@ -405,7 +423,7 @@ be true. This can be tested with logic in the package configuration file:
       set(ClimbingStats_FOUND False)
       set(ClimbingStats_NOTFOUND_MESSAGE "Specified unsupported component: ${_comp}")
     endif()
-    include("${CMAKE_CURRENT_LIST_DIR}ClimbingStats${_comp}Targets.cmake")
+    include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStats${_comp}Targets.cmake")
   endforeach()
 
 Here, the ``ClimbingStats_NOTFOUND_MESSAGE`` is set to a diagnosis that the package

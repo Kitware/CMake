@@ -23,11 +23,6 @@ set_property(TARGET sharedlib PROPERTY INTERFACE_COMPILE_DEFINITIONS "SHAREDLIB_
 add_library(sharediface INTERFACE)
 target_link_libraries(sharediface INTERFACE sharedlib)
 
-export(TARGETS sharediface sharedlib headeronly
-  NAMESPACE bld::
-  FILE ../ExportInterfaceBuildTree.cmake
-)
-
 install(TARGETS headeronly sharediface sharedlib
   EXPORT expInterface
   RUNTIME DESTINATION bin
@@ -47,3 +42,8 @@ install(FILES
 )
 
 install(EXPORT expInterface NAMESPACE exp:: DESTINATION lib/exp)
+
+export(EXPORT expInterface
+  NAMESPACE bld::
+  FILE ../ExportInterfaceBuildTree.cmake
+)
