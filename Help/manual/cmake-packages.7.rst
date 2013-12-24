@@ -375,7 +375,7 @@ dependencies of a package should be found in the ``Config.cmake`` file:
 
 .. code-block:: cmake
 
-  include(CMakePackageConfigHelpers)
+  include(CMakeFindDependencyMacro)
   find_dependency(Stats 2.6.4)
 
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
@@ -392,7 +392,7 @@ be true. This can be tested with logic in the package configuration file:
 
 .. code-block:: cmake
 
-  include(CMakePackageConfigHelpers)
+  include(CMakeFindDependencyMacro)
   find_dependency(Stats 2.6.4)
 
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
