@@ -338,8 +338,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.CMTarget = this->Target;
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
-  std::string objectDir =
-    this->LocalGenerator->GetTargetDirectory(*this->Target);
+  std::string objectDir = this->Target->GetSupportDirectory();
   objectDir = this->Convert(objectDir.c_str(),
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);
