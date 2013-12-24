@@ -11,8 +11,7 @@
 #     CONFIGURE_PACKAGE_CONFIG_FILE(<input> <output> INSTALL_DESTINATION <path>
 #                                                    [PATH_VARS <var1> <var2> ... <varN>]
 #                                                    [NO_SET_AND_CHECK_MACRO]
-#                                                    [NO_CHECK_REQUIRED_COMPONENTS_MACRO]
-#                                                    [NO_FIND_DEPENDENCY_MACRO])
+#                                                    [NO_CHECK_REQUIRED_COMPONENTS_MACRO])
 #
 #
 #
@@ -196,7 +195,6 @@
 include(CMakeParseArguments)
 
 include(WriteBasicConfigVersionFile)
-include(CMakeFindDependencyMacro)
 
 macro(WRITE_BASIC_PACKAGE_VERSION_FILE)
   write_basic_config_version_file(${ARGN})
@@ -205,7 +203,7 @@ endmacro()
 set(cfpch_dir ${CMAKE_CURRENT_LIST_DIR})
 
 function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
-  set(options NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO NO_FIND_DEPENDENCY_MACRO)
+  set(options NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)
   set(oneValueArgs INSTALL_DESTINATION )
   set(multiValueArgs PATH_VARS )
 
@@ -289,11 +287,6 @@ macro(check_required_components _NAME)
   endforeach()
 endmacro()
 ")
-  endif()
-
-  if(NOT CCF_NO_FIND_DEPENDENCY_MACRO)
-    file(READ "${cfpch_dir}/CMakeFindDependencyMacro.cmake" find_dependency_macro)
-    set(PACKAGE_INIT "${PACKAGE_INIT} ${find_dependency_macro}")
   endif()
 
   set(PACKAGE_INIT "${PACKAGE_INIT}
