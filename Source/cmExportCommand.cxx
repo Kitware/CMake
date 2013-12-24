@@ -141,7 +141,7 @@ bool cmExportCommand
       return false;
       }
 
-    cmExportSetMap setMap = gg->GetExportSets();
+    cmExportSetMap &setMap = gg->GetExportSets();
     std::string setName = this->ExportSetName.GetString();
     if (setMap.find(setName) == setMap.end())
       {
