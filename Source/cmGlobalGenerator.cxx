@@ -1166,7 +1166,6 @@ void cmGlobalGenerator::Generate()
       }
     }
 
-
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
