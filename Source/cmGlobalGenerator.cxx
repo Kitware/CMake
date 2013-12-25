@@ -1172,7 +1172,11 @@ void cmGlobalGenerator::Generate()
     this->LocalGenerators[i]->GetMakefile()->SetGeneratingBuildSystem();
     this->SetCurrentLocalGenerator(this->LocalGenerators[i]);
     this->LocalGenerators[i]->Generate();
-    this->LocalGenerators[i]->GenerateInstallRules();
+    if(!this->LocalGenerators[i]->GetMakefile()->IsOn(
+      "CMAKE_DISABLE_INSTALL_RULES"))
+      {
+      this->LocalGenerators[i]->GenerateInstallRules();
+      }
     this->LocalGenerators[i]->GenerateTestFiles();
     this->CMakeInstance->UpdateProgress("Generating",
       (static_cast<float>(i)+1.0f)/
@@ -2240,7 +2244,14 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     }
 
   //Install
-  if(this->InstallTargetEnabled)
+  bool disableInstallRules = mf->IsOn("CMAKE_DISABLE_INSTALL_RULES");
+  if(this->InstallTargetEnabled && disableInstallRules)
+    {
+    mf->IssueMessage(cmake::WARNING,
+      "CMAKE_DISABLE_INSTALL_RULES was enabled even though "
+      "installation rules have been specified");
+    }
+  else if(this->InstallTargetEnabled && !disableInstallRules)
     {
     if(!cmakeCfgIntDir || !*cmakeCfgIntDir || cmakeCfgIntDir[0] == '.')
       {
