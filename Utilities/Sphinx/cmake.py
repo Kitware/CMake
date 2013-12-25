@@ -12,16 +12,6 @@
 import os
 import re
 
-# Monkey patch for pygments reporting an error when generator expressions are
-# used.
-# https://bitbucket.org/birkenfeld/pygments-main/issue/942/cmake-generator-expressions-not-handled
-from pygments.lexers import CMakeLexer
-from pygments.token import Name, Operator
-from pygments.lexer import bygroups
-CMakeLexer.tokens["args"].append(('(\\$<)(.+?)(>)',
-                                  bygroups(Operator, Name.Variable, Operator)))
-
-
 from docutils.parsers.rst import Directive, directives
 from docutils.transforms import Transform
 try:

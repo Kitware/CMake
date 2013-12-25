@@ -298,7 +298,7 @@ bool cmGetPropertyCommand::HandleTargetMode()
         return this->StoreResult(target->GetName());
         }
       }
-    return this->StoreResult((this->Variable + "-NOTFOUND").c_str());
+    return false;
     }
   if(cmTarget* target = this->Makefile->FindTargetToUse(this->Name.c_str()))
     {

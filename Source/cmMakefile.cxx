@@ -4045,8 +4045,8 @@ cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
   // Create the target.
   cmsys::auto_ptr<cmTarget> target(new cmTarget);
   target->SetType(type, name);
-  target->MarkAsImported();
   target->SetMakefile(this);
+  target->MarkAsImported();
 
   // Add to the set of available imported targets.
   this->ImportedTargets[name] = target.get();
