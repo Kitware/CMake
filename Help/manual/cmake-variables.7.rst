@@ -31,6 +31,7 @@ Variables that Provide Information
    /variable/CMAKE_CURRENT_LIST_FILE
    /variable/CMAKE_CURRENT_LIST_LINE
    /variable/CMAKE_CURRENT_SOURCE_DIR
+   /variable/CMAKE_DISABLE_INSTALL_RULES
    /variable/CMAKE_DL_LIBS
    /variable/CMAKE_EDIT_COMMAND
    /variable/CMAKE_EXECUTABLE_SUFFIX
