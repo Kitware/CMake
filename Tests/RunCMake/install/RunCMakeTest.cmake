@@ -1,0 +1,4 @@
+include(RunCMake)
+run_cmake(SkipInstallRulesWarning)
+run_cmake(SkipInstallRulesNoWarning1)
+run_cmake(SkipInstallRulesNoWarning2)

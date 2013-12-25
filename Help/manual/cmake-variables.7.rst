@@ -59,6 +59,7 @@ Variables that Provide Information
    /variable/CMAKE_SHARED_MODULE_PREFIX
    /variable/CMAKE_SHARED_MODULE_SUFFIX
    /variable/CMAKE_SIZEOF_VOID_P
+   /variable/CMAKE_SKIP_INSTALL_RULES
    /variable/CMAKE_SKIP_RPATH
    /variable/CMAKE_SOURCE_DIR
    /variable/CMAKE_STANDARD_LIBRARIES
