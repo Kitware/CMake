@@ -55,7 +55,7 @@ bool cmIncludeDirectoryCommand
 
     std::vector<std::string> includes;
 
-    GetIncludes(*i, includes);
+    this->GetIncludes(*i, includes);
 
     if (before)
       {
