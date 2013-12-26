@@ -684,7 +684,7 @@ target, which may be an :prop_tgt:`IMPORTED` target from a package, or an
 
 ``ALIAS`` targets are not mutable, installable or exportable.  They are entirely
 local to the buildsystem description.  A name can be tested for whether it is
-an ``ALIAS`` name using the :command:`if(ALIAS)` command
+an ``ALIAS`` name by reading the :prop_tgt:`ALIASED_TARGET` property from it:
 
 .. code-block:: cmake
 
