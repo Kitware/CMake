@@ -9,6 +9,7 @@ run_cmake(InterfaceString-mismatch-depend-self)
 run_cmake(InterfaceString-mismatched-use)
 run_cmake(InterfaceString-builtin-prop)
 run_cmake(InterfaceString-Bool-Conflict)
+run_cmake(InterfaceString-Bool-Min-Conflict)
 run_cmake(DebugProperties)
 
 if (QT_QMAKE_EXECUTABLE})
