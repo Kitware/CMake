@@ -115,12 +115,17 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   bool require2_8_12 = false;
   bool require3_0_0 = false;
+  bool requiresConfigFiles = false;
   // Create all the imported targets.
   for(std::vector<cmTargetExport*>::const_iterator
         tei = allTargets.begin();
       tei != allTargets.end(); ++tei)
     {
     cmTarget* te = (*tei)->Target;
+
+    requiresConfigFiles = requiresConfigFiles
+                              || te->GetType() != cmTarget::INTERFACE_LIBRARY;
+
     this->GenerateImportTargetCode(os, te);
 
     ImportPropertyMap properties;
@@ -197,15 +202,19 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     }
   this->GenerateImportedFileCheckLoop(os);
 
-  // Generate an import file for each configuration.
   bool result = true;
-  for(std::vector<std::string>::const_iterator
-        ci = this->Configurations.begin();
-      ci != this->Configurations.end(); ++ci)
+  // Generate an import file for each configuration.
+  // Don't do this if we only export INTERFACE_LIBRARY targets.
+  if (requiresConfigFiles)
     {
-    if(!this->GenerateImportFileConfig(ci->c_str(), missingTargets))
+    for(std::vector<std::string>::const_iterator
+          ci = this->Configurations.begin();
+        ci != this->Configurations.end(); ++ci)
       {
-      result = false;
+      if(!this->GenerateImportFileConfig(ci->c_str(), missingTargets))
+        {
+        result = false;
+        }
       }
     }
 
