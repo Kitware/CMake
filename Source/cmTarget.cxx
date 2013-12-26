@@ -330,34 +330,36 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Save the backtrace of target construction.
   this->Makefile->GetBacktrace(this->Internal->Backtrace);
 
-  // Initialize the INCLUDE_DIRECTORIES property based on the current value
-  // of the same directory property:
-  const std::vector<cmValueWithOrigin> parentIncludes =
-                              this->Makefile->GetIncludeDirectoriesEntries();
-
-  for (std::vector<cmValueWithOrigin>::const_iterator it
-              = parentIncludes.begin(); it != parentIncludes.end(); ++it)
+  if (!this->IsImported())
     {
-    this->InsertInclude(*it);
-    }
+    // Initialize the INCLUDE_DIRECTORIES property based on the current value
+    // of the same directory property:
+    const std::vector<cmValueWithOrigin> parentIncludes =
+                                this->Makefile->GetIncludeDirectoriesEntries();
 
-  const std::set<cmStdString> parentSystemIncludes =
-                              this->Makefile->GetSystemIncludeDirectories();
+    for (std::vector<cmValueWithOrigin>::const_iterator it
+                = parentIncludes.begin(); it != parentIncludes.end(); ++it)
+      {
+      this->InsertInclude(*it);
+      }
+    const std::set<cmStdString> parentSystemIncludes =
+                                this->Makefile->GetSystemIncludeDirectories();
 
-  for (std::set<cmStdString>::const_iterator it
-        = parentSystemIncludes.begin();
-        it != parentSystemIncludes.end(); ++it)
-    {
-    this->SystemIncludeDirectories.insert(*it);
-    }
+    for (std::set<cmStdString>::const_iterator it
+          = parentSystemIncludes.begin();
+          it != parentSystemIncludes.end(); ++it)
+      {
+      this->SystemIncludeDirectories.insert(*it);
+      }
 
-  const std::vector<cmValueWithOrigin> parentOptions =
-                              this->Makefile->GetCompileOptionsEntries();
+    const std::vector<cmValueWithOrigin> parentOptions =
+                                this->Makefile->GetCompileOptionsEntries();
 
-  for (std::vector<cmValueWithOrigin>::const_iterator it
-              = parentOptions.begin(); it != parentOptions.end(); ++it)
-    {
-    this->InsertCompileOption(*it);
+    for (std::vector<cmValueWithOrigin>::const_iterator it
+                = parentOptions.begin(); it != parentOptions.end(); ++it)
+      {
+      this->InsertCompileOption(*it);
+      }
     }
 
   if (this->GetType() != INTERFACE_LIBRARY)

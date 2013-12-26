@@ -12,3 +12,10 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
       "DO_GNU_TESTS"
   )
 endif()
+
+add_compile_options(-rtti)
+add_library(imp UNKNOWN IMPORTED)
+get_target_property(_res imp COMPILE_OPTIONS)
+if (_res)
+  message(SEND_ERROR "add_compile_options populated the COMPILE_OPTIONS target property")
+endif()
