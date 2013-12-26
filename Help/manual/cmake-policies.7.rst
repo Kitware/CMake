@@ -22,7 +22,9 @@ The :command:`cmake_minimum_required` command does more than report an
 error if a too-old version of CMake is used to build a project.  It
 also sets all policies introduced in that CMake version or earlier to
 NEW behavior.  To manage policies without increasing the minimum required
-CMake version, the :command:`if(POLICY)` command may be used::
+CMake version, the :command:`if(POLICY)` command may be used:
+
+.. code-block:: cmake
 
   if(POLICY CMP0990)
     cmake_policy(SET CMP0990 NEW)
