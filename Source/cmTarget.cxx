@@ -6005,7 +6005,8 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
       << propsString <<
     " property in the dependencies of target \"" << this->GetName() <<
     "\".  This is not allowed. A property may only require compatibility "
-    "in a boolean interpretation or a string interpretation, but not both.";
+    "in a boolean interpretation, a numeric minimum, a numeric maximum or a "
+    "string interpretation, but not a mixture.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     }
 }
