@@ -252,3 +252,9 @@ endforeach()
 add_test(echo-old-style echo "\$<CONFIGURATION>")
 set_property(TEST echo-old-style PROPERTY
     PASS_REGULAR_EXPRESSION "^\\$<CONFIGURATION>\n$")
+
+add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-WARN)
+set(CMP0044_TYPE NEW)
+add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-NEW)
+set(CMP0044_TYPE OLD)
+add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-OLD)

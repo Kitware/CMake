@@ -412,9 +412,31 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
       }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
+    if (strcmp(parameters.begin()->c_str(), compilerId) == 0)
       {
       return "1";
+      }
+
+    if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
+      {
+      switch(context->Makefile->GetPolicyStatus(cmPolicies::CMP0044))
+        {
+        case cmPolicies::WARN:
+          {
+          cmOStringStream e;
+          e << context->Makefile->GetPolicies()
+                      ->GetPolicyWarning(cmPolicies::CMP0044);
+          context->Makefile->GetCMakeInstance()
+                 ->IssueMessage(cmake::AUTHOR_WARNING,
+                                e.str().c_str(), context->Backtrace);
+          }
+        case cmPolicies::OLD:
+          return "1";
+        case cmPolicies::NEW:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+          break;
+        }
       }
     return "0";
   }
