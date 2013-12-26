@@ -688,8 +688,9 @@ an ``ALIAS`` name using the :command:`if(ALIAS)` command
 
 .. code-block:: cmake
 
-  if(ALIAS Upstream::lib1)
-    message(STATUS "Using an ALIAS from the buildsystem.")
+  get_target_property(_aliased Upstream::lib1 ALIASED_TARGET)
+  if(_aliased)
+    message(STATUS "The name Upstream::lib1 is an ALIAS for ${_aliased}.")
   endif()
 
 Interface Libraries
