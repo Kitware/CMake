@@ -93,3 +93,4 @@ All Policies
    /policy/CMP0041
    /policy/CMP0042
    /policy/CMP0043
+   /policy/CMP0044
