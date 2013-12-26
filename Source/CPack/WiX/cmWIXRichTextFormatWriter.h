@@ -30,6 +30,7 @@ public:
 private:
   void WriteHeader();
   void WriteFontTable();
+  void WriteColorTable();
   void WriteGenerator();
 
   void WriteDocumentPrefix();
@@ -39,6 +40,11 @@ private:
 
   void StartGroup();
   void EndGroup();
+
+  void EmitUnicodeCodepoint(int c);
+  void EmitUnicodeSurrogate(int c);
+
+  void EmitInvalidCodepoint(int c);
 
   std::ofstream File;
 };
