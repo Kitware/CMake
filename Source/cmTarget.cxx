@@ -136,7 +136,7 @@ public:
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
-  std::vector<cmValueWithOrigin> LinkInterfacePropertyEntries;
+  std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
 
   mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceIncludeDirectoriesEntries;
@@ -1042,8 +1042,8 @@ cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
 void cmTarget::FinalizeSystemIncludeDirectories()
 {
   for (std::vector<cmValueWithOrigin>::const_iterator
-      it = this->Internal->LinkInterfacePropertyEntries.begin(),
-      end = this->Internal->LinkInterfacePropertyEntries.end();
+      it = this->Internal->LinkImplementationPropertyEntries.begin(),
+      end = this->Internal->LinkImplementationPropertyEntries.end();
       it != end; ++it)
     {
     if (!cmGeneratorExpression::IsValidTargetName(it->Value)
@@ -1495,11 +1495,11 @@ void cmTarget::SetProperty(const char* prop, const char* value)
     }
   if (strcmp(prop, "LINK_LIBRARIES") == 0)
     {
-    this->Internal->LinkInterfacePropertyEntries.clear();
+    this->Internal->LinkImplementationPropertyEntries.clear();
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
     cmValueWithOrigin entry(value, lfbt);
-    this->Internal->LinkInterfacePropertyEntries.push_back(entry);
+    this->Internal->LinkImplementationPropertyEntries.push_back(entry);
     return;
     }
   this->Properties.SetProperty(prop, value, cmProperty::TARGET);
@@ -1570,7 +1570,7 @@ void cmTarget::AppendProperty(const char* prop, const char* value,
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
     cmValueWithOrigin entry(value, lfbt);
-    this->Internal->LinkInterfacePropertyEntries.push_back(entry);
+    this->Internal->LinkImplementationPropertyEntries.push_back(entry);
     return;
     }
   this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
@@ -1882,8 +1882,8 @@ cmTarget::GetIncludeDirectories(const char *config) const
   if (!this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[configString])
     {
     for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkInterfacePropertyEntries.begin(),
-        end = this->Internal->LinkInterfacePropertyEntries.end();
+        it = this->Internal->LinkImplementationPropertyEntries.begin(),
+        end = this->Internal->LinkImplementationPropertyEntries.end();
         it != end; ++it)
       {
       if (!cmGeneratorExpression::IsValidTargetName(it->Value)
@@ -2111,8 +2111,8 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
   if (!this->Internal->CacheLinkInterfaceCompileOptionsDone[configString])
     {
     for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkInterfacePropertyEntries.begin(),
-        end = this->Internal->LinkInterfacePropertyEntries.end();
+        it = this->Internal->LinkImplementationPropertyEntries.begin(),
+        end = this->Internal->LinkImplementationPropertyEntries.end();
         it != end; ++it)
       {
       if (!cmGeneratorExpression::IsValidTargetName(it->Value)
@@ -2224,8 +2224,8 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
   if (!this->Internal->CacheLinkInterfaceCompileDefinitionsDone[configString])
     {
     for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkInterfacePropertyEntries.begin(),
-        end = this->Internal->LinkInterfacePropertyEntries.end();
+        it = this->Internal->LinkImplementationPropertyEntries.begin(),
+        end = this->Internal->LinkImplementationPropertyEntries.end();
         it != end; ++it)
       {
       if (!cmGeneratorExpression::IsValidTargetName(it->Value)
@@ -2800,8 +2800,8 @@ const char *cmTarget::GetProperty(const char* prop,
     output = "";
     std::string sep;
     for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkInterfacePropertyEntries.begin(),
-        end = this->Internal->LinkInterfacePropertyEntries.end();
+        it = this->Internal->LinkImplementationPropertyEntries.begin(),
+        end = this->Internal->LinkImplementationPropertyEntries.end();
         it != end; ++it)
       {
       output += sep;
