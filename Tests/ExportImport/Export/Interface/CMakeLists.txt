@@ -23,7 +23,10 @@ set_property(TARGET sharedlib PROPERTY INTERFACE_COMPILE_DEFINITIONS "SHAREDLIB_
 add_library(sharediface INTERFACE)
 target_link_libraries(sharediface INTERFACE sharedlib)
 
-install(TARGETS headeronly sharediface sharedlib
+install(TARGETS headeronly sharediface
+  EXPORT expInterface
+)
+install(TARGETS sharedlib
   EXPORT expInterface
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib NAMELINK_SKIP
