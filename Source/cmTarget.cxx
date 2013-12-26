@@ -24,6 +24,7 @@
 #include <set>
 #include <stdlib.h> // required for atof
 #include <assert.h>
+#include <errno.h>
 
 const char* cmTarget::GetTargetTypeName(TargetType targetType)
 {
@@ -4274,6 +4275,7 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
                                                       const char *rhs,
                                                       CompatibleType t)
 {
+  char *pEnd;
 
 #if defined(_MSC_VER)
   static const char* const null_ptr = 0;
@@ -4281,10 +4283,14 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
 # define null_ptr 0
 #endif
 
-  double lnum;
-  double rnum;
-  if(sscanf(lhs, "%lg", &lnum) != 1 ||
-      sscanf(rhs, "%lg", &rnum) != 1)
+  long lnum = strtol(lhs, &pEnd, 0);
+  if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
+    {
+    return std::pair<bool, const char*>(false, null_ptr);
+    }
+
+  long rnum = strtol(rhs, &pEnd, 0);
+  if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
     {
     return std::pair<bool, const char*>(false, null_ptr);
     }
