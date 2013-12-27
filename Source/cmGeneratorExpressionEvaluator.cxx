@@ -212,12 +212,24 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     char *pEnd;
 
     int base = 0;
+    bool flipSign = false;
 
     const char *lhs = parameters[0].c_str();
     if (cmHasLiteralPrefix(lhs, "0b"))
       {
       base = 2;
       lhs += 2;
+      }
+    if (cmHasLiteralPrefix(lhs, "-0b"))
+      {
+      base = 2;
+      lhs += 3;
+      flipSign = true;
+      }
+    if (cmHasLiteralPrefix(lhs, "+0b"))
+      {
+      base = 2;
+      lhs += 3;
       }
 
     long lnum = strtol(lhs, &pEnd, base);
@@ -228,13 +240,30 @@ static const struct EqualNode : public cmGeneratorExpressionNode
       return std::string();
       }
 
+    if (flipSign)
+      {
+      lnum = -lnum;
+      }
+
     base = 0;
+    flipSign = false;
 
     const char *rhs = parameters[1].c_str();
     if (cmHasLiteralPrefix(rhs, "0b"))
       {
       base = 2;
       rhs += 2;
+      }
+    if (cmHasLiteralPrefix(rhs, "-0b"))
+      {
+      base = 2;
+      rhs += 3;
+      flipSign = true;
+      }
+    if (cmHasLiteralPrefix(rhs, "+0b"))
+      {
+      base = 2;
+      rhs += 3;
       }
 
     long rnum = strtol(rhs, &pEnd, base);
@@ -243,6 +272,11 @@ static const struct EqualNode : public cmGeneratorExpressionNode
       reportError(context, content->GetOriginalExpression(),
             "$<EQUAL> parameter not a valid integer.");
       return std::string();
+      }
+
+    if (flipSign)
+      {
+      rnum = -rnum;
       }
 
     return lnum == rnum ? "1" : "0";
