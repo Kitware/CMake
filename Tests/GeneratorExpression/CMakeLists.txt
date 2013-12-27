@@ -196,6 +196,16 @@ add_custom_target(check-part3 ALL
     -Dlower_case=$<LOWER_CASE:Mi,XeD>
     -Dupper_case=$<UPPER_CASE:MiX,eD>
     -Dmake_c_identifier=$<MAKE_C_IDENTIFIER:4f,oo:+bar-$>
+    -Dequal1=$<EQUAL:1,2>
+    -Dequal2=$<EQUAL:1,1>
+    -Dequal3=$<EQUAL:0x1,1>
+    -Dequal4=$<EQUAL:0x1,2>
+    -Dequal5=$<EQUAL:0xA,0xa>
+    -Dequal6=$<EQUAL:0xA,10>
+    -Dequal7=$<EQUAL:0xA,012>
+    -Dequal8=$<EQUAL:10,012>
+    -Dequal9=$<EQUAL:10,010>
+    -Dequal10=$<EQUAL:10,0b1010>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
   VERBATIM

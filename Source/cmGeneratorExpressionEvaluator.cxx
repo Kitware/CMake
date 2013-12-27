@@ -19,6 +19,7 @@
 #include <cmsys/String.h>
 
 #include <assert.h>
+#include <errno.h>
 
 //----------------------------------------------------------------------------
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x510
@@ -195,6 +196,58 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
     return *parameters.begin() == parameters[1] ? "1" : "0";
   }
 } strEqualNode;
+
+//----------------------------------------------------------------------------
+static const struct EqualNode : public cmGeneratorExpressionNode
+{
+  EqualNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    char *pEnd;
+
+    int base = 0;
+
+    const char *lhs = parameters[0].c_str();
+    if (cmHasLiteralPrefix(lhs, "0b"))
+      {
+      base = 2;
+      lhs += 2;
+      }
+
+    long lnum = strtol(lhs, &pEnd, base);
+    if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
+      {
+      reportError(context, content->GetOriginalExpression(),
+            "$<EQUAL> parameter not a valid integer.");
+      return std::string();
+      }
+
+    base = 0;
+
+    const char *rhs = parameters[1].c_str();
+    if (cmHasLiteralPrefix(rhs, "0b"))
+      {
+      base = 2;
+      rhs += 2;
+      }
+
+    long rnum = strtol(rhs, &pEnd, base);
+    if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
+      {
+      reportError(context, content->GetOriginalExpression(),
+            "$<EQUAL> parameter not a valid integer.");
+      return std::string();
+      }
+
+    return lnum == rnum ? "1" : "0";
+  }
+} equalNode;
 
 //----------------------------------------------------------------------------
 static const struct LowerCaseNode : public cmGeneratorExpressionNode
@@ -1492,6 +1545,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &targetSoNameFileDirNode;
   else if (identifier == "STREQUAL")
     return &strEqualNode;
+  else if (identifier == "EQUAL")
+    return &equalNode;
   else if (identifier == "LOWER_CASE")
     return &lowerCaseNode;
   else if (identifier == "UPPER_CASE")
