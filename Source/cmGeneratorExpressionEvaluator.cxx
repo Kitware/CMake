@@ -236,7 +236,7 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
       {
       reportError(context, content->GetOriginalExpression(),
-            "$<EQUAL> parameter not a valid integer.");
+          "$<EQUAL> parameter " + parameters[0] + " is not a valid integer.");
       return std::string();
       }
 
@@ -270,7 +270,7 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
       {
       reportError(context, content->GetOriginalExpression(),
-            "$<EQUAL> parameter not a valid integer.");
+          "$<EQUAL> parameter " + parameters[1] + " is not a valid integer.");
       return std::string();
       }
 
