@@ -23,10 +23,6 @@
 ;;
 ;;  (setq load-path (cons (expand-file-name "/dir/with/cmake-mode") load-path))
 ;;  (require 'cmake-mode)
-;;  (setq auto-mode-alist
-;;        (append '(("CMakeLists\\.txt\\'" . cmake-mode)
-;;                  ("\\.cmake\\'" . cmake-mode))
-;;                auto-mode-alist))
 
 ;------------------------------------------------------------------------------
 
@@ -236,6 +232,7 @@ the indentation.  Otherwise it retains the same position on the line"
 ;;
 ;; CMake mode startup function.
 ;;
+;;;###autoload
 (defun cmake-mode ()
   "Major mode for editing CMake listfiles."
   (interactive)
@@ -270,6 +267,7 @@ the indentation.  Otherwise it retains the same position on the line"
 ; Help mode starts here
 
 
+;;;###autoload
 (defun cmake-command-run (type &optional topic)
   "Runs the command cmake with the arguments specified.  The
 optional argument topic will be appended to the argument list."
@@ -303,6 +301,7 @@ optional argument topic will be appended to the argument list."
     )
   )
 
+;;;###autoload
 (defun cmake-help-list-commands ()
   "Prints out a list of the cmake commands."
   (interactive)
@@ -312,6 +311,7 @@ optional argument topic will be appended to the argument list."
 (defvar cmake-help-command-history nil "Topic read history.")
 
 (require 'thingatpt)
+;;;###autoload
 (defun cmake-get-topic (type)
   "Gets the topic from the minibuffer input.  The default is the word the cursor is on."
   (interactive)
@@ -328,6 +328,7 @@ optional argument topic will be appended to the argument list."
   )
 
 
+;;;###autoload
 (defun cmake-help-command ()
   "Prints out the help message corresponding to the command the cursor is on."
   (interactive)
@@ -335,6 +336,10 @@ optional argument topic will be appended to the argument list."
   (cmake-command-run "--help-command" (downcase command))
   )
 
+;;;###autoload
+(progn
+  (add-to-list 'auto-mode-alist '("CMakeLists\\.txt\\'" . cmake-mode))
+  (add-to-list 'auto-mode-alist '("\\.cmake\\'" . cmake-mode)))
 
 ; This file provides cmake-mode.
 (provide 'cmake-mode)
