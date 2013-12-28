@@ -1,3 +1,5 @@
+;;; cmake-mode.el --- major-mode for editing CMake sources
+
 ;=============================================================================
 ; CMake - Cross Platform Makefile Generator
 ; Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
@@ -9,7 +11,6 @@
 ; implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 ; See the License for more information.
 ;=============================================================================
-;;; cmake-mode.el --- major-mode for editing CMake sources
 
 ;------------------------------------------------------------------------------
 
