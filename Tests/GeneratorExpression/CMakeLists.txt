@@ -206,6 +206,17 @@ add_custom_target(check-part3 ALL
     -Dequal8=$<EQUAL:10,012>
     -Dequal9=$<EQUAL:10,010>
     -Dequal10=$<EQUAL:10,0b1010>
+    -Dequal11=$<EQUAL:-10,-0xa>
+    -Dequal12=$<EQUAL:10,+0xa>
+    -Dequal13=$<EQUAL:+10,+0xa>
+    -Dequal14=$<EQUAL:+10,0xa>
+    -Dequal15=$<EQUAL:-10,-0xa>
+    -Dequal16=$<EQUAL:-10,-0b1010>
+    -Dequal17=$<EQUAL:-10,+0b1010>
+    -Dequal18=$<EQUAL:10,+0b1010>
+    -Dequal19=$<EQUAL:10,+012>
+    -Dequal20=$<EQUAL:10,-012>
+    -Dequal21=$<EQUAL:-10,-012>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
   VERBATIM
