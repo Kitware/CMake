@@ -90,7 +90,6 @@ cmExtraKateGenerator::WriteTargets(const cmMakefile* mf,
   "\t\"build\": {\n"
   "\t\t\"directory\": \"" << mf->GetHomeOutputDirectory() << "\",\n"
   "\t\t\"default_target\": \"all\",\n"
-  "\t\t\"prev_target\": \"all\",\n"
   "\t\t\"clean_target\": \"clean\",\n"
   "\t\t\"targets\":[\n";
 
