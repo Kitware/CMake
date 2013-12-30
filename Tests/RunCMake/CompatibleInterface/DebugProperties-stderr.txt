@@ -32,6 +32,14 @@ CMake Debug Log:
    \* Target "iface1" property value "FALSE" \(Interface set\)
 +
 CMake Debug Log:
+  Boolean compatibility of property "BOOL_PROP6" for target
+  "CompatibleInterface" \(result: "FALSE"\):
+
+   \* Target "CompatibleInterface" property not set.
+   \* Target "iface1" property value "FALSE" \(Interface set\)
+   \* Target "iface2" property value "FALSE" \(Agree\)
++
+CMake Debug Log:
   String compatibility of property "STRING_PROP1" for target
   "CompatibleInterface" \(result: "prop1"\):
 
