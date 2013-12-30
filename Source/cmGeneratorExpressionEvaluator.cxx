@@ -1024,7 +1024,12 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     /* else */ if (cmHasLiteralPrefix(propertyName.c_str(),
                            "COMPILE_DEFINITIONS_"))
       {
-      interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
+      cmPolicies::PolicyStatus polSt =
+                      context->Makefile->GetPolicyStatus(cmPolicies::CMP0043);
+      if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD)
+        {
+        interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
+        }
       }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
 
