@@ -1606,6 +1606,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
   if(this->GetType() != cmTarget::SHARED_LIBRARY &&
      this->GetType() != cmTarget::STATIC_LIBRARY &&
      this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::INTERFACE_LIBRARY &&
      !this->IsExecutableWithExports())
     {
     return;
@@ -2688,7 +2689,6 @@ const char *cmTarget::GetProperty(const char* prop,
      this->GetType() == cmTarget::STATIC_LIBRARY ||
      this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->GetType() == cmTarget::MODULE_LIBRARY ||
-     this->GetType() == cmTarget::INTERFACE_LIBRARY ||
      this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
     if(strcmp(prop,"LOCATION") == 0)
