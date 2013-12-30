@@ -2723,25 +2723,6 @@ const char *cmTarget::GetProperty(const char* prop,
                                    this->GetLocation(configName.c_str()),
                                    cmProperty::TARGET);
       }
-    else
-      {
-      // Support "<CONFIG>_LOCATION" for compatibility.
-      int len = static_cast<int>(strlen(prop));
-      if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
-        {
-        std::string configName(prop, len-9);
-        if(configName != "IMPORTED")
-          {
-          if (!this->HandleLocationPropertyPolicy())
-            {
-            return 0;
-            }
-          this->Properties.SetProperty(prop,
-                                       this->GetLocation(configName.c_str()),
-                                       cmProperty::TARGET);
-          }
-        }
-      }
     }
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
     {
@@ -4260,20 +4241,23 @@ enum CompatibleType
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-PropertyType consistentProperty(PropertyType lhs, PropertyType rhs,
-                                CompatibleType t);
+std::pair<bool, PropertyType> consistentProperty(PropertyType lhs,
+                                                 PropertyType rhs,
+                                                 CompatibleType t);
 
 //----------------------------------------------------------------------------
 template<>
-bool consistentProperty(bool lhs, bool rhs, CompatibleType)
+std::pair<bool, bool> consistentProperty(bool lhs, bool rhs, CompatibleType)
 {
-  return lhs == rhs;
+  return std::make_pair(lhs == rhs, lhs);
 }
 
 //----------------------------------------------------------------------------
-const char * consistentStringProperty(const char *lhs, const char *rhs)
+std::pair<bool, const char*> consistentStringProperty(const char *lhs,
+                                                      const char *rhs)
 {
-  return strcmp(lhs, rhs) == 0 ? lhs : 0;
+  const bool b = strcmp(lhs, rhs) == 0;
+  return std::make_pair(b, b ? lhs : 0);
 }
 
 #if defined(_MSC_VER) && _MSC_VER <= 1200
@@ -4287,8 +4271,9 @@ cmMinimum(const T& l, const T& r) {return l < r ? l : r;}
 #endif
 
 //----------------------------------------------------------------------------
-const char * consistentNumberProperty(const char *lhs, const char *rhs,
-                               CompatibleType t)
+std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
+                                                      const char *rhs,
+                                                      CompatibleType t)
 {
   char *pEnd;
 
@@ -4301,41 +4286,42 @@ const char * consistentNumberProperty(const char *lhs, const char *rhs,
   long rnum = strtol(rhs, &pEnd, 0);
   if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
     {
-    return 0;
+    return std::pair<bool, const char*>(false, 0);
     }
 
   if (t == NumberMaxType)
     {
-    return cmMaximum(lnum, rnum) == lnum ? lhs : rhs;
+    return std::make_pair(true, cmMaximum(lnum, rnum) == lnum ? lhs : rhs);
     }
   else
     {
-    return cmMinimum(lnum, rnum) == lnum ? lhs : rhs;
+    return std::make_pair(true, cmMinimum(lnum, rnum) == lnum ? lhs : rhs);
     }
 }
 
 //----------------------------------------------------------------------------
 template<>
-const char* consistentProperty(const char *lhs, const char *rhs,
-                               CompatibleType t)
+std::pair<bool, const char*> consistentProperty(const char *lhs,
+                                                const char *rhs,
+                                                CompatibleType t)
 {
   if (!lhs && !rhs)
     {
-    return "";
+    return std::make_pair(true, lhs);
     }
   if (!lhs)
     {
-    return rhs ? rhs : "";
+    return std::make_pair(true, rhs);
     }
   if (!rhs)
     {
-    return lhs ? lhs : "";
+    return std::make_pair(true, lhs);
     }
   switch(t)
   {
   case BoolType:
     assert(!"consistentProperty for strings called with BoolType");
-    return 0;
+    return std::pair<bool, const char*>(false, 0);
   case StringType:
     return consistentStringProperty(lhs, rhs);
   case NumberMinType:
@@ -4343,7 +4329,7 @@ const char* consistentProperty(const char *lhs, const char *rhs,
     return consistentNumberProperty(lhs, rhs, t);
   }
   assert(!"Unreachable!");
-  return 0;
+  return std::pair<bool, const char*>(false, 0);
 }
 
 template<typename PropertyType>
@@ -4515,7 +4501,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
                               ("INTERFACE_" + p).c_str(), 0);
 
     std::string reportEntry;
-    if (ifacePropContent)
+    if (ifaceIsSet)
       {
       reportEntry += " * Target \"";
       reportEntry += li->Target->GetName();
@@ -4528,11 +4514,12 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
       {
       if (ifaceIsSet)
         {
-        PropertyType consistent = consistentProperty(propContent,
+        std::pair<bool, PropertyType> consistent =
+                                  consistentProperty(propContent,
                                                      ifacePropContent, t);
         report += reportEntry;
-        report += compatibilityAgree(t, propContent != consistent);
-        if (!consistent)
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first)
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
@@ -4544,7 +4531,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          propContent = consistent;
+          propContent = consistent.second;
           continue;
           }
         }
@@ -4558,19 +4545,14 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
       {
       propContent = impliedValue<PropertyType>(propContent);
 
-      reportEntry += " * Target \"";
-      reportEntry += li->Target->GetName();
-      reportEntry += "\" property value \"";
-      reportEntry += valueAsString<PropertyType>(propContent);
-      reportEntry += "\" ";
-
       if (ifaceIsSet)
         {
-        PropertyType consistent = consistentProperty(propContent,
+        std::pair<bool, PropertyType> consistent =
+                                  consistentProperty(propContent,
                                                      ifacePropContent, t);
         report += reportEntry;
-        report += compatibilityAgree(t, propContent != consistent);
-        if (!consistent)
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first)
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
@@ -4583,7 +4565,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          propContent = consistent;
+          propContent = consistent.second;
           continue;
           }
         }
@@ -4599,11 +4581,12 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
         {
         if (propInitialized)
           {
-          PropertyType consistent = consistentProperty(propContent,
+          std::pair<bool, PropertyType> consistent =
+                                    consistentProperty(propContent,
                                                        ifacePropContent, t);
           report += reportEntry;
-          report += compatibilityAgree(t, propContent != consistent);
-          if (!consistent)
+          report += compatibilityAgree(t, propContent != consistent.second);
+          if (!consistent.first)
             {
             cmOStringStream e;
             e << "The INTERFACE_" << p << " property of \""
@@ -4615,7 +4598,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
             }
           else
             {
-            propContent = consistent;
+            propContent = consistent.second;
             continue;
             }
           }
