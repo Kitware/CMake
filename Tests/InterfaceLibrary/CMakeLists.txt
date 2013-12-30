@@ -6,10 +6,8 @@ project(InterfaceLibrary)
 add_library(iface_nodepends INTERFACE)
 target_compile_definitions(iface_nodepends INTERFACE IFACE_DEFINE)
 
-add_subdirectory(headerdir)
-
 add_executable(InterfaceLibrary definetestexe.cpp)
-target_link_libraries(InterfaceLibrary iface_nodepends headeriface)
+target_link_libraries(InterfaceLibrary iface_nodepends)
 
 add_subdirectory(libsdir)
 
