@@ -82,7 +82,7 @@ protected:
                                  std::vector<std::string>& missingTargets);
   void SetImportLinkProperty(std::string const& suffix,
                              cmTarget* target, const char* propName,
-                             std::vector<std::string> const& libs,
+                             std::vector<std::string> const& entries,
                              ImportPropertyMap& properties,
                              std::vector<std::string>& missingTargets);
 

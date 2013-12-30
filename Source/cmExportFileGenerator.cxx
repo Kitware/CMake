@@ -825,36 +825,36 @@ cmExportFileGenerator
 ::SetImportLinkProperty(std::string const& suffix,
                         cmTarget* target,
                         const char* propName,
-                        std::vector<std::string> const& libs,
+                        std::vector<std::string> const& entries,
                         ImportPropertyMap& properties,
                         std::vector<std::string>& missingTargets
                        )
 {
-  // Skip the property if there are no libraries.
-  if(libs.empty())
+  // Skip the property if there are no entries.
+  if(entries.empty())
     {
     return;
     }
 
   // Construct the property value.
-  std::string link_libs;
+  std::string link_entries;
   const char* sep = "";
-  for(std::vector<std::string>::const_iterator li = libs.begin();
-      li != libs.end(); ++li)
+  for(std::vector<std::string>::const_iterator li = entries.begin();
+      li != entries.end(); ++li)
     {
     // Separate this from the previous entry.
-    link_libs += sep;
+    link_entries += sep;
     sep = ";";
 
     std::string temp = *li;
     this->AddTargetNamespace(temp, target, missingTargets);
-    link_libs += temp;
+    link_entries += temp;
     }
 
   // Store the property.
   std::string prop = propName;
   prop += suffix;
-  properties[prop] = link_libs;
+  properties[prop] = link_entries;
 }
 
 
