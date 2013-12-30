@@ -4465,7 +4465,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
                               ("INTERFACE_" + p).c_str(), 0);
 
     std::string reportEntry;
-    if (ifacePropContent)
+    if (ifaceIsSet)
       {
       reportEntry += " * Target \"";
       reportEntry += li->Target->GetName();
