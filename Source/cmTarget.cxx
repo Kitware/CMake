@@ -4234,17 +4234,27 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
 {
   char *pEnd;
 
+#if defined(_MSC_VER)
+  static const char* const null_ptr = 0;
+#else
+# define null_ptr 0
+#endif
+
   long lnum = strtol(lhs, &pEnd, 0);
   if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
     {
-    return std::pair<bool, const char*>(false, 0);
+    return std::pair<bool, const char*>(false, null_ptr);
     }
 
   long rnum = strtol(rhs, &pEnd, 0);
   if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
     {
-    return std::pair<bool, const char*>(false, 0);
+    return std::pair<bool, const char*>(false, null_ptr);
     }
+
+#if !defined(_MSC_VER)
+#undef null_ptr
+#endif
 
   if (t == NumberMaxType)
     {
