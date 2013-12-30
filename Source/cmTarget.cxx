@@ -4284,11 +4284,18 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
     {
     return std::make_pair(true, lhs);
     }
+
+#if defined(_MSC_VER)
+  static const char* const null_ptr = 0;
+#else
+# define null_ptr 0
+#endif
+
   switch(t)
   {
   case BoolType:
     assert(!"consistentProperty for strings called with BoolType");
-    return std::pair<bool, const char*>(false, 0);
+    return std::pair<bool, const char*>(false, null_ptr);
   case StringType:
     return consistentStringProperty(lhs, rhs);
   case NumberMinType:
@@ -4296,7 +4303,12 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
     return consistentNumberProperty(lhs, rhs, t);
   }
   assert(!"Unreachable!");
-  return std::pair<bool, const char*>(false, 0);
+  return std::pair<bool, const char*>(false, null_ptr);
+
+#if !defined(_MSC_VER)
+#undef null_ptr
+#endif
+
 }
 
 template<typename PropertyType>
