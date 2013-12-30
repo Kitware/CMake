@@ -1341,12 +1341,12 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
       {
       cmTarget* t = &ti->second;
 
+      t->AppendBuildInterfaceIncludes();
+
       if (t->GetType() == cmTarget::INTERFACE_LIBRARY)
         {
         continue;
         }
-
-      t->AppendBuildInterfaceIncludes();
 
       for (std::vector<cmValueWithOrigin>::const_iterator it
                                       = noconfig_compile_definitions.begin();

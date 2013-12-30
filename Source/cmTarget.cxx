@@ -24,6 +24,7 @@
 #include <set>
 #include <stdlib.h> // required for atof
 #include <assert.h>
+#include <errno.h>
 
 const char* cmTarget::GetTargetTypeName(TargetType targetType)
 {
@@ -1605,6 +1606,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
   if(this->GetType() != cmTarget::SHARED_LIBRARY &&
      this->GetType() != cmTarget::STATIC_LIBRARY &&
      this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::INTERFACE_LIBRARY &&
      !this->IsExecutableWithExports())
     {
     return;
@@ -2687,7 +2689,6 @@ const char *cmTarget::GetProperty(const char* prop,
      this->GetType() == cmTarget::STATIC_LIBRARY ||
      this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->GetType() == cmTarget::MODULE_LIBRARY ||
-     this->GetType() == cmTarget::INTERFACE_LIBRARY ||
      this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
     if(strcmp(prop,"LOCATION") == 0)
@@ -2721,25 +2722,6 @@ const char *cmTarget::GetProperty(const char* prop,
       this->Properties.SetProperty(prop,
                                    this->GetLocation(configName.c_str()),
                                    cmProperty::TARGET);
-      }
-    else
-      {
-      // Support "<CONFIG>_LOCATION" for compatibility.
-      int len = static_cast<int>(strlen(prop));
-      if(len > 9 && strcmp(prop+len-9, "_LOCATION") == 0)
-        {
-        std::string configName(prop, len-9);
-        if(configName != "IMPORTED")
-          {
-          if (!this->HandleLocationPropertyPolicy())
-            {
-            return 0;
-            }
-          this->Properties.SetProperty(prop,
-                                       this->GetLocation(configName.c_str()),
-                                       cmProperty::TARGET);
-          }
-        }
       }
     }
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
@@ -4259,20 +4241,23 @@ enum CompatibleType
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-PropertyType consistentProperty(PropertyType lhs, PropertyType rhs,
-                                CompatibleType t);
+std::pair<bool, PropertyType> consistentProperty(PropertyType lhs,
+                                                 PropertyType rhs,
+                                                 CompatibleType t);
 
 //----------------------------------------------------------------------------
 template<>
-bool consistentProperty(bool lhs, bool rhs, CompatibleType)
+std::pair<bool, bool> consistentProperty(bool lhs, bool rhs, CompatibleType)
 {
-  return lhs == rhs;
+  return std::make_pair(lhs == rhs, lhs);
 }
 
 //----------------------------------------------------------------------------
-const char * consistentStringProperty(const char *lhs, const char *rhs)
+std::pair<bool, const char*> consistentStringProperty(const char *lhs,
+                                                      const char *rhs)
 {
-  return strcmp(lhs, rhs) == 0 ? lhs : 0;
+  const bool b = strcmp(lhs, rhs) == 0;
+  return std::make_pair(b, b ? lhs : 0);
 }
 
 #if defined(_MSC_VER) && _MSC_VER <= 1200
@@ -4286,49 +4271,74 @@ cmMinimum(const T& l, const T& r) {return l < r ? l : r;}
 #endif
 
 //----------------------------------------------------------------------------
-const char * consistentNumberProperty(const char *lhs, const char *rhs,
-                               CompatibleType t)
+std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
+                                                      const char *rhs,
+                                                      CompatibleType t)
 {
-  double lnum;
-  double rnum;
-  if(sscanf(lhs, "%lg", &lnum) != 1 ||
-      sscanf(rhs, "%lg", &rnum) != 1)
+  char *pEnd;
+
+#if defined(_MSC_VER)
+  static const char* const null_ptr = 0;
+#else
+# define null_ptr 0
+#endif
+
+  long lnum = strtol(lhs, &pEnd, 0);
+  if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
     {
-    return 0;
+    return std::pair<bool, const char*>(false, null_ptr);
     }
+
+  long rnum = strtol(rhs, &pEnd, 0);
+  if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
+    {
+    return std::pair<bool, const char*>(false, null_ptr);
+    }
+
+#if !defined(_MSC_VER)
+#undef null_ptr
+#endif
 
   if (t == NumberMaxType)
     {
-    return cmMaximum(lnum, rnum) == lnum ? lhs : rhs;
+    return std::make_pair(true, cmMaximum(lnum, rnum) == lnum ? lhs : rhs);
     }
   else
     {
-    return cmMinimum(lnum, rnum) == lnum ? lhs : rhs;
+    return std::make_pair(true, cmMinimum(lnum, rnum) == lnum ? lhs : rhs);
     }
 }
 
 //----------------------------------------------------------------------------
 template<>
-const char* consistentProperty(const char *lhs, const char *rhs,
-                               CompatibleType t)
+std::pair<bool, const char*> consistentProperty(const char *lhs,
+                                                const char *rhs,
+                                                CompatibleType t)
 {
   if (!lhs && !rhs)
     {
-    return "";
+    return std::make_pair(true, lhs);
     }
   if (!lhs)
     {
-    return rhs ? rhs : "";
+    return std::make_pair(true, rhs);
     }
   if (!rhs)
     {
-    return lhs ? lhs : "";
+    return std::make_pair(true, lhs);
     }
+
+#if defined(_MSC_VER)
+  static const char* const null_ptr = 0;
+#else
+# define null_ptr 0
+#endif
+
   switch(t)
   {
   case BoolType:
     assert(!"consistentProperty for strings called with BoolType");
-    return 0;
+    return std::pair<bool, const char*>(false, null_ptr);
   case StringType:
     return consistentStringProperty(lhs, rhs);
   case NumberMinType:
@@ -4336,7 +4346,12 @@ const char* consistentProperty(const char *lhs, const char *rhs,
     return consistentNumberProperty(lhs, rhs, t);
   }
   assert(!"Unreachable!");
-  return 0;
+  return std::pair<bool, const char*>(false, null_ptr);
+
+#if !defined(_MSC_VER)
+#undef null_ptr
+#endif
+
 }
 
 template<typename PropertyType>
@@ -4521,11 +4536,12 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
       {
       if (ifaceIsSet)
         {
-        PropertyType consistent = consistentProperty(propContent,
+        std::pair<bool, PropertyType> consistent =
+                                  consistentProperty(propContent,
                                                      ifacePropContent, t);
         report += reportEntry;
-        report += compatibilityAgree(t, propContent != consistent);
-        if (!consistent)
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first)
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
@@ -4537,7 +4553,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          propContent = consistent;
+          propContent = consistent.second;
           continue;
           }
         }
@@ -4551,19 +4567,14 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
       {
       propContent = impliedValue<PropertyType>(propContent);
 
-      reportEntry += " * Target \"";
-      reportEntry += li->Target->GetName();
-      reportEntry += "\" property value \"";
-      reportEntry += valueAsString<PropertyType>(propContent);
-      reportEntry += "\" ";
-
       if (ifaceIsSet)
         {
-        PropertyType consistent = consistentProperty(propContent,
+        std::pair<bool, PropertyType> consistent =
+                                  consistentProperty(propContent,
                                                      ifacePropContent, t);
         report += reportEntry;
-        report += compatibilityAgree(t, propContent != consistent);
-        if (!consistent)
+        report += compatibilityAgree(t, propContent != consistent.second);
+        if (!consistent.first)
           {
           cmOStringStream e;
           e << "Property " << p << " on target \""
@@ -4576,7 +4587,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           }
         else
           {
-          propContent = consistent;
+          propContent = consistent.second;
           continue;
           }
         }
@@ -4592,11 +4603,12 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
         {
         if (propInitialized)
           {
-          PropertyType consistent = consistentProperty(propContent,
+          std::pair<bool, PropertyType> consistent =
+                                    consistentProperty(propContent,
                                                        ifacePropContent, t);
           report += reportEntry;
-          report += compatibilityAgree(t, propContent != consistent);
-          if (!consistent)
+          report += compatibilityAgree(t, propContent != consistent.second);
+          if (!consistent.first)
             {
             cmOStringStream e;
             e << "The INTERFACE_" << p << " property of \""
@@ -4608,7 +4620,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
             }
           else
             {
-            propContent = consistent;
+            propContent = consistent.second;
             continue;
             }
           }
