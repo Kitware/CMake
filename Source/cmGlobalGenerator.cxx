@@ -1880,7 +1880,8 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmTarget& target)
 {
-  if(target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+  if(target.GetType() == cmTarget::INTERFACE_LIBRARY
+      || target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
     // This target is excluded from its directory.
     return true;
