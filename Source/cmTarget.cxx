@@ -4514,12 +4514,6 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
       {
       propContent = impliedValue<PropertyType>(propContent);
 
-      reportEntry += " * Target \"";
-      reportEntry += li->Target->GetName();
-      reportEntry += "\" property value \"";
-      reportEntry += valueAsString<PropertyType>(propContent);
-      reportEntry += "\" ";
-
       if (ifaceIsSet)
         {
         std::pair<bool, PropertyType> consistent =
