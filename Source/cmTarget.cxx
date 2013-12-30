@@ -1403,14 +1403,10 @@ static bool whiteListedInterfaceProperty(const char *prop)
     "COMPATIBLE_INTERFACE_NUMBER_MAX",
     "COMPATIBLE_INTERFACE_NUMBER_MIN",
     "COMPATIBLE_INTERFACE_STRING",
-    "EXCLUDE_FROM_ALL",
-    "EXCLUDE_FROM_DEFAULT_BUILD",
     "EXPORT_NAME",
-    "IMPORTED_LINK_INTERFACE_LANGUAGES",
     "IMPORTED",
     "NAME",
-    "TYPE",
-    "VERSION"
+    "TYPE"
   };
 
   if (std::binary_search(cmArrayBegin(builtIns),
@@ -1421,9 +1417,7 @@ static bool whiteListedInterfaceProperty(const char *prop)
     return true;
     }
 
-  if (cmHasLiteralPrefix(prop, "EXCLUDE_FROM_DEFAULT_BUILD_")
-      || cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LANGUAGES_")
-      || cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_"))
+  if (cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_"))
     {
     return true;
     }
@@ -2576,6 +2570,8 @@ void cmTarget::GetTargetVersion(bool soversion,
   minor = 0;
   patch = 0;
 
+  assert(this->GetType() != INTERFACE_LIBRARY);
+
   // Look for a VERSION or SOVERSION property.
   const char* prop = soversion? "SOVERSION" : "VERSION";
   if(const char* version = this->GetProperty(prop))
@@ -3588,6 +3584,8 @@ void cmTarget::GetLibraryNames(std::string& name,
     return;
     }
 
+  assert(this->GetType() != INTERFACE_LIBRARY);
+
   // Check for library version properties.
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
@@ -4163,6 +4161,8 @@ std::string cmTarget::GetOutputName(const char* config, bool implib) const
 //----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkVersion() const
 {
+  assert(this->GetType() != INTERFACE_LIBRARY);
+
   if(const char* fversion = this->GetProperty("FRAMEWORK_VERSION"))
     {
     return fversion;
