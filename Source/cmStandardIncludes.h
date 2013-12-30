@@ -391,6 +391,22 @@ inline bool cmHasLiteralPrefixImpl(const char* str1,
   return strncmp(str1, str2, N) == 0;
 }
 
+inline bool cmHasLiteralSuffixImpl(const std::string &str1,
+                                   const char *str2,
+                                   size_t N)
+{
+  size_t len = str1.size();
+  return len >= N && strcmp(str1.c_str() + len - N, str2) == 0;
+}
+
+inline bool cmHasLiteralSuffixImpl(const char* str1,
+                                   const char* str2,
+                                   size_t N)
+{
+  size_t len = strlen(str1);
+  return len >= N && strcmp(str1 + len - N, str2) == 0;
+}
+
 #if defined(_MSC_VER) && _MSC_VER < 1300 \
   || defined(__GNUC__) && __GNUC__ < 3 \
   || defined(__BORLANDC__)
@@ -401,6 +417,9 @@ inline bool cmHasLiteralPrefixImpl(const char* str1,
 
 #define cmHasLiteralPrefix(STR1, STR2) \
   cmHasLiteralPrefixImpl(STR1, "" STR2 "", sizeof(STR2) - 1)
+
+#define cmHasLiteralSuffix(STR1, STR2) \
+  cmHasLiteralSuffixImpl(STR1, "" STR2 "", sizeof(STR2) - 1)
 
 #else
 
@@ -415,6 +434,12 @@ template<typename T, size_t N>
 bool cmHasLiteralPrefix(T str1, const char (&str2)[N])
 {
   return cmHasLiteralPrefixImpl(str1, str2, N - 1);
+}
+
+template<typename T, size_t N>
+bool cmHasLiteralSuffix(T str1, const char (&str2)[N])
+{
+  return cmHasLiteralSuffixImpl(str1, str2, N - 1);
 }
 
 #endif
