@@ -4237,7 +4237,7 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
   long lnum = strtol(lhs, &pEnd, 0);
   if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
     {
-    return 0;
+    return std::pair<bool, const char*>(false, 0);
     }
 
   long rnum = strtol(rhs, &pEnd, 0);
