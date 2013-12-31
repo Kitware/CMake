@@ -109,12 +109,21 @@ The signature
 
 ::
 
-  add_library(<name> INTERFACE)
+  add_library(<name> INTERFACE [IMPORTED [GLOBAL]])
 
 creates an interface target.  An interface target does not directly
 create build output, though it may have properties set on it and it
 may be installed, exported and imported.  Typically the INTERFACE_*
 properties are populated on the interface target using the
-set_property(), target_link_libraries(), target_include_directories()
-and target_compile_defintions() commands, and then it is used as an
-argument to target_link_libraries() like any other target.
+:command:`set_property`, :command:`target_link_libraries`,
+:command:`target_include_directories`
+and :command:`target_compile_defintions` commands, and then it is used as an
+argument to :command:`target_link_libraries` like any other target.
+
+An ``INTERFACE`` :prop_tgt:`IMPORTED` target may also be created with this
+signature.  An :prop_tgt:`IMPORTED` library target references a library defined
+outside the project.  The target name has scope in the directory in which it is
+created and below, but the ``GLOBAL`` option extends visibility.  It may be
+referenced like any target built within the project.  :prop_tgt:`IMPORTED`
+libraries are useful for convenient reference from commands like
+:command:`target_link_libraries`.
