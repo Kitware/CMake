@@ -14,7 +14,7 @@ target_link_libraries(InterfaceLibrary iface_nodepends headeriface)
 add_subdirectory(libsdir)
 
 add_executable(sharedlibtestexe sharedlibtestexe.cpp)
-target_link_libraries(sharedlibtestexe shared_iface)
+target_link_libraries(sharedlibtestexe shared_iface imported::iface)
 
 add_library(broken EXCLUDE_FROM_ALL broken.cpp)
 
