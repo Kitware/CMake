@@ -5592,9 +5592,6 @@ void cmTarget::ComputeLinkImplementation(const char* config,
                                          LinkImplementation& impl,
                                          cmTarget const* head) const
 {
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
-
   // Collect libraries directly linked in this configuration.
   std::vector<std::string> llibs;
   this->GetDirectLinkLibraries(config, llibs, head);
@@ -5687,6 +5684,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
     impl.Libraries.push_back(item);
     }
 
+  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
   LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
       li != oldllibs.end(); ++li)
