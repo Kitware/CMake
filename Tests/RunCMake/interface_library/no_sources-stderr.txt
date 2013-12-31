@@ -1,4 +1,0 @@
-CMake Error at no_sources.cmake:2 \(add_library\):
-  add_library INTERFACE library requires no source arguments.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)

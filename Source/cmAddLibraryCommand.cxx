@@ -49,47 +49,117 @@ bool cmAddLibraryCommand
     std::string libType = *s;
     if(libType == "STATIC")
       {
+      if (type == cmTarget::INTERFACE_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting STATIC type.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       type = cmTarget::STATIC_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "SHARED")
       {
+      if (type == cmTarget::INTERFACE_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting SHARED type.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       type = cmTarget::SHARED_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "MODULE")
       {
+      if (type == cmTarget::INTERFACE_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting MODULE type.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       type = cmTarget::MODULE_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "OBJECT")
       {
+      if (type == cmTarget::INTERFACE_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting OBJECT type.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       type = cmTarget::OBJECT_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "UNKNOWN")
       {
+      if (type == cmTarget::INTERFACE_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting UNKNOWN type.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       type = cmTarget::UNKNOWN_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(libType == "ALIAS")
       {
+      if (type == cmTarget::INTERFACE_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting ALIAS type.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       isAlias = true;
       }
     else if(libType == "INTERFACE")
       {
+      if (haveSpecifiedType)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting/multiple types.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      if (isAlias)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library specified with conflicting ALIAS type.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
+      if (excludeFromAll)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       type = cmTarget::INTERFACE_LIBRARY;
       haveSpecifiedType = true;
       }
     else if(*s == "EXCLUDE_FROM_ALL")
       {
+      if (type == cmTarget::INTERFACE_LIBRARY)
+        {
+        cmOStringStream e;
+        e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
+        this->SetError(e.str().c_str());
+        return false;
+        }
       ++s;
       excludeFromAll = true;
       }
@@ -109,12 +179,22 @@ bool cmAddLibraryCommand
       }
     }
 
-  if (type == cmTarget::INTERFACE_LIBRARY && s != args.end())
+  if (type == cmTarget::INTERFACE_LIBRARY)
     {
-    cmOStringStream e;
-    e << "INTERFACE library requires no source arguments.";
-    this->SetError(e.str().c_str());
-    return false;
+    if (s != args.end())
+      {
+      cmOStringStream e;
+      e << "INTERFACE library requires no source arguments.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+    if (importGlobal && !importTarget)
+      {
+      cmOStringStream e;
+      e << "INTERFACE library specified as GLOBAL, but not as IMPORTED.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     }
 
   bool nameOk = cmGeneratorExpression::IsValidTargetName(libName) &&
