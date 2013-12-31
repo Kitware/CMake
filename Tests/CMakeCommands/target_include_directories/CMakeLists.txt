@@ -62,10 +62,3 @@ target_include_directories(consumer
 target_include_directories(consumer
   SYSTEM PRIVATE
 )
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-add_library(imp UNKNOWN IMPORTED)
-get_target_property(_res imp INCLUDE_DIRECTORIES)
-if (_res)
-  message(SEND_ERROR "include_directories populated the INCLUDE_DIRECTORIES target property")
-endif()

@@ -47,6 +47,7 @@ add_custom_target(generate_moc_input
   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/myinterface.h.in" "${CMAKE_CURRENT_BINARY_DIR}"
   COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_CURRENT_BINARY_DIR}/myinterface.h.in" "${CMAKE_CURRENT_BINARY_DIR}/myinterface.h"
 )
+# set_source_files_properties("${CMAKE_CURRENT_BINARY_DIR}/myinterface.h" PROPERTIES GENERATED TRUE)
 
 add_executable(QtAutogen main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
