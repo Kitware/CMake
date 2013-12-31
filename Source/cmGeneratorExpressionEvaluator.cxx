@@ -49,7 +49,7 @@ struct cmGeneratorExpressionNode
   enum {
     DynamicParameters = 0,
     OneOrMoreParameters = -1,
-    ZeroOrMoreParameters = -2
+    OneOrZeroParameters = -2
   };
   virtual ~cmGeneratorExpressionNode() {}
 
@@ -384,7 +384,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 {
   CompilerIdNode() {}
 
-  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
 
   std::string EvaluateWithLanguage(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -430,12 +430,6 @@ static const struct CCompilerIdNode : public CompilerIdNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<C_COMPILER_ID> expression requires one or two parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -458,12 +452,6 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<CXX_COMPILER_ID> expression requires one or two parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -481,7 +469,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
   CompilerVersionNode() {}
 
-  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
 
   std::string EvaluateWithLanguage(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -526,12 +514,6 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<C_COMPILER_VERSION> expression requires one or two parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -554,13 +536,6 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<CXX_COMPILER_VERSION> expression requires one or two "
-          "parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -579,7 +554,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
 {
   PlatformIdNode() {}
 
-  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -1821,6 +1796,12 @@ std::string GeneratorExpressionContent::EvaluateParameters(
     {
     reportError(context, this->GetOriginalExpression(), "$<" + identifier
                       + "> expression requires at least one parameter.");
+    }
+  if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters
+      && parameters.size() > 2)
+    {
+    reportError(context, this->GetOriginalExpression(), "$<" + identifier
+                      + "> expression requires one or zero parameters.");
     }
   return std::string();
 }
