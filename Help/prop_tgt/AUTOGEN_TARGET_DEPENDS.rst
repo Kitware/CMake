@@ -3,10 +3,10 @@ AUTOGEN_TARGET_DEPENDS
 
 Target dependencies of the corresponding ``_automoc`` target.
 
-Targets which have their :prop_tgt:`AUTOMOC` target set to ``TRUE`` have a
+Targets which have their :prop_tgt:`AUTOMOC` target set to true have a
 corresponding ``_automoc`` target which is used to autogenerate generate moc
 files.  As this ``_automoc`` target is created at generate-time, it is not
-possible to define dependencies of it, such as to create inputs for the ``moc``
+possible to define dependencies of it, such as to create inputs for the moc
 executable.
 
 The ``AUTOGEN_TARGET_DEPENDS`` target can be set instead to a list of dependencies

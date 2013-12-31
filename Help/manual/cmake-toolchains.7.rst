@@ -22,23 +22,17 @@ Languages
 
 Languages are enabled by the :command:`project` command. If no project command
 is in the top-level CMakeLists file, one will be implicitly generated. By default
-the enabled languages are C and CXX:
-
-.. code-block:: cmake
+the enabled languages are C and CXX::
 
   project(C_Only C)
 
 A special value of NONE can also be used with the :command:`project` command
-to enable no languages:
-
-.. code-block:: cmake
+to enable no languages::
 
   project(MyProject NONE)
 
 The :command:`enable_language` command can be used to enable languages after the
-:command:`project` command:
-
-.. code-block:: cmake
+:command:`project` command::
 
   enable_language(CXX)
 
@@ -92,9 +86,7 @@ Cross Compiling
 If :manual:`cmake(1)` is invoked with the command line parameter
 ``-DCMAKE_TOOLCHAIN_FILE=path/to/file``, the file will be loaded early to set
 values for the compilers. A typical cross-compiling toolchain has content such
-as:
-
-.. code-block:: cmake
+as::
 
   set(CMAKE_SYSTEM_NAME Linux)
 
@@ -135,9 +127,7 @@ the ``CMAKE_FIND_ROOT_PATH_MODE_*`` variables.
 
 Some compilers are inherently cross compilers, such as Clang and the QNX QCC
 compiler. The :variable:`CMAKE_<LANG>_COMPILER_TARGET` can be set to pass a
-value to those supported compilers when compiling:
-
-.. code-block:: cmake
+value to those supported compilers when compiling::
 
   set(CMAKE_SYSTEM_NAME Linux)
 
@@ -148,9 +138,7 @@ value to those supported compilers when compiling:
   set(CMAKE_CXX_COMPILER clang++)
   set(CMAKE_CXX_COMPILER_TARGET ${triple})
 
-Or, for QCC:
-
-.. code-block:: cmake
+Or, for QCC::
 
   set(CMAKE_SYSTEM_NAME QNX)
 

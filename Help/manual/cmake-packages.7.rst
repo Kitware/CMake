@@ -131,9 +131,7 @@ It may also provide a CMake package configuration file::
   <prefix>/lib/cmake/foo-1.2/FooConfig.cmake
 
 with content defining :prop_tgt:`IMPORTED` targets, or defining variables, such
-as:
-
-.. code-block:: cmake
+as::
 
   # ...
   # (compute PREFIX relative to file location)
