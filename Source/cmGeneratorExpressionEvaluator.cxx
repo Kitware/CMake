@@ -772,6 +772,8 @@ static const char* targetPropertyTransitiveWhitelist[] = {
   CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
 };
 
+#undef TRANSITIVE_PROPERTY_NAME
+
 std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
                                   cmTarget const* target,
                                   cmTarget const* headTarget,
@@ -999,6 +1001,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                             ASSERT_TRANSITIVE_PROPERTY_METHOD)
           false);
         }
+#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
       }
 
     std::string linkedTargetsContent;
