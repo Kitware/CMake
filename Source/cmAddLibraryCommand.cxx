@@ -109,14 +109,6 @@ bool cmAddLibraryCommand
       }
     }
 
-  if (type == cmTarget::INTERFACE_LIBRARY && s != args.end())
-    {
-    cmOStringStream e;
-    e << "INTERFACE library requires no source arguments.";
-    this->SetError(e.str().c_str());
-    return false;
-    }
-
   bool nameOk = cmGeneratorExpression::IsValidTargetName(libName) &&
     !cmGlobalGenerator::IsReservedTarget(libName);
 
