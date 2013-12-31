@@ -36,6 +36,8 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
 
       CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(FIND_TARGETS)
 
+#undef FIND_TARGETS
+
       this->PopulateProperties(te, properties, emittedDeps);
 
       this->GenerateInterfaceProperties(te, os, properties);
