@@ -40,6 +40,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
       CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(TEST_TRANSITIVE_PROPERTY_METHOD)
       false)
      )
+#undef TEST_TRANSITIVE_PROPERTY_METHOD
     {
     std::map<cmStdString, std::set<cmStdString> >::const_iterator it
                                                     = top->Seen.find(target);
