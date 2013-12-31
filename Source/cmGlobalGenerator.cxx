@@ -1309,12 +1309,12 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
       {
       cmTarget* t = &ti->second;
 
-      t->AppendBuildInterfaceIncludes();
-
       if (t->GetType() == cmTarget::INTERFACE_LIBRARY)
         {
         continue;
         }
+
+      t->AppendBuildInterfaceIncludes();
 
       for (std::vector<cmValueWithOrigin>::const_iterator it
                                       = noconfig_compile_definitions.begin();
@@ -1880,8 +1880,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmTarget& target)
 {
-  if(target.GetType() == cmTarget::INTERFACE_LIBRARY
-      || target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+  if(target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
     // This target is excluded from its directory.
     return true;

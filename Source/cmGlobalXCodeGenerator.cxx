@@ -488,8 +488,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
                                                     dir.c_str());
         }
 
-      if(target.GetType() != cmTarget::INTERFACE_LIBRARY
-          && !target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+      if(!target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
         allbuild->AddUtility(target.GetName());
         }

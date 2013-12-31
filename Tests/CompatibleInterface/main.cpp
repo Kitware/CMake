@@ -33,9 +33,7 @@ enum {
   NumericMaxTest1 = sizeof(CMakeStaticAssert<NUMBER_MAX_PROP1 == 100>),
   NumericMaxTest2 = sizeof(CMakeStaticAssert<NUMBER_MAX_PROP2 == 250>),
   NumericMinTest1 = sizeof(CMakeStaticAssert<NUMBER_MIN_PROP1 == 50>),
-  NumericMinTest2 = sizeof(CMakeStaticAssert<NUMBER_MIN_PROP2 == 200>),
-  NumericMinTest3 = sizeof(CMakeStaticAssert<NUMBER_MIN_PROP3 == 0xA>),
-  NumericMinTest4 = sizeof(CMakeStaticAssert<NUMBER_MIN_PROP4 == 0x10>)
+  NumericMinTest2 = sizeof(CMakeStaticAssert<NUMBER_MIN_PROP2 == 200>)
 };
 
 #include "iface2.h"
