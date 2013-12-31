@@ -104,6 +104,8 @@ expands to ``OLD_COMPILER`` if the
 than 4.2.0.
 
 ``$<CONFIGURATION>``
+  Configuration name. Deprecated. Use ``CONFIG`` instead.
+``$<CONFIG>``
   Configuration name
 ``$<PLATFORM_ID>``
   The CMake-id of the platform

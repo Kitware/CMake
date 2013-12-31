@@ -13,6 +13,7 @@ add_custom_target(check-part1 ALL
     -Dtest_1=$<1:content>
     -Dtest_1_with_comma=$<1:-Wl,--no-undefined>
     -Dconfig=$<CONFIGURATION>
+    -Dshort_config=$<CONFIG>
     -Dtest_and_0=$<AND:0>
     -Dtest_and_0_0=$<AND:0,0>
     -Dtest_and_0_1=$<AND:0,1>

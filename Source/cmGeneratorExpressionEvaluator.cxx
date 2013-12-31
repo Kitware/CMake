@@ -676,13 +676,17 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
 {
   ConfigurationTestNode() {}
 
-  virtual int NumExpectedParameters() const { return 1; }
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *) const
   {
+    if (parameters.empty())
+      {
+      return configurationNode.Evaluate(parameters, context, content, 0);
+      }
     cmsys::RegularExpression configValidator;
     configValidator.compile("^[A-Za-z0-9_]*$");
     if (!configValidator.find(parameters.begin()->c_str()))
@@ -1801,7 +1805,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
                       + "> expression requires at least one parameter.");
     }
   if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters
-      && parameters.size() > 2)
+      && parameters.size() > 1)
     {
     reportError(context, this->GetOriginalExpression(), "$<" + identifier
                       + "> expression requires one or zero parameters.");
