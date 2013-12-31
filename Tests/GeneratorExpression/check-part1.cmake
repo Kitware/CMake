@@ -2,6 +2,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/check-common.cmake)
 
 message(STATUS "config=[${config}]")
+check(config "${short_config}")
 check(test_0 "")
 check(test_0_with_comma "")
 check(test_1 "content")
