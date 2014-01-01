@@ -25,6 +25,10 @@ add_library(imported_consumer imported_consumer.cpp)
 target_link_libraries(imported_consumer iface)
 target_compile_options(imported_consumer PRIVATE -Werror=unused-variable)
 
+add_library(imported_consumer2 imported_consumer.cpp)
+target_link_libraries(imported_consumer2 imported_consumer)
+target_compile_options(imported_consumer2 PRIVATE -Werror=unused-variable)
+
 macro(do_try_compile error_option)
   set(TC_ARGS
     IFACE_TRY_COMPILE_${error_option}
