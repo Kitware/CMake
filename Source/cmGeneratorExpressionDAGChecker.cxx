@@ -192,7 +192,8 @@ bool
 cmGeneratorExpressionDAGChecker::EvaluatingSystemIncludeDirectories() const
 {
   const char *prop = this->Property.c_str();
-  return strcmp(prop, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES") == 0;
+  return (strcmp(prop, "SYSTEM_INCLUDE_DIRECTORIES") == 0
+       || strcmp(prop, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES") == 0);
 }
 
 //----------------------------------------------------------------------------
