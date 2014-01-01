@@ -1042,62 +1042,6 @@ cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::FinalizeSystemIncludeDirectories()
-{
-  for (std::vector<cmValueWithOrigin>::const_iterator
-      it = this->Internal->LinkImplementationPropertyEntries.begin(),
-      end = this->Internal->LinkImplementationPropertyEntries.end();
-      it != end; ++it)
-    {
-    if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-        && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-      {
-      continue;
-      }
-    {
-    cmListFileBacktrace lfbt;
-    cmGeneratorExpression ge(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                      ge.Parse(it->Value);
-    std::string targetName = cge->Evaluate(this->Makefile, 0,
-                                      false, this, 0, 0);
-    cmTarget *tgt = this->Makefile->FindTargetToUse(targetName.c_str());
-    if (!tgt || tgt == this)
-      {
-      continue;
-      }
-    if (tgt->IsImported()
-        && tgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")
-        && !this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED"))
-      {
-      std::string includeGenex = "$<TARGET_PROPERTY:" +
-                                it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
-        }
-      this->SystemIncludeDirectories.insert(includeGenex);
-      return; // The INTERFACE_SYSTEM_INCLUDE_DIRECTORIES are a subset
-              // of the INTERFACE_INCLUDE_DIRECTORIES
-      }
-    }
-    std::string includeGenex = "$<TARGET_PROPERTY:" +
-                        it->Value + ",INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>";
-    if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-      {
-      // Because it->Value is a generator expression, ensure that it
-      // evaluates to the non-empty string before being used in the
-      // TARGET_PROPERTY expression.
-      includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
-      }
-    this->SystemIncludeDirectories.insert(includeGenex);
-    }
-}
-
-//----------------------------------------------------------------------------
 void
 cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 {
