@@ -40,6 +40,7 @@ cmExtraEclipseCDT4Generator
   this->SupportsVirtualFolders = true;
   this->GenerateLinkedResources = true;
   this->SupportsGmakeErrorParser = true;
+  this->SupportsMachO64Parser = true;
 }
 
 //----------------------------------------------------------------------------
@@ -93,6 +94,7 @@ void cmExtraEclipseCDT4Generator::Generate()
       if (version < 3006) // 3.6 is Helios
         {
         this->SupportsVirtualFolders = false;
+        this->SupportsMachO64Parser = false;
         }
       if (version < 3007) // 3.7 is Indigo
         {
@@ -754,7 +756,9 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       }
     else if (systemName == "Darwin")
       {
-      fout << "<extension id=\"org.eclipse.cdt.core.MachO\""
+      fout << "<extension id=\"" <<
+           (this->SupportsMachO64Parser ? "org.eclipse.cdt.core.MachO64"
+                                        : "org.eclipse.cdt.core.MachO") << "\""
               " point=\"org.eclipse.cdt.core.BinaryParser\">\n"
               "<attribute key=\"c++filt\" value=\"c++filt\"/>\n"
               "</extension>\n"
