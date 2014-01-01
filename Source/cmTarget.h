@@ -564,8 +564,6 @@ public:
   std::set<cmStdString> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
-  void FinalizeSystemIncludeDirectories();
-
   bool LinkLanguagePropagatesToDependents() const
   { return this->TargetTypeValue == STATIC_LIBRARY; }
 

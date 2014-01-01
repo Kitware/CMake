@@ -18,8 +18,11 @@
 #include "cmSourceFile.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmComputeLinkInformation.h"
 
 #include <queue>
+
+#include "assert.h"
 
 //----------------------------------------------------------------------------
 cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
@@ -59,10 +62,50 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
   return 0;
 }
 
+static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
+                                  const char *config, cmTarget *headTarget,
+                                  cmGeneratorExpressionDAGChecker *dagChecker,
+                                  std::vector<std::string>& result)
+{
+  cmTarget* depTgt = mf->FindTargetToUse(name.c_str());
+
+  if (!depTgt)
+    {
+    return;
+    }
+
+  cmListFileBacktrace lfbt;
+
+  if (const char* dirs =
+          depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES"))
+    {
+    cmGeneratorExpression ge(lfbt);
+    cmSystemTools::ExpandListArgument(ge.Parse(dirs)
+                                      ->Evaluate(mf,
+                                      config, false, headTarget,
+                                      depTgt, dagChecker), result);
+    }
+  if (!depTgt->IsImported())
+    {
+    return;
+    }
+
+  if (const char* dirs =
+                depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES"))
+    {
+    cmGeneratorExpression ge(lfbt);
+    cmSystemTools::ExpandListArgument(ge.Parse(dirs)
+                                      ->Evaluate(mf,
+                                      config, false, headTarget,
+                                      depTgt, dagChecker), result);
+    }
+}
+
 //----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {
+  assert(this->GetType() != cmTarget::INTERFACE_LIBRARY);
   std::string config_upper;
   if(config && *config)
     {
@@ -75,39 +118,79 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
 
   if (iter == this->SystemIncludesCache.end())
     {
+    cmTarget::LinkImplementation const* impl
+                  = this->Target->GetLinkImplementation(config, this->Target);
+    if(!impl)
+      {
+      return false;
+      }
+
+    cmListFileBacktrace lfbt;
+    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                        this->GetName(),
+                                        "SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
+
     std::vector<std::string> result;
     for (std::set<cmStdString>::const_iterator
         it = this->Target->GetSystemIncludeDirectories().begin();
         it != this->Target->GetSystemIncludeDirectories().end(); ++it)
       {
-      cmListFileBacktrace lfbt;
       cmGeneratorExpression ge(lfbt);
-
-      cmGeneratorExpressionDAGChecker dagChecker(lfbt,
-                                                this->GetName(),
-                                "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
-
       cmSystemTools::ExpandListArgument(ge.Parse(*it)
-                                        ->Evaluate(this->Makefile,
-                                        config, false, this->Target,
-                                        &dagChecker), result);
+                                          ->Evaluate(this->Makefile,
+                                          config, false, this->Target,
+                                          &dagChecker), result);
       }
+
+    std::set<cmStdString> uniqueDeps;
+    for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
+        li != impl->Libraries.end(); ++li)
+      {
+      if (uniqueDeps.insert(*li).second)
+        {
+        cmTarget* tgt = this->Makefile->FindTargetToUse(li->c_str());
+
+        if (!tgt)
+          {
+          continue;
+          }
+
+        handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
+                                &dagChecker, result);
+
+        std::vector<std::string> deps;
+        tgt->GetTransitivePropertyLinkLibraries(config, this->Target, deps);
+
+        for(std::vector<std::string>::const_iterator di = deps.begin();
+            di != deps.end(); ++di)
+          {
+          if (uniqueDeps.insert(*di).second)
+            {
+            handleSystemIncludesDep(this->Makefile, *di, config, this->Target,
+                                    &dagChecker, result);
+            }
+          }
+        }
+      }
+    std::set<cmStdString> unique;
     for(std::vector<std::string>::iterator li = result.begin();
         li != result.end(); ++li)
       {
       cmSystemTools::ConvertToUnixSlashes(*li);
+      unique.insert(*li);
+      }
+    result.clear();
+    for(std::set<cmStdString>::iterator li = unique.begin();
+        li != unique.end(); ++li)
+      {
+      result.push_back(*li);
       }
 
     IncludeCacheType::value_type entry(config_upper, result);
     iter = this->SystemIncludesCache.insert(entry).first;
     }
 
-  if (std::find(iter->second.begin(),
-                iter->second.end(), dir) != iter->second.end())
-    {
-    return true;
-    }
-  return false;
+  return std::binary_search(iter->second.begin(), iter->second.end(), dir);
 }
 
 //----------------------------------------------------------------------------
