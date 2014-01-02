@@ -49,7 +49,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 
 find_path(IL_INCLUDE_DIR il.h
   PATH_SUFFIXES include IL
-  DOC "The path the the directory that contains il.h"
+  DOC "The path to the directory that contains il.h"
 )
 
 #message("IL_INCLUDE_DIR is ${IL_INCLUDE_DIR}")
