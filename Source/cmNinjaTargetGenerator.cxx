@@ -568,7 +568,7 @@ cmNinjaTargetGenerator
   }
   EnsureParentDirectoryExists(objectFileName);
 
-  std::string objectDir = cmSystemTools::GetFilenamePath(objectFileName);
+  std::string objectDir = this->Target->GetSupportDirectory();
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                          ConvertToNinjaPath(objectDir.c_str()).c_str(),
                          cmLocalGenerator::SHELL);

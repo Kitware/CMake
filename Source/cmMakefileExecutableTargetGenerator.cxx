@@ -338,13 +338,11 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.CMTarget = this->Target;
   vars.Language = linkLanguage;
   vars.Objects = buildObjs.c_str();
-  std::string objdir = cmake::GetCMakeFilesDirectoryPostSlash();
-  objdir += this->Target->GetName();
-  objdir += ".dir";
-  objdir = this->Convert(objdir.c_str(),
-                         cmLocalGenerator::START_OUTPUT,
-                         cmLocalGenerator::SHELL);
-  vars.ObjectDir = objdir.c_str();
+  std::string objectDir = this->Target->GetSupportDirectory();
+  objectDir = this->Convert(objectDir.c_str(),
+                            cmLocalGenerator::START_OUTPUT,
+                            cmLocalGenerator::SHELL);
+  vars.ObjectDir = objectDir.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
 
