@@ -27,6 +27,9 @@
 
 #include <rpc.h> // for GUID generation
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
 int cmCPackWIXGenerator::InitializeInternal()
 {
   componentPackageMethod = ONE_PACKAGE;
@@ -919,6 +922,14 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       fileDefinitions.AddAttribute("Id", fileId);
       fileDefinitions.AddAttribute("Source", fullPath);
       fileDefinitions.AddAttribute("KeyPath", "yes");
+
+      mode_t fileMode = 0;
+      cmSystemTools::GetPermissions(fullPath.c_str(), fileMode);
+
+      if(!(fileMode & S_IWRITE))
+        {
+        fileDefinitions.AddAttribute("ReadOnly", "yes");
+        }
 
       ApplyPatchFragment(fileId, fileDefinitions);
       fileDefinitions.EndElement("File");
