@@ -25,8 +25,9 @@ namespace @KWSYS_NAMESPACE@
       typedef std::basic_filebuf<CharType,Traits> my_base_type;
       basic_filebuf *open(char const *s,std::ios_base::openmode mode)
       {
-        my_base_type::open(Encoding::ToWide(s).c_str(), mode);
-        return this;
+        return static_cast<basic_filebuf*>(
+          my_base_type::open(Encoding::ToWide(s).c_str(), mode)
+          );
       }
   };
 
