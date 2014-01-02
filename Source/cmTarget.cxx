@@ -3186,13 +3186,17 @@ std::string cmTarget::GetSOName(const char* config) const
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::HasMacOSXRpath(const char* config) const
+bool cmTarget::HasMacOSXRpathInstallNameDir(const char* config) const
 {
   bool install_name_is_rpath = false;
-  bool macosx_rpath = this->GetPropertyAsBool("MACOSX_RPATH");
+  bool macosx_rpath = false;
 
   if(!this->IsImportedTarget)
     {
+    if(this->GetType() != cmTarget::SHARED_LIBRARY)
+      {
+      return false;
+      }
     const char* install_name = this->GetProperty("INSTALL_NAME_DIR");
     bool use_install_name =
       this->GetPropertyAsBool("BUILD_WITH_INSTALL_RPATH");
@@ -3204,6 +3208,10 @@ bool cmTarget::HasMacOSXRpath(const char* config) const
     else if(install_name && use_install_name)
       {
       return false;
+      }
+    if(!install_name_is_rpath)
+      {
+      macosx_rpath = this->MacOSXRpathInstallNameDirDefault();
       }
     }
   else
@@ -3256,6 +3264,37 @@ bool cmTarget::HasMacOSXRpath(const char* config) const
     }
 
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmTarget::MacOSXRpathInstallNameDirDefault() const
+{
+  // we can't do rpaths when unsupported
+  if(!this->Makefile->IsSet("CMAKE_SHARED_LIBRARY_RUNTIME_C_FLAG"))
+    {
+    return false;
+    }
+
+  const char* macosx_rpath_str = this->GetProperty("MACOSX_RPATH");
+  if(macosx_rpath_str)
+    {
+    return this->GetPropertyAsBool("MACOSX_RPATH");
+    }
+
+  cmPolicies::PolicyStatus cmp0042 = this->GetPolicyStatusCMP0042();
+
+  if(cmp0042 == cmPolicies::WARN)
+    {
+    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      AddCMP0042WarnTarget(this->GetName());
+    }
+
+  if(cmp0042 == cmPolicies::NEW)
+    {
+    return true;
+    }
+
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -3847,7 +3886,8 @@ std::string cmTarget::GetInstallNameDirForBuildTree(const char* config) const
      !this->GetPropertyAsBool("SKIP_BUILD_RPATH"))
     {
     std::string dir;
-    if(this->GetPropertyAsBool("MACOSX_RPATH"))
+    bool macosx_rpath = this->MacOSXRpathInstallNameDirDefault();
+    if(macosx_rpath)
       {
       dir = "@rpath";
       }
@@ -3881,9 +3921,12 @@ std::string cmTarget::GetInstallNameDirForInstallTree() const
         dir += "/";
         }
       }
-    if(!install_name_dir && this->GetPropertyAsBool("MACOSX_RPATH"))
+    if(!install_name_dir)
       {
-      dir = "@rpath/";
+      if(this->MacOSXRpathInstallNameDirDefault())
+        {
+        dir = "@rpath/";
+        }
       }
     return dir;
     }

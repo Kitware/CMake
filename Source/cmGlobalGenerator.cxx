@@ -1045,6 +1045,12 @@ cmGlobalGenerator::GetExportedTargetsFile(const std::string &filename) const
   return it == this->BuildExportSets.end() ? 0 : it->second;
 }
 
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
+{
+  this->CMP0042WarnTargets.insert(target);
+}
+
 bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
 {
   // If the property is not enabled then okay.
@@ -1071,6 +1077,9 @@ void cmGlobalGenerator::Generate()
   // Some generators track files replaced during the Generate.
   // Start with an empty vector:
   this->FilesReplacedDuringGenerate.clear();
+
+  // clear targets to issue warning CMP0042 for
+  this->CMP0042WarnTargets.clear();
 
   // Check whether this generator is allowed to run.
   if(!this->CheckALLOW_DUPLICATE_CUSTOM_TARGETS())
@@ -1201,6 +1210,25 @@ void cmGlobalGenerator::Generate()
   if (this->ExtraGenerator != 0)
     {
     this->ExtraGenerator->Generate();
+    }
+
+  if(!this->CMP0042WarnTargets.empty())
+    {
+    cmOStringStream w;
+    w <<
+      (this->GetCMakeInstance()->GetPolicies()->
+       GetPolicyWarning(cmPolicies::CMP0042)) << "\n";
+    w << "MACOSX_RPATH is not specified for"
+         " the following targets:\n";
+    for(std::set<std::string>::iterator
+      iter = this->CMP0042WarnTargets.begin();
+      iter != this->CMP0042WarnTargets.end();
+      ++iter)
+      {
+      w << " " << *iter << "\n";
+      }
+    this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                           cmListFileBacktrace());
     }
 
   this->CMakeInstance->UpdateProgress("Generating done", -1);

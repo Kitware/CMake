@@ -1752,7 +1752,7 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath,
   // @loader_path or full paths.
   if(this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
-    if(!target->HasMacOSXRpath(this->Config))
+    if(!target->HasMacOSXRpathInstallNameDir(this->Config))
       {
       return;
       }
