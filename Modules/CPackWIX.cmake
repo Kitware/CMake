@@ -52,6 +52,7 @@
 #
 #  If CPACK_RESOURCE_FILE_LICENSE has an .txt extension it is implicitly
 #  converted to RTF by the WiX Generator.
+#  The expected encoding of the .txt file is UTF-8.
 #
 #  With CPACK_WIX_LICENSE_RTF you can override the license file used by the
 #  WiX Generator in case CPACK_RESOURCE_FILE_LICENSE is in an unsupported
