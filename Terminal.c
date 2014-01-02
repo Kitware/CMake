@@ -155,6 +155,7 @@ static const char* kwsysTerminalVT100Names[] =
   "mach-color",
   "mlterm",
   "putty",
+  "putty-256color",
   "rxvt",
   "rxvt-256color",
   "rxvt-cygwin",
