@@ -6,7 +6,7 @@
 # this is the cvs module name that should be checked out
 set (CTEST_MODULE_NAME SmallAndFast)
 
-# these are the the name of the source and binary directory on disk.
+# these are the name of the source and binary directory on disk.
 # They will be appended to DASHBOARD_ROOT
 set (CTEST_SOURCE_NAME SmallAndFast)
 set (CTEST_BINARY_NAME SmallAndFastBuild)
