@@ -134,7 +134,7 @@ The contents of the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and :prop_tgt:`INTERFACE_COMPILE_OPTIONS`
 target properties are "Usage Requirements" - they specify content which consumers
 must use to correctly compile and link with the target they appear on.  For any
-binary target, the the contents of each ``INTERFACE_`` property on each target
+binary target, the contents of each ``INTERFACE_`` property on each target
 specified in a :command:`target_link_libraries` command is consumed:
 
 .. code-block:: cmake
