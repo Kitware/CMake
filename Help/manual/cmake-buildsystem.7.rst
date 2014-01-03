@@ -10,19 +10,20 @@ cmake-buildsystem(7)
 Introduction
 ============
 
-CMake is used to define a buildsystem of dependent targets.  Targets may be
-executables, libraries or custom commands.  Dependencies between the targets
-are expressed in the buildsystem and are used to determine the build order and
-the rules for regeneration in response to change.
+A CMake-based buildsystem is organized as a set of high-level logical
+targets.  Each target corresponds to an executable or library, or
+is a custom target containing custom commands.  Dependencies between the
+targets are expressed in the buildsystem to determine the build order
+and the rules for regeneration in response to change.
 
-Binary targets
+Binary Targets
 ==============
 
-Executables and libraries are defined using the :command:`add_library` and
-:command:`add_executable` commands. The resulting binary files have appropriate
-prefixes, suffixes and extensions for the platform targetted.  Dependencies
-between targets are expressed using the :command:`target_link_libraries`
-command:
+Executables and libraries are defined using the :command:`add_library`
+and :command:`add_executable` commands.  The resulting binary files have
+appropriate prefixes, suffixes and extensions for the platform targeted.
+Dependencies between binary targets are expressed using the
+:command:`target_link_libraries` command:
 
 .. code-block:: cmake
 
@@ -30,16 +31,17 @@ command:
   add_executable(zipapp zipapp.cpp)
   target_link_libraries(zipapp archive)
 
-``archive`` is defined as a static library - an archive containing objects
-compiled from ``archive.cpp`` ``zip.cpp`` and ``lzma.cpp``.  ``zipapp`` is
-defined as an executable formed by compiling and linking ``zipapp.cpp``.  When
-linking the ``zipapp`` executable, the ``archive`` static library is linked in.
+``archive`` is defined as a static library -- an archive containing objects
+compiled from ``archive.cpp``, ``zip.cpp``, and ``lzma.cpp``.  ``zipapp``
+is defined as an executable formed by compiling and linking ``zipapp.cpp``.
+When linking the ``zipapp`` executable, the ``archive`` static library is
+linked in.
 
 Binary Library Types
 --------------------
 
-By default, the :command:`add_library` command defines a static library, unless
-a type is specified.  A type may be specified when using the command:
+By default, the :command:`add_library` command defines a static library,
+unless a type is specified.  A type may be specified when using the command:
 
 .. code-block:: cmake
 
@@ -49,16 +51,16 @@ a type is specified.  A type may be specified when using the command:
 
   add_library(archive STATIC archive.cpp zip.cpp lzma.cpp)
 
-The :variable:`BUILD_SHARED_LIBS` variable may be enabled to change the behavior
-of :command:`add_library` to build shared libraries by default.
+The :variable:`BUILD_SHARED_LIBS` variable may be enabled to change the
+behavior of :command:`add_library` to build shared libraries by default.
 
-In the context of the buildsystem definition as a whole, it is largely irrelevant
-whether particular libraries are ``SHARED`` or ``STATIC`` - the commands,
-dependency specifications and other APIs function similarly regardless
-of the library type.  The ``MODULE`` library type is dissimilar in that it
-is generally not linked to - it is not used in the right-hand-side of the
-:command:`target_link_libraries` command.  It is a type which is loaded as
-a plugin using runtime techniques.
+In the context of the buildsystem definition as a whole, it is largely
+irrelevant whether particular libraries are ``SHARED`` or ``STATIC`` --
+the commands, dependency specifications and other APIs work similarly
+regardless of the library type.  The ``MODULE`` library type is
+dissimilar in that it is generally not linked to -- it is not used in
+the right-hand-side of the :command:`target_link_libraries` command.
+It is a type which is loaded as a plugin using runtime techniques.
 
 .. code-block:: cmake
 
@@ -76,15 +78,15 @@ The object files collection can be used as source inputs to other targets:
 
   add_executable(test_exe $<TARGET_OBJECTS:archive> test.cpp)
 
-``OBJECT`` libraries may only be used locally as sources in a buildsystem - they
-may not be installed, exported, or used in the right hand side of
+``OBJECT`` libraries may only be used locally as sources in a buildsystem --
+they may not be installed, exported, or used in the right hand side of
 :command:`target_link_libraries`.  They also may not be used as the ``TARGET``
-in a use of the :command:`add_custom_target(TARGET)` command signature.
+in a use of the :command:`add_custom_command(TARGET)` command signature.
 
-Commands such as :command:`add_custom_command`, which generates rules to be run
-at build time can transparently use an :prop_tgt:`EXECUTABLE <TYPE>` target as
-a ``COMMAND`` executable.  The buildsystem rules will ensure that the executable
-is built before attempting to run the command.
+Commands such as :command:`add_custom_command`, which generates rules to be
+run at build time can transparently use an :prop_tgt:`EXECUTABLE <TYPE>`
+target as a ``COMMAND`` executable.  The buildsystem rules will ensure that
+the executable is built before attempting to run the command.
 
 Build Specification and Usage Requirements
 ==========================================
@@ -113,29 +115,33 @@ Each command may be invoked with multiple uses of each keyword:
 Target Properties
 -----------------
 
-The contents of the :prop_tgt:`INCLUDE_DIRECTORIES`, :prop_tgt:`COMPILE_DEFINITIONS`
-and :prop_tgt:`COMPILE_OPTIONS` target properties are used appropriately when
-compiling the source files of a binary target.
+The contents of the :prop_tgt:`INCLUDE_DIRECTORIES`,
+:prop_tgt:`COMPILE_DEFINITIONS` and :prop_tgt:`COMPILE_OPTIONS` target
+properties are used appropriately when compiling the source files of a
+binary target.
 
 Entries in the :prop_tgt:`INCLUDE_DIRECTORIES` are added to the compile line
 with ``-I`` or ``-isystem`` prefixes and in the order of appearance in the
-CMake code.
+property value.
 
 Entries in the :prop_tgt:`COMPILE_DEFINITIONS` are prefixed with ``-D`` or
 ``/D`` and added to the compile line in an unspecified order.  The
-:prop_tgt:`DEFINE_SYMBOL` target property is also added as a compile definition
-as a special convenience case.
+:prop_tgt:`DEFINE_SYMBOL` target property is also added as a compile
+definition as a special convenience case for ``SHARED`` and ``MODULE``
+library targets.
 
 Entries in the :prop_tgt:`COMPILE_OPTIONS` are escaped for the shell and added
-in the order of appearance in the CMake code.  Several compile options have
+in the order of appearance in the property value.  Several compile options have
 special separate handling, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`.
 
 The contents of the :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
-:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and :prop_tgt:`INTERFACE_COMPILE_OPTIONS`
-target properties are "Usage Requirements" - they specify content which consumers
-must use to correctly compile and link with the target they appear on.  For any
-binary target, the the contents of each ``INTERFACE_`` property on each target
-specified in a :command:`target_link_libraries` command is consumed:
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and
+:prop_tgt:`INTERFACE_COMPILE_OPTIONS` target properties are
+*Usage Requirements* -- they specify content which consumers
+must use to correctly compile and link with the target they appear on.
+For any binary target, the contents of each ``INTERFACE_`` property on
+each target specified in a :command:`target_link_libraries` command is
+consumed:
 
 .. code-block:: cmake
 
@@ -168,9 +174,9 @@ targets in multiple different directories convenient through use of the
 Transitive Usage Requirements
 -----------------------------
 
-The usage requirements of a target can transitively propagate to dependents. The
-:command:`target_link_libraries` command also has ``PRIVATE``, ``INTERFACE`` and
-``PUBLIC`` keywords to control the propagation.
+The usage requirements of a target can transitively propagate to dependents.
+The :command:`target_link_libraries` command also has ``PRIVATE``,
+``INTERFACE`` and ``PUBLIC`` keywords to control the propagation.
 
 .. code-block:: cmake
 
@@ -183,22 +189,23 @@ The usage requirements of a target can transitively propagate to dependents. The
   add_library(archiveExtras extras.cpp)
   target_link_libraries(archiveExtras PUBLIC archive)
   target_link_libraries(archiveExtras PRIVATE serialization)
-  # archiveExtras is compiled with -DUSING_ARCHIVE_LIB -DUSING_SERIALIZATION_LIB
+  # archiveExtras is compiled with -DUSING_ARCHIVE_LIB
+  # and -DUSING_SERIALIZATION_LIB
 
-  add_executable(consumer)
+  add_executable(consumer consumer.cpp)
   # consumer is compiled with -DUSING_ARCHIVE_LIB
   target_link_libraries(consumer archiveExtras)
 
-Because ``archive`` is a ``PUBLIC`` dependency of ``archiveExtras``, the usage
-requirements of it are propagated to ``consumer`` too.  Because ``serialization``
-is a ``PRIVATE`` dependency of ``archive``, the usage requirements of it are not
-propagated to ``consumer``.
+Because ``archive`` is a ``PUBLIC`` dependency of ``archiveExtras``, the
+usage requirements of it are propagated to ``consumer`` too.  Because
+``serialization`` is a ``PRIVATE`` dependency of ``archive``, the usage
+requirements of it are not propagated to ``consumer``.
 
 Generally, a dependency should be specified in a use of
 :command:`target_link_libraries` with the ``PRIVATE`` keyword if it is used by
 only the implementation of a library, and not in the header files.  If a
-dependency is additionally used in the header files of a library for class
-inheritance for example, then it should be specified as a ``PUBLIC`` dependency.
+dependency is additionally used in the header files of a library (e.g. for
+class inheritance), then it should be specified as a ``PUBLIC`` dependency.
 A dependency which is not used by the implementation of a library, but only by
 its headers should be specified as an ``INTERFACE`` dependency.  The
 :command:`target_link_libraries` command may be invoked with multiple uses of
@@ -214,12 +221,14 @@ each keyword:
 Compatible Interface Properties
 -------------------------------
 
-Some target properties are required to be compatible between a target and the
-interface of each dependency.  For example, the :prop_tgt:`POSITION_INDEPENDENT_CODE`
-target property may specify a boolean value of whether a target should be compiled
-as position-independent-code, which has platform-specific consequences.  A target
-may also specify the usage requirement :prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`
-to communicate that consumers must be compiled as position-independent-code.
+Some target properties are required to be compatible between a target and
+the interface of each dependency.  For example, the
+:prop_tgt:`POSITION_INDEPENDENT_CODE` target property may specify a
+boolean value of whether a target should be compiled as
+position-independent-code, which has platform-specific consequences.
+A target may also specify the usage requirement
+:prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE` to communicate that
+consumers must be compiled as position-independent-code.
 
 .. code-block:: cmake
 
@@ -252,11 +261,11 @@ non-compatible requirements :manual:`cmake(1)` issues a diagnostic:
   add_executable(exe2 exe2.cpp)
   target_link_libraries(exe2 lib1 lib2)
 
-The ``lib1`` ``INTERFACE_POSITION_INDEPENDENT_CODE`` requirement is not
+The ``lib1`` requirement ``INTERFACE_POSITION_INDEPENDENT_CODE`` is not
 "compatible" with the ``POSITION_INDEPENDENT_CODE`` property of the ``exe1``
-target.  The library requires that consumers are built as position-independent-code,
-while the executable specifies to not built as position-independent-code, so a
-diagnostic is issued.
+target.  The library requires that consumers are built as
+position-independent-code, while the executable specifies to not built as
+position-independent-code, so a diagnostic is issued.
 
 The ``lib1`` and ``lib2`` requirements are not "compatible".  One of them
 requires that consumers are built as position-independent-code, while
@@ -264,8 +273,8 @@ the other requires that consumers are not built as position-independent-code.
 Because ``exe2`` links to both and they are in conflict, a diagnostic is
 issued.
 
-To be "compatible", the :prop_tgt:`POSITION_INDEPENDENT_CODE` property, if set
-must be either the same, in a boolean sense, as the
+To be "compatible", the :prop_tgt:`POSITION_INDEPENDENT_CODE` property,
+if set must be either the same, in a boolean sense, as the
 :prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE` property of all transitively
 specified dependencies on which that property is set.
 
@@ -293,18 +302,19 @@ with an ``INTERFACE_`` prefix from each dependency:
   target_link_libraries(exe2 lib1Version2 lib1Version3) # Diagnostic
 
 Non-boolean properties may also participate in "compatible interface"
-computations.  Properties specified in the COMPATIBLE_INTERFACE_STRING property
-must be either unspecified or compare to the same string among all transitively
-specified dependencies. This can be useful to ensure that multiple incompatible
-versions of a library are not linked together through transitive requirements
-of a target:
+computations.  Properties specified in the
+:prop_tgt:`COMPATIBLE_INTERFACE_STRING`
+property must be either unspecified or compare to the same string among
+all transitively specified dependencies. This can be useful to ensure
+that multiple incompatible versions of a library are not linked together
+through transitive requirements of a target:
 
 .. code-block:: cmake
 
   add_library(lib1Version2 SHARED lib1_v2.cpp)
   set_property(TARGET lib1Version2 PROPERTY INTERFACE_LIB_VERSION 2)
   set_property(TARGET lib1Version2 APPEND PROPERTY
-    COMPATIBLE_INTERFACE_BOOL LIB_VERSION
+    COMPATIBLE_INTERFACE_STRING LIB_VERSION
   )
 
   add_library(lib1Version3 SHARED lib1_v3.cpp)
@@ -316,9 +326,9 @@ of a target:
   add_executable(exe2 exe2.cpp)
   target_link_libraries(exe2 lib1Version2 lib1Version3) # Diagnostic
 
-The :prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX` target property specifies that
-content will be evaluated numerically and the maximum number among all specified
-will be calculated:
+The :prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX` target property specifies
+that content will be evaluated numerically and the maximum number among all
+specified will be calculated:
 
 .. code-block:: cmake
 
@@ -349,14 +359,14 @@ Property Origin Debugging
 -------------------------
 
 Because build specifications can be determined by dependencies, the lack of
-locality of code which creates a target and code which is responsible for setting
-build specifications may make the code more difficult to reason about.
+locality of code which creates a target and code which is responsible for
+setting build specifications may make the code more difficult to reason about.
 :manual:`cmake(1)` provides a debugging facility to print the origin of the
 contents of properties which may be determined by dependencies.  The properties
 which can be debugged are :prop_tgt:`INCLUDE_DIRECTORIES`,
 :prop_tgt:`COMPILE_DEFINITIONS`, :prop_tgt:`COMPILE_OPTIONS`,
-:prop_tgt:`AUTOUIC_OPTIONS`, and all properties listed in a ``COMPATIBLE_INTERFACE_*``
-target property:
+:prop_tgt:`AUTOUIC_OPTIONS`, and all properties listed in a
+``COMPATIBLE_INTERFACE_*`` target property:
 
 .. code-block:: cmake
 
@@ -372,8 +382,9 @@ target property:
 In the case of properties listed in :prop_tgt:`COMPATIBLE_INTERFACE_BOOL` or
 :prop_tgt:`COMPATIBLE_INTERFACE_STRING`, the debug output shows which target
 was responsible for setting the property, and which other dependencies also
-defined the property.  In the case of :prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX`
-and :prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MIN`, the debug output shows the
+defined the property.  In the case of
+:prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MAX` and
+:prop_tgt:`COMPATIBLE_INTERFACE_NUMBER_MIN`, the debug output shows the
 value of the property from each dependency, and whether the value determines
 the new extreme.
 
@@ -381,7 +392,7 @@ Build Specification with Generator Expressions
 ----------------------------------------------
 
 Build specifications may use
-:manual:`generator expressions <cmake-generator-expressions(7)>` to containing
+:manual:`generator expressions <cmake-generator-expressions(7)>` containing
 content which may be conditional or known only at generate-time.  For example,
 the calculated "compatible" value of a property may be read with the
 ``TARGET_PROPERTY`` expression:
@@ -389,7 +400,8 @@ the calculated "compatible" value of a property may be read with the
 .. code-block:: cmake
 
   add_library(lib1Version2 SHARED lib1_v2.cpp)
-  set_property(TARGET lib1Version2 PROPERTY INTERFACE_CONTAINER_SIZE_REQUIRED 200)
+  set_property(TARGET lib1Version2 PROPERTY
+    INTERFACE_CONTAINER_SIZE_REQUIRED 200)
   set_property(TARGET lib1Version2 APPEND PROPERTY
     COMPATIBLE_INTERFACE_NUMBER_MAX CONTAINER_SIZE_REQUIRED
   )
@@ -400,11 +412,11 @@ the calculated "compatible" value of a property may be read with the
       CONTAINER_SIZE=$<TARGET_PROPERTY:CONTAINER_SIZE_REQUIRED>
   )
 
-In this case, the exe1 source files will be compiled with
+In this case, the ``exe1`` source files will be compiled with
 ``-DCONTAINER_SIZE=200``.
 
-Configuration determined build specifications may be conveniently set using the
-``CONFIG`` generator expression.
+Configuration determined build specifications may be conveniently set using
+the ``CONFIG`` generator expression.
 
 .. code-block:: cmake
 
@@ -419,9 +431,9 @@ accounted for by this expression.
 
 Some buildsystems generated by :manual:`cmake(1)` have a predetermined
 build-configuration set in the :variable:`CMAKE_BUILD_TYPE` variable.  The
-buildsystem for the IDEs such as Visual Studio and Xcode are generated independent
-of the build-configuration, and the actual build configuration is not known
-until build-time.  Therefore, code such as
+buildsystem for the IDEs such as Visual Studio and Xcode are generated
+independent of the build-configuration, and the actual build configuration
+is not known until build-time.  Therefore, code such as
 
 .. code-block:: cmake
 
@@ -459,8 +471,8 @@ on the consumer:
 
 The ``exe1`` executable will be compiled with ``-DLIB1_WITH_EXE``, while the
 ``shared_lib`` shared library will be compiled with ``-DLIB1_WITH_SHARED_LIB``
-and ``-DCONSUMER_CMP0041_NEW``, because the :manual:`policy <cmake-policies(7)>`
-is ``NEW`` at the point where the ``shared_lib`` target is created.
+and ``-DCONSUMER_CMP0041_NEW``, because policy :policy:`CMP0041` is
+``NEW`` at the point where the ``shared_lib`` target is created.
 
 The ``BUILD_INTERFACE`` expression wraps requirements which are only used when
 consumed from a target in the same buildsystem, or when consumed from a target
@@ -477,7 +489,8 @@ consumed from a target which has been installed and exported with the
     $<INSTALL_INTERFACE:ClimbingStats_FROM_INSTALLED_LOCATION>
   )
   install(TARGETS ClimbingStats EXPORT libExport ${InstallArgs})
-  install(EXPORT libExport NAMESPACE Upstream:: DESTINATION lib/cmake/ClimbingStats)
+  install(EXPORT libExport NAMESPACE Upstream::
+          DESTINATION lib/cmake/ClimbingStats)
   export(EXPORT libExport NAMESPACE Upstream::)
 
   add_executable(exe1 exe1.cpp)
@@ -486,8 +499,8 @@ consumed from a target which has been installed and exported with the
 In this case, the ``exe1`` executable will be compiled with
 ``-DClimbingStats_FROM_BUILD_LOCATION``.  The exporting commands generate
 :prop_tgt:`IMPORTED` targets with either the ``INSTALL_INTERFACE`` or the
-``BUILD_INTERFACE`` omitted, and the ``*_INTERFACE`` marker stripped away. A
-separate project consuming the ``ClimbingStats`` package would contain:
+``BUILD_INTERFACE`` omitted, and the ``*_INTERFACE`` marker stripped away.
+A separate project consuming the ``ClimbingStats`` package would contain:
 
 .. code-block:: cmake
 
@@ -500,15 +513,15 @@ Depending on whether the ``ClimbingStats`` package was used from the build
 location or the install location, the ``Downstream`` target would be compiled
 with either ``-DClimbingStats_FROM_BUILD_LOCATION`` or
 ``-DClimbingStats_FROM_INSTALL_LOCATION``.  For more about packages and
-exporting see :manual:`cmake-packages(7)`.
+exporting see the :manual:`cmake-packages(7)` manual.
 
 Include Directories and Usage Requirements
 ''''''''''''''''''''''''''''''''''''''''''
 
 Include directories require some special consideration when specified as usage
 requirements and when used with generator expressions.  The
-:command:`target_include_directories` command accepts both relative and absolute
-include directories:
+:command:`target_include_directories` command accepts both relative and
+absolute include directories:
 
 .. code-block:: cmake
 
@@ -520,20 +533,19 @@ include directories:
 
 Relative paths are interpreted relative to the source directory where the
 command appears.  Relative paths are not allowed in the
-:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of :prop_tgt:`IMPORTED` targets.  If
-``PUBLIC`` or ``INTERFACE`` include directories are specified.
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of :prop_tgt:`IMPORTED` targets.
 
-In cases where a non-trivial generator expression is used, the ``INSTALL_PREFIX``
-expression may be used within the argument of an ``INSTALL_INTERFACE``
-expression.  It is a replacement marker which expands to installation prefix
-when imported.
+In cases where a non-trivial generator expression is used, the
+``INSTALL_PREFIX`` expression may be used within the argument of an
+``INSTALL_INTERFACE`` expression.  It is a replacement marker which
+expands to the installation prefix when imported by a consuming project.
 
 Include directories usage requirements commonly differ between the build-tree
 and the install-tree.  The ``BUILD_INTERFACE`` and ``INSTALL_INTERFACE``
-generator expressions can be used to describe separate usage requirements based
-on the usage location.  Relative paths are allowed within these expressions,
-and are interpreted relative to the current source directory or the installation
-prefix, as appropriate.
+generator expressions can be used to describe separate usage requirements
+based on the usage location.  Relative paths are allowed within these
+expressions, and are interpreted relative to the current source directory
+or the installation prefix, as appropriate.
 
 Two convenience APIs are provided relating to include directories usage
 requirements.  The :variable:`CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE` variable
@@ -588,31 +600,34 @@ dependencies:
 As the value of the :prop_tgt:`POSITION_INDEPENDENT_CODE` property of
 the ``exe1`` target is dependent on the linked libraries (``lib3``), and the
 edge of linking ``exe1`` is determined by the same
-:prop_tgt:`POSITION_INDEPENDENT_CODE` property, the dependency graph above is
-not acyclic.  :manual:`cmake(1)` issues a diagnostic in this case.
+:prop_tgt:`POSITION_INDEPENDENT_CODE` property, the dependency graph above
+contains a cycle.  :manual:`cmake(1)` issues a diagnostic in this case.
 
 Output Files
 ------------
 
 The buildsystem targets created by the :command:`add_library` and
-:command:`add_executable` commands create rules to create binary outputs.  The
-exact output location of the binaries can only be determined at generate-time
-because it can depend on the build-configuration and the link-language of linked
-dependencies etc.  ``TARGET_FILE``, ``TARGET_LINKER_FILE`` and related
-expressions can be used to access the name and location of generated binaries.
-These expressions do not work for ``OBJECT`` libraries however, as there is no
-single file generated by such libraries which is relevant to the expressions.
+:command:`add_executable` commands create rules to create binary outputs.
+The exact output location of the binaries can only be determined at
+generate-time because it can depend on the build-configuration and the
+link-language of linked dependencies etc.  ``TARGET_FILE``,
+``TARGET_LINKER_FILE`` and related expressions can be used to access the
+name and location of generated binaries.  These expressions do not work
+for ``OBJECT`` libraries however, as there is no single file generated
+by such libraries which is relevant to the expressions.
 
 Directory-Scoped Commands
 -------------------------
 
-The :command:`target_include_directories`, :command:`target_compile_definitions`
-and :command:`target_compile_options` commands have an effect on only one target
-at a time. The commands :command:`add_definitions`, :command:`add_compile_options`
-and :command:`include_directories` have a similar function, but operate at
-directory scope instead of target scope for convenience.
+The :command:`target_include_directories`,
+:command:`target_compile_definitions` and
+:command:`target_compile_options` commands have an effect on only one
+target at a time.  The commands :command:`add_definitions`,
+:command:`add_compile_options` and :command:`include_directories` have
+a similar function, but operate at directory scope instead of target
+scope for convenience.
 
-Psuedo targets
+Psuedo Targets
 ==============
 
 Some target types do not represent outputs of the buildsystem, but only inputs
@@ -632,9 +647,11 @@ modify it.  :prop_tgt:`IMPORTED` targets are designed to be used only in the
 right-hand-side of those commands.
 
 :prop_tgt:`IMPORTED` targets may have the same usage requirement properties
-populated as binary targets, such as :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
-:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`, :prop_tgt:`INTERFACE_COMPILE_OPTIONS`,
-:prop_tgt:`INTERFACE_LINK_LIBRARIES` and
+populated as binary targets, such as
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`,
+:prop_tgt:`INTERFACE_COMPILE_OPTIONS`,
+:prop_tgt:`INTERFACE_LINK_LIBRARIES`, and
 :prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`.
 
 The :prop_tgt:`LOCATION` may also be read from an IMPORTED target, though there
@@ -643,15 +660,15 @@ transparently use an :prop_tgt:`IMPORTED` :prop_tgt:`EXECUTABLE <TYPE>` target
 as a ``COMMAND`` executable.
 
 The scope of the definition of an :prop_tgt:`IMPORTED` target is the directory
-where it was defined.  It may be accessed and used from sub-directories, but
+where it was defined.  It may be accessed and used from subdirectories, but
 not from parent directories or sibling directories.  The scope is similar to
 the scope of a cmake variable.
 
 It is also possible to define a ``GLOBAL`` :prop_tgt:`IMPORTED` target which is
 accessible globally in the buildsystem.
 
-See :manual:`cmake-packages(7)` for more on creating packages with
-:prop_tgt:`IMPORTED` targets.
+See the :manual:`cmake-packages(7)` manual for more on creating packages
+with :prop_tgt:`IMPORTED` targets.
 
 Alias Targets
 -------------
@@ -682,9 +699,10 @@ target, which may be an :prop_tgt:`IMPORTED` target from a package, or an
   add_executable(exe1 exe1.cpp)
   target_link_libraries(exe1 Upstream::lib1)
 
-``ALIAS`` targets are not mutable, installable or exportable.  They are entirely
-local to the buildsystem description.  A name can be tested for whether it is
-an ``ALIAS`` name by reading the :prop_tgt:`ALIASED_TARGET` property from it:
+``ALIAS`` targets are not mutable, installable or exportable.  They are
+entirely local to the buildsystem description.  A name can be tested for
+whether it is an ``ALIAS`` name by reading the :prop_tgt:`ALIASED_TARGET`
+property from it:
 
 .. code-block:: cmake
 
@@ -699,13 +717,16 @@ Interface Libraries
 An ``INTERFACE`` target has no :prop_tgt:`LOCATION` and is mutable, but is
 otherwise similar to an :prop_tgt:`IMPORTED` target.
 
-It may specify usage requirements such as :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
-:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`, :prop_tgt:`INTERFACE_COMPILE_OPTIONS`,
-:prop_tgt:`INTERFACE_LINK_LIBRARIES` and
-:prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`.  Only the ``INTERFACE`` modes
-of the :command:`target_include_directories`, :command:`target_compile_definitions`,
-:command:`target_compile_options` and :command:`target_link_libraries` commands
-may be used with ``INTERFACE`` libraries.
+It may specify usage requirements such as
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`,
+:prop_tgt:`INTERFACE_COMPILE_OPTIONS`,
+:prop_tgt:`INTERFACE_LINK_LIBRARIES`, and
+:prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`.
+Only the ``INTERFACE`` modes of the :command:`target_include_directories`,
+:command:`target_compile_definitions`, :command:`target_compile_options`,
+and :command:`target_link_libraries` commands may be used with ``INTERFACE``
+libraries.
 
 A primary use-case for ``INTERFACE`` libraries is header-only libraries.
 
@@ -742,8 +763,8 @@ requirements:
   target_link_libraries(exe1 pic_on enable_rtti)
 
 This way, the build specification of ``exe1`` is expressed entirely as linked
-targets, and the complexity of compiler-specific flags is encapsulated in a
-target object.
+targets, and the complexity of compiler-specific flags is encapsulated in an
+``INTERFACE`` library target.
 
 ``INTERFACE`` libraries may be installed and exported.  Any content they refer
 to must be installed separately:
