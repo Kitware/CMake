@@ -187,6 +187,13 @@ void cmGlobalGenerator::AddBuildExportSet(cmExportBuildFileGenerator* gen)
   this->BuildExportSets[gen->GetMainExportFileName()] = gen;
 }
 
+void
+cmGlobalGenerator::AddBuildExportExportSet(cmExportBuildFileGenerator* gen)
+{
+  this->BuildExportSets[gen->GetMainExportFileName()] = gen;
+  this->BuildExportExportSets[gen->GetMainExportFileName()] = gen;
+}
+
 bool cmGlobalGenerator::GenerateImportFile(const std::string &file)
 {
   std::map<std::string, cmExportBuildFileGenerator*>::iterator it
@@ -211,7 +218,8 @@ cmGlobalGenerator::IsExportedTargetsFile(const std::string &filename) const
     {
     return false;
     }
-  return it->second->GetExportSet() ? false : true;
+  return this->BuildExportExportSets.find(filename)
+                                        == this->BuildExportExportSets.end();
 }
 
 // Find the make program for the generator, required for try compiles
