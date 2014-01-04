@@ -14,6 +14,7 @@
 #include "cmGeneratorExpression.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/FStream.hxx>
 
 void cmDependInformation::AddDependencies(cmDependInformation* info)
 {
@@ -217,7 +218,7 @@ void cmMakeDepend::DependWalk(cmDependInformation* info)
 {
   cmsys::RegularExpression includeLine
     ("^[ \t]*#[ \t]*include[ \t]*[<\"]([^\">]+)[\">]");
-  std::ifstream fin(info->FullPath.c_str());
+  cmsys::ifstream fin(info->FullPath.c_str());
   if(!fin)
     {
     cmSystemTools::Error("Cannot open ", info->FullPath.c_str());

@@ -55,11 +55,11 @@ void cmExportLibraryDependenciesCommand::FinalPass()
 void cmExportLibraryDependenciesCommand::ConstFinalPass() const
 {
   // Use copy-if-different if not appending.
-  cmsys::auto_ptr<std::ofstream> foutPtr;
+  cmsys::auto_ptr<cmsys::ofstream> foutPtr;
   if(this->Append)
     {
-    cmsys::auto_ptr<std::ofstream> ap(
-      new std::ofstream(this->Filename.c_str(), std::ios::app));
+    cmsys::auto_ptr<cmsys::ofstream> ap(
+      new cmsys::ofstream(this->Filename.c_str(), std::ios::app));
     foutPtr = ap;
     }
   else

@@ -18,6 +18,7 @@
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Base64.h>
+#include <cmsys/FStream.hxx>
 #include "cmMakefile.h"
 #include "cmXMLSafe.h"
 
@@ -929,7 +930,7 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
     }
   // put a scope around this to close ifs so the file can be removed
   {
-  std::ifstream ifs(ofile.c_str());
+  cmsys::ifstream ifs(ofile.c_str());
   if ( !ifs )
     {
     std::string log = "Cannot read memory tester output file: " + ofile;
@@ -984,7 +985,7 @@ cmCTestMemCheckHandler::appendMemTesterOutput(cmCTestTestResult& res,
     {
     return;
     }
-  std::ifstream ifs(ofile.c_str());
+  cmsys::ifstream ifs(ofile.c_str());
   if ( !ifs )
     {
     std::string log = "Cannot read memory tester output file: " + ofile;

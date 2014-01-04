@@ -3,7 +3,7 @@
 #include "cmXMLParser.h"
 #include "cmParsePythonCoverage.h"
 #include <cmsys/Directory.hxx>
-
+#include <cmsys/FStream.hxx>
 
 //----------------------------------------------------------------------------
 class cmParsePythonCoverage::XMLParser: public cmXMLParser
@@ -35,7 +35,7 @@ protected:
                                  atts[tagCount+1];
           FileLinesType& curFileLines =
             this->Coverage.TotalCoverage[this->CurFileName];
-          std::ifstream fin(this->CurFileName.c_str());
+          cmsys::ifstream fin(this->CurFileName.c_str());
           if(!fin)
           {
             cmCTestLog(this->CTest, ERROR_MESSAGE,

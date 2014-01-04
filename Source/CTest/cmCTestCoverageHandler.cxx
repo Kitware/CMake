@@ -26,6 +26,7 @@
 #include <cmsys/Glob.hxx>
 #include <cmsys/stl/iterator>
 #include <cmsys/stl/algorithm>
+#include <cmsys/FStream.hxx>
 
 #include <stdlib.h>
 #include <math.h>
@@ -511,7 +512,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       << "\" FullPath=\"" << cmXMLSafe(shortFileName) << "\">\n"
       << "\t\t<Report>" << std::endl;
 
-    std::ifstream ifs(fullFileName.c_str());
+    cmsys::ifstream ifs(fullFileName.c_str());
     if ( !ifs)
       {
       cmOStringStream ostr;
@@ -600,7 +601,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       << "\" FullPath=\"" << cmXMLSafe(*i) << "\">\n"
       << "\t\t<Report>" << std::endl;
 
-    std::ifstream ifs(fullPath.c_str());
+    cmsys::ifstream ifs(fullPath.c_str());
     if (!ifs)
       {
       cmOStringStream ostr;
@@ -1158,7 +1159,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
         cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   in gcovFile: "
           << gcovFile << std::endl);
 
-        std::ifstream ifile(gcovFile.c_str());
+        cmsys::ifstream ifile(gcovFile.c_str());
         if ( ! ifile )
           {
           cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open file: "
@@ -1370,7 +1371,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
       = &cont->TotalCoverage[actualSourceFile];
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "   in file: " << fileIt->c_str() << std::endl);
-    std::ifstream ifile(fileIt->c_str());
+    cmsys::ifstream ifile(fileIt->c_str());
     if ( ! ifile )
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot open file: "
@@ -1530,7 +1531,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
              "covbr output in  " << outputFile
              << std::endl);
   // open the output file
-  std::ifstream fin(outputFile.c_str());
+  cmsys::ifstream fin(outputFile.c_str());
   if(!fin)
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -1743,7 +1744,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   std::vector<std::string> coveredFiles;
   std::vector<std::string> coveredFilesFullPath;
   // Read and parse the summary output file
-  std::ifstream fin(outputFile.c_str());
+  cmsys::ifstream fin(outputFile.c_str());
   if(!fin)
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -2012,7 +2013,7 @@ void cmCTestCoverageHandler::LoadLabels()
   fileList += "/TargetDirectories.txt";
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              " target directory list [" << fileList << "]\n");
-  std::ifstream finList(fileList.c_str());
+  cmsys::ifstream finList(fileList.c_str());
   std::string line;
   while(cmSystemTools::GetLineFromStream(finList, line))
     {
@@ -2026,7 +2027,7 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
   LabelSet& dirLabels = this->TargetDirs[dir];
   std::string fname = dir;
   fname += "/Labels.txt";
-  std::ifstream fin(fname.c_str());
+  cmsys::ifstream fin(fname.c_str());
   if(!fin)
     {
     return;
@@ -2080,7 +2081,7 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
 }
 
 //----------------------------------------------------------------------
-void cmCTestCoverageHandler::WriteXMLLabels(std::ofstream& os,
+void cmCTestCoverageHandler::WriteXMLLabels(std::ostream& os,
                                             std::string const& source)
 {
   LabelMapType::const_iterator li = this->SourceLabels.find(source);

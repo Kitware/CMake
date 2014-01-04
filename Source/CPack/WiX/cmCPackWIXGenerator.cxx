@@ -24,6 +24,7 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Directory.hxx>
 #include <cmsys/Encoding.hxx>
+#include <cmsys/FStream.hxx>
 
 #include <rpc.h> // for GUID generation
 
@@ -56,7 +57,7 @@ bool cmCPackWIXGenerator::RunWiXCommand(const std::string& command)
   bool status = cmSystemTools::RunSingleCommand(command.c_str(), &output,
     &returnValue, 0, cmSystemTools::OUTPUT_NONE);
 
-  std::ofstream logFile(logFileName.c_str(), std::ios::app);
+  cmsys::ofstream logFile(logFileName.c_str(), std::ios::app);
   logFile << command << std::endl;
   logFile << output;
   logFile.close();
@@ -838,7 +839,7 @@ bool cmCPackWIXGenerator::CreateLicenseFile()
     {
     cmWIXRichTextFormatWriter rtfWriter(licenseDestinationFilename);
 
-    std::ifstream licenseSource(licenseSourceFilename.c_str());
+    cmsys::ifstream licenseSource(licenseSourceFilename.c_str());
 
     std::string line;
     while(std::getline(licenseSource, line))

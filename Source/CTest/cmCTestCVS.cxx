@@ -16,6 +16,7 @@
 #include "cmXMLSafe.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/FStream.hxx>
 
 //----------------------------------------------------------------------------
 cmCTestCVS::cmCTestCVS(cmCTest* ct, std::ostream& log): cmCTestVC(ct, log)
@@ -231,7 +232,7 @@ std::string cmCTestCVS::ComputeBranchFlag(std::string const& dir)
 
   // Lookup the branch in the tag file, if any.
   std::string tagLine;
-  std::ifstream tagStream(tagFile.c_str());
+  cmsys::ifstream tagStream(tagFile.c_str());
   if(tagStream && cmSystemTools::GetLineFromStream(tagStream, tagLine) &&
      tagLine.size() > 1 && tagLine[0] == 'T')
     {

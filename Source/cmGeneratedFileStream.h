@@ -13,6 +13,7 @@
 #define cmGeneratedFileStream_h
 
 #include "cmStandardIncludes.h"
+#include <cmsys/FStream.hxx>
 
 #if defined(__sgi) && !defined(__GNUC__)
 # pragma set woff 1375 /* base class destructor not virtual */
@@ -77,10 +78,10 @@ protected:
  * being updated.
  */
 class cmGeneratedFileStream: private cmGeneratedFileStreamBase,
-                             public std::ofstream
+                             public cmsys::ofstream
 {
 public:
-  typedef std::ofstream Stream;
+  typedef cmsys::ofstream Stream;
 
   /**
    * This constructor prepares a default stream.  The open method must
