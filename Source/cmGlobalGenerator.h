@@ -311,6 +311,7 @@ public:
   std::map<std::string, cmExportBuildFileGenerator*>& GetBuildExportSets()
     {return this->BuildExportSets;}
   void AddBuildExportSet(cmExportBuildFileGenerator*);
+  void AddBuildExportExportSet(cmExportBuildFileGenerator*);
   bool IsExportedTargetsFile(const std::string &filename) const;
   bool GenerateImportFile(const std::string &file);
   cmExportBuildFileGenerator*
@@ -375,6 +376,7 @@ protected:
   // Sets of named target exports
   cmExportSetMap ExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
+  std::map<std::string, cmExportBuildFileGenerator*> BuildExportExportSets;
 
   // Manifest of all targets that will be built for each configuration.
   // This is computed just before local generators generate.

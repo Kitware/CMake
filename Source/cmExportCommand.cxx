@@ -236,8 +236,14 @@ bool cmExportCommand
     {
     ebfg->AddConfiguration("");
     }
-
-  gg->AddBuildExportSet(ebfg);
+  if (this->ExportSet)
+    {
+    gg->AddBuildExportExportSet(ebfg);
+    }
+  else
+    {
+    gg->AddBuildExportSet(ebfg);
+    }
 
   return true;
 }
