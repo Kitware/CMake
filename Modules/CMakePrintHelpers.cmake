@@ -9,14 +9,11 @@
 #
 #
 # CMAKE_PRINT_PROPERTIES([TARGETS target1 ..  targetN]
-#
-# ::
-#
-#                         [SOURCES source1 .. sourceN]
-#                         [DIRECTORIES dir1 .. dirN]
-#                         [TESTS test1 .. testN]
-#                         [CACHE_ENTRIES entry1 .. entryN]
-#                         PROPERTIES prop1 .. propN )
+#                        [SOURCES source1 .. sourceN]
+#                        [DIRECTORIES dir1 .. dirN]
+#                        [TESTS test1 .. testN]
+#                        [CACHE_ENTRIES entry1 .. entryN]
+#                        PROPERTIES prop1 .. propN )
 #
 #
 #
