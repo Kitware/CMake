@@ -164,6 +164,12 @@ void cmExportBuildFileGenerator::SetExportSet(cmExportSet *exportSet)
 }
 
 //----------------------------------------------------------------------------
+cmExportSet* cmExportBuildFileGenerator::GetExportSet() const
+{
+  return this->ExportSet;
+}
+
+//----------------------------------------------------------------------------
 void
 cmExportBuildFileGenerator
 ::SetImportLocationProperty(const char* config, std::string const& suffix,

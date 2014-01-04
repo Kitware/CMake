@@ -39,6 +39,7 @@ public:
     { this->Targets.insert(this->Targets.end(),
       targets.begin(), targets.end()); }
   void SetExportSet(cmExportSet*);
+  cmExportSet* GetExportSet() const;
 
   /** Set whether to append generated code to the output file.  */
   void SetAppendMode(bool append) { this->AppendMode = append; }

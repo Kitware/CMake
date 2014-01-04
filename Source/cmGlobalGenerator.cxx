@@ -207,7 +207,11 @@ cmGlobalGenerator::IsExportedTargetsFile(const std::string &filename) const
 {
   const std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it
                                       = this->BuildExportSets.find(filename);
-  return it != this->BuildExportSets.end();
+  if (it == this->BuildExportSets.end())
+    {
+    return false;
+    }
+  return it->second->GetExportSet() ? false : true;
 }
 
 // Find the make program for the generator, required for try compiles
