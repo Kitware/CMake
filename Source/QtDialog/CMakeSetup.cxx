@@ -49,10 +49,10 @@ static const char * cmDocumentationOptions[][2] =
 
 int main(int argc, char** argv)
 {
-  cmsys::Encoding::CommandLineArguments args =
+  cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
-  int argc2 = args.argc();
-  char const* const* argv2 = args.argv();
+  int argc2 = encoding_args.argc();
+  char const* const* argv2 = encoding_args.argv();
 
   cmSystemTools::FindCMakeResources(argv2[0]);
   // check docs first so that X is not need to get docs
