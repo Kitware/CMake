@@ -4,13 +4,10 @@
 #
 # Check if the given struct or class has the specified member variable
 #
-# CHECK_STRUCT_HAS_MEMBER (<struct> <member> <header> <variable>
-#
 # ::
 #
-#                           [LANGUAGE <language>])
-#
-#
+#  CHECK_STRUCT_HAS_MEMBER(<struct> <member> <header> <variable>
+#                          [LANGUAGE <language>])
 #
 # ::
 #

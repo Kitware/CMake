@@ -2,15 +2,10 @@
 # CMakeExpandImportedTargets
 # --------------------------
 #
-#
-#
-# CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN
-#
 # ::
 #
-#                                      [CONFIGURATION <config>] )
-#
-#
+#  CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN
+#                                [CONFIGURATION <config>])
 #
 # CMAKE_EXPAND_IMPORTED_TARGETS() takes a list of libraries and replaces
 # all imported targets contained in this list with their actual file
