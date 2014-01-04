@@ -23,6 +23,7 @@
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/FStream.hxx>
 #include <algorithm>
 
 #if defined(__HAIKU__)
@@ -152,7 +153,7 @@ int cmCPackGenerator::PrepareNames()
                     << descFileName << "]" << std::endl);
       return 0;
       }
-    std::ifstream ifs(descFileName);
+    cmsys::ifstream ifs(descFileName);
     if ( !ifs )
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,

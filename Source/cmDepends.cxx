@@ -17,6 +17,7 @@
 #include "cmSystemTools.h"
 #include "cmFileTimeComparison.h"
 #include <string.h>
+#include <cmsys/FStream.hxx>
 
 //----------------------------------------------------------------------------
 cmDepends::cmDepends(cmLocalGenerator* lg, const char* targetDir):
@@ -103,7 +104,7 @@ bool cmDepends::Check(const char *makeFile, const char *internalFile,
 
   // Check whether dependencies must be regenerated.
   bool okay = true;
-  std::ifstream fin(internalFile);
+  cmsys::ifstream fin(internalFile);
   if(!(fin && this->CheckDependencies(fin, internalFile, validDeps)))
     {
     // Clear all dependencies so they will be regenerated.

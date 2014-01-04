@@ -5,6 +5,7 @@
 #include "cmParseGTMCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/FStream.hxx>
 
 
 cmParseGTMCoverage::cmParseGTMCoverage(cmCTestCoverageHandlerContainer& cont,
@@ -48,7 +49,7 @@ bool cmParseGTMCoverage::LoadCoverageData(const char* d)
 
 bool cmParseGTMCoverage::ReadMCovFile(const char* file)
 {
-  std::ifstream in(file);
+  cmsys::ifstream in(file);
   if(!in)
     {
     return false;
@@ -127,7 +128,7 @@ bool cmParseGTMCoverage::FindFunctionInMumpsFile(std::string const& filepath,
                                                  std::string const& function,
                                                  int& lineoffset)
 {
-  std::ifstream in(filepath.c_str());
+  cmsys::ifstream in(filepath.c_str());
   if(!in)
     {
     return false;

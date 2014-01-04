@@ -12,6 +12,7 @@
 #include "cmLoadCacheCommand.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/FStream.hxx>
 
 // cmLoadCacheCommand
 bool cmLoadCacheCommand
@@ -115,7 +116,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
     }
 
   // Read the cache file.
-  std::ifstream fin(cacheFile.c_str());
+  cmsys::ifstream fin(cacheFile.c_str());
 
   // This is a big hack read loop to overcome a buggy ifstream
   // implementation on HP-UX.  This should work on all platforms even

@@ -16,6 +16,7 @@
 #include "cmGeneratedFileStream.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/FStream.hxx>
 
 static const char* SLAHeader =
 "data 'LPic' (5000) {\n"
@@ -422,7 +423,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     std::string sla_r = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     sla_r += "/sla.r";
 
-    std::ifstream ifs;
+    cmsys::ifstream ifs;
     ifs.open(cpack_license_file.c_str());
     if(ifs.is_open())
     {

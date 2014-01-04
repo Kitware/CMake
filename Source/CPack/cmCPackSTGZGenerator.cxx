@@ -20,6 +20,7 @@
 #include "cmCPackLog.h"
 
 #include <cmsys/ios/sstream>
+#include <cmsys/FStream.hxx>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -91,7 +92,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
 
   std::string inLicFile = this->GetOption("CPACK_RESOURCE_FILE_LICENSE");
   std::string line;
-  std::ifstream ilfs(inLicFile.c_str());
+  cmsys::ifstream ilfs(inLicFile.c_str());
   std::string licenseText;
   while ( cmSystemTools::GetLineFromStream(ilfs, line) )
     {
@@ -104,7 +105,7 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
 
   // Create the header
   std::string inFile = this->GetOption("CPACK_STGZ_HEADER_FILE");
-  std::ifstream ifs(inFile.c_str());
+  cmsys::ifstream ifs(inFile.c_str());
   std::string packageHeaderText;
   while ( cmSystemTools::GetLineFromStream(ifs, line) )
     {

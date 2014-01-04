@@ -23,6 +23,7 @@
 
 #include <cmsys/Terminal.h>
 #include <cmsys/ios/sstream>
+#include <cmsys/FStream.hxx>
 #include <assert.h>
 
 #include <string.h>
@@ -396,7 +397,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
       || !configIncludes.empty()
       || !configUicOptions.empty())
     {
-    std::ofstream infoFile(outputFile.c_str(), std::ios::app);
+    cmsys::ofstream infoFile(outputFile.c_str(), std::ios::app);
     if ( !infoFile )
       {
       std::string error = "Internal CMake error when trying to open file: ";
@@ -2111,7 +2112,7 @@ bool cmQtAutoGenerators::EndsWith(const std::string& str,
 
 std::string cmQtAutoGenerators::ReadAll(const std::string& filename)
 {
-  std::ifstream file(filename.c_str());
+  cmsys::ifstream file(filename.c_str());
   cmsys_ios::stringstream stream;
   stream << file.rdbuf();
   file.close();

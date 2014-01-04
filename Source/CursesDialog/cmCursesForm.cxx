@@ -11,7 +11,7 @@
 ============================================================================*/
 #include "cmCursesForm.h"
 
-std::ofstream cmCursesForm::DebugFile;
+cmsys::ofstream cmCursesForm::DebugFile;
 bool cmCursesForm::Debug = false;
 
 cmCursesForm::cmCursesForm()

@@ -18,6 +18,7 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/ios/sstream>
 #include <cmsys/Process.h>
+#include <cmsys/FStream.hxx>
 
 #include <sys/types.h>
 #include <time.h>
@@ -200,7 +201,7 @@ bool cmCTestGIT::UpdateByFetchAndReset()
   std::string sha1;
   {
   std::string fetch_head = this->FindGitDir() + "/FETCH_HEAD";
-  std::ifstream fin(fetch_head.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(fetch_head.c_str(), std::ios::in | std::ios::binary);
   if(!fin)
     {
     this->Log << "Unable to open " << fetch_head << "\n";

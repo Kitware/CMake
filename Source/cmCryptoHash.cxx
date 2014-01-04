@@ -12,6 +12,7 @@
 #include "cmCryptoHash.h"
 
 #include <cmsys/MD5.h>
+#include <cmsys/FStream.hxx>
 #include "cm_sha2.h"
 
 //----------------------------------------------------------------------------
@@ -45,7 +46,7 @@ std::string cmCryptoHash::HashString(const char* input)
 //----------------------------------------------------------------------------
 std::string cmCryptoHash::HashFile(const char* file)
 {
-  std::ifstream fin(file, std::ios::in | cmsys_ios_binary);
+  cmsys::ifstream fin(file, std::ios::in | cmsys_ios_binary);
   if(!fin)
     {
     return "";

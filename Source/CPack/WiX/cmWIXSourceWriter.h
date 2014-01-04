@@ -15,7 +15,7 @@
 
 #include <vector>
 #include <string>
-#include <fstream>
+#include <cmsys/FStream.hxx>
 
 #include <CPack/cmCPackLog.h>
 
@@ -60,7 +60,7 @@ private:
 
   cmCPackLog* Logger;
 
-  std::ofstream File;
+  cmsys::ofstream File;
 
   State State;
 

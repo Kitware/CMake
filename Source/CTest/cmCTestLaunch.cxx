@@ -19,6 +19,7 @@
 #include <cmsys/MD5.h>
 #include <cmsys/Process.h>
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/FStream.hxx>
 
 //----------------------------------------------------------------------------
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
@@ -171,7 +172,7 @@ void cmCTestLaunch::HandleRealArg(const char* arg)
   // Expand response file arguments.
   if(arg[0] == '@' && cmSystemTools::FileExists(arg+1))
     {
-    std::ifstream fin(arg+1);
+    cmsys::ifstream fin(arg+1);
     std::string line;
     while(cmSystemTools::GetLineFromStream(fin, line))
       {
@@ -241,8 +242,8 @@ void cmCTestLaunch::RunChild()
   cmsysProcess* cp = this->Process;
   cmsysProcess_SetCommand(cp, this->RealArgV);
 
-  std::ofstream fout;
-  std::ofstream ferr;
+  cmsys::ofstream fout;
+  cmsys::ofstream ferr;
   if(this->Passthru)
     {
     // In passthru mode we just share the output pipes.
@@ -330,7 +331,7 @@ void cmCTestLaunch::LoadLabels()
   cmSystemTools::ConvertToUnixSlashes(source);
 
   // Load the labels file.
-  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   if(!fin) { return; }
   bool inTarget = true;
   bool inSource = false;
@@ -579,7 +580,7 @@ void cmCTestLaunch::WriteXMLLabels(std::ostream& fxml)
 void cmCTestLaunch::DumpFileToXML(std::ostream& fxml,
                                   std::string const& fname)
 {
-  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
 
   std::string line;
   const char* sep = "";
@@ -652,7 +653,7 @@ cmCTestLaunch
   fname += "Custom";
   fname += purpose;
   fname += ".txt";
-  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   std::string line;
   cmsys::RegularExpression rex;
   while(cmSystemTools::GetLineFromStream(fin, line))
@@ -671,7 +672,7 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
 
   // Look for log file lines matching warning expressions but not
   // suppression expressions.
-  std::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(fname.c_str(), std::ios::in | std::ios::binary);
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {

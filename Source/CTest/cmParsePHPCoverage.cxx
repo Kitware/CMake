@@ -2,6 +2,7 @@
 #include "cmSystemTools.h"
 #include "cmParsePHPCoverage.h"
 #include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
 
 /*
   To setup coverage for php.
@@ -20,7 +21,7 @@ cmParsePHPCoverage::cmParsePHPCoverage(cmCTestCoverageHandlerContainer& cont,
 {
 }
 
-bool cmParsePHPCoverage::ReadUntil(std::ifstream& in, char until)
+bool cmParsePHPCoverage::ReadUntil(std::istream& in, char until)
 {
   char c = 0;
   while(in.get(c) && c != until)
@@ -32,7 +33,7 @@ bool cmParsePHPCoverage::ReadUntil(std::ifstream& in, char until)
     }
   return true;
 }
-bool cmParsePHPCoverage::ReadCoverageArray(std::ifstream& in,
+bool cmParsePHPCoverage::ReadCoverageArray(std::istream& in,
                                            cmStdString const& fileName)
 {
   cmCTestCoverageHandlerContainer::SingleFileCoverageVector& coverageVector
@@ -109,7 +110,7 @@ bool cmParsePHPCoverage::ReadCoverageArray(std::ifstream& in,
   return true;
 }
 
-bool cmParsePHPCoverage::ReadInt(std::ifstream& in, int& v)
+bool cmParsePHPCoverage::ReadInt(std::istream& in, int& v)
 {
   std::string s;
   char c = 0;
@@ -121,7 +122,7 @@ bool cmParsePHPCoverage::ReadInt(std::ifstream& in, int& v)
   return true;
 }
 
-bool cmParsePHPCoverage::ReadArraySize(std::ifstream& in, int& size)
+bool cmParsePHPCoverage::ReadArraySize(std::istream& in, int& size)
 {
   char c = 0;
   in.get(c);
@@ -139,7 +140,7 @@ bool cmParsePHPCoverage::ReadArraySize(std::ifstream& in, int& size)
   return false;
 }
 
-bool cmParsePHPCoverage::ReadFileInformation(std::ifstream& in)
+bool cmParsePHPCoverage::ReadFileInformation(std::istream& in)
 {
   char buf[4];
   in.read(buf, 2);
@@ -190,7 +191,7 @@ bool cmParsePHPCoverage::ReadFileInformation(std::ifstream& in)
 
 bool cmParsePHPCoverage::ReadPHPData(const char* file)
 {
-  std::ifstream in(file);
+  cmsys::ifstream in(file);
   if(!in)
     {
     return false;

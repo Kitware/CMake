@@ -5,6 +5,7 @@
 #include "cmParseCacheCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/FStream.hxx>
 
 
 cmParseCacheCoverage::cmParseCacheCoverage(
@@ -106,7 +107,7 @@ bool cmParseCacheCoverage::SplitString(std::vector<std::string>& args,
 
 bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
 {
-  std::ifstream in(file);
+  cmsys::ifstream in(file);
   if(!in)
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,

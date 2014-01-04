@@ -12,6 +12,7 @@
 #include "cmTryRunCommand.h"
 #include "cmCacheManager.h"
 #include "cmTryCompileCommand.h"
+#include <cmsys/FStream.hxx>
 
 // cmTryRunCommand
 bool cmTryRunCommand
@@ -302,7 +303,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   if (error)
     {
     static bool firstTryRun = true;
-    std::ofstream file(resultFileName.c_str(),
+    cmsys::ofstream file(resultFileName.c_str(),
                                   firstTryRun ? std::ios::out : std::ios::app);
     if ( file )
       {

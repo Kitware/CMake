@@ -166,7 +166,7 @@ cmHexFileConverter::FileType cmHexFileConverter::DetermineFileType(
                                                         const char* inFileName)
 {
   char buf[1024];
-  FILE* inFile = fopen(inFileName, "rb");
+  FILE* inFile = cmsys::SystemTools::Fopen(inFileName, "rb");
   if (inFile == 0)
     {
     return Binary;
@@ -223,8 +223,8 @@ bool cmHexFileConverter::TryConvert(const char* inFileName,
     }
 
   // try to open the file
-  FILE* inFile = fopen(inFileName, "rb");
-  FILE* outFile = fopen(outFileName, "wb");
+  FILE* inFile = cmsys::SystemTools::Fopen(inFileName, "rb");
+  FILE* outFile = cmsys::SystemTools::Fopen(outFileName, "wb");
   if ((inFile == 0) || (outFile == 0))
     {
     if (inFile != 0)

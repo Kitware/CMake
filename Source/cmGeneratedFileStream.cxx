@@ -213,7 +213,7 @@ int cmGeneratedFileStreamBase::CompressFile(const char* oldname,
     {
     return 0;
     }
-  FILE* ifs = fopen(oldname, "r");
+  FILE* ifs = cmsys::SystemTools::Fopen(oldname, "r");
   if ( !ifs )
     {
     return 0;

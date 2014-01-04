@@ -14,6 +14,7 @@
 #include "cmSystemTools.h"
 #include <cmsys/ios/iostream>
 #include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
 #include <cm_libarchive.h>
 
 //----------------------------------------------------------------------------
@@ -263,7 +264,7 @@ bool cmArchiveWrite::AddFile(const char* file,
 //----------------------------------------------------------------------------
 bool cmArchiveWrite::AddData(const char* file, size_t size)
 {
-  std::ifstream fin(file, std::ios::in | cmsys_ios_binary);
+  cmsys::ifstream fin(file, std::ios::in | cmsys_ios_binary);
   if(!fin)
     {
     this->Error = "Error opening \"";

@@ -21,6 +21,7 @@
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
 
 //----------------------------------------------------------------------------
 void cmGlobalKdevelopGenerator
@@ -189,7 +190,7 @@ bool cmGlobalKdevelopGenerator
 
   //check if the output file already exists and read it
   //insert all files which exist into the set of files
-  std::ifstream oldFilelist(filename.c_str());
+  cmsys::ifstream oldFilelist(filename.c_str());
   if (oldFilelist)
     {
     while (cmSystemTools::GetLineFromStream(oldFilelist, tmp))
@@ -310,7 +311,7 @@ void cmGlobalKdevelopGenerator
                     const std::string& fileToOpen,
                     const std::string& sessionFilename)
 {
-  std::ifstream oldProjectFile(filename.c_str());
+  cmsys::ifstream oldProjectFile(filename.c_str());
   if (!oldProjectFile)
     {
     this->CreateNewProjectFile(outputDir, projectDir, filename,

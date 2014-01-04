@@ -273,7 +273,7 @@ public:
   // and retVal is return value or exception.
   int RunMakeCommand(const char* command, std::string* output,
     int* retVal, const char* dir, int timeout,
-    std::ofstream& ofs);
+    std::ostream& ofs);
 
   /*
    * return the current tag
