@@ -25,6 +25,7 @@
 
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/SystemTools.hxx>
+#include <cmsys/Encoding.hxx>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
@@ -97,8 +98,13 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
 
 //----------------------------------------------------------------------------
 // this is CPack.
-int main (int argc, char *argv[])
+int main (int argc, char const* const argv[])
 {
+  cmsys::Encoding::CommandLineArguments args =
+    cmsys::Encoding::CommandLineArguments::Main(argc, argv);
+  argc = args.argc();
+  argv = args.argv();
+
   cmSystemTools::FindCMakeResources(argv[0]);
   cmCPackLog log;
 

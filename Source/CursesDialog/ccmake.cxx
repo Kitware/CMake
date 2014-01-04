@@ -19,6 +19,7 @@
 
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
+#include <cmsys/Encoding.hxx>
 
 #include <form.h>
 
@@ -78,8 +79,13 @@ void CMakeErrorHandler(const char* message, const char* title, bool&, void* clie
   self->AddError(message, title);
 }
 
-int main(int argc, char** argv)
+int main(int argc, char const* const* argv)
 {
+  cmsys::Encoding::CommandLineArguments encoding_args =
+    cmsys::Encoding::CommandLineArguments::Main(argc, argv);
+  argc = encoding_args.argc();
+  argv = encoding_args.argv();
+
   cmSystemTools::FindCMakeResources(argv[0]);
   cmDocumentation doc;
   doc.addCMakeStandardDocSections();
