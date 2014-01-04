@@ -31,6 +31,7 @@ Modify cmListFileLexer.c:
 */
 
 #include "cmStandardLexer.h"
+#include <cmsys/Encoding.h>
 
 /* Setup the proper cmListFileLexer_yylex declaration.  */
 #define YY_EXTRA_TYPE cmListFileLexer*
@@ -493,7 +494,13 @@ int cmListFileLexer_SetFileName(cmListFileLexer* lexer, const char* name,
   cmListFileLexerDestroy(lexer);
   if(name)
     {
+#ifdef _WIN32
+    wchar_t* wname = cmsysEncoding_DupToWide(name);
+    lexer->file = _wfopen(wname, L"rb");
+    free(wname);
+#else
     lexer->file = fopen(name, "rb");
+#endif
     if(lexer->file)
       {
       if(bom)

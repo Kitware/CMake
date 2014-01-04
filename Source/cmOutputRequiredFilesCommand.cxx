@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmOutputRequiredFilesCommand.h"
 #include "cmMakeDepend.h"
+#include <cmsys/FStream.hxx>
 
 class cmLBDepend : public cmMakeDepend
 {
@@ -22,7 +23,7 @@ class cmLBDepend : public cmMakeDepend
 
 void cmLBDepend::DependWalk(cmDependInformation* info)
 {
-  std::ifstream fin(info->FullPath.c_str());
+  cmsys::ifstream fin(info->FullPath.c_str());
   if(!fin)
     {
     cmSystemTools::Error("error can not open ", info->FullPath.c_str());
@@ -196,7 +197,7 @@ bool cmOutputRequiredFilesCommand
   if (info)
     {
     // write them out
-    FILE *fout = fopen(this->OutputFile.c_str(),"w");
+    FILE *fout = cmsys::SystemTools::Fopen(this->OutputFile.c_str(),"w");
     if(!fout)
       {
       std::string err = "Can not open output file: ";

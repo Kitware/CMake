@@ -278,7 +278,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     sourceDirectory = this->BinaryDirectory.c_str();
 
     // now create a CMakeLists.txt file in that directory
-    FILE *fout = fopen(outFileName.c_str(),"w");
+    FILE *fout = cmsys::SystemTools::Fopen(outFileName.c_str(),"w");
     if (!fout)
       {
       cmOStringStream e;

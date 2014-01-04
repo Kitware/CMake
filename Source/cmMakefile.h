@@ -957,7 +957,6 @@ private:
 
   bool EnforceUniqueDir(const char* srcPath, const char* binPath);
 
-  void ReadSources(std::ifstream& fin, bool t);
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array
   void PrintStringVector(const char* s, const

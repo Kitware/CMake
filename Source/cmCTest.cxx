@@ -19,6 +19,7 @@
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
 #include <cmsys/SystemInformation.hxx>
+#include <cmsys/FStream.hxx>
 #include "cmDynamicLoader.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLSafe.h"
@@ -207,7 +208,7 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
         return -1;
         }
       ::curl_easy_setopt(curl, CURLOPT_PUT, 1);
-      file = ::fopen(putFile.c_str(), "rb");
+      file = cmsys::SystemTools::Fopen(putFile.c_str(), "rb");
       ::curl_easy_setopt(curl, CURLOPT_INFILE, file);
       //fall through to append GET fields
     case cmCTest::HTTP_GET:
@@ -549,7 +550,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
       }
 
     std::string tagfile = testingDir + "/TAG";
-    std::ifstream tfin(tagfile.c_str());
+    cmsys::ifstream tfin(tagfile.c_str());
     std::string tag;
 
     if (createNewTag)
@@ -604,7 +605,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
                 lctime->tm_hour,
                 lctime->tm_min);
         tag = datestring;
-        std::ofstream ofs(tagfile.c_str());
+        cmsys::ofstream ofs(tagfile.c_str());
         if ( ofs )
           {
           ofs << tag << std::endl;
@@ -763,7 +764,7 @@ bool cmCTest::UpdateCTestConfiguration()
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Parse Config file:"
                << fileName.c_str() << "\n");
     // parse the dart test file
-    std::ifstream fin(fileName.c_str());
+    cmsys::ifstream fin(fileName.c_str());
 
     if(!fin)
       {
@@ -1149,7 +1150,7 @@ int cmCTest::GetTestModelFromString(const char* str)
 
 //----------------------------------------------------------------------
 int cmCTest::RunMakeCommand(const char* command, std::string* output,
-  int* retVal, const char* dir, int timeout, std::ofstream& ofs)
+  int* retVal, const char* dir, int timeout, std::ostream& ofs)
 {
   // First generate the command and arguments
   std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
@@ -1611,7 +1612,7 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
       << "<Time>" << cmSystemTools::GetTime() << "</Time>\n"
       << "<DateTime>" << note_time << "</DateTime>\n"
       << "<Text>" << std::endl;
-    std::ifstream ifs(it->c_str());
+    cmsys::ifstream ifs(it->c_str());
     if ( ifs )
       {
       std::string line;
@@ -1692,7 +1693,7 @@ std::string cmCTest::Base64GzipEncodeFile(std::string file)
 std::string cmCTest::Base64EncodeFile(std::string file)
 {
   long len = cmSystemTools::FileLength(file.c_str());
-  std::ifstream ifs(file.c_str(), std::ios::in
+  cmsys::ifstream ifs(file.c_str(), std::ios::in
 #ifdef _WIN32
     | std::ios::binary
 #endif

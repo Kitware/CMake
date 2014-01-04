@@ -803,7 +803,7 @@ static int put_arobj(CF *cfp, struct stat *sb)
 static int ar_append(const char* archive,const std::vector<std::string>& files)
 {
   int eval = 0;
-  FILE* aFile = fopen(archive, "wb+");
+  FILE* aFile = cmSystemTools::Fopen(archive, "wb+");
   if (aFile!=NULL) {
     fwrite(ARMAG, SARMAG, 1, aFile);
     if (fseek(aFile, 0, SEEK_END) != -1) {
@@ -814,7 +814,7 @@ static int ar_append(const char* archive,const std::vector<std::string>& files)
       for(std::vector<std::string>::const_iterator fileIt = files.begin();
           fileIt!=files.end(); ++fileIt) {
         const char* filename = fileIt->c_str();
-        FILE* file = fopen(filename, "rb");
+        FILE* file = cmSystemTools::Fopen(filename, "rb");
         if (file == NULL) {
           eval = -1;
           continue;

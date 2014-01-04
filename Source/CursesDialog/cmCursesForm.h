@@ -14,6 +14,7 @@
 
 #include "../cmStandardIncludes.h"
 #include "cmCursesStandardIncludes.h"
+#include <cmsys/FStream.hxx>
 
 class cmCursesForm
 {
@@ -63,7 +64,7 @@ public:
 
 protected:
 
-  static std::ofstream DebugFile;
+  static cmsys::ofstream DebugFile;
   static bool Debug;
 
   cmCursesForm(const cmCursesForm& form);

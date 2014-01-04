@@ -17,6 +17,7 @@
 #include <stdlib.h>
 #include <stack>
 #include <float.h>
+#include <cmsys/FStream.hxx>
 
 class TestComparator
 {
@@ -325,7 +326,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 
   if(cmSystemTools::FileExists(fname.c_str()))
     {
-    std::ifstream fin;
+    cmsys::ifstream fin;
     fin.open(fname.c_str());
 
     std::string line;
@@ -384,7 +385,7 @@ void cmCTestMultiProcessHandler::ReadCostData()
 
   if(cmSystemTools::FileExists(fname.c_str(), true))
     {
-    std::ifstream fin;
+    cmsys::ifstream fin;
     fin.open(fname.c_str());
     std::string line;
     while(std::getline(fin, line))
@@ -721,7 +722,7 @@ void cmCTestMultiProcessHandler::CheckResume()
         << "----------------------------------------------------------"
         << std::endl;
 
-      std::ifstream fin;
+      cmsys::ifstream fin;
       fin.open(fname.c_str());
       std::string line;
       while(std::getline(fin, line))

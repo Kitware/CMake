@@ -30,6 +30,7 @@
 #include "cmExportBuildFileGenerator.h"
 
 #include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include <cmsys/MD5.h>
@@ -2747,9 +2748,9 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
                                         std::string const& home)
 {
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream fin(pfile.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(pfile.c_str(), std::ios::in | std::ios::binary);
 #else
-  std::ifstream fin(pfile.c_str(), std::ios::in);
+  cmsys::ifstream fin(pfile.c_str(), std::ios::in);
 #endif
   if(!fin)
     {

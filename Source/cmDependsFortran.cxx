@@ -17,7 +17,7 @@
 #include "cmGeneratedFileStream.h"
 
 #include "cmDependsFortranParser.h" /* Interface to parser object.  */
-
+#include <cmsys/FStream.hxx>
 #include <assert.h>
 #include <stack>
 
@@ -356,7 +356,7 @@ void cmDependsFortran::LocateModules()
     {
     std::string targetDir = cmSystemTools::GetFilenamePath(*i);
     std::string fname = targetDir + "/fortran.internal";
-    std::ifstream fin(fname.c_str());
+    cmsys::ifstream fin(fname.c_str());
     if(fin)
       {
       this->MatchRemoteModules(fin, targetDir.c_str());
@@ -700,7 +700,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
 // is later used for longer sequences it should be re-written using an
 // efficient string search algorithm such as Boyer-Moore.
 static
-bool cmDependsFortranStreamContainsSequence(std::ifstream& ifs,
+bool cmDependsFortranStreamContainsSequence(std::istream& ifs,
                                             const char* seq, int len)
 {
   assert(len > 0);
@@ -733,8 +733,8 @@ bool cmDependsFortranStreamContainsSequence(std::ifstream& ifs,
 
 //----------------------------------------------------------------------------
 // Helper function to compare the remaining content in two streams.
-static bool cmDependsFortranStreamsDiffer(std::ifstream& ifs1,
-                                          std::ifstream& ifs2)
+static bool cmDependsFortranStreamsDiffer(std::istream& ifs1,
+                                          std::istream& ifs2)
 {
   // Compare the remaining content.
   for(;;)
@@ -799,11 +799,11 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
     }
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream finModFile(modFile, std::ios::in | std::ios::binary);
-  std::ifstream finStampFile(stampFile, std::ios::in | std::ios::binary);
+  cmsys::ifstream finModFile(modFile, std::ios::in | std::ios::binary);
+  cmsys::ifstream finStampFile(stampFile, std::ios::in | std::ios::binary);
 #else
-  std::ifstream finModFile(modFile, std::ios::in);
-  std::ifstream finStampFile(stampFile, std::ios::in);
+  cmsys::ifstream finModFile(modFile, std::ios::in);
+  cmsys::ifstream finStampFile(stampFile, std::ios::in);
 #endif
   if(!finModFile || !finStampFile)
     {
@@ -944,7 +944,7 @@ bool cmDependsFortranParser_FilePush(cmDependsFortranParser* parser,
 {
   // Open the new file and push it onto the stack.  Save the old
   // buffer with it on the stack.
-  if(FILE* file = fopen(fname, "rb"))
+  if(FILE* file = cmsys::SystemTools::Fopen(fname, "rb"))
     {
     YY_BUFFER_STATE current =
       cmDependsFortranLexer_GetCurrentBuffer(parser->Scanner);

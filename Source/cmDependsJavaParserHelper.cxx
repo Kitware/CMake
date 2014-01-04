@@ -13,6 +13,7 @@
 
 #include "cmSystemTools.h"
 #include "cmDependsJavaLexer.h"
+#include <cmsys/FStream.hxx>
 
 int cmDependsJava_yyparse( yyscan_t yyscanner );
 
@@ -412,7 +413,7 @@ int cmDependsJavaParserHelper::ParseFile(const char* file)
     {
     return 0;
     }
-  std::ifstream ifs(file);
+  cmsys::ifstream ifs(file);
   if ( !ifs )
     {
     return 0;

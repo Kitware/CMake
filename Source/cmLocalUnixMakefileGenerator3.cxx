@@ -1172,7 +1172,7 @@ cmLocalUnixMakefileGenerator3
     }
   cleanfile += ".cmake";
   std::string cleanfilePath = this->Convert(cleanfile.c_str(), FULL);
-  std::ofstream fout(cleanfilePath.c_str());
+  cmsys::ofstream fout(cleanfilePath.c_str());
   if(!fout)
     {
     cmSystemTools::Error("Could not create ", cleanfilePath.c_str());

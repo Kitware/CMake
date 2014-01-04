@@ -28,6 +28,7 @@
 
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/FStream.hxx>
 
 // only build kdevelop generator on non-windows platforms
 // when not bootstrapping cmake
@@ -1861,7 +1862,7 @@ void cmake::UpdateConversionPathTable()
 
   if(tablepath)
     {
-    std::ifstream table( tablepath );
+    cmsys::ifstream table( tablepath );
     if(!table)
       {
       cmSystemTools::Error("CMAKE_PATH_TRANSLATION_FILE set to ", tablepath,
@@ -2387,7 +2388,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   // echo results to stdout if needed
   if (writeToStdout)
     {
-    FILE* fin = fopen(resultFile.c_str(), "r");
+    FILE* fin = cmsys::SystemTools::Fopen(resultFile.c_str(), "r");
     if(fin)
       {
       const int bufferSize = 4096;
@@ -2421,9 +2422,9 @@ static bool cmakeCheckStampFile(const char* stampName)
   std::string stampDepends = stampName;
   stampDepends += ".depend";
 #if defined(_WIN32) || defined(__CYGWIN__)
-  std::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
+  cmsys::ifstream fin(stampDepends.c_str(), std::ios::in | std::ios::binary);
 #else
-  std::ifstream fin(stampDepends.c_str(), std::ios::in);
+  cmsys::ifstream fin(stampDepends.c_str(), std::ios::in);
 #endif
   if(!fin)
     {
@@ -2464,7 +2465,7 @@ static bool cmakeCheckStampFile(const char* stampName)
   {
   // TODO: Teach cmGeneratedFileStream to use a random temp file (with
   // multiple tries in unlikely case of conflict) and use that here.
-  std::ofstream stamp(stampTemp);
+  cmsys::ofstream stamp(stampTemp);
   stamp << "# CMake generation timestamp file for this directory.\n";
   }
   if(cmSystemTools::RenameFile(stampTemp, stampName))
@@ -2494,7 +2495,7 @@ static bool cmakeCheckStampList(const char* stampList)
               << "is missing.\n";
     return false;
     }
-  std::ifstream fin(stampList);
+  cmsys::ifstream fin(stampList);
   if(!fin)
     {
     std::cout << "CMake is re-running because generate.stamp.list "

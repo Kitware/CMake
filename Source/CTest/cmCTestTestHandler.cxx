@@ -21,6 +21,7 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Base64.h>
 #include <cmsys/Directory.hxx>
+#include <cmsys/FStream.hxx>
 #include "cmMakefile.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
@@ -931,7 +932,7 @@ void cmCTestTestHandler::UpdateMaxTestNameWidth()
 
 bool cmCTestTestHandler::GetValue(const char* tag,
                                   int& value,
-                                  std::ifstream& fin)
+                                  std::istream& fin)
 {
   std::string line;
   bool ret = true;
@@ -953,7 +954,7 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 
 bool cmCTestTestHandler::GetValue(const char* tag,
                                   double& value,
-                                  std::ifstream& fin)
+                                  std::istream& fin)
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
@@ -975,7 +976,7 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 
 bool cmCTestTestHandler::GetValue(const char* tag,
                                   bool& value,
-                                  std::ifstream& fin)
+                                  std::istream& fin)
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
@@ -1007,7 +1008,7 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 
 bool cmCTestTestHandler::GetValue(const char* tag,
                                   size_t& value,
-                                  std::ifstream& fin)
+                                  std::istream& fin)
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
@@ -1029,7 +1030,7 @@ bool cmCTestTestHandler::GetValue(const char* tag,
 
 bool cmCTestTestHandler::GetValue(const char* tag,
                                   std::string& value,
-                                  std::ifstream& fin)
+                                  std::istream& fin)
 {
   std::string line;
   cmSystemTools::GetLineFromStream(fin, line);
@@ -1798,7 +1799,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
     }
 
   // parse the list of tests to rerun from LastTestsFailed.log
-  std::ifstream ifs(lastTestsFailedLog.c_str());
+  cmsys::ifstream ifs(lastTestsFailedLog.c_str());
   if ( ifs )
     {
     std::string line;
@@ -1964,7 +1965,7 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
           }
         else
           {
-          std::ifstream ifs(filename.c_str(), std::ios::in
+          cmsys::ifstream ifs(filename.c_str(), std::ios::in
 #ifdef _WIN32
                             | std::ios::binary
 #endif
@@ -2054,7 +2055,7 @@ void cmCTestTestHandler::SetTestsToRunInformation(const char* in)
   // string
   if(cmSystemTools::FileExists(in))
     {
-    std::ifstream fin(in);
+    cmsys::ifstream fin(in);
     unsigned long filelen = cmSystemTools::FileLength(in);
     char* buff = new char[filelen+1];
     fin.getline(buff, filelen);
