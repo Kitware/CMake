@@ -98,7 +98,7 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
 
 //----------------------------------------------------------------------------
 // this is CPack.
-int main (int argc, char const* const argv[])
+int main (int argc, char const* const* argv)
 {
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
