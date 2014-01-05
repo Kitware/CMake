@@ -957,10 +957,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                content,
                                                dagCheckerParent);
 
-    switch (dagChecker.check())
+    switch (dagChecker.Check())
       {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-      dagChecker.reportError(context, content->GetOriginalExpression());
+      dagChecker.ReportError(context, content->GetOriginalExpression());
       return std::string();
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
