@@ -424,7 +424,7 @@ the ``CONFIG`` generator expression.
       $<$<CONFIG:Debug>:DEBUG_BUILD>
   )
 
-The ``CONFIG`` parameter is compared case-insensitvely with the configuration
+The ``CONFIG`` parameter is compared case-insensitively with the configuration
 being built.  In the presence of :prop_tgt:`IMPORTED` targets, the content of
 :prop_tgt:`MAP_IMPORTED_CONFIG_DEBUG <MAP_IMPORTED_CONFIG_CONFIG>` is also
 accounted for by this expression.
@@ -594,7 +594,7 @@ dependencies:
   add_library(lib1 lib1.cpp)
   add_library(lib2 lib2.cpp)
   target_link_libraries(lib1 PUBLIC
-    $<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>:lib2>
+    $<$<TARGET_PROPERTY:POSITION_INDEPENDENT_CODE>:lib2>
   )
   add_library(lib3 lib3.cpp)
   set_property(TARGET lib3 PROPERTY INTERFACE_POSITION_INDEPENDENT_CODE ON)
