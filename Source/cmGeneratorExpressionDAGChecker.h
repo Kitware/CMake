@@ -16,6 +16,7 @@
 
 #include "cmGeneratorExpressionEvaluator.h"
 
+#define CM_SELECT_BOTH(F, A1, A2) F(A1, A2)
 #define CM_SELECT_FIRST(F, A1, A2) F(A1)
 #define CM_SELECT_SECOND(F, A1, A2) F(A2)
 
@@ -25,6 +26,9 @@
   SELECT(F, EvaluatingCompileDefinitions,       COMPILE_DEFINITIONS) \
   SELECT(F, EvaluatingCompileOptions,           COMPILE_OPTIONS) \
   SELECT(F, EvaluatingAutoUicOptions,           AUTOUIC_OPTIONS)
+
+#define CM_FOR_EACH_TRANSITIVE_PROPERTY(F) \
+  CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_BOTH)
 
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(F) \
   CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_FIRST)
