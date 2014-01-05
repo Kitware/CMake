@@ -20,7 +20,11 @@ with information about compiler and utility paths.
 Languages
 =========
 
-Languages are enabled by the :command:`project` command. If no project command
+Languages are enabled by the :command:`project` command.  Language-specific
+built-in variables, such as
+:variable:`CMAKE_CXX_COMPILER <CMAKE_<LANG>_COMPILER>`,
+:variable:`CMAKE_CXX_COMPILER_ID <CMAKE_<LANG>_COMPILER_ID>` etc are set by
+invoking the :command:`project` command.  If no project command
 is in the top-level CMakeLists file, one will be implicitly generated. By default
 the enabled languages are C and CXX:
 
