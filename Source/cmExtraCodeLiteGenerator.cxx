@@ -452,7 +452,7 @@ cmExtraCodeLiteGenerator::GetBuildCommand(const cmMakefile* mf) const
             generator == "Unix Makefiles"  ||
             generator == "Ninja" )
     {
-    ss << make << " -j " << this->CpuCount;
+    ss << make;
     buildCommand = ss.str();
     }
     return buildCommand;
