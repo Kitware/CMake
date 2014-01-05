@@ -16,19 +16,21 @@
 
 #include "cmGeneratorExpressionEvaluator.h"
 
+#define CM_SELECT_FIRST(F, A1, A2) F(A1)
+#define CM_SELECT_SECOND(F, A1, A2) F(A2)
+
+#define CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, SELECT) \
+  SELECT(F, EvaluatingIncludeDirectories,       INCLUDE_DIRECTORIES) \
+  SELECT(F, EvaluatingSystemIncludeDirectories, SYSTEM_INCLUDE_DIRECTORIES) \
+  SELECT(F, EvaluatingCompileDefinitions,       COMPILE_DEFINITIONS) \
+  SELECT(F, EvaluatingCompileOptions,           COMPILE_OPTIONS) \
+  SELECT(F, EvaluatingAutoUicOptions,           AUTOUIC_OPTIONS)
+
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(F) \
-  F(EvaluatingIncludeDirectories) \
-  F(EvaluatingSystemIncludeDirectories) \
-  F(EvaluatingCompileDefinitions) \
-  F(EvaluatingCompileOptions) \
-  F(EvaluatingAutoUicOptions)
+  CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_FIRST)
 
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(F) \
-  F(INCLUDE_DIRECTORIES) \
-  F(SYSTEM_INCLUDE_DIRECTORIES) \
-  F(COMPILE_DEFINITIONS) \
-  F(COMPILE_OPTIONS) \
-  F(AUTOUIC_OPTIONS)
+  CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_SECOND)
 
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionDAGChecker
