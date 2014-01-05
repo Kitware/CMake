@@ -31,7 +31,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     top = p;
     p = p->Parent;
     }
-  this->CheckResult = this->checkGraph();
+  this->CheckResult = this->CheckGraph();
 
 #define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) \
   top->METHOD () ||
@@ -61,13 +61,13 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
 
 //----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::Result
-cmGeneratorExpressionDAGChecker::check() const
+cmGeneratorExpressionDAGChecker::Check() const
 {
   return this->CheckResult;
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorExpressionDAGChecker::reportError(
+void cmGeneratorExpressionDAGChecker::ReportError(
                   cmGeneratorExpressionContext *context,
                   const std::string &expr)
 {
@@ -125,7 +125,7 @@ void cmGeneratorExpressionDAGChecker::reportError(
 
 //----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::Result
-cmGeneratorExpressionDAGChecker::checkGraph() const
+cmGeneratorExpressionDAGChecker::CheckGraph() const
 {
   const cmGeneratorExpressionDAGChecker *parent = this->Parent;
   while (parent)

@@ -52,9 +52,9 @@ struct cmGeneratorExpressionDAGChecker
     ALREADY_SEEN
   };
 
-  Result check() const;
+  Result Check() const;
 
-  void reportError(cmGeneratorExpressionContext *context,
+  void ReportError(cmGeneratorExpressionContext *context,
                    const std::string &expr);
 
   bool EvaluatingLinkLibraries(const char *tgt = 0);
@@ -71,7 +71,7 @@ struct cmGeneratorExpressionDAGChecker
     { this->TransitivePropertiesOnly = true; }
 
 private:
-  Result checkGraph() const;
+  Result CheckGraph() const;
 
 private:
   const cmGeneratorExpressionDAGChecker * const Parent;
