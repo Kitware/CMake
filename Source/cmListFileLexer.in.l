@@ -31,7 +31,9 @@ Modify cmListFileLexer.c:
 */
 
 #include "cmStandardLexer.h"
+#ifdef WIN32
 #include <cmsys/Encoding.h>
+#endif
 
 /* Setup the proper cmListFileLexer_yylex declaration.  */
 #define YY_EXTRA_TYPE cmListFileLexer*
@@ -43,7 +45,7 @@ Modify cmListFileLexer.c:
 struct cmListFileLexer_s
 {
   cmListFileLexer_Token token;
-  int bracket;
+  yy_size_t bracket;
   int comment;
   int line;
   int column;
