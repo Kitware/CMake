@@ -1,9 +1,6 @@
 
 find_package(Qt4 REQUIRED)
 
-set(QT_CORE_TARGET Qt4::QtCore)
-set(QT_GUI_TARGET Qt4::QtGui)
-
 set(CMAKE_AUTOUIC ON)
 
 set(CMAKE_DEBUG_TARGET_PROPERTIES AUTOUIC_OPTIONS)
@@ -19,4 +16,4 @@ set_property(TARGET OtherI18n APPEND PROPERTY
 )
 
 add_library(LibWidget empty.cpp)
-target_link_libraries(LibWidget KI18n OtherI18n ${QT_GUI_TARGET})
+target_link_libraries(LibWidget KI18n OtherI18n Qt4::QtGui)
