@@ -19,6 +19,7 @@
 #include <cmsys/String.h>
 
 #include <assert.h>
+#include <errno.h>
 
 //----------------------------------------------------------------------------
 #if !defined(__SUNPRO_CC) || __SUNPRO_CC > 0x510
@@ -48,7 +49,7 @@ struct cmGeneratorExpressionNode
   enum {
     DynamicParameters = 0,
     OneOrMoreParameters = -1,
-    ZeroOrMoreParameters = -2
+    OneOrZeroParameters = -2
   };
   virtual ~cmGeneratorExpressionNode() {}
 
@@ -197,6 +198,92 @@ static const struct StrEqualNode : public cmGeneratorExpressionNode
 } strEqualNode;
 
 //----------------------------------------------------------------------------
+static const struct EqualNode : public cmGeneratorExpressionNode
+{
+  EqualNode() {}
+
+  virtual int NumExpectedParameters() const { return 2; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    char *pEnd;
+
+    int base = 0;
+    bool flipSign = false;
+
+    const char *lhs = parameters[0].c_str();
+    if (cmHasLiteralPrefix(lhs, "0b"))
+      {
+      base = 2;
+      lhs += 2;
+      }
+    if (cmHasLiteralPrefix(lhs, "-0b"))
+      {
+      base = 2;
+      lhs += 3;
+      flipSign = true;
+      }
+    if (cmHasLiteralPrefix(lhs, "+0b"))
+      {
+      base = 2;
+      lhs += 3;
+      }
+
+    long lnum = strtol(lhs, &pEnd, base);
+    if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<EQUAL> parameter " + parameters[0] + " is not a valid integer.");
+      return std::string();
+      }
+
+    if (flipSign)
+      {
+      lnum = -lnum;
+      }
+
+    base = 0;
+    flipSign = false;
+
+    const char *rhs = parameters[1].c_str();
+    if (cmHasLiteralPrefix(rhs, "0b"))
+      {
+      base = 2;
+      rhs += 2;
+      }
+    if (cmHasLiteralPrefix(rhs, "-0b"))
+      {
+      base = 2;
+      rhs += 3;
+      flipSign = true;
+      }
+    if (cmHasLiteralPrefix(rhs, "+0b"))
+      {
+      base = 2;
+      rhs += 3;
+      }
+
+    long rnum = strtol(rhs, &pEnd, base);
+    if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<EQUAL> parameter " + parameters[1] + " is not a valid integer.");
+      return std::string();
+      }
+
+    if (flipSign)
+      {
+      rnum = -rnum;
+      }
+
+    return lnum == rnum ? "1" : "0";
+  }
+} equalNode;
+
+//----------------------------------------------------------------------------
 static const struct LowerCaseNode : public cmGeneratorExpressionNode
 {
   LowerCaseNode() {}
@@ -297,7 +384,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
 {
   CompilerIdNode() {}
 
-  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
 
   std::string EvaluateWithLanguage(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -343,12 +430,6 @@ static const struct CCompilerIdNode : public CompilerIdNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<C_COMPILER_ID> expression requires one or two parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -371,12 +452,6 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<CXX_COMPILER_ID> expression requires one or two parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -394,7 +469,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
 {
   CompilerVersionNode() {}
 
-  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
 
   std::string EvaluateWithLanguage(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -439,12 +514,6 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<C_COMPILER_VERSION> expression requires one or two parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -467,13 +536,6 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
                        const GeneratorExpressionContent *content,
                        cmGeneratorExpressionDAGChecker *dagChecker) const
   {
-    if (parameters.size() != 0 && parameters.size() != 1)
-      {
-      reportError(context, content->GetOriginalExpression(),
-          "$<CXX_COMPILER_VERSION> expression requires one or two "
-          "parameters");
-      return std::string();
-      }
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
@@ -492,7 +554,7 @@ struct PlatformIdNode : public cmGeneratorExpressionNode
 {
   PlatformIdNode() {}
 
-  virtual int NumExpectedParameters() const { return ZeroOrMoreParameters; }
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
 
   std::string Evaluate(const std::vector<std::string> &parameters,
                        cmGeneratorExpressionContext *context,
@@ -709,6 +771,8 @@ static const char* targetPropertyTransitiveWhitelist[] = {
   0
   CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_NAME)
 };
+
+#undef TRANSITIVE_PROPERTY_NAME
 
 std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
                                   cmTarget const* target,
@@ -937,6 +1001,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                             ASSERT_TRANSITIVE_PROPERTY_METHOD)
           false);
         }
+#undef ASSERT_TRANSITIVE_PROPERTY_METHOD
       }
 
     std::string linkedTargetsContent;
@@ -1492,6 +1557,8 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     return &targetSoNameFileDirNode;
   else if (identifier == "STREQUAL")
     return &strEqualNode;
+  else if (identifier == "EQUAL")
+    return &equalNode;
   else if (identifier == "LOWER_CASE")
     return &lowerCaseNode;
   else if (identifier == "UPPER_CASE")
@@ -1732,6 +1799,12 @@ std::string GeneratorExpressionContent::EvaluateParameters(
     {
     reportError(context, this->GetOriginalExpression(), "$<" + identifier
                       + "> expression requires at least one parameter.");
+    }
+  if (numExpected == cmGeneratorExpressionNode::OneOrZeroParameters
+      && parameters.size() > 2)
+    {
+    reportError(context, this->GetOriginalExpression(), "$<" + identifier
+                      + "> expression requires one or zero parameters.");
     }
   return std::string();
 }

@@ -187,6 +187,13 @@ void cmGlobalGenerator::AddBuildExportSet(cmExportBuildFileGenerator* gen)
   this->BuildExportSets[gen->GetMainExportFileName()] = gen;
 }
 
+void
+cmGlobalGenerator::AddBuildExportExportSet(cmExportBuildFileGenerator* gen)
+{
+  this->BuildExportSets[gen->GetMainExportFileName()] = gen;
+  this->BuildExportExportSets[gen->GetMainExportFileName()] = gen;
+}
+
 bool cmGlobalGenerator::GenerateImportFile(const std::string &file)
 {
   std::map<std::string, cmExportBuildFileGenerator*>::iterator it
@@ -207,7 +214,12 @@ cmGlobalGenerator::IsExportedTargetsFile(const std::string &filename) const
 {
   const std::map<std::string, cmExportBuildFileGenerator*>::const_iterator it
                                       = this->BuildExportSets.find(filename);
-  return it != this->BuildExportSets.end();
+  if (it == this->BuildExportSets.end())
+    {
+    return false;
+    }
+  return this->BuildExportExportSets.find(filename)
+                                        == this->BuildExportExportSets.end();
 }
 
 // Find the make program for the generator, required for try compiles
@@ -1164,17 +1176,6 @@ void cmGlobalGenerator::Generate()
   // it builds by default.
   this->FillLocalGeneratorToTargetMap();
 
-  for (i = 0; i < this->LocalGenerators.size(); ++i)
-    {
-    cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
-    cmTargets* targets = &(mf->GetTargets());
-    for ( cmTargets::iterator it = targets->begin();
-        it != targets->end(); ++ it )
-      {
-      it->second.FinalizeSystemIncludeDirectories();
-      }
-    }
-
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
@@ -1337,12 +1338,12 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
       {
       cmTarget* t = &ti->second;
 
+      t->AppendBuildInterfaceIncludes();
+
       if (t->GetType() == cmTarget::INTERFACE_LIBRARY)
         {
         continue;
         }
-
-      t->AppendBuildInterfaceIncludes();
 
       for (std::vector<cmValueWithOrigin>::const_iterator it
                                       = noconfig_compile_definitions.begin();
@@ -1908,7 +1909,8 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
                                    cmTarget& target)
 {
-  if(target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+  if(target.GetType() == cmTarget::INTERFACE_LIBRARY
+      || target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
     // This target is excluded from its directory.
     return true;

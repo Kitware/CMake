@@ -24,3 +24,5 @@ target_compile_definitions(shareddependlib
 
 add_library(shared_iface INTERFACE)
 target_link_libraries(shared_iface INTERFACE sharedlib)
+
+add_library(imported::iface INTERFACE IMPORTED GLOBAL)

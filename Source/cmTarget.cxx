@@ -24,6 +24,7 @@
 #include <set>
 #include <stdlib.h> // required for atof
 #include <assert.h>
+#include <errno.h>
 
 const char* cmTarget::GetTargetTypeName(TargetType targetType)
 {
@@ -1041,62 +1042,6 @@ cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::FinalizeSystemIncludeDirectories()
-{
-  for (std::vector<cmValueWithOrigin>::const_iterator
-      it = this->Internal->LinkImplementationPropertyEntries.begin(),
-      end = this->Internal->LinkImplementationPropertyEntries.end();
-      it != end; ++it)
-    {
-    if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-        && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-      {
-      continue;
-      }
-    {
-    cmListFileBacktrace lfbt;
-    cmGeneratorExpression ge(lfbt);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                      ge.Parse(it->Value);
-    std::string targetName = cge->Evaluate(this->Makefile, 0,
-                                      false, this, 0, 0);
-    cmTarget *tgt = this->Makefile->FindTargetToUse(targetName.c_str());
-    if (!tgt || tgt == this)
-      {
-      continue;
-      }
-    if (tgt->IsImported()
-        && tgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES")
-        && !this->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED"))
-      {
-      std::string includeGenex = "$<TARGET_PROPERTY:" +
-                                it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
-        }
-      this->SystemIncludeDirectories.insert(includeGenex);
-      return; // The INTERFACE_SYSTEM_INCLUDE_DIRECTORIES are a subset
-              // of the INTERFACE_INCLUDE_DIRECTORIES
-      }
-    }
-    std::string includeGenex = "$<TARGET_PROPERTY:" +
-                        it->Value + ",INTERFACE_SYSTEM_INCLUDE_DIRECTORIES>";
-    if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-      {
-      // Because it->Value is a generator expression, ensure that it
-      // evaluates to the non-empty string before being used in the
-      // TARGET_PROPERTY expression.
-      includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
-      }
-    this->SystemIncludeDirectories.insert(includeGenex);
-    }
-}
-
-//----------------------------------------------------------------------------
 void
 cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
 {
@@ -1402,14 +1347,10 @@ static bool whiteListedInterfaceProperty(const char *prop)
     "COMPATIBLE_INTERFACE_NUMBER_MAX",
     "COMPATIBLE_INTERFACE_NUMBER_MIN",
     "COMPATIBLE_INTERFACE_STRING",
-    "EXCLUDE_FROM_ALL",
-    "EXCLUDE_FROM_DEFAULT_BUILD",
     "EXPORT_NAME",
-    "IMPORTED_LINK_INTERFACE_LANGUAGES",
     "IMPORTED",
     "NAME",
-    "TYPE",
-    "VERSION"
+    "TYPE"
   };
 
   if (std::binary_search(cmArrayBegin(builtIns),
@@ -1420,9 +1361,7 @@ static bool whiteListedInterfaceProperty(const char *prop)
     return true;
     }
 
-  if (cmHasLiteralPrefix(prop, "EXCLUDE_FROM_DEFAULT_BUILD_")
-      || cmHasLiteralPrefix(prop, "IMPORTED_LINK_INTERFACE_LANGUAGES_")
-      || cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_"))
+  if (cmHasLiteralPrefix(prop, "MAP_IMPORTED_CONFIG_"))
     {
     return true;
     }
@@ -1605,6 +1544,7 @@ void cmTarget::AppendBuildInterfaceIncludes()
   if(this->GetType() != cmTarget::SHARED_LIBRARY &&
      this->GetType() != cmTarget::STATIC_LIBRARY &&
      this->GetType() != cmTarget::MODULE_LIBRARY &&
+     this->GetType() != cmTarget::INTERFACE_LIBRARY &&
      !this->IsExecutableWithExports())
     {
     return;
@@ -2574,6 +2514,8 @@ void cmTarget::GetTargetVersion(bool soversion,
   minor = 0;
   patch = 0;
 
+  assert(this->GetType() != INTERFACE_LIBRARY);
+
   // Look for a VERSION or SOVERSION property.
   const char* prop = soversion? "SOVERSION" : "VERSION";
   if(const char* version = this->GetProperty(prop))
@@ -2687,7 +2629,6 @@ const char *cmTarget::GetProperty(const char* prop,
      this->GetType() == cmTarget::STATIC_LIBRARY ||
      this->GetType() == cmTarget::SHARED_LIBRARY ||
      this->GetType() == cmTarget::MODULE_LIBRARY ||
-     this->GetType() == cmTarget::INTERFACE_LIBRARY ||
      this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
     if(strcmp(prop,"LOCATION") == 0)
@@ -3587,6 +3528,8 @@ void cmTarget::GetLibraryNames(std::string& name,
     return;
     }
 
+  assert(this->GetType() != INTERFACE_LIBRARY);
+
   // Check for library version properties.
   const char* version = this->GetProperty("VERSION");
   const char* soversion = this->GetProperty("SOVERSION");
@@ -4162,6 +4105,8 @@ std::string cmTarget::GetOutputName(const char* config, bool implib) const
 //----------------------------------------------------------------------------
 std::string cmTarget::GetFrameworkVersion() const
 {
+  assert(this->GetType() != INTERFACE_LIBRARY);
+
   if(const char* fversion = this->GetProperty("FRAMEWORK_VERSION"))
     {
     return fversion;
@@ -4274,6 +4219,7 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
                                                       const char *rhs,
                                                       CompatibleType t)
 {
+  char *pEnd;
 
 #if defined(_MSC_VER)
   static const char* const null_ptr = 0;
@@ -4281,10 +4227,14 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
 # define null_ptr 0
 #endif
 
-  double lnum;
-  double rnum;
-  if(sscanf(lhs, "%lg", &lnum) != 1 ||
-      sscanf(rhs, "%lg", &rnum) != 1)
+  long lnum = strtol(lhs, &pEnd, 0);
+  if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
+    {
+    return std::pair<bool, const char*>(false, null_ptr);
+    }
+
+  long rnum = strtol(rhs, &pEnd, 0);
+  if (pEnd == rhs || *pEnd != '\0' || errno == ERANGE)
     {
     return std::pair<bool, const char*>(false, null_ptr);
     }
@@ -5586,9 +5536,6 @@ void cmTarget::ComputeLinkImplementation(const char* config,
                                          LinkImplementation& impl,
                                          cmTarget const* head) const
 {
-  // Compute which library configuration to link.
-  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
-
   // Collect libraries directly linked in this configuration.
   std::vector<std::string> llibs;
   this->GetDirectLinkLibraries(config, llibs, head);
@@ -5681,6 +5628,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
     impl.Libraries.push_back(item);
     }
 
+  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
   LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
       li != oldllibs.end(); ++li)

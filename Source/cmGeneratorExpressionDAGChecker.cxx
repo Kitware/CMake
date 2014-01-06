@@ -40,6 +40,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
       CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(TEST_TRANSITIVE_PROPERTY_METHOD)
       false)
      )
+#undef TEST_TRANSITIVE_PROPERTY_METHOD
     {
     std::map<cmStdString, std::set<cmStdString> >::const_iterator it
                                                     = top->Seen.find(target);
@@ -191,7 +192,8 @@ bool
 cmGeneratorExpressionDAGChecker::EvaluatingSystemIncludeDirectories() const
 {
   const char *prop = this->Property.c_str();
-  return strcmp(prop, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES") == 0;
+  return (strcmp(prop, "SYSTEM_INCLUDE_DIRECTORIES") == 0
+       || strcmp(prop, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES") == 0);
 }
 
 //----------------------------------------------------------------------------

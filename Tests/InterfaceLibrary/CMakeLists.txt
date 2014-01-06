@@ -6,13 +6,15 @@ project(InterfaceLibrary)
 add_library(iface_nodepends INTERFACE)
 target_compile_definitions(iface_nodepends INTERFACE IFACE_DEFINE)
 
+add_subdirectory(headerdir)
+
 add_executable(InterfaceLibrary definetestexe.cpp)
-target_link_libraries(InterfaceLibrary iface_nodepends)
+target_link_libraries(InterfaceLibrary iface_nodepends headeriface)
 
 add_subdirectory(libsdir)
 
 add_executable(sharedlibtestexe sharedlibtestexe.cpp)
-target_link_libraries(sharedlibtestexe shared_iface)
+target_link_libraries(sharedlibtestexe shared_iface imported::iface)
 
 add_library(broken EXCLUDE_FROM_ALL broken.cpp)
 
