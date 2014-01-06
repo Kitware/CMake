@@ -9,17 +9,13 @@
 # information on how to load Java into your CMake project.
 #
 # add_jar(target_name
-#
-# ::
-#
-#          [SOURCES] source1 [source2 ...] [resource1 ...]
-#          [INCLUDE_JARS jar1 [jar2 ...]]
-#          [ENTRY_POINT entry]
-#          [VERSION version]
-#          [OUTPUT_NAME name]
-#          [OUTPUT_DIR dir]
+#         [SOURCES] source1 [source2 ...] [resource1 ...]
+#         [INCLUDE_JARS jar1 [jar2 ...]]
+#         [ENTRY_POINT entry]
+#         [VERSION version]
+#         [OUTPUT_NAME name]
+#         [OUTPUT_DIR dir]
 #         )
-#
 #
 #
 # This command creates a <target_name>.jar.  It compiles the given
@@ -191,16 +187,13 @@
 #
 #
 #
+#
 # find_jar(<VAR>
-#
-# ::
-#
-#           name | NAMES name1 [name2 ...]
-#           [PATHS path1 [path2 ... ENV var]]
-#           [VERSIONS version1 [version2]]
-#           [DOC "cache documentation string"]
+#          name | NAMES name1 [name2 ...]
+#          [PATHS path1 [path2 ... ENV var]]
+#          [VERSIONS version1 [version2]]
+#          [DOC "cache documentation string"]
 #          )
-#
 #
 #
 # This command is used to find a full path to the named jar.  A cache
@@ -227,21 +220,19 @@
 # DESTINATION.  It should be called in the same scope as add_jar() or it
 # will fail.
 #
+#
+#
 # create_javadoc(<VAR>
-#
-# ::
-#
-#                 PACKAGES pkg1 [pkg2 ...]
-#                 [SOURCEPATH <sourcepath>]
-#                 [CLASSPATH <classpath>]
-#                 [INSTALLPATH <install path>]
-#                 [DOCTITLE "the documentation title"]
-#                 [WINDOWTITLE "the title of the document"]
-#                 [AUTHOR TRUE|FALSE]
-#                 [USE TRUE|FALSE]
-#                 [VERSION TRUE|FALSE]
+#                PACKAGES pkg1 [pkg2 ...]
+#                [SOURCEPATH <sourcepath>]
+#                [CLASSPATH <classpath>]
+#                [INSTALLPATH <install path>]
+#                [DOCTITLE "the documentation title"]
+#                [WINDOWTITLE "the title of the document"]
+#                [AUTHOR TRUE|FALSE]
+#                [USE TRUE|FALSE]
+#                [VERSION TRUE|FALSE]
 #                )
-#
 #
 #
 # Create java documentation based on files or packages.  For more

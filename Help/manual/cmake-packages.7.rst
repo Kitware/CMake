@@ -72,6 +72,10 @@ or as a separate ``OPTIONAL_COMPONENTS`` list:
 Handling of ``COMPONENTS`` and ``OPTIONAL_COMPONENTS`` is defined by the
 package.
 
+By setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to
+``TRUE``, the ``PackageName`` package will not be searched, and will always
+be ``NOTFOUND``.
+
 Config-file Packages
 --------------------
 
@@ -276,6 +280,12 @@ shared library:
 
   add_library(ClimbingStats SHARED climbingstats.cpp)
   generate_export_header(ClimbingStats)
+  set_property(TARGET ClimbingStats PROPERTY VERSION ${Upstream_VERSION})
+  set_property(TARGET ClimbingStats PROPERTY SOVERSION 3)
+  set_property(TARGET ClimbingStats PROPERTY INTERFACE_ClimbingStats_MAJOR_VERSION 3)
+  set_property(TARGET ClimbingStats APPEND PROPERTY
+    COMPATIBLE_INTERFACE_STRING ClimbingStats_MAJOR_VERSION
+  )
 
   install(TARGETS ClimbingStats EXPORT ClimbingStatsTargets
     LIBRARY DESTINATION lib
@@ -341,6 +351,22 @@ targets, suitable for use by downsteams and arranges to install it to
 ``lib/cmake/ClimbingStats``.  The generated ``ClimbingStatsConfigVersion.cmake``
 and a ``cmake/ClimbingStatsConfig.cmake`` are installed to the same location,
 completing the package.
+
+The generated :prop_tgt:`IMPORTED` targets have appropriate properties set
+to define their usage requirements, such as
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
+:prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and other relevant built-in
+``INTERFACE_`` properties.  The ``INTERFACE`` variant of user-defined
+properties listed in :prop_tgt:`COMPATIBLE_INTERFACE_STRING` and
+other :ref:`Compatible Interface Properties` are also propagated to the
+generated :prop_tgt:`IMPORTED` targets.  In the above case,
+``ClimbingStats_MAJOR_VERSION`` is defined as a string which must be
+compatible among the dependencies of any depender.  By setting this custom
+defined user property in this version and in the next version of
+``ClimbingStats``, :manual:`cmake(1)` will issue a diagnostic if there is an
+attempt to use version 3 together with version 4.  Packages can choose to
+employ such a pattern if different major versions of the package are designed
+to be incompatible.
 
 A ``NAMESPACE`` with double-colons is specified when exporting the targets
 for installation.  This convention of double-colons gives CMake a hint that

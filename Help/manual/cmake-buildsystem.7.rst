@@ -218,6 +218,8 @@ each keyword:
     PRIVATE serialization
   )
 
+.. _`Compatible Interface Properties`:
+
 Compatible Interface Properties
 -------------------------------
 

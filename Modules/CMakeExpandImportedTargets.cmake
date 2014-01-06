@@ -2,13 +2,8 @@
 # CMakeExpandImportedTargets
 # --------------------------
 #
-#
-#
 # CMAKE_EXPAND_IMPORTED_TARGETS(<var> LIBRARIES lib1 lib2...libN
-#
-# ::
-#
-#                                      [CONFIGURATION <config>] )
+#                               [CONFIGURATION <config>])
 #
 #
 #

@@ -215,18 +215,18 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     bool flipSign = false;
 
     const char *lhs = parameters[0].c_str();
-    if (cmHasLiteralPrefix(lhs, "0b"))
+    if (cmHasLiteralPrefix(lhs, "0b") || cmHasLiteralPrefix(lhs, "0B"))
       {
       base = 2;
       lhs += 2;
       }
-    if (cmHasLiteralPrefix(lhs, "-0b"))
+    if (cmHasLiteralPrefix(lhs, "-0b") || cmHasLiteralPrefix(lhs, "-0B"))
       {
       base = 2;
       lhs += 3;
       flipSign = true;
       }
-    if (cmHasLiteralPrefix(lhs, "+0b"))
+    if (cmHasLiteralPrefix(lhs, "+0b") || cmHasLiteralPrefix(lhs, "+0B"))
       {
       base = 2;
       lhs += 3;
@@ -249,18 +249,18 @@ static const struct EqualNode : public cmGeneratorExpressionNode
     flipSign = false;
 
     const char *rhs = parameters[1].c_str();
-    if (cmHasLiteralPrefix(rhs, "0b"))
+    if (cmHasLiteralPrefix(rhs, "0b") || cmHasLiteralPrefix(rhs, "0B"))
       {
       base = 2;
       rhs += 2;
       }
-    if (cmHasLiteralPrefix(rhs, "-0b"))
+    if (cmHasLiteralPrefix(rhs, "-0b") || cmHasLiteralPrefix(rhs, "-0B"))
       {
       base = 2;
       rhs += 3;
       flipSign = true;
       }
-    if (cmHasLiteralPrefix(rhs, "+0b"))
+    if (cmHasLiteralPrefix(rhs, "+0b") || cmHasLiteralPrefix(rhs, "+0B"))
       {
       base = 2;
       rhs += 3;
@@ -957,10 +957,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                                content,
                                                dagCheckerParent);
 
-    switch (dagChecker.check())
+    switch (dagChecker.Check())
       {
     case cmGeneratorExpressionDAGChecker::SELF_REFERENCE:
-      dagChecker.reportError(context, content->GetOriginalExpression());
+      dagChecker.ReportError(context, content->GetOriginalExpression());
       return std::string();
     case cmGeneratorExpressionDAGChecker::CYCLIC_REFERENCE:
       // No error. We just skip cyclic references.
