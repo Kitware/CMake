@@ -9,6 +9,6 @@ files.  As this ``_automoc`` target is created at generate-time, it is not
 possible to define dependencies of it, such as to create inputs for the ``moc``
 executable.
 
-The ``AUTOGEN_TARGET_DEPENDS`` target can be set instead to a list of dependencies
-for the ``_automoc`` target. The buildsystem will be generated to depend on its
-contents.
+The ``AUTOGEN_TARGET_DEPENDS`` target property can be set instead to a list of
+dependencies for the ``_automoc`` target.  The buildsystem will be generated to
+depend on its contents.
