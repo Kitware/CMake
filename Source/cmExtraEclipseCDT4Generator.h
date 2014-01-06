@@ -115,6 +115,7 @@ private:
   bool GenerateLinkedResources;
   bool SupportsVirtualFolders;
   bool SupportsGmakeErrorParser;
+  bool SupportsMachO64Parser;
 
 };
 
