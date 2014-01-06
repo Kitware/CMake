@@ -1,15 +1,6 @@
 CMake Error at BadCONFIG.cmake:1 \(add_custom_target\):
   Error evaluating generator expression:
 
-    \$<CONFIG>
-
-  \$<CONFIG> expression requires exactly one parameter.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
-+
-CMake Error at BadCONFIG.cmake:1 \(add_custom_target\):
-  Error evaluating generator expression:
-
     \$<CONFIG:.>
 
   Expression syntax not recognized.
@@ -21,7 +12,7 @@ CMake Error at BadCONFIG.cmake:1 \(add_custom_target\):
 
     \$<CONFIG:Foo,Bar>
 
-  \$<CONFIG> expression requires exactly one parameter.
+  \$<CONFIG> expression requires one or zero parameters.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
