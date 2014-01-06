@@ -62,15 +62,93 @@ bool cmProjectCommand
        "Value Computed by CMake", cmCacheManager::STATIC);
     }
 
+  std::string version;
   std::vector<std::string> languages;
-  if(args.size() > 1)
+  bool doingVersion = false;
+  for(size_t i =1; i < args.size(); ++i)
     {
-    for(size_t i =1; i < args.size(); ++i)
+    if (doingVersion)
       {
-      languages.push_back(args[i]);
+      doingVersion = false;
+      version = args[i];
+      }
+    else
+      {
+      if (args[i] == "VERSION")
+        {
+        doingVersion = true;
+        }
+      else
+        {
+        languages.push_back(args[i]);
+        }
       }
     }
-  else
+
+  if (version.size() > 0)
+    {
+    // A version was set, set the variables.
+    unsigned int versionMajor = 0;
+    unsigned int versionMinor = 0;
+    unsigned int versionPatch = 0;
+    unsigned int versionTweak= 0;
+    int versionCount = sscanf(version.c_str(), "%u.%u.%u.%u",
+                              &versionMajor, &versionMinor,
+                              &versionPatch, &versionTweak);
+
+    char buffer[1024];
+
+    std::string versionVar = args[0];
+    versionVar += "_VERSION_TWEAK";
+    sprintf(buffer, "%d", versionCount >=4 ? versionTweak : 0);
+    this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", buffer);
+    this->Makefile->AddDefinition(versionVar.c_str(), buffer);
+
+    versionVar = args[0];
+    versionVar += "_VERSION_PATCH";
+    sprintf(buffer, "%d", versionCount >=3 ? versionPatch : 0);
+    this->Makefile->AddDefinition("PROJECT_VERSION_PATCH", buffer);
+    this->Makefile->AddDefinition(versionVar.c_str(), buffer);
+
+    versionVar = args[0];
+    versionVar += "_VERSION_MINOR";
+    sprintf(buffer, "%d", versionCount >=2 ? versionMinor : 0);
+    this->Makefile->AddDefinition("PROJECT_VERSION_MINOR", buffer);
+    this->Makefile->AddDefinition(versionVar.c_str(), buffer);
+
+    versionVar = args[0];
+    versionVar += "_VERSION_MAJOR";
+    sprintf(buffer, "%d", versionCount >=1 ? versionMajor : 0);
+    this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR", buffer);
+    this->Makefile->AddDefinition(versionVar.c_str(), buffer);
+
+    switch(versionCount)
+    {
+      case 4:
+        sprintf(buffer, "%d.%d.%d.%d",
+                versionMajor, versionMinor, versionPatch, versionTweak);
+        break;
+      case 3:
+        sprintf(buffer, "%d.%d.%d", versionMajor, versionMinor, versionPatch);
+        break;
+      case 2:
+        sprintf(buffer, "%d.%d", versionMajor, versionMinor);
+        break;
+      case 1:
+        sprintf(buffer, "%d", versionMajor);
+        break;
+      case 0:
+        sprintf(buffer, "0");
+        break;
+    }
+
+    versionVar = args[0];
+    versionVar += "_VERSION";
+    this->Makefile->AddDefinition("PROJECT_VERSION", buffer);
+    this->Makefile->AddDefinition(versionVar.c_str(), buffer);
+  }
+
+  if (languages.size() == 0)
     {
     // if no language is specified do c and c++
     languages.push_back("C");
