@@ -72,6 +72,10 @@ or as a separate ``OPTIONAL_COMPONENTS`` list:
 Handling of ``COMPONENTS`` and ``OPTIONAL_COMPONENTS`` is defined by the
 package.
 
+By setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to
+``TRUE``, the ``PackageName`` package will not be searched, and will always
+be ``NOTFOUND``.
+
 Config-file Packages
 --------------------
 
