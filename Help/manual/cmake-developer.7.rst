@@ -13,6 +13,165 @@ Introduction
 This manual is intended for reference by developers modifying the CMake
 source tree itself.
 
+
+Permitted C++ Subset
+====================
+
+CMake is required to build with ancient C++ compilers and standard library
+implementations.  Some common C++ constructs may not be used in CMake in order
+to build with such toolchains.
+
+std::vector::at
+---------------
+
+The ``at()`` member function of ``std::vector`` may not be used. Use
+``operator[]`` instead:
+
+.. code-block:: c++
+
+  std::vector<int> someVec = getVec();
+  int i1 = someVec.at(5); // Wrong
+  int i2 = someVec[5];    // Ok
+
+std::string::append
+-------------------
+
+The ``append()`` member function of ``std::string`` may not be used. Use
+``operator+=`` instead:
+
+.. code-block:: c++
+
+  std::string stringBuilder;
+  stringBuilder.append("chunk"); // Wrong
+  stringBuilder += "chunk";      // Ok
+
+std::set const iterators
+------------------------
+
+The ``find()`` member function of a ``const`` ``std::set`` instance may not be
+used in a comparison with the iterator returned by ``end()``:
+
+.. code-block:: c++
+
+  const std::set<cmStdString>& someSet = getSet();
+  if (someSet.find("needle") == someSet.end()) // Wrong
+    {
+    // ...
+    }
+
+The return value of ``find()`` must be assigned to an intermediate
+``const_iterator`` for comparison:
+
+.. code-block:: c++
+
+  const std::set<cmStdString>& someSet;
+  const std::set<cmStdString>::const_iterator i = someSet.find("needle");
+  if (i != propSet.end()) // Ok
+    {
+    // ...
+    }
+
+Char Array to ``string`` Conversions with Algorithms
+----------------------------------------------------
+
+In some implementations, algorithms operating on iterators to a container of
+``std::string`` can not accept a ``const char*`` value:
+
+.. code-block:: c++
+
+  const char* dir = /*...*/;
+  std::vector<std::string> vec;
+  // ...
+  std::binary_find(vec.begin(), vec.end(), dir); // Wrong
+
+The ``std::string`` may need to be explicitly constructed:
+
+.. code-block:: c++
+
+  const char* dir = /*...*/;
+  std::vector<std::string> vec;
+  // ...
+  std::binary_find(vec.begin(), vec.end(), std::string(dir)); // Ok
+
+std::auto_ptr
+-------------
+
+Some implementations have a ``std::auto_ptr`` which can not be used as a
+return value from a function. ``std::auto_ptr`` may not be used. Use
+``cmsys::auto_ptr`` instead.
+
+std::vector::insert and std::set
+--------------------------------
+
+Use of ``std::vector::insert`` with an iterator whose ``element_type`` requires
+conversion is not allowed:
+
+.. code-block:: c++
+
+  std::set<cmStdString> theSet;
+  std::vector<std::string> theVector;
+  theVector.insert(theVector.end(), theSet.begin(), theSet.end()); // Wrong
+
+A loop must be used instead:
+
+.. code-block:: c++
+
+  std::set<cmStdString> theSet;
+  std::vector<std::string> theVector;
+  for(std::set<cmStdString>::iterator li = theSet.begin();
+      li != theSet.end(); ++li)
+    {
+    theVector.push_back(*li);
+    }
+
+Template Parameter Defaults
+---------------------------
+
+On ancient compilers, C++ template must use template parameters in function
+arguments.  If no parameter of that type is needed, the common workaround is
+to add a defaulted pointer to the type to the templated function. However,
+this does not work with other ancient compilers:
+
+.. code-block:: c++
+
+  template<typename PropertyType>
+  PropertyType getTypedProperty(cmTarget* tgt, const char* prop,
+                                PropertyType* = 0) // Wrong
+    {
+
+    }
+
+.. code-block:: c++
+
+  template<typename PropertyType>
+  PropertyType getTypedProperty(cmTarget* tgt, const char* prop,
+                                PropertyType*) // Ok
+    {
+
+    }
+
+and invoke it with the value ``0`` explicitly in all cases.
+
+std::min and std::max
+---------------------
+
+``min`` and ``max`` are defined as macros on some systems. ``std::min`` and
+``std::max`` may not be used.  Use ``cmMinimum`` and ``cmMaximum`` instead.
+
+size_t
+------
+
+Various implementations have differing implementation of ``size_t``.  When
+assigning the result of ``.size()`` on a container for example, the result
+should not be assigned to an ``unsigned int`` or similar. ``std::size_t`` must
+not be used.
+
+Templates
+---------
+
+Some template code is permitted, but with some limitations. Member templates
+may not be used, and template friends may not be used.
+
 Help
 ====
 
