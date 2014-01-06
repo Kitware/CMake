@@ -1151,8 +1151,8 @@ void cmFindPackageCommand::AddPrefixesSystemEnvironment()
       std::string const& d = *i;
 
       // If the path is a PREFIX/bin case then add its parent instead.
-      if((d.size() >= 4 && cmHasLiteralSuffix(d, "/bin")) ||
-         (d.size() >= 5 && cmHasLiteralSuffix(d, "/sbin")))
+      if((cmHasLiteralSuffix(d, "/bin")) ||
+         (cmHasLiteralSuffix(d, "/sbin")))
         {
         this->AddPathInternal(cmSystemTools::GetFilenamePath(d), EnvPath);
         }
