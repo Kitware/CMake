@@ -395,14 +395,16 @@ inline bool cmHasLiteralSuffixImpl(const std::string &str1,
                                    const char *str2,
                                    size_t N)
 {
-  return strcmp(str1.c_str() + str1.size() - N, str2) == 0;
+  size_t len = str1.size();
+  return len >= N && strcmp(str1.c_str() + len - N, str2) == 0;
 }
 
 inline bool cmHasLiteralSuffixImpl(const char* str1,
                                    const char* str2,
                                    size_t N)
 {
-  return strcmp(str1 + strlen(str1) - N, str2) == 0;
+  size_t len = strlen(str1);
+  return len >= N && strcmp(str1 + len - N, str2) == 0;
 }
 
 #if defined(_MSC_VER) && _MSC_VER < 1300 \
