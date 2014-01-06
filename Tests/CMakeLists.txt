@@ -743,6 +743,19 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --test-command   ${SimpleInstallInstallDir}/MyTest/bin/SimpleInstExeS2)
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SimpleInstallS2")
 
+  set(MissingInstallInstallDir
+    "${CMake_BINARY_DIR}/Tests/MissingInstall/InstallDirectory")
+  add_test(MissingInstall ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/MissingInstall"
+    "${CMake_BINARY_DIR}/Tests/MissingInstall"
+    ${build_generator_args}
+    --build-project TestMissingInstall
+    --build-two-config
+    --build-options ${build_options}
+    "-DCMAKE_INSTALL_PREFIX:PATH=${MissingInstallInstallDir}")
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MissingInstall")
+
   # By default, run the CPackComponents test if the CTEST_TEST_CPACK
   # option is ON:
   #

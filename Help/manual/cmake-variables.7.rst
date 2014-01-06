@@ -31,7 +31,6 @@ Variables that Provide Information
    /variable/CMAKE_CURRENT_LIST_FILE
    /variable/CMAKE_CURRENT_LIST_LINE
    /variable/CMAKE_CURRENT_SOURCE_DIR
-   /variable/CMAKE_DISABLE_INSTALL_RULES
    /variable/CMAKE_DL_LIBS
    /variable/CMAKE_EDIT_COMMAND
    /variable/CMAKE_EXECUTABLE_SUFFIX
@@ -60,6 +59,7 @@ Variables that Provide Information
    /variable/CMAKE_SHARED_MODULE_PREFIX
    /variable/CMAKE_SHARED_MODULE_SUFFIX
    /variable/CMAKE_SIZEOF_VOID_P
+   /variable/CMAKE_SKIP_INSTALL_RULES
    /variable/CMAKE_SKIP_RPATH
    /variable/CMAKE_SOURCE_DIR
    /variable/CMAKE_STANDARD_LIBRARIES
