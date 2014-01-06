@@ -33,6 +33,15 @@ bool cmAddDependenciesCommand
     }
   if(cmTarget* target = this->Makefile->FindTargetToUse(target_name.c_str()))
     {
+    if (target->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      cmOStringStream e;
+      e << "Cannot add target-level dependencies to INTERFACE library "
+        "target \"" << target_name << "\".\n";
+      this->SetError(e.str().c_str());
+      return false;
+      }
+
     std::vector<std::string>::const_iterator s = args.begin();
     ++s; // skip over target_name
     for (; s != args.end(); ++s)

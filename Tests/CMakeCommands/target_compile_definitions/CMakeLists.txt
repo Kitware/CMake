@@ -25,3 +25,10 @@ target_compile_definitions(consumer
 target_compile_definitions(consumer
   PRIVATE
 )
+
+add_definitions(-DSOME_DEF)
+add_library(imp UNKNOWN IMPORTED)
+get_target_property(_res imp COMPILE_DEFINITIONS)
+if (_res)
+  message(SEND_ERROR "add_definitions populated the COMPILE_DEFINITIONS target property")
+endif()

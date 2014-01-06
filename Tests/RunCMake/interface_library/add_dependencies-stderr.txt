@@ -1,0 +1,6 @@
+CMake Error at add_dependencies.cmake:4 \(add_dependencies\):
+  add_dependencies Cannot add target-level dependencies to INTERFACE library
+  target "iface".
+
+Call Stack \(most recent call first\):
+  CMakeLists.txt:3 \(include\)
