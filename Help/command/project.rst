@@ -7,9 +7,11 @@ Set a name for the entire project.
 
   project(<projectname> [languageName1 languageName2 ... ] )
 
-Sets the name of the project.  Additionally this sets the variables
+Sets the name of the project, the name is also stored in the PROJECT_NAME
+variable.  Additionally this sets the cache variables
 <projectName>_BINARY_DIR and <projectName>_SOURCE_DIR to the
-respective values.
+respective values, as well as the PROJECT_BINARY_DIR and PROJECT_SOURCE_DIR
+variables.
 
 Optionally you can specify which languages your project supports.
 Example languages are CXX (i.e.  C++), C, Fortran, etc.  By default C
