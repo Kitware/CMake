@@ -1334,9 +1334,6 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
     const std::vector<cmValueWithOrigin> noconfig_compile_definitions =
                                 mf->GetCompileDefinitionsEntries();
 
-    std::vector<std::string> configs;
-    mf->GetConfigurations(configs);
-
     cmTargets& targets = mf->GetTargets();
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
@@ -1357,13 +1354,21 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
         t->InsertCompileDefinition(*it);
         }
 
-      for(std::vector<std::string>::const_iterator ci = configs.begin();
-          ci != configs.end(); ++ci)
+      cmPolicies::PolicyStatus polSt
+                                  = mf->GetPolicyStatus(cmPolicies::CMP0043);
+      if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD)
         {
-        std::string defPropName = "COMPILE_DEFINITIONS_";
-        defPropName += cmSystemTools::UpperCase(*ci);
-        t->AppendProperty(defPropName.c_str(),
-                          mf->GetProperty(defPropName.c_str()));
+        std::vector<std::string> configs;
+        mf->GetConfigurations(configs);
+
+        for(std::vector<std::string>::const_iterator ci = configs.begin();
+            ci != configs.end(); ++ci)
+          {
+          std::string defPropName = "COMPILE_DEFINITIONS_";
+          defPropName += cmSystemTools::UpperCase(*ci);
+          t->AppendProperty(defPropName.c_str(),
+                            mf->GetProperty(defPropName.c_str()));
+          }
         }
       }
     }

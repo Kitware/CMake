@@ -412,9 +412,30 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       return parameters.front().empty() ? "1" : "0";
       }
 
-    if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
+    if (strcmp(parameters.begin()->c_str(), compilerId) == 0)
       {
       return "1";
+      }
+
+    if (cmsysString_strcasecmp(parameters.begin()->c_str(), compilerId) == 0)
+      {
+      switch(context->Makefile->GetPolicyStatus(cmPolicies::CMP0044))
+        {
+        case cmPolicies::WARN:
+          {
+          cmOStringStream e;
+          e << context->Makefile->GetPolicies()
+                      ->GetPolicyWarning(cmPolicies::CMP0044);
+          context->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                                       e.str().c_str());
+          }
+        case cmPolicies::OLD:
+          return "1";
+        case cmPolicies::NEW:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+          break;
+        }
       }
     return "0";
   }
@@ -1024,7 +1045,12 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     /* else */ if (cmHasLiteralPrefix(propertyName.c_str(),
                            "COMPILE_DEFINITIONS_"))
       {
-      interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
+      cmPolicies::PolicyStatus polSt =
+                      context->Makefile->GetPolicyStatus(cmPolicies::CMP0043);
+      if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD)
+        {
+        interfacePropertyName = "INTERFACE_COMPILE_DEFINITIONS";
+        }
       }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
 

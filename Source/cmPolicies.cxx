@@ -316,6 +316,16 @@ cmPolicies::cmPolicies()
     CMP0042, "CMP0042",
     "MACOSX_RPATH is enabled by default.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0043, "CMP0043",
+    "Ignore COMPILE_DEFINITIONS_<Config> properties.",
+    3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0044, "CMP0044",
+    "Case sensitive <LANG>_COMPILER_ID generator expressions.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

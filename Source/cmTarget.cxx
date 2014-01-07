@@ -2209,14 +2209,34 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
       std::string configPropName = "COMPILE_DEFINITIONS_"
                                           + cmSystemTools::UpperCase(config);
       const char *configProp = this->GetProperty(configPropName.c_str());
-      std::string defsString = (configProp ? configProp : "");
-
-      cmGeneratorExpression ge(lfbt);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(defsString);
-      this->Internal
-        ->CachedLinkInterfaceCompileDefinitionsEntries[configString].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge));
+      if (configProp)
+        {
+        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0043))
+          {
+          case cmPolicies::WARN:
+            {
+            cmOStringStream e;
+            e << this->Makefile->GetCMakeInstance()->GetPolicies()
+                     ->GetPolicyWarning(cmPolicies::CMP0043);
+            this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                                         e.str().c_str());
+            }
+          case cmPolicies::OLD:
+            {
+            cmGeneratorExpression ge(lfbt);
+            cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                        ge.Parse(configProp);
+            this->Internal
+              ->CachedLinkInterfaceCompileDefinitionsEntries[configString]
+                  .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
+            }
+            break;
+          case cmPolicies::NEW:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::REQUIRED_IF_USED:
+            break;
+          }
+        }
       }
 
     }
