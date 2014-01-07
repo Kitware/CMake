@@ -877,8 +877,10 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     }
 
   std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
-
-  fileRef->AddAttribute("explicitFileType",
+  const char* attribute = (sourcecode == "file.storyboard") ?
+                           "lastKnownFileType" :
+                           "explicitFileType";
+  fileRef->AddAttribute(attribute,
                         this->CreateString(sourcecode.c_str()));
 
   // Store the file path relative to the top of the source tree.
