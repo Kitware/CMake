@@ -392,11 +392,41 @@ should be provided by the ``ClimbingStats`` package, they should
 be in a separate file which is installed to the same location as the
 ``ClimbingStatsConfig.cmake`` file, and included from there.
 
+Packages created by :command:`install(EXPORT)` are designed to be relocatable,
+using paths relative to the location of the package itself.  When defining
+the interface of a target for ``EXPORT``, keep in mind that the include
+directories should be specified as relative paths which are relative to the
+:variable:`CMAKE_INSTALL_PREFIX`:
+
+.. code-block:: cmake
+
+  target_include_directories(tgt INTERFACE
+    # Wrong, not relocatable:
+    $<INSTALL_INTERFACE:${CMAKE_INSTALL_PREFIX}/include/TgtName>
+  )
+
+  target_include_directories(tgt INTERFACE
+    # Ok, relocatable:
+    $<INSTALL_INTERFACE:include/TgtName>
+  )
+
+The ``$<INSTALL_PREFIX>``
+:manual:`generator expression <cmake-generator-expressions(7)>` may be used as
+a placeholder for the install prefix without resulting in a non-relocatable
+package.  This is necessary if complex generator expressions are used:
+
+.. code-block:: cmake
+
+  target_include_directories(tgt INTERFACE
+    # Ok, relocatable:
+    $<INSTALL_INTERFACE:$<$<CONFIG:Debug>:$<INSTALL_PREFIX>/include/TgtName>>
+  )
+
 The :command:`export(EXPORT)` command creates an :prop_tgt:`IMPORTED` targets
-definition file which is specific to the build-tree.  This can similiarly be
-used with a suitable package configuration file and package version file to
-define a package for the build tree which may be used without installation.
-Consumers of the build tree can simply ensure that the
+definition file which is specific to the build-tree, and is not relocatable.
+This can similiarly be used with a suitable package configuration file and
+package version file to define a package for the build tree which may be used
+without installation.  Consumers of the build tree can simply ensure that the
 :variable:`CMAKE_PREFIX_PATH` contains the build directory, or set the
 ``ClimbingStats_DIR`` to ``<build_dir>/ClimbingStats`` in the cache.
 
