@@ -65,7 +65,8 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
 static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
                                   const char *config, cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
-                                  std::vector<std::string>& result)
+                                  std::vector<std::string>& result,
+                                  bool excludeImported)
 {
   cmTarget* depTgt = mf->FindTargetToUse(name.c_str());
 
@@ -85,7 +86,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
                                       config, false, headTarget,
                                       depTgt, dagChecker), result);
     }
-  if (!depTgt->IsImported())
+  if (!depTgt->IsImported() || excludeImported)
     {
     return;
     }
@@ -130,6 +131,9 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                         this->GetName(),
                                         "SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
 
+    bool excludeImported
+                = this->Target->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
+
     std::vector<std::string> result;
     for (std::set<cmStdString>::const_iterator
         it = this->Target->GetSystemIncludeDirectories().begin();
@@ -156,7 +160,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
           }
 
         handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
-                                &dagChecker, result);
+                                &dagChecker, result, excludeImported);
 
         std::vector<std::string> deps;
         tgt->GetTransitivePropertyLinkLibraries(config, this->Target, deps);
@@ -167,7 +171,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
           if (uniqueDeps.insert(*di).second)
             {
             handleSystemIncludesDep(this->Makefile, *di, config, this->Target,
-                                    &dagChecker, result);
+                                    &dagChecker, result, excludeImported);
             }
           }
         }
