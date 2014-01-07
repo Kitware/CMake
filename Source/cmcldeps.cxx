@@ -139,7 +139,7 @@ static void outputDepFile(const std::string& dfile, const std::string& objfile,
   std::sort(incs.begin(), incs.end());
   incs.erase(std::unique(incs.begin(), incs.end()), incs.end());
 
-  FILE* out = fopen(dfile.c_str(), "wb");
+  FILE* out = cmsys::SystemTools::Fopen(dfile.c_str(), "wb");
 
   // FIXME should this be fatal or not? delete obj? delete d?
   if (!out)

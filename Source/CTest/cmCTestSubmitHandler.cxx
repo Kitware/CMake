@@ -235,7 +235,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const cmStdString& localprefix,
         return false;
         }
 
-      ftpfile = ::fopen(local_file.c_str(), "rb");
+      ftpfile = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
       *this->LogFile << "\tUpload file: " << local_file.c_str() << " to "
           << upload_as.c_str() << std::endl;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Upload file: "
@@ -476,7 +476,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
         return false;
         }
 
-      ftpfile = ::fopen(local_file.c_str(), "rb");
+      ftpfile = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Upload file: "
         << local_file.c_str() << " to "
         << upload_as.c_str() << " Size: " << st.st_size << std::endl);
@@ -566,7 +566,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const cmStdString& localprefix,
             << count << std::endl);
 
           ::fclose(ftpfile);
-          ftpfile = ::fopen(local_file.c_str(), "rb");
+          ftpfile = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
           ::curl_easy_setopt(curl, CURLOPT_INFILE, ftpfile);
 
           chunk.clear();
@@ -998,7 +998,7 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(const cmStdString& localprefix,
       return false;
       }
     size_t fileSize = static_cast<size_t>(st.st_size);
-    FILE* fp = fopen(local_file.c_str(), "rb");
+    FILE* fp = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
     if ( !fp )
       {
       cmCTestLog(this->CTest, ERROR_MESSAGE, "  Cannot open file: "

@@ -11,8 +11,8 @@
 ============================================================================*/
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Process.h>
-#include <cmsys/ios/fstream>
 #include <cmsys/ios/iostream>
+#include <cmsys/FStream.hxx>
 
 #include <CoreFoundation/CoreFoundation.h>
 
@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 {
   //if ( cmsys::SystemTools::FileExists(
   cmsys_stl::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
-  cmsys_ios::ofstream ofs("/tmp/output.txt");
+  cmsys::ofstream ofs("/tmp/output.txt");
 
   CFStringRef fileName;
   CFBundleRef appBundle;

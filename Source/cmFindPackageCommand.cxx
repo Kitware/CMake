@@ -1334,7 +1334,7 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir)
       cmFindPackageCommandHoldFile holdFile(fname.c_str());
 
       // Load the file.
-      std::ifstream fin(fname.c_str(), std::ios::in | cmsys_ios_binary);
+      cmsys::ifstream fin(fname.c_str(), std::ios::in | cmsys_ios_binary);
       if(fin && this->CheckPackageRegistryEntry(fin))
         {
         // The file references an existing package, so release it.

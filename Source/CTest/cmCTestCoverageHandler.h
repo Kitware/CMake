@@ -132,7 +132,7 @@ private:
   // Label reading and writing methods.
   void LoadLabels();
   void LoadLabels(const char* dir);
-  void WriteXMLLabels(std::ofstream& os, std::string const& source);
+  void WriteXMLLabels(std::ostream& os, std::string const& source);
 
   // Label-based filtering.
   std::set<int> LabelFilter;

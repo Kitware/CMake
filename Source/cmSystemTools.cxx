@@ -32,6 +32,7 @@
 # include <cmsys/Terminal.h>
 #endif
 #include <cmsys/stl/algorithm>
+#include <cmsys/FStream.hxx>
 
 #if defined(_WIN32)
 # include <windows.h>
@@ -1432,7 +1433,7 @@ bool cmSystemTools::CreateTar(const char* outFileName,
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  std::ofstream fout(outFileName, std::ios::out | cmsys_ios_binary);
+  cmsys::ofstream fout(outFileName, std::ios::out | cmsys_ios_binary);
   if(!fout)
     {
     std::string e = "Cannot open output file \"";
@@ -2037,7 +2038,7 @@ unsigned int cmSystemTools::RandomSeed()
   } seed;
 
   // Try using a real random source.
-  std::ifstream fin("/dev/urandom");
+  cmsys::ifstream fin("/dev/urandom");
   if(fin && fin.read(seed.bytes, sizeof(seed)) &&
      fin.gcount() == sizeof(seed))
     {
@@ -2160,7 +2161,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // Build tree has "<build>/bin[/<config>]/cmake" and
     // "<build>/CMakeFiles/CMakeSourceDir.txt".
     std::string src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
-    std::ifstream fin(src_dir_txt.c_str());
+    cmsys::ifstream fin(src_dir_txt.c_str());
     std::string src_dir;
     if(fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
        cmSystemTools::FileIsDirectory(src_dir.c_str()))
@@ -2171,7 +2172,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
       {
       dir = cmSystemTools::GetFilenamePath(dir);
       src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
-      std::ifstream fin2(src_dir_txt.c_str());
+      cmsys::ifstream fin2(src_dir_txt.c_str());
       if(fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
          cmSystemTools::FileIsDirectory(src_dir.c_str()))
         {
@@ -2506,7 +2507,7 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 
   {
   // Open the file for update.
-  std::ofstream f(file.c_str(),
+  cmsys::ofstream f(file.c_str(),
                   std::ios::in | std::ios::out | std::ios::binary);
   if(!f)
     {
@@ -2704,7 +2705,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
   }
 
   // Open the file for update.
-  std::ofstream f(file.c_str(),
+  cmsys::ofstream f(file.c_str(),
                   std::ios::in | std::ios::out | std::ios::binary);
   if(!f)
     {

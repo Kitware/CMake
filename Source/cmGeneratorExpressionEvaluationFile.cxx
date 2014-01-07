@@ -13,6 +13,7 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 
 #include "cmMakefile.h"
+#include <cmsys/FStream.hxx>
 
 #include <assert.h>
 
@@ -78,7 +79,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(const char *config,
   this->Files.push_back(outputFileName);
   outputFiles[outputFileName] = outputContent;
 
-  std::ofstream fout(outputFileName.c_str());
+  cmsys::ofstream fout(outputFileName.c_str());
 
   if(!fout)
     {
@@ -103,7 +104,7 @@ void cmGeneratorExpressionEvaluationFile::Generate()
     }
   else
     {
-    std::ifstream fin(this->Input.c_str());
+    cmsys::ifstream fin(this->Input.c_str());
     if(!fin)
       {
       cmOStringStream e;

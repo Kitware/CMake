@@ -15,6 +15,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include <cmsys/FStream.hxx>
 
 #include <ctype.h> // isspace
 
@@ -246,7 +247,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
 
           // Try to scan the file.  Just leave it out if we cannot find
           // it.
-          std::ifstream fin(fullName.c_str());
+          cmsys::ifstream fin(fullName.c_str());
           if(fin)
             {
             // Add this file as a dependency.
@@ -291,7 +292,7 @@ void cmDependsC::ReadCacheFile()
     {
     return;
     }
-  std::ifstream fin(this->CacheFileName.c_str());
+  cmsys::ifstream fin(this->CacheFileName.c_str());
   if(!fin)
     {
     return;
@@ -380,7 +381,7 @@ void cmDependsC::WriteCacheFile() const
     {
     return;
     }
-  std::ofstream cacheOut(this->CacheFileName.c_str());
+  cmsys::ofstream cacheOut(this->CacheFileName.c_str());
   if(!cacheOut)
     {
     return;

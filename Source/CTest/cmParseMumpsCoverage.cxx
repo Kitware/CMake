@@ -5,6 +5,7 @@
 #include "cmParseGTMCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/FStream.hxx>
 
 
 cmParseMumpsCoverage::cmParseMumpsCoverage(
@@ -23,7 +24,7 @@ bool cmParseMumpsCoverage::ReadCoverageFile(const char* file)
   // Read the gtm_coverage.mcov file, that has two lines of data:
   // packages:/full/path/to/Vista/Packages
   // coverage_dir:/full/path/to/dir/with/*.mcov
-  std::ifstream in(file);
+  cmsys::ifstream in(file);
   if(!in)
     {
     return false;
@@ -61,7 +62,7 @@ bool cmParseMumpsCoverage::ReadCoverageFile(const char* file)
 void cmParseMumpsCoverage::InitializeMumpsFile(std::string& file)
 {
   // initialize the coverage information for a given mumps file
-  std::ifstream in(file.c_str());
+  cmsys::ifstream in(file.c_str());
   if(!in)
     {
     return;

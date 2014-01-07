@@ -17,6 +17,7 @@
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
+#include <cmsys/FStream.hxx>
 
 #include <ctype.h>
 
@@ -156,11 +157,11 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     this->CurrentArgument = i->Argument;
     // If a file name was given, use it.  Otherwise, default to the
     // given stream.
-    std::ofstream* fout = 0;
+    cmsys::ofstream* fout = 0;
     std::ostream* s = &os;
     if(i->Filename.length() > 0)
       {
-      fout = new std::ofstream(i->Filename.c_str(), std::ios::out);
+      fout = new cmsys::ofstream(i->Filename.c_str(), std::ios::out);
       if(fout)
         {
         s = fout;
@@ -631,7 +632,7 @@ void cmDocumentation::PrintNames(std::ostream& os,
        i != files.end(); ++i)
     {
     std::string line;
-    std::ifstream fin(i->c_str());
+    cmsys::ifstream fin(i->c_str());
     while(fin && cmSystemTools::GetLineFromStream(fin, line))
       {
       if(!line.empty() && (isalnum(line[0]) || line[0] == '<'))

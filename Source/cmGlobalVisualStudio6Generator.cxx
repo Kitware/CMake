@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 #include "cmGeneratedFileStream.h"
+#include <cmsys/FStream.hxx>
 
 // Utility function to make a valid VS6 *.dsp filename out
 // of a CMake target name:
@@ -244,7 +245,7 @@ void cmGlobalVisualStudio6Generator
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
   fname += ".dsw";
-  std::ofstream fout(fname.c_str());
+  cmsys::ofstream fout(fname.c_str());
   if(!fout)
     {
     cmSystemTools::Error("Error can not open DSW file for write: ",

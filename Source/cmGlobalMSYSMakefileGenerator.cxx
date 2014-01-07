@@ -13,6 +13,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmake.h"
+#include <cmsys/FStream.hxx>
 
 cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
 {
@@ -27,7 +28,7 @@ cmGlobalMSYSMakefileGenerator::FindMinGW(std::string const& makeloc)
 {
   std::string fstab = makeloc;
   fstab += "/../etc/fstab";
-  std::ifstream fin(fstab.c_str());
+  cmsys::ifstream fin(fstab.c_str());
   std::string path;
   std::string mount;
   std::string mingwBin;

@@ -21,6 +21,7 @@
 #include "cmComputeLinkInformation.h"
 
 #include <cmsys/RegularExpression.hxx>
+#include <cmsys/FStream.hxx>
 
 cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator():
   cmLocalVisualStudioGenerator(VS6)
@@ -200,7 +201,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname,
   // save the name of the real dsp file
   std::string realDSP = fname;
   fname += ".cmake";
-  std::ofstream fout(fname.c_str());
+  cmsys::ofstream fout(fname.c_str());
   if(!fout)
     {
     cmSystemTools::Error("Error Writing ", fname.c_str());
@@ -336,11 +337,11 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
         std::string path = cmSystemTools::GetFilenamePath(source);
         cmSystemTools::MakeDirectory(path.c_str());
 #if defined(_WIN32) || defined(__CYGWIN__)
-        std::ofstream sourceFout(source.c_str(),
+        cmsys::ofstream sourceFout(source.c_str(),
                            std::ios::binary | std::ios::out
                            | std::ios::trunc);
 #else
-        std::ofstream sourceFout(source.c_str(),
+        cmsys::ofstream sourceFout(source.c_str(),
                            std::ios::out | std::ios::trunc);
 #endif
         if(sourceFout)
@@ -758,7 +759,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 
   // once the build type is set, determine what configurations are
   // possible
-  std::ifstream fin(this->DSPHeaderTemplate.c_str());
+  cmsys::ifstream fin(this->DSPHeaderTemplate.c_str());
 
   cmsys::RegularExpression reg("# Name ");
   if(!fin)
@@ -1452,7 +1453,7 @@ void cmLocalVisualStudio6Generator
   std::string customRuleCodeRelWithDebInfo
       = this->CreateTargetRules(target, "RELWITHDEBINFO", libName);
 
-  std::ifstream fin(this->DSPHeaderTemplate.c_str());
+  cmsys::ifstream fin(this->DSPHeaderTemplate.c_str());
   if(!fin)
     {
     cmSystemTools::Error("Error Reading ", this->DSPHeaderTemplate.c_str());
@@ -1785,7 +1786,7 @@ void cmLocalVisualStudio6Generator
 
 void cmLocalVisualStudio6Generator::WriteDSPFooter(std::ostream& fout)
 {
-  std::ifstream fin(this->DSPFooterTemplate.c_str());
+  cmsys::ifstream fin(this->DSPFooterTemplate.c_str());
   if(!fin)
     {
     cmSystemTools::Error("Error Reading ",

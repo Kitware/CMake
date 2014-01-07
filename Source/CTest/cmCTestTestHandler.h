@@ -227,19 +227,19 @@ private:
 
   bool GetValue(const char* tag,
                 std::string& value,
-                std::ifstream& fin);
+                std::istream& fin);
   bool GetValue(const char* tag,
                 int& value,
-                std::ifstream& fin);
+                std::istream& fin);
   bool GetValue(const char* tag,
                 size_t& value,
-                std::ifstream& fin);
+                std::istream& fin);
   bool GetValue(const char* tag,
                 bool& value,
-                std::ifstream& fin);
+                std::istream& fin);
   bool GetValue(const char* tag,
                 double& value,
-                std::ifstream& fin);
+                std::istream& fin);
   /**
    * Find the executable for a test
    */

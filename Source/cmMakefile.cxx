@@ -34,7 +34,7 @@
 #include <stdlib.h> // required for atoi
 
 #include <cmsys/RegularExpression.hxx>
-
+#include <cmsys/FStream.hxx>
 #include <cmsys/auto_ptr.hxx>
 
 #include <stack>
@@ -3499,7 +3499,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       }
     std::string tempOutputFile = soutfile;
     tempOutputFile += ".tmp";
-    std::ofstream fout(tempOutputFile.c_str(), omode);
+    cmsys::ofstream fout(tempOutputFile.c_str(), omode);
     if(!fout)
       {
       cmSystemTools::Error(
@@ -3508,7 +3508,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       cmSystemTools::ReportLastSystemError("");
       return 0;
       }
-    std::ifstream fin(sinfile.c_str());
+    cmsys::ifstream fin(sinfile.c_str());
     if(!fin)
       {
       cmSystemTools::Error("Could not open file for read in copy operation ",
