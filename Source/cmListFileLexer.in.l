@@ -45,7 +45,7 @@ Modify cmListFileLexer.c:
 struct cmListFileLexer_s
 {
   cmListFileLexer_Token token;
-  yy_size_t bracket;
+  int bracket;
   int comment;
   int line;
   int column;
