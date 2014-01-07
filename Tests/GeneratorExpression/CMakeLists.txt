@@ -13,6 +13,7 @@ add_custom_target(check-part1 ALL
     -Dtest_1=$<1:content>
     -Dtest_1_with_comma=$<1:-Wl,--no-undefined>
     -Dconfig=$<CONFIGURATION>
+    -Dshort_config=$<CONFIG>
     -Dtest_and_0=$<AND:0>
     -Dtest_and_0_0=$<AND:0,0>
     -Dtest_and_0_1=$<AND:0,1>
@@ -199,7 +200,7 @@ add_custom_target(check-part3 ALL
     -Dequal1=$<EQUAL:1,2>
     -Dequal2=$<EQUAL:1,1>
     -Dequal3=$<EQUAL:0x1,1>
-    -Dequal4=$<EQUAL:0x1,2>
+    -Dequal4=$<EQUAL:0X1,2>
     -Dequal5=$<EQUAL:0xA,0xa>
     -Dequal6=$<EQUAL:0xA,10>
     -Dequal7=$<EQUAL:0xA,012>
@@ -208,15 +209,17 @@ add_custom_target(check-part3 ALL
     -Dequal10=$<EQUAL:10,0b1010>
     -Dequal11=$<EQUAL:-10,-0xa>
     -Dequal12=$<EQUAL:10,+0xa>
-    -Dequal13=$<EQUAL:+10,+0xa>
+    -Dequal13=$<EQUAL:+10,+0Xa>
     -Dequal14=$<EQUAL:+10,0xa>
-    -Dequal15=$<EQUAL:-10,-0xa>
+    -Dequal15=$<EQUAL:-10,-0Xa>
     -Dequal16=$<EQUAL:-10,-0b1010>
     -Dequal17=$<EQUAL:-10,+0b1010>
-    -Dequal18=$<EQUAL:10,+0b1010>
-    -Dequal19=$<EQUAL:10,+012>
-    -Dequal20=$<EQUAL:10,-012>
-    -Dequal21=$<EQUAL:-10,-012>
+    -Dequal18=$<EQUAL:10,+0B1010>
+    -Dequal19=$<EQUAL:10,-0B1010>
+    -Dequal20=$<EQUAL:10,0B1010>
+    -Dequal21=$<EQUAL:10,+012>
+    -Dequal22=$<EQUAL:10,-012>
+    -Dequal23=$<EQUAL:-10,-012>
     -P ${CMAKE_CURRENT_SOURCE_DIR}/check-part3.cmake
   COMMAND ${CMAKE_COMMAND} -E echo "check done (part 3 of 3)"
   VERBATIM

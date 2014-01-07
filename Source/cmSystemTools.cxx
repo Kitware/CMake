@@ -360,18 +360,11 @@ bool cmSystemTools::IsOn(const char* val)
 
 bool cmSystemTools::IsNOTFOUND(const char* val)
 {
-  size_t len = strlen(val);
-  const char* notfound = "-NOTFOUND";
-  const size_t lenNotFound = 9;
-  if(len < lenNotFound-1)
+  if(strcmp(val, "NOTFOUND") == 0)
     {
-    return false;
+    return true;
     }
-  if(len == lenNotFound-1)
-    {
-    return ( strcmp(val, "NOTFOUND") == 0);
-    }
-  return ((strncmp((val + (len - lenNotFound)), notfound, lenNotFound) == 0));
+  return cmHasLiteralSuffix(val, "-NOTFOUND");
 }
 
 

@@ -31,7 +31,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
     top = p;
     p = p->Parent;
     }
-  this->CheckResult = this->checkGraph();
+  this->CheckResult = this->CheckGraph();
 
 #define TEST_TRANSITIVE_PROPERTY_METHOD(METHOD) \
   top->METHOD () ||
@@ -61,13 +61,13 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
 
 //----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::Result
-cmGeneratorExpressionDAGChecker::check() const
+cmGeneratorExpressionDAGChecker::Check() const
 {
   return this->CheckResult;
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorExpressionDAGChecker::reportError(
+void cmGeneratorExpressionDAGChecker::ReportError(
                   cmGeneratorExpressionContext *context,
                   const std::string &expr)
 {
@@ -125,7 +125,7 @@ void cmGeneratorExpressionDAGChecker::reportError(
 
 //----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::Result
-cmGeneratorExpressionDAGChecker::checkGraph() const
+cmGeneratorExpressionDAGChecker::CheckGraph() const
 {
   const cmGeneratorExpressionDAGChecker *parent = this->Parent;
   while (parent)
@@ -179,44 +179,37 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char *tgt)
        || strcmp(prop, "INTERFACE_LINK_LIBRARIES") == 0;
 }
 
-//----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingIncludeDirectories() const
+enum TransitiveProperty {
+#define DEFINE_ENUM_ENTRY(NAME) NAME,
+  CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(DEFINE_ENUM_ENTRY)
+#undef DEFINE_ENUM_ENTRY
+  TransitivePropertyTerminal
+};
+
+template<TransitiveProperty>
+bool additionalTest(const char* const)
 {
-  const char *prop = this->Property.c_str();
-  return (strcmp(prop, "INCLUDE_DIRECTORIES") == 0
-       || strcmp(prop, "INTERFACE_INCLUDE_DIRECTORIES") == 0 );
+  return false;
 }
 
-//----------------------------------------------------------------------------
-bool
-cmGeneratorExpressionDAGChecker::EvaluatingSystemIncludeDirectories() const
+template<>
+bool additionalTest<COMPILE_DEFINITIONS>(const char* const prop)
 {
-  const char *prop = this->Property.c_str();
-  return (strcmp(prop, "SYSTEM_INCLUDE_DIRECTORIES") == 0
-       || strcmp(prop, "INTERFACE_SYSTEM_INCLUDE_DIRECTORIES") == 0);
+  return cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_");
 }
 
-//----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingCompileDefinitions() const
-{
-  const char *prop = this->Property.c_str();
-  return (strcmp(prop, "COMPILE_DEFINITIONS") == 0
-       || strcmp(prop, "INTERFACE_COMPILE_DEFINITIONS") == 0
-       || cmHasLiteralPrefix(prop, "COMPILE_DEFINITIONS_"));
+#define DEFINE_TRANSITIVE_PROPERTY_METHOD(METHOD, PROPERTY) \
+bool cmGeneratorExpressionDAGChecker::METHOD() const \
+{ \
+  const char* const prop = this->Property.c_str(); \
+  if (strcmp(prop, #PROPERTY) == 0 \
+      || strcmp(prop, "INTERFACE_" #PROPERTY) == 0) \
+    { \
+    return true; \
+    } \
+  return additionalTest<PROPERTY>(prop); \
 }
 
-//----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingCompileOptions() const
-{
-  const char *prop = this->Property.c_str();
-  return (strcmp(prop, "COMPILE_OPTIONS") == 0
-       || strcmp(prop, "INTERFACE_COMPILE_OPTIONS") == 0 );
-}
+CM_FOR_EACH_TRANSITIVE_PROPERTY(DEFINE_TRANSITIVE_PROPERTY_METHOD)
 
-//----------------------------------------------------------------------------
-bool cmGeneratorExpressionDAGChecker::EvaluatingAutoUicOptions() const
-{
-  const char *prop = this->Property.c_str();
-  return (strcmp(prop, "AUTOUIC_OPTIONS") == 0
-       || strcmp(prop, "INTERFACE_AUTOUIC_OPTIONS") == 0 );
-}
+#undef DEFINE_TRANSITIVE_PROPERTY_METHOD
