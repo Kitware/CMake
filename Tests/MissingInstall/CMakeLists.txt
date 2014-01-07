@@ -9,9 +9,9 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY 1)
 set(CMAKE_SKIP_PACKAGE_ALL_DEPENDENCY 1)
 
 if(CMAKE_CONFIGURATION_TYPES)
-  set(SI_CONFIG --config $<CONFIGURATION>)
+  set(MULTI_CONFIG ON)
 else()
-  set(SI_CONFIG)
+  set(MULTI_CONFIG OFF)
 endif()
 
 add_executable(mybin mybin.cpp)
@@ -19,7 +19,7 @@ install(TARGETS mybin RUNTIME DESTINATION bin)
 
 add_custom_command(TARGET mybin
   POST_BUILD
-  COMMAND ${CMAKE_COMMAND} "-DSI_CONFIG=${SI_CONFIG}"
+  COMMAND ${CMAKE_COMMAND} "-DMULTI_CONFIG=${MULTI_CONFIG}"
     -P ${CMAKE_CURRENT_SOURCE_DIR}/ExpectInstallFail.cmake
   COMMENT "Install Project"
 )
