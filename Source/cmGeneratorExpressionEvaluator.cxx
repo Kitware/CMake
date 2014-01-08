@@ -426,8 +426,9 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
           cmOStringStream e;
           e << context->Makefile->GetPolicies()
                       ->GetPolicyWarning(cmPolicies::CMP0044);
-          context->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-                                       e.str().c_str());
+          context->Makefile->GetCMakeInstance()
+                 ->IssueMessage(cmake::AUTHOR_WARNING,
+                                e.str().c_str(), context->Backtrace);
           }
         case cmPolicies::OLD:
           return "1";
