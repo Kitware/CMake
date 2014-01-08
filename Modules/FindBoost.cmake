@@ -82,6 +82,9 @@
 #   Boost_USE_STATIC_RUNTIME - Set to ON or OFF to specify whether to use
 #                              libraries linked statically to the C++ runtime
 #                              ('s' tag).  Default is platform dependent.
+#   Boost_USE_DEBUG_RUNTIME  - Set to ON or OFF to specify whether to use
+#                              libraries linked to the MS debug C++ runtime
+#                              ('g' tag).  Default is ON.
 #   Boost_USE_DEBUG_PYTHON   - Set to ON to use libraries compiled with a
 #                              debug Python build ('y' tag). Default is OFF.
 #   Boost_USE_STLPORT        - Set to ON to use libraries compiled with
@@ -446,6 +449,9 @@ endfunction()
 if(NOT DEFINED Boost_USE_MULTITHREADED)
     set(Boost_USE_MULTITHREADED TRUE)
 endif()
+if(NOT DEFINED Boost_USE_DEBUG_RUNTIME)
+  set(Boost_USE_DEBUG_RUNTIME TRUE)
+endif()
 
 # Check the version of Boost against the requested version.
 if(Boost_FIND_VERSION AND NOT Boost_FIND_VERSION_MINOR)
@@ -787,7 +793,7 @@ if(Boost_USE_STATIC_RUNTIME)
 endif()
 #  g        using debug versions of the standard and runtime
 #           support libraries
-if(WIN32)
+if(WIN32 AND Boost_USE_DEBUG_RUNTIME)
   if(MSVC OR "${CMAKE_CXX_COMPILER}" MATCHES "icl"
           OR "${CMAKE_CXX_COMPILER}" MATCHES "icpc")
     set(_boost_DEBUG_ABI_TAG "${_boost_DEBUG_ABI_TAG}g")
