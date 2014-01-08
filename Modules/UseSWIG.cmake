@@ -22,11 +22,9 @@
 # swig generated module (swig -outdir option) The name-specific variable
 # SWIG_MODULE_<name>_EXTRA_DEPS may be used to specify extra
 # dependencies for the generated modules.  If the source file generated
-# by swig need some special flag you can use
-# set_source_files_properties( ${swig_generated_file_fullname}
+# by swig need some special flag you can use::
 #
-# ::
-#
+#   set_source_files_properties( ${swig_generated_file_fullname}
 #         PROPERTIES COMPILE_FLAGS "-bla")
 
 

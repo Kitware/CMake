@@ -4,21 +4,14 @@
 #
 # Convenience macros for printing properties and variables, useful e.g. for debugging.
 #
-#
-#
-#
-#
-# CMAKE_PRINT_PROPERTIES([TARGETS target1 ..  targetN]
-#
 # ::
 #
+#  CMAKE_PRINT_PROPERTIES([TARGETS target1 ..  targetN]
 #                         [SOURCES source1 .. sourceN]
 #                         [DIRECTORIES dir1 .. dirN]
 #                         [TESTS test1 .. testN]
 #                         [CACHE_ENTRIES entry1 .. entryN]
 #                         PROPERTIES prop1 .. propN )
-#
-#
 #
 # This macro prints the values of the properties of the given targets,
 # source files, directories, tests or cache entries.  Exactly one of the

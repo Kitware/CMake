@@ -8,19 +8,16 @@
 # FindJava.cmake has already been loaded.  See FindJava.cmake for
 # information on how to load Java into your CMake project.
 #
-# add_jar(target_name
-#
 # ::
 #
+#  add_jar(target_name
 #          [SOURCES] source1 [source2 ...] [resource1 ...]
 #          [INCLUDE_JARS jar1 [jar2 ...]]
 #          [ENTRY_POINT entry]
 #          [VERSION version]
 #          [OUTPUT_NAME name]
 #          [OUTPUT_DIR dir]
-#         )
-#
-#
+#          )
 #
 # This command creates a <target_name>.jar.  It compiles the given
 # source files (source) and adds the given resource files (resource) to
@@ -189,19 +186,14 @@
 #    CLASS_DIR          The directory where the class files can be found. For
 #                       example to use them with javah.
 #
-#
-#
-# find_jar(<VAR>
-#
 # ::
 #
+#  find_jar(<VAR>
 #           name | NAMES name1 [name2 ...]
 #           [PATHS path1 [path2 ... ENV var]]
 #           [VERSIONS version1 [version2]]
 #           [DOC "cache documentation string"]
-#          )
-#
-#
+#           )
 #
 # This command is used to find a full path to the named jar.  A cache
 # entry named by <VAR> is created to stor the result of this command.
@@ -216,21 +208,24 @@
 # the VERSIONS argument.  The argument after DOC will be used for the
 # documentation string in the cache.
 #
-# install_jar(TARGET_NAME DESTINATION)
+# ::
+#
+#  install_jar(TARGET_NAME DESTINATION)
 #
 # This command installs the TARGET_NAME files to the given DESTINATION.
 # It should be called in the same scope as add_jar() or it will fail.
 #
-# install_jni_symlink(TARGET_NAME DESTINATION)
+# ::
+#
+#  install_jni_symlink(TARGET_NAME DESTINATION)
 #
 # This command installs the TARGET_NAME JNI symlinks to the given
 # DESTINATION.  It should be called in the same scope as add_jar() or it
 # will fail.
 #
-# create_javadoc(<VAR>
-#
 # ::
 #
+#  create_javadoc(<VAR>
 #                 PACKAGES pkg1 [pkg2 ...]
 #                 [SOURCEPATH <sourcepath>]
 #                 [CLASSPATH <classpath>]
@@ -240,9 +235,7 @@
 #                 [AUTHOR TRUE|FALSE]
 #                 [USE TRUE|FALSE]
 #                 [VERSION TRUE|FALSE]
-#                )
-#
-#
+#                 )
 #
 # Create java documentation based on files or packages.  For more
 # details please read the javadoc manpage.
