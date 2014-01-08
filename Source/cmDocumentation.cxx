@@ -138,6 +138,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
       return this->PrintHelpListPolicies(os);
     case cmDocumentation::Version:
       return this->PrintVersion(os);
+    case cmDocumentation::OldCustomModules:
+      return this->PrintOldCustomModules(os);
     default: return false;
     }
 }
@@ -336,7 +338,15 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       GET_OPT_ARGUMENT(help.Filename);
       cmSystemTools::Message(
         "Warning: --help-custom-modules no longer supported");
-      return true;
+      if(help.Filename.empty())
+        {
+        return true;
+        }
+      // Avoid breaking old project builds completely by at least generating
+      // the output file.  Abuse help.Argument to give the file name to
+      // PrintOldCustomModules without disrupting our internal API.
+      help.HelpType = cmDocumentation::OldCustomModules;
+      help.Argument = cmSystemTools::GetFilenameName(help.Filename);
       }
     else if(strcmp(argv[i], "--help-commands") == 0)
       {
@@ -863,4 +873,49 @@ bool cmDocumentation::IsOption(const char* arg) const
 {
   return ((arg[0] == '-') || (strcmp(arg, "/V") == 0) ||
           (strcmp(arg, "/?") == 0));
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintOldCustomModules(std::ostream& os)
+{
+  // CheckOptions abuses the Argument field to give us the file name.
+  std::string filename = this->CurrentArgument;
+  std::string ext = cmSystemTools::UpperCase(
+    cmSystemTools::GetFilenameLastExtension(filename));
+  std::string name = cmSystemTools::GetFilenameWithoutLastExtension(filename);
+
+  const char* summary = "cmake --help-custom-modules no longer supported\n";
+  const char* detail =
+    "CMake versions prior to 3.0 exposed their internal module help page\n"
+    "generation functionality through the --help-custom-modules option.\n"
+    "CMake versions 3.0 and above use other means to generate their module\n"
+    "help pages so this functionality is no longer available to be exposed.\n"
+    "\n"
+    "This file was generated as a placeholder to provide this information.\n"
+    ;
+  if((ext == ".HTM") || (ext == ".HTML"))
+    {
+    os << "<html><title>" << name << "</title><body>\n"
+       << summary << "<p/>\n" << detail << "</body></html>\n";
+    }
+  else if((ext.length()==2) && (ext[1] >='1') && (ext[1]<='9'))
+    {
+    os <<
+      ".TH " << name << " " << ext[1] << " \"" <<
+      cmSystemTools::GetCurrentDateTime("%B %d, %Y") <<
+      "\" \"cmake " << cmVersion::GetCMakeVersion() << "\"\n"
+      ".SH NAME\n"
+      ".PP\n" <<
+      name << " \\- " << summary <<
+      "\n"
+      ".SH DESCRIPTION\n"
+      ".PP\n" <<
+      detail
+      ;
+    }
+  else
+    {
+    os << name << "\n\n" << summary << "\n" << detail;
+    }
+  return true;
 }
