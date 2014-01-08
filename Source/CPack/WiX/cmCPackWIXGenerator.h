@@ -81,6 +81,9 @@ private:
 
   bool CreateWiXSourceFiles();
 
+  bool CreateCMakePackageRegistryEntry(
+    cmWIXSourceWriter& featureDefinitions);
+
   bool CreateFeatureHierarchy(
     cmWIXSourceWriter& featureDefinitions);
 
