@@ -816,8 +816,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteString("</Filter>\n", 2);
     }
 
-  std::vector<cmSourceFile*> resxObjs;
-  this->GeneratorTarget->GetResxSources(resxObjs);
   if(!resxObjs.empty())
     {
     this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
@@ -1049,12 +1047,12 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       }
     }
 
+  std::vector<cmSourceFile*> externalObjects;
+  this->GeneratorTarget->GetExternalObjects(externalObjects);
   if(this->LocalGenerator->GetVersion() > cmLocalVisualStudioGenerator::VS10)
     {
     // For VS >= 11 we use LinkObjects to avoid linking custom command
     // outputs.  Use Object for all external objects, generated or not.
-    std::vector<cmSourceFile*> externalObjects;
-    this->GeneratorTarget->GetExternalObjects(externalObjects);
     this->WriteSources("Object", externalObjects);
     }
   else
