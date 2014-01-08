@@ -326,6 +326,11 @@ cmPolicies::cmPolicies()
     CMP0044, "CMP0044",
     "Case sensitive <LANG>_COMPILER_ID generator expressions.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0045, "CMP0045",
+    "Error on non-existent target in get_target_property.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
