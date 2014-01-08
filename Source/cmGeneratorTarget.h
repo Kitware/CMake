@@ -91,11 +91,12 @@ public:
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
+private:
+  friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
 
-private:
   std::vector<cmSourceFile*> ExtraSources;
   std::vector<cmSourceFile*> HeaderSources;
   std::vector<cmSourceFile*> ExternalObjects;
