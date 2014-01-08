@@ -135,46 +135,49 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetResxSources() const
+void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
 {
-  return this->ResxSources;
+  srcs = this->ResxSources;
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetIDLSources() const
+void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile*>& srcs) const
 {
-  return this->IDLSources;
+  srcs = this->IDLSources;
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetHeaderSources() const
+void
+cmGeneratorTarget::GetHeaderSources(std::vector<cmSourceFile*>& srcs) const
 {
-  return this->HeaderSources;
+  srcs = this->HeaderSources;
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetExtraSources() const
+void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile*>& srcs) const
 {
-  return this->ExtraSources;
+  srcs = this->ExtraSources;
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetCustomCommands() const
+void
+cmGeneratorTarget::GetCustomCommands(std::vector<cmSourceFile*>& srcs) const
 {
-  return this->CustomCommands;
+  srcs = this->CustomCommands;
 }
 
 //----------------------------------------------------------------------------
-std::set<std::string> const& cmGeneratorTarget::GetExpectedResxHeaders() const
+void
+cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs) const
 {
-  return this->ExpectedResxHeaders;
+  srcs = this->ExpectedResxHeaders;
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const&
-cmGeneratorTarget::GetExternalObjects() const
+void
+cmGeneratorTarget::GetExternalObjects(std::vector<cmSourceFile*>& srcs) const
 {
-  return this->ExternalObjects;
+  srcs = this->ExternalObjects;
 }
 
 //----------------------------------------------------------------------------

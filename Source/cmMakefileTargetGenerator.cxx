@@ -151,9 +151,11 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
 
   // First generate the object rule files.  Save a list of all object
   // files for this target.
+  std::vector<cmSourceFile*> customCommands;
+  this->GeneratorTarget->GetCustomCommands(customCommands);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->GetCustomCommands().begin();
-      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
+        si = customCommands.begin();
+      si != customCommands.end(); ++si)
     {
     cmCustomCommand const* cc = (*si)->GetCustomCommand();
     this->GenerateCustomRuleFile(*cc);
@@ -170,15 +172,21 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         }
       }
     }
+  std::vector<cmSourceFile*> headerSources;
+  this->GeneratorTarget->GetHeaderSources(headerSources);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->GetHeaderSources(),
+    headerSources,
     this->MacOSXContentGenerator);
+  std::vector<cmSourceFile*> extraSources;
+  this->GeneratorTarget->GetExtraSources(extraSources);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->GetExtraSources(),
+    extraSources,
     this->MacOSXContentGenerator);
+  std::vector<cmSourceFile*> externalObjects;
+  this->GeneratorTarget->GetExternalObjects(externalObjects);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->GetExternalObjects().begin();
-      si != this->GeneratorTarget->GetExternalObjects().end(); ++si)
+        si = externalObjects.begin();
+      si != externalObjects.end(); ++si)
     {
     this->ExternalObjects.push_back((*si)->GetFullPath());
     }
@@ -422,7 +430,8 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     }
 
   // Get the full path name of the object file.
-  std::string const& objectName = this->GeneratorTarget->GetObjectName(&source);
+  std::string const& objectName = this->GeneratorTarget
+                                      ->GetObjectName(&source);
   std::string obj = this->LocalGenerator->GetTargetDirectory(*this->Target);
   obj += "/";
   obj += objectName;
