@@ -1884,7 +1884,7 @@ bool cmVisualStudio10TargetGenerator::
   IsResxHeader(const std::string& headerFile)
 {
   std::set<std::string>::iterator it =
-      this->GeneratorTarget->ExpectedResxHeaders.find(headerFile);
+      this->GeneratorTarget->GetExpectedResxHeaders().find(headerFile);
 
-  return it != this->GeneratorTarget->ExpectedResxHeaders.end();
+  return it != this->GeneratorTarget->GetExpectedResxHeaders().end();
 }

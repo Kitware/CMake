@@ -45,6 +45,7 @@ public:
   std::vector<cmSourceFile*> const& GetHeaderSources() const;
   std::vector<cmSourceFile*> const& GetExtraSources() const;
   std::vector<cmSourceFile*> const& GetCustomCommands() const;
+  std::set<std::string> const& GetExpectedResxHeaders() const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -52,8 +53,6 @@ public:
   cmGlobalGenerator* GlobalGenerator;
 
   std::string ModuleDefinitionFile;
-
-  std::set<std::string> ExpectedResxHeaders;
 
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
@@ -103,6 +102,7 @@ private:
   std::vector<cmSourceFile*> ResxSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
+  std::set<std::string> ExpectedResxHeaders;
   std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;

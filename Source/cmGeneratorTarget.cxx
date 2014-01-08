@@ -163,6 +163,12 @@ std::vector<cmSourceFile*> const& cmGeneratorTarget::GetCustomCommands() const
 }
 
 //----------------------------------------------------------------------------
+std::set<std::string> const& cmGeneratorTarget::GetExpectedResxHeaders() const
+{
+  return this->ExpectedResxHeaders;
+}
+
+//----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const&
 cmGeneratorTarget::GetExternalObjects() const
 {
