@@ -205,6 +205,17 @@
 #
 #  ``<TOOL>`` can be either LIGHT or CANDLE.
 #
+# .. variable:: CPACK_WIX_CMAKE_PACKAGE_REGISTRY
+#
+#  If this variable is set the generated installer will create
+#  an entry in the windows registry key
+#  ``HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<package>``
+#  The value for ``<package>`` is provided by this variable.
+#
+#  Assuming you also install a CMake configuration file this will
+#  allow other CMake projects to find your package with
+#  the :command:`find_package` command.
+#
 
 #=============================================================================
 # Copyright 2013 Kitware, Inc.

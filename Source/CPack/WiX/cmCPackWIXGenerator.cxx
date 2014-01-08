@@ -437,7 +437,15 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.AddAttribute("Level", "1");
 
-  CreateFeatureHierarchy(featureDefinitions);
+  if(!CreateCMakePackageRegistryEntry(featureDefinitions))
+    {
+    return false;
+    }
+
+  if(!CreateFeatureHierarchy(featureDefinitions))
+    {
+    return false;
+    }
 
   featureDefinitions.EndElement("Feature");
 
@@ -560,6 +568,39 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
         fragmentList << std::endl);
       return false;
     }
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::CreateCMakePackageRegistryEntry(
+  cmWIXSourceWriter& featureDefinitions)
+{
+  const char* package = GetOption("CPACK_WIX_CMAKE_PACKAGE_REGISTRY");
+  if(!package)
+    {
+    return true;
+    }
+
+  featureDefinitions.BeginElement("Component");
+  featureDefinitions.AddAttribute("Id", "CM_PACKAGE_REGISTRY");
+  featureDefinitions.AddAttribute("Directory", "TARGETDIR");
+  featureDefinitions.AddAttribute("Guid", "*");
+
+  std::string registryKey =
+      std::string("Software\\Kitware\\CMake\\Packages\\") + package;
+
+  std::string upgradeGuid = GetOption("CPACK_WIX_UPGRADE_GUID");
+
+  featureDefinitions.BeginElement("RegistryValue");
+  featureDefinitions.AddAttribute("Root", "HKLM");
+  featureDefinitions.AddAttribute("Key", registryKey);
+  featureDefinitions.AddAttribute("Name", upgradeGuid);
+  featureDefinitions.AddAttribute("Type", "string");
+  featureDefinitions.AddAttribute("Value", "[INSTALL_ROOT]");
+  featureDefinitions.AddAttribute("KeyPath", "yes");
+  featureDefinitions.EndElement("RegistryValue");
+
+  featureDefinitions.EndElement("Component");
 
   return true;
 }
