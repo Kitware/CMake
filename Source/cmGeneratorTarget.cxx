@@ -139,6 +139,12 @@ std::vector<cmSourceFile*> const& cmGeneratorTarget::GetResxSources() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetIDLSources() const
+{
+  return this->IDLSources;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {

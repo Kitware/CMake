@@ -40,6 +40,7 @@ public:
   void AddExplicitObjectName(cmSourceFile* sf);
 
   std::vector<cmSourceFile*> const& GetResxSources() const;
+  std::vector<cmSourceFile*> const& GetIDLSources() const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -51,7 +52,6 @@ public:
   std::vector<cmSourceFile*> ExtraSources;
   std::vector<cmSourceFile*> HeaderSources;
   std::vector<cmSourceFile*> ExternalObjects;
-  std::vector<cmSourceFile*> IDLSources;
 
   std::string ModuleDefinitionFile;
 
@@ -96,6 +96,7 @@ public:
   SourceEntriesType SourceEntries;
 
 private:
+  std::vector<cmSourceFile*> IDLSources;
   std::vector<cmSourceFile*> ResxSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
