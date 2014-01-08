@@ -171,7 +171,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       }
     }
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->HeaderSources,
+    this->GeneratorTarget->GetHeaderSources(),
     this->MacOSXContentGenerator);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     this->GeneratorTarget->ExtraSources,

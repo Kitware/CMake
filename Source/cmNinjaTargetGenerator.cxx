@@ -467,7 +467,7 @@ cmNinjaTargetGenerator
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      }
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->HeaderSources,
+    this->GeneratorTarget->GetHeaderSources(),
     this->MacOSXContentGenerator);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     this->GeneratorTarget->ExtraSources,

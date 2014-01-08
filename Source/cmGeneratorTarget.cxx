@@ -145,6 +145,12 @@ std::vector<cmSourceFile*> const& cmGeneratorTarget::GetIDLSources() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetHeaderSources() const
+{
+  return this->HeaderSources;
+}
+
+//----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const&
 cmGeneratorTarget::GetExternalObjects() const
 {

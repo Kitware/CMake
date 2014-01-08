@@ -996,7 +996,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     }
   this->WriteString("<ItemGroup>\n", 1);
 
-  this->WriteSources("ClInclude", this->GeneratorTarget->HeaderSources);
+  this->WriteSources("ClInclude", this->GeneratorTarget->GetHeaderSources());
   this->WriteSources("Midl", this->GeneratorTarget->GetIDLSources());
 
   std::vector<cmSourceFile*> objectSources;
