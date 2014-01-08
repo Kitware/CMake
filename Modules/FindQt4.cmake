@@ -1187,7 +1187,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   endmacro()
 
   macro(_qt4_add_target_private_depends _QT_MODULE)
-    get_target_property(_configs ${_QT_MODULE} IMPORTED_CONFIGURATIONS)
+    get_target_property(_configs Qt4::${_QT_MODULE} IMPORTED_CONFIGURATIONS)
     foreach(_config ${_configs})
       _qt4_add_target_depends_internal(${_QT_MODULE} IMPORTED_LINK_DEPENDENT_LIBRARIES_${_config} ${ARGN})
     endforeach()
