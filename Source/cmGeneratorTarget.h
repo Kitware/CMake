@@ -39,13 +39,13 @@ public:
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile* sf);
 
-  std::vector<cmSourceFile*> const& GetResxSources() const;
-  std::vector<cmSourceFile*> const& GetIDLSources() const;
-  std::vector<cmSourceFile*> const& GetExternalObjects() const;
-  std::vector<cmSourceFile*> const& GetHeaderSources() const;
-  std::vector<cmSourceFile*> const& GetExtraSources() const;
-  std::vector<cmSourceFile*> const& GetCustomCommands() const;
-  std::set<std::string> const& GetExpectedResxHeaders() const;
+  void GetResxSources(std::vector<cmSourceFile*>&) const;
+  void GetIDLSources(std::vector<cmSourceFile*>&) const;
+  void GetExternalObjects(std::vector<cmSourceFile*>&) const;
+  void GetHeaderSources(std::vector<cmSourceFile*>&) const;
+  void GetExtraSources(std::vector<cmSourceFile*>&) const;
+  void GetCustomCommands(std::vector<cmSourceFile*>&) const;
+  void GetExpectedResxHeaders(std::set<std::string>&) const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
