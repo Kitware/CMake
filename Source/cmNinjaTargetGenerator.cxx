@@ -460,8 +460,8 @@ cmNinjaTargetGenerator
     << "\n\n";
 
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = this->GeneratorTarget->GetCustomCommands().begin();
+      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
      {
      cmCustomCommand const* cc = (*si)->GetCustomCommand();
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
@@ -542,8 +542,8 @@ cmNinjaTargetGenerator
 
   // Add order-only dependencies on custom command outputs.
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = this->GeneratorTarget->GetCustomCommands().begin();
+      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
     {
     cmCustomCommand const* cc = (*si)->GetCustomCommand();
     const std::vector<std::string>& ccoutputs = cc->GetOutputs();

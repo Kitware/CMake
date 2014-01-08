@@ -157,6 +157,12 @@ std::vector<cmSourceFile*> const& cmGeneratorTarget::GetExtraSources() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetCustomCommands() const
+{
+  return this->CustomCommands;
+}
+
+//----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const&
 cmGeneratorTarget::GetExternalObjects() const
 {

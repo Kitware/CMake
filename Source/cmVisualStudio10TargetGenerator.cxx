@@ -551,8 +551,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
   this->SourcesVisited.clear();
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = this->GeneratorTarget->GetCustomCommands().begin();
+      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
     {
     this->WriteCustomCommand(*si);
     }

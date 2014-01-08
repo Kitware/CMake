@@ -44,14 +44,12 @@ public:
   std::vector<cmSourceFile*> const& GetExternalObjects() const;
   std::vector<cmSourceFile*> const& GetHeaderSources() const;
   std::vector<cmSourceFile*> const& GetExtraSources() const;
+  std::vector<cmSourceFile*> const& GetCustomCommands() const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
-
-  /** Sources classified by purpose.  */
-  std::vector<cmSourceFile*> CustomCommands;
 
   std::string ModuleDefinitionFile;
 
@@ -97,6 +95,7 @@ private:
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
 
+  std::vector<cmSourceFile*> CustomCommands;
   std::vector<cmSourceFile*> ExtraSources;
   std::vector<cmSourceFile*> HeaderSources;
   std::vector<cmSourceFile*> ExternalObjects;

@@ -152,8 +152,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   // First generate the object rule files.  Save a list of all object
   // files for this target.
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = this->GeneratorTarget->GetCustomCommands().begin();
+      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
     {
     cmCustomCommand const* cc = (*si)->GetCustomCommand();
     this->GenerateCustomRuleFile(*cc);
