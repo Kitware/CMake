@@ -761,7 +761,8 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     set(QT_MKSPECS_DIR NOTFOUND)
     find_path(QT_MKSPECS_DIR NAMES qconfig.pri
       HINTS ${qt_cross_paths} ${qt_mkspecs_dirs}
-      DOC "The location of the Qt mkspecs containing qconfig.pri")
+      DOC "The location of the Qt mkspecs containing qconfig.pri"
+      NO_CMAKE_FIND_ROOT_PATH)
   endif()
 
   if(EXISTS "${QT_MKSPECS_DIR}/qconfig.pri")
@@ -917,7 +918,8 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     endforeach()
     find_path(QT_PLUGINS_DIR NAMES accessible imageformats sqldrivers codecs designer
       HINTS ${qt_cross_paths} ${qt_plugins_dir}
-      DOC "The location of the Qt plugins")
+      DOC "The location of the Qt plugins"
+      NO_CMAKE_FIND_ROOT_PATH)
   endif ()
 
   # ask qmake for the translations directory
@@ -937,6 +939,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
       find_path(QT_IMPORTS_DIR NAMES Qt
         HINTS ${qt_cross_paths} ${qt_imports_dir}
         DOC "The location of the Qt imports"
+        NO_CMAKE_FIND_ROOT_PATH
         NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH NO_SYSTEM_ENVIRONMENT_PATH
         NO_CMAKE_SYSTEM_PATH)
       mark_as_advanced(QT_IMPORTS_DIR)
