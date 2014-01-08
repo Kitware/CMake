@@ -151,6 +151,12 @@ std::vector<cmSourceFile*> const& cmGeneratorTarget::GetHeaderSources() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetExtraSources() const
+{
+  return this->ExtraSources;
+}
+
+//----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const&
 cmGeneratorTarget::GetExternalObjects() const
 {

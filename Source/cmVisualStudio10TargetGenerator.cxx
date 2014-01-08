@@ -1060,7 +1060,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       }
     }
 
-  this->WriteSources("None", this->GeneratorTarget->ExtraSources);
+  this->WriteSources("None", this->GeneratorTarget->GetExtraSources());
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;

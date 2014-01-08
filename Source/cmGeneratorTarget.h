@@ -43,6 +43,7 @@ public:
   std::vector<cmSourceFile*> const& GetIDLSources() const;
   std::vector<cmSourceFile*> const& GetExternalObjects() const;
   std::vector<cmSourceFile*> const& GetHeaderSources() const;
+  std::vector<cmSourceFile*> const& GetExtraSources() const;
 
   cmTarget* Target;
   cmMakefile* Makefile;
@@ -51,7 +52,6 @@ public:
 
   /** Sources classified by purpose.  */
   std::vector<cmSourceFile*> CustomCommands;
-  std::vector<cmSourceFile*> ExtraSources;
 
   std::string ModuleDefinitionFile;
 
@@ -96,6 +96,7 @@ public:
   SourceEntriesType SourceEntries;
 
 private:
+  std::vector<cmSourceFile*> ExtraSources;
   std::vector<cmSourceFile*> HeaderSources;
   std::vector<cmSourceFile*> ExternalObjects;
   std::vector<cmSourceFile*> IDLSources;

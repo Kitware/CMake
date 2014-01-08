@@ -470,7 +470,7 @@ cmNinjaTargetGenerator
     this->GeneratorTarget->GetHeaderSources(),
     this->MacOSXContentGenerator);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->ExtraSources,
+    this->GeneratorTarget->GetExtraSources(),
     this->MacOSXContentGenerator);
   for(std::vector<cmSourceFile*>::const_iterator
         si = this->GeneratorTarget->GetExternalObjects().begin();
