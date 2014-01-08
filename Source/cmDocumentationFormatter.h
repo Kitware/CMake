@@ -28,7 +28,8 @@ public:
   {
     None, Version, Usage, ListManuals,
     ListCommands, ListModules, ListProperties, ListVariables, ListPolicies,
-    OneManual, OneCommand, OneModule, OneProperty, OneVariable, OnePolicy
+    OneManual, OneCommand, OneModule, OneProperty, OneVariable, OnePolicy,
+    OldCustomModules
   };
 };
 
