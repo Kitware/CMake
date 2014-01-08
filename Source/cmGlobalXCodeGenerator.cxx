@@ -1361,7 +1361,8 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     postbuild.push_back(command);
     }
 
-  std::vector<cmSourceFile*>const &classes = cmtarget.GetSourceFiles();
+  std::vector<cmSourceFile*> classes;
+  cmtarget.GetSourceFiles(classes);
   // add all the sources
   std::vector<cmCustomCommand> commands;
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
