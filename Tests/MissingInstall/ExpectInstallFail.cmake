@@ -13,6 +13,6 @@ execute_process(
   ERROR_VARIABLE ERROR
 )
 
-if(NOT "${RESULT}" GREATER "0")
+if(RESULT EQUAL 0)
   message(FATAL_ERROR "install should have failed")
 endif()
