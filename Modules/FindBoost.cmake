@@ -848,6 +848,7 @@ else()
   list(APPEND _boost_LIBRARY_SEARCH_DIRS
     ${Boost_INCLUDE_DIR}/lib
     ${Boost_INCLUDE_DIR}/../lib
+    ${Boost_INCLUDE_DIR}/../lib/${CMAKE_LIBRARY_ARCHITECTURE}
     ${Boost_INCLUDE_DIR}/stage/lib
     )
   if( Boost_NO_SYSTEM_PATHS )
