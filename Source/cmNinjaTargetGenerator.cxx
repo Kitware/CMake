@@ -473,8 +473,8 @@ cmNinjaTargetGenerator
     this->GeneratorTarget->ExtraSources,
     this->MacOSXContentGenerator);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ExternalObjects.begin();
-      si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+        si = this->GeneratorTarget->GetExternalObjects().begin();
+      si != this->GeneratorTarget->GetExternalObjects().end(); ++si)
     {
     this->Objects.push_back(this->GetSourceFilePath(*si));
     }

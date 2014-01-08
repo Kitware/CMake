@@ -1044,15 +1044,15 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     {
     // For VS >= 11 we use LinkObjects to avoid linking custom command
     // outputs.  Use Object for all external objects, generated or not.
-    this->WriteSources("Object", this->GeneratorTarget->ExternalObjects);
+    this->WriteSources("Object", this->GeneratorTarget->GetExternalObjects());
     }
   else
     {
     // If an object file is generated in this target, then vs10 will use
     // it in the build, and we have to list it as None instead of Object.
     for(std::vector<cmSourceFile*>::const_iterator
-          si = this->GeneratorTarget->ExternalObjects.begin();
-        si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+          si = this->GeneratorTarget->GetExternalObjects().begin();
+        si != this->GeneratorTarget->GetExternalObjects().end(); ++si)
       {
       std::vector<cmSourceFile*> const* d =
                                 this->GeneratorTarget->GetSourceDepends(*si);

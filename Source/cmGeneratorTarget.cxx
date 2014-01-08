@@ -145,6 +145,13 @@ std::vector<cmSourceFile*> const& cmGeneratorTarget::GetIDLSources() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const&
+cmGeneratorTarget::GetExternalObjects() const
+{
+  return this->ExternalObjects;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {
