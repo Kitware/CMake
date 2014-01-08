@@ -1886,7 +1886,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 bool cmVisualStudio10TargetGenerator::
   IsResxHeader(const std::string& headerFile)
 {
-  std::set<std::string>::iterator it =
+  std::set<std::string>::const_iterator it =
       this->GeneratorTarget->GetExpectedResxHeaders().find(headerFile);
 
   return it != this->GeneratorTarget->GetExpectedResxHeaders().end();
