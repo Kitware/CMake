@@ -133,6 +133,12 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 }
 
 //----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetResxSources() const
+{
+  return this->ResxSources;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                                  const char *config) const
 {

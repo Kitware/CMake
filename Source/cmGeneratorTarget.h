@@ -39,6 +39,8 @@ public:
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile* sf);
 
+  std::vector<cmSourceFile*> const& GetResxSources() const;
+
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
@@ -50,7 +52,6 @@ public:
   std::vector<cmSourceFile*> HeaderSources;
   std::vector<cmSourceFile*> ExternalObjects;
   std::vector<cmSourceFile*> IDLSources;
-  std::vector<cmSourceFile*> ResxSources;
 
   std::string ModuleDefinitionFile;
 
@@ -95,6 +96,7 @@ public:
   SourceEntriesType SourceEntries;
 
 private:
+  std::vector<cmSourceFile*> ResxSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
   std::vector<cmSourceFile*> ObjectSources;

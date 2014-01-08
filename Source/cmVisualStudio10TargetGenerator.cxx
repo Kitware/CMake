@@ -377,7 +377,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
 {
   std::vector<cmSourceFile*> const& resxObjs =
-    this->GeneratorTarget->ResxSources;
+    this->GeneratorTarget->GetResxSources();
   if(!resxObjs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
@@ -741,7 +741,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     }
 
   std::vector<cmSourceFile*> const& resxObjs =
-    this->GeneratorTarget->ResxSources;
+    this->GeneratorTarget->GetResxSources();
   if(!resxObjs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
@@ -813,7 +813,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     this->WriteString("</Filter>\n", 2);
     }
 
-  if(!this->GeneratorTarget->ResxSources.empty())
+  if(!this->GeneratorTarget->GetResxSources().empty())
     {
     this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
     std::string guidName = "SG_Filter_Resource Files";
