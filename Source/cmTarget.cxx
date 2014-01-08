@@ -530,9 +530,9 @@ bool cmTarget::FindSourceFiles()
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmTarget::GetSourceFiles() const
+void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 {
-  return this->SourceFiles;
+  files = this->SourceFiles;
 }
 
 //----------------------------------------------------------------------------
@@ -673,7 +673,8 @@ void cmTarget::ConstructSourceFileFlags() const
 
   // Handle the MACOSX_PACKAGE_LOCATION property on source files that
   // were not listed in one of the other lists.
-  std::vector<cmSourceFile*> const& sources = this->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
       si != sources.end(); ++si)
     {

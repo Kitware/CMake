@@ -314,7 +314,8 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
 
   // get the classes from the source lists then add them to the groups
-  std::vector<cmSourceFile*> const & classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*>& classes;
+  target.GetSourceFiles(classes);
 
   // now all of the source files have been properly assigned to the target
   // now stick them into source groups using the reg expressions
@@ -401,9 +402,9 @@ void cmLocalVisualStudio6Generator
     std::string compileFlags;
     std::vector<std::string> depends;
     std::string objectNameDir;
-    if(gt->ExplicitObjectName.find(*sf) != gt->ExplicitObjectName.end())
+    if(gt->HasExplicitObjectName(*sf))
       {
-      objectNameDir = cmSystemTools::GetFilenamePath(gt->Objects[*sf]);
+      objectNameDir = cmSystemTools::GetFilenamePath(gt->GetObjectName(*sf));
       }
 
     // Add per-source file flags.

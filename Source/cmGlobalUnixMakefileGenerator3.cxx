@@ -120,17 +120,19 @@ cmGlobalUnixMakefileGenerator3
   dir_max += "/";
   gt->ObjectDirectory = dir_max;
 
+  std::vector<cmSourceFile*> objectSources;
+  gt->GetObjectSources(objectSources);
   // Compute the name of each object file.
   for(std::vector<cmSourceFile*>::iterator
-        si = gt->ObjectSources.begin();
-      si != gt->ObjectSources.end(); ++si)
+        si = objectSources.begin();
+      si != objectSources.end(); ++si)
     {
     cmSourceFile* sf = *si;
     bool hasSourceExtension = true;
     std::string objectName = gt->LocalGenerator
       ->GetObjectFileNameWithoutTarget(*sf, dir_max,
                                        &hasSourceExtension);
-    gt->Objects[sf] = objectName;
+    gt->AddObject(sf, objectName);
     lg->AddLocalObjectFile(target, sf, objectName, hasSourceExtension);
     }
 }

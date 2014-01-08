@@ -152,8 +152,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   // First generate the object rule files.  Save a list of all object
   // files for this target.
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = this->GeneratorTarget->GetCustomCommands().begin();
+      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
     {
     cmCustomCommand const* cc = (*si)->GetCustomCommand();
     this->GenerateCustomRuleFile(*cc);
@@ -171,20 +171,21 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       }
     }
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->HeaderSources,
+    this->GeneratorTarget->GetHeaderSources(),
     this->MacOSXContentGenerator);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->ExtraSources,
+    this->GeneratorTarget->GetExtraSources(),
     this->MacOSXContentGenerator);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ExternalObjects.begin();
-      si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+        si = this->GeneratorTarget->GetExternalObjects().begin();
+      si != this->GeneratorTarget->GetExternalObjects().end(); ++si)
     {
     this->ExternalObjects.push_back((*si)->GetFullPath());
     }
+  std::vector<cmSourceFile*> objectSources;
+  this->GeneratorTarget->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ObjectSources.begin();
-      si != this->GeneratorTarget->ObjectSources.end(); ++si)
+        si = objectSources.begin(); si != objectSources.end(); ++si)
     {
     // Generate this object file's rule file.
     this->WriteObjectRuleFiles(**si);
@@ -421,7 +422,7 @@ void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
     }
 
   // Get the full path name of the object file.
-  std::string const& objectName = this->GeneratorTarget->Objects[&source];
+  std::string const& objectName = this->GeneratorTarget->GetObjectName(&source);
   std::string obj = this->LocalGenerator->GetTargetDirectory(*this->Target);
   obj += "/";
   obj += objectName;
@@ -1142,8 +1143,8 @@ cmMakefileTargetGenerator
 ::DriveCustomCommands(std::vector<std::string>& depends)
 {
   // Depend on all custom command outputs.
-  const std::vector<cmSourceFile*>& sources =
-    this->Target->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->Target->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {

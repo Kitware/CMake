@@ -65,7 +65,8 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
 static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
                                   const char *config, cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
-                                  std::vector<std::string>& result)
+                                  std::vector<std::string>& result,
+                                  bool excludeImported)
 {
   cmTarget* depTgt = mf->FindTargetToUse(name.c_str());
 
@@ -85,7 +86,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
                                       config, false, headTarget,
                                       depTgt, dagChecker), result);
     }
-  if (!depTgt->IsImported())
+  if (!depTgt->IsImported() || excludeImported)
     {
     return;
     }
@@ -99,6 +100,79 @@ static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
                                       config, false, headTarget,
                                       depTgt, dagChecker), result);
     }
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &objs) const
+{
+  objs = this->ObjectSources;
+}
+
+//----------------------------------------------------------------------------
+const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
+{
+  return this->Objects[file];
+}
+
+void cmGeneratorTarget::AddObject(cmSourceFile *sf, std::string const&name)
+{
+    this->Objects[sf] = name;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile* sf)
+{
+  this->ExplicitObjectName.insert(sf);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
+{
+  return this->ExplicitObjectName.find(file) != this->ExplicitObjectName.end();
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetResxSources() const
+{
+  return this->ResxSources;
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetIDLSources() const
+{
+  return this->IDLSources;
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetHeaderSources() const
+{
+  return this->HeaderSources;
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetExtraSources() const
+{
+  return this->ExtraSources;
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const& cmGeneratorTarget::GetCustomCommands() const
+{
+  return this->CustomCommands;
+}
+
+//----------------------------------------------------------------------------
+std::set<std::string> const& cmGeneratorTarget::GetExpectedResxHeaders() const
+{
+  return this->ExpectedResxHeaders;
+}
+
+//----------------------------------------------------------------------------
+std::vector<cmSourceFile*> const&
+cmGeneratorTarget::GetExternalObjects() const
+{
+  return this->ExternalObjects;
 }
 
 //----------------------------------------------------------------------------
@@ -130,6 +204,9 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                         this->GetName(),
                                         "SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
 
+    bool excludeImported
+                = this->Target->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
+
     std::vector<std::string> result;
     for (std::set<cmStdString>::const_iterator
         it = this->Target->GetSystemIncludeDirectories().begin();
@@ -156,7 +233,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
           }
 
         handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
-                                &dagChecker, result);
+                                &dagChecker, result, excludeImported);
 
         std::vector<std::string> deps;
         tgt->GetTransitivePropertyLinkLibraries(config, this->Target, deps);
@@ -167,7 +244,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
           if (uniqueDeps.insert(*di).second)
             {
             handleSystemIncludesDep(this->Makefile, *di, config, this->Target,
-                                    &dagChecker, result);
+                                    &dagChecker, result, excludeImported);
             }
           }
         }
@@ -202,9 +279,9 @@ bool cmGeneratorTarget::GetPropertyAsBool(const char *prop) const
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmSourceFile*> const& cmGeneratorTarget::GetSourceFiles() const
+void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 {
-  return this->Target->GetSourceFiles();
+  this->Target->GetSourceFiles(files);
 }
 
 //----------------------------------------------------------------------------
@@ -216,7 +293,8 @@ void cmGeneratorTarget::ClassifySources()
   bool isObjLib = targetType == cmTarget::OBJECT_LIBRARY;
 
   std::vector<cmSourceFile*> badObjLib;
-  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->Target->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
       si != sources.end(); ++si)
     {
@@ -414,7 +492,8 @@ cmTargetTraceDependencies
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
-  std::vector<cmSourceFile*> const& sources = this->Target->GetSourceFiles();
+  std::vector<cmSourceFile*> sources;
+  this->Target->GetSourceFiles(sources);
   for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
       si != sources.end(); ++si)
     {

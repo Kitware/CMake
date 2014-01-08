@@ -237,7 +237,8 @@ void cmExtraSublimeTextGenerator::
     {
       cmGeneratorTarget *gtgt = this->GlobalGenerator
                                     ->GetGeneratorTarget(target);
-      std::vector<cmSourceFile*> const& sourceFiles = target->GetSourceFiles();
+      std::vector<cmSourceFile*> sourceFiles;
+      target->GetSourceFiles(sourceFiles);
       std::vector<cmSourceFile*>::const_iterator sourceFilesEnd =
         sourceFiles.end();
       for (std::vector<cmSourceFile*>::const_iterator iter =

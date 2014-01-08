@@ -276,7 +276,8 @@ cmNinjaTargetGenerator
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if(!path.empty())
     path += "/";
-  std::string const& objectName = this->GeneratorTarget->Objects[source];
+  std::string const& objectName = this->GeneratorTarget
+                                      ->GetObjectName(source);
   path += this->LocalGenerator->GetTargetDirectory(*this->Target);
   path += "/";
   path += objectName;
@@ -459,27 +460,28 @@ cmNinjaTargetGenerator
     << "\n\n";
 
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = this->GeneratorTarget->GetCustomCommands().begin();
+      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
      {
      cmCustomCommand const* cc = (*si)->GetCustomCommand();
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      }
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->HeaderSources,
+    this->GeneratorTarget->GetHeaderSources(),
     this->MacOSXContentGenerator);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
-    this->GeneratorTarget->ExtraSources,
+    this->GeneratorTarget->GetExtraSources(),
     this->MacOSXContentGenerator);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ExternalObjects.begin();
-      si != this->GeneratorTarget->ExternalObjects.end(); ++si)
+        si = this->GeneratorTarget->GetExternalObjects().begin();
+      si != this->GeneratorTarget->GetExternalObjects().end(); ++si)
     {
     this->Objects.push_back(this->GetSourceFilePath(*si));
     }
+  std::vector<cmSourceFile*> objectSources;
+  this->GeneratorTarget->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->ObjectSources.begin();
-      si != this->GeneratorTarget->ObjectSources.end(); ++si)
+        si = objectSources.begin(); si != objectSources.end(); ++si)
     {
     this->WriteObjectBuildStatement(*si);
     }
@@ -540,8 +542,8 @@ cmNinjaTargetGenerator
 
   // Add order-only dependencies on custom command outputs.
   for(std::vector<cmSourceFile*>::const_iterator
-        si = this->GeneratorTarget->CustomCommands.begin();
-      si != this->GeneratorTarget->CustomCommands.end(); ++si)
+        si = this->GeneratorTarget->GetCustomCommands().begin();
+      si != this->GeneratorTarget->GetCustomCommands().end(); ++si)
     {
     cmCustomCommand const* cc = (*si)->GetCustomCommand();
     const std::vector<std::string>& ccoutputs = cc->GetOutputs();
