@@ -238,6 +238,7 @@ find_path(JAVA_INCLUDE_PATH jni.h
 
 find_path(JAVA_INCLUDE_PATH2 jni_md.h
   ${JAVA_INCLUDE_PATH}
+  ${JAVA_INCLUDE_PATH}/darwin
   ${JAVA_INCLUDE_PATH}/win32
   ${JAVA_INCLUDE_PATH}/linux
   ${JAVA_INCLUDE_PATH}/freebsd
