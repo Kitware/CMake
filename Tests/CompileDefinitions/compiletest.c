@@ -13,6 +13,10 @@
 #error Unexpected LINK_LANGUAGE_IS_CXX
 #endif
 
+#ifdef DEBUG_MODE
+#error Unexpected DEBUG_MODE
+#endif
+
 int main(void)
 {
   return 0;

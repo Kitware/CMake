@@ -96,6 +96,9 @@ public:
     /// add_custom_command() must exist.
     CMP0041, ///< Error on relative include with generator expression
     CMP0042, ///< Enable MACOSX_RPATH by default
+    CMP0043, ///< Ignore COMPILE_DEFINITIONS_<Config> properties
+    CMP0044, ///< Case sensitive <LANG>_COMPILER_ID generator expressions
+    CMP0045, ///< Error on non-existent target in get_target_property
 
     /** \brief Always the last entry.
      *

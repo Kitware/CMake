@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 2.8)
+project(${RunCMake_TEST} CXX)
+include(${RunCMake_TEST}.cmake NO_POLICY_SCOPE)
+
+if(CMAKE_BUILD_TYPE)
+  # Dummy variable use
+endif()

@@ -1601,20 +1601,22 @@ void cmMakefile::InitializeFromParent()
   }
 
   // compile definitions property and per-config versions
-  {
-  this->SetProperty("COMPILE_DEFINITIONS",
-                    parent->GetProperty("COMPILE_DEFINITIONS"));
-  std::vector<std::string> configs;
-  this->GetConfigurations(configs);
-  for(std::vector<std::string>::const_iterator ci = configs.begin();
-      ci != configs.end(); ++ci)
+  cmPolicies::PolicyStatus polSt = this->GetPolicyStatus(cmPolicies::CMP0043);
+  if (polSt == cmPolicies::WARN || polSt == cmPolicies::OLD)
     {
-    std::string defPropName = "COMPILE_DEFINITIONS_";
-    defPropName += cmSystemTools::UpperCase(*ci);
-    this->SetProperty(defPropName.c_str(),
-                      parent->GetProperty(defPropName.c_str()));
+    this->SetProperty("COMPILE_DEFINITIONS",
+                      parent->GetProperty("COMPILE_DEFINITIONS"));
+    std::vector<std::string> configs;
+    this->GetConfigurations(configs);
+    for(std::vector<std::string>::const_iterator ci = configs.begin();
+        ci != configs.end(); ++ci)
+      {
+      std::string defPropName = "COMPILE_DEFINITIONS_";
+      defPropName += cmSystemTools::UpperCase(*ci);
+      const char* prop = parent->GetProperty(defPropName.c_str());
+      this->SetProperty(defPropName.c_str(), prop);
+      }
     }
-  }
 
   // link libraries
   this->LinkLibraries = parent->LinkLibraries;
