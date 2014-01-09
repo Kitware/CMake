@@ -186,8 +186,6 @@ set(SRCS
   cmExportSetMap.cxx
   cmExtraCodeBlocksGenerator.cxx
   cmExtraCodeBlocksGenerator.h
-  cmExtraCodeLiteGenerator.cxx
-  cmExtraCodeLiteGenerator.h
   cmExtraEclipseCDT4Generator.cxx
   cmExtraEclipseCDT4Generator.h
   cmExtraKateGenerator.cxx
