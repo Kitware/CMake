@@ -1420,7 +1420,9 @@ OutputIncludes(std::vector<std::string> const & includes)
   for(std::vector<std::string>::const_iterator i =  includes.begin();
       i != includes.end(); ++i)
     {
-    *this->BuildFileStream << cmVS10EscapeXML(*i) << ";";
+    std::string incDir = *i;
+    this->ConvertToWindowsSlash(incDir);
+    *this->BuildFileStream << cmVS10EscapeXML(incDir) << ";";
     }
   this->WriteString("%(AdditionalIncludeDirectories)"
                     "</AdditionalIncludeDirectories>\n", 0);
