@@ -1381,7 +1381,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
 
   // get the classes from the source lists then add them to the groups
   this->ModuleDefinitionFile = "";
-  std::vector<cmSourceFile*>const & classes = target.GetSourceFiles();
+  std::vector<cmSourceFile*> classes;
+  target.GetSourceFiles(classes);
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
     {
@@ -1468,9 +1469,9 @@ cmLocalVisualStudio7GeneratorFCInfo
   cmGeneratorTarget* gt =
     lg->GetGlobalGenerator()->GetGeneratorTarget(&target);
   std::string objectName;
-  if(gt->ExplicitObjectName.find(&sf) != gt->ExplicitObjectName.end())
+  if(gt->HasExplicitObjectName(&sf))
     {
-    objectName = gt->Objects[&sf];
+    objectName = gt->GetObjectName(&sf);
     }
 
   // Compute per-source, per-config information.

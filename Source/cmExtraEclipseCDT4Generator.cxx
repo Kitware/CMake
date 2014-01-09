@@ -559,7 +559,8 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
           std::vector<cmSourceGroup> sourceGroups=makefile->GetSourceGroups();
           // get the files from the source lists then add them to the groups
           cmTarget* tgt = const_cast<cmTarget*>(&ti->second);
-          std::vector<cmSourceFile*>const & files = tgt->GetSourceFiles();
+          std::vector<cmSourceFile*> files;
+          tgt->GetSourceFiles(files);
           for(std::vector<cmSourceFile*>::const_iterator sfIt = files.begin();
               sfIt != files.end();
               sfIt++)

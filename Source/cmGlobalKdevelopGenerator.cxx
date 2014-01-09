@@ -138,7 +138,8 @@ bool cmGlobalKdevelopGenerator
     for (cmTargets::iterator ti = targets.begin();
          ti != targets.end(); ti++)
       {
-      const std::vector<cmSourceFile*>& sources=ti->second.GetSourceFiles();
+      std::vector<cmSourceFile*> sources;
+      ti->second.GetSourceFiles(sources);
       for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
            si!=sources.end(); si++)
         {

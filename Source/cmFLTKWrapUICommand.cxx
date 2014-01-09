@@ -132,8 +132,8 @@ void cmFLTKWrapUICommand::FinalPass()
     cmSystemTools::Message(msg.c_str(),"Warning");
     return;
     }
-  std::vector<cmSourceFile*> const& srcs =
-    target->GetSourceFiles();
+  std::vector<cmSourceFile*> srcs;
+  target->GetSourceFiles(srcs);
   bool found = false;
   for (unsigned int i = 0; i < srcs.size(); ++i)
     {
