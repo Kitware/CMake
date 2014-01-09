@@ -422,12 +422,6 @@ package.  This is necessary if complex generator expressions are used:
     $<INSTALL_INTERFACE:$<$<CONFIG:Debug>:$<INSTALL_PREFIX>/include/TgtName>>
   )
 
-As a special case, packages are not relocatable if installed to the ``/usr``
-or ``/`` prefix on linux, and ``/lib`` is a symlink to ``/usr/lib``.  This is
-a workaround for some linux distros creating such a symlink and causing the
-relative paths to be evaluated incorrectly.  As installations to ``/usr`` are
-generally managed by a package manager, they do not need to be relocatable.
-
 The :command:`export(EXPORT)` command creates an :prop_tgt:`IMPORTED` targets
 definition file which is specific to the build-tree, and is not relocatable.
 This can similiarly be used with a suitable package configuration file and
