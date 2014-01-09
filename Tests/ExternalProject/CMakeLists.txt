@@ -512,6 +512,22 @@ if(do_git_tests)
     LOG_UPDATE 1
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  # git by explicit branch/tag with empty submodule list
+  #
+  set(proj TutorialStep1-GIT-bytag-withsubmodules)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_TAG "origin/master"
+    GIT_SUBMODULES ""
+    UPDATE_COMMAND ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
 endif()
 
 set(do_hg_tests 0)
