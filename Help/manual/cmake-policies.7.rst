@@ -16,9 +16,9 @@ versions will begin to warn about the backward compatible behavior.  It
 is possible to disable the warning by explicitly requesting the OLD, or
 backward compatible behavior using the :command:`cmake_policy` command.
 It is also possible to request NEW, or non-backward compatible behavior
-for a policy, also avoiding the warning.  The default behavior for a policy is
-to warn by default, but that may be overridden from the command line by
-setting the :variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable.
+for a policy, also avoiding the warning.  Each policy can also be set to
+either NEW or OLD behavior explicitly on the command line with the
+:variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable.
 
 The :command:`cmake_minimum_required` command does more than report an
 error if a too-old version of CMake is used to build a project.  It
