@@ -68,7 +68,6 @@
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmGlobalNinjaGenerator.h"
-#include "cmExtraCodeLiteGenerator.h"
 
 #if !defined(CMAKE_BOOT_MINGW)
 # include "cmExtraCodeBlocksGenerator.h"
@@ -991,8 +990,6 @@ void cmake::AddDefaultExtraGenerators()
 
   this->AddExtraGenerator(cmExtraCodeBlocksGenerator::GetActualName(),
                           &cmExtraCodeBlocksGenerator::New);
-  this->AddExtraGenerator(cmExtraCodeLiteGenerator::GetActualName(),
-                          &cmExtraCodeLiteGenerator::New);
   this->AddExtraGenerator(cmExtraSublimeTextGenerator::GetActualName(),
                           &cmExtraSublimeTextGenerator::New);
   this->AddExtraGenerator(cmExtraKateGenerator::GetActualName(),
