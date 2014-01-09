@@ -115,6 +115,7 @@ private:
   bool PrintHelpListVariables(std::ostream& os);
   bool PrintHelpListPolicies(std::ostream& os);
   bool PrintDocumentationUsage(std::ostream& os);
+  bool PrintOldCustomModules(std::ostream& os);
 
   const char* GetNameString() const;
   bool IsOption(const char* arg) const;
