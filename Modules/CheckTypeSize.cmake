@@ -222,6 +222,8 @@ macro(CHECK_TYPE_SIZE TYPE VARIABLE)
     check_include_file(stdint.h HAVE_STDINT_H)
     check_include_file(stddef.h HAVE_STDDEF_H)
   endif()
+  unset(_CHECK_TYPE_SIZE_BUILTIN_TYPES_ONLY)
+  unset(_CHECK_TYPE_SIZE_LANGUAGE)
 
   # Compute or load the size or size map.
   set(${VARIABLE}_KEYS)
