@@ -62,6 +62,7 @@ bool cmProjectCommand
        "Value Computed by CMake", cmCacheManager::STATIC);
     }
 
+  bool haveVersion = false;
   std::string version;
   std::vector<std::string> languages;
   bool doingVersion = false;
@@ -70,6 +71,7 @@ bool cmProjectCommand
     if (doingVersion)
       {
       doingVersion = false;
+      haveVersion = true;
       version = args[i];
       }
     else
@@ -85,7 +87,38 @@ bool cmProjectCommand
       }
     }
 
-  if (version.size() > 0)
+  if (version.empty())
+    {
+    if (this->Makefile->IsOn("CMAKE_PROJECT_VERSION_SET_BY_PROJECT_COMMAND"))
+      {
+      // unset these variables only if they have been set by a previous
+      // project() call
+      this->Makefile->RemoveDefinition("PROJECT_VERSION");
+      this->Makefile->RemoveDefinition("PROJECT_VERSION_MAJOR");
+      this->Makefile->RemoveDefinition("PROJECT_VERSION_MINOR");
+      this->Makefile->RemoveDefinition("PROJECT_VERSION_PATCH");
+      this->Makefile->RemoveDefinition("PROJECT_VERSION_TWEAK");
+      }
+
+    if (haveVersion)
+      {
+      // an empty version has been explicitely set
+      std::string versionVar = args[0] + "_VERSION";
+      this->Makefile->RemoveDefinition(versionVar.c_str());
+      versionVar = args[0] + "_VERSION_MAJOR";
+      this->Makefile->RemoveDefinition(versionVar.c_str());
+      versionVar = args[0] + "_VERSION_MINOR";
+      this->Makefile->RemoveDefinition(versionVar.c_str());
+      versionVar = args[0] + "_VERSION_PATCH";
+      this->Makefile->RemoveDefinition(versionVar.c_str());
+      versionVar = args[0] + "_VERSION_TWEAK";
+      this->Makefile->RemoveDefinition(versionVar.c_str());
+      }
+
+    this->Makefile->RemoveDefinition(
+                               "CMAKE_PROJECT_VERSION_SET_BY_PROJECT_COMMAND");
+    }
+  else
     {
     // A version was set, set the variables.
     unsigned int versionMajor = 0;
@@ -97,27 +130,23 @@ bool cmProjectCommand
                               &versionPatch, &versionTweak);
 
     char buffer[1024];
-
-    std::string versionVar = args[0];
-    versionVar += "_VERSION_TWEAK";
+    std::string versionVar;
+    versionVar = args[0] + "_VERSION_TWEAK";
     sprintf(buffer, "%d", versionCount >=4 ? versionTweak : 0);
     this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", buffer);
     this->Makefile->AddDefinition(versionVar.c_str(), buffer);
 
-    versionVar = args[0];
-    versionVar += "_VERSION_PATCH";
+    versionVar = args[0] + "_VERSION_PATCH";
     sprintf(buffer, "%d", versionCount >=3 ? versionPatch : 0);
     this->Makefile->AddDefinition("PROJECT_VERSION_PATCH", buffer);
     this->Makefile->AddDefinition(versionVar.c_str(), buffer);
 
-    versionVar = args[0];
-    versionVar += "_VERSION_MINOR";
+    versionVar = args[0] + "_VERSION_MINOR";
     sprintf(buffer, "%d", versionCount >=2 ? versionMinor : 0);
     this->Makefile->AddDefinition("PROJECT_VERSION_MINOR", buffer);
     this->Makefile->AddDefinition(versionVar.c_str(), buffer);
 
-    versionVar = args[0];
-    versionVar += "_VERSION_MAJOR";
+    versionVar = args[0] + "_VERSION_MAJOR";
     sprintf(buffer, "%d", versionCount >=1 ? versionMajor : 0);
     this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR", buffer);
     this->Makefile->AddDefinition(versionVar.c_str(), buffer);
@@ -146,6 +175,9 @@ bool cmProjectCommand
     versionVar += "_VERSION";
     this->Makefile->AddDefinition("PROJECT_VERSION", buffer);
     this->Makefile->AddDefinition(versionVar.c_str(), buffer);
+
+    this->Makefile->AddDefinition(
+                       "CMAKE_PROJECT_VERSION_SET_BY_PROJECT_COMMAND", "TRUE");
   }
 
   if (languages.size() == 0)
