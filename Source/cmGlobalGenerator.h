@@ -80,7 +80,7 @@ public:
   void SetLanguageEnabled(const char*, cmMakefile* mf);
   bool GetLanguageEnabled(const char*) const;
   void ClearEnabledLanguages();
-  void GetEnabledLanguages(std::vector<std::string>& lang);
+  void GetEnabledLanguages(std::vector<std::string>& lang) const;
   /**
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.
@@ -182,13 +182,13 @@ public:
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
 
   ///! return the language for the given extension
-  const char* GetLanguageFromExtension(const char* ext);
+  const char* GetLanguageFromExtension(const char* ext) const;
   ///! is an extension to be ignored
-  bool IgnoreFile(const char* ext);
+  bool IgnoreFile(const char* ext) const;
   ///! What is the preference for linkers and this language (None or Prefered)
-  int GetLinkerPreference(const char* lang);
+  int GetLinkerPreference(const char* lang) const;
   ///! What is the object file extension for a given source file?
-  const char* GetLanguageOutputExtension(cmSourceFile const&);
+  const char* GetLanguageOutputExtension(cmSourceFile const&) const;
 
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const { return "."; }
@@ -220,7 +220,7 @@ public:
       target in the project */
   bool IsDependedOn(const char* project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
-  cmLocalGenerator* FindLocalGenerator(const char* start_dir);
+  cmLocalGenerator* FindLocalGenerator(const char* start_dir) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
@@ -293,7 +293,7 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig() { return false; }
 
-  std::string GetSharedLibFlagsForLanguage(std::string const& lang);
+  std::string GetSharedLibFlagsForLanguage(std::string const& lang) const;
 
   /** Generate an <output>.rule file path for a given command output.  */
   virtual std::string GenerateRuleFile(std::string const& output) const;
@@ -325,7 +325,7 @@ protected:
   virtual void GetTargetSets(TargetDependSet& projectTargets,
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
-  virtual bool IsRootOnlyTarget(cmTarget* target);
+  bool IsRootOnlyTarget(cmTarget* target) const;
   void AddTargetDepends(cmTarget const* target,
                         TargetDependSet& projectTargets);
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
@@ -348,8 +348,8 @@ protected:
   // has been populated.
   void FillProjectMap();
   void CheckLocalGenerators();
-  bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen);
-  bool IsExcluded(cmLocalGenerator* root, cmTarget& target);
+  bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
+  bool IsExcluded(cmLocalGenerator* root, cmTarget const& target) const;
   void FillLocalGeneratorToTargetMap();
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const char* name, const char* message,
