@@ -29,3 +29,16 @@ target_link_libraries(iface_whitelist INTERFACE $<$<BOOL:$<TARGET_PROPERTY:CUSTO
 
 add_executable(exec_whitelist dummy.cpp)
 target_link_libraries(exec_whitelist iface_whitelist)
+
+add_library(iface_imported INTERFACE IMPORTED)
+set_property(TARGET iface_imported PROPERTY
+  INTERFACE_COMPILE_DEFINITIONS
+    $<$<CONFIG:SPECIAL>:SPECIAL_MODE>
+    $<$<CONFIG:Debug>:DEBUG_MODE>
+)
+set_property(TARGET iface_imported PROPERTY
+  MAP_IMPORTED_CONFIG_DEBUG SPECIAL
+)
+
+add_executable(map_config map_config.cpp)
+target_link_libraries(map_config iface_imported)
