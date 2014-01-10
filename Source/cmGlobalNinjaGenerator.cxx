@@ -1121,11 +1121,15 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     temp.insert(temp.end(), of.begin(), of.end());
   }
 
+  //Add the CMakeCache.txt file to the implicit depends so that we catch
+  //when somebody manually modifies the file.
+  implicitDeps.push_back("CMakeCache.txt");
+
   //make sure nothing is in implicit depends twice
   std::sort(implicitDeps.begin(), implicitDeps.end());
   implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
                      implicitDeps.end());
-  implicitDeps.push_back("CMakeCache.txt");
+
 
   //make sure nothing is in outputs depends twice
   std::sort(temp.begin(), temp.end());
