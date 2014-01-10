@@ -1076,7 +1076,7 @@ void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
   this->CMP0042WarnTargets.insert(target);
 }
 
-bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
+bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 {
   // If the property is not enabled then okay.
   if(!this->CMakeInstance
