@@ -1102,8 +1102,7 @@ void cmLocalVisualStudio6Generator
       // Compute the proper name to use to link this library.
       std::string lib;
       std::string libDebug;
-      cmGeneratorTarget* tgt =
-          this->GlobalGenerator->FindGeneratorTarget(0, j->first.c_str());
+      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, j->first.c_str());
       if(tgt)
         {
         lib = cmSystemTools::GetFilenameWithoutExtension
@@ -1249,14 +1248,14 @@ void cmLocalVisualStudio6Generator
     extraLinkOptionsRelWithDebInfo += targetLinkFlags;
     }
 
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
+
+
 
   // Get standard libraries for this language.
   if(targetBuilds)
     {
     // Get the language to use for linking.
-    const char* linkLanguage = gt->GetLinkerLanguage();
+    const char* linkLanguage = target.GetLinkerLanguage();
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -1306,11 +1305,11 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::SHARED_LIBRARY ||
      target.GetType() == cmTarget::MODULE_LIBRARY)
     {
-    outputName = gt->GetFullName();
-    outputNameDebug = gt->GetFullName("Debug");
-    outputNameRelease = gt->GetFullName("Release");
-    outputNameMinSizeRel = gt->GetFullName("MinSizeRel");
-    outputNameRelWithDebInfo = gt->GetFullName("RelWithDebInfo");
+    outputName = target.GetFullName();
+    outputNameDebug = target.GetFullName("Debug");
+    outputNameRelease = target.GetFullName("Release");
+    outputNameMinSizeRel = target.GetFullName("MinSizeRel");
+    outputNameRelWithDebInfo = target.GetFullName("RelWithDebInfo");
     }
   else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
     {
@@ -1407,10 +1406,10 @@ void cmLocalVisualStudio6Generator
     fullPathImpRelease += "/";
     fullPathImpMinSizeRel += "/";
     fullPathImpRelWithDebInfo += "/";
-    fullPathImpDebug += gt->GetFullName("Debug", true);
-    fullPathImpRelease += gt->GetFullName("Release", true);
-    fullPathImpMinSizeRel += gt->GetFullName("MinSizeRel", true);
-    fullPathImpRelWithDebInfo += gt->GetFullName("RelWithDebInfo", true);
+    fullPathImpDebug += target.GetFullName("Debug", true);
+    fullPathImpRelease += target.GetFullName("Release", true);
+    fullPathImpMinSizeRel += target.GetFullName("MinSizeRel", true);
+    fullPathImpRelWithDebInfo += target.GetFullName("RelWithDebInfo", true);
 
     targetImplibFlagDebug = "/implib:";
     targetImplibFlagRelease = "/implib:";
@@ -1678,7 +1677,7 @@ void cmLocalVisualStudio6Generator
     if(target.GetType() >= cmTarget::EXECUTABLE &&
        target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
-      const char* linkLanguage = gt->GetLinkerLanguage();
+      const char* linkLanguage = target.GetLinkerLanguage();
       if(!linkLanguage)
         {
         cmSystemTools::Error
@@ -1808,10 +1807,8 @@ void cmLocalVisualStudio6Generator
                      const std::string extraOptions,
                      std::string& options)
 {
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
   // Compute the link information for this configuration.
-  cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
+  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
   if(!pcli)
     {
     return;

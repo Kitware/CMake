@@ -346,6 +346,7 @@ void cmGlobalXCodeGenerator::Generate()
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
     }
+  this->ForceLinkerLanguages();
   this->cmGlobalGenerator::Generate();
   if(cmSystemTools::GetErrorOccuredFlag())
     {
@@ -1236,13 +1237,12 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
     return;
     }
 
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&cmtarget);
-  const char* llang = gtgt->GetLinkerLanguage("NOCONFIG");
+  const char* llang = cmtarget.GetLinkerLanguage("NOCONFIG");
   if(!llang) { return; }
 
   // If the language is compiled as a source trust Xcode to link with it.
-  cmGeneratorTarget::LinkImplementation const* impl =
-    gtgt->GetLinkImplementation("NOCONFIG", &cmtarget);
+  cmTarget::LinkImplementation const* impl =
+    cmtarget.GetLinkImplementation("NOCONFIG", &cmtarget);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
     {
@@ -1710,8 +1710,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                  (target.GetType() == cmTarget::EXECUTABLE) ||
                  shared);
 
-  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
-  const char* lang = gtgt->GetLinkerLanguage(configName);
+  const char* lang = target.GetLinkerLanguage(configName);
   std::string cflags;
   if(lang)
     {
@@ -1763,6 +1762,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     // Add the export symbol definition for shared library objects.
     this->AppendDefines(ppDefs, exportMacro);
     }
+  cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&target);
   std::vector<std::string> targetDefines;
   target.GetCompileDefinitions(targetDefines, configName);
   this->AppendDefines(ppDefs, targetDefines);
@@ -1852,11 +1852,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::string pnprefix;
   std::string pnbase;
   std::string pnsuffix;
-  gtgt->GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
+  target.GetFullNameComponents(pnprefix, pnbase, pnsuffix, configName);
 
   const char* version = target.GetProperty("VERSION");
   const char* soversion = target.GetProperty("SOVERSION");
-  if(!gtgt->HasSOName(configName) || target.IsFrameworkOnApple())
+  if(!target.HasSOName(configName) || target.IsFrameworkOnApple())
     {
     version = 0;
     soversion = 0;
@@ -2114,7 +2114,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       }
     }
   // Add framework search paths needed for linking.
-  if(cmComputeLinkInformation* cli = gtgt->GetLinkInformation(configName))
+  if(cmComputeLinkInformation* cli = target.GetLinkInformation(configName))
     {
     std::vector<std::string> const& fwDirs = cli->GetFrameworkPaths();
     for(std::vector<std::string>::const_iterator fdi = fwDirs.begin();
@@ -2237,7 +2237,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   if(target.GetType() == cmTarget::SHARED_LIBRARY)
     {
     // Get the install_name directory for the build tree.
-    install_name_dir = gtgt->GetInstallNameDirForBuildTree(configName);
+    install_name_dir = target.GetInstallNameDirForBuildTree(configName);
     // Xcode doesn't create the correct install_name in some cases.
     // That is, if the INSTALL_PATH is empty, or if we have versioning
     // of dylib libraries, we want to specify the install_name.
@@ -2251,7 +2251,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       install_name += install_name_dir;
       install_name += "/";
       }
-    install_name += gtgt->GetSOName(configName);
+    install_name += target.GetSOName(configName);
 
     if((realName != soName) || install_name_dir.empty())
       {
@@ -2264,7 +2264,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString(install_name_dir.c_str()));
 
   // Create the LD_RUNPATH_SEARCH_PATHS
-  cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
+  cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
   if(pcli)
     {
     std::string search_paths;
@@ -2609,8 +2609,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
     }
   else
     {
-    cmGeneratorTarget *gtgt = this->GetGeneratorTarget(&cmtarget);
-    fullName = gtgt->GetFullName(defConfig.c_str());
+    fullName = cmtarget.GetFullName(defConfig.c_str());
     }
   fileRef->AddAttribute("path", this->CreateString(fullName.c_str()));
   fileRef->AddAttribute("refType", this->CreateString("0"));
@@ -2835,8 +2834,7 @@ void cmGlobalXCodeGenerator
       }
 
     // Compute the link library and directory information.
-    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(cmtarget);
-    cmComputeLinkInformation* pcli = gtgt->GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = cmtarget->GetLinkInformation(configName);
     if(!pcli)
       {
       continue;
@@ -3503,7 +3501,6 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
       {
       cmXCodeObject* target = *i;
       cmTarget* t =target->GetTarget();
-      cmGeneratorTarget *gt = this->GetGeneratorTarget(t);
 
       if(t->GetType() == cmTarget::EXECUTABLE ||
 // Nope - no post-build for OBJECT_LIRBRARY
@@ -3521,7 +3518,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
          t->GetType() == cmTarget::SHARED_LIBRARY ||
          t->GetType() == cmTarget::MODULE_LIBRARY)
         {
-        std::string tfull = gt->GetFullPath(configName);
+        std::string tfull = t->GetFullPath(configName);
         std::string trel = this->ConvertToRelativeForMake(tfull.c_str());
 
         // Add this target to the post-build phases of its dependencies.
@@ -3572,7 +3569,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
             std::string universalFile = universal;
             universalFile += *arch;
             universalFile += "/";
-            universalFile += gt->GetFullName(configName);
+            universalFile += t->GetFullName(configName);
             makefileStream << "\t/bin/rm -f "
                            <<
               this->ConvertToRelativeForMake(universalFile.c_str())

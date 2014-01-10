@@ -633,10 +633,10 @@ cmMakefileTargetGenerator
      this->Target->GetType() == cmTarget::MODULE_LIBRARY)
     {
     targetFullPathReal =
-      this->GeneratorTarget->GetFullPath(this->ConfigName, false, true);
+      this->Target->GetFullPath(this->ConfigName, false, true);
     targetFullPathPDB = this->Target->GetPDBDirectory(this->ConfigName);
     targetFullPathPDB += "/";
-    targetFullPathPDB += this->GeneratorTarget->GetPDBName(this->ConfigName);
+    targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
     }
   targetOutPathReal = this->Convert(targetFullPathReal.c_str(),
                                     cmLocalGenerator::START_OUTPUT,
@@ -1008,8 +1008,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "set(CMAKE_TARGET_LINKED_INFO_FILES\n";
   std::set<cmTarget const*> emitted;
   const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli =
-                              this->GeneratorTarget->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
     {
     cmComputeLinkInformation::ItemVector const& items = cli->GetItems();
     for(cmComputeLinkInformation::ItemVector::const_iterator
@@ -1571,8 +1570,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
 
   std::string flags;
   const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli =
-                              this->GeneratorTarget->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& frameworks = cli->GetFrameworkPaths();
     for(std::vector<std::string>::const_iterator i = frameworks.begin();
@@ -1603,8 +1601,7 @@ void cmMakefileTargetGenerator
 
   // Loop over all library dependencies.
   const char* cfg = this->LocalGenerator->ConfigurationName.c_str();
-  if(cmComputeLinkInformation* cli =
-                              this->GeneratorTarget->GetLinkInformation(cfg))
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(cfg))
     {
     std::vector<std::string> const& libDeps = cli->GetDepends();
     for(std::vector<std::string>::const_iterator j = libDeps.begin();
@@ -1673,7 +1670,7 @@ std::string cmMakefileTargetGenerator::GetLinkRule(const char* linkRuleVar)
   if(this->Target->HasImplibGNUtoMS())
     {
     std::string ruleVar = "CMAKE_";
-    ruleVar += this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    ruleVar += this->Target->GetLinkerLanguage(this->ConfigName);
     ruleVar += "_GNUtoMS_RULE";
     if(const char* rule = this->Makefile->GetDefinition(ruleVar.c_str()))
       {
@@ -1836,8 +1833,7 @@ cmMakefileTargetGenerator
 
     // Lookup the response file reference flag.
     std::string responseFlagVar = "CMAKE_";
-    responseFlagVar += this->GeneratorTarget
-                           ->GetLinkerLanguage(this->ConfigName);
+    responseFlagVar += this->Target->GetLinkerLanguage(this->ConfigName);
     responseFlagVar += "_RESPONSE_FILE_LINK_FLAG";
     const char* responseFlag =
       this->Makefile->GetDefinition(responseFlagVar.c_str());

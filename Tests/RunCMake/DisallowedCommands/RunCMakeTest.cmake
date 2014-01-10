@@ -5,6 +5,7 @@ foreach(p
     CMP0030
     CMP0031
     CMP0032
+    CMP0033
     CMP0034
     CMP0035
     CMP0036
