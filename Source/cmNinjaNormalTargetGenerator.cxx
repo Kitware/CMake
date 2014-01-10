@@ -37,16 +37,15 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
   , TargetNamePDB()
   , TargetLinkLanguage(0)
 {
-  this->TargetLinkLanguage = target->Target
-                                   ->GetLinkerLanguage(this->GetConfigName());
+  this->TargetLinkLanguage = target->GetLinkerLanguage(this->GetConfigName());
   if (target->GetType() == cmTarget::EXECUTABLE)
-    target->Target->GetExecutableNames(this->TargetNameOut,
+    this->GetGeneratorTarget()->GetExecutableNames(this->TargetNameOut,
                                this->TargetNameReal,
                                this->TargetNameImport,
                                this->TargetNamePDB,
                                GetLocalGenerator()->GetConfigName());
   else
-    target->Target->GetLibraryNames(this->TargetNameOut,
+    this->GetGeneratorTarget()->GetLibraryNames(this->TargetNameOut,
                             this->TargetNameSO,
                             this->TargetNameReal,
                             this->TargetNameImport,
@@ -389,13 +388,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
 
   std::string targetOutput = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName()).c_str());
+    this->GetGeneratorTarget()->GetFullPath(this->GetConfigName()).c_str());
   std::string targetOutputReal = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
+    this->GetGeneratorTarget()->GetFullPath(this->GetConfigName(),
                                    /*implib=*/false,
                                    /*realpath=*/true).c_str());
   std::string targetOutputImplib = ConvertToNinjaPath(
-    this->GetTarget()->GetFullPath(this->GetConfigName(),
+    this->GetGeneratorTarget()->GetFullPath(this->GetConfigName(),
                                    /*implib=*/true).c_str());
 
   if (this->GetTarget()->IsAppBundleOnApple())
@@ -487,12 +486,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   } else {
     vars["ARCH_FLAGS"] = flags;
   }
-  if (this->GetTarget()->HasSOName(this->GetConfigName())) {
+  if (this->GetGeneratorTarget()->HasSOName(this->GetConfigName())) {
     vars["SONAME_FLAG"] =
       this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage);
     vars["SONAME"] = this->TargetNameSO;
     if (targetType == cmTarget::SHARED_LIBRARY) {
-      std::string install_name_dir = this->GetTarget()
+      std::string install_name_dir = this->GetGeneratorTarget()
         ->GetInstallNameDirForBuildTree(this->GetConfigName());
 
       if (!install_name_dir.empty()) {
@@ -520,7 +519,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     std::string prefix;
     std::string base;
     std::string suffix;
-    this->GetTarget()->GetFullNameComponents(prefix, base, suffix);
+    this->GetGeneratorTarget()->GetFullNameComponents(prefix, base, suffix);
     std::string dbg_suffix = ".dbg";
     // TODO: Where to document?
     if (mf->GetDefinition("CMAKE_DEBUG_SYMBOL_SUFFIX"))

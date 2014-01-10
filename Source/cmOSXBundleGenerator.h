@@ -19,6 +19,7 @@
 #include <set>
 
 class cmTarget;
+class cmGeneratorTarget;
 class cmMakefile;
 class cmLocalGenerator;
 class cmGeneratorTarget;
@@ -60,6 +61,7 @@ private:
 
 private:
   cmTarget* Target;
+  cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   const char* ConfigName;

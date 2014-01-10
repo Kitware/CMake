@@ -52,10 +52,6 @@ public:
   typedef std::vector<LinkEntry> EntryVector;
   EntryVector const& Compute();
 
-  void SetOldLinkDirMode(bool b);
-  std::set<cmTarget const*> const& GetOldWrongConfigItems() const
-    { return this->OldWrongConfigItems; }
-
 private:
 
   // Context information.
@@ -79,7 +75,6 @@ private:
   std::map<cmStdString, int>::iterator
   AllocateLinkEntry(std::string const& item);
   int AddLinkEntry(int depender_index, std::string const& item);
-  void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
@@ -89,14 +84,8 @@ private:
   std::vector<LinkEntry> EntryList;
   std::map<cmStdString, int> LinkEntryIndex;
 
-  // BFS of initial dependencies.
-  struct BFSEntry
-  {
-    int Index;
-    const char* LibDepends;
-  };
-  std::queue<BFSEntry> BFSQueue;
-  void FollowLinkEntry(BFSEntry const&);
+  std::queue<int> BFSQueue;
+  void FollowLinkEntry(int);
 
   // Shared libraries that are included only because they are
   // dependencies of other shared libraries, not because they are part
@@ -109,7 +98,7 @@ private:
   std::queue<SharedDepEntry> SharedDepQueue;
   std::set<int> SharedDepFollowed;
   void FollowSharedDeps(int depender_index,
-                        cmTarget::LinkInterface const* iface,
+                        cmGeneratorTarget::LinkInterface const* iface,
                         bool follow_interface = false);
   void QueueSharedDependencies(int depender_index,
                                std::vector<std::string> const& deps);
@@ -160,11 +149,6 @@ private:
 
   // Record of the original link line.
   std::vector<int> OriginalEntries;
-
-  // Compatibility help.
-  bool OldLinkDirMode;
-  void CheckWrongConfigItem(int depender_index, std::string const& item);
-  std::set<cmTarget const*> OldWrongConfigItems;
 };
 
 #endif

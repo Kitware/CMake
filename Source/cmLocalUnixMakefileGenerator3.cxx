@@ -445,8 +445,7 @@ void cmLocalUnixMakefileGenerator3
 
       // Add a local name for the rule to relink the target before
       // installation.
-      if(t->second->Target
-                  ->NeedRelinkBeforeInstall(this->ConfigurationName.c_str()))
+      if(t->second->NeedRelinkBeforeInstall(this->ConfigurationName.c_str()))
         {
         makeTargetName = this->GetRelativeTargetDirectory(*t->second->Target);
         makeTargetName += "/preinstall";

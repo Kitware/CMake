@@ -657,6 +657,10 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   const char* configType = "10";
   const char* projectType = 0;
   bool targetBuilds = true;
+
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
   switch(target.GetType())
     {
     case cmTarget::OBJECT_LIBRARY:
@@ -688,7 +692,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   if(strcmp(configType, "10") != 0)
     {
     const char* linkLanguage = (this->FortranProject? "Fortran":
-                                target.GetLinkerLanguage(configName));
+                                gt->GetLinkerLanguage(configName));
     if(!linkLanguage)
       {
       cmSystemTools::Error
@@ -750,8 +754,6 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
   targetOptions.ParseFinish();
-  cmGeneratorTarget* gt =
-    this->GlobalGenerator->GetGeneratorTarget(&target);
   std::vector<std::string> targetDefines;
   target.GetCompileDefinitions(targetDefines, configName);
   targetOptions.AddDefines(targetDefines);
@@ -999,6 +1001,9 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       this->ConvertToXMLOutputPath(this->ModuleDefinitionFile.c_str());
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
     }
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
   switch(target.GetType())
     {
     case cmTarget::UNKNOWN_LIBRARY:
@@ -1021,7 +1026,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     case cmTarget::STATIC_LIBRARY:
     {
-    std::string targetNameFull = target.GetFullName(configName);
+    std::string targetNameFull = gt->GetFullName(configName);
     std::string libpath = target.GetDirectory(configName);
     libpath += "/";
     libpath += targetNameFull;
@@ -1060,11 +1065,11 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string targetNameFull;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target.GetLibraryNames(targetName, targetNameSO, targetNameFull,
+    gt->GetLibraryNames(targetName, targetNameSO, targetNameFull,
                            targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+    cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
     if(!pcli)
       {
       return;
@@ -1156,11 +1161,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     std::string targetNameFull;
     std::string targetNameImport;
     std::string targetNamePDB;
-    target.GetExecutableNames(targetName, targetNameFull,
+    gt->GetExecutableNames(targetName, targetNameFull,
                               targetNameImport, targetNamePDB, configName);
 
     // Compute the link library and directory information.
-    cmComputeLinkInformation* pcli = target.GetLinkInformation(configName);
+    cmGeneratorTarget* gt =
+      this->GlobalGenerator->GetGeneratorTarget(&target);
+    cmComputeLinkInformation* pcli = gt->GetLinkInformation(configName);
     if(!pcli)
       {
       return;
@@ -1539,7 +1546,7 @@ cmLocalVisualStudio7GeneratorFCInfo
       lg->GlobalGenerator->GetLanguageFromExtension
       (sf.GetExtension().c_str());
     const char* sourceLang = lg->GetSourceFileLanguage(sf);
-    const char* linkLanguage = target.GetLinkerLanguage(i->c_str());
+    const char* linkLanguage = gt->GetLinkerLanguage(i->c_str());
     bool needForceLang = false;
     // source file does not match its extension language
     if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
