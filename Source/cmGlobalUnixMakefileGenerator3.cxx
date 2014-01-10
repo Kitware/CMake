@@ -491,7 +491,7 @@ cmGlobalUnixMakefileGenerator3
       // Add this to the list of depends rules in this directory.
       if((!check_all || !l->second->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
          (!check_relink ||
-          l->second
+          l->second->Target
                    ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str())))
         {
         std::string tname = lg->GetRelativeTargetDirectory(*l->second->Target);
@@ -698,8 +698,9 @@ cmGlobalUnixMakefileGenerator3
                           localName.c_str(), depends, commands, true);
 
         // Add a local name for the rule to relink the target before
-        // installation.-
-        if(t->second->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
+        // installation.
+        if(t->second->Target
+                    ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
           {
           makeTargetName = lg->GetRelativeTargetDirectory(*t->second->Target);
           makeTargetName += "/preinstall";
@@ -876,7 +877,8 @@ cmGlobalUnixMakefileGenerator3
                         t->second->GetName(), depends, commands, true);
 
       // Add rules to prepare the target for installation.
-      if(t->second->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
+      if(t->second->Target
+                  ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
         {
         localName = lg->GetRelativeTargetDirectory(*t->second->Target);
         localName += "/preinstall";
@@ -926,12 +928,7 @@ cmGlobalUnixMakefileGenerator3
   if(emitted.insert(target).second)
     {
     count = this->ProgressMap[target].Marks.size();
-
-    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                    ->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
-
-    TargetDependSet const& depends = this->GetTargetDirectDepends(*gtgt);
+    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
@@ -1020,11 +1017,7 @@ cmGlobalUnixMakefileGenerator3
 ::AppendGlobalTargetDepends(std::vector<std::string>& depends,
                             cmTarget& target)
 {
-  cmGeneratorTarget *gtgt = target.GetMakefile()->GetLocalGenerator()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(&target);
-
-  TargetDependSet const& depends_set = this->GetTargetDirectDepends(*gtgt);
+  TargetDependSet const& depends_set = this->GetTargetDirectDepends(target);
   for(TargetDependSet::const_iterator i = depends_set.begin();
       i != depends_set.end(); ++i)
     {

@@ -357,11 +357,8 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     {
     qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
     }
-  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
   if (const char *targetQtVersion =
-        gtgt->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
     {
     qtVersion = targetQtVersion;
     }
@@ -565,8 +562,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable",
-                            qt5Moc->ImportedGetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
     }
   else
     {
@@ -626,11 +622,8 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
 static void GetUicOpts(cmTarget const* target, const char * config,
                        std::string &optString)
 {
-  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
   std::vector<std::string> opts;
-  gtgt->GetAutoUicOptions(opts, config);
+  target->GetAutoUicOptions(opts, config);
 
   const char* sep = "";
   for(std::vector<std::string>::const_iterator optIt = opts.begin();
@@ -758,8 +751,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
       }
     else
       {
-      makefile->AddDefinition("_qt_uic_executable",
-                              qt5Uic->ImportedGetLocation(0));
+      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(0));
       }
     }
   else
@@ -948,8 +940,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
                           targetName);
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable",
-                            qt5Rcc->ImportedGetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
     }
   else
     {

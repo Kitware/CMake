@@ -687,7 +687,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
   std::string createRule = "CMAKE_";
   createRule += llang;
   createRule += target.GetCreateRuleVariable();
-  std::string targetName = target.GetFullName();
+  std::string targetName = target.Target->GetFullName();
   // Executable :
   // Shared Library:
   // Static Library:
@@ -736,7 +736,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
     // Store this command line.
     commandLines.push_back(commandLine);
     }
-  std::string targetFullPath = target.GetFullPath();
+  std::string targetFullPath = target.Target->GetFullPath();
   // Generate a meaningful comment for the command.
   std::string comment = "Linking ";
   comment += llang;
@@ -774,7 +774,7 @@ void cmLocalGenerator
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::EXECUTABLE:
         {
-        const char* llang = target.GetLinkerLanguage();
+        const char* llang = target.Target->GetLinkerLanguage();
         if(!llang)
           {
           cmSystemTools::Error
@@ -1681,7 +1681,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build.c_str());
         linkFlags += " ";
         }
-      const char* linkLanguage = target->GetLinkerLanguage();
+      const char* linkLanguage = target->Target->GetLinkerLanguage();
       if(!linkLanguage)
         {
         cmSystemTools::Error
@@ -1791,7 +1791,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 {
   cmOStringStream fout;
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  cmComputeLinkInformation* pcli = tgt.GetLinkInformation(config);
+  cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
   if(!pcli)
     {
     return;
@@ -2021,8 +2021,7 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
     }
 
   // Look for a CMake target with the given name.
-  if(cmGeneratorTarget* target
-                    = this->Makefile->FindGeneratorTargetToUse(name.c_str()))
+  if(cmTarget* target = this->Makefile->FindTargetToUse(name.c_str()))
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName
@@ -2213,10 +2212,8 @@ void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
         }
       return;
       }
-    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                    ->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
-    if (gtgt->GetLinkInterfaceDependentBoolProperty(
+
+    if (target->GetLinkInterfaceDependentBoolProperty(
                                                 "POSITION_INDEPENDENT_CODE",
                                                 config))
       {

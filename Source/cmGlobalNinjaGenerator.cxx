@@ -850,14 +850,10 @@ cmGlobalNinjaGenerator
   case cmTarget::SHARED_LIBRARY:
   case cmTarget::STATIC_LIBRARY:
   case cmTarget::MODULE_LIBRARY:
-    {
-    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                    ->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
     outputs.push_back(ng->ConvertToNinjaPath(
-      gtgt->GetFullPath(configName, false, realname).c_str()));
+      target->GetFullPath(configName, false, realname).c_str()));
     break;
-    }
+
   case cmTarget::OBJECT_LIBRARY:
   case cmTarget::UTILITY: {
     std::string path = ng->ConvertToNinjaPath(
@@ -893,12 +889,8 @@ cmGlobalNinjaGenerator
     std::set<cmStdString> const& utils = target->GetUtilities();
     std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
-    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                    ->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
-
     cmTargetDependSet const& targetDeps =
-      this->GetTargetDirectDepends(*gtgt);
+      this->GetTargetDirectDepends(*target);
     for (cmTargetDependSet::const_iterator i = targetDeps.begin();
          i != targetDeps.end(); ++i)
       {

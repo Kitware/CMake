@@ -26,7 +26,6 @@ cmExportBuildFileGenerator::cmExportBuildFileGenerator()
 //----------------------------------------------------------------------------
 bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
 {
-  std::vector<cmGeneratorTarget*> allTargets;
   {
   std::string expectedTargets;
   std::string sep;
@@ -36,11 +35,10 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         tei = targets.begin();
       tei != targets.end(); ++tei)
     {
-    cmGeneratorTarget *te = this->Makefile
-                                ->FindGeneratorTargetToUse(tei->c_str());
-    expectedTargets += sep + this->Namespace + te->Target->GetExportName();
+    cmTarget *te = this->Makefile->FindTargetToUse(tei->c_str());
+    expectedTargets += sep + this->Namespace + te->GetExportName();
     sep = " ";
-    if(this->ExportedTargets.insert(te->Target).second)
+    if(this->ExportedTargets.insert(te).second)
       {
       this->Exports.push_back(te);
       }
@@ -64,12 +62,11 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
   std::vector<std::string> missingTargets;
 
   // Create all the imported targets.
-  for(std::vector<cmGeneratorTarget*>::const_iterator
+  for(std::vector<cmTarget*>::const_iterator
         tei = this->Exports.begin();
       tei != this->Exports.end(); ++tei)
     {
-    cmGeneratorTarget* gte = *tei;
-    cmTarget* te = gte->Target;
+    cmTarget* te = *tei;
     this->GenerateImportTargetCode(os, te);
 
     te->AppendBuildInterfaceIncludes();
@@ -99,7 +96,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
       }
-    this->PopulateCompatibleInterfaceProperties(gte, properties);
+    this->PopulateCompatibleInterfaceProperties(te, properties);
 
     this->GenerateInterfaceProperties(te, os, properties);
     }
@@ -124,12 +121,12 @@ cmExportBuildFileGenerator
                               const char* config, std::string const& suffix,
                             std::vector<std::string> &missingTargets)
 {
-  for(std::vector<cmGeneratorTarget*>::const_iterator
+  for(std::vector<cmTarget*>::const_iterator
         tei = this->Exports.begin();
       tei != this->Exports.end(); ++tei)
     {
     // Collect import properties for this target.
-    cmGeneratorTarget* target = *tei;
+    cmTarget* target = *tei;
     ImportPropertyMap properties;
 
     if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
@@ -142,12 +139,10 @@ cmExportBuildFileGenerator
       if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
         this->SetImportDetailProperties(config, suffix,
-                                        target,
-                                        properties, missingTargets);
+                                        target, properties, missingTargets);
         this->SetImportLinkInterface(config, suffix,
                                     cmGeneratorExpression::BuildInterface,
-                                    target,
-                                    properties, missingTargets);
+                                    target, properties, missingTargets);
         }
 
       // TOOD: PUBLIC_HEADER_LOCATION
@@ -157,8 +152,7 @@ cmExportBuildFileGenerator
       //                              properties);
 
       // Generate code in the export file.
-      this->GenerateImportPropertyCode(os, config, target->Target,
-                                       properties);
+      this->GenerateImportPropertyCode(os, config, target, properties);
       }
     }
 }
@@ -173,18 +167,17 @@ void cmExportBuildFileGenerator::SetExportSet(cmExportSet *exportSet)
 void
 cmExportBuildFileGenerator
 ::SetImportLocationProperty(const char* config, std::string const& suffix,
-                            cmGeneratorTarget* target,
-                            ImportPropertyMap& properties)
+                            cmTarget* target, ImportPropertyMap& properties)
 {
   // Get the makefile in which to lookup target information.
-  cmMakefile* mf = target->Makefile;
+  cmMakefile* mf = target->GetMakefile();
 
   // Add the main target file.
   {
   std::string prop = "IMPORTED_LOCATION";
   prop += suffix;
   std::string value;
-  if(target->Target->IsAppBundleOnApple())
+  if(target->IsAppBundleOnApple())
     {
     value = target->GetFullPath(config, false);
     }
@@ -202,13 +195,13 @@ cmExportBuildFileGenerator
   // Add the import library for windows DLLs.
   if(dll_platform &&
      (target->GetType() == cmTarget::SHARED_LIBRARY ||
-      target->Target->IsExecutableWithExports()) &&
+      target->IsExecutableWithExports()) &&
      mf->GetDefinition("CMAKE_IMPORT_LIBRARY_SUFFIX"))
     {
     std::string prop = "IMPORTED_IMPLIB";
     prop += suffix;
     std::string value = target->GetFullPath(config, true);
-    target->Target->GetImplibGNUtoMS(value, value,
+    target->GetImplibGNUtoMS(value, value,
                              "${CMAKE_IMPORT_LIBRARY_SUFFIX}");
     properties[prop] = value;
     }
@@ -324,7 +317,7 @@ cmExportBuildFileGenerator
 }
 
 std::string
-cmExportBuildFileGenerator::InstallNameDir(cmGeneratorTarget* target,
+cmExportBuildFileGenerator::InstallNameDir(cmTarget* target,
                                            const std::string& config)
 {
   std::string install_name_dir;

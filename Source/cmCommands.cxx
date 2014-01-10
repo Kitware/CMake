@@ -17,6 +17,7 @@
 #include "cmCMakeHostSystemInformationCommand.cxx"
 #include "cmElseIfCommand.cxx"
 #include "cmExportCommand.cxx"
+#include "cmExportLibraryDependencies.cxx"
 #include "cmFLTKWrapUICommand.cxx"
 #include "cmIncludeExternalMSProjectCommand.cxx"
 #include "cmInstallProgramsCommand.cxx"
@@ -59,6 +60,7 @@ void GetPredefinedCommands(std::list<cmCommand*>&
   commands.push_back(new cmCMakeHostSystemInformationCommand);
   commands.push_back(new cmElseIfCommand);
   commands.push_back(new cmExportCommand);
+  commands.push_back(new cmExportLibraryDependenciesCommand);
   commands.push_back(new cmFLTKWrapUICommand);
   commands.push_back(new cmIncludeExternalMSProjectCommand);
   commands.push_back(new cmInstallProgramsCommand);
