@@ -79,6 +79,7 @@ The following extra generators are known to CMake.
    :maxdepth: 1
 
    /generator/CodeBlocks
+   /generator/CodeLite
    /generator/Eclipse CDT4
    /generator/KDevelop3
    /generator/Kate
