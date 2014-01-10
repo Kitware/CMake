@@ -90,7 +90,7 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
 }
 
 std::string cmGlobalGenerator::SelectMakeProgram(const char* makeProgram,
-                                                 std::string makeDefault)
+                                                 std::string makeDefault) const
 {
   if(cmSystemTools::IsOff(makeProgram))
     {
@@ -111,7 +111,7 @@ std::string cmGlobalGenerator::SelectMakeProgram(const char* makeProgram,
 
 void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
                                                 cmMakefile *mf,
-                                                bool optional)
+                                                bool optional) const
 {
   std::string langComp = "CMAKE_";
   langComp += lang;
@@ -723,7 +723,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
                                             std::string lang,
-                                            const char* envVar)
+                                            const char* envVar) const
 {
   // Subclasses override this method if they do not support this advice.
   os <<
@@ -744,7 +744,7 @@ void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
-                                                     std::string lang)
+                                                     std::string lang) const
 {
   std::string compilerIdVar = "CMAKE_" + lang + "_COMPILER_ID";
   const char* compilerId = mf->GetDefinition(compilerIdVar.c_str());

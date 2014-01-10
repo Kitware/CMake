@@ -93,7 +93,7 @@ public:
    * Intended to be called from EnableLanguage.
    */
   void ResolveLanguageCompiler(const std::string &lang, cmMakefile *mf,
-                               bool optional);
+                               bool optional) const;
 
   /**
    * Try to determine system infomation, get it from another generator
@@ -342,7 +342,7 @@ protected:
   void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
 
   std::string SelectMakeProgram(const char* makeProgram,
-                                std::string makeDefault = "");
+                                std::string makeDefault = "") const;
 
   // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.
@@ -418,8 +418,8 @@ private:
   void FinalizeTargetCompileInfo();
 
   virtual void PrintCompilerAdvice(std::ostream& os, std::string lang,
-                                   const char* envVar);
-  void CheckCompilerIdCompatibility(cmMakefile* mf, std::string lang);
+                                   const char* envVar) const;
+  void CheckCompilerIdCompatibility(cmMakefile* mf, std::string lang) const;
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 
