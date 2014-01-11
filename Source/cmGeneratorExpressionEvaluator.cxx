@@ -16,6 +16,9 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpression.h"
 
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
+
 #include <cmsys/String.h>
 
 #include <assert.h>
@@ -973,7 +976,11 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             "link libraries for a static library");
         return std::string();
         }
-      const char *lang = target->GetLinkerLanguage(context->Config);
+
+      cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                      ->GetGlobalGenerator()
+                                      ->GetGeneratorTarget(target);
+      const char *lang = gtgt->GetLinkerLanguage(context->Config);
       return lang ? lang : "";
       }
 
@@ -1058,6 +1065,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     cmTarget const* headTarget = context->HeadTarget
                                ? context->HeadTarget : target;
 
+    cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                    ->GetGlobalGenerator()
+                                    ->GetGeneratorTarget(target);
+
     const char * const *transBegin =
                         cmArrayBegin(targetPropertyTransitiveWhitelist) + 1;
     const char * const *transEnd =
@@ -1068,7 +1079,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
 
       std::vector<std::string> libs;
-      target->GetTransitivePropertyLinkLibraries(context->Config,
+      gtgt->GetTransitivePropertyLinkLibraries(context->Config,
                                                  headTarget, libs);
       if (!libs.empty())
         {
@@ -1082,7 +1093,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     else if (std::find_if(transBegin, transEnd,
                           cmStrCmp(interfacePropertyName)) != transEnd)
       {
-      const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
+      const cmGeneratorTarget::LinkImplementation *impl =
+                                                  gtgt->GetLinkImplementation(
                                                     context->Config,
                                                     headTarget);
       if(impl)
@@ -1105,40 +1117,40 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         return linkedTargetsContent;
         }
-      if (target->IsLinkInterfaceDependentBoolProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentBoolProperty(propertyName,
                                                        context->Config))
         {
         context->HadContextSensitiveCondition = true;
-        return target->GetLinkInterfaceDependentBoolProperty(
+        return gtgt->GetLinkInterfaceDependentBoolProperty(
                                                 propertyName,
                                                 context->Config) ? "1" : "0";
         }
-      if (target->IsLinkInterfaceDependentStringProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentStringProperty(propertyName,
                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                              target->GetLinkInterfaceDependentStringProperty(
+                              gtgt->GetLinkInterfaceDependentStringProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMinProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
                                                          context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                          target->GetLinkInterfaceDependentNumberMaxProperty(
+                          gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1147,25 +1159,25 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return linkedTargetsContent;
       }
 
-    if (!target->IsImported()
+    if (!gtgt->IsImported()
         && dagCheckerParent && !dagCheckerParent->EvaluatingLinkLibraries())
       {
-      if (target->IsLinkInterfaceDependentNumberMinProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMinProperty(propertyName,
                                                         context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMinProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMinProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
         }
-      if (target->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
+      if (gtgt->IsLinkInterfaceDependentNumberMaxProperty(propertyName,
                                                         context->Config))
         {
         context->HadContextSensitiveCondition = true;
         const char *propContent =
-                            target->GetLinkInterfaceDependentNumberMaxProperty(
+                            gtgt->GetLinkInterfaceDependentNumberMaxProperty(
                                                 propertyName,
                                                 context->Config);
         return propContent ? propContent : "";
@@ -1354,7 +1366,7 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 template<bool linker, bool soname>
 struct TargetFilesystemArtifactResultCreator
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content);
 };
@@ -1363,12 +1375,12 @@ struct TargetFilesystemArtifactResultCreator
 template<>
 struct TargetFilesystemArtifactResultCreator<false, true>
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
     // The target soname file (.so.1).
-    if(target->IsDLLPlatform())
+    if(target->Target->IsDLLPlatform())
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_SONAME_FILE is not allowed "
@@ -1382,7 +1394,7 @@ struct TargetFilesystemArtifactResultCreator<false, true>
                     "SHARED libraries.");
       return std::string();
       }
-    std::string result = target->GetDirectory(context->Config);
+    std::string result = target->Target->GetDirectory(context->Config);
     result += "/";
     result += target->GetSOName(context->Config);
     return result;
@@ -1393,12 +1405,12 @@ struct TargetFilesystemArtifactResultCreator<false, true>
 template<>
 struct TargetFilesystemArtifactResultCreator<true, false>
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *content)
   {
     // The file used to link to the target (.so, .lib, .a).
-    if(!target->IsLinkable())
+    if(!target->Target->IsLinkable())
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "TARGET_LINKER_FILE is allowed only for libraries and "
@@ -1406,7 +1418,7 @@ struct TargetFilesystemArtifactResultCreator<true, false>
       return std::string();
       }
     return target->GetFullPath(context->Config,
-                               target->HasImportLibrary());
+                               target->Target->HasImportLibrary());
   }
 };
 
@@ -1414,7 +1426,7 @@ struct TargetFilesystemArtifactResultCreator<true, false>
 template<>
 struct TargetFilesystemArtifactResultCreator<false, false>
 {
-  static std::string Create(cmTarget* target,
+  static std::string Create(cmGeneratorTarget* target,
                             cmGeneratorExpressionContext *context,
                             const GeneratorExpressionContent *)
   {
@@ -1476,7 +1488,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "Expression syntax not recognized.");
       return std::string();
       }
-    cmTarget* target = context->Makefile->FindTargetToUse(name.c_str());
+    cmGeneratorTarget* target
+                  = context->Makefile->FindGeneratorTargetToUse(name.c_str());
     if(!target)
       {
       ::reportError(context, content->GetOriginalExpression(),
@@ -1497,8 +1510,8 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "be used while evaluating link libraries");
       return std::string();
       }
-    context->DependTargets.insert(target);
-    context->AllTargets.insert(target);
+    context->DependTargets.insert(target->Target);
+    context->AllTargets.insert(target->Target);
 
     std::string result =
                 TargetFilesystemArtifactResultCreator<linker, soname>::Create(

@@ -421,7 +421,7 @@ void getPropertyContents(cmTarget const* tgt, const char *prop,
 }
 
 //----------------------------------------------------------------------------
-void getCompatibleInterfaceProperties(cmTarget *target,
+void getCompatibleInterfaceProperties(cmGeneratorTarget *target,
                                       std::set<std::string> &ifaceProperties,
                                       const char *config)
 {
@@ -429,11 +429,14 @@ void getCompatibleInterfaceProperties(cmTarget *target,
 
   if (!info)
     {
-    cmMakefile* mf = target->GetMakefile();
-    cmOStringStream e;
-    e << "Exporting the target \"" << target->GetName() << "\" is not "
-        "allowed since its linker language cannot be determined";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
+      {
+      cmMakefile* mf = target->Target->GetMakefile();
+      cmOStringStream e;
+      e << "Exporting the target \"" << target->GetName() << "\" is not "
+          "allowed since its linker language cannot be determined";
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
     return;
     }
 
@@ -464,9 +467,10 @@ void getCompatibleInterfaceProperties(cmTarget *target,
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
-                                cmTarget *target,
+                                cmGeneratorTarget *gtarget,
                                 ImportPropertyMap &properties)
 {
+  cmTarget *target = gtarget->Target;
   this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_BOOL",
                                 target, properties);
   this->PopulateInterfaceProperty("COMPATIBLE_INTERFACE_STRING",
@@ -487,7 +491,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
 
   if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
-    getCompatibleInterfaceProperties(target, ifaceProperties, 0);
+    getCompatibleInterfaceProperties(gtarget, ifaceProperties, 0);
 
     std::vector<std::string> configNames;
     target->GetMakefile()->GetConfigurations(configNames);
@@ -495,7 +499,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
     for (std::vector<std::string>::const_iterator ci = configNames.begin();
       ci != configNames.end(); ++ci)
       {
-      getCompatibleInterfaceProperties(target, ifaceProperties, ci->c_str());
+      getCompatibleInterfaceProperties(gtarget, ifaceProperties, ci->c_str());
       }
     }
 
@@ -686,12 +690,13 @@ void
 cmExportFileGenerator
 ::SetImportLinkInterface(const char* config, std::string const& suffix,
                     cmGeneratorExpression::PreprocessContext preprocessRule,
-                    cmTarget* target, ImportPropertyMap& properties,
+                    cmGeneratorTarget* target, ImportPropertyMap& properties,
                     std::vector<std::string>& missingTargets)
 {
   // Add the transitive link dependencies for this configuration.
-  cmTarget::LinkInterface const* iface = target->GetLinkInterface(config,
-                                                                  target);
+  cmGeneratorTarget::LinkInterface const* iface = target->GetLinkInterface(
+                                                              config,
+                                                              target->Target);
   if (!iface)
     {
     return;
@@ -724,12 +729,14 @@ cmExportFileGenerator
     }
 
   const bool newCMP0022Behavior =
-                        target->GetPolicyStatusCMP0022() != cmPolicies::WARN
-                     && target->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+                        target->Target
+                              ->GetPolicyStatusCMP0022() != cmPolicies::WARN
+                     && target->Target
+                              ->GetPolicyStatusCMP0022() != cmPolicies::OLD;
 
   if(newCMP0022Behavior && !this->ExportOld)
     {
-    cmMakefile *mf = target->GetMakefile();
+    cmMakefile *mf = target->Target->GetMakefile();
     cmOStringStream e;
     e << "Target \"" << target->GetName() << "\" has policy CMP0022 enabled, "
          "but also has old-style LINK_INTERFACE_LIBRARIES properties "
@@ -749,7 +756,7 @@ cmExportFileGenerator
                                                          preprocessRule);
   if (!prepro.empty())
     {
-    this->ResolveTargetsInGeneratorExpressions(prepro, target,
+    this->ResolveTargetsInGeneratorExpressions(prepro, target->Target,
                                                missingTargets,
                                                ReplaceFreeTargets);
     properties["IMPORTED_LINK_INTERFACE_LIBRARIES" + suffix] = prepro;
@@ -760,12 +767,13 @@ cmExportFileGenerator
 void
 cmExportFileGenerator
 ::SetImportDetailProperties(const char* config, std::string const& suffix,
-                            cmTarget* target, ImportPropertyMap& properties,
+                            cmGeneratorTarget* target,
+                            ImportPropertyMap& properties,
                             std::vector<std::string>& missingTargets
                            )
 {
   // Get the makefile in which to lookup target information.
-  cmMakefile* mf = target->GetMakefile();
+  cmMakefile* mf = target->Makefile;
 
   // Add the soname for unix shared libraries.
   if(target->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -798,8 +806,8 @@ cmExportFileGenerator
     }
 
   // Add the transitive link dependencies for this configuration.
-  if(cmTarget::LinkInterface const* iface = target->GetLinkInterface(config,
-                                                                     target))
+  if(cmGeneratorTarget::LinkInterface const* iface =
+                            target->GetLinkInterface(config, target->Target))
     {
     this->SetImportLinkProperty(suffix, target,
                                 "IMPORTED_LINK_INTERFACE_LANGUAGES",
@@ -824,7 +832,7 @@ cmExportFileGenerator
 void
 cmExportFileGenerator
 ::SetImportLinkProperty(std::string const& suffix,
-                        cmTarget* target,
+                        cmGeneratorTarget* target,
                         const char* propName,
                         std::vector<std::string> const& entries,
                         ImportPropertyMap& properties,
@@ -848,7 +856,7 @@ cmExportFileGenerator
     sep = ";";
 
     std::string temp = *li;
-    this->AddTargetNamespace(temp, target, missingTargets);
+    this->AddTargetNamespace(temp, target->Target, missingTargets);
     link_entries += temp;
     }
 

@@ -68,17 +68,18 @@ protected:
   /** Fill in properties indicating built file locations.  */
   void SetImportLocationProperty(const char* config,
                                  std::string const& suffix,
-                                 cmTarget* target,
+                                 cmGeneratorTarget* target,
                                  ImportPropertyMap& properties);
 
-  std::string InstallNameDir(cmTarget* target, const std::string& config);
+  std::string InstallNameDir(cmGeneratorTarget* target,
+                             const std::string& config);
 
   std::vector<std::string>
   FindNamespaces(cmMakefile* mf, const std::string& name);
 
   std::vector<std::string> Targets;
   cmExportSet *ExportSet;
-  std::vector<cmTarget*> Exports;
+  std::vector<cmGeneratorTarget*> Exports;
   cmMakefile* Makefile;
   cmListFileBacktrace Backtrace;
 };

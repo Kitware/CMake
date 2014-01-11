@@ -14,7 +14,7 @@
 
 #include "cmStandardIncludes.h"
 
-class cmTarget;
+#include "cmGeneratorTarget.h"
 
 /** One edge in the global target dependency graph.
     It may be marked as a 'link' or 'util' edge or both.  */
@@ -27,6 +27,8 @@ class cmTargetDepend
   mutable bool Link;
   mutable bool Util;
 public:
+  cmTargetDepend(cmGeneratorTarget const* t)
+    : Target(t->Target), Link(false), Util(false) {}
   cmTargetDepend(cmTarget const* t): Target(t), Link(false), Util(false) {}
   operator cmTarget const*() const { return this->Target; }
   cmTarget const* operator->() const { return this->Target; }

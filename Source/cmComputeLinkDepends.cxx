@@ -190,9 +190,6 @@ cmComputeLinkDepends
   // Enable debug mode if requested.
   this->DebugMode = this->Makefile->IsOn("CMAKE_LINK_DEPENDS_DEBUG_MODE");
 
-  // Assume no compatibility until set.
-  this->OldLinkDirMode = false;
-
   // No computation has been done.
   this->CCG = 0;
 }
@@ -210,12 +207,6 @@ cmComputeLinkDepends::~cmComputeLinkDepends()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::SetOldLinkDirMode(bool b)
-{
-  this->OldLinkDirMode = b;
-}
-
-//----------------------------------------------------------------------------
 std::vector<cmComputeLinkDepends::LinkEntry> const&
 cmComputeLinkDepends::Compute()
 {
@@ -226,7 +217,7 @@ cmComputeLinkDepends::Compute()
   while(!this->BFSQueue.empty())
     {
     // Get the next entry.
-    BFSEntry qe = this->BFSQueue.front();
+    int qe = this->BFSQueue.front();
     this->BFSQueue.pop();
 
     // Follow the entry's dependencies.
@@ -318,43 +309,32 @@ int cmComputeLinkDepends::AddLinkEntry(int depender_index,
   if(entry.Target)
     {
     // Target dependencies are always known.  Follow them.
-    BFSEntry qe = {index, 0};
-    this->BFSQueue.push(qe);
+    this->BFSQueue.push(index);
     }
-  else
+  else if(!entry.IsFlag)
     {
-    // Look for an old-style <item>_LIB_DEPENDS variable.
-    std::string var = entry.Item;
-    var += "_LIB_DEPENDS";
-    if(const char* val = this->Makefile->GetDefinition(var.c_str()))
-      {
-      // The item dependencies are known.  Follow them.
-      BFSEntry qe = {index, val};
-      this->BFSQueue.push(qe);
-      }
-    else if(!entry.IsFlag)
-      {
-      // The item dependencies are not known.  We need to infer them.
-      this->InferredDependSets[index] = new DependSetList;
-      }
+    // The item dependencies are not known.  We need to infer them.
+    this->InferredDependSets[index] = new DependSetList;
     }
 
   return index;
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
+void cmComputeLinkDepends::FollowLinkEntry(int depender_index)
 {
   // Get this entry representation.
-  int depender_index = qe.Index;
   LinkEntry const& entry = this->EntryList[depender_index];
 
   // Follow the item's dependencies.
   if(entry.Target)
     {
     // Follow the target dependencies.
-    if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
+    cmGeneratorTarget *gtgt = entry.Target->GetMakefile()->GetLocalGenerator()
+                                          ->GetGlobalGenerator()
+                                          ->GetGeneratorTarget(entry.Target);
+    if(cmGeneratorTarget::LinkInterface const* iface =
+       gtgt->GetLinkInterface(this->Config, this->HeadTarget))
       {
       const bool isIface =
                       entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
@@ -368,27 +348,15 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
 
       // Handle dependent shared libraries.
       this->FollowSharedDeps(depender_index, iface);
-
-      // Support for CMP0003.
-      for(std::vector<std::string>::const_iterator
-            oi = iface->WrongConfigLibraries.begin();
-          oi != iface->WrongConfigLibraries.end(); ++oi)
-        {
-        this->CheckWrongConfigItem(depender_index, *oi);
-        }
       }
-    }
-  else
-    {
-    // Follow the old-style dependency list.
-    this->AddVarLinkEntries(depender_index, qe.LibDepends);
     }
 }
 
 //----------------------------------------------------------------------------
 void
 cmComputeLinkDepends
-::FollowSharedDeps(int depender_index, cmTarget::LinkInterface const* iface,
+::FollowSharedDeps(int depender_index,
+                   cmGeneratorTarget::LinkInterface const* iface,
                    bool follow_interface)
 {
   // Follow dependencies if we have not followed them already.
@@ -452,8 +420,11 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   // Target items may have their own dependencies.
   if(entry.Target)
     {
-    if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
+    cmGeneratorTarget *gtgt = entry.Target->GetMakefile()->GetLocalGenerator()
+                                          ->GetGlobalGenerator()
+                                          ->GetGeneratorTarget(entry.Target);
+    if(cmGeneratorTarget::LinkInterface const* iface =
+       gtgt->GetLinkInterface(this->Config, this->HeadTarget))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -462,94 +433,15 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
-                                             const char* value)
-{
-  // This is called to add the dependencies named by
-  // <item>_LIB_DEPENDS.  The variable contains a semicolon-separated
-  // list.  The list contains link-type;item pairs and just items.
-  std::vector<std::string> deplist;
-  cmSystemTools::ExpandListArgument(value, deplist);
-
-  // Look for entries meant for this configuration.
-  std::vector<std::string> actual_libs;
-  cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
-  bool haveLLT = false;
-  for(std::vector<std::string>::const_iterator di = deplist.begin();
-      di != deplist.end(); ++di)
-    {
-    if(*di == "debug")
-      {
-      llt = cmTarget::DEBUG;
-      haveLLT = true;
-      }
-    else if(*di == "optimized")
-      {
-      llt = cmTarget::OPTIMIZED;
-      haveLLT = true;
-      }
-    else if(*di == "general")
-      {
-      llt = cmTarget::GENERAL;
-      haveLLT = true;
-      }
-    else if(!di->empty())
-      {
-      // If no explicit link type was given prior to this entry then
-      // check if the entry has its own link type variable.  This is
-      // needed for compatibility with dependency files generated by
-      // the export_library_dependencies command from CMake 2.4 and
-      // lower.
-      if(!haveLLT)
-        {
-        std::string var = *di;
-        var += "_LINK_TYPE";
-        if(const char* val = this->Makefile->GetDefinition(var.c_str()))
-          {
-          if(strcmp(val, "debug") == 0)
-            {
-            llt = cmTarget::DEBUG;
-            }
-          else if(strcmp(val, "optimized") == 0)
-            {
-            llt = cmTarget::OPTIMIZED;
-            }
-          }
-        }
-
-      // If the library is meant for this link type then use it.
-      if(llt == cmTarget::GENERAL || llt == this->LinkType)
-        {
-        actual_libs.push_back(*di);
-        }
-      else if(this->OldLinkDirMode)
-        {
-        this->CheckWrongConfigItem(depender_index, *di);
-        }
-
-      // Reset the link type until another explicit type is given.
-      llt = cmTarget::GENERAL;
-      haveLLT = false;
-      }
-    }
-
-  // Add the entries from this list.
-  this->AddLinkEntries(depender_index, actual_libs);
-}
-
-//----------------------------------------------------------------------------
 void cmComputeLinkDepends::AddDirectLinkEntries()
 {
+  cmGeneratorTarget *gtgt = this->Target->GetMakefile()->GetLocalGenerator()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this->Target);
   // Add direct link dependencies in this configuration.
-  cmTarget::LinkImplementation const* impl =
-    this->Target->GetLinkImplementation(this->Config, this->HeadTarget);
+  cmGeneratorTarget::LinkImplementation const* impl =
+    gtgt->GetLinkImplementation(this->Config, this->HeadTarget);
   this->AddLinkEntries(-1, impl->Libraries);
-  for(std::vector<std::string>::const_iterator
-        wi = impl->WrongConfigLibraries.begin();
-      wi != impl->WrongConfigLibraries.end(); ++wi)
-    {
-    this->CheckWrongConfigItem(-1, *wi);
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -566,7 +458,7 @@ cmComputeLinkDepends::AddLinkEntries(int depender_index,
     {
     // Skip entries that will resolve to the target getting linked or
     // are empty.
-    std::string item = this->Target->CheckCMP0004(*li);
+    std::string item = *li;
     if(item == this->Target->GetName() || item.empty())
       {
       continue;
@@ -952,8 +844,11 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     {
     if(cmTarget const* target = this->EntryList[*ni].Target)
       {
-      if(cmTarget::LinkInterface const* iface =
-         target->GetLinkInterface(this->Config, this->HeadTarget))
+      cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
+                                      ->GetGlobalGenerator()
+                                      ->GetGeneratorTarget(target);
+      if(cmGeneratorTarget::LinkInterface const* iface =
+         gtgt->GetLinkInterface(this->Config, this->HeadTarget))
         {
         if(iface->Multiplicity > count)
           {
@@ -983,26 +878,4 @@ void cmComputeLinkDepends::DisplayFinalEntries()
       }
     }
   fprintf(stderr, "\n");
-}
-
-//----------------------------------------------------------------------------
-void cmComputeLinkDepends::CheckWrongConfigItem(int depender_index,
-                                                std::string const& item)
-{
-  if(!this->OldLinkDirMode)
-    {
-    return;
-    }
-
-  // For CMake 2.4 bug-compatibility we need to consider the output
-  // directories of targets linked in another configuration as link
-  // directories.
-  if(cmTarget const* tgt
-                      = this->FindTargetToLink(depender_index, item.c_str()))
-    {
-    if(!tgt->IsImported())
-      {
-      this->OldWrongConfigItems.insert(tgt);
-      }
-    }
 }
