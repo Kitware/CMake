@@ -436,6 +436,8 @@ private:
 
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
+  friend class cmake;
+  void CreateGeneratorTargets(cmMakefile* mf);
   void CreateGeneratorTargets();
   void ComputeGeneratorTargetObjects();
   virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
