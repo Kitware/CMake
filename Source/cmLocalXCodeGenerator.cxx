@@ -54,10 +54,11 @@ void cmLocalXCodeGenerator::Generate()
   for(cmGeneratorTargetsType::const_iterator iter = targets.begin();
       iter != targets.end(); ++iter)
     {
-    if (l->first->IsImported())
+    if (iter->first->IsImported())
       {
       continue;
       }
+    cmGeneratorTarget* t = iter->second;
     t->HasMacOSXRpathInstallNameDir(NULL);
     }
 }
