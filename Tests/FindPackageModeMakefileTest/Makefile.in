@@ -9,9 +9,9 @@ CMAKE_FOO = $(CMAKE) --find-package -DCMAKE_MODULE_PATH=$(CMAKE_CURRENT_BINARY_D
 
 tmp = tmp.txt
 
-all: clean pngtest
+all: pngtest
 
-main.o: main.cpp
+main.o: clean main.cpp
 	@$(CMAKE_FOO) -DMODE=COMPILE >$(tmp)
 	@foo="`cat $(tmp)`"; \
 	 printf '"%s" %s %s -c main.cpp\n' $(CMAKE_CXX_COMPILER) "$(CXXFLAGS)" "$$foo" >$(tmp)
