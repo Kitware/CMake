@@ -49,11 +49,15 @@ void cmLocalXCodeGenerator::Generate()
 {
   cmLocalGenerator::Generate();
 
-  cmTargets& targets = this->Makefile->GetTargets();
-  for(cmTargets::iterator iter = targets.begin();
+  const cmGeneratorTargetsType &targets =
+                                        this->Makefile->GetGeneratorTargets();
+  for(cmGeneratorTargetsType::const_iterator iter = targets.begin();
       iter != targets.end(); ++iter)
     {
-    cmTarget* t = &iter->second;
+    if (l->first->IsImported())
+      {
+      continue;
+      }
     t->HasMacOSXRpathInstallNameDir(NULL);
     }
 }
@@ -63,11 +67,16 @@ void cmLocalXCodeGenerator::GenerateInstallRules()
 {
   cmLocalGenerator::GenerateInstallRules();
 
-  cmTargets& targets = this->Makefile->GetTargets();
-  for(cmTargets::iterator iter = targets.begin();
+  const cmGeneratorTargetsType &targets =
+                                        this->Makefile->GetGeneratorTargets();
+  for(cmGeneratorTargetsType::const_iterator iter = targets.begin();
       iter != targets.end(); ++iter)
     {
-    cmTarget* t = &iter->second;
+    if (iter->first->IsImported())
+      {
+      continue;
+      }
+    cmGeneratorTarget* t = iter->second;
     t->HasMacOSXRpathInstallNameDir(NULL);
     }
 }
