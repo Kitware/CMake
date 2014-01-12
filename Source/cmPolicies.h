@@ -99,7 +99,6 @@ public:
     CMP0043, ///< Ignore COMPILE_DEFINITIONS_<Config> properties
     CMP0044, ///< Case sensitive <LANG>_COMPILER_ID generator expressions
     CMP0045, ///< Error on non-existent target in get_target_property
-    CMP0046, ///< Error on non-existent dependency in add_dependencies
 
     /** \brief Always the last entry.
      *
