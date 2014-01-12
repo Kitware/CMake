@@ -21,7 +21,6 @@ class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
-class cmGeneratorTarget;
 class cmOrderDirectories;
 
 /** \class cmComputeLinkInformation
@@ -30,7 +29,7 @@ class cmOrderDirectories;
 class cmComputeLinkInformation
 {
 public:
-  cmComputeLinkInformation(cmGeneratorTarget const* target, const char* config,
+  cmComputeLinkInformation(cmTarget const* target, const char* config,
                            cmTarget const* headTarget);
   ~cmComputeLinkInformation();
   bool Compute();
@@ -75,8 +74,8 @@ private:
   std::set<cmTarget const*> SharedLibrariesLinked;
 
   // Context information.
-  cmGeneratorTarget const* Target;
-  cmGeneratorTarget const* HeadTarget;
+  cmTarget const* Target;
+  cmTarget const* HeadTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
@@ -143,7 +142,7 @@ private:
   void AddTargetItem(std::string const& item, cmTarget const* target);
   void AddFullItem(std::string const& item);
   bool CheckImplicitDirItem(std::string const& item);
-  void AddUserItem(std::string const& item);
+  void AddUserItem(std::string const& item, bool pathNotKnown);
   void AddDirectoryItem(std::string const& item);
   void AddFrameworkItem(std::string const& item);
   void DropDirectoryItem(std::string const& item);
@@ -159,6 +158,8 @@ private:
 
   // Linker search path computation.
   cmOrderDirectories* OrderLinkerSearchPath;
+  bool FinishLinkerSearchDirectories();
+  void PrintLinkPolicyDiagnosis(std::ostream&);
 
   // Implicit link libraries and directories for linker language.
   void LoadImplicitLinkInfo();
@@ -169,6 +170,12 @@ private:
 
   // Additional paths configured by the runtime linker
   std::vector<std::string> RuntimeLinkDirs;
+
+  // Linker search path compatibility mode.
+  std::set<cmStdString> OldLinkDirMask;
+  std::vector<std::string> OldLinkDirItems;
+  std::vector<std::string> OldUserFlagItems;
+  bool OldLinkDirMode;
 
   // Runtime path computation.
   cmOrderDirectories* OrderRuntimeSearchPath;

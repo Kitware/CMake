@@ -211,8 +211,6 @@ public:
 
   void AddAlias(const char *name, cmTarget *tgt);
   bool IsAlias(const char *name) const;
-  cmGeneratorTarget* FindGeneratorTarget(const char* project,
-                                         const char* name);
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
@@ -220,7 +218,7 @@ public:
 
   /** If check to see if the target is linked to by any other
       target in the project */
-  bool IsDependedOn(const char* project, cmGeneratorTarget const* target);
+  bool IsDependedOn(const char* project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const char* start_dir);
 
@@ -268,8 +266,7 @@ public:
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
-  TargetDependSet const&
-  GetTargetDirectDepends(cmGeneratorTarget const& target);
+  TargetDependSet const& GetTargetDirectDepends(cmTarget const& target);
 
   /** Get per-target generator information.  */
   cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
@@ -316,6 +313,7 @@ public:
   void AddBuildExportSet(cmExportBuildFileGenerator*);
   void AddBuildExportExportSet(cmExportBuildFileGenerator*);
   bool IsExportedTargetsFile(const std::string &filename) const;
+  bool GenerateImportFile(const std::string &file);
   cmExportBuildFileGenerator*
   GetExportedTargetsFile(const std::string &filename) const;
   void AddCMP0042WarnTarget(const std::string& target);
@@ -328,7 +326,7 @@ protected:
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
   virtual bool IsRootOnlyTarget(cmTarget* target);
-  void AddTargetDepends(cmGeneratorTarget const* target,
+  void AddTargetDepends(cmTarget const* target,
                         TargetDependSet& projectTargets);
   void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
@@ -415,8 +413,6 @@ private:
   void CheckRuleHashes(std::string const& pfile, std::string const& home);
   void WriteRuleHashes(std::string const& pfile);
 
-  virtual void ForceLinkerLanguages() {}
-
   void WriteSummary();
   void WriteSummary(cmTarget* target);
   void FinalizeTargetCompileInfo();
@@ -431,7 +427,7 @@ private:
   std::vector<std::string> FilesReplacedDuringGenerate;
 
   // Store computed inter-target dependencies.
-  typedef std::map<cmGeneratorTarget const*, TargetDependSet> TargetDependMap;
+  typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 
   // Per-target generator information.

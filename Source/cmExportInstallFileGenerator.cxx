@@ -169,11 +169,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       }
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
                                   te, properties);
-    cmGeneratorTarget *gtgt = te->GetMakefile()->GetLocalGenerator()
-                                ->GetGlobalGenerator()
-                                ->GetGeneratorTarget(te);
-
-    this->PopulateCompatibleInterfaceProperties(gtgt, properties);
+    this->PopulateCompatibleInterfaceProperties(te, properties);
 
     this->GenerateInterfaceProperties(te, os, properties);
     }
@@ -335,14 +331,12 @@ cmExportInstallFileGenerator
     if(!properties.empty())
       {
       // Get the rest of the target details.
-      cmGeneratorTarget *gtgt = te->Target->GetMakefile()->GetLocalGenerator()
-                    ->GetGlobalGenerator()->GetGeneratorTarget(te->Target);
       this->SetImportDetailProperties(config, suffix,
-                                      gtgt, properties, missingTargets);
+                                      te->Target, properties, missingTargets);
 
       this->SetImportLinkInterface(config, suffix,
                                    cmGeneratorExpression::InstallInterface,
-                                   gtgt, properties, missingTargets);
+                                   te->Target, properties, missingTargets);
 
       // TOOD: PUBLIC_HEADER_LOCATION
       // This should wait until the build feature propagation stuff
@@ -540,7 +534,7 @@ cmExportInstallFileGenerator
 }
 
 std::string
-cmExportInstallFileGenerator::InstallNameDir(cmGeneratorTarget* target,
+cmExportInstallFileGenerator::InstallNameDir(cmTarget* target,
                                              const std::string&)
 {
   std::string install_name_dir;

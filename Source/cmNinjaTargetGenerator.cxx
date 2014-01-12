@@ -245,7 +245,7 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
     return cmNinjaDeps();
 
   cmComputeLinkInformation* cli =
-    this->GeneratorTarget->GetLinkInformation(this->GetConfigName());
+    this->Target->GetLinkInformation(this->GetConfigName());
   if(!cli)
     return cmNinjaDeps();
 
@@ -322,7 +322,7 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       {
       pdbPath = this->Target->GetPDBDirectory(this->GetConfigName());
       pdbPath += "/";
-      pdbPath += this->GeneratorTarget->GetPDBName(this->GetConfigName());
+      pdbPath += this->Target->GetPDBName(this->GetConfigName());
       }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(

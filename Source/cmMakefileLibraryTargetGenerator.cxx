@@ -27,7 +27,7 @@ cmMakefileLibraryTargetGenerator
   this->CustomCommandDriver = OnDepends;
   if (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
-    this->GeneratorTarget->GetLibraryNames(
+    this->Target->GetLibraryNames(
       this->TargetNameOut, this->TargetNameSO, this->TargetNameReal,
       this->TargetNameImport, this->TargetNamePDB, this->ConfigName);
     }
@@ -68,7 +68,7 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
       break;
     case cmTarget::SHARED_LIBRARY:
       this->WriteSharedLibraryRules(false);
-      if(this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName))
+      if(this->Target->NeedRelinkBeforeInstall(this->ConfigName))
         {
         // Write rules to link an installable version of the target.
         this->WriteSharedLibraryRules(true);
@@ -76,7 +76,7 @@ void cmMakefileLibraryTargetGenerator::WriteRuleFiles()
       break;
     case cmTarget::MODULE_LIBRARY:
       this->WriteModuleLibraryRules(false);
-      if(this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName))
+      if(this->Target->NeedRelinkBeforeInstall(this->ConfigName))
         {
         // Write rules to link an installable version of the target.
         this->WriteModuleLibraryRules(true);
@@ -132,7 +132,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
   const char* linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -161,7 +161,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     return;
     }
   const char* linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -188,7 +188,7 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
   const char* linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -214,7 +214,7 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 {
   const char* linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
   if (linkLanguage)
     {
@@ -249,7 +249,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Get the language to use for linking this library.
   const char* linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    this->Target->GetLinkerLanguage(this->ConfigName);
 
   // Make sure we have a link language.
   if(!linkLanguage)
@@ -277,7 +277,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string targetNameReal;
   std::string targetNameImport;
   std::string targetNamePDB;
-  this->GeneratorTarget->GetLibraryNames(
+  this->Target->GetLibraryNames(
     targetName, targetNameSO, targetNameReal, targetNameImport, targetNamePDB,
     this->ConfigName);
 
@@ -588,7 +588,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   vars.Target = targetOutPathReal.c_str();
   vars.LinkLibraries = linkLibs.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
-  if (this->GeneratorTarget->HasSOName(this->ConfigName))
+  if (this->Target->HasSOName(this->ConfigName))
     {
     vars.SONameFlag = this->Makefile->GetSONameFlag(linkLanguage);
     vars.TargetSOName= targetNameSO.c_str();
@@ -601,7 +601,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     {
     // Get the install_name directory for the build tree.
     install_name_dir =
-      this->GeneratorTarget->GetInstallNameDirForBuildTree(this->ConfigName);
+      this->Target->GetInstallNameDirForBuildTree(this->ConfigName);
 
     // Set the rule variable replacement value.
     if(install_name_dir.empty())

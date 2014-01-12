@@ -322,10 +322,7 @@ void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget const* target,
 {
   if(linked.insert(target).second)
     {
-    cmGeneratorTarget const* gtgt = target->GetMakefile()->GetLocalGenerator()
-                                          ->GetGlobalGenerator()
-                                          ->GetGeneratorTarget(target);
-    TargetDependSet const& depends = this->GetTargetDirectDepends(*gtgt);
+    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
@@ -364,10 +361,7 @@ void cmGlobalVisualStudioGenerator::FollowLinkDepends(
     {
     // Static library targets do not list their link dependencies so
     // we must follow them transitively now.
-    cmGeneratorTarget const* gtgt = target->GetMakefile()->GetLocalGenerator()
-                                          ->GetGlobalGenerator()
-                                          ->GetGeneratorTarget(target);
-    TargetDependSet const& depends = this->GetTargetDirectDepends(*gtgt);
+    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
@@ -442,10 +436,7 @@ void cmGlobalVisualStudioGenerator::ComputeVSTargetDepends(cmTarget& target)
                         target.GetType() != cmTarget::MODULE_LIBRARY &&
                         target.GetType() != cmTarget::EXECUTABLE);
 
-  cmGeneratorTarget const* gtgt = target.GetMakefile()->GetLocalGenerator()
-                                        ->GetGlobalGenerator()
-                                        ->GetGeneratorTarget(&target);
-  TargetDependSet const& depends = this->GetTargetDirectDepends(*gtgt);
+  TargetDependSet const& depends = this->GetTargetDirectDepends(target);
 
   // Collect implicit link dependencies (target_link_libraries).
   // Static libraries cannot depend on their link implementation
