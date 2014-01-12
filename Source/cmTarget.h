@@ -242,9 +242,10 @@ public:
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.
    */
-  void AddUtility(const char* u) { this->Utilities.insert(u);}
+  void AddUtility(const char* u, cmMakefile *makefile = 0);
   ///! Get the utilities used by this target
   std::set<cmStdString>const& GetUtilities() const { return this->Utilities; }
+  cmListFileBacktrace const* GetUtilityBacktrace(const char* u) const;
 
   /** Finalize the target at the end of the Configure step.  */
   void FinishConfigure();
@@ -691,6 +692,7 @@ private:
   std::string RuntimeInstallPath;
   mutable std::string ExportMacro;
   std::set<cmStdString> Utilities;
+  std::map<cmStdString, cmListFileBacktrace> UtilityBacktraces;
   bool RecordDependencies;
   mutable cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
