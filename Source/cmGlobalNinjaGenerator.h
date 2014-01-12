@@ -304,7 +304,7 @@ protected:
 
   /// Overloaded methods.
   /// @see cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
-  virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() { return true; }
+  virtual bool CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const { return true; }
 
 
 private:

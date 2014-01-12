@@ -50,7 +50,7 @@ public:
   cmTarget* Target;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
-  cmGlobalGenerator* GlobalGenerator;
+  cmGlobalGenerator const* GlobalGenerator;
 
   std::string ModuleDefinitionFile;
 
