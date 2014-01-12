@@ -46,7 +46,7 @@ bool cmAddDependenciesCommand
     ++s; // skip over target_name
     for (; s != args.end(); ++s)
       {
-      target->AddUtility(s->c_str());
+      target->AddUtility(s->c_str(), this->Makefile);
       }
     }
   else

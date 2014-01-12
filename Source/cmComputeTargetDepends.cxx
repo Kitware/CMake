@@ -343,6 +343,45 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   cmTarget const* dependee =
     depender->GetMakefile()->FindTargetToUse(dependee_name);
 
+  if(!dependee && !linking &&
+    (depender->GetType() != cmTarget::GLOBAL_TARGET))
+    {
+    cmMakefile *makefile = depender->GetMakefile();
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    bool issueMessage = false;
+    switch(makefile->GetPolicyStatus(cmPolicies::CMP0046))
+      {
+      case cmPolicies::WARN:
+        issueMessage = true;
+      case cmPolicies::OLD:
+        break;
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        issueMessage = true;
+        messageType = cmake::FATAL_ERROR;
+      }
+    if(issueMessage)
+      {
+      cmake* cm = this->GlobalGenerator->GetCMakeInstance();
+      cmOStringStream e;
+      e << (makefile->GetPolicies()
+        ->GetPolicyWarning(cmPolicies::CMP0046)) << "\n";
+      e << "The dependency target \"" <<  dependee_name
+        << "\" of target \"" << depender->GetName() << "\" does not exist.";
+
+      cmListFileBacktrace nullBacktrace;
+      cmListFileBacktrace const* backtrace =
+        depender->GetUtilityBacktrace(dependee_name);
+      if(!backtrace)
+        {
+        backtrace = &nullBacktrace;
+        }
+
+      cm->IssueMessage(messageType, e.str(), *backtrace);
+      }
+    }
+
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
