@@ -368,3 +368,6 @@ endif()
 #
 add_subdirectory(Library)
 add_subdirectory(Executable)
+subdir_depends(Executable Library)
+export_library_dependencies(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake)
+include(${Complex_BINARY_DIR}/ComplexLibraryDepends.cmake OPTIONAL)

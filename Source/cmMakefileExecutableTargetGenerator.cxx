@@ -25,7 +25,7 @@ cmMakefileExecutableTargetGenerator
   cmMakefileTargetGenerator(target->Target)
 {
   this->CustomCommandDriver = OnDepends;
-  this->GeneratorTarget->GetExecutableNames(
+  this->Target->GetExecutableNames(
     this->TargetNameOut, this->TargetNameReal, this->TargetNameImport,
     this->TargetNamePDB, this->ConfigName);
 
@@ -58,7 +58,7 @@ void cmMakefileExecutableTargetGenerator::WriteRuleFiles()
 
   // write the link rules
   this->WriteExecutableRule(false);
-  if(this->GeneratorTarget->NeedRelinkBeforeInstall(this->ConfigName))
+  if(this->Target->NeedRelinkBeforeInstall(this->ConfigName))
     {
     // Write rules to link an installable version of the target.
     this->WriteExecutableRule(true);
@@ -94,7 +94,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetNameReal;
   std::string targetNameImport;
   std::string targetNamePDB;
-  this->GeneratorTarget->GetExecutableNames
+  this->Target->GetExecutableNames
     (targetName, targetNameReal, targetNameImport, targetNamePDB,
      this->ConfigName);
 
@@ -157,7 +157,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Get the language to use for linking this executable.
   const char* linkLanguage =
-    this->GeneratorTarget->GetLinkerLanguage(this->ConfigName);
+    this->Target->GetLinkerLanguage(this->ConfigName);
 
   // Make sure we have a link language.
   if(!linkLanguage)

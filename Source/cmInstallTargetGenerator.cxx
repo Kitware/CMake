@@ -16,7 +16,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmake.h"
-#include "cmGeneratorTarget.h"
 
 #include <assert.h>
 
@@ -27,8 +26,7 @@ cmInstallTargetGenerator
                            std::vector<std::string> const& configurations,
                            const char* component, bool optional):
   cmInstallGenerator(dest, configurations, component), Target(&t),
-  ImportLibrary(implib), FilePermissions(file_permissions),
-  Optional(optional), GeneratorTarget(0)
+  ImportLibrary(implib), FilePermissions(file_permissions), Optional(optional)
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;
@@ -64,10 +62,9 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
                                                        const char* config,
                                                        Indent const& indent)
 {
-  this->CreateGeneratorTarget();
   // Compute the build tree directory from which to copy the target.
   std::string fromDirConfig;
-  if(this->GeneratorTarget->NeedRelinkBeforeInstall(config))
+  if(this->Target->NeedRelinkBeforeInstall(config))
     {
     fromDirConfig = this->Target->GetMakefile()->GetStartOutputDirectory();
     fromDirConfig += cmake::GetCMakeFilesDirectory();
@@ -115,8 +112,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    this->CreateGeneratorTarget();
-    this->GeneratorTarget->GetExecutableNames(targetName, targetNameReal,
+    this->Target->GetExecutableNames(targetName, targetNameReal,
                                      targetNameImport, targetNamePDB,
                                      config);
     if(this->ImportLibrary)
@@ -176,11 +172,9 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    this->CreateGeneratorTarget();
-    this->GeneratorTarget->GetLibraryNames(targetName, targetNameSO,
-                                           targetNameReal,
-                                           targetNameImport, targetNamePDB,
-                                           config);
+    this->Target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
+                                  targetNameImport, targetNamePDB,
+                                  config);
     if(this->ImportLibrary)
       {
       // There is a bug in cmInstallCommand if this fails.
@@ -341,16 +335,13 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
 {
   std::string fname;
   // Compute the name of the library.
-  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(target);
   if(target->GetType() == cmTarget::EXECUTABLE)
     {
     std::string targetName;
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    gtgt->GetExecutableNames(targetName, targetNameReal,
+    target->GetExecutableNames(targetName, targetNameReal,
                                targetNameImport, targetNamePDB,
                                config);
     if(nameType == NameImplib)
@@ -380,7 +371,7 @@ cmInstallTargetGenerator::GetInstallFilename(cmTarget const* target,
     std::string targetNameReal;
     std::string targetNameImport;
     std::string targetNamePDB;
-    gtgt->GetLibraryNames(targetName, targetNameSO, targetNameReal,
+    target->GetLibraryNames(targetName, targetNameSO, targetNameReal,
                             targetNameImport, targetNamePDB, config);
     if(nameType == NameImplib)
       {
@@ -497,17 +488,6 @@ void cmInstallTargetGenerator::PostReplacementTweaks(std::ostream& os,
   this->AddStripRule(os, indent, file);
 }
 
-void cmInstallTargetGenerator::CreateGeneratorTarget()
-{
-  if (!this->GeneratorTarget)
-    {
-    this->GeneratorTarget = this->Target->GetMakefile()
-                                        ->GetLocalGenerator()
-                                        ->GetGlobalGenerator()
-                                        ->GetGeneratorTarget(this->Target);
-    }
-}
-
 //----------------------------------------------------------------------------
 void
 cmInstallTargetGenerator
@@ -531,13 +511,10 @@ cmInstallTargetGenerator
     return;
     }
 
-  this->CreateGeneratorTarget();
-
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
   std::map<cmStdString, cmStdString> install_name_remap;
-  if(cmComputeLinkInformation* cli =
-                            this->GeneratorTarget->GetLinkInformation(config))
+  if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
     std::set<cmTarget const*> const& sharedLibs
                                             = cli->GetSharedLibrariesLinked();
@@ -552,15 +529,11 @@ cmInstallTargetGenerator
         continue;
         }
 
-      cmGeneratorTarget *gtgt = tgt->GetMakefile()
-                                          ->GetLocalGenerator()
-                                          ->GetGlobalGenerator()
-                                          ->GetGeneratorTarget(tgt);
       // If the build tree and install tree use different path
       // components of the install_name field then we need to create a
       // mapping to be applied after installation.
-      std::string for_build = gtgt->GetInstallNameDirForBuildTree(config);
-      std::string for_install = gtgt->GetInstallNameDirForInstallTree();
+      std::string for_build = tgt->GetInstallNameDirForBuildTree(config);
+      std::string for_install = tgt->GetInstallNameDirForInstallTree();
       if(for_build != for_install)
         {
         // The directory portions differ.  Append the filename to
@@ -585,9 +558,9 @@ cmInstallTargetGenerator
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY)
     {
     std::string for_build =
-      this->GeneratorTarget->GetInstallNameDirForBuildTree(config);
+      this->Target->GetInstallNameDirForBuildTree(config);
     std::string for_install =
-      this->GeneratorTarget->GetInstallNameDirForInstallTree();
+      this->Target->GetInstallNameDirForInstallTree();
 
     if(this->Target->IsFrameworkOnApple() && for_install.empty())
       {
@@ -634,25 +607,21 @@ cmInstallTargetGenerator
 ::AddRPathCheckRule(std::ostream& os, Indent const& indent,
                     const char* config, std::string const& toDestDirPath)
 {
-  this->CreateGeneratorTarget();
-
   // Skip the chrpath if the target does not need it.
-  if(this->ImportLibrary || !this->GeneratorTarget->IsChrpathUsed(config))
+  if(this->ImportLibrary || !this->Target->IsChrpathUsed(config))
     {
     return;
     }
+
   // Skip if on Apple
   if(this->Target->GetMakefile()->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     return;
     }
 
-  this->CreateGeneratorTarget();
-
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-                            this->GeneratorTarget->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;
@@ -675,19 +644,15 @@ cmInstallTargetGenerator
 ::AddChrpathPatchRule(std::ostream& os, Indent const& indent,
                       const char* config, std::string const& toDestDirPath)
 {
-  this->CreateGeneratorTarget();
   // Skip the chrpath if the target does not need it.
-  if(this->ImportLibrary || !this->GeneratorTarget->IsChrpathUsed(config))
+  if(this->ImportLibrary || !this->Target->IsChrpathUsed(config))
     {
     return;
     }
 
-  this->CreateGeneratorTarget();
-
   // Get the link information for this target.
   // It can provide the RPATH.
-  cmComputeLinkInformation* cli =
-                            this->GeneratorTarget->GetLinkInformation(config);
+  cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config);
   if(!cli)
     {
     return;
