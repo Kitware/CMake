@@ -331,11 +331,6 @@ cmPolicies::cmPolicies()
     CMP0045, "CMP0045",
     "Error on non-existent target in get_target_property.",
     3,0,0,0, cmPolicies::WARN);
-
-  this->DefinePolicy(
-    CMP0046, "CMP0046",
-    "Error on non-existent dependency in add_dependencies.",
-    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

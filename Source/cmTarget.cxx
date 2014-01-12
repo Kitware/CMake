@@ -365,26 +365,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AddUtility(const char *u, cmMakefile *makefile)
-{
-  this->Utilities.insert(u);
-  if(makefile)
-  {
-    makefile->GetBacktrace(UtilityBacktraces[u]);
-  }
-}
-
-//----------------------------------------------------------------------------
-cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(const char *u) const
-{
-  std::map<cmStdString, cmListFileBacktrace>::const_iterator i =
-    this->UtilityBacktraces.find(u);
-  if(i == this->UtilityBacktraces.end()) return 0;
-
-  return &i->second;
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::FinishConfigure()
 {
   // Erase any cached link information that might have been comptued
