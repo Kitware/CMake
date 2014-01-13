@@ -70,8 +70,10 @@ CMakeSetupDialog::CMakeSetupDialog()
   restoreGeometry(settings.value("geometry").toByteArray());
   restoreState(settings.value("windowState").toByteArray());
 
-  this->AddVariableCompletions = settings.value("AddVariableCompletionEntries",
+  this->AddVariableNames = settings.value("AddVariableNames",
                            QStringList("CMAKE_INSTALL_PREFIX")).toStringList();
+  this->AddVariableTypes = settings.value("AddVariableTypes",
+                                           QStringList("PATH")).toStringList();
 
   QWidget* cont = new QWidget(this);
   this->setupUi(cont);
@@ -1049,7 +1051,8 @@ void CMakeSetupDialog::addCacheEntry()
   dialog.resize(400, 200);
   dialog.setWindowTitle(tr("Add Cache Entry"));
   QVBoxLayout* l = new QVBoxLayout(&dialog);
-  AddCacheEntry* w = new AddCacheEntry(&dialog, this->AddVariableCompletions);
+  AddCacheEntry* w = new AddCacheEntry(&dialog, this->AddVariableNames,
+                                                this->AddVariableTypes);
   QDialogButtonBox* btns = new QDialogButtonBox(
       QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
       Qt::Horizontal, &dialog);
@@ -1064,23 +1067,26 @@ void CMakeSetupDialog::addCacheEntry()
     m->insertProperty(w->type(), w->name(), w->description(), w->value(), false);
 
     // only add variable names to the completion which are new
-    if (!this->AddVariableCompletions.contains(w->name()))
+    if (!this->AddVariableNames.contains(w->name()))
       {
-      this->AddVariableCompletions << w->name();
+      this->AddVariableNames << w->name();
+      this->AddVariableTypes << w->typeString();
       // limit to at most 100 completion items
-      if (this->AddVariableCompletions.size() > 100)
+      if (this->AddVariableNames.size() > 100)
         {
-        this->AddVariableCompletions.removeFirst();
+        this->AddVariableNames.removeFirst();
+        this->AddVariableTypes.removeFirst();
         }
       // make sure CMAKE_INSTALL_PREFIX is always there
-      if (!this->AddVariableCompletions.contains("CMAKE_INSTALL_PREFIX"))
+      if (!this->AddVariableNames.contains("CMAKE_INSTALL_PREFIX"))
         {
-        this->AddVariableCompletions << QString("CMAKE_INSTALL_PREFIX");
+        this->AddVariableNames << "CMAKE_INSTALL_PREFIX";
+        this->AddVariableTypes << "PATH";
         }
       QSettings settings;
       settings.beginGroup("Settings/StartPath");
-      settings.setValue("AddVariableCompletionEntries",
-                        this->AddVariableCompletions);
+      settings.setValue("AddVariableNames", this->AddVariableNames);
+      settings.setValue("AddVariableTypes", this->AddVariableTypes);
       }
     }
 }
