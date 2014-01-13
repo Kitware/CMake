@@ -469,7 +469,7 @@ private:
   cmTarget* Target;
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;
-  cmGlobalGenerator* GlobalGenerator;
+  cmGlobalGenerator const* GlobalGenerator;
   typedef cmGeneratorTarget::SourceEntry SourceEntry;
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;

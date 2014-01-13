@@ -63,7 +63,7 @@ private:
   cmTarget const* HeadTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
-  cmGlobalGenerator* GlobalGenerator;
+  cmGlobalGenerator const* GlobalGenerator;
   cmake* CMakeInstance;
   bool DebugMode;
 
