@@ -30,6 +30,10 @@ public:
   QVariant value() const;
   QString description() const;
   QCMakeProperty::PropertyType type() const;
+	QString typeString() const;
+
+private slots:
+	void onCompletionActivated(const QString &text);
 };
 
 #endif
