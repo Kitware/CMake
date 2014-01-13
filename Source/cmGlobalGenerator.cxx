@@ -1375,35 +1375,37 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalGenerator::CreateGeneratorTargets(cmMakefile *mf)
+{
+  cmGeneratorTargetsType generatorTargets;
+  cmTargets& targets = mf->GetTargets();
+  for(cmTargets::iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
+    {
+    cmTarget* t = &ti->second;
+    cmGeneratorTarget* gt = new cmGeneratorTarget(t);
+    this->GeneratorTargets[t] = gt;
+    generatorTargets[t] = gt;
+    }
+
+  for(std::vector<cmTarget*>::const_iterator
+        j = mf->GetOwnedImportedTargets().begin();
+      j != mf->GetOwnedImportedTargets().end(); ++j)
+    {
+    cmGeneratorTarget* gt = new cmGeneratorTarget(*j);
+    this->GeneratorTargets[*j] = gt;
+    generatorTargets[*j] = gt;
+    }
+  mf->SetGeneratorTargets(generatorTargets);
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalGenerator::CreateGeneratorTargets()
 {
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    cmGeneratorTargetsType generatorTargets;
-
-    cmMakefile *mf = this->LocalGenerators[i]->GetMakefile();
-
-    cmTargets& targets = mf->GetTargets();
-    for(cmTargets::iterator ti = targets.begin();
-        ti != targets.end(); ++ti)
-      {
-      cmTarget* t = &ti->second;
-      cmGeneratorTarget* gt = new cmGeneratorTarget(t);
-      this->GeneratorTargets[t] = gt;
-      generatorTargets[t] = gt;
-      }
-
-    for(std::vector<cmTarget*>::const_iterator
-          j = mf->GetOwnedImportedTargets().begin();
-        j != mf->GetOwnedImportedTargets().end(); ++j)
-      {
-      cmGeneratorTarget* gt = new cmGeneratorTarget(*j);
-      this->GeneratorTargets[*j] = gt;
-      generatorTargets[*j] = gt;
-      }
-
-    mf->SetGeneratorTargets(generatorTargets);
+    this->CreateGeneratorTargets(this->LocalGenerators[i]->GetMakefile());
     }
 }
 
