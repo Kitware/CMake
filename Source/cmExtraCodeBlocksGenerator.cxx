@@ -761,10 +761,12 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
   std::string command = make;
   if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
     {
+    // For Windows ConvertToOutputPath already adds quotes when required.
+    // These need to be escaped, see
+    // http://public.kitware.com/Bug/view.php?id=13952
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
-    command += " /NOLOGO /f &quot;";
-    command += makefileName;
-    command += "&quot; ";
+    command += " /NOLOGO /f ";
+    command += cmXMLSafe(makefileName).str();
     command += " VERBOSE=1 ";
     command += target;
     }
