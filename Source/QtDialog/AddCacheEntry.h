@@ -24,7 +24,8 @@ class AddCacheEntry : public QWidget, public Ui::AddCacheEntry
 {
   Q_OBJECT
 public:
-  AddCacheEntry(QWidget* p, const QStringList& completions);
+  AddCacheEntry(QWidget* p, const QStringList& varNames,
+		                        const QStringList& varTypes);
 
   QString name() const;
   QVariant value() const;
@@ -34,6 +35,10 @@ public:
 
 private slots:
 	void onCompletionActivated(const QString &text);
+
+private:
+	const QStringList& VarNames;
+	const QStringList& VarTypes;
 };
 
 #endif

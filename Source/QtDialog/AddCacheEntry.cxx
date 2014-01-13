@@ -22,8 +22,9 @@ static const QCMakeProperty::PropertyType Types[NumTypes] =
   { QCMakeProperty::BOOL, QCMakeProperty::PATH,
     QCMakeProperty::FILEPATH, QCMakeProperty::STRING};
 
-AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& completions)
-  : QWidget(p)
+AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& varNames,
+		                                     const QStringList& varTypes)
+  : QWidget(p), VarNames(varNames), VarTypes(varTypes)
 {
   this->setupUi(this);
   for(int i=0; i<NumTypes; i++)
@@ -44,7 +45,7 @@ AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& completions)
   this->setTabOrder(path, filepath);
   this->setTabOrder(filepath, string);
   this->setTabOrder(string, this->Description);
-	QCompleter *completer = new QCompleter(completions, this);
+	QCompleter *completer = new QCompleter(this->VarNames, this);
   this->Name->setCompleter(completer);
 	connect(completer, SIGNAL(activated(const QString&)),
 		      this, SLOT(onCompletionActivated(const QString&)));
@@ -96,10 +97,10 @@ QString AddCacheEntry::typeString() const
 
 void AddCacheEntry::onCompletionActivated(const QString &text)
 {
-	int pos = text.lastIndexOf(':');
-	if (pos != -1)
+	int idx = this->VarNames.indexOf(text);
+	if (idx != -1)
 		{
-		QString type = text.mid(pos + 1, text.length() - pos).toUpper();
+		QString type = this->VarTypes[idx];
 		for (int i = 0; i < NumTypes; i++)
 			{
 				if (TypeStrings[i] == type)
