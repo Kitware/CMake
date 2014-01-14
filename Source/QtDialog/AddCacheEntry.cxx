@@ -15,6 +15,7 @@
 #include <QCompleter>
 
 static const int NumTypes = 4;
+static const int DefaultTypeIndex = 0;
 static const QByteArray TypeStrings[NumTypes] =
   { "BOOL", "PATH", "FILEPATH", "STRING" };
 static const QCMakeProperty::PropertyType Types[NumTypes] =
@@ -43,7 +44,10 @@ AddCacheEntry::AddCacheEntry(QWidget* p, const QStringList& completions)
   this->setTabOrder(path, filepath);
   this->setTabOrder(filepath, string);
   this->setTabOrder(string, this->Description);
-  this->Name->setCompleter(new QCompleter(completions, this));
+  QCompleter *completer = new QCompleter(completions, this);
+  this->Name->setCompleter(completer);
+  connect(completer, SIGNAL(activated(const QString&)),
+          this, SLOT(onCompletionActivated(const QString&)));
 }
 
 QString AddCacheEntry::name() const
@@ -77,7 +81,32 @@ QCMakeProperty::PropertyType AddCacheEntry::type() const
     {
     return Types[idx];
     }
-  return QCMakeProperty::BOOL;
+  return Types[DefaultTypeIndex];
 }
 
+QString AddCacheEntry::typeString() const
+{
+  int idx = this->Type->currentIndex();
+  if(idx >= 0 && idx < NumTypes)
+    {
+    return TypeStrings[idx];
+    }
+  return TypeStrings[DefaultTypeIndex];
+}
 
+void AddCacheEntry::onCompletionActivated(const QString &text)
+{
+  int pos = text.lastIndexOf(':');
+  if (pos != -1)
+    {
+    QString type = text.mid(pos + 1, text.length() - pos).toUpper();
+    for (int i = 0; i < NumTypes; i++)
+      {
+        if (TypeStrings[i] == type)
+          {
+          this->Type->setCurrentIndex(i);
+          break;
+          }
+      }
+    }
+}
