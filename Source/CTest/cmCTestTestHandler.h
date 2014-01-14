@@ -109,8 +109,6 @@ public:
     int Index;
     //Requested number of process slots
     int Processors;
-    // return code of test which will mark test as "not run"
-    int SkipReturnCode;
     std::vector<std::string> Environment;
     std::vector<std::string> Labels;
     std::set<std::string> LockedResources;

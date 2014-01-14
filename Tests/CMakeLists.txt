@@ -2230,17 +2230,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestParallel/testOutput.log"
     )
 
-  configure_file(
-    "${CMake_SOURCE_DIR}/Tests/CTestTestSkipReturnCode/test.cmake.in"
-    "${CMake_BINARY_DIR}/Tests/CTestTestSkipReturnCode/test.cmake"
-    @ONLY ESCAPE_QUOTES)
-  add_test(CTestTestSkipReturnCode ${CMAKE_CTEST_COMMAND}
-    -S "${CMake_BINARY_DIR}/Tests/CTestTestSkipReturnCode/test.cmake" -V
-    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestSkipReturnCode/testOutput.log"
-    )
-  set_tests_properties(CTestTestSkipReturnCode PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMakeV1 \\.* +Passed.*CMakeV2 \\.+\\*+Skipped")
-
   ADD_TEST_MACRO(CTestTestSerialInDepends ${CMAKE_CTEST_COMMAND} -j 4
     --output-on-failure -C "\${CTestTest_CONFIG}")
 

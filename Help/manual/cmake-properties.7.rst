@@ -247,7 +247,6 @@ Properties on Tests
    /prop_test/REQUIRED_FILES
    /prop_test/RESOURCE_LOCK
    /prop_test/RUN_SERIAL
-   /prop_test/SKIP_RETURN_CODE
    /prop_test/TIMEOUT
    /prop_test/WILL_FAIL
    /prop_test/WORKING_DIRECTORY
