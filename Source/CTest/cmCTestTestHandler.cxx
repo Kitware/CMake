@@ -2229,14 +2229,6 @@ bool cmCTestTestHandler::SetTestsProperties(
               rtit->Processors = 1;
               }
             }
-          if ( key == "SKIP_RETURN_CODE" )
-            {
-            rtit->SkipReturnCode = atoi(val.c_str());
-            if(rtit->SkipReturnCode < 0 || rtit->SkipReturnCode > 255)
-              {
-              rtit->SkipReturnCode = -1;
-              }
-            }
           if ( key == "DEPENDS" )
             {
             std::vector<std::string> lval;
@@ -2372,7 +2364,6 @@ bool cmCTestTestHandler::AddTest(const std::vector<std::string>& args)
   test.ExplicitTimeout = false;
   test.Cost = 0;
   test.Processors = 1;
-  test.SkipReturnCode = -1;
   test.PreviousRuns = 0;
   if (this->UseIncludeRegExpFlag &&
     !this->IncludeTestsRegularExpression.find(testname.c_str()))
