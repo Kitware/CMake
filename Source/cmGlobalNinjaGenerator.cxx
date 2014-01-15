@@ -1086,46 +1086,27 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             /*depfile=*/ "",
             /*rspfile=*/ "",
             /*rspcontent*/ "",
-            /*restat=*/ true,
+            /*restat=*/ false,
             /*generator=*/ true);
 
-  cmNinjaDeps implicitDeps, outputs, temp;
-  outputs.push_back(NINJA_BUILD_FILE);
+  cmNinjaDeps implicitDeps;
   for (std::vector<cmLocalGenerator *>::const_iterator i =
        this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i) {
     const std::vector<std::string>& lf = (*i)->GetMakefile()->GetListFiles();
     implicitDeps.insert(implicitDeps.end(), lf.begin(), lf.end());
 
     const std::vector<std::string>& of = (*i)->GetMakefile()->GetOutputFiles();
-    temp.insert(temp.end(), of.begin(), of.end());
+    implicitDeps.insert(implicitDeps.end(), of.begin(), of.end());
   }
-
-  //Add the CMakeCache.txt file to the implicit depends so that we catch
-  //when somebody manually modifies the file.
-  implicitDeps.push_back("CMakeCache.txt");
-
-  //make sure nothing is in implicit depends twice
   std::sort(implicitDeps.begin(), implicitDeps.end());
   implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
                      implicitDeps.end());
-
-
-  //make sure nothing is in outputs depends twice
-  std::sort(temp.begin(), temp.end());
-  temp.erase(std::unique(temp.begin(), temp.end()),
-                     temp.end());
-
-  //make sure that anything that is in implicitDeps is also NOT in outputs
-  std::set_difference(temp.begin(),
-                      temp.end(),
-                      implicitDeps.begin(),
-                      implicitDeps.end(),
-                      std::back_inserter(outputs));
+  implicitDeps.push_back("CMakeCache.txt");
 
   this->WriteBuild(os,
                    "Re-run CMake if any of its inputs changed.",
                    "RERUN_CMAKE",
-                   outputs,
+                   /*outputs=*/ cmNinjaDeps(1, NINJA_BUILD_FILE),
                    /*explicitDeps=*/ cmNinjaDeps(),
                    implicitDeps,
                    /*orderOnlyDeps=*/ cmNinjaDeps(),
