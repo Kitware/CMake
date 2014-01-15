@@ -31,7 +31,7 @@ bool cmTargetLinkLibrariesCommand
     return false;
     }
 
-  if (this->Makefile->IsAlias(args[0].c_str()))
+  if (this->Makefile->IsAlias(args[0]))
     {
     this->SetError("can not be used on an ALIAS target.");
     return false;
