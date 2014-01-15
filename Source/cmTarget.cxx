@@ -1681,14 +1681,14 @@ static void processIncludeDirectories(cmTarget const* tgt,
       evaluatedTargetName = cge->Evaluate(mf, config, false, tgt, 0, 0);
       }
 
-      cmTarget *dependentTarget = mf->FindTargetToUse(targetName.c_str());
+      cmTarget *dependentTarget = mf->FindTargetToUse(targetName);
 
       const bool fromImported = dependentTarget
                              && dependentTarget->IsImported();
 
       cmTarget *evaluatedDependentTarget =
         (targetName != evaluatedTargetName)
-          ? mf->FindTargetToUse(evaluatedTargetName.c_str())
+          ? mf->FindTargetToUse(evaluatedTargetName)
           : 0;
 
       targetName = evaluatedTargetName;
@@ -1860,7 +1860,7 @@ cmTarget::GetIncludeDirectories(const char *config) const
                                                         ge.Parse(it->Value);
       std::string result = cge->Evaluate(this->Makefile, config,
                                         false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(result.c_str()))
+      if (!this->Makefile->FindTargetToUse(result))
         {
         continue;
         }
@@ -2089,7 +2089,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                                                         ge.Parse(it->Value);
       std::string targetResult = cge->Evaluate(this->Makefile, config,
                                         false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(targetResult.c_str()))
+      if (!this->Makefile->FindTargetToUse(targetResult))
         {
         continue;
         }
@@ -2202,7 +2202,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                                                         ge.Parse(it->Value);
       std::string targetResult = cge->Evaluate(this->Makefile, config,
                                         false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(targetResult.c_str()))
+      if (!this->Makefile->FindTargetToUse(targetResult))
         {
         continue;
         }
@@ -2861,7 +2861,7 @@ public:
     for(std::vector<std::string>::const_iterator
           li = iface->Libraries.begin(); li != iface->Libraries.end(); ++li)
       {
-      this->Visit(mf->FindTargetToUse(li->c_str()));
+      this->Visit(mf->FindTargetToUse(*li));
       }
     }
 private:
@@ -2969,7 +2969,7 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc,
   for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
       li != impl->Libraries.end(); ++li)
     {
-    cll.Visit(this->Makefile->FindTargetToUse(li->c_str()));
+    cll.Visit(this->Makefile->FindTargetToUse(*li));
     }
 
   // Store the transitive closure of languages.
@@ -5414,7 +5414,7 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
           {
           if(emitted.insert(*li).second)
             {
-            if(cmTarget* tgt = this->Makefile->FindTargetToUse(li->c_str()))
+            if(cmTarget* tgt = this->Makefile->FindTargetToUse(*li))
               {
               // This is a runtime dependency on another shared library.
               if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
@@ -5624,7 +5624,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
         }
       continue;
       }
-    cmTarget *tgt = this->Makefile->FindTargetToUse(li->c_str());
+    cmTarget *tgt = this->Makefile->FindTargetToUse(*li);
 
     if(!tgt && std::string(item).find("::") != std::string::npos)
       {
@@ -5695,7 +5695,7 @@ void cmTarget::ComputeLinkImplementation(const char* config,
       i = this->ObjectLibraries.begin();
       i != this->ObjectLibraries.end(); ++i)
     {
-    if(cmTarget* objLib = this->Makefile->FindTargetToUse(i->c_str()))
+    if(cmTarget* objLib = this->Makefile->FindTargetToUse(*i))
       {
       if(objLib->GetType() == cmTarget::OBJECT_LIBRARY)
         {

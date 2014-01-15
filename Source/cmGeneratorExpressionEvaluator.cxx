@@ -822,7 +822,7 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
       // self-referencing loop.
       continue;
       }
-    if (context->Makefile->FindTargetToUse(it->c_str()))
+    if (context->Makefile->FindTargetToUse(*it))
       {
       depString +=
         sep + "$<TARGET_PROPERTY:" + *it + "," + interfacePropertyName + ">";
@@ -912,18 +912,16 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       if(propertyName == "ALIASED_TARGET")
         {
-        if(context->Makefile->IsAlias(targetName.c_str()))
+        if(context->Makefile->IsAlias(targetName))
           {
-          if(cmTarget* tgt =
-                      context->Makefile->FindTargetToUse(targetName.c_str()))
+          if(cmTarget* tgt = context->Makefile->FindTargetToUse(targetName))
             {
             return tgt->GetName();
             }
           }
         return "";
         }
-      target = context->Makefile->FindTargetToUse(
-                                                targetName.c_str());
+      target = context->Makefile->FindTargetToUse(targetName);
 
       if (!target)
         {
@@ -1476,7 +1474,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                     "Expression syntax not recognized.");
       return std::string();
       }
-    cmTarget* target = context->Makefile->FindTargetToUse(name.c_str());
+    cmTarget* target = context->Makefile->FindTargetToUse(name);
     if(!target)
       {
       ::reportError(context, content->GetOriginalExpression(),

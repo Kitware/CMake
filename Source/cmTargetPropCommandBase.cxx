@@ -26,7 +26,7 @@ bool cmTargetPropCommandBase
     }
 
   // Lookup the target for which libraries are specified.
-  if (this->Makefile->IsAlias(args[0].c_str()))
+  if (this->Makefile->IsAlias(args[0]))
     {
     this->SetError("can not be used on an ALIAS target.");
     return false;
@@ -36,7 +36,7 @@ bool cmTargetPropCommandBase
     ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
   if(!this->Target)
     {
-    this->Target = this->Makefile->FindTargetToUse(args[0].c_str());
+    this->Target = this->Makefile->FindTargetToUse(args[0]);
     }
   if(!this->Target)
     {

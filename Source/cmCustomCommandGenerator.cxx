@@ -41,7 +41,7 @@ unsigned int cmCustomCommandGenerator::GetNumberOfCommands() const
 std::string cmCustomCommandGenerator::GetCommand(unsigned int c) const
 {
   std::string const& argv0 = this->CC.GetCommandLines()[c][0];
-  cmTarget* target = this->Makefile->FindTargetToUse(argv0.c_str());
+  cmTarget* target = this->Makefile->FindTargetToUse(argv0);
   if(target && target->GetType() == cmTarget::EXECUTABLE &&
      (target->IsImported() || !this->Makefile->IsOn("CMAKE_CROSSCOMPILING")))
     {

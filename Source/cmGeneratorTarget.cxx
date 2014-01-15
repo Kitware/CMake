@@ -68,7 +68,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
                                   std::vector<std::string>& result,
                                   bool excludeImported)
 {
-  cmTarget* depTgt = mf->FindTargetToUse(name.c_str());
+  cmTarget* depTgt = mf->FindTargetToUse(name);
 
   if (!depTgt)
     {
@@ -230,7 +230,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
       {
       if (uniqueDeps.insert(*li).second)
         {
-        cmTarget* tgt = this->Makefile->FindTargetToUse(li->c_str());
+        cmTarget* tgt = this->Makefile->FindTargetToUse(*li);
 
         if (!tgt)
           {
@@ -394,7 +394,7 @@ void cmGeneratorTarget::LookupObjectLibraries()
       oli != objLibs.end(); ++oli)
     {
     std::string const& objLibName = *oli;
-    if(cmTarget* objLib = this->Makefile->FindTargetToUse(objLibName.c_str()))
+    if(cmTarget* objLib = this->Makefile->FindTargetToUse(objLibName))
       {
       if(objLib->GetType() == cmTarget::OBJECT_LIBRARY)
         {
@@ -607,7 +607,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
     }
 
   // Check for a target with this name.
-  if(cmTarget* t = this->Makefile->FindTargetToUse(util.c_str()))
+  if(cmTarget* t = this->Makefile->FindTargetToUse(util))
     {
     // If we find the target and the dep was given as a full path,
     // then make sure it was not a full path to something else, and
@@ -661,7 +661,7 @@ cmTargetTraceDependencies
     {
     std::string const& command = *cit->begin();
     // Check for a target with this name.
-    if(cmTarget* t = this->Makefile->FindTargetToUse(command.c_str()))
+    if(cmTarget* t = this->Makefile->FindTargetToUse(command))
       {
       if(t->GetType() == cmTarget::EXECUTABLE)
         {

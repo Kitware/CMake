@@ -290,17 +290,17 @@ bool cmGetPropertyCommand::HandleTargetMode()
 
   if(this->PropertyName == "ALIASED_TARGET")
     {
-    if(this->Makefile->IsAlias(this->Name.c_str()))
+    if(this->Makefile->IsAlias(this->Name))
       {
       if(cmTarget* target =
-                          this->Makefile->FindTargetToUse(this->Name.c_str()))
+                          this->Makefile->FindTargetToUse(this->Name))
         {
         return this->StoreResult(target->GetName());
         }
       }
     return this->StoreResult((this->Variable + "-NOTFOUND").c_str());
     }
-  if(cmTarget* target = this->Makefile->FindTargetToUse(this->Name.c_str()))
+  if(cmTarget* target = this->Makefile->FindTargetToUse(this->Name))
     {
     return this->StoreResult(target->GetProperty(this->PropertyName.c_str()));
     }

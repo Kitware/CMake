@@ -244,12 +244,12 @@ bool cmSetPropertyCommand::HandleTargetMode()
   for(std::set<cmStdString>::const_iterator ni = this->Names.begin();
       ni != this->Names.end(); ++ni)
     {
-    if (this->Makefile->IsAlias(ni->c_str()))
+    if (this->Makefile->IsAlias(*ni))
       {
       this->SetError("can not be used on an ALIAS target.");
       return false;
       }
-    if(cmTarget* target = this->Makefile->FindTargetToUse(ni->c_str()))
+    if(cmTarget* target = this->Makefile->FindTargetToUse(*ni))
       {
       // Handle the current target.
       if(!this->HandleTarget(target))
