@@ -215,8 +215,6 @@ All Modules
    /module/InstallRequiredSystemLibraries
    /module/MacroAddFileDependencies
    /module/ProcessorCount
-   /module/Qt4ConfigDependentSettings
-   /module/Qt4Macros
    /module/SelectLibraryConfigurations
    /module/SquishTestScript
    /module/TestBigEndian
@@ -230,7 +228,6 @@ All Modules
    /module/UseJava
    /module/UseJavaSymlinks
    /module/UsePkgConfig
-   /module/UseQt4
    /module/UseSWIG
    /module/UsewxWidgets
    /module/Use_wxWindows
