@@ -100,10 +100,10 @@ void AddCacheEntry::onCompletionActivated(const QString &text)
   int idx = this->VarNames.indexOf(text);
   if (idx != -1)
     {
-    QString type = this->VarTypes[idx];
+    QString vartype = this->VarTypes[idx];
     for (int i = 0; i < NumTypes; i++)
       {
-        if (TypeStrings[i] == type)
+        if (TypeStrings[i] == vartype)
           {
           this->Type->setCurrentIndex(i);
           break;
