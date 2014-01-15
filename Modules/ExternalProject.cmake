@@ -585,13 +585,30 @@ message(STATUS \"downloading... done\")
 endfunction()
 
 
-function(_ep_write_verifyfile_script script_filename local hash)
+function(_ep_write_verifyfile_script script_filename local hash retries download_script)
   if("${hash}" MATCHES "${_ep_hash_regex}")
     set(algo "${CMAKE_MATCH_1}")
     string(TOLOWER "${CMAKE_MATCH_2}" expect_value)
     set(script_content "set(expect_value \"${expect_value}\")
-file(${algo} \"\${file}\" actual_value)
-if(\"\${actual_value}\" STREQUAL \"\${expect_value}\")
+set(attempt 0)
+set(succeeded 0)
+while(\${attempt} LESS ${retries} OR \${attempt} EQUAL ${retries} AND NOT \${succeeded})
+  file(${algo} \"\${file}\" actual_value)
+  if(\"\${actual_value}\" STREQUAL \"\${expect_value}\")
+    set(succeeded 1)
+  elseif(\${attempt} LESS ${retries})
+    message(STATUS \"${algo} hash of \${file}
+does not match expected value
+  expected: \${expect_value}
+    actual: \${actual_value}
+Retrying download.
+\")
+    file(REMOVE \"\${file}\")
+    execute_process(COMMAND ${CMAKE_COMMAND} -P \"${download_script}\")
+  endif()
+endwhile()
+
+if(\${succeeded})
   message(STATUS \"verifying file... done\")
 else()
   message(FATAL_ERROR \"error: ${algo} hash of
@@ -1394,6 +1411,8 @@ function(_ep_add_download_command name)
     set(repository "external project URL")
     set(module "${url}")
     set(tag "${hash}")
+    set(retries 0)
+    set(download_script "")
     configure_file(
       "${CMAKE_ROOT}/Modules/RepositoryInfo.txt.in"
       "${stamp_dir}/${name}-urlinfo.txt"
@@ -1423,16 +1442,17 @@ function(_ep_add_download_command name)
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
-        _ep_write_downloadfile_script("${stamp_dir}/download-${name}.cmake"
-          "${url}" "${file}" "${timeout}" "${hash}" "${tls_verify}" "${tls_cainfo}")
-        set(cmd ${CMAKE_COMMAND} -P ${stamp_dir}/download-${name}.cmake
+        set(download_script "${stamp_dir}/download-${name}.cmake")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${hash}" "${tls_verify}" "${tls_cainfo}")
+        set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
+        set(retries 3)
         set(comment "Performing download step (download, verify and extract) for '${name}'")
       else()
         set(file "${url}")
         set(comment "Performing download step (verify and extract) for '${name}'")
       endif()
-      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}")
+      _ep_write_verifyfile_script("${stamp_dir}/verify-${name}.cmake" "${file}" "${hash}" "${retries}" "${download_script}")
       list(APPEND cmd ${CMAKE_COMMAND} -P ${stamp_dir}/verify-${name}.cmake
         COMMAND)
       _ep_write_extractfile_script("${stamp_dir}/extract-${name}.cmake" "${name}" "${file}" "${source_dir}")
