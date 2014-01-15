@@ -107,11 +107,13 @@
 #
 # ::
 #
-#   macro QT4_WRAP_CPP(outfiles inputfile ... OPTIONS ...)
+#   macro QT4_WRAP_CPP(outfiles inputfile ... [TARGET tgt] OPTIONS ...)
 #         create moc code from a list of files containing Qt class with
 #         the Q_OBJECT declaration.  Per-directory preprocessor definitions
-#         are also added.  Options may be given to moc, such as those found
-#         when executing "moc -help".
+#         are also added.  If the <tgt> is specified, the
+#         INTERFACE_INCLUDE_DIRECTORIES and INTERFACE_COMPILE_DEFINITIONS from
+#         the <tgt> are passed to moc.  Options may be given to moc, such as
+#         those found when executing "moc -help".
 #
 #
 #
@@ -135,16 +137,19 @@
 #
 # ::
 #
-#   macro QT4_GENERATE_MOC(inputfile outputfile )
+#   macro QT4_GENERATE_MOC(inputfile outputfile [TARGET tgt])
 #         creates a rule to run moc on infile and create outfile.
 #         Use this if for some reason QT4_WRAP_CPP() isn't appropriate, e.g.
-#         because you need a custom filename for the moc file or something similar.
+#         because you need a custom filename for the moc file or something
+#         similar.  If the <tgt> is specified, the
+#         INTERFACE_INCLUDE_DIRECTORIES and INTERFACE_COMPILE_DEFINITIONS from
+#         the <tgt> are passed to moc.
 #
 #
 #
 # ::
 #
-#   macro QT4_AUTOMOC(sourcefile1 sourcefile2 ... )
+#   macro QT4_AUTOMOC(sourcefile1 sourcefile2 ...  [TARGET tgt])
 #         The qt4_automoc macro is obsolete.  Use the CMAKE_AUTOMOC feature instead.
 #         This macro is still experimental.
 #         It can be used to have moc automatically handled.
@@ -157,7 +162,8 @@
 #         them cause a rule to be generated to run moc at build time on the
 #         accompanying header file foo.h.
 #         If a source file has the SKIP_AUTOMOC property set it will be ignored by this macro.
-#
+#         If the <tgt> is specified, the INTERFACE_INCLUDE_DIRECTORIES and
+#         INTERFACE_COMPILE_DEFINITIONS from the <tgt> are passed to moc.
 #
 #
 # ::
