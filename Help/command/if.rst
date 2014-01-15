@@ -187,7 +187,7 @@ above-documented signature accepts ``<variable|string>``:
   variables, if so their defined values are used otherwise the original
   value is used.
 
-* Both left and right hand argumemnts to ``VERSION_LESS``,
+* Both left and right hand arguments to ``VERSION_LESS``,
   ``VERSION_EQUAL``, and ``VERSION_GREATER`` are independently tested
   to see if they are defined variables, if so their defined values are
   used otherwise the original value is used.
