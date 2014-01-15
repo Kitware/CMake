@@ -363,7 +363,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       ++targetIt)
     {
 
-    if (this->Makefile->IsAlias(targetIt->c_str()))
+    if (this->Makefile->IsAlias(*targetIt))
       {
       cmOStringStream e;
       e << "TARGETS given target \"" << (*targetIt)
@@ -372,7 +372,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       return false;
       }
     // Lookup this target in the current directory.
-    if(cmTarget* target=this->Makefile->FindTarget(targetIt->c_str()))
+    if(cmTarget* target=this->Makefile->FindTarget(*targetIt))
       {
       // Found the target.  Check its type.
       if(target->GetType() != cmTarget::EXECUTABLE &&

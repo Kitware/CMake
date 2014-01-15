@@ -93,7 +93,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     else if(doing == DoingLinkLibraries)
       {
       libsToLink += "\"" + cmSystemTools::TrimWhitespace(argv[i]) + "\" ";
-      if(cmTarget *tgt = this->Makefile->FindTargetToUse(argv[i].c_str()))
+      if(cmTarget *tgt = this->Makefile->FindTargetToUse(argv[i]))
         {
         switch(tgt->GetType())
           {

@@ -201,7 +201,7 @@ bool cmAddExecutableCommand
   if(importTarget)
     {
     // Make sure the target does not already exist.
-    if(this->Makefile->FindTargetToUse(exename.c_str()))
+    if(this->Makefile->FindTargetToUse(exename))
       {
       cmOStringStream e;
       e << "cannot create imported target \"" << exename
