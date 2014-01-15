@@ -85,7 +85,31 @@ if(NOT DEFINED CMAKE_INSTALL_LOCALSTATEDIR)
   set(CMAKE_INSTALL_LOCALSTATEDIR "var" CACHE PATH "modifiable single-machine data (var)")
 endif()
 
-if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+# We check if the variable was manually set and not cached, in order to
+# allow projects to set the values as normal variables before including
+# GNUInstallDirs to avoid having the entries cached or user-editable. It
+# replaces the "if(NOT DEFINED CMAKE_INSTALL_XXX)" checks in all the
+# other cases.
+# If CMAKE_INSTALL_LIBDIR is defined, if _libdir_set is false, then the
+# variable is a normal one, otherwise it is a cache one.
+get_property(_libdir_set CACHE CMAKE_INSTALL_LIBDIR PROPERTY TYPE SET)
+if(NOT DEFINED CMAKE_INSTALL_LIBDIR OR (_libdir_set
+    AND DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX
+    AND NOT "${_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX}" STREQUAL "${CMAKE_INSTALL_PREFIX}"))
+  # If CMAKE_INSTALL_LIBDIR is not defined, it is always executed.
+  # Otherwise:
+  #  * if _libdir_set is false it is not executed (meaning that it is
+  #    not a cache variable)
+  #  * if _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX is not defined it is
+  #    not executed
+  #  * if _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX and
+  #    CMAKE_INSTALL_PREFIX are the same string it is not executed.
+  #    _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX is updated after the
+  #    execution, of this part of code, therefore at the next inclusion
+  #    of the file, CMAKE_INSTALL_LIBDIR is defined, and the 2 strings
+  #    are equal, meaning that the if is not executed the code the
+  #    second time.
+
   set(_LIBDIR_DEFAULT "lib")
   # Override this default 'lib' with 'lib64' iff:
   #  - we are on Linux system but NOT cross-compiling
@@ -94,13 +118,30 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
   # reason is: amd64 ABI: http://www.x86-64.org/documentation/abi.pdf
   # For Debian with multiarch, use 'lib/${CMAKE_LIBRARY_ARCHITECTURE}' if
   # CMAKE_LIBRARY_ARCHITECTURE is set (which contains e.g. "i386-linux-gnu"
+  # and CMAKE_INSTALL_PREFIX is "/usr"
   # See http://wiki.debian.org/Multiarch
+  if(DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX)
+    set(__LAST_LIBDIR_DEFAULT "lib")
+    # __LAST_LIBDIR_DEFAULT is the default value that we compute from
+    # _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX, not a cache entry for
+    # the value that was last used as the default.
+    # This value is used to figure out whether the user changed the
+    # CMAKE_INSTALL_LIBDIR value manually, or if the value was the
+    # default one. When CMAKE_INSTALL_PREFIX changes, the value is
+    # updated to the new default, unless the user explicitly changed it.
+  endif()
   if(CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
       AND NOT CMAKE_CROSSCOMPILING)
     if (EXISTS "/etc/debian_version") # is this a debian system ?
-       if(CMAKE_LIBRARY_ARCHITECTURE)
-         set(_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
-       endif()
+      if(CMAKE_LIBRARY_ARCHITECTURE)
+        if("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
+          set(_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
+        endif()
+        if(DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX
+            AND "${_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
+          set(__LAST_LIBDIR_DEFAULT "lib/${CMAKE_LIBRARY_ARCHITECTURE}")
+        endif()
+      endif()
     else() # not debian, rely on CMAKE_SIZEOF_VOID_P:
       if(NOT DEFINED CMAKE_SIZEOF_VOID_P)
         message(AUTHOR_WARNING
@@ -109,12 +150,25 @@ if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
       else()
         if("${CMAKE_SIZEOF_VOID_P}" EQUAL "8")
           set(_LIBDIR_DEFAULT "lib64")
+          if(DEFINED _GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX)
+            set(__LAST_LIBDIR_DEFAULT "lib64")
+          endif()
         endif()
       endif()
     endif()
   endif()
-  set(CMAKE_INSTALL_LIBDIR "${_LIBDIR_DEFAULT}" CACHE PATH "object code libraries (${_LIBDIR_DEFAULT})")
+  if(NOT DEFINED CMAKE_INSTALL_LIBDIR)
+    set(CMAKE_INSTALL_LIBDIR "${_LIBDIR_DEFAULT}" CACHE PATH "object code libraries (${_LIBDIR_DEFAULT})")
+  elseif(DEFINED __LAST_LIBDIR_DEFAULT
+      AND "${__LAST_LIBDIR_DEFAULT}" STREQUAL "${CMAKE_INSTALL_LIBDIR}")
+    set_property(CACHE CMAKE_INSTALL_LIBDIR PROPERTY VALUE "${_LIBDIR_DEFAULT}")
+  endif()
 endif()
+# Save for next run
+set(_GNUInstallDirs_LAST_CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE INTERNAL "CMAKE_INSTALL_PREFIX during last run")
+unset(_libdir_set)
+unset(__LAST_LIBDIR_DEFAULT)
+
 
 if(NOT DEFINED CMAKE_INSTALL_INCLUDEDIR)
   set(CMAKE_INSTALL_INCLUDEDIR "include" CACHE PATH "C header files (include)")
