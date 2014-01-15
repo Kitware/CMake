@@ -21,7 +21,7 @@ bool cmGetTargetPropertyCommand
     return false;
     }
   std::string var = args[0].c_str();
-  const char* targetName = args[1].c_str();
+  const std::string& targetName = args[1];
   const char *prop = 0;
 
   if(args[2] == "ALIASED_TARGET")

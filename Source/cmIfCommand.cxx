@@ -543,7 +543,7 @@ namespace
       if (*arg == "TARGET" && argP1 != newArgs.end())
         {
         HandlePredicate(
-          makefile->FindTargetToUse((argP1)->c_str())? true:false,
+          makefile->FindTargetToUse(*argP1)?true:false,
           reducible, arg, newArgs, argP1, argP2);
         }
       // is a variable defined

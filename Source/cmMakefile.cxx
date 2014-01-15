@@ -3859,7 +3859,8 @@ const char* cmMakefile::GetFeature(const char* feature, const char* config)
   return 0;
 }
 
-cmTarget* cmMakefile::FindTarget(const char* name, bool excludeAliases) const
+cmTarget* cmMakefile::FindTarget(const std::string& name,
+                                 bool excludeAliases) const
 {
   if (!excludeAliases)
     {
@@ -4063,7 +4064,8 @@ cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
 }
 
 //----------------------------------------------------------------------------
-cmTarget* cmMakefile::FindTargetToUse(const char* name, bool excludeAliases)
+cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
+                                      bool excludeAliases)
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
@@ -4081,16 +4083,18 @@ cmTarget* cmMakefile::FindTargetToUse(const char* name, bool excludeAliases)
     }
 
   // Look for a target built in this project.
-  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0, name,
+  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(0,
+                                                              name.c_str(),
                                                               excludeAliases);
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::IsAlias(const char *name)
+bool cmMakefile::IsAlias(const std::string& name)
 {
   if (this->AliasTargets.find(name) != this->AliasTargets.end())
     return true;
-  return this->GetLocalGenerator()->GetGlobalGenerator()->IsAlias(name);
+  return this->GetLocalGenerator()->GetGlobalGenerator()->IsAlias(
+                                                              name.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -4107,7 +4111,7 @@ cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
 bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
                                    bool isCustom)
 {
-  if(this->IsAlias(name.c_str()))
+  if(this->IsAlias(name))
     {
     cmOStringStream e;
     e << "cannot create target \"" << name
@@ -4115,7 +4119,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
     msg = e.str();
     return false;
     }
-  if(cmTarget* existing = this->FindTargetToUse(name.c_str()))
+  if(cmTarget* existing = this->FindTargetToUse(name))
     {
     // The name given conflicts with an existing target.  Produce an
     // error in a compatible way.

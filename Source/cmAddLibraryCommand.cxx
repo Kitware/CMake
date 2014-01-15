@@ -363,7 +363,7 @@ bool cmAddLibraryCommand
       }
 
     // Make sure the target does not already exist.
-    if(this->Makefile->FindTargetToUse(libName.c_str()))
+    if(this->Makefile->FindTargetToUse(libName))
       {
       cmOStringStream e;
       e << "cannot create imported target \"" << libName

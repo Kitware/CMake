@@ -534,7 +534,7 @@ cmExportFileGenerator::AddTargetNamespace(std::string &input,
 {
   cmMakefile *mf = target->GetMakefile();
 
-  cmTarget *tgt = mf->FindTargetToUse(input.c_str());
+  cmTarget *tgt = mf->FindTargetToUse(input);
   if (!tgt)
     {
     return false;

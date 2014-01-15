@@ -159,7 +159,7 @@ bool cmExportCommand
         currentTarget != this->Targets.GetVector().end();
         ++currentTarget)
       {
-      if (this->Makefile->IsAlias(currentTarget->c_str()))
+      if (this->Makefile->IsAlias(*currentTarget))
         {
         cmOStringStream e;
         e << "given ALIAS target \"" << *currentTarget
