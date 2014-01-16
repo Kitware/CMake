@@ -778,10 +778,6 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     {
     sourcecode += ".c.objc";
     }
-  else if(ext == "xib")
-    {
-    sourcecode += ".file.xib";
-    }
   else if(ext == "plist")
     {
     sourcecode += ".text.plist";
