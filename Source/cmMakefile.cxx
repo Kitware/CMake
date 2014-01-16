@@ -3859,7 +3859,8 @@ const char* cmMakefile::GetFeature(const char* feature, const char* config)
   return 0;
 }
 
-cmTarget* cmMakefile::FindTarget(const std::string& name, bool excludeAliases) const
+cmTarget* cmMakefile::FindTarget(const std::string& name,
+                                 bool excludeAliases) const
 {
   if (!excludeAliases)
     {
@@ -4063,7 +4064,8 @@ cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
 }
 
 //----------------------------------------------------------------------------
-cmTarget* cmMakefile::FindTargetToUse(const std::string& name, bool excludeAliases)
+cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
+                                      bool excludeAliases)
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.

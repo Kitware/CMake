@@ -533,11 +533,13 @@ public:
       this->GeneratorTargets = targets;
     }
 
-  cmTarget* FindTarget(const std::string& name, bool excludeAliases = false) const;
+  cmTarget* FindTarget(const std::string& name,
+                       bool excludeAliases = false) const;
 
   /** Find a target to use in place of the given name.  The target
       returned may be imported or built within the project.  */
-  cmTarget* FindTargetToUse(const std::string& name, bool excludeAliases = false);
+  cmTarget* FindTargetToUse(const std::string& name,
+                            bool excludeAliases = false);
   bool IsAlias(const std::string& name);
   cmGeneratorTarget* FindGeneratorTargetToUse(const char* name);
 
