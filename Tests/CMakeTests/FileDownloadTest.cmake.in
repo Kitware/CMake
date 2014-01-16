@@ -94,3 +94,16 @@ file(DOWNLOAD
   EXPECTED_MD5 d16778650db435bda3a8c3435c3ff5d1
   )
 message(STATUS "${status}")
+
+message(STATUS "FileDownload:11")
+file(DOWNLOAD
+  badhostname.png
+  ${dir}/file11.png
+  TIMEOUT 2
+  STATUS status
+  )
+message(STATUS "${status}")
+list(GET status 0 status_code)
+if(NOT ${status_code} EQUAL 6)
+  message(SEND_ERROR "error: expected status code 6 for bad host name, got: ${status_code}")
+endif()
