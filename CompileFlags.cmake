@@ -66,5 +66,5 @@ endif ()
 # avoid binutils problem with large binaries, e.g. when building CMake in debug mode
 # See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50230
 if (CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_SYSTEM_PROCESSOR STREQUAL parisc)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--unique=.text.*")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--unique=.text._*")
 endif ()
