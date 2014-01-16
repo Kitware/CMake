@@ -1,3 +1,20 @@
+Changes in CMake 2.8.12.2 (since 2.8.12.1)
+------------------------------------------
+Brad King (4):
+      VS: Map /Fd to ProgramDataBaseFileName for VS 7,8,9 (#14577)
+      Replace <OBJECT_DIR> rule placeholder consistently (#14667)
+      VS: Convert include path to backslashes for VS >= 10
+      Revert "Ninja: Track configured files so we can regenerate them."
+
+Rolf Eike Beer (1):
+      FindOpenMP: fix detecting compilers that do not need any special flag (#14567)
+
+Ruslan Baratov (1):
+      Xcode: Fix storyboard view
+
+Ted Kremenek (1):
+      CMakeDetermineCompilerId: Fix compiler line match for Xcode 5.1
+
 Changes in CMake 2.8.12.1 (since 2.8.12)
 ----------------------------------------
 Brad King (9):
