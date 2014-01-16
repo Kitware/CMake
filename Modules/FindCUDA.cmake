@@ -89,6 +89,13 @@
 #
 # ::
 #
+#   CUDA_STATIC_RUNTIME (Default OFF)
+#   -- Set to ON to link with static runtime (only for CUDA 5.5 and higher).
+#
+#
+#
+# ::
+#
 #   CUDA_GENERATED_OUTPUT_DIR (Default CMAKE_CURRENT_BINARY_DIR)
 #   -- Set to the path you wish to have the generated files placed.  If it is
 #      blank output files will be placed in CMAKE_CURRENT_BINARY_DIR.
@@ -596,6 +603,8 @@ option(CUDA_BUILD_CUBIN "Generate and parse .cubin files in Device mode." OFF)
 # Set whether we are using emulation or device mode.
 option(CUDA_BUILD_EMULATION "Build in Emulation mode" OFF)
 
+option(CUDA_STATIC_RUNTIME "Link with static runtime" OFF)
+
 # Where to put the generated output.
 set(CUDA_GENERATED_OUTPUT_DIR "" CACHE PATH "Directory to put all the output files.  If blank it will default to the CMAKE_CURRENT_BINARY_DIR")
 
@@ -652,6 +661,7 @@ endforeach()
 macro(cuda_unset_include_and_libraries)
   unset(CUDA_TOOLKIT_INCLUDE CACHE)
   unset(CUDA_CUDART_LIBRARY CACHE)
+  unset(CUDA_CUDART_STATIC_LIBRARY CACHE)
   unset(CUDA_CUDA_LIBRARY CACHE)
   # Make sure you run this before you unset CUDA_VERSION.
   if(CUDA_VERSION VERSION_EQUAL "3.0")
@@ -835,6 +845,12 @@ if(CUDA_VERSION VERSION_EQUAL "3.0")
     CUDA_CUDARTEMU_LIBRARY
     )
 endif()
+if(CUDA_VERSION VERSION_GREATER "5.0")
+  cuda_find_library_local_first(CUDA_CUDART_STATIC_LIBRARY cudart_static "\"cudart_static\" library")
+  mark_as_advanced(
+    CUDA_CUDART_STATIC_LIBRARY
+    )
+endif()
 
 # CUPTI library showed up in cuda toolkit 4.0
 if(NOT CUDA_VERSION VERSION_LESS "4.0")
@@ -846,6 +862,8 @@ endif()
 # that one instead of cudart.
 if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
   set(CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
+elseif(CUDA_STATIC_RUNTIME AND CUDA_CUDART_STATIC_LIBRARY)
+  set(CUDA_LIBRARIES ${CUDA_CUDART_STATIC_LIBRARY})
 else()
   set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
 endif()
@@ -854,6 +872,9 @@ if(APPLE)
   # library name for the cuda libraries is prepended with @rpath.
   if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
     get_filename_component(_cuda_path_to_cudart "${CUDA_CUDARTEMU_LIBRARY}" PATH)
+  elseif(CUDA_STATIC_RUNTIME AND CUDA_CUDART_STATIC_LIBRARY)
+    # don't need rpath for static library
+    unset(_cuda_path_to_cudart)
   else()
     get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
   endif()
