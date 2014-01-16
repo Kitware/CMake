@@ -110,7 +110,8 @@ protected:
   QTextCharFormat ErrorFormat;
   QTextCharFormat MessageFormat;
 
-  QStringList AddVariableCompletions;
+  QStringList AddVariableNames;
+  QStringList AddVariableTypes;
   QStringList FindHistory;
 
   QEventLoop LocalLoop;
