@@ -660,7 +660,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
         ++o;
         }
       if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                  cmStrCmp(o)) != cmArrayEnd(valueOptions))
+                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
         {
         assert(existingIt + 1 != opts.end());
         *(existingIt + 1) = *(it + 1);
@@ -831,7 +831,7 @@ void cmQtAutoGenerators::MergeRccOptions(std::vector<std::string> &opts,
         ++o;
         }
       if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                  cmStrCmp(o)) != cmArrayEnd(valueOptions))
+                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
         {
         assert(existingIt + 1 != opts.end());
         *(existingIt + 1) = *(it + 1);

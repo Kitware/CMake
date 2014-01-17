@@ -1314,7 +1314,7 @@ static bool whiteListedInterfaceProperty(const std::string& prop)
   if (std::binary_search(cmArrayBegin(builtIns),
                          cmArrayEnd(builtIns),
                          prop.c_str(),
-                         cmStrCmp(prop.c_str())))
+                         cmStrCmp(prop)))
     {
     return true;
     }
