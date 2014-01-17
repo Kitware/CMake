@@ -411,7 +411,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
         i != utils.end(); ++i)
       {
       if(cmTarget const* transitive_dependee =
-         dependee->GetMakefile()->FindTargetToUse(i->c_str()))
+         dependee->GetMakefile()->FindTargetToUse(*i))
         {
         this->AddTargetDepend(depender_index, transitive_dependee, false);
         }

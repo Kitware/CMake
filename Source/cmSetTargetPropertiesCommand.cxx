@@ -72,7 +72,7 @@ bool cmSetTargetPropertiesCommand
   int i;
   for(i = 0; i < numFiles; ++i)
     {
-    if (this->Makefile->IsAlias(args[i].c_str()))
+    if (this->Makefile->IsAlias(args[i]))
       {
       this->SetError("can not be used on an ALIAS target.");
       return false;
