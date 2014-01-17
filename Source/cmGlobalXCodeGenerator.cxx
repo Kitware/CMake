@@ -753,7 +753,8 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 //----------------------------------------------------------------------------
 std::string
 GetSourcecodeValueFromFileExtension(const std::string& _ext,
-                                    const std::string& lang)
+                                    const std::string& lang,
+                                    bool& keepLastKnownFileType)
 {
   std::string ext = cmSystemTools::LowerCase(_ext);
   std::string sourcecode = "sourcecode";
@@ -764,10 +765,12 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     }
   else if(ext == "xib")
     {
+    keepLastKnownFileType = true;
     sourcecode = "file.xib";
     }
   else if(ext == "storyboard")
     {
+    keepLastKnownFileType = true;
     sourcecode = "file.storyboard";
     }
   else if(ext == "mm")
@@ -777,10 +780,6 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
   else if(ext == "m")
     {
     sourcecode += ".c.objc";
-    }
-  else if(ext == "xib")
-    {
-    sourcecode += ".file.xib";
     }
   else if(ext == "plist")
     {
@@ -797,6 +796,7 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     }
   else if(ext == "png" || ext == "gif" || ext == "jpg")
     {
+    keepLastKnownFileType = true;
     sourcecode = "image";
     }
   else if(ext == "txt")
@@ -875,8 +875,10 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     }
   else
     {
-    std::string sourcecode = GetSourcecodeValueFromFileExtension(ext, lang);
-    const char* attribute = (sourcecode == "file.storyboard") ?
+    bool keepLastKnownFileType = false;
+    std::string sourcecode = GetSourcecodeValueFromFileExtension(ext,
+                             lang, keepLastKnownFileType);
+    const char* attribute = keepLastKnownFileType ?
                              "lastKnownFileType" :
                              "explicitFileType";
     fileRef->AddAttribute(attribute,
