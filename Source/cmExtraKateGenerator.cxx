@@ -70,7 +70,7 @@ void cmExtraKateGenerator::CreateKateProjectFile(const cmMakefile* mf) const
     }
 
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
-  std::string args = mf->GetRequiredDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
+  std::string args = mf->GetSafeDefinition("CMAKE_KATE_MAKE_ARGUMENTS");
 
   fout <<
     "{\n"
