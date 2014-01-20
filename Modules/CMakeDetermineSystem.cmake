@@ -47,9 +47,14 @@ if(CMAKE_HOST_UNIX)
   if(CMAKE_UNAME)
     exec_program(uname ARGS -s OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_NAME)
     exec_program(uname ARGS -r OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_VERSION)
-    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux|CYGWIN.*")
+    if(CMAKE_HOST_SYSTEM_NAME MATCHES "Linux|CYGWIN.*|Darwin")
       exec_program(uname ARGS -m OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
         RETURN_VALUE val)
+      if(CMAKE_HOST_SYSTEM_NAME STREQUAL "Darwin" AND
+         CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "Power Macintosh")
+        # OS X ppc 'uname -m' may report 'Power Macintosh' instead of 'powerpc'
+        set(CMAKE_HOST_SYSTEM_PROCESSOR "powerpc")
+      endif()
     elseif(CMAKE_HOST_SYSTEM_NAME MATCHES "OpenBSD")
       exec_program(arch ARGS -s OUTPUT_VARIABLE CMAKE_HOST_SYSTEM_PROCESSOR
         RETURN_VALUE val)
