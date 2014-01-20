@@ -48,6 +48,29 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
     CMAKE_DETERMINE_COMPILER_ID_VENDOR(${lang})
   endif()
 
+  if (COMPILER_QNXNTO AND CMAKE_${lang}_COMPILER_ID STREQUAL GNU)
+    execute_process(
+      COMMAND "${CMAKE_${lang}_COMPILER}"
+      -V
+      OUTPUT_VARIABLE output ERROR_VARIABLE output
+      RESULT_VARIABLE result
+      TIMEOUT 10
+      )
+    if (output MATCHES "targets available")
+      cmake_policy(GET CMP0047 policyStatus)
+      if (policyStatus STREQUAL "" OR policyStatus STREQUAL "OLD")
+        if(policyStatus STREQUAL "")
+          cmake_policy(GET_WARNING CMP0047 policyWarning)
+          message(AUTHOR_WARNING "${policyWarning}")
+        endif()
+      elseif(policyStatus STREQUAL "NEW")
+        set(CMAKE_${lang}_COMPILER_ID QCC)
+        # http://community.qnx.com/sf/discussion/do/listPosts/projects.community/discussion.qnx_momentics_community_support.topc3555?_pagenum=2
+        # The qcc driver does not itself have a version.
+      endif()
+    endif()
+  endif()
+
   # if the format is unknown after all files have been checked, put "Unknown" in the cache
   if(NOT CMAKE_EXECUTABLE_FORMAT)
     set(CMAKE_EXECUTABLE_FORMAT "Unknown" CACHE INTERNAL "Executable file format")
@@ -369,6 +392,9 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
         string(REGEX REPLACE "^0+([0-9])" "\\1" SIMULATE_VERSION "${SIMULATE_VERSION}")
         string(REGEX REPLACE "\\.0+([0-9])" ".\\1" SIMULATE_VERSION "${SIMULATE_VERSION}")
       endif()
+      if("${info}" MATCHES ".*INFO:qnxnto")
+        set(COMPILER_QNXNTO 1)
+      endif()
     endforeach()
 
     # Detect the exact architecture from the PE header.
@@ -459,6 +485,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
   set(CMAKE_${lang}_SIMULATE_ID "${CMAKE_${lang}_SIMULATE_ID}" PARENT_SCOPE)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
   set(CMAKE_EXECUTABLE_FORMAT "${CMAKE_EXECUTABLE_FORMAT}" PARENT_SCOPE)
+  set(COMPILER_QNXNTO "${COMPILER_QNXNTO}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------
