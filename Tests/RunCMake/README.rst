@@ -16,6 +16,12 @@ but do not actually build anything.  To add a test:
    where ``SubTest1`` through ``SubTestN`` are sub-test names each
    corresponding to an independent CMake run and project configuration.
 
+   One may also add calls of the form::
+
+    run_cmake_command(SubTestI ${CMAKE_COMMAND} ...)
+
+   to fully customize the test case command-line.
+
 4. Create file ``<Test>/CMakeLists.txt`` in the directory containing::
 
     cmake_minimum_required(...)

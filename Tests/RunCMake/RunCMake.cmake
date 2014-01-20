@@ -39,17 +39,27 @@ function(run_cmake test)
   if(APPLE)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
   endif()
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
-              -G "${RunCMake_GENERATOR}"
-              -T "${RunCMake_GENERATOR_TOOLSET}"
-              -DRunCMake_TEST=${test}
-              ${RunCMake_TEST_OPTIONS}
-    WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
-    OUTPUT_VARIABLE actual_stdout
-    ERROR_VARIABLE actual_stderr
-    RESULT_VARIABLE actual_result
-    )
+  if(RunCMake_TEST_COMMAND)
+    execute_process(
+      COMMAND ${RunCMake_TEST_COMMAND}
+      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
+      OUTPUT_VARIABLE actual_stdout
+      ERROR_VARIABLE actual_stderr
+      RESULT_VARIABLE actual_result
+      )
+  else()
+    execute_process(
+      COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
+                -G "${RunCMake_GENERATOR}"
+                -T "${RunCMake_GENERATOR_TOOLSET}"
+                -DRunCMake_TEST=${test}
+                ${RunCMake_TEST_OPTIONS}
+      WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
+      OUTPUT_VARIABLE actual_stdout
+      ERROR_VARIABLE actual_stderr
+      RESULT_VARIABLE actual_result
+      )
+  endif()
   set(msg "")
   if(NOT "${actual_result}" STREQUAL "${expect_result}")
     set(msg "${msg}Result is [${actual_result}], not [${expect_result}].\n")
@@ -85,4 +95,9 @@ function(run_cmake test)
   else()
     message(STATUS "${test} - PASSED")
   endif()
+endfunction()
+
+function(run_cmake_command test)
+  set(RunCMake_TEST_COMMAND "${ARGN}")
+  run_cmake(${test})
 endfunction()
