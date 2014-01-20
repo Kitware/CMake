@@ -748,7 +748,12 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
 {
   std::string compilerIdVar = "CMAKE_" + lang + "_COMPILER_ID";
   const char* compilerId = mf->GetDefinition(compilerIdVar.c_str());
-  if(compilerId && strcmp(compilerId, "AppleClang") == 0)
+  if(!compilerId)
+    {
+    return;
+    }
+
+  if(strcmp(compilerId, "AppleClang") == 0)
     {
     cmPolicies* policies = this->CMakeInstance->GetPolicies();
     switch(mf->GetPolicyStatus(cmPolicies::CMP0025))
@@ -775,6 +780,37 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
           );
       case cmPolicies::NEW:
         // NEW behavior is to keep AppleClang.
+        break;
+      }
+    }
+
+  if(strcmp(compilerId, "QCC") == 0)
+    {
+    cmPolicies* policies = this->CMakeInstance->GetPolicies();
+    switch(mf->GetPolicyStatus(cmPolicies::CMP0047))
+      {
+      case cmPolicies::WARN:
+        if(!this->CMakeInstance->GetIsInTryCompile())
+          {
+          cmOStringStream w;
+          w << policies->GetPolicyWarning(cmPolicies::CMP0047) << "\n"
+            "Converting " << lang <<
+            " compiler id \"QCC\" to \"GNU\" for compatibility."
+            ;
+          mf->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          }
+      case cmPolicies::OLD:
+        // OLD behavior is to convert QCC to GNU.
+        mf->AddDefinition(compilerIdVar.c_str(), "GNU");
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        mf->IssueMessage(
+          cmake::FATAL_ERROR,
+          policies->GetRequiredPolicyError(cmPolicies::CMP0047)
+          );
+      case cmPolicies::NEW:
+        // NEW behavior is to keep QCC.
         break;
       }
     }
