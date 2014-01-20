@@ -460,23 +460,25 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "create_symlink" && args.size() == 4)
       {
       const char* destinationFileName = args[3].c_str();
-      if ( cmSystemTools::FileExists(destinationFileName) )
+      if((cmSystemTools::FileExists(destinationFileName) ||
+          cmSystemTools::FileIsSymlink(destinationFileName)) &&
+         !cmSystemTools::RemoveFile(destinationFileName))
         {
-        if ( cmSystemTools::FileIsSymlink(destinationFileName) )
-          {
-          if ( !cmSystemTools::RemoveFile(destinationFileName) ||
-            cmSystemTools::FileExists(destinationFileName) )
-            {
-            return 0;
-            }
-          }
-        else
-          {
-          return 0;
-          }
+        std::string emsg = cmSystemTools::GetLastSystemError();
+        std::cerr <<
+          "failed to create symbolic link '" << destinationFileName <<
+          "' because existing path cannot be removed: " << emsg << "\n";
+        return 1;
         }
-      return cmSystemTools::CreateSymlink(args[2].c_str(),
-                                          args[3].c_str())? 0:1;
+      if(!cmSystemTools::CreateSymlink(args[2].c_str(), args[3].c_str()))
+        {
+        std::string emsg = cmSystemTools::GetLastSystemError();
+        std::cerr <<
+          "failed to create symbolic link '" << destinationFileName <<
+          "': " << emsg << "\n";
+        return 1;
+        }
+      return 0;
       }
 
     // Internal CMake shared library support.
