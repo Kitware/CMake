@@ -375,11 +375,8 @@ cmComputeLinkInformation
   // Add the search path entries requested by the user to path ordering.
   this->OrderLinkerSearchPath
     ->AddUserDirectories(this->Target->GetLinkDirectories());
-  if(!this->Makefile->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
-    {
-    this->OrderRuntimeSearchPath
-      ->AddUserDirectories(this->Target->GetLinkDirectories());
-    }
+  this->OrderRuntimeSearchPath
+    ->AddUserDirectories(this->Target->GetLinkDirectories());
 
   // Set up the implicit link directories.
   this->LoadImplicitLinkInfo();
