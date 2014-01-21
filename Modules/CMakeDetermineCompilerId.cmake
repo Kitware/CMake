@@ -57,17 +57,9 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
       TIMEOUT 10
       )
     if (output MATCHES "targets available")
-      cmake_policy(GET CMP0047 policyStatus)
-      if (policyStatus STREQUAL "" OR policyStatus STREQUAL "OLD")
-        if(policyStatus STREQUAL "")
-          cmake_policy(GET_WARNING CMP0047 policyWarning)
-          message(AUTHOR_WARNING "${policyWarning}")
-        endif()
-      elseif(policyStatus STREQUAL "NEW")
-        set(CMAKE_${lang}_COMPILER_ID QCC)
-        # http://community.qnx.com/sf/discussion/do/listPosts/projects.community/discussion.qnx_momentics_community_support.topc3555?_pagenum=2
-        # The qcc driver does not itself have a version.
-      endif()
+      set(CMAKE_${lang}_COMPILER_ID QCC)
+      # http://community.qnx.com/sf/discussion/do/listPosts/projects.community/discussion.qnx_momentics_community_support.topc3555?_pagenum=2
+      # The qcc driver does not itself have a version.
     endif()
   endif()
 
