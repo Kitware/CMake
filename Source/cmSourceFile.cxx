@@ -142,7 +142,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
     }
 
   // The file is not generated.  It must exist on disk.
-  cmMakefile* mf = this->Location.GetMakefile();
+  cmMakefile const* mf = this->Location.GetMakefile();
   const char* tryDirs[3] = {0, 0, 0};
   if(this->Location.DirectoryIsAmbiguous())
     {
@@ -264,7 +264,7 @@ void cmSourceFile::CheckExtension()
 void cmSourceFile::CheckLanguage(std::string const& ext)
 {
   // Try to identify the source file language from the extension.
-  cmMakefile* mf = this->Location.GetMakefile();
+  cmMakefile const* mf = this->Location.GetMakefile();
   cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
   if(const char* l = gg->GetLanguageFromExtension(ext.c_str()))
     {
@@ -292,10 +292,10 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
           cmSystemTools::GetFilenameLastExtension(this->Location.GetName());
   if (ext == ".ui")
     {
-    cmMakefile* mf = this->Location.GetMakefile();
+    cmMakefile const* mf = this->Location.GetMakefile();
     if (strcmp(prop, "AUTOUIC_OPTIONS") == 0)
       {
-      mf->AddQtUiFileWithOptions(this);
+      const_cast<cmMakefile*>(mf)->AddQtUiFileWithOptions(this);
       }
     }
 }
@@ -360,7 +360,7 @@ const char* cmSourceFile::GetProperty(const char* prop) const
     this->Properties.GetPropertyValue(prop, cmProperty::SOURCE_FILE, chain);
   if (chain)
     {
-    cmMakefile* mf = this->Location.GetMakefile();
+    cmMakefile const* mf = this->Location.GetMakefile();
     return mf->GetProperty(prop,cmProperty::SOURCE_FILE);
     }
 
