@@ -650,6 +650,7 @@ public:
   ///! When the file changes cmake will be re-run from the build system.
   void AddCMakeDependFile(const std::string& file)
     { this->ListFiles.push_back(file);}
+  void AddCMakeDependFilesFromUser();
 
     /**
      * Get the list file stack as a string

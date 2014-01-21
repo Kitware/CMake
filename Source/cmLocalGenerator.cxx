@@ -114,6 +114,8 @@ void cmLocalGenerator::Configure()
       }
     }
 
+  this->Makefile->AddCMakeDependFilesFromUser();
+
   // Check whether relative paths should be used for optionally
   // relative paths.
   this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
