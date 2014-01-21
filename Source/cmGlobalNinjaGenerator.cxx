@@ -1110,16 +1110,24 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             /*restat=*/ false,
             /*generator=*/ true);
 
+  cmLocalNinjaGenerator *ng = static_cast<cmLocalNinjaGenerator *>(lg);
+
   cmNinjaDeps implicitDeps;
-  for (std::vector<cmLocalGenerator *>::const_iterator i =
-       this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i) {
-    const std::vector<std::string>& lf = (*i)->GetMakefile()->GetListFiles();
-    implicitDeps.insert(implicitDeps.end(), lf.begin(), lf.end());
-  }
+  for(std::vector<cmLocalGenerator*>::const_iterator i =
+        this->LocalGenerators.begin(); i != this->LocalGenerators.end(); ++i)
+    {
+    std::vector<std::string> const& lf = (*i)->GetMakefile()->GetListFiles();
+    for(std::vector<std::string>::const_iterator fi = lf.begin();
+        fi != lf.end(); ++fi)
+      {
+      implicitDeps.push_back(ng->ConvertToNinjaPath(fi->c_str()));
+      }
+    }
+  implicitDeps.push_back("CMakeCache.txt");
+
   std::sort(implicitDeps.begin(), implicitDeps.end());
   implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
                      implicitDeps.end());
-  implicitDeps.push_back("CMakeCache.txt");
 
   this->WriteBuild(os,
                    "Re-run CMake if any of its inputs changed.",
