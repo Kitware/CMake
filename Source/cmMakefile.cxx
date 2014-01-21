@@ -3913,6 +3913,30 @@ cmTest* cmMakefile::GetTest(const char* testName) const
   return 0;
 }
 
+void cmMakefile::AddCMakeDependFilesFromUser()
+{
+  std::vector<std::string> deps;
+  if(const char* deps_str = this->GetProperty("CMAKE_CONFIGURE_DEPENDS"))
+    {
+    cmSystemTools::ExpandListArgument(deps_str, deps);
+    }
+  for(std::vector<std::string>::iterator i = deps.begin();
+      i != deps.end(); ++i)
+    {
+    if(cmSystemTools::FileIsFullPath(i->c_str()))
+      {
+      this->AddCMakeDependFile(*i);
+      }
+    else
+      {
+      std::string f = this->GetCurrentDirectory();
+      f += "/";
+      f += *i;
+      this->AddCMakeDependFile(f);
+      }
+    }
+}
+
 std::string cmMakefile::GetListFileStack()
 {
   cmOStringStream tmp;
