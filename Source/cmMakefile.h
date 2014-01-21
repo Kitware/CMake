@@ -63,8 +63,8 @@ public:
    * was used to write the currently loaded cache, note
    * this method will not work before the cache is loaded.
    */
-  unsigned int GetCacheMajorVersion();
-  unsigned int GetCacheMinorVersion();
+  unsigned int GetCacheMajorVersion() const;
+  unsigned int GetCacheMinorVersion() const;
 
   /* Check for unused variables in this scope */
   void CheckForUnusedVariables() const;
