@@ -2775,9 +2775,9 @@ cmMakefile::GetConfigurations(std::vector<std::string>& configs,
  * non-inherited SOURCE_GROUP commands will have precedence over
  * inherited ones.
  */
-cmSourceGroup&
+cmSourceGroup*
 cmMakefile::FindSourceGroup(const char* source,
-                            std::vector<cmSourceGroup> &groups)
+                            std::vector<cmSourceGroup> &groups) const
 {
   // First search for a group that lists the file explicitly.
   for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
@@ -2786,7 +2786,7 @@ cmMakefile::FindSourceGroup(const char* source,
     cmSourceGroup *result = sg->MatchChildrenFiles(source);
     if(result)
       {
-      return *result;
+      return result;
       }
     }
 
@@ -2797,13 +2797,13 @@ cmMakefile::FindSourceGroup(const char* source,
     cmSourceGroup *result = sg->MatchChildrenRegex(source);
     if(result)
       {
-      return *result;
+      return result;
       }
     }
 
 
   // Shouldn't get here, but just in case, return the default group.
-  return groups.front();
+  return &groups.front();
 }
 #endif
 
