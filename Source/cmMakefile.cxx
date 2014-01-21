@@ -2114,19 +2114,20 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-cmSourceGroup* cmMakefile::GetSourceGroup(const std::vector<std::string>&name)
+cmSourceGroup*
+cmMakefile::GetSourceGroup(const std::vector<std::string>&name) const
 {
   cmSourceGroup* sg = 0;
 
   // first look for source group starting with the same as the one we wants
-  for (std::vector<cmSourceGroup>::iterator sgIt = this->SourceGroups.begin();
-       sgIt != this->SourceGroups.end(); ++sgIt)
-
+  for (std::vector<cmSourceGroup>::const_iterator
+      sgIt = this->SourceGroups.begin();
+      sgIt != this->SourceGroups.end(); ++sgIt)
     {
     std::string sgName = sgIt->GetName();
     if(sgName == name[0])
       {
-      sg = &(*sgIt);
+      sg = const_cast<cmSourceGroup*>(&(*sgIt));
       break;
       }
     }

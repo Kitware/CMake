@@ -639,7 +639,7 @@ public:
   /**
    * Get the source group
    */
-  cmSourceGroup* GetSourceGroup(const std::vector<std::string>&name);
+  cmSourceGroup* GetSourceGroup(const std::vector<std::string>&name) const;
 #endif
 
   /**
