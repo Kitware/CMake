@@ -64,7 +64,7 @@ cmCustomCommand& cmCustomCommand::operator=(cmCustomCommand const& r)
 }
 
 //----------------------------------------------------------------------------
-cmCustomCommand::cmCustomCommand(cmMakefile* mf,
+cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  const std::vector<std::string>& outputs,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,

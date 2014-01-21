@@ -884,7 +884,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
                                      cmTarget::CustomCommandType type,
                                      const char* comment,
                                      const char* workingDir,
-                                     bool escapeOldStyle)
+                                     bool escapeOldStyle) const
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);

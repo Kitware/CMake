@@ -173,7 +173,7 @@ public:
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir,
-                                bool escapeOldStyle = true);
+                                bool escapeOldStyle = true) const;
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& depends,
