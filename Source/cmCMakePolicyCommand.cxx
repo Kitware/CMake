@@ -31,6 +31,10 @@ bool cmCMakePolicyCommand
     {
     return this->HandleGetMode(args);
     }
+  else if(args[0] == "GET_WARNING")
+    {
+    return this->HandleGetWarningMode(args);
+    }
   else if(args[0] == "PUSH")
     {
     if(args.size() > 1)
@@ -149,6 +153,38 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
     }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmCMakePolicyCommand::HandleGetWarningMode(std::vector<std::string> const& args)
+{
+  if(args.size() != 3)
+    {
+    this->SetError("GET_WARNING must be given exactly 2 additional "
+                   "arguments.");
+    return false;
+    }
+
+  // Get arguments.
+  std::string const& id = args[1];
+  std::string const& var = args[2];
+
+  // Lookup the policy number.
+  cmPolicies::PolicyID pid;
+  if(!this->Makefile->GetPolicies()->GetPolicyID(id.c_str(), pid))
+    {
+    cmOStringStream e;
+    e << "GET_WARNING given policy \"" << id << "\" which is not known to "
+      << "this version of CMake.";
+    this->SetError(e.str().c_str());
+    return false;
+    }
+
+  // Lookup the policy setting.
+  this->Makefile->AddDefinition(var.c_str(),
+                this->Makefile->GetPolicies()->GetPolicyWarning(pid).c_str());
 
   return true;
 }
