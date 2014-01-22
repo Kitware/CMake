@@ -380,10 +380,16 @@ std::string cmCTestP4::GetWorkingRevision()
   p4_identify.push_back(0);
 
   std::string rev;
-  IdentifyParser out(this, "rev-out> ", rev);
-  OutputLogger err(this->Log, "rev-err> ");
+  IdentifyParser out(this, "p4_changes-out> ", rev);
+  OutputLogger err(this->Log, "p4_changes-err> ");
 
-  RunChild(&p4_identify[0], &out, &err);
+  bool result = RunChild(&p4_identify[0], &out, &err);
+
+  // If there was a problem contacting the server return "<unknown>"
+  if(!result)
+    {
+    return "<unknown>";
+    }
 
   if(rev.empty())
     {
@@ -423,29 +429,24 @@ void cmCTestP4::LoadRevisions()
   // Use 'p4 changes ...@old,new' to get a list of changelists
   std::string range = this->SourceDirectory + "/...";
 
-  if(this->OldRevision != "0")
+  // If any revision is unknown it means we couldn't contact the server.
+  // Do not process updates
+  if(this->OldRevision == "<unknown>" || this->NewRevision == "<unknown>")
     {
-    range.append("@").append(this->OldRevision);
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   At least one of the revisions "
+               << "is unknown. No repository changes will be reported.\n");
+    return;
     }
 
-  if(this->NewRevision != "0")
-    {
-    if(this->OldRevision != "0")
-      {
-      range.append(",").append(this->NewRevision);
-      }
-    else
-      {
-      range.append("@").append(this->NewRevision);
-      }
-    }
+  range.append("@").append(this->OldRevision)
+       .append(",").append(this->NewRevision);
 
   p4_changes.push_back("changes");
   p4_changes.push_back(range.c_str());
   p4_changes.push_back(0);
 
-  ChangesParser out(this, "changes-out> ");
-  OutputLogger err(this->Log, "changes-err> ");
+  ChangesParser out(this, "p4_changes-out> ");
+  OutputLogger err(this->Log, "p4_changes-err> ");
 
   ChangeLists.clear();
   this->RunChild(&p4_changes[0], &out, &err);
@@ -464,8 +465,8 @@ void cmCTestP4::LoadRevisions()
     p4_describe.push_back(i->c_str());
     p4_describe.push_back(0);
 
-    DescribeParser outDescribe(this, "describe-out> ");
-    OutputLogger errDescribe(this->Log, "describe-err> ");
+    DescribeParser outDescribe(this, "p4_describe-out> ");
+    OutputLogger errDescribe(this->Log, "p4_describe-err> ");
     this->RunChild(&p4_describe[0], &outDescribe, &errDescribe);
     }
 }
@@ -484,8 +485,8 @@ void cmCTestP4::LoadModifications()
   p4_diff.push_back(source.c_str());
   p4_diff.push_back(0);
 
-  DiffParser out(this, "diff-out> ");
-  OutputLogger err(this->Log, "diff-err> ");
+  DiffParser out(this, "p4_diff-out> ");
+  OutputLogger err(this->Log, "p4_diff-err> ");
   this->RunChild(&p4_diff[0], &out, &err);
 }
 
@@ -503,8 +504,8 @@ bool cmCTestP4::UpdateCustom(const std::string& custom)
     }
   p4_custom.push_back(0);
 
-  OutputLogger custom_out(this->Log, "custom-out> ");
-  OutputLogger custom_err(this->Log, "custom-err> ");
+  OutputLogger custom_out(this->Log, "p4_customsync-out> ");
+  OutputLogger custom_err(this->Log, "p4_customsync-err> ");
 
   return this->RunUpdateCommand(&p4_custom[0], &custom_out, &custom_err);
 }
@@ -516,6 +517,14 @@ bool cmCTestP4::UpdateImpl()
   if(!custom.empty())
     {
     return this->UpdateCustom(custom);
+    }
+
+  // If we couldn't get a revision number before updating, abort.
+  if(this->OldRevision == "<unknown>")
+    {
+    this->UpdateCommandLine = "Unknown current revision";
+    cmCTestLog(this->CTest, ERROR_MESSAGE, "   Unknown current revision\n");
+    return false;
     }
 
   std::vector<char const*> p4_sync;
@@ -552,8 +561,8 @@ bool cmCTestP4::UpdateImpl()
   p4_sync.push_back(source.c_str());
   p4_sync.push_back(0);
 
-  OutputLogger out(this->Log, "sync-out> ");
-  OutputLogger err(this->Log, "sync-err> ");
+  OutputLogger out(this->Log, "p4_sync-out> ");
+  OutputLogger err(this->Log, "p4_sync-err> ");
 
   return this->RunUpdateCommand(&p4_sync[0], &out, &err);
 }
