@@ -30,7 +30,7 @@ public:
   cmCustomCommand& operator=(cmCustomCommand const& r);
 
   /** Main constructor specifies all information for the command.  */
-  cmCustomCommand(cmMakefile* mf,
+  cmCustomCommand(cmMakefile const* mf,
                   const std::vector<std::string>& outputs,
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,

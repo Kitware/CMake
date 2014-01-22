@@ -33,7 +33,7 @@ public:
    * Construct for a source file created in a given cmMakefile
    * instance with an initial name.
    */
-  cmSourceFileLocation(cmMakefile* mf, const char* name);
+  cmSourceFileLocation(cmMakefile const* mf, const char* name);
 
   /**
    * Return whether the givne source file location could refers to the
@@ -81,9 +81,9 @@ public:
   /**
    * Get the cmMakefile instance for which the source file was created.
    */
-  cmMakefile* GetMakefile() const { return this->Makefile; }
+  cmMakefile const* GetMakefile() const { return this->Makefile; }
 private:
-  cmMakefile* Makefile;
+  cmMakefile const* Makefile;
   bool AmbiguousDirectory;
   bool AmbiguousExtension;
   std::string Directory;

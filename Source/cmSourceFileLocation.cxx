@@ -18,7 +18,7 @@
 
 //----------------------------------------------------------------------------
 cmSourceFileLocation
-::cmSourceFileLocation(cmMakefile* mf, const char* name): Makefile(mf)
+::cmSourceFileLocation(cmMakefile const* mf, const char* name): Makefile(mf)
 {
   this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name);
   this->AmbiguousExtension = true;
@@ -89,7 +89,7 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
   // The global generator checks extensions of enabled languages.
   cmGlobalGenerator* gg =
     this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
-  cmMakefile* mf = this->Makefile;
+  cmMakefile const* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
   if(gg->GetLanguageFromExtension(ext.c_str()) ||
@@ -170,7 +170,7 @@ cmSourceFileLocation
   // Only a fixed set of extensions will be tried to match a file on
   // disk.  One of these must match if loc refers to this source file.
   std::string ext = this->Name.substr(loc.Name.size()+1);
-  cmMakefile* mf = this->Makefile;
+  cmMakefile const* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   if(std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end())
     {
