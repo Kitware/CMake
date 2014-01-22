@@ -2137,7 +2137,7 @@ cmMakefile::GetSourceGroup(const std::vector<std::string>&name) const
     // iterate through its children to find match source group
     for(unsigned int i=1; i<name.size(); ++i)
       {
-      sg = sg->lookupChild(name[i].c_str());
+      sg = sg->LookupChild(name[i].c_str());
       if(sg == 0)
         {
         break;
@@ -2208,7 +2208,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   for(++i; i<=lastElement; ++i)
     {
     sg->AddChild(cmSourceGroup(name[i].c_str(), 0, sg->GetFullName()));
-    sg = sg->lookupChild(name[i].c_str());
+    sg = sg->LookupChild(name[i].c_str());
     fullname = sg->GetFullName();
     if(strlen(fullname))
       {

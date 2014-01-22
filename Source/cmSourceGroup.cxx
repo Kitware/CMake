@@ -126,7 +126,7 @@ void cmSourceGroup::AddChild(cmSourceGroup child)
 }
 
 //----------------------------------------------------------------------------
-cmSourceGroup *cmSourceGroup::lookupChild(const char* name) const
+cmSourceGroup *cmSourceGroup::LookupChild(const char* name) const
 {
   // initializing iterators
   std::vector<cmSourceGroup>::const_iterator iter =
