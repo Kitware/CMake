@@ -124,7 +124,7 @@ endif()
 # e.g. powerpc-linux-gas, arm-elf-gas or i586-mingw32msvc-gas , optionally
 # with a 3-component version number at the end
 # The other tools of the toolchain usually have the same prefix
-# NAME_WE cannot be used since then this test will fail for names lile
+# NAME_WE cannot be used since then this test will fail for names like
 # "arm-unknown-nto-qnx6.3.0-gas.exe", where BASENAME would be
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 if (NOT _CMAKE_TOOLCHAIN_PREFIX)
