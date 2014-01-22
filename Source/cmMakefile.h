@@ -250,13 +250,6 @@ public:
    */
   void AddLinkDirectory(const char*);
 
-  /**
-   * Get the list of link directories
-   */
-  std::vector<std::string>& GetLinkDirectories()
-    {
-      return this->LinkDirectories;
-    }
   const std::vector<std::string>& GetLinkDirectories() const
     {
       return this->LinkDirectories;
