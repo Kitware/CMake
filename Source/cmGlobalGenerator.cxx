@@ -800,7 +800,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
           mf->IssueMessage(cmake::AUTHOR_WARNING, w.str());
           }
       case cmPolicies::OLD:
-        // OLD behavior is to convert AppleClang to Clang.
+        // OLD behavior is to convert QCC to GNU.
         mf->AddDefinition(compilerIdVar.c_str(), "GNU");
         break;
       case cmPolicies::REQUIRED_IF_USED:
