@@ -692,7 +692,7 @@ public:
    * See cmConfigureFileCommand for details.
    */
   void ConfigureString(const std::string& input, std::string& output,
-                       bool atOnly, bool escapeQuotes);
+                       bool atOnly, bool escapeQuotes) const;
 
   /**
    * Copy file but change lines acording to ConfigureString
@@ -968,8 +968,8 @@ private:
 
   std::map<cmStdString, bool> SubDirectoryOrder;
 
-  cmsys::RegularExpression cmDefineRegex;
-  cmsys::RegularExpression cmDefine01Regex;
+  mutable cmsys::RegularExpression cmDefineRegex;
+  mutable cmsys::RegularExpression cmDefine01Regex;
   mutable cmsys::RegularExpression cmAtVarRegex;
 
   cmPropertyMap Properties;
