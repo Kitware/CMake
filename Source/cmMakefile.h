@@ -547,7 +547,6 @@ public:
    * Mark include directories as system directories.
    */
   void AddSystemIncludeDirectories(const std::set<cmStdString> &incs);
-  bool IsSystemIncludeDirectory(const char* dir, const char *config);
 
   /** Expand out any arguements in the vector that have ; separated
    *  strings into multiple arguements.  A new vector is created
@@ -1005,7 +1004,6 @@ private:
   CallStackType CallStack;
   friend class cmMakefileCall;
 
-  cmTarget* FindBasicTarget(const char* name);
   std::vector<cmTarget*> ImportedTargetsOwned;
   std::map<cmStdString, cmTarget*> ImportedTargets;
 
