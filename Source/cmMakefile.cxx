@@ -179,7 +179,7 @@ unsigned int cmMakefile::GetCacheMinorVersion() const
   return this->GetCacheManager()->GetCacheMinorVersion();
 }
 
-bool cmMakefile::NeedCacheCompatibility(int major, int minor)
+bool cmMakefile::NeedCacheCompatibility(int major, int minor) const
 {
   return this->GetCacheManager()->NeedCacheCompatibility(major, minor);
 }
@@ -260,7 +260,7 @@ void cmMakefile
 
 
 // call print on all the classes in the makefile
-void cmMakefile::Print()
+void cmMakefile::Print() const
 {
   // print the class lists
   std::cout << "classes:\n";
@@ -359,7 +359,7 @@ bool cmMakefile::GetBacktrace(cmListFileBacktrace& backtrace) const
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff)
+void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   cmOStringStream msg;
   msg << lff.FilePath << "(" << lff.Line << "):  ";
@@ -734,7 +734,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::EnforceDirectoryLevelRules()
+void cmMakefile::EnforceDirectoryLevelRules() const
 {
   // Diagnose a violation of CMP0000 if necessary.
   if(this->CheckCMP0000)
@@ -2058,7 +2058,8 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
   return &it->second;
 }
 
-cmSourceFile *cmMakefile::LinearGetSourceFileWithOutput(const char *cname)
+cmSourceFile*
+cmMakefile::LinearGetSourceFileWithOutput(const char *cname) const
 {
   std::string name = cname;
   std::string out;
@@ -2094,7 +2095,7 @@ cmSourceFile *cmMakefile::LinearGetSourceFileWithOutput(const char *cname)
   return 0;
 }
 
-cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
+cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname) const
 {
   std::string name = cname;
 
@@ -2105,7 +2106,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     return LinearGetSourceFileWithOutput(cname);
     }
   // Otherwise we use an efficient lookup map.
-  OutputToSourceMap::iterator o = this->OutputToSource.find(name);
+  OutputToSourceMap::const_iterator o = this->OutputToSource.find(name);
   if (o != this->OutputToSource.end())
     {
     return (*o).second;
@@ -2376,7 +2377,7 @@ const char* cmMakefile::GetSONameFlag(const char* language) const
   return GetDefinition(name.c_str());
 }
 
-bool cmMakefile::CanIWriteThisFile(const char* fileName)
+bool cmMakefile::CanIWriteThisFile(const char* fileName) const
 {
   if ( !this->IsOn("CMAKE_DISABLE_SOURCE_CHANGES") )
     {
@@ -2518,7 +2519,7 @@ std::vector<std::string> cmMakefile
 }
 
 
-const char *cmMakefile::ExpandVariablesInString(std::string& source)
+const char *cmMakefile::ExpandVariablesInString(std::string& source) const
 {
   return this->ExpandVariablesInString(source, false, false);
 }
@@ -2530,7 +2531,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 const char* filename,
                                                 long line,
                                                 bool removeEmpty,
-                                                bool replaceAt)
+                                                bool replaceAt) const
 {
   if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
@@ -2865,7 +2866,7 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
 
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
-  std::vector<std::string>& outArgs)
+  std::vector<std::string>& outArgs) const
 {
   std::vector<cmListFileArgument>::const_iterator i;
   std::string value;
@@ -3009,7 +3010,7 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmMakefile::GetSource(const char* sourceName)
+cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
   for(std::vector<cmSourceFile*>::const_iterator
@@ -3057,7 +3058,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang,
 
 void cmMakefile::ExpandSourceListArguments(
   std::vector<std::string> const& arguments,
-  std::vector<std::string>& newargs, unsigned int /* start */)
+  std::vector<std::string>& newargs, unsigned int /* start */) const
 {
   // now expand the args
   unsigned int i;
@@ -3257,7 +3258,7 @@ cmCacheManager *cmMakefile::GetCacheManager() const
   return this->GetCMakeInstance()->GetCacheManager();
 }
 
-void cmMakefile::DisplayStatus(const char* message, float s)
+void cmMakefile::DisplayStatus(const char* message, float s) const
 {
   cmake* cm = this->GetLocalGenerator()->GetGlobalGenerator()
                                                           ->GetCMakeInstance();
@@ -3270,7 +3271,7 @@ void cmMakefile::DisplayStatus(const char* message, float s)
   cm->UpdateProgress(message, s);
 }
 
-std::string cmMakefile::GetModulesFile(const char* filename)
+std::string cmMakefile::GetModulesFile(const char* filename) const
 {
   std::string result;
 
@@ -3939,13 +3940,13 @@ void cmMakefile::AddCMakeDependFilesFromUser()
     }
 }
 
-std::string cmMakefile::GetListFileStack()
+std::string cmMakefile::GetListFileStack() const
 {
   cmOStringStream tmp;
   size_t depth = this->ListFileStack.size();
   if (depth > 0)
     {
-    std::deque<cmStdString>::iterator it = this->ListFileStack.end();
+    std::deque<cmStdString>::const_iterator it = this->ListFileStack.end();
     do
       {
       if (depth != this->ListFileStack.size())
@@ -4091,7 +4092,7 @@ cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
 
 //----------------------------------------------------------------------------
 cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
-                                      bool excludeAliases)
+                                      bool excludeAliases) const
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
@@ -4115,7 +4116,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::IsAlias(const std::string& name)
+bool cmMakefile::IsAlias(const std::string& name) const
 {
   if (this->AliasTargets.find(name) != this->AliasTargets.end())
     return true;
@@ -4124,7 +4125,8 @@ bool cmMakefile::IsAlias(const std::string& name)
 }
 
 //----------------------------------------------------------------------------
-cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
+cmGeneratorTarget*
+cmMakefile::FindGeneratorTargetToUse(const char* name) const
 {
   if (cmTarget *t = this->FindTargetToUse(name))
     {
@@ -4135,7 +4137,7 @@ cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
 
 //----------------------------------------------------------------------------
 bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
-                                   bool isCustom)
+                                   bool isCustom) const
 {
   if(this->IsAlias(name))
     {
@@ -4226,7 +4228,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::EnforceUniqueDir(const char* srcPath, const char* binPath)
+bool cmMakefile::EnforceUniqueDir(const char* srcPath,
+                                  const char* binPath) const
 {
   // Make sure the binary directory is unique.
   cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
