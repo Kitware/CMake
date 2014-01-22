@@ -4287,7 +4287,7 @@ std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
 
 //----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
-cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id)
+cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 {
   // Get the current setting of the policy.
   cmPolicies::PolicyStatus cur = this->GetPolicyStatusInternal(id);
@@ -4315,10 +4315,10 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id)
 
 //----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
-cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id)
+cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
 {
   // Is the policy set in our stack?
-  for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
+  for(PolicyStackType::const_reverse_iterator psi = this->PolicyStack.rbegin();
       psi != this->PolicyStack.rend(); ++psi)
     {
     PolicyStackEntry::const_iterator pse = psi->find(id);
@@ -4468,7 +4468,7 @@ bool cmMakefile::SetPolicyVersion(const char *version)
     ApplyPolicyVersion(this,version);
 }
 
-cmPolicies *cmMakefile::GetPolicies()
+cmPolicies *cmMakefile::GetPolicies() const
 {
   if (!this->GetCMakeInstance())
   {

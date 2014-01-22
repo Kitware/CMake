@@ -356,7 +356,7 @@ public:
      */
   bool SetPolicy(cmPolicies::PolicyID id, cmPolicies::PolicyStatus status);
   bool SetPolicy(const char *id, cmPolicies::PolicyStatus status);
-  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
+  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id) const;
   bool SetPolicyVersion(const char *version);
   void RecordPolicies(cmPolicies::PolicyMap& pm);
   //@}
@@ -379,7 +379,7 @@ public:
   /**
     * Get the Policies Instance
     */
- cmPolicies *GetPolicies();
+ cmPolicies *GetPolicies() const;
 
   /**
    * Add an auxiliary directory to the build.
@@ -1031,7 +1031,8 @@ private:
   typedef std::vector<PolicyStackEntry> PolicyStackType;
   PolicyStackType PolicyStack;
   std::vector<PolicyStackType::size_type> PolicyBarriers;
-  cmPolicies::PolicyStatus GetPolicyStatusInternal(cmPolicies::PolicyID id);
+  cmPolicies::PolicyStatus
+  GetPolicyStatusInternal(cmPolicies::PolicyID id) const;
 
   bool CheckCMP0000;
 
