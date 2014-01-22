@@ -71,6 +71,7 @@ void CMakeCommandUsage(const char* program)
        "(on one volume)\n"
     << "  tar [cxt][vfz][cvfj] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
+    << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  time command [args] ...   - run command and return elapsed time\n"
     << "  touch file                - touch a file.\n"
     << "  touch_nocreate file       - touch a file but do not create it.\n"
@@ -275,6 +276,33 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           {
           return 1;
           }
+        }
+      return 0;
+      }
+
+    // Sleep command
+    else if (args[1] == "sleep" && args.size() > 2)
+      {
+      double total = 0;
+      for(size_t i = 2; i < args.size(); ++i)
+        {
+        double num = 0.0;
+        char unit;
+        char extra;
+        int n = sscanf(args[i].c_str(), "%lg%c%c", &num, &unit, &extra);
+        if((n == 1 || (n == 2 && unit == 's')) && num >= 0)
+          {
+          total += num;
+          }
+        else
+          {
+          std::cerr << "Unknown sleep time format \"" << args[i] << "\".\n";
+          return 1;
+          }
+        }
+      if(total > 0)
+        {
+        cmSystemTools::Delay(static_cast<unsigned int>(total*1000));
         }
       return 0;
       }

@@ -23,3 +23,8 @@ if(UNIX)
     ${CMAKE_COMMAND} -E create_symlink T .
     )
 endif()
+
+run_cmake_command(E_sleep-no-args ${CMAKE_COMMAND} -E sleep)
+run_cmake_command(E_sleep-bad-arg1 ${CMAKE_COMMAND} -E sleep x)
+run_cmake_command(E_sleep-bad-arg2 ${CMAKE_COMMAND} -E sleep 1 -1)
+run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
