@@ -3371,7 +3371,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
 
 void cmMakefile::ConfigureString(const std::string& input,
                                  std::string& output, bool atOnly,
-                                 bool escapeQuotes)
+                                 bool escapeQuotes) const
 {
   // Split input to handle one line at a time.
   std::string::const_iterator lineStart = input.begin();
