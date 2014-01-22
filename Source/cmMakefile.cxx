@@ -3235,9 +3235,9 @@ void cmMakefile::AddMacro(const char* name, const char* signature)
   this->MacrosMap[name] = signature;
 }
 
-void cmMakefile::GetListOfMacros(std::string& macros)
+void cmMakefile::GetListOfMacros(std::string& macros) const
 {
-  StringStringMap::iterator it;
+  StringStringMap::const_iterator it;
   macros = "";
   int cc = 0;
   for ( it = this->MacrosMap.begin(); it != this->MacrosMap.end(); ++it )
@@ -3673,7 +3673,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
   this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
 }
 
-const char *cmMakefile::GetPropertyOrDefinition(const char* prop)
+const char *cmMakefile::GetPropertyOrDefinition(const char* prop) const
 {
   const char *ret = this->GetProperty(prop, cmProperty::DIRECTORY);
   if (!ret)
@@ -3683,13 +3683,13 @@ const char *cmMakefile::GetPropertyOrDefinition(const char* prop)
   return ret;
 }
 
-const char *cmMakefile::GetProperty(const char* prop)
+const char *cmMakefile::GetProperty(const char* prop) const
 {
   return this->GetProperty(prop, cmProperty::DIRECTORY);
 }
 
 const char *cmMakefile::GetProperty(const char* prop,
-                                    cmProperty::ScopeType scope)
+                                    cmProperty::ScopeType scope) const
 {
   if(!prop)
     {
@@ -3713,8 +3713,9 @@ const char *cmMakefile::GetProperty(const char* prop,
     }
   else if (!strcmp("LISTFILE_STACK",prop))
     {
-    for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
-         i != this->ListFileStack.end(); ++i)
+    for (std::deque<cmStdString>::const_iterator
+        i = this->ListFileStack.begin();
+        i != this->ListFileStack.end(); ++i)
       {
       if (i != this->ListFileStack.begin())
         {
@@ -3828,7 +3829,7 @@ const char *cmMakefile::GetProperty(const char* prop,
   return retVal;
 }
 
-bool cmMakefile::GetPropertyAsBool(const char* prop)
+bool cmMakefile::GetPropertyAsBool(const char* prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }

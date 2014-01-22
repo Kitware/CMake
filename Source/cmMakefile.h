@@ -142,7 +142,7 @@ public:
   void SetLocalGenerator(cmLocalGenerator*);
 
   ///! Get the current makefile generator.
-  cmLocalGenerator* GetLocalGenerator()
+  cmLocalGenerator* GetLocalGenerator() const
     { return this->LocalGenerator;}
 
   /**
@@ -492,7 +492,7 @@ public:
     {
       this->IncludeFileRegularExpression = regex;
     }
-  const char* GetIncludeRegularExpression()
+  const char* GetIncludeRegularExpression() const
     {
       return this->IncludeFileRegularExpression.c_str();
     }
@@ -803,7 +803,7 @@ public:
   /**
    * Get a list of macros as a ; separated string
    */
-  void GetListOfMacros(std::string& macros);
+  void GetListOfMacros(std::string& macros) const;
 
   /**
    * Return a location of a file in cmake or custom modules directory
@@ -813,10 +813,10 @@ public:
   ///! Set/Get a property of this directory
   void SetProperty(const char *prop, const char *value);
   void AppendProperty(const char *prop, const char *value,bool asString=false);
-  const char *GetProperty(const char *prop);
-  const char *GetPropertyOrDefinition(const char *prop);
-  const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
-  bool GetPropertyAsBool(const char *prop);
+  const char *GetProperty(const char *prop) const;
+  const char *GetPropertyOrDefinition(const char *prop) const;
+  const char *GetProperty(const char *prop, cmProperty::ScopeType scope) const;
+  bool GetPropertyAsBool(const char *prop) const;
 
   const char* GetFeature(const char* feature, const char* config);
 
