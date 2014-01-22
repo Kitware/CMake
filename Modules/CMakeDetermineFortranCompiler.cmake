@@ -193,7 +193,7 @@ endif ()
 # e.g. powerpc-linux-gfortran, arm-elf-gfortran or i586-mingw32msvc-gfortran , optionally
 # with a 3-component version number at the end (e.g. arm-eabi-gcc-4.5.2).
 # The other tools of the toolchain usually have the same prefix
-# NAME_WE cannot be used since then this test will fail for names lile
+# NAME_WE cannot be used since then this test will fail for names like
 # "arm-unknown-nto-qnx6.3.0-gcc.exe", where BASENAME would be
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
