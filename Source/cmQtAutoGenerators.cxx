@@ -1964,7 +1964,6 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& uiFileName)
     std::vector<cmStdString> command;
     command.push_back(this->UicExecutable);
 
-    std::string options;
     std::vector<std::string> opts = this->UicTargetOptions;
     std::map<std::string, std::string>::const_iterator optionIt
             = this->UicOptions.find(ui_input_file);
@@ -2039,7 +2038,6 @@ bool cmQtAutoGenerators::GenerateQrc()
                                                       &sourceNewerThanQrc);
     if (this->GenerateAll || !success || sourceNewerThanQrc >= 0)
       {
-      std::string options;
       std::map<std::string, std::string>::const_iterator optionIt
               = this->RccOptions.find(*si);
       if (optionIt != this->RccOptions.end())
