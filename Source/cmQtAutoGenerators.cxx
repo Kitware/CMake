@@ -115,6 +115,15 @@ static void copyTargetProperty(cmTarget* destinationTarget,
 }
 
 
+static std::string ReadAll(const std::string& filename)
+{
+  cmsys::ifstream file(filename.c_str());
+  cmsys_ios::stringstream stream;
+  stream << file.rdbuf();
+  file.close();
+  return stream.str();
+}
+
 cmQtAutoGenerators::cmQtAutoGenerators()
 :Verbose(cmsys::SystemTools::GetEnv("VERBOSE") != 0)
 ,ColorOutput(true)
@@ -960,11 +969,27 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
     }
 }
 
+static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
+                                                  const char* targetDirectory)
+{
+  cmGlobalGenerator* gg = new cmGlobalGenerator();
+  gg->SetCMakeInstance(cm);
+
+  cmLocalGenerator* lg = gg->CreateLocalGenerator();
+  lg->GetMakefile()->SetHomeOutputDirectory(targetDirectory);
+  lg->GetMakefile()->SetStartOutputDirectory(targetDirectory);
+  lg->GetMakefile()->SetHomeDirectory(targetDirectory);
+  lg->GetMakefile()->SetStartDirectory(targetDirectory);
+  gg->SetCurrentLocalGenerator(lg);
+
+  return gg;
+}
+
 bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 {
   bool success = true;
   cmake cm;
-  cmGlobalGenerator* gg = this->CreateGlobalGenerator(&cm, targetDirectory);
+  cmGlobalGenerator* gg = CreateGlobalGenerator(&cm, targetDirectory);
   cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
 
   this->ReadAutogenInfoFile(makefile, targetDirectory, config);
@@ -984,24 +1009,6 @@ bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
   makefile = NULL;
   return success;
 }
-
-
-cmGlobalGenerator* cmQtAutoGenerators::CreateGlobalGenerator(cmake* cm,
-                                                  const char* targetDirectory)
-{
-  cmGlobalGenerator* gg = new cmGlobalGenerator();
-  gg->SetCMakeInstance(cm);
-
-  cmLocalGenerator* lg = gg->CreateLocalGenerator();
-  lg->GetMakefile()->SetHomeOutputDirectory(targetDirectory);
-  lg->GetMakefile()->SetStartOutputDirectory(targetDirectory);
-  lg->GetMakefile()->SetHomeDirectory(targetDirectory);
-  lg->GetMakefile()->SetStartDirectory(targetDirectory);
-  gg->SetCurrentLocalGenerator(lg);
-
-  return gg;
-}
-
 
 bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                                       const char* targetDirectory,
@@ -1424,7 +1431,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   if (!automocCppChanged)
     {
     // compare contents of the _automoc.cpp file
-    const std::string oldContents = this->ReadAll(this->OutMocCppFilename);
+    const std::string oldContents = ReadAll(this->OutMocCppFilename);
     if (oldContents == automocSource)
       {
       // nothing changed: don't touch the _automoc.cpp file
@@ -1452,7 +1459,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
               "[\n][ \t]*#[ \t]*include[ \t]+"
               "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
 
-  const std::string contentsString = this->ReadAll(absFilename);
+  const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty())
     {
     std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
@@ -1635,7 +1642,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
               "[\n][ \t]*#[ \t]*include[ \t]+"
               "[\"<](([^ \">]+/)?moc_[^ \">/]+\\.cpp|[^ \">]+\\.moc)[\">]");
 
-  const std::string contentsString = this->ReadAll(absFilename);
+  const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty())
     {
     std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
@@ -1748,7 +1755,7 @@ void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
     {
     return;
     }
-  const std::string contentsString = this->ReadAll(absFilename);
+  const std::string contentsString = ReadAll(absFilename);
   if (contentsString.empty())
     {
     std::cerr << "AUTOGEN: warning: " << absFilename << ": file is empty\n"
@@ -1843,7 +1850,7 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
       ++hIt)
     {
     const std::string& headerName = *hIt;
-    const std::string contents = this->ReadAll(headerName);
+    const std::string contents = ReadAll(headerName);
 
     if (includedMocs.find(headerName) == includedMocs.end())
       {
@@ -2121,14 +2128,4 @@ bool cmQtAutoGenerators::EndsWith(const std::string& str,
     return false;
     }
   return (str.substr(str.length() - with.length(), with.length()) == with);
-}
-
-
-std::string cmQtAutoGenerators::ReadAll(const std::string& filename)
-{
-  cmsys::ifstream file(filename.c_str());
-  cmsys_ios::stringstream stream;
-  stream << file.rdbuf();
-  file.close();
-  return stream.str();
 }
