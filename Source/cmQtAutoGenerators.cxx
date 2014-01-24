@@ -652,8 +652,6 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   std::string skip_uic;
   const char *sep = "";
 
-  bool skip  = target->GetPropertyAsBool("SKIP_AUTOUIC");
-
   std::set<cmStdString> skipped;
 
   for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
@@ -663,12 +661,8 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
     cmSourceFile* sf = *fileIt;
     std::string absFile = cmsys::SystemTools::GetRealPath(
                                                     sf->GetFullPath().c_str());
-    if (!skip)
-      {
-      skip = cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC"));
-      }
 
-    if (skip)
+    if (cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTOUIC")))
       {
       skip_uic += sep;
       skip_uic += absFile;
