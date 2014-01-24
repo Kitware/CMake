@@ -1035,6 +1035,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   this->MocExecutable = makefile->GetSafeDefinition("AM_QT_MOC_EXECUTABLE");
   this->UicExecutable = makefile->GetSafeDefinition("AM_QT_UIC_EXECUTABLE");
   this->RccExecutable = makefile->GetSafeDefinition("AM_QT_RCC_EXECUTABLE");
+  {
   std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
   std::string compileDefsProp = compileDefsPropOrig;
   if(config)
@@ -1045,6 +1046,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   const char *compileDefs = makefile->GetDefinition(compileDefsProp.c_str());
   this->MocCompileDefinitionsStr = compileDefs ? compileDefs
                   : makefile->GetSafeDefinition(compileDefsPropOrig.c_str());
+  }
+  {
   std::string includesPropOrig = "AM_MOC_INCLUDES";
   std::string includesProp = includesPropOrig;
   if(config)
@@ -1055,6 +1058,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   const char *includes = makefile->GetDefinition(includesProp.c_str());
   this->MocIncludesStr = includes ? includes
                       : makefile->GetSafeDefinition(includesPropOrig.c_str());
+  }
   this->MocOptionsStr = makefile->GetSafeDefinition("AM_MOC_OPTIONS");
   this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
@@ -1074,7 +1078,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                         = makefile->GetSafeDefinition(uicOptionsProp.c_str());
   cmSystemTools::ExpandListArgument(
       uicTargetOptions ? uicTargetOptions
-                       : makefile->GetSafeDefinition(includesPropOrig.c_str()),
+                    : makefile->GetSafeDefinition(uicOptionsPropOrig.c_str()),
     this->UicTargetOptions);
   const char *uicOptionsOptions
                       = makefile->GetSafeDefinition("AM_UIC_OPTIONS_OPTIONS");
