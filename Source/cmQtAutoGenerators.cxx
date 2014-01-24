@@ -549,9 +549,6 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
       }
     }
 
-  const char *qtMoc = makefile->GetSafeDefinition("QT_MOC_EXECUTABLE");
-  makefile->AddDefinition("_qt_moc_executable", qtMoc);
-
   const char *qtVersion = makefile->GetDefinition("_target_qt_version");
   if (strcmp(qtVersion, "5") == 0)
     {
@@ -564,13 +561,21 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
       }
     makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
     }
+  else if (strcmp(qtVersion, "4") == 0)
+    {
+    cmTarget *qt4Moc = makefile->FindTargetToUse("Qt4::moc");
+    if (!qt4Moc)
+      {
+      cmSystemTools::Error("Qt4::moc target not found ",
+                          autogenTargetName.c_str());
+      return;
+      }
+    makefile->AddDefinition("_qt_moc_executable", qt4Moc->GetLocation(0));
+    }
   else
     {
-    if (strcmp(qtVersion, "4") != 0)
-      {
-      cmSystemTools::Error("The CMAKE_AUTOMOC feature supports only Qt 4 and "
-                          "Qt 5 ", autogenTargetName.c_str());
-      }
+    cmSystemTools::Error("The CMAKE_AUTOMOC feature supports only Qt 4 and "
+                        "Qt 5 ", autogenTargetName.c_str());
     }
 }
 
@@ -640,9 +645,6 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
                           std::map<std::string, std::string> &configUicOptions)
 {
   cmMakefile *makefile = target->GetMakefile();
-
-  const char *qtUic = makefile->GetSafeDefinition("QT_UIC_EXECUTABLE");
-  makefile->AddDefinition("_qt_uic_executable", qtUic);
 
   std::vector<cmSourceFile*> srcFiles;
   target->GetSourceFiles(srcFiles);
@@ -747,20 +749,27 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
     if (!qt5Uic)
       {
       // Project does not use Qt5Widgets, but has AUTOUIC ON anyway
-      makefile->RemoveDefinition("_qt_uic_executable");
       }
     else
       {
       makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(0));
       }
     }
+  else if (strcmp(qtVersion, "4") == 0)
+    {
+    cmTarget *qt4Uic = makefile->FindTargetToUse("Qt4::uic");
+    if (!qt4Uic)
+      {
+      cmSystemTools::Error("Qt4::uic target not found ",
+                          targetName);
+      return;
+      }
+    makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(0));
+    }
   else
     {
-    if (strcmp(qtVersion, "4") != 0)
-      {
-      cmSystemTools::Error("The CMAKE_AUTOUIC feature supports only Qt 4 and "
-                          "Qt 5 ", targetName);
-      }
+    cmSystemTools::Error("The CMAKE_AUTOUIC feature supports only Qt 4 and "
+                        "Qt 5 ", targetName);
     }
 }
 
@@ -927,9 +936,6 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   makefile->AddDefinition("_qt_rcc_options_options",
             cmLocalGenerator::EscapeForCMake(rccFileOptions.c_str()).c_str());
 
-  const char *qtRcc = makefile->GetSafeDefinition("QT_RCC_EXECUTABLE");
-  makefile->AddDefinition("_qt_rcc_executable", qtRcc);
-
   const char* targetName = target->GetName();
   if (strcmp(qtVersion, "5") == 0)
     {
@@ -942,13 +948,21 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
       }
     makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
     }
+  else if (strcmp(qtVersion, "4") == 0)
+    {
+    cmTarget *qt4Rcc = makefile->FindTargetToUse("Qt4::rcc");
+    if (!qt4Rcc)
+      {
+      cmSystemTools::Error("Qt4::rcc target not found ",
+                          targetName);
+      return;
+      }
+    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(0));
+    }
   else
     {
-    if (strcmp(qtVersion, "4") != 0)
-      {
-      cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
-                          "Qt 5 ", targetName);
-      }
+    cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
+                        "Qt 5 ", targetName);
     }
 }
 
