@@ -25,6 +25,7 @@ public:
 
   bool InitializeAutogenTarget(cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget const* target);
+  void SetupSourceFiles(cmTarget const* target);
 
 private:
   void SetupAutoMocTarget(cmTarget const* target,
@@ -33,7 +34,6 @@ private:
                           std::map<std::string, std::string> &configDefines);
   void SetupAutoUicTarget(cmTarget const* target,
                         std::map<std::string, std::string> &configUicOptions);
-  void InitializeAutoRccTarget(cmTarget* target);
   void SetupAutoRccTarget(cmTarget const* target);
 
   bool ReadAutogenInfoFile(cmMakefile* makefile,
