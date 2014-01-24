@@ -33,17 +33,19 @@ The ``at()`` member function of ``std::vector`` may not be used. Use
   int i1 = someVec.at(5); // Wrong
   int i2 = someVec[5];    // Ok
 
-std::string::append
--------------------
+std::string::append and std::string::clear
+------------------------------------------
 
-The ``append()`` member function of ``std::string`` may not be used. Use
-``operator+=`` instead:
+The ``append()`` and ``clear()`` member functions of ``std::string`` may not
+be used. Use ``operator+=`` and ``operator=`` instead:
 
 .. code-block:: c++
 
   std::string stringBuilder;
   stringBuilder.append("chunk"); // Wrong
+  stringBuilder.clear(); // Wrong
   stringBuilder += "chunk";      // Ok
+  stringBuilder = "";      // Ok
 
 std::set const iterators
 ------------------------
