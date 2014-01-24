@@ -11,6 +11,11 @@ if (QT_TEST_VERSION STREQUAL 4)
   include(UseQt4)
 
   set(QT_QTCORE_TARGET Qt4::QtCore)
+
+  macro(qtx_wrap_cpp)
+    qt4_wrap_cpp(${ARGN})
+  endmacro()
+
 else()
   if (NOT QT_TEST_VERSION STREQUAL 5)
     message(SEND_ERROR "Invalid Qt version specified.")
@@ -25,6 +30,11 @@ else()
   if(Qt5_POSITION_INDEPENDENT_CODE)
     set(CMAKE_POSITION_INDEPENDENT_CODE ON)
   endif()
+
+  macro(qtx_wrap_cpp)
+    qt5_wrap_cpp(${ARGN})
+  endmacro()
+
 endif()
 
 
@@ -77,3 +87,7 @@ set_target_properties(empty PROPERTIES AUTOMOC TRUE)
 target_link_libraries(empty no_link_language)
 add_library(no_link_language STATIC empty.h)
 set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
+
+qtx_wrap_cpp(uicOnlyMoc uiconly.h)
+add_executable(uiconly uiconly.cpp ${uicOnlyMoc})
+target_link_libraries(uiconly ${QT_LIBRARIES})

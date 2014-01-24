@@ -1435,6 +1435,12 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
               << std::endl;
     return;
     }
+  this->ParseForUic(absFilename, contentsString, includedUis);
+  if (this->MocExecutable.empty())
+    {
+    return;
+    }
+
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
   const std::string scannedFileBasename = cmsys::SystemTools::
@@ -1563,7 +1569,6 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
       matchOffset += mocIncludeRegExp.end();
       } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
     }
-  this->ParseForUic(absFilename, contentsString, includedUis);
 
   // In this case, check whether the scanned file itself contains a Q_OBJECT.
   // If this is the case, the moc_foo.cpp should probably be generated from
@@ -1618,6 +1623,12 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
               << std::endl;
     return;
     }
+  this->ParseForUic(absFilename, contentsString, includedUis);
+  if (this->MocExecutable.empty())
+    {
+    return;
+    }
+
   const std::string absPath = cmsys::SystemTools::GetFilenamePath(
                    cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
   const std::string scannedFileBasename = cmsys::SystemTools::
@@ -1696,7 +1707,6 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
       matchOffset += mocIncludeRegExp.end();
       } while(mocIncludeRegExp.find(contentsString.c_str() + matchOffset));
     }
-  this->ParseForUic(absFilename, contentsString, includedUis);
 
   // In this case, check whether the scanned file itself contains a Q_OBJECT.
   // If this is the case, the moc_foo.cpp should probably be generated from
@@ -1821,7 +1831,8 @@ void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
     const std::string& headerName = *hIt;
     const std::string contents = ReadAll(headerName);
 
-    if (includedMocs.find(headerName) == includedMocs.end())
+    if (!this->MocExecutable.empty()
+        && includedMocs.find(headerName) == includedMocs.end())
       {
       if (this->Verbose)
         {
