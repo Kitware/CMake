@@ -124,6 +124,27 @@ A loop must be used instead:
     theVector.push_back(*li);
     }
 
+std::set::insert
+----------------
+
+Use of ``std::set::insert`` is not allowed with a source set:
+
+.. code-block:: c++
+
+  std::set<cmTarget*> theSet;
+  theSet.insert(targets.begin(), targets.end()); // Wrong
+
+A loop must be used instead:
+
+.. code-block:: c++
+
+  std::set<cmTarget*>::const_iterator it = targets.begin();
+  const std::set<cmTarget*>::const_iterator end = targets.end();
+  for ( ; it != end; ++it)
+    {
+    theSet.insert(*it);
+    }
+
 Template Parameter Defaults
 ---------------------------
 
