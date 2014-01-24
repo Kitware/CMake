@@ -1,4 +1,4 @@
-set(AM_SOURCES @_moc_files@ )
+set(AM_SOURCES @_cpp_files@ )
 set(AM_RCC_SOURCES @_rcc_files@ )
 set(AM_SKIP_MOC @_skip_moc@ )
 set(AM_SKIP_UIC @_skip_uic@ )
