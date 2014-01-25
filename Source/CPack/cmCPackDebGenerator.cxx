@@ -20,8 +20,9 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
 
-#include <limits.h> // USHRT_MAX
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <limits.h> // USHRT_MAX
 
 // NOTE:
 // A debian package .deb is simply an 'ar' archive. The only subtle difference
@@ -110,6 +111,9 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
     retval = 0;
     }
   // add the generated package to package file names list
+  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  packageFileName += "/";
+  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   packageFileNames.push_back(packageFileName);
   return retval;
 }
@@ -232,12 +236,16 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
     }
   packageFiles = gl.GetFiles();
 
+
   int res = createDeb();
   if (res != 1)
     {
     retval = 0;
     }
   // add the generated package to package file names list
+  packageFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
+  packageFileName += "/";
+  packageFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   packageFileNames.push_back(packageFileName);
   return retval;
 }
@@ -287,9 +295,8 @@ int cmCPackDebGenerator::PackageFiles()
 int cmCPackDebGenerator::createDeb()
 {
   // debian-binary file
-  std::string dbfilename;
-    dbfilename += this->GetOption("GEN_WDIR");
-  dbfilename += "/debian-binary";
+  const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
+  const std::string dbfilename = strGenWDIR + "/debian-binary";
     { // the scope is needed for cmGeneratedFileStream
     cmGeneratedFileStream out(dbfilename.c_str());
     out << "2.0";
@@ -297,9 +304,7 @@ int cmCPackDebGenerator::createDeb()
     }
 
   // control file
-  std::string ctlfilename;
-    ctlfilename = this->GetOption("GEN_WDIR");
-  ctlfilename += "/control";
+  std::string ctlfilename = strGenWDIR + "/control";
 
   // debian policy enforce lower case for package name
   // mandatory entries:
@@ -411,7 +416,39 @@ int cmCPackDebGenerator::createDeb()
     out << std::endl;
     }
 
-  const std::string strGenWDIR(this->GetOption("GEN_WDIR"));
+  const std::string shlibsfilename = strGenWDIR + "/shlibs";
+
+  const char* debian_pkg_shlibs = this->GetOption("GEN_CPACK_DEBIAN_PACKAGE_SHLIBS");
+  const bool gen_shibs = this->IsOn("CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS") && debian_pkg_shlibs && *debian_pkg_shlibs;
+  if( gen_shibs )
+    {
+    cmGeneratedFileStream out(shlibsfilename.c_str());
+    out << debian_pkg_shlibs;
+    out << std::endl;
+    }
+
+  const std::string postinst = strGenWDIR + "/postinst";
+  const std::string postrm = strGenWDIR + "/postrm";
+  if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"))
+    {
+    cmGeneratedFileStream out(postinst.c_str());
+     out <<
+       "#!/bin/sh\n\n"
+       "set -e\n\n"
+       "if [ \"$1\" = \"configure\" ]; then\n"
+       "\tldconfig\n"
+       "fi\n";
+    }
+  if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"))
+    {
+    cmGeneratedFileStream out(postrm.c_str());
+    out <<
+      "#!/bin/sh\n\n"
+      "set -e\n\n"
+      "if [ \"$1\" = \"remove\" ]; then\n"
+      "\tldconfig\n"
+      "fi\n";
+    }
 
   cmArchiveWrite::Compress tar_compression_type = cmArchiveWrite::CompressGZip;
   const char* debian_compression_type =
@@ -611,6 +648,54 @@ int cmCPackDebGenerator::createDeb()
         return 0;
       }
 
+    // adds generated shlibs file
+    if( gen_shibs )
+      {
+      if( !control_tar.Add(shlibsfilename, strGenWDIR.length(), ".") )
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"shlibs\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      }
+
+    // adds LDCONFIG related files
+    if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTINST"))
+      {
+      control_tar.SetPermissions(permission755);
+      if(!control_tar.Add(postinst, strGenWDIR.length(), "."))
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"postinst\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      control_tar.SetPermissions(permission644);
+      }
+
+    if(this->IsOn("GEN_CPACK_DEBIAN_GENERATE_POSTRM"))
+      {
+      control_tar.SetPermissions(permission755);
+      if(!control_tar.Add(postrm, strGenWDIR.length(), "."))
+        {
+          cmCPackLogger(cmCPackLog::LOG_ERROR,
+              "Error adding file to tar:" << std::endl
+              << "#top level directory: "
+                 << strGenWDIR << std::endl
+              << "#file: \"postinst\"" << std::endl
+              << "#error:" << control_tar.GetError() << std::endl);
+          return 0;
+        }
+      control_tar.SetPermissions(permission644);
+      }
+
     // for the other files, we use
     // -either the original permission on the files
     // -either a permission strictly defined by the Debian policies
@@ -668,11 +753,11 @@ int cmCPackDebGenerator::createDeb()
   arFiles.push_back(topLevelString + "data.tar" + compression_suffix);
   std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   outputFileName += "/";
-  outputFileName += this->GetOption("CPACK_OUTPUT_FILE_NAME");
+  outputFileName += this->GetOption("GEN_CPACK_OUTPUT_FILE_NAME");
   int res = ar_append(outputFileName.c_str(), arFiles);
   if ( res!=0 )
     {
-    std::string tmpFile = this->GetOption("CPACK_TEMPORARY_PACKAGE_FILE_NAME");
+    std::string tmpFile = this->GetOption("GEN_CPACK_TEMPORARY_PACKAGE_FILE_NAME");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
     ofs << "# Problem creating archive using: " << res << std::endl;

@@ -52,6 +52,7 @@
 #
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_ARCHITECTURE
 #
 #  The Debian package architecture
 #
@@ -331,6 +332,26 @@
 #  See http://www.debian.org/doc/debian-policy/ch-relationships.html#s-binarydeps
 #
 #
+# .. variable:: CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS
+#
+#  * Mandatory : NO
+#  * Default   : OFF
+#
+#  Allows to generate shlibs control file automatically. Compatibility is defined by
+#  CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY variable value
+#
+#
+# .. variable:: CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY
+#
+#  * Mandatory : NO
+#  * Default   : "="
+#
+#  Defines compatibility policy for auto-generated shlibs control file.
+#  Possible values: "=", ">="
+#
+#  See https://www.debian.org/doc/debian-policy/ch-sharedlibs.html#s-sharedlibs-shlibdeps
+#
+#
 # .. variable:: CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
 #               CPACK_DEBIAN_<COMPONENT>_PACKAGE_CONTROL_EXTRA
 #
@@ -399,6 +420,10 @@
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
 # Copyright 2007-2009 Mathieu Malaterre <mathieu.malaterre@gmail.com>
+# Copyright 2014-2016 Alexander Smorkalov <alexander.smorkalov@itseez.com>
+# Copyright 2014-2016 Roman Donchenko <roman.donchenko@itseez.com>
+# Copyright 2014-2016 Roman Kharitonov <roman.kharitonov@itseez.com>
+# Copyright 2014-2016 Ilya Lavrenov <ilya.lavrenov@itseez.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -422,6 +447,38 @@ endif()
 if(NOT UNIX)
   message(FATAL_ERROR "CPackDeb.cmake may only be used under UNIX.")
 endif()
+
+function(get_component_package_name var component)
+  string(TOUPPER "${component}" component_upcase)
+  if(CPACK_DEBIAN_${component_upcase}_PACKAGE_NAME)
+    string(TOLOWER "${CPACK_DEBIAN_${component_upcase}_PACKAGE_NAME}" package_name)
+  else()
+    string(TOLOWER "${CPACK_DEBIAN_PACKAGE_NAME}-${component}" package_name)
+  endif()
+
+  set("${var}" "${package_name}" PARENT_SCOPE)
+endfunction()
+
+#extract library name and version for given shared object
+function(extract_so_info shared_object libname version)
+  if(READELF_EXECUTABLE)
+    execute_process(COMMAND "${READELF_EXECUTABLE}" -d "${shared_object}"
+      WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+      RESULT_VARIABLE result
+      OUTPUT_VARIABLE output
+      ERROR_QUIET
+      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(result EQUAL 0)
+      string(REGEX MATCH "\\(SONAME\\) [^\n]*: \\[([^\n]+)\\.so\\.([^\n]*)\\]\n" soname "${output}")
+      set(${libname} "${CMAKE_MATCH_1}" PARENT_SCOPE)
+      set(${version} "${CMAKE_MATCH_2}" PARENT_SCOPE)
+    else()
+      message(WARNING "Error running readelf for \"${shared_object}\"")
+    endif()
+  else()
+    message(FATAL_ERROR "Readelf utility is not available.")
+  endif()
+endfunction()
 
 function(cpack_deb_prepare_package_vars)
   # CPACK_DEBIAN_PACKAGE_SHLIBDEPS
@@ -489,9 +546,14 @@ function(cpack_deb_prepare_package_vars)
       # Extract only file name infront of ":"
       foreach(_FILE ${CPACK_DEB_INSTALL_FILES})
         if( ${_FILE} MATCHES "ELF.*dynamically linked")
-           string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
-           list(APPEND CPACK_DEB_BINARY_FILES "${CMAKE_MATCH_1}")
-           set(CONTAINS_EXECUTABLE_FILES_ TRUE)
+          string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
+          list(APPEND CPACK_DEB_BINARY_FILES "${CMAKE_MATCH_1}")
+          set(CONTAINS_EXECUTABLE_FILES_ TRUE)
+        endif()
+        if( ${_FILE} MATCHES "ELF.*shared object")
+          string(REGEX MATCH "(^.*):" _FILE_NAME ${_FILE})
+          list(APPEND CPACK_DEB_SHARED_OBJECT_FILES ${CMAKE_MATCH_1})
+          set(CONTAINS_EXECUTABLE_FILES_ TRUE)
         endif()
       endforeach()
 
@@ -586,7 +648,9 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # Architecture: (mandatory)
-  if(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
+  if(CPACK_DEB_PACKAGE_COMPONENT AND CPACK_DEBIAN_${_local_component_name}_PACKAGE_ARCHITECTURE)
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE ${CPACK_DEBIAN_${_local_component_name}_PACKAGE_ARCHITECTURE})
+  elseif(NOT CPACK_DEBIAN_PACKAGE_ARCHITECTURE)
     # There is no such thing as i686 architecture on debian, you should use i386 instead
     # $ dpkg --print-architecture
     find_program(DPKG_CMD dpkg)
@@ -630,6 +694,22 @@ function(cpack_deb_prepare_package_vars)
         endif()
       endif()
     endforeach()
+    set(COMPONENT_DEPENDS "")
+    foreach (_PACK ${CPACK_COMPONENT_${_local_component_name}_DEPENDS})
+      get_component_package_name(_PACK_NAME "${_PACK}")
+      if(COMPONENT_DEPENDS)
+        set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION}), ${COMPONENT_DEPENDS}")
+      else()
+        set(COMPONENT_DEPENDS "${_PACK_NAME} (= ${CPACK_DEBIAN_PACKAGE_VERSION})")
+      endif()
+    endforeach()
+    if(COMPONENT_DEPENDS)
+      if(CPACK_DEBIAN_PACKAGE_DEPENDS)
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+      else()
+        set(CPACK_DEBIAN_PACKAGE_DEPENDS "${COMPONENT_DEPENDS}")
+      endif()
+    endif()
   endif()
 
   # at this point, the CPACK_DEBIAN_PACKAGE_DEPENDS is properly set
@@ -637,7 +717,7 @@ function(cpack_deb_prepare_package_vars)
   # Append automatically discovered dependencies .
   if(NOT "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}" STREQUAL "")
     if (CPACK_DEBIAN_PACKAGE_DEPENDS)
-      set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+      set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
     else ()
       set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
     endif ()
@@ -718,12 +798,66 @@ function(cpack_deb_prepare_package_vars)
         set(CPACK_DEBIAN_${VAR_NAME_} "${CPACK_DEBIAN_${_local_component_name}_${VAR_NAME_}}")
       endif()
     endforeach()
+    get_component_package_name(CPACK_DEBIAN_PACKAGE_NAME ${_local_component_name})
+  endif()
 
-    if(CPACK_DEBIAN_${_local_component_name}_PACKAGE_NAME)
-      string(TOLOWER "${CPACK_DEBIAN_${_local_component_name}_PACKAGE_NAME}" CPACK_DEBIAN_PACKAGE_NAME)
-    else()
-      string(TOLOWER "${CPACK_DEBIAN_PACKAGE_NAME}-${CPACK_DEB_PACKAGE_COMPONENT}" CPACK_DEBIAN_PACKAGE_NAME)
+  set(CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "")
+
+  if (NOT CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY)
+    set(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY "=")
+  endif()
+
+  find_program(READELF_EXECUTABLE NAMES readelf)
+
+  if(CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS AND READELF_EXECUTABLE)
+    foreach(_FILE ${CPACK_DEB_SHARED_OBJECT_FILES})
+      extract_so_info(${_FILE} libname soversion)
+      if(libname AND soversion)
+        list(APPEND CPACK_DEBIAN_PACKAGE_SHLIBS_LIST
+             "${libname} ${soversion} ${CPACK_DEBIAN_PACKAGE_NAME} (${CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS_POLICY} ${CPACK_PACKAGE_VERSION})")
+      endif()
+    endforeach()
+    if (CPACK_DEBIAN_PACKAGE_SHLIBS_LIST)
+      string(REPLACE ";" "\n" CPACK_DEBIAN_PACKAGE_SHLIBS_LIST "${CPACK_DEBIAN_PACKAGE_SHLIBS_LIST}")
     endif()
+  else()
+    message(FATAL_ERROR "Readelf utility is not available. CPACK_DEBIAN_PACKAGE_GENERATE_SHLIBS option is not available.")
+  endif()
+
+  # Patch package file name to be in corrent form
+  if(CPACK_DEB_PACKAGE_COMPONENT)
+    set(CPACK_OUTPUT_FILE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+    set(CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_OUTPUT_FILE_NAME}")
+
+    get_filename_component(BINARY_DIR "${CPACK_OUTPUT_FILE_PATH}" DIRECTORY)
+    set(CPACK_OUTPUT_FILE_PATH "${BINARY_DIR}/${CPACK_OUTPUT_FILE_NAME}")
+  endif()
+
+  # add ldconfig call in default postrm and postint
+  set(CPACK_ADD_LDCONFIG_CALL 0)
+  foreach(_FILE ${CPACK_DEB_SHARED_OBJECT_FILES})
+    get_filename_component(_DIR ${_FILE} DIRECTORY)
+    # all files in CPACK_DEB_SHARED_OBJECT_FILES have dot at the beginning
+    if(_DIR STREQUAL "./lib" OR _DIR STREQUAL "./usr/lib")
+      set(CPACK_ADD_LDCONFIG_CALL 1)
+    endif()
+  endforeach()
+
+  if(CPACK_ADD_LDCONFIG_CALL)
+    set(CPACK_DEBIAN_GENERATE_POSTINST 1)
+    set(CPACK_DEBIAN_GENERATE_POSTRM 1)
+    foreach(f ${PACKAGE_CONTROL_EXTRA})
+      get_filename_component(n "${f}" NAME)
+      if("${n}" STREQUAL "postinst")
+        set(CPACK_DEBIAN_GENERATE_POSTINST 0)
+      endif()
+      if("${n}" STREQUAL "postrm")
+        set(CPACK_DEBIAN_GENERATE_POSTRM 0)
+      endif()
+    endforeach()
+  else()
+    set(CPACK_DEBIAN_GENERATE_POSTINST 0)
+    set(CPACK_DEBIAN_GENERATE_POSTRM 0)
   endif()
 
   # Print out some debug information if we were asked for that
@@ -755,11 +889,13 @@ function(cpack_deb_prepare_package_vars)
   #endif()
 
   # move variables to parent scope so that they may be used to create debian package
+  set(GEN_CPACK_OUTPUT_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}" PARENT_SCOPE)
+  set(GEN_CPACK_TEMPORARY_PACKAGE_FILE_NAME "${CPACK_TEMPORARY_PACKAGE_FILE_NAME}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_NAME "${CPACK_DEBIAN_PACKAGE_NAME}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_VERSION "${CPACK_DEBIAN_PACKAGE_VERSION}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_SECTION "${CPACK_DEBIAN_PACKAGE_SECTION}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_PRIORITY "${CPACK_DEBIAN_PACKAGE_PRIORITY}" PARENT_SCOPE)
-  set(GEN_CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_DEBIAN_PACKAGE_MAINTAINER}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_DESCRIPTION "${CPACK_DEBIAN_PACKAGE_DESCRIPTION}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}" PARENT_SCOPE)
@@ -773,11 +909,14 @@ function(cpack_deb_prepare_package_vars)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONFLICTS "${CPACK_DEBIAN_PACKAGE_CONFLICTS}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_PROVIDES "${CPACK_DEBIAN_PACKAGE_PROVIDES}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_REPLACES "${CPACK_DEBIAN_PACKAGE_REPLACES}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_PACKAGE_SHLIBS "${CPACK_DEBIAN_PACKAGE_SHLIBS_LIST}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION
       "${CPACK_DEBIAN_PACKAGE_CONTROL_STRICT_PERMISSION}" PARENT_SCOPE)
   set(GEN_CPACK_DEBIAN_PACKAGE_SOURCE
      "${CPACK_DEBIAN_PACKAGE_SOURCE}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_GENERATE_POSTINST "${CPACK_DEBIAN_GENERATE_POSTINST}" PARENT_SCOPE)
+  set(GEN_CPACK_DEBIAN_GENERATE_POSTRM "${CPACK_DEBIAN_GENERATE_POSTRM}" PARENT_SCOPE)
   set(GEN_WDIR "${WDIR}" PARENT_SCOPE)
 endfunction()
 
