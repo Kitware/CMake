@@ -5,10 +5,7 @@
 #include <QWidget>
 #include <memory>
 
-namespace Ui
-{
-class UicOnly;
-}
+#include "ui_uiconly.h"
 
 class UicOnly : public QWidget
 {
