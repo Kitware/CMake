@@ -692,7 +692,12 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   std::set<cmStdString> skipped;
   std::vector<std::string> skipVec;
   cmSystemTools::ExpandListArgument(this->SkipUic.c_str(), skipVec);
-  skipped.insert(skipVec.begin(), skipVec.end());
+
+  for (std::vector<std::string>::const_iterator li = skipVec.begin();
+       li != skipVec.end(); ++li)
+    {
+    skipped.insert(*li);
+    }
 
   makefile->AddDefinition("_skip_uic",
           cmLocalGenerator::EscapeForCMake(this->SkipUic.c_str()).c_str());
