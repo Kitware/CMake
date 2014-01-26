@@ -129,7 +129,7 @@ A loop must be used instead:
 std::set::insert
 ----------------
 
-Use of ``std::set::insert`` is not allowed with a source set:
+Use of ``std::set::insert`` is not allowed with any source container:
 
 .. code-block:: c++
 
@@ -140,12 +140,14 @@ A loop must be used instead:
 
 .. code-block:: c++
 
-  std::set<cmTarget*>::const_iterator it = targets.begin();
-  const std::set<cmTarget*>::const_iterator end = targets.end();
+  ConstIterator it = targets.begin();
+  const ConstIterator end = targets.end();
   for ( ; it != end; ++it)
     {
     theSet.insert(*it);
     }
+
+.. MSVC6, SunCC 5.9
 
 Template Parameter Defaults
 ---------------------------
