@@ -1,28 +1,42 @@
 project
 -------
 
-Set a name for the entire project.
+Set a name, version, and enable languages for the entire project.
 
-::
+.. code-block:: cmake
 
-  project(<projectname> [VERSION major[.minor[.patch[.tweak]]]] [languageName1 languageName2 ... ] )
+ project(<PROJECT-NAME>
+         [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
+         [<language-name>...])
 
-Sets the name of the project, the name is also stored in the PROJECT_NAME
-variable.  Additionally this sets the cache variables
-<projectName>_BINARY_DIR and <projectName>_SOURCE_DIR to the
-respective values, as well as the PROJECT_BINARY_DIR and PROJECT_SOURCE_DIR
-variables.
+Sets the name of the project and stores the name in the
+:variable:`PROJECT_NAME` variable.  Additionally this sets variables
 
-If a version is specified, the :command:`project()` command sets the variables
-PROJECT_VERSION and <projectName>_VERSION to this version.
-Additionally the up to 4 components of the version string are stored in the
-PROJECT_VERSION_MAJOR, PROJECT_VERSION_MINOR, PROJECT_VERSION_PATCH and
-PROJECT_VERSION_TWEAK, as well as the <projectName>_VERSION_MAJOR,
-<projectName>_VERSION_MINOR, <projectName>_VERSION_PATCH> and
-<projectName>_VERSION_TWEAK variables.
-If VERSION is not used, the PROJECT_VERSION variables will be unset if they
-have been set by a :command:`project(VERSION)` call before. This can be disabled
-by setting the variable CMAKE_PROJECT_VERSION_SET_BY_PROJECT_COMMAND to FALSE.
+* :variable:`PROJECT_SOURCE_DIR`,
+  :variable:`<PROJECT-NAME>_SOURCE_DIR`
+* :variable:`PROJECT_BINARY_DIR`,
+  :variable:`<PROJECT-NAME>_BINARY_DIR`
+
+If ``VERSION`` is specified, the components must be non-negative integers.
+The :command:`project()` command stores the version number and its components
+in variables
+
+* :variable:`PROJECT_VERSION`,
+  :variable:`<PROJECT-NAME>_VERSION`
+* :variable:`PROJECT_VERSION_MAJOR`,
+  :variable:`<PROJECT-NAME>_VERSION_MAJOR`
+* :variable:`PROJECT_VERSION_MINOR`,
+  :variable:`<PROJECT-NAME>_VERSION_MINOR`
+* :variable:`PROJECT_VERSION_PATCH`,
+  :variable:`<PROJECT-NAME>_VERSION_PATCH`
+* :variable:`PROJECT_VERSION_TWEAK`,
+  :variable:`<PROJECT-NAME>_VERSION_TWEAK`
+
+If ``VERSION`` is not used, the :variable:`PROJECT_VERSION` variables will be
+unset if they have been set by a :command:`project(VERSION)` call before.
+(This can be disabled by setting the variable
+``CMAKE_PROJECT_VERSION_SET_BY_PROJECT_COMMAND`` to ``FALSE`` before
+invoking the command.)
 
 Optionally you can specify which languages your project supports.
 Example languages are CXX (i.e.  C++), C, Fortran, etc.  By default C
