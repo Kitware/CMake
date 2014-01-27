@@ -2983,6 +2983,8 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         << "  for file: [" << file << "]" << std::endl
         << "    expected hash: [" << expectedHash << "]" << std::endl
         << "      actual hash: [" << actualHash << "]" << std::endl
+        << "           status: [" << (int)res << ";\""
+          << ::curl_easy_strerror(res) << "\"]" << std::endl
         ;
       this->SetError(oss.str().c_str());
       return false;
