@@ -708,9 +708,9 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     {
     cmSourceFile* sf = *s;
     std::string const& source = sf->GetFullPath();
-    cmSourceGroup& sourceGroup =
+    cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
-    groupsUsed.insert(&sourceGroup);
+    groupsUsed.insert(sourceGroup);
     }
 
   this->AddMissingSourceGroups(groupsUsed, sourceGroups);
@@ -901,9 +901,9 @@ WriteGroupSources(const char* name,
     {
     cmSourceFile* sf = s->SourceFile;
     std::string const& source = sf->GetFullPath();
-    cmSourceGroup& sourceGroup =
+    cmSourceGroup* sourceGroup =
       this->Makefile->FindSourceGroup(source.c_str(), sourceGroups);
-    const char* filter = sourceGroup.GetFullName();
+    const char* filter = sourceGroup->GetFullName();
     this->WriteString("<", 2);
     std::string path = this->ConvertPath(source, s->RelativePath);
     this->ConvertToWindowsSlash(path);

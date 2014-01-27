@@ -2960,10 +2960,10 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         cmSourceFile* sf = *s;
         // Add the file to the list of sources.
         std::string const& source = sf->GetFullPath();
-        cmSourceGroup& sourceGroup =
+        cmSourceGroup* sourceGroup =
           mf->FindSourceGroup(source.c_str(), sourceGroups);
         cmXCodeObject* pbxgroup =
-          this->CreateOrGetPBXGroup(cmtarget, &sourceGroup);
+          this->CreateOrGetPBXGroup(cmtarget, sourceGroup);
         cmStdString key = GetGroupMapKey(cmtarget, sf);
         this->GroupMap[key] = pbxgroup;
         }
@@ -2975,10 +2975,10 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
             oi = objs.begin(); oi != objs.end(); ++oi)
         {
         std::string const& source = *oi;
-        cmSourceGroup& sourceGroup =
+        cmSourceGroup* sourceGroup =
           mf->FindSourceGroup(source.c_str(), sourceGroups);
         cmXCodeObject* pbxgroup =
-          this->CreateOrGetPBXGroup(cmtarget, &sourceGroup);
+          this->CreateOrGetPBXGroup(cmtarget, sourceGroup);
         cmStdString key = GetGroupMapKeyFromPath(cmtarget, source);
         this->GroupMap[key] = pbxgroup;
         }

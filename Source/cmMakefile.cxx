@@ -169,17 +169,17 @@ void cmMakefile::Initialize()
   this->CheckCMP0000 = false;
 }
 
-unsigned int cmMakefile::GetCacheMajorVersion()
+unsigned int cmMakefile::GetCacheMajorVersion() const
 {
   return this->GetCacheManager()->GetCacheMajorVersion();
 }
 
-unsigned int cmMakefile::GetCacheMinorVersion()
+unsigned int cmMakefile::GetCacheMinorVersion() const
 {
   return this->GetCacheManager()->GetCacheMinorVersion();
 }
 
-bool cmMakefile::NeedCacheCompatibility(int major, int minor)
+bool cmMakefile::NeedCacheCompatibility(int major, int minor) const
 {
   return this->GetCacheManager()->NeedCacheCompatibility(major, minor);
 }
@@ -260,7 +260,7 @@ void cmMakefile
 
 
 // call print on all the classes in the makefile
-void cmMakefile::Print()
+void cmMakefile::Print() const
 {
   // print the class lists
   std::cout << "classes:\n";
@@ -359,7 +359,7 @@ bool cmMakefile::GetBacktrace(cmListFileBacktrace& backtrace) const
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff)
+void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   cmOStringStream msg;
   msg << lff.FilePath << "(" << lff.Line << "):  ";
@@ -734,7 +734,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 }
 
 //----------------------------------------------------------------------------
-void cmMakefile::EnforceDirectoryLevelRules()
+void cmMakefile::EnforceDirectoryLevelRules() const
 {
   // Diagnose a violation of CMP0000 if necessary.
   if(this->CheckCMP0000)
@@ -884,7 +884,7 @@ cmMakefile::AddCustomCommandToTarget(const char* target,
                                      cmTarget::CustomCommandType type,
                                      const char* comment,
                                      const char* workingDir,
-                                     bool escapeOldStyle)
+                                     bool escapeOldStyle) const
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
@@ -2058,7 +2058,8 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
   return &it->second;
 }
 
-cmSourceFile *cmMakefile::LinearGetSourceFileWithOutput(const char *cname)
+cmSourceFile*
+cmMakefile::LinearGetSourceFileWithOutput(const char *cname) const
 {
   std::string name = cname;
   std::string out;
@@ -2094,7 +2095,7 @@ cmSourceFile *cmMakefile::LinearGetSourceFileWithOutput(const char *cname)
   return 0;
 }
 
-cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
+cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname) const
 {
   std::string name = cname;
 
@@ -2105,7 +2106,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
     return LinearGetSourceFileWithOutput(cname);
     }
   // Otherwise we use an efficient lookup map.
-  OutputToSourceMap::iterator o = this->OutputToSource.find(name);
+  OutputToSourceMap::const_iterator o = this->OutputToSource.find(name);
   if (o != this->OutputToSource.end())
     {
     return (*o).second;
@@ -2114,19 +2115,20 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname)
 }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-cmSourceGroup* cmMakefile::GetSourceGroup(const std::vector<std::string>&name)
+cmSourceGroup*
+cmMakefile::GetSourceGroup(const std::vector<std::string>&name) const
 {
   cmSourceGroup* sg = 0;
 
   // first look for source group starting with the same as the one we wants
-  for (std::vector<cmSourceGroup>::iterator sgIt = this->SourceGroups.begin();
-       sgIt != this->SourceGroups.end(); ++sgIt)
-
+  for (std::vector<cmSourceGroup>::const_iterator
+      sgIt = this->SourceGroups.begin();
+      sgIt != this->SourceGroups.end(); ++sgIt)
     {
     std::string sgName = sgIt->GetName();
     if(sgName == name[0])
       {
-      sg = &(*sgIt);
+      sg = const_cast<cmSourceGroup*>(&(*sgIt));
       break;
       }
     }
@@ -2136,7 +2138,7 @@ cmSourceGroup* cmMakefile::GetSourceGroup(const std::vector<std::string>&name)
     // iterate through its children to find match source group
     for(unsigned int i=1; i<name.size(); ++i)
       {
-      sg = sg->lookupChild(name[i].c_str());
+      sg = sg->LookupChild(name[i].c_str());
       if(sg == 0)
         {
         break;
@@ -2207,7 +2209,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   for(++i; i<=lastElement; ++i)
     {
     sg->AddChild(cmSourceGroup(name[i].c_str(), 0, sg->GetFullName()));
-    sg = sg->lookupChild(name[i].c_str());
+    sg = sg->LookupChild(name[i].c_str());
     fullname = sg->GetFullName();
     if(strlen(fullname))
       {
@@ -2375,7 +2377,7 @@ const char* cmMakefile::GetSONameFlag(const char* language) const
   return GetDefinition(name.c_str());
 }
 
-bool cmMakefile::CanIWriteThisFile(const char* fileName)
+bool cmMakefile::CanIWriteThisFile(const char* fileName) const
 {
   if ( !this->IsOn("CMAKE_DISABLE_SOURCE_CHANGES") )
     {
@@ -2517,7 +2519,7 @@ std::vector<std::string> cmMakefile
 }
 
 
-const char *cmMakefile::ExpandVariablesInString(std::string& source)
+const char *cmMakefile::ExpandVariablesInString(std::string& source) const
 {
   return this->ExpandVariablesInString(source, false, false);
 }
@@ -2529,7 +2531,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
                                                 const char* filename,
                                                 long line,
                                                 bool removeEmpty,
-                                                bool replaceAt)
+                                                bool replaceAt) const
 {
   if ( source.empty() || source.find_first_of("$@\\") == source.npos)
     {
@@ -2773,9 +2775,9 @@ cmMakefile::GetConfigurations(std::vector<std::string>& configs,
  * non-inherited SOURCE_GROUP commands will have precedence over
  * inherited ones.
  */
-cmSourceGroup&
+cmSourceGroup*
 cmMakefile::FindSourceGroup(const char* source,
-                            std::vector<cmSourceGroup> &groups)
+                            std::vector<cmSourceGroup> &groups) const
 {
   // First search for a group that lists the file explicitly.
   for(std::vector<cmSourceGroup>::reverse_iterator sg = groups.rbegin();
@@ -2784,7 +2786,7 @@ cmMakefile::FindSourceGroup(const char* source,
     cmSourceGroup *result = sg->MatchChildrenFiles(source);
     if(result)
       {
-      return *result;
+      return result;
       }
     }
 
@@ -2795,13 +2797,13 @@ cmMakefile::FindSourceGroup(const char* source,
     cmSourceGroup *result = sg->MatchChildrenRegex(source);
     if(result)
       {
-      return *result;
+      return result;
       }
     }
 
 
   // Shouldn't get here, but just in case, return the default group.
-  return groups.front();
+  return &groups.front();
 }
 #endif
 
@@ -2864,7 +2866,7 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
 
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
-  std::vector<std::string>& outArgs)
+  std::vector<std::string>& outArgs) const
 {
   std::vector<cmListFileArgument>::const_iterator i;
   std::string value;
@@ -3008,7 +3010,7 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmMakefile::GetSource(const char* sourceName)
+cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 {
   cmSourceFileLocation sfl(this, sourceName);
   for(std::vector<cmSourceFile*>::const_iterator
@@ -3056,7 +3058,7 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang,
 
 void cmMakefile::ExpandSourceListArguments(
   std::vector<std::string> const& arguments,
-  std::vector<std::string>& newargs, unsigned int /* start */)
+  std::vector<std::string>& newargs, unsigned int /* start */) const
 {
   // now expand the args
   unsigned int i;
@@ -3235,9 +3237,9 @@ void cmMakefile::AddMacro(const char* name, const char* signature)
   this->MacrosMap[name] = signature;
 }
 
-void cmMakefile::GetListOfMacros(std::string& macros)
+void cmMakefile::GetListOfMacros(std::string& macros) const
 {
-  StringStringMap::iterator it;
+  StringStringMap::const_iterator it;
   macros = "";
   int cc = 0;
   for ( it = this->MacrosMap.begin(); it != this->MacrosMap.end(); ++it )
@@ -3256,7 +3258,7 @@ cmCacheManager *cmMakefile::GetCacheManager() const
   return this->GetCMakeInstance()->GetCacheManager();
 }
 
-void cmMakefile::DisplayStatus(const char* message, float s)
+void cmMakefile::DisplayStatus(const char* message, float s) const
 {
   cmake* cm = this->GetLocalGenerator()->GetGlobalGenerator()
                                                           ->GetCMakeInstance();
@@ -3269,7 +3271,7 @@ void cmMakefile::DisplayStatus(const char* message, float s)
   cm->UpdateProgress(message, s);
 }
 
-std::string cmMakefile::GetModulesFile(const char* filename)
+std::string cmMakefile::GetModulesFile(const char* filename) const
 {
   std::string result;
 
@@ -3369,7 +3371,7 @@ std::string cmMakefile::GetModulesFile(const char* filename)
 
 void cmMakefile::ConfigureString(const std::string& input,
                                  std::string& output, bool atOnly,
-                                 bool escapeQuotes)
+                                 bool escapeQuotes) const
 {
   // Split input to handle one line at a time.
   std::string::const_iterator lineStart = input.begin();
@@ -3673,7 +3675,7 @@ void cmMakefile::AppendProperty(const char* prop, const char* value,
   this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
 }
 
-const char *cmMakefile::GetPropertyOrDefinition(const char* prop)
+const char *cmMakefile::GetPropertyOrDefinition(const char* prop) const
 {
   const char *ret = this->GetProperty(prop, cmProperty::DIRECTORY);
   if (!ret)
@@ -3683,13 +3685,13 @@ const char *cmMakefile::GetPropertyOrDefinition(const char* prop)
   return ret;
 }
 
-const char *cmMakefile::GetProperty(const char* prop)
+const char *cmMakefile::GetProperty(const char* prop) const
 {
   return this->GetProperty(prop, cmProperty::DIRECTORY);
 }
 
 const char *cmMakefile::GetProperty(const char* prop,
-                                    cmProperty::ScopeType scope)
+                                    cmProperty::ScopeType scope) const
 {
   if(!prop)
     {
@@ -3713,8 +3715,9 @@ const char *cmMakefile::GetProperty(const char* prop,
     }
   else if (!strcmp("LISTFILE_STACK",prop))
     {
-    for (std::deque<cmStdString>::iterator i = this->ListFileStack.begin();
-         i != this->ListFileStack.end(); ++i)
+    for (std::deque<cmStdString>::const_iterator
+        i = this->ListFileStack.begin();
+        i != this->ListFileStack.end(); ++i)
       {
       if (i != this->ListFileStack.begin())
         {
@@ -3828,7 +3831,7 @@ const char *cmMakefile::GetProperty(const char* prop,
   return retVal;
 }
 
-bool cmMakefile::GetPropertyAsBool(const char* prop)
+bool cmMakefile::GetPropertyAsBool(const char* prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
@@ -3937,13 +3940,13 @@ void cmMakefile::AddCMakeDependFilesFromUser()
     }
 }
 
-std::string cmMakefile::GetListFileStack()
+std::string cmMakefile::GetListFileStack() const
 {
   cmOStringStream tmp;
   size_t depth = this->ListFileStack.size();
   if (depth > 0)
     {
-    std::deque<cmStdString>::iterator it = this->ListFileStack.end();
+    std::deque<cmStdString>::const_iterator it = this->ListFileStack.end();
     do
       {
       if (depth != this->ListFileStack.size())
@@ -4089,7 +4092,7 @@ cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
 
 //----------------------------------------------------------------------------
 cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
-                                      bool excludeAliases)
+                                      bool excludeAliases) const
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
@@ -4113,7 +4116,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::IsAlias(const std::string& name)
+bool cmMakefile::IsAlias(const std::string& name) const
 {
   if (this->AliasTargets.find(name) != this->AliasTargets.end())
     return true;
@@ -4122,7 +4125,8 @@ bool cmMakefile::IsAlias(const std::string& name)
 }
 
 //----------------------------------------------------------------------------
-cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
+cmGeneratorTarget*
+cmMakefile::FindGeneratorTargetToUse(const char* name) const
 {
   if (cmTarget *t = this->FindTargetToUse(name))
     {
@@ -4133,7 +4137,7 @@ cmGeneratorTarget* cmMakefile::FindGeneratorTargetToUse(const char* name)
 
 //----------------------------------------------------------------------------
 bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
-                                   bool isCustom)
+                                   bool isCustom) const
 {
   if(this->IsAlias(name))
     {
@@ -4224,7 +4228,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::EnforceUniqueDir(const char* srcPath, const char* binPath)
+bool cmMakefile::EnforceUniqueDir(const char* srcPath,
+                                  const char* binPath) const
 {
   // Make sure the binary directory is unique.
   cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
@@ -4285,7 +4290,7 @@ std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
 
 //----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
-cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id)
+cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 {
   // Get the current setting of the policy.
   cmPolicies::PolicyStatus cur = this->GetPolicyStatusInternal(id);
@@ -4313,10 +4318,10 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id)
 
 //----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
-cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id)
+cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
 {
   // Is the policy set in our stack?
-  for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
+  for(PolicyStackType::const_reverse_iterator psi = this->PolicyStack.rbegin();
       psi != this->PolicyStack.rend(); ++psi)
     {
     PolicyStackEntry::const_iterator pse = psi->find(id);
@@ -4466,7 +4471,7 @@ bool cmMakefile::SetPolicyVersion(const char *version)
     ApplyPolicyVersion(this,version);
 }
 
-cmPolicies *cmMakefile::GetPolicies()
+cmPolicies *cmMakefile::GetPolicies() const
 {
   if (!this->GetCMakeInstance())
   {

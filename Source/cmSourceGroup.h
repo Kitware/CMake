@@ -56,7 +56,7 @@ public:
   /**
    * Looks up child and returns it
    */
-  cmSourceGroup *lookupChild(const char *name);
+  cmSourceGroup *LookupChild(const char *name) const;
 
   /**
    * Get the name of this group.
