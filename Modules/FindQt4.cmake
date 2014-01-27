@@ -1191,7 +1191,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
       PATHS ${QT_BINARY_DIR}
       NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH
       )
-    if (${VAR} AND NOT TARGET NAME)
+    if (${VAR} AND NOT TARGET ${NAME})
       add_executable(${NAME} IMPORTED)
       set_property(TARGET ${NAME} PROPERTY IMPORTED_LOCATION ${${VAR}})
     endif()
