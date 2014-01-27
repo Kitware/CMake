@@ -379,7 +379,11 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
   std::map<std::string, std::string> configDefines;
   std::map<std::string, std::string> configUicOptions;
 
-  this->SetupSourceFiles(target);
+  if (target->GetPropertyAsBool("AUTOMOC")
+      || target->GetPropertyAsBool("AUTOUIC"))
+    {
+    this->SetupSourceFiles(target);
+    }
   makefile->AddDefinition("_cpp_files",
           cmLocalGenerator::EscapeForCMake(this->Sources.c_str()).c_str());
   if (target->GetPropertyAsBool("AUTOMOC"))
