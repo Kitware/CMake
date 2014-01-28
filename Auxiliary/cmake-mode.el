@@ -79,7 +79,7 @@ set the path with these commands:
   (if (save-excursion
         (beginning-of-line)
         (let ((parse-end (point)))
-          (beginning-of-buffer)
+          (goto-char (point-min))
           (nth 3 (parse-partial-sexp (point) parse-end))
           )
         )
