@@ -186,7 +186,6 @@ the indentation.  Otherwise it retains the same position on the line"
 (defun unscreamify-cmake-buffer ()
   "Convert all CMake commands to lowercase in buffer."
   (interactive)
-  (setq save-point (point))
   (goto-char (point-min))
   (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
     (replace-match
@@ -195,7 +194,6 @@ the indentation.  Otherwise it retains the same position on the line"
       (downcase (match-string 2))
       (match-string 3))
      t))
-  (goto-char save-point)
   )
 
 ;------------------------------------------------------------------------------
