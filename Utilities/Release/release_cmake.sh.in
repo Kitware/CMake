@@ -15,6 +15,13 @@ check_exit_value()
    fi
 }
 
+CMAKE_DOC_TARBALL=""
+if [ ! -z "@CMAKE_DOC_TARBALL_NAME@" ] ; then
+    CMAKE_DOC_TARBALL=@CMAKE_RELEASE_DIRECTORY@/@CMAKE_DOC_TARBALL_NAME@
+    mv "$HOME/@CMAKE_DOC_TARBALL_NAME@" "$CMAKE_DOC_TARBALL"
+    check_exit_value $? "mv doc tarball" || exit 1
+fi
+
 if [ ! -z "@CC@" ]; then
     export CC="@CC@"
     check_exit_value $? "set CC compiler env var" || exit 1
@@ -74,6 +81,11 @@ check_exit_value $? "Create initial cache" || exit 1
 if [ ! -z "@USER_OVERRIDE@" ]; then
   echo "@USER_OVERRIDE@" >  @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build/user.txt
   echo "CMAKE_USER_MAKE_RULES_OVERRIDE:FILEPATH=@CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build/user.txt" >> @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build/CMakeCache.txt
+fi
+
+# Point build at pre-built documentation tarball, if any.
+if [ ! -z "$CMAKE_DOC_TARBALL" ]; then
+  echo "CMAKE_DOC_TARBALL:FILEPATH=$CMAKE_DOC_TARBALL" >> @CMAKE_RELEASE_DIRECTORY@/@CMAKE_CREATE_VERSION@-build/CMakeCache.txt
 fi
 
 echo "Checkout the source for @CMAKE_CREATE_VERSION@"
