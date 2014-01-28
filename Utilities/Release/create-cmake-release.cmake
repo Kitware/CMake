@@ -28,8 +28,8 @@ function(write_batch_shell_script filename)
     math(EXPR y "160*(${i}%4)")
     file(APPEND ${filename}
     "
-${CMAKE_COMMAND} -DCMAKE_CREATE_VERSION=${CMAKE_CREATE_VERSION} -P ${CMAKE_ROOT}/Utilities/Release/${f} < /dev/null >& ${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_CREATE_VERSION}.log &
-xterm -geometry 64x6+${x}+${y} -sb -sl 2000 -T ${f}-${CMAKE_CREATE_VERSION}.log -e tail -f  ${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_CREATE_VERSION}.log&
+\"${CMAKE_COMMAND}\" -DCMAKE_CREATE_VERSION=${CMAKE_CREATE_VERSION} -P \"${CMAKE_ROOT}/Utilities/Release/${f}\" < /dev/null >& \"${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_CREATE_VERSION}.log\" &
+xterm -geometry 64x6+${x}+${y} -sb -sl 2000 -T ${f}-${CMAKE_CREATE_VERSION}.log -e tail -f \"${CMAKE_CURRENT_SOURCE_DIR}/logs/${f}-${CMAKE_CREATE_VERSION}.log\" &
 ")
     math(EXPR i "${i}+1")
   endforeach()
