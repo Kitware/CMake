@@ -50,7 +50,7 @@ function(write_docs_shell_script filename)
 
 name=${name} &&
 inst=\"\$PWD/\$name\"
-git archive --prefix=\${name}-src/ ${CMAKE_CREATE_VERSION} | tar x &&
+(GIT_WORK_TREE=x git archive --prefix=\${name}-src/ ${CMAKE_CREATE_VERSION}) | tar x &&
 rm -rf \${name}-build &&
 mkdir \${name}-build &&
 cd \${name}-build &&
