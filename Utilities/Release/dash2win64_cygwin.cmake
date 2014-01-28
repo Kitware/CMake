@@ -14,7 +14,7 @@ DART_TESTING_TIMEOUT:STRING=7200
 set(CXX g++)
 set(CC  gcc)
 set(SCRIPT_NAME dash2win64cygwin)
-set(GIT_EXTRA "git config core.autocrlf true")
+set(GIT_EXTRA "git config core.autocrlf false")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 # WARNING: Temporary fix!! This exclusion of the ExternalProject test
