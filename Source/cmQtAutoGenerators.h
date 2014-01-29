@@ -25,6 +25,7 @@ public:
 
   bool InitializeAutogenTarget(cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget const* target);
+  void SetupSourceFiles(cmTarget const* target);
 
 private:
   void SetupAutoMocTarget(cmTarget const* target,
@@ -33,11 +34,7 @@ private:
                           std::map<std::string, std::string> &configDefines);
   void SetupAutoUicTarget(cmTarget const* target,
                         std::map<std::string, std::string> &configUicOptions);
-  void InitializeAutoRccTarget(cmTarget* target);
   void SetupAutoRccTarget(cmTarget const* target);
-
-  cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
-                                           const char* targetDirectory);
 
   bool ReadAutogenInfoFile(cmMakefile* makefile,
                            const char* targetDirectory,
@@ -82,7 +79,6 @@ private:
   std::string Join(const std::vector<std::string>& lst, char separator);
   bool EndsWith(const std::string& str, const std::string& with);
   bool StartsWith(const std::string& str, const std::string& with);
-  std::string ReadAll(const std::string& filename);
 
   void MergeUicOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);
