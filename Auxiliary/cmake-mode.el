@@ -79,7 +79,7 @@ set the path with these commands:
   (if (save-excursion
         (beginning-of-line)
         (let ((parse-end (point)))
-          (beginning-of-buffer)
+          (goto-char (point-min))
           (nth 3 (parse-partial-sexp (point) parse-end))
           )
         )
@@ -186,7 +186,6 @@ the indentation.  Otherwise it retains the same position on the line"
 (defun unscreamify-cmake-buffer ()
   "Convert all CMake commands to lowercase in buffer."
   (interactive)
-  (setq save-point (point))
   (goto-char (point-min))
   (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
     (replace-match
@@ -195,7 +194,6 @@ the indentation.  Otherwise it retains the same position on the line"
       (downcase (match-string 2))
       (match-string 3))
      t))
-  (goto-char save-point)
   )
 
 ;------------------------------------------------------------------------------
@@ -278,25 +276,27 @@ optional argument topic will be appended to the argument list."
     (if buffer
         (display-buffer buffer 'not-this-window)
       ;; Buffer doesn't exist.  Create it and fill it
-      (setq buffer (generate-new-buffer bufname))
-      (setq command (concat cmake-mode-cmake-executable " " type " " topic))
-      (message "Running %s" command)
-      ;; We don't want the contents of the shell-command running to the
-      ;; minibuffer, so turn it off.  A value of nil means don't automatically
-      ;; resize mini-windows.
-      (setq resize-mini-windows-save resize-mini-windows)
-      (setq resize-mini-windows nil)
-      (shell-command command buffer)
-      ;; Save the original window, so that we can come back to it later.
-      ;; save-excursion doesn't seem to work for this.
-      (setq window (selected-window))
-      ;; We need to select it so that we can apply special modes to it
-      (select-window (display-buffer buffer 'not-this-window))
-      (cmake-mode)
-      (toggle-read-only t)
-      ;; Restore the original window
-      (select-window window)
-      (setq resize-mini-windows resize-mini-windows-save)
+      (let ((buffer (generate-new-buffer bufname))
+            (command (concat cmake-mode-cmake-executable " " type " " topic))
+            )
+        (message "Running %s" command)
+        ;; We don't want the contents of the shell-command running to the
+        ;; minibuffer, so turn it off.  A value of nil means don't automatically
+        ;; resize mini-windows.
+        (setq resize-mini-windows-save resize-mini-windows)
+        (setq resize-mini-windows nil)
+        (shell-command command buffer)
+        ;; Save the original window, so that we can come back to it later.
+        ;; save-excursion doesn't seem to work for this.
+        (setq window (selected-window))
+        ;; We need to select it so that we can apply special modes to it
+        (select-window (display-buffer buffer 'not-this-window))
+        (cmake-mode)
+        (toggle-read-only t)
+        ;; Restore the original window
+        (select-window window)
+        (setq resize-mini-windows resize-mini-windows-save)
+        )
       )
     )
   )
@@ -332,9 +332,8 @@ optional argument topic will be appended to the argument list."
 (defun cmake-help-command ()
   "Prints out the help message corresponding to the command the cursor is on."
   (interactive)
-  (setq command (cmake-get-topic "command"))
-  (cmake-command-run "--help-command" (downcase command))
-  )
+  (cmake-command-run "--help-command" (downcase (cmake-get-topic "command"))))
+
 
 ;;;###autoload
 (progn
