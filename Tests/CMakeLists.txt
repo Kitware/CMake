@@ -1168,6 +1168,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         --test-command ${CMAKE_CTEST_COMMAND} -V
         )
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5Automoc")
+      add_test(Qt4And5AutomocReverse ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/Qt4And5Automoc"
+        "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocReverse"
+        ${build_generator_args}
+        --build-project Qt4And5Automoc
+        --build-exe-dir "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocReverse"
+        --force-new-ctest-process
+        --build-options ${build_options} -DQT_REVERSE_FIND_ORDER=1
+        --test-command ${CMAKE_CTEST_COMMAND} -V
+        )
+      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4And5AutomocReverse")
     endif()
   endif()
 

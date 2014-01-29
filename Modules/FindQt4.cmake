@@ -589,6 +589,14 @@ _qt4_find_qmake("${_QT4_QMAKE_NAMES}" QT_QMAKE_EXECUTABLE QTVERSION)
 
 if (QT_QMAKE_EXECUTABLE AND QTVERSION)
 
+  if (Qt5Core_FOUND)
+    # Qt5CoreConfig sets QT_MOC_EXECUTABLE as a non-cache variable to the Qt 5
+    # path to moc.  Unset that variable when Qt 4 and 5 are used together, so
+    # that when find_program looks for moc, it is not set to the Qt 5 version.
+    # If FindQt4 has already put the Qt 4 path in the cache, the unset()
+    # command 'unhides' the (correct) cache variable.
+    unset(QT_MOC_EXECUTABLE)
+  endif()
   if (QT_QMAKE_EXECUTABLE_LAST)
     string(COMPARE NOTEQUAL "${QT_QMAKE_EXECUTABLE_LAST}" "${QT_QMAKE_EXECUTABLE}" QT_QMAKE_CHANGED)
   endif()
