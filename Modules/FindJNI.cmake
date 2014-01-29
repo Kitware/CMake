@@ -91,22 +91,26 @@ macro(java_append_library_directories _var)
     endforeach()
 endmacro()
 
+file(TO_CMAKE_PATH "$ENV{JAVA_HOME}" _JAVA_HOME)
+
+set(JAVA_AWT_LIBRARY_DIRECTORIES)
+if(_JAVA_HOME)
+  JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
+    ${_JAVA_HOME}/jre/lib/{libarch}
+    ${_JAVA_HOME}/jre/lib
+    ${_JAVA_HOME}/lib
+    ${_JAVA_HOME}
+    )
+endif()
 get_filename_component(java_install_version
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
 
-set(JAVA_AWT_LIBRARY_DIRECTORIES
+list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
   )
-
-file(TO_CMAKE_PATH "$ENV{JAVA_HOME}" _JAVA_HOME)
-
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
-  ${_JAVA_HOME}/jre/lib/{libarch}
-  ${_JAVA_HOME}/jre/lib
-  ${_JAVA_HOME}/lib
-  ${_JAVA_HOME}
   /usr/lib
   /usr/local/lib
   /usr/lib/jvm/java/lib
@@ -135,20 +139,21 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
 foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
-  set(JAVA_JVM_LIBRARY_DIRECTORIES
-    ${JAVA_JVM_LIBRARY_DIRECTORIES}
+  list(APPEND JAVA_JVM_LIBRARY_DIRECTORIES
     "${dir}"
     "${dir}/client"
     "${dir}/server"
     )
 endforeach()
 
-
-set(JAVA_AWT_INCLUDE_DIRECTORIES
+set(JAVA_AWT_INCLUDE_DIRECTORIES)
+if(_JAVA_HOME)
+  list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES ${_JAVA_HOME}/include)
+endif()
+list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
-  ${_JAVA_HOME}/include
   /usr/include
   /usr/local/include
   /usr/lib/java/include
@@ -173,7 +178,7 @@ foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
   get_filename_component(jpath "${JAVA_PROG}" PATH)
   foreach(JAVA_INC_PATH ../include ../java/include ../share/java/include)
     if(EXISTS ${jpath}/${JAVA_INC_PATH})
-      set(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES} "${jpath}/${JAVA_INC_PATH}")
+      list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES "${jpath}/${JAVA_INC_PATH}")
     endif()
   endforeach()
   foreach(JAVA_LIB_PATH
@@ -181,7 +186,7 @@ foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
     ../java/lib ../java/jre/lib ../java/jre/lib/i386
     ../share/java/lib ../share/java/jre/lib ../share/java/jre/lib/i386)
     if(EXISTS ${jpath}/${JAVA_LIB_PATH})
-      set(JAVA_AWT_LIBRARY_DIRECTORIES ${JAVA_AWT_LIBRARY_DIRECTORIES} "${jpath}/${JAVA_LIB_PATH}")
+      list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES "${jpath}/${JAVA_LIB_PATH}")
     endif()
   endforeach()
 endforeach()

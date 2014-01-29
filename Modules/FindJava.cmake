@@ -67,8 +67,14 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+file(TO_CMAKE_PATH "$ENV{JAVA_HOME}" _JAVA_HOME)
+
 # The HINTS option should only be used for values computed from the system.
-set(_JAVA_HINTS
+set(_JAVA_HINTS)
+if(_JAVA_HOME)
+  list(APPEND _JAVA_HINTS ${_JAVA_HOME}/bin)
+endif()
+list(APPEND _JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\2.0;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/bin"
@@ -77,7 +83,6 @@ set(_JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
-  $ENV{JAVA_HOME}/bin
   )
 # Hard-coded guesses should still go in PATHS. This ensures that the user
 # environment can always override hard guesses.
