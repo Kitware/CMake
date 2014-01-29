@@ -328,6 +328,37 @@ optional argument topic will be appended to the argument list."
   (interactive)
   (cmake-command-run "--help-command" (downcase (cmake-get-command)) "*CMake Help*"))
 
+(defvar cmake-help-module-history nil "Module read history.")
+(defvar cmake-help-modules '() "List of available topics for --help-module.")
+
+(defun cmake-module-list ()
+  (let ((temp-buffer-name "*CMake Modules Temporary*"))
+    (save-window-excursion
+      (cmake-command-run "--help-module-list" nil temp-buffer-name)
+      (with-current-buffer temp-buffer-name
+        (cdr (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n" t)))))
+  )
+
+(defun cmake-get-module ()
+  (let ((input (completing-read
+                "CMake module: " ; prompt
+                ((lambda ()
+                   (if cmake-help-modules cmake-help-modules
+                     (setq cmake-help-modules (cmake-module-list))))) ; completions
+                nil ; predicate
+                t   ; require-match
+                nil ; initial-input
+                'cmake-help-module-history ; module history
+                )))
+    (if (string= input "")
+        (error "No argument given")
+      input)
+    ))
+
+(defun cmake-help-module ()
+  "Prints out the help message corresponding to the given module."
+  (interactive)
+  (cmake-command-run "--help-module" (cmake-get-module) "*CMake Module Help*"))
 
 ;;;###autoload
 (progn
