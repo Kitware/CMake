@@ -99,7 +99,7 @@
 #
 # ::
 #
-#   WRITE_BASIC_PACKAGE_VERSION_FILE( filename [VERSION major.minor.patch] COMPATIBILITY (AnyNewerVersion|SameMajorVersion|ExactVersion) )
+#   WRITE_BASIC_PACKAGE_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion|ExactVersion) )
 #
 #
 #
@@ -112,9 +112,6 @@
 #     filename is the output filename, it should be in the build tree.
 #     major.minor.patch is the version number of the project to be installed
 #
-# If no VERSION is given, the version number specified via
-# project(... VERSION x.y.z ...) is used. If this hasn't been set, it errors
-# out.
 # The COMPATIBILITY mode AnyNewerVersion means that the installed
 # package version will be considered compatible if it is newer or
 # exactly the same as the requested version.  This mode should be used
