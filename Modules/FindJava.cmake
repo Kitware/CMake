@@ -5,8 +5,10 @@
 # Find Java
 #
 # This module finds if Java is installed and determines where the
-# include files and libraries are.  This code sets the following
-# variables:
+# include files and libraries are.  The caller may set variable JAVA_HOME
+# to specify a Java installation prefix explicitly.
+#
+# This module sets the following result variables:
 #
 # ::
 #
@@ -67,7 +69,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-file(TO_CMAKE_PATH "$ENV{JAVA_HOME}" _JAVA_HOME)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindJavaCommon.cmake)
 
 # The HINTS option should only be used for values computed from the system.
 set(_JAVA_HINTS)

@@ -6,7 +6,10 @@
 #
 # This module finds if Java is installed and determines where the
 # include files and libraries are.  It also determines what the name of
-# the library is.  This code sets the following variables:
+# the library is.  The caller may set variable JAVA_HOME to specify a
+# Java installation prefix explicitly.
+#
+# This module sets the following result variables:
 #
 # ::
 #
@@ -91,7 +94,7 @@ macro(java_append_library_directories _var)
     endforeach()
 endmacro()
 
-file(TO_CMAKE_PATH "$ENV{JAVA_HOME}" _JAVA_HOME)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindJavaCommon.cmake)
 
 set(JAVA_AWT_LIBRARY_DIRECTORIES)
 if(_JAVA_HOME)
