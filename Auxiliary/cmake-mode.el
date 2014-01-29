@@ -281,7 +281,6 @@ optional argument topic will be appended to the argument list."
       (select-window (display-buffer buffer 'not-this-window))
       (cmake-mode)
       (toggle-read-only t))
-    (setq resize-mini-windows resize-mini-windows-save)
     )
   )
 
@@ -293,18 +292,30 @@ optional argument topic will be appended to the argument list."
   )
 
 (defvar cmake-help-command-history nil "Topic read history.")
+(defvar cmake-help-commands '() "List of available topics for --help-command.")
+(defun cmake-command-list-as-list ()
+  "Run cmake --help-command-list and return a list where each element is a cmake command."
+  (let ((temp-buffer-name "*CMake Commands Temporary*"))
+    (save-window-excursion
+      (cmake-command-run "--help-command-list" nil temp-buffer-name)
+      (with-current-buffer temp-buffer-name
+        (cdr (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n" t)))))
+  )
 
 (require 'thingatpt)
 ;;;###autoload
-(defun cmake-get-topic (type)
+(defun cmake-get-command ()
   "Gets the topic from the minibuffer input.  The default is the word the cursor is on."
-  (interactive)
   (let* ((default-entry (word-at-point))
-         (input (read-string
-                 (format "CMake %s (default %s): " type default-entry) ; prompt
-                 nil ; initial input
+         (input (completing-read
+                 "CMake command: " ; prompt
+                 ((lambda ()
+                    (if cmake-help-commands cmake-help-commands
+                      (setq cmake-help-commands (cmake-command-list-as-list))))) ; completions
+                 nil ; predicate
+                 t   ; require-match
+                 default-entry ; initial-input
                  'cmake-help-command-history ; command history
-                 default-entry ; default-value
                  )))
     (if (string= input "")
         (error "No argument given")
@@ -315,7 +326,7 @@ optional argument topic will be appended to the argument list."
 (defun cmake-help-command ()
   "Prints out the help message corresponding to the command the cursor is on."
   (interactive)
-  (cmake-command-run "--help-command" (downcase (cmake-get-topic "command")) "*CMake Help*"))
+  (cmake-command-run "--help-command" (downcase (cmake-get-command)) "*CMake Help*"))
 
 
 ;;;###autoload
