@@ -102,6 +102,12 @@ set(JAVA_AWT_LIBRARY_DIRECTORIES
 
 file(TO_CMAKE_PATH "$ENV{JAVA_HOME}" _JAVA_HOME)
 
+if(APPLE AND NOT EXISTS ${_JAVA_HOME})
+  execute_process(COMMAND /usr/libexec/java_home
+    OUTPUT_VARIABLE _JAVA_HOME OUTPUT_STRIP_TRAILING_WHITESPACE)
+  file(TO_CMAKE_PATH "${_JAVA_HOME}" _JAVA_HOME)
+endif()
+
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
   ${_JAVA_HOME}/jre/lib/{libarch}
   ${_JAVA_HOME}/jre/lib
@@ -186,7 +192,10 @@ foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
   endforeach()
 endforeach()
 
-if(APPLE)
+set(_APPLE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+set(_REVERT_FIND_FRAMEWORK 0)
+
+if(APPLE AND EXISTS "${_JAVA_HOME}/bundle")
   if(EXISTS ~/Library/Frameworks/JavaVM.framework)
     set(JAVA_HAVE_FRAMEWORK 1)
   endif()
@@ -223,6 +232,12 @@ if(APPLE)
       )
   endif()
 else()
+  if(APPLE)
+    # Redefine CMAKE_FIND_FRAMEWORK to ensure Apple's frameworks are not searched first
+    # (is reverted back below)
+    set(_REVERT_FIND_FRAMEWORK 1)
+    set(CMAKE_FIND_FRAMEWORK LAST)
+  endif()
   find_library(JAVA_AWT_LIBRARY jawt
     PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
   )
@@ -255,6 +270,11 @@ find_path(JAVA_AWT_INCLUDE_PATH jawt.h
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY JAVA_JVM_LIBRARY
                                                     JAVA_INCLUDE_PATH  JAVA_INCLUDE_PATH2 JAVA_AWT_INCLUDE_PATH)
+
+if(APPLE AND ${_REVERT_FIND_FRAMEWORK})
+  # Revert back to defined CMAKE_FIND_FRAMEWORK
+  set(CMAKE_FIND_FRAMEWORK ${_APPLE_FIND_FRAMEWORK})
+endif()
 
 mark_as_advanced(
   JAVA_AWT_LIBRARY
