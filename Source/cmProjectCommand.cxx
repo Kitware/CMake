@@ -62,15 +62,33 @@ bool cmProjectCommand
        "Value Computed by CMake", cmCacheManager::STATIC);
     }
 
+  bool haveLanguages = false;
   std::vector<std::string> languages;
-  if(args.size() > 1)
+  for(size_t i = 1; i < args.size(); ++i)
     {
-    for(size_t i =1; i < args.size(); ++i)
+    if(args[i] == "LANGUAGES")
+      {
+      if(haveLanguages)
+        {
+        this->Makefile->IssueMessage
+          (cmake::FATAL_ERROR, "LANGUAGES may be specified at most once.");
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+        }
+      haveLanguages = true;
+      }
+    else
       {
       languages.push_back(args[i]);
       }
     }
-  else
+
+  if (haveLanguages && languages.empty())
+    {
+    languages.push_back("NONE");
+    }
+
+  if (languages.empty())
     {
     // if no language is specified do c and c++
     languages.push_back("C");
