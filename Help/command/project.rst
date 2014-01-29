@@ -1,42 +1,15 @@
 project
 -------
 
-Set a name, version, and enable languages for the entire project.
+Set a name for the entire project.
 
-.. code-block:: cmake
+::
 
- project(<PROJECT-NAME>
-         [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
-         [<language-name>...])
+  project(<projectname> [languageName1 languageName2 ... ] )
 
-Sets the name of the project and stores the name in the
-:variable:`PROJECT_NAME` variable.  Additionally this sets variables
-
-* :variable:`PROJECT_SOURCE_DIR`,
-  :variable:`<PROJECT-NAME>_SOURCE_DIR`
-* :variable:`PROJECT_BINARY_DIR`,
-  :variable:`<PROJECT-NAME>_BINARY_DIR`
-
-If ``VERSION`` is specified, the components must be non-negative integers.
-The :command:`project()` command stores the version number and its components
-in variables
-
-* :variable:`PROJECT_VERSION`,
-  :variable:`<PROJECT-NAME>_VERSION`
-* :variable:`PROJECT_VERSION_MAJOR`,
-  :variable:`<PROJECT-NAME>_VERSION_MAJOR`
-* :variable:`PROJECT_VERSION_MINOR`,
-  :variable:`<PROJECT-NAME>_VERSION_MINOR`
-* :variable:`PROJECT_VERSION_PATCH`,
-  :variable:`<PROJECT-NAME>_VERSION_PATCH`
-* :variable:`PROJECT_VERSION_TWEAK`,
-  :variable:`<PROJECT-NAME>_VERSION_TWEAK`
-
-If ``VERSION`` is not used, the :variable:`PROJECT_VERSION` variables will be
-unset if they have been set by a :command:`project(VERSION)` call before.
-(This can be disabled by setting the variable
-``CMAKE_PROJECT_VERSION_SET_BY_PROJECT_COMMAND`` to ``FALSE`` before
-invoking the command.)
+Sets the name of the project.  Additionally this sets the variables
+<projectName>_BINARY_DIR and <projectName>_SOURCE_DIR to the
+respective values.
 
 Optionally you can specify which languages your project supports.
 Example languages are CXX (i.e.  C++), C, Fortran, etc.  By default C

@@ -6,7 +6,7 @@
 #
 # ::
 #
-#   WRITE_BASIC_CONFIG_VERSION_FILE( filename [VERSION major.minor.patch] COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
+#   WRITE_BASIC_CONFIG_VERSION_FILE( filename VERSION major.minor.patch COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
 #
 #
 #
@@ -46,11 +46,7 @@ function(WRITE_BASIC_CONFIG_VERSION_FILE _filename)
   endif()
 
   if("${CVF_VERSION}" STREQUAL "")
-    if ("${PROJECT_VERSION}" STREQUAL "")
-      message(FATAL_ERROR "No VERSION specified for WRITE_BASIC_CONFIG_VERSION_FILE()")
-    else()
-      set(CVF_VERSION "${PROJECT_VERSION}")
-    endif()
+    message(FATAL_ERROR "No VERSION specified for WRITE_BASIC_CONFIG_VERSION_FILE()")
   endif()
 
   configure_file("${versionTemplateFile}" "${_filename}" @ONLY)
