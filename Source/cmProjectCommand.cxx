@@ -62,15 +62,168 @@ bool cmProjectCommand
        "Value Computed by CMake", cmCacheManager::STATIC);
     }
 
+  bool haveVersion = false;
+  bool haveLanguages = false;
+  std::string version;
   std::vector<std::string> languages;
-  if(args.size() > 1)
+  enum Doing { DoingLanguages, DoingVersion };
+  Doing doing = DoingLanguages;
+  for(size_t i = 1; i < args.size(); ++i)
     {
-    for(size_t i =1; i < args.size(); ++i)
+    if(args[i] == "LANGUAGES")
+      {
+      if(haveLanguages)
+        {
+        this->Makefile->IssueMessage
+          (cmake::FATAL_ERROR, "LANGUAGES may be specified at most once.");
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+        }
+      haveLanguages = true;
+      doing = DoingLanguages;
+      }
+    else if (args[i] == "VERSION")
+      {
+      if(haveVersion)
+        {
+        this->Makefile->IssueMessage
+          (cmake::FATAL_ERROR, "VERSION may be specified at most once.");
+        cmSystemTools::SetFatalErrorOccured();
+        return true;
+        }
+      haveVersion = true;
+      doing = DoingVersion;
+      }
+    else if(doing == DoingVersion)
+      {
+      doing = DoingLanguages;
+      version = args[i];
+      }
+    else // doing == DoingLanguages
       {
       languages.push_back(args[i]);
       }
     }
-  else
+
+  if (haveVersion && !haveLanguages && !languages.empty())
+    {
+    this->Makefile->IssueMessage
+      (cmake::FATAL_ERROR,
+       "project with VERSION must use LANGUAGES before language names.");
+    cmSystemTools::SetFatalErrorOccured();
+    return true;
+    }
+  if (haveLanguages && languages.empty())
+    {
+    languages.push_back("NONE");
+    }
+
+  cmPolicies::PolicyStatus cmp0048 =
+    this->Makefile->GetPolicyStatus(cmPolicies::CMP0048);
+  if (haveVersion)
+    {
+    // Set project VERSION variables to given values
+    if (cmp0048 == cmPolicies::OLD ||
+        cmp0048 == cmPolicies::WARN)
+      {
+      this->Makefile->IssueMessage
+        (cmake::FATAL_ERROR,
+         "VERSION not allowed unless CMP0048 is set to NEW");
+      cmSystemTools::SetFatalErrorOccured();
+      return true;
+      }
+
+    cmsys::RegularExpression
+      vx("^([0-9]+(\\.[0-9]+(\\.[0-9]+(\\.[0-9]+)?)?)?)?$");
+    if(!vx.find(version))
+      {
+      std::string e = "VERSION \"" + version + "\" format invalid.";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e);
+      cmSystemTools::SetFatalErrorOccured();
+      return true;
+      }
+
+    std::string vs;
+    const char* sep = "";
+    char vb[4][64];
+    unsigned int v[4] = {0,0,0,0};
+    int vc = sscanf(version.c_str(), "%u.%u.%u.%u",
+                    &v[0], &v[1], &v[2], &v[3]);
+    for(int i=0; i < 4; ++i)
+      {
+      if(i < vc)
+        {
+        sprintf(vb[i], "%u", v[i]);
+        vs += sep;
+        vs += vb[i];
+        sep = ".";
+        }
+      else
+        {
+        vb[i][0] = 0;
+        }
+      }
+
+    std::string vv;
+    vv = args[0] + "_VERSION";
+    this->Makefile->AddDefinition("PROJECT_VERSION", vs.c_str());
+    this->Makefile->AddDefinition(vv.c_str(), vs.c_str());
+    vv = args[0] + "_VERSION_MAJOR";
+    this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR", vb[0]);
+    this->Makefile->AddDefinition(vv.c_str(), vb[0]);
+    vv = args[0] + "_VERSION_MINOR";
+    this->Makefile->AddDefinition("PROJECT_VERSION_MINOR", vb[1]);
+    this->Makefile->AddDefinition(vv.c_str(), vb[1]);
+    vv = args[0] + "_VERSION_PATCH";
+    this->Makefile->AddDefinition("PROJECT_VERSION_PATCH", vb[2]);
+    this->Makefile->AddDefinition(vv.c_str(), vb[2]);
+    vv = args[0] + "_VERSION_TWEAK";
+    this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", vb[3]);
+    this->Makefile->AddDefinition(vv.c_str(), vb[3]);
+    }
+  else if(cmp0048 != cmPolicies::OLD)
+    {
+    // Set project VERSION variables to empty
+    std::vector<std::string> vv;
+    vv.push_back("PROJECT_VERSION");
+    vv.push_back("PROJECT_VERSION_MAJOR");
+    vv.push_back("PROJECT_VERSION_MINOR");
+    vv.push_back("PROJECT_VERSION_PATCH");
+    vv.push_back("PROJECT_VERSION_TWEAK");
+    vv.push_back(args[0] + "_VERSION");
+    vv.push_back(args[0] + "_VERSION_MAJOR");
+    vv.push_back(args[0] + "_VERSION_MINOR");
+    vv.push_back(args[0] + "_VERSION_PATCH");
+    vv.push_back(args[0] + "_VERSION_TWEAK");
+    std::string vw;
+    for(std::vector<std::string>::iterator i = vv.begin();
+        i != vv.end(); ++i)
+      {
+      const char* v = this->Makefile->GetDefinition(i->c_str());
+      if(v && *v)
+        {
+        if(cmp0048 == cmPolicies::WARN)
+          {
+          vw += "\n  ";
+          vw += *i;
+          }
+        else
+          {
+          this->Makefile->AddDefinition(i->c_str(), "");
+          }
+        }
+      }
+    if(!vw.empty())
+      {
+      cmOStringStream w;
+      w << (this->Makefile->GetPolicies()
+            ->GetPolicyWarning(cmPolicies::CMP0048))
+        << "\nThe following variable(s) would be set to empty:" << vw;
+      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      }
+    }
+
+  if (languages.empty())
     {
     // if no language is specified do c and c++
     languages.push_back("C");

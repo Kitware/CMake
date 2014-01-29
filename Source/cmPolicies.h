@@ -101,6 +101,7 @@ public:
     CMP0045, ///< Error on non-existent target in get_target_property
     CMP0046, ///< Error on non-existent dependency in add_dependencies
     CMP0047, ///< Use QCC compiler id for the qcc drivers on QNX.
+    CMP0048, ///< project() command manages VERSION variables
 
     /** \brief Always the last entry.
      *

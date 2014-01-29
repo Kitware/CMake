@@ -79,7 +79,17 @@ Variables that Provide Information
    /variable/PROJECT-NAME_BINARY_DIR
    /variable/PROJECT_NAME
    /variable/PROJECT-NAME_SOURCE_DIR
+   /variable/PROJECT-NAME_VERSION
+   /variable/PROJECT-NAME_VERSION_MAJOR
+   /variable/PROJECT-NAME_VERSION_MINOR
+   /variable/PROJECT-NAME_VERSION_PATCH
+   /variable/PROJECT-NAME_VERSION_TWEAK
    /variable/PROJECT_SOURCE_DIR
+   /variable/PROJECT_VERSION
+   /variable/PROJECT_VERSION_MAJOR
+   /variable/PROJECT_VERSION_MINOR
+   /variable/PROJECT_VERSION_PATCH
+   /variable/PROJECT_VERSION_TWEAK
 
 Variables that Change Behavior
 ==============================
@@ -121,6 +131,7 @@ Variables that Change Behavior
    /variable/CMAKE_POLICY_DEFAULT_CMPNNNN
    /variable/CMAKE_PREFIX_PATH
    /variable/CMAKE_PROGRAM_PATH
+   /variable/CMAKE_PROJECT_PROJECT-NAME_INCLUDE
    /variable/CMAKE_SKIP_INSTALL_ALL_DEPENDENCY
    /variable/CMAKE_STAGING_PREFIX
    /variable/CMAKE_SYSTEM_IGNORE_PATH

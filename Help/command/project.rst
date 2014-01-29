@@ -1,27 +1,57 @@
 project
 -------
 
-Set a name for the entire project.
+Set a name, version, and enable languages for the entire project.
 
-::
+.. code-block:: cmake
 
-  project(<projectname> [languageName1 languageName2 ... ] )
+ project(<PROJECT-NAME> [LANGUAGES] [<language-name>...])
+ project(<PROJECT-NAME>
+         [VERSION <major>[.<minor>[.<patch>[.<tweak>]]]]
+         [LANGUAGES <language-name>...])
 
-Sets the name of the project.  Additionally this sets the variables
-<projectName>_BINARY_DIR and <projectName>_SOURCE_DIR to the
-respective values.
+Sets the name of the project and stores the name in the
+:variable:`PROJECT_NAME` variable.  Additionally this sets variables
+
+* :variable:`PROJECT_SOURCE_DIR`,
+  :variable:`<PROJECT-NAME>_SOURCE_DIR`
+* :variable:`PROJECT_BINARY_DIR`,
+  :variable:`<PROJECT-NAME>_BINARY_DIR`
+
+If ``VERSION`` is specified, given components must be non-negative integers.
+If ``VERSION`` is not specified, the default version is the empty string.
+The ``VERSION`` option may not be used unless policy :policy:`CMP0048` is
+set to ``NEW``.
+
+The :command:`project()` command stores the version number and its components
+in variables
+
+* :variable:`PROJECT_VERSION`,
+  :variable:`<PROJECT-NAME>_VERSION`
+* :variable:`PROJECT_VERSION_MAJOR`,
+  :variable:`<PROJECT-NAME>_VERSION_MAJOR`
+* :variable:`PROJECT_VERSION_MINOR`,
+  :variable:`<PROJECT-NAME>_VERSION_MINOR`
+* :variable:`PROJECT_VERSION_PATCH`,
+  :variable:`<PROJECT-NAME>_VERSION_PATCH`
+* :variable:`PROJECT_VERSION_TWEAK`,
+  :variable:`<PROJECT-NAME>_VERSION_TWEAK`
+
+Variables corresponding to unspecified versions are set to the empty string
+(if policy :policy:`CMP0048` is set to ``NEW``).
 
 Optionally you can specify which languages your project supports.
-Example languages are CXX (i.e.  C++), C, Fortran, etc.  By default C
-and CXX are enabled.  E.g.  if you do not have a C++ compiler, you can
-disable the check for it by explicitly listing the languages you want
-to support, e.g.  C.  By using the special language "NONE" all checks
-for any language can be disabled.  If a variable exists called
-CMAKE_PROJECT_<projectName>_INCLUDE, the file pointed to by that
-variable will be included as the last step of the project command.
+Example languages are ``C``, ``CXX`` (i.e.  C++), ``Fortran``, etc.
+By default ``C`` and ``CXX`` are enabled if no language options are
+given.  Specify language ``NONE``, or use the ``LANGUAGES`` keyword
+and list no languages, to skip enabling any languages.
 
-The top-level CMakeLists.txt file for a project must contain a
-literal, direct call to the project() command; loading one through the
-include() command is not sufficient.  If no such call exists CMake
-will implicitly add one to the top that enables the default languages
-(C and CXX).
+If a variable exists called :variable:`CMAKE_PROJECT_<PROJECT-NAME>_INCLUDE`,
+the file pointed to by that variable will be included as the last step of the
+project command.
+
+The top-level ``CMakeLists.txt`` file for a project must contain a
+literal, direct call to the :command:`project` command; loading one
+through the :command:`include` command is not sufficient.  If no such
+call exists CMake will implicitly add one to the top that enables the
+default languages (``C`` and ``CXX``).
