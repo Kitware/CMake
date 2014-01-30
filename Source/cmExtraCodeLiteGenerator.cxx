@@ -449,8 +449,12 @@ cmExtraCodeLiteGenerator::GetBuildCommand(const cmMakefile* mf) const
     buildCommand = make;
     }
   else if ( generator == "MinGW Makefiles" ||
-            generator == "Unix Makefiles"  ||
-            generator == "Ninja" )
+            generator == "Unix Makefiles" )
+    {
+    ss << make << " -j " << this->CpuCount;
+    buildCommand = ss.str();
+    }
+  else if ( generator == "Ninja" )
     {
     ss << make;
     buildCommand = ss.str();
