@@ -400,6 +400,29 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(PositionIndependentTargets PositionIndependentTargets)
   endif()
 
+  if((CMAKE_CXX_COMPILER_ID MATCHES "GNU") AND
+    (NOT "${CMAKE_CXX_COMPILER_VERSION}" VERSION_LESS 4.2) AND
+    (CMAKE_SYSTEM_NAME MATCHES "Linux"))
+
+    include(CheckCXXCompilerFlag)
+    check_cxx_compiler_flag(
+      -fvisibility-inlines-hidden run_inlines_hidden_test)
+  endif()
+
+  if(run_inlines_hidden_test)
+    add_test(VisibilityInlinesHidden ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/VisibilityInlinesHidden"
+      "${CMake_BINARY_DIR}/Tests/VisibilityInlinesHidden"
+      ${build_generator_args}
+      --build-project VisibilityInlinesHidden
+      --build-options ${build_options}
+    )
+    list(APPEND TEST_BUILD_DIRS
+      "${CMake_BINARY_DIR}/Tests/VisibilityInlinesHidden"
+    )
+  endif()
+
   add_test(LinkFlags-prepare
     ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
