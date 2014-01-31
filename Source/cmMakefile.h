@@ -804,7 +804,6 @@ public:
   void AppendProperty(const std::string& prop, const char *value,
                       bool asString=false);
   const char *GetProperty(const std::string& prop) const;
-  const char *GetPropertyOrDefinition(const std::string& prop) const;
   const char *GetProperty(const std::string& prop,
                           cmProperty::ScopeType scope) const;
   bool GetPropertyAsBool(const std::string& prop) const;

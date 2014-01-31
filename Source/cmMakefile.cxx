@@ -3662,16 +3662,6 @@ void cmMakefile::AppendProperty(const std::string& prop,
   this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
 }
 
-const char *cmMakefile::GetPropertyOrDefinition(const std::string& prop) const
-{
-  const char *ret = this->GetProperty(prop, cmProperty::DIRECTORY);
-  if (!ret)
-    {
-    ret = this->GetDefinition(prop.c_str());
-    }
-  return ret;
-}
-
 const char *cmMakefile::GetProperty(const std::string& prop) const
 {
   return this->GetProperty(prop, cmProperty::DIRECTORY);
