@@ -1620,16 +1620,11 @@ void cmTarget::InsertCompileOption(const cmValueWithOrigin &entry,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry,
-                     bool before)
+void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry)
 {
   cmGeneratorExpression ge(entry.Backtrace);
 
-  std::vector<cmTargetInternals::TargetPropertyEntry*>::iterator position
-                = before ? this->Internal->CompileDefinitionsEntries.begin()
-                         : this->Internal->CompileDefinitionsEntries.end();
-
-  this->Internal->CompileDefinitionsEntries.insert(position,
+  this->Internal->CompileDefinitionsEntries.push_back(
       new cmTargetInternals::TargetPropertyEntry(ge.Parse(entry.Value)));
 }
 
