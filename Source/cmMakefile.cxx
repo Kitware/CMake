@@ -1573,8 +1573,8 @@ void cmMakefile::InitializeFromParent()
   const std::vector<cmValueWithOrigin> parentIncludes =
                                         parent->GetIncludeDirectoriesEntries();
   this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
-                                       parentIncludes.begin(),
-                                       parentIncludes.end());
+                                         parentIncludes.begin(),
+                                         parentIncludes.end());
 
   const std::vector<cmValueWithOrigin> parentOptions =
                                         parent->GetCompileOptionsEntries();
@@ -1585,8 +1585,8 @@ void cmMakefile::InitializeFromParent()
   const std::vector<cmValueWithOrigin> parentDefines =
                                       parent->GetCompileDefinitionsEntries();
   this->CompileDefinitionsEntries.insert(this->CompileDefinitionsEntries.end(),
-                                     parentDefines.begin(),
-                                     parentDefines.end());
+                                         parentDefines.begin(),
+                                         parentDefines.end());
 
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
