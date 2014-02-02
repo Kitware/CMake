@@ -69,6 +69,10 @@ included by the user in the C++ implementation file with a preprocessor
 ``#include``.  If it is not so included, it will be added to a separate file
 which is compiled into the target.
 
+The ``moc`` command line will consume the :prop_tgt:`COMPILE_DEFINITIONS` and
+:prop_tgt:`INCLUDE_DIRECTORIES` target properties from the target it is being
+invoked for, and for the appropriate build configuration.
+
 Generated ``moc_*.cpp`` and ``*.moc`` files are placed in the build directory
 so it is convenient to set the :variable:`CMAKE_INCLUDE_CURRENT_DIR`
 variable.  The :prop_tgt:`AUTOMOC` target property may be pre-set for all
