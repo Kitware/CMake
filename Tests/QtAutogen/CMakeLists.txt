@@ -88,6 +88,6 @@ target_link_libraries(empty no_link_language)
 add_library(no_link_language STATIC empty.h)
 set_target_properties(no_link_language PROPERTIES AUTOMOC TRUE)
 
-qtx_wrap_cpp(uicOnlyMoc uiconly.h)
-add_executable(uiconly uiconly.cpp ${uicOnlyMoc})
+qtx_wrap_cpp(uicOnlyMoc sub/uiconly.h)
+add_executable(uiconly sub/uiconly.cpp ${uicOnlyMoc})
 target_link_libraries(uiconly ${QT_LIBRARIES})
