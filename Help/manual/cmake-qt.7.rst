@@ -103,6 +103,46 @@ populated to pre-set the options for all following targets.  The
 ``<basename>.ui`` file to set particular options for the file.  This
 overrides options from the :prop_tgt:`AUTOUIC_OPTIONS` target property.
 
+A target may populate the :prop_tgt:`INTERFACE_AUTOUIC_OPTIONS` target
+property with options that should be used when invoking ``uic``.  This must be
+consistent with the :prop_tgt:`AUTOUIC_OPTIONS` target property content of the
+depender target.  The :variable:`CMAKE_DEBUG_TARGET_PROPERTIES` variable may
+be used to track the origin target of such
+:prop_tgt:`INTERFACE_AUTOUIC_OPTIONS`.  This means that a library which
+provides an alternative translation system for Qt may specify options which
+should be used when running ``uic``:
+
+.. code-block:: cmake
+
+  add_library(KI18n klocalizedstring.cpp)
+  target_link_libraries(KI18n Qt5::Core)
+
+  # KI18n uses the tr2i18n() function instead of tr().  That function is
+  # declared in the klocalizedstring.h header.
+  set(autouic_options
+    -tr tr2i18n
+    -include klocalizedstring.h
+  )
+
+  set_property(TARGET KI18n APPEND PROPERTY
+    INTERFACE_AUTOUIC_OPTIONS ${autouic_options}
+  )
+
+A consuming project linking to the target exported from upstream automatically
+uses appropriate options when ``uic`` is run by :prop_tgt:`AUTOUIC`, as a
+result of linking with the :prop_tgt:`IMPORTED` target:
+
+.. code-block:: cmake
+
+  set(CMAKE_AUTOUIC ON)
+  # Uses a libwidget.ui file:
+  add_library(LibWidget libwidget.cpp)
+  target_link_libraries(LibWidget
+    KF5::KI18n
+    Qt5::Widgets
+  )
+
+
 AUTORCC
 '''''''
 
