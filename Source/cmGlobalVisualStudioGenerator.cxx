@@ -902,3 +902,20 @@ cmGlobalVisualStudioGenerator::OrderedTargetDependSet
     this->insert(*ti);
     }
 }
+
+std::string cmGlobalVisualStudioGenerator::ExpandCFGIntDir(
+  const std::string& str,
+  const std::string& config) const
+{
+  std::string replace = GetCMakeCFGIntDir();
+
+  std::string tmp = str;
+  for(std::string::size_type i = tmp.find(replace);
+      i != std::string::npos;
+      i = tmp.find(replace, i))
+    {
+    tmp.replace(i, replace.size(), config);
+    i += config.size();
+    }
+  return tmp;
+}

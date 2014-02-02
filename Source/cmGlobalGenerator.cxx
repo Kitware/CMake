@@ -3032,3 +3032,10 @@ void cmGlobalGenerator::ProcessEvaluationFiles()
       }
     }
 }
+
+//----------------------------------------------------------------------------
+std::string cmGlobalGenerator::ExpandCFGIntDir(const std::string& str,
+                            const std::string& /*config*/) const
+{
+  return str;
+}

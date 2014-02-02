@@ -193,6 +193,10 @@ public:
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const { return "."; }
 
+  ///! expand CFGIntDir for a configuration
+  virtual std::string ExpandCFGIntDir(const std::string& str,
+                                      const std::string& config) const;
+
   /** Get whether the generator should use a script for link commands.  */
   bool GetUseLinkScript() const { return this->UseLinkScript; }
 
