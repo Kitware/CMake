@@ -341,6 +341,11 @@ cmPolicies::cmPolicies()
     CMP0047, "CMP0047",
     "Use QCC compiler id for the qcc drivers on QNX.",
     3,0,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0048, "CMP0048",
+    "project() command manages VERSION variables.",
+    3,0,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
