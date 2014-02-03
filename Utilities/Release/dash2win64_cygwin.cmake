@@ -10,11 +10,13 @@ set(INITIAL_CACHE "CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_Fortran_COMPILER_FULLPATH:FILEPATH=FALSE
 CTEST_TEST_TIMEOUT:STRING=7200
 DART_TESTING_TIMEOUT:STRING=7200
+SPHINX_HTML:BOOL=ON
+SPHINX_MAN:BOOL=ON
 ")
 set(CXX g++)
 set(CC  gcc)
 set(SCRIPT_NAME dash2win64cygwin)
-set(GIT_EXTRA "git config core.autocrlf true")
+set(GIT_EXTRA "git config core.autocrlf false")
 get_filename_component(path "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 # WARNING: Temporary fix!! This exclusion of the ExternalProject test
