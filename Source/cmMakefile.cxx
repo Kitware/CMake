@@ -1570,23 +1570,23 @@ void cmMakefile::InitializeFromParent()
   // Initialize definitions with the closure of the parent scope.
   this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
-  const std::vector<cmValueWithOrigin> parentIncludes =
+  const std::vector<cmValueWithOrigin>& parentIncludes =
                                         parent->GetIncludeDirectoriesEntries();
   this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
-                                       parentIncludes.begin(),
-                                       parentIncludes.end());
+                                         parentIncludes.begin(),
+                                         parentIncludes.end());
 
-  const std::vector<cmValueWithOrigin> parentOptions =
+  const std::vector<cmValueWithOrigin>& parentOptions =
                                         parent->GetCompileOptionsEntries();
   this->CompileOptionsEntries.insert(this->CompileOptionsEntries.end(),
                                      parentOptions.begin(),
                                      parentOptions.end());
 
-  const std::vector<cmValueWithOrigin> parentDefines =
+  const std::vector<cmValueWithOrigin>& parentDefines =
                                       parent->GetCompileDefinitionsEntries();
   this->CompileDefinitionsEntries.insert(this->CompileDefinitionsEntries.end(),
-                                     parentDefines.begin(),
-                                     parentDefines.end());
+                                         parentDefines.begin(),
+                                         parentDefines.end());
 
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
