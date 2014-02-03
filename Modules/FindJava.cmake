@@ -5,8 +5,10 @@
 # Find Java
 #
 # This module finds if Java is installed and determines where the
-# include files and libraries are.  This code sets the following
-# variables:
+# include files and libraries are.  The caller may set variable JAVA_HOME
+# to specify a Java installation prefix explicitly.
+#
+# This module sets the following result variables:
 #
 # ::
 #
@@ -67,8 +69,14 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindJavaCommon.cmake)
+
 # The HINTS option should only be used for values computed from the system.
-set(_JAVA_HINTS
+set(_JAVA_HINTS)
+if(_JAVA_HOME)
+  list(APPEND _JAVA_HINTS ${_JAVA_HOME}/bin)
+endif()
+list(APPEND _JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\2.0;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.9;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.8;JavaHome]/bin"
@@ -77,7 +85,6 @@ set(_JAVA_HINTS
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.5;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/bin"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/bin"
-  $ENV{JAVA_HOME}/bin
   )
 # Hard-coded guesses should still go in PATHS. This ensures that the user
 # environment can always override hard guesses.

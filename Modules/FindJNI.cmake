@@ -6,7 +6,10 @@
 #
 # This module finds if Java is installed and determines where the
 # include files and libraries are.  It also determines what the name of
-# the library is.  This code sets the following variables:
+# the library is.  The caller may set variable JAVA_HOME to specify a
+# Java installation prefix explicitly.
+#
+# This module sets the following result variables:
 #
 # ::
 #
@@ -91,22 +94,37 @@ macro(java_append_library_directories _var)
     endforeach()
 endmacro()
 
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindJavaCommon.cmake)
+
+# Save CMAKE_FIND_FRAMEWORK
+if(DEFINED CMAKE_FIND_FRAMEWORK)
+  set(_JNI_CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK})
+else()
+  unset(_JNI_CMAKE_FIND_FRAMEWORK)
+endif()
+
+if(_JAVA_HOME_EXPLICIT)
+  set(CMAKE_FIND_FRAMEWORK NEVER)
+endif()
+
+set(JAVA_AWT_LIBRARY_DIRECTORIES)
+if(_JAVA_HOME)
+  JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
+    ${_JAVA_HOME}/jre/lib/{libarch}
+    ${_JAVA_HOME}/jre/lib
+    ${_JAVA_HOME}/lib
+    ${_JAVA_HOME}
+    )
+endif()
 get_filename_component(java_install_version
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit;CurrentVersion]" NAME)
 
-set(JAVA_AWT_LIBRARY_DIRECTORIES
+list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/lib"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/lib"
   )
-
-file(TO_CMAKE_PATH "$ENV{JAVA_HOME}" _JAVA_HOME)
-
 JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
-  ${_JAVA_HOME}/jre/lib/{libarch}
-  ${_JAVA_HOME}/jre/lib
-  ${_JAVA_HOME}/lib
-  ${_JAVA_HOME}
   /usr/lib
   /usr/local/lib
   /usr/lib/jvm/java/lib
@@ -135,20 +153,21 @@ JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
 
 set(JAVA_JVM_LIBRARY_DIRECTORIES)
 foreach(dir ${JAVA_AWT_LIBRARY_DIRECTORIES})
-  set(JAVA_JVM_LIBRARY_DIRECTORIES
-    ${JAVA_JVM_LIBRARY_DIRECTORIES}
+  list(APPEND JAVA_JVM_LIBRARY_DIRECTORIES
     "${dir}"
     "${dir}/client"
     "${dir}/server"
     )
 endforeach()
 
-
-set(JAVA_AWT_INCLUDE_DIRECTORIES
+set(JAVA_AWT_INCLUDE_DIRECTORIES)
+if(_JAVA_HOME)
+  list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES ${_JAVA_HOME}/include)
+endif()
+list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.4;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\1.3;JavaHome]/include"
   "[HKEY_LOCAL_MACHINE\\SOFTWARE\\JavaSoft\\Java Development Kit\\${java_install_version};JavaHome]/include"
-  ${_JAVA_HOME}/include
   /usr/include
   /usr/local/include
   /usr/lib/java/include
@@ -173,7 +192,7 @@ foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
   get_filename_component(jpath "${JAVA_PROG}" PATH)
   foreach(JAVA_INC_PATH ../include ../java/include ../share/java/include)
     if(EXISTS ${jpath}/${JAVA_INC_PATH})
-      set(JAVA_AWT_INCLUDE_DIRECTORIES ${JAVA_AWT_INCLUDE_DIRECTORIES} "${jpath}/${JAVA_INC_PATH}")
+      list(APPEND JAVA_AWT_INCLUDE_DIRECTORIES "${jpath}/${JAVA_INC_PATH}")
     endif()
   endforeach()
   foreach(JAVA_LIB_PATH
@@ -181,54 +200,55 @@ foreach(JAVA_PROG "${JAVA_RUNTIME}" "${JAVA_COMPILE}" "${JAVA_ARCHIVE}")
     ../java/lib ../java/jre/lib ../java/jre/lib/i386
     ../share/java/lib ../share/java/jre/lib ../share/java/jre/lib/i386)
     if(EXISTS ${jpath}/${JAVA_LIB_PATH})
-      set(JAVA_AWT_LIBRARY_DIRECTORIES ${JAVA_AWT_LIBRARY_DIRECTORIES} "${jpath}/${JAVA_LIB_PATH}")
+      list(APPEND JAVA_AWT_LIBRARY_DIRECTORIES "${jpath}/${JAVA_LIB_PATH}")
     endif()
   endforeach()
 endforeach()
 
 if(APPLE)
-  if(EXISTS ~/Library/Frameworks/JavaVM.framework)
-    set(JAVA_HAVE_FRAMEWORK 1)
+  if(CMAKE_FIND_FRAMEWORK STREQUAL "ONLY")
+    set(_JNI_SEARCHES FRAMEWORK)
+  elseif(CMAKE_FIND_FRAMEWORK STREQUAL "NEVER")
+    set(_JNI_SEARCHES NORMAL)
+  elseif(CMAKE_FIND_FRAMEWORK STREQUAL "LAST")
+    set(_JNI_SEARCHES NORMAL FRAMEWORK)
+  else()
+    set(_JNI_SEARCHES FRAMEWORK NORMAL)
   endif()
-  if(EXISTS /Library/Frameworks/JavaVM.framework)
-    set(JAVA_HAVE_FRAMEWORK 1)
-  endif()
-  if(EXISTS /System/Library/Frameworks/JavaVM.framework)
-    set(JAVA_HAVE_FRAMEWORK 1)
-  endif()
-
-  if(JAVA_HAVE_FRAMEWORK)
-    if(NOT JAVA_AWT_LIBRARY)
-      set (JAVA_AWT_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
-    endif()
-
-    if(NOT JAVA_JVM_LIBRARY)
-      set (JAVA_JVM_LIBRARY "-framework JavaVM" CACHE FILEPATH "Java Frameworks" FORCE)
-    endif()
-
-    if(NOT JAVA_AWT_INCLUDE_PATH)
-      if(EXISTS /System/Library/Frameworks/JavaVM.framework/Headers/jawt.h)
-        set (JAVA_AWT_INCLUDE_PATH "/System/Library/Frameworks/JavaVM.framework/Headers" CACHE FILEPATH "jawt.h location" FORCE)
-      endif()
-    endif()
-
-    # If using "-framework JavaVM", prefer its headers *before* the others in
-    # JAVA_AWT_INCLUDE_DIRECTORIES... (*prepend* to the list here)
-    #
-    set(JAVA_AWT_INCLUDE_DIRECTORIES
-      ~/Library/Frameworks/JavaVM.framework/Headers
-      /Library/Frameworks/JavaVM.framework/Headers
-      /System/Library/Frameworks/JavaVM.framework/Headers
-      ${JAVA_AWT_INCLUDE_DIRECTORIES}
-      )
-  endif()
+  set(_JNI_FRAMEWORK_JVM NAMES JavaVM)
+  set(_JNI_FRAMEWORK_JAWT "${_JNI_FRAMEWORK_JVM}")
 else()
-  find_library(JAVA_AWT_LIBRARY jawt
-    PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
+  set(_JNI_SEARCHES NORMAL)
+endif()
+
+set(_JNI_NORMAL_JVM
+  NAMES jvm
+  PATHS ${JAVA_JVM_LIBRARY_DIRECTORIES}
   )
-  find_library(JAVA_JVM_LIBRARY NAMES jvm JavaVM
-    PATHS ${JAVA_JVM_LIBRARY_DIRECTORIES}
+
+set(_JNI_NORMAL_JAWT
+  NAMES jawt
+  PATHS ${JAVA_AWT_LIBRARY_DIRECTORIES}
   )
+
+foreach(search ${_JNI_SEARCHES})
+  find_library(JAVA_JVM_LIBRARY ${_JNI_${search}_JVM})
+  find_library(JAVA_AWT_LIBRARY ${_JNI_${search}_JAWT})
+  if(JAVA_JVM_LIBRARY)
+    break()
+  endif()
+endforeach()
+unset(_JNI_SEARCHES)
+unset(_JNI_FRAMEWORK_JVM)
+unset(_JNI_FRAMEWORK_JAWT)
+unset(_JNI_NORMAL_JVM)
+unset(_JNI_NORMAL_JAWT)
+
+# Find headers matching the library.
+if("${JAVA_JVM_LIBRARY};${JAVA_AWT_LIBRARY};" MATCHES "(/JavaVM.framework|-framework JavaVM);")
+  set(CMAKE_FIND_FRAMEWORK ONLY)
+else()
+  set(CMAKE_FIND_FRAMEWORK NEVER)
 endif()
 
 # add in the include path
@@ -251,6 +271,14 @@ find_path(JAVA_INCLUDE_PATH2 jni_md.h
 find_path(JAVA_AWT_INCLUDE_PATH jawt.h
   ${JAVA_INCLUDE_PATH}
 )
+
+# Restore CMAKE_FIND_FRAMEWORK
+if(DEFINED _JNI_CMAKE_FIND_FRAMEWORK)
+  set(CMAKE_FIND_FRAMEWORK ${_JNI_CMAKE_FIND_FRAMEWORK})
+  unset(_JNI_CMAKE_FIND_FRAMEWORK)
+else()
+  unset(CMAKE_FIND_FRAMEWORK)
+endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(JNI  DEFAULT_MSG  JAVA_AWT_LIBRARY JAVA_JVM_LIBRARY
