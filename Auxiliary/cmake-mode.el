@@ -266,38 +266,21 @@ the indentation.  Otherwise it retains the same position on the line"
 
 
 ;;;###autoload
-(defun cmake-command-run (type &optional topic)
+(defun cmake-command-run (type &optional topic buffer)
   "Runs the command cmake with the arguments specified.  The
 optional argument topic will be appended to the argument list."
   (interactive "s")
-  (let* ((bufname (concat "*CMake" type (if topic "-") topic "*"))
-         (buffer  (get-buffer bufname))
+  (let* ((bufname (if buffer buffer (concat "*CMake" type (if topic "-") topic "*")))
+         (buffer  (if (get-buffer bufname) (get-buffer bufname) (generate-new-buffer bufname)))
+         (command (concat cmake-mode-cmake-executable " " type " " topic))
+         ;; Turn of resizing of mini-windows for shell-command.
+         (resize-mini-windows nil)
          )
-    (if buffer
-        (display-buffer buffer 'not-this-window)
-      ;; Buffer doesn't exist.  Create it and fill it
-      (let ((buffer (generate-new-buffer bufname))
-            (command (concat cmake-mode-cmake-executable " " type " " topic))
-            )
-        (message "Running %s" command)
-        ;; We don't want the contents of the shell-command running to the
-        ;; minibuffer, so turn it off.  A value of nil means don't automatically
-        ;; resize mini-windows.
-        (setq resize-mini-windows-save resize-mini-windows)
-        (setq resize-mini-windows nil)
-        (shell-command command buffer)
-        ;; Save the original window, so that we can come back to it later.
-        ;; save-excursion doesn't seem to work for this.
-        (setq window (selected-window))
-        ;; We need to select it so that we can apply special modes to it
-        (select-window (display-buffer buffer 'not-this-window))
-        (cmake-mode)
-        (toggle-read-only t)
-        ;; Restore the original window
-        (select-window window)
-        (setq resize-mini-windows resize-mini-windows-save)
-        )
-      )
+    (shell-command command buffer)
+    (save-selected-window
+      (select-window (display-buffer buffer 'not-this-window))
+      (cmake-mode)
+      (toggle-read-only t))
     )
   )
 
@@ -309,30 +292,41 @@ optional argument topic will be appended to the argument list."
   )
 
 (defvar cmake-help-command-history nil "Topic read history.")
+(defvar cmake-help-commands '() "List of available topics for --help-command.")
+(defun cmake-command-list-as-list ()
+  "Run cmake --help-command-list and return a list where each element is a cmake command."
+  (let ((temp-buffer-name "*CMake Commands Temporary*"))
+    (save-window-excursion
+      (cmake-command-run "--help-command-list" nil temp-buffer-name)
+      (with-current-buffer temp-buffer-name
+        (cdr (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n" t)))))
+  )
 
 (require 'thingatpt)
 ;;;###autoload
-(defun cmake-get-topic (type)
+(defun cmake-get-command ()
   "Gets the topic from the minibuffer input.  The default is the word the cursor is on."
-  (interactive)
   (let* ((default-entry (word-at-point))
-         (input (read-string
-                 (format "CMake %s (default %s): " type default-entry) ; prompt
-                 nil ; initial input
+         (input (completing-read
+                 "CMake command: " ; prompt
+                 ((lambda ()
+                    (if cmake-help-commands cmake-help-commands
+                      (setq cmake-help-commands (cmake-command-list-as-list))))) ; completions
+                 nil ; predicate
+                 t   ; require-match
+                 default-entry ; initial-input
                  'cmake-help-command-history ; command history
-                 default-entry ; default-value
                  )))
     (if (string= input "")
         (error "No argument given")
       input))
   )
 
-
 ;;;###autoload
 (defun cmake-help-command ()
   "Prints out the help message corresponding to the command the cursor is on."
   (interactive)
-  (cmake-command-run "--help-command" (downcase (cmake-get-topic "command"))))
+  (cmake-command-run "--help-command" (downcase (cmake-get-command)) "*CMake Help*"))
 
 
 ;;;###autoload
