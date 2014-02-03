@@ -107,7 +107,7 @@ private:
   bool FindFullPathFailed;
 
   bool FindFullPath(std::string* error);
-  bool TryFullPath(const char* tryPath, const char* ext);
+  bool TryFullPath(const std::string& path, const std::string& ext);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 
