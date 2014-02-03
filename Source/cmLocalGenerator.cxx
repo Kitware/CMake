@@ -2187,7 +2187,11 @@ void cmLocalGenerator
     return;
     }
   AddVisibilityCompileOption(flags, target, this, lang);
-  AddInlineVisibilityCompileOption(flags, target, this);
+
+  if(strcmp(lang, "CXX") == 0)
+    {
+    AddInlineVisibilityCompileOption(flags, target, this);
+    }
 }
 
 //----------------------------------------------------------------------------
