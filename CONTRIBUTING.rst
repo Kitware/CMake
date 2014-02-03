@@ -4,6 +4,11 @@ Contributing to CMake
 Community
 =========
 
+CMake is maintained by `Kitware, Inc.`_ and developed in
+collaboration with a productive community of contributors.
+
+.. _`Kitware, Inc.`: http://www.kitware.com
+
 The preferred entry point for new contributors is the mailing list.
 Please subscribe and post to the `CMake Developers List`_ to offer
 contributions.  Regular and productive contributors may be invited
