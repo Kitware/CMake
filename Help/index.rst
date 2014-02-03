@@ -35,6 +35,7 @@ Reference Manuals
    /manual/cmake-packages.7
    /manual/cmake-policies.7
    /manual/cmake-properties.7
+   /manual/cmake-qt.7
    /manual/cmake-toolchains.7
    /manual/cmake-variables.7
 
