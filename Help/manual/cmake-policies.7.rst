@@ -15,15 +15,15 @@ across multiple releases.  When a new policy is introduced, newer CMake
 versions will begin to warn about the backward compatible behavior.  It
 is possible to disable the warning by explicitly requesting the OLD, or
 backward compatible behavior using the :command:`cmake_policy` command.
-It is also possible to request NEW, or non-backward compatible behavior
+It is also possible to request ``NEW``, or non-backward compatible behavior
 for a policy, also avoiding the warning.  Each policy can also be set to
-either NEW or OLD behavior explicitly on the command line with the
+either ``NEW`` or ``OLD`` behavior explicitly on the command line with the
 :variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable.
 
 The :command:`cmake_minimum_required` command does more than report an
 error if a too-old version of CMake is used to build a project.  It
 also sets all policies introduced in that CMake version or earlier to
-NEW behavior.  To manage policies without increasing the minimum required
+``NEW`` behavior.  To manage policies without increasing the minimum required
 CMake version, the :command:`if(POLICY)` command may be used:
 
 .. code-block:: cmake
@@ -32,7 +32,7 @@ CMake version, the :command:`if(POLICY)` command may be used:
     cmake_policy(SET CMP0990 NEW)
   endif()
 
-This has the effect of using the NEW behavior with newer CMake releases which
+This has the effect of using the ``NEW`` behavior with newer CMake releases which
 users may be using and not issuing a compatibility warning.
 
 The setting of a policy is confined in some cases to not propagate to the
