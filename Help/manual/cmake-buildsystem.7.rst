@@ -171,6 +171,9 @@ can be enabled to add the corresponding directories to the
 targets in multiple different directories convenient through use of the
 :command:`target_link_libraries` command.
 
+
+.. _`Target Usage Requirements`:
+
 Transitive Usage Requirements
 -----------------------------
 
@@ -641,6 +644,8 @@ Some target types do not represent outputs of the buildsystem, but only inputs
 such as external dependencies, aliases or other non-build artifacts.  Pseudo
 targets are not represented in the generated buildsystem.
 
+.. _`Imported Targets`:
+
 Imported Targets
 ----------------
 
@@ -676,6 +681,8 @@ accessible globally in the buildsystem.
 
 See the :manual:`cmake-packages(7)` manual for more on creating packages
 with :prop_tgt:`IMPORTED` targets.
+
+.. _`Alias Targets`:
 
 Alias Targets
 -------------
@@ -717,6 +724,8 @@ property from it:
   if(_aliased)
     message(STATUS "The name Upstream::lib1 is an ALIAS for ${_aliased}.")
   endif()
+
+.. _`Interface Libraries`:
 
 Interface Libraries
 -------------------
