@@ -269,7 +269,7 @@ protected:
   //==================================================================
   // Convenience routines that do nothing more than forward to
   // implementaitons
-  std::string Convert(const char* source,
+  std::string Convert(const std::string& source,
                       cmLocalGenerator::RelativeRoot relative,
                       cmLocalGenerator::OutputFormat output =
                       cmLocalGenerator::UNCHANGED,

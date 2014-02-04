@@ -106,11 +106,12 @@ public:
    */
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
   enum OutputFormat { UNCHANGED, MAKEFILE, SHELL, RESPONSE };
-  std::string ConvertToOutputFormat(const char* source, OutputFormat output);
-  std::string Convert(const char* remote, RelativeRoot local,
+  std::string ConvertToOutputFormat(const std::string& source,
+                                    OutputFormat output);
+  std::string Convert(const std::string& remote, RelativeRoot local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
-  std::string Convert(RelativeRoot remote, const char* local,
+  std::string Convert(RelativeRoot remote, const std::string& local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
 
@@ -125,7 +126,7 @@ public:
    * remote path must use forward slashes and not already be escaped
    * or quoted.
    */
-  std::string ConvertToOptionallyRelativeOutputPath(const char* remote);
+  std::string ConvertToOptionallyRelativeOutputPath(const std::string& remote);
 
   ///! set/get the parent generator
   cmLocalGenerator* GetParent(){return this->Parent;}
@@ -198,14 +199,14 @@ public:
                          std::string& dep);
 
   ///! for existing files convert to output path and short path if spaces
-  std::string ConvertToOutputForExisting(const char* remote,
+  std::string ConvertToOutputForExisting(const std::string& remote,
                                          RelativeRoot local = START_OUTPUT,
                                          OutputFormat format = SHELL);
 
   /** For existing path identified by RelativeRoot convert to output
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
-                                         const char* local = 0,
+                                         const std::string& local = "",
                                          OutputFormat format = SHELL);
 
   virtual std::string ConvertToIncludeReference(std::string const& path,
@@ -309,7 +310,8 @@ public:
    * or quoted.
    */
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const char* remote, bool force=false);
+                                    const std::string& remote,
+                                    bool force=false);
 
   /**
    * Get the relative path from the generator output directory to a
@@ -410,7 +412,7 @@ protected:
     std::ostream& os, const char* config,
     std::vector<std::string> const& configurationTypes);
 
-  std::string& CreateSafeUniqueObjectFileName(const char* sin,
+  std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
   void ComputeObjectMaxPath();
 
@@ -472,7 +474,7 @@ protected:
   cmIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;
 private:
-  std::string ConvertToOutputForExistingCommon(const char* remote,
+  std::string ConvertToOutputForExistingCommon(const std::string& remote,
                                                std::string const& result,
                                                OutputFormat format);
 

@@ -1230,7 +1230,7 @@ void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
+cmLocalGenerator::ConvertToOutputForExistingCommon(const std::string& remote,
                                                    std::string const& result,
                                                    OutputFormat format)
 {
@@ -1238,10 +1238,10 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
   // already exists, we can use a short-path to reference it without a
   // space.
   if(this->WindowsShell && result.find(' ') != result.npos &&
-     cmSystemTools::FileExists(remote))
+     cmSystemTools::FileExists(remote.c_str()))
     {
     std::string tmp;
-    if(cmSystemTools::GetShortPath(remote, tmp))
+    if(cmSystemTools::GetShortPath(remote.c_str(), tmp))
       {
       return this->Convert(tmp.c_str(), NONE, format, true);
       }
@@ -1253,7 +1253,7 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConvertToOutputForExisting(const char* remote,
+cmLocalGenerator::ConvertToOutputForExisting(const std::string& remote,
                                              RelativeRoot local,
                                              OutputFormat format)
 {
@@ -1267,7 +1267,7 @@ cmLocalGenerator::ConvertToOutputForExisting(const char* remote,
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
-                                             const char* local,
+                                             const std::string& local,
                                              OutputFormat format)
 {
   // Perform standard conversion.
@@ -2513,7 +2513,8 @@ cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(const char* remote)
+cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(
+                                                    const std::string& remote)
 {
   return this->Convert(remote, START_OUTPUT, SHELL, true);
 }
@@ -2533,7 +2534,7 @@ const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::Convert(const char* source,
+std::string cmLocalGenerator::Convert(const std::string& source,
                                       RelativeRoot relative,
                                       OutputFormat output,
                                       bool optional)
@@ -2585,7 +2586,7 @@ std::string cmLocalGenerator::Convert(const char* source,
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::ConvertToOutputFormat(const char* source,
+std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
                                                     OutputFormat output)
 {
   std::string result = source;
@@ -2627,7 +2628,7 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const char* source,
 
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::Convert(RelativeRoot remote,
-                                      const char* local,
+                                      const std::string& local,
                                       OutputFormat output,
                                       bool optional)
 {
@@ -2636,10 +2637,10 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
   // The relative root must have a path (i.e. not FULL or NONE)
   assert(remotePath != 0);
 
-  if(local && (!optional || this->UseRelativePaths))
+  if(!local.empty() && (!optional || this->UseRelativePaths))
     {
     std::vector<std::string> components;
-    cmSystemTools::SplitPath(local, components);
+    cmSystemTools::SplitPath(local.c_str(), components);
     std::string result = this->ConvertToRelativePath(components, remotePath);
     return this->ConvertToOutputFormat(result.c_str(), output);
     }
@@ -2722,7 +2723,8 @@ static bool cmLocalGeneratorNotAbove(const char* a, const char* b)
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
-                                        const char* in_remote, bool force)
+                                        const std::string& in_remote,
+                                        bool force)
 {
   // The path should never be quoted.
   assert(in_remote[0] != '\"');
@@ -2731,7 +2733,7 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
   assert(local.size() > 0 && !(local[local.size()-1] == ""));
 
   // If the path is already relative then just return the path.
-  if(!cmSystemTools::FileIsFullPath(in_remote))
+  if(!cmSystemTools::FileIsFullPath(in_remote.c_str()))
     {
     return in_remote;
     }
@@ -2750,11 +2752,11 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
     std::string local_path = cmSystemTools::JoinPath(local);
     if(!((cmLocalGeneratorNotAbove(local_path.c_str(),
                                    this->RelativePathTopBinary.c_str()) &&
-          cmLocalGeneratorNotAbove(in_remote,
+          cmLocalGeneratorNotAbove(in_remote.c_str(),
                                    this->RelativePathTopBinary.c_str())) ||
          (cmLocalGeneratorNotAbove(local_path.c_str(),
                                    this->RelativePathTopSource.c_str()) &&
-          cmLocalGeneratorNotAbove(in_remote,
+          cmLocalGeneratorNotAbove(in_remote.c_str(),
                                    this->RelativePathTopSource.c_str()))))
       {
       return in_remote;
@@ -2764,7 +2766,7 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
   // Identify the longest shared path component between the remote
   // path and the local path.
   std::vector<std::string> remote;
-  cmSystemTools::SplitPath(in_remote, remote);
+  cmSystemTools::SplitPath(in_remote.c_str(), remote);
   unsigned int common=0;
   while(common < remote.size() &&
         common < local.size() &&
@@ -2982,7 +2984,7 @@ bool cmLocalGeneratorCheckObjectName(std::string& objName,
 //----------------------------------------------------------------------------
 std::string&
 cmLocalGenerator
-::CreateSafeUniqueObjectFileName(const char* sin,
+::CreateSafeUniqueObjectFileName(const std::string& sin,
                                  std::string const& dir_max)
 {
   // Look for an existing mapped name for this object file.
