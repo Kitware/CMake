@@ -22,7 +22,6 @@ public:
             unsigned int majorVersionIntroduced,
             unsigned int minorVersionIntroduced,
             unsigned int patchVersionIntroduced,
-            unsigned int tweakVersionIntroduced,
             cmPolicies::PolicyStatus status)
   {
     if (!idString || !shortDescription)
@@ -37,7 +36,6 @@ public:
     this->MajorVersionIntroduced = majorVersionIntroduced;
     this->MinorVersionIntroduced = minorVersionIntroduced;
     this->PatchVersionIntroduced = patchVersionIntroduced;
-    this->TweakVersionIntroduced = tweakVersionIntroduced;
     this->Status = status;
   }
 
@@ -45,18 +43,16 @@ public:
   {
     cmOStringStream v;
     v << this->MajorVersionIntroduced << "." << this->MinorVersionIntroduced;
-    v << "." << this->PatchVersionIntroduced;
-    if(this->TweakVersionIntroduced > 0)
+    if(this->PatchVersionIntroduced > 0)
       {
-      v << "." << this->TweakVersionIntroduced;
+      v << "." << this->PatchVersionIntroduced;
       }
     return v.str();
   }
 
   bool IsPolicyNewerThan(unsigned int majorV,
                          unsigned int minorV,
-                         unsigned int patchV,
-                         unsigned int tweakV)
+                         unsigned int patchV)
   {
     if (majorV < this->MajorVersionIntroduced)
       {
@@ -74,15 +70,7 @@ public:
       {
       return false;
       }
-    if (patchV < this->PatchVersionIntroduced)
-      {
-      return true;
-      }
-    if (patchV > this->PatchVersionIntroduced)
-      {
-      return false;
-      }
-    return (tweakV < this->TweakVersionIntroduced);
+    return (patchV < this->PatchVersionIntroduced);
   }
 
   cmPolicies::PolicyID ID;
@@ -91,7 +79,6 @@ public:
   unsigned int MajorVersionIntroduced;
   unsigned int MinorVersionIntroduced;
   unsigned int PatchVersionIntroduced;
-  unsigned int TweakVersionIntroduced;
   cmPolicies::PolicyStatus Status;
 };
 
@@ -101,251 +88,251 @@ cmPolicies::cmPolicies()
   this->DefinePolicy(
     CMP0000, "CMP0000",
     "A minimum required CMake version must be specified.",
-    2,6,0,0, cmPolicies::WARN
+    2,6,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
     CMP0001, "CMP0001",
     "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.",
-    2,6,0,0, cmPolicies::WARN
+    2,6,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
     CMP0002, "CMP0002",
     "Logical target names must be globally unique.",
-    2,6,0,0, cmPolicies::WARN
+    2,6,0, cmPolicies::WARN
     );
 
   this->DefinePolicy(
     CMP0003, "CMP0003",
     "Libraries linked via full path no longer produce linker search paths.",
-    2,6,0,0, cmPolicies::WARN);
+    2,6,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0004, "CMP0004",
     "Libraries linked may not have leading or trailing whitespace.",
-    2,6,0,0, cmPolicies::WARN);
+    2,6,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0005, "CMP0005",
     "Preprocessor definition values are now escaped automatically.",
-    2,6,0,0, cmPolicies::WARN);
+    2,6,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0006, "CMP0006",
     "Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.",
-    2,6,0,0, cmPolicies::WARN);
+    2,6,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0007, "CMP0007",
     "list command no longer ignores empty elements.",
-    2,6,0,0, cmPolicies::WARN);
+    2,6,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0008, "CMP0008",
     "Libraries linked by full-path must have a valid library file name.",
-    2,6,1,0, cmPolicies::WARN);
+    2,6,1, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0009, "CMP0009",
     "FILE GLOB_RECURSE calls should not follow symlinks by default.",
-    2,6,2,0, cmPolicies::WARN);
+    2,6,2, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0010, "CMP0010",
     "Bad variable reference syntax is an error.",
-    2,6,3,0, cmPolicies::WARN);
+    2,6,3, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0011, "CMP0011",
     "Included scripts do automatic cmake_policy PUSH and POP.",
-    2,6,3,0, cmPolicies::WARN);
+    2,6,3, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0012, "CMP0012",
     "if() recognizes numbers and boolean constants.",
-    2,8,0,0, cmPolicies::WARN);
+    2,8,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0013, "CMP0013",
     "Duplicate binary directories are not allowed.",
-    2,8,0,0, cmPolicies::WARN);
+    2,8,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0014, "CMP0014",
     "Input directories must have CMakeLists.txt.",
-    2,8,0,0, cmPolicies::WARN);
+    2,8,0, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0015, "CMP0015",
     "link_directories() treats paths relative to the source dir.",
-    2,8,1,0, cmPolicies::WARN);
+    2,8,1, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0016, "CMP0016",
     "target_link_libraries() reports error if its only argument "
     "is not a target.",
-    2,8,3,0, cmPolicies::WARN);
+    2,8,3, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0017, "CMP0017",
     "Prefer files from the CMake module directory when including from there.",
-    2,8,4,0, cmPolicies::WARN);
+    2,8,4, cmPolicies::WARN);
 
     this->DefinePolicy(
     CMP0018, "CMP0018",
     "Ignore CMAKE_SHARED_LIBRARY_<Lang>_FLAGS variable.",
-    2,8,9,0, cmPolicies::WARN);
+    2,8,9, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0019, "CMP0019",
     "Do not re-expand variables in include and link information.",
-    2,8,11,0, cmPolicies::WARN);
+    2,8,11, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0020, "CMP0020",
     "Automatically link Qt executables to qtmain target on Windows.",
-    2,8,11,0, cmPolicies::WARN);
+    2,8,11, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0021, "CMP0021",
     "Fatal error on relative paths in INCLUDE_DIRECTORIES target property.",
-    2,8,12,0, cmPolicies::WARN);
+    2,8,12, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0022, "CMP0022",
     "INTERFACE_LINK_LIBRARIES defines the link interface.",
-    2,8,12,0, cmPolicies::WARN);
+    2,8,12, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0023, "CMP0023",
     "Plain and keyword target_link_libraries signatures cannot be mixed.",
-    2,8,12,0, cmPolicies::WARN);
+    2,8,12, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0024, "CMP0024",
     "Disallow include export result.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0025, "CMP0025",
     "Compiler id for Apple Clang is now AppleClang.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0026, "CMP0026",
     "Disallow use of the LOCATION target property.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0027, "CMP0027",
     "Conditionally linked imported targets with missing include directories.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0028, "CMP0028",
     "Double colon in target name means ALIAS or IMPORTED target.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0029, "CMP0029",
     "The subdir_depends command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0030, "CMP0030",
     "The use_mangled_mesa command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0031, "CMP0031",
     "The load_command command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0032, "CMP0032",
     "The output_required_files command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0033, "CMP0033",
     "The export_library_dependencies command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0034, "CMP0034",
     "The utility_source command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0035, "CMP0035",
     "The variable_requires command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0036, "CMP0036",
     "The build_name command should not be called.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0037, "CMP0037",
     "Target names should not be reserved and should match a validity pattern.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0038, "CMP0038",
     "Targets may not link directly to themselves.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0039, "CMP0039",
     "Utility targets may not have link dependencies.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0040, "CMP0040",
     "The target in the TARGET signature of add_custom_command() must exist.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0041, "CMP0041",
     "Error on relative include with generator expression.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0042, "CMP0042",
     "MACOSX_RPATH is enabled by default.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0043, "CMP0043",
     "Ignore COMPILE_DEFINITIONS_<Config> properties.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0044, "CMP0044",
     "Case sensitive <LANG>_COMPILER_ID generator expressions.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0045, "CMP0045",
     "Error on non-existent target in get_target_property.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0046, "CMP0046",
     "Error on non-existent dependency in add_dependencies.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0047, "CMP0047",
     "Use QCC compiler id for the qcc drivers on QNX.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 
   this->DefinePolicy(
     CMP0048, "CMP0048",
     "project() command manages VERSION variables.",
-    3,0,0,0, cmPolicies::WARN);
+    3,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
@@ -365,7 +352,6 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               unsigned int majorVersionIntroduced,
                               unsigned int minorVersionIntroduced,
                               unsigned int patchVersionIntroduced,
-                              unsigned int tweakVersionIntroduced,
                               cmPolicies::PolicyStatus status)
 {
   // a policy must be unique and can only be defined once
@@ -381,7 +367,6 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                                     majorVersionIntroduced,
                                     minorVersionIntroduced,
                                     patchVersionIntroduced,
-                                    tweakVersionIntroduced,
                                     status);
   this->PolicyStringMap[idString] = iD;
 }
@@ -451,7 +436,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   for(std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
                      = this->Policies.begin(); i != this->Policies.end(); ++i)
     {
-    if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer,tweakVer))
+    if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer))
       {
       if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
         {

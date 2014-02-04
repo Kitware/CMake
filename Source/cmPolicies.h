@@ -125,7 +125,6 @@ public:
                     unsigned int majorVersionIntroduced,
                     unsigned int minorVersionIntroduced,
                     unsigned int patchVersionIntroduced,
-                    unsigned int tweakVersionIntroduced,
                     cmPolicies::PolicyStatus status);
 
   ///! Set a policy level for this listfile
