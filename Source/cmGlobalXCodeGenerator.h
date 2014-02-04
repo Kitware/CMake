@@ -79,6 +79,9 @@ public:
 
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const;
+  ///! expand CFGIntDir
+  virtual std::string ExpandCFGIntDir(const std::string& str,
+                                      const std::string& config) const;
 
   void SetCurrentLocalGenerator(cmLocalGenerator*);
 

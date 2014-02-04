@@ -2272,14 +2272,24 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     std::string search_paths;
     std::vector<std::string> runtimeDirs;
     pcli->GetRPath(runtimeDirs, false);
+    // runpath dirs needs to be unique to prevent corruption
+    std::set<std::string> unique_dirs;
+
     for(std::vector<std::string>::const_iterator i = runtimeDirs.begin();
         i != runtimeDirs.end(); ++i)
       {
-      if(!search_paths.empty())
+      std::string runpath = *i;
+      runpath = this->ExpandCFGIntDir(runpath, configName);
+
+      if(unique_dirs.find(runpath) == unique_dirs.end())
         {
-        search_paths += " ";
+        unique_dirs.insert(runpath);
+        if(!search_paths.empty())
+          {
+          search_paths += " ";
+          }
+        search_paths += this->XCodeEscapePath(runpath.c_str());
         }
-      search_paths += this->XCodeEscapePath((*i).c_str());
       }
     if(!search_paths.empty())
       {
@@ -3673,6 +3683,30 @@ const char* cmGlobalXCodeGenerator::GetCMakeCFGIntDir() const
 {
   return this->XcodeVersion >= 21 ?
     "$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)" : ".";
+}
+
+std::string cmGlobalXCodeGenerator::ExpandCFGIntDir(const std::string& str,
+                                        const std::string& config) const
+{
+  std::string replace1 = "$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+  std::string replace2 = "$(CONFIGURATION)";
+
+  std::string tmp = str;
+  for(std::string::size_type i = tmp.find(replace1);
+      i != std::string::npos;
+      i = tmp.find(replace1, i))
+    {
+    tmp.replace(i, replace1.size(), config);
+    i += config.size();
+    }
+  for(std::string::size_type i = tmp.find(replace2);
+      i != std::string::npos;
+      i = tmp.find(replace2, i))
+    {
+    tmp.replace(i, replace2.size(), config);
+    i += config.size();
+    }
+  return tmp;
 }
 
 //----------------------------------------------------------------------------

@@ -84,6 +84,10 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
+
+  virtual std::string ExpandCFGIntDir(const std::string& str,
+                                      const std::string& config) const;
+
 protected:
   // Does this VS version link targets to each other if there are
   // dependencies in the SLN file?  This was done for VS versions

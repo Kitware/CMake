@@ -669,22 +669,36 @@ cmInstallTargetGenerator
     cli->GetRPath(oldRuntimeDirs, false);
     cli->GetRPath(newRuntimeDirs, true);
 
-    // Note: These are separate commands to avoid install_name_tool
-    // corruption on 10.6.
+    // Note: These paths are kept unique to avoid install_name_tool corruption.
+    std::set<std::string> runpaths;
     for(std::vector<std::string>::const_iterator i = oldRuntimeDirs.begin();
         i != oldRuntimeDirs.end(); ++i)
       {
-      os << indent << "execute_process(COMMAND " << installNameTool << "\n";
-      os << indent << "  -delete_rpath \"" << *i << "\"\n";
-      os << indent << "  \"" << toDestDirPath << "\")\n";
+      std::string runpath = this->Target->GetMakefile()->GetLocalGenerator()->
+        GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
+
+      if(runpaths.find(runpath) == runpaths.end())
+        {
+        runpaths.insert(runpath);
+        os << indent << "execute_process(COMMAND " << installNameTool << "\n";
+        os << indent << "  -delete_rpath \"" << runpath << "\"\n";
+        os << indent << "  \"" << toDestDirPath << "\")\n";
+        }
       }
 
+    runpaths.clear();
     for(std::vector<std::string>::const_iterator i = newRuntimeDirs.begin();
         i != newRuntimeDirs.end(); ++i)
       {
-      os << indent << "execute_process(COMMAND " << installNameTool << "\n";
-      os << indent << "  -add_rpath \"" << *i << "\"\n";
-      os << indent << "  \"" << toDestDirPath << "\")\n";
+      std::string runpath = this->Target->GetMakefile()->GetLocalGenerator()->
+        GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
+
+      if(runpaths.find(runpath) == runpaths.end())
+        {
+        os << indent << "execute_process(COMMAND " << installNameTool << "\n";
+        os << indent << "  -add_rpath \"" << runpath << "\"\n";
+        os << indent << "  \"" << toDestDirPath << "\")\n";
+        }
       }
     }
   else
