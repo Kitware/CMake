@@ -3852,34 +3852,27 @@ cmTarget* cmMakefile::FindTarget(const std::string& name,
 }
 
 //----------------------------------------------------------------------------
-cmTest* cmMakefile::CreateTest(const char* testName)
+cmTest* cmMakefile::CreateTest(const std::string& testName)
 {
-  if ( !testName )
-    {
-    return 0;
-    }
   cmTest* test = this->GetTest(testName);
   if ( test )
     {
     return test;
     }
   test = new cmTest(this);
-  test->SetName(testName);
+  test->SetName(testName.c_str());
   this->Tests[testName] = test;
   return test;
 }
 
 //----------------------------------------------------------------------------
-cmTest* cmMakefile::GetTest(const char* testName) const
+cmTest* cmMakefile::GetTest(const std::string& testName) const
 {
-  if(testName)
+  std::map<cmStdString, cmTest*>::const_iterator
+    mi = this->Tests.find(testName);
+  if(mi != this->Tests.end())
     {
-    std::map<cmStdString, cmTest*>::const_iterator
-      mi = this->Tests.find(testName);
-    if(mi != this->Tests.end())
-      {
-      return mi->second;
-      }
+    return mi->second;
     }
   return 0;
 }

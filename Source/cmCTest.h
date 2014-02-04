@@ -70,8 +70,8 @@ public:
   {
     PartInfo(): Enabled(false) {}
 
-    void SetName(const char* name) { this->Name = name; }
-    const char* GetName() const { return this->Name.c_str(); }
+    void SetName(const std::string& name) { this->Name = name; }
+    const std::string& GetName() const { return this->Name; }
 
     void Enable() { this->Enabled = true; }
     operator bool() const { return this->Enabled; }
@@ -349,7 +349,7 @@ public:
 
   //! Add overwrite to ctest configuration.
   // The format is key=value
-  void AddCTestConfigurationOverwrite(const char* encstr);
+  void AddCTestConfigurationOverwrite(const std::string& encstr);
 
   //! Create XML file that contains all the notes specified
   int GenerateNotesFile(const std::vector<cmStdString> &files);

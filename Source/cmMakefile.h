@@ -782,12 +782,12 @@ public:
   void AddMacro(const char* name, const char* signature);
 
   ///! Add a new cmTest to the list of tests for this makefile.
-  cmTest* CreateTest(const char* testName);
+  cmTest* CreateTest(const std::string& testName);
 
   /** Get a cmTest pointer for a given test name, if the name is
    *  not found, then a null pointer is returned.
    */
-  cmTest* GetTest(const char* testName) const;
+  cmTest* GetTest(const std::string& testName) const;
 
   /**
    * Get a list of macros as a ; separated string

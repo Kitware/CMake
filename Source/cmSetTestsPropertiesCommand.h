@@ -36,7 +36,7 @@ public:
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
 
-  static bool SetOneTest(const char *tname,
+  static bool SetOneTest(const std::string& tname,
                          std::vector<std::string> &propertyPairs,
                          cmMakefile *mf,
                          std::string &errors);

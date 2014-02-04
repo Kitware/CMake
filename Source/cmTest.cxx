@@ -38,12 +38,8 @@ cmListFileBacktrace const& cmTest::GetBacktrace() const
 }
 
 //----------------------------------------------------------------------------
-void cmTest::SetName(const char* name)
+void cmTest::SetName(const std::string& name)
 {
-  if ( !name )
-    {
-    name = "";
-    }
   this->Name = name;
 }
 

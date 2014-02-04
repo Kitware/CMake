@@ -2126,7 +2126,7 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
     {
     i++;
-    this->AddCTestConfigurationOverwrite(args[i].c_str());
+    this->AddCTestConfigurationOverwrite(args[i]);
     }
   if(this->CheckArgument(arg, "-A", "--add-notes") && i < args.size() - 1)
     {
@@ -2840,9 +2840,8 @@ void cmCTest::AddSubmitFile(Part part, const char* name)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::AddCTestConfigurationOverwrite(const char* encstr)
+void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
 {
-  std::string overStr = encstr;
   size_t epos = overStr.find("=");
   if ( epos == overStr.npos )
     {

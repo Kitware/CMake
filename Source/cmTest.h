@@ -31,8 +31,8 @@ public:
   ~cmTest();
 
   ///! Set the test name
-  void SetName(const char* name);
-  const char* GetName() const { return this->Name.c_str(); }
+  void SetName(const std::string& name);
+  std::string GetName() const { return this->Name; }
 
   void SetCommand(std::vector<std::string> const& command);
   std::vector<std::string> const& GetCommand() const
