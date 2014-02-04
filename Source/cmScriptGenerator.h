@@ -47,7 +47,7 @@ inline std::ostream& operator<<(std::ostream& os,
 class cmScriptGenerator
 {
 public:
-  cmScriptGenerator(const char* config_var,
+  cmScriptGenerator(const std::string& config_var,
                     std::vector<std::string> const& configurations);
   virtual ~cmScriptGenerator();
 

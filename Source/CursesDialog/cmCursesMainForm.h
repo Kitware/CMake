@@ -51,7 +51,7 @@ public:
    * Returns true if an entry with the given key is in the
    * list of current composites.
    */
-  bool LookForCacheEntry(const char* key);
+  bool LookForCacheEntry(const std::string& key);
 
   enum {
     MIN_WIDTH = 65,

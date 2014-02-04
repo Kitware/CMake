@@ -69,11 +69,11 @@ public:
   /* Check for unused variables in this scope */
   void CheckForUnusedVariables() const;
   /* Mark a variable as used */
-  void MarkVariableAsUsed(const char* var);
+  void MarkVariableAsUsed(const std::string& var);
   /* return true if a variable has been initialized */
-  bool VariableInitialized(const char* ) const;
+  bool VariableInitialized(const std::string& ) const;
   /* return true if a variable has been used */
-  bool VariableUsed(const char* ) const;
+  bool VariableUsed(const std::string& ) const;
   /** Return whether compatibility features needed for a version of
       the cache or lower should be enabled.  */
   bool NeedCacheCompatibility(int major, int minor) const;
@@ -283,9 +283,9 @@ public:
    * Add a variable definition to the build. This variable
    * can be used in CMake to refer to lists, directories, etc.
    */
-  void AddDefinition(const char* name, const char* value);
+  void AddDefinition(const std::string& name, const char* value);
   ///! Add a definition to this makefile and the global cmake cache.
-  void AddCacheDefinition(const char* name, const char* value,
+  void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc,
                           cmCacheManager::CacheEntryType type,
                           bool force = false);
@@ -293,15 +293,15 @@ public:
   /**
    * Add bool variable definition to the build.
    */
-  void AddDefinition(const char* name, bool);
+  void AddDefinition(const std::string& name, bool);
 
   /**
    * Remove a variable definition from the build.  This is not valid
    * for cache entries, and will only affect the current makefile.
    */
-  void RemoveDefinition(const char* name);
+  void RemoveDefinition(const std::string& name);
   ///! Remove a definition from the cache.
-  void RemoveCacheDefinition(const char* name);
+  void RemoveCacheDefinition(const std::string& name);
 
   /**
    * Specify the name of the project for this build.
@@ -587,10 +587,10 @@ public:
    * If the variable is not found in this makefile instance, the
    * cache is then queried.
    */
-  const char* GetDefinition(const char*) const;
-  const char* GetSafeDefinition(const char*) const;
-  const char* GetRequiredDefinition(const char* name) const;
-  bool IsDefinitionSet(const char*) const;
+  const char* GetDefinition(const std::string&) const;
+  const char* GetSafeDefinition(const std::string&) const;
+  const char* GetRequiredDefinition(const std::string& name) const;
+  bool IsDefinitionSet(const std::string&) const;
   /**
    * Get the list of all variables in the current space. If argument
    * cacheonly is specified and is greater than 0, then only cache
@@ -601,8 +601,8 @@ public:
   /** Test a boolean cache entry to see if it is true or false,
    *  returns false if no entry defined.
    */
-  bool IsOn(const char* name) const;
-  bool IsSet(const char* name) const;
+  bool IsOn(const std::string& name) const;
+  bool IsSet(const std::string& name) const;
 
   /** Return whether the target platform is 64-bit.  */
   bool PlatformIs64Bit() const;
@@ -837,7 +837,7 @@ public:
   // push and pop variable scopes
   void PushScope();
   void PopScope();
-  void RaiseScope(const cmStdString& var, const char *value);
+  void RaiseScope(const std::string& var, const char *value);
 
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop
@@ -882,7 +882,7 @@ protected:
   void AddGlobalLinkInformation(const char* name, cmTarget& target);
 
   // Check for a an unused variable
-  void CheckForUnused(const char* reason, const char* name) const;
+  void CheckForUnused(const char* reason, const std::string& name) const;
 
   std::string Prefix;
   std::vector<std::string> AuxSourceDirectories; //

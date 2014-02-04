@@ -79,7 +79,7 @@ public:
 
   // Get a definition from the makefile.  If it doesn't exist,
   // return the original string.
-  static const char* GetVariableOrString(const char* str,
+  static const char* GetVariableOrString(const std::string& str,
                                          const cmMakefile* mf);
 
   cmTypeMacro(cmIfCommand, cmCommand);

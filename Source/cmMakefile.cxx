@@ -1769,7 +1769,7 @@ cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
     }
 }
 
-void cmMakefile::AddDefinition(const char* name, const char* value)
+void cmMakefile::AddDefinition(const std::string& name, const char* value)
 {
   if (!value )
     {
@@ -1798,14 +1798,14 @@ void cmMakefile::AddDefinition(const char* name, const char* value)
 }
 
 
-void cmMakefile::AddCacheDefinition(const char* name, const char* value,
+void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     const char* doc,
                                     cmCacheManager::CacheEntryType type,
                                     bool force)
 {
   const char* val = value;
   cmCacheManager::CacheIterator it =
-    this->GetCacheManager()->GetCacheIterator(name);
+    this->GetCacheManager()->GetCacheIterator(name.c_str());
   if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
      it.Initialized())
     {
@@ -1845,7 +1845,7 @@ void cmMakefile::AddCacheDefinition(const char* name, const char* value,
 }
 
 
-void cmMakefile::AddDefinition(const char* name, bool value)
+void cmMakefile::AddDefinition(const std::string& name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
   if (this->Internal->VarUsageStack.size() &&
@@ -1880,12 +1880,12 @@ void cmMakefile::CheckForUnusedVariables() const
     }
 }
 
-void cmMakefile::MarkVariableAsUsed(const char* var)
+void cmMakefile::MarkVariableAsUsed(const std::string& var)
 {
   this->Internal->VarUsageStack.top().insert(var);
 }
 
-bool cmMakefile::VariableInitialized(const char* var) const
+bool cmMakefile::VariableInitialized(const std::string& var) const
 {
   if(this->Internal->VarInitStack.top().find(var) !=
       this->Internal->VarInitStack.top().end())
@@ -1895,7 +1895,7 @@ bool cmMakefile::VariableInitialized(const char* var) const
   return false;
 }
 
-bool cmMakefile::VariableUsed(const char* var) const
+bool cmMakefile::VariableUsed(const std::string& var) const
 {
   if(this->Internal->VarUsageStack.top().find(var) !=
       this->Internal->VarUsageStack.top().end())
@@ -1905,7 +1905,8 @@ bool cmMakefile::VariableUsed(const char* var) const
   return false;
 }
 
-void cmMakefile::CheckForUnused(const char* reason, const char* name) const
+void cmMakefile::CheckForUnused(const char* reason,
+                                const std::string& name) const
 {
   if (this->WarnUnused && !this->VariableUsed(name))
     {
@@ -1943,7 +1944,7 @@ void cmMakefile::CheckForUnused(const char* reason, const char* name) const
     }
 }
 
-void cmMakefile::RemoveDefinition(const char* name)
+void cmMakefile::RemoveDefinition(const std::string& name)
 {
   this->Internal->VarStack.top().Set(name, 0);
   if (this->Internal->VarUsageStack.size() &&
@@ -1963,7 +1964,7 @@ void cmMakefile::RemoveDefinition(const char* name)
 #endif
 }
 
-void cmMakefile::RemoveCacheDefinition(const char* name)
+void cmMakefile::RemoveCacheDefinition(const std::string& name)
 {
   this->GetCacheManager()->RemoveCacheEntry(name);
 }
@@ -2329,13 +2330,13 @@ void cmMakefile::ExpandVariablesCMP0019()
     }
 }
 
-bool cmMakefile::IsOn(const char* name) const
+bool cmMakefile::IsOn(const std::string& name) const
 {
   const char* value = this->GetDefinition(name);
   return cmSystemTools::IsOn(value);
 }
 
-bool cmMakefile::IsSet(const char* name) const
+bool cmMakefile::IsSet(const std::string& name) const
 {
   const char* value = this->GetDefinition(name);
   if ( !value )
@@ -2406,7 +2407,7 @@ bool cmMakefile::CanIWriteThisFile(const char* fileName) const
   return true;
 }
 
-const char* cmMakefile::GetRequiredDefinition(const char* name) const
+const char* cmMakefile::GetRequiredDefinition(const std::string& name) const
 {
   const char* ret = this->GetDefinition(name);
   if(!ret)
@@ -2414,13 +2415,13 @@ const char* cmMakefile::GetRequiredDefinition(const char* name) const
     cmSystemTools::Error("Error required internal CMake variable not "
                          "set, cmake may be not be built correctly.\n",
                          "Missing variable is:\n",
-                         name);
+                         name.c_str());
     return "";
     }
   return ret;
 }
 
-bool cmMakefile::IsDefinitionSet(const char* name) const
+bool cmMakefile::IsDefinitionSet(const std::string& name) const
 {
   const char* def = this->Internal->VarStack.top().Get(name);
   this->Internal->VarUsageStack.top().insert(name);
@@ -2442,7 +2443,7 @@ bool cmMakefile::IsDefinitionSet(const char* name) const
   return def?true:false;
 }
 
-const char* cmMakefile::GetDefinition(const char* name) const
+const char* cmMakefile::GetDefinition(const std::string& name) const
 {
   if (this->WarnUnused)
     {
@@ -2483,7 +2484,7 @@ const char* cmMakefile::GetDefinition(const char* name) const
   return def;
 }
 
-const char* cmMakefile::GetSafeDefinition(const char* def) const
+const char* cmMakefile::GetSafeDefinition(const std::string& def) const
 {
   const char* ret = this->GetDefinition(def);
   if(!ret)
@@ -3995,7 +3996,7 @@ void cmMakefile::PopScope()
     }
 }
 
-void cmMakefile::RaiseScope(const cmStdString& var, const char *varDef)
+void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
 {
   if (var.empty())
     {

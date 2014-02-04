@@ -138,7 +138,7 @@ protected:
   void AppendLinkDepends(std::vector<std::string>& depends);
 
   // Lookup the link rule for this target.
-  std::string GetLinkRule(const char* linkRuleVar);
+  std::string GetLinkRule(const cmStdString& linkRuleVar);
 
   /** In order to support parallel builds for custom commands with
       multiple outputs the outputs are given a serial order, and only

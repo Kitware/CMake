@@ -57,7 +57,7 @@ private:
   void AppendToFoundProperty(bool found);
   void SetModuleVariables(const std::string& components);
   bool FindModule(bool& found);
-  void AddFindDefinition(const char* var, const char* val);
+  void AddFindDefinition(const std::string& var, const char* val);
   void RestoreFindDefinitions();
   bool HandlePackageMode();
   bool FindConfig();

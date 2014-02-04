@@ -63,8 +63,8 @@ private:
   void AddUserGuessPath();
 
   // Helpers.
-  void AddCMakePrefixPath(const char* variable);
-  void AddEnvPrefixPath(const char* variable);
+  void AddCMakePrefixPath(const std::string& variable);
+  void AddEnvPrefixPath(const std::string& variable);
   void AddPrefixPaths(std::vector<std::string> const& in_paths,
                       PathType pathType);
 };

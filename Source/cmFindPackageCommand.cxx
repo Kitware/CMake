@@ -535,7 +535,8 @@ void cmFindPackageCommand::SetModuleVariables(const std::string& components)
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddFindDefinition(const char* var, const char* val)
+void cmFindPackageCommand::AddFindDefinition(const std::string& var,
+                                             const char* val)
 {
   if(const char* old = this->Makefile->GetDefinition(var))
     {

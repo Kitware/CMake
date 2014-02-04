@@ -99,12 +99,12 @@ public:
   virtual ~cmCPackGenerator();
 
   //! Set and get the options
-  void SetOption(const char* op, const char* value);
-  void SetOptionIfNotSet(const char* op, const char* value);
-  const char* GetOption(const char* op) const;
+  void SetOption(const std::string& op, const char* value);
+  void SetOptionIfNotSet(const std::string& op, const char* value);
+  const char* GetOption(const std::string& op) const;
   std::vector<std::string> GetOptions() const;
-  bool IsSet(const char* name) const;
-  bool IsOn(const char* name) const;
+  bool IsSet(const std::string& name) const;
+  bool IsOn(const std::string& name) const;
 
   //! Set the logger
   void SetLogger(cmCPackLog* log) { this->Logger = log; }

@@ -30,7 +30,8 @@ protected:
   void WriteStaticLibraryRules();
   void WriteSharedLibraryRules(bool relink);
   void WriteModuleLibraryRules(bool relink);
-  void WriteLibraryRules(const char *linkRule, const char *extraFlags,
+  void WriteLibraryRules(const std::string& linkRule,
+                         const std::string& extraFlags,
                          bool relink);
   // MacOSX Framework support methods
   void WriteFrameworkRules(bool relink);

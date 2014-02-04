@@ -53,7 +53,7 @@ public:
   {
   public:
     void Begin();
-    bool Find(const char*);
+    bool Find(const std::string&);
     bool IsAtEnd() const;
     void Next();
     const char *GetName() const {
@@ -129,7 +129,7 @@ public:
   cmCacheManager::CacheIterator GetCacheIterator(const char *key=0);
 
   ///! Remove an entry from the cache
-  void RemoveCacheEntry(const char* key);
+  void RemoveCacheEntry(const std::string& key);
 
   ///! Get the number of entries in the cache
   int GetSize() {
@@ -142,7 +142,7 @@ public:
                          CacheEntryType& type);
 
   ///! Get a value from the cache given a key
-  const char* GetCacheValue(const char* key) const;
+  const char* GetCacheValue(const std::string& key) const;
 
   /** Get the version of CMake that wrote the cache.  */
   unsigned int GetCacheMajorVersion() const
@@ -153,11 +153,11 @@ public:
 
 protected:
   ///! Add an entry into the cache
-  void AddCacheEntry(const char* key, const char* value,
+  void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString, CacheEntryType type);
 
   ///! Get a cache entry object for a key
-  CacheEntry *GetCacheEntry(const char *key);
+  CacheEntry *GetCacheEntry(const std::string& key);
   ///! Clean out the CMakeFiles directory if no CMakeCache.txt
   void CleanCMakeFiles(const char* path);
 

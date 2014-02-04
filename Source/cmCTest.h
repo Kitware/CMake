@@ -172,7 +172,7 @@ public:
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
   static std::string CleanString(const std::string& str);
-  std::string GetCTestConfiguration(const char *name);
+  std::string GetCTestConfiguration(const std::string& name);
   void SetCTestConfiguration(const char *name, const char* value);
   void EmptyCTestConfiguration();
 
@@ -185,9 +185,9 @@ public:
   //! Set the notes files to be created.
   void SetNotesFiles(const char* notes);
 
-  void PopulateCustomVector(cmMakefile* mf, const char* definition,
+  void PopulateCustomVector(cmMakefile* mf, const std::string& definition,
     VectorOfStrings& vec);
-  void PopulateCustomInteger(cmMakefile* mf, const char* def,
+  void PopulateCustomInteger(cmMakefile* mf, const std::string& def,
     int& val);
 
   ///! Get the current time as string
@@ -332,7 +332,7 @@ public:
    * Set the CTest variable from CMake variable
    */
   bool SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
-    const char* dconfig, const char* cmake_var);
+    const char* dconfig, const std::string& cmake_var);
 
   //! Make string safe to be send as an URL
   static std::string MakeURLSafe(const std::string&);

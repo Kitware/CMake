@@ -1202,7 +1202,7 @@ struct SaveCacheEntry
   cmCacheManager::CacheEntryType type;
 };
 
-int cmake::HandleDeleteCacheVariables(const char* var)
+int cmake::HandleDeleteCacheVariables(const std::string& var)
 {
   std::vector<std::string> argsSplit;
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
@@ -1725,7 +1725,7 @@ int cmake::Generate()
   return 0;
 }
 
-void cmake::AddCacheEntry(const char* key, const char* value,
+void cmake::AddCacheEntry(const std::string& key, const char* value,
                           const char* helpString,
                           int type)
 {
@@ -1734,7 +1734,7 @@ void cmake::AddCacheEntry(const char* key, const char* value,
                                     cmCacheManager::CacheEntryType(type));
 }
 
-const char* cmake::GetCacheDefinition(const char* name) const
+const char* cmake::GetCacheDefinition(const std::string& name) const
 {
   return this->CacheManager->GetCacheValue(name);
 }
@@ -2676,7 +2676,7 @@ int cmake::Build(const std::string& dir,
                     nativeOptions);
 }
 
-void cmake::WatchUnusedCli(const char* var)
+void cmake::WatchUnusedCli(const std::string& var)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
@@ -2687,7 +2687,7 @@ void cmake::WatchUnusedCli(const char* var)
 #endif
 }
 
-void cmake::UnwatchUnusedCli(const char* var)
+void cmake::UnwatchUnusedCli(const std::string& var)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch->RemoveWatch(var, cmWarnUnusedCliWarning);

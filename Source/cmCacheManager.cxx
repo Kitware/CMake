@@ -650,7 +650,7 @@ void cmCacheManager::OutputHelpString(std::ostream& fout,
     }
 }
 
-void cmCacheManager::RemoveCacheEntry(const char* key)
+void cmCacheManager::RemoveCacheEntry(const std::string& key)
 {
   CacheEntryMap::iterator i = this->Cache.find(key);
   if(i != this->Cache.end())
@@ -660,7 +660,8 @@ void cmCacheManager::RemoveCacheEntry(const char* key)
 }
 
 
-cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(const char* key)
+cmCacheManager::CacheEntry *cmCacheManager::GetCacheEntry(
+    const std::string& key)
 {
   CacheEntryMap::iterator i = this->Cache.find(key);
   if(i != this->Cache.end())
@@ -676,7 +677,7 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(
   return CacheIterator(*this, key);
 }
 
-const char* cmCacheManager::GetCacheValue(const char* key) const
+const char* cmCacheManager::GetCacheValue(const std::string& key) const
 {
   CacheEntryMap::const_iterator i = this->Cache.find(key);
   if(i != this->Cache.end() &&
@@ -708,7 +709,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 }
 
 
-void cmCacheManager::AddCacheEntry(const char* key,
+void cmCacheManager::AddCacheEntry(const std::string& key,
                                    const char* value,
                                    const char* helpString,
                                    CacheEntryType type)
@@ -767,7 +768,7 @@ void cmCacheManager::CacheIterator::Begin()
   this->Position = this->Container.Cache.begin();
 }
 
-bool cmCacheManager::CacheIterator::Find(const char* key)
+bool cmCacheManager::CacheIterator::Find(const std::string& key)
 {
   this->Position = this->Container.Cache.find(key);
   return !this->IsAtEnd();

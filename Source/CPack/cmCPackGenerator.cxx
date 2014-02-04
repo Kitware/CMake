@@ -972,7 +972,7 @@ bool cmCPackGenerator::ReadListFile(const char* moduleName)
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenerator::SetOptionIfNotSet(const char* op,
+void cmCPackGenerator::SetOptionIfNotSet(const std::string& op,
   const char* value)
 {
   const char* def = this->MakefileMap->GetDefinition(op);
@@ -984,12 +984,8 @@ void cmCPackGenerator::SetOptionIfNotSet(const char* op,
 }
 
 //----------------------------------------------------------------------
-void cmCPackGenerator::SetOption(const char* op, const char* value)
+void cmCPackGenerator::SetOption(const std::string& op, const char* value)
 {
-  if ( !op )
-    {
-    return;
-    }
   if ( !value )
     {
     this->MakefileMap->RemoveDefinition(op);
@@ -1176,19 +1172,19 @@ int cmCPackGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-bool cmCPackGenerator::IsSet(const char* name) const
+bool cmCPackGenerator::IsSet(const std::string& name) const
 {
   return this->MakefileMap->IsSet(name);
 }
 
 //----------------------------------------------------------------------
-bool cmCPackGenerator::IsOn(const char* name) const
+bool cmCPackGenerator::IsOn(const std::string& name) const
 {
   return cmSystemTools::IsOn(GetOption(name));
 }
 
 //----------------------------------------------------------------------
-const char* cmCPackGenerator::GetOption(const char* op) const
+const char* cmCPackGenerator::GetOption(const std::string& op) const
 {
   const char* ret = this->MakefileMap->GetDefinition(op);
   if(!ret)

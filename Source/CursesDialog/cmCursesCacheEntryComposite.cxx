@@ -19,9 +19,10 @@
 #include "cmCursesDummyWidget.h"
 #include "../cmSystemTools.h"
 
-cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
-                                                         int labelwidth,
-                                                         int entrywidth) :
+cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
+                                                        const std::string& key,
+                                                        int labelwidth,
+                                                        int entrywidth) :
   Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
@@ -31,7 +32,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const char* key, const cmCacheManager::CacheIterator& it, bool isNew,
+  const std::string& key, const cmCacheManager::CacheIterator& it, bool isNew,
   int labelwidth, int entrywidth)
   : Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {

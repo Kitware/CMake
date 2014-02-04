@@ -35,10 +35,10 @@ public:
 
   /** Get the value associated with a key; null if none.
       Store the result locally if it came from a parent.  */
-  const char* Get(const char* key);
+  const char* Get(const std::string& key);
 
   /** Set (or unset if null) a value associated with a key.  */
-  const char* Set(const char* key, const char* value);
+  const char* Set(const std::string& key, const char* value);
 
   /** Get the set of all local keys.  */
   std::set<cmStdString> LocalKeys() const;
@@ -69,8 +69,8 @@ private:
   MapType Map;
 
   // Internal query and update methods.
-  Def const& GetInternal(const char* key);
-  Def const& SetInternal(const char* key, Def const& def);
+  Def const& GetInternal(const std::string& key);
+  Def const& SetInternal(const std::string& key, Def const& def);
 
   // Implementation of Closure() method.
   struct ClosureTag {};

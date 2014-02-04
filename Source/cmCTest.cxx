@@ -2593,13 +2593,9 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
+void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
   VectorOfStrings& vec)
 {
-  if ( !def)
-    {
-    return;
-    }
   const char* dval = mf->GetDefinition(def);
   if ( !dval )
     {
@@ -2620,12 +2616,9 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
 }
 
 //----------------------------------------------------------------------
-void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
+void cmCTest::PopulateCustomInteger(cmMakefile* mf, const std::string& def,
+  int& val)
 {
-  if ( !def)
-    {
-    return;
-    }
   const char* dval = mf->GetDefinition(def);
   if ( !dval )
     {
@@ -2702,7 +2695,7 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
 }
 
 //----------------------------------------------------------------------
-std::string cmCTest::GetCTestConfiguration(const char *name)
+std::string cmCTest::GetCTestConfiguration(const std::string& name)
 {
   if ( this->CTestConfigurationOverwrites.find(name) !=
     this->CTestConfigurationOverwrites.end() )
@@ -2877,7 +2870,7 @@ void cmCTest::SetConfigType(const char* ct)
 
 //----------------------------------------------------------------------
 bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
-  const char* dconfig, const char* cmake_var)
+  const char* dconfig, const std::string& cmake_var)
 {
   const char* ctvar;
   ctvar = mf->GetDefinition(cmake_var);

@@ -203,9 +203,9 @@ class cmake
   /**
    * Given a variable name, return its value (as a string).
    */
-  const char* GetCacheDefinition(const char*) const;
+  const char* GetCacheDefinition(const std::string&) const;
   ///! Add an entry into the cache
-  void AddCacheEntry(const char* key, const char* value,
+  void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString,
                      int type);
 
@@ -357,12 +357,12 @@ class cmake
             const std::vector<std::string>& nativeOptions,
             bool clean);
 
-  void UnwatchUnusedCli(const char* var);
-  void WatchUnusedCli(const char* var);
+  void UnwatchUnusedCli(const std::string& var);
+  void WatchUnusedCli(const std::string& var);
 protected:
   void RunCheckForUnusedVariables();
   void InitializeProperties();
-  int HandleDeleteCacheVariables(const char* var);
+  int HandleDeleteCacheVariables(const std::string& var);
   cmPropertyMap Properties;
   std::set<std::pair<cmStdString,cmProperty::ScopeType> > AccessedProperties;
 

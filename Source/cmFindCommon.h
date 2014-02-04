@@ -63,7 +63,7 @@ protected:
   void AddPathSuffix(std::string const& arg);
   void AddUserPath(std::string const& p,
                    std::vector<std::string>& paths);
-  void AddCMakePath(const char* variable);
+  void AddCMakePath(const std::string& variable);
   void AddEnvPath(const char* variable);
   void AddPathsInternal(std::vector<std::string> const& in_paths,
                         PathType pathType);

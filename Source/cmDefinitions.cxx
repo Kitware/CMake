@@ -28,7 +28,7 @@ void cmDefinitions::Reset(cmDefinitions* parent)
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const&
-cmDefinitions::GetInternal(const char* key)
+cmDefinitions::GetInternal(const std::string& key)
 {
   MapType::const_iterator i = this->Map.find(key);
   if(i != this->Map.end())
@@ -46,7 +46,7 @@ cmDefinitions::GetInternal(const char* key)
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const&
-cmDefinitions::SetInternal(const char* key, Def const& def)
+cmDefinitions::SetInternal(const std::string& key, Def const& def)
 {
   if(this->Up || def.Exists)
     {
@@ -71,14 +71,14 @@ cmDefinitions::SetInternal(const char* key, Def const& def)
 }
 
 //----------------------------------------------------------------------------
-const char* cmDefinitions::Get(const char* key)
+const char* cmDefinitions::Get(const std::string& key)
 {
   Def const& def = this->GetInternal(key);
   return def.Exists? def.c_str() : 0;
 }
 
 //----------------------------------------------------------------------------
-const char* cmDefinitions::Set(const char* key, const char* value)
+const char* cmDefinitions::Set(const std::string& key, const char* value)
 {
   Def const& def = this->SetInternal(key, Def(value));
   return def.Exists? def.c_str() : 0;

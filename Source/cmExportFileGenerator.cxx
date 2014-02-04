@@ -151,7 +151,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::PopulateInterfaceProperty(
                       const std::string& propName,
-                      const cmStdString& outputName,
+                      const std::string& outputName,
                       cmTarget *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
                       ImportPropertyMap &properties,

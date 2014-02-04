@@ -145,7 +145,7 @@ public:
                        std::string const& lang, const char *config);
   void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
                                 const char *lang);
-  void AddConfigVariableFlags(std::string& flags, const char* var,
+  void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const char* config);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);

@@ -15,7 +15,7 @@
 
 //----------------------------------------------------------------------------
 cmScriptGenerator
-::cmScriptGenerator(const char* config_var,
+::cmScriptGenerator(const std::string& config_var,
                     std::vector<std::string> const& configurations):
   RuntimeConfigVariable(config_var),
   Configurations(configurations),

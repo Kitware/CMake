@@ -174,7 +174,7 @@ protected:
   std::set<cmTarget*> ExportedTargets;
 
 private:
-  void PopulateInterfaceProperty(const std::string&, const cmStdString&,
+  void PopulateInterfaceProperty(const std::string&, const std::string&,
                                  cmTarget *target,
                                  cmGeneratorExpression::PreprocessContext,
                                  ImportPropertyMap &properties,
