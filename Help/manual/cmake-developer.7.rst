@@ -703,7 +703,7 @@ If the package provides Xxx_INCLUDE_DIRS and Xxx_LIBRARIES variables, the
 include dirs and libraries for all components which were requested and which
 have been found should be added to those two variables.
 
-To get this behaviour you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS()
+To get this behavior you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS()
 macro, as an example see FindJPEG.cmake.
 
 For internal implementation, it's a generally accepted convention that

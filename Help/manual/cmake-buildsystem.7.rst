@@ -634,7 +634,7 @@ target at a time.  The commands :command:`add_definitions`,
 a similar function, but operate at directory scope instead of target
 scope for convenience.
 
-Psuedo Targets
+Pseudo Targets
 ==============
 
 Some target types do not represent outputs of the buildsystem, but only inputs
