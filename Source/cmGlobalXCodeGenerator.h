@@ -135,7 +135,7 @@ private:
   // correctly.  All objects created are stored in this->XCodeObjects.
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
-  cmXCodeObject* CreateString(const char* s);
+  cmXCodeObject* CreateString(const std::string& s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmTarget& target,
                                    cmXCodeObject* buildPhases);

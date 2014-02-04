@@ -613,7 +613,7 @@ cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
 
 //----------------------------------------------------------------------------
 cmXCodeObject*
-cmGlobalXCodeGenerator::CreateString(const char* s)
+cmGlobalXCodeGenerator::CreateString(const std::string& s)
 {
   cmXCodeObject* obj = this->CreateObject(cmXCodeObject::STRING);
   obj->SetString(s);

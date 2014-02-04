@@ -86,7 +86,7 @@ private:
   void Print(const char* place, const char* str);
   void SafePrintMissing(const char* str, int line, int cnt);
 
-  char* AddString(const char* str);
+  char* AddString(const std::string& str);
 
   void CleanupParser();
   void SetError(std::string const& msg);

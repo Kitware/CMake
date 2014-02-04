@@ -37,7 +37,7 @@ public:
   Type GetType() { return this->TypeValue;}
   PBXType GetIsA() { return this->IsA;}
 
-  void SetString(const char* s);
+  void SetString(const std::string& s);
   const char* GetString()
     {
       return this->String.c_str();

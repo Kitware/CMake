@@ -266,7 +266,7 @@ void cmXCodeObject::PrintString(std::ostream& os) const
 }
 
 //----------------------------------------------------------------------------
-void cmXCodeObject::SetString(const char* s)
+void cmXCodeObject::SetString(const std::string& s)
 {
   this->String = s;
 }
