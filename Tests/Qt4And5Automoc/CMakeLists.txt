@@ -2,8 +2,13 @@ cmake_minimum_required(VERSION 2.8.12)
 
 project(Qt4And5Automoc)
 
-find_package(Qt4 REQUIRED)
-find_package(Qt5Core REQUIRED)
+if (QT_REVERSE_FIND_ORDER)
+  find_package(Qt5Core REQUIRED)
+  find_package(Qt4 REQUIRED)
+else()
+  find_package(Qt4 REQUIRED)
+  find_package(Qt5Core REQUIRED)
+endif()
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)

@@ -1279,8 +1279,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
   const std::vector<std::string>& headerExtensions =
                                                makefile->GetHeaderExtensions();
 
-  std::vector<std::string> includedUis;
-  std::vector<std::string> skippedUis;
+  std::map<std::string, std::string> includedUis;
+  std::map<std::string, std::string> skippedUis;
   std::vector<std::string> uicSkipped;
   cmSystemTools::ExpandListArgument(this->SkipUic, uicSkipped);
 
@@ -1290,7 +1290,8 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     {
     const bool skipUic = std::find(uicSkipped.begin(), uicSkipped.end(), *it)
         != uicSkipped.end();
-    std::vector<std::string>& uiFiles = skipUic ? skippedUis : includedUis;
+    std::map<std::string, std::string>& uiFiles
+                                          = skipUic ? skippedUis : includedUis;
     const std::string &absFilename = *it;
     if (this->Verbose)
       {
@@ -1350,11 +1351,12 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     {
     this->GenerateMoc(it->first, it->second);
     }
-  for(std::vector<std::string>::const_iterator it = includedUis.begin();
+  for(std::map<std::string, std::string>::const_iterator
+      it = includedUis.begin();
       it != includedUis.end();
       ++it)
     {
-    this->GenerateUi(*it);
+    this->GenerateUi(it->first, it->second);
     }
 
   if(!this->RccExecutable.empty())
@@ -1431,7 +1433,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs,
-                              std::vector<std::string> &includedUis)
+                              std::map<std::string, std::string> &includedUis)
 {
   cmsys::RegularExpression mocIncludeRegExp(
               "[\n][ \t]*#[ \t]*include[ \t]+"
@@ -1619,7 +1621,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
 void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
                               const std::vector<std::string>& headerExtensions,
                               std::map<std::string, std::string>& includedMocs,
-                              std::vector<std::string>& includedUis)
+                              std::map<std::string, std::string>& includedUis)
 {
   cmsys::RegularExpression mocIncludeRegExp(
               "[\n][ \t]*#[ \t]*include[ \t]+"
@@ -1737,7 +1739,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
 
 
 void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
-                              std::vector<std::string>& includedUis)
+                              std::map<std::string, std::string>& includedUis)
 {
   if (this->UicExecutable.empty())
     {
@@ -1754,9 +1756,9 @@ void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
 }
 
 
-void cmQtAutoGenerators::ParseForUic(const std::string&,
+void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
                                      const std::string& contentsString,
-                                     std::vector<std::string>& includedUis)
+                              std::map<std::string, std::string>& includedUis)
 {
   if (this->UicExecutable.empty())
     {
@@ -1767,6 +1769,9 @@ void cmQtAutoGenerators::ParseForUic(const std::string&,
               "[\"<](([^ \">]+/)?ui_[^ \">/]+\\.h)[\">]");
 
   std::string::size_type matchOffset = 0;
+
+  const std::string absPath = cmsys::SystemTools::GetFilenamePath(
+                   cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
 
   matchOffset = 0;
   if ((strstr(contentsString.c_str(), "ui_") != NULL)
@@ -1783,7 +1788,7 @@ void cmQtAutoGenerators::ParseForUic(const std::string&,
       // finding the correct header, so we need to remove the ui_ part
       basename = basename.substr(3);
 
-      includedUis.push_back(basename);
+      includedUis[absPath] = basename;
 
       matchOffset += uiIncludeRegExp.end();
       } while(uiIncludeRegExp.find(contentsString.c_str() + matchOffset));
@@ -1831,7 +1836,7 @@ cmQtAutoGenerators::SearchHeadersForCppFile(const std::string& absFilename,
 void cmQtAutoGenerators::ParseHeaders(const std::set<std::string>& absHeaders,
                         const std::map<std::string, std::string>& includedMocs,
                         std::map<std::string, std::string>& notIncludedMocs,
-                        std::vector<std::string>& includedUis)
+                        std::map<std::string, std::string>& includedUis)
 {
   for(std::set<std::string>::const_iterator hIt=absHeaders.begin();
       hIt!=absHeaders.end();
@@ -1939,7 +1944,8 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   return false;
 }
 
-bool cmQtAutoGenerators::GenerateUi(const std::string& uiFileName)
+bool cmQtAutoGenerators::GenerateUi(const std::string& path,
+                                    const std::string& uiFileName)
 {
   if (!cmsys::SystemTools::FileExists(this->Builddir.c_str(), false))
     {
@@ -1947,7 +1953,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& uiFileName)
     }
 
   std::string ui_output_file = "ui_" + uiFileName + ".h";
-  std::string ui_input_file = this->Srcdir + uiFileName + ".ui";
+  std::string ui_input_file = path + uiFileName + ".ui";
 
   int sourceNewerThanUi = 0;
   bool success = cmsys::SystemTools::FileTimeCompare(ui_input_file.c_str(),
