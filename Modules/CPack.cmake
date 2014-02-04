@@ -174,7 +174,7 @@
 #  create Start Menu shortcuts. For example, setting this to the list
 #  ccmake;CMake will create a shortcut named "CMake" that will execute the
 #  installed executable ccmake. Not all CPack generators use it (at least
-#  NSIS and OSXX11 do).
+#  NSIS, WIX and OSXX11 do).
 #
 # .. variable:: CPACK_STRIP_FILES
 #
@@ -261,6 +261,8 @@
 # .. variable:: CPACK_CREATE_DESKTOP_LINKS
 #
 #  List of desktop links to create.
+#  Each desktop link requires a corresponding start menu shortcut
+#  as created by :variable:`CPACK_PACKAGE_EXECUTABLES`.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.

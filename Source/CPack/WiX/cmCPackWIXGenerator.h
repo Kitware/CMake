@@ -22,8 +22,13 @@
 
 struct cmWIXShortcut
 {
+  cmWIXShortcut()
+    :desktop(false)
+    {}
+
   std::string textLabel;
   std::string workingDirectoryId;
+  bool desktop;
 };
 
 class cmWIXSourceWriter;
@@ -35,6 +40,8 @@ class cmCPackWIXGenerator : public cmCPackGenerator
 {
 public:
   cmCPackTypeMacro(cmCPackWIXGenerator, cmCPackGenerator);
+
+  cmCPackWIXGenerator();
 
 protected:
   virtual int InitializeInternal();
@@ -133,6 +140,7 @@ private:
     cmWIXSourceWriter& fileDefinitions,
     cmWIXSourceWriter& featureDefinitions,
     const std::vector<std::string>& pkgExecutables,
+    const std::vector<std::string>& desktopExecutables,
     shortcut_map_t& shortcutMap);
 
   bool RequireOption(const std::string& name, std::string& value) const;
@@ -165,6 +173,8 @@ private:
 
   void CreateStartMenuFolder(cmWIXSourceWriter& directoryDefinitions);
 
+  void CreateDesktopFolder(cmWIXSourceWriter& directoryDefinitions);
+
   void LoadPatchFragments(const std::string& patchFilePath);
 
   void ApplyPatchFragment(const std::string& id, cmWIXSourceWriter& writer);
@@ -180,6 +190,8 @@ private:
   extension_set_t LightExtensions;
 
   cmWIXPatchParser::fragment_map_t Fragments;
+
+  bool HasDesktopShortcuts;
 };
 
 #endif
