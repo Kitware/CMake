@@ -494,7 +494,7 @@ public:
    * Set a regular expression that include files that are not found
    * must match in order to be considered a problem.
    */
-  void SetComplainRegularExpression(const char* regex)
+  void SetComplainRegularExpression(const std::string& regex)
     {
       this->ComplainFileRegularExpression = regex;
     }
