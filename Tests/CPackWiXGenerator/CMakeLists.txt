@@ -49,6 +49,11 @@ set(CPACK_PACKAGE_EXECUTABLES
   "my-other-app" "Second CPack WiX Test"
 )
 
+set(CPACK_CREATE_DESKTOP_LINKS
+  "my-libapp"
+  "my-other-app"
+)
+
 set(CPACK_WIX_PATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/patch.xml")
 
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/license.txt")
