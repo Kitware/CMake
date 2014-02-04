@@ -245,12 +245,14 @@ protected:
    * @return true if component installation is supported and wanted.
    */
   virtual bool WantsComponentInstallation() const;
-  virtual cmCPackInstallationType* GetInstallationType(const char *projectName,
-                                                       const char* name);
-  virtual cmCPackComponent* GetComponent(const char *projectName,
-                                         const char* name);
-  virtual cmCPackComponentGroup* GetComponentGroup(const char *projectName,
-                                                   const char* name);
+  virtual cmCPackInstallationType* GetInstallationType(
+                                                const std::string& projectName,
+                                                const std::string& name);
+  virtual cmCPackComponent* GetComponent(const std::string& projectName,
+                                         const std::string& name);
+  virtual cmCPackComponentGroup* GetComponentGroup(
+                                                const std::string& projectName,
+                                                const std::string& name);
 
   cmSystemTools::OutputOption GeneratorVerbose;
   std::string Name;

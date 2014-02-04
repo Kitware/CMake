@@ -1482,8 +1482,8 @@ bool cmCPackGenerator::WantsComponentInstallation() const
 
 //----------------------------------------------------------------------
 cmCPackInstallationType*
-cmCPackGenerator::GetInstallationType(const char *projectName,
-                                      const char *name)
+cmCPackGenerator::GetInstallationType(const std::string& projectName,
+                                      const std::string& name)
 {
   (void) projectName;
   bool hasInstallationType = this->InstallationTypes.count(name) != 0;
@@ -1514,7 +1514,8 @@ cmCPackGenerator::GetInstallationType(const char *projectName,
 
 //----------------------------------------------------------------------
 cmCPackComponent*
-cmCPackGenerator::GetComponent(const char *projectName, const char *name)
+cmCPackGenerator::GetComponent(const std::string& projectName,
+                               const std::string& name)
 {
   bool hasComponent = this->Components.count(name) != 0;
   cmCPackComponent *component = &this->Components[name];
@@ -1582,7 +1583,7 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
            ++installTypesIt)
         {
         component->InstallationTypes.push_back(
-          this->GetInstallationType(projectName, installTypesIt->c_str()));
+          this->GetInstallationType(projectName, *installTypesIt));
         }
       }
 
@@ -1609,7 +1610,8 @@ cmCPackGenerator::GetComponent(const char *projectName, const char *name)
 
 //----------------------------------------------------------------------
 cmCPackComponentGroup*
-cmCPackGenerator::GetComponentGroup(const char *projectName, const char *name)
+cmCPackGenerator::GetComponentGroup(const std::string& projectName,
+                                    const std::string& name)
 {
   (void) projectName;
   std::string macroPrefix = "CPACK_COMPONENT_GROUP_"
