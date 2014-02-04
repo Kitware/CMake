@@ -24,12 +24,15 @@ project(CMakeHelp NONE)
 
 option(SPHINX_MAN "Build man pages with Sphinx" OFF)
 option(SPHINX_HTML "Build html help with Sphinx" OFF)
+option(SPHINX_TEXT "Build text help with Sphinx (not installed)" OFF)
 find_program(SPHINX_EXECUTABLE
   NAMES sphinx-build
   DOC "Sphinx Documentation Builder (sphinx-doc.org)"
   )
 
-if(NOT SPHINX_MAN AND NOT SPHINX_HTML)
+mark_as_advanced(SPHINX_TEXT)
+
+if(NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_TEXT)
   return()
 elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
@@ -56,6 +59,9 @@ if(SPHINX_HTML)
 endif()
 if(SPHINX_MAN)
   list(APPEND doc_formats man)
+endif()
+if(SPHINX_TEXT)
+  list(APPEND doc_formats text)
 endif()
 
 set(doc_format_outputs "")
