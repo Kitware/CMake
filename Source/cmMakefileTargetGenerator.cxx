@@ -422,8 +422,9 @@ cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
 void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
 {
   // Identify the language of the source file.
-  const char* lang = this->LocalGenerator->GetSourceFileLanguage(source);
-  if(!lang)
+  const std::string& lang =
+    this->LocalGenerator->GetSourceFileLanguage(source);
+  if(lang.empty())
     {
     // don't know anything about this file so skip it
     return;
@@ -523,7 +524,7 @@ cmMakefileTargetGenerator
 void
 cmMakefileTargetGenerator
 ::WriteObjectBuildFile(std::string &obj,
-                       const char *lang,
+                       const std::string& lang,
                        cmSourceFile& source,
                        std::vector<std::string>& depends)
 {
@@ -552,7 +553,7 @@ cmMakefileTargetGenerator
     cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
 
   // Add Fortran format flags.
-  if(strcmp(lang, "Fortran") == 0)
+  if(lang == "Fortran")
     {
     this->AppendFortranFormatFlags(flags, source);
     }
@@ -664,7 +665,7 @@ cmMakefileTargetGenerator
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
   vars.CMTarget = this->Target;
-  vars.Language = lang;
+  vars.Language = lang.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
   vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
@@ -689,8 +690,7 @@ cmMakefileTargetGenerator
 
   vars.Defines = definesString.c_str();
 
-  bool lang_is_c_or_cxx = ((strcmp(lang, "C") == 0) ||
-                           (strcmp(lang, "CXX") == 0));
+  bool lang_is_c_or_cxx = ((lang == "C") || (lang == "CXX"));
 
   // Construct the compile rules.
   {
@@ -1709,8 +1709,8 @@ void cmMakefileTargetGenerator
 }
 
 void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
-                                                     const char* linkLang,
-                                                     std::string& linkFlags)
+                                                const std::string& linkLang,
+                                                std::string& linkFlags)
 {
   // check for language flags that are not allowed at link time, and
   // remove them, -w on darwin for gcc -w -dynamiclib sends -w to libtool
@@ -1943,7 +1943,7 @@ cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
-                                                const char* lang)
+                                                const std::string& lang)
 {
   std::string responseVar = "CMAKE_";
   responseVar += lang;
@@ -2113,7 +2113,7 @@ bool cmMakefileTargetGenerator::GetFeatureAsBool(const char* feature)
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddFeatureFlags(
-  std::string& flags, const char* lang
+  std::string& flags, const std::string& lang
   )
 {
   // Add language-specific flags.

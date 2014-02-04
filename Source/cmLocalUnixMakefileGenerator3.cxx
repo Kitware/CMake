@@ -2198,7 +2198,7 @@ cmLocalUnixMakefileGenerator3::GetImplicitDepends(cmTarget const& tgt)
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3::AddImplicitDepends(cmTarget const& tgt,
-                                                  const char* lang,
+                                                  const std::string& lang,
                                                   const char* obj,
                                                   const char* src)
 {

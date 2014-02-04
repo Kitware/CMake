@@ -2361,10 +2361,10 @@ bool cmMakefile::PlatformIs64Bit() const
   return false;
 }
 
-const char* cmMakefile::GetSONameFlag(const char* language) const
+const char* cmMakefile::GetSONameFlag(const std::string& language) const
 {
   std::string name = "CMAKE_SHARED_LIBRARY_SONAME";
-  if(language)
+  if(!language.empty())
     {
     name += "_";
     name += language;

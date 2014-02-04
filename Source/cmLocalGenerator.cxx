@@ -572,7 +572,7 @@ void cmLocalGenerator::GenerateTargetManifest()
 }
 
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
-                                                    const char* lang,
+                                                    const std::string& lang,
                                                     cmSourceFile& source,
                                                     cmGeneratorTarget& target)
 {
@@ -604,7 +604,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   std::vector<std::string> commands;
   cmSystemTools::ExpandList(rules, commands);
   cmLocalGenerator::RuleVariables vars;
-  vars.Language = lang;
+  vars.Language = lang.c_str();
   vars.Source = sourceFile.c_str();
   vars.Object = objectFile.c_str();
   vars.ObjectDir = objectDir.c_str();
@@ -653,7 +653,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     );
 }
 
-void cmLocalGenerator::AddBuildTargetRule(const char* llang,
+void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
                                           cmGeneratorTarget& target)
 {
   cmStdString objs;
@@ -703,7 +703,7 @@ void cmLocalGenerator::AddBuildTargetRule(const char* llang,
                        &target);
   linkLibs = frameworkPath + linkPath + linkLibs;
   cmLocalGenerator::RuleVariables vars;
-  vars.Language = llang;
+  vars.Language = llang.c_str();
   vars.Objects = objs.c_str();
   vars.ObjectDir = ".";
   vars.Target = targetName.c_str();
@@ -776,8 +776,8 @@ void cmLocalGenerator
       case cmTarget::MODULE_LIBRARY:
       case cmTarget::EXECUTABLE:
         {
-        const char* llang = target.Target->GetLinkerLanguage();
-        if(!llang)
+        std::string llang = target.Target->GetLinkerLanguage();
+        if(llang.empty())
           {
           cmSystemTools::Error
             ("CMake can not determine linker language for target: ",
@@ -1290,10 +1290,11 @@ cmLocalGenerator::ConvertToIncludeReference(std::string const& path,
 std::string cmLocalGenerator::GetIncludeFlags(
                                      const std::vector<std::string> &includes,
                                      cmGeneratorTarget* target,
-                                     const char* lang, bool forResponseFile,
+                                     const std::string& lang,
+                                     bool forResponseFile,
                                      const char *config)
 {
-  if(!lang)
+  if(lang.empty())
     {
     return "";
     }
@@ -1415,7 +1416,7 @@ void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileOptions(
   std::string& flags, cmTarget* target,
-  const char* lang, const char* config
+  const std::string& lang, const char* config
   )
 {
   std::string langFlagRegexVar = std::string("CMAKE_")+lang+"_FLAG_REGEX";
@@ -1463,7 +1464,7 @@ void cmLocalGenerator::AddCompileOptions(
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              cmGeneratorTarget* target,
-                                             const char* lang,
+                                             const std::string& lang,
                                              const char *config,
                                              bool stripImplicitInclDirs
                                             )
@@ -1689,8 +1690,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build.c_str());
         linkFlags += " ";
         }
-      const char* linkLanguage = target->Target->GetLinkerLanguage();
-      if(!linkLanguage)
+      std::string linkLanguage = target->Target->GetLinkerLanguage();
+      if(linkLanguage.empty())
         {
         cmSystemTools::Error
           ("CMake can not determine linker language for target: ",
@@ -1813,7 +1814,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   // Collect library linking flags command line options.
   std::string linkLibs;
 
-  const char* linkLanguage = cli.GetLinkLanguage();
+  std::string linkLanguage = cli.GetLinkLanguage();
 
   std::string libPathFlag =
     this->Makefile->GetRequiredDefinition("CMAKE_LIBRARY_PATH_FLAG");
@@ -1943,7 +1944,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
                                             cmGeneratorTarget* target,
-                                            const char *lang,
+                                            const std::string& lang,
                                             const char* config)
 {
   // Only add Mac OS X specific flags on Darwin platforms (OSX and iphone):
@@ -1969,7 +1970,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       std::string("CMAKE_") + lang + "_OSX_DEPLOYMENT_TARGET_FLAG";
     const char* deploymentTargetFlag =
       this->Makefile->GetDefinition(deploymentTargetFlagVar.c_str());
-    if(!archs.empty() && lang && (lang[0] =='C' || lang[0] == 'F'))
+    if(!archs.empty() && !lang.empty() && (lang[0] =='C' || lang[0] == 'F'))
       {
       for(std::vector<std::string>::iterator i = archs.begin();
           i != archs.end(); ++i)
@@ -2000,7 +2001,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddLanguageFlags(std::string& flags,
-                                        const char* lang,
+                                        const std::string& lang,
                                         const char* config)
 {
   // Add language-specific flags.
@@ -2112,7 +2113,7 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddSharedFlags(std::string& flags,
-                                      const char* lang,
+                                      const std::string& lang,
                                       bool shared)
 {
   std::string flagsVar;
@@ -2128,7 +2129,8 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 }
 
 static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
-                                       cmLocalGenerator *lg, const char *lang)
+                                       cmLocalGenerator *lg,
+                                       const std::string& lang)
 {
   std::string l(lang);
   std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
@@ -2182,7 +2184,7 @@ static void AddInlineVisibilityCompileOption(std::string &flags,
 //----------------------------------------------------------------------------
 void cmLocalGenerator
 ::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
-                            const char *lang)
+                            const std::string& lang)
 {
   int targetType = target->GetType();
   bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
@@ -2194,13 +2196,13 @@ void cmLocalGenerator
     return;
     }
 
-  if (!lang)
+  if (lang.empty())
     {
     return;
     }
   AddVisibilityCompileOption(flags, target, this, lang);
 
-  if(strcmp(lang, "CXX") == 0)
+  if(lang == "CXX")
     {
     AddInlineVisibilityCompileOption(flags, target, this);
     }
@@ -2396,11 +2398,11 @@ void cmLocalGenerator::AppendDefines(std::set<std::string>& defines,
 //----------------------------------------------------------------------------
 void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
                                    std::string &definesString,
-                                   const char* lang)
+                                   const std::string& lang)
 {
   // Lookup the define flag for the current language.
   std::string dflag = "-D";
-  if(lang)
+  if(!lang.empty())
     {
     std::string defineFlagVar = "CMAKE_";
     defineFlagVar += lang;
@@ -2460,7 +2462,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFeatureOptions(
-  std::string& flags, const char* lang, const char* feature)
+  std::string& flags, const std::string& lang, const char* feature)
 {
   std::string optVar = "CMAKE_";
   optVar += lang;
@@ -3140,7 +3142,8 @@ cmLocalGenerator
     bool replaceExt = this->NeedBackwardsCompatibility_2_4();
     if(!replaceExt)
       {
-      if(const char* lang = source.GetLanguage())
+      std::string lang = source.GetLanguage();
+      if(!lang.empty())
         {
         std::string repVar = "CMAKE_";
         repVar += lang;
@@ -3174,7 +3177,7 @@ cmLocalGenerator
 }
 
 //----------------------------------------------------------------------------
-const char*
+std::string
 cmLocalGenerator
 ::GetSourceFileLanguage(const cmSourceFile& source)
 {

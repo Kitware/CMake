@@ -50,7 +50,7 @@ public:
   std::vector<std::string> const& GetDirectories();
   std::vector<std::string> const& GetDepends();
   std::vector<std::string> const& GetFrameworkPaths();
-  const char* GetLinkLanguage() const { return this->LinkLanguage; }
+  std::string GetLinkLanguage() const { return this->LinkLanguage; }
   std::vector<std::string> const& GetRuntimeSearchPath();
   std::string const& GetRuntimeFlag() const { return this->RuntimeFlag; }
   std::string const& GetRuntimeSep() const { return this->RuntimeSep; }
@@ -83,7 +83,7 @@ private:
 
   // Configuration information.
   const char* Config;
-  const char* LinkLanguage;
+  std::string LinkLanguage;
   bool LinkDependsNoShared;
 
   // Modes for dealing with dependent shared libraries.

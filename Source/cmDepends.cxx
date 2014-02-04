@@ -297,7 +297,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
 }
 
 //----------------------------------------------------------------------------
-void cmDepends::SetIncludePathFromLanguage(const char* lang)
+void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
 {
   // Look for the new per "TARGET_" variant first:
   const char * includePath = 0;

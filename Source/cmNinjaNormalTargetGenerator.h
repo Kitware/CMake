@@ -47,7 +47,7 @@ private:
   std::string TargetNameReal;
   std::string TargetNameImport;
   std::string TargetNamePDB;
-  const char *TargetLinkLanguage;
+  std::string TargetLinkLanguage;
 };
 
 #endif // ! cmNinjaNormalTargetGenerator_h

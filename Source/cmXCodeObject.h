@@ -123,7 +123,7 @@ public:
   void CopyAttributes(cmXCodeObject* );
 
   void AddDependLibrary(const char* configName,
-                        const char* l)
+                        const std::string& l)
     {
       if(!configName)
         {

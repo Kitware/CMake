@@ -77,8 +77,8 @@ public:
   /**
    * Set/Get and Clear the enabled languages.
    */
-  void SetLanguageEnabled(const char*, cmMakefile* mf);
-  bool GetLanguageEnabled(const char*) const;
+  void SetLanguageEnabled(const std::string&, cmMakefile* mf);
+  bool GetLanguageEnabled(const std::string&) const;
   void ClearEnabledLanguages();
   void GetEnabledLanguages(std::vector<std::string>& lang) const;
   /**
@@ -182,13 +182,13 @@ public:
   bool GetToolSupportsColor() const { return this->ToolSupportsColor; }
 
   ///! return the language for the given extension
-  const char* GetLanguageFromExtension(const char* ext) const;
+  std::string GetLanguageFromExtension(const char* ext) const;
   ///! is an extension to be ignored
   bool IgnoreFile(const char* ext) const;
   ///! What is the preference for linkers and this language (None or Prefered)
-  int GetLinkerPreference(const char* lang) const;
+  int GetLinkerPreference(const std::string& lang) const;
   ///! What is the object file extension for a given source file?
-  const char* GetLanguageOutputExtension(cmSourceFile const&) const;
+  std::string GetLanguageOutputExtension(cmSourceFile const&) const;
 
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const { return "."; }
@@ -332,9 +332,9 @@ protected:
   bool IsRootOnlyTarget(cmTarget* target) const;
   void AddTargetDepends(cmTarget const* target,
                         TargetDependSet& projectTargets);
-  void SetLanguageEnabledFlag(const char* l, cmMakefile* mf);
-  void SetLanguageEnabledMaps(const char* l, cmMakefile* mf);
-  void FillExtensionToLanguageMap(const char* l, cmMakefile* mf);
+  void SetLanguageEnabledFlag(const std::string& l, cmMakefile* mf);
+  void SetLanguageEnabledMaps(const std::string& l, cmMakefile* mf);
+  void FillExtensionToLanguageMap(const std::string& l, cmMakefile* mf);
 
   virtual bool ComputeTargetDepends();
 
@@ -420,9 +420,10 @@ private:
   void WriteSummary(cmTarget* target);
   void FinalizeTargetCompileInfo();
 
-  virtual void PrintCompilerAdvice(std::ostream& os, std::string lang,
+  virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
                                    const char* envVar) const;
-  void CheckCompilerIdCompatibility(cmMakefile* mf, std::string lang) const;
+  void CheckCompilerIdCompatibility(cmMakefile* mf,
+                                    std::string const& lang) const;
 
   cmExternalMakefileProjectGenerator* ExtraGenerator;
 

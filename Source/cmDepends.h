@@ -41,7 +41,7 @@ public:
   void SetLocalGenerator(cmLocalGenerator* lg) { this->LocalGenerator = lg; }
 
   /** Set the specific language to be scanned.  */
-  void SetLanguage(const char* lang) { this->Language = lang; }
+  void SetLanguage(const std::string& lang) { this->Language = lang; }
 
   /** Set the target build directory.  */
   void SetTargetDirectory(const char* dir) { this->TargetDirectory = dir; }
@@ -114,7 +114,7 @@ protected:
   // The include file search path.
   std::vector<std::string> IncludePath;
 
-  void SetIncludePathFromLanguage(const char* lang);
+  void SetIncludePathFromLanguage(const std::string& lang);
 
 private:
   cmDepends(cmDepends const&); // Purposely not implemented.

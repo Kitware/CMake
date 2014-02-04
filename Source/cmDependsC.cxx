@@ -37,7 +37,7 @@ cmDependsC::cmDependsC()
 //----------------------------------------------------------------------------
 cmDependsC::cmDependsC(cmLocalGenerator* lg,
                    const char* targetDir,
-                   const char* lang,
+                   const std::string& lang,
                    const std::map<std::string, DependencyVector>* validDeps)
 : cmDepends(lg, targetDir)
 , ValidDeps(validDeps)

@@ -268,7 +268,7 @@ cmComputeLinkInformation
 
   // Get the language used for linking this target.
   this->LinkLanguage = this->Target->GetLinkerLanguage(config, headTarget);
-  if(!this->LinkLanguage)
+  if(this->LinkLanguage.empty())
     {
     // The Compute method will do nothing, so skip the rest of the
     // initialization.
@@ -496,7 +496,7 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // We require a link language for the target.
-  if(!this->LinkLanguage)
+  if(this->LinkLanguage.empty())
     {
     cmSystemTools::
       Error("CMake can not determine linker language for target: ",

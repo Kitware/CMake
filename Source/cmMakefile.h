@@ -608,7 +608,7 @@ public:
   bool PlatformIs64Bit() const;
 
   /** Retrieve soname flag for the specified language if supported */
-  const char* GetSONameFlag(const char* language) const;
+  const char* GetSONameFlag(const std::string& language) const;
 
   /**
    * Get a list of preprocessor define flags.

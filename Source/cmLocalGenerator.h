@@ -137,14 +137,14 @@ public:
 
 
   void AddArchitectureFlags(std::string& flags, cmGeneratorTarget* target,
-                            const char *lang, const char* config);
+                            const std::string&lang, const char* config);
 
-  void AddLanguageFlags(std::string& flags, const char* lang,
+  void AddLanguageFlags(std::string& flags, const std::string& lang,
                         const char* config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
                        std::string const& lang, const char *config);
   void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
-                                const char *lang);
+                                const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const char* config);
   ///! Append flags to a string.
@@ -153,7 +153,8 @@ public:
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               cmGeneratorTarget* target,
-                              const char* lang, bool forResponseFile = false,
+                              const std::string& lang,
+                              bool forResponseFile = false,
                               const char *config = 0);
 
   /**
@@ -175,10 +176,10 @@ public:
    */
   void JoinDefines(const std::set<std::string>& defines,
                    std::string &definesString,
-                   const char* lang);
+                   const std::string& lang);
 
   /** Lookup and append options associated with a particular feature.  */
-  void AppendFeatureOptions(std::string& flags, const char* lang,
+  void AppendFeatureOptions(std::string& flags, const std::string& lang,
                             const char* feature);
 
   /** \brief Get absolute path to dependency \a name
@@ -223,16 +224,17 @@ public:
   /** Get the include flags for the current makefile and language.  */
   void GetIncludeDirectories(std::vector<std::string>& dirs,
                              cmGeneratorTarget* target,
-                             const char* lang = "C", const char *config = 0,
+                             const std::string& lang = "C",
+                             const char *config = 0,
                              bool stripImplicitInclDirs = true);
   void AddCompileOptions(std::string& flags, cmTarget* target,
-                         const char* lang, const char* config);
+                         const std::string& lang, const char* config);
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmTarget const* target,
                              const char* config);
 
   /** Compute the language used to compile the given source file.  */
-  const char* GetSourceFileLanguage(const cmSourceFile& source);
+  std::string GetSourceFileLanguage(const cmSourceFile& source);
 
   // Fill the vector with the target names for the object files,
   // preprocessed files and assembly files.
@@ -389,10 +391,11 @@ protected:
 
   /** Convert a target to a utility target for unsupported
    *  languages of a generator */
-  void AddBuildTargetRule(const char* llang, cmGeneratorTarget& target);
+  void AddBuildTargetRule(const std::string& llang,
+                          cmGeneratorTarget& target);
   ///! add a custom command to build a .o file that is part of a target
   void AddCustomCommandToCreateObject(const char* ofname,
-                                      const char* lang,
+                                      const std::string& lang,
                                       cmSourceFile& source,
                                       cmGeneratorTarget& target);
   // Create Custom Targets and commands for unsupported languages
@@ -473,7 +476,8 @@ private:
                                                std::string const& result,
                                                OutputFormat format);
 
-  void AddSharedFlags(std::string& flags, const char* lang, bool shared);
+  void AddSharedFlags(std::string& flags, const std::string& lang,
+                      bool shared);
   bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;
   void AddPositionIndependentFlags(std::string& flags, std::string const& l,
                                    int targetType);

@@ -39,7 +39,7 @@ std::string const& cmSourceFile::GetExtension() const
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetLanguage()
+std::string cmSourceFile::GetLanguage()
 {
   // If the language was set explicitly by the user then use it.
   if(const char* lang = this->GetProperty("LANGUAGE"))
@@ -76,7 +76,7 @@ const char* cmSourceFile::GetLanguage()
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetLanguage() const
+std::string cmSourceFile::GetLanguage() const
 {
   // If the language was set explicitly by the user then use it.
   if(const char* lang = this->GetProperty("LANGUAGE"))
@@ -87,11 +87,11 @@ const char* cmSourceFile::GetLanguage() const
   // If the language was determined from the source file extension use it.
   if(!this->Language.empty())
     {
-    return this->Language.c_str();
+    return this->Language;
     }
 
   // The language is not known.
-  return 0;
+  return "";
 }
 
 //----------------------------------------------------------------------------
@@ -267,7 +267,8 @@ void cmSourceFile::CheckLanguage(std::string const& ext)
   // Try to identify the source file language from the extension.
   cmMakefile const* mf = this->Location.GetMakefile();
   cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
-  if(const char* l = gg->GetLanguageFromExtension(ext.c_str()))
+  std::string l = gg->GetLanguageFromExtension(ext.c_str());
+  if(!l.empty())
     {
     this->Language = l;
     }

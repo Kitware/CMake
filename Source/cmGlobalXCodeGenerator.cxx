@@ -696,12 +696,8 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     flags += flagsBuild.GetString();
     }
 
-  const char* lang =
+  std::string lang =
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
-  if (!lang)
-    {
-    lang = "";
-    }
 
   cmXCodeObject* buildFile =
     this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), cmtarget, lang);
@@ -906,12 +902,8 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
                                                  cmTarget& cmtarget)
 {
-  const char* lang =
+  std::string lang =
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
-  if (!lang)
-    {
-    lang = "";
-    }
 
   return this->CreateXCodeFileReferenceFromPath(
     sf->GetFullPath(), cmtarget, lang);
@@ -1036,7 +1028,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         // Include this file in the build if it has a known language
         // and has not been listed as an ignored extension for this
         // generator.
-        if(this->CurrentLocalGenerator->GetSourceFileLanguage(**i) &&
+        if(!this->CurrentLocalGenerator->GetSourceFileLanguage(**i).empty() &&
            !this->IgnoreFile((*i)->GetExtension().c_str()))
           {
           sourceFiles.push_back(xsf);
@@ -1241,8 +1233,8 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
     return;
     }
 
-  const char* llang = cmtarget.GetLinkerLanguage("NOCONFIG");
-  if(!llang) { return; }
+  std::string llang = cmtarget.GetLinkerLanguage("NOCONFIG");
+  if(llang.empty()) { return; }
 
   // If the language is compiled as a source trust Xcode to link with it.
   cmTarget::LinkImplementation const* impl =
@@ -1270,7 +1262,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   }
   if(cmSourceFile* sf = mf->GetOrCreateSource(fname.c_str()))
     {
-    sf->SetProperty("LANGUAGE", llang);
+    sf->SetProperty("LANGUAGE", llang.c_str());
     cmtarget.AddSourceFile(sf);
     }
 }
@@ -1714,12 +1706,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                  (target.GetType() == cmTarget::EXECUTABLE) ||
                  shared);
 
-  const char* lang = target.GetLinkerLanguage(configName);
+  std::string lang = target.GetLinkerLanguage(configName);
   std::string cflags;
-  if(lang)
+  if(!lang.empty())
     {
     // for c++ projects get the c flags as well
-    if(strcmp(lang, "CXX") == 0)
+    if(lang == "CXX")
       {
       this->CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
       this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target,
@@ -2178,7 +2170,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   const char* debugStr = "YES";
   // We can't set the Xcode flag differently depending on the language,
   // so put them back in this case.
-  if( (lang && strcmp(lang, "CXX") == 0) && gflag != gflagc )
+  if( (lang == "CXX") && gflag != gflagc )
     {
     cflags += " ";
     cflags += gflagc;
@@ -2201,7 +2193,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString("NO"));
   buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN",
                               this->CreateString("NO"));
-  if(lang && strcmp(lang, "CXX") == 0)
+  if(lang == "CXX")
     {
     flags += " ";
     flags += defFlags;
@@ -3800,12 +3792,13 @@ cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::LookupFlags(const char* varNamePrefix,
-                                                const char* varNameLang,
-                                                const char* varNameSuffix,
-                                                const char* default_flags)
+std::string cmGlobalXCodeGenerator::LookupFlags(
+                                              const std::string& varNamePrefix,
+                                              const std::string& varNameLang,
+                                              const std::string& varNameSuffix,
+                                              const std::string& default_flags)
 {
-  if(varNameLang)
+  if(!varNameLang.empty())
     {
     std::string varName = varNamePrefix;
     varName += varNameLang;

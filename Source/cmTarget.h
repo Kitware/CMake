@@ -347,7 +347,7 @@ public:
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
 
   ///! Return the preferred linker language for this target
-  const char* GetLinkerLanguage(const char* config = 0,
+  std::string GetLinkerLanguage(const char* config = 0,
                                 cmTarget const* head = 0) const;
 
   /** Get the full name of the target according to the settings in its

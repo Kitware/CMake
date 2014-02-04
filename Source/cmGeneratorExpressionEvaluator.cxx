@@ -990,8 +990,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             "link libraries for a static library");
         return std::string();
         }
-      const char *lang = target->GetLinkerLanguage(context->Config);
-      return lang ? lang : "";
+      return target->GetLinkerLanguage(context->Config);
       }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,

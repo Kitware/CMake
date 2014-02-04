@@ -72,7 +72,7 @@ protected:
 
   const char* GetFeature(const char* feature);
   bool GetFeatureAsBool(const char* feature);
-  void AddFeatureFlags(std::string& flags, const char* lang);
+  void AddFeatureFlags(std::string& flags, const std::string& lang);
 
   /**
    * Compute the flags for compilation of object files for a given @a language.

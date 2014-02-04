@@ -79,8 +79,8 @@ public:
   /**
    * Get the language of the compiler to use for this source file.
    */
-  const char* GetLanguage();
-  const char* GetLanguage() const;
+  std::string GetLanguage();
+  std::string GetLanguage() const;
 
   /**
    * Return the vector that holds the list of dependencies

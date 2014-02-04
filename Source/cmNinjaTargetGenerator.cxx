@@ -110,7 +110,7 @@ bool cmNinjaTargetGenerator::GetFeatureAsBool(const char* feature)
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
 void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
-                                             const char* lang)
+                                             const std::string& lang)
 {
   // Add language-specific flags.
   this->LocalGenerator->AddLanguageFlags(flags, lang, this->GetConfigName());

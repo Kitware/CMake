@@ -217,7 +217,7 @@ public:
     public std::map<cmStdString, ImplicitDependLanguageMap> {};
   ImplicitDependLanguageMap const& GetImplicitDepends(cmTarget const& tgt);
 
-  void AddImplicitDepends(cmTarget const& tgt, const char* lang,
+  void AddImplicitDepends(cmTarget const& tgt, const std::string& lang,
                           const char* obj, const char* src);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
@@ -358,7 +358,7 @@ private:
     cmTarget* Target;
     std::string Language;
     LocalObjectEntry(): Target(0), Language() {}
-    LocalObjectEntry(cmTarget* t, const char* lang):
+    LocalObjectEntry(cmTarget* t, const std::string& lang):
       Target(t), Language(lang) {}
   };
   struct LocalObjectInfo: public std::vector<LocalObjectEntry>

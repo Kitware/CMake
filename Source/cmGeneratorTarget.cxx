@@ -168,7 +168,7 @@ struct TagVisitor
         this->BadObjLibFiles.push_back(sf);
         }
       }
-    else if(sf->GetLanguage())
+    else if(!sf->GetLanguage().empty())
       {
       DoAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>::Do(this->Data, sf);
       }

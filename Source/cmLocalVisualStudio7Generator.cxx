@@ -687,17 +687,18 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string flags;
   if(strcmp(configType, "10") != 0)
     {
-    const char* linkLanguage = (this->FortranProject? "Fortran":
+    const std::string& linkLanguage = (this->FortranProject?
+                                       std::string("Fortran"):
                                 target.GetLinkerLanguage(configName));
-    if(!linkLanguage)
+    if(linkLanguage.empty())
       {
       cmSystemTools::Error
         ("CMake can not determine linker language for target: ",
          target.GetName());
       return;
       }
-    if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0
-      || strcmp(linkLanguage, "Fortran") == 0)
+    if(linkLanguage == "C" || linkLanguage == "CXX"
+      || linkLanguage == "Fortran")
       {
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += linkLanguage;
@@ -709,11 +710,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       flags += this->Makefile->GetRequiredDefinition(flagVar.c_str());
       }
     // set the correct language
-    if(strcmp(linkLanguage, "C") == 0)
+    if(linkLanguage == "C")
       {
       flags += " /TC ";
       }
-    if(strcmp(linkLanguage, "CXX") == 0)
+    if(linkLanguage == "CXX")
       {
       flags += " /TP ";
       }
@@ -1081,7 +1082,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       return;
       }
     cmComputeLinkInformation& cli = *pcli;
-    const char* linkLanguage = cli.GetLinkLanguage();
+    std::string linkLanguage = cli.GetLinkLanguage();
 
     // Compute the variable name to lookup standard libraries for this
     // language.
@@ -1177,7 +1178,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       return;
       }
     cmComputeLinkInformation& cli = *pcli;
-    const char* linkLanguage = cli.GetLinkLanguage();
+    std::string linkLanguage = cli.GetLinkLanguage();
 
     bool isWin32Executable = target.GetPropertyAsBool("WIN32_EXECUTABLE");
 
@@ -1546,14 +1547,14 @@ cmLocalVisualStudio7GeneratorFCInfo
         }
       }
 
-    const char* lang =
+    std::string lang =
       lg->GlobalGenerator->GetLanguageFromExtension
       (sf.GetExtension().c_str());
-    const char* sourceLang = lg->GetSourceFileLanguage(sf);
-    const char* linkLanguage = target.GetLinkerLanguage(i->c_str());
+    const std::string& sourceLang = lg->GetSourceFileLanguage(sf);
+    const std::string& linkLanguage = target.GetLinkerLanguage(i->c_str());
     bool needForceLang = false;
     // source file does not match its extension language
-    if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
+    if(lang != sourceLang)
       {
       needForceLang = true;
       lang = sourceLang;
@@ -1569,16 +1570,15 @@ cmLocalVisualStudio7GeneratorFCInfo
 
     // if the source file does not match the linker language
     // then force c or c++
-    if(needForceLang || (linkLanguage && lang
-                         && strcmp(lang, linkLanguage) != 0))
+    if(needForceLang || (linkLanguage != lang))
       {
-      if(strcmp(lang, "CXX") == 0)
+      if(lang == "CXX")
         {
         // force a C++ file type
         fc.CompileFlags += " /TP ";
         needfc = true;
         }
-      else if(strcmp(lang, "C") == 0)
+      else if(lang == "C")
         {
         // force to c
         fc.CompileFlags += " /TC ";

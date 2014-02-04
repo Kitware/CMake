@@ -722,7 +722,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
-                                            std::string lang,
+                                            std::string const& lang,
                                             const char* envVar) const
 {
   // Subclasses override this method if they do not support this advice.
@@ -744,7 +744,7 @@ void cmGlobalGenerator::PrintCompilerAdvice(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
-                                                     std::string lang) const
+                                                std::string const& lang) const
 {
   std::string compilerIdVar = "CMAKE_" + lang + "_COMPILER_ID";
   const char* compilerId = mf->GetDefinition(compilerIdVar.c_str());
@@ -817,17 +817,18 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
 }
 
 //----------------------------------------------------------------------------
-const char*
+std::string
 cmGlobalGenerator::GetLanguageOutputExtension(cmSourceFile const& source) const
 {
-  if(const char* lang = source.GetLanguage())
+  const std::string& lang = source.GetLanguage();
+  if(!lang.empty())
     {
     std::map<cmStdString, cmStdString>::const_iterator it =
                                   this->LanguageToOutputExtension.find(lang);
 
     if(it != this->LanguageToOutputExtension.end())
       {
-      return it->second.c_str();
+      return it->second;
       }
     }
   else
@@ -840,7 +841,7 @@ cmGlobalGenerator::GetLanguageOutputExtension(cmSourceFile const& source) const
       {
       if(this->OutputExtensions.count(ext))
         {
-        return ext.c_str();
+        return ext;
         }
       }
     }
@@ -848,7 +849,7 @@ cmGlobalGenerator::GetLanguageOutputExtension(cmSourceFile const& source) const
 }
 
 
-const char* cmGlobalGenerator::GetLanguageFromExtension(const char* ext) const
+std::string cmGlobalGenerator::GetLanguageFromExtension(const char* ext) const
 {
   // if there is an extension and it starts with . then move past the
   // . because the extensions are not stored with a .  in the map
@@ -860,9 +861,9 @@ const char* cmGlobalGenerator::GetLanguageFromExtension(const char* ext) const
                                         = this->ExtensionToLanguage.find(ext);
   if(it != this->ExtensionToLanguage.end())
     {
-    return it->second.c_str();
+    return it->second;
     }
-  return 0;
+  return "";
 }
 
 /* SetLanguageEnabled() is now split in two parts:
@@ -877,13 +878,15 @@ files could change the object file extension
 (CMAKE_<LANG>_OUTPUT_EXTENSION) before the CMake variables were copied
 to the C++ maps.
 */
-void cmGlobalGenerator::SetLanguageEnabled(const char* l, cmMakefile* mf)
+void cmGlobalGenerator::SetLanguageEnabled(const std::string& l,
+                                           cmMakefile* mf)
 {
   this->SetLanguageEnabledFlag(l, mf);
   this->SetLanguageEnabledMaps(l, mf);
 }
 
-void cmGlobalGenerator::SetLanguageEnabledFlag(const char* l, cmMakefile* mf)
+void cmGlobalGenerator::SetLanguageEnabledFlag(const std::string& l,
+                                               cmMakefile* mf)
 {
   this->LanguageEnabled[l] = true;
 
@@ -895,7 +898,8 @@ void cmGlobalGenerator::SetLanguageEnabledFlag(const char* l, cmMakefile* mf)
   this->FillExtensionToLanguageMap(l, mf);
 }
 
-void cmGlobalGenerator::SetLanguageEnabledMaps(const char* l, cmMakefile* mf)
+void cmGlobalGenerator::SetLanguageEnabledMaps(const std::string& l,
+                                               cmMakefile* mf)
 {
   // use LanguageToLinkerPreference to detect whether this functions has
   // run before
@@ -969,7 +973,7 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const char* l, cmMakefile* mf)
 
 }
 
-void cmGlobalGenerator::FillExtensionToLanguageMap(const char* l,
+void cmGlobalGenerator::FillExtensionToLanguageMap(const std::string& l,
                                                    cmMakefile* mf)
 {
   std::string extensionsVar = std::string("CMAKE_") +
@@ -986,14 +990,14 @@ void cmGlobalGenerator::FillExtensionToLanguageMap(const char* l,
 
 bool cmGlobalGenerator::IgnoreFile(const char* l) const
 {
-  if(this->GetLanguageFromExtension(l))
+  if(!this->GetLanguageFromExtension(l).empty())
     {
     return false;
     }
   return (this->IgnoreExtensions.count(l) > 0);
 }
 
-bool cmGlobalGenerator::GetLanguageEnabled(const char* l) const
+bool cmGlobalGenerator::GetLanguageEnabled(const std::string& l) const
 {
   return (this->LanguageEnabled.find(l)!= this->LanguageEnabled.end());
 }
@@ -1958,7 +1962,7 @@ cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang) const
     }
 }
 
-int cmGlobalGenerator::GetLinkerPreference(const char* lang) const
+int cmGlobalGenerator::GetLinkerPreference(const std::string& lang) const
 {
   std::map<cmStdString, int>::const_iterator it =
                                    this->LanguageToLinkerPreference.find(lang);

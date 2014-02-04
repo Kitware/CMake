@@ -190,10 +190,10 @@ private:
   void CreateReRunCMakeFile(cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*> const& gens);
 
-  std::string LookupFlags(const char* varNamePrefix,
-                          const char* varNameLang,
-                          const char* varNameSuffix,
-                          const char* default_flags);
+  std::string LookupFlags(const std::string& varNamePrefix,
+                          const std::string& varNameLang,
+                          const std::string& varNameSuffix,
+                          const std::string& default_flags);
 
   class Factory;
   class BuildObjectListOrString;
@@ -215,7 +215,8 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
-  void PrintCompilerAdvice(std::ostream&, std::string, const char*) const {}
+  void PrintCompilerAdvice(std::ostream&, std::string const&,
+                           const char*) const {}
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   std::string GetObjectsNormalDirectory(

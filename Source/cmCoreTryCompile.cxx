@@ -249,7 +249,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         si != sources.end(); ++si)
       {
       std::string ext = cmSystemTools::GetFilenameLastExtension(*si);
-      if(const char* lang = gg->GetLanguageFromExtension(ext.c_str()))
+      std::string lang = gg->GetLanguageFromExtension(ext.c_str());
+      if(!lang.empty())
         {
         testLangs.insert(lang);
         }

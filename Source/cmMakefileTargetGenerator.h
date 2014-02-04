@@ -93,7 +93,7 @@ protected:
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
-                            const char *lang,
+                            const std::string& lang,
                             cmSourceFile& source,
                             std::vector<std::string>& depends);
 
@@ -173,10 +173,10 @@ protected:
                          bool useResponseFile, std::string& buildObjs,
                          std::vector<std::string>& makefile_depends);
 
-  void AddIncludeFlags(std::string& flags, const char* lang);
+  void AddIncludeFlags(std::string& flags, const std::string& lang);
 
   virtual void CloseFileStreams();
-  void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
+  void RemoveForbiddenFlags(const char* flagVar, const std::string& linkLang,
                             std::string& linkFlags);
   cmTarget *Target;
   cmGeneratorTarget* GeneratorTarget;
@@ -260,7 +260,7 @@ protected:
   void AddModuleDefinitionFlag(std::string& flags);
 
   // Add language feature flags.
-  void AddFeatureFlags(std::string& flags, const char* lang);
+  void AddFeatureFlags(std::string& flags, const std::string& lang);
 
   // Feature query methods.
   const char* GetFeature(const char* feature);

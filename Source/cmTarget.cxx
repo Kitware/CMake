@@ -2884,13 +2884,11 @@ private:
 };
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLinkerLanguage(const char* config,
+std::string cmTarget::GetLinkerLanguage(const char* config,
                                         cmTarget const* head) const
 {
   cmTarget const* headTarget = head ? head : this;
-  const char* lang = this->GetLinkClosure(config, headTarget)
-                                                    ->LinkerLanguage.c_str();
-  return *lang? lang : 0;
+  return this->GetLinkClosure(config, headTarget)->LinkerLanguage;
 }
 
 //----------------------------------------------------------------------------
@@ -2924,7 +2922,7 @@ public:
     this->Makefile = this->Target->GetMakefile();
     this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
     }
-  void Consider(const char* lang)
+  void Consider(const std::string& lang)
     {
     int preference = this->GG->GetLinkerPreference(lang);
     if(preference > this->Preference)
@@ -3530,7 +3528,8 @@ void cmTarget::GetFullNameInternal(const char* config,
   const char* suffixVar = this->GetSuffixVariableInternal(implib);
 
   // Check for language-specific default prefix and suffix.
-  if(const char* ll = this->GetLinkerLanguage(config, this))
+  std::string ll = this->GetLinkerLanguage(config, this);
+  if(!ll.empty())
     {
     if(!targetSuffix && suffixVar && *suffixVar)
       {
@@ -3867,7 +3866,8 @@ bool cmTarget::NeedRelinkBeforeInstall(const char* config) const
     }
 
   // Check for rpath support on this platform.
-  if(const char* ll = this->GetLinkerLanguage(config, this))
+  std::string ll = this->GetLinkerLanguage(config, this);
+  if(!ll.empty())
     {
     std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     flagVar += ll;
@@ -4825,7 +4825,8 @@ void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
   for(std::vector<cmSourceFile*>::const_iterator
         i = this->SourceFiles.begin(); i != this->SourceFiles.end(); ++i)
     {
-    if(const char* lang = (*i)->GetLanguage())
+    const std::string& lang = (*i)->GetLanguage();
+    if(!lang.empty())
       {
       languages.insert(lang);
       }
@@ -4876,7 +4877,8 @@ bool cmTarget::IsChrpathUsed(const char* config) const
 #if defined(CMAKE_USE_ELF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
-  if(const char* ll = this->GetLinkerLanguage(config, this))
+  std::string ll = this->GetLinkerLanguage(config, this);
+  if(!ll.empty())
     {
     std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
     sepVar += ll;

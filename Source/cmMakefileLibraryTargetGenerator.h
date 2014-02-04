@@ -39,7 +39,7 @@ protected:
   // Store the computd framework version for OS X Frameworks.
   std::string FrameworkVersion;
 
-  void AppendOSXVerFlag(std::string& flags, const char* lang,
+  void AppendOSXVerFlag(std::string& flags, const std::string& lang,
                         const char* name, bool so);
 };
 

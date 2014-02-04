@@ -220,7 +220,8 @@ void cmExtraCodeLiteGenerator
             {
             // check whether it is a C/C++ implementation file
             bool isCFile = false;
-            if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
+            std::string lang = (*si)->GetLanguage();
+            if (lang == "C" || lang == "CXX")
               {
               for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();

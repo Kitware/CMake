@@ -1012,18 +1012,18 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
         si = objectSources.begin();
       si != objectSources.end(); ++si)
     {
-    const char* lang = (*si)->GetLanguage();
+    const std::string& lang = (*si)->GetLanguage();
     const char* tool = NULL;
-    if (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") == 0)
+    if (lang == "C"|| lang == "CXX")
       {
       tool = "ClCompile";
       }
-    else if (strcmp(lang, "ASM_MASM") == 0 &&
+    else if (lang == "ASM_NASM" &&
              this->GlobalGenerator->IsMasmEnabled())
       {
       tool = "MASM";
       }
-    else if (strcmp(lang, "RC") == 0)
+    else if (lang == "RC")
       {
       tool = "ResourceCompile";
       }
@@ -1108,29 +1108,28 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     {
     defines += cdefs;
     }
-  const char* lang =
+  std::string lang =
     this->GlobalGenerator->GetLanguageFromExtension
     (sf.GetExtension().c_str());
-  const char* sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const char* linkLanguage = this->Target->GetLinkerLanguage();
+  std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
+  const std::string& linkLanguage = this->Target->GetLinkerLanguage();
   bool needForceLang = false;
   // source file does not match its extension language
-  if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
+  if(lang != sourceLang)
     {
     needForceLang = true;
     lang = sourceLang;
     }
   // if the source file does not match the linker language
   // then force c or c++
-  if(needForceLang || (linkLanguage && lang
-                       && strcmp(lang, linkLanguage) != 0))
+  if(needForceLang || (linkLanguage != lang))
     {
-    if(strcmp(lang, "CXX") == 0)
+    if(lang == "CXX")
       {
       // force a C++ file type
       flags += " /TP ";
       }
-    else if(strcmp(lang, "C") == 0)
+    else if(lang == "C")
       {
       // force to c
       flags += " /TC ";
@@ -1341,17 +1340,17 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // collect up flags for
   if(this->Target->GetType() < cmTarget::UTILITY)
     {
-    const char* linkLanguage =
+    const std::string& linkLanguage =
       this->Target->GetLinkerLanguage(configName.c_str());
-    if(!linkLanguage)
+    if(linkLanguage.empty())
       {
       cmSystemTools::Error
         ("CMake can not determine linker language for target: ",
          this->Name.c_str());
       return false;
       }
-    if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0
-       || strcmp(linkLanguage, "Fortran") == 0)
+    if(linkLanguage == "C" || linkLanguage == "CXX"
+       || linkLanguage == "Fortran")
       {
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += linkLanguage;
@@ -1365,11 +1364,11 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
       }
     // set the correct language
-    if(strcmp(linkLanguage, "C") == 0)
+    if(linkLanguage == "C")
       {
       flags += " /TC ";
       }
-    if(strcmp(linkLanguage, "CXX") == 0)
+    if(linkLanguage == "CXX")
       {
       flags += " /TP ";
       }
@@ -1525,9 +1524,9 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
                 cmVSGetLinkFlagTable(this->LocalGenerator), 0, this));
   Options& linkOptions = *pOptions;
 
-  const char* linkLanguage =
+  const std::string& linkLanguage =
     this->Target->GetLinkerLanguage(config.c_str());
-  if(!linkLanguage)
+  if(linkLanguage.empty())
     {
     cmSystemTools::Error
       ("CMake can not determine linker language for target: ",
