@@ -487,19 +487,23 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
       }
 
     std::string ext = sf->GetExtension();
-    if (ext == "qrc"
-        && !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC")))
-      {
-      std::string basename = cmsys::SystemTools::
-                                    GetFilenameWithoutLastExtension(absFile);
 
-      std::string rcc_output_file = makefile->GetCurrentOutputDirectory();
-      rcc_output_file += "/qrc_" + basename + ".cpp";
-      makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
-                              rcc_output_file.c_str(), false);
-      cmSourceFile* rccCppSource
-              = makefile->GetOrCreateSource(rcc_output_file.c_str(), true);
-      newRccFiles.push_back(rccCppSource);
+    if (target->GetPropertyAsBool("AUTORCC"))
+      {
+      if (ext == "qrc"
+          && !cmSystemTools::IsOn(sf->GetPropertyForUser("SKIP_AUTORCC")))
+        {
+        std::string basename = cmsys::SystemTools::
+                                      GetFilenameWithoutLastExtension(absFile);
+
+        std::string rcc_output_file = makefile->GetCurrentOutputDirectory();
+        rcc_output_file += "/qrc_" + basename + ".cpp";
+        makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
+                                rcc_output_file.c_str(), false);
+        cmSourceFile* rccCppSource
+                = makefile->GetOrCreateSource(rcc_output_file.c_str(), true);
+        newRccFiles.push_back(rccCppSource);
+        }
       }
 
     if (!generated)
