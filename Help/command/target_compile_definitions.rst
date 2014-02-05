@@ -20,5 +20,5 @@ definitions.  Repeated calls for the same <target> append items in the
 order called.
 
 Arguments to target_compile_definitions may use "generator expressions" with
-the syntax "$<...>".  See the :manual:`cmake-generator-expressions(7)` manual
+the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual
 for available expressions.

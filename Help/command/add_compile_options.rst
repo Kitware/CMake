@@ -13,5 +13,5 @@ alternative commands exist to add preprocessor definitions or include
 directories.  See documentation of the directory and target
 COMPILE_OPTIONS properties for details.  Arguments to
 add_compile_options may use "generator expressions" with the syntax
-"$<...>".  See the :manual:`cmake-generator-expressions(7)` manual for
+``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
 available expressions.

@@ -10,5 +10,5 @@ The target property values are used by the generators to set the
 options for the compiler.
 
 Contents of COMPILE_OPTIONS may use "generator expressions" with the
-syntax "$<...>".  See the :manual:`cmake-generator-expressions(7)` manual for
+syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
 available expressions.

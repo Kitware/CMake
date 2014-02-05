@@ -13,5 +13,5 @@ libraries for the compiler.  See also the target_link_libraries
 command.
 
 Contents of LINK_LIBRARIES may use "generator expressions" with the syntax
-"$<...>".  See the :manual:`cmake-generator-expressions(7)` manual for
+``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
 available expressions.

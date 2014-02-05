@@ -32,6 +32,6 @@ INTERFACE_SYSTEM_INCLUDE_DIRECTORIES target property will be populated
 with the specified directories.
 
 Arguments to target_include_directories may use "generator
-expressions" with the syntax "$<...>".
+expressions" with the syntax ``$<...>``.
 See the :manual:`cmake-generator-expressions(7)` manual for available
 expressions.

@@ -16,6 +16,6 @@ This property is initialized by the value of the variable
 The options set on the target may be overridden by :prop_sf:`AUTOUIC_OPTIONS` set
 on the ``.ui`` source file.
 
-This property may use "generator expressions" with the syntax "$<...>".
+This property may use "generator expressions" with the syntax ``$<...>``.
 See the :manual:`cmake-generator-expressions(7)` manual for available
 expressions.

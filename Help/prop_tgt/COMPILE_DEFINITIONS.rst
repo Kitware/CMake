@@ -17,7 +17,7 @@ by the native build tool.  The VS6 IDE does not support definition
 values with spaces (but NMake does).
 
 Contents of COMPILE_DEFINITIONS may use "generator expressions" with the
-syntax "$<...>".  See the :manual:`cmake-generator-expressions(7)` manual
+syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual
 for available expressions.
 
 .. include:: /include/COMPILE_DEFINITIONS_DISCLAIMER.txt

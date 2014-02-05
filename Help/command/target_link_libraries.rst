@@ -140,7 +140,7 @@ archives are really so interdependent they should probably be combined
 into a single archive.)
 
 Arguments to target_link_libraries may use "generator expressions"
-with the syntax "$<...>".  Note however, that generator expressions
+with the syntax ``$<...>``.  Note however, that generator expressions
 will not be used in OLD handling of CMP0003 or CMP0004.
 See the :manual:`cmake-generator-expressions(7)` manual for available
 expressions.
