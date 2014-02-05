@@ -22,8 +22,14 @@
 
 struct cmWIXShortcut
 {
+  cmWIXShortcut()
+    :desktop(false)
+    {}
+
   std::string textLabel;
   std::string workingDirectoryId;
+  std::string target;
+  bool desktop;
 };
 
 class cmWIXSourceWriter;
@@ -108,7 +114,8 @@ private:
     std::string const& featureId,
     shortcut_map_t& shortcutMap,
     cmWIXSourceWriter& fileDefinitions,
-    cmWIXSourceWriter& featureDefinitions);
+    cmWIXSourceWriter& featureDefinitions,
+    bool &hasDesktopShortcuts);
 
   void CreateUninstallShortcut(
     std::string const& packageName,
@@ -133,6 +140,7 @@ private:
     cmWIXSourceWriter& fileDefinitions,
     cmWIXSourceWriter& featureDefinitions,
     const std::vector<std::string>& pkgExecutables,
+    const std::vector<std::string>& desktopExecutables,
     shortcut_map_t& shortcutMap);
 
   bool RequireOption(const std::string& name, std::string& value) const;
@@ -164,6 +172,8 @@ private:
     const std::string& variableName, std::ostream& stream);
 
   void CreateStartMenuFolder(cmWIXSourceWriter& directoryDefinitions);
+
+  void CreateDesktopFolder(cmWIXSourceWriter& directoryDefinitions);
 
   void LoadPatchFragments(const std::string& patchFilePath);
 
