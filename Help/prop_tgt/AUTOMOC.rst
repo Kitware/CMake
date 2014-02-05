@@ -12,8 +12,11 @@ statement like ``#include "moc_foo.cpp"`` is found, the ``Q_OBJECT`` class
 declaration is expected in the header, and ``moc`` is run on the header
 file.  If an ``#include`` statement like ``#include "foo.moc"`` is found, then
 a ``Q_OBJECT`` is expected in the current source file and ``moc`` is run on
-the file itself.  Additionally, all header files are parsed for
-``Q_OBJECT`` macros, and if found, ``moc`` is also executed on those files.
+the file itself.  Additionally, header files with the same base name (like
+``foo.h``) or ``_p`` appended to the base name (like ``foo_p.h``) are parsed
+for ``Q_OBJECT`` macros, and if found, ``moc`` is also executed on those files.
+``AUTOMOC`` checks multiple header alternative extensions, such as
+``hpp``, ``hxx`` etc when searching for headers.
 The resulting moc files, which are not included as shown above in any
 of the source files are included in a generated
 ``<targetname>_automoc.cpp`` file, which is compiled as part of the
