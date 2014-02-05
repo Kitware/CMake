@@ -380,6 +380,10 @@ calculate the numeric minimum value for a property from dependencies.
 Each calculated "compatible" property value may be read in the consumer at
 generate-time using generator expressions.
 
+Note that for each dependee, the set of properties specified in each
+compatible interface property must not intersect with the set specified in
+any of the other properties.
+
 Property Origin Debugging
 -------------------------
 
