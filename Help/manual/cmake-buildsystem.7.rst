@@ -178,7 +178,7 @@ Transitive Usage Requirements
 -----------------------------
 
 The usage requirements of a target can transitively propagate to dependents.
-The :command:`target_link_libraries` command also has ``PRIVATE``,
+The :command:`target_link_libraries` command has ``PRIVATE``,
 ``INTERFACE`` and ``PUBLIC`` keywords to control the propagation.
 
 .. code-block:: cmake
@@ -220,6 +220,26 @@ each keyword:
     PUBLIC archive
     PRIVATE serialization
   )
+
+Usage requirements are propagated by reading the ``INTERFACE_`` variants
+of target properties from dependencies and appending the values to the
+non-``INTERFACE_`` variants of the operand.  For example, the
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of dependencies is read and
+appended to the :prop_tgt:`INCLUDE_DIRECTORIES` of the operand.  In cases
+where order is relevant and maintained, and the order resulting from the
+:command:`target_link_libraries` calls does not allow correct compilation,
+use of an appropriate command to set the property directly may update the
+order.
+
+For example, if the linked libraries for a target must be specified
+in the order ``lib1`` ``lib2`` ``lib3`` , but the include directories must
+be specified in the order ``lib3`` ``lib1`` ``lib2``:
+
+.. code-block:: cmake
+
+  target_link_libraries(myExe lib1 lib2 lib3)
+  target_include_directories(myExe
+    PRIVATE $<TARGET_PROPERTY:INTERFACE_INCLUDE_DIRECTORIES:lib3>)
 
 .. _`Compatible Interface Properties`:
 
