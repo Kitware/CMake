@@ -7,8 +7,11 @@ This property contains the list of transitive link dependencies.  When
 the target is linked into another target the libraries listed (and
 recursively their link interface libraries) will be provided to the
 other target also.  This property is overridden by the
-LINK_INTERFACE_LIBRARIES or LINK_INTERFACE_LIBRARIES_<CONFIG> property
-if policy CMP0022 is OLD or unset.
+:prop_tgt:`LINK_INTERFACE_LIBRARIES` or
+:prop_tgt:`LINK_INTERFACE_LIBRARIES_<CONFIG>` property if policy
+:policy:`CMP0022` is ``OLD`` or unset.
 
-This property also supports generator expressions.  See the
-:manual:`cmake-generator-expressions(7)` manual for available expressions.
+Contents of ``INTERFACE_LINK_LIBRARIES`` may use "generator expressions"
+with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
+manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
+manual for more on defining buildsystem properties.
