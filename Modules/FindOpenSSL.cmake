@@ -59,16 +59,17 @@ if (WIN32)
     "C:/OpenSSL-Win64/"
     )
   unset(_programfiles)
-  set(_OPENSSL_ROOT_HINTS_AND_PATHS
-    HINTS ${_OPENSSL_ROOT_HINTS}
-    PATHS ${_OPENSSL_ROOT_PATHS}
-    )
 else ()
   set(_OPENSSL_ROOT_HINTS
     ${OPENSSL_ROOT_DIR}
     ENV OPENSSL_ROOT_DIR
     )
 endif ()
+
+set(_OPENSSL_ROOT_HINTS_AND_PATHS
+    HINTS ${_OPENSSL_ROOT_HINTS}
+    PATHS ${_OPENSSL_ROOT_PATHS}
+    )
 
 find_path(OPENSSL_INCLUDE_DIR
   NAMES
