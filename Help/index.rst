@@ -39,6 +39,16 @@ Reference Manuals
    /manual/cmake-toolchains.7
    /manual/cmake-variables.7
 
+.. only:: html or text
+
+ Release Notes
+ #############
+
+ .. toctree::
+    :maxdepth: 1
+
+    /release/index
+
 .. only:: html
 
  Index and Search
