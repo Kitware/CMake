@@ -376,6 +376,12 @@ function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
           set(includeThisOne FALSE)
         endif()
       endif()
+      get_property(_isTransitiveDepend
+        GLOBAL PROPERTY _CMAKE_${_currentFeature}_TRANSITIVE_DEPENDENCY
+      )
+      if(_isTransitiveDepend)
+        set(includeThisOne FALSE)
+      endif()
 
       if(includeThisOne)
 

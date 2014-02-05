@@ -45,7 +45,16 @@ macro(find_dependency dep)
       set(required_arg REQUIRED)
     endif()
 
+    get_property(alreadyTransitive GLOBAL PROPERTY
+      _CMAKE_${dep}_TRANSITIVE_DEPENDENCY
+    )
+
     find_package(${dep} ${version} ${exact_arg} ${quiet_arg} ${required_arg})
+
+    if(NOT DEFINED alreadyTransitive OR alreadyTransitive)
+      set_property(GLOBAL PROPERTY _CMAKE_${dep}_TRANSITIVE_DEPENDENCY TRUE)
+    endif()
+
     if (NOT ${dep}_FOUND)
       set(${CMAKE_FIND_PACKAGE_NAME}_NOT_FOUND_MESSAGE "${CMAKE_FIND_PACKAGE_NAME} could not be found because dependency ${dep} could not be found.")
       set(${CMAKE_FIND_PACKAGE_NAME}_FOUND False)

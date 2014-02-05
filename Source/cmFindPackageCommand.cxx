@@ -1043,6 +1043,12 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::AppendSuccessInformation()
 {
+  {
+  std::string transitivePropName = "_CMAKE_";
+  transitivePropName += this->Name + "_TRANSITIVE_DEPENDENCY";
+  this->Makefile->GetCMakeInstance()
+                ->SetProperty(transitivePropName.c_str(), "False");
+  }
   std::string found = this->Name;
   found += "_FOUND";
   std::string upperFound = cmSystemTools::UpperCase(found);
