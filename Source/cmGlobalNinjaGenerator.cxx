@@ -554,7 +554,7 @@ void cmGlobalNinjaGenerator
                        const char* makeProgram,
                        const char* /*projectName*/,
                        const char* /*projectDir*/,
-                       const char* targetName,
+                       const std::string& targetName,
                        const char* /*config*/,
                        bool /*fast*/,
                        std::vector<std::string> const& makeOptions)
@@ -565,9 +565,9 @@ void cmGlobalNinjaGenerator
 
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());
-  if(targetName && *targetName)
+  if(!targetName.empty())
     {
-    if(strcmp(targetName, "clean") == 0)
+    if(targetName == "clean")
       {
       makeCommand.push_back("-t");
       makeCommand.push_back("clean");

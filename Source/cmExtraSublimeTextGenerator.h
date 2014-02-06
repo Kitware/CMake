@@ -60,12 +60,12 @@ private:
    *  specified target.
    */
   std::string BuildMakeCommand(const std::string& make, const char* makefile,
-                               const char* target);
+                               const std::string& target);
   /** Appends the specified target to the generated project file as a Sublime
    *  Text build system.
    */
   void AppendTarget(cmGeneratedFileStream& fout,
-                    const char* targetName,
+                    const std::string& targetName,
                     cmLocalGenerator* lg,
                     cmTarget* target,
                     const char* make,

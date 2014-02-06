@@ -1616,7 +1616,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
 
 int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
                                   const char *projectName,
-                                  const char *target, bool fast,
+                                  const std::string& target, bool fast,
                                   std::string *output, cmMakefile *mf)
 {
   // if this is not set, then this is a first time configure
@@ -1640,7 +1640,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
     }
 
   std::string newTarget;
-  if (target && strlen(target))
+  if (!target.empty())
     {
     newTarget += target;
 #if 0
@@ -1664,7 +1664,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 
 void cmGlobalGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const char*, const char*, const char*,
-  const char*, const char*, bool, std::vector<std::string> const&)
+  const std::string&, const char*, bool, std::vector<std::string> const&)
 {
   makeCommand.push_back(
     "cmGlobalGenerator::GenerateBuildCommand not implemented");
@@ -1672,7 +1672,7 @@ void cmGlobalGenerator::GenerateBuildCommand(
 
 int cmGlobalGenerator::Build(
   const char *, const char *bindir,
-  const char *projectName, const char *target,
+  const char *projectName, const std::string& target,
   std::string *output,
   const char *makeCommandCSTR,
   const char *config,
@@ -1787,7 +1787,7 @@ int cmGlobalGenerator::Build(
 
 //----------------------------------------------------------------------------
 std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
-  const char* target, const char* config, const char* native,
+  const std::string& target, const char* config, const char* native,
   bool ignoreErrors)
 {
   std::string makeCommand = cmSystemTools::GetCMakeCommand();
@@ -1799,7 +1799,7 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
     makeCommand += config;
     makeCommand += "\"";
     }
-  if(target && *target)
+  if(!target.empty())
     {
     makeCommand += " --target \"";
     makeCommand += target;
@@ -2041,7 +2041,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
 
 ///! Find a local generator by its startdirectory
 cmLocalGenerator*
-cmGlobalGenerator::FindLocalGenerator(const char* start_dir) const
+cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
 {
   for(std::vector<cmLocalGenerator*>::const_iterator it =
       this->LocalGenerators.begin(); it != this->LocalGenerators.end(); ++it)
@@ -2056,20 +2056,20 @@ cmGlobalGenerator::FindLocalGenerator(const char* start_dir) const
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddAlias(const char *name, cmTarget *tgt)
+void cmGlobalGenerator::AddAlias(const std::string& name, cmTarget *tgt)
 {
   this->AliasTargets[name] = tgt;
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::IsAlias(const char *name) const
+bool cmGlobalGenerator::IsAlias(const std::string& name) const
 {
   return this->AliasTargets.find(name) != this->AliasTargets.end();
 }
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmGlobalGenerator::FindTarget(const char* project, const char* name,
+cmGlobalGenerator::FindTarget(const char* project, const std::string& name,
                               bool excludeAliases) const
 {
   // if project specific
@@ -2481,7 +2481,7 @@ void cmGlobalGenerator::EnableMinGWLanguage(cmMakefile *mf)
 
 //----------------------------------------------------------------------------
 cmTarget cmGlobalGenerator::CreateGlobalTarget(
-  const char* name, const char* message,
+  const std::string& name, const char* message,
   const cmCustomCommandLines* commandLines,
   std::vector<std::string> depends,
   const char* workingDirectory)
@@ -2672,7 +2672,7 @@ void cmGlobalGenerator::GetTargetSets(TargetDependSet& projectTargets,
 bool cmGlobalGenerator::IsRootOnlyTarget(cmTarget* target) const
 {
   return (target->GetType() == cmTarget::GLOBAL_TARGET ||
-          strcmp(target->GetName(), this->GetAllTargetName()) == 0);
+          target->GetName() == this->GetAllTargetName());
 }
 
 //----------------------------------------------------------------------------

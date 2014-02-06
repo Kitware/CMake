@@ -781,7 +781,7 @@ void cmLocalGenerator
           {
           cmSystemTools::Error
             ("CMake can not determine linker language for target: ",
-             target.Target->GetName());
+             target.Target->GetName().c_str());
           return;
           }
         // if the language is not in the set lang then create custom
@@ -1695,7 +1695,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         {
         cmSystemTools::Error
           ("CMake can not determine linker language for target: ",
-           target->Target->GetName());
+           target->Target->GetName().c_str());
         return;
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
@@ -2012,7 +2012,7 @@ void cmLocalGenerator::AddLanguageFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
-bool cmLocalGenerator::GetRealDependency(const char* inName,
+bool cmLocalGenerator::GetRealDependency(const std::string& inName,
                                          const char* config,
                                          std::string& dep)
 {
@@ -2040,7 +2040,7 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
     {
     // make sure it is not just a coincidence that the target name
     // found is part of the inName
-    if(cmSystemTools::FileIsFullPath(inName))
+    if(cmSystemTools::FileIsFullPath(inName.c_str()))
       {
       std::string tLocation;
       if(target->GetType() >= cmTarget::EXECUTABLE &&
@@ -2088,7 +2088,7 @@ bool cmLocalGenerator::GetRealDependency(const char* inName,
     }
 
   // The name was not that of a CMake target.  It must name a file.
-  if(cmSystemTools::FileIsFullPath(inName))
+  if(cmSystemTools::FileIsFullPath(inName.c_str()))
     {
     // This is a full path.  Return it as given.
     dep = inName;
@@ -3474,7 +3474,7 @@ static void cmLGInfoProp(cmMakefile* mf, cmTarget* target,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
-                                              const char* targetName,
+                                              const std::string& targetName,
                                               const char* fname)
 {
   // Find the Info.plist template.
@@ -3503,7 +3503,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
   // back to the directory-level values set by the user.
   cmMakefile* mf = this->Makefile;
   mf->PushScope();
-  mf->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME", targetName);
+  mf->AddDefinition("MACOSX_BUNDLE_EXECUTABLE_NAME", targetName.c_str());
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_INFO_STRING");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_ICON_FILE");
   cmLGInfoProp(mf, target, "MACOSX_BUNDLE_GUI_IDENTIFIER");
@@ -3518,8 +3518,8 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::GenerateFrameworkInfoPList(cmTarget* target,
-                                                  const char* targetName,
-                                                  const char* fname)
+                                                const std::string& targetName,
+                                                const char* fname)
 {
   // Find the Info.plist template.
   const char* in = target->GetProperty("MACOSX_FRAMEWORK_INFO_PLIST");
@@ -3547,7 +3547,7 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(cmTarget* target,
   // back to the directory-level values set by the user.
   cmMakefile* mf = this->Makefile;
   mf->PushScope();
-  mf->AddDefinition("MACOSX_FRAMEWORK_NAME", targetName);
+  mf->AddDefinition("MACOSX_FRAMEWORK_NAME", targetName.c_str());
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_ICON_FILE");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_IDENTIFIER");
   cmLGInfoProp(mf, target, "MACOSX_FRAMEWORK_SHORT_VERSION_STRING");

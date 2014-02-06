@@ -37,7 +37,7 @@ public:
     const char* makeProgram,
     const char* projectName,
     const char* projectDir,
-    const char* targetName,
+    const std::string& targetName,
     const char* config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()

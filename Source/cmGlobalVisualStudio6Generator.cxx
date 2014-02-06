@@ -119,7 +119,7 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
   const char* makeProgram,
   const char* projectName,
   const char* /*projectDir*/,
-  const char* targetName,
+  const std::string& targetName,
   const char* config,
   bool /*fast*/,
   std::vector<std::string> const& makeOptions
@@ -134,14 +134,15 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
   makeCommand.push_back("/MAKE");
   std::string targetArg;
   bool clean = false;
-  if ( targetName && strcmp(targetName, "clean") == 0 )
+  std::string realTarget = targetName;
+  if ( realTarget == "clean" )
     {
     clean = true;
-    targetName = "ALL_BUILD";
+    realTarget = "ALL_BUILD";
     }
-  if (targetName && strlen(targetName))
+  if (!realTarget.empty())
     {
-    targetArg += targetName;
+    targetArg += realTarget;
     }
   else
     {

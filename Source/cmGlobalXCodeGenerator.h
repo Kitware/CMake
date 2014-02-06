@@ -58,7 +58,7 @@ public:
     const char* makeProgram,
     const char* projectName,
     const char* projectDir,
-    const char* targetName,
+    const std::string& targetName,
     const char* config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
@@ -129,7 +129,7 @@ private:
                                 );
 
   cmXCodeObject* FindXCodeTarget(cmTarget const*);
-  std::string GetOrCreateId(const char* name, const char* id);
+  std::string GetOrCreateId(const std::string& name, const std::string& id);
 
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in this->XCodeObjects.

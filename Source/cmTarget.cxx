@@ -234,7 +234,7 @@ void cmTarget::DefineProperties(cmake *cm)
      "", "", true);
 }
 
-void cmTarget::SetType(TargetType type, const char* name)
+void cmTarget::SetType(TargetType type, const std::string& name)
 {
   this->Name = name;
   // only add dependency information for library targets
@@ -415,7 +415,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AddUtility(const char *u, cmMakefile *makefile)
+void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
 {
   this->Utilities.insert(u);
   if(makefile)
@@ -425,7 +425,8 @@ void cmTarget::AddUtility(const char *u, cmMakefile *makefile)
 }
 
 //----------------------------------------------------------------------------
-cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(const char *u) const
+cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
+    const std::string& u) const
 {
   std::map<cmStdString, cmListFileBacktrace>::const_iterator i =
     this->UtilityBacktraces.find(u);
@@ -657,7 +658,7 @@ void cmTarget::ProcessSourceExpression(std::string const& expr)
 
 //----------------------------------------------------------------------------
 void cmTarget::MergeLinkLibraries( cmMakefile& mf,
-                                   const char *selfname,
+                                   const std::string& selfname,
                                    const LinkLibraryVectorType& libs )
 {
   // Only add on libraries we haven't added on before.
@@ -675,7 +676,7 @@ void cmTarget::MergeLinkLibraries( cmMakefile& mf,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AddLinkDirectory(const char* d)
+void cmTarget::AddLinkDirectory(const std::string& d)
 {
   // Make sure we don't add unnecessary search directories.
   if(this->LinkDirectoriesEmmitted.insert(d).second)
@@ -720,7 +721,7 @@ cmTarget::LinkLibraryType cmTarget::ComputeLinkType(const char* config) const
 
 //----------------------------------------------------------------------------
 void cmTarget::ClearDependencyInformation( cmMakefile& mf,
-                                           const char* target )
+                                           const std::string& target )
 {
   // Clear the dependencies. The cache variable must exist iff we are
   // recording dependency information for this target.
@@ -844,9 +845,9 @@ std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
 }
 
 //----------------------------------------------------------------------------
-static std::string targetNameGenex(const char *lib)
+static std::string targetNameGenex(const std::string& lib)
 {
-  return std::string("$<TARGET_NAME:") + lib + ">";
+  return "$<TARGET_NAME:" + lib + ">";
 }
 
 //----------------------------------------------------------------------------
@@ -908,7 +909,8 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
 
 //----------------------------------------------------------------------------
 void cmTarget::AddLinkLibrary(cmMakefile& mf,
-                              const char *target, const char* lib,
+                              const std::string& target,
+                              const std::string& lib,
                               LinkLibraryType llt)
 {
   cmTarget *tgt = this->Makefile->FindTargetToUse(lib);
@@ -917,7 +919,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 
   const std::string libName = (isNonImportedTarget && llt != GENERAL)
                                                         ? targetNameGenex(lib)
-                                                        : std::string(lib);
+                                                        : lib;
   this->AppendProperty("LINK_LIBRARIES",
                        this->GetDebugGeneratorExpressions(libName,
                                                           llt).c_str());
@@ -925,7 +927,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 
   if (cmGeneratorExpression::Find(lib) != std::string::npos
       || (tgt && tgt->GetType() == INTERFACE_LIBRARY)
-      || (strcmp( target, lib ) == 0))
+      || (target == lib ))
     {
     return;
     }
@@ -1469,7 +1471,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetExportName() const
+std::string cmTarget::GetExportName() const
 {
   const char *exportName = this->GetProperty("EXPORT_NAME");
 
@@ -2630,7 +2632,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
 
   if (prop == "NAME")
     {
-    return this->GetName();
+    return this->GetName().c_str();
     }
 
   // Watch for special "computed" properties that are dependent on

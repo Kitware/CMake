@@ -125,7 +125,7 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
                                       depends, commands, true);
 
   // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(this->Target->GetName(), false);
+  this->WriteTargetDriverRule(this->Target->GetName().c_str(), false);
 }
 
 //----------------------------------------------------------------------------
@@ -243,7 +243,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   if(linkLanguage.empty())
     {
     cmSystemTools::Error("Cannot determine link language for target \"",
-                         this->Target->GetName(), "\".");
+                         this->Target->GetName().c_str(), "\".");
     return;
     }
 

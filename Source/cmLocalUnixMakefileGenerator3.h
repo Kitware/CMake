@@ -55,7 +55,7 @@ public:
   // Write out a make rule
   void WriteMakeRule(std::ostream& os,
                      const char* comment,
-                     const char* target,
+                     const std::string& target,
                      const std::vector<std::string>& depends,
                      const std::vector<std::string>& commands,
                      bool symbolic,
@@ -168,7 +168,8 @@ public:
   void WriteDivider(std::ostream& os);
 
   /** used to create a recursive make call */
-  std::string GetRecursiveMakeCall(const char *makefile, const char* tgt);
+  std::string GetRecursiveMakeCall(const char *makefile,
+                                   const std::string& tgt);
 
   // append flags to a string
   virtual void AppendFlags(std::string& flags, const char* newFlags);
@@ -273,8 +274,8 @@ protected:
 
 
   void WriteConvenienceRule(std::ostream& ruleFileStream,
-                            const char* realTarget,
-                            const char* helpTarget);
+                            const std::string& realTarget,
+                            const std::string& helpTarget);
 
   void WriteTargetDependRule(std::ostream& ruleFileStream,
                              cmTarget& target);

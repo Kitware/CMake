@@ -27,7 +27,7 @@ public:
   cmGeneratorTarget(cmTarget*);
 
   int GetType() const;
-  const char *GetName() const;
+  std::string GetName() const;
   const char *GetProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files) const;

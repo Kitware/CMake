@@ -870,15 +870,15 @@ cmGlobalVisualStudioGenerator::TargetCompare
 ::operator()(cmTarget const* l, cmTarget const* r) const
 {
   // Make sure ALL_BUILD is first so it is the default active project.
-  if(strcmp(r->GetName(), "ALL_BUILD") == 0)
+  if(r->GetName() == "ALL_BUILD")
     {
     return false;
     }
-  if(strcmp(l->GetName(), "ALL_BUILD") == 0)
+  if(l->GetName() == "ALL_BUILD")
     {
     return true;
     }
-  return strcmp(l->GetName(), r->GetName()) < 0;
+  return strcmp(l->GetName().c_str(), r->GetName().c_str()) < 0;
 }
 
 //----------------------------------------------------------------------------

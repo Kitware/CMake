@@ -500,7 +500,7 @@ bool cmComputeLinkInformation::Compute()
     {
     cmSystemTools::
       Error("CMake can not determine linker language for target: ",
-            this->Target->GetName());
+            this->Target->GetName().c_str());
     return false;
     }
 

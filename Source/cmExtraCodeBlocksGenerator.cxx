@@ -537,7 +537,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
 
 // Generate the xml code for one target.
 void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
-                                              const char* targetName,
+                                              const std::string& targetName,
                                               cmTarget* target,
                                               const char* make,
                                               const cmMakefile* makefile,
@@ -757,7 +757,8 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
 // Create the command line for building the given target using the selected
 // make
 std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
-             const std::string& make, const char* makefile, const char* target)
+             const std::string& make, const char* makefile,
+             const std::string& target)
 {
   std::string command = make;
   if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)

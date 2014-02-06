@@ -44,23 +44,23 @@ protected:
 
   void WriteHeader(cmGeneratedFileStream& str) const;
 
-  void WriteConnections(const char* targetName,
+  void WriteConnections(const std::string& targetName,
                         std::set<std::string>& insertedNodes,
                         std::set<std::string>& insertedConnections,
                         cmGeneratedFileStream& str) const;
 
-  void WriteDependerConnections(const char* targetName,
+  void WriteDependerConnections(const std::string& targetName,
                                 std::set<std::string>& insertedNodes,
                                 std::set<std::string>& insertedConnections,
                                 cmGeneratedFileStream& str) const;
 
-  void WriteNode(const char* targetName, const cmTarget* target,
+  void WriteNode(const std::string& targetName, const cmTarget* target,
                  std::set<std::string>& insertedNodes,
                  cmGeneratedFileStream& str) const;
 
   void WriteFooter(cmGeneratedFileStream& str) const;
 
-  bool IgnoreThisTarget(const char* name);
+  bool IgnoreThisTarget(const std::string& name);
 
   bool GenerateForTargetType(cmTarget::TargetType targetType) const;
 

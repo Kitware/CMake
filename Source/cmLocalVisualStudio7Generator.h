@@ -74,29 +74,29 @@ private:
                                       const char* configName);
   void FixGlobalTargets();
   void WriteProjectFiles();
-  void WriteVCProjHeader(std::ostream& fout, const char *libName,
+  void WriteVCProjHeader(std::ostream& fout, const std::string& libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout, cmTarget &target);
-  void WriteVCProjFile(std::ostream& fout, const char *libName,
+  void WriteVCProjFile(std::ostream& fout, const std::string& libName,
                        cmTarget &tgt);
   void WriteConfigurations(std::ostream& fout,
-                           const char *libName, cmTarget &tgt);
+                           const std::string& libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
                           const char* configName,
-                          const char* libName, cmTarget &tgt);
+                          const std::string& libName, cmTarget &tgt);
   std::string EscapeForXML(const char* s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
   void OutputTargetRules(std::ostream& fout, const char* configName,
-                         cmTarget &target, const char *libName);
+                         cmTarget &target, const std::string& libName);
   void OutputBuildTool(std::ostream& fout, const char* configName,
                        cmTarget& t, const Options& targetOptions);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
   void WriteProjectSCC(std::ostream& fout, cmTarget& target);
-  void WriteProjectStart(std::ostream& fout, const char *libName,
+  void WriteProjectStart(std::ostream& fout, const std::string& libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
-  void WriteProjectStartFortran(std::ostream& fout, const char *libName,
+  void WriteProjectStartFortran(std::ostream& fout, const std::string& libName,
                                 cmTarget &tgt);
   void WriteVCProjBeginGroup(std::ostream& fout,
                           const char* group,
@@ -111,7 +111,8 @@ private:
 
   bool WriteGroup(const cmSourceGroup *sg,
                   cmTarget& target, std::ostream &fout,
-                  const char *libName, std::vector<std::string> *configs);
+                  const std::string& libName,
+                  std::vector<std::string> *configs);
 
   friend class cmLocalVisualStudio7GeneratorFCInfo;
   friend class cmLocalVisualStudio7GeneratorInternals;

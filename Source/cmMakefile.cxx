@@ -878,7 +878,7 @@ void cmMakefile::ConfigureFinalPass()
 
 //----------------------------------------------------------------------------
 void
-cmMakefile::AddCustomCommandToTarget(const char* target,
+cmMakefile::AddCustomCommandToTarget(const std::string& target,
                                      const std::vector<std::string>& depends,
                                      const cmCustomCommandLines& commandLines,
                                      cmTarget::CustomCommandType type,
@@ -1120,7 +1120,7 @@ cmMakefile::AddCustomCommandToOutput(const char* output,
 
 //----------------------------------------------------------------------------
 void
-cmMakefile::AddCustomCommandOldStyle(const char* target,
+cmMakefile::AddCustomCommandOldStyle(const std::string& target,
                                      const std::vector<std::string>& outputs,
                                      const std::vector<std::string>& depends,
                                      const char* source,
@@ -1129,7 +1129,7 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
 {
   // Translate the old-style signature to one of the new-style
   // signatures.
-  if(strcmp(source, target) == 0)
+  if(source == target)
     {
     // In the old-style signature if the source and target were the
     // same then it added a post-build rule to the target.  Preserve
@@ -1179,7 +1179,8 @@ cmMakefile::AddCustomCommandOldStyle(const char* target,
       else
         {
         cmSystemTools::Error("Attempt to add a custom rule to a target "
-                             "that does not exist yet for target ", target);
+                             "that does not exist yet for target ",
+                             target.c_str());
         return;
         }
       }
@@ -1453,7 +1454,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
   return true;
 }
 
-void cmMakefile::AddLinkLibrary(const char* lib,
+void cmMakefile::AddLinkLibrary(const std::string& lib,
                                 cmTarget::LinkLibraryType llt)
 {
   cmTarget::LibraryID tmp;
@@ -1462,8 +1463,8 @@ void cmMakefile::AddLinkLibrary(const char* lib,
   this->LinkLibraries.push_back(tmp);
 }
 
-void cmMakefile::AddLinkLibraryForTarget(const char *target,
-                                         const char* lib,
+void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
+                                         const std::string& lib,
                                          cmTarget::LinkLibraryType llt)
 {
   cmTargets::iterator i = this->Targets.find(target);
@@ -1500,8 +1501,8 @@ void cmMakefile::AddLinkLibraryForTarget(const char *target,
     }
 }
 
-void cmMakefile::AddLinkDirectoryForTarget(const char *target,
-                                           const char* d)
+void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
+                                           const std::string& d)
 {
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
@@ -1520,46 +1521,37 @@ void cmMakefile::AddLinkDirectoryForTarget(const char *target,
     {
     cmSystemTools::Error
       ("Attempt to add link directories to non-existent target: ",
-       target, " for directory ", d);
+       target.c_str(), " for directory ", d.c_str());
     }
 }
 
-void cmMakefile::AddLinkLibrary(const char* lib)
+void cmMakefile::AddLinkLibrary(const std::string& lib)
 {
   this->AddLinkLibrary(lib,cmTarget::GENERAL);
 }
 
-void cmMakefile::AddLinkDirectory(const char* dir)
+void cmMakefile::AddLinkDirectory(const std::string& dir)
 {
   // Don't add a link directory that is already present.  Yes, this
   // linear search results in n^2 behavior, but n won't be getting
   // much bigger than 20.  We cannot use a set because of order
   // dependency of the link search path.
 
-  if(!dir)
+  if(dir.empty())
     {
     return;
     }
+  std::string newdir = dir;
   // remove trailing slashes
-  if(dir[strlen(dir)-1] == '/')
+  if(*dir.rbegin() == '/')
     {
-    std::string newdir = dir;
-    newdir = newdir.substr(0, newdir.size()-1);
-    if(std::find(this->LinkDirectories.begin(),
-                 this->LinkDirectories.end(),
-                 newdir.c_str()) == this->LinkDirectories.end())
-      {
-      this->LinkDirectories.push_back(newdir);
-      }
+    newdir = dir.substr(0, dir.size()-1);
     }
-  else
+  if(std::find(this->LinkDirectories.begin(),
+               this->LinkDirectories.end(), newdir)
+      == this->LinkDirectories.end())
     {
-    if(std::find(this->LinkDirectories.begin(),
-                 this->LinkDirectories.end(), dir)
-       == this->LinkDirectories.end())
-      {
-      this->LinkDirectories.push_back(dir);
-      }
+    this->LinkDirectories.push_back(dir);
     }
 }
 
@@ -1975,7 +1967,8 @@ void cmMakefile::SetProjectName(const char* p)
 }
 
 
-void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
+void cmMakefile::AddGlobalLinkInformation(const std::string& name,
+                                          cmTarget& target)
 {
   // for these targets do not add anything
   switch(target.GetType())
@@ -1996,13 +1989,14 @@ void cmMakefile::AddGlobalLinkInformation(const char* name, cmTarget& target)
 }
 
 
-void cmMakefile::AddAlias(const char* lname, cmTarget *tgt)
+void cmMakefile::AddAlias(const std::string& lname, cmTarget *tgt)
 {
   this->AliasTargets[lname] = tgt;
   this->LocalGenerator->GetGlobalGenerator()->AddAlias(lname, tgt);
 }
 
-cmTarget* cmMakefile::AddLibrary(const char* lname, cmTarget::TargetType type,
+cmTarget* cmMakefile::AddLibrary(const std::string& lname,
+                            cmTarget::TargetType type,
                             const std::vector<std::string> &srcs,
                             bool excludeFromAll)
 {
@@ -2048,7 +2042,7 @@ cmTarget* cmMakefile::AddExecutable(const char *exeName,
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
+cmMakefile::AddNewTarget(cmTarget::TargetType type, const std::string& name)
 {
   cmTargets::iterator it =
     this->Targets.insert(cmTargets::value_type(name, cmTarget())).first;
@@ -3066,7 +3060,8 @@ void cmMakefile::ExpandSourceListArguments(
 }
 
 int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
-                           const char *projectName, const char *targetName,
+                           const char *projectName,
+                           const std::string& targetName,
                            bool fast,
                            const std::vector<std::string> *cmakeArgs,
                            std::string *output)
@@ -4030,7 +4025,8 @@ void cmMakefile::DefineProperties(cmake *cm)
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmMakefile::AddImportedTarget(const char* name, cmTarget::TargetType type,
+cmMakefile::AddImportedTarget(const std::string& name,
+                              cmTarget::TargetType type,
                               bool global)
 {
   // Create the target.
@@ -4087,7 +4083,7 @@ bool cmMakefile::IsAlias(const std::string& name) const
 
 //----------------------------------------------------------------------------
 cmGeneratorTarget*
-cmMakefile::FindGeneratorTargetToUse(const char* name) const
+cmMakefile::FindGeneratorTargetToUse(const std::string& name) const
 {
   if (cmTarget *t = this->FindTargetToUse(name))
     {

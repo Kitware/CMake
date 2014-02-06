@@ -106,7 +106,8 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
-                         const char *projectName, const char *targetName,
+                         const char *projectName,
+                         const std::string& targetName,
                          bool fast, std::string *output, cmMakefile* mf);
 
 
@@ -117,7 +118,7 @@ public:
    * done first.
    */
   int Build(const char *srcdir, const char *bindir,
-            const char *projectName, const char *targetName,
+            const char *projectName, const std::string& targetName,
             std::string *output,
             const char *makeProgram, const char *config,
             bool clean, bool fast,
@@ -130,12 +131,12 @@ public:
     std::vector<std::string>& makeCommand,
     const char* makeProgram,
     const char *projectName, const char *projectDir,
-    const char *targetName, const char* config, bool fast,
+    const std::string& targetName, const char* config, bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
 
   /** Generate a "cmake --build" call for a given target and config.  */
-  std::string GenerateCMakeBuildCommand(const char* target,
+  std::string GenerateCMakeBuildCommand(const std::string& target,
                                         const char* config,
                                         const char* native,
                                         bool ignoreErrors);
@@ -210,11 +211,11 @@ public:
   virtual void FindMakeProgram(cmMakefile*);
 
   ///! Find a target by name by searching the local generators.
-  cmTarget* FindTarget(const char* project, const char* name,
+  cmTarget* FindTarget(const char* project, const std::string& name,
                        bool excludeAliases = false) const;
 
-  void AddAlias(const char *name, cmTarget *tgt);
-  bool IsAlias(const char *name) const;
+  void AddAlias(const std::string& name, cmTarget *tgt);
+  bool IsAlias(const std::string& name) const;
 
   /** Determine if a name resolves to a framework on disk or a built target
       that is a framework. */
@@ -224,7 +225,7 @@ public:
       target in the project */
   bool IsDependedOn(const char* project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
-  cmLocalGenerator* FindLocalGenerator(const char* start_dir) const;
+  cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
@@ -355,7 +356,7 @@ protected:
   bool IsExcluded(cmLocalGenerator* root, cmTarget const& target) const;
   void FillLocalGeneratorToTargetMap();
   void CreateDefaultGlobalTargets(cmTargets* targets);
-  cmTarget CreateGlobalTarget(const char* name, const char* message,
+  cmTarget CreateGlobalTarget(const std::string& name, const char* message,
     const cmCustomCommandLines* commandLines,
     std::vector<std::string> depends, const char* workingDir);
 

@@ -568,7 +568,7 @@ void cmGlobalUnixMakefileGenerator3
                        const char* makeProgram,
                        const char* /*projectName*/,
                        const char* /*projectDir*/,
-                       const char* targetName,
+                       const std::string& targetName,
                        const char* /*config*/,
                        bool fast,
                        std::vector<std::string> const& makeOptions)
@@ -585,7 +585,7 @@ void cmGlobalUnixMakefileGenerator3
     }
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());
-  if ( targetName && strlen(targetName))
+  if (!targetName.empty())
     {
     cmLocalUnixMakefileGenerator3 *lg;
     if (this->LocalGenerators.size())
@@ -649,8 +649,7 @@ cmGlobalUnixMakefileGenerator3
         }
       // Don't emit the same rule twice (e.g. two targets with the same
       // simple name)
-      if(t->second->GetName() &&
-         strlen(t->second->GetName()) &&
+      if(!t->second->GetName().empty() &&
          emitted.insert(t->second->GetName()).second &&
          // Handle user targets here.  Global targets are handled in
          // the local generator on a per-directory basis.
@@ -746,8 +745,7 @@ cmGlobalUnixMakefileGenerator3
       {
       continue;
       }
-    if (t->second->GetName()
-     && strlen(t->second->GetName())
+    if (!t->second->GetName().empty()
      && ((t->second->GetType() == cmTarget::EXECUTABLE)
         || (t->second->GetType() == cmTarget::STATIC_LIBRARY)
         || (t->second->GetType() == cmTarget::SHARED_LIBRARY)
@@ -975,7 +973,7 @@ cmGlobalUnixMakefileGenerator3::ProgressMapCompare
 ::operator()(cmTarget const* l, cmTarget const* r) const
 {
   // Order by target name.
-  if(int c = strcmp(l->GetName(), r->GetName()))
+  if(int c = strcmp(l->GetName().c_str(), r->GetName().c_str()))
     {
     return c < 0;
     }

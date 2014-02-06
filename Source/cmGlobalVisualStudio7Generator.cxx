@@ -186,7 +186,7 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   const char* makeProgram,
   const char* projectName,
   const char* /*projectDir*/,
-  const char* targetName,
+  const std::string& targetName,
   const char* config,
   bool /*fast*/,
   std::vector<std::string> const& makeOptions)
@@ -208,11 +208,12 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   makeCommand.push_back(makeProgramSelected);
 
   makeCommand.push_back(std::string(projectName) + ".sln");
+  std::string realTarget = targetName;
   bool clean = false;
-  if ( targetName && strcmp(targetName, "clean") == 0 )
+  if ( realTarget == "clean" )
     {
     clean = true;
-    targetName = "ALL_BUILD";
+    realTarget = "ALL_BUILD";
     }
   if(clean)
     {
@@ -233,9 +234,9 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     }
   makeCommand.push_back("/project");
 
-  if (targetName && strlen(targetName))
+  if (!realTarget.empty())
     {
-    makeCommand.push_back(targetName);
+    makeCommand.push_back(realTarget);
     }
   else
     {
@@ -381,7 +382,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       std::set<std::string> allConfigurations(this->Configurations.begin(),
                                               this->Configurations.end());
       this->WriteProjectConfigurations(
-        fout, target->GetName(), target->GetType(),
+        fout, target->GetName().c_str(), target->GetType(),
         allConfigurations, target->GetProperty("VS_PLATFORM_MAPPING"));
       }
     else

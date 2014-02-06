@@ -223,7 +223,7 @@ void cmExtraSublimeTextGenerator::
 
 void cmExtraSublimeTextGenerator::
   AppendTarget(cmGeneratedFileStream& fout,
-               const char* targetName,
+               const std::string& targetName,
                cmLocalGenerator* lg,
                cmTarget* target,
                const char* make,
@@ -315,7 +315,8 @@ void cmExtraSublimeTextGenerator::
 // Create the command line for building the given target using the selected
 // make
 std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
-             const std::string& make, const char* makefile, const char* target)
+             const std::string& make, const char* makefile,
+             const std::string& target)
 {
   std::string command = "\"";
   command += make + "\"";

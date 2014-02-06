@@ -136,7 +136,7 @@ public:
       return this->DependLibraries;
     }
   void AddDependTarget(const char* configName,
-                       const char* tName)
+                       const std::string& tName)
     {
       if(!configName)
         {

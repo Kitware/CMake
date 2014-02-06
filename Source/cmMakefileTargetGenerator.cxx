@@ -1347,7 +1347,7 @@ cmMakefileTargetGenerator
   // Write a make variable assignment that lists all objects for the
   // target.
   variableName =
-    this->LocalGenerator->CreateMakeVariable(this->Target->GetName(),
+    this->LocalGenerator->CreateMakeVariable(this->Target->GetName().c_str(),
                                              "_OBJECTS");
   *this->BuildFileStream
     << "# Object files for target " << this->Target->GetName() << "\n"
@@ -1382,7 +1382,7 @@ cmMakefileTargetGenerator
   // Write a make variable assignment that lists all external objects
   // for the target.
   variableNameExternal =
-    this->LocalGenerator->CreateMakeVariable(this->Target->GetName(),
+    this->LocalGenerator->CreateMakeVariable(this->Target->GetName().c_str(),
                                              "_EXTERNAL_OBJECTS");
   *this->BuildFileStream
     << "\n"
@@ -1683,7 +1683,7 @@ void cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 std::string cmMakefileTargetGenerator::GetLinkRule(
-                                              const cmStdString& linkRuleVar)
+                                              const std::string& linkRuleVar)
 {
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
   if(this->Target->HasImplibGNUtoMS())

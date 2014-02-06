@@ -228,7 +228,7 @@ int cmGeneratorTarget::GetType() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetName() const
+std::string cmGeneratorTarget::GetName() const
 {
   return this->Target->GetName();
 }
@@ -988,7 +988,7 @@ void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
 bool cmStrictTargetComparison::operator()(cmTarget const* t1,
                                           cmTarget const* t2) const
 {
-  int nameResult = strcmp(t1->GetName(), t2->GetName());
+  int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
   if (nameResult == 0)
     {
     return strcmp(t1->GetMakefile()->GetStartOutputDirectory(),

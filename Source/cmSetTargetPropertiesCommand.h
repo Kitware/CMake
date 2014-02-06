@@ -37,7 +37,7 @@ public:
   /**
    *  Used by this command and cmSetPropertiesCommand
    */
-  static bool SetOneTarget(const char *tname,
+  static bool SetOneTarget(const std::string& tname,
                            std::vector<std::string> &propertyPairs,
                            cmMakefile *mf);
 

@@ -195,7 +195,7 @@ public:
    *   the source directory of this generator.  This should only be
    *   used for dependencies of custom commands.
    */
-  bool GetRealDependency(const char* name, const char* config,
+  bool GetRealDependency(const std::string& name, const char* config,
                          std::string& dep);
 
   ///! for existing files convert to output path and short path if spaces
@@ -339,14 +339,14 @@ public:
   /**
    * Generate a Mac OS X application bundle Info.plist file.
    */
-  void GenerateAppleInfoPList(cmTarget* target, const char* targetName,
+  void GenerateAppleInfoPList(cmTarget* target, const std::string& targetName,
                               const char* fname);
 
   /**
    * Generate a Mac OS X framework Info.plist file.
    */
   void GenerateFrameworkInfoPList(cmTarget* target,
-                                  const char* targetName,
+                                  const std::string& targetName,
                                   const char* fname);
   /** Construct a comment for a custom command.  */
   std::string ConstructComment(const cmCustomCommand& cc,

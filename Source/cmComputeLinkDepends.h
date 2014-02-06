@@ -83,7 +83,8 @@ private:
   void AddDirectLinkEntries();
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
-  cmTarget const* FindTargetToLink(int depender_index, const char* name);
+  cmTarget const* FindTargetToLink(int depender_index,
+                                   const std::string& name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;

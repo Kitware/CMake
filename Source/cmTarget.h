@@ -93,13 +93,13 @@ public:
   /**
    * Set the target type
    */
-  void SetType(TargetType f, const char* name);
+  void SetType(TargetType f, const std::string& name);
 
   void MarkAsImported();
 
   ///! Set/Get the name of the target
-  const char* GetName() const {return this->Name.c_str();}
-  const char* GetExportName() const;
+  const std::string& GetName() const {return this->Name;}
+  std::string GetExportName() const;
 
   ///! Set the cmMakefile that owns this target
   void SetMakefile(cmMakefile *mf);
@@ -168,12 +168,12 @@ public:
   /**
    * Clear the dependency information recorded for this target, if any.
    */
-  void ClearDependencyInformation(cmMakefile& mf, const char* target);
+  void ClearDependencyInformation(cmMakefile& mf, const std::string& target);
 
   // Check to see if a library is a framework and treat it different on Mac
   bool NameResolvesToFramework(const std::string& libname) const;
   void AddLinkLibrary(cmMakefile& mf,
-                      const char *target, const char* lib,
+                      const std::string& target, const std::string& lib,
                       LinkLibraryType llt);
   enum TLLSignature {
     KeywordTLLSignature,
@@ -182,12 +182,12 @@ public:
   bool PushTLLCommandTrace(TLLSignature signature);
   void GetTllSignatureTraces(cmOStringStream &s, TLLSignature sig) const;
 
-  void MergeLinkLibraries( cmMakefile& mf, const char* selfname,
+  void MergeLinkLibraries( cmMakefile& mf, const std::string& selfname,
                            const LinkLibraryVectorType& libs );
 
   const std::vector<std::string>& GetLinkDirectories() const;
 
-  void AddLinkDirectory(const char* d);
+  void AddLinkDirectory(const std::string& d);
 
   /**
    * Set the path where this target should be installed. This is relative to
@@ -214,10 +214,10 @@ public:
    * name as would be specified to the ADD_EXECUTABLE or UTILITY_SOURCE
    * commands. It is not a full path nor does it have an extension.
    */
-  void AddUtility(const char* u, cmMakefile *makefile = 0);
+  void AddUtility(const std::string& u, cmMakefile *makefile = 0);
   ///! Get the utilities used by this target
   std::set<cmStdString>const& GetUtilities() const { return this->Utilities; }
-  cmListFileBacktrace const* GetUtilityBacktrace(const char* u) const;
+  cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
   /** Finalize the target at the end of the Configure step.  */
   void FinishConfigure();

@@ -550,14 +550,14 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteMakeRule(std::ostream& os,
                 const char* comment,
-                const char* target,
+                const std::string& target,
                 const std::vector<std::string>& depends,
                 const std::vector<std::string>& commands,
                 bool symbolic,
                 bool in_help)
 {
   // Make sure there is a target.
-  if(!target || !*target)
+  if(target.empty())
     {
     cmSystemTools::Error("No target for WriteMakeRule! called with comment: ",
                          comment);
@@ -859,11 +859,11 @@ void cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::WriteConvenienceRule(std::ostream& ruleFileStream,
-                       const char* realTarget,
-                       const char* helpTarget)
+                       const std::string& realTarget,
+                       const std::string& helpTarget)
 {
   // A rule is only needed if the names are different.
-  if(strcmp(realTarget, helpTarget) != 0)
+  if(realTarget != helpTarget)
     {
     // The helper target depends on the real target.
     std::vector<std::string> depends;
@@ -2034,7 +2034,7 @@ void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetRecursiveMakeCall(const char *makefile, const char* tgt)
+::GetRecursiveMakeCall(const char *makefile, const std::string& tgt)
 {
   // Call make on the given file.
   std::string cmd;
@@ -2059,7 +2059,7 @@ cmLocalUnixMakefileGenerator3
     }
 
   // Add the target.
-  if (tgt && tgt[0] != '\0')
+  if (!tgt.empty())
     {
     // The make target is always relative to the top of the build tree.
     std::string tgt2 = this->Convert(tgt, HOME_OUTPUT);

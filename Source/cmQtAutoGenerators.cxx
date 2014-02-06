@@ -772,7 +772,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   makefile->AddDefinition("_qt_uic_options_options",
             cmLocalGenerator::EscapeForCMake(uiFileOptions.c_str()).c_str());
 
-  const char* targetName = target->GetName();
+  std::string targetName = target->GetName();
   if (strcmp(qtVersion, "5") == 0)
     {
     cmTarget *qt5Uic = makefile->FindTargetToUse("Qt5::uic");
@@ -791,7 +791,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
     if (!qt4Uic)
       {
       cmSystemTools::Error("Qt4::uic target not found ",
-                          targetName);
+                          targetName.c_str());
       return;
       }
     makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(0));
@@ -799,7 +799,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   else
     {
     cmSystemTools::Error("The CMAKE_AUTOUIC feature supports only Qt 4 and "
-                        "Qt 5 ", targetName);
+                        "Qt 5 ", targetName.c_str());
     }
 }
 
@@ -921,14 +921,14 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   makefile->AddDefinition("_qt_rcc_options_options",
             cmLocalGenerator::EscapeForCMake(rccFileOptions.c_str()).c_str());
 
-  const char* targetName = target->GetName();
+  std::string targetName = target->GetName();
   if (strcmp(qtVersion, "5") == 0)
     {
     cmTarget *qt5Rcc = makefile->FindTargetToUse("Qt5::rcc");
     if (!qt5Rcc)
       {
       cmSystemTools::Error("Qt5::rcc target not found ",
-                          targetName);
+                          targetName.c_str());
       return;
       }
     makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
@@ -939,7 +939,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
     if (!qt4Rcc)
       {
       cmSystemTools::Error("Qt4::rcc target not found ",
-                          targetName);
+                          targetName.c_str());
       return;
       }
     makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(0));
@@ -947,7 +947,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   else
     {
     cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
-                        "Qt 5 ", targetName);
+                        "Qt 5 ", targetName.c_str());
     }
 }
 

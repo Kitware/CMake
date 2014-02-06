@@ -313,7 +313,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   const char* makeProgram,
   const char* projectName,
   const char* projectDir,
-  const char* targetName,
+  const std::string& targetName,
   const char* config,
   bool fast,
   std::vector<std::string> const& makeOptions)
@@ -369,25 +369,26 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 
   makeCommand.push_back(makeProgramSelected);
 
+  std::string realTarget = targetName;
   // msbuild.exe CxxOnly.sln /t:Build /p:Configuration=Debug /target:ALL_BUILD
-  if(!targetName || strlen(targetName) == 0)
+  if(realTarget.empty())
     {
-    targetName = "ALL_BUILD";
+    realTarget = "ALL_BUILD";
     }
-  if ( targetName && strcmp(targetName, "clean") == 0 )
+  if ( realTarget == "clean" )
     {
     makeCommand.push_back(std::string(projectName)+".sln");
     makeCommand.push_back("/t:Clean");
     }
   else
     {
-    std::string targetProject(targetName);
+    std::string targetProject(realTarget);
     targetProject += ".vcxproj";
     if (targetProject.find('/') == std::string::npos)
       {
       // it might be in a subdir
       if (cmSlnProjectEntry const* proj =
-          slnData.GetProjectByName(targetName))
+          slnData.GetProjectByName(realTarget))
         {
         targetProject = proj->GetRelativePath();
         cmSystemTools::ConvertToUnixSlashes(targetProject);

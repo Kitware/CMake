@@ -104,8 +104,8 @@ protected:
   VSDependMap VSTargetDepends;
   void ComputeVSTargetDepends(cmTarget&);
 
-  bool CheckTargetLinks(cmTarget& target, const char* name);
-  std::string GetUtilityForTarget(cmTarget& target, const char*);
+  bool CheckTargetLinks(cmTarget& target, const std::string& name);
+  std::string GetUtilityForTarget(cmTarget& target, const std::string&);
   virtual std::string WriteUtilityDepend(cmTarget const*) = 0;
   std::string GetUtilityDepend(cmTarget const* target);
   typedef std::map<cmTarget const*, cmStdString> UtilityDependsMap;

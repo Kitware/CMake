@@ -263,7 +263,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   const char* makeProgram,
   const char* projectName,
   const char* /*projectDir*/,
-  const char* targetName,
+  const std::string& targetName,
   const char* config,
   bool /*fast*/,
   std::vector<std::string> const& makeOptions)
@@ -283,10 +283,11 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   makeCommand.push_back(projectArg);
 
   bool clean = false;
-  if ( targetName && strcmp(targetName, "clean") == 0 )
+  std::string realTarget = targetName;
+  if ( realTarget == "clean" )
     {
     clean = true;
-    targetName = "ALL_BUILD";
+    realTarget = "ALL_BUILD";
     }
   if(clean)
     {
@@ -302,9 +303,9 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
     {
     config = 0;
     }
-  if (targetName && strlen(targetName))
+  if (!realTarget.empty())
     {
-    makeCommand.push_back(targetName);
+    makeCommand.push_back(realTarget);
     }
   else
     {
@@ -1737,7 +1738,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   {
     cmSystemTools::Error
       ("CMake can not determine linker language for target: ",
-       target.GetName());
+       target.GetName().c_str());
     return;
   }
 
@@ -2420,7 +2421,7 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
 
   cmXCodeObject* target =
     this->CreateObject(cmXCodeObject::PBXAggregateTarget);
-  target->SetComment(cmtarget.GetName());
+  target->SetComment(cmtarget.GetName().c_str());
   cmXCodeObject* buildPhases =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   std::vector<cmXCodeObject*> emptyContentVector;
@@ -2621,7 +2622,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   fileRef->AddAttribute("refType", this->CreateString("0"));
   fileRef->AddAttribute("sourceTree",
                         this->CreateString("BUILT_PRODUCTS_DIR"));
-  fileRef->SetComment(cmtarget.GetName());
+  fileRef->SetComment(cmtarget.GetName().c_str());
   target->AddAttribute("productReference",
                        this->CreateObjectReference(fileRef));
   if(const char* productType = this->GetTargetProductType(cmtarget))
@@ -2654,8 +2655,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(cmTarget const* t)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::GetOrCreateId(const char* name,
-                                                  const char* id)
+std::string cmGlobalXCodeGenerator::GetOrCreateId(const std::string& name,
+                                                  const std::string& id)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
@@ -2668,7 +2669,7 @@ std::string cmGlobalXCodeGenerator::GetOrCreateId(const char* name,
     }
 
   this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(),
-    id, "Stored Xcode object GUID", cmCacheManager::INTERNAL);
+    id.c_str(), "Stored Xcode object GUID", cmCacheManager::INTERNAL);
 
   return id;
 }

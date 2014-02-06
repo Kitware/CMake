@@ -300,7 +300,7 @@ void cmGraphVizWriter::WriteFooter(cmGeneratedFileStream& str) const
 }
 
 
-void cmGraphVizWriter::WriteConnections(const char* targetName,
+void cmGraphVizWriter::WriteConnections(const std::string& targetName,
                                     std::set<std::string>& insertedNodes,
                                     std::set<std::string>& insertedConnections,
                                     cmGeneratedFileStream& str) const
@@ -359,7 +359,7 @@ void cmGraphVizWriter::WriteConnections(const char* targetName,
 }
 
 
-void cmGraphVizWriter::WriteDependerConnections(const char* targetName,
+void cmGraphVizWriter::WriteDependerConnections(const std::string& targetName,
                                     std::set<std::string>& insertedNodes,
                                     std::set<std::string>& insertedConnections,
                                     cmGeneratedFileStream& str) const
@@ -444,7 +444,7 @@ void cmGraphVizWriter::WriteDependerConnections(const char* targetName,
 }
 
 
-void cmGraphVizWriter::WriteNode(const char* targetName,
+void cmGraphVizWriter::WriteNode(const std::string& targetName,
                                  const cmTarget* target,
                                  std::set<std::string>& insertedNodes,
                                  cmGeneratedFileStream& str) const
@@ -558,7 +558,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
 }
 
 
-bool cmGraphVizWriter::IgnoreThisTarget(const char* name)
+bool cmGraphVizWriter::IgnoreThisTarget(const std::string& name)
 {
   for(std::vector<cmsys::RegularExpression>::iterator itvIt
                                           = this->TargetsToIgnoreRegex.begin();
