@@ -14,7 +14,7 @@ targets instead in cases where the goal is to refer to targets by
 another name.
 
 The OLD behavior for this policy is to allow including the result of
-an export() command.  The NEW behavior for this policy is to not to
+an export() command.  The NEW behavior for this policy is not to
 allow including the result of an export() command.
 
 This policy was introduced in CMake version 3.0.0.  CMake version
