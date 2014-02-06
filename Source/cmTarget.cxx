@@ -592,7 +592,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmTarget::AddSource(const char* s)
+cmSourceFile* cmTarget::AddSource(const std::string& s)
 {
   std::string src = s;
 

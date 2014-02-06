@@ -31,7 +31,7 @@ public:
    * Construct with the makefile storing the source and the initial
    * name referencing it.
    */
-  cmSourceFile(cmMakefile* mf, const char* name);
+  cmSourceFile(cmMakefile* mf, const std::string& name);
 
   ~cmSourceFile();
 

@@ -2060,9 +2060,8 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const char* name)
 }
 
 cmSourceFile*
-cmMakefile::LinearGetSourceFileWithOutput(const char *cname) const
+cmMakefile::LinearGetSourceFileWithOutput(const std::string& name) const
 {
-  std::string name = cname;
   std::string out;
 
   // look through all the source files that have custom commands
@@ -2096,15 +2095,14 @@ cmMakefile::LinearGetSourceFileWithOutput(const char *cname) const
   return 0;
 }
 
-cmSourceFile *cmMakefile::GetSourceFileWithOutput(const char *cname) const
+cmSourceFile *cmMakefile::GetSourceFileWithOutput(
+                                                const std::string& name) const
 {
-  std::string name = cname;
-
   // If the queried path is not absolute we use the backward compatible
   // linear-time search for an output with a matching suffix.
-  if(!cmSystemTools::FileIsFullPath(cname))
+  if(!cmSystemTools::FileIsFullPath(name.c_str()))
     {
-    return LinearGetSourceFileWithOutput(cname);
+    return LinearGetSourceFileWithOutput(name.c_str());
     }
   // Otherwise we use an efficient lookup map.
   OutputToSourceMap::const_iterator o = this->OutputToSource.find(name);
@@ -2149,15 +2147,12 @@ cmMakefile::GetSourceGroup(const std::vector<std::string>&name) const
   return sg;
 }
 
- void cmMakefile::AddSourceGroup(const char* name,
+void cmMakefile::AddSourceGroup(const std::string& name,
                                  const char* regex)
 {
-  if (name)
-    {
-    std::vector<std::string> nameVector;
-    nameVector.push_back(name);
-    AddSourceGroup(nameVector, regex);
-    }
+  std::vector<std::string> nameVector;
+  nameVector.push_back(name);
+  AddSourceGroup(nameVector, regex);
 }
 
 void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
@@ -3011,9 +3006,9 @@ void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
+cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 {
-  cmSourceFileLocation sfl(this, sourceName);
+  cmSourceFileLocation sfl(this, sourceName.c_str());
   for(std::vector<cmSourceFile*>::const_iterator
         sfi = this->SourceFiles.begin();
       sfi != this->SourceFiles.end(); ++sfi)
@@ -3028,7 +3023,7 @@ cmSourceFile* cmMakefile::GetSource(const char* sourceName) const
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
+cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
                                             bool generated)
 {
   if(cmSourceFile* esf = this->GetSource(sourceName))
@@ -3037,7 +3032,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const char* sourceName,
     }
   else
     {
-    cmSourceFile* sf = new cmSourceFile(this, sourceName);
+    cmSourceFile* sf = new cmSourceFile(this, sourceName.c_str());
     if(generated)
       {
       sf->SetProperty("GENERATED", "1");

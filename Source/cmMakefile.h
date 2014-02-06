@@ -332,7 +332,7 @@ public:
   /**
    * Add a root source group for consideration when adding a new source.
    */
-  void AddSourceGroup(const char* name, const char* regex=0);
+  void AddSourceGroup(const std::string& name, const char* regex=0);
 
   /**
    * Add a source group for consideration when adding a new source.
@@ -555,14 +555,14 @@ public:
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then a null pointer is returned.
    */
-  cmSourceFile* GetSource(const char* sourceName) const;
+  cmSourceFile* GetSource(const std::string& sourceName) const;
 
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then create the source file and return it. generated
    * indicates if it is a generated file, this is used in determining
    * how to create the source file instance e.g. name
    */
-  cmSourceFile* GetOrCreateSource(const char* sourceName,
+  cmSourceFile* GetOrCreateSource(const std::string& sourceName,
                                   bool generated = false);
 
   /**
@@ -773,7 +773,7 @@ public:
    * Is there a source file that has the provided source file as an output?
    * if so then return it
    */
-  cmSourceFile *GetSourceFileWithOutput(const char *outName) const;
+  cmSourceFile *GetSourceFileWithOutput(const std::string& outName) const;
 
   /**
    * Add a macro to the list of macros. The arguments should be name of the
@@ -1030,12 +1030,12 @@ private:
 
   bool GeneratingBuildSystem;
   /**
-   * Old version of GetSourceFileWithOutput(const char*) kept for
+   * Old version of GetSourceFileWithOutput(const std::string&) kept for
    * backward-compatibility. It implements a linear search and support
    * relative file paths. It is used as a fall back by
-   * GetSourceFileWithOutput(const char*).
+   * GetSourceFileWithOutput(const std::string&).
    */
-  cmSourceFile *LinearGetSourceFileWithOutput(const char *cname) const;
+  cmSourceFile *LinearGetSourceFileWithOutput(const std::string& cname) const;
 
   // A map for fast output to input look up.
 #if defined(CMAKE_BUILD_WITH_CMAKE)

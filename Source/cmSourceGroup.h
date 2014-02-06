@@ -46,7 +46,7 @@ public:
   /**
    * Add a file name to the explicit list of files for this group.
    */
-  void AddGroupFile(const char* name);
+  void AddGroupFile(const std::string& name);
 
   /**
    * Add child to this sourcegroup

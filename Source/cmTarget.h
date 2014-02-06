@@ -143,7 +143,7 @@ public:
    * Add sources to the target.
    */
   void AddSources(std::vector<std::string> const& srcs);
-  cmSourceFile* AddSource(const char* src);
+  cmSourceFile* AddSource(const std::string& src);
 
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
 

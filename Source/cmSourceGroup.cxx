@@ -73,7 +73,7 @@ void cmSourceGroup::SetGroupRegex(const char* regex)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceGroup::AddGroupFile(const char* name)
+void cmSourceGroup::AddGroupFile(const std::string& name)
 {
   this->GroupFiles.insert(name);
 }

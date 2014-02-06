@@ -18,7 +18,7 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
-cmSourceFile::cmSourceFile(cmMakefile* mf, const char* name):
+cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
   Location(mf, name)
 {
   this->CustomCommand = 0;
