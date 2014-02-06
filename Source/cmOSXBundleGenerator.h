@@ -59,7 +59,7 @@ private:
   bool MustSkip();
 
 private:
-  cmTarget* Target;
+  cmGeneratorTarget* GT;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   const char* ConfigName;

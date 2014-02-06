@@ -25,7 +25,8 @@
 #include "assert.h"
 
 //----------------------------------------------------------------------------
-cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t)
+cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
+  SourceFileFlagsConstructed(false)
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
@@ -875,4 +876,107 @@ bool cmStrictTargetComparison::operator()(cmTarget const* t1,
                   t2->GetMakefile()->GetStartOutputDirectory()) < 0;
     }
   return nameResult < 0;
+}
+
+//----------------------------------------------------------------------------
+struct cmGeneratorTarget::SourceFileFlags
+cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
+{
+  struct SourceFileFlags flags;
+  this->ConstructSourceFileFlags();
+  std::map<cmSourceFile const*, SourceFileFlags>::iterator si =
+    this->SourceFlagsMap.find(sf);
+  if(si != this->SourceFlagsMap.end())
+    {
+    flags = si->second;
+    }
+  return flags;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget::ConstructSourceFileFlags() const
+{
+  if(this->SourceFileFlagsConstructed)
+    {
+    return;
+    }
+  this->SourceFileFlagsConstructed = true;
+
+  // Process public headers to mark the source files.
+  if(const char* files = this->Target->GetProperty("PUBLIC_HEADER"))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    for(std::vector<std::string>::iterator it = relFiles.begin();
+        it != relFiles.end(); ++it)
+      {
+      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
+        {
+        SourceFileFlags& flags = this->SourceFlagsMap[sf];
+        flags.MacFolder = "Headers";
+        flags.Type = cmGeneratorTarget::SourceFileTypePublicHeader;
+        }
+      }
+    }
+
+  // Process private headers after public headers so that they take
+  // precedence if a file is listed in both.
+  if(const char* files = this->Target->GetProperty("PRIVATE_HEADER"))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    for(std::vector<std::string>::iterator it = relFiles.begin();
+        it != relFiles.end(); ++it)
+      {
+      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
+        {
+        SourceFileFlags& flags = this->SourceFlagsMap[sf];
+        flags.MacFolder = "PrivateHeaders";
+        flags.Type = cmGeneratorTarget::SourceFileTypePrivateHeader;
+        }
+      }
+    }
+
+  // Mark sources listed as resources.
+  if(const char* files = this->Target->GetProperty("RESOURCE"))
+    {
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(files, relFiles);
+    for(std::vector<std::string>::iterator it = relFiles.begin();
+        it != relFiles.end(); ++it)
+      {
+      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
+        {
+        SourceFileFlags& flags = this->SourceFlagsMap[sf];
+        flags.MacFolder = "Resources";
+        flags.Type = cmGeneratorTarget::SourceFileTypeResource;
+        }
+      }
+    }
+
+  // Handle the MACOSX_PACKAGE_LOCATION property on source files that
+  // were not listed in one of the other lists.
+  std::vector<cmSourceFile*> sources;
+  this->GetSourceFiles(sources);
+  for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
+      si != sources.end(); ++si)
+    {
+    cmSourceFile* sf = *si;
+    if(const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION"))
+      {
+      SourceFileFlags& flags = this->SourceFlagsMap[sf];
+      if(flags.Type == cmGeneratorTarget::SourceFileTypeNormal)
+        {
+        flags.MacFolder = location;
+        if(strcmp(location, "Resources") == 0)
+          {
+          flags.Type = cmGeneratorTarget::SourceFileTypeResource;
+          }
+        else
+          {
+          flags.Type = cmGeneratorTarget::SourceFileTypeMacContent;
+          }
+        }
+      }
+    }
 }

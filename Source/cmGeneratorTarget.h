@@ -88,6 +88,31 @@ public:
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
+  /**
+   * Flags for a given source file as used in this target. Typically assigned
+   * via SET_TARGET_PROPERTIES when the property is a list of source files.
+   */
+  enum SourceFileType
+  {
+    SourceFileTypeNormal,
+    SourceFileTypePrivateHeader, // is in "PRIVATE_HEADER" target property
+    SourceFileTypePublicHeader,  // is in "PUBLIC_HEADER" target property
+    SourceFileTypeResource,      // is in "RESOURCE" target property *or*
+                                 // has MACOSX_PACKAGE_LOCATION=="Resources"
+    SourceFileTypeMacContent     // has MACOSX_PACKAGE_LOCATION!="Resources"
+  };
+  struct SourceFileFlags
+  {
+    SourceFileFlags(): Type(SourceFileTypeNormal), MacFolder(0) {}
+    SourceFileFlags(SourceFileFlags const& r):
+      Type(r.Type), MacFolder(r.MacFolder) {}
+    SourceFileType Type;
+    const char* MacFolder; // location inside Mac content folders
+  };
+
+  struct SourceFileFlags
+  GetTargetSourceFileFlags(const cmSourceFile* sf) const;
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
@@ -106,6 +131,10 @@ private:
   std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+
+  void ConstructSourceFileFlags() const;
+  mutable bool SourceFileFlagsConstructed;
+  mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);

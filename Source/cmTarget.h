@@ -140,34 +140,6 @@ public:
     }
 
   /**
-   * Flags for a given source file as used in this target. Typically assigned
-   * via SET_TARGET_PROPERTIES when the property is a list of source files.
-   */
-  enum SourceFileType
-  {
-    SourceFileTypeNormal,
-    SourceFileTypePrivateHeader, // is in "PRIVATE_HEADER" target property
-    SourceFileTypePublicHeader,  // is in "PUBLIC_HEADER" target property
-    SourceFileTypeResource,      // is in "RESOURCE" target property *or*
-                                 // has MACOSX_PACKAGE_LOCATION=="Resources"
-    SourceFileTypeMacContent     // has MACOSX_PACKAGE_LOCATION!="Resources"
-  };
-  struct SourceFileFlags
-  {
-    SourceFileFlags(): Type(SourceFileTypeNormal), MacFolder(0) {}
-    SourceFileFlags(SourceFileFlags const& r):
-      Type(r.Type), MacFolder(r.MacFolder) {}
-    SourceFileType Type;
-    const char* MacFolder; // location inside Mac content folders
-  };
-
-  /**
-   * Get the flags for a given source file as used in this target
-   */
-  struct SourceFileFlags
-  GetTargetSourceFileFlags(const cmSourceFile* sf) const;
-
-  /**
    * Add sources to the target.
    */
   void AddSources(std::vector<std::string> const& srcs);
@@ -756,7 +728,6 @@ private:
   friend class cmTargetTraceDependencies;
   cmTargetInternalPointer Internal;
 
-  void ConstructSourceFileFlags() const;
   void ComputeVersionedName(std::string& vName,
                             std::string const& prefix,
                             std::string const& base,
