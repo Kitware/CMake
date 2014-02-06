@@ -171,11 +171,14 @@ can be enabled to add the corresponding directories to the
 targets in multiple different directories convenient through use of the
 :command:`target_link_libraries` command.
 
+
+.. _`Target Usage Requirements`:
+
 Transitive Usage Requirements
 -----------------------------
 
 The usage requirements of a target can transitively propagate to dependents.
-The :command:`target_link_libraries` command also has ``PRIVATE``,
+The :command:`target_link_libraries` command has ``PRIVATE``,
 ``INTERFACE`` and ``PUBLIC`` keywords to control the propagation.
 
 .. code-block:: cmake
@@ -217,6 +220,26 @@ each keyword:
     PUBLIC archive
     PRIVATE serialization
   )
+
+Usage requirements are propagated by reading the ``INTERFACE_`` variants
+of target properties from dependencies and appending the values to the
+non-``INTERFACE_`` variants of the operand.  For example, the
+:prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of dependencies is read and
+appended to the :prop_tgt:`INCLUDE_DIRECTORIES` of the operand.  In cases
+where order is relevant and maintained, and the order resulting from the
+:command:`target_link_libraries` calls does not allow correct compilation,
+use of an appropriate command to set the property directly may update the
+order.
+
+For example, if the linked libraries for a target must be specified
+in the order ``lib1`` ``lib2`` ``lib3`` , but the include directories must
+be specified in the order ``lib3`` ``lib1`` ``lib2``:
+
+.. code-block:: cmake
+
+  target_link_libraries(myExe lib1 lib2 lib3)
+  target_include_directories(myExe
+    PRIVATE $<TARGET_PROPERTY:INTERFACE_INCLUDE_DIRECTORIES:lib3>)
 
 .. _`Compatible Interface Properties`:
 
@@ -356,6 +379,10 @@ calculate the numeric minimum value for a property from dependencies.
 
 Each calculated "compatible" property value may be read in the consumer at
 generate-time using generator expressions.
+
+Note that for each dependee, the set of properties specified in each
+compatible interface property must not intersect with the set specified in
+any of the other properties.
 
 Property Origin Debugging
 -------------------------
@@ -634,12 +661,14 @@ target at a time.  The commands :command:`add_definitions`,
 a similar function, but operate at directory scope instead of target
 scope for convenience.
 
-Psuedo Targets
+Pseudo Targets
 ==============
 
 Some target types do not represent outputs of the buildsystem, but only inputs
 such as external dependencies, aliases or other non-build artifacts.  Pseudo
 targets are not represented in the generated buildsystem.
+
+.. _`Imported Targets`:
 
 Imported Targets
 ----------------
@@ -676,6 +705,8 @@ accessible globally in the buildsystem.
 
 See the :manual:`cmake-packages(7)` manual for more on creating packages
 with :prop_tgt:`IMPORTED` targets.
+
+.. _`Alias Targets`:
 
 Alias Targets
 -------------
@@ -717,6 +748,8 @@ property from it:
   if(_aliased)
     message(STATUS "The name Upstream::lib1 is an ALIAS for ${_aliased}.")
   endif()
+
+.. _`Interface Libraries`:
 
 Interface Libraries
 -------------------

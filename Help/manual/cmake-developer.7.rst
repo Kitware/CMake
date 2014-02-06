@@ -249,8 +249,7 @@ literal block after ``::``
  the following indented block as literal text without interpretation.
  The command-line help processor prints the ``::`` literally and
  prints the block content with common indentation replaced by one
- space.  We prefer the ``::`` to appear at the end of a paragraph
- line instead of as its own line.
+ space.
 
 ``note`` directive
  Call out a side note.  The command-line help processor prints the
@@ -417,6 +416,172 @@ This is necessary because we use ``<placeholders>`` frequently in
 object names like ``OUTPUT_NAME_<CONFIG>``.  The form ``a <b>``,
 with a space preceding ``<``, is still interpreted as a link text
 with an explicit target.
+
+Style
+-----
+
+1)
+  Command signatures should be marked up as plain literal blocks, not as
+  cmake ``code-blocks``.
+
+2)
+  Signatures are separated from preceding content by a horizontal
+  line. That is, use:
+
+  .. code-block:: rst
+
+    ... preceding paragraph.
+
+    ---------------------------------------------------------------------
+
+    ::
+
+      add_library(<lib> ...)
+
+    This signature is used for ...
+
+3)
+  Use "``OFF``" and "``ON``" for boolean values which can be modified by
+  the user, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`. Such properties
+  may be "enabled" and "disabled". Use "``True``" and "``False``" for
+  inherent values which can't be modified after being set, such as the
+  :prop_tgt:`IMPORTED` property of a build target.
+
+4)
+  Use two spaces for indentation.  Use two spaces between sentences in
+  prose.
+
+5)
+  Prefer to mark the start of literal blocks with ``::`` at the end of
+  the preceding paragraph. In cases where the following block gets
+  a ``code-block`` marker, put a single ``:`` at the end of the preceding
+  paragraph.
+
+6)
+  Prefer to restrict the width of lines to 75-80 columns.  This is not a
+  hard restriction, but writing new paragraphs wrapped at 75 columns
+  allows space for adding minor content without significant re-wrapping of
+  content.
+
+7)
+  Mark up self-references with  ``inline-literal`` syntax. For example,
+  within the add_executable command documentation, use
+
+  .. code-block:: rst
+
+    ``add_executable``
+
+  not
+
+  .. code-block:: rst
+
+    :command:`add_executable`
+
+  which is used elsewhere.
+
+8)
+  Mark up all other linkable references as links, including repeats. An
+  alternative, which is used by wikipedia (`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
+  is to link to a reference only once per article. That style is not used
+  in CMake documentation.
+
+9)
+  Mark up references to keywords in signatures, file names, and other
+  technical terms with ``inline-literl`` syntax, for example:
+
+  .. code-block:: rst
+
+    If ``WIN32`` is used with :command:`add_executable`, the
+    :prop_tgt:`WIN32_EXECUTABLE` target property is enabled. That command
+    creates the file ``<name>.exe`` on Windows.
+
+
+10)
+  If referring to a concept which corresponds to a property, and that
+  concept is described in a high-level manual, prefer to link to the
+  manual section instead of the property. For example:
+
+  .. code-block:: rst
+
+    This command creates an :ref:`Imported Target <Imported Targets>`.
+
+  instead of:
+
+  .. code-block:: rst
+
+    This command creates an :prop_tgt:`IMPORTED` target.
+
+  The latter should be used only when referring specifically to the
+  property.
+
+  References to manual sections are not automatically created by creating
+  a section, but code such as:
+
+  .. code-block:: rst
+
+    .. _`Imported Targets`:
+
+  creates a suitable anchor.  Use an anchor name which matches the name
+  of the corresponding section.  Refer to the anchor using a
+  cross-reference with specified text.
+
+  Imported Targets need the ``IMPORTED`` term marked up with care in
+  particular because the term may refer to a command keyword
+  (``IMPORTED``), a target property (:prop_tgt:`IMPORTED`), or a
+  concept (:ref:`Imported Targets`).
+
+11)
+  Where a property, command or variable is related conceptually to others,
+  by for example, being related to the buildsystem description, generator
+  expressions or Qt, each relevant property, command or variable should
+  link to the primary manual, which provides high-level information.  Only
+  particular information relating to the command should be in the
+  documentation of the command.
+
+12)
+  When marking section titles, make the section decoration line as long as
+  the title text.  Use only a line below the title, not above. For
+  example:
+
+  .. code-block:: rst
+
+    Title Text
+    ----------
+
+  Capitalize the first letter of each non-minor word in the title.
+
+13)
+  When referring to properties, variables, commands etc, prefer to link
+  to the target object and follow that with the type of object it is.
+  For example:
+
+  .. code-block:: rst
+
+    Set the :prop_tgt:`AUTOMOC` target property to ``ON``.
+
+  Instead of
+
+  .. code-block:: rst
+
+    Set the target property :prop_tgt:`AUTOMOC` to ``ON``.
+
+  The ``policy`` directive is an exception, and the type us usually
+  referred to before the link:
+
+  .. code-block:: rst
+
+    If policy :prop_tgt:`CMP0022` is set to ``NEW`` the behavior is ...
+
+14)
+  Signatures of commands should wrap optional parts with square brackets,
+  and should mark list of optional arguments with an ellipsis (``...``).
+  Elements of the signature which are specified by the user should be
+  specified with angle brackets, and may be referred to in prose using
+  ``inline-literal`` syntax.
+
+15)
+  Use American English spellings in prose.
+
 
 Modules
 =======
@@ -703,7 +868,7 @@ If the package provides Xxx_INCLUDE_DIRS and Xxx_LIBRARIES variables, the
 include dirs and libraries for all components which were requested and which
 have been found should be added to those two variables.
 
-To get this behaviour you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS()
+To get this behavior you can use the FIND_PACKAGE_HANDLE_STANDARD_ARGS()
 macro, as an example see FindJPEG.cmake.
 
 For internal implementation, it's a generally accepted convention that

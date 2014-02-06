@@ -113,7 +113,7 @@ dependency that would cause the custom command to re-run whenever the
 executable is recompiled.
 
 Arguments to COMMAND may use "generator expressions" with the syntax
-"$<...>".  See the :manual:`cmake-generator-expressions(7)` manual for
+``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
 available expressions.
 
 Note that tgt is not added as a dependency of the target this

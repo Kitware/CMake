@@ -35,7 +35,7 @@ a WORKING_DIRECTORY option is given then the test will be executed in
 the given directory.
 
 Arguments after COMMAND may use "generator expressions" with the syntax
-"$<...>".  See the :manual:`cmake-generator-expressions(7)` manual for
+``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
 available expressions.
 
 Note that tgt is not added as a dependency of the target this
