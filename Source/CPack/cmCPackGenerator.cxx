@@ -254,7 +254,7 @@ int cmCPackGenerator::InstallProject()
   // If the project is a CMAKE project then run pre-install
   // and then read the cmake_install script to run it
   if ( !this->InstallProjectViaInstallCMakeProjects(
-         setDestDir, bareTempInstallDirectory.c_str()) )
+         setDestDir, bareTempInstallDirectory) )
     {
     return 0;
     }
@@ -269,7 +269,7 @@ int cmCPackGenerator::InstallProject()
 
 //----------------------------------------------------------------------
 int cmCPackGenerator::InstallProjectViaInstallCommands(
-  bool setDestDir, const char* tempInstallDirectory)
+  bool setDestDir, const std::string& tempInstallDirectory)
 {
   (void) setDestDir;
   const char* installCommands = this->GetOption("CPACK_INSTALL_COMMANDS");
@@ -312,7 +312,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
 
 //----------------------------------------------------------------------
 int cmCPackGenerator::InstallProjectViaInstalledDirectories(
-  bool setDestDir, const char* tempInstallDirectory)
+  bool setDestDir, const std::string& tempInstallDirectory)
 {
   (void)setDestDir;
   (void)tempInstallDirectory;
@@ -349,7 +349,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       return 0;
       }
     std::vector<std::string>::iterator it;
-    const char* tempDir = tempInstallDirectory;
+    const std::string& tempDir = tempInstallDirectory;
     for ( it = installDirectoriesVector.begin();
       it != installDirectoriesVector.end();
       ++it )
@@ -457,7 +457,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
 
 //----------------------------------------------------------------------
 int cmCPackGenerator::InstallProjectViaInstallScript(
-  bool setDestDir, const char* tempInstallDirectory)
+  bool setDestDir, const std::string& tempInstallDirectory)
 {
   const char* cmakeScripts
     = this->GetOption("CPACK_INSTALL_SCRIPT");
@@ -499,7 +499,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
         }
       else
         {
-        this->SetOption("CMAKE_INSTALL_PREFIX", tempInstallDirectory);
+        this->SetOption("CMAKE_INSTALL_PREFIX", tempInstallDirectory.c_str());
 
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
           "- Using non-DESTDIR install... (this->SetOption)" << std::endl);
@@ -509,9 +509,9 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
         }
 
       this->SetOptionIfNotSet("CMAKE_CURRENT_BINARY_DIR",
-        tempInstallDirectory);
+        tempInstallDirectory.c_str());
       this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR",
-        tempInstallDirectory);
+        tempInstallDirectory.c_str());
       int res = this->MakefileMap->ReadListFile(0, installScript.c_str());
       if ( cmSystemTools::GetErrorOccuredFlag() || !res )
         {
@@ -524,7 +524,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
 
 //----------------------------------------------------------------------
 int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
-  bool setDestDir, const char* baseTempInstallDirectory)
+  bool setDestDir, const std::string& baseTempInstallDirectory)
 {
   const char* cmakeProjects
     = this->GetOption("CPACK_INSTALL_CMAKE_PROJECTS");

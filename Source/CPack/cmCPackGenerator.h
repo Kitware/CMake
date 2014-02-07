@@ -190,13 +190,13 @@ protected:
 
   //! Run install commands if specified
   virtual int InstallProjectViaInstallCommands(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
   virtual int InstallProjectViaInstallScript(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
   virtual int InstallProjectViaInstalledDirectories(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
   virtual int InstallProjectViaInstallCMakeProjects(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
 
   /**
    * The various level of support of
