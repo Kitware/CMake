@@ -16,5 +16,5 @@ add_library(iface15 ALIAS INTERFACE)
 add_library(iface16 INTERFACE INTERFACE)
 add_library(iface17 INTERFACE EXCLUDE_FROM_ALL)
 add_library(iface18 EXCLUDE_FROM_ALL INTERFACE)
-add_library(iface19 GLOBAL INTERFACE)
+# add_library(iface19 GLOBAL INTERFACE) Tested separately
 add_library(iface20 INTERFACE GLOBAL)
