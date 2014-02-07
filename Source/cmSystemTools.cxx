@@ -944,7 +944,7 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
 #endif
 }
 
-bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
+bool cmSystemTools::ComputeFileMD5(const std::string& source, char* md5out)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmCryptoHashMD5 md5;
@@ -959,7 +959,7 @@ bool cmSystemTools::ComputeFileMD5(const char* source, char* md5out)
 #endif
 }
 
-std::string cmSystemTools::ComputeStringMD5(const char* input)
+std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmCryptoHashMD5 md5;

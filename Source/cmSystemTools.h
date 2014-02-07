@@ -185,10 +185,10 @@ public:
   static bool RenameFile(const char* oldname, const char* newname);
 
   ///! Compute the md5sum of a file
-  static bool ComputeFileMD5(const char* source, char* md5out);
+  static bool ComputeFileMD5(const std::string& source, char* md5out);
 
   /** Compute the md5sum of a string.  */
-  static std::string ComputeStringMD5(const char* input);
+  static std::string ComputeStringMD5(const std::string& input);
 
   /**
    * Run a single executable command
