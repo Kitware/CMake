@@ -117,7 +117,7 @@ void
 cmGlobalVisualStudio6Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,
-  const char* projectName,
+  const std::string& projectName,
   const char* /*projectDir*/,
   const std::string& targetName,
   const char* config,
@@ -271,7 +271,7 @@ void cmGlobalVisualStudio6Generator::OutputDSWFile()
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
-                                                  const char* dspname,
+                                                  const std::string& dspname,
                                                   const char* dir,
                                                   cmTarget const& target)
 {
@@ -316,7 +316,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio6Generator::WriteExternalProject(std::ostream& fout,
-                               const char* name,
+                               const std::string& name,
                                const char* location,
                                const std::set<cmStdString>& dependencies)
 {

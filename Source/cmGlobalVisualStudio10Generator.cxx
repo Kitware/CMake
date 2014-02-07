@@ -311,7 +311,7 @@ std::string cmGlobalVisualStudio10Generator::FindDevEnvCommand()
 void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,
-  const char* projectName,
+  const std::string& projectName,
   const char* projectDir,
   const std::string& targetName,
   const char* config,

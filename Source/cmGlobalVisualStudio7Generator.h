@@ -63,7 +63,7 @@ public:
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
     const char* makeProgram,
-    const char* projectName,
+    const std::string& projectName,
     const char* projectDir,
     const std::string& targetName,
     const char* config,
@@ -90,7 +90,7 @@ public:
 
   ///! Create a GUID or get an existing one.
   void CreateGUID(const char* name);
-  std::string GetGUID(const char* name);
+  std::string GetGUID(const std::string& name);
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
@@ -123,13 +123,13 @@ protected:
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout,
-                            const char* name, const char* path,
+                            const std::string& name, const char* path,
                             cmTarget const& t);
   virtual void WriteProjectDepends(std::ostream& fout,
-                           const char* name, const char* path,
+                           const std::string& name, const char* path,
                            cmTarget const&t);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name, cmTarget::TargetType type,
+    std::ostream& fout, const std::string& name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const char* platformMapping = NULL);
   virtual void WriteSLNGlobalSections(std::ostream& fout,
@@ -153,7 +153,7 @@ protected:
   void GenerateConfigurations(cmMakefile* mf);
 
   virtual void WriteExternalProject(std::ostream& fout,
-                                    const char* name,
+                                    const std::string& name,
                                     const char* path,
                                     const char* typeGuid,
                                     const std::set<cmStdString>&
@@ -161,7 +161,7 @@ protected:
 
   std::string ConvertToSolutionPath(const char* path);
 
-  std::set<std::string> IsPartOfDefaultBuild(const char* project,
+  std::set<std::string> IsPartOfDefaultBuild(const std::string& project,
                                              cmTarget const* target);
   std::vector<std::string> Configurations;
   std::map<cmStdString, cmStdString> GUIDMap;

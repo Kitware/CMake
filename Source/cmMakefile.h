@@ -127,7 +127,7 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   int TryCompile(const char *srcdir, const char *bindir,
-                 const char *projectName, const std::string& targetName,
+                 const std::string& projectName, const std::string& targetName,
                  bool fast,
                  const std::vector<std::string> *cmakeArgs,
                  std::string *output);

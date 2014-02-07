@@ -3061,7 +3061,7 @@ void cmMakefile::ExpandSourceListArguments(
 }
 
 int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
-                           const char *projectName,
+                           const std::string& projectName,
                            const std::string& targetName,
                            bool fast,
                            const std::vector<std::string> *cmakeArgs,

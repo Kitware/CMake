@@ -228,7 +228,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator
-::CreateSingleVCProj(const char *lname, cmTarget &target)
+::CreateSingleVCProj(const std::string& lname, cmTarget &target)
 {
   this->FortranProject =
     static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
@@ -245,8 +245,7 @@ void cmLocalVisualStudio7Generator
     }
 
   // add to the list of projects
-  std::string pname = lname;
-  target.SetProperty("GENERATOR_FILE_NAME",lname);
+  target.SetProperty("GENERATOR_FILE_NAME",lname.c_str());
   // create the dsp.cmake file
   std::string fname;
   fname = this->Makefile->GetStartOutputDirectory();

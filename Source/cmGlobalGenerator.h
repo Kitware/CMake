@@ -106,7 +106,7 @@ public:
    * loaded commands, not as part of the usual build process.
    */
   virtual int TryCompile(const char *srcdir, const char *bindir,
-                         const char *projectName,
+                         const std::string& projectName,
                          const std::string& targetName,
                          bool fast, std::string *output, cmMakefile* mf);
 
@@ -118,7 +118,7 @@ public:
    * done first.
    */
   int Build(const char *srcdir, const char *bindir,
-            const char *projectName, const std::string& targetName,
+            const std::string& projectName, const std::string& targetName,
             std::string *output,
             const char *makeProgram, const char *config,
             bool clean, bool fast,
@@ -130,7 +130,7 @@ public:
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
     const char* makeProgram,
-    const char *projectName, const char *projectDir,
+    const std::string& projectName, const char *projectDir,
     const std::string& targetName, const char* config, bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
@@ -223,7 +223,7 @@ public:
 
   /** If check to see if the target is linked to by any other
       target in the project */
-  bool IsDependedOn(const char* project, cmTarget const* target);
+  bool IsDependedOn(const std::string& project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 

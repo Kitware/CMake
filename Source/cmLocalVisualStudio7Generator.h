@@ -66,7 +66,7 @@ public:
                                         const char* path);
   virtual void AddCMakeListsRules();
 protected:
-  void CreateSingleVCProj(const char *lname, cmTarget &tgt);
+  void CreateSingleVCProj(const std::string& lname, cmTarget &tgt);
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;

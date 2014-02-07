@@ -59,17 +59,17 @@ protected:
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProject(std::ostream& fout,
-                            const char* name, const char* path,
+                            const std::string& name, const char* path,
                             cmTarget const& t);
   virtual void WriteProjectDepends(std::ostream& fout,
-                           const char* name, const char* path,
+                           const std::string& name, const char* path,
                            cmTarget const& t);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name, cmTarget::TargetType type,
+    std::ostream& fout, const std::string& name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const char* platformMapping = NULL);
   virtual void WriteExternalProject(std::ostream& fout,
-                                    const char* name,
+                                    const std::string& name,
                                     const char* path,
                                     const char* typeGuid,
                                     const std::set<cmStdString>& depends);

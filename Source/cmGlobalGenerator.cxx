@@ -1007,7 +1007,7 @@ void cmGlobalGenerator::ClearEnabledLanguages()
   this->LanguageEnabled.clear();
 }
 
-bool cmGlobalGenerator::IsDependedOn(const char* project,
+bool cmGlobalGenerator::IsDependedOn(const std::string& project,
                                      cmTarget const* targetIn)
 {
   // Get all local gens for this project
@@ -1615,7 +1615,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
 }
 
 int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
-                                  const char *projectName,
+                                  const std::string& projectName,
                                   const std::string& target, bool fast,
                                   std::string *output, cmMakefile *mf)
 {
@@ -1663,8 +1663,9 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 }
 
 void cmGlobalGenerator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const char*, const char*, const char*,
-  const std::string&, const char*, bool, std::vector<std::string> const&)
+  std::vector<std::string>& makeCommand, const char*, const std::string&,
+  const char*, const std::string&, const char*, bool,
+  std::vector<std::string> const&)
 {
   makeCommand.push_back(
     "cmGlobalGenerator::GenerateBuildCommand not implemented");
@@ -1672,7 +1673,7 @@ void cmGlobalGenerator::GenerateBuildCommand(
 
 int cmGlobalGenerator::Build(
   const char *, const char *bindir,
-  const char *projectName, const std::string& target,
+  const std::string& projectName, const std::string& target,
   std::string *output,
   const char *makeCommandCSTR,
   const char *config,

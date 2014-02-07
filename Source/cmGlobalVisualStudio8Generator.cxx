@@ -372,7 +372,7 @@ cmGlobalVisualStudio8Generator
 void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name, cmTarget::TargetType type,
+  std::ostream& fout, const std::string& name, cmTarget::TargetType type,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {
@@ -415,7 +415,7 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
-  std::ostream& fout, const char*, const char*, cmTarget const& t)
+  std::ostream& fout, const std::string&, const char*, cmTarget const& t)
 {
   TargetDependSet const& unordered = this->GetTargetDirectDepends(t);
   OrderedTargetDependSet depends(unordered);

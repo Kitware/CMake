@@ -55,7 +55,7 @@ public:
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
     const char* makeProgram,
-    const char* projectName,
+    const std::string& projectName,
     const char* projectDir,
     const std::string& targetName,
     const char* config,
@@ -99,9 +99,10 @@ private:
   void WriteDSWFile(std::ostream& fout);
   void WriteDSWHeader(std::ostream& fout);
   void WriteProject(std::ostream& fout,
-                    const char* name, const char* path, cmTarget const& t);
+                    const std::string& name, const char* path,
+                    cmTarget const& t);
   void WriteExternalProject(std::ostream& fout,
-                            const char* name, const char* path,
+                            const std::string& name, const char* path,
                             const std::set<cmStdString>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget const* target);

@@ -566,7 +566,7 @@ cmGlobalUnixMakefileGenerator3
 void cmGlobalUnixMakefileGenerator3
 ::GenerateBuildCommand(std::vector<std::string>& makeCommand,
                        const char* makeProgram,
-                       const char* /*projectName*/,
+                       const std::string& /*projectName*/,
                        const char* /*projectDir*/,
                        const std::string& targetName,
                        const char* /*config*/,

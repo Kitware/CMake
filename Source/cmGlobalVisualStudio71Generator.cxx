@@ -155,7 +155,7 @@ cmGlobalVisualStudio71Generator
 // the libraries it uses are also done here
 void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
-                                              const char* dspname,
+                                              const std::string& dspname,
                                               const char* dir,
                                               cmTarget const& t)
 {
@@ -208,7 +208,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 void
 cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
-                      const char*,
+                      const std::string&,
                       const char*, cmTarget const& target)
 {
   VSDependSet const& depends = this->VSTargetDepends[&target];
@@ -234,7 +234,7 @@ cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteExternalProject(std::ostream& fout,
-                       const char* name,
+                       const std::string& name,
                        const char* location,
                        const char* typeGuid,
                        const std::set<cmStdString>& depends)
@@ -277,7 +277,7 @@ void cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name, cmTarget::TargetType,
+  std::ostream& fout, const std::string& name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {

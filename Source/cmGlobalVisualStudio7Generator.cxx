@@ -184,7 +184,7 @@ const char* cmGlobalVisualStudio7Generator::ExternalProjectType(
 void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,
-  const char* projectName,
+  const std::string& projectName,
   const char* /*projectDir*/,
   const std::string& targetName,
   const char* config,
@@ -654,7 +654,7 @@ cmGlobalVisualStudio7Generator::ConvertToSolutionPath(const char* path)
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
-                               const char* dspname,
+                               const std::string& dspname,
                                const char* dir, cmTarget const& target)
 {
    // check to see if this is a fortran build
@@ -694,7 +694,7 @@ void cmGlobalVisualStudio7Generator::WriteProject(std::ostream& fout,
 void
 cmGlobalVisualStudio7Generator
 ::WriteProjectDepends(std::ostream& fout,
-                      const char* dspname,
+                      const std::string& dspname,
                       const char*, cmTarget const& target)
 {
   int depcount = 0;
@@ -730,7 +730,7 @@ cmGlobalVisualStudio7Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name, cmTarget::TargetType,
+  std::ostream& fout, const std::string& name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
   const char* platformMapping)
 {
@@ -758,7 +758,7 @@ void cmGlobalVisualStudio7Generator
 // Note, that dependencies from executables to
 // the libraries it uses are also done here
 void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
-                               const char* name,
+                               const std::string& name,
                                const char* location,
                                const char* typeGuid,
                                const std::set<cmStdString>&)
@@ -908,7 +908,7 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
   return pname;
 }
 
-std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)
+std::string cmGlobalVisualStudio7Generator::GetGUID(const std::string& name)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
@@ -919,7 +919,7 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(const char* name)
     return std::string(storedGUID);
     }
   cmSystemTools::Error("Unknown Target referenced : ",
-                       name);
+                       name.c_str());
   return "";
 }
 
@@ -975,8 +975,9 @@ cmGlobalVisualStudio7Generator
 }
 
 std::set<std::string>
-cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(const char* project,
-                                                     cmTarget const* target)
+cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
+                                                    const std::string& project,
+                                                    cmTarget const* target)
 {
   std::set<std::string> activeConfigs;
   // if it is a utilitiy target then only make it part of the
