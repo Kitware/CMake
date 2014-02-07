@@ -158,9 +158,10 @@ public:
   static std::string FileExistsInParentDirectories(const char* fname,
     const char* directory, const char* toplevel);
 
-  static void Glob(const char *directory, const char *regexp,
+  static void Glob(const std::string& directory, const std::string& regexp,
                    std::vector<std::string>& files);
-  static void GlobDirs(const char *fullPath, std::vector<std::string>& files);
+  static void GlobDirs(const std::string& fullPath,
+                       std::vector<std::string>& files);
 
   /**
    * Try to find a list of files that match the "simple" globbing

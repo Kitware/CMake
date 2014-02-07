@@ -971,13 +971,14 @@ std::string cmSystemTools::ComputeStringMD5(const std::string& input)
 #endif
 }
 
-void cmSystemTools::Glob(const char *directory, const char *regexp,
+void cmSystemTools::Glob(const std::string& directory,
+                         const std::string& regexp,
                          std::vector<std::string>& files)
 {
   cmsys::Directory d;
-  cmsys::RegularExpression reg(regexp);
+  cmsys::RegularExpression reg(regexp.c_str());
 
-  if (d.Load(directory))
+  if (d.Load(directory.c_str()))
     {
     size_t numf;
         unsigned int i;
@@ -994,14 +995,13 @@ void cmSystemTools::Glob(const char *directory, const char *regexp,
 }
 
 
-void cmSystemTools::GlobDirs(const char *fullPath,
+void cmSystemTools::GlobDirs(const std::string& path,
                              std::vector<std::string>& files)
 {
-  std::string path = fullPath;
   std::string::size_type pos = path.find("/*");
   if(pos == std::string::npos)
     {
-    files.push_back(fullPath);
+    files.push_back(path);
     return;
     }
   std::string startPath = path.substr(0, pos);
