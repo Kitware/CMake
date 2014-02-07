@@ -51,7 +51,8 @@ protected:
   // CPACK_RESOURCE_FILE_${NAME} (where ${NAME} is the uppercased
   // version of name) specifies the input file to use for this file,
   // which will be configured via ConfigureFile.
-  bool CopyCreateResourceFile(const char* name, const char *dirName);
+  bool CopyCreateResourceFile(const std::string& name,
+                              const std::string& dirName);
   bool CopyResourcePlistFile(const char* name, const char* outName = 0);
 
   // Run PackageMaker with the given command line, which will (if

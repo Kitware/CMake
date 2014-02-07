@@ -227,7 +227,7 @@ int cmCPackOSXX11Generator::InitializeInternal()
 
 //----------------------------------------------------------------------
 /*
-bool cmCPackOSXX11Generator::CopyCreateResourceFile(const char* name)
+bool cmCPackOSXX11Generator::CopyCreateResourceFile(const std::string& name)
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
@@ -271,7 +271,7 @@ bool cmCPackOSXX11Generator::CopyCreateResourceFile(const char* name)
 */
 
 //----------------------------------------------------------------------
-bool cmCPackOSXX11Generator::CopyResourcePlistFile(const char* name,
+bool cmCPackOSXX11Generator::CopyResourcePlistFile(const std::string& name,
   const char* dir, const char* outputFileName /* = 0 */,
   bool copyOnly /* = false */)
 {
@@ -288,7 +288,7 @@ bool cmCPackOSXX11Generator::CopyResourcePlistFile(const char* name,
 
   if ( !outputFileName )
     {
-    outputFileName = name;
+    outputFileName = name.c_str();
     }
 
   std::string destFileName = dir;

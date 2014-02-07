@@ -553,8 +553,9 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
-                                                          const char* dirName)
+bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(
+                                            const std::string& name,
+                                            const std::string& dirName)
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
@@ -563,7 +564,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: " << cpackVar.c_str()
                   << " not specified. It should point to "
-                  << (name ? name : "(NULL)")
+                  << (!name.empty() ? name : "<empty>")
                   << ".rtf, " << name
                   << ".html, or " << name << ".txt file" << std::endl);
     return false;
@@ -571,7 +572,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
   if ( !cmSystemTools::FileExists(inFileName) )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find "
-                  << (name ? name : "(NULL)")
+                  << (!name.empty() ? name : "<empty>")
                   << " resource file: " << inFileName << std::endl);
     return false;
     }
