@@ -2956,7 +2956,7 @@ cmMakefile::LexicalPushPop::~LexicalPushPop()
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
-void cmMakefile::SetHomeDirectory(const char* dir)
+void cmMakefile::SetHomeDirectory(const std::string& dir)
 {
   this->cmHomeDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
@@ -2967,7 +2967,7 @@ void cmMakefile::SetHomeDirectory(const char* dir)
     }
 }
 
-void cmMakefile::SetHomeOutputDirectory(const char* lib)
+void cmMakefile::SetHomeOutputDirectory(const std::string& lib)
 {
   this->HomeOutputDirectory = lib;
   cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);

@@ -82,12 +82,12 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
 }
 
 
-bool cmCacheManager::LoadCache(const char* path)
+bool cmCacheManager::LoadCache(const std::string& path)
 {
   return this->LoadCache(path,true);
 }
 
-bool cmCacheManager::LoadCache(const char* path,
+bool cmCacheManager::LoadCache(const std::string& path,
                                bool internal)
 {
   std::set<cmStdString> emptySet;
@@ -178,7 +178,7 @@ bool cmCacheManager::ParseEntry(const char* entry,
   return flag;
 }
 
-void cmCacheManager::CleanCMakeFiles(const char* path)
+void cmCacheManager::CleanCMakeFiles(const std::string& path)
 {
   std::string glob = path;
   glob += cmake::GetCMakeFilesDirectory();
@@ -193,7 +193,7 @@ void cmCacheManager::CleanCMakeFiles(const char* path)
     }
 }
 
-bool cmCacheManager::LoadCache(const char* path,
+bool cmCacheManager::LoadCache(const std::string& path,
                                bool internal,
                                std::set<cmStdString>& excludes,
                                std::set<cmStdString>& includes)
@@ -428,7 +428,7 @@ bool cmCacheManager::SaveCache(cmMakefile* mf)
 }
 
 
-bool cmCacheManager::SaveCache(const char* path)
+bool cmCacheManager::SaveCache(const std::string& path)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -578,7 +578,7 @@ bool cmCacheManager::SaveCache(const char* path)
   return true;
 }
 
-bool cmCacheManager::DeleteCache(const char* path)
+bool cmCacheManager::DeleteCache(const std::string& path)
 {
   std::string cacheFile = path;
   cmSystemTools::ConvertToUnixSlashes(cacheFile);

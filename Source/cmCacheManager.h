@@ -108,19 +108,19 @@ public:
   ///! Load a cache for given makefile.  Loads from ouput home.
   bool LoadCache(cmMakefile*);
   ///! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
-  bool LoadCache(const char* path);
-  bool LoadCache(const char* path, bool internal);
-  bool LoadCache(const char* path, bool internal,
+  bool LoadCache(const std::string& path);
+  bool LoadCache(const std::string& path, bool internal);
+  bool LoadCache(const std::string& path, bool internal,
                  std::set<cmStdString>& excludes,
                  std::set<cmStdString>& includes);
 
   ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
   bool SaveCache(cmMakefile*) ;
   ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
-  bool SaveCache(const char* path) ;
+  bool SaveCache(const std::string& path) ;
 
   ///! Delete the cache given
-  bool DeleteCache(const char* path);
+  bool DeleteCache(const std::string& path);
 
   ///! Print the cache to a stream
   void PrintCache(std::ostream&) const;
@@ -159,7 +159,7 @@ protected:
   ///! Get a cache entry object for a key
   CacheEntry *GetCacheEntry(const std::string& key);
   ///! Clean out the CMakeFiles directory if no CMakeCache.txt
-  void CleanCMakeFiles(const char* path);
+  void CleanCMakeFiles(const std::string& path);
 
   // Cache version info
   unsigned int CacheMajorVersion;
