@@ -183,7 +183,7 @@ public:
     bool replace = false,
     bool escapeOldStyle = true);
   cmSourceFile* AddCustomCommandToOutput(
-    const char* output,
+    const std::string& output,
     const std::vector<std::string>& depends,
     const char* main_dependency,
     const cmCustomCommandLines& commandLines,

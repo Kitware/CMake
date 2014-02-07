@@ -1102,7 +1102,7 @@ cmMakefile::UpdateOutputToSourceMap(std::string const& output,
 
 //----------------------------------------------------------------------------
 cmSourceFile*
-cmMakefile::AddCustomCommandToOutput(const char* output,
+cmMakefile::AddCustomCommandToOutput(const std::string& output,
                                      const std::vector<std::string>& depends,
                                      const char* main_dependency,
                                      const cmCustomCommandLines& commandLines,
