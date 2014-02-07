@@ -263,9 +263,10 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const char*, bool excludeFromAll=false,
+  void AddSubDirectory(const std::string&, bool excludeFromAll=false,
                        bool preorder = false);
-  void AddSubDirectory(const char* fullSrcDir,const char *fullBinDir,
+  void AddSubDirectory(const std::string& fullSrcDir,
+                       const std::string& fullBinDir,
                        bool excludeFromAll, bool preorder,
                        bool immediate);
 
@@ -430,7 +431,7 @@ public:
    * recursing up the tree starting at the StartDirectory and going up until
    * it reaches the HomeDirectory.
    */
-  void SetStartDirectory(const char* dir)
+  void SetStartDirectory(const std::string& dir)
     {
       this->cmStartDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
@@ -443,7 +444,7 @@ public:
     {
       return this->cmStartDirectory.c_str();
     }
-  void SetStartOutputDirectory(const char* lib)
+  void SetStartOutputDirectory(const std::string& lib)
     {
       this->StartOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
@@ -949,7 +950,8 @@ private:
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
-  bool EnforceUniqueDir(const char* srcPath, const char* binPath) const;
+  bool EnforceUniqueDir(const std::string& srcPath,
+                        const std::string& binPath) const;
 
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array

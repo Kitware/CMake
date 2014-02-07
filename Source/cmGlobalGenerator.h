@@ -287,7 +287,7 @@ public:
                    std::string const& content);
 
   /** Return whether the given binary directory is unused.  */
-  bool BinaryDirectoryIsNew(const char* dir)
+  bool BinaryDirectoryIsNew(const std::string& dir)
     {
     return this->BinaryDirectories.insert(dir).second;
     }

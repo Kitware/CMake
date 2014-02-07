@@ -1648,7 +1648,7 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
     }
 }
 
-void cmMakefile::AddSubDirectory(const char* sub,
+void cmMakefile::AddSubDirectory(const std::string& sub,
                                  bool excludeFromAll, bool preorder)
 {
   // the source path must be made full if it isn't already
@@ -1675,7 +1675,8 @@ void cmMakefile::AddSubDirectory(const char* sub,
 }
 
 
-void cmMakefile::AddSubDirectory(const char* srcPath, const char *binPath,
+void cmMakefile::AddSubDirectory(const std::string& srcPath,
+                                 const std::string& binPath,
                                  bool excludeFromAll, bool preorder,
                                  bool immediate)
 {
@@ -4185,8 +4186,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::EnforceUniqueDir(const char* srcPath,
-                                  const char* binPath) const
+bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
+                                  const std::string& binPath) const
 {
   // Make sure the binary directory is unique.
   cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
