@@ -305,10 +305,15 @@ endmacro()
 macro(_Boost_FIND_LIBRARY var)
   find_library(${var} ${ARGN})
 
-  # If we found the first library save Boost_LIBRARY_DIR.
-  if(${var} AND NOT Boost_LIBRARY_DIR)
-    get_filename_component(_dir "${${var}}" PATH)
-    set(Boost_LIBRARY_DIR "${_dir}" CACHE PATH "Boost library directory" FORCE)
+  if(${var})
+    # If this is the first library found then save Boost_LIBRARY_DIR.
+    if(NOT Boost_LIBRARY_DIR)
+      get_filename_component(_dir "${${var}}" PATH)
+      set(Boost_LIBRARY_DIR "${_dir}" CACHE PATH "Boost library directory" FORCE)
+    endif()
+  elseif(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
+    # Try component-specific hints but do not save Boost_LIBRARY_DIR.
+    find_library(${var} HINTS ${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT} ${ARGN})
   endif()
 
   # If Boost_LIBRARY_DIR is known then search only there.
@@ -934,6 +939,28 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
 
   set( _boost_docstring_release "Boost ${COMPONENT} library (release)")
   set( _boost_docstring_debug   "Boost ${COMPONENT} library (debug)")
+
+  # Compute component-specific hints.
+  set(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT "")
+  if(${COMPONENT} STREQUAL "mpi" OR ${COMPONENT} STREQUAL "mpi_python")
+    foreach(lib ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES})
+      if(IS_ABSOLUTE "${lib}")
+        get_filename_component(libdir "${lib}" PATH)
+        string(REPLACE "\\" "/" libdir "${libdir}")
+        list(APPEND _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT ${libdir})
+      endif()
+    endforeach()
+  endif()
+
+  # Consolidate and report component-specific hints.
+  if(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
+    list(REMOVE_DUPLICATES _Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
+    if(Boost_DEBUG)
+      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+        "Component-specific library search paths for ${COMPONENT}: "
+        "${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT}")
+    endif()
+  endif()
 
   #
   # Find RELEASE libraries
