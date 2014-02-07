@@ -173,6 +173,13 @@ bool cmAddLibraryCommand
       ++s;
       importGlobal = true;
       }
+    else if(type == cmTarget::INTERFACE_LIBRARY && *s == "GLOBAL")
+      {
+      cmOStringStream e;
+      e << "GLOBAL option may only be used with IMPORTED libraries.";
+      this->SetError(e.str().c_str());
+      return false;
+      }
     else
       {
       break;
