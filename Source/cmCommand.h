@@ -166,7 +166,7 @@ public:
   /**
    * Set the error message
    */
-  void SetError(const char* e)
+  void SetError(const std::string& e)
     {
     this->Error = this->GetName();
     this->Error += " ";
