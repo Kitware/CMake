@@ -1069,13 +1069,13 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
   return generator;
 }
 
-void cmake::SetHomeDirectory(const char* dir)
+void cmake::SetHomeDirectory(const std::string& dir)
 {
   this->cmHomeDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
 }
 
-void cmake::SetHomeOutputDirectory(const char* lib)
+void cmake::SetHomeOutputDirectory(const std::string& lib)
 {
   this->HomeOutputDirectory = lib;
   cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);

@@ -110,12 +110,12 @@ class cmake
    * CMakeLists files by recursing up the tree starting at the StartDirectory
    * and going up until it reaches the HomeDirectory.
    */
-  void SetHomeDirectory(const char* dir);
+  void SetHomeDirectory(const std::string& dir);
   const char* GetHomeDirectory() const
     {
     return this->cmHomeDirectory.c_str();
     }
-  void SetHomeOutputDirectory(const char* lib);
+  void SetHomeOutputDirectory(const std::string& lib);
   const char* GetHomeOutputDirectory() const
     {
     return this->HomeOutputDirectory.c_str();
@@ -130,7 +130,7 @@ class cmake
    * recursing up the tree starting at the StartDirectory and going up until
    * it reaches the HomeDirectory.
    */
-  void SetStartDirectory(const char* dir)
+  void SetStartDirectory(const std::string& dir)
     {
       this->cmStartDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
@@ -139,7 +139,7 @@ class cmake
     {
       return this->cmStartDirectory.c_str();
     }
-  void SetStartOutputDirectory(const char* lib)
+  void SetStartOutputDirectory(const std::string& lib)
     {
       this->StartOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
