@@ -94,7 +94,7 @@ public:
   /**
    * Add a directory to the search path for include files.
    */
-  virtual void AddSearchPath(const char*);
+  virtual void AddSearchPath(const std::string&);
 
   /**
    * Generate dependencies for the file given.  Returns a pointer to
