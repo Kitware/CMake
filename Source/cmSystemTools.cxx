@@ -384,14 +384,28 @@ bool cmSystemTools::IsOn(const char* val)
     {
     return false;
     }
-  std::basic_string<char> v = val;
+  size_t len = strlen(val);
+  if (len > 4)
+    {
+    return false;
+    }
+  std::basic_string<char> v(val, len);
 
+  static std::set<std::string> onValues;
+  if(onValues.empty())
+    {
+    onValues.insert("ON");
+    onValues.insert("1");
+    onValues.insert("YES");
+    onValues.insert("TRUE");
+    onValues.insert("Y");
+    }
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
     {
     *c = static_cast<char>(toupper(*c));
     }
-  return (v == "ON" || v == "1" || v == "YES" || v == "TRUE" || v == "Y");
+  return (onValues.count(v) > 0);
 }
 
 bool cmSystemTools::IsNOTFOUND(const char* val)
@@ -410,16 +424,31 @@ bool cmSystemTools::IsOff(const char* val)
     {
     return true;
     }
-  size_t len = val ? strlen(val) : 0;
-  std::basic_string<char> v(val, len);
+  size_t len = strlen(val);
+  // Try and avoid toupper() for large strings.
+  if (len > 6)
+    {
+    return cmSystemTools::IsNOTFOUND(val);
+    }
 
+  static std::set<std::string> offValues;
+  if(offValues.empty())
+    {
+    offValues.insert("OFF");
+    offValues.insert("0");
+    offValues.insert("NO");
+    offValues.insert("FALSE");
+    offValues.insert("N");
+    offValues.insert("IGNORE");
+    }
+  // Try and avoid toupper().
+  std::basic_string<char> v(val, len);
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
     {
     *c = static_cast<char>(toupper(*c));
     }
-  return (v == "OFF" || v == "0" || v == "NO" || v == "FALSE" ||
-          v == "N" || cmSystemTools::IsNOTFOUND(v.c_str()) || v == "IGNORE");
+  return (offValues.count(v) > 0);
 }
 
 //----------------------------------------------------------------------------
