@@ -100,7 +100,7 @@ public:
 
   ~cmCompiledGeneratorExpression();
 
-  std::string GetInput() const
+  std::string const& GetInput() const
   {
     return this->Input;
   }
@@ -116,7 +116,7 @@ public:
 
 private:
   cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
-              const char *input);
+              const std::string& input);
 
   friend class cmGeneratorExpression;
 

@@ -33,17 +33,17 @@ cmGeneratorExpression::cmGeneratorExpression(
 cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(std::string const& input)
 {
-  return this->Parse(input.c_str());
+  return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
+                                      new cmCompiledGeneratorExpression(
+                                        this->Backtrace,
+                                        input));
 }
 
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(const char* input)
 {
-  return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
-                                      new cmCompiledGeneratorExpression(
-                                        this->Backtrace,
-                                        input));
+  return this->Parse(std::string(input ? input : ""));
 }
 
 cmGeneratorExpression::~cmGeneratorExpression()
@@ -122,13 +122,13 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
               cmListFileBacktrace const& backtrace,
-              const char *input)
-  : Backtrace(backtrace), Input(input ? input : ""),
+              const std::string& input)
+  : Backtrace(backtrace), Input(input),
     HadContextSensitiveCondition(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens =
-                                              l.Tokenize(this->Input.c_str());
+                                              l.Tokenize(this->Input);
   this->NeedsEvaluation = l.GetSawGeneratorExpression();
 
   if (this->NeedsEvaluation)

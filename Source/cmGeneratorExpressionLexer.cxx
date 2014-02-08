@@ -32,13 +32,11 @@ static void InsertText(const char *upto, const char *c,
 
 //----------------------------------------------------------------------------
 std::vector<cmGeneratorExpressionToken>
-cmGeneratorExpressionLexer::Tokenize(const char *input)
+cmGeneratorExpressionLexer::Tokenize(const std::string& input)
 {
   std::vector<cmGeneratorExpressionToken> result;
-  if (!input)
-    return result;
 
-  const char *c = input;
+  const char *c = input.c_str();
   const char *upto = c;
 
   for ( ; *c; ++c)
