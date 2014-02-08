@@ -440,7 +440,7 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
         target.GetUtilities().begin();
       ui != target.GetUtilities().end(); ++ui)
     {
-    if(cmTarget* depTarget = this->FindTarget(0, ui->c_str()))
+    if(cmTarget* depTarget = this->FindTarget(ui->c_str()))
       {
       if(depTarget->GetType() != cmTarget::INTERFACE_LIBRARY
           && depTarget->GetProperty("EXTERNAL_MSPROJECT"))

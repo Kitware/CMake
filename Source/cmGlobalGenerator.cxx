@@ -2070,47 +2070,28 @@ bool cmGlobalGenerator::IsAlias(const std::string& name) const
 
 //----------------------------------------------------------------------------
 cmTarget*
-cmGlobalGenerator::FindTarget(const char* project, const std::string& name,
+cmGlobalGenerator::FindTarget(const std::string& name,
                               bool excludeAliases) const
 {
-  // if project specific
-  if(project)
+  if (!excludeAliases)
     {
-    std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
-      gens = this->ProjectMap.find(project);
-    for(unsigned int i = 0; i < gens->second.size(); ++i)
+    std::map<cmStdString, cmTarget*>::const_iterator ai
+                                            = this->AliasTargets.find(name);
+    if (ai != this->AliasTargets.end())
       {
-      cmTarget* ret = (gens->second)[i]->GetMakefile()->FindTarget(name,
-                                                            excludeAliases);
-      if(ret)
-        {
-        return ret;
-        }
+      return ai->second;
       }
     }
-  // if all projects/directories
-  else
+  std::map<cmStdString,cmTarget *>::const_iterator i =
+    this->TotalTargets.find ( name );
+  if ( i != this->TotalTargets.end() )
     {
-    if (!excludeAliases)
-      {
-      std::map<cmStdString, cmTarget*>::const_iterator ai
-                                              = this->AliasTargets.find(name);
-      if (ai != this->AliasTargets.end())
-        {
-        return ai->second;
-        }
-      }
-    std::map<cmStdString,cmTarget *>::const_iterator i =
-      this->TotalTargets.find ( name );
-    if ( i != this->TotalTargets.end() )
-      {
-      return i->second;
-      }
-    i = this->ImportedTargets.find(name);
-    if ( i != this->ImportedTargets.end() )
-      {
-      return i->second;
-      }
+    return i->second;
+    }
+  i = this->ImportedTargets.find(name);
+  if ( i != this->ImportedTargets.end() )
+    {
+    return i->second;
     }
   return 0;
 }
@@ -2124,7 +2105,7 @@ cmGlobalGenerator::NameResolvesToFramework(const std::string& libname) const
     return true;
     }
 
-  if(cmTarget* tgt = this->FindTarget(0, libname.c_str()))
+  if(cmTarget* tgt = this->FindTarget(libname.c_str()))
     {
     if(tgt->IsFrameworkOnApple())
        {

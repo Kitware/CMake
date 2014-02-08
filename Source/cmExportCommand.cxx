@@ -168,7 +168,7 @@ bool cmExportCommand
         return false;
         }
 
-      if(cmTarget* target = gg->FindTarget(0, currentTarget->c_str()))
+      if(cmTarget* target = gg->FindTarget(currentTarget->c_str()))
         {
         if(target->GetType() == cmTarget::OBJECT_LIBRARY)
           {
