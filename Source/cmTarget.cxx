@@ -3037,7 +3037,8 @@ const char *cmTarget::GetProperty(const std::string& prop,
      this->GetType() == cmTarget::MODULE_LIBRARY ||
      this->GetType() == cmTarget::UNKNOWN_LIBRARY)
     {
-    if(prop == "LOCATION")
+    static const std::string propLOCATION = "LOCATION";
+    if(prop == propLOCATION)
       {
       if (!this->HandleLocationPropertyPolicy(context))
         {
@@ -3053,12 +3054,12 @@ const char *cmTarget::GetProperty(const std::string& prop,
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
       // CMake time.
-      this->Properties.SetProperty("LOCATION", this->GetLocationForBuild(),
+      this->Properties.SetProperty(propLOCATION, this->GetLocationForBuild(),
                                    cmProperty::TARGET);
       }
 
     // Support "LOCATION_<CONFIG>".
-    if(cmHasLiteralPrefix(prop, "LOCATION_"))
+    else if(cmHasLiteralPrefix(prop, "LOCATION_"))
       {
       if (!this->HandleLocationPropertyPolicy(context))
         {
@@ -3086,21 +3087,33 @@ const char *cmTarget::GetProperty(const std::string& prop,
       }
     }
   static std::set<std::string> specialProps;
+#define MAKE_STATIC_PROP(PROP) \
+  static const std::string prop##PROP = #PROP
+  MAKE_STATIC_PROP(LINK_LIBRARIES);
+  MAKE_STATIC_PROP(TYPE);
+  MAKE_STATIC_PROP(INCLUDE_DIRECTORIES);
+  MAKE_STATIC_PROP(COMPILE_FEATURES);
+  MAKE_STATIC_PROP(COMPILE_OPTIONS);
+  MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
+  MAKE_STATIC_PROP(IMPORTED);
+  MAKE_STATIC_PROP(NAME);
+  MAKE_STATIC_PROP(SOURCES);
+#undef MAKE_STATIC_PROP
   if(specialProps.empty())
     {
-    specialProps.insert("INCLUDE_DIRECTORIES");
-    specialProps.insert("COMPILE_FEATURES");
-    specialProps.insert("COMPILE_OPTIONS");
-    specialProps.insert("COMPILE_DEFINITIONS");
-    specialProps.insert("LINK_LIBRARIES");
-    specialProps.insert("IMPORTED");
-    specialProps.insert("NAME");
-    specialProps.insert("SOURCES");
-    specialProps.insert("TYPE");
+    specialProps.insert(propLINK_LIBRARIES);
+    specialProps.insert(propTYPE);
+    specialProps.insert(propINCLUDE_DIRECTORIES);
+    specialProps.insert(propCOMPILE_FEATURES);
+    specialProps.insert(propCOMPILE_OPTIONS);
+    specialProps.insert(propCOMPILE_DEFINITIONS);
+    specialProps.insert(propIMPORTED);
+    specialProps.insert(propNAME);
+    specialProps.insert(propSOURCES);
     }
   if(specialProps.count(prop))
     {
-    if(prop == "LINK_LIBRARIES")
+    if(prop == propLINK_LIBRARIES)
       {
       if (this->Internal->LinkImplementationPropertyEntries.empty())
         {
@@ -3122,11 +3135,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
       return output.c_str();
       }
     // the type property returns what type the target is
-    else if (prop == "TYPE")
+    else if (prop == propTYPE)
       {
       return cmTarget::GetTargetTypeName(this->GetType());
       }
-    else if(prop == "INCLUDE_DIRECTORIES")
+    else if(prop == propINCLUDE_DIRECTORIES)
       {
       if (this->Internal->IncludeDirectoriesEntries.empty())
         {
@@ -3137,7 +3150,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
       MakePropertyList(output, this->Internal->IncludeDirectoriesEntries);
       return output.c_str();
       }
-    else if(prop == "COMPILE_FEATURES")
+    else if(prop == propCOMPILE_FEATURES)
       {
       if (this->Internal->CompileFeaturesEntries.empty())
         {
@@ -3148,7 +3161,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
       MakePropertyList(output, this->Internal->CompileFeaturesEntries);
       return output.c_str();
       }
-    else if(prop == "COMPILE_OPTIONS")
+    else if(prop == propCOMPILE_OPTIONS)
       {
       if (this->Internal->CompileOptionsEntries.empty())
         {
@@ -3159,7 +3172,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
       MakePropertyList(output, this->Internal->CompileOptionsEntries);
       return output.c_str();
       }
-    else if(prop == "COMPILE_DEFINITIONS")
+    else if(prop == propCOMPILE_DEFINITIONS)
       {
       if (this->Internal->CompileDefinitionsEntries.empty())
         {
@@ -3170,15 +3183,15 @@ const char *cmTarget::GetProperty(const std::string& prop,
       MakePropertyList(output, this->Internal->CompileDefinitionsEntries);
       return output.c_str();
       }
-    else if (prop == "IMPORTED")
+    else if (prop == propIMPORTED)
       {
       return this->IsImported()?"TRUE":"FALSE";
       }
-    else if (prop == "NAME")
+    else if (prop == propNAME)
       {
       return this->GetName().c_str();
       }
-    else if(prop == "SOURCES")
+    else if(prop == propSOURCES)
       {
       if (this->Internal->SourceEntries.empty())
         {
@@ -4795,12 +4808,13 @@ bool cmTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-PropertyType getTypedProperty(cmTarget const* tgt, const char *prop,
+PropertyType getTypedProperty(cmTarget const* tgt, const std::string& prop,
                               PropertyType *);
 
 //----------------------------------------------------------------------------
 template<>
-bool getTypedProperty<bool>(cmTarget const* tgt, const char *prop, bool *)
+bool getTypedProperty<bool>(cmTarget const* tgt, const std::string& prop,
+                            bool *)
 {
   return tgt->GetPropertyAsBool(prop);
 }
@@ -4808,7 +4822,7 @@ bool getTypedProperty<bool>(cmTarget const* tgt, const char *prop, bool *)
 //----------------------------------------------------------------------------
 template<>
 const char *getTypedProperty<const char *>(cmTarget const* tgt,
-                                           const char *prop,
+                                           const std::string& prop,
                                            const char **)
 {
   return tgt->GetProperty(prop);
@@ -5047,7 +5061,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
                                           CompatibleType t,
                                           PropertyType *)
 {
-  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p.c_str(),
+  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p,
                                                             0);
   const bool explicitlySet = tgt->GetProperties()
                                   .find(p)
@@ -5083,6 +5097,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     report += "\" property not set.\n";
     }
 
+  std::string interfaceProperty = "INTERFACE_" + p;
   for(std::vector<cmTarget const*>::const_iterator li =
       deps.begin();
       li != deps.end(); ++li)
@@ -5096,11 +5111,11 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     cmTarget const* theTarget = *li;
 
     const bool ifaceIsSet = theTarget->GetProperties()
-                            .find("INTERFACE_" + p)
+                            .find(interfaceProperty)
                             != theTarget->GetProperties().end();
     PropertyType ifacePropContent =
                     getTypedProperty<PropertyType>(theTarget,
-                              ("INTERFACE_" + p).c_str(), 0);
+                              interfaceProperty, 0);
 
     std::string reportEntry;
     if (ifaceIsSet)
@@ -6167,7 +6182,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
       // Compare the link implementation fallback link interface to the
       // preferred new link interface property and warn if different.
       std::vector<cmLinkItem> ifaceLibs;
-      std::string newProp = "INTERFACE_LINK_LIBRARIES";
+      static const std::string newProp = "INTERFACE_LINK_LIBRARIES";
       if(const char* newExplicitLibraries = thisTarget->GetProperty(newProp))
         {
         thisTarget->ExpandLinkItems(newProp, newExplicitLibraries, config,
@@ -6752,9 +6767,13 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
 
   std::set<std::string> emittedBools;
+  static std::string strBool = "COMPATIBLE_INTERFACE_BOOL";
   std::set<std::string> emittedStrings;
+  static std::string strString = "COMPATIBLE_INTERFACE_STRING";
   std::set<std::string> emittedMinNumbers;
+  static std::string strNumMin = "COMPATIBLE_INTERFACE_NUMBER_MIN";
   std::set<std::string> emittedMaxNumbers;
+  static std::string strNumMax = "COMPATIBLE_INTERFACE_NUMBER_MAX";
 
   for(cmComputeLinkInformation::ItemVector::const_iterator li =
       deps.begin();
@@ -6766,14 +6785,14 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
       }
 
     checkPropertyConsistency<bool>(this, li->Target,
-                                std::string("COMPATIBLE_INTERFACE_BOOL"),
+                                strBool,
                                 emittedBools, config, BoolType, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
       {
       return;
       }
     checkPropertyConsistency<const char *>(this, li->Target,
-                                std::string("COMPATIBLE_INTERFACE_STRING"),
+                                strString,
                                 emittedStrings, config,
                                 StringType, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
@@ -6781,7 +6800,7 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
       return;
       }
     checkPropertyConsistency<const char *>(this, li->Target,
-                                std::string("COMPATIBLE_INTERFACE_NUMBER_MIN"),
+                                strNumMin,
                                 emittedMinNumbers, config,
                                 NumberMinType, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
@@ -6789,7 +6808,7 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
       return;
       }
     checkPropertyConsistency<const char *>(this, li->Target,
-                                std::string("COMPATIBLE_INTERFACE_NUMBER_MAX"),
+                                strNumMax,
                                 emittedMaxNumbers, config,
                                 NumberMaxType, 0);
     if (cmSystemTools::GetErrorOccuredFlag())
@@ -6809,22 +6828,22 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
     std::set<std::string>::const_iterator i = emittedBools.find(prop);
     if (i != emittedBools.end())
       {
-      props.insert("COMPATIBLE_INTERFACE_BOOL");
+      props.insert(strBool);
       }
     i = emittedStrings.find(prop);
     if (i != emittedStrings.end())
       {
-      props.insert("COMPATIBLE_INTERFACE_STRING");
+      props.insert(strString);
       }
     i = emittedMinNumbers.find(prop);
     if (i != emittedMinNumbers.end())
       {
-      props.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
+      props.insert(strNumMin);
       }
     i = emittedMaxNumbers.find(prop);
     if (i != emittedMaxNumbers.end())
       {
-      props.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
+      props.insert(strNumMax);
       }
 
     std::string propsString = *props.begin();
