@@ -392,10 +392,8 @@ locality of code which creates a target and code which is responsible for
 setting build specifications may make the code more difficult to reason about.
 :manual:`cmake(1)` provides a debugging facility to print the origin of the
 contents of properties which may be determined by dependencies.  The properties
-which can be debugged are :prop_tgt:`INCLUDE_DIRECTORIES`,
-:prop_tgt:`COMPILE_DEFINITIONS`, :prop_tgt:`COMPILE_OPTIONS`,
-:prop_tgt:`AUTOUIC_OPTIONS`, and all properties listed in a
-``COMPATIBLE_INTERFACE_*`` target property:
+which can be debugged are listed in the
+:variable:`CMAKE_DEBUG_TARGET_PROPERTIES` variable documentation:
 
 .. code-block:: cmake
 
