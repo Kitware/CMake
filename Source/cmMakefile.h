@@ -222,7 +222,7 @@ public:
    * Add a utility to the build.  A utiltity target is a command that
    * is run every time the target is built.
    */
-  void AddUtilityCommand(const char* utilityName, bool excludeFromAll,
+  void AddUtilityCommand(const std::string& utilityName, bool excludeFromAll,
                          const std::vector<std::string>& depends,
                          const char* workingDirectory,
                          const char* command,
@@ -230,7 +230,8 @@ public:
                          const char* arg2=0,
                          const char* arg3=0,
                          const char* arg4=0);
-  cmTarget* AddUtilityCommand(const char* utilityName, bool excludeFromAll,
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
                               const char* workingDirectory,
                               const std::vector<std::string>& depends,
                               const cmCustomCommandLines& commandLines,
