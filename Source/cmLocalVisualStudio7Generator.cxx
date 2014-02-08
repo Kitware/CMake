@@ -2100,7 +2100,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFooter(std::ostream& fout,
        << "</VisualStudioProject>\n";
 }
 
-std::string cmLocalVisualStudio7GeneratorEscapeForXML(const char* s)
+std::string cmLocalVisualStudio7GeneratorEscapeForXML(const std::string& s)
 {
   std::string ret = s;
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
@@ -2111,7 +2111,7 @@ std::string cmLocalVisualStudio7GeneratorEscapeForXML(const char* s)
   return ret;
 }
 
-std::string cmLocalVisualStudio7Generator::EscapeForXML(const char* s)
+std::string cmLocalVisualStudio7Generator::EscapeForXML(const std::string& s)
 {
   return cmLocalVisualStudio7GeneratorEscapeForXML(s);
 }

@@ -150,7 +150,8 @@ public:
                               const char* config);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
-  virtual void AppendFlagEscape(std::string& flags, const char* rawFlag);
+  virtual void AppendFlagEscape(std::string& flags,
+                                const std::string& rawFlag);
   ///! Get the include flags for the current makefile and language
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               cmGeneratorTarget* target,
@@ -285,14 +286,14 @@ public:
       system to replace make variable references.  Optionally adjust
       escapes for the special case of passing to the native echo
       command.  */
-  std::string EscapeForShell(const char* str, bool makeVars = false,
+  std::string EscapeForShell(const std::string& str, bool makeVars = false,
                              bool forEcho = false);
 
   /** Backwards-compatibility version of EscapeForShell.  */
-  std::string EscapeForShellOldStyle(const char* str);
+  std::string EscapeForShellOldStyle(const std::string& str);
 
   /** Escape the given string as an argument in a CMake script.  */
-  static std::string EscapeForCMake(const char* str);
+  static std::string EscapeForCMake(const std::string& str);
 
   enum FortranFormat
     {

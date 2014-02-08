@@ -84,7 +84,7 @@ private:
   void WriteConfiguration(std::ostream& fout,
                           const char* configName,
                           const std::string& libName, cmTarget &tgt);
-  std::string EscapeForXML(const char* s);
+  std::string EscapeForXML(const std::string& s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
   void OutputTargetRules(std::ostream& fout, const char* configName,

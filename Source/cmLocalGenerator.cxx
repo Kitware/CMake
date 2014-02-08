@@ -2358,7 +2358,7 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFlagEscape(std::string& flags,
-                                        const char* rawFlag)
+                                        const std::string& rawFlag)
 {
   this->AppendFlags(flags, this->EscapeForShell(rawFlag).c_str());
 }
@@ -3187,7 +3187,7 @@ cmLocalGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
+std::string cmLocalGenerator::EscapeForShellOldStyle(const std::string& str)
 {
   std::string result;
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -3203,7 +3203,7 @@ std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
     }
   return str;
 #else
-  for(const char* ch = str; *ch != '\0'; ++ch)
+  for(const char* ch = str.c_str(); *ch != '\0'; ++ch)
     {
     if(*ch == ' ')
       {
@@ -3216,28 +3216,30 @@ std::string cmLocalGenerator::EscapeForShellOldStyle(const char* str)
 }
 
 //----------------------------------------------------------------------------
-static bool cmLocalGeneratorIsShellOperator(const char* str)
+static bool cmLocalGeneratorIsShellOperator(const std::string& str)
 {
-  if(strcmp(str, "<") == 0 ||
-     strcmp(str, ">") == 0 ||
-     strcmp(str, "<<") == 0 ||
-     strcmp(str, ">>") == 0 ||
-     strcmp(str, "|") == 0 ||
-     strcmp(str, "||") == 0 ||
-     strcmp(str, "&&") == 0 ||
-     strcmp(str, "&>") == 0 ||
-     strcmp(str, "1>") == 0 ||
-     strcmp(str, "2>") == 0 ||
-     strcmp(str, "2>&1") == 0 ||
-     strcmp(str, "1>&2") == 0)
+  static std::set<std::string> shellOperators;
+  if(shellOperators.empty())
     {
-    return true;
+    shellOperators.insert("<");
+    shellOperators.insert(">");
+    shellOperators.insert("<<");
+    shellOperators.insert(">>");
+    shellOperators.insert("|");
+    shellOperators.insert("||");
+    shellOperators.insert("&&");
+    shellOperators.insert("&>");
+    shellOperators.insert("1>");
+    shellOperators.insert("2>");
+    shellOperators.insert("2>&1");
+    shellOperators.insert("1>&2");
     }
-  return false;
+  return shellOperators.count(str) > 0;
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
+std::string cmLocalGenerator::EscapeForShell(const std::string& str,
+                                             bool makeVars,
                                              bool forEcho)
 {
   // Do not escape shell operators.
@@ -3279,28 +3281,28 @@ std::string cmLocalGenerator::EscapeForShell(const char* str, bool makeVars,
 
   // Compute the buffer size needed.
   int size = (this->WindowsShell ?
-              cmsysSystem_Shell_GetArgumentSizeForWindows(str, flags) :
-              cmsysSystem_Shell_GetArgumentSizeForUnix(str, flags));
+              cmsysSystem_Shell_GetArgumentSizeForWindows(str.c_str(), flags) :
+              cmsysSystem_Shell_GetArgumentSizeForUnix(str.c_str(), flags));
 
   // Compute the shell argument itself.
   std::vector<char> arg(size);
   if(this->WindowsShell)
     {
-    cmsysSystem_Shell_GetArgumentForWindows(str, &arg[0], flags);
+    cmsysSystem_Shell_GetArgumentForWindows(str.c_str(), &arg[0], flags);
     }
   else
     {
-    cmsysSystem_Shell_GetArgumentForUnix(str, &arg[0], flags);
+    cmsysSystem_Shell_GetArgumentForUnix(str.c_str(), &arg[0], flags);
     }
   return std::string(&arg[0]);
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForCMake(const char* str)
+std::string cmLocalGenerator::EscapeForCMake(const std::string& str)
 {
   // Always double-quote the argument to take care of most escapes.
   std::string result = "\"";
-  for(const char* c = str; *c; ++c)
+  for(const char* c = str.c_str(); *c; ++c)
     {
     if(*c == '"')
       {

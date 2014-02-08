@@ -47,7 +47,7 @@ public:
                                    KeyWOW64 view = KeyWOW64_Default);
 
   ///! Escape quotes in a string.
-  static std::string EscapeQuotes(const char* str);
+  static std::string EscapeQuotes(const std::string& str);
 
   /** Map help document name to file name.  */
   static std::string HelpFileName(std::string);
