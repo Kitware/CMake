@@ -679,7 +679,7 @@ public:
                                       const char* filename = 0,
                                       long line = -1,
                                       bool removeEmpty = false,
-                                      bool replaceAt = true) const;
+                                      bool replaceAt = false) const;
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
@@ -994,6 +994,7 @@ private:
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
   mutable cmsys::RegularExpression cmAtVarRegex;
+  mutable cmsys::RegularExpression cmNamedCurly;
 
   cmPropertyMap Properties;
 
@@ -1050,6 +1051,28 @@ private:
   // Enforce rules about CMakeLists.txt files.
   void EnforceDirectoryLevelRules() const;
 
+  // CMP0053 == old
+  cmake::MessageType ExpandVariablesInStringOld(
+                                  std::string& errorstr,
+                                  std::string& source,
+                                  bool escapeQuotes,
+                                  bool noEscapes,
+                                  bool atOnly,
+                                  const char* filename,
+                                  long line,
+                                  bool removeEmpty,
+                                  bool replaceAt) const;
+  // CMP0053 == new
+  cmake::MessageType ExpandVariablesInStringNew(
+                                  std::string& errorstr,
+                                  std::string& source,
+                                  bool escapeQuotes,
+                                  bool noEscapes,
+                                  bool atOnly,
+                                  const char* filename,
+                                  long line,
+                                  bool removeEmpty,
+                                  bool replaceAt) const;
   bool GeneratingBuildSystem;
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
