@@ -62,7 +62,7 @@ private:
 
   ProcessingState CurrentProcessingState;
 
-  bool HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
+  bool HandleLibrary(const std::string& lib, cmTarget::LinkLibraryType llt);
 };
 
 
