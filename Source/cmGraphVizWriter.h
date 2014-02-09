@@ -74,6 +74,8 @@ protected:
   bool GenerateForSharedLibs;
   bool GenerateForModuleLibs;
   bool GenerateForExternals;
+  bool GeneratePerTarget;
+  bool GenerateDependers;
 
   std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
 
