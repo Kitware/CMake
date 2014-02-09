@@ -1147,6 +1147,11 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   _find_qt4_program(QT_DESIGNER_EXECUTABLE Qt4::designer designer-qt4 designer designer4)
   _find_qt4_program(QT_LINGUIST_EXECUTABLE Qt4::linguist linguist-qt4 linguist linguist4)
 
+  if (NOT TARGET Qt4::qmake)
+    add_executable(Qt4::qmake IMPORTED)
+    set_property(TARGET Qt4::qmake PROPERTY IMPORTED_LOCATION ${QT_QMAKE_EXECUTABLE})
+  endif()
+
   if (QT_MOC_EXECUTABLE)
      set(QT_WRAP_CPP "YES")
   endif ()
