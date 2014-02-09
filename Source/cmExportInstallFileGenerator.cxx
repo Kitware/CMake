@@ -19,6 +19,18 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
+#include "cmVersionConfig.h"
+
+#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
+#define DEVEL_CMAKE_VERSION(maj, min, patch) \
+  (maj > CMake_VERSION_MAJOR \
+  || min > CMake_VERSION_MINOR \
+  || patch > CMake_VERSION_PATCH) ? \
+    STRINGIFY(CMake_VERSION_MAJOR) "." STRINGIFY(CMake_VERSION_MINOR) "." \
+    STRINGIFY(CMake_VERSION_PATCH) "." STRINGIFY(CMake_VERSION_TWEAK) \
+  : #maj "." #min "." #patch
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator
@@ -176,7 +188,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
   if (require3_0_0)
     {
-    this->GenerateRequiredCMakeVersion(os, "2.8.12.20131007");
+    this->GenerateRequiredCMakeVersion(os, DEVEL_CMAKE_VERSION(3, 0, 0));
     }
   else if (require2_8_12)
     {
