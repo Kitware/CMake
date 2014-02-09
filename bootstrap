@@ -284,7 +284,7 @@ CMAKE_CXX_SOURCES="\
   cmNewLineStyle \
   cmBootstrapCommands1 \
   cmBootstrapCommands2 \
-  cmCommands \
+  cmCommandsForBootstrap \
   cmTarget \
   cmTest \
   cmCustomCommand \

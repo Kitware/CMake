@@ -127,7 +127,7 @@ set(SRCS
   cmBootstrapCommands2.cxx
   cmCacheManager.cxx
   cmCacheManager.h
-  cmCommands.cxx
+  "${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx"
   cmCommands.h
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx
@@ -297,6 +297,50 @@ set(SRCS
   cm_utf8.h
   cm_utf8.c
   )
+
+set(COMMAND_INCLUDES "#include \"cmTargetPropCommandBase.cxx\"\n")
+list(APPEND SRCS cmTargetPropCommandBase.cxx)
+set_property(SOURCE cmTargetPropCommandBase.cxx PROPERTY HEADER_FILE_ONLY ON)
+set(NEW_COMMANDS "")
+foreach(command_file
+    cmAddCompileOptionsCommand
+    cmAuxSourceDirectoryCommand
+    cmBuildNameCommand
+    cmCMakeHostSystemInformationCommand
+    cmElseIfCommand
+    cmExportCommand
+    cmExportLibraryDependenciesCommand
+    cmFLTKWrapUICommand
+    cmIncludeExternalMSProjectCommand
+    cmInstallProgramsCommand
+    cmLinkLibrariesCommand
+    cmLoadCacheCommand
+    cmOutputRequiredFilesCommand
+    cmQTWrapCPPCommand
+    cmQTWrapUICommand
+    cmRemoveCommand
+    cmRemoveDefinitionsCommand
+    cmSourceGroupCommand
+    cmSubdirDependsCommand
+    cmTargetCompileDefinitionsCommand
+    cmTargetCompileOptionsCommand
+    cmTargetIncludeDirectoriesCommand
+    cmUseMangledMesaCommand
+    cmUtilitySourceCommand
+    cmVariableRequiresCommand
+    cmVariableWatchCommand
+    cmWriteFileCommand
+    # This one must be last because it includes windows.h and
+    # windows.h #defines GetCurrentDirectory which is a member
+    # of cmMakefile
+    cmLoadCommandCommand
+    )
+  set(COMMAND_INCLUDES "${COMMAND_INCLUDES}#include \"${command_file}.cxx\"\n")
+  set(NEW_COMMANDS "${NEW_COMMANDS}commands.push_back(new ${command_file});\n")
+  list(APPEND SRCS ${command_file}.cxx)
+  set_property(SOURCE ${command_file}.cxx PROPERTY HEADER_FILE_ONLY ON)
+endforeach()
+configure_file(cmCommands.cxx.in ${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx @ONLY)
 
 # Kdevelop only works on UNIX and not windows
 if(UNIX)
