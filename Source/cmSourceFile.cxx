@@ -24,6 +24,8 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
   this->CustomCommand = 0;
   this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
   this->FindFullPathFailed = false;
+  this->IsUiFile = ("ui" ==
+          cmSystemTools::GetFilenameLastExtension(this->Location.GetName()));
 }
 
 //----------------------------------------------------------------------------
@@ -297,9 +299,7 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
 
-  std::string ext =
-          cmSystemTools::GetFilenameLastExtension(this->Location.GetName());
-  if (ext == ".ui")
+  if (this->IsUiFile)
     {
     cmMakefile const* mf = this->Location.GetMakefile();
     if (prop == "AUTOUIC_OPTIONS")
