@@ -81,6 +81,8 @@ following targets by setting the :variable:`CMAKE_AUTOMOC` variable.  The
 options to pass to ``moc``. The :variable:`CMAKE_AUTOMOC_MOC_OPTIONS`
 variable may be populated to pre-set the options for all following targets.
 
+.. _`Qt AUTOUIC`:
+
 AUTOUIC
 '''''''
 
@@ -142,6 +144,7 @@ result of linking with the :prop_tgt:`IMPORTED` target:
     Qt5::Widgets
   )
 
+.. _`Qt AUTORCC`:
 
 AUTORCC
 '''''''

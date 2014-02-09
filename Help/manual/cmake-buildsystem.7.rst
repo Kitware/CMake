@@ -544,6 +544,8 @@ with either ``-DClimbingStats_FROM_BUILD_LOCATION`` or
 ``-DClimbingStats_FROM_INSTALL_LOCATION``.  For more about packages and
 exporting see the :manual:`cmake-packages(7)` manual.
 
+.. _`Include Directories and Usage Requirements`:
+
 Include Directories and Usage Requirements
 ''''''''''''''''''''''''''''''''''''''''''
 
