@@ -2832,12 +2832,54 @@ public:
   cmTargetCollectLinkLanguages(cmTarget const* target, const char* config,
                                std::set<cmStdString>& languages,
                                cmTarget const* head):
-    Config(config), Languages(languages), HeadTarget(head)
+    Config(config), Languages(languages), HeadTarget(head),
+    Makefile(target->GetMakefile()), Target(target)
   { this->Visited.insert(target); }
 
-  void Visit(cmTarget const* target)
+  void Visit(const std::string& name)
     {
-    if(!target || !this->Visited.insert(target).second)
+    cmTarget *target = this->Makefile->FindTargetToUse(name);
+
+    if(!target)
+      {
+      if(name.find("::") != std::string::npos)
+        {
+        bool noMessage = false;
+        cmake::MessageType messageType = cmake::FATAL_ERROR;
+        cmOStringStream e;
+        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0028))
+          {
+          case cmPolicies::WARN:
+            {
+            e << (this->Makefile->GetPolicies()
+                  ->GetPolicyWarning(cmPolicies::CMP0028)) << "\n";
+            messageType = cmake::AUTHOR_WARNING;
+            }
+            break;
+          case cmPolicies::OLD:
+            noMessage = true;
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::NEW:
+            // Issue the fatal message.
+            break;
+          }
+
+        if(!noMessage)
+          {
+          e << "Target \"" << this->Target->GetName()
+            << "\" links to target \"" << name
+            << "\" but the target was not found.  Perhaps a find_package() "
+            "call is missing for an IMPORTED target, or an ALIAS target is "
+            "missing?";
+          this->Makefile->GetCMakeInstance()->IssueMessage(messageType,
+                                                e.str(),
+                                                this->Target->GetBacktrace());
+          }
+        }
+      return;
+      }
+    if(!this->Visited.insert(target).second)
       {
       return;
       }
@@ -2852,17 +2894,18 @@ public:
       this->Languages.insert(*li);
       }
 
-    cmMakefile* mf = target->GetMakefile();
     for(std::vector<std::string>::const_iterator
           li = iface->Libraries.begin(); li != iface->Libraries.end(); ++li)
       {
-      this->Visit(mf->FindTargetToUse(*li));
+      this->Visit(*li);
       }
     }
 private:
   const char* Config;
   std::set<cmStdString>& Languages;
   cmTarget const* HeadTarget;
+  cmMakefile* Makefile;
+  const cmTarget* Target;
   std::set<cmTarget const*> Visited;
 };
 
@@ -2964,7 +3007,7 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc,
   for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
       li != impl->Libraries.end(); ++li)
     {
-    cll.Visit(this->Makefile->FindTargetToUse(*li));
+    cll.Visit(*li);
     }
 
   // Store the transitive closure of languages.
@@ -5618,46 +5661,6 @@ void cmTarget::ComputeLinkImplementation(const char* config,
           }
         }
       continue;
-      }
-    cmTarget *tgt = this->Makefile->FindTargetToUse(*li);
-
-    if(!tgt && std::string(item).find("::") != std::string::npos)
-      {
-      bool noMessage = false;
-      cmake::MessageType messageType = cmake::FATAL_ERROR;
-      cmOStringStream e;
-      switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0028))
-        {
-        case cmPolicies::WARN:
-          {
-          e << (this->Makefile->GetPolicies()
-                ->GetPolicyWarning(cmPolicies::CMP0028)) << "\n";
-          messageType = cmake::AUTHOR_WARNING;
-          }
-          break;
-        case cmPolicies::OLD:
-          noMessage = true;
-        case cmPolicies::REQUIRED_IF_USED:
-        case cmPolicies::REQUIRED_ALWAYS:
-        case cmPolicies::NEW:
-          // Issue the fatal message.
-          break;
-        }
-
-      if(!noMessage)
-        {
-        e << "Target \"" << this->GetName() << "\" links to target \"" << item
-          << "\" but the target was not found.  Perhaps a find_package() "
-          "call is missing for an IMPORTED target, or an ALIAS target is "
-          "missing?";
-        this->Makefile->GetCMakeInstance()->IssueMessage(messageType,
-                                                      e.str(),
-                                                      this->GetBacktrace());
-        if (messageType == cmake::FATAL_ERROR)
-          {
-          return;
-          }
-        }
       }
 
     // The entry is meant for this configuration.
