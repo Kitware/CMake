@@ -84,6 +84,6 @@ Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
 CMake Error at invalid_signature.cmake:20 \(add_library\):
-  add_library INTERFACE library requires no source arguments.
+  add_library GLOBAL option may only be used with IMPORTED libraries.
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
