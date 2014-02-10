@@ -91,7 +91,7 @@ cmGlobalNinjaGenerator* cmNinjaTargetGenerator::GetGlobalGenerator() const
   return this->LocalGenerator->GetGlobalNinjaGenerator();
 }
 
-const char* cmNinjaTargetGenerator::GetConfigName() const
+std::string const& cmNinjaTargetGenerator::GetConfigName() const
 {
   return this->LocalGenerator->GetConfigName();
 }

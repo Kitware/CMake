@@ -65,7 +65,7 @@ protected:
   cmMakefile* GetMakefile() const
   { return this->Makefile; }
 
-  const char* GetConfigName() const;
+  std::string const& GetConfigName() const;
 
   std::string LanguageCompilerRule(const std::string& lang) const
   { return lang + "_COMPILER"; }

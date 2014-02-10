@@ -76,7 +76,7 @@ public:
    * final name (but could be).  Otherwise the returned name is the
    * final name.
    */
-  const char* GetName() const { return this->Name.c_str(); }
+  const std::string& GetName() const { return this->Name; }
 
   /**
    * Get the cmMakefile instance for which the source file was created.
