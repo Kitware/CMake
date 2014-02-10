@@ -40,6 +40,9 @@
 #pragma warning ( disable : 1572 ) /* floating-point equality test */
 #endif
 
+// Provide fixed-size integer types.
+#include <cmIML/INT.h>
+
 #include <stdarg.h> // Work-around for SGI MIPSpro 7.4.2m header bug
 
 // This is a hack to prevent warnings about these functions being
