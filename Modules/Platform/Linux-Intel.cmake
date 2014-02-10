@@ -47,4 +47,8 @@ macro(__linux_compiler_intel lang)
       "${XIAR} cr <TARGET> <LINK_FLAGS> <OBJECTS> "
       "${XIAR} -s <TARGET> ")
   endif()
+
+  if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 12.0)
+    set(CMAKE_${lang}_COMPILE_OPTIONS_VISIBILITY "-fvisibility=")
+  endif()
 endmacro()
