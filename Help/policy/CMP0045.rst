@@ -12,6 +12,6 @@ variable to a ``-NOTFOUND`` value.  The NEW behavior
 for this policy is to issue a ``FATAL_ERROR`` if the command is called with a
 non-existent target.
 
-This policy was introduced in CMake version 3.0.0.  CMake version
+This policy was introduced in CMake version 3.0.  CMake version
 |release| warns when the policy is not set and uses OLD behavior.  Use
 the cmake_policy command to set it to OLD or NEW explicitly.

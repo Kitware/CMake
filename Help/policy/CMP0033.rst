@@ -10,5 +10,5 @@ work for applications outside of the original build tree of a project.
 The functionality has been superseded by the :command:`export` and
 :command:`install(EXPORT)` commands.
 
-.. |disallowed_version| replace:: 3.0.0
+.. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt

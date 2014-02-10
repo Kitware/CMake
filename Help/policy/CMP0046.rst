@@ -11,7 +11,7 @@ dependencies. The NEW behavior for this policy is to report an error
 if non-existent dependencies are listed in the :command:`add_dependencies`
 command.
 
-This policy was introduced in CMake version 3.0.0.
+This policy was introduced in CMake version 3.0.
 CMake version |release| warns when the policy is not set and uses
 OLD behavior.  Use the cmake_policy command to set it to OLD or
 NEW explicitly.

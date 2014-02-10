@@ -8,5 +8,5 @@ operating system and compiler combination.  The command has long been
 documented as discouraged and replaced by the :variable:`CMAKE_SYSTEM`
 and :variable:`CMAKE_<LANG>_COMPILER` variables.
 
-.. |disallowed_version| replace:: 3.0.0
+.. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
