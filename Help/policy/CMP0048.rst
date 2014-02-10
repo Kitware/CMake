@@ -3,7 +3,7 @@ CMP0048
 
 The :command:`project` command manages VERSION variables.
 
-CMake version 3.0.0 introduced the ``VERSION`` option of the :command:`project`
+CMake version 3.0 introduced the ``VERSION`` option of the :command:`project`
 command to specify a project version as well as the name.  In order to keep
 :variable:`PROJECT_VERSION` and related variables consistent with variable
 :variable:`PROJECT_NAME` it is necessary to set the VERSION variables
@@ -16,7 +16,7 @@ The OLD behavior for this policy is to leave VERSION variables untouched.
 The NEW behavior for this policy is to set VERSION as documented by the
 :command:`project` command.
 
-This policy was introduced in CMake version 3.0.0.
+This policy was introduced in CMake version 3.0.
 CMake version |release| warns when the policy is not set and uses
 OLD behavior.  Use the cmake_policy command to set it to OLD or
 NEW explicitly.

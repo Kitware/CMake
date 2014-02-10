@@ -9,5 +9,5 @@ not work when the toolchain in use does not match the ABI of
 the CMake process.  It has been mostly superseded by the
 :command:`macro` and :command:`function` commands.
 
-.. |disallowed_version| replace:: 3.0.0
+.. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt

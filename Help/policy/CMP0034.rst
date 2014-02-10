@@ -7,5 +7,5 @@ This command was introduced in March 2001 to help build executables used to
 generate other files.  This approach has long been replaced by
 :command:`add_executable` combined with :command:`add_custom_command`.
 
-.. |disallowed_version| replace:: 3.0.0
+.. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt

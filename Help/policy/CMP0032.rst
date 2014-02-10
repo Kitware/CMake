@@ -9,5 +9,5 @@ has evolved since then but is not exposed through this command.  The
 scanning capabilities of this command are very limited and this
 functionality is better achieved through dedicated outside tools.
 
-.. |disallowed_version| replace:: 3.0.0
+.. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt

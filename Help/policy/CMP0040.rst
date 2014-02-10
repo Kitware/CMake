@@ -11,6 +11,6 @@ The OLD behavior for this policy is to ignore custom commands
 for unknown targets. The NEW behavior for this policy is to report an error
 if the target referenced in :command:`add_custom_command` is unknown.
 
-This policy was introduced in CMake version 3.0.0.  CMake version
+This policy was introduced in CMake version 3.0.  CMake version
 |release| warns when the policy is not set and uses OLD behavior.  Use
 the cmake_policy command to set it to OLD or NEW explicitly.

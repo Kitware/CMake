@@ -9,11 +9,11 @@ name.  This was enabled by setting the target property
 flexible and powerful mechanism than ``@executable_path`` or ``@loader_path``
 for locating shared libraries.
 
-CMake 3.0.0 and later prefer this property to be ON by default.  Projects
+CMake 3.0 and later prefer this property to be ON by default.  Projects
 wanting ``@rpath`` in a target's install name may remove any setting of
 the :prop_tgt:`INSTALL_NAME_DIR` and :variable:`CMAKE_INSTALL_NAME_DIR`
 variables.
 
-This policy was introduced in CMake version 3.0.0.  CMake version
+This policy was introduced in CMake version 3.0.  CMake version
 |release| warns when the policy is not set and uses OLD behavior.  Use
 the cmake_policy command to set it to OLD or NEW explicitly.
