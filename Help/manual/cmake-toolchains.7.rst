@@ -90,6 +90,8 @@ the compiler supports that feature. The :prop_tgt:`<LANG>_VISIBILITY_PRESET`
 and :prop_tgt:`VISIBILITY_INLINES_HIDDEN` target properties add flags for
 hidden visibility, if supported by the compiler.
 
+.. _`Cross Compiling Toolchain`:
+
 Cross Compiling
 ===============
 
