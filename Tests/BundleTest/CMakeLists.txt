@@ -17,7 +17,7 @@ set_source_files_properties(
 
 set_source_files_properties(
   SomeRandomFile.txt
-  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../README.rst"
   PROPERTIES
   MACOSX_PACKAGE_LOCATION MacOS
   )
@@ -38,7 +38,7 @@ add_executable(BundleTest
   MACOSX_BUNDLE
   BundleTest.cxx
   SomeRandomFile.txt
-  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../README.rst"
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   )
 target_link_libraries(BundleTest BundleTestLib)

@@ -12,7 +12,7 @@ set_source_files_properties(
 
 set_source_files_properties(
   "${BundleTest_SOURCE_DIR}/SomeRandomFile.txt"
-  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../README.rst"
   PROPERTIES
   MACOSX_PACKAGE_LOCATION MacOS
   )
@@ -21,7 +21,7 @@ add_executable(SecondBundle
   MACOSX_BUNDLE
   "${BundleTest_SOURCE_DIR}/BundleTest.cxx"
   "${BundleTest_SOURCE_DIR}/SomeRandomFile.txt"
-  "${BundleTest_SOURCE_DIR}/../../ChangeLog.txt"
+  "${BundleTest_SOURCE_DIR}/../../README.rst"
   "${CMAKE_CURRENT_BINARY_DIR}/randomResourceFile.plist"
   )
 target_link_libraries(SecondBundle BundleTestLib)

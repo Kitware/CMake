@@ -140,6 +140,8 @@ There are three types of arguments within `Command Invocations`_:
 .. productionlist::
  argument: `bracket_argument` | `quoted_argument` | `unquoted_argument`
 
+.. _`Bracket Argument`:
+
 Bracket Argument
 ^^^^^^^^^^^^^^^^
 
@@ -187,6 +189,8 @@ For example:
 
 .. _`Lua`: http://www.lua.org/
 
+.. _`Quoted Argument`:
+
 Quoted Argument
 ^^^^^^^^^^^^^^^
 
@@ -232,6 +236,8 @@ immediately following newline character.  For example:
  CMake versions prior to 3.0 do not support continuation with ``\``.
  They report errors in quoted arguments containing lines ending in
  an odd number of ``\`` characters.
+
+.. _`Unquoted Argument`:
 
 Unquoted Argument
 ^^^^^^^^^^^^^^^^^
