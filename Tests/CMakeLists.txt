@@ -1058,18 +1058,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   # because of the registry write these tests depend on each other
   set_tests_properties ( complex PROPERTIES DEPENDS complexOneConfig)
 
-  add_test(Example ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Example"
-    "${CMake_BINARY_DIR}/Example"
-    ${build_generator_args}
-    --build-project HELLO
-    --build-exe-dir "${CMake_BINARY_DIR}/Example/Demo"
-    --build-options ${build_options}
-    --test-command helloDemo
-    )
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Example")
-
   add_test(Environment ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/Environment"
