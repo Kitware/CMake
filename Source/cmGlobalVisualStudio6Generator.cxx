@@ -120,7 +120,7 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
   const std::string& projectName,
   const char* /*projectDir*/,
   const std::string& targetName,
-  const char* config,
+  const std::string& config,
   bool /*fast*/,
   std::vector<std::string> const& makeOptions
   )
@@ -149,7 +149,7 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
     targetArg += "ALL_BUILD";
     }
   targetArg += " - ";
-  if(config && strlen(config))
+  if(!config.empty())
     {
     targetArg += config;
     }
@@ -419,11 +419,11 @@ void cmGlobalVisualStudio6Generator
 void
 cmGlobalVisualStudio6Generator
 ::AppendDirectoryForConfig(const char* prefix,
-                           const char* config,
+                           const std::string& config,
                            const char* suffix,
                            std::string& dir)
 {
-  if(config)
+  if(!config.empty())
     {
     dir += prefix;
     dir += config;

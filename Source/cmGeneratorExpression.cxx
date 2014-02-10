@@ -52,7 +52,7 @@ cmGeneratorExpression::~cmGeneratorExpression()
 
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
-  cmMakefile* mf, const char* config, bool quiet,
+  cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const
 {
@@ -66,7 +66,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
-  cmMakefile* mf, const char* config, bool quiet,
+  cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmTarget const* currentTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const

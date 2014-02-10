@@ -2734,7 +2734,7 @@ void cmMakefile::AddDefaultDefinitions()
 }
 
 //----------------------------------------------------------------------------
-const char*
+std::string
 cmMakefile::GetConfigurations(std::vector<std::string>& configs,
                               bool single) const
 {
@@ -2745,12 +2745,12 @@ cmMakefile::GetConfigurations(std::vector<std::string>& configs,
       {
       cmSystemTools::ExpandListArgument(configTypes, configs);
       }
-    return 0;
+    return "";
     }
   else
     {
-    const char* buildType = this->GetDefinition("CMAKE_BUILD_TYPE");
-    if(single && buildType && *buildType)
+    const std::string& buildType = this->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    if(single && !buildType.empty())
       {
       configs.push_back(buildType);
       }
@@ -3801,11 +3801,12 @@ bool cmMakefile::GetPropertyAsBool(const std::string& prop) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmMakefile::GetFeature(const char* feature, const char* config)
+const char* cmMakefile::GetFeature(const char* feature,
+                                   const std::string& config)
 {
   // TODO: Define accumulation policy for features (prepend, append, replace).
   // Currently we always replace.
-  if(config && *config)
+  if(!config.empty())
     {
     std::string featureConfig = feature;
     featureConfig += "_";

@@ -240,7 +240,8 @@ cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string &input)
 
 //----------------------------------------------------------------------------
 bool
-cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
+cmExportInstallFileGenerator::GenerateImportFileConfig(
+                                    const std::string& config,
                                     std::vector<std::string> &missingTargets)
 {
   // Skip configurations not enabled for this export.
@@ -254,7 +255,7 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
   fileName += "/";
   fileName += this->FileBase;
   fileName += "-";
-  if(config && *config)
+  if(!config.empty())
     {
     fileName += cmSystemTools::LowerCase(config);
     }
@@ -296,7 +297,8 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
 void
 cmExportInstallFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
-                              const char* config, std::string const& suffix,
+                              const std::string& config,
+                              std::string const& suffix,
                               std::vector<std::string> &missingTargets)
 {
   // Add each target in the set to the export.
@@ -355,7 +357,8 @@ cmExportInstallFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
-::SetImportLocationProperty(const char* config, std::string const& suffix,
+::SetImportLocationProperty(const std::string& config,
+                            std::string const& suffix,
                             cmInstallTargetGenerator* itgen,
                             ImportPropertyMap& properties,
                             std::set<std::string>& importedLocations

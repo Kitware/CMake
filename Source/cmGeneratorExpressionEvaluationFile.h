@@ -32,7 +32,7 @@ public:
   std::vector<std::string> GetFiles() const { return this->Files; }
 
 private:
-  void Generate(const char *config,
+  void Generate(const std::string& config,
               cmCompiledGeneratorExpression* inputExpression,
               std::map<std::string, std::string> &outputFiles);
 

@@ -33,7 +33,7 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
-                                                   const char* config,
+                                                   const std::string& config,
                                                    bool isFortran)
 {
   cmsys::auto_ptr<cmCustomCommand> pcc;
@@ -80,7 +80,7 @@ const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(cmCustomCommand const& cc,
-                  const char* configName,
+                  const std::string& configName,
                   const char* newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();

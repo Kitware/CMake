@@ -71,7 +71,7 @@ private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
-                                      const char* configName);
+                                      const std::string& configName);
   void FixGlobalTargets();
   void WriteProjectFiles();
   void WriteVCProjHeader(std::ostream& fout, const std::string& libName,
@@ -82,14 +82,14 @@ private:
   void WriteConfigurations(std::ostream& fout,
                            const std::string& libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
-                          const char* configName,
+                          const std::string& configName,
                           const std::string& libName, cmTarget &tgt);
   std::string EscapeForXML(const std::string& s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
-  void OutputTargetRules(std::ostream& fout, const char* configName,
+  void OutputTargetRules(std::ostream& fout, const std::string& configName,
                          cmTarget &target, const std::string& libName);
-  void OutputBuildTool(std::ostream& fout, const char* configName,
+  void OutputBuildTool(std::ostream& fout, const std::string& configName,
                        cmTarget& t, const Options& targetOptions);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);

@@ -264,7 +264,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   const std::string& projectName,
   const char* /*projectDir*/,
   const std::string& targetName,
-  const char* config,
+  const std::string& config,
   bool /*fast*/,
   std::vector<std::string> const& makeOptions)
 {
@@ -298,11 +298,6 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
     makeCommand.push_back("build");
     }
   makeCommand.push_back("-target");
-  // if it is a null string for config don't use it
-  if(config && *config == 0)
-    {
-    config = 0;
-    }
   if (!realTarget.empty())
     {
     makeCommand.push_back(realTarget);
@@ -319,7 +314,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   else
     {
     makeCommand.push_back("-configuration");
-    makeCommand.push_back(config?config:"Debug");
+    makeCommand.push_back(!config.empty()?config:"Debug");
     }
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());
@@ -1547,7 +1542,7 @@ void  cmGlobalXCodeGenerator
                             cmTarget& target,
                             std::vector<cmCustomCommand>
                             const & commands,
-                            const char* configName,
+                            const std::string& configName,
                             const std::map<std::string,
                             std::string>& multipleOutputPairs
                            )
@@ -1690,8 +1685,8 @@ void  cmGlobalXCodeGenerator
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
-                                                 cmXCodeObject* buildSettings,
-                                                 const char* configName)
+                                                cmXCodeObject* buildSettings,
+                                                const std::string& configName)
 {
   if(target.GetType() == cmTarget::INTERFACE_LIBRARY)
     {
@@ -1804,7 +1799,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       this->CurrentLocalGenerator->
         AppendFlags(extraLinkOptions, targetLinkFlags);
       }
-    if(configName && *configName)
+    if(!configName.empty())
       {
       std::string linkFlagsVar = "LINK_FLAGS_";
       linkFlagsVar += cmSystemTools::UpperCase(configName);
@@ -2738,7 +2733,7 @@ void cmGlobalXCodeGenerator
 ::AppendBuildSettingAttribute(cmXCodeObject* target,
                               const char* attribute,
                               const char* value,
-                              const char* configName)
+                              const std::string& configName)
 {
   if(this->XcodeVersion < 21)
     {
@@ -2761,9 +2756,9 @@ void cmGlobalXCodeGenerator
     for(std::vector<cmXCodeObject*>::iterator i = list.begin();
         i != list.end(); ++i)
       {
-      if(configName)
+      if(!configName.empty())
         {
-        if(strcmp((*i)->GetObject("name")->GetString(), configName) == 0)
+        if((*i)->GetObject("name")->GetString() == configName)
           {
           cmXCodeObject* settings = (*i)->GetObject("buildSettings");
           this->AppendOrAddBuildSetting(settings, attribute, value);
@@ -3777,13 +3772,13 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
 void
 cmGlobalXCodeGenerator
 ::AppendDirectoryForConfig(const char* prefix,
-                           const char* config,
+                           const std::string& config,
                            const char* suffix,
                            std::string& dir)
 {
   if(this->XcodeVersion > 20)
     {
-    if(config)
+    if(!config.empty())
       {
       dir += prefix;
       dir += config;

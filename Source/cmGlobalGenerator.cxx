@@ -1655,7 +1655,8 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 #endif // WIN32
 #endif
     }
-  const char* config = mf->GetDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
+  std::string config =
+    mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget.c_str(),
                      output,0,config,false,fast,
@@ -1664,7 +1665,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 
 void cmGlobalGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const char*, const std::string&,
-  const char*, const std::string&, const char*, bool,
+  const char*, const std::string&, const std::string&, bool,
   std::vector<std::string> const&)
 {
   makeCommand.push_back(
@@ -1676,7 +1677,7 @@ int cmGlobalGenerator::Build(
   const std::string& projectName, const std::string& target,
   std::string *output,
   const char *makeCommandCSTR,
-  const char *config,
+  const std::string& config,
   bool clean, bool fast,
   double timeout,
   cmSystemTools::OutputOption outputflag,
@@ -1788,13 +1789,14 @@ int cmGlobalGenerator::Build(
 
 //----------------------------------------------------------------------------
 std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
-  const std::string& target, const char* config, const char* native,
+  const std::string& target, const std::string& config,
+  const char* native,
   bool ignoreErrors)
 {
   std::string makeCommand = cmSystemTools::GetCMakeCommand();
   makeCommand = cmSystemTools::ConvertToOutputPath(makeCommand.c_str());
   makeCommand += " --build .";
-  if(config && *config)
+  if(!config.empty())
     {
     makeCommand += " --config \"";
     makeCommand += config;
@@ -2526,7 +2528,8 @@ std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AppendDirectoryForConfig(const char*, const char*,
+void cmGlobalGenerator::AppendDirectoryForConfig(const char*,
+                                                 const std::string&,
                                                  const char*, std::string&)
 {
   // Subclasses that support multiple configurations should implement
@@ -2677,7 +2680,7 @@ void cmGlobalGenerator::AddTargetDepends(cmTarget const* target,
 
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AddToManifest(const char* config,
+void cmGlobalGenerator::AddToManifest(const std::string& config,
                                       std::string const& f)
 {
   // Add to the main manifest for this configuration.

@@ -59,7 +59,7 @@ public:
     const std::string& projectName,
     const char* projectDir,
     const std::string& targetName,
-    const char* config,
+    const std::string& config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
@@ -73,7 +73,7 @@ public:
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
+                                        const std::string& config,
                                         const char* suffix,
                                         std::string& dir);
 
@@ -123,7 +123,7 @@ private:
   void CreateCustomRulesMakefile(const char* makefileBasename,
                                  cmTarget& target,
                                  std::vector<cmCustomCommand> const & commands,
-                                 const char* configName,
+                                 const std::string& configName,
                                  const std::map<std::string, std::string>&
                                      multipleOutputPairs
                                 );
@@ -147,12 +147,13 @@ private:
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr,
                                const char* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr,
-                                   const char* value, const char* configName);
+                                   const char* value,
+                                   const std::string& configName);
   cmXCodeObject* CreateUtilityTarget(cmTarget& target);
   void AddDependAndLinkInformation(cmXCodeObject* target);
   void CreateBuildSettings(cmTarget& target,
                            cmXCodeObject* buildSettings,
-                           const char* buildType);
+                           const std::string& buildType);
   std::string ExtractFlag(const char* flag, std::string& flags);
   // delete all objects in the this->XCodeObjects vector.
   void ClearXCodeObjects();

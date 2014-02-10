@@ -66,7 +66,7 @@ public:
     const std::string& projectName,
     const char* projectDir,
     const std::string& targetName,
-    const char* config,
+    const std::string& config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
@@ -94,7 +94,7 @@ public:
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
+                                        const std::string& config,
                                         const char* suffix,
                                         std::string& dir);
 

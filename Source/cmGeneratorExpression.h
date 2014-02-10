@@ -78,12 +78,12 @@ private:
 class cmCompiledGeneratorExpression
 {
 public:
-  const char* Evaluate(cmMakefile* mf, const char* config,
+  const char* Evaluate(cmMakefile* mf, const std::string& config,
                        bool quiet = false,
                        cmTarget const* headTarget = 0,
                        cmTarget const* currentTarget = 0,
                        cmGeneratorExpressionDAGChecker *dagChecker = 0) const;
-  const char* Evaluate(cmMakefile* mf, const char* config,
+  const char* Evaluate(cmMakefile* mf, const std::string& config,
                        bool quiet,
                        cmTarget const* headTarget,
                        cmGeneratorExpressionDAGChecker *dagChecker) const;

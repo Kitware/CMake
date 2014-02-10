@@ -33,7 +33,7 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorExpressionEvaluationFile::Generate(const char *config,
+void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
               cmCompiledGeneratorExpression* inputExpression,
               std::map<std::string, std::string> &outputFiles)
 {
@@ -135,7 +135,7 @@ void cmGeneratorExpressionEvaluationFile::Generate()
 
   if (allConfigs.empty())
     {
-    this->Generate(0, inputExpression.get(), outputFiles);
+    this->Generate("", inputExpression.get(), outputFiles);
     }
   else
     {

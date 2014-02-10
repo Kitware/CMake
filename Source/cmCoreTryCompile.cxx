@@ -357,7 +357,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       cmExportTryCompileFileGenerator tcfg;
       tcfg.SetExportFile((this->BinaryDirectory + fname).c_str());
       tcfg.SetExports(targets);
-      tcfg.SetConfig(this->Makefile->GetDefinition(
+      tcfg.SetConfig(this->Makefile->GetSafeDefinition(
                                           "CMAKE_TRY_COMPILE_CONFIGURATION"));
 
       if(!tcfg.GenerateImportFile())

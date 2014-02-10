@@ -187,7 +187,7 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   const std::string& projectName,
   const char* /*projectDir*/,
   const std::string& targetName,
-  const char* config,
+  const std::string& config,
   bool /*fast*/,
   std::vector<std::string> const& makeOptions)
 {
@@ -224,7 +224,7 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
     makeCommand.push_back("/build");
     }
 
-  if(config && strlen(config))
+  if(!config.empty())
     {
     makeCommand.push_back(config);
     }
@@ -962,11 +962,11 @@ void cmGlobalVisualStudio7Generator
 void
 cmGlobalVisualStudio7Generator
 ::AppendDirectoryForConfig(const char* prefix,
-                           const char* config,
+                           const std::string& config,
                            const char* suffix,
                            std::string& dir)
 {
-  if(config)
+  if(!config.empty())
     {
     dir += prefix;
     dir += config;

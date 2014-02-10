@@ -122,26 +122,18 @@ public:
 
   void CopyAttributes(cmXCodeObject* );
 
-  void AddDependLibrary(const char* configName,
+  void AddDependLibrary(const std::string& configName,
                         const std::string& l)
     {
-      if(!configName)
-        {
-        configName = "";
-        }
       this->DependLibraries[configName].push_back(l);
     }
   std::map<std::string, StringVec> const& GetDependLibraries()
     {
       return this->DependLibraries;
     }
-  void AddDependTarget(const char* configName,
+  void AddDependTarget(const std::string& configName,
                        const std::string& tName)
     {
-      if(!configName)
-        {
-        configName = "";
-        }
       this->DependTargets[configName].push_back(tName);
     }
   std::map<std::string, StringVec> const& GetDependTargets()

@@ -239,7 +239,7 @@ because this need be done only for shared libraries without soname-s.
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation
-::cmComputeLinkInformation(cmTarget const* target, const char* config,
+::cmComputeLinkInformation(cmTarget const* target, const std::string& config,
                            cmTarget const* headTarget)
 {
   // Store context information.
@@ -505,7 +505,8 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config, this->HeadTarget);
+  cmComputeLinkDepends cld(this->Target, this->Config.c_str(),
+                           this->HeadTarget);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
@@ -624,7 +625,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
                                        cmTarget const* tgt)
 {
   // Compute the proper name to use to link this library.
-  const char* config = this->Config;
+  const std::string& config = this->Config;
   bool impexe = (tgt && tgt->IsExecutableWithExports());
   if(impexe && !this->UseImportLibrary && !this->LoaderFlag)
     {

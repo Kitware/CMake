@@ -133,7 +133,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
      this->Makefile->GetProperty
      ("ADDITIONAL_MAKE_CLEAN_FILES"))
     {
-    const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    const std::string& config =
+      this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
     cmListFileBacktrace lfbt;
     cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
@@ -1070,7 +1071,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "set(CMAKE_C_TARGET_INCLUDE_PATH\n";
   std::vector<std::string> includes;
 
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
                                               this->GeneratorTarget,
                                               "C", config);
@@ -1567,7 +1569,8 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
 #endif
   std::vector<std::string> includes;
 
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
                                               this->GeneratorTarget,
                                               "C", config);
@@ -1952,7 +1955,8 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
 
   std::vector<std::string> includes;
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
                                               this->GeneratorTarget,
                                               lang, config);
@@ -2059,7 +2063,8 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
      this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG"))
     {
     std::vector<std::string> includes;
-    const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    const std::string& config =
+      this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
     this->LocalGenerator->GetIncludeDirectories(includes,
                                                 this->GeneratorTarget,
                                                 "C", config);

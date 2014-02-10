@@ -375,7 +375,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
    {
    language = "C";
    }
-  const char* config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   // Add language-specific flags.
   lg->AddLanguageFlags(flags, language, config);
 
@@ -425,7 +425,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
   std::set<std::string> defines;
   cmMakefile *makefile = lg->GetMakefile();
   const std::string& language = source->GetLanguage();
-  const char* config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
   // Add the export symbol definition for shared library objects.
   if(const char* exportMacro = target->GetExportMacro())

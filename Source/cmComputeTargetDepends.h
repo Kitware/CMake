@@ -55,7 +55,7 @@ private:
                            const std::string& dependee_name,
                            bool linking, std::set<std::string> &emitted);
   void AddInterfaceDepends(int depender_index, cmTarget const* dependee,
-                           const char *config,
+                           const std::string& config,
                            std::set<std::string> &emitted);
   cmGlobalGenerator* GlobalGenerator;
   bool DebugMode;

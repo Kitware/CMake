@@ -23,14 +23,14 @@ public:
   /** Set the list of targets to export.  */
   void SetExports(const std::vector<cmTarget const*> &exports)
     { this->Exports = exports; }
-  void SetConfig(const char *config) { this->Config = config; }
+  void SetConfig(const std::string& config) { this->Config = config; }
 protected:
 
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);
 
   virtual void GenerateImportTargetsConfig(std::ostream&,
-                                           const char*,
+                                           const std::string&,
                                            std::string const&,
                             std::vector<std::string>&) {}
   virtual void HandleMissingTarget(std::string&,
@@ -51,7 +51,7 @@ private:
 
 
   std::vector<cmTarget const*> Exports;
-  const char *Config;
+  std::string Config;
 };
 
 #endif

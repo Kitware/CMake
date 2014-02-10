@@ -320,7 +320,7 @@ public:
     }
 
   /** Get the configurations to be generated.  */
-  const char* GetConfigurations(std::vector<std::string>& configs,
+  std::string GetConfigurations(std::vector<std::string>& configs,
                                 bool single = true) const;
 
   /**
@@ -811,7 +811,7 @@ public:
                           cmProperty::ScopeType scope) const;
   bool GetPropertyAsBool(const std::string& prop) const;
 
-  const char* GetFeature(const char* feature, const char* config);
+  const char* GetFeature(const char* feature, const std::string& config);
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };

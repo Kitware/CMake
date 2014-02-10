@@ -555,7 +555,7 @@ void cmGlobalNinjaGenerator
                        const std::string& /*projectName*/,
                        const char* /*projectDir*/,
                        const std::string& targetName,
-                       const char* /*config*/,
+                       const std::string& /*config*/,
                        bool /*fast*/,
                        std::vector<std::string> const& makeOptions)
 {
@@ -834,8 +834,8 @@ void
 cmGlobalNinjaGenerator
 ::AppendTargetOutputs(cmTarget const* target, cmNinjaDeps& outputs)
 {
-  const char* configName =
-    target->GetMakefile()->GetDefinition("CMAKE_BUILD_TYPE");
+  std::string configName =
+    target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmLocalNinjaGenerator *ng =
     static_cast<cmLocalNinjaGenerator *>(this->LocalGenerators[0]);
 

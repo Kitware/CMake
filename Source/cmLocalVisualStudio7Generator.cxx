@@ -588,7 +588,7 @@ class cmLocalVisualStudio7Generator::EventWriter
 {
 public:
   EventWriter(cmLocalVisualStudio7Generator* lg,
-              const char* config, std::ostream& os):
+              const std::string& config, std::ostream& os):
     LG(lg), Config(config), Stream(os), First(true) {}
   void Start(const char* tool)
     {
@@ -629,14 +629,14 @@ public:
     }
 private:
   cmLocalVisualStudio7Generator* LG;
-  const char* Config;
+  std::string Config;
   std::ostream& Stream;
   bool First;
 };
 
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
-                                                const char* configName,
+                                                const std::string& configName,
                                                 const std::string& libName,
                                                 cmTarget &target)
 {
@@ -745,7 +745,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
                         table,
                         this->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
-  std::string asmLocation = std::string(configName) + "/";
+  std::string asmLocation = configName + "/";
   targetOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
   targetOptions.Parse(flags.c_str());
   targetOptions.Parse(defineFlags.c_str());
@@ -944,7 +944,8 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 //----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudio7Generator
-::GetBuildTypeLinkerFlags(std::string rootLinkerFlags, const char* configName)
+::GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
+                          const std::string& configName)
 {
   std::string configTypeUpper = cmSystemTools::UpperCase(configName);
   std::string extraLinkOptionsBuildTypeDef =
@@ -958,7 +959,8 @@ cmLocalVisualStudio7Generator
 }
 
 void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
-  const char* configName, cmTarget &target, const Options& targetOptions)
+  const std::string& configName, cmTarget &target,
+  const Options& targetOptions)
 {
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
@@ -1903,7 +1905,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjEndGroup(std::ostream& fout)
 // look for custom rules on a target and collect them together
 void cmLocalVisualStudio7Generator
 ::OutputTargetRules(std::ostream& fout,
-                    const char* configName,
+                    const std::string& configName,
                     cmTarget &target,
                     const std::string& /*libName*/)
 {

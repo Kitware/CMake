@@ -120,7 +120,7 @@ public:
   int Build(const char *srcdir, const char *bindir,
             const std::string& projectName, const std::string& targetName,
             std::string *output,
-            const char *makeProgram, const char *config,
+            const char *makeProgram, const std::string& config,
             bool clean, bool fast,
             double timeout,
             cmSystemTools::OutputOption outputflag=cmSystemTools::OUTPUT_NONE,
@@ -131,13 +131,13 @@ public:
     std::vector<std::string>& makeCommand,
     const char* makeProgram,
     const std::string& projectName, const char *projectDir,
-    const std::string& targetName, const char* config, bool fast,
+    const std::string& targetName, const std::string& config, bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
 
   /** Generate a "cmake --build" call for a given target and config.  */
   std::string GenerateCMakeBuildCommand(const std::string& target,
-                                        const char* config,
+                                        const std::string& config,
                                         const char* native,
                                         bool ignoreErrors);
 
@@ -173,7 +173,7 @@ public:
   cmExportSetMap& GetExportSets() {return this->ExportSets;}
 
   /** Add a file to the manifest of generated targets for a configuration.  */
-  void AddToManifest(const char* config, std::string const& f);
+  void AddToManifest(const std::string& config, std::string const& f);
 
   void EnableInstallTarget();
 
@@ -231,7 +231,7 @@ public:
       appended the given prefix and suffix will be appended around it, which
       is useful for leading or trailing slashes.  */
   virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
+                                        const std::string& config,
                                         const char* suffix,
                                         std::string& dir);
 

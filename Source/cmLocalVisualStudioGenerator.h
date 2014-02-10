@@ -47,7 +47,7 @@ public:
 
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(cmCustomCommand const& cc,
-                              const char* configName,
+                              const std::string& configName,
                               const char* newline = "\n");
 
   /** Label to which to jump in a batch file after a failed step in a
@@ -67,7 +67,8 @@ protected:
 
   /** Construct a custom command to make exe import lib dir.  */
   cmsys::auto_ptr<cmCustomCommand>
-  MaybeCreateImplibDir(cmTarget& target, const char* config, bool isFortran);
+  MaybeCreateImplibDir(cmTarget& target, const std::string& config,
+                       bool isFortran);
 
   VSVersion Version;
 };

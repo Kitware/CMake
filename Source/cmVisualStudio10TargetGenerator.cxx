@@ -140,7 +140,7 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   const char* tag,
-  const char* config,
+  const std::string& config,
   int indentLevel,
   const char* attribute,
   const char* end,

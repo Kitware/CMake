@@ -35,7 +35,7 @@ public:
   // used by cmVisualStudioGeneratorOptions
   void WritePlatformConfigTag(
     const char* tag,
-    const char* config,
+    const std::string& config,
     int indentLevel,
     const char* attribute = 0,
     const char* end = 0,

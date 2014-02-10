@@ -38,7 +38,7 @@ class cmLocalVisualStudio6Generator::EventWriter
 {
 public:
   EventWriter(cmLocalVisualStudio6Generator* lg,
-              const char* config, std::string& code):
+              const std::string& config, std::string& code):
     LG(lg), Config(config), Code(code), First(true) {}
   void Start(const char* event)
     {
@@ -72,7 +72,7 @@ public:
     }
 private:
   cmLocalVisualStudio6Generator* LG;
-  const char* Config;
+  std::string Config;
   std::string& Code;
   bool First;
   std::string Event;
@@ -785,7 +785,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
-                                                    const char* config)
+                                                    const std::string& config)
 {
   cmsys::auto_ptr<cmCustomCommand> pcc;
 
@@ -813,7 +813,7 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
 // look for custom rules on a target and collect them together
 std::string
 cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
-                                              const char* configName,
+                                              const std::string& configName,
                                               const std::string& /* libName */)
 {
   if (target.GetType() >= cmTarget::UTILITY )
@@ -863,7 +863,7 @@ inline std::string removeQuotes(const std::string& s)
 
 std::string
 cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target,
-                                                       const char *config)
+                                                  const std::string& config)
 {
   std::string includeOptions;
 
@@ -1704,7 +1704,7 @@ void cmLocalVisualStudio6Generator
       flagsRelWithDebInfo = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelWithDebInfo += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
 
-      this->AddCompileOptions(flags, &target, linkLanguage, 0);
+      this->AddCompileOptions(flags, &target, linkLanguage, "");
       this->AddCompileOptions(flagsDebug, &target, linkLanguage, "Debug");
       this->AddCompileOptions(flagsRelease, &target, linkLanguage, "Release");
       this->AddCompileOptions(flagsMinSizeRel, &target, linkLanguage,
@@ -1730,7 +1730,7 @@ void cmLocalVisualStudio6Generator
     std::set<std::string> minsizeDefinesSet;
     std::set<std::string> debugrelDefinesSet;
 
-    this->AddCompileDefinitions(definesSet, &target, 0);
+    this->AddCompileDefinitions(definesSet, &target, "");
     this->AddCompileDefinitions(debugDefinesSet, &target, "DEBUG");
     this->AddCompileDefinitions(releaseDefinesSet, &target, "RELEASE");
     this->AddCompileDefinitions(minsizeDefinesSet, &target, "MINSIZEREL");
@@ -1800,7 +1800,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFooter(std::ostream& fout)
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio6Generator
 ::ComputeLinkOptions(cmTarget& target,
-                     const char* configName,
+                     const std::string& configName,
                      const std::string extraOptions,
                      std::string& options)
 {

@@ -138,16 +138,16 @@ public:
 
 
   void AddArchitectureFlags(std::string& flags, cmGeneratorTarget* target,
-                            const std::string&lang, const char* config);
+                            const std::string&lang, const std::string& config);
 
   void AddLanguageFlags(std::string& flags, const std::string& lang,
-                        const char* config);
+                        const std::string& config);
   void AddCMP0018Flags(std::string &flags, cmTarget* target,
-                       std::string const& lang, const char *config);
+                       std::string const& lang, const std::string& config);
   void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
-                              const char* config);
+                              const std::string& config);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   virtual void AppendFlagEscape(std::string& flags,
@@ -157,7 +157,7 @@ public:
                               cmGeneratorTarget* target,
                               const std::string& lang,
                               bool forResponseFile = false,
-                              const char *config = 0);
+                              const std::string& config = "");
 
   /**
    * Encode a list of preprocessor definitions for the compiler
@@ -196,7 +196,7 @@ public:
    *   the source directory of this generator.  This should only be
    *   used for dependencies of custom commands.
    */
-  bool GetRealDependency(const std::string& name, const char* config,
+  bool GetRealDependency(const std::string& name, const std::string& config,
                          std::string& dep);
 
   ///! for existing files convert to output path and short path if spaces
@@ -227,13 +227,13 @@ public:
   void GetIncludeDirectories(std::vector<std::string>& dirs,
                              cmGeneratorTarget* target,
                              const std::string& lang = "C",
-                             const char *config = 0,
+                             const std::string& config = "",
                              bool stripImplicitInclDirs = true);
   void AddCompileOptions(std::string& flags, cmTarget* target,
-                         const std::string& lang, const char* config);
+                         const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmTarget const* target,
-                             const char* config);
+                             const std::string& config);
 
   /** Compute the language used to compile the given source file.  */
   std::string GetSourceFileLanguage(const cmSourceFile& source);
@@ -410,7 +410,7 @@ protected:
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(
-    std::ostream& os, const char* config,
+    std::ostream& os, const std::string& config,
     std::vector<std::string> const& configurationTypes);
 
   std::string& CreateSafeUniqueObjectFileName(const std::string& sin,

@@ -51,7 +51,7 @@ public:
                     std::vector<std::string> const& configurations);
   virtual ~cmScriptGenerator();
 
-  void Generate(std::ostream& os, const char* config,
+  void Generate(std::ostream& os, const std::string& config,
                 std::vector<std::string> const& configurationTypes);
 
   const std::vector<std::string>& GetConfigurations() const
@@ -63,15 +63,15 @@ protected:
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptForConfig(std::ostream& os,
-                                       const char* config,
+                                       const std::string& config,
                                        Indent const& indent);
   virtual void GenerateScriptNoConfig(std::ostream&, Indent const&) {}
   virtual bool NeedsScriptNoConfig() const { return false; }
 
   // Test if this generator does something for a given configuration.
-  bool GeneratesForConfig(const char*);
+  bool GeneratesForConfig(const std::string&);
 
-  std::string CreateConfigTest(const char* config);
+  std::string CreateConfigTest(const std::string& config);
   std::string CreateConfigTest(std::vector<std::string> const& configs);
   std::string CreateComponentTest(const char* component);
 
@@ -80,7 +80,7 @@ protected:
   std::vector<std::string> const Configurations;
 
   // Information used during generation.
-  const char* ConfigurationName;
+  std::string ConfigurationName;
   std::vector<std::string> const* ConfigurationTypes;
 
   // True if the subclass needs to generate an explicit rule for each

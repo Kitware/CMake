@@ -569,7 +569,7 @@ void cmGlobalUnixMakefileGenerator3
                        const std::string& /*projectName*/,
                        const char* /*projectDir*/,
                        const std::string& targetName,
-                       const char* /*config*/,
+                       const std::string& /*config*/,
                        bool fast,
                        std::vector<std::string> const& makeOptions)
 {

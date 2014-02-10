@@ -252,7 +252,8 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
 }
 
 static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
-                                  const char *config, cmTarget *headTarget,
+                                  const std::string& config,
+                                  cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   std::vector<std::string>& result,
                                   bool excludeImported)
@@ -390,12 +391,12 @@ void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
-                                                 const char *config) const
+bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
+                                              const std::string& config) const
 {
   assert(this->GetType() != cmTarget::INTERFACE_LIBRARY);
   std::string config_upper;
-  if(config && *config)
+  if(!config.empty())
     {
     config_upper = cmSystemTools::UpperCase(config);
     }
@@ -802,7 +803,7 @@ cmTargetTraceDependencies
       {
       const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
                                                               = ge.Parse(*cli);
-      cge->Evaluate(this->Makefile, 0, true);
+      cge->Evaluate(this->Makefile, "", true);
       std::set<cmTarget*> geTargets = cge->GetTargets();
       for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
           it != geTargets.end(); ++it)
@@ -863,11 +864,11 @@ void cmGeneratorTarget::TraceDependencies()
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetAppleArchs(const char* config,
+void cmGeneratorTarget::GetAppleArchs(const std::string& config,
                              std::vector<std::string>& archVec) const
 {
   const char* archs = 0;
-  if(config && *config)
+  if(!config.empty())
     {
     std::string defVarName = "OSX_ARCHITECTURES_";
     defVarName += cmSystemTools::UpperCase(config);
@@ -904,13 +905,14 @@ const char* cmGeneratorTarget::GetCreateRuleVariable() const
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmGeneratorTarget::GetIncludeDirectories(const char *config) const
+cmGeneratorTarget::GetIncludeDirectories(const std::string& config) const
 {
   return this->Target->GetIncludeDirectories(config);
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
+void cmGeneratorTarget::GenerateTargetManifest(
+                                              const std::string& config) const
 {
   if (this->Target->IsImported())
     {
@@ -953,35 +955,35 @@ void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
     f = dir;
     f += "/";
     f += name;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!soName.empty())
     {
     f = dir;
     f += "/";
     f += soName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!realName.empty())
     {
     f = dir;
     f += "/";
     f += realName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!pdbName.empty())
     {
     f = dir;
     f += "/";
     f += pdbName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!impName.empty())
     {
     f = this->Target->GetDirectory(config, true);
     f += "/";
     f += impName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
 }
 

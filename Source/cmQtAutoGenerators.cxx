@@ -306,7 +306,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 }
 
 static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
-                                                const char * config,
+                                                const std::string& config,
                                                 std::string &incs,
                                                 std::string &defs)
 {
@@ -366,7 +366,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
     }
   if (const char *targetQtVersion =
-      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""))
     {
     qtVersion = targetQtVersion;
     }
@@ -563,7 +563,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
   std::string _moc_incs;
   std::string _moc_compile_defs;
   std::vector<std::string> configs;
-  const char *config = makefile->GetConfigurations(configs);
+  const std::string& config = makefile->GetConfigurations(configs);
   GetCompileDefinitionsAndDirectories(target, config,
                                       _moc_incs, _moc_compile_defs);
 
@@ -675,7 +675,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-static void GetUicOpts(cmTarget const* target, const char * config,
+static void GetUicOpts(cmTarget const* target, const std::string& config,
                        std::string &optString)
 {
   std::vector<std::string> opts;
@@ -717,7 +717,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
 
   std::string _uic_opts;
   std::vector<std::string> configs;
-  const char *config = makefile->GetConfigurations(configs);
+  const std::string& config = makefile->GetConfigurations(configs);
   GetUicOpts(target, config, _uic_opts);
 
   if (!_uic_opts.empty())
@@ -967,7 +967,8 @@ static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
   return gg;
 }
 
-bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
+bool cmQtAutoGenerators::Run(const char* targetDirectory,
+                             const std::string& config)
 {
   bool success = true;
   cmake cm;
@@ -994,7 +995,7 @@ bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 
 bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                                       const char* targetDirectory,
-                                      const char *config)
+                                      const std::string& config)
 {
   std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
   cmSystemTools::ConvertToUnixSlashes(filename);
@@ -1027,7 +1028,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   {
   std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
   std::string compileDefsProp = compileDefsPropOrig;
-  if(config)
+  if(!config.empty())
     {
     compileDefsProp += "_";
     compileDefsProp += config;
@@ -1039,7 +1040,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   {
   std::string includesPropOrig = "AM_MOC_INCLUDES";
   std::string includesProp = includesPropOrig;
-  if(config)
+  if(!config.empty())
     {
     includesProp += "_";
     includesProp += config;
@@ -1058,7 +1059,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                         = makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES");
   std::string uicOptionsPropOrig = "AM_UIC_TARGET_OPTIONS";
   std::string uicOptionsProp = uicOptionsPropOrig;
-  if(config)
+  if(!config.empty())
     {
     uicOptionsProp += "_";
     uicOptionsProp += config;

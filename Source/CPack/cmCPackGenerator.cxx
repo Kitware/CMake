@@ -623,7 +623,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         componentsVector.push_back(installComponent);
         }
 
-      const char* buildConfig = this->GetOption("CPACK_BUILD_CONFIG");
+      const char* buildConfigCstr = this->GetOption("CPACK_BUILD_CONFIG");
+      std::string buildConfig = buildConfigCstr ? buildConfigCstr : "";
       cmGlobalGenerator* globalGenerator
         = this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
           cmakeGenerator);
@@ -822,9 +823,9 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                         << "'" << std::endl);
           }
 
-        if ( buildConfig && *buildConfig )
+        if (!buildConfig.empty())
           {
-          mf->AddDefinition("BUILD_TYPE", buildConfig);
+          mf->AddDefinition("BUILD_TYPE", buildConfig.c_str());
           }
         std::string installComponentLowerCase
           = cmSystemTools::LowerCase(installComponent);

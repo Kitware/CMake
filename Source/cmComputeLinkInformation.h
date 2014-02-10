@@ -29,7 +29,7 @@ class cmOrderDirectories;
 class cmComputeLinkInformation
 {
 public:
-  cmComputeLinkInformation(cmTarget const* target, const char* config,
+  cmComputeLinkInformation(cmTarget const* target, const std::string& config,
                            cmTarget const* headTarget);
   ~cmComputeLinkInformation();
   bool Compute();
@@ -82,7 +82,7 @@ private:
   cmake* CMakeInstance;
 
   // Configuration information.
-  const char* Config;
+  std::string Config;
   std::string LinkLanguage;
   bool LinkDependsNoShared;
 

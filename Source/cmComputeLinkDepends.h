@@ -32,7 +32,7 @@ class cmake;
 class cmComputeLinkDepends
 {
 public:
-  cmComputeLinkDepends(cmTarget const* target, const char* config,
+  cmComputeLinkDepends(cmTarget const* target, const std::string& config,
                        cmTarget const* head);
   ~cmComputeLinkDepends();
 
@@ -68,7 +68,8 @@ private:
   bool DebugMode;
 
   // Configuration information.
-  const char* Config;
+  bool HasConfig;
+  std::string Config;
   cmTarget::LinkLibraryType LinkType;
 
   // Output information.

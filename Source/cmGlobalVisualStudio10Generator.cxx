@@ -314,7 +314,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   const std::string& projectName,
   const char* projectDir,
   const std::string& targetName,
-  const char* config,
+  const std::string& config,
   bool fast,
   std::vector<std::string> const& makeOptions)
 {
@@ -397,7 +397,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     makeCommand.push_back(targetProject);
     }
   std::string configArg = "/p:Configuration=";
-  if(config && strlen(config))
+  if(!config.empty())
     {
     configArg += config;
     }

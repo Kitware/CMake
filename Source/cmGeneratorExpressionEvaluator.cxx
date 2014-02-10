@@ -689,7 +689,7 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker *) const
   {
     context->HadContextSensitiveCondition = true;
-    return context->Config ? context->Config : "";
+    return context->Config;
   }
 } configurationNode;
 
@@ -718,13 +718,13 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return std::string();
       }
     context->HadContextSensitiveCondition = true;
-    if (!context->Config)
+    if (context->Config.empty())
       {
       return parameters.front().empty() ? "1" : "0";
       }
 
     if (cmsysString_strcasecmp(parameters.begin()->c_str(),
-                                  context->Config) == 0)
+                               context->Config.c_str()) == 0)
       {
       return "1";
       }

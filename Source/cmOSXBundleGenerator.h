@@ -27,7 +27,7 @@ class cmOSXBundleGenerator
 {
 public:
   cmOSXBundleGenerator(cmGeneratorTarget* target,
-                       const char* configName);
+                       const std::string& configName);
 
   // create an app bundle at a given root, and return
   // the directory within the bundle that contains the executable
@@ -62,7 +62,7 @@ private:
   cmGeneratorTarget* GT;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
-  const char* ConfigName;
+  std::string ConfigName;
   std::set<std::string>* MacContentFolders;
 };
 

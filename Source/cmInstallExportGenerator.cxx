@@ -142,7 +142,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   this->EFGen->SetExportOld(this->ExportOld);
   if(this->ConfigurationTypes->empty())
     {
-    if(this->ConfigurationName && *this->ConfigurationName)
+    if(!this->ConfigurationName.empty())
       {
       this->EFGen->AddConfiguration(this->ConfigurationName);
       }
