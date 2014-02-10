@@ -183,8 +183,9 @@ cmSourceFileLocation
   // Check if loc's name could possibly be extended to our name by
   // adding an extension.
   if(!(this->Name.size() > loc.Name.size() &&
-       this->Name.substr(0, loc.Name.size()) == loc.Name &&
-       this->Name[loc.Name.size()] == '.'))
+       this->Name[loc.Name.size()] == '.' &&
+       cmHasLiteralPrefixImpl(this->Name.c_str(),
+                              loc.Name.c_str(), loc.Name.size())))
     {
     return false;
     }
