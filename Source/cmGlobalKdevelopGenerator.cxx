@@ -44,7 +44,7 @@ void cmGlobalKdevelopGenerator::Generate()
 {
   // for each sub project in the project create
   // a kdevelop project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)
@@ -103,7 +103,7 @@ bool cmGlobalKdevelopGenerator
   std::string projectDir = projectDirIn + "/";
   std::string filename = outputDir+ "/" + projectname +".kdevelop.filelist";
 
-  std::set<cmStdString> files;
+  std::set<std::string> files;
   std::string tmp;
 
   for (std::vector<cmLocalGenerator*>::const_iterator it=lgs.begin();
@@ -217,7 +217,7 @@ bool cmGlobalKdevelopGenerator
     }
 
   fileToOpen="";
-  for (std::set<cmStdString>::const_iterator it=files.begin();
+  for (std::set<std::string>::const_iterator it=files.begin();
        it!=files.end(); it++)
     {
     // get the full path to the file

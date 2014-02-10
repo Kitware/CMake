@@ -65,7 +65,7 @@ public:
 
 private:
   cmPropertyMap Properties;
-  cmStdString Name;
+  std::string Name;
   std::vector<std::string> Command;
 
   bool OldStyle;

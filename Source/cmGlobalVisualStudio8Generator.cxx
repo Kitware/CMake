@@ -338,7 +338,7 @@ void cmGlobalVisualStudio8Generator::Generate()
   if(this->AddCheckTarget())
     {
     // All targets depend on the build-system check target.
-    for(std::map<cmStdString,cmTarget *>::const_iterator
+    for(std::map<std::string,cmTarget *>::const_iterator
           ti = this->TotalTargets.begin();
         ti != this->TotalTargets.end(); ++ti)
       {
@@ -436,7 +436,7 @@ bool cmGlobalVisualStudio8Generator::NeedLinkLibraryDependencies(
   cmTarget& target)
 {
   // Look for utility dependencies that magically link.
-  for(std::set<cmStdString>::const_iterator ui =
+  for(std::set<std::string>::const_iterator ui =
         target.GetUtilities().begin();
       ui != target.GetUtilities().end(); ++ui)
     {

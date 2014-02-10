@@ -126,7 +126,7 @@ private:
   std::vector<std::string> StaticLinkExtensions;
   std::vector<std::string> SharedLinkExtensions;
   std::vector<std::string> LinkExtensions;
-  std::set<cmStdString> LinkPrefixes;
+  std::set<std::string> LinkPrefixes;
   cmsys::RegularExpression ExtractStaticLibraryName;
   cmsys::RegularExpression ExtractSharedLibraryName;
   cmsys::RegularExpression ExtractAnyLibraryName;
@@ -153,7 +153,7 @@ private:
   // Framework info.
   void ComputeFrameworkInfo();
   void AddFrameworkPath(std::string const& p);
-  std::set<cmStdString> FrameworkPathsEmmitted;
+  std::set<std::string> FrameworkPathsEmmitted;
   cmsys::RegularExpression SplitFramework;
 
   // Linker search path computation.
@@ -165,14 +165,14 @@ private:
   void LoadImplicitLinkInfo();
   void AddImplicitLinkInfo();
   void AddImplicitLinkInfo(std::string const& lang);
-  std::set<cmStdString> ImplicitLinkDirs;
-  std::set<cmStdString> ImplicitLinkLibs;
+  std::set<std::string> ImplicitLinkDirs;
+  std::set<std::string> ImplicitLinkLibs;
 
   // Additional paths configured by the runtime linker
   std::vector<std::string> RuntimeLinkDirs;
 
   // Linker search path compatibility mode.
-  std::set<cmStdString> OldLinkDirMask;
+  std::set<std::string> OldLinkDirMask;
   std::vector<std::string> OldLinkDirItems;
   std::vector<std::string> OldUserFlagItems;
   bool OldLinkDirMode;

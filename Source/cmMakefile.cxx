@@ -45,8 +45,8 @@ class cmMakefile::Internals
 {
 public:
   std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
-  std::stack<std::set<cmStdString> > VarInitStack;
-  std::stack<std::set<cmStdString> > VarUsageStack;
+  std::stack<std::set<std::string> > VarInitStack;
+  std::stack<std::set<std::string> > VarUsageStack;
   bool IsSourceFileTryCompile;
 };
 
@@ -54,7 +54,7 @@ public:
 cmMakefile::cmMakefile(): Internal(new Internals)
 {
   const cmDefinitions& defs = cmDefinitions();
-  const std::set<cmStdString> globalKeys = defs.LocalKeys();
+  const std::set<std::string> globalKeys = defs.LocalKeys();
   this->Internal->VarStack.push(defs);
   this->Internal->VarInitStack.push(globalKeys);
   this->Internal->VarUsageStack.push(globalKeys);
@@ -203,7 +203,7 @@ cmMakefile::~cmMakefile()
     {
     delete *i;
     }
-  for(std::map<cmStdString, cmTest*>::iterator i = this->Tests.begin();
+  for(std::map<std::string, cmTest*>::iterator i = this->Tests.begin();
       i != this->Tests.end(); ++i)
     {
     delete i->second;
@@ -247,10 +247,10 @@ void cmMakefile::PrintStringVector(const char* s,
 
 void cmMakefile
 ::PrintStringVector(const char* s,
-                    const std::vector<std::pair<cmStdString, bool> >& v) const
+                    const std::vector<std::pair<std::string, bool> >& v) const
 {
   std::cout << s << ": ( \n";
-  for(std::vector<std::pair<cmStdString, bool> >::const_iterator i
+  for(std::vector<std::pair<std::string, bool> >::const_iterator i
         = v.begin(); i != v.end(); ++i)
     {
     std::cout << i->first.c_str() << " " << i->second;
@@ -1746,9 +1746,9 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
 
 //----------------------------------------------------------------------------
 void
-cmMakefile::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
+cmMakefile::AddSystemIncludeDirectories(const std::set<std::string> &incs)
 {
-  for(std::set<cmStdString>::const_iterator li = incs.begin();
+  for(std::set<std::string>::const_iterator li = incs.begin();
       li != incs.end(); ++li)
     {
     this->SystemIncludeDirectories.insert(*li);
@@ -1865,8 +1865,8 @@ void cmMakefile::CheckForUnusedVariables() const
     return;
     }
   const cmDefinitions& defs = this->Internal->VarStack.top();
-  const std::set<cmStdString>& locals = defs.LocalKeys();
-  std::set<cmStdString>::const_iterator it = locals.begin();
+  const std::set<std::string>& locals = defs.LocalKeys();
+  std::set<std::string>::const_iterator it = locals.begin();
   for (; it != locals.end(); ++it)
     {
     this->CheckForUnused("out of scope", it->c_str());
@@ -1903,7 +1903,7 @@ void cmMakefile::CheckForUnused(const char* reason,
 {
   if (this->WarnUnused && !this->VariableUsed(name))
     {
-    cmStdString path;
+    std::string path;
     cmListFileBacktrace bt;
     if (this->CallStack.size())
       {
@@ -2487,7 +2487,7 @@ const char* cmMakefile::GetSafeDefinition(const std::string& def) const
 std::vector<std::string> cmMakefile
 ::GetDefinitions(int cacheonly /* = 0 */) const
 {
-  std::set<cmStdString> definitions;
+  std::set<std::string> definitions;
   if ( !cacheonly )
     {
     definitions = this->Internal->VarStack.top().ClosureKeys();
@@ -2501,7 +2501,7 @@ std::vector<std::string> cmMakefile
 
   std::vector<std::string> res;
 
-  std::set<cmStdString>::iterator fit;
+  std::set<std::string>::iterator fit;
   for ( fit = definitions.begin(); fit != definitions.end(); fit ++ )
     {
     res.push_back(*fit);
@@ -3679,7 +3679,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LISTFILE_STACK")
     {
-    for (std::deque<cmStdString>::const_iterator
+    for (std::deque<std::string>::const_iterator
         i = this->ListFileStack.begin();
         i != this->ListFileStack.end(); ++i)
       {
@@ -3864,7 +3864,7 @@ cmTest* cmMakefile::CreateTest(const std::string& testName)
 //----------------------------------------------------------------------------
 cmTest* cmMakefile::GetTest(const std::string& testName) const
 {
-  std::map<cmStdString, cmTest*>::const_iterator
+  std::map<std::string, cmTest*>::const_iterator
     mi = this->Tests.find(testName);
   if(mi != this->Tests.end())
     {
@@ -3903,7 +3903,7 @@ std::string cmMakefile::GetListFileStack() const
   size_t depth = this->ListFileStack.size();
   if (depth > 0)
     {
-    std::deque<cmStdString>::const_iterator it = this->ListFileStack.end();
+    std::deque<std::string>::const_iterator it = this->ListFileStack.end();
     do
       {
       if (depth != this->ListFileStack.size())
@@ -3926,8 +3926,8 @@ std::string cmMakefile::GetListFileStack() const
 void cmMakefile::PushScope()
 {
   cmDefinitions* parent = &this->Internal->VarStack.top();
-  const std::set<cmStdString>& init = this->Internal->VarInitStack.top();
-  const std::set<cmStdString>& usage = this->Internal->VarUsageStack.top();
+  const std::set<std::string>& init = this->Internal->VarInitStack.top();
+  const std::set<std::string>& usage = this->Internal->VarUsageStack.top();
   this->Internal->VarStack.push(cmDefinitions(parent));
   this->Internal->VarInitStack.push(init);
   this->Internal->VarUsageStack.push(usage);
@@ -3936,12 +3936,12 @@ void cmMakefile::PushScope()
 void cmMakefile::PopScope()
 {
   cmDefinitions* current = &this->Internal->VarStack.top();
-  std::set<cmStdString> init = this->Internal->VarInitStack.top();
-  std::set<cmStdString> usage = this->Internal->VarUsageStack.top();
-  const std::set<cmStdString>& locals = current->LocalKeys();
+  std::set<std::string> init = this->Internal->VarInitStack.top();
+  std::set<std::string> usage = this->Internal->VarUsageStack.top();
+  const std::set<std::string>& locals = current->LocalKeys();
   // Remove initialization and usage information for variables in the local
   // scope.
-  std::set<cmStdString>::const_iterator it = locals.begin();
+  std::set<std::string>::const_iterator it = locals.begin();
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);
@@ -4054,7 +4054,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
-  std::map<cmStdString, cmTarget*>::const_iterator
+  std::map<std::string, cmTarget*>::const_iterator
     imported = this->ImportedTargets.find(name);
   if(imported != this->ImportedTargets.end())
     {

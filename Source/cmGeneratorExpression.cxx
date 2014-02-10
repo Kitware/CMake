@@ -97,7 +97,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
     {
     this->Output += (*it)->Evaluate(&context, dagChecker);
 
-    for(std::set<cmStdString>::const_iterator
+    for(std::set<std::string>::const_iterator
           p = context.SeenTargetProperties.begin();
           p != context.SeenTargetProperties.end(); ++p)
       {

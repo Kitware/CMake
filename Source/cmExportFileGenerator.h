@@ -63,7 +63,7 @@ public:
   bool GenerateImportFile();
 protected:
 
-  typedef std::map<cmStdString, cmStdString> ImportPropertyMap;
+  typedef std::map<std::string, std::string> ImportPropertyMap;
 
   // Generate per-configuration target information to the given output
   // stream.

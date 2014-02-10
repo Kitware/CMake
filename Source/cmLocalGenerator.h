@@ -406,7 +406,7 @@ protected:
   // generator directly.  Any targets containing files that are not
   // of the types listed will be compiled as custom commands and added
   // to a custom target.
-  void CreateCustomTargetsAndCommands(std::set<cmStdString> const&);
+  void CreateCustomTargetsAndCommands(std::set<std::string> const&);
 
   // Handle old-style install rules stored in the targets.
   void GenerateTargetInstallRules(
@@ -443,9 +443,9 @@ protected:
   std::vector<std::string> StartOutputDirectoryComponents;
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
-  std::map<cmStdString, cmStdString> UniqueObjectNamesMap;
+  std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
-  std::set<cmStdString> ObjectMaxPathViolations;
+  std::set<std::string> ObjectMaxPathViolations;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;

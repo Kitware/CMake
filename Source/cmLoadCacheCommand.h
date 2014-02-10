@@ -45,7 +45,7 @@ public:
   cmTypeMacro(cmLoadCacheCommand, cmCommand);
 protected:
 
-  std::set<cmStdString> VariablesToRead;
+  std::set<std::string> VariablesToRead;
   std::string Prefix;
 
   bool ReadWithPrefix(std::vector<std::string> const& args);

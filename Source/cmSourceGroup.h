@@ -118,7 +118,7 @@ private:
   /**
    * Set of file names explicitly added to this group.
    */
-  std::set<cmStdString> GroupFiles;
+  std::set<std::string> GroupFiles;
 
   /**
    * Vector of all source files that have been assigned to

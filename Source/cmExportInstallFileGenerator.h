@@ -41,7 +41,7 @@ public:
   /** Get the per-config file generated for each configuraiton.  This
       maps from the configuration name to the file temporary location
       for installation.  */
-  std::map<cmStdString, cmStdString> const& GetConfigImportFiles()
+  std::map<std::string, std::string> const& GetConfigImportFiles()
     { return this->ConfigImportFiles; }
 
   /** Compute the globbing expression used to load per-config import
@@ -92,7 +92,7 @@ protected:
   std::string ImportPrefix;
 
   // The import file generated for each configuration.
-  std::map<cmStdString, cmStdString> ConfigImportFiles;
+  std::map<std::string, std::string> ConfigImportFiles;
 };
 
 #endif

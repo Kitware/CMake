@@ -103,7 +103,7 @@ private:
                     cmTarget const& t);
   void WriteExternalProject(std::ostream& fout,
                             const std::string& name, const char* path,
-                            const std::set<cmStdString>& dependencies);
+                            const std::set<std::string>& dependencies);
   void WriteDSWFooter(std::ostream& fout);
   virtual std::string WriteUtilityDepend(cmTarget const* target);
   std::string MSDevCommand;

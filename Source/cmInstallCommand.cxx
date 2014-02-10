@@ -97,7 +97,7 @@ bool cmInstallCommand::InitialPass(std::vector<std::string> const& args,
     }
 
   // Unknown mode.
-  cmStdString e = "called with unknown mode ";
+  std::string e = "called with unknown mode ";
   e += args[0];
   this->SetError(e.c_str());
   return false;

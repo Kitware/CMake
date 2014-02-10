@@ -16,7 +16,7 @@
 
 class cmake;
 
-class cmPropertyMap : public std::map<cmStdString,cmProperty>
+class cmPropertyMap : public std::map<std::string,cmProperty>
 {
 public:
   cmProperty *GetOrCreateProperty(const std::string& name);

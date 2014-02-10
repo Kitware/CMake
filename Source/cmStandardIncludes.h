@@ -241,7 +241,7 @@ inline bool operator==(std::string const& a, const char* b)
 // std::string is really basic_string<....lots of stuff....>
 // when combined with a map or set, the symbols can be > 2000 chars!
 #include <cmsys/String.hxx>
-typedef cmsys::String cmStdString;
+//typedef cmsys::String std::string;
 
 // Define cmOStringStream and cmIStringStream wrappers to hide
 // differences between std::stringstream and the old strstream.
@@ -468,7 +468,7 @@ struct cmStrCmp {
   }
 
 private:
-  const cmStdString m_test;
+  const std::string m_test;
 };
 
 #endif

@@ -140,7 +140,7 @@ protected:
   MacOSXContentGeneratorType* MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   cmOSXBundleGenerator* OSXBundleGenerator;
-  std::set<cmStdString> MacContentFolders;
+  std::set<std::string> MacContentFolders;
 
   void addPoolNinjaVariable(const char* pool_property,
                             cmTarget* target,

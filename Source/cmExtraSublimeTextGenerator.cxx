@@ -64,7 +64,7 @@ cmExtraSublimeTextGenerator::cmExtraSublimeTextGenerator()
 void cmExtraSublimeTextGenerator::Generate()
 {
   // for each sub project in the project create a sublime text 2 project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)

@@ -64,10 +64,10 @@ protected:
 
   bool GenerateForTargetType(cmTarget::TargetType targetType) const;
 
-  cmStdString GraphType;
-  cmStdString GraphName;
-  cmStdString GraphHeader;
-  cmStdString GraphNodePrefix;
+  std::string GraphType;
+  std::string GraphName;
+  std::string GraphHeader;
+  std::string GraphNodePrefix;
 
   bool GenerateForExecutables;
   bool GenerateForStaticLibs;
@@ -81,9 +81,9 @@ protected:
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 
-  std::map<cmStdString, const cmTarget*> TargetPtrs;
+  std::map<std::string, const cmTarget*> TargetPtrs;
   // maps from the actual target names to node names in dot:
-  std::map<cmStdString, cmStdString> TargetNamesNodes;
+  std::map<std::string, std::string> TargetNamesNodes;
 
   bool HaveTargetsAndLibs;
 };

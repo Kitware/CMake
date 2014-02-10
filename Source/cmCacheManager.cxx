@@ -90,7 +90,7 @@ bool cmCacheManager::LoadCache(const std::string& path)
 bool cmCacheManager::LoadCache(const std::string& path,
                                bool internal)
 {
-  std::set<cmStdString> emptySet;
+  std::set<std::string> emptySet;
   return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
@@ -195,8 +195,8 @@ void cmCacheManager::CleanCMakeFiles(const std::string& path)
 
 bool cmCacheManager::LoadCache(const std::string& path,
                                bool internal,
-                               std::set<cmStdString>& excludes,
-                               std::set<cmStdString>& includes)
+                               std::set<std::string>& excludes,
+                               std::set<std::string>& includes)
 {
   std::string cacheFile = path;
   cacheFile += "/CMakeCache.txt";
@@ -500,7 +500,7 @@ bool cmCacheManager::SaveCache(const std::string& path)
   fout << "########################\n";
   fout << "\n";
 
-  for( std::map<cmStdString, CacheEntry>::const_iterator i =
+  for( std::map<std::string, CacheEntry>::const_iterator i =
          this->Cache.begin(); i != this->Cache.end(); ++i)
     {
     const CacheEntry& ce = (*i).second;
@@ -693,7 +693,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
 {
   out << "=================================================" << std::endl;
   out << "CMakeCache Contents:" << std::endl;
-  for(std::map<cmStdString, CacheEntry>::const_iterator i =
+  for(std::map<std::string, CacheEntry>::const_iterator i =
         this->Cache.begin(); i != this->Cache.end(); ++i)
     {
     if((*i).second.Type != INTERNAL)

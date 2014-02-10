@@ -368,8 +368,8 @@ bool cmFindLibraryHelper::CheckDirectoryForName(std::string const& path,
   // Search for a file matching the library name regex.
   std::string dir = path;
   cmSystemTools::ConvertToUnixSlashes(dir);
-  std::set<cmStdString> const& files = this->GG->GetDirectoryContent(dir);
-  for(std::set<cmStdString>::const_iterator fi = files.begin();
+  std::set<std::string> const& files = this->GG->GetDirectoryContent(dir);
+  for(std::set<std::string>::const_iterator fi = files.begin();
       fi != files.end(); ++fi)
     {
     std::string const& origName = *fi;

@@ -42,14 +42,14 @@ protected:
   bool CheckForVariableInCache();
 
   // use by command during find
-  cmStdString VariableDocumentation;
-  cmStdString VariableName;
+  std::string VariableDocumentation;
+  std::string VariableName;
   std::vector<std::string> Names;
   bool NamesPerDir;
   bool NamesPerDirAllowed;
 
   // CMAKE_*_PATH CMAKE_SYSTEM_*_PATH FRAMEWORK|LIBRARY|INCLUDE|PROGRAM
-  cmStdString EnvironmentPath; // LIB,INCLUDE
+  std::string EnvironmentPath; // LIB,INCLUDE
 
   bool AlreadyInCache;
   bool AlreadyInCacheWithoutMetaInfo;

@@ -91,7 +91,7 @@ class cmake
      */
     FIND_PACKAGE_MODE
   };
-  typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
+  typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
 
   /// Default constructor
   cmake();
@@ -364,14 +364,14 @@ protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
   cmPropertyMap Properties;
-  std::set<std::pair<cmStdString,cmProperty::ScopeType> > AccessedProperties;
+  std::set<std::pair<std::string,cmProperty::ScopeType> > AccessedProperties;
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>
   PropertyDefinitions;
 
   typedef
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
-  typedef std::map<cmStdString,
+  typedef std::map<std::string,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
   typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
   RegisteredCommandsMap Commands;
@@ -432,7 +432,7 @@ private:
   bool WarnUnused;
   bool WarnUnusedCli;
   bool CheckSystemVars;
-  std::map<cmStdString, bool> UsedCliVariables;
+  std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CXXEnvironment;
   std::string CCEnvironment;

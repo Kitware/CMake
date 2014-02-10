@@ -96,7 +96,7 @@ public:
 
   // write the top level target rules
   void WriteConvenienceRules(std::ostream& ruleFileStream,
-                             std::set<cmStdString> &emitted);
+                             std::set<std::string> &emitted);
 
   /** Get the command to use for a target that has no rule.  This is
       used for multiple output dependencies and for cmake_force.  */

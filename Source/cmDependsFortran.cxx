@@ -34,11 +34,11 @@ public:
   std::string Source;
 
   // Set of provided and required modules.
-  std::set<cmStdString> Provides;
-  std::set<cmStdString> Requires;
+  std::set<std::string> Provides;
+  std::set<std::string> Requires;
 
   // Set of files included in the translation unit.
-  std::set<cmStdString> Includes;
+  std::set<std::string> Includes;
 };
 
 //----------------------------------------------------------------------------
@@ -98,24 +98,24 @@ class cmDependsFortranInternals
 {
 public:
   // The set of modules provided by this target.
-  std::set<cmStdString> TargetProvides;
+  std::set<std::string> TargetProvides;
 
   // Map modules required by this target to locations.
-  typedef std::map<cmStdString, cmStdString> TargetRequiresMap;
+  typedef std::map<std::string, std::string> TargetRequiresMap;
   TargetRequiresMap TargetRequires;
 
   // Information about each object file.
-  typedef std::map<cmStdString, cmDependsFortranSourceInfo> ObjectInfoMap;
+  typedef std::map<std::string, cmDependsFortranSourceInfo> ObjectInfoMap;
   ObjectInfoMap ObjectInfo;
 
   cmDependsFortranSourceInfo& CreateObjectInfo(const char* obj,
                                                const char* src)
     {
-    std::map<cmStdString, cmDependsFortranSourceInfo>::iterator i =
+    std::map<std::string, cmDependsFortranSourceInfo>::iterator i =
       this->ObjectInfo.find(obj);
     if(i == this->ObjectInfo.end())
       {
-      std::map<cmStdString, cmDependsFortranSourceInfo>::value_type
+      std::map<std::string, cmDependsFortranSourceInfo>::value_type
         entry(obj, cmDependsFortranSourceInfo());
       i = this->ObjectInfo.insert(entry).first;
       i->second.Source = src;
@@ -260,8 +260,8 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   cmGeneratedFileStream fiStream(fiName.c_str());
   fiStream << "# The fortran modules provided by this target.\n";
   fiStream << "provides\n";
-  std::set<cmStdString> const& provides = this->Internal->TargetProvides;
-  for(std::set<cmStdString>::const_iterator i = provides.begin();
+  std::set<std::string> const& provides = this->Internal->TargetProvides;
+  for(std::set<std::string>::const_iterator i = provides.begin();
       i != provides.end(); ++i)
     {
     fiStream << " " << *i << "\n";
@@ -275,7 +275,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     cmGeneratedFileStream fcStream(fcName.c_str());
     fcStream << "# Remove fortran modules provided by this target.\n";
     fcStream << "FILE(REMOVE";
-    for(std::set<cmStdString>::const_iterator i = provides.begin();
+    for(std::set<std::string>::const_iterator i = provides.begin();
         i != provides.end(); ++i)
       {
       std::string mod_upper = mod_dir;
@@ -319,14 +319,14 @@ void cmDependsFortran::LocateModules()
       infoI != objInfo.end(); ++infoI)
     {
     cmDependsFortranSourceInfo const& info = infoI->second;
-    for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+    for(std::set<std::string>::const_iterator i = info.Provides.begin();
         i != info.Provides.end(); ++i)
       {
       // Include this module in the set provided by this target.
       this->Internal->TargetProvides.insert(*i);
       }
 
-    for(std::set<cmStdString>::const_iterator i = info.Requires.begin();
+    for(std::set<std::string>::const_iterator i = info.Requires.begin();
         i != info.Requires.end(); ++i)
       {
       // Include this module in the set required by this target.
@@ -368,8 +368,8 @@ void cmDependsFortran::LocateModules()
 void cmDependsFortran::MatchLocalModules()
 {
   const char* stampDir = this->TargetDirectory.c_str();
-  std::set<cmStdString> const& provides = this->Internal->TargetProvides;
-  for(std::set<cmStdString>::const_iterator i = provides.begin();
+  std::set<std::string> const& provides = this->Internal->TargetProvides;
+  for(std::set<std::string>::const_iterator i = provides.begin();
       i != provides.end(); ++i)
     {
     this->ConsiderModule(i->c_str(), stampDir);
@@ -445,7 +445,7 @@ cmDependsFortran
   // Write the include dependencies to the output stream.
   internalDepends << obj << std::endl;
   internalDepends << " " << src << std::endl;
-  for(std::set<cmStdString>::const_iterator i = info.Includes.begin();
+  for(std::set<std::string>::const_iterator i = info.Includes.begin();
       i != info.Includes.end(); ++i)
     {
     makeDepends << obj << ": " <<
@@ -458,11 +458,11 @@ cmDependsFortran
   makeDepends << std::endl;
 
   // Write module requirements to the output stream.
-  for(std::set<cmStdString>::const_iterator i = info.Requires.begin();
+  for(std::set<std::string>::const_iterator i = info.Requires.begin();
       i != info.Requires.end(); ++i)
     {
     // Require only modules not provided in the same source.
-    if(std::set<cmStdString>::const_iterator(info.Provides.find(*i)) !=
+    if(std::set<std::string>::const_iterator(info.Provides.find(*i)) !=
        info.Provides.end())
       {
       continue;
@@ -519,7 +519,7 @@ cmDependsFortran
     }
 
   // Write provided modules to the output stream.
-  for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+  for(std::set<std::string>::const_iterator i = info.Provides.begin();
       i != info.Provides.end(); ++i)
     {
     std::string proxy = stamp_dir;
@@ -538,7 +538,7 @@ cmDependsFortran
     // Create a target to copy the module after the object file
     // changes.
     makeDepends << obj << ".provides.build:\n";
-    for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+    for(std::set<std::string>::const_iterator i = info.Provides.begin();
         i != info.Provides.end(); ++i)
       {
       // Include this module in the set provided by this target.

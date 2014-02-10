@@ -231,7 +231,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
              cmSystemTools::GetCTestCommand() << "\n");
 
   // now pass through all the other arguments
-  std::vector<cmStdString> &initArgs =
+  std::vector<std::string> &initArgs =
     this->CTest->GetInitialCommandLineArguments();
   //*** need to make sure this does not have the current script ***
   for(size_t i=1; i < initArgs.size(); ++i)
@@ -766,7 +766,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
 
   // do an initial cvs update as required
   command = this->UpdateCmd;
-  std::vector<cmStdString>::iterator it;
+  std::vector<std::string>::iterator it;
   for (it = this->ExtraUpdates.begin();
     it != this->ExtraUpdates.end();
     ++ it )

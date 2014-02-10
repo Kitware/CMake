@@ -33,7 +33,7 @@ bool cmLoadCacheCommand
   // and they can not be overridden.
   bool excludeFiles=false;
   unsigned int i;
-  std::set<cmStdString> excludes;
+  std::set<std::string> excludes;
 
   for(i=0; i<args.size(); i++)
     {
@@ -55,7 +55,7 @@ bool cmLoadCacheCommand
   // If this set is empty, no internal cache entries are
   // brought in.
   bool includeFiles=false;
-  std::set<cmStdString> includes;
+  std::set<std::string> includes;
 
   for(i=0; i<args.size(); i++)
     {

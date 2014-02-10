@@ -409,7 +409,7 @@ bool cmCTestBZR::UpdateImpl()
     {
     opts = this->CTest->GetCTestConfiguration("BZRUpdateOptions");
     }
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
 
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
 
@@ -418,7 +418,7 @@ bool cmCTestBZR::UpdateImpl()
   bzr_update.push_back(this->CommandLineTool.c_str());
   bzr_update.push_back("pull");
 
-  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+  for(std::vector<std::string>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     bzr_update.push_back(ai->c_str());

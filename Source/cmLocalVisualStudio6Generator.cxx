@@ -80,7 +80,7 @@ private:
 
 void cmLocalVisualStudio6Generator::AddHelperCommands()
 {
-  std::set<cmStdString> lang;
+  std::set<std::string> lang;
   lang.insert("C");
   lang.insert("CXX");
   this->CreateCustomTargetsAndCommands(lang);
@@ -426,7 +426,7 @@ void cmLocalVisualStudio6Generator
       }
 
     // Add per-source and per-configuration preprocessor definitions.
-    std::map<cmStdString, cmStdString> cdmap;
+    std::map<std::string, std::string> cdmap;
 
       {
       std::set<std::string> targetCompileDefinitions;
@@ -526,7 +526,7 @@ void cmLocalVisualStudio6Generator
             {
             fout << "\n# ADD CPP " << compileFlags << "\n\n";
             }
-          std::map<cmStdString, cmStdString>::iterator cdi =
+          std::map<std::string, std::string>::iterator cdi =
             cdmap.find(cmSystemTools::UpperCase(config));
           if(cdi != cdmap.end() && !cdi->second.empty())
             {

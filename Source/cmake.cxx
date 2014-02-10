@@ -2701,7 +2701,7 @@ void cmake::RunCheckForUnusedVariables()
   bool haveUnused = false;
   cmOStringStream msg;
   msg << "Manually-specified variables were not used by the project:";
-  for(std::map<cmStdString, bool>::const_iterator
+  for(std::map<std::string, bool>::const_iterator
         it = this->UsedCliVariables.begin();
       it != this->UsedCliVariables.end(); ++it)
     {

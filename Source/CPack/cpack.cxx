@@ -68,7 +68,7 @@ int cpackUnknownArgument(const char*, void*)
 //----------------------------------------------------------------------------
 struct cpackDefinitions
 {
-  typedef std::map<cmStdString, cmStdString> MapType;
+  typedef std::map<std::string, std::string> MapType;
   MapType Map;
   cmCPackLog *Log;
 };

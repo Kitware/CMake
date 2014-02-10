@@ -101,8 +101,8 @@ public:
       if the string does not name a valid part.  */
   Part GetPartFromName(const char* name);
 
-  typedef std::vector<cmStdString> VectorOfStrings;
-  typedef std::set<cmStdString> SetOfStrings;
+  typedef std::vector<cmsys::String> VectorOfStrings;
+  typedef std::set<std::string> SetOfStrings;
 
   ///! Process Command line arguments
   int Run(std::vector<std::string> &, std::string* output = 0);
@@ -186,7 +186,7 @@ public:
   void SetNotesFiles(const char* notes);
 
   void PopulateCustomVector(cmMakefile* mf, const std::string& definition,
-    VectorOfStrings& vec);
+    std::vector<std::string>& vec);
   void PopulateCustomInteger(cmMakefile* mf, const std::string& def,
     int& val);
 
@@ -352,11 +352,11 @@ public:
   void AddCTestConfigurationOverwrite(const std::string& encstr);
 
   //! Create XML file that contains all the notes specified
-  int GenerateNotesFile(const std::vector<cmStdString> &files);
+  int GenerateNotesFile(const VectorOfStrings &files);
 
   //! Submit extra files to the server
   bool SubmitExtraFiles(const char* files);
-  bool SubmitExtraFiles(const std::vector<cmStdString> &files);
+  bool SubmitExtraFiles(const VectorOfStrings &files);
 
   //! Set the output log file name
   void SetOutputLogFileName(const char* name);
@@ -391,7 +391,7 @@ public:
   //! Read the custom configuration files and apply them to the current ctest
   int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf);
 
-  std::vector<cmStdString> &GetInitialCommandLineArguments()
+  std::vector<std::string> &GetInitialCommandLineArguments()
   { return this->InitialCommandLineArguments; };
 
   //! Set the track to submit to
@@ -447,13 +447,13 @@ private:
   void DetermineNextDayStop();
 
   // these are helper classes
-  typedef std::map<cmStdString,cmCTestGenericHandler*> t_TestingHandlers;
+  typedef std::map<std::string,cmCTestGenericHandler*> t_TestingHandlers;
   t_TestingHandlers TestingHandlers;
 
   bool ShowOnly;
 
   //! Map of configuration properties
-  typedef std::map<cmStdString, cmStdString> CTestConfigurationMap;
+  typedef std::map<std::string, std::string> CTestConfigurationMap;
 
   std::string             CTestConfigFile;
   // TODO: The ctest configuration should be a hierarchy of
@@ -463,7 +463,7 @@ private:
   CTestConfigurationMap CTestConfiguration;
   CTestConfigurationMap CTestConfigurationOverwrites;
   PartInfo                Parts[PartCount];
-  typedef std::map<cmStdString, Part> PartMapType;
+  typedef std::map<std::string, Part> PartMapType;
   PartMapType             PartMap;
 
   std::string             CurrentTag;
@@ -556,7 +556,7 @@ private:
   int  DartVersion;
   bool DropSiteCDash;
 
-  std::vector<cmStdString> InitialCommandLineArguments;
+  std::vector<std::string> InitialCommandLineArguments;
 
   int SubmitIndex;
 

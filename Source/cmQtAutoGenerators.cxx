@@ -697,7 +697,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
 {
   cmMakefile *makefile = target->GetMakefile();
 
-  std::set<cmStdString> skipped;
+  std::set<std::string> skipped;
   std::vector<std::string> skipVec;
   cmSystemTools::ExpandListArgument(this->SkipUic.c_str(), skipVec);
 
@@ -1895,7 +1895,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                                            |cmsysTerminal_Color_ForegroundBold,
                                      msg.c_str(), true, this->ColorOutput);
 
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->MocExecutable);
     for (std::list<std::string>::const_iterator it = this->MocIncludes.begin();
          it != this->MocIncludes.end();
@@ -1924,7 +1924,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
 
     if (this->Verbose)
       {
-      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
           cmdIt != command.end();
           ++cmdIt)
         {
@@ -1971,7 +1971,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& path,
                                           |cmsysTerminal_Color_ForegroundBold,
                                       msg.c_str(), true, this->ColorOutput);
 
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->UicExecutable);
 
     std::vector<std::string> opts = this->UicTargetOptions;
@@ -1996,7 +1996,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& path,
 
     if (this->Verbose)
       {
-      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
           cmdIt != command.end();
           ++cmdIt)
         {
@@ -2034,7 +2034,7 @@ bool cmQtAutoGenerators::GenerateQrc()
       {
       continue;
       }
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->RccExecutable);
 
     std::string basename = cmsys::SystemTools::
@@ -2068,7 +2068,7 @@ bool cmQtAutoGenerators::GenerateQrc()
 
       if (this->Verbose)
         {
-        for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+        for(std::vector<std::string>::const_iterator cmdIt = command.begin();
             cmdIt != command.end();
             ++cmdIt)
           {

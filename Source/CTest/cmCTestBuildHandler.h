@@ -97,10 +97,10 @@ private:
   double                  StartBuildTime;
   double                  EndBuildTime;
 
-  std::vector<cmStdString> CustomErrorMatches;
-  std::vector<cmStdString> CustomErrorExceptions;
-  std::vector<cmStdString> CustomWarningMatches;
-  std::vector<cmStdString> CustomWarningExceptions;
+  std::vector<std::string> CustomErrorMatches;
+  std::vector<std::string> CustomErrorExceptions;
+  std::vector<std::string> CustomWarningMatches;
+  std::vector<std::string> CustomWarningExceptions;
   std::vector<std::string> ReallyCustomWarningMatches;
   std::vector<std::string> ReallyCustomWarningExceptions;
   std::vector<cmCTestCompileErrorWarningRex> ErrorWarningFileLineRegex;
@@ -121,8 +121,8 @@ private:
   size_t                                BuildOutputLogSize;
   std::vector<char>                     CurrentProcessingLine;
 
-  cmStdString                           SimplifySourceDir;
-  cmStdString                           SimplifyBuildDir;
+  std::string                           SimplifySourceDir;
+  std::string                           SimplifyBuildDir;
   size_t                                OutputLineCounter;
   typedef std::vector<cmCTestBuildErrorWarning> t_ErrorsAndWarningsVector;
   t_ErrorsAndWarningsVector             ErrorsAndWarnings;
@@ -130,7 +130,7 @@ private:
   size_t                                PostContextCount;
   size_t                                MaxPreContext;
   size_t                                MaxPostContext;
-  std::deque<cmStdString>               PreContext;
+  std::deque<std::string>               PreContext;
 
   int                                   TotalErrors;
   int                                   TotalWarnings;

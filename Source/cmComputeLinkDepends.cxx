@@ -279,12 +279,12 @@ cmComputeLinkDepends::Compute()
 }
 
 //----------------------------------------------------------------------------
-std::map<cmStdString, int>::iterator
+std::map<std::string, int>::iterator
 cmComputeLinkDepends::AllocateLinkEntry(std::string const& item)
 {
-  std::map<cmStdString, int>::value_type
+  std::map<std::string, int>::value_type
     index_entry(item, static_cast<int>(this->EntryList.size()));
-  std::map<cmStdString, int>::iterator
+  std::map<std::string, int>::iterator
     lei = this->LinkEntryIndex.insert(index_entry).first;
   this->EntryList.push_back(LinkEntry());
   this->InferredDependSets.push_back(0);
@@ -297,7 +297,7 @@ int cmComputeLinkDepends::AddLinkEntry(int depender_index,
                                        std::string const& item)
 {
   // Check if the item entry has already been added.
-  std::map<cmStdString, int>::iterator lei = this->LinkEntryIndex.find(item);
+  std::map<std::string, int>::iterator lei = this->LinkEntryIndex.find(item);
   if(lei != this->LinkEntryIndex.end())
     {
     // Yes.  We do not need to follow the item's dependencies again.
@@ -423,7 +423,7 @@ cmComputeLinkDepends
 void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
 {
   // Check if the target already has an entry.
-  std::map<cmStdString, int>::iterator lei =
+  std::map<std::string, int>::iterator lei =
     this->LinkEntryIndex.find(dep.Item);
   if(lei == this->LinkEntryIndex.end())
     {

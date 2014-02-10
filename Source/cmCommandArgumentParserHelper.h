@@ -77,8 +77,8 @@ public:
   char BSLASHVariable[3];
 
 private:
-  cmStdString::size_type InputBufferPos;
-  cmStdString InputBuffer;
+  std::string::size_type InputBufferPos;
+  std::string InputBuffer;
   std::vector<char> OutputBuffer;
   int CurrentLine;
   int Verbose;

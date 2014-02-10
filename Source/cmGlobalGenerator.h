@@ -167,7 +167,7 @@ public:
 
   void AddInstallComponent(const char* component);
 
-  const std::set<cmStdString>* GetInstallComponents() const
+  const std::set<std::string>* GetInstallComponents() const
     { return &this->InstallComponents; }
 
   cmExportSetMap& GetExportSets() {return this->ExportSets;}
@@ -244,7 +244,7 @@ public:
       from disk at most once and cached.  During the generation step
       the content will include the target files to be built even if
       they do not yet exist.  */
-  std::set<cmStdString> const& GetDirectoryContent(std::string const& dir,
+  std::set<std::string> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
 
   void AddTarget(cmTarget* t);
@@ -276,7 +276,7 @@ public:
   /** Get per-target generator information.  */
   cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
 
-  const std::map<cmStdString, std::vector<cmLocalGenerator*> >& GetProjectMap()
+  const std::map<std::string, std::vector<cmLocalGenerator*> >& GetProjectMap()
                                                const {return this->ProjectMap;}
 
   // track files replaced during a Generate
@@ -364,18 +364,18 @@ protected:
   bool UseLinkScript;
   bool ForceUnixPaths;
   bool ToolSupportsColor;
-  cmStdString FindMakeProgramFile;
-  cmStdString ConfiguredFilesPath;
+  std::string FindMakeProgramFile;
+  std::string ConfiguredFilesPath;
   cmake *CMakeInstance;
   std::vector<cmLocalGenerator *> LocalGenerators;
   cmLocalGenerator* CurrentLocalGenerator;
   // map from project name to vector of local generators in that project
-  std::map<cmStdString, std::vector<cmLocalGenerator*> > ProjectMap;
+  std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
   std::map<cmLocalGenerator*, std::set<cmTarget const*> >
                                                     LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
-  std::set<cmStdString> InstallComponents;
+  std::set<std::string> InstallComponents;
   bool InstallTargetEnabled;
   // Sets of named target exports
   cmExportSetMap ExportSets;
@@ -387,9 +387,9 @@ protected:
   cmTargetManifest TargetManifest;
 
   // All targets in the entire project.
-  std::map<cmStdString,cmTarget *> TotalTargets;
-  std::map<cmStdString,cmTarget *> AliasTargets;
-  std::map<cmStdString,cmTarget *> ImportedTargets;
+  std::map<std::string,cmTarget *> TotalTargets;
+  std::map<std::string,cmTarget *> AliasTargets;
+  std::map<std::string,cmTarget *> ImportedTargets;
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   virtual const char* GetPredefinedTargetsFolder();
@@ -401,18 +401,18 @@ private:
   float FirstTimeProgress;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator
-  std::map<cmStdString, bool> IgnoreExtensions;
-  std::map<cmStdString, bool> LanguageEnabled;
-  std::set<cmStdString> LanguagesReady; // Ready for try_compile
-  std::map<cmStdString, cmStdString> OutputExtensions;
-  std::map<cmStdString, cmStdString> LanguageToOutputExtension;
-  std::map<cmStdString, cmStdString> ExtensionToLanguage;
-  std::map<cmStdString, int> LanguageToLinkerPreference;
-  std::map<cmStdString, cmStdString> LanguageToOriginalSharedLibFlags;
+  std::map<std::string, bool> IgnoreExtensions;
+  std::map<std::string, bool> LanguageEnabled;
+  std::set<std::string> LanguagesReady; // Ready for try_compile
+  std::map<std::string, std::string> OutputExtensions;
+  std::map<std::string, std::string> LanguageToOutputExtension;
+  std::map<std::string, std::string> ExtensionToLanguage;
+  std::map<std::string, int> LanguageToLinkerPreference;
+  std::map<std::string, std::string> LanguageToOriginalSharedLibFlags;
 
   // Record hashes for rules and outputs.
   struct RuleHash { char Data[32]; };
-  std::map<cmStdString, RuleHash> RuleHashes;
+  std::map<std::string, RuleHash> RuleHashes;
   void CheckRuleHashes();
   void CheckRuleHashes(std::string const& pfile, std::string const& home);
   void WriteRuleHashes(std::string const& pfile);
@@ -448,18 +448,18 @@ private:
   virtual const char* GetBuildIgnoreErrorsFlag() const { return 0; }
 
   // Cache directory content and target files to be built.
-  struct DirectoryContent: public std::set<cmStdString>
+  struct DirectoryContent: public std::set<std::string>
   {
-    typedef std::set<cmStdString> derived;
+    typedef std::set<std::string> derived;
     bool LoadedFromDisk;
     DirectoryContent(): LoadedFromDisk(false) {}
     DirectoryContent(DirectoryContent const& dc):
       derived(dc), LoadedFromDisk(dc.LoadedFromDisk) {}
   };
-  std::map<cmStdString, DirectoryContent> DirectoryContentMap;
+  std::map<std::string, DirectoryContent> DirectoryContentMap;
 
   // Set of binary directories on disk.
-  std::set<cmStdString> BinaryDirectories;
+  std::set<std::string> BinaryDirectories;
 
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;

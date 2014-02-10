@@ -148,7 +148,7 @@ public:
   enum LinkLibraryType {GENERAL, DEBUG, OPTIMIZED};
 
   //* how we identify a library, by name and type
-  typedef std::pair<cmStdString, LinkLibraryType> LibraryID;
+  typedef std::pair<std::string, LinkLibraryType> LibraryID;
 
   typedef std::vector<LibraryID > LinkLibraryVectorType;
   const LinkLibraryVectorType &GetLinkLibraries() const {
@@ -216,7 +216,7 @@ public:
    */
   void AddUtility(const std::string& u, cmMakefile *makefile = 0);
   ///! Get the utilities used by this target
-  std::set<cmStdString>const& GetUtilities() const { return this->Utilities; }
+  std::set<std::string>const& GetUtilities() const { return this->Utilities; }
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
   /** Finalize the target at the end of the Configure step.  */
@@ -455,7 +455,7 @@ public:
   // when source file properties are changed and we do not have enough
   // information to forward these property changes to the targets
   // until we have per-target object file properties.
-  void GetLanguages(std::set<cmStdString>& languages) const;
+  void GetLanguages(std::set<std::string>& languages) const;
 
   /** Return whether this target is an executable with symbol exports
       enabled.  */
@@ -552,9 +552,9 @@ public:
   std::string GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt) const;
 
-  void AddSystemIncludeDirectories(const std::set<cmStdString> &incs);
+  void AddSystemIncludeDirectories(const std::set<std::string> &incs);
   void AddSystemIncludeDirectories(const std::vector<std::string> &incs);
-  std::set<cmStdString> const & GetSystemIncludeDirectories() const
+  std::set<std::string> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
   bool LinkLanguagePropagatesToDependents() const
@@ -570,7 +570,7 @@ private:
 
   // The set of include directories that are marked as system include
   // directories.
-  std::set<cmStdString> SystemIncludeDirectories;
+  std::set<std::string> SystemIncludeDirectories;
 
   std::vector<std::pair<TLLSignature, cmListFileBacktrace> > TLLCommands;
 
@@ -675,13 +675,13 @@ private:
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;
   std::vector<std::string> LinkDirectories;
-  std::set<cmStdString> LinkDirectoriesEmmitted;
+  std::set<std::string> LinkDirectoriesEmmitted;
   bool HaveInstallRule;
   std::string InstallPath;
   std::string RuntimeInstallPath;
   mutable std::string ExportMacro;
-  std::set<cmStdString> Utilities;
-  std::map<cmStdString, cmListFileBacktrace> UtilityBacktraces;
+  std::set<std::string> Utilities;
+  std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
   bool RecordDependencies;
   mutable cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
@@ -762,9 +762,9 @@ private:
                             const char* version) const;
 };
 
-typedef std::map<cmStdString,cmTarget> cmTargets;
+typedef std::map<std::string,cmTarget> cmTargets;
 
-class cmTargetSet: public std::set<cmStdString> {};
-class cmTargetManifest: public std::map<cmStdString, cmTargetSet> {};
+class cmTargetSet: public std::set<std::string> {};
+class cmTargetManifest: public std::map<std::string, cmTargetSet> {};
 
 #endif

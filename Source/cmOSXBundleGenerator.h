@@ -52,7 +52,7 @@ public:
     MacOSXContentGeneratorType* generator);
   std::string InitMacOSXContentDirectory(const char* pkgloc);
 
-  void SetMacContentFolders(std::set<cmStdString>* macContentFolders)
+  void SetMacContentFolders(std::set<std::string>* macContentFolders)
   { this->MacContentFolders = macContentFolders; }
 
 private:
@@ -63,7 +63,7 @@ private:
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   const char* ConfigName;
-  std::set<cmStdString>* MacContentFolders;
+  std::set<std::string>* MacContentFolders;
 };
 
 

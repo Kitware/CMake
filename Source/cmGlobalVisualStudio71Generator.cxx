@@ -237,7 +237,7 @@ void cmGlobalVisualStudio71Generator
                        const std::string& name,
                        const char* location,
                        const char* typeGuid,
-                       const std::set<cmStdString>& depends)
+                       const std::set<std::string>& depends)
 {
   fout << "Project(\"{"
        << (typeGuid ? typeGuid : this->ExternalProjectType(location))
@@ -252,7 +252,7 @@ void cmGlobalVisualStudio71Generator
   if(!depends.empty())
     {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-    std::set<cmStdString>::const_iterator it;
+    std::set<std::string>::const_iterator it;
     for(it = depends.begin(); it != depends.end(); ++it)
       {
       if(it->size() > 0)

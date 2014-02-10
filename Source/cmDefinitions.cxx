@@ -85,9 +85,9 @@ const char* cmDefinitions::Set(const std::string& key, const char* value)
 }
 
 //----------------------------------------------------------------------------
-std::set<cmStdString> cmDefinitions::LocalKeys() const
+std::set<std::string> cmDefinitions::LocalKeys() const
 {
-  std::set<cmStdString> keys;
+  std::set<std::string> keys;
   // Consider local definitions.
   for(MapType::const_iterator mi = this->Map.begin();
       mi != this->Map.end(); ++mi)
@@ -110,12 +110,12 @@ cmDefinitions cmDefinitions::Closure() const
 cmDefinitions::cmDefinitions(ClosureTag const&, cmDefinitions const* root):
   Up(0)
 {
-  std::set<cmStdString> undefined;
+  std::set<std::string> undefined;
   this->ClosureImpl(undefined, root);
 }
 
 //----------------------------------------------------------------------------
-void cmDefinitions::ClosureImpl(std::set<cmStdString>& undefined,
+void cmDefinitions::ClosureImpl(std::set<std::string>& undefined,
                                 cmDefinitions const* defs)
 {
   // Consider local definitions.
@@ -145,17 +145,17 @@ void cmDefinitions::ClosureImpl(std::set<cmStdString>& undefined,
 }
 
 //----------------------------------------------------------------------------
-std::set<cmStdString> cmDefinitions::ClosureKeys() const
+std::set<std::string> cmDefinitions::ClosureKeys() const
 {
-  std::set<cmStdString> defined;
-  std::set<cmStdString> undefined;
+  std::set<std::string> defined;
+  std::set<std::string> undefined;
   this->ClosureKeys(defined, undefined);
   return defined;
 }
 
 //----------------------------------------------------------------------------
-void cmDefinitions::ClosureKeys(std::set<cmStdString>& defined,
-                                std::set<cmStdString>& undefined) const
+void cmDefinitions::ClosureKeys(std::set<std::string>& defined,
+                                std::set<std::string>& undefined) const
 {
   // Consider local definitions.
   for(MapType::const_iterator mi = this->Map.begin();
@@ -165,7 +165,7 @@ void cmDefinitions::ClosureKeys(std::set<cmStdString>& defined,
     if(defined.find(mi->first) == defined.end() &&
        undefined.find(mi->first) == undefined.end())
       {
-      std::set<cmStdString>& m = mi->second.Exists? defined : undefined;
+      std::set<std::string>& m = mi->second.Exists? defined : undefined;
       m.insert(mi->first);
       }
     }

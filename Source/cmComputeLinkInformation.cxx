@@ -902,7 +902,7 @@ void cmComputeLinkInformation::ComputeItemParserInfo()
   // be the library name.  Match index 3 will be the library
   // extension.
   reg = "^(";
-  for(std::set<cmStdString>::iterator p = this->LinkPrefixes.begin();
+  for(std::set<std::string>::iterator p = this->LinkPrefixes.begin();
       p != this->LinkPrefixes.end(); ++p)
     {
     reg += *p;
@@ -1640,7 +1640,7 @@ void cmComputeLinkInformation::PrintLinkPolicyDiagnosis(std::ostream& os)
 
   // List the paths old behavior is adding.
   os << "and other libraries with known full path:\n";
-  std::set<cmStdString> emitted;
+  std::set<std::string> emitted;
   for(std::vector<std::string>::const_iterator
         i = this->OldLinkDirItems.begin();
       i != this->OldLinkDirItems.end(); ++i)
@@ -1856,7 +1856,7 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
 //----------------------------------------------------------------------------
 static void cmCLI_ExpandListUnique(const char* str,
                                    std::vector<std::string>& out,
-                                   std::set<cmStdString>& emitted)
+                                   std::set<std::string>& emitted)
 {
   std::vector<std::string> tmp;
   cmSystemTools::ExpandListArgument(str, tmp);
@@ -1894,7 +1894,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
     this->Target->GetPropertyAsBool("INSTALL_RPATH_USE_LINK_PATH");
 
   // Construct the RPATH.
-  std::set<cmStdString> emitted;
+  std::set<std::string> emitted;
   if(use_install_rpath)
     {
     const char* install_rpath = this->Target->GetProperty("INSTALL_RPATH");

@@ -353,7 +353,7 @@ void cmGlobalVisualStudio7Generator
 // output the SLN file
 void cmGlobalVisualStudio7Generator::OutputSLNFile()
 {
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     this->OutputSLNFile(it->second[0], it->second);
@@ -761,7 +761,7 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
                                const std::string& name,
                                const char* location,
                                const char* typeGuid,
-                               const std::set<cmStdString>&)
+                               const std::set<std::string>&)
 {
   std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project("

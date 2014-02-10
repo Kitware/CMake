@@ -342,21 +342,21 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   this->Target->GetLanguages(languages);
   // put the compiler in the rules.make file so that if it changes
   // things rebuild
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
-    cmStdString compiler = "CMAKE_";
+    std::string compiler = "CMAKE_";
     compiler += *l;
     compiler += "_COMPILER";
     *this->FlagFileStream << "# compile " << l->c_str() << " with " <<
       this->Makefile->GetSafeDefinition(compiler.c_str()) << "\n";
     }
 
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
     *this->FlagFileStream << *l << "_FLAGS = " << this->GetFlags(*l) << "\n\n";
@@ -1531,7 +1531,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
       }
 
     // Make sure the extra files are built.
-    for(std::set<cmStdString>::const_iterator i = this->ExtraFiles.begin();
+    for(std::set<std::string>::const_iterator i = this->ExtraFiles.begin();
         i != this->ExtraFiles.end(); ++i)
       {
       depends.push_back(*i);
@@ -1561,7 +1561,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
     return std::string();
     }
 
- std::set<cmStdString> emitted;
+ std::set<std::string> emitted;
 #ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
   emitted.insert("/System/Library/Frameworks");
 #endif

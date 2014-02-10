@@ -513,7 +513,7 @@ cmInstallTargetGenerator
 
   // Build a map of build-tree install_name to install-tree install_name for
   // shared libraries linked to this target.
-  std::map<cmStdString, cmStdString> install_name_remap;
+  std::map<std::string, std::string> install_name_remap;
   if(cmComputeLinkInformation* cli = this->Target->GetLinkInformation(config))
     {
     std::set<cmTarget const*> const& sharedLibs
@@ -590,7 +590,7 @@ cmInstallTargetGenerator
       {
       os << "\n" << indent << "  -id \"" << new_id << "\"";
       }
-    for(std::map<cmStdString, cmStdString>::const_iterator
+    for(std::map<std::string, std::string>::const_iterator
           i = install_name_remap.begin();
         i != install_name_remap.end(); ++i)
       {

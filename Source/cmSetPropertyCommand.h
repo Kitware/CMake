@@ -44,7 +44,7 @@ public:
   cmTypeMacro(cmSetPropertyCommand, cmCommand);
 
 private:
-  std::set<cmStdString> Names;
+  std::set<std::string> Names;
   std::string PropertyName;
   std::string PropertyValue;
   bool Remove;

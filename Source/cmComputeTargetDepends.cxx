@@ -211,7 +211,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // dependencies in all targets, because the generated build-systems can't
   // deal with config-specific dependencies.
   {
-  std::set<cmStdString> emitted;
+  std::set<std::string> emitted;
   {
   std::vector<std::string> tlibs;
   depender->GetDirectLinkLibraries(0, tlibs, depender);
@@ -255,11 +255,11 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 
   // Loop over all utility dependencies.
   {
-  std::set<cmStdString> const& tutils = depender->GetUtilities();
-  std::set<cmStdString> emitted;
+  std::set<std::string> const& tutils = depender->GetUtilities();
+  std::set<std::string> emitted;
   // A target should not depend on itself.
   emitted.insert(depender->GetName());
-  for(std::set<cmStdString>::const_iterator util = tutils.begin();
+  for(std::set<std::string>::const_iterator util = tutils.begin();
       util != tutils.end(); ++util)
     {
     // Don't emit the same utility twice for this target.
@@ -275,7 +275,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                                  cmTarget const* dependee,
                                                  const char *config,
-                                               std::set<cmStdString> &emitted)
+                                               std::set<std::string> &emitted)
 {
   cmTarget const* depender = this->Targets[depender_index];
   if(cmTarget::LinkInterface const* iface =
@@ -300,7 +300,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
 void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                              const std::string& dependee_name,
                                              bool linking,
-                                             std::set<cmStdString> &emitted)
+                                             std::set<std::string> &emitted)
 {
   cmTarget const* depender = this->Targets[depender_index];
   cmTarget const* dependee =
@@ -406,8 +406,8 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   if(dependee->IsImported())
     {
     // Skip imported targets but follow their utility dependencies.
-    std::set<cmStdString> const& utils = dependee->GetUtilities();
-    for(std::set<cmStdString>::const_iterator i = utils.begin();
+    std::set<std::string> const& utils = dependee->GetUtilities();
+    for(std::set<std::string>::const_iterator i = utils.begin();
         i != utils.end(); ++i)
       {
       if(cmTarget const* transitive_dependee =

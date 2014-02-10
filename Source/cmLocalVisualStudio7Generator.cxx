@@ -59,7 +59,7 @@ cmLocalVisualStudio7Generator::~cmLocalVisualStudio7Generator()
 
 void cmLocalVisualStudio7Generator::AddHelperCommands()
 {
-  std::set<cmStdString> lang;
+  std::set<std::string> lang;
   lang.insert("C");
   lang.insert("CXX");
   lang.insert("RC");
@@ -1468,7 +1468,7 @@ public:
                                       cmTarget& target,
                                       cmSourceFile const& sf,
                                       std::vector<std::string>* configs);
-  std::map<cmStdString, cmLVS7GFileConfig> FileConfigMap;
+  std::map<std::string, cmLVS7GFileConfig> FileConfigMap;
 };
 
 cmLocalVisualStudio7GeneratorFCInfo
@@ -1712,7 +1712,7 @@ bool cmLocalVisualStudio7Generator
             aCompilerTool = "VFCustomBuildTool";
             }
           }
-        for(std::map<cmStdString, cmLVS7GFileConfig>::const_iterator
+        for(std::map<std::string, cmLVS7GFileConfig>::const_iterator
               fci = fcinfo.FileConfigMap.begin();
             fci != fcinfo.FileConfigMap.end(); ++fci)
           {

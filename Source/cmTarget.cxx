@@ -118,7 +118,7 @@ public:
   LinkInterfaceMapType LinkInterfaceMap;
   bool PolicyWarnedCMP0022;
 
-  typedef std::map<cmStdString, cmTarget::OutputInfo> OutputInfoMapType;
+  typedef std::map<std::string, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
 
   typedef std::map<TargetConfigPair, cmTarget::ImportInfo>
@@ -356,10 +356,10 @@ void cmTarget::SetMakefile(cmMakefile* mf)
       {
       this->InsertInclude(*it);
       }
-    const std::set<cmStdString> parentSystemIncludes =
+    const std::set<std::string> parentSystemIncludes =
                                 this->Makefile->GetSystemIncludeDirectories();
 
-    for (std::set<cmStdString>::const_iterator it
+    for (std::set<std::string>::const_iterator it
           = parentSystemIncludes.begin();
           it != parentSystemIncludes.end(); ++it)
       {
@@ -428,7 +428,7 @@ void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
 cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
     const std::string& u) const
 {
-  std::map<cmStdString, cmListFileBacktrace>::const_iterator i =
+  std::map<std::string, cmListFileBacktrace>::const_iterator i =
     this->UtilityBacktraces.find(u);
   if(i == this->UtilityBacktraces.end()) return 0;
 
@@ -776,8 +776,8 @@ void cmTarget::GetDirectLinkLibraries(const char *config,
                                         &dagChecker),
                                       libs);
 
-    std::set<cmStdString> seenProps = cge->GetSeenTargetProperties();
-    for (std::set<cmStdString>::const_iterator it = seenProps.begin();
+    std::set<std::string> seenProps = cge->GetSeenTargetProperties();
+    for (std::set<std::string>::const_iterator it = seenProps.begin();
         it != seenProps.end(); ++it)
       {
       if (!this->GetProperty(it->c_str()))
@@ -887,7 +887,7 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
                         = (sig == cmTarget::KeywordTLLSignature ? "keyword"
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
-    std::set<cmStdString> emitted;
+    std::set<std::string> emitted;
     for(std::vector<cmListFileBacktrace>::const_iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
@@ -981,9 +981,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 
 //----------------------------------------------------------------------------
 void
-cmTarget::AddSystemIncludeDirectories(const std::set<cmStdString> &incs)
+cmTarget::AddSystemIncludeDirectories(const std::set<std::string> &incs)
 {
-  for(std::set<cmStdString>::const_iterator li = incs.begin();
+  for(std::set<std::string>::const_iterator li = incs.begin();
       li != incs.end(); ++li)
     {
     this->SystemIncludeDirectories.insert(*li);
@@ -1574,7 +1574,7 @@ static void processIncludeDirectories(cmTarget const* tgt,
     {
     bool testIsOff = true;
     bool cacheIncludes = false;
-    std::vector<std::string> entryIncludes = (*it)->CachedEntries;
+    std::vector<std::string>& entryIncludes = (*it)->CachedEntries;
     if(!entryIncludes.empty())
       {
       testIsOff = false;
@@ -2806,7 +2806,7 @@ class cmTargetCollectLinkLanguages
 {
 public:
   cmTargetCollectLinkLanguages(cmTarget const* target, const char* config,
-                               std::set<cmStdString>& languages,
+                               std::set<std::string>& languages,
                                cmTarget const* head):
     Config(config), Languages(languages), HeadTarget(head),
     Makefile(target->GetMakefile()), Target(target)
@@ -2878,7 +2878,7 @@ public:
     }
 private:
   const char* Config;
-  std::set<cmStdString>& Languages;
+  std::set<std::string>& Languages;
   cmTarget const* HeadTarget;
   cmMakefile* Makefile;
   const cmTarget* Target;
@@ -2917,7 +2917,7 @@ class cmTargetSelectLinker
   cmTarget const* Target;
   cmMakefile* Makefile;
   cmGlobalGenerator* GG;
-  std::set<cmStdString> Preferred;
+  std::set<std::string> Preferred;
 public:
   cmTargetSelectLinker(cmTarget const* target): Preference(0), Target(target)
     {
@@ -2949,7 +2949,7 @@ public:
       e << "Target " << this->Target->GetName()
         << " contains multiple languages with the highest linker preference"
         << " (" << this->Preference << "):\n";
-      for(std::set<cmStdString>::const_iterator
+      for(std::set<std::string>::const_iterator
             li = this->Preferred.begin(); li != this->Preferred.end(); ++li)
         {
         e << "  " << *li << "\n";
@@ -2968,7 +2968,7 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc,
                                   cmTarget const* head) const
 {
   // Get languages built in this target.
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   LinkImplementation const* impl = this->GetLinkImplementation(config, head);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
@@ -2985,7 +2985,7 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc,
     }
 
   // Store the transitive closure of languages.
-  for(std::set<cmStdString>::const_iterator li = languages.begin();
+  for(std::set<std::string>::const_iterator li = languages.begin();
       li != languages.end(); ++li)
     {
     lc.Languages.push_back(*li);
@@ -3013,7 +3013,7 @@ void cmTarget::ComputeLinkClosure(const char* config, LinkClosure& lc,
       }
 
     // Now consider languages that propagate from linked targets.
-    for(std::set<cmStdString>::const_iterator sit = languages.begin();
+    for(std::set<std::string>::const_iterator sit = languages.begin();
         sit != languages.end(); ++sit)
       {
       std::string propagates = "CMAKE_"+*sit+"_LINKER_PREFERENCE_PROPAGATES";
@@ -4822,7 +4822,7 @@ bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetLanguages(std::set<cmStdString>& languages) const
+void cmTarget::GetLanguages(std::set<std::string>& languages) const
 {
   for(std::vector<cmSourceFile*>::const_iterator
         i = this->SourceFiles.begin(); i != this->SourceFiles.end(); ++i)
@@ -5662,7 +5662,7 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
-      std::set<cmStdString> emitted;
+      std::set<std::string> emitted;
       for(std::vector<std::string>::const_iterator
           li = iface.Libraries.begin(); li != iface.Libraries.end(); ++li)
         {
@@ -5891,7 +5891,7 @@ void
 cmTarget::ComputeLinkImplementationLanguages(LinkImplementation& impl) const
 {
   // This target needs runtime libraries for its source languages.
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   // Get languages used in our source files.
   this->GetLanguages(languages);
   // Get languages used in object library sources.
@@ -5908,7 +5908,7 @@ cmTarget::ComputeLinkImplementationLanguages(LinkImplementation& impl) const
       }
     }
   // Copy the set of langauges to the link implementation.
-  for(std::set<cmStdString>::iterator li = languages.begin();
+  for(std::set<std::string>::iterator li = languages.begin();
       li != languages.end(); ++li)
     {
     impl.Languages.push_back(*li);
@@ -6017,8 +6017,8 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
 template<typename PropertyType>
 void checkPropertyConsistency(cmTarget const* depender,
                               cmTarget const* dependee,
-                              const cmStdString& propName,
-                              std::set<cmStdString> &emitted,
+                              const std::string& propName,
+                              std::set<std::string> &emitted,
                               const char *config,
                               CompatibleType t,
                               PropertyType *)
@@ -6062,10 +6062,10 @@ void checkPropertyConsistency(cmTarget const* depender,
     }
 }
 
-static cmStdString intersect(const std::set<cmStdString> &s1,
-                             const std::set<cmStdString> &s2)
+static std::string intersect(const std::set<std::string> &s1,
+                             const std::set<std::string> &s2)
 {
-  std::set<cmStdString> intersect;
+  std::set<std::string> intersect;
   std::set_intersection(s1.begin(),s1.end(),
                         s2.begin(),s2.end(),
                       std::inserter(intersect,intersect.begin()));
@@ -6075,11 +6075,11 @@ static cmStdString intersect(const std::set<cmStdString> &s1,
     }
   return "";
 }
-static cmStdString intersect(const std::set<cmStdString> &s1,
-                       const std::set<cmStdString> &s2,
-                       const std::set<cmStdString> &s3)
+static std::string intersect(const std::set<std::string> &s1,
+                       const std::set<std::string> &s2,
+                       const std::set<std::string> &s3)
 {
-  cmStdString result;
+  std::string result;
   result = intersect(s1, s2);
   if (!result.empty())
     return result;
@@ -6088,12 +6088,12 @@ static cmStdString intersect(const std::set<cmStdString> &s1,
     return result;
   return intersect(s2, s3);
 }
-static cmStdString intersect(const std::set<cmStdString> &s1,
-                       const std::set<cmStdString> &s2,
-                       const std::set<cmStdString> &s3,
-                       const std::set<cmStdString> &s4)
+static std::string intersect(const std::set<std::string> &s1,
+                       const std::set<std::string> &s2,
+                       const std::set<std::string> &s3,
+                       const std::set<std::string> &s4)
 {
-  cmStdString result;
+  std::string result;
   result = intersect(s1, s2);
   if (!result.empty())
     return result;
@@ -6112,10 +6112,10 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 {
   const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
 
-  std::set<cmStdString> emittedBools;
-  std::set<cmStdString> emittedStrings;
-  std::set<cmStdString> emittedMinNumbers;
-  std::set<cmStdString> emittedMaxNumbers;
+  std::set<std::string> emittedBools;
+  std::set<std::string> emittedStrings;
+  std::set<std::string> emittedMinNumbers;
+  std::set<std::string> emittedMaxNumbers;
 
   for(cmComputeLinkInformation::ItemVector::const_iterator li =
       deps.begin();
@@ -6167,7 +6167,7 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
   if (!prop.empty())
     {
     std::set<std::string> props;
-    std::set<cmStdString>::const_iterator i = emittedBools.find(prop);
+    std::set<std::string>::const_iterator i = emittedBools.find(prop);
     if (i != emittedBools.end())
       {
       props.insert("COMPATIBLE_INTERFACE_BOOL");

@@ -42,12 +42,12 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
      )
 #undef TEST_TRANSITIVE_PROPERTY_METHOD
     {
-    std::map<cmStdString, std::set<cmStdString> >::const_iterator it
+    std::map<std::string, std::set<std::string> >::const_iterator it
                                                     = top->Seen.find(target);
     if (it != top->Seen.end())
       {
-      const std::set<cmStdString> &propSet = it->second;
-      const std::set<cmStdString>::const_iterator i = propSet.find(property);
+      const std::set<std::string> &propSet = it->second;
+      const std::set<std::string>::const_iterator i = propSet.find(property);
       if (i != propSet.end())
         {
         this->CheckResult = ALREADY_SEEN;

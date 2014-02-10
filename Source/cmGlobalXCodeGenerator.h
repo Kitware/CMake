@@ -95,7 +95,7 @@ private:
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
   cmXCodeObject* CreatePBXGroup(cmXCodeObject *parent,
-                                cmStdString name);
+                                std::string name);
   void CreateGroups(cmLocalGenerator* root,
                     std::vector<cmLocalGenerator*>&
                     generators);
@@ -124,7 +124,7 @@ private:
                                  cmTarget& target,
                                  std::vector<cmCustomCommand> const & commands,
                                  const char* configName,
-                                 const std::map<cmStdString, cmStdString>&
+                                 const std::map<std::string, std::string>&
                                      multipleOutputPairs
                                 );
 
@@ -211,7 +211,7 @@ protected:
 
   unsigned int XcodeVersion;
   std::string VersionString;
-  std::set<cmStdString> XCodeObjectIDs;
+  std::set<std::string> XCodeObjectIDs;
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
@@ -236,14 +236,14 @@ private:
   std::string CurrentReRunCMakeMakefile;
   std::string CurrentXCodeHackMakefile;
   std::string CurrentProject;
-  std::set<cmStdString> TargetDoneSet;
+  std::set<std::string> TargetDoneSet;
   std::vector<std::string> CurrentOutputDirectoryComponents;
   std::vector<std::string> ProjectSourceDirectoryComponents;
   std::vector<std::string> ProjectOutputDirectoryComponents;
-  std::map<cmStdString, cmXCodeObject* > GroupMap;
-  std::map<cmStdString, cmXCodeObject* > GroupNameMap;
-  std::map<cmStdString, cmXCodeObject* > TargetGroup;
-  std::map<cmStdString, cmXCodeObject* > FileRefs;
+  std::map<std::string, cmXCodeObject* > GroupMap;
+  std::map<std::string, cmXCodeObject* > GroupNameMap;
+  std::map<std::string, cmXCodeObject* > TargetGroup;
+  std::map<std::string, cmXCodeObject* > FileRefs;
   std::vector<std::string> Architectures;
   std::string PlatformToolset;
 };

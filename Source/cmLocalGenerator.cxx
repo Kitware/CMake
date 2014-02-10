@@ -617,8 +617,8 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
 
     // Parse the string to get the custom command line.
     cmCustomCommandLine commandLine;
-    std::vector<cmStdString> cmd = cmSystemTools::ParseArguments(i->c_str());
-    for(std::vector<cmStdString>::iterator a = cmd.begin();
+    std::vector<std::string> cmd = cmSystemTools::ParseArguments(i->c_str());
+    for(std::vector<std::string>::iterator a = cmd.begin();
         a != cmd.end(); ++a)
       {
       commandLine.push_back(*a);
@@ -656,7 +656,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
 void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
                                           cmGeneratorTarget& target)
 {
-  cmStdString objs;
+  std::string objs;
   std::vector<std::string> objVector;
   // Add all the sources outputs to the depends of the target
   std::vector<cmSourceFile*> classes;
@@ -728,8 +728,8 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
     this->ExpandRuleVariables(*i, vars);
     // Parse the string to get the custom command line.
     cmCustomCommandLine commandLine;
-    std::vector<cmStdString> cmd = cmSystemTools::ParseArguments(i->c_str());
-    for(std::vector<cmStdString>::iterator a = cmd.begin();
+    std::vector<std::string> cmd = cmSystemTools::ParseArguments(i->c_str());
+    for(std::vector<std::string>::iterator a = cmd.begin();
         a != cmd.end(); ++a)
       {
       commandLine.push_back(*a);
@@ -758,7 +758,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
 
 
 void cmLocalGenerator
-::CreateCustomTargetsAndCommands(std::set<cmStdString> const& lang)
+::CreateCustomTargetsAndCommands(std::set<std::string> const& lang)
 {
   cmGeneratorTargetsType tgts = this->Makefile->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator l = tgts.begin();
@@ -1344,7 +1344,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     this->Makefile->GetDefinition(fwSearchFlagVar.c_str());
 
   bool flagUsed = false;
-  std::set<cmStdString> emitted;
+  std::set<std::string> emitted;
 #ifdef __APPLE__
   emitted.insert("/System/Library/Frameworks");
 #endif
@@ -1488,7 +1488,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
     }
 
   // Do not repeat an include path.
-  std::set<cmStdString> emitted;
+  std::set<std::string> emitted;
 
   // Store the automatic include paths.
   if(includeBinaryDir)
@@ -2988,7 +2988,7 @@ cmLocalGenerator
                                  std::string const& dir_max)
 {
   // Look for an existing mapped name for this object file.
-  std::map<cmStdString,cmStdString>::iterator it =
+  std::map<std::string,std::string>::iterator it =
     this->UniqueObjectNamesMap.find(sin);
 
   // If no entry exists create one.
@@ -3071,7 +3071,7 @@ cmLocalGenerator
 #endif
 
     // Insert the newly mapped object file name.
-    std::map<cmStdString, cmStdString>::value_type e(sin, ssin);
+    std::map<std::string, std::string>::value_type e(sin, ssin);
     it = this->UniqueObjectNamesMap.insert(e).first;
     }
 

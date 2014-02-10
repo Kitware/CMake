@@ -190,7 +190,7 @@ void cmLocalUnixMakefileGenerator3::AddLocalObjectFile(
 void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
                                             (std::vector<std::string>& targets)
 {
-  for (std::map<cmStdString, LocalObjectInfo>::iterator lo =
+  for (std::map<std::string, LocalObjectInfo>::iterator lo =
          this->LocalObjectFiles.begin();
        lo != this->LocalObjectFiles.end(); ++lo)
     {
@@ -235,7 +235,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   // only write local targets unless at the top Keep track of targets already
   // listed.
-  std::set<cmStdString> emittedTargets;
+  std::set<std::string> emittedTargets;
   if (this->Parent)
     {
     // write our targets, and while doing it collect up the object
@@ -256,7 +256,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   // now write out the object rules
   // for each object file name
-  for (std::map<cmStdString, LocalObjectInfo>::iterator lo =
+  for (std::map<std::string, LocalObjectInfo>::iterator lo =
          this->LocalObjectFiles.begin();
        lo != this->LocalObjectFiles.end(); ++lo)
     {
@@ -371,7 +371,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::WriteLocalMakefileTargets(std::ostream& ruleFileStream,
-                            std::set<cmStdString> &emitted)
+                            std::set<std::string> &emitted)
 {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
@@ -1196,12 +1196,12 @@ cmLocalUnixMakefileGenerator3
   if(!filename)
     {
     // Get the set of source languages in the target.
-    std::set<cmStdString> languages;
+    std::set<std::string> languages;
     target.GetLanguages(languages);
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"
          << "foreach(lang";
-    for(std::set<cmStdString>::const_iterator l = languages.begin();
+    for(std::set<std::string>::const_iterator l = languages.begin();
         l != languages.end(); ++l)
       {
       fout << " " << *l;
@@ -1317,7 +1317,7 @@ cmLocalUnixMakefileGenerator3
 
   // see if the variable has been defined before and return
   // the modified version of the variable
-  std::map<cmStdString, cmStdString>::iterator i =
+  std::map<std::string, std::string>::iterator i =
     this->MakeVariableMap.find(unmodified);
   if(i != this->MakeVariableMap.end())
     {
@@ -1721,7 +1721,7 @@ void cmLocalUnixMakefileGenerator3
         {
         text = "Running external command ...";
         }
-      std::set<cmStdString>::const_iterator dit;
+      std::set<std::string>::const_iterator dit;
       for ( dit = glIt->second.GetUtilities().begin();
          dit != glIt->second.GetUtilities().end();
         ++ dit )

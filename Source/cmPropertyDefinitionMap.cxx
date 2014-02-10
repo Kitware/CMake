@@ -14,7 +14,7 @@
 #include "cmDocumentationSection.h"
 
 void cmPropertyDefinitionMap
-::DefineProperty(const cmStdString& name, cmProperty::ScopeType scope,
+::DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                  const char *ShortDescription,
                  const char *FullDescription,
                  bool chain)
@@ -29,7 +29,7 @@ void cmPropertyDefinitionMap
     }
 }
 
-bool cmPropertyDefinitionMap::IsPropertyDefined(const cmStdString& name)
+bool cmPropertyDefinitionMap::IsPropertyDefined(const std::string& name)
 {
   cmPropertyDefinitionMap::iterator it = this->find(name);
   if (it == this->end())
@@ -40,7 +40,7 @@ bool cmPropertyDefinitionMap::IsPropertyDefined(const cmStdString& name)
   return true;
 }
 
-bool cmPropertyDefinitionMap::IsPropertyChained(const cmStdString& name)
+bool cmPropertyDefinitionMap::IsPropertyChained(const std::string& name)
 {
   cmPropertyDefinitionMap::iterator it = this->find(name);
   if (it == this->end())

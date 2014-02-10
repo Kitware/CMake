@@ -567,7 +567,7 @@ void cmCTestLaunch::WriteXMLLabels(std::ostream& fxml)
     fxml << "\n";
     fxml << "\t\t<!-- Interested parties -->\n";
     fxml << "\t\t<Labels>\n";
-    for(std::set<cmStdString>::const_iterator li = this->Labels.begin();
+    for(std::set<std::string>::const_iterator li = this->Labels.begin();
         li != this->Labels.end(); ++li)
       {
       fxml << "\t\t\t<Label>" << cmXMLSafe(*li) << "</Label>\n";

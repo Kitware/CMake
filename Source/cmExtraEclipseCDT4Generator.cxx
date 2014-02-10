@@ -624,7 +624,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
   this->AppendLinkedResource(fout, "[Subprojects]",
                              "virtual:/virtual", VirtualFolder);
 
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it != this->GlobalGenerator->GetProjectMap().end();
        ++it)

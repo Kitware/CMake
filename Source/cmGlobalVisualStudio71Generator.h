@@ -72,7 +72,7 @@ protected:
                                     const std::string& name,
                                     const char* path,
                                     const char* typeGuid,
-                                    const std::set<cmStdString>& depends);
+                                    const std::set<std::string>& depends);
   virtual void WriteSLNHeader(std::ostream& fout);
 
   std::string ProjectConfigurationSectionName;

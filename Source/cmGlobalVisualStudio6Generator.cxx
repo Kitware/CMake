@@ -260,7 +260,7 @@ void cmGlobalVisualStudio6Generator
 // output the DSW file
 void cmGlobalVisualStudio6Generator::OutputDSWFile()
 {
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     this->OutputDSWFile(it->second[0], it->second);
@@ -318,7 +318,7 @@ void cmGlobalVisualStudio6Generator::WriteProject(std::ostream& fout,
 void cmGlobalVisualStudio6Generator::WriteExternalProject(std::ostream& fout,
                                const std::string& name,
                                const char* location,
-                               const std::set<cmStdString>& dependencies)
+                               const std::set<std::string>& dependencies)
 {
  fout << "#########################################################"
     "######################\n\n";
@@ -329,7 +329,7 @@ void cmGlobalVisualStudio6Generator::WriteExternalProject(std::ostream& fout,
   fout << "{{{\n";
 
 
-  std::set<cmStdString>::const_iterator i, end;
+  std::set<std::string>::const_iterator i, end;
   // write dependencies.
   i = dependencies.begin();
   end = dependencies.end();

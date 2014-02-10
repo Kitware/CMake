@@ -363,7 +363,7 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   // setup the regex exclude stuff
   this->CustomCoverageExcludeRegex.clear();
-  std::vector<cmStdString>::iterator rexIt;
+  std::vector<std::string>::iterator rexIt;
   for ( rexIt = this->CustomCoverageExclude.begin();
     rexIt != this->CustomCoverageExclude.end();
     ++ rexIt )
@@ -713,7 +713,7 @@ void cmCTestCoverageHandler::PopulateCustomVectors(cmMakefile *mf)
                                 this->CustomCoverageExclude);
   this->CTest->PopulateCustomVector(mf, "CTEST_EXTRA_COVERAGE_GLOB",
                                 this->ExtraCoverageGlobs);
-  std::vector<cmStdString>::iterator it;
+  std::vector<std::string>::iterator it;
   for ( it = this->CustomCoverageExclude.begin();
     it != this->CustomCoverageExclude.end();
     ++ it )
@@ -989,8 +989,8 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       << "--------------------------------------------------------------"
       << std::endl);
 
-    std::vector<cmStdString> lines;
-    std::vector<cmStdString>::iterator line;
+    std::vector<std::string> lines;
+    std::vector<std::string>::iterator line;
 
     cmSystemTools::Split(output.c_str(), lines);
 
@@ -1504,7 +1504,7 @@ namespace
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
   cmCTestCoverageHandlerContainer* cont,
-  std::set<cmStdString>& coveredFileNames,
+  std::set<std::string>& coveredFileNames,
   std::vector<std::string>& files,
   std::vector<std::string>& filesFullPath)
 {
@@ -1545,7 +1545,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
                outputFile.c_str() << std::endl);
     return 0;
     }
-  std::map<cmStdString, cmStdString> fileMap;
+  std::map<std::string, std::string> fileMap;
   std::vector<std::string>::iterator fp = filesFullPath.begin();
   for(std::vector<std::string>::iterator f =  files.begin();
       f != files.end(); ++f, ++fp)
@@ -1558,7 +1558,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
   std::string lineIn;
   bool valid = false; // are we in a valid output file
   int line = 0; // line of the current file
-  cmStdString file;
+  std::string file;
   while(cmSystemTools::GetLineFromStream(fin, lineIn))
     {
     bool startFile = false;
@@ -1593,7 +1593,7 @@ int cmCTestCoverageHandler::RunBullseyeCoverageBranch(
           }
         count++; // move on one
         }
-      std::map<cmStdString, cmStdString>::iterator
+      std::map<std::string, std::string>::iterator
         i = fileMap.find(file);
       // if the file should be covered write out the header for that file
       if(i != fileMap.end())
@@ -1758,7 +1758,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
                outputFile.c_str() << std::endl);
     return 0;
     }
-  std::set<cmStdString> coveredFileNames;
+  std::set<std::string> coveredFileNames;
   while(cmSystemTools::GetLineFromStream(fin, stdline))
     {
     // if we have a line of output from stdout
@@ -2105,10 +2105,10 @@ void cmCTestCoverageHandler::WriteXMLLabels(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void
-cmCTestCoverageHandler::SetLabelFilter(std::set<cmStdString> const& labels)
+cmCTestCoverageHandler::SetLabelFilter(std::set<std::string> const& labels)
 {
   this->LabelFilter.clear();
-  for(std::set<cmStdString>::const_iterator li = labels.begin();
+  for(std::set<std::string>::const_iterator li = labels.begin();
       li != labels.end(); ++li)
     {
     this->LabelFilter.insert(this->GetLabelId(*li));
@@ -2158,7 +2158,7 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
 {
   std::set<std::string> extraMatches;
 
-  for(std::vector<cmStdString>::iterator i = this->ExtraCoverageGlobs.begin();
+  for(std::vector<std::string>::iterator i = this->ExtraCoverageGlobs.begin();
       i != this->ExtraCoverageGlobs.end(); ++i)
     {
     cmsys::Glob gl;

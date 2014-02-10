@@ -30,7 +30,7 @@ public:
                  PBXCopyFilesBuildPhase,
                  None
   };
-  class StringVec: public std::vector<cmStdString> {};
+  class StringVec: public std::vector<std::string> {};
   static const char* PBXTypeNames[];
   virtual ~cmXCodeObject();
   cmXCodeObject(PBXType ptype, Type type);
@@ -131,7 +131,7 @@ public:
         }
       this->DependLibraries[configName].push_back(l);
     }
-  std::map<cmStdString, StringVec> const& GetDependLibraries()
+  std::map<std::string, StringVec> const& GetDependLibraries()
     {
       return this->DependLibraries;
     }
@@ -144,27 +144,27 @@ public:
         }
       this->DependTargets[configName].push_back(tName);
     }
-  std::map<cmStdString, StringVec> const& GetDependTargets()
+  std::map<std::string, StringVec> const& GetDependTargets()
     {
     return this->DependTargets;
     }
   std::vector<cmXCodeObject*> const& GetObjectList() { return this->List;}
   void SetComment(const char* c) { this->Comment = c;}
-  static void PrintString(std::ostream& os,cmStdString String);
+  static void PrintString(std::ostream& os,std::string String);
 protected:
   void PrintString(std::ostream& os) const;
 
   cmTarget* Target;
   Type TypeValue;
-  cmStdString Id;
+  std::string Id;
   PBXType IsA;
   int Version;
-  cmStdString Comment;
-  cmStdString String;
+  std::string Comment;
+  std::string String;
   cmXCodeObject* Object;
   std::vector<cmXCodeObject*> List;
-  std::map<cmStdString, StringVec> DependLibraries;
-  std::map<cmStdString, StringVec> DependTargets;
-  std::map<cmStdString, cmXCodeObject*> ObjectAttributes;
+  std::map<std::string, StringVec> DependLibraries;
+  std::map<std::string, StringVec> DependTargets;
+  std::map<std::string, cmXCodeObject*> ObjectAttributes;
 };
 #endif

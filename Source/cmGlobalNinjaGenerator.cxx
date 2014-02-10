@@ -886,7 +886,7 @@ cmGlobalNinjaGenerator
   if (target->GetType() == cmTarget::GLOBAL_TARGET) {
     // Global targets only depend on other utilities, which may not appear in
     // the TargetDepends set (e.g. "all").
-    std::set<cmStdString> const& utils = target->GetUtilities();
+    std::set<std::string> const& utils = target->GetUtilities();
     std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
     cmTargetDependSet const& targetDeps =

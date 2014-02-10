@@ -277,7 +277,7 @@ bool cmCTestSVN::UpdateImpl()
     {
     opts = this->CTest->GetCTestConfiguration("SVNUpdateOptions");
     }
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
 
   // Specify the start time for nightly testing.
   if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
@@ -287,7 +287,7 @@ bool cmCTestSVN::UpdateImpl()
 
   std::vector<char const*> svn_update;
   svn_update.push_back("update");
-  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+  for(std::vector<std::string>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     svn_update.push_back(ai->c_str());
@@ -314,9 +314,9 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
   std::string userOptions =
     this->CTest->GetCTestConfiguration("SVNOptions");
 
-  std::vector<cmStdString> parsedUserOptions =
+  std::vector<std::string> parsedUserOptions =
     cmSystemTools::ParseArguments(userOptions.c_str());
-  for(std::vector<cmStdString>::iterator i = parsedUserOptions.begin();
+  for(std::vector<std::string>::iterator i = parsedUserOptions.begin();
       i != parsedUserOptions.end(); ++i)
     {
     args.push_back(i->c_str());

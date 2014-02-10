@@ -99,7 +99,7 @@ protected:
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   virtual bool ComputeTargetDepends();
-  class VSDependSet: public std::set<cmStdString> {};
+  class VSDependSet: public std::set<std::string> {};
   class VSDependMap: public std::map<cmTarget const*, VSDependSet> {};
   VSDependMap VSTargetDepends;
   void ComputeVSTargetDepends(cmTarget&);
@@ -108,7 +108,7 @@ protected:
   std::string GetUtilityForTarget(cmTarget& target, const std::string&);
   virtual std::string WriteUtilityDepend(cmTarget const*) = 0;
   std::string GetUtilityDepend(cmTarget const* target);
-  typedef std::map<cmTarget const*, cmStdString> UtilityDependsMap;
+  typedef std::map<cmTarget const*, std::string> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
   const char* AdditionalPlatformDefinition;
 

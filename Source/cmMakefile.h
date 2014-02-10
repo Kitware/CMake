@@ -542,7 +542,7 @@ public:
   /**
    * Mark include directories as system directories.
    */
-  void AddSystemIncludeDirectories(const std::set<cmStdString> &incs);
+  void AddSystemIncludeDirectories(const std::set<std::string> &incs);
 
   /** Expand out any arguements in the vector that have ; separated
    *  strings into multiple arguements.  A new vector is created
@@ -876,7 +876,7 @@ public:
   void AddQtUiFileWithOptions(cmSourceFile *sf);
   std::vector<cmSourceFile*> GetQtUiFilesWithOptions() const;
 
-  std::set<cmStdString> const & GetSystemIncludeDirectories() const
+  std::set<std::string> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
 protected:
@@ -904,14 +904,14 @@ protected:
   std::vector<cmSourceFile*> SourceFiles;
 
   // Tests
-  std::map<cmStdString, cmTest*> Tests;
+  std::map<std::string, cmTest*> Tests;
 
   // The link-library paths.  Order matters, use std::vector (not std::set).
   std::vector<std::string> LinkDirectories;
 
   // The set of include directories that are marked as system include
   // directories.
-  std::set<cmStdString> SystemIncludeDirectories;
+  std::set<std::string> SystemIncludeDirectories;
 
   std::vector<std::string> ListFiles; // list of command files loaded
   std::vector<std::string> OutputFiles; // list of command files loaded
@@ -957,7 +957,7 @@ private:
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array
   void PrintStringVector(const char* s, const
-                         std::vector<std::pair<cmStdString, bool> >& v) const;
+                         std::vector<std::pair<std::string, bool> >& v) const;
   void PrintStringVector(const char* s,
                          const std::vector<std::string>& v) const;
 
@@ -968,10 +968,10 @@ private:
   void PushFunctionBlockerBarrier();
   void PopFunctionBlockerBarrier(bool reportError = true);
 
-  typedef std::map<cmStdString, cmStdString> StringStringMap;
+  typedef std::map<std::string, std::string> StringStringMap;
   StringStringMap MacrosMap;
 
-  std::map<cmStdString, bool> SubDirectoryOrder;
+  std::map<std::string, bool> SubDirectoryOrder;
 
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
@@ -987,7 +987,7 @@ private:
   bool CheckSystemVars;
 
   // stack of list files being read
-  std::deque<cmStdString> ListFileStack;
+  std::deque<std::string> ListFileStack;
 
   // stack of commands being invoked.
   struct CallStackEntry
@@ -1000,7 +1000,7 @@ private:
   friend class cmMakefileCall;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
-  std::map<cmStdString, cmTarget*> ImportedTargets;
+  std::map<std::string, cmTarget*> ImportedTargets;
 
   // Internal policy stack management.
   void PushPolicy(bool weak = false,

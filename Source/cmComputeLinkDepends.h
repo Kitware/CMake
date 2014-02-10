@@ -76,7 +76,7 @@ private:
 
   typedef cmTarget::LinkLibraryVectorType LinkLibraryVectorType;
 
-  std::map<cmStdString, int>::iterator
+  std::map<std::string, int>::iterator
   AllocateLinkEntry(std::string const& item);
   int AddLinkEntry(int depender_index, std::string const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
@@ -88,7 +88,7 @@ private:
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
-  std::map<cmStdString, int> LinkEntryIndex;
+  std::map<std::string, int> LinkEntryIndex;
 
   // BFS of initial dependencies.
   struct BFSEntry

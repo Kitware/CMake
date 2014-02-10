@@ -156,7 +156,7 @@ protected:
                                     const std::string& name,
                                     const char* path,
                                     const char* typeGuid,
-                                    const std::set<cmStdString>&
+                                    const std::set<std::string>&
                                     dependencies);
 
   std::string ConvertToSolutionPath(const char* path);
@@ -164,7 +164,7 @@ protected:
   std::set<std::string> IsPartOfDefaultBuild(const std::string& project,
                                              cmTarget const* target);
   std::vector<std::string> Configurations;
-  std::map<cmStdString, cmStdString> GUIDMap;
+  std::map<std::string, std::string> GUIDMap;
 
   virtual void WriteFolders(std::ostream& fout);
   virtual void WriteFoldersContent(std::ostream& fout);

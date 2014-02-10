@@ -92,7 +92,7 @@ public:
   std::set<cmTarget*> const& GetTargets() const
     { return this->DependTargets; }
 
-  std::set<cmStdString> const& GetSeenTargetProperties() const
+  std::set<std::string> const& GetSeenTargetProperties() const
     { return this->SeenTargetProperties; }
 
   std::set<cmTarget const*> const& GetAllTargetsSeen() const
@@ -130,7 +130,7 @@ private:
 
   mutable std::set<cmTarget*> DependTargets;
   mutable std::set<cmTarget const*> AllTargetsSeen;
-  mutable std::set<cmStdString> SeenTargetProperties;
+  mutable std::set<std::string> SeenTargetProperties;
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
 };

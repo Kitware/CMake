@@ -72,7 +72,7 @@ public:
     void SetType(CacheEntryType ty) { this->GetEntry().Type = ty; }
     bool Initialized() { return this->GetEntry().Initialized; }
     cmCacheManager &Container;
-    std::map<cmStdString, CacheEntry>::iterator Position;
+    std::map<std::string, CacheEntry>::iterator Position;
     CacheIterator(cmCacheManager &cm) : Container(cm) {
       this->Begin();
     }
@@ -111,8 +111,8 @@ public:
   bool LoadCache(const std::string& path);
   bool LoadCache(const std::string& path, bool internal);
   bool LoadCache(const std::string& path, bool internal,
-                 std::set<cmStdString>& excludes,
-                 std::set<cmStdString>& includes);
+                 std::set<std::string>& excludes,
+                 std::set<std::string>& includes);
 
   ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
   bool SaveCache(cmMakefile*) ;
@@ -166,7 +166,7 @@ protected:
   unsigned int CacheMinorVersion;
 private:
   cmake* CMakeInstance;
-  typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
+  typedef  std::map<std::string, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
   static void OutputKey(std::ostream& fout, std::string const& key);

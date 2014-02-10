@@ -109,9 +109,9 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
     << "\n\n";
 #endif
 
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   this->GetTarget()->GetLanguages(languages);
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end();
       ++l)
     this->WriteLanguageRules(*l);

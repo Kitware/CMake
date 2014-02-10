@@ -553,7 +553,7 @@ void cmFindPackageCommand::AddFindDefinition(const std::string& var,
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::RestoreFindDefinitions()
 {
-  for(std::map<cmStdString, OriginalDef>::iterator
+  for(std::map<std::string, OriginalDef>::iterator
         i = this->OriginalDefs.begin(); i != this->OriginalDefs.end(); ++i)
     {
     OriginalDef const& od = i->second;
