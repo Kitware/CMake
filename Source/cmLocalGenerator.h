@@ -321,7 +321,7 @@ public:
    *
    * and is monotonically increasing with the CMake version.
    */
-  unsigned int GetBackwardsCompatibility();
+  cmIML_INT_uint64_t GetBackwardsCompatibility();
 
   /**
    * Test whether compatibility is set to a given version or lower.
@@ -460,7 +460,7 @@ protected:
   bool RelativePathsConfigured;
   bool PathConversionsSetup;
 
-  unsigned int BackwardsCompatibility;
+  cmIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;
 private:
   std::string ConvertToOutputForExistingCommon(const char* remote,
