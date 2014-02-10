@@ -232,7 +232,7 @@ public:
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
 
-  const char* GetFeature(const char* feature,
+  const char* GetFeature(const std::string& feature,
                          const std::string& config) const;
 
   bool IsImported() const {return this->IsImportedTarget;}

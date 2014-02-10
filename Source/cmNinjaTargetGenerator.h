@@ -70,8 +70,8 @@ protected:
   std::string LanguageCompilerRule(const std::string& lang) const
   { return lang + "_COMPILER"; }
 
-  const char* GetFeature(const char* feature);
-  bool GetFeatureAsBool(const char* feature);
+  const char* GetFeature(const std::string& feature);
+  bool GetFeatureAsBool(const std::string& feature);
   void AddFeatureFlags(std::string& flags, const std::string& lang);
 
   /**
