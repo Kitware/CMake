@@ -2266,25 +2266,32 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
-    bool cacheOptions = false;
-    std::vector<std::string> entryOptions = (*it)->CachedEntries;
-    if(entryOptions.empty())
+    std::vector<std::string>& entriesRef = (*it)->CachedEntries;
+    std::vector<std::string> localEntries;
+    std::vector<std::string>* entryOptions = &entriesRef;
+    if(entryOptions->empty())
       {
       cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
                                                 config,
                                                 false,
                                                 tgt,
                                                 dagChecker),
-                                      entryOptions);
+                                      localEntries);
       if (mf->IsGeneratingBuildSystem()
           && !(*it)->ge->GetHadContextSensitiveCondition())
         {
-        cacheOptions = true;
+        // Cache the result.
+        *entryOptions = localEntries;
+        }
+      else
+        {
+        // Use the context-sensitive results here.
+        entryOptions = &localEntries;
         }
       }
     std::string usedOptions;
     for(std::vector<std::string>::iterator
-          li = entryOptions.begin(); li != entryOptions.end(); ++li)
+          li = entryOptions->begin(); li != entryOptions->end(); ++li)
       {
       std::string opt = *li;
 
@@ -2296,10 +2303,6 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
           usedOptions += " * " + opt + "\n";
           }
         }
-      }
-    if (cacheOptions)
-      {
-      (*it)->CachedEntries = entryOptions;
       }
     if (!usedOptions.empty())
       {
