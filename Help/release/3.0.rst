@@ -322,6 +322,11 @@ New Diagnostics
   messages up front and stops processing when no working compiler
   is known to be available.
 
+* Target sources specified with the :command:`add_library` or
+  :command:`add_executable` command learned to reject items which
+  require an undocumented extra layer of variable expansion.
+  See policy :policy:`CMP0049`.
+
 Deprecated and Removed Features
 ===============================
 
