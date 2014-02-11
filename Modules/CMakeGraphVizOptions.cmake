@@ -93,6 +93,20 @@
 #
 #  * Mandatory : NO
 #  * Default   : empty
+#
+# .. variable:: GRAPHVIZ_GENERATE_PER_TARGET
+#
+#  Set this to FALSE to exclude per target graphs ``foo.dot.<target>``.
+#
+#  * Mandatory : NO
+#  * Default   : TRUE
+#
+# .. variable:: GRAPHVIZ_GENERATE_DEPENDERS
+#
+#  Set this to FALSE to exclude depender graphs ``foo.dot.<target>.dependers``.
+#
+#  * Mandatory : NO
+#  * Default   : TRUE
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

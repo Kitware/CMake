@@ -53,6 +53,8 @@ cmGraphVizWriter::cmGraphVizWriter(const std::vector<cmLocalGenerator*>&
 ,GenerateForSharedLibs(true)
 ,GenerateForModuleLibs(true)
 ,GenerateForExternals(true)
+,GeneratePerTarget(true)
+,GenerateDependers(true)
 ,LocalGenerators(localGenerators)
 ,HaveTargetsAndLibs(false)
 {
@@ -116,6 +118,8 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_bool_if_set(this->GenerateForSharedLibs, "GRAPHVIZ_SHARED_LIBS");
   __set_bool_if_set(this->GenerateForModuleLibs, "GRAPHVIZ_MODULE_LIBS");
   __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
+  __set_bool_if_set(this->GeneratePerTarget, "GRAPHVIZ_GENERATE_PER_TARGET");
+  __set_bool_if_set(this->GenerateDependers, "GRAPHVIZ_GENERATE_DEPENDERS");
 
   cmStdString ignoreTargetsRegexes;
   __set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
@@ -149,6 +153,11 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
 // which other targets depend on it.
 void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
 {
+  if(this->GenerateDependers == false)
+    {
+    return;
+    }
+
   this->CollectTargetsAndLibs();
 
   for(std::map<cmStdString, const cmTarget*>::const_iterator ptrIt =
@@ -195,6 +204,11 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
 // on which targets it depends.
 void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
 {
+  if(this->GeneratePerTarget == false)
+    {
+    return;
+    }
+
   this->CollectTargetsAndLibs();
 
   for(std::map<cmStdString, const cmTarget*>::const_iterator ptrIt =
