@@ -357,6 +357,11 @@ KWSYS_IOS_FILES="
   iostream \
   sstream"
 
+KWIML_FILES='
+  ABI.h
+  INT.h
+'
+
 # Display CMake bootstrap usage
 cmake_usage()
 {
@@ -704,6 +709,11 @@ for a in stl ios; do
     cmake_error 5 "Cannot create directory ${cmake_bootstrap_dir}/cmsys/${a}"
   fi
 done
+
+[ -d "cmIML" ] || mkdir "cmIML"
+if [ ! -d "cmIML" ]; then
+  cmake_error 12 "Cannot create directory ${cmake_bootstrap_dir}/cmIML"
+fi
 
 # Delete all the bootstrap files
 rm -f "${cmake_bootstrap_dir}/cmake_bootstrap.log"
@@ -1498,6 +1508,11 @@ cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_a" \
 for a in string vector set map algorithm; do
   cmake_replace_string "${cmake_bootstrap_dir}/cmsys/stl/stl.hxx_b" \
     "${cmake_bootstrap_dir}/cmsys/stl/${a}" KWSYS_STL_HEADER ${a}
+done
+
+for a in ${KWIML_FILES}; do
+  cmake_replace_string "${cmake_source_dir}/Utilities/KWIML/${a}.in" \
+     "${cmake_bootstrap_dir}/cmIML/${a}" KWIML cmIML
 done
 
 # Generate Makefile

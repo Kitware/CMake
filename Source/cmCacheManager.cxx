@@ -930,7 +930,7 @@ bool cmCacheManager::NeedCacheCompatibility(int major, int minor)
 
   // Compatibility is needed if the cache version is equal to or lower
   // than the given version.
-  unsigned int actual_compat =
+  cmIML_INT_uint64_t actual_compat =
     CMake_VERSION_ENCODE(this->CacheMajorVersion, this->CacheMinorVersion, 0);
   return (actual_compat &&
           actual_compat <= CMake_VERSION_ENCODE(major, minor, 0));

@@ -19,15 +19,17 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
-#include "cmVersionConfig.h"
+#include "cmVersionMacros.h"
+#include "cmVersion.h"
 
 #define STRINGIFY_HELPER(X) #X
 #define STRINGIFY(X) STRINGIFY_HELPER(X)
 
 #define DEVEL_CMAKE_VERSION(maj, min, patch) \
-  (maj > CMake_VERSION_MAJOR \
-  || min > CMake_VERSION_MINOR \
-  || patch > CMake_VERSION_PATCH) ? \
+  (CMake_VERSION_ENCODE(maj, min, patch) > \
+   CMake_VERSION_ENCODE(CMake_VERSION_MAJOR, CMake_VERSION_MINOR, \
+                        CMake_VERSION_PATCH) \
+  ) ? \
     STRINGIFY(CMake_VERSION_MAJOR) "." STRINGIFY(CMake_VERSION_MINOR) "." \
     STRINGIFY(CMake_VERSION_PATCH) "." STRINGIFY(CMake_VERSION_TWEAK) \
   : #maj "." #min "." #patch
