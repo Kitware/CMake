@@ -327,6 +327,9 @@ New Diagnostics
   require an undocumented extra layer of variable expansion.
   See policy :policy:`CMP0049`.
 
+* Use of :command:`add_custom_command` undocumented ``SOURCE``
+  signatures now results in an error.  See policy :policy:`CMP0050`.
+
 Deprecated and Removed Features
 ===============================
 

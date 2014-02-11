@@ -344,6 +344,36 @@ bool cmAddCustomCommandCommand
     }
   else
     {
+    bool issueMessage = true;
+    cmOStringStream e;
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0050))
+    {
+    case cmPolicies::WARN:
+      e << (this->Makefile->GetPolicies()
+                ->GetPolicyWarning(cmPolicies::CMP0050)) << "\n";
+      break;
+    case cmPolicies::OLD:
+      issueMessage = false;
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::NEW:
+      messageType = cmake::FATAL_ERROR;
+      break;
+    }
+
+    if (issueMessage)
+      {
+      e << "The SOURCE signatures of add_custom_command are no longer "
+           "supported.";
+      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      if (messageType == cmake::FATAL_ERROR)
+        {
+        return false;
+        }
+      }
+
     // Use the old-style mode for backward compatibility.
     this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
                                              source.c_str(), commandLines,

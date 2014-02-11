@@ -101,3 +101,4 @@ All Policies
    /policy/CMP0047
    /policy/CMP0048
    /policy/CMP0049
+   /policy/CMP0050
