@@ -841,11 +841,16 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
       {
       // Expand the list.
       std::vector<std::string> defs;
-      cmSystemTools::ExpandListArgument(cdefs, defs);
+      cmGeneratorExpression::Split(cdefs, defs);
 
       for(std::vector<std::string>::const_iterator di = defs.begin();
           di != defs.end(); ++di)
         {
+        if (cmGeneratorExpression::Find(*di) != std::string::npos)
+          {
+          continue;
+          }
+
         std::string::size_type equals = di->find('=', 0);
         std::string::size_type enddef = di->length();
 
