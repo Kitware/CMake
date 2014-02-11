@@ -15,6 +15,21 @@
 #include "cmCommand.h"
 #include "cmGeneratorExpression.h"
 
+#include "cmVersionMacros.h"
+#include "cmVersion.h"
+
+#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
+#define DEVEL_CMAKE_VERSION(maj, min, patch) \
+  (CMake_VERSION_ENCODE(maj, min, patch) > \
+   CMake_VERSION_ENCODE(CMake_VERSION_MAJOR, CMake_VERSION_MINOR, \
+                        CMake_VERSION_PATCH) \
+  ) ? \
+    STRINGIFY(CMake_VERSION_MAJOR) "." STRINGIFY(CMake_VERSION_MINOR) "." \
+    STRINGIFY(CMake_VERSION_PATCH) "." STRINGIFY(CMake_VERSION_TWEAK) \
+  : #maj "." #min "." #patch
+
 class cmTargetExport;
 
 /** \class cmExportFileGenerator
