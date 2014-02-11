@@ -317,8 +317,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     // variable only for non-executable targets.  This preserves
     // compatibility with previous CMake versions in which executables
     // did not support this variable.  Projects may still specify the
-    // property directly.  TODO: Make this depend on backwards
-    // compatibility setting.
+    // property directly.
     if(this->TargetTypeValue != cmTarget::EXECUTABLE
         && this->TargetTypeValue != cmTarget::INTERFACE_LIBRARY)
       {
