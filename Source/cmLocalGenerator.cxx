@@ -1972,7 +1972,7 @@ void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
       flags += " ";
       flags += sysrootFlag;
       flags += " ";
-      flags += sysroot;
+      flags += this->Convert(sysroot, NONE, SHELL);
       }
 
     if (deploymentTargetFlag && *deploymentTargetFlag &&
