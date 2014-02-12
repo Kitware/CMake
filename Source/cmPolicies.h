@@ -102,6 +102,8 @@ public:
     CMP0046, ///< Error on non-existent dependency in add_dependencies
     CMP0047, ///< Use QCC compiler id for the qcc drivers on QNX.
     CMP0048, ///< project() command manages VERSION variables
+    CMP0049, ///< Do not expand variables in target source entries
+    CMP0050, ///< Disallow add_custom_command SOURCE signatures
 
     /** \brief Always the last entry.
      *

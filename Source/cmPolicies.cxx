@@ -333,6 +333,16 @@ cmPolicies::cmPolicies()
     CMP0048, "CMP0048",
     "project() command manages VERSION variables.",
     3,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0049, "CMP0049",
+    "Do not expand variables in target source entries.",
+    3,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0050, "CMP0050",
+    "Disallow add_custom_command SOURCE signatures.",
+    3,0,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

@@ -590,6 +590,38 @@ cmSourceFile* cmTarget::AddSource(const char* s)
   // For backwards compatibility replace varibles in source names.
   // This should eventually be removed.
   this->Makefile->ExpandVariablesInString(src);
+  if (src != s)
+    {
+    cmOStringStream e;
+    bool noMessage = false;
+    cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0049))
+      {
+      case cmPolicies::WARN:
+        e << (this->Makefile->GetPolicies()
+              ->GetPolicyWarning(cmPolicies::CMP0049)) << "\n";
+        break;
+      case cmPolicies::OLD:
+        noMessage = true;
+        break;
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::NEW:
+        messageType = cmake::FATAL_ERROR;
+      }
+    if (!noMessage)
+      {
+      e << "Legacy variable expansion in source file \""
+        << s << "\" expanded to \"" << src << "\" in target \""
+        << this->GetName() << "\".  This behavior will be removed in a "
+        "future version of CMake.";
+      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      if (messageType == cmake::FATAL_ERROR)
+        {
+        return 0;
+        }
+      }
+    }
 
   cmSourceFile* sf = this->Makefile->GetOrCreateSource(src.c_str());
   this->AddSourceFile(sf);
