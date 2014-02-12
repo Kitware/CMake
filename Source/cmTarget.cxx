@@ -4459,23 +4459,24 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     // target itself has a POSITION_INDEPENDENT_CODE which disagrees
     // with a dependency.
 
-    if (!li->Target)
+    cmTarget const* theTarget = li->Target;
+    if (!theTarget)
       {
       continue;
       }
 
-    const bool ifaceIsSet = li->Target->GetProperties()
+    const bool ifaceIsSet = theTarget->GetProperties()
                             .find("INTERFACE_" + p)
-                            != li->Target->GetProperties().end();
+                            != theTarget->GetProperties().end();
     PropertyType ifacePropContent =
-                    getTypedProperty<PropertyType>(li->Target,
+                    getTypedProperty<PropertyType>(theTarget,
                               ("INTERFACE_" + p).c_str(), 0);
 
     std::string reportEntry;
     if (ifaceIsSet)
       {
       reportEntry += " * Target \"";
-      reportEntry += li->Target->GetName();
+      reportEntry += theTarget->GetName();
       reportEntry += "\" property value \"";
       reportEntry += valueAsString<PropertyType>(ifacePropContent);
       reportEntry += "\" ";
@@ -4496,7 +4497,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
           e << "Property " << p << " on target \""
             << tgt->GetName() << "\" does\nnot match the "
             "INTERFACE_" << p << " property requirement\nof "
-            "dependency \"" << li->Target->GetName() << "\".\n";
+            "dependency \"" << theTarget->GetName() << "\".\n";
           cmSystemTools::Error(e.str().c_str());
           break;
           }
@@ -4530,7 +4531,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
             << tgt->GetName() << "\" is\nimplied to be " << defaultValue
             << " because it was used to determine the link libraries\n"
                "already. The INTERFACE_" << p << " property on\ndependency \""
-            << li->Target->GetName() << "\" is in conflict.\n";
+            << theTarget->GetName() << "\" is in conflict.\n";
           cmSystemTools::Error(e.str().c_str());
           break;
           }
@@ -4561,7 +4562,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
             {
             cmOStringStream e;
             e << "The INTERFACE_" << p << " property of \""
-              << li->Target->GetName() << "\" does\nnot agree with the value "
+              << theTarget->GetName() << "\" does\nnot agree with the value "
                 "of " << p << " already determined\nfor \""
               << tgt->GetName() << "\".\n";
             cmSystemTools::Error(e.str().c_str());
