@@ -460,6 +460,15 @@ public:
   /** Tokenize a string */
   static std::vector<std::string> tokenize(const std::string& str,
                                            const std::string& sep);
+
+#ifdef _WIN32
+  struct WindowsFileRetry
+  {
+    unsigned int Count;
+    unsigned int Delay;
+  };
+  static WindowsFileRetry GetWindowsFileRetry();
+#endif
 private:
   static bool s_ForceUnixPaths;
   static bool s_RunCommandHideConsole;
