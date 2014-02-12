@@ -11,5 +11,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+include(Platform/Darwin-Intel)
+__darwin_compiler_intel(Fortran)
+
 set(CMAKE_Fortran_OSX_COMPATIBILITY_VERSION_FLAG "-compatibility_version ")
 set(CMAKE_Fortran_OSX_CURRENT_VERSION_FLAG "-current_version ")
