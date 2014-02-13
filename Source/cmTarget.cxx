@@ -4424,12 +4424,13 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
   assert((impliedByUse ^ explicitlySet)
       || (!impliedByUse && !explicitlySet));
 
-  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
-  if(!info)
+  std::vector<cmTarget*> deps;
+  tgt->GetTransitiveTargetClosure(config, tgt, deps);
+
+  if(deps.empty())
     {
     return propContent;
     }
-  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
   bool propInitialized = explicitlySet;
 
   std::string report = " * Target \"";
@@ -4449,7 +4450,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     report += "\" property not set.\n";
     }
 
-  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+  for(std::vector<cmTarget*>::const_iterator li =
       deps.begin();
       li != deps.end(); ++li)
     {
@@ -4459,11 +4460,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     // target itself has a POSITION_INDEPENDENT_CODE which disagrees
     // with a dependency.
 
-    cmTarget const* theTarget = li->Target;
-    if (!theTarget)
-      {
-      continue;
-      }
+    cmTarget const* theTarget = *li;
 
     const bool ifaceIsSet = theTarget->GetProperties()
                             .find("INTERFACE_" + p)
@@ -4643,23 +4640,19 @@ bool isLinkDependentProperty(cmTarget const* tgt, const std::string &p,
                              const char *interfaceProperty,
                              const char *config)
 {
-  cmComputeLinkInformation *info = tgt->GetLinkInformation(config);
-  if(!info)
+  std::vector<cmTarget*> deps;
+  tgt->GetTransitiveTargetClosure(config, tgt, deps);
+
+  if(deps.empty())
     {
     return false;
     }
 
-  const cmComputeLinkInformation::ItemVector &deps = info->GetItems();
-
-  for(cmComputeLinkInformation::ItemVector::const_iterator li =
+  for(std::vector<cmTarget*>::const_iterator li =
       deps.begin();
       li != deps.end(); ++li)
     {
-    if (!li->Target)
-      {
-      continue;
-      }
-    const char *prop = li->Target->GetProperty(interfaceProperty);
+    const char *prop = (*li)->GetProperty(interfaceProperty);
     if (!prop)
       {
       continue;
@@ -5275,6 +5268,51 @@ cmTarget::GetLinkInterfaceLibraries(const char* config,
     }
 
   return i->second.Exists ? &i->second : 0;
+}
+
+//----------------------------------------------------------------------------
+void processILibs(const char* config,
+                  cmTarget const* headTarget,
+                  std::string const& name,
+                  std::vector<cmTarget*>& tgts, std::set<cmTarget*>& emitted)
+{
+  if (cmTarget* tgt = headTarget->GetMakefile()
+                                ->FindTargetToUse(name.c_str()))
+    {
+    if (emitted.insert(tgt).second)
+      {
+      tgts.push_back(tgt);
+      std::vector<std::string> ilibs;
+      cmTarget::LinkInterface const* iface =
+                          tgt->GetLinkInterfaceLibraries(config, headTarget);
+      if (iface)
+        {
+        for(std::vector<std::string>::const_iterator
+            it = iface->Libraries.begin();
+            it != iface->Libraries.end(); ++it)
+          {
+          processILibs(config, headTarget, *it, tgts, emitted);
+          }
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetTransitiveTargetClosure(const char* config,
+                                      cmTarget const* headTarget,
+                                      std::vector<cmTarget*> &tgts) const
+{
+  std::set<cmTarget*> emitted;
+
+  cmTarget::LinkImplementation const* impl
+      = this->GetLinkImplementationLibraries(config, headTarget);
+
+  for(std::vector<std::string>::const_iterator it = impl->Libraries.begin();
+      it != impl->Libraries.end(); ++it)
+    {
+      processILibs(config, headTarget, *it, tgts, emitted);
+    }
 }
 
 //----------------------------------------------------------------------------
