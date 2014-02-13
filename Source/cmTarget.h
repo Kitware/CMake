@@ -696,6 +696,7 @@ private:
   void ComputeLinkImplementation(const char* config,
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
+  void ComputeLinkImplementationLanguages(LinkImplementation& impl) const;
   void ComputeLinkClosure(const char* config, LinkClosure& lc,
                           cmTarget const* head) const;
 
