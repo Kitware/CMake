@@ -282,6 +282,7 @@ if(BUILD_TESTING)
     set(ConfigSources_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=Debug)
     ADD_TEST_MACRO(ConfigSources ConfigSources)
   endif()
+  ADD_TEST_MACRO(SourcesProperty SourcesProperty)
   set_tests_properties(EmptyLibrary PROPERTIES
     PASS_REGULAR_EXPRESSION "CMake Error: CMake can not determine linker language for target: test")
   ADD_TEST_MACRO(CrossCompile CrossCompile)

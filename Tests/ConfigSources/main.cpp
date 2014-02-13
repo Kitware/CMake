@@ -1,5 +1,7 @@
 
+#include "iface_debug.h"
+
 int main(int argc, char** argv)
 {
-  return 0;
+  return iface_src() + iface_debug();
 }

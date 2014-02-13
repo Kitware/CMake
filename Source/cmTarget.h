@@ -136,9 +136,11 @@ public:
    * Get the list of the source files used by this target
    */
   void GetSourceFiles(std::vector<std::string> &files,
-                      const std::string& config) const;
+                      const std::string& config,
+                      cmTarget const* head = 0) const;
   void GetSourceFiles(std::vector<cmSourceFile*> &files,
-                      const std::string& config) const;
+                      const std::string& config,
+                      cmTarget const* head = 0) const;
   bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   /**
@@ -469,7 +471,8 @@ public:
   // information to forward these property changes to the targets
   // until we have per-target object file properties.
   void GetLanguages(std::set<std::string>& languages,
-                    const std::string& config) const;
+                    std::string const& config,
+                    cmTarget const* head = 0) const;
 
   /** Return whether this target is an executable with symbol exports
       enabled.  */
@@ -743,7 +746,8 @@ private:
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
   void ComputeLinkImplementationLanguages(const std::string& config,
-                                          LinkImplementation& impl) const;
+                                          LinkImplementation& impl,
+                                          cmTarget const* head) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc,
                           cmTarget const* head) const;
 
