@@ -264,6 +264,8 @@ public:
       if the target cannot be linked.  */
   LinkInterface const* GetLinkInterface(const char* config,
                                         cmTarget const* headTarget) const;
+  LinkInterface const* GetLinkInterfaceLibraries(const char* config,
+                                        cmTarget const* headTarget) const;
   void GetTransitivePropertyTargets(const char* config,
                                         cmTarget const* headTarget,
                                         std::vector<cmTarget*> &libs) const;
@@ -283,6 +285,9 @@ public:
     std::vector<std::string> WrongConfigLibraries;
   };
   LinkImplementation const* GetLinkImplementation(const char* config,
+                                                  cmTarget const* head) const;
+
+  LinkImplementation const* GetLinkImplementationLibraries(const char* config,
                                                   cmTarget const* head) const;
 
   /** Link information from the transitive closure of the link
