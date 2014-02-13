@@ -63,19 +63,12 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
   return 0;
 }
 
-static void handleSystemIncludesDep(cmMakefile *mf, const std::string &name,
+static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
                                   const char *config, cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   std::vector<std::string>& result,
                                   bool excludeImported)
 {
-  cmTarget* depTgt = mf->FindTargetToUse(name);
-
-  if (!depTgt)
-    {
-    return;
-    }
-
   cmListFileBacktrace lfbt;
 
   if (const char* dirs =
@@ -225,26 +218,25 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                                           &dagChecker), result);
       }
 
-    std::set<cmStdString> uniqueDeps;
+    std::set<cmTarget*> uniqueDeps;
     for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
         li != impl->Libraries.end(); ++li)
       {
-      if (uniqueDeps.insert(*li).second)
+      cmTarget* tgt = this->Makefile->FindTargetToUse(*li);
+      if (!tgt)
         {
-        cmTarget* tgt = this->Makefile->FindTargetToUse(*li);
+        continue;
+        }
 
-        if (!tgt)
-          {
-          continue;
-          }
-
-        handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
+      if (uniqueDeps.insert(tgt).second)
+        {
+        handleSystemIncludesDep(this->Makefile, tgt, config, this->Target,
                                 &dagChecker, result, excludeImported);
 
-        std::vector<std::string> deps;
-        tgt->GetTransitivePropertyLinkLibraries(config, this->Target, deps);
+        std::vector<cmTarget*> deps;
+        tgt->GetTransitivePropertyTargets(config, this->Target, deps);
 
-        for(std::vector<std::string>::const_iterator di = deps.begin();
+        for(std::vector<cmTarget*>::const_iterator di = deps.begin();
             di != deps.end(); ++di)
           {
           if (uniqueDeps.insert(*di).second)

@@ -5213,10 +5213,9 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(const char* config,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetTransitivePropertyLinkLibraries(
-                                      const char* config,
+void cmTarget::GetTransitivePropertyTargets(const char* config,
                                       cmTarget const* headTarget,
-                                      std::vector<std::string> &libs) const
+                                      std::vector<cmTarget*> &tgts) const
 {
   cmTarget::LinkInterface const* iface = this->GetLinkInterface(config,
                                                                 headTarget);
@@ -5228,7 +5227,15 @@ void cmTarget::GetTransitivePropertyLinkLibraries(
       || this->GetPolicyStatusCMP0022() == cmPolicies::WARN
       || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
-    libs = iface->Libraries;
+    for(std::vector<std::string>::const_iterator it = iface->Libraries.begin();
+        it != iface->Libraries.end(); ++it)
+      {
+      if (cmTarget* tgt = headTarget->GetMakefile()
+                                    ->FindTargetToUse(it->c_str()))
+        {
+        tgts.push_back(tgt);
+        }
+      }
     return;
     }
 
@@ -5246,12 +5253,23 @@ void cmTarget::GetTransitivePropertyLinkLibraries(
   cmGeneratorExpressionDAGChecker dagChecker(lfbt, this->GetName(),
                                               linkIfaceProp, 0, 0);
   dagChecker.SetTransitivePropertiesOnly();
+  std::vector<std::string> libs;
   cmSystemTools::ExpandListArgument(ge.Parse(interfaceLibs)->Evaluate(
                                       this->Makefile,
                                       config,
                                       false,
                                       headTarget,
                                       this, &dagChecker), libs);
+
+  for(std::vector<std::string>::const_iterator it = libs.begin();
+      it != libs.end(); ++it)
+    {
+    if (cmTarget* tgt = headTarget->GetMakefile()
+                                  ->FindTargetToUse(it->c_str()))
+      {
+      tgts.push_back(tgt);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
