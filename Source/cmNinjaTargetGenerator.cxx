@@ -485,8 +485,9 @@ cmNinjaTargetGenerator
     << this->GetTargetName()
     << "\n\n";
 
+  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands);
+  this->GeneratorTarget->GetCustomCommands(customCommands, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = customCommands.begin();
       si != customCommands.end(); ++si)
@@ -495,17 +496,17 @@ cmNinjaTargetGenerator
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      }
   std::vector<cmSourceFile const*> headerSources;
-  this->GeneratorTarget->GetHeaderSources(headerSources);
+  this->GeneratorTarget->GetHeaderSources(headerSources, config);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     headerSources,
     this->MacOSXContentGenerator);
   std::vector<cmSourceFile const*> extraSources;
-  this->GeneratorTarget->GetExtraSources(extraSources);
+  this->GeneratorTarget->GetExtraSources(extraSources, config);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     extraSources,
     this->MacOSXContentGenerator);
   std::vector<cmSourceFile const*> externalObjects;
-  this->GeneratorTarget->GetExternalObjects(externalObjects);
+  this->GeneratorTarget->GetExternalObjects(externalObjects, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = externalObjects.begin();
       si != externalObjects.end(); ++si)
@@ -513,13 +514,13 @@ cmNinjaTargetGenerator
     this->Objects.push_back(this->GetSourceFilePath(*si));
     }
   std::vector<cmSourceFile const*> objectSources;
-  this->GeneratorTarget->GetObjectSources(objectSources);
+  this->GeneratorTarget->GetObjectSources(objectSources, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = objectSources.begin(); si != objectSources.end(); ++si)
     {
     this->WriteObjectBuildStatement(*si);
     }
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile(config);
   if(!def.empty())
     {
     this->ModuleDefinitionFile = this->ConvertToNinjaPath(def.c_str());
@@ -565,7 +566,8 @@ cmNinjaTargetGenerator
 
   // Add order-only dependencies on custom command outputs.
   std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands);
+  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  this->GeneratorTarget->GetCustomCommands(customCommands, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = customCommands.begin();
       si != customCommands.end(); ++si)

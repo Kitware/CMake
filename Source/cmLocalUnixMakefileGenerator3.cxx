@@ -200,7 +200,8 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
       continue;
       }
     std::vector<cmSourceFile const*> objectSources;
-    gt->GetObjectSources(objectSources);
+    gt->GetObjectSources(objectSources, this->Makefile
+                                    ->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     // Compute full path to object file directory for this target.
     std::string dir;
     dir += gt->Makefile->GetCurrentOutputDirectory();
@@ -1262,7 +1263,8 @@ cmLocalUnixMakefileGenerator3
     {
     // Get the set of source languages in the target.
     std::set<std::string> languages;
-    target.GetLanguages(languages);
+    target.GetLanguages(languages,
+                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"
          << "foreach(lang";

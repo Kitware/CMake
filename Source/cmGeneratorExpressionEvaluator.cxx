@@ -1272,7 +1272,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       }
 
     std::vector<cmSourceFile const*> objectSources;
-    gt->GetObjectSources(objectSources);
+    gt->GetObjectSources(objectSources, context->Config);
     std::map<cmSourceFile const*, std::string> mapping;
 
     for(std::vector<cmSourceFile const*>::const_iterator it

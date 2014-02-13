@@ -51,6 +51,11 @@
 #include "yaf.h"
 #include "libC.h"
 #include "resourcetester.h"
+#ifdef TEST_DEBUG_CLASS
+#include "debug_class.h"
+#include <iostream>
+#endif
+
 
 int main(int argv, char **args)
 {
@@ -80,6 +85,10 @@ int main(int argv, char **args)
   ResourceTester rt;
 
   QTimer::singleShot(0, &rt, SLOT(doTest()));
+
+#ifdef TEST_DEBUG_CLASS
+  std::cout << DebugClass::staticMetaObject.className() << std::endl;
+#endif
 
   return app.exec();
 }

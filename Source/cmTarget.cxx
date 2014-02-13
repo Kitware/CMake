@@ -543,7 +543,8 @@ bool cmTarget::IsBundleOnApple() const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetSourceFiles(std::vector<std::string> &files) const
+void cmTarget::GetSourceFiles(std::vector<std::string> &files,
+                              const std::string& config) const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
   for(std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
@@ -552,7 +553,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files) const
     {
     std::vector<std::string> srcs;
     cmSystemTools::ExpandListArgument((*si)->ge->Evaluate(this->Makefile,
-                                        "",
+                                        config,
                                         false,
                                         this),
                                       srcs);
@@ -580,10 +581,68 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
+bool
+cmTarget::GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const
+{
+  std::vector<std::string> configs;
+  this->Makefile->GetConfigurations(configs);
+  if (configs.empty())
+    {
+    configs.push_back("");
+    }
+
+  std::vector<std::string>::const_iterator it = configs.begin();
+  const std::string& firstConfig = *it;
+  this->GetSourceFiles(files, firstConfig);
+
+  for ( ; it != configs.end(); ++it)
+    {
+    std::vector<cmSourceFile*> configFiles;
+    this->GetSourceFiles(configFiles, *it);
+    if (configFiles != files)
+      {
+      std::string firstConfigFiles;
+      const char* sep = "";
+      for (std::vector<cmSourceFile*>::const_iterator fi = files.begin();
+           fi != files.end(); ++fi)
+        {
+        firstConfigFiles += sep;
+        firstConfigFiles += (*fi)->GetFullPath();
+        sep = "\n  ";
+        }
+
+      std::string thisConfigFiles;
+      sep = "";
+      for (std::vector<cmSourceFile*>::const_iterator fi = configFiles.begin();
+           fi != configFiles.end(); ++fi)
+        {
+        thisConfigFiles += sep;
+        thisConfigFiles += (*fi)->GetFullPath();
+        sep = "\n  ";
+        }
+      cmOStringStream e;
+      e << "Target \"" << this->Name << "\" has source files which vary by "
+        "configuration. This is not supported by the \""
+        << this->Makefile->GetLocalGenerator()
+                         ->GetGlobalGenerator()->GetName()
+        << "\" generator.\n"
+          "Config \"" << firstConfig << "\":\n"
+          "  " << firstConfigFiles << "\n"
+          "Config \"" << *it << "\":\n"
+          "  " << thisConfigFiles << "\n";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
+                              const std::string& config) const
 {
   std::vector<std::string> srcs;
-  this->GetSourceFiles(srcs);
+  this->GetSourceFiles(srcs, config);
 
   std::set<cmSourceFile*> emitted;
 
@@ -4993,10 +5052,11 @@ bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetLanguages(std::set<std::string>& languages) const
+void cmTarget::GetLanguages(std::set<std::string>& languages,
+                            const std::string& config) const
 {
   std::vector<cmSourceFile*> sourceFiles;
-  this->GetSourceFiles(sourceFiles);
+  this->GetSourceFiles(sourceFiles, config);
   for(std::vector<cmSourceFile*>::const_iterator
         i = sourceFiles.begin(); i != sourceFiles.end(); ++i)
     {
@@ -5037,7 +5097,7 @@ void cmTarget::GetLanguages(std::set<std::string>& languages) const
     cmGeneratorTarget* gt = this->Makefile->GetLocalGenerator()
                                 ->GetGlobalGenerator()
                                 ->GetGeneratorTarget(this);
-    gt->GetExternalObjects(externalObjects);
+    gt->GetExternalObjects(externalObjects, config);
     for(std::vector<cmSourceFile const*>::const_iterator
           i = externalObjects.begin(); i != externalObjects.end(); ++i)
       {
@@ -5051,7 +5111,7 @@ void cmTarget::GetLanguages(std::set<std::string>& languages) const
   for(std::vector<cmTarget*>::const_iterator
       i = objectLibraries.begin(); i != objectLibraries.end(); ++i)
     {
-    (*i)->GetLanguages(languages);
+    (*i)->GetLanguages(languages, config);
     }
 }
 
@@ -5990,7 +6050,7 @@ cmTarget::GetLinkImplementation(const std::string& config,
     // Compute the link implementation for this configuration.
     LinkImplementation impl;
     this->ComputeLinkImplementation(config, impl, head);
-    this->ComputeLinkImplementationLanguages(impl);
+    this->ComputeLinkImplementationLanguages(config, impl);
 
     // Store the information for this configuration.
     cmTargetInternals::LinkImplMapType::value_type entry(key, impl);
@@ -5998,7 +6058,7 @@ cmTarget::GetLinkImplementation(const std::string& config,
     }
   else if (i->second.Languages.empty())
     {
-    this->ComputeLinkImplementationLanguages(i->second);
+    this->ComputeLinkImplementationLanguages(config, i->second);
     }
 
   return &i->second;
@@ -6111,12 +6171,13 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
 
 //----------------------------------------------------------------------------
 void
-cmTarget::ComputeLinkImplementationLanguages(LinkImplementation& impl) const
+cmTarget::ComputeLinkImplementationLanguages(const std::string& config,
+                                             LinkImplementation& impl) const
 {
   // This target needs runtime libraries for its source languages.
   std::set<std::string> languages;
   // Get languages used in our source files.
-  this->GetLanguages(languages);
+  this->GetLanguages(languages, config);
   // Copy the set of langauges to the link implementation.
   for(std::set<std::string>::iterator li = languages.begin();
       li != languages.end(); ++li)

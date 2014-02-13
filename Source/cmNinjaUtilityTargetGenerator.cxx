@@ -46,7 +46,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
   }
 
   std::vector<cmSourceFile*> sources;
-  this->GetTarget()->GetSourceFiles(sources);
+  std::string config = this->GetMakefile()
+                           ->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  this->GetTarget()->GetSourceFiles(sources, config);
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {

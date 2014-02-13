@@ -1330,7 +1330,7 @@ cmLocalVisualStudio7GeneratorInternals
   cmGeneratorTarget* gt =
     lg->GetGlobalGenerator()->GetGeneratorTarget(t);
   std::vector<std::string> objs;
-  gt->UseObjectLibraries(objs);
+  gt->UseObjectLibraries(objs, "");
   const char* sep = isep? isep : "";
   for(std::vector<std::string>::const_iterator
         oi = objs.begin(); oi != objs.end(); ++oi)
@@ -1397,7 +1397,10 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   // get the classes from the source lists then add them to the groups
   this->ModuleDefinitionFile = "";
   std::vector<cmSourceFile*> classes;
-  target.GetSourceFiles(classes);
+  if (!target.GetConfigCommonSourceFiles(classes))
+    {
+    return;
+    }
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
     {
@@ -1438,7 +1441,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     cmGeneratorTarget* gt =
       this->GlobalGenerator->GetGeneratorTarget(&target);
     std::vector<std::string> objs;
-    gt->UseObjectLibraries(objs);
+    gt->UseObjectLibraries(objs, "");
     if(!objs.empty())
       {
       // TODO: Separate sub-filter for each object library used?
