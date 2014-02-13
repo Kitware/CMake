@@ -129,15 +129,6 @@ std::string
 cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
                                               const std::string& language)
 {
-  std::string flags;
-
-  this->AddFeatureFlags(flags, language.c_str());
-
-  this->GetLocalGenerator()->AddArchitectureFlags(flags,
-                                                  this->GeneratorTarget,
-                                                  language.c_str(),
-                                                  this->GetConfigName());
-
   // TODO: Fortran support.
   // // Fortran-specific flags computed for this target.
   // if(*l == "Fortran")
@@ -145,42 +136,56 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
   //   this->AddFortranFlags(flags);
   //   }
 
-  // Add shared-library flags if needed.
-  this->LocalGenerator->AddCMP0018Flags(flags, this->Target,
-                                        language.c_str(),
-                                        this->GetConfigName());
+  bool hasLangCached = this->LanguageFlags.count(language) != 0;
+  std::string& languageFlags = this->LanguageFlags[language];
+  if(!hasLangCached)
+    {
+    this->AddFeatureFlags(languageFlags, language.c_str());
 
-  this->LocalGenerator->AddVisibilityPresetFlags(flags, this->Target,
-                                                 language.c_str());
+    this->GetLocalGenerator()->AddArchitectureFlags(languageFlags,
+                                                    this->GeneratorTarget,
+                                                    language.c_str(),
+                                                    this->GetConfigName());
 
-  // Add include directory flags.
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
-  {
-  std::vector<std::string> includes;
-  this->LocalGenerator->GetIncludeDirectories(includes,
-                                              this->GeneratorTarget,
-                                              language.c_str(), config);
-  std::string includeFlags =
-    this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
-                                          language.c_str(),
-    language == "RC" ? true : false); // full include paths for RC
-                                      // needed by cmcldeps
-  if(cmGlobalNinjaGenerator::IsMinGW())
-    cmSystemTools::ReplaceString(includeFlags, "\\", "/");
+    // Add shared-library flags if needed.
+    this->LocalGenerator->AddCMP0018Flags(languageFlags, this->Target,
+                                          language,
+                                          this->GetConfigName());
 
-  this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
-  }
+    this->LocalGenerator->AddVisibilityPresetFlags(languageFlags, this->Target,
+                                                   language.c_str());
 
-  // Append old-style preprocessor definition flags.
-  this->LocalGenerator->AppendFlags(flags, this->Makefile->GetDefineFlags());
+    std::vector<std::string> includes;
+    this->LocalGenerator->GetIncludeDirectories(includes,
+                                                this->GeneratorTarget,
+                                                language.c_str(),
+                                                this->GetConfigName());
+    // Add include directory flags.
+    std::string includeFlags =
+      this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
+                                            language.c_str(),
+      language == "RC" ? true : false); // full include paths for RC
+                                        // needed by cmcldeps
+    if(cmGlobalNinjaGenerator::IsMinGW())
+      cmSystemTools::ReplaceString(includeFlags, "\\", "/");
 
-  // Add target-specific flags.
-  this->LocalGenerator->AddCompileOptions(flags, this->Target,
-                                          language.c_str(), config);
+    this->LocalGenerator->AppendFlags(languageFlags, includeFlags.c_str());
 
-    // Add source file specific flags.
-    this->LocalGenerator->AppendFlags(flags,
-      source->GetProperty("COMPILE_FLAGS"));
+    // Append old-style preprocessor definition flags.
+    this->LocalGenerator->AppendFlags(languageFlags,
+                                      this->Makefile->GetDefineFlags());
+
+    // Add target-specific flags.
+    this->LocalGenerator->AddCompileOptions(languageFlags, this->Target,
+                                            language.c_str(),
+                                            this->GetConfigName());
+    }
+
+  std::string flags = languageFlags;
+
+  // Add source file specific flags.
+  this->LocalGenerator->AppendFlags(flags,
+    source->GetProperty("COMPILE_FLAGS"));
 
   // TODO: Handle Apple frameworks.
 
