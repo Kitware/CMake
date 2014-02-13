@@ -1439,7 +1439,6 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
         continue;
         }
       cmGeneratorTarget* gt = ti->second;
-      gt->ClassifySources();
       gt->LookupObjectLibraries();
       this->ComputeTargetObjects(gt);
       }

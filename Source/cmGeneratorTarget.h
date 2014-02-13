@@ -82,7 +82,6 @@ public:
    */
   void TraceDependencies();
 
-  void ClassifySources();
   void LookupObjectLibraries();
 
   /** Get sources that must be built before the given source.  */
@@ -113,23 +112,19 @@ public:
   struct SourceFileFlags
   GetTargetSourceFileFlags(const cmSourceFile* sf) const;
 
+  struct ResxData {
+    mutable std::set<std::string> ExpectedResxHeaders;
+    mutable std::vector<cmSourceFile*> ResxSources;
+  };
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
-  std::string ModuleDefinitionFile;
 
-  std::vector<cmSourceFile*> CustomCommands;
-  std::vector<cmSourceFile*> ExtraSources;
-  std::vector<cmSourceFile*> HeaderSources;
-  std::vector<cmSourceFile*> ExternalObjects;
-  std::vector<cmSourceFile*> IDLSources;
-  std::vector<cmSourceFile*> ResxSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
-  std::set<std::string> ExpectedResxHeaders;
-  std::vector<cmSourceFile*> ObjectSources;
+  mutable std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
