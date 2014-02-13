@@ -690,10 +690,6 @@ private:
   void CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                   const char* config) const;
 
-  void ComputeLinkInterface(const char* config, LinkInterface& iface,
-                            cmTarget const* head,
-                            const char *explicitLibraries) const;
-
   const char* ComputeLinkInterfaceLibraries(const char* config,
                                             LinkInterface& iface,
                                             cmTarget const* head,
