@@ -498,11 +498,14 @@ cmTargetTraceDependencies
 
   // Queue all the source files already specified for the target.
   std::vector<cmSourceFile*> sources;
-  this->Target->GetSourceFiles(sources);
-  for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
-      si != sources.end(); ++si)
+  if (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
-    this->QueueSource(*si);
+    this->Target->GetSourceFiles(sources);
+    for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
+        si != sources.end(); ++si)
+      {
+      this->QueueSource(*si);
+      }
     }
 
   // Queue pre-build, pre-link, and post-build rule dependencies.
