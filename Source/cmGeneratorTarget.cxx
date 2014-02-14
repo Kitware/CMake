@@ -1009,6 +1009,23 @@ cmGeneratorTarget::GetTargetSourceFileFlags(const cmSourceFile* sf) const
     {
     flags = si->second;
     }
+  else
+    {
+    // Handle the MACOSX_PACKAGE_LOCATION property on source files that
+    // were not listed in one of the other lists.
+    if(const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION"))
+      {
+      flags.MacFolder = location;
+      if(strcmp(location, "Resources") == 0)
+        {
+        flags.Type = cmGeneratorTarget::SourceFileTypeResource;
+        }
+      else
+        {
+        flags.Type = cmGeneratorTarget::SourceFileTypeMacContent;
+        }
+      }
+    }
   return flags;
 }
 
@@ -1069,32 +1086,6 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "Resources";
         flags.Type = cmGeneratorTarget::SourceFileTypeResource;
-        }
-      }
-    }
-
-  // Handle the MACOSX_PACKAGE_LOCATION property on source files that
-  // were not listed in one of the other lists.
-  std::vector<cmSourceFile*> sources;
-  this->GetSourceFiles(sources);
-  for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
-      si != sources.end(); ++si)
-    {
-    cmSourceFile* sf = *si;
-    if(const char* location = sf->GetProperty("MACOSX_PACKAGE_LOCATION"))
-      {
-      SourceFileFlags& flags = this->SourceFlagsMap[sf];
-      if(flags.Type == cmGeneratorTarget::SourceFileTypeNormal)
-        {
-        flags.MacFolder = location;
-        if(strcmp(location, "Resources") == 0)
-          {
-          flags.Type = cmGeneratorTarget::SourceFileTypeResource;
-          }
-        else
-          {
-          flags.Type = cmGeneratorTarget::SourceFileTypeMacContent;
-          }
         }
       }
     }
