@@ -52,7 +52,7 @@ public:
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
 
-  std::string ModuleDefinitionFile;
+  std::string GetModuleDefinitionFile() const;
 
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
@@ -118,6 +118,7 @@ private:
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
+  std::string ModuleDefinitionFile;
 
   std::vector<cmSourceFile*> CustomCommands;
   std::vector<cmSourceFile*> ExtraSources;

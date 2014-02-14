@@ -1666,10 +1666,10 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
-  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  if(!def.empty())
     {
-    linkOptions.AddFlag("ModuleDefinitionFile",
-                        this->GeneratorTarget->ModuleDefinitionFile.c_str());
+    linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
     }
 
   this->LinkOptions[config] = pOptions.release();
