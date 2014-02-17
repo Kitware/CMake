@@ -585,15 +585,20 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
           }
         else
           {
+#ifdef _WIN32
           // Sometimes anti-virus software hangs on to new files so we
           // cannot delete them immediately.  Try a few times.
-          int tries = 5;
+          cmSystemTools::WindowsFileRetry retry =
+            cmSystemTools::GetWindowsFileRetry();
           while(!cmSystemTools::RemoveFile(fullPath.c_str()) &&
-                --tries && cmSystemTools::FileExists(fullPath.c_str()))
+                --retry.Count && cmSystemTools::FileExists(fullPath.c_str()))
             {
-            cmSystemTools::Delay(500);
+            cmSystemTools::Delay(retry.Delay);
             }
-          if(tries == 0)
+          if(retry.Count == 0)
+#else
+          if(!cmSystemTools::RemoveFile(fullPath.c_str()))
+#endif
             {
             std::string m = "Remove failed on file: " + fullPath;
             cmSystemTools::ReportLastSystemError(m.c_str());
