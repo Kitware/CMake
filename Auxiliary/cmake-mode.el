@@ -291,31 +291,47 @@ optional argument topic will be appended to the argument list."
   (cmake-command-run "--help-command-list")
   )
 
-(defvar cmake-help-command-history nil "Topic read history.")
-(defvar cmake-help-commands '() "List of available topics for --help-command.")
-(defun cmake-command-list-as-list ()
-  "Run cmake --help-command-list and return a list where each element is a cmake command."
-  (let ((temp-buffer-name "*CMake Commands Temporary*"))
-    (save-window-excursion
-      (cmake-command-run "--help-command-list" nil temp-buffer-name)
-      (with-current-buffer temp-buffer-name
-        (cdr (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n" t)))))
+(defvar cmake-commands '() "List of available topics for --help-command.")
+(defvar cmake-help-command-history nil "Command read history.")
+(defvar cmake-modules '() "List of available topics for --help-module.")
+(defvar cmake-help-module-history nil "Module read history.")
+(defvar cmake-variables '() "List of available topics for --help-variable.")
+(defvar cmake-help-variable-history nil "Variable read history.")
+(defvar cmake-properties '() "List of available topics for --help-property.")
+(defvar cmake-help-property-history nil "Property read history.")
+(defvar cmake-help-complete-history nil "Complete help read history.")
+(defvar cmake-string-to-list-symbol
+  '(("command" cmake-commands cmake-help-command-history)
+    ("module" cmake-modules cmake-help-module-history)
+    ("variable"  cmake-variables cmake-help-variable-history)
+    ("property" cmake-properties cmake-help-property-history)
+    ))
+
+(defun cmake-get-list (listname)
+  "If the value of LISTVAR is nil, run cmake --help-LISTNAME-list
+and store the result as a list in LISTVAR."
+  (let ((listvar (car (cdr (assoc listname cmake-string-to-list-symbol)))))
+    (if (not (symbol-value listvar))
+        (let ((temp-buffer-name "*CMake Temporary*"))
+          (save-window-excursion
+            (cmake-command-run (concat "--help-" listname "-list") nil temp-buffer-name)
+            (with-current-buffer temp-buffer-name
+              (set listvar (cdr (split-string (buffer-substring-no-properties (point-min) (point-max)) "\n" t))))))
+      (symbol-value listvar)
+      ))
   )
 
 (require 'thingatpt)
-;;;###autoload
-(defun cmake-get-command ()
-  "Gets the topic from the minibuffer input.  The default is the word the cursor is on."
+(defun cmake-help-type (type)
   (let* ((default-entry (word-at-point))
+         (history (car (cdr (cdr (assoc type cmake-string-to-list-symbol)))))
          (input (completing-read
-                 "CMake command: " ; prompt
-                 ((lambda ()
-                    (if cmake-help-commands cmake-help-commands
-                      (setq cmake-help-commands (cmake-command-list-as-list))))) ; completions
+                 (format "CMake %s: " type) ; prompt
+                 (cmake-get-list type) ; completions
                  nil ; predicate
                  t   ; require-match
                  default-entry ; initial-input
-                 'cmake-help-command-history ; command history
+                 history
                  )))
     (if (string= input "")
         (error "No argument given")
@@ -324,10 +340,59 @@ optional argument topic will be appended to the argument list."
 
 ;;;###autoload
 (defun cmake-help-command ()
-  "Prints out the help message corresponding to the command the cursor is on."
+  "Prints out the help message for the command the cursor is on."
   (interactive)
-  (cmake-command-run "--help-command" (downcase (cmake-get-command)) "*CMake Help*"))
+  (cmake-command-run "--help-command" (cmake-help-type "command") "*CMake Help*"))
 
+;;;###autoload
+(defun cmake-help-module ()
+  "Prints out the help message for the module the cursor is on."
+  (interactive)
+  (cmake-command-run "--help-module" (cmake-help-type "module") "*CMake Help*"))
+
+;;;###autoload
+(defun cmake-help-variable ()
+  "Prints out the help message for the variable the cursor is on."
+  (interactive)
+  (cmake-command-run "--help-variable" (cmake-help-type "variable") "*CMake Help*"))
+
+;;;###autoload
+(defun cmake-help-property ()
+  "Prints out the help message for the property the cursor is on."
+  (interactive)
+  (cmake-command-run "--help-property" (cmake-help-type "property") "*CMake Help*"))
+
+;;;###autoload
+(defun cmake-help ()
+  "Queries for any of the four available help topics and prints out the approriate page."
+  (interactive)
+  (let* ((default-entry (word-at-point))
+         (command-list (cmake-get-list "command"))
+         (variable-list (cmake-get-list "variable"))
+         (module-list (cmake-get-list "module"))
+         (property-list (cmake-get-list "property"))
+         (all-words (append command-list variable-list module-list property-list))
+         (input (completing-read
+                 "CMake command/module/variable/property: " ; prompt
+                 all-words ; completions
+                 nil ; predicate
+                 t   ; require-match
+                 default-entry ; initial-input
+                 'cmake-help-complete-history
+                 )))
+    (if (string= input "")
+        (error "No argument given")
+      (if (member input command-list)
+          (cmake-command-run "--help-command" input "*CMake Help*")
+        (if (member input variable-list)
+            (cmake-command-run "--help-variable" input "*CMake Help*")
+          (if (member input module-list)
+              (cmake-command-run "--help-module" input "*CMake Help*")
+            (if (member input property-list)
+                (cmake-command-run "--help-property" input "*CMake Help*")
+              (error "Not a know help topic.") ; this really should not happen
+              ))))))
+  )
 
 ;;;###autoload
 (progn
