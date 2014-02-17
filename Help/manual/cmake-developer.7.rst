@@ -84,7 +84,7 @@ In some implementations, algorithms operating on iterators to a container of
   const char* dir = /*...*/;
   std::vector<std::string> vec;
   // ...
-  std::binary_find(vec.begin(), vec.end(), dir); // Wrong
+  std::binary_search(vec.begin(), vec.end(), dir); // Wrong
 
 The ``std::string`` may need to be explicitly constructed:
 
@@ -93,7 +93,7 @@ The ``std::string`` may need to be explicitly constructed:
   const char* dir = /*...*/;
   std::vector<std::string> vec;
   // ...
-  std::binary_find(vec.begin(), vec.end(), std::string(dir)); // Ok
+  std::binary_search(vec.begin(), vec.end(), std::string(dir)); // Ok
 
 std::auto_ptr
 -------------
