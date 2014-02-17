@@ -551,6 +551,7 @@ bool cmTarget::FindSourceFiles()
 //----------------------------------------------------------------------------
 void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 {
+  assert(this->GetType() != INTERFACE_LIBRARY);
   files = this->SourceFiles;
 }
 

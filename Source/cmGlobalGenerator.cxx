@@ -1468,7 +1468,8 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
     for(cmGeneratorTargetsType::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
-      if (ti->second->Target->IsImported())
+      if (ti->second->Target->IsImported()
+          || ti->second->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
         {
         continue;
         }
