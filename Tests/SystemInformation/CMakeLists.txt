@@ -57,5 +57,3 @@ endforeach()
 get_directory_property(res INCLUDE_REGULAR_EXPRESSION)
 file(APPEND ${CMAKE_CURRENT_BINARY_DIR}/OtherProperties.txt
   "INCLUDE_REGULAR_EXPRESSION: ${res}\n")
-
-
