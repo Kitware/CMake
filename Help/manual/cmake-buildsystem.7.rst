@@ -112,6 +112,12 @@ Each command may be invoked with multiple uses of each keyword:
     INTERFACE USING_ARCHIVE_LIB
   )
 
+Note that usage requirements are not designed as a way to make downstreams
+use particular :prop_tgt:`COMPILE_OPTIONS` or
+:prop_tgt:`COMPILE_DEFINITIONS` etc for convenience only.  The contents of
+the properties must be **requirements**, not merely recommendations or
+convenience.
+
 Target Properties
 -----------------
 
