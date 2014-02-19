@@ -216,6 +216,9 @@ Modules
 * A new :module:`FindLua` module has been added to support
   :command:`find_package(Lua)` calls.
 
+* The :module:`FindBoost` module learned a new ``Boost_NAMESPACE``
+  option to change the ``boost`` prefix on library names.
+
 * The :module:`FindBoost` module learned to control search
   for libraies with the ``g`` tag (for MS debug runtime) with
   a new ``Boost_USE_DEBUG_RUNTIME`` option.  It is ``ON`` by
