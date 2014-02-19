@@ -74,9 +74,9 @@ set(_OPENSSL_ROOT_HINTS_AND_PATHS
 find_path(OPENSSL_INCLUDE_DIR
   NAMES
     openssl/ssl.h
+  ${_OPENSSL_ROOT_HINTS_AND_PATHS}
   HINTS
     ${_OPENSSL_INCLUDEDIR}
-  ${_OPENSSL_ROOT_HINTS_AND_PATHS}
   PATH_SUFFIXES
     include
 )
@@ -189,9 +189,9 @@ if(WIN32 AND NOT CYGWIN)
     find_library(LIB_EAY
       NAMES
         libeay32
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       HINTS
         ${_OPENSSL_LIBDIR}
-      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         lib
     )
@@ -199,9 +199,9 @@ if(WIN32 AND NOT CYGWIN)
     find_library(SSL_EAY
       NAMES
         ssleay32
+      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       HINTS
         ${_OPENSSL_LIBDIR}
-      ${_OPENSSL_ROOT_HINTS_AND_PATHS}
       PATH_SUFFIXES
         lib
     )
@@ -216,9 +216,9 @@ else()
       ssl
       ssleay32
       ssleay32MD
+    ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}
-    ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     PATH_SUFFIXES
       lib
   )
@@ -226,9 +226,9 @@ else()
   find_library(OPENSSL_CRYPTO_LIBRARY
     NAMES
       crypto
+    ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     HINTS
       ${_OPENSSL_LIBDIR}
-    ${_OPENSSL_ROOT_HINTS_AND_PATHS}
     PATH_SUFFIXES
       lib
   )
