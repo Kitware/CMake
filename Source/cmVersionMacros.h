@@ -14,8 +14,8 @@
 
 #include "cmVersionConfig.h"
 
-#define CMake_VERSION_TWEAK_IS_RELEASE(tweak) ((tweak) < 20000000)
-#if CMake_VERSION_TWEAK_IS_RELEASE(CMake_VERSION_TWEAK)
+#define CMake_VERSION_PATCH_IS_RELEASE(patch) ((patch) < 20000000)
+#if CMake_VERSION_PATCH_IS_RELEASE(CMake_VERSION_PATCH)
 # define CMake_VERSION_IS_RELEASE 1
 #endif
 

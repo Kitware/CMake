@@ -108,7 +108,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-# Version 1.6 (CMake 2.8.13)
+# Version 1.6 (CMake 3.0)
 #   * Create targets for each library
 #   * Do not link libfreetype
 # Version 1.5 (CMake 2.8.12)

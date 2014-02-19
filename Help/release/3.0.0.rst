@@ -1,5 +1,5 @@
-CMake 3.0 Release Notes
-***********************
+CMake 3.0.0 Release Notes
+*************************
 
 .. only:: html
 
@@ -39,7 +39,7 @@ Documentation Changes
   - :manual:`cmake-toolchains(7)`
   - :manual:`cmake-variables(7)`, replacing ``cmakevars(1)``
 
-* Release notes for CMake 3.0 and above will now be included with
+* Release notes for CMake 3.0.0 and above will now be included with
   the html documentation.
 
 New Features
@@ -216,6 +216,9 @@ Modules
 * A new :module:`FindLua` module has been added to support
   :command:`find_package(Lua)` calls.
 
+* The :module:`FindBoost` module learned a new ``Boost_NAMESPACE``
+  option to change the ``boost`` prefix on library names.
+
 * The :module:`FindBoost` module learned to control search
   for libraies with the ``g`` tag (for MS debug runtime) with
   a new ``Boost_USE_DEBUG_RUNTIME`` option.  It is ``ON`` by
@@ -386,6 +389,11 @@ Deprecated and Removed Features
 
 Other Changes
 =============
+
+* The version scheme was changed to use only two components for
+  the feature level instead of three.  The third component will
+  now be used for bug-fix releases or the date of development versions.
+  See the :variable:`CMAKE_VERSION` variable documentation for details.
 
 * The default install locations of CMake itself on Windows and
   OS X no longer contain the CMake version number.  This allows
