@@ -390,6 +390,11 @@ Deprecated and Removed Features
 Other Changes
 =============
 
+* The version scheme was changed to use only two components for
+  the feature level instead of three.  The third component will
+  now be used for bug-fix releases or the date of development versions.
+  See the :variable:`CMAKE_VERSION` variable documentation for details.
+
 * The default install locations of CMake itself on Windows and
   OS X no longer contain the CMake version number.  This allows
   for easy replacement without re-generating local build trees

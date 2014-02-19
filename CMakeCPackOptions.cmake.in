@@ -58,13 +58,11 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   endif()
 
   set(CPACK_PACKAGE_VERSION
-    "@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@.@CMake_VERSION_PATCH@")
+    "@CMake_VERSION_MAJOR@.@CMake_VERSION_MINOR@")
   # WIX installers require at most a 4 component version number, where
   # each component is an integer between 0 and 65534 inclusive
-  set(tweak "@CMake_VERSION_TWEAK@")
-  if(tweak MATCHES "^[0-9]+$")
-    if(tweak GREATER 0 AND tweak LESS 65535)
-      set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${tweak}")
-    endif()
+  set(patch "@CMake_VERSION_PATCH@")
+  if(patch MATCHES "^[0-9]+$" AND patch LESS 65535)
+    set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${patch}")
   endif()
 endif()
