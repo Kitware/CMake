@@ -488,3 +488,132 @@ Here, the ``ClimbingStats_NOTFOUND_MESSAGE`` is set to a diagnosis that the pack
 could not be found because an invalid component was specified.  This message
 variable can be set for any case where the ``_FOUND`` variable is set to ``False``,
 and will be displayed to the user.
+
+.. _`Package Registry`:
+
+Package Registry
+================
+
+CMake provides two central locations to register packages that have
+been built or installed anywhere on a system:
+
+* `User Package Registry`_
+* `System Package Registry`_
+
+The registries are especially useful to help projects find packages in
+non-standard install locations or directly in their own build trees.
+A project may populate either the user or system registry (using its own
+means, see below) to refer to its location.
+In either case the package should store at the registered location a
+`Package Configuration File`_ (``<package>Config.cmake``) and optionally a
+`Package Version File`_ (``<package>ConfigVersion.cmake``).
+
+The :command:`find_package` command searches the two package registries
+as two of the search steps specified in its documentation.  If it has
+sufficient permissions it also removes stale package registry entries
+that refer to directories that do not exist or do not contain a matching
+package configuration file.
+
+.. _`User Package Registry`:
+
+User Package Registry
+---------------------
+
+The User Package Registry is stored in a per-user location.
+The :command:`export(PACKAGE)` command may be used to register a project
+build tree in the user package registry.  CMake currently provides no
+interface to add install trees to the user package registry.  Installers
+must be manually taught to register their packages if desired.
+
+On Windows the user package registry is stored in the Windows registry
+under a key in ``HKEY_CURRENT_USER``.
+
+A ``<package>`` may appear under registry key::
+
+  HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\<package>
+
+as a ``REG_SZ`` value, with arbitrary name, that specifies the directory
+containing the package configuration file.
+
+On UNIX platforms the user package registry is stored in the user home
+directory under ``~/.cmake/packages``.  A ``<package>`` may appear under
+the directory::
+
+  ~/.cmake/packages/<package>
+
+as a file, with arbitrary name, whose content specifies the directory
+containing the package configuration file.
+
+.. _`System Package Registry`:
+
+System Package Registry
+-----------------------
+
+The System Package Registry is stored in a system-wide location.
+CMake currently provides no interface to add to the system package registry.
+Installers must be manually taught to register their packages if desired.
+
+On Windows the system package registry is stored in the Windows registry
+under a key in ``HKEY_LOCAL_MACHINE``.  A ``<package>`` may appear under
+registry key::
+
+  HKEY_LOCAL_MACHINE\Software\Kitware\CMake\Packages\<package>
+
+as a ``REG_SZ`` value, with arbitrary name, that specifies the directory
+containing the package configuration file.
+
+There is no system package registry on non-Windows platforms.
+
+Package Registry Example
+------------------------
+
+A simple convention for naming package registry entries is to use content
+hashes.  They are deterministic and unlikely to collide
+(:command:`export(PACKAGE)` uses this approach).
+The name of an entry referencing a specific directory is simply the content
+hash of the directory path itself.
+
+If a project arranges for package registry entries to exist, such as::
+
+ > reg query HKCU\Software\Kitware\CMake\Packages\MyPackage
+ HKEY_CURRENT_USER\Software\Kitware\CMake\Packages\MyPackage
+  45e7d55f13b87179bb12f907c8de6fc4 REG_SZ c:/Users/Me/Work/lib/cmake/MyPackage
+  7b4a9844f681c80ce93190d4e3185db9 REG_SZ c:/Users/Me/Work/MyPackage-build
+
+or::
+
+ $ cat ~/.cmake/packages/MyPackage/7d1fb77e07ce59a81bed093bbee945bd
+ /home/me/work/lib/cmake/MyPackage
+ $ cat ~/.cmake/packages/MyPackage/f92c1db873a1937f3100706657c63e07
+ /home/me/work/MyPackage-build
+
+then the ``CMakeLists.txt`` code:
+
+.. code-block:: cmake
+
+  find_package(MyPackage)
+
+will search the registered locations for package configuration files
+(``MyPackageConfig.cmake``).  The search order among package registry
+entries for a single package is unspecified and the entry names
+(hashes in this example) have no meaning.  Registered locations may
+contain package version files (``MyPackageConfigVersion.cmake``) to
+tell :command:`find_package` whether a specific location is suitable
+for the version requested.
+
+Package Registry Ownership
+--------------------------
+
+Package registry entries are individually owned by the project installations
+that they reference.  A package installer is responsible for adding its own
+entry and the corresponding uninstaller is responsible for removing it.
+
+The :command:`export(PACKAGE)` command populates the user package registry
+with the location of a project build tree.  Build trees tend to be deleted by
+developers and have no "uninstall" event that could trigger removal of their
+entries.  In order to keep the registries clean the :command:`find_package`
+command automatically removes stale entries it encounters if it has sufficient
+permissions.  CMake provides no interface to remove an entry referencing an
+existing build tree once :command:`export(PACKAGE)` has been invoked.
+However, if the project removes its package configuration file from the build
+tree then the entry referencing the location will be considered stale.
