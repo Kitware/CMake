@@ -105,8 +105,8 @@ if(NOT DOXYGEN_SKIP_DOT)
   find_program(DOXYGEN_DOT_EXECUTABLE
     NAMES dot
     PATHS
-      "$ENV{ProgramFiles}/Graphviz 2.21/bin"
-      "C:/Program Files/Graphviz 2.21/bin"
+      "$ENV{ProgramFiles}/Graphviz*/bin"
+      "C:/Program Files/Graphviz*/bin"
       "$ENV{ProgramFiles}/ATT/Graphviz/bin"
       "C:/Program Files/ATT/Graphviz/bin"
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\ATT\\Graphviz;InstallPath]/bin
@@ -120,6 +120,11 @@ if(NOT DOXYGEN_SKIP_DOT)
     set(DOXYGEN_DOT_FOUND TRUE)
     # The Doxyfile wants the path to Dot, not the entire path and executable
     get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH CACHE)
+    # Under Windows it is necessary to have the path in the correct windows syntax
+    if(WIN32)
+      file(TO_NATIVE_PATH ${DOXYGEN_DOT_PATH} DOXYGEN_DOT_PATH)
+      set((DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_PATH}\"")
+    endif()
   endif()
 
 endif()
