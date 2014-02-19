@@ -1,5 +1,5 @@
-CMake 3.0 Release Notes
-***********************
+CMake 3.0.0 Release Notes
+*************************
 
 .. only:: html
 
@@ -39,7 +39,7 @@ Documentation Changes
   - :manual:`cmake-toolchains(7)`
   - :manual:`cmake-variables(7)`, replacing ``cmakevars(1)``
 
-* Release notes for CMake 3.0 and above will now be included with
+* Release notes for CMake 3.0.0 and above will now be included with
   the html documentation.
 
 New Features
