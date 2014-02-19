@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmTargetIncludeDirectoriesCommand.h"
 
+#include "cmGeneratorExpression.h"
+
 //----------------------------------------------------------------------------
 bool cmTargetIncludeDirectoriesCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)

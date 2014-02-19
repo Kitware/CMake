@@ -344,7 +344,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
   // write language flags for target
   std::set<cmStdString> languages;
   this->Target->GetLanguages(languages);
-    // put the compiler in the rules.make file so that if it changes
+  // put the compiler in the rules.make file so that if it changes
   // things rebuild
   for(std::set<cmStdString>::const_iterator l = languages.begin();
       l != languages.end(); ++l)

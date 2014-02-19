@@ -1512,7 +1512,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
           }
         else
           {
-          std::cerr << "AUTOGEN: error: " << absFilename << " The file "
+          std::cerr << "AUTOGEN: error: " << absFilename << ": The file "
                     << "includes the moc file \"" << currentMoc << "\", "
                     << "but could not find header \"" << basename
                     << '{' << this->Join(headerExtensions, ',') << "}\" ";
