@@ -30,7 +30,15 @@
 #
 #    DOXYGEN_DOT_EXECUTABLE = The path to the dot program used by doxygen.
 #    DOXYGEN_DOT_FOUND      = Was Dot found or not?
+#
+# ::
+#
 #    DOXYGEN_DOT_PATH       = The path to dot not including the executable
+#
+# DOXYGEN_DOT_PATH is intended to be used in a Doxyfile.in in conjunction with
+# configure_file(). Under Windows the path is tranformed into a native windows
+# path wrapped in quotes.
+
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -101,12 +109,14 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(Doxygen REQUIRED_VARS DOXYGEN_EXECUTABLE VERSI
 # Find Dot...
 #
 
+file(GLOB GRAPHVIZ_INSTALL_DIR $ENV{ProgramFiles}/Graphviz*/bin)
+
 if(NOT DOXYGEN_SKIP_DOT)
   find_program(DOXYGEN_DOT_EXECUTABLE
     NAMES dot
+    HINTS
+      "${GRAPHVIZ_INSTALL_DIR}"
     PATHS
-      "$ENV{ProgramFiles}/Graphviz*/bin"
-      "C:/Program Files/Graphviz*/bin"
       "$ENV{ProgramFiles}/ATT/Graphviz/bin"
       "C:/Program Files/ATT/Graphviz/bin"
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\ATT\\Graphviz;InstallPath]/bin
@@ -119,11 +129,11 @@ if(NOT DOXYGEN_SKIP_DOT)
   if(DOXYGEN_DOT_EXECUTABLE)
     set(DOXYGEN_DOT_FOUND TRUE)
     # The Doxyfile wants the path to Dot, not the entire path and executable
-    get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH CACHE)
+    get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH)
     # Under Windows it is necessary to have the path in the correct windows syntax
     if(WIN32)
       file(TO_NATIVE_PATH ${DOXYGEN_DOT_PATH} DOXYGEN_DOT_PATH)
-      set((DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_PATH}\"")
+      set(DOXYGEN_DOT_PATH "\"${DOXYGEN_DOT_PATH}\"")
     endif()
   endif()
 
