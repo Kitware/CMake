@@ -148,7 +148,8 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
  */
 std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
 {
-  if(cmSystemTools::FileIsFullPath(name))
+  if(cmSystemTools::FileIsFullPath(name) ||
+     cmGeneratorExpression::Find(name) == 0)
     {
     // This is a full path.
     return name;

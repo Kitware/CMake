@@ -109,7 +109,8 @@ void cmInstallProgramsCommand::FinalPass()
 std::string cmInstallProgramsCommand
 ::FindInstallSource(const char* name) const
 {
-  if(cmSystemTools::FileIsFullPath(name))
+  if(cmSystemTools::FileIsFullPath(name) ||
+     cmGeneratorExpression::Find(name) == 0)
     {
     // This is a full path.
     return name;

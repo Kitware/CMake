@@ -1355,7 +1355,8 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
       ++fileIt)
     {
     std::string file = (*fileIt);
-    if(!cmSystemTools::FileIsFullPath(file.c_str()))
+    std::string::size_type gpos = cmGeneratorExpression::Find(file);
+    if(gpos != 0 && !cmSystemTools::FileIsFullPath(file.c_str()))
       {
       file = this->Makefile->GetCurrentDirectory();
       file += "/";
@@ -1363,7 +1364,7 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
       }
 
     // Make sure the file is not a directory.
-    if(cmSystemTools::FileIsDirectory(file.c_str()))
+    if(gpos == file.npos && cmSystemTools::FileIsDirectory(file.c_str()))
       {
       cmOStringStream e;
       e << modeName << " given directory \"" << (*fileIt) << "\" to install.";

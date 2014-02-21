@@ -102,6 +102,10 @@ Commands
   configuration because it will not be available.
   Use :ref:`Alias Targets` instead.  See policy :policy:`CMP0024`.
 
+* The :command:`install(FILES)` command learned to support
+  :manual:`generator expressions <cmake-generator-expressions(7)>`
+  in the list of files.
+
 * The :command:`project` command learned to set some version variables
   to values specified by the new ``VERSION`` option or to empty strings.
   See policy :policy:`CMP0048`.

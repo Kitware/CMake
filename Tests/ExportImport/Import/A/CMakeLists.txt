@@ -68,6 +68,12 @@ target_link_libraries(imp_testExe1b
   bld_testLibCycleA
   )
 
+add_custom_target(check_testLib1_genex ALL
+  COMMAND ${CMAKE_COMMAND} -DtestLib1=$<TARGET_FILE:exp_testLib1>
+                           -Dprefix=${CMAKE_INSTALL_PREFIX}
+          -P ${CMAKE_CURRENT_SOURCE_DIR}/check_testLib1_genex.cmake
+  )
+
 add_executable(cmp0022OLD_test cmp0022OLD_test_vs6_1.cpp)
 target_link_libraries(cmp0022OLD_test bld_cmp0022OLD)
 add_executable(cmp0022NEW_test cmp0022NEW_test_vs6_1.cpp)
