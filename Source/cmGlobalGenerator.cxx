@@ -988,13 +988,13 @@ void cmGlobalGenerator::FillExtensionToLanguageMap(const std::string& l,
     }
 }
 
-bool cmGlobalGenerator::IgnoreFile(const char* l) const
+bool cmGlobalGenerator::IgnoreFile(const char* ext) const
 {
-  if(!this->GetLanguageFromExtension(l).empty())
+  if(!this->GetLanguageFromExtension(ext).empty())
     {
     return false;
     }
-  return (this->IgnoreExtensions.count(l) > 0);
+  return (this->IgnoreExtensions.count(ext) > 0);
 }
 
 bool cmGlobalGenerator::GetLanguageEnabled(const std::string& l) const
