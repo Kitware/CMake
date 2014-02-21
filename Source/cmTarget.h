@@ -340,7 +340,7 @@ public:
       If the configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
       pdb output directory is given.  */
-  std::string GetPDBDirectory(const char* config = 0) const;
+  std::string GetPDBDirectory(const char* config) const;
 
   /** Get the location of the target in the build tree for the given
       configuration.  This location is suitable for use as the LOCATION
@@ -375,7 +375,7 @@ public:
                              const char* config=0, bool implib = false) const;
 
   /** Get the name of the pdb file for the target.  */
-  std::string GetPDBName(const char* config=0) const;
+  std::string GetPDBName(const char* config) const;
 
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const char* config) const;
