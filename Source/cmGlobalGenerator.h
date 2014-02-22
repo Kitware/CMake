@@ -138,7 +138,7 @@ public:
   /** Generate a "cmake --build" call for a given target and config.  */
   std::string GenerateCMakeBuildCommand(const std::string& target,
                                         const std::string& config,
-                                        const char* native,
+                                        const std::string& native,
                                         bool ignoreErrors);
 
   ///! Set the CMake instance
@@ -230,9 +230,9 @@ public:
   /** Append the subdirectory for the given configuration.  If anything is
       appended the given prefix and suffix will be appended around it, which
       is useful for leading or trailing slashes.  */
-  virtual void AppendDirectoryForConfig(const char* prefix,
+  virtual void AppendDirectoryForConfig(const std::string& prefix,
                                         const std::string& config,
-                                        const char* suffix,
+                                        const std::string& suffix,
                                         std::string& dir);
 
   /** Get the manifest of all targets that will be built for each
@@ -292,7 +292,7 @@ public:
     return this->BinaryDirectories.insert(dir).second;
     }
   /** Supported systems creates a GUID for the given name */
-  virtual void CreateGUID(const char*) {}
+  virtual void CreateGUID(const std::string&) {}
 
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */

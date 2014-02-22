@@ -62,7 +62,7 @@ const char* cmVisualStudioWCEPlatformParser::GetArchitectureFamily() const
   return 0;
 }
 
-void cmVisualStudioWCEPlatformParser::StartElement(const char* name,
+void cmVisualStudioWCEPlatformParser::StartElement(const std::string& name,
                                                    const char** attributes)
 {
   if(this->FoundRequiredName)
@@ -72,7 +72,7 @@ void cmVisualStudioWCEPlatformParser::StartElement(const char* name,
 
   this->CharacterData = "";
 
-  if(strcmp(name, "PlatformData") == 0)
+  if(name == "PlatformData")
     {
     this->PlatformName = "";
     this->OSMajorVersion = "";
@@ -80,7 +80,7 @@ void cmVisualStudioWCEPlatformParser::StartElement(const char* name,
     this->Macros.clear();
     }
 
-  if(strcmp(name, "Macro") == 0)
+  if(name == "Macro")
     {
     std::string macroName;
     std::string macroValue;
@@ -102,7 +102,7 @@ void cmVisualStudioWCEPlatformParser::StartElement(const char* name,
       this->Macros[macroName] = macroValue;
       }
     }
-  else if(strcmp(name, "Directories") == 0)
+  else if(name == "Directories")
     {
     for(const char** attr = attributes; *attr; attr += 2)
       {
@@ -122,11 +122,11 @@ void cmVisualStudioWCEPlatformParser::StartElement(const char* name,
     }
 }
 
-void cmVisualStudioWCEPlatformParser::EndElement(const char* name)
+void cmVisualStudioWCEPlatformParser::EndElement(const std::string& name)
 {
   if(!this->RequiredName)
     {
-    if(strcmp(name, "PlatformName") == 0)
+    if(name == "PlatformName")
       {
       this->AvailablePlatforms.push_back(this->CharacterData);
       }
@@ -138,19 +138,19 @@ void cmVisualStudioWCEPlatformParser::EndElement(const char* name)
     return;
     }
 
-  if(strcmp(name, "PlatformName") == 0)
+  if(name == "PlatformName")
     {
     this->PlatformName = this->CharacterData;
     }
-  else if(strcmp(name, "OSMajorVersion") == 0)
+  else if(name == "OSMajorVersion")
     {
     this->OSMajorVersion = this->CharacterData;
     }
-  else if(strcmp(name, "OSMinorVersion") == 0)
+  else if(name == "OSMinorVersion")
    {
    this->OSMinorVersion = this->CharacterData;
    }
-  else if(strcmp(name, "Platform") == 0)
+  else if(name == "Platform")
     {
     if(this->PlatformName == this->RequiredName)
       {

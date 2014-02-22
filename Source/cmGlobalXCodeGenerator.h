@@ -72,9 +72,9 @@ public:
   virtual void Generate();
 
   /** Append the subdirectory for the given configuration.  */
-  virtual void AppendDirectoryForConfig(const char* prefix,
+  virtual void AppendDirectoryForConfig(const std::string& prefix,
                                         const std::string& config,
-                                        const char* suffix,
+                                        const std::string& suffix,
                                         std::string& dir);
 
   ///! What is the configurations directory variable called?

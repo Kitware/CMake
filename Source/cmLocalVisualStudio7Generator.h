@@ -51,7 +51,7 @@ public:
   /**
    * Specify the type of the build: static, dll, or executable.
    */
-  void SetBuildType(BuildType,const char *name);
+  void SetBuildType(BuildType,const std::string& name);
 
   void SetPlatformName(const char* n) { this->PlatformName = n;}
 
@@ -62,7 +62,7 @@ public:
   void WriteStampFiles();
   virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
 
-  virtual void ReadAndStoreExternalGUID(const char* name,
+  virtual void ReadAndStoreExternalGUID(const std::string& name,
                                         const char* path);
   virtual void AddCMakeListsRules();
 protected:

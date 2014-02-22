@@ -1790,7 +1790,7 @@ int cmGlobalGenerator::Build(
 //----------------------------------------------------------------------------
 std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
   const std::string& target, const std::string& config,
-  const char* native,
+  const std::string& native,
   bool ignoreErrors)
 {
   std::string makeCommand = cmSystemTools::GetCMakeCommand();
@@ -1819,7 +1819,7 @@ std::string cmGlobalGenerator::GenerateCMakeBuildCommand(
       sep = " ";
       }
     }
-  if(native && *native)
+  if(!native.empty())
     {
     makeCommand += sep;
     makeCommand += native;
@@ -2528,9 +2528,10 @@ std::string cmGlobalGenerator::GetSharedLibFlagsForLanguage(
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::AppendDirectoryForConfig(const char*,
+void cmGlobalGenerator::AppendDirectoryForConfig(const std::string&,
                                                  const std::string&,
-                                                 const char*, std::string&)
+                                                 const std::string&,
+                                                 std::string&)
 {
   // Subclasses that support multiple configurations should implement
   // this method to append the subdirectory for the given build

@@ -714,7 +714,7 @@ private:
   bool
   ComputeOutputDir(const std::string& config,
                    bool implib, std::string& out) const;
-  bool ComputePDBOutputDir(const char* kind, const std::string& config,
+  bool ComputePDBOutputDir(const std::string& kind, const std::string& config,
                            std::string& out) const;
 
   // Cache import information from properties for each configuration.

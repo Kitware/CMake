@@ -34,17 +34,17 @@ class cmXcodeVersionParser : public cmXMLParser
 {
 public:
   cmXcodeVersionParser(): Version("1.5") {}
-  void StartElement(const char* , const char** )
+  void StartElement(const std::string&, const char**)
     {
       this->Data = "";
     }
-  void EndElement(const char* name)
+  void EndElement(const std::string& name)
     {
-      if(strcmp(name, "key") == 0)
+      if(name == "key")
         {
         this->Key = this->Data;
         }
-      else if(strcmp(name, "string") == 0)
+      else if(name == "string")
         {
         if(this->Key == "CFBundleShortVersionString")
           {
@@ -1005,7 +1005,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         gtgt->GetTargetSourceFileFlags(*i);
 
       if(filetype &&
-         strcmp(filetype->GetString(), "compiled.mach-o.objfile") == 0)
+         filetype->GetString() == "compiled.mach-o.objfile")
         {
         externalObjFiles.push_back(xsf);
         }
@@ -3771,9 +3771,9 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
 //----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator
-::AppendDirectoryForConfig(const char* prefix,
+::AppendDirectoryForConfig(const std::string& prefix,
                            const std::string& config,
-                           const char* suffix,
+                           const std::string& suffix,
                            std::string& dir)
 {
   if(this->XcodeVersion > 20)

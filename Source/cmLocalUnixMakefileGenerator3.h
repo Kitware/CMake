@@ -75,7 +75,7 @@ public:
   /**
    * Set the flag used to keep the make program silent.
    */
-  void SetMakeSilentFlag(const char* s) { this->MakeSilentFlag = s; }
+  void SetMakeSilentFlag(const std::string& s) { this->MakeSilentFlag = s; }
   std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
 
   /**
@@ -130,8 +130,9 @@ public:
    * Set the string used to include one makefile into another default
    * is include.
    */
-  void SetIncludeDirective(const char* s) { this->IncludeDirective = s; }
-  const char *GetIncludeDirective() { return this->IncludeDirective.c_str(); }
+  void SetIncludeDirective(const std::string& s)
+    { this->IncludeDirective = s; }
+  const std::string& GetIncludeDirective() { return this->IncludeDirective; }
 
   /**
    * Set max makefile variable size, default is 0 which means unlimited.
@@ -192,7 +193,8 @@ public:
 
   static std::string ConvertToQuotedOutputPath(const char* p);
 
-  std::string CreateMakeVariable(const char* sin, const char* s2in);
+  std::string CreateMakeVariable(const std::string& sin,
+                                 const std::string& s2in);
 
   /** Called from command-line hook to bring dependencies up to date
       for a target.  */

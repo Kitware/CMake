@@ -924,7 +924,7 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(const std::string& name)
 }
 
 
-void cmGlobalVisualStudio7Generator::CreateGUID(const char* name)
+void cmGlobalVisualStudio7Generator::CreateGUID(const std::string& name)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
@@ -961,9 +961,9 @@ void cmGlobalVisualStudio7Generator
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio7Generator
-::AppendDirectoryForConfig(const char* prefix,
+::AppendDirectoryForConfig(const std::string& prefix,
                            const std::string& config,
-                           const char* suffix,
+                           const std::string& suffix,
                            std::string& dir)
 {
   if(!config.empty())

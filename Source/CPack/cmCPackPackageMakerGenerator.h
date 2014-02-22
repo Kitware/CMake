@@ -38,9 +38,9 @@ public:
   virtual bool SupportsComponentInstallation() const;
 
 protected:
-  int CopyInstallScript(const char* resdir,
-                        const char* script,
-                        const char* name);
+  int CopyInstallScript(const std::string& resdir,
+                        const std::string& script,
+                        const std::string& name);
   virtual int InitializeInternal();
   int PackageFiles();
   virtual const char* GetOutputExtension() { return ".dmg"; }
@@ -53,7 +53,7 @@ protected:
   // which will be configured via ConfigureFile.
   bool CopyCreateResourceFile(const std::string& name,
                               const std::string& dirName);
-  bool CopyResourcePlistFile(const char* name, const char* outName = 0);
+  bool CopyResourcePlistFile(const std::string& name, const char* outName = 0);
 
   // Run PackageMaker with the given command line, which will (if
   // successful) produce the given package file. Returns true if

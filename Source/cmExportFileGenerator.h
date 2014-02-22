@@ -50,7 +50,7 @@ public:
   const char *GetMainExportFileName() const;
 
   /** Set the namespace in which to place exported target names.  */
-  void SetNamespace(const char* ns) { this->Namespace = ns; }
+  void SetNamespace(const std::string& ns) { this->Namespace = ns; }
   std::string GetNamespace() const { return this->Namespace; }
 
   void SetExportOld(bool exportOld) { this->ExportOld = exportOld; }

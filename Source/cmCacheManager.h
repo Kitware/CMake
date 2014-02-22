@@ -136,7 +136,7 @@ public:
     return static_cast<int>(this->Cache.size()); }
 
   ///! Break up a line like VAR:type="value" into var, type and value
-  static bool ParseEntry(const char* entry,
+  static bool ParseEntry(const std::string& entry,
                          std::string& var,
                          std::string& value,
                          CacheEntryType& type);

@@ -1299,7 +1299,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::CreateMakeVariable(const char* sin, const char* s2in)
+::CreateMakeVariable(const std::string& sin, const std::string& s2in)
 {
   std::string s = sin;
   std::string s2 = s2in;

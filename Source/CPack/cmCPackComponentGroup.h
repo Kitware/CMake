@@ -94,11 +94,11 @@ public:
   /// Get the total installed size of all of the files in this
   /// component, in bytes. installDir is the directory into which the
   /// component was installed.
-  unsigned long GetInstalledSize(const char* installDir) const;
+  unsigned long GetInstalledSize(const std::string& installDir) const;
 
   /// Identical to GetInstalledSize, but returns the result in
   /// kilobytes.
-  unsigned long GetInstalledSizeInKbytes(const char* installDir) const;
+  unsigned long GetInstalledSizeInKbytes(const std::string& installDir) const;
 
  private:
   mutable unsigned long TotalSize;

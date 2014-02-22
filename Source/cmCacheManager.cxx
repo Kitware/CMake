@@ -94,7 +94,7 @@ bool cmCacheManager::LoadCache(const std::string& path,
   return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
-static bool ParseEntryWithoutType(const char* entry,
+static bool ParseEntryWithoutType(const std::string& entry,
                                   std::string& var,
                                   std::string& value)
 {
@@ -132,7 +132,7 @@ static bool ParseEntryWithoutType(const char* entry,
   return flag;
 }
 
-bool cmCacheManager::ParseEntry(const char* entry,
+bool cmCacheManager::ParseEntry(const std::string& entry,
                                 std::string& var,
                                 std::string& value,
                                 CacheEntryType& type)

@@ -131,8 +131,8 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       std::string buildCommand
         = this->GlobalGenerator->
         GenerateCMakeBuildCommand(cmakeBuildTarget ? cmakeBuildTarget : "",
-                                  cmakeBuildConfiguration,
-                                  cmakeBuildAdditionalFlags, true);
+          cmakeBuildConfiguration,
+          cmakeBuildAdditionalFlags ? cmakeBuildAdditionalFlags : "", true);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "SetMakeCommand:"
                  << buildCommand.c_str() << "\n");

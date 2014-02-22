@@ -38,12 +38,12 @@ public:
   PBXType GetIsA() { return this->IsA;}
 
   void SetString(const std::string& s);
-  const char* GetString()
+  const std::string& GetString()
     {
-      return this->String.c_str();
+      return this->String;
     }
 
-  void AddAttribute(const char* name, cmXCodeObject* value)
+  void AddAttribute(const std::string& name, cmXCodeObject* value)
     {
       this->ObjectAttributes[name] = value;
     }
@@ -79,11 +79,11 @@ public:
 
   static void PrintList(std::vector<cmXCodeObject*> const&,
                         std::ostream& out);
-  const char* GetId()
+  const std::string& GetId()
     {
-      return this->Id.c_str();
+      return this->Id;
     }
-  void SetId(const char* id)
+  void SetId(const std::string& id)
     {
       this->Id = id;
     }
@@ -95,8 +95,8 @@ public:
     {
       this->Target = t;
     }
-  const char* GetComment() {return this->Comment.c_str();}
-  bool HasComment() { return (this->Comment.size() !=  0);}
+  const std::string& GetComment() {return this->Comment;}
+  bool HasComment() { return (!this->Comment.empty());}
   cmXCodeObject* GetObject(const char* name)
     {
       if(this->ObjectAttributes.count(name))
@@ -141,7 +141,7 @@ public:
     return this->DependTargets;
     }
   std::vector<cmXCodeObject*> const& GetObjectList() { return this->List;}
-  void SetComment(const char* c) { this->Comment = c;}
+  void SetComment(const std::string& c) { this->Comment = c;}
   static void PrintString(std::ostream& os,std::string String);
 protected:
   void PrintString(std::ostream& os) const;

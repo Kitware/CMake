@@ -90,7 +90,7 @@ public:
   /**
    * Initialize generator
    */
-  int Initialize(const char* name, cmMakefile* mf);
+  int Initialize(const std::string& name, cmMakefile* mf);
 
   /**
    * Construct generator

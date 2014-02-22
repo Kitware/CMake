@@ -272,7 +272,7 @@ bool cmCPackOSXX11Generator::CopyCreateResourceFile(const std::string& name)
 
 //----------------------------------------------------------------------
 bool cmCPackOSXX11Generator::CopyResourcePlistFile(const std::string& name,
-  const char* dir, const char* outputFileName /* = 0 */,
+  const std::string& dir, const char* outputFileName /* = 0 */,
   bool copyOnly /* = false */)
 {
   std::string inFName = "CPack.";

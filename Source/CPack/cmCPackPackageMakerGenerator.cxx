@@ -43,14 +43,14 @@ bool cmCPackPackageMakerGenerator::SupportsComponentInstallation() const
 }
 
 //----------------------------------------------------------------------
-int cmCPackPackageMakerGenerator::CopyInstallScript(const char* resdir,
-                                                    const char* script,
-                                                    const char* name)
+int cmCPackPackageMakerGenerator::CopyInstallScript(const std::string& resdir,
+                                                    const std::string& script,
+                                                    const std::string& name)
 {
   std::string dst = resdir;
   dst += "/";
   dst += name;
-  cmSystemTools::CopyFileAlways(script, dst.c_str());
+  cmSystemTools::CopyFileAlways(script.c_str(), dst.c_str());
   cmSystemTools::SetPermissions(dst.c_str(),0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "copy script : " << script << "\ninto " << dst.c_str() <<
@@ -601,12 +601,13 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(
   return true;
 }
 
-bool cmCPackPackageMakerGenerator::CopyResourcePlistFile(const char* name,
-                                                         const char* outName)
+bool cmCPackPackageMakerGenerator::CopyResourcePlistFile(
+                                                const std::string& name,
+                                                const char* outName)
 {
   if (!outName)
     {
-    outName = name;
+    outName = name.c_str();
     }
 
   std::string inFName = "CPack.";

@@ -49,21 +49,15 @@ class cmBoundsCheckerParser : public cmXMLParser
 {
 public:
   cmBoundsCheckerParser(cmCTest* c) { this->CTest = c;}
-  void StartElement(const char* name, const char** atts)
+  void StartElement(const std::string& name, const char** atts)
     {
-      if(strcmp(name, "MemoryLeak") == 0)
+      if(name == "MemoryLeak" ||
+         name == "ResourceLeak")
         {
         this->Errors.push_back(cmCTestMemCheckHandler::MLK);
         }
-      if(strcmp(name, "ResourceLeak") == 0)
-        {
-        this->Errors.push_back(cmCTestMemCheckHandler::MLK);
-        }
-      if(strcmp(name, "Error") == 0)
-        {
-        this->ParseError(atts);
-        }
-      if(strcmp(name, "Dangling Pointer") == 0)
+      else if(name == "Error" ||
+              name == "Dangling Pointer")
         {
         this->ParseError(atts);
         }
@@ -79,7 +73,7 @@ public:
       ostr << "\n";
       this->Log += ostr.str();
     }
-  void EndElement(const char* )
+  void EndElement(const std::string& )
     {
     }
 

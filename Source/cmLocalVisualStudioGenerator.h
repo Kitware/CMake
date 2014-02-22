@@ -48,7 +48,7 @@ public:
   /** Construct a script from the given list of command lines.  */
   std::string ConstructScript(cmCustomCommand const& cc,
                               const std::string& configName,
-                              const char* newline = "\n");
+                              const std::string& newline = "\n");
 
   /** Label to which to jump in a batch file after a failed step in a
       sequence of custom commands. */

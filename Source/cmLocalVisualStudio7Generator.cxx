@@ -2146,10 +2146,10 @@ std::string cmLocalVisualStudio7Generator
 class cmVS7XMLParser : public cmXMLParser
 {
 public:
-  virtual void EndElement(const char* /* name */)
+  virtual void EndElement(const std::string& /* name */)
     {
     }
-  virtual void StartElement(const char* name, const char** atts)
+  virtual void StartElement(const std::string& name, const char** atts)
     {
       // once the GUID is found do nothing
       if(this->GUID.size())
@@ -2157,7 +2157,7 @@ public:
         return;
         }
       int i =0;
-      if(strcmp("VisualStudioProject", name) == 0)
+      if("VisualStudioProject" == name)
         {
         while(atts[i])
           {
@@ -2194,7 +2194,7 @@ public:
 };
 
 void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
-  const char* name,
+  const std::string& name,
   const char* path)
 {
   cmVS7XMLParser parser;

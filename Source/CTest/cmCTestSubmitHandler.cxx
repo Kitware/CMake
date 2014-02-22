@@ -68,10 +68,10 @@ private:
     return val;
     }
 
-  virtual void StartElement(const char* name, const char** atts)
+  virtual void StartElement(const std::string& name, const char** atts)
     {
     this->CurrentValue.clear();
-    if(strcmp(name, "cdash") == 0)
+    if(name == "cdash")
       {
       this->CDashVersion = this->FindAttribute(atts, "version");
       }
@@ -82,9 +82,9 @@ private:
     this->CurrentValue.insert(this->CurrentValue.end(), data, data+length);
     }
 
-  virtual void EndElement(const char* name)
+  virtual void EndElement(const std::string& name)
     {
-    if(strcmp(name, "status") == 0)
+    if(name == "status")
       {
       std::string status = cmSystemTools::UpperCase(this->GetCurrentValue());
       if(status == "OK" || status == "SUCCESS")
@@ -100,15 +100,15 @@ private:
         this->Status = STATUS_ERROR;
         }
       }
-    else if(strcmp(name, "filename") == 0)
+    else if(name == "filename")
       {
       this->Filename = this->GetCurrentValue();
       }
-    else if(strcmp(name, "md5") == 0)
+    else if(name == "md5")
       {
       this->MD5 = this->GetCurrentValue();
       }
-    else if(strcmp(name, "message") == 0)
+    else if(name == "message")
       {
       this->Message = this->GetCurrentValue();
       }

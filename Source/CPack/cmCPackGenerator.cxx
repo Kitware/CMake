@@ -1139,7 +1139,7 @@ int cmCPackGenerator::DoPackage()
 }
 
 //----------------------------------------------------------------------
-int cmCPackGenerator::Initialize(const char* name, cmMakefile* mf)
+int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
 {
   this->MakefileMap = mf;
   this->Name = name;

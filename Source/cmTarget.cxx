@@ -4100,7 +4100,8 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::ComputePDBOutputDir(const char* kind, const std::string& config,
+bool cmTarget::ComputePDBOutputDir(const std::string& kind,
+                                   const std::string& config,
                                    std::string& out) const
 {
   // Look for a target property defining the target output directory
