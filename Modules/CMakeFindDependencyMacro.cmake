@@ -29,9 +29,7 @@
 
 macro(find_dependency dep)
   if (NOT ${dep}_FOUND)
-    if (${ARGV1})
-      set(version ${ARGV1})
-    endif()
+    set(version ${ARGV1})
     set(exact_arg)
     if(${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION_EXACT)
       set(exact_arg EXACT)
