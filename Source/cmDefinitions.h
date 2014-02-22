@@ -59,6 +59,7 @@ private:
   public:
     Def(): std_string(), Exists(false) {}
     Def(const char* v): std_string(v?v:""), Exists(v?true:false) {}
+    Def(const std_string& v): std_string(v), Exists(true) {}
     Def(Def const& d): std_string(d), Exists(d.Exists) {}
     bool Exists;
   };
