@@ -37,6 +37,8 @@
 
 find_program(HG_EXECUTABLE
   NAMES hg
+  PATHS
+    [HKEY_LOCAL_MACHINE\\Software\\TortoiseHG]
   PATH_SUFFIXES Mercurial
   DOC "hg command line client"
   )
