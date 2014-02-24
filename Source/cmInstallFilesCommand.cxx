@@ -133,7 +133,7 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
                                        "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
   std::vector<std::string> no_configurations;
   this->Makefile->AddInstallGenerator(
-    new cmInstallFilesGenerator(this->Files,
+    new cmInstallFilesGenerator(this->Makefile, this->Files,
                                 destination.c_str(), false,
                                 no_permissions, no_configurations,
                                 no_component.c_str(), no_rename));
@@ -148,7 +148,8 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
  */
 std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
 {
-  if(cmSystemTools::FileIsFullPath(name))
+  if(cmSystemTools::FileIsFullPath(name) ||
+     cmGeneratorExpression::Find(name) == 0)
     {
     // This is a full path.
     return name;

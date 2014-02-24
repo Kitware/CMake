@@ -14,13 +14,16 @@
 
 #include "cmInstallGenerator.h"
 
+class cmMakefile;
+
 /** \class cmInstallFilesGenerator
  * \brief Generate file installation rules.
  */
 class cmInstallFilesGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallFilesGenerator(std::vector<std::string> const& files,
+  cmInstallFilesGenerator(cmMakefile* mf,
+                          std::vector<std::string> const& files,
                           const char* dest, bool programs,
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
@@ -31,6 +34,13 @@ public:
 
 protected:
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptForConfig(std::ostream& os,
+                                       const char* config,
+                                       Indent const& indent);
+  void AddFilesInstallRule(std::ostream& os, Indent const& indent,
+                           std::vector<std::string> const& files);
+
+  cmMakefile* Makefile;
   std::vector<std::string> Files;
   bool Programs;
   std::string FilePermissions;
