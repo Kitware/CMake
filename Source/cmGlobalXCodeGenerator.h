@@ -55,7 +55,7 @@ public:
    */
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
-    const char* makeProgram,
+    const std::string& makeProgram,
     const std::string& projectName,
     const std::string& projectDir,
     const std::string& targetName,

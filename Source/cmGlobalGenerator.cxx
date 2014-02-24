@@ -89,19 +89,25 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
   return false;
 }
 
-std::string cmGlobalGenerator::SelectMakeProgram(const char* makeProgram,
-                                                 std::string makeDefault) const
+std::string cmGlobalGenerator::SelectMakeProgram(
+                                          const std::string& inMakeProgram,
+                                          const std::string& makeDefault) const
 {
-  if(cmSystemTools::IsOff(makeProgram))
+  std::string makeProgram = inMakeProgram;
+  if(cmSystemTools::IsOff(makeProgram.c_str()))
     {
-    makeProgram =
+    const char* makeProgramCSTR =
       this->CMakeInstance->GetCacheDefinition("CMAKE_MAKE_PROGRAM");
-    if(cmSystemTools::IsOff(makeProgram))
+    if(cmSystemTools::IsOff(makeProgramCSTR))
       {
-      makeProgram = makeDefault.c_str();
+      makeProgram = makeDefault;
       }
-    if(cmSystemTools::IsOff(makeProgram) &&
-       !(makeProgram && *makeProgram))
+    else
+      {
+      makeProgram = makeProgramCSTR;
+      }
+    if(cmSystemTools::IsOff(makeProgram.c_str()) &&
+       !makeProgram.empty())
       {
       makeProgram = "CMAKE_MAKE_PROGRAM-NOTFOUND";
       }
@@ -1660,13 +1666,14 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget.c_str(),
-                     output,0,config,false,fast,
+                     output,"",config,false,fast,
                      this->TryCompileTimeout);
 }
 
 void cmGlobalGenerator::GenerateBuildCommand(
-  std::vector<std::string>& makeCommand, const char*, const std::string&,
-  const std::string&, const std::string&, const std::string&, bool,
+  std::vector<std::string>& makeCommand, const std::string&,
+  const std::string&, const std::string&, const std::string&,
+  const std::string&, bool,
   std::vector<std::string> const&)
 {
   makeCommand.push_back(
@@ -1677,7 +1684,7 @@ int cmGlobalGenerator::Build(
   const std::string&, const std::string& bindir,
   const std::string& projectName, const std::string& target,
   std::string *output,
-  const char *makeCommandCSTR,
+  const std::string& makeCommandCSTR,
   const std::string& config,
   bool clean, bool fast,
   double timeout,

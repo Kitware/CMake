@@ -551,7 +551,7 @@ bool cmGlobalNinjaGenerator::UsingMinGW = false;
 //   cmGlobalGenerator::Build()
 void cmGlobalNinjaGenerator
 ::GenerateBuildCommand(std::vector<std::string>& makeCommand,
-                       const char* makeProgram,
+                       const std::string& makeProgram,
                        const std::string& /*projectName*/,
                        const std::string& /*projectDir*/,
                        const std::string& targetName,

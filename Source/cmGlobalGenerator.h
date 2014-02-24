@@ -120,7 +120,7 @@ public:
   int Build(const std::string& srcdir, const std::string& bindir,
             const std::string& projectName, const std::string& targetName,
             std::string *output,
-            const char *makeProgram, const std::string& config,
+            const std::string& makeProgram, const std::string& config,
             bool clean, bool fast,
             double timeout,
             cmSystemTools::OutputOption outputflag=cmSystemTools::OUTPUT_NONE,
@@ -129,7 +129,7 @@ public:
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
-    const char* makeProgram,
+    const std::string& makeProgram,
     const std::string& projectName, const std::string& projectDir,
     const std::string& targetName, const std::string& config, bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
@@ -345,8 +345,8 @@ protected:
                                 cmTarget const*> > AutogensType;
   void CreateQtAutoGeneratorsTargets(AutogensType& autogens);
 
-  std::string SelectMakeProgram(const char* makeProgram,
-                                std::string makeDefault = "") const;
+  std::string SelectMakeProgram(const std::string& makeProgram,
+                                const std::string& makeDefault = "") const;
 
   // Fill the ProjectMap, this must be called after LocalGenerators
   // has been populated.

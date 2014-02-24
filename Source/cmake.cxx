@@ -2672,7 +2672,7 @@ int cmake::Build(const std::string& dir,
   return gen->Build("", dir.c_str(),
                     projName.c_str(), target.c_str(),
                     &output,
-                    0,
+                    "",
                     config.c_str(), clean, false, 0,
                     cmSystemTools::OUTPUT_PASSTHROUGH,
                     nativeOptions);

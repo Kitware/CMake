@@ -261,7 +261,7 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 void
 cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
-  const char* makeProgram,
+  const std::string& makeProgram,
   const std::string& projectName,
   const std::string& /*projectDir*/,
   const std::string& targetName,
