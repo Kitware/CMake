@@ -54,6 +54,7 @@
 #    [BINARY_DIR dir]            # Specify build dir location
 #    [BUILD_COMMAND cmd...]      # Command to drive the native build
 #    [BUILD_IN_SOURCE 1]         # Use source dir for build dir
+#    [BUILD_ALWAYS 1]            # No stamp file, build step always runs
 #   #--Install step---------------
 #    [INSTALL_DIR dir]           # Installation prefix
 #    [INSTALL_COMMAND cmd...]    # Command to drive install after build
@@ -1716,10 +1717,18 @@ function(_ep_add_build_command name)
     set(log "")
   endif()
 
+  get_property(build_always TARGET ${name} PROPERTY _EP_BUILD_ALWAYS)
+  if(build_always)
+    set(always 1)
+  else()
+    set(always 0)
+  endif()
+
   ExternalProject_Add_Step(${name} build
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES configure
+    ALWAYS ${always}
     ${log}
     )
 endfunction()

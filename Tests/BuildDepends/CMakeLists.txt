@@ -68,6 +68,8 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_exe.h
   "#define link_depends_no_shared_exe_value 0\n")
 set(link_depends_no_shared_check_txt ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_check.txt)
 
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external original\n")
+
 help_xcode_depends()
 
 message("Building project first time")
@@ -166,6 +168,19 @@ else()
     "Targets link_depends_no_shared_lib and link_depends_no_shared_exe not both built.")
 endif()
 
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/external.out)
+  file(STRINGS ${BuildDepends_BINARY_DIR}/Project/external.out external_out)
+  if("${external_out}" STREQUAL "external original")
+    message(STATUS "external.out contains '${external_out}'")
+  else()
+    message(SEND_ERROR "Project did not initially build properly: "
+      "external.out contains '${external_out}'")
+  endif()
+else()
+  message(SEND_ERROR "Project did not initially build properly: "
+    "external.out is missing")
+endif()
+
 message("Waiting 3 seconds...")
 # any additional argument will cause ${bar} to wait forever
 execute_process(COMMAND ${bar} -infinite TIMEOUT 3 OUTPUT_VARIABLE out)
@@ -190,6 +205,8 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_lib.h
 if(TEST_LINK_DEPENDS)
   file(WRITE ${TEST_LINK_DEPENDS} "2")
 endif()
+
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external changed\n")
 
 help_xcode_depends()
 
@@ -293,4 +310,17 @@ if(EXISTS "${link_depends_no_shared_check_txt}")
 else()
   message(SEND_ERROR "Project did not rebuild properly.  "
     "Targets link_depends_no_shared_lib and link_depends_no_shared_exe not both built.")
+endif()
+
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/external.out)
+  file(STRINGS ${BuildDepends_BINARY_DIR}/Project/external.out external_out)
+  if("${external_out}" STREQUAL "external changed")
+    message(STATUS "external.out contains '${external_out}'")
+  else()
+    message(SEND_ERROR "Project did not rebuild properly: "
+      "external.out contains '${external_out}'")
+  endif()
+else()
+  message(SEND_ERROR "Project did not rebuild properly: "
+    "external.out is missing")
 endif()
