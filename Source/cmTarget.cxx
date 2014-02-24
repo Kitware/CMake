@@ -2467,7 +2467,7 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(const char* config) const
     OutputInfo info;
     this->ComputeOutputDir(config, false, info.OutDir);
     this->ComputeOutputDir(config, true, info.ImpDir);
-    if(!this->ComputePDBOutputDir(config, info.PdbDir))
+    if(!this->ComputePDBOutputDir("PDB", config, info.PdbDir))
       {
       info.PdbDir = info.OutDir;
       }
@@ -4111,13 +4111,13 @@ bool cmTarget::ComputeOutputDir(const char* config,
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::ComputePDBOutputDir(const char* config, std::string& out) const
+bool cmTarget::ComputePDBOutputDir(const char* kind, const char* config,
+                                   std::string& out) const
 {
   // Look for a target property defining the target output directory
   // based on the target type.
-  std::string targetTypeName = "PDB";
   const char* propertyName = 0;
-  std::string propertyNameStr = targetTypeName;
+  std::string propertyNameStr = kind;
   if(!propertyNameStr.empty())
     {
     propertyNameStr += "_OUTPUT_DIRECTORY";
@@ -4127,7 +4127,7 @@ bool cmTarget::ComputePDBOutputDir(const char* config, std::string& out) const
   // Check for a per-configuration output directory target property.
   std::string configUpper = cmSystemTools::UpperCase(config? config : "");
   const char* configProp = 0;
-  std::string configPropStr = targetTypeName;
+  std::string configPropStr = kind;
   if(!configPropStr.empty())
     {
     configPropStr += "_OUTPUT_DIRECTORY_";

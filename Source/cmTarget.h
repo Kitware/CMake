@@ -710,7 +710,8 @@ private:
   OutputInfo const* GetOutputInfo(const char* config) const;
   bool
   ComputeOutputDir(const char* config, bool implib, std::string& out) const;
-  bool ComputePDBOutputDir(const char* config, std::string& out) const;
+  bool ComputePDBOutputDir(const char* kind, const char* config,
+                           std::string& out) const;
 
   // Cache import information from properties for each configuration.
   struct ImportInfo;
