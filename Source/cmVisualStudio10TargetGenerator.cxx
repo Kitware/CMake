@@ -1427,6 +1427,17 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
+
+  // Specify the compiler program database file if configured.
+  std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
+  if(!pdb.empty())
+    {
+    this->ConvertToWindowsSlash(pdb);
+    this->WriteString("<ProgramDataBaseFileName>", 3);
+    *this->BuildFileStream << cmVS10EscapeXML(pdb)
+                           << "</ProgramDataBaseFileName>\n";
+    }
+
   this->WriteString("</ClCompile>\n", 2);
 }
 
