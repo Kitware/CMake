@@ -29,27 +29,31 @@
 
 macro(find_dependency dep)
   if (NOT ${dep}_FOUND)
-    set(version ${ARGV1})
-    set(exact_arg)
+    set(cmake_fd_version ${ARGV1})
+    set(cmake_fd_exact_arg)
     if(${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION_EXACT)
-      set(exact_arg EXACT)
+      set(cmake_fd_exact_arg EXACT)
     endif()
-    set(quiet_arg)
+    set(cmake_fd_quiet_arg)
     if(${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)
-      set(quiet_arg QUIET)
+      set(cmake_fd_quiet_arg QUIET)
     endif()
-    set(required_arg)
+    set(cmake_fd_required_arg)
     if(${CMAKE_FIND_PACKAGE_NAME}_FIND_REQUIRED)
-      set(required_arg REQUIRED)
+      set(cmake_fd_required_arg REQUIRED)
     endif()
 
-    get_property(alreadyTransitive GLOBAL PROPERTY
+    get_property(cmake_fd_alreadyTransitive GLOBAL PROPERTY
       _CMAKE_${dep}_TRANSITIVE_DEPENDENCY
     )
 
-    find_package(${dep} ${version} ${exact_arg} ${quiet_arg} ${required_arg})
+    find_package(${dep} ${version}
+        ${cmake_fd_exact_arg}
+        ${cmake_fd_quiet_arg}
+        ${cmake_fd_required_arg}
+    )
 
-    if(NOT DEFINED alreadyTransitive OR alreadyTransitive)
+    if(NOT DEFINED cmake_fd_alreadyTransitive OR cmake_fd_alreadyTransitive)
       set_property(GLOBAL PROPERTY _CMAKE_${dep}_TRANSITIVE_DEPENDENCY TRUE)
     endif()
 
@@ -58,8 +62,8 @@ macro(find_dependency dep)
       set(${CMAKE_FIND_PACKAGE_NAME}_FOUND False)
       return()
     endif()
-    set(required_arg)
-    set(quiet_arg)
-    set(exact_arg)
+    set(cmake_fd_required_arg)
+    set(cmake_fd_quiet_arg)
+    set(cmake_fd_exact_arg)
   endif()
 endmacro()
