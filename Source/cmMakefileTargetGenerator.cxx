@@ -624,9 +624,11 @@ cmMakefileTargetGenerator
 
   std::string targetOutPathReal;
   std::string targetOutPathPDB;
+  std::string targetOutPathCompilePDB;
   {
   std::string targetFullPathReal;
   std::string targetFullPathPDB;
+  std::string targetFullPathCompilePDB;
   if(this->Target->GetType() == cmTarget::EXECUTABLE ||
      this->Target->GetType() == cmTarget::STATIC_LIBRARY ||
      this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -638,11 +640,25 @@ cmMakefileTargetGenerator
     targetFullPathPDB += "/";
     targetFullPathPDB += this->Target->GetPDBName(this->ConfigName);
     }
+  if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
+    {
+    targetFullPathCompilePDB =
+      this->Target->GetCompilePDBPath(this->ConfigName);
+    if(targetFullPathCompilePDB.empty())
+      {
+      targetFullPathCompilePDB = this->Target->GetSupportDirectory() + "/";
+      }
+    }
+
   targetOutPathReal = this->Convert(targetFullPathReal.c_str(),
                                     cmLocalGenerator::START_OUTPUT,
                                     cmLocalGenerator::SHELL);
   targetOutPathPDB =
     this->Convert(targetFullPathPDB.c_str(),cmLocalGenerator::NONE,
+                  cmLocalGenerator::SHELL);
+  targetOutPathCompilePDB =
+    this->Convert(targetFullPathCompilePDB.c_str(),
+                  cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
   }
   cmLocalGenerator::RuleVariables vars;
@@ -651,6 +667,7 @@ cmMakefileTargetGenerator
   vars.Language = lang;
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
+  vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
   vars.Source = sourceFile.c_str();
   std::string shellObj =
     this->Convert(obj.c_str(),

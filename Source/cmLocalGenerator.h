@@ -245,6 +245,7 @@ public:
       }
     cmTarget* CMTarget;
     const char* TargetPDB;
+    const char* TargetCompilePDB;
     const char* TargetVersionMajor;
     const char* TargetVersionMinor;
     const char* Language;

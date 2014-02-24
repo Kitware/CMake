@@ -342,6 +342,12 @@ public:
       pdb output directory is given.  */
   std::string GetPDBDirectory(const char* config) const;
 
+  /** Get the directory in which to place the target compiler .pdb file.
+      If the configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      compiler pdb output directory is given.  */
+  std::string GetCompilePDBDirectory(const char* config = 0) const;
+
   /** Get the location of the target in the build tree for the given
       configuration.  This location is suitable for use as the LOCATION
       target property.  */
@@ -376,6 +382,12 @@ public:
 
   /** Get the name of the pdb file for the target.  */
   std::string GetPDBName(const char* config) const;
+
+  /** Get the name of the compiler pdb file for the target.  */
+  std::string GetCompilePDBName(const char* config=0) const;
+
+  /** Get the path for the MSVC /Fd option for this target.  */
+  std::string GetCompilePDBPath(const char* config=0) const;
 
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const char* config) const;
