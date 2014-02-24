@@ -24,11 +24,12 @@ class cmGlobalVisualStudio10Generator :
   public cmGlobalVisualStudio8Generator
 {
 public:
-  cmGlobalVisualStudio10Generator(const char* name,
-    const char* platformName, const char* additionalPlatformDefinition);
+  cmGlobalVisualStudio10Generator(const std::string& name,
+    const std::string& platformName,
+    const std::string& additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
-  virtual bool MatchesGeneratorName(const char* name) const;
+  virtual bool MatchesGeneratorName(const std::string& name) const;
 
   virtual bool SetGeneratorToolset(std::string const& ts);
 

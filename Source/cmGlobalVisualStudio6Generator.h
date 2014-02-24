@@ -31,9 +31,9 @@ public:
       <cmGlobalVisualStudio6Generator>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalVisualStudio6Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 6";}
+  static std::string GetActualName() {return "Visual Studio 6";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

@@ -20,13 +20,13 @@ void cmExternalMakefileProjectGenerator
 }
 
 std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
-                                                   const char* globalGenerator,
-                                                   const char* extraGenerator)
+                                            const std::string& globalGenerator,
+                                            const std::string& extraGenerator)
 {
   std::string fullName;
-  if (globalGenerator)
+  if (!globalGenerator.empty())
     {
-    if (extraGenerator && *extraGenerator)
+    if (!extraGenerator.empty())
       {
       fullName = extraGenerator;
       fullName += " - ";
@@ -36,22 +36,22 @@ std::string cmExternalMakefileProjectGenerator::CreateFullGeneratorName(
   return fullName;
 }
 
-const char* cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
-                                                          const char* fullName)
+std::string cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
+                                                  const std::string& fullName)
 {
   // at least one global generator must be supported
   assert(!this->SupportedGlobalGenerators.empty());
 
-  if (fullName==0)
+  if (fullName.empty())
     {
-    return 0;
+    return "";
     }
 
   std::string currentName = fullName;
   // if we get only the short name, take the first global generator as default
   if (currentName == this->GetName())
     {
-    return this->SupportedGlobalGenerators[0].c_str();
+    return this->SupportedGlobalGenerators[0];
     }
 
   // otherwise search for the matching global generator
@@ -63,8 +63,8 @@ const char* cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
       if (this->CreateFullGeneratorName(it->c_str(), this->GetName())
                                                                 == currentName)
       {
-        return it->c_str();
+        return *it;
       }
     }
-  return 0;
+  return "";
 }

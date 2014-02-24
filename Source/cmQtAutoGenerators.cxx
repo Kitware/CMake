@@ -251,7 +251,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   bool usePRE_BUILD = false;
   cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
-  if(strstr(gg->GetName(), "Visual Studio"))
+  if(gg->GetName().find("Visual Studio") != std::string::npos)
     {
     cmLocalVisualStudioGenerator* vslg =
       static_cast<cmLocalVisualStudioGenerator*>(localGen);

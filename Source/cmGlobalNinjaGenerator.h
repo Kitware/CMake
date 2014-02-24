@@ -173,11 +173,11 @@ public:
   virtual cmLocalGenerator* CreateLocalGenerator();
 
   /// Overloaded methods. @see cmGlobalGenerator::GetName().
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalNinjaGenerator::GetActualName(); }
 
   /// @return the name of this generator.
-  static const char* GetActualName() { return "Ninja"; }
+  static std::string GetActualName() { return "Ninja"; }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry& entry);

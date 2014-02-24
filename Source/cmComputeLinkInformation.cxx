@@ -1127,9 +1127,10 @@ void cmComputeLinkInformation::AddFullItem(std::string const& item)
 
   // Full path libraries should specify a valid library file name.
   // See documentation of CMP0008.
+  std::string generator = this->GlobalGenerator->GetName();
   if(this->Target->GetPolicyStatusCMP0008() != cmPolicies::NEW &&
-     (strstr(this->GlobalGenerator->GetName(), "Visual Studio") ||
-      strstr(this->GlobalGenerator->GetName(), "Xcode")))
+     (generator.find("Visual Studio") != generator.npos ||
+      generator.find("Xcode") != generator.npos))
     {
     std::string file = cmSystemTools::GetFilenameName(item);
     if(!this->ExtractAnyLibraryName.find(file.c_str()))

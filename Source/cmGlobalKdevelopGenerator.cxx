@@ -25,7 +25,7 @@
 
 //----------------------------------------------------------------------------
 void cmGlobalKdevelopGenerator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates KDevelop 3 project files.";

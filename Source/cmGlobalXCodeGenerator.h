@@ -33,9 +33,9 @@ public:
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalXCodeGenerator::GetActualName();}
-  static const char* GetActualName() {return "Xcode";}
+  static std::string GetActualName() {return "Xcode";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

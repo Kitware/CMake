@@ -101,8 +101,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         }
       if ( this->GlobalGenerator )
         {
-        if ( strcmp(this->GlobalGenerator->GetName(),
-            cmakeGeneratorName) != 0 )
+        if ( this->GlobalGenerator->GetName() != cmakeGeneratorName )
           {
           delete this->GlobalGenerator;
           this->GlobalGenerator = 0;

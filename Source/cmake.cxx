@@ -965,7 +965,7 @@ int cmake::AddCMakePaths()
   return 1;
 }
 
-void cmake::AddExtraGenerator(const char* name,
+void cmake::AddExtraGenerator(const std::string& name,
                               CreateExtraGeneratorFunctionType newFunction)
 {
   cmExternalMakefileProjectGenerator* extraGenerator = newFunction();
@@ -1034,9 +1034,10 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
     }
 }
 
-cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
+cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 {
   cmExternalMakefileProjectGenerator* extraGenerator = 0;
+  std::string name = gname;
   RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
                                             this->ExtraGenerators.find(name);
   if (extraGenIt != this->ExtraGenerators.end())
@@ -1324,7 +1325,8 @@ int cmake::ActualConfigure()
     if(genName)
       {
       std::string fullName = cmExternalMakefileProjectGenerator::
-                                CreateFullGeneratorName(genName, extraGenName);
+                                CreateFullGeneratorName(genName,
+                                    extraGenName ? extraGenName : "");
       this->GlobalGenerator = this->CreateGlobalGenerator(fullName.c_str());
       }
     if(this->GlobalGenerator)
@@ -1417,13 +1419,13 @@ int cmake::ActualConfigure()
   if(!this->CacheManager->GetCacheValue("CMAKE_GENERATOR"))
     {
     this->CacheManager->AddCacheEntry("CMAKE_GENERATOR",
-                                      this->GlobalGenerator->GetName(),
+                                      this->GlobalGenerator->GetName().c_str(),
                                       "Name of generator.",
                                       cmCacheManager::INTERNAL);
     this->CacheManager->AddCacheEntry("CMAKE_EXTRA_GENERATOR",
-                                this->GlobalGenerator->GetExtraGeneratorName(),
-                                "Name of external makefile project generator.",
-                                cmCacheManager::INTERNAL);
+                        this->GlobalGenerator->GetExtraGeneratorName().c_str(),
+                        "Name of external makefile project generator.",
+                        cmCacheManager::INTERNAL);
     }
 
   if(const char* tsName =

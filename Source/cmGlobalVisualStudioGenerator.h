@@ -110,7 +110,7 @@ protected:
   std::string GetUtilityDepend(cmTarget const* target);
   typedef std::map<cmTarget const*, std::string> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
-  const char* AdditionalPlatformDefinition;
+  std::string AdditionalPlatformDefinition;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;

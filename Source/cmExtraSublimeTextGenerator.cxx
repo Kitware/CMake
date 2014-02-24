@@ -41,7 +41,7 @@ http://sublimetext.info/docs/en/reference/build_systems.html
 
 //----------------------------------------------------------------------------
 void cmExtraSublimeTextGenerator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates Sublime Text 2 project files.";
@@ -290,7 +290,7 @@ void cmExtraSublimeTextGenerator::
   // Ninja uses ninja.build files (look for a way to get the output file name
   // from cmMakefile or something)
   std::string makefileName;
-  if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+  if (this->GlobalGenerator->GetName() == "Ninja")
     {
       makefileName = "build.ninja";
     }
@@ -320,7 +320,8 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
 {
   std::string command = "\"";
   command += make + "\"";
-  if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
+  std::string generator = this->GlobalGenerator->GetName();
+  if (generator == "NMake Makefiles")
     {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += ", \"/NOLOGO\", \"/f\", \"";
@@ -329,7 +330,7 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     command += target;
     command += "\"";
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+  else if (generator == "Ninja")
     {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += ", \"-f\", \"";
@@ -341,7 +342,7 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
   else
     {
     std::string makefileName;
-    if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+    if (generator == "MinGW Makefiles")
       {
         // no escaping of spaces in this case, see
         // http://public.kitware.com/Bug/view.php?id=10014

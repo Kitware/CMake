@@ -31,15 +31,15 @@ public:
   typedef std::map<std::string, std::vector<std::string> > MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
 
-  virtual const char* GetName() const
+  virtual std::string GetName() const
                         { return cmExtraSublimeTextGenerator::GetActualName();}
-  static const char* GetActualName()
+  static std::string GetActualName()
                         { return "Sublime Text 2";}
   static cmExternalMakefileProjectGenerator* New()
                                     { return new cmExtraSublimeTextGenerator; }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const char* fullName) const;
+                                const std::string& fullName) const;
 
   virtual void Generate();
 private:

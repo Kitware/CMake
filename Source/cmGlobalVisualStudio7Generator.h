@@ -26,7 +26,7 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator(const char* platformName = NULL);
+  cmGlobalVisualStudio7Generator(const std::string& platformName = "");
   ~cmGlobalVisualStudio7Generator();
 
   static cmGlobalGeneratorFactory* NewFactory() {
@@ -34,12 +34,12 @@ public:
       <cmGlobalVisualStudio7Generator>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalVisualStudio7Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 7";}
+  static std::string GetActualName() {return "Visual Studio 7";}
 
   ///! Get the name for the platform.
-  const char* GetPlatformName() const { return this->PlatformName.c_str(); }
+  const std::string& GetPlatformName() const { return this->PlatformName; }
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -131,7 +131,7 @@ protected:
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
-    const char* platformMapping = NULL);
+    const std::string& platformMapping = "");
   virtual void WriteSLNGlobalSections(std::ostream& fout,
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);

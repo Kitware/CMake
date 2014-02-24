@@ -28,7 +28,7 @@
 
 //----------------------------------------------------------------------------
 void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                                const char*) const
+                                                const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates CodeLite project files.";

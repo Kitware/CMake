@@ -51,11 +51,11 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   ///! Get the name for this generator
-  virtual const char *GetName() const { return "Generic"; };
+  virtual std::string GetName() const { return "Generic"; };
 
   /** Check whether the given name matches the current generator.  */
-  virtual bool MatchesGeneratorName(const char* name) const
-  { return strcmp(this->GetName(), name) == 0; }
+  virtual bool MatchesGeneratorName(const std::string& name) const
+  { return this->GetName() == name; }
 
   /** Set the generator-specific toolset name.  Returns true if toolset
       is supported and false otherwise.  */
@@ -163,7 +163,7 @@ public:
   void SetExternalMakefileProjectGenerator(
                            cmExternalMakefileProjectGenerator *extraGenerator);
 
-  const char* GetExtraGeneratorName() const;
+  std::string GetExtraGeneratorName() const;
 
   void AddInstallComponent(const char* component);
 

@@ -17,7 +17,8 @@
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
-  const char* platformName) : cmGlobalVisualStudio7Generator(platformName)
+  const std::string& platformName)
+  : cmGlobalVisualStudio7Generator(platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
 }
@@ -279,10 +280,10 @@ void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(
   std::ostream& fout, const std::string& name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
-  const char* platformMapping)
+  std::string const& platformMapping)
 {
-  const char* platformName =
-    platformMapping ? platformMapping : this->GetPlatformName();
+  const std::string& platformName =
+    !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)

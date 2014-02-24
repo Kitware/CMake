@@ -45,7 +45,7 @@ cmExtraEclipseCDT4Generator
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates Eclipse CDT 4.0 project files.";

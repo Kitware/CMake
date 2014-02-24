@@ -22,17 +22,19 @@ class cmGlobalVisualStudio9Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(strstr(name, vs9generatorName) != name)
+  virtual cmGlobalGenerator* CreateGlobalGenerator(
+                                              const std::string& name) const {
+    if(strncmp(name.c_str(), vs9generatorName,
+               sizeof(vs9generatorName) - 1) != 0)
       {
       return 0;
       }
 
-    const char* p = name + sizeof(vs9generatorName) - 1;
+    const char* p = name.c_str() + sizeof(vs9generatorName) - 1;
     if(p[0] == '\0')
       {
       return new cmGlobalVisualStudio9Generator(
-        name, NULL, NULL);
+        name, "", "");
       }
 
     if(p[0] != ' ')
@@ -96,8 +98,8 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
-  const char* name, const char* platformName,
-  const char* additionalPlatformDefinition)
+  const std::string& name, const std::string& platformName,
+  const std::string& additionalPlatformDefinition)
   : cmGlobalVisualStudio8Generator(name, platformName,
                                    additionalPlatformDefinition)
 {

@@ -23,15 +23,15 @@
 class cmGlobalVisualStudio71Generator : public cmGlobalVisualStudio7Generator
 {
 public:
-  cmGlobalVisualStudio71Generator(const char* platformName = NULL);
+  cmGlobalVisualStudio71Generator(const std::string& platformName = "");
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalVisualStudio71Generator>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalVisualStudio71Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 7 .NET 2003";}
+  static std::string GetActualName() {return "Visual Studio 7 .NET 2003";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -67,7 +67,7 @@ protected:
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
-    const char* platformMapping = NULL);
+    const std::string& platformMapping = "");
   virtual void WriteExternalProject(std::ostream& fout,
                                     const std::string& name,
                                     const char* path,

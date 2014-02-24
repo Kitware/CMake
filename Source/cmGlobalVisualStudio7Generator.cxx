@@ -19,16 +19,19 @@
 #include <cmsys/Encoding.hxx>
 
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
-  const char* platformName)
+  const std::string& platformName)
 {
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
 
-  if (!platformName)
+  if (platformName.empty())
     {
-    platformName = "Win32";
+    this->PlatformName = "Win32";
     }
-  this->PlatformName = platformName;
+  else
+    {
+    this->PlatformName = platformName;
+    }
 }
 
 cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
@@ -260,7 +263,7 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName());
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
                     this->GetIntelProjectVersion());
 }
@@ -381,9 +384,10 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
       {
       std::set<std::string> allConfigurations(this->Configurations.begin(),
                                               this->Configurations.end());
+      const char* mapping = target->GetProperty("VS_PLATFORM_MAPPING");
       this->WriteProjectConfigurations(
         fout, target->GetName().c_str(), target->GetType(),
-        allConfigurations, target->GetProperty("VS_PLATFORM_MAPPING"));
+        allConfigurations, mapping ? mapping : "");
       }
     else
       {
@@ -732,10 +736,10 @@ void cmGlobalVisualStudio7Generator
 ::WriteProjectConfigurations(
   std::ostream& fout, const std::string& name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
-  const char* platformMapping)
+  const std::string& platformMapping)
 {
-  const char* platformName =
-    platformMapping ? platformMapping : this->GetPlatformName();
+  const std::string& platformName =
+    !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)

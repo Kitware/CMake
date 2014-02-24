@@ -28,14 +28,14 @@ class cmExtraCodeBlocksGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmExtraCodeBlocksGenerator();
 
-  virtual const char* GetName() const
+  virtual std::string GetName() const
                          { return cmExtraCodeBlocksGenerator::GetActualName();}
-  static const char* GetActualName()                    { return "CodeBlocks";}
+  static std::string GetActualName()                    { return "CodeBlocks";}
   static cmExternalMakefileProjectGenerator* New()
                                      { return new cmExtraCodeBlocksGenerator; }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const char* fullName) const;
+                                const std::string& fullName) const;
 
   virtual void Generate();
 private:

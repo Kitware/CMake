@@ -60,9 +60,9 @@ public:
       <cmGlobalUnixMakefileGenerator3>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalUnixMakefileGenerator3::GetActualName();}
-  static const char* GetActualName() {return "Unix Makefiles";}
+  static std::string GetActualName() {return "Unix Makefiles";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

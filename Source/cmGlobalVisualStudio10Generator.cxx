@@ -21,13 +21,14 @@
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 
 // Map generator name without year to name with year.
-static const char* cmVS10GenName(const char* name, std::string& genName)
+static const char* cmVS10GenName(const std::string& name, std::string& genName)
 {
-  if(strncmp(name, vs10generatorName, sizeof(vs10generatorName)-6) != 0)
+  if(strncmp(name.c_str(), vs10generatorName,
+             sizeof(vs10generatorName)-6) != 0)
     {
     return 0;
     }
-  const char* p = name + sizeof(vs10generatorName) - 6;
+  const char* p = name.c_str() + sizeof(vs10generatorName) - 6;
   if(cmHasLiteralPrefix(p, " 2010"))
     {
     p += 5;
@@ -40,27 +41,27 @@ class cmGlobalVisualStudio10Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const
+  virtual cmGlobalGenerator* CreateGlobalGenerator(
+                                            const std::string& name) const
     {
     std::string genName;
     const char* p = cmVS10GenName(name, genName);
     if(!p)
       { return 0; }
-    name = genName.c_str();
     if(strcmp(p, "") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
-        name, NULL, NULL);
+        genName, "", "");
       }
     if(strcmp(p, " Win64") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
-        name, "x64", "CMAKE_FORCE_WIN64");
+        genName, "x64", "CMAKE_FORCE_WIN64");
       }
     if(strcmp(p, " IA64") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
-        name, "Itanium", "CMAKE_FORCE_IA64");
+        genName, "Itanium", "CMAKE_FORCE_IA64");
       }
     return 0;
     }
@@ -87,8 +88,8 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio10Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
-  const char* name, const char* platformName,
-  const char* additionalPlatformDefinition)
+  const std::string& name, const std::string& platformName,
+  const std::string& additionalPlatformDefinition)
   : cmGlobalVisualStudio8Generator(name, platformName,
                                    additionalPlatformDefinition)
 {
@@ -102,7 +103,8 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
 
 //----------------------------------------------------------------------------
 bool
-cmGlobalVisualStudio10Generator::MatchesGeneratorName(const char* name) const
+cmGlobalVisualStudio10Generator::MatchesGeneratorName(
+                                               const std::string& name) const
 {
   std::string genName;
   if(cmVS10GenName(name, genName))

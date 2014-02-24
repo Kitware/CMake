@@ -72,7 +72,7 @@ std::string cmGlobalUnixMakefileGenerator3::GetEditCacheCommand() const
 {
   // If generating for an extra IDE, the edit_cache target cannot
   // launch a terminal-interactive tool, so always use cmake-gui.
-  if(this->GetExtraGeneratorName())
+  if(!this->GetExtraGeneratorName().empty())
     {
     return cmSystemTools::GetCMakeGUICommand();
     }
@@ -579,7 +579,7 @@ void cmGlobalUnixMakefileGenerator3
 
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
-  if ( strcmp(this->GetName(), "NMake Makefiles") == 0 )
+  if ( this->GetName() == "NMake Makefiles" )
     {
     makeCommand.push_back("/NOLOGO");
     }

@@ -175,7 +175,7 @@ class cmake
   void PreLoadCMakeFiles();
 
   ///! Create a GlobalGenerator
-  cmGlobalGenerator* CreateGlobalGenerator(const char* name);
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name);
 
   ///! Return the global generator assigned to this instance of cmake
   cmGlobalGenerator* GetGlobalGenerator()     { return this->GlobalGenerator; }
@@ -380,7 +380,7 @@ protected:
   void AddDefaultCommands();
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
-  void AddExtraGenerator(const char* name,
+  void AddExtraGenerator(const std::string& name,
                          CreateExtraGeneratorFunctionType newFunction);
 
   cmPolicies *Policies;

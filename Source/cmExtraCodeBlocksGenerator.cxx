@@ -38,7 +38,7 @@ http://forums.codeblocks.org/index.php/topic,6789.0.html
 
 //----------------------------------------------------------------------------
 void cmExtraCodeBlocksGenerator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates CodeBlocks project files.";
@@ -761,7 +761,8 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
              const std::string& target)
 {
   std::string command = make;
-  if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
+  std::string generator = this->GlobalGenerator->GetName();
+  if (generator == "NMake Makefiles")
     {
     // For Windows ConvertToOutputPath already adds quotes when required.
     // These need to be escaped, see
@@ -772,7 +773,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " VERBOSE=1 ";
     command += target;
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+  else if (generator == "MinGW Makefiles")
     {
     // no escaping of spaces in this case, see
     // http://public.kitware.com/Bug/view.php?id=10014
@@ -783,7 +784,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " VERBOSE=1 ";
     command += target;
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+  else if (generator == "Ninja")
     {
     command += " -v ";
     command += target;

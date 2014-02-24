@@ -23,17 +23,19 @@ class cmGlobalVisualStudio8Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if(strstr(name, vs8generatorName) != name)
+  virtual cmGlobalGenerator* CreateGlobalGenerator(
+                                              const std::string& name) const {
+    if(strncmp(name.c_str(), vs8generatorName,
+               sizeof(vs8generatorName) - 1) != 0)
       {
       return 0;
       }
 
-    const char* p = name + sizeof(vs8generatorName) - 1;
+    const char* p = name.c_str() + sizeof(vs8generatorName) - 1;
     if(p[0] == '\0')
       {
       return new cmGlobalVisualStudio8Generator(
-        name, NULL, NULL);
+        name, "", "");
       }
 
     if(p[0] != ' ')
@@ -57,7 +59,7 @@ public:
       }
 
     cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
-      name, p, NULL);
+      name, p, "");
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -90,14 +92,14 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  const char* name, const char* platformName,
-  const char* additionalPlatformDefinition)
+  const std::string& name, const std::string& platformName,
+  const std::string& additionalPlatformDefinition)
   : cmGlobalVisualStudio71Generator(platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
 
-  if (additionalPlatformDefinition)
+  if (!additionalPlatformDefinition.empty())
     {
     this->AdditionalPlatformDefinition = additionalPlatformDefinition;
     }
@@ -374,7 +376,7 @@ cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
   std::ostream& fout, const std::string& name, cmTarget::TargetType type,
   const std::set<std::string>& configsPartOfDefaultBuild,
-  const char* platformMapping)
+  std::string const& platformMapping)
 {
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
@@ -382,7 +384,8 @@ cmGlobalVisualStudio8Generator
     {
     fout << "\t\t{" << guid << "}." << *i
          << "|" << this->GetPlatformName() << ".ActiveCfg = " << *i << "|"
-         << (platformMapping ? platformMapping : this->GetPlatformName())
+         << (!platformMapping.empty()?
+             platformMapping : this->GetPlatformName())
          << "\n";
       std::set<std::string>::const_iterator
         ci = configsPartOfDefaultBuild.find(*i);
@@ -390,7 +393,8 @@ cmGlobalVisualStudio8Generator
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->GetPlatformName() << ".Build.0 = " << *i << "|"
-           << (platformMapping ? platformMapping : this->GetPlatformName())
+           << (!platformMapping.empty()?
+               platformMapping : this->GetPlatformName())
            << "\n";
       }
     bool needsDeploy = (type == cmTarget::EXECUTABLE ||
@@ -399,7 +403,8 @@ cmGlobalVisualStudio8Generator
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->GetPlatformName() << ".Deploy.0 = " << *i << "|"
-           << (platformMapping ? platformMapping : this->GetPlatformName())
+           << (!platformMapping.empty()?
+               platformMapping : this->GetPlatformName())
            << "\n";
       }
     }
