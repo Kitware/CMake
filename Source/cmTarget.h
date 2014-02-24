@@ -720,6 +720,10 @@ private:
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
                                         cmTarget const* head) const;
 
+  // Cache target compile paths for each configuration.
+  struct CompileInfo;
+  CompileInfo const* GetCompileInfo(const char* config) const;
+
   mutable cmTargetLinkInformationMap LinkInformation;
   void CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                   const char* config) const;
