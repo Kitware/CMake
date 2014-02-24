@@ -21,7 +21,7 @@ class cmQtAutoGenerators
 {
 public:
   cmQtAutoGenerators();
-  bool Run(const char* targetDirectory, const std::string& config);
+  bool Run(const std::string& targetDirectory, const std::string& config);
 
   bool InitializeAutogenTarget(cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget const* target);
@@ -37,11 +37,11 @@ private:
   void SetupAutoRccTarget(cmTarget const* target);
 
   bool ReadAutogenInfoFile(cmMakefile* makefile,
-                           const char* targetDirectory,
+                           const std::string& targetDirectory,
                            const std::string& config);
   bool ReadOldMocDefinitionsFile(cmMakefile* makefile,
-                                 const char* targetDirectory);
-  void WriteOldMocDefinitionsFile(const char* targetDirectory);
+                                 const std::string& targetDirectory);
+  void WriteOldMocDefinitionsFile(const std::string& targetDirectory);
 
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 

@@ -185,7 +185,7 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,
   const std::string& projectName,
-  const char* /*projectDir*/,
+  const std::string& /*projectDir*/,
   const std::string& targetName,
   const std::string& config,
   bool /*fast*/,

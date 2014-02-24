@@ -3060,7 +3060,8 @@ void cmMakefile::ExpandSourceListArguments(
     }
 }
 
-int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
+int cmMakefile::TryCompile(const std::string& srcdir,
+                           const std::string& bindir,
                            const std::string& projectName,
                            const std::string& targetName,
                            bool fast,
@@ -3069,15 +3070,15 @@ int cmMakefile::TryCompile(const char *srcdir, const char *bindir,
 {
   this->Internal->IsSourceFileTryCompile = fast;
   // does the binary directory exist ? If not create it...
-  if (!cmSystemTools::FileIsDirectory(bindir))
+  if (!cmSystemTools::FileIsDirectory(bindir.c_str()))
     {
-    cmSystemTools::MakeDirectory(bindir);
+    cmSystemTools::MakeDirectory(bindir.c_str());
     }
 
   // change to the tests directory and run cmake
   // use the cmake object instead of calling cmake
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
+  cmSystemTools::ChangeDirectory(bindir.c_str());
 
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not

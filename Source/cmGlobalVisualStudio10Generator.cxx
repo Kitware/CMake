@@ -312,7 +312,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
   const char* makeProgram,
   const std::string& projectName,
-  const char* projectDir,
+  const std::string& projectDir,
   const std::string& targetName,
   const std::string& config,
   bool fast,
@@ -334,7 +334,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   cmSlnData slnData;
   {
   std::string slnFile;
-  if(projectDir && *projectDir)
+  if(!projectDir.empty())
     {
     slnFile = projectDir;
     slnFile += "/";

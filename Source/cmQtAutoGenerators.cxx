@@ -952,7 +952,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
 }
 
 static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
-                                                  const char* targetDirectory)
+                                            const std::string& targetDirectory)
 {
   cmGlobalGenerator* gg = new cmGlobalGenerator();
   gg->SetCMakeInstance(cm);
@@ -967,7 +967,7 @@ static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
   return gg;
 }
 
-bool cmQtAutoGenerators::Run(const char* targetDirectory,
+bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
                              const std::string& config)
 {
   bool success = true;
@@ -994,10 +994,11 @@ bool cmQtAutoGenerators::Run(const char* targetDirectory,
 }
 
 bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
-                                      const char* targetDirectory,
+                                      const std::string& targetDirectory,
                                       const std::string& config)
 {
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  std::string filename(
+      cmSystemTools::CollapseFullPath(targetDirectory.c_str()));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutogenInfo.cmake";
 
@@ -1137,9 +1138,10 @@ std::string cmQtAutoGenerators::MakeCompileSettingsString(cmMakefile* makefile)
 
 
 bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(cmMakefile* makefile,
-                                            const char* targetDirectory)
+                                            const std::string& targetDirectory)
 {
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  std::string filename(
+      cmSystemTools::CollapseFullPath(targetDirectory.c_str()));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
@@ -1153,9 +1155,11 @@ bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(cmMakefile* makefile,
 
 
 void
-cmQtAutoGenerators::WriteOldMocDefinitionsFile(const char* targetDirectory)
+cmQtAutoGenerators::WriteOldMocDefinitionsFile(
+                                            const std::string& targetDirectory)
 {
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  std::string filename(
+      cmSystemTools::CollapseFullPath(targetDirectory.c_str()));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 

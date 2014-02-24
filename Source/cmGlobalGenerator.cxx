@@ -1614,7 +1614,8 @@ void cmGlobalGenerator::CheckLocalGenerators()
     }
 }
 
-int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
+int cmGlobalGenerator::TryCompile(const std::string& srcdir,
+                                  const std::string& bindir,
                                   const std::string& projectName,
                                   const std::string& target, bool fast,
                                   std::string *output, cmMakefile *mf)
@@ -1665,7 +1666,7 @@ int cmGlobalGenerator::TryCompile(const char *srcdir, const char *bindir,
 
 void cmGlobalGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const char*, const std::string&,
-  const char*, const std::string&, const std::string&, bool,
+  const std::string&, const std::string&, const std::string&, bool,
   std::vector<std::string> const&)
 {
   makeCommand.push_back(
@@ -1673,7 +1674,7 @@ void cmGlobalGenerator::GenerateBuildCommand(
 }
 
 int cmGlobalGenerator::Build(
-  const char *, const char *bindir,
+  const std::string&, const std::string& bindir,
   const std::string& projectName, const std::string& target,
   std::string *output,
   const char *makeCommandCSTR,
@@ -1687,7 +1688,7 @@ int cmGlobalGenerator::Build(
    * Run an executable command and put the stdout in output.
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir);
+  cmSystemTools::ChangeDirectory(bindir.c_str());
   if(output)
     {
     *output += "Change Dir: ";

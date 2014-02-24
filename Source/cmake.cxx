@@ -2667,7 +2667,7 @@ int cmake::Build(const std::string& dir,
     return 1;
     }
   projName = it.GetValue();
-  return gen->Build(0, dir.c_str(),
+  return gen->Build("", dir.c_str(),
                     projName.c_str(), target.c_str(),
                     &output,
                     0,

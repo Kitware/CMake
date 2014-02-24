@@ -105,7 +105,7 @@ public:
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  virtual int TryCompile(const char *srcdir, const char *bindir,
+  virtual int TryCompile(const std::string& srcdir, const std::string& bindir,
                          const std::string& projectName,
                          const std::string& targetName,
                          bool fast, std::string *output, cmMakefile* mf);
@@ -117,7 +117,7 @@ public:
    * empty then all is assumed. clean indicates if a "make clean" should be
    * done first.
    */
-  int Build(const char *srcdir, const char *bindir,
+  int Build(const std::string& srcdir, const std::string& bindir,
             const std::string& projectName, const std::string& targetName,
             std::string *output,
             const char *makeProgram, const std::string& config,
@@ -130,7 +130,7 @@ public:
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
     const char* makeProgram,
-    const std::string& projectName, const char *projectDir,
+    const std::string& projectName, const std::string& projectDir,
     const std::string& targetName, const std::string& config, bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
