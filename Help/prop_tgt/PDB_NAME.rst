@@ -8,6 +8,3 @@ This property specifies the base name for the debug symbols file.
 If not set, the logical target name is used by default.
 
 .. include:: PDB_NOTE.txt
-
-This property is not implemented by the :generator:`Visual Studio 6`
-generator.

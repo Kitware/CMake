@@ -10,6 +10,3 @@ value of the :variable:`CMAKE_PDB_OUTPUT_DIRECTORY` variable if it is
 set when a target is created.
 
 .. include:: PDB_NOTE.txt
-
-This property is not implemented by the :generator:`Visual Studio 6`
-generator.
