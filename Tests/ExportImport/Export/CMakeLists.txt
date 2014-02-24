@@ -23,6 +23,22 @@ add_library(testLib1 STATIC testLib1.c)
 add_library(testLib2 STATIC testLib2.c)
 target_link_libraries(testLib2 testLib1)
 
+# Test install(FILES) with generator expressions referencing testLib1.
+add_custom_command(TARGET testLib1 POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testLib1>
+                                   $<TARGET_FILE:testLib1>.genex
+  )
+install(FILES $<TARGET_FILE:testLib1>.genex
+  DESTINATION lib
+  )
+set_property(TARGET testLib1 PROPERTY MY_FILES
+  ${CMAKE_CURRENT_SOURCE_DIR}/testLib1file1.txt
+  ${CMAKE_CURRENT_SOURCE_DIR}/testLib1file2.txt
+  )
+install(FILES $<TARGET_PROPERTY:testLib1,MY_FILES>
+  DESTINATION doc
+  )
+
 # Test library with empty link interface.  Link it to an implementation
 # dependency that itself links to dependencies publicly.
 add_library(testLib3ImpDep SHARED testLib3ImpDep.c)
