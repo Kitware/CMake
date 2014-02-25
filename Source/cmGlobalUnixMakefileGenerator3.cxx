@@ -477,24 +477,26 @@ cmGlobalUnixMakefileGenerator3
   for(cmGeneratorTargetsType::iterator l = targets.begin();
       l != targets.end(); ++l)
     {
-    if((l->second->GetType() == cmTarget::EXECUTABLE) ||
-       (l->second->GetType() == cmTarget::STATIC_LIBRARY) ||
-       (l->second->GetType() == cmTarget::SHARED_LIBRARY) ||
-       (l->second->GetType() == cmTarget::MODULE_LIBRARY) ||
-       (l->second->GetType() == cmTarget::OBJECT_LIBRARY) ||
-       (l->second->GetType() == cmTarget::UTILITY))
+    cmGeneratorTarget* gtarget = l->second;
+    int type = gtarget->GetType();
+    if((type == cmTarget::EXECUTABLE) ||
+       (type == cmTarget::STATIC_LIBRARY) ||
+       (type == cmTarget::SHARED_LIBRARY) ||
+       (type == cmTarget::MODULE_LIBRARY) ||
+       (type == cmTarget::OBJECT_LIBRARY) ||
+       (type == cmTarget::UTILITY))
       {
-      if(l->second->Target->IsImported())
+      if(gtarget->Target->IsImported())
         {
         continue;
         }
       // Add this to the list of depends rules in this directory.
-      if((!check_all || !l->second->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
+      if((!check_all || !gtarget->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
          (!check_relink ||
-          l->second->Target
+          gtarget->Target
                    ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str())))
         {
-        std::string tname = lg->GetRelativeTargetDirectory(*l->second->Target);
+        std::string tname = lg->GetRelativeTargetDirectory(*gtarget->Target);
         tname += "/";
         tname += pass;
         depends.push_back(tname);
@@ -643,45 +645,48 @@ cmGlobalUnixMakefileGenerator3
     for(cmGeneratorTargetsType::iterator t = targets.begin();
         t != targets.end(); ++t)
       {
-      if(t->second->Target->IsImported())
+      cmGeneratorTarget* gtarget = t->second;
+      if(gtarget->Target->IsImported())
         {
         continue;
         }
       // Don't emit the same rule twice (e.g. two targets with the same
       // simple name)
-      if(!t->second->GetName().empty() &&
-         emitted.insert(t->second->GetName()).second &&
+      int type = gtarget->GetType();
+      std::string name = gtarget->GetName();
+      if(!name.empty() &&
+         emitted.insert(name).second &&
          // Handle user targets here.  Global targets are handled in
          // the local generator on a per-directory basis.
-         ((t->second->GetType() == cmTarget::EXECUTABLE) ||
-          (t->second->GetType() == cmTarget::STATIC_LIBRARY) ||
-          (t->second->GetType() == cmTarget::SHARED_LIBRARY) ||
-          (t->second->GetType() == cmTarget::MODULE_LIBRARY) ||
-          (t->second->GetType() == cmTarget::OBJECT_LIBRARY) ||
-          (t->second->GetType() == cmTarget::UTILITY)))
+         ((type == cmTarget::EXECUTABLE) ||
+          (type == cmTarget::STATIC_LIBRARY) ||
+          (type == cmTarget::SHARED_LIBRARY) ||
+          (type == cmTarget::MODULE_LIBRARY) ||
+          (type == cmTarget::OBJECT_LIBRARY) ||
+          (type == cmTarget::UTILITY)))
         {
         // Add a rule to build the target by name.
         lg->WriteDivider(ruleFileStream);
         ruleFileStream
           << "# Target rules for targets named "
-          << t->second->GetName() << "\n\n";
+          << name << "\n\n";
 
         // Write the rule.
         commands.clear();
         std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
         tmp += "Makefile2";
         commands.push_back(lg->GetRecursiveMakeCall
-                            (tmp.c_str(),t->second->GetName()));
+                            (tmp.c_str(),name));
         depends.clear();
         depends.push_back("cmake_check_build_system");
         lg->WriteMakeRule(ruleFileStream,
                           "Build rule for target.",
-                          t->second->GetName(), depends, commands,
+                          name, depends, commands,
                           true);
 
         // Add a fast rule to build the target
         std::string localName =
-                          lg->GetRelativeTargetDirectory(*t->second->Target);
+                          lg->GetRelativeTargetDirectory(*gtarget->Target);
         std::string makefileName;
         makefileName = localName;
         makefileName += "/build.make";
@@ -689,7 +694,7 @@ cmGlobalUnixMakefileGenerator3
         commands.clear();
         std::string makeTargetName = localName;
         makeTargetName += "/build";
-        localName = t->second->GetName();
+        localName = name;
         localName += "/fast";
         commands.push_back(lg->GetRecursiveMakeCall
                             (makefileName.c_str(), makeTargetName.c_str()));
@@ -698,12 +703,12 @@ cmGlobalUnixMakefileGenerator3
 
         // Add a local name for the rule to relink the target before
         // installation.
-        if(t->second->Target
+        if(gtarget->Target
                     ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
           {
-          makeTargetName = lg->GetRelativeTargetDirectory(*t->second->Target);
+          makeTargetName = lg->GetRelativeTargetDirectory(*gtarget->Target);
           makeTargetName += "/preinstall";
-          localName = t->second->GetName();
+          localName = name;
           localName += "/preinstall";
           depends.clear();
           commands.clear();
@@ -741,25 +746,28 @@ cmGlobalUnixMakefileGenerator3
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if(t->second->Target->IsImported())
+    cmGeneratorTarget* gtarget = t->second;
+    if(gtarget->Target->IsImported())
       {
       continue;
       }
-    if (!t->second->GetName().empty()
-     && ((t->second->GetType() == cmTarget::EXECUTABLE)
-        || (t->second->GetType() == cmTarget::STATIC_LIBRARY)
-        || (t->second->GetType() == cmTarget::SHARED_LIBRARY)
-        || (t->second->GetType() == cmTarget::MODULE_LIBRARY)
-        || (t->second->GetType() == cmTarget::OBJECT_LIBRARY)
-        || (t->second->GetType() == cmTarget::UTILITY)))
+    int type = gtarget->GetType();
+    std::string name = gtarget->GetName();
+    if (!name.empty()
+     && (  (type == cmTarget::EXECUTABLE)
+        || (type == cmTarget::STATIC_LIBRARY)
+        || (type == cmTarget::SHARED_LIBRARY)
+        || (type == cmTarget::MODULE_LIBRARY)
+        || (type == cmTarget::OBJECT_LIBRARY)
+        || (type == cmTarget::UTILITY)))
       {
       std::string makefileName;
       // Add a rule to build the target by name.
-      localName = lg->GetRelativeTargetDirectory(*t->second->Target);
+      localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
       makefileName = localName;
       makefileName += "/build.make";
 
-      bool needRequiresStep = this->NeedRequiresStep(*t->second->Target);
+      bool needRequiresStep = this->NeedRequiresStep(*gtarget->Target);
 
       lg->WriteDivider(ruleFileStream);
       ruleFileStream
@@ -801,7 +809,7 @@ cmGlobalUnixMakefileGenerator3
                                 cmLocalGenerator::SHELL);
         progCmd << " ";
         std::vector<unsigned long>& progFiles =
-          this->ProgressMap[t->second->Target].Marks;
+          this->ProgressMap[gtarget->Target].Marks;
         for (std::vector<unsigned long>::iterator i = progFiles.begin();
               i != progFiles.end(); ++i)
           {
@@ -810,15 +818,15 @@ cmGlobalUnixMakefileGenerator3
         commands.push_back(progCmd.str());
         }
       progressDir = "Built target ";
-      progressDir += t->second->GetName();
+      progressDir += name;
       lg->AppendEcho(commands,progressDir.c_str());
 
-      this->AppendGlobalTargetDepends(depends,*t->second->Target);
+      this->AppendGlobalTargetDepends(depends,*gtarget->Target);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName.c_str(), depends, commands, true);
 
       // add the all/all dependency
-      if(!this->IsExcluded(this->LocalGenerators[0], *t->second->Target))
+      if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
         {
         depends.clear();
         depends.push_back(localName);
@@ -843,7 +851,7 @@ cmGlobalUnixMakefileGenerator3
       //
       std::set<cmTarget const*> emitted;
       progCmd << " "
-              << this->CountProgressMarksInTarget(t->second->Target, emitted);
+              << this->CountProgressMarksInTarget(gtarget->Target, emitted);
       commands.push_back(progCmd.str());
       }
       std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -861,7 +869,7 @@ cmGlobalUnixMakefileGenerator3
       }
       depends.clear();
       depends.push_back("cmake_check_build_system");
-      localName = lg->GetRelativeTargetDirectory(*t->second->Target);
+      localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
       localName += "/rule";
       lg->WriteMakeRule(ruleFileStream,
                         "Build rule for subdir invocation for target.",
@@ -872,13 +880,13 @@ cmGlobalUnixMakefileGenerator3
       depends.clear();
       depends.push_back(localName);
       lg->WriteMakeRule(ruleFileStream, "Convenience name for target.",
-                        t->second->GetName(), depends, commands, true);
+                        name, depends, commands, true);
 
       // Add rules to prepare the target for installation.
-      if(t->second->Target
+      if(gtarget->Target
                   ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
         {
-        localName = lg->GetRelativeTargetDirectory(*t->second->Target);
+        localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
         localName += "/preinstall";
         depends.clear();
         commands.clear();
@@ -888,7 +896,7 @@ cmGlobalUnixMakefileGenerator3
                           "Pre-install relink rule for target.",
                           localName.c_str(), depends, commands, true);
 
-        if(!this->IsExcluded(this->LocalGenerators[0], *t->second->Target))
+        if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
           {
           depends.clear();
           depends.push_back(localName);
@@ -899,7 +907,7 @@ cmGlobalUnixMakefileGenerator3
         }
 
       // add the clean rule
-      localName = lg->GetRelativeTargetDirectory(*t->second->Target);
+      localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
       makeTargetName = localName;
       makeTargetName += "/clean";
       depends.clear();
@@ -1066,18 +1074,21 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
       cmTargets& targets = lg2->GetMakefile()->GetTargets();
       for(cmTargets::iterator t = targets.begin(); t != targets.end(); ++t)
         {
-        if((t->second.GetType() == cmTarget::EXECUTABLE) ||
-           (t->second.GetType() == cmTarget::STATIC_LIBRARY) ||
-           (t->second.GetType() == cmTarget::SHARED_LIBRARY) ||
-           (t->second.GetType() == cmTarget::MODULE_LIBRARY) ||
-           (t->second.GetType() == cmTarget::OBJECT_LIBRARY) ||
-           (t->second.GetType() == cmTarget::GLOBAL_TARGET) ||
-           (t->second.GetType() == cmTarget::UTILITY))
+        cmTarget const& target = t->second;
+        cmTarget::TargetType type = target.GetType();
+        if((type == cmTarget::EXECUTABLE) ||
+           (type == cmTarget::STATIC_LIBRARY) ||
+           (type == cmTarget::SHARED_LIBRARY) ||
+           (type == cmTarget::MODULE_LIBRARY) ||
+           (type == cmTarget::OBJECT_LIBRARY) ||
+           (type == cmTarget::GLOBAL_TARGET) ||
+           (type == cmTarget::UTILITY))
           {
-          if(emittedTargets.insert(t->second.GetName()).second)
+          std::string name = target.GetName();
+          if(emittedTargets.insert(name).second)
             {
             path = "... ";
-            path += t->second.GetName();
+            path += name;
             lg->AppendEcho(commands,path.c_str());
             }
           }
