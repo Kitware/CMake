@@ -34,7 +34,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "set_property";}
+  virtual std::string GetName() const { return "set_property";}
 
   /**
    * This determines if the command is invoked when in script mode.

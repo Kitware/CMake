@@ -60,7 +60,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "subdirs";}
+  virtual std::string GetName() const { return "subdirs";}
 
   cmTypeMacro(cmCTestSubdirCommand, cmCommand);
 
@@ -157,7 +157,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "add_subdirectory";}
+  virtual std::string GetName() const { return "add_subdirectory";}
 
   cmTypeMacro(cmCTestAddSubdirectoryCommand, cmCommand);
 
@@ -243,7 +243,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "add_test";}
+  virtual std::string GetName() const { return "add_test";}
 
   cmTypeMacro(cmCTestAddTestCommand, cmCommand);
 
@@ -287,7 +287,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "set_tests_properties";}
+  virtual std::string GetName() const { return "set_tests_properties";}
 
   cmTypeMacro(cmCTestSetTestsPropertiesCommand, cmCommand);
 

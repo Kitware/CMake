@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "cmake_minimum_required";}
+  virtual std::string GetName() const {return "cmake_minimum_required";}
 
   cmTypeMacro(cmCMakeMinimumRequired, cmCommand);
 

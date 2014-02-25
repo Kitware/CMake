@@ -63,7 +63,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "if";}
+  virtual std::string GetName() const { return "if";}
 
   /**
    * This determines if the command is invoked when in script mode.

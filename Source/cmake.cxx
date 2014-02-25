@@ -221,13 +221,13 @@ void cmake::CleanupCommandsAndMacros()
     }
 }
 
-bool cmake::CommandExists(const char* name) const
+bool cmake::CommandExists(const std::string& name) const
 {
   std::string sName = cmSystemTools::LowerCase(name);
   return (this->Commands.find(sName) != this->Commands.end());
 }
 
-cmCommand *cmake::GetCommand(const char *name)
+cmCommand *cmake::GetCommand(const std::string& name)
 {
   cmCommand* rm = 0;
   std::string sName = cmSystemTools::LowerCase(name);
@@ -239,7 +239,8 @@ cmCommand *cmake::GetCommand(const char *name)
   return rm;
 }
 
-void cmake::RenameCommand(const char*oldName, const char* newName)
+void cmake::RenameCommand(const std::string& oldName,
+                          const std::string& newName)
 {
   // if the command already exists, free the old one
   std::string sOldName = cmSystemTools::LowerCase(oldName);
@@ -262,7 +263,7 @@ void cmake::RenameCommand(const char*oldName, const char* newName)
   this->Commands.erase(pos);
 }
 
-void cmake::RemoveCommand(const char* name)
+void cmake::RemoveCommand(const std::string& name)
 {
   std::string sName = cmSystemTools::LowerCase(name);
   RegisteredCommandsMap::iterator pos = this->Commands.find(sName);

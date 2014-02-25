@@ -20,7 +20,7 @@ public:
   virtual cmCommand* Clone() { return new cmLoadCommandCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  virtual const char* GetName() const {return "load_command";}
+  virtual std::string GetName() const {return "load_command";}
   virtual bool IsDiscouraged() const { return true; }
   cmTypeMacro(cmLoadCommandCommand, cmCommand);
 };

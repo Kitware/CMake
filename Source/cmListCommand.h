@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "list";}
+  virtual std::string GetName() const { return "list";}
 
   cmTypeMacro(cmListCommand, cmCommand);
 protected:

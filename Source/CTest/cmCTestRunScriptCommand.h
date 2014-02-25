@@ -47,7 +47,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "ctest_run_script";}
+  virtual std::string GetName() const { return "ctest_run_script";}
 
   cmTypeMacro(cmCTestRunScriptCommand, cmCTestCommand);
 };

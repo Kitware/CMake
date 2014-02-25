@@ -218,20 +218,20 @@ class cmake
    * Add a command to this cmake instance
    */
   void AddCommand(cmCommand* );
-  void RenameCommand(const char* oldName, const char* newName);
-  void RemoveCommand(const char* name);
+  void RenameCommand(const std::string& oldName, const std::string& newName);
+  void RemoveCommand(const std::string& name);
   void RemoveUnscriptableCommands();
 
   /**
    * Get a command by its name
    */
-  cmCommand *GetCommand(const char *name);
+  cmCommand *GetCommand(const std::string& name);
 
   /** Get list of all commands */
   RegisteredCommandsMap* GetCommands() { return &this->Commands; }
 
   /** Check if a command exists. */
-  bool CommandExists(const char* name) const;
+  bool CommandExists(const std::string& name) const;
 
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&,

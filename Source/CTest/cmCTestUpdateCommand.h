@@ -39,7 +39,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "ctest_update";}
+  virtual std::string GetName() const { return "ctest_update";}
 
   cmTypeMacro(cmCTestUpdateCommand, cmCTestHandlerCommand);
 

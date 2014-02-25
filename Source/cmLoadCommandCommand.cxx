@@ -69,7 +69,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return info.Name; }
+  virtual std::string GetName() const { return info.Name; }
 
   static const char* LastName;
   static void TrapsForSignals(int sig)

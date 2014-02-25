@@ -124,7 +124,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const = 0;
+  virtual std::string GetName() const = 0;
 
   /**
    * Enable the command.

@@ -32,7 +32,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "set_target_properties";}
+  virtual std::string GetName() const { return "set_target_properties";}
 
   /**
    *  Used by this command and cmSetPropertiesCommand
