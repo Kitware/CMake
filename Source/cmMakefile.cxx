@@ -1796,7 +1796,8 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
                                     cmCacheManager::CacheEntryType type,
                                     bool force)
 {
-  const char* val = value;
+  bool haveVal = value ? true : false;
+  std::string val = haveVal ? value : "";
   cmCacheManager::CacheIterator it =
     this->GetCacheManager()->GetCacheIterator(name.c_str());
   if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
@@ -1807,6 +1808,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
     if(!force)
       {
       val = it.GetValue();
+      haveVal = true;
       }
     if ( type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH )
       {
@@ -1829,10 +1831,12 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
 
       this->GetCacheManager()->AddCacheEntry(name, nvalue.c_str(), doc, type);
       val = it.GetValue();
+      haveVal = true;
       }
 
     }
-  this->GetCacheManager()->AddCacheEntry(name, val, doc, type);
+  this->GetCacheManager()->AddCacheEntry(name, haveVal ? val.c_str() : 0, doc,
+                                         type);
   // if there was a definition then remove it
   this->Internal->VarStack.top().Set(name, 0);
 }

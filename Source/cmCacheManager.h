@@ -56,8 +56,8 @@ public:
     bool Find(const std::string&);
     bool IsAtEnd() const;
     void Next();
-    const char *GetName() const {
-      return this->Position->first.c_str(); }
+    std::string GetName() const {
+      return this->Position->first; }
     const char* GetProperty(const std::string&) const ;
     bool GetPropertyAsBool(const std::string&) const ;
     bool PropertyExists(const std::string&) const;
@@ -65,7 +65,7 @@ public:
     void AppendProperty(const std::string& property, const char* value,
                         bool asString=false);
     void SetProperty(const std::string& property, bool value);
-    const char* GetValue() const { return this->GetEntry().Value.c_str(); }
+    std::string GetValue() const { return this->GetEntry().Value; }
     bool GetValueAsBool() const;
     void SetValue(const char*);
     CacheEntryType GetType() const { return this->GetEntry().Type; }

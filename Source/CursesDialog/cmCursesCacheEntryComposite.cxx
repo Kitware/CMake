@@ -51,7 +51,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     {
     case  cmCacheManager::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
-      if (cmSystemTools::IsOn(it.GetValue()))
+      if (cmSystemTools::IsOn(it.GetValue().c_str()))
         {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
         }
@@ -94,7 +94,8 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         }
       break;
     case cmCacheManager::UNINITIALIZED:
-      cmSystemTools::Error("Found an undefined variable: ", it.GetName());
+      cmSystemTools::Error("Found an undefined variable: ",
+                           it.GetName().c_str());
       break;
     default:
       // TODO : put warning message here
