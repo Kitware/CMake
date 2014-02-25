@@ -414,12 +414,13 @@ void cmExtraCodeBlocksGenerator
             std::string lang = (*si)->GetLanguage();
             if (lang == "C" || lang == "CXX")
               {
+              std::string srcext = (*si)->GetExtension();
               for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
                   ext !=  mf->GetSourceExtensions().end();
                   ++ext)
                 {
-                if ((*si)->GetExtension() == *ext)
+                if (srcext == *ext)
                   {
                   isCFile = true;
                   break;
