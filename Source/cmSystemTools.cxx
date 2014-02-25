@@ -1044,7 +1044,7 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
                                        bool emptyArgs)
 {
   // If argument is empty, it is an empty list.
-  if(arg.length() == 0 && !emptyArgs)
+  if(!emptyArgs && arg.empty())
     {
     return;
     }
@@ -1054,10 +1054,11 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
     newargs.push_back(arg);
     return;
     }
-  std::vector<char> newArgVec;
+  std::string newArg;
+  const char *last = arg.c_str();
   // Break the string at non-escaped semicolons not nested in [].
   int squareNesting = 0;
-  for(const char* c = arg.c_str(); *c; ++c)
+  for(const char* c = last; *c; ++c)
     {
     switch(*c)
       {
@@ -1065,34 +1066,21 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         {
         // We only want to allow escaping of semicolons.  Other
         // escapes should not be processed here.
-        ++c;
-        if(*c == ';')
+        const char* next = c + 1;
+        if(*next == ';')
           {
-          newArgVec.push_back(*c);
-          }
-        else
-          {
-          newArgVec.push_back('\\');
-          if(*c)
-            {
-            newArgVec.push_back(*c);
-            }
-          else
-            {
-            // Terminate the loop properly.
-            --c;
-            }
+          newArg.append(last, c - last);
+          // Skip over the escape character
+          last = c = next;
           }
         } break;
       case '[':
         {
         ++squareNesting;
-        newArgVec.push_back(*c);
         } break;
       case ']':
         {
         --squareNesting;
-        newArgVec.push_back(*c);
         } break;
       case ';':
         {
@@ -1100,31 +1088,28 @@ void cmSystemTools::ExpandListArgument(const std::string& arg,
         // brackets.
         if(squareNesting == 0)
           {
-          if ( newArgVec.size() || emptyArgs )
+          newArg.append(last, c - last);
+          // Skip over the semicolon
+          last = c + 1;
+          if ( !newArg.empty() || emptyArgs )
             {
             // Add the last argument if the string is not empty.
-            newArgVec.push_back(0);
-            newargs.push_back(&*newArgVec.begin());
-            newArgVec.clear();
+            newargs.push_back(newArg);
+            newArg = "";
             }
-          }
-        else
-          {
-          newArgVec.push_back(*c);
           }
         } break;
       default:
         {
         // Just append this character.
-        newArgVec.push_back(*c);
         } break;
       }
     }
-  if ( newArgVec.size() || emptyArgs )
+  newArg.append(last);
+  if ( !newArg.empty() || emptyArgs )
     {
     // Add the last argument if the string is not empty.
-    newArgVec.push_back(0);
-    newargs.push_back(&*newArgVec.begin());
+    newargs.push_back(newArg);
     }
 }
 
