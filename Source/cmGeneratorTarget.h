@@ -52,7 +52,7 @@ public:
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
 
-  std::string ModuleDefinitionFile;
+  std::string GetModuleDefinitionFile() const;
 
   /** Full path with trailing slash to the top-level directory
       holding object files for this target.  Includes the build
@@ -82,30 +82,55 @@ public:
    */
   void TraceDependencies();
 
-  void ClassifySources();
   void LookupObjectLibraries();
 
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
 
+  /**
+   * Flags for a given source file as used in this target. Typically assigned
+   * via SET_TARGET_PROPERTIES when the property is a list of source files.
+   */
+  enum SourceFileType
+  {
+    SourceFileTypeNormal,
+    SourceFileTypePrivateHeader, // is in "PRIVATE_HEADER" target property
+    SourceFileTypePublicHeader,  // is in "PUBLIC_HEADER" target property
+    SourceFileTypeResource,      // is in "RESOURCE" target property *or*
+                                 // has MACOSX_PACKAGE_LOCATION=="Resources"
+    SourceFileTypeMacContent     // has MACOSX_PACKAGE_LOCATION!="Resources"
+  };
+  struct SourceFileFlags
+  {
+    SourceFileFlags(): Type(SourceFileTypeNormal), MacFolder(0) {}
+    SourceFileFlags(SourceFileFlags const& r):
+      Type(r.Type), MacFolder(r.MacFolder) {}
+    SourceFileType Type;
+    const char* MacFolder; // location inside Mac content folders
+  };
+
+  struct SourceFileFlags
+  GetTargetSourceFileFlags(const cmSourceFile* sf) const;
+
+  struct ResxData {
+    mutable std::set<std::string> ExpectedResxHeaders;
+    mutable std::vector<cmSourceFile*> ResxSources;
+  };
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
   typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
 
-  std::vector<cmSourceFile*> CustomCommands;
-  std::vector<cmSourceFile*> ExtraSources;
-  std::vector<cmSourceFile*> HeaderSources;
-  std::vector<cmSourceFile*> ExternalObjects;
-  std::vector<cmSourceFile*> IDLSources;
-  std::vector<cmSourceFile*> ResxSources;
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
-  std::set<std::string> ExpectedResxHeaders;
-  std::vector<cmSourceFile*> ObjectSources;
+  mutable std::vector<cmSourceFile*> ObjectSources;
   std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
+
+  void ConstructSourceFileFlags() const;
+  mutable bool SourceFileFlagsConstructed;
+  mutable std::map<cmSourceFile const*, SourceFileFlags> SourceFlagsMap;
 
   cmGeneratorTarget(cmGeneratorTarget const&);
   void operator=(cmGeneratorTarget const&);

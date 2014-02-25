@@ -1650,9 +1650,10 @@ void cmMakefileTargetGenerator
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  if(!def.empty())
     {
-    depends.push_back(this->GeneratorTarget->ModuleDefinitionFile);
+    depends.push_back(def);
     }
 
   // Add user-specified dependencies.
@@ -2019,7 +2020,8 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 {
-  if(this->GeneratorTarget->ModuleDefinitionFile.empty())
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  if(def.empty())
     {
     return;
     }
@@ -2035,8 +2037,7 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   // Append the flag and value.  Use ConvertToLinkReference to help
   // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
-  flag += (this->LocalGenerator->ConvertToLinkReference(
-             this->GeneratorTarget->ModuleDefinitionFile.c_str()));
+  flag += (this->LocalGenerator->ConvertToLinkReference(def.c_str()));
   this->LocalGenerator->AppendFlags(flags, flag.c_str());
 }
 

@@ -1148,12 +1148,6 @@ void cmGlobalGenerator::Generate()
     return;
     }
 
-  // Check that all targets are valid.
-  if(!this->CheckTargets())
-    {
-    return;
-    }
-
   this->FinalizeTargetCompileInfo();
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -1306,35 +1300,6 @@ bool cmGlobalGenerator::ComputeTargetDepends()
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalGenerator::CheckTargets()
-{
-  // Make sure all targets can find their source files.
-  for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
-    {
-    cmTargets& targets =
-      this->LocalGenerators[i]->GetMakefile()->GetTargets();
-    for(cmTargets::iterator ti = targets.begin();
-        ti != targets.end(); ++ti)
-      {
-      cmTarget& target = ti->second;
-      if(target.GetType() == cmTarget::EXECUTABLE ||
-         target.GetType() == cmTarget::STATIC_LIBRARY ||
-         target.GetType() == cmTarget::SHARED_LIBRARY ||
-         target.GetType() == cmTarget::MODULE_LIBRARY ||
-         target.GetType() == cmTarget::OBJECT_LIBRARY ||
-         target.GetType() == cmTarget::UTILITY)
-        {
-        if(!target.FindSourceFiles())
-          {
-          return false;
-          }
-        }
-      }
-    }
-  return true;
-}
-
-//----------------------------------------------------------------------------
 void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -1474,7 +1439,6 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
         continue;
         }
       cmGeneratorTarget* gt = ti->second;
-      gt->ClassifySources();
       gt->LookupObjectLibraries();
       this->ComputeTargetObjects(gt);
       }

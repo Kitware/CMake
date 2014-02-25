@@ -140,34 +140,6 @@ public:
     }
 
   /**
-   * Flags for a given source file as used in this target. Typically assigned
-   * via SET_TARGET_PROPERTIES when the property is a list of source files.
-   */
-  enum SourceFileType
-  {
-    SourceFileTypeNormal,
-    SourceFileTypePrivateHeader, // is in "PRIVATE_HEADER" target property
-    SourceFileTypePublicHeader,  // is in "PUBLIC_HEADER" target property
-    SourceFileTypeResource,      // is in "RESOURCE" target property *or*
-                                 // has MACOSX_PACKAGE_LOCATION=="Resources"
-    SourceFileTypeMacContent     // has MACOSX_PACKAGE_LOCATION!="Resources"
-  };
-  struct SourceFileFlags
-  {
-    SourceFileFlags(): Type(SourceFileTypeNormal), MacFolder(0) {}
-    SourceFileFlags(SourceFileFlags const& r):
-      Type(r.Type), MacFolder(r.MacFolder) {}
-    SourceFileType Type;
-    const char* MacFolder; // location inside Mac content folders
-  };
-
-  /**
-   * Get the flags for a given source file as used in this target
-   */
-  struct SourceFileFlags
-  GetTargetSourceFileFlags(const cmSourceFile* sf) const;
-
-  /**
    * Add sources to the target.
    */
   void AddSources(std::vector<std::string> const& srcs);
@@ -292,9 +264,14 @@ public:
       if the target cannot be linked.  */
   LinkInterface const* GetLinkInterface(const char* config,
                                         cmTarget const* headTarget) const;
-  void GetTransitivePropertyLinkLibraries(const char* config,
+  LinkInterface const* GetLinkInterfaceLibraries(const char* config,
+                                        cmTarget const* headTarget) const;
+  void GetTransitivePropertyTargets(const char* config,
                                         cmTarget const* headTarget,
-                                        std::vector<std::string> &libs) const;
+                                        std::vector<cmTarget*> &libs) const;
+  void GetTransitiveTargetClosure(const char* config,
+                                        cmTarget const* headTarget,
+                                        std::vector<cmTarget*> &libs) const;
 
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
@@ -311,6 +288,9 @@ public:
     std::vector<std::string> WrongConfigLibraries;
   };
   LinkImplementation const* GetLinkImplementation(const char* config,
+                                                  cmTarget const* head) const;
+
+  LinkImplementation const* GetLinkImplementationLibraries(const char* config,
                                                   cmTarget const* head) const;
 
   /** Link information from the transitive closure of the link
@@ -357,11 +337,6 @@ public:
       is returned if the property is not set or cannot be parsed.  */
   void
   GetTargetVersion(bool soversion, int& major, int& minor, int& patch) const;
-
-  /**
-   * Make sure the full path to all source files is known.
-   */
-  bool FindSourceFiles();
 
   ///! Return the preferred linker language for this target
   const char* GetLinkerLanguage(const char* config = 0,
@@ -723,12 +698,15 @@ private:
   void CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                   const char* config) const;
 
-  bool ComputeLinkInterface(const char* config, LinkInterface& iface,
-                                        cmTarget const* head) const;
+  const char* ComputeLinkInterfaceLibraries(const char* config,
+                                            LinkInterface& iface,
+                                            cmTarget const* head,
+                                            bool &exists) const;
 
   void ComputeLinkImplementation(const char* config,
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
+  void ComputeLinkImplementationLanguages(LinkImplementation& impl) const;
   void ComputeLinkClosure(const char* config, LinkClosure& lc,
                           cmTarget const* head) const;
 
@@ -756,7 +734,6 @@ private:
   friend class cmTargetTraceDependencies;
   cmTargetInternalPointer Internal;
 
-  void ConstructSourceFileFlags() const;
   void ComputeVersionedName(std::string& vName,
                             std::string const& prefix,
                             std::string const& base,

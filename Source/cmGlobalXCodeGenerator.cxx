@@ -713,22 +713,23 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 
   // Is this a resource file in this target? Add it to the resources group...
   //
-  cmTarget::SourceFileFlags tsFlags = cmtarget.GetTargetSourceFileFlags(sf);
-  bool isResource = (tsFlags.Type == cmTarget::SourceFileTypeResource);
+  cmGeneratorTarget::SourceFileFlags tsFlags =
+            this->GetGeneratorTarget(&cmtarget)->GetTargetSourceFileFlags(sf);
+  bool isResource = tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource;
 
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
   //
   if(cmtarget.IsFrameworkOnApple())
     {
-    if(tsFlags.Type == cmTarget::SourceFileTypePrivateHeader)
+    if(tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Private"));
       settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
       }
-    else if(tsFlags.Type == cmTarget::SourceFileTypePublicHeader)
+    else if(tsFlags.Type == cmGeneratorTarget::SourceFileTypePublicHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Public"));
@@ -973,6 +974,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
     cmTarget& cmtarget = l->second;
+    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
 
     // make sure ALL_BUILD, INSTALL, etc are only done once
     if(this->SpecialTargetEmitted(l->first.c_str()))
@@ -1011,8 +1013,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       cmXCodeObject* filetype =
         fr->GetObject()->GetObject("explicitFileType");
 
-      cmTarget::SourceFileFlags tsFlags =
-        cmtarget.GetTargetSourceFileFlags(*i);
+      cmGeneratorTarget::SourceFileFlags tsFlags =
+        gtgt->GetTargetSourceFileFlags(*i);
 
       if(filetype &&
          strcmp(filetype->GetString(), "compiled.mach-o.objfile") == 0)
@@ -1020,12 +1022,12 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         externalObjFiles.push_back(xsf);
         }
       else if(this->IsHeaderFile(*i) ||
-        (tsFlags.Type == cmTarget::SourceFileTypePrivateHeader) ||
-        (tsFlags.Type == cmTarget::SourceFileTypePublicHeader))
+        (tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader) ||
+        (tsFlags.Type == cmGeneratorTarget::SourceFileTypePublicHeader))
         {
         headerFiles.push_back(xsf);
         }
-      else if(tsFlags.Type == cmTarget::SourceFileTypeResource)
+      else if(tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource)
         {
         resourceFiles.push_back(xsf);
         }
@@ -1048,7 +1050,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       // the externalObjFiles above, except each one is not a cmSourceFile
       // within the target.)
       std::vector<std::string> objs;
-      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
+      gtgt->UseObjectLibraries(objs);
       for(std::vector<std::string>::const_iterator
             oi = objs.begin(); oi != objs.end(); ++oi)
         {
@@ -1138,9 +1140,9 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
           i != classes.end(); ++i)
         {
-        cmTarget::SourceFileFlags tsFlags =
-          cmtarget.GetTargetSourceFileFlags(*i);
-        if(tsFlags.Type == cmTarget::SourceFileTypeMacContent)
+        cmGeneratorTarget::SourceFileFlags tsFlags =
+          gtgt->GetTargetSourceFileFlags(*i);
+        if(tsFlags.Type == cmGeneratorTarget::SourceFileTypeMacContent)
           {
           bundleFiles[tsFlags.MacFolder].push_back(*i);
           }

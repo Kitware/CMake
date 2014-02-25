@@ -800,7 +800,7 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 
 #undef TRANSITIVE_PROPERTY_NAME
 
-std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
+std::string getLinkedTargetsContent(const std::vector<cmTarget*> &targets,
                                   cmTarget const* target,
                                   cmTarget const* headTarget,
                                   cmGeneratorExpressionContext *context,
@@ -811,23 +811,21 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
 
   std::string sep;
   std::string depString;
-  for (std::vector<std::string>::const_iterator
-      it = libraries.begin();
-      it != libraries.end(); ++it)
+  for (std::vector<cmTarget*>::const_iterator
+      it = targets.begin();
+      it != targets.end(); ++it)
     {
-    if (*it == target->GetName())
+    if (*it == target)
       {
       // Broken code can have a target in its own link interface.
       // Don't follow such link interface entries so as not to create a
       // self-referencing loop.
       continue;
       }
-    if (context->Makefile->FindTargetToUse(*it))
-      {
-      depString +=
-        sep + "$<TARGET_PROPERTY:" + *it + "," + interfacePropertyName + ">";
-      sep = ";";
-      }
+    depString +=
+      sep + "$<TARGET_PROPERTY:" +
+        (*it)->GetName() + "," + interfacePropertyName + ">";
+    sep = ";";
     }
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depString);
   std::string linkedTargetsContent = cge->Evaluate(context->Makefile,
@@ -841,6 +839,27 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
     context->HadContextSensitiveCondition = true;
     }
   return linkedTargetsContent;
+}
+
+std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
+                                  cmTarget const* target,
+                                  cmTarget const* headTarget,
+                                  cmGeneratorExpressionContext *context,
+                                  cmGeneratorExpressionDAGChecker *dagChecker,
+                                  const std::string &interfacePropertyName)
+{
+  std::vector<cmTarget*> tgts;
+  for (std::vector<std::string>::const_iterator
+      it = libraries.begin();
+      it != libraries.end(); ++it)
+    {
+    if (cmTarget *tgt = context->Makefile->FindTargetToUse(*it))
+      {
+      tgts.push_back(tgt);
+      }
+    }
+  return getLinkedTargetsContent(tgts, target, headTarget, context,
+                                 dagChecker, interfacePropertyName);
 }
 
 //----------------------------------------------------------------------------
@@ -1065,13 +1084,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                      cmStrCmp(propertyName)) != transEnd)
       {
 
-      std::vector<std::string> libs;
-      target->GetTransitivePropertyLinkLibraries(context->Config,
-                                                 headTarget, libs);
-      if (!libs.empty())
+      std::vector<cmTarget*> tgts;
+      target->GetTransitivePropertyTargets(context->Config,
+                                                 headTarget, tgts);
+      if (!tgts.empty())
         {
         linkedTargetsContent =
-                  getLinkedTargetsContent(libs, target,
+                  getLinkedTargetsContent(tgts, target,
                                           headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
@@ -1080,9 +1099,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     else if (std::find_if(transBegin, transEnd,
                           cmStrCmp(interfacePropertyName)) != transEnd)
       {
-      const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
-                                                    context->Config,
-                                                    headTarget);
+      const cmTarget::LinkImplementation *impl
+          = target->GetLinkImplementationLibraries(context->Config,
+                                                   headTarget);
       if(impl)
         {
         linkedTargetsContent =
