@@ -88,6 +88,7 @@ private:
   bool ScrapeLog(std::string const& fname);
   bool Match(std::string const& line,
              std::vector<cmsys::RegularExpression>& regexps);
+  bool MatchesFilterPrefix(std::string const& line) const;
 
   // Methods to generate the xml fragment.
   void WriteXML();
