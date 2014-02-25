@@ -128,7 +128,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
 
       std::vector<std::string> depends;
       depends.push_back(uiName);
-      const char* no_main_dependency = 0;
+      std::string no_main_dependency = "";
       const char* no_comment = 0;
       const char* no_working_dir = 0;
       this->Makefile->AddCustomCommandToOutput(hName.c_str(),

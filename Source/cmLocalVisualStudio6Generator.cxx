@@ -578,7 +578,7 @@ cmLocalVisualStudio6Generator
   std::string comment = this->ConstructComment(origCommand, "<hack>");
 
   // Add the rule with the given dependencies and commands.
-  const char* no_main_dependency = 0;
+  std::string no_main_dependency = "";
   if(cmSourceFile* outsf =
      this->Makefile->AddCustomCommandToOutput(
        output, depends, no_main_dependency,

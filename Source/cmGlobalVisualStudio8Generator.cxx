@@ -316,7 +316,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // file as the main dependency because it would get
   // overwritten by the CreateVCProjBuildRule.
   // (this could be avoided with per-target source files)
-  const char* no_main_dependency = 0;
+  std::string no_main_dependency = "";
   if(cmSourceFile* file =
      mf->AddCustomCommandToOutput(
        stamps, listFiles,

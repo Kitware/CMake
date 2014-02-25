@@ -97,7 +97,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
       depends.push_back(moc_exe);
       depends.push_back(hname);
 
-      const char* no_main_dependency = 0;
+      std::string no_main_dependency = "";
       const char* no_working_dir = 0;
       this->Makefile->AddCustomCommandToOutput(newName.c_str(),
                                                depends,

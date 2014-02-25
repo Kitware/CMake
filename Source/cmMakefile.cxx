@@ -950,7 +950,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
 cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const std::vector<std::string>& depends,
-                                     const char* main_dependency,
+                                     const std::string& main_dependency,
                                      const cmCustomCommandLines& commandLines,
                                      const char* comment,
                                      const char* workingDir,
@@ -980,7 +980,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
 
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = 0;
-  if(main_dependency && main_dependency[0])
+  if(!main_dependency.empty())
     {
     // The main dependency was specified.  Use it unless a different
     // custom command already used it.
@@ -1048,7 +1048,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
 
   // Construct a complete list of dependencies.
   std::vector<std::string> depends2(depends);
-  if(main_dependency && main_dependency[0])
+  if(!main_dependency.empty())
     {
     depends2.push_back(main_dependency);
     }
@@ -1104,7 +1104,7 @@ cmMakefile::UpdateOutputToSourceMap(std::string const& output,
 cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const std::string& output,
                                      const std::vector<std::string>& depends,
-                                     const char* main_dependency,
+                                     const std::string& main_dependency,
                                      const cmCustomCommandLines& commandLines,
                                      const char* comment,
                                      const char* workingDir,
@@ -1123,7 +1123,7 @@ void
 cmMakefile::AddCustomCommandOldStyle(const std::string& target,
                                      const std::vector<std::string>& outputs,
                                      const std::vector<std::string>& depends,
-                                     const char* source,
+                                     const std::string& source,
                                      const cmCustomCommandLines& commandLines,
                                      const char* comment)
 {
@@ -1160,7 +1160,7 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
     else
       {
       // The source may not be a real file.  Do not use a main dependency.
-      const char* no_main_dependency = 0;
+      std::string no_main_dependency = "";
       std::vector<std::string> depends2 = depends;
       depends2.push_back(source);
       sf = this->AddCustomCommandToOutput(output, depends2, no_main_dependency,
@@ -1251,7 +1251,7 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
   force += cmake::GetCMakeFilesDirectory();
   force += "/";
   force += utilityName;
-  const char* no_main_dependency = 0;
+  std::string no_main_dependency = "";
   bool no_replace = false;
   this->AddCustomCommandToOutput(force.c_str(), depends,
                                  no_main_dependency,

@@ -1496,8 +1496,9 @@ cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
-                                                      bool relink)
+void cmMakefileTargetGenerator::WriteTargetDriverRule(
+                                                const std::string& main_output,
+                                                bool relink)
 {
   // Compute the name of the driver target.
   std::string dir =
@@ -1510,10 +1511,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
 
   // Build the list of target outputs to drive.
   std::vector<std::string> depends;
-  if(main_output)
-    {
-    depends.push_back(main_output);
-    }
+  depends.push_back(main_output);
 
   const char* comment = 0;
   if(relink)

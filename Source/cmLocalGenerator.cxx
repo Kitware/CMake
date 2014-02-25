@@ -747,7 +747,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
   this->Makefile->AddCustomCommandToOutput(
     targetFullPath.c_str(),
     objVector,
-    0,
+    "",
     commandLines,
     comment.c_str(),
     this->Makefile->GetStartOutputDirectory()

@@ -141,7 +141,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       force_command.push_back(".");
       cmCustomCommandLines force_commands;
       force_commands.push_back(force_command);
-      const char* no_main_dependency = 0;
+      std::string no_main_dependency = "";
       std::string force = this->Makefile->GetStartOutputDirectory();
       force += cmake::GetCMakeFilesDirectory();
       force += "/";

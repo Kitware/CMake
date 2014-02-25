@@ -119,7 +119,7 @@ protected:
                            std::string::size_type limit = std::string::npos);
 
   // write the driver rule to build target outputs
-  void WriteTargetDriverRule(const char* main_output, bool relink);
+  void WriteTargetDriverRule(const std::string& main_output, bool relink);
 
   void DriveCustomCommands(std::vector<std::string>& depends);
 

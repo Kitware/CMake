@@ -177,7 +177,7 @@ public:
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& depends,
-    const char* main_dependency,
+    const std::string& main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
@@ -185,7 +185,7 @@ public:
   cmSourceFile* AddCustomCommandToOutput(
     const std::string& output,
     const std::vector<std::string>& depends,
-    const char* main_dependency,
+    const std::string& main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
@@ -193,7 +193,7 @@ public:
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
-                                const char* source,
+                                const std::string& source,
                                 const cmCustomCommandLines& commandLines,
                                 const char* comment);
 
