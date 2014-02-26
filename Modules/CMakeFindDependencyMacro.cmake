@@ -50,7 +50,7 @@ macro(find_dependency dep)
       _CMAKE_${dep}_TRANSITIVE_DEPENDENCY
     )
 
-    find_package(${dep} ${version}
+    find_package(${dep} ${cmake_fd_version}
         ${cmake_fd_exact_arg}
         ${cmake_fd_quiet_arg}
         ${cmake_fd_required_arg}
