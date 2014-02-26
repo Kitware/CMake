@@ -67,14 +67,15 @@ macro(remote_command comment command)
 endmacro()
 
 if(CMAKE_DOC_TARBALL)
-  message("scp '${CMAKE_DOC_TARBALL}' '${HOST}:'")
+  get_filename_component(CMAKE_DOC_TARBALL_NAME "${CMAKE_DOC_TARBALL}" NAME)
+  string(REPLACE ".tar.gz" "-${SCRIPT_NAME}.tar.gz" CMAKE_DOC_TARBALL_STAGED "${CMAKE_DOC_TARBALL_NAME}")
+  message("scp '${CMAKE_DOC_TARBALL}' '${HOST}:${CMAKE_DOC_TARBALL_STAGED}'")
   execute_process(COMMAND
-    scp ${CMAKE_DOC_TARBALL} ${HOST}:
+    scp ${CMAKE_DOC_TARBALL} ${HOST}:${CMAKE_DOC_TARBALL_STAGED}
     RESULT_VARIABLE result)
   if(${result} GREATER 0)
-    message("error sending doc tarball with scp '${CMAKE_DOC_TARBALL}' '${HOST}:'")
+    message("error sending doc tarball with scp '${CMAKE_DOC_TARBALL}' '${HOST}:${CMAKE_DOC_TARBALL_STAGED}'")
   endif()
-  get_filename_component(CMAKE_DOC_TARBALL_NAME "${CMAKE_DOC_TARBALL}" NAME)
 endif()
 
 # set this so configure file will work from script mode
