@@ -258,3 +258,17 @@ set(CMP0044_TYPE NEW)
 add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-NEW)
 set(CMP0044_TYPE OLD)
 add_subdirectory(CMP0044 ${CMAKE_BINARY_DIR}/CMP0044-OLD)
+
+add_library(objlib OBJECT objlib1.c objlib2.c)
+file(GENERATE
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/objlib_files"
+  CONTENT "$<JOIN:$<TARGET_OBJECTS:objlib>,\n>\n"
+)
+add_custom_target(check_object_files ALL
+  COMMAND ${CMAKE_COMMAND}
+    "-DOBJLIB_LISTFILE=${CMAKE_CURRENT_BINARY_DIR}/objlib_files"
+    -DTEST_CONFIGURATION=${CMAKE_BUILD_TYPE}
+    -DEXPECTED_NUM_OBJECTFILES=2
+    -P "${CMAKE_CURRENT_SOURCE_DIR}/check_object_files.cmake"
+  DEPENDS objlib
+)

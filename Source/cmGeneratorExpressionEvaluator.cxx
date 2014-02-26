@@ -15,6 +15,8 @@
 #include "cmGeneratorExpressionParser.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpression.h"
+#include "cmLocalGenerator.h"
+#include "cmSourceFile.h"
 
 #include <cmsys/String.h>
 
@@ -1240,6 +1242,67 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
 } targetNameNode;
 
 //----------------------------------------------------------------------------
+static const struct TargetObjectsNode : public cmGeneratorExpressionNode
+{
+  TargetObjectsNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    std::string tgtName = parameters.front();
+    cmGeneratorTarget* gt =
+                context->Makefile->FindGeneratorTargetToUse(tgtName.c_str());
+    if (!gt)
+      {
+      cmOStringStream e;
+      e << "Objects of target \"" << tgtName
+        << "\" referenced but no such target exists.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+      }
+    if (gt->GetType() != cmTarget::OBJECT_LIBRARY)
+      {
+      cmOStringStream e;
+      e << "Objects of target \"" << tgtName
+        << "\" referenced but is not an OBJECT library.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+      }
+
+    std::vector<cmSourceFile const*> objectSources;
+    gt->GetObjectSources(objectSources);
+    std::map<cmSourceFile const*, std::string> mapping;
+
+    for(std::vector<cmSourceFile const*>::const_iterator it
+        = objectSources.begin(); it != objectSources.end(); ++it)
+      {
+      mapping[*it];
+      }
+
+    gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+
+    std::string obj_dir = gt->ObjectDirectory;
+    std::string result;
+    const char* sep = "";
+    for(std::map<cmSourceFile const*, std::string>::const_iterator it
+        = mapping.begin(); it != mapping.end(); ++it)
+      {
+      assert(!it->second.empty());
+      result += sep;
+      std::string objFile = obj_dir + it->second;
+      cmSourceFile* sf = context->Makefile->GetOrCreateSource(objFile, true);
+      sf->SetObjectLibrary(tgtName);
+      sf->SetProperty("EXTERNAL_OBJECT", "1");
+      result += objFile;
+      sep = ";";
+      }
+    return result;
+  }
+} targetObjectsNode;
+
+//----------------------------------------------------------------------------
 static const char* targetPolicyWhitelist[] = {
   0
 #define TARGET_POLICY_STRING(POLICY) \
@@ -1593,6 +1656,7 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     nodeMap["SEMICOLON"] = &semicolonNode;
     nodeMap["TARGET_PROPERTY"] = &targetPropertyNode;
     nodeMap["TARGET_NAME"] = &targetNameNode;
+    nodeMap["TARGET_OBJECTS"] = &targetObjectsNode;
     nodeMap["TARGET_POLICY"] = &targetPolicyNode;
     nodeMap["BUILD_INTERFACE"] = &buildInterfaceNode;
     nodeMap["INSTALL_INTERFACE"] = &installInterfaceNode;
