@@ -6,6 +6,11 @@
 #
 #
 #
+# To find the pkg-config executable, it uses the variable
+# PKG_CONFIG_EXECUTABLE or the environment variable PKG_CONFIG first.
+#
+#
+#
 # Usage:
 #
 # ::
@@ -134,8 +139,9 @@
 #    pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+# Copyright 2006-2014 Kitware, Inc.
+# Copyright 2014      Christoph Grüninger <foss@grueninger.de>
+# Copyright 2006      Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -150,6 +156,10 @@
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
 
+# find pkg-config, use PKG_CONFIG if set
+if((NOT PKG_CONFIG_EXECUTABLE) AND (NOT "$ENV{PKG_CONFIG}" STREQUAL ""))
+  set(PKG_CONFIG_EXECUTABLE "$ENV{PKG_CONFIG}" CACHE FILEPATH "pkg-config executable")
+endif()
 find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
