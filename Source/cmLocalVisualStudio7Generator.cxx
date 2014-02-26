@@ -660,7 +660,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   switch(target.GetType())
     {
     case cmTarget::OBJECT_LIBRARY:
-      targetBuilds = false; // TODO: PDB for object library?
+      targetBuilds = false; // no manifest tool for object library
     case cmTarget::STATIC_LIBRARY:
       projectType = "typeStaticLibrary";
       configType = "4";
@@ -846,6 +846,17 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   targetOptions.OutputFlagMap(fout, "\t\t\t\t");
   targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n", "CXX");
   fout << "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n";
+  if(target.GetType() <= cmTarget::OBJECT_LIBRARY)
+    {
+    // Specify the compiler program database file if configured.
+    std::string pdb = target.GetCompilePDBPath(configName);
+    if(!pdb.empty())
+      {
+      fout <<  "\t\t\t\tProgramDataBaseFileName=\""
+           << this->ConvertToXMLOutputPathSingle(pdb.c_str())
+           << "\"\n";
+      }
+    }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
   tool = "VCCustomBuildTool";
   if(this->FortranProject)

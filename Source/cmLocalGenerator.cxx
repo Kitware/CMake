@@ -901,6 +901,13 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
       return replaceValues.TargetPDB;
       }
     }
+  if(replaceValues.TargetCompilePDB)
+    {
+    if(variable == "TARGET_COMPILE_PDB")
+      {
+      return replaceValues.TargetCompilePDB;
+      }
+    }
   if(replaceValues.DependencyFile )
     {
     if(variable == "DEP_FILE")

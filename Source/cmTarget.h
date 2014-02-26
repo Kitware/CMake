@@ -320,7 +320,13 @@ public:
       If the configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical
       pdb output directory is given.  */
-  std::string GetPDBDirectory(const char* config = 0) const;
+  std::string GetPDBDirectory(const char* config) const;
+
+  /** Get the directory in which to place the target compiler .pdb file.
+      If the configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      compiler pdb output directory is given.  */
+  std::string GetCompilePDBDirectory(const char* config = 0) const;
 
   /** Get the location of the target in the build tree for the given
       configuration.  This location is suitable for use as the LOCATION
@@ -350,7 +356,13 @@ public:
                              const char* config=0, bool implib = false) const;
 
   /** Get the name of the pdb file for the target.  */
-  std::string GetPDBName(const char* config=0) const;
+  std::string GetPDBName(const char* config) const;
+
+  /** Get the name of the compiler pdb file for the target.  */
+  std::string GetCompilePDBName(const char* config=0) const;
+
+  /** Get the path for the MSVC /Fd option for this target.  */
+  std::string GetCompilePDBPath(const char* config=0) const;
 
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const char* config) const;
@@ -685,7 +697,8 @@ private:
   OutputInfo const* GetOutputInfo(const char* config) const;
   bool
   ComputeOutputDir(const char* config, bool implib, std::string& out) const;
-  bool ComputePDBOutputDir(const char* config, std::string& out) const;
+  bool ComputePDBOutputDir(const char* kind, const char* config,
+                           std::string& out) const;
 
   // Cache import information from properties for each configuration.
   struct ImportInfo;
@@ -693,6 +706,10 @@ private:
                                         cmTarget const* workingTarget) const;
   void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
                                         cmTarget const* head) const;
+
+  // Cache target compile paths for each configuration.
+  struct CompileInfo;
+  CompileInfo const* GetCompileInfo(const char* config) const;
 
   mutable cmTargetLinkInformationMap LinkInformation;
   void CheckPropertyCompatibility(cmComputeLinkInformation *info,

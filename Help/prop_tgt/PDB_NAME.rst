@@ -7,7 +7,5 @@ linker for an executable or shared library target.
 This property specifies the base name for the debug symbols file.
 If not set, the logical target name is used by default.
 
+.. |COMPILE_PDB_XXX| replace:: :prop_tgt:`COMPILE_PDB_NAME`
 .. include:: PDB_NOTE.txt
-
-This property is not implemented by the :generator:`Visual Studio 6`
-generator.
