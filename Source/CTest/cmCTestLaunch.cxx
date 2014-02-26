@@ -587,8 +587,7 @@ void cmCTestLaunch::DumpFileToXML(std::ostream& fxml,
 
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
-    if(OptionFilterPrefix.size() && cmSystemTools::StringStartsWith(
-      line.c_str(), OptionFilterPrefix.c_str()))
+    if(MatchesFilterPrefix(line))
       {
       continue;
       }
@@ -676,6 +675,11 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
   std::string line;
   while(cmSystemTools::GetLineFromStream(fin, line))
     {
+    if(MatchesFilterPrefix(line))
+      {
+      continue;
+      }
+
     if(this->Match(line.c_str(), this->RegexWarning) &&
        !this->Match(line.c_str(), this->RegexWarningSuppress))
       {
@@ -696,6 +700,17 @@ bool cmCTestLaunch::Match(std::string const& line,
       {
       return true;
       }
+    }
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCTestLaunch::MatchesFilterPrefix(std::string const& line) const
+{
+  if(this->OptionFilterPrefix.size() && cmSystemTools::StringStartsWith(
+      line.c_str(), this->OptionFilterPrefix.c_str()))
+    {
+    return true;
     }
   return false;
 }
