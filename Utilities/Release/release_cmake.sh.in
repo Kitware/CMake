@@ -155,11 +155,6 @@ done
 
 
 
-# need to add an extra copy thing here
-if [ ! -z "@EXTRA_COPY@" ]; then
-    @EXTRA_COPY@
-    check_exit_value $? "Extra copy step @EXTRA_COPY@" || exit 1
-fi
 echo "End release"
 date
 echo ""
