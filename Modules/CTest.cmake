@@ -212,8 +212,8 @@ if(BUILD_TESTING)
     "Path to scp command, used by CTest for submitting results to a Dart server"
     )
   find_program(COVERAGE_COMMAND gcov DOC
-    "Path to the coverage program that CTest uses for performing coverage inspection"
-    )
+    "Path to the coverage program that CTest uses for performing coverage
+    inspection")
   set(COVERAGE_EXTRA_FLAGS "-l" CACHE STRING
     "Extra command line flags to pass to the coverage tool")
 
