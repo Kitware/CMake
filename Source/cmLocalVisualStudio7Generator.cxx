@@ -1044,7 +1044,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"" << tool << "\"\n";
 
-    if(this->GetVersion() < VS8)
+    if(this->GetVersion() < VS8 || this->FortranProject)
       {
       cmOStringStream libdeps;
       this->Internal->OutputObjects(libdeps, &target);
@@ -1104,7 +1104,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // libraries which may be set by the user to something bad.
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
          << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-    if(this->GetVersion() < VS8)
+    if(this->GetVersion() < VS8 || this->FortranProject)
       {
       this->Internal->OutputObjects(fout, &target, " ");
       }
@@ -1202,7 +1202,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // libraries which may be set by the user to something bad.
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
          << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-    if(this->GetVersion() < VS8)
+    if(this->GetVersion() < VS8 || this->FortranProject)
       {
       this->Internal->OutputObjects(fout, &target, " ");
       }
@@ -1423,7 +1423,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     this->WriteGroup(&sg, target, fout, libName, configs);
     }
 
-  if(this->GetVersion() >= VS8)
+  if(this->GetVersion() >= VS8 && !this->FortranProject)
     {
     // VS >= 8 support per-config source locations so we
     // list object library content as external objects.
