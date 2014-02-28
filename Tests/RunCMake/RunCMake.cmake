@@ -53,6 +53,7 @@ function(run_cmake test)
                 -G "${RunCMake_GENERATOR}"
                 -T "${RunCMake_GENERATOR_TOOLSET}"
                 -DRunCMake_TEST=${test}
+                --no-warn-unused-cli
                 ${RunCMake_TEST_OPTIONS}
       WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
       OUTPUT_VARIABLE actual_stdout
