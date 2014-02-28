@@ -164,8 +164,6 @@ macro(CMAKE_SETUP_TESTING)
     ${CMake_BINARY_DIR}/Modules/.NoDartCoverage)
   configure_file(${CMake_SOURCE_DIR}/CTestCustom.cmake.in
     ${CMake_BINARY_DIR}/CTestCustom.cmake @ONLY)
-  configure_file(${CMake_SOURCE_DIR}/CTestCustom.ctest.in
-    ${CMake_BINARY_DIR}/CTestCustom.ctest @ONLY)
   if(BUILD_TESTING AND DART_ROOT)
     configure_file(${CMake_SOURCE_DIR}/CMakeLogo.gif
       ${CMake_BINARY_DIR}/Testing/HTML/TestingResults/Icons/Logo.gif COPYONLY)
