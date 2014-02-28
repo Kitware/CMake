@@ -22,10 +22,10 @@
 class cmWIXRichTextFormatWriter
 {
 public:
-  cmWIXRichTextFormatWriter(const std::string& filename);
+  cmWIXRichTextFormatWriter(std::string const& filename);
   ~cmWIXRichTextFormatWriter();
 
-  void AddText(const std::string& text);
+  void AddText(std::string const& text);
 
 private:
   void WriteHeader();
@@ -35,8 +35,8 @@ private:
 
   void WriteDocumentPrefix();
 
-  void ControlWord(const std::string& keyword);
-  void NewControlWord(const std::string& keyword);
+  void ControlWord(std::string const& keyword);
+  void NewControlWord(std::string const& keyword);
 
   void StartGroup();
   void EndGroup();

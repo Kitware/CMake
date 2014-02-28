@@ -132,7 +132,7 @@ void cmWIXPatchParser::ReportError(int line, int column, const char* msg)
   Valid = false;
 }
 
-void cmWIXPatchParser::ReportValidationError(const std::string& message)
+void cmWIXPatchParser::ReportValidationError(std::string const& message)
 {
   ReportError(XML_GetCurrentLineNumber(Parser),
     XML_GetCurrentColumnNumber(Parser),

@@ -50,7 +50,7 @@ private:
   virtual void EndElement(const char *name);
   virtual void ReportError(int line, int column, const char* msg);
 
-  void ReportValidationError(const std::string& message);
+  void ReportValidationError(std::string const& message);
 
   bool IsValid() const;
 
