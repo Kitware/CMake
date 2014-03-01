@@ -9,6 +9,11 @@ target_link_libraries(my-libapp mylib)
 
 add_executable(my-other-app myotherapp.cpp)
 
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/empty)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/empty
+  DESTINATION extras
+  COMPONENT extras)
+
 install(TARGETS mylib
   ARCHIVE
   DESTINATION lib
@@ -71,6 +76,12 @@ cpack_add_component_group(Runtime)
 cpack_add_component_group(Development
   EXPANDED
   DESCRIPTION "All of the tools you'll ever need to develop software")
+
+cpack_add_component(extras
+  DISPLAY_NAME "Extras"
+  DESCRIPTION "Extras"
+  GROUP Runtime
+  INSTALL_TYPES Full)
 
 cpack_add_component(applications
   REQUIRED

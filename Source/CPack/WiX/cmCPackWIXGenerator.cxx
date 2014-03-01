@@ -814,6 +814,16 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
 
+  if(dir.GetNumberOfFiles() == 2)
+    {
+    std::string componentId = fileDefinitions.EmitComponentCreateFolder(
+      directoryId, GenerateGUID());
+
+    featureDefinitions.EmitComponentRef(componentId);
+
+    return;
+    }
+
   for(size_t i = 0; i < dir.GetNumberOfFiles(); ++i)
     {
     std::string fileName = dir.GetFile(static_cast<unsigned long>(i));
