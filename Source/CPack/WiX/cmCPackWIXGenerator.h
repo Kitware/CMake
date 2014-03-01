@@ -73,6 +73,8 @@ private:
 
   void CreateWiXVariablesIncludeFile();
 
+  void CreateWiXPropertiesIncludeFile();
+
   void CopyDefinition(
     cmWIXSourceWriter &source, std::string const& name);
 

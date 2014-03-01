@@ -1202,6 +1202,12 @@ const char* cmCPackGenerator::GetOption(const char* op) const
 }
 
 //----------------------------------------------------------------------
+std::vector<std::string> cmCPackGenerator::GetOptions() const
+{
+  return this->MakefileMap->GetDefinitions();
+}
+
+//----------------------------------------------------------------------
 int cmCPackGenerator::PackageFiles()
 {
   return 0;

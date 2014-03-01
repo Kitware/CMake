@@ -58,6 +58,9 @@ set(CPACK_WIX_PATCH_FILE "${CMAKE_CURRENT_SOURCE_DIR}/patch.xml")
 
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/license.txt")
 
+set(CPACK_WIX_PROPERTY_ARPCOMMENTS "My Custom ARPCOMMENTS")
+set(CPACK_WIX_PROPERTY_ARPHELPLINK "http://www.cmake.org")
+
 include(CPack)
 
 cpack_add_install_type(Full DISPLAY_NAME "Everything")
