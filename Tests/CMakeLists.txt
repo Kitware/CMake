@@ -51,7 +51,6 @@ if(BUILD_TESTING)
     set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
 
-  set(CMAKE_TEST_MAKEPROGRAM "${CMAKE_MAKE_PROGRAM}")
   if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio")
     set(CMake_TEST_EXPLICIT_MAKE_PROGRAM "")
   else()
@@ -63,8 +62,8 @@ if(BUILD_TESTING)
   endif()
 
   set(MAKE_IS_GNU )
-  if(CMAKE_TEST_MAKEPROGRAM MATCHES make)
-    execute_process(COMMAND ${CMAKE_TEST_MAKEPROGRAM} no_such_target --version
+  if(CMAKE_MAKE_PROGRAM MATCHES make)
+    execute_process(COMMAND ${CMAKE_MAKE_PROGRAM} no_such_target --version
       RESULT_VARIABLE res OUTPUT_VARIABLE out ERROR_VARIABLE out)
     if("${res}" STREQUAL "0")
       if("${out}" MATCHES "GNU")
@@ -75,7 +74,7 @@ if(BUILD_TESTING)
 
   # some old versions of make simply cannot handle spaces in paths
   if (MAKE_IS_GNU OR
-      CMAKE_TEST_MAKEPROGRAM MATCHES "nmake|gmake|wmake" OR
+      CMAKE_MAKE_PROGRAM MATCHES "nmake|gmake|wmake" OR
       CMAKE_TEST_GENERATOR MATCHES "Visual Studio|XCode|Borland")
     set(MAKE_SUPPORTS_SPACES 1)
   else()
@@ -1533,10 +1532,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
       # Look for evidence that this is a VCExpress build. If so, avoid
       # the MFC test by default.
-      string(TOLOWER "${CMAKE_MAKE_PROGRAM};${CMAKE_TEST_MAKEPROGRAM}" mkprog)
+      string(TOLOWER "${CMAKE_MAKE_PROGRAM}" mkprog)
       if(mkprog MATCHES "vcexpress")
         message(STATUS
-          "CMAKE_TEST_MAKEPROGRAM indicates vcexpress, avoiding MFC test")
+          "CMAKE_MAKE_PROGRAM indicates vcexpress, avoiding MFC test")
         set(CTEST_RUN_MFC OFF)
       endif()
 
