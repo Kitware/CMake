@@ -117,17 +117,6 @@ macro(CMAKE_SETUP_TESTING)
     set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
     set(CMAKE_TEST_GENERATOR_TOOLSET "${CMAKE_GENERATOR_TOOLSET}")
 
-    # Are we testing with the MSVC compiler?
-    set(CMAKE_TEST_MSVC 0)
-    if(MSVC AND NOT CMAKE_TEST_DIFFERENT_GENERATOR)
-      set(CMAKE_TEST_MSVC 1)
-    else()
-      if("${CMAKE_TEST_GENERATOR}" MATCHES "NMake" OR
-          "${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio")
-        set(CMAKE_TEST_MSVC 1)
-      endif()
-    endif()
-
     set(CMAKE_TEST_SYSTEM_LIBRARIES 0)
     foreach(util CURL EXPAT XMLRPC ZLIB)
       if(CMAKE_USE_SYSTEM_${util})

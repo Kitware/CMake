@@ -1497,12 +1497,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   endif ()
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/SubDir")
 
-  if(CMAKE_TEST_MSVC)
+  if(MSVC)
     ADD_TEST_MACRO(ForceInclude foo)
     ADD_TEST_MACRO(PDBDirectoryAndName myexe)
     ADD_TEST_MACRO(PrecompiledHeader foo)
   endif()
-  if(CMAKE_TEST_MSVC OR
+  if(MSVC OR
       "${CMAKE_TEST_GENERATOR}" MATCHES "(MSYS|MinGW) Makefiles")
     ADD_TEST_MACRO(ModuleDefinition example_exe)
   endif()
