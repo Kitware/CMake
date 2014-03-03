@@ -1453,19 +1453,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       )
   endif()
 
-  if(NOT CMAKE_TEST_DIFFERENT_GENERATOR)
-    add_test(kwsys ${CMAKE_CTEST_COMMAND}
-      --build-and-test
-      "${CMake_SOURCE_DIR}/Source/kwsys"
-      "${CMake_BINARY_DIR}/Tests/kwsys"
-      ${build_generator_args}
-      --build-project kwsys
-      --build-options ${build_options}
-      --test-command kwsysTestsCxx testIOS
-      )
-    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/kwsys")
-  endif()
-
   if(MAKE_SUPPORTS_SPACES)
     add_test(SubDirSpaces ${CMAKE_CTEST_COMMAND}
       --build-and-test
