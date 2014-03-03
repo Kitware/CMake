@@ -23,6 +23,26 @@
 #if defined(__OpenBSD__)
 # include <stdint.h>
 # include <elf_abi.h>
+#elif defined(__HAIKU__)
+# include <elf32.h>
+# include <elf64.h>
+  typedef struct Elf32_Ehdr Elf32_Ehdr;
+  typedef struct Elf32_Shdr Elf32_Shdr;
+  typedef struct Elf32_Sym Elf32_Sym;
+  typedef struct Elf32_Rel Elf32_Rel;
+  typedef struct Elf32_Rela Elf32_Rela;
+# define ELFMAG0 0x7F
+# define ELFMAG1 'E'
+# define ELFMAG2 'L'
+# define ELFMAG3 'F'
+# define ET_NONE 0
+# define ET_REL 1
+# define ET_EXEC 2
+# define ET_DYN 3
+# define ET_CORE 4
+# define EM_386 3
+# define EM_SPARC 2
+# define EM_PPC 20
 #else
 # include <elf.h>
 #endif
