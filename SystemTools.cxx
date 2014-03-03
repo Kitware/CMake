@@ -188,6 +188,9 @@ static inline char *realpath(const char *path, char *resolved_path)
 #endif
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__))
+
+#include <wctype.h>
+
 inline int Mkdir(const char* dir)
 {
   return _wmkdir(KWSYS_NAMESPACE::Encoding::ToWide(dir).c_str());

@@ -415,7 +415,7 @@ static int kwsys_shared_forward_realpath(const char* in_path, char* out_path)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   /* Implementation for Windows.  */
-  DWORD n = GetFullPathName(in_path, KWSYS_SHARED_FORWARD_MAXPATH,
+  DWORD n = GetFullPathNameA(in_path, KWSYS_SHARED_FORWARD_MAXPATH,
                             out_path, 0);
   return n > 0 && n <= KWSYS_SHARED_FORWARD_MAXPATH;
 #else
@@ -429,9 +429,9 @@ static int kwsys_shared_forward_samepath(const char* file1, const char* file2)
 {
 #if defined(_WIN32)
   int result = 0;
-  HANDLE h1 = CreateFile(file1, GENERIC_READ, FILE_SHARE_READ, NULL,
+  HANDLE h1 = CreateFileA(file1, GENERIC_READ, FILE_SHARE_READ, NULL,
                          OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
-  HANDLE h2 = CreateFile(file2, GENERIC_READ, FILE_SHARE_READ, NULL,
+  HANDLE h2 = CreateFileA(file2, GENERIC_READ, FILE_SHARE_READ, NULL,
                          OPEN_EXISTING, FILE_FLAG_BACKUP_SEMANTICS, NULL);
   if(h1 != INVALID_HANDLE_VALUE && h2 != INVALID_HANDLE_VALUE)
     {
@@ -462,7 +462,7 @@ static void kwsys_shared_forward_strerror(char* message)
 #if defined(_WIN32) && !defined(__CYGWIN__)
   /* Implementation for Windows.  */
   DWORD original = GetLastError();
-  DWORD length = FormatMessage(FORMAT_MESSAGE_FROM_SYSTEM |
+  DWORD length = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM |
                                FORMAT_MESSAGE_IGNORE_INSERTS, 0, original,
                                MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
                                message, KWSYS_SHARED_FORWARD_MAXPATH, 0);
