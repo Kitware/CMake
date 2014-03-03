@@ -114,9 +114,6 @@ endif()
 #-----------------------------------------------------------------------
 macro(CMAKE_SETUP_TESTING)
   if(BUILD_TESTING)
-    set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
-    set(CMAKE_TEST_GENERATOR_TOOLSET "${CMAKE_GENERATOR_TOOLSET}")
-
     set(CMAKE_TEST_SYSTEM_LIBRARIES 0)
     foreach(util CURL EXPAT XMLRPC ZLIB)
       if(CMAKE_USE_SYSTEM_${util})
@@ -547,7 +544,7 @@ endif()
 
 # add a test
 add_test(SystemInformationNew "${CMAKE_CMAKE_COMMAND}"
-  --system-information  -G "${CMAKE_TEST_GENERATOR}" )
+  --system-information  -G "${CMAKE_GENERATOR}" )
 
 # Install license file as it requires.
 install(FILES Copyright.txt DESTINATION ${CMAKE_DOC_DIR})
