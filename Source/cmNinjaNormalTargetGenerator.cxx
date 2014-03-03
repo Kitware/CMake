@@ -591,7 +591,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       cmSystemTools::GetEnv(forceRspFile) == 0) {
 #ifdef _WIN32
     commandLineLengthLimit = 8000 - linkRuleLength;
-#elif defined(__linux) || defined(__APPLE__)
+#elif defined(__linux) || defined(__APPLE__) || defined(__HAIKU__)
     // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
     commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))-linkRuleLength-1000;
 #else
