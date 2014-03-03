@@ -18,9 +18,12 @@ or via :command:`target_compile_definitions`:
 
 .. code-block:: cmake
 
-  # Old Interface:
+  # Old Interfaces:
   set_property(TARGET tgt APPEND PROPERTY
     COMPILE_DEFINITIONS_DEBUG DEBUG_MODE
+  )
+  set_property(DIRECTORY APPEND PROPERTY
+    COMPILE_DEFINITIONS_DEBUG DIR_DEBUG_MODE
   )
 
   # New Interfaces:
@@ -28,6 +31,9 @@ or via :command:`target_compile_definitions`:
     COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DEBUG_MODE>
   )
   target_compile_definitions(tgt PRIVATE $<$<CONFIG:Debug>:DEBUG_MODE>)
+  set_property(DIRECTORY APPEND PROPERTY
+    COMPILE_DEFINITIONS $<$<CONFIG:Debug>:DIR_DEBUG_MODE>
+  )
 
 The OLD behavior for this policy is to consume the content of the suffixed
 :prop_tgt:`COMPILE_DEFINITIONS_<CONFIG>` target property when generating the
