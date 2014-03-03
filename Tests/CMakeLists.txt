@@ -259,7 +259,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
-  set(ExportImport_BUILD_OPTIONS -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+  set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
@@ -1405,7 +1405,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${build_generator_args}
       --build-project MacRuntimePath
       --build-options ${build_options}
-        -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
+        -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
       )
   endif()
 
@@ -2567,7 +2567,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-project testf
       --build-two-config
       --build-options ${build_options}
-        -DCMAKE_TEST_MAKEPROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
+        -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
       --test-command testf)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
 
