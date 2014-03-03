@@ -57,8 +57,10 @@ if(BUILD_TESTING)
     set(CMake_TEST_EXPLICIT_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
   endif()
 
-  if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles" OR ("${CMAKE_GENERATOR}" MATCHES Ninja AND NOT WIN32))
-    set(TEST_CompileCommandOutput 1)
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    if("${CMAKE_GENERATOR}" MATCHES "Unix Makefiles" OR ("${CMAKE_GENERATOR}" MATCHES Ninja AND NOT WIN32))
+      set(TEST_CompileCommandOutput 1)
+    endif()
   endif()
 
   set(MAKE_IS_GNU )
@@ -95,13 +97,17 @@ if(BUILD_TESTING)
     list(APPEND build_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
   endif()
 
-  add_subdirectory(CMakeLib)
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    add_subdirectory(CMakeLib)
+  endif()
   add_subdirectory(CMakeOnly)
   add_subdirectory(RunCMake)
 
   add_subdirectory(FindPackageModeMakefileTest)
 
-  add_subdirectory(CTestTestMemcheck)
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    add_subdirectory(CTestTestMemcheck)
+  endif()
 
   # Collect a list of all test build directories.
   set(TEST_BUILD_DIRS)
@@ -248,7 +254,9 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(SetLang SetLang)
   ADD_TEST_MACRO(EmptyProperty EmptyProperty)
   ADD_TEST_MACRO(ExternalOBJ ExternalOBJ)
-  ADD_TEST_MACRO(LoadCommand LoadedCommand)
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    ADD_TEST_MACRO(LoadCommand LoadedCommand)
+  endif()
   ADD_TEST_MACRO(LinkDirectory bin/LinkDirectory)
   ADD_TEST_MACRO(LinkLanguage LinkLanguage)
   ADD_TEST_MACRO(LinkLine LinkLine)
@@ -1018,16 +1026,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       "${CMake_BINARY_DIR}/Tests/CMakeTestMultipleConfigures")
   endif()
 
-  add_test(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
-    --build-and-test
-    "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
-    "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
-    ${build_generator_args}
-    --build-project LoadCommand
-    --build-options ${build_options}
-    --test-command  LoadedCommand
-    )
-  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig")
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    add_test(LoadedCommandOneConfig  ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/LoadCommandOneConfig"
+      "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig"
+      ${build_generator_args}
+      --build-project LoadCommand
+      --build-options ${build_options}
+      --test-command  LoadedCommand
+      )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/LoadCommandOneConfig")
+  endif()
 
   add_test(complex  ${CMAKE_CTEST_COMMAND}
     --build-and-test
@@ -2771,5 +2781,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       WORKING_DIRECTORY ${CMake_BINARY_DIR}/Utilities/KWStyle)
   endif()
 
-  add_subdirectory(CMakeTests)
+  if(NOT CMake_TEST_EXTERNAL_CMAKE)
+    add_subdirectory(CMakeTests)
+  endif()
 endif()
