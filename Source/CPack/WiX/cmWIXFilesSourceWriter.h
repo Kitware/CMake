@@ -45,6 +45,10 @@ public:
 
   void EmitUninstallShortcut(std::string const& packageName);
 
+  std::string EmitComponentCreateFolder(
+    std::string const& directoryId,
+    std::string const& guid);
+
   std::string EmitComponentFile(
     std::string const& directoryId,
     std::string const& id,

@@ -215,6 +215,13 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
     SetOption("CPACK_WIX_UI_REF", defaultRef.c_str());
     }
 
+  const char* packageContact = GetOption("CPACK_PACKAGE_CONTACT");
+  if(packageContact != 0 &&
+     GetOption("CPACK_WIX_PROPERTY_ARPCONTACT") == 0)
+    {
+    SetOption("CPACK_WIX_PROPERTY_ARPCONTACT", packageContact);
+    }
+
   CollectExtensions("CPACK_WIX_EXTENSIONS", this->CandleExtensions);
   CollectExtensions("CPACK_WIX_CANDLE_EXTENSIONS", this->CandleExtensions);
 
@@ -239,6 +246,7 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
     }
 
   CreateWiXVariablesIncludeFile();
+  CreateWiXPropertiesIncludeFile();
 
   if(!CreateWiXSourceFiles())
     {
@@ -313,6 +321,35 @@ void cmCPackWIXGenerator::CreateWiXVariablesIncludeFile()
     GetOption("CPACK_PACKAGE_NAME"));
   CopyDefinition(includeFile, "CPACK_WIX_PROGRAM_MENU_FOLDER");
   CopyDefinition(includeFile, "CPACK_WIX_UI_REF");
+}
+
+void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
+{
+  std::string includeFilename =
+    this->CPackTopLevel + "/properties.wxi";
+
+  cmWIXSourceWriter includeFile(
+    this->Logger, includeFilename, true);
+
+  std::string prefix = "CPACK_WIX_PROPERTY_";
+  std::vector<std::string> options = GetOptions();
+
+  for(size_t i = 0; i < options.size(); ++i)
+    {
+    std::string const& name = options[i];
+
+    if(name.length() > prefix.length() &&
+       name.substr(0, prefix.length()) == prefix)
+      {
+      std::string id = name.substr(prefix.length());
+      std::string value = GetOption(name.c_str());
+
+      includeFile.BeginElement("Property");
+      includeFile.AddAttribute("Id", id);
+      includeFile.AddAttribute("Value", value);
+      includeFile.EndElement("Property");
+      }
+    }
 }
 
 void cmCPackWIXGenerator::CopyDefinition(
@@ -776,6 +813,16 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
 {
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
+
+  if(dir.GetNumberOfFiles() == 2)
+    {
+    std::string componentId = fileDefinitions.EmitComponentCreateFolder(
+      directoryId, GenerateGUID());
+
+    featureDefinitions.EmitComponentRef(componentId);
+
+    return;
+    }
 
   for(size_t i = 0; i < dir.GetNumberOfFiles(); ++i)
     {

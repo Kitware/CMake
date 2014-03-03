@@ -109,6 +109,28 @@ void cmWIXFilesSourceWriter::EmitUninstallShortcut(
   EndElement("Shortcut");
 }
 
+std::string cmWIXFilesSourceWriter::EmitComponentCreateFolder(
+  std::string const& directoryId, std::string const& guid)
+{
+  std::string componentId =
+    std::string("CM_C_EMPTY_") + directoryId;
+
+  BeginElement("DirectoryRef");
+  AddAttribute("Id", directoryId);
+
+  BeginElement("Component");
+  AddAttribute("Id", componentId);
+  AddAttribute("Guid", guid);
+
+  BeginElement("CreateFolder");
+
+  EndElement("CreateFolder");
+  EndElement("Component");
+  EndElement("DirectoryRef");
+
+  return componentId;
+}
+
 std::string cmWIXFilesSourceWriter::EmitComponentFile(
   std::string const& directoryId,
   std::string const& id,
