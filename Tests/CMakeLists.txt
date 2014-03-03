@@ -51,10 +51,11 @@ if(BUILD_TESTING)
     set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
 
+  set(CMAKE_TEST_MAKEPROGRAM "${CMAKE_MAKE_PROGRAM}")
   if(CMAKE_TEST_GENERATOR MATCHES "Visual Studio")
-    set(CMAKE_TEST_MAKEPROGRAM "")
+    set(CMake_TEST_EXPLICIT_MAKE_PROGRAM "")
   else()
-    set(CMAKE_TEST_MAKEPROGRAM "${CMAKE_MAKE_PROGRAM}")
+    set(CMake_TEST_EXPLICIT_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")
   endif()
 
   if("${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles" OR ("${CMAKE_TEST_GENERATOR}" MATCHES Ninja AND NOT WIN32))
@@ -91,8 +92,8 @@ if(BUILD_TESTING)
   endif()
 
   set(build_options)
-  if(CMAKE_TEST_MAKEPROGRAM)
-    list(APPEND build_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+  if(CMake_TEST_EXPLICIT_MAKE_PROGRAM)
+    list(APPEND build_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
   endif()
 
   add_subdirectory(CMakeLib)
@@ -259,7 +260,7 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Assembler HelloAsm)
   ADD_TEST_MACRO(SourceGroups SourceGroups)
   ADD_TEST_MACRO(Preprocess Preprocess)
-  set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+  set(ExportImport_BUILD_OPTIONS -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
   ADD_TEST_MACRO(ExportImport ExportImport)
   ADD_TEST_MACRO(Unset Unset)
   ADD_TEST_MACRO(PolicyScope PolicyScope)
@@ -536,9 +537,9 @@ if(BUILD_TESTING)
     # the bar library which should be referenced because
     # foo links to the static library bar, but bar is not
     # directly in the foo sub project
-    if(CMAKE_TEST_MAKEPROGRAM)
+    if(CMake_TEST_EXPLICIT_MAKE_PROGRAM)
       set(SubProject-Stage2_BUILD_MAKEPROGRAM
-        --build-makeprogram ${CMAKE_TEST_MAKEPROGRAM}
+        --build-makeprogram ${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
         )
     endif()
     add_test(SubProject-Stage2  ${CMAKE_CTEST_COMMAND}
@@ -1405,7 +1406,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       ${build_generator_args}
       --build-project MacRuntimePath
       --build-options ${build_options}
-        -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
+        -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
       )
   endif()
 
@@ -1866,8 +1867,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
   if(CMAKE_TEST_GENERATOR_TOOLSET)
     list(APPEND ctest_configure_options -T ${CMAKE_TEST_GENERATOR_TOOLSET})
   endif()
-  if(CMAKE_TEST_MAKEPROGRAM)
-    list(APPEND ctest_configure_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM})
+  if(CMake_TEST_EXPLICIT_MAKE_PROGRAM)
+    list(APPEND ctest_configure_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
   endif()
   configure_file("${CMake_SOURCE_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake.in"
                  "${CMake_BINARY_DIR}/Tests/CTestBuildCommandProjectInSubdir/CTestBuildCommandProjectInSubdir.cmake" @ONLY)
@@ -2567,7 +2568,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
       --build-project testf
       --build-two-config
       --build-options ${build_options}
-        -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMAKE_TEST_MAKEPROGRAM}
+        -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
       --test-command testf)
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Fortran")
 
