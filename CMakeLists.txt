@@ -114,17 +114,8 @@ endif()
 #-----------------------------------------------------------------------
 macro(CMAKE_SETUP_TESTING)
   if(BUILD_TESTING)
-    set(CMAKE_TEST_GENERATOR "" CACHE STRING
-      "Generator used when running tests")
-    set(CMAKE_TEST_MAKEPROGRAM "" CACHE FILEPATH
-      "Generator used when running tests")
-    if(NOT CMAKE_TEST_GENERATOR)
-      set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
-      set(CMAKE_TEST_GENERATOR_TOOLSET "${CMAKE_GENERATOR_TOOLSET}")
-    else()
-      set(CMAKE_TEST_DIFFERENT_GENERATOR TRUE)
-      set(CMAKE_TEST_GENERATOR_TOOLSET "")
-    endif()
+    set(CMAKE_TEST_GENERATOR "${CMAKE_GENERATOR}")
+    set(CMAKE_TEST_GENERATOR_TOOLSET "${CMAKE_GENERATOR_TOOLSET}")
 
     # Are we testing with the MSVC compiler?
     set(CMAKE_TEST_MSVC 0)
