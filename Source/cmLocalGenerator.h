@@ -372,7 +372,8 @@ protected:
                                    std::string& frameworkPath,
                                    std::string& linkPath,
                                    cmGeneratorTarget &,
-                                   bool relink);
+                                   bool relink,
+                                   bool forResponseFile);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,

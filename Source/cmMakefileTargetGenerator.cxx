@@ -1840,7 +1840,7 @@ cmMakefileTargetGenerator
   std::string linkPath;
   this->LocalGenerator
     ->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                          *this->GeneratorTarget, relink);
+                          *this->GeneratorTarget, relink, false);
   linkLibs = frameworkPath + linkPath + linkLibs;
 }
 

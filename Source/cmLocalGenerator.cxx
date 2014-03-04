@@ -1671,7 +1671,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           }
         }
       this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                                *target, false);
+                                *target, false, false);
       }
       break;
     case cmTarget::EXECUTABLE:
@@ -1696,7 +1696,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
       this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                                *target, false);
+                                *target, false, false);
       if(cmSystemTools::IsOn
          (this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
@@ -1793,8 +1793,11 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
                                            std::string& frameworkPath,
                                            std::string& linkPath,
                                            cmGeneratorTarget &tgt,
-                                           bool relink)
+                                           bool relink,
+                                           bool forResponseFile)
 {
+  OutputFormat shellFormat = forResponseFile? RESPONSE : SHELL;
+  bool escapeAllowMakeVars = !forResponseFile;
   cmOStringStream fout;
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
@@ -1837,7 +1840,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         fdi != fwDirs.end(); ++fdi)
       {
       frameworkPath += fwSearchFlag;
-      frameworkPath += this->Convert(fdi->c_str(), NONE, SHELL, false);
+      frameworkPath += this->Convert(fdi->c_str(), NONE, shellFormat, false);
       frameworkPath += " ";
       }
     }
@@ -1847,7 +1850,9 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   for(std::vector<std::string>::const_iterator libDir = libDirs.begin();
       libDir != libDirs.end(); ++libDir)
     {
-    std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
+    std::string libpath = this->ConvertToOutputForExisting(libDir->c_str(),
+                                                           START_OUTPUT,
+                                                           shellFormat);
     linkPath += " " + libPathFlag;
     linkPath += libpath;
     linkPath += libPathTerminator;
@@ -1865,7 +1870,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
       }
     if(li->IsPath)
       {
-      linkLibs += this->ConvertToLinkReference(li->Value);
+      linkLibs += this->ConvertToLinkReference(li->Value, shellFormat);
       }
     else
       {
@@ -1890,7 +1895,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         ri != runtimeDirs.end(); ++ri)
       {
       rpath += cli.GetRuntimeFlag();
-      rpath += this->Convert(ri->c_str(), NONE, SHELL, false);
+      rpath += this->Convert(ri->c_str(), NONE, shellFormat, false);
       rpath += " ";
       }
     fout << rpath;
@@ -1904,7 +1909,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     if(!rpath.empty())
       {
       fout << cli.GetRuntimeFlag();
-      fout << this->EscapeForShell(rpath.c_str(), true);
+      fout << this->EscapeForShell(rpath.c_str(), escapeAllowMakeVars);
       fout << " ";
       }
     }
@@ -1914,7 +1919,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   if(!cli.GetRPathLinkFlag().empty() && !rpath_link.empty())
     {
     fout << cli.GetRPathLinkFlag();
-    fout << this->EscapeForShell(rpath_link.c_str(), true);
+    fout << this->EscapeForShell(rpath_link.c_str(), escapeAllowMakeVars);
     fout << " ";
     }
 
