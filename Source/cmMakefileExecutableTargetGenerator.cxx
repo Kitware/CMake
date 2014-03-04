@@ -325,12 +325,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Collect up flags to link in needed libraries.
   std::string linkLibs;
-  std::string frameworkPath;
-  std::string linkPath;
-  this->LocalGenerator->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                                            *this->GeneratorTarget,
-                                            relink);
-  linkLibs = frameworkPath + linkPath + linkLibs;
+  this->CreateLinkLibs(linkLibs, relink, depends);
+
   // Construct object file lists that may be needed to expand the
   // rule.
   std::string buildObjs;

@@ -1833,6 +1833,20 @@ cmMakefileTargetGenerator
 //----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
+::CreateLinkLibs(std::string& linkLibs, bool relink,
+                 std::vector<std::string>& makefile_depends)
+{
+  std::string frameworkPath;
+  std::string linkPath;
+  this->LocalGenerator
+    ->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
+                          *this->GeneratorTarget, relink);
+  linkLibs = frameworkPath + linkPath + linkLibs;
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator
 ::CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                     bool useResponseFile, std::string& buildObjs,
                     std::vector<std::string>& makefile_depends)

@@ -546,12 +546,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string linkLibs;
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
-    std::string frameworkPath;
-    std::string linkPath;
-    this->LocalGenerator
-      ->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                            *this->GeneratorTarget, relink);
-    linkLibs = frameworkPath + linkPath + linkLibs;
+    this->CreateLinkLibs(linkLibs, relink, depends);
     }
 
   // Construct object file lists that may be needed to expand the
