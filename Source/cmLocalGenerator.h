@@ -198,12 +198,14 @@ public:
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* remote,
-                                         RelativeRoot local = START_OUTPUT);
+                                         RelativeRoot local = START_OUTPUT,
+                                         OutputFormat format = SHELL);
 
   /** For existing path identified by RelativeRoot convert to output
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
-                                         const char* local = 0);
+                                         const char* local = 0,
+                                         OutputFormat format = SHELL);
 
   virtual std::string ConvertToIncludeReference(std::string const& path);
 
@@ -465,7 +467,8 @@ protected:
   bool BackwardsCompatibilityFinal;
 private:
   std::string ConvertToOutputForExistingCommon(const char* remote,
-                                               std::string const& result);
+                                               std::string const& result,
+                                               OutputFormat format);
 
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
   bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;

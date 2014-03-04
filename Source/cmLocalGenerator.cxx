@@ -1228,7 +1228,8 @@ void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
-                                                   std::string const& result)
+                                                   std::string const& result,
+                                                   OutputFormat format)
 {
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
@@ -1239,7 +1240,7 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
     std::string tmp;
     if(cmSystemTools::GetShortPath(remote, tmp))
       {
-      return this->Convert(tmp.c_str(), NONE, SHELL, true);
+      return this->Convert(tmp.c_str(), NONE, format, true);
       }
     }
 
@@ -1250,26 +1251,28 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOutputForExisting(const char* remote,
-                                             RelativeRoot local)
+                                             RelativeRoot local,
+                                             OutputFormat format)
 {
   // Perform standard conversion.
-  std::string result = this->Convert(remote, local, SHELL, true);
+  std::string result = this->Convert(remote, local, format, true);
 
   // Consider short-path.
-  return this->ConvertToOutputForExistingCommon(remote, result);
+  return this->ConvertToOutputForExistingCommon(remote, result, format);
 }
 
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
-                                             const char* local)
+                                             const char* local,
+                                             OutputFormat format)
 {
   // Perform standard conversion.
-  std::string result = this->Convert(remote, local, SHELL, true);
+  std::string result = this->Convert(remote, local, format, true);
 
   // Consider short-path.
   const char* remotePath = this->GetRelativeRootPath(remote);
-  return this->ConvertToOutputForExistingCommon(remotePath, result);
+  return this->ConvertToOutputForExistingCommon(remotePath, result, format);
 }
 
 //----------------------------------------------------------------------------
