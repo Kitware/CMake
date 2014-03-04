@@ -3337,7 +3337,8 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   if ((moduleInCMakeModulePath.size()>0) && (moduleInCMakeRoot.size()>0))
     {
     const char* currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
-    if (currentFile && (strstr(currentFile, cmakeRoot) == currentFile))
+    std::string mods = cmakeRoot + std::string("/Modules/");
+    if (currentFile && strncmp(currentFile, mods.c_str(), mods.size()) == 0)
       {
       switch (this->GetPolicyStatus(cmPolicies::CMP0017))
         {
