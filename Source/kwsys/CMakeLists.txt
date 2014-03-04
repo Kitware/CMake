@@ -685,6 +685,7 @@ IF(KWSYS_USE_SystemInformation)
     # usually it's in libc but on FreeBSD
     # it's in libexecinfo
     FIND_LIBRARY(EXECINFO_LIB "execinfo")
+    MARK_AS_ADVANCED(EXECINFO_LIB)
     IF (NOT EXECINFO_LIB)
       SET(EXECINFO_LIB "")
     ENDIF()
@@ -1074,6 +1075,11 @@ IF(MSVC OR (WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$"))
     -D_CRT_SECURE_NO_WARNINGS
     -D_SCL_SECURE_NO_DEPRECATE
     )
+ENDIF()
+
+IF(WIN32)
+  # Help enforce the use of wide Windows apis.
+  ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
 ENDIF()
 
 IF(KWSYS_USE_String)
