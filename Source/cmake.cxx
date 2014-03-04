@@ -653,7 +653,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       cmSystemTools::ConvertToUnixSlashes(path);
       this->SetHomeOutputDirectory(path.c_str());
       }
-    else if((i < args.size()-1) && (arg.find("--check-build-system",0) == 0))
+    else if((i < args.size()-2) && (arg.find("--check-build-system",0) == 0))
       {
       this->CheckBuildSystemArgument = args[++i];
       this->ClearBuildSystem = (atoi(args[++i].c_str()) > 0);
