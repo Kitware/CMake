@@ -415,7 +415,8 @@ protected:
   std::string FindRelativePathTopBinary();
   void SetupPathConversions();
 
-  virtual std::string ConvertToLinkReference(std::string const& lib);
+  virtual std::string ConvertToLinkReference(std::string const& lib,
+                                             OutputFormat format = SHELL);
 
   /** Check whether the native build system supports the given
       definition.  Issues a warning.  */

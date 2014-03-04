@@ -1759,7 +1759,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
     }
 }
 
-std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
+std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
+                                                     OutputFormat format)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   // Work-ardound command line parsing limitations in MSVC 6.0 and
@@ -1781,14 +1782,14 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
         sp += lib.substr(pos);
 
         // Convert to an output path.
-        return this->Convert(sp.c_str(), NONE, SHELL);
+        return this->Convert(sp.c_str(), NONE, format);
         }
       }
     }
 #endif
 
   // Normal behavior.
-  return this->Convert(lib.c_str(), START_OUTPUT, SHELL);
+  return this->Convert(lib.c_str(), START_OUTPUT, format);
 }
 
 /**
