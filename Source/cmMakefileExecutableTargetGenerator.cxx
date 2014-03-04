@@ -307,14 +307,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
 
   // Select whether to use a response file for objects.
-  bool useResponseFile = false;
+  bool useResponseFileForObjects = false;
   {
   std::string responseVar = "CMAKE_";
   responseVar += linkLanguage;
   responseVar += "_USE_RESPONSE_FILE_FOR_OBJECTS";
   if(this->Makefile->IsOn(responseVar.c_str()))
     {
-    useResponseFile = true;
+    useResponseFileForObjects = true;
     }
   }
 
@@ -330,8 +330,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Construct object file lists that may be needed to expand the
   // rule.
   std::string buildObjs;
-  this->CreateObjectLists(useLinkScript, false, useResponseFile,
-                          buildObjs, depends);
+  this->CreateObjectLists(useLinkScript, false,
+                          useResponseFileForObjects, buildObjs, depends);
 
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_LINK";
