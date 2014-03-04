@@ -141,7 +141,7 @@ macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
   set(_moc_extra_parameters_file @${_moc_parameters_file})
   add_custom_command(OUTPUT ${outfile}
                       COMMAND Qt4::moc ${_moc_extra_parameters_file}
-                      DEPENDS ${infile}
+                      DEPENDS ${infile} ${_moc_parameters_file}
                       ${_moc_working_dir}
                       VERBATIM)
 endmacro ()
