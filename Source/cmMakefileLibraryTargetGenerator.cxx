@@ -485,6 +485,18 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   }
 
+  // Select whether to use a response file for libraries.
+  bool useResponseFileForLibs = false;
+  {
+  std::string responseVar = "CMAKE_";
+  responseVar += linkLanguage;
+  responseVar += "_USE_RESPONSE_FILE_FOR_LIBRARIES";
+  if(this->Makefile->IsOn(responseVar.c_str()))
+    {
+    useResponseFileForLibs = true;
+    }
+  }
+
   // For static libraries there might be archiving rules.
   bool haveStaticLibraryRule = false;
   std::vector<std::string> archiveCreateCommands;
@@ -546,7 +558,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string linkLibs;
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
-    this->CreateLinkLibs(linkLibs, relink, depends);
+    this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends);
     }
 
   // Construct object file lists that may be needed to expand the

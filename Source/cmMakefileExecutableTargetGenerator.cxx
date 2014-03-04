@@ -318,6 +318,18 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
   }
 
+  // Select whether to use a response file for libraries.
+  bool useResponseFileForLibs = false;
+  {
+  std::string responseVar = "CMAKE_";
+  responseVar += linkLanguage;
+  responseVar += "_USE_RESPONSE_FILE_FOR_LIBRARIES";
+  if(this->Makefile->IsOn(responseVar.c_str()))
+    {
+    useResponseFileForLibs = true;
+    }
+  }
+
   // Expand the rule variables.
   {
   // Set path conversion for link script shells.
@@ -325,7 +337,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Collect up flags to link in needed libraries.
   std::string linkLibs;
-  this->CreateLinkLibs(linkLibs, relink, depends);
+  this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends);
 
   // Construct object file lists that may be needed to expand the
   // rule.
