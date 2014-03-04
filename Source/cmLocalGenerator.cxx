@@ -1277,9 +1277,10 @@ cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
+cmLocalGenerator::ConvertToIncludeReference(std::string const& path,
+                                            OutputFormat format)
 {
-  return this->ConvertToOutputForExisting(path.c_str());
+  return this->ConvertToOutputForExisting(path.c_str(), START_OUTPUT, format);
 }
 
 //----------------------------------------------------------------------------

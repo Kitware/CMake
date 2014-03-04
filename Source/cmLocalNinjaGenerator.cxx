@@ -149,9 +149,10 @@ cmLocalNinjaGenerator::ConvertToLinkReference(std::string const& lib)
 }
 
 std::string
-cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path)
+cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path,
+                                                 OutputFormat format)
 {
-  return this->Convert(path.c_str(), HOME_OUTPUT, SHELL);
+  return this->Convert(path.c_str(), HOME_OUTPUT, format);
 }
 
 //----------------------------------------------------------------------------

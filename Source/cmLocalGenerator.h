@@ -207,7 +207,8 @@ public:
                                          const char* local = 0,
                                          OutputFormat format = SHELL);
 
-  virtual std::string ConvertToIncludeReference(std::string const& path);
+  virtual std::string ConvertToIncludeReference(std::string const& path,
+                                                OutputFormat format = SHELL);
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */,
