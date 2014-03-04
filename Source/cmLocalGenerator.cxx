@@ -1295,6 +1295,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     return "";
     }
 
+  OutputFormat shellFormat = forResponseFile? RESPONSE : SHELL;
   cmOStringStream includeFlags;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
@@ -1354,10 +1355,9 @@ std::string cmLocalGenerator::GetIncludeFlags(
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        OutputFormat format = forResponseFile? RESPONSE : SHELL;
         includeFlags
           << fwSearchFlag << this->Convert(frameworkDir.c_str(),
-                                           START_OUTPUT, format, true)
+                                           START_OUTPUT, shellFormat, true)
           << " ";
         }
       continue;
@@ -1376,16 +1376,8 @@ std::string cmLocalGenerator::GetIncludeFlags(
         }
       flagUsed = true;
       }
-    std::string includePath;
-    if(forResponseFile)
-      {
-      includePath = this->Convert(i->c_str(), START_OUTPUT,
-                                  RESPONSE, true);
-      }
-    else
-      {
-      includePath = this->ConvertToIncludeReference(*i);
-      }
+    std::string includePath =
+      this->ConvertToIncludeReference(*i, shellFormat);
     if(quotePaths && includePath.size() && includePath[0] != '\"')
       {
       includeFlags << "\"";
