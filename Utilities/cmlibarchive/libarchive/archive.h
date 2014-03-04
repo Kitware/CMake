@@ -54,7 +54,7 @@
 
 /* Get appropriate definitions of standard POSIX-style types. */
 /* These should match the types used in 'struct stat' */
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__WATCOMC__)
 # define	__LA_INT64_T	__int64
 # if defined(_SSIZE_T_DEFINED) || defined(_SSIZE_T_)
 #  define	__LA_SSIZE_T	ssize_t
