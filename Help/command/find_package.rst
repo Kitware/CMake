@@ -269,6 +269,7 @@ enabled.
    This can be skipped if ``NO_CMAKE_BUILDS_PATH`` is passed.  It is intended
    for the case when a user is building multiple dependent projects one
    after another.
+   (This step is implemented only on Windows.)
 
 6. Search paths stored in the CMake :ref:`User Package Registry`.
    This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed.
