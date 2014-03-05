@@ -3,5 +3,6 @@ CMAKE_HOST_SYSTEM_PROCESSOR
 
 The name of the CPU CMake is running on.
 
-The same as CMAKE_SYSTEM_PROCESSOR but for the host system instead of
-the target system when cross compiling.
+On systems that support uname, this variable is set to the output of
+uname -p, on windows it is set to the value of the environment variable
+``PROCESSOR_ARCHITECTURE``.
