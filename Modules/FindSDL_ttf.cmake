@@ -54,7 +54,9 @@ find_path(SDL_TTF_INCLUDE_DIR SDL_ttf.h
   HINTS
     ENV SDLTTFDIR
     ENV SDLDIR
-  PATH_SUFFIXES include/SDL include/SDL12 include/SDL11 include
+  PATH_SUFFIXES SDL
+                # path suffixes to search inside ENV{SDLDIR}
+                include/SDL include/SDL12 include/SDL11 include
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
