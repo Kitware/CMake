@@ -39,6 +39,8 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "Warning: public.*BZ2_bz.*in module.*bzlib.*clashes with prior module.*bzlib.*"
   "Warning: public.*_archive.*clashes with prior module.*"
   "Warning: LINN32: Last line.*is less.*"
+  "Warning: Olimit was exceeded on function.*"
+  "Warning: To override Olimit for all functions in file.*"
   "warning.*directory name.*CMake-Xcode.*/bin/.*does not exist.*"
   "stl_deque.h:1051"
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
