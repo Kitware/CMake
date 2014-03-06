@@ -474,14 +474,26 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
   // Select whether to use a response file for objects.
-  bool useResponseFile = false;
+  bool useResponseFileForObjects = false;
   {
   std::string responseVar = "CMAKE_";
   responseVar += linkLanguage;
   responseVar += "_USE_RESPONSE_FILE_FOR_OBJECTS";
   if(this->Makefile->IsOn(responseVar.c_str()))
     {
-    useResponseFile = true;
+    useResponseFileForObjects = true;
+    }
+  }
+
+  // Select whether to use a response file for libraries.
+  bool useResponseFileForLibs = false;
+  {
+  std::string responseVar = "CMAKE_";
+  responseVar += linkLanguage;
+  responseVar += "_USE_RESPONSE_FILE_FOR_LIBRARIES";
+  if(this->Makefile->IsOn(responseVar.c_str()))
+    {
+    useResponseFileForLibs = true;
     }
   }
 
@@ -528,7 +540,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     useLinkScript = true;
 
     // Archiving rules never use a response file.
-    useResponseFile = false;
+    useResponseFileForObjects = false;
 
     // Limit the length of individual object lists to less than the
     // 32K command line length limit on Windows.  We could make this a
@@ -546,19 +558,14 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string linkLibs;
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
-    std::string frameworkPath;
-    std::string linkPath;
-    this->LocalGenerator
-      ->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                            *this->GeneratorTarget, relink);
-    linkLibs = frameworkPath + linkPath + linkLibs;
+    this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends);
     }
 
   // Construct object file lists that may be needed to expand the
   // rule.
   std::string buildObjs;
-  this->CreateObjectLists(useLinkScript, useArchiveRules, useResponseFile,
-                          buildObjs, depends);
+  this->CreateObjectLists(useLinkScript, useArchiveRules,
+                          useResponseFileForObjects, buildObjs, depends);
 
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();

@@ -97,11 +97,13 @@ public:
   void AppendCustomCommandDeps(const cmCustomCommand *cc,
                                cmNinjaDeps &ninjaDeps);
 
-  virtual std::string ConvertToLinkReference(std::string const& lib);
+  virtual std::string ConvertToLinkReference(std::string const& lib,
+                                             OutputFormat format = SHELL);
 
 
 protected:
-  virtual std::string ConvertToIncludeReference(std::string const& path);
+  virtual std::string ConvertToIncludeReference(std::string const& path,
+                                                OutputFormat format = SHELL);
 
 
 private:

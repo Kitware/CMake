@@ -198,14 +198,17 @@ public:
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const char* remote,
-                                         RelativeRoot local = START_OUTPUT);
+                                         RelativeRoot local = START_OUTPUT,
+                                         OutputFormat format = SHELL);
 
   /** For existing path identified by RelativeRoot convert to output
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
-                                         const char* local = 0);
+                                         const char* local = 0,
+                                         OutputFormat format = SHELL);
 
-  virtual std::string ConvertToIncludeReference(std::string const& path);
+  virtual std::string ConvertToIncludeReference(std::string const& path,
+                                                OutputFormat format = SHELL);
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */,
@@ -369,7 +372,8 @@ protected:
                                    std::string& frameworkPath,
                                    std::string& linkPath,
                                    cmGeneratorTarget &,
-                                   bool relink);
+                                   bool relink,
+                                   bool forResponseFile);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,
@@ -412,7 +416,8 @@ protected:
   std::string FindRelativePathTopBinary();
   void SetupPathConversions();
 
-  virtual std::string ConvertToLinkReference(std::string const& lib);
+  virtual std::string ConvertToLinkReference(std::string const& lib,
+                                             OutputFormat format = SHELL);
 
   /** Check whether the native build system supports the given
       definition.  Issues a warning.  */
@@ -465,7 +470,8 @@ protected:
   bool BackwardsCompatibilityFinal;
 private:
   std::string ConvertToOutputForExistingCommon(const char* remote,
-                                               std::string const& result);
+                                               std::string const& result,
+                                               OutputFormat format);
 
   void AddSharedFlags(std::string& flags, const char* lang, bool shared);
   bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;

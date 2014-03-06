@@ -1833,6 +1833,46 @@ cmMakefileTargetGenerator
 //----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator
+::CreateLinkLibs(std::string& linkLibs, bool relink,
+                 bool useResponseFile,
+                 std::vector<std::string>& makefile_depends)
+{
+  std::string frameworkPath;
+  std::string linkPath;
+  this->LocalGenerator
+    ->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
+                          *this->GeneratorTarget, relink,
+                          useResponseFile);
+  linkLibs = frameworkPath + linkPath + linkLibs;
+
+  if(useResponseFile)
+    {
+    // Lookup the response file reference flag.
+    std::string responseFlagVar = "CMAKE_";
+    responseFlagVar += this->Target->GetLinkerLanguage(this->ConfigName);
+    responseFlagVar += "_RESPONSE_FILE_LINK_FLAG";
+    const char* responseFlag =
+      this->Makefile->GetDefinition(responseFlagVar.c_str());
+    if(!responseFlag)
+      {
+      responseFlag = "@";
+      }
+
+    // Create this response file.
+    std::string link_rsp =
+      this->CreateResponseFile("linklibs.rsp", linkLibs, makefile_depends);
+
+    // Reference the response file.
+    linkLibs = responseFlag;
+    linkLibs += this->Convert(link_rsp.c_str(),
+                              cmLocalGenerator::NONE,
+                              cmLocalGenerator::SHELL);
+    }
+}
+
+//----------------------------------------------------------------------------
+void
+cmMakefileTargetGenerator
 ::CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                     bool useResponseFile, std::string& buildObjs,
                     std::vector<std::string>& makefile_depends)

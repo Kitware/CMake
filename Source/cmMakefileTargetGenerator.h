@@ -163,6 +163,11 @@ protected:
                                  std::string const& options,
                                  std::vector<std::string>& makefile_depends);
 
+  /** Create list of flags for link libraries. */
+  void CreateLinkLibs(std::string& linkLibs, bool relink,
+                      bool useResponseFile,
+                      std::vector<std::string>& makefile_depends);
+
   /** Create lists of object files for linking and cleaning.  */
   void CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                          bool useResponseFile, std::string& buildObjs,

@@ -1228,7 +1228,8 @@ void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
-                                                   std::string const& result)
+                                                   std::string const& result,
+                                                   OutputFormat format)
 {
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
@@ -1239,7 +1240,7 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
     std::string tmp;
     if(cmSystemTools::GetShortPath(remote, tmp))
       {
-      return this->Convert(tmp.c_str(), NONE, SHELL, true);
+      return this->Convert(tmp.c_str(), NONE, format, true);
       }
     }
 
@@ -1250,33 +1251,36 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const char* remote,
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOutputForExisting(const char* remote,
-                                             RelativeRoot local)
+                                             RelativeRoot local,
+                                             OutputFormat format)
 {
   // Perform standard conversion.
-  std::string result = this->Convert(remote, local, SHELL, true);
+  std::string result = this->Convert(remote, local, format, true);
 
   // Consider short-path.
-  return this->ConvertToOutputForExistingCommon(remote, result);
+  return this->ConvertToOutputForExistingCommon(remote, result, format);
 }
 
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConvertToOutputForExisting(RelativeRoot remote,
-                                             const char* local)
+                                             const char* local,
+                                             OutputFormat format)
 {
   // Perform standard conversion.
-  std::string result = this->Convert(remote, local, SHELL, true);
+  std::string result = this->Convert(remote, local, format, true);
 
   // Consider short-path.
   const char* remotePath = this->GetRelativeRootPath(remote);
-  return this->ConvertToOutputForExistingCommon(remotePath, result);
+  return this->ConvertToOutputForExistingCommon(remotePath, result, format);
 }
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConvertToIncludeReference(std::string const& path)
+cmLocalGenerator::ConvertToIncludeReference(std::string const& path,
+                                            OutputFormat format)
 {
-  return this->ConvertToOutputForExisting(path.c_str());
+  return this->ConvertToOutputForExisting(path.c_str(), START_OUTPUT, format);
 }
 
 //----------------------------------------------------------------------------
@@ -1291,6 +1295,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     return "";
     }
 
+  OutputFormat shellFormat = forResponseFile? RESPONSE : SHELL;
   cmOStringStream includeFlags;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
@@ -1350,10 +1355,9 @@ std::string cmLocalGenerator::GetIncludeFlags(
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        OutputFormat format = forResponseFile? RESPONSE : SHELL;
         includeFlags
           << fwSearchFlag << this->Convert(frameworkDir.c_str(),
-                                           START_OUTPUT, format, true)
+                                           START_OUTPUT, shellFormat, true)
           << " ";
         }
       continue;
@@ -1372,16 +1376,8 @@ std::string cmLocalGenerator::GetIncludeFlags(
         }
       flagUsed = true;
       }
-    std::string includePath;
-    if(forResponseFile)
-      {
-      includePath = this->Convert(i->c_str(), START_OUTPUT,
-                                  RESPONSE, true);
-      }
-    else
-      {
-      includePath = this->ConvertToIncludeReference(*i);
-      }
+    std::string includePath =
+      this->ConvertToIncludeReference(*i, shellFormat);
     if(quotePaths && includePath.size() && includePath[0] != '\"')
       {
       includeFlags << "\"";
@@ -1675,7 +1671,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
           }
         }
       this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                                *target, false);
+                                *target, false, false);
       }
       break;
     case cmTarget::EXECUTABLE:
@@ -1700,7 +1696,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         }
       this->AddLanguageFlags(flags, linkLanguage, buildType.c_str());
       this->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
-                                *target, false);
+                                *target, false, false);
       if(cmSystemTools::IsOn
          (this->Makefile->GetDefinition("BUILD_SHARED_LIBS")))
         {
@@ -1755,7 +1751,8 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
     }
 }
 
-std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
+std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib,
+                                                     OutputFormat format)
 {
 #if defined(_WIN32) && !defined(__CYGWIN__)
   // Work-ardound command line parsing limitations in MSVC 6.0 and
@@ -1777,14 +1774,14 @@ std::string cmLocalGenerator::ConvertToLinkReference(std::string const& lib)
         sp += lib.substr(pos);
 
         // Convert to an output path.
-        return this->Convert(sp.c_str(), NONE, SHELL);
+        return this->Convert(sp.c_str(), NONE, format);
         }
       }
     }
 #endif
 
   // Normal behavior.
-  return this->Convert(lib.c_str(), START_OUTPUT, SHELL);
+  return this->Convert(lib.c_str(), START_OUTPUT, format);
 }
 
 /**
@@ -1796,8 +1793,11 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
                                            std::string& frameworkPath,
                                            std::string& linkPath,
                                            cmGeneratorTarget &tgt,
-                                           bool relink)
+                                           bool relink,
+                                           bool forResponseFile)
 {
+  OutputFormat shellFormat = forResponseFile? RESPONSE : SHELL;
+  bool escapeAllowMakeVars = !forResponseFile;
   cmOStringStream fout;
   const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
   cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
@@ -1840,7 +1840,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         fdi != fwDirs.end(); ++fdi)
       {
       frameworkPath += fwSearchFlag;
-      frameworkPath += this->Convert(fdi->c_str(), NONE, SHELL, false);
+      frameworkPath += this->Convert(fdi->c_str(), NONE, shellFormat, false);
       frameworkPath += " ";
       }
     }
@@ -1850,7 +1850,9 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   for(std::vector<std::string>::const_iterator libDir = libDirs.begin();
       libDir != libDirs.end(); ++libDir)
     {
-    std::string libpath = this->ConvertToOutputForExisting(libDir->c_str());
+    std::string libpath = this->ConvertToOutputForExisting(libDir->c_str(),
+                                                           START_OUTPUT,
+                                                           shellFormat);
     linkPath += " " + libPathFlag;
     linkPath += libpath;
     linkPath += libPathTerminator;
@@ -1868,7 +1870,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
       }
     if(li->IsPath)
       {
-      linkLibs += this->ConvertToLinkReference(li->Value);
+      linkLibs += this->ConvertToLinkReference(li->Value, shellFormat);
       }
     else
       {
@@ -1893,7 +1895,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         ri != runtimeDirs.end(); ++ri)
       {
       rpath += cli.GetRuntimeFlag();
-      rpath += this->Convert(ri->c_str(), NONE, SHELL, false);
+      rpath += this->Convert(ri->c_str(), NONE, shellFormat, false);
       rpath += " ";
       }
     fout << rpath;
@@ -1907,7 +1909,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
     if(!rpath.empty())
       {
       fout << cli.GetRuntimeFlag();
-      fout << this->EscapeForShell(rpath.c_str(), true);
+      fout << this->EscapeForShell(rpath.c_str(), escapeAllowMakeVars);
       fout << " ";
       }
     }
@@ -1917,7 +1919,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   if(!cli.GetRPathLinkFlag().empty() && !rpath_link.empty())
     {
     fout << cli.GetRPathLinkFlag();
-    fout << this->EscapeForShell(rpath_link.c_str(), true);
+    fout << this->EscapeForShell(rpath_link.c_str(), escapeAllowMakeVars);
     fout << " ";
     }
 
