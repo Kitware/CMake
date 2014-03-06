@@ -211,11 +211,19 @@ if(BUILD_TESTING)
   find_program(SCPCOMMAND scp DOC
     "Path to scp command, used by CTest for submitting results to a Dart server"
     )
-  find_program(COVERAGE_COMMAND gcov DOC
-    "Path to the coverage program that CTest uses for performing coverage inspection"
-    )
-  set(COVERAGE_EXTRA_FLAGS "-l" CACHE STRING
-    "Extra command line flags to pass to the coverage tool")
+  # CTEST_COVERAGE_COMMAND and CTEST_COVERAGE_EXTRA_FLAGS have precedence
+  # over COVERAGE_COMMAND and COVERAGE_EXTRA_FLAGS
+  SET_IF_SET_AND_NOT_SET(COVERAGE_COMMAND "${CTEST_COVERAGE_COMMAND}")
+  SET_IF_SET_AND_NOT_SET(COVERAGE_EXTRA_FLAGS "${CTEST_COVERAGE_EXTRA_FLAGS}")
+
+  # IF COVERAGE_COMMAND still not set, assign the gcov default values
+  IF(NOT COVERAGE_COMMAND)
+    find_program(COVERAGE_COMMAND gcov DOC
+      "Path to the coverage program that CTest uses for performing coverage
+      inspection")
+    set(COVERAGE_EXTRA_FLAGS "-l" CACHE STRING
+      "Extra command line flags to pass to the coverage tool")
+  endif()
 
   # set the site name
   site_name(SITE)
