@@ -99,6 +99,7 @@ Variables that Change Behavior
 
    /variable/BUILD_SHARED_LIBS
    /variable/CMAKE_ABSOLUTE_DESTINATION_FILES
+   /variable/CMAKE_APPBUNDLE_PATH
    /variable/CMAKE_AUTOMOC_RELAXED_MODE
    /variable/CMAKE_BACKWARDS_COMPATIBILITY
    /variable/CMAKE_BUILD_TYPE
@@ -118,6 +119,7 @@ Variables that Change Behavior
    /variable/CMAKE_FIND_ROOT_PATH_MODE_LIBRARY
    /variable/CMAKE_FIND_ROOT_PATH_MODE_PACKAGE
    /variable/CMAKE_FIND_ROOT_PATH_MODE_PROGRAM
+   /variable/CMAKE_FRAMEWORK_PATH
    /variable/CMAKE_IGNORE_PATH
    /variable/CMAKE_INCLUDE_PATH
    /variable/CMAKE_INCLUDE_DIRECTORIES_BEFORE
