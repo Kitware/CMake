@@ -99,9 +99,20 @@ macro(_pkgconfig_invoke_dyn _pkglist _prefix _varname cleanup_regexp)
 endmacro()
 
 # Splits given arguments into options and a package list
-macro(_pkgconfig_parse_options _result _is_req _is_silent)
+macro(_pkgconfig_parse_options _result _is_req _is_silent _no_cmake_path _no_cmake_environment_path)
   set(${_is_req} 0)
   set(${_is_silent} 0)
+  set(${_no_cmake_path} 0)
+  set(${_no_cmake_environment_path} 0)
+  if(DEFINED PKG_CONFIG_USE_CMAKE_PREFIX_PATH)
+    if(NOT PKG_CONFIG_USE_CMAKE_PREFIX_PATH)
+      set(${_no_cmake_path} 1)
+      set(${_no_cmake_environment_path} 1)
+    endif()
+  elseif(${CMAKE_MINIMUM_REQUIRED_VERSION} VERSION_LESS 3.1)
+    set(${_no_cmake_path} 1)
+    set(${_no_cmake_environment_path} 1)
+  endif()
 
   foreach(_pkg ${ARGN})
     if (_pkg STREQUAL "REQUIRED")
@@ -110,15 +121,23 @@ macro(_pkgconfig_parse_options _result _is_req _is_silent)
     if (_pkg STREQUAL "QUIET")
       set(${_is_silent} 1)
     endif ()
+    if (_pkg STREQUAL "NO_CMAKE_PATH")
+      set(${_no_cmake_path} 1)
+    endif()
+    if (_pkg STREQUAL "NO_CMAKE_ENVIRONMENT_PATH")
+      set(${_no_cmake_environment_path} 1)
+    endif()
   endforeach()
 
   set(${_result} ${ARGN})
   list(REMOVE_ITEM ${_result} "REQUIRED")
   list(REMOVE_ITEM ${_result} "QUIET")
+  list(REMOVE_ITEM ${_result} "NO_CMAKE_PATH")
+  list(REMOVE_ITEM ${_result} "NO_CMAKE_ENVIRONMENT_PATH")
 endmacro()
 
 ###
-macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
+macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _prefix)
   _pkgconfig_unset(${_prefix}_FOUND)
   _pkgconfig_unset(${_prefix}_VERSION)
   _pkgconfig_unset(${_prefix}_PREFIX)
@@ -156,6 +175,95 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
 
     set(_pkg_check_modules_packages)
     set(_pkg_check_modules_failed)
+
+    set(_extra_paths)
+
+    if(NOT _no_cmake_path)
+      if(NOT "${CMAKE_PREFIX_PATH}" STREQUAL "")
+        list(APPEND _extra_paths ${CMAKE_PREFIX_PATH})
+      endif()
+      if(NOT "${CMAKE_FRAMEWORK_PATH}" STREQUAL "")
+        list(APPEND _extra_paths ${CMAKE_FRAMEWORK_PATH})
+      endif()
+      if(NOT "${CMAKE_APPBUNDLE_PATH}" STREQUAL "")
+        list(APPEND _extra_paths ${CMAKE_FRAMEWORK_PATH})
+      endif()
+    endif()
+
+    if(NOT _no_cmake_environment_path)
+      if(NOT "$ENV{CMAKE_PREFIX_PATH}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{CMAKE_PREFIX_PATH}" _path)
+        list(APPEND _extra_paths ${_path})
+        unset(_path)
+      endif()
+      if(NOT "$ENV{CMAKE_FRAMEWORK_PATH}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{CMAKE_FRAMEWORK_PATH}" _path)
+        list(APPEND _extra_paths ${_path})
+        unset(_path)
+      endif()
+      if(NOT "$ENV{CMAKE_APPBUNDLE_PATH}" STREQUAL "")
+        file(TO_CMAKE_PATH "$ENV{CMAKE_APPBUNDLE_PATH}" _path)
+        list(APPEND _extra_paths ${_path})
+        unset(_path)
+      endif()
+    endif()
+
+    if(NOT "${_extra_paths}" STREQUAL "")
+      # Save the PKG_CONFIG_PATH environment variable, and add paths
+      # from the CMAKE_PREFIX_PATH variables
+      set(_pkgconfig_path_old $ENV{PKG_CONFIG_PATH})
+      set(_pkgconfig_path ${_pkgconfig_path_old})
+      if(NOT "${_pkgconfig_path}" STREQUAL "")
+        file(TO_CMAKE_PATH "${_pkgconfig_path}" _pkgconfig_path)
+      endif()
+
+      # Create a list of the possible pkgconfig subfolder (depending on
+      # the system
+      set(_lib_dirs)
+      if(NOT DEFINED CMAKE_SYSTEM_NAME
+          OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
+              AND NOT CMAKE_CROSSCOMPILING))
+        if(EXISTS "/etc/debian_version") # is this a debian system ?
+          if(CMAKE_LIBRARY_ARCHITECTURE)
+            list(APPEND _lib_dirs "lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig")
+          endif()
+        else()
+          # not debian, chech the FIND_LIBRARY_USE_LIB64_PATHS property
+          get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+          if(uselib64)
+            list(APPEND _lib_dirs "lib64/pkgconfig")
+          endif()
+        endif()
+      endif()
+      list(APPEND _lib_dirs "lib/pkgconfig")
+
+      # Check if directories exist and eventually append them to the
+      # pkgconfig path list
+      foreach(_prefix_dir ${_extra_paths})
+        foreach(_lib_dir ${_lib_dirs})
+          if(EXISTS "${_prefix_dir}/${_lib_dir}")
+            list(APPEND _pkgconfig_path "${_prefix_dir}/${_lib_dir}")
+            list(REMOVE_DUPLICATES _pkgconfig_path)
+          endif()
+        endforeach()
+      endforeach()
+
+      # Prepare and set the environment variable
+      if(NOT "${_pkgconfig_path}" STREQUAL "")
+        # remove empty values from the list
+        list(REMOVE_ITEM _pkgconfig_path "")
+        file(TO_NATIVE_PATH "${_pkgconfig_path}" _pkgconfig_path)
+        if(UNIX)
+          string(REPLACE ";" ":" _pkgconfig_path "${_pkgconfig_path}")
+          string(REPLACE "\\ " " " _pkgconfig_path "${_pkgconfig_path}")
+        endif()
+        set(ENV{PKG_CONFIG_PATH} ${_pkgconfig_path})
+      endif()
+
+      # Unset variables
+      unset(_lib_dirs)
+      unset(_pkgconfig_path)
+    endif()
 
     # iterate through module list and check whether they exist and match the required version
     foreach (_pkg_check_modules_pkg ${_pkg_check_modules_list})
@@ -260,6 +368,14 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS              ""        --cflags )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS_OTHER        ""        --cflags-only-other )
     endif()
+
+    if(NOT "${_extra_paths}" STREQUAL "")
+      # Restore the environment variable
+      set(ENV{PKG_CONFIG_PATH} ${_pkgconfig_path})
+    endif()
+
+    unset(_extra_paths)
+    unset(_pkgconfig_path_old)
   else()
     if (${_is_required})
       message(SEND_ERROR "pkg-config tool not found")
@@ -276,12 +392,24 @@ endmacro()
 
  Checks for all the given modules. ::
 
-    pkg_check_modules(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
+    pkg_check_modules(<PREFIX> [REQUIRED] [QUIET]
+                      [NO_CMAKE_PATH] [NO_CMAKE_ENVIRONMENT_PATH]
+                      <MODULE> [<MODULE>]*)
+
 
  When the ``REQUIRED`` argument was set, macros will fail with an error
  when module(s) could not be found.
 
  When the ``QUIET`` argument is set, no status messages will be printed.
+
+ By default, if :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or
+ later, or if :variable:`PKG_CONFIG_USE_CMAKE_PREFIX_PATH` is set, the
+ :variable:`CMAKE_PREFIX_PATH`, :variable:`CMAKE_FRAMEWORK_PATH`, and
+ :variable:`CMAKE_APPBUNDLE_PATH` cache and environment variables will
+ be added to ``pkg-config`` search path.
+ The ``NO_CMAKE_PATH`` and ``NO_CMAKE_ENVIRONMENT_PATH`` arguments
+ disable this behavior for the cache variables and the environment
+ variables, respectively.
 
  It sets the following variables: ::
 
@@ -362,8 +490,8 @@ endmacro()
 macro(pkg_check_modules _prefix _module0)
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
-    _pkgconfig_parse_options   (_pkg_modules _pkg_is_required _pkg_is_silent "${_module0}" ${ARGN})
-    _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" "${_prefix}" ${_pkg_modules})
+    _pkgconfig_parse_options   (_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path "${_module0}" ${ARGN})
+    _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" ${_no_cmake_path} ${_no_cmake_environment_path} "${_prefix}" ${_pkg_modules})
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
   endif()
@@ -376,7 +504,9 @@ endmacro()
  Same as :command:`pkg_check_modules`, but instead it checks for given
  modules and uses the first working one. ::
 
-    pkg_search_module(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
+    pkg_search_module(<PREFIX> [REQUIRED] [QUIET]
+                      [NO_CMAKE_PATH] [NO_CMAKE_ENVIRONMENT_PATH]
+                      <MODULE> [<MODULE>]*)
 
  Examples
 
@@ -388,7 +518,7 @@ macro(pkg_search_module _prefix _module0)
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
     set(_pkg_modules_found 0)
-    _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent "${_module0}" ${ARGN})
+    _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path "${_module0}" ${ARGN})
 
     if (NOT ${_pkg_is_silent})
       message(STATUS "checking for one of the modules '${_pkg_modules_alt}'")
@@ -397,7 +527,7 @@ macro(pkg_search_module _prefix _module0)
     # iterate through all modules and stop at the first working one.
     foreach(_pkg_alt ${_pkg_modules_alt})
       if(NOT _pkg_modules_found)
-        _pkg_check_modules_internal(0 1 "${_prefix}" "${_pkg_alt}")
+        _pkg_check_modules_internal(0 1 ${_no_cmake_path} ${_no_cmake_environment_path} "${_prefix}" "${_pkg_alt}")
       endif()
 
       if (${_prefix}_FOUND)
@@ -420,6 +550,18 @@ endmacro()
 .. variable:: PKG_CONFIG_EXECUTABLE
 
  Path to the pkg-config executable.
+
+
+.. variable:: PKG_CONFIG_USE_CMAKE_PREFIX_PATH
+
+ Whether :command:`pkg_check_modules` and :command:`pkg_search_module`
+ should add the paths in :variable:`CMAKE_PREFIX_PATH`,
+ :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH`
+ cache and environment variables to ``pkg-config`` search path.
+
+ If this variable is not set, this behavior is enabled by default if
+ :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or later, disabled
+ otherwise.
 #]========================================]
 
 
