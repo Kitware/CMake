@@ -1089,7 +1089,7 @@ int cmCPackGenerator::DoPackage()
    * may update this during PackageFiles.
    * (either putting several names or updating the provided one)
    */
-  packageFileNames.push_back(tempPackageFileName);
+  packageFileNames.push_back(tempPackageFileName ? tempPackageFileName : "");
   toplevel = tempDirectory;
   if ( !this->PackageFiles() || cmSystemTools::GetErrorOccuredFlag())
     {
