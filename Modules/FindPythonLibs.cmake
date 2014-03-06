@@ -83,7 +83,6 @@ endif()
 # If FindPythonInterp has already found the major and minor version,
 # insert that version between the user supplied versions and the stock
 # version list.
-find_package(PythonInterp QUIET)
 set(_Python_VERSIONS ${Python_ADDITIONAL_VERSIONS})
 if(DEFINED PYTHON_VERSION_MAJOR AND DEFINED PYTHON_VERSION_MINOR)
   list(APPEND _Python_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
