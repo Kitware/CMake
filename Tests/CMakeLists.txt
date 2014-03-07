@@ -829,6 +829,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
 
     if(WIX_LIGHT_EXECUTABLE)
       add_test(CPackWiXGenerator ${CMAKE_CTEST_COMMAND}
+        -C \${CTEST_CONFIGURATION_TYPE}
         --build-and-test
         "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator"
         "${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
@@ -837,6 +838,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/
         --build-options ${build_options}
         --test-command ${CMAKE_CMAKE_COMMAND}
           "-DCPackWiXGenerator_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/CPackWiXGenerator"
+          "-Dconfig=\${CTEST_CONFIGURATION_TYPE}"
           -P "${CMake_SOURCE_DIR}/Tests/CPackWiXGenerator/RunCPackVerifyResult.cmake")
     endif()
   endif()
