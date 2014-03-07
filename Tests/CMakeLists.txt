@@ -575,7 +575,7 @@ if(BUILD_TESTING)
     file(WRITE "${_TEST_DIR}/nightly-cmake.sh"
       "cd ${_TEST_DIR}
 ${CMake_BINARY_DIR}/bin/cmake -DCMAKE_CREATE_VERSION=nightly -P ${CMake_SOURCE_DIR}/Utilities/Release/${script}
-${CMake_BINARY_DIR}/bin/cmake -DVERSION=master -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
+${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release/upload_release.cmake
     ")
     add_test(${name} /bin/sh ${_TEST_DIR}/nightly-cmake.sh)
     if(COMMAND SET_TESTS_PROPERTIES AND COMMAND GET_TEST_PROPERTY)
