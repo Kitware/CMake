@@ -156,3 +156,7 @@ target is built before any target using this custom command.
 Additionally, if the target is an executable or library a file-level
 dependency is created to cause the custom command to re-run whenever
 the target is recompiled.
+
+Arguments to ``DEPENDS`` may use "generator expressions" with the syntax
+``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
+available expressions.

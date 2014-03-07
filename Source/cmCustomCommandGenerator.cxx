@@ -21,7 +21,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmCustomCommand const& cc, const std::string& config, cmMakefile* mf):
   CC(cc), Config(config), Makefile(mf), LG(mf->GetLocalGenerator()),
   OldStyle(cc.GetEscapeOldStyle()), MakeVars(cc.GetEscapeAllowMakeVars()),
-  GE(new cmGeneratorExpression(cc.GetBacktrace()))
+  GE(new cmGeneratorExpression(cc.GetBacktrace())), DependsDone(false)
 {
 }
 
@@ -93,5 +93,19 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 //----------------------------------------------------------------------------
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
-  return this->CC.GetDepends();
+  if (!this->DependsDone)
+    {
+    this->DependsDone = true;
+    std::vector<std::string> depends = this->CC.GetDepends();
+    for(std::vector<std::string>::const_iterator
+          i = depends.begin();
+        i != depends.end(); ++i)
+      {
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
+                                              = this->GE->Parse(*i);
+      cmSystemTools::ExpandListArgument(
+                  cge->Evaluate(this->Makefile, this->Config), this->Depends);
+      }
+    }
+  return this->Depends;
 }

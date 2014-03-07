@@ -19,6 +19,7 @@
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCustomCommandGenerator.h"
 
 #include <queue>
 
@@ -610,6 +611,9 @@ private:
   bool IsUtility(std::string const& dep);
   void CheckCustomCommand(cmCustomCommand const& cc);
   void CheckCustomCommands(const std::vector<cmCustomCommand>& commands);
+  void FollowCommandDepends(cmCustomCommand const& cc,
+                            const std::string& config,
+                            std::set<std::string>& emitted);
 };
 
 //----------------------------------------------------------------------------
@@ -826,16 +830,41 @@ cmTargetTraceDependencies
     }
 
   // Queue the custom command dependencies.
-  std::vector<std::string> const& depends = cc.GetDepends();
+  std::vector<std::string> configs;
+  std::set<std::string> emitted;
+  this->Makefile->GetConfigurations(configs);
+  if (configs.empty())
+    {
+    configs.push_back("");
+    }
+  for(std::vector<std::string>::const_iterator ci = configs.begin();
+      ci != configs.end(); ++ci)
+    {
+    this->FollowCommandDepends(cc, *ci, emitted);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTargetTraceDependencies::FollowCommandDepends(cmCustomCommand const& cc,
+                                              const std::string& config,
+                                              std::set<std::string>& emitted)
+{
+  cmCustomCommandGenerator ccg(cc, config, this->Makefile);
+
+  const std::vector<std::string>& depends = ccg.GetDepends();
+
   for(std::vector<std::string>::const_iterator di = depends.begin();
       di != depends.end(); ++di)
     {
     std::string const& dep = *di;
-    if(!this->IsUtility(dep))
+    if(emitted.insert(dep).second)
       {
-      // The dependency does not name a target and may be a file we
-      // know how to generate.  Queue it.
-      this->FollowName(dep);
+      if(!this->IsUtility(dep))
+        {
+        // The dependency does not name a target and may be a file we
+        // know how to generate.  Queue it.
+        this->FollowName(dep);
+        }
       }
     }
 }
