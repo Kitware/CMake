@@ -3518,6 +3518,20 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       return 0;
       }
 
+    cmsys::FStream::BOM bom = cmsys::FStream::ReadBOM(fin);
+    if(bom != cmsys::FStream::BOM_None &&
+       bom != cmsys::FStream::BOM_UTF8)
+      {
+      cmOStringStream e;
+      e << "File starts with a Byte-Order-Mark that is not UTF-8:\n  "
+        << sinfile;
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return 0;
+      }
+    // rewind to copy BOM to output file
+    fin.seekg(0);
+
+
     // now copy input to output and expand variables in the
     // input file at the same time
     std::string inLine;

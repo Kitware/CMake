@@ -329,6 +329,7 @@ fi
 KWSYS_CXX_SOURCES="\
   Directory \
   EncodingCXX \
+  FStream \
   Glob \
   RegularExpression \
   SystemTools"
