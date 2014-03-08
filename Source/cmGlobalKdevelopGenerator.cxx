@@ -76,7 +76,7 @@ void cmGlobalKdevelopGenerator::Generate()
         {
         if (ti->second.GetType()==cmTarget::EXECUTABLE)
           {
-          executable = ti->second.GetLocation(0);
+          executable = ti->second.GetLocation("");
           break;
           }
         }

@@ -742,7 +742,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         {
         // This is really only for compatibility so we do not need to
         // worry about configuration names and output names.
-        std::string tLocation = t->GetLocation(0);
+        std::string tLocation = t->GetLocationForBuild();
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         std::string depLocation = cmSystemTools::GetFilenamePath(dep);
         depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());

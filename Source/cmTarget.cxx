@@ -2458,32 +2458,25 @@ std::string cmTarget::GetCompilePDBDirectory(const char* config) const
 //----------------------------------------------------------------------------
 const char* cmTarget::GetLocation(const char* config) const
 {
+  static std::string location;
   if (this->IsImported())
     {
-    return this->ImportedGetLocation(config);
+    location = this->ImportedGetFullPath(config, false);
     }
   else
     {
-    return this->NormalGetLocation(config);
+    location = this->GetFullPath(config, false);
     }
-}
-
-//----------------------------------------------------------------------------
-const char* cmTarget::ImportedGetLocation(const char* config) const
-{
-  static std::string location;
-  location = this->ImportedGetFullPath(config, false);
   return location.c_str();
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::NormalGetLocation(const char* config) const
+const char* cmTarget::GetLocationForBuild() const
 {
   static std::string location;
-  // Handle the configuration-specific case first.
-  if(config)
+  if(this->IsImported())
     {
-    location = this->GetFullPath(config, false);
+    location = this->ImportedGetFullPath("", false);
     return location.c_str();
     }
 
@@ -2503,7 +2496,7 @@ const char* cmTarget::NormalGetLocation(const char* config) const
 
   if(this->IsAppBundleOnApple())
     {
-    std::string macdir = this->BuildMacContentDirectory("", config, false);
+    std::string macdir = this->BuildMacContentDirectory("", "", false);
     if(!macdir.empty())
       {
       location += "/";
@@ -2511,7 +2504,7 @@ const char* cmTarget::NormalGetLocation(const char* config) const
       }
     }
   location += "/";
-  location += this->GetFullName(config, false);
+  location += this->GetFullName("", false);
   return location.c_str();
 }
 
@@ -2659,7 +2652,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
       // CMake time.
-      this->Properties.SetProperty("LOCATION", this->GetLocation(0),
+      this->Properties.SetProperty("LOCATION", this->GetLocationForBuild(),
                                    cmProperty::TARGET);
       }
 

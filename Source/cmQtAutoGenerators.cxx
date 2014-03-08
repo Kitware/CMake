@@ -610,7 +610,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(""));
     }
   else if (strcmp(qtVersion, "4") == 0)
     {
@@ -621,7 +621,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable", qt4Moc->GetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable", qt4Moc->GetLocation(""));
     }
   else
     {
@@ -782,7 +782,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
       }
     else
       {
-      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(0));
+      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(""));
       }
     }
   else if (strcmp(qtVersion, "4") == 0)
@@ -794,7 +794,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
                           targetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(0));
+    makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(""));
     }
   else
     {
@@ -931,7 +931,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
                           targetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(""));
     }
   else if (strcmp(qtVersion, "4") == 0)
     {
@@ -942,7 +942,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
                           targetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(""));
     }
   else
     {
