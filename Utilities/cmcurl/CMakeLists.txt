@@ -172,6 +172,11 @@ IF(NOT CURL_SPECIAL_LIBZ)
   CHECK_LIBRARY_EXISTS_CONCAT("z"      inflateEnd   HAVE_LIBZ)
 ENDIF(NOT CURL_SPECIAL_LIBZ)
 
+# Include the local directories before any others so that we do not end up
+# including system curl's include directory first by mistake.
+INCLUDE_DIRECTORIES(${LIBCURL_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${LIBCURL_BINARY_DIR})
+
 OPTION(CMAKE_USE_OPENSSL "Use OpenSSL code with curl." OFF)
 MARK_AS_ADVANCED(CMAKE_USE_OPENSSL)
 IF(CMAKE_USE_OPENSSL)
@@ -679,8 +684,6 @@ INCLUDE(CMake/OtherTests.cmake)
 
 # The rest of the build
 
-INCLUDE_DIRECTORIES(${LIBCURL_SOURCE_DIR})
-INCLUDE_DIRECTORIES(${LIBCURL_BINARY_DIR})
 OPTION(CMAKE_BUILD_CURL_SHARED "Should curl be built shared" TRUE)
 IF(CMAKE_BUILD_CURL_SHARED)
   SET(LIBRARY_TYPE SHARED)
