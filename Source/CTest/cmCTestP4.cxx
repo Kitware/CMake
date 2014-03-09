@@ -346,10 +346,10 @@ void cmCTestP4::SetP4Options(std::vector<char const*> &CommandOptions)
     //The CTEST_P4_OPTIONS variable adds additional Perforce command line
     //options before the main command
     std::string opts = this->CTest->GetCTestConfiguration("P4Options");
-    std::vector<cmStdString> args =
+    std::vector<std::string> args =
             cmSystemTools::ParseArguments(opts.c_str());
 
-    for(std::vector<cmStdString>::const_iterator ai = args.begin();
+    for(std::vector<std::string>::const_iterator ai = args.begin();
         ai != args.end(); ++ai)
       {
       P4Options.push_back(ai->c_str());
@@ -538,8 +538,8 @@ bool cmCTestP4::UpdateImpl()
     {
     opts = this->CTest->GetCTestConfiguration("P4UpdateOptions");
     }
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(opts.c_str());
-  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  for(std::vector<std::string>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     p4_sync.push_back(ai->c_str());

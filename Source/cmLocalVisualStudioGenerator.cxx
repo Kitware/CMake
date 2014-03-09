@@ -33,7 +33,7 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
-                                                   const char* config,
+                                                   const std::string& config,
                                                    bool isFortran)
 {
   cmsys::auto_ptr<cmCustomCommand> pcc;
@@ -80,8 +80,8 @@ const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 std::string
 cmLocalVisualStudioGenerator
 ::ConstructScript(cmCustomCommand const& cc,
-                  const char* configName,
-                  const char* newline_text)
+                  const std::string& configName,
+                  const std::string& newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();
   const char* workingDirectory = cc.GetWorkingDirectory();
@@ -89,7 +89,7 @@ cmLocalVisualStudioGenerator
   RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;
 
   // Avoid leading or trailing newlines.
-  const char* newline = "";
+  std::string newline = "";
 
   // Line to check for error between commands.
   std::string check_error = newline_text;

@@ -55,10 +55,7 @@ bool cmOptionCommand
       it.SetProperty("HELPSTRING", args[1].c_str());
       return true;
       }
-    if ( it.GetValue() )
-      {
-      initialValue = it.GetValue();
-      }
+    initialValue = it.GetValue();
     }
   if(args.size() == 3)
     {

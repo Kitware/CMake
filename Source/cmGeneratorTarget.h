@@ -27,9 +27,9 @@ public:
   cmGeneratorTarget(cmTarget*);
 
   int GetType() const;
-  const char *GetName() const;
-  const char *GetProperty(const char *prop) const;
-  bool GetPropertyAsBool(const char *prop) const;
+  std::string GetName() const;
+  const char *GetProperty(const std::string& prop) const;
+  bool GetPropertyAsBool(const std::string& prop) const;
   void GetSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   void GetObjectSources(std::vector<cmSourceFile*> &) const;
@@ -61,7 +61,7 @@ public:
 
   void UseObjectLibraries(std::vector<std::string>& objs) const;
 
-  void GetAppleArchs(const char* config,
+  void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
 
   ///! Return the rule variable used to create this type of target,
@@ -69,12 +69,14 @@ public:
   const char* GetCreateRuleVariable() const;
 
   /** Get the include directories for this target.  */
-  std::vector<std::string> GetIncludeDirectories(const char *config) const;
+  std::vector<std::string> GetIncludeDirectories(
+      const std::string& config) const;
 
-  bool IsSystemIncludeDirectory(const char *dir, const char *config) const;
+  bool IsSystemIncludeDirectory(const std::string& dir,
+                                const std::string& config) const;
 
   /** Add the target output files to the global generator manifest.  */
-  void GenerateTargetManifest(const char* config) const;
+  void GenerateTargetManifest(const std::string& config) const;
 
   /**
    * Trace through the source files in this target and add al source files

@@ -16,8 +16,9 @@
 
 //----------------------------------------------------------------------------
 bool cmTargetPropCommandBase
-::HandleArguments(std::vector<std::string> const& args, const char *prop,
-                 ArgumentFlags flags)
+::HandleArguments(std::vector<std::string> const& args,
+                  const std::string& prop,
+                  ArgumentFlags flags)
 {
   if(args.size() < 2)
     {
@@ -33,7 +34,7 @@ bool cmTargetPropCommandBase
     }
   this->Target =
     this->Makefile->GetCMakeInstance()
-    ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
+    ->GetGlobalGenerator()->FindTarget(args[0].c_str());
   if(!this->Target)
     {
     this->Target = this->Makefile->FindTargetToUse(args[0]);

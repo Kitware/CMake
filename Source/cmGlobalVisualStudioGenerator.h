@@ -99,22 +99,23 @@ protected:
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   virtual bool ComputeTargetDepends();
-  class VSDependSet: public std::set<cmStdString> {};
+  class VSDependSet: public std::set<std::string> {};
   class VSDependMap: public std::map<cmTarget const*, VSDependSet> {};
   VSDependMap VSTargetDepends;
   void ComputeVSTargetDepends(cmTarget&);
 
-  bool CheckTargetLinks(cmTarget& target, const char* name);
-  std::string GetUtilityForTarget(cmTarget& target, const char*);
+  bool CheckTargetLinks(cmTarget& target, const std::string& name);
+  std::string GetUtilityForTarget(cmTarget& target, const std::string&);
   virtual std::string WriteUtilityDepend(cmTarget const*) = 0;
   std::string GetUtilityDepend(cmTarget const* target);
-  typedef std::map<cmTarget const*, cmStdString> UtilityDependsMap;
+  typedef std::map<cmTarget const*, std::string> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
-  const char* AdditionalPlatformDefinition;
+  std::string AdditionalPlatformDefinition;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;
-  void PrintCompilerAdvice(std::ostream&, std::string, const char*) const {}
+  void PrintCompilerAdvice(std::ostream&, std::string const&,
+                           const char*) const {}
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void FollowLinkDepends(cmTarget const* target,

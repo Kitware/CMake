@@ -35,7 +35,7 @@ public:
   // used by cmVisualStudioGeneratorOptions
   void WritePlatformConfigTag(
     const char* tag,
-    const char* config,
+    const std::string& config,
     int indentLevel,
     const char* attribute = 0,
     const char* end = 0,
@@ -98,7 +98,7 @@ private:
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;
-  typedef std::map<cmStdString, Options*> OptionsMap;
+  typedef std::map<std::string, Options*> OptionsMap;
   OptionsMap ClOptions;
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
@@ -113,7 +113,7 @@ private:
   cmLocalVisualStudio7Generator* LocalGenerator;
   std::set<cmSourceFile*> SourcesVisited;
 
-  typedef std::map<cmStdString, ToolSources> ToolSourceMap;
+  typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;
 };
 

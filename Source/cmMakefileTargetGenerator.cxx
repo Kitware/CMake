@@ -133,7 +133,8 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
      this->Makefile->GetProperty
      ("ADDITIONAL_MAKE_CLEAN_FILES"))
     {
-    const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    const std::string& config =
+      this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
     cmListFileBacktrace lfbt;
     cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
@@ -342,21 +343,21 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   this->Target->GetLanguages(languages);
   // put the compiler in the rules.make file so that if it changes
   // things rebuild
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
-    cmStdString compiler = "CMAKE_";
+    std::string compiler = "CMAKE_";
     compiler += *l;
     compiler += "_COMPILER";
     *this->FlagFileStream << "# compile " << l->c_str() << " with " <<
       this->Makefile->GetSafeDefinition(compiler.c_str()) << "\n";
     }
 
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
     *this->FlagFileStream << *l << "_FLAGS = " << this->GetFlags(*l) << "\n\n";
@@ -422,8 +423,9 @@ cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
 void cmMakefileTargetGenerator::WriteObjectRuleFiles(cmSourceFile& source)
 {
   // Identify the language of the source file.
-  const char* lang = this->LocalGenerator->GetSourceFileLanguage(source);
-  if(!lang)
+  const std::string& lang =
+    this->LocalGenerator->GetSourceFileLanguage(source);
+  if(lang.empty())
     {
     // don't know anything about this file so skip it
     return;
@@ -523,7 +525,7 @@ cmMakefileTargetGenerator
 void
 cmMakefileTargetGenerator
 ::WriteObjectBuildFile(std::string &obj,
-                       const char *lang,
+                       const std::string& lang,
                        cmSourceFile& source,
                        std::vector<std::string>& depends)
 {
@@ -552,7 +554,7 @@ cmMakefileTargetGenerator
     cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
 
   // Add Fortran format flags.
-  if(strcmp(lang, "Fortran") == 0)
+  if(lang == "Fortran")
     {
     this->AppendFortranFormatFlags(flags, source);
     }
@@ -664,7 +666,7 @@ cmMakefileTargetGenerator
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_COMPILE";
   vars.CMTarget = this->Target;
-  vars.Language = lang;
+  vars.Language = lang.c_str();
   vars.Target = targetOutPathReal.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
   vars.TargetCompilePDB = targetOutPathCompilePDB.c_str();
@@ -689,8 +691,7 @@ cmMakefileTargetGenerator
 
   vars.Defines = definesString.c_str();
 
-  bool lang_is_c_or_cxx = ((strcmp(lang, "C") == 0) ||
-                           (strcmp(lang, "CXX") == 0));
+  bool lang_is_c_or_cxx = ((lang == "C") || (lang == "CXX"));
 
   // Construct the compile rules.
   {
@@ -1070,7 +1071,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
     << "set(CMAKE_C_TARGET_INCLUDE_PATH\n";
   std::vector<std::string> includes;
 
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
                                               this->GeneratorTarget,
                                               "C", config);
@@ -1347,7 +1349,7 @@ cmMakefileTargetGenerator
   // Write a make variable assignment that lists all objects for the
   // target.
   variableName =
-    this->LocalGenerator->CreateMakeVariable(this->Target->GetName(),
+    this->LocalGenerator->CreateMakeVariable(this->Target->GetName().c_str(),
                                              "_OBJECTS");
   *this->BuildFileStream
     << "# Object files for target " << this->Target->GetName() << "\n"
@@ -1382,7 +1384,7 @@ cmMakefileTargetGenerator
   // Write a make variable assignment that lists all external objects
   // for the target.
   variableNameExternal =
-    this->LocalGenerator->CreateMakeVariable(this->Target->GetName(),
+    this->LocalGenerator->CreateMakeVariable(this->Target->GetName().c_str(),
                                              "_EXTERNAL_OBJECTS");
   *this->BuildFileStream
     << "\n"
@@ -1494,8 +1496,9 @@ cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
-                                                      bool relink)
+void cmMakefileTargetGenerator::WriteTargetDriverRule(
+                                                const std::string& main_output,
+                                                bool relink)
 {
   // Compute the name of the driver target.
   std::string dir =
@@ -1508,10 +1511,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
 
   // Build the list of target outputs to drive.
   std::vector<std::string> depends;
-  if(main_output)
-    {
-    depends.push_back(main_output);
-    }
+  depends.push_back(main_output);
 
   const char* comment = 0;
   if(relink)
@@ -1531,7 +1531,7 @@ void cmMakefileTargetGenerator::WriteTargetDriverRule(const char* main_output,
       }
 
     // Make sure the extra files are built.
-    for(std::set<cmStdString>::const_iterator i = this->ExtraFiles.begin();
+    for(std::set<std::string>::const_iterator i = this->ExtraFiles.begin();
         i != this->ExtraFiles.end(); ++i)
       {
       depends.push_back(*i);
@@ -1561,13 +1561,14 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
     return std::string();
     }
 
- std::set<cmStdString> emitted;
+ std::set<std::string> emitted;
 #ifdef __APPLE__  /* don't insert this when crosscompiling e.g. to iphone */
   emitted.insert("/System/Library/Frameworks");
 #endif
   std::vector<std::string> includes;
 
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
                                               this->GeneratorTarget,
                                               "C", config);
@@ -1682,7 +1683,8 @@ void cmMakefileTargetGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmMakefileTargetGenerator::GetLinkRule(const char* linkRuleVar)
+std::string cmMakefileTargetGenerator::GetLinkRule(
+                                              const std::string& linkRuleVar)
 {
   std::string linkRule = this->Makefile->GetRequiredDefinition(linkRuleVar);
   if(this->Target->HasImplibGNUtoMS())
@@ -1708,8 +1710,8 @@ void cmMakefileTargetGenerator
 }
 
 void cmMakefileTargetGenerator::RemoveForbiddenFlags(const char* flagVar,
-                                                     const char* linkLang,
-                                                     std::string& linkFlags)
+                                                const std::string& linkLang,
+                                                std::string& linkFlags)
 {
   // check for language flags that are not allowed at link time, and
   // remove them, -w on darwin for gcc -w -dynamiclib sends -w to libtool
@@ -1942,7 +1944,7 @@ cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
-                                                const char* lang)
+                                                const std::string& lang)
 {
   std::string responseVar = "CMAKE_";
   responseVar += lang;
@@ -1951,7 +1953,8 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
 
   std::vector<std::string> includes;
-  const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   this->LocalGenerator->GetIncludeDirectories(includes,
                                               this->GeneratorTarget,
                                               lang, config);
@@ -2058,7 +2061,8 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
      this->Makefile->GetDefinition("CMAKE_Fortran_MODPATH_FLAG"))
     {
     std::vector<std::string> includes;
-    const char *config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    const std::string& config =
+      this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
     this->LocalGenerator->GetIncludeDirectories(includes,
                                                 this->GeneratorTarget,
                                                 "C", config);
@@ -2099,20 +2103,20 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 }
 
 //----------------------------------------------------------------------------
-const char* cmMakefileTargetGenerator::GetFeature(const char* feature)
+const char* cmMakefileTargetGenerator::GetFeature(const std::string& feature)
 {
   return this->Target->GetFeature(feature, this->ConfigName);
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefileTargetGenerator::GetFeatureAsBool(const char* feature)
+bool cmMakefileTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
   return cmSystemTools::IsOn(this->GetFeature(feature));
 }
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddFeatureFlags(
-  std::string& flags, const char* lang
+  std::string& flags, const std::string& lang
   )
 {
   // Add language-specific flags.

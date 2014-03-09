@@ -64,7 +64,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return this->Args[0].c_str(); }
+  virtual std::string GetName() const { return this->Args[0]; }
 
   cmTypeMacro(cmFunctionHelperCommand, cmCommand);
 

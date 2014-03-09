@@ -125,19 +125,16 @@ void cmMakefileLibraryTargetGenerator::WriteObjectLibraryRules()
                                       depends, commands, true);
 
   // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(this->Target->GetName(), false);
+  this->WriteTargetDriverRule(this->Target->GetName().c_str(), false);
 }
 
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteStaticLibraryRules()
 {
-  const char* linkLanguage =
+  std::string linkLanguage =
     this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
-  if (linkLanguage)
-    {
-    linkRuleVar += linkLanguage;
-    }
+  linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_STATIC_LIBRARY";
 
   if(this->GetFeatureAsBool("INTERPROCEDURAL_OPTIMIZATION") &&
@@ -160,13 +157,10 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
     this->WriteFrameworkRules(relink);
     return;
     }
-  const char* linkLanguage =
+  std::string linkLanguage =
     this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
-  if (linkLanguage)
-    {
-    linkRuleVar += linkLanguage;
-    }
+  linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_SHARED_LIBRARY";
 
   std::string extraFlags;
@@ -187,13 +181,10 @@ void cmMakefileLibraryTargetGenerator::WriteSharedLibraryRules(bool relink)
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 {
-  const char* linkLanguage =
+  std::string linkLanguage =
     this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
-  if (linkLanguage)
-    {
-    linkRuleVar += linkLanguage;
-    }
+  linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_SHARED_MODULE";
 
   std::string extraFlags;
@@ -213,13 +204,10 @@ void cmMakefileLibraryTargetGenerator::WriteModuleLibraryRules(bool relink)
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 {
-  const char* linkLanguage =
+  std::string linkLanguage =
     this->Target->GetLinkerLanguage(this->ConfigName);
   std::string linkRuleVar = "CMAKE_";
-  if (linkLanguage)
-    {
-    linkRuleVar += linkLanguage;
-    }
+  linkRuleVar += linkLanguage;
   linkRuleVar += "_CREATE_MACOSX_FRAMEWORK";
 
   std::string extraFlags;
@@ -237,7 +225,7 @@ void cmMakefileLibraryTargetGenerator::WriteFrameworkRules(bool relink)
 
 //----------------------------------------------------------------------------
 void cmMakefileLibraryTargetGenerator::WriteLibraryRules
-(const char* linkRuleVar, const char* extraFlags, bool relink)
+(const std::string& linkRuleVar, const std::string& extraFlags, bool relink)
 {
   // TODO: Merge the methods that call this method to avoid
   // code duplication.
@@ -248,20 +236,20 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   this->AppendLinkDepends(depends);
 
   // Get the language to use for linking this library.
-  const char* linkLanguage =
+  std::string linkLanguage =
     this->Target->GetLinkerLanguage(this->ConfigName);
 
   // Make sure we have a link language.
-  if(!linkLanguage)
+  if(linkLanguage.empty())
     {
     cmSystemTools::Error("Cannot determine link language for target \"",
-                         this->Target->GetName(), "\".");
+                         this->Target->GetName().c_str(), "\".");
     return;
     }
 
   // Create set of linking flags.
   std::string linkFlags;
-  this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
+  this->LocalGenerator->AppendFlags(linkFlags, extraFlags.c_str());
 
   // Add OSX version flags, if any.
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -589,7 +577,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   vars.RuleLauncher = "RULE_LAUNCH_LINK";
   vars.CMTarget = this->Target;
-  vars.Language = linkLanguage;
+  vars.Language = linkLanguage.c_str();
   vars.Objects = buildObjs.c_str();
   std::string objectDir = this->Target->GetSupportDirectory();
   objectDir = this->Convert(objectDir.c_str(),
@@ -786,7 +774,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 //----------------------------------------------------------------------------
 void
 cmMakefileLibraryTargetGenerator
-::AppendOSXVerFlag(std::string& flags, const char* lang,
+::AppendOSXVerFlag(std::string& flags, const std::string& lang,
                    const char* name, bool so)
 {
   // Lookup the flag to specify the version.

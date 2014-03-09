@@ -132,7 +132,7 @@ bool cmCTestGlobalVC::WriteXMLUpdates(std::ostream& xml)
 
   this->WriteXMLGlobal(xml);
 
-  for(std::map<cmStdString, Directory>::const_iterator
+  for(std::map<std::string, Directory>::const_iterator
         di = this->Dirs.begin(); di != this->Dirs.end(); ++di)
     {
     this->WriteXMLDirectory(xml, di->first, di->second);

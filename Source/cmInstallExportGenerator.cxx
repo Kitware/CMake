@@ -142,7 +142,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   this->EFGen->SetExportOld(this->ExportOld);
   if(this->ConfigurationTypes->empty())
     {
-    if(this->ConfigurationName && *this->ConfigurationName)
+    if(!this->ConfigurationName.empty())
       {
       this->EFGen->AddConfiguration(this->ConfigurationName);
       }
@@ -177,7 +177,7 @@ cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
   // Now create a configuration-specific install rule for the import
   // file of each configuration.
   std::vector<std::string> files;
-  for(std::map<cmStdString, cmStdString>::const_iterator
+  for(std::map<std::string, std::string>::const_iterator
         i = this->EFGen->GetConfigImportFiles().begin();
       i != this->EFGen->GetConfigImportFiles().end(); ++i)
     {

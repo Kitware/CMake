@@ -160,14 +160,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                   cmLocalGenerator::SHELL);
 
   // Get the language to use for linking this executable.
-  const char* linkLanguage =
+  std::string linkLanguage =
     this->Target->GetLinkerLanguage(this->ConfigName);
 
   // Make sure we have a link language.
-  if(!linkLanguage)
+  if(linkLanguage.empty())
     {
     cmSystemTools::Error("Cannot determine link language for target \"",
-                         this->Target->GetName(), "\".");
+                         this->Target->GetName().c_str(), "\".");
     return;
     }
 
@@ -348,7 +348,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   cmLocalGenerator::RuleVariables vars;
   vars.RuleLauncher = "RULE_LAUNCH_LINK";
   vars.CMTarget = this->Target;
-  vars.Language = linkLanguage;
+  vars.Language = linkLanguage.c_str();
   vars.Objects = buildObjs.c_str();
   std::string objectDir = this->Target->GetSupportDirectory();
   objectDir = this->Convert(objectDir.c_str(),

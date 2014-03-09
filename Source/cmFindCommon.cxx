@@ -374,7 +374,7 @@ void cmFindCommon::AddUserPath(std::string const& p,
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddCMakePath(const char* variable)
+void cmFindCommon::AddCMakePath(const std::string& variable)
 {
   // Get a path from a CMake variable.
   if(const char* varPath = this->Makefile->GetDefinition(variable))

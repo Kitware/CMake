@@ -268,7 +268,7 @@ void cmFindBase::AddPrefixPaths(std::vector<std::string> const& in_paths,
 }
 
 //----------------------------------------------------------------------------
-void cmFindBase::AddCMakePrefixPath(const char* variable)
+void cmFindBase::AddCMakePrefixPath(const std::string& variable)
 {
   // Get a path from a CMake variable.
   if(const char* varPath = this->Makefile->GetDefinition(variable))
@@ -280,11 +280,11 @@ void cmFindBase::AddCMakePrefixPath(const char* variable)
 }
 
 //----------------------------------------------------------------------------
-void cmFindBase::AddEnvPrefixPath(const char* variable)
+void cmFindBase::AddEnvPrefixPath(const std::string& variable)
 {
   // Get a path from the environment.
   std::vector<std::string> tmp;
-  cmSystemTools::GetPath(tmp, variable);
+  cmSystemTools::GetPath(tmp, variable.c_str());
   this->AddPrefixPaths(tmp, EnvPath);
 }
 

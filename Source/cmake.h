@@ -91,7 +91,7 @@ class cmake
      */
     FIND_PACKAGE_MODE
   };
-  typedef std::map<cmStdString, cmCommand*> RegisteredCommandsMap;
+  typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
 
   /// Default constructor
   cmake();
@@ -110,12 +110,12 @@ class cmake
    * CMakeLists files by recursing up the tree starting at the StartDirectory
    * and going up until it reaches the HomeDirectory.
    */
-  void SetHomeDirectory(const char* dir);
+  void SetHomeDirectory(const std::string& dir);
   const char* GetHomeDirectory() const
     {
     return this->cmHomeDirectory.c_str();
     }
-  void SetHomeOutputDirectory(const char* lib);
+  void SetHomeOutputDirectory(const std::string& lib);
   const char* GetHomeOutputDirectory() const
     {
     return this->HomeOutputDirectory.c_str();
@@ -130,7 +130,7 @@ class cmake
    * recursing up the tree starting at the StartDirectory and going up until
    * it reaches the HomeDirectory.
    */
-  void SetStartDirectory(const char* dir)
+  void SetStartDirectory(const std::string& dir)
     {
       this->cmStartDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
@@ -139,7 +139,7 @@ class cmake
     {
       return this->cmStartDirectory.c_str();
     }
-  void SetStartOutputDirectory(const char* lib)
+  void SetStartOutputDirectory(const std::string& lib)
     {
       this->StartOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
@@ -175,7 +175,7 @@ class cmake
   void PreLoadCMakeFiles();
 
   ///! Create a GlobalGenerator
-  cmGlobalGenerator* CreateGlobalGenerator(const char* name);
+  cmGlobalGenerator* CreateGlobalGenerator(const std::string& name);
 
   ///! Return the global generator assigned to this instance of cmake
   cmGlobalGenerator* GetGlobalGenerator()     { return this->GlobalGenerator; }
@@ -203,9 +203,9 @@ class cmake
   /**
    * Given a variable name, return its value (as a string).
    */
-  const char* GetCacheDefinition(const char*) const;
+  const char* GetCacheDefinition(const std::string&) const;
   ///! Add an entry into the cache
-  void AddCacheEntry(const char* key, const char* value,
+  void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString,
                      int type);
 
@@ -218,20 +218,20 @@ class cmake
    * Add a command to this cmake instance
    */
   void AddCommand(cmCommand* );
-  void RenameCommand(const char* oldName, const char* newName);
-  void RemoveCommand(const char* name);
+  void RenameCommand(const std::string& oldName, const std::string& newName);
+  void RemoveCommand(const std::string& name);
   void RemoveUnscriptableCommands();
 
   /**
    * Get a command by its name
    */
-  cmCommand *GetCommand(const char *name);
+  cmCommand *GetCommand(const std::string& name);
 
   /** Get list of all commands */
   RegisteredCommandsMap* GetCommands() { return &this->Commands; }
 
   /** Check if a command exists. */
-  bool CommandExists(const char* name) const;
+  bool CommandExists(const std::string& name) const;
 
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&,
@@ -269,11 +269,13 @@ class cmake
   void GetGeneratorDocumentation(std::vector<cmDocumentationEntry>&);
 
   ///! Set/Get a property of this target file
-  void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char *prop, const char *value,bool asString=false);
-  const char *GetProperty(const char *prop);
-  const char *GetProperty(const char *prop, cmProperty::ScopeType scope);
-  bool GetPropertyAsBool(const char *prop);
+  void SetProperty(const std::string& prop, const char *value);
+  void AppendProperty(const std::string& prop,
+                      const char *value,bool asString=false);
+  const char *GetProperty(const std::string& prop);
+  const char *GetProperty(const std::string& prop,
+                          cmProperty::ScopeType scope);
+  bool GetPropertyAsBool(const std::string& prop);
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; };
@@ -317,18 +319,18 @@ class cmake
   void MarkCliAsUsed(const std::string& variable);
 
   // Define a property
-  void DefineProperty(const char *name, cmProperty::ScopeType scope,
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
                       bool chain = false);
 
   // get property definition
   cmPropertyDefinition *GetPropertyDefinition
-  (const char *name, cmProperty::ScopeType scope);
+  (const std::string& name, cmProperty::ScopeType scope);
 
   // Is a property defined?
-  bool IsPropertyDefined(const char *name, cmProperty::ScopeType scope);
-  bool IsPropertyChained(const char *name, cmProperty::ScopeType scope);
+  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
+  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
 
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/
@@ -355,21 +357,21 @@ class cmake
             const std::vector<std::string>& nativeOptions,
             bool clean);
 
-  void UnwatchUnusedCli(const char* var);
-  void WatchUnusedCli(const char* var);
+  void UnwatchUnusedCli(const std::string& var);
+  void WatchUnusedCli(const std::string& var);
 protected:
   void RunCheckForUnusedVariables();
   void InitializeProperties();
-  int HandleDeleteCacheVariables(const char* var);
+  int HandleDeleteCacheVariables(const std::string& var);
   cmPropertyMap Properties;
-  std::set<std::pair<cmStdString,cmProperty::ScopeType> > AccessedProperties;
+  std::set<std::pair<std::string,cmProperty::ScopeType> > AccessedProperties;
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>
   PropertyDefinitions;
 
   typedef
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
-  typedef std::map<cmStdString,
+  typedef std::map<std::string,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
   typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
   RegisteredCommandsMap Commands;
@@ -378,7 +380,7 @@ protected:
   void AddDefaultCommands();
   void AddDefaultGenerators();
   void AddDefaultExtraGenerators();
-  void AddExtraGenerator(const char* name,
+  void AddExtraGenerator(const std::string& name,
                          CreateExtraGeneratorFunctionType newFunction);
 
   cmPolicies *Policies;
@@ -430,7 +432,7 @@ private:
   bool WarnUnused;
   bool WarnUnusedCli;
   bool CheckSystemVars;
-  std::map<cmStdString, bool> UsedCliVariables;
+  std::map<std::string, bool> UsedCliVariables;
   std::string CMakeEditCommand;
   std::string CXXEnvironment;
   std::string CCEnvironment;

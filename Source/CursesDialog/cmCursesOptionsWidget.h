@@ -25,7 +25,7 @@ public:
   // when this widget has focus. Returns true if the input was
   // handled.
   virtual bool HandleInput(int& key, cmCursesMainForm* fm, WINDOW* w);
-  void SetOption(const char*);
+  void SetOption(const std::string&);
   void AddOption(std::string const &);
   void NextOption();
   void PreviousOption();

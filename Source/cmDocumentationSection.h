@@ -34,8 +34,8 @@ public:
   void Clear() { this->Entries.clear(); }
 
   /** Return the name of this section. */
-  const char* GetName() const
-  { return this->Name.c_str(); }
+  std::string GetName() const
+  { return this->Name; }
 
   /** Return a pointer to the first entry of this section. */
   const std::vector<cmDocumentationEntry> &GetEntries() const

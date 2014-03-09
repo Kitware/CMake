@@ -45,7 +45,7 @@ cmExtraEclipseCDT4Generator
 
 //----------------------------------------------------------------------------
 void cmExtraEclipseCDT4Generator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates Eclipse CDT 4.0 project files.";
@@ -624,7 +624,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
   this->AppendLinkedResource(fout, "[Subprojects]",
                              "virtual:/virtual", VirtualFolder);
 
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it != this->GlobalGenerator->GetProjectMap().end();
        ++it)

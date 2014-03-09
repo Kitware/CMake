@@ -49,10 +49,10 @@ bool cmGetCMakePropertyCommand
     }
   else if ( args[1] == "COMPONENTS" )
     {
-    const std::set<cmStdString>* components
+    const std::set<std::string>* components
       = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
         ->GetInstallComponents();
-    std::set<cmStdString>::const_iterator compIt;
+    std::set<std::string>::const_iterator compIt;
     output = "";
     for (compIt = components->begin(); compIt != components->end(); ++compIt)
       {

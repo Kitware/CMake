@@ -22,14 +22,15 @@ class cmGeneratorExpression;
 class cmCustomCommandGenerator
 {
   cmCustomCommand const& CC;
-  const char* Config;
+  std::string Config;
   cmMakefile* Makefile;
   cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;
   cmGeneratorExpression* GE;
 public:
-  cmCustomCommandGenerator(cmCustomCommand const& cc, const char* config,
+  cmCustomCommandGenerator(cmCustomCommand const& cc,
+                           const std::string& config,
                            cmMakefile* mf);
   ~cmCustomCommandGenerator();
   unsigned int GetNumberOfCommands() const;

@@ -35,7 +35,7 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
   , TargetNameReal()
   , TargetNameImport()
   , TargetNamePDB()
-  , TargetLinkLanguage(0)
+  , TargetLinkLanguage("")
 {
   this->TargetLinkLanguage = target->Target
                                    ->GetLinkerLanguage(this->GetConfigName());
@@ -72,10 +72,10 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 
 void cmNinjaNormalTargetGenerator::Generate()
 {
-  if (!this->TargetLinkLanguage) {
+  if (this->TargetLinkLanguage.empty()) {
     cmSystemTools::Error("CMake can not determine linker language for "
                          "target: ",
-                         this->GetTarget()->GetName());
+                         this->GetTarget()->GetName().c_str());
     return;
   }
 
@@ -109,9 +109,9 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
     << "\n\n";
 #endif
 
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   this->GetTarget()->GetLanguages(languages);
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end();
       ++l)
     this->WriteLanguageRules(*l);
@@ -140,7 +140,7 @@ std::string
 cmNinjaNormalTargetGenerator
 ::LanguageLinkerRule() const
 {
-  return std::string(this->TargetLinkLanguage)
+  return this->TargetLinkLanguage
     + "_"
     + cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
     + "_LINKER";
@@ -163,7 +163,7 @@ cmNinjaNormalTargetGenerator
     cmLocalGenerator::RuleVariables vars;
     vars.RuleLauncher = "RULE_LAUNCH_LINK";
     vars.CMTarget = this->GetTarget();
-    vars.Language = this->TargetLinkLanguage;
+    vars.Language = this->TargetLinkLanguage.c_str();
 
     std::string responseFlag;
     if (!useResponseFile) {

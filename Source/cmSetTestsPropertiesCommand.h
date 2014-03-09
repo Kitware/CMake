@@ -32,11 +32,11 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "set_tests_properties";}
+  virtual std::string GetName() const { return "set_tests_properties";}
 
   cmTypeMacro(cmSetTestsPropertiesCommand, cmCommand);
 
-  static bool SetOneTest(const char *tname,
+  static bool SetOneTest(const std::string& tname,
                          std::vector<std::string> &propertyPairs,
                          cmMakefile *mf,
                          std::string &errors);

@@ -22,7 +22,7 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
-  this->AdditionalPlatformDefinition = NULL;
+  this->AdditionalPlatformDefinition = "";
 }
 
 //----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ void cmGlobalVisualStudioGenerator::Generate()
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
@@ -128,7 +128,7 @@ cmGlobalVisualStudioGenerator
 
   // Count the number of object files with each name.  Note that
   // windows file names are not case sensitive.
-  std::map<cmStdString, int> counts;
+  std::map<std::string, int> counts;
   std::vector<cmSourceFile*> objectSources;
   gt->GetObjectSources(objectSources);
   for(std::vector<cmSourceFile*>::const_iterator
@@ -380,7 +380,7 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
     {
     return false;
     }
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
@@ -518,7 +518,7 @@ void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  if(this->AdditionalPlatformDefinition)
+  if(!this->AdditionalPlatformDefinition.empty())
     {
     mf->AddDefinition(this->AdditionalPlatformDefinition, "TRUE");
     }
@@ -852,7 +852,7 @@ bool
 cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 {
   // check to see if this is a fortran build
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   target.GetLanguages(languages);
   if(languages.size() == 1)
     {
@@ -870,15 +870,15 @@ cmGlobalVisualStudioGenerator::TargetCompare
 ::operator()(cmTarget const* l, cmTarget const* r) const
 {
   // Make sure ALL_BUILD is first so it is the default active project.
-  if(strcmp(r->GetName(), "ALL_BUILD") == 0)
+  if(r->GetName() == "ALL_BUILD")
     {
     return false;
     }
-  if(strcmp(l->GetName(), "ALL_BUILD") == 0)
+  if(l->GetName() == "ALL_BUILD")
     {
     return true;
     }
-  return strcmp(l->GetName(), r->GetName()) < 0;
+  return strcmp(l->GetName().c_str(), r->GetName().c_str()) < 0;
 }
 
 //----------------------------------------------------------------------------

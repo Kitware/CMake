@@ -39,7 +39,7 @@ bool cmTargetLinkLibrariesCommand
   // Lookup the target for which libraries are specified.
   this->Target =
     this->Makefile->GetCMakeInstance()
-    ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
+    ->GetGlobalGenerator()->FindTarget(args[0].c_str());
   if(!this->Target)
     {
     cmake::MessageType t = cmake::FATAL_ERROR;  // fail by default
@@ -272,7 +272,7 @@ bool cmTargetLinkLibrariesCommand
       {
       // The link type was specified by the previous argument.
       haveLLT = false;
-      if (!this->HandleLibrary(args[i].c_str(), llt))
+      if (!this->HandleLibrary(args[i], llt))
         {
         return false;
         }
@@ -301,7 +301,7 @@ bool cmTargetLinkLibrariesCommand
           llt = cmTarget::OPTIMIZED;
           }
         }
-      if (!this->HandleLibrary(args[i].c_str(), llt))
+      if (!this->HandleLibrary(args[i], llt))
         {
         return false;
         }
@@ -352,7 +352,7 @@ cmTargetLinkLibrariesCommand
 
 //----------------------------------------------------------------------------
 bool
-cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
+cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
                                             cmTarget::LinkLibraryType llt)
 {
   if(this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
@@ -479,13 +479,13 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       {
       prop = "LINK_INTERFACE_LIBRARIES_";
       prop += *i;
-      this->Target->AppendProperty(prop.c_str(), lib);
+      this->Target->AppendProperty(prop.c_str(), lib.c_str());
       }
     }
   if(llt == cmTarget::OPTIMIZED || llt == cmTarget::GENERAL)
     {
     // Put in the non-DEBUG configuration interfaces.
-    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib.c_str());
 
     // Make sure the DEBUG configuration interfaces exist so that the
     // general one will not be used as a fall-back.

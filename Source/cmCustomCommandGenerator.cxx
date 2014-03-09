@@ -18,7 +18,7 @@
 
 //----------------------------------------------------------------------------
 cmCustomCommandGenerator::cmCustomCommandGenerator(
-  cmCustomCommand const& cc, const char* config, cmMakefile* mf):
+  cmCustomCommand const& cc, const std::string& config, cmMakefile* mf):
   CC(cc), Config(config), Makefile(mf), LG(mf->GetLocalGenerator()),
   OldStyle(cc.GetEscapeOldStyle()), MakeVars(cc.GetEscapeAllowMakeVars()),
   GE(new cmGeneratorExpression(cc.GetBacktrace()))

@@ -46,8 +46,9 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
   return true;
 }
 
-std::string cmExportTryCompileFileGenerator::FindTargets(const char *propName,
-                                                cmTarget const* tgt,
+std::string cmExportTryCompileFileGenerator::FindTargets(
+                                          const std::string& propName,
+                                          cmTarget const* tgt,
                                           std::set<cmTarget const*> &emitted)
 {
   const char *prop = tgt->GetProperty(propName);

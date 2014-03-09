@@ -190,7 +190,7 @@ void cmLocalUnixMakefileGenerator3::AddLocalObjectFile(
 void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
                                             (std::vector<std::string>& targets)
 {
-  for (std::map<cmStdString, LocalObjectInfo>::iterator lo =
+  for (std::map<std::string, LocalObjectInfo>::iterator lo =
          this->LocalObjectFiles.begin();
        lo != this->LocalObjectFiles.end(); ++lo)
     {
@@ -235,7 +235,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   // only write local targets unless at the top Keep track of targets already
   // listed.
-  std::set<cmStdString> emittedTargets;
+  std::set<std::string> emittedTargets;
   if (this->Parent)
     {
     // write our targets, and while doing it collect up the object
@@ -256,7 +256,7 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
 
   // now write out the object rules
   // for each object file name
-  for (std::map<cmStdString, LocalObjectInfo>::iterator lo =
+  for (std::map<std::string, LocalObjectInfo>::iterator lo =
          this->LocalObjectFiles.begin();
        lo != this->LocalObjectFiles.end(); ++lo)
     {
@@ -371,7 +371,7 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3
 ::WriteLocalMakefileTargets(std::ostream& ruleFileStream,
-                            std::set<cmStdString> &emitted)
+                            std::set<std::string> &emitted)
 {
   std::vector<std::string> depends;
   std::vector<std::string> commands;
@@ -550,14 +550,14 @@ void
 cmLocalUnixMakefileGenerator3
 ::WriteMakeRule(std::ostream& os,
                 const char* comment,
-                const char* target,
+                const std::string& target,
                 const std::vector<std::string>& depends,
                 const std::vector<std::string>& commands,
                 bool symbolic,
                 bool in_help)
 {
   // Make sure there is a target.
-  if(!target || !*target)
+  if(target.empty())
     {
     cmSystemTools::Error("No target for WriteMakeRule! called with comment: ",
                          comment);
@@ -859,11 +859,11 @@ void cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::WriteConvenienceRule(std::ostream& ruleFileStream,
-                       const char* realTarget,
-                       const char* helpTarget)
+                       const std::string& realTarget,
+                       const std::string& helpTarget)
 {
   // A rule is only needed if the names are different.
-  if(strcmp(realTarget, helpTarget) != 0)
+  if(realTarget != helpTarget)
     {
     // The helper target depends on the real target.
     std::vector<std::string> depends;
@@ -1196,12 +1196,12 @@ cmLocalUnixMakefileGenerator3
   if(!filename)
     {
     // Get the set of source languages in the target.
-    std::set<cmStdString> languages;
+    std::set<std::string> languages;
     target.GetLanguages(languages);
     fout << "\n"
          << "# Per-language clean rules from dependency scanning.\n"
          << "foreach(lang";
-    for(std::set<cmStdString>::const_iterator l = languages.begin();
+    for(std::set<std::string>::const_iterator l = languages.begin();
         l != languages.end(); ++l)
       {
       fout << " " << *l;
@@ -1299,7 +1299,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::CreateMakeVariable(const char* sin, const char* s2in)
+::CreateMakeVariable(const std::string& sin, const std::string& s2in)
 {
   std::string s = sin;
   std::string s2 = s2in;
@@ -1317,7 +1317,7 @@ cmLocalUnixMakefileGenerator3
 
   // see if the variable has been defined before and return
   // the modified version of the variable
-  std::map<cmStdString, cmStdString>::iterator i =
+  std::map<std::string, std::string>::iterator i =
     this->MakeVariableMap.find(unmodified);
   if(i != this->MakeVariableMap.end())
     {
@@ -1721,7 +1721,7 @@ void cmLocalUnixMakefileGenerator3
         {
         text = "Running external command ...";
         }
-      std::set<cmStdString>::const_iterator dit;
+      std::set<std::string>::const_iterator dit;
       for ( dit = glIt->second.GetUtilities().begin();
          dit != glIt->second.GetUtilities().end();
         ++ dit )
@@ -2034,7 +2034,7 @@ void cmLocalUnixMakefileGenerator3::WriteDisclaimer(std::ostream& os)
 //----------------------------------------------------------------------------
 std::string
 cmLocalUnixMakefileGenerator3
-::GetRecursiveMakeCall(const char *makefile, const char* tgt)
+::GetRecursiveMakeCall(const char *makefile, const std::string& tgt)
 {
   // Call make on the given file.
   std::string cmd;
@@ -2059,7 +2059,7 @@ cmLocalUnixMakefileGenerator3
     }
 
   // Add the target.
-  if (tgt && tgt[0] != '\0')
+  if (!tgt.empty())
     {
     // The make target is always relative to the top of the build tree.
     std::string tgt2 = this->Convert(tgt, HOME_OUTPUT);
@@ -2198,7 +2198,7 @@ cmLocalUnixMakefileGenerator3::GetImplicitDepends(cmTarget const& tgt)
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3::AddImplicitDepends(cmTarget const& tgt,
-                                                  const char* lang,
+                                                  const std::string& lang,
                                                   const char* obj,
                                                   const char* src)
 {

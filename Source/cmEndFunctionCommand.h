@@ -52,7 +52,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "endfunction";}
+  virtual std::string GetName() const { return "endfunction";}
 
   cmTypeMacro(cmEndFunctionCommand, cmCommand);
 };

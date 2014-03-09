@@ -168,7 +168,7 @@ struct TagVisitor
         this->BadObjLibFiles.push_back(sf);
         }
       }
-    else if(sf->GetLanguage())
+    else if(!sf->GetLanguage().empty())
       {
       DoAccept<IsSameTag<Tag, ObjectSourcesTag>::Result>::Do(this->Data, sf);
       }
@@ -228,13 +228,13 @@ int cmGeneratorTarget::GetType() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetName() const
+std::string cmGeneratorTarget::GetName() const
 {
   return this->Target->GetName();
 }
 
 //----------------------------------------------------------------------------
-const char *cmGeneratorTarget::GetProperty(const char *prop) const
+const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
 {
   return this->Target->GetProperty(prop);
 }
@@ -252,7 +252,8 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
 }
 
 static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
-                                  const char *config, cmTarget *headTarget,
+                                  const std::string& config,
+                                  cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   std::vector<std::string>& result,
                                   bool excludeImported)
@@ -390,12 +391,12 @@ void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
-                                                 const char *config) const
+bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
+                                              const std::string& config) const
 {
   assert(this->GetType() != cmTarget::INTERFACE_LIBRARY);
   std::string config_upper;
-  if(config && *config)
+  if(!config.empty())
     {
     config_upper = cmSystemTools::UpperCase(config);
     }
@@ -422,7 +423,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
                 = this->Target->GetPropertyAsBool("NO_SYSTEM_FROM_IMPORTED");
 
     std::vector<std::string> result;
-    for (std::set<cmStdString>::const_iterator
+    for (std::set<std::string>::const_iterator
         it = this->Target->GetSystemIncludeDirectories().begin();
         it != this->Target->GetSystemIncludeDirectories().end(); ++it)
       {
@@ -462,7 +463,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
           }
         }
       }
-    std::set<cmStdString> unique;
+    std::set<std::string> unique;
     for(std::vector<std::string>::iterator li = result.begin();
         li != result.end(); ++li)
       {
@@ -470,7 +471,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
       unique.insert(*li);
       }
     result.clear();
-    for(std::set<cmStdString>::iterator li = unique.begin();
+    for(std::set<std::string>::iterator li = unique.begin();
         li != unique.end(); ++li)
       {
       result.push_back(*li);
@@ -486,7 +487,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const char *dir,
 }
 
 //----------------------------------------------------------------------------
-bool cmGeneratorTarget::GetPropertyAsBool(const char *prop) const
+bool cmGeneratorTarget::GetPropertyAsBool(const std::string& prop) const
 {
   return this->Target->GetPropertyAsBool(prop);
 }
@@ -594,7 +595,7 @@ private:
   SourceEntry* CurrentEntry;
   std::queue<cmSourceFile*> SourceQueue;
   std::set<cmSourceFile*> SourcesQueued;
-  typedef std::map<cmStdString, cmSourceFile*> NameMapType;
+  typedef std::map<std::string, cmSourceFile*> NameMapType;
   NameMapType NameMap;
 
   void QueueSource(cmSourceFile* sf);
@@ -742,7 +743,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         {
         // This is really only for compatibility so we do not need to
         // worry about configuration names and output names.
-        std::string tLocation = t->GetLocation(0);
+        std::string tLocation = t->GetLocationForBuild();
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         std::string depLocation = cmSystemTools::GetFilenamePath(dep);
         depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
@@ -802,7 +803,7 @@ cmTargetTraceDependencies
       {
       const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
                                                               = ge.Parse(*cli);
-      cge->Evaluate(this->Makefile, 0, true);
+      cge->Evaluate(this->Makefile, "", true);
       std::set<cmTarget*> geTargets = cge->GetTargets();
       for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
           it != geTargets.end(); ++it)
@@ -863,11 +864,11 @@ void cmGeneratorTarget::TraceDependencies()
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetAppleArchs(const char* config,
+void cmGeneratorTarget::GetAppleArchs(const std::string& config,
                              std::vector<std::string>& archVec) const
 {
   const char* archs = 0;
-  if(config && *config)
+  if(!config.empty())
     {
     std::string defVarName = "OSX_ARCHITECTURES_";
     defVarName += cmSystemTools::UpperCase(config);
@@ -904,13 +905,14 @@ const char* cmGeneratorTarget::GetCreateRuleVariable() const
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmGeneratorTarget::GetIncludeDirectories(const char *config) const
+cmGeneratorTarget::GetIncludeDirectories(const std::string& config) const
 {
   return this->Target->GetIncludeDirectories(config);
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
+void cmGeneratorTarget::GenerateTargetManifest(
+                                              const std::string& config) const
 {
   if (this->Target->IsImported())
     {
@@ -953,42 +955,42 @@ void cmGeneratorTarget::GenerateTargetManifest(const char* config) const
     f = dir;
     f += "/";
     f += name;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!soName.empty())
     {
     f = dir;
     f += "/";
     f += soName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!realName.empty())
     {
     f = dir;
     f += "/";
     f += realName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!pdbName.empty())
     {
     f = dir;
     f += "/";
     f += pdbName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
   if(!impName.empty())
     {
     f = this->Target->GetDirectory(config, true);
     f += "/";
     f += impName;
-    gg->AddToManifest(config? config:"", f);
+    gg->AddToManifest(config, f);
     }
 }
 
 bool cmStrictTargetComparison::operator()(cmTarget const* t1,
                                           cmTarget const* t2) const
 {
-  int nameResult = strcmp(t1->GetName(), t2->GetName());
+  int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
   if (nameResult == 0)
     {
     return strcmp(t1->GetMakefile()->GetStartOutputDirectory(),

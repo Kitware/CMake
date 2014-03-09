@@ -105,7 +105,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
                                       depends, commands, true);
 
   // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(this->Target->GetName(), false);
+  this->WriteTargetDriverRule(this->Target->GetName().c_str(), false);
 
   // Write clean target
   this->WriteTargetCleanRules();

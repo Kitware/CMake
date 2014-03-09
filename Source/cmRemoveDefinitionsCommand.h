@@ -42,7 +42,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "remove_definitions";}
+  virtual std::string GetName() const {return "remove_definitions";}
 
   cmTypeMacro(cmRemoveDefinitionsCommand, cmCommand);
 };

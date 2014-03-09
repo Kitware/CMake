@@ -90,7 +90,7 @@ public:
   /**
    * Initialize generator
    */
-  int Initialize(const char* name, cmMakefile* mf);
+  int Initialize(const std::string& name, cmMakefile* mf);
 
   /**
    * Construct generator
@@ -99,12 +99,12 @@ public:
   virtual ~cmCPackGenerator();
 
   //! Set and get the options
-  void SetOption(const char* op, const char* value);
-  void SetOptionIfNotSet(const char* op, const char* value);
-  const char* GetOption(const char* op) const;
+  void SetOption(const std::string& op, const char* value);
+  void SetOptionIfNotSet(const std::string& op, const char* value);
+  const char* GetOption(const std::string& op) const;
   std::vector<std::string> GetOptions() const;
-  bool IsSet(const char* name) const;
-  bool IsOn(const char* name) const;
+  bool IsSet(const std::string& name) const;
+  bool IsOn(const std::string& name) const;
 
   //! Set the logger
   void SetLogger(cmCPackLog* log) { this->Logger = log; }
@@ -190,13 +190,13 @@ protected:
 
   //! Run install commands if specified
   virtual int InstallProjectViaInstallCommands(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
   virtual int InstallProjectViaInstallScript(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
   virtual int InstallProjectViaInstalledDirectories(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
   virtual int InstallProjectViaInstallCMakeProjects(
-    bool setDestDir, const char* tempInstallDirectory);
+    bool setDestDir, const std::string& tempInstallDirectory);
 
   /**
    * The various level of support of
@@ -245,12 +245,14 @@ protected:
    * @return true if component installation is supported and wanted.
    */
   virtual bool WantsComponentInstallation() const;
-  virtual cmCPackInstallationType* GetInstallationType(const char *projectName,
-                                                       const char* name);
-  virtual cmCPackComponent* GetComponent(const char *projectName,
-                                         const char* name);
-  virtual cmCPackComponentGroup* GetComponentGroup(const char *projectName,
-                                                   const char* name);
+  virtual cmCPackInstallationType* GetInstallationType(
+                                                const std::string& projectName,
+                                                const std::string& name);
+  virtual cmCPackComponent* GetComponent(const std::string& projectName,
+                                         const std::string& name);
+  virtual cmCPackComponentGroup* GetComponentGroup(
+                                                const std::string& projectName,
+                                                const std::string& name);
 
   cmSystemTools::OutputOption GeneratorVerbose;
   std::string Name;

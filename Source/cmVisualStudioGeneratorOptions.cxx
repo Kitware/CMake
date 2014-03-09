@@ -222,7 +222,7 @@ cmVisualStudioGeneratorOptions
 ::OutputPreprocessorDefinitions(std::ostream& fout,
                                 const char* prefix,
                                 const char* suffix,
-                                const char* lang)
+                                const std::string& lang)
 {
   if(this->Defines.empty())
     {
@@ -270,7 +270,7 @@ cmVisualStudioGeneratorOptions
       {
       define = cmVisualStudio10GeneratorOptionsEscapeForXML(define.c_str());
 
-      if(0 == strcmp(lang, "RC"))
+      if(lang == "RC")
         {
         cmSystemTools::ReplaceString(define, "\"", "\\\"");
         }
@@ -300,7 +300,7 @@ cmVisualStudioGeneratorOptions
 {
   if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
-    for(std::map<cmStdString, cmStdString>::iterator m = this->FlagMap.begin();
+    for(std::map<std::string, std::string>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
       {
       fout << indent;
@@ -326,7 +326,7 @@ cmVisualStudioGeneratorOptions
     }
   else
     {
-    for(std::map<cmStdString, cmStdString>::iterator m = this->FlagMap.begin();
+    for(std::map<std::string, std::string>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
       {
       fout << indent << m->first << "=\"" << m->second << "\"\n";

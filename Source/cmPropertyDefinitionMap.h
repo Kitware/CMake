@@ -17,20 +17,20 @@
 class cmDocumentationSection;
 
 class cmPropertyDefinitionMap :
-public std::map<cmStdString,cmPropertyDefinition>
+public std::map<std::string,cmPropertyDefinition>
 {
 public:
   // define the property
-  void DefineProperty(const char *name, cmProperty::ScopeType scope,
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
                       bool chain);
 
   // has a named property been defined
-  bool IsPropertyDefined(const char *name);
+  bool IsPropertyDefined(const std::string& name);
 
   // is a named property set to chain
-  bool IsPropertyChained(const char *name);
+  bool IsPropertyChained(const std::string& name);
 };
 
 #endif

@@ -28,7 +28,7 @@
 
 //----------------------------------------------------------------------------
 void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                                const char*) const
+                                                const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates CodeLite project files.";
@@ -60,7 +60,7 @@ void cmExtraCodeLiteGenerator::Generate()
 
   // loop projects and locate the root project.
   // and extract the information for creating the worspace
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it!= this->GlobalGenerator->GetProjectMap().end();
        ++it)
@@ -85,7 +85,7 @@ void cmExtraCodeLiteGenerator::Generate()
     }
 
   // for each sub project in the workspace create a codelite project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it!= this->GlobalGenerator->GetProjectMap().end();
        ++it)
@@ -220,14 +220,16 @@ void cmExtraCodeLiteGenerator
             {
             // check whether it is a C/C++ implementation file
             bool isCFile = false;
-            if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
+            std::string lang = (*si)->GetLanguage();
+            if (lang == "C" || lang == "CXX")
               {
+              std::string srcext = (*si)->GetExtension();
               for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
                   ext !=  mf->GetSourceExtensions().end();
                   ++ext)
                 {
-                if ((*si)->GetExtension() == *ext)
+                if (srcext == *ext)
                   {
                   isCFile = true;
                   break;

@@ -63,7 +63,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "if";}
+  virtual std::string GetName() const { return "if";}
 
   /**
    * This determines if the command is invoked when in script mode.
@@ -79,7 +79,7 @@ public:
 
   // Get a definition from the makefile.  If it doesn't exist,
   // return the original string.
-  static const char* GetVariableOrString(const char* str,
+  static const char* GetVariableOrString(const std::string& str,
                                          const cmMakefile* mf);
 
   cmTypeMacro(cmIfCommand, cmCommand);

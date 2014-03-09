@@ -35,7 +35,7 @@ cmExportFileGenerator::cmExportFileGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::AddConfiguration(const char* config)
+void cmExportFileGenerator::AddConfiguration(const std::string& config)
 {
   this->Configurations.push_back(config);
 }
@@ -117,12 +117,12 @@ bool cmExportFileGenerator::GenerateImportFile()
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
-                                    const char* config,
+                                    const std::string& config,
                                     std::vector<std::string> &missingTargets)
 {
   // Construct the property configuration suffix.
   std::string suffix = "_";
-  if(config && *config)
+  if(!config.empty())
     {
     suffix += cmSystemTools::UpperCase(config);
     }
@@ -136,7 +136,8 @@ void cmExportFileGenerator::GenerateImportConfig(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+void cmExportFileGenerator::PopulateInterfaceProperty(
+                                              const std::string& propName,
                                               cmTarget *target,
                                               ImportPropertyMap &properties)
 {
@@ -148,8 +149,9 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
-                      const char *outputName,
+void cmExportFileGenerator::PopulateInterfaceProperty(
+                      const std::string& propName,
+                      const std::string& outputName,
                       cmTarget *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
                       ImportPropertyMap &properties,
@@ -343,7 +345,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
                                             true);
   this->ReplaceInstallPrefix(dirs);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(dirs);
-  std::string exportDirs = cge->Evaluate(target->GetMakefile(), 0,
+  std::string exportDirs = cge->Evaluate(target->GetMakefile(), "",
                                          false, target);
 
   if (cge->GetHadContextSensitiveCondition())
@@ -391,7 +393,8 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
 }
 
 //----------------------------------------------------------------------------
-void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
+void cmExportFileGenerator::PopulateInterfaceProperty(
+                      const std::string& propName,
                       cmTarget *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
                       ImportPropertyMap &properties,
@@ -403,7 +406,7 @@ void cmExportFileGenerator::PopulateInterfaceProperty(const char *propName,
 
 
 //----------------------------------------------------------------------------
-void getPropertyContents(cmTarget const* tgt, const char *prop,
+void getPropertyContents(cmTarget const* tgt, const std::string& prop,
          std::set<std::string> &ifaceProperties)
 {
   const char *p = tgt->GetProperty(prop);
@@ -423,7 +426,7 @@ void getPropertyContents(cmTarget const* tgt, const char *prop,
 //----------------------------------------------------------------------------
 void getCompatibleInterfaceProperties(cmTarget *target,
                                       std::set<std::string> &ifaceProperties,
-                                      const char *config)
+                                      const std::string& config)
 {
   cmComputeLinkInformation *info = target->GetLinkInformation(config);
 
@@ -487,7 +490,7 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
 
   if (target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
-    getCompatibleInterfaceProperties(target, ifaceProperties, 0);
+    getCompatibleInterfaceProperties(target, ifaceProperties, "");
 
     std::vector<std::string> configNames;
     target->GetMakefile()->GetConfigurations(configNames);
@@ -684,7 +687,7 @@ cmExportFileGenerator::ReplaceInstallPrefix(std::string &)
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
-::SetImportLinkInterface(const char* config, std::string const& suffix,
+::SetImportLinkInterface(const std::string& config, std::string const& suffix,
                     cmGeneratorExpression::PreprocessContext preprocessRule,
                     cmTarget* target, ImportPropertyMap& properties,
                     std::vector<std::string>& missingTargets)
@@ -759,7 +762,8 @@ cmExportFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
-::SetImportDetailProperties(const char* config, std::string const& suffix,
+::SetImportDetailProperties(const std::string& config,
+                            std::string const& suffix,
                             cmTarget* target, ImportPropertyMap& properties,
                             std::vector<std::string>& missingTargets
                            )
@@ -825,7 +829,7 @@ void
 cmExportFileGenerator
 ::SetImportLinkProperty(std::string const& suffix,
                         cmTarget* target,
-                        const char* propName,
+                        const std::string& propName,
                         std::vector<std::string> const& entries,
                         ImportPropertyMap& properties,
                         std::vector<std::string>& missingTargets
@@ -861,11 +865,11 @@ cmExportFileGenerator
 
 //----------------------------------------------------------------------------
 void cmExportFileGenerator::GenerateImportHeaderCode(std::ostream& os,
-                                                     const char* config)
+                                                    const std::string& config)
 {
   os << "#----------------------------------------------------------------\n"
      << "# Generated CMake target import file";
-  if(config)
+  if(!config.empty())
     {
     os << " for configuration \"" << config << "\".\n";
     }
@@ -996,7 +1000,7 @@ cmExportFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportFileGenerator
-::GenerateImportPropertyCode(std::ostream& os, const char* config,
+::GenerateImportPropertyCode(std::ostream& os, const std::string& config,
                              cmTarget const* target,
                              ImportPropertyMap const& properties)
 {
@@ -1010,7 +1014,7 @@ cmExportFileGenerator
      << config << "\"\n";
   os << "set_property(TARGET " << targetName
      << " APPEND PROPERTY IMPORTED_CONFIGURATIONS ";
-  if(config && *config)
+  if(!config.empty())
     {
     os << cmSystemTools::UpperCase(config);
     }

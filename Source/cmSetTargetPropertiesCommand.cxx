@@ -91,7 +91,7 @@ bool cmSetTargetPropertiesCommand
 }
 
 bool cmSetTargetPropertiesCommand
-::SetOneTarget(const char *tname,
+::SetOneTarget(const std::string& tname,
                std::vector<std::string> &propertyPairs,
                cmMakefile *mf)
 {

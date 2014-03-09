@@ -105,7 +105,7 @@ static std::string extractSubDir(const std::string& absPath,
 
 static void copyTargetProperty(cmTarget* destinationTarget,
                                cmTarget* sourceTarget,
-                               const char* propertyName)
+                               const std::string& propertyName)
 {
   const char* propertyValue = sourceTarget->GetProperty(propertyName);
   if (propertyValue)
@@ -251,7 +251,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   bool usePRE_BUILD = false;
   cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
-  if(strstr(gg->GetName(), "Visual Studio"))
+  if(gg->GetName().find("Visual Studio") != std::string::npos)
     {
     cmLocalVisualStudioGenerator* vslg =
       static_cast<cmLocalVisualStudioGenerator*>(localGen);
@@ -306,7 +306,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 }
 
 static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
-                                                const char * config,
+                                                const std::string& config,
                                                 std::string &incs,
                                                 std::string &defs)
 {
@@ -366,7 +366,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
     }
   if (const char *targetQtVersion =
-      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", 0))
+      target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION", ""))
     {
     qtVersion = targetQtVersion;
     }
@@ -563,7 +563,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
   std::string _moc_incs;
   std::string _moc_compile_defs;
   std::vector<std::string> configs;
-  const char *config = makefile->GetConfigurations(configs);
+  const std::string& config = makefile->GetConfigurations(configs);
   GetCompileDefinitionsAndDirectories(target, config,
                                       _moc_incs, _moc_compile_defs);
 
@@ -610,7 +610,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable", qt5Moc->GetLocation(""));
     }
   else if (strcmp(qtVersion, "4") == 0)
     {
@@ -621,7 +621,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                           autogenTargetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_moc_executable", qt4Moc->GetLocation(0));
+    makefile->AddDefinition("_qt_moc_executable", qt4Moc->GetLocation(""));
     }
   else
     {
@@ -660,7 +660,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
         ++o;
         }
       if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                  cmStrCmp(o)) != cmArrayEnd(valueOptions))
+                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
         {
         assert(existingIt + 1 != opts.end());
         *(existingIt + 1) = *(it + 1);
@@ -675,7 +675,7 @@ void cmQtAutoGenerators::MergeUicOptions(std::vector<std::string> &opts,
   opts.insert(opts.end(), extraOpts.begin(), extraOpts.end());
 }
 
-static void GetUicOpts(cmTarget const* target, const char * config,
+static void GetUicOpts(cmTarget const* target, const std::string& config,
                        std::string &optString)
 {
   std::vector<std::string> opts;
@@ -697,7 +697,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
 {
   cmMakefile *makefile = target->GetMakefile();
 
-  std::set<cmStdString> skipped;
+  std::set<std::string> skipped;
   std::vector<std::string> skipVec;
   cmSystemTools::ExpandListArgument(this->SkipUic.c_str(), skipVec);
 
@@ -717,7 +717,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
 
   std::string _uic_opts;
   std::vector<std::string> configs;
-  const char *config = makefile->GetConfigurations(configs);
+  const std::string& config = makefile->GetConfigurations(configs);
   GetUicOpts(target, config, _uic_opts);
 
   if (!_uic_opts.empty())
@@ -772,7 +772,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   makefile->AddDefinition("_qt_uic_options_options",
             cmLocalGenerator::EscapeForCMake(uiFileOptions.c_str()).c_str());
 
-  const char* targetName = target->GetName();
+  std::string targetName = target->GetName();
   if (strcmp(qtVersion, "5") == 0)
     {
     cmTarget *qt5Uic = makefile->FindTargetToUse("Qt5::uic");
@@ -782,7 +782,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
       }
     else
       {
-      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(0));
+      makefile->AddDefinition("_qt_uic_executable", qt5Uic->GetLocation(""));
       }
     }
   else if (strcmp(qtVersion, "4") == 0)
@@ -791,15 +791,15 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
     if (!qt4Uic)
       {
       cmSystemTools::Error("Qt4::uic target not found ",
-                          targetName);
+                          targetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(0));
+    makefile->AddDefinition("_qt_uic_executable", qt4Uic->GetLocation(""));
     }
   else
     {
     cmSystemTools::Error("The CMAKE_AUTOUIC feature supports only Qt 4 and "
-                        "Qt 5 ", targetName);
+                        "Qt 5 ", targetName.c_str());
     }
 }
 
@@ -831,7 +831,7 @@ void cmQtAutoGenerators::MergeRccOptions(std::vector<std::string> &opts,
         ++o;
         }
       if (std::find_if(cmArrayBegin(valueOptions), cmArrayEnd(valueOptions),
-                  cmStrCmp(o)) != cmArrayEnd(valueOptions))
+                  cmStrCmp(*it)) != cmArrayEnd(valueOptions))
         {
         assert(existingIt + 1 != opts.end());
         *(existingIt + 1) = *(it + 1);
@@ -921,17 +921,17 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   makefile->AddDefinition("_qt_rcc_options_options",
             cmLocalGenerator::EscapeForCMake(rccFileOptions.c_str()).c_str());
 
-  const char* targetName = target->GetName();
+  std::string targetName = target->GetName();
   if (strcmp(qtVersion, "5") == 0)
     {
     cmTarget *qt5Rcc = makefile->FindTargetToUse("Qt5::rcc");
     if (!qt5Rcc)
       {
       cmSystemTools::Error("Qt5::rcc target not found ",
-                          targetName);
+                          targetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(""));
     }
   else if (strcmp(qtVersion, "4") == 0)
     {
@@ -939,20 +939,20 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
     if (!qt4Rcc)
       {
       cmSystemTools::Error("Qt4::rcc target not found ",
-                          targetName);
+                          targetName.c_str());
       return;
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(0));
+    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(""));
     }
   else
     {
     cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
-                        "Qt 5 ", targetName);
+                        "Qt 5 ", targetName.c_str());
     }
 }
 
 static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
-                                                  const char* targetDirectory)
+                                            const std::string& targetDirectory)
 {
   cmGlobalGenerator* gg = new cmGlobalGenerator();
   gg->SetCMakeInstance(cm);
@@ -967,7 +967,8 @@ static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
   return gg;
 }
 
-bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
+bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
+                             const std::string& config)
 {
   bool success = true;
   cmake cm;
@@ -993,10 +994,11 @@ bool cmQtAutoGenerators::Run(const char* targetDirectory, const char *config)
 }
 
 bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
-                                      const char* targetDirectory,
-                                      const char *config)
+                                      const std::string& targetDirectory,
+                                      const std::string& config)
 {
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  std::string filename(
+      cmSystemTools::CollapseFullPath(targetDirectory.c_str()));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutogenInfo.cmake";
 
@@ -1027,7 +1029,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   {
   std::string compileDefsPropOrig = "AM_MOC_COMPILE_DEFINITIONS";
   std::string compileDefsProp = compileDefsPropOrig;
-  if(config)
+  if(!config.empty())
     {
     compileDefsProp += "_";
     compileDefsProp += config;
@@ -1039,7 +1041,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   {
   std::string includesPropOrig = "AM_MOC_INCLUDES";
   std::string includesProp = includesPropOrig;
-  if(config)
+  if(!config.empty())
     {
     includesProp += "_";
     includesProp += config;
@@ -1058,7 +1060,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                         = makefile->GetSafeDefinition("AM_UIC_OPTIONS_FILES");
   std::string uicOptionsPropOrig = "AM_UIC_TARGET_OPTIONS";
   std::string uicOptionsProp = uicOptionsPropOrig;
-  if(config)
+  if(!config.empty())
     {
     uicOptionsProp += "_";
     uicOptionsProp += config;
@@ -1136,9 +1138,10 @@ std::string cmQtAutoGenerators::MakeCompileSettingsString(cmMakefile* makefile)
 
 
 bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(cmMakefile* makefile,
-                                            const char* targetDirectory)
+                                            const std::string& targetDirectory)
 {
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  std::string filename(
+      cmSystemTools::CollapseFullPath(targetDirectory.c_str()));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
@@ -1152,9 +1155,11 @@ bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(cmMakefile* makefile,
 
 
 void
-cmQtAutoGenerators::WriteOldMocDefinitionsFile(const char* targetDirectory)
+cmQtAutoGenerators::WriteOldMocDefinitionsFile(
+                                            const std::string& targetDirectory)
 {
-  std::string filename(cmSystemTools::CollapseFullPath(targetDirectory));
+  std::string filename(
+      cmSystemTools::CollapseFullPath(targetDirectory.c_str()));
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
@@ -1895,7 +1900,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
                                            |cmsysTerminal_Color_ForegroundBold,
                                      msg.c_str(), true, this->ColorOutput);
 
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->MocExecutable);
     for (std::list<std::string>::const_iterator it = this->MocIncludes.begin();
          it != this->MocIncludes.end();
@@ -1924,7 +1929,7 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
 
     if (this->Verbose)
       {
-      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
           cmdIt != command.end();
           ++cmdIt)
         {
@@ -1971,7 +1976,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& path,
                                           |cmsysTerminal_Color_ForegroundBold,
                                       msg.c_str(), true, this->ColorOutput);
 
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->UicExecutable);
 
     std::vector<std::string> opts = this->UicTargetOptions;
@@ -1996,7 +2001,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& path,
 
     if (this->Verbose)
       {
-      for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+      for(std::vector<std::string>::const_iterator cmdIt = command.begin();
           cmdIt != command.end();
           ++cmdIt)
         {
@@ -2034,7 +2039,7 @@ bool cmQtAutoGenerators::GenerateQrc()
       {
       continue;
       }
-    std::vector<cmStdString> command;
+    std::vector<std::string> command;
     command.push_back(this->RccExecutable);
 
     std::string basename = cmsys::SystemTools::
@@ -2068,7 +2073,7 @@ bool cmQtAutoGenerators::GenerateQrc()
 
       if (this->Verbose)
         {
-        for(std::vector<cmStdString>::const_iterator cmdIt = command.begin();
+        for(std::vector<std::string>::const_iterator cmdIt = command.begin();
             cmdIt != command.end();
             ++cmdIt)
           {

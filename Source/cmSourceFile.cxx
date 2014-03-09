@@ -18,7 +18,7 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
-cmSourceFile::cmSourceFile(cmMakefile* mf, const char* name):
+cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
   Location(mf, name)
 {
   this->CustomCommand = 0;
@@ -39,7 +39,7 @@ std::string const& cmSourceFile::GetExtension() const
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetLanguage()
+std::string cmSourceFile::GetLanguage()
 {
   // If the language was set explicitly by the user then use it.
   if(const char* lang = this->GetProperty("LANGUAGE"))
@@ -76,7 +76,7 @@ const char* cmSourceFile::GetLanguage()
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetLanguage() const
+std::string cmSourceFile::GetLanguage() const
 {
   // If the language was set explicitly by the user then use it.
   if(const char* lang = this->GetProperty("LANGUAGE"))
@@ -87,11 +87,11 @@ const char* cmSourceFile::GetLanguage() const
   // If the language was determined from the source file extension use it.
   if(!this->Language.empty())
     {
-    return this->Language.c_str();
+    return this->Language;
     }
 
   // The language is not known.
-  return 0;
+  return "";
 }
 
 //----------------------------------------------------------------------------
@@ -164,7 +164,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
       }
     tryPath += this->Location.GetName();
     tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str(), *di);
-    if(this->TryFullPath(tryPath.c_str(), 0))
+    if(this->TryFullPath(tryPath.c_str(), ""))
       {
       return true;
       }
@@ -217,10 +217,11 @@ bool cmSourceFile::FindFullPath(std::string* error)
 }
 
 //----------------------------------------------------------------------------
-bool cmSourceFile::TryFullPath(const char* tp, const char* ext)
+bool cmSourceFile::TryFullPath(const std::string& path,
+                               const std::string& ext)
 {
-  std::string tryPath = tp;
-  if(ext && *ext)
+  std::string tryPath = path;
+  if(!ext.empty())
     {
     tryPath += ".";
     tryPath += ext;
@@ -266,7 +267,8 @@ void cmSourceFile::CheckLanguage(std::string const& ext)
   // Try to identify the source file language from the extension.
   cmMakefile const* mf = this->Location.GetMakefile();
   cmGlobalGenerator* gg = mf->GetLocalGenerator()->GetGlobalGenerator();
-  if(const char* l = gg->GetLanguageFromExtension(ext.c_str()))
+  std::string l = gg->GetLanguageFromExtension(ext.c_str());
+  if(!l.empty())
     {
     this->Language = l;
     }
@@ -279,13 +281,8 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFile::SetProperty(const char* prop, const char* value)
+void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
-  if (!prop)
-    {
-    return;
-    }
-
   this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
 
   std::string ext =
@@ -293,7 +290,7 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
   if (ext == ".ui")
     {
     cmMakefile const* mf = this->Location.GetMakefile();
-    if (strcmp(prop, "AUTOUIC_OPTIONS") == 0)
+    if (prop == "AUTOUIC_OPTIONS")
       {
       const_cast<cmMakefile*>(mf)->AddQtUiFileWithOptions(this);
       }
@@ -301,19 +298,15 @@ void cmSourceFile::SetProperty(const char* prop, const char* value)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFile::AppendProperty(const char* prop, const char* value,
+void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
                                   bool asString)
 {
-  if (!prop)
-    {
-    return;
-    }
   this->Properties.AppendProperty(prop, value, cmProperty::SOURCE_FILE,
                                   asString);
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetPropertyForUser(const char *prop)
+const char* cmSourceFile::GetPropertyForUser(const std::string& prop)
 {
   // This method is a consequence of design history and backwards
   // compatibility.  GetProperty is (and should be) a const method.
@@ -329,7 +322,7 @@ const char* cmSourceFile::GetPropertyForUser(const char *prop)
   // cmSourceFileLocation class to commit to a particular full path to
   // the source file as late as possible.  If the users requests the
   // LOCATION property we must commit now.
-  if(strcmp(prop, "LOCATION") == 0)
+  if(prop == "LOCATION")
     {
     // Commit to a location.
     this->GetFullPath();
@@ -340,10 +333,10 @@ const char* cmSourceFile::GetPropertyForUser(const char *prop)
 }
 
 //----------------------------------------------------------------------------
-const char* cmSourceFile::GetProperty(const char* prop) const
+const char* cmSourceFile::GetProperty(const std::string& prop) const
 {
   // Check for computed properties.
-  if(strcmp(prop, "LOCATION") == 0)
+  if(prop == "LOCATION")
     {
     if(this->FullPath.empty())
       {
@@ -368,7 +361,7 @@ const char* cmSourceFile::GetProperty(const char* prop) const
 }
 
 //----------------------------------------------------------------------------
-bool cmSourceFile::GetPropertyAsBool(const char* prop) const
+bool cmSourceFile::GetPropertyAsBool(const std::string& prop) const
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }

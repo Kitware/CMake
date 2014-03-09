@@ -551,11 +551,11 @@ bool cmGlobalNinjaGenerator::UsingMinGW = false;
 //   cmGlobalGenerator::Build()
 void cmGlobalNinjaGenerator
 ::GenerateBuildCommand(std::vector<std::string>& makeCommand,
-                       const char* makeProgram,
-                       const char* /*projectName*/,
-                       const char* /*projectDir*/,
-                       const char* targetName,
-                       const char* /*config*/,
+                       const std::string& makeProgram,
+                       const std::string& /*projectName*/,
+                       const std::string& /*projectDir*/,
+                       const std::string& targetName,
+                       const std::string& /*config*/,
                        bool /*fast*/,
                        std::vector<std::string> const& makeOptions)
 {
@@ -565,9 +565,9 @@ void cmGlobalNinjaGenerator
 
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());
-  if(targetName && *targetName)
+  if(!targetName.empty())
     {
-    if(strcmp(targetName, "clean") == 0)
+    if(targetName == "clean")
       {
       makeCommand.push_back("-t");
       makeCommand.push_back("clean");
@@ -834,8 +834,8 @@ void
 cmGlobalNinjaGenerator
 ::AppendTargetOutputs(cmTarget const* target, cmNinjaDeps& outputs)
 {
-  const char* configName =
-    target->GetMakefile()->GetDefinition("CMAKE_BUILD_TYPE");
+  std::string configName =
+    target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmLocalNinjaGenerator *ng =
     static_cast<cmLocalNinjaGenerator *>(this->LocalGenerators[0]);
 
@@ -886,7 +886,7 @@ cmGlobalNinjaGenerator
   if (target->GetType() == cmTarget::GLOBAL_TARGET) {
     // Global targets only depend on other utilities, which may not appear in
     // the TargetDepends set (e.g. "all").
-    std::set<cmStdString> const& utils = target->GetUtilities();
+    std::set<std::string> const& utils = target->GetUtilities();
     std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
     cmTargetDependSet const& targetDeps =

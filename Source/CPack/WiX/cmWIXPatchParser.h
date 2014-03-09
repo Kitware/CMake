@@ -43,11 +43,11 @@ public:
   cmWIXPatchParser(fragment_map_t& Fragments, cmCPackLog* logger);
 
 private:
-  virtual void StartElement(const char *name, const char **atts);
+  virtual void StartElement(const std::string& name, const char **atts);
 
   void StartFragment(const char **attributes);
 
-  virtual void EndElement(const char *name);
+  virtual void EndElement(const std::string& name);
   virtual void ReportError(int line, int column, const char* msg);
 
   void ReportValidationError(std::string const& message);

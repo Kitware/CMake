@@ -140,7 +140,7 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
 bool cmParseMumpsCoverage::FindMumpsFile(std::string const& routine,
                                          std::string& filepath)
 {
-  std::map<cmStdString, cmStdString>::iterator i =
+  std::map<std::string, std::string>::iterator i =
     this->RoutineToDirectory.find(routine);
   if(i != this->RoutineToDirectory.end())
     {

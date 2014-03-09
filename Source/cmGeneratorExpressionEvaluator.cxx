@@ -689,7 +689,7 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker *) const
   {
     context->HadContextSensitiveCondition = true;
-    return context->Config ? context->Config : "";
+    return context->Config;
   }
 } configurationNode;
 
@@ -718,13 +718,13 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return std::string();
       }
     context->HadContextSensitiveCondition = true;
-    if (!context->Config)
+    if (context->Config.empty())
       {
       return parameters.front().empty() ? "1" : "0";
       }
 
     if (cmsysString_strcasecmp(parameters.begin()->c_str(),
-                                  context->Config) == 0)
+                               context->Config.c_str()) == 0)
       {
       return "1";
       }
@@ -990,8 +990,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
             "link libraries for a static library");
         return std::string();
         }
-      const char *lang = target->GetLinkerLanguage(context->Config);
-      return lang ? lang : "";
+      return target->GetLinkerLanguage(context->Config);
       }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
@@ -1555,89 +1554,58 @@ TargetFilesystemArtifact<false, true, true, false> targetSoNameFileDirNode;
 static const
 cmGeneratorExpressionNode* GetNode(const std::string &identifier)
 {
-  if (identifier == "0")
-    return &zeroNode;
-  else if (identifier == "1")
-    return &oneNode;
-  else if (identifier == "AND")
-    return &andNode;
-  else if (identifier == "OR")
-    return &orNode;
-  else if (identifier == "NOT")
-    return &notNode;
-  else if (identifier == "C_COMPILER_ID")
-    return &cCompilerIdNode;
-  else if (identifier == "CXX_COMPILER_ID")
-    return &cxxCompilerIdNode;
-  else if (identifier == "VERSION_GREATER")
-    return &versionGreaterNode;
-  else if (identifier == "VERSION_LESS")
-    return &versionLessNode;
-  else if (identifier == "VERSION_EQUAL")
-    return &versionEqualNode;
-  else if (identifier == "C_COMPILER_VERSION")
-    return &cCompilerVersionNode;
-  else if (identifier == "CXX_COMPILER_VERSION")
-    return &cxxCompilerVersionNode;
-  else if (identifier == "PLATFORM_ID")
-    return &platformIdNode;
-  else if (identifier == "CONFIGURATION")
-    return &configurationNode;
-  else if (identifier == "CONFIG")
-    return &configurationTestNode;
-  else if (identifier == "TARGET_FILE")
-    return &targetFileNode;
-  else if (identifier == "TARGET_LINKER_FILE")
-    return &targetLinkerFileNode;
-  else if (identifier == "TARGET_SONAME_FILE")
-    return &targetSoNameFileNode;
-  else if (identifier == "TARGET_FILE_NAME")
-    return &targetFileNameNode;
-  else if (identifier == "TARGET_LINKER_FILE_NAME")
-    return &targetLinkerFileNameNode;
-  else if (identifier == "TARGET_SONAME_FILE_NAME")
-    return &targetSoNameFileNameNode;
-  else if (identifier == "TARGET_FILE_DIR")
-    return &targetFileDirNode;
-  else if (identifier == "TARGET_LINKER_FILE_DIR")
-    return &targetLinkerFileDirNode;
-  else if (identifier == "TARGET_SONAME_FILE_DIR")
-    return &targetSoNameFileDirNode;
-  else if (identifier == "STREQUAL")
-    return &strEqualNode;
-  else if (identifier == "EQUAL")
-    return &equalNode;
-  else if (identifier == "LOWER_CASE")
-    return &lowerCaseNode;
-  else if (identifier == "UPPER_CASE")
-    return &upperCaseNode;
-  else if (identifier == "MAKE_C_IDENTIFIER")
-    return &makeCIdentifierNode;
-  else if (identifier == "BOOL")
-    return &boolNode;
-  else if (identifier == "ANGLE-R")
-    return &angle_rNode;
-  else if (identifier == "COMMA")
-    return &commaNode;
-  else if (identifier == "SEMICOLON")
-    return &semicolonNode;
-  else if (identifier == "TARGET_PROPERTY")
-    return &targetPropertyNode;
-  else if (identifier == "TARGET_NAME")
-    return &targetNameNode;
-  else if (identifier == "TARGET_POLICY")
-    return &targetPolicyNode;
-  else if (identifier == "BUILD_INTERFACE")
-    return &buildInterfaceNode;
-  else if (identifier == "INSTALL_INTERFACE")
-    return &installInterfaceNode;
-  else if (identifier == "INSTALL_PREFIX")
-    return &installPrefixNode;
-  else if (identifier == "JOIN")
-    return &joinNode;
-  else if (identifier == "LINK_ONLY")
-    return &linkOnlyNode;
-  return 0;
+  typedef std::map<std::string, const cmGeneratorExpressionNode*> NodeMap;
+  static NodeMap nodeMap;
+  if (nodeMap.empty())
+    {
+    nodeMap["0"] = &zeroNode;
+    nodeMap["1"] = &oneNode;
+    nodeMap["AND"] = &andNode;
+    nodeMap["OR"] = &orNode;
+    nodeMap["NOT"] = &notNode;
+    nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
+    nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
+    nodeMap["VERSION_GREATER"] = &versionGreaterNode;
+    nodeMap["VERSION_LESS"] = &versionLessNode;
+    nodeMap["VERSION_EQUAL"] = &versionEqualNode;
+    nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
+    nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
+    nodeMap["PLATFORM_ID"] = &platformIdNode;
+    nodeMap["CONFIGURATION"] = &configurationNode;
+    nodeMap["CONFIG"] = &configurationTestNode;
+    nodeMap["TARGET_FILE"] = &targetFileNode;
+    nodeMap["TARGET_LINKER_FILE"] = &targetLinkerFileNode;
+    nodeMap["TARGET_SONAME_FILE"] = &targetSoNameFileNode;
+    nodeMap["TARGET_FILE_NAME"] = &targetFileNameNode;
+    nodeMap["TARGET_LINKER_FILE_NAME"] = &targetLinkerFileNameNode;
+    nodeMap["TARGET_SONAME_FILE_NAME"] = &targetSoNameFileNameNode;
+    nodeMap["TARGET_FILE_DIR"] = &targetFileDirNode;
+    nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerFileDirNode;
+    nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameFileDirNode;
+    nodeMap["STREQUAL"] = &strEqualNode;
+    nodeMap["EQUAL"] = &equalNode;
+    nodeMap["LOWER_CASE"] = &lowerCaseNode;
+    nodeMap["UPPER_CASE"] = &upperCaseNode;
+    nodeMap["MAKE_C_IDENTIFIER"] = &makeCIdentifierNode;
+    nodeMap["BOOL"] = &boolNode;
+    nodeMap["ANGLE-R"] = &angle_rNode;
+    nodeMap["COMMA"] = &commaNode;
+    nodeMap["SEMICOLON"] = &semicolonNode;
+    nodeMap["TARGET_PROPERTY"] = &targetPropertyNode;
+    nodeMap["TARGET_NAME"] = &targetNameNode;
+    nodeMap["TARGET_POLICY"] = &targetPolicyNode;
+    nodeMap["BUILD_INTERFACE"] = &buildInterfaceNode;
+    nodeMap["INSTALL_INTERFACE"] = &installInterfaceNode;
+    nodeMap["INSTALL_PREFIX"] = &installPrefixNode;
+    nodeMap["JOIN"] = &joinNode;
+    nodeMap["LINK_ONLY"] = &linkOnlyNode;
+    }
+  NodeMap::const_iterator i = nodeMap.find(identifier);
+  if (i == nodeMap.end())
+    {
+    return 0;
+    }
+  return i->second;
 
 }
 

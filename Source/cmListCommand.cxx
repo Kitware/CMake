@@ -74,12 +74,9 @@ bool cmListCommand
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::GetListString(std::string& listString, const char* var)
+bool cmListCommand::GetListString(std::string& listString,
+                                  const std::string& var)
 {
-  if ( !var )
-    {
-    return false;
-    }
   // get the old value
   const char* cacheValue
     = this->Makefile->GetDefinition(var);
@@ -92,7 +89,8 @@ bool cmListCommand::GetListString(std::string& listString, const char* var)
 }
 
 //----------------------------------------------------------------------------
-bool cmListCommand::GetList(std::vector<std::string>& list, const char* var)
+bool cmListCommand::GetList(std::vector<std::string>& list,
+                            const std::string& var)
 {
   std::string listString;
   if ( !this->GetListString(listString, var) )

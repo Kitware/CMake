@@ -21,7 +21,7 @@ public:
   virtual cmCommand* Clone() { return new cmBuildNameCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  virtual const char* GetName() const {return "build_name";}
+  virtual std::string GetName() const {return "build_name";}
   virtual bool IsScriptable() const { return true; }
   virtual bool IsDiscouraged() const { return true; }
 };

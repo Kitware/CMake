@@ -21,7 +21,7 @@ public:
   virtual cmCommand* Clone() { return new cmExportLibraryDependenciesCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  virtual const char* GetName() const { return "export_library_dependencies";}
+  virtual std::string GetName() const { return "export_library_dependencies";}
   virtual bool IsDiscouraged() const { return true; }
 
   virtual void FinalPass();

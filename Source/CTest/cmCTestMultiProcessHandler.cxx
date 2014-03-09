@@ -369,7 +369,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 
   // Write list of failed tests
   fout << "---\n";
-  for(std::vector<cmStdString>::iterator i = this->Failed->begin();
+  for(std::vector<std::string>::iterator i = this->Failed->begin();
       i != this->Failed->end(); ++i)
     {
     fout << i->c_str() << "\n";

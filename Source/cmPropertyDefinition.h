@@ -27,7 +27,7 @@ class cmPropertyDefinition
 {
 public:
   /// Define this property
-  void DefineProperty(const char *name, cmProperty::ScopeType scope,
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
                       const char *FullDescription,
                       bool chained);

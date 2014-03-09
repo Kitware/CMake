@@ -359,7 +359,7 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
 }
 
 // Add a directory to the search path
-void cmMakeDepend::AddSearchPath(const char* path)
+void cmMakeDepend::AddSearchPath(const std::string& path)
 {
   this->IncludeDirectories.push_back(path);
 }

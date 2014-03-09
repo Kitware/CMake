@@ -163,7 +163,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-bool cmInstallGenerator::InstallsForConfig(const char* config)
+bool cmInstallGenerator::InstallsForConfig(const std::string& config)
 {
   return this->GeneratesForConfig(config);
 }

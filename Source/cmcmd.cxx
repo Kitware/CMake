@@ -666,7 +666,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     else if (args[1] == "cmake_autogen" && args.size() >= 4)
       {
         cmQtAutoGenerators autogen;
-        const char *config = args[3].empty() ? 0 : args[3].c_str();
+        std::string const& config = args[3];
         bool autogenSuccess = autogen.Run(args[2].c_str(), config);
         return autogenSuccess ? 0 : 1;
       }
@@ -677,7 +677,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       std::string flags = args[2];
       std::string outFile = args[3];
-      std::vector<cmStdString> files;
+      std::vector<std::string> files;
       for (std::string::size_type cc = 4; cc < args.size(); cc ++)
         {
         files.push_back(args[cc]);
@@ -1143,7 +1143,7 @@ int cmcmd::VisualStudioLink(std::vector<std::string>& args, int type)
 }
 
 int cmcmd::ParseVisualStudioLinkCommand(std::vector<std::string>& args,
-                                        std::vector<cmStdString>& command,
+                                        std::vector<std::string>& command,
                                         std::string& targetName)
 {
   std::vector<std::string>::iterator i = args.begin();
@@ -1171,14 +1171,14 @@ int cmcmd::ParseVisualStudioLinkCommand(std::vector<std::string>& args,
 }
 
 bool cmcmd::RunCommand(const char* comment,
-                       std::vector<cmStdString>& command,
+                       std::vector<std::string>& command,
                        bool verbose,
                        int* retCodeOut)
 {
   if(verbose)
     {
     std::cout << comment << ":\n";
-    for(std::vector<cmStdString>::iterator i = command.begin();
+    for(std::vector<std::string>::iterator i = command.begin();
         i != command.end(); ++i)
       {
       std::cout << i->c_str() << " ";
@@ -1239,16 +1239,16 @@ int cmcmd::VisualStudioLinkIncremental(std::vector<std::string>& args,
   //    7.  Finally, the Linker does another incremental link, but since the
   //    only thing that has changed is the *.res file that contains the
   //    manifest it is a short link.
-  std::vector<cmStdString> linkCommand;
+  std::vector<std::string> linkCommand;
   std::string targetName;
   if(cmcmd::ParseVisualStudioLinkCommand(args, linkCommand, targetName) == -1)
     {
     return -1;
     }
   std::string manifestArg = "/MANIFESTFILE:";
-  std::vector<cmStdString> rcCommand;
+  std::vector<std::string> rcCommand;
   rcCommand.push_back(cmSystemTools::FindProgram("rc.exe"));
-  std::vector<cmStdString> mtCommand;
+  std::vector<std::string> mtCommand;
   mtCommand.push_back(cmSystemTools::FindProgram("mt.exe"));
   std::string tempManifest;
   tempManifest = targetName;
@@ -1349,7 +1349,7 @@ int cmcmd::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
                                           bool hasManifest,
                                           bool verbose)
 {
-  std::vector<cmStdString> linkCommand;
+  std::vector<std::string> linkCommand;
   std::string targetName;
   if(cmcmd::ParseVisualStudioLinkCommand(args, linkCommand, targetName) == -1)
     {
@@ -1368,7 +1368,7 @@ int cmcmd::VisualStudioLinkNonIncremental(std::vector<std::string>& args,
     {
     return 0;
     }
-  std::vector<cmStdString> mtCommand;
+  std::vector<std::string> mtCommand;
   mtCommand.push_back(cmSystemTools::FindProgram("mt.exe"));
   mtCommand.push_back("/nologo");
   mtCommand.push_back("/manifest");

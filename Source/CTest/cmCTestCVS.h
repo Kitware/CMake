@@ -32,8 +32,8 @@ private:
   virtual bool WriteXMLUpdates(std::ostream& xml);
 
   // Update status for files in each directory.
-  class Directory: public std::map<cmStdString, PathStatus> {};
-  std::map<cmStdString, Directory> Dirs;
+  class Directory: public std::map<std::string, PathStatus> {};
+  std::map<std::string, Directory> Dirs;
 
   std::string ComputeBranchFlag(std::string const& dir);
   void LoadRevisions(std::string const& file, const char* branchFlag,

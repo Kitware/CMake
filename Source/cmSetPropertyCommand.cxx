@@ -203,7 +203,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
     // Lookup the generator.
     if(cmLocalGenerator* lg =
        (this->Makefile->GetLocalGenerator()
-        ->GetGlobalGenerator()->FindLocalGenerator(dir.c_str())))
+        ->GetGlobalGenerator()->FindLocalGenerator(dir)))
       {
       // Use the makefile for the directory found.
       mf = lg->GetMakefile();
@@ -241,7 +241,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
 //----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleTargetMode()
 {
-  for(std::set<cmStdString>::const_iterator ni = this->Names.begin();
+  for(std::set<std::string>::const_iterator ni = this->Names.begin();
       ni != this->Names.end(); ++ni)
     {
     if (this->Makefile->IsAlias(*ni))
@@ -297,7 +297,7 @@ bool cmSetPropertyCommand::HandleTarget(cmTarget* target)
 //----------------------------------------------------------------------------
 bool cmSetPropertyCommand::HandleSourceMode()
 {
-  for(std::set<cmStdString>::const_iterator ni = this->Names.begin();
+  for(std::set<std::string>::const_iterator ni = this->Names.begin();
       ni != this->Names.end(); ++ni)
     {
     // Get the source file.
@@ -345,8 +345,8 @@ bool cmSetPropertyCommand::HandleSource(cmSourceFile* sf)
 bool cmSetPropertyCommand::HandleTestMode()
 {
   // Look for tests with all names given.
-  std::set<cmStdString>::iterator next;
-  for(std::set<cmStdString>::iterator ni = this->Names.begin();
+  std::set<std::string>::iterator next;
+  for(std::set<std::string>::iterator ni = this->Names.begin();
       ni != this->Names.end(); ni = next)
     {
     next = ni;
@@ -369,7 +369,7 @@ bool cmSetPropertyCommand::HandleTestMode()
     {
     cmOStringStream e;
     e << "given TEST names that do not exist:\n";
-    for(std::set<cmStdString>::const_iterator ni = this->Names.begin();
+    for(std::set<std::string>::const_iterator ni = this->Names.begin();
         ni != this->Names.end(); ++ni)
       {
       e << "  " << *ni << "\n";
@@ -440,7 +440,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
     return false;
     }
 
-  for(std::set<cmStdString>::const_iterator ni = this->Names.begin();
+  for(std::set<std::string>::const_iterator ni = this->Names.begin();
       ni != this->Names.end(); ++ni)
     {
     // Get the source file.

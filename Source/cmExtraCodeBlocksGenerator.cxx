@@ -38,7 +38,7 @@ http://forums.codeblocks.org/index.php/topic,6789.0.html
 
 //----------------------------------------------------------------------------
 void cmExtraCodeBlocksGenerator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates CodeBlocks project files.";
@@ -61,7 +61,7 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 void cmExtraCodeBlocksGenerator::Generate()
 {
   // for each sub project in the project create a codeblocks project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)
@@ -243,7 +243,7 @@ void cmExtraCodeBlocksGenerator
   Tree tree;
 
   // build tree of virtual folders
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
           it = this->GlobalGenerator->GetProjectMap().begin();
          it != this->GlobalGenerator->GetProjectMap().end();
          ++it)
@@ -411,14 +411,16 @@ void cmExtraCodeBlocksGenerator
 
             // check whether it is a C/C++ implementation file
             bool isCFile = false;
-            if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
+            std::string lang = (*si)->GetLanguage();
+            if (lang == "C" || lang == "CXX")
               {
+              std::string srcext = (*si)->GetExtension();
               for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
                   ext !=  mf->GetSourceExtensions().end();
                   ++ext)
                 {
-                if ((*si)->GetExtension() == *ext)
+                if (srcext == *ext)
                   {
                   isCFile = true;
                   break;
@@ -536,7 +538,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
 
 // Generate the xml code for one target.
 void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
-                                              const char* targetName,
+                                              const std::string& targetName,
                                               cmTarget* target,
                                               const char* make,
                                               const cmMakefile* makefile,
@@ -756,10 +758,12 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
 // Create the command line for building the given target using the selected
 // make
 std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
-             const std::string& make, const char* makefile, const char* target)
+             const std::string& make, const char* makefile,
+             const std::string& target)
 {
   std::string command = make;
-  if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
+  std::string generator = this->GlobalGenerator->GetName();
+  if (generator == "NMake Makefiles")
     {
     // For Windows ConvertToOutputPath already adds quotes when required.
     // These need to be escaped, see
@@ -770,7 +774,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " VERBOSE=1 ";
     command += target;
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+  else if (generator == "MinGW Makefiles")
     {
     // no escaping of spaces in this case, see
     // http://public.kitware.com/Bug/view.php?id=10014
@@ -781,7 +785,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " VERBOSE=1 ";
     command += target;
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+  else if (generator == "Ninja")
     {
     command += " -v ";
     command += target;

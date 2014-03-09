@@ -101,8 +101,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         }
       if ( this->GlobalGenerator )
         {
-        if ( strcmp(this->GlobalGenerator->GetName(),
-            cmakeGeneratorName) != 0 )
+        if ( this->GlobalGenerator->GetName() != cmakeGeneratorName )
           {
           delete this->GlobalGenerator;
           this->GlobalGenerator = 0;
@@ -130,8 +129,9 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       std::string dir = this->CTest->GetCTestConfiguration("BuildDirectory");
       std::string buildCommand
         = this->GlobalGenerator->
-        GenerateCMakeBuildCommand(cmakeBuildTarget, cmakeBuildConfiguration,
-                                  cmakeBuildAdditionalFlags, true);
+        GenerateCMakeBuildCommand(cmakeBuildTarget ? cmakeBuildTarget : "",
+          cmakeBuildConfiguration,
+          cmakeBuildAdditionalFlags ? cmakeBuildAdditionalFlags : "", true);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "SetMakeCommand:"
                  << buildCommand.c_str() << "\n");

@@ -44,7 +44,7 @@ bool cmBuildCommand
   // Parse remaining arguments.
   const char* configuration = 0;
   const char* project_name = 0;
-  const char* target = 0;
+  std::string target;
   enum Doing { DoingNone, DoingConfiguration, DoingProjectName, DoingTarget };
   Doing doing = DoingNone;
   for(unsigned int i=1; i < args.size(); ++i)
@@ -74,7 +74,7 @@ bool cmBuildCommand
     else if(doing == DoingTarget)
       {
       doing = DoingNone;
-      target = args[i].c_str();
+      target = args[i];
       }
     else
       {
@@ -107,7 +107,7 @@ bool cmBuildCommand
 
   std::string makecommand = this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->GenerateCMakeBuildCommand(target, configuration,
-                                                      0, true);
+                                                      "", true);
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 
@@ -136,8 +136,8 @@ bool cmBuildCommand
     }
 
   std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateCMakeBuildCommand(0, configType.c_str(),
-                                                      0, true);
+    ->GetGlobalGenerator()->GenerateCMakeBuildCommand("", configType.c_str(),
+                                                      "", true);
 
   if(cacheValue)
     {

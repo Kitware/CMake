@@ -91,26 +91,26 @@ cmGlobalNinjaGenerator* cmNinjaTargetGenerator::GetGlobalGenerator() const
   return this->LocalGenerator->GetGlobalNinjaGenerator();
 }
 
-const char* cmNinjaTargetGenerator::GetConfigName() const
+std::string const& cmNinjaTargetGenerator::GetConfigName() const
 {
   return this->LocalGenerator->GetConfigName();
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-const char* cmNinjaTargetGenerator::GetFeature(const char* feature)
+const char* cmNinjaTargetGenerator::GetFeature(const std::string& feature)
 {
   return this->Target->GetFeature(feature, this->GetConfigName());
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
-bool cmNinjaTargetGenerator::GetFeatureAsBool(const char* feature)
+bool cmNinjaTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
   return cmSystemTools::IsOn(this->GetFeature(feature));
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
 void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
-                                             const char* lang)
+                                             const std::string& lang)
 {
   // Add language-specific flags.
   this->LocalGenerator->AddLanguageFlags(flags, lang, this->GetConfigName());

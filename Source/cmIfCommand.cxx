@@ -593,7 +593,7 @@ namespace
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
         *(argP1) == "MATCHES")
         {
-        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
+        def = cmIfCommand::GetVariableOrString(*arg, makefile);
         const char* rex = (argP2)->c_str();
         cmStringCommand::ClearMatches(makefile);
         cmsys::RegularExpression regEntry;
@@ -634,8 +634,8 @@ namespace
         (*(argP1) == "LESS" || *(argP1) == "GREATER" ||
          *(argP1) == "EQUAL"))
         {
-        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
-        def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        def = cmIfCommand::GetVariableOrString(*arg, makefile);
+        def2 = cmIfCommand::GetVariableOrString(*argP2, makefile);
         double lhs;
         double rhs;
         bool result;
@@ -665,8 +665,8 @@ namespace
          *(argP1) == "STREQUAL" ||
          *(argP1) == "STRGREATER"))
         {
-        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
-        def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        def = cmIfCommand::GetVariableOrString(*arg, makefile);
+        def2 = cmIfCommand::GetVariableOrString(*argP2, makefile);
         int val = strcmp(def,def2);
         bool result;
         if (*(argP1) == "STRLESS")
@@ -689,8 +689,8 @@ namespace
         (*(argP1) == "VERSION_LESS" || *(argP1) == "VERSION_GREATER" ||
          *(argP1) == "VERSION_EQUAL"))
         {
-        def = cmIfCommand::GetVariableOrString(arg->c_str(), makefile);
-        def2 = cmIfCommand::GetVariableOrString((argP2)->c_str(), makefile);
+        def = cmIfCommand::GetVariableOrString(*arg, makefile);
+        def2 = cmIfCommand::GetVariableOrString(*argP2, makefile);
         cmSystemTools::CompareOp op = cmSystemTools::OP_EQUAL;
         if(*argP1 == "VERSION_LESS")
           {
@@ -907,13 +907,13 @@ bool cmIfCommand::IsTrue(const std::vector<std::string> &args,
 }
 
 //=========================================================================
-const char* cmIfCommand::GetVariableOrString(const char* str,
+const char* cmIfCommand::GetVariableOrString(const std::string& str,
                                              const cmMakefile* mf)
 {
   const char* def = mf->GetDefinition(str);
   if(!def)
     {
-    def = str;
+    def = str.c_str();
     }
   return def;
 }

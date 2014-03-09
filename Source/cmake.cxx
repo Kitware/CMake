@@ -221,13 +221,13 @@ void cmake::CleanupCommandsAndMacros()
     }
 }
 
-bool cmake::CommandExists(const char* name) const
+bool cmake::CommandExists(const std::string& name) const
 {
   std::string sName = cmSystemTools::LowerCase(name);
   return (this->Commands.find(sName) != this->Commands.end());
 }
 
-cmCommand *cmake::GetCommand(const char *name)
+cmCommand *cmake::GetCommand(const std::string& name)
 {
   cmCommand* rm = 0;
   std::string sName = cmSystemTools::LowerCase(name);
@@ -239,7 +239,8 @@ cmCommand *cmake::GetCommand(const char *name)
   return rm;
 }
 
-void cmake::RenameCommand(const char*oldName, const char* newName)
+void cmake::RenameCommand(const std::string& oldName,
+                          const std::string& newName)
 {
   // if the command already exists, free the old one
   std::string sOldName = cmSystemTools::LowerCase(oldName);
@@ -262,7 +263,7 @@ void cmake::RenameCommand(const char*oldName, const char* newName)
   this->Commands.erase(pos);
 }
 
-void cmake::RemoveCommand(const char* name)
+void cmake::RemoveCommand(const std::string& name)
 {
   std::string sName = cmSystemTools::LowerCase(name);
   RegisteredCommandsMap::iterator pos = this->Commands.find(sName);
@@ -965,7 +966,7 @@ int cmake::AddCMakePaths()
   return 1;
 }
 
-void cmake::AddExtraGenerator(const char* name,
+void cmake::AddExtraGenerator(const std::string& name,
                               CreateExtraGeneratorFunctionType newFunction)
 {
   cmExternalMakefileProjectGenerator* extraGenerator = newFunction();
@@ -1034,9 +1035,10 @@ void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
     }
 }
 
-cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
+cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 {
   cmExternalMakefileProjectGenerator* extraGenerator = 0;
+  std::string name = gname;
   RegisteredExtraGeneratorsMap::const_iterator extraGenIt =
                                             this->ExtraGenerators.find(name);
   if (extraGenIt != this->ExtraGenerators.end())
@@ -1069,13 +1071,13 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const char* name)
   return generator;
 }
 
-void cmake::SetHomeDirectory(const char* dir)
+void cmake::SetHomeDirectory(const std::string& dir)
 {
   this->cmHomeDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
 }
 
-void cmake::SetHomeOutputDirectory(const char* lib)
+void cmake::SetHomeOutputDirectory(const std::string& lib)
 {
   this->HomeOutputDirectory = lib;
   cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
@@ -1202,7 +1204,7 @@ struct SaveCacheEntry
   cmCacheManager::CacheEntryType type;
 };
 
-int cmake::HandleDeleteCacheVariables(const char* var)
+int cmake::HandleDeleteCacheVariables(const std::string& var)
 {
   std::vector<std::string> argsSplit;
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
@@ -1324,7 +1326,8 @@ int cmake::ActualConfigure()
     if(genName)
       {
       std::string fullName = cmExternalMakefileProjectGenerator::
-                                CreateFullGeneratorName(genName, extraGenName);
+                                CreateFullGeneratorName(genName,
+                                    extraGenName ? extraGenName : "");
       this->GlobalGenerator = this->CreateGlobalGenerator(fullName.c_str());
       }
     if(this->GlobalGenerator)
@@ -1417,13 +1420,13 @@ int cmake::ActualConfigure()
   if(!this->CacheManager->GetCacheValue("CMAKE_GENERATOR"))
     {
     this->CacheManager->AddCacheEntry("CMAKE_GENERATOR",
-                                      this->GlobalGenerator->GetName(),
+                                      this->GlobalGenerator->GetName().c_str(),
                                       "Name of generator.",
                                       cmCacheManager::INTERNAL);
     this->CacheManager->AddCacheEntry("CMAKE_EXTRA_GENERATOR",
-                                this->GlobalGenerator->GetExtraGeneratorName(),
-                                "Name of external makefile project generator.",
-                                cmCacheManager::INTERNAL);
+                        this->GlobalGenerator->GetExtraGeneratorName().c_str(),
+                        "Name of external makefile project generator.",
+                        cmCacheManager::INTERNAL);
     }
 
   if(const char* tsName =
@@ -1725,7 +1728,7 @@ int cmake::Generate()
   return 0;
 }
 
-void cmake::AddCacheEntry(const char* key, const char* value,
+void cmake::AddCacheEntry(const std::string& key, const char* value,
                           const char* helpString,
                           int type)
 {
@@ -1734,7 +1737,7 @@ void cmake::AddCacheEntry(const char* key, const char* value,
                                     cmCacheManager::CacheEntryType(type));
 }
 
-const char* cmake::GetCacheDefinition(const char* name) const
+const char* cmake::GetCacheDefinition(const std::string& name) const
 {
   return this->CacheManager->GetCacheValue(name);
 }
@@ -2144,7 +2147,8 @@ void cmake::GenerateGraphViz(const char* fileName) const
 #endif
 }
 
-void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
+void cmake::DefineProperty(const std::string& name,
+                           cmProperty::ScopeType scope,
                            const char *ShortDescription,
                            const char *FullDescription,
                            bool chained)
@@ -2155,7 +2159,7 @@ void cmake::DefineProperty(const char *name, cmProperty::ScopeType scope,
 }
 
 cmPropertyDefinition *cmake
-::GetPropertyDefinition(const char *name,
+::GetPropertyDefinition(const std::string& name,
                         cmProperty::ScopeType scope)
 {
   if (this->IsPropertyDefined(name,scope))
@@ -2165,25 +2169,22 @@ cmPropertyDefinition *cmake
   return 0;
 }
 
-bool cmake::IsPropertyDefined(const char *name, cmProperty::ScopeType scope)
+bool cmake::IsPropertyDefined(const std::string& name,
+                              cmProperty::ScopeType scope)
 {
   return this->PropertyDefinitions[scope].IsPropertyDefined(name);
 }
 
-bool cmake::IsPropertyChained(const char *name, cmProperty::ScopeType scope)
+bool cmake::IsPropertyChained(const std::string& name,
+                              cmProperty::ScopeType scope)
 {
   return this->PropertyDefinitions[scope].IsPropertyChained(name);
 }
 
-void cmake::SetProperty(const char* prop, const char* value)
+void cmake::SetProperty(const std::string& prop, const char* value)
 {
-  if (!prop)
-    {
-    return;
-    }
-
   // Special hook to invalidate cached value.
-  if(strcmp(prop, "DEBUG_CONFIGURATIONS") == 0)
+  if(prop == "DEBUG_CONFIGURATIONS")
     {
     this->DebugConfigs.clear();
     }
@@ -2191,15 +2192,11 @@ void cmake::SetProperty(const char* prop, const char* value)
   this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
-void cmake::AppendProperty(const char* prop, const char* value, bool asString)
+void cmake::AppendProperty(const std::string& prop,
+                           const char* value, bool asString)
 {
-  if (!prop)
-    {
-    return;
-    }
-
   // Special hook to invalidate cached value.
-  if(strcmp(prop, "DEBUG_CONFIGURATIONS") == 0)
+  if(prop == "DEBUG_CONFIGURATIONS")
     {
     this->DebugConfigs.clear();
     }
@@ -2207,23 +2204,19 @@ void cmake::AppendProperty(const char* prop, const char* value, bool asString)
   this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL, asString);
 }
 
-const char *cmake::GetProperty(const char* prop)
+const char *cmake::GetProperty(const std::string& prop)
 {
   return this->GetProperty(prop, cmProperty::GLOBAL);
 }
 
-const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
+const char *cmake::GetProperty(const std::string& prop,
+                               cmProperty::ScopeType scope)
 {
-  if(!prop)
-    {
-    return 0;
-    }
   bool chain = false;
 
   // watch for special properties
-  std::string propname = prop;
   std::string output = "";
-  if ( propname == "CACHE_VARIABLES" )
+  if ( prop == "CACHE_VARIABLES" )
     {
     cmCacheManager::CacheIterator cit =
       this->GetCacheManager()->GetCacheIterator();
@@ -2237,7 +2230,7 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
       }
     this->SetProperty("CACHE_VARIABLES", output.c_str());
     }
-  else if ( propname == "COMMANDS" )
+  else if ( prop == "COMMANDS" )
     {
     cmake::RegisteredCommandsMap::iterator cmds
         = this->GetCommands()->begin();
@@ -2252,12 +2245,12 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
       }
     this->SetProperty("COMMANDS",output.c_str());
     }
-  else if ( propname == "IN_TRY_COMPILE" )
+  else if ( prop == "IN_TRY_COMPILE" )
     {
     this->SetProperty("IN_TRY_COMPILE",
                       this->GetIsInTryCompile()? "1":"0");
     }
-  else if ( propname == "ENABLED_LANGUAGES" )
+  else if ( prop == "ENABLED_LANGUAGES" )
     {
     std::string lang;
     if(this->GlobalGenerator)
@@ -2278,7 +2271,7 @@ const char *cmake::GetProperty(const char* prop, cmProperty::ScopeType scope)
   return this->Properties.GetPropertyValue(prop, scope, chain);
 }
 
-bool cmake::GetPropertyAsBool(const char* prop)
+bool cmake::GetPropertyAsBool(const std::string& prop)
 {
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
@@ -2677,16 +2670,16 @@ int cmake::Build(const std::string& dir,
     return 1;
     }
   projName = it.GetValue();
-  return gen->Build(0, dir.c_str(),
+  return gen->Build("", dir.c_str(),
                     projName.c_str(), target.c_str(),
                     &output,
-                    0,
+                    "",
                     config.c_str(), clean, false, 0,
                     cmSystemTools::OUTPUT_PASSTHROUGH,
                     nativeOptions);
 }
 
-void cmake::WatchUnusedCli(const char* var)
+void cmake::WatchUnusedCli(const std::string& var)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch->AddWatch(var, cmWarnUnusedCliWarning, this);
@@ -2697,7 +2690,7 @@ void cmake::WatchUnusedCli(const char* var)
 #endif
 }
 
-void cmake::UnwatchUnusedCli(const char* var)
+void cmake::UnwatchUnusedCli(const std::string& var)
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   this->VariableWatch->RemoveWatch(var, cmWarnUnusedCliWarning);
@@ -2711,7 +2704,7 @@ void cmake::RunCheckForUnusedVariables()
   bool haveUnused = false;
   cmOStringStream msg;
   msg << "Manually-specified variables were not used by the project:";
-  for(std::map<cmStdString, bool>::const_iterator
+  for(std::map<std::string, bool>::const_iterator
         it = this->UsedCliVariables.begin();
       it != this->UsedCliVariables.end(); ++it)
     {
