@@ -80,7 +80,6 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
 {
-  this->SilentNoColon = false;
   this->WindowsShell = false;
   this->IncludeDirective = "include";
   this->MakefileVariableSize = 0;
@@ -758,15 +757,17 @@ cmLocalUnixMakefileGenerator3
   depends.push_back(".hpux_make_needs_suffix_list");
   this->WriteMakeRule(makefileStream, 0,
                       ".SUFFIXES", depends, no_commands, false);
-
-  cmGlobalUnixMakefileGenerator3* gg =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
-  // Write special target to silence make output.  This must be after
-  // the default target in case VERBOSE is set (which changes the
-  // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
-  // "VERBOSE=1" to be added as a make variable which will change the
-  // name of this special target.  This gives a make-time choice to
-  // the user.
+  if(this->WatcomWMake)
+    {
+    // Switch on WMake feature, if an error or interrupt occurs during
+    // makefile processing, the current target being made may be deleted
+    // without prompting (the same as command line -e option).
+    makefileStream <<
+      "\n"
+      ".ERASE\n"
+      "\n"
+      ;
+    }
   if(this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"))
     {
     makefileStream
@@ -774,12 +775,22 @@ cmLocalUnixMakefileGenerator3
       << "VERBOSE = 1\n"
       << "\n";
     }
-  if(this->SilentNoColon)
+  if(this->WatcomWMake)
     {
-    makefileStream << "$(VERBOSE).SILENT\n";
+    makefileStream <<
+      "!ifndef VERBOSE\n"
+      ".SILENT\n"
+      "!endif\n"
+      ;
     }
   else
     {
+    // Write special target to silence make output.  This must be after
+    // the default target in case VERBOSE is set (which changes the
+    // name).  The setting of CMAKE_VERBOSE_MAKEFILE to ON will cause a
+    // "VERBOSE=1" to be added as a make variable which will change the
+    // name of this special target.  This gives a make-time choice to
+    // the user.
     this->WriteMakeRule(makefileStream,
                         "Suppress display of executed commands.",
                         "$(VERBOSE).SILENT",
@@ -789,6 +800,8 @@ cmLocalUnixMakefileGenerator3
 
   // Work-around for makes that drop rules that have no dependencies
   // or commands.
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   std::string hack = gg->GetEmptyRuleHackDepends();
   if(!hack.empty())
     {
