@@ -124,9 +124,7 @@ private:
                                  cmTarget& target,
                                  std::vector<cmCustomCommand> const & commands,
                                  const std::string& configName,
-                                 const std::map<std::string, std::string>&
-                                     multipleOutputPairs
-                                );
+                                 bool& haveMultipleOutputPairs);
 
   cmXCodeObject* FindXCodeTarget(cmTarget const*);
   std::string GetOrCreateId(const std::string& name, const std::string& id);
