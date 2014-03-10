@@ -74,6 +74,10 @@ protected:
   bool GetFeatureAsBool(const std::string& feature);
   void AddFeatureFlags(std::string& flags, const std::string& lang);
 
+  std::string OrderDependsTargetForTarget();
+
+  std::string ComputeOrderDependsForTarget();
+
   /**
    * Compute the flags for compilation of object files for a given @a language.
    * @note Generally it is the value of the variable whose name is computed

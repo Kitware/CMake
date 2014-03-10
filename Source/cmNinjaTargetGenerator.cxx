@@ -121,6 +121,12 @@ void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
     }
 }
 
+std::string
+cmNinjaTargetGenerator::OrderDependsTargetForTarget()
+{
+  return "cmake_order_depends_target_" + this->GetTargetName();
+}
+
 // TODO: Most of the code is picked up from
 // void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink),
 // void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
@@ -516,6 +522,19 @@ cmNinjaTargetGenerator
     {
     this->Objects.push_back(this->GetSourceFilePath(*si));
     }
+
+  cmNinjaDeps orderOnlyDeps;
+  this->GetLocalGenerator()->AppendTargetDepends(this->Target, orderOnlyDeps);
+  cmNinjaDeps orderOnlyTarget;
+  orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
+  this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
+                                          "Order-only phony target for "
+                                            + this->GetTargetName(),
+                                          orderOnlyTarget,
+                                          cmNinjaDeps(),
+                                          cmNinjaDeps(),
+                                          orderOnlyDeps);
+
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources, config);
   for(std::vector<cmSourceFile const*>::const_iterator
@@ -554,11 +573,6 @@ cmNinjaTargetGenerator
     sourceFileName = this->GetSourceFilePath(source);
   explicitDeps.push_back(sourceFileName);
 
-  // Ensure that the target dependencies are built before any source file in
-  // the target, using order-only dependencies.
-  cmNinjaDeps orderOnlyDeps;
-  this->GetLocalGenerator()->AppendTargetDepends(this->Target, orderOnlyDeps);
-
   cmNinjaDeps implicitDeps;
   if(const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
     std::vector<std::string> depList;
@@ -566,6 +580,9 @@ cmNinjaTargetGenerator
     std::transform(depList.begin(), depList.end(),
                    std::back_inserter(implicitDeps), MapToNinjaPath());
   }
+
+  cmNinjaDeps orderOnlyDeps;
+  orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
 
   // Add order-only dependencies on custom command outputs.
   for(std::vector<cmCustomCommand const*>::const_iterator
