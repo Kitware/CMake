@@ -4918,8 +4918,8 @@ void SystemTools::ClassInitialize()
 
         // Strip off one directory level and see if the logical
         // mapping still works.
-        pwd_str = SystemTools::GetFilenamePath(pwd_str.c_str());
-        cwd_str = SystemTools::GetFilenamePath(cwd_str.c_str());
+        pwd_str = SystemTools::GetFilenamePath(pwd_str);
+        cwd_str = SystemTools::GetFilenamePath(cwd_str);
         Realpath(pwd_str.c_str(), pwd_path);
         }
 

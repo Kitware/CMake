@@ -183,7 +183,7 @@ bool cmGlobalKdevelopGenerator
             (strstr(tmp.c_str(),
                     cmake::GetCMakeFilesDirectoryPostSlash())==0))
           {
-          files.insert(tmp.c_str());
+          files.insert(tmp);
           }
         }
       }

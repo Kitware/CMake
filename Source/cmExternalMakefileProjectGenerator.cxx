@@ -60,7 +60,7 @@ std::string cmExternalMakefileProjectGenerator::GetGlobalGeneratorName(
        it != this->SupportedGlobalGenerators.end();
        ++it)
     {
-      if (this->CreateFullGeneratorName(it->c_str(), this->GetName())
+      if (this->CreateFullGeneratorName(*it, this->GetName())
                                                                 == currentName)
       {
         return *it;

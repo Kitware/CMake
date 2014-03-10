@@ -146,14 +146,14 @@ std::string
 cmLocalNinjaGenerator::ConvertToLinkReference(std::string const& lib,
                                               OutputFormat format)
 {
-  return this->Convert(lib.c_str(), HOME_OUTPUT, format);
+  return this->Convert(lib, HOME_OUTPUT, format);
 }
 
 std::string
 cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path,
                                                  OutputFormat format)
 {
-  return this->Convert(path.c_str(), HOME_OUTPUT, format);
+  return this->Convert(path, HOME_OUTPUT, format);
 }
 
 //----------------------------------------------------------------------------
@@ -310,7 +310,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(const cmCustomCommand *cc,
   for (std::vector<std::string>::const_iterator i = deps.begin();
        i != deps.end(); ++i) {
     std::string dep;
-    if (this->GetRealDependency(i->c_str(), this->GetConfigName(), dep))
+    if (this->GetRealDependency(*i, this->GetConfigName(), dep))
       ninjaDeps.push_back(ConvertToNinjaPath(dep.c_str()));
   }
 }
@@ -382,7 +382,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
 
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
     cmdLines.push_back(launcher +
-      this->ConvertToOutputFormat(ccg.GetCommand(i).c_str(), SHELL));
+      this->ConvertToOutputFormat(ccg.GetCommand(i), SHELL));
 
     std::string& cmd = cmdLines.back();
     ccg.AppendArguments(i, cmd);
@@ -493,7 +493,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
     RelativeRoot relative_root =
       cc.GetWorkingDirectory() ? NONE : START_OUTPUT;
 
-    output = this->Convert(outputs[0].c_str(), relative_root, SHELL);
+    output = this->Convert(outputs[0], relative_root, SHELL);
   }
   vars.Output = output.c_str();
 

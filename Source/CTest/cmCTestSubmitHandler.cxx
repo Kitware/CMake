@@ -339,7 +339,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
   std::string dropMethod(this->CTest->GetCTestConfiguration("DropMethod"));
   std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
   std::vector<std::string> args;
-  cmSystemTools::ExpandListArgument(curlopt.c_str(), args);
+  cmSystemTools::ExpandListArgument(curlopt, args);
   bool verifyPeerOff = false;
   bool verifyHostOff = false;
   for( std::vector<std::string>::iterator i = args.begin();
@@ -461,7 +461,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
       else
         {
         char md5[33];
-        cmSystemTools::ComputeFileMD5(local_file.c_str(), md5);
+        cmSystemTools::ComputeFileMD5(local_file, md5);
         md5[32] = 0;
         upload_as += md5;
         }

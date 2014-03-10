@@ -629,7 +629,7 @@ void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
     // if so add a desktop link
     std::string desktop = "CPACK_CREATE_DESKTOP_LINK_";
     desktop += linkName;
-    if(this->IsSet(desktop.c_str()))
+    if(this->IsSet(desktop))
       {
       str << "  StrCmp \"$INSTALL_DESKTOP\" \"1\" 0 +2\n";
       str << "    CreateShortCut \"$DESKTOP\\"

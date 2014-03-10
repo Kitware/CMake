@@ -680,8 +680,8 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
       continue;
       }
 
-    if(this->Match(line.c_str(), this->RegexWarning) &&
-       !this->Match(line.c_str(), this->RegexWarningSuppress))
+    if(this->Match(line, this->RegexWarning) &&
+       !this->Match(line, this->RegexWarningSuppress))
       {
       return true;
       }

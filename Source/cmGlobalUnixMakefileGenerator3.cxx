@@ -356,14 +356,14 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     << "# The top level Makefile was generated from the following files:\n"
     << "set(CMAKE_MAKEFILE_DEPENDS\n"
     << "  \""
-    << lg->Convert(cache.c_str(),
+    << lg->Convert(cache,
                    cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
     cmakefileStream
       << "  \""
-      << lg->Convert(i->c_str(), cmLocalGenerator::START_OUTPUT).c_str()
+      << lg->Convert(*i, cmLocalGenerator::START_OUTPUT).c_str()
       << "\"\n";
     }
   cmakefileStream
@@ -379,10 +379,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     << "# The corresponding makefile is:\n"
     << "set(CMAKE_MAKEFILE_OUTPUTS\n"
     << "  \""
-    << lg->Convert(makefileName.c_str(),
+    << lg->Convert(makefileName,
                    cmLocalGenerator::START_OUTPUT).c_str() << "\"\n"
     << "  \""
-    << lg->Convert(check.c_str(),
+    << lg->Convert(check,
                    cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
   cmakefileStream << "  )\n\n";
 
@@ -397,7 +397,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
       k != outfiles.end(); ++k)
     {
     cmakefileStream << "  \"" <<
-      lg->Convert(k->c_str(),cmLocalGenerator::HOME_OUTPUT).c_str()
+      lg->Convert(*k,cmLocalGenerator::HOME_OUTPUT).c_str()
                     << "\"\n";
     }
 
@@ -411,7 +411,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     tmpStr += cmake::GetCMakeFilesDirectory();
     tmpStr += "/CMakeDirectoryInformation.cmake";
     cmakefileStream << "  \"" <<
-      lg->Convert(tmpStr.c_str(),cmLocalGenerator::HOME_OUTPUT).c_str()
+      lg->Convert(tmpStr,cmLocalGenerator::HOME_OUTPUT).c_str()
                     << "\"\n";
     }
   cmakefileStream << "  )\n\n";
@@ -494,7 +494,7 @@ cmGlobalUnixMakefileGenerator3
       if((!check_all || !gtarget->GetPropertyAsBool("EXCLUDE_FROM_ALL")) &&
          (!check_relink ||
           gtarget->Target
-                   ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str())))
+                   ->NeedRelinkBeforeInstall(lg->ConfigurationName)))
         {
         std::string tname = lg->GetRelativeTargetDirectory(*gtarget->Target);
         tname += "/";
@@ -530,7 +530,7 @@ cmGlobalUnixMakefileGenerator3
   doc += "\" pass in the directory.";
   std::vector<std::string> no_commands;
   lg->WriteMakeRule(ruleFileStream, doc.c_str(),
-                    makeTarget.c_str(), depends, no_commands, true);
+                    makeTarget, depends, no_commands, true);
 }
 
 //----------------------------------------------------------------------------
@@ -547,7 +547,7 @@ cmGlobalUnixMakefileGenerator3
 
   // Begin the directory-level rules section.
   std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
-  dir = lg->Convert(dir.c_str(), cmLocalGenerator::HOME_OUTPUT,
+  dir = lg->Convert(dir, cmLocalGenerator::HOME_OUTPUT,
                     cmLocalGenerator::MAKEFILE);
   lg->WriteDivider(ruleFileStream);
   ruleFileStream
@@ -612,7 +612,7 @@ void cmGlobalUnixMakefileGenerator3
       {
       tname += "/fast";
       }
-    tname = lg->Convert(tname.c_str(),cmLocalGenerator::HOME_OUTPUT);
+    tname = lg->Convert(tname,cmLocalGenerator::HOME_OUTPUT);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(tname);
     if (!this->LocalGenerators.size())
@@ -697,14 +697,14 @@ cmGlobalUnixMakefileGenerator3
         localName = name;
         localName += "/fast";
         commands.push_back(lg->GetRecursiveMakeCall
-                            (makefileName.c_str(), makeTargetName.c_str()));
+                            (makefileName.c_str(), makeTargetName));
         lg->WriteMakeRule(ruleFileStream, "fast build rule for target.",
-                          localName.c_str(), depends, commands, true);
+                          localName, depends, commands, true);
 
         // Add a local name for the rule to relink the target before
         // installation.
         if(gtarget->Target
-                    ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
+                    ->NeedRelinkBeforeInstall(lg->ConfigurationName))
           {
           makeTargetName = lg->GetRelativeTargetDirectory(*gtarget->Target);
           makeTargetName += "/preinstall";
@@ -713,10 +713,10 @@ cmGlobalUnixMakefileGenerator3
           depends.clear();
           commands.clear();
           commands.push_back(lg->GetRecursiveMakeCall
-                             (makefileName.c_str(), makeTargetName.c_str()));
+                             (makefileName.c_str(), makeTargetName));
           lg->WriteMakeRule(ruleFileStream,
                             "Manual pre-install relink rule for target.",
-                            localName.c_str(), depends, commands, true);
+                            localName, depends, commands, true);
           }
         }
       }
@@ -778,7 +778,7 @@ cmGlobalUnixMakefileGenerator3
       makeTargetName = localName;
       makeTargetName += "/depend";
       commands.push_back(lg->GetRecursiveMakeCall
-                         (makefileName.c_str(),makeTargetName.c_str()));
+                         (makefileName.c_str(),makeTargetName));
 
       // add requires if we need it for this generator
       if (needRequiresStep)
@@ -786,12 +786,12 @@ cmGlobalUnixMakefileGenerator3
         makeTargetName = localName;
         makeTargetName += "/requires";
         commands.push_back(lg->GetRecursiveMakeCall
-                          (makefileName.c_str(),makeTargetName.c_str()));
+                          (makefileName.c_str(),makeTargetName));
         }
       makeTargetName = localName;
       makeTargetName += "/build";
       commands.push_back(lg->GetRecursiveMakeCall
-                         (makefileName.c_str(),makeTargetName.c_str()));
+                         (makefileName.c_str(),makeTargetName));
 
       // Write the rule.
       localName += "/all";
@@ -804,7 +804,7 @@ cmGlobalUnixMakefileGenerator3
         cmOStringStream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
         // all target counts
-        progCmd << lg->Convert(progressDir.c_str(),
+        progCmd << lg->Convert(progressDir,
                                 cmLocalGenerator::FULL,
                                 cmLocalGenerator::SHELL);
         progCmd << " ";
@@ -823,7 +823,7 @@ cmGlobalUnixMakefileGenerator3
 
       this->AppendGlobalTargetDepends(depends,*gtarget->Target);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
-                        localName.c_str(), depends, commands, true);
+                        localName, depends, commands, true);
 
       // add the all/all dependency
       if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
@@ -845,7 +845,7 @@ cmGlobalUnixMakefileGenerator3
       cmOStringStream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
       // # in target
-      progCmd << lg->Convert(progressDir.c_str(),
+      progCmd << lg->Convert(progressDir,
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       //
@@ -857,11 +857,11 @@ cmGlobalUnixMakefileGenerator3
       std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
       tmp += "Makefile2";
       commands.push_back(lg->GetRecursiveMakeCall
-                          (tmp.c_str(),localName.c_str()));
+                          (tmp.c_str(),localName));
       {
       cmOStringStream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-      progCmd << lg->Convert(progressDir.c_str(),
+      progCmd << lg->Convert(progressDir,
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       progCmd << " 0";
@@ -873,7 +873,7 @@ cmGlobalUnixMakefileGenerator3
       localName += "/rule";
       lg->WriteMakeRule(ruleFileStream,
                         "Build rule for subdir invocation for target.",
-                        localName.c_str(), depends, commands, true);
+                        localName, depends, commands, true);
 
       // Add a target with the canonical name (no prefix, suffix or path).
       commands.clear();
@@ -884,17 +884,17 @@ cmGlobalUnixMakefileGenerator3
 
       // Add rules to prepare the target for installation.
       if(gtarget->Target
-                  ->NeedRelinkBeforeInstall(lg->ConfigurationName.c_str()))
+                  ->NeedRelinkBeforeInstall(lg->ConfigurationName))
         {
         localName = lg->GetRelativeTargetDirectory(*gtarget->Target);
         localName += "/preinstall";
         depends.clear();
         commands.clear();
         commands.push_back(lg->GetRecursiveMakeCall
-                            (makefileName.c_str(), localName.c_str()));
+                            (makefileName.c_str(), localName));
         lg->WriteMakeRule(ruleFileStream,
                           "Pre-install relink rule for target.",
-                          localName.c_str(), depends, commands, true);
+                          localName, depends, commands, true);
 
         if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
           {
@@ -913,9 +913,9 @@ cmGlobalUnixMakefileGenerator3
       depends.clear();
       commands.clear();
       commands.push_back(lg->GetRecursiveMakeCall
-                          (makefileName.c_str(), makeTargetName.c_str()));
+                          (makefileName.c_str(), makeTargetName));
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
-                        makeTargetName.c_str(), depends, commands, true);
+                        makeTargetName, depends, commands, true);
       commands.clear();
       depends.push_back(makeTargetName);
       lg->WriteMakeRule(ruleFileStream, "clean rule for target.",
@@ -1121,7 +1121,7 @@ bool cmGlobalUnixMakefileGenerator3
     std::string var = "CMAKE_NEEDS_REQUIRES_STEP_";
     var += *l;
     var += "_FLAG";
-    if(target.GetMakefile()->GetDefinition(var.c_str()))
+    if(target.GetMakefile()->GetDefinition(var))
       {
       return true;
       }

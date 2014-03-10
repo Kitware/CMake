@@ -192,7 +192,7 @@ void cmGraphVizWriter::WriteTargetDependersFiles(const char* fileName)
     std::cout << "Writing " << currentFilename << "..." << std::endl;
     this->WriteHeader(str);
 
-    this->WriteDependerConnections(ptrIt->first.c_str(),
+    this->WriteDependerConnections(ptrIt->first,
                                    insertedNodes, insertedConnections, str);
 
     this->WriteFooter(str);
@@ -241,7 +241,7 @@ void cmGraphVizWriter::WritePerTargetFiles(const char* fileName)
     std::cout << "Writing " << currentFilename << "..." << std::endl;
     this->WriteHeader(str);
 
-    this->WriteConnections(ptrIt->first.c_str(),
+    this->WriteConnections(ptrIt->first,
                               insertedNodes, insertedConnections, str);
     this->WriteFooter(str);
     }
@@ -280,7 +280,7 @@ void cmGraphVizWriter::WriteGlobalFile(const char* fileName)
       continue;
       }
 
-    this->WriteConnections(ptrIt->first.c_str(),
+    this->WriteConnections(ptrIt->first,
                               insertedNodes, insertedConnections, str);
     }
   this->WriteFooter(str);
@@ -407,7 +407,7 @@ void cmGraphVizWriter::WriteDependerConnections(const std::string& targetName,
          llit != ll->end();
          ++ llit )
       {
-      std::string libName = llit->first.c_str();
+      std::string libName = llit->first;
       if (libName == targetName)
         {
         // So this target links against targetName.
@@ -424,13 +424,13 @@ void cmGraphVizWriter::WriteDependerConnections(const std::string& targetName,
                                                      insertedConnections.end())
             {
             insertedConnections.insert(connectionName);
-            this->WriteNode(dependerIt->first.c_str(), dependerIt->second,
+            this->WriteNode(dependerIt->first, dependerIt->second,
                             insertedNodes, str);
 
             str << "    \"" << dependerNodeNameIt->second << "\" -> \""
                 << myNodeName << "\"";
             str << " // " <<targetName<< " -> " <<dependerIt->first<<std::endl;
-            this->WriteDependerConnections(dependerIt->first.c_str(),
+            this->WriteDependerConnections(dependerIt->first,
                                       insertedNodes, insertedConnections, str);
             }
 

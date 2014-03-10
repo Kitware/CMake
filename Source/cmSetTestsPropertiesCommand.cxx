@@ -76,12 +76,12 @@ bool cmSetTestsPropertiesCommand
     {
     std::string errors;
     bool ret =
-      cmSetTestsPropertiesCommand::SetOneTest(args[i].c_str(),
+      cmSetTestsPropertiesCommand::SetOneTest(args[i],
                                               propertyPairs,
                                               this->Makefile, errors);
     if (!ret)
       {
-      this->SetError(errors.c_str());
+      this->SetError(errors);
       return ret;
       }
     }
@@ -101,7 +101,7 @@ bool cmSetTestsPropertiesCommand
     unsigned int k;
     for (k = 0; k < propertyPairs.size(); k = k + 2)
       {
-      test->SetProperty(propertyPairs[k].c_str(),
+      test->SetProperty(propertyPairs[k],
                         propertyPairs[k+1].c_str());
       }
     }

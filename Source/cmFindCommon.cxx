@@ -51,7 +51,7 @@ void cmFindCommon::SelectDefaultRootPathMode()
   std::string findRootPathVar = "CMAKE_FIND_ROOT_PATH_MODE_";
   findRootPathVar += this->CMakePathName;
   std::string rootPathMode =
-    this->Makefile->GetSafeDefinition(findRootPathVar.c_str());
+    this->Makefile->GetSafeDefinition(findRootPathVar);
   if (rootPathMode=="NEVER")
     {
     this->FindRootPathMode = RootPathModeNoRootPath;
@@ -361,7 +361,7 @@ void cmFindCommon::AddUserPath(std::string const& p,
   // Expand using the view of the target application.
   std::string expanded = p;
   cmSystemTools::ExpandRegistryValues(expanded, view);
-  cmSystemTools::GlobDirs(expanded.c_str(), paths);
+  cmSystemTools::GlobDirs(expanded, paths);
 
   // Executables can be either 32-bit or 64-bit, so expand using the
   // alternative view.
@@ -369,7 +369,7 @@ void cmFindCommon::AddUserPath(std::string const& p,
     {
     expanded = p;
     cmSystemTools::ExpandRegistryValues(expanded, other_view);
-    cmSystemTools::GlobDirs(expanded.c_str(), paths);
+    cmSystemTools::GlobDirs(expanded, paths);
     }
 }
 
@@ -433,7 +433,7 @@ void cmFindCommon::AddPathInternal(std::string const& in_path,
   // Insert the path if has not already been emitted.
   if(this->SearchPathsEmitted.insert(fullPath).second)
     {
-    this->SearchPaths.push_back(fullPath.c_str());
+    this->SearchPaths.push_back(fullPath);
     }
 }
 

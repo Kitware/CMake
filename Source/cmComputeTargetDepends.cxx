@@ -223,8 +223,8 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     // Don't emit the same library twice for this target.
     if(emitted.insert(*lib).second)
       {
-      this->AddTargetDepend(depender_index, lib->c_str(), true);
-      this->AddInterfaceDepends(depender_index, lib->c_str(),
+      this->AddTargetDepend(depender_index, *lib, true);
+      this->AddInterfaceDepends(depender_index, *lib,
                                 true, emitted);
       }
     }
@@ -235,7 +235,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     it != configs.end(); ++it)
     {
     std::vector<std::string> tlibs;
-    depender->GetDirectLinkLibraries(it->c_str(), tlibs, depender);
+    depender->GetDirectLinkLibraries(*it, tlibs, depender);
 
     // A target should not depend on itself.
     emitted.insert(depender->GetName());
@@ -245,8 +245,8 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       // Don't emit the same library twice for this target.
       if(emitted.insert(*lib).second)
         {
-        this->AddTargetDepend(depender_index, lib->c_str(), true);
-        this->AddInterfaceDepends(depender_index, lib->c_str(),
+        this->AddTargetDepend(depender_index, *lib, true);
+        this->AddInterfaceDepends(depender_index, *lib,
                                   true, emitted);
         }
       }
@@ -265,7 +265,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
     // Don't emit the same utility twice for this target.
     if(emitted.insert(*util).second)
       {
-      this->AddTargetDepend(depender_index, util->c_str(), false);
+      this->AddTargetDepend(depender_index, *util, false);
       }
     }
   }
@@ -288,8 +288,8 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
       // Don't emit the same library twice for this target.
       if(emitted.insert(*lib).second)
         {
-        this->AddTargetDepend(depender_index, lib->c_str(), true);
-        this->AddInterfaceDepends(depender_index, lib->c_str(),
+        this->AddTargetDepend(depender_index, *lib, true);
+        this->AddInterfaceDepends(depender_index, *lib,
                                   true, emitted);
         }
       }
@@ -326,7 +326,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
       // A target should not depend on itself.
       emitted.insert(depender->GetName());
       this->AddInterfaceDepends(depender_index, dependee,
-                                it->c_str(), emitted);
+                                *it, emitted);
       }
     }
 }

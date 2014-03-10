@@ -1159,7 +1159,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "CLEAN",
-            (ninjaCmd() + " -t clean").c_str(),
+            ninjaCmd() + " -t clean",
             "Cleaning all built files...",
             "Rule for cleaning all built files.",
             /*depfile=*/ "",
@@ -1182,7 +1182,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "HELP",
-            (ninjaCmd() + " -t targets").c_str(),
+            ninjaCmd() + " -t targets",
             "All primary targets available:",
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",

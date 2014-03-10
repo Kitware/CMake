@@ -89,7 +89,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     std::string errorMsg =
       "Function invoked with incorrect arguments for function named: ";
     errorMsg += this->Args[0];
-    this->SetError(errorMsg.c_str());
+    this->SetError(errorMsg);
     return false;
     }
 
@@ -113,15 +113,15 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     {
     cmOStringStream tmpStream;
     tmpStream << "ARGV" << t;
-    this->Makefile->AddDefinition(tmpStream.str().c_str(),
+    this->Makefile->AddDefinition(tmpStream.str(),
                                   expandedArgs[t].c_str());
-    this->Makefile->MarkVariableAsUsed(tmpStream.str().c_str());
+    this->Makefile->MarkVariableAsUsed(tmpStream.str());
     }
 
   // define the formal arguments
   for (unsigned int j = 1; j < this->Args.size(); ++j)
     {
-    this->Makefile->AddDefinition(this->Args[j].c_str(),
+    this->Makefile->AddDefinition(this->Args[j],
                                   expandedArgs[j-1].c_str());
     }
 
@@ -219,8 +219,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
         }
 
       std::string newName = "_" + this->Args[0];
-      mf.GetCMakeInstance()->RenameCommand(this->Args[0].c_str(),
-                                           newName.c_str());
+      mf.GetCMakeInstance()->RenameCommand(this->Args[0],
+                                           newName);
       mf.AddCommand(f);
 
       // remove the function blocker now that the function is defined

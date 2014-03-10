@@ -66,14 +66,14 @@ bool cmGetCMakePropertyCommand
   else
     {
     const char *prop =
-      this->Makefile->GetCMakeInstance()->GetProperty(args[1].c_str());
+      this->Makefile->GetCMakeInstance()->GetProperty(args[1]);
     if (prop)
       {
       output = prop;
       }
     }
 
-  this->Makefile->AddDefinition(variable.c_str(), output.c_str());
+  this->Makefile->AddDefinition(variable, output.c_str());
 
   return true;
 }

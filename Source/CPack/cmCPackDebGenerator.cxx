@@ -506,7 +506,7 @@ int cmCPackDebGenerator::createDeb()
           controlExtraList.begin(); i != controlExtraList.end(); ++i)
       {
       std::string filenamename =
-        cmsys::SystemTools::GetFilenameName(i->c_str());
+        cmsys::SystemTools::GetFilenameName(*i);
       std::string localcopy = this->GetOption("WDIR");
       localcopy += "/";
       localcopy += filenamename;
@@ -588,9 +588,9 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar = "CPACK_COMPONENT_" +
         cmSystemTools::UpperCase(componentName) + "_GROUP";
-    if (NULL != GetOption(groupVar.c_str()))
+    if (NULL != GetOption(groupVar))
       {
-      return std::string(GetOption(groupVar.c_str()));
+      return std::string(GetOption(groupVar));
       }
     else
       {

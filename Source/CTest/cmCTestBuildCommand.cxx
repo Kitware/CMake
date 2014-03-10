@@ -151,7 +151,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         "\n"
         "Alternatively, set CTEST_BUILD_COMMAND to build the project "
         "with a custom command line.";
-      this->SetError(ostr.str().c_str());
+      this->SetError(ostr.str());
       return 0;
       }
     }

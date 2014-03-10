@@ -175,7 +175,7 @@ cmNinjaNormalTargetGenerator
 
         // build response file name
         std::string cmakeLinkVar =  cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-        const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar.c_str());
+        const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar);
         if(flag) {
           responseFlag = flag;
         } else {
@@ -189,7 +189,7 @@ cmNinjaNormalTargetGenerator
         linkOptionVar += "_COMPILER_LINKER_OPTION_FLAG_";
         linkOptionVar += cmTarget::GetTargetTypeName(targetType);
         const std::string linkOption =
-                GetMakefile()->GetSafeDefinition(linkOptionVar.c_str());
+                GetMakefile()->GetSafeDefinition(linkOptionVar);
         rspcontent = "$in_newline "+linkOption+" $LINK_PATH $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
         vars.LinkLibraries = "";
@@ -321,7 +321,7 @@ cmNinjaNormalTargetGenerator
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_CREATE_STATIC_LIBRARY";
       if (const char *linkCmd =
-            this->GetMakefile()->GetDefinition(linkCmdVar.c_str()))
+            this->GetMakefile()->GetDefinition(linkCmdVar))
         {
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
         return linkCmds;
@@ -341,7 +341,7 @@ cmNinjaNormalTargetGenerator
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_CREATE";
       const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+        this->GetMakefile()->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       {
@@ -349,7 +349,7 @@ cmNinjaNormalTargetGenerator
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_FINISH";
       const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+        this->GetMakefile()->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       return linkCmds;
@@ -374,7 +374,7 @@ cmNinjaNormalTargetGenerator
       }
 
       const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+        this->GetMakefile()->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       return linkCmds;
     }
@@ -497,7 +497,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
       if (!install_name_dir.empty()) {
         vars["INSTALLNAME_DIR"] =
-          this->GetLocalGenerator()->Convert(install_name_dir.c_str(),
+          this->GetLocalGenerator()->Convert(install_name_dir,
               cmLocalGenerator::NONE,
               cmLocalGenerator::SHELL, false);
       }
@@ -506,7 +506,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   if (!this->TargetNameImport.empty()) {
     const std::string impLibPath = this->GetLocalGenerator()
-      ->ConvertToOutputFormat(targetOutputImplib.c_str(),
+      ->ConvertToOutputFormat(targetOutputImplib,
                               cmLocalGenerator::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);

@@ -52,7 +52,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
     *this->BuildFileStream
       << "# Include the progress variables for this target.\n"
       << this->LocalGenerator->IncludeDirective << " " << root
-      << this->Convert(this->ProgressFileNameFull.c_str(),
+      << this->Convert(this->ProgressFileNameFull,
                        cmLocalGenerator::HOME_OUTPUT,
                        cmLocalGenerator::MAKEFILE)
       << "\n\n";
@@ -105,7 +105,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
                                       depends, commands, true);
 
   // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(this->Target->GetName().c_str(), false);
+  this->WriteTargetDriverRule(this->Target->GetName(), false);
 
   // Write clean target
   this->WriteTargetCleanRules();

@@ -78,7 +78,7 @@ bool cmSourceGroupCommand
     else if(doingFiles)
       {
       // Convert name to full path and add to the group's list.
-      std::string src = args[i].c_str();
+      std::string src = args[i];
       if(!cmSystemTools::FileIsFullPath(src.c_str()))
         {
         src = this->Makefile->GetCurrentDirectory();
@@ -86,14 +86,14 @@ bool cmSourceGroupCommand
         src += args[i];
         }
       src = cmSystemTools::CollapseFullPath(src.c_str());
-      sg->AddGroupFile(src.c_str());
+      sg->AddGroupFile(src);
       }
     else
       {
       cmOStringStream err;
       err << "Unknown argument \"" << args[i].c_str() << "\".  "
           << "Perhaps the FILES keyword is missing.\n";
-      this->SetError(err.str().c_str());
+      this->SetError(err.str());
       return false;
       }
     }

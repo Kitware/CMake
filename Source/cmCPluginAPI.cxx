@@ -557,9 +557,9 @@ void CCONV *cmGetSource(void *arg, const char *name)
       sf->RealSourceFile = rsf;
       sf->FullPath = rsf->GetFullPath();
       sf->SourceName =
-        cmSystemTools::GetFilenameWithoutLastExtension(sf->FullPath.c_str());
+        cmSystemTools::GetFilenameWithoutLastExtension(sf->FullPath);
       sf->SourceExtension =
-        cmSystemTools::GetFilenameLastExtension(sf->FullPath.c_str());
+        cmSystemTools::GetFilenameLastExtension(sf->FullPath);
 
       // Store the proxy in the map so it can be re-used and deleted later.
       cmCPluginAPISourceFileMap::value_type entry(rsf, sf);
@@ -583,7 +583,7 @@ void * CCONV cmAddSource(void *arg, void *arg2)
     }
 
   // Create the real cmSourceFile instance and copy over saved information.
-  cmSourceFile* rsf = mf->GetOrCreateSource(osf->FullPath.c_str());
+  cmSourceFile* rsf = mf->GetOrCreateSource(osf->FullPath);
   rsf->GetProperties() = osf->Properties;
   for(std::vector<std::string>::iterator i = osf->Depends.begin();
       i != osf->Depends.end(); ++i)

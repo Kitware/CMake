@@ -137,7 +137,7 @@ bool cmVariableWatchCommand
     {
     cmOStringStream ostr;
     ostr << "cannot be set on the variable: " << variable.c_str();
-    this->SetError(ostr.str().c_str());
+    this->SetError(ostr.str());
     return false;
     }
 

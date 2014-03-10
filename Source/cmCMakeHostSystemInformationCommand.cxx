@@ -53,7 +53,7 @@ bool cmCMakeHostSystemInformationCommand
     result_list += value;
     }
 
-  this->Makefile->AddDefinition(variable.c_str(), result_list.c_str());
+  this->Makefile->AddDefinition(variable, result_list.c_str());
 
   return true;
 }
@@ -97,7 +97,7 @@ bool cmCMakeHostSystemInformationCommand
   else
     {
     std::string e = "does not recognize <key> " + key;
-    this->SetError(e.c_str());
+    this->SetError(e);
     return false;
     }
 

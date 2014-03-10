@@ -99,7 +99,7 @@ cmScriptGenerator::CreateConfigTest(std::vector<std::string> const& configs)
     {
     result += sep;
     sep = "|";
-    cmScriptGeneratorEncodeConfig(ci->c_str(), result);
+    cmScriptGeneratorEncodeConfig(*ci, result);
     }
   result += ")$\"";
   return result;

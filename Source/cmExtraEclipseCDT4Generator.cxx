@@ -205,7 +205,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
   const char* cacheValue = mf->GetCacheManager()->GetCacheValue(
-                                                       cacheEntryName.c_str());
+                                                       cacheEntryName);
 
   // now we have both, decide which one to use
   std::string valueToUse;
@@ -219,7 +219,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     // The variable is in the env, but not in the cache. Use it and put it
     // in the cache
     valueToUse = envVarValue;
-    mf->AddCacheDefinition(cacheEntryName.c_str(), valueToUse.c_str(),
+    mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                            cacheEntryName.c_str(), cmCacheManager::STRING,
                            true);
     mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
@@ -240,7 +240,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     if (valueToUse.find(envVarValue) == std::string::npos)
       {
       valueToUse = envVarValue;
-      mf->AddCacheDefinition(cacheEntryName.c_str(), valueToUse.c_str(),
+      mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                              cacheEntryName.c_str(), cmCacheManager::STRING,
                              true);
       mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
@@ -981,7 +981,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     std::string systemIncludeDirs = mf->GetSafeDefinition(
                                 "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
-    cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+    cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
     this->AppendIncludeDirectories(fout, dirs, emmited);
     }
   compiler = mf->GetSafeDefinition("CMAKE_CXX_COMPILER");
@@ -990,7 +990,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     std::string systemIncludeDirs = mf->GetSafeDefinition(
                               "CMAKE_EXTRA_GENERATOR_CXX_SYSTEM_INCLUDE_DIRS");
     std::vector<std::string> dirs;
-    cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+    cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
     this->AppendIncludeDirectories(fout, dirs, emmited);
     }
 

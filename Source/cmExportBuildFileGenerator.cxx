@@ -47,7 +47,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       cmOStringStream e;
       e << "given target \"" << te->GetName() << "\" more than once.";
       this->Makefile->GetCMakeInstance()
-          ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(), this->Backtrace);
+          ->IssueMessage(cmake::FATAL_ERROR, e.str(), this->Backtrace);
       return false;
       }
     if (te->GetType() == cmTarget::INTERFACE_LIBRARY)
@@ -106,7 +106,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
         ci = this->Configurations.begin();
       ci != this->Configurations.end(); ++ci)
     {
-    this->GenerateImportConfig(os, ci->c_str(), missingTargets);
+    this->GenerateImportConfig(os, *ci, missingTargets);
     }
 
   this->GenerateMissingTargetsCheckCode(os, missingTargets);
@@ -315,7 +315,7 @@ cmExportBuildFileGenerator
     << "consider using the APPEND option with multiple separate calls.";
 
   this->Makefile->GetCMakeInstance()
-      ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(), this->Backtrace);
+      ->IssueMessage(cmake::FATAL_ERROR, e.str(), this->Backtrace);
 }
 
 std::string
@@ -328,7 +328,7 @@ cmExportBuildFileGenerator::InstallNameDir(cmTarget* target,
   if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     install_name_dir =
-      target->GetInstallNameDirForBuildTree(config.c_str());
+      target->GetInstallNameDirForBuildTree(config);
     }
 
   return install_name_dir;

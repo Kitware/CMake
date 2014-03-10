@@ -37,7 +37,7 @@ bool cmFindLibraryCommand
     // value.
     if(this->AlreadyInCacheWithoutMetaInfo)
       {
-      this->Makefile->AddCacheDefinition(this->VariableName.c_str(), "",
+      this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
                                          cmCacheManager::FILEPATH);
       }
@@ -69,14 +69,14 @@ bool cmFindLibraryCommand
   if(library != "")
     {
     // Save the value in the cache
-    this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+    this->Makefile->AddCacheDefinition(this->VariableName,
                                        library.c_str(),
                                        this->VariableDocumentation.c_str(),
                                        cmCacheManager::FILEPATH);
     return true;
     }
   std::string notfound = this->VariableName + "-NOTFOUND";
-  this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+  this->Makefile->AddCacheDefinition(this->VariableName,
                                      notfound.c_str(),
                                      this->VariableDocumentation.c_str(),
                                      cmCacheManager::FILEPATH);

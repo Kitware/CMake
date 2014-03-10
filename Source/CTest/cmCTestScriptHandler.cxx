@@ -337,8 +337,8 @@ void cmCTestScriptHandler::CreateCMake()
   // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
   // Also, some commands need Makefile->GetCurrentDirectory().
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  this->Makefile->SetStartDirectory(cwd.c_str());
-  this->Makefile->SetStartOutputDirectory(cwd.c_str());
+  this->Makefile->SetStartDirectory(cwd);
+  this->Makefile->SetStartOutputDirectory(cwd);
 
   // remove all cmake commands which are not scriptable, since they can't be
   // used in ctest scripts
@@ -436,7 +436,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   for (std::map<std::string, std::string>::const_iterator it = defs.begin();
        it != defs.end(); ++it)
     {
-    this->Makefile->AddDefinition(it->first.c_str(), it->second.c_str());
+    this->Makefile->AddDefinition(it->first, it->second.c_str());
     }
 
   // finally read in the script
@@ -646,7 +646,7 @@ int cmCTestScriptHandler::RunCurrentScript()
   if (!this->CTestEnv.empty())
     {
     std::vector<std::string> envArgs;
-    cmSystemTools::ExpandListArgument(this->CTestEnv.c_str(),envArgs);
+    cmSystemTools::ExpandListArgument(this->CTestEnv,envArgs);
     cmSystemTools::AppendEnv(envArgs);
     }
 
@@ -772,7 +772,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
     ++ it )
     {
     std::vector<std::string> cvsArgs;
-    cmSystemTools::ExpandListArgument(it->c_str(),cvsArgs);
+    cmSystemTools::ExpandListArgument(*it,cvsArgs);
     if (cvsArgs.size() == 2)
       {
       std::string fullCommand = command;

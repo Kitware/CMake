@@ -54,14 +54,14 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg,
   std::string scanRegexVar = "CMAKE_";
   scanRegexVar += lang;
   scanRegexVar += "_INCLUDE_REGEX_SCAN";
-  if(const char* sr = mf->GetDefinition(scanRegexVar.c_str()))
+  if(const char* sr = mf->GetDefinition(scanRegexVar))
     {
     scanRegex = sr;
     }
   std::string complainRegexVar = "CMAKE_";
   complainRegexVar += lang;
   complainRegexVar += "_INCLUDE_REGEX_COMPLAIN";
-  if(const char* cr = mf->GetDefinition(complainRegexVar.c_str()))
+  if(const char* cr = mf->GetDefinition(complainRegexVar))
     {
     complainRegex = cr;
     }
@@ -274,7 +274,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
       i != dependencies.end(); ++i)
     {
     makeDepends << obj << ": " <<
-      this->LocalGenerator->Convert(i->c_str(),
+      this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
                                     cmLocalGenerator::MAKEFILE)
                 << std::endl;

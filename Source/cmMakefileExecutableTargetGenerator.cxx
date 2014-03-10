@@ -142,20 +142,20 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetFullPathPDB =  pdbOutputPath + targetNamePDB;
   std::string targetFullPathImport = outpathImp + targetNameImport;
   std::string targetOutPathPDB =
-    this->Convert(targetFullPathPDB.c_str(),
+    this->Convert(targetFullPathPDB,
                   cmLocalGenerator::NONE,
                   cmLocalGenerator::SHELL);
   // Convert to the output path to use in constructing commands.
   std::string targetOutPath =
-    this->Convert(targetFullPath.c_str(),
+    this->Convert(targetFullPath,
                   cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
   std::string targetOutPathReal =
-    this->Convert(targetFullPathReal.c_str(),
+    this->Convert(targetFullPathReal,
                   cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
   std::string targetOutPathImport =
-    this->Convert(targetFullPathImport.c_str(),
+    this->Convert(targetFullPathImport,
                   cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
 
@@ -210,7 +210,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     export_flag_var += linkLanguage;
     export_flag_var += "_FLAG";
     this->LocalGenerator->AppendFlags
-      (linkFlags, this->Makefile->GetDefinition(export_flag_var.c_str()));
+      (linkFlags, this->Makefile->GetDefinition(export_flag_var));
     }
 
   // Add language feature flags.
@@ -225,14 +225,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string linkFlagsConfig = "LINK_FLAGS_";
   linkFlagsConfig += cmSystemTools::UpperCase(this->ConfigName);
   this->LocalGenerator->AppendFlags
-    (linkFlags, this->Target->GetProperty(linkFlagsConfig.c_str()));
+    (linkFlags, this->Target->GetProperty(linkFlagsConfig));
 
   this->AddModuleDefinitionFlag(linkFlags);
 
   // Construct a list of files associated with this executable that
   // may need to be cleaned.
   std::vector<std::string> exeCleanFiles;
-  exeCleanFiles.push_back(this->Convert(targetFullPath.c_str(),
+  exeCleanFiles.push_back(this->Convert(targetFullPath,
                                         cmLocalGenerator::START_OUTPUT,
                                         cmLocalGenerator::UNCHANGED));
 #ifdef _WIN32
@@ -244,19 +244,19 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 #endif
   if(targetNameReal != targetName)
     {
-    exeCleanFiles.push_back(this->Convert(targetFullPathReal.c_str(),
+    exeCleanFiles.push_back(this->Convert(targetFullPathReal,
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     }
   if(!targetNameImport.empty())
     {
-    exeCleanFiles.push_back(this->Convert(targetFullPathImport.c_str(),
+    exeCleanFiles.push_back(this->Convert(targetFullPathImport,
                                           cmLocalGenerator::START_OUTPUT,
                                           cmLocalGenerator::UNCHANGED));
     std::string implib;
     if(this->Target->GetImplibGNUtoMS(targetFullPathImport, implib))
       {
-      exeCleanFiles.push_back(this->Convert(implib.c_str(),
+      exeCleanFiles.push_back(this->Convert(implib,
                                             cmLocalGenerator::START_OUTPUT,
                                             cmLocalGenerator::UNCHANGED));
       }
@@ -266,7 +266,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // cleaned.  We do not want to delete the .pdb file just before
   // linking the target.
   this->CleanFiles.push_back
-    (this->Convert(targetFullPathPDB.c_str(),
+    (this->Convert(targetFullPathPDB,
                    cmLocalGenerator::START_OUTPUT,
                    cmLocalGenerator::UNCHANGED));
 
@@ -289,7 +289,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string linkRuleVar = "CMAKE_";
   linkRuleVar += linkLanguage;
   linkRuleVar += "_LINK_EXECUTABLE";
-  std::string linkRule = this->GetLinkRule(linkRuleVar.c_str());
+  std::string linkRule = this->GetLinkRule(linkRuleVar);
   std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
   if(this->Target->IsExecutableWithExports())
@@ -300,7 +300,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     implibRuleVar += linkLanguage;
     implibRuleVar += "_CREATE_IMPORT_LIBRARY";
     if(const char* rule =
-       this->Makefile->GetDefinition(implibRuleVar.c_str()))
+       this->Makefile->GetDefinition(implibRuleVar))
       {
       cmSystemTools::ExpandListArgument(rule, real_link_commands);
       }
@@ -312,7 +312,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string responseVar = "CMAKE_";
   responseVar += linkLanguage;
   responseVar += "_USE_RESPONSE_FILE_FOR_OBJECTS";
-  if(this->Makefile->IsOn(responseVar.c_str()))
+  if(this->Makefile->IsOn(responseVar))
     {
     useResponseFileForObjects = true;
     }
@@ -324,7 +324,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string responseVar = "CMAKE_";
   responseVar += linkLanguage;
   responseVar += "_USE_RESPONSE_FILE_FOR_LIBRARIES";
-  if(this->Makefile->IsOn(responseVar.c_str()))
+  if(this->Makefile->IsOn(responseVar))
     {
     useResponseFileForLibs = true;
     }
@@ -351,7 +351,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   vars.Language = linkLanguage.c_str();
   vars.Objects = buildObjs.c_str();
   std::string objectDir = this->Target->GetSupportDirectory();
-  objectDir = this->Convert(objectDir.c_str(),
+  objectDir = this->Convert(objectDir,
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);
   vars.ObjectDir = objectDir.c_str();
@@ -437,7 +437,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   // Write the build rule.
   this->LocalGenerator->WriteMakeRule(*this->BuildFileStream,
                                       0,
-                                      targetFullPathReal.c_str(),
+                                      targetFullPathReal,
                                       depends, commands, false);
 
   // The symlink name for the target should depend on the real target
@@ -447,14 +447,14 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     {
     depends.clear();
     commands.clear();
-    depends.push_back(targetFullPathReal.c_str());
+    depends.push_back(targetFullPathReal);
     this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                        targetFullPath.c_str(),
+                                        targetFullPath,
                                         depends, commands, false);
     }
 
   // Write the main driver rule to build everything in this target.
-  this->WriteTargetDriverRule(targetFullPath.c_str(), relink);
+  this->WriteTargetDriverRule(targetFullPath, relink);
 
   // Clean all the possible executable names and symlinks.
   this->CleanFiles.insert(this->CleanFiles.end(),

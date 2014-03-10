@@ -688,7 +688,7 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
   if(i == this->NameMap.end())
     {
     // Check if we know how to generate this file.
-    cmSourceFile* sf = this->Makefile->GetSourceFileWithOutput(name.c_str());
+    cmSourceFile* sf = this->Makefile->GetSourceFileWithOutput(name);
     NameMapType::value_type entry(name, sf);
     i = this->NameMap.insert(entry).first;
     }
@@ -750,7 +750,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
         if(depLocation == tLocation)
           {
-          this->Target->AddUtility(util.c_str());
+          this->Target->AddUtility(util);
           return true;
           }
         }
@@ -759,7 +759,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
       {
       // The original name of the dependency was not a full path.  It
       // must name a target, so add the target-level dependency.
-      this->Target->AddUtility(util.c_str());
+      this->Target->AddUtility(util);
       return true;
       }
     }
@@ -793,7 +793,7 @@ cmTargetTraceDependencies
         // this project.  Add the target-level dependency to make
         // sure the executable is up to date before this custom
         // command possibly runs.
-        this->Target->AddUtility(command.c_str());
+        this->Target->AddUtility(command);
         }
       }
 
@@ -872,7 +872,7 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
     {
     std::string defVarName = "OSX_ARCHITECTURES_";
     defVarName += cmSystemTools::UpperCase(config);
-    archs = this->Target->GetProperty(defVarName.c_str());
+    archs = this->Target->GetProperty(defVarName);
     }
   if(!archs)
     {
@@ -1048,7 +1048,7 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
     for(std::vector<std::string>::iterator it = relFiles.begin();
         it != relFiles.end(); ++it)
       {
-      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
+      if(cmSourceFile* sf = this->Makefile->GetSource(*it))
         {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "Headers";
@@ -1066,7 +1066,7 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
     for(std::vector<std::string>::iterator it = relFiles.begin();
         it != relFiles.end(); ++it)
       {
-      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
+      if(cmSourceFile* sf = this->Makefile->GetSource(*it))
         {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "PrivateHeaders";
@@ -1083,7 +1083,7 @@ void cmGeneratorTarget::ConstructSourceFileFlags() const
     for(std::vector<std::string>::iterator it = relFiles.begin();
         it != relFiles.end(); ++it)
       {
-      if(cmSourceFile* sf = this->Makefile->GetSource(it->c_str()))
+      if(cmSourceFile* sf = this->Makefile->GetSource(*it))
         {
         SourceFileFlags& flags = this->SourceFlagsMap[sf];
         flags.MacFolder = "Resources";

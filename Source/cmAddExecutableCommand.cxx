@@ -101,7 +101,7 @@ bool cmAddExecutableCommand
           "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
           "in undefined behavior.";
-      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      this->Makefile->IssueMessage(messageType, e.str());
 
       if (messageType == cmake::FATAL_ERROR)
         {
@@ -132,9 +132,9 @@ bool cmAddExecutableCommand
     }
   if (isAlias)
     {
-    if(!cmGeneratorExpression::IsValidTargetName(exename.c_str()))
+    if(!cmGeneratorExpression::IsValidTargetName(exename))
       {
-      this->SetError(("Invalid name for ALIAS: " + exename).c_str());
+      this->SetError("Invalid name for ALIAS: " + exename);
       return false;
       }
     if(excludeFromAll)
@@ -151,7 +151,7 @@ bool cmAddExecutableCommand
       {
       cmOStringStream e;
       e << "ALIAS requires exactly one target argument.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
@@ -161,7 +161,7 @@ bool cmAddExecutableCommand
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" is itself an ALIAS.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     cmTarget *aliasedTarget =
@@ -172,7 +172,7 @@ bool cmAddExecutableCommand
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" does not already "
         "exist.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     cmTarget::TargetType type = aliasedTarget->GetType();
@@ -182,7 +182,7 @@ bool cmAddExecutableCommand
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" is not an "
         "executable.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     if(aliasedTarget->IsImported())
@@ -190,10 +190,10 @@ bool cmAddExecutableCommand
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" is IMPORTED.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
-    this->Makefile->AddAlias(exename.c_str(), aliasedTarget);
+    this->Makefile->AddAlias(exename, aliasedTarget);
     return true;
     }
 
@@ -206,12 +206,12 @@ bool cmAddExecutableCommand
       cmOStringStream e;
       e << "cannot create imported target \"" << exename
         << "\" because another target with the same name already exists.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(exename.c_str(), cmTarget::EXECUTABLE,
+    this->Makefile->AddImportedTarget(exename, cmTarget::EXECUTABLE,
                                       importGlobal);
     return true;
     }
@@ -221,7 +221,7 @@ bool cmAddExecutableCommand
   std::string msg;
   if(!this->Makefile->EnforceUniqueName(exename, msg))
     {
-    this->SetError(msg.c_str());
+    this->SetError(msg);
     return false;
     }
   }

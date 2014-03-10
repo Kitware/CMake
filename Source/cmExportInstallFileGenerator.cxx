@@ -211,7 +211,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
           ci = this->Configurations.begin();
         ci != this->Configurations.end(); ++ci)
       {
-      if(!this->GenerateImportFileConfig(ci->c_str(), missingTargets))
+      if(!this->GenerateImportFileConfig(*ci, missingTargets))
         {
         result = false;
         }

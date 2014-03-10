@@ -38,7 +38,7 @@ bool cmUseMangledMesaCommand
     std::string e = "Bad path to Mesa, could not find: ";
     e += glh;
     e += " ";
-    this->SetError(e.c_str());
+    this->SetError(e);
     return false;
     }
   const char* destDir = args[1].c_str();

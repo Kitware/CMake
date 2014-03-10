@@ -157,7 +157,7 @@ void cmCTestCoverageHandler::CleanCoverageLogFiles(std::ostream& log)
   logGlob += this->CTest->GetCurrentTag();
   logGlob += "/CoverageLog*";
   cmsys::Glob gl;
-  gl.FindFiles(logGlob.c_str());
+  gl.FindFiles(logGlob);
   std::vector<std::string> const& files = gl.GetFiles();
   for(std::vector<std::string>::const_iterator fi = files.begin();
       fi != files.end(); ++fi)
@@ -241,7 +241,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
   bool buildSubDir = cmSystemTools::IsSubDirectory(fFile.c_str(),
     fBinDir.c_str());
   // Always check parent directory of the file.
-  std::string fileDir = cmSystemTools::GetFilenamePath(fFile.c_str());
+  std::string fileDir = cmSystemTools::GetFilenamePath(fFile);
   std::string checkDir;
 
   // We also need to check the binary/source directory pair.
@@ -296,7 +296,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
     checkDir = fSrcDir;
     }
   fFile = checkDir + "/" + relPath;
-  fFile = cmSystemTools::GetFilenamePath(fFile.c_str());
+  fFile = cmSystemTools::GetFilenamePath(fFile);
 
   if ( fileDir == fFile )
     {
@@ -503,7 +503,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       }
 
     const std::string fileName
-      = cmSystemTools::GetFilenameName(fullFileName.c_str());
+      = cmSystemTools::GetFilenameName(fullFileName);
     std::string shortFileName =
       this->CTest->GetShortPathToFile(fullFileName.c_str());
     const cmCTestCoverageHandlerContainer::SingleFileCoverageVector& fcov
@@ -947,7 +947,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
 
     // Call gcov to get coverage data for this *.gcda file:
     //
-    std::string fileDir = cmSystemTools::GetFilenamePath(it->c_str());
+    std::string fileDir = cmSystemTools::GetFilenamePath(*it);
     std::string command = "\"" + gcovCommand + "\" " +
       gcovExtraFlags + " " +
       "-o \"" + fileDir + "\" " +
@@ -1814,7 +1814,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
       total_tested += functionsCalled;
       total_untested += (totalFunctions - functionsCalled);
 
-      std::string fileName = cmSystemTools::GetFilenameName(file.c_str());
+      std::string fileName = cmSystemTools::GetFilenameName(file);
       std::string shortFileName =
         this->CTest->GetShortPathToFile(file.c_str());
 

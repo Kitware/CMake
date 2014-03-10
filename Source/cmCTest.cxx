@@ -649,8 +649,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
 bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
 {
   std::string src_dir
-    = this->GetCTestConfiguration("SourceDirectory").c_str();
-  std::string bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
+    = this->GetCTestConfiguration("SourceDirectory");
+  std::string bld_dir = this->GetCTestConfiguration("BuildDirectory");
   this->DartVersion = 1;
   this->DropSiteCDash = false;
   for(Part p = PartStart; p != PartCount; p = Part(p+1))
@@ -688,7 +688,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
       {
       std::string m = "Could not find include file: ";
       m += fname;
-      command->SetError(m.c_str());
+      command->SetError(m);
       return false;
       }
     }
@@ -930,7 +930,7 @@ bool cmCTest::AddIfExists(Part part, const char* file)
     {
     std::string name = file;
     name += ".gz";
-    if ( this->CTestFileExists(name.c_str()) )
+    if ( this->CTestFileExists(name) )
       {
       this->AddSubmitFile(part, file);
       }
@@ -2246,7 +2246,7 @@ bool cmCTest::AddVariableDefinition(const std::string &arg)
   std::string value;
   cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
 
-  if (cmCacheManager::ParseEntry(arg.c_str(), name, value, type))
+  if (cmCacheManager::ParseEntry(arg, name, value, type))
     {
     this->Definitions[name] = value;
     return true;
@@ -2611,7 +2611,7 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
   for ( it = slist.begin(); it != slist.end(); ++it )
     {
     cmCTestLog(this, DEBUG, "  -- " << it->c_str() << std::endl);
-    vec.push_back(it->c_str());
+    vec.push_back(*it);
     }
 }
 

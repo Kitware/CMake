@@ -47,7 +47,7 @@ bool cmDepends::Write(std::ostream &makeDepends,
   std::string srcLang = "CMAKE_DEPENDS_CHECK_";
   srcLang += this->Language;
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  const char* srcStr = mf->GetSafeDefinition(srcLang.c_str());
+  const char* srcStr = mf->GetSafeDefinition(srcLang);
   std::vector<std::string> pairs;
   cmSystemTools::ExpandListArgument(srcStr, pairs);
 
@@ -61,7 +61,7 @@ bool cmDepends::Write(std::ostream &makeDepends,
     std::string obj = *si++;
 
     // Make sure the object file is relative to the top of the build tree.
-    obj = this->LocalGenerator->Convert(obj.c_str(),
+    obj = this->LocalGenerator->Convert(obj,
                                         cmLocalGenerator::HOME_OUTPUT,
                                         cmLocalGenerator::MAKEFILE);
     dependencies[obj].insert(src);
@@ -305,7 +305,7 @@ void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
   includePathVar += lang;
   includePathVar += "_TARGET_INCLUDE_PATH";
   cmMakefile* mf = this->LocalGenerator->GetMakefile();
-  includePath = mf->GetDefinition(includePathVar.c_str());
+  includePath = mf->GetDefinition(includePathVar);
   if(includePath)
     {
     cmSystemTools::ExpandListArgument(includePath, this->IncludePath);
@@ -316,7 +316,7 @@ void cmDepends::SetIncludePathFromLanguage(const std::string& lang)
     includePathVar = "CMAKE_";
     includePathVar += lang;
     includePathVar += "_INCLUDE_PATH";
-    includePath = mf->GetDefinition(includePathVar.c_str());
+    includePath = mf->GetDefinition(includePathVar);
     if(includePath)
       {
       cmSystemTools::ExpandListArgument(includePath, this->IncludePath);

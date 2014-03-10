@@ -38,7 +38,7 @@ bool cmAddDependenciesCommand
       cmOStringStream e;
       e << "Cannot add target-level dependencies to INTERFACE library "
         "target \"" << target_name << "\".\n";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
@@ -46,7 +46,7 @@ bool cmAddDependenciesCommand
     ++s; // skip over target_name
     for (; s != args.end(); ++s)
       {
-      target->AddUtility(s->c_str(), this->Makefile);
+      target->AddUtility(*s, this->Makefile);
       }
     }
   else

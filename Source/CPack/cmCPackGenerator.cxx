@@ -357,9 +357,9 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       std::list<std::pair<std::string,std::string> > symlinkedFiles;
       cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
       cmsys::Glob gl;
-      std::string top = it->c_str();
+      std::string top = *it;
       it ++;
-      std::string subdir = it->c_str();
+      std::string subdir = *it;
       std::string findExpr = top;
       findExpr += "/*";
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
@@ -473,7 +473,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
       it != cmakeScriptsVector.end();
       ++it )
       {
-      std::string installScript = it->c_str();
+      std::string installScript = *it;
 
       cmCPackLogger(cmCPackLog::LOG_OUTPUT,
         "- Install script: " << installScript << std::endl);
@@ -562,13 +562,13 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           << std::endl);
         return 0;
         }
-      std::string installDirectory = it->c_str();
+      std::string installDirectory = *it;
       ++it;
-      std::string installProjectName = it->c_str();
+      std::string installProjectName = *it;
       ++it;
-      std::string installComponent = it->c_str();
+      std::string installComponent = *it;
       ++it;
-      std::string installSubDirectory = it->c_str();
+      std::string installSubDirectory = *it;
       std::string installFile = installDirectory + "/cmake_install.cmake";
 
       std::vector<std::string> componentsVector;
@@ -586,7 +586,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         // Determine the installation types for this project (if provided).
         std::string installTypesVar = "CPACK_"
           + cmSystemTools::UpperCase(installComponent) + "_INSTALL_TYPES";
-        const char *installTypes = this->GetOption(installTypesVar.c_str());
+        const char *installTypes = this->GetOption(installTypesVar);
         if (installTypes && *installTypes)
           {
           std::vector<std::string> installTypesVector;
@@ -596,15 +596,15 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                installTypeIt != installTypesVector.end();
                ++installTypeIt)
             {
-            this->GetInstallationType(installProjectName.c_str(),
-                                      installTypeIt->c_str());
+            this->GetInstallationType(installProjectName,
+                                      *installTypeIt);
             }
           }
 
         // Determine the set of components that will be used in this project
         std::string componentsVar
           = "CPACK_COMPONENTS_" + cmSystemTools::UpperCase(installComponent);
-        const char *components = this->GetOption(componentsVar.c_str());
+        const char *components = this->GetOption(componentsVar);
         if (components && *components)
           {
           cmSystemTools::ExpandListArgument(components, componentsVector);
@@ -613,7 +613,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                compIt != componentsVector.end();
                ++compIt)
             {
-            GetComponent(installProjectName.c_str(), compIt->c_str());
+            GetComponent(installProjectName, *compIt);
             }
           componentInstall = true;
           }
@@ -641,7 +641,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           = this->MakefileMap->GetDefinition("CMAKE_MAKE_PROGRAM");
         std::vector<std::string> buildCommand;
         globalGenerator->GenerateBuildCommand(buildCommand, cmakeMakeProgram,
-            installProjectName.c_str(), installDirectory.c_str(),
+            installProjectName, installDirectory,
             globalGenerator->GetPreinstallTargetName(),
             buildConfig, false);
         std::string buildCommandStr =
@@ -932,19 +932,19 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
             std::string absoluteDestFileComponent =
                 std::string("CPACK_ABSOLUTE_DESTINATION_FILES")
                 + "_" + GetComponentInstallDirNameSuffix(installComponent);
-            if (NULL != this->GetOption(absoluteDestFileComponent.c_str()))
+            if (NULL != this->GetOption(absoluteDestFileComponent))
               {
                 std::string absoluteDestFilesListComponent =
-                    this->GetOption(absoluteDestFileComponent.c_str());
+                    this->GetOption(absoluteDestFileComponent);
                 absoluteDestFilesListComponent +=";";
                 absoluteDestFilesListComponent +=
                     mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES");
-                this->SetOption(absoluteDestFileComponent.c_str(),
+                this->SetOption(absoluteDestFileComponent,
                     absoluteDestFilesListComponent.c_str());
               }
             else
               {
-              this->SetOption(absoluteDestFileComponent.c_str(),
+              this->SetOption(absoluteDestFileComponent,
                   mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES"));
               }
             }
@@ -1428,14 +1428,14 @@ std::string cmCPackGenerator::GetComponentPackageFileName(
   std::string suffix="-"+groupOrComponentName;
   /* check if we should use DISPLAY name */
   std::string dispNameVar = "CPACK_"+Name+"_USE_DISPLAY_NAME_IN_FILENAME";
-  if (IsOn(dispNameVar.c_str()))
+  if (IsOn(dispNameVar))
     {
     /* the component Group case */
     if (isGroupName)
       {
       std::string groupDispVar = "CPACK_COMPONENT_GROUP_"
           + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
-      const char* groupDispName = GetOption(groupDispVar.c_str());
+      const char* groupDispName = GetOption(groupDispVar);
       if (groupDispName)
         {
         suffix = "-"+std::string(groupDispName);
@@ -1446,7 +1446,7 @@ std::string cmCPackGenerator::GetComponentPackageFileName(
       {
       std::string dispVar = "CPACK_COMPONENT_"
            + cmSystemTools::UpperCase(groupOrComponentName) + "_DISPLAY_NAME";
-            const char* dispName = GetOption(dispVar.c_str());
+            const char* dispName = GetOption(dispVar);
             if(dispName)
               {
               suffix = "-"+std::string(dispName);
@@ -1497,7 +1497,7 @@ cmCPackGenerator::GetInstallationType(const std::string& projectName,
     installType->Name = name;
 
     const char* displayName
-      = this->GetOption((macroPrefix + "_DISPLAY_NAME").c_str());
+      = this->GetOption(macroPrefix + "_DISPLAY_NAME");
     if (displayName && *displayName)
       {
       installType->DisplayName = displayName;
@@ -1527,7 +1527,7 @@ cmCPackGenerator::GetComponent(const std::string& projectName,
       + cmsys::SystemTools::UpperCase(name);
     component->Name = name;
     const char* displayName
-      = this->GetOption((macroPrefix + "_DISPLAY_NAME").c_str());
+      = this->GetOption(macroPrefix + "_DISPLAY_NAME");
     if (displayName && *displayName)
       {
       component->DisplayName = displayName;
@@ -1537,23 +1537,23 @@ cmCPackGenerator::GetComponent(const std::string& projectName,
       component->DisplayName = component->Name;
       }
     component->IsHidden
-      = this->IsOn((macroPrefix + "_HIDDEN").c_str());
+      = this->IsOn(macroPrefix + "_HIDDEN");
     component->IsRequired
-      = this->IsOn((macroPrefix + "_REQUIRED").c_str());
+      = this->IsOn(macroPrefix + "_REQUIRED");
     component->IsDisabledByDefault
-      = this->IsOn((macroPrefix + "_DISABLED").c_str());
+      = this->IsOn(macroPrefix + "_DISABLED");
     component->IsDownloaded
-      = this->IsOn((macroPrefix + "_DOWNLOADED").c_str())
+      = this->IsOn(macroPrefix + "_DOWNLOADED")
         || cmSystemTools::IsOn(this->GetOption("CPACK_DOWNLOAD_ALL"));
 
-    const char* archiveFile = this->GetOption((macroPrefix +
-                                               "_ARCHIVE_FILE").c_str());
+    const char* archiveFile = this->GetOption(macroPrefix +
+                                               "_ARCHIVE_FILE");
     if (archiveFile && *archiveFile)
       {
       component->ArchiveFile = archiveFile;
       }
 
-    const char* groupName = this->GetOption((macroPrefix + "_GROUP").c_str());
+    const char* groupName = this->GetOption(macroPrefix + "_GROUP");
     if (groupName && *groupName)
       {
       component->Group = GetComponentGroup(projectName, groupName);
@@ -1565,7 +1565,7 @@ cmCPackGenerator::GetComponent(const std::string& projectName,
       }
 
     const char* description
-      = this->GetOption((macroPrefix + "_DESCRIPTION").c_str());
+      = this->GetOption(macroPrefix + "_DESCRIPTION");
     if (description && *description)
       {
       component->Description = description;
@@ -1573,7 +1573,7 @@ cmCPackGenerator::GetComponent(const std::string& projectName,
 
     // Determine the installation types.
     const char *installTypes
-      = this->GetOption((macroPrefix + "_INSTALL_TYPES").c_str());
+      = this->GetOption(macroPrefix + "_INSTALL_TYPES");
     if (installTypes && *installTypes)
       {
       std::vector<std::string> installTypesVector;
@@ -1589,7 +1589,7 @@ cmCPackGenerator::GetComponent(const std::string& projectName,
       }
 
     // Determine the component dependencies.
-    const char *depends = this->GetOption((macroPrefix + "_DEPENDS").c_str());
+    const char *depends = this->GetOption(macroPrefix + "_DEPENDS");
     if (depends && *depends)
       {
       std::vector<std::string> dependsVector;
@@ -1600,7 +1600,7 @@ cmCPackGenerator::GetComponent(const std::string& projectName,
            ++dependIt)
         {
         cmCPackComponent *child = GetComponent(projectName,
-                                               dependIt->c_str());
+                                               *dependIt);
         component->Dependencies.push_back(child);
         child->ReverseDependencies.push_back(component);
         }
@@ -1624,7 +1624,7 @@ cmCPackGenerator::GetComponentGroup(const std::string& projectName,
     // Define the group
     group->Name = name;
     const char* displayName
-      = this->GetOption((macroPrefix + "_DISPLAY_NAME").c_str());
+      = this->GetOption(macroPrefix + "_DISPLAY_NAME");
     if (displayName && *displayName)
       {
       group->DisplayName = displayName;
@@ -1635,17 +1635,17 @@ cmCPackGenerator::GetComponentGroup(const std::string& projectName,
       }
 
     const char* description
-      = this->GetOption((macroPrefix + "_DESCRIPTION").c_str());
+      = this->GetOption(macroPrefix + "_DESCRIPTION");
     if (description && *description)
       {
       group->Description = description;
       }
     group->IsBold
-      = this->IsOn((macroPrefix + "_BOLD_TITLE").c_str());
+      = this->IsOn(macroPrefix + "_BOLD_TITLE");
     group->IsExpandedByDefault
-      = this->IsOn((macroPrefix + "_EXPANDED").c_str());
+      = this->IsOn(macroPrefix + "_EXPANDED");
     const char* parentGroupName
-      = this->GetOption((macroPrefix + "_PARENT_GROUP").c_str());
+      = this->GetOption(macroPrefix + "_PARENT_GROUP");
     if (parentGroupName && *parentGroupName)
       {
       group->ParentGroup = GetComponentGroup(projectName, parentGroupName);

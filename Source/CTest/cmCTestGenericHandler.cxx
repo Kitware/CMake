@@ -75,7 +75,7 @@ void cmCTestGenericHandler::Initialize()
     it != this->PersistentOptions.end();
     ++ it )
     {
-    this->Options[it->first.c_str()] = it->second.c_str();
+    this->Options[it->first] = it->second.c_str();
     }
 }
 
@@ -121,7 +121,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
     return false;
     }
   if( !this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(),
-      ostr.str().c_str(), xofs, true) )
+      ostr.str(), xofs, true) )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot create resulting XML file: " << ostr.str().c_str()
@@ -153,7 +153,7 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
     ostr << "_" << this->CTest->GetCurrentTag();
     }
   ostr << ".log";
-  if( !this->CTest->OpenOutputFile("Temporary", ostr.str().c_str(), xofs) )
+  if( !this->CTest->OpenOutputFile("Temporary", ostr.str(), xofs) )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create log file: "
       << ostr.str().c_str() << std::endl);

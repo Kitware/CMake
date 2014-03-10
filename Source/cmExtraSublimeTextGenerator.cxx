@@ -177,7 +177,7 @@ void cmExtraSublimeTextGenerator::
           if (strcmp(makefile->GetStartOutputDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
-            this->AppendTarget(fout, ti->first.c_str(), *lg, 0,
+            this->AppendTarget(fout, ti->first, *lg, 0,
                                make.c_str(), makefile, compiler.c_str(),
                                sourceFileFlags, false);
             }
@@ -194,7 +194,7 @@ void cmExtraSublimeTextGenerator::
             break;
             }
 
-          this->AppendTarget(fout, ti->first.c_str(), *lg, 0,
+          this->AppendTarget(fout, ti->first, *lg, 0,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           break;
@@ -204,12 +204,12 @@ void cmExtraSublimeTextGenerator::
         case cmTarget::MODULE_LIBRARY:
         case cmTarget::OBJECT_LIBRARY:
           {
-          this->AppendTarget(fout, ti->first.c_str(), *lg, &ti->second,
+          this->AppendTarget(fout, ti->first, *lg, &ti->second,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget.c_str(), *lg, &ti->second,
+          this->AppendTarget(fout, fastTarget, *lg, &ti->second,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           }
@@ -440,7 +440,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(config);
-  lg->AppendDefines(defines, source->GetProperty(defPropName.c_str()));
+  lg->AppendDefines(defines, source->GetProperty(defPropName));
   }
 
   std::string definesString;

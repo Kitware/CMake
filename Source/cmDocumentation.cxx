@@ -672,7 +672,7 @@ bool cmDocumentation::PrintFiles(std::ostream& os,
   for (std::vector<std::string>::const_iterator i = files.begin();
        i != files.end(); ++i)
     {
-    found = r.ProcessFile(i->c_str()) || found;
+    found = r.ProcessFile(*i) || found;
     }
   return found;
 }

@@ -77,7 +77,7 @@ bool cmMessageCommand
 
   if (type != cmake::MESSAGE)
     {
-    this->Makefile->IssueMessage(type, message.c_str());
+    this->Makefile->IssueMessage(type, message);
     }
   else
     {

@@ -69,7 +69,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         cmOStringStream e;
         e << "CMakeLists.txt file does not exist ["
           << cmakelists_file << "]";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return 0;
         }
 

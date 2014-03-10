@@ -334,7 +334,7 @@ void cmExtraCodeBlocksGenerator
           if (strcmp(makefile->GetStartOutputDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
-            this->AppendTarget(fout, ti->first.c_str(), 0,
+            this->AppendTarget(fout, ti->first, 0,
                                make.c_str(), makefile, compiler.c_str());
             }
           }
@@ -350,7 +350,7 @@ void cmExtraCodeBlocksGenerator
             break;
             }
 
-          this->AppendTarget(fout, ti->first.c_str(), 0,
+          this->AppendTarget(fout, ti->first, 0,
                                  make.c_str(), makefile, compiler.c_str());
           break;
         case cmTarget::EXECUTABLE:
@@ -359,11 +359,11 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::MODULE_LIBRARY:
         case cmTarget::OBJECT_LIBRARY:
           {
-          this->AppendTarget(fout, ti->first.c_str(), &ti->second,
+          this->AppendTarget(fout, ti->first, &ti->second,
                              make.c_str(), makefile, compiler.c_str());
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget.c_str(), &ti->second,
+          this->AppendTarget(fout, fastTarget, &ti->second,
                              make.c_str(), makefile, compiler.c_str());
           }
           break;
@@ -626,7 +626,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     if (!systemIncludeDirs.empty())
       {
       std::vector<std::string> dirs;
-      cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+      cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
       for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
           dirIt != dirs.end();
           ++dirIt)
@@ -640,7 +640,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     if (!systemIncludeDirs.empty())
       {
       std::vector<std::string> dirs;
-      cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+      cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
       for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
           dirIt != dirs.end();
           ++dirIt)
@@ -697,7 +697,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 
   std::string hostSystemName = mf->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
   std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar.c_str());
+  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gcc";  // default to gcc
   if (compilerId == "MSVC")
     {

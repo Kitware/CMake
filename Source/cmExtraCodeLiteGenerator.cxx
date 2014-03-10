@@ -404,7 +404,7 @@ cmExtraCodeLiteGenerator::GetCodeLiteCompilerName(const cmMakefile* mf) const
     compilerIdVar = "CMAKE_C_COMPILER_ID";
     }
 
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar.c_str());
+  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gnu g++"; // default to g++
 
   // Since we need the compiler for parsing purposes only

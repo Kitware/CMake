@@ -613,16 +613,16 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       startDir = cmSystemTools::CollapseFullPath(startDir.c_str());
       homeOutDir = cmSystemTools::CollapseFullPath(homeOutDir.c_str());
       startOutDir = cmSystemTools::CollapseFullPath(startOutDir.c_str());
-      cm.SetHomeDirectory(homeDir.c_str());
-      cm.SetStartDirectory(startDir.c_str());
-      cm.SetHomeOutputDirectory(homeOutDir.c_str());
-      cm.SetStartOutputDirectory(startOutDir.c_str());
-      if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen.c_str()))
+      cm.SetHomeDirectory(homeDir);
+      cm.SetStartDirectory(startDir);
+      cm.SetHomeOutputDirectory(homeOutDir);
+      cm.SetStartOutputDirectory(startOutDir);
+      if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen))
         {
         cm.SetGlobalGenerator(ggd);
         cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-        lgd->GetMakefile()->SetStartDirectory(startDir.c_str());
-        lgd->GetMakefile()->SetStartOutputDirectory(startOutDir.c_str());
+        lgd->GetMakefile()->SetStartDirectory(startDir);
+        lgd->GetMakefile()->SetStartOutputDirectory(startOutDir);
         lgd->GetMakefile()->MakeStartDirectoriesCurrent();
 
         // Actually scan dependencies.
@@ -667,7 +667,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
         cmQtAutoGenerators autogen;
         std::string const& config = args[3];
-        bool autogenSuccess = autogen.Run(args[2].c_str(), config);
+        bool autogenSuccess = autogen.Run(args[2], config);
         return autogenSuccess ? 0 : 1;
       }
 #endif

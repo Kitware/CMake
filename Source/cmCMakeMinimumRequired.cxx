@@ -80,7 +80,7 @@ bool cmCMakeMinimumRequired
     {
     cmOStringStream e;
     e << "could not parse VERSION \"" << version_string.c_str() << "\".";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
@@ -135,7 +135,7 @@ bool cmCMakeMinimumRequired::EnforceUnknownArguments()
     cmOStringStream e;
     e << "called with unknown argument \""
       << this->UnknownArguments[0] << "\".";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
   return true;

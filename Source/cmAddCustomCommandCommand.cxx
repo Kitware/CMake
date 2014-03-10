@@ -273,7 +273,7 @@ bool cmAddCustomCommandCommand
     {
     // Lookup an existing command.
     if(cmSourceFile* sf =
-       this->Makefile->GetSourceFileWithOutput(output[0].c_str()))
+       this->Makefile->GetSourceFileWithOutput(output[0]))
       {
       if(cmCustomCommand* cc = sf->GetCustomCommand())
         {
@@ -288,7 +288,7 @@ bool cmAddCustomCommandCommand
     cmOStringStream e;
     e << "given APPEND option with output \"" << output[0].c_str()
       << "\" which is not already a custom command output.";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
@@ -305,7 +305,7 @@ bool cmAddCustomCommandCommand
     {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
-    this->Makefile->AddCustomCommandToTarget(target.c_str(), no_depends,
+    this->Makefile->AddCustomCommandToTarget(target, no_depends,
                                              commandLines, cctype,
                                              comment, working.c_str(),
                                              escapeOldStyle);
@@ -314,7 +314,7 @@ bool cmAddCustomCommandCommand
     {
     // Target is empty, use the output.
     this->Makefile->AddCustomCommandToOutput(output, depends,
-                                             main_dependency.c_str(),
+                                             main_dependency,
                                              commandLines, comment,
                                              working.c_str(), false,
                                              escapeOldStyle);
@@ -324,7 +324,7 @@ bool cmAddCustomCommandCommand
       {
       bool okay = false;
       if(cmSourceFile* sf =
-         this->Makefile->GetSourceFileWithOutput(output[0].c_str()))
+         this->Makefile->GetSourceFileWithOutput(output[0]))
         {
         if(cmCustomCommand* cc = sf->GetCustomCommand())
           {
@@ -337,7 +337,7 @@ bool cmAddCustomCommandCommand
         cmOStringStream e;
         e << "could not locate source file with a custom command producing \""
           << output[0] << "\" even though this command tried to create it!";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       }
@@ -367,7 +367,7 @@ bool cmAddCustomCommandCommand
       {
       e << "The SOURCE signatures of add_custom_command are no longer "
            "supported.";
-      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      this->Makefile->IssueMessage(messageType, e.str());
       if (messageType == cmake::FATAL_ERROR)
         {
         return false;
@@ -375,8 +375,8 @@ bool cmAddCustomCommandCommand
       }
 
     // Use the old-style mode for backward compatibility.
-    this->Makefile->AddCustomCommandOldStyle(target.c_str(), outputs, depends,
-                                             source.c_str(), commandLines,
+    this->Makefile->AddCustomCommandOldStyle(target, outputs, depends,
+                                             source, commandLines,
                                              comment);
     }
 
@@ -397,7 +397,7 @@ cmAddCustomCommandCommand
       {
       std::string e = "attempted to have a file \"" + *o +
         "\" in a source directory as an output of custom command.";
-      this->SetError(e.c_str());
+      this->SetError(e);
       cmSystemTools::SetFatalErrorOccured();
       return false;
       }
@@ -409,7 +409,7 @@ cmAddCustomCommandCommand
       cmOStringStream msg;
       msg << "called with OUTPUT containing a \"" << (*o)[pos]
           << "\".  This character is not allowed.";
-      this->SetError(msg.str().c_str());
+      this->SetError(msg.str());
       return false;
       }
     }

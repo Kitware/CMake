@@ -326,7 +326,7 @@ int main (int argc, char const* const* argv)
       cdit != definitions.Map.end();
       ++cdit )
       {
-      globalMF->AddDefinition(cdit->first.c_str(), cdit->second.c_str());
+      globalMF->AddDefinition(cdit->first, cdit->second.c_str());
       }
 
     const char* cpackModulesPath =

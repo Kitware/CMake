@@ -92,7 +92,7 @@ bool cmExportCommand
       cmOStringStream e;
       e << "FILE option given filename \"" << this->Filename.GetString()
         << "\" which does not have an extension of \".cmake\".\n";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     fname = this->Filename.GetString();
@@ -106,7 +106,7 @@ bool cmExportCommand
       cmOStringStream e;
       e << "FILE option given filename \"" << fname
         << "\" which is in the source tree.\n";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -128,7 +128,7 @@ bool cmExportCommand
       {
       cmOStringStream e;
       e << "EXPORT signature does not recognise the APPEND option.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
@@ -137,7 +137,7 @@ bool cmExportCommand
       cmOStringStream e;
       e << "EXPORT signature does not recognise the "
         "EXPORT_LINK_INTERFACE_LIBRARIES option.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
@@ -147,7 +147,7 @@ bool cmExportCommand
       {
       cmOStringStream e;
       e << "Export set \"" << setName << "\" not found.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     this->ExportSet = setMap[setName];
@@ -164,18 +164,18 @@ bool cmExportCommand
         cmOStringStream e;
         e << "given ALIAS target \"" << *currentTarget
           << "\" which may not be exported.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
 
-      if(cmTarget* target = gg->FindTarget(currentTarget->c_str()))
+      if(cmTarget* target = gg->FindTarget(*currentTarget))
         {
         if(target->GetType() == cmTarget::OBJECT_LIBRARY)
           {
           cmOStringStream e;
           e << "given OBJECT library \"" << *currentTarget
             << "\" which may not be exported.";
-          this->SetError(e.str().c_str());
+          this->SetError(e.str());
           return false;
           }
         }
@@ -184,7 +184,7 @@ bool cmExportCommand
         cmOStringStream e;
         e << "given target \"" << *currentTarget
           << "\" which is not built by this project.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       targets.push_back(*currentTarget);
@@ -229,7 +229,7 @@ bool cmExportCommand
           ci = configurationTypes.begin();
         ci != configurationTypes.end(); ++ci)
       {
-      ebfg->AddConfiguration(ci->c_str());
+      ebfg->AddConfiguration(*ci);
       }
     }
   else
@@ -266,7 +266,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
       {
       cmOStringStream e;
       e << "PACKAGE given unknown argument: " << args[i];
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -284,7 +284,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
     cmOStringStream e;
     e << "PACKAGE given invalid package name \"" << package << "\".  "
       << "Package names must match \"" << packageExpr << "\".";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 

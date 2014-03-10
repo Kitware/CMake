@@ -79,7 +79,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
       {
       if (this->EscapeQuotes)
         {
-        return this->AddString(cmSystemTools::EscapeQuotes(ptr).c_str());
+        return this->AddString(cmSystemTools::EscapeQuotes(ptr));
         }
       else
         {
@@ -94,7 +94,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
       {
       if(this->EscapeQuotes)
         {
-        return this->AddString(cmSystemTools::EscapeQuotes(c).c_str());
+        return this->AddString(cmSystemTools::EscapeQuotes(c));
         }
       else
         {
@@ -120,7 +120,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     {
     cmOStringStream ostr;
     ostr << this->FileLine;
-    return this->AddString(ostr.str().c_str());
+    return this->AddString(ostr.str());
     }
   const char* value = this->Makefile->GetDefinition(var);
   if(!value && !this->RemoveEmpty)
@@ -144,14 +144,14 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
         bt.push_back(lfc);
         msg << "uninitialized variable \'" << var << "\'";
         this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                        msg.str().c_str(), bt);
+                                                        msg.str(), bt);
         }
       }
     return 0;
     }
   if (this->EscapeQuotes && value)
     {
-    return this->AddString(cmSystemTools::EscapeQuotes(value).c_str());
+    return this->AddString(cmSystemTools::EscapeQuotes(value));
     }
   return this->AddString(value ? value : "");
 }
@@ -181,7 +181,7 @@ char* cmCommandArgumentParserHelper::ExpandVariableForAt(const char* var)
   std::string ref = "@";
   ref += var;
   ref += "@";
-  return this->AddString(ref.c_str());
+  return this->AddString(ref);
 }
 
 char* cmCommandArgumentParserHelper::CombineUnions(char* in1, char* in2)

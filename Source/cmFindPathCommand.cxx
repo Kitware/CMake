@@ -38,7 +38,7 @@ bool cmFindPathCommand
     if(this->AlreadyInCacheWithoutMetaInfo)
       {
       this->Makefile->AddCacheDefinition(
-        this->VariableName.c_str(), "",
+        this->VariableName, "",
         this->VariableDocumentation.c_str(),
         (this->IncludeFileInPath ?
          cmCacheManager::FILEPATH :cmCacheManager::PATH)
@@ -51,14 +51,14 @@ bool cmFindPathCommand
   if(result.size() != 0)
     {
     this->Makefile->AddCacheDefinition
-      (this->VariableName.c_str(), result.c_str(),
+      (this->VariableName, result.c_str(),
        this->VariableDocumentation.c_str(),
        (this->IncludeFileInPath) ?
        cmCacheManager::FILEPATH :cmCacheManager::PATH);
     return true;
     }
   this->Makefile->AddCacheDefinition
-    (this->VariableName.c_str(),
+    (this->VariableName,
      (this->VariableName + "-NOTFOUND").c_str(),
      this->VariableDocumentation.c_str(),
      (this->IncludeFileInPath) ?

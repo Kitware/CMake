@@ -34,7 +34,7 @@ bool cmTargetPropCommandBase
     }
   this->Target =
     this->Makefile->GetCMakeInstance()
-    ->GetGlobalGenerator()->FindTarget(args[0].c_str());
+    ->GetGlobalGenerator()->FindTarget(args[0]);
   if(!this->Target)
     {
     this->Target = this->Makefile->FindTargetToUse(args[0]);
@@ -165,15 +165,15 @@ void cmTargetPropCommandBase::HandleInterfaceContent(cmTarget *tgt,
   if (prepend)
     {
     const std::string propName = std::string("INTERFACE_") + this->Property;
-    const char *propValue = tgt->GetProperty(propName.c_str());
+    const char *propValue = tgt->GetProperty(propName);
     const std::string totalContent = this->Join(content) + (propValue
                                               ? std::string(";") + propValue
                                               : std::string());
-    tgt->SetProperty(propName.c_str(), totalContent.c_str());
+    tgt->SetProperty(propName, totalContent.c_str());
     }
   else
     {
-    tgt->AppendProperty(("INTERFACE_" + this->Property).c_str(),
+    tgt->AppendProperty("INTERFACE_" + this->Property,
                           this->Join(content).c_str());
     }
 }

@@ -312,7 +312,7 @@ int cmComputeLinkDepends::AddLinkEntry(int depender_index,
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target = this->FindTargetToLink(depender_index, entry.Item.c_str());
+  entry.Target = this->FindTargetToLink(depender_index, entry.Item);
   entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
                   item.substr(0, 10) != "-framework");
 
@@ -328,7 +328,7 @@ int cmComputeLinkDepends::AddLinkEntry(int depender_index,
     // Look for an old-style <item>_LIB_DEPENDS variable.
     std::string var = entry.Item;
     var += "_LIB_DEPENDS";
-    if(const char* val = this->Makefile->GetDefinition(var.c_str()))
+    if(const char* val = this->Makefile->GetDefinition(var))
       {
       // The item dependencies are known.  Follow them.
       BFSEntry qe = {index, val};
@@ -435,7 +435,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     LinkEntry& entry = this->EntryList[lei->second];
     entry.Item = dep.Item;
     entry.Target = this->FindTargetToLink(dep.DependerIndex,
-                                          dep.Item.c_str());
+                                          dep.Item);
 
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
@@ -506,7 +506,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
         {
         std::string var = *di;
         var += "_LINK_TYPE";
-        if(const char* val = this->Makefile->GetDefinition(var.c_str()))
+        if(const char* val = this->Makefile->GetDefinition(var))
           {
           if(strcmp(val, "debug") == 0)
             {
@@ -1000,7 +1000,7 @@ void cmComputeLinkDepends::CheckWrongConfigItem(int depender_index,
   // directories of targets linked in another configuration as link
   // directories.
   if(cmTarget const* tgt
-                      = this->FindTargetToLink(depender_index, item.c_str()))
+                      = this->FindTargetToLink(depender_index, item))
     {
     if(!tgt->IsImported())
       {
