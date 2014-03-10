@@ -2026,7 +2026,8 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
       }
 
     // Specify the compiler program database file if configured.
-    std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
+    std::string pdb =
+        this->GeneratorTarget->GetCompilePDBPath(configName.c_str());
     if(!pdb.empty())
       {
       this->ConvertToWindowsSlash(pdb);

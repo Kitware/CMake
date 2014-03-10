@@ -163,6 +163,12 @@ public:
   /** Whether this library has soname enabled and platform supports it.  */
   bool HasSOName(const std::string& config) const;
 
+  /** Get the name of the compiler pdb file for the target.  */
+  std::string GetCompilePDBName(const std::string& config="") const;
+
+  /** Get the path for the MSVC /Fd option for this target.  */
+  std::string GetCompilePDBPath(const std::string& config="") const;
+
   /**
    * Flags for a given source file as used in this target. Typically assigned
    * via SET_TARGET_PROPERTIES when the property is a list of source files.
