@@ -540,6 +540,41 @@ bool cmGeneratorTarget::IsImported() const
 }
 
 //----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetLocationForBuild() const
+{
+  static std::string location;
+  if(this->IsImported())
+    {
+    location = this->Target->ImportedGetFullPath("", false);
+    return location.c_str();
+    }
+
+  // Now handle the deprecated build-time configuration location.
+  location = this->Target->GetDirectory();
+  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
+  if(cfgid && strcmp(cfgid, ".") != 0)
+    {
+    location += "/";
+    location += cfgid;
+    }
+
+  if(this->Target->IsAppBundleOnApple())
+    {
+    std::string macdir = this->Target->BuildMacContentDirectory("", "",
+                                                                false);
+    if(!macdir.empty())
+      {
+      location += "/";
+      location += macdir;
+      }
+    }
+  location += "/";
+  location += this->Target->GetFullName("", false);
+  return location.c_str();
+}
+
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                               const std::string& config) const
 {
@@ -867,7 +902,7 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         {
         // This is really only for compatibility so we do not need to
         // worry about configuration names and output names.
-        std::string tLocation = t->Target->GetLocationForBuild();
+        std::string tLocation = t->GetLocationForBuild();
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         std::string depLocation = cmSystemTools::GetFilenamePath(dep);
         depLocation = cmSystemTools::CollapseFullPath(depLocation);

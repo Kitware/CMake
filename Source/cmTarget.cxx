@@ -2748,39 +2748,6 @@ const char* cmTarget::ImportedGetLocation(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetLocationForBuild() const
-{
-  static std::string location;
-  if(this->IsImported())
-    {
-    location = this->ImportedGetFullPath("", false);
-    return location.c_str();
-    }
-
-  // Now handle the deprecated build-time configuration location.
-  location = this->GetDirectory();
-  const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
-  if(cfgid && strcmp(cfgid, ".") != 0)
-    {
-    location += "/";
-    location += cfgid;
-    }
-
-  if(this->IsAppBundleOnApple())
-    {
-    std::string macdir = this->BuildMacContentDirectory("", "", false);
-    if(!macdir.empty())
-      {
-      location += "/";
-      location += macdir;
-      }
-    }
-  location += "/";
-  location += this->GetFullName("", false);
-  return location.c_str();
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::GetTargetVersion(int& major, int& minor) const
 {
   int patch;
@@ -2922,8 +2889,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
         // cannot take into account the per-configuration name of the
         // target because the configuration type may not be known at
         // CMake time.
-        this->Properties.SetProperty(
-                propLOCATION, this->GetLocationForBuild());
+        cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
+        gg->CreateGenerationObjects();
+        cmGeneratorTarget* gt = gg->GetGeneratorTarget(this);
+        this->Properties.SetProperty(propLOCATION,
+                                     gt->GetLocationForBuild());
         }
 
       }
