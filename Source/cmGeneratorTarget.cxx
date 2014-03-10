@@ -657,6 +657,51 @@ void cmGeneratorTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
 }
 
 //----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetCompilePDBName(const std::string& config) const
+{
+  std::string prefix;
+  std::string base;
+  std::string suffix;
+  this->Target->GetFullNameInternal(config, false, prefix, base, suffix);
+
+  // Check for a per-configuration output directory target property.
+  std::string configUpper = cmSystemTools::UpperCase(config);
+  std::string configProp = "COMPILE_PDB_NAME_";
+  configProp += configUpper;
+  const char* config_name = this->Target->GetProperty(configProp);
+  if(config_name && *config_name)
+    {
+    return prefix + config_name + ".pdb";
+    }
+
+  const char* name = this->Target->GetProperty("COMPILE_PDB_NAME");
+  if(name && *name)
+    {
+    return prefix + name + ".pdb";
+    }
+
+  return "";
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmGeneratorTarget::GetCompilePDBPath(const std::string& config) const
+{
+  std::string dir = this->Target->GetCompilePDBDirectory(config);
+  std::string name = this->GetCompilePDBName(config);
+  if(dir.empty() && !name.empty())
+    {
+    dir = this->Target->GetPDBDirectory(config);
+    }
+  if(!dir.empty())
+    {
+    dir += "/";
+    }
+  return dir + name;
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::HasSOName(const std::string& config) const
 {
   // soname is supported only for shared libraries and modules,
