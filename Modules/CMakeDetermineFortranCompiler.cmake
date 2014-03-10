@@ -28,6 +28,7 @@ endif()
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(CMAKE_Fortran_COMPILER_XCODE_TYPE sourcecode.fortran.f90)
+  _cmake_find_compiler_path(Fortran)
 else()
   if(NOT CMAKE_Fortran_COMPILER)
     # prefer the environment variable CC
