@@ -31,6 +31,11 @@ public:
   bool IsImported() const;
   const char *GetLocation(const std::string& config) const;
 
+  /** Get the location of the target in the build tree with a placeholder
+      referencing the configuration in the native build system.  This
+      location is suitable for use as the LOCATION target property.  */
+  const char* GetLocationForBuild() const;
+
   int GetType() const;
   std::string GetName() const;
   const char *GetProperty(const std::string& prop) const;
