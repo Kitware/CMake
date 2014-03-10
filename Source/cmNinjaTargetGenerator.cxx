@@ -760,9 +760,10 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   this->Generator->GetGlobalGenerator()->AddDependencyToAll(output);
 }
 
-void cmNinjaTargetGenerator::addPoolNinjaVariable(const char* pool_property,
-                                                  cmTarget* target,
-                                                  cmNinjaVars& vars)
+void cmNinjaTargetGenerator::addPoolNinjaVariable(
+                                              const std::string& pool_property,
+                                              cmTarget* target,
+                                              cmNinjaVars& vars)
 {
     const char* pool = target->GetProperty(pool_property);
     if (pool)

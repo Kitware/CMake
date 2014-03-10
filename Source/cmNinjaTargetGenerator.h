@@ -85,7 +85,7 @@ protected:
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
 
-  std::string ConvertToNinjaPath(const char *path) const {
+  std::string ConvertToNinjaPath(const std::string& path) const {
     return this->GetLocalGenerator()->ConvertToNinjaPath(path);
   }
   cmLocalNinjaGenerator::map_to_ninja_path MapToNinjaPath() const {
@@ -142,7 +142,7 @@ protected:
   cmOSXBundleGenerator* OSXBundleGenerator;
   std::set<std::string> MacContentFolders;
 
-  void addPoolNinjaVariable(const char* pool_property,
+  void addPoolNinjaVariable(const std::string& pool_property,
                             cmTarget* target,
                             cmNinjaVars& vars);
 

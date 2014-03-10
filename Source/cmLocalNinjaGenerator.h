@@ -67,7 +67,7 @@ public:
   std::string GetHomeRelativeOutputPath() const
   { return this->HomeRelativeOutputPath; }
 
-  std::string ConvertToNinjaPath(const char *path);
+  std::string ConvertToNinjaPath(const std::string& path);
 
   struct map_to_ninja_path {
     cmLocalNinjaGenerator *LocalGenerator;
