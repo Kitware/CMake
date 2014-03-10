@@ -21,6 +21,7 @@ class cmTarget;
 class cmTargetManifest;
 class cmSourceFile;
 class cmCustomCommand;
+class cmCustomCommandGenerator;
 
 /** \class cmLocalGenerator
  * \brief Create required build files for a directory.
@@ -350,7 +351,7 @@ public:
                                   const std::string& targetName,
                                   const char* fname);
   /** Construct a comment for a custom command.  */
-  std::string ConstructComment(const cmCustomCommand& cc,
+  std::string ConstructComment(cmCustomCommandGenerator const& ccg,
                                const char* default_comment = "");
   // Compute object file names.
   std::string GetObjectFileNameWithoutTarget(const cmSourceFile& source,

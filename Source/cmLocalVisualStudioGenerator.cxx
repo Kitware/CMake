@@ -79,13 +79,11 @@ const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 //----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudioGenerator
-::ConstructScript(cmCustomCommand const& cc,
-                  const std::string& configName,
+::ConstructScript(cmCustomCommandGenerator const& ccg,
                   const std::string& newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();
-  std::string workingDirectory = cc.GetWorkingDirectory();
-  cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
+  std::string workingDirectory = ccg.GetWorkingDirectory();
   RelativeRoot relativeRoot = workingDirectory.empty()? START_OUTPUT : NONE;
 
   // Avoid leading or trailing newlines.

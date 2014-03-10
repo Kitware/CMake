@@ -21,6 +21,7 @@
 #include "cmTarget.h"
 #include "cmake.h"
 #include "cmComputeLinkInformation.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmGeneratorExpression.h"
 
 #include "cmMakefileExecutableTargetGenerator.h"
@@ -158,11 +159,13 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
         si = customCommands.begin();
       si != customCommands.end(); ++si)
     {
-    cmCustomCommand const* cc = (*si)->GetCustomCommand();
-    this->GenerateCustomRuleFile(*cc);
+    cmCustomCommandGenerator ccg(*(*si)->GetCustomCommand(),
+                                 this->ConfigName,
+                                 this->Makefile);
+    this->GenerateCustomRuleFile(ccg);
     if (clean)
       {
-      const std::vector<std::string>& outputs = cc->GetOutputs();
+      const std::vector<std::string>& outputs = ccg.GetOutputs();
       for(std::vector<std::string>::const_iterator o = outputs.begin();
           o != outputs.end(); ++o)
         {
@@ -1178,7 +1181,8 @@ cmMakefileTargetGenerator
     {
     if(cmCustomCommand* cc = (*source)->GetCustomCommand())
       {
-      const std::vector<std::string>& outputs = cc->GetOutputs();
+      cmCustomCommandGenerator ccg(*cc, this->ConfigName, this->Makefile);
+      const std::vector<std::string>& outputs = ccg.GetOutputs();
       for(std::vector<std::string>::const_iterator o = outputs.begin();
           o != outputs.end(); ++o)
         {
@@ -1210,11 +1214,11 @@ void cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator
-::GenerateCustomRuleFile(const cmCustomCommand& cc)
+::GenerateCustomRuleFile(cmCustomCommandGenerator const& ccg)
 {
   // Collect the commands.
   std::vector<std::string> commands;
-  std::string comment = this->LocalGenerator->ConstructComment(cc);
+  std::string comment = this->LocalGenerator->ConstructComment(ccg);
   if(!comment.empty())
     {
     // add in a progress call if needed
@@ -1229,19 +1233,19 @@ void cmMakefileTargetGenerator
 
   // Now append the actual user-specified commands.
   cmOStringStream content;
-  this->LocalGenerator->AppendCustomCommand(commands, cc, this->Target, false,
+  this->LocalGenerator->AppendCustomCommand(commands, ccg, this->Target, false,
                                             cmLocalGenerator::HOME_OUTPUT,
                                             &content);
 
   // Collect the dependencies.
   std::vector<std::string> depends;
-  this->LocalGenerator->AppendCustomDepend(depends, cc);
+  this->LocalGenerator->AppendCustomDepend(depends, ccg);
 
   // Check whether we need to bother checking for a symbolic output.
   bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();
 
   // Write the rule.
-  const std::vector<std::string>& outputs = cc.GetOutputs();
+  const std::vector<std::string>& outputs = ccg.GetOutputs();
   std::vector<std::string>::const_iterator o = outputs.begin();
   {
   bool symbolic = false;
@@ -1259,7 +1263,7 @@ void cmMakefileTargetGenerator
   // If the rule has changed make sure the output is rebuilt.
   if(!symbolic)
     {
-    this->GlobalGenerator->AddRuleHash(cc.GetOutputs(), content.str());
+    this->GlobalGenerator->AddRuleHash(ccg.GetOutputs(), content.str());
     }
   }
 
@@ -1280,8 +1284,8 @@ void cmMakefileTargetGenerator
 
   // Setup implicit dependency scanning.
   for(cmCustomCommand::ImplicitDependsList::const_iterator
-        idi = cc.GetImplicitDepends().begin();
-      idi != cc.GetImplicitDepends().end(); ++idi)
+        idi = ccg.GetCC().GetImplicitDepends().begin();
+      idi != ccg.GetCC().GetImplicitDepends().end(); ++idi)
     {
     std::string objFullPath =
       this->Convert(outputs[0], cmLocalGenerator::FULL);

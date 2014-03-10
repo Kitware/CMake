@@ -960,7 +960,9 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    this->AppendCustomDepend(depends, *i);
+    cmCustomCommandGenerator ccg(*i, this->ConfigurationName,
+                                 this->Makefile);
+    this->AppendCustomDepend(depends, ccg);
     }
 }
 
@@ -968,10 +970,10 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomDepend(std::vector<std::string>& depends,
-                     const cmCustomCommand& cc)
+                     cmCustomCommandGenerator const& ccg)
 {
-  for(std::vector<std::string>::const_iterator d = cc.GetDepends().begin();
-      d != cc.GetDepends().end(); ++d)
+  for(std::vector<std::string>::const_iterator d = ccg.GetDepends().begin();
+      d != ccg.GetDepends().end(); ++d)
     {
     // Lookup the real name of the dependency in case it is a CMake target.
     std::string dep;
@@ -994,7 +996,9 @@ cmLocalUnixMakefileGenerator3
   for(std::vector<cmCustomCommand>::const_iterator i = ccs.begin();
       i != ccs.end(); ++i)
     {
-    this->AppendCustomCommand(commands, *i, target, true, relative);
+    cmCustomCommandGenerator ccg(*i, this->ConfigurationName,
+                                 this->Makefile);
+    this->AppendCustomCommand(commands, ccg, target, true, relative);
     }
 }
 
@@ -1002,7 +1006,7 @@ cmLocalUnixMakefileGenerator3
 void
 cmLocalUnixMakefileGenerator3
 ::AppendCustomCommand(std::vector<std::string>& commands,
-                      const cmCustomCommand& cc,
+                      cmCustomCommandGenerator const& ccg,
                       cmTarget* target,
                       bool echo_comment,
                       cmLocalGenerator::RelativeRoot relative,
@@ -1014,8 +1018,8 @@ cmLocalUnixMakefileGenerator3
   // their comments generated elsewhere.
   if(echo_comment)
     {
-    const char* comment = cc.GetComment();
-    if(comment && *comment)
+    const char* comment = ccg.GetComment();
+    if(comment && !*comment)
       {
       this->AppendEcho(commands, comment,
                        cmLocalUnixMakefileGenerator3::EchoGenerate);
@@ -1024,7 +1028,7 @@ cmLocalUnixMakefileGenerator3
 
   // if the command specified a working directory use it.
   std::string dir  = this->Makefile->GetStartOutputDirectory();
-  std::string workingDir = cc.GetWorkingDirectory();
+  std::string workingDir = ccg.GetWorkingDirectory();
   if(!workingDir.empty())
     {
     dir = workingDir;
@@ -1033,8 +1037,6 @@ cmLocalUnixMakefileGenerator3
     {
     *content << dir;
     }
-  cmCustomCommandGenerator ccg(cc, this->ConfigurationName,
-                               this->Makefile);
 
   // Add each command line to the set of commands.
   std::vector<std::string> commands1;
@@ -1079,7 +1081,7 @@ cmLocalUnixMakefileGenerator3
         cmd = "./" + cmd;
         }
       std::string launcher =
-        this->MakeLauncher(cc, target,
+        this->MakeLauncher(ccg, target,
                            workingDir.empty()? START_OUTPUT : NONE);
       cmd = launcher + this->ConvertShellCommand(cmd, NONE);
 
@@ -1134,9 +1136,9 @@ cmLocalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator3::MakeLauncher(const cmCustomCommand& cc,
-                                            cmTarget* target,
-                                            RelativeRoot relative)
+cmLocalUnixMakefileGenerator3::MakeLauncher(
+  cmCustomCommandGenerator const& ccg,
+  cmTarget* target, RelativeRoot relative)
 {
   // Short-circuit if there is no launcher.
   const char* prop = "RULE_LAUNCH_CUSTOM";
@@ -1152,7 +1154,7 @@ cmLocalUnixMakefileGenerator3::MakeLauncher(const cmCustomCommand& cc,
   vars.RuleLauncher = prop;
   vars.CMTarget = target;
   std::string output;
-  const std::vector<std::string>& outputs = cc.GetOutputs();
+  const std::vector<std::string>& outputs = ccg.GetOutputs();
   if(!outputs.empty())
     {
     output = this->Convert(outputs[0], relative, SHELL);

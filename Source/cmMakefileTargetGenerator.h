@@ -15,7 +15,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmOSXBundleGenerator.h"
 
-class cmCustomCommand;
+class cmCustomCommandGenerator;
 class cmDependInformation;
 class cmDepends;
 class cmGeneratorTarget;
@@ -102,7 +102,7 @@ protected:
                               std::vector<std::string>& depends);
 
   // write the build rule for a custom command
-  void GenerateCustomRuleFile(const cmCustomCommand& cc);
+  void GenerateCustomRuleFile(cmCustomCommandGenerator const& ccg);
 
   // write a rule to drive building of more than one output from
   // another rule

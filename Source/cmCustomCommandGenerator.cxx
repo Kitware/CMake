@@ -71,3 +71,27 @@ cmCustomCommandGenerator
       }
     }
 }
+
+//----------------------------------------------------------------------------
+const char* cmCustomCommandGenerator::GetComment() const
+{
+  return this->CC.GetComment();
+}
+
+//----------------------------------------------------------------------------
+std::string cmCustomCommandGenerator::GetWorkingDirectory() const
+{
+  return this->CC.GetWorkingDirectory();
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
+{
+  return this->CC.GetOutputs();
+}
+
+//----------------------------------------------------------------------------
+std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
+{
+  return this->CC.GetDepends();
+}

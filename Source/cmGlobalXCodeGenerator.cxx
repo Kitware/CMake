@@ -1546,10 +1546,10 @@ void  cmGlobalXCodeGenerator
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    if(ccg.GetNumberOfCommands() > 0)
       {
-      const std::vector<std::string>& outputs = cc.GetOutputs();
+      const std::vector<std::string>& outputs = ccg.GetOutputs();
       if(!outputs.empty())
         {
         for(std::vector<std::string>::const_iterator o = outputs.begin();
@@ -1573,8 +1573,8 @@ void  cmGlobalXCodeGenerator
         {
         cmOStringStream str;
         str << "_buildpart_" << count++ ;
-        tname[&cc] = std::string(target.GetName()) + str.str();
-        makefileStream << "\\\n\t" << tname[&cc];
+        tname[&ccg.GetCC()] = std::string(target.GetName()) + str.str();
+        makefileStream << "\\\n\t" << tname[&ccg.GetCC()];
         }
       }
     }
@@ -1582,12 +1582,11 @@ void  cmGlobalXCodeGenerator
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    if(ccg.GetNumberOfCommands() > 0)
       {
-      cmCustomCommandGenerator ccg(cc, configName, this->CurrentMakefile);
       makefileStream << "\n";
-      const std::vector<std::string>& outputs = cc.GetOutputs();
+      const std::vector<std::string>& outputs = ccg.GetOutputs();
       if(!outputs.empty())
         {
         // There is at least one output, start the rule for it
@@ -1598,11 +1597,11 @@ void  cmGlobalXCodeGenerator
       else
         {
         // There are no outputs.  Use the generated force rule name.
-        makefileStream << tname[&cc] << ": ";
+        makefileStream << tname[&ccg.GetCC()] << ": ";
         }
       for(std::vector<std::string>::const_iterator d =
-          cc.GetDepends().begin();
-          d != cc.GetDepends().end(); ++d)
+          ccg.GetDepends().begin();
+          d != ccg.GetDepends().end(); ++d)
         {
         std::string dep;
         if(this->CurrentLocalGenerator
@@ -1614,11 +1613,11 @@ void  cmGlobalXCodeGenerator
         }
       makefileStream << "\n";
 
-      if(const char* comment = cc.GetComment())
+      if(const char* comment = ccg.GetComment())
         {
         std::string echo_cmd = "echo ";
         echo_cmd += (this->CurrentLocalGenerator->
-                     EscapeForShell(comment, cc.GetEscapeAllowMakeVars()));
+          EscapeForShell(comment, ccg.GetCC().GetEscapeAllowMakeVars()));
         makefileStream << "\t" << echo_cmd.c_str() << "\n";
         }
 
@@ -1630,7 +1629,7 @@ void  cmGlobalXCodeGenerator
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
         cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
         std::string cmd;
-        std::string wd = cc.GetWorkingDirectory();
+        std::string wd = ccg.GetWorkingDirectory();
         if(!wd.empty())
           {
           cmd += "cd ";
