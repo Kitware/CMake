@@ -1023,9 +1023,9 @@ cmLocalUnixMakefileGenerator3
     }
 
   // if the command specified a working directory use it.
-  const char* dir  = this->Makefile->GetStartOutputDirectory();
-  const char* workingDir = cc.GetWorkingDirectory();
-  if(workingDir)
+  std::string dir  = this->Makefile->GetStartOutputDirectory();
+  std::string workingDir = cc.GetWorkingDirectory();
+  if(!workingDir.empty())
     {
     dir = workingDir;
     }
@@ -1066,7 +1066,7 @@ cmLocalUnixMakefileGenerator3
       // Convert the command to a relative path only if the current
       // working directory will be the start-output directory.
       bool had_slash = cmd.find("/") != cmd.npos;
-      if(!workingDir)
+      if(workingDir.empty())
         {
         cmd = this->Convert(cmd,START_OUTPUT);
         }
@@ -1079,7 +1079,8 @@ cmLocalUnixMakefileGenerator3
         cmd = "./" + cmd;
         }
       std::string launcher =
-        this->MakeLauncher(cc, target, workingDir? NONE : START_OUTPUT);
+        this->MakeLauncher(cc, target,
+                           workingDir.empty()? START_OUTPUT : NONE);
       cmd = launcher + this->ConvertShellCommand(cmd, NONE);
 
       ccg.AppendArguments(c, cmd);
@@ -1125,7 +1126,7 @@ cmLocalUnixMakefileGenerator3
     }
 
   // Setup the proper working directory for the commands.
-  this->CreateCDCommand(commands1, dir, relative);
+  this->CreateCDCommand(commands1, dir.c_str(), relative);
 
   // push back the custom commands
   commands.insert(commands.end(), commands1.begin(), commands1.end());

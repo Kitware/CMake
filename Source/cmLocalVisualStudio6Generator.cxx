@@ -583,7 +583,7 @@ cmLocalVisualStudio6Generator
      this->Makefile->AddCustomCommandToOutput(
        output, depends, no_main_dependency,
        origCommand.GetCommandLines(), comment.c_str(),
-       origCommand.GetWorkingDirectory()))
+       origCommand.GetWorkingDirectory().c_str()))
     {
     target.AddSourceFile(outsf);
     }

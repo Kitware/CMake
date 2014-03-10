@@ -1646,10 +1646,11 @@ void  cmGlobalXCodeGenerator
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
         cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
         std::string cmd;
-        if(cc.GetWorkingDirectory())
+        std::string wd = cc.GetWorkingDirectory();
+        if(!wd.empty())
           {
           cmd += "cd ";
-          cmd += this->ConvertToRelativeForMake(cc.GetWorkingDirectory());
+          cmd += this->ConvertToRelativeForMake(wd.c_str());
           cmd += " && ";
           }
         cmd += cmd2;

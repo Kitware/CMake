@@ -364,8 +364,8 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
 {
   cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
   if (ccg.GetNumberOfCommands() > 0) {
-    const char* wd = cc->GetWorkingDirectory();
-    if (!wd)
+    std::string wd = cc->GetWorkingDirectory();
+    if (wd.empty())
       wd = this->GetMakefile()->GetStartOutputDirectory();
 
     cmOStringStream cdCmd;
@@ -491,7 +491,7 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   if(!outputs.empty())
   {
     RelativeRoot relative_root =
-      cc.GetWorkingDirectory() ? NONE : START_OUTPUT;
+      cc.GetWorkingDirectory().empty() ? START_OUTPUT : NONE;
 
     output = this->Convert(outputs[0], relative_root, SHELL);
   }

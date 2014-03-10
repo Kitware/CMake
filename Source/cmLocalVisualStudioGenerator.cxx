@@ -84,9 +84,9 @@ cmLocalVisualStudioGenerator
                   const std::string& newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();
-  const char* workingDirectory = cc.GetWorkingDirectory();
+  std::string workingDirectory = cc.GetWorkingDirectory();
   cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
-  RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;
+  RelativeRoot relativeRoot = workingDirectory.empty()? START_OUTPUT : NONE;
 
   // Avoid leading or trailing newlines.
   std::string newline = "";
@@ -114,7 +114,7 @@ cmLocalVisualStudioGenerator
     script += "setlocal";
     }
 
-  if(workingDirectory)
+  if(!workingDirectory.empty())
     {
     // Change the working directory.
     script += newline;
@@ -124,7 +124,7 @@ cmLocalVisualStudioGenerator
     script += check_error;
 
     // Change the working drive.
-    if(workingDirectory[0] && workingDirectory[1] == ':')
+    if(workingDirectory.size() > 1 && workingDirectory[1] == ':')
       {
       script += newline;
       newline = newline_text;
