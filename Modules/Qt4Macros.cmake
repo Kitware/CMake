@@ -342,7 +342,7 @@ macro(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optional
 
   if(_optionalClassName)
     add_custom_command(OUTPUT "${_impl}" "${_header}"
-       COMMAND Qt4::qdbuscpp2xml -m -a ${_basename} -c ${_optionalClassName} -i ${_include} -l ${_parentClass} ${_infile}
+       COMMAND Qt4::qdbusxml2cpp -m -a ${_basename} -c ${_optionalClassName} -i ${_include} -l ${_parentClass} ${_infile}
        DEPENDS ${_infile} VERBATIM
     )
   else()
