@@ -2754,6 +2754,15 @@ const char* cmTarget::GetLocation(const std::string& config) const
 }
 
 //----------------------------------------------------------------------------
+const char* cmTarget::ImportedGetLocation(const std::string& config) const
+{
+  static std::string location;
+  assert(this->IsImported());
+  location = this->ImportedGetFullPath(config, false);
+  return location.c_str();
+}
+
+//----------------------------------------------------------------------------
 const char* cmTarget::GetLocationForBuild() const
 {
   static std::string location;
