@@ -293,9 +293,6 @@ public:
                               cmTarget const* headTarget,
                               bool usage_requirements_only) const;
 
-  std::vector<cmTarget const*> const&
-    GetLinkImplementationClosure(const std::string& config) const;
-
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
   struct LinkImplementationLibraries

@@ -618,7 +618,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       }
 
     std::vector<cmTarget const*> const& deps =
-      this->Target->GetLinkImplementationClosure(config);
+      this->GetLinkImplementationClosure(config);
     for(std::vector<cmTarget const*>::const_iterator
           li = deps.begin(), le = deps.end(); li != le; ++li)
       {
@@ -772,6 +772,54 @@ void cmGeneratorTarget::GetAutoUicOptions(std::vector<std::string> &result,
                                                 this->Target,
                                                 &dagChecker),
                                   result);
+}
+
+//----------------------------------------------------------------------------
+void processILibs(const std::string& config,
+                  cmTarget const* headTarget,
+                  cmLinkItem const& item,
+                  std::vector<cmTarget const*>& tgts,
+                  std::set<cmTarget const*>& emitted)
+{
+  if (item.Target && emitted.insert(item.Target).second)
+    {
+    tgts.push_back(item.Target);
+    if(cmTarget::LinkInterfaceLibraries const* iface =
+       item.Target->GetLinkInterfaceLibraries(config, headTarget, true))
+      {
+      for(std::vector<cmLinkItem>::const_iterator
+            it = iface->Libraries.begin();
+          it != iface->Libraries.end(); ++it)
+        {
+        processILibs(config, headTarget, *it, tgts, emitted);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
+const std::vector<const cmTarget*>&
+cmGeneratorTarget::GetLinkImplementationClosure(
+    const std::string& config) const
+{
+  LinkImplClosure& tgts =
+    this->LinkImplClosureMap[config];
+  if(!tgts.Done)
+    {
+    tgts.Done = true;
+    std::set<cmTarget const*> emitted;
+
+    cmTarget::LinkImplementationLibraries const* impl
+      = this->Target->GetLinkImplementationLibraries(config);
+
+    for(std::vector<cmLinkImplItem>::const_iterator
+          it = impl->Libraries.begin();
+        it != impl->Libraries.end(); ++it)
+      {
+      processILibs(config, this->Target, *it, tgts , emitted);
+      }
+    }
+  return tgts;
 }
 
 //----------------------------------------------------------------------------
@@ -1455,7 +1503,7 @@ cmGeneratorTarget::GetCompatibleInterfaces(std::string const& config) const
     compat.PropsBool.insert("POSITION_INDEPENDENT_CODE");
     compat.PropsString.insert("AUTOUIC_OPTIONS");
     std::vector<cmTarget const*> const& deps =
-      this->Target->GetLinkImplementationClosure(config);
+      this->GetLinkImplementationClosure(config);
     for(std::vector<cmTarget const*>::const_iterator li = deps.begin();
         li != deps.end(); ++li)
       {
@@ -1954,7 +2002,7 @@ PropertyType checkInterfacePropertyCompatibility(cmGeneratorTarget const* tgt,
       || (!impliedByUse && !explicitlySet));
 
   std::vector<cmTarget const*> const& deps =
-    tgt->Target->GetLinkImplementationClosure(config);
+    tgt->GetLinkImplementationClosure(config);
 
   if(deps.empty())
     {
