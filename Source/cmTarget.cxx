@@ -1631,7 +1631,7 @@ static void processIncludeDirectories(cmTarget const* tgt,
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         if (fromEvaluatedImported)
           {
-          switch(mf->GetPolicyStatus(cmPolicies::CMP0027))
+          switch(tgt->GetPolicyStatusCMP0027())
             {
             case cmPolicies::WARN:
               e << (mf->GetPolicies()
@@ -5840,7 +5840,7 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
         cmOStringStream e;
-        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0038))
+        switch(this->GetPolicyStatusCMP0038())
           {
           case cmPolicies::WARN:
             {
