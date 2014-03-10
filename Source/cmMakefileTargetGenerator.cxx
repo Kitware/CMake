@@ -553,7 +553,7 @@ cmMakefileTargetGenerator
   if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     targetFullPathCompilePDB =
-      this->Target->GetCompilePDBPath(this->ConfigName);
+      this->GeneratorTarget->GetCompilePDBPath(this->ConfigName);
     if(targetFullPathCompilePDB.empty())
       {
       targetFullPathCompilePDB = this->Target->GetSupportDirectory() + "/";
