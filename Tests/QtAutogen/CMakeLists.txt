@@ -58,11 +58,17 @@ add_custom_target(generate_moc_input
   COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_CURRENT_BINARY_DIR}/myinterface.h.in" "${CMAKE_CURRENT_BINARY_DIR}/myinterface.h"
 )
 
+add_custom_command(
+  OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/myotherinterface.h"
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/myotherinterface.h.in" "${CMAKE_CURRENT_BINARY_DIR}/myotherinterface.h"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/myotherinterface.h.in"
+)
+
 add_executable(QtAutogen main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
                test.qrc resourcetester.cpp generated.cpp
 )
-set_property(TARGET QtAutogen APPEND PROPERTY AUTOGEN_TARGET_DEPENDS generate_moc_input)
+set_property(TARGET QtAutogen APPEND PROPERTY AUTOGEN_TARGET_DEPENDS generate_moc_input "${CMAKE_CURRENT_BINARY_DIR}/myotherinterface.h")
 
 set_target_properties(QtAutogen codeeditorLib privateSlot PROPERTIES AUTOMOC TRUE)
 
