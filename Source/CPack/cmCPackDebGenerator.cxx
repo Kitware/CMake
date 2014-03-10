@@ -403,9 +403,39 @@ int cmCPackDebGenerator::createDeb()
   if (NULL != this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE")) {
       cmd += this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
   }
-  cmd += " \"";
-  cmd += cmakeExecutable;
-  cmd += "\" -E tar cfz data.tar.gz ";
+
+  const char* debian_compression_type =
+      this->GetOption("CPACK_DEBIAN_COMPRESSION_TYPE");
+  if(!debian_compression_type)
+    {
+    debian_compression_type = "gzip";
+    }
+
+  std::string cmake_tar = " ", compression_modifier = "a", compression_suffix;
+  if(!strcmp(debian_compression_type, "lzma")) {
+      compression_suffix = ".lzma";
+  } else if(!strcmp(debian_compression_type, "xz")) {
+      compression_suffix = ".xz";
+  } else if(!strcmp(debian_compression_type, "bzip2")) {
+      compression_suffix = ".bz2";
+      compression_modifier = "j";
+      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+  } else if(!strcmp(debian_compression_type, "gzip")) {
+      compression_suffix = ".gz";
+      compression_modifier = "z";
+      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+  } else if(!strcmp(debian_compression_type, "none")) {
+      compression_suffix = "";
+      compression_modifier = "";
+      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+  } else {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Error unrecognized compression type: "
+                    << debian_compression_type << std::endl);
+  }
+
+  cmd += cmake_tar + "tar c" + compression_modifier + "f data.tar"
+      + compression_suffix;
 
   // now add all directories which have to be compressed
   // collect all top level install dirs for that
@@ -493,9 +523,7 @@ int cmCPackDebGenerator::createDeb()
       {
       cmd = this->GetOption("CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
       }
-    cmd += " \"";
-    cmd += cmakeExecutable;
-    cmd += "\" -E tar cfz control.tar.gz ./control ./md5sums";
+    cmd += cmake_tar + "tar czf control.tar.gz ./control ./md5sums";
     const char* controlExtra =
       this->GetOption("CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA");
   if( controlExtra )
@@ -514,7 +542,7 @@ int cmCPackDebGenerator::createDeb()
       if( cmsys::SystemTools::CopyFileIfDifferent(
             i->c_str(), localcopy.c_str()) )
         {
-        // debian is picky and need relative to ./ path in the tar.gz
+        // debian is picky and need relative to ./ path in the tar.*
         cmd += " ./";
         cmd += filenamename;
         }
@@ -538,7 +566,7 @@ int cmCPackDebGenerator::createDeb()
     return 0;
     }
 
-  // ar -r your-package-name.deb debian-binary control.tar.gz data.tar.gz
+  // ar -r your-package-name.deb debian-binary control.tar.* data.tar.*
   // since debian packages require BSD ar (most Linux distros and even
   // FreeBSD and NetBSD ship GNU ar) we use a copy of OpenBSD ar here.
   std::vector<std::string> arFiles;
@@ -546,7 +574,7 @@ int cmCPackDebGenerator::createDeb()
   topLevelString += "/";
   arFiles.push_back(topLevelString + "debian-binary");
   arFiles.push_back(topLevelString + "control.tar.gz");
-  arFiles.push_back(topLevelString + "data.tar.gz");
+  arFiles.push_back(topLevelString + "data.tar" + compression_suffix);
     std::string outputFileName = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     outputFileName += "/";
     outputFileName += this->GetOption("CPACK_OUTPUT_FILE_NAME");
