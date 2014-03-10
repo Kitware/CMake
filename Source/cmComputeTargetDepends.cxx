@@ -349,7 +349,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     cmMakefile *makefile = depender->GetMakefile();
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
-    switch(makefile->GetPolicyStatus(cmPolicies::CMP0046))
+    switch(depender->GetPolicyStatusCMP0046())
       {
       case cmPolicies::WARN:
         issueMessage = true;
