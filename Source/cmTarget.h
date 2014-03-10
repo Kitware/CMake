@@ -376,11 +376,6 @@ public:
 
   const char* ImportedGetLocation(const std::string& config) const;
 
-  /** Get the location of the target in the build tree with a placeholder
-      referencing the configuration in the native build system.  This
-      location is suitable for use as the LOCATION target property.  */
-  const char* GetLocationForBuild() const;
-
   /** Get the target major and minor version numbers interpreted from
       the VERSION property.  Version 0 is returned if the property is
       not set or cannot be parsed.  */
