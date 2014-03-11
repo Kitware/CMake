@@ -19,6 +19,7 @@
 #include "cmVersion.h"
 
 #include <algorithm>
+#include <assert.h>
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
@@ -636,15 +637,21 @@ void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
 {
   std::vector<cmSourceFile const*> objectSources;
   gt->GetObjectSources(objectSources);
-  // Compute the name of each object file.
-  for(std::vector<cmSourceFile const*>::iterator
-        si = objectSources.begin();
-      si != objectSources.end(); ++si)
+
+  std::map<cmSourceFile const*, std::string> mapping;
+  for(std::vector<cmSourceFile const*>::const_iterator it
+      = objectSources.begin(); it != objectSources.end(); ++it)
     {
-    cmSourceFile const* sf = *si;
-    std::string objectName = gt->LocalGenerator
-      ->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
-    gt->AddObject(sf, objectName);
+    mapping[*it];
+    }
+
+  gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+
+  for(std::map<cmSourceFile const*, std::string>::const_iterator it
+      = mapping.begin(); it != mapping.end(); ++it)
+    {
+    assert(!it->second.empty());
+    gt->AddObject(it->first, it->second);
     }
 }
 

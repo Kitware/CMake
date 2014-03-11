@@ -172,6 +172,20 @@ void cmLocalUnixMakefileGenerator3::Generate()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalUnixMakefileGenerator3::ComputeObjectFilenames(
+                        std::map<cmSourceFile const*, std::string>& mapping,
+                        cmGeneratorTarget const* gt)
+{
+  for(std::map<cmSourceFile const*, std::string>::iterator
+      si = mapping.begin(); si != mapping.end(); ++si)
+    {
+    cmSourceFile const* sf = si->first;
+    si->second = this->GetObjectFileNameWithoutTarget(*sf,
+                                                      gt->ObjectDirectory);
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::
 GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
 {

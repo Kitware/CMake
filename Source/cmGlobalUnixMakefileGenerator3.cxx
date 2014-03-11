@@ -110,15 +110,20 @@ cmGlobalUnixMakefileGenerator3
 {
   std::vector<cmSourceFile const*> objectSources;
   gt->GetObjectSources(objectSources);
-  // Compute the name of each object file.
-  for(std::vector<cmSourceFile const*>::iterator
-        si = objectSources.begin();
-      si != objectSources.end(); ++si)
+
+  std::map<cmSourceFile const*, std::string> mapping;
+  for(std::vector<cmSourceFile const*>::const_iterator it
+      = objectSources.begin(); it != objectSources.end(); ++it)
     {
-    cmSourceFile const* sf = *si;
-    std::string objectName = gt->LocalGenerator
-      ->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
-    gt->AddObject(sf, objectName);
+    mapping[*it];
+    }
+
+  gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+
+  for(std::map<cmSourceFile const*, std::string>::const_iterator it
+      = mapping.begin(); it != mapping.end(); ++it)
+    {
+    gt->AddObject(it->first, it->second);
     }
 }
 

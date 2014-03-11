@@ -101,6 +101,10 @@ public:
   virtual std::string ConvertToLinkReference(std::string const& lib,
                                              OutputFormat format = SHELL);
 
+  virtual void ComputeObjectFilenames(
+                        std::map<cmSourceFile const*, std::string>& mapping,
+                        cmGeneratorTarget const* gt = 0);
+
 
 protected:
   virtual std::string ConvertToIncludeReference(std::string const& path,
