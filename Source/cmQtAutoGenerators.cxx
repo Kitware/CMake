@@ -260,6 +260,18 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
     // This also works around a VS 11 bug that may skip updating the target:
     //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
     usePRE_BUILD = vslg->GetVersion() >= cmLocalVisualStudioGenerator::VS7;
+    if(usePRE_BUILD)
+      {
+      for (std::vector<std::string>::iterator it = depends.begin();
+            it != depends.end(); ++it)
+        {
+        if(!makefile->FindTargetToUse(it->c_str()))
+          {
+          usePRE_BUILD = false;
+          break;
+          }
+        }
+      }
     }
   if(usePRE_BUILD)
     {
