@@ -117,7 +117,6 @@ private:
   virtual std::string GetVSMakeProgram() = 0;
   void PrintCompilerAdvice(std::ostream&, std::string const&,
                            const char*) const {}
-  void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void FollowLinkDepends(cmTarget const* target,
                          std::set<cmTarget const*>& linked);

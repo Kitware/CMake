@@ -217,7 +217,6 @@ protected:
 private:
   void PrintCompilerAdvice(std::ostream&, std::string const&,
                            const char*) const {}
-  void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   std::string GetObjectsNormalDirectory(
     const std::string &projName,

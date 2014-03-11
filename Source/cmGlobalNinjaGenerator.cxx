@@ -632,29 +632,6 @@ std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
   return cmSystemTools::GetCMakeGUICommand();
 }
 
-// TODO: Refactor to combine with cmGlobalUnixMakefileGenerator3 impl.
-void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
-{
-  std::vector<cmSourceFile const*> objectSources;
-  gt->GetObjectSources(objectSources);
-
-  std::map<cmSourceFile const*, std::string> mapping;
-  for(std::vector<cmSourceFile const*>::const_iterator it
-      = objectSources.begin(); it != objectSources.end(); ++it)
-    {
-    mapping[*it];
-    }
-
-  gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
-
-  for(std::map<cmSourceFile const*, std::string>::const_iterator it
-      = mapping.begin(); it != mapping.end(); ++it)
-    {
-    assert(!it->second.empty());
-    gt->AddObject(it->first, it->second);
-    }
-}
-
 //----------------------------------------------------------------------------
 void cmGlobalNinjaGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const

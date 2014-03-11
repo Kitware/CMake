@@ -1516,9 +1516,26 @@ cmGlobalGenerator::GetGeneratorTarget(cmTarget const* t) const
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::ComputeTargetObjects(cmGeneratorTarget*) const
+void cmGlobalGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
 {
-  // Implemented in generator subclasses that need this.
+  std::vector<cmSourceFile const*> objectSources;
+  gt->GetObjectSources(objectSources);
+
+  std::map<cmSourceFile const*, std::string> mapping;
+  for(std::vector<cmSourceFile const*>::const_iterator it
+      = objectSources.begin(); it != objectSources.end(); ++it)
+    {
+    mapping[*it];
+    }
+
+  gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+
+  for(std::map<cmSourceFile const*, std::string>::const_iterator it
+      = mapping.begin(); it != mapping.end(); ++it)
+    {
+    assert(!it->second.empty());
+    gt->AddObject(it->first, it->second);
+    }
 }
 
 //----------------------------------------------------------------------------

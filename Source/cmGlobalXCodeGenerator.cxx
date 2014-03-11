@@ -3934,30 +3934,6 @@ bool cmGlobalXCodeGenerator::IsMultiConfig()
   return true;
 }
 
- //----------------------------------------------------------------------------
-void
-cmGlobalXCodeGenerator
-::ComputeTargetObjects(cmGeneratorTarget* gt) const
-{
-  std::vector<cmSourceFile const*> objectSources;
-  gt->GetObjectSources(objectSources);
-
-  std::map<cmSourceFile const*, std::string> mapping;
-  for(std::vector<cmSourceFile const*>::const_iterator it
-      = objectSources.begin(); it != objectSources.end(); ++it)
-    {
-    mapping[*it];
-    }
-
-  gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
-
-  for(std::map<cmSourceFile const*, std::string>::const_iterator it
-      = mapping.begin(); it != mapping.end(); ++it)
-    {
-    gt->AddObject(it->first, it->second);
-    }
-}
-
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
