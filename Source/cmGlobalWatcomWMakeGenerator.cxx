@@ -43,11 +43,10 @@ void cmGlobalWatcomWMakeGenerator
 cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetSilentNoColon(true);
   lg->SetDefineWindowsNULL(true);
   lg->SetWindowsShell(true);
   lg->SetWatcomWMake(true);
-  lg->SetMakeSilentFlag("-s -h -e");
+  lg->SetMakeSilentFlag("-h");
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);

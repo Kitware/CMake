@@ -121,12 +121,6 @@ public:
   void SetUnixCD(bool v)  {this->UnixCD = v;}
 
   /**
-   * Set Support Verbose Variable.  If true, then .SILENT will
-   * be not end with :  i.e. .SILENT: or .SILENT
-   */
-  void SetSilentNoColon(bool v)  {this->SilentNoColon = v;}
-
-  /**
    * Set the string used to include one makefile into another default
    * is include.
    */
@@ -339,7 +333,6 @@ private:
   bool DefineWindowsNULL;
   bool UnixCD;
   bool PassMakeflags;
-  bool SilentNoColon;
   bool MakeCommandEscapeTargetTwice;
   bool BorlandMakeCurlyHack;
   //==========================================================================
