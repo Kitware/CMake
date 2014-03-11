@@ -109,9 +109,6 @@ cmGlobalUnixMakefileGenerator3
 ::ComputeTargetObjects(cmGeneratorTarget* gt) const
 {
   cmTarget* target = gt->Target;
-  cmLocalUnixMakefileGenerator3* lg =
-    static_cast<cmLocalUnixMakefileGenerator3*>(gt->LocalGenerator);
-
   // Compute full path to object file directory for this target.
   std::string dir_max;
   dir_max += gt->Makefile->GetCurrentOutputDirectory();
@@ -128,12 +125,9 @@ cmGlobalUnixMakefileGenerator3
       si != objectSources.end(); ++si)
     {
     cmSourceFile* sf = *si;
-    bool hasSourceExtension = true;
     std::string objectName = gt->LocalGenerator
-      ->GetObjectFileNameWithoutTarget(*sf, dir_max,
-                                       &hasSourceExtension);
+      ->GetObjectFileNameWithoutTarget(*sf, dir_max);
     gt->AddObject(sf, objectName);
-    lg->AddLocalObjectFile(target, sf, objectName, hasSourceExtension);
     }
 }
 

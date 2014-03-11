@@ -172,26 +172,57 @@ void cmLocalUnixMakefileGenerator3::Generate()
 }
 
 //----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator3::AddLocalObjectFile(
-  cmTarget* target, cmSourceFile* sf, std::string objNoTargetDir,
-  bool hasSourceExtension)
+void cmLocalUnixMakefileGenerator3::
+GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
 {
-  if(cmSystemTools::FileIsFullPath(objNoTargetDir.c_str()))
+  std::set<std::string> emitted;
+  cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
+  for(cmGeneratorTargetsType::iterator ti = targets.begin();
+      ti != targets.end(); ++ti)
     {
-    objNoTargetDir = cmSystemTools::GetFilenameName(objNoTargetDir);
+    cmGeneratorTarget* gt = ti->second;
+    if (gt->GetType() == cmTarget::INTERFACE_LIBRARY)
+      {
+      continue;
+      }
+    std::vector<cmSourceFile*> objectSources;
+    gt->GetObjectSources(objectSources);
+    // Compute full path to object file directory for this target.
+    std::string dir_max;
+    dir_max += gt->Makefile->GetCurrentOutputDirectory();
+    dir_max += "/";
+    dir_max += this->GetTargetDirectory(*gt->Target);
+    dir_max += "/";
+    // Compute the name of each object file.
+    for(std::vector<cmSourceFile*>::iterator
+          si = objectSources.begin();
+        si != objectSources.end(); ++si)
+      {
+      cmSourceFile* sf = *si;
+      bool hasSourceExtension = true;
+      std::string objectName = this->GetObjectFileNameWithoutTarget(*sf,
+                                                                    dir_max,
+                                                        &hasSourceExtension);
+      if(cmSystemTools::FileIsFullPath(objectName.c_str()))
+        {
+        objectName = cmSystemTools::GetFilenameName(objectName);
+        }
+      LocalObjectInfo& info = localObjectFiles[objectName];
+      info.HasSourceExtension = hasSourceExtension;
+      info.push_back(LocalObjectEntry(gt->Target, sf->GetLanguage()));
+      }
     }
-  LocalObjectInfo& info = this->LocalObjectFiles[objNoTargetDir];
-  info.HasSourceExtension = hasSourceExtension;
-  info.push_back(LocalObjectEntry(target, sf->GetLanguage()));
 }
 
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::GetIndividualFileTargets
                                             (std::vector<std::string>& targets)
 {
+  std::map<std::string, LocalObjectInfo> localObjectFiles;
+  this->GetLocalObjectFiles(localObjectFiles);
   for (std::map<std::string, LocalObjectInfo>::iterator lo =
-         this->LocalObjectFiles.begin();
-       lo != this->LocalObjectFiles.end(); ++lo)
+         localObjectFiles.begin();
+       lo != localObjectFiles.end(); ++lo)
     {
     targets.push_back(lo->first);
 
@@ -253,11 +284,14 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
   bool do_assembly_rules =
     this->GetCreateAssemblySourceRules();
 
+  std::map<std::string, LocalObjectInfo> localObjectFiles;
+  this->GetLocalObjectFiles(localObjectFiles);
+
   // now write out the object rules
   // for each object file name
   for (std::map<std::string, LocalObjectInfo>::iterator lo =
-         this->LocalObjectFiles.begin();
-       lo != this->LocalObjectFiles.end(); ++lo)
+         localObjectFiles.begin();
+       lo != localObjectFiles.end(); ++lo)
     {
     // Add a convenience rule for building the object file.
     this->WriteObjectConvenienceRule(ruleFileStream,
