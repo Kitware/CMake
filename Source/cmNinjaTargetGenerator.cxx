@@ -502,7 +502,7 @@ cmNinjaTargetGenerator
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      // Record the custom commands for this target. The container is used
      // in WriteObjectBuildStatement when called in a loop below.
-     this->CustomCommands.push_back((*si)->GetCustomCommand());
+     this->CustomCommands.push_back(cc);
      }
   std::vector<cmSourceFile const*> headerSources;
   this->GeneratorTarget->GetHeaderSources(headerSources, config);
@@ -525,6 +525,20 @@ cmNinjaTargetGenerator
 
   cmNinjaDeps orderOnlyDeps;
   this->GetLocalGenerator()->AppendTargetDepends(this->Target, orderOnlyDeps);
+
+  // Add order-only dependencies on custom command outputs.
+  for(std::vector<cmCustomCommand const*>::const_iterator
+        cci = this->CustomCommands.begin();
+      cci != this->CustomCommands.end(); ++cci)
+    {
+    cmCustomCommand const* cc = *cci;
+    cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
+                                 this->GetMakefile());
+    const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
+    std::transform(ccoutputs.begin(), ccoutputs.end(),
+                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+    }
+
   cmNinjaDeps orderOnlyTarget;
   orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
   this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
@@ -583,19 +597,6 @@ cmNinjaTargetGenerator
 
   cmNinjaDeps orderOnlyDeps;
   orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
-
-  // Add order-only dependencies on custom command outputs.
-  for(std::vector<cmCustomCommand const*>::const_iterator
-        cci = this->CustomCommands.begin();
-      cci != this->CustomCommands.end(); ++cci)
-    {
-    cmCustomCommand const* cc = *cci;
-    cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
-                                 this->GetMakefile());
-    const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
-    std::transform(ccoutputs.begin(), ccoutputs.end(),
-                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
-    }
 
   // If the source file is GENERATED and does not have a custom command
   // (either attached to this source file or another one), assume that one of
