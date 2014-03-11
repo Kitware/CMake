@@ -1010,11 +1010,9 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
         file = 0;
         }
       }
-    else
+    else if (!file)
       {
-      // The main dependency does not have a custom command or we are
-      // allowed to replace it.  Use it to store the command.
-      file = this->GetOrCreateSource(main_dependency);
+      file = this->CreateSource(main_dependency);
       }
     }
 
@@ -1041,8 +1039,11 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       }
 
     // Create a cmSourceFile for the rule file.
-    file = this->GetOrCreateSource(outName, true);
-    file->SetProperty("__CMAKE_RULE", "1");
+    if (!file)
+      {
+      file = this->CreateSource(outName, true);
+      file->SetProperty("__CMAKE_RULE", "1");
+      }
     }
 
   // Always create the output sources and mark them generated.
@@ -3451,6 +3452,19 @@ cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 }
 
 //----------------------------------------------------------------------------
+cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
+                                       bool generated)
+{
+  cmSourceFile* sf = new cmSourceFile(this, sourceName);
+  if(generated)
+    {
+    sf->SetProperty("GENERATED", "1");
+    }
+  this->SourceFiles.push_back(sf);
+  return sf;
+}
+
+//----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
                                             bool generated)
 {
@@ -3460,13 +3474,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
     }
   else
     {
-    cmSourceFile* sf = new cmSourceFile(this, sourceName);
-    if(generated)
-      {
-      sf->SetProperty("GENERATED", "1");
-      }
-    this->SourceFiles.push_back(sf);
-    return sf;
+    return this->CreateSource(sourceName, generated);
     }
 }
 

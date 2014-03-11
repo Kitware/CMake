@@ -560,6 +560,13 @@ public:
    */
   cmSourceFile* GetSource(const std::string& sourceName) const;
 
+  /** Create the source file and return it. generated
+   * indicates if it is a generated file, this is used in determining
+   * how to create the source file instance e.g. name
+   */
+  cmSourceFile* CreateSource(const std::string& sourceName,
+                             bool generated = false);
+
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then create the source file and return it. generated
    * indicates if it is a generated file, this is used in determining
