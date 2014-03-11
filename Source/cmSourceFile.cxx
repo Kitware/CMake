@@ -40,6 +40,8 @@ std::string const& cmSourceFile::GetExtension() const
   return this->Extension;
 }
 
+const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
+
 //----------------------------------------------------------------------------
 void cmSourceFile::SetObjectLibrary(std::string const& objlib)
 {
@@ -56,7 +58,7 @@ std::string cmSourceFile::GetObjectLibrary() const
 std::string cmSourceFile::GetLanguage()
 {
   // If the language was set explicitly by the user then use it.
-  if(const char* lang = this->GetProperty("LANGUAGE"))
+  if(const char* lang = this->GetProperty(propLANGUAGE))
     {
     return lang;
     }
@@ -93,7 +95,7 @@ std::string cmSourceFile::GetLanguage()
 std::string cmSourceFile::GetLanguage() const
 {
   // If the language was set explicitly by the user then use it.
-  if(const char* lang = this->GetProperty("LANGUAGE"))
+  if(const char* lang = this->GetProperty(propLANGUAGE))
     {
     return lang;
     }

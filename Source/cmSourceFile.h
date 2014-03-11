@@ -117,6 +117,8 @@ private:
   void CheckLanguage(std::string const& ext);
 
   std::vector<std::string> Depends;
+
+  static const std::string propLANGUAGE;
 };
 
 // TODO: Factor out into platform information modules.
