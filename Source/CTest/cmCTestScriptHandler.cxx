@@ -426,7 +426,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
       cmSystemTools::GetErrorOccuredFlag())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:"
-               << systemFile.c_str() << "\n");
+               << systemFile << "\n");
     return 2;
     }
 
@@ -444,7 +444,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     cmSystemTools::GetErrorOccuredFlag())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read script: "
-               << script.c_str()
+               << script
                << std::endl);
     // Reset the error flag so that it can run more than
     // one script with an error when you
@@ -781,7 +781,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       output = "";
       retVal = 0;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run Update: "
-        << fullCommand.c_str() << std::endl);
+        << fullCommand << std::endl);
       res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output,
         &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, 0 /*this->TimeOut*/);
@@ -902,7 +902,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     command += "\"";
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run cmake command: "
-      << command.c_str() << std::endl);
+      << command << std::endl);
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
       &retVal, this->BinaryDir.c_str(),
       this->HandlerVerbose, 0 /*this->TimeOut*/);
@@ -916,7 +916,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         }
 
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "Write CMake output to file: " << cmakeOutputFile.c_str()
+        "Write CMake output to file: " << cmakeOutputFile
         << std::endl);
       cmGeneratedFileStream fout(cmakeOutputFile.c_str());
       if ( fout )
@@ -927,7 +927,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
           "Cannot open CMake output file: "
-          << cmakeOutputFile.c_str() << " for writing" << std::endl);
+          << cmakeOutputFile << " for writing" << std::endl);
         }
       }
     if (!res || retVal != 0)
@@ -948,7 +948,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     output = "";
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run ctest command: "
-      << command.c_str() << std::endl);
+      << command << std::endl);
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
       &retVal, this->BinaryDir.c_str(), this->HandlerVerbose,
       0 /*this->TimeOut*/);
@@ -962,13 +962,13 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
           "Unable to run cmake:" << std::endl
-          << cmakeFailedOuput.c_str() << std::endl);
+          << cmakeFailedOuput << std::endl);
         return 10;
         }
       cmCTestLog(this->CTest, ERROR_MESSAGE,
         "Unable to run ctest:" << std::endl
-        << "command: " << command.c_str() << std::endl
-        << "output: " << output.c_str() << std::endl);
+        << "command: " << command << std::endl
+        << "output: " << output << std::endl);
       if (!res)
         {
         return 11;

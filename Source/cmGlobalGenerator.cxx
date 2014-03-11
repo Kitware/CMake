@@ -2318,7 +2318,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
           it != componentsSet->end();
           ++ it )
           {
-          ostr << " \"" << it->c_str() << "\"";
+          ostr << " \"" << *it << "\"";
           }
         }
       else

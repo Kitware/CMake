@@ -514,7 +514,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
           cmCTestLog(this->CTest, ERROR_MESSAGE,
             "Cannot find memory checker suppression file: "
             << this->CTest->GetCTestConfiguration(
-              "MemoryCheckSuppressionFile").c_str() << std::endl);
+              "MemoryCheckSuppressionFile") << std::endl);
           return false;
           }
         std::string suppressions = "--suppressions="
@@ -569,7 +569,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       }
     default:
       cmCTestLog(this->CTest, ERROR_MESSAGE,
-        "Do not understand memory checker: " << this->MemoryTester.c_str()
+        "Do not understand memory checker: " << this->MemoryTester
         << std::endl);
       return false;
     }
@@ -885,7 +885,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
       else if(!parser.ParseChunk(theLine.c_str(), theLine.size()))
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
-                   "Error in ParseChunk: " << theLine.c_str()
+                   "Error in ParseChunk: " << theLine
                    << std::endl);
         }
       }
@@ -916,7 +916,7 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessBoundsCheckerTest for : "
-             << res.Name.c_str() << std::endl);
+             << res.Name << std::endl);
   std::string ofile = testOutputFileName(test);
   if ( ofile.empty() )
     {
@@ -943,10 +943,10 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
   cmSystemTools::Delay(1000);
   cmSystemTools::RemoveFile(this->BoundsCheckerDPBDFile.c_str());
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
-    << this->BoundsCheckerDPBDFile.c_str() << std::endl);
+    << this->BoundsCheckerDPBDFile << std::endl);
   cmSystemTools::RemoveFile(this->BoundsCheckerXMLFile.c_str());
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
-    << this->BoundsCheckerXMLFile.c_str() << std::endl);
+    << this->BoundsCheckerXMLFile << std::endl);
 }
 
 void
@@ -955,7 +955,7 @@ cmCTestMemCheckHandler::PostProcessPurifyTest(cmCTestTestResult& res,
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessPurifyTest for : "
-             << res.Name.c_str() << std::endl);
+             << res.Name << std::endl);
   appendMemTesterOutput(res, test);
 }
 
@@ -965,7 +965,7 @@ cmCTestMemCheckHandler::PostProcessValgrindTest(cmCTestTestResult& res,
 {
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessValgrindTest for : "
-             << res.Name.c_str() << std::endl);
+             << res.Name << std::endl);
   appendMemTesterOutput(res, test);
 }
 

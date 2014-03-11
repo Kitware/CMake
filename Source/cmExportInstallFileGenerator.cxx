@@ -271,7 +271,7 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(
     {
     std::string se = cmSystemTools::GetLastSystemError();
     cmOStringStream e;
-    e << "cannot write to file \"" << fileName.c_str()
+    e << "cannot write to file \"" << fileName
       << "\": " << se;
     cmSystemTools::Error(e.str().c_str());
     return false;

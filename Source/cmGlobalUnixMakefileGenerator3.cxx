@@ -357,13 +357,13 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     << "set(CMAKE_MAKEFILE_DEPENDS\n"
     << "  \""
     << lg->Convert(cache,
-                   cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
+                   cmLocalGenerator::START_OUTPUT) << "\"\n";
   for(std::vector<std::string>::const_iterator i = lfiles.begin();
       i !=  lfiles.end(); ++i)
     {
     cmakefileStream
       << "  \""
-      << lg->Convert(*i, cmLocalGenerator::START_OUTPUT).c_str()
+      << lg->Convert(*i, cmLocalGenerator::START_OUTPUT)
       << "\"\n";
     }
   cmakefileStream
@@ -380,10 +380,10 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     << "set(CMAKE_MAKEFILE_OUTPUTS\n"
     << "  \""
     << lg->Convert(makefileName,
-                   cmLocalGenerator::START_OUTPUT).c_str() << "\"\n"
+                   cmLocalGenerator::START_OUTPUT) << "\"\n"
     << "  \""
     << lg->Convert(check,
-                   cmLocalGenerator::START_OUTPUT).c_str() << "\"\n";
+                   cmLocalGenerator::START_OUTPUT) << "\"\n";
   cmakefileStream << "  )\n\n";
 
   // CMake must rerun if a byproduct is missing.
@@ -397,7 +397,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
       k != outfiles.end(); ++k)
     {
     cmakefileStream << "  \"" <<
-      lg->Convert(*k,cmLocalGenerator::HOME_OUTPUT).c_str()
+      lg->Convert(*k,cmLocalGenerator::HOME_OUTPUT)
                     << "\"\n";
     }
 
@@ -411,7 +411,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     tmpStr += cmake::GetCMakeFilesDirectory();
     tmpStr += "/CMakeDirectoryInformation.cmake";
     cmakefileStream << "  \"" <<
-      lg->Convert(tmpStr,cmLocalGenerator::HOME_OUTPUT).c_str()
+      lg->Convert(tmpStr,cmLocalGenerator::HOME_OUTPUT)
                     << "\"\n";
     }
   cmakefileStream << "  )\n\n";
@@ -450,7 +450,7 @@ void cmGlobalUnixMakefileGenerator3
         std::string tname = lg->GetRelativeTargetDirectory(l->second);
         tname += "/DependInfo.cmake";
         cmSystemTools::ConvertToUnixSlashes(tname);
-        cmakefileStream << "  \"" << tname.c_str() << "\"\n";
+        cmakefileStream << "  \"" << tname << "\"\n";
         }
       }
     }

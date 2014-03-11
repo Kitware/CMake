@@ -91,7 +91,7 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
   value = value.c_str() + pos + 1;
   def->Map[key] = value;
   cmCPack_Log(def->Log, cmCPackLog::LOG_DEBUG, "Set CPack variable: "
-    << key.c_str() << " to \"" << value.c_str() << "\"" << std::endl);
+    << key << " to \"" << value << "\"" << std::endl);
   return 1;
 }
 
@@ -195,7 +195,7 @@ int main (int argc, char const* const* argv)
     }
 
   cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
-    "Read CPack config file: " << cpackConfigFile.c_str() << std::endl);
+    "Read CPack config file: " << cpackConfigFile << std::endl);
 
   cmake cminst;
   cminst.RemoveUnscriptableCommands();
@@ -262,20 +262,20 @@ int main (int argc, char const* const* argv)
       cpackConfigFile =
         cmSystemTools::CollapseFullPath(cpackConfigFile.c_str());
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
-        "Read CPack configuration file: " << cpackConfigFile.c_str()
+        "Read CPack configuration file: " << cpackConfigFile
         << std::endl);
       if ( !globalMF->ReadListFile(0, cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
           "Problem reading CPack config file: \""
-          << cpackConfigFile.c_str() << "\"" << std::endl);
+          << cpackConfigFile << "\"" << std::endl);
         return 1;
         }
       }
     else if ( cpackConfigFileSpecified )
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-        "Cannot find CPack config file: \"" << cpackConfigFile.c_str()
+        "Cannot find CPack config file: \"" << cpackConfigFile
         << "\"" << std::endl);
       return 1;
       }

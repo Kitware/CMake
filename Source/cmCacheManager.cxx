@@ -644,7 +644,7 @@ void cmCacheManager::OutputHelpString(std::ostream& fout,
         fout << "\\n";
         }
       oneLine = helpString.substr(pos, i - pos);
-      fout << oneLine.c_str() << "\n";
+      fout << oneLine << "\n";
       pos = i;
       }
     }
@@ -698,7 +698,7 @@ void cmCacheManager::PrintCache(std::ostream& out) const
     {
     if((*i).second.Type != INTERNAL)
       {
-      out << (*i).first.c_str() << " = " << (*i).second.Value.c_str()
+      out << (*i).first << " = " << (*i).second.Value
           << std::endl;
       }
     }

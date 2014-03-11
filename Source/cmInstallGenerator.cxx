@@ -91,7 +91,7 @@ void cmInstallGenerator
         << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
      os << indent << "endif()\n";
      }
-  os << "file(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
+  os << "file(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype;
   if(optional)
     {
     os << " OPTIONAL";

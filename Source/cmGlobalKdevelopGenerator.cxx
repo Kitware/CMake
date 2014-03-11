@@ -360,7 +360,7 @@ void cmGlobalKdevelopGenerator
     if (strstr(line, "<general>"))
       {
       fout<< "  <projectmanagement>KDevCustomProject</projectmanagement>\n";
-      fout<< "  <projectdirectory>" <<projectDir.c_str()
+      fout<< "  <projectdirectory>" <<projectDir
           << "</projectdirectory>\n";   //this one is important
       fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n";
       //and this one
@@ -368,14 +368,14 @@ void cmGlobalKdevelopGenerator
     // inside kdevcustomproject the <filelistdirectory> must be put
     if (strstr(line, "<kdevcustomproject>"))
       {
-      fout<<"    <filelistdirectory>"<<outputDir.c_str()
+      fout<<"    <filelistdirectory>"<<outputDir
           <<"</filelistdirectory>\n";
       }
     // buildtool and builddir go inside <build>
     if (strstr(line, "<build>"))
       {
       fout<<"      <buildtool>make</buildtool>\n";
-      fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n";
+      fout<<"      <builddir>"<<outputDir<<"</builddir>\n";
       }
     }
 }
@@ -417,7 +417,7 @@ void cmGlobalKdevelopGenerator
         "  <projectmanagement>KDevCustomProject</projectmanagement>\n"
         "  <primarylanguage>" << primaryLanguage << "</primarylanguage>\n"
         "  <ignoreparts/>\n"
-        "  <projectdirectory>" << projectDir.c_str() <<
+        "  <projectdirectory>" << projectDir <<
         "</projectdirectory>\n";   //this one is important
   fout<<"  <absoluteprojectpath>true</absoluteprojectpath>\n"; //and this one
 
@@ -444,12 +444,12 @@ void cmGlobalKdevelopGenerator
 
   fout<<"  </general>\n"
         "  <kdevcustomproject>\n"
-        "    <filelistdirectory>" << outputDir.c_str() <<
+        "    <filelistdirectory>" << outputDir <<
         "</filelistdirectory>\n"
         "    <run>\n"
-        "      <mainprogram>" << executable.c_str() << "</mainprogram>\n"
+        "      <mainprogram>" << executable << "</mainprogram>\n"
         "      <directoryradio>custom</directoryradio>\n"
-        "      <customdirectory>"<<outputDir.c_str()<<"</customdirectory>\n"
+        "      <customdirectory>"<<outputDir<<"</customdirectory>\n"
         "      <programargs></programargs>\n"
         "      <terminal>false</terminal>\n"
         "      <autocompile>true</autocompile>\n"
@@ -457,7 +457,7 @@ void cmGlobalKdevelopGenerator
         "    </run>\n"
         "    <build>\n"
         "      <buildtool>make</buildtool>\n"; //this one is important
-  fout<<"      <builddir>"<<outputDir.c_str()<<"</builddir>\n";  //and this one
+  fout<<"      <builddir>"<<outputDir<<"</builddir>\n";  //and this one
   fout<<"    </build>\n"
         "    <make>\n"
         "      <abortonerror>false</abortonerror>\n"
@@ -480,7 +480,7 @@ void cmGlobalKdevelopGenerator
       dirIt != this->Blacklist.end();
       ++dirIt)
     {
-    fout<<"      <path>" << dirIt->c_str() << "</path>\n";
+    fout<<"      <path>" << *dirIt << "</path>\n";
     }
   fout<<"    </blacklist>\n";
 
@@ -558,7 +558,7 @@ void cmGlobalKdevelopGenerator
   // command
   fout<<"  <kdevfileview>\n"
         "    <groups>\n"
-        "      <group pattern=\"" << cmakeFilePattern.c_str() <<
+        "      <group pattern=\"" << cmakeFilePattern <<
         "\" name=\"CMake\" />\n";
 
   if (enableCxx)
@@ -601,7 +601,7 @@ void cmGlobalKdevelopGenerator
           "<!DOCTYPE KDevPrjSession>\n"
           "<KDevPrjSession>\n"
           " <DocsAndViews NumberOfDocuments=\"1\" >\n"
-          "  <Doc0 NumberOfViews=\"1\" URL=\"file://" << fileToOpen.c_str() <<
+          "  <Doc0 NumberOfViews=\"1\" URL=\"file://" << fileToOpen <<
           "\" >\n"
           "   <View0 line=\"0\" Type=\"Source\" />\n"
           "  </Doc0>\n"

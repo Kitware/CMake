@@ -91,7 +91,7 @@ bool cmSourceGroupCommand
     else
       {
       cmOStringStream err;
-      err << "Unknown argument \"" << args[i].c_str() << "\".  "
+      err << "Unknown argument \"" << args[i] << "\".  "
           << "Perhaps the FILES keyword is missing.\n";
       this->SetError(err.str());
       return false;

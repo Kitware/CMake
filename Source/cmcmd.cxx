@@ -102,8 +102,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       if(!cmSystemTools::cmCopyFile(args[2].c_str(), args[3].c_str()))
         {
-        std::cerr << "Error copying file \"" << args[2].c_str()
-                  << "\" to \"" << args[3].c_str() << "\".\n";
+        std::cerr << "Error copying file \"" << args[2]
+                  << "\" to \"" << args[3] << "\".\n";
         return 1;
         }
       return 0;
@@ -116,7 +116,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           args[3].c_str()))
         {
         std::cerr << "Error copying file (if different) from \""
-                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << args[2] << "\" to \"" << args[3]
                   << "\".\n";
         return 1;
         }
@@ -129,7 +129,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       if(!cmSystemTools::CopyADirectory(args[2].c_str(), args[3].c_str()))
         {
         std::cerr << "Error copying directory from \""
-                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << args[2] << "\" to \"" << args[3]
                   << "\".\n";
         return 1;
         }
@@ -143,7 +143,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         {
         std::string e = cmSystemTools::GetLastSystemError();
         std::cerr << "Error renaming from \""
-                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << args[2] << "\" to \"" << args[3]
                   << "\": " << e << "\n";
         return 1;
         }
@@ -156,7 +156,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       if(cmSystemTools::FilesDiffer(args[2].c_str(), args[3].c_str()))
         {
         std::cerr << "Files \""
-                  << args[2].c_str() << "\" to \"" << args[3].c_str()
+                  << args[2] << "\" to \"" << args[3]
                   << "\" are different.\n";
         return 1;
         }
@@ -199,7 +199,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::vector<std::string>::iterator it;
       for ( it = env.begin(); it != env.end(); ++ it )
         {
-        std::cout << it->c_str() << std::endl;
+        std::cout << *it << std::endl;
         }
       return 0;
       }
@@ -209,7 +209,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       if(!cmSystemTools::MakeDirectory(args[2].c_str()))
         {
-        std::cerr << "Error making directory \"" << args[2].c_str()
+        std::cerr << "Error making directory \"" << args[2]
                   << "\".\n";
         return 1;
         }
@@ -221,7 +221,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       if(cmSystemTools::FileIsDirectory(args[2].c_str()) &&
          !cmSystemTools::RemoveADirectory(args[2].c_str()))
         {
-        std::cerr << "Error removing directory \"" << args[2].c_str()
+        std::cerr << "Error removing directory \"" << args[2]
                   << "\".\n";
         return 1;
         }
@@ -1181,7 +1181,7 @@ bool cmcmd::RunCommand(const char* comment,
     for(std::vector<std::string>::iterator i = command.begin();
         i != command.end(); ++i)
       {
-      std::cout << i->c_str() << " ";
+      std::cout << *i << " ";
       }
     std::cout << "\n";
     }
@@ -1257,7 +1257,7 @@ int cmcmd::VisualStudioLinkIncremental(std::vector<std::string>& args,
   resourceInputFile += ".resource.txt";
   if(verbose)
     {
-    std::cout << "Create " << resourceInputFile.c_str() << "\n";
+    std::cout << "Create " << resourceInputFile << "\n";
     }
   // Create input file for rc command
   cmsys::ofstream fout(resourceInputFile.c_str());
@@ -1269,7 +1269,7 @@ int cmcmd::VisualStudioLinkIncremental(std::vector<std::string>& args,
   manifestFile += ".embed.manifest";
   std::string fullPath= cmSystemTools::CollapseFullPath(manifestFile.c_str());
   fout << type << " /* CREATEPROCESS_MANIFEST_RESOURCE_ID "
-    "*/ 24 /* RT_MANIFEST */ " << "\"" << fullPath.c_str() << "\"";
+    "*/ 24 /* RT_MANIFEST */ " << "\"" << fullPath << "\"";
   fout.close();
   manifestArg += tempManifest;
   // add the manifest arg to the linkCommand
@@ -1281,7 +1281,7 @@ int cmcmd::VisualStudioLinkIncremental(std::vector<std::string>& args,
     {
     if(verbose)
       {
-      std::cout << "Create empty: " << manifestFile.c_str() << "\n";
+      std::cout << "Create empty: " << manifestFile << "\n";
       }
     cmsys::ofstream foutTmp(manifestFile.c_str());
     }

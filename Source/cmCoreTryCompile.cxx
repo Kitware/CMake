@@ -284,7 +284,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       {
       cmOStringStream e;
       e << "Failed to open\n"
-        << "  " << outFileName.c_str() << "\n"
+        << "  " << outFileName << "\n"
         << cmSystemTools::GetLastSystemError();
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return -1;
@@ -519,9 +519,9 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         {
         cmOStringStream emsg;
         emsg << "Cannot copy output executable\n"
-             << "  '" << this->OutputFile.c_str() << "'\n"
+             << "  '" << this->OutputFile << "'\n"
              << "to destination specified by COPY_FILE:\n"
-             << "  '" << copyFile.c_str() << "'\n";
+             << "  '" << copyFile << "'\n";
         if(!this->FindErrorMessage.empty())
           {
           emsg << this->FindErrorMessage.c_str();

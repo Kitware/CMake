@@ -268,7 +268,7 @@ bool cmFindPackageCommand
     else
       {
       cmOStringStream e;
-      e << "called with invalid argument \"" << args[i].c_str() << "\"";
+      e << "called with invalid argument \"" << args[i] << "\"";
       this->SetError(e.str());
       return false;
       }

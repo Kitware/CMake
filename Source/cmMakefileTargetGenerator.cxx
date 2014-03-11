@@ -353,7 +353,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
     std::string compiler = "CMAKE_";
     compiler += *l;
     compiler += "_COMPILER";
-    *this->FlagFileStream << "# compile " << l->c_str() << " with " <<
+    *this->FlagFileStream << "# compile " << *l << " with " <<
       this->Makefile->GetSafeDefinition(compiler) << "\n";
     }
 
@@ -1353,7 +1353,7 @@ cmMakefileTargetGenerator
                                              "_OBJECTS");
   *this->BuildFileStream
     << "# Object files for target " << this->Target->GetName() << "\n"
-    << variableName.c_str() << " =";
+    << variableName << " =";
   std::string object;
   const char* objName =
     this->Makefile->GetDefinition("CMAKE_NO_QUOTED_OBJECTS");
@@ -1390,7 +1390,7 @@ cmMakefileTargetGenerator
     << "\n"
     << "# External object files for target "
     << this->Target->GetName() << "\n"
-    << variableNameExternal.c_str() << " =";
+    << variableNameExternal << " =";
   for(std::vector<std::string>::const_iterator i =
         this->ExternalObjects.begin();
       i != this->ExternalObjects.end(); ++i)

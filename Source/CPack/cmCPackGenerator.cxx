@@ -285,7 +285,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
       it != installCommandsVector.end();
       ++it )
       {
-      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << it->c_str()
+      cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << *it
         << std::endl);
       std::string output;
       int retVal = 1;
@@ -296,12 +296,12 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
         std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
         tmpFile += "/InstallOutput.log";
         cmGeneratedFileStream ofs(tmpFile.c_str());
-        ofs << "# Run command: " << it->c_str() << std::endl
+        ofs << "# Run command: " << *it << std::endl
           << "# Output:" << std::endl
-          << output.c_str() << std::endl;
+          << output << std::endl;
         cmCPackLogger(cmCPackLog::LOG_ERROR,
-          "Problem running install command: " << it->c_str() << std::endl
-          << "Please check " << tmpFile.c_str() << " for errors"
+          "Problem running install command: " << *it << std::endl
+          << "Please check " << tmpFile << " for errors"
           << std::endl);
         return 0;
         }
@@ -329,7 +329,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
       ++it )
       {
       cmCPackLogger(cmCPackLog::LOG_VERBOSE,
-        "Create ignore files regex for: " << it->c_str() << std::endl);
+        "Create ignore files regex for: " << *it << std::endl);
       ignoreFilesRegex.push_back(it->c_str());
       }
     }
@@ -385,7 +385,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           if ( regIt->find(inFile.c_str()) )
             {
             cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Ignore file: "
-              << inFile.c_str() << std::endl);
+              << inFile << std::endl);
             skip = true;
             }
           }
@@ -397,7 +397,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         filePath += "/" + subdir + "/"
           + cmSystemTools::RelativePath(top.c_str(), gfit->c_str());
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
-          << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
+          << inFile << " -> " << filePath << std::endl);
         /* If the file is a symlink we will have to re-create it */
         if ( cmSystemTools::FileIsSymlink(inFile.c_str()))
           {
@@ -416,7 +416,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
                 ) )
           {
           cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem copying file: "
-            << inFile.c_str() << " -> " << filePath.c_str() << std::endl);
+            << inFile << " -> " << filePath << std::endl);
           return 0;
           }
         }
@@ -663,14 +663,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
           tmpFile += "/PreinstallOutput.log";
           cmGeneratedFileStream ofs(tmpFile.c_str());
-          ofs << "# Run command: " << buildCommandStr.c_str() << std::endl
-            << "# Directory: " << installDirectory.c_str() << std::endl
+          ofs << "# Run command: " << buildCommandStr << std::endl
+            << "# Directory: " << installDirectory << std::endl
             << "# Output:" << std::endl
-            << output.c_str() << std::endl;
+            << output << std::endl;
           cmCPackLogger(cmCPackLog::LOG_ERROR,
-            "Problem running install command: " << buildCommandStr.c_str()
+            "Problem running install command: " << buildCommandStr
             << std::endl
-            << "Please check " << tmpFile.c_str() << " for errors"
+            << "Please check " << tmpFile << " for errors"
             << std::endl);
           return 0;
           }
@@ -1001,7 +1001,7 @@ void cmCPackGenerator::SetOption(const std::string& op, const char* value)
 int cmCPackGenerator::DoPackage()
 {
   cmCPackLogger(cmCPackLog::LOG_OUTPUT,
-    "Create package using " << this->Name.c_str() << std::endl);
+    "Create package using " << this->Name << std::endl);
 
   // Prepare CPack internal name and check
   // values for many CPACK_xxx vars
@@ -1269,7 +1269,7 @@ std::string cmCPackGenerator::FindTemplate(const char* name)
     << (name ? name : "(NULL)") << std::endl);
   std::string ffile = this->MakefileMap->GetModulesFile(name);
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Found template: "
-    << ffile.c_str() << std::endl);
+    << ffile << std::endl);
   return ffile;
 }
 

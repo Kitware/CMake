@@ -616,7 +616,7 @@ int cmCTestTestHandler::ProcessHandler()
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
           cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t" << std::setw(3)
                      << ftit->TestCount << " - "
-                     << ftit->Name.c_str() << " ("
+                     << ftit->Name << " ("
                      << this->GetTestStatus(ftit->Status) << ")"
                      << std::endl);
           }
@@ -1022,7 +1022,7 @@ bool cmCTestTestHandler::GetValue(const char* tag,
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
-               << tag << " found [" << line.c_str() << "]" << std::endl);
+               << tag << " found [" << line << "]" << std::endl);
     ret = false;
     }
   return ret;
@@ -1223,7 +1223,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       {
       os
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
-        << "name=\"" << measureIt->first.c_str() << "\"><Value>"
+        << "name=\"" << measureIt->first << "\"><Value>"
         << cmXMLSafe(measureIt->second)
         << "</Value></NamedMeasurement>\n";
       }
@@ -1820,7 +1820,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   else if ( !this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem reading file: "
-      << lastTestsFailedLog.c_str() <<
+      << lastTestsFailedLog <<
       " while generating list of previously failed tests." << std::endl);
     }
 }
@@ -1960,7 +1960,7 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
             << " " << k1 << "=\"" << v1 << "\""
             << " " << k2 << "=\"" << v2 << "\""
             << " encoding=\"none\""
-            << "><Value>Image " << filename.c_str()
+            << "><Value>Image " << filename
             << " is empty</Value></NamedMeasurement>";
           }
         else
@@ -2014,10 +2014,10 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
           << "\t\t\t<NamedMeasurement"
           << " name=\"" << measurementfile.match(idx) << "\""
           << " text=\"text/string\""
-          << "><Value>File " << filename.c_str()
+          << "><Value>File " << filename
           << " not found</Value></NamedMeasurement>"
           << std::endl;
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "File \"" << filename.c_str()
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "File \"" << filename
           << "\" not found." << std::endl);
         }
       cxml.erase(measurementfile.start(),

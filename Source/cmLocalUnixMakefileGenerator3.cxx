@@ -625,7 +625,7 @@ cmLocalUnixMakefileGenerator3
       i != commands.end(); ++i)
     {
     replace = *i;
-    os << "\t" << replace.c_str() << "\n";
+    os << "\t" << replace << "\n";
     }
   if(symbolic && !this->WatcomWMake)
     {
@@ -1933,7 +1933,7 @@ void cmLocalUnixMakefileGenerator3
   for(ImplicitDependLanguageMap::const_iterator
         l = implicitLangs.begin(); l != implicitLangs.end(); ++l)
     {
-    cmakefileStream << "  \"" << l->first.c_str() << "\"\n";
+    cmakefileStream << "  \"" << l->first << "\"\n";
     }
   cmakefileStream << "  )\n";
 
@@ -1944,7 +1944,7 @@ void cmLocalUnixMakefileGenerator3
         l = implicitLangs.begin(); l != implicitLangs.end(); ++l)
     {
     cmakefileStream
-      << "set(CMAKE_DEPENDS_CHECK_" << l->first.c_str() << "\n";
+      << "set(CMAKE_DEPENDS_CHECK_" << l->first << "\n";
     ImplicitDependFileMap const& implicitPairs = l->second;
 
     // for each file pair
@@ -1968,7 +1968,7 @@ void cmLocalUnixMakefileGenerator3
     if(cid && *cid)
       {
       cmakefileStream
-        << "set(CMAKE_" << l->first.c_str() << "_COMPILER_ID \""
+        << "set(CMAKE_" << l->first << "_COMPILER_ID \""
         << cid << "\")\n";
       }
     }

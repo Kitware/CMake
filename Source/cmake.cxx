@@ -433,7 +433,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           return false;
           }
         }
-      std::cerr << "loading initial cache file " << path.c_str() << "\n";
+      std::cerr << "loading initial cache file " << path << "\n";
       this->ReadListFile(args, path.c_str());
       }
     else if(arg.find("-P",0) == 0)
@@ -1922,7 +1922,7 @@ int cmake::CheckBuildSystem()
       {
       cmOStringStream msg;
       msg << "Re-run cmake missing file: "
-          << this->CheckBuildSystemArgument.c_str() << "\n";
+          << this->CheckBuildSystemArgument << "\n";
       cmSystemTools::Stdout(msg.str().c_str());
       }
     return 1;
@@ -1942,7 +1942,7 @@ int cmake::CheckBuildSystem()
       {
       cmOStringStream msg;
       msg << "Re-run cmake error reading : "
-          << this->CheckBuildSystemArgument.c_str() << "\n";
+          << this->CheckBuildSystemArgument << "\n";
       cmSystemTools::Stdout(msg.str().c_str());
       }
     // There was an error reading the file.  Just rerun.
@@ -2076,8 +2076,8 @@ int cmake::CheckBuildSystem()
     if(verbose)
       {
       cmOStringStream msg;
-      msg << "Re-run cmake file: " << out_oldest.c_str()
-          << " older than: " << dep_newest.c_str() << "\n";
+      msg << "Re-run cmake file: " << out_oldest
+          << " older than: " << dep_newest << "\n";
       cmSystemTools::Stdout(msg.str().c_str());
       }
     return 1;
@@ -2351,8 +2351,8 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   // Copy file
   if(!cmSystemTools::cmCopyFile(inFile.c_str(), outFile.c_str()))
     {
-    std::cerr << "Error copying file \"" << inFile.c_str()
-              << "\" to \"" << outFile.c_str() << "\".\n";
+    std::cerr << "Error copying file \"" << inFile
+              << "\" to \"" << outFile << "\".\n";
     return 1;
     }
 

@@ -503,7 +503,7 @@ void cmLocalGenerator::GenerateInstallRules()
         {
         std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
-        fout << "  include(\"" <<  odir.c_str()
+        fout << "  include(\"" <<  odir
              << "/cmake_install.cmake\")" << std::endl;
         }
       }
@@ -523,12 +523,12 @@ void cmLocalGenerator::GenerateInstallRules()
       "endif()\n\n";
     fout
       << "file(WRITE \""
-      << homedir.c_str() << "/${CMAKE_INSTALL_MANIFEST}\" "
+      << homedir << "/${CMAKE_INSTALL_MANIFEST}\" "
       << "\"\")" << std::endl;
     fout
       << "foreach(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
       << "  file(APPEND \""
-      << homedir.c_str() << "/${CMAKE_INSTALL_MANIFEST}\" "
+      << homedir << "/${CMAKE_INSTALL_MANIFEST}\" "
       << "\"${file}\\n\")" << std::endl
       << "endforeach()" << std::endl;
     }

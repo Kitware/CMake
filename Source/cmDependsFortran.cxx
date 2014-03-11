@@ -453,7 +453,7 @@ cmDependsFortran
                                     cmLocalGenerator::HOME_OUTPUT,
                                     cmLocalGenerator::MAKEFILE)
                 << std::endl;
-    internalDepends << " " << i->c_str() << std::endl;
+    internalDepends << " " << *i << std::endl;
     }
   makeDepends << std::endl;
 
@@ -666,7 +666,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       if(!cmSystemTools::CopyFileAlways(mod_upper.c_str(), stamp.c_str()))
         {
         std::cerr << "Error copying Fortran module from \""
-                  << mod_upper.c_str() << "\" to \"" << stamp.c_str()
+                  << mod_upper << "\" to \"" << stamp
                   << "\".\n";
         return false;
         }
@@ -681,7 +681,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       if(!cmSystemTools::CopyFileAlways(mod_lower.c_str(), stamp.c_str()))
         {
         std::cerr << "Error copying Fortran module from \""
-                  << mod_lower.c_str() << "\" to \"" << stamp.c_str()
+                  << mod_lower << "\" to \"" << stamp
                   << "\".\n";
         return false;
         }
@@ -689,9 +689,9 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     return true;
     }
 
-  std::cerr << "Error copying Fortran module \"" << args[2].c_str()
-            << "\".  Tried \"" << mod_upper.c_str()
-            << "\" and \"" << mod_lower.c_str() << "\".\n";
+  std::cerr << "Error copying Fortran module \"" << args[2]
+            << "\".  Tried \"" << mod_upper
+            << "\" and \"" << mod_lower << "\".\n";
   return false;
 }
 

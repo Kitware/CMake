@@ -311,7 +311,7 @@ void cmExtraCodeLiteGenerator
     {
     std::string relativePath =
       cmSystemTools::RelativePath(projectPath.c_str(), sit->first.c_str());
-    fout<< "    <File Name=\"" << relativePath.c_str() << "\"/>\n";
+    fout<< "    <File Name=\"" << relativePath << "\"/>\n";
     }
   fout<< "  </VirtualDirectory>\n";
   fout<< "  <VirtualDirectory Name=\"include\">\n";
@@ -322,7 +322,7 @@ void cmExtraCodeLiteGenerator
     {
     std::string relativePath =
       cmSystemTools::RelativePath(projectPath.c_str(), sit->c_str());
-    fout << "    <File Name=\"" << relativePath.c_str() << "\"/>\n";
+    fout << "    <File Name=\"" << relativePath << "\"/>\n";
     }
   fout << "  </VirtualDirectory>\n";
 

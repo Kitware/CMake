@@ -293,7 +293,7 @@ int cmCommandArgumentParserHelper::ParseString(const char* str, int verb)
   if ( Verbose )
     {
     std::cerr << "Expanding [" << str << "] produced: ["
-              << this->Result.c_str() << "]" << std::endl;
+              << this->Result << "]" << std::endl;
     }
   return 1;
 }

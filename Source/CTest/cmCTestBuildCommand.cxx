@@ -134,7 +134,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           cmakeBuildAdditionalFlags ? cmakeBuildAdditionalFlags : "", true);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "SetMakeCommand:"
-                 << buildCommand.c_str() << "\n");
+                 << buildCommand << "\n");
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else

@@ -240,7 +240,7 @@ void cmMakefile::PrintStringVector(const char* s,
   for(std::vector<std::string>::const_iterator i = v.begin();
       i != v.end(); ++i)
     {
-    std::cout << (*i).c_str() << " ";
+    std::cout << *i << " ";
     }
   std::cout << " )\n";
 }
@@ -253,7 +253,7 @@ void cmMakefile
   for(std::vector<std::pair<std::string, bool> >::const_iterator i
         = v.begin(); i != v.end(); ++i)
     {
-    std::cout << i->first.c_str() << " " << i->second;
+    std::cout << i->first << " " << i->second;
     }
   std::cout << " )\n";
 }
@@ -273,15 +273,15 @@ void cmMakefile::Print() const
     }
 
   std::cout << " this->StartOutputDirectory; " <<
-    this->StartOutputDirectory.c_str() << std::endl;
+    this->StartOutputDirectory << std::endl;
   std::cout << " this->HomeOutputDirectory; " <<
-    this->HomeOutputDirectory.c_str() << std::endl;
+    this->HomeOutputDirectory << std::endl;
   std::cout << " this->cmStartDirectory; " <<
-    this->cmStartDirectory.c_str() << std::endl;
+    this->cmStartDirectory << std::endl;
   std::cout << " this->cmHomeDirectory; " <<
-    this->cmHomeDirectory.c_str() << std::endl;
+    this->cmHomeDirectory << std::endl;
   std::cout << " this->ProjectName; "
-            <<  this->ProjectName.c_str() << std::endl;
+            <<  this->ProjectName << std::endl;
   this->PrintStringVector("this->LinkDirectories", this->LinkDirectories);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   for( std::vector<cmSourceGroup>::const_iterator i =
@@ -2619,7 +2619,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
             << "  " << filename << ":" << line << "\n";
       }
     error << "when parsing string\n"
-          << "  " << source.c_str() << "\n";
+          << "  " << source << "\n";
     error << emsg;
 
     // If the parser failed ("res" is false) then this is a real

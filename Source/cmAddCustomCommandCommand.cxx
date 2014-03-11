@@ -286,7 +286,7 @@ bool cmAddCustomCommandCommand
 
     // No command for this output exists.
     cmOStringStream e;
-    e << "given APPEND option with output \"" << output[0].c_str()
+    e << "given APPEND option with output \"" << output[0]
       << "\" which is not already a custom command output.";
     this->SetError(e.str());
     return false;

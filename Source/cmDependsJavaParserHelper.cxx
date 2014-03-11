@@ -262,7 +262,7 @@ void cmDependsJavaParserHelper::PrintClasses()
     sit != files.end();
     ++ sit )
     {
-    std::cout << "  " << sit->c_str() << ".class" << std::endl;
+    std::cout << "  " << *sit << ".class" << std::endl;
     }
 }
 
@@ -308,7 +308,7 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
     if ( this->CurrentPackage.size() > 0 )
       {
       std::cout << "Current package is: " <<
-        this->CurrentPackage.c_str() << std::endl;
+        this->CurrentPackage << std::endl;
       }
     std::cout << "Imports packages:";
     if ( this->PackagesImport.size() > 0 )
@@ -318,7 +318,7 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
         it != this->PackagesImport.end();
         ++ it )
         {
-        std::cout << " " << it->c_str();
+        std::cout << " " << *it;
         }
       }
     std::cout << std::endl;
@@ -330,7 +330,7 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
         it != this->ClassesFound.end();
         ++ it )
         {
-        std::cout << " " << it->c_str();
+        std::cout << " " << *it;
         }
       }
     std::cout << std::endl;

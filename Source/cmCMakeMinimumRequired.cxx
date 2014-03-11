@@ -79,7 +79,7 @@ bool cmCMakeMinimumRequired
             &required_patch, &required_tweak) < 2)
     {
     cmOStringStream e;
-    e << "could not parse VERSION \"" << version_string.c_str() << "\".";
+    e << "could not parse VERSION \"" << version_string << "\".";
     this->SetError(e.str());
     return false;
     }
@@ -98,7 +98,7 @@ bool cmCMakeMinimumRequired
     {
     // The current version is too low.
     cmOStringStream e;
-    e << "CMake " << version_string.c_str()
+    e << "CMake " << version_string
       << " or higher is required.  You are running version "
       << cmVersion::GetCMakeVersion();
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());

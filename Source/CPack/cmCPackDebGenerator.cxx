@@ -444,13 +444,13 @@ int cmCPackDebGenerator::createDeb()
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << cmd.c_str() << std::endl
+    ofs << "# Run command: " << cmd << std::endl
       << "# Working directory: " << toplevel << std::endl
       << "# Output:" << std::endl
-      << output.c_str() << std::endl;
+      << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
-      << cmd.c_str() << std::endl
-      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+      << cmd << std::endl
+      << "Please check " << tmpFile << " for errors" << std::endl);
     return 0;
     }
 
@@ -528,13 +528,13 @@ int cmCPackDebGenerator::createDeb()
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << cmd.c_str() << std::endl
+    ofs << "# Run command: " << cmd << std::endl
       << "# Working directory: " << toplevel << std::endl
       << "# Output:" << std::endl
-      << output.c_str() << std::endl;
+      << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
-      << cmd.c_str() << std::endl
-      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+      << cmd << std::endl
+      << "Please check " << tmpFile << " for errors" << std::endl);
     return 0;
     }
 

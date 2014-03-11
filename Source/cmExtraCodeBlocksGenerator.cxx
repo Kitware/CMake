@@ -499,7 +499,7 @@ void cmExtraCodeBlocksGenerator
        sit!=otherFiles.end();
        ++sit)
     {
-    fout<<"      <Unit filename=\""<< sit->c_str() <<"\">\n"
+    fout<<"      <Unit filename=\""<< *sit <<"\">\n"
           "      </Unit>\n";
     }
 
@@ -653,7 +653,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
         dirIt != uniqIncludeDirs.end();
         ++dirIt)
       {
-      fout <<"            <Add directory=\"" << dirIt->c_str() << "\" />\n";
+      fout <<"            <Add directory=\"" << *dirIt << "\" />\n";
       }
 
     fout<<"         </Compiler>\n";

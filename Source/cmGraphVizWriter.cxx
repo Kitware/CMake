@@ -349,8 +349,8 @@ void cmGraphVizWriter::WriteConnections(const std::string& targetName,
       this->WriteNode(libName, this->TargetPtrs.find(libName)->second,
                       insertedNodes, str);
 
-      str << "    \"" << myNodeName.c_str() << "\" -> \""
-          << libNameIt->second.c_str() << "\"";
+      str << "    \"" << myNodeName << "\" -> \""
+          << libNameIt->second << "\"";
       str << " // " << targetName << " -> " << libName << std::endl;
       this->WriteConnections(libName, insertedNodes, insertedConnections, str);
       }
@@ -455,7 +455,7 @@ void cmGraphVizWriter::WriteNode(const std::string& targetName,
     std::map<std::string, std::string>::const_iterator nameIt =
                                        this->TargetNamesNodes.find(targetName);
 
-    str << "    \"" << nameIt->second.c_str() << "\" [ label=\""
+    str << "    \"" << nameIt->second << "\" [ label=\""
         << targetName <<  "\" shape=\"" << getShapeForTarget(target)
         << "\"];" << std::endl;
   }

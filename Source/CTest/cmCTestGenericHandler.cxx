@@ -124,7 +124,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
       ostr.str(), xofs, true) )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-      "Cannot create resulting XML file: " << ostr.str().c_str()
+      "Cannot create resulting XML file: " << ostr.str()
       << std::endl);
     return false;
     }
@@ -156,7 +156,7 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
   if( !this->CTest->OpenOutputFile("Temporary", ostr.str(), xofs) )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create log file: "
-      << ostr.str().c_str() << std::endl);
+      << ostr.str() << std::endl);
     return false;
     }
   return true;
