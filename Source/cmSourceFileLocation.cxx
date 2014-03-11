@@ -192,7 +192,7 @@ cmSourceFileLocation
 
   // Only a fixed set of extensions will be tried to match a file on
   // disk.  One of these must match if loc refers to this source file.
-  std::string ext = this->Name.substr(loc.Name.size()+1);
+  std::string const& ext = this->Name.substr(loc.Name.size()+1);
   cmMakefile const* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   if(std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end())
@@ -216,7 +216,7 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
     // Both extensions are similarly ambiguous.  Since only the old fixed set
     // of extensions will be tried, the names must match at this point to be
     // the same file.
-    if(this->Name != loc.Name)
+    if(this->Name.size() != loc.Name.size() || this->Name != loc.Name)
       {
       return false;
       }
@@ -278,10 +278,10 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
   else if(this->AmbiguousDirectory)
     {
     // Compare possible directory combinations.
-    std::string srcDir =
+    std::string const& srcDir =
       cmSystemTools::CollapseFullPath(
         this->Directory.c_str(), this->Makefile->GetCurrentDirectory());
-    std::string binDir =
+    std::string const& binDir =
       cmSystemTools::CollapseFullPath(
         this->Directory.c_str(), this->Makefile->GetCurrentOutputDirectory());
     if(srcDir != loc.Directory &&
@@ -293,10 +293,10 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
   else if(loc.AmbiguousDirectory)
     {
     // Compare possible directory combinations.
-    std::string srcDir =
+    std::string const& srcDir =
       cmSystemTools::CollapseFullPath(
         loc.Directory.c_str(), loc.Makefile->GetCurrentDirectory());
-    std::string binDir =
+    std::string const& binDir =
       cmSystemTools::CollapseFullPath(
         loc.Directory.c_str(), loc.Makefile->GetCurrentOutputDirectory());
     if(srcDir != this->Directory &&
