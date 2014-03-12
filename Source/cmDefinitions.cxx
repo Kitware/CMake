@@ -15,7 +15,8 @@
 cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
-cmDefinitions::cmDefinitions(cmDefinitions* parent): Up(parent)
+cmDefinitions::cmDefinitions(cmDefinitions* parent)
+  : Up(parent)
 {
 }
 
@@ -35,7 +36,7 @@ cmDefinitions::GetInternal(const std::string& key) const
     {
     return i->second;
     }
-  else if(cmDefinitions* up = this->Up)
+  if(cmDefinitions* up = this->Up)
     {
     // Query the parent scope.
     return up->GetInternal(key);
