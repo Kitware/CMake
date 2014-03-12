@@ -275,8 +275,8 @@ int main (int argc, char const* const* argv)
     else if ( cpackConfigFileSpecified )
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
-        "Cannot find CPack config file: \"" << cpackConfigFile
-        << "\"" << std::endl);
+        "Cannot find CPack config file: \"" <<
+         cpackConfigFile << "\"" << std::endl);
       return 1;
       }
 
