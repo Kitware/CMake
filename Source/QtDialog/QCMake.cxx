@@ -117,7 +117,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
       {
       const char* extraGen = cachem->GetCacheValue("CMAKE_EXTRA_GENERATOR");
       std::string curGen = cmExternalMakefileProjectGenerator::
-                              CreateFullGeneratorName(itm.GetValue(), extraGen);
+        CreateFullGeneratorName(itm.GetValue(), extraGen? extraGen : "");
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
       }
     }
