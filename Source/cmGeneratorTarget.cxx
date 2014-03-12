@@ -241,7 +241,7 @@ const char *cmGeneratorTarget::GetProperty(const std::string& prop) const
 
 //----------------------------------------------------------------------------
 std::vector<cmSourceFile*> const*
-cmGeneratorTarget::GetSourceDepends(cmSourceFile* sf) const
+cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
 {
   SourceEntriesType::const_iterator i = this->SourceEntries.find(sf);
   if(i != this->SourceEntries.end())

@@ -87,7 +87,8 @@ public:
   void LookupObjectLibraries();
 
   /** Get sources that must be built before the given source.  */
-  std::vector<cmSourceFile*> const* GetSourceDepends(cmSourceFile* sf) const;
+  std::vector<cmSourceFile*> const*
+  GetSourceDepends(cmSourceFile const* sf) const;
 
   /**
    * Flags for a given source file as used in this target. Typically assigned
@@ -121,7 +122,7 @@ public:
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
-  typedef std::map<cmSourceFile*, SourceEntry> SourceEntriesType;
+  typedef std::map<cmSourceFile const*, SourceEntry> SourceEntriesType;
   SourceEntriesType SourceEntries;
 
   std::map<cmSourceFile const*, std::string> Objects;
