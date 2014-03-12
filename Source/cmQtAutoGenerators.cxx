@@ -187,13 +187,11 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
     mocCppFile += "/";
     mocCppFile += automocTargetName;
     mocCppFile += ".cpp";
-    cmSourceFile* mocCppSource = makefile->GetOrCreateSource(
-                                                          mocCppFile,
-                                                          true);
+    makefile->GetOrCreateSource(mocCppFile, true);
     makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                             mocCppFile.c_str(), false);
 
-    target->AddSourceFile(mocCppSource);
+    target->AddSource(mocCppFile);
     }
   // create a custom target for running generators at buildtime:
   std::string autogenTargetName = getAutogenTargetName(target);
@@ -479,7 +477,7 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
   const char *skipMocSep = "";
   const char *skipUicSep = "";
 
-  std::vector<cmSourceFile*> newRccFiles;
+  std::vector<std::string> newRccFiles;
 
   for(std::vector<cmSourceFile*>::const_iterator fileIt = srcFiles.begin();
       fileIt != srcFiles.end();
@@ -512,9 +510,8 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
         rcc_output_file += "/qrc_" + basename + ".cpp";
         makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                                 rcc_output_file.c_str(), false);
-        cmSourceFile* rccCppSource
-                = makefile->GetOrCreateSource(rcc_output_file, true);
-        newRccFiles.push_back(rccCppSource);
+        makefile->GetOrCreateSource(rcc_output_file, true);
+        newRccFiles.push_back(rcc_output_file);
         }
       }
 
@@ -546,11 +543,11 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
       }
     }
 
-  for(std::vector<cmSourceFile*>::const_iterator fileIt = newRccFiles.begin();
+  for(std::vector<std::string>::const_iterator fileIt = newRccFiles.begin();
       fileIt != newRccFiles.end();
       ++fileIt)
     {
-    const_cast<cmTarget*>(target)->AddSourceFile(*fileIt);
+    const_cast<cmTarget*>(target)->AddSource(*fileIt);
     }
 }
 

@@ -1260,7 +1260,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   if(cmSourceFile* sf = mf->GetOrCreateSource(fname.c_str()))
     {
     sf->SetProperty("LANGUAGE", llang.c_str());
-    cmtarget.AddSourceFile(sf);
+    cmtarget.AddSource(fname);
     }
 }
 
@@ -2934,8 +2934,8 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
         std::string plist = this->ComputeInfoPListLocation(cmtarget);
-        cmSourceFile* sf = mf->GetOrCreateSource(plist.c_str(), true);
-        cmtarget.AddSourceFile(sf);
+        mf->GetOrCreateSource(plist, true);
+        cmtarget.AddSource(plist);
         }
 
       std::vector<cmSourceFile*> classes;

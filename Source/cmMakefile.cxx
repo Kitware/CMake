@@ -1182,7 +1182,7 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
       {
       if (this->Targets.find(target) != this->Targets.end())
         {
-        this->Targets[target].AddSourceFile(sf);
+        this->Targets[target].AddSource(sf->GetFullPath());
         }
       else
         {
