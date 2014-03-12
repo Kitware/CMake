@@ -403,11 +403,10 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 //----------------------------------------------------------------------------
 void cmTarget::AddUtility(const char *u, cmMakefile *makefile)
 {
-  this->Utilities.insert(u);
-  if(makefile)
-  {
+  if(this->Utilities.insert(u).second && makefile)
+    {
     makefile->GetBacktrace(UtilityBacktraces[u]);
-  }
+    }
 }
 
 //----------------------------------------------------------------------------
