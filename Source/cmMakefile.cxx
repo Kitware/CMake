@@ -989,7 +989,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
 
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = 0;
-  if(!main_dependency.empty())
+  if(!commandLines.empty() && !main_dependency.empty())
     {
     // The main dependency was specified.  Use it unless a different
     // custom command already used it.
@@ -1257,28 +1257,31 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
     }
 
   // Store the custom command in the target.
-  std::string force = this->GetStartOutputDirectory();
-  force += cmake::GetCMakeFilesDirectory();
-  force += "/";
-  force += utilityName;
-  std::string no_main_dependency = "";
-  bool no_replace = false;
-  this->AddCustomCommandToOutput(force, depends,
-                                 no_main_dependency,
-                                 commandLines, comment,
-                                 workingDirectory, no_replace,
-                                 escapeOldStyle);
-  cmSourceFile* sf = target->AddSourceCMP0049(force);
+  if (!commandLines.empty() || !depends.empty())
+    {
+    std::string force = this->GetStartOutputDirectory();
+    force += cmake::GetCMakeFilesDirectory();
+    force += "/";
+    force += utilityName;
+    std::string no_main_dependency = "";
+    bool no_replace = false;
+    this->AddCustomCommandToOutput(force, depends,
+                                   no_main_dependency,
+                                   commandLines, comment,
+                                   workingDirectory, no_replace,
+                                   escapeOldStyle);
+    cmSourceFile* sf = target->AddSourceCMP0049(force);
 
-  // The output is not actually created so mark it symbolic.
-  if(sf)
-    {
-    sf->SetProperty("SYMBOLIC", "1");
-    }
-  else
-    {
-    cmSystemTools::Error("Could not get source file entry for ",
-                         force.c_str());
+    // The output is not actually created so mark it symbolic.
+    if(sf)
+      {
+      sf->SetProperty("SYMBOLIC", "1");
+      }
+    else
+      {
+      cmSystemTools::Error("Could not get source file entry for ",
+                          force.c_str());
+      }
     }
   return target;
 }
