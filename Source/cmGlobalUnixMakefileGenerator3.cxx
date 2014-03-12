@@ -108,14 +108,14 @@ void
 cmGlobalUnixMakefileGenerator3
 ::ComputeTargetObjects(cmGeneratorTarget* gt) const
 {
-  std::vector<cmSourceFile*> objectSources;
+  std::vector<cmSourceFile const*> objectSources;
   gt->GetObjectSources(objectSources);
   // Compute the name of each object file.
-  for(std::vector<cmSourceFile*>::iterator
+  for(std::vector<cmSourceFile const*>::iterator
         si = objectSources.begin();
       si != objectSources.end(); ++si)
     {
-    cmSourceFile* sf = *si;
+    cmSourceFile const* sf = *si;
     std::string objectName = gt->LocalGenerator
       ->GetObjectFileNameWithoutTarget(*sf, gt->ObjectDirectory);
     gt->AddObject(sf, objectName);

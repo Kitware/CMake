@@ -3944,13 +3944,13 @@ cmGlobalXCodeGenerator
   // to avoid exact duplicate file names. Note that Mac file names are not
   // typically case sensitive, hence the LowerCase.
   std::map<std::string, int> counts;
-  std::vector<cmSourceFile*> objectSources;
+  std::vector<cmSourceFile const*> objectSources;
   gt->GetObjectSources(objectSources);
-  for(std::vector<cmSourceFile*>::const_iterator
+  for(std::vector<cmSourceFile const*>::const_iterator
       si = objectSources.begin();
       si != objectSources.end(); ++si)
     {
-    cmSourceFile* sf = *si;
+    cmSourceFile const* sf = *si;
     std::string objectName =
       cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
     objectName += ".o";

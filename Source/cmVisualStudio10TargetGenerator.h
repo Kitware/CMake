@@ -57,7 +57,8 @@ private:
   void WriteProjectConfigurationValues();
   void WriteSource(const char* tool, cmSourceFile const* sf,
                    const char* end = 0);
-  void WriteSources(const char* tool, std::vector<cmSourceFile*> const&);
+  void WriteSources(const char* tool,
+                    std::vector<cmSourceFile const*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteEmbeddedResourceGroup();

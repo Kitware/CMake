@@ -97,7 +97,7 @@ struct DoAccept
 template<>
 struct DoAccept<true>
 {
-  static void Do(std::vector<cmSourceFile*>& files, cmSourceFile* f)
+  static void Do(std::vector<cmSourceFile const*>& files, cmSourceFile* f)
     {
     files.push_back(f);
     }
@@ -120,7 +120,7 @@ struct DoAccept<true>
 };
 
 //----------------------------------------------------------------------------
-template<typename Tag, typename DataType = std::vector<cmSourceFile*> >
+template<typename Tag, typename DataType = std::vector<cmSourceFile const*> >
 struct TagVisitor
 {
   DataType& Data;
@@ -306,7 +306,8 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
 
 //----------------------------------------------------------------------------
 void
-cmGeneratorTarget::GetObjectSources(std::vector<cmSourceFile*> &data) const
+cmGeneratorTarget
+::GetObjectSources(std::vector<cmSourceFile const*> &data) const
 {
   IMPLEMENT_VISIT(ObjectSources);
   if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
@@ -342,34 +343,39 @@ bool cmGeneratorTarget::HasExplicitObjectName(cmSourceFile const* file) const
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetIDLSources(std::vector<cmSourceFile*>& data) const
+void cmGeneratorTarget
+::GetIDLSources(std::vector<cmSourceFile const*>& data) const
 {
   IMPLEMENT_VISIT(IDLSources);
 }
 
 //----------------------------------------------------------------------------
 void
-cmGeneratorTarget::GetHeaderSources(std::vector<cmSourceFile*>& data) const
+cmGeneratorTarget
+::GetHeaderSources(std::vector<cmSourceFile const*>& data) const
 {
   IMPLEMENT_VISIT(HeaderSources);
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetExtraSources(std::vector<cmSourceFile*>& data) const
+void cmGeneratorTarget
+::GetExtraSources(std::vector<cmSourceFile const*>& data) const
 {
   IMPLEMENT_VISIT(ExtraSources);
 }
 
 //----------------------------------------------------------------------------
 void
-cmGeneratorTarget::GetCustomCommands(std::vector<cmSourceFile*>& data) const
+cmGeneratorTarget
+::GetCustomCommands(std::vector<cmSourceFile const*>& data) const
 {
   IMPLEMENT_VISIT(CustomCommands);
 }
 
 //----------------------------------------------------------------------------
 void
-cmGeneratorTarget::GetExternalObjects(std::vector<cmSourceFile*>& data) const
+cmGeneratorTarget
+::GetExternalObjects(std::vector<cmSourceFile const*>& data) const
 {
   IMPLEMENT_VISIT(ExternalObjects);
 }
@@ -384,7 +390,8 @@ cmGeneratorTarget::GetExpectedResxHeaders(std::set<std::string>& srcs) const
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::GetResxSources(std::vector<cmSourceFile*>& srcs) const
+void cmGeneratorTarget
+::GetResxSources(std::vector<cmSourceFile const*>& srcs) const
 {
   ResxData data;
   IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
@@ -570,7 +577,7 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs) const
     cmTarget* objLib = *ti;
     cmGeneratorTarget* ogt =
       this->GlobalGenerator->GetGeneratorTarget(objLib);
-    for(std::vector<cmSourceFile*>::const_iterator
+    for(std::vector<cmSourceFile const*>::const_iterator
           si = ogt->ObjectSources.begin();
         si != ogt->ObjectSources.end(); ++si)
       {

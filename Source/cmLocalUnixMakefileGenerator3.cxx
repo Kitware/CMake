@@ -185,7 +185,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
       {
       continue;
       }
-    std::vector<cmSourceFile*> objectSources;
+    std::vector<cmSourceFile const*> objectSources;
     gt->GetObjectSources(objectSources);
     // Compute full path to object file directory for this target.
     std::string dir_max;
@@ -194,11 +194,11 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
     dir_max += this->GetTargetDirectory(*gt->Target);
     dir_max += "/";
     // Compute the name of each object file.
-    for(std::vector<cmSourceFile*>::iterator
+    for(std::vector<cmSourceFile const*>::iterator
           si = objectSources.begin();
         si != objectSources.end(); ++si)
       {
-      cmSourceFile* sf = *si;
+      cmSourceFile const* sf = *si;
       bool hasSourceExtension = true;
       std::string objectName = this->GetObjectFileNameWithoutTarget(*sf,
                                                                     dir_max,

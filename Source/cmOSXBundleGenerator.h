@@ -49,7 +49,7 @@ public:
   };
 
   void GenerateMacOSXContentStatements(
-    std::vector<cmSourceFile*> const& sources,
+    std::vector<cmSourceFile const*> const& sources,
     MacOSXContentGeneratorType* generator);
   std::string InitMacOSXContentDirectory(const char* pkgloc);
 
