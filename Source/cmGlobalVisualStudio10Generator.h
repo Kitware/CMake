@@ -87,7 +87,7 @@ public:
   /** Generate an <output>.rule file path for a given command output.  */
   virtual std::string GenerateRuleFile(std::string const& output) const;
 
-  void PathTooLong(cmTarget* target, cmSourceFile* sf,
+  void PathTooLong(cmTarget* target, cmSourceFile const* sf,
                    std::string const& sfRel);
 
   virtual const char* GetToolsVersion() { return "4.0"; }
@@ -112,7 +112,7 @@ private:
     LongestSourcePath(): Length(0), Target(0), SourceFile(0) {}
     size_t Length;
     cmTarget* Target;
-    cmSourceFile* SourceFile;
+    cmSourceFile const* SourceFile;
     std::string SourceRel;
   };
   LongestSourcePath LongestSource;

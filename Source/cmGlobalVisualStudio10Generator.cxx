@@ -470,7 +470,7 @@ cmGlobalVisualStudio10Generator
 
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio10Generator::PathTooLong(
-  cmTarget* target, cmSourceFile* sf, std::string const& sfRel)
+  cmTarget* target, cmSourceFile const* sf, std::string const& sfRel)
 {
   size_t len = (strlen(target->GetMakefile()->GetCurrentOutputDirectory()) +
                 1 + sfRel.length());

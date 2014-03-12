@@ -562,7 +562,8 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 }
 
 //----------------------------------------------------------------------------
-void cmVisualStudio10TargetGenerator::WriteCustomCommand(cmSourceFile* sf)
+void cmVisualStudio10TargetGenerator
+::WriteCustomCommand(cmSourceFile const* sf)
 {
   if(this->SourcesVisited.insert(sf).second)
     {
@@ -585,7 +586,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommand(cmSourceFile* sf)
 }
 
 void
-cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
+cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
                                                  cmCustomCommand const &
                                                  command)
 {
@@ -928,7 +929,7 @@ WriteGroupSources(const char* name,
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(
-  const char* tool, cmSourceFile* sf, const char* end)
+  const char* tool, cmSourceFile const* sf, const char* end)
 {
   // Visual Studio tools append relative paths to the current dir, as in:
   //
@@ -1091,9 +1092,9 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 }
 
 bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
-  cmSourceFile* source)
+  cmSourceFile const* source)
 {
-  cmSourceFile& sf = *source;
+  cmSourceFile const& sf = *source;
 
   std::string objectName;
   if(this->GeneratorTarget->HasExplicitObjectName(&sf))

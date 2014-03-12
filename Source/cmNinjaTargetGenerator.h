@@ -79,10 +79,10 @@ protected:
    * @note Generally it is the value of the variable whose name is computed
    *       by LanguageFlagsVarName().
    */
-  std::string ComputeFlagsForObject(cmSourceFile *source,
+  std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language);
 
-  std::string ComputeDefines(cmSourceFile *source,
+  std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
 
   std::string ConvertToNinjaPath(const char *path) const {
@@ -96,10 +96,10 @@ protected:
   cmNinjaDeps ComputeLinkDeps() const;
 
   /// @return the source file path for the given @a source.
-  std::string GetSourceFilePath(cmSourceFile* source) const;
+  std::string GetSourceFilePath(cmSourceFile const* source) const;
 
   /// @return the object file path for the given @a source.
-  std::string GetObjectFilePath(cmSourceFile* source) const;
+  std::string GetObjectFilePath(cmSourceFile const* source) const;
 
   /// @return the file path where the target named @a name is generated.
   std::string GetTargetFilePath(const std::string& name) const;
@@ -110,7 +110,7 @@ protected:
   void WriteLanguageRules(const std::string& language);
   void WriteCompileRule(const std::string& language);
   void WriteObjectBuildStatements();
-  void WriteObjectBuildStatement(cmSourceFile* source);
+  void WriteObjectBuildStatement(cmSourceFile const* source);
   void WriteCustomCommandBuildStatement(cmCustomCommand *cc);
 
   cmNinjaDeps GetObjects() const

@@ -89,16 +89,16 @@ protected:
   friend struct MacOSXContentGeneratorType;
 
   // write the rules for an object
-  void WriteObjectRuleFiles(cmSourceFile& source);
+  void WriteObjectRuleFiles(cmSourceFile const& source);
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
                             const std::string& lang,
-                            cmSourceFile& source,
+                            cmSourceFile const& source,
                             std::vector<std::string>& depends);
 
   // write the depend.make file for an object
-  void WriteObjectDependRules(cmSourceFile& source,
+  void WriteObjectDependRules(cmSourceFile const& source,
                               std::vector<std::string>& depends);
 
   // write the build rule for a custom command
@@ -126,7 +126,8 @@ protected:
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags(std::string const& l);
 
-  void AppendFortranFormatFlags(std::string& flags, cmSourceFile& source);
+  void AppendFortranFormatFlags(std::string& flags,
+                                cmSourceFile const& source);
 
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);

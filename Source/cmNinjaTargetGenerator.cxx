@@ -126,7 +126,7 @@ void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
 // void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 // Refactor it.
 std::string
-cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
+cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
                                               const std::string& language)
 {
   // TODO: Fortran support.
@@ -211,7 +211,7 @@ bool cmNinjaTargetGenerator::needsDepFile(const std::string& lang)
 // void cmMakefileTargetGenerator::WriteTargetLanguageFlags().
 std::string
 cmNinjaTargetGenerator::
-ComputeDefines(cmSourceFile *source, const std::string& language)
+ComputeDefines(cmSourceFile const* source, const std::string& language)
 {
   std::set<std::string> defines;
 
@@ -269,14 +269,14 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 
 std::string
 cmNinjaTargetGenerator
-::GetSourceFilePath(cmSourceFile* source) const
+::GetSourceFilePath(cmSourceFile const* source) const
 {
   return ConvertToNinjaPath(source->GetFullPath().c_str());
 }
 
 std::string
 cmNinjaTargetGenerator
-::GetObjectFilePath(cmSourceFile* source) const
+::GetObjectFilePath(cmSourceFile const* source) const
 {
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if(!path.empty())
@@ -536,7 +536,7 @@ cmNinjaTargetGenerator
 
 void
 cmNinjaTargetGenerator
-::WriteObjectBuildStatement(cmSourceFile* source)
+::WriteObjectBuildStatement(cmSourceFile const* source)
 {
   std::string comment;
   const std::string language = source->GetLanguage();
