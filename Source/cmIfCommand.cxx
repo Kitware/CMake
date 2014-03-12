@@ -595,7 +595,7 @@ namespace
         {
         def = cmIfCommand::GetVariableOrString(*arg, makefile);
         const char* rex = (argP2)->c_str();
-        cmStringCommand::ClearMatches(makefile);
+        makefile->ClearMatches();
         cmsys::RegularExpression regEntry;
         if ( !regEntry.compile(rex) )
           {
@@ -607,7 +607,7 @@ namespace
           }
         if (regEntry.find(def))
           {
-          cmStringCommand::StoreMatches(makefile, regEntry);
+          makefile->StoreMatches(regEntry);
           *arg = "1";
           }
         else

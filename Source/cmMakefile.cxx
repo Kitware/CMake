@@ -148,6 +148,8 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->Initialize();
   this->PreOrder = false;
   this->GeneratingBuildSystem = false;
+
+  this->NumLastMatches = 0;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -196,6 +198,8 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->CheckSystemVars = mf.CheckSystemVars;
   this->ListFileStack = mf.ListFileStack;
   this->OutputToSource = mf.OutputToSource;
+
+  this->NumLastMatches = mf.NumLastMatches;
 }
 
 //----------------------------------------------------------------------------
@@ -4326,6 +4330,42 @@ void cmMakefile::AddQtUiFileWithOptions(cmSourceFile *sf)
 std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
 {
   return this->QtUiFilesWithOptions;
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::ClearMatches()
+{
+  std::stringstream sstr;
+  for (unsigned int i=0; i<this->NumLastMatches; i++)
+    {
+    sstr.str("");
+    sstr << "CMAKE_MATCH_" << i;
+    std::string const& name = sstr.str();
+    std::string const& s = this->GetSafeDefinition(name);
+    if(!s.empty())
+      {
+      this->AddDefinition(name, "");
+      this->MarkVariableAsUsed(name);
+      }
+    }
+  this->NumLastMatches = 0;
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
+{
+  for (unsigned int i=0; i<10; i++)
+    {
+    std::string m = re.match(i);
+    if(m.size() > 0)
+      {
+      char name[128];
+      sprintf(name, "CMAKE_MATCH_%d", i);
+      this->AddDefinition(name, re.match(i).c_str());
+      this->MarkVariableAsUsed(name);
+      this->NumLastMatches = i + 1;
+      }
+    }
 }
 
 //----------------------------------------------------------------------------

@@ -889,6 +889,9 @@ public:
                                 const std::string& feature,
                                 std::string *error = 0) const;
 
+  void ClearMatches();
+  void StoreMatches(cmsys::RegularExpression& re);
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
@@ -1065,6 +1068,8 @@ private:
                                cmSourceFile* source);
 
   std::vector<cmSourceFile*> QtUiFilesWithOptions;
+
+  unsigned int NumLastMatches;
 };
 
 //----------------------------------------------------------------------------
