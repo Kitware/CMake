@@ -4844,8 +4844,10 @@ bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
 //----------------------------------------------------------------------------
 void cmTarget::GetLanguages(std::set<std::string>& languages) const
 {
+  std::vector<cmSourceFile*> sourceFiles;
+  this->GetSourceFiles(sourceFiles);
   for(std::vector<cmSourceFile*>::const_iterator
-        i = this->SourceFiles.begin(); i != this->SourceFiles.end(); ++i)
+        i = sourceFiles.begin(); i != sourceFiles.end(); ++i)
     {
     const std::string& lang = (*i)->GetLanguage();
     if(!lang.empty())
