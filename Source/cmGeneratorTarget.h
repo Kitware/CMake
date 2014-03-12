@@ -35,7 +35,7 @@ public:
   void GetObjectSources(std::vector<cmSourceFile*> &) const;
   const std::string& GetObjectName(cmSourceFile const* file);
 
-  void AddObject(cmSourceFile *sf, std::string const&name);
+  void AddObject(cmSourceFile const* sf, std::string const&name);
   bool HasExplicitObjectName(cmSourceFile const* file) const;
   void AddExplicitObjectName(cmSourceFile* sf);
 

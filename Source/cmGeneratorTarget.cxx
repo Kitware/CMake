@@ -321,7 +321,8 @@ const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
   return this->Objects[file];
 }
 
-void cmGeneratorTarget::AddObject(cmSourceFile *sf, std::string const&name)
+void cmGeneratorTarget::AddObject(cmSourceFile const* sf,
+                                  std::string const&name)
 {
     this->Objects[sf] = name;
 }
