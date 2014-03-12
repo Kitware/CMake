@@ -27,7 +27,9 @@ if (Qt5Widgets_FOUND)
   macro(qt4_add_resources)
     qt5_add_resources(${ARGN})
   endmacro()
-  set(QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+  set(CMake_QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
+  set(QT_QTMAIN_LIBRARY Qt5::WinMain)
+
   # Remove this when the minimum version of Qt is 4.6.
   add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
 
@@ -46,6 +48,8 @@ else()
   endif()
 
   include(${QT_USE_FILE})
+
+  set(CMake_QT_LIBRARIES ${QT_LIBRARIES})
 
   if(WIN32 AND EXISTS "${QT_QMAKE_EXECUTABLE}")
     get_filename_component(_Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
@@ -112,7 +116,7 @@ endif()
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 add_executable(cmake-gui WIN32 MACOSX_BUNDLE ${SRCS})
-target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${QT_LIBRARIES})
+target_link_libraries(cmake-gui CMakeLib ${QT_QTMAIN_LIBRARY} ${CMake_QT_LIBRARIES})
 if(Qt_BIN_DIR)
   set_property(TARGET cmake-gui PROPERTY Qt_BIN_DIR ${Qt_BIN_DIR})
 endif()
