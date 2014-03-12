@@ -42,6 +42,7 @@ endif()
 if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
 elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
   set(CMAKE_C_COMPILER_XCODE_TYPE sourcecode.c.c)
+  _cmake_find_compiler_path(C)
 else()
   if(NOT CMAKE_C_COMPILER)
     set(CMAKE_C_COMPILER_INIT NOTFOUND)
@@ -72,31 +73,7 @@ else()
     _cmake_find_compiler(C)
 
   else()
-
-    # we only get here if CMAKE_C_COMPILER was specified using -D or a pre-made CMakeCache.txt
-    # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
-    # if CMAKE_C_COMPILER is a list of length 2, use the first item as
-    # CMAKE_C_COMPILER and the 2nd one as CMAKE_C_COMPILER_ARG1
-
-    list(LENGTH CMAKE_C_COMPILER _CMAKE_C_COMPILER_LIST_LENGTH)
-    if("${_CMAKE_C_COMPILER_LIST_LENGTH}" EQUAL 2)
-      list(GET CMAKE_C_COMPILER 1 CMAKE_C_COMPILER_ARG1)
-      list(GET CMAKE_C_COMPILER 0 CMAKE_C_COMPILER)
-    endif()
-
-    # if a compiler was specified by the user but without path,
-    # now try to find it with the full path
-    # if it is found, force it into the cache,
-    # if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
-    # if the C compiler already had a path, reuse it for searching the CXX compiler
-    get_filename_component(_CMAKE_USER_C_COMPILER_PATH "${CMAKE_C_COMPILER}" PATH)
-    if(NOT _CMAKE_USER_C_COMPILER_PATH)
-      find_program(CMAKE_C_COMPILER_WITH_PATH NAMES ${CMAKE_C_COMPILER})
-      if(CMAKE_C_COMPILER_WITH_PATH)
-        set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER_WITH_PATH} CACHE STRING "C compiler" FORCE)
-      endif()
-      unset(CMAKE_C_COMPILER_WITH_PATH CACHE)
-    endif()
+    _cmake_find_compiler_path(C)
   endif()
   mark_as_advanced(CMAKE_C_COMPILER)
 
