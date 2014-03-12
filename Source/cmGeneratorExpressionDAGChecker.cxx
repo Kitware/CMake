@@ -34,7 +34,7 @@ cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(
                 const GeneratorExpressionContent *content,
                 cmGeneratorExpressionDAGChecker *parent)
   : Parent(parent), Target(target), Property(property),
-    Content(content), TransitivePropertiesOnly(false)
+    Content(content), Backtrace(NULL), TransitivePropertiesOnly(false)
 {
   Initialize();
 }

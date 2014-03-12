@@ -2562,8 +2562,11 @@ static bool cmakeCheckStampList(const char* stampList)
 
 //----------------------------------------------------------------------------
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& backtrace)
+                         cmListFileBacktrace const& bt)
 {
+  cmListFileBacktrace backtrace = bt;
+  backtrace.MakeRelative();
+
   cmOStringStream msg;
   bool isError = false;
   // Construct the message header.

@@ -17,6 +17,7 @@
 
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand()
+  : Backtrace(NULL)
 {
   this->HaveComment = false;
   this->EscapeOldStyle = true;
@@ -73,7 +74,8 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   Comment(comment?comment:""),
   WorkingDirectory(workingDirectory?workingDirectory:""),
   EscapeAllowMakeVars(false),
-  EscapeOldStyle(true)
+  EscapeOldStyle(true),
+  Backtrace(NULL)
 {
   this->EscapeOldStyle = true;
   this->EscapeAllowMakeVars = false;

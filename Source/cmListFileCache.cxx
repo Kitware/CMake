@@ -12,6 +12,7 @@
 #include "cmListFileCache.h"
 
 #include "cmListFileLexer.h"
+#include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
@@ -406,6 +407,23 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     return true;
     }
 }
+
+//----------------------------------------------------------------------------
+void cmListFileBacktrace::MakeRelative()
+{
+  if (this->Relative)
+    {
+    return;
+    }
+  for (cmListFileBacktrace::iterator i = this->begin();
+       i != this->end(); ++i)
+    {
+    i->FilePath = this->LocalGenerator->Convert(i->FilePath,
+                                                cmLocalGenerator::HOME);
+    }
+  this->Relative = true;
+}
+
 
 //----------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)

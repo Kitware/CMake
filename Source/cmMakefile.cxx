@@ -310,7 +310,12 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
   // Collect context information.
-  cmListFileBacktrace backtrace;
+  cmLocalGenerator* localGen = this->GetLocalGenerator();
+  if(this->CallStack.empty() && this->GetCMakeInstance()->GetIsInTryCompile())
+    {
+    localGen = 0;
+    }
+  cmListFileBacktrace backtrace(localGen);
   if(!this->CallStack.empty())
     {
     if((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR))
@@ -335,11 +340,6 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       lfc.FilePath = this->ListFileStack.back();
       }
     lfc.Line = 0;
-    if(!this->GetCMakeInstance()->GetIsInTryCompile())
-      {
-      lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                                   cmLocalGenerator::HOME);
-      }
     backtrace.push_back(lfc);
     }
 
@@ -350,14 +350,11 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
-  cmListFileBacktrace backtrace;
+  cmListFileBacktrace backtrace(this->GetLocalGenerator());
   for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
       i != this->CallStack.rend(); ++i)
     {
-    cmListFileContext lfc = *(*i).Context;
-    lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                                 cmLocalGenerator::HOME);
-    backtrace.push_back(lfc);
+    backtrace.push_back(*i->Context);
     }
   return backtrace;
 }
@@ -1919,7 +1916,7 @@ void cmMakefile::CheckForUnused(const char* reason,
   if (this->WarnUnused && !this->VariableUsed(name))
     {
     std::string path;
-    cmListFileBacktrace bt;
+    cmListFileBacktrace bt(this->GetLocalGenerator());
     if (this->CallStack.size())
       {
       const cmListFileContext* file = this->CallStack.back().Context;
@@ -2870,7 +2867,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                                              this->GetHomeOutputDirectory()))
                 {
                 cmOStringStream msg;
-                cmListFileBacktrace bt;
+                cmListFileBacktrace bt(this->GetLocalGenerator());
                 cmListFileContext lfc;
                 lfc.FilePath = filename;
                 lfc.Line = line;

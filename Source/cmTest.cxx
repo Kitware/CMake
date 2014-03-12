@@ -17,11 +17,11 @@
 
 //----------------------------------------------------------------------------
 cmTest::cmTest(cmMakefile* mf)
+  : Backtrace(mf->GetBacktrace())
 {
   this->Makefile = mf;
   this->OldStyle = true;
   this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
-  this->Backtrace = this->Makefile->GetBacktrace();
 }
 
 //----------------------------------------------------------------------------

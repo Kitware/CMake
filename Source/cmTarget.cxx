@@ -87,10 +87,12 @@ class cmTargetInternals
 {
 public:
   cmTargetInternals()
+    : Backtrace(NULL)
     {
     this->PolicyWarnedCMP0022 = false;
     }
   cmTargetInternals(cmTargetInternals const&)
+    : Backtrace(NULL)
     {
     this->PolicyWarnedCMP0022 = false;
     }
@@ -1324,9 +1326,10 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
     std::set<std::string> emitted;
-    for(std::vector<cmListFileBacktrace>::const_iterator it = sigs.begin();
+    for(std::vector<cmListFileBacktrace>::iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
+      it->MakeRelative();
       cmListFileBacktrace::const_iterator i = it->begin();
       if(i != it->end())
         {
