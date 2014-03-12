@@ -4366,11 +4366,11 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
 {
   for (unsigned int i=0; i<10; i++)
     {
-    std::string m = re.match(i);
-    if(m.size() > 0)
+    std::string const& m = re.match(i);
+    if(!m.empty())
       {
       std::string const& var = matchVariables[i];
-      this->AddDefinition(var, re.match(i).c_str());
+      this->AddDefinition(var, m.c_str());
       this->MarkVariableAsUsed(var);
       this->NumLastMatches = i + 1;
       }
