@@ -328,7 +328,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   this->IsApple = this->Makefile->IsOn("APPLE");
 
   // Setup default property values.
-  if (this->GetType() != INTERFACE_LIBRARY)
+  if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
     {
     this->SetPropertyDefault("INSTALL_NAME_DIR", 0);
     this->SetPropertyDefault("INSTALL_RPATH", "");
@@ -369,41 +369,44 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   mf->GetConfigurations(configNames);
 
   // Setup per-configuration property default values.
-  const char* configProps[] = {
-    "ARCHIVE_OUTPUT_DIRECTORY_",
-    "LIBRARY_OUTPUT_DIRECTORY_",
-    "RUNTIME_OUTPUT_DIRECTORY_",
-    "PDB_OUTPUT_DIRECTORY_",
-    "COMPILE_PDB_OUTPUT_DIRECTORY_",
-    "MAP_IMPORTED_CONFIG_",
-    0};
-  for(std::vector<std::string>::iterator ci = configNames.begin();
-      ci != configNames.end(); ++ci)
+  if (this->GetType() != UTILITY)
     {
-    std::string configUpper = cmSystemTools::UpperCase(*ci);
-    for(const char** p = configProps; *p; ++p)
+    const char* configProps[] = {
+      "ARCHIVE_OUTPUT_DIRECTORY_",
+      "LIBRARY_OUTPUT_DIRECTORY_",
+      "RUNTIME_OUTPUT_DIRECTORY_",
+      "PDB_OUTPUT_DIRECTORY_",
+      "COMPILE_PDB_OUTPUT_DIRECTORY_",
+      "MAP_IMPORTED_CONFIG_",
+      0};
+    for(std::vector<std::string>::iterator ci = configNames.begin();
+        ci != configNames.end(); ++ci)
       {
-      if (this->TargetTypeValue == INTERFACE_LIBRARY
-          && strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0)
+      std::string configUpper = cmSystemTools::UpperCase(*ci);
+      for(const char** p = configProps; *p; ++p)
         {
-        continue;
+        if (this->TargetTypeValue == INTERFACE_LIBRARY
+            && strcmp(*p, "MAP_IMPORTED_CONFIG_") != 0)
+          {
+          continue;
+          }
+        std::string property = *p;
+        property += configUpper;
+        this->SetPropertyDefault(property, 0);
         }
-      std::string property = *p;
-      property += configUpper;
-      this->SetPropertyDefault(property, 0);
-      }
 
-    // Initialize per-configuration name postfix property from the
-    // variable only for non-executable targets.  This preserves
-    // compatibility with previous CMake versions in which executables
-    // did not support this variable.  Projects may still specify the
-    // property directly.
-    if(this->TargetTypeValue != cmTarget::EXECUTABLE
-        && this->TargetTypeValue != cmTarget::INTERFACE_LIBRARY)
-      {
-      std::string property = cmSystemTools::UpperCase(*ci);
-      property += "_POSTFIX";
-      this->SetPropertyDefault(property, 0);
+      // Initialize per-configuration name postfix property from the
+      // variable only for non-executable targets.  This preserves
+      // compatibility with previous CMake versions in which executables
+      // did not support this variable.  Projects may still specify the
+      // property directly.
+      if(this->TargetTypeValue != cmTarget::EXECUTABLE
+          && this->TargetTypeValue != cmTarget::INTERFACE_LIBRARY)
+        {
+        std::string property = cmSystemTools::UpperCase(*ci);
+        property += "_POSTFIX";
+        this->SetPropertyDefault(property, 0);
+        }
       }
     }
 
@@ -442,7 +445,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
       }
     }
 
-  if (this->GetType() != INTERFACE_LIBRARY)
+  if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
     {
     this->SetPropertyDefault("C_VISIBILITY_PRESET", 0);
     this->SetPropertyDefault("CXX_VISIBILITY_PRESET", 0);
@@ -454,7 +457,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
     }
-  if (this->GetType() != INTERFACE_LIBRARY)
+  if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
     {
     this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", 0);
     }
@@ -476,8 +479,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->PolicyStatusCMP0022 = cmPolicies::NEW;
     }
 
-  this->SetPropertyDefault("JOB_POOL_COMPILE", 0);
-  this->SetPropertyDefault("JOB_POOL_LINK", 0);
+  if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
+    {
+    this->SetPropertyDefault("JOB_POOL_COMPILE", 0);
+    this->SetPropertyDefault("JOB_POOL_LINK", 0);
+    }
 }
 
 //----------------------------------------------------------------------------
