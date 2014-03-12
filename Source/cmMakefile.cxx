@@ -4332,20 +4332,30 @@ std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
   return this->QtUiFilesWithOptions;
 }
 
+static std::string matchVariables[] = {
+  "CMAKE_MATCH_0",
+  "CMAKE_MATCH_1",
+  "CMAKE_MATCH_2",
+  "CMAKE_MATCH_3",
+  "CMAKE_MATCH_4",
+  "CMAKE_MATCH_5",
+  "CMAKE_MATCH_6",
+  "CMAKE_MATCH_7",
+  "CMAKE_MATCH_8",
+  "CMAKE_MATCH_9"
+};
+
 //----------------------------------------------------------------------------
 void cmMakefile::ClearMatches()
 {
-  std::stringstream sstr;
   for (unsigned int i=0; i<this->NumLastMatches; i++)
     {
-    sstr.str("");
-    sstr << "CMAKE_MATCH_" << i;
-    std::string const& name = sstr.str();
-    std::string const& s = this->GetSafeDefinition(name);
+    std::string const& var = matchVariables[i];
+    std::string const& s = this->GetSafeDefinition(var);
     if(!s.empty())
       {
-      this->AddDefinition(name, "");
-      this->MarkVariableAsUsed(name);
+      this->AddDefinition(var, "");
+      this->MarkVariableAsUsed(var);
       }
     }
   this->NumLastMatches = 0;
@@ -4359,10 +4369,9 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
     std::string m = re.match(i);
     if(m.size() > 0)
       {
-      char name[128];
-      sprintf(name, "CMAKE_MATCH_%d", i);
-      this->AddDefinition(name, re.match(i).c_str());
-      this->MarkVariableAsUsed(name);
+      std::string const& var = matchVariables[i];
+      this->AddDefinition(var, re.match(i).c_str());
+      this->MarkVariableAsUsed(var);
       this->NumLastMatches = i + 1;
       }
     }
