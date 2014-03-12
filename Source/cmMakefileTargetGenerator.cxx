@@ -373,7 +373,7 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 //----------------------------------------------------------------------------
 void
 cmMakefileTargetGenerator::MacOSXContentGeneratorType::operator()
-  (cmSourceFile& source, const char* pkgloc)
+  (cmSourceFile const& source, const char* pkgloc)
 {
   // Skip OS X content when not building a Framework or Bundle.
   if(!this->Generator->GetTarget()->IsBundleOnApple())

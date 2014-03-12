@@ -44,7 +44,8 @@ public:
   struct MacOSXContentGeneratorType
   {
     virtual ~MacOSXContentGeneratorType() {}
-    virtual void operator()(cmSourceFile& source, const char* pkgloc) = 0;
+    virtual void operator()(cmSourceFile const& source,
+                            const char* pkgloc) = 0;
   };
 
   void GenerateMacOSXContentStatements(

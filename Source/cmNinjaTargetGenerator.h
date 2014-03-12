@@ -129,7 +129,7 @@ protected:
     MacOSXContentGeneratorType(cmNinjaTargetGenerator* g) :
       Generator(g)  {}
 
-    void operator()(cmSourceFile& source, const char* pkgloc);
+    void operator()(cmSourceFile const& source, const char* pkgloc);
 
   private:
     cmNinjaTargetGenerator* Generator;

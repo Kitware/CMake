@@ -81,7 +81,7 @@ protected:
     MacOSXContentGeneratorType(cmMakefileTargetGenerator* gen) :
       Generator(gen) {}
 
-    void operator()(cmSourceFile& source, const char* pkgloc);
+    void operator()(cmSourceFile const& source, const char* pkgloc);
 
   private:
     cmMakefileTargetGenerator* Generator;
