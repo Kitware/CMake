@@ -125,7 +125,7 @@ bool cmCTestSubdirCommand
       {
       std::string m = "Could not find include file: ";
       m += fname;
-      this->SetError(m.c_str());
+      this->SetError(m);
       return false;
       }
     }
@@ -213,7 +213,7 @@ bool cmCTestAddSubdirectoryCommand
     {
     std::string m = "Could not find include file: ";
     m += fname;
-    this->SetError(m.c_str());
+    this->SetError(m);
     return false;
     }
   return true;
@@ -616,7 +616,7 @@ int cmCTestTestHandler::ProcessHandler()
           ofs << ftit->TestCount << ":" << ftit->Name << std::endl;
           cmCTestLog(this->CTest, HANDLER_OUTPUT, "\t" << std::setw(3)
                      << ftit->TestCount << " - "
-                     << ftit->Name.c_str() << " ("
+                     << ftit->Name << " ("
                      << this->GetTestStatus(ftit->Status) << ")"
                      << std::endl);
           }
@@ -1022,7 +1022,7 @@ bool cmCTestTestHandler::GetValue(const char* tag,
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "parse error: missing tag: "
-               << tag << " found [" << line.c_str() << "]" << std::endl);
+               << tag << " found [" << line << "]" << std::endl);
     ret = false;
     }
   return ret;
@@ -1223,7 +1223,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
       {
       os
         << "\t\t\t<NamedMeasurement type=\"text/string\" "
-        << "name=\"" << measureIt->first.c_str() << "\"><Value>"
+        << "name=\"" << measureIt->first << "\"><Value>"
         << cmXMLSafe(measureIt->second)
         << "</Value></NamedMeasurement>\n";
       }
@@ -1506,7 +1506,7 @@ std::string cmCTestTestHandler
     // then try with the exe extension
     else
       {
-      failed.push_back(attempted[ai].c_str());
+      failed.push_back(attempted[ai]);
       tempPath = attempted[ai];
       tempPath += cmSystemTools::GetExecutableExtension();
       if(cmSystemTools::FileExists(tempPath.c_str())
@@ -1517,7 +1517,7 @@ std::string cmCTestTestHandler
         }
       else
         {
-        failed.push_back(tempPath.c_str());
+        failed.push_back(tempPath);
         }
       }
     }
@@ -1820,7 +1820,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   else if ( !this->CTest->GetShowOnly() && !this->CTest->ShouldPrintLabels() )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Problem reading file: "
-      << lastTestsFailedLog.c_str() <<
+      << lastTestsFailedLog <<
       " while generating list of previously failed tests." << std::endl);
     }
 }
@@ -1960,7 +1960,7 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
             << " " << k1 << "=\"" << v1 << "\""
             << " " << k2 << "=\"" << v2 << "\""
             << " encoding=\"none\""
-            << "><Value>Image " << filename.c_str()
+            << "><Value>Image " << filename
             << " is empty</Value></NamedMeasurement>";
           }
         else
@@ -2014,10 +2014,10 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
           << "\t\t\t<NamedMeasurement"
           << " name=\"" << measurementfile.match(idx) << "\""
           << " text=\"text/string\""
-          << "><Value>File " << filename.c_str()
+          << "><Value>File " << filename
           << " not found</Value></NamedMeasurement>"
           << std::endl;
-        cmCTestLog(this->CTest, HANDLER_OUTPUT, "File \"" << filename.c_str()
+        cmCTestLog(this->CTest, HANDLER_OUTPUT, "File \"" << filename
           << "\" not found." << std::endl);
         }
       cxml.erase(measurementfile.start(),
@@ -2154,7 +2154,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "ATTACHED_FILES" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
 
             for(std::vector<std::string>::iterator f = lval.begin();
                 f != lval.end(); ++f)
@@ -2165,7 +2165,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "ATTACHED_FILES_ON_FAIL" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
 
             for(std::vector<std::string>::iterator f = lval.begin();
                 f != lval.end(); ++f)
@@ -2176,7 +2176,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "RESOURCE_LOCK" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
 
             for(std::vector<std::string>::iterator f = lval.begin();
                 f != lval.end(); ++f)
@@ -2196,7 +2196,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "REQUIRED_FILES" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
 
             for(std::vector<std::string>::iterator f = lval.begin();
                 f != lval.end(); ++f)
@@ -2211,14 +2211,14 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "FAIL_REGULAR_EXPRESSION" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
             std::vector<std::string>::iterator crit;
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
               rtit->ErrorRegularExpressions.push_back(
                 std::pair<cmsys::RegularExpression, std::string>(
                   cmsys::RegularExpression(crit->c_str()),
-                  std::string(crit->c_str())));
+                  std::string(*crit)));
               }
             }
           if ( key == "PROCESSORS" )
@@ -2240,7 +2240,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "DEPENDS" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
             std::vector<std::string>::iterator crit;
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
@@ -2250,7 +2250,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "ENVIRONMENT" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
             std::vector<std::string>::iterator crit;
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
@@ -2260,7 +2260,7 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "LABELS" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
             std::vector<std::string>::iterator crit;
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
@@ -2284,14 +2284,14 @@ bool cmCTestTestHandler::SetTestsProperties(
           if ( key == "PASS_REGULAR_EXPRESSION" )
             {
             std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val.c_str(), lval);
+            cmSystemTools::ExpandListArgument(val, lval);
             std::vector<std::string>::iterator crit;
             for ( crit = lval.begin(); crit != lval.end(); ++ crit )
               {
               rtit->RequiredRegularExpressions.push_back(
                 std::pair<cmsys::RegularExpression, std::string>(
                   cmsys::RegularExpression(crit->c_str()),
-                  std::string(crit->c_str())));
+                  std::string(*crit)));
               }
             }
           if ( key == "WORKING_DIRECTORY" )

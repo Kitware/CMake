@@ -53,7 +53,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting STATIC type.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -66,7 +66,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting SHARED type.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -79,7 +79,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting MODULE type.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -92,7 +92,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting OBJECT type.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -105,7 +105,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting UNKNOWN type.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -118,7 +118,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting ALIAS type.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -130,21 +130,21 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting/multiple types.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       if (isAlias)
         {
         cmOStringStream e;
         e << "INTERFACE library specified with conflicting ALIAS type.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       if (excludeFromAll)
         {
         cmOStringStream e;
         e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -157,7 +157,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       ++s;
@@ -177,7 +177,7 @@ bool cmAddLibraryCommand
       {
       cmOStringStream e;
       e << "GLOBAL option may only be used with IMPORTED libraries.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     else
@@ -192,14 +192,14 @@ bool cmAddLibraryCommand
       {
       cmOStringStream e;
       e << "INTERFACE library requires no source arguments.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     if (importGlobal && !importTarget)
       {
       cmOStringStream e;
       e << "INTERFACE library specified as GLOBAL, but not as IMPORTED.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -236,7 +236,7 @@ bool cmAddLibraryCommand
           "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
           "in undefined behavior.";
-      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      this->Makefile->IssueMessage(messageType, e.str());
 
       if (messageType == cmake::FATAL_ERROR)
         {
@@ -247,9 +247,9 @@ bool cmAddLibraryCommand
 
   if (isAlias)
     {
-    if(!cmGeneratorExpression::IsValidTargetName(libName.c_str()))
+    if(!cmGeneratorExpression::IsValidTargetName(libName))
       {
-      this->SetError(("Invalid name for ALIAS: " + libName).c_str());
+      this->SetError("Invalid name for ALIAS: " + libName);
       return false;
       }
     if(excludeFromAll)
@@ -266,7 +266,7 @@ bool cmAddLibraryCommand
       {
       cmOStringStream e;
       e << "ALIAS requires exactly one target argument.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
@@ -276,7 +276,7 @@ bool cmAddLibraryCommand
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" is itself an ALIAS.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     cmTarget *aliasedTarget =
@@ -287,7 +287,7 @@ bool cmAddLibraryCommand
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" does not already "
         "exist.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     cmTarget::TargetType aliasedType = aliasedTarget->GetType();
@@ -300,7 +300,7 @@ bool cmAddLibraryCommand
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" is not a library.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     if(aliasedTarget->IsImported())
@@ -308,10 +308,10 @@ bool cmAddLibraryCommand
       cmOStringStream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" is IMPORTED.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
-    this->Makefile->AddAlias(libName.c_str(), aliasedTarget);
+    this->Makefile->AddAlias(libName, aliasedTarget);
     return true;
     }
 
@@ -364,7 +364,7 @@ bool cmAddLibraryCommand
         {
         cmOStringStream e;
         e << "Invalid name for IMPORTED INTERFACE library target: " << libName;
-        this->SetError(e.str().c_str());
+        this->SetError(e.str());
         return false;
         }
       }
@@ -375,12 +375,12 @@ bool cmAddLibraryCommand
       cmOStringStream e;
       e << "cannot create imported target \"" << libName
         << "\" because another target with the same name already exists.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
     // Create the imported target.
-    this->Makefile->AddImportedTarget(libName.c_str(), type, importGlobal);
+    this->Makefile->AddImportedTarget(libName, type, importGlobal);
     return true;
     }
 
@@ -399,7 +399,7 @@ bool cmAddLibraryCommand
   std::string msg;
   if(!this->Makefile->EnforceUniqueName(libName, msg))
     {
-    this->SetError(msg.c_str());
+    this->SetError(msg);
     return false;
     }
   }
@@ -413,11 +413,11 @@ bool cmAddLibraryCommand
       {
       cmOStringStream e;
       e << "Invalid name for INTERFACE library target: " << libName;
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
-    this->Makefile->AddLibrary(libName.c_str(),
+    this->Makefile->AddLibrary(libName,
                                type,
                                srclists,
                                excludeFromAll);
@@ -439,7 +439,7 @@ bool cmAddLibraryCommand
     ++s;
     }
 
-  this->Makefile->AddLibrary(libName.c_str(), type, srclists, excludeFromAll);
+  this->Makefile->AddLibrary(libName, type, srclists, excludeFromAll);
 
   return true;
 }

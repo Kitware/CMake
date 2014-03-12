@@ -63,11 +63,11 @@ cmCustomCommandGenerator
     cmd += " ";
     if(this->OldStyle)
       {
-      cmd += this->LG->EscapeForShellOldStyle(arg.c_str());
+      cmd += this->LG->EscapeForShellOldStyle(arg);
       }
     else
       {
-      cmd += this->LG->EscapeForShell(arg.c_str(), this->MakeVars);
+      cmd += this->LG->EscapeForShell(arg, this->MakeVars);
       }
     }
 }

@@ -78,12 +78,12 @@ bool cmSetTargetPropertiesCommand
       return false;
       }
     bool ret = cmSetTargetPropertiesCommand::SetOneTarget
-      (args[i].c_str(),propertyPairs,this->Makefile);
+      (args[i],propertyPairs,this->Makefile);
     if (!ret)
       {
       std::string message = "Can not find target to add properties to: ";
       message += args[i];
-      this->SetError(message.c_str());
+      this->SetError(message);
       return false;
       }
     }
@@ -101,9 +101,9 @@ bool cmSetTargetPropertiesCommand
     unsigned int k;
     for (k = 0; k < propertyPairs.size(); k = k + 2)
       {
-      target->SetProperty(propertyPairs[k].c_str(),
+      target->SetProperty(propertyPairs[k],
                           propertyPairs[k+1].c_str());
-      target->CheckProperty(propertyPairs[k].c_str(), mf);
+      target->CheckProperty(propertyPairs[k], mf);
       }
     }
   // if file is not already in the makefile, then add it

@@ -409,7 +409,7 @@ int cmCTestBuildHandler::ProcessHandler()
   for ( it = strings.begin(); it != strings.end(); ++it ) \
     { \
     cmCTestLog(this->CTest, DEBUG, "Add " #strings ": " \
-    << it->c_str() << std::endl); \
+    << *it << std::endl); \
     regexes.push_back(it->c_str()); \
     }
   cmCTestBuildHandlerPopulateRegexVector(

@@ -32,13 +32,13 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
   // Get the variable holding the list of sources.
   std::string const& sourceList = args[1];
   std::string sourceListValue =
-    this->Makefile->GetSafeDefinition(sourceList.c_str());
+    this->Makefile->GetSafeDefinition(sourceList);
 
   // Create a rule for all sources listed.
   for(std::vector<std::string>::iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {
-    cmSourceFile *curr = this->Makefile->GetSource(j->c_str());
+    cmSourceFile *curr = this->Makefile->GetSource(*j);
     // if we should wrap the class
     if(!(curr && curr->GetPropertyAsBool("WRAP_EXCLUDE")))
       {
@@ -50,7 +50,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
       newName += srcName;
       newName += ".cxx";
       cmSourceFile* sf =
-        this->Makefile->GetOrCreateSource(newName.c_str(), true);
+        this->Makefile->GetOrCreateSource(newName, true);
       if (curr)
         {
         sf->SetProperty("ABSTRACT", curr->GetProperty("ABSTRACT"));
@@ -99,7 +99,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
 
       std::string no_main_dependency = "";
       const char* no_working_dir = 0;
-      this->Makefile->AddCustomCommandToOutput(newName.c_str(),
+      this->Makefile->AddCustomCommandToOutput(newName,
                                                depends,
                                                no_main_dependency,
                                                commandLines,
@@ -109,7 +109,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
     }
 
   // Store the final list of source files.
-  this->Makefile->AddDefinition(sourceList.c_str(),
+  this->Makefile->AddDefinition(sourceList,
                                 sourceListValue.c_str());
   return true;
 }

@@ -50,7 +50,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
       cmOStringStream e;
       e << "Evaluation file condition \"" << rawCondition << "\" did "
           "not evaluate to valid content. Got \"" << condResult << "\".";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
     }
@@ -72,7 +72,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
     cmOStringStream e;
     e << "Evaluation file to be written multiple times for different "
          "configurations with different content:\n  " << outputFileName;
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
@@ -85,7 +85,7 @@ void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
     {
     cmOStringStream e;
     e << "Evaluation file \"" << outputFileName << "\" cannot be written.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
@@ -109,7 +109,7 @@ void cmGeneratorExpressionEvaluationFile::Generate()
       {
       cmOStringStream e;
       e << "Evaluation file \"" << this->Input << "\" cannot be read.";
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
 
@@ -142,7 +142,7 @@ void cmGeneratorExpressionEvaluationFile::Generate()
     for(std::vector<std::string>::const_iterator li = allConfigs.begin();
         li != allConfigs.end(); ++li)
       {
-      this->Generate(li->c_str(), inputExpression.get(), outputFiles);
+      this->Generate(*li, inputExpression.get(), outputFiles);
       if(cmSystemTools::GetFatalErrorOccured())
         {
         return;

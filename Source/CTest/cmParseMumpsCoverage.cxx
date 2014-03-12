@@ -122,7 +122,7 @@ bool cmParseMumpsCoverage::LoadPackages(const char* d)
   glob.RecurseOn();
   std::string pat = d;
   pat += "/*.m";
-  glob.FindFiles(pat.c_str());
+  glob.FindFiles(pat);
   std::vector<std::string>& files = glob.GetFiles();
   std::vector<std::string>::iterator fileIt;
   for ( fileIt = files.begin(); fileIt != files.end();

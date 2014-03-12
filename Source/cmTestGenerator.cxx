@@ -97,7 +97,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
 
   // Generate the command line with full escapes.
   cmLocalGenerator* lg = mf->GetLocalGenerator();
-  os << lg->EscapeForCMake(exe.c_str());
+  os << lg->EscapeForCMake(exe);
   for(std::vector<std::string>::const_iterator ci = command.begin()+1;
       ci != command.end(); ++ci)
     {

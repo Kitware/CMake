@@ -66,7 +66,7 @@ bool cmSetPropertyCommand
     cmOStringStream e;
     e << "given invalid scope " << *arg << ".  "
       << "Valid scopes are GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, CACHE.";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
@@ -114,7 +114,7 @@ bool cmSetPropertyCommand
       {
       cmOStringStream e;
       e << "given invalid argument \"" << *arg << "\".";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -262,7 +262,7 @@ bool cmSetPropertyCommand::HandleTargetMode()
       cmOStringStream e;
       e << "could not find TARGET " << *ni
         << ".  Perhaps it has not yet been created.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -301,7 +301,7 @@ bool cmSetPropertyCommand::HandleSourceMode()
       ni != this->Names.end(); ++ni)
     {
     // Get the source file.
-    if(cmSourceFile* sf = this->Makefile->GetOrCreateSource(ni->c_str()))
+    if(cmSourceFile* sf = this->Makefile->GetOrCreateSource(*ni))
       {
       if(!this->HandleSource(sf))
         {
@@ -312,7 +312,7 @@ bool cmSetPropertyCommand::HandleSourceMode()
       {
       cmOStringStream e;
       e << "given SOURCE name that could not be found or created: " << *ni;
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -351,7 +351,7 @@ bool cmSetPropertyCommand::HandleTestMode()
     {
     next = ni;
     ++next;
-    if(cmTest* test = this->Makefile->GetTest(ni->c_str()))
+    if(cmTest* test = this->Makefile->GetTest(*ni))
       {
       if(this->HandleTest(test))
         {
@@ -374,7 +374,7 @@ bool cmSetPropertyCommand::HandleTestMode()
       {
       e << "  " << *ni << "\n";
       }
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
   return true;
@@ -414,7 +414,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
       cmOStringStream e;
       e << "given non-boolean value \"" << this->PropertyValue
         << "\" for CACHE property \"ADVANCED\".  ";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -424,7 +424,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
       {
       cmOStringStream e;
       e << "given invalid CACHE entry TYPE \"" << this->PropertyValue << "\"";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -436,7 +436,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
     e << "given invalid CACHE property " << this->PropertyName << ".  "
       << "Settable CACHE properties are: "
       << "ADVANCED, HELPSTRING, STRINGS, TYPE, and VALUE.";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
@@ -460,7 +460,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
       cmOStringStream e;
       e << "could not find CACHE variable " << *ni
         << ".  Perhaps it has not yet been created.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }

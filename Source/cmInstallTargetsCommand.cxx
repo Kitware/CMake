@@ -52,7 +52,7 @@ bool cmInstallTargetsCommand
     else
       {
       std::string str = "Cannot find target: \"" + *s + "\" to install.";
-      this->SetError(str.c_str());
+      this->SetError(str);
       return false;
       }
     }

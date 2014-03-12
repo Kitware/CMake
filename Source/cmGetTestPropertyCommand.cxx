@@ -26,17 +26,17 @@ bool cmGetTestPropertyCommand
 
   std::string testName = args[0];
   std::string var = args[2];
-  cmTest *test = this->Makefile->GetTest(testName.c_str());
+  cmTest *test = this->Makefile->GetTest(testName);
   if (test)
     {
-    const char *prop = test->GetProperty(args[1].c_str());
+    const char *prop = test->GetProperty(args[1]);
     if (prop)
       {
-      this->Makefile->AddDefinition(var.c_str(), prop);
+      this->Makefile->AddDefinition(var, prop);
       return true;
       }
     }
-  this->Makefile->AddDefinition(var.c_str(), "NOTFOUND");
+  this->Makefile->AddDefinition(var, "NOTFOUND");
   return true;
 }
 

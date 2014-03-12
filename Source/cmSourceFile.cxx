@@ -164,14 +164,14 @@ bool cmSourceFile::FindFullPath(std::string* error)
       }
     tryPath += this->Location.GetName();
     tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str(), *di);
-    if(this->TryFullPath(tryPath.c_str(), ""))
+    if(this->TryFullPath(tryPath, ""))
       {
       return true;
       }
     for(std::vector<std::string>::const_iterator ei = srcExts.begin();
         ei != srcExts.end(); ++ei)
       {
-      if(this->TryFullPath(tryPath.c_str(), ei->c_str()))
+      if(this->TryFullPath(tryPath, *ei))
         {
         return true;
         }
@@ -179,7 +179,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
     for(std::vector<std::string>::const_iterator ei = hdrExts.begin();
         ei != hdrExts.end(); ++ei)
       {
-      if(this->TryFullPath(tryPath.c_str(), ei->c_str()))
+      if(this->TryFullPath(tryPath, *ei))
         {
         return true;
         }

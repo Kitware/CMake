@@ -379,7 +379,7 @@ void cmGeneratorExpression::Split(const std::string &input,
         }
       if(!part.empty())
         {
-        cmSystemTools::ExpandListArgument(part.c_str(), output);
+        cmSystemTools::ExpandListArgument(part, output);
         }
       }
     pos += 2;

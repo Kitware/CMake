@@ -352,7 +352,7 @@ void cmCTestP4::SetP4Options(std::vector<char const*> &CommandOptions)
     for(std::vector<std::string>::const_iterator ai = args.begin();
         ai != args.end(); ++ai)
       {
-      P4Options.push_back(ai->c_str());
+      P4Options.push_back(*ai);
       }
     }
 

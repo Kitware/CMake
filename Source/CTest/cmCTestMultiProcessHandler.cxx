@@ -672,7 +672,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
     indexStr << " #" << p.Index << ":";
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
       std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
-      << indexStr.str().c_str());
+      << indexStr.str());
     cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
     cmCTestLog(this->CTest, HANDLER_OUTPUT, p.Name.c_str() << std::endl);
     //pop working dir

@@ -35,15 +35,15 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
   std::string const& headerList = args[1];
   std::string const& sourceList = args[2];
   std::string headerListValue =
-    this->Makefile->GetSafeDefinition(headerList.c_str());
+    this->Makefile->GetSafeDefinition(headerList);
   std::string sourceListValue =
-    this->Makefile->GetSafeDefinition(sourceList.c_str());
+    this->Makefile->GetSafeDefinition(sourceList);
 
   // Create rules for all sources listed.
   for(std::vector<std::string>::iterator j = (args.begin() + 3);
       j != args.end(); ++j)
     {
-    cmSourceFile *curr = this->Makefile->GetSource(j->c_str());
+    cmSourceFile *curr = this->Makefile->GetSource(*j);
     // if we should wrap the class
     if(!(curr && curr->GetPropertyAsBool("WRAP_EXCLUDE")))
       {
@@ -131,7 +131,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
       std::string no_main_dependency = "";
       const char* no_comment = 0;
       const char* no_working_dir = 0;
-      this->Makefile->AddCustomCommandToOutput(hName.c_str(),
+      this->Makefile->AddCustomCommandToOutput(hName,
                                                depends,
                                                no_main_dependency,
                                                hCommandLines,
@@ -139,7 +139,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
                                                no_working_dir);
 
       depends.push_back(hName);
-      this->Makefile->AddCustomCommandToOutput(cxxName.c_str(),
+      this->Makefile->AddCustomCommandToOutput(cxxName,
                                                depends,
                                                no_main_dependency,
                                                cxxCommandLines,
@@ -148,7 +148,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
 
       depends.clear();
       depends.push_back(hName);
-      this->Makefile->AddCustomCommandToOutput(mocName.c_str(),
+      this->Makefile->AddCustomCommandToOutput(mocName,
                                                depends,
                                                no_main_dependency,
                                                mocCommandLines,
@@ -158,9 +158,9 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
     }
 
   // Store the final list of source files and headers.
-  this->Makefile->AddDefinition(sourceList.c_str(),
+  this->Makefile->AddDefinition(sourceList,
                                 sourceListValue.c_str());
-  this->Makefile->AddDefinition(headerList.c_str(),
+  this->Makefile->AddDefinition(headerList,
                                 headerListValue.c_str());
   return true;
 }

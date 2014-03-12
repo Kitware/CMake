@@ -138,7 +138,7 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
             break;
           }
         std::string lib = li->first;
-        if(cmTarget* libtgt = global->FindTarget(lib.c_str()))
+        if(cmTarget* libtgt = global->FindTarget(lib))
           {
           // Handle simple output name changes.  This command is
           // deprecated so we do not support full target name

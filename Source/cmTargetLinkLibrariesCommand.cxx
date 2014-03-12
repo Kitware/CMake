@@ -39,7 +39,7 @@ bool cmTargetLinkLibrariesCommand
   // Lookup the target for which libraries are specified.
   this->Target =
     this->Makefile->GetCMakeInstance()
-    ->GetGlobalGenerator()->FindTarget(args[0].c_str());
+    ->GetGlobalGenerator()->FindTarget(args[0]);
   if(!this->Target)
     {
     cmake::MessageType t = cmake::FATAL_ERROR;  // fail by default
@@ -124,7 +124,7 @@ bool cmTargetLinkLibrariesCommand
                             ->GetPolicyWarning(cmPolicies::CMP0039) << "\n"
         "Utility target \"" << this->Target->GetName() << "\" " << modal
         << " not be used as the target of a target_link_libraries call.";
-      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      this->Makefile->IssueMessage(messageType, e.str());
       if(messageType == cmake::FATAL_ERROR)
         {
         return false;
@@ -289,7 +289,7 @@ bool cmTargetLinkLibrariesCommand
       std::string linkType = args[0];
       linkType += "_LINK_TYPE";
       const char* linkTypeString =
-        this->Makefile->GetDefinition( linkType.c_str() );
+        this->Makefile->GetDefinition( linkType );
       if(linkTypeString)
         {
         if(strcmp(linkTypeString, "debug") == 0)
@@ -407,7 +407,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
                                           sig == cmTarget::KeywordTLLSignature
                                             ? cmTarget::PlainTLLSignature
                                             : cmTarget::KeywordTLLSignature);
-        this->Makefile->IssueMessage(messageType, e.str().c_str());
+        this->Makefile->IssueMessage(messageType, e.str());
         if(messageType == cmake::FATAL_ERROR)
           {
           return false;
@@ -479,7 +479,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       {
       prop = "LINK_INTERFACE_LIBRARIES_";
       prop += *i;
-      this->Target->AppendProperty(prop.c_str(), lib.c_str());
+      this->Target->AppendProperty(prop, lib.c_str());
       }
     }
   if(llt == cmTarget::OPTIMIZED || llt == cmTarget::GENERAL)
@@ -494,9 +494,9 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       {
       prop = "LINK_INTERFACE_LIBRARIES_";
       prop += *i;
-      if(!this->Target->GetProperty(prop.c_str()))
+      if(!this->Target->GetProperty(prop))
         {
-        this->Target->SetProperty(prop.c_str(), "");
+        this->Target->SetProperty(prop, "");
         }
       }
     }

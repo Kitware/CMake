@@ -26,7 +26,7 @@ static std::string cmIfCommandError(
       i != args.end(); ++i)
     {
     err += " ";
-    err += lg->EscapeForCMake(i->c_str());
+    err += lg->EscapeForCMake(*i);
     }
   err += "\n";
   return err;
@@ -199,7 +199,7 @@ bool cmIfCommand
     err += errorString;
     if (status == cmake::FATAL_ERROR)
       {
-      this->SetError(err.c_str());
+      this->SetError(err);
       cmSystemTools::SetFatalErrorOccured();
       return false;
       }
@@ -261,7 +261,7 @@ namespace
     }
 
   // Check definition.
-  const char* def = mf->GetDefinition(arg.c_str());
+  const char* def = mf->GetDefinition(arg);
   return !cmSystemTools::IsOff(def);
   }
 
@@ -277,12 +277,12 @@ namespace
     else if(arg == "1")
       { return true; }
     else
-      { return !cmSystemTools::IsOff(mf->GetDefinition(arg.c_str())); }
+      { return !cmSystemTools::IsOff(mf->GetDefinition(arg)); }
     }
   else
     {
     // Old GetVariableOrNumber behavior.
-    const char* def = mf->GetDefinition(arg.c_str());
+    const char* def = mf->GetDefinition(arg);
     if(!def && atoi(arg.c_str()))
       {
       def = arg.c_str();
@@ -559,7 +559,7 @@ namespace
           }
         else
           {
-          bdef = makefile->IsDefinitionSet((argP1)->c_str());
+          bdef = makefile->IsDefinitionSet(*(argP1));
           }
         HandlePredicate(bdef, reducible, arg, newArgs, argP1, argP2);
         }

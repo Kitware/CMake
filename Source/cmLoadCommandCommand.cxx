@@ -201,7 +201,7 @@ bool cmLoadCommandCommand
   // Start by removing the definition in case of failure.
   std::string reportVar = "CMAKE_LOADED_COMMAND_";
   reportVar += args[0];
-  this->Makefile->RemoveDefinition(reportVar.c_str());
+  this->Makefile->RemoveDefinition(reportVar);
 
   // the file must exist
   std::string moduleName =
@@ -219,7 +219,7 @@ bool cmLoadCommandCommand
     cmSystemTools::ExpandRegistryValues(exp);
 
     // Glob the entry in case of wildcards.
-    cmSystemTools::GlobDirs(exp.c_str(), path);
+    cmSystemTools::GlobDirs(exp, path);
     }
 
   // Try to find the program.
@@ -229,7 +229,7 @@ bool cmLoadCommandCommand
     cmOStringStream e;
     e << "Attempt to load command failed from file \""
       << moduleName << "\"";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
@@ -246,12 +246,12 @@ bool cmLoadCommandCommand
       err += " Additional error info is:\n";
       err += error;
       }
-    this->SetError(err.c_str());
+    this->SetError(err);
     return false;
     }
 
   // Report what file was loaded for this command.
-  this->Makefile->AddDefinition(reportVar.c_str(), fullPath.c_str());
+  this->Makefile->AddDefinition(reportVar, fullPath.c_str());
 
   // find the init function
   std::string initFuncName = args[0] + "Init";

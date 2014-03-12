@@ -397,12 +397,12 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     << "Argument not separated from preceding token by whitespace.";
   if(isError)
     {
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str().c_str());
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
     return false;
     }
   else
     {
-    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str().c_str());
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
     return true;
     }
 }

@@ -311,7 +311,7 @@ void cmExtraCodeLiteGenerator
     {
     std::string relativePath =
       cmSystemTools::RelativePath(projectPath.c_str(), sit->first.c_str());
-    fout<< "    <File Name=\"" << relativePath.c_str() << "\"/>\n";
+    fout<< "    <File Name=\"" << relativePath << "\"/>\n";
     }
   fout<< "  </VirtualDirectory>\n";
   fout<< "  <VirtualDirectory Name=\"include\">\n";
@@ -322,7 +322,7 @@ void cmExtraCodeLiteGenerator
     {
     std::string relativePath =
       cmSystemTools::RelativePath(projectPath.c_str(), sit->c_str());
-    fout << "    <File Name=\"" << relativePath.c_str() << "\"/>\n";
+    fout << "    <File Name=\"" << relativePath << "\"/>\n";
     }
   fout << "  </VirtualDirectory>\n";
 
@@ -404,7 +404,7 @@ cmExtraCodeLiteGenerator::GetCodeLiteCompilerName(const cmMakefile* mf) const
     compilerIdVar = "CMAKE_C_COMPILER_ID";
     }
 
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar.c_str());
+  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gnu g++"; // default to g++
 
   // Since we need the compiler for parsing purposes only

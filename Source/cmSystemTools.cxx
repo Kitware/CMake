@@ -990,7 +990,7 @@ void cmSystemTools::GlobDirs(const std::string& path,
         if(cmSystemTools::FileIsDirectory(fname.c_str()))
           {
           fname += finishPath;
-          cmSystemTools::GlobDirs(fname.c_str(), files);
+          cmSystemTools::GlobDirs(fname, files);
           }
         }
       }
@@ -2105,7 +2105,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     // remove symlinks
     exe = cmSystemTools::GetRealPath(exe.c_str());
     exe_dir =
-      cmSystemTools::GetFilenamePath(exe.c_str());
+      cmSystemTools::GetFilenamePath(exe);
     }
   else
     {
@@ -2288,7 +2288,7 @@ bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
   std::vector<std::string> cmds;
   cmds.push_back("otool");
   cmds.push_back("-D");
-  cmds.push_back(fullPath.c_str());
+  cmds.push_back(fullPath);
 
   std::string output;
   if(!RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE))

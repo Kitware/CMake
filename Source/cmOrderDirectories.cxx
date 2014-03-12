@@ -261,7 +261,7 @@ bool cmOrderDirectoriesConstraintLibrary::FindConflict(std::string const& dir)
         {
         std::string fname = lib;
         fname += *i;
-        if(this->FileMayConflict(dir, fname.c_str()))
+        if(this->FileMayConflict(dir, fname))
           {
           return true;
           }

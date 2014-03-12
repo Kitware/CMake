@@ -39,7 +39,7 @@ void reportError(cmGeneratorExpressionContext *context,
     << "  " << expr << "\n"
     << result;
   context->Makefile->GetCMakeInstance()
-    ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(),
+    ->IssueMessage(cmake::FATAL_ERROR, e.str(),
                     context->Backtrace);
 }
 
@@ -393,8 +393,8 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                        const std::string &lang) const
   {
     const char *compilerId = context->Makefile ?
-                              context->Makefile->GetSafeDefinition((
-                              "CMAKE_" + lang + "_COMPILER_ID").c_str()) : "";
+                              context->Makefile->GetSafeDefinition(
+                                      "CMAKE_" + lang + "_COMPILER_ID") : "";
     if (parameters.size() == 0)
       {
       return compilerId ? compilerId : "";
@@ -428,7 +428,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                       ->GetPolicyWarning(cmPolicies::CMP0044);
           context->Makefile->GetCMakeInstance()
                  ->IssueMessage(cmake::AUTHOR_WARNING,
-                                e.str().c_str(), context->Backtrace);
+                                e.str(), context->Backtrace);
           }
         case cmPolicies::OLD:
           return "1";
@@ -500,8 +500,8 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
                        const std::string &lang) const
   {
     const char *compilerVersion = context->Makefile ?
-                              context->Makefile->GetSafeDefinition((
-                        "CMAKE_" + lang + "_COMPILER_VERSION").c_str()) : "";
+                              context->Makefile->GetSafeDefinition(
+                                  "CMAKE_" + lang + "_COMPILER_VERSION") : "";
     if (parameters.size() == 0)
       {
       return compilerVersion ? compilerVersion : "";
@@ -747,7 +747,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         std::string mapProp = "MAP_IMPORTED_CONFIG_";
         mapProp += cmSystemTools::UpperCase(context->Config);
         if(const char* mapValue =
-                        context->CurrentTarget->GetProperty(mapProp.c_str()))
+                        context->CurrentTarget->GetProperty(mapProp))
           {
           cmSystemTools::ExpandListArgument(cmSystemTools::UpperCase(mapValue),
                                             mappedConfigs);
@@ -1022,7 +1022,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       break;
       }
 
-    const char *prop = target->GetProperty(propertyName.c_str());
+    const char *prop = target->GetProperty(propertyName);
 
     if (dagCheckerParent)
       {

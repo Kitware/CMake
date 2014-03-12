@@ -81,7 +81,7 @@ bool cmLoadCacheCommand
       {
       break;
       }
-    this->Makefile->GetCacheManager()->LoadCache(args[i].c_str(), false,
+    this->Makefile->GetCacheManager()->LoadCache(args[i], false,
                                              excludes, includes);
     }
 
@@ -104,7 +104,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
   if(!cmSystemTools::FileExists(cacheFile.c_str()))
     {
     std::string e = "Cannot load cache file from " + cacheFile;
-    this->SetError(e.c_str());
+    this->SetError(e);
     return false;
     }
 
@@ -186,11 +186,11 @@ void cmLoadCacheCommand::CheckLine(const char* line)
       var = this->Prefix + var;
       if(value.length())
         {
-        this->Makefile->AddDefinition(var.c_str(), value.c_str());
+        this->Makefile->AddDefinition(var, value.c_str());
         }
       else
         {
-        this->Makefile->RemoveDefinition(var.c_str());
+        this->Makefile->RemoveDefinition(var);
         }
       }
     }

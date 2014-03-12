@@ -211,7 +211,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
           ci = this->Configurations.begin();
         ci != this->Configurations.end(); ++ci)
       {
-      if(!this->GenerateImportFileConfig(ci->c_str(), missingTargets))
+      if(!this->GenerateImportFileConfig(*ci, missingTargets))
         {
         result = false;
         }
@@ -271,7 +271,7 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(
     {
     std::string se = cmSystemTools::GetLastSystemError();
     cmOStringStream e;
-    e << "cannot write to file \"" << fileName.c_str()
+    e << "cannot write to file \"" << fileName
       << "\": " << se;
     cmSystemTools::Error(e.str().c_str());
     return false;

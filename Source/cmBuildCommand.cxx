@@ -80,7 +80,7 @@ bool cmBuildCommand
       {
       cmOStringStream e;
       e << "unknown argument \"" << args[i] << "\"";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -136,7 +136,7 @@ bool cmBuildCommand
     }
 
   std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateCMakeBuildCommand("", configType.c_str(),
+    ->GetGlobalGenerator()->GenerateCMakeBuildCommand("", configType,
                                                       "", true);
 
   if(cacheValue)

@@ -24,7 +24,7 @@ bool cmMakeDirectoryCommand
       {
       std::string e = "attempted to create a directory: " + args[0]
         + " into a source directory.";
-      this->SetError(e.c_str());
+      this->SetError(e);
       cmSystemTools::SetFatalErrorOccured();
       return false;
       }

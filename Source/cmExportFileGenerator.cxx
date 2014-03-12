@@ -275,7 +275,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       e << "Target \"" << target->GetName() << "\" "
            "INTERFACE_INCLUDE_DIRECTORIES property contains relative path:\n"
            "  \"" << *li << "\"";
-      target->GetMakefile()->IssueMessage(messageType, e.str().c_str());
+      target->GetMakefile()->IssueMessage(messageType, e.str());
       }
     if (isSubDirectory(li->c_str(), installDir))
       {
@@ -286,7 +286,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       e << "Target \"" << target->GetName() << "\" "
            "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
            "  \"" << *li << "\"\nwhich is prefixed in the build directory.";
-      target->GetMakefile()->IssueMessage(messageType, e.str().c_str());
+      target->GetMakefile()->IssueMessage(messageType, e.str());
       }
     if (!inSourceBuild)
       {
@@ -295,7 +295,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
         e << "Target \"" << target->GetName() << "\" "
             "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
             "  \"" << *li << "\"\nwhich is prefixed in the source directory.";
-        target->GetMakefile()->IssueMessage(messageType, e.str().c_str());
+        target->GetMakefile()->IssueMessage(messageType, e.str());
         }
       }
     }
@@ -498,14 +498,14 @@ void cmExportFileGenerator::PopulateCompatibleInterfaceProperties(
     for (std::vector<std::string>::const_iterator ci = configNames.begin();
       ci != configNames.end(); ++ci)
       {
-      getCompatibleInterfaceProperties(target, ifaceProperties, ci->c_str());
+      getCompatibleInterfaceProperties(target, ifaceProperties, *ci);
       }
     }
 
   for (std::set<std::string>::const_iterator it = ifaceProperties.begin();
     it != ifaceProperties.end(); ++it)
     {
-    this->PopulateInterfaceProperty(("INTERFACE_" + *it).c_str(),
+    this->PopulateInterfaceProperty("INTERFACE_" + *it,
                                     target, properties);
     }
 }
@@ -712,7 +712,7 @@ cmExportFileGenerator
   const char *propContent;
 
   if (const char *prop_suffixed = target->GetProperty(
-                    ("LINK_INTERFACE_LIBRARIES" + suffix).c_str()))
+                    "LINK_INTERFACE_LIBRARIES" + suffix))
     {
     propContent = prop_suffixed;
     }

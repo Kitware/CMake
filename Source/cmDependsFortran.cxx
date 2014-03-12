@@ -292,15 +292,15 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       stamp += ".mod.stamp";
       fcStream << "\n";
       fcStream << "  \"" <<
-        this->LocalGenerator->Convert(mod_lower.c_str(),
+        this->LocalGenerator->Convert(mod_lower,
                                       cmLocalGenerator::START_OUTPUT)
                << "\"\n";
       fcStream << "  \"" <<
-        this->LocalGenerator->Convert(mod_upper.c_str(),
+        this->LocalGenerator->Convert(mod_upper,
                                       cmLocalGenerator::START_OUTPUT)
                << "\"\n";
       fcStream << "  \"" <<
-        this->LocalGenerator->Convert(stamp.c_str(),
+        this->LocalGenerator->Convert(stamp,
                                       cmLocalGenerator::START_OUTPUT)
                << "\"\n";
       }
@@ -449,11 +449,11 @@ cmDependsFortran
       i != info.Includes.end(); ++i)
     {
     makeDepends << obj << ": " <<
-      this->LocalGenerator->Convert(i->c_str(),
+      this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
                                     cmLocalGenerator::MAKEFILE)
                 << std::endl;
-    internalDepends << " " << i->c_str() << std::endl;
+    internalDepends << " " << *i << std::endl;
     }
   makeDepends << std::endl;
 
@@ -480,7 +480,7 @@ cmDependsFortran
       proxy += "/";
       proxy += *i;
       proxy += ".mod.proxy";
-      proxy = this->LocalGenerator->Convert(proxy.c_str(),
+      proxy = this->LocalGenerator->Convert(proxy,
                                             cmLocalGenerator::HOME_OUTPUT,
                                             cmLocalGenerator::MAKEFILE);
 
@@ -497,7 +497,7 @@ cmDependsFortran
       {
       // This module is known.  Depend on its timestamp file.
       std::string stampFile =
-        this->LocalGenerator->Convert(required->second.c_str(),
+        this->LocalGenerator->Convert(required->second,
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::MAKEFILE);
       makeDepends << obj << ": " << stampFile << "\n";
@@ -510,7 +510,7 @@ cmDependsFortran
       if(this->FindModule(*i, module))
         {
         module =
-          this->LocalGenerator->Convert(module.c_str(),
+          this->LocalGenerator->Convert(module,
                                         cmLocalGenerator::HOME_OUTPUT,
                                         cmLocalGenerator::MAKEFILE);
         makeDepends << obj << ": " << module << "\n";
@@ -526,7 +526,7 @@ cmDependsFortran
     proxy += "/";
     proxy += *i;
     proxy += ".mod.proxy";
-    proxy = this->LocalGenerator->Convert(proxy.c_str(),
+    proxy = this->LocalGenerator->Convert(proxy,
                                           cmLocalGenerator::HOME_OUTPUT,
                                           cmLocalGenerator::MAKEFILE);
     makeDepends << proxy << ": " << obj << ".provides" << std::endl;
@@ -552,7 +552,7 @@ cmDependsFortran
       modFile += "/";
       modFile += *i;
       modFile =
-        this->LocalGenerator->Convert(modFile.c_str(),
+        this->LocalGenerator->Convert(modFile,
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::SHELL);
       std::string stampFile = stamp_dir;
@@ -560,7 +560,7 @@ cmDependsFortran
       stampFile += m;
       stampFile += ".mod.stamp";
       stampFile =
-        this->LocalGenerator->Convert(stampFile.c_str(),
+        this->LocalGenerator->Convert(stampFile,
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::SHELL);
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
@@ -582,7 +582,7 @@ cmDependsFortran
     // the target finishes building.
     std::string driver = this->TargetDirectory;
     driver += "/build";
-    driver = this->LocalGenerator->Convert(driver.c_str(),
+    driver = this->LocalGenerator->Convert(driver,
                                            cmLocalGenerator::HOME_OUTPUT,
                                            cmLocalGenerator::MAKEFILE);
     makeDepends << driver << ": " << obj << ".provides.build\n";
@@ -666,7 +666,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       if(!cmSystemTools::CopyFileAlways(mod_upper.c_str(), stamp.c_str()))
         {
         std::cerr << "Error copying Fortran module from \""
-                  << mod_upper.c_str() << "\" to \"" << stamp.c_str()
+                  << mod_upper << "\" to \"" << stamp
                   << "\".\n";
         return false;
         }
@@ -681,7 +681,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       if(!cmSystemTools::CopyFileAlways(mod_lower.c_str(), stamp.c_str()))
         {
         std::cerr << "Error copying Fortran module from \""
-                  << mod_lower.c_str() << "\" to \"" << stamp.c_str()
+                  << mod_lower << "\" to \"" << stamp
                   << "\".\n";
         return false;
         }
@@ -689,9 +689,9 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     return true;
     }
 
-  std::cerr << "Error copying Fortran module \"" << args[2].c_str()
-            << "\".  Tried \"" << mod_upper.c_str()
-            << "\" and \"" << mod_lower.c_str() << "\".\n";
+  std::cerr << "Error copying Fortran module \"" << args[2]
+            << "\".  Tried \"" << mod_upper
+            << "\" and \"" << mod_lower << "\".\n";
   return false;
 }
 

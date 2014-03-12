@@ -134,7 +134,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
           cmakeBuildAdditionalFlags ? cmakeBuildAdditionalFlags : "", true);
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "SetMakeCommand:"
-                 << buildCommand.c_str() << "\n");
+                 << buildCommand << "\n");
       this->CTest->SetCTestConfiguration("MakeCommand", buildCommand.c_str());
       }
     else
@@ -151,7 +151,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         "\n"
         "Alternatively, set CTEST_BUILD_COMMAND to build the project "
         "with a custom command line.";
-      this->SetError(ostr.str().c_str());
+      this->SetError(ostr.str());
       return 0;
       }
     }
