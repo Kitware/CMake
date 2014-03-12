@@ -159,10 +159,15 @@ cmGlobalVisualStudioGenerator
       }
     gt->AddObject(sf, objectName);
     }
+}
 
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudioGenerator
+::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
+{
   std::string dir = gt->Makefile->GetCurrentOutputDirectory();
   dir += "/";
-  std::string tgtDir = lg->GetTargetDirectory(*gt->Target);
+  std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(*gt->Target);
   if(!tgtDir.empty())
     {
     dir += tgtDir;

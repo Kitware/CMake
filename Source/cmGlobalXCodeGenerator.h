@@ -204,6 +204,7 @@ private:
                      std::vector<std::string> const& defines,
                      bool dflag = false);
 
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
   virtual const char* GetInstallTargetName() const { return "install"; }
   virtual const char* GetPackageTargetName() const { return "package"; }

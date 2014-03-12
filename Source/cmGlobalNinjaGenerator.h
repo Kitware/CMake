@@ -299,7 +299,7 @@ public:
 
   void AddTargetAlias(const std::string& alias, cmTarget* target);
 
-
+  virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
 
   /// Overloaded methods.

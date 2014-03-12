@@ -1449,6 +1449,7 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
         continue;
         }
       cmGeneratorTarget* gt = ti->second;
+      this->ComputeTargetObjectDirectory(gt);
       gt->LookupObjectLibraries();
       this->ComputeTargetObjects(gt);
       }
@@ -1518,6 +1519,11 @@ cmGlobalGenerator::GetGeneratorTarget(cmTarget const* t) const
 void cmGlobalGenerator::ComputeTargetObjects(cmGeneratorTarget*) const
 {
   // Implemented in generator subclasses that need this.
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::ComputeTargetObjectDirectory(cmGeneratorTarget*) const
+{
 }
 
 void cmGlobalGenerator::CheckLocalGenerators()
