@@ -36,7 +36,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "target_compile_options";}
+  virtual std::string GetName() const { return "target_compile_options";}
 
   cmTypeMacro(cmTargetCompileOptionsCommand, cmTargetPropCommandBase);
 

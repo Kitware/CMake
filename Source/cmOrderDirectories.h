@@ -34,7 +34,7 @@ public:
   void AddLinkLibrary(std::string const& fullPath);
   void AddUserDirectories(std::vector<std::string> const& extra);
   void AddLanguageDirectories(std::vector<std::string> const& dirs);
-  void SetImplicitDirectories(std::set<cmStdString> const& implicitDirs);
+  void SetImplicitDirectories(std::set<std::string> const& implicitDirs);
   void SetLinkExtensionInfo(std::vector<std::string> const& linkExtensions,
                             std::string const& removeExtRegex);
 
@@ -54,11 +54,11 @@ private:
   std::vector<std::string> LanguageDirectories;
   cmsys::RegularExpression RemoveLibraryExtension;
   std::vector<std::string> LinkExtensions;
-  std::set<cmStdString> ImplicitDirectories;
-  std::set<cmStdString> EmmittedConstraintSOName;
-  std::set<cmStdString> EmmittedConstraintLibrary;
+  std::set<std::string> ImplicitDirectories;
+  std::set<std::string> EmmittedConstraintSOName;
+  std::set<std::string> EmmittedConstraintLibrary;
   std::vector<std::string> OriginalDirectories;
-  std::map<cmStdString, int> DirectoryIndex;
+  std::map<std::string, int> DirectoryIndex;
   std::vector<int> DirectoryVisited;
   void CollectOriginalDirectories();
   int AddOriginalDirectory(std::string const& dir);

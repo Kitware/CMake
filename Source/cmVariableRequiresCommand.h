@@ -21,7 +21,7 @@ public:
   virtual cmCommand* Clone() { return new cmVariableRequiresCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  virtual const char* GetName() const { return "variable_requires";}
+  virtual std::string GetName() const { return "variable_requires";}
   virtual bool IsDiscouraged() const { return true; }
 };
 

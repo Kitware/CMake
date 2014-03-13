@@ -71,12 +71,12 @@ public:
   cmCTestGenericHandler();
   virtual ~cmCTestGenericHandler();
 
-  typedef std::map<cmStdString,cmStdString> t_StringToString;
+  typedef std::map<std::string,std::string> t_StringToString;
 
 
-  void SetPersistentOption(const char* op, const char* value);
-  void SetOption(const char* op, const char* value);
-  const char* GetOption(const char* op);
+  void SetPersistentOption(const std::string& op, const char* value);
+  void SetOption(const std::string& op, const char* value);
+  const char* GetOption(const std::string& op);
 
   void SetCommand(cmCTestCommand* command)
     {

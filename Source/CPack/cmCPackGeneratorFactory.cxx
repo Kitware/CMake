@@ -151,7 +151,8 @@ cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 }
 
 //----------------------------------------------------------------------
-cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(const char* name)
+cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(
+                                                const std::string& name)
 {
   cmCPackGenerator* gen = this->NewGeneratorInternal(name);
   if ( !gen )
@@ -165,12 +166,8 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGenerator(const char* name)
 
 //----------------------------------------------------------------------
 cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
-  const char* name)
+  const std::string& name)
 {
-  if ( !name )
-    {
-    return 0;
-    }
   cmCPackGeneratorFactory::t_GeneratorCreatorsMap::iterator it
     = this->GeneratorCreators.find(name);
   if ( it == this->GeneratorCreators.end() )
@@ -181,11 +178,11 @@ cmCPackGenerator* cmCPackGeneratorFactory::NewGeneratorInternal(
 }
 
 //----------------------------------------------------------------------
-void cmCPackGeneratorFactory::RegisterGenerator(const char* name,
+void cmCPackGeneratorFactory::RegisterGenerator(const std::string& name,
   const char* generatorDescription,
   CreateGeneratorCall* createGenerator)
 {
-  if ( !name || !createGenerator )
+  if ( !createGenerator )
     {
     cmCPack_Log(this->Logger, cmCPackLog::LOG_ERROR,
       "Cannot register generator" << std::endl);

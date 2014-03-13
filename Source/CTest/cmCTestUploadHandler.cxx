@@ -64,7 +64,7 @@ int cmCTestUploadHandler::ProcessHandler()
   for ( it = this->Files.begin(); it != this->Files.end(); it ++ )
     {
     cmCTestLog(this->CTest, OUTPUT,
-               "\tUpload file: " << it->c_str() << std::endl);
+               "\tUpload file: " << *it << std::endl);
     ofs << "<File filename=\"" << cmXMLSafe(*it) << "\">\n"
        << "<Content encoding=\"base64\">\n";
     ofs << this->CTest->Base64EncodeFile(*it);

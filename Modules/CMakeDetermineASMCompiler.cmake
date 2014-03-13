@@ -48,22 +48,7 @@ if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   _cmake_find_compiler(ASM${ASM_DIALECT})
 
 else()
-
-  # we only get here if CMAKE_ASM${ASM_DIALECT}_COMPILER was specified using -D or a pre-made CMakeCache.txt
-  # (e.g. via ctest) or set in CMAKE_TOOLCHAIN_FILE
-  #
-  # if a compiler was specified by the user but without path,
-  # now try to find it with the full path
-  # if it is found, force it into the cache,
-  # if not, don't overwrite the setting (which was given by the user) with "NOTFOUND"
-  get_filename_component(_CMAKE_USER_ASM${ASM_DIALECT}_COMPILER_PATH "${CMAKE_ASM${ASM_DIALECT}_COMPILER}" PATH)
-  if(NOT _CMAKE_USER_ASM${ASM_DIALECT}_COMPILER_PATH)
-    find_program(CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH NAMES ${CMAKE_ASM${ASM_DIALECT}_COMPILER})
-    if(CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH)
-      set(CMAKE_ASM${ASM_DIALECT}_COMPILER ${CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH} CACHE FILEPATH "Assembler" FORCE)
-    endif()
-    unset(CMAKE_ASM${ASM_DIALECT}_COMPILER_WITH_PATH CACHE)
-  endif()
+  _cmake_find_compiler_path(ASM${ASM_DIALECT})
 endif()
 mark_as_advanced(CMAKE_ASM${ASM_DIALECT}_COMPILER)
 

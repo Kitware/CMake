@@ -245,6 +245,8 @@ Modules
   for Qt executables.  This helps disambiguate when using multiple
   :manual:`Qt versions <cmake-qt(7)>` in the same buildsystem.
 
+* The :module:`FindRuby` module learned to search for Ruby 2.0 and 2.1.
+
 Generator Expressions
 ---------------------
 

@@ -40,7 +40,7 @@ public:
    * Set/Get the value (setting the value also changes the contents
    * of the field buffer).
    */
-  virtual void SetValue(const char* value);
+  virtual void SetValue(const std::string& value);
   virtual const char* GetValue();
 
   /**

@@ -32,7 +32,7 @@ protected:
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
   virtual void GenerateScriptForConfig(std::ostream& os,
-                                       const char* config,
+                                       const std::string& config,
                                        Indent const& indent);
   virtual void GenerateScriptNoConfig(std::ostream& os, Indent const& indent);
   virtual bool NeedsScriptNoConfig() const;

@@ -71,6 +71,13 @@
 #     RUNTIME_PACKAGES_FOUND: only those packages which have been found which have the type RUNTIME
 #     RUNTIME_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RUNTIME
 #
+# With the exception of the ``ALL`` value, these values can be combined
+# in order to customize the output. For example:
+#
+# ::
+#
+#    feature_summary(WHAT ENABLED_FEATURES DISABLED_FEATURES)
+#
 #
 #
 # If a FILENAME is given, the information is printed into this file.  If
@@ -417,8 +424,8 @@ endfunction()
 function(FEATURE_SUMMARY)
 # CMAKE_PARSE_ARGUMENTS(<prefix> <options> <one_value_keywords> <multi_value_keywords> args...)
   set(options APPEND INCLUDE_QUIET_PACKAGES FATAL_ON_MISSING_REQUIRED_PACKAGES)
-  set(oneValueArgs FILENAME VAR DESCRIPTION WHAT)
-  set(multiValueArgs ) # none
+  set(oneValueArgs FILENAME VAR DESCRIPTION)
+  set(multiValueArgs WHAT)
 
   CMAKE_PARSE_ARGUMENTS(_FS "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${_FIRST_ARG} ${ARGN})
 
@@ -451,20 +458,37 @@ function(FEATURE_SUMMARY)
       set(requiredPackagesNotFound TRUE)
     endif()
 
-  elseif("${_FS_WHAT}" STREQUAL "ALL")
+  else()
+    if("${_FS_WHAT}" STREQUAL "ALL")
 
-    set(allWhatParts "ENABLED_FEATURES"
-                     "RUNTIME_PACKAGES_FOUND"
-                     "OPTIONAL_PACKAGES_FOUND"
-                     "RECOMMENDED_PACKAGES_FOUND"
-                     "REQUIRED_PACKAGES_FOUND"
+      set(allWhatParts "ENABLED_FEATURES"
+                       "RUNTIME_PACKAGES_FOUND"
+                       "OPTIONAL_PACKAGES_FOUND"
+                       "RECOMMENDED_PACKAGES_FOUND"
+                       "REQUIRED_PACKAGES_FOUND"
 
-                     "DISABLED_FEATURES"
-                     "RUNTIME_PACKAGES_NOT_FOUND"
-                     "OPTIONAL_PACKAGES_NOT_FOUND"
-                     "RECOMMENDED_PACKAGES_NOT_FOUND"
-                     "REQUIRED_PACKAGES_NOT_FOUND"
-       )
+                       "DISABLED_FEATURES"
+                       "RUNTIME_PACKAGES_NOT_FOUND"
+                       "OPTIONAL_PACKAGES_NOT_FOUND"
+                       "RECOMMENDED_PACKAGES_NOT_FOUND"
+                       "REQUIRED_PACKAGES_NOT_FOUND"
+      )
+
+    else()
+      set(allWhatParts)
+      foreach(part ${_FS_WHAT})
+        list(FIND validWhatParts "${part}" indexInList)
+        if(NOT "${indexInList}" STREQUAL "-1")
+          list(APPEND allWhatParts "${part}")
+        else()
+          if("${part}" STREQUAL "ALL")
+            message(FATAL_ERROR "The WHAT argument of FEATURE_SUMMARY() contains ALL, which cannot be combined with other values.")
+          else()
+            message(FATAL_ERROR "The WHAT argument of FEATURE_SUMMARY() contains ${part}, which is not a valid value.")
+          endif()
+        endif()
+      endforeach()
+    endif()
 
     set(title_ENABLED_FEATURES               "The following features have been enabled:")
     set(title_DISABLED_FEATURES              "The following features have been disabled:")
@@ -488,8 +512,6 @@ function(FEATURE_SUMMARY)
         endif()
       endif()
     endforeach()
-  else()
-    message(FATAL_ERROR "The WHAT argument of FEATURE_SUMMARY() is set to ${_FS_WHAT}, which is not a valid value.")
   endif()
 
   if(_FS_FILENAME)

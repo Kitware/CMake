@@ -25,9 +25,9 @@ struct cmGeneratorExpressionContext
   cmListFileBacktrace Backtrace;
   std::set<cmTarget*> DependTargets;
   std::set<cmTarget const*> AllTargets;
-  std::set<cmStdString> SeenTargetProperties;
+  std::set<std::string> SeenTargetProperties;
   cmMakefile *Makefile;
-  const char *Config;
+  std::string Config;
   cmTarget const* HeadTarget; // The target whose property is being evaluated.
   cmTarget const* CurrentTarget; // The dependent of HeadTarget which appears
                                  // directly or indirectly in the property.

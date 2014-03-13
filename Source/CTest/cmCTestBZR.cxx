@@ -225,35 +225,35 @@ private:
     return true;
     }
 
-  virtual void StartElement(const char* name, const char**)
+  virtual void StartElement(const std::string& name, const char**)
     {
     this->CData.clear();
-    if(strcmp(name, "log") == 0)
+    if(name == "log")
       {
       this->Rev = Revision();
       this->Changes.clear();
       }
     // affected-files can contain blocks of
     // modified, unknown, renamed, kind-changed, removed, conflicts, added
-    else if(strcmp(name, "modified") == 0
-            || strcmp(name, "renamed") == 0
-            || strcmp(name, "kind-changed") == 0)
+    else if(name == "modified"
+            || name == "renamed"
+            || name == "kind-changed")
       {
       this->CurChange = Change();
       this->CurChange.Action = 'M';
       }
-    else if(strcmp(name, "added") == 0)
+    else if(name == "added")
       {
       this->CurChange = Change();
       this->CurChange = 'A';
       }
-    else if(strcmp(name, "removed") == 0)
+    else if(name == "removed")
       {
       this->CurChange = Change();
       this->CurChange = 'D';
       }
-    else if(strcmp(name, "unknown") == 0
-            || strcmp(name, "conflicts") == 0)
+    else if(name == "unknown"
+            || name == "conflicts")
       {
       // Should not happen here
       this->CurChange = Change();
@@ -265,27 +265,27 @@ private:
     this->CData.insert(this->CData.end(), data, data+length);
     }
 
-  virtual void EndElement(const char* name)
+  virtual void EndElement(const std::string& name)
     {
-    if(strcmp(name, "log") == 0)
+    if(name == "log")
       {
       this->BZR->DoRevision(this->Rev, this->Changes);
       }
-    else if((strcmp(name, "file") == 0 || strcmp(name, "directory") == 0)
-            && !this->CData.empty())
+    else if(!this->CData.empty() &&
+            (name == "file" || name == "directory"))
       {
       this->CurChange.Path.assign(&this->CData[0], this->CData.size());
       cmSystemTools::ConvertToUnixSlashes(this->CurChange.Path);
       this->Changes.push_back(this->CurChange);
       }
-    else if(strcmp(name, "symlink") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "symlink")
       {
       // symlinks have an arobase at the end in the log
       this->CurChange.Path.assign(&this->CData[0], this->CData.size()-1);
       cmSystemTools::ConvertToUnixSlashes(this->CurChange.Path);
       this->Changes.push_back(this->CurChange);
       }
-    else if(strcmp(name, "committer") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "committer")
       {
       this->Rev.Author.assign(&this->CData[0], this->CData.size());
       if(this->EmailRegex.find(this->Rev.Author))
@@ -294,15 +294,15 @@ private:
         this->Rev.EMail = this->EmailRegex.match(2);
         }
       }
-    else if(strcmp(name, "timestamp") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "timestamp")
       {
       this->Rev.Date.assign(&this->CData[0], this->CData.size());
       }
-    else if(strcmp(name, "message") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "message")
       {
       this->Rev.Log.assign(&this->CData[0], this->CData.size());
       }
-    else if(strcmp(name, "revno") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "revno")
       {
       this->Rev.Rev.assign(&this->CData[0], this->CData.size());
       }
@@ -409,7 +409,7 @@ bool cmCTestBZR::UpdateImpl()
     {
     opts = this->CTest->GetCTestConfiguration("BZRUpdateOptions");
     }
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
 
   // TODO: if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
 
@@ -418,7 +418,7 @@ bool cmCTestBZR::UpdateImpl()
   bzr_update.push_back(this->CommandLineTool.c_str());
   bzr_update.push_back("pull");
 
-  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+  for(std::vector<std::string>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     bzr_update.push_back(ai->c_str());

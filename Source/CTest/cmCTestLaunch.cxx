@@ -567,7 +567,7 @@ void cmCTestLaunch::WriteXMLLabels(std::ostream& fxml)
     fxml << "\n";
     fxml << "\t\t<!-- Interested parties -->\n";
     fxml << "\t\t<Labels>\n";
-    for(std::set<cmStdString>::const_iterator li = this->Labels.begin();
+    for(std::set<std::string>::const_iterator li = this->Labels.begin();
         li != this->Labels.end(); ++li)
       {
       fxml << "\t\t\t<Label>" << cmXMLSafe(*li) << "</Label>\n";
@@ -680,8 +680,8 @@ bool cmCTestLaunch::ScrapeLog(std::string const& fname)
       continue;
       }
 
-    if(this->Match(line.c_str(), this->RegexWarning) &&
-       !this->Match(line.c_str(), this->RegexWarningSuppress))
+    if(this->Match(line, this->RegexWarning) &&
+       !this->Match(line, this->RegexWarningSuppress))
       {
       return true;
       }

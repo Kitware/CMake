@@ -33,9 +33,9 @@ public:
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalXCodeGenerator::GetActualName();}
-  static const char* GetActualName() {return "Xcode";}
+  static std::string GetActualName() {return "Xcode";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -55,11 +55,11 @@ public:
    */
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
-    const char* makeProgram,
-    const char* projectName,
-    const char* projectDir,
-    const char* targetName,
-    const char* config,
+    const std::string& makeProgram,
+    const std::string& projectName,
+    const std::string& projectDir,
+    const std::string& targetName,
+    const std::string& config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
@@ -72,9 +72,9 @@ public:
   virtual void Generate();
 
   /** Append the subdirectory for the given configuration.  */
-  virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
-                                        const char* suffix,
+  virtual void AppendDirectoryForConfig(const std::string& prefix,
+                                        const std::string& config,
+                                        const std::string& suffix,
                                         std::string& dir);
 
   ///! What is the configurations directory variable called?
@@ -95,7 +95,7 @@ private:
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
                                      cmSourceGroup* sg);
   cmXCodeObject* CreatePBXGroup(cmXCodeObject *parent,
-                                cmStdString name);
+                                std::string name);
   void CreateGroups(cmLocalGenerator* root,
                     std::vector<cmLocalGenerator*>&
                     generators);
@@ -123,19 +123,19 @@ private:
   void CreateCustomRulesMakefile(const char* makefileBasename,
                                  cmTarget& target,
                                  std::vector<cmCustomCommand> const & commands,
-                                 const char* configName,
-                                 const std::map<cmStdString, cmStdString>&
+                                 const std::string& configName,
+                                 const std::map<std::string, std::string>&
                                      multipleOutputPairs
                                 );
 
   cmXCodeObject* FindXCodeTarget(cmTarget const*);
-  std::string GetOrCreateId(const char* name, const char* id);
+  std::string GetOrCreateId(const std::string& name, const std::string& id);
 
   // create cmXCodeObject from these functions so that memory can be managed
   // correctly.  All objects created are stored in this->XCodeObjects.
   cmXCodeObject* CreateObject(cmXCodeObject::PBXType ptype);
   cmXCodeObject* CreateObject(cmXCodeObject::Type type);
-  cmXCodeObject* CreateString(const char* s);
+  cmXCodeObject* CreateString(const std::string& s);
   cmXCodeObject* CreateObjectReference(cmXCodeObject*);
   cmXCodeObject* CreateXCodeTarget(cmTarget& target,
                                    cmXCodeObject* buildPhases);
@@ -147,12 +147,13 @@ private:
   void AppendOrAddBuildSetting(cmXCodeObject* settings, const char* attr,
                                const char* value);
   void AppendBuildSettingAttribute(cmXCodeObject* target, const char* attr,
-                                   const char* value, const char* configName);
+                                   const char* value,
+                                   const std::string& configName);
   cmXCodeObject* CreateUtilityTarget(cmTarget& target);
   void AddDependAndLinkInformation(cmXCodeObject* target);
   void CreateBuildSettings(cmTarget& target,
                            cmXCodeObject* buildSettings,
-                           const char* buildType);
+                           const std::string& buildType);
   std::string ExtractFlag(const char* flag, std::string& flags);
   // delete all objects in the this->XCodeObjects vector.
   void ClearXCodeObjects();
@@ -190,10 +191,10 @@ private:
   void CreateReRunCMakeFile(cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*> const& gens);
 
-  std::string LookupFlags(const char* varNamePrefix,
-                          const char* varNameLang,
-                          const char* varNameSuffix,
-                          const char* default_flags);
+  std::string LookupFlags(const std::string& varNamePrefix,
+                          const std::string& varNameLang,
+                          const std::string& varNameSuffix,
+                          const std::string& default_flags);
 
   class Factory;
   class BuildObjectListOrString;
@@ -211,11 +212,12 @@ protected:
 
   unsigned int XcodeVersion;
   std::string VersionString;
-  std::set<cmStdString> XCodeObjectIDs;
+  std::set<std::string> XCodeObjectIDs;
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
-  void PrintCompilerAdvice(std::ostream&, std::string, const char*) const {}
+  void PrintCompilerAdvice(std::ostream&, std::string const&,
+                           const char*) const {}
   void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   std::string GetObjectsNormalDirectory(
@@ -235,14 +237,14 @@ private:
   std::string CurrentReRunCMakeMakefile;
   std::string CurrentXCodeHackMakefile;
   std::string CurrentProject;
-  std::set<cmStdString> TargetDoneSet;
+  std::set<std::string> TargetDoneSet;
   std::vector<std::string> CurrentOutputDirectoryComponents;
   std::vector<std::string> ProjectSourceDirectoryComponents;
   std::vector<std::string> ProjectOutputDirectoryComponents;
-  std::map<cmStdString, cmXCodeObject* > GroupMap;
-  std::map<cmStdString, cmXCodeObject* > GroupNameMap;
-  std::map<cmStdString, cmXCodeObject* > TargetGroup;
-  std::map<cmStdString, cmXCodeObject* > FileRefs;
+  std::map<std::string, cmXCodeObject* > GroupMap;
+  std::map<std::string, cmXCodeObject* > GroupNameMap;
+  std::map<std::string, cmXCodeObject* > TargetGroup;
+  std::map<std::string, cmXCodeObject* > FileRefs;
   std::vector<std::string> Architectures;
   std::string PlatformToolset;
 };

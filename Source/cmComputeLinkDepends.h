@@ -32,7 +32,7 @@ class cmake;
 class cmComputeLinkDepends
 {
 public:
-  cmComputeLinkDepends(cmTarget const* target, const char* config,
+  cmComputeLinkDepends(cmTarget const* target, const std::string& config,
                        cmTarget const* head);
   ~cmComputeLinkDepends();
 
@@ -68,7 +68,8 @@ private:
   bool DebugMode;
 
   // Configuration information.
-  const char* Config;
+  bool HasConfig;
+  std::string Config;
   cmTarget::LinkLibraryType LinkType;
 
   // Output information.
@@ -76,18 +77,19 @@ private:
 
   typedef cmTarget::LinkLibraryVectorType LinkLibraryVectorType;
 
-  std::map<cmStdString, int>::iterator
+  std::map<std::string, int>::iterator
   AllocateLinkEntry(std::string const& item);
   int AddLinkEntry(int depender_index, std::string const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
   void AddLinkEntries(int depender_index,
                       std::vector<std::string> const& libs);
-  cmTarget const* FindTargetToLink(int depender_index, const char* name);
+  cmTarget const* FindTargetToLink(int depender_index,
+                                   const std::string& name);
 
   // One entry for each unique item.
   std::vector<LinkEntry> EntryList;
-  std::map<cmStdString, int> LinkEntryIndex;
+  std::map<std::string, int> LinkEntryIndex;
 
   // BFS of initial dependencies.
   struct BFSEntry

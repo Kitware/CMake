@@ -111,7 +111,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     cmCacheManager::CacheIterator itm = cachem->NewIterator();
     if ( itm.Find("CMAKE_HOME_DIRECTORY"))
       {
-      setSourceDirectory(QString::fromLocal8Bit(itm.GetValue()));
+      setSourceDirectory(QString::fromLocal8Bit(itm.GetValue().c_str()));
       }
     if ( itm.Find("CMAKE_GENERATOR"))
       {
@@ -201,11 +201,11 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
       }
 
     QCMakeProperty prop;
-    prop.Key = QString::fromLocal8Bit(i.GetName());
+    prop.Key = QString::fromLocal8Bit(i.GetName().c_str());
     int idx = props.indexOf(prop);
     if(idx == -1)
       {
-      toremove.append(QString::fromLocal8Bit(i.GetName()));
+      toremove.append(QString::fromLocal8Bit(i.GetName().c_str()));
       }
     else
       {
@@ -286,15 +286,15 @@ QCMakePropertyList QCMake::properties() const
       }
 
     QCMakeProperty prop;
-    prop.Key = QString::fromLocal8Bit(i.GetName());
+    prop.Key = QString::fromLocal8Bit(i.GetName().c_str());
     prop.Help = QString::fromLocal8Bit(i.GetProperty("HELPSTRING"));
-    prop.Value = QString::fromLocal8Bit(i.GetValue());
+    prop.Value = QString::fromLocal8Bit(i.GetValue().c_str());
     prop.Advanced = i.GetPropertyAsBool("ADVANCED");
 
     if(i.GetType() == cmCacheManager::BOOL)
       {
       prop.Type = QCMakeProperty::BOOL;
-      prop.Value = cmSystemTools::IsOn(i.GetValue());
+      prop.Value = cmSystemTools::IsOn(i.GetValue().c_str());
       }
     else if(i.GetType() == cmCacheManager::PATH)
       {

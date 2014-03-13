@@ -444,13 +444,13 @@ int cmCPackDebGenerator::createDeb()
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << cmd.c_str() << std::endl
+    ofs << "# Run command: " << cmd << std::endl
       << "# Working directory: " << toplevel << std::endl
       << "# Output:" << std::endl
-      << output.c_str() << std::endl;
+      << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
-      << cmd.c_str() << std::endl
-      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+      << cmd << std::endl
+      << "Please check " << tmpFile << " for errors" << std::endl);
     return 0;
     }
 
@@ -506,7 +506,7 @@ int cmCPackDebGenerator::createDeb()
           controlExtraList.begin(); i != controlExtraList.end(); ++i)
       {
       std::string filenamename =
-        cmsys::SystemTools::GetFilenameName(i->c_str());
+        cmsys::SystemTools::GetFilenameName(*i);
       std::string localcopy = this->GetOption("WDIR");
       localcopy += "/";
       localcopy += filenamename;
@@ -528,13 +528,13 @@ int cmCPackDebGenerator::createDeb()
     std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     tmpFile += "/Deb.log";
     cmGeneratedFileStream ofs(tmpFile.c_str());
-    ofs << "# Run command: " << cmd.c_str() << std::endl
+    ofs << "# Run command: " << cmd << std::endl
       << "# Working directory: " << toplevel << std::endl
       << "# Output:" << std::endl
-      << output.c_str() << std::endl;
+      << output << std::endl;
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running tar command: "
-      << cmd.c_str() << std::endl
-      << "Please check " << tmpFile.c_str() << " for errors" << std::endl);
+      << cmd << std::endl
+      << "Please check " << tmpFile << " for errors" << std::endl);
     return 0;
     }
 
@@ -588,9 +588,9 @@ std::string cmCPackDebGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar = "CPACK_COMPONENT_" +
         cmSystemTools::UpperCase(componentName) + "_GROUP";
-    if (NULL != GetOption(groupVar.c_str()))
+    if (NULL != GetOption(groupVar))
       {
-      return std::string(GetOption(groupVar.c_str()));
+      return std::string(GetOption(groupVar));
       }
     else
       {

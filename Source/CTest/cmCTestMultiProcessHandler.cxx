@@ -369,7 +369,7 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 
   // Write list of failed tests
   fout << "---\n";
-  for(std::vector<cmStdString>::iterator i = this->Failed->begin();
+  for(std::vector<std::string>::iterator i = this->Failed->begin();
       i != this->Failed->end(); ++i)
     {
     fout << i->c_str() << "\n";
@@ -672,7 +672,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
     indexStr << " #" << p.Index << ":";
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
       std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))
-      << indexStr.str().c_str());
+      << indexStr.str());
     cmCTestLog(this->CTest, HANDLER_OUTPUT, " ");
     cmCTestLog(this->CTest, HANDLER_OUTPUT, p.Name.c_str() << std::endl);
     //pop working dir

@@ -272,9 +272,9 @@ std::string cmCPackRPMGenerator::GetComponentInstallDirNameSuffix(
   // the current COMPONENT belongs to.
   std::string groupVar = "CPACK_COMPONENT_" +
         cmSystemTools::UpperCase(componentName) + "_GROUP";
-    if (NULL != GetOption(groupVar.c_str()))
+    if (NULL != GetOption(groupVar))
       {
-      return std::string(GetOption(groupVar.c_str()));
+      return std::string(GetOption(groupVar));
       }
     else
       {

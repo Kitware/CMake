@@ -169,13 +169,13 @@ bool cmCreateTestSourceList
   // Construct the source list.
   std::string sourceListValue;
   {
-  cmSourceFile* sf = this->Makefile->GetOrCreateSource(driver.c_str());
+  cmSourceFile* sf = this->Makefile->GetOrCreateSource(driver);
   sf->SetProperty("ABSTRACT","0");
   sourceListValue = args[1];
   }
   for(i = testsBegin; i != tests.end(); ++i)
     {
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(i->c_str());
+    cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
     sf->SetProperty("ABSTRACT","0");
     sourceListValue += ";";
     sourceListValue += *i;

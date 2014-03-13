@@ -331,7 +331,7 @@ int cmCTestUpdateHandler::DetectVCS(const char* dir)
 {
   std::string sourceDirectory = dir;
   cmCTestLog(this->CTest, DEBUG, "Check directory: "
-    << sourceDirectory.c_str() << std::endl);
+    << sourceDirectory << std::endl);
   sourceDirectory += "/.svn";
   if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
     {

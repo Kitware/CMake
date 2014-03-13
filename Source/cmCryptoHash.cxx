@@ -35,18 +35,18 @@ cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
 }
 
 //----------------------------------------------------------------------------
-std::string cmCryptoHash::HashString(const char* input)
+std::string cmCryptoHash::HashString(const std::string& input)
 {
   this->Initialize();
-  this->Append(reinterpret_cast<unsigned char const*>(input),
-               static_cast<int>(strlen(input)));
+  this->Append(reinterpret_cast<unsigned char const*>(&input[0]),
+               static_cast<int>(input.size()));
   return this->Finalize();
 }
 
 //----------------------------------------------------------------------------
-std::string cmCryptoHash::HashFile(const char* file)
+std::string cmCryptoHash::HashFile(const std::string& file)
 {
-  cmsys::ifstream fin(file, std::ios::in | cmsys_ios_binary);
+  cmsys::ifstream fin(file.c_str(), std::ios::in | cmsys_ios_binary);
   if(!fin)
     {
     return "";

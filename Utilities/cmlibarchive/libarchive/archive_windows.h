@@ -188,6 +188,9 @@
 #define	S_ISDIR(m)	(((m) & S_IFMT) == S_IFDIR)	/* directory */
 #define	S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)	/* regular file */
 #endif
+
+#if !defined(__WATCOMC__) 
+
 #define	S_ISLNK(m)  (((m) & S_IFMT) == S_IFLNK) /* Symbolic link */
 #define	S_ISSOCK(m) (((m) & S_IFMT) == S_IFSOCK) /* Socket */
 
@@ -226,6 +229,8 @@
 #define	S_IXOTH        _S_IXOTH
 #define	S_IWOTH        _S_IWOTH
 #define	S_IROTH        _S_IROTH
+
+#endif
 
 #define	F_DUPFD	  	0	/* Duplicate file descriptor.  */
 #define	F_GETFD		1	/* Get file descriptor flags.  */

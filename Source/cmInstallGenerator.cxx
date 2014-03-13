@@ -91,7 +91,7 @@ void cmInstallGenerator
         << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
      os << indent << "endif()\n";
      }
-  os << "file(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype.c_str();
+  os << "file(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype;
   if(optional)
     {
     os << " OPTIONAL";
@@ -163,7 +163,7 @@ void cmInstallGenerator::GenerateScript(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-bool cmInstallGenerator::InstallsForConfig(const char* config)
+bool cmInstallGenerator::InstallsForConfig(const std::string& config)
 {
   return this->GeneratesForConfig(config);
 }

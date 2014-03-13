@@ -60,9 +60,9 @@ public:
       <cmGlobalUnixMakefileGenerator3>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalUnixMakefileGenerator3::GetActualName();}
-  static const char* GetActualName() {return "Unix Makefiles";}
+  static std::string GetActualName() {return "Unix Makefiles";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -96,7 +96,7 @@ public:
 
   // write the top level target rules
   void WriteConvenienceRules(std::ostream& ruleFileStream,
-                             std::set<cmStdString> &emitted);
+                             std::set<std::string> &emitted);
 
   /** Get the command to use for a target that has no rule.  This is
       used for multiple output dependencies and for cmake_force.  */
@@ -109,11 +109,11 @@ public:
   // change the build command for speed
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
-    const char* makeProgram,
-    const char* projectName,
-    const char* projectDir,
-    const char* targetName,
-    const char* config,
+    const std::string& makeProgram,
+    const std::string& projectName,
+    const std::string& projectDir,
+    const std::string& targetName,
+    const std::string& config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );

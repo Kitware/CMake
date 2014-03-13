@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QTranslator>
 #include <QLocale>
+#include <QTextCodec>
 #include "QMacInstallDialog.h"
 #include "CMakeSetupDialog.h"
 #include "cmDocumentation.h"
@@ -77,6 +78,13 @@ int main(int argc, char** argv)
     }
 
   QApplication app(argc, argv);
+
+#if defined(KWSYS_CP_UTF8)
+  QTextCodec* utf8_codec = QTextCodec::codecForName("UTF-8");
+  QTextCodec::setCodecForCStrings(utf8_codec);
+  QTextCodec::setCodecForLocale(utf8_codec);
+  QTextCodec::setCodecForTr(utf8_codec);
+#endif
 
   // clean out standard Qt paths for plugins, which we don't use anyway
   // when creating Mac bundles, it potentially causes problems

@@ -18,9 +18,10 @@
 
 //----------------------------------------------------------------------------
 cmSourceFileLocation
-::cmSourceFileLocation(cmMakefile const* mf, const char* name): Makefile(mf)
+::cmSourceFileLocation(cmMakefile const* mf, const std::string& name)
+  : Makefile(mf)
 {
-  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name);
+  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name.c_str());
   this->AmbiguousExtension = true;
   this->Directory = cmSystemTools::GetFilenamePath(name);
   this->Name = cmSystemTools::GetFilenameName(name);
@@ -28,7 +29,7 @@ cmSourceFileLocation
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::Update(const char* name)
+void cmSourceFileLocation::Update(const std::string& name)
 {
   if(this->AmbiguousDirectory)
     {
@@ -80,7 +81,7 @@ void cmSourceFileLocation::DirectoryUseBinary()
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::UpdateExtension(const char* name)
+void cmSourceFileLocation::UpdateExtension(const std::string& name)
 {
   // Check the extension.
   std::string ext = cmSystemTools::GetFilenameLastExtension(name);
@@ -92,7 +93,7 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
   cmMakefile const* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
-  if(gg->GetLanguageFromExtension(ext.c_str()) ||
+  if(!gg->GetLanguageFromExtension(ext.c_str()).empty() ||
      std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end() ||
      std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
     {
@@ -136,10 +137,10 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::UpdateDirectory(const char* name)
+void cmSourceFileLocation::UpdateDirectory(const std::string& name)
 {
   // If a full path was given we know the directory.
-  if(cmSystemTools::FileIsFullPath(name))
+  if(cmSystemTools::FileIsFullPath(name.c_str()))
     {
     this->Directory = cmSystemTools::GetFilenamePath(name);
     this->AmbiguousDirectory = false;

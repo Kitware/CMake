@@ -55,8 +55,8 @@ public:
   const cmake* GetCMakeInstance() const;
   cmake* GetCMakeInstance();
 
-  const char* GetConfigName() const
-  { return this->ConfigName.c_str(); }
+  std::string const& GetConfigName() const
+  { return this->ConfigName; }
 
   /// @return whether we are processing the top CMakeLists.txt file.
   bool isRootMakefile() const;
@@ -97,11 +97,13 @@ public:
   void AppendCustomCommandDeps(const cmCustomCommand *cc,
                                cmNinjaDeps &ninjaDeps);
 
-  virtual std::string ConvertToLinkReference(std::string const& lib);
+  virtual std::string ConvertToLinkReference(std::string const& lib,
+                                             OutputFormat format = SHELL);
 
 
 protected:
-  virtual std::string ConvertToIncludeReference(std::string const& path);
+  virtual std::string ConvertToIncludeReference(std::string const& path,
+                                                OutputFormat format = SHELL);
 
 
 private:

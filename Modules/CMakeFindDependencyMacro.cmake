@@ -4,7 +4,7 @@
 #
 # ::
 #
-#     find_dependency(<dep> [<version>])
+#     find_dependency(<dep> [<version> [EXACT]])
 #
 #
 # ``find_dependency()`` wraps a :command:`find_package` call for a package
@@ -31,11 +31,20 @@ macro(find_dependency dep)
   if (NOT ${dep}_FOUND)
     set(cmake_fd_version)
     if (${ARGC} GREATER 1)
+      if (${ARGV1} STREQUAL EXACT)
+        message(FATAL_ERROR "Invalid arguments to find_dependency. EXACT may only be specified if a VERSION is specified")
+      endif()
       set(cmake_fd_version ${ARGV1})
     endif()
     set(cmake_fd_exact_arg)
-    if(${CMAKE_FIND_PACKAGE_NAME}_FIND_VERSION_EXACT)
+    if(${ARGC} GREATER 2)
+      if (NOT ${ARGV2} STREQUAL EXACT)
+        message(FATAL_ERROR "Invalid arguments to find_dependency")
+      endif()
       set(cmake_fd_exact_arg EXACT)
+    endif()
+    if(${ARGC} GREATER 3)
+      message(FATAL_ERROR "Invalid arguments to find_dependency")
     endif()
     set(cmake_fd_quiet_arg)
     if(${CMAKE_FIND_PACKAGE_NAME}_FIND_QUIETLY)

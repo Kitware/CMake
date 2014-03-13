@@ -39,7 +39,7 @@ bool cmOptionCommand
       m += args[i];
       m += " ";
       }
-    this->SetError(m.c_str());
+    this->SetError(m);
     return false;
     }
 
@@ -55,17 +55,14 @@ bool cmOptionCommand
       it.SetProperty("HELPSTRING", args[1].c_str());
       return true;
       }
-    if ( it.GetValue() )
-      {
-      initialValue = it.GetValue();
-      }
+    initialValue = it.GetValue();
     }
   if(args.size() == 3)
     {
     initialValue = args[2];
     }
   bool init = cmSystemTools::IsOn(initialValue.c_str());
-  this->Makefile->AddCacheDefinition(args[0].c_str(), init? "ON":"OFF",
+  this->Makefile->AddCacheDefinition(args[0], init? "ON":"OFF",
                                      args[1].c_str(), cmCacheManager::BOOL);
   return true;
 }

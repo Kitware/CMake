@@ -48,7 +48,7 @@ public:
   std::string GetInstallDestination() const;
 
   /** Test if this generator installs something for a given configuration.  */
-  bool InstallsForConfig(const char*);
+  bool InstallsForConfig(const std::string& config);
 
 protected:
   virtual void GenerateScript(std::ostream& os);

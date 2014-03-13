@@ -132,14 +132,14 @@ bool cmExecProgramCommand
       }
 
     std::string coutput = std::string(output, first, last-first+1);
-    this->Makefile->AddDefinition(output_variable.c_str(), coutput.c_str());
+    this->Makefile->AddDefinition(output_variable, coutput.c_str());
     }
 
   if ( return_variable.size() > 0 )
     {
     char buffer[100];
     sprintf(buffer, "%d", retVal);
-    this->Makefile->AddDefinition(return_variable.c_str(), buffer);
+    this->Makefile->AddDefinition(return_variable, buffer);
     }
 
   return true;

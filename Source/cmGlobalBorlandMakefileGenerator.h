@@ -28,9 +28,9 @@ public:
       <cmGlobalBorlandMakefileGenerator>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalBorlandMakefileGenerator::GetActualName();}
-  static const char* GetActualName() {return "Borland Makefiles";}
+  static std::string GetActualName() {return "Borland Makefiles";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

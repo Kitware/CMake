@@ -216,9 +216,24 @@
 #  allow other CMake projects to find your package with
 #  the :command:`find_package` command.
 #
+# .. variable:: CPACK_WIX_PROPERTY_<PROPERTY>
+#
+#  This variable can be used to provide a value for
+#  the Windows Installer property ``<PROPERTY>``
+#
+#  The follwing list contains some example properties that can be used to
+#  customize information under
+#  "Programs and Features" (also known as "Add or Remove Programs")
+#
+#  * ARPCOMMENTS - Comments
+#  * ARPHELPLINK - Help and support information URL
+#  * ARPURLINFOABOUT - General information URL
+#  * URLUPDATEINFO - Update information URL
+#  * ARPHELPTELEPHONE - Help and support telephone number
+#  * ARPSIZE - Size (in kilobytes) of the application
 
 #=============================================================================
-# Copyright 2013 Kitware, Inc.
+# Copyright 2014 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.

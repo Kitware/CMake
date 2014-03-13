@@ -81,7 +81,7 @@ protected:
   };
 
   typedef std::vector< Pair* > VectorOfPairs;
-  typedef std::map<cmStdString, VectorOfPairs > StringToVectorOfPairs;
+  typedef std::map<std::string, VectorOfPairs > StringToVectorOfPairs;
 
   StringToVectorOfPairs WatchMap;
 };
