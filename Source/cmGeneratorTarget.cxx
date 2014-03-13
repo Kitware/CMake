@@ -328,7 +328,7 @@ void cmGeneratorTarget::AddObject(cmSourceFile const* sf,
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile* sf)
+void cmGeneratorTarget::AddExplicitObjectName(cmSourceFile const* sf)
 {
   this->ExplicitObjectName.insert(sf);
 }

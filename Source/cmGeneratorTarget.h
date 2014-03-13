@@ -37,7 +37,7 @@ public:
 
   void AddObject(cmSourceFile const* sf, std::string const&name);
   bool HasExplicitObjectName(cmSourceFile const* file) const;
-  void AddExplicitObjectName(cmSourceFile* sf);
+  void AddExplicitObjectName(cmSourceFile const* sf);
 
   void GetResxSources(std::vector<cmSourceFile*>&) const;
   void GetIDLSources(std::vector<cmSourceFile*>&) const;
