@@ -16,6 +16,7 @@
 #  include "cmLocalGenerator.h"
 #  include "cmNinjaTypes.h"
 
+class cmCustomCommandGenerator;
 class cmGlobalNinjaGenerator;
 class cmGeneratedFileStream;
 class cmake;
@@ -92,9 +93,9 @@ public:
   void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
 
   void AddCustomCommandTarget(cmCustomCommand const* cc, cmTarget* target);
-  void AppendCustomCommandLines(const cmCustomCommand *cc,
+  void AppendCustomCommandLines(cmCustomCommandGenerator const& ccg,
                                 std::vector<std::string> &cmdLines);
-  void AppendCustomCommandDeps(const cmCustomCommand *cc,
+  void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps &ninjaDeps);
 
   virtual std::string ConvertToLinkReference(std::string const& lib,
@@ -124,7 +125,7 @@ private:
 
   void WriteCustomCommandBuildStatements();
 
-  std::string MakeCustomLauncher(const cmCustomCommand& cc);
+  std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
   std::string ConfigName;
   std::string HomeRelativeOutputPath;

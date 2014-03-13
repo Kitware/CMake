@@ -18,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
 #include "cmGeneratorTarget.h"
+#include "cmCustomCommandGenerator.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -555,7 +556,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     for (std::vector<cmCustomCommand>::const_iterator
          ci = cmdLists[i]->begin();
          ci != cmdLists[i]->end(); ++ci) {
-      this->GetLocalGenerator()->AppendCustomCommandLines(&*ci,
+      cmCustomCommandGenerator ccg(*ci, this->GetConfigName(),
+                                   this->GetMakefile());
+      this->GetLocalGenerator()->AppendCustomCommandLines(ccg,
                                                           *cmdLineLists[i]);
     }
   }

@@ -42,11 +42,12 @@ public:
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
 
-  /** Get the working directory.  */
-  const char* GetWorkingDirectory() const;
-
   /** Get the vector that holds the list of dependencies.  */
   const std::vector<std::string>& GetDepends() const;
+
+  /** Get the working directory.  */
+  std::string const& GetWorkingDirectory() const
+    { return this->WorkingDirectory; }
 
   /** Get the list of command lines.  */
   const cmCustomCommandLines& GetCommandLines() const;

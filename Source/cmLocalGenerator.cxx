@@ -22,6 +22,7 @@
 #include "cmSourceFile.h"
 #include "cmTest.h"
 #include "cmTestGenerator.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
 
@@ -2482,23 +2483,23 @@ void cmLocalGenerator::AppendFeatureOptions(
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalGenerator::ConstructComment(const cmCustomCommand& cc,
+cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
                                    const char* default_comment)
 {
   // Check for a comment provided with the command.
-  if(cc.GetComment())
+  if(ccg.GetComment())
     {
-    return cc.GetComment();
+    return ccg.GetComment();
     }
 
   // Construct a reasonable default comment if possible.
-  if(!cc.GetOutputs().empty())
+  if(!ccg.GetOutputs().empty())
     {
     std::string comment;
     comment = "Generating ";
     const char* sep = "";
-    for(std::vector<std::string>::const_iterator o = cc.GetOutputs().begin();
-        o != cc.GetOutputs().end(); ++o)
+    for(std::vector<std::string>::const_iterator o = ccg.GetOutputs().begin();
+        o != ccg.GetOutputs().end(); ++o)
       {
       comment += sep;
       comment += this->Convert(*o, cmLocalGenerator::START_OUTPUT);

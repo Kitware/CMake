@@ -18,6 +18,7 @@
 #include "cmDepends.h"
 
 class cmCustomCommand;
+class cmCustomCommandGenerator;
 class cmDependInformation;
 class cmDepends;
 class cmMakefileTargetGenerator;
@@ -289,14 +290,14 @@ protected:
   void AppendCustomDepends(std::vector<std::string>& depends,
                            const std::vector<cmCustomCommand>& ccs);
   void AppendCustomDepend(std::vector<std::string>& depends,
-                          const cmCustomCommand& cc);
+                          cmCustomCommandGenerator const& cc);
   void AppendCustomCommands(std::vector<std::string>& commands,
                             const std::vector<cmCustomCommand>& ccs,
                             cmTarget* target,
                             cmLocalGenerator::RelativeRoot relative =
                             cmLocalGenerator::HOME_OUTPUT);
   void AppendCustomCommand(std::vector<std::string>& commands,
-                           const cmCustomCommand& cc,
+                           cmCustomCommandGenerator const& ccg,
                            cmTarget* target,
                            bool echo_comment=false,
                            cmLocalGenerator::RelativeRoot relative =
@@ -313,8 +314,8 @@ protected:
 
 private:
   std::string ConvertShellCommand(std::string const& cmd, RelativeRoot root);
-  std::string MakeLauncher(const cmCustomCommand& cc, cmTarget* target,
-                           RelativeRoot relative);
+  std::string MakeLauncher(cmCustomCommandGenerator const& ccg,
+                           cmTarget* target, RelativeRoot relative);
 
   friend class cmMakefileTargetGenerator;
   friend class cmMakefileExecutableTargetGenerator;

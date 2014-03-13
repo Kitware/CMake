@@ -577,7 +577,9 @@ cmNinjaTargetGenerator
       si != customCommands.end(); ++si)
     {
     cmCustomCommand const* cc = (*si)->GetCustomCommand();
-    const std::vector<std::string>& ccoutputs = cc->GetOutputs();
+    cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
+                                 this->GetMakefile());
+    const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
     std::transform(ccoutputs.begin(), ccoutputs.end(),
                    std::back_inserter(orderOnlyDeps), MapToNinjaPath());
     }

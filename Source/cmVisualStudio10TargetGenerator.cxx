@@ -19,6 +19,7 @@
 #include "cmSourceFile.h"
 #include "cmVisualStudioGeneratorOptions.h"
 #include "cmLocalVisualStudio7Generator.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
@@ -616,8 +617,6 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
       }
     }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
-  std::string comment = lg->ConstructComment(command);
-  comment = cmVS10EscapeComment(comment);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
@@ -627,8 +626,11 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
+    cmCustomCommandGenerator ccg(command, *i, this->Makefile);
+    std::string comment = lg->ConstructComment(ccg);
+    comment = cmVS10EscapeComment(comment);
     std::string script =
-      cmVS10EscapeXML(lg->ConstructScript(command, i->c_str()));
+      cmVS10EscapeXML(lg->ConstructScript(ccg));
     this->WritePlatformConfigTag("Message",i->c_str(), 3);
     (*this->BuildFileStream ) << cmVS10EscapeXML(comment) << "</Message>\n";
     this->WritePlatformConfigTag("Command", i->c_str(), 3);
@@ -637,8 +639,8 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
 
     (*this->BuildFileStream ) << source->GetFullPath();
     for(std::vector<std::string>::const_iterator d =
-          command.GetDepends().begin();
-        d != command.GetDepends().end();
+          ccg.GetDepends().begin();
+        d != ccg.GetDepends().end();
         ++d)
       {
       std::string dep;
@@ -652,8 +654,8 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     this->WritePlatformConfigTag("Outputs", i->c_str(), 3);
     const char* sep = "";
     for(std::vector<std::string>::const_iterator o =
-          command.GetOutputs().begin();
-        o != command.GetOutputs().end();
+          ccg.GetOutputs().begin();
+        o != ccg.GetOutputs().end();
         ++o)
       {
       std::string out = *o;
@@ -1835,13 +1837,12 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    const cmCustomCommand& command = *i;
+    cmCustomCommandGenerator ccg(*i, configName, this->Makefile);
     comment += pre;
-    comment += lg->ConstructComment(command);
+    comment += lg->ConstructComment(ccg);
     script += pre;
     pre = "\n";
-    script +=
-      cmVS10EscapeXML(lg->ConstructScript(command, configName.c_str()));
+    script += cmVS10EscapeXML(lg->ConstructScript(ccg));
     }
   comment = cmVS10EscapeComment(comment);
   this->WriteString("<Message>",3);
