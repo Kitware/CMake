@@ -418,11 +418,10 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 //----------------------------------------------------------------------------
 void cmTarget::AddUtility(const std::string& u, cmMakefile *makefile)
 {
-  this->Utilities.insert(u);
-  if(makefile)
-  {
+  if(this->Utilities.insert(u).second && makefile)
+    {
     makefile->GetBacktrace(UtilityBacktraces[u]);
-  }
+    }
 }
 
 //----------------------------------------------------------------------------
