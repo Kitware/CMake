@@ -1975,7 +1975,8 @@ cmLocalVisualStudio7Generator
 
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
-  fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
+  fout << "<?xml version=\"1.0\" encoding = \""
+       << gg->Encoding() << "\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectCreator=\"Intel Fortran\"\n"
        << "\tVersion=\"" << gg->GetIntelProjectVersion() << "\"\n";
@@ -2038,7 +2039,12 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     this->WriteProjectStartFortran(fout, libName, target);
     return;
     }
-  fout << "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
+
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
+
+  fout << "<?xml version=\"1.0\" encoding = \""
+       << gg->Encoding() << "\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
   if(this->Version == VS71)
@@ -2059,8 +2065,6 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     {
     keyword = "Win32Proj";
     }
-  cmGlobalVisualStudio7Generator* gg =
-    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   fout << "\tName=\"" << projLabel << "\"\n";
   if(this->Version >= VS8)
     {
