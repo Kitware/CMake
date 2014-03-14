@@ -27,6 +27,7 @@ cmCTestGenericHandler* cmCTestCoverageCommand::InitializeHandler()
     "CoverageCommand", "CTEST_COVERAGE_COMMAND");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "CoverageExtraFlags", "CTEST_COVERAGE_EXTRA_FLAGS");
+
   cmCTestCoverageHandler* handler = static_cast<cmCTestCoverageHandler*>(
     this->CTest->GetInitializedHandler("coverage"));
   if ( !handler )
