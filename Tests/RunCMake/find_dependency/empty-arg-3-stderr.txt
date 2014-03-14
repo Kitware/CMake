@@ -1,6 +1,5 @@
 CMake Error at .*Modules/CMakeFindDependencyMacro.cmake:[0-9]+ \(message\):
-  Invalid arguments to find_dependency.  EXACT may only be specified if a
-  VERSION is specified
+  Invalid arguments to find_dependency
 Call Stack \(most recent call first\):
-  EXACT-no-version.cmake:4 \(find_dependency\)
+  empty-arg-3.cmake:4 \(find_dependency\)
   CMakeLists.txt:4 \(include\)
