@@ -310,10 +310,6 @@ cmGeneratorTarget
 ::GetObjectSources(std::vector<cmSourceFile const*> &data) const
 {
   IMPLEMENT_VISIT(ObjectSources);
-  if (this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
-    {
-    this->ObjectSources = data;
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -577,9 +573,11 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs) const
     cmTarget* objLib = *ti;
     cmGeneratorTarget* ogt =
       this->GlobalGenerator->GetGeneratorTarget(objLib);
+    std::vector<cmSourceFile const*> objectSources;
+    ogt->GetObjectSources(objectSources);
     for(std::vector<cmSourceFile const*>::const_iterator
-          si = ogt->ObjectSources.begin();
-        si != ogt->ObjectSources.end(); ++si)
+          si = objectSources.begin();
+        si != objectSources.end(); ++si)
       {
       std::string obj = ogt->ObjectDirectory;
       obj += ogt->Objects[*si];
