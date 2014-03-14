@@ -36,6 +36,13 @@ if("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
   endmacro()
 endif()
 
+# option to set the internal encoding of CMake to UTF-8
+option(CMAKE_ENCODING_UTF8 "Use UTF-8 encoding internally (experimental)." OFF)
+mark_as_advanced(CMAKE_ENCODING_UTF8)
+if(CMAKE_ENCODING_UTF8)
+  set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)
+endif()
+
 #-----------------------------------------------------------------------
 # a macro to deal with system libraries, implemented as a macro
 # simply to improve readability of the main script

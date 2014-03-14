@@ -55,11 +55,6 @@ else()
   endif()
 endif()
 
-
-if(WIN32 AND KWSYS_ENCODING_DEFAULT_CODEPAGE MATCHES CP_UTF8)
-  add_definitions(-DKWSYS_CP_UTF8)
-endif()
-
 set(SRCS
   AddCacheEntry.cxx
   AddCacheEntry.h

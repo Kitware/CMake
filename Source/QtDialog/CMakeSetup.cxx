@@ -79,7 +79,7 @@ int main(int argc, char** argv)
 
   QApplication app(argc, argv);
 
-#if defined(KWSYS_CP_UTF8)
+#if defined(CMAKE_ENCODING_UTF8)
   QTextCodec* utf8_codec = QTextCodec::codecForName("UTF-8");
   QTextCodec::setCodecForCStrings(utf8_codec);
   QTextCodec::setCodecForLocale(utf8_codec);
