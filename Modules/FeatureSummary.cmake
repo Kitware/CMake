@@ -492,6 +492,8 @@ function(FEATURE_SUMMARY)
 
     set(title_ENABLED_FEATURES               "The following features have been enabled:")
     set(title_DISABLED_FEATURES              "The following features have been disabled:")
+    set(title_PACKAGES_FOUND                 "The following packages have been found:")
+    set(title_PACKAGES_NOT_FOUND             "The following packages have not been found:")
     set(title_OPTIONAL_PACKAGES_FOUND        "The following OPTIONAL packages have been found:")
     set(title_OPTIONAL_PACKAGES_NOT_FOUND    "The following OPTIONAL packages have not been found:")
     set(title_RECOMMENDED_PACKAGES_FOUND     "The following RECOMMENDED packages have been found:")
