@@ -987,6 +987,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     cmtarget.GetSourceFiles(classes);
     std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
 
+    gtgt->ComputeObjectMapping();
+
     std::vector<cmXCodeObject*> externalObjFiles;
     std::vector<cmXCodeObject*> headerFiles;
     std::vector<cmXCodeObject*> resourceFiles;
