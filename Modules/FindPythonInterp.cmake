@@ -27,6 +27,10 @@
 # of version numbers that should be taken into account when searching
 # for Python.  You need to set this variable before calling
 # find_package(PythonInterp).
+#
+# If also calling find_package(PythonLibs), call find_package(PythonInterp)
+# first to get the currently active Python version by default with a consistent
+# version of PYTHON_LIBRARIES.
 
 #=============================================================================
 # Copyright 2005-2010 Kitware, Inc.
@@ -71,18 +75,23 @@ if(PythonInterp_FIND_VERSION)
 else()
     set(_PYTHON_FIND_OTHER_VERSIONS ${_PYTHON3_VERSIONS} ${_PYTHON2_VERSIONS} ${_PYTHON1_VERSIONS})
 endif()
-
-list(APPEND _Python_NAMES python)
-
-# Search for the current active python version first
 find_program(PYTHON_EXECUTABLE NAMES ${_Python_NAMES})
 
 # Set up the versions we know about, in the order we will search. Always add
 # the user supplied additional versions to the front.
-set(_Python_VERSIONS
-  ${Python_ADDITIONAL_VERSIONS}
-  ${_PYTHON_FIND_OTHER_VERSIONS}
-  )
+set(_Python_VERSIONS ${Python_ADDITIONAL_VERSIONS})
+# If FindPythonInterp has already found the major and minor version,
+# insert that version next to get consistent versions of the interpreter and
+# library.
+if(DEFINED PYTHONLIBS_VERSION_STRING)
+  string(REPLACE "." ";" _PYTHONLIBS_VERSION "${PYTHONLIBS_VERSION_STRING}")
+  list(GET _PYTHONLIBS_VERSION 0 _PYTHONLIBS_VERSION_MAJOR)
+  list(GET _PYTHONLIBS_VERSION 1 _PYTHONLIBS_VERSION_MINOR)
+  list(APPEND _Python_VERSIONS ${_PYTHONLIBS_VERSION_MAJOR}.${_PYTHONLIBS_VERSION_MINOR})
+endif()
+# Search for the current active python version first
+list(APPEND _Python_VERSIONS ";")
+list(APPEND _Python_VERSIONS ${_PYTHON_FIND_OTHER_VERSIONS})
 
 unset(_PYTHON_FIND_OTHER_VERSIONS)
 unset(_PYTHON1_VERSIONS)
@@ -91,7 +100,7 @@ unset(_PYTHON3_VERSIONS)
 
 # Search for newest python version if python executable isn't found
 if(NOT PYTHON_EXECUTABLE)
-    foreach(_CURRENT_VERSION ${_Python_VERSIONS})
+    foreach(_CURRENT_VERSION IN LISTS _Python_VERSIONS)
       set(_Python_NAMES python${_CURRENT_VERSION})
       if(WIN32)
         list(APPEND _Python_NAMES python)

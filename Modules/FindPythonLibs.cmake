@@ -31,6 +31,10 @@
 #
 #   PYTHON_LIBRARY             - path to the python library
 #   PYTHON_INCLUDE_DIR         - path to where Python.h is found
+#
+# If also calling find_package(PythonInterp), call find_package(PythonInterp)
+# first to get the currently active Python version by default with a consistent
+# version of PYTHON_LIBRARIES.
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
