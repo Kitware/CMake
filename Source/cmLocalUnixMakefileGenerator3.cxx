@@ -829,6 +829,7 @@ cmLocalUnixMakefileGenerator3
       "!ifndef VERBOSE\n"
       ".SILENT\n"
       "!endif\n"
+      "\n"
       ;
     }
   else
