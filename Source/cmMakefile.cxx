@@ -2071,7 +2071,7 @@ cmMakefile::LinearGetSourceFileWithOutput(const std::string& name) const
     // does this source file have a custom command?
     if ((*i)->GetCustomCommand())
       {
-      // is the output of the custom command match the source files name
+      // Does the output of the custom command match the source file name?
       const std::vector<std::string>& outputs =
         (*i)->GetCustomCommand()->GetOutputs();
       for(std::vector<std::string>::const_iterator o = outputs.begin();
