@@ -715,7 +715,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     {
     compiler = "icc";
     }
-  else if (compilerId == "Watcom")
+  else if (compilerId == "Watcom" || compilerId == "OpenWatcom")
     {
     compiler = "ow";
     }

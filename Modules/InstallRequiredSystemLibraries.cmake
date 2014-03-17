@@ -374,10 +374,6 @@ if(WATCOM)
   string(REGEX MATCHALL "[0-9]+" _watcom_version_list "${_compiler_version}")
   list(GET _watcom_version_list 0 _watcom_major)
   list(GET _watcom_version_list 1 _watcom_minor)
-  if(${_watcom_major} GREATER 11)
-    math(EXPR _watcom_major "${_watcom_major} - 11")
-  endif()
-  math(EXPR _watcom_minor "${_watcom_minor} / 10")
   set( __install__libs
     ${CompilerPath}/clbr${_watcom_major}${_watcom_minor}.dll
     ${CompilerPath}/mt7r${_watcom_major}${_watcom_minor}.dll
