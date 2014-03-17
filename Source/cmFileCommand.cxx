@@ -2539,6 +2539,11 @@ namespace {
       if (total > 0.0)
         {
         this->CurrentPercentage = static_cast<int>(value/total*100.0 + 0.5);
+        if(this->CurrentPercentage > 100)
+          {
+          // Avoid extra progress reports for unexpected data beyond total.
+          this->CurrentPercentage = 100;
+          }
         }
 
       bool updated = (OldPercentage != this->CurrentPercentage);
