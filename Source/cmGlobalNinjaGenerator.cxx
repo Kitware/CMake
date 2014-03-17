@@ -639,12 +639,12 @@ void cmGlobalNinjaGenerator
   cmTarget* target = gt->Target;
 
   // Compute full path to object file directory for this target.
-  std::string dir_max;
-  dir_max += gt->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
-  dir_max += "/";
-  gt->ObjectDirectory = dir_max;
+  std::string dir;
+  dir += gt->Makefile->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += gt->LocalGenerator->GetTargetDirectory(*target);
+  dir += "/";
+  gt->ObjectDirectory = dir;
 }
 
 //----------------------------------------------------------------------------
