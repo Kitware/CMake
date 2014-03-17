@@ -137,7 +137,6 @@ public:
    */
   void GetSourceFiles(std::vector<std::string> &files) const;
   void GetSourceFiles(std::vector<cmSourceFile*> &files) const;
-  void AddSourceFile(cmSourceFile* sf);
   std::vector<std::string> const& GetObjectLibraries() const
     {
     return this->ObjectLibraries;

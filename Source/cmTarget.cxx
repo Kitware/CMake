@@ -579,16 +579,6 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::AddSourceFile(cmSourceFile* sf)
-{
-  if (std::find(this->SourceFiles.begin(), this->SourceFiles.end(), sf)
-                                            == this->SourceFiles.end())
-    {
-    this->SourceFiles.push_back(sf);
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   for(std::vector<std::string>::const_iterator i = srcs.begin();
@@ -653,7 +643,11 @@ cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
 cmSourceFile* cmTarget::AddSource(const std::string& src)
 {
   cmSourceFile* sf = this->Makefile->GetOrCreateSource(src);
-  this->AddSourceFile(sf);
+  if (std::find(this->SourceFiles.begin(), this->SourceFiles.end(), sf)
+                                            == this->SourceFiles.end())
+    {
+    this->SourceFiles.push_back(sf);
+    }
   return sf;
 }
 
