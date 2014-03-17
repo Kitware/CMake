@@ -19,6 +19,7 @@
 #include "cmVersion.h"
 
 #include <algorithm>
+#include <assert.h>
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
@@ -631,8 +632,9 @@ std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
   return cmSystemTools::GetCMakeGUICommand();
 }
 
-// TODO: Refactor to combine with cmGlobalUnixMakefileGenerator3 impl.
-void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
+//----------------------------------------------------------------------------
+void cmGlobalNinjaGenerator
+::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
   cmTarget* target = gt->Target;
 
@@ -643,19 +645,6 @@ void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
   dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
   dir_max += "/";
   gt->ObjectDirectory = dir_max;
-
-  std::vector<cmSourceFile*> objectSources;
-  gt->GetObjectSources(objectSources);
-  // Compute the name of each object file.
-  for(std::vector<cmSourceFile*>::iterator
-        si = objectSources.begin();
-      si != objectSources.end(); ++si)
-    {
-    cmSourceFile* sf = *si;
-    std::string objectName = gt->LocalGenerator
-      ->GetObjectFileNameWithoutTarget(*sf, dir_max);
-    gt->AddObject(sf, objectName);
-    }
 }
 
 //----------------------------------------------------------------------------

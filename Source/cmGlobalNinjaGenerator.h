@@ -299,7 +299,7 @@ public:
 
   void AddTargetAlias(const std::string& alias, cmTarget* target);
 
-
+  virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
 
   /// Overloaded methods.
@@ -310,8 +310,6 @@ protected:
 private:
   virtual std::string GetEditCacheCommand() const;
 
-  /// @see cmGlobalGenerator::ComputeTargetObjects
-  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void OpenBuildFileStream();
   void CloseBuildFileStream();

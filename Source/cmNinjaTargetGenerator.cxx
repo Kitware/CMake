@@ -126,7 +126,7 @@ void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
 // void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 // Refactor it.
 std::string
-cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile *source,
+cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
                                               const std::string& language)
 {
   // TODO: Fortran support.
@@ -211,7 +211,7 @@ bool cmNinjaTargetGenerator::needsDepFile(const std::string& lang)
 // void cmMakefileTargetGenerator::WriteTargetLanguageFlags().
 std::string
 cmNinjaTargetGenerator::
-ComputeDefines(cmSourceFile *source, const std::string& language)
+ComputeDefines(cmSourceFile const* source, const std::string& language)
 {
   std::set<std::string> defines;
 
@@ -269,14 +269,14 @@ cmNinjaDeps cmNinjaTargetGenerator::ComputeLinkDeps() const
 
 std::string
 cmNinjaTargetGenerator
-::GetSourceFilePath(cmSourceFile* source) const
+::GetSourceFilePath(cmSourceFile const* source) const
 {
   return ConvertToNinjaPath(source->GetFullPath().c_str());
 }
 
 std::string
 cmNinjaTargetGenerator
-::GetObjectFilePath(cmSourceFile* source) const
+::GetObjectFilePath(cmSourceFile const* source) const
 {
   std::string path = this->LocalGenerator->GetHomeRelativeOutputPath();
   if(!path.empty())
@@ -480,36 +480,36 @@ cmNinjaTargetGenerator
     << this->GetTargetName()
     << "\n\n";
 
-  std::vector<cmSourceFile*> customCommands;
+  std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands);
-  for(std::vector<cmSourceFile*>::const_iterator
+  for(std::vector<cmSourceFile const*>::const_iterator
         si = customCommands.begin();
       si != customCommands.end(); ++si)
      {
      cmCustomCommand const* cc = (*si)->GetCustomCommand();
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      }
-  std::vector<cmSourceFile*> headerSources;
+  std::vector<cmSourceFile const*> headerSources;
   this->GeneratorTarget->GetHeaderSources(headerSources);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     headerSources,
     this->MacOSXContentGenerator);
-  std::vector<cmSourceFile*> extraSources;
+  std::vector<cmSourceFile const*> extraSources;
   this->GeneratorTarget->GetExtraSources(extraSources);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     extraSources,
     this->MacOSXContentGenerator);
-  std::vector<cmSourceFile*> externalObjects;
+  std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects);
-  for(std::vector<cmSourceFile*>::const_iterator
+  for(std::vector<cmSourceFile const*>::const_iterator
         si = externalObjects.begin();
       si != externalObjects.end(); ++si)
     {
     this->Objects.push_back(this->GetSourceFilePath(*si));
     }
-  std::vector<cmSourceFile*> objectSources;
+  std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources);
-  for(std::vector<cmSourceFile*>::const_iterator
+  for(std::vector<cmSourceFile const*>::const_iterator
         si = objectSources.begin(); si != objectSources.end(); ++si)
     {
     this->WriteObjectBuildStatement(*si);
@@ -536,7 +536,7 @@ cmNinjaTargetGenerator
 
 void
 cmNinjaTargetGenerator
-::WriteObjectBuildStatement(cmSourceFile* source)
+::WriteObjectBuildStatement(cmSourceFile const* source)
 {
   std::string comment;
   const std::string language = source->GetLanguage();
@@ -570,9 +570,9 @@ cmNinjaTargetGenerator
   }
 
   // Add order-only dependencies on custom command outputs.
-  std::vector<cmSourceFile*> customCommands;
+  std::vector<cmSourceFile const*> customCommands;
   this->GeneratorTarget->GetCustomCommands(customCommands);
-  for(std::vector<cmSourceFile*>::const_iterator
+  for(std::vector<cmSourceFile const*>::const_iterator
         si = customCommands.begin();
       si != customCommands.end(); ++si)
     {
@@ -733,7 +733,7 @@ cmNinjaTargetGenerator
 //----------------------------------------------------------------------------
 void
 cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
-  cmSourceFile& source, const char* pkgloc)
+  cmSourceFile const& source, const char* pkgloc)
 {
   // Skip OS X content when not building a Framework or Bundle.
   if(!this->Generator->GetTarget()->IsBundleOnApple())

@@ -106,11 +106,9 @@ std::string cmGlobalUnixMakefileGenerator3::GetEditCacheCommand() const
 //----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3
-::ComputeTargetObjects(cmGeneratorTarget* gt) const
+::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
   cmTarget* target = gt->Target;
-  cmLocalUnixMakefileGenerator3* lg =
-    static_cast<cmLocalUnixMakefileGenerator3*>(gt->LocalGenerator);
 
   // Compute full path to object file directory for this target.
   std::string dir_max;
@@ -119,22 +117,6 @@ cmGlobalUnixMakefileGenerator3
   dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
   dir_max += "/";
   gt->ObjectDirectory = dir_max;
-
-  std::vector<cmSourceFile*> objectSources;
-  gt->GetObjectSources(objectSources);
-  // Compute the name of each object file.
-  for(std::vector<cmSourceFile*>::iterator
-        si = objectSources.begin();
-      si != objectSources.end(); ++si)
-    {
-    cmSourceFile* sf = *si;
-    bool hasSourceExtension = true;
-    std::string objectName = gt->LocalGenerator
-      ->GetObjectFileNameWithoutTarget(*sf, dir_max,
-                                       &hasSourceExtension);
-    gt->AddObject(sf, objectName);
-    lg->AddLocalObjectFile(target, sf, objectName, hasSourceExtension);
-    }
 }
 
 void cmGlobalUnixMakefileGenerator3::Configure()

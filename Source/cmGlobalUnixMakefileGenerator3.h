@@ -128,6 +128,7 @@ public:
   /** Does the make tool tolerate .NOTPARALLEL? */
   virtual bool AllowNotParallel() const { return true; }
 
+  virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
@@ -198,7 +199,6 @@ protected:
 private:
   virtual const char* GetBuildIgnoreErrorsFlag() const { return "-i"; }
   virtual std::string GetEditCacheCommand() const;
-  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 };
 
 #endif

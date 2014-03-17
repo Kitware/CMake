@@ -88,6 +88,7 @@ public:
   virtual std::string ExpandCFGIntDir(const std::string& str,
                                       const std::string& config) const;
 
+  void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
   // Does this VS version link targets to each other if there are
   // dependencies in the SLN file?  This was done for VS versions
@@ -116,7 +117,6 @@ private:
   virtual std::string GetVSMakeProgram() = 0;
   void PrintCompilerAdvice(std::ostream&, std::string const&,
                            const char*) const {}
-  void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void FollowLinkDepends(cmTarget const* target,
                          std::set<cmTarget const*>& linked);

@@ -31,6 +31,46 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
+                        std::map<cmSourceFile const*, std::string>& mapping,
+                        cmGeneratorTarget const* gt)
+{
+  std::string dir_max = this->ComputeLongestObjectDirectory(*gt->Target);
+
+  // Count the number of object files with each name.  Note that
+  // windows file names are not case sensitive.
+  std::map<std::string, int> counts;
+
+  for(std::map<cmSourceFile const*, std::string>::iterator
+      si = mapping.begin(); si != mapping.end(); ++si)
+    {
+    cmSourceFile const* sf = si->first;
+    std::string objectNameLower = cmSystemTools::LowerCase(
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
+    objectNameLower += ".obj";
+    counts[objectNameLower] += 1;
+    }
+
+  // For all source files producing duplicate names we need unique
+  // object name computation.
+
+  for(std::map<cmSourceFile const*, std::string>::iterator
+      si = mapping.begin(); si != mapping.end(); ++si)
+    {
+    cmSourceFile const* sf = si->first;
+    std::string objectName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    objectName += ".obj";
+    if(counts[cmSystemTools::LowerCase(objectName)] > 1)
+      {
+      const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
+      objectName = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
+      }
+    si->second = objectName;
+    }
+}
+
+//----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
                                                    const std::string& config,

@@ -45,7 +45,7 @@ public:
 private:
   struct ToolSource
   {
-    cmSourceFile* SourceFile;
+    cmSourceFile const* SourceFile;
     bool RelativePath;
   };
   struct ToolSources: public std::vector<ToolSource> {};
@@ -55,8 +55,10 @@ private:
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
-  void WriteSource(const char* tool, cmSourceFile* sf, const char* end = 0);
-  void WriteSources(const char* tool, std::vector<cmSourceFile*> const&);
+  void WriteSource(const char* tool, cmSourceFile const* sf,
+                   const char* end = 0);
+  void WriteSources(const char* tool,
+                    std::vector<cmSourceFile const*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteEmbeddedResourceGroup();
@@ -77,13 +79,13 @@ private:
                         std::vector<std::string> const & includes);
   void OutputIncludes(std::vector<std::string> const & includes);
   void OutputLinkIncremental(std::string const& configName);
-  void WriteCustomRule(cmSourceFile* source,
+  void WriteCustomRule(cmSourceFile const* source,
                        cmCustomCommand const & command);
   void WriteCustomCommands();
-  void WriteCustomCommand(cmSourceFile* sf);
+  void WriteCustomCommand(cmSourceFile const* sf);
   void WriteGroups();
   void WriteProjectReferences();
-  bool OutputSourceSpecificFlags(cmSourceFile* source);
+  bool OutputSourceSpecificFlags(cmSourceFile const* source);
   void AddLibraries(cmComputeLinkInformation& cli, std::string& libstring);
   void WriteLibOptions(std::string const& config);
   void WriteEvents(std::string const& configName);
@@ -111,7 +113,7 @@ private:
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
-  std::set<cmSourceFile*> SourcesVisited;
+  std::set<cmSourceFile const*> SourcesVisited;
 
   typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;
