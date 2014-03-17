@@ -185,10 +185,8 @@ protected:
     std::vector<unsigned long> Marks;
     void WriteProgressVariables(unsigned long total, unsigned long& current);
   };
-  struct ProgressMapCompare { bool operator()(cmTarget const*,
-                                              cmTarget const*) const; };
   typedef std::map<cmTarget const*, TargetProgress,
-                   ProgressMapCompare> ProgressMapType;
+                   cmStrictTargetComparison> ProgressMapType;
   ProgressMapType ProgressMap;
 
   size_t CountProgressMarksInTarget(cmTarget const* target,

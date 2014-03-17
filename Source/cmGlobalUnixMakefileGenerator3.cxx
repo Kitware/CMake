@@ -958,21 +958,6 @@ cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
 }
 
 //----------------------------------------------------------------------------
-bool
-cmGlobalUnixMakefileGenerator3::ProgressMapCompare
-::operator()(cmTarget const* l, cmTarget const* r) const
-{
-  // Order by target name.
-  if(int c = strcmp(l->GetName().c_str(), r->GetName().c_str()))
-    {
-    return c < 0;
-    }
-  // Order duplicate targets by binary directory.
-  return strcmp(l->GetMakefile()->GetCurrentOutputDirectory(),
-                r->GetMakefile()->GetCurrentOutputDirectory()) < 0;
-}
-
-//----------------------------------------------------------------------------
 void
 cmGlobalUnixMakefileGenerator3::TargetProgress
 ::WriteProgressVariables(unsigned long total, unsigned long &current)
