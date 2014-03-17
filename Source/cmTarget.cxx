@@ -2730,6 +2730,21 @@ const char *cmTarget::GetProperty(const char* prop,
                                    this->GetLocation(configName.c_str()),
                                    cmProperty::TARGET);
       }
+    // Support "<CONFIG>_LOCATION".
+    if(cmHasLiteralSuffix(prop, "_LOCATION"))
+      {
+      std::string configName(prop, strlen(prop) - 9);
+      if(configName != "IMPORTED")
+        {
+        if (!this->HandleLocationPropertyPolicy())
+          {
+          return 0;
+          }
+        this->Properties.SetProperty(prop,
+                                     this->GetLocation(configName.c_str()),
+                                     cmProperty::TARGET);
+        }
+      }
     }
   if(strcmp(prop,"INCLUDE_DIRECTORIES") == 0)
     {
