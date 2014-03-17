@@ -542,6 +542,20 @@ bool cmTarget::IsBundleOnApple() const
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::GetSourceFiles(std::vector<std::string> &files) const
+{
+  assert(this->GetType() != INTERFACE_LIBRARY);
+  std::vector<cmSourceFile*> sourceFiles;
+  this->GetSourceFiles(sourceFiles);
+  for(std::vector<cmSourceFile*>::const_iterator
+      si = sourceFiles.begin();
+      si != sourceFiles.end(); ++si)
+    {
+    files.push_back((*si)->GetFullPath());
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files) const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);

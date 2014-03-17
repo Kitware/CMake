@@ -600,12 +600,12 @@ private:
   cmGlobalGenerator const* GlobalGenerator;
   typedef cmGeneratorTarget::SourceEntry SourceEntry;
   SourceEntry* CurrentEntry;
-  std::queue<cmSourceFile*> SourceQueue;
-  std::set<cmSourceFile*> SourcesQueued;
+  std::queue<std::string> SourceQueue;
+  std::set<std::string> SourcesQueued;
   typedef std::map<std::string, cmSourceFile*> NameMapType;
   NameMapType NameMap;
 
-  void QueueSource(cmSourceFile* sf);
+  void QueueSource(std::string const& name);
   void FollowName(std::string const& name);
   void FollowNames(std::vector<std::string> const& names);
   bool IsUtility(std::string const& dep);
@@ -628,11 +628,11 @@ cmTargetTraceDependencies
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
-  std::vector<cmSourceFile*> sources;
   if (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
+    std::vector<std::string> sources;
     this->Target->GetSourceFiles(sources);
-    for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
+    for(std::vector<std::string>::const_iterator si = sources.begin();
         si != sources.end(); ++si)
       {
       this->QueueSource(*si);
@@ -652,7 +652,8 @@ void cmTargetTraceDependencies::Trace()
   while(!this->SourceQueue.empty())
     {
     // Get the next source from the queue.
-    cmSourceFile* sf = this->SourceQueue.front();
+    std::string src = this->SourceQueue.front();
+    cmSourceFile* sf = this->Makefile->GetSource(src);
     this->SourceQueue.pop();
     this->CurrentEntry = &this->GeneratorTarget->SourceEntries[sf];
 
@@ -680,14 +681,14 @@ void cmTargetTraceDependencies::Trace()
 }
 
 //----------------------------------------------------------------------------
-void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
+void cmTargetTraceDependencies::QueueSource(std::string const& name)
 {
-  if(this->SourcesQueued.insert(sf).second)
+  if(this->SourcesQueued.insert(name).second)
     {
-    this->SourceQueue.push(sf);
+    this->SourceQueue.push(name);
 
     // Make sure this file is in the target.
-    this->Target->AddSourceFile(sf);
+    this->Target->AddSource(name);
     }
 }
 
@@ -709,8 +710,7 @@ void cmTargetTraceDependencies::FollowName(std::string const& name)
       {
       this->CurrentEntry->Depends.push_back(sf);
       }
-
-    this->QueueSource(sf);
+    this->QueueSource(sf->GetFullPath());
     }
 }
 
