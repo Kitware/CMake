@@ -1266,7 +1266,7 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                                  commandLines, comment,
                                  workingDirectory, no_replace,
                                  escapeOldStyle);
-  cmSourceFile* sf = target->AddSource(force);
+  cmSourceFile* sf = target->AddSourceCMP0049(force);
 
   // The output is not actually created so mark it symbolic.
   if(sf)

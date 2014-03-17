@@ -412,7 +412,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   std::string listfile = mf->GetStartDirectory();
   listfile += "/";
   listfile += "CMakeLists.txt";
-  allbuild->AddSource(listfile.c_str());
+  allbuild->AddSourceCMP0049(listfile.c_str());
 
   // Add XCODE depend helper
   std::string dir = mf->GetCurrentOutputDirectory();
@@ -495,7 +495,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       listfile = lg->GetMakefile()->GetStartDirectory();
       listfile += "/";
       listfile += "CMakeLists.txt";
-      target.AddSource(listfile.c_str());
+      target.AddSourceCMP0049(listfile.c_str());
       }
     }
 }

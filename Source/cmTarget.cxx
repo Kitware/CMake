@@ -587,13 +587,13 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
       }
     else
       {
-      this->AddSource(src);
+      this->AddSourceCMP0049(src);
       }
     }
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmTarget::AddSource(const std::string& s)
+cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
 {
   std::string src = s;
 
@@ -632,7 +632,12 @@ cmSourceFile* cmTarget::AddSource(const std::string& s)
         }
       }
     }
+  return this->AddSource(src);
+}
 
+//----------------------------------------------------------------------------
+cmSourceFile* cmTarget::AddSource(const std::string& src)
+{
   cmSourceFile* sf = this->Makefile->GetOrCreateSource(src);
   this->AddSourceFile(sf);
   return sf;
