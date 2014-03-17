@@ -109,6 +109,9 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
+  // Encoding for Visual Studio files
+  virtual std::string Encoding();
+
 protected:
   virtual const char* GetIDEVersion() { return "7.0"; }
 

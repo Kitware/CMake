@@ -873,7 +873,8 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
   std::string guid = this->GetGUID(pname.c_str());
 
   fout <<
-    "<?xml version=\"1.0\" encoding = \"Windows-1252\"?>\n"
+    "<?xml version=\"1.0\" encoding = \""
+    << this->Encoding() << "\"?>\n"
     "<VisualStudioProject\n"
     "\tProjectType=\"Visual C++\"\n"
     "\tVersion=\"" << this->GetIDEVersion() << "0\"\n"
@@ -1037,4 +1038,15 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] =
 cmIDEFlagTable const* cmGlobalVisualStudio7Generator::GetExtraFlagTableVS7()
 {
   return cmVS7ExtraFlagTable;
+}
+
+std::string cmGlobalVisualStudio7Generator::Encoding()
+{
+  std::ostringstream encoding;
+#ifdef CMAKE_ENCODING_UTF8
+  encoding << "UTF-8";
+#else
+  encoding << "Windows-1252";
+#endif
+  return encoding.str();
 }

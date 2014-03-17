@@ -24,6 +24,11 @@ endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
+# ensure Unicode friendly APIs are used on Windows
+if(WIN32)
+  add_definitions(-DUNICODE -D_UNICODE)
+endif()
+
 # configure the .h file
 configure_file(
   "${CMake_SOURCE_DIR}/Source/cmConfigure.cmake.h.in"
