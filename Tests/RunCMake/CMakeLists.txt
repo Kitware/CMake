@@ -107,6 +107,11 @@ if (QT4_FOUND)
   add_RunCMake_test(ObsoleteQtMacros)
 endif()
 
+find_package(PkgConfig QUIET)
+if(PKG_CONFIG_FOUND)
+  add_RunCMake_test(FindPkgConfig)
+endif()
+
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(include_external_msproject)
   add_RunCMake_test(SolutionGlobalSections)
