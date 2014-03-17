@@ -2670,6 +2670,21 @@ const char *cmTarget::GetProperty(const std::string& prop,
                                    this->GetLocation(configName),
                                    cmProperty::TARGET);
       }
+    // Support "<CONFIG>_LOCATION".
+    if(cmHasLiteralSuffix(prop, "_LOCATION"))
+      {
+      std::string configName(prop.c_str(), prop.size() - 9);
+      if(configName != "IMPORTED")
+        {
+        if (!this->HandleLocationPropertyPolicy())
+          {
+          return 0;
+          }
+        this->Properties.SetProperty(prop,
+                                     this->GetLocation(configName),
+                                     cmProperty::TARGET);
+        }
+      }
     }
   if(prop == "INCLUDE_DIRECTORIES")
     {
