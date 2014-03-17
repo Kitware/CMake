@@ -2101,7 +2101,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(
   // linear-time search for an output with a matching suffix.
   if(!cmSystemTools::FileIsFullPath(name.c_str()))
     {
-    return LinearGetSourceFileWithOutput(name);
+    return this->LinearGetSourceFileWithOutput(name);
     }
   // Otherwise we use an efficient lookup map.
   OutputToSourceMap::const_iterator o = this->OutputToSource.find(name);
