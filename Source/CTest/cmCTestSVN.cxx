@@ -277,7 +277,7 @@ bool cmCTestSVN::UpdateImpl()
     {
     opts = this->CTest->GetCTestConfiguration("SVNUpdateOptions");
     }
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
 
   // Specify the start time for nightly testing.
   if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
@@ -287,7 +287,7 @@ bool cmCTestSVN::UpdateImpl()
 
   std::vector<char const*> svn_update;
   svn_update.push_back("update");
-  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+  for(std::vector<std::string>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     svn_update.push_back(ai->c_str());
@@ -314,9 +314,9 @@ bool cmCTestSVN::RunSVNCommand(std::vector<char const*> const& parameters,
   std::string userOptions =
     this->CTest->GetCTestConfiguration("SVNOptions");
 
-  std::vector<cmStdString> parsedUserOptions =
+  std::vector<std::string> parsedUserOptions =
     cmSystemTools::ParseArguments(userOptions.c_str());
-  for(std::vector<cmStdString>::iterator i = parsedUserOptions.begin();
+  for(std::vector<std::string>::iterator i = parsedUserOptions.begin();
       i != parsedUserOptions.end(); ++i)
     {
     args.push_back(i->c_str());
@@ -361,10 +361,10 @@ private:
     return true;
     }
 
-  virtual void StartElement(const char* name, const char** atts)
+  virtual void StartElement(const std::string& name, const char** atts)
     {
     this->CData.clear();
-    if(strcmp(name, "logentry") == 0)
+    if(name == "logentry")
       {
       this->Rev = Revision();
       this->Rev.SVNInfo = &SVNRepo;
@@ -374,7 +374,7 @@ private:
         }
       this->Changes.clear();
       }
-    else if(strcmp(name, "path") == 0)
+    else if(name == "path")
       {
       this->CurChange = Change();
       if(const char* action = this->FindAttribute(atts, "action"))
@@ -389,28 +389,28 @@ private:
     this->CData.insert(this->CData.end(), data, data+length);
     }
 
-  virtual void EndElement(const char* name)
+  virtual void EndElement(const std::string& name)
     {
-    if(strcmp(name, "logentry") == 0)
+    if(name == "logentry")
       {
       this->SVN->DoRevisionSVN(this->Rev, this->Changes);
       }
-    else if(strcmp(name, "path") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "path")
       {
       std::string orig_path(&this->CData[0], this->CData.size());
       std::string new_path = SVNRepo.BuildLocalPath( orig_path );
       this->CurChange.Path.assign(new_path);
       this->Changes.push_back(this->CurChange);
       }
-    else if(strcmp(name, "author") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "author")
       {
       this->Rev.Author.assign(&this->CData[0], this->CData.size());
       }
-    else if(strcmp(name, "date") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "date")
       {
       this->Rev.Date.assign(&this->CData[0], this->CData.size());
       }
-    else if(strcmp(name, "msg") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "msg")
       {
       this->Rev.Log.assign(&this->CData[0], this->CData.size());
       }

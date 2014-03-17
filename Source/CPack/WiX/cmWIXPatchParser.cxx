@@ -34,12 +34,11 @@ cmWIXPatchParser::cmWIXPatchParser(
 
 }
 
-void cmWIXPatchParser::StartElement(const char *name, const char **atts)
+void cmWIXPatchParser::StartElement(const std::string& name, const char **atts)
 {
-  std::string name_str = name;
   if(State == BEGIN_DOCUMENT)
     {
-    if(name_str == "CPackWiXPatch")
+    if(name == "CPackWiXPatch")
       {
       State = BEGIN_FRAGMENTS;
       }
@@ -50,7 +49,7 @@ void cmWIXPatchParser::StartElement(const char *name, const char **atts)
     }
   else if(State == BEGIN_FRAGMENTS)
     {
-      if(name_str == "CPackWiXFragment")
+      if(name == "CPackWiXFragment")
         {
         State = INSIDE_FRAGMENT;
         StartFragment(atts);
@@ -107,12 +106,11 @@ void cmWIXPatchParser::StartFragment(const char **attributes)
     }
 }
 
-void cmWIXPatchParser::EndElement(const char *name)
+void cmWIXPatchParser::EndElement(const std::string& name)
 {
-  std::string name_str = name;
   if(State == INSIDE_FRAGMENT)
     {
-      if(name_str == "CPackWiXFragment")
+      if(name == "CPackWiXFragment")
         {
         State = BEGIN_FRAGMENTS;
         ElementStack.clear();
@@ -132,7 +130,7 @@ void cmWIXPatchParser::ReportError(int line, int column, const char* msg)
   Valid = false;
 }
 
-void cmWIXPatchParser::ReportValidationError(const std::string& message)
+void cmWIXPatchParser::ReportValidationError(std::string const& message)
 {
   ReportError(XML_GetCurrentLineNumber(Parser),
     XML_GetCurrentColumnNumber(Parser),

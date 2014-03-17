@@ -31,6 +31,10 @@
 #
 #   PYTHON_LIBRARY             - path to the python library
 #   PYTHON_INCLUDE_DIR         - path to where Python.h is found
+#
+# If also calling find_package(PythonInterp), call find_package(PythonInterp)
+# first to get the currently active Python version by default with a consistent
+# version of PYTHON_LIBRARIES.
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -80,10 +84,14 @@ endif()
 
 # Set up the versions we know about, in the order we will search. Always add
 # the user supplied additional versions to the front.
-set(_Python_VERSIONS
-  ${Python_ADDITIONAL_VERSIONS}
-  ${_PYTHON_FIND_OTHER_VERSIONS}
-  )
+# If FindPythonInterp has already found the major and minor version,
+# insert that version between the user supplied versions and the stock
+# version list.
+set(_Python_VERSIONS ${Python_ADDITIONAL_VERSIONS})
+if(DEFINED PYTHON_VERSION_MAJOR AND DEFINED PYTHON_VERSION_MINOR)
+  list(APPEND _Python_VERSIONS ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR})
+endif()
+list(APPEND _Python_VERSIONS ${_PYTHON_FIND_OTHER_VERSIONS})
 
 unset(_PYTHON_FIND_OTHER_VERSIONS)
 unset(_PYTHON1_VERSIONS)

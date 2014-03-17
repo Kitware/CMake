@@ -48,7 +48,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "ctest_submit";}
+  virtual std::string GetName() const { return "ctest_submit";}
 
   cmTypeMacro(cmCTestSubmitCommand, cmCTestHandlerCommand);
 

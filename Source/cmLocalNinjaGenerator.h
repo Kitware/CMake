@@ -16,6 +16,7 @@
 #  include "cmLocalGenerator.h"
 #  include "cmNinjaTypes.h"
 
+class cmCustomCommandGenerator;
 class cmGlobalNinjaGenerator;
 class cmGeneratedFileStream;
 class cmake;
@@ -55,8 +56,8 @@ public:
   const cmake* GetCMakeInstance() const;
   cmake* GetCMakeInstance();
 
-  const char* GetConfigName() const
-  { return this->ConfigName.c_str(); }
+  std::string const& GetConfigName() const
+  { return this->ConfigName; }
 
   /// @return whether we are processing the top CMakeLists.txt file.
   bool isRootMakefile() const;
@@ -92,16 +93,18 @@ public:
   void AppendTargetDepends(cmTarget* target, cmNinjaDeps& outputs);
 
   void AddCustomCommandTarget(cmCustomCommand const* cc, cmTarget* target);
-  void AppendCustomCommandLines(const cmCustomCommand *cc,
+  void AppendCustomCommandLines(cmCustomCommandGenerator const& ccg,
                                 std::vector<std::string> &cmdLines);
-  void AppendCustomCommandDeps(const cmCustomCommand *cc,
+  void AppendCustomCommandDeps(cmCustomCommandGenerator const& ccg,
                                cmNinjaDeps &ninjaDeps);
 
-  virtual std::string ConvertToLinkReference(std::string const& lib);
+  virtual std::string ConvertToLinkReference(std::string const& lib,
+                                             OutputFormat format = SHELL);
 
 
 protected:
-  virtual std::string ConvertToIncludeReference(std::string const& path);
+  virtual std::string ConvertToIncludeReference(std::string const& path,
+                                                OutputFormat format = SHELL);
 
 
 private:
@@ -122,7 +125,7 @@ private:
 
   void WriteCustomCommandBuildStatements();
 
-  std::string MakeCustomLauncher(const cmCustomCommand& cc);
+  std::string MakeCustomLauncher(cmCustomCommandGenerator const& ccg);
 
   std::string ConfigName;
   std::string HomeRelativeOutputPath;

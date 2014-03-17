@@ -2,140 +2,20 @@
 # FindPkgConfig
 # -------------
 #
-# a pkg-config module for CMake
+# A `pkg-config` module for CMake.
 #
+# Finds the ``pkg-config`` executable and add the
+# :command:`pkg_check_modules` and :command:`pkg_search_module`
+# commands.
 #
-#
-# Usage:
-#
-# ::
-#
-#    pkg_check_modules(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
-#      checks for all the given modules
-#
-#
-#
-# ::
-#
-#    pkg_search_module(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
-#      checks for given modules and uses the first working one
-#
-#
-#
-# When the 'REQUIRED' argument was set, macros will fail with an error
-# when module(s) could not be found
-#
-# When the 'QUIET' argument is set, no status messages will be printed.
-#
-# It sets the following variables:
-#
-# ::
-#
-#    PKG_CONFIG_FOUND          ... if pkg-config executable was found
-#    PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
-#    PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
-#                                  (since CMake 2.8.8)
-#
-#
-#
-# For the following variables two sets of values exist; first one is the
-# common one and has the given PREFIX.  The second set contains flags
-# which are given out when pkgconfig was called with the '--static'
-# option.
-#
-# ::
-#
-#    <XPREFIX>_FOUND          ... set to 1 if module(s) exist
-#    <XPREFIX>_LIBRARIES      ... only the libraries (w/o the '-l')
-#    <XPREFIX>_LIBRARY_DIRS   ... the paths of the libraries (w/o the '-L')
-#    <XPREFIX>_LDFLAGS        ... all required linker flags
-#    <XPREFIX>_LDFLAGS_OTHER  ... all other linker flags
-#    <XPREFIX>_INCLUDE_DIRS   ... the '-I' preprocessor flags (w/o the '-I')
-#    <XPREFIX>_CFLAGS         ... all required cflags
-#    <XPREFIX>_CFLAGS_OTHER   ... the other compiler flags
-#
-#
-#
-# ::
-#
-#    <XPREFIX> = <PREFIX>        for common case
-#    <XPREFIX> = <PREFIX>_STATIC for static linking
-#
-#
-#
-# There are some special variables whose prefix depends on the count of
-# given modules.  When there is only one module, <PREFIX> stays
-# unchanged.  When there are multiple modules, the prefix will be
-# changed to <PREFIX>_<MODNAME>:
-#
-# ::
-#
-#    <XPREFIX>_VERSION    ... version of the module
-#    <XPREFIX>_PREFIX     ... prefix-directory of the module
-#    <XPREFIX>_INCLUDEDIR ... include-dir of the module
-#    <XPREFIX>_LIBDIR     ... lib-dir of the module
-#
-#
-#
-# ::
-#
-#    <XPREFIX> = <PREFIX>  when |MODULES| == 1, else
-#    <XPREFIX> = <PREFIX>_<MODNAME>
-#
-#
-#
-# A <MODULE> parameter can have the following formats:
-#
-# ::
-#
-#    {MODNAME}            ... matches any version
-#    {MODNAME}>={VERSION} ... at least version <VERSION> is required
-#    {MODNAME}={VERSION}  ... exactly version <VERSION> is required
-#    {MODNAME}<={VERSION} ... modules must not be newer than <VERSION>
-#
-#
-#
-# Examples
-#
-# ::
-#
-#    pkg_check_modules (GLIB2   glib-2.0)
-#
-#
-#
-# ::
-#
-#    pkg_check_modules (GLIB2   glib-2.0>=2.10)
-#      requires at least version 2.10 of glib2 and defines e.g.
-#        GLIB2_VERSION=2.10.3
-#
-#
-#
-# ::
-#
-#    pkg_check_modules (FOO     glib-2.0>=2.10 gtk+-2.0)
-#      requires both glib2 and gtk2, and defines e.g.
-#        FOO_glib-2.0_VERSION=2.10.3
-#        FOO_gtk+-2.0_VERSION=2.8.20
-#
-#
-#
-# ::
-#
-#    pkg_check_modules (XRENDER REQUIRED xrender)
-#      defines e.g.:
-#        XRENDER_LIBRARIES=Xrender;X11
-#        XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
-#
-#
-#
-# ::
-#
-#    pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
+# In order to find the ``pkg-config`` executable, it uses the
+# :variable:`PKG_CONFIG_EXECUTABLE` variable or the ``PKG_CONFIG``
+# environment variable first.
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+# Copyright 2006-2014 Kitware, Inc.
+# Copyright 2014      Christoph Grüninger <foss@grueninger.de>
+# Copyright 2006      Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -150,6 +30,10 @@
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
 
+# find pkg-config, use PKG_CONFIG if set
+if((NOT PKG_CONFIG_EXECUTABLE) AND (NOT "$ENV{PKG_CONFIG}" STREQUAL ""))
+  set(PKG_CONFIG_EXECUTABLE "$ENV{PKG_CONFIG}" CACHE FILEPATH "pkg-config executable")
+endif()
 find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
@@ -387,7 +271,94 @@ endmacro()
 ### User visible macros start here
 ###
 
-###
+#[========================================[.rst:
+.. command:: pkg_check_modules
+
+ Checks for all the given modules. ::
+
+    pkg_check_modules(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
+
+ When the ``REQUIRED`` argument was set, macros will fail with an error
+ when module(s) could not be found.
+
+ When the ``QUIET`` argument is set, no status messages will be printed.
+
+ It sets the following variables: ::
+
+    PKG_CONFIG_FOUND          ... if pkg-config executable was found
+    PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
+    PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
+                                  (since CMake 2.8.8)
+
+ For the following variables two sets of values exist; first one is the
+ common one and has the given PREFIX.  The second set contains flags
+ which are given out when ``pkg-config`` was called with the ``--static``
+ option. ::
+
+    <XPREFIX>_FOUND          ... set to 1 if module(s) exist
+    <XPREFIX>_LIBRARIES      ... only the libraries (w/o the '-l')
+    <XPREFIX>_LIBRARY_DIRS   ... the paths of the libraries (w/o the '-L')
+    <XPREFIX>_LDFLAGS        ... all required linker flags
+    <XPREFIX>_LDFLAGS_OTHER  ... all other linker flags
+    <XPREFIX>_INCLUDE_DIRS   ... the '-I' preprocessor flags (w/o the '-I')
+    <XPREFIX>_CFLAGS         ... all required cflags
+    <XPREFIX>_CFLAGS_OTHER   ... the other compiler flags
+
+ ::
+
+    <XPREFIX> = <PREFIX>        for common case
+    <XPREFIX> = <PREFIX>_STATIC for static linking
+
+ There are some special variables whose prefix depends on the count of
+ given modules.  When there is only one module, <PREFIX> stays
+ unchanged.  When there are multiple modules, the prefix will be
+ changed to <PREFIX>_<MODNAME>: ::
+
+    <XPREFIX>_VERSION    ... version of the module
+    <XPREFIX>_PREFIX     ... prefix-directory of the module
+    <XPREFIX>_INCLUDEDIR ... include-dir of the module
+    <XPREFIX>_LIBDIR     ... lib-dir of the module
+
+ ::
+
+    <XPREFIX> = <PREFIX>  when |MODULES| == 1, else
+    <XPREFIX> = <PREFIX>_<MODNAME>
+
+ A <MODULE> parameter can have the following formats: ::
+
+    {MODNAME}            ... matches any version
+    {MODNAME}>={VERSION} ... at least version <VERSION> is required
+    {MODNAME}={VERSION}  ... exactly version <VERSION> is required
+    {MODNAME}<={VERSION} ... modules must not be newer than <VERSION>
+
+ Examples
+
+ .. code-block:: cmake
+
+    pkg_check_modules (GLIB2   glib-2.0)
+
+ .. code-block:: cmake
+
+    pkg_check_modules (GLIB2   glib-2.0>=2.10)
+
+ Requires at least version 2.10 of glib2 and defines e.g.
+ ``GLIB2_VERSION=2.10.3``
+
+ .. code-block:: cmake
+
+    pkg_check_modules (FOO     glib-2.0>=2.10 gtk+-2.0)
+
+ Requires both glib2 and gtk2, and defines e.g.
+ ``FOO_glib-2.0_VERSION=2.10.3`` and ``FOO_gtk+-2.0_VERSION=2.8.20``
+
+ .. code-block:: cmake
+
+    pkg_check_modules (XRENDER REQUIRED xrender)
+
+ Defines e.g.:
+ ``XRENDER_LIBRARIES=Xrender;X11`` and
+ ``XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp``
+#]========================================]
 macro(pkg_check_modules _prefix _module0)
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
@@ -398,7 +369,21 @@ macro(pkg_check_modules _prefix _module0)
   endif()
 endmacro()
 
-###
+
+#[========================================[.rst:
+.. command:: pkg_search_module
+
+ Same as :command:`pkg_check_modules`, but instead it checks for given
+ modules and uses the first working one. ::
+
+    pkg_search_module(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
+
+ Examples
+
+ .. code-block:: cmake
+
+    pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
+#]========================================]
 macro(pkg_search_module _prefix _module0)
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
@@ -429,6 +414,14 @@ macro(pkg_search_module _prefix _module0)
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
   endif()
 endmacro()
+
+
+#[========================================[.rst:
+.. variable:: PKG_CONFIG_EXECUTABLE
+
+ Path to the pkg-config executable.
+#]========================================]
+
 
 ### Local Variables:
 ### mode: cmake

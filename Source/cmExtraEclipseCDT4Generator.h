@@ -33,14 +33,14 @@ public:
     return new cmExtraEclipseCDT4Generator;
   }
 
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmExtraEclipseCDT4Generator::GetActualName();
   }
 
-  static const char* GetActualName() { return "Eclipse CDT4"; }
+  static std::string GetActualName() { return "Eclipse CDT4"; }
 
   virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const char*           fullName) const;
+                                const std::string&    fullName) const;
   virtual void EnableLanguage(std::vector<std::string> const& languages,
                               cmMakefile *, bool optional);
 

@@ -18,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
 #include "cmGeneratorTarget.h"
+#include "cmCustomCommandGenerator.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -35,7 +36,7 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
   , TargetNameReal()
   , TargetNameImport()
   , TargetNamePDB()
-  , TargetLinkLanguage(0)
+  , TargetLinkLanguage("")
 {
   this->TargetLinkLanguage = target->Target
                                    ->GetLinkerLanguage(this->GetConfigName());
@@ -72,10 +73,10 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 
 void cmNinjaNormalTargetGenerator::Generate()
 {
-  if (!this->TargetLinkLanguage) {
+  if (this->TargetLinkLanguage.empty()) {
     cmSystemTools::Error("CMake can not determine linker language for "
                          "target: ",
-                         this->GetTarget()->GetName());
+                         this->GetTarget()->GetName().c_str());
     return;
   }
 
@@ -109,9 +110,9 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
     << "\n\n";
 #endif
 
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   this->GetTarget()->GetLanguages(languages);
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end();
       ++l)
     this->WriteLanguageRules(*l);
@@ -140,7 +141,7 @@ std::string
 cmNinjaNormalTargetGenerator
 ::LanguageLinkerRule() const
 {
-  return std::string(this->TargetLinkLanguage)
+  return this->TargetLinkLanguage
     + "_"
     + cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
     + "_LINKER";
@@ -163,7 +164,7 @@ cmNinjaNormalTargetGenerator
     cmLocalGenerator::RuleVariables vars;
     vars.RuleLauncher = "RULE_LAUNCH_LINK";
     vars.CMTarget = this->GetTarget();
-    vars.Language = this->TargetLinkLanguage;
+    vars.Language = this->TargetLinkLanguage.c_str();
 
     std::string responseFlag;
     if (!useResponseFile) {
@@ -175,7 +176,7 @@ cmNinjaNormalTargetGenerator
 
         // build response file name
         std::string cmakeLinkVar =  cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-        const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar.c_str());
+        const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar);
         if(flag) {
           responseFlag = flag;
         } else {
@@ -189,7 +190,7 @@ cmNinjaNormalTargetGenerator
         linkOptionVar += "_COMPILER_LINKER_OPTION_FLAG_";
         linkOptionVar += cmTarget::GetTargetTypeName(targetType);
         const std::string linkOption =
-                GetMakefile()->GetSafeDefinition(linkOptionVar.c_str());
+                GetMakefile()->GetSafeDefinition(linkOptionVar);
         rspcontent = "$in_newline "+linkOption+" $LINK_PATH $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
         vars.LinkLibraries = "";
@@ -321,7 +322,7 @@ cmNinjaNormalTargetGenerator
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_CREATE_STATIC_LIBRARY";
       if (const char *linkCmd =
-            this->GetMakefile()->GetDefinition(linkCmdVar.c_str()))
+            this->GetMakefile()->GetDefinition(linkCmdVar))
         {
         cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
         return linkCmds;
@@ -341,7 +342,7 @@ cmNinjaNormalTargetGenerator
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_CREATE";
       const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+        this->GetMakefile()->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       {
@@ -349,7 +350,7 @@ cmNinjaNormalTargetGenerator
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_FINISH";
       const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+        this->GetMakefile()->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       return linkCmds;
@@ -374,7 +375,7 @@ cmNinjaNormalTargetGenerator
       }
 
       const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+        this->GetMakefile()->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       return linkCmds;
     }
@@ -497,7 +498,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
       if (!install_name_dir.empty()) {
         vars["INSTALLNAME_DIR"] =
-          this->GetLocalGenerator()->Convert(install_name_dir.c_str(),
+          this->GetLocalGenerator()->Convert(install_name_dir,
               cmLocalGenerator::NONE,
               cmLocalGenerator::SHELL, false);
       }
@@ -506,7 +507,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   if (!this->TargetNameImport.empty()) {
     const std::string impLibPath = this->GetLocalGenerator()
-      ->ConvertToOutputFormat(targetOutputImplib.c_str(),
+      ->ConvertToOutputFormat(targetOutputImplib,
                               cmLocalGenerator::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
@@ -555,7 +556,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     for (std::vector<cmCustomCommand>::const_iterator
          ci = cmdLists[i]->begin();
          ci != cmdLists[i]->end(); ++ci) {
-      this->GetLocalGenerator()->AppendCustomCommandLines(&*ci,
+      cmCustomCommandGenerator ccg(*ci, this->GetConfigName(),
+                                   this->GetMakefile());
+      this->GetLocalGenerator()->AppendCustomCommandLines(ccg,
                                                           *cmdLineLists[i]);
     }
   }
@@ -591,7 +594,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       cmSystemTools::GetEnv(forceRspFile) == 0) {
 #ifdef _WIN32
     commandLineLengthLimit = 8000 - linkRuleLength;
-#elif defined(__linux) || defined(__APPLE__)
+#elif defined(__linux) || defined(__APPLE__) || defined(__HAIKU__)
     // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
     commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))-linkRuleLength-1000;
 #else

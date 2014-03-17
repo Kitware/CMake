@@ -67,7 +67,12 @@
 #  * Mandatory : YES
 #  * Default   : 'devel'
 #
-#  The debian package section
+# .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
+#
+#  * Mandatory : YES
+#  * Default   : 'gzip'
+#
+#     Possible values are: lzma, xz, bzip2 and gzip.
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_PRIORITY
 #
@@ -389,6 +394,12 @@ endif()
 if(NOT CPACK_DEBIAN_PACKAGE_PRIORITY)
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 endif()
+
+# Compression: (recommended)
+if(NOT CPACK_DEBIAN_COMPRESSION_TYPE)
+  set(CPACK_DEBIAN_COMPRESSION_TYPE "gzip")
+endif()
+
 
 # Recommends:
 # You should set: CPACK_DEBIAN_PACKAGE_RECOMMENDS

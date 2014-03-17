@@ -31,7 +31,7 @@ bool cmSiteNameCommand
   paths.push_back("/usr/local/bin");
 
   const char* cacheValue
-    = this->Makefile->GetDefinition(args[0].c_str());
+    = this->Makefile->GetDefinition(args[0]);
   if(cacheValue)
     {
     return true;
@@ -85,7 +85,7 @@ bool cmSiteNameCommand
     }
 #endif
   this->Makefile->
-    AddCacheDefinition(args[0].c_str(),
+    AddCacheDefinition(args[0],
                        siteName.c_str(),
                        "Name of the computer/site where compile is being run",
                        cmCacheManager::STRING);

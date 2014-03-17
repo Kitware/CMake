@@ -181,7 +181,7 @@ struct cmELFTypes32
   static const char* GetName() { return "32-bit"; }
 };
 
-// Configure the implementation template for 32-bit ELF files.
+// Configure the implementation template for 64-bit ELF files.
 struct cmELFTypes64
 {
   typedef Elf64_Ehdr ELF_Ehdr;

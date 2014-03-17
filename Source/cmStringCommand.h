@@ -50,7 +50,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "string";}
+  virtual std::string GetName() const { return "string";}
 
   cmTypeMacro(cmStringCommand, cmCommand);
   static void ClearMatches(cmMakefile* mf);

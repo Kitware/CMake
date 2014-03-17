@@ -74,11 +74,11 @@ protected:
    * element.  atts = Null-terminated array of attribute name/value pairs.
    * Even indices are attribute names, and odd indices are values.
    */
-  virtual void StartElement(const char* name, const char** atts);
+  virtual void StartElement(const std::string& name, const char** atts);
 
   //! Called at the end of an element in the XML source opened when
   //StartElement was called.
-  virtual void EndElement(const char* name);
+  virtual void EndElement(const std::string& name);
 
   //! Called when there is character data to handle.
   virtual void CharacterDataHandler(const char* data, int length);

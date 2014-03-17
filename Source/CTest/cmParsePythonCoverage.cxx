@@ -20,9 +20,9 @@ public:
 
 protected:
 
-  virtual void StartElement(const char* name, const char** atts)
+  virtual void StartElement(const std::string& name, const char** atts)
   {
-    if(strcmp(name, "class") == 0)
+    if(name == "class")
     {
       int tagCount = 0;
       while(true)
@@ -57,7 +57,7 @@ protected:
         ++tagCount;
       }
     }
-    else if(strcmp(name, "line") == 0)
+    else if(name == "line")
     {
       int tagCount = 0;
       int curNumber = -1;
@@ -85,7 +85,7 @@ protected:
     }
   }
 
-  virtual void EndElement(const char*) {}
+  virtual void EndElement(const std::string&) {}
 
 private:
 

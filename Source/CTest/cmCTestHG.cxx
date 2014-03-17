@@ -149,8 +149,8 @@ bool cmCTestHG::UpdateImpl()
     {
     opts = this->CTest->GetCTestConfiguration("HGUpdateOptions");
     }
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(opts.c_str());
-  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
+  for(std::vector<std::string>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     hg_update.push_back(ai->c_str());
@@ -189,10 +189,10 @@ private:
     return true;
     }
 
-  virtual void StartElement(const char* name, const char** atts)
+  virtual void StartElement(const std::string& name, const char** atts)
     {
     this->CData.clear();
-    if(strcmp(name, "logentry") == 0)
+    if(name == "logentry")
       {
       this->Rev = Revision();
       if(const char* rev = this->FindAttribute(atts, "revision"))
@@ -208,29 +208,29 @@ private:
     this->CData.insert(this->CData.end(), data, data+length);
     }
 
-  virtual void EndElement(const char* name)
+  virtual void EndElement(const std::string& name)
     {
-    if(strcmp(name, "logentry") == 0)
+    if(name == "logentry")
       {
       this->HG->DoRevision(this->Rev, this->Changes);
       }
-    else if(strcmp(name, "author") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "author")
       {
       this->Rev.Author.assign(&this->CData[0], this->CData.size());
       }
-    else if ( strcmp(name, "email") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "email")
       {
       this->Rev.EMail.assign(&this->CData[0], this->CData.size());
       }
-    else if(strcmp(name, "date") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "date")
       {
       this->Rev.Date.assign(&this->CData[0], this->CData.size());
       }
-    else if(strcmp(name, "msg") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "msg")
       {
       this->Rev.Log.assign(&this->CData[0], this->CData.size());
       }
-    else if(strcmp(name, "files") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "files")
       {
       std::vector<std::string> paths = this->SplitCData();
       for(unsigned int i = 0; i < paths.size(); ++i)
@@ -242,7 +242,7 @@ private:
         this->Changes.push_back(this->CurChange);
         }
       }
-    else if(strcmp(name, "file_adds") == 0 && !this->CData.empty())
+    else if(!this->CData.empty() && name == "file_adds")
       {
       std::string added_paths(this->CData.begin(), this->CData.end());
       for(unsigned int i = 0; i < this->Changes.size(); ++i)
@@ -253,7 +253,7 @@ private:
           }
         }
       }
-     else if(strcmp(name, "file_dels") == 0 && !this->CData.empty())
+     else if(!this->CData.empty() && name == "file_dels")
       {
       std::string added_paths(this->CData.begin(), this->CData.end());
       for(unsigned int i = 0; i < this->Changes.size(); ++i)

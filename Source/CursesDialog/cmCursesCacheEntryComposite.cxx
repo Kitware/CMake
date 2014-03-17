@@ -19,9 +19,10 @@
 #include "cmCursesDummyWidget.h"
 #include "../cmSystemTools.h"
 
-cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
-                                                         int labelwidth,
-                                                         int entrywidth) :
+cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
+                                                        const std::string& key,
+                                                        int labelwidth,
+                                                        int entrywidth) :
   Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
   this->Label = new cmCursesLabelWidget(this->LabelWidth, 1, 1, 1, key);
@@ -31,7 +32,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(const char* key,
 }
 
 cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
-  const char* key, const cmCacheManager::CacheIterator& it, bool isNew,
+  const std::string& key, const cmCacheManager::CacheIterator& it, bool isNew,
   int labelwidth, int entrywidth)
   : Key(key), LabelWidth(labelwidth), EntryWidth(entrywidth)
 {
@@ -50,7 +51,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     {
     case  cmCacheManager::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
-      if (cmSystemTools::IsOn(it.GetValue()))
+      if (cmSystemTools::IsOn(it.GetValue().c_str()))
         {
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(true);
         }
@@ -93,7 +94,8 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         }
       break;
     case cmCacheManager::UNINITIALIZED:
-      cmSystemTools::Error("Found an undefined variable: ", it.GetName());
+      cmSystemTools::Error("Found an undefined variable: ",
+                           it.GetName().c_str());
       break;
     default:
       // TODO : put warning message here

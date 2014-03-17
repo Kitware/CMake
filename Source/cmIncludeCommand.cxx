@@ -65,7 +65,7 @@ bool cmIncludeCommand
         {
         std::string errorText = "called with invalid argument: ";
         errorText += args[i];
-        this->SetError(errorText.c_str());
+        this->SetError(errorText);
         return false;
         }
     }
@@ -121,7 +121,7 @@ bool cmIncludeCommand
         "command.  It " << modal << " not be used as the argument to the "
         "include() command.  Use ALIAS targets instead to refer to targets "
         "by alternative names.\n";
-      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      this->Makefile->IssueMessage(messageType, e.str());
       if (messageType == cmake::FATAL_ERROR)
         {
         return false;
@@ -139,7 +139,7 @@ bool cmIncludeCommand
   // add the location of the included file if a result variable was given
   if (resultVarName.size())
     {
-      this->Makefile->AddDefinition(resultVarName.c_str(),
+      this->Makefile->AddDefinition(resultVarName,
                                     readit?fullFilePath.c_str():"NOTFOUND");
     }
 
@@ -149,7 +149,7 @@ bool cmIncludeCommand
       "could not find load file:\n"
       "  ";
     m += fname;
-    this->SetError(m.c_str());
+    this->SetError(m);
     return false;
     }
   return true;

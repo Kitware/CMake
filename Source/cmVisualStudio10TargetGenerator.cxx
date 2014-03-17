@@ -19,6 +19,7 @@
 #include "cmSourceFile.h"
 #include "cmVisualStudioGeneratorOptions.h"
 #include "cmLocalVisualStudio7Generator.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmVS10CLFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
@@ -140,7 +141,7 @@ cmVisualStudio10TargetGenerator::~cmVisualStudio10TargetGenerator()
 
 void cmVisualStudio10TargetGenerator::WritePlatformConfigTag(
   const char* tag,
-  const char* config,
+  const std::string& config,
   int indentLevel,
   const char* attribute,
   const char* end,
@@ -616,8 +617,6 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
       }
     }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
-  std::string comment = lg->ConstructComment(command);
-  comment = cmVS10EscapeComment(comment);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
@@ -627,8 +626,11 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
   for(std::vector<std::string>::iterator i = configs->begin();
       i != configs->end(); ++i)
     {
+    cmCustomCommandGenerator ccg(command, *i, this->Makefile);
+    std::string comment = lg->ConstructComment(ccg);
+    comment = cmVS10EscapeComment(comment);
     std::string script =
-      cmVS10EscapeXML(lg->ConstructScript(command, i->c_str()));
+      cmVS10EscapeXML(lg->ConstructScript(ccg));
     this->WritePlatformConfigTag("Message",i->c_str(), 3);
     (*this->BuildFileStream ) << cmVS10EscapeXML(comment) << "</Message>\n";
     this->WritePlatformConfigTag("Command", i->c_str(), 3);
@@ -637,8 +639,8 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
 
     (*this->BuildFileStream ) << source->GetFullPath();
     for(std::vector<std::string>::const_iterator d =
-          command.GetDepends().begin();
-        d != command.GetDepends().end();
+          ccg.GetDepends().begin();
+        d != ccg.GetDepends().end();
         ++d)
       {
       std::string dep;
@@ -652,8 +654,8 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile* source,
     this->WritePlatformConfigTag("Outputs", i->c_str(), 3);
     const char* sep = "";
     for(std::vector<std::string>::const_iterator o =
-          command.GetOutputs().begin();
-        o != command.GetOutputs().end();
+          ccg.GetOutputs().begin();
+        o != ccg.GetOutputs().end();
         ++o)
       {
       std::string out = *o;
@@ -1012,18 +1014,18 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
         si = objectSources.begin();
       si != objectSources.end(); ++si)
     {
-    const char* lang = (*si)->GetLanguage();
+    const std::string& lang = (*si)->GetLanguage();
     const char* tool = NULL;
-    if (strcmp(lang, "C") == 0 || strcmp(lang, "CXX") == 0)
+    if (lang == "C"|| lang == "CXX")
       {
       tool = "ClCompile";
       }
-    else if (strcmp(lang, "ASM_MASM") == 0 &&
+    else if (lang == "ASM_NASM" &&
              this->GlobalGenerator->IsMasmEnabled())
       {
       tool = "MASM";
       }
-    else if (strcmp(lang, "RC") == 0)
+    else if (lang == "RC")
       {
       tool = "ResourceCompile";
       }
@@ -1108,29 +1110,28 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     {
     defines += cdefs;
     }
-  const char* lang =
+  std::string lang =
     this->GlobalGenerator->GetLanguageFromExtension
     (sf.GetExtension().c_str());
-  const char* sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
-  const char* linkLanguage = this->Target->GetLinkerLanguage();
+  std::string sourceLang = this->LocalGenerator->GetSourceFileLanguage(sf);
+  const std::string& linkLanguage = this->Target->GetLinkerLanguage();
   bool needForceLang = false;
   // source file does not match its extension language
-  if(lang && sourceLang && strcmp(lang, sourceLang) != 0)
+  if(lang != sourceLang)
     {
     needForceLang = true;
     lang = sourceLang;
     }
   // if the source file does not match the linker language
   // then force c or c++
-  if(needForceLang || (linkLanguage && lang
-                       && strcmp(lang, linkLanguage) != 0))
+  if(needForceLang || (linkLanguage != lang))
     {
-    if(strcmp(lang, "CXX") == 0)
+    if(lang == "CXX")
       {
       // force a C++ file type
       flags += " /TP ";
       }
-    else if(strcmp(lang, "C") == 0)
+    else if(lang == "C")
       {
       // force to c
       flags += " /TC ";
@@ -1341,17 +1342,17 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // collect up flags for
   if(this->Target->GetType() < cmTarget::UTILITY)
     {
-    const char* linkLanguage =
+    const std::string& linkLanguage =
       this->Target->GetLinkerLanguage(configName.c_str());
-    if(!linkLanguage)
+    if(linkLanguage.empty())
       {
       cmSystemTools::Error
         ("CMake can not determine linker language for target: ",
          this->Name.c_str());
       return false;
       }
-    if(strcmp(linkLanguage, "C") == 0 || strcmp(linkLanguage, "CXX") == 0
-       || strcmp(linkLanguage, "Fortran") == 0)
+    if(linkLanguage == "C" || linkLanguage == "CXX"
+       || linkLanguage == "Fortran")
       {
       std::string baseFlagVar = "CMAKE_";
       baseFlagVar += linkLanguage;
@@ -1365,11 +1366,11 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
         Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
       }
     // set the correct language
-    if(strcmp(linkLanguage, "C") == 0)
+    if(linkLanguage == "C")
       {
       flags += " /TC ";
       }
-    if(strcmp(linkLanguage, "CXX") == 0)
+    if(linkLanguage == "CXX")
       {
       flags += " /TP ";
       }
@@ -1427,6 +1428,17 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
   this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
+
+  // Specify the compiler program database file if configured.
+  std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
+  if(!pdb.empty())
+    {
+    this->ConvertToWindowsSlash(pdb);
+    this->WriteString("<ProgramDataBaseFileName>", 3);
+    *this->BuildFileStream << cmVS10EscapeXML(pdb)
+                           << "</ProgramDataBaseFileName>\n";
+    }
+
   this->WriteString("</ClCompile>\n", 2);
 }
 
@@ -1514,9 +1526,9 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
                 cmVSGetLinkFlagTable(this->LocalGenerator), 0, this));
   Options& linkOptions = *pOptions;
 
-  const char* linkLanguage =
+  const std::string& linkLanguage =
     this->Target->GetLinkerLanguage(config.c_str());
-  if(!linkLanguage)
+  if(linkLanguage.empty())
     {
     cmSystemTools::Error
       ("CMake can not determine linker language for target: ",
@@ -1666,10 +1678,10 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
-  if(!this->GeneratorTarget->ModuleDefinitionFile.empty())
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  if(!def.empty())
     {
-    linkOptions.AddFlag("ModuleDefinitionFile",
-                        this->GeneratorTarget->ModuleDefinitionFile.c_str());
+    linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
     }
 
   this->LinkOptions[config] = pOptions.release();
@@ -1825,13 +1837,12 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    const cmCustomCommand& command = *i;
+    cmCustomCommandGenerator ccg(*i, configName, this->Makefile);
     comment += pre;
-    comment += lg->ConstructComment(command);
+    comment += lg->ConstructComment(ccg);
     script += pre;
     pre = "\n";
-    script +=
-      cmVS10EscapeXML(lg->ConstructScript(command, configName.c_str()));
+    script += cmVS10EscapeXML(lg->ConstructScript(ccg));
     }
   comment = cmVS10EscapeComment(comment);
   this->WriteString("<Message>",3);

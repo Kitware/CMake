@@ -241,11 +241,11 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     {
     // Make the generator available for the Build call below.
     cm.SetGlobalGenerator(cm.CreateGlobalGenerator(
-                            this->BuildGenerator.c_str()));
+                            this->BuildGenerator));
     cm.SetGeneratorToolset(this->BuildGeneratorToolset);
 
     // Load the cache to make CMAKE_MAKE_PROGRAM available.
-    cm.GetCacheManager()->LoadCache(this->BinaryDir.c_str());
+    cm.GetCacheManager()->LoadCache(this->BinaryDir);
     }
   else
     {
@@ -295,9 +295,9 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       config = "Debug";
       }
     int retVal = cm.GetGlobalGenerator()->Build(
-      this->SourceDir.c_str(), this->BinaryDir.c_str(),
-      this->BuildProject.c_str(), tarIt->c_str(),
-      &output, this->BuildMakeProgram.c_str(),
+      this->SourceDir, this->BinaryDir,
+      this->BuildProject, *tarIt,
+      &output, this->BuildMakeProgram,
       config,
       !this->BuildNoClean,
       false, remainingTime);

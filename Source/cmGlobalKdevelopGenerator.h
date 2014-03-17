@@ -33,14 +33,14 @@ class cmGlobalKdevelopGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmGlobalKdevelopGenerator();
 
-  virtual const char* GetName() const
+  virtual std::string GetName() const
                           { return cmGlobalKdevelopGenerator::GetActualName();}
-  static const char* GetActualName()                     { return "KDevelop3";}
+  static std::string GetActualName()                     { return "KDevelop3";}
   static cmExternalMakefileProjectGenerator* New()
                                       { return new cmGlobalKdevelopGenerator; }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const char* fullName) const;
+                                const std::string& fullName) const;
 
   virtual void Generate();
 private:

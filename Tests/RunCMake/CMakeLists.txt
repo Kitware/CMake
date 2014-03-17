@@ -3,8 +3,8 @@
 macro(add_RunCMake_test test)
   add_test(RunCMake.${test} ${CMAKE_CMAKE_COMMAND}
     -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
-    -DRunCMake_GENERATOR=${CMAKE_TEST_GENERATOR}
-    -DRunCMake_GENERATOR_TOOLSET=${CMAKE_TEST_GENERATOR_TOOLSET}
+    -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
+    -DRunCMake_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
     -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test}
     -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${test}
     ${${test}_ARGS}
@@ -35,19 +35,21 @@ add_RunCMake_test(CMP0046)
 add_RunCMake_test(CMP0049)
 add_RunCMake_test(CMP0050)
 add_RunCMake_test(CTest)
-if(UNIX AND "${CMAKE_TEST_GENERATOR}" MATCHES "Unix Makefiles")
+if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles")
   add_RunCMake_test(CompilerChange)
 endif()
 add_RunCMake_test(CompilerNotFound)
 add_RunCMake_test(Configure)
 add_RunCMake_test(DisallowedCommands)
 add_RunCMake_test(ExternalData)
+add_RunCMake_test(FeatureSummary)
 add_RunCMake_test(FPHSA)
 add_RunCMake_test(GeneratorExpression)
 add_RunCMake_test(GeneratorToolset)
 add_RunCMake_test(TargetPropertyGeneratorExpressions)
 add_RunCMake_test(Languages)
 add_RunCMake_test(ObjectLibrary)
+add_RunCMake_test(find_dependency)
 if(NOT WIN32)
   add_RunCMake_test(PositionIndependentCode)
   set(SKIP_VISIBILITY 0)
@@ -105,7 +107,7 @@ if (QT4_FOUND)
   add_RunCMake_test(ObsoleteQtMacros)
 endif()
 
-if("${CMAKE_TEST_GENERATOR}" MATCHES "Visual Studio [^6]")
+if("${CMAKE_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(include_external_msproject)
   add_RunCMake_test(SolutionGlobalSections)
 endif()

@@ -33,7 +33,7 @@ public:
     {
     return new cmFindFileCommand;
     }
-  virtual const char* GetName() const { return "find_file";}
+  virtual std::string GetName() const { return "find_file";}
 
   cmTypeMacro(cmFindFileCommand, cmFindPathCommand);
 };

@@ -26,7 +26,7 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator(const char* platformName = NULL);
+  cmGlobalVisualStudio7Generator(const std::string& platformName = "");
   ~cmGlobalVisualStudio7Generator();
 
   static cmGlobalGeneratorFactory* NewFactory() {
@@ -34,12 +34,12 @@ public:
       <cmGlobalVisualStudio7Generator>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalVisualStudio7Generator::GetActualName();}
-  static const char* GetActualName() {return "Visual Studio 7";}
+  static std::string GetActualName() {return "Visual Studio 7";}
 
   ///! Get the name for the platform.
-  const char* GetPlatformName() const { return this->PlatformName.c_str(); }
+  const std::string& GetPlatformName() const { return this->PlatformName; }
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -62,11 +62,11 @@ public:
    */
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
-    const char* makeProgram,
-    const char* projectName,
-    const char* projectDir,
-    const char* targetName,
-    const char* config,
+    const std::string& makeProgram,
+    const std::string& projectName,
+    const std::string& projectDir,
+    const std::string& targetName,
+    const std::string& config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
@@ -89,13 +89,13 @@ public:
   std::vector<std::string> *GetConfigurations();
 
   ///! Create a GUID or get an existing one.
-  void CreateGUID(const char* name);
-  std::string GetGUID(const char* name);
+  void CreateGUID(const std::string& name);
+  std::string GetGUID(const std::string& name);
 
   /** Append the subdirectory for the given configuration.  */
-  virtual void AppendDirectoryForConfig(const char* prefix,
-                                        const char* config,
-                                        const char* suffix,
+  virtual void AppendDirectoryForConfig(const std::string& prefix,
+                                        const std::string& config,
+                                        const std::string& suffix,
                                         std::string& dir);
 
   ///! What is the configurations directory variable called?
@@ -123,15 +123,15 @@ protected:
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
   virtual void WriteProject(std::ostream& fout,
-                            const char* name, const char* path,
+                            const std::string& name, const char* path,
                             cmTarget const& t);
   virtual void WriteProjectDepends(std::ostream& fout,
-                           const char* name, const char* path,
+                           const std::string& name, const char* path,
                            cmTarget const&t);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name, cmTarget::TargetType type,
+    std::ostream& fout, const std::string& name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
-    const char* platformMapping = NULL);
+    const std::string& platformMapping = "");
   virtual void WriteSLNGlobalSections(std::ostream& fout,
                                       cmLocalGenerator* root);
   virtual void WriteSLNFooter(std::ostream& fout);
@@ -153,18 +153,18 @@ protected:
   void GenerateConfigurations(cmMakefile* mf);
 
   virtual void WriteExternalProject(std::ostream& fout,
-                                    const char* name,
+                                    const std::string& name,
                                     const char* path,
                                     const char* typeGuid,
-                                    const std::set<cmStdString>&
+                                    const std::set<std::string>&
                                     dependencies);
 
   std::string ConvertToSolutionPath(const char* path);
 
-  std::set<std::string> IsPartOfDefaultBuild(const char* project,
+  std::set<std::string> IsPartOfDefaultBuild(const std::string& project,
                                              cmTarget const* target);
   std::vector<std::string> Configurations;
-  std::map<cmStdString, cmStdString> GUIDMap;
+  std::map<std::string, std::string> GUIDMap;
 
   virtual void WriteFolders(std::ostream& fout);
   virtual void WriteFoldersContent(std::ostream& fout);

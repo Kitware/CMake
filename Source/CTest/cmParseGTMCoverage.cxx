@@ -182,7 +182,7 @@ bool cmParseGTMCoverage::ParseMCOVLine(std::string const& line,
   //          ( file  , entry ) = "number_executed:timing_info"
   // ^COVERAGE("%RSEL","init",8,"FOR_LOOP",1)=1
   //          ( file  , entry, line, IGNORE ) =number_executed
-  std::vector<cmStdString> args;
+  std::vector<std::string> args;
   std::string::size_type pos = line.find('(', 0);
   // if no ( is found, then return line has no coverage
   if(pos == std::string::npos)

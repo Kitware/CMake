@@ -46,10 +46,10 @@ void cmCursesWidget::Move(int x, int y, bool isNewPage)
     }
 }
 
-void cmCursesWidget::SetValue(const char* value)
+void cmCursesWidget::SetValue(const std::string& value)
 {
   this->Value = value;
-  set_field_buffer(this->Field, 0, value);
+  set_field_buffer(this->Field, 0, value.c_str());
 }
 
 const char* cmCursesWidget::GetValue()

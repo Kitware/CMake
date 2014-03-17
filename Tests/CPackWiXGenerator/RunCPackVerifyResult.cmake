@@ -10,7 +10,12 @@ message(STATUS "CMAKE_COMMAND: ${CMAKE_COMMAND}")
 message(STATUS "CMAKE_CPACK_COMMAND: ${CMAKE_CPACK_COMMAND}")
 message(STATUS "CPackWiXGenerator_BINARY_DIR: ${CPackWiXGenerator_BINARY_DIR}")
 
+if(config)
+  set(_C_config -C ${config})
+endif()
+
 execute_process(COMMAND "${CMAKE_CPACK_COMMAND}"
+                        ${_C_config}
   RESULT_VARIABLE CPack_result
   OUTPUT_VARIABLE CPack_output
   ERROR_VARIABLE CPack_error

@@ -66,7 +66,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "while";}
+  virtual std::string GetName() const { return "while";}
 
   cmTypeMacro(cmWhileCommand, cmCommand);
 };

@@ -87,8 +87,8 @@ public:
   // ctest -j N will break for that feature
   struct cmCTestTestProperties
   {
-    cmStdString Name;
-    cmStdString Directory;
+    std::string Name;
+    std::string Directory;
     std::vector<std::string> Args;
     std::vector<std::string> RequiredFiles;
     std::vector<std::string> Depends;
@@ -98,7 +98,7 @@ public:
                           std::string> > ErrorRegularExpressions;
     std::vector<std::pair<cmsys::RegularExpression,
                           std::string> > RequiredRegularExpressions;
-    std::map<cmStdString, cmStdString> Measurements;
+    std::map<std::string, std::string> Measurements;
     bool IsInBasedOnREOptions;
     bool WillFail;
     float Cost;
@@ -162,7 +162,7 @@ protected:
   virtual int PreProcessHandler();
   virtual int PostProcessHandler();
   virtual void GenerateTestCommand(std::vector<std::string>& args, int test);
-  int ExecuteCommands(std::vector<cmStdString>& vec);
+  int ExecuteCommands(std::vector<std::string>& vec);
 
   void WriteTestResultHeader(std::ostream& os, cmCTestTestResult* result);
   void WriteTestResultFooter(std::ostream& os, cmCTestTestResult* result);
@@ -177,7 +177,7 @@ protected:
   typedef std::vector<cmCTestTestResult> TestResultsVector;
   TestResultsVector    TestResults;
 
-  std::vector<cmStdString> CustomTestsIgnore;
+  std::vector<std::string> CustomTestsIgnore;
   std::string             StartTest;
   std::string             EndTest;
   unsigned int            StartTestTime;
@@ -210,8 +210,8 @@ private:
   /**
    * Run the tests for a directory and any subdirectories
    */
-  void ProcessDirectory(std::vector<cmStdString> &passed,
-                        std::vector<cmStdString> &failed);
+  void ProcessDirectory(std::vector<std::string> &passed,
+                        std::vector<std::string> &failed);
 
   /**
    * Get the list of tests in directory and subdirectories.
@@ -251,8 +251,8 @@ private:
   void ExpandTestsToRunInformation(size_t numPossibleTests);
   void ExpandTestsToRunInformationForRerunFailed();
 
-  std::vector<cmStdString> CustomPreTest;
-  std::vector<cmStdString> CustomPostTest;
+  std::vector<std::string> CustomPreTest;
+  std::vector<std::string> CustomPostTest;
 
   std::vector<int>        TestsToRun;
 

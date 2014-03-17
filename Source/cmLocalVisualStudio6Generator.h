@@ -48,7 +48,7 @@ public:
   /**
    * Specify the type of the build: static, dll, or executable.
    */
-  void SetBuildType(BuildType, const char* libName, cmTarget&);
+  void SetBuildType(BuildType, const std::string& libName, cmTarget&);
 
   virtual std::string GetTargetDirectory(cmTarget const& target) const;
   virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
@@ -56,15 +56,15 @@ private:
   std::string DSPHeaderTemplate;
   std::string DSPFooterTemplate;
 
-  void CreateSingleDSP(const char *lname, cmTarget &tgt);
-  void WriteDSPFile(std::ostream& fout, const char *libName,
+  void CreateSingleDSP(const std::string& lname, cmTarget &tgt);
+  void WriteDSPFile(std::ostream& fout, const std::string& libName,
                     cmTarget &tgt);
   void WriteDSPBeginGroup(std::ostream& fout,
                           const char* group,
                           const char* filter);
   void WriteDSPEndGroup(std::ostream& fout);
 
-  void WriteDSPHeader(std::ostream& fout, const char *libName,
+  void WriteDSPHeader(std::ostream& fout, const std::string& libName,
                       cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
 
   void WriteDSPFooter(std::ostream& fout);
@@ -77,20 +77,21 @@ private:
                              std::vector<std::string>& depends,
                              const cmCustomCommand& origCommand);
   void WriteGroup(const cmSourceGroup *sg, cmTarget& target,
-                  std::ostream &fout, const char *libName);
+                  std::ostream &fout, const std::string& libName);
   class EventWriter;
   friend class EventWriter;
   cmsys::auto_ptr<cmCustomCommand>
-  MaybeCreateOutputDir(cmTarget& target, const char* config);
+  MaybeCreateOutputDir(cmTarget& target, const std::string& config);
   std::string CreateTargetRules(cmTarget &target,
-                                const char* configName,
-                                const char *libName);
-  void ComputeLinkOptions(cmTarget& target, const char* configName,
+                                const std::string& configName,
+                                const std::string& libName);
+  void ComputeLinkOptions(cmTarget& target, const std::string& configName,
                           const std::string extraOptions,
                           std::string& options);
   void OutputObjects(cmTarget& target, const char* tool,
                      std::string& options);
-  std::string GetTargetIncludeOptions(cmTarget &target, const char *config);
+  std::string GetTargetIncludeOptions(cmTarget &target,
+                                      const std::string& config);
   std::vector<std::string> Configurations;
 
   std::string GetConfigName(std::string const& configuration) const;

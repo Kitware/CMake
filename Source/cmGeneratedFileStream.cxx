@@ -249,12 +249,7 @@ int cmGeneratedFileStreamBase::RenameFile(const char* oldname,
 }
 
 //----------------------------------------------------------------------------
-void cmGeneratedFileStream::SetName(const char* fname)
+void cmGeneratedFileStream::SetName(const std::string& fname)
 {
-  if ( !fname )
-    {
-    this->Name = "";
-    return;
-    }
   this->Name = fname;
 }

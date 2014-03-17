@@ -21,10 +21,11 @@ public:
                    TEST, VARIABLE, CACHED_VARIABLE };
 
   // set this property
-  void Set(const char *name, const char *value);
+  void Set(const std::string& name, const char *value);
 
   // append to this property
-  void Append(const char *name, const char *value, bool asString = false);
+  void Append(const std::string& name, const char *value,
+              bool asString = false);
 
   // get the value
   const char *GetValue() const;

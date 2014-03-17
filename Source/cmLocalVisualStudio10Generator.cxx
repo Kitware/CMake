@@ -19,7 +19,7 @@
 class cmVS10XMLParser : public cmXMLParser
 {
   public:
-  virtual void EndElement(const char* /* name */)
+  virtual void EndElement(const std::string& /* name */)
     {
     }
   virtual void CharacterDataHandler(const char* data, int length)
@@ -30,14 +30,14 @@ class cmVS10XMLParser : public cmXMLParser
         this->DoGUID = false;
         }
     }
-  virtual void StartElement(const char* name, const char**)
+  virtual void StartElement(const std::string& name, const char**)
     {
       // once the GUID is found do nothing
       if(this->GUID.size())
         {
         return;
         }
-      if(strcmp("ProjectGUID", name) == 0 || strcmp("ProjectGuid", name) == 0)
+      if("ProjectGUID" == name || "ProjectGuid" == name)
         {
         this->DoGUID = true;
         }
@@ -98,7 +98,7 @@ void cmLocalVisualStudio10Generator::Generate()
 
 
 void cmLocalVisualStudio10Generator
-::ReadAndStoreExternalGUID(const char* name,
+::ReadAndStoreExternalGUID(const std::string& name,
                            const char* path)
 {
   cmVS10XMLParser parser;

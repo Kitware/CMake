@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "set";}
+  virtual std::string GetName() const {return "set";}
 
   cmTypeMacro(cmSetCommand, cmCommand);
 };

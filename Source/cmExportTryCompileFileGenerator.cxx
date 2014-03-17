@@ -46,8 +46,9 @@ bool cmExportTryCompileFileGenerator::GenerateMainFile(std::ostream& os)
   return true;
 }
 
-std::string cmExportTryCompileFileGenerator::FindTargets(const char *propName,
-                                                cmTarget const* tgt,
+std::string cmExportTryCompileFileGenerator::FindTargets(
+                                          const std::string& propName,
+                                          cmTarget const* tgt,
                                           std::set<cmTarget const*> &emitted)
 {
   const char *prop = tgt->GetProperty(propName);
@@ -101,7 +102,7 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
       {
       const std::string libs = i->second.GetValue();
 
-      std::string evalResult = this->FindTargets(i->first.c_str(),
+      std::string evalResult = this->FindTargets(i->first,
                                                  target, emitted);
 
       std::vector<std::string> depends;
@@ -128,7 +129,7 @@ cmExportTryCompileFileGenerator::InstallNameDir(cmTarget* target,
   if(mf->IsOn("CMAKE_PLATFORM_HAS_INSTALLNAME"))
     {
     install_name_dir =
-      target->GetInstallNameDirForBuildTree(config.c_str());
+      target->GetInstallNameDirForBuildTree(config);
     }
 
   return install_name_dir;
