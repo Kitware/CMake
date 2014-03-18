@@ -84,8 +84,6 @@ public:
    */
   void TraceDependencies();
 
-  void LookupObjectLibraries();
-
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const*
   GetSourceDepends(cmSourceFile const* sf) const;
@@ -127,7 +125,6 @@ private:
 
   std::map<cmSourceFile const*, std::string> Objects;
   std::set<cmSourceFile const*> ExplicitObjectName;
-  std::vector<cmTarget*> ObjectLibraries;
   mutable std::map<std::string, std::vector<std::string> > SystemIncludesCache;
 
   void ConstructSourceFileFlags() const;
