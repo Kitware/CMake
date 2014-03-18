@@ -286,3 +286,9 @@ string(MAKE_C_IDENTIFIER "1one-two$" MCI_1)
 if(NOT MCI_1 STREQUAL _1one_two_)
   message(SEND_ERROR "MAKE_C_IDENTIFIER did not create expected result.")
 endif()
+
+string(GENEX_STRIP "one;$<1:two;three>;four;$<TARGET_OBJECTS:some_target>" strip_result)
+
+if (NOT strip_result STREQUAL "one;four")
+  message(SEND_ERROR "GENEX_STRIP did not create expected result: ${strip_result}")
+endif()
