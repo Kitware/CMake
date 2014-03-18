@@ -17,6 +17,11 @@ The features known to this version of CMake are:
 
   .. _N1984: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1984.pdf
 
+``cxx_constexpr``
+  Constant expressions, as defined in N2235_.
+
+  .. _N2235: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf
+
 ``cxx_delegating_constructors``
   Delegating constructors, as defined in N1986_.
 

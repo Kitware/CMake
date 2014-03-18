@@ -10,6 +10,9 @@ set(_cmake_feature_test_cxx_delegating_constructors "${GNU47_CXX11}")
 # support -std=c++11. Prior to that, support for C++11 features is technically
 # experiemental and possibly incomplete (see for example the note below about
 # cxx_variadic_template_template_parameters)
+# TODO: Should be supported by GNU 4.6
+set(GNU46_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
+set(_cmake_feature_test_cxx_constexpr "${GNU46_CXX11}")
 # TODO: Should be supported by GNU 4.4
 set(GNU44_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_auto_type "${GNU44_CXX11}")
