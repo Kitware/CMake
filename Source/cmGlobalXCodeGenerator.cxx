@@ -1007,7 +1007,10 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       if(filetype &&
          filetype->GetString() == "compiled.mach-o.objfile")
         {
-        externalObjFiles.push_back(xsf);
+        if ((*i)->GetObjectLibrary().empty())
+          {
+          externalObjFiles.push_back(xsf);
+          }
         }
       else if(this->IsHeaderFile(*i) ||
         (tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader) ||

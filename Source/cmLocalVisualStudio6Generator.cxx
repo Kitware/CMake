@@ -324,6 +324,11 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
     {
+    if (!(*i)->GetObjectLibrary().empty())
+      {
+      continue;
+      }
+
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
     cmSourceGroup* sourceGroup =
@@ -398,6 +403,11 @@ void cmLocalVisualStudio6Generator
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
+    if (!(*sf)->GetObjectLibrary().empty())
+      {
+      continue;
+      }
+
     std::string source = (*sf)->GetFullPath();
     const cmCustomCommand *command =
       (*sf)->GetCustomCommand();

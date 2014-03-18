@@ -202,9 +202,6 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     // Generate this object file's rule file.
     this->WriteObjectRuleFiles(**si);
     }
-
-  // Add object library contents as external objects.
-  this->GeneratorTarget->UseObjectLibraries(this->ExternalObjects);
 }
 
 //----------------------------------------------------------------------------

@@ -1401,6 +1401,10 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
     {
+    if (!(*i)->GetObjectLibrary().empty())
+      {
+      continue;
+      }
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
     if(cmSystemTools::UpperCase((*i)->GetExtension()) == "DEF")

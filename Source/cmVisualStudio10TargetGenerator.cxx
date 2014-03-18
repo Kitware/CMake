@@ -1054,6 +1054,19 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects);
+  for(std::vector<cmSourceFile const*>::iterator
+        si = externalObjects.begin();
+      si != externalObjects.end(); )
+    {
+    if (!(*si)->GetObjectLibrary().empty())
+      {
+      si = externalObjects.erase(si);
+      }
+    else
+      {
+      ++si;
+      }
+    }
   if(this->LocalGenerator->GetVersion() > cmLocalVisualStudioGenerator::VS10)
     {
     // For VS >= 11 we use LinkObjects to avoid linking custom command

@@ -551,15 +551,16 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files) const
       si != this->Internal->SourceEntries.end(); ++si)
     {
     std::vector<std::string> srcs;
-    cmSystemTools::ExpandListArgument((*si)->ge->GetInput(), srcs);
+    cmSystemTools::ExpandListArgument((*si)->ge->Evaluate(this->Makefile,
+                                        "",
+                                        false,
+                                        this),
+                                      srcs);
+
     for(std::vector<std::string>::const_iterator i = srcs.begin();
         i != srcs.end(); ++i)
       {
       std::string src = *i;
-      if (cmGeneratorExpression::Find(src) != std::string::npos)
-        {
-        continue;
-        }
       cmSourceFile* sf = this->Makefile->GetOrCreateSource(src);
       std::string e;
       src = sf->GetFullPath(&e);
@@ -606,7 +607,14 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     const char* src = i->c_str();
     if(src[0] == '$' && src[1] == '<')
       {
-      this->ProcessSourceExpression(*i);
+      this->AddSource(src);
+
+      if(cmHasLiteralPrefix(i->c_str(), "$<TARGET_OBJECTS:") &&
+         (*i)[i->size()-1] == '>')
+        {
+        std::string objLibName = i->substr(17, i->size()-18);
+        this->ObjectLibraries.push_back(objLibName);
+        }
       }
     else
       {
@@ -734,28 +742,11 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
     this->Internal->SourceEntries.push_back(
                           new cmTargetInternals::TargetPropertyEntry(cge));
     }
+  if (cmGeneratorExpression::Find(src) != std::string::npos)
+    {
+    return 0;
+    }
   return this->Makefile->GetOrCreateSource(src);
-}
-
-
-
-//----------------------------------------------------------------------------
-void cmTarget::ProcessSourceExpression(std::string const& expr)
-{
-  if(cmHasLiteralPrefix(expr.c_str(), "$<TARGET_OBJECTS:") &&
-     expr[expr.size()-1] == '>')
-    {
-    std::string objLibName = expr.substr(17, expr.size()-18);
-    this->ObjectLibraries.push_back(objLibName);
-    this->AddSource(expr);
-    }
-  else
-    {
-    cmOStringStream e;
-    e << "Unrecognized generator expression:\n"
-      << "  " << expr;
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -2886,6 +2877,14 @@ const char *cmTarget::GetProperty(const std::string& prop,
           {
           std::string objLibName = li->substr(17, li->size()-18);
 
+          if (cmGeneratorExpression::Find(objLibName) != std::string::npos)
+            {
+            ss << sep;
+            sep = ";";
+            ss << *li;
+            continue;
+            }
+
           bool addContent = false;
           bool noMessage = true;
           cmOStringStream e;
@@ -2919,6 +2918,12 @@ const char *cmTarget::GetProperty(const std::string& prop,
             sep = ";";
             ss << *li;
             }
+          }
+        else if (cmGeneratorExpression::Find(*li) == std::string::npos)
+          {
+          ss << sep;
+          sep = ";";
+          ss << *li;
           }
         else
           {
