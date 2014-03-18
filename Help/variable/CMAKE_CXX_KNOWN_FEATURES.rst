@@ -27,6 +27,11 @@ The features known to this version of CMake are:
 
   .. _N1986: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
 
+``cxx_final``
+  Override control ``final`` keyword, as defined in N2928_.
+
+  .. _N2928: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2009/n2928.htm
+
 ``cxx_static_assert``
   Static assert, as defined in N1720_.
 

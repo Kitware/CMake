@@ -45,6 +45,7 @@
   F(cxx_auto_type) \
   F(cxx_constexpr) \
   F(cxx_delegating_constructors) \
+  F(cxx_final) \
   F(cxx_static_assert) \
   F(cxx_variadic_templates)
 
