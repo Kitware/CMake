@@ -46,6 +46,9 @@
 # :prop_gbl:`CMAKE_C_KNOWN_FEATURES` and
 # :prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global properties.
 #
+# See the :manual:`cmake-compile-features(7)` manual for information on
+# compile features.
+#
 # Feature Test Macros
 # ===================
 #

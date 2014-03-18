@@ -9,6 +9,9 @@ property is ``OFF`` or unset, the :prop_tgt:`CXX_STANDARD` target property is
 treated as optional and may "decay" to a previous standard if the requested is
 not available.
 
+See the :manual:`cmake-compile-features(7)` manual for information on
+compile features.
+
 This property is initialized by the value of
 the :variable:`CMAKE_CXX_STANDARD_REQUIRED` variable if it is set when a
 target is created.
