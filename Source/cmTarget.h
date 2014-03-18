@@ -137,10 +137,6 @@ public:
    */
   void GetSourceFiles(std::vector<std::string> &files) const;
   void GetSourceFiles(std::vector<cmSourceFile*> &files) const;
-  std::vector<std::string> const& GetObjectLibraries() const
-    {
-    return this->ObjectLibraries;
-    }
 
   /**
    * Add sources to the target.
@@ -686,7 +682,6 @@ private:
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
   TargetType TargetTypeValue;
-  std::vector<std::string> ObjectLibraries;
   LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
   bool LinkLibrariesAnalyzed;

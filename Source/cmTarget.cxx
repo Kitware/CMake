@@ -608,13 +608,6 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     if(src[0] == '$' && src[1] == '<')
       {
       this->AddSource(src);
-
-      if(cmHasLiteralPrefix(i->c_str(), "$<TARGET_OBJECTS:") &&
-         (*i)[i->size()-1] == '>')
-        {
-        std::string objLibName = i->substr(17, i->size()-18);
-        this->ObjectLibraries.push_back(objLibName);
-        }
       }
     else
       {
@@ -5013,6 +5006,53 @@ void cmTarget::GetLanguages(std::set<std::string>& languages) const
       languages.insert(lang);
       }
     }
+
+  std::vector<cmTarget*> objectLibraries;
+  std::vector<cmSourceFile const*> externalObjects;
+  if (this->Makefile->GetGeneratorTargets().empty())
+    {
+    // At configure-time, this method can be called as part of getting the
+    // LOCATION property or to export() a file to be include()d.  However
+    // there is no cmGeneratorTarget at configure-time, so search the SOURCES
+    // for TARGET_OBJECTS instead for backwards compatibility with OLD
+    // behavior of CMP0024 and CMP0026 only.
+    std::vector<std::string> srcs;
+    cmSystemTools::ExpandListArgument(this->GetProperty("SOURCES"), srcs);
+    for(std::vector<std::string>::const_iterator it = srcs.begin();
+        it != srcs.end(); ++it)
+      {
+      if (cmHasLiteralPrefix(*it, "$<TARGET_OBJECTS:")
+          && cmHasLiteralSuffix(*it, ">"))
+        {
+        std::string objLibName = it->substr(17, it->size()-18);
+        if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLibName))
+          {
+          objectLibraries.push_back(tgt);
+          }
+        }
+      }
+    }
+  else
+    {
+    cmGeneratorTarget* gt = this->Makefile->GetLocalGenerator()
+                                ->GetGlobalGenerator()
+                                ->GetGeneratorTarget(this);
+    gt->GetExternalObjects(externalObjects);
+    for(std::vector<cmSourceFile const*>::const_iterator
+          i = externalObjects.begin(); i != externalObjects.end(); ++i)
+      {
+      std::string objLib = (*i)->GetObjectLibrary();
+      if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
+        {
+        objectLibraries.push_back(tgt);
+        }
+      }
+    }
+  for(std::vector<cmTarget*>::const_iterator
+      i = objectLibraries.begin(); i != objectLibraries.end(); ++i)
+    {
+    (*i)->GetLanguages(languages);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -6077,19 +6117,6 @@ cmTarget::ComputeLinkImplementationLanguages(LinkImplementation& impl) const
   std::set<std::string> languages;
   // Get languages used in our source files.
   this->GetLanguages(languages);
-  // Get languages used in object library sources.
-  for(std::vector<std::string>::const_iterator
-      i = this->ObjectLibraries.begin();
-      i != this->ObjectLibraries.end(); ++i)
-    {
-    if(cmTarget* objLib = this->Makefile->FindTargetToUse(*i))
-      {
-      if(objLib->GetType() == cmTarget::OBJECT_LIBRARY)
-        {
-        objLib->GetLanguages(languages);
-        }
-      }
-    }
   // Copy the set of langauges to the link implementation.
   for(std::set<std::string>::iterator li = languages.begin();
       li != languages.end(); ++li)
