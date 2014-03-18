@@ -1407,6 +1407,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(cmMakefile *mf)
     {
     cmTarget* t = &ti->second;
     cmGeneratorTarget* gt = new cmGeneratorTarget(t);
+    this->ComputeTargetObjectDirectory(gt);
     this->GeneratorTargets[t] = gt;
     generatorTargets[t] = gt;
     }
@@ -1449,7 +1450,6 @@ void cmGlobalGenerator::ComputeGeneratorTargetObjects()
         continue;
         }
       cmGeneratorTarget* gt = ti->second;
-      this->ComputeTargetObjectDirectory(gt);
       gt->LookupObjectLibraries();
       this->ComputeTargetObjects(gt);
       }
