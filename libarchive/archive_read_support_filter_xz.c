@@ -601,7 +601,7 @@ lzip_init(struct archive_read_filter *self)
 		return (ARCHIVE_FATAL);
 	}
 	ret = lzma_raw_decoder(&(state->stream), filters);
-#if LZMA_VERSION < 50000030
+#if LZMA_VERSION < 50010000
 	free(filters[0].options);
 #endif
 	if (ret != LZMA_OK) {

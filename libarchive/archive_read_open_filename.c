@@ -103,7 +103,9 @@ int
 archive_read_open_filename(struct archive *a, const char *filename,
     size_t block_size)
 {
-	const char *filenames[2] = { filename, NULL };
+	const char *filenames[2];
+	filenames[0] = filename;
+	filenames[1] = NULL;
 	return archive_read_open_filenames(a, filenames, block_size);
 }
 
