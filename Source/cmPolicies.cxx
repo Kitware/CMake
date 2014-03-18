@@ -343,6 +343,11 @@ cmPolicies::cmPolicies()
     CMP0050, "CMP0050",
     "Disallow add_custom_command SOURCE signatures.",
     3,0,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0051, "CMP0051",
+    "List TARGET_OBJECTS in SOURCES target property.",
+    3,1,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

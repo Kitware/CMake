@@ -556,6 +556,10 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files) const
         i != srcs.end(); ++i)
       {
       std::string src = *i;
+      if (cmGeneratorExpression::Find(src) != std::string::npos)
+        {
+        continue;
+        }
       cmSourceFile* sf = this->Makefile->GetOrCreateSource(src);
       std::string e;
       src = sf->GetFullPath(&e);
@@ -743,6 +747,7 @@ void cmTarget::ProcessSourceExpression(std::string const& expr)
     {
     std::string objLibName = expr.substr(17, expr.size()-18);
     this->ObjectLibraries.push_back(objLibName);
+    this->AddSource(expr);
     }
   else
     {
@@ -2876,20 +2881,62 @@ const char *cmTarget::GetProperty(const std::string& prop,
       for (std::vector<std::string>::const_iterator
           li = files.begin(); li != files.end(); ++li)
         {
-        cmSourceFile *sf = this->Makefile->GetOrCreateSource(*li);
-        // Construct what is known about this source file location.
-        cmSourceFileLocation const& location = sf->GetLocation();
-        std::string sname = location.GetDirectory();
-        if(!sname.empty())
+        if(cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
+            (*li)[li->size() - 1] == '>')
           {
-          sname += "/";
-          }
-        sname += location.GetName();
+          std::string objLibName = li->substr(17, li->size()-18);
 
-        ss << sep;
-        sep = ";";
-        // Append this list entry.
-        ss << sname;
+          bool addContent = false;
+          bool noMessage = true;
+          cmOStringStream e;
+          cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+          switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0051))
+            {
+            case cmPolicies::WARN:
+              e << (this->Makefile->GetPolicies()
+                    ->GetPolicyWarning(cmPolicies::CMP0051)) << "\n";
+              noMessage = false;
+            case cmPolicies::OLD:
+              break;
+            case cmPolicies::REQUIRED_ALWAYS:
+            case cmPolicies::REQUIRED_IF_USED:
+            case cmPolicies::NEW:
+              addContent = true;
+            }
+          if (!noMessage)
+            {
+            e << "Target \"" << this->Name << "\" contains $<TARGET_OBJECTS> "
+            "generator expression in its sources list.  This content was not "
+            "previously part of the SOURCES property when that property was "
+            "read at configure time.  Code reading that property needs to be "
+            "adapted to ignore the generator expression using the "
+            "string(GENEX_STRIP) command.";
+            this->Makefile->IssueMessage(messageType, e.str());
+            }
+          if (addContent)
+            {
+            ss << sep;
+            sep = ";";
+            ss << *li;
+            }
+          }
+        else
+          {
+          cmSourceFile *sf = this->Makefile->GetOrCreateSource(*li);
+          // Construct what is known about this source file location.
+          cmSourceFileLocation const& location = sf->GetLocation();
+          std::string sname = location.GetDirectory();
+          if(!sname.empty())
+            {
+            sname += "/";
+            }
+          sname += location.GetName();
+
+          ss << sep;
+          sep = ";";
+          // Append this list entry.
+          ss << sname;
+          }
         }
       }
     this->Properties.SetProperty("SOURCES", ss.str().c_str(),
