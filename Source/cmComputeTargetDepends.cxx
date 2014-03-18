@@ -16,6 +16,7 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
+#include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
 
@@ -212,6 +213,34 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // deal with config-specific dependencies.
   {
   std::set<std::string> emitted;
+  {
+  cmGeneratorTarget* gt = depender->GetMakefile()->GetLocalGenerator()
+                                  ->GetGlobalGenerator()
+                                  ->GetGeneratorTarget(depender);
+  std::vector<cmSourceFile const*> objectFiles;
+  gt->GetExternalObjects(objectFiles);
+  for(std::vector<cmSourceFile const*>::const_iterator
+      it = objectFiles.begin(); it != objectFiles.end(); ++it)
+    {
+    std::string objLib = (*it)->GetObjectLibrary();
+    if (!objLib.empty() && emitted.insert(objLib).second)
+      {
+      if(depender->GetType() != cmTarget::EXECUTABLE &&
+          depender->GetType() != cmTarget::STATIC_LIBRARY &&
+          depender->GetType() != cmTarget::SHARED_LIBRARY &&
+          depender->GetType() != cmTarget::MODULE_LIBRARY)
+        {
+        this->GlobalGenerator->GetCMakeInstance()
+          ->IssueMessage(cmake::FATAL_ERROR,
+                          "Only executables and non-OBJECT libraries may "
+                          "reference target objects.",
+                          depender->GetBacktrace());
+        return;
+        }
+      const_cast<cmTarget*>(depender)->AddUtility(objLib);
+      }
+    }
+  }
   {
   std::vector<std::string> tlibs;
   depender->GetDirectLinkLibraries("", tlibs, depender);

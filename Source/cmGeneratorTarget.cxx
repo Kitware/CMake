@@ -528,7 +528,6 @@ void cmGeneratorTarget::LookupObjectLibraries()
                            this->Target->GetBacktrace());
           return;
           }
-        this->Target->AddUtility(objLib->GetName());
         this->ObjectLibraries.push_back(objLib);
         }
       else
