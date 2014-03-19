@@ -426,6 +426,7 @@ function(add_jar _TARGET_NAME)
     set(_JAVA_DEPENDS)
     set(_JAVA_COMPILE_DEPENDS)
     set(_JAVA_RESOURCE_FILES)
+    set(_JAVA_RESOURCE_FILES_RELATIVE)
     foreach(_JAVA_SOURCE_FILE ${_JAVA_SOURCE_FILES})
         get_filename_component(_JAVA_EXT ${_JAVA_SOURCE_FILE} EXT)
         get_filename_component(_JAVA_FILE ${_JAVA_SOURCE_FILE} NAME_WE)
@@ -462,7 +463,8 @@ function(add_jar _TARGET_NAME)
             __java_copy_file(${CMAKE_CURRENT_SOURCE_DIR}/${_JAVA_SOURCE_FILE}
                              ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_SOURCE_FILE}
                              "Copying ${_JAVA_SOURCE_FILE} to the build directory")
-            list(APPEND _JAVA_RESOURCE_FILES ${_JAVA_SOURCE_FILE})
+            list(APPEND _JAVA_RESOURCE_FILES ${CMAKE_JAVA_CLASS_OUTPUT_PATH}/${_JAVA_SOURCE_FILE})
+            list(APPEND _JAVA_RESOURCE_FILES_RELATIVE ${_JAVA_SOURCE_FILE})
         endif ()
     endforeach()
 
@@ -529,7 +531,7 @@ function(add_jar _TARGET_NAME)
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
                 -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
-                ${_JAVA_RESOURCE_FILES} @java_class_filelist
+                ${_JAVA_RESOURCE_FILES_RELATIVE} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
                 -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_TARGET_OUTPUT_NAME}
@@ -549,7 +551,7 @@ function(add_jar _TARGET_NAME)
             OUTPUT ${_JAVA_JAR_OUTPUT_PATH}
             COMMAND ${Java_JAR_EXECUTABLE}
                 -cf${_ENTRY_POINT_OPTION}${_MANIFEST_OPTION} ${_JAVA_JAR_OUTPUT_PATH} ${_ENTRY_POINT_VALUE} ${_MANIFEST_VALUE}
-                ${_JAVA_RESOURCE_FILES} @java_class_filelist
+                ${_JAVA_RESOURCE_FILES_RELATIVE} @java_class_filelist
             COMMAND ${CMAKE_COMMAND}
                 -D_JAVA_TARGET_DIR=${_add_jar_OUTPUT_DIR}
                 -D_JAVA_TARGET_OUTPUT_NAME=${_JAVA_TARGET_OUTPUT_NAME}
