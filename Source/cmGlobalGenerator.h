@@ -423,6 +423,8 @@ private:
   void WriteSummary(cmTarget* target);
   void FinalizeTargetCompileInfo();
 
+  virtual void ForceLinkerLanguages();
+
   virtual void PrintCompilerAdvice(std::ostream& os, std::string const& lang,
                                    const char* envVar) const;
   void CheckCompilerIdCompatibility(cmMakefile* mf,
