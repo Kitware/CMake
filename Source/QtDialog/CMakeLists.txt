@@ -28,7 +28,7 @@ if (Qt5Widgets_FOUND)
     qt5_add_resources(${ARGN})
   endmacro()
   set(CMake_QT_LIBRARIES ${Qt5Widgets_LIBRARIES})
-  set(QT_QTMAIN_LIBRARY Qt5::WinMain)
+  set(QT_QTMAIN_LIBRARY ${Qt5Core_QTMAIN_LIBRARIES})
 
   # Remove this when the minimum version of Qt is 4.6.
   add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0)
