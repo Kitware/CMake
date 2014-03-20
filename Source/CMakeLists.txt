@@ -404,7 +404,6 @@ if (WIN32)
       cmGlobalVisualStudio12Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
-      cmGlobalWatcomWMakeGenerator.cxx
       cmIDEFlagTable.h
       cmIDEOptions.cxx
       cmIDEOptions.h
@@ -423,6 +422,15 @@ if (WIN32)
       )
   endif()
 endif ()
+
+# Watcom support
+if(WIN32 OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+  set_property(SOURCE cmake.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_USE_WMAKE)
+  list(APPEND SRCS
+    cmGlobalWatcomWMakeGenerator.cxx
+    cmGlobalWatcomWMakeGenerator.h
+    )
+endif()
 
 # Ninja support
 set(SRCS ${SRCS}

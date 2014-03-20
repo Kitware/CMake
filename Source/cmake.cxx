@@ -60,12 +60,14 @@
 #    include "cmGlobalBorlandMakefileGenerator.h"
 #    include "cmGlobalNMakeMakefileGenerator.h"
 #    include "cmGlobalJOMMakefileGenerator.h"
-#    include "cmGlobalWatcomWMakeGenerator.h"
 #    define CMAKE_HAVE_VS_GENERATORS
 #  endif
 #  include "cmGlobalMSYSMakefileGenerator.h"
 #  include "cmGlobalMinGWMakefileGenerator.h"
 #else
+#endif
+#if defined(CMAKE_USE_WMAKE)
+# include "cmGlobalWatcomWMakeGenerator.h"
 #endif
 #include "cmGlobalUnixMakefileGenerator3.h"
 #include "cmGlobalNinjaGenerator.h"
@@ -1781,8 +1783,6 @@ void cmake::AddDefaultGenerators()
     cmGlobalNMakeMakefileGenerator::NewFactory());
   this->Generators.push_back(
     cmGlobalJOMMakefileGenerator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalWatcomWMakeGenerator::NewFactory());
 # endif
   this->Generators.push_back(
     cmGlobalMSYSMakefileGenerator::NewFactory());
@@ -1793,6 +1793,10 @@ void cmake::AddDefaultGenerators()
     cmGlobalUnixMakefileGenerator3::NewFactory());
   this->Generators.push_back(
     cmGlobalNinjaGenerator::NewFactory());
+#if defined(CMAKE_USE_WMAKE)
+  this->Generators.push_back(
+    cmGlobalWatcomWMakeGenerator::NewFactory());
+#endif
 #ifdef CMAKE_USE_XCODE
   this->Generators.push_back(
     cmGlobalXCodeGenerator::NewFactory());

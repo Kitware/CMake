@@ -74,6 +74,23 @@
 #elif defined(__XENIX__) || defined(_XENIX) || defined(XENIX)
 # define PLATFORM_ID "Xenix"
 
+#elif defined(__WATCOMC__)
+# if defined(__LINUX__)
+#  define PLATFORM_ID "Linux"
+
+# elif defined(__DOS__)
+#  define PLATFORM_ID "DOS"
+
+# elif defined(__OS2__)
+#  define PLATFORM_ID "OS2"
+
+# elif defined(__WINDOWS__)
+#  define PLATFORM_ID "Windows3x"
+
+# else /* unknown platform */
+#  define PLATFORM_ID ""
+# endif
+
 #else /* unknown platform */
 # define PLATFORM_ID ""
 
@@ -102,6 +119,17 @@
 
 # elif defined(_M_SH)
 #  define ARCHITECTURE_ID "SHx"
+
+# else /* unknown architecture */
+#  define ARCHITECTURE_ID ""
+# endif
+
+#elif defined(__WATCOMC__)
+# if defined(_M_I86)
+#  define ARCHITECTURE_ID "I86"
+
+# elif defined(_M_IX86)
+#  define ARCHITECTURE_ID "X86"
 
 # else /* unknown architecture */
 #  define ARCHITECTURE_ID ""
