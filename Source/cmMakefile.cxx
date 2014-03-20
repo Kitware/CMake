@@ -926,6 +926,14 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
+  if(ti->second.GetType() == cmTarget::INTERFACE_LIBRARY)
+    {
+    cmOStringStream e;
+    e << "Target \"" << target << "\" is an INTERFACE library "
+      "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
+    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return;
+    }
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
   cmCustomCommand cc(this, no_output, depends,

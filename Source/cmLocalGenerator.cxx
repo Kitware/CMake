@@ -264,7 +264,8 @@ void cmLocalGenerator::TraceDependencies()
   for(cmGeneratorTargetsType::iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    if (t->second->Target->IsImported())
+    if (t->second->Target->IsImported()
+        || t->second->Target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
       }
