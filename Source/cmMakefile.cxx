@@ -2079,7 +2079,7 @@ cmMakefile::LinearGetSourceFileWithOutput(const std::string& name) const
     // does this source file have a custom command?
     if ((*i)->GetCustomCommand())
       {
-      // is the output of the custom command match the source files name
+      // Does the output of the custom command match the source file name?
       const std::vector<std::string>& outputs =
         (*i)->GetCustomCommand()->GetOutputs();
       for(std::vector<std::string>::const_iterator o = outputs.begin();
@@ -2109,7 +2109,7 @@ cmSourceFile *cmMakefile::GetSourceFileWithOutput(
   // linear-time search for an output with a matching suffix.
   if(!cmSystemTools::FileIsFullPath(name.c_str()))
     {
-    return LinearGetSourceFileWithOutput(name);
+    return this->LinearGetSourceFileWithOutput(name);
     }
   // Otherwise we use an efficient lookup map.
   OutputToSourceMap::const_iterator o = this->OutputToSource.find(name);

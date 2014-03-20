@@ -111,12 +111,12 @@ cmGlobalUnixMakefileGenerator3
   cmTarget* target = gt->Target;
 
   // Compute full path to object file directory for this target.
-  std::string dir_max;
-  dir_max += gt->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
-  dir_max += "/";
-  gt->ObjectDirectory = dir_max;
+  std::string dir;
+  dir += gt->Makefile->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += gt->LocalGenerator->GetTargetDirectory(*target);
+  dir += "/";
+  gt->ObjectDirectory = dir;
 }
 
 void cmGlobalUnixMakefileGenerator3::Configure()
@@ -955,21 +955,6 @@ cmGlobalUnixMakefileGenerator3::RecordTargetProgress(
   TargetProgress& tp = this->ProgressMap[tg->GetTarget()];
   tp.NumberOfActions = tg->GetNumberOfProgressActions();
   tp.VariableFile = tg->GetProgressFileNameFull();
-}
-
-//----------------------------------------------------------------------------
-bool
-cmGlobalUnixMakefileGenerator3::ProgressMapCompare
-::operator()(cmTarget const* l, cmTarget const* r) const
-{
-  // Order by target name.
-  if(int c = strcmp(l->GetName().c_str(), r->GetName().c_str()))
-    {
-    return c < 0;
-    }
-  // Order duplicate targets by binary directory.
-  return strcmp(l->GetMakefile()->GetCurrentOutputDirectory(),
-                r->GetMakefile()->GetCurrentOutputDirectory()) < 0;
 }
 
 //----------------------------------------------------------------------------

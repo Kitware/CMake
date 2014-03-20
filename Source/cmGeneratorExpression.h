@@ -16,8 +16,6 @@
 #include "cmStandardIncludes.h"
 #include "cmListFileCache.h"
 
-#include <stack>
-
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/auto_ptr.hxx>
 
