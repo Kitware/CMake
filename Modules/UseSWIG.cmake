@@ -201,6 +201,7 @@ macro(SWIG_ADD_MODULE name language)
     MODULE
     ${swig_generated_sources}
     ${swig_other_sources})
+  set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES NO_SONAME ON)
   string(TOLOWER "${language}" swig_lowercase_language)
   if ("${swig_lowercase_language}" STREQUAL "octave")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
