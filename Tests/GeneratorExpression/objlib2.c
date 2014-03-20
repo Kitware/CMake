@@ -1,5 +1,0 @@
-
-void objlib2()
-{
-
-}

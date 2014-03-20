@@ -1,4 +1,3 @@
 include(RunCMake)
 
-run_cmake(NoTarget)
-run_cmake(NotObjlibTarget)
+run_cmake(BadContext)

@@ -90,6 +90,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   context.HadError = false;
   context.HadContextSensitiveCondition = false;
   context.HeadTarget = headTarget;
+  context.EvaluateForBuildsystem = this->EvaluateForBuildsystem;
   context.CurrentTarget = currentTarget ? currentTarget : headTarget;
   context.Backtrace = this->Backtrace;
 
@@ -124,7 +125,8 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
               cmListFileBacktrace const& backtrace,
               const std::string& input)
   : Backtrace(backtrace), Input(input),
-    HadContextSensitiveCondition(false)
+    HadContextSensitiveCondition(false),
+    EvaluateForBuildsystem(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens =
