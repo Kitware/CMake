@@ -185,7 +185,7 @@ add_executable(CustomCommand
 # here to test adding the generation rule after referencing the
 # generated source in a target.
 add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/generated.c
-  DEPENDS generator
+  DEPENDS $<1:generator> $<0:does_not_exist>
   COMMAND generator
   ARGS ${PROJECT_BINARY_DIR}/generated.c
   )
@@ -221,8 +221,11 @@ add_subdirectory(GeneratorInExtraDir)
 
 add_executable(tcat tcat.cxx)
 
+# Test that list expansion from a generator expression works.
+set_property(TARGET tcat PROPERTY DEPSLIST tcat gen_redirect_in.c)
+
 add_custom_command(OUTPUT gen_redirect.c
-  DEPENDS tcat gen_redirect_in.c
+  DEPENDS $<TARGET_PROPERTY:tcat,DEPSLIST>
   COMMAND tcat < ${CMAKE_CURRENT_SOURCE_DIR}/gen_redirect_in.c > gen_redirect.c
   COMMAND ${CMAKE_COMMAND} -E echo "#endif" >> gen_redirect.c
   VERBATIM
