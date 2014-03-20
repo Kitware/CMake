@@ -20,6 +20,7 @@
 #    [DOWNLOAD_NAME fname]       # File name to store (if not end of URL)
 #    [DOWNLOAD_DIR dir]          # Directory to store downloaded files
 #    [DOWNLOAD_COMMAND cmd...]   # Command to download source tree
+#    [DOWNLOAD_NO_PROGRESS 1]    # Disable download progress reports
 #    [CVS_REPOSITORY cvsroot]    # CVSROOT of CVS repository
 #    [CVS_MODULE mod]            # Module to checkout from CVS repo
 #    [CVS_TAG tag]               # Tag to checkout from CVS repo
@@ -515,13 +516,19 @@ endif()
 
 endfunction(_ep_write_gitupdate_script)
 
-function(_ep_write_downloadfile_script script_filename remote local timeout hash tls_verify tls_cainfo)
+function(_ep_write_downloadfile_script script_filename remote local timeout no_progress hash tls_verify tls_cainfo)
   if(timeout)
     set(timeout_args TIMEOUT ${timeout})
     set(timeout_msg "${timeout} seconds")
   else()
     set(timeout_args "# no TIMEOUT")
     set(timeout_msg "none")
+  endif()
+
+  if(no_progress)
+    set(show_progress "")
+  else()
+    set(show_progress "SHOW_PROGRESS")
   endif()
 
   if("${hash}" MATCHES "${_ep_hash_regex}")
@@ -563,7 +570,7 @@ ${tls_cainfo}
 file(DOWNLOAD
   \"${remote}\"
   \"${local}\"
-  SHOW_PROGRESS
+  ${show_progress}
   ${hash_args}
   ${timeout_args}
   STATUS status
@@ -1443,10 +1450,11 @@ function(_ep_add_download_command name)
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
+        get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${hash}" "${tls_verify}" "${tls_cainfo}")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         set(retries 3)
