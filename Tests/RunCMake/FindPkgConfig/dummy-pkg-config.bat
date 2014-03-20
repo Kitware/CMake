@@ -9,6 +9,8 @@ IF "%1"=="--version" (
 
 IF "%1"=="--exists" (
   SHIFT
+  ECHO Expected: %*
+  ECHO Found:    %PKG_CONFIG_PATH%
   IF NOT "%*"=="%PKG_CONFIG_PATH%" (
     EXIT /B 1
   )

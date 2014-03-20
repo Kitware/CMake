@@ -10,8 +10,8 @@ case $1 in
     ;;
   --exists)
     shift
-    echo "$@"
-    echo "${PKG_CONFIG_PATH}"
+    echo "Expected: $@"
+    echo "Found:    ${PKG_CONFIG_PATH}"
     [ "$@" = "${PKG_CONFIG_PATH}" ] || exit 1
     ;;
   *)
