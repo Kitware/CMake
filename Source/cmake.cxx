@@ -1413,8 +1413,8 @@ int cmake::ActualConfigure()
       message += "\nDoes not match the generator used previously: ";
       message += genName;
       message +=
-        "\nEither remove the CMakeCache.txt file or choose a different"
-        " binary directory.";
+        "\nEither remove the CMakeCache.txt file and CMakeFiles "
+        "directory or choose a different binary directory.";
       cmSystemTools::Error(message.c_str());
       return -2;
       }
@@ -1445,8 +1445,8 @@ int cmake::ActualConfigure()
       message += "\nDoes not match the toolset used previously: ";
       message += tsName;
       message +=
-        "\nEither remove the CMakeCache.txt file or choose a different"
-        " binary directory.";
+        "\nEither remove the CMakeCache.txt file and CMakeFiles "
+        "directory or choose a different binary directory.";
       cmSystemTools::Error(message.c_str());
       return -2;
       }
