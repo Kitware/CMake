@@ -86,7 +86,7 @@ public:
    * Return the vector that holds the list of dependencies
    */
   const std::vector<std::string> &GetDepends() const {return this->Depends;}
-  void AddDepend(const char* d) { this->Depends.push_back(d); }
+  void AddDepend(const std::string& d) { this->Depends.push_back(d); }
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; }
