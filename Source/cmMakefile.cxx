@@ -1056,16 +1056,16 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       }
     }
 
-  // Construct a complete list of dependencies.
-  std::vector<std::string> depends2(depends);
-  if(!main_dependency.empty())
-    {
-    depends2.push_back(main_dependency);
-    }
-
   // Attach the custom command to the file.
   if(file)
     {
+    // Construct a complete list of dependencies.
+    std::vector<std::string> depends2(depends);
+    if(!main_dependency.empty())
+      {
+      depends2.push_back(main_dependency);
+      }
+
     cmCustomCommand* cc =
       new cmCustomCommand(this, outputs, depends2, commandLines,
                           comment, workingDir);
