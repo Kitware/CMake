@@ -96,7 +96,7 @@ else()
 
     if(NOT CMAKE_HAVE_THREADS_LIBRARY)
       # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
-      if("THREADS_HAVE_PTHREAD_ARG" MATCHES "^THREADS_HAVE_PTHREAD_ARG")
+      if("x${THREADS_HAVE_PTHREAD_ARG}" STREQUAL "x")
         message(STATUS "Check if compiler accepts -pthread")
         try_run(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
           ${CMAKE_BINARY_DIR}
