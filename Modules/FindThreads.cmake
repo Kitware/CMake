@@ -80,7 +80,7 @@ else()
             set(CMAKE_HAVE_THREADS_LIBRARY 1)
             set(Threads_FOUND TRUE)
 
-          elseif(CMAKE_SYSTEM MATCHES "SunOS.*")
+          elseif(CMAKE_SYSTEM_NAME MATCHES "SunOS")
             # On sun also check for -lthread
             CHECK_LIBRARY_EXISTS(thread thr_create "" CMAKE_HAVE_THR_CREATE)
             if(CMAKE_HAVE_THR_CREATE)
