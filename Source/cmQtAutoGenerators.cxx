@@ -2074,6 +2074,8 @@ bool cmQtAutoGenerators::GenerateQrc()
           }
         }
 
+      command.push_back("-name");
+      command.push_back(basename);
       command.push_back("-o");
       command.push_back(rcc_output_file);
       command.push_back(*si);
