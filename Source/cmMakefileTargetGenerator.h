@@ -113,7 +113,8 @@ protected:
 
   // write out the variable that lists the objects for this target
   void WriteObjectsVariable(std::string& variableName,
-                            std::string& variableNameExternal);
+                            std::string& variableNameExternal,
+                            bool useWatcomQuote);
   void WriteObjectsString(std::string& buildObjs);
   void WriteObjectsStrings(std::vector<std::string>& objStrings,
                            std::string::size_type limit = std::string::npos);
@@ -172,7 +173,8 @@ protected:
   /** Create lists of object files for linking and cleaning.  */
   void CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                          bool useResponseFile, std::string& buildObjs,
-                         std::vector<std::string>& makefile_depends);
+                         std::vector<std::string>& makefile_depends,
+                         bool useWatcomQuote);
 
   void AddIncludeFlags(std::string& flags, const std::string& lang);
 

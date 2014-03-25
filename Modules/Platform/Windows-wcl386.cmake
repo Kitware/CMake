@@ -39,6 +39,11 @@ set (CMAKE_C_FLAGS_RELWITHDEBINFO_INIT "-br -bm -d2 -ot -dNDEBUG")
 set (CMAKE_C_STANDARD_LIBRARIES_INIT "library clbrdll.lib library plbrdll.lib  library kernel32.lib library user32.lib library gdi32.lib library winspool.lib library comdlg32.lib library advapi32.lib library shell32.lib library ole32.lib library oleaut32.lib library uuid.lib library odbc32.lib library odbccp32.lib")
 set (CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 
+foreach(type CREATE_SHARED_LIBRARY CREATE_SHARED_MODULE LINK_EXECUTABLE)
+  set(CMAKE_C_${type}_USE_WATCOM_QUOTE 1)
+  set(CMAKE_CXX_${type}_USE_WATCOM_QUOTE 1)
+endforeach()
+
 set(CMAKE_C_CREATE_IMPORT_LIBRARY
   "wlib -c -q -n -b <TARGET_IMPLIB> +<TARGET_QUOTED>")
 set(CMAKE_CXX_CREATE_IMPORT_LIBRARY ${CMAKE_C_CREATE_IMPORT_LIBRARY})

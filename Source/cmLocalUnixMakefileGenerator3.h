@@ -186,7 +186,8 @@ public:
                        const char *targetDir,
                        cmLocalGenerator::RelativeRoot returnDir);
 
-  static std::string ConvertToQuotedOutputPath(const char* p);
+  static std::string ConvertToQuotedOutputPath(const char* p,
+                                               bool useWatcomQuote);
 
   std::string CreateMakeVariable(const std::string& sin,
                                  const std::string& s2in);

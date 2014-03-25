@@ -1349,7 +1349,8 @@ cmMakefileTargetGenerator::AppendProgress(std::vector<std::string>& commands)
 void
 cmMakefileTargetGenerator
 ::WriteObjectsVariable(std::string& variableName,
-                       std::string& variableNameExternal)
+                       std::string& variableNameExternal,
+                       bool useWatcomQuote)
 {
   // Write a make variable assignment that lists all objects for the
   // target.
@@ -1360,8 +1361,6 @@ cmMakefileTargetGenerator
     << "# Object files for target " << this->Target->GetName() << "\n"
     << variableName << " =";
   std::string object;
-  const char* objName =
-    this->Makefile->GetDefinition("CMAKE_NO_QUOTED_OBJECTS");
   const char* lineContinue =
     this->Makefile->GetDefinition("CMAKE_MAKE_LINE_CONTINUE");
   if(!lineContinue)
@@ -1372,17 +1371,9 @@ cmMakefileTargetGenerator
       i != this->Objects.end(); ++i)
     {
     *this->BuildFileStream << " " << lineContinue << "\n";
-    if(objName)
-      {
-      *this->BuildFileStream <<
-        this->Convert(*i, cmLocalGenerator::START_OUTPUT,
-                      cmLocalGenerator::MAKEFILE);
-      }
-    else
-      {
-      *this->BuildFileStream  <<
-        this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str());
-      }
+    *this->BuildFileStream  <<
+      this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str(),
+                                                      useWatcomQuote);
     }
   *this->BuildFileStream << "\n";
 
@@ -1404,17 +1395,9 @@ cmMakefileTargetGenerator
     *this->BuildFileStream
       << " " << lineContinue << "\n"
       << this->Makefile->GetSafeDefinition("CMAKE_OBJECT_NAME");
-    if(objName)
-      {
-      *this->BuildFileStream  <<
-        this->Convert(*i, cmLocalGenerator::START_OUTPUT,
-                      cmLocalGenerator::MAKEFILE);
-      }
-    else
-      {
-      *this->BuildFileStream  <<
-        this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str());
-      }
+    *this->BuildFileStream  <<
+      this->LocalGenerator->ConvertToQuotedOutputPath(i->c_str(),
+                                                      useWatcomQuote);
     }
   *this->BuildFileStream << "\n" << "\n";
 }
@@ -1882,11 +1865,13 @@ void
 cmMakefileTargetGenerator
 ::CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                     bool useResponseFile, std::string& buildObjs,
-                    std::vector<std::string>& makefile_depends)
+                    std::vector<std::string>& makefile_depends,
+                    bool useWatcomQuote)
 {
   std::string variableName;
   std::string variableNameExternal;
-  this->WriteObjectsVariable(variableName, variableNameExternal);
+  this->WriteObjectsVariable(variableName, variableNameExternal,
+                             useWatcomQuote);
   if(useResponseFile)
     {
     // MSVC response files cannot exceed 128K.

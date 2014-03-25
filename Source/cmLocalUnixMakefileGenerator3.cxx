@@ -2181,14 +2181,27 @@ cmLocalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p)
+cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
+                                                         bool useWatcomQuote)
 {
   // Split the path into its components.
   std::vector<std::string> components;
   cmSystemTools::SplitPath(p, components);
 
   // Open the quoted result.
-  std::string result = "\"";
+  std::string result;
+  if(useWatcomQuote)
+    {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    result = "'";
+#else
+    result = "\"'";
+#endif
+    }
+  else
+    {
+    result = "\"";
+    }
 
   // Return an empty path if there are no components.
   if(!components.empty())
@@ -2232,7 +2245,18 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p)
     }
 
   // Close the quoted result.
-  result += "\"";
+  if(useWatcomQuote)
+    {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    result += "'";
+#else
+    result += "'\"";
+#endif
+    }
+  else
+    {
+    result += "\"";
+    }
 
   return result;
 }
