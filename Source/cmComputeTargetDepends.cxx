@@ -241,25 +241,12 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       }
     }
   }
-  {
-  std::vector<std::string> tlibs;
-  depender->GetDirectLinkLibraries("", tlibs, depender);
-  // A target should not depend on itself.
-  emitted.insert(depender->GetName());
-  for(std::vector<std::string>::const_iterator lib = tlibs.begin();
-      lib != tlibs.end(); ++lib)
-    {
-    // Don't emit the same library twice for this target.
-    if(emitted.insert(*lib).second)
-      {
-      this->AddTargetDepend(depender_index, *lib, true);
-      this->AddInterfaceDepends(depender_index, *lib,
-                                true, emitted);
-      }
-    }
-  }
   std::vector<std::string> configs;
   depender->GetMakefile()->GetConfigurations(configs);
+  if (configs.empty())
+    {
+    configs.push_back("");
+    }
   for (std::vector<std::string>::const_iterator it = configs.begin();
     it != configs.end(); ++it)
     {
