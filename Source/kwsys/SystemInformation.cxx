@@ -5023,21 +5023,26 @@ bool SystemInformationImplementation::QueryHPUXProcessor()
     case CPU_PA_RISC1_0:
       this->ChipID.Vendor = "Hewlett-Packard";
       this->ChipID.Family = 0x100;
+      break;
     case CPU_PA_RISC1_1:
       this->ChipID.Vendor = "Hewlett-Packard";
       this->ChipID.Family = 0x110;
+      break;
     case CPU_PA_RISC2_0:
       this->ChipID.Vendor = "Hewlett-Packard";
       this->ChipID.Family = 0x200;
-#  ifdef CPU_HP_INTEL_EM_1_0
+      break;
+#  if defined(CPU_HP_INTEL_EM_1_0) || defined(CPU_IA64_ARCHREV_0)
+#   ifdef CPU_HP_INTEL_EM_1_0
     case CPU_HP_INTEL_EM_1_0:
-#  endif
-#  ifdef CPU_IA64_ARCHREV_0
+#   endif
+#   ifdef CPU_IA64_ARCHREV_0
     case CPU_IA64_ARCHREV_0:
-#  endif
+#   endif
       this->ChipID.Vendor = "GenuineIntel";
       this->Features.HasIA64 = true;
       break;
+#  endif
     default:
       return false;
     }
