@@ -1791,8 +1791,8 @@ void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
 
   std::string::size_type matchOffset = 0;
 
-  const std::string absPath = cmsys::SystemTools::GetFilenamePath(
-                   cmsys::SystemTools::GetRealPath(absFilename.c_str())) + '/';
+  const std::string realName =
+                   cmsys::SystemTools::GetRealPath(absFilename.c_str());
 
   matchOffset = 0;
   if ((strstr(contentsString.c_str(), "ui_") != NULL)
@@ -1809,7 +1809,7 @@ void cmQtAutoGenerators::ParseForUic(const std::string& absFilename,
       // finding the correct header, so we need to remove the ui_ part
       basename = basename.substr(3);
 
-      includedUis[absPath] = basename;
+      includedUis[realName] = basename;
 
       matchOffset += uiIncludeRegExp.end();
       } while(uiIncludeRegExp.find(contentsString.c_str() + matchOffset));
@@ -1965,13 +1965,16 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
   return false;
 }
 
-bool cmQtAutoGenerators::GenerateUi(const std::string& path,
+bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
                                     const std::string& uiFileName)
 {
   if (!cmsys::SystemTools::FileExists(this->Builddir.c_str(), false))
     {
     cmsys::SystemTools::MakeDirectory(this->Builddir.c_str());
     }
+
+  const std::string path = cmsys::SystemTools::GetFilenamePath(
+                                                      realName.c_str()) + '/';
 
   std::string ui_output_file = "ui_" + uiFileName + ".h";
   std::string ui_input_file = path + uiFileName + ".ui";
@@ -2079,6 +2082,8 @@ bool cmQtAutoGenerators::GenerateQrc()
           }
         }
 
+      command.push_back("-name");
+      command.push_back(basename);
       command.push_back("-o");
       command.push_back(rcc_output_file);
       command.push_back(*si);
