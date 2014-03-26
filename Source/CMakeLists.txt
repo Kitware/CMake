@@ -18,6 +18,23 @@ else()
 endif()
 if(HAVE_ELF_H)
   set(CMAKE_USE_ELF_PARSER 1)
+elseif(HAIKU)
+  # On Haiku, we need to include elf32.h from the private headers
+  set(CMake_HAIKU_INCLUDE_DIRS
+    /boot/system/develop/headers/private/system
+    /boot/system/develop/headers/private/system/arch/x86
+    )
+
+  set(CMAKE_REQUIRED_INCLUDES ${CMake_HAIKU_INCLUDE_DIRS})
+  CHECK_INCLUDE_FILE("elf32.h" HAVE_ELF32_H)
+  unset(CMAKE_REQUIRED_INCLUDES)
+
+  if(HAVE_ELF32_H)
+    set(CMAKE_USE_ELF_PARSER 1)
+  else()
+    unset(CMake_HAIKU_INCLUDE_DIRS)
+    set(CMAKE_USE_ELF_PARSER)
+  endif()
 else()
   set(CMAKE_USE_ELF_PARSER)
 endif()
@@ -57,6 +74,7 @@ include_directories(
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
   ${CMAKE_COMPRESS_INCLUDES}
+  ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
 # let cmake know it is supposed to use it

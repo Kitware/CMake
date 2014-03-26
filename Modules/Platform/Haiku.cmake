@@ -21,18 +21,26 @@ set(CMAKE_EXE_EXPORTS_C_FLAG "-Wl,--export-dynamic")
 # "/boot/system/develop/lib/<subdir>/", which we assume to be the secondary
 # architecture specific subdirectory and extract the name of the architecture
 # accordingly.
-set(__HAIKU_COMPILER ${CMAKE_C_COMPILER})
 
-if(NOT __HAIKU_COMPILER)
+# First of all, find a C or C++ compiler we can run. The "arg1" is necessary
+# here for compilers such as "distcc gcc-x86" or "ccache gcc-x86"
+# TODO See CMakeDetermineCompilerId.cmake for some more things we may want to do.
+if(CMAKE_C_COMPILER)
+  set(__HAIKU_COMPILER ${CMAKE_C_COMPILER})
+  string (STRIP "${CMAKE_C_COMPILER_ARG1}" __HAIKU_COMPILER_FLAGS)
+else()
   set(__HAIKU_COMPILER ${CMAKE_CXX_COMPILER})
+  string (STRIP "${CMAKE_CXX_COMPILER_ARG1}" __HAIKU_COMPILER_FLAGS)
 endif()
 
+
 execute_process(
-  COMMAND ${__HAIKU_COMPILER} -print-search-dirs
+  COMMAND ${__HAIKU_COMPILER} ${__HAIKU_COMPILER_FLAGS} -print-search-dirs
   OUTPUT_VARIABLE _HAIKU_SEARCH_DIRS
+  RESULT_VARIABLE _HAIKU_SEARCH_DIRS_FOUND
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
-string(REGEX MATCH ".*\nlibraries: =?([^\n]*:)?/boot/system/develop/lib/([^/]*)/(:[^\n]*)?\n.*" _dummy "\n${_HAIKU_SEARCH_DIRS}\n")
+string(REGEX MATCH "libraries: =?([^\n]*:)?/boot/system/develop/lib/([^/]*)/?(:?\n+)" _dummy "${_HAIKU_SEARCH_DIRS}\n")
 set(CMAKE_HAIKU_SECONDARY_ARCH "${CMAKE_MATCH_2}")
 
 if(NOT CMAKE_HAIKU_SECONDARY_ARCH)
@@ -53,14 +61,12 @@ else()
 endif()
 
 list(APPEND CMAKE_SYSTEM_PREFIX_PATH
-  /boot/common/non-packaged
-  /boot/common
+  /boot/system/non-packaged
   /boot/system
   )
 
 LIST(APPEND CMAKE_HAIKU_COMMON_INCLUDE_DIRECTORIES
-  /boot/common/non-packaged/develop/headers${CMAKE_HAIKU_SECONDARY_ARCH_SUBDIR}
-  /boot/common/develop/headers${CMAKE_HAIKU_SECONDARY_ARCH_SUBDIR}
+  /boot/system/non-packaged/develop/headers${CMAKE_HAIKU_SECONDARY_ARCH_SUBDIR}
   /boot/system/develop/headers/os
   /boot/system/develop/headers/os/app
   /boot/system/develop/headers/os/device
@@ -108,8 +114,7 @@ LIST(APPEND CMAKE_HAIKU_CXX_INCLUDE_DIRECTORIES
 LIST(APPEND CMAKE_SYSTEM_INCLUDE_PATH ${CMAKE_HAIKU_C_INCLUDE_DIRECTORIES})
 
 LIST(APPEND CMAKE_HAIKU_DEVELOP_LIB_DIRECTORIES
-  /boot/common/non-packaged/develop/lib${CMAKE_HAIKU_SECONDARY_ARCH_SUBDIR}
-  /boot/common/develop/lib${CMAKE_HAIKU_SECONDARY_ARCH_SUBDIR}
+  /boot/system/non-packaged/develop/lib${CMAKE_HAIKU_SECONDARY_ARCH_SUBDIR}
   /boot/system/develop/lib${CMAKE_HAIKU_SECONDARY_ARCH_SUBDIR}
   )
 
@@ -120,6 +125,6 @@ LIST(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
 LIST(APPEND CMAKE_SYSTEM_LIBRARY_PATH ${CMAKE_HAIKU_DEVELOP_LIB_DIRECTORIES})
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "/boot/common" CACHE PATH
+  set(CMAKE_INSTALL_PREFIX "/boot/system" CACHE PATH
     "Install path prefix, prepended onto install directories." FORCE)
 endif()
