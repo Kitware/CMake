@@ -173,7 +173,7 @@ The Qt 4 and 5 :prop_tgt:`IMPORTED` targets for the QtGui libraries specify
 that the qtmain.lib static library shipped with Qt will be linked by all
 dependent executables which have the :prop_tgt:`WIN32_EXECUTABLE` enabled.
 
-Do disable this behavior, enable the ``Qt5_NO_LINK_QTMAIN`` target property for
+To disable this behavior, enable the ``Qt5_NO_LINK_QTMAIN`` target property for
 Qt 5 based targets or ``QT4_NO_LINK_QTMAIN`` target property for Qt 4 based
 targets.
 
