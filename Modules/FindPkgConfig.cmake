@@ -337,7 +337,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
     if(_pkg_check_modules_failed)
       # fail when requested
       if (${_is_required})
-        message(SEND_ERROR "A required package was not found")
+        message(FATAL_ERROR "A required package was not found")
       endif ()
     else()
       # when we are here, we checked whether requested modules
