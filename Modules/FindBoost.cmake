@@ -954,7 +954,8 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
 
   # Compute component-specific hints.
   set(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT "")
-  if(${COMPONENT} STREQUAL "mpi" OR ${COMPONENT} STREQUAL "mpi_python")
+  if(${COMPONENT} STREQUAL "mpi" OR ${COMPONENT} STREQUAL "mpi_python" OR
+     ${COMPONENT} STREQUAL "graph_parallel")
     foreach(lib ${MPI_CXX_LIBRARIES} ${MPI_C_LIBRARIES})
       if(IS_ABSOLUTE "${lib}")
         get_filename_component(libdir "${lib}" PATH)
