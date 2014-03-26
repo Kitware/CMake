@@ -54,6 +54,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "ld: warning: directory not found for option .-(F|L)"
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
+  "note: in expansion of macro" # diagnostic context note
 
   # Ignore clang's summary warning, assuming prior text has matched some
   # other warning expression:
