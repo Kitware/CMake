@@ -178,7 +178,7 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
-  std::string plist =
+  std::string plist = root + "/" +
     this->GT->Target->GetCFBundleDirectory(this->ConfigName, true);
   plist += "/Info.plist";
   this->LocalGenerator->GenerateAppleInfoPList(this->GT->Target,
