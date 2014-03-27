@@ -53,6 +53,14 @@ if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
   endif()
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "HP-UX" AND CMAKE_CXX_COMPILER_ID MATCHES "HP")
+  # it is known that version 3.85 fails and 6.25 works without these flags
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4)
+    # use new C++ library and improved template support
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA +hpxstd98")
+  endif()
+endif()
+
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")
