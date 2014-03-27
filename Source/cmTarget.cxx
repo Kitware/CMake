@@ -224,6 +224,7 @@ cmTarget::cmTarget()
   this->DebugIncludesDone = false;
   this->DebugCompileOptionsDone = false;
   this->DebugCompileDefinitionsDone = false;
+  this->DebugSourcesDone = false;
 }
 
 //----------------------------------------------------------------------------
@@ -553,7 +554,7 @@ static void processSources(cmTarget const* tgt,
       std::set<std::string> &uniqueSrcs,
       cmGeneratorExpressionDAGChecker *dagChecker,
       cmTarget const* head,
-      std::string const& config)
+      std::string const& config, bool debugSources)
 {
   cmMakefile *mf = tgt->GetMakefile();
 
@@ -601,6 +602,7 @@ static void processSources(cmTarget const* tgt,
         (*it)->CachedEntries = entrySources;
         }
       }
+    std::string usedSources;
     for(std::vector<std::string>::iterator
           li = entrySources.begin(); li != entrySources.end(); ++li)
       {
@@ -609,7 +611,18 @@ static void processSources(cmTarget const* tgt,
       if(uniqueSrcs.insert(src).second)
         {
         srcs.push_back(src);
+        if (debugSources)
+          {
+          usedSources += " * " + src + "\n";
+          }
         }
+      }
+    if (!usedSources.empty())
+      {
+      mf->GetCMakeInstance()->IssueMessage(cmake::LOG,
+                            std::string("Used sources for target ")
+                            + tgt->GetName() + ":\n"
+                            + usedSources, (*it)->ge->GetBacktrace());
       }
     }
 }
@@ -621,6 +634,24 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
 
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugSources = !this->DebugSourcesDone
+                    && std::find(debugProperties.begin(),
+                                 debugProperties.end(),
+                                 "SOURCES")
+                        != debugProperties.end();
+
+  if (this->Makefile->IsGeneratingBuildSystem())
+    {
+    this->DebugSourcesDone = true;
+    }
 
   cmListFileBacktrace lfbt;
 
@@ -635,7 +666,8 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                  uniqueSrcs,
                  &dagChecker,
                  head,
-                 config);
+                 config,
+                 debugSources);
 
   if (!this->Internal->CacheLinkInterfaceSourcesDone[config])
     {
@@ -686,7 +718,8 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                             uniqueSrcs,
                             &dagChecker,
                             head,
-                            config);
+                            config,
+                            debugSources);
 
   if (!this->Makefile->IsGeneratingBuildSystem())
     {
