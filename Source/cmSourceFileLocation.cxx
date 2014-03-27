@@ -60,6 +60,11 @@ cmSourceFileLocation
   this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name.c_str());
   this->AmbiguousExtension = true;
   this->Directory = cmSystemTools::GetFilenamePath(name);
+  if (cmSystemTools::FileIsFullPath(this->Directory.c_str()))
+    {
+    this->Directory
+                  = cmSystemTools::CollapseFullPath(this->Directory.c_str());
+    }
   this->Name = cmSystemTools::GetFilenameName(name);
   this->UpdateExtension(name);
 }
