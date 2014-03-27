@@ -96,9 +96,7 @@ private:
 
   // Update the location with additional knowledge.
   void Update(cmSourceFileLocation const& loc);
-  void Update(const std::string& name);
   void UpdateExtension(const std::string& name);
-  void UpdateDirectory(const std::string& name);
 };
 
 #endif

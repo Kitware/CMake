@@ -65,19 +65,6 @@ cmSourceFileLocation
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::Update(const std::string& name)
-{
-  if(this->AmbiguousDirectory)
-    {
-    this->UpdateDirectory(name);
-    }
-  if(this->AmbiguousExtension)
-    {
-    this->UpdateExtension(name);
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmSourceFileLocation::Update(cmSourceFileLocation const& loc)
 {
   if(this->AmbiguousDirectory && !loc.AmbiguousDirectory)
@@ -172,17 +159,6 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
         this->DirectoryUseSource();
         }
       }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmSourceFileLocation::UpdateDirectory(const std::string& name)
-{
-  // If a full path was given we know the directory.
-  if(cmSystemTools::FileIsFullPath(name.c_str()))
-    {
-    this->Directory = cmSystemTools::GetFilenamePath(name);
-    this->AmbiguousDirectory = false;
     }
 }
 
