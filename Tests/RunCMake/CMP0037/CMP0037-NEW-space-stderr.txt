@@ -1,9 +1,4 @@
 CMake Error at CMP0037-NEW-space.cmake:4 \(add_library\):
-  Policy CMP0037 is not set: Target names should not be reserved and should
-  match a validity pattern.  Run "cmake --help-policy CMP0037" for policy
-  details.  Use the cmake_policy command to set the policy and suppress this
-  warning.
-
   The target name "lib with spaces" is reserved or not valid for certain
   CMake features, such as generator expressions, and may result in undefined
   behavior.
@@ -11,11 +6,6 @@ Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
 CMake Error at CMP0037-NEW-space.cmake:5 \(add_executable\):
-  Policy CMP0037 is not set: Target names should not be reserved and should
-  match a validity pattern.  Run "cmake --help-policy CMP0037" for policy
-  details.  Use the cmake_policy command to set the policy and suppress this
-  warning.
-
   The target name "exe with spaces" is reserved or not valid for certain
   CMake features, such as generator expressions, and may result in undefined
   behavior.
@@ -23,11 +13,6 @@ Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
 +
 CMake Error at CMP0037-NEW-space.cmake:6 \(add_custom_target\):
-  Policy CMP0037 is not set: Target names should not be reserved and should
-  match a validity pattern.  Run "cmake --help-policy CMP0037" for policy
-  details.  Use the cmake_policy command to set the policy and suppress this
-  warning.
-
   The target name "custom with spaces" is reserved or not valid for certain
   CMake features, such as generator expressions, and may result in undefined
   behavior.

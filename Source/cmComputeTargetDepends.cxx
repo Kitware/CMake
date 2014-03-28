@@ -349,9 +349,12 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     cmMakefile *makefile = depender->GetMakefile();
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
+    cmOStringStream e;
     switch(depender->GetPolicyStatusCMP0046())
       {
       case cmPolicies::WARN:
+        e << (makefile->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0046)) << "\n";
         issueMessage = true;
       case cmPolicies::OLD:
         break;
@@ -364,9 +367,7 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
     if(issueMessage)
       {
       cmake* cm = this->GlobalGenerator->GetCMakeInstance();
-      cmOStringStream e;
-      e << (makefile->GetPolicies()
-        ->GetPolicyWarning(cmPolicies::CMP0046)) << "\n";
+
       e << "The dependency target \"" <<  dependee_name
         << "\" of target \"" << depender->GetName() << "\" does not exist.";
 

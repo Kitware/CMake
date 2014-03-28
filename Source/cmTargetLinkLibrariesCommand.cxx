@@ -103,11 +103,14 @@ bool cmTargetLinkLibrariesCommand
 
   if (this->Target->GetType() == cmTarget::UTILITY)
     {
+    cmOStringStream e;
     const char *modal = 0;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0039))
       {
       case cmPolicies::WARN:
+        e << this->Makefile->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0039) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;
@@ -119,9 +122,7 @@ bool cmTargetLinkLibrariesCommand
       }
     if (modal)
       {
-      cmOStringStream e;
-      e << this->Makefile->GetPolicies()
-                            ->GetPolicyWarning(cmPolicies::CMP0039) << "\n"
+      e <<
         "Utility target \"" << this->Target->GetName() << "\" " << modal
         << " not be used as the target of a target_link_libraries call.";
       this->Makefile->IssueMessage(messageType, e.str().c_str());
@@ -373,11 +374,14 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
         ? cmTarget::KeywordTLLSignature : cmTarget::PlainTLLSignature;
   if (!this->Target->PushTLLCommandTrace(sig))
     {
+    cmOStringStream e;
     const char *modal = 0;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0023))
       {
       case cmPolicies::WARN:
+        e << this->Makefile->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0023) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;
@@ -390,14 +394,12 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
 
       if(modal)
         {
-        cmOStringStream e;
         // If the sig is a keyword form and there is a conflict, the existing
         // form must be the plain form.
         const char *existingSig
                     = (sig == cmTarget::KeywordTLLSignature ? "plain"
                                                             : "keyword");
-        e << this->Makefile->GetPolicies()
-                              ->GetPolicyWarning(cmPolicies::CMP0023) << "\n"
+          e <<
             "The " << existingSig << " signature for target_link_libraries "
             "has already been used with the target \""
           << this->Target->GetName() << "\".  All uses of "

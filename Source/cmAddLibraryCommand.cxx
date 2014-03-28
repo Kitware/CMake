@@ -214,11 +214,17 @@ bool cmAddLibraryCommand
   if (!nameOk)
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    cmOStringStream e;
     bool issueMessage = false;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
       case cmPolicies::WARN:
-        issueMessage = type != cmTarget::INTERFACE_LIBRARY;
+        if(type != cmTarget::INTERFACE_LIBRARY)
+          {
+          e << (this->Makefile->GetPolicies()
+            ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
+          issueMessage = true;
+          }
       case cmPolicies::OLD:
         break;
       case cmPolicies::NEW:
@@ -229,9 +235,6 @@ bool cmAddLibraryCommand
       }
     if (issueMessage)
       {
-      cmOStringStream e;
-      e << (this->Makefile->GetPolicies()
-            ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
       e << "The target name \"" << libName <<
           "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
