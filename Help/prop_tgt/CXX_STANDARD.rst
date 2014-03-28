@@ -1,13 +1,25 @@
 CXX_STANDARD
 ------------
 
-The C++ standard whose features are required to build this target.
+The C++ standard whose features are requested to build this target.
 
-This property specifies the C++ standard whose features are required
+This property specifies the C++ standard whose features are requested
 to build this target.  For some compilers, this results in adding a
 flag such as ``-std=c++11`` to the compile line.
 
 Supported values are ``98`` and ``11``.
+
+If the value requested does not result in a compile flag being added for
+the compiler in use, a previous standard flag will be added instead.  This
+means that using:
+
+.. code-block:: cmake
+
+  set_property(TARGET tgt PROPERTY CXX_STANDARD 11)
+
+with a compiler which does not support ``-std=c++11`` or an equivalent
+flag will not result in an error or warning, but will instead add the
+``-std=c++98`` flag if supported.
 
 This property is initialized by the value of
 the :variable:`CMAKE_CXX_STANDARD` variable if it is set when a target

@@ -24,6 +24,8 @@ elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.3)
   set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=gnu++0x")
 endif()
 
+set(CMAKE_CXX_STANDARD_DEFAULT 98)
+
 macro(cmake_record_cxx_compile_features)
   macro(_get_gcc_features std_version list)
     record_compiler_features(CXX "-std=${std_version}" ${list})
