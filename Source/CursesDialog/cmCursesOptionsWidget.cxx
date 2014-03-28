@@ -59,7 +59,6 @@ bool cmCursesOptionsWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
     {
     return false;
     }
-  return false;
 }
 
 void cmCursesOptionsWidget::AddOption(std::string const & option )

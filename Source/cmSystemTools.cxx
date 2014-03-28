@@ -1662,7 +1662,6 @@ long copy_data(struct archive *ar, struct archive *aw)
       return (r);
       }
     }
-  return r;
 }
 
 bool extract_tar(const char* outFileName, bool verbose,
