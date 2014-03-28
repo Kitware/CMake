@@ -58,7 +58,7 @@ static char* lowercase(const char *string)
 
 int main(int ac, char *av[])
 {
-  int i, NumTests, testNum, partial_match;
+  int i, NumTests, testNum = 0, partial_match;
   char *arg, *test_name;
   int count;
   int testToRun = -1;
@@ -81,7 +81,6 @@ int main(int ac, char *av[])
       }
     printf("To run a test, enter the test number: ");
     fflush(stdout);
-    testNum = 0;
     if( scanf("%d", &testNum) != 1 )
       {
       printf("Couldn't parse that input as a number\n");
