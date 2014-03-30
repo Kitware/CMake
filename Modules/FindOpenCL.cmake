@@ -35,6 +35,7 @@
 function(_FIND_OPENCL_VERSION)
   include(CheckSymbolExists)
   include(CMakePushCheckState)
+  set(CMAKE_REQUIRED_QUIET ${OpenCL_FIND_QUIETLY})
 
   CMAKE_PUSH_CHECK_STATE()
   foreach(VERSION "2_0" "1_2" "1_1" "1_0")

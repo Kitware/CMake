@@ -52,6 +52,9 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+cmake_push_check_state()
+set(CMAKE_REQUIRED_QUIET ${BLAS_FIND_QUIETLY})
 
 set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
@@ -687,4 +690,5 @@ else()
   endif()
 endif()
 
+cmake_pop_check_state()
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})
