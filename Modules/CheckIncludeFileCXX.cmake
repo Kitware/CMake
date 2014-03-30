@@ -28,6 +28,7 @@
 #   CMAKE_REQUIRED_FLAGS = string of compile command line flags
 #   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #   CMAKE_REQUIRED_INCLUDES = list of include directories
+#   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
@@ -53,7 +54,9 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     set(CHECK_INCLUDE_FILE_VAR ${INCLUDE})
     configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
-    message(STATUS "Looking for C++ include ${INCLUDE}")
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Looking for C++ include ${INCLUDE}")
+    endif()
     if(${ARGC} EQUAL 3)
       set(CMAKE_CXX_FLAGS_SAVE ${CMAKE_CXX_FLAGS})
       set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${ARGV2}")
@@ -73,14 +76,18 @@ macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
     endif()
 
     if(${VARIABLE})
-      message(STATUS "Looking for C++ include ${INCLUDE} - found")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Looking for C++ include ${INCLUDE} - found")
+      endif()
       set(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the include file ${INCLUDE} "
         "exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     else()
-      message(STATUS "Looking for C++ include ${INCLUDE} - not found")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Looking for C++ include ${INCLUDE} - not found")
+      endif()
       set(${VARIABLE} "" CACHE INTERNAL "Have include ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the include file ${INCLUDE} "
