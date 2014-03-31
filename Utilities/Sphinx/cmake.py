@@ -21,6 +21,24 @@ from pygments.lexer import bygroups
 CMakeLexer.tokens["args"].append(('(\\$<)(.+?)(>)',
                                   bygroups(Operator, Name.Variable, Operator)))
 
+# Monkey patch for sphinx generating invalid content for qcollectiongenerator
+# https://bitbucket.org/birkenfeld/sphinx/issue/1435/qthelp-builder-should-htmlescape-keywords
+from sphinx.util.pycompat import htmlescape
+from sphinx.builders.qthelp import QtHelpBuilder
+old_build_keywords = QtHelpBuilder.build_keywords
+def new_build_keywords(self, title, refs, subitems):
+  old_items = old_build_keywords(self, title, refs, subitems)
+  new_items = []
+  for item in old_items:
+    before, rest = item.split("ref=\"", 1)
+    ref, after = rest.split("\"")
+    if ("<" in ref and ">" in ref):
+      new_items.append(before + "ref=\"" + htmlescape(ref) + "\"" + after)
+    else:
+      new_items.append(item)
+  return new_items
+QtHelpBuilder.build_keywords = new_build_keywords
+
 
 from docutils.parsers.rst import Directive, directives
 from docutils.transforms import Transform
