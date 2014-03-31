@@ -348,6 +348,12 @@ cmPolicies::cmPolicies()
     CMP0051, "CMP0051",
     "List TARGET_OBJECTS in SOURCES target property.",
     3,1,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0052, "CMP0052",
+    "Reject source and build dirs in installed "
+    "INTERFACE_INCLUDE_DIRECTORIES.",
+    3,1,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
