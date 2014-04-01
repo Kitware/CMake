@@ -44,7 +44,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "warning.*directory name.*CMake-Xcode.*/bin/.*does not exist.*"
   "stl_deque.h:1051"
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
-  "(Lexer|Parser).*warning.*statement is unreachable"
+  "(Lexer|Parser).*warning.*(statement is unreachable|will never be executed)"
   "PGC-W-0095-Type cast required for this conversion.*ProcessUNIX.c"
   "[Qq]t([Cc]ore|[Gg]ui).*warning.*conversion.*may alter its value"
   "warning:.*is.*very unsafe.*consider using.*"
