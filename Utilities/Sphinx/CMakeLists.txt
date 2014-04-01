@@ -24,6 +24,7 @@ project(CMakeHelp NONE)
 
 option(SPHINX_MAN "Build man pages with Sphinx" OFF)
 option(SPHINX_HTML "Build html help with Sphinx" OFF)
+option(SPHINX_QTHELP "Build Qt help with Sphinx" OFF)
 option(SPHINX_TEXT "Build text help with Sphinx (not installed)" OFF)
 find_program(SPHINX_EXECUTABLE
   NAMES sphinx-build
@@ -32,7 +33,7 @@ find_program(SPHINX_EXECUTABLE
 
 mark_as_advanced(SPHINX_TEXT)
 
-if(NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_TEXT)
+if(NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT)
   return()
 elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
@@ -63,6 +64,21 @@ endif()
 if(SPHINX_TEXT)
   list(APPEND doc_formats text)
 endif()
+if(SPHINX_QTHELP)
+  find_program(QCOLLECTIONGENERATOR_EXECUTABLE
+    NAMES qcollectiongenerator
+    DOC "qcollectiongenerator tool"
+    )
+  if (NOT QCOLLECTIONGENERATOR_EXECUTABLE)
+    message(FATAL_ERROR "QCOLLECTIONGENERATOR_EXECUTABLE (qcollectiongenerator) not found!")
+  endif()
+  list(APPEND doc_formats qthelp)
+
+  set(qthelp_extra_commands
+    COMMAND qcollectiongenerator ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
+  )
+endif()
+
 
 set(doc_format_outputs "")
 set(doc_format_last "")
@@ -78,6 +94,7 @@ foreach(format ${doc_formats})
             ${CMake_SOURCE_DIR}/Help
             ${CMAKE_CURRENT_BINARY_DIR}/${format}
             > ${doc_format_log} # log stdout, pass stderr
+    ${${format}_extra_commands}
     DEPENDS ${doc_format_last}
     COMMENT "sphinx-build ${format}: see Utilities/Sphinx/${doc_format_log}"
     VERBATIM
@@ -120,5 +137,10 @@ if(SPHINX_HTML)
           DESTINATION ${CMAKE_DOC_DIR}
           PATTERN .buildinfo EXCLUDE
           PATTERN objects.inv EXCLUDE
+          )
+endif()
+if(SPHINX_QTHELP)
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch
+          DESTINATION ${CMAKE_DOC_DIR}
           )
 endif()
