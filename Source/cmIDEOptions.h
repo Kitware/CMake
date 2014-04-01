@@ -56,6 +56,7 @@ protected:
   void HandleFlag(const char* flag);
   bool CheckFlagTable(cmIDEFlagTable const* table, const char* flag,
                       bool& flag_handled);
+  void FlagMapUpdate(cmIDEFlagTable const* entry, const char* new_value);
   virtual void StoreUnknownFlag(const char* flag) = 0;
 };
 

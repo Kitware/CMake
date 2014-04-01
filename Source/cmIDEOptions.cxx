@@ -99,33 +99,7 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
          (!(entry->special & cmIDEFlagTable::UserRequired) ||
           static_cast<int>(strlen(flag+1)) > n))
         {
-        if(entry->special & cmIDEFlagTable::UserIgnored)
-          {
-          // Ignore the user-specified value.
-          this->FlagMap[entry->IDEName] = entry->value;
-          }
-        else if(entry->special & cmIDEFlagTable::SemicolonAppendable)
-          {
-          const char *new_value = flag+1+n;
-
-          std::map<std::string,std::string>::iterator itr;
-          itr = this->FlagMap.find(entry->IDEName);
-          if(itr != this->FlagMap.end())
-            {
-            // Append to old value (if present) with semicolons;
-            itr->second += ";";
-            itr->second += new_value;
-            }
-          else
-            {
-            this->FlagMap[entry->IDEName] = new_value;
-            }
-          }
-        else
-          {
-          // Use the user-specified value.
-          this->FlagMap[entry->IDEName] = flag+1+n;
-          }
+        this->FlagMapUpdate(entry, flag+n+1);
         entry_found = true;
         }
       }
@@ -148,6 +122,37 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
     }
 
   return false;
+}
+
+//----------------------------------------------------------------------------
+void cmIDEOptions::FlagMapUpdate(cmIDEFlagTable const* entry,
+                                 const char* new_value)
+{
+  if(entry->special & cmIDEFlagTable::UserIgnored)
+    {
+    // Ignore the user-specified value.
+    this->FlagMap[entry->IDEName] = entry->value;
+    }
+  else if(entry->special & cmIDEFlagTable::SemicolonAppendable)
+    {
+    std::map<std::string,std::string>::iterator itr;
+    itr = this->FlagMap.find(entry->IDEName);
+    if(itr != this->FlagMap.end())
+      {
+      // Append to old value (if present) with semicolons;
+      itr->second += ";";
+      itr->second += new_value;
+      }
+    else
+      {
+      this->FlagMap[entry->IDEName] = new_value;
+      }
+    }
+  else
+    {
+    // Use the user-specified value.
+    this->FlagMap[entry->IDEName] = new_value;
+    }
 }
 
 //----------------------------------------------------------------------------
