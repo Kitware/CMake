@@ -35,7 +35,6 @@ void cmGlobalWatcomWMakeGenerator
   mf->AddDefinition("CMAKE_MANGLE_OBJECT_FILE_NAMES", "1");
   mf->AddDefinition("CMAKE_MAKE_LINE_CONTINUE", "&");
   mf->AddDefinition("CMAKE_MAKE_SYMBOLIC_RULE", ".SYMBOLIC");
-  mf->AddDefinition("CMAKE_NO_QUOTED_OBJECTS", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl386");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl386");
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);

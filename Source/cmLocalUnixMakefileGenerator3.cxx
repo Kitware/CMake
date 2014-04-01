@@ -2181,59 +2181,82 @@ cmLocalUnixMakefileGenerator3
 
 //----------------------------------------------------------------------------
 std::string
-cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p)
+cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
+                                                         bool useWatcomQuote)
 {
-
   // Split the path into its components.
   std::vector<std::string> components;
   cmSystemTools::SplitPath(p, components);
 
-  // Return an empty path if there are no components.
-  if(components.empty())
+  // Open the quoted result.
+  std::string result;
+  if(useWatcomQuote)
     {
-    return "\"\"";
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    result = "'";
+#else
+    result = "\"'";
+#endif
+    }
+  else
+    {
+    result = "\"";
     }
 
-  // Choose a slash direction and fix root component.
-  const char* slash = "/";
+  // Return an empty path if there are no components.
+  if(!components.empty())
+    {
+    // Choose a slash direction and fix root component.
+    const char* slash = "/";
 #if defined(_WIN32) && !defined(__CYGWIN__)
-   if(!cmSystemTools::GetForceUnixPaths())
-     {
-     slash = "\\";
-     for(std::string::iterator i = components[0].begin();
-       i != components[0].end(); ++i)
-       {
-       if(*i == '/')
-         {
-         *i = '\\';
-         }
-       }
-     }
+    if(!cmSystemTools::GetForceUnixPaths())
+      {
+      slash = "\\";
+      for(std::string::iterator i = components[0].begin();
+          i != components[0].end(); ++i)
+        {
+        if(*i == '/')
+          {
+          *i = '\\';
+          }
+        }
+      }
 #endif
 
-  // Begin the quoted result with the root component.
-  std::string result = "\"";
-  result += components[0];
+    // Begin the quoted result with the root component.
+    result += components[0];
 
-  // Now add the rest of the components separated by the proper slash
-  // direction for this platform.
-  bool first = true;
-  for(unsigned int i=1; i < components.size(); ++i)
-    {
-    // Only the last component can be empty to avoid double slashes.
-    if(components[i].length() > 0 || (i == (components.size()-1)))
+    // Now add the rest of the components separated by the proper slash
+    // direction for this platform.
+    bool first = true;
+    for(unsigned int i=1; i < components.size(); ++i)
       {
-      if(!first)
+      // Only the last component can be empty to avoid double slashes.
+      if(components[i].length() > 0 || (i == (components.size()-1)))
         {
-        result += slash;
+        if(!first)
+          {
+          result += slash;
+          }
+        result += components[i];
+        first = false;
         }
-      result += components[i];
-      first = false;
       }
     }
 
   // Close the quoted result.
-  result += "\"";
+  if(useWatcomQuote)
+    {
+#if defined(_WIN32) && !defined(__CYGWIN__)
+    result += "'";
+#else
+    result += "'\"";
+#endif
+    }
+  else
+    {
+    result += "\"";
+    }
 
   return result;
 }

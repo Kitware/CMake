@@ -458,6 +458,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                              this->Target);
     }
 
+  bool useWatcomQuote = this->Makefile->IsOn(linkRuleVar+"_USE_WATCOM_QUOTE");
+
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
@@ -553,7 +555,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // rule.
   std::string buildObjs;
   this->CreateObjectLists(useLinkScript, useArchiveRules,
-                          useResponseFileForObjects, buildObjs, depends);
+                          useResponseFileForObjects, buildObjs, depends,
+                          useWatcomQuote);
 
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();
