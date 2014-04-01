@@ -86,7 +86,30 @@ macro(SWIG_GET_EXTRA_OUTPUT_FILES language outfiles generatedpath infile)
   get_source_file_property(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename
     ${infile} SWIG_MODULE_NAME)
   if(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename STREQUAL "NOTFOUND")
-    get_filename_component(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename "${infile}" NAME_WE)
+
+    # try to get module name from "%module foo" syntax
+    if ( EXISTS ${infile} )
+      file ( STRINGS ${infile} _MODULE_NAME REGEX "[ ]*%module[ ]*[a-zA-Z0-9_]+.*" )
+    endif ()
+    if ( _MODULE_NAME )
+      string ( REGEX REPLACE "[ ]*%module[ ]*([a-zA-Z0-9_]+).*" "\\1" _MODULE_NAME "${_MODULE_NAME}" )
+      set(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename "${_MODULE_NAME}")
+
+    else ()
+      # try to get module name from "%module (options=...) foo" syntax
+      if ( EXISTS ${infile} )
+        file ( STRINGS ${infile} _MODULE_NAME REGEX "[ ]*%module[ ]*\\(.*\\)[ ]*[a-zA-Z0-9_]+.*" )
+      endif ()
+      if ( _MODULE_NAME )
+        string ( REGEX REPLACE "[ ]*%module[ ]*\\(.*\\)[ ]*([a-zA-Z0-9_]+).*" "\\1" _MODULE_NAME "${_MODULE_NAME}" )
+        set(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename "${_MODULE_NAME}")
+
+      else ()
+        # fallback to file basename
+        get_filename_component(SWIG_GET_EXTRA_OUTPUT_FILES_module_basename ${infile} NAME_WE)
+      endif ()
+    endif ()
+
   endif()
   foreach(it ${SWIG_${language}_EXTRA_FILE_EXTENSION})
     set(${outfiles} ${${outfiles}}
