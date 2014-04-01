@@ -75,6 +75,10 @@ if(SPHINX_QTHELP)
   list(APPEND doc_formats qthelp)
 
   set(qthelp_extra_commands
+    # Workaround for assistant prior to
+    # https://codereview.qt-project.org/#change,82250 in Qt 4.
+    COMMAND ${CMAKE_COMMAND} "-DCSS_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/_static"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/apply_qthelp_css_workaround.cmake"
     COMMAND qcollectiongenerator ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
   )
 endif()
