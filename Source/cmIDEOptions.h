@@ -51,6 +51,7 @@ protected:
   bool DoingDefine;
   bool AllowDefine;
   bool AllowSlash;
+  cmIDEFlagTable const* DoingFollowing;
   enum { FlagTableCount = 16 };
   cmIDEFlagTable const* FlagTable[FlagTableCount];
   void HandleFlag(const char* flag);
