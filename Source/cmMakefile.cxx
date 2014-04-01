@@ -893,9 +893,12 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
+    cmOStringStream e;
     switch(this->GetPolicyStatus(cmPolicies::CMP0040))
       {
       case cmPolicies::WARN:
+        e << (this->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0040)) << "\n";
         issueMessage = true;
       case cmPolicies::OLD:
         break;
@@ -908,9 +911,6 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
 
     if(issueMessage)
       {
-      cmOStringStream e;
-      e << (this->GetPolicies()
-        ->GetPolicyWarning(cmPolicies::CMP0040)) << "\n";
       e << "The target name \"" << target << "\" is unknown in this context.";
       IssueMessage(messageType, e.str());
       }
