@@ -70,7 +70,6 @@ bool cmTargetLinkLibrariesCommand
                                   GetRequiredPolicyError(cmPolicies::CMP0016);
           break;
         case cmPolicies::NEW:  // NEW behavior prints the error.
-        default:
           break;
         }
       }
