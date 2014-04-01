@@ -73,6 +73,8 @@ if (UNIX)
   # found in tcl on the mac
   set(CMAKE_FIND_FRAMEWORK_SAVE ${CMAKE_FIND_FRAMEWORK})
   set(CMAKE_FIND_FRAMEWORK NEVER)
+  set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
+  set(CMAKE_REQUIRED_QUIET ${X11_FIND_QUIETLY})
   set(X11_INC_SEARCH_PATH
     /usr/pkg/xorg/include
     /usr/X11R6/include
@@ -507,6 +509,7 @@ if (UNIX)
     X11_XSync_INCLUDE_PATH
   )
   set(CMAKE_FIND_FRAMEWORK ${CMAKE_FIND_FRAMEWORK_SAVE})
+  set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 endif ()
 
 # X11_FIND_REQUIRED_<component> could be checked too

@@ -27,6 +27,7 @@
 #   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #   CMAKE_REQUIRED_INCLUDES = list of include directories
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
 #=============================================================================
 # Copyright 2003-2011 Kitware, Inc.

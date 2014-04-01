@@ -54,6 +54,10 @@ include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 else ()
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 endif ()
+include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+
+cmake_push_check_state()
+set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
 
 set(LAPACK_FOUND FALSE)
 set(LAPACK95_FOUND FALSE)
@@ -347,4 +351,5 @@ else()
  endif()
 endif()
 
+cmake_pop_check_state()
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})

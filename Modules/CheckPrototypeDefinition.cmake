@@ -33,6 +33,7 @@
 #   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #   CMAKE_REQUIRED_INCLUDES = list of include directories
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
 #=============================================================================
 # Copyright 2005-2009 Kitware, Inc.
@@ -97,12 +98,16 @@ function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIAB
 
     if (${_VARIABLE})
       set(${_VARIABLE} 1 CACHE INTERNAL "Have correct prototype for ${_FUNCTION}")
-      message(STATUS "Checking prototype ${_FUNCTION} for ${_VARIABLE} - True")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Checking prototype ${_FUNCTION} for ${_VARIABLE} - True")
+      endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the prototype ${_FUNCTION} exists for ${_VARIABLE} passed with the following output:\n"
         "${OUTPUT}\n\n")
     else ()
-      message(STATUS "Checking prototype ${_FUNCTION} for ${_VARIABLE} - False")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Checking prototype ${_FUNCTION} for ${_VARIABLE} - False")
+      endif()
       set(${_VARIABLE} 0 CACHE INTERNAL "Have correct prototype for ${_FUNCTION}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the prototype ${_FUNCTION} exists for ${_VARIABLE} failed with the following output:\n"

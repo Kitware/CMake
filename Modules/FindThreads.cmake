@@ -37,6 +37,8 @@ include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckSymbolExists)
 set(Threads_FOUND FALSE)
+set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
+set(CMAKE_REQUIRED_QUIET ${Threads_FIND_QUIETLY})
 
 # Do we have sproc?
 if(CMAKE_SYSTEM MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
@@ -173,5 +175,6 @@ if(CMAKE_USE_PTHREADS_INIT)
   endif()
 endif()
 
+set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Threads DEFAULT_MSG Threads_FOUND)

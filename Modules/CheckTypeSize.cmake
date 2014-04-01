@@ -59,6 +59,7 @@
 #   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #   CMAKE_REQUIRED_INCLUDES = list of include directories
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#   CMAKE_REQUIRED_QUIET = execute quietly without messages
 #   CMAKE_EXTRA_INCLUDE_FILES = list of extra headers to include
 
 #=============================================================================
@@ -85,7 +86,9 @@ get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 #-----------------------------------------------------------------------------
 # Helper function.  DO NOT CALL DIRECTLY.
 function(__check_type_size_impl type var map builtin language)
-  message(STATUS "Check size of ${type}")
+  if(NOT CMAKE_REQUIRED_QUIET)
+    message(STATUS "Check size of ${type}")
+  endif()
 
   # Include header files.
   set(headers)
@@ -169,13 +172,17 @@ function(__check_type_size_impl type var map builtin language)
       message(SEND_ERROR "CHECK_TYPE_SIZE found different results, consider setting CMAKE_OSX_ARCHITECTURES or CMAKE_TRY_COMPILE_OSX_ARCHITECTURES to one or no architecture !")
     endif()
 
-    message(STATUS "Check size of ${type} - done")
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Check size of ${type} - done")
+    endif()
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
       "Determining size of ${type} passed with the following output:\n${output}\n\n")
     set(${var} "${${var}}" CACHE INTERNAL "CHECK_TYPE_SIZE: sizeof(${type})")
   else()
     # The check failed to compile.
-    message(STATUS "Check size of ${type} - failed")
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Check size of ${type} - failed")
+    endif()
     file(READ ${src} content)
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
       "Determining size of ${type} failed with the following output:\n${output}\n${src}:\n${content}\n\n")
