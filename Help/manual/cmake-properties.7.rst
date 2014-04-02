@@ -98,6 +98,7 @@ Properties on Targets
    /prop_tgt/COMPATIBLE_INTERFACE_STRING
    /prop_tgt/COMPILE_DEFINITIONS_CONFIG
    /prop_tgt/COMPILE_DEFINITIONS
+   /prop_tgt/COMPILE_FEATURES
    /prop_tgt/COMPILE_FLAGS
    /prop_tgt/COMPILE_OPTIONS
    /prop_tgt/COMPILE_PDB_NAME
