@@ -4336,7 +4336,7 @@ bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
   // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
   if(!var.empty())
     {
-    if(const char* val = this->GetDefinition(var.c_str()))
+    if(const char* val = this->GetDefinition(var))
       {
       return cmSystemTools::IsOn(val);
       }
