@@ -875,6 +875,8 @@ public:
   std::set<cmStdString> const & GetSystemIncludeDirectories() const
     { return this->SystemIncludeDirectories; }
 
+  bool PolicyOptionalWarningEnabled(std::string const& var);
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const char* name, cmTarget& target);

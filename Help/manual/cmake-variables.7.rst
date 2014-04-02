@@ -131,6 +131,7 @@ Variables that Change Behavior
    /variable/CMAKE_MODULE_PATH
    /variable/CMAKE_NOT_USING_CONFIG_FLAGS
    /variable/CMAKE_POLICY_DEFAULT_CMPNNNN
+   /variable/CMAKE_POLICY_WARNING_CMPNNNN
    /variable/CMAKE_PREFIX_PATH
    /variable/CMAKE_PROGRAM_PATH
    /variable/CMAKE_PROJECT_PROJECT-NAME_INCLUDE

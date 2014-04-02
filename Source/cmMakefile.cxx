@@ -4350,6 +4350,22 @@ cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
   return this->GetPolicies()->GetPolicyStatus(id);
 }
 
+//----------------------------------------------------------------------------
+bool cmMakefile::PolicyOptionalWarningEnabled(std::string const& var)
+{
+  // Check for an explicit CMAKE_POLICY_WARNING_CMP<NNNN> setting.
+  if(!var.empty())
+    {
+    if(const char* val = this->GetDefinition(var.c_str()))
+      {
+      return cmSystemTools::IsOn(val);
+      }
+    }
+  // Enable optional policy warnings with --debug-output or --trace.
+  cmake* cm = this->GetCMakeInstance();
+  return cm->GetDebugOutput() || cm->GetTrace();
+}
+
 bool cmMakefile::SetPolicy(const char *id,
                            cmPolicies::PolicyStatus status)
 {
