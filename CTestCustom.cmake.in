@@ -46,7 +46,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "(Lexer|Parser).*warning.*conversion.*may (alter its value|change the sign)"
   "(Lexer|Parser).*warning.*statement is unreachable"
   "PGC-W-0095-Type cast required for this conversion.*ProcessUNIX.c"
-  "[Qq]t([Cc]ore|[Gg]ui).*warning.*conversion.*may alter its value"
+  "[Qq]t([Cc]ore|[Gg]ui|[Ww]idgets).*warning.*conversion.*may alter its value"
   "warning:.*is.*very unsafe.*consider using.*"
   "warning:.*is.*misused, please use.*"
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
