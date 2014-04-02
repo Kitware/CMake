@@ -42,6 +42,11 @@ The features known to this version of CMake are:
 
   .. _N1720: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1720.html
 
+``cxx_strong_enums``
+  Strongly typed enums, as defined in N2347_.
+
+  .. _N2347: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2347.pdf
+
 ``cxx_trailing_return_types``
   Automatic function return type, as defined in N2541_.
 
