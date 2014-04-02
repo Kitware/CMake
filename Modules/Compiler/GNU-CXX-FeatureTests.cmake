@@ -18,6 +18,7 @@ set(_cmake_feature_test_cxx_constexpr "${GNU46_CXX11}")
 # TODO: Should be supported by GNU 4.4
 set(GNU44_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_auto_type "${GNU44_CXX11}")
+set(_cmake_feature_test_cxx_defaulted_functions "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_strong_enums "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_trailing_return_types "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_variadic_templates "${GNU44_CXX11}")

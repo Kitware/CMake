@@ -45,6 +45,7 @@
   F(cxx_auto_type) \
   F(cxx_constexpr) \
   F(cxx_decltype) \
+  F(cxx_defaulted_functions) \
   F(cxx_delegating_constructors) \
   F(cxx_final) \
   F(cxx_override) \

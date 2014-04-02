@@ -27,6 +27,11 @@ The features known to this version of CMake are:
 
   .. _N2343: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2343.pdf
 
+``cxx_defaulted_functions``
+  Defaulted functions, as defined in N2346_.
+
+  .. _N2346: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
+
 ``cxx_delegating_constructors``
   Delegating constructors, as defined in N1986_.
 
