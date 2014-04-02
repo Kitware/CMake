@@ -285,6 +285,13 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
     return false;
     }
 
+  // If the CMAKE_EXPORT_NO_PACKAGE_REGISTRY variable is set the command
+  // export(PACKAGE) does nothing.
+  if(this->Makefile->IsOn("CMAKE_EXPORT_NO_PACKAGE_REGISTRY"))
+    {
+    return true;
+    }
+
   // We store the current build directory in the registry as a value
   // named by a hash of its own content.  This is deterministic and is
   // unique with high probability.
