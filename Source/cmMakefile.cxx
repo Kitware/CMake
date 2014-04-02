@@ -41,7 +41,8 @@
 #include <ctype.h> // for isspace
 #include <assert.h>
 
-#define FOR_EACH_CXX_FEATURE(F)
+#define FOR_EACH_CXX_FEATURE(F) \
+  F(cxx_auto_type)
 
 class cmMakefile::Internals
 {
@@ -2453,6 +2454,12 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
     {
     this->Internal->VarUsageStack.top().insert(name);
     }
+  if (name == "CMAKE_CXX_KNOWN_FEATURES")
+    {
+#define STRING_LIST_ELEMENT(F) ";" #F
+    return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
+#undef STRING_LIST_ELEMENT
+    }
   const char* def = this->Internal->VarStack.top().Get(name);
   if(!def)
     {
@@ -4520,7 +4527,15 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
   if (!isCxxFeature)
     {
     cmOStringStream e;
-    e << "specified unknown feature \"" << feature << "\" specified for "
+    if (error)
+      {
+      e << "specified";
+      }
+    else
+      {
+      e << "Specified";
+      }
+    e << " unknown feature \"" << feature << "\" for "
       "target \"" << target->GetName() << "\".";
     if (error)
       {
