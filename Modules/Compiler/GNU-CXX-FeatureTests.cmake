@@ -30,5 +30,6 @@ set(_cmake_feature_test_cxx_variadic_templates "${GNU44_CXX11}")
 # http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2555.pdf
 # TODO: Should be supported by GNU 4.3
 set(GNU43_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
+set(_cmake_feature_test_cxx_decltype "${GNU43_CXX11}")
 set(_cmake_feature_test_cxx_static_assert "${GNU43_CXX11}")
 set(_oldestSupported)
