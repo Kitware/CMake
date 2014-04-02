@@ -79,10 +79,13 @@ bool cmAddExecutableCommand
   if (!nameOk)
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+    cmOStringStream e;
     bool issueMessage = false;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
       case cmPolicies::WARN:
+        e << (this->Makefile->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
         issueMessage = true;
       case cmPolicies::OLD:
         break;
@@ -94,9 +97,6 @@ bool cmAddExecutableCommand
       }
     if (issueMessage)
       {
-      cmOStringStream e;
-      e << (this->Makefile->GetPolicies()
-            ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
       e << "The target name \"" << exename <<
           "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "

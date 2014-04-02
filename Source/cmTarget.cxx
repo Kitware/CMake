@@ -2636,11 +2636,14 @@ bool cmTarget::HandleLocationPropertyPolicy() const
     {
     return true;
     }
+  cmOStringStream e;
   const char *modal = 0;
   cmake::MessageType messageType = cmake::AUTHOR_WARNING;
   switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0026))
     {
     case cmPolicies::WARN:
+      e << (this->Makefile->GetPolicies()
+        ->GetPolicyWarning(cmPolicies::CMP0026)) << "\n";
       modal = "should";
     case cmPolicies::OLD:
       break;
@@ -2653,9 +2656,6 @@ bool cmTarget::HandleLocationPropertyPolicy() const
 
   if (modal)
     {
-    cmOStringStream e;
-    e << (this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0026)) << "\n";
     e << "The LOCATION property " << modal << " not be read from target \""
       << this->GetName() << "\".  Use the target name directly with "
       "add_custom_command, or use the generator expression $<TARGET_FILE>, "
