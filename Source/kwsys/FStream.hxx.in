@@ -161,13 +161,28 @@ class basic_ofstream : public std::basic_ostream<CharType,Traits>
   typedef basic_ofstream<char> ofstream;
 
 #else
-  using @KWSYS_NAMESPACE@_ios_namespace::basic_filebuf;
   using @KWSYS_NAMESPACE@_ios_namespace::ofstream;
   using @KWSYS_NAMESPACE@_ios_namespace::ifstream;
 #endif
 
+  namespace FStream
+  {
+    enum BOM
+    {
+      BOM_None,
+      BOM_UTF8,
+      BOM_UTF16BE,
+      BOM_UTF16LE,
+      BOM_UTF32BE,
+      BOM_UTF32LE
+    };
+
+    // Read a BOM, if one exists.
+    // If a BOM exists, the stream is advanced to after the BOM.
+    // This function requires a seekable stream (but not a relative
+    // seekable stream).
+    BOM ReadBOM(std::istream& in);
+  }
 }
-
-
 
 #endif

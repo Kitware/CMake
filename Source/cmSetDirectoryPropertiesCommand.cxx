@@ -30,7 +30,7 @@ bool cmSetDirectoryPropertiesCommand
                                                 args.end(), errors);
   if (!ret)
     {
-    this->SetError(errors.c_str());
+    this->SetError(errors);
     }
   return ret;
 }
@@ -62,7 +62,7 @@ bool cmSetDirectoryPropertiesCommand
         "Commands and macros cannot be set using SET_CMAKE_PROPERTIES";
       return false;
       }
-    mf->SetProperty(prop.c_str(), value.c_str());
+    mf->SetProperty(prop, value.c_str());
     }
 
   return true;

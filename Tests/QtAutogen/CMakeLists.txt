@@ -64,9 +64,9 @@ add_custom_command(
   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/myotherinterface.h.in"
 )
 
-add_executable(QtAutogen main.cpp calwidget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
+add_executable(QtAutogen main.cpp calwidget.cpp second_widget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
-               test.qrc resourcetester.cpp generated.cpp
+               test.qrc second_resource.qrc resourcetester.cpp generated.cpp
 )
 set_property(TARGET QtAutogen APPEND PROPERTY AUTOGEN_TARGET_DEPENDS generate_moc_input "${CMAKE_CURRENT_BINARY_DIR}/myotherinterface.h")
 

@@ -34,11 +34,11 @@ public:
   std::string Source;
 
   // Set of provided and required modules.
-  std::set<cmStdString> Provides;
-  std::set<cmStdString> Requires;
+  std::set<std::string> Provides;
+  std::set<std::string> Requires;
 
   // Set of files included in the translation unit.
-  std::set<cmStdString> Includes;
+  std::set<std::string> Includes;
 };
 
 //----------------------------------------------------------------------------
@@ -98,24 +98,24 @@ class cmDependsFortranInternals
 {
 public:
   // The set of modules provided by this target.
-  std::set<cmStdString> TargetProvides;
+  std::set<std::string> TargetProvides;
 
   // Map modules required by this target to locations.
-  typedef std::map<cmStdString, cmStdString> TargetRequiresMap;
+  typedef std::map<std::string, std::string> TargetRequiresMap;
   TargetRequiresMap TargetRequires;
 
   // Information about each object file.
-  typedef std::map<cmStdString, cmDependsFortranSourceInfo> ObjectInfoMap;
+  typedef std::map<std::string, cmDependsFortranSourceInfo> ObjectInfoMap;
   ObjectInfoMap ObjectInfo;
 
   cmDependsFortranSourceInfo& CreateObjectInfo(const char* obj,
                                                const char* src)
     {
-    std::map<cmStdString, cmDependsFortranSourceInfo>::iterator i =
+    std::map<std::string, cmDependsFortranSourceInfo>::iterator i =
       this->ObjectInfo.find(obj);
     if(i == this->ObjectInfo.end())
       {
-      std::map<cmStdString, cmDependsFortranSourceInfo>::value_type
+      std::map<std::string, cmDependsFortranSourceInfo>::value_type
         entry(obj, cmDependsFortranSourceInfo());
       i = this->ObjectInfo.insert(entry).first;
       i->second.Source = src;
@@ -260,8 +260,8 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   cmGeneratedFileStream fiStream(fiName.c_str());
   fiStream << "# The fortran modules provided by this target.\n";
   fiStream << "provides\n";
-  std::set<cmStdString> const& provides = this->Internal->TargetProvides;
-  for(std::set<cmStdString>::const_iterator i = provides.begin();
+  std::set<std::string> const& provides = this->Internal->TargetProvides;
+  for(std::set<std::string>::const_iterator i = provides.begin();
       i != provides.end(); ++i)
     {
     fiStream << " " << *i << "\n";
@@ -275,7 +275,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
     cmGeneratedFileStream fcStream(fcName.c_str());
     fcStream << "# Remove fortran modules provided by this target.\n";
     fcStream << "FILE(REMOVE";
-    for(std::set<cmStdString>::const_iterator i = provides.begin();
+    for(std::set<std::string>::const_iterator i = provides.begin();
         i != provides.end(); ++i)
       {
       std::string mod_upper = mod_dir;
@@ -292,15 +292,15 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
       stamp += ".mod.stamp";
       fcStream << "\n";
       fcStream << "  \"" <<
-        this->LocalGenerator->Convert(mod_lower.c_str(),
+        this->LocalGenerator->Convert(mod_lower,
                                       cmLocalGenerator::START_OUTPUT)
                << "\"\n";
       fcStream << "  \"" <<
-        this->LocalGenerator->Convert(mod_upper.c_str(),
+        this->LocalGenerator->Convert(mod_upper,
                                       cmLocalGenerator::START_OUTPUT)
                << "\"\n";
       fcStream << "  \"" <<
-        this->LocalGenerator->Convert(stamp.c_str(),
+        this->LocalGenerator->Convert(stamp,
                                       cmLocalGenerator::START_OUTPUT)
                << "\"\n";
       }
@@ -319,14 +319,14 @@ void cmDependsFortran::LocateModules()
       infoI != objInfo.end(); ++infoI)
     {
     cmDependsFortranSourceInfo const& info = infoI->second;
-    for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+    for(std::set<std::string>::const_iterator i = info.Provides.begin();
         i != info.Provides.end(); ++i)
       {
       // Include this module in the set provided by this target.
       this->Internal->TargetProvides.insert(*i);
       }
 
-    for(std::set<cmStdString>::const_iterator i = info.Requires.begin();
+    for(std::set<std::string>::const_iterator i = info.Requires.begin();
         i != info.Requires.end(); ++i)
       {
       // Include this module in the set required by this target.
@@ -368,8 +368,8 @@ void cmDependsFortran::LocateModules()
 void cmDependsFortran::MatchLocalModules()
 {
   const char* stampDir = this->TargetDirectory.c_str();
-  std::set<cmStdString> const& provides = this->Internal->TargetProvides;
-  for(std::set<cmStdString>::const_iterator i = provides.begin();
+  std::set<std::string> const& provides = this->Internal->TargetProvides;
+  for(std::set<std::string>::const_iterator i = provides.begin();
       i != provides.end(); ++i)
     {
     this->ConsiderModule(i->c_str(), stampDir);
@@ -445,24 +445,24 @@ cmDependsFortran
   // Write the include dependencies to the output stream.
   internalDepends << obj << std::endl;
   internalDepends << " " << src << std::endl;
-  for(std::set<cmStdString>::const_iterator i = info.Includes.begin();
+  for(std::set<std::string>::const_iterator i = info.Includes.begin();
       i != info.Includes.end(); ++i)
     {
     makeDepends << obj << ": " <<
-      this->LocalGenerator->Convert(i->c_str(),
+      this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
                                     cmLocalGenerator::MAKEFILE)
                 << std::endl;
-    internalDepends << " " << i->c_str() << std::endl;
+    internalDepends << " " << *i << std::endl;
     }
   makeDepends << std::endl;
 
   // Write module requirements to the output stream.
-  for(std::set<cmStdString>::const_iterator i = info.Requires.begin();
+  for(std::set<std::string>::const_iterator i = info.Requires.begin();
       i != info.Requires.end(); ++i)
     {
     // Require only modules not provided in the same source.
-    if(std::set<cmStdString>::const_iterator(info.Provides.find(*i)) !=
+    if(std::set<std::string>::const_iterator(info.Provides.find(*i)) !=
        info.Provides.end())
       {
       continue;
@@ -480,7 +480,7 @@ cmDependsFortran
       proxy += "/";
       proxy += *i;
       proxy += ".mod.proxy";
-      proxy = this->LocalGenerator->Convert(proxy.c_str(),
+      proxy = this->LocalGenerator->Convert(proxy,
                                             cmLocalGenerator::HOME_OUTPUT,
                                             cmLocalGenerator::MAKEFILE);
 
@@ -497,7 +497,7 @@ cmDependsFortran
       {
       // This module is known.  Depend on its timestamp file.
       std::string stampFile =
-        this->LocalGenerator->Convert(required->second.c_str(),
+        this->LocalGenerator->Convert(required->second,
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::MAKEFILE);
       makeDepends << obj << ": " << stampFile << "\n";
@@ -510,7 +510,7 @@ cmDependsFortran
       if(this->FindModule(*i, module))
         {
         module =
-          this->LocalGenerator->Convert(module.c_str(),
+          this->LocalGenerator->Convert(module,
                                         cmLocalGenerator::HOME_OUTPUT,
                                         cmLocalGenerator::MAKEFILE);
         makeDepends << obj << ": " << module << "\n";
@@ -519,14 +519,14 @@ cmDependsFortran
     }
 
   // Write provided modules to the output stream.
-  for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+  for(std::set<std::string>::const_iterator i = info.Provides.begin();
       i != info.Provides.end(); ++i)
     {
     std::string proxy = stamp_dir;
     proxy += "/";
     proxy += *i;
     proxy += ".mod.proxy";
-    proxy = this->LocalGenerator->Convert(proxy.c_str(),
+    proxy = this->LocalGenerator->Convert(proxy,
                                           cmLocalGenerator::HOME_OUTPUT,
                                           cmLocalGenerator::MAKEFILE);
     makeDepends << proxy << ": " << obj << ".provides" << std::endl;
@@ -538,7 +538,7 @@ cmDependsFortran
     // Create a target to copy the module after the object file
     // changes.
     makeDepends << obj << ".provides.build:\n";
-    for(std::set<cmStdString>::const_iterator i = info.Provides.begin();
+    for(std::set<std::string>::const_iterator i = info.Provides.begin();
         i != info.Provides.end(); ++i)
       {
       // Include this module in the set provided by this target.
@@ -552,7 +552,7 @@ cmDependsFortran
       modFile += "/";
       modFile += *i;
       modFile =
-        this->LocalGenerator->Convert(modFile.c_str(),
+        this->LocalGenerator->Convert(modFile,
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::SHELL);
       std::string stampFile = stamp_dir;
@@ -560,7 +560,7 @@ cmDependsFortran
       stampFile += m;
       stampFile += ".mod.stamp";
       stampFile =
-        this->LocalGenerator->Convert(stampFile.c_str(),
+        this->LocalGenerator->Convert(stampFile,
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::SHELL);
       makeDepends << "\t$(CMAKE_COMMAND) -E cmake_copy_f90_mod "
@@ -582,7 +582,7 @@ cmDependsFortran
     // the target finishes building.
     std::string driver = this->TargetDirectory;
     driver += "/build";
-    driver = this->LocalGenerator->Convert(driver.c_str(),
+    driver = this->LocalGenerator->Convert(driver,
                                            cmLocalGenerator::HOME_OUTPUT,
                                            cmLocalGenerator::MAKEFILE);
     makeDepends << driver << ": " << obj << ".provides.build\n";
@@ -666,7 +666,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       if(!cmSystemTools::CopyFileAlways(mod_upper.c_str(), stamp.c_str()))
         {
         std::cerr << "Error copying Fortran module from \""
-                  << mod_upper.c_str() << "\" to \"" << stamp.c_str()
+                  << mod_upper << "\" to \"" << stamp
                   << "\".\n";
         return false;
         }
@@ -681,7 +681,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
       if(!cmSystemTools::CopyFileAlways(mod_lower.c_str(), stamp.c_str()))
         {
         std::cerr << "Error copying Fortran module from \""
-                  << mod_lower.c_str() << "\" to \"" << stamp.c_str()
+                  << mod_lower << "\" to \"" << stamp
                   << "\".\n";
         return false;
         }
@@ -689,9 +689,9 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     return true;
     }
 
-  std::cerr << "Error copying Fortran module \"" << args[2].c_str()
-            << "\".  Tried \"" << mod_upper.c_str()
-            << "\" and \"" << mod_lower.c_str() << "\".\n";
+  std::cerr << "Error copying Fortran module \"" << args[2]
+            << "\".  Tried \"" << mod_upper
+            << "\" and \"" << mod_lower << "\".\n";
   return false;
 }
 

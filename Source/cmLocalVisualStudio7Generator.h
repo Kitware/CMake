@@ -51,9 +51,9 @@ public:
   /**
    * Specify the type of the build: static, dll, or executable.
    */
-  void SetBuildType(BuildType,const char *name);
+  void SetBuildType(BuildType,const std::string& name);
 
-  void SetPlatformName(const char* n) { this->PlatformName = n;}
+  void SetPlatformName(const std::string& n) { this->PlatformName = n;}
 
   void SetExtraFlagTable(cmVS7FlagTable const* table)
     { this->ExtraFlagTable = table; }
@@ -62,41 +62,41 @@ public:
   void WriteStampFiles();
   virtual std::string ComputeLongestObjectDirectory(cmTarget&) const;
 
-  virtual void ReadAndStoreExternalGUID(const char* name,
+  virtual void ReadAndStoreExternalGUID(const std::string& name,
                                         const char* path);
   virtual void AddCMakeListsRules();
 protected:
-  void CreateSingleVCProj(const char *lname, cmTarget &tgt);
+  void CreateSingleVCProj(const std::string& lname, cmTarget &tgt);
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef cmLocalVisualStudio7GeneratorFCInfo FCInfo;
   std::string GetBuildTypeLinkerFlags(std::string rootLinkerFlags,
-                                      const char* configName);
+                                      const std::string& configName);
   void FixGlobalTargets();
   void WriteProjectFiles();
-  void WriteVCProjHeader(std::ostream& fout, const char *libName,
+  void WriteVCProjHeader(std::ostream& fout, const std::string& libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
   void WriteVCProjFooter(std::ostream& fout, cmTarget &target);
-  void WriteVCProjFile(std::ostream& fout, const char *libName,
+  void WriteVCProjFile(std::ostream& fout, const std::string& libName,
                        cmTarget &tgt);
   void WriteConfigurations(std::ostream& fout,
-                           const char *libName, cmTarget &tgt);
+                           const std::string& libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
-                          const char* configName,
-                          const char* libName, cmTarget &tgt);
-  std::string EscapeForXML(const char* s);
+                          const std::string& configName,
+                          const std::string& libName, cmTarget &tgt);
+  std::string EscapeForXML(const std::string& s);
   std::string ConvertToXMLOutputPath(const char* path);
   std::string ConvertToXMLOutputPathSingle(const char* path);
-  void OutputTargetRules(std::ostream& fout, const char* configName,
-                         cmTarget &target, const char *libName);
-  void OutputBuildTool(std::ostream& fout, const char* configName,
+  void OutputTargetRules(std::ostream& fout, const std::string& configName,
+                         cmTarget &target, const std::string& libName);
+  void OutputBuildTool(std::ostream& fout, const std::string& configName,
                        cmTarget& t, const Options& targetOptions);
   void OutputLibraryDirectories(std::ostream& fout,
                                 std::vector<std::string> const& dirs);
   void WriteProjectSCC(std::ostream& fout, cmTarget& target);
-  void WriteProjectStart(std::ostream& fout, const char *libName,
+  void WriteProjectStart(std::ostream& fout, const std::string& libName,
                          cmTarget &tgt, std::vector<cmSourceGroup> &sgs);
-  void WriteProjectStartFortran(std::ostream& fout, const char *libName,
+  void WriteProjectStartFortran(std::ostream& fout, const std::string& libName,
                                 cmTarget &tgt);
   void WriteVCProjBeginGroup(std::ostream& fout,
                           const char* group,
@@ -111,7 +111,8 @@ private:
 
   bool WriteGroup(const cmSourceGroup *sg,
                   cmTarget& target, std::ostream &fout,
-                  const char *libName, std::vector<std::string> *configs);
+                  const std::string& libName,
+                  std::vector<std::string> *configs);
 
   friend class cmLocalVisualStudio7GeneratorFCInfo;
   friend class cmLocalVisualStudio7GeneratorInternals;

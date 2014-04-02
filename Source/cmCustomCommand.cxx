@@ -101,16 +101,6 @@ const std::vector<std::string>& cmCustomCommand::GetOutputs() const
 }
 
 //----------------------------------------------------------------------------
-const char* cmCustomCommand::GetWorkingDirectory() const
-{
-  if(this->WorkingDirectory.size() == 0)
-    {
-    return 0;
-    }
-  return this->WorkingDirectory.c_str();
-}
-
-//----------------------------------------------------------------------------
 const std::vector<std::string>& cmCustomCommand::GetDepends() const
 {
   return this->Depends;

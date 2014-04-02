@@ -26,7 +26,7 @@ bool cmGetFilenameComponentCommand
   // already, if so use that value
   if(args.size() == 4 && args[3] == "CACHE")
     {
-    const char* cacheValue = this->Makefile->GetDefinition(args[0].c_str());
+    const char* cacheValue = this->Makefile->GetDefinition(args[0]);
     if(cacheValue && !cmSystemTools::IsNOTFOUND(cacheValue))
       {
       return true;
@@ -107,7 +107,7 @@ bool cmGetFilenameComponentCommand
   else
     {
     std::string err = "unknown component " + args[2];
-    this->SetError(err.c_str());
+    this->SetError(err);
     return false;
     }
 
@@ -116,12 +116,12 @@ bool cmGetFilenameComponentCommand
     if(programArgs.size() && storeArgs.size())
       {
       this->Makefile->AddCacheDefinition
-        (storeArgs.c_str(), programArgs.c_str(),
+        (storeArgs, programArgs.c_str(),
          "", args[2] == "PATH" ? cmCacheManager::FILEPATH
          : cmCacheManager::STRING);
       }
     this->Makefile->AddCacheDefinition
-      (args[0].c_str(), result.c_str(), "",
+      (args[0], result.c_str(), "",
        args[2] == "PATH" ? cmCacheManager::FILEPATH
        : cmCacheManager::STRING);
     }
@@ -129,9 +129,9 @@ bool cmGetFilenameComponentCommand
     {
     if(programArgs.size() && storeArgs.size())
       {
-      this->Makefile->AddDefinition(storeArgs.c_str(), programArgs.c_str());
+      this->Makefile->AddDefinition(storeArgs, programArgs.c_str());
       }
-    this->Makefile->AddDefinition(args[0].c_str(), result.c_str());
+    this->Makefile->AddDefinition(args[0], result.c_str());
     }
 
   return true;

@@ -241,7 +241,7 @@ inline bool operator==(std::string const& a, const char* b)
 // std::string is really basic_string<....lots of stuff....>
 // when combined with a map or set, the symbols can be > 2000 chars!
 #include <cmsys/String.hxx>
-typedef cmsys::String cmStdString;
+//typedef cmsys::String std::string;
 
 // Define cmOStringStream and cmIStringStream wrappers to hide
 // differences between std::stringstream and the old strstream.
@@ -449,11 +449,16 @@ bool cmHasLiteralSuffix(T str1, const char (&str2)[N])
 
 struct cmStrCmp {
   cmStrCmp(const char *test) : m_test(test) {}
-  cmStrCmp(std::string &test) : m_test(test.c_str()) {}
+  cmStrCmp(const std::string &test) : m_test(test) {}
+
+  bool operator()(const std::string& input) const
+  {
+    return m_test == input;
+  }
 
   bool operator()(const char * input) const
   {
-    return strcmp(input, m_test) == 0;
+    return strcmp(input, m_test.c_str()) == 0;
   }
 
   // For use with binary_search
@@ -463,7 +468,7 @@ struct cmStrCmp {
   }
 
 private:
-  const char * const m_test;
+  const std::string m_test;
 };
 
 #endif

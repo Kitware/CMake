@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "list";}
+  virtual std::string GetName() const { return "list";}
 
   cmTypeMacro(cmListCommand, cmCommand);
 protected:
@@ -60,8 +60,8 @@ protected:
   bool HandleReverseCommand(std::vector<std::string> const& args);
 
 
-  bool GetList(std::vector<std::string>& list, const char* var);
-  bool GetListString(std::string& listString, const char* var);
+  bool GetList(std::vector<std::string>& list, const std::string& var);
+  bool GetListString(std::string& listString, const std::string& var);
 };
 
 

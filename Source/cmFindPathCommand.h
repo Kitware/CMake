@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "find_path";}
+  virtual std::string GetName() const {return "find_path";}
 
   cmTypeMacro(cmFindPathCommand, cmFindBase);
   bool IncludeFileInPath;

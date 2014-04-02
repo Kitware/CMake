@@ -31,15 +31,15 @@ public:
   typedef std::map<std::string, std::vector<std::string> > MapSourceFileFlags;
   cmExtraSublimeTextGenerator();
 
-  virtual const char* GetName() const
+  virtual std::string GetName() const
                         { return cmExtraSublimeTextGenerator::GetActualName();}
-  static const char* GetActualName()
+  static std::string GetActualName()
                         { return "Sublime Text 2";}
   static cmExternalMakefileProjectGenerator* New()
                                     { return new cmExtraSublimeTextGenerator; }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const char* fullName) const;
+                                const std::string& fullName) const;
 
   virtual void Generate();
 private:
@@ -60,12 +60,12 @@ private:
    *  specified target.
    */
   std::string BuildMakeCommand(const std::string& make, const char* makefile,
-                               const char* target);
+                               const std::string& target);
   /** Appends the specified target to the generated project file as a Sublime
    *  Text build system.
    */
   void AppendTarget(cmGeneratedFileStream& fout,
-                    const char* targetName,
+                    const std::string& targetName,
                     cmLocalGenerator* lg,
                     cmTarget* target,
                     const char* make,

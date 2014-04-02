@@ -15,7 +15,7 @@
 #include <cmVersion.h>
 
 cmWIXRichTextFormatWriter::cmWIXRichTextFormatWriter(
-  const std::string& filename):
+  std::string const& filename):
     File(filename.c_str(), std::ios::binary)
 {
   StartGroup();
@@ -33,7 +33,7 @@ cmWIXRichTextFormatWriter::~cmWIXRichTextFormatWriter()
   File.put(0);
 }
 
-void cmWIXRichTextFormatWriter::AddText(const std::string& text)
+void cmWIXRichTextFormatWriter::AddText(std::string const& text)
 {
   typedef unsigned char rtf_byte_t;
 
@@ -167,12 +167,12 @@ void cmWIXRichTextFormatWriter::WriteDocumentPrefix()
   ControlWord("fs20");
 }
 
-void cmWIXRichTextFormatWriter::ControlWord(const std::string& keyword)
+void cmWIXRichTextFormatWriter::ControlWord(std::string const& keyword)
 {
   File << "\\" << keyword;
 }
 
-void cmWIXRichTextFormatWriter::NewControlWord(const std::string& keyword)
+void cmWIXRichTextFormatWriter::NewControlWord(std::string const& keyword)
 {
   File << "\\*\\" << keyword;
 }

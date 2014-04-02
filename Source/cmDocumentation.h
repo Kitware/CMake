@@ -56,7 +56,7 @@ public:
   void SetShowGenerators(bool showGen) { this->ShowGenerators = showGen; }
 
   /** Set the program name for standard document generation.  */
-  void SetName(const char* name);
+  void SetName(const std::string& name);
 
   /** Set a section of the documentation. Typical sections include Name,
       Usage, Description, Options */

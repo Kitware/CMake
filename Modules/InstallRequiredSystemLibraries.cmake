@@ -366,18 +366,18 @@ endif()
 
 if(WATCOM)
   get_filename_component( CompilerPath ${CMAKE_C_COMPILER} PATH )
-  if(WATCOM17)
-     set( __install__libs ${CompilerPath}/clbr17.dll
-       ${CompilerPath}/mt7r17.dll ${CompilerPath}/plbr17.dll )
+  if(CMAKE_C_COMPILER_VERSION)
+    set(_compiler_version ${CMAKE_C_COMPILER_VERSION})
+  else()
+    set(_compiler_version ${CMAKE_CXX_COMPILER_VERSION})
   endif()
-  if(WATCOM18)
-     set( __install__libs ${CompilerPath}/clbr18.dll
-       ${CompilerPath}/mt7r18.dll ${CompilerPath}/plbr18.dll )
-  endif()
-  if(WATCOM19)
-     set( __install__libs ${CompilerPath}/clbr19.dll
-       ${CompilerPath}/mt7r19.dll ${CompilerPath}/plbr19.dll )
-  endif()
+  string(REGEX MATCHALL "[0-9]+" _watcom_version_list "${_compiler_version}")
+  list(GET _watcom_version_list 0 _watcom_major)
+  list(GET _watcom_version_list 1 _watcom_minor)
+  set( __install__libs
+    ${CompilerPath}/clbr${_watcom_major}${_watcom_minor}.dll
+    ${CompilerPath}/mt7r${_watcom_major}${_watcom_minor}.dll
+    ${CompilerPath}/plbr${_watcom_major}${_watcom_minor}.dll )
   foreach(lib
       ${__install__libs}
       )

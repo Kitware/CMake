@@ -12,3 +12,5 @@ run_cmake(CheckTypeSizeUnknownLanguage)
 run_cmake(CheckTypeSizeMissingLanguage)
 run_cmake(CheckTypeSizeUnknownArgument)
 run_cmake(CheckTypeSizeMixedArgs)
+
+run_cmake(CheckTypeSizeOkNoC)

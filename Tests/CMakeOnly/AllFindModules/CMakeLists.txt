@@ -8,11 +8,14 @@ endif ()
 # Avoid ctest truncation of output
 message(STATUS "CTEST_FULL_OUTPUT")
 
+set(ORIGINAL_MODULE_PATH "${CMAKE_MODULE_PATH}")
+
 file(GLOB FIND_MODULES "${CMAKE_CURRENT_SOURCE_DIR}/../../../Modules/Find*.cmake" )
 
 macro(do_find MODULE_NAME)
     message(STATUS "   Checking Find${MODULE_NAME}")
     find_package(${MODULE_NAME})
+    set(CMAKE_MODULE_PATH "${ORIGINAL_MODULE_PATH}")
 endmacro()
 
 # It is only possible to use either Qt3 or Qt4 in one project.

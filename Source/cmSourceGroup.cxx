@@ -73,7 +73,7 @@ void cmSourceGroup::SetGroupRegex(const char* regex)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceGroup::AddGroupFile(const char* name)
+void cmSourceGroup::AddGroupFile(const std::string& name)
 {
   this->GroupFiles.insert(name);
 }
@@ -99,7 +99,7 @@ bool cmSourceGroup::MatchesRegex(const char* name)
 //----------------------------------------------------------------------------
 bool cmSourceGroup::MatchesFiles(const char* name)
 {
-  std::set<cmStdString>::const_iterator i = this->GroupFiles.find(name);
+  std::set<std::string>::const_iterator i = this->GroupFiles.find(name);
   if(i != this->GroupFiles.end())
     {
     return true;

@@ -56,14 +56,14 @@ protected:
   /** Compute the current default bundle/framework search policy.  */
   void SelectDefaultMacMode();
 
-  cmStdString CMakePathName;
+  std::string CMakePathName;
   RootPathMode FindRootPathMode;
 
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
   void AddUserPath(std::string const& p,
                    std::vector<std::string>& paths);
-  void AddCMakePath(const char* variable);
+  void AddCMakePath(const std::string& variable);
   void AddEnvPath(const char* variable);
   void AddPathsInternal(std::vector<std::string> const& in_paths,
                         PathType pathType);
@@ -81,7 +81,7 @@ protected:
   std::vector<std::string> UserPaths;
   std::vector<std::string> UserHints;
   std::vector<std::string> SearchPaths;
-  std::set<cmStdString> SearchPathsEmitted;
+  std::set<std::string> SearchPathsEmitted;
 
   bool SearchFrameworkFirst;
   bool SearchFrameworkOnly;

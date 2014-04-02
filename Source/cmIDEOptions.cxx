@@ -108,7 +108,7 @@ bool cmIDEOptions::CheckFlagTable(cmIDEFlagTable const* table,
           {
           const char *new_value = flag+1+n;
 
-          std::map<cmStdString,cmStdString>::iterator itr;
+          std::map<std::string,std::string>::iterator itr;
           itr = this->FlagMap.find(entry->IDEName);
           if(itr != this->FlagMap.end())
             {
@@ -186,7 +186,7 @@ void cmIDEOptions::RemoveFlag(const char* flag)
 //----------------------------------------------------------------------------
 const char* cmIDEOptions::GetFlag(const char* flag)
 {
-  std::map<cmStdString, cmStdString>::iterator i = this->FlagMap.find(flag);
+  std::map<std::string, std::string>::iterator i = this->FlagMap.find(flag);
   if(i != this->FlagMap.end())
     {
     return i->second.c_str();

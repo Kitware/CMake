@@ -30,12 +30,8 @@ cmCTestGenericHandler::~cmCTestGenericHandler()
 }
 
 //----------------------------------------------------------------------
-void cmCTestGenericHandler::SetOption(const char* op, const char* value)
+void cmCTestGenericHandler::SetOption(const std::string& op, const char* value)
 {
-  if ( !op )
-    {
-    return;
-    }
   if ( !value )
     {
     cmCTestGenericHandler::t_StringToString::iterator remit
@@ -51,14 +47,10 @@ void cmCTestGenericHandler::SetOption(const char* op, const char* value)
 }
 
 //----------------------------------------------------------------------
-void cmCTestGenericHandler::SetPersistentOption(const char* op,
+void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
                                                 const char* value)
 {
   this->SetOption(op, value);
-  if ( !op )
-    {
-    return;
-    }
   if ( !value )
     {
     cmCTestGenericHandler::t_StringToString::iterator remit
@@ -83,12 +75,12 @@ void cmCTestGenericHandler::Initialize()
     it != this->PersistentOptions.end();
     ++ it )
     {
-    this->Options[it->first.c_str()] = it->second.c_str();
+    this->Options[it->first] = it->second.c_str();
     }
 }
 
 //----------------------------------------------------------------------
-const char* cmCTestGenericHandler::GetOption(const char* op)
+const char* cmCTestGenericHandler::GetOption(const std::string& op)
 {
   cmCTestGenericHandler::t_StringToString::iterator remit
     = this->Options.find(op);
@@ -129,10 +121,10 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
     return false;
     }
   if( !this->CTest->OpenOutputFile(this->CTest->GetCurrentTag(),
-      ostr.str().c_str(), xofs, true) )
+      ostr.str(), xofs, true) )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-      "Cannot create resulting XML file: " << ostr.str().c_str()
+      "Cannot create resulting XML file: " << ostr.str()
       << std::endl);
     return false;
     }
@@ -161,10 +153,10 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
     ostr << "_" << this->CTest->GetCurrentTag();
     }
   ostr << ".log";
-  if( !this->CTest->OpenOutputFile("Temporary", ostr.str().c_str(), xofs) )
+  if( !this->CTest->OpenOutputFile("Temporary", ostr.str(), xofs) )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot create log file: "
-      << ostr.str().c_str() << std::endl);
+      << ostr.str() << std::endl);
     return false;
     }
   return true;

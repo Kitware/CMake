@@ -17,6 +17,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmTarget.h"
+#include "cmCustomCommandGenerator.h"
 
 cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
     cmGeneratorTarget *target)
@@ -37,8 +38,10 @@ void cmNinjaUtilityTargetGenerator::Generate()
   for (unsigned i = 0; i != 2; ++i) {
     for (std::vector<cmCustomCommand>::const_iterator
          ci = cmdLists[i]->begin(); ci != cmdLists[i]->end(); ++ci) {
-      this->GetLocalGenerator()->AppendCustomCommandDeps(&*ci, deps);
-      this->GetLocalGenerator()->AppendCustomCommandLines(&*ci, commands);
+      cmCustomCommandGenerator ccg(*ci, this->GetConfigName(),
+                                   this->GetMakefile());
+      this->GetLocalGenerator()->AppendCustomCommandDeps(ccg, deps);
+      this->GetLocalGenerator()->AppendCustomCommandLines(ccg, commands);
     }
   }
 
@@ -49,10 +52,12 @@ void cmNinjaUtilityTargetGenerator::Generate()
     {
     if(cmCustomCommand* cc = (*source)->GetCustomCommand())
       {
+      cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
+                                   this->GetMakefile());
       this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
 
       // Depend on all custom command outputs.
-      const std::vector<std::string>& ccOutputs = cc->GetOutputs();
+      const std::vector<std::string>& ccOutputs = ccg.GetOutputs();
       std::transform(ccOutputs.begin(), ccOutputs.end(),
                      std::back_inserter(deps), MapToNinjaPath());
       }

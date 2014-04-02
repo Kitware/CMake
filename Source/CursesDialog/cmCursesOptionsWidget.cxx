@@ -59,7 +59,6 @@ bool cmCursesOptionsWidget::HandleInput(int& key, cmCursesMainForm*, WINDOW* w)
     {
     return false;
     }
-  return false;
 }
 
 void cmCursesOptionsWidget::AddOption(std::string const & option )
@@ -74,7 +73,7 @@ void cmCursesOptionsWidget::NextOption()
     {
     this->CurrentOption = 0;
     }
-  this->SetValue(this->Options[this->CurrentOption].c_str());
+  this->SetValue(this->Options[this->CurrentOption]);
 }
 void cmCursesOptionsWidget::PreviousOption()
 {
@@ -86,10 +85,10 @@ void cmCursesOptionsWidget::PreviousOption()
     {
     this->CurrentOption--;
     }
-  this->SetValue(this->Options[this->CurrentOption].c_str());
+  this->SetValue(this->Options[this->CurrentOption]);
 }
 
-void cmCursesOptionsWidget::SetOption(const char* value)
+void cmCursesOptionsWidget::SetOption(const std::string& value)
 {
   this->CurrentOption = 0; // default to 0 index
   this->SetValue(value);

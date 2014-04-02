@@ -18,6 +18,7 @@
 #include "cmMakefile.h"
 #include "cmOSXBundleGenerator.h"
 #include "cmGeneratorTarget.h"
+#include "cmCustomCommandGenerator.h"
 
 #include <assert.h>
 #include <algorithm>
@@ -35,7 +36,7 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
   , TargetNameReal()
   , TargetNameImport()
   , TargetNamePDB()
-  , TargetLinkLanguage(0)
+  , TargetLinkLanguage("")
 {
   this->TargetLinkLanguage = target->Target
                                    ->GetLinkerLanguage(this->GetConfigName());
@@ -72,10 +73,10 @@ cmNinjaNormalTargetGenerator::~cmNinjaNormalTargetGenerator()
 
 void cmNinjaNormalTargetGenerator::Generate()
 {
-  if (!this->TargetLinkLanguage) {
+  if (this->TargetLinkLanguage.empty()) {
     cmSystemTools::Error("CMake can not determine linker language for "
                          "target: ",
-                         this->GetTarget()->GetName());
+                         this->GetTarget()->GetName().c_str());
     return;
   }
 
@@ -109,9 +110,9 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
     << "\n\n";
 #endif
 
-  std::set<cmStdString> languages;
+  std::set<std::string> languages;
   this->GetTarget()->GetLanguages(languages);
-  for(std::set<cmStdString>::const_iterator l = languages.begin();
+  for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end();
       ++l)
     this->WriteLanguageRules(*l);
@@ -140,7 +141,7 @@ std::string
 cmNinjaNormalTargetGenerator
 ::LanguageLinkerRule() const
 {
-  return std::string(this->TargetLinkLanguage)
+  return this->TargetLinkLanguage
     + "_"
     + cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
     + "_LINKER";
@@ -163,7 +164,7 @@ cmNinjaNormalTargetGenerator
     cmLocalGenerator::RuleVariables vars;
     vars.RuleLauncher = "RULE_LAUNCH_LINK";
     vars.CMTarget = this->GetTarget();
-    vars.Language = this->TargetLinkLanguage;
+    vars.Language = this->TargetLinkLanguage.c_str();
 
     std::string responseFlag;
     if (!useResponseFile) {
@@ -175,7 +176,7 @@ cmNinjaNormalTargetGenerator
 
         // build response file name
         std::string cmakeLinkVar =  cmakeVarLang + "_RESPONSE_FILE_LINK_FLAG";
-        const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar.c_str());
+        const char * flag = GetMakefile()->GetDefinition(cmakeLinkVar);
         if(flag) {
           responseFlag = flag;
         } else {
@@ -189,7 +190,7 @@ cmNinjaNormalTargetGenerator
         linkOptionVar += "_COMPILER_LINKER_OPTION_FLAG_";
         linkOptionVar += cmTarget::GetTargetTypeName(targetType);
         const std::string linkOption =
-                GetMakefile()->GetSafeDefinition(linkOptionVar.c_str());
+                GetMakefile()->GetSafeDefinition(linkOptionVar);
         rspcontent = "$in_newline "+linkOption+" $LINK_PATH $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
         vars.LinkLibraries = "";
@@ -312,72 +313,49 @@ cmNinjaNormalTargetGenerator
 ::ComputeLinkCmd()
 {
   std::vector<std::string> linkCmds;
-  cmTarget::TargetType targetType = this->GetTarget()->GetType();
-  switch (targetType) {
+  cmMakefile* mf = this->GetMakefile();
+  {
+  std::string linkCmdVar = "CMAKE_";
+  linkCmdVar += this->TargetLinkLanguage;
+  linkCmdVar += this->GetGeneratorTarget()->GetCreateRuleVariable();
+  const char *linkCmd = mf->GetDefinition(linkCmdVar);
+  if (linkCmd)
+    {
+    cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
+    return linkCmds;
+    }
+  }
+  switch (this->GetTarget()->GetType()) {
     case cmTarget::STATIC_LIBRARY: {
-      // Check if you have a non archive way to create the static library.
-      {
-      std::string linkCmdVar = "CMAKE_";
-      linkCmdVar += this->TargetLinkLanguage;
-      linkCmdVar += "_CREATE_STATIC_LIBRARY";
-      if (const char *linkCmd =
-            this->GetMakefile()->GetDefinition(linkCmdVar.c_str()))
-        {
-        cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
-        return linkCmds;
-        }
-      }
-
       // We have archive link commands set. First, delete the existing archive.
+      {
       std::string cmakeCommand =
         this->GetLocalGenerator()->ConvertToOutputFormat(
-          this->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND"),
+          mf->GetRequiredDefinition("CMAKE_COMMAND"),
           cmLocalGenerator::SHELL);
       linkCmds.push_back(cmakeCommand + " -E remove $out");
-
+      }
       // TODO: Use ARCHIVE_APPEND for archives over a certain size.
       {
       std::string linkCmdVar = "CMAKE_";
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_CREATE";
-      const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+      const char *linkCmd = mf->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       {
       std::string linkCmdVar = "CMAKE_";
       linkCmdVar += this->TargetLinkLanguage;
       linkCmdVar += "_ARCHIVE_FINISH";
-      const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
+      const char *linkCmd = mf->GetRequiredDefinition(linkCmdVar);
       cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
       }
       return linkCmds;
     }
     case cmTarget::SHARED_LIBRARY:
     case cmTarget::MODULE_LIBRARY:
-    case cmTarget::EXECUTABLE: {
-      std::string linkCmdVar = "CMAKE_";
-      linkCmdVar += this->TargetLinkLanguage;
-      switch (targetType) {
-      case cmTarget::SHARED_LIBRARY:
-        linkCmdVar += "_CREATE_SHARED_LIBRARY";
-        break;
-      case cmTarget::MODULE_LIBRARY:
-        linkCmdVar += "_CREATE_SHARED_MODULE";
-        break;
-      case cmTarget::EXECUTABLE:
-        linkCmdVar += "_LINK_EXECUTABLE";
-        break;
-      default:
-        assert(0 && "Unexpected target type");
-      }
-
-      const char *linkCmd =
-        this->GetMakefile()->GetRequiredDefinition(linkCmdVar.c_str());
-      cmSystemTools::ExpandListArgument(linkCmd, linkCmds);
-      return linkCmds;
-    }
+    case cmTarget::EXECUTABLE:
+      break;
     default:
       assert(0 && "Unexpected target type");
   }
@@ -455,14 +433,17 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmNinjaDeps explicitDeps = this->GetObjects();
   cmNinjaDeps implicitDeps = this->ComputeLinkDeps();
 
+  cmMakefile* mf = this->GetMakefile();
+
   std::string frameworkPath;
   std::string linkPath;
+  cmGeneratorTarget* gtarget = this->GetGeneratorTarget();
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
                                             vars["LINK_FLAGS"],
                                             frameworkPath,
                                             linkPath,
-                                            this->GetGeneratorTarget());
+                                            gtarget);
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", this->GetTarget(), vars);
 
@@ -479,7 +460,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                ? vars["FLAGS"]
                                : vars["ARCH_FLAGS"]);
   this->GetLocalGenerator()->AddArchitectureFlags(flags,
-                             this->GetGeneratorTarget(),
+                             gtarget,
                              this->TargetLinkLanguage,
                              this->GetConfigName());
   if (targetType == cmTarget::EXECUTABLE) {
@@ -489,7 +470,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   }
   if (this->GetTarget()->HasSOName(this->GetConfigName())) {
     vars["SONAME_FLAG"] =
-      this->GetMakefile()->GetSONameFlag(this->TargetLinkLanguage);
+      mf->GetSONameFlag(this->TargetLinkLanguage);
     vars["SONAME"] = this->TargetNameSO;
     if (targetType == cmTarget::SHARED_LIBRARY) {
       std::string install_name_dir = this->GetTarget()
@@ -497,7 +478,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
       if (!install_name_dir.empty()) {
         vars["INSTALLNAME_DIR"] =
-          this->GetLocalGenerator()->Convert(install_name_dir.c_str(),
+          this->GetLocalGenerator()->Convert(install_name_dir,
               cmLocalGenerator::NONE,
               cmLocalGenerator::SHELL, false);
       }
@@ -506,13 +487,12 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   if (!this->TargetNameImport.empty()) {
     const std::string impLibPath = this->GetLocalGenerator()
-      ->ConvertToOutputFormat(targetOutputImplib.c_str(),
+      ->ConvertToOutputFormat(targetOutputImplib,
                               cmLocalGenerator::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
   }
 
-  cmMakefile* mf = this->GetMakefile();
   if (!this->SetMsvcTargetPdbVariable(vars))
     {
     // It is common to place debug symbols at a specific place,
@@ -555,7 +535,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     for (std::vector<cmCustomCommand>::const_iterator
          ci = cmdLists[i]->begin();
          ci != cmdLists[i]->end(); ++ci) {
-      this->GetLocalGenerator()->AppendCustomCommandLines(&*ci,
+      cmCustomCommandGenerator ccg(*ci, this->GetConfigName(), mf);
+      this->GetLocalGenerator()->AppendCustomCommandLines(ccg,
                                                           *cmdLineLists[i]);
     }
   }
@@ -564,7 +545,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // the link commands.
   if (!preLinkCmdLines.empty()) {
     const std::string homeOutDir = this->GetLocalGenerator()
-      ->ConvertToOutputFormat(this->GetMakefile()->GetHomeOutputDirectory(),
+      ->ConvertToOutputFormat(mf->GetHomeOutputDirectory(),
                               cmLocalGenerator::SHELL);
     preLinkCmdLines.push_back("cd " + homeOutDir);
   }
@@ -587,11 +568,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
 
   int commandLineLengthLimit = 1;
   const char* forceRspFile = "CMAKE_NINJA_FORCE_RESPONSE_FILE";
-  if (!this->GetMakefile()->IsDefinitionSet(forceRspFile) &&
+  if (!mf->IsDefinitionSet(forceRspFile) &&
       cmSystemTools::GetEnv(forceRspFile) == 0) {
 #ifdef _WIN32
     commandLineLengthLimit = 8000 - linkRuleLength;
-#elif defined(__linux) || defined(__APPLE__)
+#elif defined(__linux) || defined(__APPLE__) || defined(__HAIKU__)
     // for instance ARG_MAX is 2096152 on Ubuntu or 262144 on Mac
     commandLineLengthLimit = ((int)sysconf(_SC_ARG_MAX))-linkRuleLength-1000;
 #else

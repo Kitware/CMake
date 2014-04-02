@@ -35,7 +35,7 @@ private:
   bool ReadArraySize(std::istream& in, int& size);
   bool ReadFileInformation(std::istream& in);
   bool ReadInt(std::istream& in, int& v);
-  bool ReadCoverageArray(std::istream& in, cmStdString const&);
+  bool ReadCoverageArray(std::istream& in, std::string const&);
   bool ReadUntil(std::istream& in, char until);
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;

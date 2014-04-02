@@ -59,7 +59,7 @@ bool cmSetCommand
   // SET (VAR) // Removes the definition of VAR.
   if (args.size() == 1)
     {
-    this->Makefile->RemoveDefinition(args[0].c_str());
+    this->Makefile->RemoveDefinition(args[0]);
     return true;
     }
   // SET (VAR PARENT_SCOPE) // Removes the definition of VAR

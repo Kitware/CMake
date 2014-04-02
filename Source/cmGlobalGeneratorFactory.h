@@ -29,7 +29,8 @@ public:
   virtual ~cmGlobalGeneratorFactory() {}
 
   /** Create a GlobalGenerator */
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* n) const = 0;
+  virtual cmGlobalGenerator* CreateGlobalGenerator(
+      const std::string& n) const = 0;
 
   /** Get the documentation entry for this factory */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const = 0;
@@ -43,8 +44,9 @@ class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 {
 public:
   /** Create a GlobalGenerator */
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const {
-    if (strcmp(name, T::GetActualName())) return 0;
+  virtual cmGlobalGenerator* CreateGlobalGenerator(
+                                              const std::string& name) const {
+    if (name != T::GetActualName()) return 0;
     return new T; }
 
   /** Get the documentation entry for this factory */

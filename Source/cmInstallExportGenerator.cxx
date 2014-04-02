@@ -94,7 +94,7 @@ void cmInstallExportGenerator::ComputeTempDir()
     {
     // Replace the destination path with a hash to keep it short.
     this->TempDir +=
-      cmSystemTools::ComputeStringMD5(this->Destination.c_str());
+      cmSystemTools::ComputeStringMD5(this->Destination);
     }
   else
     {
@@ -138,11 +138,11 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
 
   // Generate the import file for this export set.
   this->EFGen->SetExportFile(this->MainImportFile.c_str());
-  this->EFGen->SetNamespace(this->Namespace.c_str());
+  this->EFGen->SetNamespace(this->Namespace);
   this->EFGen->SetExportOld(this->ExportOld);
   if(this->ConfigurationTypes->empty())
     {
-    if(this->ConfigurationName && *this->ConfigurationName)
+    if(!this->ConfigurationName.empty())
       {
       this->EFGen->AddConfiguration(this->ConfigurationName);
       }
@@ -157,7 +157,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
           ci = this->ConfigurationTypes->begin();
         ci != this->ConfigurationTypes->end(); ++ci)
       {
-      this->EFGen->AddConfiguration(ci->c_str());
+      this->EFGen->AddConfiguration(*ci);
       }
     }
   this->EFGen->GenerateImportFile();
@@ -177,12 +177,12 @@ cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
   // Now create a configuration-specific install rule for the import
   // file of each configuration.
   std::vector<std::string> files;
-  for(std::map<cmStdString, cmStdString>::const_iterator
+  for(std::map<std::string, std::string>::const_iterator
         i = this->EFGen->GetConfigImportFiles().begin();
       i != this->EFGen->GetConfigImportFiles().end(); ++i)
     {
     files.push_back(i->second);
-    std::string config_test = this->CreateConfigTest(i->first.c_str());
+    std::string config_test = this->CreateConfigTest(i->first);
     os << indent << "if(" << config_test << ")\n";
     this->AddInstallRule(os, cmInstallType_FILES, files, false,
                          this->FilePermissions.c_str(), 0, 0, 0,

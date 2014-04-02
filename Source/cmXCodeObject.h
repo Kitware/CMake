@@ -30,20 +30,20 @@ public:
                  PBXCopyFilesBuildPhase,
                  None
   };
-  class StringVec: public std::vector<cmStdString> {};
+  class StringVec: public std::vector<std::string> {};
   static const char* PBXTypeNames[];
   virtual ~cmXCodeObject();
   cmXCodeObject(PBXType ptype, Type type);
   Type GetType() { return this->TypeValue;}
   PBXType GetIsA() { return this->IsA;}
 
-  void SetString(const char* s);
-  const char* GetString()
+  void SetString(const std::string& s);
+  const std::string& GetString()
     {
-      return this->String.c_str();
+      return this->String;
     }
 
-  void AddAttribute(const char* name, cmXCodeObject* value)
+  void AddAttribute(const std::string& name, cmXCodeObject* value)
     {
       this->ObjectAttributes[name] = value;
     }
@@ -79,11 +79,11 @@ public:
 
   static void PrintList(std::vector<cmXCodeObject*> const&,
                         std::ostream& out);
-  const char* GetId()
+  const std::string& GetId()
     {
-      return this->Id.c_str();
+      return this->Id;
     }
-  void SetId(const char* id)
+  void SetId(const std::string& id)
     {
       this->Id = id;
     }
@@ -95,8 +95,8 @@ public:
     {
       this->Target = t;
     }
-  const char* GetComment() {return this->Comment.c_str();}
-  bool HasComment() { return (this->Comment.size() !=  0);}
+  const std::string& GetComment() {return this->Comment;}
+  bool HasComment() { return (!this->Comment.empty());}
   cmXCodeObject* GetObject(const char* name)
     {
       if(this->ObjectAttributes.count(name))
@@ -122,49 +122,41 @@ public:
 
   void CopyAttributes(cmXCodeObject* );
 
-  void AddDependLibrary(const char* configName,
-                        const char* l)
+  void AddDependLibrary(const std::string& configName,
+                        const std::string& l)
     {
-      if(!configName)
-        {
-        configName = "";
-        }
       this->DependLibraries[configName].push_back(l);
     }
-  std::map<cmStdString, StringVec> const& GetDependLibraries()
+  std::map<std::string, StringVec> const& GetDependLibraries()
     {
       return this->DependLibraries;
     }
-  void AddDependTarget(const char* configName,
-                       const char* tName)
+  void AddDependTarget(const std::string& configName,
+                       const std::string& tName)
     {
-      if(!configName)
-        {
-        configName = "";
-        }
       this->DependTargets[configName].push_back(tName);
     }
-  std::map<cmStdString, StringVec> const& GetDependTargets()
+  std::map<std::string, StringVec> const& GetDependTargets()
     {
     return this->DependTargets;
     }
   std::vector<cmXCodeObject*> const& GetObjectList() { return this->List;}
-  void SetComment(const char* c) { this->Comment = c;}
-  static void PrintString(std::ostream& os,cmStdString String);
+  void SetComment(const std::string& c) { this->Comment = c;}
+  static void PrintString(std::ostream& os,std::string String);
 protected:
   void PrintString(std::ostream& os) const;
 
   cmTarget* Target;
   Type TypeValue;
-  cmStdString Id;
+  std::string Id;
   PBXType IsA;
   int Version;
-  cmStdString Comment;
-  cmStdString String;
+  std::string Comment;
+  std::string String;
   cmXCodeObject* Object;
   std::vector<cmXCodeObject*> List;
-  std::map<cmStdString, StringVec> DependLibraries;
-  std::map<cmStdString, StringVec> DependTargets;
-  std::map<cmStdString, cmXCodeObject*> ObjectAttributes;
+  std::map<std::string, StringVec> DependLibraries;
+  std::map<std::string, StringVec> DependTargets;
+  std::map<std::string, cmXCodeObject*> ObjectAttributes;
 };
 #endif

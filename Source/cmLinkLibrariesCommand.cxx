@@ -33,7 +33,7 @@ bool cmLinkLibrariesCommand
                        "a library");
         return false;
         }
-      this->Makefile->AddLinkLibrary(i->c_str(),
+      this->Makefile->AddLinkLibrary(*i,
                                  cmTarget::DEBUG);
       }
     else if (*i == "optimized")
@@ -45,12 +45,12 @@ bool cmLinkLibrariesCommand
                        "a library");
         return false;
         }
-      this->Makefile->AddLinkLibrary(i->c_str(),
+      this->Makefile->AddLinkLibrary(*i,
                                  cmTarget::OPTIMIZED);
       }
     else
       {
-      this->Makefile->AddLinkLibrary(i->c_str());
+      this->Makefile->AddLinkLibrary(*i);
       }
     }
 

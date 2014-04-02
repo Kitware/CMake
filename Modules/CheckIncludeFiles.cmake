@@ -23,6 +23,7 @@
 #   CMAKE_REQUIRED_FLAGS = string of compile command line flags
 #   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #   CMAKE_REQUIRED_INCLUDES = list of include directories
+#   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
 #=============================================================================
 # Copyright 2003-2012 Kitware, Inc.
@@ -66,7 +67,9 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       set(_description "include file ${_INCLUDE}")
     endif()
 
-    message(STATUS "Looking for ${_description}")
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Looking for ${_description}")
+    endif()
     try_compile(${VARIABLE}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c
@@ -76,14 +79,18 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
       "${CHECK_INCLUDE_FILES_INCLUDE_DIRS}"
       OUTPUT_VARIABLE OUTPUT)
     if(${VARIABLE})
-      message(STATUS "Looking for ${_description} - found")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Looking for ${_description} - found")
+      endif()
       set(${VARIABLE} 1 CACHE INTERNAL "Have include ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if files ${INCLUDE} "
         "exist passed with the following output:\n"
         "${OUTPUT}\n\n")
     else()
-      message(STATUS "Looking for ${_description} - not found")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Looking for ${_description} - not found")
+      endif()
       set(${VARIABLE} "" CACHE INTERNAL "Have includes ${INCLUDE}")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if files ${INCLUDE} "

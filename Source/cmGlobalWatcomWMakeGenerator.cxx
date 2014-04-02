@@ -16,7 +16,9 @@
 cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
 {
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
+#ifdef _WIN32
   this->ForceUnixPaths = false;
+#endif
   this->ToolSupportsColor = true;
   this->NeedSymbolicMark = true;
   this->EmptyRuleHackCommand = "@cd .";
@@ -33,7 +35,6 @@ void cmGlobalWatcomWMakeGenerator
   mf->AddDefinition("CMAKE_MANGLE_OBJECT_FILE_NAMES", "1");
   mf->AddDefinition("CMAKE_MAKE_LINE_CONTINUE", "&");
   mf->AddDefinition("CMAKE_MAKE_SYMBOLIC_RULE", ".SYMBOLIC");
-  mf->AddDefinition("CMAKE_NO_QUOTED_OBJECTS", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl386");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl386");
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
@@ -43,11 +44,12 @@ void cmGlobalWatcomWMakeGenerator
 cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
 {
   cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
-  lg->SetSilentNoColon(true);
   lg->SetDefineWindowsNULL(true);
+#ifdef _WIN32
   lg->SetWindowsShell(true);
+#endif
   lg->SetWatcomWMake(true);
-  lg->SetMakeSilentFlag("-s -h -e");
+  lg->SetMakeSilentFlag("-h");
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);

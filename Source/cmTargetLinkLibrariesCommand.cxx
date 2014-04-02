@@ -39,7 +39,7 @@ bool cmTargetLinkLibrariesCommand
   // Lookup the target for which libraries are specified.
   this->Target =
     this->Makefile->GetCMakeInstance()
-    ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
+    ->GetGlobalGenerator()->FindTarget(args[0]);
   if(!this->Target)
     {
     cmake::MessageType t = cmake::FATAL_ERROR;  // fail by default
@@ -103,11 +103,14 @@ bool cmTargetLinkLibrariesCommand
 
   if (this->Target->GetType() == cmTarget::UTILITY)
     {
+    cmOStringStream e;
     const char *modal = 0;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0039))
       {
       case cmPolicies::WARN:
+        e << this->Makefile->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0039) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;
@@ -119,12 +122,10 @@ bool cmTargetLinkLibrariesCommand
       }
     if (modal)
       {
-      cmOStringStream e;
-      e << this->Makefile->GetPolicies()
-                            ->GetPolicyWarning(cmPolicies::CMP0039) << "\n"
+      e <<
         "Utility target \"" << this->Target->GetName() << "\" " << modal
         << " not be used as the target of a target_link_libraries call.";
-      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      this->Makefile->IssueMessage(messageType, e.str());
       if(messageType == cmake::FATAL_ERROR)
         {
         return false;
@@ -272,7 +273,7 @@ bool cmTargetLinkLibrariesCommand
       {
       // The link type was specified by the previous argument.
       haveLLT = false;
-      if (!this->HandleLibrary(args[i].c_str(), llt))
+      if (!this->HandleLibrary(args[i], llt))
         {
         return false;
         }
@@ -289,7 +290,7 @@ bool cmTargetLinkLibrariesCommand
       std::string linkType = args[0];
       linkType += "_LINK_TYPE";
       const char* linkTypeString =
-        this->Makefile->GetDefinition( linkType.c_str() );
+        this->Makefile->GetDefinition( linkType );
       if(linkTypeString)
         {
         if(strcmp(linkTypeString, "debug") == 0)
@@ -301,7 +302,7 @@ bool cmTargetLinkLibrariesCommand
           llt = cmTarget::OPTIMIZED;
           }
         }
-      if (!this->HandleLibrary(args[i].c_str(), llt))
+      if (!this->HandleLibrary(args[i], llt))
         {
         return false;
         }
@@ -352,7 +353,7 @@ cmTargetLinkLibrariesCommand
 
 //----------------------------------------------------------------------------
 bool
-cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
+cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
                                             cmTarget::LinkLibraryType llt)
 {
   if(this->Target->GetType() == cmTarget::INTERFACE_LIBRARY
@@ -373,11 +374,14 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
         ? cmTarget::KeywordTLLSignature : cmTarget::PlainTLLSignature;
   if (!this->Target->PushTLLCommandTrace(sig))
     {
+    cmOStringStream e;
     const char *modal = 0;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0023))
       {
       case cmPolicies::WARN:
+        e << this->Makefile->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0023) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;
@@ -390,14 +394,12 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
 
       if(modal)
         {
-        cmOStringStream e;
         // If the sig is a keyword form and there is a conflict, the existing
         // form must be the plain form.
         const char *existingSig
                     = (sig == cmTarget::KeywordTLLSignature ? "plain"
                                                             : "keyword");
-        e << this->Makefile->GetPolicies()
-                              ->GetPolicyWarning(cmPolicies::CMP0023) << "\n"
+          e <<
             "The " << existingSig << " signature for target_link_libraries "
             "has already been used with the target \""
           << this->Target->GetName() << "\".  All uses of "
@@ -407,7 +409,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
                                           sig == cmTarget::KeywordTLLSignature
                                             ? cmTarget::PlainTLLSignature
                                             : cmTarget::KeywordTLLSignature);
-        this->Makefile->IssueMessage(messageType, e.str().c_str());
+        this->Makefile->IssueMessage(messageType, e.str());
         if(messageType == cmake::FATAL_ERROR)
           {
           return false;
@@ -479,13 +481,13 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       {
       prop = "LINK_INTERFACE_LIBRARIES_";
       prop += *i;
-      this->Target->AppendProperty(prop.c_str(), lib);
+      this->Target->AppendProperty(prop, lib.c_str());
       }
     }
   if(llt == cmTarget::OPTIMIZED || llt == cmTarget::GENERAL)
     {
     // Put in the non-DEBUG configuration interfaces.
-    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib);
+    this->Target->AppendProperty("LINK_INTERFACE_LIBRARIES", lib.c_str());
 
     // Make sure the DEBUG configuration interfaces exist so that the
     // general one will not be used as a fall-back.
@@ -494,9 +496,9 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const char* lib,
       {
       prop = "LINK_INTERFACE_LIBRARIES_";
       prop += *i;
-      if(!this->Target->GetProperty(prop.c_str()))
+      if(!this->Target->GetProperty(prop))
         {
-        this->Target->SetProperty(prop.c_str(), "");
+        this->Target->SetProperty(prop, "");
         }
       }
     }

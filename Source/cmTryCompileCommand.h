@@ -40,7 +40,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "try_compile";}
+  virtual std::string GetName() const { return "try_compile";}
 
   cmTypeMacro(cmTryCompileCommand, cmCoreTryCompile);
 

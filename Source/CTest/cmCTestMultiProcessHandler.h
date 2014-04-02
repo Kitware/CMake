@@ -41,8 +41,8 @@ public:
   void PrintTestList();
   void PrintLabels();
 
-  void SetPassFailVectors(std::vector<cmStdString>* passed,
-                          std::vector<cmStdString>* failed)
+  void SetPassFailVectors(std::vector<std::string>* passed,
+                          std::vector<std::string>* failed)
     {
     this->Passed = passed;
     this->Failed = failed;
@@ -107,9 +107,9 @@ protected:
   PropertiesMap Properties;
   std::map<int, bool> TestRunningMap;
   std::map<int, bool> TestFinishMap;
-  std::map<int, cmStdString> TestOutput;
-  std::vector<cmStdString>* Passed;
-  std::vector<cmStdString>* Failed;
+  std::map<int, std::string> TestOutput;
+  std::vector<std::string>* Passed;
+  std::vector<std::string>* Failed;
   std::vector<std::string> LastTestsFailed;
   std::set<std::string> LockedResources;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;

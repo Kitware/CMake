@@ -24,7 +24,7 @@ bool cmIncludeRegularExpressionCommand
 
   if(args.size() > 1)
     {
-    this->Makefile->SetComplainRegularExpression(args[1].c_str());
+    this->Makefile->SetComplainRegularExpression(args[1]);
     }
 
   return true;

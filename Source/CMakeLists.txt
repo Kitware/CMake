@@ -18,11 +18,33 @@ else()
 endif()
 if(HAVE_ELF_H)
   set(CMAKE_USE_ELF_PARSER 1)
+elseif(HAIKU)
+  # On Haiku, we need to include elf32.h from the private headers
+  set(CMake_HAIKU_INCLUDE_DIRS
+    /boot/system/develop/headers/private/system
+    /boot/system/develop/headers/private/system/arch/x86
+    )
+
+  set(CMAKE_REQUIRED_INCLUDES ${CMake_HAIKU_INCLUDE_DIRS})
+  CHECK_INCLUDE_FILE("elf32.h" HAVE_ELF32_H)
+  unset(CMAKE_REQUIRED_INCLUDES)
+
+  if(HAVE_ELF32_H)
+    set(CMAKE_USE_ELF_PARSER 1)
+  else()
+    unset(CMake_HAIKU_INCLUDE_DIRS)
+    set(CMAKE_USE_ELF_PARSER)
+  endif()
 else()
   set(CMAKE_USE_ELF_PARSER)
 endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
+
+# ensure Unicode friendly APIs are used on Windows
+if(WIN32)
+  add_definitions(-DUNICODE -D_UNICODE)
+endif()
 
 # configure the .h file
 configure_file(
@@ -52,6 +74,7 @@ include_directories(
   ${CMAKE_EXPAT_INCLUDES}
   ${CMAKE_TAR_INCLUDES}
   ${CMAKE_COMPRESS_INCLUDES}
+  ${CMake_HAIKU_INCLUDE_DIRS}
   )
 
 # let cmake know it is supposed to use it
@@ -399,7 +422,6 @@ if (WIN32)
       cmGlobalVisualStudio12Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
-      cmGlobalWatcomWMakeGenerator.cxx
       cmIDEFlagTable.h
       cmIDEOptions.cxx
       cmIDEOptions.h
@@ -418,6 +440,15 @@ if (WIN32)
       )
   endif()
 endif ()
+
+# Watcom support
+if(WIN32 OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+  set_property(SOURCE cmake.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_USE_WMAKE)
+  list(APPEND SRCS
+    cmGlobalWatcomWMakeGenerator.cxx
+    cmGlobalWatcomWMakeGenerator.h
+    )
+endif()
 
 # Ninja support
 set(SRCS ${SRCS}
@@ -562,7 +593,11 @@ if(WIN32)
   set(CPACK_SRCS ${CPACK_SRCS}
     CPack/WiX/cmCPackWIXGenerator.cxx
     CPack/WiX/cmWIXSourceWriter.cxx
+    CPack/WiX/cmWIXDirectoriesSourceWriter.cxx
+    CPack/WiX/cmWIXFeaturesSourceWriter.cxx
+    CPack/WiX/cmWIXFilesSourceWriter.cxx
     CPack/WiX/cmWIXRichTextFormatWriter.cxx
+    CPack/WiX/cmWIXPatch.cxx
     CPack/WiX/cmWIXPatchParser.cxx
   )
 endif()

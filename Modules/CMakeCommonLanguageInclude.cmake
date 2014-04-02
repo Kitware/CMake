@@ -16,9 +16,11 @@
 # cache values that can be initialized in the platform-compiler.cmake file
 # it may be included by more than one language.
 
-set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}"
-     CACHE STRING "Flags used by the linker.")
-
+if(NOT "x$ENV{LDFLAGS}" STREQUAL "x")
+  set (CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}")
+  set (CMAKE_SHARED_LINKER_FLAGS_INIT "${CMAKE_SHARED_LINKER_FLAGS_INIT} $ENV{LDFLAGS}")
+  set (CMAKE_MODULE_LINKER_FLAGS_INIT "${CMAKE_MODULE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}")
+endif()
 
 if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
 # default build type is none
@@ -82,12 +84,17 @@ if(NOT CMAKE_NOT_USING_CONFIG_FLAGS)
      ${CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO_INIT} CACHE STRING
      "Flags used by the linker during Release with Debug Info builds.")
 endif()
+
+# executable linker flags
+set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS_INIT}"
+     CACHE STRING "Flags used by the linker.")
+
 # shared linker flags
-set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT} $ENV{LDFLAGS}"
+set (CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS_INIT}"
      CACHE STRING "Flags used by the linker during the creation of dll's.")
 
 # module linker flags
-set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS_INIT} $ENV{LDFLAGS}"
+set (CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS_INIT}"
      CACHE STRING "Flags used by the linker during the creation of modules.")
 
 # static linker flags
@@ -124,4 +131,3 @@ CMAKE_STATIC_LINKER_FLAGS_MINSIZEREL
 CMAKE_STATIC_LINKER_FLAGS_RELEASE
 CMAKE_STATIC_LINKER_FLAGS_RELWITHDEBINFO
 )
-

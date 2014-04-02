@@ -19,8 +19,8 @@
 //----------------------------------------------------------------------------
 cmOSXBundleGenerator::
 cmOSXBundleGenerator(cmGeneratorTarget* target,
-                     const char* configName)
- : Target(target->Target)
+                     const std::string& configName)
+ : GT(target)
  , Makefile(target->Target->GetMakefile())
  , LocalGenerator(Makefile->GetLocalGenerator())
  , ConfigName(configName)
@@ -34,7 +34,7 @@ cmOSXBundleGenerator(cmGeneratorTarget* target,
 //----------------------------------------------------------------------------
 bool cmOSXBundleGenerator::MustSkip()
 {
-  return !this->Target->HaveWellDefinedOutputFiles();
+  return !this->GT->Target->HaveWellDefinedOutputFiles();
 }
 
 //----------------------------------------------------------------------------
@@ -47,7 +47,7 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   // Compute bundle directory names.
   std::string out = outpath;
   out += "/";
-  out += this->Target->GetAppBundleDirectory(this->ConfigName, false);
+  out += this->GT->Target->GetAppBundleDirectory(this->ConfigName, false);
   cmSystemTools::MakeDirectory(out.c_str());
   this->Makefile->AddCMakeOutputFile(out);
 
@@ -57,10 +57,10 @@ void cmOSXBundleGenerator::CreateAppBundle(const std::string& targetName,
   // to be set.
   std::string plist = outpath;
   plist += "/";
-  plist += this->Target->GetAppBundleDirectory(this->ConfigName, true);
+  plist += this->GT->Target->GetAppBundleDirectory(this->ConfigName, true);
   plist += "/Info.plist";
-  this->LocalGenerator->GenerateAppleInfoPList(this->Target,
-                                               targetName.c_str(),
+  this->LocalGenerator->GenerateAppleInfoPList(this->GT->Target,
+                                               targetName,
                                                plist.c_str());
   this->Makefile->AddCMakeOutputFile(plist);
   outpath = newoutpath;
@@ -77,21 +77,21 @@ void cmOSXBundleGenerator::CreateFramework(
 
   // Compute the location of the top-level foo.framework directory.
   std::string contentdir = outpath + "/" +
-    this->Target->GetFrameworkDirectory(this->ConfigName, true);
+    this->GT->Target->GetFrameworkDirectory(this->ConfigName, true);
   contentdir += "/";
 
   std::string newoutpath = outpath + "/" +
-    this->Target->GetFrameworkDirectory(this->ConfigName, false);
+    this->GT->Target->GetFrameworkDirectory(this->ConfigName, false);
 
-  std::string frameworkVersion = this->Target->GetFrameworkVersion();
+  std::string frameworkVersion = this->GT->Target->GetFrameworkVersion();
 
   // Configure the Info.plist file into the Resources directory.
   this->MacContentFolders->insert("Resources");
   std::string plist = newoutpath;
   plist += "/Resources/Info.plist";
   std::string name = cmSystemTools::GetFilenameName(targetName);
-  this->LocalGenerator->GenerateFrameworkInfoPList(this->Target,
-                                                   name.c_str(),
+  this->LocalGenerator->GenerateFrameworkInfoPList(this->GT->Target,
+                                                   name,
                                                    plist.c_str());
 
   // TODO: Use the cmMakefileTargetGenerator::ExtraFiles vector to
@@ -172,17 +172,17 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
   // Compute bundle directory names.
   std::string out = root;
   out += "/";
-  out += this->Target->GetCFBundleDirectory(this->ConfigName, false);
+  out += this->GT->Target->GetCFBundleDirectory(this->ConfigName, false);
   cmSystemTools::MakeDirectory(out.c_str());
   this->Makefile->AddCMakeOutputFile(out);
 
   // Configure the Info.plist file.  Note that it needs the executable name
   // to be set.
-  std::string plist =
-    this->Target->GetCFBundleDirectory(this->ConfigName, true);
+  std::string plist = root + "/" +
+    this->GT->Target->GetCFBundleDirectory(this->ConfigName, true);
   plist += "/Info.plist";
-  this->LocalGenerator->GenerateAppleInfoPList(this->Target,
-                                               targetName.c_str(),
+  this->LocalGenerator->GenerateAppleInfoPList(this->GT->Target,
+                                               targetName,
                                                plist.c_str());
   this->Makefile->AddCMakeOutputFile(plist);
 }
@@ -190,18 +190,19 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
 //----------------------------------------------------------------------------
 void
 cmOSXBundleGenerator::
-GenerateMacOSXContentStatements(std::vector<cmSourceFile*> const& sources,
-                                MacOSXContentGeneratorType* generator)
+GenerateMacOSXContentStatements(
+                              std::vector<cmSourceFile const*> const& sources,
+                              MacOSXContentGeneratorType* generator)
 {
   if (this->MustSkip())
     return;
 
-  for(std::vector<cmSourceFile*>::const_iterator
+  for(std::vector<cmSourceFile const*>::const_iterator
         si = sources.begin(); si != sources.end(); ++si)
     {
-    cmTarget::SourceFileFlags tsFlags =
-      this->Target->GetTargetSourceFileFlags(*si);
-    if(tsFlags.Type != cmTarget::SourceFileTypeNormal)
+    cmGeneratorTarget::SourceFileFlags tsFlags =
+      this->GT->GetTargetSourceFileFlags(*si);
+    if(tsFlags.Type != cmGeneratorTarget::SourceFileTypeNormal)
       {
       (*generator)(**si, tsFlags.MacFolder);
       }
@@ -215,7 +216,7 @@ cmOSXBundleGenerator::InitMacOSXContentDirectory(const char* pkgloc)
   // Construct the full path to the content subdirectory.
 
   std::string macdir =
-    this->Target->GetMacContentDirectory(this->ConfigName,
+    this->GT->Target->GetMacContentDirectory(this->ConfigName,
                                          /*implib*/ false);
   macdir += "/";
   macdir += pkgloc;

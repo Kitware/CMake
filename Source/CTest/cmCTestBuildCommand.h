@@ -43,7 +43,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "ctest_build";}
+  virtual std::string GetName() const { return "ctest_build";}
 
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);

@@ -326,11 +326,11 @@ std::string cmRST::ReplaceSubstitutions(std::string const& line)
     std::string::size_type start = this->Substitution.start(2);
     std::string::size_type end = this->Substitution.end(2);
     std::string substitute = this->Substitution.match(3);
-    std::map<cmStdString, cmStdString>::iterator
+    std::map<std::string, std::string>::iterator
       replace = this->Replace.find(substitute);
     if(replace != this->Replace.end())
       {
-      std::pair<std::set<cmStdString>::iterator, bool> replaced =
+      std::pair<std::set<std::string>::iterator, bool> replaced =
         this->Replaced.insert(substitute);
       if(replaced.second)
         {

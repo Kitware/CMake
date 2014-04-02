@@ -100,6 +100,10 @@ Properties on Targets
    /prop_tgt/COMPILE_DEFINITIONS
    /prop_tgt/COMPILE_FLAGS
    /prop_tgt/COMPILE_OPTIONS
+   /prop_tgt/COMPILE_PDB_NAME
+   /prop_tgt/COMPILE_PDB_NAME_CONFIG
+   /prop_tgt/COMPILE_PDB_OUTPUT_DIRECTORY
+   /prop_tgt/COMPILE_PDB_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/CONFIG_OUTPUT_NAME
    /prop_tgt/CONFIG_POSTFIX
    /prop_tgt/DEBUG_POSTFIX

@@ -79,7 +79,7 @@
 #     extra_args = Pass a list of extra arguments to be passed to
 #                  executable enclosed in quotes (or "" for none)
 #     ARGN =       A list of source files to search for tests & test
-#                  fixtures.
+#                  fixtures. Or AUTO to find them from executable target.
 #
 #
 #
@@ -88,7 +88,7 @@
 #   Example:
 #      set(FooTestArgs --foo 1 --bar 2)
 #      add_executable(FooTest FooUnitTest.cc)
-#      GTEST_ADD_TESTS(FooTest "${FooTestArgs}" FooUnitTest.cc)
+#      GTEST_ADD_TESTS(FooTest "${FooTestArgs}" AUTO)
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
@@ -110,6 +110,10 @@
 function(GTEST_ADD_TESTS executable extra_args)
     if(NOT ARGN)
         message(FATAL_ERROR "Missing ARGN: Read the documentation for GTEST_ADD_TESTS")
+    endif()
+    if(ARGN STREQUAL "AUTO")
+        # obtain sources used for building that executable
+        get_property(ARGN TARGET ${executable} PROPERTY SOURCES)
     endif()
     foreach(source ${ARGN})
         file(READ "${source}" contents)

@@ -34,7 +34,7 @@ public:
    * Generate the makefile for this directory.
    */
   virtual void Generate();
-  virtual void ReadAndStoreExternalGUID(const char* name,
+  virtual void ReadAndStoreExternalGUID(const std::string& name,
                                         const char* path);
 
 protected:

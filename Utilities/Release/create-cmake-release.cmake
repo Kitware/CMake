@@ -10,7 +10,7 @@ set(RELEASE_SCRIPTS_BATCH_1
   dashmacmini2_release.cmake  # Mac Darwin universal ppc;i386
   dashmacmini5_release.cmake  # Mac Darwin64 universal x86_64;i386
   magrathea_release.cmake     # Linux
-  v20n250_aix_release.cmake   # AIX 5.3
+  ibm_aix_release.cmake       # AIX
   ferrari_sgi64_release.cmake # IRIX 64
   ferrari_sgi_release.cmake   # IRIX
 )

@@ -51,7 +51,7 @@ bool cmSetSourceFilesPropertiesCommand
                  args.end(), errors);
   if (!ret)
     {
-    this->SetError(errors.c_str());
+    this->SetError(errors);
     }
   return ret;
 }
@@ -154,14 +154,14 @@ bool cmSetSourceFilesPropertiesCommand
     {
     // get the source file
     cmSourceFile* sf =
-      mf->GetOrCreateSource(j->c_str(), generated);
+      mf->GetOrCreateSource(*j, generated);
     if(sf)
       {
       // now loop through all the props and set them
       unsigned int k;
       for (k = 0; k < propertyPairs.size(); k = k + 2)
         {
-        sf->SetProperty(propertyPairs[k].c_str(),propertyPairs[k+1].c_str());
+        sf->SetProperty(propertyPairs[k],propertyPairs[k+1].c_str());
         }
       }
     }
