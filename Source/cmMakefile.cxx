@@ -43,7 +43,8 @@
 
 #define FOR_EACH_CXX_FEATURE(F) \
   F(cxx_auto_type) \
-  F(cxx_delegating_constructors)
+  F(cxx_delegating_constructors) \
+  F(cxx_variadic_templates)
 
 class cmMakefile::Internals
 {
