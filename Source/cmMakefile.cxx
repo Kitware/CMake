@@ -52,6 +52,7 @@
   F(cxx_final) \
   F(cxx_inheriting_constructors) \
   F(cxx_lambdas) \
+  F(cxx_nonstatic_member_init) \
   F(cxx_override) \
   F(cxx_static_assert) \
   F(cxx_strong_enums) \

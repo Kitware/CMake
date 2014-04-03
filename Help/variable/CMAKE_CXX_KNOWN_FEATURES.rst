@@ -62,6 +62,11 @@ The features known to this version of CMake are:
 
   .. _N2927: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2927.pdf
 
+``cxx_nonstatic_member_init``
+  Non-static data member initialization, as defined in N2756.
+
+  .. _N2756: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2756.htm
+
 ``cxx_override``
   Override control ``override`` keyword, as defined in N2928_.
 
