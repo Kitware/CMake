@@ -472,7 +472,7 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
   const char* sepHeaders = "";
 
   std::vector<cmSourceFile*> srcFiles;
-  target->GetSourceFiles(srcFiles);
+  target->GetConfigCommonSourceFiles(srcFiles);
 
   const char *skipMocSep = "";
   const char *skipUicSep = "";
@@ -862,7 +862,7 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   cmMakefile *makefile = target->GetMakefile();
 
   std::vector<cmSourceFile*> srcFiles;
-  target->GetSourceFiles(srcFiles);
+  target->GetConfigCommonSourceFiles(srcFiles);
 
   std::string rccFileFiles;
   std::string rccFileOptions;

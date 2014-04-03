@@ -111,7 +111,8 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
 #endif
 
   std::set<std::string> languages;
-  this->GetTarget()->GetLanguages(languages);
+  this->GetTarget()->GetLanguages(languages,
+                  this->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end();
       ++l)

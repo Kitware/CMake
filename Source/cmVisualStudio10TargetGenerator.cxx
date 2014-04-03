@@ -379,7 +379,7 @@ void cmVisualStudio10TargetGenerator::WriteDotNetReferences()
 void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
 {
   std::vector<cmSourceFile const*> resxObjs;
-    this->GeneratorTarget->GetResxSources(resxObjs);
+    this->GeneratorTarget->GetResxSources(resxObjs, "");
   if(!resxObjs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
@@ -553,7 +553,7 @@ void cmVisualStudio10TargetGenerator::WriteCustomCommands()
 {
   this->SourcesVisited.clear();
   std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands);
+  this->GeneratorTarget->GetCustomCommands(customCommands, "");
   for(std::vector<cmSourceFile const*>::const_iterator
         si = customCommands.begin();
       si != customCommands.end(); ++si)
@@ -704,7 +704,10 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   std::vector<cmSourceGroup> sourceGroups =
     this->Makefile->GetSourceGroups();
   std::vector<cmSourceFile*> classes;
-  this->Target->GetSourceFiles(classes);
+  if (!this->Target->GetConfigCommonSourceFiles(classes))
+    {
+    return;
+    }
 
   std::set<cmSourceGroup*> groupsUsed;
   for(std::vector<cmSourceFile*>::const_iterator s = classes.begin();
@@ -749,7 +752,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     }
 
   std::vector<cmSourceFile const*> resxObjs;
-    this->GeneratorTarget->GetResxSources(resxObjs);
+    this->GeneratorTarget->GetResxSources(resxObjs, "");
   if(!resxObjs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
@@ -768,7 +771,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;
-  this->GeneratorTarget->UseObjectLibraries(objs);
+  this->GeneratorTarget->UseObjectLibraries(objs, "");
   if(!objs.empty())
     {
     this->WriteString("<ItemGroup>\n", 1);
@@ -1005,14 +1008,14 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
   this->WriteString("<ItemGroup>\n", 1);
 
   std::vector<cmSourceFile const*> headerSources;
-  this->GeneratorTarget->GetHeaderSources(headerSources);
+  this->GeneratorTarget->GetHeaderSources(headerSources, "");
   this->WriteSources("ClInclude", headerSources);
   std::vector<cmSourceFile const*> idlSources;
-  this->GeneratorTarget->GetIDLSources(idlSources);
+  this->GeneratorTarget->GetIDLSources(idlSources, "");
   this->WriteSources("Midl", idlSources);
 
   std::vector<cmSourceFile const*> objectSources;
-  this->GeneratorTarget->GetObjectSources(objectSources);
+  this->GeneratorTarget->GetObjectSources(objectSources, "");
   for(std::vector<cmSourceFile const*>::const_iterator
         si = objectSources.begin();
       si != objectSources.end(); ++si)
@@ -1053,7 +1056,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     }
 
   std::vector<cmSourceFile const*> externalObjects;
-  this->GeneratorTarget->GetExternalObjects(externalObjects);
+  this->GeneratorTarget->GetExternalObjects(externalObjects, "");
   for(std::vector<cmSourceFile const*>::iterator
         si = externalObjects.begin();
       si != externalObjects.end(); )
@@ -1088,12 +1091,12 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     }
 
   std::vector<cmSourceFile const*> extraSources;
-  this->GeneratorTarget->GetExtraSources(extraSources);
+  this->GeneratorTarget->GetExtraSources(extraSources, "");
   this->WriteSources("None", extraSources);
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;
-  this->GeneratorTarget->UseObjectLibraries(objs);
+  this->GeneratorTarget->UseObjectLibraries(objs, "");
   for(std::vector<std::string>::const_iterator
         oi = objs.begin(); oi != objs.end(); ++oi)
     {
@@ -1694,7 +1697,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkOptions.AddFlag("ImportLibrary", imLib.c_str());
   linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile("");
   if(!def.empty())
     {
     linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
@@ -1924,7 +1927,7 @@ bool cmVisualStudio10TargetGenerator::
   IsResxHeader(const std::string& headerFile)
 {
   std::set<std::string> expectedResxHeaders;
-  this->GeneratorTarget->GetExpectedResxHeaders(expectedResxHeaders);
+  this->GeneratorTarget->GetExpectedResxHeaders(expectedResxHeaders, "");
 
   std::set<std::string>::const_iterator it =
                                         expectedResxHeaders.find(headerFile);

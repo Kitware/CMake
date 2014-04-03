@@ -815,7 +815,15 @@ cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 {
   // check to see if this is a fortran build
   std::set<std::string> languages;
-  target.GetLanguages(languages);
+  {
+  // Issue diagnostic if the source files depend on the config.
+  std::vector<cmSourceFile*> sources;
+  if (!target.GetConfigCommonSourceFiles(sources))
+    {
+    return false;
+    }
+  }
+  target.GetLanguages(languages, "");
   if(languages.size() == 1)
     {
     if(*languages.begin() == "Fortran")

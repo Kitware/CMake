@@ -984,7 +984,10 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 
     // organize the sources
     std::vector<cmSourceFile*> classes;
-    cmtarget.GetSourceFiles(classes);
+    if (!cmtarget.GetConfigCommonSourceFiles(classes))
+      {
+      return;
+      }
     std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
 
     gtgt->ComputeObjectMapping();
@@ -1043,7 +1046,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       // the externalObjFiles above, except each one is not a cmSourceFile
       // within the target.)
       std::vector<std::string> objs;
-      gtgt->UseObjectLibraries(objs);
+      gtgt->UseObjectLibraries(objs, "");
       for(std::vector<std::string>::const_iterator
             oi = objs.begin(); oi != objs.end(); ++oi)
         {
@@ -1359,7 +1362,10 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     }
 
   std::vector<cmSourceFile*> classes;
-  cmtarget.GetSourceFiles(classes);
+  if (!cmtarget.GetConfigCommonSourceFiles(classes))
+    {
+    return;
+    }
   // add all the sources
   std::vector<cmCustomCommand> commands;
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
@@ -2439,7 +2445,11 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
   if(cmtarget.GetType() == cmTarget::UTILITY)
     {
     std::vector<cmSourceFile*> sources;
-    cmtarget.GetSourceFiles(sources);
+    if (!cmtarget.GetConfigCommonSourceFiles(sources))
+      {
+      return 0;
+      }
+
     for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
         i != sources.end(); ++i)
       {
@@ -2808,7 +2818,7 @@ void cmGlobalXCodeGenerator
       std::string linkObjs;
       const char* sep = "";
       std::vector<std::string> objs;
-      this->GetGeneratorTarget(cmtarget)->UseObjectLibraries(objs);
+      this->GetGeneratorTarget(cmtarget)->UseObjectLibraries(objs, "");
       for(std::vector<std::string>::const_iterator
             oi = objs.begin(); oi != objs.end(); ++oi)
         {
@@ -2943,8 +2953,10 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
         }
 
       std::vector<cmSourceFile*> classes;
-      cmtarget.GetSourceFiles(classes);
-
+      if (!cmtarget.GetConfigCommonSourceFiles(classes))
+        {
+        return;
+        }
       // Put cmSourceFile instances in proper groups:
       for(std::vector<cmSourceFile*>::const_iterator s = classes.begin();
           s != classes.end(); s++)
@@ -2962,7 +2974,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
 
       // Put OBJECT_LIBRARY objects in proper groups:
       std::vector<std::string> objs;
-      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
+      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs, "");
       for(std::vector<std::string>::const_iterator
             oi = objs.begin(); oi != objs.end(); ++oi)
         {

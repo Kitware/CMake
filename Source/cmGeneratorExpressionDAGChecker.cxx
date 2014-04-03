@@ -179,6 +179,18 @@ bool cmGeneratorExpressionDAGChecker::EvaluatingLinkLibraries(const char *tgt)
        || strcmp(prop, "INTERFACE_LINK_LIBRARIES") == 0;
 }
 
+std::string cmGeneratorExpressionDAGChecker::TopTarget() const
+{
+  const cmGeneratorExpressionDAGChecker *top = this;
+  const cmGeneratorExpressionDAGChecker *parent = this->Parent;
+  while (parent)
+    {
+    top = parent;
+    parent = parent->Parent;
+    }
+  return top->Target;
+}
+
 enum TransitiveProperty {
 #define DEFINE_ENUM_ENTRY(NAME) NAME,
   CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(DEFINE_ENUM_ENTRY)

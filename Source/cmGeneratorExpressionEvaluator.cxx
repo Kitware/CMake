@@ -985,7 +985,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (propertyName == "LINKER_LANGUAGE")
       {
       if (target->LinkLanguagePropagatesToDependents() &&
-          dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
+          dagCheckerParent && (dagCheckerParent->EvaluatingLinkLibraries()
+            || dagCheckerParent->EvaluatingSources()))
         {
         reportError(context, content->GetOriginalExpression(),
             "LINKER_LANGUAGE target property can not be used while evaluating "
@@ -1282,7 +1283,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       }
 
     std::vector<cmSourceFile const*> objectSources;
-    gt->GetObjectSources(objectSources);
+    gt->GetObjectSources(objectSources, context->Config);
     std::map<cmSourceFile const*, std::string> mapping;
 
     for(std::vector<cmSourceFile const*>::const_iterator it
@@ -1579,7 +1580,9 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                   "Target \"" + name + "\" is not an executable or library.");
       return std::string();
       }
-    if (dagChecker && dagChecker->EvaluatingLinkLibraries(name.c_str()))
+    if (dagChecker && (dagChecker->EvaluatingLinkLibraries(name.c_str())
+        || (dagChecker->EvaluatingSources()
+          && name == dagChecker->TopTarget())))
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "Expressions which require the linker language may not "

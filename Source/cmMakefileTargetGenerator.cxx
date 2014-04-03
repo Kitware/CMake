@@ -128,14 +128,15 @@ void cmMakefileTargetGenerator::CreateRuleFile()
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::WriteTargetBuildRules()
 {
+  const std::string& config =
+    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+
   // write the custom commands for this target
   // Look for files registered for cleaning in this directory.
   if(const char* additional_clean_files =
      this->Makefile->GetProperty
      ("ADDITIONAL_MAKE_CLEAN_FILES"))
     {
-    const std::string& config =
-      this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
     cmListFileBacktrace lfbt;
     cmGeneratorExpression ge(lfbt);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
@@ -154,7 +155,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
   // First generate the object rule files.  Save a list of all object
   // files for this target.
   std::vector<cmSourceFile const*> customCommands;
-  this->GeneratorTarget->GetCustomCommands(customCommands);
+  this->GeneratorTarget->GetCustomCommands(customCommands, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = customCommands.begin();
       si != customCommands.end(); ++si)
@@ -177,17 +178,17 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
       }
     }
   std::vector<cmSourceFile const*> headerSources;
-  this->GeneratorTarget->GetHeaderSources(headerSources);
+  this->GeneratorTarget->GetHeaderSources(headerSources, config);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     headerSources,
     this->MacOSXContentGenerator);
   std::vector<cmSourceFile const*> extraSources;
-  this->GeneratorTarget->GetExtraSources(extraSources);
+  this->GeneratorTarget->GetExtraSources(extraSources, config);
   this->OSXBundleGenerator->GenerateMacOSXContentStatements(
     extraSources,
     this->MacOSXContentGenerator);
   std::vector<cmSourceFile const*> externalObjects;
-  this->GeneratorTarget->GetExternalObjects(externalObjects);
+  this->GeneratorTarget->GetExternalObjects(externalObjects, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = externalObjects.begin();
       si != externalObjects.end(); ++si)
@@ -195,7 +196,7 @@ void cmMakefileTargetGenerator::WriteTargetBuildRules()
     this->ExternalObjects.push_back((*si)->GetFullPath());
     }
   std::vector<cmSourceFile const*> objectSources;
-  this->GeneratorTarget->GetObjectSources(objectSources);
+  this->GeneratorTarget->GetObjectSources(objectSources, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = objectSources.begin(); si != objectSources.end(); ++si)
     {
@@ -344,7 +345,8 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
 {
   // write language flags for target
   std::set<std::string> languages;
-  this->Target->GetLanguages(languages);
+  this->Target->GetLanguages(languages,
+                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   // put the compiler in the rules.make file so that if it changes
   // things rebuild
   for(std::set<std::string>::const_iterator l = languages.begin();
@@ -1173,7 +1175,8 @@ cmMakefileTargetGenerator
 {
   // Depend on all custom command outputs.
   std::vector<cmSourceFile*> sources;
-  this->Target->GetSourceFiles(sources);
+  this->Target->GetSourceFiles(sources,
+                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   for(std::vector<cmSourceFile*>::const_iterator source = sources.begin();
       source != sources.end(); ++source)
     {
@@ -1653,7 +1656,8 @@ void cmMakefileTargetGenerator
   this->AppendTargetDepends(depends);
 
   // Add a dependency on the link definitions file, if any.
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile(
+                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   if(!def.empty())
     {
     depends.push_back(def);
@@ -2049,7 +2053,7 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
     {
     std::vector<std::string> includes;
     const std::string& config =
-      this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     this->LocalGenerator->GetIncludeDirectories(includes,
                                                 this->GeneratorTarget,
                                                 "C", config);
@@ -2068,7 +2072,8 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
 //----------------------------------------------------------------------------
 void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
 {
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile();
+  std::string def = this->GeneratorTarget->GetModuleDefinitionFile(
+                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   if(def.empty())
     {
     return;

@@ -133,7 +133,7 @@ void cmFLTKWrapUICommand::FinalPass()
     return;
     }
   std::vector<cmSourceFile*> srcs;
-  target->GetSourceFiles(srcs);
+  target->GetSourceFiles(srcs, "");
   bool found = false;
   for (unsigned int i = 0; i < srcs.size(); ++i)
     {

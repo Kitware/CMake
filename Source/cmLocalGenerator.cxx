@@ -659,7 +659,8 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
   std::vector<std::string> objVector;
   // Add all the sources outputs to the depends of the target
   std::vector<cmSourceFile*> classes;
-  target.GetSourceFiles(classes);
+  target.GetSourceFiles(classes,
+                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); ++i)
     {
@@ -1641,7 +1642,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
          !(this->Makefile->IsOn("CYGWIN") || this->Makefile->IsOn("MINGW")))
         {
         std::vector<cmSourceFile*> sources;
-        target->GetSourceFiles(sources);
+        target->GetSourceFiles(sources, buildType);
         for(std::vector<cmSourceFile*>::const_iterator i = sources.begin();
             i != sources.end(); ++i)
           {
@@ -1689,7 +1690,7 @@ void cmLocalGenerator::GetTargetFlags(std::string& linkLibs,
         linkFlags += this->Makefile->GetSafeDefinition(build);
         linkFlags += " ";
         }
-      std::string linkLanguage = target->Target->GetLinkerLanguage();
+      std::string linkLanguage = target->Target->GetLinkerLanguage(buildType);
       if(linkLanguage.empty())
         {
         cmSystemTools::Error

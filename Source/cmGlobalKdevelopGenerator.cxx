@@ -139,7 +139,8 @@ bool cmGlobalKdevelopGenerator
          ti != targets.end(); ti++)
       {
       std::vector<cmSourceFile*> sources;
-      ti->second.GetSourceFiles(sources);
+      ti->second.GetSourceFiles(sources, ti->second.GetMakefile()
+                                    ->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
            si!=sources.end(); si++)
         {
