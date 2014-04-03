@@ -57,6 +57,11 @@ The features known to this version of CMake are:
 
   .. _N2540: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2540.htm
 
+``cxx_lambdas``
+  Lambda functions, as defined in N2927_.
+
+  .. _N2927: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2927.pdf
+
 ``cxx_override``
   Override control ``override`` keyword, as defined in N2928_.
 
