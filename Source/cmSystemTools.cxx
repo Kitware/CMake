@@ -1616,6 +1616,9 @@ long copy_data(struct archive *ar, struct archive *aw)
       return (r);
       }
     }
+#if !defined(__clang__)
+  return r; /* this should not happen but it silences a warning */
+#endif
 }
 
 bool extract_tar(const char* outFileName, bool verbose,
