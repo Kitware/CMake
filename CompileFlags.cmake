@@ -19,7 +19,6 @@ endif()
 if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
   set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
 endif()
-include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
 
 if(WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
   set(_INTEL_WINDOWS 1)
@@ -68,3 +67,5 @@ endif ()
 if (CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_SYSTEM_PROCESSOR STREQUAL parisc)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--unique=.text._*")
 endif ()
+
+include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
