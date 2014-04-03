@@ -62,6 +62,11 @@ The features known to this version of CMake are:
 
   .. _N2927: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2927.pdf
 
+``cxx_noexcept``
+  Exception specifications, as defined in N3050_.
+
+  .. _N3050: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3050.html
+
 ``cxx_nonstatic_member_init``
   Non-static data member initialization, as defined in N2756.
 
