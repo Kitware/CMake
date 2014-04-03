@@ -48,6 +48,7 @@
   F(cxx_final) \
   F(cxx_override) \
   F(cxx_static_assert) \
+  F(cxx_trailing_return_types) \
   F(cxx_variadic_templates)
 
 class cmMakefile::Internals

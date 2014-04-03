@@ -42,6 +42,11 @@ The features known to this version of CMake are:
 
   .. _N1720: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1720.html
 
+``cxx_trailing_return_types``
+  Automatic function return type, as defined in N2541_.
+
+  .. _N2541: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2541.htm
+
 ``cxx_variadic_templates``
   Variadic templates, as defined in N2242_.
 
