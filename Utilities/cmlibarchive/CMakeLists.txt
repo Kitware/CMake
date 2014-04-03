@@ -76,15 +76,9 @@ OPTION(ENABLE_EXPAT "Enable the use of the system found EXPAT library if found" 
 OPTION(ENABLE_PCREPOSIX "Enable the use of the system found PCREPOSIX library if found" ON)
 OPTION(ENABLE_LibGCC "Enable the use of the system found LibGCC library if found" ON)
 
-OPTION(ENABLE_TAR "Enable tar building" ON)
-OPTION(ENABLE_TAR_SHARED "Enable dynamic build of tar" FALSE)
-OPTION(ENABLE_CPIO "Enable cpio building" ON)
-OPTION(ENABLE_CPIO_SHARED "Enable dynamic build of cpio" FALSE)
 OPTION(ENABLE_XATTR "Enable extended attribute support" ON)
 OPTION(ENABLE_ACL "Enable ACL support" ON)
 OPTION(ENABLE_ICONV "Enable iconv support" ON)
-OPTION(ENABLE_TEST "Enable unit and regression tests" ON)
-OPTION(ENABLE_COVERAGE "Enable code coverage (GCC only, automatically sets ENABLE_TEST to ON)" FALSE)
 
 IF(WIN32)
   IF(MSVC60)
