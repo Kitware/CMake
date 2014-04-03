@@ -561,7 +561,7 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 			version_needed = 20;
 		}
 		if ((zip->flags & ZIP_FLAG_FORCE_ZIP64) /* User asked. */
-		    || (zip->entry_uncompressed_size > 0xffffffffLL)) { /* Large entry. */
+		    || (zip->entry_uncompressed_size > ARCHIVE_LITERAL_LL(0xffffffff))) { /* Large entry. */
 			zip->entry_uses_zip64 = 1;
 			version_needed = 45;
 		}
@@ -598,8 +598,8 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 		 * are included only if these are 0xffffffff;
 		 * THEREFORE these must be set this way, even if we
 		 * know one of them is smaller. */
-		archive_le32enc(local_header + 18, 0xffffffffLL);
-		archive_le32enc(local_header + 22, 0xffffffffLL);
+		archive_le32enc(local_header + 18, ARCHIVE_LITERAL_LL(0xffffffff));
+		archive_le32enc(local_header + 22, ARCHIVE_LITERAL_LL(0xffffffff));
 	} else {
 		archive_le32enc(local_header + 18, zip->entry_compressed_size);
 		archive_le32enc(local_header + 22, zip->entry_uncompressed_size);
@@ -873,22 +873,22 @@ archive_write_zip_finish_entry(struct archive_write *a)
 	}
 
 	/* Append Zip64 extra data to central directory information. */
-	if (zip->entry_compressed_written > 0xffffffffLL
-	    || zip->entry_uncompressed_written > 0xffffffffLL
-	    || zip->entry_offset > 0xffffffffLL) {
+	if (zip->entry_compressed_written > ARCHIVE_LITERAL_LL(0xffffffff)
+	    || zip->entry_uncompressed_written > ARCHIVE_LITERAL_LL(0xffffffff)
+	    || zip->entry_offset > ARCHIVE_LITERAL_LL(0xffffffff)) {
 		unsigned char zip64[32];
 		unsigned char *z = zip64, *zd;
 		memcpy(z, "\001\000\000\000", 4);
 		z += 4;
-		if (zip->entry_uncompressed_written >= 0xffffffffLL) {
+		if (zip->entry_uncompressed_written >= ARCHIVE_LITERAL_LL(0xffffffff)) {
 			archive_le64enc(z, zip->entry_uncompressed_written);
 			z += 8;
 		}
-		if (zip->entry_compressed_written >= 0xffffffffLL) {
+		if (zip->entry_compressed_written >= ARCHIVE_LITERAL_LL(0xffffffff)) {
 			archive_le64enc(z, zip->entry_compressed_written);
 			z += 8;
 		}
-		if (zip->entry_offset >= 0xffffffffLL) {
+		if (zip->entry_offset >= ARCHIVE_LITERAL_LL(0xffffffff)) {
 			archive_le64enc(z, zip->entry_offset);
 			z += 8;
 		}
@@ -908,13 +908,13 @@ archive_write_zip_finish_entry(struct archive_write *a)
 	/* Fix up central directory file header. */
 	archive_le32enc(zip->file_header + 16, zip->entry_crc32);
 	archive_le32enc(zip->file_header + 20,
-	    zipmin(zip->entry_compressed_written, 0xffffffffLL));
+	    zipmin(zip->entry_compressed_written, ARCHIVE_LITERAL_LL(0xffffffff)));
 	archive_le32enc(zip->file_header + 24,
-	    zipmin(zip->entry_uncompressed_written, 0xffffffffLL));
+	    zipmin(zip->entry_uncompressed_written, ARCHIVE_LITERAL_LL(0xffffffff)));
 	archive_le16enc(zip->file_header + 30,
 	    zip->central_directory_bytes - zip->file_header_extra_offset);
 	archive_le32enc(zip->file_header + 42,
-	    zipmin(zip->entry_offset, 0xffffffffLL));
+	    zipmin(zip->entry_offset, ARCHIVE_LITERAL_LL(0xffffffff)));
 
 	return (ARCHIVE_OK);
 }
@@ -941,8 +941,8 @@ archive_write_zip_close(struct archive_write *a)
 	offset_end = zip->written_bytes;
 
 	/* If central dir info is too large, write Zip64 end-of-cd */
-	if (offset_end - offset_start > 0xffffffffLL
-	    || offset_start > 0xffffffffLL
+	if (offset_end - offset_start > ARCHIVE_LITERAL_LL(0xffffffff)
+	    || offset_start > ARCHIVE_LITERAL_LL(0xffffffff)
 	    || zip->central_directory_entries > 0xffffUL
 	    || (zip->flags & ZIP_FLAG_FORCE_ZIP64)) {
 	  /* Zip64 end-of-cd record */
@@ -979,8 +979,8 @@ archive_write_zip_close(struct archive_write *a)
 	memcpy(buff, "PK\005\006", 4);
 	archive_le16enc(buff + 8, zipmin(0xffffU, zip->central_directory_entries));
 	archive_le16enc(buff + 10, zipmin(0xffffU, zip->central_directory_entries));
-	archive_le32enc(buff + 12, (uint32_t)zipmin(0xffffffffLL, (offset_end - offset_start)));
-	archive_le32enc(buff + 16, (uint32_t)zipmin(0xffffffffLL, offset_start));
+	archive_le32enc(buff + 12, (uint32_t)zipmin(ARCHIVE_LITERAL_LL(0xffffffff), (offset_end - offset_start)));
+	archive_le32enc(buff + 16, (uint32_t)zipmin(ARCHIVE_LITERAL_LL(0xffffffff), offset_start));
 	ret = __archive_write_output(a, buff, 22);
 	if (ret != ARCHIVE_OK)
 		return (ARCHIVE_FATAL);
