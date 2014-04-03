@@ -32,7 +32,7 @@ public:
   cmDepends(cmLocalGenerator* lg=0, const char* targetDir="");
 
   /** at what level will the compile be done from */
-  void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;};
+  void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;}
 
   /** Set the local generator for the directory in which we are
       scanning dependencies.  This is not a full local generator; it

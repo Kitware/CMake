@@ -98,9 +98,9 @@ class cmake
   /// Destructor
   ~cmake();
 
-  static const char *GetCMakeFilesDirectory() {return "/CMakeFiles";};
+  static const char *GetCMakeFilesDirectory() {return "/CMakeFiles";}
   static const char *GetCMakeFilesDirectoryPostSlash() {
-    return "CMakeFiles/";};
+    return "CMakeFiles/";}
 
   //@{
   /**
@@ -261,7 +261,7 @@ class cmake
   void UpdateProgress(const char *msg, float prog);
 
   ///!  get the cmake policies instance
-  cmPolicies *GetPolicies() {return this->Policies;} ;
+  cmPolicies *GetPolicies() {return this->Policies;}
 
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
@@ -278,7 +278,7 @@ class cmake
   bool GetPropertyAsBool(const std::string& prop);
 
   // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; };
+  cmPropertyMap &GetProperties() { return this->Properties; }
 
   ///! Do all the checks before running configure
   int DoPreConfigureChecks();

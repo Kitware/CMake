@@ -58,7 +58,7 @@ public:
    * the CMakeLists.txt file.
    */
   virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus &) { return false;};
+                           cmExecutionStatus &) { return false;}
 
   /**
    * The name of the command as specified in CMakeList.txt.

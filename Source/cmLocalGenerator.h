@@ -76,17 +76,17 @@ public:
 
   ///! Get the makefile for this generator
   cmMakefile *GetMakefile() {
-    return this->Makefile; };
+    return this->Makefile; }
 
   ///! Get the makefile for this generator, const version
     const cmMakefile *GetMakefile() const {
-      return this->Makefile; };
+      return this->Makefile; }
 
   ///! Get the GlobalGenerator this is associated with
   cmGlobalGenerator *GetGlobalGenerator() {
-    return this->GlobalGenerator; };
+    return this->GlobalGenerator; }
   const cmGlobalGenerator *GetGlobalGenerator() const {
-    return this->GlobalGenerator; };
+    return this->GlobalGenerator; }
 
   ///! Set the Global Generator, done on creation by the GlobalGenerator
   void SetGlobalGenerator(cmGlobalGenerator *gg);
@@ -135,7 +135,7 @@ public:
 
   ///! set/get the children
   void AddChild(cmLocalGenerator* g) { this->Children.push_back(g); }
-  std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; };
+  std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; }
 
 
   void AddArchitectureFlags(std::string& flags, cmGeneratorTarget* target,

@@ -36,8 +36,8 @@ public:
   static void FlushCache();
 
 protected:
-  cmDynamicLoader() {};
-  ~cmDynamicLoader() {};
+  cmDynamicLoader() {}
+  ~cmDynamicLoader() {}
 
 private:
   cmDynamicLoader(const cmDynamicLoader&);  // Not implemented.
