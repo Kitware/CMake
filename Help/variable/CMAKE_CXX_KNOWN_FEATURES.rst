@@ -42,6 +42,11 @@ The features known to this version of CMake are:
 
   .. _N2346: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
 
+``cxx_explicit_conversions``
+  Explicit conversion operators, as defined in N2437_.
+
+  .. _N2437: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2437.pdf
+
 ``cxx_final``
   Override control ``final`` keyword, as defined in N2928_.
 

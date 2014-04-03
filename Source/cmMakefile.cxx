@@ -48,6 +48,7 @@
   F(cxx_defaulted_functions) \
   F(cxx_delegating_constructors) \
   F(cxx_deleted_functions) \
+  F(cxx_explicit_conversions) \
   F(cxx_final) \
   F(cxx_override) \
   F(cxx_static_assert) \

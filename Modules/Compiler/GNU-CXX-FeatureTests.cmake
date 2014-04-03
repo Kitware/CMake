@@ -15,6 +15,9 @@ set(_cmake_feature_test_cxx_override "${GNU47_CXX11}")
 # TODO: Should be supported by GNU 4.6
 set(GNU46_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_constexpr "${GNU46_CXX11}")
+# TODO: Should be supported by GNU 4.5
+set(GNU45_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
+set(_cmake_feature_test_cxx_explicit_conversions "${GNU45_CXX11}")
 # TODO: Should be supported by GNU 4.4
 set(GNU44_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_auto_type "${GNU44_CXX11}")
