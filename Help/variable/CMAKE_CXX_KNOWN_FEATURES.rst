@@ -27,6 +27,11 @@ The features known to this version of CMake are:
 
   .. _N1986: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
 
+``cxx_static_assert``
+  Static assert, as defined in N1720_.
+
+  .. _N1720: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1720.html
+
 ``cxx_variadic_templates``
   Variadic templates, as defined in N2242_.
 
