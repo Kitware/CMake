@@ -601,8 +601,11 @@ public:
    */
   std::vector<std::string> GetDefinitions(int cacheonly=0) const;
 
-  /** Test a boolean cache entry to see if it is true or false,
-   *  returns false if no entry defined.
+  /**
+   * Test a boolean variable to see if it is true or false.
+   * If the variable is not found in this makefile instance, the
+   * cache is then queried.
+   * Returns false if no entry defined.
    */
   bool IsOn(const std::string& name) const;
   bool IsSet(const std::string& name) const;
