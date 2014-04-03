@@ -378,7 +378,8 @@ static thisClass* SafeDownCast(cmObject *c) \
     return static_cast<thisClass *>(c); \
     } \
   return 0;\
-}
+} \
+class cmTypeMacro_UseTrailingSemicolon
 
 inline bool cmHasLiteralPrefixImpl(const std::string &str1,
                                  const char *str2,
