@@ -1296,9 +1296,6 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/config.h.in
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 
-# Handle generation of the libarchive.pc file for pkg-config
-INCLUDE(CreatePkgConfigFile)
-
 #
 # Register installation of PDF documents.
 #
