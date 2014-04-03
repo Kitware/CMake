@@ -223,18 +223,15 @@ bool cmExportCommand
   // Compute the set of configurations exported.
   std::vector<std::string> configurationTypes;
   this->Makefile->GetConfigurations(configurationTypes);
-  if(!configurationTypes.empty())
+  if(configurationTypes.empty())
     {
-    for(std::vector<std::string>::const_iterator
-          ci = configurationTypes.begin();
-        ci != configurationTypes.end(); ++ci)
-      {
-      ebfg->AddConfiguration(*ci);
-      }
+    configurationTypes.push_back("");
     }
-  else
+  for(std::vector<std::string>::const_iterator
+        ci = configurationTypes.begin();
+      ci != configurationTypes.end(); ++ci)
     {
-    ebfg->AddConfiguration("");
+    ebfg->AddConfiguration(*ci);
     }
   if (this->ExportSet)
     {

@@ -542,6 +542,10 @@ void cmLocalGenerator::GenerateTargetManifest()
   // Collect the set of configuration types.
   std::vector<std::string> configNames;
   this->Makefile->GetConfigurations(configNames);
+  if(configNames.empty())
+    {
+    configNames.push_back("");
+    }
 
   // Add our targets to the manifest for each configuration.
   cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
@@ -557,18 +561,11 @@ void cmLocalGenerator::GenerateTargetManifest()
       {
       continue;
       }
-    if(configNames.empty())
+    for(std::vector<std::string>::iterator ci = configNames.begin();
+        ci != configNames.end(); ++ci)
       {
-      target.GenerateTargetManifest("");
-      }
-    else
-      {
-      for(std::vector<std::string>::iterator ci = configNames.begin();
-          ci != configNames.end(); ++ci)
-        {
-        const char* config = ci->c_str();
-        target.GenerateTargetManifest(config);
-        }
+      const char* config = ci->c_str();
+      target.GenerateTargetManifest(config);
       }
     }
 }

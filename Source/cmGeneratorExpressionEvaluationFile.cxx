@@ -135,18 +135,15 @@ void cmGeneratorExpressionEvaluationFile::Generate()
 
   if (allConfigs.empty())
     {
-    this->Generate("", inputExpression.get(), outputFiles);
+    allConfigs.push_back("");
     }
-  else
+  for(std::vector<std::string>::const_iterator li = allConfigs.begin();
+      li != allConfigs.end(); ++li)
     {
-    for(std::vector<std::string>::const_iterator li = allConfigs.begin();
-        li != allConfigs.end(); ++li)
+    this->Generate(*li, inputExpression.get(), outputFiles);
+    if(cmSystemTools::GetFatalErrorOccured())
       {
-      this->Generate(*li, inputExpression.get(), outputFiles);
-      if(cmSystemTools::GetFatalErrorOccured())
-        {
-        return;
-        }
+      return;
       }
     }
 }
