@@ -82,6 +82,11 @@ The features known to this version of CMake are:
 
   .. _N2928: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2009/n2928.htm
 
+``cxx_range_for``
+  Range-based for, as defined in N2930_.
+
+  .. _N2930: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2930.html
+
 ``cxx_static_assert``
   Static assert, as defined in N1720_.
 

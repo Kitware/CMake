@@ -56,6 +56,7 @@
   F(cxx_nonstatic_member_init) \
   F(cxx_nullptr) \
   F(cxx_override) \
+  F(cxx_range_for) \
   F(cxx_static_assert) \
   F(cxx_strong_enums) \
   F(cxx_trailing_return_types) \
