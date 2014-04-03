@@ -72,6 +72,11 @@ The features known to this version of CMake are:
 
   .. _N2756: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2756.htm
 
+``cxx_nullptr``
+  Null pointer, as defined in N2431_.
+
+  .. _N2431: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2431.pdf
+
 ``cxx_override``
   Override control ``override`` keyword, as defined in N2928_.
 

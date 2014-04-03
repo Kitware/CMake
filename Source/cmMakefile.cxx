@@ -54,6 +54,7 @@
   F(cxx_lambdas) \
   F(cxx_noexcept) \
   F(cxx_nonstatic_member_init) \
+  F(cxx_nullptr) \
   F(cxx_override) \
   F(cxx_static_assert) \
   F(cxx_strong_enums) \
