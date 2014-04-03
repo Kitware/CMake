@@ -43,10 +43,6 @@
 #include <stddef.h>  /* for wchar_t */
 #include <time.h>
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
-#endif
-
 /* Get a suitable 64-bit integer type. */
 #if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__WATCOMC__)
 # define	__LA_INT64_T	__int64
@@ -235,6 +231,9 @@ __LA_DECL const wchar_t	*archive_entry_symlink_w(struct archive_entry *);
 __LA_DECL __LA_INT64_T	 archive_entry_uid(struct archive_entry *);
 __LA_DECL const char	*archive_entry_uname(struct archive_entry *);
 __LA_DECL const wchar_t	*archive_entry_uname_w(struct archive_entry *);
+__LA_DECL int archive_entry_is_data_encrypted(struct archive_entry *);
+__LA_DECL int archive_entry_is_metadata_encrypted(struct archive_entry *);
+__LA_DECL int archive_entry_is_encrypted(struct archive_entry *);
 
 /*
  * Set fields in an archive_entry.
@@ -306,6 +305,8 @@ __LA_DECL void	archive_entry_set_uname(struct archive_entry *, const char *);
 __LA_DECL void	archive_entry_copy_uname(struct archive_entry *, const char *);
 __LA_DECL void	archive_entry_copy_uname_w(struct archive_entry *, const wchar_t *);
 __LA_DECL int	archive_entry_update_uname_utf8(struct archive_entry *, const char *);
+__LA_DECL void	archive_entry_set_is_data_encrypted(struct archive_entry *, char is_encrypted);
+__LA_DECL void	archive_entry_set_is_metadata_encrypted(struct archive_entry *, char is_encrypted);
 /*
  * Routines to bulk copy fields to/from a platform-native "struct
  * stat."  Libarchive used to just store a struct stat inside of each

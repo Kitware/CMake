@@ -35,6 +35,8 @@ SET(libarchive_SOURCES
   archive_match.c
   archive_options.c
   archive_options_private.h
+  archive_pack_dev.h
+  archive_pack_dev.c
   archive_pathmatch.c
   archive_pathmatch.h
   archive_platform.h
@@ -125,6 +127,7 @@ SET(libarchive_SOURCES
   archive_write_set_format_iso9660.c
   archive_write_set_format_mtree.c
   archive_write_set_format_pax.c
+  archive_write_set_format_raw.c
   archive_write_set_format_shar.c
   archive_write_set_format_ustar.c
   archive_write_set_format_v7tar.c
