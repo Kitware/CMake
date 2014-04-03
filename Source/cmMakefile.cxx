@@ -1182,7 +1182,7 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
       {
       if (this->Targets.find(target) != this->Targets.end())
         {
-        this->Targets[target].AddSourceFile(sf);
+        this->Targets[target].AddSource(sf->GetFullPath());
         }
       else
         {
@@ -1266,7 +1266,7 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                                  commandLines, comment,
                                  workingDirectory, no_replace,
                                  escapeOldStyle);
-  cmSourceFile* sf = target->AddSource(force);
+  cmSourceFile* sf = target->AddSourceCMP0049(force);
 
   // The output is not actually created so mark it symbolic.
   if(sf)

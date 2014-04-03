@@ -525,17 +525,6 @@ cmNinjaTargetGenerator
     this->ModuleDefinitionFile = this->ConvertToNinjaPath(def.c_str());
     }
 
-  {
-  // Add object library contents as external objects.
-  std::vector<std::string> objs;
-  this->GeneratorTarget->UseObjectLibraries(objs);
-  for(std::vector<std::string>::iterator oi = objs.begin();
-      oi != objs.end(); ++oi)
-    {
-    this->Objects.push_back(ConvertToNinjaPath(oi->c_str()));
-    }
-  }
-
   this->GetBuildFileStream() << "\n";
 }
 

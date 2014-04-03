@@ -343,7 +343,6 @@ void cmGlobalXCodeGenerator::Generate()
     // add ALL_BUILD, INSTALL, etc
     this->AddExtraTargets(root, it->second);
     }
-  this->ForceLinkerLanguages();
   this->cmGlobalGenerator::Generate();
   if(cmSystemTools::GetErrorOccuredFlag())
     {
@@ -412,7 +411,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   std::string listfile = mf->GetStartDirectory();
   listfile += "/";
   listfile += "CMakeLists.txt";
-  allbuild->AddSource(listfile.c_str());
+  allbuild->AddSourceCMP0049(listfile.c_str());
 
   // Add XCODE depend helper
   std::string dir = mf->GetCurrentOutputDirectory();
@@ -495,7 +494,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
       listfile = lg->GetMakefile()->GetStartDirectory();
       listfile += "/";
       listfile += "CMakeLists.txt";
-      target.AddSource(listfile.c_str());
+      target.AddSourceCMP0049(listfile.c_str());
       }
     }
 }
@@ -988,6 +987,8 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     cmtarget.GetSourceFiles(classes);
     std::sort(classes.begin(), classes.end(), cmSourceFilePathCompare());
 
+    gtgt->ComputeObjectMapping();
+
     std::vector<cmXCodeObject*> externalObjFiles;
     std::vector<cmXCodeObject*> headerFiles;
     std::vector<cmXCodeObject*> resourceFiles;
@@ -1008,7 +1009,10 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       if(filetype &&
          filetype->GetString() == "compiled.mach-o.objfile")
         {
-        externalObjFiles.push_back(xsf);
+        if ((*i)->GetObjectLibrary().empty())
+          {
+          externalObjFiles.push_back(xsf);
+          }
         }
       else if(this->IsHeaderFile(*i) ||
         (tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader) ||
@@ -1260,7 +1264,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   if(cmSourceFile* sf = mf->GetOrCreateSource(fname.c_str()))
     {
     sf->SetProperty("LANGUAGE", llang.c_str());
-    cmtarget.AddSourceFile(sf);
+    cmtarget.AddSource(fname);
     }
 }
 
@@ -2934,8 +2938,8 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
       if(cmtarget.GetPropertyAsBool("MACOSX_BUNDLE"))
         {
         std::string plist = this->ComputeInfoPListLocation(cmtarget);
-        cmSourceFile* sf = mf->GetOrCreateSource(plist.c_str(), true);
-        cmtarget.AddSourceFile(sf);
+        mf->GetOrCreateSource(plist, true);
+        cmtarget.AddSource(plist);
         }
 
       std::vector<cmSourceFile*> classes;

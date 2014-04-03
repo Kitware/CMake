@@ -101,6 +101,10 @@ bool cmStringCommand
     {
     return this->HandleMakeCIdentifierCommand(args);
     }
+  else if(subCommand == "GENEX_STRIP")
+    {
+    return this->HandleGenexStripCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e);
@@ -806,6 +810,27 @@ bool cmStringCommand
 
   this->Makefile->AddDefinition(variableName,
                       cmSystemTools::MakeCidentifier(input.c_str()).c_str());
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmStringCommand
+::HandleGenexStripCommand(std::vector<std::string> const& args)
+{
+  if(args.size() != 3)
+    {
+    this->SetError("sub-command GENEX_STRIP requires two arguments.");
+    return false;
+    }
+
+  const std::string& input = args[1];
+
+  std::string result = cmGeneratorExpression::Preprocess(input,
+                        cmGeneratorExpression::StripAllGeneratorExpressions);
+
+  const std::string& variableName = args[2];
+
+  this->Makefile->AddDefinition(variableName, result.c_str());
   return true;
 }
 

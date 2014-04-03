@@ -75,6 +75,7 @@ protected:
   bool HandleFindCommand(std::vector<std::string> const& args);
   bool HandleTimestampCommand(std::vector<std::string> const& args);
   bool HandleMakeCIdentifierCommand(std::vector<std::string> const& args);
+  bool HandleGenexStripCommand(std::vector<std::string> const& args);
 
   class RegexReplacement
   {

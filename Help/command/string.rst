@@ -35,6 +35,7 @@ String operations.
   string(FIND <string> <substring> <output variable> [REVERSE])
   string(TIMESTAMP <output variable> [<format string>] [UTC])
   string(MAKE_C_IDENTIFIER <input string> <output variable>)
+  string(GENEX_STRIP <input string> <output variable>)
 
 REGEX MATCH will match the regular expression once and store the match
 in the output variable.
@@ -154,3 +155,7 @@ If no explicit <format string> is given it will default to:
 
 MAKE_C_IDENTIFIER will write a string which can be used as an
 identifier in C.
+
+``GENEX_STRIP`` will strip any
+:manual:`generator expressions <cmake-generator-expressions(7)>` from the
+``input string`` and store the result in the ``output variable``.
