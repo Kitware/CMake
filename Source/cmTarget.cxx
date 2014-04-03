@@ -2684,7 +2684,6 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(
     msg += " which has type ";
     msg += cmTarget::GetTargetTypeName(this->GetType());
     this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
-    abort();
     return 0;
     }
 
@@ -2729,7 +2728,6 @@ cmTarget::CompileInfo const* cmTarget::GetCompileInfo(
     msg += " which has type ";
     msg += cmTarget::GetTargetTypeName(this->GetType());
     this->GetMakefile()->IssueMessage(cmake::INTERNAL_ERROR, msg);
-    abort();
     return 0;
     }
 
