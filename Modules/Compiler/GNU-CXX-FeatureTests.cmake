@@ -44,6 +44,7 @@ set(_cmake_feature_test_cxx_generalized_initializers "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_strong_enums "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_trailing_return_types "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_unicode_literals "${GNU44_CXX11}")
+set(_cmake_feature_test_cxx_uniform_initialization "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_variadic_templates "${GNU44_CXX11}")
 # TODO: If features are ever recorded for GNU 4.3, there should possibly
 # be a new feature added like cxx_variadic_template_template_parameters,
