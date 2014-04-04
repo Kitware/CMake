@@ -122,6 +122,11 @@ The features known to this version of CMake are:
 
   .. _N2541: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2541.htm
 
+``cxx_unicode_literals``
+  Unicode string literals, as defined in N2442_.
+
+  .. _N2442: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2442.htm
+
 ``cxx_user_literals``
   User-defined literals, as defined in N2765_.
 
