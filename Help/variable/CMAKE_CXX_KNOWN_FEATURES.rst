@@ -167,6 +167,11 @@ The features known to this version of CMake are:
 
   .. _N2765: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2765.pdf
 
+``cxx_variadic_macros``
+  Variadic macros, as defined in N1653_.
+
+  .. _N1653: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2004/n1653.htm
+
 ``cxx_variadic_templates``
   Variadic templates, as defined in N2242_.
 

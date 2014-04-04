@@ -73,6 +73,7 @@
   F(cxx_uniform_initialization) \
   F(cxx_unrestricted_unions) \
   F(cxx_user_literals) \
+  F(cxx_variadic_macros) \
   F(cxx_variadic_templates)
 
 class cmMakefile::Internals
