@@ -217,8 +217,6 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
         url += "?" + fields;
         }
       break;
-    default:
-      break;
     }
 
   ::curl_easy_setopt(curl, CURLOPT_URL, url.c_str());

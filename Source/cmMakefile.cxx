@@ -3365,7 +3365,6 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
-        default:
           result = moduleInCMakeRoot;
           break;
         }

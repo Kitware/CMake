@@ -818,7 +818,7 @@ public:
                          const std::string& config);
 
   // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; };
+  cmPropertyMap &GetProperties() { return this->Properties; }
 
   ///! Initialize a makefile from its parent
   void InitializeFromParent();

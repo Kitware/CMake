@@ -89,7 +89,7 @@ public:
   void AddDepend(const char* d) { this->Depends.push_back(d); }
 
   // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; };
+  cmPropertyMap &GetProperties() { return this->Properties; }
 
   /**
    * Check whether the given source file location could refer to this

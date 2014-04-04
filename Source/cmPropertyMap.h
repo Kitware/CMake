@@ -31,9 +31,9 @@ public:
                                cmProperty::ScopeType scope,
                                bool &chain) const;
 
-  void SetCMakeInstance(cmake *cm) { this->CMakeInstance = cm; };
+  void SetCMakeInstance(cmake *cm) { this->CMakeInstance = cm; }
 
-  cmPropertyMap() { this->CMakeInstance = 0;};
+  cmPropertyMap() { this->CMakeInstance = 0;}
 
 private:
   cmake *CMakeInstance;

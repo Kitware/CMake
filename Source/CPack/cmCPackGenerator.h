@@ -22,9 +22,10 @@
   // Forward declarations are insufficient since we use them in
   // std::map data members below...
 
-#define cmCPackTypeMacro(class, superclass) \
-  cmTypeMacro(class, superclass); \
-  static cmCPackGenerator* CreateGenerator() { return new class; }
+#define cmCPackTypeMacro(klass, superclass) \
+  cmTypeMacro(klass, superclass); \
+  static cmCPackGenerator* CreateGenerator() { return new klass; } \
+  class cmCPackTypeMacro_UseTrailingSemicolon
 
 #define cmCPackLogger(logType, msg) \
   do { \

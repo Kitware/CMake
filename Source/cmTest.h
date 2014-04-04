@@ -51,10 +51,10 @@ public:
                       const char* value,bool asString=false);
   const char *GetProperty(const std::string& prop) const;
   bool GetPropertyAsBool(const std::string& prop) const;
-  cmPropertyMap &GetProperties() { return this->Properties; };
+  cmPropertyMap &GetProperties() { return this->Properties; }
 
   /** Get the cmMakefile instance that owns this test.  */
-  cmMakefile *GetMakefile() { return this->Makefile;};
+  cmMakefile *GetMakefile() { return this->Makefile;}
 
   /** Get the backtrace of the command that created this test.  */
   cmListFileBacktrace const& GetBacktrace() const;

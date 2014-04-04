@@ -81,7 +81,7 @@ public:
    * not implement this method.  At this point, reading and
    * writing to the cache can be done.
    */
-  virtual void FinalPass() {};
+  virtual void FinalPass() {}
 
   /**
    * Does this command have a final pass?  Query after InitialPass.

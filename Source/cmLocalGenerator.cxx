@@ -2283,7 +2283,6 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
         case cmPolicies::NEW:
-        default:
           return false;
         }
       }

@@ -51,7 +51,7 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   ///! Get the name for this generator
-  virtual std::string GetName() const { return "Generic"; };
+  virtual std::string GetName() const { return "Generic"; }
 
   /** Check whether the given name matches the current generator.  */
   virtual bool MatchesGeneratorName(const std::string& name) const

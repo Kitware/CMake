@@ -31,7 +31,7 @@ public:
   const char *GetValue() const;
 
   // construct with the value not set
-  cmProperty() { this->ValueHasBeenSet = false; };
+  cmProperty() { this->ValueHasBeenSet = false; }
 
 protected:
   std::string Name;

@@ -134,7 +134,7 @@ public:
   /*
    * Is the tomorrow tag set?
    */
-  bool GetTomorrowTag() { return this->TomorrowTag; };
+  bool GetTomorrowTag() { return this->TomorrowTag; }
 
   /**
    * Try to run tests of the project
@@ -167,7 +167,7 @@ public:
    * Set the cmake test mode (experimental, nightly, continuous).
    */
   void SetTestModel(int mode);
-  int GetTestModel() { return this->TestModel; };
+  int GetTestModel() { return this->TestModel; }
 
   std::string GetTestModelString();
   static int GetTestModelFromString(const char* str);
@@ -392,7 +392,7 @@ public:
   int ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf);
 
   std::vector<std::string> &GetInitialCommandLineArguments()
-  { return this->InitialCommandLineArguments; };
+  { return this->InitialCommandLineArguments; }
 
   //! Set the track to submit to
   void SetSpecificTrack(const char* track);

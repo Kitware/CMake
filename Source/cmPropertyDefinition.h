@@ -33,22 +33,22 @@ public:
                       bool chained);
 
   /// Default constructor
-  cmPropertyDefinition() { this->Chained = false; };
+  cmPropertyDefinition() { this->Chained = false; }
 
   /// Is the property chained?
-  bool IsChained() const { return this->Chained; };
+  bool IsChained() const { return this->Chained; }
 
   /// Get the scope
   cmProperty::ScopeType GetScope() const {
-    return this->Scope; };
+    return this->Scope; }
 
   /// Get the documentation (short version)
   const std::string &GetShortDescription() const {
-    return this->ShortDescription; };
+    return this->ShortDescription; }
 
   /// Get the documentation (full version)
   const std::string &GetFullDescription() const {
-    return this->FullDescription; };
+    return this->FullDescription; }
 
 protected:
   std::string Name;
