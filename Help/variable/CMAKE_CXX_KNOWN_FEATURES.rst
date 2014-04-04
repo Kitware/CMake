@@ -122,6 +122,11 @@ The features known to this version of CMake are:
 
   .. _N2541: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2541.htm
 
+``cxx_user_literals``
+  User-defined literals, as defined in N2765_.
+
+  .. _N2765: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2765.pdf
+
 ``cxx_variadic_templates``
   Variadic templates, as defined in N2242_.
 

@@ -15,6 +15,7 @@ set(_cmake_feature_test_cxx_final "${GNU47_CXX11}")
 set(_cmake_feature_test_cxx_noexcept "${GNU47_CXX11}")
 set(_cmake_feature_test_cxx_nonstatic_member_init "${GNU47_CXX11}")
 set(_cmake_feature_test_cxx_override "${GNU47_CXX11}")
+set(_cmake_feature_test_cxx_user_literals "${GNU47_CXX11}")
 # NOTE: C++11 was ratified in September 2011. GNU 4.7 is the first minor
 # release following that (March 2012), and the first minor release to
 # support -std=c++11. Prior to that, support for C++11 features is technically
