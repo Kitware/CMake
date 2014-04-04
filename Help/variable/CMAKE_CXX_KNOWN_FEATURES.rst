@@ -92,6 +92,11 @@ The features known to this version of CMake are:
 
   .. _N2442: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2442.htm
 
+``cxx_reference_qualified_functions``
+  Reference qualified functions, as defined in N2439_.
+
+  .. _N2439: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2439.htm
+
 ``cxx_static_assert``
   Static assert, as defined in N1720_.
 

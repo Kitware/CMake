@@ -2,6 +2,9 @@
 # Reference: http://gcc.gnu.org/projects/cxx0x.html
 
 set(_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 408")
+# Introduced in GCC 4.8.1
+set(_cmake_feature_test_cxx_reference_qualified_functions
+  "((__GNUC__ * 100 + __GNUC_MINOR__) > 408 || __GNUC_PATCHLEVEL__ >= 1) && __cplusplus >= 201103L")
 set(GNU48_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_inheriting_constructors "${GNU48_CXX11}")
 # TODO: Should be supported by GNU 4.7

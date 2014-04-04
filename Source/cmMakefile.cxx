@@ -58,6 +58,7 @@
   F(cxx_override) \
   F(cxx_range_for) \
   F(cxx_raw_string_literals) \
+  F(cxx_reference_qualified_functions) \
   F(cxx_static_assert) \
   F(cxx_strong_enums) \
   F(cxx_trailing_return_types) \
