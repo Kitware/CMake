@@ -97,6 +97,11 @@ The features known to this version of CMake are:
 
   .. _N2439: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2439.htm
 
+``cxx_rvalue_references``
+  R-value references, as defined in N2118_.
+
+  .. _N2118: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2118.html
+
 ``cxx_static_assert``
   Static assert, as defined in N1720_.
 
