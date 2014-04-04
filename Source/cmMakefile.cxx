@@ -45,6 +45,7 @@
   F(cxx_alias_templates) \
   F(cxx_alignas) \
   F(cxx_alignof) \
+  F(cxx_attributes) \
   F(cxx_auto_type) \
   F(cxx_constexpr) \
   F(cxx_decltype) \

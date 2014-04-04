@@ -27,6 +27,11 @@ The features known to this version of CMake are:
 
   .. _N2341: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2341.pdf
 
+``cxx_attributes``
+  Generic attributes, as defined in N2761_.
+
+  .. _N2761: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2761.pdf
+
 ``cxx_auto_type``
   Automatic type deduction, as defined in N1984_.
 
