@@ -812,23 +812,41 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
 //----------------------------------------------------------------------------
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
+  std::string srcFiles;
+  const char* sep = "";
   for(std::vector<std::string>::const_iterator i = srcs.begin();
       i != srcs.end(); ++i)
     {
-    const char* src = i->c_str();
-    if(src[0] == '$' && src[1] == '<')
+    std::string filename = *i;
+    const char* src = filename.c_str();
+
+    if(!(src[0] == '$' && src[1] == '<'))
       {
-      this->AddSource(src);
+      filename = this->ProcessSourceItemCMP0049(filename);
+      if (cmSystemTools::GetErrorOccuredFlag())
+        {
+        return;
+        }
+      this->Makefile->GetOrCreateSource(filename);
       }
-    else
-      {
-      this->AddSourceCMP0049(src);
-      }
+    srcFiles += sep;
+    srcFiles += filename;
+    sep = ";";
+    }
+  if (!srcFiles.empty())
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
+    cge->SetEvaluateForBuildsystem(true);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     }
 }
 
 //----------------------------------------------------------------------------
-cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
+std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
 {
   std::string src = s;
 
@@ -863,9 +881,21 @@ cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
       this->Makefile->IssueMessage(messageType, e.str());
       if (messageType == cmake::FATAL_ERROR)
         {
-        return 0;
+        return "";
         }
       }
+    }
+  return src;
+}
+
+//----------------------------------------------------------------------------
+cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
+{
+  std::string src = this->ProcessSourceItemCMP0049(s);
+
+  if (cmSystemTools::GetErrorOccuredFlag())
+    {
+    return 0;
     }
   return this->AddSource(src);
 }

@@ -752,6 +752,8 @@ private:
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc,
                           cmTarget const* head) const;
 
+  std::string ProcessSourceItemCMP0049(const std::string& s);
+
   void ClearLinkMaps();
 
   void MaybeInvalidatePropertyCache(const std::string& prop);
