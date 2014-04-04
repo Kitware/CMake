@@ -12,6 +12,11 @@ command.
 
 The features known to this version of CMake are:
 
+``cxx_alias_templates``
+  Template aliases, as defined in N2258_.
+
+  .. _N2258: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf
+
 ``cxx_auto_type``
   Automatic type deduction, as defined in N1984_.
 

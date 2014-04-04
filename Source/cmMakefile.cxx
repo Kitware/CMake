@@ -42,6 +42,7 @@
 #include <assert.h>
 
 #define FOR_EACH_CXX_FEATURE(F) \
+  F(cxx_alias_templates) \
   F(cxx_auto_type) \
   F(cxx_constexpr) \
   F(cxx_decltype) \
