@@ -50,6 +50,7 @@
   F(cxx_delegating_constructors) \
   F(cxx_deleted_functions) \
   F(cxx_explicit_conversions) \
+  F(cxx_extern_templates) \
   F(cxx_final) \
   F(cxx_inheriting_constructors) \
   F(cxx_lambdas) \
