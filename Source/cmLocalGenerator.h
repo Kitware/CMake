@@ -106,7 +106,7 @@ public:
    * path setting
    */
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
-  enum OutputFormat { UNCHANGED, MAKEFILE, SHELL, RESPONSE };
+  enum OutputFormat { UNCHANGED, MAKEFILE, SHELL, WATCOMQUOTE, RESPONSE };
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output);
   std::string Convert(const std::string& remote, RelativeRoot local,
@@ -288,7 +288,8 @@ public:
       escapes for the special case of passing to the native echo
       command.  */
   std::string EscapeForShell(const std::string& str, bool makeVars = false,
-                             bool forEcho = false);
+                             bool forEcho = false,
+                             bool useWatcomQuote = false);
 
   /** Backwards-compatibility version of EscapeForShell.  */
   std::string EscapeForShellOldStyle(const std::string& str);
@@ -370,7 +371,8 @@ public:
                       std::string& linkFlags,
                       std::string& frameworkPath,
                       std::string& linkPath,
-                      cmGeneratorTarget* target);
+                      cmGeneratorTarget* target,
+                      bool useWatcomQuote);
 
   virtual void ComputeObjectFilenames(
                         std::map<cmSourceFile const*, std::string>& mapping,
@@ -383,7 +385,8 @@ protected:
                                    std::string& linkPath,
                                    cmGeneratorTarget &,
                                    bool relink,
-                                   bool forResponseFile);
+                                   bool forResponseFile,
+                                   bool useWatcomQuote);
 
   // Expand rule variables in CMake of the type found in language rules
   void ExpandRuleVariables(std::string& string,

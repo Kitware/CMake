@@ -290,7 +290,6 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   linkRuleVar += linkLanguage;
   linkRuleVar += "_LINK_EXECUTABLE";
   std::string linkRule = this->GetLinkRule(linkRuleVar);
-  bool useWatcomQuote = this->Makefile->IsOn(linkRuleVar+"_USE_WATCOM_QUOTE");
   std::vector<std::string> commands1;
   cmSystemTools::ExpandListArgument(linkRule, real_link_commands);
   if(this->Target->IsExecutableWithExports())
@@ -333,12 +332,15 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
 
   // Expand the rule variables.
   {
+  bool useWatcomQuote = this->Makefile->IsOn(linkRuleVar+"_USE_WATCOM_QUOTE");
+
   // Set path conversion for link script shells.
   this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
   // Collect up flags to link in needed libraries.
   std::string linkLibs;
-  this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends);
+  this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends,
+                       useWatcomQuote);
 
   // Construct object file lists that may be needed to expand the
   // rule.
@@ -357,7 +359,12 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);
   vars.ObjectDir = objectDir.c_str();
-  vars.Target = targetOutPathReal.c_str();
+  cmLocalGenerator::OutputFormat output = (useWatcomQuote) ?
+    cmLocalGenerator::WATCOMQUOTE : cmLocalGenerator::SHELL;
+  std::string target = this->Convert(targetFullPathReal,
+                                     cmLocalGenerator::START_OUTPUT,
+                                     output);
+  vars.Target = target.c_str();
   vars.TargetPDB = targetOutPathPDB.c_str();
 
   // Setup the target version.
