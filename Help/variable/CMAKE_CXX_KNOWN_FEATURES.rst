@@ -17,6 +17,11 @@ The features known to this version of CMake are:
 
   .. _N2258: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2258.pdf
 
+``cxx_alignas``
+  Alignment control ``alignas``, as defined in N2341_.
+
+  .. _N2341: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2341.pdf
+
 ``cxx_auto_type``
   Automatic type deduction, as defined in N1984_.
 

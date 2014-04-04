@@ -6,6 +6,7 @@ set(_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 408")
 set(_cmake_feature_test_cxx_reference_qualified_functions
   "((__GNUC__ * 100 + __GNUC_MINOR__) > 408 || __GNUC_PATCHLEVEL__ >= 1) && __cplusplus >= 201103L")
 set(GNU48_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L")
+set(_cmake_feature_test_cxx_alignas "${GNU48_CXX11}")
 set(_cmake_feature_test_cxx_inheriting_constructors "${GNU48_CXX11}")
 # TODO: Should be supported by GNU 4.7
 set(GNU47_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
