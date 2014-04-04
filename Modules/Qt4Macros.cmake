@@ -103,7 +103,7 @@ endmacro()
 
 
 # helper macro to set up a moc rule
-macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
+function (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
   # For Windows, create a parameters file to work around command line length limit
   # Pass the parameters in a file.  Set the working directory to
   # be that containing the parameters file and reference it by
@@ -144,7 +144,7 @@ macro (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target)
                       DEPENDS ${infile} ${_moc_parameters_file}
                       ${_moc_working_dir}
                       VERBATIM)
-endmacro ()
+endfunction ()
 
 
 macro (QT4_GENERATE_MOC infile outfile )
