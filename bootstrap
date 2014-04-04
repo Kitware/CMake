@@ -1086,8 +1086,8 @@ if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
   cmake_test_flags=
 
   # If we are on HP-UX, check for -Ae for the C compiler.
-  cmake_test_flags="-Ae"
   if [ "x${cmake_system}" = "xHP-UX" ]; then
+    cmake_test_flags="-Ae"
     TMPFILE=`cmake_tmp_file`
     echo '
     int main(int argc, char** argv) { (void)argc; (void)argv; return 0; }
@@ -1108,6 +1108,29 @@ if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
       echo "${cmake_c_compiler} does not need ${cmake_test_flags}"
     fi
     rm -f "${TMPFILE}.c"
+    echo '
+    #include <iostream>
+    int main(int argc, char** argv) {
+    for(int i=0; i < 1; ++i);
+    for(int i=0; i < 1; ++i);
+    (void)argc; (void)argv; return 0; }
+' > ${TMPFILE}.cxx
+    cmake_need_AAstd98=0
+    cmake_test_flags="-AA +hpxstd98"
+    if cmake_try_run "${cmake_cxx_compiler}" "${cmake_cxx_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+      :
+    else
+      if cmake_try_run "${cmake_cxx_compiler}" \
+        "${cmake_cxx_flags} ${cmake_test_flags}" "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+        cmake_need_AAstd98=1
+      fi
+    fi
+    if [ "x${cmake_need_AAstd98}" = "x1" ]; then
+      cmake_cxx_flags="${cmake_cxx_flags} ${cmake_test_flags}"
+      echo "${cmake_cxx_compiler} needs ${cmake_test_flags}"
+    else
+      echo "${cmake_cxx_compiler} does not need ${cmake_test_flags}"
+    fi
   fi
   cmake_test_flags=
 fi

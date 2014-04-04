@@ -19,7 +19,6 @@ endif()
 if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
   set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
 endif()
-include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
 
 if(WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
   set(_INTEL_WINDOWS 1)
@@ -54,6 +53,14 @@ if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
   endif()
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "HP-UX" AND CMAKE_CXX_COMPILER_ID MATCHES "HP")
+  # it is known that version 3.85 fails and 6.25 works without these flags
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4)
+    # use new C++ library and improved template support
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA +hpxstd98")
+  endif()
+endif()
+
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")
@@ -68,3 +75,5 @@ endif ()
 if (CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_SYSTEM_PROCESSOR STREQUAL parisc)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--unique=.text._*")
 endif ()
+
+include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
