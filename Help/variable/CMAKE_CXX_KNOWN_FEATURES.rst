@@ -77,6 +77,11 @@ The features known to this version of CMake are:
 
   .. _N2928: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2009/n2928.htm
 
+``cxx_generalized_initializers``
+  Initializer lists, as defined in N2672_.
+
+  .. _N2672: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2672.htm
+
 ``cxx_inheriting_constructors``
   Inheriting constructors, as defined in N2540_.
 

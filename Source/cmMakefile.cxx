@@ -55,6 +55,7 @@
   F(cxx_explicit_conversions) \
   F(cxx_extern_templates) \
   F(cxx_final) \
+  F(cxx_generalized_initializers) \
   F(cxx_inheriting_constructors) \
   F(cxx_lambdas) \
   F(cxx_noexcept) \
