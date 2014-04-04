@@ -65,6 +65,7 @@
   F(cxx_strong_enums) \
   F(cxx_trailing_return_types) \
   F(cxx_unicode_literals) \
+  F(cxx_unrestricted_unions) \
   F(cxx_user_literals) \
   F(cxx_variadic_templates)
 

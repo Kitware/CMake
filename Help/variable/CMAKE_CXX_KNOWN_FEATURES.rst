@@ -127,6 +127,11 @@ The features known to this version of CMake are:
 
   .. _N2442: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2442.htm
 
+``cxx_unrestricted_unions``
+  Unrestricted unions, as defined in N2544_.
+
+  .. _N2544: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2544.pdf
+
 ``cxx_user_literals``
   User-defined literals, as defined in N2765_.
 
