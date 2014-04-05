@@ -636,26 +636,26 @@ cmTargetTraceDependencies
   // Queue all the source files already specified for the target.
   if (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
     {
-    std::vector<std::string> sources;
     std::vector<std::string> configs;
     this->Makefile->GetConfigurations(configs);
     if (configs.empty())
       {
       configs.push_back("");
       }
+    std::set<std::string> emitted;
     for(std::vector<std::string>::const_iterator ci = configs.begin();
         ci != configs.end(); ++ci)
       {
+      std::vector<std::string> sources;
       this->Target->GetSourceFiles(sources, *ci);
-      }
-    std::set<std::string> emitted;
-    for(std::vector<std::string>::const_iterator si = sources.begin();
-        si != sources.end(); ++si)
-      {
-      if(emitted.insert(*si).second && this->SourcesQueued.insert(*si).second)
+      for(std::vector<std::string>::const_iterator si = sources.begin();
+          si != sources.end(); ++si)
         {
-        this->SourceQueue.push(*si);
-        this->Makefile->GetOrCreateSource(*si);
+        if(emitted.insert(*si).second && this->SourcesQueued.insert(*si).second)
+          {
+          this->SourceQueue.push(*si);
+          this->Makefile->GetOrCreateSource(*si);
+          }
         }
       }
     }

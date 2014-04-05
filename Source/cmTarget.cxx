@@ -138,6 +138,10 @@ public:
                                                           LinkClosureMapType;
   LinkClosureMapType LinkClosureMap;
 
+  typedef std::map<TargetConfigPair, std::vector<cmSourceFile*> >
+                                                          SourceFilesMapType;
+  SourceFilesMapType SourceFilesMap;
+
   struct TargetPropertyEntry {
     TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
       const std::string &targetName = std::string())
@@ -793,19 +797,33 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
                               const std::string& config,
                               cmTarget const* head) const
 {
-  std::vector<std::string> srcs;
-  this->GetSourceFiles(srcs, config, head);
 
-  std::set<cmSourceFile*> emitted;
+  // Lookup any existing link implementation for this configuration.
+  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
 
-  for(std::vector<std::string>::const_iterator i = srcs.begin();
-      i != srcs.end(); ++i)
+  cmTargetInternals::SourceFilesMapType::iterator
+    it = this->Internal->SourceFilesMap.find(key);
+  if(it != this->Internal->SourceFilesMap.end())
     {
-    cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
-    if (emitted.insert(sf).second)
+    files = it->second;
+    }
+  else
+    {
+    std::vector<std::string> srcs;
+    this->GetSourceFiles(srcs, config, head);
+
+    std::set<cmSourceFile*> emitted;
+
+    for(std::vector<std::string>::const_iterator i = srcs.begin();
+        i != srcs.end(); ++i)
       {
-      files.push_back(sf);
+      cmSourceFile* sf = this->Makefile->GetOrCreateSource(*i);
+      if (emitted.insert(sf).second)
+        {
+        files.push_back(sf);
+        }
       }
+    this->Internal->SourceFilesMap[key] = files;
     }
 }
 
@@ -835,6 +853,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
     }
   if (!srcFiles.empty())
     {
+    this->Internal->SourceFilesMap.clear();
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
@@ -969,6 +988,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
                    TargetPropertyEntryFinder(sfl))
                                       == this->Internal->SourceEntries.end())
     {
+    this->Internal->SourceFilesMap.clear();
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
@@ -1738,6 +1758,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
+    this->Internal->SourceFilesMap.clear();
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
@@ -1824,7 +1845,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
-
+      this->Internal->SourceFilesMap.clear();
       cmListFileBacktrace lfbt;
       this->Makefile->GetBacktrace(lfbt);
       cmGeneratorExpression ge(lfbt);
