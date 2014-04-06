@@ -52,6 +52,11 @@ The features known to this version of CMake are:
 
   .. _N2343: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2343.pdf
 
+``cxx_default_function_template_args``
+  Default template arguments for function templates, as defined in DR226_
+
+  .. _DR226: http://www.open-std.org/jtc1/sc22/wg21/docs/cwg_defects.html#226
+
 ``cxx_defaulted_functions``
   Defaulted functions, as defined in N2346_.
 
