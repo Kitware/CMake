@@ -62,6 +62,11 @@ The features known to this version of CMake are:
 
   .. _N2346: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
 
+``cxx_defaulted_move_initializers``
+  Defaulted move initializers, as defined in N3053_.
+
+  .. _N3053: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3053.html
+
 ``cxx_delegating_constructors``
   Delegating constructors, as defined in N1986_.
 

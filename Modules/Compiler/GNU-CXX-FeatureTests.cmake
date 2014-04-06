@@ -30,6 +30,7 @@ set(_cmake_feature_test_cxx_user_literals "${GNU47_CXX11}")
 # TODO: Should be supported by GNU 4.6
 set(GNU46_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_constexpr "${GNU46_CXX11}")
+set(_cmake_feature_test_cxx_defaulted_move_initializers "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_enum_forward_declarations "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_nullptr "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_range_for "${GNU46_CXX11}")
