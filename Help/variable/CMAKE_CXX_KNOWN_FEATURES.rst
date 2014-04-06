@@ -72,6 +72,11 @@ The features known to this version of CMake are:
 
   .. _N2346: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
 
+``cxx_enum_forward_declarations``
+  Enum forward declarations, as defined in N2764_.
+
+  .. _N2764: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2764.pdf
+
 ``cxx_explicit_conversions``
   Explicit conversion operators, as defined in N2437_.
 
