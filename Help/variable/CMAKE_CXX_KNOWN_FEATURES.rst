@@ -117,6 +117,11 @@ The features known to this version of CMake are:
 
   .. _N2927: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2009/n2927.pdf
 
+``cxx_local_type_template_args``
+  Local and unnamed types as template arguments, as defined in N2657_.
+
+  .. _N2657: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2657.htm
+
 ``cxx_noexcept``
   Exception specifications, as defined in N3050_.
 

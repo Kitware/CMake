@@ -38,6 +38,7 @@ set(_cmake_feature_test_cxx_unrestricted_unions "${GNU46_CXX11}")
 set(GNU45_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_explicit_conversions "${GNU45_CXX11}")
 set(_cmake_feature_test_cxx_lambdas "${GNU45_CXX11}")
+set(_cmake_feature_test_cxx_local_type_template_args "${GNU45_CXX11}")
 set(_cmake_feature_test_cxx_raw_string_literals "${GNU45_CXX11}")
 # TODO: Should be supported by GNU 4.4
 set(GNU44_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
