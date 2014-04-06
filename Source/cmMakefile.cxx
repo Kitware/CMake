@@ -79,6 +79,7 @@
   F(cxx_sizeof_member) \
   F(cxx_static_assert) \
   F(cxx_strong_enums) \
+  F(cxx_template_template_parameters) \
   F(cxx_thread_local) \
   F(cxx_trailing_return_types) \
   F(cxx_unicode_literals) \
@@ -4626,8 +4627,16 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
 
   target->AppendProperty("COMPILE_FEATURES", feature.c_str());
 
+  bool needCxx98 = false;
   bool needCxx11 = false;
 
+  if (const char *propCxx98 =
+          this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES"))
+    {
+    std::vector<std::string> props;
+    cmSystemTools::ExpandListArgument(propCxx98, props);
+    needCxx98 = std::find(props.begin(), props.end(), feature) != props.end();
+    }
   if (const char *propCxx11 =
           this->GetDefinition("CMAKE_CXX11_COMPILE_FEATURES"))
     {
@@ -4655,6 +4664,7 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
                                       cmStrCmp(existingCxxStandard))
                                     : cmArrayEnd(CXX_STANDARDS);
 
+  bool setCxx98 = needCxx98 && !existingCxxStandard;
   bool setCxx11 = needCxx11 && !existingCxxStandard;
 
   if (needCxx11 && existingCxxStandard && existingCxxIt <
@@ -4664,10 +4674,21 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
     {
     setCxx11 = true;
     }
+  else if(needCxx98 && existingCxxStandard && existingCxxIt <
+                                    std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                      cmArrayEnd(CXX_STANDARDS),
+                                      cmStrCmp("98")))
+    {
+    setCxx98 = true;
+    }
 
   if (setCxx11)
     {
     target->SetProperty("CXX_STANDARD", "11");
+    }
+  else if (setCxx98)
+    {
+    target->SetProperty("CXX_STANDARD", "98");
     }
   return true;
 }

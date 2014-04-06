@@ -236,3 +236,6 @@ The features known to this version of CMake are:
   Variadic templates, as defined in N2242_.
 
   .. _N2242: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2242.pdf
+
+``cxx_template_template_parameters``
+  Template template parameters, as defined in ``ISO/IEC 14882:1998``.
