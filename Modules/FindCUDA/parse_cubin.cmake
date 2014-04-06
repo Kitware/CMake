@@ -57,7 +57,7 @@ if (${file_text} MATCHES ".+")
 
         # Extract kernel names.
         if (${entry} MATCHES "[^g]name = ([^ ]+)")
-          string(REGEX REPLACE ".* = ([^ ]+)" "\\1" entry ${entry})
+          set(entry "${CMAKE_MATCH_1}")
 
           # Check to see if the kernel name starts with "_"
           set(skip FALSE)
@@ -76,19 +76,19 @@ if (${file_text} MATCHES ".+")
 
           # Registers
           if (${entry} MATCHES "reg([ ]+)=([ ]+)([^ ]+)")
-            string(REGEX REPLACE ".*([ ]+)=([ ]+)([^ ]+)" "\\3" entry ${entry})
+            set(entry "${CMAKE_MATCH_3}")
             message("Registers: ${entry}")
           endif()
 
           # Local memory
           if (${entry} MATCHES "lmem([ ]+)=([ ]+)([^ ]+)")
-            string(REGEX REPLACE ".*([ ]+)=([ ]+)([^ ]+)" "\\3" entry ${entry})
+            set(entry "${CMAKE_MATCH_3}")
             message("Local:     ${entry}")
           endif()
 
           # Shared memory
           if (${entry} MATCHES "smem([ ]+)=([ ]+)([^ ]+)")
-            string(REGEX REPLACE ".*([ ]+)=([ ]+)([^ ]+)" "\\3" entry ${entry})
+            set(entry "${CMAKE_MATCH_3}")
             message("Shared:    ${entry}")
           endif()
 

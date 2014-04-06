@@ -142,7 +142,7 @@ function(__check_type_size_impl type var map builtin language)
     foreach(info ${strings})
       if("${info}" MATCHES "${regex_size}")
         # Get the type size.
-        string(REGEX REPLACE "${regex_size}" "\\1" size "${info}")
+        set(size "${CMAKE_MATCH_1}")
         if(first)
           set(${var} ${size})
         elseif(NOT "${size}" STREQUAL "${${var}}")

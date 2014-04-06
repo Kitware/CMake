@@ -292,8 +292,7 @@ function(ExternalData_expand_arguments target outArgsVar)
       foreach(piece IN LISTS pieces)
         if("x${piece}" MATCHES "^x${data_regex}$")
           # Replace this DATA{}-piece with a file path.
-          string(REGEX REPLACE "${data_regex}" "\\1" data "${piece}")
-          _ExternalData_arg("${target}" "${piece}" "${data}" file)
+          _ExternalData_arg("${target}" "${piece}" "${CMAKE_MATCH_1}" file)
           set(outArg "${outArg}${file}")
         else()
           # No replacement needed for this piece.
@@ -428,10 +427,9 @@ function(_ExternalData_arg target arg options var_file)
   set(associated_files "")
   set(associated_regex "")
   foreach(opt ${options})
-    if("x${opt}" MATCHES "^xREGEX:[^:/]+$")
-      # Regular expression to match associated files.
-      string(REGEX REPLACE "^REGEX:" "" regex "${opt}")
-      list(APPEND associated_regex "${regex}")
+    # Regular expression to match associated files.
+    if("x${opt}" MATCHES "^xREGEX:([^:/]+)$")
+      list(APPEND associated_regex "${CMAKE_MATCH_1}")
     elseif(opt STREQUAL ":")
       # Activate series matching.
       set(series_option "${opt}")

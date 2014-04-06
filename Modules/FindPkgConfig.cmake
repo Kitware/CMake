@@ -277,10 +277,10 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       set(_pkg_check_modules_exist_query)
 
       # check whether version is given
-      if (_pkg_check_modules_pkg MATCHES ".*(>=|=|<=).*")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\1" _pkg_check_modules_pkg_name "${_pkg_check_modules_pkg}")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\2" _pkg_check_modules_pkg_op   "${_pkg_check_modules_pkg}")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\3" _pkg_check_modules_pkg_ver  "${_pkg_check_modules_pkg}")
+      if (_pkg_check_modules_pkg MATCHES "(.*[^><])(>=|=|<=)(.*)")
+        set(_pkg_check_modules_pkg_name "${CMAKE_MATCH_1}")
+        set(_pkg_check_modules_pkg_op "${CMAKE_MATCH_2}")
+        set(_pkg_check_modules_pkg_ver "${CMAKE_MATCH_3}")
       else()
         set(_pkg_check_modules_pkg_name "${_pkg_check_modules_pkg}")
         set(_pkg_check_modules_pkg_op)
