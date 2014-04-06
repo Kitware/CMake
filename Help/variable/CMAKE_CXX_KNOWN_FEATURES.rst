@@ -127,6 +127,11 @@ The features known to this version of CMake are:
 
   .. _N2657: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2657.htm
 
+``cxx_long_long_type``
+  ``long long`` type, as defined in N1811_.
+
+  .. _N1811: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1811.pdf
+
 ``cxx_noexcept``
   Exception specifications, as defined in N3050_.
 

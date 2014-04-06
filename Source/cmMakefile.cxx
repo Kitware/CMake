@@ -65,6 +65,7 @@
   F(cxx_inline_namespaces) \
   F(cxx_lambdas) \
   F(cxx_local_type_template_args) \
+  F(cxx_long_long_type) \
   F(cxx_noexcept) \
   F(cxx_nonstatic_member_init) \
   F(cxx_nullptr) \
