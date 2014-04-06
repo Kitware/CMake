@@ -56,6 +56,7 @@
   F(cxx_deleted_functions) \
   F(cxx_enum_forward_declarations) \
   F(cxx_explicit_conversions) \
+  F(cxx_extended_friend_declarations) \
   F(cxx_extern_templates) \
   F(cxx_final) \
   F(cxx_generalized_initializers) \

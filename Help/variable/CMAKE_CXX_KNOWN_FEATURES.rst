@@ -82,6 +82,11 @@ The features known to this version of CMake are:
 
   .. _N2437: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2437.pdf
 
+``cxx_extended_friend_declarations``
+  Extended friend declarations, as defined in N1791_.
+
+  .. _N1791: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1791.pdf
+
 ``cxx_extern_templates``
   Extern templates, as defined in N1987_.
 
