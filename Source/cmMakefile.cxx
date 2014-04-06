@@ -59,6 +59,7 @@
   F(cxx_extended_friend_declarations) \
   F(cxx_extern_templates) \
   F(cxx_final) \
+  F(cxx_func_identifier) \
   F(cxx_generalized_initializers) \
   F(cxx_inheriting_constructors) \
   F(cxx_inline_namespaces) \

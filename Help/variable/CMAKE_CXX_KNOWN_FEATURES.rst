@@ -97,6 +97,11 @@ The features known to this version of CMake are:
 
   .. _N2928: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2009/n2928.htm
 
+``cxx_func_identifier``
+  Predefined ``__func__`` identifier, as defined in N2340_.
+
+  .. _N2340: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2340.htm
+
 ``cxx_generalized_initializers``
   Initializer lists, as defined in N2672_.
 
