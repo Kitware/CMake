@@ -259,7 +259,7 @@ if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
       OUTPUT_VARIABLE CPACK_DEB_INSTALL_FILES)
 
     # Convert to CMake list
-    string(REGEX REPLACE "\n" ";" CPACK_DEB_INSTALL_FILES ${CPACK_DEB_INSTALL_FILES})
+    string(REPLACE "\n" ";" CPACK_DEB_INSTALL_FILES ${CPACK_DEB_INSTALL_FILES})
 
     # Only dynamically linked ELF files are included
     # Extract only file name infront of ":"

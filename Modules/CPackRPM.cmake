@@ -384,7 +384,7 @@ if(CPACK_RPM_PACKAGE_DEBUG)
                     OUTPUT_VARIABLE _TMP_LSB_RELEASE_OUTPUT
                     ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    string(REGEX REPLACE "\n" ", "
+    string(REPLACE "\n" ", "
            LSB_RELEASE_OUTPUT
            ${_TMP_LSB_RELEASE_OUTPUT})
   else ()

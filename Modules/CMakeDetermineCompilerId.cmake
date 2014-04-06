@@ -27,7 +27,7 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   else()
     set(CMAKE_${lang}_COMPILER_ID_FLAGS $ENV{${flagvar}})
   endif()
-  string(REGEX REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
+  string(REPLACE " " ";" CMAKE_${lang}_COMPILER_ID_FLAGS_LIST "${CMAKE_${lang}_COMPILER_ID_FLAGS}")
 
   # Compute the directory in which to run the test.
   set(CMAKE_${lang}_COMPILER_ID_DIR ${CMAKE_PLATFORM_INFO_DIR}/CompilerId${lang})

@@ -39,9 +39,8 @@ file(READ ${input_file} file_text)
 
 if (${file_text} MATCHES ".+")
 
-  # Remember, four backslashes is escaped to one backslash in the string.
-  string(REGEX REPLACE ";" "\\\\;" file_text ${file_text})
-  string(REGEX REPLACE "\ncode" ";code" file_text ${file_text})
+  string(REPLACE ";" "\\;" file_text ${file_text})
+  string(REPLACE "\ncode" ";code" file_text ${file_text})
 
   list(LENGTH file_text len)
 

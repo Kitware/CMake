@@ -162,7 +162,7 @@ macro( _HDF5_parse_compile_line
     )
     foreach( IPATH ${include_path_flags} )
         string( REGEX REPLACE "^-I" "" IPATH ${IPATH} )
-        string( REGEX REPLACE "//" "/" IPATH ${IPATH} )
+        string( REPLACE "//" "/" IPATH ${IPATH} )
         list( APPEND ${include_paths} ${IPATH} )
     endforeach()
 
@@ -179,7 +179,7 @@ macro( _HDF5_parse_compile_line
 
     foreach( LPATH ${library_path_flags} )
         string( REGEX REPLACE "^-L" "" LPATH ${LPATH} )
-        string( REGEX REPLACE "//" "/" LPATH ${LPATH} )
+        string( REPLACE "//" "/" LPATH ${LPATH} )
         list( APPEND ${library_paths} ${LPATH} )
     endforeach()
 

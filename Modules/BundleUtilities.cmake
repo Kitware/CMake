@@ -235,8 +235,8 @@ function(get_bundle_main_executable bundle result_var)
     #
     set(eol_char "E")
     file(READ "${bundle}/Contents/Info.plist" info_plist)
-    string(REGEX REPLACE ";" "\\\\;" info_plist "${info_plist}")
-    string(REGEX REPLACE "\n" "${eol_char};" info_plist "${info_plist}")
+    string(REPLACE ";" "\\;" info_plist "${info_plist}")
+    string(REPLACE "\n" "${eol_char};" info_plist "${info_plist}")
 
     # Scan the lines for "<key>CFBundleExecutable</key>" - the line after that
     # is the name of the main executable.
@@ -394,7 +394,7 @@ function(get_item_key item key_var)
   if(WIN32)
     string(TOLOWER "${item_name}" item_name)
   endif()
-  string(REGEX REPLACE "\\." "_" ${key_var} "${item_name}")
+  string(REPLACE "." "_" ${key_var} "${item_name}")
   set(${key_var} ${${key_var}} PARENT_SCOPE)
 endfunction()
 
