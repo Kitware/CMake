@@ -69,6 +69,7 @@
   F(cxx_rvalue_references) \
   F(cxx_static_assert) \
   F(cxx_strong_enums) \
+  F(cxx_thread_local) \
   F(cxx_trailing_return_types) \
   F(cxx_unicode_literals) \
   F(cxx_uniform_initialization) \

@@ -147,6 +147,11 @@ The features known to this version of CMake are:
 
   .. _N2347: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2347.pdf
 
+``cxx_thread_local``
+  Thread-local variables, as defined in N2659_.
+
+  .. _N2659: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2659.htm
+
 ``cxx_trailing_return_types``
   Automatic function return type, as defined in N2541_.
 

@@ -10,6 +10,7 @@ set(_cmake_feature_test_cxx_alignas "${GNU48_CXX11}")
 set(_cmake_feature_test_cxx_alignof "${GNU48_CXX11}")
 set(_cmake_feature_test_cxx_attributes "${GNU48_CXX11}")
 set(_cmake_feature_test_cxx_inheriting_constructors "${GNU48_CXX11}")
+set(_cmake_feature_test_cxx_thread_local "${GNU48_CXX11}")
 # TODO: Should be supported by GNU 4.7
 set(GNU47_CXX11 "${_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_alias_templates "${GNU47_CXX11}")
