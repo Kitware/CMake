@@ -32,7 +32,7 @@ macro(cmake_record_cxx_compile_features)
     endif()
   endmacro()
 
-  if (UNIX AND NOT APPLE AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+  if (UNIX AND NOT APPLE AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
     _get_gcc_features(c++11 CMAKE_CXX11_COMPILE_FEATURES)
     _get_gcc_features(c++98 CMAKE_CXX98_COMPILE_FEATURES)
   else()
