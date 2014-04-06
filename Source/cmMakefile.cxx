@@ -57,6 +57,7 @@
   F(cxx_final) \
   F(cxx_generalized_initializers) \
   F(cxx_inheriting_constructors) \
+  F(cxx_inline_namespaces) \
   F(cxx_lambdas) \
   F(cxx_noexcept) \
   F(cxx_nonstatic_member_init) \
