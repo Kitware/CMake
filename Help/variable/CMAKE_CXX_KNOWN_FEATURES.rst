@@ -137,6 +137,11 @@ The features known to this version of CMake are:
 
   .. _N2118: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n2118.html
 
+``cxx_sizeof_member``
+  Size of non-static data members, as defined in N2253_.
+
+  .. _N2253: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2253.html
+
 ``cxx_static_assert``
   Static assert, as defined in N1720_.
 

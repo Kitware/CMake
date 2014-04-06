@@ -67,6 +67,7 @@
   F(cxx_raw_string_literals) \
   F(cxx_reference_qualified_functions) \
   F(cxx_rvalue_references) \
+  F(cxx_sizeof_member) \
   F(cxx_static_assert) \
   F(cxx_strong_enums) \
   F(cxx_thread_local) \
