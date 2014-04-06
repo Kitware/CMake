@@ -49,6 +49,7 @@
   F(cxx_auto_type) \
   F(cxx_constexpr) \
   F(cxx_decltype) \
+  F(cxx_decltype_incomplete_return_types) \
   F(cxx_defaulted_functions) \
   F(cxx_delegating_constructors) \
   F(cxx_deleted_functions) \

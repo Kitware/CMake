@@ -42,6 +42,11 @@ The features known to this version of CMake are:
 
   .. _N2235: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2235.pdf
 
+``cxx_decltype_incomplete_return_types``
+  Decltype on incomplete return types, as defined in N3276_.
+
+  .. _N3276 : http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3276.pdf
+
 ``cxx_decltype``
   Decltype, as defined in N2343_.
 
