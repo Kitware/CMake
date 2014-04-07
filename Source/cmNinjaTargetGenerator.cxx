@@ -494,6 +494,9 @@ cmNinjaTargetGenerator
      {
      cmCustomCommand const* cc = (*si)->GetCustomCommand();
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
+     // Record the custom commands for this target. The container is used
+     // in WriteObjectBuildStatement when called in a loop below.
+     this->CustomCommands.push_back((*si)->GetCustomCommand());
      }
   std::vector<cmSourceFile const*> headerSources;
   this->GeneratorTarget->GetHeaderSources(headerSources, config);
@@ -565,14 +568,11 @@ cmNinjaTargetGenerator
   }
 
   // Add order-only dependencies on custom command outputs.
-  std::vector<cmSourceFile const*> customCommands;
-  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  this->GeneratorTarget->GetCustomCommands(customCommands, config);
-  for(std::vector<cmSourceFile const*>::const_iterator
-        si = customCommands.begin();
-      si != customCommands.end(); ++si)
+  for(std::vector<cmCustomCommand const*>::const_iterator
+        cci = this->CustomCommands.begin();
+      cci != this->CustomCommands.end(); ++cci)
     {
-    cmCustomCommand const* cc = (*si)->GetCustomCommand();
+    cmCustomCommand const* cc = *cci;
     cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
                                  this->GetMakefile());
     const std::vector<std::string>& ccoutputs = ccg.GetOutputs();

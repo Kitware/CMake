@@ -135,9 +135,6 @@ public:
   /**
    * Get the list of the source files used by this target
    */
-  void GetSourceFiles(std::vector<std::string> &files,
-                      const std::string& config,
-                      cmTarget const* head = 0) const;
   void GetSourceFiles(std::vector<cmSourceFile*> &files,
                       const std::string& config,
                       cmTarget const* head = 0) const;
@@ -683,6 +680,9 @@ private:
                                        const std::string& config,
                                        bool contentOnly) const;
 
+  void GetSourceFiles(std::vector<std::string> &files,
+                      const std::string& config,
+                      cmTarget const* head = 0) const;
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -751,6 +751,8 @@ private:
                                           cmTarget const* head) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc,
                           cmTarget const* head) const;
+
+  std::string ProcessSourceItemCMP0049(const std::string& s);
 
   void ClearLinkMaps();
 

@@ -153,6 +153,7 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+  std::vector<cmCustomCommand const*> CustomCommands;
 
   typedef std::map<std::string, std::string> LanguageFlagMap;
   LanguageFlagMap LanguageFlags;
