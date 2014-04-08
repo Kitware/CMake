@@ -784,6 +784,8 @@ private:
                             std::string const& suffix,
                             std::string const& name,
                             const char* version) const;
+
+  mutable bool LinkImplementationLanguageIsContextDependent;
 };
 
 typedef std::map<std::string,cmTarget> cmTargets;
