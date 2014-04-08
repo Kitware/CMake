@@ -610,6 +610,7 @@ private:
   std::set<cmSourceFile*> SourcesQueued;
   typedef std::map<std::string, cmSourceFile*> NameMapType;
   NameMapType NameMap;
+  std::vector<std::string> NewSources;
 
   void QueueSource(cmSourceFile* sf);
   void FollowName(std::string const& name);
@@ -698,6 +699,8 @@ void cmTargetTraceDependencies::Trace()
       }
     }
   this->CurrentEntry = 0;
+
+  this->Target->AddTracedSources(this->NewSources);
 }
 
 //----------------------------------------------------------------------------
@@ -707,8 +710,8 @@ void cmTargetTraceDependencies::QueueSource(cmSourceFile* sf)
     {
     this->SourceQueue.push(sf);
 
-    // Make sure this file is in the target.
-    this->Target->AddSource(sf->GetFullPath());
+    // Make sure this file is in the target at the end.
+    this->NewSources.push_back(sf->GetFullPath());
     }
 }
 

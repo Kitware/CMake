@@ -850,6 +850,33 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
+{
+  std::string srcFiles;
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator i = srcs.begin();
+      i != srcs.end(); ++i)
+    {
+    std::string filename = *i;
+    srcFiles += sep;
+    srcFiles += filename;
+    sep = ";";
+    }
+  if (!srcFiles.empty())
+    {
+    this->Internal->SourceFilesMap.clear();
+    this->LinkImplementationLanguageIsContextDependent = true;
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
+    cge->SetEvaluateForBuildsystem(true);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::AddSources(std::vector<std::string> const& srcs)
 {
   std::string srcFiles;
