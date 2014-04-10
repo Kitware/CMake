@@ -2,15 +2,15 @@
 # CMakeDetermineVSServicePack
 # ---------------------------
 #
+# Deprecated.  Do not use.
+#
+# The functionality of this module has been superseded by the
+# :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable that contains
+# the compiler version number.
+#
 # Determine the Visual Studio service pack of the 'cl' in use.
 #
-# The functionality of this module has been superseded by the platform
-# variable CMAKE_<LANG>_COMPILER_VERSION that contains the compiler
-# version number.
-#
-# Usage:
-#
-# ::
+# Usage::
 #
 #   if(MSVC)
 #     include(CMakeDetermineVSServicePack)
@@ -21,14 +21,12 @@
 #   endif()
 #
 # Function DetermineVSServicePack sets the given variable to one of the
-# following values or an empty string if unknown:
-#
-# ::
+# following values or an empty string if unknown::
 #
 #   vc80, vc80sp1
 #   vc90, vc90sp1
 #   vc100, vc100sp1
-#   vc110, vc110sp1, vc110sp2
+#   vc110, vc110sp1, vc110sp2, vc110sp3
 
 #=============================================================================
 # Copyright 2009-2013 Kitware, Inc.
