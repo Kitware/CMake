@@ -13,7 +13,7 @@
 #  License text for the above reference.)
 
 
-# This file sets the basic flags for the Fortran language in CMake.
+# This file sets the basic flags for the Windows Resource Compiler.
 # It also loads the available platform file for the system-compiler
 # if it exists.
 
@@ -30,7 +30,7 @@ include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 
 
 set (CMAKE_RC_FLAGS "$ENV{RCFLAGS} ${CMAKE_RC_FLAGS_INIT}" CACHE STRING
-     "Flags for Fortran compiler.")
+     "Flags for Windows Resource Compiler.")
 
 # These are the only types of flags that should be passed to the rc
 # command, if COMPILE_FLAGS is used on a target this will be used
