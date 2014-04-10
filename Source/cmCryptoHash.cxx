@@ -38,7 +38,7 @@ cmsys::auto_ptr<cmCryptoHash> cmCryptoHash::New(const char* algo)
 std::string cmCryptoHash::HashString(const std::string& input)
 {
   this->Initialize();
-  this->Append(reinterpret_cast<unsigned char const*>(&input[0]),
+  this->Append(reinterpret_cast<unsigned char const*>(input.c_str()),
                static_cast<int>(input.size()));
   return this->Finalize();
 }
