@@ -299,6 +299,13 @@ IF(NOT CMAKE_COMPILER_IS_GNUCXX)
   ENDIF(CMAKE_SYSTEM MATCHES "OSF1-V.*")
   IF(CMAKE_SYSTEM MATCHES "HP-UX")
     SET(KWSYS_PLATFORM_CXX_TEST_EXTRA_FLAGS "+p")
+    IF(CMAKE_CXX_COMPILER_ID MATCHES "HP")
+      # it is known that version 3.85 fails and 6.25 works without these flags
+      IF(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4)
+        # use new C++ library and improved template support
+        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA +hpxstd98")
+      ENDIF()
+    ENDIF()
   ENDIF(CMAKE_SYSTEM MATCHES "HP-UX")
 ENDIF(NOT CMAKE_COMPILER_IS_GNUCXX)
 
