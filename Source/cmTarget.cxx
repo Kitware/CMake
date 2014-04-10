@@ -229,6 +229,7 @@ cmTarget::cmTarget()
   this->DebugCompileOptionsDone = false;
   this->DebugCompileDefinitionsDone = false;
   this->DebugSourcesDone = false;
+  this->LinkImplementationLanguageIsContextDependent = true;
 }
 
 //----------------------------------------------------------------------------
@@ -461,6 +462,7 @@ void cmTarget::FinishConfigure()
 //----------------------------------------------------------------------------
 void cmTarget::ClearLinkMaps()
 {
+  this->LinkImplementationLanguageIsContextDependent = true;
   this->Internal->LinkImplMap.clear();
   this->Internal->LinkInterfaceMap.clear();
   this->Internal->LinkClosureMap.clear();
@@ -552,7 +554,7 @@ bool cmTarget::IsBundleOnApple() const
 }
 
 //----------------------------------------------------------------------------
-static void processSources(cmTarget const* tgt,
+static bool processSources(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &srcs,
       std::set<std::string> &uniqueSrcs,
@@ -561,6 +563,8 @@ static void processSources(cmTarget const* tgt,
       std::string const& config, bool debugSources)
 {
   cmMakefile *mf = tgt->GetMakefile();
+
+  bool contextDependent = false;
 
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
@@ -576,8 +580,12 @@ static void processSources(cmTarget const* tgt,
                                                 tgt,
                                                 dagChecker),
                                       entrySources);
-      if (mf->IsGeneratingBuildSystem()
-          && !(*it)->ge->GetHadContextSensitiveCondition())
+
+      if ((*it)->ge->GetHadContextSensitiveCondition())
+        {
+        contextDependent = true;
+        }
+      else if (mf->IsGeneratingBuildSystem())
         {
         cacheSources = true;
         }
@@ -598,7 +606,7 @@ static void processSources(cmTarget const* tgt,
             cm->IssueMessage(cmake::FATAL_ERROR, e,
                             tgt->GetBacktrace());
             }
-          return;
+          return contextDependent;
           }
         }
       if (cacheSources)
@@ -629,6 +637,7 @@ static void processSources(cmTarget const* tgt,
                             + usedSources, (*it)->ge->GetBacktrace());
       }
     }
+  return contextDependent;
 }
 
 //----------------------------------------------------------------------------
@@ -664,7 +673,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                                               "SOURCES", 0, 0);
 
   std::set<std::string> uniqueSrcs;
-  processSources(this,
+  bool contextDependentDirectSources = processSources(this,
                  this->Internal->SourceEntries,
                  files,
                  uniqueSrcs,
@@ -716,7 +725,8 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
       }
     }
 
-  processSources(this,
+    std::vector<std::string>::size_type numFilesBefore = files.size();
+    bool contextDependentInterfaceSources = processSources(this,
     this->Internal->CachedLinkInterfaceSourcesEntries[config],
                             files,
                             uniqueSrcs,
@@ -724,6 +734,12 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                             head,
                             config,
                             debugSources);
+
+  if (!contextDependentDirectSources
+      && !(contextDependentInterfaceSources && numFilesBefore < files.size()))
+    {
+    this->LinkImplementationLanguageIsContextDependent = false;
+    }
 
   if (!this->Makefile->IsGeneratingBuildSystem())
     {
@@ -801,6 +817,12 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
   // Lookup any existing link implementation for this configuration.
   TargetConfigPair key(head, cmSystemTools::UpperCase(config));
 
+  if(!this->LinkImplementationLanguageIsContextDependent)
+    {
+    files = this->Internal->SourceFilesMap.begin()->second;
+    return;
+    }
+
   cmTargetInternals::SourceFilesMapType::iterator
     it = this->Internal->SourceFilesMap.find(key);
   if(it != this->Internal->SourceFilesMap.end())
@@ -824,6 +846,33 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
         }
       }
     this->Internal->SourceFilesMap[key] = files;
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
+{
+  std::string srcFiles;
+  const char* sep = "";
+  for(std::vector<std::string>::const_iterator i = srcs.begin();
+      i != srcs.end(); ++i)
+    {
+    std::string filename = *i;
+    srcFiles += sep;
+    srcFiles += filename;
+    sep = ";";
+    }
+  if (!srcFiles.empty())
+    {
+    this->Internal->SourceFilesMap.clear();
+    this->LinkImplementationLanguageIsContextDependent = true;
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(srcFiles);
+    cge->SetEvaluateForBuildsystem(true);
+    this->Internal->SourceEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
     }
 }
 
@@ -854,6 +903,7 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
   if (!srcFiles.empty())
     {
     this->Internal->SourceFilesMap.clear();
+    this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
@@ -989,6 +1039,7 @@ cmSourceFile* cmTarget::AddSource(const std::string& src)
                                       == this->Internal->SourceEntries.end())
     {
     this->Internal->SourceFilesMap.clear();
+    this->LinkImplementationLanguageIsContextDependent = true;
     cmListFileBacktrace lfbt;
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
