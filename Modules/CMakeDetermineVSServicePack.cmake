@@ -43,6 +43,13 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+if(NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 2.8.8)
+  message(DEPRECATION
+    "This module is deprecated and should not be used.  "
+    "Use the CMAKE_<LANG>_COMPILER_VERSION variable instead."
+    )
+endif()
+
 # [INTERNAL]
 # Please do not call this function directly
 function(_DetermineVSServicePackFromCompiler _OUT_VAR _cl_version)
