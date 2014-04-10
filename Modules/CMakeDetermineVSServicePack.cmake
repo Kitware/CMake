@@ -84,27 +84,14 @@ function(_DetermineVSServicePack_FastCheckVersionWithCompiler _SUCCESS_VAR  _VER
           OUTPUT_QUIET
         )
 
-      string(REGEX MATCH "Compiler Version [0-9]+.[0-9]+.[0-9]+.[0-9]+"
-        _cl_version "${_output}")
-
-      if(_cl_version)
-        string(REGEX MATCHALL "[0-9]+"
-            _cl_version_list "${_cl_version}")
-        list(GET _cl_version_list 0 _major)
-        list(GET _cl_version_list 1 _minor)
-        list(GET _cl_version_list 2 _patch)
-        list(GET _cl_version_list 3 _tweak)
-
+      if(_output MATCHES "Compiler Version (([0-9]+)\\.([0-9]+)\\.([0-9]+)(\\.([0-9]+))?)")
+        set(_cl_version ${CMAKE_MATCH_1})
+        set(_major ${CMAKE_MATCH_2})
+        set(_minor ${CMAKE_MATCH_3})
         if("${_major}${_minor}" STREQUAL "${MSVC_VERSION}")
-          set(_cl_version ${_major}.${_minor}.${_patch}.${_tweak})
-        else()
-          unset(_cl_version)
-        endif()
-      endif()
-
-      if(_cl_version)
           set(${_SUCCESS_VAR} true PARENT_SCOPE)
           set(${_VERSION_VAR} ${_cl_version} PARENT_SCOPE)
+        endif()
       endif()
     endif()
 endfunction()
@@ -125,20 +112,9 @@ function(_DetermineVSServicePack_CheckVersionWithTryCompile _SUCCESS_VAR  _VERSI
 
     file(REMOVE "${CMAKE_BINARY_DIR}/return0.cc")
 
-    string(REGEX MATCH "Compiler Version [0-9]+.[0-9]+.[0-9]+.[0-9]+"
-      _cl_version "${_output}")
-
-    if(_cl_version)
-      string(REGEX MATCHALL "[0-9]+"
-          _cl_version_list "${_cl_version}")
-
-      list(GET _cl_version_list 0 _major)
-      list(GET _cl_version_list 1 _minor)
-      list(GET _cl_version_list 2 _patch)
-      list(GET _cl_version_list 3 _tweak)
-
+    if(_output MATCHES "Compiler Version (([0-9]+)\\.([0-9]+)\\.([0-9]+)(\\.([0-9]+))?)")
       set(${_SUCCESS_VAR} true PARENT_SCOPE)
-      set(${_VERSION_VAR} ${_major}.${_minor}.${_patch}.${_tweak} PARENT_SCOPE)
+      set(${_VERSION_VAR} "${CMAKE_MATCH_1}" PARENT_SCOPE)
     endif()
 endfunction()
 
