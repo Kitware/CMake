@@ -1616,8 +1616,8 @@ long copy_data(struct archive *ar, struct archive *aw)
       return (r);
       }
     }
-#if !defined(__clang__)
-  return r; /* this should not happen but it silences a warning */
+#if !defined(__clang__) && !defined(__HP_aCC)
+  return r; /* this should not happen but it quiets some compilers */
 #endif
 }
 
