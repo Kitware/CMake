@@ -19,9 +19,10 @@
 
 # make sure we don't use CMAKE_BASE_NAME from somewhere else
 set(CMAKE_BASE_NAME)
-get_filename_component(CMAKE_BASE_NAME ${CMAKE_RC_COMPILER} NAME_WE)
-if("${CMAKE_BASE_NAME}" MATCHES "windres")
-  set(CMAKE_BASE_NAME "windres")
+if(CMAKE_RC_COMPILER MATCHES "windres[^/]*$")
+ set(CMAKE_BASE_NAME "windres")
+else()
+ get_filename_component(CMAKE_BASE_NAME ${CMAKE_RC_COMPILER} NAME_WE)
 endif()
 set(CMAKE_SYSTEM_AND_RC_COMPILER_INFO_FILE
   ${CMAKE_ROOT}/Modules/Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME}.cmake)
