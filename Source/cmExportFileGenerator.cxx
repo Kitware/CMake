@@ -279,7 +279,43 @@ static bool checkInterfaceDirs(const std::string &prepro,
       }
     if (isSubDirectory(li->c_str(), installDir))
       {
-      continue;
+      // The include directory is inside the install tree.  If the
+      // install tree is not inside the source tree or build tree then
+      // fall through to the checks below that the include directory is not
+      // also inside the source tree or build tree.
+      bool shouldContinue =
+          isSubDirectory(installDir, topBinaryDir)
+        || isSubDirectory(installDir, topSourceDir);
+
+      if (!shouldContinue)
+        {
+        switch(target->GetPolicyStatusCMP0052())
+          {
+          case cmPolicies::WARN:
+            {
+            cmOStringStream s;
+            s << target->GetMakefile()->GetPolicies()
+                      ->GetPolicyWarning(cmPolicies::CMP0052) << "\n";
+            s << "Directory:\n    \"" << *li << "\"\nin "
+              "INTERFACE_INCLUDE_DIRECTORIES of target \""
+              << target->GetName() << "\" is a subdirectory of the install "
+              "directory:\n    \"" << installDir << "\"";
+            target->GetMakefile()->IssueMessage(cmake::AUTHOR_WARNING,
+                                                s.str());
+            }
+          case cmPolicies::OLD:
+            shouldContinue = true;
+            break;
+          case cmPolicies::REQUIRED_ALWAYS:
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::NEW:
+            break;
+          }
+        }
+      if (shouldContinue)
+        {
+        continue;
+        }
       }
     if (isSubDirectory(li->c_str(), topBinaryDir))
       {

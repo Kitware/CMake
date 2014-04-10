@@ -25,7 +25,9 @@ function(run_cmake test)
       unset(expect_std${o})
     endif()
   endforeach()
-  set(RunCMake_TEST_SOURCE_DIR "${top_src}")
+  if (NOT RunCMake_TEST_SOURCE_DIR)
+    set(RunCMake_TEST_SOURCE_DIR "${top_src}")
+  endif()
   if(NOT RunCMake_TEST_BINARY_DIR)
     set(RunCMake_TEST_BINARY_DIR "${top_bin}/${test}-build")
   endif()
@@ -35,6 +37,9 @@ function(run_cmake test)
   file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
   if(NOT DEFINED RunCMake_TEST_OPTIONS)
     set(RunCMake_TEST_OPTIONS "")
+  endif()
+  if (NOT RunCMake_TEST_FILE)
+    set(RunCMake_TEST_FILE "${test}")
   endif()
   if(APPLE)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
@@ -52,7 +57,7 @@ function(run_cmake test)
       COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
                 -G "${RunCMake_GENERATOR}"
                 -T "${RunCMake_GENERATOR_TOOLSET}"
-                -DRunCMake_TEST=${test}
+                -DRunCMake_TEST=${RunCMake_TEST_FILE}
                 --no-warn-unused-cli
                 ${RunCMake_TEST_OPTIONS}
       WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"

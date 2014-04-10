@@ -1,0 +1,5 @@
+CMP0052
+-------
+
+* Policy :policy:`CMP0052` introduced to control directories in the
+  :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` of exported targets.
