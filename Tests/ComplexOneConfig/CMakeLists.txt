@@ -36,7 +36,7 @@ ASSERT(Complex_BINARY_DIR "The PROJECT command is broken")
 #
 macro(TEST_ARGC value1 value2)
   add_definitions(${value1} ${value2})
-  if (${ARGC} MATCHES 4)
+  if (${ARGC} EQUAL 4)
     add_definitions(${ARGV2} ${ARGV3})
   endif ()
 endmacro()
