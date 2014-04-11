@@ -439,12 +439,18 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   std::string frameworkPath;
   std::string linkPath;
   cmGeneratorTarget* gtarget = this->GetGeneratorTarget();
+
+  std::string createRule = "CMAKE_";
+  createRule += this->TargetLinkLanguage;
+  createRule += gtarget->GetCreateRuleVariable();
+  bool useWatcomQuote = mf->IsOn(createRule+"_USE_WATCOM_QUOTE");
   this->GetLocalGenerator()->GetTargetFlags(vars["LINK_LIBRARIES"],
                                             vars["FLAGS"],
                                             vars["LINK_FLAGS"],
                                             frameworkPath,
                                             linkPath,
-                                            gtarget);
+                                            gtarget,
+                                            useWatcomQuote);
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", this->GetTarget(), vars);
 

@@ -1826,14 +1826,16 @@ void
 cmMakefileTargetGenerator
 ::CreateLinkLibs(std::string& linkLibs, bool relink,
                  bool useResponseFile,
-                 std::vector<std::string>& makefile_depends)
+                 std::vector<std::string>& makefile_depends,
+                 bool useWatcomQuote)
 {
   std::string frameworkPath;
   std::string linkPath;
   this->LocalGenerator
     ->OutputLinkLibraries(linkLibs, frameworkPath, linkPath,
                           *this->GeneratorTarget, relink,
-                          useResponseFile);
+                          useResponseFile,
+                          useWatcomQuote);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
   if(useResponseFile)

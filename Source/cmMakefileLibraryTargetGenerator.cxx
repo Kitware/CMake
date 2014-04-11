@@ -458,8 +458,6 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                              this->Target);
     }
 
-  bool useWatcomQuote = this->Makefile->IsOn(linkRuleVar+"_USE_WATCOM_QUOTE");
-
   // Determine whether a link script will be used.
   bool useLinkScript = this->GlobalGenerator->GetUseLinkScript();
 
@@ -541,6 +539,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   // Expand the rule variables.
   std::vector<std::string> real_link_commands;
   {
+  bool useWatcomQuote = this->Makefile->IsOn(linkRuleVar+"_USE_WATCOM_QUOTE");
+
   // Set path conversion for link script shells.
   this->LocalGenerator->SetLinkScriptShell(useLinkScript);
 
@@ -548,7 +548,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string linkLibs;
   if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
     {
-    this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends);
+    this->CreateLinkLibs(linkLibs, relink, useResponseFileForLibs, depends,
+                         useWatcomQuote);
     }
 
   // Construct object file lists that may be needed to expand the
@@ -587,7 +588,12 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);
   vars.ObjectDir = objectDir.c_str();
-  vars.Target = targetOutPathReal.c_str();
+  cmLocalGenerator::OutputFormat output = (useWatcomQuote) ?
+    cmLocalGenerator::WATCOMQUOTE : cmLocalGenerator::SHELL;
+  std::string target = this->Convert(targetFullPathReal,
+                                     cmLocalGenerator::START_OUTPUT,
+                                     output);
+  vars.Target = target.c_str();
   vars.LinkLibraries = linkLibs.c_str();
   vars.ObjectsQuoted = buildObjs.c_str();
   if (this->Target->HasSOName(this->ConfigName))
