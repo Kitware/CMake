@@ -48,7 +48,7 @@ else()
     set(CMAKE_C_COMPILER_INIT NOTFOUND)
 
     # prefer the environment variable CC
-    if($ENV{CC} MATCHES ".+")
+    if(NOT $ENV{CC} STREQUAL "")
       get_filename_component(CMAKE_C_COMPILER_INIT $ENV{CC} PROGRAM PROGRAM_ARGS CMAKE_C_FLAGS_ENV_INIT)
       if(CMAKE_C_FLAGS_ENV_INIT)
         set(CMAKE_C_COMPILER_ARG1 "${CMAKE_C_FLAGS_ENV_INIT}" CACHE STRING "First argument to C compiler")

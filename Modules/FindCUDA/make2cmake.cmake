@@ -37,7 +37,7 @@
 
 file(READ ${input_file} depend_text)
 
-if (${depend_text} MATCHES ".+")
+if (NOT "${depend_text}" STREQUAL "")
 
   # message("FOUND DEPENDS")
 

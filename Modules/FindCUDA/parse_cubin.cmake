@@ -37,7 +37,7 @@
 
 file(READ ${input_file} file_text)
 
-if (${file_text} MATCHES ".+")
+if (NOT "${file_text}" STREQUAL "")
 
   string(REPLACE ";" "\\;" file_text ${file_text})
   string(REPLACE "\ncode" ";code" file_text ${file_text})

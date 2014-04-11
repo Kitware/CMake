@@ -47,7 +47,7 @@ else()
     set(CMAKE_CXX_COMPILER_INIT NOTFOUND)
 
     # prefer the environment variable CXX
-    if($ENV{CXX} MATCHES ".+")
+    if(NOT $ENV{CXX} STREQUAL "")
       get_filename_component(CMAKE_CXX_COMPILER_INIT $ENV{CXX} PROGRAM PROGRAM_ARGS CMAKE_CXX_FLAGS_ENV_INIT)
       if(CMAKE_CXX_FLAGS_ENV_INIT)
         set(CMAKE_CXX_COMPILER_ARG1 "${CMAKE_CXX_FLAGS_ENV_INIT}" CACHE STRING "First argument to CXX compiler")
