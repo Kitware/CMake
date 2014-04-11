@@ -34,8 +34,7 @@
 #ifndef	_PACK_DEV_H
 #define	_PACK_DEV_H
 
-typedef	dev_t pack_t(int, u_long [], const char **);
-typedef unsigned long u_long;
+typedef	dev_t pack_t(int, unsigned long [], const char **);
 
 pack_t	*pack_find(const char *);
 pack_t	 pack_native;
