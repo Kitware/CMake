@@ -79,6 +79,11 @@ if(SPHINX_QTHELP)
     # https://codereview.qt-project.org/#change,82250 in Qt 4.
     COMMAND ${CMAKE_COMMAND} "-DCSS_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/_static"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/apply_qthelp_css_workaround.cmake"
+    # Workaround sphinx configurability:
+    # https://bitbucket.org/birkenfeld/sphinx/issue/1448/make-qthelp-more-configurable
+    COMMAND ${CMAKE_COMMAND} "-DQTHELP_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
+      "-DCMake_VERSION=${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}"
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/fixup_qthelp_names.cmake"
     COMMAND qcollectiongenerator ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
   )
 endif()
