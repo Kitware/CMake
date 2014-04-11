@@ -247,7 +247,7 @@ function(get_bundle_main_executable bundle result_var)
         break()
       endif()
 
-      if(line MATCHES "^.*<key>CFBundleExecutable</key>.*$")
+      if(line MATCHES "<key>CFBundleExecutable</key>")
         set(line_is_main_executable 1)
       endif()
     endforeach()
@@ -287,7 +287,7 @@ endfunction()
 function(get_dotapp_dir exe dotapp_dir_var)
   set(s "${exe}")
 
-  if(s MATCHES "^.*/.*\\.app/.*$")
+  if(s MATCHES "/.*\\.app/")
     # If there is a ".app" parent directory,
     # ascend until we hit it:
     #   (typical of a Mac bundle executable)

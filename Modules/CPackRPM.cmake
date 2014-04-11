@@ -397,7 +397,7 @@ endif()
 # to shut down warning about space in buildtree
 # some recent RPM version should support space in different places.
 # not checked [yet].
-if(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
+if(CPACK_TOPLEVEL_DIRECTORY MATCHES " ")
   message(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
 endif()
 

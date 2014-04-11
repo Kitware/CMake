@@ -312,7 +312,7 @@ else()
   if(CMAKE_ANSI_CFLAGS)
     set(VTK_REQUIRED_C_FLAGS "${VTK_REQUIRED_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
   endif()
-  if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+  if(CMAKE_SYSTEM MATCHES "OSF1-V")
      set(VTK_REQUIRED_CXX_FLAGS
          "${VTK_REQUIRED_CXX_FLAGS} -timplicit_local -no_implicit_include")
   endif()

@@ -183,7 +183,7 @@ endif ()
 
 
 #acml lapack
- if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
+ if (BLA_VENDOR MATCHES "ACML" OR BLA_VENDOR STREQUAL "All")
    if (BLAS_LIBRARIES MATCHES ".+acml.+")
      set (LAPACK_LIBRARIES ${BLAS_LIBRARIES})
    endif ()
@@ -233,7 +233,7 @@ if (BLA_VENDOR STREQUAL "Generic" OR
   endif ()
 endif ()
 #intel lapack
-if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
+if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
   if (NOT WIN32)
     set(LM "-lm")
   endif ()

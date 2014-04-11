@@ -1194,7 +1194,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   foreach(file ${ARGN})
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
-    if(${file} MATCHES ".*\\.cu$" AND NOT _is_header)
+    if(${file} MATCHES "\\.cu$" AND NOT _is_header)
 
       # Allow per source file overrides of the format.
       get_source_file_property(_cuda_source_format ${file} CUDA_SOURCE_PROPERTY_FORMAT)

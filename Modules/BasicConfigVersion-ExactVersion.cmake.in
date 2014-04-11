@@ -11,13 +11,13 @@
 
 set(PACKAGE_VERSION "@CVF_VERSION@")
 
-if("@CVF_VERSION@" MATCHES "^([0-9]+\\.[0-9]+\\.[0-9]+)\\..*") # strip the tweak version
+if("@CVF_VERSION@" MATCHES "^([0-9]+\\.[0-9]+\\.[0-9]+)\\.") # strip the tweak version
   set(CVF_VERSION_NO_TWEAK "${CMAKE_MATCH_1}")
 else()
   set(CVF_VERSION_NO_TWEAK "@CVF_VERSION@")
 endif()
 
-if("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+\\.[0-9]+\\.[0-9]+)\\..*") # strip the tweak version
+if("${PACKAGE_FIND_VERSION}" MATCHES "^([0-9]+\\.[0-9]+\\.[0-9]+)\\.") # strip the tweak version
   set(REQUESTED_VERSION_NO_TWEAK "${CMAKE_MATCH_1}")
 else()
   set(REQUESTED_VERSION_NO_TWEAK "${PACKAGE_FIND_VERSION}")

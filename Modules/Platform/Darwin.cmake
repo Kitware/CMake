@@ -203,7 +203,7 @@ endif()
 
 # Make sure the combination of SDK and Deployment Target are allowed
 if(CMAKE_OSX_DEPLOYMENT_TARGET)
-  if("${_CMAKE_OSX_SYSROOT_PATH}" MATCHES "^.*/MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk")
+  if("${_CMAKE_OSX_SYSROOT_PATH}" MATCHES "/MacOSX([0-9]+\\.[0-9]+)[^/]*\\.sdk")
     set(_sdk_ver "${CMAKE_MATCH_1}")
   elseif("${_CMAKE_OSX_SYSROOT_ORIG}" MATCHES "^macosx([0-9]+\\.[0-9]+)$")
     set(_sdk_ver "${CMAKE_MATCH_1}")

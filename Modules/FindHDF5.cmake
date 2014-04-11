@@ -253,7 +253,7 @@ if( NOT HDF5_FOUND )
         list( APPEND HDF5_DEFINITIONS ${HDF5_${LANGUAGE}_DEFINITIONS} )
 
         # find the HDF5 include directories
-        if(${LANGUAGE} MATCHES "Fortran.*")
+        if(${LANGUAGE} MATCHES "Fortran")
             set(HDF5_INCLUDE_FILENAME hdf5.mod)
         else()
             set(HDF5_INCLUDE_FILENAME hdf5.h)

@@ -184,7 +184,7 @@ if(SQUISH_CLIENT_EXECUTABLE)
   execute_process(COMMAND "${SQUISH_CLIENT_EXECUTABLE}" --version
                   OUTPUT_VARIABLE _squishVersionOutput
                   ERROR_QUIET )
-  if("${_squishVersionOutput}" MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+).*$")
+  if("${_squishVersionOutput}" MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+)")
     set(SQUISH_VERSION_MAJOR "${CMAKE_MATCH_1}")
     set(SQUISH_VERSION_MINOR "${CMAKE_MATCH_2}")
     set(SQUISH_VERSION_PATCH "${CMAKE_MATCH_3}")

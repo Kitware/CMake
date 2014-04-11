@@ -70,7 +70,7 @@ if(NOT 2.4 EQUAL 2.4)
   message(FATAL_ERROR "Failed: NOT 2.4 EQUAL 2.4")
 endif()
 
-if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
+if(CMAKE_SYSTEM MATCHES "OSF1-V")
   if(NOT CMAKE_COMPILER_IS_GNUCXX)
      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -timplicit_local -no_implicit_include ")
   endif()
