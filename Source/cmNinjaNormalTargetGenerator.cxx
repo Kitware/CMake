@@ -232,13 +232,11 @@ cmNinjaNormalTargetGenerator
     vars.LinkFlags = "$LINK_FLAGS";
 
     std::string langFlags;
-    if (targetType != cmTarget::EXECUTABLE) {
-      this->GetLocalGenerator()->AddLanguageFlags(langFlags,
-                                                  this->TargetLinkLanguage,
-                                                  this->GetConfigName());
-      langFlags += " $ARCH_FLAGS";
+    if (targetType != cmTarget::EXECUTABLE)
+      {
+      langFlags += "$LANGUAGE_COMPILE_FLAGS $ARCH_FLAGS";
       vars.LanguageCompileFlags = langFlags.c_str();
-    }
+      }
 
     // Rule for linking library/executable.
     std::vector<std::string> linkCmds = this->ComputeLinkCmd();
@@ -476,21 +474,22 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   // Compute architecture specific link flags.  Yes, these go into a different
   // variable for executables, probably due to a mistake made when duplicating
   // code between the Makefile executable and library generators.
-  std::string flags = (targetType == cmTarget::EXECUTABLE
-                               ? vars["FLAGS"]
-                               : vars["ARCH_FLAGS"]);
-  localGen.AddArchitectureFlags(flags,
-                                &genTarget,
-                                this->TargetLinkLanguage,
-                                cfgName);
   if (targetType == cmTarget::EXECUTABLE)
     {
-    vars["FLAGS"] = flags;
+    std::string t = vars["FLAGS"];
+    localGen.AddArchitectureFlags(t, &genTarget, TargetLinkLanguage, cfgName);
+    vars["FLAGS"] = t;
     }
   else
     {
-    vars["ARCH_FLAGS"] = flags;
+    std::string t = vars["ARCH_FLAGS"];
+    localGen.AddArchitectureFlags(t, &genTarget, TargetLinkLanguage, cfgName);
+    vars["ARCH_FLAGS"] = t;
+    t = "";
+    localGen.AddLanguageFlags(t, TargetLinkLanguage, cfgName);
+    vars["LANGUAGE_COMPILE_FLAGS"] = t;
     }
+
   if (target.HasSOName(cfgName))
     {
     vars["SONAME_FLAG"] = mf->GetSONameFlag(this->TargetLinkLanguage);
