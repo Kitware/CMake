@@ -7,3 +7,5 @@ if(RunCMake_GENERATOR MATCHES Xcode
 else()
   run_cmake(OriginDebug)
 endif()
+
+run_cmake(CMP0026-LOCATION)

@@ -647,6 +647,38 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
 
+  if (this->Makefile->GetGeneratorTargets().empty())
+    {
+    // At configure-time, this method can be called as part of getting the
+    // LOCATION property or to export() a file to be include()d.  However
+    // there is no cmGeneratorTarget at configure-time, so search the SOURCES
+    // for TARGET_OBJECTS instead for backwards compatibility with OLD
+    // behavior of CMP0024 and CMP0026 only.
+
+    typedef cmTargetInternals::TargetPropertyEntry
+                                TargetPropertyEntry;
+    for(std::vector<TargetPropertyEntry*>::const_iterator
+          i = this->Internal->SourceEntries.begin();
+        i != this->Internal->SourceEntries.end(); ++i)
+      {
+      std::string entry = (*i)->ge->GetInput();
+
+      std::vector<std::string> items;
+      cmSystemTools::ExpandListArgument(entry, items);
+      for (std::vector<std::string>::const_iterator
+          li = items.begin(); li != items.end(); ++li)
+        {
+        if(cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
+            (*li)[li->size() - 1] == '>')
+          {
+          continue;
+          }
+        files.push_back(*li);
+        }
+      }
+    return;
+    }
+
   std::vector<std::string> debugProperties;
   const char *debugProp =
               this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
@@ -5343,6 +5375,45 @@ bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
 }
 
 //----------------------------------------------------------------------------
+void
+cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
+{
+  // At configure-time, this method can be called as part of getting the
+  // LOCATION property or to export() a file to be include()d.  However
+  // there is no cmGeneratorTarget at configure-time, so search the SOURCES
+  // for TARGET_OBJECTS instead for backwards compatibility with OLD
+  // behavior of CMP0024 and CMP0026 only.
+  typedef cmTargetInternals::TargetPropertyEntry
+                              TargetPropertyEntry;
+  for(std::vector<TargetPropertyEntry*>::const_iterator
+        i = this->Internal->SourceEntries.begin();
+      i != this->Internal->SourceEntries.end(); ++i)
+    {
+    std::string entry = (*i)->ge->GetInput();
+
+    std::vector<std::string> files;
+    cmSystemTools::ExpandListArgument(entry, files);
+    for (std::vector<std::string>::const_iterator
+        li = files.begin(); li != files.end(); ++li)
+      {
+      if(cmHasLiteralPrefix(*li, "$<TARGET_OBJECTS:") &&
+          (*li)[li->size() - 1] == '>')
+        {
+        std::string objLibName = li->substr(17, li->size()-18);
+
+        if (cmGeneratorExpression::Find(objLibName) != std::string::npos)
+          {
+          continue;
+          }
+        cmTarget *objLib = this->Makefile->FindTargetToUse(objLibName.c_str());
+        assert(objLib);
+        objlibs.push_back(objLib);
+        }
+      }
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::GetLanguages(std::set<std::string>& languages,
                             const std::string& config,
                             cmTarget const* head) const
@@ -5363,26 +5434,7 @@ void cmTarget::GetLanguages(std::set<std::string>& languages,
   std::vector<cmSourceFile const*> externalObjects;
   if (this->Makefile->GetGeneratorTargets().empty())
     {
-    // At configure-time, this method can be called as part of getting the
-    // LOCATION property or to export() a file to be include()d.  However
-    // there is no cmGeneratorTarget at configure-time, so search the SOURCES
-    // for TARGET_OBJECTS instead for backwards compatibility with OLD
-    // behavior of CMP0024 and CMP0026 only.
-    std::vector<std::string> srcs;
-    cmSystemTools::ExpandListArgument(this->GetProperty("SOURCES"), srcs);
-    for(std::vector<std::string>::const_iterator it = srcs.begin();
-        it != srcs.end(); ++it)
-      {
-      if (cmHasLiteralPrefix(*it, "$<TARGET_OBJECTS:")
-          && cmHasLiteralSuffix(*it, ">"))
-        {
-        std::string objLibName = it->substr(17, it->size()-18);
-        if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLibName))
-          {
-          objectLibraries.push_back(tgt);
-          }
-        }
-      }
+    this->GetObjectLibrariesCMP0026(objectLibraries);
     }
   else
     {
