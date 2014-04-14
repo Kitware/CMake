@@ -399,7 +399,7 @@ setup_mac_metadata(struct archive_read_disk *a,
 #endif
 
 
-#if defined(HAVE_POSIX_ACL) && defined(ACL_TYPE_NFS4)
+#ifdef HAVE_POSIX_ACL
 static int translate_acl(struct archive_read_disk *a,
     struct archive_entry *entry, acl_t acl, int archive_entry_acl_type);
 
@@ -419,6 +419,7 @@ setup_acls(struct archive_read_disk *a,
 
 	archive_entry_acl_clear(entry);
 
+#ifdef ACL_TYPE_NFS4
 	/* Try NFS4 ACL first. */
 	if (*fd >= 0)
 		acl = acl_get_fd(*fd);
@@ -447,6 +448,7 @@ setup_acls(struct archive_read_disk *a,
 		acl_free(acl);
 		return (ARCHIVE_OK);
 	}
+#endif
 
 	/* Retrieve access ACL from file. */
 	if (*fd >= 0)
@@ -492,6 +494,7 @@ static struct {
         {ARCHIVE_ENTRY_ACL_EXECUTE, ACL_EXECUTE},
         {ARCHIVE_ENTRY_ACL_WRITE, ACL_WRITE},
         {ARCHIVE_ENTRY_ACL_READ, ACL_READ},
+#ifdef ACL_TYPE_NFS4
         {ARCHIVE_ENTRY_ACL_READ_DATA, ACL_READ_DATA},
         {ARCHIVE_ENTRY_ACL_LIST_DIRECTORY, ACL_LIST_DIRECTORY},
         {ARCHIVE_ENTRY_ACL_WRITE_DATA, ACL_WRITE_DATA},
@@ -508,8 +511,10 @@ static struct {
         {ARCHIVE_ENTRY_ACL_WRITE_ACL, ACL_WRITE_ACL},
         {ARCHIVE_ENTRY_ACL_WRITE_OWNER, ACL_WRITE_OWNER},
         {ARCHIVE_ENTRY_ACL_SYNCHRONIZE, ACL_SYNCHRONIZE}
+#endif
 };
 
+#ifdef ACL_TYPE_NFS4
 static struct {
         int archive_inherit;
         int platform_inherit;
@@ -519,21 +524,25 @@ static struct {
 	{ARCHIVE_ENTRY_ACL_ENTRY_NO_PROPAGATE_INHERIT, ACL_ENTRY_NO_PROPAGATE_INHERIT},
 	{ARCHIVE_ENTRY_ACL_ENTRY_INHERIT_ONLY, ACL_ENTRY_INHERIT_ONLY}
 };
-
+#endif
 static int
 translate_acl(struct archive_read_disk *a,
     struct archive_entry *entry, acl_t acl, int default_entry_acl_type)
 {
 	acl_tag_t	 acl_tag;
+#ifdef ACL_TYPE_NFS4
 	acl_entry_type_t acl_type;
 	acl_flagset_t	 acl_flagset;
+	int brand, r;
+#endif
 	acl_entry_t	 acl_entry;
 	acl_permset_t	 acl_permset;
-	int		 brand, i, r, entry_acl_type;
+	int		 i, entry_acl_type;
 	int		 s, ae_id, ae_tag, ae_perm;
 	const char	*ae_name;
 
 
+#ifdef ACL_TYPE_NFS4
 	// FreeBSD "brands" ACLs as POSIX.1e or NFSv4
 	// Make sure the "brand" on this ACL is consistent
 	// with the default_entry_acl_type bits provided.
@@ -560,6 +569,7 @@ translate_acl(struct archive_read_disk *a,
 		return ARCHIVE_FAILED;
 		break;
 	}
+#endif
 
 
 	s = acl_get_entry(acl, ACL_FIRST_ENTRY, &acl_entry);
@@ -592,9 +602,11 @@ translate_acl(struct archive_read_disk *a,
 		case ACL_OTHER:
 			ae_tag = ARCHIVE_ENTRY_ACL_OTHER;
 			break;
+#ifdef ACL_TYPE_NFS4
 		case ACL_EVERYONE:
 			ae_tag = ARCHIVE_ENTRY_ACL_EVERYONE;
 			break;
+#endif
 		default:
 			/* Skip types that libarchive can't support. */
 			s = acl_get_entry(acl, ACL_NEXT_ENTRY, &acl_entry);
@@ -605,6 +617,7 @@ translate_acl(struct archive_read_disk *a,
 		// XXX acl_get_entry_type_np on FreeBSD returns EINVAL for
 		// non-NFSv4 ACLs
 		entry_acl_type = default_entry_acl_type;
+#ifdef ACL_TYPE_NFS4
 		r = acl_get_entry_type_np(acl_entry, &acl_type);
 		if (r == 0) {
 			switch (acl_type) {
@@ -634,9 +647,10 @@ translate_acl(struct archive_read_disk *a,
 				ae_perm |= acl_inherit_map[i].archive_inherit;
 
                 }
+#endif
 
 		acl_get_permset(acl_entry, &acl_permset);
-                for (i = 0; i < (int)(sizeof(acl_perm_map) / sizeof(acl_perm_map[0])); ++i) {
+		for (i = 0; i < (int)(sizeof(acl_perm_map) / sizeof(acl_perm_map[0])); ++i) {
 			/*
 			 * acl_get_perm() is spelled differently on different
 			 * platforms; see above.

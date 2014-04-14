@@ -207,6 +207,8 @@ struct archive_read {
 		int	(*read_data_skip)(struct archive_read *);
 		int64_t	(*seek_data)(struct archive_read *, int64_t, int);
 		int	(*cleanup)(struct archive_read *);
+		int	(*format_capabilties)(struct archive_read *);
+		int	(*has_encrypted_entries)(struct archive_read *);
 	}	formats[16];
 	struct archive_format_descriptor	*format; /* Active format. */
 
@@ -218,15 +220,17 @@ struct archive_read {
 };
 
 int	__archive_read_register_format(struct archive_read *a,
-	    void *format_data,
-	    const char *name,
-	    int (*bid)(struct archive_read *, int),
-	    int (*options)(struct archive_read *, const char *, const char *),
-	    int (*read_header)(struct archive_read *, struct archive_entry *),
-	    int (*read_data)(struct archive_read *, const void **, size_t *, int64_t *),
-	    int (*read_data_skip)(struct archive_read *),
-	    int64_t (*seek_data)(struct archive_read *, int64_t, int),
-	    int (*cleanup)(struct archive_read *));
+		void *format_data,
+		const char *name,
+		int (*bid)(struct archive_read *, int),
+		int (*options)(struct archive_read *, const char *, const char *),
+		int (*read_header)(struct archive_read *, struct archive_entry *),
+		int (*read_data)(struct archive_read *, const void **, size_t *, int64_t *),
+		int (*read_data_skip)(struct archive_read *),
+		int64_t (*seek_data)(struct archive_read *, int64_t, int),
+		int (*cleanup)(struct archive_read *),
+		int (*format_capabilities)(struct archive_read *),
+		int (*has_encrypted_entries)(struct archive_read *));
 
 int __archive_read_get_bidder(struct archive_read *a,
     struct archive_read_filter_bidder **bidder);
