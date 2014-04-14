@@ -149,7 +149,7 @@ if(SPHINX_HTML)
           )
 endif()
 if(SPHINX_QTHELP)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake-${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}.qch
           DESTINATION ${CMAKE_DOC_DIR}
           )
 endif()
