@@ -23,8 +23,8 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/SystemInformation.hxx>
 #include <cmsys/Directory.hxx>
+#include "cmStandardIncludes.h"
 #include "cmXMLSafe.h"
-#include <sstream>
 
 //----------------------------------------------------------------------------
 void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
