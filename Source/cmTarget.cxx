@@ -153,6 +153,7 @@ public:
   };
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
+  std::vector<TargetPropertyEntry*> CompileFeaturesEntries;
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
@@ -165,11 +166,14 @@ public:
                                 CachedLinkInterfaceCompileDefinitionsEntries;
   mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceSourcesEntries;
+  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
+                                CachedLinkInterfaceCompileFeaturesEntries;
 
   mutable std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
   mutable std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
   mutable std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
   mutable std::map<std::string, bool> CacheLinkInterfaceSourcesDone;
+  mutable std::map<std::string, bool> CacheLinkInterfaceCompileFeaturesDone;
 };
 
 //----------------------------------------------------------------------------
@@ -204,6 +208,7 @@ cmTargetInternals::~cmTargetInternals()
 {
   deleteAndClear(this->CachedLinkInterfaceIncludeDirectoriesEntries);
   deleteAndClear(this->CachedLinkInterfaceCompileOptionsEntries);
+  deleteAndClear(this->CachedLinkInterfaceCompileFeaturesEntries);
   deleteAndClear(this->CachedLinkInterfaceCompileDefinitionsEntries);
   deleteAndClear(this->CachedLinkInterfaceSourcesEntries);
 }
@@ -227,6 +232,7 @@ cmTarget::cmTarget()
   this->BuildInterfaceIncludesAppended = false;
   this->DebugIncludesDone = false;
   this->DebugCompileOptionsDone = false;
+  this->DebugCompileFeaturesDone = false;
   this->DebugCompileDefinitionsDone = false;
   this->DebugSourcesDone = false;
   this->LinkImplementationLanguageIsContextDependent = true;
@@ -308,6 +314,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     this->SetPropertyDefault("MACOSX_BUNDLE", 0);
     this->SetPropertyDefault("MACOSX_RPATH", 0);
     this->SetPropertyDefault("NO_SYSTEM_FROM_IMPORTED", 0);
+    this->SetPropertyDefault("CXX_STANDARD", 0);
+    this->SetPropertyDefault("CXX_EXTENSIONS", 0);
     }
 
   // Collect the set of configuration types.
@@ -1803,6 +1811,17 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
                           new cmTargetInternals::TargetPropertyEntry(cge));
     return;
     }
+  if(prop == "COMPILE_FEATURES")
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    deleteAndClear(this->Internal->CompileFeaturesEntries);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+    this->Internal->CompileFeaturesEntries.push_back(
+                          new cmTargetInternals::TargetPropertyEntry(cge));
+    return;
+    }
   if(prop == "COMPILE_DEFINITIONS")
     {
     cmListFileBacktrace lfbt;
@@ -1890,6 +1909,15 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     this->Makefile->GetBacktrace(lfbt);
     cmGeneratorExpression ge(lfbt);
     this->Internal->CompileOptionsEntries.push_back(
+              new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
+    return;
+    }
+  if(prop == "COMPILE_FEATURES")
+    {
+    cmListFileBacktrace lfbt;
+    this->Makefile->GetBacktrace(lfbt);
+    cmGeneratorExpression ge(lfbt);
+    this->Internal->CompileFeaturesEntries.push_back(
               new cmTargetInternals::TargetPropertyEntry(ge.Parse(value)));
     return;
     }
@@ -2677,6 +2705,118 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 }
 
 //----------------------------------------------------------------------------
+static void processCompileFeatures(cmTarget const* tgt,
+      const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
+      std::vector<std::string> &options,
+      std::set<std::string> &uniqueOptions,
+      cmGeneratorExpressionDAGChecker *dagChecker,
+      const std::string& config, bool debugOptions)
+{
+  processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
+                                dagChecker, config, debugOptions, "features");
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
+                                  const std::string& config) const
+{
+  std::set<std::string> uniqueFeatures;
+  cmListFileBacktrace lfbt;
+
+  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+                                             this->GetName(),
+                                             "COMPILE_FEATURES",
+                                             0, 0);
+
+  std::vector<std::string> debugProperties;
+  const char *debugProp =
+              this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp)
+    {
+    cmSystemTools::ExpandListArgument(debugProp, debugProperties);
+    }
+
+  bool debugFeatures = !this->DebugCompileFeaturesDone
+                    && std::find(debugProperties.begin(),
+                                 debugProperties.end(),
+                                 "COMPILE_FEATURES")
+                        != debugProperties.end();
+
+  if (this->Makefile->IsGeneratingBuildSystem())
+    {
+    this->DebugCompileFeaturesDone = true;
+    }
+
+  processCompileFeatures(this,
+                            this->Internal->CompileFeaturesEntries,
+                            result,
+                            uniqueFeatures,
+                            &dagChecker,
+                            config,
+                            debugFeatures);
+
+  if (!this->Internal->CacheLinkInterfaceCompileFeaturesDone[config])
+    {
+    for (std::vector<cmValueWithOrigin>::const_iterator
+        it = this->Internal->LinkImplementationPropertyEntries.begin(),
+        end = this->Internal->LinkImplementationPropertyEntries.end();
+        it != end; ++it)
+      {
+      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
+          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
+        {
+        continue;
+        }
+      {
+      cmGeneratorExpression ge(lfbt);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                        ge.Parse(it->Value);
+      std::string targetResult = cge->Evaluate(this->Makefile, config,
+                                        false, this, 0, 0);
+      if (!this->Makefile->FindTargetToUse(targetResult))
+        {
+        continue;
+        }
+      }
+      std::string featureGenex = "$<TARGET_PROPERTY:" +
+                              it->Value + ",INTERFACE_COMPILE_FEATURES>";
+      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
+        {
+        // Because it->Value is a generator expression, ensure that it
+        // evaluates to the non-empty string before being used in the
+        // TARGET_PROPERTY expression.
+        featureGenex = "$<$<BOOL:" + it->Value + ">:" + featureGenex + ">";
+        }
+      cmGeneratorExpression ge(it->Backtrace);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
+                                                                featureGenex);
+
+      this->Internal
+        ->CachedLinkInterfaceCompileFeaturesEntries[config].push_back(
+                        new cmTargetInternals::TargetPropertyEntry(cge,
+                                                              it->Value));
+      }
+    }
+
+  processCompileFeatures(this,
+    this->Internal->CachedLinkInterfaceCompileFeaturesEntries[config],
+                            result,
+                            uniqueFeatures,
+                            &dagChecker,
+                            config,
+                            debugFeatures);
+
+  if (!this->Makefile->IsGeneratingBuildSystem())
+    {
+    deleteAndClear(this->Internal->CachedLinkInterfaceCompileFeaturesEntries);
+    }
+  else
+    {
+    this->Internal->CacheLinkInterfaceCompileFeaturesDone[config] = true;
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmTarget::MaybeInvalidatePropertyCache(const std::string& prop)
 {
   // Wipe out maps caching information affected by this property.
@@ -3182,6 +3322,24 @@ const char *cmTarget::GetProperty(const std::string& prop,
     for (std::vector<TargetPropertyEntry*>::const_iterator
         it = this->Internal->CompileOptionsEntries.begin(),
         end = this->Internal->CompileOptionsEntries.end();
+        it != end; ++it)
+      {
+      output += sep;
+      output += (*it)->ge->GetInput();
+      sep = ";";
+      }
+    return output.c_str();
+    }
+  if(prop == "COMPILE_FEATURES")
+    {
+    static std::string output;
+    output = "";
+    std::string sep;
+    typedef cmTargetInternals::TargetPropertyEntry
+                                TargetPropertyEntry;
+    for (std::vector<TargetPropertyEntry*>::const_iterator
+        it = this->Internal->CompileFeaturesEntries.begin(),
+        end = this->Internal->CompileFeaturesEntries.end();
         it != end; ++it)
       {
       output += sep;
@@ -6987,6 +7145,7 @@ cmTargetInternalPointer::~cmTargetInternalPointer()
 {
   deleteAndClear(this->Pointer->IncludeDirectoriesEntries);
   deleteAndClear(this->Pointer->CompileOptionsEntries);
+  deleteAndClear(this->Pointer->CompileFeaturesEntries);
   deleteAndClear(this->Pointer->CompileDefinitionsEntries);
   deleteAndClear(this->Pointer->SourceEntries);
   delete this->Pointer;

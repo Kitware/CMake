@@ -885,6 +885,10 @@ public:
 
   bool PolicyOptionalWarningEnabled(std::string const& var);
 
+  bool AddRequiredTargetFeature(cmTarget *target,
+                                const std::string& feature,
+                                std::string *error = 0) const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
