@@ -1,6 +1,14 @@
-
 cmake_minimum_required(VERSION 2.8.11)
 project(AliasTarget)
+
+set(CMAKE_CXX_STANDARD 98)
+
+# Those versions of the HP compiler that need a flag to get proper C++98
+# template support also need a flag to use the newer C++ library.
+if (CMAKE_CXX_COMPILER_ID STREQUAL HP AND
+    CMAKE_CXX98_STANDARD_COMPILE_OPTION STREQUAL "+hpxstd98")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA")
+endif ()
 
 add_library(foo SHARED empty.cpp)
 add_library(PREFIX::Foo ALIAS foo)

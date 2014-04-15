@@ -392,6 +392,21 @@ if(NOT RESULT STREQUAL "a[b]c[d]e")
     "string(REGEX REPLACE ... ) test failed (\"${RESULT}\" v. \"a[b]c[d]e\")")
 endif()
 
+#
+# This tests needs Ansi C++98
+#
+set(CMAKE_CXX_STANDARD 98)
+#
+# GNU extensions are needed for stricmp() on Windows.
+#
+set(CMAKE_CXX_EXTENSIONS TRUE)
+
+# Those versions of the HP compiler that need a flag to get proper C++98
+# template support also need a flag to use the newer C++ library.
+if (CMAKE_CXX_COMPILER_ID STREQUAL HP AND
+    CMAKE_CXX98_STANDARD_COMPILE_OPTION STREQUAL "+hpxstd98")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA")
+endif ()
 
 #
 # Create the libs and the main exe
