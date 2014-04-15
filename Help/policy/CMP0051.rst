@@ -10,7 +10,7 @@ returning the :prop_tgt:`SOURCES` target property.
 Configure-time CMake code is not able to handle generator expressions.  If
 using the :prop_tgt:`SOURCES` target property at configure time, it may be
 necessary to first remove generator expressions using the
-:command:`string(STRIP_GENEX)` command.  Generate-time CMake code such as
+:command:`string(GENEX_STRIP)` command.  Generate-time CMake code such as
 :command:`file(GENERATE)` can handle the content without stripping.
 
 The ``OLD`` behavior for this policy is to omit ``TARGET_OBJECTS``
