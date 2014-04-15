@@ -523,6 +523,8 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
     std::string& linkLibraries = vars["LINK_LIBRARIES"];
     std::replace(linkLibraries.begin(), linkLibraries.end(), '\\', '/');
+    std::string& link_path = vars["LINK_PATH"];
+    std::replace(link_path.begin(), link_path.end(), '\\', '/');
     }
 
   const std::vector<cmCustomCommand> *cmdLists[3] = {
