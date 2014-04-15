@@ -204,10 +204,11 @@ compression_name(const int compression)
 {
 	static const int num_compression_methods = sizeof(compression_methods)/sizeof(compression_methods[0]);
 	int i=0;
-	while(compression >= 0 && i++ < num_compression_methods) {
+	while(compression >= 0 && i < num_compression_methods) {
 		if (compression_methods[i].id == compression) {
 			return compression_methods[i].name;
 		}
+		i++;
 	}
 	return "??";
 }
@@ -743,7 +744,7 @@ zip_read_local_file_header(struct archive_read *a, struct archive_entry *entry,
 		zip->end_of_entry = 1;
 
 	/* Set up a more descriptive format name. */
-	sprintf(zip->format_name, "ZIP %d.%d (%s)",
+	snprintf(zip->format_name, sizeof(zip->format_name), "ZIP %d.%d (%s)",
 	    version / 10, version % 10,
 	    compression_name(zip->entry->compression));
 	a->archive.archive_format_name = zip->format_name;

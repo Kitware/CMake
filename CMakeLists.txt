@@ -55,6 +55,7 @@ STRING(REGEX REPLACE "[0]*([^0]*[0-9])$" "\\1" _trimmed_revision ${_revision})
 SET(VERSION                    "${_major}.${_trimmed_minor}.${_trimmed_revision}${_quality}")
 SET(BSDCPIO_VERSION_STRING     "${VERSION}")
 SET(BSDTAR_VERSION_STRING      "${VERSION}")
+SET(BSDCAT_VERSION_STRING      "${VERSION}")
 SET(LIBARCHIVE_VERSION_NUMBER  "${_version_number}")
 SET(LIBARCHIVE_VERSION_STRING  "${VERSION}")
 
@@ -168,6 +169,8 @@ OPTION(ENABLE_TAR "Enable tar building" ON)
 OPTION(ENABLE_TAR_SHARED "Enable dynamic build of tar" FALSE)
 OPTION(ENABLE_CPIO "Enable cpio building" ON)
 OPTION(ENABLE_CPIO_SHARED "Enable dynamic build of cpio" FALSE)
+OPTION(ENABLE_CAT "Enable cat building" ON)
+OPTION(ENABLE_CAT_SHARED "Enable dynamic build of cat" FALSE)
 OPTION(ENABLE_XATTR "Enable extended attribute support" ON)
 OPTION(ENABLE_ACL "Enable ACL support" ON)
 OPTION(ENABLE_ICONV "Enable iconv support" ON)
@@ -1536,6 +1539,12 @@ ADD_DEFINITIONS(-DHAVE_CONFIG_H)
 INCLUDE(CreatePkgConfigFile)
 
 #
+# Expose ADDITIONAL_LIBS for projects using libarchive as a subdirectory
+# and linking against archive_static.
+#
+set(LIBARCHIVE_ADDITIONAL_LIBS ${ADDITIONAL_LIBS} CACHE INTERNAL "libarchive dependencies")
+
+#
 # Register installation of PDF documents.
 #
 IF(WIN32 AND NOT CYGWIN)
@@ -1565,5 +1574,6 @@ IF(ENABLE_TEST)
 ENDIF(ENABLE_TEST)
 
 add_subdirectory(libarchive)
+add_subdirectory(cat)
 add_subdirectory(tar)
 add_subdirectory(cpio)

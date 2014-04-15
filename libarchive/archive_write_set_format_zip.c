@@ -405,8 +405,8 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 	unsigned char *e;
 	unsigned char *cd_extra;
 	size_t filename_length;
-	const char *symlink = NULL;
-	size_t symlink_size = 0;
+	const char *slink = NULL;
+	size_t slink_size = 0;
 	struct archive_string_conv *sconv = get_sconv(a, zip);
 	int ret, ret2 = ARCHIVE_OK;
 	int64_t size;
@@ -528,16 +528,16 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 
 	/* Determine appropriate compression and size for this entry. */
 	if (type == AE_IFLNK) {
-		symlink = archive_entry_symlink(zip->entry);
-		if (symlink != NULL)
-			symlink_size = strlen(symlink);
+		slink = archive_entry_symlink(zip->entry);
+		if (slink != NULL)
+			slink_size = strlen(slink);
 		else
-			symlink_size = 0;
-		zip->entry_uncompressed_limit = symlink_size;
-		zip->entry_compressed_size = symlink_size;
-		zip->entry_uncompressed_size = symlink_size;
+			slink_size = 0;
+		zip->entry_uncompressed_limit = slink_size;
+		zip->entry_compressed_size = slink_size;
+		zip->entry_uncompressed_size = slink_size;
 		zip->entry_crc32 = zip->crc32func(zip->entry_crc32,
-		    (const unsigned char *)symlink, symlink_size);
+		    (const unsigned char *)slink, slink_size);
 		zip->entry_compression = COMPRESSION_STORE;
 		version_needed = 20;
 	} else if (type != AE_IFREG) {
@@ -742,13 +742,13 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 	zip->written_bytes += e - local_extra;
 
 	/* For symlinks, write the body now. */
-	if (symlink != NULL) {
-		ret = __archive_write_output(a, symlink, (size_t)symlink_size);
+	if (slink != NULL) {
+		ret = __archive_write_output(a, slink, slink_size);
 		if (ret != ARCHIVE_OK)
 			return (ARCHIVE_FATAL);
-		zip->entry_compressed_written += symlink_size;
-		zip->entry_uncompressed_written += symlink_size;
-		zip->written_bytes += symlink_size;
+		zip->entry_compressed_written += slink_size;
+		zip->entry_uncompressed_written += slink_size;
+		zip->written_bytes += slink_size;
 	}
 
 #ifdef HAVE_ZLIB_H

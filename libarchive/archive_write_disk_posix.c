@@ -2215,7 +2215,8 @@ _archive_write_disk_free(struct archive *_a)
 	free(a->resource_fork);
 	free(a->compressed_buffer);
 	free(a->uncompressed_buffer);
-#ifdef HAVE_ZLIB_H
+#if defined(__APPLE__) && defined(UF_COMPRESSED) && defined(HAVE_SYS_XATTR_H)\
+	&& defined(HAVE_ZLIB_H)
 	if (a->stream_valid) {
 		switch (deflateEnd(&a->stream)) {
 		case Z_OK:

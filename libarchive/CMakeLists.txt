@@ -54,6 +54,7 @@ SET(libarchive_SOURCES
   archive_read_disk_private.h
   archive_read_disk_set_standard_lookup.c
   archive_read_extract.c
+  archive_read_extract2.c
   archive_read_open_fd.c
   archive_read_open_file.c
   archive_read_open_filename.c
