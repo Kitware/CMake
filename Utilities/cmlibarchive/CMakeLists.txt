@@ -28,6 +28,7 @@ STRING(REGEX REPLACE "[0]*([^0]*[0-9])$" "\\1" _trimmed_revision ${_revision})
 SET(VERSION                    "${_major}.${_trimmed_minor}.${_trimmed_revision}${_quality}")
 SET(BSDCPIO_VERSION_STRING     "${VERSION}")
 SET(BSDTAR_VERSION_STRING      "${VERSION}")
+SET(BSDCAT_VERSION_STRING      "${VERSION}")
 SET(LIBARCHIVE_VERSION_NUMBER  "${_version_number}")
 SET(LIBARCHIVE_VERSION_STRING  "${VERSION}")
 
@@ -1289,6 +1290,12 @@ CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/build/cmake/config.h.in
 	${CMAKE_CURRENT_BINARY_DIR}/config.h)
 INCLUDE_DIRECTORIES(BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 ADD_DEFINITIONS(-DHAVE_CONFIG_H)
+
+#
+# Expose ADDITIONAL_LIBS for projects using libarchive as a subdirectory
+# and linking against archive_static.
+#
+set(LIBARCHIVE_ADDITIONAL_LIBS ${ADDITIONAL_LIBS} CACHE INTERNAL "libarchive dependencies")
 
 #
 # Register installation of PDF documents.
