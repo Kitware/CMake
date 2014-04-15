@@ -621,7 +621,7 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 	archive_le16enc(zip->file_header + 28, filename_length);
 	/* Following Info-Zip, store mode in the "external attributes" field. */
 	archive_le32enc(zip->file_header + 38,
-	    archive_entry_mode(zip->entry) << 16);
+	    ((uint32_t)archive_entry_mode(zip->entry)) << 16);
 	e = cd_alloc(zip, filename_length);
 	/* If (e == NULL) XXXX */
 	copy_path(zip->entry, e);
@@ -714,7 +714,7 @@ archive_write_zip_header(struct archive_write *a, struct archive_entry *entry)
 		}
 		if (included & 4) {
 			archive_le32enc(e,  /* external file attributes */
-			    archive_entry_mode(zip->entry) << 16);
+			    ((uint32_t)archive_entry_mode(zip->entry)) << 16);
 			e += 4;
 		}
 		if (included & 8) {
