@@ -241,6 +241,8 @@ public:
 
   bool IsImported() const {return this->IsImportedTarget;}
 
+  void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
+
   /** The link interface specifies transitive library dependencies and
       other information needed by targets that link to this target.  */
   struct LinkInterface
