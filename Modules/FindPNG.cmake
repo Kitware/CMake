@@ -56,10 +56,8 @@ if(ZLIB_FOUND)
   list(APPEND PNG_NAMES png libpng)
   unset(PNG_NAMES_DEBUG)
   set(_PNG_VERSION_SUFFIXES 17 16 15 14 12)
-  if (PNG_FIND_VERSION MATCHES "^[0-9]+\\.[0-9]+(\\..*)?$")
-    string(REGEX REPLACE
-        "^([0-9]+)\\.([0-9]+).*" "\\1\\2"
-        _PNG_VERSION_SUFFIX_MIN "${PNG_FIND_VERSION}")
+  if (PNG_FIND_VERSION MATCHES "^([0-9]+)\\.([0-9]+)(\\..*)?$")
+    set(_PNG_VERSION_SUFFIX_MIN "${CMAKE_MATCH_1}${CMAKE_MATCH_2}")
     if (PNG_FIND_VERSION_EXACT)
       set(_PNG_VERSION_SUFFIXES ${_PNG_VERSION_SUFFIX_MIN})
     else ()

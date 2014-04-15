@@ -509,10 +509,10 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
 
     if(WIN32)
       string(TOLOWER "$ENV{SystemRoot}" sysroot)
-      string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
+      file(TO_CMAKE_PATH "${sysroot}" sysroot)
 
       string(TOLOWER "$ENV{windir}" windir)
-      string(REGEX REPLACE "\\\\" "/" windir "${windir}")
+      file(TO_CMAKE_PATH "${windir}" windir)
 
       if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
         set(is_system 1)
@@ -772,8 +772,8 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
   # Convert to a list of lines:
   #
-  string(REGEX REPLACE ";" "\\\\;" candidates "${gp_cmd_ov}")
-  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
+  string(REPLACE ";" "\\;" candidates "${gp_cmd_ov}")
+  string(REPLACE "\n" "${eol_char};" candidates "${candidates}")
 
   # check for install id and remove it from list, since otool -L can include a
   # reference to itself

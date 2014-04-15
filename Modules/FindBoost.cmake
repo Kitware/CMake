@@ -631,12 +631,12 @@ if(NOT Boost_INCLUDE_DIR)
     set(_boost_BOOSTIFIED_VERSION)
 
     # Transform 1.35 => 1_35 and 1.36.0 => 1_36_0
-    if(_boost_VER MATCHES "[0-9]+\\.[0-9]+\\.[0-9]+")
-        string(REGEX REPLACE "([0-9]+)\\.([0-9]+)\\.([0-9]+)" "\\1_\\2_\\3"
-          _boost_BOOSTIFIED_VERSION ${_boost_VER})
-    elseif(_boost_VER MATCHES "[0-9]+\\.[0-9]+")
-        string(REGEX REPLACE "([0-9]+)\\.([0-9]+)" "\\1_\\2"
-          _boost_BOOSTIFIED_VERSION ${_boost_VER})
+    if(_boost_VER MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+)")
+        set(_boost_BOOSTIFIED_VERSION
+          "${CMAKE_MATCH_1}_${CMAKE_MATCH_2}_${CMAKE_MATCH_3}")
+    elseif(_boost_VER MATCHES "([0-9]+)\\.([0-9]+)")
+        set(_boost_BOOSTIFIED_VERSION
+          "${CMAKE_MATCH_1}_${CMAKE_MATCH_2}")
     endif()
 
     list(APPEND _boost_PATH_SUFFIXES
@@ -684,7 +684,7 @@ if(Boost_INCLUDE_DIR)
   set(_Boost_VERSION_REGEX "([0-9]+)")
   set(_Boost_LIB_VERSION_REGEX "\"([0-9_]+)\"")
   foreach(v VERSION LIB_VERSION)
-    if("${_boost_VERSION_HPP_CONTENTS}" MATCHES ".*#define BOOST_${v} ${_Boost_${v}_REGEX}.*")
+    if("${_boost_VERSION_HPP_CONTENTS}" MATCHES "#define BOOST_${v} ${_Boost_${v}_REGEX}")
       set(Boost_${v} "${CMAKE_MATCH_1}")
     endif()
   endforeach()

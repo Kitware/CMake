@@ -41,7 +41,7 @@ set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
 set(CMAKE_REQUIRED_QUIET ${Threads_FIND_QUIETLY})
 
 # Do we have sproc?
-if(CMAKE_SYSTEM MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
+if(CMAKE_SYSTEM_NAME MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
   CHECK_INCLUDE_FILES("sys/types.h;sys/prctl.h"  CMAKE_HAVE_SPROC_H)
 endif()
 
@@ -138,13 +138,13 @@ if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_CREATE)
   set(Threads_FOUND TRUE)
 endif()
 
-if(CMAKE_SYSTEM MATCHES "Windows")
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   set(CMAKE_USE_WIN32_THREADS_INIT 1)
   set(Threads_FOUND TRUE)
 endif()
 
 if(CMAKE_USE_PTHREADS_INIT)
-  if(CMAKE_SYSTEM MATCHES "HP-UX-*")
+  if(CMAKE_SYSTEM_NAME MATCHES "HP-UX")
     # Use libcma if it exists and can be used.  It provides more
     # symbols than the plain pthread library.  CMA threads
     # have actually been deprecated:
@@ -162,12 +162,12 @@ if(CMAKE_USE_PTHREADS_INIT)
     set(CMAKE_USE_PTHREADS_INIT 1)
   endif()
 
-  if(CMAKE_SYSTEM MATCHES "OSF1-V*")
+  if(CMAKE_SYSTEM MATCHES "OSF1-V")
     set(CMAKE_USE_PTHREADS_INIT 0)
     set(CMAKE_THREAD_LIBS_INIT )
   endif()
 
-  if(CMAKE_SYSTEM MATCHES "CYGWIN_NT*")
+  if(CMAKE_SYSTEM MATCHES "CYGWIN_NT")
     set(CMAKE_USE_PTHREADS_INIT 1)
     set(Threads_FOUND TRUE)
     set(CMAKE_THREAD_LIBS_INIT )

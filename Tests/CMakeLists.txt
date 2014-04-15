@@ -798,7 +798,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
   set(CTEST_RUN_CPackComponentsForAll ${CTEST_TEST_CPACK})
 
-  if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+  if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
     find_program(RPMBUILD NAMES rpmbuild)
   endif()
   # Do not try to build RPM
@@ -899,7 +899,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(APPLE)
       list(APPEND GENLST "DragNDrop")
     endif()
-    if (NOT CMAKE_CURRENT_BINARY_DIR MATCHES ".* .*")
+    if (NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
       list(FIND ACTIVE_CPACK_GENERATORS "RPM" RPM_ACTIVE)
       if (NOT ${RPM_ACTIVE} EQUAL -1)
         list(APPEND GENLST "RPM")

@@ -295,12 +295,12 @@ if(QT_UIC_EXECUTABLE)
 endif()
 
 set(_QT_UIC_VERSION_3 FALSE)
-if("${QTVERSION_UIC}" MATCHES ".* 3..*")
+if("${QTVERSION_UIC}" MATCHES " 3.")
   set(_QT_UIC_VERSION_3 TRUE)
 endif()
 
 set(_QT_MOC_VERSION_3 FALSE)
-if("${QTVERSION_MOC}" MATCHES ".* 3..*")
+if("${QTVERSION_MOC}" MATCHES " 3.")
   set(_QT_MOC_VERSION_3 TRUE)
 endif()
 

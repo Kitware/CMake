@@ -27,7 +27,7 @@ endif()
 # loaded by another project using CMAKE_IMPORT_BUILD_SETTINGS.  Now it
 # creates a file that refuses to load (with comment explaining why).
 macro(CMAKE_EXPORT_BUILD_SETTINGS SETTINGS_FILE)
-  if(${SETTINGS_FILE} MATCHES ".+")
+  if(NOT ${SETTINGS_FILE} STREQUAL "")
     configure_file(${CMAKE_ROOT}/Modules/CMakeBuildSettings.cmake.in
                    ${SETTINGS_FILE} @ONLY)
   else()

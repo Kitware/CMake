@@ -367,8 +367,8 @@ endif()
 
 foreach(arg ${CHECK_ARGS} "")
   set(ARG "${arg}")
-  string(REGEX REPLACE "\\\\" "\\\\\\\\" ARG "${ARG}")
-  string(REGEX REPLACE "\"" "\\\\\"" ARG "${ARG}")
+  string(REPLACE "\\" "\\\\" ARG "${ARG}")
+  string(REPLACE "\"" "\\\"" ARG "${ARG}")
   set(EXPECTED_ARGUMENTS
     "${EXPECTED_ARGUMENTS}  \"${ARG}\",
 ")
