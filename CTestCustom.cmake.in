@@ -19,6 +19,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "Utilities.cmbzip2."
   "Source.CTest.Curl"
   "Source.CursesDialog.form"
+  "Source.cm_sha2.*warning.*cast increases required alignment of target type"
   "Utilities.cmcurl"
   "Utilities.cmexpat."
   "Utilities.cmlibarchive"
