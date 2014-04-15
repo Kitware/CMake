@@ -685,7 +685,8 @@ cmVisualStudio10TargetGenerator::ConvertPath(std::string const& path,
       this->Makefile->GetCurrentOutputDirectory(), path.c_str())
     : this->LocalGenerator->Convert(path.c_str(),
                                     cmLocalGenerator::START_OUTPUT,
-                                    cmLocalGenerator::UNCHANGED);
+                                    cmLocalGenerator::UNCHANGED,
+                                    /* optional = */ true);
 }
 
 void cmVisualStudio10TargetGenerator::ConvertToWindowsSlash(std::string& s)
@@ -941,7 +942,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(
   //  c:\path\to\current\dir\..\..\..\relative\path\to\source.c
   //
   // and fail if this exceeds the maximum allowed path length.  Our path
-  // conversion uses full paths outside the build tree to allow deeper trees.
+  // conversion uses full paths when possible to allow deeper trees.
   bool forceRelative = false;
   std::string sourceFile = this->ConvertPath(sf->GetFullPath(), false);
   if(this->LocalGenerator->GetVersion() == cmLocalVisualStudioGenerator::VS10
