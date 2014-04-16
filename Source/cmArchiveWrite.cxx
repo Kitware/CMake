@@ -18,6 +18,13 @@
 #include <cm_libarchive.h>
 
 //----------------------------------------------------------------------------
+static std::string cm_archive_error_string(struct archive* a)
+{
+  const char* e = archive_error_string(a);
+  return e? e : "unknown error";
+}
+
+//----------------------------------------------------------------------------
 class cmArchiveWrite::Entry
 {
   struct archive_entry* Object;
@@ -60,7 +67,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_compression_none(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_compression_none: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
@@ -68,7 +75,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_compression_compress(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_compression_compress: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
@@ -76,7 +83,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_compression_gzip(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_compression_gzip: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
@@ -84,7 +91,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_compression_bzip2(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_compression_bzip2: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
@@ -92,7 +99,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_compression_lzma(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_compression_lzma: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
@@ -100,7 +107,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_compression_xz(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_compression_xz: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
@@ -109,7 +116,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
   if (archive_read_disk_set_standard_lookup(this->Disk) != ARCHIVE_OK)
     {
     this->Error = "archive_read_disk_set_standard_lookup: ";
-    this->Error += archive_error_string(this->Archive);
+    this->Error += cm_archive_error_string(this->Archive);
     return;;
     }
 #endif
@@ -119,7 +126,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_format_zip(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_format_zip: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
       break;
@@ -127,7 +134,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
       if(archive_write_set_format_pax_restricted(this->Archive) != ARCHIVE_OK)
         {
         this->Error = "archive_write_set_format_pax_restricted: ";
-        this->Error += archive_error_string(this->Archive);
+        this->Error += cm_archive_error_string(this->Archive);
         return;
         }
     break;
@@ -137,7 +144,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
   if (archive_write_set_bytes_in_last_block(this->Archive, 1))
     {
     this->Error = "archive_write_set_bytes_in_last_block: ";
-    this->Error += archive_error_string(this->Archive);
+    this->Error += cm_archive_error_string(this->Archive);
     return;
     }
 
@@ -147,7 +154,7 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
        0) != ARCHIVE_OK)
     {
     this->Error = "archive_write_open: ";
-    this->Error += archive_error_string(this->Archive);
+    this->Error += cm_archive_error_string(this->Archive);
     return;
     }
 }
@@ -235,7 +242,7 @@ bool cmArchiveWrite::AddFile(const char* file,
   if(archive_read_disk_entry_from_file(this->Disk, e, -1, 0) != ARCHIVE_OK)
     {
     this->Error = "archive_read_disk_entry_from_file: ";
-    this->Error += archive_error_string(this->Disk);
+    this->Error += cm_archive_error_string(this->Disk);
     return false;
     }
   // Clear acl and xattr fields not useful for distribution.
@@ -245,7 +252,7 @@ bool cmArchiveWrite::AddFile(const char* file,
   if(archive_write_header(this->Archive, e) != ARCHIVE_OK)
     {
     this->Error = "archive_write_header: ";
-    this->Error += archive_error_string(this->Archive);
+    this->Error += cm_archive_error_string(this->Archive);
     return false;
     }
 
@@ -292,7 +299,7 @@ bool cmArchiveWrite::AddData(const char* file, size_t size)
     if(archive_write_data(this->Archive, buffer, nnext) != nnext_s)
       {
       this->Error = "archive_write_data: ";
-      this->Error += archive_error_string(this->Archive);
+      this->Error += cm_archive_error_string(this->Archive);
       return false;
       }
     nleft -= nnext;
