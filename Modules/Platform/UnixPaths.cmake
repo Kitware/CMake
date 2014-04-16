@@ -83,7 +83,7 @@ list(APPEND CMAKE_SYSTEM_PROGRAM_PATH
   )
 
 list(APPEND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES
-  /lib /usr/lib /usr/lib32 /usr/lib64
+  /lib /lib32 /lib64 /usr/lib /usr/lib32 /usr/lib64
   )
 
 list(APPEND CMAKE_C_IMPLICIT_INCLUDE_DIRECTORIES
