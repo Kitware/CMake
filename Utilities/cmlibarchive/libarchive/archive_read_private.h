@@ -142,6 +142,14 @@ struct archive_read_client {
 	struct archive_read_data_node *dataset;
 };
 
+struct archive_read_extract {
+	struct archive *ad; /* archive_write_disk object */
+
+	/* Progress function invoked during extract. */
+	void			(*extract_progress)(void *);
+	void			 *extract_progress_user_data;
+};
+
 struct archive_read {
 	struct archive	archive;
 
@@ -215,7 +223,7 @@ struct archive_read {
 	/*
 	 * Various information needed by archive_extract.
 	 */
-	struct extract		 *extract;
+	struct archive_read_extract		*extract;
 	int			(*cleanup_archive_extract)(struct archive_read *);
 };
 
@@ -245,4 +253,5 @@ int64_t	__archive_read_filter_consume(struct archive_read_filter *, int64_t);
 int __archive_read_program(struct archive_read_filter *, const char *);
 void __archive_read_free_filters(struct archive_read *);
 int  __archive_read_close_filters(struct archive_read *);
+struct archive_read_extract *__archive_read_get_extract(struct archive_read *);
 #endif

@@ -28,6 +28,7 @@ STRING(REGEX REPLACE "[0]*([^0]*[0-9])$" "\\1" _trimmed_revision ${_revision})
 SET(VERSION                    "${_major}.${_trimmed_minor}.${_trimmed_revision}${_quality}")
 SET(BSDCPIO_VERSION_STRING     "${VERSION}")
 SET(BSDTAR_VERSION_STRING      "${VERSION}")
+SET(BSDCAT_VERSION_STRING      "${VERSION}")
 SET(LIBARCHIVE_VERSION_NUMBER  "${_version_number}")
 SET(LIBARCHIVE_VERSION_STRING  "${VERSION}")
 
