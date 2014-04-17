@@ -8,6 +8,28 @@ if(DEFINED DataSpace)
     message(SEND_ERROR "Input file:\n  ${DataSpace}\ndoes not have expected content, but [[${lines}]]")
   endif()
 endif()
+if(DataMissing)
+  if(EXISTS "${DataMissing}")
+    message(SEND_ERROR
+      "Input file:\n"
+      "  ${DataMissing}\n"
+      "exists but should not."
+      )
+  endif()
+else()
+  message(SEND_ERROR "DataMissing is not set!")
+endif()
+if(DataMissingWithAssociated)
+  if(EXISTS "${DataMissingWithAssociated}")
+    message(SEND_ERROR
+      "Input file:\n"
+      "  ${DataMissingWithAssociated}\n"
+      "exists but should not."
+      )
+  endif()
+else()
+  message(SEND_ERROR "DataMissingWithAssociated is not set!")
+endif()
 set(SeriesAn1 "1\\.dat")
 set(SeriesBn1 "_1\\.dat")
 set(SeriesCn1 "\\.1\\.dat")
