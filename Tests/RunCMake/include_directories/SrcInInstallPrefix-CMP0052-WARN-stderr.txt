@@ -12,4 +12,9 @@ CMake Warning \(dev\) in CMakeLists.txt:
   of the install directory:
 
       ".*Tests/RunCMake/include_directories/prefix"
+
+  however it is also a subdirectory of the source tree:
+
+      ".*Tests/RunCMake/include_directories/prefix/src"
+
 This warning is for project developers.  Use -Wno-dev to suppress it.

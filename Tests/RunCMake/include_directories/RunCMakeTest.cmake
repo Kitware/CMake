@@ -13,6 +13,9 @@ run_cmake(install_config)
 run_cmake(incomplete-genex)
 run_cmake(export-NOWARN)
 
+set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/DirInInstallPrefix/prefix")
+run_cmake(DirInInstallPrefix)
+
 configure_file(
   "${RunCMake_SOURCE_DIR}/CMakeLists.txt"
   "${RunCMake_BINARY_DIR}/copy/CMakeLists.txt"

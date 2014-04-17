@@ -277,6 +277,8 @@ static bool checkInterfaceDirs(const std::string &prepro,
            "  \"" << *li << "\"";
       target->GetMakefile()->IssueMessage(messageType, e.str());
       }
+    bool inBinary = isSubDirectory(li->c_str(), topBinaryDir);
+    bool inSource = isSubDirectory(li->c_str(), topSourceDir);
     if (isSubDirectory(li->c_str(), installDir))
       {
       // The include directory is inside the install tree.  If the
@@ -284,8 +286,8 @@ static bool checkInterfaceDirs(const std::string &prepro,
       // fall through to the checks below that the include directory is not
       // also inside the source tree or build tree.
       bool shouldContinue =
-          isSubDirectory(installDir, topBinaryDir)
-        || isSubDirectory(installDir, topSourceDir);
+        (!inBinary || isSubDirectory(installDir, topBinaryDir)) &&
+        (!inSource || isSubDirectory(installDir, topSourceDir));
 
       if (!shouldContinue)
         {
@@ -299,7 +301,10 @@ static bool checkInterfaceDirs(const std::string &prepro,
             s << "Directory:\n    \"" << *li << "\"\nin "
               "INTERFACE_INCLUDE_DIRECTORIES of target \""
               << target->GetName() << "\" is a subdirectory of the install "
-              "directory:\n    \"" << installDir << "\"";
+              "directory:\n    \"" << installDir << "\"\nhowever it is also "
+              "a subdirectory of the " << (inBinary ? "build" : "source")
+              << " tree:\n    \"" << (inBinary ? topBinaryDir : topSourceDir)
+              << "\"" << std::endl;
             target->GetMakefile()->IssueMessage(cmake::AUTHOR_WARNING,
                                                 s.str());
             }
@@ -317,7 +322,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
         continue;
         }
       }
-    if (isSubDirectory(li->c_str(), topBinaryDir))
+    if (inBinary)
       {
       e << "Target \"" << target->GetName() << "\" "
            "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
@@ -326,7 +331,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       }
     if (!inSourceBuild)
       {
-      if (isSubDirectory(li->c_str(), topSourceDir))
+      if (inSource)
         {
         e << "Target \"" << target->GetName() << "\" "
             "INTERFACE_INCLUDE_DIRECTORIES property contains path:\n"
