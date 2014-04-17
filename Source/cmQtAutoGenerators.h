@@ -104,6 +104,7 @@ private:
   std::string ProjectBinaryDir;
   std::string ProjectSourceDir;
   std::string TargetName;
+  std::string OriginTargetName;
 
   std::string CurrentCompileSettingsStr;
   std::string OldCompileSettingsStr;
