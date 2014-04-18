@@ -50,7 +50,7 @@ for fpath in cmake_manuals:
                               name, desc, [], int(sec)))
         else:
             sys.stderr.write("ERROR: No cmake-manual-description in '%s'\n" % fpath)
-    except Exception, e:
+    except Exception as e:
         sys.stderr.write("ERROR: %s\n" % str(e))
 man_show_urls = False
 
