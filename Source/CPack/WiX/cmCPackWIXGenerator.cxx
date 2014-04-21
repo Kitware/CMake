@@ -33,14 +33,23 @@
 
 cmCPackWIXGenerator::cmCPackWIXGenerator():
   HasDesktopShortcuts(false),
-  Patch(Logger)
+  Patch(0)
 {
 
+}
+
+cmCPackWIXGenerator::~cmCPackWIXGenerator()
+{
+  if(this->Patch)
+    {
+    delete this->Patch;
+    }
 }
 
 int cmCPackWIXGenerator::InitializeInternal()
 {
   componentPackageMethod = ONE_PACKAGE;
+  this->Patch = new cmWIXPatch(this->Logger);
 
   return this->Superclass::InitializeInternal();
 }
@@ -232,7 +241,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
   const char* patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
   if(patchFilePath)
     {
-    this->Patch.LoadFragments(patchFilePath);
+    this->Patch->LoadFragments(patchFilePath);
     }
 
   return true;
@@ -525,7 +534,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     return false;
     }
 
-  return this->Patch.CheckForUnappliedFragments();
+  return this->Patch->CheckForUnappliedFragments();
 }
 
 std::string cmCPackWIXGenerator::GetProgramFilesFolderId() const
@@ -857,13 +866,13 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         desktopExecutables,
         shortcutMap);
 
-      this->Patch.ApplyFragment(subDirectoryId, directoryDefinitions);
+      this->Patch->ApplyFragment(subDirectoryId, directoryDefinitions);
       directoryDefinitions.EndElement("Directory");
       }
     else
       {
       std::string componentId = fileDefinitions.EmitComponentFile(
-        directoryId, id, fullPath, this->Patch);
+        directoryId, id, fullPath, *(this->Patch));
 
       featureDefinitions.EmitComponentRef(componentId);
 

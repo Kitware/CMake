@@ -35,6 +35,7 @@ public:
   cmCPackTypeMacro(cmCPackWIXGenerator, cmCPackGenerator);
 
   cmCPackWIXGenerator();
+  ~cmCPackWIXGenerator();
 
 protected:
   virtual int InitializeInternal();
@@ -166,7 +167,7 @@ private:
 
   std::string CPackTopLevel;
 
-  cmWIXPatch Patch;
+  cmWIXPatch* Patch;
 };
 
 #endif
