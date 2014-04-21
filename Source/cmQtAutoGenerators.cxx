@@ -367,6 +367,8 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
 
   makefile->AddDefinition("_moc_target_name",
           cmLocalGenerator::EscapeForCMake(autogenTargetName).c_str());
+  makefile->AddDefinition("_origin_target_name",
+          cmLocalGenerator::EscapeForCMake(target->GetName()).c_str());
 
   std::string targetDir = getAutogenTargetDir(target);
 
@@ -506,7 +508,9 @@ void cmQtAutoGenerators::SetupSourceFiles(cmTarget const* target)
         std::string basename = cmsys::SystemTools::
                                       GetFilenameWithoutLastExtension(absFile);
 
-        std::string rcc_output_file = makefile->GetCurrentOutputDirectory();
+        std::string rcc_output_dir = target->GetSupportDirectory();
+        cmSystemTools::MakeDirectory(rcc_output_dir.c_str());
+        std::string rcc_output_file = rcc_output_dir;
         rcc_output_file += "/qrc_" + basename + ".cpp";
         makefile->AppendProperty("ADDITIONAL_MAKE_CLEAN_FILES",
                                 rcc_output_file.c_str(), false);
@@ -1063,6 +1067,8 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   this->ProjectBinaryDir = makefile->GetSafeDefinition("AM_CMAKE_BINARY_DIR");
   this->ProjectSourceDir = makefile->GetSafeDefinition("AM_CMAKE_SOURCE_DIR");
   this->TargetName = makefile->GetSafeDefinition("AM_TARGET_NAME");
+  this->OriginTargetName
+                      = makefile->GetSafeDefinition("AM_ORIGIN_TARGET_NAME");
 
   {
   const char *uicOptionsFiles
@@ -2057,7 +2063,9 @@ bool cmQtAutoGenerators::GenerateQrc()
     std::string basename = cmsys::SystemTools::
                                   GetFilenameWithoutLastExtension(*si);
 
-    std::string rcc_output_file = this->Builddir + "qrc_" + basename + ".cpp";
+    std::string rcc_output_file = this->Builddir
+                                + "CMakeFiles/" + this->OriginTargetName
+                                + ".dir/qrc_" + basename + ".cpp";
 
     int sourceNewerThanQrc = 0;
     bool success = cmsys::SystemTools::FileTimeCompare(si->c_str(),
