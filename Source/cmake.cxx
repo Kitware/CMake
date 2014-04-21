@@ -24,6 +24,7 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmGraphVizWriter.h"
 # include "cmVariableWatch.h"
+# include <cmsys/SystemInformation.hxx>
 #endif
 
 #include <cmsys/Glob.hxx>
@@ -2600,6 +2601,22 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 
   // Add a terminating blank line.
   msg << "\n";
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  // Add a C++ stack trace to internal errors.
+  if(t == cmake::INTERNAL_ERROR)
+    {
+    std::string stack = cmsys::SystemInformation::GetProgramStack(0,0);
+    if(!stack.empty())
+      {
+      if(cmHasLiteralPrefix(stack, "WARNING:"))
+        {
+        stack = "Note:" + stack.substr(8);
+        }
+      msg << stack << "\n";
+      }
+    }
+#endif
 
   // Output the message.
   if(isError)
