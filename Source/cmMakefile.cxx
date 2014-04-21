@@ -4604,8 +4604,28 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
 
   if (!featuresKnown || !*featuresKnown)
     {
-    // We know of no features for the compiler at all.
-    return true;
+    cmOStringStream e;
+    if (error)
+      {
+      e << "no";
+      }
+    else
+      {
+      e << "No";
+      }
+    e << " known features for compiler\n\""
+      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
+      << "\"\nversion "
+      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
+    if (error)
+      {
+      *error = e.str();
+      }
+    else
+      {
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+    return false;
     }
 
   std::vector<std::string> availableFeatures;
