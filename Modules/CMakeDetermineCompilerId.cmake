@@ -97,11 +97,88 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   set(CMAKE_${lang}_SIMULATE_VERSION "${CMAKE_${lang}_SIMULATE_VERSION}" PARENT_SCOPE)
 endfunction()
 
+function(_readFile file)
+  include(${file})
+  get_filename_component(name ${file} NAME_WE)
+  string(REGEX REPLACE "-.*" "" CompilerId ${name})
+  set(_compiler_id_version_compute_${CompilerId} ${_compiler_id_version_compute} PARENT_SCOPE)
+  set(_compiler_id_pp_test_${CompilerId} ${_compiler_id_pp_test} PARENT_SCOPE)
+endfunction()
+
 #-----------------------------------------------------------------------------
 # Function to write the compiler id source file.
 function(CMAKE_DETERMINE_COMPILER_ID_WRITE lang src)
   find_file(src_in ${src}.in PATHS ${CMAKE_ROOT}/Modules ${CMAKE_MODULE_PATH} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   file(READ ${src_in} ID_CONTENT_IN)
+
+  file(GLOB lang_files
+    "${CMAKE_ROOT}/Modules/Compiler/*-${lang}-DetermineCompiler.cmake")
+
+  if (NOT lang STREQUAL Fortran)
+    file(GLOB non_lang_files
+      "${CMAKE_ROOT}/Modules/Compiler/*-${lang}-DetermineCompiler.cmake")
+  endif()
+
+  set(files ${lang_files} ${non_lang_files})
+  if (files)
+    foreach(file ${files})
+      _readFile(${file})
+    endforeach()
+    set(pp_if "#if")
+    set(CMAKE_CXX_COMPILER_ID_CONTENT "/* Version number components: V=Version, R=Revision, P=Patch
+   Version date components:   YYYY=Year, MM=Month,   DD=Day  */\n")
+
+    foreach(Id
+        Comeau
+        Intel
+        PathScale
+        AppleClang
+        Clang
+        Embarcadero
+        Borland
+        Watcom
+        OpenWatcom
+        SunPro
+        HP
+        Compaq
+        zOS
+        XL
+        VisualAge
+        PGI
+        Cray
+        TI
+        SCO
+        GNU
+        MSVC
+        ADSP
+        IAR
+        MIPSpro)
+      if (NOT _compiler_id_pp_test_${Id})
+        message(FATAL_ERROR "No test for \"${Id}\"")
+      endif()
+      set(id_content "${pp_if} ${_compiler_id_pp_test_${Id}}\n# define COMPILER_ID \"${Id}\"${_compiler_id_version_compute_${Id}}\n")
+      set(CMAKE_CXX_COMPILER_ID_CONTENT "${CMAKE_CXX_COMPILER_ID_CONTENT}\n${id_content}")
+      set(pp_if "#elif")
+    endforeach()
+
+    set(platform_compiler_detection "
+/* These compilers are either not known or too old to define an
+  identification macro.  Try to identify the platform and guess that
+  it is the native compiler.  */
+#elif defined(__sgi)
+# define COMPILER_ID \"MIPSpro\"
+
+#elif defined(__hpux) || defined(__hpua)
+# define COMPILER_ID \"HP\"
+
+#else /* unknown compiler */
+# define COMPILER_ID \"\"
+
+#endif")
+
+    set(CMAKE_CXX_COMPILER_ID_CONTENT "${CMAKE_CXX_COMPILER_ID_CONTENT}\n${platform_compiler_detection}")
+  endif()
+
   unset(src_in CACHE)
   string(CONFIGURE "${ID_CONTENT_IN}" ID_CONTENT_OUT @ONLY)
   file(WRITE ${CMAKE_${lang}_COMPILER_ID_DIR}/${src} "${ID_CONTENT_OUT}")
