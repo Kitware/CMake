@@ -54,7 +54,7 @@ bool cmGetDirectoryPropertyCommand
     // lookup the makefile from the directory name
     cmLocalGenerator *lg =
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
-      FindLocalGenerator(sd.c_str());
+      FindLocalGenerator(sd);
     if (!lg)
       {
       this->SetError
@@ -79,18 +79,18 @@ bool cmGetDirectoryPropertyCommand
                      "providing the name of the variable to get.");
       return false;
       }
-    output = dir->GetSafeDefinition(i->c_str());
-    this->Makefile->AddDefinition(variable.c_str(), output.c_str());
+    output = dir->GetSafeDefinition(*i);
+    this->Makefile->AddDefinition(variable, output.c_str());
     return true;
     }
 
-  const char *prop = dir->GetProperty(i->c_str());
+  const char *prop = dir->GetProperty(*i);
   if (prop)
     {
-    this->Makefile->AddDefinition(variable.c_str(), prop);
+    this->Makefile->AddDefinition(variable, prop);
     return true;
     }
-  this->Makefile->AddDefinition(variable.c_str(), "");
+  this->Makefile->AddDefinition(variable, "");
   return true;
 }
 

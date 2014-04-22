@@ -52,7 +52,7 @@ protected:
   // Implement virtual methods from the superclass.
   virtual bool GenerateMainFile(std::ostream& os);
   virtual void GenerateImportTargetsConfig(std::ostream& os,
-                                           const char* config,
+                                           const std::string& config,
                                            std::string const& suffix,
                             std::vector<std::string> &missingTargets);
   virtual void HandleMissingTarget(std::string& link_libs,
@@ -66,7 +66,7 @@ protected:
                                   int occurrences);
 
   /** Fill in properties indicating built file locations.  */
-  void SetImportLocationProperty(const char* config,
+  void SetImportLocationProperty(const std::string& config,
                                  std::string const& suffix,
                                  cmTarget* target,
                                  ImportPropertyMap& properties);

@@ -188,6 +188,9 @@ static inline char *realpath(const char *path, char *resolved_path)
 #endif
 
 #if defined(_WIN32) && (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__BORLANDC__) || defined(__MINGW32__))
+
+#include <wctype.h>
+
 inline int Mkdir(const char* dir)
 {
   return _wmkdir(KWSYS_NAMESPACE::Encoding::ToWide(dir).c_str());
@@ -4915,8 +4918,8 @@ void SystemTools::ClassInitialize()
 
         // Strip off one directory level and see if the logical
         // mapping still works.
-        pwd_str = SystemTools::GetFilenamePath(pwd_str.c_str());
-        cwd_str = SystemTools::GetFilenamePath(cwd_str.c_str());
+        pwd_str = SystemTools::GetFilenamePath(pwd_str);
+        cwd_str = SystemTools::GetFilenamePath(cwd_str);
         Realpath(pwd_str.c_str(), pwd_path);
         }
 

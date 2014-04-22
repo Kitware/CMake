@@ -43,7 +43,7 @@ int cmCPackSTGZGenerator::InitializeInternal()
   if ( inFile.empty() )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find template file: "
-      << inFile.c_str() << std::endl);
+      << inFile << std::endl);
     return 0;
     }
   this->SetOptionIfNotSet("CPACK_STGZ_HEADER_FILE", inFile.c_str());
@@ -134,6 +134,6 @@ int cmCPackSTGZGenerator::GenerateHeader(std::ostream* os)
   cmSystemTools::ReplaceString(res, headerLengthTag, buffer);
 
   // Write in file
-  *os << res.c_str();
+  *os << res;
   return this->Superclass::GenerateHeader(os);
 }

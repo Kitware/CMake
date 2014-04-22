@@ -87,6 +87,7 @@ macro(__windows_compiler_gnu lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
 
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS ${__WINDOWS_GNU_LD_RESPONSE})
+  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES ${__WINDOWS_GNU_LD_RESPONSE})
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
 
   # We prefer "@" for response files but it is not supported by gcc 3.
@@ -103,7 +104,9 @@ macro(__windows_compiler_gnu lang)
     endif()
     # The GNU 3.x compilers do not support response files (only linkers).
     set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 0)
-  elseif(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS)
+    # Link libraries are generated only for the front-end.
+    set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES 0)
+  else()
     # Use "@" to pass the response file to the front-end.
     set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "@")
   endif()

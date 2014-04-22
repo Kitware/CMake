@@ -27,9 +27,9 @@ public:
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalWatcomWMakeGenerator>(); }
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalWatcomWMakeGenerator::GetActualName();}
-  static const char* GetActualName() {return "Watcom WMake";}
+  static std::string GetActualName() {return "Watcom WMake";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

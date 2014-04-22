@@ -55,7 +55,7 @@ used in a comparison with the iterator returned by ``end()``:
 
 .. code-block:: c++
 
-  const std::set<cmStdString>& someSet = getSet();
+  const std::set<std::string>& someSet = getSet();
   if (someSet.find("needle") == someSet.end()) // Wrong
     {
     // ...
@@ -66,8 +66,8 @@ The return value of ``find()`` must be assigned to an intermediate
 
 .. code-block:: c++
 
-  const std::set<cmStdString>& someSet;
-  const std::set<cmStdString>::const_iterator i = someSet.find("needle");
+  const std::set<std::string>& someSet;
+  const std::set<std::string>::const_iterator i = someSet.find("needle");
   if (i != propSet.end()) // Ok
     {
     // ...
@@ -110,7 +110,7 @@ conversion is not allowed:
 
 .. code-block:: c++
 
-  std::set<cmStdString> theSet;
+  std::set<const char*> theSet;
   std::vector<std::string> theVector;
   theVector.insert(theVector.end(), theSet.begin(), theSet.end()); // Wrong
 
@@ -118,9 +118,9 @@ A loop must be used instead:
 
 .. code-block:: c++
 
-  std::set<cmStdString> theSet;
+  std::set<const char*> theSet;
   std::vector<std::string> theVector;
-  for(std::set<cmStdString>::iterator li = theSet.begin();
+  for(std::set<const char*>::iterator li = theSet.begin();
       li != theSet.end(); ++li)
     {
     theVector.push_back(*li);

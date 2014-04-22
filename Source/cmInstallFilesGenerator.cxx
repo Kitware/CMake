@@ -80,8 +80,8 @@ void cmInstallFilesGenerator::GenerateScriptActions(std::ostream& os,
 
 //----------------------------------------------------------------------------
 void cmInstallFilesGenerator::GenerateScriptForConfig(std::ostream& os,
-                                                      const char* config,
-                                                      Indent const& indent)
+                                                    const std::string& config,
+                                                    Indent const& indent)
 {
   std::vector<std::string> files;
   cmListFileBacktrace lfbt;

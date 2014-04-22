@@ -4698,11 +4698,28 @@ bool SystemInformationImplementation::QueryHaikuInfo()
 {
 #if defined(__HAIKU__)
 
+  // CPU count
   system_info info;
   get_system_info(&info);
-
   this->NumberOfPhysicalCPU = info.cpu_count;
-  this->CPUSpeedInMHz = info.cpu_clock_speed / 1000000.0F;
+
+  // CPU speed
+  uint32 topologyNodeCount = 0;
+  cpu_topology_node_info* topology = 0;
+  get_cpu_topology_info(0, &topologyNodeCount);
+  if (topologyNodeCount != 0)
+    topology = new cpu_topology_node_info[topologyNodeCount];
+  get_cpu_topology_info(topology, &topologyNodeCount);
+
+  for (uint32 i = 0; i < topologyNodeCount; i++) {
+    if (topology[i].type == B_TOPOLOGY_CORE) {
+      this->CPUSpeedInMHz = topology[i].data.core.default_frequency /
+        1000000.0f;
+      break;
+    }
+  }
+
+  delete[] topology;
 
   // Physical Memory
   this->TotalPhysicalMemory = (info.max_pages * B_PAGE_SIZE) / (1024 * 1024) ;
@@ -5006,21 +5023,26 @@ bool SystemInformationImplementation::QueryHPUXProcessor()
     case CPU_PA_RISC1_0:
       this->ChipID.Vendor = "Hewlett-Packard";
       this->ChipID.Family = 0x100;
+      break;
     case CPU_PA_RISC1_1:
       this->ChipID.Vendor = "Hewlett-Packard";
       this->ChipID.Family = 0x110;
+      break;
     case CPU_PA_RISC2_0:
       this->ChipID.Vendor = "Hewlett-Packard";
       this->ChipID.Family = 0x200;
-#  ifdef CPU_HP_INTEL_EM_1_0
+      break;
+#  if defined(CPU_HP_INTEL_EM_1_0) || defined(CPU_IA64_ARCHREV_0)
+#   ifdef CPU_HP_INTEL_EM_1_0
     case CPU_HP_INTEL_EM_1_0:
-#  endif
-#  ifdef CPU_IA64_ARCHREV_0
+#   endif
+#   ifdef CPU_IA64_ARCHREV_0
     case CPU_IA64_ARCHREV_0:
-#  endif
+#   endif
       this->ChipID.Vendor = "GenuineIntel";
       this->Features.HasIA64 = true;
       break;
+#  endif
     default:
       return false;
     }

@@ -28,14 +28,14 @@ class cmExtraKateGenerator : public cmExternalMakefileProjectGenerator
 public:
   cmExtraKateGenerator();
 
-  virtual const char* GetName() const
+  virtual std::string GetName() const
                          { return cmExtraKateGenerator::GetActualName();}
-  static const char* GetActualName()                    { return "Kate";}
+  static std::string GetActualName()                    { return "Kate";}
   static cmExternalMakefileProjectGenerator* New()
                                      { return new cmExtraKateGenerator; }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const char* fullName) const;
+                                const std::string& fullName) const;
 
   virtual void Generate();
 private:

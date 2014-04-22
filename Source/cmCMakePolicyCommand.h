@@ -46,7 +46,7 @@ public:
  /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "cmake_policy";}
+  virtual std::string GetName() const {return "cmake_policy";}
 
   cmTypeMacro(cmCMakePolicyCommand, cmCommand);
 private:

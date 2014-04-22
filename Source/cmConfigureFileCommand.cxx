@@ -38,7 +38,7 @@ bool cmConfigureFileCommand
     e << "input location\n"
       << "  " << this->InputFile << "\n"
       << "is a directory but a file was expected.";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
@@ -61,14 +61,14 @@ bool cmConfigureFileCommand
     {
     std::string e = "attempted to configure a file: " + this->OutputFile
       + " into a source directory.";
-    this->SetError(e.c_str());
+    this->SetError(e);
     cmSystemTools::SetFatalErrorOccured();
     return false;
     }
   std::string errorMessage;
   if (!this->NewLineStyle.ReadFromArguments(args, errorMessage))
     {
-    this->SetError(errorMessage.c_str());
+    this->SetError(errorMessage);
     return false;
     }
   this->CopyOnly = false;

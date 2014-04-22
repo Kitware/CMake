@@ -34,17 +34,17 @@ class cmXcodeVersionParser : public cmXMLParser
 {
 public:
   cmXcodeVersionParser(): Version("1.5") {}
-  void StartElement(const char* , const char** )
+  void StartElement(const std::string&, const char**)
     {
       this->Data = "";
     }
-  void EndElement(const char* name)
+  void EndElement(const std::string& name)
     {
-      if(strcmp(name, "key") == 0)
+      if(name == "key")
         {
         this->Key = this->Data;
         }
-      else if(strcmp(name, "string") == 0)
+      else if(name == "string")
         {
         if(this->Key == "CFBundleShortVersionString")
           {
@@ -116,7 +116,8 @@ public:
 class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(const char* name) const;
+  virtual cmGlobalGenerator* CreateGlobalGenerator(
+                                              const std::string& name) const;
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
     cmGlobalXCodeGenerator::GetDocumentation(entry); }
@@ -152,9 +153,9 @@ cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
-::CreateGlobalGenerator(const char* name) const
+::CreateGlobalGenerator(const std::string& name) const
 {
-  if (strcmp(name, GetActualName()))
+  if (name != GetActualName())
     return 0;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   cmXcodeVersionParser parser;
@@ -260,11 +261,11 @@ void cmGlobalXCodeGenerator::EnableLanguage(std::vector<std::string>const&
 void
 cmGlobalXCodeGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand,
-  const char* makeProgram,
-  const char* projectName,
-  const char* /*projectDir*/,
-  const char* targetName,
-  const char* config,
+  const std::string& makeProgram,
+  const std::string& projectName,
+  const std::string& /*projectDir*/,
+  const std::string& targetName,
+  const std::string& config,
   bool /*fast*/,
   std::vector<std::string> const& makeOptions)
 {
@@ -283,10 +284,11 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   makeCommand.push_back(projectArg);
 
   bool clean = false;
-  if ( targetName && strcmp(targetName, "clean") == 0 )
+  std::string realTarget = targetName;
+  if ( realTarget == "clean" )
     {
     clean = true;
-    targetName = "ALL_BUILD";
+    realTarget = "ALL_BUILD";
     }
   if(clean)
     {
@@ -297,14 +299,9 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
     makeCommand.push_back("build");
     }
   makeCommand.push_back("-target");
-  // if it is a null string for config don't use it
-  if(config && *config == 0)
+  if (!realTarget.empty())
     {
-    config = 0;
-    }
-  if (targetName && strlen(targetName))
-    {
-    makeCommand.push_back(targetName);
+    makeCommand.push_back(realTarget);
     }
   else
     {
@@ -318,7 +315,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
   else
     {
     makeCommand.push_back("-configuration");
-    makeCommand.push_back(config?config:"Debug");
+    makeCommand.push_back(!config.empty()?config:"Debug");
     }
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());
@@ -336,7 +333,7 @@ cmLocalGenerator *cmGlobalXCodeGenerator::CreateLocalGenerator()
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::Generate()
 {
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   // make sure extra targets are added before calling
   // the parent generate which will call trace depends
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
@@ -569,7 +566,7 @@ void cmGlobalXCodeGenerator::addObject(cmXCodeObject *obj)
 {
   if(obj->GetType() == cmXCodeObject::OBJECT)
     {
-    cmStdString id = obj->GetId();
+    std::string id = obj->GetId();
 
     // If this is a duplicate id, it's an error:
     //
@@ -613,7 +610,7 @@ cmGlobalXCodeGenerator::CreateObject(cmXCodeObject::Type type)
 
 //----------------------------------------------------------------------------
 cmXCodeObject*
-cmGlobalXCodeGenerator::CreateString(const char* s)
+cmGlobalXCodeGenerator::CreateString(const std::string& s)
 {
   cmXCodeObject* obj = this->CreateObject(cmXCodeObject::STRING);
   obj->SetString(s);
@@ -630,17 +627,17 @@ cmXCodeObject* cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
-cmStdString
+std::string
 GetGroupMapKeyFromPath(cmTarget& cmtarget, const std::string& fullpath)
 {
-  cmStdString key(cmtarget.GetName());
+  std::string key(cmtarget.GetName());
   key += "-";
   key += fullpath;
   return key;
 }
 
 //----------------------------------------------------------------------------
-cmStdString
+std::string
 GetGroupMapKey(cmTarget& cmtarget, cmSourceFile* sf)
 {
   return GetGroupMapKeyFromPath(cmtarget, sf->GetFullPath());
@@ -696,12 +693,8 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     flags += flagsBuild.GetString();
     }
 
-  const char* lang =
+  std::string lang =
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
-  if (!lang)
-    {
-    lang = "";
-    }
 
   cmXCodeObject* buildFile =
     this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), cmtarget, lang);
@@ -713,22 +706,23 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
 
   // Is this a resource file in this target? Add it to the resources group...
   //
-  cmTarget::SourceFileFlags tsFlags = cmtarget.GetTargetSourceFileFlags(sf);
-  bool isResource = (tsFlags.Type == cmTarget::SourceFileTypeResource);
+  cmGeneratorTarget::SourceFileFlags tsFlags =
+            this->GetGeneratorTarget(&cmtarget)->GetTargetSourceFileFlags(sf);
+  bool isResource = tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource;
 
   // Is this a "private" or "public" framework header file?
   // Set the ATTRIBUTES attribute appropriately...
   //
   if(cmtarget.IsFrameworkOnApple())
     {
-    if(tsFlags.Type == cmTarget::SourceFileTypePrivateHeader)
+    if(tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Private"));
       settings->AddAttribute("ATTRIBUTES", attrs);
       isResource = true;
       }
-    else if(tsFlags.Type == cmTarget::SourceFileTypePublicHeader)
+    else if(tsFlags.Type == cmGeneratorTarget::SourceFileTypePublicHeader)
       {
       cmXCodeObject* attrs = this->CreateObject(cmXCodeObject::OBJECT_LIST);
       attrs->AddObject(this->CreateString("Public"));
@@ -846,7 +840,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     fileRef->SetComment(fname.c_str());
     this->FileRefs[fname] = fileRef;
     }
-  cmStdString key = GetGroupMapKeyFromPath(cmtarget, fullpath);
+  std::string key = GetGroupMapKeyFromPath(cmtarget, fullpath);
   cmXCodeObject* group = this->GroupMap[key];
   cmXCodeObject* children = group->GetObject("children");
   if (!children->HasObject(fileRef))
@@ -905,12 +899,8 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
                                                  cmTarget& cmtarget)
 {
-  const char* lang =
+  std::string lang =
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
-  if (!lang)
-    {
-    lang = "";
-    }
 
   return this->CreateXCodeFileReferenceFromPath(
     sf->GetFullPath(), cmtarget, lang);
@@ -973,6 +963,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
     cmTarget& cmtarget = l->second;
+    cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
 
     // make sure ALL_BUILD, INSTALL, etc are only done once
     if(this->SpecialTargetEmitted(l->first.c_str()))
@@ -1011,21 +1002,21 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       cmXCodeObject* filetype =
         fr->GetObject()->GetObject("explicitFileType");
 
-      cmTarget::SourceFileFlags tsFlags =
-        cmtarget.GetTargetSourceFileFlags(*i);
+      cmGeneratorTarget::SourceFileFlags tsFlags =
+        gtgt->GetTargetSourceFileFlags(*i);
 
       if(filetype &&
-         strcmp(filetype->GetString(), "compiled.mach-o.objfile") == 0)
+         filetype->GetString() == "compiled.mach-o.objfile")
         {
         externalObjFiles.push_back(xsf);
         }
       else if(this->IsHeaderFile(*i) ||
-        (tsFlags.Type == cmTarget::SourceFileTypePrivateHeader) ||
-        (tsFlags.Type == cmTarget::SourceFileTypePublicHeader))
+        (tsFlags.Type == cmGeneratorTarget::SourceFileTypePrivateHeader) ||
+        (tsFlags.Type == cmGeneratorTarget::SourceFileTypePublicHeader))
         {
         headerFiles.push_back(xsf);
         }
-      else if(tsFlags.Type == cmTarget::SourceFileTypeResource)
+      else if(tsFlags.Type == cmGeneratorTarget::SourceFileTypeResource)
         {
         resourceFiles.push_back(xsf);
         }
@@ -1034,7 +1025,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         // Include this file in the build if it has a known language
         // and has not been listed as an ignored extension for this
         // generator.
-        if(this->CurrentLocalGenerator->GetSourceFileLanguage(**i) &&
+        if(!this->CurrentLocalGenerator->GetSourceFileLanguage(**i).empty() &&
            !this->IgnoreFile((*i)->GetExtension().c_str()))
           {
           sourceFiles.push_back(xsf);
@@ -1048,7 +1039,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
       // the externalObjFiles above, except each one is not a cmSourceFile
       // within the target.)
       std::vector<std::string> objs;
-      this->GetGeneratorTarget(&cmtarget)->UseObjectLibraries(objs);
+      gtgt->UseObjectLibraries(objs);
       for(std::vector<std::string>::const_iterator
             oi = objs.begin(); oi != objs.end(); ++oi)
         {
@@ -1132,15 +1123,15 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
     std::vector<cmXCodeObject*> contentBuildPhases;
     if (isFrameworkTarget || isBundleTarget || isCFBundleTarget)
       {
-      typedef std::map<cmStdString, std::vector<cmSourceFile*> >
+      typedef std::map<std::string, std::vector<cmSourceFile*> >
         mapOfVectorOfSourceFiles;
       mapOfVectorOfSourceFiles bundleFiles;
       for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
           i != classes.end(); ++i)
         {
-        cmTarget::SourceFileFlags tsFlags =
-          cmtarget.GetTargetSourceFileFlags(*i);
-        if(tsFlags.Type == cmTarget::SourceFileTypeMacContent)
+        cmGeneratorTarget::SourceFileFlags tsFlags =
+          gtgt->GetTargetSourceFileFlags(*i);
+        if(tsFlags.Type == cmGeneratorTarget::SourceFileTypeMacContent)
           {
           bundleFiles[tsFlags.MacFolder].push_back(*i);
           }
@@ -1221,7 +1212,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
   // This makes sure all targets link using the proper language.
-  for(std::map<cmStdString, cmTarget*>::const_iterator
+  for(std::map<std::string, cmTarget*>::const_iterator
         ti = this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
     this->ForceLinkerLanguage(*ti->second);
@@ -1239,8 +1230,8 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
     return;
     }
 
-  const char* llang = cmtarget.GetLinkerLanguage("NOCONFIG");
-  if(!llang) { return; }
+  std::string llang = cmtarget.GetLinkerLanguage("NOCONFIG");
+  if(llang.empty()) { return; }
 
   // If the language is compiled as a source trust Xcode to link with it.
   cmTarget::LinkImplementation const* impl =
@@ -1268,7 +1259,7 @@ void cmGlobalXCodeGenerator::ForceLinkerLanguage(cmTarget& cmtarget)
   }
   if(cmSourceFile* sf = mf->GetOrCreateSource(fname.c_str()))
     {
-    sf->SetProperty("LANGUAGE", llang);
+    sf->SetProperty("LANGUAGE", llang.c_str());
     cmtarget.AddSourceFile(sf);
     }
 }
@@ -1479,32 +1470,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                                 const & commands,
                                                 const char* name)
 {
-
-  // collect multiple outputs of custom commands into a set
-  // which will be used for every configuration
-  std::map<cmStdString, cmStdString> multipleOutputPairs;
-  for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
-      i != commands.end(); ++i)
-    {
-    cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
-      {
-      const std::vector<std::string>& outputs = cc.GetOutputs();
-      if(!outputs.empty())
-        {
-        // If there are more than one outputs treat the
-        // first as the primary output and make the rest depend on it.
-        std::vector<std::string>::const_iterator o = outputs.begin();
-        std::string primaryOutput = this->ConvertToRelativeForMake(o->c_str());
-        for(++o; o != outputs.end(); ++o)
-          {
-          std::string currentOutput=this->ConvertToRelativeForMake(o->c_str());
-          multipleOutputPairs[currentOutput] = primaryOutput;
-          }
-        }
-      }
-    }
-
+  bool haveMultipleOutputPairs = false;
   std::string dir = this->CurrentMakefile->GetCurrentOutputDirectory();
   dir += "/CMakeScripts";
   cmSystemTools::MakeDirectory(dir.c_str());
@@ -1524,7 +1490,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
                                     target,
                                     commands,
                                     currentConfig->c_str(),
-                                    multipleOutputPairs);
+                                    haveMultipleOutputPairs);
     }
 
   std::string cdir = this->CurrentMakefile->GetCurrentOutputDirectory();
@@ -1534,7 +1500,7 @@ cmGlobalXCodeGenerator::AddCommandsToBuildPhase(cmXCodeObject* buildphase,
   makecmd += " -f ";
   makecmd += this->ConvertToRelativeForMake(
                                           (makefile+"$CONFIGURATION").c_str());
-  if(!multipleOutputPairs.empty())
+  if(haveMultipleOutputPairs)
     {
     makecmd += " cmake_check_multiple_outputs";
     }
@@ -1552,10 +1518,8 @@ void  cmGlobalXCodeGenerator
                             cmTarget& target,
                             std::vector<cmCustomCommand>
                             const & commands,
-                            const char* configName,
-                            const std::map<cmStdString,
-                            cmStdString>& multipleOutputPairs
-                           )
+                            const std::string& configName,
+                            bool& haveMultipleOutputPairs)
 {
   std::string makefileName=makefileBasename;
   if(this->XcodeVersion > 20)
@@ -1576,15 +1540,16 @@ void  cmGlobalXCodeGenerator
 
   // have all depend on all outputs
   makefileStream << "all: ";
-  std::map<const cmCustomCommand*, cmStdString> tname;
+  std::map<const cmCustomCommand*, std::string> tname;
   int count = 0;
+  std::map<std::string, std::string> multipleOutputPairs;
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    if(ccg.GetNumberOfCommands() > 0)
       {
-      const std::vector<std::string>& outputs = cc.GetOutputs();
+      const std::vector<std::string>& outputs = ccg.GetOutputs();
       if(!outputs.empty())
         {
         for(std::vector<std::string>::const_iterator o = outputs.begin();
@@ -1593,13 +1558,23 @@ void  cmGlobalXCodeGenerator
           makefileStream
               << "\\\n\t" << this->ConvertToRelativeForMake(o->c_str());
           }
+
+        // If there is more than one output treat the first as the
+        // primary output and make the rest depend on it.
+        std::vector<std::string>::const_iterator o = outputs.begin();
+        std::string primaryOutput = this->ConvertToRelativeForMake(o->c_str());
+        for(++o; o != outputs.end(); ++o)
+          {
+          std::string currentOutput=this->ConvertToRelativeForMake(o->c_str());
+          multipleOutputPairs[currentOutput] = primaryOutput;
+          }
         }
       else
         {
         cmOStringStream str;
         str << "_buildpart_" << count++ ;
-        tname[&cc] = std::string(target.GetName()) + str.str();
-        makefileStream << "\\\n\t" << tname[&cc];
+        tname[&ccg.GetCC()] = std::string(target.GetName()) + str.str();
+        makefileStream << "\\\n\t" << tname[&ccg.GetCC()];
         }
       }
     }
@@ -1607,12 +1582,11 @@ void  cmGlobalXCodeGenerator
   for(std::vector<cmCustomCommand>::const_iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    cmCustomCommand const& cc = *i;
-    if(!cc.GetCommandLines().empty())
+    cmCustomCommandGenerator ccg(*i, configName, this->CurrentMakefile);
+    if(ccg.GetNumberOfCommands() > 0)
       {
-      cmCustomCommandGenerator ccg(cc, configName, this->CurrentMakefile);
       makefileStream << "\n";
-      const std::vector<std::string>& outputs = cc.GetOutputs();
+      const std::vector<std::string>& outputs = ccg.GetOutputs();
       if(!outputs.empty())
         {
         // There is at least one output, start the rule for it
@@ -1623,11 +1597,11 @@ void  cmGlobalXCodeGenerator
       else
         {
         // There are no outputs.  Use the generated force rule name.
-        makefileStream << tname[&cc] << ": ";
+        makefileStream << tname[&ccg.GetCC()] << ": ";
         }
       for(std::vector<std::string>::const_iterator d =
-          cc.GetDepends().begin();
-          d != cc.GetDepends().end(); ++d)
+          ccg.GetDepends().begin();
+          d != ccg.GetDepends().end(); ++d)
         {
         std::string dep;
         if(this->CurrentLocalGenerator
@@ -1639,11 +1613,11 @@ void  cmGlobalXCodeGenerator
         }
       makefileStream << "\n";
 
-      if(const char* comment = cc.GetComment())
+      if(const char* comment = ccg.GetComment())
         {
         std::string echo_cmd = "echo ";
         echo_cmd += (this->CurrentLocalGenerator->
-                     EscapeForShell(comment, cc.GetEscapeAllowMakeVars()));
+          EscapeForShell(comment, ccg.GetCC().GetEscapeAllowMakeVars()));
         makefileStream << "\t" << echo_cmd.c_str() << "\n";
         }
 
@@ -1655,10 +1629,11 @@ void  cmGlobalXCodeGenerator
         cmSystemTools::ReplaceString(cmd2, "/./", "/");
         cmd2 = this->ConvertToRelativeForMake(cmd2.c_str());
         std::string cmd;
-        if(cc.GetWorkingDirectory())
+        std::string wd = ccg.GetWorkingDirectory();
+        if(!wd.empty())
           {
           cmd += "cd ";
-          cmd += this->ConvertToRelativeForMake(cc.GetWorkingDirectory());
+          cmd += this->ConvertToRelativeForMake(wd.c_str());
           cmd += " && ";
           }
         cmd += cmd2;
@@ -1674,7 +1649,7 @@ void  cmGlobalXCodeGenerator
     makefileStream <<
         "\n# Dependencies of multiple outputs to their primary outputs \n";
 
-    for(std::map<cmStdString, cmStdString>::const_iterator o =
+    for(std::map<std::string, std::string>::const_iterator o =
         multipleOutputPairs.begin(); o != multipleOutputPairs.end(); ++o)
       {
       makefileStream << o->first << ": " << o->second << "\n";
@@ -1683,7 +1658,7 @@ void  cmGlobalXCodeGenerator
     makefileStream <<
         "\n"
         "cmake_check_multiple_outputs:\n";
-    for(std::map<cmStdString, cmStdString>::const_iterator o =
+    for(std::map<std::string, std::string>::const_iterator o =
         multipleOutputPairs.begin(); o != multipleOutputPairs.end(); ++o)
       {
       makefileStream << "\t@if [ ! -f "
@@ -1691,12 +1666,15 @@ void  cmGlobalXCodeGenerator
           << o->second << "; fi\n";
       }
     }
+
+  haveMultipleOutputPairs =
+    haveMultipleOutputPairs || !multipleOutputPairs.empty();
 }
 
 //----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
-                                                 cmXCodeObject* buildSettings,
-                                                 const char* configName)
+                                                cmXCodeObject* buildSettings,
+                                                const std::string& configName)
 {
   if(target.GetType() == cmTarget::INTERFACE_LIBRARY)
     {
@@ -1712,12 +1690,12 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                  (target.GetType() == cmTarget::EXECUTABLE) ||
                  shared);
 
-  const char* lang = target.GetLinkerLanguage(configName);
+  std::string lang = target.GetLinkerLanguage(configName);
   std::string cflags;
-  if(lang)
+  if(!lang.empty())
     {
     // for c++ projects get the c flags as well
-    if(strcmp(lang, "CXX") == 0)
+    if(lang == "CXX")
       {
       this->CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
       this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target,
@@ -1743,7 +1721,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   {
     cmSystemTools::Error
       ("CMake can not determine linker language for target: ",
-       target.GetName());
+       target.GetName().c_str());
     return;
   }
 
@@ -1809,7 +1787,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       this->CurrentLocalGenerator->
         AppendFlags(extraLinkOptions, targetLinkFlags);
       }
-    if(configName && *configName)
+    if(!configName.empty())
       {
       std::string linkFlagsVar = "LINK_FLAGS_";
       linkFlagsVar += cmSystemTools::UpperCase(configName);
@@ -2093,7 +2071,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   std::vector<std::string> includes;
   this->CurrentLocalGenerator->GetIncludeDirectories(includes, gtgt,
                                                      "C", configName);
-  std::set<cmStdString> emitted;
+  std::set<std::string> emitted;
   emitted.insert("/System/Library/Frameworks");
   for(std::vector<std::string>::iterator i = includes.begin();
       i != includes.end(); ++i)
@@ -2176,7 +2154,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
   const char* debugStr = "YES";
   // We can't set the Xcode flag differently depending on the language,
   // so put them back in this case.
-  if( (lang && strcmp(lang, "CXX") == 0) && gflag != gflagc )
+  if( (lang == "CXX") && gflag != gflagc )
     {
     cflags += " ";
     cflags += gflagc;
@@ -2199,7 +2177,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString("NO"));
   buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN",
                               this->CreateString("NO"));
-  if(lang && strcmp(lang, "CXX") == 0)
+  if(lang == "CXX")
     {
     flags += " ";
     flags += defFlags;
@@ -2362,18 +2340,18 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     if(i->first.find("XCODE_ATTRIBUTE_") == 0)
       {
-      cmStdString attribute = i->first.substr(16);
+      std::string attribute = i->first.substr(16);
       // Handle [variant=<config>] condition explicitly here.
-      cmStdString::size_type beginVariant =
+      std::string::size_type beginVariant =
         attribute.find("[variant=");
-      if (beginVariant != cmStdString::npos)
+      if (beginVariant != std::string::npos)
         {
-        cmStdString::size_type endVariant =
+        std::string::size_type endVariant =
           attribute.find("]", beginVariant+9);
-        if (endVariant != cmStdString::npos)
+        if (endVariant != std::string::npos)
           {
           // Compare the variant to the configuration.
-          cmStdString variant =
+          std::string variant =
             attribute.substr(beginVariant+9, endVariant-beginVariant-9);
           if (variant == configName)
             {
@@ -2426,7 +2404,7 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
 
   cmXCodeObject* target =
     this->CreateObject(cmXCodeObject::PBXAggregateTarget);
-  target->SetComment(cmtarget.GetName());
+  target->SetComment(cmtarget.GetName().c_str());
   cmXCodeObject* buildPhases =
     this->CreateObject(cmXCodeObject::OBJECT_LIST);
   std::vector<cmXCodeObject*> emptyContentVector;
@@ -2627,7 +2605,7 @@ cmGlobalXCodeGenerator::CreateXCodeTarget(cmTarget& cmtarget,
   fileRef->AddAttribute("refType", this->CreateString("0"));
   fileRef->AddAttribute("sourceTree",
                         this->CreateString("BUILT_PRODUCTS_DIR"));
-  fileRef->SetComment(cmtarget.GetName());
+  fileRef->SetComment(cmtarget.GetName().c_str());
   target->AddAttribute("productReference",
                        this->CreateObjectReference(fileRef));
   if(const char* productType = this->GetTargetProductType(cmtarget))
@@ -2660,8 +2638,8 @@ cmXCodeObject* cmGlobalXCodeGenerator::FindXCodeTarget(cmTarget const* t)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::GetOrCreateId(const char* name,
-                                                  const char* id)
+std::string cmGlobalXCodeGenerator::GetOrCreateId(const std::string& name,
+                                                  const std::string& id)
 {
   std::string guidStoreName = name;
   guidStoreName += "_GUID_CMAKE";
@@ -2674,7 +2652,7 @@ std::string cmGlobalXCodeGenerator::GetOrCreateId(const char* name,
     }
 
   this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(),
-    id, "Stored Xcode object GUID", cmCacheManager::INTERNAL);
+    id.c_str(), "Stored Xcode object GUID", cmCacheManager::INTERNAL);
 
   return id;
 }
@@ -2743,7 +2721,7 @@ void cmGlobalXCodeGenerator
 ::AppendBuildSettingAttribute(cmXCodeObject* target,
                               const char* attribute,
                               const char* value,
-                              const char* configName)
+                              const std::string& configName)
 {
   if(this->XcodeVersion < 21)
     {
@@ -2766,9 +2744,9 @@ void cmGlobalXCodeGenerator
     for(std::vector<cmXCodeObject*>::iterator i = list.begin();
         i != list.end(); ++i)
       {
-      if(configName)
+      if(!configName.empty())
         {
-        if(strcmp((*i)->GetObject("name")->GetString(), configName) == 0)
+        if((*i)->GetObject("name")->GetString() == configName)
           {
           cmXCodeObject* settings = (*i)->GetObject("buildSettings");
           this->AppendOrAddBuildSetting(settings, attribute, value);
@@ -2974,7 +2952,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
           mf->FindSourceGroup(source.c_str(), sourceGroups);
         cmXCodeObject* pbxgroup =
           this->CreateOrGetPBXGroup(cmtarget, sourceGroup);
-        cmStdString key = GetGroupMapKey(cmtarget, sf);
+        std::string key = GetGroupMapKey(cmtarget, sf);
         this->GroupMap[key] = pbxgroup;
         }
 
@@ -2989,7 +2967,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
           mf->FindSourceGroup(source.c_str(), sourceGroups);
         cmXCodeObject* pbxgroup =
           this->CreateOrGetPBXGroup(cmtarget, sourceGroup);
-        cmStdString key = GetGroupMapKeyFromPath(cmtarget, source);
+        std::string key = GetGroupMapKeyFromPath(cmtarget, source);
         this->GroupMap[key] = pbxgroup;
         }
       }
@@ -2997,7 +2975,7 @@ void cmGlobalXCodeGenerator::CreateGroups(cmLocalGenerator* root,
 }
 
 cmXCodeObject *cmGlobalXCodeGenerator
-::CreatePBXGroup(cmXCodeObject *parent, cmStdString name)
+::CreatePBXGroup(cmXCodeObject *parent, std::string name)
 {
   cmXCodeObject* parentChildren = NULL;
   if(parent)
@@ -3021,8 +2999,8 @@ cmXCodeObject *cmGlobalXCodeGenerator
 cmXCodeObject* cmGlobalXCodeGenerator
 ::CreateOrGetPBXGroup(cmTarget& cmtarget, cmSourceGroup* sg)
 {
-  cmStdString s;
-  cmStdString target;
+  std::string s;
+  std::string target;
   const char *targetFolder= cmtarget.GetProperty("FOLDER");
   if(targetFolder) {
     target = targetFolder;
@@ -3031,7 +3009,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
   target += cmtarget.GetName();
   s = target + "/";
   s += sg->GetFullName();
-  std::map<cmStdString, cmXCodeObject* >::iterator it =
+  std::map<std::string, cmXCodeObject* >::iterator it =
     this->GroupNameMap.find(s);
   if(it != this->GroupNameMap.end())
     {
@@ -3048,7 +3026,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
     {
     std::vector<std::string> tgt_folders =
       cmSystemTools::tokenize(target, "/");
-    cmStdString curr_tgt_folder;
+    std::string curr_tgt_folder;
     for(std::vector<std::string>::size_type i = 0; i < tgt_folders.size();i++)
       {
       if (i != 0)
@@ -3075,7 +3053,7 @@ cmXCodeObject* cmGlobalXCodeGenerator
   // If it's the default source group (empty name) then put the source file
   // directly in the tgroup...
   //
-  if (cmStdString(sg->GetFullName()) == "")
+  if (std::string(sg->GetFullName()) == "")
     {
     this->GroupNameMap[s] = tgroup;
     return tgroup;
@@ -3086,12 +3064,12 @@ cmXCodeObject* cmGlobalXCodeGenerator
     {
     std::vector<std::string> folders =
       cmSystemTools::tokenize(sg->GetFullName(), "\\");
-    cmStdString curr_folder = target;
+    std::string curr_folder = target;
     curr_folder += "/";
     for(std::vector<std::string>::size_type i = 0; i < folders.size();i++)
       {
       curr_folder += folders[i];
-      std::map<cmStdString, cmXCodeObject* >::iterator i_folder =
+      std::map<std::string, cmXCodeObject* >::iterator i_folder =
         this->GroupNameMap.find(curr_folder);
       //Create new folder
       if(i_folder == this->GroupNameMap.end())
@@ -3471,14 +3449,14 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
   makefileStream
     << "# For each target create a dummy rule "
     "so the target does not have to exist\n";
-  std::set<cmStdString> emitted;
+  std::set<std::string> emitted;
   for(std::vector<cmXCodeObject*>::iterator i = targets.begin();
       i != targets.end(); ++i)
     {
     cmXCodeObject* target = *i;
-    std::map<cmStdString, cmXCodeObject::StringVec> const& deplibs =
+    std::map<std::string, cmXCodeObject::StringVec> const& deplibs =
       target->GetDependLibraries();
-    for(std::map<cmStdString, cmXCodeObject::StringVec>::const_iterator ci
+    for(std::map<std::string, cmXCodeObject::StringVec>::const_iterator ci
           = deplibs.begin(); ci != deplibs.end(); ++ci)
       {
       for(cmXCodeObject::StringVec::const_iterator d = ci->second.begin();
@@ -3534,12 +3512,12 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         std::string trel = this->ConvertToRelativeForMake(tfull.c_str());
 
         // Add this target to the post-build phases of its dependencies.
-        std::map<cmStdString, cmXCodeObject::StringVec>::const_iterator
+        std::map<std::string, cmXCodeObject::StringVec>::const_iterator
           y = target->GetDependTargets().find(*ct);
         if(y != target->GetDependTargets().end())
           {
-          std::vector<cmStdString> const& deptgts = y->second;
-          for(std::vector<cmStdString>::const_iterator d = deptgts.begin();
+          std::vector<std::string> const& deptgts = y->second;
+          for(std::vector<std::string>::const_iterator d = deptgts.begin();
               d != deptgts.end(); ++d)
             {
             makefileStream << this->PostBuildMakeTarget(*d, *ct) << ": "
@@ -3551,12 +3529,12 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         makefileStream << trel << ":";
 
         // List dependencies if any exist.
-        std::map<cmStdString, cmXCodeObject::StringVec>::const_iterator
+        std::map<std::string, cmXCodeObject::StringVec>::const_iterator
           x = target->GetDependLibraries().find(*ct);
         if(x != target->GetDependLibraries().end())
           {
-          std::vector<cmStdString> const& deplibs = x->second;
-          for(std::vector<cmStdString>::const_iterator d = deplibs.begin();
+          std::vector<std::string> const& deplibs = x->second;
+          for(std::vector<std::string>::const_iterator d = deplibs.begin();
               d != deplibs.end(); ++d)
             {
             makefileStream << "\\\n\t" <<
@@ -3781,14 +3759,14 @@ std::string cmGlobalXCodeGenerator::XCodeEscapePath(const char* p)
 //----------------------------------------------------------------------------
 void
 cmGlobalXCodeGenerator
-::AppendDirectoryForConfig(const char* prefix,
-                           const char* config,
-                           const char* suffix,
+::AppendDirectoryForConfig(const std::string& prefix,
+                           const std::string& config,
+                           const std::string& suffix,
                            std::string& dir)
 {
   if(this->XcodeVersion > 20)
     {
-    if(config)
+    if(!config.empty())
       {
       dir += prefix;
       dir += config;
@@ -3798,12 +3776,13 @@ cmGlobalXCodeGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalXCodeGenerator::LookupFlags(const char* varNamePrefix,
-                                                const char* varNameLang,
-                                                const char* varNameSuffix,
-                                                const char* default_flags)
+std::string cmGlobalXCodeGenerator::LookupFlags(
+                                              const std::string& varNamePrefix,
+                                              const std::string& varNameLang,
+                                              const std::string& varNameSuffix,
+                                              const std::string& default_flags)
 {
-  if(varNameLang)
+  if(!varNameLang.empty())
     {
     std::string varName = varNamePrefix;
     varName += varNameLang;
@@ -3955,37 +3934,10 @@ bool cmGlobalXCodeGenerator::IsMultiConfig()
   return true;
 }
 
- //----------------------------------------------------------------------------
-void
-cmGlobalXCodeGenerator
-::ComputeTargetObjects(cmGeneratorTarget* gt) const
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator
+::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  // Count the number of object files with each name. Warn about duplicate
-  // names since Xcode names them uniquely automatically with a numeric suffix
-  // to avoid exact duplicate file names. Note that Mac file names are not
-  // typically case sensitive, hence the LowerCase.
-  std::map<cmStdString, int> counts;
-  std::vector<cmSourceFile*> objectSources;
-  gt->GetObjectSources(objectSources);
-  for(std::vector<cmSourceFile*>::const_iterator
-      si = objectSources.begin();
-      si != objectSources.end(); ++si)
-    {
-    cmSourceFile* sf = *si;
-    std::string objectName =
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
-    objectName += ".o";
-
-    std::string objectNameLower = cmSystemTools::LowerCase(objectName);
-    counts[objectNameLower] += 1;
-    if (2 == counts[objectNameLower])
-      {
-      // TODO: emit warning about duplicate name?
-      }
-
-    gt->AddObject(sf, objectName);
-    }
-
   const char* configName = this->GetCMakeCFGIntDir();
   std::string dir = this->GetObjectsNormalDirectory(
     "$(PROJECT_NAME)", configName, gt->Target);

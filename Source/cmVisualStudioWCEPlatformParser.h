@@ -41,8 +41,8 @@ public:
     return this->AvailablePlatforms; }
 
 protected:
-  virtual void StartElement(const char* name, const char** attributes);
-  void EndElement(const char* name);
+  virtual void StartElement(const std::string& name, const char** attributes);
+  void EndElement(const std::string& name);
   void CharacterDataHandler(const char* data, int length);
 
 private:

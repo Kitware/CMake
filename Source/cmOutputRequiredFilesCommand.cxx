@@ -202,7 +202,7 @@ bool cmOutputRequiredFilesCommand
       {
       std::string err = "Can not open output file: ";
       err += this->OutputFile;
-      this->SetError(err.c_str());
+      this->SetError(err);
       return false;
       }
     std::set<cmDependInformation const*> visited;

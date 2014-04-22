@@ -40,7 +40,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "mark_as_advanced";}
+  virtual std::string GetName() const {return "mark_as_advanced";}
 
   /**
    * This determines if the command is invoked when in script mode.

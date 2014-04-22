@@ -124,7 +124,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const = 0;
+  virtual std::string GetName() const = 0;
 
   /**
    * Enable the command.
@@ -166,7 +166,7 @@ public:
   /**
    * Set the error message
    */
-  void SetError(const char* e)
+  void SetError(const std::string& e)
     {
     this->Error = this->GetName();
     this->Error += " ";

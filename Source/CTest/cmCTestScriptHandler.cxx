@@ -231,7 +231,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
              cmSystemTools::GetCTestCommand() << "\n");
 
   // now pass through all the other arguments
-  std::vector<cmStdString> &initArgs =
+  std::vector<std::string> &initArgs =
     this->CTest->GetInitialCommandLineArguments();
   //*** need to make sure this does not have the current script ***
   for(size_t i=1; i < initArgs.size(); ++i)
@@ -337,8 +337,8 @@ void cmCTestScriptHandler::CreateCMake()
   // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
   // Also, some commands need Makefile->GetCurrentDirectory().
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  this->Makefile->SetStartDirectory(cwd.c_str());
-  this->Makefile->SetStartOutputDirectory(cwd.c_str());
+  this->Makefile->SetStartDirectory(cwd);
+  this->Makefile->SetStartOutputDirectory(cwd);
 
   // remove all cmake commands which are not scriptable, since they can't be
   // used in ctest scripts
@@ -426,7 +426,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
       cmSystemTools::GetErrorOccuredFlag())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:"
-               << systemFile.c_str() << "\n");
+               << systemFile << "\n");
     return 2;
     }
 
@@ -436,7 +436,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   for (std::map<std::string, std::string>::const_iterator it = defs.begin();
        it != defs.end(); ++it)
     {
-    this->Makefile->AddDefinition(it->first.c_str(), it->second.c_str());
+    this->Makefile->AddDefinition(it->first, it->second.c_str());
     }
 
   // finally read in the script
@@ -444,7 +444,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     cmSystemTools::GetErrorOccuredFlag())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read script: "
-               << script.c_str()
+               << script
                << std::endl);
     // Reset the error flag so that it can run more than
     // one script with an error when you
@@ -646,7 +646,7 @@ int cmCTestScriptHandler::RunCurrentScript()
   if (!this->CTestEnv.empty())
     {
     std::vector<std::string> envArgs;
-    cmSystemTools::ExpandListArgument(this->CTestEnv.c_str(),envArgs);
+    cmSystemTools::ExpandListArgument(this->CTestEnv,envArgs);
     cmSystemTools::AppendEnv(envArgs);
     }
 
@@ -766,13 +766,13 @@ int cmCTestScriptHandler::PerformExtraUpdates()
 
   // do an initial cvs update as required
   command = this->UpdateCmd;
-  std::vector<cmStdString>::iterator it;
+  std::vector<std::string>::iterator it;
   for (it = this->ExtraUpdates.begin();
     it != this->ExtraUpdates.end();
     ++ it )
     {
     std::vector<std::string> cvsArgs;
-    cmSystemTools::ExpandListArgument(it->c_str(),cvsArgs);
+    cmSystemTools::ExpandListArgument(*it,cvsArgs);
     if (cvsArgs.size() == 2)
       {
       std::string fullCommand = command;
@@ -781,7 +781,7 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       output = "";
       retVal = 0;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run Update: "
-        << fullCommand.c_str() << std::endl);
+        << fullCommand << std::endl);
       res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output,
         &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, 0 /*this->TimeOut*/);
@@ -902,7 +902,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     command += "\"";
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run cmake command: "
-      << command.c_str() << std::endl);
+      << command << std::endl);
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
       &retVal, this->BinaryDir.c_str(),
       this->HandlerVerbose, 0 /*this->TimeOut*/);
@@ -916,7 +916,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         }
 
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-        "Write CMake output to file: " << cmakeOutputFile.c_str()
+        "Write CMake output to file: " << cmakeOutputFile
         << std::endl);
       cmGeneratedFileStream fout(cmakeOutputFile.c_str());
       if ( fout )
@@ -927,7 +927,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
           "Cannot open CMake output file: "
-          << cmakeOutputFile.c_str() << " for writing" << std::endl);
+          << cmakeOutputFile << " for writing" << std::endl);
         }
       }
     if (!res || retVal != 0)
@@ -948,7 +948,7 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     output = "";
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run ctest command: "
-      << command.c_str() << std::endl);
+      << command << std::endl);
     res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
       &retVal, this->BinaryDir.c_str(), this->HandlerVerbose,
       0 /*this->TimeOut*/);
@@ -962,13 +962,13 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE,
           "Unable to run cmake:" << std::endl
-          << cmakeFailedOuput.c_str() << std::endl);
+          << cmakeFailedOuput << std::endl);
         return 10;
         }
       cmCTestLog(this->CTest, ERROR_MESSAGE,
         "Unable to run ctest:" << std::endl
-        << "command: " << command.c_str() << std::endl
-        << "output: " << output.c_str() << std::endl);
+        << "command: " << command << std::endl
+        << "output: " << output << std::endl);
       if (!res)
         {
         return 11;

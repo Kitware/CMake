@@ -143,15 +143,17 @@ cmGlobalNinjaGenerator* cmLocalNinjaGenerator::GetGlobalNinjaGenerator()
 // Virtual protected methods.
 
 std::string
-cmLocalNinjaGenerator::ConvertToLinkReference(std::string const& lib)
+cmLocalNinjaGenerator::ConvertToLinkReference(std::string const& lib,
+                                              OutputFormat format)
 {
-  return this->Convert(lib.c_str(), HOME_OUTPUT, SHELL);
+  return this->Convert(lib, HOME_OUTPUT, format);
 }
 
 std::string
-cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path)
+cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path,
+                                                 OutputFormat format)
 {
-  return this->Convert(path.c_str(), HOME_OUTPUT, SHELL);
+  return this->Convert(path, HOME_OUTPUT, format);
 }
 
 //----------------------------------------------------------------------------
@@ -265,6 +267,20 @@ void cmLocalNinjaGenerator::SetConfigName()
     }
 }
 
+//----------------------------------------------------------------------------
+void cmLocalNinjaGenerator::ComputeObjectFilenames(
+                        std::map<cmSourceFile const*, std::string>& mapping,
+                        cmGeneratorTarget const* gt)
+{
+  for(std::map<cmSourceFile const*, std::string>::iterator
+      si = mapping.begin(); si != mapping.end(); ++si)
+    {
+    cmSourceFile const* sf = si->first;
+    si->second = this->GetObjectFileNameWithoutTarget(*sf,
+                                                      gt->ObjectDirectory);
+    }
+}
+
 void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
@@ -301,14 +317,15 @@ cmLocalNinjaGenerator
   this->GetGlobalNinjaGenerator()->AppendTargetDepends(target, outputs);
 }
 
-void cmLocalNinjaGenerator::AppendCustomCommandDeps(const cmCustomCommand *cc,
-                                                    cmNinjaDeps &ninjaDeps)
+void cmLocalNinjaGenerator::AppendCustomCommandDeps(
+  cmCustomCommandGenerator const& ccg,
+  cmNinjaDeps &ninjaDeps)
 {
-  const std::vector<std::string> &deps = cc->GetDepends();
+  const std::vector<std::string> &deps = ccg.GetDepends();
   for (std::vector<std::string>::const_iterator i = deps.begin();
        i != deps.end(); ++i) {
     std::string dep;
-    if (this->GetRealDependency(i->c_str(), this->GetConfigName(), dep))
+    if (this->GetRealDependency(*i, this->GetConfigName(), dep))
       ninjaDeps.push_back(ConvertToNinjaPath(dep.c_str()));
   }
 }
@@ -357,13 +374,13 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
   return cmd.str();
 }
 
-void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
-                                            std::vector<std::string> &cmdLines)
+void cmLocalNinjaGenerator::AppendCustomCommandLines(
+  cmCustomCommandGenerator const& ccg,
+  std::vector<std::string> &cmdLines)
 {
-  cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
   if (ccg.GetNumberOfCommands() > 0) {
-    const char* wd = cc->GetWorkingDirectory();
-    if (!wd)
+    std::string wd = ccg.GetWorkingDirectory();
+    if (wd.empty())
       wd = this->GetMakefile()->GetStartOutputDirectory();
 
     cmOStringStream cdCmd;
@@ -376,11 +393,11 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(const cmCustomCommand *cc,
     cmdLines.push_back(cdCmd.str());
   }
 
-  std::string launcher = this->MakeCustomLauncher(*cc);
+  std::string launcher = this->MakeCustomLauncher(ccg);
 
   for (unsigned i = 0; i != ccg.GetNumberOfCommands(); ++i) {
     cmdLines.push_back(launcher +
-      this->ConvertToOutputFormat(ccg.GetCommand(i).c_str(), SHELL));
+      this->ConvertToOutputFormat(ccg.GetCommand(i), SHELL));
 
     std::string& cmd = cmdLines.back();
     ccg.AppendArguments(i, cmd);
@@ -394,19 +411,21 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   if (this->GetGlobalNinjaGenerator()->SeenCustomCommand(cc))
     return;
 
-  const std::vector<std::string> &outputs = cc->GetOutputs();
+  cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
+
+  const std::vector<std::string> &outputs = ccg.GetOutputs();
   cmNinjaDeps ninjaOutputs(outputs.size()), ninjaDeps;
 
   std::transform(outputs.begin(), outputs.end(),
                  ninjaOutputs.begin(), MapToNinjaPath());
-  this->AppendCustomCommandDeps(cc, ninjaDeps);
+  this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
   for (cmNinjaDeps::iterator i = ninjaOutputs.begin(); i != ninjaOutputs.end();
        ++i)
     this->GetGlobalNinjaGenerator()->SeenCustomCommandOutput(*i);
 
   std::vector<std::string> cmdLines;
-  this->AppendCustomCommandLines(cc, cmdLines);
+  this->AppendCustomCommandLines(ccg, cmdLines);
 
   if (cmdLines.empty()) {
     this->GetGlobalNinjaGenerator()->WritePhonyBuild(
@@ -421,7 +440,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   } else {
     this->GetGlobalNinjaGenerator()->WriteCustomCommandBuild(
       this->BuildCommandLine(cmdLines),
-      this->ConstructComment(*cc),
+      this->ConstructComment(ccg),
       "Custom command for " + ninjaOutputs[0],
       ninjaOutputs,
       ninjaDeps,
@@ -470,7 +489,7 @@ void cmLocalNinjaGenerator::WriteCustomCommandBuildStatements()
 }
 
 std::string cmLocalNinjaGenerator::MakeCustomLauncher(
-  const cmCustomCommand& cc)
+  cmCustomCommandGenerator const& ccg)
 {
   const char* property = "RULE_LAUNCH_CUSTOM";
   const char* property_value = this->Makefile->GetProperty(property);
@@ -485,13 +504,13 @@ std::string cmLocalNinjaGenerator::MakeCustomLauncher(
   RuleVariables vars;
   vars.RuleLauncher = property;
   std::string output;
-  const std::vector<std::string>& outputs = cc.GetOutputs();
+  const std::vector<std::string>& outputs = ccg.GetOutputs();
   if(!outputs.empty())
   {
     RelativeRoot relative_root =
-      cc.GetWorkingDirectory() ? NONE : START_OUTPUT;
+      ccg.GetWorkingDirectory().empty() ? START_OUTPUT : NONE;
 
-    output = this->Convert(outputs[0].c_str(), relative_root, SHELL);
+    output = this->Convert(outputs[0], relative_root, SHELL);
   }
   vars.Output = output.c_str();
 

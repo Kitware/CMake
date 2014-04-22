@@ -92,8 +92,8 @@ private:
 
   std::vector<std::string> MarkupLines;
   std::string DocDir;
-  std::map<cmStdString, cmStdString> Replace;
-  std::set<cmStdString> Replaced;
+  std::map<std::string, std::string> Replace;
+  std::set<std::string> Replaced;
   std::string ReplaceName;
 };
 

@@ -47,33 +47,33 @@ private:
   /**
    * Submit file using various ways
    */
-  bool SubmitUsingFTP(const cmStdString& localprefix,
-                      const std::set<cmStdString>& files,
-                      const cmStdString& remoteprefix,
-                      const cmStdString& url);
-  bool SubmitUsingHTTP(const cmStdString& localprefix,
-                       const std::set<cmStdString>& files,
-                       const cmStdString& remoteprefix,
-                       const cmStdString& url);
-  bool SubmitUsingSCP(const cmStdString& scp_command,
-                      const cmStdString& localprefix,
-                      const std::set<cmStdString>& files,
-                      const cmStdString& remoteprefix,
-                      const cmStdString& url);
+  bool SubmitUsingFTP(const std::string& localprefix,
+                      const std::set<std::string>& files,
+                      const std::string& remoteprefix,
+                      const std::string& url);
+  bool SubmitUsingHTTP(const std::string& localprefix,
+                       const std::set<std::string>& files,
+                       const std::string& remoteprefix,
+                       const std::string& url);
+  bool SubmitUsingSCP(const std::string& scp_command,
+                      const std::string& localprefix,
+                      const std::set<std::string>& files,
+                      const std::string& remoteprefix,
+                      const std::string& url);
 
-  bool SubmitUsingCP( const cmStdString& localprefix,
-                      const std::set<cmStdString>& files,
-                      const cmStdString& remoteprefix,
-                      const cmStdString& url);
+  bool SubmitUsingCP( const std::string& localprefix,
+                      const std::set<std::string>& files,
+                      const std::string& remoteprefix,
+                      const std::string& url);
 
-  bool TriggerUsingHTTP(const std::set<cmStdString>& files,
-                        const cmStdString& remoteprefix,
-                        const cmStdString& url);
+  bool TriggerUsingHTTP(const std::set<std::string>& files,
+                        const std::string& remoteprefix,
+                        const std::string& url);
 
-  bool SubmitUsingXMLRPC(const cmStdString& localprefix,
-                       const std::set<cmStdString>& files,
-                       const cmStdString& remoteprefix,
-                       const cmStdString& url);
+  bool SubmitUsingXMLRPC(const std::string& localprefix,
+                       const std::set<std::string>& files,
+                       const std::string& remoteprefix,
+                       const std::string& url);
 
   typedef std::vector<char> cmCTestSubmitHandlerVectorOfChar;
 
@@ -82,10 +82,10 @@ private:
   std::string GetSubmitResultsPrefix();
 
   class         ResponseParser;
-  cmStdString   HTTPProxy;
+  std::string   HTTPProxy;
   int           HTTPProxyType;
-  cmStdString   HTTPProxyAuth;
-  cmStdString   FTPProxy;
+  std::string   HTTPProxyAuth;
+  std::string   FTPProxy;
   int           FTPProxyType;
   std::ostream* LogFile;
   bool SubmitPart[cmCTest::PartCount];

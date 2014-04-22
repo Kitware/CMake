@@ -29,7 +29,7 @@ bool cmUtilitySourceCommand
   // The first argument is the cache entry name.
   std::string cacheEntry = *arg++;
   const char* cacheValue =
-    this->Makefile->GetDefinition(cacheEntry.c_str());
+    this->Makefile->GetDefinition(cacheEntry);
   // If it exists already and appears up to date then we are done.  If
   // the string contains "(IntDir)" but that is not the
   // CMAKE_CFG_INTDIR setting then the value is out of date.
@@ -113,14 +113,14 @@ bool cmUtilitySourceCommand
   cmSystemTools::ReplaceString(utilityExecutable, "/./", "/");
 
   // Enter the value into the cache.
-  this->Makefile->AddCacheDefinition(cacheEntry.c_str(),
+  this->Makefile->AddCacheDefinition(cacheEntry,
                                  utilityExecutable.c_str(),
                                  "Path to an internal program.",
                                  cmCacheManager::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
-  this->Makefile->AddCacheDefinition(utilityExecutable.c_str(),
+  this->Makefile->AddCacheDefinition(utilityExecutable,
                                  utilityName.c_str(),
                                  "Executable to project name.",
                                  cmCacheManager::INTERNAL);

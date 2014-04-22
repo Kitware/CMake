@@ -89,8 +89,8 @@ private:
   std::string              BoundsCheckerDPBDFile;
   std::string              BoundsCheckerXMLFile;
   std::string              MemoryTester;
-  std::vector<cmStdString> MemoryTesterDynamicOptions;
-  std::vector<cmStdString> MemoryTesterOptions;
+  std::vector<std::string> MemoryTesterDynamicOptions;
+  std::vector<std::string> MemoryTesterOptions;
   int                      MemoryTesterStyle;
   std::string              MemoryTesterOutputFile;
   int                      MemoryTesterGlobalResults[NO_MEMORY_FAULT];
@@ -103,8 +103,8 @@ private:
    */
   void GenerateDartOutput(std::ostream& os);
 
-  std::vector<cmStdString> CustomPreMemCheck;
-  std::vector<cmStdString> CustomPostMemCheck;
+  std::vector<std::string> CustomPreMemCheck;
+  std::vector<std::string> CustomPostMemCheck;
 
   //! Parse Valgrind/Purify/Bounds Checker result out of the output
   //string. After running, log holds the output and results hold the
@@ -127,7 +127,7 @@ private:
                              int test);
 
   ///! generate the output filename for the given test index
-  cmStdString testOutputFileName(int test);
+  std::string testOutputFileName(int test);
 };
 
 #endif

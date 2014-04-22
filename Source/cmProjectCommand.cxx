@@ -28,20 +28,20 @@ bool cmProjectCommand
   srcdir += "_SOURCE_DIR";
 
   this->Makefile->AddCacheDefinition
-    (bindir.c_str(),
+    (bindir,
      this->Makefile->GetCurrentOutputDirectory(),
      "Value Computed by CMake", cmCacheManager::STATIC);
   this->Makefile->AddCacheDefinition
-    (srcdir.c_str(),
+    (srcdir,
      this->Makefile->GetCurrentDirectory(),
      "Value Computed by CMake", cmCacheManager::STATIC);
 
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";
 
-  this->Makefile->AddDefinition(bindir.c_str(),
+  this->Makefile->AddDefinition(bindir,
           this->Makefile->GetCurrentOutputDirectory());
-  this->Makefile->AddDefinition(srcdir.c_str(),
+  this->Makefile->AddDefinition(srcdir,
           this->Makefile->GetCurrentDirectory());
 
   this->Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
@@ -167,19 +167,19 @@ bool cmProjectCommand
     std::string vv;
     vv = args[0] + "_VERSION";
     this->Makefile->AddDefinition("PROJECT_VERSION", vs.c_str());
-    this->Makefile->AddDefinition(vv.c_str(), vs.c_str());
+    this->Makefile->AddDefinition(vv, vs.c_str());
     vv = args[0] + "_VERSION_MAJOR";
     this->Makefile->AddDefinition("PROJECT_VERSION_MAJOR", vb[0]);
-    this->Makefile->AddDefinition(vv.c_str(), vb[0]);
+    this->Makefile->AddDefinition(vv, vb[0]);
     vv = args[0] + "_VERSION_MINOR";
     this->Makefile->AddDefinition("PROJECT_VERSION_MINOR", vb[1]);
-    this->Makefile->AddDefinition(vv.c_str(), vb[1]);
+    this->Makefile->AddDefinition(vv, vb[1]);
     vv = args[0] + "_VERSION_PATCH";
     this->Makefile->AddDefinition("PROJECT_VERSION_PATCH", vb[2]);
-    this->Makefile->AddDefinition(vv.c_str(), vb[2]);
+    this->Makefile->AddDefinition(vv, vb[2]);
     vv = args[0] + "_VERSION_TWEAK";
     this->Makefile->AddDefinition("PROJECT_VERSION_TWEAK", vb[3]);
-    this->Makefile->AddDefinition(vv.c_str(), vb[3]);
+    this->Makefile->AddDefinition(vv, vb[3]);
     }
   else if(cmp0048 != cmPolicies::OLD)
     {
@@ -199,7 +199,7 @@ bool cmProjectCommand
     for(std::vector<std::string>::iterator i = vv.begin();
         i != vv.end(); ++i)
       {
-      const char* v = this->Makefile->GetDefinition(i->c_str());
+      const char* v = this->Makefile->GetDefinition(*i);
       if(v && *v)
         {
         if(cmp0048 == cmPolicies::WARN)
@@ -209,7 +209,7 @@ bool cmProjectCommand
           }
         else
           {
-          this->Makefile->AddDefinition(i->c_str(), "");
+          this->Makefile->AddDefinition(*i, "");
           }
         }
       }
@@ -231,7 +231,7 @@ bool cmProjectCommand
     }
   this->Makefile->EnableLanguage(languages, false);
   std::string extraInclude = "CMAKE_PROJECT_" + args[0] + "_INCLUDE";
-  const char* include = this->Makefile->GetDefinition(extraInclude.c_str());
+  const char* include = this->Makefile->GetDefinition(extraInclude);
   if(include)
     {
     std::string fullFilePath;
@@ -244,7 +244,7 @@ bool cmProjectCommand
         "could not find file:\n"
         "  ";
       m += include;
-      this->SetError(m.c_str());
+      this->SetError(m);
       return false;
       }
     }

@@ -53,7 +53,7 @@ bool cmSeparateArgumentsCommand
       {
       cmOStringStream e;
       e << "given unknown argument " << args[i];
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -61,11 +61,11 @@ bool cmSeparateArgumentsCommand
   if(mode == ModeOld)
     {
     // Original space-replacement version of command.
-    if(const char* def = this->Makefile->GetDefinition(var.c_str()))
+    if(const char* def = this->Makefile->GetDefinition(var))
       {
       std::string value = def;
       cmSystemTools::ReplaceString(value, " ", ";");
-      this->Makefile->AddDefinition(var.c_str(), value.c_str());
+      this->Makefile->AddDefinition(var, value.c_str());
       }
     }
   else
@@ -102,7 +102,7 @@ bool cmSeparateArgumentsCommand
         value += *si;
         }
       }
-    this->Makefile->AddDefinition(var.c_str(), value.c_str());
+    this->Makefile->AddDefinition(var, value.c_str());
     }
 
   return true;

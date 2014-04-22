@@ -685,6 +685,7 @@ IF(KWSYS_USE_SystemInformation)
     # usually it's in libc but on FreeBSD
     # it's in libexecinfo
     FIND_LIBRARY(EXECINFO_LIB "execinfo")
+    MARK_AS_ADVANCED(EXECINFO_LIB)
     IF (NOT EXECINFO_LIB)
       SET(EXECINFO_LIB "")
     ENDIF()
@@ -1076,6 +1077,11 @@ IF(MSVC OR (WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$"))
     )
 ENDIF()
 
+IF(WIN32)
+  # Help enforce the use of wide Windows apis.
+  ADD_DEFINITIONS(-DUNICODE -D_UNICODE)
+ENDIF()
+
 IF(KWSYS_USE_String)
   # Activate code in "String.c".  See the comment in the source.
   SET_SOURCE_FILES_PROPERTIES(String.c PROPERTIES
@@ -1222,6 +1228,9 @@ IF(KWSYS_STANDALONE OR CMake_SOURCE_DIR)
     # Some Apple compilers produce bad optimizations in this source.
     IF(APPLE AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(GNU|LLVM)$")
       SET_SOURCE_FILES_PROPERTIES(testProcess.c PROPERTIES COMPILE_FLAGS -O0)
+    ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "XL")
+      # Tell IBM XL not to warn about our test infinite loop
+      SET_PROPERTY(SOURCE testProcess.c PROPERTY COMPILE_FLAGS -qsuppress=1500-010)
     ENDIF()
 
     # Test SharedForward

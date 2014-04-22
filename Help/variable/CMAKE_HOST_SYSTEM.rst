@@ -1,7 +1,10 @@
 CMAKE_HOST_SYSTEM
 -----------------
 
-Name of system cmake is being run on.
+Composit Name of OS CMake is being run on.
 
-The same as CMAKE_SYSTEM but for the host system instead of the target
-system when cross compiling.
+This variable is the composite of :variable:`CMAKE_HOST_SYSTEM_NAME` and
+:variable:`CMAKE_HOST_SYSTEM_VERSION`, e.g.
+``${CMAKE_HOST_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_VERSION}``.  If
+:variable:`CMAKE_HOST_SYSTEM_VERSION` is not set, then this variable is
+the same as :variable:`CMAKE_HOST_SYSTEM_NAME`.

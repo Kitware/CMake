@@ -3,6 +3,10 @@
  is invoked to produce them so they have no linker-generated ``.pdb`` file
  containing debug symbols.
 
- The compiler-generated program database files specified by the MSVC
- ``/Fd`` flag are not the same as linker-generated program database
- files and so are not influenced by this property.
+ The linker-generated program database files are specified by the
+ ``/pdb`` linker flag and are not the same as compiler-generated
+ program database files specified by the ``/Fd`` compiler flag.
+ Use the |COMPILE_PDB_XXX| property to specify the latter.
+
+ This property is not implemented by the :generator:`Visual Studio 6`
+ generator.

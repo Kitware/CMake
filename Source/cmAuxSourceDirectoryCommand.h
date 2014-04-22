@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "aux_source_directory";}
+  virtual std::string GetName() const { return "aux_source_directory";}
 
   cmTypeMacro(cmAuxSourceDirectoryCommand, cmCommand);
 };
