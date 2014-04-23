@@ -39,6 +39,7 @@ function(compiler_id_detection outvar lang)
     endforeach()
 
     set(options ID_STRING VERSION_STRINGS ID_DEFINE PLATFORM_DEFAULT_COMPILER)
+    set(oneValueArgs PREFIX)
     cmake_parse_arguments(CID "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
     if (CID_UNPARSED_ARGUMENTS)
       message(FATAL_ERROR "Unrecognized arguments: \"${CID_UNPARSED_ARGUMENTS}\"")
@@ -74,7 +75,7 @@ function(compiler_id_detection outvar lang)
 
     if(CID_ID_DEFINE)
       foreach(Id ${ordered_compilers})
-        set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}# define COMPILER_IS_${Id} 0\n")
+        set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}# define ${CID_PREFIX}COMPILER_IS_${Id} 0\n")
       endforeach()
     endif()
 
@@ -90,14 +91,16 @@ function(compiler_id_detection outvar lang)
       endif()
       set(id_content "${pp_if} ${_compiler_id_pp_test_${Id}}\n")
       if (CID_ID_STRING)
-        set(id_content "${id_content}# define COMPILER_ID \"${Id}\"")
+        set(id_content "${id_content}# define ${CID_PREFIX}COMPILER_ID \"${Id}\"")
       endif()
       if (CID_ID_DEFINE)
-        set(id_content "${id_content}# undef COMPILER_IS_${Id}\n")
-        set(id_content "${id_content}# define COMPILER_IS_${Id} 1\n")
+        set(id_content "${id_content}# undef ${CID_PREFIX}COMPILER_IS_${Id}\n")
+        set(id_content "${id_content}# define ${CID_PREFIX}COMPILER_IS_${Id} 1\n")
       endif()
       if (CID_VERSION_STRINGS)
-        set(id_content "${id_content}${_compiler_id_version_compute_${Id}}\n")
+        set(PREFIX ${CID_PREFIX})
+        string(CONFIGURE "${_compiler_id_version_compute_${Id}}" VERSION_BLOCK @ONLY)
+        set(id_content "${id_content}${VERSION_BLOCK}\n")
       endif()
       set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${id_content}")
       set(pp_if "#elif")
@@ -109,13 +112,13 @@ function(compiler_id_detection outvar lang)
   identification macro.  Try to identify the platform and guess that
   it is the native compiler.  */
 #elif defined(__sgi)
-# define COMPILER_ID \"MIPSpro\"
+# define ${CID_PREFIX}COMPILER_ID \"MIPSpro\"
 
 #elif defined(__hpux) || defined(__hpua)
-# define COMPILER_ID \"HP\"
+# define ${CID_PREFIX}COMPILER_ID \"HP\"
 
 #else /* unknown compiler */
-# define COMPILER_ID \"\"")
+# define ${CID_PREFIX}COMPILER_ID \"\"")
     endif()
 
     set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${platform_compiler_detection}\n#endif")
