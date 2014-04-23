@@ -38,7 +38,7 @@ function(compiler_id_detection outvar lang)
       _readFile(${file})
     endforeach()
 
-    set(options ID_STRING VERSION_STRINGS)
+    set(options ID_STRING VERSION_STRINGS ID_DEFINE)
     cmake_parse_arguments(CID "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
     if (CID_UNPARSED_ARGUMENTS)
       message(FATAL_ERROR "Unrecognized arguments: \"${CID_UNPARSED_ARGUMENTS}\"")
@@ -72,9 +72,15 @@ function(compiler_id_detection outvar lang)
       IAR
       MIPSpro)
 
+    if(CID_ID_DEFINE)
+      foreach(Id ${ordered_compilers})
+        set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}# define COMPILER_IS_${Id} 0\n")
+      endforeach()
+    endif()
+
     set(pp_if "#if")
     if (CID_VERSION_STRINGS)
-      set(CMAKE_${lang}_COMPILER_ID_CONTENT "/* Version number components: V=Version, R=Revision, P=Patch
+      set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n/* Version number components: V=Version, R=Revision, P=Patch
    Version date components:   YYYY=Year, MM=Month,   DD=Day  */\n")
     endif()
 
@@ -85,6 +91,10 @@ function(compiler_id_detection outvar lang)
       set(id_content "${pp_if} ${_compiler_id_pp_test_${Id}}\n")
       if (CID_ID_STRING)
         set(id_content "${id_content}# define COMPILER_ID \"${Id}\"")
+      endif()
+      if (CID_ID_DEFINE)
+        set(id_content "${id_content}# undef COMPILER_IS_${Id}\n")
+        set(id_content "${id_content}# define COMPILER_IS_${Id} 1\n")
       endif()
       if (CID_VERSION_STRINGS)
         set(id_content "${id_content}${_compiler_id_version_compute_${Id}}\n")
