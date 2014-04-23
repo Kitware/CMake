@@ -38,7 +38,7 @@ function(compiler_id_detection outvar lang)
       _readFile(${file})
     endforeach()
 
-    set(options ID_STRING VERSION_STRINGS ID_DEFINE)
+    set(options ID_STRING VERSION_STRINGS ID_DEFINE PLATFORM_DEFAULT_COMPILER)
     cmake_parse_arguments(CID "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
     if (CID_UNPARSED_ARGUMENTS)
       message(FATAL_ERROR "Unrecognized arguments: \"${CID_UNPARSED_ARGUMENTS}\"")
@@ -103,7 +103,8 @@ function(compiler_id_detection outvar lang)
       set(pp_if "#elif")
     endforeach()
 
-    set(platform_compiler_detection "
+    if (CID_PLATFORM_DEFAULT_COMPILER)
+      set(platform_compiler_detection "
 /* These compilers are either not known or too old to define an
   identification macro.  Try to identify the platform and guess that
   it is the native compiler.  */
@@ -114,11 +115,10 @@ function(compiler_id_detection outvar lang)
 # define COMPILER_ID \"HP\"
 
 #else /* unknown compiler */
-# define COMPILER_ID \"\"
+# define COMPILER_ID \"\"")
+    endif()
 
-#endif")
-
-    set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${platform_compiler_detection}")
+    set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${platform_compiler_detection}\n#endif")
   endif()
 
   set(${outvar} ${CMAKE_${lang}_COMPILER_ID_CONTENT} PARENT_SCOPE)

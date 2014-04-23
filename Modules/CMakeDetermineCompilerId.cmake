@@ -108,6 +108,7 @@ function(CMAKE_DETERMINE_COMPILER_ID_WRITE lang src)
   compiler_id_detection(CMAKE_${lang}_COMPILER_ID_CONTENT ${lang}
     ID_STRING
     VERSION_STRINGS
+    PLATFORM_DEFAULT_COMPILER
   )
 
   unset(src_in CACHE)
