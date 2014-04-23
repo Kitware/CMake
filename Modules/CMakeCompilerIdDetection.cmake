@@ -20,6 +20,8 @@ function(_readFile file)
   set(_compiler_id_pp_test_${CompilerId} ${_compiler_id_pp_test} PARENT_SCOPE)
 endfunction()
 
+include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
+
 function(compiler_id_detection outvar lang)
 
   file(GLOB lang_files
@@ -35,6 +37,12 @@ function(compiler_id_detection outvar lang)
     foreach(file ${files})
       _readFile(${file})
     endforeach()
+
+    set(options ID_STRING VERSION_STRINGS)
+    cmake_parse_arguments(CID "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
+    if (CID_UNPARSED_ARGUMENTS)
+      message(FATAL_ERROR "Unrecognized arguments: \"${CID_UNPARSED_ARGUMENTS}\"")
+    endif()
 
     set(ordered_compilers
       # Order is relevant here. For example, compilers which pretend to be
@@ -65,14 +73,22 @@ function(compiler_id_detection outvar lang)
       MIPSpro)
 
     set(pp_if "#if")
-    set(CMAKE_${lang}_COMPILER_ID_CONTENT "/* Version number components: V=Version, R=Revision, P=Patch
+    if (CID_VERSION_STRINGS)
+      set(CMAKE_${lang}_COMPILER_ID_CONTENT "/* Version number components: V=Version, R=Revision, P=Patch
    Version date components:   YYYY=Year, MM=Month,   DD=Day  */\n")
+    endif()
 
     foreach(Id ${ordered_compilers})
       if (NOT _compiler_id_pp_test_${Id})
         message(FATAL_ERROR "No preprocessor test for \"${Id}\"")
       endif()
-      set(id_content "${pp_if} ${_compiler_id_pp_test_${Id}}\n# define COMPILER_ID \"${Id}\"${_compiler_id_version_compute_${Id}}\n")
+      set(id_content "${pp_if} ${_compiler_id_pp_test_${Id}}\n")
+      if (CID_ID_STRING)
+        set(id_content "${id_content}# define COMPILER_ID \"${Id}\"")
+      endif()
+      if (CID_VERSION_STRINGS)
+        set(id_content "${id_content}${_compiler_id_version_compute_${Id}}\n")
+      endif()
       set(CMAKE_${lang}_COMPILER_ID_CONTENT "${CMAKE_${lang}_COMPILER_ID_CONTENT}\n${id_content}")
       set(pp_if "#elif")
     endforeach()
