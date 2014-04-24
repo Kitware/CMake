@@ -643,6 +643,10 @@ endif()
 
 foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     if(_GTK2_component STREQUAL "gtk")
+        # Left for compatibility with previous versions.
+        _GTK2_FIND_INCLUDE_DIR(FONTCONFIG fontconfig/fontconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(X11 X11/Xlib.h)
+
         _GTK2_FIND_INCLUDE_DIR(GLIB glib.h)
         _GTK2_FIND_INCLUDE_DIR(GLIBCONFIG glibconfig.h)
         _GTK2_FIND_LIBRARY    (GLIB glib false true)
@@ -720,10 +724,6 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         endif()
         _GTK2_ADD_TARGET (GTK GTK2_DEPENDS gdk atk pangoft2 pango gdk_pixbuf gthread gobject glib
                               GTK2_OPTIONAL_DEPENDS gio pangocairo cairo)
-
-        # Left for compatibility with previous versions.
-        _GTK2_FIND_INCLUDE_DIR(FONTCONFIG fontconfig/fontconfig.h)
-        _GTK2_FIND_INCLUDE_DIR(X11 X11/Xlib.h)
 
     elseif(_GTK2_component STREQUAL "gtkmm")
 
