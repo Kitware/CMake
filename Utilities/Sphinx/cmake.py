@@ -308,9 +308,12 @@ class CMakeDomain(Domain):
     }
 
     def clear_doc(self, docname):
+        to_clear = set()
         for fullname, (fn, _) in self.data['objects'].items():
             if fn == docname:
-                del self.data['objects'][fullname]
+                to_clear.add(fullname)
+        for fullname in to_clear:
+            del self.data['objects'][fullname]
 
     def resolve_xref(self, env, fromdocname, builder,
                      typ, target, node, contnode):
