@@ -102,6 +102,7 @@ private:
   bool PrintFiles(std::ostream& os, std::string const& pattern);
 
   bool PrintVersion(std::ostream& os);
+  bool PrintHelpFull(std::ostream& os);
   bool PrintHelpOneManual(std::ostream& os);
   bool PrintHelpOneCommand(std::ostream& os);
   bool PrintHelpOneModule(std::ostream& os);
