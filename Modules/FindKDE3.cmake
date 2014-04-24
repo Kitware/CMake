@@ -192,7 +192,7 @@ if(KDECONFIG_EXECUTABLE)
    if ("${kde_version}" MATCHES "KDE: 3\\.")
       execute_process(COMMAND ${KDECONFIG_EXECUTABLE} --prefix
                         OUTPUT_VARIABLE kdedir )
-      string(REGEX REPLACE "\n" "" KDE3PREFIX "${kdedir}")
+      string(REPLACE "\n" "" KDE3PREFIX "${kdedir}")
 
     endif ()
 endif()

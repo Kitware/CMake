@@ -138,26 +138,26 @@ private:
   // Try to remove the binary directory once
   static bool TryToRemoveBinaryDirectoryOnce(const std::string& directoryPath);
 
-  std::vector<cmStdString> ConfigurationScripts;
+  std::vector<std::string> ConfigurationScripts;
   std::vector<bool> ScriptProcessScope;
 
   bool Backup;
   bool EmptyBinDir;
   bool EmptyBinDirOnce;
 
-  cmStdString SourceDir;
-  cmStdString BinaryDir;
-  cmStdString BackupSourceDir;
-  cmStdString BackupBinaryDir;
-  cmStdString CTestRoot;
-  cmStdString CVSCheckOut;
-  cmStdString CTestCmd;
-  cmStdString UpdateCmd;
-  cmStdString CTestEnv;
-  cmStdString InitialCache;
-  cmStdString CMakeCmd;
-  cmStdString CMOutFile;
-  std::vector<cmStdString> ExtraUpdates;
+  std::string SourceDir;
+  std::string BinaryDir;
+  std::string BackupSourceDir;
+  std::string BackupBinaryDir;
+  std::string CTestRoot;
+  std::string CVSCheckOut;
+  std::string CTestCmd;
+  std::string UpdateCmd;
+  std::string CTestEnv;
+  std::string InitialCache;
+  std::string CMakeCmd;
+  std::string CMOutFile;
+  std::vector<std::string> ExtraUpdates;
 
   double MinimumInterval;
   double ContinuousDuration;

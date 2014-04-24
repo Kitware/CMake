@@ -138,6 +138,7 @@ All Modules
    /module/FindMPEG
    /module/FindMPI
    /module/FindOpenAL
+   /module/FindOpenCL
    /module/FindOpenGL
    /module/FindOpenMP
    /module/FindOpenSceneGraph

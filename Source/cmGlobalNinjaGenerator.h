@@ -173,11 +173,11 @@ public:
   virtual cmLocalGenerator* CreateLocalGenerator();
 
   /// Overloaded methods. @see cmGlobalGenerator::GetName().
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalNinjaGenerator::GetActualName(); }
 
   /// @return the name of this generator.
-  static const char* GetActualName() { return "Ninja"; }
+  static std::string GetActualName() { return "Ninja"; }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -193,11 +193,11 @@ public:
   /// Overloaded methods. @see cmGlobalGenerator::GenerateBuildCommand()
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
-    const char* makeProgram,
-    const char* projectName,
-    const char* projectDir,
-    const char* targetName,
-    const char* config,
+    const std::string& makeProgram,
+    const std::string& projectName,
+    const std::string& projectDir,
+    const std::string& targetName,
+    const std::string& config,
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
@@ -299,7 +299,7 @@ public:
 
   void AddTargetAlias(const std::string& alias, cmTarget* target);
 
-
+  virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
 
   /// Overloaded methods.
@@ -310,8 +310,6 @@ protected:
 private:
   virtual std::string GetEditCacheCommand() const;
 
-  /// @see cmGlobalGenerator::ComputeTargetObjects
-  virtual void ComputeTargetObjects(cmGeneratorTarget* gt) const;
 
   void OpenBuildFileStream();
   void CloseBuildFileStream();

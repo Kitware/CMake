@@ -98,7 +98,9 @@ find_path(SDL_SOUND_INCLUDE_DIR SDL_sound.h
   HINTS
     ENV SDLSOUNDDIR
     ENV SDLDIR
-  PATH_SUFFIXES include/SDL include/SDL12 include/SDL11 include
+  PATH_SUFFIXES SDL
+                # path suffixes to search inside ENV{SDLDIR}
+                include/SDL include/SDL12 include/SDL11 include
   )
 
 find_library(SDL_SOUND_LIBRARY

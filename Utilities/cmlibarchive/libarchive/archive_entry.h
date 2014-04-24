@@ -43,12 +43,8 @@
 #include <stddef.h>  /* for wchar_t */
 #include <time.h>
 
-#if defined(_WIN32) && !defined(__CYGWIN__)
-#include <windows.h>
-#endif
-
 /* Get a suitable 64-bit integer type. */
-#if defined(_WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__) && !defined(__WATCOMC__)
 # define	__LA_INT64_T	__int64
 #else
 #include <unistd.h>
@@ -63,7 +59,7 @@
 #if ARCHIVE_VERSION_NUMBER >= 3999000
 /* Switch to plain 'int' for libarchive 4.0.  It's less broken than 'mode_t' */
 # define	__LA_MODE_T	int
-#elif defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__)
+#elif defined(_WIN32) && !defined(__CYGWIN__) && !defined(__BORLANDC__) && !defined(__WATCOMC__)
 # define	__LA_MODE_T	unsigned short
 #else
 # define	__LA_MODE_T	mode_t
@@ -235,6 +231,9 @@ __LA_DECL const wchar_t	*archive_entry_symlink_w(struct archive_entry *);
 __LA_DECL __LA_INT64_T	 archive_entry_uid(struct archive_entry *);
 __LA_DECL const char	*archive_entry_uname(struct archive_entry *);
 __LA_DECL const wchar_t	*archive_entry_uname_w(struct archive_entry *);
+__LA_DECL int archive_entry_is_data_encrypted(struct archive_entry *);
+__LA_DECL int archive_entry_is_metadata_encrypted(struct archive_entry *);
+__LA_DECL int archive_entry_is_encrypted(struct archive_entry *);
 
 /*
  * Set fields in an archive_entry.
@@ -248,7 +247,7 @@ __LA_DECL const wchar_t	*archive_entry_uname_w(struct archive_entry *);
 __LA_DECL void	archive_entry_set_atime(struct archive_entry *, time_t, long);
 __LA_DECL void  archive_entry_unset_atime(struct archive_entry *);
 #if defined(_WIN32) && !defined(__CYGWIN__)
-__LA_DECL void archive_entry_copy_bhfi(struct archive_entry *, BY_HANDLE_FILE_INFORMATION *);
+__LA_DECL void archive_entry_copy_bhfi(struct archive_entry *, struct _BY_HANDLE_FILE_INFORMATION *);
 #endif
 __LA_DECL void	archive_entry_set_birthtime(struct archive_entry *, time_t, long);
 __LA_DECL void  archive_entry_unset_birthtime(struct archive_entry *);
@@ -306,6 +305,8 @@ __LA_DECL void	archive_entry_set_uname(struct archive_entry *, const char *);
 __LA_DECL void	archive_entry_copy_uname(struct archive_entry *, const char *);
 __LA_DECL void	archive_entry_copy_uname_w(struct archive_entry *, const wchar_t *);
 __LA_DECL int	archive_entry_update_uname_utf8(struct archive_entry *, const char *);
+__LA_DECL void	archive_entry_set_is_data_encrypted(struct archive_entry *, char is_encrypted);
+__LA_DECL void	archive_entry_set_is_metadata_encrypted(struct archive_entry *, char is_encrypted);
 /*
  * Routines to bulk copy fields to/from a platform-native "struct
  * stat."  Libarchive used to just store a struct stat inside of each

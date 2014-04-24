@@ -21,6 +21,7 @@
 #   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #   CMAKE_REQUIRED_INCLUDES = list of include directories
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -56,7 +57,9 @@ macro(CHECK_C_SOURCE_RUNS SOURCE VAR)
     file(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
       "${SOURCE}\n")
 
-    message(STATUS "Performing Test ${VAR}")
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Performing Test ${VAR}")
+    endif()
     try_run(${VAR}_EXITCODE ${VAR}_COMPILED
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c
@@ -73,7 +76,9 @@ macro(CHECK_C_SOURCE_RUNS SOURCE VAR)
     # if the return value was 0 then it worked
     if("${${VAR}_EXITCODE}" EQUAL 0)
       set(${VAR} 1 CACHE INTERNAL "Test ${VAR}")
-      message(STATUS "Performing Test ${VAR} - Success")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Performing Test ${VAR} - Success")
+      endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test ${VAR} succeded with the following output:\n"
         "${OUTPUT}\n"
@@ -86,7 +91,9 @@ macro(CHECK_C_SOURCE_RUNS SOURCE VAR)
         set(${VAR} "" CACHE INTERNAL "Test ${VAR}")
       endif()
 
-      message(STATUS "Performing Test ${VAR} - Failed")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Performing Test ${VAR} - Failed")
+      endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${VAR} failed with the following output:\n"
         "${OUTPUT}\n"

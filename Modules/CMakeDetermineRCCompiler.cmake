@@ -20,7 +20,7 @@
 # as a default compiler
 if(NOT CMAKE_RC_COMPILER)
   # prefer the environment variable RC
-  if($ENV{RC} MATCHES ".+")
+  if(NOT $ENV{RC} STREQUAL "")
     get_filename_component(CMAKE_RC_COMPILER_INIT $ENV{RC} PROGRAM PROGRAM_ARGS CMAKE_RC_FLAGS_ENV_INIT)
     if(CMAKE_RC_FLAGS_ENV_INIT)
       set(CMAKE_RC_COMPILER_ARG1 "${CMAKE_RC_FLAGS_ENV_INIT}" CACHE STRING "First argument to RC compiler")

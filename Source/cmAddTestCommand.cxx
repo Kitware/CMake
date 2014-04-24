@@ -44,7 +44,7 @@ bool cmAddTestCommand
 
   // Create the test but add a generator only the first time it is
   // seen.  This preserves behavior from before test generators.
-  cmTest* test = this->Makefile->GetTest(args[0].c_str());
+  cmTest* test = this->Makefile->GetTest(args[0]);
   if(test)
     {
     // If the test was already added by a new-style signature do not
@@ -54,13 +54,13 @@ bool cmAddTestCommand
       cmOStringStream e;
       e << " given test name \"" << args[0]
         << "\" which already exists in this directory.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
   else
     {
-    test = this->Makefile->CreateTest(args[0].c_str());
+    test = this->Makefile->CreateTest(args[0]);
     test->SetOldStyle(true);
     this->Makefile->AddTestGenerator(new cmTestGenerator(test));
     }
@@ -137,7 +137,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
       {
       cmOStringStream e;
       e << " given unknown argument:\n  " << args[i] << "\n";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
     }
@@ -157,17 +157,17 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
     }
 
   // Require a unique test name within the directory.
-  if(this->Makefile->GetTest(name.c_str()))
+  if(this->Makefile->GetTest(name))
     {
     cmOStringStream e;
     e << " given test NAME \"" << name
       << "\" which already exists in this directory.";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
   // Add the test.
-  cmTest* test = this->Makefile->CreateTest(name.c_str());
+  cmTest* test = this->Makefile->CreateTest(name);
   test->SetOldStyle(false);
   test->SetCommand(command);
   if(!working_directory.empty())

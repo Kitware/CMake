@@ -32,7 +32,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "define_property";}
+  virtual std::string GetName() const { return "define_property";}
 
   cmTypeMacro(cmDefinePropertyCommand, cmCommand);
 private:

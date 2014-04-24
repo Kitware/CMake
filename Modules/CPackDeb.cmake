@@ -67,7 +67,12 @@
 #  * Mandatory : YES
 #  * Default   : 'devel'
 #
-#  The debian package section
+# .. variable:: CPACK_DEBIAN_COMPRESSION_TYPE
+#
+#  * Mandatory : YES
+#  * Default   : 'gzip'
+#
+#     Possible values are: lzma, xz, bzip2 and gzip.
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_PRIORITY
 #
@@ -254,7 +259,7 @@ if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
       OUTPUT_VARIABLE CPACK_DEB_INSTALL_FILES)
 
     # Convert to CMake list
-    string(REGEX REPLACE "\n" ";" CPACK_DEB_INSTALL_FILES ${CPACK_DEB_INSTALL_FILES})
+    string(REPLACE "\n" ";" CPACK_DEB_INSTALL_FILES ${CPACK_DEB_INSTALL_FILES})
 
     # Only dynamically linked ELF files are included
     # Extract only file name infront of ":"
@@ -389,6 +394,12 @@ endif()
 if(NOT CPACK_DEBIAN_PACKAGE_PRIORITY)
   set(CPACK_DEBIAN_PACKAGE_PRIORITY "optional")
 endif()
+
+# Compression: (recommended)
+if(NOT CPACK_DEBIAN_COMPRESSION_TYPE)
+  set(CPACK_DEBIAN_COMPRESSION_TYPE "gzip")
+endif()
+
 
 # Recommends:
 # You should set: CPACK_DEBIAN_PACKAGE_RECOMMENDS

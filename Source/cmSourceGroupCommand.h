@@ -41,7 +41,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "source_group";}
+  virtual std::string GetName() const {return "source_group";}
 
   cmTypeMacro(cmSourceGroupCommand, cmCommand);
 };

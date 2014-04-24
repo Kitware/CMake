@@ -195,7 +195,7 @@ bool cmCursesStringWidget::HandleInput(int& key, cmCursesMainForm* fm,
   return true;
 }
 
-void cmCursesStringWidget::SetString(const char* value)
+void cmCursesStringWidget::SetString(const std::string& value)
 {
   this->SetValue(value);
 }

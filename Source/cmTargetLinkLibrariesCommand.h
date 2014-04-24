@@ -42,7 +42,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "target_link_libraries";}
+  virtual std::string GetName() const { return "target_link_libraries";}
 
   cmTypeMacro(cmTargetLinkLibrariesCommand, cmCommand);
 private:
@@ -62,7 +62,7 @@ private:
 
   ProcessingState CurrentProcessingState;
 
-  bool HandleLibrary(const char* lib, cmTarget::LinkLibraryType llt);
+  bool HandleLibrary(const std::string& lib, cmTarget::LinkLibraryType llt);
 };
 
 

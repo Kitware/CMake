@@ -62,7 +62,7 @@ find_path(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
-  PATH_SUFFIXES include/freetype2 include
+  PATH_SUFFIXES include/freetype2 include freetype2
 )
 
 find_path(FREETYPE_INCLUDE_DIR_freetype2
@@ -79,7 +79,7 @@ find_path(FREETYPE_INCLUDE_DIR_freetype2
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
-  PATH_SUFFIXES include/freetype2 include
+  PATH_SUFFIXES include/freetype2 include freetype2
 )
 
 find_library(FREETYPE_LIBRARY
@@ -117,9 +117,8 @@ if(FREETYPE_INCLUDE_DIR_freetype2 AND FREETYPE_H)
     unset(FREETYPE_VERSION_STRING)
     foreach(VPART MAJOR MINOR PATCH)
         foreach(VLINE ${freetype_version_str})
-            if(VLINE MATCHES "^#[\t ]*define[\t ]+FREETYPE_${VPART}")
-                string(REGEX REPLACE "^#[\t ]*define[\t ]+FREETYPE_${VPART}[\t ]+([0-9]+)$" "\\1"
-                       FREETYPE_VERSION_PART "${VLINE}")
+            if(VLINE MATCHES "^#[\t ]*define[\t ]+FREETYPE_${VPART}[\t ]+([0-9]+)$")
+                set(FREETYPE_VERSION_PART "${CMAKE_MATCH_1}")
                 if(FREETYPE_VERSION_STRING)
                     set(FREETYPE_VERSION_STRING "${FREETYPE_VERSION_STRING}.${FREETYPE_VERSION_PART}")
                 else()

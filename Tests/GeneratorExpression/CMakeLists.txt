@@ -166,7 +166,7 @@ add_library(imported4 SHARED IMPORTED)
 set_property(TARGET imported4 APPEND PROPERTY
   INCLUDE_DIRECTORIES $<TARGET_PROPERTY:imported3,INTERFACE_INCLUDE_DIRECTORIES>)
 
-add_executable(someexe empty.cpp)
+add_executable(someexe $<1:empty.cpp> $<0:does_not_exist>)
 add_executable(Alias::SomeExe ALIAS someexe)
 
 add_library(Alias::SomeLib ALIAS empty1)

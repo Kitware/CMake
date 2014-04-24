@@ -43,7 +43,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const {return "enable_language";}
+  virtual std::string GetName() const {return "enable_language";}
 
   cmTypeMacro(cmEnableLanguageCommand, cmCommand);
 };

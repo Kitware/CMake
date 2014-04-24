@@ -42,11 +42,11 @@ bool cmMarkAsAdvancedCommand
     if ( it.IsAtEnd() )
       {
       this->Makefile->GetCacheManager()
-        ->AddCacheEntry(variable.c_str(), 0, 0,
+        ->AddCacheEntry(variable, 0, 0,
           cmCacheManager::UNINITIALIZED);
       overwrite = true;
       }
-    it.Find(variable.c_str());
+    it.Find(variable);
     if ( it.IsAtEnd() )
       {
       cmSystemTools::Error("This should never happen...");

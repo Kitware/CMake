@@ -23,6 +23,8 @@ ExternalData_Add_Test(Data1
   COMMAND ${CMAKE_COMMAND}
     -D Data=DATA{Data.dat}
     ${Data1CheckSpaces}
+    -D DataMissing=DATA{DataMissing.dat}
+    -D DataMissingWithAssociated=DATA{DataMissing.dat,Data.dat}
     -D SeriesA=DATA{SeriesA.dat,:}
     -D SeriesB=DATA{SeriesB.dat,:}
     -D SeriesC=DATA{SeriesC.dat,:}

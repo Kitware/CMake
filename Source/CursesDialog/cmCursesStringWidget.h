@@ -37,7 +37,7 @@ public:
   /**
    * Set/Get the string.
    */
-  void SetString(const char* value);
+  void SetString(const std::string& value);
   const char* GetString();
   virtual const char* GetValue();
 

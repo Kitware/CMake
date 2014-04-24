@@ -16,28 +16,57 @@
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 
+#include "assert.h"
+
 //----------------------------------------------------------------------------
-cmSourceFileLocation
-::cmSourceFileLocation(cmMakefile const* mf, const char* name): Makefile(mf)
+cmSourceFileLocation::cmSourceFileLocation()
+  : Makefile(0), AmbiguousDirectory(true), AmbiguousExtension(true)
 {
-  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name);
-  this->AmbiguousExtension = true;
-  this->Directory = cmSystemTools::GetFilenamePath(name);
-  this->Name = cmSystemTools::GetFilenameName(name);
-  this->UpdateExtension(name);
+
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::Update(const char* name)
+cmSourceFileLocation::cmSourceFileLocation(const cmSourceFileLocation& loc)
+  : Makefile(loc.Makefile)
 {
-  if(this->AmbiguousDirectory)
+  this->AmbiguousDirectory = loc.AmbiguousDirectory;
+  this->AmbiguousExtension = loc.AmbiguousExtension;
+  this->Directory = loc.Directory;
+  this->Name = loc.Name;
+}
+
+//----------------------------------------------------------------------------
+cmSourceFileLocation&
+cmSourceFileLocation::operator=(const cmSourceFileLocation& loc)
+{
+  if(this == &loc)
     {
-    this->UpdateDirectory(name);
+    return *this;
     }
-  if(this->AmbiguousExtension)
+  this->Makefile = loc.Makefile;
+  this->AmbiguousDirectory = loc.AmbiguousDirectory;
+  this->AmbiguousExtension = loc.AmbiguousExtension;
+  this->Directory = loc.Directory;
+  this->Name = loc.Name;
+  this->UpdateExtension(this->Name);
+  return *this;
+}
+
+//----------------------------------------------------------------------------
+cmSourceFileLocation
+::cmSourceFileLocation(cmMakefile const* mf, const std::string& name)
+  : Makefile(mf)
+{
+  this->AmbiguousDirectory = !cmSystemTools::FileIsFullPath(name.c_str());
+  this->AmbiguousExtension = true;
+  this->Directory = cmSystemTools::GetFilenamePath(name);
+  if (cmSystemTools::FileIsFullPath(this->Directory.c_str()))
     {
-    this->UpdateExtension(name);
+    this->Directory
+                  = cmSystemTools::CollapseFullPath(this->Directory.c_str());
     }
+  this->Name = cmSystemTools::GetFilenameName(name);
+  this->UpdateExtension(name);
 }
 
 //----------------------------------------------------------------------------
@@ -58,6 +87,7 @@ void cmSourceFileLocation::Update(cmSourceFileLocation const& loc)
 //----------------------------------------------------------------------------
 void cmSourceFileLocation::DirectoryUseSource()
 {
+  assert(this->Makefile);
   if(this->AmbiguousDirectory)
     {
     this->Directory =
@@ -70,6 +100,7 @@ void cmSourceFileLocation::DirectoryUseSource()
 //----------------------------------------------------------------------------
 void cmSourceFileLocation::DirectoryUseBinary()
 {
+  assert(this->Makefile);
   if(this->AmbiguousDirectory)
     {
     this->Directory =
@@ -80,8 +111,9 @@ void cmSourceFileLocation::DirectoryUseBinary()
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::UpdateExtension(const char* name)
+void cmSourceFileLocation::UpdateExtension(const std::string& name)
 {
+  assert(this->Makefile);
   // Check the extension.
   std::string ext = cmSystemTools::GetFilenameLastExtension(name);
   if(!ext.empty()) { ext = ext.substr(1); }
@@ -92,7 +124,7 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
   cmMakefile const* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();
-  if(gg->GetLanguageFromExtension(ext.c_str()) ||
+  if(!gg->GetLanguageFromExtension(ext.c_str()).empty() ||
      std::find(srcExts.begin(), srcExts.end(), ext) != srcExts.end() ||
      std::find(hdrExts.begin(), hdrExts.end(), ext) != hdrExts.end())
     {
@@ -136,21 +168,11 @@ void cmSourceFileLocation::UpdateExtension(const char* name)
 }
 
 //----------------------------------------------------------------------------
-void cmSourceFileLocation::UpdateDirectory(const char* name)
-{
-  // If a full path was given we know the directory.
-  if(cmSystemTools::FileIsFullPath(name))
-    {
-    this->Directory = cmSystemTools::GetFilenamePath(name);
-    this->AmbiguousDirectory = false;
-    }
-}
-
-//----------------------------------------------------------------------------
 bool
 cmSourceFileLocation
 ::MatchesAmbiguousExtension(cmSourceFileLocation const& loc) const
 {
+  assert(this->Makefile);
   // This location's extension is not ambiguous but loc's extension
   // is.  See if the names match as-is.
   if(this->Name == loc.Name)
@@ -187,6 +209,7 @@ cmSourceFileLocation
 //----------------------------------------------------------------------------
 bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
 {
+  assert(this->Makefile);
   if(this->AmbiguousExtension && loc.AmbiguousExtension)
     {
     // Both extensions are ambiguous.  Since only the old fixed set of

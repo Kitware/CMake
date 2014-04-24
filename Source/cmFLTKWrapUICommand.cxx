@@ -48,7 +48,7 @@ bool cmFLTKWrapUICommand
   for(std::vector<std::string>::iterator i = (newArgs.begin() + 1);
       i != newArgs.end(); i++)
     {
-    cmSourceFile *curr = this->Makefile->GetSource(i->c_str());
+    cmSourceFile *curr = this->Makefile->GetSource(*i);
     // if we should use the source GUI
     // to generate .cxx and .h files
     if (!curr || !curr->GetPropertyAsBool("WRAP_EXCLUDE"))
@@ -78,19 +78,19 @@ bool cmFLTKWrapUICommand
       commandLines.push_back(commandLine);
 
       // Add command for generating the .h and .cxx files
-      const char* no_main_dependency = 0;
+      std::string no_main_dependency = "";
       const char* no_comment = 0;
       const char* no_working_dir = 0;
-      this->Makefile->AddCustomCommandToOutput(cxxres.c_str(),
+      this->Makefile->AddCustomCommandToOutput(cxxres,
                                            depends, no_main_dependency,
                                            commandLines, no_comment,
                                            no_working_dir);
-      this->Makefile->AddCustomCommandToOutput(hname.c_str(),
+      this->Makefile->AddCustomCommandToOutput(hname,
                                            depends, no_main_dependency,
                                            commandLines, no_comment,
                                            no_working_dir);
 
-      cmSourceFile *sf = this->Makefile->GetSource(cxxres.c_str());
+      cmSourceFile *sf = this->Makefile->GetSource(cxxres);
       sf->AddDepend(hname.c_str());
       sf->AddDepend(origname.c_str());
       this->GeneratedSourcesClasses.push_back(sf);
@@ -110,7 +110,7 @@ bool cmFLTKWrapUICommand
     }
   std::string varName = this->Target;
   varName += "_FLTK_UI_SRCS";
-  this->Makefile->AddDefinition(varName.c_str(), sourceListValue.c_str());
+  this->Makefile->AddDefinition(varName, sourceListValue.c_str());
 
   return true;
 }
@@ -133,7 +133,7 @@ void cmFLTKWrapUICommand::FinalPass()
     return;
     }
   std::vector<cmSourceFile*> srcs;
-  target->GetSourceFiles(srcs);
+  target->GetSourceFiles(srcs, "");
   bool found = false;
   for (unsigned int i = 0; i < srcs.size(); ++i)
     {
@@ -168,7 +168,7 @@ void cmFLTKWrapUICommand::FinalPass()
     for(size_t classNum = 0; classNum < lastHeadersClass; classNum++)
       {
       this->Makefile->GetTargets()[this->Target]
-        .AddSourceFile(this->GeneratedSourcesClasses[classNum]);
+        .AddSource(this->GeneratedSourcesClasses[classNum]->GetFullPath());
       }
     }
 }

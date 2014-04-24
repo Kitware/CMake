@@ -31,6 +31,7 @@ struct cmIDEFlagTable
                                   // old value with semicolons (e.g.
                                   // /NODEFAULTLIB: =>
                                   // IgnoreDefaultLibraryNames)
+    UserFollowing = (1<<5), // expect value in following argument
 
     UserValueIgnored  = UserValue | UserIgnored,
     UserValueRequired = UserValue | UserRequired

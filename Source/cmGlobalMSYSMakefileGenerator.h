@@ -28,9 +28,9 @@ public:
       <cmGlobalMSYSMakefileGenerator>(); }
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {
+  virtual std::string GetName() const {
     return cmGlobalMSYSMakefileGenerator::GetActualName();}
-  static const char* GetActualName() {return "MSYS Makefiles";}
+  static std::string GetActualName() {return "MSYS Makefiles";}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

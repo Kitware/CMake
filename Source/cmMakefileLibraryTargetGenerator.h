@@ -30,7 +30,8 @@ protected:
   void WriteStaticLibraryRules();
   void WriteSharedLibraryRules(bool relink);
   void WriteModuleLibraryRules(bool relink);
-  void WriteLibraryRules(const char *linkRule, const char *extraFlags,
+  void WriteLibraryRules(const std::string& linkRule,
+                         const std::string& extraFlags,
                          bool relink);
   // MacOSX Framework support methods
   void WriteFrameworkRules(bool relink);
@@ -38,7 +39,7 @@ protected:
   // Store the computd framework version for OS X Frameworks.
   std::string FrameworkVersion;
 
-  void AppendOSXVerFlag(std::string& flags, const char* lang,
+  void AppendOSXVerFlag(std::string& flags, const std::string& lang,
                         const char* name, bool so);
 };
 

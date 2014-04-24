@@ -35,14 +35,14 @@ protected:
 public:
   cmExtraCodeLiteGenerator();
 
-  virtual const char* GetName() const
+  virtual std::string GetName() const
                           { return cmExtraCodeLiteGenerator::GetActualName();}
-  static const char* GetActualName()                     { return "CodeLite";}
+  static std::string GetActualName()                     { return "CodeLite";}
   static cmExternalMakefileProjectGenerator* New()
                                       { return new cmExtraCodeLiteGenerator; }
   /** Get the documentation entry for this generator.  */
   virtual void GetDocumentation(cmDocumentationEntry& entry,
-                                const char* fullName) const;
+                                const std::string& fullName) const;
 
   virtual void Generate();
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);

@@ -1,3 +1,0 @@
-# This file is provided for compatibility with CMake 2.2 and lower.
-# Just include the custom file by its new name.
-INCLUDE("CTestCustom.cmake")

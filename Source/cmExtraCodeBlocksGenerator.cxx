@@ -38,7 +38,7 @@ http://forums.codeblocks.org/index.php/topic,6789.0.html
 
 //----------------------------------------------------------------------------
 void cmExtraCodeBlocksGenerator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates CodeBlocks project files.";
@@ -61,7 +61,7 @@ cmExtraCodeBlocksGenerator::cmExtraCodeBlocksGenerator()
 void cmExtraCodeBlocksGenerator::Generate()
 {
   // for each sub project in the project create a codeblocks project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)
@@ -243,7 +243,7 @@ void cmExtraCodeBlocksGenerator
   Tree tree;
 
   // build tree of virtual folders
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
           it = this->GlobalGenerator->GetProjectMap().begin();
          it != this->GlobalGenerator->GetProjectMap().end();
          ++it)
@@ -334,7 +334,7 @@ void cmExtraCodeBlocksGenerator
           if (strcmp(makefile->GetStartOutputDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
-            this->AppendTarget(fout, ti->first.c_str(), 0,
+            this->AppendTarget(fout, ti->first, 0,
                                make.c_str(), makefile, compiler.c_str());
             }
           }
@@ -350,7 +350,7 @@ void cmExtraCodeBlocksGenerator
             break;
             }
 
-          this->AppendTarget(fout, ti->first.c_str(), 0,
+          this->AppendTarget(fout, ti->first, 0,
                                  make.c_str(), makefile, compiler.c_str());
           break;
         case cmTarget::EXECUTABLE:
@@ -359,11 +359,11 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::MODULE_LIBRARY:
         case cmTarget::OBJECT_LIBRARY:
           {
-          this->AppendTarget(fout, ti->first.c_str(), &ti->second,
+          this->AppendTarget(fout, ti->first, &ti->second,
                              make.c_str(), makefile, compiler.c_str());
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget.c_str(), &ti->second,
+          this->AppendTarget(fout, fastTarget, &ti->second,
                              make.c_str(), makefile, compiler.c_str());
           }
           break;
@@ -399,7 +399,8 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::UTILITY: // can have sources since 2.6.3
           {
           std::vector<cmSourceFile*> sources;
-          ti->second.GetSourceFiles(sources);
+          ti->second.GetSourceFiles(sources,
+                            makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
             {
@@ -411,14 +412,16 @@ void cmExtraCodeBlocksGenerator
 
             // check whether it is a C/C++ implementation file
             bool isCFile = false;
-            if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
+            std::string lang = (*si)->GetLanguage();
+            if (lang == "C" || lang == "CXX")
               {
+              std::string srcext = (*si)->GetExtension();
               for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
                   ext !=  mf->GetSourceExtensions().end();
                   ++ext)
                 {
-                if ((*si)->GetExtension() == *ext)
+                if (srcext == *ext)
                   {
                   isCFile = true;
                   break;
@@ -497,7 +500,7 @@ void cmExtraCodeBlocksGenerator
        sit!=otherFiles.end();
        ++sit)
     {
-    fout<<"      <Unit filename=\""<< sit->c_str() <<"\">\n"
+    fout<<"      <Unit filename=\""<< *sit <<"\">\n"
           "      </Unit>\n";
     }
 
@@ -536,7 +539,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
 
 // Generate the xml code for one target.
 void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
-                                              const char* targetName,
+                                              const std::string& targetName,
                                               cmTarget* target,
                                               const char* make,
                                               const cmMakefile* makefile,
@@ -624,7 +627,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     if (!systemIncludeDirs.empty())
       {
       std::vector<std::string> dirs;
-      cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+      cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
       for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
           dirIt != dirs.end();
           ++dirIt)
@@ -638,7 +641,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     if (!systemIncludeDirs.empty())
       {
       std::vector<std::string> dirs;
-      cmSystemTools::ExpandListArgument(systemIncludeDirs.c_str(), dirs);
+      cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
       for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
           dirIt != dirs.end();
           ++dirIt)
@@ -651,7 +654,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
         dirIt != uniqIncludeDirs.end();
         ++dirIt)
       {
-      fout <<"            <Add directory=\"" << dirIt->c_str() << "\" />\n";
+      fout <<"            <Add directory=\"" << *dirIt << "\" />\n";
       }
 
     fout<<"         </Compiler>\n";
@@ -695,7 +698,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
 
   std::string hostSystemName = mf->GetSafeDefinition("CMAKE_HOST_SYSTEM_NAME");
   std::string systemName = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar.c_str());
+  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gcc";  // default to gcc
   if (compilerId == "MSVC")
     {
@@ -713,7 +716,7 @@ std::string cmExtraCodeBlocksGenerator::GetCBCompilerId(const cmMakefile* mf)
     {
     compiler = "icc";
     }
-  else if (compilerId == "Watcom")
+  else if (compilerId == "Watcom" || compilerId == "OpenWatcom")
     {
     compiler = "ow";
     }
@@ -756,10 +759,12 @@ int cmExtraCodeBlocksGenerator::GetCBTargetType(cmTarget* target)
 // Create the command line for building the given target using the selected
 // make
 std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
-             const std::string& make, const char* makefile, const char* target)
+             const std::string& make, const char* makefile,
+             const std::string& target)
 {
   std::string command = make;
-  if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
+  std::string generator = this->GlobalGenerator->GetName();
+  if (generator == "NMake Makefiles")
     {
     // For Windows ConvertToOutputPath already adds quotes when required.
     // These need to be escaped, see
@@ -770,7 +775,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " VERBOSE=1 ";
     command += target;
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+  else if (generator == "MinGW Makefiles")
     {
     // no escaping of spaces in this case, see
     // http://public.kitware.com/Bug/view.php?id=10014
@@ -781,7 +786,7 @@ std::string cmExtraCodeBlocksGenerator::BuildMakeCommand(
     command += " VERBOSE=1 ";
     command += target;
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+  else if (generator == "Ninja")
     {
     command += " -v ";
     command += target;

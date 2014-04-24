@@ -1,3 +1,4 @@
+
 /*============================================================================
   CMake - Cross Platform Makefile Generator
   Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
@@ -22,7 +23,7 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
-  this->AdditionalPlatformDefinition = NULL;
+  this->AdditionalPlatformDefinition = "";
 }
 
 //----------------------------------------------------------------------------
@@ -53,7 +54,7 @@ void cmGlobalVisualStudioGenerator::Generate()
   const char* no_working_dir = 0;
   std::vector<std::string> no_depends;
   cmCustomCommandLines no_commands;
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
@@ -118,51 +119,12 @@ void cmGlobalVisualStudioGenerator::Generate()
 }
 
 //----------------------------------------------------------------------------
-void
-cmGlobalVisualStudioGenerator
-::ComputeTargetObjects(cmGeneratorTarget* gt) const
+void cmGlobalVisualStudioGenerator
+::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  cmLocalVisualStudioGenerator* lg =
-    static_cast<cmLocalVisualStudioGenerator*>(gt->LocalGenerator);
-  std::string dir_max = lg->ComputeLongestObjectDirectory(*gt->Target);
-
-  // Count the number of object files with each name.  Note that
-  // windows file names are not case sensitive.
-  std::map<cmStdString, int> counts;
-  std::vector<cmSourceFile*> objectSources;
-  gt->GetObjectSources(objectSources);
-  for(std::vector<cmSourceFile*>::const_iterator
-        si = objectSources.begin();
-      si != objectSources.end(); ++si)
-    {
-    cmSourceFile* sf = *si;
-    std::string objectNameLower = cmSystemTools::LowerCase(
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
-    objectNameLower += ".obj";
-    counts[objectNameLower] += 1;
-    }
-
-  // For all source files producing duplicate names we need unique
-  // object name computation.
-  for(std::vector<cmSourceFile*>::const_iterator
-        si = objectSources.begin();
-      si != objectSources.end(); ++si)
-    {
-    cmSourceFile* sf = *si;
-    std::string objectName =
-      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
-    objectName += ".obj";
-    if(counts[cmSystemTools::LowerCase(objectName)] > 1)
-      {
-      gt->AddExplicitObjectName(sf);
-      objectName = lg->GetObjectFileNameWithoutTarget(*sf, dir_max);
-      }
-    gt->AddObject(sf, objectName);
-    }
-
   std::string dir = gt->Makefile->GetCurrentOutputDirectory();
   dir += "/";
-  std::string tgtDir = lg->GetTargetDirectory(*gt->Target);
+  std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(*gt->Target);
   if(!tgtDir.empty())
     {
     dir += tgtDir;
@@ -380,7 +342,7 @@ bool cmGlobalVisualStudioGenerator::ComputeTargetDepends()
     {
     return false;
     }
-  std::map<cmStdString, std::vector<cmLocalGenerator*> >::iterator it;
+  std::map<std::string, std::vector<cmLocalGenerator*> >::iterator it;
   for(it = this->ProjectMap.begin(); it!= this->ProjectMap.end(); ++it)
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
@@ -518,7 +480,7 @@ void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  if(this->AdditionalPlatformDefinition)
+  if(!this->AdditionalPlatformDefinition.empty())
     {
     mf->AddDefinition(this->AdditionalPlatformDefinition, "TRUE");
     }
@@ -852,8 +814,16 @@ bool
 cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 {
   // check to see if this is a fortran build
-  std::set<cmStdString> languages;
-  target.GetLanguages(languages);
+  std::set<std::string> languages;
+  {
+  // Issue diagnostic if the source files depend on the config.
+  std::vector<cmSourceFile*> sources;
+  if (!target.GetConfigCommonSourceFiles(sources))
+    {
+    return false;
+    }
+  }
+  target.GetLanguages(languages, "");
   if(languages.size() == 1)
     {
     if(*languages.begin() == "Fortran")
@@ -870,15 +840,15 @@ cmGlobalVisualStudioGenerator::TargetCompare
 ::operator()(cmTarget const* l, cmTarget const* r) const
 {
   // Make sure ALL_BUILD is first so it is the default active project.
-  if(strcmp(r->GetName(), "ALL_BUILD") == 0)
+  if(r->GetName() == "ALL_BUILD")
     {
     return false;
     }
-  if(strcmp(l->GetName(), "ALL_BUILD") == 0)
+  if(l->GetName() == "ALL_BUILD")
     {
     return true;
     }
-  return strcmp(l->GetName(), r->GetName()) < 0;
+  return strcmp(l->GetName().c_str(), r->GetName().c_str()) < 0;
 }
 
 //----------------------------------------------------------------------------

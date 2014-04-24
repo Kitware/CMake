@@ -99,7 +99,7 @@ bool cmCTestCVS::UpdateImpl()
       opts = "-dP";
       }
     }
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(opts.c_str());
+  std::vector<std::string> args = cmSystemTools::ParseArguments(opts.c_str());
 
   // Specify the start time for nightly testing.
   if(this->CTest->GetTestModel() == cmCTest::NIGHTLY)
@@ -112,7 +112,7 @@ bool cmCTestCVS::UpdateImpl()
   cvs_update.push_back(this->CommandLineTool.c_str());
   cvs_update.push_back("-z3");
   cvs_update.push_back("update");
-  for(std::vector<cmStdString>::const_iterator ai = args.begin();
+  for(std::vector<std::string>::const_iterator ai = args.begin();
       ai != args.end(); ++ai)
     {
     cvs_update.push_back(ai->c_str());
@@ -308,7 +308,7 @@ bool cmCTestCVS::WriteXMLUpdates(std::ostream& xml)
              "   Gathering version information (one . per updated file):\n"
              "    " << std::flush);
 
-  for(std::map<cmStdString, Directory>::const_iterator
+  for(std::map<std::string, Directory>::const_iterator
         di = this->Dirs.begin(); di != this->Dirs.end(); ++di)
     {
     this->WriteXMLDirectory(xml, di->first, di->second);

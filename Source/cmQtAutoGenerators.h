@@ -21,7 +21,7 @@ class cmQtAutoGenerators
 {
 public:
   cmQtAutoGenerators();
-  bool Run(const char* targetDirectory, const char *config);
+  bool Run(const std::string& targetDirectory, const std::string& config);
 
   bool InitializeAutogenTarget(cmTarget* target);
   void SetupAutoGenerateTarget(cmTarget const* target);
@@ -37,18 +37,18 @@ private:
   void SetupAutoRccTarget(cmTarget const* target);
 
   bool ReadAutogenInfoFile(cmMakefile* makefile,
-                           const char* targetDirectory,
-                           const char *config);
+                           const std::string& targetDirectory,
+                           const std::string& config);
   bool ReadOldMocDefinitionsFile(cmMakefile* makefile,
-                                 const char* targetDirectory);
-  void WriteOldMocDefinitionsFile(const char* targetDirectory);
+                                 const std::string& targetDirectory);
+  void WriteOldMocDefinitionsFile(const std::string& targetDirectory);
 
   std::string MakeCompileSettingsString(cmMakefile* makefile);
 
   bool RunAutogen(cmMakefile* makefile);
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
-  bool GenerateUi(const std::string& path, const std::string& uiFileName);
+  bool GenerateUi(const std::string& realName, const std::string& uiFileName);
   bool GenerateQrc();
   void ParseCppFile(const std::string& absFilename,
                     const std::vector<std::string>& headerExtensions,
@@ -104,6 +104,7 @@ private:
   std::string ProjectBinaryDir;
   std::string ProjectSourceDir;
   std::string TargetName;
+  std::string OriginTargetName;
 
   std::string CurrentCompileSettingsStr;
   std::string OldCompileSettingsStr;

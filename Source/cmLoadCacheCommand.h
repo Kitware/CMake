@@ -40,12 +40,12 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "load_cache";}
+  virtual std::string GetName() const { return "load_cache";}
 
   cmTypeMacro(cmLoadCacheCommand, cmCommand);
 protected:
 
-  std::set<cmStdString> VariablesToRead;
+  std::set<std::string> VariablesToRead;
   std::string Prefix;
 
   bool ReadWithPrefix(std::vector<std::string> const& args);

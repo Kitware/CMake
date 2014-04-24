@@ -39,8 +39,8 @@ protected:
   };
 
   // Update status for files in each directory.
-  class Directory: public std::map<cmStdString, File> {};
-  std::map<cmStdString, Directory> Dirs;
+  class Directory: public std::map<std::string, File> {};
+  std::map<std::string, Directory> Dirs;
 
   // Old and new repository revisions.
   std::string OldRevision;

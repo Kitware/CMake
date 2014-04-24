@@ -23,12 +23,12 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/SystemInformation.hxx>
 #include <cmsys/Directory.hxx>
+#include "cmStandardIncludes.h"
 #include "cmXMLSafe.h"
-#include <sstream>
 
 //----------------------------------------------------------------------------
 void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
-                                                const char*) const
+                                                const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates CodeLite project files.";
@@ -60,7 +60,7 @@ void cmExtraCodeLiteGenerator::Generate()
 
   // loop projects and locate the root project.
   // and extract the information for creating the worspace
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it!= this->GlobalGenerator->GetProjectMap().end();
        ++it)
@@ -85,7 +85,7 @@ void cmExtraCodeLiteGenerator::Generate()
     }
 
   // for each sub project in the workspace create a codelite project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
        it!= this->GlobalGenerator->GetProjectMap().end();
        ++it)
@@ -214,20 +214,23 @@ void cmExtraCodeLiteGenerator
         case cmTarget::MODULE_LIBRARY:
           {
           std::vector<cmSourceFile*> sources;
-          ti->second.GetSourceFiles(sources);
+          ti->second.GetSourceFiles(sources,
+                            makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
           for (std::vector<cmSourceFile*>::const_iterator si=sources.begin();
                si!=sources.end(); si++)
             {
             // check whether it is a C/C++ implementation file
             bool isCFile = false;
-            if ((*si)->GetLanguage() && (*(*si)->GetLanguage() == 'C'))
+            std::string lang = (*si)->GetLanguage();
+            if (lang == "C" || lang == "CXX")
               {
+              std::string srcext = (*si)->GetExtension();
               for(std::vector<std::string>::const_iterator
                   ext = mf->GetSourceExtensions().begin();
                   ext !=  mf->GetSourceExtensions().end();
                   ++ext)
                 {
-                if ((*si)->GetExtension() == *ext)
+                if (srcext == *ext)
                   {
                   isCFile = true;
                   break;
@@ -309,7 +312,7 @@ void cmExtraCodeLiteGenerator
     {
     std::string relativePath =
       cmSystemTools::RelativePath(projectPath.c_str(), sit->first.c_str());
-    fout<< "    <File Name=\"" << relativePath.c_str() << "\"/>\n";
+    fout<< "    <File Name=\"" << relativePath << "\"/>\n";
     }
   fout<< "  </VirtualDirectory>\n";
   fout<< "  <VirtualDirectory Name=\"include\">\n";
@@ -320,7 +323,7 @@ void cmExtraCodeLiteGenerator
     {
     std::string relativePath =
       cmSystemTools::RelativePath(projectPath.c_str(), sit->c_str());
-    fout << "    <File Name=\"" << relativePath.c_str() << "\"/>\n";
+    fout << "    <File Name=\"" << relativePath << "\"/>\n";
     }
   fout << "  </VirtualDirectory>\n";
 
@@ -402,7 +405,7 @@ cmExtraCodeLiteGenerator::GetCodeLiteCompilerName(const cmMakefile* mf) const
     compilerIdVar = "CMAKE_C_COMPILER_ID";
     }
 
-  std::string compilerId = mf->GetSafeDefinition(compilerIdVar.c_str());
+  std::string compilerId = mf->GetSafeDefinition(compilerIdVar);
   std::string compiler = "gnu g++"; // default to g++
 
   // Since we need the compiler for parsing purposes only
@@ -440,26 +443,22 @@ cmExtraCodeLiteGenerator::GetConfigurationName(const cmMakefile* mf) const
 std::string
 cmExtraCodeLiteGenerator::GetBuildCommand(const cmMakefile* mf) const
 {
-  std::stringstream ss;
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string buildCommand = make; // Default
-  if ( generator == "NMake Makefiles" )
+  if ( generator == "NMake Makefiles" ||
+       generator == "Ninja" )
     {
     buildCommand = make;
     }
   else if ( generator == "MinGW Makefiles" ||
             generator == "Unix Makefiles" )
     {
+    cmOStringStream ss;
     ss << make << " -j " << this->CpuCount;
     buildCommand = ss.str();
     }
-  else if ( generator == "Ninja" )
-    {
-    ss << make;
-    buildCommand = ss.str();
-    }
-    return buildCommand;
+  return buildCommand;
 }
 
 std::string
@@ -483,7 +482,7 @@ cmExtraCodeLiteGenerator::GetSingleFileBuildCommand
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   if ( generator == "Unix Makefiles" || generator == "MinGW Makefiles" )
     {
-    std::stringstream ss;
+    cmOStringStream ss;
     ss << make << " -f$(ProjectPath)/Makefile $(CurrentFileName).cpp.o";
     buildCommand = ss.str();
     }

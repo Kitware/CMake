@@ -54,6 +54,10 @@ include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 else ()
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
 endif ()
+include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+
+cmake_push_check_state()
+set(CMAKE_REQUIRED_QUIET ${LAPACK_FIND_QUIETLY})
 
 set(LAPACK_FOUND FALSE)
 set(LAPACK95_FOUND FALSE)
@@ -155,7 +159,7 @@ endif()
 
 if(BLAS_FOUND)
   set(LAPACK_LINKER_FLAGS ${BLAS_LINKER_FLAGS})
-  if ($ENV{BLA_VENDOR} MATCHES ".+")
+  if (NOT $ENV{BLA_VENDOR} STREQUAL "")
     set(BLA_VENDOR $ENV{BLA_VENDOR})
   else ()
     if(NOT BLA_VENDOR)
@@ -179,7 +183,7 @@ endif ()
 
 
 #acml lapack
- if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
+ if (BLA_VENDOR MATCHES "ACML" OR BLA_VENDOR STREQUAL "All")
    if (BLAS_LIBRARIES MATCHES ".+acml.+")
      set (LAPACK_LIBRARIES ${BLAS_LIBRARIES})
    endif ()
@@ -229,7 +233,7 @@ if (BLA_VENDOR STREQUAL "Generic" OR
   endif ()
 endif ()
 #intel lapack
-if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
+if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
   if (NOT WIN32)
     set(LM "-lm")
   endif ()
@@ -347,4 +351,5 @@ else()
  endif()
 endif()
 
+cmake_pop_check_state()
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_lapack_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})

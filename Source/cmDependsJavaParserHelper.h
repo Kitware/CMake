@@ -59,15 +59,15 @@ public:
   const char* GetCurrentCombine() { return this->CurrentCombine.c_str(); }
   void UpdateCombine(const char* str1, const char* str2);
 
-  std::vector<cmStdString>& GetClassesFound() { return this->ClassesFound; }
+  std::vector<std::string>& GetClassesFound() { return this->ClassesFound; }
 
-  std::vector<cmStdString> GetFilesProduced();
+  std::vector<std::string> GetFilesProduced();
 
 private:
   class CurrentClass
   {
   public:
-    cmStdString Name;
+    std::string Name;
     std::vector<CurrentClass>* NestedClasses;
     CurrentClass()
       {
@@ -93,16 +93,16 @@ private:
       {
         (*this) = c;
       }
-    void AddFileNamesForPrinting(std::vector<cmStdString> *files,
+    void AddFileNamesForPrinting(std::vector<std::string> *files,
                                  const char* prefix, const char* sep);
   };
-  cmStdString CurrentPackage;
-  cmStdString::size_type InputBufferPos;
-  cmStdString InputBuffer;
+  std::string CurrentPackage;
+  std::string::size_type InputBufferPos;
+  std::string InputBuffer;
   std::vector<char> OutputBuffer;
-  std::vector<cmStdString> ClassesFound;
-  std::vector<cmStdString> PackagesImport;
-  cmStdString CurrentCombine;
+  std::vector<std::string> ClassesFound;
+  std::vector<std::string> PackagesImport;
+  std::string CurrentCombine;
 
   std::vector<CurrentClass> ClassStack;
 

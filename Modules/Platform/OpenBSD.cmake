@@ -10,7 +10,7 @@ if(NOT CMAKE_PLATFORM_RUNTIME_PATH)
                   ERROR_QUIET)
   string(REGEX REPLACE ".*search\\ directories:\\ ([^\n]*).*" "\\1"
          LDCONFIG_HINTS "${LDCONFIG_HINTS}")
-  string(REGEX REPLACE ":" ";"
+  string(REPLACE ":" ";"
          CMAKE_PLATFORM_RUNTIME_PATH
          "${LDCONFIG_HINTS}")
 endif()

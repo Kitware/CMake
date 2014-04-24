@@ -39,9 +39,9 @@ private:
     std::string Value;
     CacheEntryType Type;
     cmPropertyMap Properties;
-    const char* GetProperty(const char*) const;
-    void SetProperty(const char* property, const char* value);
-    void AppendProperty(const char* property, const char* value,
+    const char* GetProperty(const std::string&) const;
+    void SetProperty(const std::string& property, const char* value);
+    void AppendProperty(const std::string& property, const char* value,
                         bool asString=false);
     bool Initialized;
     CacheEntry() : Value(""), Type(UNINITIALIZED), Initialized(false)
@@ -53,26 +53,26 @@ public:
   {
   public:
     void Begin();
-    bool Find(const char*);
+    bool Find(const std::string&);
     bool IsAtEnd() const;
     void Next();
-    const char *GetName() const {
-      return this->Position->first.c_str(); }
-    const char* GetProperty(const char*) const ;
-    bool GetPropertyAsBool(const char*) const ;
-    bool PropertyExists(const char*) const;
-    void SetProperty(const char* property, const char* value);
-    void AppendProperty(const char* property, const char* value,
+    std::string GetName() const {
+      return this->Position->first; }
+    const char* GetProperty(const std::string&) const ;
+    bool GetPropertyAsBool(const std::string&) const ;
+    bool PropertyExists(const std::string&) const;
+    void SetProperty(const std::string& property, const char* value);
+    void AppendProperty(const std::string& property, const char* value,
                         bool asString=false);
-    void SetProperty(const char* property, bool value);
-    const char* GetValue() const { return this->GetEntry().Value.c_str(); }
+    void SetProperty(const std::string& property, bool value);
+    std::string GetValue() const { return this->GetEntry().Value; }
     bool GetValueAsBool() const;
     void SetValue(const char*);
     CacheEntryType GetType() const { return this->GetEntry().Type; }
     void SetType(CacheEntryType ty) { this->GetEntry().Type = ty; }
     bool Initialized() { return this->GetEntry().Initialized; }
     cmCacheManager &Container;
-    std::map<cmStdString, CacheEntry>::iterator Position;
+    std::map<std::string, CacheEntry>::iterator Position;
     CacheIterator(cmCacheManager &cm) : Container(cm) {
       this->Begin();
     }
@@ -108,19 +108,19 @@ public:
   ///! Load a cache for given makefile.  Loads from ouput home.
   bool LoadCache(cmMakefile*);
   ///! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
-  bool LoadCache(const char* path);
-  bool LoadCache(const char* path, bool internal);
-  bool LoadCache(const char* path, bool internal,
-                 std::set<cmStdString>& excludes,
-                 std::set<cmStdString>& includes);
+  bool LoadCache(const std::string& path);
+  bool LoadCache(const std::string& path, bool internal);
+  bool LoadCache(const std::string& path, bool internal,
+                 std::set<std::string>& excludes,
+                 std::set<std::string>& includes);
 
   ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
   bool SaveCache(cmMakefile*) ;
   ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
-  bool SaveCache(const char* path) ;
+  bool SaveCache(const std::string& path) ;
 
   ///! Delete the cache given
-  bool DeleteCache(const char* path);
+  bool DeleteCache(const std::string& path);
 
   ///! Print the cache to a stream
   void PrintCache(std::ostream&) const;
@@ -129,20 +129,20 @@ public:
   cmCacheManager::CacheIterator GetCacheIterator(const char *key=0);
 
   ///! Remove an entry from the cache
-  void RemoveCacheEntry(const char* key);
+  void RemoveCacheEntry(const std::string& key);
 
   ///! Get the number of entries in the cache
   int GetSize() {
     return static_cast<int>(this->Cache.size()); }
 
   ///! Break up a line like VAR:type="value" into var, type and value
-  static bool ParseEntry(const char* entry,
+  static bool ParseEntry(const std::string& entry,
                          std::string& var,
                          std::string& value,
                          CacheEntryType& type);
 
   ///! Get a value from the cache given a key
-  const char* GetCacheValue(const char* key) const;
+  const char* GetCacheValue(const std::string& key) const;
 
   /** Get the version of CMake that wrote the cache.  */
   unsigned int GetCacheMajorVersion() const
@@ -153,20 +153,20 @@ public:
 
 protected:
   ///! Add an entry into the cache
-  void AddCacheEntry(const char* key, const char* value,
+  void AddCacheEntry(const std::string& key, const char* value,
                      const char* helpString, CacheEntryType type);
 
   ///! Get a cache entry object for a key
-  CacheEntry *GetCacheEntry(const char *key);
+  CacheEntry *GetCacheEntry(const std::string& key);
   ///! Clean out the CMakeFiles directory if no CMakeCache.txt
-  void CleanCMakeFiles(const char* path);
+  void CleanCMakeFiles(const std::string& path);
 
   // Cache version info
   unsigned int CacheMajorVersion;
   unsigned int CacheMinorVersion;
 private:
   cmake* CMakeInstance;
-  typedef  std::map<cmStdString, CacheEntry> CacheEntryMap;
+  typedef  std::map<std::string, CacheEntry> CacheEntryMap;
   static void OutputHelpString(std::ostream& fout,
                                const std::string& helpString);
   static void OutputKey(std::ostream& fout, std::string const& key);

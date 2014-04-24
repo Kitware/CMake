@@ -21,7 +21,7 @@ public:
   virtual cmCommand* Clone() { return new cmUseMangledMesaCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  virtual const char* GetName() const { return "use_mangled_mesa";}
+  virtual std::string GetName() const { return "use_mangled_mesa";}
   virtual bool IsScriptable() const { return true; }
   virtual bool IsDiscouraged() const { return true; }
 protected:

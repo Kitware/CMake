@@ -31,7 +31,7 @@ public:
    * Construct with the makefile storing the source and the initial
    * name referencing it.
    */
-  cmSourceFile(cmMakefile* mf, const char* name);
+  cmSourceFile(cmMakefile* mf, const std::string& name);
 
   ~cmSourceFile();
 
@@ -43,14 +43,15 @@ public:
   void SetCustomCommand(cmCustomCommand *cc);
 
   ///! Set/Get a property of this source file
-  void SetProperty(const char *prop, const char *value);
-  void AppendProperty(const char* prop, const char* value,bool asString=false);
-  const char *GetProperty(const char *prop) const;
-  bool GetPropertyAsBool(const char *prop) const;
+  void SetProperty(const std::string& prop, const char *value);
+  void AppendProperty(const std::string& prop,
+                      const char* value,bool asString=false);
+  const char *GetProperty(const std::string& prop) const;
+  bool GetPropertyAsBool(const std::string& prop) const;
 
   /** Implement getting a property when called from a CMake language
       command like get_property or get_source_file_property.  */
-  const char* GetPropertyForUser(const char *prop);
+  const char* GetPropertyForUser(const std::string& prop);
 
   /**
    * The full path to the file.  The non-const version of this method
@@ -78,8 +79,8 @@ public:
   /**
    * Get the language of the compiler to use for this source file.
    */
-  const char* GetLanguage();
-  const char* GetLanguage() const;
+  std::string GetLanguage();
+  std::string GetLanguage() const;
 
   /**
    * Return the vector that holds the list of dependencies
@@ -88,13 +89,16 @@ public:
   void AddDepend(const char* d) { this->Depends.push_back(d); }
 
   // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; };
+  cmPropertyMap &GetProperties() { return this->Properties; }
 
   /**
    * Check whether the given source file location could refer to this
    * source.
    */
   bool Matches(cmSourceFileLocation const&);
+
+  void SetObjectLibrary(std::string const& objlib);
+  std::string GetObjectLibrary() const;
 
 private:
   cmSourceFileLocation Location;
@@ -104,9 +108,10 @@ private:
   std::string Language;
   std::string FullPath;
   bool FindFullPathFailed;
+  std::string ObjectLibrary;
 
   bool FindFullPath(std::string* error);
-  bool TryFullPath(const char* tryPath, const char* ext);
+  bool TryFullPath(const std::string& path, const std::string& ext);
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 

@@ -20,7 +20,7 @@ public:
   cmMacroHelperCommand() {}
 
   ///! clean up any memory allocated by the macro
-  ~cmMacroHelperCommand() {};
+  ~cmMacroHelperCommand() {}
 
   /**
    * This is used to avoid including this command
@@ -60,12 +60,12 @@ public:
                                  cmExecutionStatus &);
 
   virtual bool InitialPass(std::vector<std::string> const&,
-                           cmExecutionStatus &) { return false; };
+                           cmExecutionStatus &) { return false; }
 
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return this->Args[0].c_str(); }
+  virtual std::string GetName() const { return this->Args[0]; }
 
   cmTypeMacro(cmMacroHelperCommand, cmCommand);
 
@@ -95,7 +95,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
     std::string errorMsg =
       "Macro invoked with incorrect arguments for macro named: ";
     errorMsg += this->Args[0];
-    this->SetError(errorMsg.c_str());
+    this->SetError(errorMsg);
     return false;
     }
 
@@ -276,8 +276,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       f->Functions = this->Functions;
       mf.RecordPolicies(f->Policies);
       std::string newName = "_" + this->Args[0];
-      mf.GetCMakeInstance()->RenameCommand(this->Args[0].c_str(),
-                                           newName.c_str());
+      mf.GetCMakeInstance()->RenameCommand(this->Args[0],
+                                           newName);
       mf.AddCommand(f);
 
       // remove the function blocker now that the macro is defined

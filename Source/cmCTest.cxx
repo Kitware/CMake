@@ -78,7 +78,7 @@ struct tm* cmCTest::GetNightlyTime(std::string str,
           lctime->tm_mday,
           str.c_str());
   cmCTestLog(this, OUTPUT, "Determine Nightly Start Time" << std::endl
-    << "   Specified time: " << str.c_str() << std::endl);
+    << "   Specified time: " << str << std::endl);
   //Convert the nightly start time to seconds. Since we are
   //providing only a time and a timezone, the current date of
   //the local machine is assumed. Consequently, nightlySeconds
@@ -216,8 +216,6 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
         {
         url += "?" + fields;
         }
-      break;
-    default:
       break;
     }
 
@@ -649,8 +647,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
 bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
 {
   std::string src_dir
-    = this->GetCTestConfiguration("SourceDirectory").c_str();
-  std::string bld_dir = this->GetCTestConfiguration("BuildDirectory").c_str();
+    = this->GetCTestConfiguration("SourceDirectory");
+  std::string bld_dir = this->GetCTestConfiguration("BuildDirectory");
   this->DartVersion = 1;
   this->DropSiteCDash = false;
   for(Part p = PartStart; p != PartCount; p = Part(p+1))
@@ -681,14 +679,14 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
   if ( !fname.empty() )
     {
     cmCTestLog(this, OUTPUT, "   Reading ctest configuration file: "
-      << fname.c_str() << std::endl);
+      << fname << std::endl);
     bool readit = mf->ReadListFile(mf->GetCurrentListFile(),
       fname.c_str() );
     if(!readit)
       {
       std::string m = "Could not find include file: ";
       m += fname;
-      command->SetError(m.c_str());
+      command->SetError(m);
       return false;
       }
     }
@@ -696,10 +694,10 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     {
     cmCTestLog(this, WARNING,
       "Cannot locate CTest configuration: in BuildDirectory: "
-      << bld_dir_fname.c_str() << std::endl);
+      << bld_dir_fname << std::endl);
     cmCTestLog(this, WARNING,
       "Cannot locate CTest configuration: in SourceDirectory: "
-      << src_dir_fname.c_str() << std::endl);
+      << src_dir_fname << std::endl);
     }
 
   this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime",
@@ -748,13 +746,13 @@ bool cmCTest::UpdateCTestConfiguration()
       }
     }
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "UpdateCTestConfiguration  from :"
-             << fileName.c_str() << "\n");
+             << fileName << "\n");
   if ( !cmSystemTools::FileExists(fileName.c_str()) )
     {
     // No need to exit if we are not producing XML
     if ( this->ProduceXML )
       {
-      cmCTestLog(this, ERROR_MESSAGE, "Cannot find file: " << fileName.c_str()
+      cmCTestLog(this, ERROR_MESSAGE, "Cannot find file: " << fileName
         << std::endl);
       return false;
       }
@@ -762,7 +760,7 @@ bool cmCTest::UpdateCTestConfiguration()
   else
     {
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Parse Config file:"
-               << fileName.c_str() << "\n");
+               << fileName << "\n");
     // parse the dart test file
     cmsys::ifstream fin(fileName.c_str());
 
@@ -930,7 +928,7 @@ bool cmCTest::AddIfExists(Part part, const char* file)
     {
     std::string name = file;
     name += ".gz";
-    if ( this->CTestFileExists(name.c_str()) )
+    if ( this->CTestFileExists(name) )
       {
       this->AddSubmitFile(part, file);
       }
@@ -1153,7 +1151,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
   int* retVal, const char* dir, int timeout, std::ostream& ofs)
 {
   // First generate the command and arguments
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
+  std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
   if(args.size() < 1)
     {
@@ -1161,7 +1159,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     }
 
   std::vector<const char*> argv;
-  for(std::vector<cmStdString>::const_iterator a = args.begin();
+  for(std::vector<std::string>::const_iterator a = args.begin();
     a != args.end(); ++a)
     {
     argv.push_back(a->c_str());
@@ -1346,7 +1344,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     *output += oss.str();
     if ( log )
       {
-      *log << output->c_str();
+      *log << *output;
       }
     cmSystemTools::ChangeDirectory(oldpath.c_str());
 
@@ -1562,7 +1560,7 @@ void cmCTest::AddSiteProperties(std::ostream& ostr)
       for(std::vector<std::string>::iterator i = args.begin();
           i != args.end(); ++i)
         {
-        ostr << "    <Label>" << i->c_str() << "</Label>\n";
+        ostr << "    <Label>" << *i << "</Label>\n";
         }
       ostr << "  </Labels>\n";
       }
@@ -1606,7 +1604,7 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
 
   for ( it = files.begin(); it != files.end(); it ++ )
     {
-    cmCTestLog(this, OUTPUT, "\tAdd file: " << it->c_str() << std::endl);
+    cmCTestLog(this, OUTPUT, "\tAdd file: " << *it << std::endl);
     std::string note_time = this->CurrentTime();
     os << "<Note Name=\"" << cmXMLSafe(*it) << "\">\n"
       << "<Time>" << cmSystemTools::GetTime() << "</Time>\n"
@@ -1624,8 +1622,8 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
       }
     else
       {
-      os << "Problem reading file: " << it->c_str() << std::endl;
-      cmCTestLog(this, ERROR_MESSAGE, "Problem reading file: " << it->c_str()
+      os << "Problem reading file: " << *it << std::endl;
+      cmCTestLog(this, ERROR_MESSAGE, "Problem reading file: " << *it
         << " while creating notes" << std::endl);
       }
     os << "</Text>\n"
@@ -1637,7 +1635,7 @@ int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
 }
 
 //----------------------------------------------------------------------
-int cmCTest::GenerateNotesFile(const std::vector<cmStdString> &files)
+int cmCTest::GenerateNotesFile(const VectorOfStrings &files)
 {
   cmGeneratedFileStream ofs;
   if ( !this->OpenOutputFile(this->CurrentTag, "Notes.xml", ofs) )
@@ -1658,7 +1656,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
     return 1;
     }
 
-  std::vector<cmStdString> files;
+  VectorOfStrings files;
 
   cmCTestLog(this, OUTPUT, "Create notes file" << std::endl);
 
@@ -1675,7 +1673,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
 std::string cmCTest::Base64GzipEncodeFile(std::string file)
 {
   std::string tarFile = file + "_temp.tar.gz";
-  std::vector<cmStdString> files;
+  std::vector<std::string> files;
   files.push_back(file);
 
   if(!cmSystemTools::CreateTar(tarFile.c_str(), files, true, false, false))
@@ -1722,9 +1720,9 @@ std::string cmCTest::Base64EncodeFile(std::string file)
 
 
 //----------------------------------------------------------------------
-bool cmCTest::SubmitExtraFiles(const std::vector<cmStdString> &files)
+bool cmCTest::SubmitExtraFiles(const VectorOfStrings &files)
 {
-  std::vector<cmStdString>::const_iterator it;
+  VectorOfStrings::const_iterator it;
   for ( it = files.begin();
     it != files.end();
     ++ it )
@@ -1732,7 +1730,7 @@ bool cmCTest::SubmitExtraFiles(const std::vector<cmStdString> &files)
     if ( !cmSystemTools::FileExists(it->c_str()) )
       {
       cmCTestLog(this, ERROR_MESSAGE, "Cannot find extra file: "
-        << it->c_str() << " to submit."
+        << *it << " to submit."
         << std::endl;);
       return false;
       }
@@ -1749,7 +1747,7 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
     return 1;
     }
 
-  std::vector<cmStdString> files;
+  VectorOfStrings files;
 
   cmCTestLog(this, OUTPUT, "Submit extra files" << std::endl);
 
@@ -2126,7 +2124,7 @@ void cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--overwrite") && i < args.size() - 1)
     {
     i++;
-    this->AddCTestConfigurationOverwrite(args[i].c_str());
+    this->AddCTestConfigurationOverwrite(args[i]);
     }
   if(this->CheckArgument(arg, "-A", "--add-notes") && i < args.size() - 1)
     {
@@ -2246,7 +2244,7 @@ bool cmCTest::AddVariableDefinition(const std::string &arg)
   std::string value;
   cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
 
-  if (cmCacheManager::ParseEntry(arg.c_str(), name, value, type))
+  if (cmCacheManager::ParseEntry(arg, name, value, type))
     {
     this->Definitions[name] = value;
     return true;
@@ -2319,7 +2317,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         executeTests = false;
         cmCTestLog(this, ERROR_MESSAGE,
           "CTest -T called with incorrect option: "
-          << args[i].c_str() << std::endl);
+          << args[i] << std::endl);
         cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
           << "  " << ctestExec << " -T all" << std::endl
           << "  " << ctestExec << " -T start" << std::endl
@@ -2356,7 +2354,7 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
         {
         executeTests = false;
         cmCTestLog(this, ERROR_MESSAGE,
-          "CTest -M called with incorrect option: " << str.c_str()
+          "CTest -M called with incorrect option: " << str
           << std::endl);
         cmCTestLog(this, ERROR_MESSAGE, "Available options are:" << std::endl
           << "  " << ctestExec << " -M Continuous" << std::endl
@@ -2527,11 +2525,11 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
   std::string fname = dir;
   fname += "/CTestCustom.cmake";
   cmCTestLog(this, DEBUG, "* Check for file: "
-    << fname.c_str() << std::endl);
+    << fname << std::endl);
   if ( cmSystemTools::FileExists(fname.c_str()) )
     {
     cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
-      << fname.c_str() << std::endl);
+      << fname << std::endl);
     bool erroroc = cmSystemTools::GetErrorOccuredFlag();
     cmSystemTools::ResetErrorOccuredFlag();
 
@@ -2540,7 +2538,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
       {
       cmCTestLog(this, ERROR_MESSAGE,
         "Problem reading custom configuration: "
-        << fname.c_str() << std::endl);
+        << fname << std::endl);
       }
     found = true;
     if ( erroroc )
@@ -2552,7 +2550,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
   std::string rexpr = dir;
   rexpr += "/CTestCustom.ctest";
   cmCTestLog(this, DEBUG, "* Check for file: "
-    << rexpr.c_str() << std::endl);
+    << rexpr << std::endl);
   if ( !found && cmSystemTools::FileExists(rexpr.c_str()) )
     {
     cmsys::Glob gl;
@@ -2564,13 +2562,13 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
       ++ fileIt )
       {
       cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
-        << fileIt->c_str() << std::endl);
+        << *fileIt << std::endl);
       if ( !mf->ReadListFile(0, fileIt->c_str()) ||
         cmSystemTools::GetErrorOccuredFlag() )
         {
         cmCTestLog(this, ERROR_MESSAGE,
           "Problem reading custom configuration: "
-          << fileIt->c_str() << std::endl);
+          << *fileIt << std::endl);
         }
       }
     found = true;
@@ -2584,7 +2582,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
       {
       cmCTestLog(this, DEBUG,
         "* Read custom CTest configuration vectors for handler: "
-        << it->first.c_str() << " (" << it->second << ")" << std::endl);
+        << it->first << " (" << it->second << ")" << std::endl);
       it->second->PopulateCustomVectors(mf);
       }
     }
@@ -2593,13 +2591,9 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
-  VectorOfStrings& vec)
+void cmCTest::PopulateCustomVector(cmMakefile* mf, const std::string& def,
+  std::vector<std::string>& vec)
 {
-  if ( !def)
-    {
-    return;
-    }
   const char* dval = mf->GetDefinition(def);
   if ( !dval )
     {
@@ -2614,18 +2608,15 @@ void cmCTest::PopulateCustomVector(cmMakefile* mf, const char* def,
 
   for ( it = slist.begin(); it != slist.end(); ++it )
     {
-    cmCTestLog(this, DEBUG, "  -- " << it->c_str() << std::endl);
-    vec.push_back(it->c_str());
+    cmCTestLog(this, DEBUG, "  -- " << *it << std::endl);
+    vec.push_back(*it);
     }
 }
 
 //----------------------------------------------------------------------
-void cmCTest::PopulateCustomInteger(cmMakefile* mf, const char* def, int& val)
+void cmCTest::PopulateCustomInteger(cmMakefile* mf, const std::string& def,
+  int& val)
 {
-  if ( !def)
-    {
-    return;
-    }
   const char* dval = mf->GetDefinition(def);
   if ( !dval )
     {
@@ -2702,7 +2693,7 @@ std::string cmCTest::GetShortPathToFile(const char* cfname)
 }
 
 //----------------------------------------------------------------------
-std::string cmCTest::GetCTestConfiguration(const char *name)
+std::string cmCTest::GetCTestConfiguration(const std::string& name)
 {
   if ( this->CTestConfigurationOverwrites.find(name) !=
     this->CTestConfigurationOverwrites.end() )
@@ -2847,9 +2838,8 @@ void cmCTest::AddSubmitFile(Part part, const char* name)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::AddCTestConfigurationOverwrite(const char* encstr)
+void cmCTest::AddCTestConfigurationOverwrite(const std::string& overStr)
 {
-  std::string overStr = encstr;
   size_t epos = overStr.find("=");
   if ( epos == overStr.npos )
     {
@@ -2857,7 +2847,7 @@ void cmCTest::AddCTestConfigurationOverwrite(const char* encstr)
       "CTest configuration overwrite specified in the wrong format."
       << std::endl
       << "Valid format is: --overwrite key=value" << std::endl
-      << "The specified was: --overwrite " << overStr.c_str() << std::endl);
+      << "The specified was: --overwrite " << overStr << std::endl);
     return;
     }
   std::string key = overStr.substr(0, epos);
@@ -2877,7 +2867,7 @@ void cmCTest::SetConfigType(const char* ct)
 
 //----------------------------------------------------------------------
 bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
-  const char* dconfig, const char* cmake_var)
+  const char* dconfig, const std::string& cmake_var)
 {
   const char* ctvar;
   ctvar = mf->GetDefinition(cmake_var);
@@ -2900,7 +2890,7 @@ bool cmCTest::RunCommand(
   const char* dir,
   double timeout)
 {
-  std::vector<cmStdString> args = cmSystemTools::ParseArguments(command);
+  std::vector<std::string> args = cmSystemTools::ParseArguments(command);
 
   if(args.size() < 1)
     {
@@ -2908,7 +2898,7 @@ bool cmCTest::RunCommand(
     }
 
   std::vector<const char*> argv;
-  for(std::vector<cmStdString>::const_iterator a = args.begin();
+  for(std::vector<std::string>::const_iterator a = args.begin();
       a != args.end(); ++a)
     {
     argv.push_back(a->c_str());

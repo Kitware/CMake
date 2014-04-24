@@ -27,6 +27,7 @@
 #   CMAKE_REQUIRED_FLAGS = string of compile command line flags
 #   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
 #   CMAKE_REQUIRED_LIBRARIES = list of libraries to link
+#   CMAKE_REQUIRED_QUIET = execute quietly without messages
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
@@ -47,7 +48,9 @@ macro(CHECK_VARIABLE_EXISTS VAR VARIABLE)
   if("${VARIABLE}" MATCHES "^${VARIABLE}$")
     set(MACRO_CHECK_VARIABLE_DEFINITIONS
       "-DCHECK_VARIABLE_EXISTS=${VAR} ${CMAKE_REQUIRED_FLAGS}")
-    message(STATUS "Looking for ${VAR}")
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Looking for ${VAR}")
+    endif()
     if(CMAKE_REQUIRED_LIBRARIES)
       set(CHECK_VARIABLE_EXISTS_ADD_LIBRARIES
         LINK_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES})
@@ -63,13 +66,17 @@ macro(CHECK_VARIABLE_EXISTS VAR VARIABLE)
       OUTPUT_VARIABLE OUTPUT)
     if(${VARIABLE})
       set(${VARIABLE} 1 CACHE INTERNAL "Have variable ${VAR}")
-      message(STATUS "Looking for ${VAR} - found")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Looking for ${VAR} - found")
+      endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Determining if the variable ${VAR} exists passed with the following output:\n"
         "${OUTPUT}\n\n")
     else()
       set(${VARIABLE} "" CACHE INTERNAL "Have variable ${VAR}")
-      message(STATUS "Looking for ${VAR} - not found")
+      if(NOT CMAKE_REQUIRED_QUIET)
+        message(STATUS "Looking for ${VAR} - not found")
+      endif()
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Determining if the variable ${VAR} exists failed with the following output:\n"
         "${OUTPUT}\n\n")

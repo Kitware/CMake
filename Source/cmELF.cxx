@@ -23,6 +23,26 @@
 #if defined(__OpenBSD__)
 # include <stdint.h>
 # include <elf_abi.h>
+#elif defined(__HAIKU__)
+# include <elf32.h>
+# include <elf64.h>
+  typedef struct Elf32_Ehdr Elf32_Ehdr;
+  typedef struct Elf32_Shdr Elf32_Shdr;
+  typedef struct Elf32_Sym Elf32_Sym;
+  typedef struct Elf32_Rel Elf32_Rel;
+  typedef struct Elf32_Rela Elf32_Rela;
+# define ELFMAG0 0x7F
+# define ELFMAG1 'E'
+# define ELFMAG2 'L'
+# define ELFMAG3 'F'
+# define ET_NONE 0
+# define ET_REL 1
+# define ET_EXEC 2
+# define ET_DYN 3
+# define ET_CORE 4
+# define EM_386 3
+# define EM_SPARC 2
+# define EM_PPC 20
 #else
 # include <elf.h>
 #endif
@@ -104,7 +124,7 @@ public:
   virtual unsigned int GetNumberOfSections() const = 0;
   virtual unsigned int GetDynamicEntryCount() = 0;
   virtual unsigned long GetDynamicEntryPosition(int j) = 0;
-  virtual StringEntry const* GetDynamicSectionString(int tag) = 0;
+  virtual StringEntry const* GetDynamicSectionString(unsigned int tag) = 0;
   virtual void PrintInfo(std::ostream& os) const = 0;
 
   bool ReadBytes(unsigned long pos, unsigned long size, char* buf)
@@ -167,7 +187,7 @@ protected:
     }
 
   // Store string table entry states.
-  std::map<int, StringEntry> DynamicSectionStrings;
+  std::map<unsigned int, StringEntry> DynamicSectionStrings;
 };
 
 //----------------------------------------------------------------------------
@@ -178,16 +198,18 @@ struct cmELFTypes32
   typedef Elf32_Shdr ELF_Shdr;
   typedef Elf32_Dyn  ELF_Dyn;
   typedef Elf32_Half ELF_Half;
+  typedef cmIML_INT_uint32_t tagtype;
   static const char* GetName() { return "32-bit"; }
 };
 
-// Configure the implementation template for 32-bit ELF files.
+// Configure the implementation template for 64-bit ELF files.
 struct cmELFTypes64
 {
   typedef Elf64_Ehdr ELF_Ehdr;
   typedef Elf64_Shdr ELF_Shdr;
   typedef Elf64_Dyn  ELF_Dyn;
   typedef Elf64_Half ELF_Half;
+  typedef cmIML_INT_uint64_t tagtype;
   static const char* GetName() { return "64-bit"; }
 };
 
@@ -202,6 +224,7 @@ public:
   typedef typename Types::ELF_Shdr ELF_Shdr;
   typedef typename Types::ELF_Dyn  ELF_Dyn;
   typedef typename Types::ELF_Half ELF_Half;
+  typedef typename Types::tagtype tagtype;
 
   // Construct with a stream and byte swap indicator.
   cmELFInternalImpl(cmELF* external,
@@ -219,7 +242,7 @@ public:
   virtual unsigned long GetDynamicEntryPosition(int j);
 
   // Lookup a string from the dynamic section with the given tag.
-  virtual StringEntry const* GetDynamicSectionString(int tag);
+  virtual StringEntry const* GetDynamicSectionString(unsigned int tag);
 
   // Print information about the ELF file.
   virtual void PrintInfo(std::ostream& os) const
@@ -604,10 +627,10 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
 //----------------------------------------------------------------------------
 template <class Types>
 cmELF::StringEntry const*
-cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
+cmELFInternalImpl<Types>::GetDynamicSectionString(unsigned int tag)
 {
   // Short-circuit if already checked.
-  std::map<int, StringEntry>::iterator dssi =
+  std::map<unsigned int, StringEntry>::iterator dssi =
     this->DynamicSectionStrings.find(tag);
   if(dssi != this->DynamicSectionStrings.end())
     {
@@ -645,7 +668,7 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
       di != this->DynamicSectionEntries.end(); ++di)
     {
     ELF_Dyn& dyn = *di;
-    if(dyn.d_tag == tag)
+    if(static_cast<tagtype>(dyn.d_tag) == static_cast<tagtype>(tag))
       {
       // We found the tag requested.
       // Make sure the position given is within the string section.

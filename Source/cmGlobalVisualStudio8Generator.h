@@ -23,12 +23,13 @@
 class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
-  cmGlobalVisualStudio8Generator(const char* name,
-    const char* platformName, const char* additionalPlatformDefinition);
+  cmGlobalVisualStudio8Generator(const std::string& name,
+    const std::string& platformName,
+    const std::string& additionalPlatformDefinition);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
-  virtual const char* GetName() const {return this->Name.c_str();}
+  virtual std::string GetName() const {return this->Name;}
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
@@ -79,11 +80,12 @@ protected:
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);
   virtual void WriteProjectConfigurations(
-    std::ostream& fout, const char* name, cmTarget::TargetType type,
+    std::ostream& fout, const std::string& name, cmTarget::TargetType type,
     const std::set<std::string>& configsPartOfDefaultBuild,
-    const char* platformMapping = NULL);
+    const std::string& platformMapping = "");
   virtual bool ComputeTargetDepends();
-  virtual void WriteProjectDepends(std::ostream& fout, const char* name,
+  virtual void WriteProjectDepends(std::ostream& fout,
+                                   const std::string& name,
                                    const char* path, cmTarget const& t);
 
   std::string Name;

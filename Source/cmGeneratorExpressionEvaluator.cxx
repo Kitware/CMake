@@ -15,6 +15,8 @@
 #include "cmGeneratorExpressionParser.h"
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpression.h"
+#include "cmLocalGenerator.h"
+#include "cmSourceFile.h"
 
 #include <cmsys/String.h>
 
@@ -39,7 +41,7 @@ void reportError(cmGeneratorExpressionContext *context,
     << "  " << expr << "\n"
     << result;
   context->Makefile->GetCMakeInstance()
-    ->IssueMessage(cmake::FATAL_ERROR, e.str().c_str(),
+    ->IssueMessage(cmake::FATAL_ERROR, e.str(),
                     context->Backtrace);
 }
 
@@ -393,8 +395,8 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                        const std::string &lang) const
   {
     const char *compilerId = context->Makefile ?
-                              context->Makefile->GetSafeDefinition((
-                              "CMAKE_" + lang + "_COMPILER_ID").c_str()) : "";
+                              context->Makefile->GetSafeDefinition(
+                                      "CMAKE_" + lang + "_COMPILER_ID") : "";
     if (parameters.size() == 0)
       {
       return compilerId ? compilerId : "";
@@ -428,7 +430,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
                       ->GetPolicyWarning(cmPolicies::CMP0044);
           context->Makefile->GetCMakeInstance()
                  ->IssueMessage(cmake::AUTHOR_WARNING,
-                                e.str().c_str(), context->Backtrace);
+                                e.str(), context->Backtrace);
           }
         case cmPolicies::OLD:
           return "1";
@@ -500,8 +502,8 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
                        const std::string &lang) const
   {
     const char *compilerVersion = context->Makefile ?
-                              context->Makefile->GetSafeDefinition((
-                        "CMAKE_" + lang + "_COMPILER_VERSION").c_str()) : "";
+                              context->Makefile->GetSafeDefinition(
+                                  "CMAKE_" + lang + "_COMPILER_VERSION") : "";
     if (parameters.size() == 0)
       {
       return compilerVersion ? compilerVersion : "";
@@ -689,7 +691,7 @@ static const struct ConfigurationNode : public cmGeneratorExpressionNode
                        cmGeneratorExpressionDAGChecker *) const
   {
     context->HadContextSensitiveCondition = true;
-    return context->Config ? context->Config : "";
+    return context->Config;
   }
 } configurationNode;
 
@@ -718,13 +720,13 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return std::string();
       }
     context->HadContextSensitiveCondition = true;
-    if (!context->Config)
+    if (context->Config.empty())
       {
       return parameters.front().empty() ? "1" : "0";
       }
 
     if (cmsysString_strcasecmp(parameters.begin()->c_str(),
-                                  context->Config) == 0)
+                               context->Config.c_str()) == 0)
       {
       return "1";
       }
@@ -747,7 +749,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
         std::string mapProp = "MAP_IMPORTED_CONFIG_";
         mapProp += cmSystemTools::UpperCase(context->Config);
         if(const char* mapValue =
-                        context->CurrentTarget->GetProperty(mapProp.c_str()))
+                        context->CurrentTarget->GetProperty(mapProp))
           {
           cmSystemTools::ExpandListArgument(cmSystemTools::UpperCase(mapValue),
                                             mappedConfigs);
@@ -800,7 +802,7 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 
 #undef TRANSITIVE_PROPERTY_NAME
 
-std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
+std::string getLinkedTargetsContent(const std::vector<cmTarget*> &targets,
                                   cmTarget const* target,
                                   cmTarget const* headTarget,
                                   cmGeneratorExpressionContext *context,
@@ -811,23 +813,21 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
 
   std::string sep;
   std::string depString;
-  for (std::vector<std::string>::const_iterator
-      it = libraries.begin();
-      it != libraries.end(); ++it)
+  for (std::vector<cmTarget*>::const_iterator
+      it = targets.begin();
+      it != targets.end(); ++it)
     {
-    if (*it == target->GetName())
+    if (*it == target)
       {
       // Broken code can have a target in its own link interface.
       // Don't follow such link interface entries so as not to create a
       // self-referencing loop.
       continue;
       }
-    if (context->Makefile->FindTargetToUse(*it))
-      {
-      depString +=
-        sep + "$<TARGET_PROPERTY:" + *it + "," + interfacePropertyName + ">";
-      sep = ";";
-      }
+    depString +=
+      sep + "$<TARGET_PROPERTY:" +
+        (*it)->GetName() + "," + interfacePropertyName + ">";
+    sep = ";";
     }
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depString);
   std::string linkedTargetsContent = cge->Evaluate(context->Makefile,
@@ -841,6 +841,27 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
     context->HadContextSensitiveCondition = true;
     }
   return linkedTargetsContent;
+}
+
+std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
+                                  cmTarget const* target,
+                                  cmTarget const* headTarget,
+                                  cmGeneratorExpressionContext *context,
+                                  cmGeneratorExpressionDAGChecker *dagChecker,
+                                  const std::string &interfacePropertyName)
+{
+  std::vector<cmTarget*> tgts;
+  for (std::vector<std::string>::const_iterator
+      it = libraries.begin();
+      it != libraries.end(); ++it)
+    {
+    if (cmTarget *tgt = context->Makefile->FindTargetToUse(*it))
+      {
+      tgts.push_back(tgt);
+      }
+    }
+  return getLinkedTargetsContent(tgts, target, headTarget, context,
+                                 dagChecker, interfacePropertyName);
 }
 
 //----------------------------------------------------------------------------
@@ -964,15 +985,15 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (propertyName == "LINKER_LANGUAGE")
       {
       if (target->LinkLanguagePropagatesToDependents() &&
-          dagCheckerParent && dagCheckerParent->EvaluatingLinkLibraries())
+          dagCheckerParent && (dagCheckerParent->EvaluatingLinkLibraries()
+            || dagCheckerParent->EvaluatingSources()))
         {
         reportError(context, content->GetOriginalExpression(),
             "LINKER_LANGUAGE target property can not be used while evaluating "
             "link libraries for a static library");
         return std::string();
         }
-      const char *lang = target->GetLinkerLanguage(context->Config);
-      return lang ? lang : "";
+      return target->GetLinkerLanguage(context->Config);
       }
 
     cmGeneratorExpressionDAGChecker dagChecker(context->Backtrace,
@@ -1004,7 +1025,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       break;
       }
 
-    const char *prop = target->GetProperty(propertyName.c_str());
+    const char *prop = target->GetProperty(propertyName);
 
     if (dagCheckerParent)
       {
@@ -1065,13 +1086,13 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                      cmStrCmp(propertyName)) != transEnd)
       {
 
-      std::vector<std::string> libs;
-      target->GetTransitivePropertyLinkLibraries(context->Config,
-                                                 headTarget, libs);
-      if (!libs.empty())
+      std::vector<cmTarget*> tgts;
+      target->GetTransitivePropertyTargets(context->Config,
+                                                 headTarget, tgts);
+      if (!tgts.empty())
         {
         linkedTargetsContent =
-                  getLinkedTargetsContent(libs, target,
+                  getLinkedTargetsContent(tgts, target,
                                           headTarget,
                                           context, &dagChecker,
                                           interfacePropertyName);
@@ -1080,9 +1101,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     else if (std::find_if(transBegin, transEnd,
                           cmStrCmp(interfacePropertyName)) != transEnd)
       {
-      const cmTarget::LinkImplementation *impl = target->GetLinkImplementation(
-                                                    context->Config,
-                                                    headTarget);
+      const cmTarget::LinkImplementation *impl
+          = target->GetLinkImplementationLibraries(context->Config,
+                                                   headTarget);
       if(impl)
         {
         linkedTargetsContent =
@@ -1220,6 +1241,77 @@ static const struct TargetNameNode : public cmGeneratorExpressionNode
   virtual int NumExpectedParameters() const { return 1; }
 
 } targetNameNode;
+
+//----------------------------------------------------------------------------
+static const struct TargetObjectsNode : public cmGeneratorExpressionNode
+{
+  TargetObjectsNode() {}
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *) const
+  {
+    if (!context->EvaluateForBuildsystem)
+      {
+      cmOStringStream e;
+      e << "The evaluation of the TARGET_OBJECTS generator expression "
+        "is only suitable for consumption by CMake.  It is not suitable "
+        "for writing out elsewhere.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+      }
+
+    std::string tgtName = parameters.front();
+    cmGeneratorTarget* gt =
+                context->Makefile->FindGeneratorTargetToUse(tgtName.c_str());
+    if (!gt)
+      {
+      cmOStringStream e;
+      e << "Objects of target \"" << tgtName
+        << "\" referenced but no such target exists.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+      }
+    if (gt->GetType() != cmTarget::OBJECT_LIBRARY)
+      {
+      cmOStringStream e;
+      e << "Objects of target \"" << tgtName
+        << "\" referenced but is not an OBJECT library.";
+      reportError(context, content->GetOriginalExpression(), e.str());
+      return std::string();
+      }
+
+    std::vector<cmSourceFile const*> objectSources;
+    gt->GetObjectSources(objectSources, context->Config);
+    std::map<cmSourceFile const*, std::string> mapping;
+
+    for(std::vector<cmSourceFile const*>::const_iterator it
+        = objectSources.begin(); it != objectSources.end(); ++it)
+      {
+      mapping[*it];
+      }
+
+    gt->LocalGenerator->ComputeObjectFilenames(mapping, gt);
+
+    std::string obj_dir = gt->ObjectDirectory;
+    std::string result;
+    const char* sep = "";
+    for(std::map<cmSourceFile const*, std::string>::const_iterator it
+        = mapping.begin(); it != mapping.end(); ++it)
+      {
+      assert(!it->second.empty());
+      result += sep;
+      std::string objFile = obj_dir + it->second;
+      cmSourceFile* sf = context->Makefile->GetOrCreateSource(objFile, true);
+      sf->SetObjectLibrary(tgtName);
+      sf->SetProperty("EXTERNAL_OBJECT", "1");
+      result += objFile;
+      sep = ";";
+      }
+    return result;
+  }
+} targetObjectsNode;
 
 //----------------------------------------------------------------------------
 static const char* targetPolicyWhitelist[] = {
@@ -1488,7 +1580,9 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
                   "Target \"" + name + "\" is not an executable or library.");
       return std::string();
       }
-    if (dagChecker && dagChecker->EvaluatingLinkLibraries(name.c_str()))
+    if (dagChecker && (dagChecker->EvaluatingLinkLibraries(name.c_str())
+        || (dagChecker->EvaluatingSources()
+          && name == dagChecker->TopTarget())))
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "Expressions which require the linker language may not "
@@ -1536,89 +1630,59 @@ TargetFilesystemArtifact<false, true, true, false> targetSoNameFileDirNode;
 static const
 cmGeneratorExpressionNode* GetNode(const std::string &identifier)
 {
-  if (identifier == "0")
-    return &zeroNode;
-  else if (identifier == "1")
-    return &oneNode;
-  else if (identifier == "AND")
-    return &andNode;
-  else if (identifier == "OR")
-    return &orNode;
-  else if (identifier == "NOT")
-    return &notNode;
-  else if (identifier == "C_COMPILER_ID")
-    return &cCompilerIdNode;
-  else if (identifier == "CXX_COMPILER_ID")
-    return &cxxCompilerIdNode;
-  else if (identifier == "VERSION_GREATER")
-    return &versionGreaterNode;
-  else if (identifier == "VERSION_LESS")
-    return &versionLessNode;
-  else if (identifier == "VERSION_EQUAL")
-    return &versionEqualNode;
-  else if (identifier == "C_COMPILER_VERSION")
-    return &cCompilerVersionNode;
-  else if (identifier == "CXX_COMPILER_VERSION")
-    return &cxxCompilerVersionNode;
-  else if (identifier == "PLATFORM_ID")
-    return &platformIdNode;
-  else if (identifier == "CONFIGURATION")
-    return &configurationNode;
-  else if (identifier == "CONFIG")
-    return &configurationTestNode;
-  else if (identifier == "TARGET_FILE")
-    return &targetFileNode;
-  else if (identifier == "TARGET_LINKER_FILE")
-    return &targetLinkerFileNode;
-  else if (identifier == "TARGET_SONAME_FILE")
-    return &targetSoNameFileNode;
-  else if (identifier == "TARGET_FILE_NAME")
-    return &targetFileNameNode;
-  else if (identifier == "TARGET_LINKER_FILE_NAME")
-    return &targetLinkerFileNameNode;
-  else if (identifier == "TARGET_SONAME_FILE_NAME")
-    return &targetSoNameFileNameNode;
-  else if (identifier == "TARGET_FILE_DIR")
-    return &targetFileDirNode;
-  else if (identifier == "TARGET_LINKER_FILE_DIR")
-    return &targetLinkerFileDirNode;
-  else if (identifier == "TARGET_SONAME_FILE_DIR")
-    return &targetSoNameFileDirNode;
-  else if (identifier == "STREQUAL")
-    return &strEqualNode;
-  else if (identifier == "EQUAL")
-    return &equalNode;
-  else if (identifier == "LOWER_CASE")
-    return &lowerCaseNode;
-  else if (identifier == "UPPER_CASE")
-    return &upperCaseNode;
-  else if (identifier == "MAKE_C_IDENTIFIER")
-    return &makeCIdentifierNode;
-  else if (identifier == "BOOL")
-    return &boolNode;
-  else if (identifier == "ANGLE-R")
-    return &angle_rNode;
-  else if (identifier == "COMMA")
-    return &commaNode;
-  else if (identifier == "SEMICOLON")
-    return &semicolonNode;
-  else if (identifier == "TARGET_PROPERTY")
-    return &targetPropertyNode;
-  else if (identifier == "TARGET_NAME")
-    return &targetNameNode;
-  else if (identifier == "TARGET_POLICY")
-    return &targetPolicyNode;
-  else if (identifier == "BUILD_INTERFACE")
-    return &buildInterfaceNode;
-  else if (identifier == "INSTALL_INTERFACE")
-    return &installInterfaceNode;
-  else if (identifier == "INSTALL_PREFIX")
-    return &installPrefixNode;
-  else if (identifier == "JOIN")
-    return &joinNode;
-  else if (identifier == "LINK_ONLY")
-    return &linkOnlyNode;
-  return 0;
+  typedef std::map<std::string, const cmGeneratorExpressionNode*> NodeMap;
+  static NodeMap nodeMap;
+  if (nodeMap.empty())
+    {
+    nodeMap["0"] = &zeroNode;
+    nodeMap["1"] = &oneNode;
+    nodeMap["AND"] = &andNode;
+    nodeMap["OR"] = &orNode;
+    nodeMap["NOT"] = &notNode;
+    nodeMap["C_COMPILER_ID"] = &cCompilerIdNode;
+    nodeMap["CXX_COMPILER_ID"] = &cxxCompilerIdNode;
+    nodeMap["VERSION_GREATER"] = &versionGreaterNode;
+    nodeMap["VERSION_LESS"] = &versionLessNode;
+    nodeMap["VERSION_EQUAL"] = &versionEqualNode;
+    nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
+    nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
+    nodeMap["PLATFORM_ID"] = &platformIdNode;
+    nodeMap["CONFIGURATION"] = &configurationNode;
+    nodeMap["CONFIG"] = &configurationTestNode;
+    nodeMap["TARGET_FILE"] = &targetFileNode;
+    nodeMap["TARGET_LINKER_FILE"] = &targetLinkerFileNode;
+    nodeMap["TARGET_SONAME_FILE"] = &targetSoNameFileNode;
+    nodeMap["TARGET_FILE_NAME"] = &targetFileNameNode;
+    nodeMap["TARGET_LINKER_FILE_NAME"] = &targetLinkerFileNameNode;
+    nodeMap["TARGET_SONAME_FILE_NAME"] = &targetSoNameFileNameNode;
+    nodeMap["TARGET_FILE_DIR"] = &targetFileDirNode;
+    nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerFileDirNode;
+    nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameFileDirNode;
+    nodeMap["STREQUAL"] = &strEqualNode;
+    nodeMap["EQUAL"] = &equalNode;
+    nodeMap["LOWER_CASE"] = &lowerCaseNode;
+    nodeMap["UPPER_CASE"] = &upperCaseNode;
+    nodeMap["MAKE_C_IDENTIFIER"] = &makeCIdentifierNode;
+    nodeMap["BOOL"] = &boolNode;
+    nodeMap["ANGLE-R"] = &angle_rNode;
+    nodeMap["COMMA"] = &commaNode;
+    nodeMap["SEMICOLON"] = &semicolonNode;
+    nodeMap["TARGET_PROPERTY"] = &targetPropertyNode;
+    nodeMap["TARGET_NAME"] = &targetNameNode;
+    nodeMap["TARGET_OBJECTS"] = &targetObjectsNode;
+    nodeMap["TARGET_POLICY"] = &targetPolicyNode;
+    nodeMap["BUILD_INTERFACE"] = &buildInterfaceNode;
+    nodeMap["INSTALL_INTERFACE"] = &installInterfaceNode;
+    nodeMap["INSTALL_PREFIX"] = &installPrefixNode;
+    nodeMap["JOIN"] = &joinNode;
+    nodeMap["LINK_ONLY"] = &linkOnlyNode;
+    }
+  NodeMap::const_iterator i = nodeMap.find(identifier);
+  if (i == nodeMap.end())
+    {
+    return 0;
+    }
+  return i->second;
 
 }
 

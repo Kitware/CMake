@@ -40,22 +40,24 @@ protected:
   // Then parse the command line flags specified in CMAKE_CXX_FLAGS
   // and CMAKE_C_FLAGS
   // and overwrite or add new values to this map
-  std::map<cmStdString, cmStdString> FlagMap;
+  std::map<std::string, std::string> FlagMap;
 
   // Preprocessor definitions.
   std::vector<std::string> Defines;
 
   // Unrecognized flags that get no special handling.
-  cmStdString FlagString;
+  std::string FlagString;
 
   bool DoingDefine;
   bool AllowDefine;
   bool AllowSlash;
+  cmIDEFlagTable const* DoingFollowing;
   enum { FlagTableCount = 16 };
   cmIDEFlagTable const* FlagTable[FlagTableCount];
   void HandleFlag(const char* flag);
   bool CheckFlagTable(cmIDEFlagTable const* table, const char* flag,
                       bool& flag_handled);
+  void FlagMapUpdate(cmIDEFlagTable const* entry, const char* new_value);
   virtual void StoreUnknownFlag(const char* flag) = 0;
 };
 

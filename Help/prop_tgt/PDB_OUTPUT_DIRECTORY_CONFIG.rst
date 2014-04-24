@@ -11,5 +11,5 @@ property is initialized by the value of the
 :variable:`CMAKE_PDB_OUTPUT_DIRECTORY_<CONFIG>` variable if it is
 set when a target is created.
 
-This property is not implemented by the :generator:`Visual Studio 6`
-generator.
+.. |COMPILE_PDB_XXX| replace:: :prop_tgt:`COMPILE_PDB_OUTPUT_DIRECTORY_<CONFIG>`
+.. include:: PDB_NOTE.txt

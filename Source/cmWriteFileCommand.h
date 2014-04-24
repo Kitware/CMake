@@ -44,7 +44,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "write_file";}
+  virtual std::string GetName() const { return "write_file";}
 
   /** This command is kept for compatibility with older CMake versions. */
   virtual bool IsDiscouraged() const

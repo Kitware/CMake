@@ -34,7 +34,7 @@ bool cmAddCustomTargetCommand
     e << "called with invalid target name \"" << targetName
       << "\".  Target names may not contain a slash.  "
       << "Use ADD_CUSTOM_COMMAND to generate files.";
-    this->SetError(e.str().c_str());
+    this->SetError(e.str());
     return false;
     }
 
@@ -149,7 +149,7 @@ bool cmAddCustomTargetCommand
     cmOStringStream msg;
     msg << "called with target name containing a \"" << targetName[pos]
         << "\".  This character is not allowed.";
-    this->SetError(msg.str().c_str());
+    this->SetError(msg.str());
     return false;
     }
 
@@ -187,7 +187,7 @@ bool cmAddCustomTargetCommand
           "\" is reserved or not valid for certain "
           "CMake features, such as generator expressions, and may result "
           "in undefined behavior.";
-      this->Makefile->IssueMessage(messageType, e.str().c_str());
+      this->Makefile->IssueMessage(messageType, e.str());
 
       if (messageType == cmake::FATAL_ERROR)
         {
@@ -208,7 +208,7 @@ bool cmAddCustomTargetCommand
   std::string msg;
   if(!this->Makefile->EnforceUniqueName(targetName, msg, true))
     {
-    this->SetError(msg.c_str());
+    this->SetError(msg);
     return false;
     }
   }
@@ -224,7 +224,7 @@ bool cmAddCustomTargetCommand
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target =
-    this->Makefile->AddUtilityCommand(targetName.c_str(), excludeFromAll,
+    this->Makefile->AddUtilityCommand(targetName, excludeFromAll,
                                       working_directory.c_str(), depends,
                                       commandLines, escapeOldStyle, comment);
 

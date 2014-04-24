@@ -48,7 +48,7 @@ bool cmCTestHandlerCommand
       {
       cmOStringStream e;
       e << "called with unknown argument \"" << args[i] << "\".";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 

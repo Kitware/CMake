@@ -19,6 +19,7 @@
 #include "cmVersion.h"
 
 #include <algorithm>
+#include <assert.h>
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
@@ -551,11 +552,11 @@ bool cmGlobalNinjaGenerator::UsingMinGW = false;
 //   cmGlobalGenerator::Build()
 void cmGlobalNinjaGenerator
 ::GenerateBuildCommand(std::vector<std::string>& makeCommand,
-                       const char* makeProgram,
-                       const char* /*projectName*/,
-                       const char* /*projectDir*/,
-                       const char* targetName,
-                       const char* /*config*/,
+                       const std::string& makeProgram,
+                       const std::string& /*projectName*/,
+                       const std::string& /*projectDir*/,
+                       const std::string& targetName,
+                       const std::string& /*config*/,
                        bool /*fast*/,
                        std::vector<std::string> const& makeOptions)
 {
@@ -565,9 +566,9 @@ void cmGlobalNinjaGenerator
 
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());
-  if(targetName && *targetName)
+  if(!targetName.empty())
     {
-    if(strcmp(targetName, "clean") == 0)
+    if(targetName == "clean")
       {
       makeCommand.push_back("-t");
       makeCommand.push_back("clean");
@@ -631,31 +632,19 @@ std::string cmGlobalNinjaGenerator::GetEditCacheCommand() const
   return cmSystemTools::GetCMakeGUICommand();
 }
 
-// TODO: Refactor to combine with cmGlobalUnixMakefileGenerator3 impl.
-void cmGlobalNinjaGenerator::ComputeTargetObjects(cmGeneratorTarget* gt) const
+//----------------------------------------------------------------------------
+void cmGlobalNinjaGenerator
+::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
   cmTarget* target = gt->Target;
 
   // Compute full path to object file directory for this target.
-  std::string dir_max;
-  dir_max += gt->Makefile->GetCurrentOutputDirectory();
-  dir_max += "/";
-  dir_max += gt->LocalGenerator->GetTargetDirectory(*target);
-  dir_max += "/";
-  gt->ObjectDirectory = dir_max;
-
-  std::vector<cmSourceFile*> objectSources;
-  gt->GetObjectSources(objectSources);
-  // Compute the name of each object file.
-  for(std::vector<cmSourceFile*>::iterator
-        si = objectSources.begin();
-      si != objectSources.end(); ++si)
-    {
-    cmSourceFile* sf = *si;
-    std::string objectName = gt->LocalGenerator
-      ->GetObjectFileNameWithoutTarget(*sf, dir_max);
-    gt->AddObject(sf, objectName);
-    }
+  std::string dir;
+  dir += gt->Makefile->GetCurrentOutputDirectory();
+  dir += "/";
+  dir += gt->LocalGenerator->GetTargetDirectory(*target);
+  dir += "/";
+  gt->ObjectDirectory = dir;
 }
 
 //----------------------------------------------------------------------------
@@ -834,8 +823,8 @@ void
 cmGlobalNinjaGenerator
 ::AppendTargetOutputs(cmTarget const* target, cmNinjaDeps& outputs)
 {
-  const char* configName =
-    target->GetMakefile()->GetDefinition("CMAKE_BUILD_TYPE");
+  std::string configName =
+    target->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmLocalNinjaGenerator *ng =
     static_cast<cmLocalNinjaGenerator *>(this->LocalGenerators[0]);
 
@@ -886,7 +875,7 @@ cmGlobalNinjaGenerator
   if (target->GetType() == cmTarget::GLOBAL_TARGET) {
     // Global targets only depend on other utilities, which may not appear in
     // the TargetDepends set (e.g. "all").
-    std::set<cmStdString> const& utils = target->GetUtilities();
+    std::set<std::string> const& utils = target->GetUtilities();
     std::copy(utils.begin(), utils.end(), std::back_inserter(outputs));
   } else {
     cmTargetDependSet const& targetDeps =
@@ -1159,7 +1148,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "CLEAN",
-            (ninjaCmd() + " -t clean").c_str(),
+            ninjaCmd() + " -t clean",
             "Cleaning all built files...",
             "Rule for cleaning all built files.",
             /*depfile=*/ "",
@@ -1182,7 +1171,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
 {
   WriteRule(*this->RulesFileStream,
             "HELP",
-            (ninjaCmd() + " -t targets").c_str(),
+            ninjaCmd() + " -t targets",
             "All primary targets available:",
             "Rule for printing all primary targets available.",
             /*depfile=*/ "",

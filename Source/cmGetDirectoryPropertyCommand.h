@@ -37,7 +37,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "get_directory_property";}
+  virtual std::string GetName() const { return "get_directory_property";}
 
   cmTypeMacro(cmGetDirectoryPropertyCommand, cmCommand);
 };

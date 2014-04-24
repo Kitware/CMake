@@ -84,7 +84,7 @@ static void cmVariableWatchCommandVariableAccessed(
   if ( !processed )
     {
     cmOStringStream msg;
-    msg << "Variable \"" << variable.c_str() << "\" was accessed using "
+    msg << "Variable \"" << variable << "\" was accessed using "
         << accessString << " with value \"" << (newValue?newValue:"") << "\".";
     makefile->IssueMessage(cmake::LOG, msg.str());
     }
@@ -136,8 +136,8 @@ bool cmVariableWatchCommand
   if ( variable == "CMAKE_CURRENT_LIST_FILE" )
     {
     cmOStringStream ostr;
-    ostr << "cannot be set on the variable: " << variable.c_str();
-    this->SetError(ostr.str().c_str());
+    ostr << "cannot be set on the variable: " << variable;
+    this->SetError(ostr.str());
     return false;
     }
 

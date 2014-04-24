@@ -292,8 +292,7 @@ function(ExternalData_expand_arguments target outArgsVar)
       foreach(piece IN LISTS pieces)
         if("x${piece}" MATCHES "^x${data_regex}$")
           # Replace this DATA{}-piece with a file path.
-          string(REGEX REPLACE "${data_regex}" "\\1" data "${piece}")
-          _ExternalData_arg("${target}" "${piece}" "${data}" file)
+          _ExternalData_arg("${target}" "${piece}" "${CMAKE_MATCH_1}" file)
           set(outArg "${outArg}${file}")
         else()
           # No replacement needed for this piece.
@@ -422,16 +421,16 @@ function(_ExternalData_arg target arg options var_file)
   set(external "") # Entries external to the source tree.
   set(internal "") # Entries internal to the source tree.
   set(have_original ${data_is_directory})
+  set(have_original_as_dir 0)
 
   # Process options.
   set(series_option "")
   set(associated_files "")
   set(associated_regex "")
   foreach(opt ${options})
-    if("x${opt}" MATCHES "^xREGEX:[^:/]+$")
-      # Regular expression to match associated files.
-      string(REGEX REPLACE "^REGEX:" "" regex "${opt}")
-      list(APPEND associated_regex "${regex}")
+    # Regular expression to match associated files.
+    if("x${opt}" MATCHES "^xREGEX:([^:/]+)$")
+      list(APPEND associated_regex "${CMAKE_MATCH_1}")
     elseif(opt STREQUAL ":")
       # Activate series matching.
       set(series_option "${opt}")
@@ -472,11 +471,18 @@ function(_ExternalData_arg target arg options var_file)
   endif()
 
   if(NOT have_original)
-    message(FATAL_ERROR "Data file referenced by argument\n"
+    if(have_original_as_dir)
+      set(msg_kind FATAL_ERROR)
+      set(msg "that is directory instead of a file!")
+    else()
+      set(msg_kind AUTHOR_WARNING)
+      set(msg "that does not exist as a file (with or without an extension)!")
+    endif()
+    message(${msg_kind} "Data file referenced by argument\n"
       "  ${arg}\n"
       "corresponds to source tree path\n"
       "  ${reldata}\n"
-      "that does not exist as a file (with or without an extension)!")
+      "${msg}")
   endif()
 
   if(external)
@@ -593,27 +599,33 @@ function(_ExternalData_arg_find_files pattern regex)
       set(alg "")
     endif()
     if("x${relname}" MATCHES "^x${regex}$" # matches
-        AND NOT IS_DIRECTORY "${top_src}/${entry}" # not a directory
         AND NOT "x${relname}" MATCHES "(^x|/)\\.ExternalData_" # not staged obj
         )
-      set(name "${top_src}/${relname}")
-      set(file "${top_bin}/${relname}")
-      if(alg)
-        list(APPEND external "${file}|${name}|${alg}")
-      elseif(ExternalData_LINK_CONTENT)
-        _ExternalData_link_content("${name}" alg)
-        list(APPEND external "${file}|${name}|${alg}")
-      elseif(NOT top_same)
-        list(APPEND internal "${file}|${name}")
-      endif()
-      if("${relname}" STREQUAL "${reldata}")
-        set(have_original 1)
+      if(IS_DIRECTORY "${top_src}/${entry}")
+        if("${relname}" STREQUAL "${reldata}")
+          set(have_original_as_dir 1)
+        endif()
+      else()
+        set(name "${top_src}/${relname}")
+        set(file "${top_bin}/${relname}")
+        if(alg)
+          list(APPEND external "${file}|${name}|${alg}")
+        elseif(ExternalData_LINK_CONTENT)
+          _ExternalData_link_content("${name}" alg)
+          list(APPEND external "${file}|${name}|${alg}")
+        elseif(NOT top_same)
+          list(APPEND internal "${file}|${name}")
+        endif()
+        if("${relname}" STREQUAL "${reldata}")
+          set(have_original 1)
+        endif()
       endif()
     endif()
   endforeach()
   set(external "${external}" PARENT_SCOPE)
   set(internal "${internal}" PARENT_SCOPE)
   set(have_original "${have_original}" PARENT_SCOPE)
+  set(have_original_as_dir "${have_original_as_dir}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------

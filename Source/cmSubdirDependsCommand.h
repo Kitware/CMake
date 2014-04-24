@@ -20,7 +20,7 @@ public:
   virtual cmCommand* Clone() { return new cmSubdirDependsCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  virtual const char* GetName() const { return "subdir_depends";}
+  virtual std::string GetName() const { return "subdir_depends";}
   virtual bool IsDiscouraged() const { return true; }
   cmTypeMacro(cmSubdirDependsCommand, cmCommand);
 };

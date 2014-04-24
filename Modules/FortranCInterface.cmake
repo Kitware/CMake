@@ -328,7 +328,7 @@ function(FortranCInterface_VERIFY)
   # Error if compilers are incompatible.
   if(NOT FortranCInterface_VERIFIED_${lang} AND NOT quiet)
     file(READ "${FortranCInterface_BINARY_DIR}/Verify${lang}/output.txt" _output)
-    string(REGEX REPLACE "\n" "\n  " _output "${_output}")
+    string(REPLACE "\n" "\n  " _output "${_output}")
     message(FATAL_ERROR
       "The Fortran compiler:\n  ${CMAKE_Fortran_COMPILER}\n"
       "and the ${lang} compiler:\n  ${CMAKE_${lang}_COMPILER}\n"

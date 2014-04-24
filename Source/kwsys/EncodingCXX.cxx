@@ -110,16 +110,19 @@ Encoding::CommandLineArguments::
 Encoding::CommandLineArguments&
 Encoding::CommandLineArguments::operator=(const CommandLineArguments& other)
 {
-  size_t i;
-  for(i=0; i<this->argv_.size(); i++)
+  if(this != &other)
     {
-    free(this->argv_[i]);
-    }
+    size_t i;
+    for(i=0; i<this->argv_.size(); i++)
+      {
+      free(this->argv_[i]);
+      }
 
-  this->argv_.resize(other.argv_.size());
-  for(i=0; i<this->argv_.size(); i++)
-    {
-    this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : 0;
+    this->argv_.resize(other.argv_.size());
+    for(i=0; i<this->argv_.size(); i++)
+      {
+      this->argv_[i] = other.argv_[i] ? strdup(other.argv_[i]) : 0;
+      }
     }
 
   return *this;

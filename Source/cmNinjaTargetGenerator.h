@@ -65,24 +65,24 @@ protected:
   cmMakefile* GetMakefile() const
   { return this->Makefile; }
 
-  const char* GetConfigName() const;
+  std::string const& GetConfigName() const;
 
   std::string LanguageCompilerRule(const std::string& lang) const
   { return lang + "_COMPILER"; }
 
-  const char* GetFeature(const char* feature);
-  bool GetFeatureAsBool(const char* feature);
-  void AddFeatureFlags(std::string& flags, const char* lang);
+  const char* GetFeature(const std::string& feature);
+  bool GetFeatureAsBool(const std::string& feature);
+  void AddFeatureFlags(std::string& flags, const std::string& lang);
 
   /**
    * Compute the flags for compilation of object files for a given @a language.
    * @note Generally it is the value of the variable whose name is computed
    *       by LanguageFlagsVarName().
    */
-  std::string ComputeFlagsForObject(cmSourceFile *source,
+  std::string ComputeFlagsForObject(cmSourceFile const* source,
                                     const std::string& language);
 
-  std::string ComputeDefines(cmSourceFile *source,
+  std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
 
   std::string ConvertToNinjaPath(const char *path) const {
@@ -96,10 +96,10 @@ protected:
   cmNinjaDeps ComputeLinkDeps() const;
 
   /// @return the source file path for the given @a source.
-  std::string GetSourceFilePath(cmSourceFile* source) const;
+  std::string GetSourceFilePath(cmSourceFile const* source) const;
 
   /// @return the object file path for the given @a source.
-  std::string GetObjectFilePath(cmSourceFile* source) const;
+  std::string GetObjectFilePath(cmSourceFile const* source) const;
 
   /// @return the file path where the target named @a name is generated.
   std::string GetTargetFilePath(const std::string& name) const;
@@ -110,7 +110,7 @@ protected:
   void WriteLanguageRules(const std::string& language);
   void WriteCompileRule(const std::string& language);
   void WriteObjectBuildStatements();
-  void WriteObjectBuildStatement(cmSourceFile* source);
+  void WriteObjectBuildStatement(cmSourceFile const* source);
   void WriteCustomCommandBuildStatement(cmCustomCommand *cc);
 
   cmNinjaDeps GetObjects() const
@@ -129,7 +129,7 @@ protected:
     MacOSXContentGeneratorType(cmNinjaTargetGenerator* g) :
       Generator(g)  {}
 
-    void operator()(cmSourceFile& source, const char* pkgloc);
+    void operator()(cmSourceFile const& source, const char* pkgloc);
 
   private:
     cmNinjaTargetGenerator* Generator;
@@ -140,7 +140,7 @@ protected:
   MacOSXContentGeneratorType* MacOSXContentGenerator;
   // Properly initialized by sub-classes.
   cmOSXBundleGenerator* OSXBundleGenerator;
-  std::set<cmStdString> MacContentFolders;
+  std::set<std::string> MacContentFolders;
 
   void addPoolNinjaVariable(const char* pool_property,
                             cmTarget* target,
@@ -153,6 +153,7 @@ private:
   cmLocalNinjaGenerator* LocalGenerator;
   /// List of object files for this target.
   cmNinjaDeps Objects;
+  std::vector<cmCustomCommand const*> CustomCommands;
 
   typedef std::map<std::string, std::string> LanguageFlagMap;
   LanguageFlagMap LanguageFlags;

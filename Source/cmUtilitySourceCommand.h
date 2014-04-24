@@ -21,7 +21,7 @@ public:
   virtual cmCommand* Clone() { return new cmUtilitySourceCommand; }
   virtual bool InitialPass(std::vector<std::string> const& args,
                            cmExecutionStatus &status);
-  virtual const char* GetName() const { return "utility_source";}
+  virtual std::string GetName() const { return "utility_source";}
   virtual bool IsDiscouraged() const { return true; }
 };
 

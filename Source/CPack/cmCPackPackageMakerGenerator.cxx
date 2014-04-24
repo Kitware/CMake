@@ -43,14 +43,14 @@ bool cmCPackPackageMakerGenerator::SupportsComponentInstallation() const
 }
 
 //----------------------------------------------------------------------
-int cmCPackPackageMakerGenerator::CopyInstallScript(const char* resdir,
-                                                    const char* script,
-                                                    const char* name)
+int cmCPackPackageMakerGenerator::CopyInstallScript(const std::string& resdir,
+                                                    const std::string& script,
+                                                    const std::string& name)
 {
   std::string dst = resdir;
   dst += "/";
   dst += name;
-  cmSystemTools::CopyFileAlways(script, dst.c_str());
+  cmSystemTools::CopyFileAlways(script.c_str(), dst.c_str());
   cmSystemTools::SetPermissions(dst.c_str(),0777);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE,
                 "copy script : " << script << "\ninto " << dst.c_str() <<
@@ -553,8 +553,9 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
-                                                          const char* dirName)
+bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(
+                                            const std::string& name,
+                                            const std::string& dirName)
 {
   std::string uname = cmSystemTools::UpperCase(name);
   std::string cpackVar = "CPACK_RESOURCE_FILE_" + uname;
@@ -563,7 +564,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "CPack option: " << cpackVar.c_str()
                   << " not specified. It should point to "
-                  << (name ? name : "(NULL)")
+                  << (!name.empty() ? name : "<empty>")
                   << ".rtf, " << name
                   << ".html, or " << name << ".txt file" << std::endl);
     return false;
@@ -571,7 +572,7 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
   if ( !cmSystemTools::FileExists(inFileName) )
     {
     cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot find "
-                  << (name ? name : "(NULL)")
+                  << (!name.empty() ? name : "<empty>")
                   << " resource file: " << inFileName << std::endl);
     return false;
     }
@@ -600,12 +601,13 @@ bool cmCPackPackageMakerGenerator::CopyCreateResourceFile(const char* name,
   return true;
 }
 
-bool cmCPackPackageMakerGenerator::CopyResourcePlistFile(const char* name,
-                                                         const char* outName)
+bool cmCPackPackageMakerGenerator::CopyResourcePlistFile(
+                                                const std::string& name,
+                                                const char* outName)
 {
   if (!outName)
     {
-    outName = name;
+    outName = name.c_str();
     }
 
   std::string inFName = "CPack.";

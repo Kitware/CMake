@@ -92,16 +92,13 @@ if(BISON_EXECUTABLE)
     message(SEND_ERROR "Command \"${BISON_EXECUTABLE} --version\" failed with output:\n${BISON_version_error}")
   else()
     # Bison++
-    if("${BISON_version_output}" MATCHES "^bison\\+\\+")
-      string(REGEX REPLACE "^bison\\+\\+ Version ([^,]+).*" "\\1"
-        BISON_VERSION "${BISON_version_output}")
+    if("${BISON_version_output}" MATCHES "^bison\\+\\+ Version ([^,]+)")
+      set(BISON_VERSION "${CMAKE_MATCH_1}")
     # GNU Bison
-    elseif("${BISON_version_output}" MATCHES "^bison[^+]")
-      string(REGEX REPLACE "^bison \\(GNU Bison\\) ([^\n]+)\n.*" "\\1"
-        BISON_VERSION "${BISON_version_output}")
-    elseif("${BISON_version_output}" MATCHES "^GNU Bison ")
-      string(REGEX REPLACE "^GNU Bison (version )?([^\n]+).*" "\\2"
-        BISON_VERSION "${BISON_version_output}")
+    elseif("${BISON_version_output}" MATCHES "^bison \\(GNU Bison\\) ([^\n]+)\n")
+      set(BISON_VERSION "${CMAKE_MATCH_1}")
+    elseif("${BISON_version_output}" MATCHES "^GNU Bison (version )?([^\n]+)")
+      set(BISON_VERSION "${CMAKE_MATCH_2}")
     endif()
   endif()
 

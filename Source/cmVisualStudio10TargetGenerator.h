@@ -35,7 +35,7 @@ public:
   // used by cmVisualStudioGeneratorOptions
   void WritePlatformConfigTag(
     const char* tag,
-    const char* config,
+    const std::string& config,
     int indentLevel,
     const char* attribute = 0,
     const char* end = 0,
@@ -45,7 +45,7 @@ public:
 private:
   struct ToolSource
   {
-    cmSourceFile* SourceFile;
+    cmSourceFile const* SourceFile;
     bool RelativePath;
   };
   struct ToolSources: public std::vector<ToolSource> {};
@@ -55,8 +55,10 @@ private:
   void WriteString(const char* line, int indentLevel);
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
-  void WriteSource(const char* tool, cmSourceFile* sf, const char* end = 0);
-  void WriteSources(const char* tool, std::vector<cmSourceFile*> const&);
+  void WriteSource(const char* tool, cmSourceFile const* sf,
+                   const char* end = 0);
+  void WriteSources(const char* tool,
+                    std::vector<cmSourceFile const*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteEmbeddedResourceGroup();
@@ -77,13 +79,13 @@ private:
                         std::vector<std::string> const & includes);
   void OutputIncludes(std::vector<std::string> const & includes);
   void OutputLinkIncremental(std::string const& configName);
-  void WriteCustomRule(cmSourceFile* source,
+  void WriteCustomRule(cmSourceFile const* source,
                        cmCustomCommand const & command);
   void WriteCustomCommands();
-  void WriteCustomCommand(cmSourceFile* sf);
+  void WriteCustomCommand(cmSourceFile const* sf);
   void WriteGroups();
   void WriteProjectReferences();
-  bool OutputSourceSpecificFlags(cmSourceFile* source);
+  bool OutputSourceSpecificFlags(cmSourceFile const* source);
   void AddLibraries(cmComputeLinkInformation& cli, std::string& libstring);
   void WriteLibOptions(std::string const& config);
   void WriteEvents(std::string const& configName);
@@ -98,7 +100,7 @@ private:
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;
-  typedef std::map<cmStdString, Options*> OptionsMap;
+  typedef std::map<std::string, Options*> OptionsMap;
   OptionsMap ClOptions;
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
@@ -111,9 +113,9 @@ private:
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
-  std::set<cmSourceFile*> SourcesVisited;
+  std::set<cmSourceFile const*> SourcesVisited;
 
-  typedef std::map<cmStdString, ToolSources> ToolSourceMap;
+  typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;
 };
 
