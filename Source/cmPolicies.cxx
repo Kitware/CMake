@@ -354,6 +354,11 @@ cmPolicies::cmPolicies()
     "Reject source and build dirs in installed "
     "INTERFACE_INCLUDE_DIRECTORIES.",
     3,1,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0053, "CMP0053",
+    "Simplify variable reference and escape sequence evaluation.",
+    3,1,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
