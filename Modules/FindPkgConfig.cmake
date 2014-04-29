@@ -2,140 +2,20 @@
 # FindPkgConfig
 # -------------
 #
-# a pkg-config module for CMake
+# A `pkg-config` module for CMake.
 #
+# Finds the ``pkg-config`` executable and add the
+# :command:`pkg_check_modules` and :command:`pkg_search_module`
+# commands.
 #
-#
-# Usage:
-#
-# ::
-#
-#    pkg_check_modules(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
-#      checks for all the given modules
-#
-#
-#
-# ::
-#
-#    pkg_search_module(<PREFIX> [REQUIRED] [QUIET] <MODULE> [<MODULE>]*)
-#      checks for given modules and uses the first working one
-#
-#
-#
-# When the 'REQUIRED' argument was set, macros will fail with an error
-# when module(s) could not be found
-#
-# When the 'QUIET' argument is set, no status messages will be printed.
-#
-# It sets the following variables:
-#
-# ::
-#
-#    PKG_CONFIG_FOUND          ... if pkg-config executable was found
-#    PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
-#    PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
-#                                  (since CMake 2.8.8)
-#
-#
-#
-# For the following variables two sets of values exist; first one is the
-# common one and has the given PREFIX.  The second set contains flags
-# which are given out when pkgconfig was called with the '--static'
-# option.
-#
-# ::
-#
-#    <XPREFIX>_FOUND          ... set to 1 if module(s) exist
-#    <XPREFIX>_LIBRARIES      ... only the libraries (w/o the '-l')
-#    <XPREFIX>_LIBRARY_DIRS   ... the paths of the libraries (w/o the '-L')
-#    <XPREFIX>_LDFLAGS        ... all required linker flags
-#    <XPREFIX>_LDFLAGS_OTHER  ... all other linker flags
-#    <XPREFIX>_INCLUDE_DIRS   ... the '-I' preprocessor flags (w/o the '-I')
-#    <XPREFIX>_CFLAGS         ... all required cflags
-#    <XPREFIX>_CFLAGS_OTHER   ... the other compiler flags
-#
-#
-#
-# ::
-#
-#    <XPREFIX> = <PREFIX>        for common case
-#    <XPREFIX> = <PREFIX>_STATIC for static linking
-#
-#
-#
-# There are some special variables whose prefix depends on the count of
-# given modules.  When there is only one module, <PREFIX> stays
-# unchanged.  When there are multiple modules, the prefix will be
-# changed to <PREFIX>_<MODNAME>:
-#
-# ::
-#
-#    <XPREFIX>_VERSION    ... version of the module
-#    <XPREFIX>_PREFIX     ... prefix-directory of the module
-#    <XPREFIX>_INCLUDEDIR ... include-dir of the module
-#    <XPREFIX>_LIBDIR     ... lib-dir of the module
-#
-#
-#
-# ::
-#
-#    <XPREFIX> = <PREFIX>  when |MODULES| == 1, else
-#    <XPREFIX> = <PREFIX>_<MODNAME>
-#
-#
-#
-# A <MODULE> parameter can have the following formats:
-#
-# ::
-#
-#    {MODNAME}            ... matches any version
-#    {MODNAME}>={VERSION} ... at least version <VERSION> is required
-#    {MODNAME}={VERSION}  ... exactly version <VERSION> is required
-#    {MODNAME}<={VERSION} ... modules must not be newer than <VERSION>
-#
-#
-#
-# Examples
-#
-# ::
-#
-#    pkg_check_modules (GLIB2   glib-2.0)
-#
-#
-#
-# ::
-#
-#    pkg_check_modules (GLIB2   glib-2.0>=2.10)
-#      requires at least version 2.10 of glib2 and defines e.g.
-#        GLIB2_VERSION=2.10.3
-#
-#
-#
-# ::
-#
-#    pkg_check_modules (FOO     glib-2.0>=2.10 gtk+-2.0)
-#      requires both glib2 and gtk2, and defines e.g.
-#        FOO_glib-2.0_VERSION=2.10.3
-#        FOO_gtk+-2.0_VERSION=2.8.20
-#
-#
-#
-# ::
-#
-#    pkg_check_modules (XRENDER REQUIRED xrender)
-#      defines e.g.:
-#        XRENDER_LIBRARIES=Xrender;X11
-#        XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
-#
-#
-#
-# ::
-#
-#    pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
+# In order to find the ``pkg-config`` executable, it uses the
+# :variable:`PKG_CONFIG_EXECUTABLE` variable or the ``PKG_CONFIG``
+# environment variable first.
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
-# Copyright 2006 Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
+# Copyright 2006-2014 Kitware, Inc.
+# Copyright 2014      Christoph Grüninger <foss@grueninger.de>
+# Copyright 2006      Enrico Scholz <enrico.scholz@informatik.tu-chemnitz.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -150,6 +30,10 @@
 ### Common stuff ####
 set(PKG_CONFIG_VERSION 1)
 
+# find pkg-config, use PKG_CONFIG if set
+if((NOT PKG_CONFIG_EXECUTABLE) AND (NOT "$ENV{PKG_CONFIG}" STREQUAL ""))
+  set(PKG_CONFIG_EXECUTABLE "$ENV{PKG_CONFIG}" CACHE FILEPATH "pkg-config executable")
+endif()
 find_program(PKG_CONFIG_EXECUTABLE NAMES pkg-config DOC "pkg-config executable")
 mark_as_advanced(PKG_CONFIG_EXECUTABLE)
 
@@ -215,9 +99,20 @@ macro(_pkgconfig_invoke_dyn _pkglist _prefix _varname cleanup_regexp)
 endmacro()
 
 # Splits given arguments into options and a package list
-macro(_pkgconfig_parse_options _result _is_req _is_silent)
+macro(_pkgconfig_parse_options _result _is_req _is_silent _no_cmake_path _no_cmake_environment_path)
   set(${_is_req} 0)
   set(${_is_silent} 0)
+  set(${_no_cmake_path} 0)
+  set(${_no_cmake_environment_path} 0)
+  if(DEFINED PKG_CONFIG_USE_CMAKE_PREFIX_PATH)
+    if(NOT PKG_CONFIG_USE_CMAKE_PREFIX_PATH)
+      set(${_no_cmake_path} 1)
+      set(${_no_cmake_environment_path} 1)
+    endif()
+  elseif(${CMAKE_MINIMUM_REQUIRED_VERSION} VERSION_LESS 3.1)
+    set(${_no_cmake_path} 1)
+    set(${_no_cmake_environment_path} 1)
+  endif()
 
   foreach(_pkg ${ARGN})
     if (_pkg STREQUAL "REQUIRED")
@@ -226,15 +121,48 @@ macro(_pkgconfig_parse_options _result _is_req _is_silent)
     if (_pkg STREQUAL "QUIET")
       set(${_is_silent} 1)
     endif ()
+    if (_pkg STREQUAL "NO_CMAKE_PATH")
+      set(${_no_cmake_path} 1)
+    endif()
+    if (_pkg STREQUAL "NO_CMAKE_ENVIRONMENT_PATH")
+      set(${_no_cmake_environment_path} 1)
+    endif()
   endforeach()
 
   set(${_result} ${ARGN})
   list(REMOVE_ITEM ${_result} "REQUIRED")
   list(REMOVE_ITEM ${_result} "QUIET")
+  list(REMOVE_ITEM ${_result} "NO_CMAKE_PATH")
+  list(REMOVE_ITEM ${_result} "NO_CMAKE_ENVIRONMENT_PATH")
 endmacro()
 
+# Add the content of a variable or an environment variable to a list of
+# paths
+# Usage:
+#  - _pkgconfig_add_extra_path(_extra_paths VAR)
+#  - _pkgconfig_add_extra_path(_extra_paths ENV VAR)
+function(_pkgconfig_add_extra_path _extra_paths_var _var)
+  set(_is_env 0)
+  if(_var STREQUAL "ENV")
+    set(_var ${ARGV2})
+    set(_is_env 1)
+  endif()
+  if(NOT _is_env)
+    if(NOT "${${_var}}" STREQUAL "")
+      list(APPEND ${_extra_paths_var} ${CMAKE_PREFIX_PATH})
+    endif()
+  else()
+    if(NOT "$ENV{${_var}}" STREQUAL "")
+      file(TO_CMAKE_PATH "$ENV{${_var}}" _path)
+      list(APPEND ${_extra_paths_var} ${_path})
+      unset(_path)
+    endif()
+  endif()
+  set(${_extra_paths_var} ${${_extra_paths_var}} PARENT_SCOPE)
+endfunction()
+
 ###
-macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
+macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cmake_environment_path _prefix)
   _pkgconfig_unset(${_prefix}_FOUND)
   _pkgconfig_unset(${_prefix}_VERSION)
   _pkgconfig_unset(${_prefix}_PREFIX)
@@ -273,15 +201,86 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
     set(_pkg_check_modules_packages)
     set(_pkg_check_modules_failed)
 
+    set(_extra_paths)
+
+    if(NOT _no_cmake_path)
+      _pkgconfig_add_extra_path(_extra_paths CMAKE_PREFIX_PATH)
+      _pkgconfig_add_extra_path(_extra_paths CMAKE_FRAMEWORK_PATH)
+      _pkgconfig_add_extra_path(_extra_paths CMAKE_APPBUNDLE_PATH)
+    endif()
+
+    if(NOT _no_cmake_environment_path)
+      _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_PREFIX_PATH)
+      _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_FRAMEWORK_PATH)
+      _pkgconfig_add_extra_path(_extra_paths ENV CMAKE_APPBUNDLE_PATH)
+    endif()
+
+    if(NOT "${_extra_paths}" STREQUAL "")
+      # Save the PKG_CONFIG_PATH environment variable, and add paths
+      # from the CMAKE_PREFIX_PATH variables
+      set(_pkgconfig_path_old $ENV{PKG_CONFIG_PATH})
+      set(_pkgconfig_path ${_pkgconfig_path_old})
+      if(NOT "${_pkgconfig_path}" STREQUAL "")
+        file(TO_CMAKE_PATH "${_pkgconfig_path}" _pkgconfig_path)
+      endif()
+
+      # Create a list of the possible pkgconfig subfolder (depending on
+      # the system
+      set(_lib_dirs)
+      if(NOT DEFINED CMAKE_SYSTEM_NAME
+          OR (CMAKE_SYSTEM_NAME MATCHES "^(Linux|kFreeBSD|GNU)$"
+              AND NOT CMAKE_CROSSCOMPILING))
+        if(EXISTS "/etc/debian_version") # is this a debian system ?
+          if(CMAKE_LIBRARY_ARCHITECTURE)
+            list(APPEND _lib_dirs "lib/${CMAKE_LIBRARY_ARCHITECTURE}/pkgconfig")
+          endif()
+        else()
+          # not debian, chech the FIND_LIBRARY_USE_LIB64_PATHS property
+          get_property(uselib64 GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS)
+          if(uselib64)
+            list(APPEND _lib_dirs "lib64/pkgconfig")
+          endif()
+        endif()
+      endif()
+      list(APPEND _lib_dirs "lib/pkgconfig")
+
+      # Check if directories exist and eventually append them to the
+      # pkgconfig path list
+      foreach(_prefix_dir ${_extra_paths})
+        foreach(_lib_dir ${_lib_dirs})
+          if(EXISTS "${_prefix_dir}/${_lib_dir}")
+            list(APPEND _pkgconfig_path "${_prefix_dir}/${_lib_dir}")
+            list(REMOVE_DUPLICATES _pkgconfig_path)
+          endif()
+        endforeach()
+      endforeach()
+
+      # Prepare and set the environment variable
+      if(NOT "${_pkgconfig_path}" STREQUAL "")
+        # remove empty values from the list
+        list(REMOVE_ITEM _pkgconfig_path "")
+        file(TO_NATIVE_PATH "${_pkgconfig_path}" _pkgconfig_path)
+        if(UNIX)
+          string(REPLACE ";" ":" _pkgconfig_path "${_pkgconfig_path}")
+          string(REPLACE "\\ " " " _pkgconfig_path "${_pkgconfig_path}")
+        endif()
+        set(ENV{PKG_CONFIG_PATH} ${_pkgconfig_path})
+      endif()
+
+      # Unset variables
+      unset(_lib_dirs)
+      unset(_pkgconfig_path)
+    endif()
+
     # iterate through module list and check whether they exist and match the required version
     foreach (_pkg_check_modules_pkg ${_pkg_check_modules_list})
       set(_pkg_check_modules_exist_query)
 
       # check whether version is given
-      if (_pkg_check_modules_pkg MATCHES ".*(>=|=|<=).*")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\1" _pkg_check_modules_pkg_name "${_pkg_check_modules_pkg}")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\2" _pkg_check_modules_pkg_op   "${_pkg_check_modules_pkg}")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\3" _pkg_check_modules_pkg_ver  "${_pkg_check_modules_pkg}")
+      if (_pkg_check_modules_pkg MATCHES "(.*[^><])(>=|=|<=)(.*)")
+        set(_pkg_check_modules_pkg_name "${CMAKE_MATCH_1}")
+        set(_pkg_check_modules_pkg_op "${CMAKE_MATCH_2}")
+        set(_pkg_check_modules_pkg_ver "${CMAKE_MATCH_3}")
       else()
         set(_pkg_check_modules_pkg_name "${_pkg_check_modules_pkg}")
         set(_pkg_check_modules_pkg_op)
@@ -338,7 +337,7 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
     if(_pkg_check_modules_failed)
       # fail when requested
       if (${_is_required})
-        message(SEND_ERROR "A required package was not found")
+        message(FATAL_ERROR "A required package was not found")
       endif ()
     else()
       # when we are here, we checked whether requested modules
@@ -376,6 +375,14 @@ macro(_pkg_check_modules_internal _is_required _is_silent _prefix)
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS              ""        --cflags )
       _pkgconfig_invoke_dyn("${_pkg_check_modules_packages}" "${_prefix}" CFLAGS_OTHER        ""        --cflags-only-other )
     endif()
+
+    if(NOT "${_extra_paths}" STREQUAL "")
+      # Restore the environment variable
+      set(ENV{PKG_CONFIG_PATH} ${_pkgconfig_path})
+    endif()
+
+    unset(_extra_paths)
+    unset(_pkgconfig_path_old)
   else()
     if (${_is_required})
       message(SEND_ERROR "pkg-config tool not found")
@@ -387,23 +394,138 @@ endmacro()
 ### User visible macros start here
 ###
 
-###
+#[========================================[.rst:
+.. command:: pkg_check_modules
+
+ Checks for all the given modules. ::
+
+    pkg_check_modules(<PREFIX> [REQUIRED] [QUIET]
+                      [NO_CMAKE_PATH] [NO_CMAKE_ENVIRONMENT_PATH]
+                      <MODULE> [<MODULE>]*)
+
+
+ When the ``REQUIRED`` argument was set, macros will fail with an error
+ when module(s) could not be found.
+
+ When the ``QUIET`` argument is set, no status messages will be printed.
+
+ By default, if :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or
+ later, or if :variable:`PKG_CONFIG_USE_CMAKE_PREFIX_PATH` is set, the
+ :variable:`CMAKE_PREFIX_PATH`, :variable:`CMAKE_FRAMEWORK_PATH`, and
+ :variable:`CMAKE_APPBUNDLE_PATH` cache and environment variables will
+ be added to ``pkg-config`` search path.
+ The ``NO_CMAKE_PATH`` and ``NO_CMAKE_ENVIRONMENT_PATH`` arguments
+ disable this behavior for the cache variables and the environment
+ variables, respectively.
+
+ It sets the following variables: ::
+
+    PKG_CONFIG_FOUND          ... if pkg-config executable was found
+    PKG_CONFIG_EXECUTABLE     ... pathname of the pkg-config program
+    PKG_CONFIG_VERSION_STRING ... the version of the pkg-config program found
+                                  (since CMake 2.8.8)
+
+ For the following variables two sets of values exist; first one is the
+ common one and has the given PREFIX.  The second set contains flags
+ which are given out when ``pkg-config`` was called with the ``--static``
+ option. ::
+
+    <XPREFIX>_FOUND          ... set to 1 if module(s) exist
+    <XPREFIX>_LIBRARIES      ... only the libraries (w/o the '-l')
+    <XPREFIX>_LIBRARY_DIRS   ... the paths of the libraries (w/o the '-L')
+    <XPREFIX>_LDFLAGS        ... all required linker flags
+    <XPREFIX>_LDFLAGS_OTHER  ... all other linker flags
+    <XPREFIX>_INCLUDE_DIRS   ... the '-I' preprocessor flags (w/o the '-I')
+    <XPREFIX>_CFLAGS         ... all required cflags
+    <XPREFIX>_CFLAGS_OTHER   ... the other compiler flags
+
+ ::
+
+    <XPREFIX> = <PREFIX>        for common case
+    <XPREFIX> = <PREFIX>_STATIC for static linking
+
+ There are some special variables whose prefix depends on the count of
+ given modules.  When there is only one module, <PREFIX> stays
+ unchanged.  When there are multiple modules, the prefix will be
+ changed to <PREFIX>_<MODNAME>: ::
+
+    <XPREFIX>_VERSION    ... version of the module
+    <XPREFIX>_PREFIX     ... prefix-directory of the module
+    <XPREFIX>_INCLUDEDIR ... include-dir of the module
+    <XPREFIX>_LIBDIR     ... lib-dir of the module
+
+ ::
+
+    <XPREFIX> = <PREFIX>  when |MODULES| == 1, else
+    <XPREFIX> = <PREFIX>_<MODNAME>
+
+ A <MODULE> parameter can have the following formats: ::
+
+    {MODNAME}            ... matches any version
+    {MODNAME}>={VERSION} ... at least version <VERSION> is required
+    {MODNAME}={VERSION}  ... exactly version <VERSION> is required
+    {MODNAME}<={VERSION} ... modules must not be newer than <VERSION>
+
+ Examples
+
+ .. code-block:: cmake
+
+    pkg_check_modules (GLIB2   glib-2.0)
+
+ .. code-block:: cmake
+
+    pkg_check_modules (GLIB2   glib-2.0>=2.10)
+
+ Requires at least version 2.10 of glib2 and defines e.g.
+ ``GLIB2_VERSION=2.10.3``
+
+ .. code-block:: cmake
+
+    pkg_check_modules (FOO     glib-2.0>=2.10 gtk+-2.0)
+
+ Requires both glib2 and gtk2, and defines e.g.
+ ``FOO_glib-2.0_VERSION=2.10.3`` and ``FOO_gtk+-2.0_VERSION=2.8.20``
+
+ .. code-block:: cmake
+
+    pkg_check_modules (XRENDER REQUIRED xrender)
+
+ Defines e.g.:
+ ``XRENDER_LIBRARIES=Xrender;X11`` and
+ ``XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp``
+#]========================================]
 macro(pkg_check_modules _prefix _module0)
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
-    _pkgconfig_parse_options   (_pkg_modules _pkg_is_required _pkg_is_silent "${_module0}" ${ARGN})
-    _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" "${_prefix}" ${_pkg_modules})
+    _pkgconfig_parse_options   (_pkg_modules _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path "${_module0}" ${ARGN})
+    _pkg_check_modules_internal("${_pkg_is_required}" "${_pkg_is_silent}" ${_no_cmake_path} ${_no_cmake_environment_path} "${_prefix}" ${_pkg_modules})
 
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
   endif()
 endmacro()
 
-###
+
+#[========================================[.rst:
+.. command:: pkg_search_module
+
+ Same as :command:`pkg_check_modules`, but instead it checks for given
+ modules and uses the first working one. ::
+
+    pkg_search_module(<PREFIX> [REQUIRED] [QUIET]
+                      [NO_CMAKE_PATH] [NO_CMAKE_ENVIRONMENT_PATH]
+                      <MODULE> [<MODULE>]*)
+
+ Examples
+
+ .. code-block:: cmake
+
+    pkg_search_module (BAR     libxml-2.0 libxml2 libxml>=2)
+#]========================================]
 macro(pkg_search_module _prefix _module0)
   # check cached value
   if (NOT DEFINED __pkg_config_checked_${_prefix} OR __pkg_config_checked_${_prefix} LESS ${PKG_CONFIG_VERSION} OR NOT ${_prefix}_FOUND)
     set(_pkg_modules_found 0)
-    _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent "${_module0}" ${ARGN})
+    _pkgconfig_parse_options(_pkg_modules_alt _pkg_is_required _pkg_is_silent _no_cmake_path _no_cmake_environment_path "${_module0}" ${ARGN})
 
     if (NOT ${_pkg_is_silent})
       message(STATUS "checking for one of the modules '${_pkg_modules_alt}'")
@@ -412,7 +534,7 @@ macro(pkg_search_module _prefix _module0)
     # iterate through all modules and stop at the first working one.
     foreach(_pkg_alt ${_pkg_modules_alt})
       if(NOT _pkg_modules_found)
-        _pkg_check_modules_internal(0 1 "${_prefix}" "${_pkg_alt}")
+        _pkg_check_modules_internal(0 1 ${_no_cmake_path} ${_no_cmake_environment_path} "${_prefix}" "${_pkg_alt}")
       endif()
 
       if (${_prefix}_FOUND)
@@ -429,6 +551,26 @@ macro(pkg_search_module _prefix _module0)
     _pkgconfig_set(__pkg_config_checked_${_prefix} ${PKG_CONFIG_VERSION})
   endif()
 endmacro()
+
+
+#[========================================[.rst:
+.. variable:: PKG_CONFIG_EXECUTABLE
+
+ Path to the pkg-config executable.
+
+
+.. variable:: PKG_CONFIG_USE_CMAKE_PREFIX_PATH
+
+ Whether :command:`pkg_check_modules` and :command:`pkg_search_module`
+ should add the paths in :variable:`CMAKE_PREFIX_PATH`,
+ :variable:`CMAKE_FRAMEWORK_PATH`, and :variable:`CMAKE_APPBUNDLE_PATH`
+ cache and environment variables to ``pkg-config`` search path.
+
+ If this variable is not set, this behavior is enabled by default if
+ :variable:`CMAKE_MINIMUM_REQUIRED_VERSION` is 3.1 or later, disabled
+ otherwise.
+#]========================================]
+
 
 ### Local Variables:
 ### mode: cmake

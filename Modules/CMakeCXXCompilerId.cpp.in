@@ -73,10 +73,19 @@
 # define COMPILER_VERSION_MINOR HEX(__BORLANDC__ & 0xFF)
 
 #elif defined(__WATCOMC__)
-# define COMPILER_ID "Watcom"
-  /* __WATCOMC__ = VVRR */
-# define COMPILER_VERSION_MAJOR DEC(__WATCOMC__ / 100)
-# define COMPILER_VERSION_MINOR DEC(__WATCOMC__ % 100)
+# if __WATCOMC__ < 1200
+#  define COMPILER_ID "Watcom"
+   /* __WATCOMC__ = VVRP */
+#  define COMPILER_VERSION_MAJOR DEC(__WATCOMC__ / 100)
+# else
+#  define COMPILER_ID "OpenWatcom"
+   /* __WATCOMC__ = VVRP + 1100 */
+#  define COMPILER_VERSION_MAJOR DEC((__WATCOMC__ - 1100) / 100)
+# endif
+# define COMPILER_VERSION_MINOR  DEC((__WATCOMC__ / 10) % 10)
+# if (__WATCOMC__ % 10) > 0
+#  define COMPILER_VERSION_PATCH DEC(__WATCOMC__ % 10)
+# endif
 
 #elif defined(__SUNPRO_CC)
 # define COMPILER_ID "SunPro"

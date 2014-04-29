@@ -47,7 +47,7 @@ bool cmSubdirCommand
       std::string binPath =
         std::string(this->Makefile->GetCurrentOutputDirectory()) +
         "/" + i->c_str();
-      this->Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
+      this->Makefile->AddSubDirectory(srcPath, binPath,
                                   excludeFromAll, preorder, false);
       }
     // otherwise it is a full path
@@ -57,15 +57,15 @@ bool cmSubdirCommand
       // element from the source path and use that
       std::string binPath =
         std::string(this->Makefile->GetCurrentOutputDirectory()) +
-        "/" + cmSystemTools::GetFilenameName(i->c_str());
-      this->Makefile->AddSubDirectory(i->c_str(), binPath.c_str(),
+        "/" + cmSystemTools::GetFilenameName(*i);
+      this->Makefile->AddSubDirectory(*i, binPath,
                                   excludeFromAll, preorder, false);
       }
     else
       {
       std::string error = "Incorrect SUBDIRS command. Directory: ";
       error += *i + " does not exist.";
-      this->SetError(error.c_str());
+      this->SetError(error);
       res = false;
       }
     }

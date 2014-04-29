@@ -41,7 +41,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "include_directories";}
+  virtual std::string GetName() const { return "include_directories";}
 
   cmTypeMacro(cmIncludeDirectoryCommand, cmCommand);
 

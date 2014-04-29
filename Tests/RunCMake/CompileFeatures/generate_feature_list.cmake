@@ -1,0 +1,4 @@
+
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/features.txt"
+  "${CMAKE_CXX_COMPILE_FEATURES}"
+)

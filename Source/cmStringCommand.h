@@ -50,7 +50,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "string";}
+  virtual std::string GetName() const { return "string";}
 
   cmTypeMacro(cmStringCommand, cmCommand);
   static void ClearMatches(cmMakefile* mf);
@@ -75,6 +75,7 @@ protected:
   bool HandleFindCommand(std::vector<std::string> const& args);
   bool HandleTimestampCommand(std::vector<std::string> const& args);
   bool HandleMakeCIdentifierCommand(std::vector<std::string> const& args);
+  bool HandleGenexStripCommand(std::vector<std::string> const& args);
 
   class RegexReplacement
   {
@@ -82,7 +83,7 @@ protected:
     RegexReplacement(const char* s): number(-1), value(s) {}
     RegexReplacement(const std::string& s): number(-1), value(s) {}
     RegexReplacement(int n): number(n), value() {}
-    RegexReplacement() {};
+    RegexReplacement() {}
     int number;
     std::string value;
   };

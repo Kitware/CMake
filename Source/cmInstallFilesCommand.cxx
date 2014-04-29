@@ -100,9 +100,9 @@ void cmInstallFilesCommand::FinalPass()
   else     // reg exp list
     {
     std::vector<std::string> files;
-    std::string regex = this->FinalArgs[0].c_str();
+    std::string regex = this->FinalArgs[0];
     cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
-                        regex.c_str(), files);
+                        regex, files);
 
     std::vector<std::string>::iterator s = files.begin();
     // for each argument, get the files

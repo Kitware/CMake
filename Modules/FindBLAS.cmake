@@ -52,6 +52,9 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFunctionExists.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranFunctionExists.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
+cmake_push_check_state()
+set(CMAKE_REQUIRED_QUIET ${BLAS_FIND_QUIETLY})
 
 set(_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES})
 
@@ -147,7 +150,7 @@ endmacro()
 set(BLAS_LINKER_FLAGS)
 set(BLAS_LIBRARIES)
 set(BLAS95_LIBRARIES)
-if ($ENV{BLA_VENDOR} MATCHES ".+")
+if (NOT $ENV{BLA_VENDOR} STREQUAL "")
   set(BLA_VENDOR $ENV{BLA_VENDOR})
 else ()
   if(NOT BLA_VENDOR)
@@ -285,7 +288,7 @@ if (BLA_VENDOR STREQUAL "IBMESSL" OR BLA_VENDOR STREQUAL "All")
 endif ()
 
 #BLAS in acml library?
-if (BLA_VENDOR MATCHES "ACML.*" OR BLA_VENDOR STREQUAL "All")
+if (BLA_VENDOR MATCHES "ACML" OR BLA_VENDOR STREQUAL "All")
  if( ((BLA_VENDOR STREQUAL "ACML") AND (NOT BLAS_ACML_LIB_DIRS)) OR
      ((BLA_VENDOR STREQUAL "ACML_MP") AND (NOT BLAS_ACML_MP_LIB_DIRS)) OR
      ((BLA_VENDOR STREQUAL "ACML_GPU") AND (NOT BLAS_ACML_GPU_LIB_DIRS))
@@ -462,7 +465,7 @@ if (BLA_VENDOR STREQUAL "Generic" OR BLA_VENDOR STREQUAL "All")
 endif ()
 
 #BLAS in intel mkl 10 library? (em64t 64bit)
-if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
+if (BLA_VENDOR MATCHES "Intel" OR BLA_VENDOR STREQUAL "All")
  if (NOT WIN32)
   set(LM "-lm")
  endif ()
@@ -529,7 +532,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
           "mkl_blas95 mkl_intel_lp64 mkl_intel_thread mkl_core guide")
 
         # mkl >= 10.3
-        if (CMAKE_C_COMPILER MATCHES ".+gcc.*")
+        if (CMAKE_C_COMPILER MATCHES ".+gcc")
           list(APPEND BLAS_SEARCH_LIBS
             "mkl_blas95_lp64 mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
         else ()
@@ -597,7 +600,7 @@ if (BLA_VENDOR MATCHES "Intel*" OR BLA_VENDOR STREQUAL "All")
           "mkl_intel_lp64 mkl_intel_thread mkl_core guide")
 
         # mkl >= 10.3
-        if (CMAKE_C_COMPILER MATCHES ".+gcc.*")
+        if (CMAKE_C_COMPILER MATCHES ".+gcc")
           list(APPEND BLAS_SEARCH_LIBS
             "mkl_intel_lp64 mkl_gnu_thread mkl_core gomp")
         else ()
@@ -687,4 +690,5 @@ else()
   endif()
 endif()
 
+cmake_pop_check_state()
 set(CMAKE_FIND_LIBRARY_SUFFIXES ${_blas_ORIG_CMAKE_FIND_LIBRARY_SUFFIXES})

@@ -44,7 +44,7 @@ protected:
   bool FindMumpsFile(std::string const& routine,
                      std::string& filepath);
 protected:
-  std::map<cmStdString, cmStdString> RoutineToDirectory;
+  std::map<std::string, std::string> RoutineToDirectory;
   cmCTestCoverageHandlerContainer& Coverage;
   cmCTest* CTest;
 };

@@ -41,7 +41,7 @@ http://sublimetext.info/docs/en/reference/build_systems.html
 
 //----------------------------------------------------------------------------
 void cmExtraSublimeTextGenerator
-::GetDocumentation(cmDocumentationEntry& entry, const char*) const
+::GetDocumentation(cmDocumentationEntry& entry, const std::string&) const
 {
   entry.Name = this->GetName();
   entry.Brief = "Generates Sublime Text 2 project files.";
@@ -64,7 +64,7 @@ cmExtraSublimeTextGenerator::cmExtraSublimeTextGenerator()
 void cmExtraSublimeTextGenerator::Generate()
 {
   // for each sub project in the project create a sublime text 2 project
-  for (std::map<cmStdString, std::vector<cmLocalGenerator*> >::const_iterator
+  for (std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator
        it = this->GlobalGenerator->GetProjectMap().begin();
       it!= this->GlobalGenerator->GetProjectMap().end();
       ++it)
@@ -177,7 +177,7 @@ void cmExtraSublimeTextGenerator::
           if (strcmp(makefile->GetStartOutputDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
-            this->AppendTarget(fout, ti->first.c_str(), *lg, 0,
+            this->AppendTarget(fout, ti->first, *lg, 0,
                                make.c_str(), makefile, compiler.c_str(),
                                sourceFileFlags, false);
             }
@@ -194,7 +194,7 @@ void cmExtraSublimeTextGenerator::
             break;
             }
 
-          this->AppendTarget(fout, ti->first.c_str(), *lg, 0,
+          this->AppendTarget(fout, ti->first, *lg, 0,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           break;
@@ -204,12 +204,12 @@ void cmExtraSublimeTextGenerator::
         case cmTarget::MODULE_LIBRARY:
         case cmTarget::OBJECT_LIBRARY:
           {
-          this->AppendTarget(fout, ti->first.c_str(), *lg, &ti->second,
+          this->AppendTarget(fout, ti->first, *lg, &ti->second,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
-          this->AppendTarget(fout, fastTarget.c_str(), *lg, &ti->second,
+          this->AppendTarget(fout, fastTarget, *lg, &ti->second,
                              make.c_str(), makefile, compiler.c_str(),
                              sourceFileFlags, false);
           }
@@ -223,7 +223,7 @@ void cmExtraSublimeTextGenerator::
 
 void cmExtraSublimeTextGenerator::
   AppendTarget(cmGeneratedFileStream& fout,
-               const char* targetName,
+               const std::string& targetName,
                cmLocalGenerator* lg,
                cmTarget* target,
                const char* make,
@@ -238,7 +238,8 @@ void cmExtraSublimeTextGenerator::
       cmGeneratorTarget *gtgt = this->GlobalGenerator
                                     ->GetGeneratorTarget(target);
       std::vector<cmSourceFile*> sourceFiles;
-      target->GetSourceFiles(sourceFiles);
+      target->GetSourceFiles(sourceFiles,
+                             makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
       std::vector<cmSourceFile*>::const_iterator sourceFilesEnd =
         sourceFiles.end();
       for (std::vector<cmSourceFile*>::const_iterator iter =
@@ -290,7 +291,7 @@ void cmExtraSublimeTextGenerator::
   // Ninja uses ninja.build files (look for a way to get the output file name
   // from cmMakefile or something)
   std::string makefileName;
-  if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+  if (this->GlobalGenerator->GetName() == "Ninja")
     {
       makefileName = "build.ninja";
     }
@@ -315,11 +316,13 @@ void cmExtraSublimeTextGenerator::
 // Create the command line for building the given target using the selected
 // make
 std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
-             const std::string& make, const char* makefile, const char* target)
+             const std::string& make, const char* makefile,
+             const std::string& target)
 {
   std::string command = "\"";
   command += make + "\"";
-  if (strcmp(this->GlobalGenerator->GetName(), "NMake Makefiles")==0)
+  std::string generator = this->GlobalGenerator->GetName();
+  if (generator == "NMake Makefiles")
     {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += ", \"/NOLOGO\", \"/f\", \"";
@@ -328,7 +331,7 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
     command += target;
     command += "\"";
     }
-  else if (strcmp(this->GlobalGenerator->GetName(), "Ninja")==0)
+  else if (generator == "Ninja")
     {
     std::string makefileName = cmSystemTools::ConvertToOutputPath(makefile);
     command += ", \"-f\", \"";
@@ -340,7 +343,7 @@ std::string cmExtraSublimeTextGenerator::BuildMakeCommand(
   else
     {
     std::string makefileName;
-    if (strcmp(this->GlobalGenerator->GetName(), "MinGW Makefiles")==0)
+    if (generator == "MinGW Makefiles")
       {
         // no escaping of spaces in this case, see
         // http://public.kitware.com/Bug/view.php?id=10014
@@ -369,12 +372,12 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   std::string flags;
 
   cmMakefile *makefile = lg->GetMakefile();
-  const char* language = source->GetLanguage();
-  if (language == NULL)
+  std::string language = source->GetLanguage();
+  if (language.empty())
    {
    language = "C";
    }
-  const char* config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   // Add language-specific flags.
   lg->AddLanguageFlags(flags, language, config);
 
@@ -423,12 +426,8 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
 {
   std::set<std::string> defines;
   cmMakefile *makefile = lg->GetMakefile();
-  const char* language = source->GetLanguage();
-  if (language == NULL)
-   {
-   language = "";
-   }
-  const char* config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+  const std::string& language = source->GetLanguage();
+  const std::string& config = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
 
   // Add the export symbol definition for shared library objects.
   if(const char* exportMacro = target->GetExportMacro())
@@ -442,7 +441,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";
   defPropName += cmSystemTools::UpperCase(config);
-  lg->AppendDefines(defines, source->GetProperty(defPropName.c_str()));
+  lg->AppendDefines(defines, source->GetProperty(defPropName));
   }
 
   std::string definesString;

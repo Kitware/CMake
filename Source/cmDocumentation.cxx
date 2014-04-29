@@ -477,9 +477,9 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
 }
 
 //----------------------------------------------------------------------------
-void cmDocumentation::SetName(const char* name)
+void cmDocumentation::SetName(const std::string& name)
 {
-  this->NameString = name?name:"";
+  this->NameString = name;
 }
 
 //----------------------------------------------------------------------------
@@ -672,7 +672,7 @@ bool cmDocumentation::PrintFiles(std::ostream& os,
   for (std::vector<std::string>::const_iterator i = files.begin();
        i != files.end(); ++i)
     {
-    found = r.ProcessFile(i->c_str()) || found;
+    found = r.ProcessFile(*i) || found;
     }
   return found;
 }
@@ -693,7 +693,7 @@ bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
     return true;
     }
   // Argument was not a manual.  Complain.
-  os << "Argument \"" << this->CurrentArgument.c_str()
+  os << "Argument \"" << this->CurrentArgument
      << "\" to --help-manual is not an available manual.  "
      << "Use --help-manual-list to see all available manuals.\n";
   return false;
@@ -715,7 +715,7 @@ bool cmDocumentation::PrintHelpOneCommand(std::ostream& os)
     return true;
     }
   // Argument was not a command.  Complain.
-  os << "Argument \"" << this->CurrentArgument.c_str()
+  os << "Argument \"" << this->CurrentArgument
      << "\" to --help-command is not a CMake command.  "
      << "Use --help-command-list to see all commands.\n";
   return false;
@@ -737,7 +737,7 @@ bool cmDocumentation::PrintHelpOneModule(std::ostream& os)
     return true;
     }
   // Argument was not a module.  Complain.
-  os << "Argument \"" << this->CurrentArgument.c_str()
+  os << "Argument \"" << this->CurrentArgument
      << "\" to --help-module is not a CMake module.\n";
   return false;
 }
@@ -772,7 +772,7 @@ bool cmDocumentation::PrintHelpOneProperty(std::ostream& os)
     return true;
     }
   // Argument was not a property.  Complain.
-  os << "Argument \"" << this->CurrentArgument.c_str()
+  os << "Argument \"" << this->CurrentArgument
      << "\" to --help-property is not a CMake property.  "
      << "Use --help-property-list to see all properties.\n";
   return false;
@@ -796,7 +796,7 @@ bool cmDocumentation::PrintHelpOnePolicy(std::ostream& os)
     }
 
   // Argument was not a policy.  Complain.
-  os << "Argument \"" << this->CurrentArgument.c_str()
+  os << "Argument \"" << this->CurrentArgument
      << "\" to --help-policy is not a CMake policy.\n";
   return false;
 }
@@ -817,7 +817,7 @@ bool cmDocumentation::PrintHelpOneVariable(std::ostream& os)
     return true;
     }
   // Argument was not a variable.  Complain.
-  os << "Argument \"" << this->CurrentArgument.c_str()
+  os << "Argument \"" << this->CurrentArgument
      << "\" to --help-variable is not a defined variable.  "
      << "Use --help-variable-list to see all defined variables.\n";
   return false;

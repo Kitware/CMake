@@ -32,7 +32,7 @@ public:
   cmDepends(cmLocalGenerator* lg=0, const char* targetDir="");
 
   /** at what level will the compile be done from */
-  void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;};
+  void SetCompileDirectory(const char *dir) {this->CompileDirectory = dir;}
 
   /** Set the local generator for the directory in which we are
       scanning dependencies.  This is not a full local generator; it
@@ -41,7 +41,7 @@ public:
   void SetLocalGenerator(cmLocalGenerator* lg) { this->LocalGenerator = lg; }
 
   /** Set the specific language to be scanned.  */
-  void SetLanguage(const char* lang) { this->Language = lang; }
+  void SetLanguage(const std::string& lang) { this->Language = lang; }
 
   /** Set the target build directory.  */
   void SetTargetDirectory(const char* dir) { this->TargetDirectory = dir; }
@@ -114,7 +114,7 @@ protected:
   // The include file search path.
   std::vector<std::string> IncludePath;
 
-  void SetIncludePathFromLanguage(const char* lang);
+  void SetIncludePathFromLanguage(const std::string& lang);
 
 private:
   cmDepends(cmDepends const&); // Purposely not implemented.

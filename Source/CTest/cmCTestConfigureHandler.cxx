@@ -76,7 +76,7 @@ int cmCTestConfigureHandler::ProcessHandler()
     cmGeneratedFileStream ofs;
     this->StartLogFile("Configure", ofs);
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Configure with command: "
-      << cCommand.c_str() << std::endl);
+      << cCommand << std::endl);
     res = this->CTest->RunMakeCommand(cCommand.c_str(), &output,
       &retVal, buildDirectory.c_str(),
       0, ofs);
@@ -99,7 +99,7 @@ int cmCTestConfigureHandler::ProcessHandler()
         {
         os << retVal;
         }
-      os << "<ConfigureCommand>" << cCommand.c_str() << "</ConfigureCommand>"
+      os << "<ConfigureCommand>" << cCommand << "</ConfigureCommand>"
         << std::endl;
       cmCTestLog(this->CTest, DEBUG, "End" << std::endl);
       os << "<Log>" << cmXMLSafe(output) << "</Log>" << std::endl;

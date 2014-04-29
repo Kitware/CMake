@@ -248,9 +248,9 @@ static cmVS7FlagTable cmVS11CLFlagTable[] =
   {"ForcedUsingFiles", "FU",
    "Forced #using File",
    "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
-  {"PREfastAdditionalOptions", "analyze:",
-   "Additional Code Analysis Native options",
-   "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
+  {"PREfastLog", "analyze:log",
+   "Code Analysis Log",
+   "", cmVS7FlagTable::UserFollowing},
   {"PREfastAdditionalPlugins", "analyze:plugin",
    "Additional Code Analysis Native plugins",
    "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
@@ -283,9 +283,6 @@ static cmVS7FlagTable cmVS11CLFlagTable[] =
    "", cmVS7FlagTable::UserValue},
   // Skip [XMLDocumentationFileName] - no command line Switch.
   // Skip [BrowseInformationFile] - no command line Switch.
-  {"PREfastLog", "analyze:log ",
-   "Code Analysis Log",
-   "", cmVS7FlagTable::UserValue},
   // Skip [AdditionalOptions] - no command line Switch.
   {0,0,0,0,0}
 };

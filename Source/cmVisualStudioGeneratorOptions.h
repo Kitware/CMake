@@ -55,7 +55,7 @@ public:
   void OutputPreprocessorDefinitions(std::ostream& fout,
                                      const char* prefix,
                                      const char* suffix,
-                                     const char* lang);
+                                     const std::string& lang);
   void OutputFlagMap(std::ostream& fout, const char* indent);
   void OutputAdditionalOptions(std::ostream& fout,
                                const char* prefix,

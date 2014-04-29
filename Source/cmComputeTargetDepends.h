@@ -45,16 +45,18 @@ private:
   void CollectTargets();
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
-  void AddTargetDepend(int depender_index, const char* dependee_name,
+  void AddTargetDepend(int depender_index,
+                       const std::string& dependee_name,
                        bool linking);
   void AddTargetDepend(int depender_index, cmTarget const* dependee,
                        bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
-  void AddInterfaceDepends(int depender_index, const char* dependee_name,
-                           bool linking, std::set<cmStdString> &emitted);
+  void AddInterfaceDepends(int depender_index,
+                           const std::string& dependee_name,
+                           bool linking, std::set<std::string> &emitted);
   void AddInterfaceDepends(int depender_index, cmTarget const* dependee,
-                           const char *config,
-                           std::set<cmStdString> &emitted);
+                           const std::string& config,
+                           std::set<std::string> &emitted);
   cmGlobalGenerator* GlobalGenerator;
   bool DebugMode;
   bool NoCycles;
@@ -71,7 +73,7 @@ private:
   typedef cmGraphAdjacencyList Graph;
   Graph InitialGraph;
   Graph FinalGraph;
-  void DisplayGraph(Graph const& graph, const char* name);
+  void DisplayGraph(Graph const& graph, const std::string& name);
 
   // Deal with connected components.
   void DisplayComponents(cmComputeComponentGraph const& ccg);

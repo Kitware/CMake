@@ -237,7 +237,7 @@ void cmFindBase::AddPrefixPaths(std::vector<std::string> const& in_paths,
   for(std::vector<std::string>::const_iterator it = in_paths.begin();
       it != in_paths.end(); ++it)
     {
-    std::string dir = it->c_str();
+    std::string dir = *it;
     if(!subdir.empty() && !dir.empty() && dir[dir.size()-1] != '/')
       {
       dir += "/";
@@ -268,7 +268,7 @@ void cmFindBase::AddPrefixPaths(std::vector<std::string> const& in_paths,
 }
 
 //----------------------------------------------------------------------------
-void cmFindBase::AddCMakePrefixPath(const char* variable)
+void cmFindBase::AddCMakePrefixPath(const std::string& variable)
 {
   // Get a path from a CMake variable.
   if(const char* varPath = this->Makefile->GetDefinition(variable))
@@ -280,11 +280,11 @@ void cmFindBase::AddCMakePrefixPath(const char* variable)
 }
 
 //----------------------------------------------------------------------------
-void cmFindBase::AddEnvPrefixPath(const char* variable)
+void cmFindBase::AddEnvPrefixPath(const std::string& variable)
 {
   // Get a path from the environment.
   std::vector<std::string> tmp;
-  cmSystemTools::GetPath(tmp, variable);
+  cmSystemTools::GetPath(tmp, variable.c_str());
   this->AddPrefixPaths(tmp, EnvPath);
 }
 
@@ -323,7 +323,7 @@ void cmFindBase::AddCMakeVariablePath()
     var += this->CMakePathName;
     var += "_PATH";
     this->AddCMakePrefixPath("CMAKE_PREFIX_PATH");
-    this->AddCMakePath(var.c_str());
+    this->AddCMakePath(var);
 
     if(this->CMakePathName == "PROGRAM")
       {
@@ -360,7 +360,7 @@ void cmFindBase::AddCMakeSystemVariablePath()
     var += this->CMakePathName;
     var += "_PATH";
     this->AddCMakePrefixPath("CMAKE_SYSTEM_PREFIX_PATH");
-    this->AddCMakePath(var.c_str());
+    this->AddCMakePath(var);
 
     if(this->CMakePathName == "PROGRAM")
       {
@@ -466,7 +466,7 @@ void cmFindBase::PrintFindStuff()
 bool cmFindBase::CheckForVariableInCache()
 {
   if(const char* cacheValue =
-     this->Makefile->GetDefinition(this->VariableName.c_str()))
+     this->Makefile->GetDefinition(this->VariableName))
     {
     cmCacheManager::CacheIterator it =
       this->Makefile->GetCacheManager()->

@@ -17,7 +17,7 @@
 #include <windows.h>
 
 cmWIXSourceWriter::cmWIXSourceWriter(cmCPackLog* logger,
-  const std::string& filename,
+  std::string const& filename,
   bool isIncludeFile):
     Logger(logger),
     File(filename.c_str()),
@@ -51,7 +51,7 @@ cmWIXSourceWriter::~cmWIXSourceWriter()
   EndElement(Elements.back());
 }
 
-void cmWIXSourceWriter::BeginElement(const std::string& name)
+void cmWIXSourceWriter::BeginElement(std::string const& name)
 {
   if(State == BEGIN)
     {
@@ -101,7 +101,7 @@ void cmWIXSourceWriter::EndElement(std::string const& name)
 }
 
 void cmWIXSourceWriter::AddProcessingInstruction(
-  const std::string& target, const std::string& content)
+  std::string const& target, std::string const& content)
 {
   if(State == BEGIN)
     {
@@ -116,7 +116,7 @@ void cmWIXSourceWriter::AddProcessingInstruction(
 }
 
 void cmWIXSourceWriter::AddAttribute(
-  const std::string& key, const std::string& value)
+  std::string const& key, std::string const& value)
 {
   std::string utf8 = WindowsCodepageToUtf8(value);
 
@@ -124,7 +124,7 @@ void cmWIXSourceWriter::AddAttribute(
 }
 
 void cmWIXSourceWriter::AddAttributeUnlessEmpty(
-    const std::string& key, const std::string& value)
+    std::string const& key, std::string const& value)
 {
   if(value.size())
     {
@@ -132,7 +132,7 @@ void cmWIXSourceWriter::AddAttributeUnlessEmpty(
     }
 }
 
-std::string cmWIXSourceWriter::WindowsCodepageToUtf8(const std::string& value)
+std::string cmWIXSourceWriter::WindowsCodepageToUtf8(std::string const& value)
 {
   if(value.empty())
     {
@@ -184,7 +184,7 @@ void cmWIXSourceWriter::Indent(size_t count)
 }
 
 std::string cmWIXSourceWriter::EscapeAttributeValue(
-  const std::string& value)
+  std::string const& value)
 {
   std::string result;
   result.reserve(value.size());

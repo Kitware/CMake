@@ -13,7 +13,7 @@
 #include "cmSystemTools.h"
 #include "cmake.h"
 
-cmProperty *cmPropertyMap::GetOrCreateProperty(const char *name)
+cmProperty *cmPropertyMap::GetOrCreateProperty(const std::string& name)
 {
   cmPropertyMap::iterator it = this->find(name);
   cmProperty *prop;
@@ -28,13 +28,9 @@ cmProperty *cmPropertyMap::GetOrCreateProperty(const char *name)
   return prop;
 }
 
-void cmPropertyMap::SetProperty(const char *name, const char *value,
+void cmPropertyMap::SetProperty(const std::string& name, const char *value,
                                 cmProperty::ScopeType scope)
 {
-  if (!name)
-    {
-    return;
-    }
   if(!value)
     {
     this->erase(name);
@@ -46,11 +42,11 @@ void cmPropertyMap::SetProperty(const char *name, const char *value,
   prop->Set(name,value);
 }
 
-void cmPropertyMap::AppendProperty(const char* name, const char* value,
+void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
                                    cmProperty::ScopeType scope, bool asString)
 {
   // Skip if nothing to append.
-  if(!name || !value || !*value)
+  if(!value || !*value)
     {
     return;
     }
@@ -61,12 +57,12 @@ void cmPropertyMap::AppendProperty(const char* name, const char* value,
 }
 
 const char *cmPropertyMap
-::GetPropertyValue(const char *name,
+::GetPropertyValue(const std::string& name,
                    cmProperty::ScopeType scope,
                    bool &chain) const
 {
   chain = false;
-  if (!name)
+  if (name.empty())
     {
     return 0;
     }

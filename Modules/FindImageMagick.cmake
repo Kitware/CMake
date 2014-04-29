@@ -221,8 +221,8 @@ if(ImageMagick_mogrify_EXECUTABLE)
                   OUTPUT_VARIABLE imagemagick_version
                   ERROR_QUIET
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
-  if(imagemagick_version MATCHES "^Version: ImageMagick [0-9]")
-    string(REGEX REPLACE "^Version: ImageMagick ([-0-9\\.]+).*" "\\1" ImageMagick_VERSION_STRING "${imagemagick_version}")
+  if(imagemagick_version MATCHES "^Version: ImageMagick ([-0-9\\.]+)")
+    set(ImageMagick_VERSION_STRING "${CMAKE_MATCH_1}")
   endif()
   unset(imagemagick_version)
 endif()

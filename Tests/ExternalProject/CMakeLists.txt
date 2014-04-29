@@ -98,6 +98,7 @@ ExternalProject_Add(${proj}
   CVS_TAG ""
   DEPENDS "MinimalNoOpProject" NonExternalProjectTarget
   DOWNLOAD_COMMAND ""
+  DOWNLOAD_NO_PROGRESS 1
   INSTALL_COMMAND ""
   PATCH_COMMAND ""
   STEP_TARGETS install update

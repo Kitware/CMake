@@ -37,9 +37,11 @@ include (CheckIncludeFiles)
 include (CheckLibraryExists)
 include (CheckSymbolExists)
 set(Threads_FOUND FALSE)
+set(CMAKE_REQUIRED_QUIET_SAVE ${CMAKE_REQUIRED_QUIET})
+set(CMAKE_REQUIRED_QUIET ${Threads_FIND_QUIETLY})
 
 # Do we have sproc?
-if(CMAKE_SYSTEM MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
+if(CMAKE_SYSTEM_NAME MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
   CHECK_INCLUDE_FILES("sys/types.h;sys/prctl.h"  CMAKE_HAVE_SPROC_H)
 endif()
 
@@ -63,32 +65,31 @@ else()
         set(CMAKE_THREAD_LIBS_INIT "")
         set(CMAKE_HAVE_THREADS_LIBRARY 1)
         set(Threads_FOUND TRUE)
-      endif()
+      else()
 
-      if(NOT CMAKE_HAVE_THREADS_LIBRARY)
         # Do we have -lpthreads
         CHECK_LIBRARY_EXISTS(pthreads pthread_create "" CMAKE_HAVE_PTHREADS_CREATE)
         if(CMAKE_HAVE_PTHREADS_CREATE)
           set(CMAKE_THREAD_LIBS_INIT "-lpthreads")
           set(CMAKE_HAVE_THREADS_LIBRARY 1)
           set(Threads_FOUND TRUE)
-        endif()
+        else()
 
-        # Ok, how about -lpthread
-        CHECK_LIBRARY_EXISTS(pthread pthread_create "" CMAKE_HAVE_PTHREAD_CREATE)
-        if(CMAKE_HAVE_PTHREAD_CREATE)
-          set(CMAKE_THREAD_LIBS_INIT "-lpthread")
-          set(CMAKE_HAVE_THREADS_LIBRARY 1)
-          set(Threads_FOUND TRUE)
-        endif()
-
-        if(CMAKE_SYSTEM MATCHES "SunOS.*")
-          # On sun also check for -lthread
-          CHECK_LIBRARY_EXISTS(thread thr_create "" CMAKE_HAVE_THR_CREATE)
-          if(CMAKE_HAVE_THR_CREATE)
-            set(CMAKE_THREAD_LIBS_INIT "-lthread")
+          # Ok, how about -lpthread
+          CHECK_LIBRARY_EXISTS(pthread pthread_create "" CMAKE_HAVE_PTHREAD_CREATE)
+          if(CMAKE_HAVE_PTHREAD_CREATE)
+            set(CMAKE_THREAD_LIBS_INIT "-lpthread")
             set(CMAKE_HAVE_THREADS_LIBRARY 1)
             set(Threads_FOUND TRUE)
+
+          elseif(CMAKE_SYSTEM_NAME MATCHES "SunOS")
+            # On sun also check for -lthread
+            CHECK_LIBRARY_EXISTS(thread thr_create "" CMAKE_HAVE_THR_CREATE)
+            if(CMAKE_HAVE_THR_CREATE)
+              set(CMAKE_THREAD_LIBS_INIT "-lthread")
+              set(CMAKE_HAVE_THREADS_LIBRARY 1)
+              set(Threads_FOUND TRUE)
+            endif()
           endif()
         endif()
       endif()
@@ -96,7 +97,7 @@ else()
 
     if(NOT CMAKE_HAVE_THREADS_LIBRARY)
       # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
-      if("THREADS_HAVE_PTHREAD_ARG" MATCHES "^THREADS_HAVE_PTHREAD_ARG")
+      if("x${THREADS_HAVE_PTHREAD_ARG}" STREQUAL "x")
         message(STATUS "Check if compiler accepts -pthread")
         try_run(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
           ${CMAKE_BINARY_DIR}
@@ -137,13 +138,13 @@ if(CMAKE_THREAD_LIBS_INIT OR CMAKE_HAVE_LIBC_CREATE)
   set(Threads_FOUND TRUE)
 endif()
 
-if(CMAKE_SYSTEM MATCHES "Windows")
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
   set(CMAKE_USE_WIN32_THREADS_INIT 1)
   set(Threads_FOUND TRUE)
 endif()
 
 if(CMAKE_USE_PTHREADS_INIT)
-  if(CMAKE_SYSTEM MATCHES "HP-UX-*")
+  if(CMAKE_SYSTEM_NAME MATCHES "HP-UX")
     # Use libcma if it exists and can be used.  It provides more
     # symbols than the plain pthread library.  CMA threads
     # have actually been deprecated:
@@ -161,12 +162,12 @@ if(CMAKE_USE_PTHREADS_INIT)
     set(CMAKE_USE_PTHREADS_INIT 1)
   endif()
 
-  if(CMAKE_SYSTEM MATCHES "OSF1-V*")
+  if(CMAKE_SYSTEM MATCHES "OSF1-V")
     set(CMAKE_USE_PTHREADS_INIT 0)
     set(CMAKE_THREAD_LIBS_INIT )
   endif()
 
-  if(CMAKE_SYSTEM MATCHES "CYGWIN_NT*")
+  if(CMAKE_SYSTEM MATCHES "CYGWIN_NT")
     set(CMAKE_USE_PTHREADS_INIT 1)
     set(Threads_FOUND TRUE)
     set(CMAKE_THREAD_LIBS_INIT )
@@ -174,5 +175,6 @@ if(CMAKE_USE_PTHREADS_INIT)
   endif()
 endif()
 
+set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Threads DEFAULT_MSG Threads_FOUND)

@@ -37,7 +37,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "set_directory_properties";}
+  virtual std::string GetName() const { return "set_directory_properties";}
 
   /**
    * Static entry point for use by other commands

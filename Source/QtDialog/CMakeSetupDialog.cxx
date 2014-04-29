@@ -578,7 +578,8 @@ void CMakeSetupDialog::doInterrupt()
 void CMakeSetupDialog::doSourceBrowse()
 {
   QString dir = QFileDialog::getExistingDirectory(this,
-    tr("Enter Path to Source"), this->SourceDirectory->text());
+    tr("Enter Path to Source"), this->SourceDirectory->text(),
+    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   if(!dir.isEmpty())
     {
     this->setSourceDirectory(dir);
@@ -608,7 +609,8 @@ void CMakeSetupDialog::updateBinaryDirectory(const QString& dir)
 void CMakeSetupDialog::doBinaryBrowse()
 {
   QString dir = QFileDialog::getExistingDirectory(this,
-    tr("Enter Path to Build"), this->BinaryDirectory->currentText());
+    tr("Enter Path to Build"), this->BinaryDirectory->currentText(),
+    QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
   if(!dir.isEmpty() && dir != this->BinaryDirectory->currentText())
     {
     this->setBinaryDirectory(dir);

@@ -16,8 +16,9 @@
 
 //----------------------------------------------------------------------------
 bool cmTargetPropCommandBase
-::HandleArguments(std::vector<std::string> const& args, const char *prop,
-                 ArgumentFlags flags)
+::HandleArguments(std::vector<std::string> const& args,
+                  const std::string& prop,
+                  ArgumentFlags flags)
 {
   if(args.size() < 2)
     {
@@ -33,7 +34,7 @@ bool cmTargetPropCommandBase
     }
   this->Target =
     this->Makefile->GetCMakeInstance()
-    ->GetGlobalGenerator()->FindTarget(0, args[0].c_str());
+    ->GetGlobalGenerator()->FindTarget(args[0]);
   if(!this->Target)
     {
     this->Target = this->Makefile->FindTargetToUse(args[0]);
@@ -131,29 +132,31 @@ bool cmTargetPropCommandBase
         || args[i] == "PRIVATE"
         || args[i] == "INTERFACE" )
       {
-      this->PopulateTargetProperies(scope, content, prepend, system);
-      return true;
+      return this->PopulateTargetProperies(scope, content, prepend, system);
       }
     content.push_back(args[i]);
     }
-  this->PopulateTargetProperies(scope, content, prepend, system);
-  return true;
+  return this->PopulateTargetProperies(scope, content, prepend, system);
 }
 
 //----------------------------------------------------------------------------
-void cmTargetPropCommandBase
+bool cmTargetPropCommandBase
 ::PopulateTargetProperies(const std::string &scope,
                           const std::vector<std::string> &content,
                           bool prepend, bool system)
 {
   if (scope == "PRIVATE" || scope == "PUBLIC")
     {
-    this->HandleDirectContent(this->Target, content, prepend, system);
+    if (!this->HandleDirectContent(this->Target, content, prepend, system))
+      {
+      return false;
+      }
     }
   if (scope == "INTERFACE" || scope == "PUBLIC")
     {
     this->HandleInterfaceContent(this->Target, content, prepend, system);
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -164,15 +167,15 @@ void cmTargetPropCommandBase::HandleInterfaceContent(cmTarget *tgt,
   if (prepend)
     {
     const std::string propName = std::string("INTERFACE_") + this->Property;
-    const char *propValue = tgt->GetProperty(propName.c_str());
+    const char *propValue = tgt->GetProperty(propName);
     const std::string totalContent = this->Join(content) + (propValue
                                               ? std::string(";") + propValue
                                               : std::string());
-    tgt->SetProperty(propName.c_str(), totalContent.c_str());
+    tgt->SetProperty(propName, totalContent.c_str());
     }
   else
     {
-    tgt->AppendProperty(("INTERFACE_" + this->Property).c_str(),
+    tgt->AppendProperty("INTERFACE_" + this->Property,
                           this->Join(content).c_str());
     }
 }

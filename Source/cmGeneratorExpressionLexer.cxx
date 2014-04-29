@@ -32,52 +32,50 @@ static void InsertText(const char *upto, const char *c,
 
 //----------------------------------------------------------------------------
 std::vector<cmGeneratorExpressionToken>
-cmGeneratorExpressionLexer::Tokenize(const char *input)
+cmGeneratorExpressionLexer::Tokenize(const std::string& input)
 {
   std::vector<cmGeneratorExpressionToken> result;
-  if (!input)
-    return result;
 
-  const char *c = input;
+  const char *c = input.c_str();
   const char *upto = c;
 
   for ( ; *c; ++c)
-  {
-  if(c[0] == '$' && c[1] == '<')
     {
-    InsertText(upto, c, result);
-    upto = c;
-    result.push_back(cmGeneratorExpressionToken(
-                      cmGeneratorExpressionToken::BeginExpression, upto, 2));
-    upto = c + 2;
-    ++c;
-    SawBeginExpression = true;
-    }
-  else if(c[0] == '>')
-    {
-    InsertText(upto, c, result);
-    upto = c;
-    result.push_back(cmGeneratorExpressionToken(
-                        cmGeneratorExpressionToken::EndExpression, upto, 1));
-    upto = c + 1;
-    SawGeneratorExpression = SawBeginExpression;
-    }
-  else if(c[0] == ':')
-    {
-    InsertText(upto, c, result);
-    upto = c;
-    result.push_back(cmGeneratorExpressionToken(
-                        cmGeneratorExpressionToken::ColonSeparator, upto, 1));
-    upto = c + 1;
-    }
-  else if(c[0] == ',')
-    {
-    InsertText(upto, c, result);
-    upto = c;
-    result.push_back(cmGeneratorExpressionToken(
-                        cmGeneratorExpressionToken::CommaSeparator, upto, 1));
-    upto = c + 1;
-    }
+    switch(*c)
+      {
+      case '$':
+        if(c[1] == '<')
+          {
+          InsertText(upto, c, result);
+          result.push_back(cmGeneratorExpressionToken(
+                           cmGeneratorExpressionToken::BeginExpression, c, 2));
+          upto = c + 2;
+          ++c;
+          SawBeginExpression = true;
+          }
+        break;
+      case '>':
+        InsertText(upto, c, result);
+        result.push_back(cmGeneratorExpressionToken(
+                            cmGeneratorExpressionToken::EndExpression, c, 1));
+        upto = c + 1;
+        SawGeneratorExpression = SawBeginExpression;
+        break;
+      case ':':
+        InsertText(upto, c, result);
+        result.push_back(cmGeneratorExpressionToken(
+                            cmGeneratorExpressionToken::ColonSeparator, c, 1));
+        upto = c + 1;
+        break;
+      case ',':
+        InsertText(upto, c, result);
+        result.push_back(cmGeneratorExpressionToken(
+                            cmGeneratorExpressionToken::CommaSeparator, c, 1));
+        upto = c + 1;
+        break;
+      default:
+        break;
+      }
   }
   InsertText(upto, c, result);
 

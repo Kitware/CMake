@@ -66,14 +66,17 @@
  * headers as required.
  */
 
-/* Get a real definition for __FBSDID if we can */
+/* Get a real definition for __FBSDID or __RCSID if we can */
 #if HAVE_SYS_CDEFS_H
 #include <sys/cdefs.h>
 #endif
 
-/* If not, define it so as to avoid dangling semicolons. */
+/* If not, define them so as to avoid dangling semicolons. */
 #ifndef __FBSDID
 #define	__FBSDID(a)     struct _undefined_hack
+#endif
+#ifndef __RCSID
+#define	__RCSID(a)     struct _undefined_hack
 #endif
 
 /* Old glibc mbsnrtowcs fails assertions in our use case.  */

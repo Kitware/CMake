@@ -62,6 +62,7 @@ if (NOT DEFINED Backtrace_LIBRARY)
   # First, check if we already have backtrace(), e.g., in libc
   cmake_push_check_state(RESET)
   set(CMAKE_REQUIRED_INCLUDES ${Backtrace_INCLUDE_DIRS})
+  set(CMAKE_REQUIRED_QUIET ${Backtrace_FIND_QUIETLY})
   check_symbol_exists("backtrace" "${_Backtrace_HEADER_TRY}" _Backtrace_SYM_FOUND)
   cmake_pop_check_state()
 endif()

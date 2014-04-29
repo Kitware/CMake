@@ -16,10 +16,12 @@
 #    [LIST_SEPARATOR sep]        # Sep to be replaced by ; in cmd lines
 #    [TMP_DIR dir]               # Directory to store temporary files
 #    [STAMP_DIR dir]             # Directory to store step timestamps
+#    [EXCLUDE_FROM_ALL 1]        # The "all" target does not depend on this
 #   #--Download step--------------
 #    [DOWNLOAD_NAME fname]       # File name to store (if not end of URL)
 #    [DOWNLOAD_DIR dir]          # Directory to store downloaded files
 #    [DOWNLOAD_COMMAND cmd...]   # Command to download source tree
+#    [DOWNLOAD_NO_PROGRESS 1]    # Disable download progress reports
 #    [CVS_REPOSITORY cvsroot]    # CVSROOT of CVS repository
 #    [CVS_MODULE mod]            # Module to checkout from CVS repo
 #    [CVS_TAG tag]               # Tag to checkout from CVS repo
@@ -54,6 +56,7 @@
 #    [BINARY_DIR dir]            # Specify build dir location
 #    [BUILD_COMMAND cmd...]      # Command to drive the native build
 #    [BUILD_IN_SOURCE 1]         # Use source dir for build dir
+#    [BUILD_ALWAYS 1]            # No stamp file, build step always runs
 #   #--Install step---------------
 #    [INSTALL_DIR dir]           # Installation prefix
 #    [INSTALL_COMMAND cmd...]    # Command to drive install after build
@@ -117,6 +120,7 @@
 #    [DEPENDERS steps...]    # Steps that depend on this step
 #    [DEPENDS files...]      # Files on which this step depends
 #    [ALWAYS 1]              # No stamp file, step always runs
+#    [EXCLUDE_FROM_MAIN 1]   # Main target does not depend on this step
 #    [WORKING_DIRECTORY dir] # Working directory for command
 #    [LOG 1]                 # Wrap step in script to log output
 #    )
@@ -197,11 +201,11 @@ file(STRINGS "${CMAKE_CURRENT_LIST_FILE}" lines
      LIMIT_COUNT ${_ep_documentation_line_count}
      REGEX "^#  (  \\[[A-Z0-9_]+ [^]]*\\] +#.*$|[A-Za-z0-9_]+\\()")
 foreach(line IN LISTS lines)
-  if("${line}" MATCHES "^#  [A-Za-z0-9_]+\\(")
+  if("${line}" MATCHES "^#  ([A-Za-z0-9_]+)\\(")
     if(_ep_func)
       set(_ep_keywords_${_ep_func} "${_ep_keywords_${_ep_func}})$")
     endif()
-    string(REGEX REPLACE "^#  ([A-Za-z0-9_]+)\\(.*" "\\1" _ep_func "${line}")
+    set(_ep_func "${CMAKE_MATCH_1}")
     #message("function [${_ep_func}]")
     set(_ep_keywords_${_ep_func} "^(")
     set(_ep_keyword_sep)
@@ -452,6 +456,7 @@ execute_process(
   WORKING_DIRECTORY \"${work_dir}\"
   RESULT_VARIABLE error_code
   OUTPUT_VARIABLE head_sha
+  OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 if(error_code)
   message(FATAL_ERROR \"Failed to get the hash for HEAD\")
@@ -470,6 +475,17 @@ else()
   set(is_remote_ref 0)
 endif()
 
+# Tag is in the form <remote>/<tag> (i.e. origin/master) we must strip
+# the remote from the tag.
+if(\"\${show_ref_output}\" MATCHES \"refs/remotes/${git_tag}\")
+  string(REGEX MATCH \"^([^/]+)/(.+)$\" _unused \"${git_tag}\")
+  set(git_remote \"\${CMAKE_MATCH_1}\")
+  set(git_tag \"\${CMAKE_MATCH_2}\")
+else()
+  set(git_remote \"origin\")
+  set(git_tag \"${git_tag}\")
+endif()
+
 # This will fail if the tag does not exist (it probably has not been fetched
 # yet).
 execute_process(
@@ -477,6 +493,7 @@ execute_process(
   WORKING_DIRECTORY \"${work_dir}\"
   RESULT_VARIABLE error_code
   OUTPUT_VARIABLE tag_sha
+  OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
 # Is the hash checkout out that we want?
@@ -490,13 +507,94 @@ if(error_code OR is_remote_ref OR NOT (\"\${tag_sha}\" STREQUAL \"\${head_sha}\"
     message(FATAL_ERROR \"Failed to fetch repository '${git_repository}'\")
   endif()
 
-  execute_process(
-    COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
-    WORKING_DIRECTORY \"${work_dir}\"
-    RESULT_VARIABLE error_code
-    )
-  if(error_code)
-    message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
+  if(is_remote_ref)
+    # Check if stash is needed
+    execute_process(
+      COMMAND \"${git_EXECUTABLE}\" status --porcelain
+      WORKING_DIRECTORY \"${work_dir}\"
+      RESULT_VARIABLE error_code
+      OUTPUT_VARIABLE repo_status
+      )
+    if(error_code)
+      message(FATAL_ERROR \"Failed to get the status\")
+    endif()
+    string(LENGTH \"\${repo_status}\" need_stash)
+
+    # If not in clean state, stash changes in order to be able to be able to
+    # perform git pull --rebase
+    if(need_stash)
+      execute_process(
+        COMMAND \"${git_EXECUTABLE}\" stash save --all --quiet
+        WORKING_DIRECTORY \"${work_dir}\"
+        RESULT_VARIABLE error_code
+        )
+      if(error_code)
+        message(FATAL_ERROR \"Failed to stash changes\")
+      endif()
+    endif()
+
+    # Pull changes from the remote branch
+    execute_process(
+      COMMAND \"${git_EXECUTABLE}\" rebase \${git_remote}/\${git_tag}
+      WORKING_DIRECTORY \"${work_dir}\"
+      RESULT_VARIABLE error_code
+      )
+    if(error_code)
+      # Rebase failed: Restore previous state.
+      execute_process(
+        COMMAND \"${git_EXECUTABLE}\" rebase --abort
+        WORKING_DIRECTORY \"${work_dir}\"
+      )
+      if(need_stash)
+        execute_process(
+          COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
+          WORKING_DIRECTORY \"${work_dir}\"
+          )
+      endif()
+      message(FATAL_ERROR \"\\nFailed to rebase in: '${work_dir}/${src_name}'.\\nYou will have to resolve the conflicts manually\")
+    endif()
+
+    if(need_stash)
+      execute_process(
+        COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
+        WORKING_DIRECTORY \"${work_dir}\"
+        RESULT_VARIABLE error_code
+        )
+      if(error_code)
+        # Stash pop --index failed: Try again dropping the index
+        execute_process(
+          COMMAND \"${git_EXECUTABLE}\" reset --hard --quiet
+          WORKING_DIRECTORY \"${work_dir}\"
+          RESULT_VARIABLE error_code
+          )
+        execute_process(
+          COMMAND \"${git_EXECUTABLE}\" stash pop --quiet
+          WORKING_DIRECTORY \"${work_dir}\"
+          RESULT_VARIABLE error_code
+          )
+        if(error_code)
+          # Stash pop failed: Restore previous state.
+          execute_process(
+            COMMAND \"${git_EXECUTABLE}\" reset --hard --quiet \${head_sha}
+            WORKING_DIRECTORY \"${work_dir}\"
+          )
+          execute_process(
+            COMMAND \"${git_EXECUTABLE}\" stash pop --index --quiet
+            WORKING_DIRECTORY \"${work_dir}\"
+          )
+          message(FATAL_ERROR \"\\nFailed to unstash changes in: '${work_dir}/${src_name}'.\\nYou will have to resolve the conflicts manually\")
+        endif()
+      endif()
+    endif()
+  else()
+    execute_process(
+      COMMAND \"${git_EXECUTABLE}\" checkout ${git_tag}
+      WORKING_DIRECTORY \"${work_dir}\"
+      RESULT_VARIABLE error_code
+      )
+    if(error_code)
+      message(FATAL_ERROR \"Failed to checkout tag: '${git_tag}'\")
+    endif()
   endif()
 
   execute_process(
@@ -514,13 +612,19 @@ endif()
 
 endfunction(_ep_write_gitupdate_script)
 
-function(_ep_write_downloadfile_script script_filename remote local timeout hash tls_verify tls_cainfo)
+function(_ep_write_downloadfile_script script_filename remote local timeout no_progress hash tls_verify tls_cainfo)
   if(timeout)
     set(timeout_args TIMEOUT ${timeout})
     set(timeout_msg "${timeout} seconds")
   else()
     set(timeout_args "# no TIMEOUT")
     set(timeout_msg "none")
+  endif()
+
+  if(no_progress)
+    set(show_progress "")
+  else()
+    set(show_progress "SHOW_PROGRESS")
   endif()
 
   if("${hash}" MATCHES "${_ep_hash_regex}")
@@ -562,7 +666,7 @@ ${tls_cainfo}
 file(DOWNLOAD
   \"${remote}\"
   \"${local}\"
-  SHOW_PROGRESS
+  ${show_progress}
   ${hash_args}
   ${timeout_args}
   STATUS status
@@ -803,7 +907,8 @@ function(_ep_write_initial_cache target_name script_filename args)
   set(regex "^([^:]+):([^=]+)=(.*)$")
   set(setArg "")
   foreach(line ${args})
-    if("${line}" MATCHES "^-D")
+    if("${line}" MATCHES "^-D(.*)")
+      set(line "${CMAKE_MATCH_1}")
       if(setArg)
         # This is required to build up lists in variables, or complete an entry
         set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" FORCE)")
@@ -811,9 +916,7 @@ function(_ep_write_initial_cache target_name script_filename args)
         set(accumulator "")
         set(setArg "")
       endif()
-      string(REGEX REPLACE "^-D" "" line ${line})
       if("${line}" MATCHES "${regex}")
-        string(REGEX MATCH "${regex}" match "${line}")
         set(name "${CMAKE_MATCH_1}")
         set(type "${CMAKE_MATCH_2}")
         set(value "${CMAKE_MATCH_3}")
@@ -1090,13 +1193,16 @@ function(ExternalProject_Add_Step name step)
   set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
   _ep_get_step_stampfile(${name} ${step} stamp_file)
 
-  add_custom_command(APPEND
-    OUTPUT ${complete_stamp_file}
-    DEPENDS ${stamp_file}
-    )
-
   _ep_parse_arguments(ExternalProject_Add_Step
                       ${name} _EP_${step}_ "${ARGN}")
+
+  get_property(exclude_from_main TARGET ${name} PROPERTY _EP_${step}_EXCLUDE_FROM_MAIN)
+  if(NOT exclude_from_main)
+    add_custom_command(APPEND
+      OUTPUT ${complete_stamp_file}
+      DEPENDS ${stamp_file}
+      )
+  endif()
 
   # Steps depending on this step.
   get_property(dependers TARGET ${name} PROPERTY _EP_${step}_DEPENDERS)
@@ -1245,7 +1351,7 @@ function(_ep_add_download_command name)
   if(cmd_set)
     set(work_dir ${download_dir})
   elseif(cvs_repository)
-    find_package(CVS)
+    find_package(CVS QUIET)
     if(NOT CVS_EXECUTABLE)
       message(FATAL_ERROR "error: could not find cvs for checkout of ${name}")
     endif()
@@ -1272,7 +1378,7 @@ function(_ep_add_download_command name)
     set(cmd ${CVS_EXECUTABLE} -d ${cvs_repository} -q co ${cvs_tag} -d ${src_name} ${cvs_module})
     list(APPEND depends ${stamp_dir}/${name}-cvsinfo.txt)
   elseif(svn_repository)
-    find_package(Subversion)
+    find_package(Subversion QUIET)
     if(NOT Subversion_SVN_EXECUTABLE)
       message(FATAL_ERROR "error: could not find svn for checkout of ${name}")
     endif()
@@ -1308,7 +1414,7 @@ function(_ep_add_download_command name)
       --non-interactive ${svn_trust_cert_args} ${svn_user_pw_args} ${src_name})
     list(APPEND depends ${stamp_dir}/${name}-svninfo.txt)
   elseif(git_repository)
-    find_package(Git)
+    find_package(Git QUIET)
     if(NOT GIT_EXECUTABLE)
       message(FATAL_ERROR "error: could not find git for clone of ${name}")
     endif()
@@ -1356,7 +1462,7 @@ function(_ep_add_download_command name)
     set(cmd ${CMAKE_COMMAND} -P ${tmp_dir}/${name}-gitclone.cmake)
     list(APPEND depends ${stamp_dir}/${name}-gitinfo.txt)
   elseif(hg_repository)
-    find_package(Hg)
+    find_package(Hg QUIET)
     if(NOT HG_EXECUTABLE)
       message(FATAL_ERROR "error: could not find hg for clone of ${name}")
     endif()
@@ -1442,10 +1548,11 @@ function(_ep_add_download_command name)
         string(REPLACE ";" "-" fname "${fname}")
         set(file ${download_dir}/${fname})
         get_property(timeout TARGET ${name} PROPERTY _EP_TIMEOUT)
+        get_property(no_progress TARGET ${name} PROPERTY _EP_DOWNLOAD_NO_PROGRESS)
         get_property(tls_verify TARGET ${name} PROPERTY _EP_TLS_VERIFY)
         get_property(tls_cainfo TARGET ${name} PROPERTY _EP_TLS_CAINFO)
         set(download_script "${stamp_dir}/download-${name}.cmake")
-        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${hash}" "${tls_verify}" "${tls_cainfo}")
+        _ep_write_downloadfile_script("${download_script}" "${url}" "${file}" "${timeout}" "${no_progress}" "${hash}" "${tls_verify}" "${tls_cainfo}")
         set(cmd ${CMAKE_COMMAND} -P "${download_script}"
           COMMAND)
         set(retries 3)
@@ -1716,10 +1823,18 @@ function(_ep_add_build_command name)
     set(log "")
   endif()
 
+  get_property(build_always TARGET ${name} PROPERTY _EP_BUILD_ALWAYS)
+  if(build_always)
+    set(always 1)
+  else()
+    set(always 0)
+  endif()
+
   ExternalProject_Add_Step(${name} build
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
     DEPENDEES configure
+    ALWAYS ${always}
     ${log}
     )
 endfunction()
@@ -1798,12 +1913,21 @@ function(ExternalProject_Add name)
   set(cmf_dir ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles)
   set(complete_stamp_file "${cmf_dir}${cfgdir}/${name}-complete")
 
+  # The "ALL" option to add_custom_target just tells it to not set the
+  # EXCLUDE_FROM_ALL target property. Later, if the EXCLUDE_FROM_ALL
+  # argument was passed, we explicitly set it for the target.
   add_custom_target(${name} ALL DEPENDS ${complete_stamp_file})
   set_property(TARGET ${name} PROPERTY _EP_IS_EXTERNAL_PROJECT 1)
   _ep_parse_arguments(ExternalProject_Add ${name} _EP_ "${ARGN}")
   _ep_set_directories(${name})
   _ep_get_step_stampfile(${name} "done" done_stamp_file)
   _ep_get_step_stampfile(${name} "install" install_stamp_file)
+
+  # Set the EXCLUDE_FROM_ALL target property if required.
+  get_property(exclude_from_all TARGET ${name} PROPERTY _EP_EXCLUDE_FROM_ALL)
+  if(exclude_from_all)
+    set_property(TARGET ${name} PROPERTY EXCLUDE_FROM_ALL TRUE)
+  endif()
 
   # The 'complete' step depends on all other steps and creates a
   # 'done' mark.  A dependent external project's 'configure' step

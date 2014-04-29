@@ -66,7 +66,7 @@ bool cmAddSubDirectoryCommand::InitialPass
     std::string error = "given source \"";
     error += srcArg;
     error += "\" which is not an existing directory.";
-    this->SetError(error.c_str());
+    this->SetError(error);
     return false;
     }
   srcPath = cmSystemTools::CollapseFullPath(srcPath.c_str());
@@ -87,7 +87,7 @@ bool cmAddSubDirectoryCommand::InitialPass
         << this->Makefile->GetCurrentDirectory() << "\".  "
         << "When specifying an out-of-tree source a binary directory "
         << "must be explicitly specified.";
-      this->SetError(e.str().c_str());
+      this->SetError(e.str());
       return false;
       }
 
@@ -121,7 +121,7 @@ bool cmAddSubDirectoryCommand::InitialPass
   binPath = cmSystemTools::CollapseFullPath(binPath.c_str());
 
   // Add the subdirectory using the computed full paths.
-  this->Makefile->AddSubDirectory(srcPath.c_str(), binPath.c_str(),
+  this->Makefile->AddSubDirectory(srcPath, binPath,
                                   excludeFromAll, false, true);
 
   return true;

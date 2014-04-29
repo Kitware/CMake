@@ -149,6 +149,10 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
                                   te,
                                   cmGeneratorExpression::InstallInterface,
                                   properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES",
+                                  te,
+                                  cmGeneratorExpression::InstallInterface,
+                                  properties, missingTargets);
 
     const bool newCMP0022Behavior =
                               te->GetPolicyStatusCMP0022() != cmPolicies::WARN
@@ -211,7 +215,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
           ci = this->Configurations.begin();
         ci != this->Configurations.end(); ++ci)
       {
-      if(!this->GenerateImportFileConfig(ci->c_str(), missingTargets))
+      if(!this->GenerateImportFileConfig(*ci, missingTargets))
         {
         result = false;
         }
@@ -240,7 +244,8 @@ cmExportInstallFileGenerator::ReplaceInstallPrefix(std::string &input)
 
 //----------------------------------------------------------------------------
 bool
-cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
+cmExportInstallFileGenerator::GenerateImportFileConfig(
+                                    const std::string& config,
                                     std::vector<std::string> &missingTargets)
 {
   // Skip configurations not enabled for this export.
@@ -254,7 +259,7 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
   fileName += "/";
   fileName += this->FileBase;
   fileName += "-";
-  if(config && *config)
+  if(!config.empty())
     {
     fileName += cmSystemTools::LowerCase(config);
     }
@@ -270,7 +275,7 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
     {
     std::string se = cmSystemTools::GetLastSystemError();
     cmOStringStream e;
-    e << "cannot write to file \"" << fileName.c_str()
+    e << "cannot write to file \"" << fileName
       << "\": " << se;
     cmSystemTools::Error(e.str().c_str());
     return false;
@@ -296,7 +301,8 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(const char* config,
 void
 cmExportInstallFileGenerator
 ::GenerateImportTargetsConfig(std::ostream& os,
-                              const char* config, std::string const& suffix,
+                              const std::string& config,
+                              std::string const& suffix,
                               std::vector<std::string> &missingTargets)
 {
   // Add each target in the set to the export.
@@ -355,7 +361,8 @@ cmExportInstallFileGenerator
 //----------------------------------------------------------------------------
 void
 cmExportInstallFileGenerator
-::SetImportLocationProperty(const char* config, std::string const& suffix,
+::SetImportLocationProperty(const std::string& config,
+                            std::string const& suffix,
                             cmInstallTargetGenerator* itgen,
                             ImportPropertyMap& properties,
                             std::set<std::string>& importedLocations

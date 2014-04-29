@@ -35,7 +35,7 @@ bool cmFindProgramCommand
     // value.
     if(this->AlreadyInCacheWithoutMetaInfo)
       {
-      this->Makefile->AddCacheDefinition(this->VariableName.c_str(), "",
+      this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
                                          cmCacheManager::FILEPATH);
       }
@@ -46,14 +46,14 @@ bool cmFindProgramCommand
   if(result != "")
     {
     // Save the value in the cache
-    this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+    this->Makefile->AddCacheDefinition(this->VariableName,
                                        result.c_str(),
                                        this->VariableDocumentation.c_str(),
                                        cmCacheManager::FILEPATH);
 
     return true;
     }
-  this->Makefile->AddCacheDefinition(this->VariableName.c_str(),
+  this->Makefile->AddCacheDefinition(this->VariableName,
                                  (this->VariableName + "-NOTFOUND").c_str(),
                                  this->VariableDocumentation.c_str(),
                                  cmCacheManager::FILEPATH);

@@ -49,7 +49,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "find_package";}
+  virtual std::string GetName() const { return "find_package";}
 
   cmTypeMacro(cmFindPackageCommand, cmFindCommon);
 private:
@@ -57,7 +57,7 @@ private:
   void AppendToFoundProperty(bool found);
   void SetModuleVariables(const std::string& components);
   bool FindModule(bool& found);
-  void AddFindDefinition(const char* var, const char* val);
+  void AddFindDefinition(const std::string& var, const char* val);
   void RestoreFindDefinitions();
   bool HandlePackageMode();
   bool FindConfig();
@@ -96,19 +96,19 @@ private:
   friend class cmFindPackageFileList;
 
   struct OriginalDef { bool exists; std::string value; };
-  std::map<cmStdString, OriginalDef> OriginalDefs;
+  std::map<std::string, OriginalDef> OriginalDefs;
 
-  cmStdString Name;
-  cmStdString Variable;
-  cmStdString Version;
+  std::string Name;
+  std::string Variable;
+  std::string Version;
   unsigned int VersionMajor;
   unsigned int VersionMinor;
   unsigned int VersionPatch;
   unsigned int VersionTweak;
   unsigned int VersionCount;
   bool VersionExact;
-  cmStdString FileFound;
-  cmStdString VersionFound;
+  std::string FileFound;
+  std::string VersionFound;
   unsigned int VersionFoundMajor;
   unsigned int VersionFoundMinor;
   unsigned int VersionFoundPatch;

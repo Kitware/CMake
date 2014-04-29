@@ -201,6 +201,8 @@ Variables that Control the Build
    /variable/CMAKE_AUTOUIC
    /variable/CMAKE_AUTOUIC_OPTIONS
    /variable/CMAKE_BUILD_WITH_INSTALL_RPATH
+   /variable/CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY
+   /variable/CMAKE_COMPILE_PDB_OUTPUT_DIRECTORY_CONFIG
    /variable/CMAKE_CONFIG_POSTFIX
    /variable/CMAKE_DEBUG_POSTFIX
    /variable/CMAKE_EXE_LINKER_FLAGS_CONFIG
@@ -255,6 +257,10 @@ Variables for Languages
    :maxdepth: 1
 
    /variable/CMAKE_COMPILER_IS_GNULANG
+   /variable/CMAKE_CXX_COMPILE_FEATURES
+   /variable/CMAKE_CXX_KNOWN_FEATURES
+   /variable/CMAKE_CXX_STANDARD
+   /variable/CMAKE_CXX_EXTENSIONS
    /variable/CMAKE_Fortran_MODDIR_DEFAULT
    /variable/CMAKE_Fortran_MODDIR_FLAG
    /variable/CMAKE_Fortran_MODOUT_FLAG

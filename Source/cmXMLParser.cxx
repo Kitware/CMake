@@ -152,14 +152,14 @@ int cmXMLParser::ParsingComplete()
 }
 
 //----------------------------------------------------------------------------
-void cmXMLParser::StartElement(const char * name,
+void cmXMLParser::StartElement(const std::string& name,
   const char ** /*atts*/)
 {
   std::cout << "Start element: " << name << std::endl;
 }
 
 //----------------------------------------------------------------------------
-void cmXMLParser::EndElement(const char * name)
+void cmXMLParser::EndElement(const std::string& name)
 {
   std::cout << "End element: " << name << std::endl;
 }

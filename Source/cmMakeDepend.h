@@ -94,7 +94,7 @@ public:
   /**
    * Add a directory to the search path for include files.
    */
-  virtual void AddSearchPath(const char*);
+  virtual void AddSearchPath(const std::string&);
 
   /**
    * Generate dependencies for the file given.  Returns a pointer to
@@ -138,10 +138,10 @@ protected:
   cmsys::RegularExpression IncludeFileRegularExpression;
   cmsys::RegularExpression ComplainFileRegularExpression;
   std::vector<std::string> IncludeDirectories;
-  typedef std::map<cmStdString, cmStdString> FileToPathMapType;
-  typedef std::map<cmStdString, FileToPathMapType>
+  typedef std::map<std::string, std::string> FileToPathMapType;
+  typedef std::map<std::string, FileToPathMapType>
   DirectoryToFileToPathMapType;
-  typedef std::map<cmStdString, cmDependInformation*>
+  typedef std::map<std::string, cmDependInformation*>
   DependInformationMapType;
   DependInformationMapType DependInformationMap;
   DirectoryToFileToPathMapType DirectoryToFileToPathMap;

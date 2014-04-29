@@ -18,8 +18,9 @@
 class cmCursesCacheEntryComposite
 {
 public:
-  cmCursesCacheEntryComposite(const char* key, int labelwidth, int entrywidth);
-  cmCursesCacheEntryComposite(const char* key,
+  cmCursesCacheEntryComposite(const std::string& key, int labelwidth,
+                              int entrywidth);
+  cmCursesCacheEntryComposite(const std::string& key,
                               const cmCacheManager::CacheIterator& it,
                               bool isNew, int labelwidth, int entrywidth);
   ~cmCursesCacheEntryComposite();

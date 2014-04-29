@@ -26,7 +26,7 @@ bool cmVariableRequiresCommand
     }
 
   std::string testVariable = args[0];
-  if(!this->Makefile->IsOn(testVariable.c_str()))
+  if(!this->Makefile->IsOn(testVariable))
     {
     return true;
     }
@@ -36,7 +36,7 @@ bool cmVariableRequiresCommand
   bool hasAdvanced = false;
   for(unsigned int i = 2; i < args.size(); ++i)
     {
-    if(!this->Makefile->IsOn(args[i].c_str()))
+    if(!this->Makefile->IsOn(args[i]))
       {
       requirementsMet = false;
       notSet += args[i];
@@ -49,13 +49,13 @@ bool cmVariableRequiresCommand
         }
       }
     }
-  const char* reqVar = this->Makefile->GetDefinition(resultVariable.c_str());
+  const char* reqVar = this->Makefile->GetDefinition(resultVariable);
   // if reqVar is unset, then set it to requirementsMet
   // if reqVar is set to true, but requirementsMet is false , then
   // set reqVar to false.
   if(!reqVar || (!requirementsMet && this->Makefile->IsOn(reqVar)))
     {
-    this->Makefile->AddDefinition(resultVariable.c_str(), requirementsMet);
+    this->Makefile->AddDefinition(resultVariable, requirementsMet);
     }
 
   if(!requirementsMet)

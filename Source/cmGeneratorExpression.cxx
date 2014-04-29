@@ -33,17 +33,17 @@ cmGeneratorExpression::cmGeneratorExpression(
 cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(std::string const& input)
 {
-  return this->Parse(input.c_str());
+  return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
+                                      new cmCompiledGeneratorExpression(
+                                        this->Backtrace,
+                                        input));
 }
 
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(const char* input)
 {
-  return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
-                                      new cmCompiledGeneratorExpression(
-                                        this->Backtrace,
-                                        input));
+  return this->Parse(std::string(input ? input : ""));
 }
 
 cmGeneratorExpression::~cmGeneratorExpression()
@@ -52,7 +52,7 @@ cmGeneratorExpression::~cmGeneratorExpression()
 
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
-  cmMakefile* mf, const char* config, bool quiet,
+  cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const
 {
@@ -66,7 +66,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
 //----------------------------------------------------------------------------
 const char *cmCompiledGeneratorExpression::Evaluate(
-  cmMakefile* mf, const char* config, bool quiet,
+  cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmTarget const* currentTarget,
   cmGeneratorExpressionDAGChecker *dagChecker) const
@@ -90,6 +90,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   context.HadError = false;
   context.HadContextSensitiveCondition = false;
   context.HeadTarget = headTarget;
+  context.EvaluateForBuildsystem = this->EvaluateForBuildsystem;
   context.CurrentTarget = currentTarget ? currentTarget : headTarget;
   context.Backtrace = this->Backtrace;
 
@@ -97,7 +98,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
     {
     this->Output += (*it)->Evaluate(&context, dagChecker);
 
-    for(std::set<cmStdString>::const_iterator
+    for(std::set<std::string>::const_iterator
           p = context.SeenTargetProperties.begin();
           p != context.SeenTargetProperties.end(); ++p)
       {
@@ -122,13 +123,14 @@ const char *cmCompiledGeneratorExpression::Evaluate(
 
 cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
               cmListFileBacktrace const& backtrace,
-              const char *input)
-  : Backtrace(backtrace), Input(input ? input : ""),
-    HadContextSensitiveCondition(false)
+              const std::string& input)
+  : Backtrace(backtrace), Input(input),
+    HadContextSensitiveCondition(false),
+    EvaluateForBuildsystem(false)
 {
   cmGeneratorExpressionLexer l;
   std::vector<cmGeneratorExpressionToken> tokens =
-                                              l.Tokenize(this->Input.c_str());
+                                              l.Tokenize(this->Input);
   this->NeedsEvaluation = l.GetSawGeneratorExpression();
 
   if (this->NeedsEvaluation)
@@ -157,17 +159,24 @@ cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 std::string cmGeneratorExpression::StripEmptyListElements(
                                                     const std::string &input)
 {
+  if (input.find(';') == input.npos)
+    {
+    return input;
+    }
   std::string result;
+  result.reserve(input.size());
 
   const char *c = input.c_str();
+  const char *last = c;
   bool skipSemiColons = true;
   for ( ; *c; ++c)
     {
-    if(c[0] == ';')
+    if(*c == ';')
       {
       if(skipSemiColons)
         {
-        continue;
+        result.append(last, c - last);
+        last = c + 1;
         }
       skipSemiColons = true;
       }
@@ -175,8 +184,8 @@ std::string cmGeneratorExpression::StripEmptyListElements(
       {
       skipSemiColons = false;
       }
-    result += *c;
     }
+  result.append(last);
 
   if (!result.empty() && *(result.end() - 1) == ';')
     {
@@ -372,7 +381,7 @@ void cmGeneratorExpression::Split(const std::string &input,
         }
       if(!part.empty())
         {
-        cmSystemTools::ExpandListArgument(part.c_str(), output);
+        cmSystemTools::ExpandListArgument(part, output);
         }
       }
     pos += 2;

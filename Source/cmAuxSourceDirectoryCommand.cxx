@@ -40,7 +40,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
     }
 
   // was the list already populated
-  const char *def = this->Makefile->GetDefinition(args[1].c_str());
+  const char *def = this->Makefile->GetDefinition(args[1]);
   if (def)
     {
     sourceListValue = def;
@@ -72,7 +72,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
           // add the file as a class file so
           // depends can be done
           cmSourceFile* sf =
-            this->Makefile->GetOrCreateSource(fullname.c_str());
+            this->Makefile->GetOrCreateSource(fullname);
           sf->SetProperty("ABSTRACT","0");
           if(!sourceListValue.empty())
             {
@@ -83,7 +83,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
         }
       }
     }
-  this->Makefile->AddDefinition(args[1].c_str(), sourceListValue.c_str());
+  this->Makefile->AddDefinition(args[1], sourceListValue.c_str());
   return true;
 }
 

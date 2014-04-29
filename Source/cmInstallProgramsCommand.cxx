@@ -68,7 +68,7 @@ void cmInstallProgramsCommand::FinalPass()
     {
     std::vector<std::string> programs;
     cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
-                        this->FinalArgs[0].c_str(), programs);
+                        this->FinalArgs[0], programs);
 
     std::vector<std::string>::iterator s = programs.begin();
     // for each argument, get the programs

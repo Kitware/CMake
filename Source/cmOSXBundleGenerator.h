@@ -27,7 +27,7 @@ class cmOSXBundleGenerator
 {
 public:
   cmOSXBundleGenerator(cmGeneratorTarget* target,
-                       const char* configName);
+                       const std::string& configName);
 
   // create an app bundle at a given root, and return
   // the directory within the bundle that contains the executable
@@ -44,26 +44,27 @@ public:
   struct MacOSXContentGeneratorType
   {
     virtual ~MacOSXContentGeneratorType() {}
-    virtual void operator()(cmSourceFile& source, const char* pkgloc) = 0;
+    virtual void operator()(cmSourceFile const& source,
+                            const char* pkgloc) = 0;
   };
 
   void GenerateMacOSXContentStatements(
-    std::vector<cmSourceFile*> const& sources,
+    std::vector<cmSourceFile const*> const& sources,
     MacOSXContentGeneratorType* generator);
   std::string InitMacOSXContentDirectory(const char* pkgloc);
 
-  void SetMacContentFolders(std::set<cmStdString>* macContentFolders)
+  void SetMacContentFolders(std::set<std::string>* macContentFolders)
   { this->MacContentFolders = macContentFolders; }
 
 private:
   bool MustSkip();
 
 private:
-  cmTarget* Target;
+  cmGeneratorTarget* GT;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
-  const char* ConfigName;
-  std::set<cmStdString>* MacContentFolders;
+  std::string ConfigName;
+  std::set<std::string>* MacContentFolders;
 };
 
 

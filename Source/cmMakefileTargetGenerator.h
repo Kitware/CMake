@@ -15,7 +15,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmOSXBundleGenerator.h"
 
-class cmCustomCommand;
+class cmCustomCommandGenerator;
 class cmDependInformation;
 class cmDepends;
 class cmGeneratorTarget;
@@ -81,7 +81,7 @@ protected:
     MacOSXContentGeneratorType(cmMakefileTargetGenerator* gen) :
       Generator(gen) {}
 
-    void operator()(cmSourceFile& source, const char* pkgloc);
+    void operator()(cmSourceFile const& source, const char* pkgloc);
 
   private:
     cmMakefileTargetGenerator* Generator;
@@ -89,20 +89,20 @@ protected:
   friend struct MacOSXContentGeneratorType;
 
   // write the rules for an object
-  void WriteObjectRuleFiles(cmSourceFile& source);
+  void WriteObjectRuleFiles(cmSourceFile const& source);
 
   // write the build rule for an object
   void WriteObjectBuildFile(std::string &obj,
-                            const char *lang,
-                            cmSourceFile& source,
+                            const std::string& lang,
+                            cmSourceFile const& source,
                             std::vector<std::string>& depends);
 
   // write the depend.make file for an object
-  void WriteObjectDependRules(cmSourceFile& source,
+  void WriteObjectDependRules(cmSourceFile const& source,
                               std::vector<std::string>& depends);
 
   // write the build rule for a custom command
-  void GenerateCustomRuleFile(const cmCustomCommand& cc);
+  void GenerateCustomRuleFile(cmCustomCommandGenerator const& ccg);
 
   // write a rule to drive building of more than one output from
   // another rule
@@ -113,20 +113,22 @@ protected:
 
   // write out the variable that lists the objects for this target
   void WriteObjectsVariable(std::string& variableName,
-                            std::string& variableNameExternal);
+                            std::string& variableNameExternal,
+                            bool useWatcomQuote);
   void WriteObjectsString(std::string& buildObjs);
   void WriteObjectsStrings(std::vector<std::string>& objStrings,
                            std::string::size_type limit = std::string::npos);
 
   // write the driver rule to build target outputs
-  void WriteTargetDriverRule(const char* main_output, bool relink);
+  void WriteTargetDriverRule(const std::string& main_output, bool relink);
 
   void DriveCustomCommands(std::vector<std::string>& depends);
 
   // Return the a string with -F flags on apple
   std::string GetFrameworkFlags(std::string const& l);
 
-  void AppendFortranFormatFlags(std::string& flags, cmSourceFile& source);
+  void AppendFortranFormatFlags(std::string& flags,
+                                cmSourceFile const& source);
 
   // append intertarget dependencies
   void AppendTargetDepends(std::vector<std::string>& depends);
@@ -138,7 +140,7 @@ protected:
   void AppendLinkDepends(std::vector<std::string>& depends);
 
   // Lookup the link rule for this target.
-  std::string GetLinkRule(const char* linkRuleVar);
+  std::string GetLinkRule(const std::string& linkRuleVar);
 
   /** In order to support parallel builds for custom commands with
       multiple outputs the outputs are given a serial order, and only
@@ -163,22 +165,29 @@ protected:
                                  std::string const& options,
                                  std::vector<std::string>& makefile_depends);
 
+  /** Create list of flags for link libraries. */
+  void CreateLinkLibs(std::string& linkLibs, bool relink,
+                      bool useResponseFile,
+                      std::vector<std::string>& makefile_depends,
+                      bool useWatcomQuote);
+
   /** Create lists of object files for linking and cleaning.  */
   void CreateObjectLists(bool useLinkScript, bool useArchiveRules,
                          bool useResponseFile, std::string& buildObjs,
-                         std::vector<std::string>& makefile_depends);
+                         std::vector<std::string>& makefile_depends,
+                         bool useWatcomQuote);
 
-  void AddIncludeFlags(std::string& flags, const char* lang);
+  void AddIncludeFlags(std::string& flags, const std::string& lang);
 
   virtual void CloseFileStreams();
-  void RemoveForbiddenFlags(const char* flagVar, const char* linkLang,
+  void RemoveForbiddenFlags(const char* flagVar, const std::string& linkLang,
                             std::string& linkFlags);
   cmTarget *Target;
   cmGeneratorTarget* GeneratorTarget;
   cmLocalUnixMakefileGenerator3 *LocalGenerator;
   cmGlobalUnixMakefileGenerator3 *GlobalGenerator;
   cmMakefile *Makefile;
-  const char *ConfigName;
+  std::string ConfigName;
 
   enum CustomCommandDriveType { OnBuild, OnDepends, OnUtility };
   CustomCommandDriveType CustomCommandDriver;
@@ -203,7 +212,7 @@ protected:
   std::string FlagFileNameFull;
   cmGeneratedFileStream *FlagFileStream;
   class StringList: public std::vector<std::string> {};
-  std::map<cmStdString, StringList> FlagFileDepends;
+  std::map<std::string, StringList> FlagFileDepends;
 
   // the stream for the info file
   std::string InfoFileNameFull;
@@ -217,12 +226,12 @@ protected:
   std::vector<std::string> ExternalObjects;
 
   // Set of object file names that will be built in this directory.
-  std::set<cmStdString> ObjectFiles;
+  std::set<std::string> ObjectFiles;
 
   // Set of extra output files to be driven by the build.
-  std::set<cmStdString> ExtraFiles;
+  std::set<std::string> ExtraFiles;
 
-  typedef std::map<cmStdString, cmStdString> MultipleOutputPairsType;
+  typedef std::map<std::string, std::string> MultipleOutputPairsType;
   MultipleOutputPairsType MultipleOutputPairs;
 
   // Target name info.
@@ -233,11 +242,11 @@ protected:
   std::string TargetNamePDB;
 
   // Mac OS X content info.
-  std::set<cmStdString> MacContentFolders;
+  std::set<std::string> MacContentFolders;
   cmOSXBundleGenerator* OSXBundleGenerator;
   MacOSXContentGeneratorType* MacOSXContentGenerator;
 
-  typedef std::map<cmStdString, cmStdString> ByLanguageMap;
+  typedef std::map<std::string, std::string> ByLanguageMap;
   std::string GetFlags(const std::string &l);
   ByLanguageMap FlagsByLanguage;
   std::string GetDefines(const std::string &l);
@@ -255,16 +264,16 @@ protected:
   void AddModuleDefinitionFlag(std::string& flags);
 
   // Add language feature flags.
-  void AddFeatureFlags(std::string& flags, const char* lang);
+  void AddFeatureFlags(std::string& flags, const std::string& lang);
 
   // Feature query methods.
-  const char* GetFeature(const char* feature);
-  bool GetFeatureAsBool(const char* feature);
+  const char* GetFeature(const std::string& feature);
+  bool GetFeatureAsBool(const std::string& feature);
 
   //==================================================================
   // Convenience routines that do nothing more than forward to
   // implementaitons
-  std::string Convert(const char* source,
+  std::string Convert(const std::string& source,
                       cmLocalGenerator::RelativeRoot relative,
                       cmLocalGenerator::OutputFormat output =
                       cmLocalGenerator::UNCHANGED,

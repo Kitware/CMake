@@ -139,3 +139,15 @@ add_custom_target(header_tgt DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/dir/header.h)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 add_executable(ninjadep ninjadep.cpp)
 add_dependencies(ninjadep header_tgt)
+
+include(ExternalProject)
+ExternalProject_Add(ExternalBuild
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/External
+  BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/External
+  STAMP_DIR ${CMAKE_CURRENT_BINARY_DIR}/External/Stamp
+  BUILD_ALWAYS 1
+  CMAKE_ARGS
+    -Dexternal_in=${CMAKE_CURRENT_BINARY_DIR}/external.in
+    -Dexternal_out=${CMAKE_CURRENT_BINARY_DIR}/external.out
+  INSTALL_COMMAND ""
+  )

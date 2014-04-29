@@ -353,6 +353,10 @@ static int kwsysSystem_Shell__GetArgumentSize(const char* in,
   if(kwsysSystem_Shell__ArgumentNeedsQuotes(in, isUnix, flags))
     {
     /* Surrounding quotes are needed.  Allocate space for them.  */
+    if((flags & kwsysSystem_Shell_Flag_WatcomQuote) && (isUnix))
+      {
+        size += 2;
+      }
     size += 2;
 
     /* We must escape all ending backslashes when quoting on windows.  */
@@ -377,7 +381,18 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
   if(needQuotes)
     {
     /* Add the opening quote for this argument.  */
-    *out++ = '"';
+    if(flags & kwsysSystem_Shell_Flag_WatcomQuote)
+      {
+      if(isUnix)
+        {
+        *out++ = '"';
+        }
+      *out++ = '\'';
+      }
+    else
+      {
+      *out++ = '"';
+      }
     }
 
   /* Scan the string for characters that require escaping or quoting.  */
@@ -549,7 +564,18 @@ static char* kwsysSystem_Shell__GetArgument(const char* in, char* out,
       }
 
     /* Add the closing quote for this argument.  */
-    *out++ = '"';
+    if(flags & kwsysSystem_Shell_Flag_WatcomQuote)
+      {
+      *out++ = '\'';
+      if(isUnix)
+        {
+        *out++ = '"';
+        }
+      }
+    else
+      {
+      *out++ = '"';
+      }
     }
 
   /* Store a terminating null without incrementing.  */

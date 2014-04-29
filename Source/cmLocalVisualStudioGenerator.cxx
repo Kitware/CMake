@@ -31,9 +31,49 @@ cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 }
 
 //----------------------------------------------------------------------------
+void cmLocalVisualStudioGenerator::ComputeObjectFilenames(
+                        std::map<cmSourceFile const*, std::string>& mapping,
+                        cmGeneratorTarget const* gt)
+{
+  std::string dir_max = this->ComputeLongestObjectDirectory(*gt->Target);
+
+  // Count the number of object files with each name.  Note that
+  // windows file names are not case sensitive.
+  std::map<std::string, int> counts;
+
+  for(std::map<cmSourceFile const*, std::string>::iterator
+      si = mapping.begin(); si != mapping.end(); ++si)
+    {
+    cmSourceFile const* sf = si->first;
+    std::string objectNameLower = cmSystemTools::LowerCase(
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath()));
+    objectNameLower += ".obj";
+    counts[objectNameLower] += 1;
+    }
+
+  // For all source files producing duplicate names we need unique
+  // object name computation.
+
+  for(std::map<cmSourceFile const*, std::string>::iterator
+      si = mapping.begin(); si != mapping.end(); ++si)
+    {
+    cmSourceFile const* sf = si->first;
+    std::string objectName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sf->GetFullPath());
+    objectName += ".obj";
+    if(counts[cmSystemTools::LowerCase(objectName)] > 1)
+      {
+      const_cast<cmGeneratorTarget*>(gt)->AddExplicitObjectName(sf);
+      objectName = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
+      }
+    si->second = objectName;
+    }
+}
+
+//----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
-                                                   const char* config,
+                                                   const std::string& config,
                                                    bool isFortran)
 {
   cmsys::auto_ptr<cmCustomCommand> pcc;
@@ -79,17 +119,15 @@ const char* cmLocalVisualStudioGenerator::GetReportErrorLabel() const
 //----------------------------------------------------------------------------
 std::string
 cmLocalVisualStudioGenerator
-::ConstructScript(cmCustomCommand const& cc,
-                  const char* configName,
-                  const char* newline_text)
+::ConstructScript(cmCustomCommandGenerator const& ccg,
+                  const std::string& newline_text)
 {
   bool useLocal = this->CustomCommandUseLocal();
-  const char* workingDirectory = cc.GetWorkingDirectory();
-  cmCustomCommandGenerator ccg(cc, configName, this->Makefile);
-  RelativeRoot relativeRoot = workingDirectory? NONE : START_OUTPUT;
+  std::string workingDirectory = ccg.GetWorkingDirectory();
+  RelativeRoot relativeRoot = workingDirectory.empty()? START_OUTPUT : NONE;
 
   // Avoid leading or trailing newlines.
-  const char* newline = "";
+  std::string newline = "";
 
   // Line to check for error between commands.
   std::string check_error = newline_text;
@@ -114,7 +152,7 @@ cmLocalVisualStudioGenerator
     script += "setlocal";
     }
 
-  if(workingDirectory)
+  if(!workingDirectory.empty())
     {
     // Change the working directory.
     script += newline;
@@ -124,7 +162,7 @@ cmLocalVisualStudioGenerator
     script += check_error;
 
     // Change the working drive.
-    if(workingDirectory[0] && workingDirectory[1] == ':')
+    if(workingDirectory.size() > 1 && workingDirectory[1] == ':')
       {
       script += newline;
       newline = newline_text;

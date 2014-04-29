@@ -17,7 +17,8 @@
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
-  const char* platformName) : cmGlobalVisualStudio7Generator(platformName)
+  const std::string& platformName)
+  : cmGlobalVisualStudio7Generator(platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
 }
@@ -155,7 +156,7 @@ cmGlobalVisualStudio71Generator
 // the libraries it uses are also done here
 void
 cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
-                                              const char* dspname,
+                                              const std::string& dspname,
                                               const char* dir,
                                               cmTarget const& t)
 {
@@ -208,7 +209,7 @@ cmGlobalVisualStudio71Generator::WriteProject(std::ostream& fout,
 void
 cmGlobalVisualStudio71Generator
 ::WriteProjectDepends(std::ostream& fout,
-                      const char*,
+                      const std::string&,
                       const char*, cmTarget const& target)
 {
   VSDependSet const& depends = this->VSTargetDepends[&target];
@@ -234,10 +235,10 @@ cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteExternalProject(std::ostream& fout,
-                       const char* name,
+                       const std::string& name,
                        const char* location,
                        const char* typeGuid,
-                       const std::set<cmStdString>& depends)
+                       const std::set<std::string>& depends)
 {
   fout << "Project(\"{"
        << (typeGuid ? typeGuid : this->ExternalProjectType(location))
@@ -252,7 +253,7 @@ void cmGlobalVisualStudio71Generator
   if(!depends.empty())
     {
     fout << "\tProjectSection(ProjectDependencies) = postProject\n";
-    std::set<cmStdString>::const_iterator it;
+    std::set<std::string>::const_iterator it;
     for(it = depends.begin(); it != depends.end(); ++it)
       {
       if(it->size() > 0)
@@ -277,12 +278,12 @@ void cmGlobalVisualStudio71Generator
 // executables to the libraries it uses are also done here
 void cmGlobalVisualStudio71Generator
 ::WriteProjectConfigurations(
-  std::ostream& fout, const char* name, cmTarget::TargetType,
+  std::ostream& fout, const std::string& name, cmTarget::TargetType,
   const std::set<std::string>& configsPartOfDefaultBuild,
-  const char* platformMapping)
+  std::string const& platformMapping)
 {
-  const char* platformName =
-    platformMapping ? platformMapping : this->GetPlatformName();
+  const std::string& platformName =
+    !platformMapping.empty() ? platformMapping : this->GetPlatformName();
   std::string guid = this->GetGUID(name);
   for(std::vector<std::string>::iterator i = this->Configurations.begin();
       i != this->Configurations.end(); ++i)

@@ -45,7 +45,7 @@ public:
   /**
    * The name of the command as specified in CMakeList.txt.
    */
-  virtual const char* GetName() const { return "export";}
+  virtual std::string GetName() const { return "export";}
 
   cmTypeMacro(cmExportCommand, cmCommand);
 

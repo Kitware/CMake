@@ -16,6 +16,7 @@
 #include "cmSourceFile.h"
 #include "cmCacheManager.h"
 #include "cmGeneratorTarget.h"
+#include "cmCustomCommandGenerator.h"
 #include "cmake.h"
 
 #include "cmComputeLinkInformation.h"
@@ -38,7 +39,7 @@ class cmLocalVisualStudio6Generator::EventWriter
 {
 public:
   EventWriter(cmLocalVisualStudio6Generator* lg,
-              const char* config, std::string& code):
+              const std::string& config, std::string& code):
     LG(lg), Config(config), Code(code), First(true) {}
   void Start(const char* event)
     {
@@ -59,6 +60,7 @@ public:
     }
   void Write(cmCustomCommand const& cc)
     {
+    cmCustomCommandGenerator ccg(cc, this->Config, this->LG->GetMakefile());
     if(this->First)
       {
       this->Code += this->Event + "_Cmds=";
@@ -68,11 +70,11 @@ public:
       {
       this->Code += "\\\n\t";
       }
-    this->Code += this->LG->ConstructScript(cc, this->Config, "\\\n\t");
+    this->Code += this->LG->ConstructScript(ccg, "\\\n\t");
     }
 private:
   cmLocalVisualStudio6Generator* LG;
-  const char* Config;
+  std::string Config;
   std::string& Code;
   bool First;
   std::string Event;
@@ -80,7 +82,7 @@ private:
 
 void cmLocalVisualStudio6Generator::AddHelperCommands()
 {
-  std::set<cmStdString> lang;
+  std::set<std::string> lang;
   lang.insert("C");
   lang.insert("CXX");
   this->CreateCustomTargetsAndCommands(lang);
@@ -186,7 +188,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
 //
 extern std::string GetVS6TargetName(const std::string& targetName);
 
-void cmLocalVisualStudio6Generator::CreateSingleDSP(const char *lname,
+void cmLocalVisualStudio6Generator::CreateSingleDSP(const std::string& lname,
                                                     cmTarget &target)
 {
   // add to the list of projects
@@ -251,9 +253,9 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
                                            makefileIn.c_str(), commandLines,
                                            comment.c_str(),
                                            no_working_directory, true);
-  if(cmSourceFile* file = this->Makefile->GetSource(makefileIn.c_str()))
+  if(this->Makefile->GetSource(makefileIn.c_str()))
     {
-    tgt.AddSourceFile(file);
+    tgt.AddSource(makefileIn);
     }
   else
     {
@@ -263,7 +265,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
 
 
 void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
-                                                 const char *libName,
+                                                 const std::string& libName,
                                                  cmTarget &target)
 {
   // For utility targets need custom command since pre- and post-
@@ -315,13 +317,21 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
 
   // get the classes from the source lists then add them to the groups
   std::vector<cmSourceFile*> classes;
-  target.GetSourceFiles(classes);
+  if (!target.GetConfigCommonSourceFiles(classes))
+    {
+    return;
+    }
 
   // now all of the source files have been properly assigned to the target
   // now stick them into source groups using the reg expressions
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); i++)
     {
+    if (!(*i)->GetObjectLibrary().empty())
+      {
+      continue;
+      }
+
     // Add the file to the list of sources.
     std::string source = (*i)->GetFullPath();
     cmSourceGroup* sourceGroup =
@@ -372,7 +382,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFile(std::ostream& fout,
 
 void cmLocalVisualStudio6Generator
 ::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
-             std::ostream &fout, const char *libName)
+             std::ostream &fout, const std::string& libName)
 {
   cmGeneratorTarget* gt =
     this->GlobalGenerator->GetGeneratorTarget(&target);
@@ -396,6 +406,11 @@ void cmLocalVisualStudio6Generator
   for(std::vector<const cmSourceFile *>::const_iterator sf =
         sourceFiles.begin(); sf != sourceFiles.end(); ++sf)
     {
+    if (!(*sf)->GetObjectLibrary().empty())
+      {
+      continue;
+      }
+
     std::string source = (*sf)->GetFullPath();
     const cmCustomCommand *command =
       (*sf)->GetCustomCommand();
@@ -413,23 +428,20 @@ void cmLocalVisualStudio6Generator
       compileFlags += cflags;
       }
 
-    const char* lang = this->GetSourceFileLanguage(*(*sf));
-    if(lang)
+    const std::string& lang = this->GetSourceFileLanguage(*(*sf));
+    if(lang == "CXX")
       {
-      if(strcmp(lang, "CXX") == 0)
-        {
-        // force a C++ file type
-        compileFlags += " /TP ";
-        }
-      else if(strcmp(lang, "C") == 0)
-        {
-        // force to c file type
-        compileFlags += " /TC ";
-        }
+      // force a C++ file type
+      compileFlags += " /TP ";
+      }
+    else if(lang == "C")
+      {
+      // force to c file type
+      compileFlags += " /TC ";
       }
 
     // Add per-source and per-configuration preprocessor definitions.
-    std::map<cmStdString, cmStdString> cdmap;
+    std::map<std::string, std::string> cdmap;
 
       {
       std::set<std::string> targetCompileDefinitions;
@@ -469,7 +481,7 @@ void cmLocalVisualStudio6Generator
       }
 
     bool excludedFromBuild =
-      (lang && (*sf)->GetPropertyAsBool("HEADER_FILE_ONLY"));
+      (!lang.empty() && (*sf)->GetPropertyAsBool("HEADER_FILE_ONLY"));
 
     // Check for extra object-file dependencies.
     const char* dependsValue = (*sf)->GetProperty("OBJECT_DEPENDS");
@@ -529,7 +541,7 @@ void cmLocalVisualStudio6Generator
             {
             fout << "\n# ADD CPP " << compileFlags << "\n\n";
             }
-          std::map<cmStdString, cmStdString>::iterator cdi =
+          std::map<std::string, std::string>::iterator cdi =
             cdmap.find(cmSystemTools::UpperCase(config));
           if(cdi != cdmap.end() && !cdi->second.empty())
             {
@@ -575,20 +587,24 @@ cmLocalVisualStudio6Generator
 {
   // Create a fake output that forces the rule to run.
   char* output = new char[(strlen(this->Makefile->GetStartOutputDirectory()) +
-                           strlen(target.GetName()) + 30)];
+                           target.GetName().size() + 30)];
   sprintf(output,"%s/%s_force_%i", this->Makefile->GetStartOutputDirectory(),
-          target.GetName(), count);
-  std::string comment = this->ConstructComment(origCommand, "<hack>");
+          target.GetName().c_str(), count);
+  const char* comment = origCommand.GetComment();
+  if(!comment && origCommand.GetOutputs().empty())
+    {
+    comment = "<hack>";
+    }
 
   // Add the rule with the given dependencies and commands.
-  const char* no_main_dependency = 0;
+  std::string no_main_dependency = "";
   if(cmSourceFile* outsf =
      this->Makefile->AddCustomCommandToOutput(
        output, depends, no_main_dependency,
-       origCommand.GetCommandLines(), comment.c_str(),
-       origCommand.GetWorkingDirectory()))
+       origCommand.GetCommandLines(), comment,
+       origCommand.GetWorkingDirectory().c_str()))
     {
-    target.AddSourceFile(outsf);
+    target.AddSource(outsf->GetFullPath());
     }
 
   // Replace the dependencies with the output of this rule so that the
@@ -607,20 +623,21 @@ cmLocalVisualStudio6Generator
                   const cmCustomCommand& command,
                   const char* flags)
 {
-  std::string comment =
-    this->ConstructComment(command, "Building Custom Rule $(InputPath)");
-  if(comment == "<hack>")
-    {
-    comment = "";
-    }
-
   // Write the rule for each configuration.
   std::vector<std::string>::iterator i;
   for(i = this->Configurations.begin(); i != this->Configurations.end(); ++i)
     {
     std::string config = this->GetConfigName(*i);
+    cmCustomCommandGenerator ccg(command, config, this->Makefile);
+    std::string comment =
+      this->ConstructComment(ccg, "Building Custom Rule $(InputPath)");
+    if(comment == "<hack>")
+      {
+      comment = "";
+      }
+
     std::string script =
-      this->ConstructScript(command, config.c_str(), "\\\n\t");
+      this->ConstructScript(ccg, "\\\n\t");
 
     if (i == this->Configurations.begin())
       {
@@ -637,8 +654,8 @@ cmLocalVisualStudio6Generator
     // Write out the dependencies for the rule.
     fout << "USERDEP__HACK=";
     for(std::vector<std::string>::const_iterator d =
-          command.GetDepends().begin();
-        d != command.GetDepends().end();
+          ccg.GetDepends().begin();
+        d != ccg.GetDepends().end();
         ++d)
       {
       // Lookup the real name of the dependency in case it is a CMake target.
@@ -658,7 +675,7 @@ cmLocalVisualStudio6Generator
       fout << " " << comment.c_str();
       }
     fout << "\n\n";
-    if(command.GetOutputs().empty())
+    if(ccg.GetOutputs().empty())
       {
       fout << source
            << "_force :  \"$(SOURCE)\" \"$(INTDIR)\" \"$(OUTDIR)\"\n\t";
@@ -667,8 +684,8 @@ cmLocalVisualStudio6Generator
     else
       {
       for(std::vector<std::string>::const_iterator o =
-          command.GetOutputs().begin();
-          o != command.GetOutputs().end();
+          ccg.GetOutputs().begin();
+          o != ccg.GetOutputs().end();
           ++o)
         {
         // Write a rule for every output generated by this command.
@@ -702,7 +719,7 @@ void cmLocalVisualStudio6Generator::WriteDSPEndGroup(std::ostream& fout)
 
 
 void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
-                                                 const char* libName,
+                                                 const std::string& libName,
                                                  cmTarget& target)
 {
   std::string root= this->Makefile->GetRequiredDefinition("CMAKE_ROOT");
@@ -788,7 +805,7 @@ void cmLocalVisualStudio6Generator::SetBuildType(BuildType b,
 //----------------------------------------------------------------------------
 cmsys::auto_ptr<cmCustomCommand>
 cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
-                                                    const char* config)
+                                                    const std::string& config)
 {
   cmsys::auto_ptr<cmCustomCommand> pcc;
 
@@ -816,8 +833,8 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
 // look for custom rules on a target and collect them together
 std::string
 cmLocalVisualStudio6Generator::CreateTargetRules(cmTarget &target,
-                                                 const char* configName,
-                                                 const char * /* libName */)
+                                              const std::string& configName,
+                                              const std::string& /* libName */)
 {
   if (target.GetType() >= cmTarget::UTILITY )
     {
@@ -866,7 +883,7 @@ inline std::string removeQuotes(const std::string& s)
 
 std::string
 cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target,
-                                                       const char *config)
+                                                  const std::string& config)
 {
   std::string includeOptions;
 
@@ -929,7 +946,7 @@ cmLocalVisualStudio6Generator::GetTargetIncludeOptions(cmTarget &target,
 
 void cmLocalVisualStudio6Generator
 ::WriteDSPHeader(std::ostream& fout,
-                 const char *libName, cmTarget &target,
+                 const std::string& libName, cmTarget &target,
                  std::vector<cmSourceGroup> &)
 {
   bool targetBuilds = (target.GetType() >= cmTarget::EXECUTABLE &&
@@ -1102,7 +1119,7 @@ void cmLocalVisualStudio6Generator
       // Compute the proper name to use to link this library.
       std::string lib;
       std::string libDebug;
-      cmTarget* tgt = this->GlobalGenerator->FindTarget(0, j->first.c_str());
+      cmTarget* tgt = this->GlobalGenerator->FindTarget(j->first.c_str());
       if(tgt)
         {
         lib = cmSystemTools::GetFilenameWithoutExtension
@@ -1255,12 +1272,25 @@ void cmLocalVisualStudio6Generator
   if(targetBuilds)
     {
     // Get the language to use for linking.
-    const char* linkLanguage = target.GetLinkerLanguage();
-    if(!linkLanguage)
+    std::vector<std::string> configs;
+    target.GetMakefile()->GetConfigurations(configs);
+    std::vector<std::string>::const_iterator it = configs.begin();
+    const std::string& linkLanguage = target.GetLinkerLanguage(*it);
+    for ( ; it != configs.end(); ++it)
+      {
+      const std::string& configLinkLanguage = target.GetLinkerLanguage(*it);
+      if (configLinkLanguage != linkLanguage)
+        {
+        cmSystemTools::Error
+          ("Linker language must not vary by configuration for target: ",
+          target.GetName().c_str());
+        }
+      }
+    if(linkLanguage.empty())
       {
       cmSystemTools::Error
         ("CMake can not determine linker language for target: ",
-         target.GetName());
+         target.GetName().c_str());
       return;
       }
 
@@ -1677,12 +1707,25 @@ void cmLocalVisualStudio6Generator
     if(target.GetType() >= cmTarget::EXECUTABLE &&
        target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
-      const char* linkLanguage = target.GetLinkerLanguage();
-      if(!linkLanguage)
+      std::vector<std::string> configs;
+      target.GetMakefile()->GetConfigurations(configs);
+      std::vector<std::string>::const_iterator it = configs.begin();
+      const std::string& linkLanguage = target.GetLinkerLanguage(*it);
+      for ( ; it != configs.end(); ++it)
+        {
+        const std::string& configLinkLanguage = target.GetLinkerLanguage(*it);
+        if (configLinkLanguage != linkLanguage)
+          {
+          cmSystemTools::Error
+            ("Linker language must not vary by configuration for target: ",
+            target.GetName().c_str());
+          }
+        }
+      if(linkLanguage.empty())
         {
         cmSystemTools::Error
           ("CMake can not determine linker language for target: ",
-           target.GetName());
+           target.GetName().c_str());
         return;
         }
       // if CXX is on and the target contains cxx code then add the cxx flags
@@ -1707,7 +1750,7 @@ void cmLocalVisualStudio6Generator
       flagsRelWithDebInfo = this->Makefile->GetSafeDefinition(flagVar.c_str());
       flagsRelWithDebInfo += " -DCMAKE_INTDIR=\\\"RelWithDebInfo\\\" ";
 
-      this->AddCompileOptions(flags, &target, linkLanguage, 0);
+      this->AddCompileOptions(flags, &target, linkLanguage, "");
       this->AddCompileOptions(flagsDebug, &target, linkLanguage, "Debug");
       this->AddCompileOptions(flagsRelease, &target, linkLanguage, "Release");
       this->AddCompileOptions(flagsMinSizeRel, &target, linkLanguage,
@@ -1733,7 +1776,7 @@ void cmLocalVisualStudio6Generator
     std::set<std::string> minsizeDefinesSet;
     std::set<std::string> debugrelDefinesSet;
 
-    this->AddCompileDefinitions(definesSet, &target, 0);
+    this->AddCompileDefinitions(definesSet, &target, "");
     this->AddCompileDefinitions(debugDefinesSet, &target, "DEBUG");
     this->AddCompileDefinitions(releaseDefinesSet, &target, "RELEASE");
     this->AddCompileDefinitions(minsizeDefinesSet, &target, "MINSIZEREL");
@@ -1745,11 +1788,11 @@ void cmLocalVisualStudio6Generator
     std::string minsizeDefines = " ";
     std::string debugrelDefines = " ";
 
-    this->JoinDefines(definesSet, defines, 0);
-    this->JoinDefines(debugDefinesSet, debugDefines, 0);
-    this->JoinDefines(releaseDefinesSet, releaseDefines, 0);
-    this->JoinDefines(minsizeDefinesSet, minsizeDefines, 0);
-    this->JoinDefines(debugrelDefinesSet, debugrelDefines, 0);
+    this->JoinDefines(definesSet, defines, "");
+    this->JoinDefines(debugDefinesSet, debugDefines, "");
+    this->JoinDefines(releaseDefinesSet, releaseDefines, "");
+    this->JoinDefines(minsizeDefinesSet, minsizeDefines, "");
+    this->JoinDefines(debugrelDefinesSet, debugrelDefines, "");
 
     flags += defines;
     flagsDebug += debugDefines;
@@ -1803,7 +1846,7 @@ void cmLocalVisualStudio6Generator::WriteDSPFooter(std::ostream& fout)
 //----------------------------------------------------------------------------
 void cmLocalVisualStudio6Generator
 ::ComputeLinkOptions(cmTarget& target,
-                     const char* configName,
+                     const std::string& configName,
                      const std::string extraOptions,
                      std::string& options)
 {
@@ -1875,7 +1918,7 @@ void cmLocalVisualStudio6Generator
   cmGeneratorTarget* gt =
     this->GlobalGenerator->GetGeneratorTarget(&target);
   std::vector<std::string> objs;
-  gt->UseObjectLibraries(objs);
+  gt->UseObjectLibraries(objs, "");
   for(std::vector<std::string>::const_iterator
         oi = objs.begin(); oi != objs.end(); ++oi)
     {

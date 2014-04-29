@@ -36,6 +36,7 @@
 # define kwsysSystem_Shell_Flag_MinGWMake             kwsys_ns(System_Shell_Flag_MinGWMake)
 # define kwsysSystem_Shell_Flag_NMake                 kwsys_ns(System_Shell_Flag_NMake)
 # define kwsysSystem_Shell_Flag_AllowMakeVariables    kwsys_ns(System_Shell_Flag_AllowMakeVariables)
+# define kwsysSystem_Shell_Flag_WatcomQuote           kwsys_ns(System_Shell_Flag_WatcomQuote)
 #endif
 
 #ifdef __VMS
@@ -102,14 +103,17 @@ enum kwsysSystem_Shell_Flag_e
   kwsysSystem_Shell_Flag_MinGWMake          = (1<<4),
 
   /** The target shell is in a NMake makefile.  */
-  kwsysSystem_Shell_Flag_NMake              = (1<<6),
+  kwsysSystem_Shell_Flag_NMake              = (1<<5),
 
   /** Make variable reference syntax $(MAKEVAR) should not be escaped
       to allow a build tool to replace it.  Replacement values
       containing spaces, quotes, backslashes, or other
       non-alphanumeric characters that have significance to some makes
       or shells produce undefined behavior.  */
-  kwsysSystem_Shell_Flag_AllowMakeVariables = (1<<5)
+  kwsysSystem_Shell_Flag_AllowMakeVariables = (1<<6),
+
+  /** The target shell quoting uses extra single Quotes for Watcom tools.  */
+  kwsysSystem_Shell_Flag_WatcomQuote        = (1<<7)
 };
 
 /**
@@ -156,6 +160,7 @@ kwsysEXPORT char** kwsysSystem_Parse_CommandForUnix(const char* command,
 #  undef kwsysSystem_Shell_Flag_MinGWMake
 #  undef kwsysSystem_Shell_Flag_NMake
 #  undef kwsysSystem_Shell_Flag_AllowMakeVariables
+#  undef kwsysSystem_Shell_Flag_WatcomQuote
 # endif
 #endif
 

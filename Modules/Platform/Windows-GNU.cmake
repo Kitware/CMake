@@ -67,8 +67,8 @@ macro(__windows_compiler_gnu lang)
 
   if(MSYS OR MINGW)
     # Create archiving rules to support large object file lists for static libraries.
-    set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> cr <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> r  <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> cq <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> q  <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_${lang}_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
 
     # Initialize C link type selection flags.  These flags are used when
@@ -87,6 +87,7 @@ macro(__windows_compiler_gnu lang)
   set(CMAKE_SHARED_LIBRARY_${lang}_FLAGS "")
 
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS ${__WINDOWS_GNU_LD_RESPONSE})
+  set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES ${__WINDOWS_GNU_LD_RESPONSE})
   set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 1)
 
   # We prefer "@" for response files but it is not supported by gcc 3.
@@ -103,16 +104,18 @@ macro(__windows_compiler_gnu lang)
     endif()
     # The GNU 3.x compilers do not support response files (only linkers).
     set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_INCLUDES 0)
-  elseif(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_OBJECTS)
+    # Link libraries are generated only for the front-end.
+    set(CMAKE_${lang}_USE_RESPONSE_FILE_FOR_LIBRARIES 0)
+  else()
     # Use "@" to pass the response file to the front-end.
     set(CMAKE_${lang}_RESPONSE_FILE_LINK_FLAG "@")
   endif()
 
   # Binary link rules.
   set(CMAKE_${lang}_CREATE_SHARED_MODULE
-    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_MODULE_${lang}_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_MODULE_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
-    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
 

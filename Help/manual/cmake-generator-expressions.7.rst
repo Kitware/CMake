@@ -188,3 +188,8 @@ property is non-empty::
   Content of ``...`` converted to upper case.
 ``$<MAKE_C_IDENTIFIER:...>``
   Content of ``...`` converted to a C identifier.
+``$<TARGET_OBJECTS:objLib>``
+  List of objects resulting from build of ``objLib``. ``objLib`` must be an
+  object of type ``OBJECT_LIBRARY``.  This expression may only be used in
+  the sources of :command:`add_library` and :command:`add_executable`
+  commands.

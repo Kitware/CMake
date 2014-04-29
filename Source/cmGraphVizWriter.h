@@ -44,30 +44,30 @@ protected:
 
   void WriteHeader(cmGeneratedFileStream& str) const;
 
-  void WriteConnections(const char* targetName,
+  void WriteConnections(const std::string& targetName,
                         std::set<std::string>& insertedNodes,
                         std::set<std::string>& insertedConnections,
                         cmGeneratedFileStream& str) const;
 
-  void WriteDependerConnections(const char* targetName,
+  void WriteDependerConnections(const std::string& targetName,
                                 std::set<std::string>& insertedNodes,
                                 std::set<std::string>& insertedConnections,
                                 cmGeneratedFileStream& str) const;
 
-  void WriteNode(const char* targetName, const cmTarget* target,
+  void WriteNode(const std::string& targetName, const cmTarget* target,
                  std::set<std::string>& insertedNodes,
                  cmGeneratedFileStream& str) const;
 
   void WriteFooter(cmGeneratedFileStream& str) const;
 
-  bool IgnoreThisTarget(const char* name);
+  bool IgnoreThisTarget(const std::string& name);
 
   bool GenerateForTargetType(cmTarget::TargetType targetType) const;
 
-  cmStdString GraphType;
-  cmStdString GraphName;
-  cmStdString GraphHeader;
-  cmStdString GraphNodePrefix;
+  std::string GraphType;
+  std::string GraphName;
+  std::string GraphHeader;
+  std::string GraphNodePrefix;
 
   bool GenerateForExecutables;
   bool GenerateForStaticLibs;
@@ -81,9 +81,9 @@ protected:
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 
-  std::map<cmStdString, const cmTarget*> TargetPtrs;
+  std::map<std::string, const cmTarget*> TargetPtrs;
   // maps from the actual target names to node names in dot:
-  std::map<cmStdString, cmStdString> TargetNamesNodes;
+  std::map<std::string, std::string> TargetNamesNodes;
 
   bool HaveTargetsAndLibs;
 };

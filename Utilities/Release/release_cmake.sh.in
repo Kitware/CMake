@@ -18,7 +18,7 @@ check_exit_value()
 CMAKE_DOC_TARBALL=""
 if [ ! -z "@CMAKE_DOC_TARBALL_NAME@" ] ; then
     CMAKE_DOC_TARBALL=@CMAKE_RELEASE_DIRECTORY@/@CMAKE_DOC_TARBALL_NAME@
-    mv "$HOME/@CMAKE_DOC_TARBALL_NAME@" "$CMAKE_DOC_TARBALL"
+    mv "$HOME/@CMAKE_DOC_TARBALL_STAGED@" "$CMAKE_DOC_TARBALL"
     check_exit_value $? "mv doc tarball" || exit 1
 fi
 
@@ -155,11 +155,6 @@ done
 
 
 
-# need to add an extra copy thing here
-if [ ! -z "@EXTRA_COPY@" ]; then
-    @EXTRA_COPY@
-    check_exit_value $? "Extra copy step @EXTRA_COPY@" || exit 1
-fi
 echo "End release"
 date
 echo ""
