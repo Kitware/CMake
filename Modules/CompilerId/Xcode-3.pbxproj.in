@@ -84,6 +84,8 @@
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				SYMROOT = .;
 				@id_toolset@
+				@id_deployment_target@
+				@id_sdkroot@
 			};
 			name = Debug;
 		};
