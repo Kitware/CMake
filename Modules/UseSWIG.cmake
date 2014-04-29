@@ -244,6 +244,8 @@ macro(SWIG_ADD_MODULE name language)
   if ("${swig_lowercase_language}" STREQUAL "octave")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".oct")
+  elseif ("${swig_lowercase_language}" STREQUAL "go")
+    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
   elseif ("${swig_lowercase_language}" STREQUAL "java")
     if (APPLE)
         # In java you want:
@@ -254,6 +256,8 @@ macro(SWIG_ADD_MODULE name language)
         #   Linux  : libLIBRARY.so
         set_target_properties (${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".jnilib")
       endif ()
+  elseif ("${swig_lowercase_language}" STREQUAL "lua")
+    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
   elseif ("${swig_lowercase_language}" STREQUAL "python")
     # this is only needed for the python case where a _modulename.so is generated
     set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
