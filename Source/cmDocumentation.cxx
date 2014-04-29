@@ -30,6 +30,8 @@ static const char *cmDocumentationStandardOptions[][2] =
    "Print usage information and exit."},
   {"--version,-version,/V [<f>]",
    "Print version number and exit."},
+  {"--help-full [<f>]",
+   "Print all help manuals and exit."},
   {"--help-manual <man> [<f>]",
    "Print one help manual and exit."},
   {"--help-manual-list [<f>]",
@@ -112,6 +114,8 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
     {
     case cmDocumentation::Usage:
       return this->PrintDocumentationUsage(os);
+    case cmDocumentation::Full:
+      return this->PrintHelpFull(os);
     case cmDocumentation::OneManual:
       return this->PrintHelpOneManual(os);
     case cmDocumentation::OneCommand:
@@ -364,9 +368,9 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       }
     else if(strcmp(argv[i], "--help-full") == 0)
       {
+      help.HelpType = cmDocumentation::Full;
       GET_OPT_ARGUMENT(help.Filename);
-      cmSystemTools::Message("Warning: --help-full no longer supported");
-      return true;
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-html") == 0)
       {
@@ -675,6 +679,12 @@ bool cmDocumentation::PrintFiles(std::ostream& os,
     found = r.ProcessFile(*i) || found;
     }
   return found;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintHelpFull(std::ostream& os)
+{
+  return this->PrintFiles(os, "index");
 }
 
 //----------------------------------------------------------------------------
