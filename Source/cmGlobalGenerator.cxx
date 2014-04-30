@@ -319,6 +319,9 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 //   CMakeSystem.cmake - configured file created by
 //                       CMakeDetermineSystem.cmake IF CMAKE_SYSTEM_LOADED
 
+// CMakeSystemSpecificInitialize.cmake
+//   - includes Platform/${CMAKE_SYSTEM_NAME}-Initialize.cmake
+
 // Next try and enable all languages found in the languages vector
 //
 // FOREACH LANG in languages
@@ -443,6 +446,18 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     fpath += "/CMakeSystem.cmake";
     mf->ReadListFile(0,fpath.c_str());
     }
+
+  // **** Load the system specific initialization if not yet loaded
+  if (!mf->GetDefinition("CMAKE_SYSTEM_SPECIFIC_INITIALIZE_LOADED"))
+    {
+    fpath = mf->GetModulesFile("CMakeSystemSpecificInitialize.cmake");
+    if(!mf->ReadListFile(0,fpath.c_str()))
+      {
+      cmSystemTools::Error("Could not find cmake module file: ",
+                           fpath.c_str());
+      }
+    }
+
   std::map<std::string, bool> needTestLanguage;
   std::map<std::string, bool> needSetLanguageEnabledMaps;
   // foreach language
