@@ -37,29 +37,44 @@ set_property(TARGET Qt4WrapMacroTest PROPERTY AUTOMOC OFF)
 target_include_directories(Qt4WrapMacroTest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/interface")
 target_link_libraries(Qt4WrapMacroTest Qt4::QtGui)
 
-set(timeformat "%Y%j%H%M%S")
-try_compile(RESULT
-  "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild"
-  "${CMAKE_CURRENT_SOURCE_DIR}/IncrementalMoc"
-  IncrementalMoc
-  CMAKE_FLAGS -DADD_DEF=0 "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}")
-file(TIMESTAMP "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild/moc_foo.cpp" tsvar_before "${timeformat}")
-if (NOT tsvar_before)
-  message(SEND_ERROR "Unable to read timestamp from moc file from first build!")
-endif()
+macro(test_incremental def)
+  set(timeformat "%Y%j%H%M%S")
+  try_compile(RESULT
+    "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild_${def}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/IncrementalMoc"
+    IncrementalMoc
+    CMAKE_FLAGS -D${def}=0 "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+    OUTPUT_VARIABLE output
+    )
+  file(TIMESTAMP "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild_${def}/moc_foo.cpp" tsvar_before "${timeformat}")
+  if (NOT tsvar_before)
+    message(SEND_ERROR
+      "Unable to read timestamp from moc file from first build with -D${def}!\n"
+      "try_compile output:\n${output}"
+      )
+  endif()
 
-execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 2) # Ensure that the timestamp will change.
+  execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 2) # Ensure that the timestamp will change.
 
-try_compile(RESULT
-  "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild"
-  "${CMAKE_CURRENT_SOURCE_DIR}/IncrementalMoc"
-  IncrementalMoc
-  CMAKE_FLAGS -DADD_DEF=1 "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}")
-file(TIMESTAMP "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild/moc_foo.cpp" tsvar_after "${timeformat}")
-if (NOT tsvar_after)
-  message(SEND_ERROR "Unable to read timestamp from moc file from second build!")
-endif()
+  try_compile(RESULT
+    "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild_${def}"
+    "${CMAKE_CURRENT_SOURCE_DIR}/IncrementalMoc"
+    IncrementalMoc
+    CMAKE_FLAGS -D${def}=1 "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}"
+    OUTPUT_VARIABLE output
+    )
+  file(TIMESTAMP "${CMAKE_CURRENT_BINARY_DIR}/IncrementalMocBuild_${def}/moc_foo.cpp" tsvar_after "${timeformat}")
+  if (NOT tsvar_after)
+    message(SEND_ERROR
+      "Unable to read timestamp from moc file from second build!\n"
+      "try_compile output:\n${output}"
+      )
+  endif()
 
-if (NOT tsvar_after GREATER tsvar_before)
-  message(SEND_ERROR "Rebuild did not re-create moc file. Before: ${tsvar_before}. After: ${tsvar_after}")
-endif()
+  if (NOT tsvar_after GREATER tsvar_before)
+    message(SEND_ERROR "Rebuild did not re-create moc file with -D${def}. Before: ${tsvar_before}. After: ${tsvar_after}")
+  endif()
+endmacro()
+
+test_incremental(ADD_TARGET_DEF)
+test_incremental(ADD_DIR_DEF)
