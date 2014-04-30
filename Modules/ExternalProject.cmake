@@ -605,7 +605,7 @@ does not match expected value
 Retrying download.
 \")
     file(REMOVE \"\${file}\")
-    execute_process(COMMAND ${CMAKE_COMMAND} -P \"${download_script}\")
+    execute_process(COMMAND \${CMAKE_COMMAND} -P \"${download_script}\")
   endif()
 endwhile()
 
