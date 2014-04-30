@@ -2161,6 +2161,26 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
   bool ext = target->GetPropertyAsBool(extProp);
   std::string type = ext ? "EXTENSION" : "STANDARD";
 
+  if (target->GetPropertyAsBool(lang + "_STANDARD_REQUIRED"))
+    {
+    std::string option_flag =
+              "CMAKE_" + lang + standardProp
+                      + "_" + type + "_COMPILE_OPTION";
+
+    const char *opt = target->GetMakefile()->GetDefinition(option_flag);
+    if (!opt)
+      {
+      cmOStringStream e;
+      e << "Target \"" << target->GetName() << "\" requires the language "
+           "dialect \"" << lang << standardProp << "\" "
+        << (ext ? "(with compiler extensions)" : "") << ", but CMake "
+           "does not know the compile flags to use to enable it.";
+      this->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+    this->AppendFlags(flags, opt);
+    return;
+    }
+
   static std::map<std::string, std::vector<std::string> > langStdMap;
   if (langStdMap.empty())
     {

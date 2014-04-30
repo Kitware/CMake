@@ -18,3 +18,18 @@ if (NOT FEATURES)
   run_cmake(NoSupportedCxxFeatures)
   run_cmake(NoSupportedCxxFeaturesGenex)
 endif()
+
+foreach(standard 98 11)
+  file(READ
+    "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx${standard}_flag.txt"
+    CXX${standard}_FLAG
+  )
+  if (CXX${standard}_FLAG STREQUAL NOTFOUND)
+    run_cmake(RequireCXX${standard})
+    run_cmake(RequireCXX${standard}Variable)
+  endif()
+  if (CXX${standard}EXT_FLAG STREQUAL NOTFOUND)
+    run_cmake(RequireCXX${standard}Ext)
+    run_cmake(RequireCXX${standard}ExtVariable)
+  endif()
+endforeach()

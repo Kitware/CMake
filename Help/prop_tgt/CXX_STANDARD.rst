@@ -19,7 +19,8 @@ means that using:
 
 with a compiler which does not support ``-std=c++11`` or an equivalent
 flag will not result in an error or warning, but will instead add the
-``-std=c++98`` flag if supported.
+``-std=c++98`` flag if supported.  This "decay" behavior may be controlled
+with the :prop_tgt:`CXX_STANDARD_REQUIRED` target property.
 
 This property is initialized by the value of
 the :variable:`CMAKE_CXX_STANDARD` variable if it is set when a target
