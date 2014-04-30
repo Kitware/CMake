@@ -401,8 +401,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       {
       return compilerId ? compilerId : "";
       }
-    cmsys::RegularExpression compilerIdValidator;
-    compilerIdValidator.compile("^[A-Za-z0-9_]*$");
+    static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
     if (!compilerIdValidator.find(parameters.begin()->c_str()))
       {
       reportError(context, content->GetOriginalExpression(),
@@ -509,8 +508,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
       return compilerVersion ? compilerVersion : "";
       }
 
-    cmsys::RegularExpression compilerIdValidator;
-    compilerIdValidator.compile("^[0-9\\.]*$");
+    static cmsys::RegularExpression compilerIdValidator("^[0-9\\.]*$");
     if (!compilerIdValidator.find(parameters.begin()->c_str()))
       {
       reportError(context, content->GetOriginalExpression(),
@@ -711,8 +709,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       {
       return configurationNode.Evaluate(parameters, context, content, 0);
       }
-    cmsys::RegularExpression configValidator;
-    configValidator.compile("^[A-Za-z0-9_]*$");
+    static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
     if (!configValidator.find(parameters.begin()->c_str()))
       {
       reportError(context, content->GetOriginalExpression(),
@@ -884,8 +881,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           "$<TARGET_PROPERTY:...> expression requires one or two parameters");
       return std::string();
       }
-    cmsys::RegularExpression propertyNameValidator;
-    propertyNameValidator.compile("^[A-Za-z0-9_]+$");
+    static cmsys::RegularExpression propertyNameValidator("^[A-Za-z0-9_]+$");
 
     cmTarget const* target = context->HeadTarget;
     std::string propertyName = *parameters.begin();

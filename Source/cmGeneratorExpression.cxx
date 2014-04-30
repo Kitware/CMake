@@ -469,12 +469,11 @@ std::string::size_type cmGeneratorExpression::Find(const std::string &input)
 //----------------------------------------------------------------------------
 bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
 {
-  cmsys::RegularExpression targetNameValidator;
   // The ':' is supported to allow use with IMPORTED targets. At least
   // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
-  targetNameValidator.compile("^[A-Za-z0-9_.:+-]+$");
+  static cmsys::RegularExpression targetNameValidator("^[A-Za-z0-9_.:+-]+$");
 
-  return targetNameValidator.find(input.c_str());
+  return targetNameValidator.find(input);
 }
 
 //----------------------------------------------------------------------------

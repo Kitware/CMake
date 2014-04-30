@@ -588,8 +588,8 @@ void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
     return;
     }
 
-  cmsys::RegularExpression urlRegex;
-  urlRegex.compile("^(mailto:|(ftps?|https?|news)://).*$");
+  static cmsys::RegularExpression
+    urlRegex("^(mailto:|(ftps?|https?|news)://).*$");
 
   std::vector<std::string>::iterator it;
   for ( it = cpackMenuLinksVector.begin();
