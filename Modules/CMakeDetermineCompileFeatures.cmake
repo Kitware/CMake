@@ -17,6 +17,7 @@ function(cmake_determine_compile_features lang)
   if(lang STREQUAL CXX AND COMMAND cmake_record_cxx_compile_features)
     message(STATUS "Detecting ${lang} compile features")
 
+    set(CMAKE_CXX98_COMPILE_FEATURES)
     set(CMAKE_CXX11_COMPILE_FEATURES)
 
     include("${CMAKE_ROOT}/Modules/Internal/FeatureTesting.cmake")
@@ -28,13 +29,19 @@ function(cmake_determine_compile_features lang)
       return()
     endif()
 
+    if (CMAKE_CXX98_COMPILE_FEATURES)
+      list(REMOVE_ITEM CMAKE_CXX11_COMPILE_FEATURES ${CMAKE_CXX98_COMPILE_FEATURES})
+    endif()
+
     if(NOT CMAKE_CXX_COMPILE_FEATURES)
       set(CMAKE_CXX_COMPILE_FEATURES
+        ${CMAKE_CXX98_COMPILE_FEATURES}
         ${CMAKE_CXX11_COMPILE_FEATURES}
       )
     endif()
 
     set(CMAKE_CXX_COMPILE_FEATURES ${CMAKE_CXX_COMPILE_FEATURES} PARENT_SCOPE)
+    set(CMAKE_CXX98_COMPILE_FEATURES ${CMAKE_CXX98_COMPILE_FEATURES} PARENT_SCOPE)
     set(CMAKE_CXX11_COMPILE_FEATURES ${CMAKE_CXX11_COMPILE_FEATURES} PARENT_SCOPE)
 
     message(STATUS "Detecting ${lang} compile features - done")
