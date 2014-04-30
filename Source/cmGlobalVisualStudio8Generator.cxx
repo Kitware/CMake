@@ -341,7 +341,7 @@ void cmGlobalVisualStudio8Generator::Generate()
   if(this->AddCheckTarget())
     {
     // All targets depend on the build-system check target.
-    for(std::map<std::string,cmTarget *>::const_iterator
+    for(TargetMap::const_iterator
           ti = this->TotalTargets.begin();
         ti != this->TotalTargets.end(); ++ti)
       {
