@@ -176,10 +176,11 @@ public:
   public:
     TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
                         cmLinkImplItem const& item = NoLinkImplItem)
-      : ge(cge), LinkImplItem(item)
+      : ge(cge), Cached(false), LinkImplItem(item)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
     std::vector<std::string> CachedEntries;
+    bool Cached;
     cmLinkImplItem const& LinkImplItem;
   };
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
@@ -2269,7 +2270,7 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
     std::vector<std::string>& entriesRef = (*it)->CachedEntries;
     std::vector<std::string> localEntries;
     std::vector<std::string>* entryOptions = &entriesRef;
-    if(entryOptions->empty())
+    if(!(*it)->Cached)
       {
       cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
                                                 config,
@@ -2282,6 +2283,7 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
         {
         // Cache the result.
         *entryOptions = localEntries;
+        (*it)->Cached = true;
         }
       else
         {
