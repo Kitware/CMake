@@ -402,7 +402,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
       return compilerId ? compilerId : "";
       }
     static cmsys::RegularExpression compilerIdValidator("^[A-Za-z0-9_]*$");
-    if (!compilerIdValidator.find(parameters.begin()->c_str()))
+    if (!compilerIdValidator.find(*parameters.begin()))
       {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
@@ -509,7 +509,7 @@ struct CompilerVersionNode : public cmGeneratorExpressionNode
       }
 
     static cmsys::RegularExpression compilerIdValidator("^[0-9\\.]*$");
-    if (!compilerIdValidator.find(parameters.begin()->c_str()))
+    if (!compilerIdValidator.find(*parameters.begin()))
       {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
@@ -710,7 +710,7 @@ static const struct ConfigurationTestNode : public cmGeneratorExpressionNode
       return configurationNode.Evaluate(parameters, context, content, 0);
       }
     static cmsys::RegularExpression configValidator("^[A-Za-z0-9_]*$");
-    if (!configValidator.find(parameters.begin()->c_str()))
+    if (!configValidator.find(*parameters.begin()))
       {
       reportError(context, content->GetOriginalExpression(),
                   "Expression syntax not recognized.");
@@ -969,7 +969,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       return std::string();
       }
 
-    if (!propertyNameValidator.find(propertyName.c_str()))
+    if (!propertyNameValidator.find(propertyName))
       {
       ::reportError(context, content->GetOriginalExpression(),
                     "Property name not supported.");

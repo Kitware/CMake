@@ -1811,7 +1811,7 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
       }
     }
 
-  is_shared_library = this->ExtractSharedLibraryName.find(file.c_str());
+  is_shared_library = this->ExtractSharedLibraryName.find(file);
 
   if(!is_shared_library)
     {
