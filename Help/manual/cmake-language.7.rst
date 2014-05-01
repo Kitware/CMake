@@ -287,6 +287,8 @@ For example:
  Instead use a `Quoted Argument`_ or a `Bracket Argument`_ to
  represent the content.
 
+.. _`Escape Sequences`:
+
 Escape Sequences
 ----------------
 
@@ -304,6 +306,8 @@ character without interpreting it as syntax.  A ``\t``, ``\r``, or ``\n``
 encodes a tab, carriage return, or newline character, respectively.
 A ``\;`` encodes itself but may be used in an `Unquoted Argument`_
 to encode the ``;`` without dividing the argument value on it.
+
+.. _`Variable References`:
 
 Variable References
 -------------------
