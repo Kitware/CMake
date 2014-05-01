@@ -169,7 +169,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
     if(cmGlobalNinjaGenerator::IsMinGW())
       cmSystemTools::ReplaceString(includeFlags, "\\", "/");
 
-    this->LocalGenerator->AppendFlags(languageFlags, includeFlags.c_str());
+    this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
 
     // Append old-style preprocessor definition flags.
     this->LocalGenerator->AppendFlags(languageFlags,
@@ -698,7 +698,7 @@ cmNinjaTargetGenerator
   std::string flag = defFileFlag;
   flag += (this->LocalGenerator->ConvertToLinkReference(
              this->ModuleDefinitionFile));
-  this->LocalGenerator->AppendFlags(flags, flag.c_str());
+  this->LocalGenerator->AppendFlags(flags, flag);
 }
 
 void

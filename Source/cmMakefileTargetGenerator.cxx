@@ -303,7 +303,7 @@ std::string cmMakefileTargetGenerator::GetFlags(const std::string &l)
 
     // Add include directory flags.
     this->LocalGenerator->
-      AppendFlags(flags,this->GetFrameworkFlags(l).c_str());
+      AppendFlags(flags,this->GetFrameworkFlags(l));
 
     // Add target-specific flags.
     this->LocalGenerator->AddCompileOptions(flags, this->Target,
@@ -551,7 +551,7 @@ cmMakefileTargetGenerator
   std::string langFlags = "$(";
   langFlags += lang;
   langFlags += "_FLAGS)";
-  this->LocalGenerator->AppendFlags(flags, langFlags.c_str());
+  this->LocalGenerator->AppendFlags(flags, langFlags);
 
   std::string configUpper =
     cmSystemTools::UpperCase(this->LocalGenerator->ConfigurationName);
@@ -1968,11 +1968,11 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
     std::string arg = "@" +
       this->CreateResponseFile(name.c_str(), includeFlags,
                                this->FlagFileDepends[lang]);
-    this->LocalGenerator->AppendFlags(flags, arg.c_str());
+    this->LocalGenerator->AppendFlags(flags, arg);
     }
   else
     {
-    this->LocalGenerator->AppendFlags(flags, includeFlags.c_str());
+    this->LocalGenerator->AppendFlags(flags, includeFlags);
     }
 }
 
@@ -2044,7 +2044,7 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
     modflag += this->Convert(mod_dir,
                              cmLocalGenerator::START_OUTPUT,
                              cmLocalGenerator::SHELL);
-    this->LocalGenerator->AppendFlags(flags, modflag.c_str());
+    this->LocalGenerator->AppendFlags(flags, modflag);
     }
 
   // If there is a separate module path flag then duplicate the
@@ -2066,7 +2066,7 @@ void cmMakefileTargetGenerator::AddFortranFlags(std::string& flags)
       flg += this->Convert(*idi,
                            cmLocalGenerator::NONE,
                            cmLocalGenerator::SHELL);
-      this->LocalGenerator->AppendFlags(flags, flg.c_str());
+      this->LocalGenerator->AppendFlags(flags, flg);
       }
     }
 }
@@ -2093,7 +2093,7 @@ void cmMakefileTargetGenerator::AddModuleDefinitionFlag(std::string& flags)
   // vs6's "cl -link" pass it to the linker.
   std::string flag = defFileFlag;
   flag += (this->LocalGenerator->ConvertToLinkReference(def));
-  this->LocalGenerator->AppendFlags(flags, flag.c_str());
+  this->LocalGenerator->AppendFlags(flags, flag);
 }
 
 //----------------------------------------------------------------------------

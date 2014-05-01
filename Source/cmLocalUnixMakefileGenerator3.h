@@ -168,6 +168,7 @@ public:
                                    const std::string& tgt);
 
   // append flags to a string
+  virtual void AppendFlags(std::string& flags, const std::string& newFlags);
   virtual void AppendFlags(std::string& flags, const char* newFlags);
 
   // append an echo command

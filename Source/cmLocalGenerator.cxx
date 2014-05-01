@@ -2200,7 +2200,7 @@ static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
     return;
     }
   std::string option = std::string(opt) + prop;
-  lg->AppendFlags(flags, option.c_str());
+  lg->AppendFlags(flags, option);
 }
 
 static void AddInlineVisibilityCompileOption(std::string &flags,
@@ -2384,11 +2384,10 @@ void cmLocalGenerator::AddConfigVariableFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFlags(std::string& flags,
-                                                const char* newFlags)
+                                   const std::string& newFlags)
 {
-  if(newFlags && *newFlags)
+  if(!newFlags.empty())
     {
-    std::string newf = newFlags;
     if(flags.size())
       {
       flags += " ";
@@ -2398,10 +2397,20 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 }
 
 //----------------------------------------------------------------------------
+void cmLocalGenerator::AppendFlags(std::string& flags,
+                                   const char* newFlags)
+{
+  if(newFlags && *newFlags)
+    {
+    this->AppendFlags(flags, std::string(newFlags));
+    }
+}
+
+//----------------------------------------------------------------------------
 void cmLocalGenerator::AppendFlagEscape(std::string& flags,
                                         const std::string& rawFlag)
 {
-  this->AppendFlags(flags, this->EscapeForShell(rawFlag).c_str());
+  this->AppendFlags(flags, this->EscapeForShell(rawFlag));
 }
 
 //----------------------------------------------------------------------------

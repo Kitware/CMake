@@ -249,7 +249,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Create set of linking flags.
   std::string linkFlags;
-  this->LocalGenerator->AppendFlags(linkFlags, extraFlags.c_str());
+  this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
 
   // Add OSX version flags, if any.
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -810,6 +810,6 @@ cmMakefileLibraryTargetGenerator
     // Append the flag since a non-zero version is specified.
     cmOStringStream vflag;
     vflag << flag << major << "." << minor << "." << patch;
-    this->LocalGenerator->AppendFlags(flags, vflag.str().c_str());
+    this->LocalGenerator->AppendFlags(flags, vflag.str());
     }
 }
