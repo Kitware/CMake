@@ -11,8 +11,6 @@ set(RELEASE_SCRIPTS_BATCH_1
   dashmacmini5_release.cmake  # Mac Darwin64 universal x86_64;i386
   magrathea_release.cmake     # Linux
   ibm_aix_release.cmake       # AIX
-  ferrari_sgi64_release.cmake # IRIX 64
-  ferrari_sgi_release.cmake   # IRIX
 )
 
 set(RELEASE_SCRIPTS_BATCH_2
