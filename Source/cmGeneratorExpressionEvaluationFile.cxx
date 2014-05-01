@@ -13,6 +13,7 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 
 #include "cmMakefile.h"
+#include "cmGeneratedFileStream.h"
 #include <cmsys/FStream.hxx>
 
 #include <assert.h>
@@ -79,19 +80,9 @@ void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
   this->Files.push_back(outputFileName);
   outputFiles[outputFileName] = outputContent;
 
-  cmsys::ofstream fout(outputFileName.c_str());
-
-  if(!fout)
-    {
-    cmOStringStream e;
-    e << "Evaluation file \"" << outputFileName << "\" cannot be written.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return;
-    }
-
+  cmGeneratedFileStream fout(outputFileName.c_str());
+  fout.SetCopyIfDifferent(true);
   fout << outputContent;
-
-  fout.close();
 }
 
 //----------------------------------------------------------------------------
