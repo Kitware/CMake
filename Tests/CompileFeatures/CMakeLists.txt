@@ -22,7 +22,8 @@ macro(run_test feature)
   endif()
 endmacro()
 
-foreach(feature ${CMAKE_CXX_KNOWN_FEATURES})
+get_property(features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
+foreach(feature ${features})
   run_test(${feature})
 endforeach()
 

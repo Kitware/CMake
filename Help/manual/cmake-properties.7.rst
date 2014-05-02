@@ -16,6 +16,7 @@ Properties of Global Scope
    /prop_gbl/ALLOW_DUPLICATE_CUSTOM_TARGETS
    /prop_gbl/AUTOGEN_TARGETS_FOLDER
    /prop_gbl/AUTOMOC_TARGETS_FOLDER
+   /prop_gbl/CMAKE_CXX_KNOWN_FEATURES
    /prop_gbl/DEBUG_CONFIGURATIONS
    /prop_gbl/DISABLED_FEATURES
    /prop_gbl/ENABLED_FEATURES

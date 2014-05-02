@@ -2273,6 +2273,12 @@ const char *cmake::GetProperty(const std::string& prop,
       }
     this->SetProperty("ENABLED_LANGUAGES", lang.c_str());
     }
+  if (prop == "CMAKE_CXX_KNOWN_FEATURES")
+    {
+#define STRING_LIST_ELEMENT(F) ";" #F
+    return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
+#undef STRING_LIST_ELEMENT
+    }
   return this->Properties.GetPropertyValue(prop, scope, chain);
 }
 
