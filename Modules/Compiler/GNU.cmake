@@ -55,8 +55,4 @@ macro(__compiler_gnu lang)
   if(NOT APPLE)
     set(CMAKE_INCLUDE_SYSTEM_FLAG_${lang} "-isystem ")
   endif()
-
-  if(APPLE AND NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.3)
-    set(CMAKE_${lang}_SYSTEM_FRAMEWORK_SEARCH_FLAG -iframework)
-  endif()
 endmacro()
