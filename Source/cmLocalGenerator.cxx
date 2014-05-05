@@ -1344,6 +1344,12 @@ std::string cmLocalGenerator::GetIncludeFlags(
   const char* fwSearchFlag =
     this->Makefile->GetDefinition(fwSearchFlagVar);
 
+  std::string sysFwSearchFlagVar = "CMAKE_";
+  sysFwSearchFlagVar += lang;
+  sysFwSearchFlagVar += "_SYSTEM_FRAMEWORK_SEARCH_FLAG";
+  const char* sysFwSearchFlag =
+    this->Makefile->GetDefinition(sysFwSearchFlagVar);
+
   bool flagUsed = false;
   std::set<std::string> emitted;
 #ifdef __APPLE__
@@ -1360,9 +1366,17 @@ std::string cmLocalGenerator::GetIncludeFlags(
       frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
       if(emitted.insert(frameworkDir).second)
         {
-        includeFlags
-          << fwSearchFlag << this->Convert(frameworkDir,
-                                           START_OUTPUT, shellFormat, true)
+        if (sysFwSearchFlag && target &&
+            target->IsSystemIncludeDirectory(*i, config))
+          {
+          includeFlags << sysFwSearchFlag;
+          }
+        else
+          {
+          includeFlags << fwSearchFlag;
+          }
+        includeFlags << this->Convert(frameworkDir, START_OUTPUT,
+                                      shellFormat, true)
           << " ";
         }
       continue;
