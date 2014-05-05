@@ -16,7 +16,6 @@ static const char* const cmVariableWatchAccessStrings[] =
     "READ_ACCESS",
     "UNKNOWN_READ_ACCESS",
     "UNKNOWN_DEFINED_ACCESS",
-    "ALLOWED_UNKNOWN_READ_ACCESS",
     "MODIFIED_ACCESS",
     "REMOVED_ACCESS",
     "NO_ACCESS"

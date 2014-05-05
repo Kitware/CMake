@@ -2472,19 +2472,8 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
       }
     else
       {
-      // are unknown access allowed
-      const char* allow = this->Internal->VarStack.top()
-        .Get("CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS");
-      if(cmSystemTools::IsOn(allow))
-        {
-        vv->VariableAccessed(name,
-          cmVariableWatch::ALLOWED_UNKNOWN_VARIABLE_READ_ACCESS, def, this);
-        }
-      else
-        {
-        vv->VariableAccessed(name,
+      vv->VariableAccessed(name,
           cmVariableWatch::UNKNOWN_VARIABLE_READ_ACCESS, def, this);
-        }
       }
     }
 #endif
