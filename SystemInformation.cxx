@@ -88,15 +88,6 @@ typedef int siginfo_t;
 #  include <ifaddrs.h>
 #  define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 # endif
-# if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
-#  include <execinfo.h>
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
-#    include <cxxabi.h>
-#  endif
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
-#    include <dlfcn.h>
-#  endif
-# endif
 #endif
 
 #if defined(__OpenBSD__) || defined(__NetBSD__)
@@ -126,16 +117,8 @@ typedef int siginfo_t;
 #  include <ifaddrs.h>
 #  define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 # endif
-# if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
-#   include <execinfo.h>
-#   if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
-#     include <cxxabi.h>
-#   endif
-#   if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
-#     include <dlfcn.h>
-#   endif
-#  endif
+# if !(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050)
+#  undef KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE
 # endif
 #endif
 
@@ -148,15 +131,6 @@ typedef int siginfo_t;
 #  include <ifaddrs.h>
 #  if !defined(__LSB_VERSION__) /* LSB has no getifaddrs */
 #   define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
-#  endif
-# endif
-# if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
-#  include <execinfo.h>
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
-#    include <cxxabi.h>
-#  endif
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
-#    include <dlfcn.h>
 #  endif
 # endif
 # if defined(KWSYS_CXX_HAS_RLIMIT64)
@@ -176,6 +150,19 @@ typedef struct rlimit ResourceLimitType;
 
 #ifdef __HAIKU__
 # include <OS.h>
+#endif
+
+#if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
+# include <execinfo.h>
+# if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
+#  include <cxxabi.h>
+# endif
+# if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
+#  include <dlfcn.h>
+# endif
+#else
+# undef KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE
+# undef KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP
 #endif
 
 #include <memory.h>
