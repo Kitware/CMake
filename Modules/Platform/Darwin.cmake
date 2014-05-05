@@ -132,6 +132,12 @@ set(CMAKE_C_FRAMEWORK_SEARCH_FLAG -F)
 set(CMAKE_CXX_FRAMEWORK_SEARCH_FLAG -F)
 set(CMAKE_Fortran_FRAMEWORK_SEARCH_FLAG -F)
 
+# Like CMAKE_*_FRAMEWORK_SEARCH_FLAG but the directory is treated as a system
+# directory (analogous to -I and -isystem).
+set(CMAKE_C_SYSTEM_FRAMEWORK_SEARCH_FLAG -iframework)
+set(CMAKE_CXX_SYSTEM_FRAMEWORK_SEARCH_FLAG -iframework)
+set(CMAKE_Fortran_SYSTEM_FRAMEWORK_SEARCH_FLAG -iframework)
+
 # default to searching for frameworks first
 if(NOT DEFINED CMAKE_FIND_FRAMEWORK)
   set(CMAKE_FIND_FRAMEWORK FIRST)
