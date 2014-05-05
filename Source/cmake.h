@@ -465,19 +465,25 @@ private:
   F(c_variadic_macros)
 
 #define FOR_EACH_CXX_FEATURE(F) \
+  F(cxx_aggregate_default_initializers) \
   F(cxx_alias_templates) \
   F(cxx_alignas) \
   F(cxx_alignof) \
   F(cxx_attributes) \
+  F(cxx_attribute_deprecated) \
   F(cxx_auto_type) \
+  F(cxx_binary_literals) \
   F(cxx_constexpr) \
+  F(cxx_contextual_conversions) \
   F(cxx_decltype) \
+  F(cxx_decltype_auto) \
   F(cxx_decltype_incomplete_return_types) \
   F(cxx_default_function_template_args) \
   F(cxx_defaulted_functions) \
   F(cxx_defaulted_move_initializers) \
   F(cxx_delegating_constructors) \
   F(cxx_deleted_functions) \
+  F(cxx_digit_separators) \
   F(cxx_enum_forward_declarations) \
   F(cxx_explicit_conversions) \
   F(cxx_extended_friend_declarations) \
@@ -485,9 +491,11 @@ private:
   F(cxx_final) \
   F(cxx_func_identifier) \
   F(cxx_generalized_initializers) \
+  F(cxx_generic_lambdas) \
   F(cxx_inheriting_constructors) \
   F(cxx_inline_namespaces) \
   F(cxx_lambdas) \
+  F(cxx_lambda_init_captures) \
   F(cxx_local_type_template_args) \
   F(cxx_long_long_type) \
   F(cxx_noexcept) \
@@ -497,6 +505,8 @@ private:
   F(cxx_range_for) \
   F(cxx_raw_string_literals) \
   F(cxx_reference_qualified_functions) \
+  F(cxx_relaxed_constexpr) \
+  F(cxx_return_type_deduction) \
   F(cxx_right_angle_brackets) \
   F(cxx_rvalue_references) \
   F(cxx_sizeof_member) \
@@ -509,6 +519,7 @@ private:
   F(cxx_uniform_initialization) \
   F(cxx_unrestricted_unions) \
   F(cxx_user_literals) \
+  F(cxx_variable_templates) \
   F(cxx_variadic_macros) \
   F(cxx_variadic_templates)
 

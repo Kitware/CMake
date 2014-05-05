@@ -37,11 +37,24 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
     cxx_alignof
   )
 endif()
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+    AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
+  # GNU prior to 4.9 does not set any preprocessor define to distinguish
+  # c++1y from c++11, so CMake does not support c++1y features before GNU 4.9.
+  list(REMOVE_ITEM CXX_non_features
+    # GNU 4.8 knows cxx_attributes, but doesn't know [[deprecated]]
+    # and warns that it is unknown and ignored.
+    cxx_attribute_deprecated
+    cxx_binary_literals
+    cxx_lambda_init_captures
+    cxx_return_type_deduction
+  )
+endif()
 
 set(C_ext c)
 set(C_standard_flag 11)
 set(CXX_ext cpp)
-set(CXX_standard_flag 11)
+set(CXX_standard_flag 14)
 foreach(lang CXX C)
   if (CMAKE_${lang}_COMPILE_FEATURES)
     foreach(feature ${${lang}_non_features})

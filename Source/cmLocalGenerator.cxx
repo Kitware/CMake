@@ -2222,6 +2222,7 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
   if (langStdMap.empty())
     {
     // Maintain sorted order, most recent first.
+    langStdMap["CXX"].push_back("14");
     langStdMap["CXX"].push_back("11");
     langStdMap["CXX"].push_back("98");
 
