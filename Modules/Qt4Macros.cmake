@@ -135,7 +135,9 @@ function (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target
     set(targetincludes)
     set(targetdefines)
   else()
-    file(WRITE ${_moc_parameters_file} "${_moc_parameters}\n")
+    set(CMAKE_CONFIGURABLE_FILE_CONTENT "${_moc_parameters}")
+    configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
+                   "${_moc_parameters_file}" @ONLY)
   endif()
 
   set(_moc_extra_parameters_file @${_moc_parameters_file})
