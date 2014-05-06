@@ -19,7 +19,6 @@ endif()
 if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
   set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
 endif()
-include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
 
 if(WIN32 AND "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
   set(_INTEL_WINDOWS 1)
@@ -54,6 +53,18 @@ if(CMAKE_SYSTEM MATCHES "OSF1-V.*")
   endif()
 endif()
 
+if(CMAKE_SYSTEM_NAME MATCHES "HP-UX" AND CMAKE_CXX_COMPILER_ID MATCHES "HP")
+  # HP aCC since version 3.80 supports the flag +hpxstd98 to get ANSI C++98
+  # template support. It is known that version 6.25 doesn't need that flag.
+  # Versions prior to 3.80 will not be able to build CMake. Current assumption:
+  # it is needed for every version from 3.80 to 4 to get it working.
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4 AND
+         NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.80)
+    # use new C++ library and improved template support
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -AA +hpxstd98")
+  endif()
+endif()
+
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")
@@ -68,3 +79,5 @@ endif ()
 if (CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_SYSTEM_PROCESSOR STREQUAL parisc)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--unique=.text._*")
 endif ()
+
+include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
