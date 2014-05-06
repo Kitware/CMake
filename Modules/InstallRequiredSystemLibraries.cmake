@@ -295,25 +295,42 @@ if(MSVC)
     macro(MFC_FILES_FOR_VERSION version)
       set(v "${version}")
 
+      # Multi-Byte Character Set versions of MFC are available as optional
+      # addon since Visual Studio 12.  So for version 12 or higher, check
+      # whether they are available and exclude them if they are not.
+      if("${v}" LESS 12 OR EXISTS "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll")
+        set(mbcs ON)
+      else()
+        set(mbcs OFF)
+      endif()
+
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
         set(MSVC${v}_MFC_DIR
           "${MSVC${v}_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.DebugMFC")
         set(__install__libs ${__install__libs}
-          "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll"
           "${MSVC${v}_MFC_DIR}/mfc${v}0ud.dll"
-          "${MSVC${v}_MFC_DIR}/mfcm${v}0d.dll"
           "${MSVC${v}_MFC_DIR}/mfcm${v}0ud.dll"
           )
+        if(mbcs)
+          set(__install__libs ${__install__libs}
+            "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll"
+            "${MSVC${v}_MFC_DIR}/mfcm${v}0d.dll"
+          )
+        endif()
       endif()
 
       set(MSVC${v}_MFC_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.MFC")
       if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
         set(__install__libs ${__install__libs}
-          "${MSVC${v}_MFC_DIR}/mfc${v}0.dll"
           "${MSVC${v}_MFC_DIR}/mfc${v}0u.dll"
-          "${MSVC${v}_MFC_DIR}/mfcm${v}0.dll"
           "${MSVC${v}_MFC_DIR}/mfcm${v}0u.dll"
           )
+        if(mbcs)
+          set(__install__libs ${__install__libs}
+            "${MSVC${v}_MFC_DIR}/mfc${v}0.dll"
+            "${MSVC${v}_MFC_DIR}/mfcm${v}0.dll"
+          )
+        endif()
       endif()
 
       # include the language dll's as well as the actuall dll's
