@@ -5406,8 +5406,10 @@ cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
           continue;
           }
         cmTarget *objLib = this->Makefile->FindTargetToUse(objLibName.c_str());
-        assert(objLib);
-        objlibs.push_back(objLib);
+        if(objLib)
+          {
+          objlibs.push_back(objLib);
+          }
         }
       }
     }
