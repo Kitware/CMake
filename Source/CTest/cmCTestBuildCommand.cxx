@@ -113,6 +113,15 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
         this->GlobalGenerator =
           this->Makefile->GetCMakeInstance()->CreateGlobalGenerator(
             cmakeGeneratorName);
+        if(!this->GlobalGenerator)
+          {
+          std::string e = "could not create generator named \"";
+          e += cmakeGeneratorName;
+          e += "\"";
+          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e);
+          cmSystemTools::SetFatalErrorOccured();
+          return 0;
+          }
         }
       if(strlen(cmakeBuildConfiguration) == 0)
         {
