@@ -23,6 +23,10 @@ macro(__darwin_compiler_gnu lang)
   # GNU does not have -shared on OS X
   set(CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS "-dynamiclib -Wl,-headerpad_max_install_names")
   set(CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS "-bundle -Wl,-headerpad_max_install_names")
+
+  if(NOT CMAKE_${lang}_COMPILER_VERSION VERSION_LESS 4.3)
+    set(CMAKE_${lang}_SYSTEM_FRAMEWORK_SEARCH_FLAG "-iframework ")
+  endif()
 endmacro()
 
 macro(cmake_gnu_set_sysroot_flag lang)
