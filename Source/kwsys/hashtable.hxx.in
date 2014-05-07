@@ -310,6 +310,9 @@ struct _Hashtable_node
 {
   _Hashtable_node* _M_next;
   _Val _M_val;
+  void public_method_to_quiet_warning_about_all_methods_private();
+private:
+  void operator=(_Hashtable_node<_Val> const&); // poison node assignment
 };
 
 template <class _Val, class _Key, class _HashFcn,
