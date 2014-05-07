@@ -357,8 +357,8 @@ public:
    * (which defaults to the current working directory).  The full path
    * is returned.
    */
-  static kwsys_stl::string CollapseFullPath(const char* in_relative);
-  static kwsys_stl::string CollapseFullPath(const char* in_relative,
+  static kwsys_stl::string CollapseFullPath(const kwsys_stl::string& in_relative);
+  static kwsys_stl::string CollapseFullPath(const kwsys_stl::string& in_relative,
                                             const char* in_base);
 
   /** 
@@ -383,7 +383,7 @@ public:
    * returned.  The root component is stored in the "root" string if
    * given.
    */
-  static const char* SplitPathRootComponent(const char* p,
+  static const char* SplitPathRootComponent(const std::string& p,
                                             kwsys_stl::string* root=0);
 
   /**
@@ -396,7 +396,7 @@ public:
    * automatically expanded if expand_home_dir is true and this
    * platform supports them.
    */
-  static void SplitPath(const char* p,
+  static void SplitPath(const std::string& p,
                         kwsys_stl::vector<kwsys_stl::string>& components,
                         bool expand_home_dir = true);
 
@@ -413,7 +413,7 @@ public:
   /**
    * Compare a path or components of a path.
    */
-  static bool ComparePath(const char* c1, const char* c2);
+  static bool ComparePath(const kwsys_stl::string& c1, const kwsys_stl::string& c2);
 
 
   /**
@@ -465,7 +465,7 @@ public:
    * For windows return the short path for the given path,
    * Unix just a pass through
    */
-  static bool GetShortPath(const char* path, kwsys_stl::string& result);
+  static bool GetShortPath(const kwsys_stl::string& path, kwsys_stl::string& result);
   
   /**
    * Read line from file. Make sure to get everything. Due to a buggy stream
@@ -487,7 +487,7 @@ public:
   /**
    * Check if the given file or directory is in subdirectory of dir
    */
-  static bool IsSubDirectory(const char* fileOrDir, const char* dir);
+  static bool IsSubDirectory(const kwsys_stl::string& fileOrDir, const kwsys_stl::string& dir);
 
   /** -----------------------------------------------------------------
    *               File Manipulation Routines
@@ -806,13 +806,13 @@ public:
   /**
    * Add an entry in the path translation table.
    */
-  static void AddTranslationPath(const char * dir, const char * refdir);
+  static void AddTranslationPath(const kwsys_stl::string& dir, const kwsys_stl::string& refdir);
 
   /**
    * If dir is different after CollapseFullPath is called,
    * Then insert it into the path translation table
    */
-  static void AddKeepPath(const char* dir);
+  static void AddKeepPath(const kwsys_stl::string& dir);
 
   /**
    * Update path by going through the Path Translation table;

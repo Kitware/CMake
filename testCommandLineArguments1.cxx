@@ -57,12 +57,12 @@ int testCommandLineArguments1(int argc, char* argv[])
     }
   if ( p != "1" )
     {
-    kwsys_ios::cout << "Problem setting P. Value of P: " << p.c_str() << kwsys_ios::endl;
+    kwsys_ios::cout << "Problem setting P. Value of P: " << p << kwsys_ios::endl;
     res = 1;
     }
   kwsys_ios::cout << "Value of N: " << n << kwsys_ios::endl;
   kwsys_ios::cout << "Value of M: " << m << kwsys_ios::endl;
-  kwsys_ios::cout << "Value of P: " << p.c_str() << kwsys_ios::endl;
+  kwsys_ios::cout << "Value of P: " << p << kwsys_ios::endl;
   if ( m )
     {
     delete [] m;

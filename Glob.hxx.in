@@ -91,10 +91,10 @@ protected:
     const kwsys_stl::string& dir);
 
   //! Add regular expression
-  void AddExpression(const char* expr);
+  void AddExpression(const kwsys_stl::string& expr);
 
   //! Add a file to the list
-  void AddFile(kwsys_stl::vector<kwsys_stl::string>& files, const char* file);
+  void AddFile(kwsys_stl::vector<kwsys_stl::string>& files, const kwsys_stl::string& file);
 
   GlobInternals* Internals;
   bool Recurse;

@@ -60,8 +60,8 @@ static bool CheckConvertToUnixSlashes(kwsys_stl::string input,
   if ( result != output )
     {
     kwsys_ios::cerr
-      << "Problem with ConvertToUnixSlashes - input: " << input.c_str()
-      << " output: " << result.c_str() << " expected: " << output.c_str()
+      << "Problem with ConvertToUnixSlashes - input: " << input
+      << " output: " << result << " expected: " << output
       << kwsys_ios::endl;
     return false;
     }
@@ -86,8 +86,8 @@ static bool CheckEscapeChars(kwsys_stl::string input,
   if (result != output)
     {
     kwsys_ios::cerr
-      << "Problem with CheckEscapeChars - input: " << input.c_str()
-      << " output: " << result.c_str() << " expected: " << output.c_str()
+      << "Problem with CheckEscapeChars - input: " << input
+      << " output: " << result << " expected: " << output
       << kwsys_ios::endl;
     return false;
     }

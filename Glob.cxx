@@ -229,8 +229,7 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     fname = d.GetFile(cc);
-    if ( strcmp(fname.c_str(), ".") == 0 ||
-      strcmp(fname.c_str(), "..") == 0  )
+    if ( fname == "." || fname == ".." )
       {
       continue;
       }
@@ -271,11 +270,10 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
       }
     else
       {
-      if ( (this->Internals->Expressions.size() > 0) &&
-           this->Internals->Expressions[
-             this->Internals->Expressions.size()-1].find(fname.c_str()) )
+      if ( !this->Internals->Expressions.empty() &&
+           this->Internals->Expressions.rbegin()->find(fname) )
         {
-        this->AddFile(this->Internals->Files, realname.c_str());
+        this->AddFile(this->Internals->Files, realname);
         }
       }
     }
@@ -310,8 +308,7 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
     {
     fname = d.GetFile(cc);
-    if ( strcmp(fname.c_str(), ".") == 0 ||
-      strcmp(fname.c_str(), "..") == 0  )
+    if ( fname == "." || fname == ".." )
       {
       continue;
       }
@@ -354,7 +351,7 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
       {
       if ( last )
         {
-        this->AddFile(this->Internals->Files, realname.c_str());
+        this->AddFile(this->Internals->Files, realname);
         }
       else
         {
@@ -442,9 +439,9 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
     int ch = expr[cc];
     if ( ch == '/' )
       {
-      if ( cexpr.size() > 0 )
+      if ( !cexpr.empty() )
         {
-        this->AddExpression(cexpr.c_str());
+        this->AddExpression(cexpr);
         }
       cexpr = "";
       }
@@ -453,9 +450,9 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
       cexpr.append(1, static_cast<char>(ch));
       }
     }
-  if ( cexpr.size() > 0 )
+  if ( !cexpr.empty() )
     {
-    this->AddExpression(cexpr.c_str());
+    this->AddExpression(cexpr);
     }
 
   // Handle network paths
@@ -471,11 +468,11 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
 }
 
 //----------------------------------------------------------------------------
-void Glob::AddExpression(const char* expr)
+void Glob::AddExpression(const kwsys_stl::string& expr)
 {
   this->Internals->Expressions.push_back(
     kwsys::RegularExpression(
-      this->PatternToRegex(expr).c_str()));
+      this->PatternToRegex(expr)));
 }
 
 //----------------------------------------------------------------------------
@@ -500,11 +497,11 @@ const char* Glob::GetRelative()
 }
 
 //----------------------------------------------------------------------------
-void Glob::AddFile(kwsys_stl::vector<kwsys_stl::string>& files, const char* file)
+void Glob::AddFile(kwsys_stl::vector<kwsys_stl::string>& files, const kwsys_stl::string& file)
 {
   if ( !this->Relative.empty() )
     {
-    files.push_back(kwsys::SystemTools::RelativePath(this->Relative.c_str(), file));
+    files.push_back(kwsys::SystemTools::RelativePath(this->Relative.c_str(), file.c_str()));
     }
   else
     {
