@@ -330,11 +330,6 @@
 
 # FindCUDA.cmake
 
-# We need to have at least this version to support the VERSION_LESS argument to 'if' (2.6.2) and unset (2.6.3)
-cmake_policy(PUSH)
-cmake_minimum_required(VERSION 2.6.3)
-cmake_policy(POP)
-
 # This macro helps us find the location of helper files we will need the full path to
 macro(CUDA_FIND_HELPER_FILE _name _extension)
   set(_full_name "${_name}.${_extension}")

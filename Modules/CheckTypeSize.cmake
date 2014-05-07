@@ -79,7 +79,7 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
 cmake_policy(PUSH)
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_policy(VERSION 3.0)
 
 get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
