@@ -4560,7 +4560,7 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
       {
       e << "No";
       }
-    e << " known features for compiler\n\""
+    e << " known features for " << lang << " compiler\n\""
       << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
       << "\"\nversion "
       << this->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
@@ -4583,7 +4583,7 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
     {
     cmOStringStream e;
     e << "The compiler feature \"" << feature
-      << "\" is not known to compiler\n\""
+      << "\" is not known to " << lang << " compiler\n\""
       << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
       << "\"\nversion "
       << this->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";

@@ -1,5 +1,5 @@
 CMake Error in CMakeLists.txt:
-  No known features for compiler
+  No known features for CXX compiler
 
   "[^"]*"
 
