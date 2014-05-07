@@ -1219,7 +1219,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 void cmGlobalXCodeGenerator::ForceLinkerLanguages()
 {
   // This makes sure all targets link using the proper language.
-  for(std::map<std::string, cmTarget*>::const_iterator
+  for(TargetMap::const_iterator
         ti = this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
     this->ForceLinkerLanguage(*ti->second);

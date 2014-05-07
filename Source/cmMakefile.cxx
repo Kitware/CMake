@@ -3858,8 +3858,7 @@ cmTarget* cmMakefile::FindTarget(const std::string& name,
 {
   if (!excludeAliases)
     {
-    std::map<std::string, cmTarget*>::const_iterator i
-                                              = this->AliasTargets.find(name);
+    TargetMap::const_iterator i = this->AliasTargets.find(name);
     if (i != this->AliasTargets.end())
       {
       return i->second;
@@ -4081,7 +4080,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
 {
   // Look for an imported target.  These take priority because they
   // are more local in scope and do not have to be globally unique.
-  std::map<std::string, cmTarget*>::const_iterator
+  TargetMap::const_iterator
     imported = this->ImportedTargets.find(name);
   if(imported != this->ImportedTargets.end())
     {

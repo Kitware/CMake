@@ -2085,15 +2085,13 @@ cmGlobalGenerator::FindTarget(const std::string& name,
 {
   if (!excludeAliases)
     {
-    std::map<std::string, cmTarget*>::const_iterator ai
-                                            = this->AliasTargets.find(name);
+    TargetMap::const_iterator ai = this->AliasTargets.find(name);
     if (ai != this->AliasTargets.end())
       {
       return ai->second;
       }
     }
-  std::map<std::string,cmTarget *>::const_iterator i =
-    this->TotalTargets.find ( name );
+  TargetMap::const_iterator i = this->TotalTargets.find ( name );
   if ( i != this->TotalTargets.end() )
     {
     return i->second;
@@ -2874,7 +2872,7 @@ void cmGlobalGenerator::WriteSummary()
   cmGeneratedFileStream fout(fname.c_str());
 
   // Generate summary information files for each target.
-  for(std::map<std::string,cmTarget *>::const_iterator ti =
+  for(TargetMap::const_iterator ti =
         this->TotalTargets.begin(); ti != this->TotalTargets.end(); ++ti)
     {
     if ((ti->second)->GetType() == cmTarget::INTERFACE_LIBRARY)

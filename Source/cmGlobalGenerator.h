@@ -22,6 +22,10 @@
 #include "cmGeneratorTarget.h"
 #include "cmGeneratorExpression.h"
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include <cmsys/hash_map.hxx>
+#endif
+
 class cmake;
 class cmGeneratorTarget;
 class cmGeneratorExpressionEvaluationFile;
@@ -389,9 +393,14 @@ protected:
   cmTargetManifest TargetManifest;
 
   // All targets in the entire project.
-  std::map<std::string,cmTarget *> TotalTargets;
-  std::map<std::string,cmTarget *> AliasTargets;
-  std::map<std::string,cmTarget *> ImportedTargets;
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
+#else
+  typedef std::map<std::string,cmTarget *> TargetMap;
+#endif
+  TargetMap TotalTargets;
+  TargetMap AliasTargets;
+  TargetMap ImportedTargets;
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   virtual const char* GetPredefinedTargetsFolder();
