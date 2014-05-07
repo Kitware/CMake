@@ -399,7 +399,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   lg->GetIncludeDirectories(includes, gtgt, language, config);
   std::string includeFlags =
     lg->GetIncludeFlags(includes, gtgt, language, true); // full include paths
-  lg->AppendFlags(flags, includeFlags.c_str());
+  lg->AppendFlags(flags, includeFlags);
   }
 
   // Append old-style preprocessor definition flags.

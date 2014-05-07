@@ -141,7 +141,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
 
   cmGlobalNinjaGenerator::WriteComment(os, comment);
 
-  cmOStringStream arguments;
+  std::string arguments;
 
   // TODO: Better formatting for when there are multiple input/output files.
 
@@ -150,7 +150,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
       i != explicitDeps.end();
       ++i)
     {
-    arguments  << " " << EncodeIdent(EncodePath(*i), os);
+    arguments += " " + EncodeIdent(EncodePath(*i), os);
 
     //we need to track every dependency that comes in, since we are trying
     //to find dependencies that are side effects of build commands
@@ -161,39 +161,39 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   // Write implicit dependencies.
   if(!implicitDeps.empty())
     {
-    arguments << " |";
+    arguments += " |";
     for(cmNinjaDeps::const_iterator i = implicitDeps.begin();
         i != implicitDeps.end();
         ++i)
-      arguments  << " " << EncodeIdent(EncodePath(*i), os);
+      arguments += " " + EncodeIdent(EncodePath(*i), os);
     }
 
   // Write order-only dependencies.
   if(!orderOnlyDeps.empty())
     {
-    arguments << " ||";
+    arguments += " ||";
     for(cmNinjaDeps::const_iterator i = orderOnlyDeps.begin();
         i != orderOnlyDeps.end();
         ++i)
-      arguments  << " " << EncodeIdent(EncodePath(*i), os);
+      arguments += " " + EncodeIdent(EncodePath(*i), os);
     }
 
-  arguments << "\n";
+  arguments += "\n";
 
-  cmOStringStream build;
+  std::string build;
 
   // Write outputs files.
-  build << "build";
+  build += "build";
   for(cmNinjaDeps::const_iterator i = outputs.begin();
       i != outputs.end(); ++i)
     {
-    build << " " << EncodeIdent(EncodePath(*i), os);
+    build += " " + EncodeIdent(EncodePath(*i), os);
     this->CombinedBuildOutputs.insert( EncodePath(*i) );
     }
-  build << ":";
+  build += ":";
 
   // Write the rule.
-  build << " " << rule;
+  build += " " + rule;
 
   // Write the variables bound to this build statement.
   cmOStringStream variable_assignments;
@@ -203,9 +203,9 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
                                           i->first, i->second, "", 1);
 
   // check if a response file rule should be used
-  std::string buildstr = build.str();
+  std::string buildstr = build;
   std::string assignments = variable_assignments.str();
-  const std::string args = arguments.str();
+  const std::string& args = arguments;
   if (cmdLineLimit > 0
       && args.size() + buildstr.size() + assignments.size()
                                                     > (size_t) cmdLineLimit) {

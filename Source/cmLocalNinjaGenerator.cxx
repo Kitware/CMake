@@ -294,7 +294,7 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
   os << std::endl;
 }
 
-std::string cmLocalNinjaGenerator::ConvertToNinjaPath(const char *path)
+std::string cmLocalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
 {
   std::string convPath = this->Convert(path, cmLocalGenerator::HOME_OUTPUT);
 #ifdef _WIN32

@@ -121,6 +121,12 @@ void cmNinjaTargetGenerator::AddFeatureFlags(std::string& flags,
     }
 }
 
+std::string
+cmNinjaTargetGenerator::OrderDependsTargetForTarget()
+{
+  return "cmake_order_depends_target_" + this->GetTargetName();
+}
+
 // TODO: Most of the code is picked up from
 // void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink),
 // void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
@@ -169,7 +175,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
     if(cmGlobalNinjaGenerator::IsMinGW())
       cmSystemTools::ReplaceString(includeFlags, "\\", "/");
 
-    this->LocalGenerator->AppendFlags(languageFlags, includeFlags.c_str());
+    this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
 
     // Append old-style preprocessor definition flags.
     this->LocalGenerator->AppendFlags(languageFlags,
@@ -496,7 +502,7 @@ cmNinjaTargetGenerator
      this->GetLocalGenerator()->AddCustomCommandTarget(cc, this->GetTarget());
      // Record the custom commands for this target. The container is used
      // in WriteObjectBuildStatement when called in a loop below.
-     this->CustomCommands.push_back((*si)->GetCustomCommand());
+     this->CustomCommands.push_back(cc);
      }
   std::vector<cmSourceFile const*> headerSources;
   this->GeneratorTarget->GetHeaderSources(headerSources, config);
@@ -516,6 +522,33 @@ cmNinjaTargetGenerator
     {
     this->Objects.push_back(this->GetSourceFilePath(*si));
     }
+
+  cmNinjaDeps orderOnlyDeps;
+  this->GetLocalGenerator()->AppendTargetDepends(this->Target, orderOnlyDeps);
+
+  // Add order-only dependencies on custom command outputs.
+  for(std::vector<cmCustomCommand const*>::const_iterator
+        cci = this->CustomCommands.begin();
+      cci != this->CustomCommands.end(); ++cci)
+    {
+    cmCustomCommand const* cc = *cci;
+    cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
+                                 this->GetMakefile());
+    const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
+    std::transform(ccoutputs.begin(), ccoutputs.end(),
+                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
+    }
+
+  cmNinjaDeps orderOnlyTarget;
+  orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
+  this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
+                                          "Order-only phony target for "
+                                            + this->GetTargetName(),
+                                          orderOnlyTarget,
+                                          cmNinjaDeps(),
+                                          cmNinjaDeps(),
+                                          orderOnlyDeps);
+
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources, config);
   for(std::vector<cmSourceFile const*>::const_iterator
@@ -554,11 +587,6 @@ cmNinjaTargetGenerator
     sourceFileName = this->GetSourceFilePath(source);
   explicitDeps.push_back(sourceFileName);
 
-  // Ensure that the target dependencies are built before any source file in
-  // the target, using order-only dependencies.
-  cmNinjaDeps orderOnlyDeps;
-  this->GetLocalGenerator()->AppendTargetDepends(this->Target, orderOnlyDeps);
-
   cmNinjaDeps implicitDeps;
   if(const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
     std::vector<std::string> depList;
@@ -567,18 +595,8 @@ cmNinjaTargetGenerator
                    std::back_inserter(implicitDeps), MapToNinjaPath());
   }
 
-  // Add order-only dependencies on custom command outputs.
-  for(std::vector<cmCustomCommand const*>::const_iterator
-        cci = this->CustomCommands.begin();
-      cci != this->CustomCommands.end(); ++cci)
-    {
-    cmCustomCommand const* cc = *cci;
-    cmCustomCommandGenerator ccg(*cc, this->GetConfigName(),
-                                 this->GetMakefile());
-    const std::vector<std::string>& ccoutputs = ccg.GetOutputs();
-    std::transform(ccoutputs.begin(), ccoutputs.end(),
-                   std::back_inserter(orderOnlyDeps), MapToNinjaPath());
-    }
+  cmNinjaDeps orderOnlyDeps;
+  orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
 
   // If the source file is GENERATED and does not have a custom command
   // (either attached to this source file or another one), assume that one of
@@ -698,7 +716,7 @@ cmNinjaTargetGenerator
   std::string flag = defFileFlag;
   flag += (this->LocalGenerator->ConvertToLinkReference(
              this->ModuleDefinitionFile));
-  this->LocalGenerator->AppendFlags(flags, flag.c_str());
+  this->LocalGenerator->AppendFlags(flags, flag);
 }
 
 void
@@ -760,9 +778,10 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   this->Generator->GetGlobalGenerator()->AddDependencyToAll(output);
 }
 
-void cmNinjaTargetGenerator::addPoolNinjaVariable(const char* pool_property,
-                                                  cmTarget* target,
-                                                  cmNinjaVars& vars)
+void cmNinjaTargetGenerator::addPoolNinjaVariable(
+                                              const std::string& pool_property,
+                                              cmTarget* target,
+                                              cmNinjaVars& vars)
 {
     const char* pool = target->GetProperty(pool_property);
     if (pool)

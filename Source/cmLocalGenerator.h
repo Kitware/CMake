@@ -152,6 +152,7 @@ public:
   void AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
                                   const std::string& lang);
   ///! Append flags to a string.
+  virtual void AppendFlags(std::string& flags, const std::string& newFlags);
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag);
