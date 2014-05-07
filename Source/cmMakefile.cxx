@@ -101,6 +101,8 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->Initialize();
   this->PreOrder = false;
   this->GeneratingBuildSystem = false;
+
+  this->NumLastMatches = 0;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -149,6 +151,8 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->CheckSystemVars = mf.CheckSystemVars;
   this->ListFileStack = mf.ListFileStack;
   this->OutputToSource = mf.OutputToSource;
+
+  this->NumLastMatches = mf.NumLastMatches;
 }
 
 //----------------------------------------------------------------------------
@@ -4272,6 +4276,51 @@ void cmMakefile::AddQtUiFileWithOptions(cmSourceFile *sf)
 std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
 {
   return this->QtUiFilesWithOptions;
+}
+
+static std::string matchVariables[] = {
+  "CMAKE_MATCH_0",
+  "CMAKE_MATCH_1",
+  "CMAKE_MATCH_2",
+  "CMAKE_MATCH_3",
+  "CMAKE_MATCH_4",
+  "CMAKE_MATCH_5",
+  "CMAKE_MATCH_6",
+  "CMAKE_MATCH_7",
+  "CMAKE_MATCH_8",
+  "CMAKE_MATCH_9"
+};
+
+//----------------------------------------------------------------------------
+void cmMakefile::ClearMatches()
+{
+  for (unsigned int i=0; i<this->NumLastMatches; i++)
+    {
+    std::string const& var = matchVariables[i];
+    std::string const& s = this->GetSafeDefinition(var);
+    if(!s.empty())
+      {
+      this->AddDefinition(var, "");
+      this->MarkVariableAsUsed(var);
+      }
+    }
+  this->NumLastMatches = 0;
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
+{
+  for (unsigned int i=0; i<10; i++)
+    {
+    std::string const& m = re.match(i);
+    if(!m.empty())
+      {
+      std::string const& var = matchVariables[i];
+      this->AddDefinition(var, m.c_str());
+      this->MarkVariableAsUsed(var);
+      this->NumLastMatches = i + 1;
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
