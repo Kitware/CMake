@@ -86,7 +86,7 @@ public:
    * Return the vector that holds the list of dependencies
    */
   const std::vector<std::string> &GetDepends() const {return this->Depends;}
-  void AddDepend(const char* d) { this->Depends.push_back(d); }
+  void AddDepend(const std::string& d) { this->Depends.push_back(d); }
 
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; }
@@ -109,6 +109,7 @@ private:
   std::string FullPath;
   bool FindFullPathFailed;
   std::string ObjectLibrary;
+  bool IsUiFile;
 
   bool FindFullPath(std::string* error);
   bool TryFullPath(const std::string& path, const std::string& ext);
@@ -116,6 +117,8 @@ private:
   void CheckLanguage(std::string const& ext);
 
   std::vector<std::string> Depends;
+
+  static const std::string propLANGUAGE;
 };
 
 // TODO: Factor out into platform information modules.

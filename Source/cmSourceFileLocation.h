@@ -71,7 +71,7 @@ public:
    * Otherwise it will be a relative path (possibly empty) that is
    * either with respect to the source or build tree.
    */
-  const char* GetDirectory() const { return this->Directory.c_str(); }
+  const std::string& GetDirectory() const { return this->Directory; }
 
   /**
    * Get the file name as best is currently known.  If
