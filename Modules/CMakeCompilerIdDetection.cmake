@@ -24,15 +24,20 @@ include(${CMAKE_CURRENT_LIST_DIR}/CMakeParseArguments.cmake)
 
 function(compiler_id_detection outvar lang)
 
-  file(GLOB lang_files
-    "${CMAKE_ROOT}/Modules/Compiler/*-${lang}-DetermineCompiler.cmake")
-
   if (NOT lang STREQUAL Fortran)
-    file(GLOB non_lang_files
+    file(GLOB lang_files
       "${CMAKE_ROOT}/Modules/Compiler/*-DetermineCompiler.cmake")
+    set(nonlang CXX)
+    if (lang STREQUAL CXX)
+      set(nonlang C)
+    endif()
+
+    file(GLOB nonlang_files
+      "${CMAKE_ROOT}/Modules/Compiler/*-${nonlang}-DetermineCompiler.cmake")
+    list(REMOVE_ITEM lang_files ${nonlang_files})
   endif()
 
-  set(files ${lang_files} ${non_lang_files})
+  set(files ${lang_files})
   if (files)
     foreach(file ${files})
       _readFile(${file})
@@ -45,10 +50,14 @@ function(compiler_id_detection outvar lang)
       message(FATAL_ERROR "Unrecognized arguments: \"${CID_UNPARSED_ARGUMENTS}\"")
     endif()
 
-    set(ordered_compilers
-      # Order is relevant here. For example, compilers which pretend to be
-      # GCC must appear before the actual GCC.
-      Comeau
+    # Order is relevant here. For example, compilers which pretend to be
+    # GCC must appear before the actual GCC.
+    if (lang STREQUAL CXX)
+      list(APPEND ordered_compilers
+        Comeau
+      )
+    endif()
+    list(APPEND ordered_compilers
       Intel
       PathScale
       AppleClang
@@ -66,11 +75,25 @@ function(compiler_id_detection outvar lang)
       PGI
       Cray
       TI
+    )
+    if (lang STREQUAL C)
+      list(APPEND ordered_compilers
+        TinyCC
+      )
+    endif()
+    list(APPEND ordered_compilers
       SCO
       GNU
       MSVC
       ADSP
       IAR
+    )
+    if (lang STREQUAL C)
+      list(APPEND ordered_compilers
+        SDCC
+      )
+    endif()
+    list(APPEND ordered_compilers
       MIPSpro)
 
     if(CID_ID_DEFINE)
