@@ -320,16 +320,23 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Test export(PACKAGE) with find_package.
+
+# Choose a unique version.
+string(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
+string(RANDOM LENGTH 4 ALPHABET "0123456789" v)
+set(version "${version}.${v}")
+
 message(STATUS "Preparing export(PACKAGE) test project")
 try_compile(EXPORTER_COMPILED
   ${FindPackageTest_BINARY_DIR}/Exporter
   ${FindPackageTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
+  CMAKE_FLAGS
+    -Dversion=${version}
   OUTPUT_VARIABLE output)
 message(STATUS "Searching for export(PACKAGE) test project")
 set(CMakeTestExportPackage_DIR "" CACHE FILEPATH
   "Wipe out find results for testing." FORCE)
-string(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
 find_package(CMakeTestExportPackage 1.${version} EXACT REQUIRED)
 
 #-----------------------------------------------------------------------------
