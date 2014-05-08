@@ -2265,6 +2265,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     PASS_REGULAR_EXPRESSION "${CTestTestBadExe_REGEX}")
 
   configure_file(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestBadGenerator/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestBadGenerator/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  add_test(CTestTestBadGenerator ${CMAKE_CTEST_COMMAND}
+    -C "\${CTestTest_CONFIG}"
+    -S "${CMake_BINARY_DIR}/Tests/CTestTestBadGenerator/test.cmake" -V
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestTestBadGenerator/testOutput.log"
+    )
+  set_property(TEST CTestTestBadGenerator PROPERTY
+    PASS_REGULAR_EXPRESSION "could not create generator named \"Bad Generator\"")
+
+  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestParallel/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestParallel/test.cmake"
     @ONLY ESCAPE_QUOTES)
