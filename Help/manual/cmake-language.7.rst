@@ -287,6 +287,8 @@ For example:
  Instead use a `Quoted Argument`_ or a `Bracket Argument`_ to
  represent the content.
 
+.. _`Escape Sequences`:
+
 Escape Sequences
 ----------------
 
@@ -294,16 +296,20 @@ An *escape sequence* is a ``\`` followed by one character:
 
 .. productionlist::
  escape_sequence: `escape_identity` | `escape_encoded` | `escape_semicolon`
- escape_identity: '\(' | '\)' | '\#' | '\"' | '\ ' |
-                : '\\' | '\$' | '\@' | '\^'
+ escape_identity: '\' <match '[^A-Za-z0-9;]'>
  escape_encoded: '\t' | '\r' | '\n'
  escape_semicolon: '\;'
 
-A ``\`` followed by one of ``()#" \#@^`` simply encodes the literal
+A ``\`` followed by a non-alphanumeric character simply encodes the literal
 character without interpreting it as syntax.  A ``\t``, ``\r``, or ``\n``
-encodes a tab, carriage return, or newline character, respectively.
-A ``\;`` encodes itself but may be used in an `Unquoted Argument`_
-to encode the ``;`` without dividing the argument value on it.
+encodes a tab, carriage return, or newline character, respectively. A ``\;``
+outside of any `Variable References`_  encodes itself but may be used in an
+`Unquoted Argument`_ to encode the ``;`` without dividing the argument
+value on it.  A ``\;`` inside `Variable References`_ encodes the literal
+``;`` character.  (See also policy :policy:`CMP0053` documentation for
+historical considerations.)
+
+.. _`Variable References`:
 
 Variable References
 -------------------
@@ -314,6 +320,11 @@ A variable reference is replaced by the value of the variable,
 or by the empty string if the variable is not set.
 Variable references can nest and are evaluated from the
 inside out, e.g. ``${outer_${inner_variable}_variable}``.
+
+Literal variable references may consist of alphanumeric characters,
+the characters ``/_.+-``, and `Escape Sequences`_.  Nested references
+may be used to evaluate variables of any name.  (See also policy
+:policy:`CMP0053` documentation for historical considerations.)
 
 The `Variables`_ section documents the scope of variable names
 and how their values are set.

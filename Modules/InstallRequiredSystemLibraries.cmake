@@ -157,7 +157,8 @@ if(MSVC)
         "${msvc_install_dir}/../../VC/redist"
         "${base_dir}/VC/redist"
         "$ENV{ProgramFiles}/Microsoft Visual Studio ${v}.0/VC/redist"
-        "$ENV{ProgramFiles(x86)}/Microsoft Visual Studio ${v}.0/VC/redist"
+        set(programfilesx86 "ProgramFiles(x86)")
+        "$ENV{${programfilesx86}}/Microsoft Visual Studio ${v}.0/VC/redist"
       )
     mark_as_advanced(MSVC${v}_REDIST_DIR)
     set(MSVC${v}_CRT_DIR "${MSVC${v}_REDIST_DIR}/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.CRT")

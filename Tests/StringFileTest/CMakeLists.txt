@@ -127,25 +127,12 @@ string(LENGTH ${substringres} lengthres)
 
 file(RELATIVE_PATH relpath "/usr/local/bin" "/usr/X11R6/bin/xnest")
 
-# Escaping test
-set(var "\\ \" \  \t \n \r \# \( \) \0")
-message("Output: [${var}]")
-set(var \\ \" \  \t \n \r \# \( \) \0)
-message("Output: [${var}]")
-
 # Make-style unquoted argument test
 set(var $(VAR1)$(VAR2)/$(VAR3))
 message("Output: [${var}]")
 string(COMPARE EQUAL "${var}" "$(VAR1)$(VAR2)/$(VAR3)" result)
 if(NOT result)
   message(SEND_ERROR "Unquoted $(VAR) syntax is broken.")
-endif()
-
-# Obscure environment variable name
-set("ENV{x+(y)}" "Obscure environment variable value")
-message("Output: [$ENV{x+(y)}]")
-if(NOT "$ENV{x+(y)}" STREQUAL "Obscure environment variable value")
-  message(SEND_ERROR "Environment variable \"ENV{x+(y)}\" does not work.")
 endif()
 
 # Make directories test

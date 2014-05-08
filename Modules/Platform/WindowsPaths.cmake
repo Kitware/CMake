@@ -56,9 +56,10 @@ else()
   if(DEFINED "ENV{ProgramFiles}")
     list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles}")
   endif()
-  if(DEFINED "ENV{ProgramFiles(x86)}")
+  set(programfilesx86 "ProgramFiles(x86)")
+  if(DEFINED "ENV{${programfilesx86}}")
     # 64-bit binary.  32-bit program files are in ProgramFiles(x86).
-    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{ProgramFiles(x86)}")
+    list(APPEND CMAKE_SYSTEM_PREFIX_PATH "$ENV{${programfilesx86}}")
   elseif(DEFINED "ENV{SystemDrive}")
     # Guess the 32-bit program files location.
     if(EXISTS "$ENV{SystemDrive}/Program Files (x86)")
