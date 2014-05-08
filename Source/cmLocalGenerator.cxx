@@ -2166,8 +2166,8 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     return;
     }
   std::string stdProp = lang + "_STANDARD";
-  const char *standard = target->GetProperty(stdProp);
-  if (!standard)
+  const char *standardProp = target->GetProperty(stdProp);
+  if (!standardProp)
     {
     return;
     }
@@ -2175,12 +2175,66 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
   bool ext = target->GetPropertyAsBool(extProp);
   std::string type = ext ? "EXTENSION" : "STANDARD";
 
-  std::string compile_option =
-            "CMAKE_" + lang + std::string(standard)
-                     + "_" + type + "_COMPILE_OPTION";
-  if (const char *opt = target->GetMakefile()->GetDefinition(compile_option))
+  if (target->GetPropertyAsBool(lang + "_STANDARD_REQUIRED"))
     {
+    std::string option_flag =
+              "CMAKE_" + lang + standardProp
+                      + "_" + type + "_COMPILE_OPTION";
+
+    const char *opt = target->GetMakefile()->GetDefinition(option_flag);
+    if (!opt)
+      {
+      cmOStringStream e;
+      e << "Target \"" << target->GetName() << "\" requires the language "
+           "dialect \"" << lang << standardProp << "\" "
+        << (ext ? "(with compiler extensions)" : "") << ", but CMake "
+           "does not know the compile flags to use to enable it.";
+      this->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
     this->AppendFlags(flags, opt);
+    return;
+    }
+
+  static std::map<std::string, std::vector<std::string> > langStdMap;
+  if (langStdMap.empty())
+    {
+    // Maintain sorted order, most recent first.
+    langStdMap["CXX"].push_back("11");
+    langStdMap["CXX"].push_back("98");
+    }
+
+  std::string standard(standardProp);
+
+  std::vector<std::string>& stds = langStdMap[lang];
+
+  std::vector<std::string>::const_iterator stdIt =
+                                std::find(stds.begin(), stds.end(), standard);
+  assert(stdIt != stds.end());
+
+  const char* defaultStd
+      = this->Makefile->GetDefinition("CMAKE_" + lang + "_STANDARD_DEFAULT");
+  std::vector<std::string>::const_iterator defaultStdIt;
+  if (defaultStd)
+    {
+    defaultStdIt = std::find(stds.begin(), stds.end(), defaultStd);
+    assert(defaultStdIt != stds.end());
+    }
+  else
+    {
+    defaultStdIt = stds.end() - 1;
+    }
+
+  for ( ; stdIt <= defaultStdIt; ++stdIt)
+    {
+    std::string option_flag =
+              "CMAKE_" + lang + *stdIt
+                      + "_" + type + "_COMPILE_OPTION";
+
+    if (const char *opt = target->GetMakefile()->GetDefinition(option_flag))
+      {
+      this->AppendFlags(flags, opt);
+      return;
+      }
     }
 }
 

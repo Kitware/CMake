@@ -31,6 +31,9 @@ add_executable(CompileFeatures main.cpp)
 set_property(TARGET CompileFeatures
   PROPERTY COMPILE_FEATURES "cxx_auto_type"
 )
+set_property(TARGET CompileFeatures
+  PROPERTY CXX_STANDARD_REQUIRED TRUE
+)
 
 add_executable(GenexCompileFeatures main.cpp)
 set_property(TARGET GenexCompileFeatures

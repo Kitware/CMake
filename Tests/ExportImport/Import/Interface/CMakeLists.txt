@@ -50,9 +50,9 @@ macro(do_try_compile prefix)
       auto value = 0;
       return value;
     }
-    " ${prefix}IMPORTED_IFACE_CONSTEXPR)
+    " ${prefix}IMPORTED_IFACE_AUTO_TYPE)
 
-    if(NOT ${prefix}IMPORTED_IFACE_CONSTEXPR)
+    if(NOT ${prefix}IMPORTED_IFACE_AUTO_TYPE)
       message(SEND_ERROR "${prefix} try_compile with IMPORTED INTERFACE target failed!\n\n${OUTPUT}")
     endif()
   endif()
