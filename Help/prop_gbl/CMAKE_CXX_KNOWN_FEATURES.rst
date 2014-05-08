@@ -73,7 +73,7 @@ The features known to this version of CMake are:
   .. _N1986: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1986.pdf
 
 ``cxx_deleted_functions``
-  Deleted functions, as defined in  N2346_.
+  Deleted functions, as defined in N2346_.
 
   .. _N2346: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2346.htm
 
