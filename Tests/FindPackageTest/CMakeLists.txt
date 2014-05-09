@@ -328,7 +328,7 @@ set(version "${version}.${v}")
 
 message(STATUS "Preparing export(PACKAGE) test project")
 try_compile(EXPORTER_COMPILED
-  ${FindPackageTest_BINARY_DIR}/Exporter
+  ${FindPackageTest_BINARY_DIR}/Exporter-build
   ${FindPackageTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
   CMAKE_FLAGS
