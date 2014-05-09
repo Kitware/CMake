@@ -257,7 +257,6 @@ public:
   void SetProperty(const char *prop, const char *value);
   void AppendProperty(const char* prop, const char* value,bool asString=false);
   const char *GetProperty(const char *prop) const;
-  const char *GetProperty(const char *prop, cmProperty::ScopeType scope) const;
   bool GetPropertyAsBool(const char *prop) const;
   void CheckProperty(const char* prop, cmMakefile* context) const;
 

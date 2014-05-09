@@ -2624,12 +2624,6 @@ const char* cmTarget::GetFeature(const char* feature, const char* config) const
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const char* prop) const
-{
-  return this->GetProperty(prop, cmProperty::TARGET);
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy() const
 {
   if (this->IsImported())
@@ -2667,8 +2661,7 @@ bool cmTarget::HandleLocationPropertyPolicy() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const char* prop,
-                                  cmProperty::ScopeType scope) const
+const char *cmTarget::GetProperty(const char* prop) const
 {
   if(!prop)
     {
@@ -2857,10 +2850,10 @@ const char *cmTarget::GetProperty(const char* prop,
     }
   bool chain = false;
   const char *retVal =
-    this->Properties.GetPropertyValue(prop, scope, chain);
+    this->Properties.GetPropertyValue(prop, cmProperty::TARGET, chain);
   if (chain)
     {
-    return this->Makefile->GetProperty(prop,scope);
+    return this->Makefile->GetProperty(prop, cmProperty::TARGET);
     }
   return retVal;
 }
