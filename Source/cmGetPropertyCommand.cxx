@@ -302,7 +302,8 @@ bool cmGetPropertyCommand::HandleTargetMode()
     }
   if(cmTarget* target = this->Makefile->FindTargetToUse(this->Name))
     {
-    return this->StoreResult(target->GetProperty(this->PropertyName));
+    return this->StoreResult(target->GetProperty(this->PropertyName,
+                                                 this->Makefile));
     }
   else
     {
