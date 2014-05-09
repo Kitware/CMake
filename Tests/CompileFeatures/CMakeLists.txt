@@ -34,25 +34,29 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
   )
 endif()
 
-if (CMAKE_CXX_COMPILE_FEATURES)
-  foreach(feature ${CXX_non_features})
-    message("Testing feature : ${feature}")
-    try_compile(${feature}_works
-      "${CMAKE_CURRENT_BINARY_DIR}/${feature}_test"
-      "${CMAKE_CURRENT_SOURCE_DIR}/feature_test.cpp"
-      COMPILE_DEFINITIONS "-DTEST=${CMAKE_CURRENT_SOURCE_DIR}/${feature}.cpp"
-      CMAKE_FLAGS "-DCMAKE_CXX_STANDARD=11"
-      OUTPUT_VARIABLE OUTPUT
-    )
-    if (${feature}_works)
-      message(SEND_ERROR
-        "Feature ${feature} expected not to work for ${CMAKE_CXX_COMPILER_ID}-${CMAKE_CXX_COMPILER_VERSION}.
-Update the supported features or blacklist it.\n${OUTPUT}")
-    else()
-      message("Testing feature : ${feature} -- Fails, as expected.")
-    endif()
-  endforeach()
-endif()
+set(CXX_ext cpp)
+set(CXX_standard_flag 11)
+foreach(lang CXX)
+  if (CMAKE_${lang}_COMPILE_FEATURES)
+    foreach(feature ${${lang}_non_features})
+      message("Testing feature : ${feature}")
+      try_compile(${feature}_works
+        "${CMAKE_CURRENT_BINARY_DIR}/${feature}_test"
+        "${CMAKE_CURRENT_SOURCE_DIR}/feature_test.${${lang}_ext}"
+        COMPILE_DEFINITIONS "-DTEST=${CMAKE_CURRENT_SOURCE_DIR}/${feature}.${${lang}_ext}"
+        CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD=${${lang}_standard_flag}"
+        OUTPUT_VARIABLE OUTPUT
+      )
+      if (${feature}_works)
+        message(SEND_ERROR
+          "Feature ${feature} expected not to work for ${lang} ${CMAKE_${lang}_COMPILER_ID}-${CMAKE_${lang}_COMPILER_VERSION}.
+  Update the supported features or blacklist it.\n${OUTPUT}")
+      else()
+        message("Testing feature : ${feature} -- Fails, as expected.")
+      endif()
+    endforeach()
+  endif()
+endforeach()
 
 add_executable(CompileFeatures main.cpp)
 set_property(TARGET CompileFeatures
