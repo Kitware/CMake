@@ -38,7 +38,7 @@ bool cmGetTargetPropertyCommand
   else if(cmTarget* tgt = this->Makefile->FindTargetToUse(targetName))
     {
     cmTarget& target = *tgt;
-    prop = target.GetProperty(args[2].c_str());
+    prop = target.GetProperty(args[2].c_str(), this->Makefile);
     }
   else
     {

@@ -2624,13 +2624,7 @@ const char* cmTarget::GetFeature(const char* feature, const char* config) const
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const char* prop) const
-{
-  return this->GetProperty(prop, cmProperty::TARGET);
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::HandleLocationPropertyPolicy() const
+bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())
     {
@@ -2639,7 +2633,7 @@ bool cmTarget::HandleLocationPropertyPolicy() const
   cmOStringStream e;
   const char *modal = 0;
   cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0026))
+  switch (context->GetPolicyStatus(cmPolicies::CMP0026))
     {
     case cmPolicies::WARN:
       e << (this->Makefile->GetPolicies()
@@ -2660,15 +2654,21 @@ bool cmTarget::HandleLocationPropertyPolicy() const
       << this->GetName() << "\".  Use the target name directly with "
       "add_custom_command, or use the generator expression $<TARGET_FILE>, "
       "as appropriate.\n";
-    this->Makefile->IssueMessage(messageType, e.str().c_str());
+    context->IssueMessage(messageType, e.str().c_str());
     }
 
   return messageType != cmake::FATAL_ERROR;
 }
 
 //----------------------------------------------------------------------------
+const char *cmTarget::GetProperty(const char* prop) const
+{
+  return this->GetProperty(prop, this->Makefile);
+}
+
+//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const char* prop,
-                                  cmProperty::ScopeType scope) const
+                                  cmMakefile* context) const
 {
   if(!prop)
     {
@@ -2681,7 +2681,7 @@ const char *cmTarget::GetProperty(const char* prop,
     cmOStringStream e;
     e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
          "The property \"" << prop << "\" is not allowed.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    context->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
     return 0;
     }
 
@@ -2700,7 +2700,7 @@ const char *cmTarget::GetProperty(const char* prop,
     {
     if(strcmp(prop,"LOCATION") == 0)
       {
-      if (!this->HandleLocationPropertyPolicy())
+      if (!this->HandleLocationPropertyPolicy(context))
         {
         return 0;
         }
@@ -2721,7 +2721,7 @@ const char *cmTarget::GetProperty(const char* prop,
     // Support "LOCATION_<CONFIG>".
     if(cmHasLiteralPrefix(prop, "LOCATION_"))
       {
-      if (!this->HandleLocationPropertyPolicy())
+      if (!this->HandleLocationPropertyPolicy(context))
         {
         return 0;
         }
@@ -2736,7 +2736,7 @@ const char *cmTarget::GetProperty(const char* prop,
       std::string configName(prop, strlen(prop) - 9);
       if(configName != "IMPORTED")
         {
-        if (!this->HandleLocationPropertyPolicy())
+        if (!this->HandleLocationPropertyPolicy(context))
           {
           return 0;
           }
@@ -2857,10 +2857,10 @@ const char *cmTarget::GetProperty(const char* prop,
     }
   bool chain = false;
   const char *retVal =
-    this->Properties.GetPropertyValue(prop, scope, chain);
+    this->Properties.GetPropertyValue(prop, cmProperty::TARGET, chain);
   if (chain)
     {
-    return this->Makefile->GetProperty(prop,scope);
+    return this->Makefile->GetProperty(prop, cmProperty::TARGET);
     }
   return retVal;
 }
