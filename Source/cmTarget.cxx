@@ -3178,12 +3178,6 @@ const char* cmTarget::GetFeature(const std::string& feature,
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const std::string& prop) const
-{
-  return this->GetProperty(prop, cmProperty::TARGET);
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy() const
 {
   if (this->IsImported())
@@ -3221,8 +3215,7 @@ bool cmTarget::HandleLocationPropertyPolicy() const
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const std::string& prop,
-                                  cmProperty::ScopeType scope) const
+const char *cmTarget::GetProperty(const std::string& prop) const
 {
   if (this->GetType() == INTERFACE_LIBRARY
       && !whiteListedInterfaceProperty(prop))
@@ -3489,10 +3482,10 @@ const char *cmTarget::GetProperty(const std::string& prop,
     }
   bool chain = false;
   const char *retVal =
-    this->Properties.GetPropertyValue(prop, scope, chain);
+    this->Properties.GetPropertyValue(prop, cmProperty::TARGET, chain);
   if (chain)
     {
-    return this->Makefile->GetProperty(prop,scope);
+    return this->Makefile->GetProperty(prop, cmProperty::TARGET);
     }
   return retVal;
 }
