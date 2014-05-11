@@ -1028,6 +1028,19 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       if (dagCheckerParent->EvaluatingLinkLibraries())
         {
+#define TRANSITIVE_PROPERTY_COMPARE(PROPERTY) \
+    (#PROPERTY == propertyName || "INTERFACE_" #PROPERTY == propertyName) ||
+        if (CM_FOR_EACH_TRANSITIVE_PROPERTY_NAME(TRANSITIVE_PROPERTY_COMPARE)
+            false)
+          {
+          reportError(context, content->GetOriginalExpression(),
+              "$<TARGET_PROPERTY:...> expression in link libraries "
+              "evaluation depends on target property which is transitive "
+              "over the link libraries, creating a recursion.");
+          return std::string();
+          }
+#undef TRANSITIVE_PROPERTY_COMPARE
+
         if(!prop)
           {
           return std::string();
