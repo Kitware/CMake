@@ -154,14 +154,6 @@ if(UNIX)
 endif()
 
 if(APPLE)
-  set(CMAKE_POSTFLIGHT_SCRIPT
-    "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
-  set(CMAKE_POSTUPGRADE_SCRIPT
-    "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
-  configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postflight.sh.in"
-    "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
-  configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postupgrade.sh.in"
-    "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
   install(CODE "execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
                 WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
 endif()
