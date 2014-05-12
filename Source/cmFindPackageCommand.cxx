@@ -90,6 +90,18 @@ bool cmFindPackageCommand
     this->UseLib64Paths = true;
     }
 
+  // Check if User Package Registry should be disabled
+  if(this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY"))
+    {
+    this->NoUserRegistry = true;
+    }
+
+  // Check if System Package Registry should be disabled
+  if(this->Makefile->IsOn("CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY"))
+    {
+    this->NoSystemRegistry = true;
+    }
+
   // Find the current root path mode.
   this->SelectDefaultRootPathMode();
 
