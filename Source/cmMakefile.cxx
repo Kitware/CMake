@@ -4978,6 +4978,7 @@ static const char * const CXX_FEATURES[] = {
   0
   FOR_EACH_CXX_FEATURE(FEATURE_STRING)
 };
+#undef FEATURE_STRING
 
 static const char * const CXX_STANDARDS[] = {
     "98"

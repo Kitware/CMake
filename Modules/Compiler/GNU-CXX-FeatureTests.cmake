@@ -3,11 +3,13 @@
 
 set(_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 407")
 # Introduced in GCC 4.8.1
-set(GNU481_CXX11 "((__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __GNUC_PATCHLEVEL__ >= 1) && __cplusplus >= 201103L")
+set(GNU481_CXX11 "((__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__) >= 40801) && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_decltype_incomplete_return_types "${GNU481_CXX11}")
 set(_cmake_feature_test_cxx_reference_qualified_functions "${GNU481_CXX11}")
 set(GNU48_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 408 && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_alignas "${GNU48_CXX11}")
+# The alignof feature works with GNU 4.7 and -std=c++11, but it is documented
+# as available with GNU 4.8, so treat that as true.
 set(_cmake_feature_test_cxx_alignof "${GNU48_CXX11}")
 set(_cmake_feature_test_cxx_attributes "${GNU48_CXX11}")
 set(_cmake_feature_test_cxx_inheriting_constructors "${GNU48_CXX11}")
