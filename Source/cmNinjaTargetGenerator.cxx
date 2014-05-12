@@ -391,8 +391,10 @@ cmNinjaTargetGenerator
   const std::string cId = mf->GetDefinition("CMAKE_C_COMPILER_ID")
                           ? mf->GetSafeDefinition("CMAKE_C_COMPILER_ID")
                           : mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID");
-
-  const bool usingMSVC = (cId == "MSVC" || cId == "Intel");
+  const std::string sId = mf->GetDefinition("CMAKE_C_SIMULATE_ID")
+                          ? mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID")
+                          : mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID");
+  const bool usingMSVC = (cId == "MSVC" || sId == "MSVC");
 
   // Tell ninja dependency format so all deps can be loaded into a database
   std::string deptype;
