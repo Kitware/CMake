@@ -3178,13 +3178,7 @@ const char* cmTarget::GetFeature(const std::string& feature,
 }
 
 //----------------------------------------------------------------------------
-const char *cmTarget::GetProperty(const std::string& prop) const
-{
-  return this->GetProperty(prop, cmProperty::TARGET);
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::HandleLocationPropertyPolicy() const
+bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())
     {
@@ -3193,7 +3187,7 @@ bool cmTarget::HandleLocationPropertyPolicy() const
   cmOStringStream e;
   const char *modal = 0;
   cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-  switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0026))
+  switch (context->GetPolicyStatus(cmPolicies::CMP0026))
     {
     case cmPolicies::WARN:
       e << (this->Makefile->GetPolicies()
@@ -3214,15 +3208,21 @@ bool cmTarget::HandleLocationPropertyPolicy() const
       << this->GetName() << "\".  Use the target name directly with "
       "add_custom_command, or use the generator expression $<TARGET_FILE>, "
       "as appropriate.\n";
-    this->Makefile->IssueMessage(messageType, e.str());
+    context->IssueMessage(messageType, e.str());
     }
 
   return messageType != cmake::FATAL_ERROR;
 }
 
 //----------------------------------------------------------------------------
+const char *cmTarget::GetProperty(const std::string& prop) const
+{
+  return this->GetProperty(prop, this->Makefile);
+}
+
+//----------------------------------------------------------------------------
 const char *cmTarget::GetProperty(const std::string& prop,
-                                  cmProperty::ScopeType scope) const
+                                  cmMakefile* context) const
 {
   if (this->GetType() == INTERFACE_LIBRARY
       && !whiteListedInterfaceProperty(prop))
@@ -3230,7 +3230,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
     cmOStringStream e;
     e << "INTERFACE_LIBRARY targets may only have whitelisted properties.  "
          "The property \"" << prop << "\" is not allowed.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    context->IssueMessage(cmake::FATAL_ERROR, e.str());
     return 0;
     }
 
@@ -3249,7 +3249,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
     {
     if(prop == "LOCATION")
       {
-      if (!this->HandleLocationPropertyPolicy())
+      if (!this->HandleLocationPropertyPolicy(context))
         {
         return 0;
         }
@@ -3270,7 +3270,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
     // Support "LOCATION_<CONFIG>".
     if(cmHasLiteralPrefix(prop, "LOCATION_"))
       {
-      if (!this->HandleLocationPropertyPolicy())
+      if (!this->HandleLocationPropertyPolicy(context))
         {
         return 0;
         }
@@ -3285,7 +3285,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
       std::string configName(prop.c_str(), prop.size() - 9);
       if(configName != "IMPORTED")
         {
-        if (!this->HandleLocationPropertyPolicy())
+        if (!this->HandleLocationPropertyPolicy(context))
           {
           return 0;
           }
@@ -3423,7 +3423,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
           bool noMessage = true;
           cmOStringStream e;
           cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-          switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0051))
+          switch(context->GetPolicyStatus(cmPolicies::CMP0051))
             {
             case cmPolicies::WARN:
               e << (this->Makefile->GetPolicies()
@@ -3444,7 +3444,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
             "read at configure time.  Code reading that property needs to be "
             "adapted to ignore the generator expression using the "
             "string(GENEX_STRIP) command.";
-            this->Makefile->IssueMessage(messageType, e.str());
+            context->IssueMessage(messageType, e.str());
             }
           if (addContent)
             {
@@ -3489,10 +3489,10 @@ const char *cmTarget::GetProperty(const std::string& prop,
     }
   bool chain = false;
   const char *retVal =
-    this->Properties.GetPropertyValue(prop, scope, chain);
+    this->Properties.GetPropertyValue(prop, cmProperty::TARGET, chain);
   if (chain)
     {
-    return this->Makefile->GetProperty(prop,scope);
+    return this->Makefile->GetProperty(prop, cmProperty::TARGET);
     }
   return retVal;
 }

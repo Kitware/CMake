@@ -231,8 +231,7 @@ public:
   void AppendProperty(const std::string&  prop, const char* value,
           bool asString=false);
   const char *GetProperty(const std::string& prop) const;
-  const char *GetProperty(const std::string& prop,
-          cmProperty::ScopeType scope) const;
+  const char *GetProperty(const std::string& prop, cmMakefile* context) const;
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
 
@@ -589,7 +588,7 @@ public:
                             const std::string &compatibilityType) const;
 
 private:
-  bool HandleLocationPropertyPolicy() const;
+  bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
   // The set of include directories that are marked as system include
   // directories.
