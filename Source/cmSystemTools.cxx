@@ -886,8 +886,10 @@ bool cmSystemTools::RenameFile(const char* oldname, const char* newname)
                      cmsys::Encoding::ToWide(newname).c_str(),
                      MOVEFILE_REPLACE_EXISTING) && --retry.Count)
     {
-    // Try again only if failure was due to access permissions.
-    if(GetLastError() != ERROR_ACCESS_DENIED)
+    DWORD last_error = GetLastError();
+    // Try again only if failure was due to access/sharing permissions.
+    if(last_error != ERROR_ACCESS_DENIED &&
+       last_error != ERROR_SHARING_VIOLATION)
       {
       return false;
       }
