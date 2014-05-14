@@ -411,6 +411,8 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(Module.GenerateExportHeader GenerateExportHeader)
   ADD_TEST_MACRO(Module.FindDependency FindDependency)
 
+  ADD_TEST_MACRO(Module.WriteCompilerDetectionHeader WriteCompilerDetectionHeader)
+
   if (APPLE OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     include(CheckCXXCompilerFlag)
     check_cxx_compiler_flag(-fPIE run_pic_test)
