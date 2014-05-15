@@ -117,6 +117,9 @@ public:
     this->EvaluateForBuildsystem = eval;
   }
 
+  void GetMaxLanguageStandard(cmTarget const* tgt,
+                    std::map<std::string, std::string>& mapping);
+
 private:
   cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
               const std::string& input);
@@ -134,6 +137,8 @@ private:
   mutable std::set<cmTarget*> DependTargets;
   mutable std::set<cmTarget const*> AllTargetsSeen;
   mutable std::set<std::string> SeenTargetProperties;
+  mutable std::map<cmTarget const*, std::map<std::string, std::string> >
+                                                          MaxLanguageStandard;
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
   bool EvaluateForBuildsystem;

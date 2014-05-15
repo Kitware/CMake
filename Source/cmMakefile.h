@@ -898,6 +898,10 @@ public:
   bool HaveFeatureAvailable(cmTarget const* target, std::string const& lang,
                             const std::string& feature) const;
 
+  bool IsLaterStandard(std::string const& lang,
+                       std::string const& lhs,
+                       std::string const& rhs);
+
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
 

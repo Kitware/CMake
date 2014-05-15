@@ -5187,6 +5187,28 @@ HaveCFeatureAvailable(cmTarget const* target, const std::string& feature) const
 }
 
 //----------------------------------------------------------------------------
+bool cmMakefile::IsLaterStandard(std::string const& lang,
+                                 std::string const& lhs,
+                                 std::string const& rhs)
+{
+  if (lang == "C")
+    {
+    const char * const *rhsIt = std::find_if(cmArrayBegin(C_STANDARDS),
+                                            cmArrayEnd(C_STANDARDS),
+                                            cmStrCmp(rhs));
+
+    return std::find_if(rhsIt, cmArrayEnd(C_STANDARDS),
+                        cmStrCmp(lhs)) != cmArrayEnd(C_STANDARDS);
+    }
+  const char * const *rhsIt = std::find_if(cmArrayBegin(CXX_STANDARDS),
+                                           cmArrayEnd(CXX_STANDARDS),
+                                           cmStrCmp(rhs));
+
+  return std::find_if(rhsIt, cmArrayEnd(CXX_STANDARDS),
+                      cmStrCmp(lhs)) != cmArrayEnd(CXX_STANDARDS);
+}
+
+//----------------------------------------------------------------------------
 bool cmMakefile::HaveCxxFeatureAvailable(cmTarget const* target,
                                          const std::string& feature) const
 {
