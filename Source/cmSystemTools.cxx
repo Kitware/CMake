@@ -122,11 +122,11 @@ bool cmSystemTools::s_DisableMessages = false;
 bool cmSystemTools::s_ForceUnixPaths = false;
 
 cmSystemTools::MessageCallback cmSystemTools::s_MessageCallback;
+cmSystemTools::InterruptCallback cmSystemTools::s_InterruptCallback;
 void (*cmSystemTools::s_StdoutCallback)(const char*, int len, void*);
 void* cmSystemTools::s_MessageCallbackClientData;
 void* cmSystemTools::s_StdoutCallbackClientData = 0;
-bool (*cmSystemTools::s_InterruptCallback)(void*);
-void* cmSystemTools::s_InterruptCallbackClientData = 0;
+void* cmSystemTools::s_InterruptCallbackClientData;
 
 // replace replace with with as many times as it shows up in source.
 // write the result into source.
