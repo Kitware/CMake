@@ -895,6 +895,9 @@ public:
   const char* CompileFeaturesAvailable(const std::string& lang,
                                        std::string *error) const;
 
+  bool HaveFeatureAvailable(cmTarget const* target, std::string const& lang,
+                            const std::string& feature) const;
+
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
 
@@ -1115,6 +1118,11 @@ private:
                             bool& needC99, bool& needC11) const;
   void CheckNeededCxxLanguage(const std::string& feature, bool& needCxx98,
                               bool& needCxx11) const;
+
+  bool HaveCFeatureAvailable(cmTarget const* target,
+                             const std::string& feature) const;
+  bool HaveCxxFeatureAvailable(cmTarget const* target,
+                               const std::string& feature) const;
 };
 
 //----------------------------------------------------------------------------
