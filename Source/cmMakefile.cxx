@@ -5011,37 +5011,14 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
     return false;
     }
 
-  const char* featuresKnown =
-    this->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
-
-  if (!featuresKnown || !*featuresKnown)
+  const char* features = this->CompileFeaturesAvailable(lang, error);
+  if (!features)
     {
-    cmOStringStream e;
-    if (error)
-      {
-      e << "no";
-      }
-    else
-      {
-      e << "No";
-      }
-    e << " known features for " << lang << " compiler\n\""
-      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
-      << "\"\nversion "
-      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
-    if (error)
-      {
-      *error = e.str();
-      }
-    else
-      {
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      }
     return false;
     }
 
   std::vector<std::string> availableFeatures;
-  cmSystemTools::ExpandListArgument(featuresKnown, availableFeatures);
+  cmSystemTools::ExpandListArgument(features, availableFeatures);
   if (std::find(availableFeatures.begin(),
                 availableFeatures.end(),
                 feature) == availableFeatures.end())
@@ -5106,6 +5083,41 @@ CompileFeatureKnown(cmTarget const* target, const std::string& feature,
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     }
   return false;
+}
+
+//----------------------------------------------------------------------------
+const char* cmMakefile::
+CompileFeaturesAvailable(const std::string& lang, std::string *error) const
+{
+  const char* featuresKnown =
+    this->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
+
+  if (!featuresKnown || !*featuresKnown)
+    {
+    cmOStringStream e;
+    if (error)
+      {
+      e << "no";
+      }
+    else
+      {
+      e << "No";
+      }
+    e << " known features for " << lang << " compiler\n\""
+      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
+      << "\"\nversion "
+      << this->GetDefinition("CMAKE_" + lang + "_COMPILER_VERSION") << ".";
+    if (error)
+      {
+      *error = e.str();
+      }
+    else
+      {
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+    return 0;
+    }
+  return featuresKnown;
 }
 
 //----------------------------------------------------------------------------
