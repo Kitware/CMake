@@ -123,6 +123,10 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio [^6]")
   add_RunCMake_test(SolutionGlobalSections)
 endif()
 
+if(XCODE_VERSION AND NOT "${XCODE_VERSION}" VERSION_LESS 3)
+  add_RunCMake_test(XcodeProject)
+endif()
+
 add_RunCMake_test(File_Generate)
 add_RunCMake_test(ExportWithoutLanguage)
 add_RunCMake_test(target_link_libraries)

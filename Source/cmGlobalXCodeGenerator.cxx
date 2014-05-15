@@ -647,13 +647,14 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
   const std::string &fullpath,
   cmTarget& cmtarget,
-  const std::string &lang)
+  const std::string &lang,
+  cmSourceFile* sf)
 {
   // Using a map and the full path guarantees that we will always get the same
   // fileRef object for any given full path.
   //
   cmXCodeObject* fileRef =
-    this->CreateXCodeFileReferenceFromPath(fullpath, cmtarget, lang);
+    this->CreateXCodeFileReferenceFromPath(fullpath, cmtarget, lang, sf);
 
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildFile->SetComment(fileRef->GetComment());
@@ -696,7 +697,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
 
   cmXCodeObject* buildFile =
-    this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), cmtarget, lang);
+    this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), cmtarget, lang, sf);
   cmXCodeObject* fileRef = buildFile->GetObject("fileRef")->GetObject();
 
   cmXCodeObject* settings =
@@ -828,7 +829,8 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   const std::string &fullpath,
   cmTarget& cmtarget,
-  const std::string &lang)
+  const std::string &lang,
+  cmSourceFile* sf)
 {
   std::string fname = fullpath;
   cmXCodeObject* fileRef = this->FileRefs[fname];
@@ -850,6 +852,19 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
 
   bool useLastKnownFileType = false;
   std::string fileType;
+  if(sf)
+    {
+    if(const char* e = sf->GetProperty("XCODE_EXPLICIT_FILE_TYPE"))
+      {
+      fileType = e;
+      }
+    else if(const char* l = sf->GetProperty("XCODE_LAST_KNOWN_FILE_TYPE"))
+      {
+      useLastKnownFileType = true;
+      fileType = l;
+      }
+    }
+  if(fileType.empty())
     {
     // If fullpath references a directory, then we need to specify
     // lastKnownFileType as folder in order for Xcode to be able to
@@ -902,7 +917,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
 
   return this->CreateXCodeFileReferenceFromPath(
-    sf->GetFullPath(), cmtarget, lang);
+    sf->GetFullPath(), cmtarget, lang, sf);
 }
 
 //----------------------------------------------------------------------------
@@ -1052,7 +1067,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         {
         std::string obj = *oi;
         cmXCodeObject* xsf =
-          this->CreateXCodeSourceFileFromPath(obj, cmtarget, "");
+          this->CreateXCodeSourceFileFromPath(obj, cmtarget, "", 0);
         externalObjFiles.push_back(xsf);
         }
       }
