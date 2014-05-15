@@ -138,6 +138,8 @@ protected:
   static void progressCallback(const char* msg, float percent, void* cd);
   static void messageCallback(const char* msg, const char* title,
                               bool&, void* cd);
+  static void stdoutCallback(const char* msg, size_t len, void* cd);
+  static void stderrCallback(const char* msg, size_t len, void* cd);
   bool SuppressDevWarnings;
   bool WarnUninitializedMode;
   bool WarnUnusedMode;
