@@ -156,7 +156,7 @@ void CMakeProgressCallback(const char*msg, float , void * s)
 }
 
 //----------------------------------------------------------------------
-void CMakeStdoutCallback(const char* m, int len, void* s)
+void CMakeOutputCallback(const char* m, size_t len, void* s)
 {
   std::string* out = (std::string*)s;
   out->append(m, len);
@@ -170,12 +170,14 @@ public:
   cmCTestBuildAndTestCaptureRAII(cmake& cm, std::string& s): CM(cm)
     {
     cmSystemTools::SetMessageCallback(CMakeMessageCallback, &s);
-    cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &s);
+    cmSystemTools::SetStdoutCallback(CMakeOutputCallback, &s);
+    cmSystemTools::SetStderrCallback(CMakeOutputCallback, &s);
     this->CM.SetProgressCallback(CMakeProgressCallback, &s);
     }
   ~cmCTestBuildAndTestCaptureRAII()
     {
     this->CM.SetProgressCallback(0, 0);
+    cmSystemTools::SetStderrCallback(0, 0);
     cmSystemTools::SetStdoutCallback(0, 0);
     cmSystemTools::SetMessageCallback(0, 0);
     }

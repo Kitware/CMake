@@ -122,10 +122,12 @@ bool cmSystemTools::s_DisableMessages = false;
 bool cmSystemTools::s_ForceUnixPaths = false;
 
 cmSystemTools::MessageCallback cmSystemTools::s_MessageCallback;
+cmSystemTools::OutputCallback cmSystemTools::s_StdoutCallback;
+cmSystemTools::OutputCallback cmSystemTools::s_StderrCallback;
 cmSystemTools::InterruptCallback cmSystemTools::s_InterruptCallback;
-void (*cmSystemTools::s_StdoutCallback)(const char*, int len, void*);
 void* cmSystemTools::s_MessageCallbackClientData;
-void* cmSystemTools::s_StdoutCallbackClientData = 0;
+void* cmSystemTools::s_StdoutCallbackClientData;
+void* cmSystemTools::s_StderrCallbackClientData;
 void* cmSystemTools::s_InterruptCallbackClientData;
 
 // replace replace with with as many times as it shows up in source.
@@ -259,33 +261,42 @@ void cmSystemTools::SetMessageCallback(MessageCallback f, void* clientData)
   s_MessageCallbackClientData = clientData;
 }
 
-void cmSystemTools::SetStdoutCallback(StdoutCallback f, void* clientData)
+void cmSystemTools::SetStdoutCallback(OutputCallback f, void* clientData)
 {
   s_StdoutCallback = f;
   s_StdoutCallbackClientData = clientData;
 }
 
+void cmSystemTools::SetStderrCallback(OutputCallback f, void* clientData)
+{
+  s_StderrCallback = f;
+  s_StderrCallbackClientData = clientData;
+}
+
 void cmSystemTools::Stdout(const char* s)
 {
-  if(s_StdoutCallback)
+  cmSystemTools::Stdout(s, strlen(s));
+}
+
+void cmSystemTools::Stderr(const char* s)
+{
+  cmSystemTools::Stderr(s, strlen(s));
+}
+
+void cmSystemTools::Stderr(const char* s, size_t length)
+{
+  if(s_StderrCallback)
     {
-    (*s_StdoutCallback)(s, static_cast<int>(strlen(s)),
-                        s_StdoutCallbackClientData);
+    (*s_StderrCallback)(s, length, s_StderrCallbackClientData);
     }
   else
     {
-    std::cout << s;
-    std::cout.flush();
+    std::cerr.write(s, length);
+    std::cerr.flush();
     }
 }
 
-void cmSystemTools::Stderr(const char* s, int length)
-{
-    std::cerr.write(s, length);
-    std::cerr.flush();
-}
-
-void cmSystemTools::Stdout(const char* s, int length)
+void cmSystemTools::Stdout(const char* s, size_t length)
 {
   if(s_StdoutCallback)
     {
