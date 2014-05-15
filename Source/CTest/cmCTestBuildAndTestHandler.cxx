@@ -173,7 +173,6 @@ struct cmSetupOutputCaptureCleanup
 //----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 {
-  unsigned int k;
   std::string cmakeOutString;
   cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
   cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
@@ -369,7 +368,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   std::vector<const char*> testCommand;
   testCommand.push_back(fullPath.c_str());
-  for(k=0; k < this->TestCommandArgs.size(); ++k)
+  for(size_t k=0; k < this->TestCommandArgs.size(); ++k)
     {
     testCommand.push_back(this->TestCommandArgs[k].c_str());
     }
@@ -383,7 +382,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cmSystemTools::ChangeDirectory(this->BuildRunDir.c_str());
     }
   out << "Running test command: \"" << fullPath << "\"";
-  for(k=0; k < this->TestCommandArgs.size(); ++k)
+  for(size_t k=0; k < this->TestCommandArgs.size(); ++k)
     {
     out << " \"" << this->TestCommandArgs[k] << "\"";
     }
