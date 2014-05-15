@@ -5004,37 +5004,12 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
     target->AppendProperty("COMPILE_FEATURES", feature.c_str());
     return true;
     }
-  bool isCFeature = std::find_if(cmArrayBegin(C_FEATURES) + 1,
-              cmArrayEnd(C_FEATURES), cmStrCmp(feature))
-              != cmArrayEnd(C_FEATURES);
-  bool isCxxFeature = std::find_if(cmArrayBegin(CXX_FEATURES) + 1,
-              cmArrayEnd(CXX_FEATURES), cmStrCmp(feature))
-              != cmArrayEnd(CXX_FEATURES);
-  if (!isCFeature && !isCxxFeature)
+
+  std::string lang;
+  if (!this->CompileFeatureKnown(target, feature, lang, error))
     {
-    cmOStringStream e;
-    if (error)
-      {
-      e << "specified";
-      }
-    else
-      {
-      e << "Specified";
-      }
-    e << " unknown feature \"" << feature << "\" for "
-      "target \"" << target->GetName() << "\".";
-    if (error)
-      {
-      *error = e.str();
-      }
-    else
-      {
-      this->IssueMessage(cmake::FATAL_ERROR, e.str());
-      }
     return false;
     }
-
-  std::string lang = isCFeature ? "C" : "CXX";
 
   const char* featuresKnown =
     this->GetDefinition("CMAKE_" + lang + "_COMPILE_FEATURES");
@@ -5083,9 +5058,54 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
 
   target->AppendProperty("COMPILE_FEATURES", feature.c_str());
 
-  return isCFeature
+  return lang == "C"
       ? this->AddRequiredTargetCFeature(target, feature)
       : this->AddRequiredTargetCxxFeature(target, feature);
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::
+CompileFeatureKnown(cmTarget const* target, const std::string& feature,
+                    std::string& lang, std::string *error) const
+{
+  assert(cmGeneratorExpression::Find(feature) == std::string::npos);
+
+  bool isCFeature = std::find_if(cmArrayBegin(C_FEATURES) + 1,
+              cmArrayEnd(C_FEATURES), cmStrCmp(feature))
+              != cmArrayEnd(C_FEATURES);
+  if (isCFeature)
+    {
+    lang = "C";
+    return true;
+    }
+  bool isCxxFeature = std::find_if(cmArrayBegin(CXX_FEATURES) + 1,
+              cmArrayEnd(CXX_FEATURES), cmStrCmp(feature))
+              != cmArrayEnd(CXX_FEATURES);
+  if (isCxxFeature)
+    {
+    lang = "CXX";
+    return true;
+    }
+  cmOStringStream e;
+  if (error)
+    {
+    e << "specified";
+    }
+  else
+    {
+    e << "Specified";
+    }
+  e << " unknown feature \"" << feature << "\" for "
+    "target \"" << target->GetName() << "\".";
+  if (error)
+    {
+    *error = e.str();
+    }
+  else
+    {
+    this->IssueMessage(cmake::FATAL_ERROR, e.str());
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------

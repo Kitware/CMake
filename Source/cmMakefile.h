@@ -889,6 +889,9 @@ public:
                                 const std::string& feature,
                                 std::string *error = 0) const;
 
+  bool CompileFeatureKnown(cmTarget const* target, const std::string& feature,
+                           std::string& lang, std::string *error) const;
+
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
 
