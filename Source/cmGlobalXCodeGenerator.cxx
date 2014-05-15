@@ -848,35 +848,35 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     }
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
 
-  // Compute the extension.
-  std::string ext;
-  std::string realExt =
-    cmSystemTools::GetFilenameLastExtension(fullpath);
-  if(!realExt.empty())
+  bool useLastKnownFileType = false;
+  std::string fileType;
     {
-    // Extension without the leading '.'.
-    ext = realExt.substr(1);
+    // If fullpath references a directory, then we need to specify
+    // lastKnownFileType as folder in order for Xcode to be able to
+    // open the contents of the folder.
+    // (Xcode 4.6 does not like explicitFileType=folder).
+    if(cmSystemTools::FileIsDirectory(fullpath.c_str()))
+      {
+      fileType = "folder";
+      useLastKnownFileType = true;
+      }
+    else
+      {
+      // Compute the extension without leading '.'.
+      std::string ext = cmSystemTools::GetFilenameLastExtension(fullpath);
+      if(!ext.empty())
+        {
+        ext = ext.substr(1);
+        }
+
+      fileType = GetSourcecodeValueFromFileExtension(
+        ext, lang, useLastKnownFileType);
+      }
     }
 
-  // If fullpath references a directory, then we need to specify
-  // lastKnownFileType as folder in order for Xcode to be able to open the
-  // contents of the folder (Xcode 4.6 does not like explicitFileType=folder).
-  if(cmSystemTools::FileIsDirectory(fullpath.c_str()))
-    {
-    fileRef->AddAttribute("lastKnownFileType",
-                          this->CreateString("folder"));
-    }
-  else
-    {
-    bool keepLastKnownFileType = false;
-    std::string sourcecode = GetSourcecodeValueFromFileExtension(ext,
-                             lang, keepLastKnownFileType);
-    const char* attribute = keepLastKnownFileType ?
-                             "lastKnownFileType" :
-                             "explicitFileType";
-    fileRef->AddAttribute(attribute,
-                          this->CreateString(sourcecode.c_str()));
-    }
+  fileRef->AddAttribute(useLastKnownFileType? "lastKnownFileType"
+                                            : "explicitFileType",
+                        this->CreateString(fileType));
 
   // Store the file path relative to the top of the source tree.
   std::string path = this->RelativeToSource(fullpath.c_str());
