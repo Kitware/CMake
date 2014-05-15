@@ -61,11 +61,16 @@ bool cmSetPropertyCommand
     {
     scope = cmProperty::CACHE;
     }
+  else if(*arg == "INSTALL")
+    {
+    scope = cmProperty::INSTALL;
+    }
   else
     {
     cmOStringStream e;
     e << "given invalid scope " << *arg << ".  "
-      << "Valid scopes are GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, CACHE.";
+      << "Valid scopes are GLOBAL, DIRECTORY, "
+        "TARGET, SOURCE, TEST, CACHE, INSTALL.";
     this->SetError(e.str());
     return false;
     }
@@ -135,6 +140,7 @@ bool cmSetPropertyCommand
     case cmProperty::SOURCE_FILE: return this->HandleSourceMode();
     case cmProperty::TEST:        return this->HandleTestMode();
     case cmProperty::CACHE:       return this->HandleCacheMode();
+    case cmProperty::INSTALL:     return this->HandleInstallMode();
 
     case cmProperty::VARIABLE:
     case cmProperty::CACHED_VARIABLE:
@@ -486,5 +492,56 @@ bool cmSetPropertyCommand::HandleCacheEntry(cmCacheManager::CacheIterator& it)
     it.SetProperty(name, value);
     }
 
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmSetPropertyCommand::HandleInstallMode()
+{
+  cmake* cm = this->Makefile->GetCMakeInstance();
+
+  for(std::set<std::string>::const_iterator i = this->Names.begin();
+      i != this->Names.end(); ++i)
+    {
+    if(cmInstalledFile* file = cm->GetOrCreateInstalledFile(
+      this->Makefile, *i))
+      {
+      if(!this->HandleInstall(file))
+        {
+        return false;
+        }
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "given INSTALL name that could not be found or created: " << *i;
+      this->SetError(e.str());
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmSetPropertyCommand::HandleInstall(cmInstalledFile* file)
+{
+  // Set or append the property.
+  std::string const& name = this->PropertyName;
+
+  cmMakefile* mf = this->Makefile;
+
+  const char *value = this->PropertyValue.c_str();
+  if (this->Remove)
+    {
+    file->RemoveProperty(name);
+    }
+  else if(this->AppendMode)
+    {
+    file->AppendProperty(mf, name, value, this->AppendAsString);
+    }
+  else
+    {
+    file->SetProperty(mf, name, value);
+    }
   return true;
 }

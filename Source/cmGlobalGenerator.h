@@ -329,6 +329,8 @@ public:
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
+  bool GenerateCPackPropertiesFile();
+
 protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend

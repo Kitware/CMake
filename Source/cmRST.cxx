@@ -39,7 +39,8 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
   ModuleRST("^#\\[(=*)\\[\\.rst:$"),
   CMakeRole("(:cmake)?:("
             "command|generator|variable|module|policy|"
-            "prop_cache|prop_dir|prop_gbl|prop_sf|prop_test|prop_tgt|"
+            "prop_cache|prop_dir|prop_gbl|prop_inst|prop_sf|"
+            "prop_test|prop_tgt|"
             "manual"
             "):`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`"),
   Substitution("(^|[^A-Za-z0-9_])"

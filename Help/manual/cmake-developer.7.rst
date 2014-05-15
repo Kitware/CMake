@@ -331,10 +331,10 @@ documentation:
  See the :manual:`cmake-policies(7)` manual
  and the :command:`cmake_policy` command.
 
-``prop_cache, prop_dir, prop_gbl, prop_sf, prop_test, prop_tgt``
- A CMake cache, directory, global, source file, test, or target
- property, respectively.  See the :manual:`cmake-properties(7)` manual
- and the :command:`set_property` command.
+``prop_cache, prop_dir, prop_gbl, prop_sf, prop_inst, prop_test, prop_tgt``
+ A CMake cache, directory, global, source file, installed file, test,
+ or target property, respectively.  See the :manual:`cmake-properties(7)`
+ manual and the :command:`set_property` command.
 
 ``variable``
  A CMake language variable.

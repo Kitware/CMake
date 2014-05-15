@@ -163,6 +163,8 @@ set(SRCS
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmCPackPropertiesGenerator.h
+  cmCPackPropertiesGenerator.cxx
   cmCryptoHash.cxx
   cmCryptoHash.h
   cmCustomCommand.cxx
@@ -243,6 +245,8 @@ set(SRCS
   cmInstallGenerator.h
   cmInstallGenerator.cxx
   cmInstallExportGenerator.cxx
+  cmInstalledFile.h
+  cmInstalledFile.cxx
   cmInstallFilesGenerator.h
   cmInstallFilesGenerator.cxx
   cmInstallScriptGenerator.h

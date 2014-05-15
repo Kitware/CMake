@@ -2287,6 +2287,41 @@ bool cmake::GetPropertyAsBool(const std::string& prop)
   return cmSystemTools::IsOn(this->GetProperty(prop));
 }
 
+cmInstalledFile *cmake::GetOrCreateInstalledFile(
+  cmMakefile* mf, const std::string& name)
+{
+  std::map<std::string, cmInstalledFile>::iterator i =
+    this->InstalledFiles.find(name);
+
+  if(i != this->InstalledFiles.end())
+    {
+    cmInstalledFile &file = i->second;
+    return &file;
+    }
+  else
+    {
+    cmInstalledFile &file = this->InstalledFiles[name];
+    file.SetName(mf, name);
+    return &file;
+    }
+}
+
+cmInstalledFile const* cmake::GetInstalledFile(const std::string& name) const
+{
+  std::map<std::string, cmInstalledFile>::const_iterator i =
+    this->InstalledFiles.find(name);
+
+  if(i != this->InstalledFiles.end())
+    {
+    cmInstalledFile const& file = i->second;
+    return &file;
+    }
+  else
+    {
+    return 0;
+    }
+}
+
 int cmake::GetSystemInformation(std::vector<std::string>& args)
 {
   // so create the directory

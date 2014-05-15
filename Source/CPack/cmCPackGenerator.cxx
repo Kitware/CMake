@@ -1314,6 +1314,14 @@ int cmCPackGenerator::CleanTemporaryDirectory()
 }
 
 //----------------------------------------------------------------------
+cmInstalledFile const* cmCPackGenerator::GetInstalledFile(
+  std::string const& name) const
+{
+  cmake const* cm = this->MakefileMap->GetCMakeInstance();
+  return cm->GetInstalledFile(name);
+}
+
+//----------------------------------------------------------------------
 int cmCPackGenerator::PrepareGroupingKind()
 {
   // find a component package method specified by the user
