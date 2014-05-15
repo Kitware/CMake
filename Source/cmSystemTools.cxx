@@ -121,10 +121,9 @@ bool cmSystemTools::s_FatalErrorOccured = false;
 bool cmSystemTools::s_DisableMessages = false;
 bool cmSystemTools::s_ForceUnixPaths = false;
 
-void (*cmSystemTools::s_ErrorCallback)(const char*, const char*,
-                                       bool&, void*);
+cmSystemTools::MessageCallback cmSystemTools::s_MessageCallback;
 void (*cmSystemTools::s_StdoutCallback)(const char*, int len, void*);
-void* cmSystemTools::s_ErrorCallbackClientData = 0;
+void* cmSystemTools::s_MessageCallbackClientData;
 void* cmSystemTools::s_StdoutCallbackClientData = 0;
 bool (*cmSystemTools::s_InterruptCallback)(void*);
 void* cmSystemTools::s_InterruptCallbackClientData = 0;
@@ -254,10 +253,10 @@ bool cmSystemTools::GetInterruptFlag()
   return false;
 }
 
-void cmSystemTools::SetErrorCallback(ErrorCallback f, void* clientData)
+void cmSystemTools::SetMessageCallback(MessageCallback f, void* clientData)
 {
-  s_ErrorCallback = f;
-  s_ErrorCallbackClientData = clientData;
+  s_MessageCallback = f;
+  s_MessageCallbackClientData = clientData;
 }
 
 void cmSystemTools::SetStdoutCallback(StdoutCallback f, void* clientData)
@@ -305,10 +304,10 @@ void cmSystemTools::Message(const char* m1, const char *title)
     {
     return;
     }
-  if(s_ErrorCallback)
+  if(s_MessageCallback)
     {
-    (*s_ErrorCallback)(m1, title, s_DisableMessages,
-                       s_ErrorCallbackClientData);
+    (*s_MessageCallback)(m1, title, s_DisableMessages,
+                         s_MessageCallbackClientData);
     return;
     }
   else

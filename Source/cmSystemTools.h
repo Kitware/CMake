@@ -57,14 +57,14 @@ public:
    */
   static std::string TrimWhitespace(const std::string& s);
 
-  typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
+  typedef void (*MessageCallback)(const char*, const char*, bool&, void*);
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
    *  title as a const char*, and a reference to bool that when
    *  set to false, will disable furthur messages (cancel).
    */
-  static void SetErrorCallback(ErrorCallback f, void* clientData=0);
+  static void SetMessageCallback(MessageCallback f, void* clientData=0);
 
   /**
    * Display an error message.
@@ -470,10 +470,10 @@ private:
   static bool s_FatalErrorOccured;
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
-  static ErrorCallback s_ErrorCallback;
+  static MessageCallback s_MessageCallback;
   static StdoutCallback s_StdoutCallback;
   static InterruptCallback s_InterruptCallback;
-  static void* s_ErrorCallbackClientData;
+  static void* s_MessageCallbackClientData;
   static void* s_StdoutCallbackClientData;
   static void* s_InterruptCallbackClientData;
 };

@@ -169,7 +169,7 @@ class cmCTestBuildAndTestCaptureRAII
 public:
   cmCTestBuildAndTestCaptureRAII(cmake& cm, std::string& s): CM(cm)
     {
-    cmSystemTools::SetErrorCallback(CMakeMessageCallback, &s);
+    cmSystemTools::SetMessageCallback(CMakeMessageCallback, &s);
     cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &s);
     this->CM.SetProgressCallback(CMakeProgressCallback, &s);
     }
@@ -177,7 +177,7 @@ public:
     {
     this->CM.SetProgressCallback(0, 0);
     cmSystemTools::SetStdoutCallback(0, 0);
-    cmSystemTools::SetErrorCallback(0, 0);
+    cmSystemTools::SetMessageCallback(0, 0);
     }
 };
 
