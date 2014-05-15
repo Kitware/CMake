@@ -256,10 +256,6 @@ bool cmExecuteProcessCommand
 
   // Check the output variables.
   bool merge_output = (output_variable == error_variable);
-  if(error_variable.empty() && !error_quiet)
-    {
-    cmsysProcess_SetPipeShared(cp, cmsysProcess_Pipe_STDERR, 1);
-    }
   if(!input_file.empty())
     {
     cmsysProcess_SetPipeFile(cp, cmsysProcess_Pipe_STDIN, input_file.c_str());
@@ -307,7 +303,11 @@ bool cmExecuteProcessCommand
       }
     else if(p == cmsysProcess_Pipe_STDERR && !error_quiet)
       {
-      if(!error_variable.empty())
+      if(error_variable.empty())
+        {
+        cmSystemTools::Stderr(data, length);
+        }
+      else
         {
         cmExecuteProcessCommandAppend(tempError, data, length);
         }
