@@ -5121,13 +5121,10 @@ CompileFeaturesAvailable(const std::string& lang, std::string *error) const
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::
-AddRequiredTargetCxxFeature(cmTarget *target,
-                            const std::string& feature) const
+void cmMakefile::CheckNeededCxxLanguage(const std::string& feature,
+                                        bool& needCxx98,
+                                        bool& needCxx11) const
 {
-  bool needCxx98 = false;
-  bool needCxx11 = false;
-
   if (const char *propCxx98 =
           this->GetDefinition("CMAKE_CXX98_COMPILE_FEATURES"))
     {
@@ -5142,6 +5139,17 @@ AddRequiredTargetCxxFeature(cmTarget *target,
     cmSystemTools::ExpandListArgument(propCxx11, props);
     needCxx11 = std::find(props.begin(), props.end(), feature) != props.end();
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::
+AddRequiredTargetCxxFeature(cmTarget *target,
+                            const std::string& feature) const
+{
+  bool needCxx98 = false;
+  bool needCxx11 = false;
+
+  this->CheckNeededCxxLanguage(feature, needCxx98, needCxx11);
 
   const char *existingCxxStandard = target->GetProperty("CXX_STANDARD");
   if (existingCxxStandard)
@@ -5192,13 +5200,11 @@ AddRequiredTargetCxxFeature(cmTarget *target,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::
-AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
+void cmMakefile::CheckNeededCLanguage(const std::string& feature,
+                                        bool& needC90,
+                                        bool& needC99,
+                                        bool& needC11) const
 {
-  bool needC90 = false;
-  bool needC99 = false;
-  bool needC11 = false;
-
   if (const char *propC90 =
           this->GetDefinition("CMAKE_C90_COMPILE_FEATURES"))
     {
@@ -5220,6 +5226,17 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
     cmSystemTools::ExpandListArgument(propC11, props);
     needC11 = std::find(props.begin(), props.end(), feature) != props.end();
     }
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::
+AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
+{
+  bool needC90 = false;
+  bool needC99 = false;
+  bool needC11 = false;
+
+  this->CheckNeededCLanguage(feature, needC90, needC99, needC11);
 
   const char *existingCStandard = target->GetProperty("C_STANDARD");
   if (existingCStandard)
