@@ -156,34 +156,36 @@ void CMakeProgressCallback(const char*msg, float , void * s)
 }
 
 //----------------------------------------------------------------------
-void CMakeStdoutCallback(const char* m, int len, void* s)
+void CMakeOutputCallback(const char* m, size_t len, void* s)
 {
   std::string* out = (std::string*)s;
   out->append(m, len);
 }
-struct cmSetupOutputCaptureCleanup
+
+//----------------------------------------------------------------------
+class cmCTestBuildAndTestCaptureRAII
 {
-  ~cmSetupOutputCaptureCleanup()
-  {
-    cmSystemTools::SetErrorCallback(0, 0);
+  cmake& CM;
+public:
+  cmCTestBuildAndTestCaptureRAII(cmake& cm, std::string& s): CM(cm)
+    {
+    cmSystemTools::SetMessageCallback(CMakeMessageCallback, &s);
+    cmSystemTools::SetStdoutCallback(CMakeOutputCallback, &s);
+    cmSystemTools::SetStderrCallback(CMakeOutputCallback, &s);
+    this->CM.SetProgressCallback(CMakeProgressCallback, &s);
+    }
+  ~cmCTestBuildAndTestCaptureRAII()
+    {
+    this->CM.SetProgressCallback(0, 0);
+    cmSystemTools::SetStderrCallback(0, 0);
     cmSystemTools::SetStdoutCallback(0, 0);
-  }
+    cmSystemTools::SetMessageCallback(0, 0);
+    }
 };
 
 //----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 {
-  unsigned int k;
-  std::string cmakeOutString;
-  cmSystemTools::SetErrorCallback(CMakeMessageCallback, &cmakeOutString);
-  cmSystemTools::SetStdoutCallback(CMakeStdoutCallback, &cmakeOutString);
-  // make sure SetStdoutCallback and SetErrorCallback are set to null
-  // after this function exits so that they do not point at a destroyed
-  // string cmakeOutString
-  cmSetupOutputCaptureCleanup cleanup;
-  static_cast<void>(cleanup);
-  cmOStringStream out;
-
   // if the generator and make program are not specified then it is an error
   if (!this->BuildGenerator.size())
     {
@@ -196,6 +198,12 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       }
     return 1;
     }
+
+  cmake cm;
+  std::string cmakeOutString;
+  cmCTestBuildAndTestCaptureRAII captureRAII(cm, cmakeOutString);
+  static_cast<void>(captureRAII);
+  cmOStringStream out;
 
   if ( this->CTest->GetConfigType().size() == 0 &&
        this->ConfigSample.size())
@@ -232,10 +240,6 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cmSystemTools::MakeDirectory(this->BinaryDir.c_str());
     }
   cmSystemTools::ChangeDirectory(this->BinaryDir.c_str());
-
-  // should we cmake?
-  cmake cm;
-  cm.SetProgressCallback(CMakeProgressCallback, &cmakeOutString);
 
   if(this->BuildNoCMake)
     {
@@ -369,7 +373,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   std::vector<const char*> testCommand;
   testCommand.push_back(fullPath.c_str());
-  for(k=0; k < this->TestCommandArgs.size(); ++k)
+  for(size_t k=0; k < this->TestCommandArgs.size(); ++k)
     {
     testCommand.push_back(this->TestCommandArgs[k].c_str());
     }
@@ -383,7 +387,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cmSystemTools::ChangeDirectory(this->BuildRunDir.c_str());
     }
   out << "Running test command: \"" << fullPath << "\"";
-  for(k=0; k < this->TestCommandArgs.size(); ++k)
+  for(size_t k=0; k < this->TestCommandArgs.size(); ++k)
     {
     out << " \"" << this->TestCommandArgs[k] << "\"";
     }

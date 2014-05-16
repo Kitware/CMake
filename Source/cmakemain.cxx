@@ -129,8 +129,8 @@ static std::string cmakemainGetStack(void *clientdata)
   return msg;
 }
 
-static void cmakemainErrorCallback(const char* m, const char*, bool&,
-                                   void *clientdata)
+static void cmakemainMessageCallback(const char* m, const char*, bool&,
+                                     void *clientdata)
 {
   std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
 }
@@ -310,7 +310,7 @@ int do_cmake(int ac, char const* const* av)
     return ret;
     }
   cmake cm;
-  cmSystemTools::SetErrorCallback(cmakemainErrorCallback, (void *)&cm);
+  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void *)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void *)&cm);
   cm.SetWorkingMode(workingMode);
 

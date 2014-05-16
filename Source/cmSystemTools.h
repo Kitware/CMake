@@ -57,14 +57,14 @@ public:
    */
   static std::string TrimWhitespace(const std::string& s);
 
-  typedef  void (*ErrorCallback)(const char*, const char*, bool&, void*);
+  typedef void (*MessageCallback)(const char*, const char*, bool&, void*);
   /**
    *  Set the function used by GUIs to display error messages
    *  Function gets passed: message as a const char*,
    *  title as a const char*, and a reference to bool that when
    *  set to false, will disable furthur messages (cancel).
    */
-  static void SetErrorCallback(ErrorCallback f, void* clientData=0);
+  static void SetMessageCallback(MessageCallback f, void* clientData=0);
 
   /**
    * Display an error message.
@@ -77,14 +77,17 @@ public:
    */
   static void Message(const char* m, const char* title=0);
 
+  typedef void (*OutputCallback)(const char*, size_t length, void*);
+
   ///! Send a string to stdout
   static void Stdout(const char* s);
-  static void Stdout(const char* s, int length);
-  typedef  void (*StdoutCallback)(const char*, int length, void*);
-  static void SetStdoutCallback(StdoutCallback, void* clientData=0);
+  static void Stdout(const char* s, size_t length);
+  static void SetStdoutCallback(OutputCallback, void* clientData=0);
 
-  ///! Send a string to stderr. Stdout callbacks will not be invoced.
-  static void Stderr(const char* s, int length);
+  ///! Send a string to stderr
+  static void Stderr(const char* s);
+  static void Stderr(const char* s, size_t length);
+  static void SetStderrCallback(OutputCallback, void* clientData=0);
 
 
   typedef bool (*InterruptCallback)(void*);
@@ -470,11 +473,13 @@ private:
   static bool s_FatalErrorOccured;
   static bool s_DisableMessages;
   static bool s_DisableRunCommandOutput;
-  static ErrorCallback s_ErrorCallback;
-  static StdoutCallback s_StdoutCallback;
+  static MessageCallback s_MessageCallback;
+  static OutputCallback s_StdoutCallback;
+  static OutputCallback s_StderrCallback;
   static InterruptCallback s_InterruptCallback;
-  static void* s_ErrorCallbackClientData;
+  static void* s_MessageCallbackClientData;
   static void* s_StdoutCallbackClientData;
+  static void* s_StderrCallbackClientData;
   static void* s_InterruptCallbackClientData;
 };
 
