@@ -53,7 +53,8 @@ public:
     std::string const& directoryId,
     std::string const& id,
     std::string const& filePath,
-    cmWIXPatch &patch);
+    cmWIXPatch &patch,
+    cmInstalledFile const* installedFile);
 
 private:
   void EmitInstallRegistryValue(

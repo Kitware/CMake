@@ -12,6 +12,8 @@
 
 #include "cmWIXFilesSourceWriter.h"
 
+#include <cmInstalledFile.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -135,7 +137,8 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   std::string const& directoryId,
   std::string const& id,
   std::string const& filePath,
-  cmWIXPatch &patch)
+  cmWIXPatch &patch,
+  cmInstalledFile const* installedFile)
 {
   std::string componentId = std::string("CM_C") + id;
   std::string fileId = std::string("CM_F") + id;
@@ -146,6 +149,18 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   BeginElement("Component");
   AddAttribute("Id", componentId);
   AddAttribute("Guid", "*");
+
+  if(installedFile)
+    {
+    if(installedFile->GetPropertyAsBool("CPACK_NEVER_OVERWRITE"))
+      {
+      AddAttribute("NeverOverwrite", "yes");
+      }
+    if(installedFile->GetPropertyAsBool("CPACK_PERMANENT"))
+      {
+      AddAttribute("Permanent", "yes");
+      }
+    }
 
   BeginElement("File");
   AddAttribute("Id", fileId);

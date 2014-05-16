@@ -308,3 +308,6 @@ Properties on Installed Files
 
 .. toctree::
    :maxdepth: 1
+
+   /prop_inst/CPACK_NEVER_OVERWRITE.rst
+   /prop_inst/CPACK_PERMANENT.rst
