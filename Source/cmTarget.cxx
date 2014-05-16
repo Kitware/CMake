@@ -6481,11 +6481,6 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
               }
             }
           }
-        if(thisTarget->LinkLanguagePropagatesToDependents())
-          {
-          // Targets using this archive need its language runtime libraries.
-          iface.Languages = impl->Languages;
-          }
         }
       }
     }
@@ -6497,9 +6492,14 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
                 impl = thisTarget->GetLinkImplementation(config, headTarget);
     iface.ImplementationIsInterface = true;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
-    if(thisTarget->LinkLanguagePropagatesToDependents())
+    }
+
+  if(thisTarget->LinkLanguagePropagatesToDependents())
+    {
+    // Targets using this archive need its language runtime libraries.
+    if(cmTarget::LinkImplementation const* impl =
+       thisTarget->GetLinkImplementation(config, headTarget))
       {
-      // Targets using this archive need its language runtime libraries.
       iface.Languages = impl->Languages;
       }
     }
