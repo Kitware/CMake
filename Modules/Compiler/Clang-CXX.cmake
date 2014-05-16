@@ -6,7 +6,7 @@ if(NOT CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
 endif()
 
 cmake_policy(GET CMP0025 appleClangPolicy)
-if(NOT appleClangPolicy STREQUAL NEW)
+if(APPLE AND NOT appleClangPolicy STREQUAL NEW)
   return()
 endif()
 

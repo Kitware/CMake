@@ -20,7 +20,7 @@ macro(record_compiler_features lang compile_flags feature_list)
     endif()
   endforeach()
   file(APPEND "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
-    "\n};\n\nint main() { return 0; }\n")
+    "\n};\n\nint main(int argc, char** argv) { (void)argv; return features[argc]; }\n")
 
   try_compile(CMAKE_${lang}_FEATURE_TEST
     ${CMAKE_BINARY_DIR} "${CMAKE_BINARY_DIR}/CMakeFiles/feature_tests.${lang_lc}"
