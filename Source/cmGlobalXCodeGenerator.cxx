@@ -647,13 +647,14 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeSourceFileFromPath(
   const std::string &fullpath,
   cmTarget& cmtarget,
-  const std::string &lang)
+  const std::string &lang,
+  cmSourceFile* sf)
 {
   // Using a map and the full path guarantees that we will always get the same
   // fileRef object for any given full path.
   //
   cmXCodeObject* fileRef =
-    this->CreateXCodeFileReferenceFromPath(fullpath, cmtarget, lang);
+    this->CreateXCodeFileReferenceFromPath(fullpath, cmtarget, lang, sf);
 
   cmXCodeObject* buildFile = this->CreateObject(cmXCodeObject::PBXBuildFile);
   buildFile->SetComment(fileRef->GetComment());
@@ -696,7 +697,7 @@ cmGlobalXCodeGenerator::CreateXCodeSourceFile(cmLocalGenerator* lg,
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
 
   cmXCodeObject* buildFile =
-    this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), cmtarget, lang);
+    this->CreateXCodeSourceFileFromPath(sf->GetFullPath(), cmtarget, lang, sf);
   cmXCodeObject* fileRef = buildFile->GetObject("fileRef")->GetObject();
 
   cmXCodeObject* settings =
@@ -828,7 +829,8 @@ cmXCodeObject*
 cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   const std::string &fullpath,
   cmTarget& cmtarget,
-  const std::string &lang)
+  const std::string &lang,
+  cmSourceFile* sf)
 {
   std::string fname = fullpath;
   cmXCodeObject* fileRef = this->FileRefs[fname];
@@ -848,35 +850,48 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     }
   fileRef->AddAttribute("fileEncoding", this->CreateString("4"));
 
-  // Compute the extension.
-  std::string ext;
-  std::string realExt =
-    cmSystemTools::GetFilenameLastExtension(fullpath);
-  if(!realExt.empty())
+  bool useLastKnownFileType = false;
+  std::string fileType;
+  if(sf)
     {
-    // Extension without the leading '.'.
-    ext = realExt.substr(1);
+    if(const char* e = sf->GetProperty("XCODE_EXPLICIT_FILE_TYPE"))
+      {
+      fileType = e;
+      }
+    else if(const char* l = sf->GetProperty("XCODE_LAST_KNOWN_FILE_TYPE"))
+      {
+      useLastKnownFileType = true;
+      fileType = l;
+      }
+    }
+  if(fileType.empty())
+    {
+    // If fullpath references a directory, then we need to specify
+    // lastKnownFileType as folder in order for Xcode to be able to
+    // open the contents of the folder.
+    // (Xcode 4.6 does not like explicitFileType=folder).
+    if(cmSystemTools::FileIsDirectory(fullpath.c_str()))
+      {
+      fileType = "folder";
+      useLastKnownFileType = true;
+      }
+    else
+      {
+      // Compute the extension without leading '.'.
+      std::string ext = cmSystemTools::GetFilenameLastExtension(fullpath);
+      if(!ext.empty())
+        {
+        ext = ext.substr(1);
+        }
+
+      fileType = GetSourcecodeValueFromFileExtension(
+        ext, lang, useLastKnownFileType);
+      }
     }
 
-  // If fullpath references a directory, then we need to specify
-  // lastKnownFileType as folder in order for Xcode to be able to open the
-  // contents of the folder (Xcode 4.6 does not like explicitFileType=folder).
-  if(cmSystemTools::FileIsDirectory(fullpath.c_str()))
-    {
-    fileRef->AddAttribute("lastKnownFileType",
-                          this->CreateString("folder"));
-    }
-  else
-    {
-    bool keepLastKnownFileType = false;
-    std::string sourcecode = GetSourcecodeValueFromFileExtension(ext,
-                             lang, keepLastKnownFileType);
-    const char* attribute = keepLastKnownFileType ?
-                             "lastKnownFileType" :
-                             "explicitFileType";
-    fileRef->AddAttribute(attribute,
-                          this->CreateString(sourcecode.c_str()));
-    }
+  fileRef->AddAttribute(useLastKnownFileType? "lastKnownFileType"
+                                            : "explicitFileType",
+                        this->CreateString(fileType));
 
   // Store the file path relative to the top of the source tree.
   std::string path = this->RelativeToSource(fullpath.c_str());
@@ -902,7 +917,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReference(cmSourceFile* sf,
     this->CurrentLocalGenerator->GetSourceFileLanguage(*sf);
 
   return this->CreateXCodeFileReferenceFromPath(
-    sf->GetFullPath(), cmtarget, lang);
+    sf->GetFullPath(), cmtarget, lang, sf);
 }
 
 //----------------------------------------------------------------------------
@@ -1052,7 +1067,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
         {
         std::string obj = *oi;
         cmXCodeObject* xsf =
-          this->CreateXCodeSourceFileFromPath(obj, cmtarget, "");
+          this->CreateXCodeSourceFileFromPath(obj, cmtarget, "", 0);
         externalObjFiles.push_back(xsf);
         }
       }

@@ -289,6 +289,8 @@ Properties on Source Files
    /prop_sf/OBJECT_OUTPUTS
    /prop_sf/SYMBOLIC
    /prop_sf/WRAP_EXCLUDE
+   /prop_sf/XCODE_EXPLICIT_FILE_TYPE
+   /prop_sf/XCODE_LAST_KNOWN_FILE_TYPE
 
 Properties on Cache Entries
 ===========================
