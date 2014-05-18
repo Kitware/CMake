@@ -1418,15 +1418,24 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
     if( ccbin_found0 LESS 0 AND ccbin_found1 LESS 0 )
       list(APPEND nvcc_flags -ccbin "\"${CUDA_HOST_COMPILER}\"")
     endif()
+    # Create a list of flags specified by CUDA_NVCC_FLAGS_${CONFIG}
+    set(config_specific_flags)
     set(flags)
     foreach(config ${CUDA_configuration_types})
       string(TOUPPER ${config} config_upper)
+      # Add config specific flags
+      foreach(f ${CUDA_NVCC_FLAGS_${config_upper}})
+        list(APPEND config_specific_flags $<$<CONFIG:${config}>:${f}>)
+      endforeach()
       set(important_host_flags)
       _cuda_get_important_host_flags(important_host_flags ${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}})
       foreach(f ${important_host_flags})
         list(APPEND flags $<$<CONFIG:${config}>:-Xcompiler> $<$<CONFIG:${config}>:${f}>)
       endforeach()
     endforeach()
+    # Add our general CUDA_NVCC_FLAGS with the configuration specifig flags
+    set(nvcc_flags ${CUDA_NVCC_FLAGS} ${config_specific_flags} ${nvcc_flags})
+
     file(RELATIVE_PATH output_file_relative_path "${CMAKE_BINARY_DIR}" "${output_file}")
 
     # Some generators don't handle the multiple levels of custom command
