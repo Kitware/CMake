@@ -182,8 +182,7 @@ else()
 endif()
 
 message("Waiting 3 seconds...")
-# any additional argument will cause ${bar} to wait forever
-execute_process(COMMAND ${bar} -infinite TIMEOUT 3 OUTPUT_VARIABLE out)
+execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 3)
 
 message("Modifying Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
