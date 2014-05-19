@@ -5515,11 +5515,6 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
               }
             }
           }
-        if(this->LinkLanguagePropagatesToDependents())
-          {
-          // Targets using this archive need its language runtime libraries.
-          iface.Languages = impl->Languages;
-          }
         }
       }
     }
@@ -5536,11 +5531,6 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
     iface.ImplementationIsInterface = true;
     iface.Libraries = impl->Libraries;
     iface.WrongConfigLibraries = impl->WrongConfigLibraries;
-    if(this->LinkLanguagePropagatesToDependents())
-      {
-      // Targets using this archive need its language runtime libraries.
-      iface.Languages = impl->Languages;
-      }
 
     if(this->PolicyStatusCMP0022 == cmPolicies::WARN &&
        !this->Internal->PolicyWarnedCMP0022)
@@ -5604,6 +5594,16 @@ bool cmTarget::ComputeLinkInterface(const char* config, LinkInterface& iface,
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         this->Internal->PolicyWarnedCMP0022 = true;
         }
+      }
+    }
+
+  if(this->LinkLanguagePropagatesToDependents())
+    {
+    // Targets using this archive need its language runtime libraries.
+    if(LinkImplementation const* impl =
+       this->GetLinkImplementation(config, headTarget))
+      {
+      iface.Languages = impl->Languages;
       }
     }
 
