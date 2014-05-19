@@ -92,7 +92,7 @@ extern char **environ;
 #endif
 
 #ifdef __CYGWIN__
-extern "C" void cygwin_conv_to_win32_path(const char *path, char *win32_path);
+# include <sys/cygwin.h>
 #endif
 
 // getpwnam doesn't exist on Windows and Cray Xt3/Catamount
@@ -1113,7 +1113,10 @@ bool SystemTools::PathCygwinToWin32(const char *path, char *win32_path)
     }
   else
     {
-    cygwin_conv_to_win32_path(path, win32_path);
+    if(cygwin_conv_path(CCP_POSIX_TO_WIN_A, path, win32_path, MAX_PATH) != 0)
+      {
+      win32_path[0] = 0;
+      }
     SystemToolsTranslationMap::value_type entry(path, win32_path);
     SystemTools::Cyg2Win32Map->insert(entry);
     }
