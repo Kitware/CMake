@@ -1098,6 +1098,12 @@ private:
   std::vector<cmSourceFile*> QtUiFilesWithOptions;
 
   unsigned int NumLastMatches;
+
+  bool AddRequiredTargetCFeature(cmTarget *target,
+                                 const std::string& feature) const;
+
+  bool AddRequiredTargetCxxFeature(cmTarget *target,
+                                   const std::string& feature) const;
 };
 
 //----------------------------------------------------------------------------

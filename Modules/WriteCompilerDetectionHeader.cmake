@@ -43,7 +43,8 @@
 # Possible compiler identifiers are documented with the
 # :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 # Available features in this version of CMake are listed in the
-# :prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global property.
+# :prop_gbl:`CMAKE_C_KNOWN_FEATURES` and
+# :prop_gbl:`CMAKE_CXX_KNOWN_FEATURES` global properties.
 #
 # Feature Test Macros
 # ===================
@@ -102,6 +103,7 @@
 # ========================== =================================== =================
 #         Feature                          Define                      Symbol
 # ========================== =================================== =================
+# ``c_restrict``              ``<PREFIX>_RESTRICT``               ``restrict``
 # ``cxx_constexpr``           ``<PREFIX>_CONSTEXPR``              ``constexpr``
 # ``cxx_deleted_functions``   ``<PREFIX>_DELETED_FUNCTION``       ``= delete``
 # ``cxx_extern_templates``    ``<PREFIX>_EXTERN_TEMPLATE``        ``extern``
@@ -221,6 +223,9 @@ function(write_compiler_detection_header
     if (feature MATCHES "^cxx_")
       list(APPEND _langs CXX)
       list(APPEND CXX_features ${feature})
+    elseif (feature MATCHES "^c_")
+      list(APPEND _langs C)
+      list(APPEND C_features ${feature})
     else()
       message(FATAL_ERROR "Unsupported feature ${feature}.")
     endif()
@@ -239,6 +244,8 @@ function(write_compiler_detection_header
 
     if(_lang STREQUAL CXX)
       set(file_content "${file_content}\n#ifdef __cplusplus\n")
+    else()
+      set(file_content "${file_content}\n#ifndef __cplusplus\n")
     endif()
 
     compiler_id_detection(ID_CONTENT ${_lang} PREFIX ${prefix_arg}_
@@ -279,6 +286,16 @@ function(write_compiler_detection_header
       string(TOUPPER ${feature} feature_upper)
       set(feature_PP "COMPILER_${feature_upper}")
       set(def_name ${prefix_arg}_${feature_PP})
+      if (feature STREQUAL c_restrict)
+        set(def_value "${prefix_arg}_RESTRICT")
+        set(file_content "${file_content}
+#  if ${def_name}
+#    define ${def_value} restrict
+#  else
+#    define ${def_value}
+#  endif
+\n")
+      endif()
       if (feature STREQUAL cxx_constexpr)
         set(def_value "${prefix_arg}_DECL_${feature_upper}")
         set(file_content "${file_content}
@@ -382,9 +399,8 @@ function(write_compiler_detection_header
 \n")
       endif()
     endforeach()
-    if(_lang STREQUAL CXX)
-      set(file_content "${file_content}#endif\n")
-    endif()
+
+    set(file_content "${file_content}#endif\n")
 
   endforeach()
 

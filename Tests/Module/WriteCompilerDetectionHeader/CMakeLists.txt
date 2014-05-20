@@ -6,6 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 include(WriteCompilerDetectionHeader)
 
 get_property(cxx_known_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
+get_property(c_known_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
 
 write_compiler_detection_header(
   FILE "${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h"
@@ -15,10 +16,10 @@ write_compiler_detection_header(
   PROLOG "// something"
   EPILOG "// more"
   FEATURES
-    ${cxx_known_features}
+    ${cxx_known_features} ${c_known_features}
 )
 
-if (NOT CMAKE_CXX_COMPILE_FEATURES)
+if (NOT CMAKE_CXX_COMPILE_FEATURES AND NOT CMAKE_C_COMPILE_FEATURES)
   file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp"
     "int main(int,char**) { return 0; }\n"
   )
