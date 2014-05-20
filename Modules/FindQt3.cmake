@@ -161,7 +161,7 @@ find_library(QT_QASSISTANTCLIENT_LIBRARY
 
 # Qt 3 should prefer QTDIR over the PATH
 find_program(QT_MOC_EXECUTABLE
-  NAMES moc-qt3 moc moc3 moc3-mt
+  NAMES moc-qt3 moc3 moc3-mt moc
   HINTS
     ENV QTDIR
   PATHS
@@ -186,7 +186,7 @@ endif()
 
 # Qt 3 should prefer QTDIR over the PATH
 find_program(QT_UIC_EXECUTABLE
-  NAMES uic-qt3 uic uic3 uic3-mt
+  NAMES uic-qt3 uic3 uic3-mt uic
   HINTS
     ENV QTDIR
   PATHS
