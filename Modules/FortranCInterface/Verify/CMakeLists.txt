@@ -9,7 +9,7 @@
 # See the License for more information.
 #=============================================================================
 
-cmake_minimum_required(VERSION 2.7)
+cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(VerifyFortranC C Fortran)
 
 option(VERIFY_CXX "Whether to verify C++ and Fortran" OFF)

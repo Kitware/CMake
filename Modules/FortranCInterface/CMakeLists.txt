@@ -9,7 +9,7 @@
 # See the License for more information.
 #=============================================================================
 
-cmake_minimum_required(VERSION 2.6.3)
+cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(FortranCInterface C Fortran)
 include(${FortranCInterface_BINARY_DIR}/Input.cmake OPTIONAL)
 
