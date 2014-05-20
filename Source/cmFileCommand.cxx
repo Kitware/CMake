@@ -232,9 +232,10 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   cmsys::ofstream file(fileName.c_str(), append?std::ios::app: std::ios::out);
   if ( !file )
     {
-    std::string error = "Internal CMake error when trying to open file: ";
-    error += fileName.c_str();
-    error += " for writing.";
+    std::string error = "failed to open for writing (";
+    error += cmSystemTools::GetLastSystemError();
+    error += "):\n  ";
+    error += fileName;
     this->SetError(error);
     return false;
     }
@@ -292,9 +293,10 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 
   if ( !file )
     {
-    std::string error = "Internal CMake error when trying to open file: ";
-    error += fileName.c_str();
-    error += " for reading.";
+    std::string error = "failed to open for reading (";
+    error += cmSystemTools::GetLastSystemError();
+    error += "):\n  ";
+    error += fileName;
     this->SetError(error);
     return false;
     }
