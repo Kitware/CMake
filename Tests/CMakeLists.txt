@@ -2202,6 +2202,22 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       "Process file.*CoverageTest.java.*Total LOC:.*18.*Percentage Coverage: 72.22.*"
       ENVIRONMENT COVFILE=)
 
+
+  # Adding a test case for JaCoCo Coverage
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/JacocoCoverage/DartConfiguration.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/JacocoCoverage/DartConfiguration.tcl")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/JacocoCoverage/Coverage"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/JacocoCoverage")
+  add_test(NAME CTestJacocoCoverage
+    COMMAND cmake -E chdir
+    ${CMake_BINARY_DIR}/Testing/JacocoCoverage
+    $<TARGET_FILE:ctest> -T Coverage --debug)
+  set_tests_properties(CTestJacocoCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*CoverageTest.java.*Total LOC:.*17.*Percentage Coverage: 76.47*"
+      ENVIRONMENT COVFILE=)
+
   function(add_config_tests cfg)
     set(base "${CMake_BINARY_DIR}/Tests/CTestConfig")
 

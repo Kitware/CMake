@@ -81,7 +81,10 @@ private:
   //! Handle coverage for mumps
   int HandleMumpsCoverage(cmCTestCoverageHandlerContainer* cont);
 
-  //! Handle coverage using Bullseye
+  //! Handle coverage for Jacoco
+  int HandleJacocoCoverage(cmCTestCoverageHandlerContainer* cont);
+
+//! Handle coverage using Bullseye
   int HandleBullseyeCoverage(cmCTestCoverageHandlerContainer* cont);
   int RunBullseyeSourceSummary(cmCTestCoverageHandlerContainer* cont);
   int RunBullseyeCoverageBranch(cmCTestCoverageHandlerContainer* cont,

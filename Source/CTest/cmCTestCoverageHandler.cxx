@@ -14,6 +14,7 @@
 #include "cmParseCoberturaCoverage.h"
 #include "cmParseGTMCoverage.h"
 #include "cmParseCacheCoverage.h"
+#include "cmParseJacocoCoverage.h"
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -409,6 +410,13 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
 
   file_count += this->HandleMumpsCoverage(&cont);
+  error = cont.Error;
+  if ( file_count < 0 )
+    {
+    return error;
+    }
+
+  file_count += this->HandleJacocoCoverage(&cont);
   error = cont.Error;
   if ( file_count < 0 )
     {
@@ -870,6 +878,38 @@ struct cmCTestCoverageHandlerLocale
     }
   std::string lc_all;
 };
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandleJacocoCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  cmParseJacocoCoverage cov =
+   cmParseJacocoCoverage(*cont, this->CTest);
+  cmsys::Glob g;
+  std::vector<std::string> files;
+  g.SetRecurse(true);
+
+  std::string SourceDir
+    = this->CTest->GetCTestConfiguration("SourceDirectory");
+  std::string coverageFile = SourceDir+ "/*jacoco.xml";
+
+  g.FindFiles(coverageFile);
+  files=g.GetFiles();
+  if (files.size() > 0)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Found Jacoco Files, Performing Coverage" << std::endl);
+    cov.LoadCoverageData(files);
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      " Cannot find Jacoco coverage files: " << coverageFile
+      << std::endl);
+    }
+  return static_cast<int>(cont->TotalCoverage.size());
+}
+
 
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
