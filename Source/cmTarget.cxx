@@ -3181,6 +3181,13 @@ const char* cmTarget::GetFeature(const std::string& feature,
 }
 
 //----------------------------------------------------------------------------
+bool cmTarget::GetFeatureAsBool(const std::string& feature,
+                                const std::string& config) const
+{
+  return cmSystemTools::IsOn(this->GetFeature(feature, config));
+}
+
+//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())

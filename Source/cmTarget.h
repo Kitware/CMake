@@ -237,6 +237,8 @@ public:
 
   const char* GetFeature(const std::string& feature,
                          const std::string& config) const;
+  bool GetFeatureAsBool(const std::string& feature,
+                        const std::string& config) const;
 
   bool IsImported() const {return this->IsImportedTarget;}
 
