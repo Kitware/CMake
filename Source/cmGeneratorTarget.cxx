@@ -945,12 +945,24 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
 //----------------------------------------------------------------------------
 std::string
 cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
-                                         std::string const&) const
+                                         std::string const& config) const
 {
   switch(this->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
-      return "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
+      {
+      std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
+      if(this->Target->GetFeatureAsBool(
+           "INTERPROCEDURAL_OPTIMIZATION", config))
+        {
+        std::string varIPO = var + "_IPO";
+        if(this->Makefile->GetDefinition(varIPO))
+          {
+          return varIPO;
+          }
+        }
+      return var;
+      }
     case cmTarget::SHARED_LIBRARY:
       return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
     case cmTarget::MODULE_LIBRARY:
