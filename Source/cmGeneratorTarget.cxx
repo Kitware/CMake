@@ -943,18 +943,20 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-const char* cmGeneratorTarget::GetCreateRuleVariable() const
+std::string
+cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
+                                         std::string const&) const
 {
   switch(this->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
-      return "_CREATE_STATIC_LIBRARY";
+      return "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
     case cmTarget::SHARED_LIBRARY:
-      return "_CREATE_SHARED_LIBRARY";
+      return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
     case cmTarget::MODULE_LIBRARY:
-      return "_CREATE_SHARED_MODULE";
+      return "CMAKE_" + lang + "_CREATE_SHARED_MODULE";
     case cmTarget::EXECUTABLE:
-      return "_LINK_EXECUTABLE";
+      return "CMAKE_" + lang + "_LINK_EXECUTABLE";
     default:
       break;
     }
