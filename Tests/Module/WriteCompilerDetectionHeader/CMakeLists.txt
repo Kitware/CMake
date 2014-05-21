@@ -11,7 +11,7 @@ get_property(c_known_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
 write_compiler_detection_header(
   FILE "${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h"
   PREFIX TEST
-  COMPILERS GNU
+  COMPILERS GNU Clang
   VERSION 3.1
   PROLOG "// something"
   EPILOG "// more"
@@ -49,7 +49,8 @@ macro(set_defines target true_defs false_defs)
   )
 endmacro()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU)
+if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+    OR CMAKE_CXX_COMPILER_ID STREQUAL Clang)
   # False for C++98 mode.
   list(APPEND false_defs EXPECTED_COMPILER_CXX_DELEGATING_CONSTRUCTORS)
   list(APPEND false_defs EXPECTED_COMPILER_CXX_VARIADIC_TEMPLATES)
