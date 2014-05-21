@@ -1220,7 +1220,7 @@ void cmTarget::GetDirectLinkLibraries(const std::string& config,
                                         &dagChecker),
                                       libs);
 
-    std::set<std::string> seenProps = cge->GetSeenTargetProperties();
+    std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
     for (std::set<std::string>::const_iterator it = seenProps.begin();
         it != seenProps.end(); ++it)
       {

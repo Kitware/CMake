@@ -67,7 +67,7 @@ function(cmake_determine_compile_features lang)
       return()
     endif()
 
-    if (CMAKE_CXX98_COMPILE_FEATURES)
+    if (CMAKE_CXX11_COMPILE_FEATURES AND CMAKE_CXX98_COMPILE_FEATURES)
       list(REMOVE_ITEM CMAKE_CXX11_COMPILE_FEATURES ${CMAKE_CXX98_COMPILE_FEATURES})
     endif()
 

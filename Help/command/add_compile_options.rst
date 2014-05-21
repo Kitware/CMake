@@ -14,7 +14,7 @@ alternative commands exist to add preprocessor definitions
 include directories (:command:`target_include_directories` and
 :command:`include_directories`).  See documentation of the
 :prop_tgt:`directory <COMPILE_OPTIONS>` and
-:prop_tgt:` target <COMPILE_OPTIONS>` ``COMPILE_OPTIONS`` properties.
+:prop_tgt:`target <COMPILE_OPTIONS>` ``COMPILE_OPTIONS`` properties.
 
 Arguments to ``add_compile_options`` may use "generator expressions" with
 the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
