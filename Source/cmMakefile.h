@@ -889,6 +889,19 @@ public:
                                 const std::string& feature,
                                 std::string *error = 0) const;
 
+  bool CompileFeatureKnown(cmTarget const* target, const std::string& feature,
+                           std::string& lang, std::string *error) const;
+
+  const char* CompileFeaturesAvailable(const std::string& lang,
+                                       std::string *error) const;
+
+  bool HaveFeatureAvailable(cmTarget const* target, std::string const& lang,
+                            const std::string& feature) const;
+
+  bool IsLaterStandard(std::string const& lang,
+                       std::string const& lhs,
+                       std::string const& rhs);
+
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
 
@@ -1104,6 +1117,16 @@ private:
 
   bool AddRequiredTargetCxxFeature(cmTarget *target,
                                    const std::string& feature) const;
+
+  void CheckNeededCLanguage(const std::string& feature, bool& needC90,
+                            bool& needC99, bool& needC11) const;
+  void CheckNeededCxxLanguage(const std::string& feature, bool& needCxx98,
+                              bool& needCxx11) const;
+
+  bool HaveCFeatureAvailable(cmTarget const* target,
+                             const std::string& feature) const;
+  bool HaveCxxFeatureAvailable(cmTarget const* target,
+                               const std::string& feature) const;
 };
 
 //----------------------------------------------------------------------------

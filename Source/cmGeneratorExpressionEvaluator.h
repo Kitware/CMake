@@ -26,6 +26,8 @@ struct cmGeneratorExpressionContext
   std::set<cmTarget*> DependTargets;
   std::set<cmTarget const*> AllTargets;
   std::set<std::string> SeenTargetProperties;
+  std::map<cmTarget const*, std::map<std::string, std::string> >
+                                                          MaxLanguageStandard;
   cmMakefile *Makefile;
   std::string Config;
   cmTarget const* HeadTarget; // The target whose property is being evaluated.

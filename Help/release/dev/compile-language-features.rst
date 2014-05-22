@@ -22,3 +22,7 @@ target-language-features
 * New :command:`target_compile_features` command allows populating the
   :prop_tgt:`COMPILE_FEATURES` target property, just like any other
   build variable.
+
+* New ``COMPILE_FEATURES``
+  :manual:`generator expression <cmake-generator-expressions(7)>` allows
+  setting build properties based on available compiler features.

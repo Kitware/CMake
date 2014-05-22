@@ -1484,6 +1484,31 @@ void cmLocalGenerator::AddCompileOptions(
       return;
       }
     }
+
+  for(std::map<std::string, std::string>::const_iterator it
+      = target->GetMaxLanguageStandards().begin();
+      it != target->GetMaxLanguageStandards().end(); ++it)
+    {
+    const char* standard = target->GetProperty(it->first + "_STANDARD");
+    if(!standard)
+      {
+      continue;
+      }
+    if (this->Makefile->IsLaterStandard(it->first, standard, it->second))
+      {
+      cmOStringStream e;
+      e << "The COMPILE_FEATURES property of target \""
+        << target->GetName() << "\" was evaluated when computing the link "
+        "implementation, and the \"" << it->first << "_STANDARD\" was \""
+        << it->second << "\" for that computation.  Computing the "
+        "COMPILE_FEATURES based on the link implementation resulted in a "
+        "higher \"" << it->first << "_STANDARD\" \"" << standard << "\".  "
+        "This is not permitted. The COMPILE_FEATURES may not both depend on "
+        "and be depended on by the link implementation." << std::endl;
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return;
+      }
+    }
   this->AddCompilerRequirementFlag(flags, target, lang);
 }
 

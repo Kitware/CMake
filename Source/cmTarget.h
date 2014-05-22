@@ -587,6 +587,12 @@ public:
                             const std::string &report,
                             const std::string &compatibilityType) const;
 
+  std::map<std::string, std::string> const&
+  GetMaxLanguageStandards() const
+  {
+    return this->MaxLanguageStandards;
+  }
+
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
@@ -718,6 +724,7 @@ private:
   mutable bool DebugSourcesDone;
   mutable bool DebugCompileFeaturesDone;
   mutable std::set<std::string> LinkImplicitNullProperties;
+  mutable std::map<std::string, std::string> MaxLanguageStandards;
   bool BuildInterfaceIncludesAppended;
 
   // Cache target output paths for each configuration.

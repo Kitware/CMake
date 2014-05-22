@@ -110,6 +110,9 @@ const char *cmCompiledGeneratorExpression::Evaluate(
       break;
       }
     }
+
+  this->MaxLanguageStandard = context.MaxLanguageStandard;
+
   if (!context.HadError)
     {
     this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
@@ -464,4 +467,18 @@ bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
   targetNameValidator.compile("^[A-Za-z0-9_.:+-]+$");
 
   return targetNameValidator.find(input.c_str());
+}
+
+//----------------------------------------------------------------------------
+void
+cmCompiledGeneratorExpression::GetMaxLanguageStandard(cmTarget const* tgt,
+                  std::map<std::string, std::string>& mapping)
+{
+  typedef std::map<cmTarget const*,
+                   std::map<std::string, std::string> > MapType;
+  MapType::const_iterator it = this->MaxLanguageStandard.find(tgt);
+  if (it != this->MaxLanguageStandard.end())
+    {
+    mapping = it->second;
+    }
 }

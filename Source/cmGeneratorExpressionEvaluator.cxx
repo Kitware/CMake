@@ -1314,6 +1314,94 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 } targetObjectsNode;
 
 //----------------------------------------------------------------------------
+static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
+{
+  CompileFeaturesNode() {}
+
+  virtual int NumExpectedParameters() const { return OneOrMoreParameters; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    cmTarget const* target = context->HeadTarget;
+    if (!target)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<COMPILE_FEATURE> may only be used with binary targets.  It may "
+          "not be used with add_custom_command or add_custom_target.");
+      return std::string();
+      }
+
+    typedef std::map<std::string, std::vector<std::string> > LangMap;
+    static LangMap availableFeatures;
+
+    LangMap testedFeatures;
+
+    for (std::vector<std::string>::const_iterator it = parameters.begin();
+        it != parameters.end(); ++it)
+      {
+      std::string error;
+      std::string lang;
+      if (!context->Makefile->CompileFeatureKnown(context->HeadTarget,
+                                                  *it, lang, &error))
+        {
+        reportError(context, content->GetOriginalExpression(), error);
+        return std::string();
+        }
+      testedFeatures[lang].push_back(*it);
+
+      if (availableFeatures.find(lang) == availableFeatures.end())
+        {
+        const char* featuresKnown
+                  = context->Makefile->CompileFeaturesAvailable(lang, &error);
+        if (!featuresKnown)
+          {
+          reportError(context, content->GetOriginalExpression(), error);
+          return std::string();
+          }
+        cmSystemTools::ExpandListArgument(featuresKnown,
+                                          availableFeatures[lang]);
+        }
+      }
+
+    bool evalLL = dagChecker && dagChecker->EvaluatingLinkLibraries();
+
+    std::string result;
+
+    for (LangMap::const_iterator lit = testedFeatures.begin();
+          lit != testedFeatures.end(); ++lit)
+      {
+      for (std::vector<std::string>::const_iterator it = lit->second.begin();
+          it != lit->second.end(); ++it)
+        {
+        if (!context->Makefile->HaveFeatureAvailable(target,
+                                                      lit->first, *it))
+          {
+          if (evalLL)
+            {
+            const char* l = target->GetProperty(lit->first + "_STANDARD");
+            if (!l)
+              {
+              l = context->Makefile
+                  ->GetDefinition("CMAKE_" + lit->first + "_STANDARD_DEFAULT");
+              }
+            assert(l);
+            context->MaxLanguageStandard[target][lit->first] = l;
+            }
+          else
+            {
+            return "0";
+            }
+          }
+        }
+      }
+    return "1";
+  }
+} compileFeaturesNode;
+
+//----------------------------------------------------------------------------
 static const char* targetPolicyWhitelist[] = {
   0
 #define TARGET_POLICY_STRING(POLICY) \
@@ -1647,6 +1735,7 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     nodeMap["C_COMPILER_VERSION"] = &cCompilerVersionNode;
     nodeMap["CXX_COMPILER_VERSION"] = &cxxCompilerVersionNode;
     nodeMap["PLATFORM_ID"] = &platformIdNode;
+    nodeMap["COMPILE_FEATURES"] = &compileFeaturesNode;
     nodeMap["CONFIGURATION"] = &configurationNode;
     nodeMap["CONFIG"] = &configurationTestNode;
     nodeMap["TARGET_FILE"] = &targetFileNode;

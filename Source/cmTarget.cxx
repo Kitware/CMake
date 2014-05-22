@@ -1229,6 +1229,7 @@ void cmTarget::GetDirectLinkLibraries(const std::string& config,
         this->LinkImplicitNullProperties.insert(*it);
         }
       }
+    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
     }
 }
 
