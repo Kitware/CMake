@@ -23,3 +23,16 @@ set_property(GLOBAL PROPERTY FIND_LIBRARY_USE_LIB64_PATHS FALSE)
 # OpenBSD policy requires that shared libraries be installed without
 # executable permission.
 set(CMAKE_INSTALL_SO_NO_EXE 1)
+
+if($ENV{LOCALBASE})
+  set(OPENBSD_LOCALBASE $ENV{LOCALBASE})
+else()
+  set(OPENBSD_LOCALBASE /usr/local)
+endif()
+if($ENV{X11BASE})
+  set(OPENBSD_X11BASE $ENV{X11BASE})
+else()
+  set(OPENBSD_X11BASE /usr/X11R6)
+endif()
+
+list(APPEND CMAKE_SYSTEM_PREFIX_PATH ${OPENBSD_LOCALBASE})
