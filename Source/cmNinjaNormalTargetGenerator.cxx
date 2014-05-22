@@ -314,9 +314,8 @@ cmNinjaNormalTargetGenerator
   std::vector<std::string> linkCmds;
   cmMakefile* mf = this->GetMakefile();
   {
-  std::string linkCmdVar = "CMAKE_";
-  linkCmdVar += this->TargetLinkLanguage;
-  linkCmdVar += this->GetGeneratorTarget()->GetCreateRuleVariable();
+  std::string linkCmdVar = this->GetGeneratorTarget()
+    ->GetCreateRuleVariable(this->TargetLinkLanguage, this->GetConfigName());
   const char *linkCmd = mf->GetDefinition(linkCmdVar);
   if (linkCmd)
     {
@@ -451,8 +450,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   std::string linkPath;
   cmGeneratorTarget& genTarget = *this->GetGeneratorTarget();
 
-  std::string createRule = "CMAKE_";
-  createRule += this->TargetLinkLanguage + genTarget.GetCreateRuleVariable();
+  std::string createRule =
+    genTarget.GetCreateRuleVariable(this->TargetLinkLanguage,
+                                    this->GetConfigName());
   bool useWatcomQuote = mf->IsOn(createRule+"_USE_WATCOM_QUOTE");
   cmLocalNinjaGenerator& localGen = *this->GetLocalGenerator();
   localGen.GetTargetFlags(vars["LINK_LIBRARIES"],

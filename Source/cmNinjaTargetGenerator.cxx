@@ -105,7 +105,7 @@ const char* cmNinjaTargetGenerator::GetFeature(const std::string& feature)
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
 bool cmNinjaTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
-  return cmSystemTools::IsOn(this->GetFeature(feature));
+  return this->Target->GetFeatureAsBool(feature, this->GetConfigName());
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.

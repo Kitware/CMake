@@ -2105,7 +2105,7 @@ const char* cmMakefileTargetGenerator::GetFeature(const std::string& feature)
 //----------------------------------------------------------------------------
 bool cmMakefileTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
-  return cmSystemTools::IsOn(this->GetFeature(feature));
+  return this->Target->GetFeatureAsBool(feature, this->ConfigName);
 }
 
 //----------------------------------------------------------------------------

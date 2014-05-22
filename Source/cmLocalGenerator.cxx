@@ -657,10 +657,10 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
 {
   std::string objs;
   std::vector<std::string> objVector;
+  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   // Add all the sources outputs to the depends of the target
   std::vector<cmSourceFile*> classes;
-  target.GetSourceFiles(classes,
-                      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+  target.GetSourceFiles(classes, config);
   for(std::vector<cmSourceFile*>::const_iterator i = classes.begin();
       i != classes.end(); ++i)
     {
@@ -686,9 +686,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
         }
       }
     }
-  std::string createRule = "CMAKE_";
-  createRule += llang;
-  createRule += target.GetCreateRuleVariable();
+  std::string createRule = target.GetCreateRuleVariable(llang, config);
   bool useWatcomQuote = this->Makefile->IsOn(createRule+"_USE_WATCOM_QUOTE");
   std::string targetName = target.Target->GetFullName();
   // Executable :
