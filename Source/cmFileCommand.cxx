@@ -3270,8 +3270,7 @@ void cmFileCommand::AddEvaluationFile(const std::string &inputName,
                                       bool inputIsContent
                                      )
 {
-  cmListFileBacktrace lfbt;
-  this->Makefile->GetBacktrace(lfbt);
+  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
 
   cmGeneratorExpression outputGe(lfbt);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> outputCge

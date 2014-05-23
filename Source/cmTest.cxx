@@ -22,7 +22,7 @@ cmTest::cmTest(cmMakefile* mf)
   this->OldStyle = true;
   this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
   this->Backtrace = new cmListFileBacktrace;
-  this->Makefile->GetBacktrace(*this->Backtrace);
+  *this->Backtrace = this->Makefile->GetBacktrace();
 }
 
 //----------------------------------------------------------------------------

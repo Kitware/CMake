@@ -84,7 +84,7 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
   this->EscapeAllowMakeVars = false;
   if(mf)
     {
-    mf->GetBacktrace(*this->Backtrace);
+    *this->Backtrace = mf->GetBacktrace();
     }
 }
 
