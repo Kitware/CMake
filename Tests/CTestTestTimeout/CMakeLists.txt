@@ -11,18 +11,14 @@ if(NOT TIMEOUT)
 endif()
 
 add_definitions(-DTIMEOUT=${TIMEOUT})
-add_executable (Timeout timeout.c)
+add_executable (Sleep sleep.c)
 
 add_test(NAME TestTimeout
-  COMMAND ${CMAKE_COMMAND} -D Timeout=$<TARGET_FILE:Timeout>
+  COMMAND ${CMAKE_COMMAND} -D Sleep=$<TARGET_FILE:Sleep>
                            -D Log=${CMAKE_CURRENT_BINARY_DIR}/timeout.log
                            -P ${CMAKE_CURRENT_SOURCE_DIR}/timeout.cmake
   )
 set_tests_properties(TestTimeout PROPERTIES TIMEOUT ${TIMEOUT})
 
-add_test(NAME CheckChild
-  COMMAND ${CMAKE_COMMAND} -D Timeout=$<TARGET_FILE:Timeout>
-                           -D Log=${CMAKE_CURRENT_BINARY_DIR}/timeout.log
-                           -P ${CMAKE_CURRENT_SOURCE_DIR}/check.cmake
-  )
-set_tests_properties(CheckChild PROPERTIES DEPENDS TestTimeout)
+add_test(NAME TestSleep COMMAND Sleep)
+set_tests_properties(TestSleep PROPERTIES DEPENDS TestTimeout)
