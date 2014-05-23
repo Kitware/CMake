@@ -13,8 +13,8 @@
 #define cmCustomCommand_h
 
 #include "cmStandardIncludes.h"
+#include "cmListFileCache.h"
 class cmMakefile;
-class cmListFileBacktrace;
 
 /** \class cmCustomCommand
  * \brief A class to encapsulate a custom command
@@ -88,7 +88,7 @@ private:
   std::string WorkingDirectory;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;
-  cmListFileBacktrace* Backtrace;
+  cmListFileBacktrace Backtrace;
   ImplicitDependsList ImplicitDepends;
 };
 

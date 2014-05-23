@@ -21,20 +21,18 @@ cmTest::cmTest(cmMakefile* mf)
   this->Makefile = mf;
   this->OldStyle = true;
   this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
-  this->Backtrace = new cmListFileBacktrace;
-  *this->Backtrace = this->Makefile->GetBacktrace();
+  this->Backtrace = this->Makefile->GetBacktrace();
 }
 
 //----------------------------------------------------------------------------
 cmTest::~cmTest()
 {
-  delete this->Backtrace;
 }
 
 //----------------------------------------------------------------------------
 cmListFileBacktrace const& cmTest::GetBacktrace() const
 {
-  return *this->Backtrace;
+  return this->Backtrace;
 }
 
 //----------------------------------------------------------------------------

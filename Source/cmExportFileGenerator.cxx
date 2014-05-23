@@ -377,8 +377,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   const char *propName = "INTERFACE_INCLUDE_DIRECTORIES";
   const char *input = target->GetProperty(propName);
 
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
+  cmGeneratorExpression ge;
 
   std::string dirs = cmGeneratorExpression::Preprocess(
                                             tei->InterfaceIncludeDirectories,

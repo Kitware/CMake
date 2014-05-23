@@ -41,7 +41,7 @@ class cmGeneratorExpression
 {
 public:
   /** Construct. */
-  cmGeneratorExpression(cmListFileBacktrace const& backtrace);
+  cmGeneratorExpression(cmListFileBacktrace const* backtrace = NULL);
   ~cmGeneratorExpression();
 
   cmsys::auto_ptr<cmCompiledGeneratorExpression> Parse(
@@ -70,7 +70,7 @@ private:
   cmGeneratorExpression(const cmGeneratorExpression &);
   void operator=(const cmGeneratorExpression &);
 
-  cmListFileBacktrace const& Backtrace;
+  cmListFileBacktrace const* Backtrace;
 };
 
 class cmCompiledGeneratorExpression

@@ -809,7 +809,7 @@ std::string getLinkedTargetsContent(const std::vector<cmTarget*> &targets,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   const std::string &interfacePropertyName)
 {
-  cmGeneratorExpression ge(context->Backtrace);
+  cmGeneratorExpression ge(&context->Backtrace);
 
   std::string sep;
   std::string depString;
@@ -1196,7 +1196,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       {
       if (targetPropertyTransitiveWhitelist[i] == interfacePropertyName)
         {
-        cmGeneratorExpression ge(context->Backtrace);
+        cmGeneratorExpression ge(&context->Backtrace);
         cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
         std::string result = cge->Evaluate(context->Makefile,
                             context->Config,
