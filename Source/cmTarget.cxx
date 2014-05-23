@@ -5167,8 +5167,7 @@ cmTarget::ReportPropertyOrigin(const std::string &p,
   areport += result;
   areport += "\"):\n" + report;
 
-  cmListFileBacktrace lfbt;
-  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport, lfbt);
+  this->Makefile->GetCMakeInstance()->IssueMessage(cmake::LOG, areport);
 }
 
 //----------------------------------------------------------------------------

@@ -2786,7 +2786,7 @@ void cmake::RunCheckForUnusedVariables()
     }
   if(haveUnused)
     {
-    this->IssueMessage(cmake::WARNING, msg.str(), cmListFileBacktrace());
+    this->IssueMessage(cmake::WARNING, msg.str());
     }
 #endif
 }
