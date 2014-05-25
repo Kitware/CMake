@@ -51,7 +51,9 @@
 # wants explicit full paths and this trickery doesn't work too well.
 # I'm going to attempt to cut out the middleman and hope
 # everything still works.
-find_path(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
+find_path(
+  FREETYPE_INCLUDE_DIR_ft2build
+  ft2build.h
   HINTS
     ENV FREETYPE_DIR
   PATHS
@@ -62,10 +64,14 @@ find_path(FREETYPE_INCLUDE_DIR_ft2build ft2build.h
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
-  PATH_SUFFIXES include/freetype2 include freetype2
+  PATH_SUFFIXES
+    include/freetype2
+    include
+    freetype2
 )
 
-find_path(FREETYPE_INCLUDE_DIR_freetype2
+find_path(
+  FREETYPE_INCLUDE_DIR_freetype2
   NAMES
     freetype/config/ftheader.h
     config/ftheader.h
@@ -79,11 +85,17 @@ find_path(FREETYPE_INCLUDE_DIR_freetype2
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
-  PATH_SUFFIXES include/freetype2 include freetype2
+  PATH_SUFFIXES
+    include/freetype2
+    include
+    freetype2
 )
 
 find_library(FREETYPE_LIBRARY
-  NAMES freetype libfreetype freetype219
+  NAMES
+    freetype
+    libfreetype
+    freetype219
   HINTS
     ENV FREETYPE_DIR
   PATH_SUFFIXES lib
@@ -134,8 +146,17 @@ endif()
 # handle the QUIETLY and REQUIRED arguments and set FREETYPE_FOUND to TRUE if
 # all listed variables are TRUE
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Freetype
-                                  REQUIRED_VARS FREETYPE_LIBRARY FREETYPE_INCLUDE_DIRS
-                                  VERSION_VAR FREETYPE_VERSION_STRING)
+FIND_PACKAGE_HANDLE_STANDARD_ARGS(
+  Freetype
+  REQUIRED_VARS
+    FREETYPE_LIBRARY
+    FREETYPE_INCLUDE_DIRS
+  VERSION_VAR
+    FREETYPE_VERSION_STRING
+)
 
-mark_as_advanced(FREETYPE_LIBRARY FREETYPE_INCLUDE_DIR_freetype2 FREETYPE_INCLUDE_DIR_ft2build)
+mark_as_advanced(
+  FREETYPE_LIBRARY
+  FREETYPE_INCLUDE_DIR_freetype2
+  FREETYPE_INCLUDE_DIR_ft2build
+)
