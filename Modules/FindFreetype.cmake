@@ -98,7 +98,6 @@ find_library(FREETYPE_LIBRARY
     freetype219
   HINTS
     ENV FREETYPE_DIR
-  PATH_SUFFIXES lib
   PATHS
     /usr/X11R6
     /usr/local/X11R6
@@ -107,6 +106,8 @@ find_library(FREETYPE_LIBRARY
     ENV GTKMM_BASEPATH
     [HKEY_CURRENT_USER\\SOFTWARE\\gtkmm\\2.4;Path]
     [HKEY_LOCAL_MACHINE\\SOFTWARE\\gtkmm\\2.4;Path]
+  PATH_SUFFIXES
+    lib
 )
 
 # set the user variables
