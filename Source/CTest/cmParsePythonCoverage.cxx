@@ -79,11 +79,11 @@ protected:
           curNumber = atoi(atts[tagCount+1]);
         }
 
-        if(curHits > -1 && curNumber > -1)
+        if(curHits > -1 && curNumber > 0)
         {
           FileLinesType& curFileLines =
             this->Coverage.TotalCoverage[this->CurFileName];
-          curFileLines[curNumber] = curHits;
+          curFileLines[curNumber-1] = curHits;
           break;
         }
         ++tagCount;
