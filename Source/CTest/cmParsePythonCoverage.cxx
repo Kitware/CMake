@@ -77,7 +77,7 @@ protected:
         {
           FileLinesType& curFileLines =
             this->Coverage.TotalCoverage[this->CurFileName];
-          curFileLines[curNumber] = curHits;
+          curFileLines[curNumber-1] = curHits;
           break;
         }
         ++tagCount;
