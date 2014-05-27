@@ -1231,7 +1231,10 @@ int cmake::HandleDeleteCacheVariables(const char* var)
     if(ci.Find(save.key.c_str()))
       {
       save.type = ci.GetType();
-      save.help = ci.GetProperty("HELPSTRING");
+      if(const char* help = ci.GetProperty("HELPSTRING"))
+        {
+        save.help = help;
+        }
       }
     saved.push_back(save);
     }
