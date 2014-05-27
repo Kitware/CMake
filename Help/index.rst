@@ -27,6 +27,7 @@ Reference Manuals
 
    /manual/cmake-buildsystem.7
    /manual/cmake-commands.7
+   /manual/cmake-compile-features.7
    /manual/cmake-developer.7
    /manual/cmake-generator-expressions.7
    /manual/cmake-generators.7

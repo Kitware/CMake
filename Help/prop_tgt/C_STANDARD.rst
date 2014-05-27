@@ -22,6 +22,9 @@ flag will not result in an error or warning, but will instead add the
 ``-std=c99`` or ``-std=c90`` flag if supported.  This "decay" behavior may
 be controlled with the :prop_tgt:`C_STANDARD_REQUIRED` target property.
 
+See the :manual:`cmake-compile-features(7)` manual for information on
+compile features.
+
 This property is initialized by the value of
 the :variable:`CMAKE_C_STANDARD` variable if it is set when a target
 is created.

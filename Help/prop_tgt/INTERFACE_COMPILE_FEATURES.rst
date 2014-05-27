@@ -11,4 +11,6 @@ to require the features specified in the interface of ``foo``.
 
 Contents of ``INTERFACE_COMPILE_FEATURES`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
-manual for available expressions.
+manual for available expressions.  See the
+:manual:`cmake-compile-features(7)` manual for information on compile
+features.
