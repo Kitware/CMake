@@ -2394,7 +2394,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestTimeout/testOutput.log"
     )
   set_tests_properties(CTestTestTimeout PROPERTIES
-    PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*CheckChild *\\.+ *Passed")
+    PASS_REGULAR_EXPRESSION "TestTimeout *\\.+ *\\*\\*\\*Timeout.*TestSleep *\\.+ *Passed.*timeout correctly killed child")
 
   add_test(
     NAME CTestTestRerunFailed
