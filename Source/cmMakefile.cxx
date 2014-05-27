@@ -103,6 +103,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->GeneratingBuildSystem = false;
 
   this->NumLastMatches = 0;
+  this->SuppressWatches = false;
 }
 
 cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
@@ -153,6 +154,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->OutputToSource = mf.OutputToSource;
 
   this->NumLastMatches = mf.NumLastMatches;
+  this->SuppressWatches = mf.SuppressWatches;
 }
 
 //----------------------------------------------------------------------------
@@ -2463,7 +2465,7 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
-  if ( vv )
+  if ( vv && !this->SuppressWatches )
     {
     if ( def )
       {
@@ -2559,10 +2561,14 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
       original = source;
       newResult = source;
       compareResults = true;
+      // Suppress variable watches to avoid calling hooks twice. Suppress new
+      // dereferences since the OLD behavior is still what is actually used.
+      this->SuppressWatches = true;
       newError =
         ExpandVariablesInStringNew(newErrorstr, newResult, escapeQuotes,
                                    noEscapes, atOnly, filename, line,
                                    removeEmpty, replaceAt);
+      this->SuppressWatches = false;
       }
     case cmPolicies::OLD:
       mtype = ExpandVariablesInStringOld(errorstr, source, escapeQuotes,

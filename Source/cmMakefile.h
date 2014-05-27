@@ -1127,6 +1127,8 @@ private:
                              const std::string& feature) const;
   bool HaveCxxFeatureAvailable(cmTarget const* target,
                                const std::string& feature) const;
+
+  mutable bool SuppressWatches;
 };
 
 //----------------------------------------------------------------------------
