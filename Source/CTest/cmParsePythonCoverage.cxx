@@ -33,19 +33,25 @@ protected:
                      << atts[tagCount+1] << std::endl);
           this->CurFileName = this->Coverage.SourceDir + "/" +
                                  atts[tagCount+1];
-          FileLinesType& curFileLines =
-            this->Coverage.TotalCoverage[this->CurFileName];
           cmsys::ifstream fin(this->CurFileName.c_str());
           if(!fin)
           {
-            cmCTestLog(this->CTest, ERROR_MESSAGE,
-                       "Python Coverage: Error opening " << this->CurFileName
-                       << std::endl);
-            this->Coverage.Error++;
-            break;
+            this->CurFileName = this->Coverage.BinaryDir + "/" +
+                                   atts[tagCount+1];
+            fin.open(this->CurFileName.c_str());
+            if (!fin)
+            {
+              cmCTestLog(this->CTest, ERROR_MESSAGE,
+                         "Python Coverage: Error opening " << this->CurFileName
+                         << std::endl);
+              this->Coverage.Error++;
+              break;
+            }
           }
 
           std::string line;
+          FileLinesType& curFileLines =
+            this->Coverage.TotalCoverage[this->CurFileName];
           curFileLines.push_back(-1);
           while(cmSystemTools::GetLineFromStream(fin, line))
           {
