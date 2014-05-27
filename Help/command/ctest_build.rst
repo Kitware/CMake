@@ -22,3 +22,8 @@ of build errors and warnings detected.
 The APPEND option marks results for append to those previously
 submitted to a dashboard server since the last ctest_start.  Append
 semantics are defined by the dashboard server in use.
+
+If set the contents of the variable CTEST_BUILD_FLAGS are passed as
+additional arguments to the underlying build command. This can e.g. be
+used to trigger a parallel build using the -j option of make. See
+:module:`ProcessorCount` for an example.
