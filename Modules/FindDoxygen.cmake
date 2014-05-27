@@ -30,7 +30,16 @@
 #
 #    DOXYGEN_DOT_EXECUTABLE = The path to the dot program used by doxygen.
 #    DOXYGEN_DOT_FOUND      = Was Dot found or not?
-#    DOXYGEN_DOT_PATH       = The path to dot not including the executable
+#
+# For compatibility with older versions of CMake, the now-deprecated
+# variable ``DOXYGEN_DOT_PATH`` is set to the path to the directory
+# containing ``dot`` as reported in ``DOXYGEN_DOT_EXECUTABLE``.
+# The path may have forward slashes even on Windows and is not
+# suitable for direct substitution into a ``Doxyfile.in`` template.
+# If you need this value, use :command:`get_filename_component`
+# to compute it from ``DOXYGEN_DOT_EXECUTABLE`` directly, and
+# perhaps the :command:`file(TO_NATIVE_PATH)` command to prepare
+# the path for a Doxygen configuration file.
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -125,7 +134,7 @@ if(NOT DOXYGEN_SKIP_DOT)
   if(DOXYGEN_DOT_EXECUTABLE)
     set(DOXYGEN_DOT_FOUND TRUE)
     # The Doxyfile wants the path to Dot, not the entire path and executable
-    get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH CACHE)
+    get_filename_component(DOXYGEN_DOT_PATH "${DOXYGEN_DOT_EXECUTABLE}" PATH)
   endif()
 
 endif()
@@ -159,5 +168,4 @@ set (DOT ${DOXYGEN_DOT_EXECUTABLE} )
 mark_as_advanced(
   DOXYGEN_EXECUTABLE
   DOXYGEN_DOT_EXECUTABLE
-  DOXYGEN_DOT_PATH
   )
