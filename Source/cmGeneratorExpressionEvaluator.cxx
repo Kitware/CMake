@@ -457,8 +457,8 @@ static const struct CCompilerIdNode : public CompilerIdNode
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
-          "$<C_COMPILER_ID> may only be used with targets.  It may not "
-          "be used with add_custom_command.");
+          "$<C_COMPILER_ID> may only be used with binary targets.  It may "
+          "not be used with add_custom_command or add_custom_target.");
       return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
@@ -479,8 +479,8 @@ static const struct CXXCompilerIdNode : public CompilerIdNode
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
-          "$<CXX_COMPILER_ID> may only be used with targets.  It may not "
-          "be used with add_custom_command.");
+          "$<CXX_COMPILER_ID> may only be used with binary targets.  It may "
+          "not be used with add_custom_command or add_custom_target.");
       return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
@@ -541,8 +541,8 @@ static const struct CCompilerVersionNode : public CompilerVersionNode
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
-          "$<C_COMPILER_VERSION> may only be used with targets.  It may not "
-          "be used with add_custom_command.");
+          "$<C_COMPILER_VERSION> may only be used with binary targets.  It "
+          "may not be used with add_custom_command or add_custom_target.");
       return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
@@ -563,8 +563,8 @@ static const struct CxxCompilerVersionNode : public CompilerVersionNode
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
-          "$<CXX_COMPILER_VERSION> may only be used with targets.  It may "
-          "not be used with add_custom_command.");
+          "$<CXX_COMPILER_VERSION> may only be used with binary targets.  It "
+          "may not be used with add_custom_command or add_custom_target.");
       return std::string();
       }
     return this->EvaluateWithLanguage(parameters, context, content,
@@ -893,10 +893,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (!target && parameters.size() == 1)
       {
       reportError(context, content->GetOriginalExpression(),
-          "$<TARGET_PROPERTY:prop> may only be used with targets.  It may not "
-          "be used with add_custom_command.  Specify the target to read a "
-          "property from using the $<TARGET_PROPERTY:tgt,prop> signature "
-          "instead.");
+          "$<TARGET_PROPERTY:prop>  may only be used with binary targets.  "
+          "It may not be used with add_custom_command or add_custom_target.  "
+          "Specify the target to read a property from using the "
+          "$<TARGET_PROPERTY:tgt,prop> signature instead.");
       return std::string();
       }
 
@@ -1460,8 +1460,8 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
     if (!context->HeadTarget)
       {
       reportError(context, content->GetOriginalExpression(),
-          "$<TARGET_POLICY:prop> may only be used with targets.  It may not "
-          "be used with add_custom_command.");
+          "$<TARGET_POLICY:prop> may only be used with binary targets.  It "
+          "may not be used with add_custom_command or add_custom_target.");
       return std::string();
       }
 
