@@ -16,6 +16,7 @@
 #include "cmSystemTools.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
+#include "cmInstalledFile.h"
 
 class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
@@ -92,6 +93,7 @@ class cmake
     FIND_PACKAGE_MODE
   };
   typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
+  typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
   cmake();
@@ -280,6 +282,15 @@ class cmake
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; }
 
+  ///! Get or create an cmInstalledFile instance and return a pointer to it
+  cmInstalledFile *GetOrCreateInstalledFile(
+    cmMakefile* mf, const std::string& name);
+
+  cmInstalledFile const* GetInstalledFile(const std::string& name) const;
+
+  InstalledFilesMap const& GetInstalledFiles() const
+    { return this->InstalledFiles; }
+
   ///! Do all the checks before running configure
   int DoPreConfigureChecks();
 
@@ -445,6 +456,7 @@ private:
   cmFileTimeComparison* FileComparison;
   std::string GraphVizFile;
   std::vector<std::string> DebugConfigs;
+  InstalledFilesMap InstalledFiles;
 
   void UpdateConversionPathTable();
 };

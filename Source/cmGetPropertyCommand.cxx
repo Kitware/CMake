@@ -67,12 +67,16 @@ bool cmGetPropertyCommand
     {
     scope = cmProperty::CACHE;
     }
+  else if(args[1] == "INSTALL")
+    {
+    scope = cmProperty::INSTALL;
+    }
   else
     {
     cmOStringStream e;
     e << "given invalid scope " << args[1] << ".  "
       << "Valid scopes are "
-      << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE.";
+      << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE, INSTALL.";
     this->SetError(e.str());
     return false;
     }
@@ -190,6 +194,7 @@ bool cmGetPropertyCommand
       case cmProperty::TEST:        return this->HandleTestMode();
       case cmProperty::VARIABLE:    return this->HandleVariableMode();
       case cmProperty::CACHE:       return this->HandleCacheMode();
+      case cmProperty::INSTALL:       return this->HandleInstallMode();
 
       case cmProperty::CACHED_VARIABLE:
         break; // should never happen
@@ -394,4 +399,34 @@ bool cmGetPropertyCommand::HandleCacheMode()
     }
   this->StoreResult(value);
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGetPropertyCommand::HandleInstallMode()
+{
+  if(this->Name.empty())
+    {
+    this->SetError("not given name for INSTALL scope.");
+    return false;
+    }
+
+  // Get the installed file.
+  cmake* cm = this->Makefile->GetCMakeInstance();
+
+  if(cmInstalledFile* file = cm->GetOrCreateInstalledFile(
+    this->Makefile, this->Name))
+    {
+    std::string value;
+    bool isSet = file->GetProperty(this->PropertyName, value);
+
+    return this->StoreResult(isSet ? value.c_str() : 0);
+    }
+  else
+    {
+    cmOStringStream e;
+    e << "given INSTALL name that could not be found or created: "
+      << this->Name;
+    this->SetError(e.str());
+    return false;
+    }
 }

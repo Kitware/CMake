@@ -18,7 +18,7 @@ class cmProperty
 {
 public:
   enum ScopeType { TARGET, SOURCE_FILE, DIRECTORY, GLOBAL, CACHE,
-                   TEST, VARIABLE, CACHED_VARIABLE };
+                   TEST, VARIABLE, CACHED_VARIABLE, INSTALL };
 
   // set this property
   void Set(const std::string& name, const char *value);

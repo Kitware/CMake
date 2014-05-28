@@ -15,6 +15,7 @@
 #include <cmSystemTools.h>
 #include <cmGeneratedFileStream.h>
 #include <cmCryptoHash.h>
+#include <cmInstalledFile.h>
 #include <CPack/cmCPackLog.h>
 #include <CPack/cmCPackComponentGroup.h>
 
@@ -871,8 +872,11 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       }
     else
       {
+      cmInstalledFile const* installedFile =
+        this->GetInstalledFile(relativePath);
+
       std::string componentId = fileDefinitions.EmitComponentFile(
-        directoryId, id, fullPath, *(this->Patch));
+        directoryId, id, fullPath, *(this->Patch), installedFile);
 
       featureDefinitions.EmitComponentRef(componentId);
 

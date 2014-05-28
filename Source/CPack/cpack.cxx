@@ -257,6 +257,11 @@ int main (int argc, char const* const* argv)
       return 1;
       }
 
+    if ( !cpackBuildConfig.empty() )
+      {
+      globalMF->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
+      }
+
     if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) )
       {
       cpackConfigFile =
@@ -316,10 +321,6 @@ int main (int argc, char const* const* argv)
         globalMF->AddDefinition("CPACK_PACKAGE_DIRECTORY",
                                 cpackProjectDirectory.c_str());
         }
-      }
-    if ( !cpackBuildConfig.empty() )
-      {
-      globalMF->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
       }
     cpackDefinitions::MapType::iterator cdit;
     for ( cdit = definitions.Map.begin();

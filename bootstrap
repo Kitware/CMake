@@ -232,6 +232,7 @@ CMAKE_CXX_SOURCES="\
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
+  cmCPackPropertiesGenerator \
   cmDefinitions \
   cmDepends \
   cmDependsC \
@@ -258,6 +259,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpression \
   cmGlobalGenerator \
   cmLocalGenerator \
+  cmInstalledFile \
   cmInstallGenerator \
   cmInstallExportGenerator \
   cmInstallFilesGenerator \
