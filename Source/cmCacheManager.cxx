@@ -751,11 +751,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key,
     }
   e.SetProperty("HELPSTRING", helpString? helpString :
                 "(This variable does not exist and should not be used)");
-  if (this->Cache[key].Value == e.Value)
-    {
-    this->CMakeInstance->UnwatchUnusedCli(key);
-    }
-  this->Cache[key] = e;
+  this->CMakeInstance->UnwatchUnusedCli(key);
 }
 
 bool cmCacheManager::CacheIterator::IsAtEnd() const
