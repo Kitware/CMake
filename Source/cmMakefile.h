@@ -1121,7 +1121,7 @@ private:
   void CheckNeededCLanguage(const std::string& feature, bool& needC90,
                             bool& needC99, bool& needC11) const;
   void CheckNeededCxxLanguage(const std::string& feature, bool& needCxx98,
-                              bool& needCxx11) const;
+                              bool& needCxx11, bool& needCxx14) const;
 
   bool HaveCFeatureAvailable(cmTarget const* target,
                              const std::string& feature) const;

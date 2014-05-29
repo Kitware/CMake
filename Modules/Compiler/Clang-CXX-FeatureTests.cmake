@@ -7,7 +7,9 @@ set(testable_features
   cxx_alignas
   cxx_attributes
   cxx_auto_type
+  cxx_binary_literals
   cxx_constexpr
+  cxx_contextual_conversions
   cxx_decltype
   cxx_decltype_incomplete_return_types
   cxx_default_function_template_args
@@ -25,6 +27,8 @@ set(testable_features
   cxx_range_for
   cxx_raw_string_literals
   cxx_reference_qualified_functions
+  cxx_relaxed_constexpr
+  cxx_return_type_deduction
   cxx_rvalue_references
   cxx_static_assert
   cxx_strong_enums
@@ -32,6 +36,7 @@ set(testable_features
   cxx_unicode_literals
   cxx_unrestricted_unions
   cxx_user_literals
+  cxx_variable_templates
   cxx_variadic_templates
 )
 
@@ -43,12 +48,24 @@ endforeach()
 
 unset(testable_features)
 
+set(_cmake_feature_test_cxx_aggregate_default_initializers "${_cmake_oldestSupported} && __has_feature(cxx_aggregate_nsdmi)")
+
 set(_cmake_feature_test_cxx_trailing_return_types "${_cmake_oldestSupported} && __has_feature(cxx_trailing_return)")
 set(_cmake_feature_test_cxx_alignof "${_cmake_oldestSupported} && __has_feature(cxx_alignas)")
 set(_cmake_feature_test_cxx_final "${_cmake_oldestSupported} && __has_feature(cxx_override_control)")
 set(_cmake_feature_test_cxx_override "${_cmake_oldestSupported} && __has_feature(cxx_override_control)")
 set(_cmake_feature_test_cxx_uniform_initialization "${_cmake_oldestSupported} && __has_feature(cxx_generalized_initializers)")
 set(_cmake_feature_test_cxx_defaulted_move_initializers "${_cmake_oldestSupported} && __has_feature(cxx_defaulted_functions)")
+set(_cmake_feature_test_cxx_lambda_init_captures "${_cmake_oldestSupported} && __has_feature(cxx_init_captures)")
+
+set(Clang34_CXX14 "((__clang_major__ * 100) + __clang_minor__) >= 304 && __cplusplus > 201103L")
+# http://llvm.org/bugs/show_bug.cgi?id=19242
+set(_cmake_feature_test_cxx_attribute_deprecated "${Clang34_CXX14}")
+# http://llvm.org/bugs/show_bug.cgi?id=19698
+set(_cmake_feature_test_cxx_decltype_auto "${Clang34_CXX14}")
+set(_cmake_feature_test_cxx_digit_separators "${Clang34_CXX14}")
+# http://llvm.org/bugs/show_bug.cgi?id=19674
+set(_cmake_feature_test_cxx_generic_lambdas "${Clang34_CXX14}")
 
 # TODO: Should be supported by Clang 3.1
 set(Clang31_CXX11 "${_cmake_oldestSupported} && __cplusplus >= 201103L")
