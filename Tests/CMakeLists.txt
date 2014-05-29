@@ -2184,6 +2184,24 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       "Process file.*foo.py.*Total LOC:.*13.*Percentage Coverage: 84.62.*"
       ENVIRONMENT COVFILE=)
 
+  # Adding a test case for non-python Cobertura Coverage
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/CoberturaCoverage/DartConfiguration.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/CoberturaCoverage/DartConfiguration.tcl")
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/CoberturaCoverage/coverage.xml.in"
+     "${CMake_BINARY_DIR}/Testing/CoberturaCoverage/coverage.xml")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/CoberturaCoverage/src"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/CoberturaCoverage")
+  add_test(NAME CTestCoberturaCoverage
+    COMMAND cmake -E chdir
+    ${CMake_BINARY_DIR}/Testing/CoberturaCoverage
+    $<TARGET_FILE:ctest> -T Coverage --debug)
+  set_tests_properties(CTestCoberturaCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*CoverageTest.java.*Total LOC:.*18.*Percentage Coverage: 72.22.*"
+      ENVIRONMENT COVFILE=)
+
   function(add_config_tests cfg)
     set(base "${CMake_BINARY_DIR}/Tests/CTestConfig")
 

@@ -34,6 +34,9 @@ public:
   cmParseCoberturaCoverage(cmCTestCoverageHandlerContainer& cont,
     cmCTest* ctest);
 
+  bool inSources;
+  bool inSource;
+  std::vector<std::string> filepaths;
   //! Read the XML produced by running `coverage xml`
   bool ReadCoverageXML(const char* xmlFile);
 
