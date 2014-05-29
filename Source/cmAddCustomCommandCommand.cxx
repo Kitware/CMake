@@ -173,6 +173,10 @@ bool cmAddCustomCommandCommand
           break;
         }
 
+      if (cmSystemTools::FileIsFullPath(filename.c_str()))
+        {
+        filename = cmSystemTools::CollapseFullPath(filename);
+        }
        switch (doing)
          {
          case doing_working_directory:

@@ -456,3 +456,30 @@ add_custom_target(source_in_custom_target SOURCES source_in_custom_target.cpp)
 set_property(SOURCE source_in_custom_target
   PROPERTY COMPILE_DEFINITIONS "TEST"
 )
+
+set(gen_path "${CMAKE_CURRENT_BINARY_DIR}//./foo")
+set(gen_file "${gen_path}/foo.cxx")
+
+add_custom_command(
+  OUTPUT "${gen_file}"
+  # Make sure the output directory exists before trying to write to it.
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E touch "${gen_file}"
+)
+
+add_library(NormOutput "${gen_file}")
+
+set(gen_path "${gen_path}/bar")
+set(gen_file "${gen_path}/bar.cxx")
+
+add_custom_command(
+  OUTPUT "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${gen_path}"
+)
+
+add_custom_command(
+  OUTPUT "${gen_file}"
+  DEPENDS "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E touch "${gen_file}")
+
+add_library(NormDepends "${gen_file}")

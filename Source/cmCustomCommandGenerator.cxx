@@ -103,8 +103,18 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
       {
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
                                               = this->GE->Parse(*i);
+      std::vector<std::string> result;
       cmSystemTools::ExpandListArgument(
-                  cge->Evaluate(this->Makefile, this->Config), this->Depends);
+                  cge->Evaluate(this->Makefile, this->Config), result);
+      for (std::vector<std::string>::iterator it = result.begin();
+          it != result.end(); ++it)
+        {
+        if (cmSystemTools::FileIsFullPath(it->c_str()))
+          {
+          *it = cmSystemTools::CollapseFullPath(*it);
+          }
+        }
+      this->Depends.insert(this->Depends.end(), result.begin(), result.end());
       }
     }
   return this->Depends;
