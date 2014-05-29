@@ -486,34 +486,34 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[] =
    cmVS7FlagTable::UserValue},
 
   // boolean flags
-  {"BufferSecurityCheck", "GS", "Buffer security check", "TRUE", 0},
-  {"BufferSecurityCheck", "GS-", "Turn off Buffer security check", "FALSE", 0},
+  {"BufferSecurityCheck", "GS", "Buffer security check", "true", 0},
+  {"BufferSecurityCheck", "GS-", "Turn off Buffer security check", "false", 0},
   {"Detect64BitPortabilityProblems", "Wp64",
-   "Detect 64-bit Portability Problems", "TRUE", 0},
+   "Detect 64-bit Portability Problems", "true", 0},
   {"EnableFiberSafeOptimizations", "GT", "Enable Fiber-safe Optimizations",
-   "TRUE", 0},
+   "true", 0},
   {"EnableFunctionLevelLinking", "Gy",
-   "EnableFunctionLevelLinking", "TRUE", 0},
-  {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "TRUE", 0},
-  {"GlobalOptimizations", "Og", "Global Optimize", "TRUE", 0},
+   "EnableFunctionLevelLinking", "true", 0},
+  {"EnableIntrinsicFunctions", "Oi", "EnableIntrinsicFunctions", "true", 0},
+  {"GlobalOptimizations", "Og", "Global Optimize", "true", 0},
   {"ImproveFloatingPointConsistency", "Op",
-   "ImproveFloatingPointConsistency", "TRUE", 0},
-  {"MinimalRebuild", "Gm", "minimal rebuild", "TRUE", 0},
-  {"OmitFramePointers", "Oy", "OmitFramePointers", "TRUE", 0},
-  {"OptimizeForWindowsApplication", "GA", "Optimize for windows", "TRUE", 0},
+   "ImproveFloatingPointConsistency", "true", 0},
+  {"MinimalRebuild", "Gm", "minimal rebuild", "true", 0},
+  {"OmitFramePointers", "Oy", "OmitFramePointers", "true", 0},
+  {"OptimizeForWindowsApplication", "GA", "Optimize for windows", "true", 0},
   {"RuntimeTypeInfo", "GR",
-   "Turn on Run time type information for c++", "TRUE", 0},
+   "Turn on Run time type information for c++", "true", 0},
   {"RuntimeTypeInfo", "GR-",
-   "Turn off Run time type information for c++", "FALSE", 0},
-  {"SmallerTypeCheck", "RTCc", "smaller type check", "TRUE", 0},
-  {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "TRUE", 0},
+   "Turn off Run time type information for c++", "false", 0},
+  {"SmallerTypeCheck", "RTCc", "smaller type check", "true", 0},
+  {"SuppressStartupBanner", "nologo", "SuppressStartupBanner", "true", 0},
   {"WholeProgramOptimization", "GL",
-   "Enables whole program optimization", "TRUE", 0},
+   "Enables whole program optimization", "true", 0},
   {"WholeProgramOptimization", "GL-",
-   "Disables whole program optimization", "FALSE", 0},
-  {"WarnAsError", "WX", "Treat warnings as errors", "TRUE", 0},
+   "Disables whole program optimization", "false", 0},
+  {"WarnAsError", "WX", "Treat warnings as errors", "true", 0},
   {"BrowseInformation", "FR", "Generate browse information", "1", 0},
-  {"StringPooling", "GF", "Enable StringPooling", "TRUE", 0},
+  {"StringPooling", "GF", "Enable StringPooling", "true", 0},
   {0,0,0,0,0}
 };
 
@@ -523,8 +523,8 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
 {
   // option flags (some flags map to the same option)
   {"GenerateManifest", "MANIFEST:NO",
-   "disable manifest generation", "FALSE", 0},
-  {"GenerateManifest", "MANIFEST", "enable manifest generation", "TRUE", 0},
+   "disable manifest generation", "false", 0},
+  {"GenerateManifest", "MANIFEST", "enable manifest generation", "true", 0},
   {"LinkIncremental", "INCREMENTAL:NO", "link incremental", "1", 0},
   {"LinkIncremental", "INCREMENTAL:YES", "link incremental", "2", 0},
   {"CLRUnmanagedCodeCheck", "CLRUNMANAGEDCODECHECK:NO", "", "false", 0},
@@ -540,7 +540,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {"IgnoreDefaultLibraryNames", "NODEFAULTLIB:", "default libs to ignore", "",
   cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
   {"IgnoreAllDefaultLibraries", "NODEFAULTLIB", "ignore all default libs",
-   "TRUE", 0},
+   "true", 0},
   {"FixedBaseAddress", "FIXED:NO", "Generate a relocation section", "1", 0},
   {"FixedBaseAddress", "FIXED", "Image must be loaded at a fixed address",
    "2", 0},
@@ -579,7 +579,7 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
    "No assembly even if CLR information is present in objects.", "true", 0},
   {"ModuleDefinitionFile", "DEF:", "add an export def file", "",
    cmVS7FlagTable::UserValue},
-  {"GenerateMapFile", "MAP", "enable generation of map file", "TRUE", 0},
+  {"GenerateMapFile", "MAP", "enable generation of map file", "true", 0},
   {0,0,0,0,0}
 };
 
@@ -782,7 +782,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
        << "\"\n"
        << "\t\t\tConfigurationType=\"" << configType << "\"\n"
        << "\t\t\tUseOfMFC=\"" << mfcFlag << "\"\n"
-       << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"FALSE\"\n";
+       << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"false\"\n";
 
   // If unicode is enabled change the character set to unicode, if not
   // then default to MBCS.
@@ -895,7 +895,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     fout << ipath << ";";
     }
   fout << "\"\n";
-  fout << "\t\t\t\tMkTypLibCompatible=\"FALSE\"\n";
+  fout << "\t\t\t\tMkTypLibCompatible=\"false\"\n";
   if( this->PlatformName == "x64" )
     {
     fout << "\t\t\t\tTargetEnvironment=\"3\"\n";
@@ -908,7 +908,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     fout << "\t\t\t\tTargetEnvironment=\"1\"\n";
     }
-  fout << "\t\t\t\tGenerateStublessProxies=\"TRUE\"\n";
+  fout << "\t\t\t\tGenerateStublessProxies=\"true\"\n";
   fout << "\t\t\t\tTypeLibraryName=\"$(InputName).tlb\"\n";
   fout << "\t\t\t\tOutputDirectory=\"$(IntDir)\"\n";
   fout << "\t\t\t\tHeaderFileName=\"$(InputName).h\"\n";
@@ -1132,7 +1132,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       this->ConvertToXMLOutputPathSingle(temp.c_str()) << "\"\n";
     if(targetOptions.IsDebug())
       {
-      fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
+      fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
     if(this->WindowsCEProject)
       {
@@ -1230,7 +1230,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
          << "\"\n";
     if(targetOptions.IsDebug())
       {
-      fout << "\t\t\t\tGenerateDebugInformation=\"TRUE\"\n";
+      fout << "\t\t\t\tGenerateDebugInformation=\"true\"\n";
       }
     if ( this->WindowsCEProject )
       {

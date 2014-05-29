@@ -1024,11 +1024,11 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] =
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
    cmVS7FlagTable::UserValueRequired},
-  {"WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "TRUE", 0},
+  {"WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "true", 0},
 
   // Exception handling mode.  If no entries match, it will be FALSE.
-  {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE", 0},
-  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "TRUE", 0},
+  {"ExceptionHandling", "GX", "enable c++ exceptions", "true", 0},
+  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "true", 0},
   // The EHa option does not have an IDE setting.  Let it go to false,
   // and have EHa passed on the command line by leaving out the table
   // entry.
