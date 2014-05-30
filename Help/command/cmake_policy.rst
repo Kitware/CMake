@@ -36,6 +36,9 @@ version and tells newer CMake versions to warn about their new policies.
 The policy version specified must be at least 2.4 or the command will
 report an error.
 
+Note that the :command:`cmake_minimum_required(VERSION)`
+command implicitly calls ``cmake_policy(VERSION)`` too.
+
 Setting Policies Explicitly
 '''''''''''''''''''''''''''
 
@@ -79,6 +82,9 @@ entries on the policy stack::
 
 Each ``PUSH`` must have a matching ``POP`` to erase any changes.
 This is useful to make temporary changes to policy settings.
+Calls to the :command:`cmake_minimum_required(VERSION)`,
+``cmake_policy(VERSION)``, or ``cmake_policy(SET)`` commands
+influence only the current top of the policy stack.
 
 Commands created by the :command:`function` and :command:`macro`
 commands record policy settings when they are created and
