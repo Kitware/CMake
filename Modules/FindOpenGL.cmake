@@ -2,32 +2,48 @@
 # FindOpenGL
 # ----------
 #
-# Try to find OpenGL
+# FindModule for OpenGL and GLU.
 #
-# Once done this will define
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module defines the :prop_tgt:`IMPORTED` targets:
 #
-#   OPENGL_FOUND        - system has OpenGL
-#   OPENGL_XMESA_FOUND  - system has XMESA
-#   OPENGL_GLU_FOUND    - system has GLU
-#   OPENGL_INCLUDE_DIR  - the GL include directory
-#   OPENGL_LIBRARIES    - Link these to use OpenGL and GLU
+# ``OpenGL::OpenGL``
+#  Defined if the system has OpenGL.
+# ``OpenGL::GLU``
+#  Defined if the system has GLU.
 #
+# Result Variables
+# ^^^^^^^^^^^^^^^^
 #
+# This module sets the following variables:
 #
-# If you want to use just GL you can use these values
+# ``OPENGL_FOUND``
+#  True, if the system has OpenGL.
+# ``OPENGL_XMESA_FOUND``
+#  True, if the system has XMESA.
+# ``OPENGL_GLU_FOUND``
+#  True, if the system has GLU.
+# ``OPENGL_INCLUDE_DIR``
+#  Path to the OpenGL include directory.
+# ``OPENGL_LIBRARIES``
+#  Paths to the OpenGL and GLU libraries.
 #
-# ::
+# If you want to use just GL you can use these values:
 #
-#   OPENGL_gl_LIBRARY   - Path to OpenGL Library
-#   OPENGL_glu_LIBRARY  - Path to GLU Library
+# ``OPENGL_gl_LIBRARY``
+#  Path to the OpenGL library.
+# ``OPENGL_glu_LIBRARY``
+#  Path to the GLU library.
 #
-#
-#
-# On OSX default to using the framework version of opengl People will
+# OSX Specific
+# ^^^^^^^^^^^^
+# 
+# On OSX default to using the framework version of OpenGL. People will
 # have to change the cache values of OPENGL_glu_LIBRARY and
-# OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX
+# OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX.
+
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
