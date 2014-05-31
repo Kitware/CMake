@@ -16,6 +16,7 @@
 
 #include <signal.h>
 #include <sys/ioctl.h>
+#include <locale.h>
 
 #include "cmCursesMainForm.h"
 #include "cmCursesStandardIncludes.h"
@@ -82,6 +83,8 @@ void CMakeMessageHandler(const char* message, const char* title, bool&,
 
 int main(int argc, char const* const* argv)
 {
+  setlocale(LC_ALL, "");
+
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();
