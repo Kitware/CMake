@@ -465,8 +465,49 @@ with an explicit target.
 Style
 -----
 
-Style: Command Signatures
-^^^^^^^^^^^^^^^^^^^^^^^^^
+Style: Section Headers
+^^^^^^^^^^^^^^^^^^^^^^
+
+When marking section titles, make the section decoration line as long as
+the title text.  Use only a line below the title, not above. For
+example:
+
+.. code-block:: rst
+
+  Title Text
+  ----------
+
+Capitalize the first letter of each non-minor word in the title.
+
+Style: Whitespace
+^^^^^^^^^^^^^^^^^
+
+Use two spaces for indentation.  Use two spaces between sentences in
+prose.
+
+Style: Line Length
+^^^^^^^^^^^^^^^^^^
+
+Prefer to restrict the width of lines to 75-80 columns.  This is not a
+hard restriction, but writing new paragraphs wrapped at 75 columns
+allows space for adding minor content without significant re-wrapping of
+content.
+
+Style: Prose
+^^^^^^^^^^^^
+
+Use American English spellings in prose.
+
+Style: Starting Literal Blocks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Prefer to mark the start of literal blocks with ``::`` at the end of
+the preceding paragraph. In cases where the following block gets
+a ``code-block`` marker, put a single ``:`` at the end of the preceding
+paragraph.
+
+Style: CMake Command Signatures
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Command signatures should be marked up as plain literal blocks, not as
 cmake ``code-blocks``.
@@ -486,6 +527,12 @@ line. That is, use:
 
   This signature is used for ...
 
+Signatures of commands should wrap optional parts with square brackets,
+and should mark list of optional arguments with an ellipsis (``...``).
+Elements of the signature which are specified by the user should be
+specified with angle brackets, and may be referred to in prose using
+``inline-literal`` syntax.
+
 Style: Boolean Constants
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -495,59 +542,11 @@ may be "enabled" and "disabled". Use "``True``" and "``False``" for
 inherent values which can't be modified after being set, such as the
 :prop_tgt:`IMPORTED` property of a build target.
 
-Style: Whitespace
-^^^^^^^^^^^^^^^^^
-
-Use two spaces for indentation.  Use two spaces between sentences in
-prose.
-
-Style: Starting Literal Blocks
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Prefer to mark the start of literal blocks with ``::`` at the end of
-the preceding paragraph. In cases where the following block gets
-a ``code-block`` marker, put a single ``:`` at the end of the preceding
-paragraph.
-
-Style: Line Length
-^^^^^^^^^^^^^^^^^^
-
-Prefer to restrict the width of lines to 75-80 columns.  This is not a
-hard restriction, but writing new paragraphs wrapped at 75 columns
-allows space for adding minor content without significant re-wrapping of
-content.
-
-Style: Document Self-References
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Mark up self-references with  ``inline-literal`` syntax. For example,
-within the add_executable command documentation, use
-
-.. code-block:: rst
-
-  ``add_executable``
-
-not
-
-.. code-block:: rst
-
-  :command:`add_executable`
-
-which is used elsewhere.
-
-Style: Linkable References
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Mark up all other linkable references as links, including repeats. An
-alternative, which is used by wikipedia (`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
-is to link to a reference only once per article. That style is not used
-in CMake documentation.
-
-Style: Technical Terms
+Style: Inline Literals
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Mark up references to keywords in signatures, file names, and other
-technical terms with ``inline-literl`` syntax, for example:
+technical terms with ``inline-literal`` syntax, for example:
 
 .. code-block:: rst
 
@@ -555,8 +554,17 @@ technical terms with ``inline-literl`` syntax, for example:
   :prop_tgt:`WIN32_EXECUTABLE` target property is enabled. That command
   creates the file ``<name>.exe`` on Windows.
 
-Style: Referencing Concepts
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Style: Cross-References
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Mark up linkable references as links, including repeats.
+An alternative, which is used by wikipedia
+(`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
+is to link to a reference only once per article. That style is not used
+in CMake documentation.
+
+Style: Referencing CMake Concepts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If referring to a concept which corresponds to a property, and that
 concept is described in a high-level manual, prefer to link to the
@@ -598,26 +606,12 @@ link to the primary manual, which provides high-level information.  Only
 particular information relating to the command should be in the
 documentation of the command.
 
-Style: Section Titles
-^^^^^^^^^^^^^^^^^^^^^
-
-When marking section titles, make the section decoration line as long as
-the title text.  Use only a line below the title, not above. For
-example:
-
-.. code-block:: rst
-
-  Title Text
-  ----------
-
-Capitalize the first letter of each non-minor word in the title.
-
 Style: Referencing CMake Domain Objects
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-When referring to properties, variables, commands etc, prefer to link
-to the target object and follow that with the type of object it is.
-For example:
+When referring to `CMake Domain`_ objects such as properties, variables,
+commands etc, prefer to link to the target object and follow that with
+the type of object it is.  For example:
 
 .. code-block:: rst
 
@@ -636,19 +630,21 @@ referred to before the link:
 
   If policy :prop_tgt:`CMP0022` is set to ``NEW`` the behavior is ...
 
-Style: Command Signature Markup
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+However, markup self-references with ``inline-literal`` syntax.
+For example, within the :command:`add_executable` command
+documentation, use
 
-Signatures of commands should wrap optional parts with square brackets,
-and should mark list of optional arguments with an ellipsis (``...``).
-Elements of the signature which are specified by the user should be
-specified with angle brackets, and may be referred to in prose using
-``inline-literal`` syntax.
+.. code-block:: rst
 
-Style: Prose
-^^^^^^^^^^^^
+  ``add_executable``
 
-Use American English spellings in prose.
+not
+
+.. code-block:: rst
+
+  :command:`add_executable`
+
+which is used elsewhere.
 
 Modules
 =======
