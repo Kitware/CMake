@@ -128,6 +128,8 @@ versions of CMake.  Do not use them in new code.
    /command/variable_requires
    /command/write_file
 
+.. _`CTest Commands`:
+
 CTest Commands
 ==============
 
