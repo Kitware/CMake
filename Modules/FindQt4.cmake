@@ -1,9 +1,9 @@
 #.rst:
 # FindQt4
-# *******
+# -------
 #
 # Finding and Using Qt4
-# =====================
+# ^^^^^^^^^^^^^^^^^^^^^
 #
 # This module can be used to find Qt4.  The most important issue is that
 # the Qt4 qmake is available via the system path.  This qmake is then
@@ -30,7 +30,7 @@
 #  property to ``TRUE`` on the executable.
 #
 # Qt Build Tools
-# ==============
+# ^^^^^^^^^^^^^^
 #
 # Qt relies on some bundled tools for code generation, such as ``moc`` for
 # meta-object code generation,``uic`` for widget layout and population,
@@ -39,7 +39,7 @@
 # are met.  See :manual:`cmake-qt(7)` for more.
 #
 # Qt Macros
-# =========
+# ^^^^^^^^^
 #
 # In some cases it can be necessary or useful to invoke the Qt build tools in a
 # more-manual way. Several macros are available to add targets for such uses.
@@ -194,7 +194,7 @@
 #
 #
 # IMPORTED Targets
-# ================
+# ^^^^^^^^^^^^^^^^
 #
 # A particular Qt library may be used by using the corresponding
 # :prop_tgt:`IMPORTED` target with the :command:`target_link_libraries`
@@ -271,7 +271,7 @@
 #  The phonon target
 #
 # Result Variables
-# ================
+# ^^^^^^^^^^^^^^^^
 #
 #   Below is a detailed list of variables that FindQt4.cmake sets.
 #
