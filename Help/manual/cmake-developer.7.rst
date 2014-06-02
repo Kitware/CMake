@@ -479,6 +479,15 @@ example:
 
 Capitalize the first letter of each non-minor word in the title.
 
+The section header underline character hierarchy is
+
+* ``#``: Manual group (part) in the master document
+* ``*``: Manual (chapter) title
+* ``=``: Section within a manual
+* ``-``: Subsection or `CMake Domain`_ object document title
+* ``^``: Subsubsection or `CMake Domain`_ object document section
+* ``"``: Paragraph or `CMake Domain`_ object document subsection
+
 Style: Whitespace
 ^^^^^^^^^^^^^^^^^
 
