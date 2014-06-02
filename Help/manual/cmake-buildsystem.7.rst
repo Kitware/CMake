@@ -578,9 +578,19 @@ expands to the installation prefix when imported by a consuming project.
 Include directories usage requirements commonly differ between the build-tree
 and the install-tree.  The ``BUILD_INTERFACE`` and ``INSTALL_INTERFACE``
 generator expressions can be used to describe separate usage requirements
-based on the usage location.  Relative paths are allowed within these
-expressions, and are interpreted relative to the current source directory
-or the installation prefix, as appropriate.
+based on the usage location.  Relative paths are allowed within the
+``INSTALL_INTERFACE`` expression and are interpreted relative to the
+installation prefix.  For example:
+
+.. code-block:: cmake
+
+  add_library(ClimbingStats climbingstats.cpp)
+  target_include_directories(ClimbingStats INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/generated>
+    $<INSTALL_INTERFACE:/absolute/path>
+    $<INSTALL_INTERFACE:relative/path>
+    $<INSTALL_INTERFACE:$<INSTALL_PREFIX>/$<CONFIG>/generated>
+  )
 
 Two convenience APIs are provided relating to include directories usage
 requirements.  The :variable:`CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE` variable
