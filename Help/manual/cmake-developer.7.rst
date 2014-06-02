@@ -465,168 +465,190 @@ with an explicit target.
 Style
 -----
 
-1)
-  Command signatures should be marked up as plain literal blocks, not as
-  cmake ``code-blocks``.
+Style: Command Signatures
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
-2)
-  Signatures are separated from preceding content by a horizontal
-  line. That is, use:
+Command signatures should be marked up as plain literal blocks, not as
+cmake ``code-blocks``.
 
-  .. code-block:: rst
+Signatures are separated from preceding content by a horizontal
+line. That is, use:
 
-    ... preceding paragraph.
+.. code-block:: rst
 
-    ---------------------------------------------------------------------
+  ... preceding paragraph.
 
-    ::
+  ---------------------------------------------------------------------
 
-      add_library(<lib> ...)
+  ::
 
-    This signature is used for ...
+    add_library(<lib> ...)
 
-3)
-  Use "``OFF``" and "``ON``" for boolean values which can be modified by
-  the user, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`. Such properties
-  may be "enabled" and "disabled". Use "``True``" and "``False``" for
-  inherent values which can't be modified after being set, such as the
-  :prop_tgt:`IMPORTED` property of a build target.
+  This signature is used for ...
 
-4)
-  Use two spaces for indentation.  Use two spaces between sentences in
-  prose.
+Style: Boolean Constants
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-5)
-  Prefer to mark the start of literal blocks with ``::`` at the end of
-  the preceding paragraph. In cases where the following block gets
-  a ``code-block`` marker, put a single ``:`` at the end of the preceding
-  paragraph.
+Use "``OFF``" and "``ON``" for boolean values which can be modified by
+the user, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`. Such properties
+may be "enabled" and "disabled". Use "``True``" and "``False``" for
+inherent values which can't be modified after being set, such as the
+:prop_tgt:`IMPORTED` property of a build target.
 
-6)
-  Prefer to restrict the width of lines to 75-80 columns.  This is not a
-  hard restriction, but writing new paragraphs wrapped at 75 columns
-  allows space for adding minor content without significant re-wrapping of
-  content.
+Style: Whitespace
+^^^^^^^^^^^^^^^^^
 
-7)
-  Mark up self-references with  ``inline-literal`` syntax. For example,
-  within the add_executable command documentation, use
+Use two spaces for indentation.  Use two spaces between sentences in
+prose.
 
-  .. code-block:: rst
+Style: Starting Literal Blocks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    ``add_executable``
+Prefer to mark the start of literal blocks with ``::`` at the end of
+the preceding paragraph. In cases where the following block gets
+a ``code-block`` marker, put a single ``:`` at the end of the preceding
+paragraph.
 
-  not
+Style: Line Length
+^^^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+Prefer to restrict the width of lines to 75-80 columns.  This is not a
+hard restriction, but writing new paragraphs wrapped at 75 columns
+allows space for adding minor content without significant re-wrapping of
+content.
 
-    :command:`add_executable`
+Style: Document Self-References
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  which is used elsewhere.
+Mark up self-references with  ``inline-literal`` syntax. For example,
+within the add_executable command documentation, use
 
-8)
-  Mark up all other linkable references as links, including repeats. An
-  alternative, which is used by wikipedia (`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
-  is to link to a reference only once per article. That style is not used
-  in CMake documentation.
+.. code-block:: rst
 
-9)
-  Mark up references to keywords in signatures, file names, and other
-  technical terms with ``inline-literl`` syntax, for example:
+  ``add_executable``
 
-  .. code-block:: rst
+not
 
-    If ``WIN32`` is used with :command:`add_executable`, the
-    :prop_tgt:`WIN32_EXECUTABLE` target property is enabled. That command
-    creates the file ``<name>.exe`` on Windows.
+.. code-block:: rst
 
+  :command:`add_executable`
 
-10)
-  If referring to a concept which corresponds to a property, and that
-  concept is described in a high-level manual, prefer to link to the
-  manual section instead of the property. For example:
+which is used elsewhere.
 
-  .. code-block:: rst
+Style: Linkable References
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    This command creates an :ref:`Imported Target <Imported Targets>`.
+Mark up all other linkable references as links, including repeats. An
+alternative, which is used by wikipedia (`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
+is to link to a reference only once per article. That style is not used
+in CMake documentation.
 
-  instead of:
+Style: Technical Terms
+^^^^^^^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+Mark up references to keywords in signatures, file names, and other
+technical terms with ``inline-literl`` syntax, for example:
 
-    This command creates an :prop_tgt:`IMPORTED` target.
+.. code-block:: rst
 
-  The latter should be used only when referring specifically to the
-  property.
+  If ``WIN32`` is used with :command:`add_executable`, the
+  :prop_tgt:`WIN32_EXECUTABLE` target property is enabled. That command
+  creates the file ``<name>.exe`` on Windows.
 
-  References to manual sections are not automatically created by creating
-  a section, but code such as:
+Style: Referencing Concepts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+If referring to a concept which corresponds to a property, and that
+concept is described in a high-level manual, prefer to link to the
+manual section instead of the property. For example:
 
-    .. _`Imported Targets`:
+.. code-block:: rst
 
-  creates a suitable anchor.  Use an anchor name which matches the name
-  of the corresponding section.  Refer to the anchor using a
-  cross-reference with specified text.
+  This command creates an :ref:`Imported Target <Imported Targets>`.
 
-  Imported Targets need the ``IMPORTED`` term marked up with care in
-  particular because the term may refer to a command keyword
-  (``IMPORTED``), a target property (:prop_tgt:`IMPORTED`), or a
-  concept (:ref:`Imported Targets`).
+instead of:
 
-11)
-  Where a property, command or variable is related conceptually to others,
-  by for example, being related to the buildsystem description, generator
-  expressions or Qt, each relevant property, command or variable should
-  link to the primary manual, which provides high-level information.  Only
-  particular information relating to the command should be in the
-  documentation of the command.
+.. code-block:: rst
 
-12)
-  When marking section titles, make the section decoration line as long as
-  the title text.  Use only a line below the title, not above. For
-  example:
+  This command creates an :prop_tgt:`IMPORTED` target.
 
-  .. code-block:: rst
+The latter should be used only when referring specifically to the
+property.
 
-    Title Text
-    ----------
+References to manual sections are not automatically created by creating
+a section, but code such as:
 
-  Capitalize the first letter of each non-minor word in the title.
+.. code-block:: rst
 
-13)
-  When referring to properties, variables, commands etc, prefer to link
-  to the target object and follow that with the type of object it is.
-  For example:
+  .. _`Imported Targets`:
 
-  .. code-block:: rst
+creates a suitable anchor.  Use an anchor name which matches the name
+of the corresponding section.  Refer to the anchor using a
+cross-reference with specified text.
 
-    Set the :prop_tgt:`AUTOMOC` target property to ``ON``.
+Imported Targets need the ``IMPORTED`` term marked up with care in
+particular because the term may refer to a command keyword
+(``IMPORTED``), a target property (:prop_tgt:`IMPORTED`), or a
+concept (:ref:`Imported Targets`).
 
-  Instead of
+Where a property, command or variable is related conceptually to others,
+by for example, being related to the buildsystem description, generator
+expressions or Qt, each relevant property, command or variable should
+link to the primary manual, which provides high-level information.  Only
+particular information relating to the command should be in the
+documentation of the command.
 
-  .. code-block:: rst
+Style: Section Titles
+^^^^^^^^^^^^^^^^^^^^^
 
-    Set the target property :prop_tgt:`AUTOMOC` to ``ON``.
+When marking section titles, make the section decoration line as long as
+the title text.  Use only a line below the title, not above. For
+example:
 
-  The ``policy`` directive is an exception, and the type us usually
-  referred to before the link:
+.. code-block:: rst
 
-  .. code-block:: rst
+  Title Text
+  ----------
 
-    If policy :prop_tgt:`CMP0022` is set to ``NEW`` the behavior is ...
+Capitalize the first letter of each non-minor word in the title.
 
-14)
-  Signatures of commands should wrap optional parts with square brackets,
-  and should mark list of optional arguments with an ellipsis (``...``).
-  Elements of the signature which are specified by the user should be
-  specified with angle brackets, and may be referred to in prose using
-  ``inline-literal`` syntax.
+Style: Referencing CMake Domain Objects
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-15)
-  Use American English spellings in prose.
+When referring to properties, variables, commands etc, prefer to link
+to the target object and follow that with the type of object it is.
+For example:
 
+.. code-block:: rst
+
+  Set the :prop_tgt:`AUTOMOC` target property to ``ON``.
+
+Instead of
+
+.. code-block:: rst
+
+  Set the target property :prop_tgt:`AUTOMOC` to ``ON``.
+
+The ``policy`` directive is an exception, and the type us usually
+referred to before the link:
+
+.. code-block:: rst
+
+  If policy :prop_tgt:`CMP0022` is set to ``NEW`` the behavior is ...
+
+Style: Command Signature Markup
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Signatures of commands should wrap optional parts with square brackets,
+and should mark list of optional arguments with an ellipsis (``...``).
+Elements of the signature which are specified by the user should be
+specified with angle brackets, and may be referred to in prose using
+``inline-literal`` syntax.
+
+Style: Prose
+^^^^^^^^^^^^
+
+Use American English spellings in prose.
 
 Modules
 =======
