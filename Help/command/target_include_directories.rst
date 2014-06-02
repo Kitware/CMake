@@ -40,3 +40,17 @@ Arguments to ``target_include_directories`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
+
+Include directories usage requirements commonly differ between the build-tree
+and the install-tree.  The ``BUILD_INTERFACE`` and ``INSTALL_INTERFACE``
+generator expressions can be used to describe separate usage requirements
+based on the usage location.  Relative paths are allowed within the
+``INSTALL_INTERFACE`` expression and are interpreted relative to the
+installation prefix.  For example:
+
+.. code-block:: cmake
+
+  target_include_directories(mylib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/mylib>
+    $<INSTALL_INTERFACE:include/mylib>  # <prefix>/include/mylib
+  )
