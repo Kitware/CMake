@@ -18,7 +18,7 @@ setting is available the ``OLD`` behavior is assumed and a warning is
 produced requesting that the policy be set.
 
 Setting Policies by CMake Version
-'''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``cmake_policy`` command is used to set policies to ``OLD`` or ``NEW``
 behavior.  While setting policies individually is supported, we
@@ -40,7 +40,7 @@ Note that the :command:`cmake_minimum_required(VERSION)`
 command implicitly calls ``cmake_policy(VERSION)`` too.
 
 Setting Policies Explicitly
-'''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -54,7 +54,7 @@ one may fix the project to work with the new behavior and set the
 policy state to ``NEW``.
 
 Checking Policy Settings
-''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -65,7 +65,7 @@ The output ``<variable>`` value will be ``OLD`` or ``NEW`` if the
 policy is set, and empty otherwise.
 
 CMake Policy Stack
-''''''''''''''''''
+^^^^^^^^^^^^^^^^^^
 
 CMake keeps policy settings on a stack, so changes made by the
 cmake_policy command affect only the top of the stack.  A new entry on

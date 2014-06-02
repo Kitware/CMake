@@ -551,7 +551,7 @@ exporting see the :manual:`cmake-packages(7)` manual.
 .. _`Include Directories and Usage Requirements`:
 
 Include Directories and Usage Requirements
-''''''''''''''''''''''''''''''''''''''''''
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Include directories require some special consideration when specified as usage
 requirements and when used with generator expressions.  The
