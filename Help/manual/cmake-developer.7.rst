@@ -808,7 +808,7 @@ Documentation`_ section above.
 
 
 Standard Variable Names
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 For a ``FindXxx.cmake`` module that takes the approach of setting
 variables (either instead of or in addition to creating imported
@@ -914,7 +914,7 @@ them.
 
 
 A Sample Find Module
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^
 
 We will describe how to create a simple find module for a library
 ``Foo``.
