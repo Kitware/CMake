@@ -5,7 +5,7 @@ The C standard whose features are requested to build this target.
 
 This property specifies the C standard whose features are requested
 to build this target.  For some compilers, this results in adding a
-flag such as ``-std=c11`` to the compile line.
+flag such as ``-std=gnu11`` to the compile line.
 
 Supported values are ``90``, ``99`` and ``11``.
 
@@ -17,9 +17,9 @@ means that using:
 
   set_property(TARGET tgt PROPERTY C_STANDARD 11)
 
-with a compiler which does not support ``-std=c11`` or an equivalent
+with a compiler which does not support ``-std=gnu11`` or an equivalent
 flag will not result in an error or warning, but will instead add the
-``-std=c99`` or ``-std=c90`` flag if supported.  This "decay" behavior may
+``-std=gnu99`` or ``-std=gnu90`` flag if supported.  This "decay" behavior may
 be controlled with the :prop_tgt:`C_STANDARD_REQUIRED` target property.
 
 See the :manual:`cmake-compile-features(7)` manual for information on

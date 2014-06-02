@@ -2195,8 +2195,16 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     return;
     }
   std::string extProp = lang + "_EXTENSIONS";
-  bool ext = target->GetPropertyAsBool(extProp);
-  std::string type = ext ? "EXTENSION" : "STANDARD";
+  std::string type = "EXTENSION";
+  bool ext = true;
+  if (const char* extPropValue = target->GetProperty(extProp))
+    {
+    if (cmSystemTools::IsOff(extPropValue))
+      {
+      ext = false;
+      type = "STANDARD";
+      }
+    }
 
   if (target->GetPropertyAsBool(lang + "_STANDARD_REQUIRED"))
     {

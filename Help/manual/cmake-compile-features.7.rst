@@ -47,7 +47,7 @@ be compiled with compiler support for the
 
 In processing the requirement for the ``cxx_constexpr`` feature,
 :manual:`cmake(1)` will ensure that the in-use C++ compiler is capable
-of the feature, and will add any necessary flags such as ``-std=c++11``
+of the feature, and will add any necessary flags such as ``-std=gnu++11``
 to the compile lines of C++ files in the ``mylib`` target.  A
 ``FATAL_ERROR`` is issued if the compiler is not capable of the
 feature.
@@ -59,8 +59,8 @@ for each target.
 
 Such compile flags are added even if the compiler supports the
 particular feature without the flag. For example, the GNU compiler
-supports variadic templates (with a warning) even if ``-std=c++98`` is
-used.  CMake adds the ``-std=c++11`` flag if ``cxx_variadic_templates``
+supports variadic templates (with a warning) even if ``-std=gnu++98`` is
+used.  CMake adds the ``-std=gnu++11`` flag if ``cxx_variadic_templates``
 is specified as a requirement.
 
 In the above example, ``mylib`` requires ``cxx_constexpr`` when it
@@ -76,7 +76,7 @@ known feature), that may be specified with the ``PUBLIC`` or
   # cxx_constexpr is a usage-requirement
   target_compile_features(mylib PUBLIC cxx_constexpr)
 
-  # main.cpp will be compiled with -std=c++11 on GNU for cxx_constexpr.
+  # main.cpp will be compiled with -std=gnu++11 on GNU for cxx_constexpr.
   add_executable(myexe main.cpp)
   target_link_libraries(myexe mylib)
 
@@ -84,16 +84,13 @@ Feature requirements are evaluated transitively by consuming the link
 implementation.  See :manual:`cmake-buildsystem(7)` for more on
 transitive behavior of build properties and usage requirements.
 
-Note that new use of compile feature requirements may expose
-cross-platform bugs in user code.  For example, the GNU compiler uses the
-``gnu++98`` language by default as of GCC version 4.8.  User code may
-be relying on that by expecting the ``typeof`` GNU extension to work.
-However, if the :command:`target_compile_features` command is used to
-specify the requirement for ``cxx_constexpr``, a ``-std=c++11`` flag may
-be added, and the ``typeof`` extension would no longer be available.  The
-solution is to specify that compiler extensions are relied upon by setting
-the :prop_tgt:`CXX_EXTENSIONS` target property to ``ON`` when starting to
-use the :command:`target_compile_features` command.
+Because the :prop_tgt:`CXX_EXTENSIONS` target property is ``ON`` by default,
+CMake uses extended variants of language dialects by default, such as
+``-std=gnu++11`` instead of ``-std=c++11``.  That target property may be
+set to ``OFF`` to use the non-extended variant of the dialect flag.  Note
+that because most compilers enable extensions by default, this could
+expose cross-platform bugs in user code or in the headers of third-party
+dependencies.
 
 Optional Compile Features
 =========================
