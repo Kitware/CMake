@@ -308,6 +308,57 @@ Variables for Languages
    /variable/CMAKE_LANG_SOURCE_FILE_EXTENSIONS
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE_LANG
 
+Variables for CTest
+===================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CTEST_BINARY_DIRECTORY
+   /variable/CTEST_BUILD_COMMAND
+   /variable/CTEST_BUILD_NAME
+   /variable/CTEST_BZR_COMMAND
+   /variable/CTEST_BZR_UPDATE_OPTIONS
+   /variable/CTEST_CHECKOUT_COMMAND
+   /variable/CTEST_CONFIGURATION_TYPE
+   /variable/CTEST_CONFIGURE_COMMAND
+   /variable/CTEST_COVERAGE_COMMAND
+   /variable/CTEST_COVERAGE_EXTRA_FLAGS
+   /variable/CTEST_CURL_OPTIONS
+   /variable/CTEST_CVS_CHECKOUT
+   /variable/CTEST_CVS_COMMAND
+   /variable/CTEST_CVS_UPDATE_OPTIONS
+   /variable/CTEST_DROP_LOCATION
+   /variable/CTEST_DROP_METHOD
+   /variable/CTEST_DROP_SITE
+   /variable/CTEST_DROP_SITE_CDASH
+   /variable/CTEST_DROP_SITE_PASSWORD
+   /variable/CTEST_DROP_SITE_USER
+   /variable/CTEST_GIT_COMMAND
+   /variable/CTEST_GIT_UPDATE_CUSTOM
+   /variable/CTEST_GIT_UPDATE_OPTIONS
+   /variable/CTEST_HG_COMMAND
+   /variable/CTEST_HG_UPDATE_OPTIONS
+   /variable/CTEST_MEMORYCHECK_COMMAND
+   /variable/CTEST_MEMORYCHECK_COMMAND_OPTIONS
+   /variable/CTEST_MEMORYCHECK_SUPPRESSIONS_FILE
+   /variable/CTEST_NIGHTLY_START_TIME
+   /variable/CTEST_P4_CLIENT
+   /variable/CTEST_P4_COMMAND
+   /variable/CTEST_P4_OPTIONS
+   /variable/CTEST_P4_UPDATE_OPTIONS
+   /variable/CTEST_SCP_COMMAND
+   /variable/CTEST_SITE
+   /variable/CTEST_SOURCE_DIRECTORY
+   /variable/CTEST_SVN_COMMAND
+   /variable/CTEST_SVN_OPTIONS
+   /variable/CTEST_SVN_UPDATE_OPTIONS
+   /variable/CTEST_TEST_TIMEOUT
+   /variable/CTEST_TRIGGER_SITE
+   /variable/CTEST_UPDATE_COMMAND
+   /variable/CTEST_UPDATE_OPTIONS
+   /variable/CTEST_USE_LAUNCHERS
+
 Variables for CPack
 ===================
 
