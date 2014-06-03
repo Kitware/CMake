@@ -23,6 +23,7 @@ class cmCustomCommand;
 class cmLocalVisualStudio7Generator;
 class cmComputeLinkInformation;
 class cmVisualStudioGeneratorOptions;
+struct cmIDEFlagTable;
 #include "cmSourceGroup.h"
 
 class cmVisualStudio10TargetGenerator
@@ -97,6 +98,10 @@ private:
   void AddMissingSourceGroups(std::set<cmSourceGroup*>& groupsUsed,
                               const std::vector<cmSourceGroup>& allGroups);
   bool IsResxHeader(const std::string& headerFile);
+
+  cmIDEFlagTable const* GetClFlagTable() const;
+  cmIDEFlagTable const* GetLibFlagTable() const;
+  cmIDEFlagTable const* GetLinkFlagTable() const;
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;

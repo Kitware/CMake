@@ -32,34 +32,37 @@
 
 #include <cmsys/auto_ptr.hxx>
 
-static cmVS7FlagTable const*
-cmVSGetCLFlagTable(cmLocalVisualStudioGenerator* lg)
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+  cmLocalVisualStudioGenerator::VSVersion
+    v = this->LocalGenerator->GetVersion();
+  if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12CLFlagTable; }
-  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
+  else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11CLFlagTable; }
   else
     { return cmVS10CLFlagTable; }
 }
 
-static cmVS7FlagTable const*
-cmVSGetLibFlagTable(cmLocalVisualStudioGenerator* lg)
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+  cmLocalVisualStudioGenerator::VSVersion
+    v = this->LocalGenerator->GetVersion();
+  if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12LibFlagTable; }
-  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
+  else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LibFlagTable; }
   else
     { return cmVS10LibFlagTable; }
 }
 
-static cmVS7FlagTable const*
-cmVSGetLinkFlagTable(cmLocalVisualStudioGenerator* lg)
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+  cmLocalVisualStudioGenerator::VSVersion
+    v = this->LocalGenerator->GetVersion();
+  if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12LinkFlagTable; }
-  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
+  else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LinkFlagTable; }
   else
     { return cmVS10LinkFlagTable; }
@@ -1198,7 +1201,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmVisualStudioGeneratorOptions
         clOptions(this->LocalGenerator,
                   cmVisualStudioGeneratorOptions::Compiler,
-                  cmVSGetCLFlagTable(this->LocalGenerator), 0, this);
+                  this->GetClFlagTable(), 0, this);
       clOptions.Parse(flags.c_str());
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
@@ -1355,7 +1358,7 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   cmsys::auto_ptr<Options> pOptions(
     new Options(this->LocalGenerator, Options::Compiler,
-                cmVSGetCLFlagTable(this->LocalGenerator)));
+                this->GetClFlagTable()));
   Options& clOptions = *pOptions;
 
   std::string flags;
@@ -1508,7 +1511,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     cmVisualStudioGeneratorOptions
       libOptions(this->LocalGenerator,
                  cmVisualStudioGeneratorOptions::Linker,
-                 cmVSGetLibFlagTable(this->LocalGenerator), 0, this);
+                 this->GetLibFlagTable(), 0, this);
     libOptions.Parse(libflags.c_str());
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
@@ -1543,7 +1546,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 {
   cmsys::auto_ptr<Options> pOptions(
     new Options(this->LocalGenerator, Options::Linker,
-                cmVSGetLinkFlagTable(this->LocalGenerator), 0, this));
+                this->GetLinkFlagTable(), 0, this));
   Options& linkOptions = *pOptions;
 
   const std::string& linkLanguage =
