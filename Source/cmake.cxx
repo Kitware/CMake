@@ -2664,11 +2664,17 @@ int cmake::Build(const std::string& dir,
     }
   if(!it.Find("CMAKE_GENERATOR"))
     {
-    std::cerr << "Error: could find generator in Cache\n";
+    std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return 1;
     }
   cmsys::auto_ptr<cmGlobalGenerator> gen(
     this->CreateGlobalGenerator(it.GetValue()));
+  if(!gen.get())
+    {
+    std::cerr << "Error: could create CMAKE_GENERATOR \""
+              << it.GetValue() << "\"\n";
+    return 1;
+    }
   std::string output;
   std::string projName;
   if(!it.Find("CMAKE_PROJECT_NAME"))
