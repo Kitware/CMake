@@ -1,12 +1,12 @@
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include "cmParsePythonCoverage.h"
+#include "cmParseCoberturaCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 
 //----------------------------------------------------------------------------
-class cmParsePythonCoverage::XMLParser: public cmXMLParser
+class cmParseCoberturaCoverage::XMLParser: public cmXMLParser
 {
 public:
   XMLParser(cmCTest* ctest, cmCTestCoverageHandlerContainer& cont)
@@ -104,16 +104,16 @@ private:
 };
 
 
-cmParsePythonCoverage::cmParsePythonCoverage(
+cmParseCoberturaCoverage::cmParseCoberturaCoverage(
     cmCTestCoverageHandlerContainer& cont,
     cmCTest* ctest)
     :Coverage(cont), CTest(ctest)
 {
 }
 
-bool cmParsePythonCoverage::ReadCoverageXML(const char* xmlFile)
+bool cmParseCoberturaCoverage::ReadCoverageXML(const char* xmlFile)
 {
-  cmParsePythonCoverage::XMLParser parser(this->CTest, this->Coverage);
+  cmParseCoberturaCoverage::XMLParser parser(this->CTest, this->Coverage);
   parser.ParseFile(xmlFile);
   return true;
 }

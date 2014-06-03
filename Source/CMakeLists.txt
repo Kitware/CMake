@@ -519,7 +519,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmParseCacheCoverage.cxx
   CTest/cmParseGTMCoverage.cxx
   CTest/cmParsePHPCoverage.cxx
-  CTest/cmParsePythonCoverage.cxx
+  CTest/cmParseCoberturaCoverage.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx

@@ -76,7 +76,7 @@ private:
   int HandlePHPCoverage(cmCTestCoverageHandlerContainer* cont);
 
   //! Handle coverage for Python with coverage.py
-  int HandlePythonCoverage(cmCTestCoverageHandlerContainer* cont);
+  int HandleCoberturaCoverage(cmCTestCoverageHandlerContainer* cont);
 
   //! Handle coverage for mumps
   int HandleMumpsCoverage(cmCTestCoverageHandlerContainer* cont);
