@@ -518,13 +518,13 @@ Configuration settings include:
 ``BuildDirectory``
   The full path to the project build tree.
 
-  * `CTest Script`_ variable: ``CTEST_BINARY_DIRECTORY``
+  * `CTest Script`_ variable: :variable:`CTEST_BINARY_DIRECTORY`
   * :module:`CTest` module variable: :variable:`PROJECT_BINARY_DIR`
 
 ``SourceDirectory``
   The full path to the project source tree.
 
-  * `CTest Script`_ variable: ``CTEST_SOURCE_DIRECTORY``
+  * `CTest Script`_ variable: :variable:`CTEST_SOURCE_DIRECTORY`
   * :module:`CTest` module variable: :variable:`PROJECT_SOURCE_DIR`
 
 .. _`CTest Update Step`:
@@ -540,31 +540,31 @@ Configuration settings to specify the version control tool include:
 ``BZRCommand``
   ``bzr`` command-line tool to use if source tree is managed by Bazaar.
 
-  * `CTest Script`_ variable: ``CTEST_BZR_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_BZR_COMMAND`
   * :module:`CTest` module variable: none
 
 ``BZRUpdateOptions``
   Command-line options to the ``BZRCommand`` when updating the source.
 
-  * `CTest Script`_ variable: ``CTEST_BZR_UPDATE_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_BZR_UPDATE_OPTIONS`
   * :module:`CTest` module variable: none
 
 ``CVSCommand``
   ``cvs`` command-line tool to use if source tree is managed by CVS.
 
-  * `CTest Script`_ variable: ``CTEST_CVS_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_CVS_COMMAND`
   * :module:`CTest` module variable: ``CVSCOMMAND``
 
 ``CVSUpdateOptions``
   Command-line options to the ``CVSCommand`` when updating the source.
 
-  * `CTest Script`_ variable: ``CTEST_CVS_UPDATE_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_CVS_UPDATE_OPTIONS`
   * :module:`CTest` module variable: ``CVS_UPDATE_OPTIONS``
 
 ``GITCommand``
   ``git`` command-line tool to use if source tree is managed by Git.
 
-  * `CTest Script`_ variable: ``CTEST_GIT_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_GIT_COMMAND`
   * :module:`CTest` module variable: ``GITCOMMAND``
 
 ``GITUpdateCustom``
@@ -572,43 +572,43 @@ Configuration settings to specify the version control tool include:
   in the source tree (Git work tree) to update it instead of running
   the ``GITCommand``.
 
-  * `CTest Script`_ variable: ``CTEST_GIT_UPDATE_CUSTOM``
+  * `CTest Script`_ variable: :variable:`CTEST_GIT_UPDATE_CUSTOM`
   * :module:`CTest` module variable: ``CTEST_GIT_UPDATE_CUSTOM``
 
 ``GITUpdateOptions``
   Command-line options to the ``GITCommand`` when updating the source.
 
-  * `CTest Script`_ variable: ``CTEST_GIT_UPDATE_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_GIT_UPDATE_OPTIONS`
   * :module:`CTest` module variable: ``GIT_UPDATE_OPTIONS``
 
 ``HGCommand``
   ``hg`` command-line tool to use if source tree is managed by Mercurial.
 
-  * `CTest Script`_ variable: ``CTEST_HG_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_HG_COMMAND`
   * :module:`CTest` module variable: none
 
 ``HGUpdateOptions``
   Command-line options to the ``HGCommand`` when updating the source.
 
-  * `CTest Script`_ variable: ``CTEST_HG_UPDATE_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_HG_UPDATE_OPTIONS`
   * :module:`CTest` module variable: none
 
 ``P4Client``
   Value of the ``-c`` option to the ``P4Command``.
 
-  * `CTest Script`_ variable: ``CTEST_P4_CLIENT``
+  * `CTest Script`_ variable: :variable:`CTEST_P4_CLIENT`
   * :module:`CTest` module variable: ``CTEST_P4_CLIENT``
 
 ``P4Command``
   ``p4`` command-line tool to use if source tree is managed by Perforce.
 
-  * `CTest Script`_ variable: ``CTEST_P4_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_P4_COMMAND`
   * :module:`CTest` module variable: ``P4COMMAND``
 
 ``P4Options``
   Command-line options to the ``P4Command`` for all invocations.
 
-  * `CTest Script`_ variable: ``CTEST_P4_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_P4_OPTIONS`
   * :module:`CTest` module variable: ``CTEST_P4_OPTIONS``
 
 ``P4UpdateCustom``
@@ -622,39 +622,39 @@ Configuration settings to specify the version control tool include:
 ``P4UpdateOptions``
   Command-line options to the ``P4Command`` when updating the source.
 
-  * `CTest Script`_ variable: ``CTEST_P4_UPDATE_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_P4_UPDATE_OPTIONS`
   * :module:`CTest` module variable: ``CTEST_P4_UPDATE_OPTIONS``
 
 ``SVNCommand``
   ``svn`` command-line tool to use if source tree is managed by Subversion.
 
-  * `CTest Script`_ variable: ``CTEST_SVN_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_SVN_COMMAND`
   * :module:`CTest` module variable: ``SVNCOMMAND``
 
 ``SVNOptions``
   Command-line options to the ``SVNCommand`` for all invocations.
 
-  * `CTest Script`_ variable: ``CTEST_SVN_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_SVN_OPTIONS`
   * :module:`CTest` module variable: ``CTEST_SVN_OPTIONS``
 
 ``SVNUpdateOptions``
   Command-line options to the ``SVNCommand`` when updating the source.
 
-  * `CTest Script`_ variable: ``CTEST_SVN_UPDATE_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_SVN_UPDATE_OPTIONS`
   * :module:`CTest` module variable: ``SVN_UPDATE_OPTIONS``
 
 ``UpdateCommand``
   Specify the version-control command-line tool to use without
   detecting the VCS that manages the source tree.
 
-  * `CTest Script`_ variable: ``CTEST_UPDATE_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_COMMAND`
   * :module:`CTest` module variable: ``<VCS>COMMAND``
     when ``UPDATE_TYPE`` is ``<vcs>``, else ``UPDATE_COMMAND``
 
 ``UpdateOptions``
   Command-line options to the ``UpdateCommand``.
 
-  * `CTest Script`_ variable: ``CTEST_UPDATE_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_OPTIONS`
   * :module:`CTest` module variable: ``<VCS>_UPDATE_OPTIONS``
     when ``UPDATE_TYPE`` is ``<vcs>``, else ``UPDATE_OPTIONS``
 
@@ -678,7 +678,7 @@ Additional configuration settings include:
   This is not well-defined in distributed version-control systems so
   the setting is ignored.
 
-  * `CTest Script`_ variable: ``CTEST_NIGHTLY_START_TIME``
+  * `CTest Script`_ variable: :variable:`CTEST_NIGHTLY_START_TIME`
   * :module:`CTest` module variable: ``NIGHTLY_START_TIME`` if set,
     else ``CTEST_NIGHTLY_START_TIME``
 
@@ -697,7 +697,7 @@ Configuration settings include:
   It will be executed in the location specified by the
   ``BuildDirectory`` setting.
 
-  * `CTest Script`_ variable: ``CTEST_CONFIGURE_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_CONFIGURE_COMMAND`
   * :module:`CTest` module variable: :variable:`CMAKE_COMMAND`
     followed by :variable:`PROJECT_SOURCE_DIR`
 
@@ -719,7 +719,7 @@ Configuration settings include:
   the value of ``MakeCommand`` to replace the literal string
   ``${CTEST_CONFIGURATION_TYPE}`` if it appears.
 
-  * `CTest Script`_ variable: ``CTEST_CONFIGURATION_TYPE``
+  * `CTest Script`_ variable: :variable:`CTEST_CONFIGURATION_TYPE`
   * :module:`CTest` module variable: ``DEFAULT_CTEST_CONFIGURATION_TYPE``,
     initialized by the ``CMAKE_CONFIG_TYPE`` environment variable
 
@@ -728,7 +728,7 @@ Configuration settings include:
   It will be executed in the location specified by the
   ``BuildDirectory`` setting.
 
-  * `CTest Script`_ variable: ``CTEST_BUILD_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_BUILD_COMMAND`
   * :module:`CTest` module variable: ``MAKECOMMAND``,
     initialized by the :command:`build_command` command
 
@@ -744,7 +744,7 @@ Configuration settings include:
   granular build warning and error information.  Otherwise,
   CTest must "scrape" the build output log for diagnostics.
 
-  * `CTest Script`_ variable: ``CTEST_USE_LAUNCHERS``
+  * `CTest Script`_ variable: :variable:`CTEST_USE_LAUNCHERS`
   * :module:`CTest` module variable: ``CTEST_USE_LAUNCHERS``
 
 .. _`CTest Test Step`:
@@ -761,7 +761,7 @@ Configuration settings include:
   The default timeout for each test if not specified by the
   :prop_test:`TIMEOUT` test property.
 
-  * `CTest Script`_ variable: ``CTEST_TEST_TIMEOUT``
+  * `CTest Script`_ variable: :variable:`CTEST_TEST_TIMEOUT`
   * :module:`CTest` module variable: ``DART_TESTING_TIMEOUT``
 
 .. _`CTest Coverage Step`:
@@ -779,13 +779,13 @@ Configuration settings include:
   It will be executed in the location specified by the
   ``BuildDirectory`` setting.
 
-  * `CTest Script`_ variable: ``CTEST_COVERAGE_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_COVERAGE_COMMAND`
   * :module:`CTest` module variable: ``COVERAGE_COMMAND``
 
 ``CoverageExtraFlags``
   Specify command-line options to the ``CoverageCommand`` tool.
 
-  * `CTest Script`_ variable: ``CTEST_COVERAGE_EXTRA_FLAGS``
+  * `CTest Script`_ variable: :variable:`CTEST_COVERAGE_EXTRA_FLAGS`
   * :module:`CTest` module variable: ``COVERAGE_EXTRA_FLAGS``
 
 .. _`CTest MemCheck Step`:
@@ -802,14 +802,14 @@ Configuration settings include:
   Command-line tool to perform dynamic analysis.  Test command lines
   will be launched through this tool.
 
-  * `CTest Script`_ variable: ``CTEST_MEMORYCHECK_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_COMMAND`
   * :module:`CTest` module variable: ``MEMORYCHECK_COMMAND``
 
 ``MemoryCheckCommandOptions``
   Specify command-line options to the ``MemoryCheckCommand`` tool.
   They will be placed prior to the test command line.
 
-  * `CTest Script`_ variable: ``CTEST_MEMORYCHECK_COMMAND_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_COMMAND_OPTIONS`
   * :module:`CTest` module variable: ``MEMORYCHECK_COMMAND_OPTIONS``
 
 ``MemoryCheckSuppressionFile``
@@ -817,7 +817,7 @@ Configuration settings include:
   ``MemoryCheckCommand`` tool.  It will be passed with options
   appropriate to the tool.
 
-  * `CTest Script`_ variable: ``CTEST_MEMORYCHECK_SUPPRESSIONS_FILE``
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_SUPPRESSIONS_FILE`
   * :module:`CTest` module variable: ``MEMORYCHECK_SUPPRESSIONS_FILE``
 
 Additional configuration settings include:
@@ -864,7 +864,7 @@ Configuration settings include:
   Describe the dashboard client platform with a short string.
   (Operating system, compiler, etc.)
 
-  * `CTest Script`_ variable: ``CTEST_BUILD_NAME``
+  * `CTest Script`_ variable: :variable:`CTEST_BUILD_NAME`
   * :module:`CTest` module variable: ``BUILDNAME``
 
 ``CDashVersion``
@@ -893,13 +893,13 @@ Configuration settings include:
   server.  Possible options are ``CURLOPT_SSL_VERIFYPEER_OFF``
   and ``CURLOPT_SSL_VERIFYHOST_OFF``.
 
-  * `CTest Script`_ variable: ``CTEST_CURL_OPTIONS``
+  * `CTest Script`_ variable: :variable:`CTEST_CURL_OPTIONS`
   * :module:`CTest` module variable: ``CTEST_CURL_OPTIONS``
 
 ``DropLocation``
   The path on the dashboard server to send the submission.
 
-  * `CTest Script`_ variable: ``CTEST_DROP_LOCATION``
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_LOCATION`
   * :module:`CTest` module variable: ``DROP_LOCATION`` if set,
     else ``CTEST_DROP_LOCATION``
 
@@ -909,7 +909,7 @@ Configuration settings include:
   ``https``, ``scp``, or ``xmlrpc`` (if CMake was built with
   support for it).
 
-  * `CTest Script`_ variable: ``CTEST_DROP_METHOD``
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
   * :module:`CTest` module variable: ``DROP_METHOD`` if set,
     else ``CTEST_DROP_METHOD``
 
@@ -917,7 +917,7 @@ Configuration settings include:
   The dashboard server name
   (for ``ftp``, ``http``, and ``https``, ``scp``, and ``xmlrpc``).
 
-  * `CTest Script`_ variable: ``CTEST_DROP_SITE``
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE`
   * :module:`CTest` module variable: ``DROP_SITE`` if set,
     else ``CTEST_DROP_SITE``
 
@@ -925,7 +925,7 @@ Configuration settings include:
   The dashboard server login password, if any
   (for ``ftp``, ``http``, and ``https``).
 
-  * `CTest Script`_ variable: ``CTEST_DROP_SITE_PASSWORD``
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_PASSWORD`
   * :module:`CTest` module variable: ``DROP_SITE_PASSWORD`` if set,
     else ``CTEST_DROP_SITE_PASWORD``
 
@@ -933,7 +933,7 @@ Configuration settings include:
   The dashboard server login user name, if any
   (for ``ftp``, ``http``, and ``https``).
 
-  * `CTest Script`_ variable: ``CTEST_DROP_SITE_USER``
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_USER`
   * :module:`CTest` module variable: ``DROP_SITE_USER`` if set,
     else ``CTEST_DROP_SITE_USER``
 
@@ -941,20 +941,20 @@ Configuration settings include:
   Specify whether the dashboard server is `CDash`_ or an older
   dashboard server implementation requiring ``TriggerSite``.
 
-  * `CTest Script`_ variable: ``CTEST_DROP_SITE_CDASH``
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_CDASH`
   * :module:`CTest` module variable: ``CTEST_DROP_SITE_CDASH``
 
 ``ScpCommand``
   ``scp`` command-line tool to use when ``DropMethod`` is ``scp``.
 
-  * `CTest Script`_ variable: ``CTEST_SCP_COMMAND``
+  * `CTest Script`_ variable: :variable:`CTEST_SCP_COMMAND`
   * :module:`CTest` module variable: ``SCPCOMMAND``
 
 ``Site``
   Describe the dashboard client host site with a short string.
   (Hostname, domain, etc.)
 
-  * `CTest Script`_ variable: ``CTEST_SITE``
+  * `CTest Script`_ variable: :variable:`CTEST_SITE`
   * :module:`CTest` module variable: ``SITE``,
     initialized by the :command:`site_name` command
 
@@ -962,7 +962,7 @@ Configuration settings include:
   Legacy option to support older dashboard server implementations.
   Not used when ``IsCDash`` is true.
 
-  * `CTest Script`_ variable: ``CTEST_TRIGGER_SITE``
+  * `CTest Script`_ variable: :variable:`CTEST_TRIGGER_SITE`
   * :module:`CTest` module variable: ``TRIGGER_SITE`` if set,
     else ``CTEST_TRIGGER_SITE``
 
