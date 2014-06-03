@@ -11,10 +11,10 @@ For full documentation visit the `CMake Home Page`_ and the
 .. _`CMake Home Page`: http://www.cmake.org
 .. _`CMake Documentation Page`: http://www.cmake.org/cmake/help/documentation.html
 
-CMake is maintained by `Kitware, Inc.`_ and developed in
+CMake is maintained and supported by `Kitware`_ and developed in
 collaboration with a productive community of contributors.
 
-.. _`Kitware, Inc.`: http://www.kitware.com
+.. _`Kitware`: http://www.kitware.com/cmake
 
 License
 =======
