@@ -1,5 +1,12 @@
 include(RunCMake)
 
+run_cmake_command(build-no-cache
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
+run_cmake_command(build-no-generator
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-no-generator)
+run_cmake_command(build-bad-generator
+  ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
+
 if(UNIX)
   run_cmake_command(E_create_symlink-missing-dir
     ${CMAKE_COMMAND} -E create_symlink T missing-dir/L
