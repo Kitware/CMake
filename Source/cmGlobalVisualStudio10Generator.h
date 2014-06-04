@@ -31,7 +31,7 @@ public:
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
-  virtual bool SetGeneratorToolset(std::string const& ts);
+  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,

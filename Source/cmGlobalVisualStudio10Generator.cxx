@@ -116,9 +116,11 @@ cmGlobalVisualStudio10Generator::MatchesGeneratorName(
 
 //----------------------------------------------------------------------------
 bool
-cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts)
+cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
+                                                     cmMakefile* mf)
 {
   this->GeneratorToolset = ts;
+  this->AddVSPlatformToolsetDefinition(mf);
   return true;
 }
 

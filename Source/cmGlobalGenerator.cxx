@@ -76,7 +76,8 @@ cmGlobalGenerator::~cmGlobalGenerator()
     }
 }
 
-bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
+bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
+                                            cmMakefile* mf)
 {
   cmOStringStream e;
   e <<
@@ -85,8 +86,7 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts)
     "does not support toolset specification, but toolset\n"
     "  " << ts << "\n"
     "was specified.";
-  this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                    cmListFileBacktrace());
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
 }
 
@@ -446,6 +446,15 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     fpath = rootBin;
     fpath += "/CMakeSystem.cmake";
     mf->ReadListFile(0,fpath.c_str());
+    }
+
+  // Tell the generator about the toolset, if any.
+  std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
+  if(!toolset.empty() &&
+     !this->SetGeneratorToolset(toolset, mf))
+    {
+    cmSystemTools::SetFatalErrorOccured();
+    return;
     }
 
   // **** Load the system specific initialization if not yet loaded

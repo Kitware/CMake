@@ -89,7 +89,7 @@ public:
       i.e. "Can I build Debug and Release in the same tree?" */
   virtual bool IsMultiConfig();
 
-  virtual bool SetGeneratorToolset(std::string const& ts);
+  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
   void AppendFlag(std::string& flags, std::string const& flag);
 private:
   cmXCodeObject* CreateOrGetPBXGroup(cmTarget& cmtarget,
