@@ -1263,23 +1263,22 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       this->ConvertToWindowsSlash(outDir);
 
       this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
-      *this->BuildFileStream << outDir
+      *this->BuildFileStream << cmVS10EscapeXML(outDir)
                              << "</OutDir>\n";
 
       this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
-      *this->BuildFileStream << intermediateDir
+      *this->BuildFileStream << cmVS10EscapeXML(intermediateDir)
                              << "</IntDir>\n";
 
+      std::string name =
+        cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
       this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
-      *this->BuildFileStream
-        << cmSystemTools::GetFilenameWithoutLastExtension(
-             targetNameFull.c_str())
-        << "</TargetName>\n";
+      *this->BuildFileStream << cmVS10EscapeXML(name) << "</TargetName>\n";
 
+      std::string ext =
+        cmSystemTools::GetFilenameLastExtension(targetNameFull);
       this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
-      *this->BuildFileStream
-        << cmSystemTools::GetFilenameLastExtension(targetNameFull.c_str())
-        << "</TargetExt>\n";
+      *this->BuildFileStream << cmVS10EscapeXML(ext) << "</TargetExt>\n";
 
       this->OutputLinkIncremental(*config);
       }
