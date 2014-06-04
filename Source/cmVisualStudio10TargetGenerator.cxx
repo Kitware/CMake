@@ -1277,6 +1277,12 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
 
       std::string ext =
         cmSystemTools::GetFilenameLastExtension(targetNameFull);
+      if(ext.empty())
+        {
+        // An empty TargetExt causes a default extension to be used.
+        // A single "." appears to be treated as an empty extension.
+        ext = ".";
+        }
       this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
       *this->BuildFileStream << cmVS10EscapeXML(ext) << "</TargetExt>\n";
 
