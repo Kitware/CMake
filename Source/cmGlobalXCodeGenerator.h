@@ -246,7 +246,7 @@ private:
   std::map<std::string, cmXCodeObject* > TargetGroup;
   std::map<std::string, cmXCodeObject* > FileRefs;
   std::vector<std::string> Architectures;
-  std::string PlatformToolset;
+  std::string GeneratorToolset;
 };
 
 #endif
