@@ -92,7 +92,7 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\12.0\\Setup\\VC;"
     "ProductDir", vc12Express, cmSystemTools::KeyWOW64_32);
-  this->PlatformToolset = "v120";
+  this->DefaultPlatformToolset = "v120";
 }
 
 //----------------------------------------------------------------------------
