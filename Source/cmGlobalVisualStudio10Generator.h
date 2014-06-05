@@ -31,7 +31,7 @@ public:
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
-  virtual bool SetGeneratorToolset(std::string const& ts);
+  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
@@ -66,7 +66,7 @@ public:
   bool IsMasmEnabled() const { return this->MasmEnabled; }
 
   /** The toolset name for the target platform.  */
-  const char* GetPlatformToolset();
+  const char* GetPlatformToolset() const;
 
   /**
    * Where does this version of Visual Studio look for macros for the
@@ -99,7 +99,8 @@ protected:
 
   std::string const& GetMSBuildCommand();
 
-  std::string PlatformToolset;
+  std::string GeneratorToolset;
+  std::string DefaultPlatformToolset;
   bool ExpressEdition;
   bool MasmEnabled;
 
@@ -122,5 +123,6 @@ private:
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
+  void AddVSPlatformToolsetDefinition(cmMakefile* mf) const;
 };
 #endif

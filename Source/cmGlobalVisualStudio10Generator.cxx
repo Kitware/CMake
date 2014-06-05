@@ -116,9 +116,11 @@ cmGlobalVisualStudio10Generator::MatchesGeneratorName(
 
 //----------------------------------------------------------------------------
 bool
-cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts)
+cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
+                                                     cmMakefile* mf)
 {
-  this->PlatformToolset = ts;
+  this->GeneratorToolset = ts;
+  this->AddVSPlatformToolsetDefinition(mf);
   return true;
 }
 
@@ -126,10 +128,16 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts)
 void cmGlobalVisualStudio10Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
   cmGlobalVisualStudio8Generator::AddPlatformDefinitions(mf);
-  if(!this->PlatformToolset.empty())
+  this->AddVSPlatformToolsetDefinition(mf);
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalVisualStudio10Generator
+::AddVSPlatformToolsetDefinition(cmMakefile* mf) const
+{
+  if(const char* toolset = this->GetPlatformToolset())
     {
-    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET",
-                      this->PlatformToolset.c_str());
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
     }
 }
 
@@ -215,11 +223,15 @@ void cmGlobalVisualStudio10Generator
 }
 
 //----------------------------------------------------------------------------
-const char* cmGlobalVisualStudio10Generator::GetPlatformToolset()
+const char* cmGlobalVisualStudio10Generator::GetPlatformToolset() const
 {
-  if(!this->PlatformToolset.empty())
+  if(!this->GeneratorToolset.empty())
     {
-    return this->PlatformToolset.c_str();
+    return this->GeneratorToolset.c_str();
+    }
+  if(!this->DefaultPlatformToolset.empty())
+    {
+    return this->DefaultPlatformToolset.c_str();
     }
   return 0;
 }
@@ -417,7 +429,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
 {
-  if(!this->PlatformToolset.empty())
+  if(this->GetPlatformToolset())
     {
     return true;
     }
@@ -435,7 +447,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
     cmOStringStream m;
     m << "Found Windows SDK v7.1: " << winSDK_7_1;
     mf->DisplayStatus(m.str().c_str(), -1);
-    this->PlatformToolset = "Windows7.1SDK";
+    this->DefaultPlatformToolset = "Windows7.1SDK";
     return true;
     }
   else

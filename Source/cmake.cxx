@@ -1462,11 +1462,6 @@ int cmake::ActualConfigure()
                                       "Name of generator toolset.",
                                       cmCacheManager::INTERNAL);
     }
-  if(!this->GeneratorToolset.empty() &&
-     !this->GlobalGenerator->SetGeneratorToolset(this->GeneratorToolset))
-    {
-    return -2;
-    }
 
   // reset any system configuration information, except for when we are
   // InTryCompile. With TryCompile the system info is taken from the parent's
