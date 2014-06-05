@@ -1445,6 +1445,10 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
   this->OutputIncludes(includes);
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                          "\n", "CXX");
+
+  this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
 
   // If not in debug mode, write the DebugInformationFormat field
   // without value so PDBs don't get generated uselessly.
@@ -1453,10 +1457,6 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     this->WriteString("<DebugInformationFormat>"
                       "</DebugInformationFormat>\n", 3);
     }
-
-  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", "CXX");
-  this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
 
   // Specify the compiler program database file if configured.
   std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
@@ -1600,14 +1600,6 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     flags += " ";
     flags += flagsConfig;
     }
-  if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
-    {
-    linkOptions.AddFlag("SubSystem", "Windows");
-    }
-  else
-    {
-    linkOptions.AddFlag("SubSystem", "Console");
-    }
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += linkLanguage;
   standardLibsVar += "_STANDARD_LIBRARIES";
@@ -1661,22 +1653,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkDirs += "%(AdditionalLibraryDirectories)";
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
   linkOptions.AddFlag("AdditionalDependencies", libs.c_str());
-  linkOptions.AddFlag("Version", "");
 
-  if(const char* stackVal =
-     this->Makefile->GetDefinition("CMAKE_"+linkLanguage+"_STACK_SIZE"))
-    {
-    linkOptions.AddFlag("StackReserveSize", stackVal);
-    }
-
-  if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
-    {
-    linkOptions.AddFlag("GenerateDebugInformation", "true");
-    }
-  else
-    {
-    linkOptions.AddFlag("GenerateDebugInformation", "false");
-    }
   std::string targetName;
   std::string targetNameSO;
   std::string targetNameFull;
@@ -1695,6 +1672,31 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
                                   config.c_str());
     }
 
+  linkOptions.AddFlag("Version", "");
+
+  if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
+    {
+    linkOptions.AddFlag("SubSystem", "Windows");
+    }
+  else
+    {
+    linkOptions.AddFlag("SubSystem", "Console");
+    }
+
+  if(const char* stackVal =
+     this->Makefile->GetDefinition("CMAKE_"+linkLanguage+"_STACK_SIZE"))
+    {
+    linkOptions.AddFlag("StackReserveSize", stackVal);
+    }
+
+  if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
+    {
+    linkOptions.AddFlag("GenerateDebugInformation", "true");
+    }
+  else
+    {
+    linkOptions.AddFlag("GenerateDebugInformation", "false");
+    }
   std::string pdb = this->Target->GetPDBDirectory(config.c_str());
   pdb += "/";
   pdb += targetNamePDB;
