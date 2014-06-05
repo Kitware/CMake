@@ -467,8 +467,6 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 {
-  cmGlobalVisualStudio10Generator* gg =
-    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
@@ -503,52 +501,61 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2);
 
-    const char* mfcFlag =
-      this->Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
-    std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
-
-    std::string useOfMfcValue = "false";
-    if(mfcFlagValue == "1")
-      {
-      useOfMfcValue = "Static";
-      }
-    else if(mfcFlagValue == "2")
-      {
-      useOfMfcValue = "Dynamic";
-      }
-    std::string mfcLine = "<UseOfMfc>";
-    mfcLine += useOfMfcValue + "</UseOfMfc>\n";
-    this->WriteString(mfcLine.c_str(), 2);
-
-    if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
-       this->ClOptions[*i]->UsingUnicode()) ||
-       this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
-      {
-      this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
-      }
-    else if (this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
-       this->ClOptions[*i]->UsingSBCS())
-      {
-      this->WriteString("<CharacterSet>NotSet</CharacterSet>\n", 2);
-      }
-    else
-      {
-      this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
-      }
-    if(const char* toolset = gg->GetPlatformToolset())
-      {
-      std::string pts = "<PlatformToolset>";
-      pts += toolset;
-      pts += "</PlatformToolset>\n";
-      this->WriteString(pts.c_str(), 2);
-      }
-    if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
-      {
-      this->WriteString("<WindowsAppContainer>true"
-                        "</WindowsAppContainer>\n", 2);
-      }
+    this->WriteMSToolConfigurationValues(*i);
 
     this->WriteString("</PropertyGroup>\n", 1);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator
+::WriteMSToolConfigurationValues(std::string const& config)
+{
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+  const char* mfcFlag =
+    this->Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
+  std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
+
+  std::string useOfMfcValue = "false";
+  if(mfcFlagValue == "1")
+    {
+    useOfMfcValue = "Static";
+    }
+  else if(mfcFlagValue == "2")
+    {
+    useOfMfcValue = "Dynamic";
+    }
+  std::string mfcLine = "<UseOfMfc>";
+  mfcLine += useOfMfcValue + "</UseOfMfc>\n";
+  this->WriteString(mfcLine.c_str(), 2);
+
+  if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
+      this->ClOptions[config]->UsingUnicode()) ||
+     this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+    {
+    this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
+    }
+  else if (this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+           this->ClOptions[config]->UsingSBCS())
+    {
+    this->WriteString("<CharacterSet>NotSet</CharacterSet>\n", 2);
+    }
+  else
+    {
+    this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+    }
+  if(const char* toolset = gg->GetPlatformToolset())
+    {
+    std::string pts = "<PlatformToolset>";
+    pts += toolset;
+    pts += "</PlatformToolset>\n";
+    this->WriteString(pts.c_str(), 2);
+    }
+  if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+    {
+    this->WriteString("<WindowsAppContainer>true"
+                      "</WindowsAppContainer>\n", 2);
     }
 }
 
