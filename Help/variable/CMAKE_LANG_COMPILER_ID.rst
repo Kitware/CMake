@@ -20,13 +20,13 @@ include:
   Intel = Intel Compiler (intel.com)
   MIPSpro = SGI MIPSpro (sgi.com)
   MSVC = Microsoft Visual Studio (microsoft.com)
+  OpenWatcom = Open Watcom (openwatcom.org)
   PGI = The Portland Group (pgroup.com)
   PathScale = PathScale (pathscale.com)
   SDCC = Small Device C Compiler (sdcc.sourceforge.net)
   SunPro = Oracle Solaris Studio (oracle.com)
   TI = Texas Instruments (ti.com)
   TinyCC = Tiny C Compiler (tinycc.org)
-  Watcom = Open Watcom (openwatcom.org)
   XL, VisualAge, zOS = IBM XL (ibm.com)
 
 This variable is not guaranteed to be defined for all compilers or
