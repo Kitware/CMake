@@ -197,8 +197,13 @@ function(write_compiler_detection_header
   if(NOT _WCD_VERSION)
     set(_WCD_VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
   endif()
-  if (_WCD_VERSION VERSION_LESS 3.1.0) # Version which introduced this function
-    message(FATAL_ERROR "VERSION parameter too low.")
+  set(_min_version 3.1.0) # Version which introduced this function
+  if (_WCD_VERSION VERSION_LESS _min_version)
+    set(err "VERSION compatibility for write_compiler_detection_header is set to ${_WCD_VERSION}, which is too low.")
+    set(err "${err}  It must be set to at least ${_min_version}.  ")
+    set(err "${err}  Either set the VERSION parameter to the write_compiler_detection_header function, or update")
+    set(err "${err} your minimum required CMake version with the cmake_minimum_required command.")
+    message(FATAL_ERROR "${err}")
   endif()
 
   set(compilers
