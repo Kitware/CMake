@@ -385,6 +385,7 @@ cmNinjaTargetGenerator
   vars.TargetPDB = "$TARGET_PDB";
   vars.TargetCompilePDB = "$TARGET_COMPILE_PDB";
   vars.ObjectDir = "$OBJECT_DIR";
+  vars.ObjectFileDir = "$OBJECT_FILE_DIR";
 
   cmMakefile* mf = this->GetMakefile();
 
@@ -623,6 +624,10 @@ cmNinjaTargetGenerator
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
                          ConvertToNinjaPath(objectDir.c_str()),
                          cmLocalGenerator::SHELL);
+  std::string objectFileDir = cmSystemTools::GetFilenamePath(objectFileName);
+  vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
+                              ConvertToNinjaPath(objectFileDir.c_str()),
+                              cmLocalGenerator::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetTarget(), vars);
 
@@ -651,6 +656,7 @@ cmNinjaTargetGenerator
     compileObjectVars.Source = escapedSourceFileName.c_str();
     compileObjectVars.Object = objectFileName.c_str();
     compileObjectVars.ObjectDir = objectDir.c_str();
+    compileObjectVars.ObjectFileDir = objectFileDir.c_str();
     compileObjectVars.Flags = vars["FLAGS"].c_str();
     compileObjectVars.Defines = vars["DEFINES"].c_str();
 
