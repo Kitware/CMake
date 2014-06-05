@@ -13,6 +13,18 @@
 #error cxx_variadic_templates expected availability did not match.
 #endif
 
+#if !CHECK(VERSION_MAJOR)
+#error Compiler major version did not match.
+#endif
+
+#if !CHECK(VERSION_MINOR)
+#error Compiler minor version did not match.
+#endif
+
+#if !CHECK(VERSION_PATCH)
+#error Compiler patch version did not match.
+#endif
+
 int main()
 {
   return 0;

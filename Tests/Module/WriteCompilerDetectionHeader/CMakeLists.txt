@@ -35,6 +35,10 @@ if (NOT CMAKE_CXX_COMPILE_FEATURES AND NOT CMAKE_C_COMPILE_FEATURES)
   return()
 endif()
 
+string(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+.*" "\\1" COMPILER_VERSION_MAJOR "${CMAKE_CXX_COMPILER_VERSION}")
+string(REGEX REPLACE "^[0-9]+\\.([0-9]+)\\.[0-9]+.*" "\\1" COMPILER_VERSION_MINOR "${CMAKE_CXX_COMPILER_VERSION}")
+string(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+).*" "\\1" COMPILER_VERSION_PATCH "${CMAKE_CXX_COMPILER_VERSION}")
+
 macro(set_defines target true_defs false_defs)
   set(defines)
   foreach(def ${true_defs})
@@ -46,6 +50,9 @@ macro(set_defines target true_defs false_defs)
   target_compile_definitions(${target}
     PRIVATE
       ${defines}
+      EXPECTED_COMPILER_VERSION_MAJOR=${COMPILER_VERSION_MAJOR}
+      EXPECTED_COMPILER_VERSION_MINOR=${COMPILER_VERSION_MINOR}
+      EXPECTED_COMPILER_VERSION_PATCH=${COMPILER_VERSION_PATCH}
   )
 endmacro()
 
