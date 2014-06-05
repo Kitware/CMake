@@ -44,7 +44,8 @@ static const char * cmDocumentationOptions[][2] =
   {"-V,--verbose", "Enable verbose output from tests."},
   {"-VV,--extra-verbose", "Enable more verbose output from tests."},
   {"--debug", "Displaying more verbose internals of CTest."},
-  {"--output-on-failure"},
+  {"--output-on-failure", "Output anything outputted by the test program "
+    "if the test should fail."},
   {"-F", "Enable failover."},
   {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the"
    "given number of jobs."},
