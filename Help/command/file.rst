@@ -271,6 +271,8 @@ from the input content to produce the output content.  The options are:
 
 Exactly one ``CONTENT`` or ``INPUT`` option must be given.  A specific
 ``OUTPUT`` file may be named by at most one invocation of ``file(GENERATE)``.
+Generated files are modified on subsequent cmake runs only if their content
+is changed.
 
 ------------------------------------------------------------------------------
 

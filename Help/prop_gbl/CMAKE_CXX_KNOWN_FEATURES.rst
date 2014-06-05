@@ -185,7 +185,7 @@ The features known to this version of CMake are:
   .. _N3050: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3050.html
 
 ``cxx_nonstatic_member_init``
-  Non-static data member initialization, as defined in N2756.
+  Non-static data member initialization, as defined in N2756_.
 
   .. _N2756: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2756.htm
 
