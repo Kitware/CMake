@@ -1147,17 +1147,18 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
   // if the source file does not match the linker language
   // then force c or c++
+  const char* compileAs = 0;
   if(needForceLang || (linkLanguage != lang))
     {
     if(lang == "CXX")
       {
       // force a C++ file type
-      flags += " /TP ";
+      compileAs = "CompileAsCpp";
       }
     else if(lang == "C")
       {
       // force to c
-      flags += " /TC ";
+      compileAs = "CompileAsC";
       }
     }
   bool hasFlags = false;
@@ -1193,7 +1194,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       }
     // if we have flags or defines for this config then
     // use them
-    if(flags.size() || configDefines.size())
+    if(!flags.empty() || !configDefines.empty() || compileAs)
       {
       (*this->BuildFileStream ) << firstString;
       firstString = ""; // only do firstString once
@@ -1202,6 +1203,10 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions(this->LocalGenerator,
                   cmVisualStudioGeneratorOptions::Compiler,
                   this->GetClFlagTable(), 0, this);
+      if(compileAs)
+        {
+        clOptions.AddFlag("CompileAs", compileAs);
+        }
       clOptions.Parse(flags.c_str());
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
@@ -1393,11 +1398,11 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   // set the correct language
   if(linkLanguage == "C")
     {
-    flags += " /TC ";
+    clOptions.AddFlag("CompileAs", "CompileAsC");
     }
   if(linkLanguage == "CXX")
     {
-    flags += " /TP ";
+    clOptions.AddFlag("CompileAs", "CompileAsCpp");
     }
   this->LocalGenerator->AddCompileOptions(flags, this->Target,
                                           linkLanguage, configName.c_str());
@@ -1571,16 +1576,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     {
     linkType = "EXE";
     }
-  std::string stackVar = "CMAKE_";
-  stackVar += linkLanguage;
-  stackVar += "_STACK_SIZE";
-  const char* stackVal = this->Makefile->GetDefinition(stackVar.c_str());
   std::string flags;
-  if(stackVal)
-    {
-    flags += " /STACK:";
-    flags += stackVal;
-    }
   std::string linkFlagVarBase = "CMAKE_";
   linkFlagVarBase += linkType;
   linkFlagVarBase += "_LINKER_FLAGS";
@@ -1666,6 +1662,13 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
   linkOptions.AddFlag("AdditionalDependencies", libs.c_str());
   linkOptions.AddFlag("Version", "");
+
+  if(const char* stackVal =
+     this->Makefile->GetDefinition("CMAKE_"+linkLanguage+"_STACK_SIZE"))
+    {
+    linkOptions.AddFlag("StackReserveSize", stackVal);
+    }
+
   if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
     {
     linkOptions.AddFlag("GenerateDebugInformation", "true");
