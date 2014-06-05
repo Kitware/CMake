@@ -15,8 +15,12 @@ set(_compiler_id_version_compute "
 #  define @PREFIX@COMPILER_VERSION_TWEAK DEC(__INTEL_COMPILER_BUILD_DATE)
 # endif
 # if defined(_MSC_VER)
-#  define @PREFIX@SIMULATE_ID \"MSVC\"
    /* _MSC_VER = VVRR */
 #  define @PREFIX@SIMULATE_VERSION_MAJOR DEC(_MSC_VER / 100)
 #  define @PREFIX@SIMULATE_VERSION_MINOR DEC(_MSC_VER % 100)
+# endif")
+
+set(_compiler_id_simulate "
+# if defined(_MSC_VER)
+#  define @PREFIX@SIMULATE_ID \"MSVC\"
 # endif")
