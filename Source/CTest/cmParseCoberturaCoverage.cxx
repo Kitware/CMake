@@ -1,17 +1,21 @@
 #include "cmStandardIncludes.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include "cmParsePythonCoverage.h"
+#include "cmParseCoberturaCoverage.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 
 //----------------------------------------------------------------------------
-class cmParsePythonCoverage::XMLParser: public cmXMLParser
+class cmParseCoberturaCoverage::XMLParser: public cmXMLParser
 {
 public:
   XMLParser(cmCTest* ctest, cmCTestCoverageHandlerContainer& cont)
     : CTest(ctest), Coverage(cont)
   {
+   this->InSources = false;
+   this->InSource  = false;
+   this->FilePaths.push_back(this->Coverage.SourceDir);
+   this->CurFileName = "";
   }
 
   virtual ~XMLParser()
@@ -20,9 +24,44 @@ public:
 
 protected:
 
+
+  virtual void EndElement(const std::string& name)
+  {
+   if(name == "source")
+     {
+     this->InSource=false;
+     }
+   else if (name == "sources")
+     {
+     this->InSources=false;
+     }
+  }
+
+  virtual void CharacterDataHandler(const char* data, int length)
+  {
+     std::string tmp;
+     tmp.insert(0,data,length);
+     if (this->InSources && this->InSource)
+       {
+       this->FilePaths.push_back(tmp);
+       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Adding Source: "
+                   << tmp << std::endl);
+       }
+  }
+
   virtual void StartElement(const std::string& name, const char** atts)
   {
-    if(name == "class")
+    std::string FoundSource;
+    std::string finalpath = "";
+    if(name == "source")
+    {
+      this->InSource = true;
+    }
+    else if(name == "sources")
+      {
+      this->InSources = true;
+      }
+    else if(name == "class")
     {
       int tagCount = 0;
       while(true)
@@ -30,11 +69,19 @@ protected:
         if(strcmp(atts[tagCount], "filename") == 0)
         {
           cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Reading file: "
-                     << atts[tagCount+1] << std::endl);
-          this->CurFileName = this->Coverage.SourceDir + "/" +
-                                 atts[tagCount+1];
+                     << atts[tagCount+1]<< std::endl);
+          std::string filename = atts[tagCount+1];
+          for(size_t i=0;i < FilePaths.size();i++)
+            {
+            finalpath = FilePaths[i] + "/" + filename;
+            if(cmSystemTools::FileExists(finalpath.c_str()))
+              {
+              this->CurFileName = finalpath;
+              break;
+              }
+            }
           cmsys::ifstream fin(this->CurFileName.c_str());
-          if(!fin)
+          if(this->CurFileName == "" || !fin )
           {
             this->CurFileName = this->Coverage.BinaryDir + "/" +
                                    atts[tagCount+1];
@@ -48,7 +95,6 @@ protected:
               break;
             }
           }
-
           std::string line;
           FileLinesType& curFileLines =
             this->Coverage.TotalCoverage[this->CurFileName];
@@ -83,7 +129,9 @@ protected:
         {
           FileLinesType& curFileLines =
             this->Coverage.TotalCoverage[this->CurFileName];
-          curFileLines[curNumber-1] = curHits;
+            {
+            curFileLines[curNumber-1] = curHits;
+            }
           break;
         }
         ++tagCount;
@@ -91,10 +139,11 @@ protected:
     }
   }
 
-  virtual void EndElement(const std::string&) {}
-
 private:
 
+  bool InSources;
+  bool InSource;
+  std::vector<std::string> FilePaths;
   typedef cmCTestCoverageHandlerContainer::SingleFileCoverageVector
      FileLinesType;
   cmCTest* CTest;
@@ -104,16 +153,16 @@ private:
 };
 
 
-cmParsePythonCoverage::cmParsePythonCoverage(
+cmParseCoberturaCoverage::cmParseCoberturaCoverage(
     cmCTestCoverageHandlerContainer& cont,
     cmCTest* ctest)
     :Coverage(cont), CTest(ctest)
 {
 }
 
-bool cmParsePythonCoverage::ReadCoverageXML(const char* xmlFile)
+bool cmParseCoberturaCoverage::ReadCoverageXML(const char* xmlFile)
 {
-  cmParsePythonCoverage::XMLParser parser(this->CTest, this->Coverage);
+  cmParseCoberturaCoverage::XMLParser parser(this->CTest, this->Coverage);
   parser.ParseFile(xmlFile);
   return true;
 }

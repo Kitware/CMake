@@ -10,8 +10,8 @@
   See the License for more information.
 ============================================================================*/
 
-#ifndef cmParsePythonCoverage_h
-#define cmParsePythonCoverage_h
+#ifndef cmParseCoberturaCoverage_h
+#define cmParseCoberturaCoverage_h
 
 #include "cmStandardIncludes.h"
 #include "cmCTestCoverageHandler.h"
@@ -25,15 +25,18 @@
  * Java-based Cobertura coverage application. This helper class parses
  * that XML file to fill the coverage-handler container.
  */
-class cmParsePythonCoverage
+class cmParseCoberturaCoverage
 {
 public:
 
   //! Create the coverage parser by passing in the coverage handler
   //! container and the cmCTest object
-  cmParsePythonCoverage(cmCTestCoverageHandlerContainer& cont,
+  cmParseCoberturaCoverage(cmCTestCoverageHandlerContainer& cont,
     cmCTest* ctest);
 
+  bool inSources;
+  bool inSource;
+  std::vector<std::string> filepaths;
   //! Read the XML produced by running `coverage xml`
   bool ReadCoverageXML(const char* xmlFile);
 
