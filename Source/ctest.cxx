@@ -19,6 +19,7 @@
 #include "CTest/cmCTestScriptHandler.h"
 #include "CTest/cmCTestLaunch.h"
 #include "cmsys/Encoding.hxx"
+#include <locale.h>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
@@ -114,6 +115,8 @@ static const char * cmDocumentationOptions[][2] =
 // this is a test driver program for cmCTest.
 int main (int argc, char const* const* argv)
 {
+  setlocale(LC_ALL, "");
+
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = encoding_args.argc();
