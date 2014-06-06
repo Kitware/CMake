@@ -684,6 +684,11 @@ cmMakefileTargetGenerator
                             cmLocalGenerator::START_OUTPUT,
                             cmLocalGenerator::SHELL);
   vars.ObjectDir = objectDir.c_str();
+  std::string objectFileDir = cmSystemTools::GetFilenamePath(obj);
+  objectFileDir = this->Convert(objectFileDir,
+                                cmLocalGenerator::START_OUTPUT,
+                                cmLocalGenerator::SHELL);
+  vars.ObjectFileDir = objectFileDir.c_str();
   vars.Flags = flags.c_str();
 
   std::string definesString = "$(";
