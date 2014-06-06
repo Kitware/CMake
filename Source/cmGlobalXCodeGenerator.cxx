@@ -2440,8 +2440,8 @@ cmGlobalXCodeGenerator::CreateUtilityTarget(cmTarget& cmtarget)
     }
   else
     {
-    const char* theConfig =
-      this->CurrentMakefile->GetDefinition("CMAKE_BUILD_TYPE");
+    std::string theConfig =
+      this->CurrentMakefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     cmXCodeObject* buildSettings =
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
     this->CreateBuildSettings(cmtarget, buildSettings, theConfig);
@@ -2819,11 +2819,7 @@ void cmGlobalXCodeGenerator
       i != this->CurrentConfigurationTypes.end(); ++i)
     {
     // Get the current configuration name.
-    const char* configName = i->c_str();
-    if(!*configName)
-      {
-      configName = 0;
-      }
+    std::string configName = *i;
 
     if(this->XcodeVersion >= 50)
       {
@@ -3510,11 +3506,7 @@ cmGlobalXCodeGenerator::CreateXCodeDependHackTarget(
         ct = this->CurrentConfigurationTypes.begin();
       ct != this->CurrentConfigurationTypes.end(); ++ct)
     {
-    const char* configName = 0;
-    if(!ct->empty())
-      {
-      configName = ct->c_str();
-      }
+    std::string configName = *ct;
     for(std::vector<cmXCodeObject*>::iterator i = targets.begin();
         i != targets.end(); ++i)
       {
@@ -3967,7 +3959,7 @@ bool cmGlobalXCodeGenerator::IsMultiConfig()
 void cmGlobalXCodeGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  const char* configName = this->GetCMakeCFGIntDir();
+  std::string configName = this->GetCMakeCFGIntDir();
   std::string dir = this->GetObjectsNormalDirectory(
     "$(PROJECT_NAME)", configName, gt->Target);
   if(this->XcodeVersion >= 21)
