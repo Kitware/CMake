@@ -25,9 +25,14 @@ void reportLine(std::ostream& os, bool ret, std::string line, bool eol)
     }
 }
 
-int testRST(int, char*[])
+int testRST(int argc, char* argv[])
 {
-  std::string dir = cmSystemTools::GetFilenamePath(__FILE__);
+  if(argc != 2)
+    {
+    std::cerr << "Usage: testRST <dir>" << std::endl;
+    return 1;
+    }
+  std::string dir = argv[1];
   if(dir.empty())
     {
     dir = ".";
