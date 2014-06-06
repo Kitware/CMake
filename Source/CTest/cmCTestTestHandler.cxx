@@ -509,7 +509,7 @@ int cmCTestTestHandler::ProcessHandler()
   if ( val )
     {
     this->UseExcludeLabelRegExpFlag = true;
-    this->ExcludeLabelRegularExpression = val;
+    this->ExcludeLabelRegExp = val;
     }
   val = this->GetOption("IncludeRegularExpression");
   if ( val )
@@ -1558,7 +1558,7 @@ void cmCTestTestHandler::GetListOfTests()
     this->IncludeLabelRegularExpression.
       compile(this->IncludeLabelRegExp.c_str());
     }
-  if ( !this->IncludeLabelRegExp.empty() )
+  if ( !this->ExcludeLabelRegExp.empty() )
     {
     this->ExcludeLabelRegularExpression.
       compile(this->ExcludeLabelRegExp.c_str());

@@ -2343,6 +2343,17 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     "All Labels:.*  Label1.*  Label2")
 
   configure_file(
+    "${CMake_SOURCE_DIR}/Tests/CTestTestLabelRegExp/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestTestLabelRegExp/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  add_test(NAME CTestTestLabelRegExp
+    COMMAND ${CMAKE_CMAKE_COMMAND}
+      -DSOURCE_DIR=${CMAKE_SOURCE_DIR}/Tests/CTestTestLabelRegExp
+      -P ${CMAKE_BINARY_DIR}/Tests/CTestTestLabelRegExp/test.cmake
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/Tests/CTestTestLabelRegExp
+  )
+
+  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestResourceLock/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestResourceLock/test.cmake"
     @ONLY ESCAPE_QUOTES)
