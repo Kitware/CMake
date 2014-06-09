@@ -9,7 +9,7 @@
 #
 # This module defines the :prop_tgt:`IMPORTED` targets:
 #
-# ``OpenGL::OpenGL``
+# ``OpenGL::GL``
 #  Defined if the system has OpenGL.
 # ``OpenGL::GLU``
 #  Defined if the system has GLU.
