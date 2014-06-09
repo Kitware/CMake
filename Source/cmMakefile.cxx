@@ -310,14 +310,19 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
   // Collect context information.
-  cmListFileBacktrace backtrace;
+  cmLocalGenerator* localGen = this->GetLocalGenerator();
+  if(this->CallStack.empty() && this->GetCMakeInstance()->GetIsInTryCompile())
+    {
+    localGen = 0;
+    }
+  cmListFileBacktrace backtrace(localGen);
   if(!this->CallStack.empty())
     {
     if((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR))
       {
       this->CallStack.back().Status->SetNestedError(true);
       }
-    this->GetBacktrace(backtrace);
+    backtrace = this->GetBacktrace();
     }
   else
     {
@@ -335,11 +340,6 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       lfc.FilePath = this->ListFileStack.back();
       }
     lfc.Line = 0;
-    if(!this->GetCMakeInstance()->GetIsInTryCompile())
-      {
-      lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                                   cmLocalGenerator::HOME);
-      }
     backtrace.push_back(lfc);
     }
 
@@ -348,21 +348,15 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::GetBacktrace(cmListFileBacktrace& backtrace) const
+cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
-  if(this->CallStack.empty())
-    {
-    return false;
-    }
+  cmListFileBacktrace backtrace(this->GetLocalGenerator());
   for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
       i != this->CallStack.rend(); ++i)
     {
-    cmListFileContext lfc = *(*i).Context;
-    lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                                 cmLocalGenerator::HOME);
-    backtrace.push_back(lfc);
+    backtrace.push_back(*i->Context);
     }
-  return true;
+  return backtrace;
 }
 
 //----------------------------------------------------------------------------
@@ -1745,8 +1739,7 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
                               before ? this->IncludeDirectoriesEntries.begin()
                                     : this->IncludeDirectoriesEntries.end();
 
-  cmListFileBacktrace lfbt;
-  this->GetBacktrace(lfbt);
+  cmListFileBacktrace lfbt = this->GetBacktrace();
   cmValueWithOrigin entry(incString, lfbt);
   this->IncludeDirectoriesEntries.insert(position, entry);
 
@@ -1923,7 +1916,7 @@ void cmMakefile::CheckForUnused(const char* reason,
   if (this->WarnUnused && !this->VariableUsed(name))
     {
     std::string path;
-    cmListFileBacktrace bt;
+    cmListFileBacktrace bt(this->GetLocalGenerator());
     if (this->CallStack.size())
       {
       const cmListFileContext* file = this->CallStack.back().Context;
@@ -2874,7 +2867,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                                              this->GetHomeOutputDirectory()))
                 {
                 cmOStringStream msg;
-                cmListFileBacktrace bt;
+                cmListFileBacktrace bt(this->GetLocalGenerator());
                 cmListFileContext lfc;
                 lfc.FilePath = filename;
                 lfc.Line = line;
@@ -4013,8 +4006,7 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
         {
         return;
         }
-    cmListFileBacktrace lfbt;
-    this->GetBacktrace(lfbt);
+    cmListFileBacktrace lfbt = this->GetBacktrace();
     this->IncludeDirectoriesEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;
@@ -4026,8 +4018,7 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
         {
         return;
         }
-    cmListFileBacktrace lfbt;
-    this->GetBacktrace(lfbt);
+    cmListFileBacktrace lfbt = this->GetBacktrace();
     this->CompileOptionsEntries.push_back(cmValueWithOrigin(value, lfbt));
     return;
     }
@@ -4038,8 +4029,7 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
       {
       return;
       }
-    cmListFileBacktrace lfbt;
-    this->GetBacktrace(lfbt);
+    cmListFileBacktrace lfbt = this->GetBacktrace();
     cmValueWithOrigin entry(value, lfbt);
     this->CompileDefinitionsEntries.push_back(entry);
     return;
@@ -4070,24 +4060,21 @@ void cmMakefile::AppendProperty(const std::string& prop,
 {
   if (prop == "INCLUDE_DIRECTORIES")
     {
-    cmListFileBacktrace lfbt;
-    this->GetBacktrace(lfbt);
+    cmListFileBacktrace lfbt = this->GetBacktrace();
     this->IncludeDirectoriesEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
   if (prop == "COMPILE_OPTIONS")
     {
-    cmListFileBacktrace lfbt;
-    this->GetBacktrace(lfbt);
+    cmListFileBacktrace lfbt = this->GetBacktrace();
     this->CompileOptionsEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;
     }
   if (prop == "COMPILE_DEFINITIONS")
     {
-    cmListFileBacktrace lfbt;
-    this->GetBacktrace(lfbt);
+    cmListFileBacktrace lfbt = this->GetBacktrace();
     this->CompileDefinitionsEntries.push_back(
                                         cmValueWithOrigin(value, lfbt));
     return;

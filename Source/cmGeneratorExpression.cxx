@@ -24,7 +24,7 @@
 
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
-  cmListFileBacktrace const& backtrace):
+  cmListFileBacktrace const* backtrace):
   Backtrace(backtrace)
 {
 }
@@ -33,10 +33,18 @@ cmGeneratorExpression::cmGeneratorExpression(
 cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(std::string const& input)
 {
+#if !defined(__BORLANDC__)
   return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
-                                      new cmCompiledGeneratorExpression(
-                                        this->Backtrace,
-                                        input));
+    new cmCompiledGeneratorExpression(
+      this->Backtrace ? *this->Backtrace : cmListFileBacktrace(NULL),
+      input));
+#else
+  cmListFileBacktrace emptyBacktrace(NULL);
+  return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
+    new cmCompiledGeneratorExpression(
+      this->Backtrace ? *this->Backtrace : emptyBacktrace,
+      input));
+#endif
 }
 
 //----------------------------------------------------------------------------

@@ -655,7 +655,7 @@ public:
   /**
    * Get the current context backtrace.
    */
-  bool GetBacktrace(cmListFileBacktrace& backtrace) const;
+  cmListFileBacktrace GetBacktrace() const;
 
   /**
    * Get the vector of  files created by this makefile

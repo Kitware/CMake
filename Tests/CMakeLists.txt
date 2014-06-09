@@ -1820,9 +1820,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     --build-options ${build_options}
       "--warn-unused-vars")
   set_tests_properties(WarnUnusedUnusedViaUnset PROPERTIES
-    PASS_REGULAR_EXPRESSION "CMake Warning .*VariableUnusedViaUnset.CMakeLists.txt:7 \\(set\\):")
+    PASS_REGULAR_EXPRESSION "CMake Warning \\(dev\\) at CMakeLists.txt:7 \\(set\\):")
   set_tests_properties(WarnUnusedUnusedViaUnset PROPERTIES
-    FAIL_REGULAR_EXPRESSION "CMake Warning .*VariableUnusedViaUnset.CMakeLists.txt:5 \\(set\\):")
+    FAIL_REGULAR_EXPRESSION "CMakeLists.txt:5 \\(set\\):")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUnusedUnusedViaUnset")
 
   if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND NOT WIN32)

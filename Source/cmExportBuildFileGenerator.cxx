@@ -18,6 +18,7 @@
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
+  : Backtrace(NULL)
 {
   this->Makefile = 0;
   this->ExportSet = 0;

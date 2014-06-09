@@ -46,6 +46,10 @@ struct cmGeneratorExpressionDAGChecker
                                   const std::string &property,
                                   const GeneratorExpressionContent *content,
                                   cmGeneratorExpressionDAGChecker *parent);
+  cmGeneratorExpressionDAGChecker(const std::string &target,
+                                  const std::string &property,
+                                  const GeneratorExpressionContent *content,
+                                  cmGeneratorExpressionDAGChecker *parent);
 
   enum Result {
     DAG,
@@ -76,6 +80,7 @@ struct cmGeneratorExpressionDAGChecker
 
 private:
   Result CheckGraph() const;
+  void Initialize();
 
 private:
   const cmGeneratorExpressionDAGChecker * const Parent;

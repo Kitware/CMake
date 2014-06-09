@@ -13,6 +13,7 @@
 #ifndef cmake_h
 #define cmake_h
 
+#include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
@@ -29,7 +30,6 @@ class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
 class cmDocumentationSection;
 class cmPolicies;
-class cmListFileBacktrace;
 class cmTarget;
 class cmGeneratedFileStream;
 
@@ -360,7 +360,7 @@ class cmake
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
-                    cmListFileBacktrace const& backtrace);
+        cmListFileBacktrace const& backtrace = cmListFileBacktrace(NULL));
   ///! run the --build option
   int Build(const std::string& dir,
             const std::string& target,
