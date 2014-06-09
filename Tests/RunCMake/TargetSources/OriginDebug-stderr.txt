@@ -5,7 +5,7 @@ CMake Debug Log at OriginDebug.cmake:13 \(add_library\):
 
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
-+
+.*
 CMake Debug Log at OriginDebug.cmake:16 \(set_property\):
   Used sources for target OriginDebug:
 
@@ -13,7 +13,7 @@ CMake Debug Log at OriginDebug.cmake:16 \(set_property\):
 
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
-+
+.*
 CMake Debug Log at OriginDebug.cmake:20 \(target_sources\):
   Used sources for target OriginDebug:
 
@@ -21,7 +21,7 @@ CMake Debug Log at OriginDebug.cmake:20 \(target_sources\):
 
 Call Stack \(most recent call first\):
   CMakeLists.txt:3 \(include\)
-+
+.*
 CMake Debug Log at OriginDebug.cmake:14 \(target_link_libraries\):
   Used sources for target OriginDebug:
 
