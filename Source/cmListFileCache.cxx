@@ -142,7 +142,8 @@ bool cmListFile::ParseFile(const char* filename,
                            bool topLevel,
                            cmMakefile *mf)
 {
-  if(!cmSystemTools::FileExists(filename))
+  if(!cmSystemTools::FileExists(filename) ||
+     cmSystemTools::FileIsDirectory(filename))
     {
     return false;
     }
