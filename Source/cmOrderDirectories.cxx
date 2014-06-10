@@ -39,8 +39,8 @@ public:
 
     if(file.rfind(".framework") != std::string::npos)
       {
-      cmsys::RegularExpression splitFramework;
-      splitFramework.compile("^(.*)/(.*).framework/(.*)$");
+      static cmsys::RegularExpression
+        splitFramework("^(.*)/(.*).framework/(.*)$");
       if(splitFramework.find(file) &&
         (std::string::npos !=
          splitFramework.match(3).find(splitFramework.match(2))))
@@ -326,8 +326,8 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
 
       if(fullPath.rfind(".framework") != std::string::npos)
         {
-        cmsys::RegularExpression splitFramework;
-        splitFramework.compile("^(.*)/(.*).framework/(.*)$");
+        static cmsys::RegularExpression
+          splitFramework("^(.*)/(.*).framework/(.*)$");
         if(splitFramework.find(fullPath) &&
           (std::string::npos !=
            splitFramework.match(3).find(splitFramework.match(2))))

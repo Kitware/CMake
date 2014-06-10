@@ -1811,7 +1811,7 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
       }
     }
 
-  is_shared_library = this->ExtractSharedLibraryName.find(file.c_str());
+  is_shared_library = this->ExtractSharedLibraryName.find(file);
 
   if(!is_shared_library)
     {
@@ -1831,8 +1831,8 @@ cmComputeLinkInformation::AddLibraryRuntimeInfo(std::string const& fullPath)
     {
     if(fullPath.find(".framework") != std::string::npos)
       {
-      cmsys::RegularExpression splitFramework;
-      splitFramework.compile("^(.*)/(.*).framework/(.*)$");
+      static cmsys::RegularExpression
+        splitFramework("^(.*)/(.*).framework/(.*)$");
       if(splitFramework.find(fullPath) &&
         (std::string::npos !=
          splitFramework.match(3).find(splitFramework.match(2))))
