@@ -52,7 +52,15 @@
 # Feature Test Macros
 # ===================
 #
-# For each compiler, a preprocessor test of the compiler version is generated
+# For each compiler, a preprocessor macro is generated matching
+# ``<PREFIX>_COMPILER_IS_<compiler>`` which has the content either ``0``
+# or ``1``, depending on the compiler in use. Preprocessor macros for
+# compiler version components are generated matching
+# ``<PREFIX>_COMPILER_VERSION_MAJOR`` ``<PREFIX>_COMPILER_VERSION_MINOR``
+# and ``<PREFIX>_COMPILER_VERSION_PATCH`` containing decimal values
+# for the corresponding compiler version components, if defined.
+#
+# A preprocessor test is generated based on the compiler version
 # denoting whether each feature is enabled.  A preprocessor macro
 # matching ``<PREFIX>_COMPILER_<FEATURE>``, where ``<FEATURE>`` is the
 # upper-case ``<feature>`` name, is generated to contain the value
@@ -187,6 +195,8 @@ function(_load_compiler_variables CompilerId lang)
   foreach(feature ${ARGN})
     set(_cmake_feature_test_${CompilerId}_${feature} ${_cmake_feature_test_${feature}} PARENT_SCOPE)
   endforeach()
+  include("${CMAKE_ROOT}/Modules/Compiler/${CompilerId}-DetermineCompiler.cmake" OPTIONAL)
+  set(_compiler_id_version_compute_${CompilerId} ${_compiler_id_version_compute} PARENT_SCOPE)
 endfunction()
 
 function(write_compiler_detection_header
@@ -218,18 +228,32 @@ function(write_compiler_detection_header
   if(NOT _WCD_VERSION)
     set(_WCD_VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
   endif()
-  if (_WCD_VERSION VERSION_LESS 3.1.0) # Version which introduced this function
-    message(FATAL_ERROR "VERSION parameter too low.")
+  set(_min_version 3.1.0) # Version which introduced this function
+  if (_WCD_VERSION VERSION_LESS _min_version)
+    set(err "VERSION compatibility for write_compiler_detection_header is set to ${_WCD_VERSION}, which is too low.")
+    set(err "${err}  It must be set to at least ${_min_version}.  ")
+    set(err "${err}  Either set the VERSION parameter to the write_compiler_detection_header function, or update")
+    set(err "${err} your minimum required CMake version with the cmake_minimum_required command.")
+    message(FATAL_ERROR "${err}")
   endif()
 
   set(compilers
     GNU
     Clang
   )
+
+  set(_hex_compilers ADSP Borland Embarcadero SunPro)
+
   foreach(_comp ${_WCD_COMPILERS})
     list(FIND compilers ${_comp} idx)
     if (idx EQUAL -1)
       message(FATAL_ERROR "Unsupported compiler ${_comp}.")
+    endif()
+    if (NOT _need_hex_conversion)
+      list(FIND _hex_compilers ${_comp} idx)
+      if (NOT idx EQUAL -1)
+        set(_need_hex_conversion TRUE)
+      endif()
     endif()
   endforeach()
 
@@ -242,6 +266,21 @@ function(write_compiler_detection_header
 
   if (_WCD_PROLOG)
     set(file_content "${file_content}\n${_WCD_PROLOG}\n")
+  endif()
+
+  if (_need_hex_conversion)
+    set(file_content "${file_content}
+#define ${prefix_arg}_DEC(X) (X)
+#define ${prefix_arg}_HEX(X) ( \\
+    ((X)>>28 & 0xF) * 10000000 + \\
+    ((X)>>24 & 0xF) *  1000000 + \\
+    ((X)>>20 & 0xF) *   100000 + \\
+    ((X)>>16 & 0xF) *    10000 + \\
+    ((X)>>12 & 0xF) *     1000 + \\
+    ((X)>>8  & 0xF) *      100 + \\
+    ((X)>>4  & 0xF) *       10 + \\
+    ((X)     & 0xF) \\
+    )\n")
   endif()
 
   foreach(feature ${_WCD_FEATURES})
@@ -287,6 +326,21 @@ function(write_compiler_detection_header
 #    if !(${_cmake_oldestSupported_${compiler}})
 #      error Unsupported compiler version
 #    endif\n")
+
+      set(PREFIX ${prefix_arg}_)
+      if (_need_hex_conversion)
+        set(MACRO_DEC ${prefix_arg}_DEC)
+        set(MACRO_HEX ${prefix_arg}_HEX)
+      else()
+        set(MACRO_DEC)
+        set(MACRO_HEX)
+      endif()
+      string(CONFIGURE "${_compiler_id_version_compute_${compiler}}" VERSION_BLOCK @ONLY)
+      set(file_content "${file_content}${VERSION_BLOCK}\n")
+      set(PREFIX)
+      set(MACRO_DEC)
+      set(MACRO_HEX)
+
       set(pp_if "elif")
       foreach(feature ${${_lang}_features})
         string(TOUPPER ${feature} feature_upper)
