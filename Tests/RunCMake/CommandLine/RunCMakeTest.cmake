@@ -35,3 +35,5 @@ run_cmake_command(E_sleep-no-args ${CMAKE_COMMAND} -E sleep)
 run_cmake_command(E_sleep-bad-arg1 ${CMAKE_COMMAND} -E sleep x)
 run_cmake_command(E_sleep-bad-arg2 ${CMAKE_COMMAND} -E sleep 1 -1)
 run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
+
+run_cmake_command(P_directory ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR})
