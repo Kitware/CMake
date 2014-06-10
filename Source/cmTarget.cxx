@@ -224,7 +224,7 @@ public:
 cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
 
 //----------------------------------------------------------------------------
-void deleteAndClear(
+static void deleteAndClear(
       std::vector<cmTargetInternals::TargetPropertyEntry*> &entries)
 {
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
@@ -238,7 +238,7 @@ void deleteAndClear(
 }
 
 //----------------------------------------------------------------------------
-void deleteAndClear(
+static void deleteAndClear(
   std::map<std::string,
           std::vector<cmTargetInternals::TargetPropertyEntry*> > &entries)
 {
@@ -2299,7 +2299,7 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
     for(std::vector<std::string>::iterator
           li = entryOptions->begin(); li != entryOptions->end(); ++li)
       {
-      std::string opt = *li;
+      std::string const& opt = *li;
 
       if(uniqueOptions.insert(opt).second)
         {
