@@ -180,7 +180,8 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
-  this->MSTools = true;
+  this->NsightTegra = gg->IsNsightTegra();
+  this->MSTools = !this->NsightTegra;
   this->TargetCompileAsWinRT = false;
   this->BuildFileStream = 0;
   this->IsMissingFiles = false;
@@ -311,6 +312,15 @@ void cmVisualStudio10TargetGenerator::Generate()
   project_defaults.append(
           "xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
   this->WriteString(project_defaults.c_str(),0);
+
+  if(this->NsightTegra)
+    {
+    this->WriteString("<PropertyGroup Label=\"NsightTegraProject\">\n", 1);
+    this->WriteString("<NsightTegraProjectRevisionNumber>"
+                      "6"
+                      "</NsightTegraProjectRevisionNumber>\n", 2);
+    this->WriteString("</PropertyGroup>\n", 1);
+    }
 
   this->WriteProjectConfigurations();
   this->WriteString("<PropertyGroup Label=\"Globals\">\n", 1);
@@ -605,11 +615,27 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
         configType += "StaticLibrary";
         break;
       case cmTarget::EXECUTABLE:
-        configType += "Application";
+        if(this->NsightTegra)
+          {
+          // Android executables are .so too.
+          configType += "DynamicLibrary";
+          }
+        else
+          {
+          configType += "Application";
+          }
         break;
       case cmTarget::UTILITY:
       case cmTarget::GLOBAL_TARGET:
-        configType += "Utility";
+        if(this->NsightTegra)
+          {
+          // Tegra-Android platform does not understand "Utility".
+          configType += "StaticLibrary";
+          }
+        else
+          {
+          configType += "Utility";
+          }
         break;
       case cmTarget::UNKNOWN_LIBRARY:
       case cmTarget::INTERFACE_LIBRARY:
@@ -621,6 +647,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     if(this->MSTools)
       {
       this->WriteMSToolConfigurationValues(*i);
+      }
+    else if(this->NsightTegra)
+      {
+      this->WriteNsightTegraConfigurationValues(*i);
       }
 
     this->WriteString("</PropertyGroup>\n", 1);
@@ -681,6 +711,19 @@ void cmVisualStudio10TargetGenerator
     this->WriteString("<WindowsAppContainer>true"
                       "</WindowsAppContainer>\n", 2);
     }
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator
+::WriteNsightTegraConfigurationValues(std::string const&)
+{
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+  const char* toolset = gg->GetPlatformToolset();
+  std::string ntv = "<NdkToolchainVersion>";
+  ntv += toolset? toolset : "Default";
+  ntv += "</NdkToolchainVersion>\n";
+  this->WriteString(ntv.c_str(), 2);
 }
 
 void cmVisualStudio10TargetGenerator::WriteCustomCommands()
@@ -2187,6 +2230,10 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       // WindowsPhone 8.0 does not have ole32.
       linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries", "ole32.lib");
       }
+    }
+  else if(this->NsightTegra)
+    {
+    linkOptions.AddFlag("SoName", targetNameSO.c_str());
     }
 
   linkOptions.Parse(flags.c_str());

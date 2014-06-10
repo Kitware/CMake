@@ -59,6 +59,7 @@ private:
   void WriteMSToolConfigurationValues(std::string const& config);
   void WriteHeaderSource(cmSourceFile const* sf);
   void WriteExtraSource(cmSourceFile const* sf);
+  void WriteNsightTegraConfigurationValues(std::string const& config);
   void WriteSource(std::string const& tool, cmSourceFile const* sf,
                    const char* end = 0);
   void WriteSources(std::string const& tool,
@@ -139,6 +140,7 @@ private:
   std::string GUID;
   std::string Name;
   bool MSTools;
+  bool NsightTegra;
   bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
