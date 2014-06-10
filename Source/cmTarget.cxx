@@ -25,6 +25,12 @@
 #include <stdlib.h> // required for atof
 #include <assert.h>
 #include <errno.h>
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/hash_set.hxx>
+#define UNORDERED_SET cmsys::hash_set
+#else
+#define UNORDERED_SET std::set
+#endif
 
 const char* cmTarget::GetTargetTypeName(TargetType targetType)
 {
@@ -642,7 +648,7 @@ bool cmTarget::IsBundleOnApple() const
 static bool processSources(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &srcs,
-      std::set<std::string> &uniqueSrcs,
+      UNORDERED_SET<std::string> &uniqueSrcs,
       cmGeneratorExpressionDAGChecker *dagChecker,
       std::string const& config, bool debugSources)
 {
@@ -784,7 +790,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
                                              "SOURCES", 0, 0);
 
-  std::set<std::string> uniqueSrcs;
+  UNORDERED_SET<std::string> uniqueSrcs;
   bool contextDependentDirectSources = processSources(this,
                  this->Internal->SourceEntries,
                  files,
@@ -1298,7 +1304,7 @@ void cmTarget::GetTllSignatureTraces(cmOStringStream &s,
                         = (sig == cmTarget::KeywordTLLSignature ? "keyword"
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
-    std::set<std::string> emitted;
+    UNORDERED_SET<std::string> emitted;
     for(std::vector<cmListFileBacktrace>::iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
@@ -1717,22 +1723,20 @@ static bool whiteListedInterfaceProperty(const std::string& prop)
     {
     return true;
     }
-  static const char* builtIns[] = {
-    // ###: This must remain sorted. It is processed with a binary search.
-    "COMPATIBLE_INTERFACE_BOOL",
-    "COMPATIBLE_INTERFACE_NUMBER_MAX",
-    "COMPATIBLE_INTERFACE_NUMBER_MIN",
-    "COMPATIBLE_INTERFACE_STRING",
-    "EXPORT_NAME",
-    "IMPORTED",
-    "NAME",
-    "TYPE"
-  };
+  static UNORDERED_SET<std::string> builtIns;
+  if (builtIns.empty())
+    {
+    builtIns.insert("COMPATIBLE_INTERFACE_BOOL");
+    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MAX");
+    builtIns.insert("COMPATIBLE_INTERFACE_NUMBER_MIN");
+    builtIns.insert("COMPATIBLE_INTERFACE_STRING");
+    builtIns.insert("EXPORT_NAME");
+    builtIns.insert("IMPORTED");
+    builtIns.insert("NAME");
+    builtIns.insert("TYPE");
+    }
 
-  if (std::binary_search(cmArrayBegin(builtIns),
-                         cmArrayEnd(builtIns),
-                         prop.c_str(),
-                         cmStrCmp(prop)))
+  if (builtIns.count(prop))
     {
     return true;
     }
@@ -2017,7 +2021,7 @@ void cmTarget::InsertCompileDefinition(const cmValueWithOrigin &entry)
 static void processIncludeDirectories(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &includes,
-      std::set<std::string> &uniqueIncludes,
+      UNORDERED_SET<std::string> &uniqueIncludes,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const std::string& config, bool debugIncludes)
 {
@@ -2166,7 +2170,7 @@ std::vector<std::string>
 cmTarget::GetIncludeDirectories(const std::string& config) const
 {
   std::vector<std::string> includes;
-  std::set<std::string> uniqueIncludes;
+  UNORDERED_SET<std::string> uniqueIncludes;
 
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
                                              "INCLUDE_DIRECTORIES", 0, 0);
@@ -2258,7 +2262,7 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
 static void processCompileOptionsInternal(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
-      std::set<std::string> &uniqueOptions,
+      UNORDERED_SET<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const std::string& config, bool debugOptions, const char *logName)
 {
@@ -2321,7 +2325,7 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
 static void processCompileOptions(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
-      std::set<std::string> &uniqueOptions,
+      UNORDERED_SET<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const std::string& config, bool debugOptions)
 {
@@ -2358,7 +2362,7 @@ void cmTarget::GetAutoUicOptions(std::vector<std::string> &result,
 void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                                  const std::string& config) const
 {
-  std::set<std::string> uniqueOptions;
+  UNORDERED_SET<std::string> uniqueOptions;
 
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
                                              "COMPILE_OPTIONS", 0, 0);
@@ -2419,7 +2423,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
 static void processCompileDefinitions(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
-      std::set<std::string> &uniqueOptions,
+      UNORDERED_SET<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const std::string& config, bool debugOptions)
 {
@@ -2432,7 +2436,7 @@ static void processCompileDefinitions(cmTarget const* tgt,
 void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                                             const std::string& config) const
 {
-  std::set<std::string> uniqueOptions;
+  UNORDERED_SET<std::string> uniqueOptions;
 
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
                                              "COMPILE_DEFINITIONS", 0, 0);
@@ -2530,7 +2534,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 static void processCompileFeatures(cmTarget const* tgt,
       const std::vector<cmTargetInternals::TargetPropertyEntry*> &entries,
       std::vector<std::string> &options,
-      std::set<std::string> &uniqueOptions,
+      UNORDERED_SET<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
       const std::string& config, bool debugOptions)
 {
@@ -2542,7 +2546,7 @@ static void processCompileFeatures(cmTarget const* tgt,
 void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
                                   const std::string& config) const
 {
-  std::set<std::string> uniqueFeatures;
+  UNORDERED_SET<std::string> uniqueFeatures;
 
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
                                              "COMPILE_FEATURES",
@@ -3082,7 +3086,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
                                    cmProperty::TARGET);
       }
     // Support "<CONFIG>_LOCATION".
-    if(cmHasLiteralSuffix(prop, "_LOCATION"))
+    else if(cmHasLiteralSuffix(prop, "_LOCATION"))
       {
       std::string configName(prop.c_str(), prop.size() - 9);
       if(configName != "IMPORTED")
@@ -3097,7 +3101,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         }
       }
     }
-  static std::set<std::string> specialProps;
+  static UNORDERED_SET<std::string> specialProps;
 #define MAKE_STATIC_PROP(PROP) \
   static const std::string prop##PROP = #PROP
   MAKE_STATIC_PROP(LINK_LIBRARIES);
@@ -3323,7 +3327,7 @@ class cmTargetCollectLinkLanguages
 public:
   cmTargetCollectLinkLanguages(cmTarget const* target,
                                const std::string& config,
-                               std::set<std::string>& languages,
+                               UNORDERED_SET<std::string>& languages,
                                cmTarget const* head):
     Config(config), Languages(languages), HeadTarget(head),
     Makefile(target->GetMakefile()), Target(target)
@@ -3393,7 +3397,7 @@ public:
     }
 private:
   std::string Config;
-  std::set<std::string>& Languages;
+  UNORDERED_SET<std::string>& Languages;
   cmTarget const* HeadTarget;
   cmMakefile* Makefile;
   const cmTarget* Target;
@@ -3430,7 +3434,7 @@ class cmTargetSelectLinker
   cmTarget const* Target;
   cmMakefile* Makefile;
   cmGlobalGenerator* GG;
-  std::set<std::string> Preferred;
+  UNORDERED_SET<std::string> Preferred;
 public:
   cmTargetSelectLinker(cmTarget const* target): Preference(0), Target(target)
     {
@@ -3462,7 +3466,7 @@ public:
       e << "Target " << this->Target->GetName()
         << " contains multiple languages with the highest linker preference"
         << " (" << this->Preference << "):\n";
-      for(std::set<std::string>::const_iterator
+      for(UNORDERED_SET<std::string>::const_iterator
             li = this->Preferred.begin(); li != this->Preferred.end(); ++li)
         {
         e << "  " << *li << "\n";
@@ -3481,7 +3485,7 @@ void cmTarget::ComputeLinkClosure(const std::string& config,
                                   LinkClosure& lc) const
 {
   // Get languages built in this target.
-  std::set<std::string> languages;
+  UNORDERED_SET<std::string> languages;
   LinkImplementation const* impl = this->GetLinkImplementation(config);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
@@ -3499,7 +3503,7 @@ void cmTarget::ComputeLinkClosure(const std::string& config,
     }
 
   // Store the transitive closure of languages.
-  for(std::set<std::string>::const_iterator li = languages.begin();
+  for(UNORDERED_SET<std::string>::const_iterator li = languages.begin();
       li != languages.end(); ++li)
     {
     lc.Languages.push_back(*li);
@@ -3527,7 +3531,7 @@ void cmTarget::ComputeLinkClosure(const std::string& config,
       }
 
     // Now consider languages that propagate from linked targets.
-    for(std::set<std::string>::const_iterator sit = languages.begin();
+    for(UNORDERED_SET<std::string>::const_iterator sit = languages.begin();
         sit != languages.end(); ++sit)
       {
       std::string propagates = "CMAKE_"+*sit+"_LINKER_PREFERENCE_PROPAGATES";
@@ -6261,7 +6265,7 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
       {
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
-      std::set<std::string> emitted;
+      UNORDERED_SET<std::string> emitted;
       for(std::vector<cmLinkItem>::const_iterator
           li = iface.Libraries.begin(); li != iface.Libraries.end(); ++li)
         {
@@ -6835,6 +6839,7 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 
   if (!prop.empty())
     {
+    // Use a std::set to keep the error message sorted.
     std::set<std::string> props;
     std::set<std::string>::const_iterator i = emittedBools.find(prop);
     if (i != emittedBools.end())
