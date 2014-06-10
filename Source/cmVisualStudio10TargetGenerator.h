@@ -120,6 +120,7 @@ private:
   std::string Platform;
   std::string GUID;
   std::string Name;
+  bool MSTools;
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
