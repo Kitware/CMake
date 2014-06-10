@@ -48,17 +48,19 @@ public:
     const char* p = cmVS10GenName(name, genName);
     if(!p)
       { return 0; }
-    if(strcmp(p, "") == 0)
+    if(!*p)
       {
       return new cmGlobalVisualStudio10Generator(
         genName, "", "");
       }
-    if(strcmp(p, " Win64") == 0)
+    if(*p++ != ' ')
+      { return 0; }
+    if(strcmp(p, "Win64") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
         genName, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(strcmp(p, " IA64") == 0)
+    if(strcmp(p, "IA64") == 0)
       {
       return new cmGlobalVisualStudio10Generator(
         genName, "Itanium", "CMAKE_FORCE_IA64");

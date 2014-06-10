@@ -32,34 +32,37 @@
 
 #include <cmsys/auto_ptr.hxx>
 
-static cmVS7FlagTable const*
-cmVSGetCLFlagTable(cmLocalVisualStudioGenerator* lg)
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+  cmLocalVisualStudioGenerator::VSVersion
+    v = this->LocalGenerator->GetVersion();
+  if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12CLFlagTable; }
-  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
+  else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11CLFlagTable; }
   else
     { return cmVS10CLFlagTable; }
 }
 
-static cmVS7FlagTable const*
-cmVSGetLibFlagTable(cmLocalVisualStudioGenerator* lg)
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+  cmLocalVisualStudioGenerator::VSVersion
+    v = this->LocalGenerator->GetVersion();
+  if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12LibFlagTable; }
-  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
+  else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LibFlagTable; }
   else
     { return cmVS10LibFlagTable; }
 }
 
-static cmVS7FlagTable const*
-cmVSGetLinkFlagTable(cmLocalVisualStudioGenerator* lg)
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
 {
-  if(lg->GetVersion() >= cmLocalVisualStudioGenerator::VS12)
+  cmLocalVisualStudioGenerator::VSVersion
+    v = this->LocalGenerator->GetVersion();
+  if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12LinkFlagTable; }
-  else if(lg->GetVersion() == cmLocalVisualStudioGenerator::VS11)
+  else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LinkFlagTable; }
   else
     { return cmVS10LinkFlagTable; }
@@ -464,8 +467,6 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 {
-  cmGlobalVisualStudio10Generator* gg =
-    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
   std::vector<std::string> *configs =
     static_cast<cmGlobalVisualStudio7Generator *>
     (this->GlobalGenerator)->GetConfigurations();
@@ -500,52 +501,61 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2);
 
-    const char* mfcFlag =
-      this->Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
-    std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
-
-    std::string useOfMfcValue = "false";
-    if(mfcFlagValue == "1")
-      {
-      useOfMfcValue = "Static";
-      }
-    else if(mfcFlagValue == "2")
-      {
-      useOfMfcValue = "Dynamic";
-      }
-    std::string mfcLine = "<UseOfMfc>";
-    mfcLine += useOfMfcValue + "</UseOfMfc>\n";
-    this->WriteString(mfcLine.c_str(), 2);
-
-    if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
-       this->ClOptions[*i]->UsingUnicode()) ||
-       this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
-      {
-      this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
-      }
-    else if (this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
-       this->ClOptions[*i]->UsingSBCS())
-      {
-      this->WriteString("<CharacterSet>NotSet</CharacterSet>\n", 2);
-      }
-    else
-      {
-      this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
-      }
-    if(const char* toolset = gg->GetPlatformToolset())
-      {
-      std::string pts = "<PlatformToolset>";
-      pts += toolset;
-      pts += "</PlatformToolset>\n";
-      this->WriteString(pts.c_str(), 2);
-      }
-    if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
-      {
-      this->WriteString("<WindowsAppContainer>true"
-                        "</WindowsAppContainer>\n", 2);
-      }
+    this->WriteMSToolConfigurationValues(*i);
 
     this->WriteString("</PropertyGroup>\n", 1);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator
+::WriteMSToolConfigurationValues(std::string const& config)
+{
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+  const char* mfcFlag =
+    this->Target->GetMakefile()->GetDefinition("CMAKE_MFC_FLAG");
+  std::string mfcFlagValue = mfcFlag ? mfcFlag : "0";
+
+  std::string useOfMfcValue = "false";
+  if(mfcFlagValue == "1")
+    {
+    useOfMfcValue = "Static";
+    }
+  else if(mfcFlagValue == "2")
+    {
+    useOfMfcValue = "Dynamic";
+    }
+  std::string mfcLine = "<UseOfMfc>";
+  mfcLine += useOfMfcValue + "</UseOfMfc>\n";
+  this->WriteString(mfcLine.c_str(), 2);
+
+  if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
+      this->ClOptions[config]->UsingUnicode()) ||
+     this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+    {
+    this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
+    }
+  else if (this->Target->GetType() <= cmTarget::MODULE_LIBRARY &&
+           this->ClOptions[config]->UsingSBCS())
+    {
+    this->WriteString("<CharacterSet>NotSet</CharacterSet>\n", 2);
+    }
+  else
+    {
+    this->WriteString("<CharacterSet>MultiByte</CharacterSet>\n", 2);
+    }
+  if(const char* toolset = gg->GetPlatformToolset())
+    {
+    std::string pts = "<PlatformToolset>";
+    pts += toolset;
+    pts += "</PlatformToolset>\n";
+    this->WriteString(pts.c_str(), 2);
+    }
+  if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+    {
+    this->WriteString("<WindowsAppContainer>true"
+                      "</WindowsAppContainer>\n", 2);
     }
 }
 
@@ -1144,17 +1154,18 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     }
   // if the source file does not match the linker language
   // then force c or c++
+  const char* compileAs = 0;
   if(needForceLang || (linkLanguage != lang))
     {
     if(lang == "CXX")
       {
       // force a C++ file type
-      flags += " /TP ";
+      compileAs = "CompileAsCpp";
       }
     else if(lang == "C")
       {
       // force to c
-      flags += " /TC ";
+      compileAs = "CompileAsC";
       }
     }
   bool hasFlags = false;
@@ -1190,7 +1201,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       }
     // if we have flags or defines for this config then
     // use them
-    if(flags.size() || configDefines.size())
+    if(!flags.empty() || !configDefines.empty() || compileAs)
       {
       (*this->BuildFileStream ) << firstString;
       firstString = ""; // only do firstString once
@@ -1198,7 +1209,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
       cmVisualStudioGeneratorOptions
         clOptions(this->LocalGenerator,
                   cmVisualStudioGeneratorOptions::Compiler,
-                  cmVSGetCLFlagTable(this->LocalGenerator), 0, this);
+                  this->GetClFlagTable(), 0, this);
+      if(compileAs)
+        {
+        clOptions.AddFlag("CompileAs", compileAs);
+        }
       clOptions.Parse(flags.c_str());
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
@@ -1260,23 +1275,28 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
       this->ConvertToWindowsSlash(outDir);
 
       this->WritePlatformConfigTag("OutDir", config->c_str(), 3);
-      *this->BuildFileStream << outDir
+      *this->BuildFileStream << cmVS10EscapeXML(outDir)
                              << "</OutDir>\n";
 
       this->WritePlatformConfigTag("IntDir", config->c_str(), 3);
-      *this->BuildFileStream << intermediateDir
+      *this->BuildFileStream << cmVS10EscapeXML(intermediateDir)
                              << "</IntDir>\n";
 
+      std::string name =
+        cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
       this->WritePlatformConfigTag("TargetName", config->c_str(), 3);
-      *this->BuildFileStream
-        << cmSystemTools::GetFilenameWithoutLastExtension(
-             targetNameFull.c_str())
-        << "</TargetName>\n";
+      *this->BuildFileStream << cmVS10EscapeXML(name) << "</TargetName>\n";
 
+      std::string ext =
+        cmSystemTools::GetFilenameLastExtension(targetNameFull);
+      if(ext.empty())
+        {
+        // An empty TargetExt causes a default extension to be used.
+        // A single "." appears to be treated as an empty extension.
+        ext = ".";
+        }
       this->WritePlatformConfigTag("TargetExt", config->c_str(), 3);
-      *this->BuildFileStream
-        << cmSystemTools::GetFilenameLastExtension(targetNameFull.c_str())
-        << "</TargetExt>\n";
+      *this->BuildFileStream << cmVS10EscapeXML(ext) << "</TargetExt>\n";
 
       this->OutputLinkIncremental(*config);
       }
@@ -1355,48 +1375,44 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   cmsys::auto_ptr<Options> pOptions(
     new Options(this->LocalGenerator, Options::Compiler,
-                cmVSGetCLFlagTable(this->LocalGenerator)));
+                this->GetClFlagTable()));
   Options& clOptions = *pOptions;
 
   std::string flags;
-  // collect up flags for
-  if(this->Target->GetType() < cmTarget::UTILITY)
+  const std::string& linkLanguage =
+    this->Target->GetLinkerLanguage(configName.c_str());
+  if(linkLanguage.empty())
     {
-    const std::string& linkLanguage =
-      this->Target->GetLinkerLanguage(configName.c_str());
-    if(linkLanguage.empty())
-      {
-      cmSystemTools::Error
-        ("CMake can not determine linker language for target: ",
-         this->Name.c_str());
-      return false;
-      }
-    if(linkLanguage == "C" || linkLanguage == "CXX"
-       || linkLanguage == "Fortran")
-      {
-      std::string baseFlagVar = "CMAKE_";
-      baseFlagVar += linkLanguage;
-      baseFlagVar += "_FLAGS";
-      flags = this->
-        Target->GetMakefile()->GetRequiredDefinition(baseFlagVar.c_str());
-      std::string flagVar = baseFlagVar + std::string("_") +
-        cmSystemTools::UpperCase(configName);
-      flags += " ";
-      flags += this->
-        Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
-      }
-    // set the correct language
-    if(linkLanguage == "C")
-      {
-      flags += " /TC ";
-      }
-    if(linkLanguage == "CXX")
-      {
-      flags += " /TP ";
-      }
-    this->LocalGenerator->AddCompileOptions(flags, this->Target,
-                                            linkLanguage, configName.c_str());
+    cmSystemTools::Error
+      ("CMake can not determine linker language for target: ",
+       this->Name.c_str());
+    return false;
     }
+  if(linkLanguage == "C" || linkLanguage == "CXX"
+     || linkLanguage == "Fortran")
+    {
+    std::string baseFlagVar = "CMAKE_";
+    baseFlagVar += linkLanguage;
+    baseFlagVar += "_FLAGS";
+    flags = this->
+      Target->GetMakefile()->GetRequiredDefinition(baseFlagVar.c_str());
+    std::string flagVar = baseFlagVar + std::string("_") +
+      cmSystemTools::UpperCase(configName);
+    flags += " ";
+    flags += this->
+      Target->GetMakefile()->GetRequiredDefinition(flagVar.c_str());
+    }
+  // set the correct language
+  if(linkLanguage == "C")
+    {
+    clOptions.AddFlag("CompileAs", "CompileAsC");
+    }
+  if(linkLanguage == "CXX")
+    {
+    clOptions.AddFlag("CompileAs", "CompileAsCpp");
+    }
+  this->LocalGenerator->AddCompileOptions(flags, this->Target,
+                                          linkLanguage, configName.c_str());
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
@@ -1436,6 +1452,10 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
   this->OutputIncludes(includes);
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                          "\n", "CXX");
+
+  this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
 
   // If not in debug mode, write the DebugInformationFormat field
   // without value so PDBs don't get generated uselessly.
@@ -1444,10 +1464,6 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
     this->WriteString("<DebugInformationFormat>"
                       "</DebugInformationFormat>\n", 3);
     }
-
-  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
-                                          "\n", "CXX");
-  this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
 
   // Specify the compiler program database file if configured.
   std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
@@ -1508,7 +1524,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     cmVisualStudioGeneratorOptions
       libOptions(this->LocalGenerator,
                  cmVisualStudioGeneratorOptions::Linker,
-                 cmVSGetLibFlagTable(this->LocalGenerator), 0, this);
+                 this->GetLibFlagTable(), 0, this);
     libOptions.Parse(libflags.c_str());
     libOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
     libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
@@ -1543,7 +1559,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 {
   cmsys::auto_ptr<Options> pOptions(
     new Options(this->LocalGenerator, Options::Linker,
-                cmVSGetLinkFlagTable(this->LocalGenerator), 0, this));
+                this->GetLinkFlagTable(), 0, this));
   Options& linkOptions = *pOptions;
 
   const std::string& linkLanguage =
@@ -1567,16 +1583,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     {
     linkType = "EXE";
     }
-  std::string stackVar = "CMAKE_";
-  stackVar += linkLanguage;
-  stackVar += "_STACK_SIZE";
-  const char* stackVal = this->Makefile->GetDefinition(stackVar.c_str());
   std::string flags;
-  if(stackVal)
-    {
-    flags += " /STACK:";
-    flags += stackVal;
-    }
   std::string linkFlagVarBase = "CMAKE_";
   linkFlagVarBase += linkType;
   linkFlagVarBase += "_LINKER_FLAGS";
@@ -1599,14 +1606,6 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     {
     flags += " ";
     flags += flagsConfig;
-    }
-  if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
-    {
-    linkOptions.AddFlag("SubSystem", "Windows");
-    }
-  else
-    {
-    linkOptions.AddFlag("SubSystem", "Console");
     }
   std::string standardLibsVar = "CMAKE_";
   standardLibsVar += linkLanguage;
@@ -1661,15 +1660,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
   linkDirs += "%(AdditionalLibraryDirectories)";
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
   linkOptions.AddFlag("AdditionalDependencies", libs.c_str());
-  linkOptions.AddFlag("Version", "");
-  if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
-    {
-    linkOptions.AddFlag("GenerateDebugInformation", "true");
-    }
-  else
-    {
-    linkOptions.AddFlag("GenerateDebugInformation", "false");
-    }
+
   std::string targetName;
   std::string targetNameSO;
   std::string targetNameFull;
@@ -1688,6 +1679,31 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
                                   config.c_str());
     }
 
+  linkOptions.AddFlag("Version", "");
+
+  if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
+    {
+    linkOptions.AddFlag("SubSystem", "Windows");
+    }
+  else
+    {
+    linkOptions.AddFlag("SubSystem", "Console");
+    }
+
+  if(const char* stackVal =
+     this->Makefile->GetDefinition("CMAKE_"+linkLanguage+"_STACK_SIZE"))
+    {
+    linkOptions.AddFlag("StackReserveSize", stackVal);
+    }
+
+  if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
+    {
+    linkOptions.AddFlag("GenerateDebugInformation", "true");
+    }
+  else
+    {
+    linkOptions.AddFlag("GenerateDebugInformation", "false");
+    }
   std::string pdb = this->Target->GetPDBDirectory(config.c_str());
   pdb += "/";
   pdb += targetNamePDB;

@@ -43,25 +43,22 @@ public:
     const char* p = cmVS11GenName(name, genName);
     if(!p)
       { return 0; }
-    if(strcmp(p, "") == 0)
+    if(!*p)
       {
       return new cmGlobalVisualStudio11Generator(
         genName, "", "");
       }
-    if(strcmp(p, " Win64") == 0)
+    if(*p++ != ' ')
+      { return 0; }
+    if(strcmp(p, "Win64") == 0)
       {
       return new cmGlobalVisualStudio11Generator(
         genName, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(strcmp(p, " ARM") == 0)
+    if(strcmp(p, "ARM") == 0)
       {
       return new cmGlobalVisualStudio11Generator(
         genName, "ARM", "");
-      }
-
-    if(*p++ != ' ')
-      {
-      return 0;
       }
 
     std::set<std::string> installedSDKs =

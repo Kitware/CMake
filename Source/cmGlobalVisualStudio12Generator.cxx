@@ -43,17 +43,19 @@ public:
     const char* p = cmVS12GenName(name, genName);
     if(!p)
       { return 0; }
-    if(strcmp(p, "") == 0)
+    if(!*p)
       {
       return new cmGlobalVisualStudio12Generator(
         genName, "", "");
       }
-    if(strcmp(p, " Win64") == 0)
+    if(*p++ != ' ')
+      { return 0; }
+    if(strcmp(p, "Win64") == 0)
       {
       return new cmGlobalVisualStudio12Generator(
         genName, "x64", "CMAKE_FORCE_WIN64");
       }
-    if(strcmp(p, " ARM") == 0)
+    if(strcmp(p, "ARM") == 0)
       {
       return new cmGlobalVisualStudio12Generator(
         genName, "ARM", "");
