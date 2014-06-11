@@ -5207,7 +5207,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
       || (!impliedByUse && !explicitlySet));
 
   std::vector<cmTarget*> deps;
-  tgt->GetTransitiveTargetClosure(config, tgt, deps);
+  tgt->GetTransitiveTargetClosure(config, deps);
 
   if(deps.empty())
     {
@@ -5423,7 +5423,7 @@ bool isLinkDependentProperty(cmTarget const* tgt, const std::string &p,
                              const std::string& config)
 {
   std::vector<cmTarget*> deps;
-  tgt->GetTransitiveTargetClosure(config, tgt, deps);
+  tgt->GetTransitiveTargetClosure(config, deps);
 
   if(deps.empty())
     {
@@ -6143,18 +6143,17 @@ void processILibs(const std::string& config,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetTransitiveTargetClosure(const std::string& config,
-                                      cmTarget const* headTarget,
                                       std::vector<cmTarget*> &tgts) const
 {
   std::set<cmTarget*> emitted;
 
   cmTarget::LinkImplementation const* impl
-      = this->GetLinkImplementationLibraries(config, headTarget);
+      = this->GetLinkImplementationLibraries(config, this);
 
   for(std::vector<std::string>::const_iterator it = impl->Libraries.begin();
       it != impl->Libraries.end(); ++it)
     {
-      processILibs(config, headTarget, *it, tgts, emitted);
+      processILibs(config, this, *it, tgts, emitted);
     }
 }
 
