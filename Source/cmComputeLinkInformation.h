@@ -29,8 +29,7 @@ class cmOrderDirectories;
 class cmComputeLinkInformation
 {
 public:
-  cmComputeLinkInformation(cmTarget const* target, const std::string& config,
-                           cmTarget const* headTarget);
+  cmComputeLinkInformation(cmTarget const* target, const std::string& config);
   ~cmComputeLinkInformation();
   bool Compute();
 
@@ -75,7 +74,6 @@ private:
 
   // Context information.
   cmTarget const* Target;
-  cmTarget const* HeadTarget;
   cmMakefile* Makefile;
   cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;

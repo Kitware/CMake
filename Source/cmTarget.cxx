@@ -6953,7 +6953,7 @@ cmTarget::GetLinkInformation(const std::string& config) const
     {
     // Compute information for this configuration.
     cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this, config, this);
+      new cmComputeLinkInformation(this, config);
     if(!info || !info->Compute())
       {
       delete info;

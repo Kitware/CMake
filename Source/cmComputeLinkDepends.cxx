@@ -172,12 +172,10 @@ satisfy dependencies.
 
 //----------------------------------------------------------------------------
 cmComputeLinkDepends
-::cmComputeLinkDepends(cmTarget const* target, const std::string& config,
-                       cmTarget const* head)
+::cmComputeLinkDepends(cmTarget const* target, const std::string& config)
 {
   // Store context information.
   this->Target = target;
-  this->HeadTarget = head;
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
@@ -356,7 +354,7 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
     {
     // Follow the target dependencies.
     if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
+       entry.Target->GetLinkInterface(this->Config, this->Target))
       {
       const bool isIface =
                       entry.Target->GetType() == cmTarget::INTERFACE_LIBRARY;
@@ -455,7 +453,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
   if(entry.Target)
     {
     if(cmTarget::LinkInterface const* iface =
-       entry.Target->GetLinkInterface(this->Config, this->HeadTarget))
+       entry.Target->GetLinkInterface(this->Config, this->Target))
       {
       // Follow public and private dependencies transitively.
       this->FollowSharedDeps(index, iface, true);
@@ -544,7 +542,7 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
 {
   // Add direct link dependencies in this configuration.
   cmTarget::LinkImplementation const* impl =
-    this->Target->GetLinkImplementation(this->Config, this->HeadTarget);
+    this->Target->GetLinkImplementation(this->Config, this->Target);
   this->AddLinkEntries(-1, impl->Libraries);
   for(std::vector<std::string>::const_iterator
         wi = impl->WrongConfigLibraries.begin();
@@ -955,7 +953,7 @@ int cmComputeLinkDepends::ComputeComponentCount(NodeList const& nl)
     if(cmTarget const* target = this->EntryList[*ni].Target)
       {
       if(cmTarget::LinkInterface const* iface =
-         target->GetLinkInterface(this->Config, this->HeadTarget))
+         target->GetLinkInterface(this->Config, this->Target))
         {
         if(iface->Multiplicity > count)
           {

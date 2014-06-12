@@ -239,12 +239,10 @@ because this need be done only for shared libraries without soname-s.
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation
-::cmComputeLinkInformation(cmTarget const* target, const std::string& config,
-                           cmTarget const* headTarget)
+::cmComputeLinkInformation(cmTarget const* target, const std::string& config)
 {
   // Store context information.
   this->Target = target;
-  this->HeadTarget = headTarget;
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
@@ -267,7 +265,7 @@ cmComputeLinkInformation
   this->OrderDependentRPath = 0;
 
   // Get the language used for linking this target.
-  this->LinkLanguage = this->Target->GetLinkerLanguage(config, headTarget);
+  this->LinkLanguage = this->Target->GetLinkerLanguage(config);
   if(this->LinkLanguage.empty())
     {
     // The Compute method will do nothing, so skip the rest of the
@@ -505,8 +503,7 @@ bool cmComputeLinkInformation::Compute()
     }
 
   // Compute the ordered link line items.
-  cmComputeLinkDepends cld(this->Target, this->Config,
-                           this->HeadTarget);
+  cmComputeLinkDepends cld(this->Target, this->Config);
   cld.SetOldLinkDirMode(this->OldLinkDirMode);
   cmComputeLinkDepends::EntryVector const& linkEntries = cld.Compute();
 
@@ -573,7 +570,7 @@ void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
   cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config,
-                                                          this->HeadTarget);
+                                                          this->Target);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
@@ -1972,7 +1969,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // present.  This is done even when skipping rpath support.
   {
   cmTarget::LinkClosure const* lc =
-    this->Target->GetLinkClosure(this->Config, this->HeadTarget);
+    this->Target->GetLinkClosure(this->Config, this->Target);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
