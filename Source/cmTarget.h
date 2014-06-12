@@ -308,8 +308,7 @@ public:
     // Languages whose runtime libraries must be linked.
     std::vector<std::string> Languages;
   };
-  LinkClosure const* GetLinkClosure(const std::string& config,
-                                    cmTarget const* head) const;
+  LinkClosure const* GetLinkClosure(const std::string& config) const;
 
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
@@ -757,8 +756,7 @@ private:
   void ComputeLinkImplementationLanguages(const std::string& config,
                                           LinkImplementation& impl,
                                           cmTarget const* head) const;
-  void ComputeLinkClosure(const std::string& config, LinkClosure& lc,
-                          cmTarget const* head) const;
+  void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,

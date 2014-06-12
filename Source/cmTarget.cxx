@@ -136,8 +136,7 @@ public:
                    cmTarget::LinkImplementation> LinkImplMapType;
   LinkImplMapType LinkImplMap;
 
-  typedef std::map<TargetConfigPair, cmTarget::LinkClosure>
-                                                          LinkClosureMapType;
+  typedef std::map<std::string, cmTarget::LinkClosure> LinkClosureMapType;
   LinkClosureMapType LinkClosureMap;
 
   typedef std::map<TargetConfigPair, std::vector<cmSourceFile*> >
@@ -3554,21 +3553,20 @@ private:
 //----------------------------------------------------------------------------
 std::string cmTarget::GetLinkerLanguage(const std::string& config) const
 {
-  return this->GetLinkClosure(config, this)->LinkerLanguage;
+  return this->GetLinkClosure(config)->LinkerLanguage;
 }
 
 //----------------------------------------------------------------------------
-cmTarget::LinkClosure const* cmTarget::GetLinkClosure(
-                                                  const std::string& config,
-                                                  cmTarget const* head) const
+cmTarget::LinkClosure const*
+cmTarget::GetLinkClosure(const std::string& config) const
 {
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+  std::string key(cmSystemTools::UpperCase(config));
   cmTargetInternals::LinkClosureMapType::iterator
     i = this->Internal->LinkClosureMap.find(key);
   if(i == this->Internal->LinkClosureMap.end())
     {
     LinkClosure lc;
-    this->ComputeLinkClosure(config, lc, head);
+    this->ComputeLinkClosure(config, lc);
     cmTargetInternals::LinkClosureMapType::value_type entry(key, lc);
     i = this->Internal->LinkClosureMap.insert(entry).first;
     }
@@ -3629,12 +3627,12 @@ public:
 };
 
 //----------------------------------------------------------------------------
-void cmTarget::ComputeLinkClosure(const std::string& config, LinkClosure& lc,
-                                  cmTarget const* head) const
+void cmTarget::ComputeLinkClosure(const std::string& config,
+                                  LinkClosure& lc) const
 {
   // Get languages built in this target.
   std::set<std::string> languages;
-  LinkImplementation const* impl = this->GetLinkImplementation(config, head);
+  LinkImplementation const* impl = this->GetLinkImplementation(config, this);
   for(std::vector<std::string>::const_iterator li = impl->Languages.begin();
       li != impl->Languages.end(); ++li)
     {
@@ -3642,7 +3640,7 @@ void cmTarget::ComputeLinkClosure(const std::string& config, LinkClosure& lc,
     }
 
   // Add interface languages from linked targets.
-  cmTargetCollectLinkLanguages cll(this, config, languages, head);
+  cmTargetCollectLinkLanguages cll(this, config, languages, this);
   for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
       li != impl->Libraries.end(); ++li)
     {

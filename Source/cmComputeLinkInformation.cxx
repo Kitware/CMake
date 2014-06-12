@@ -569,8 +569,7 @@ bool cmComputeLinkInformation::Compute()
 void cmComputeLinkInformation::AddImplicitLinkInfo()
 {
   // The link closure lists all languages whose implicit info is needed.
-  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config,
-                                                          this->Target);
+  cmTarget::LinkClosure const* lc=this->Target->GetLinkClosure(this->Config);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
@@ -1969,7 +1968,7 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
   // present.  This is done even when skipping rpath support.
   {
   cmTarget::LinkClosure const* lc =
-    this->Target->GetLinkClosure(this->Config, this->Target);
+    this->Target->GetLinkClosure(this->Config);
   for(std::vector<std::string>::const_iterator li = lc->Languages.begin();
       li != lc->Languages.end(); ++li)
     {
