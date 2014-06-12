@@ -392,8 +392,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     else
       {
       const std::set<std::string>& configsPartOfDefaultBuild =
-        this->IsPartOfDefaultBuild(root->GetMakefile()->GetProjectName(),
-                                   target);
+        this->IsPartOfDefaultBuild(projectTargets, target);
       const char *vcprojName =
         target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName)
@@ -981,8 +980,7 @@ cmGlobalVisualStudio7Generator
 
 std::set<std::string>
 cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
-                                                    const std::string& project,
-                                                    cmTarget const* target)
+  OrderedTargetDependSet const& projectTargets, cmTarget const* target)
 {
   std::set<std::string> activeConfigs;
   // if it is a utilitiy target then only make it part of the
@@ -992,7 +990,7 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
     {
     return activeConfigs;
     }
-  if(type == cmTarget::UTILITY && !this->IsDependedOn(project, target))
+  if(type == cmTarget::UTILITY && !this->IsDependedOn(projectTargets, target))
     {
     return activeConfigs;
     }
@@ -1011,31 +1009,18 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
 }
 
 bool
-cmGlobalVisualStudio7Generator::IsDependedOn(const std::string& project,
-                                             cmTarget const* targetIn)
+cmGlobalVisualStudio7Generator
+::IsDependedOn(OrderedTargetDependSet const& projectTargets,
+               cmTarget const* targetIn)
 {
-  // Get all local gens for this project
-  std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator it =
-                                              this->ProjectMap.find(project);
-  if (it == this->ProjectMap.end())
+  for (OrderedTargetDependSet::const_iterator l = projectTargets.begin();
+       l != projectTargets.end(); ++l)
     {
-    return false;
-    }
-
-  // loop over local gens and get the targets for each one
-  for(std::vector<cmLocalGenerator*>::const_iterator geIt = it->second.begin();
-      geIt != it->second.end(); ++geIt)
-    {
-    cmTargets const& targets = (*geIt)->GetMakefile()->GetTargets();
-    for (cmTargets::const_iterator l = targets.begin();
-         l != targets.end(); l++)
+    cmTarget const& target = **l;
+    TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
+    if(tgtdeps.count(targetIn))
       {
-      cmTarget const& target = l->second;
-      TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
-      if(tgtdeps.count(targetIn))
-        {
-        return true;
-        }
+      return true;
       }
     }
   return false;

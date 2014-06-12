@@ -164,9 +164,11 @@ protected:
 
   std::string ConvertToSolutionPath(const char* path);
 
-  std::set<std::string> IsPartOfDefaultBuild(const std::string& project,
-                                             cmTarget const* target);
-  bool IsDependedOn(const std::string& project, cmTarget const* target);
+  std::set<std::string>
+    IsPartOfDefaultBuild(OrderedTargetDependSet const& projectTargets,
+                         cmTarget const* target);
+  bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
+                    cmTarget const* target);
   std::vector<std::string> Configurations;
   std::map<std::string, std::string> GUIDMap;
 
