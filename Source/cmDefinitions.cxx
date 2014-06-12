@@ -15,7 +15,8 @@
 cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
-cmDefinitions::cmDefinitions(cmDefinitions* parent): Up(parent)
+cmDefinitions::cmDefinitions(cmDefinitions* parent)
+  : Up(parent)
 {
 }
 
@@ -28,18 +29,17 @@ void cmDefinitions::Reset(cmDefinitions* parent)
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const&
-cmDefinitions::GetInternal(const std::string& key)
+cmDefinitions::GetInternal(const std::string& key) const
 {
   MapType::const_iterator i = this->Map.find(key);
   if(i != this->Map.end())
     {
     return i->second;
     }
-  else if(cmDefinitions* up = this->Up)
+  if(cmDefinitions* up = this->Up)
     {
-    // Query the parent scope and store the result locally.
-    Def def = up->GetInternal(key);
-    return this->Map.insert(MapType::value_type(key, def)).first->second;
+    // Query the parent scope.
+    return up->GetInternal(key);
     }
   return this->NoDef;
 }
@@ -51,16 +51,7 @@ cmDefinitions::SetInternal(const std::string& key, Def const& def)
   if(this->Up || def.Exists)
     {
     // In lower scopes we store keys, defined or not.
-    MapType::iterator i = this->Map.find(key);
-    if(i == this->Map.end())
-      {
-      i = this->Map.insert(MapType::value_type(key, def)).first;
-      }
-    else
-      {
-      i->second = def;
-      }
-    return i->second;
+    return (this->Map[key] = def);
     }
   else
     {
@@ -71,10 +62,23 @@ cmDefinitions::SetInternal(const std::string& key, Def const& def)
 }
 
 //----------------------------------------------------------------------------
-const char* cmDefinitions::Get(const std::string& key)
+const char* cmDefinitions::Get(const std::string& key) const
 {
   Def const& def = this->GetInternal(key);
   return def.Exists? def.c_str() : 0;
+}
+
+//----------------------------------------------------------------------------
+void cmDefinitions::Pull(const std::string& key)
+{
+  if (this->Up)
+    {
+    Def const& def = this->Up->GetInternal(key);
+    if (def.Exists)
+      {
+      this->SetInternal(key, def);
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
