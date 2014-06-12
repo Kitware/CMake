@@ -225,9 +225,6 @@ public:
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
 
-  /** If check to see if the target is linked to by any other
-      target in the project */
-  bool IsDependedOn(const std::string& project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 

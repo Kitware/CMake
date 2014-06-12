@@ -166,6 +166,7 @@ protected:
 
   std::set<std::string> IsPartOfDefaultBuild(const std::string& project,
                                              cmTarget const* target);
+  bool IsDependedOn(const std::string& project, cmTarget const* target);
   std::vector<std::string> Configurations;
   std::map<std::string, std::string> GUIDMap;
 
