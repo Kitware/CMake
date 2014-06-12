@@ -521,14 +521,15 @@ Style: CMake Command Signatures
 Command signatures should be marked up as plain literal blocks, not as
 cmake ``code-blocks``.
 
-Signatures are separated from preceding content by a horizontal
-line. That is, use:
+Signatures are separated from preceding content by a section header.
+That is, use:
 
 .. code-block:: rst
 
   ... preceding paragraph.
 
-  ---------------------------------------------------------------------
+  Normal Libraries
+  ^^^^^^^^^^^^^^^^
 
   ::
 
