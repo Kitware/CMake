@@ -38,6 +38,18 @@ static const char * cmDocumentationUsage[][2] =
   {0,
    "  ccmake <path-to-source>\n"
    "  ccmake <path-to-existing-build>"},
+  {0,
+   "Specify a source directory to (re-)generate a build system for "
+   "it in the current working directory.  Specify an existing build "
+   "directory to re-generate its build system."},
+  {0,0}
+};
+
+//----------------------------------------------------------------------------
+static const char * cmDocumentationUsageNote[][2] =
+{
+  {0,
+   "Run 'ccmake --help' for more information."},
   {0,0}
 };
 
@@ -102,6 +114,10 @@ int main(int argc, char const* const* argv)
     doc.SetName("ccmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
+    if ( argc == 1 )
+      {
+      doc.AppendSection("Usage",cmDocumentationUsageNote);
+      }
     doc.SetSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
