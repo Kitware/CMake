@@ -452,7 +452,17 @@ set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CUDA_HOST_COMPILER "$(VCInstallDir)bin" CACHE FILEPATH "Host side compiler used by NVCC")
 else()
-  set(CUDA_HOST_COMPILER "${CMAKE_C_COMPILER}" CACHE FILEPATH "Host side compiler used by NVCC")
+  # Using cc which is symlink to clang may let NVCC think it is GCC and issue
+  # unhandled -dumpspecs option to clang. Also in case neither
+  # CMAKE_C_COMPILER is defined (project does not use C language) nor
+  # CUDA_HOST_COMPILER is specified manually we should skip -ccbin and let
+  # nvcc use its own default C compiler.
+  if(DEFINED CMAKE_C_COMPILER AND NOT DEFINED CUDA_HOST_COMPILER)
+    get_filename_component(c_compiler_realpath "${CMAKE_C_COMPILER}" REALPATH)
+  else()
+    set(c_compiler_realpath "")
+  endif()
+  set(CUDA_HOST_COMPILER "${c_compiler_realpath}" CACHE FILEPATH "Host side compiler used by NVCC")
 endif()
 
 # Propagate the host flags to the host compiler via -Xcompiler
@@ -1422,7 +1432,7 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
     # If -ccbin, --compiler-bindir has been specified, don't do anything.  Otherwise add it here.
     list( FIND nvcc_flags "-ccbin" ccbin_found0 )
     list( FIND nvcc_flags "--compiler-bindir" ccbin_found1 )
-    if( ccbin_found0 LESS 0 AND ccbin_found1 LESS 0 )
+    if( ccbin_found0 LESS 0 AND ccbin_found1 LESS 0 AND CUDA_HOST_COMPILER )
       list(APPEND nvcc_flags -ccbin "\"${CUDA_HOST_COMPILER}\"")
     endif()
     # Create a list of flags specified by CUDA_NVCC_FLAGS_${CONFIG}
