@@ -44,11 +44,9 @@ class cmGeneratorTarget;
 class cmTargetTraceDependencies;
 
 struct cmTargetLinkInformationMap:
-  public std::map<std::pair<cmTarget const* , std::string>,
-                  cmComputeLinkInformation*>
+  public std::map<std::string, cmComputeLinkInformation*>
 {
-  typedef std::map<std::pair<cmTarget const* , std::string>,
-                   cmComputeLinkInformation*> derived;
+  typedef std::map<std::string, cmComputeLinkInformation*> derived;
   cmTargetLinkInformationMap() {}
   cmTargetLinkInformationMap(cmTargetLinkInformationMap const& r);
   ~cmTargetLinkInformationMap();
@@ -442,8 +440,8 @@ public:
     * install tree.  For example: "\@rpath/" or "\@loader_path/". */
   std::string GetInstallNameDirForInstallTree() const;
 
-  cmComputeLinkInformation* GetLinkInformation(const std::string& config,
-                                               cmTarget const* head = 0) const;
+  cmComputeLinkInformation*
+    GetLinkInformation(const std::string& config) const;
 
   // Get the properties
   cmPropertyMap &GetProperties() const { return this->Properties; }

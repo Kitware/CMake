@@ -6943,19 +6943,17 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 
 //----------------------------------------------------------------------------
 cmComputeLinkInformation*
-cmTarget::GetLinkInformation(const std::string& config,
-                             cmTarget const* head) const
+cmTarget::GetLinkInformation(const std::string& config) const
 {
-  cmTarget const* headTarget = head ? head : this;
   // Lookup any existing information for this configuration.
-  TargetConfigPair key(headTarget, cmSystemTools::UpperCase(config));
+  std::string key(cmSystemTools::UpperCase(config));
   cmTargetLinkInformationMap::iterator
     i = this->LinkInformation.find(key);
   if(i == this->LinkInformation.end())
     {
     // Compute information for this configuration.
     cmComputeLinkInformation* info =
-      new cmComputeLinkInformation(this, config, headTarget);
+      new cmComputeLinkInformation(this, config, this);
     if(!info || !info->Compute())
       {
       delete info;
