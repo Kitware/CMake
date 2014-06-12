@@ -45,6 +45,17 @@ static const char * cmDocumentationUsage[][2] =
   {0,0}
 };
 
+//----------------------------------------------------------------------------
+static const char * cmDocumentationUsageNote[][2] =
+{
+  {0,
+   "Specify a source directory to (re-)generate a build system for it in the "
+   "current working directory.  Specify an existing build directory to "
+   "re-generate its build system.\n"
+   "Run 'cmake --help' for more information."},
+  {0,0}
+};
+
 #define CMAKE_BUILD_OPTIONS                                             \
   "  <dir>          = Project binary directory to be built.\n"          \
   "  --target <tgt> = Build <tgt> instead of default targets.\n"        \
@@ -223,6 +234,10 @@ int do_cmake(int ac, char const* const* av)
     doc.SetName("cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
+    if ( ac == 1 )
+      {
+      doc.AppendSection("Usage",cmDocumentationUsageNote);
+      }
     doc.AppendSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
 

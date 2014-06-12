@@ -42,6 +42,17 @@ static const char * cmDocumentationUsage[][2] =
 };
 
 //----------------------------------------------------------------------------
+static const char * cmDocumentationUsageNote[][2] =
+{
+  {0,
+   "Specify a source directory to (re-)generate a build system for it in the "
+   "current working directory.  Specify an existing build directory to "
+   "re-generate its build system.\n"
+   "Run 'ccmake --help' for more information."},
+  {0,0}
+};
+
+//----------------------------------------------------------------------------
 static const char * cmDocumentationOptions[][2] =
 {
   CMAKE_STANDARD_OPTIONS_TABLE,
@@ -102,6 +113,10 @@ int main(int argc, char const* const* argv)
     doc.SetName("ccmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
+    if ( argc == 1 )
+      {
+      doc.AppendSection("Usage",cmDocumentationUsageNote);
+      }
     doc.SetSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
     return doc.PrintRequestedDocumentation(std::cout)? 0:1;
