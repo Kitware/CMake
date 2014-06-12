@@ -3552,11 +3552,9 @@ private:
 };
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetLinkerLanguage(const std::string& config,
-                                        cmTarget const* head) const
+std::string cmTarget::GetLinkerLanguage(const std::string& config) const
 {
-  cmTarget const* headTarget = head ? head : this;
-  return this->GetLinkClosure(config, headTarget)->LinkerLanguage;
+  return this->GetLinkClosure(config, this)->LinkerLanguage;
 }
 
 //----------------------------------------------------------------------------
@@ -3842,8 +3840,7 @@ bool cmTarget::HasSOName(const std::string& config) const
   return ((this->GetType() == cmTarget::SHARED_LIBRARY ||
            this->GetType() == cmTarget::MODULE_LIBRARY) &&
           !this->GetPropertyAsBool("NO_SONAME") &&
-          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config,
-                                                                this)));
+          this->Makefile->GetSONameFlag(this->GetLinkerLanguage(config)));
 }
 
 //----------------------------------------------------------------------------
@@ -4216,7 +4213,7 @@ void cmTarget::GetFullNameInternal(const std::string& config,
   const char* suffixVar = this->GetSuffixVariableInternal(implib);
 
   // Check for language-specific default prefix and suffix.
-  std::string ll = this->GetLinkerLanguage(config, this);
+  std::string ll = this->GetLinkerLanguage(config);
   if(!ll.empty())
     {
     if(!targetSuffix && suffixVar && *suffixVar)
@@ -4555,7 +4552,7 @@ bool cmTarget::NeedRelinkBeforeInstall(const std::string& config) const
     }
 
   // Check for rpath support on this platform.
-  std::string ll = this->GetLinkerLanguage(config, this);
+  std::string ll = this->GetLinkerLanguage(config);
   if(!ll.empty())
     {
     std::string flagVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
@@ -5644,7 +5641,7 @@ bool cmTarget::IsChrpathUsed(const std::string& config) const
 #if defined(CMAKE_USE_ELF_PARSER)
   // Enable if the rpath flag uses a separator and the target uses ELF
   // binaries.
-  std::string ll = this->GetLinkerLanguage(config, this);
+  std::string ll = this->GetLinkerLanguage(config);
   if(!ll.empty())
     {
     std::string sepVar = "CMAKE_SHARED_LIBRARY_RUNTIME_";
