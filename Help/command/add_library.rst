@@ -1,7 +1,14 @@
 add_library
 -----------
 
+.. only:: html
+
+   .. contents::
+
 Add a library to the project using the specified source files.
+
+Normal Libraries
+^^^^^^^^^^^^^^^^
 
 ::
 
@@ -44,7 +51,8 @@ the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
 
---------------------------------------------------------------------------
+Imported Libraries
+^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -65,7 +73,8 @@ variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) which specifies the
 location of the main library file on disk.  See documentation of the
 ``IMPORTED_*`` and ``INTERFACE_*`` properties for more information.
 
---------------------------------------------------------------------------
+Object Libraries
+^^^^^^^^^^^^^^^^
 
 ::
 
@@ -93,7 +102,8 @@ systems may not like targets that have only object files, so consider
 adding at least one real source file to any target that references
 ``$<TARGET_OBJECTS:objlib>``.
 
---------------------------------------------------------------------------
+Alias Libraries
+^^^^^^^^^^^^^^^
 
 ::
 
@@ -111,7 +121,8 @@ operand of :command:`set_property`, :command:`set_target_properties`,
 :command:`target_link_libraries` etc.  An ``ALIAS`` target may not be
 installed or exported.
 
---------------------------------------------------------------------------
+Interface Libraries
+^^^^^^^^^^^^^^^^^^^
 
 ::
 
