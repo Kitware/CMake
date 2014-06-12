@@ -124,8 +124,9 @@ imported. Typically the ``INTERFACE_*`` properties are populated on
 the interface target using the :command:`set_property`,
 :command:`target_link_libraries(INTERFACE)`,
 :command:`target_include_directories(INTERFACE)`,
-:command:`target_compile_options(INTERFACE)`
-and :command:`target_compile_definitions(INTERFACE)` commands, and then it
+:command:`target_compile_options(INTERFACE)`,
+:command:`target_compile_definitions(INTERFACE)`,
+and :command:`target_sources(INTERFACE)` commands, and then it
 is used as an argument to :command:`target_link_libraries` like any other
 target.
 

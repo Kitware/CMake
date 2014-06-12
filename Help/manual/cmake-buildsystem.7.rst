@@ -786,11 +786,12 @@ It may specify usage requirements such as
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`,
 :prop_tgt:`INTERFACE_COMPILE_OPTIONS`,
 :prop_tgt:`INTERFACE_LINK_LIBRARIES`, and
+:prop_tgt:`INTERFACE_SOURCES`,
 :prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`.
 Only the ``INTERFACE`` modes of the :command:`target_include_directories`,
 :command:`target_compile_definitions`, :command:`target_compile_options`,
-and :command:`target_link_libraries` commands may be used with ``INTERFACE``
-libraries.
+:command:`target_sources`, and :command:`target_link_libraries` commands
+may be used with ``INTERFACE`` libraries.
 
 A primary use-case for ``INTERFACE`` libraries is header-only libraries.
 
