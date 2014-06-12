@@ -146,6 +146,16 @@
 # ``[[deprecated]]`` attribute or a compiler-specific decorator such
 # as ``__attribute__((__deprecated__))`` used by GNU compilers.
 #
+# The ``cxx_alignas`` feature provides a macro definition
+# ``<PREFIX>_ALIGNAS`` which expands to either the standard ``alignas``
+# decorator or a compiler-specific decorator such as
+# ``__attribute__ ((__aligned__))`` used by GNU compilers.
+#
+# The ``cxx_alignof`` feature provides a macro definition
+# ``<PREFIX>_ALIGNOF`` which expands to either the standard ``alignof``
+# decorator or a compiler-specific decorator such as ``__alignof__``
+# used by GNU compilers.
+#
 # ============================= ================================ =====================
 #           Feature                          Define                     Symbol
 # ============================= ================================ =====================
