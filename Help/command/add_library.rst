@@ -80,8 +80,8 @@ Object Libraries
 
   add_library(<name> OBJECT <src>...)
 
-Creates a special "object library" target.  An object library compiles
-source files but does not archive or link their object files into a
+Creates an :ref:`Object Library <Object Libraries>`.  An object library
+compiles source files but does not archive or link their object files into a
 library.  Instead other targets created by :command:`add_library` or
 :command:`add_executable` may reference the objects using an expression of the
 form ``$<TARGET_OBJECTS:objlib>`` as a source, where ``objlib`` is the
