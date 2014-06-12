@@ -250,7 +250,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
         }
       }
     std::vector<std::string> tlibs;
-    depender->GetDirectLinkLibraries(*it, tlibs, depender);
+    depender->GetDirectLinkLibraries(*it, tlibs);
 
     // A target should not depend on itself.
     emitted.insert(depender->GetName());

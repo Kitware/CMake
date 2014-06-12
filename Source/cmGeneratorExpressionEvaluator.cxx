@@ -1098,8 +1098,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                           cmStrCmp(interfacePropertyName)) != transEnd)
       {
       const cmTarget::LinkImplementation *impl
-          = target->GetLinkImplementationLibraries(context->Config,
-                                                   headTarget);
+        = target->GetLinkImplementationLibraries(context->Config);
       if(impl)
         {
         linkedTargetsContent =

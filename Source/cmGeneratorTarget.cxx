@@ -449,7 +449,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
   if (iter == this->SystemIncludesCache.end())
     {
     cmTarget::LinkImplementation const* impl
-                  = this->Target->GetLinkImplementation(config, this->Target);
+      = this->Target->GetLinkImplementation(config);
     if(!impl)
       {
       return false;

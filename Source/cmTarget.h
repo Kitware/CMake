@@ -158,8 +158,7 @@ public:
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
   void GetDirectLinkLibraries(const std::string& config,
-                              std::vector<std::string> &,
-                              cmTarget const* head) const;
+                              std::vector<std::string> &) const;
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const std::string& config) const;
@@ -291,12 +290,11 @@ public:
     // Needed only for OLD behavior of CMP0003.
     std::vector<std::string> WrongConfigLibraries;
   };
-  LinkImplementation const* GetLinkImplementation(const std::string& config,
-                                                  cmTarget const* head) const;
+  LinkImplementation const*
+    GetLinkImplementation(const std::string& config) const;
 
-  LinkImplementation const* GetLinkImplementationLibraries(
-                                                  const std::string& config,
-                                                  cmTarget const* head) const;
+  LinkImplementation const*
+    GetLinkImplementationLibraries(const std::string& config) const;
 
   /** Link information from the transitive closure of the link
       implementation and the interfaces of its dependencies.  */
@@ -750,6 +748,12 @@ private:
                                             cmTarget const* head,
                                             bool &exists) const;
 
+  void GetDirectLinkLibrariesInternal(const std::string& config,
+                                      std::vector<std::string>& libs,
+                                      cmTarget const* head) const;
+  LinkImplementation const*
+    GetLinkImplementationLibrariesInternal(const std::string& config,
+                                           cmTarget const* head) const;
   void ComputeLinkImplementation(const std::string& config,
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
