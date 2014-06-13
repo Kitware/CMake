@@ -83,7 +83,7 @@ void CMakeMessageHandler(const char* message, const char* title, bool&,
 
 int main(int argc, char const* const* argv)
 {
-  setlocale(LC_ALL, "");
+  setlocale(LC_CTYPE, "");
 
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);

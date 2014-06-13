@@ -163,7 +163,7 @@ static void cmakemainProgressCallback(const char *m, float prog,
 
 int main(int ac, char const* const* av)
 {
-  setlocale(LC_ALL, "");
+  setlocale(LC_CTYPE, "");
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();

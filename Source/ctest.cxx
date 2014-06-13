@@ -116,7 +116,7 @@ static const char * cmDocumentationOptions[][2] =
 // this is a test driver program for cmCTest.
 int main (int argc, char const* const* argv)
 {
-  setlocale(LC_ALL, "");
+  setlocale(LC_CTYPE, "");
 
   cmsys::Encoding::CommandLineArguments encoding_args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
