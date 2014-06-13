@@ -1032,16 +1032,18 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
 
   std::string const rootBuildDirectory =
       this->GetCMakeInstance()->GetHomeOutputDirectory();
+  std::string const cmakeFiles =
+      rootBuildDirectory + cmake::GetCMakeFilesDirectory();
   for (std::vector<std::string>::const_iterator
        i = unkownExplicitDepends.begin();
        i != unkownExplicitDepends.end();
        ++i)
     {
-    //verify the file is in the build directory
+    //verify the file is in the build CMakeFiles subdirectory
     std::string const absDepPath = cmSystemTools::CollapseFullPath(
                                      i->c_str(), rootBuildDirectory.c_str());
     bool const inBuildDir = cmSystemTools::IsSubDirectory(absDepPath.c_str(),
-                                                  rootBuildDirectory.c_str());
+                                                          cmakeFiles.c_str());
     if(inBuildDir)
       {
       cmNinjaDeps deps(1,*i);
