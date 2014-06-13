@@ -452,7 +452,14 @@ set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CUDA_HOST_COMPILER "$(VCInstallDir)bin" CACHE FILEPATH "Host side compiler used by NVCC")
 else()
-  set(CUDA_HOST_COMPILER "${CMAKE_C_COMPILER}" CACHE FILEPATH "Host side compiler used by NVCC")
+  # Project may not set C language, enabling it here since it is used by NVCC.
+  if(NOT CMAKE_C_COMPILER AND NOT CUDA_HOST_COMPILER)
+    include(CMakeDetermineCCompiler)
+  endif()
+  # Using cc which is symlink to clang may let NVCC think it is GCC and issue
+  # unhandled -dumpspecs option to clang.
+  get_filename_component(c_compiler_realpath "${CMAKE_C_COMPILER}" REALPATH)
+  set(CUDA_HOST_COMPILER "${c_compiler_realpath}" CACHE FILEPATH "Host side compiler used by NVCC")
 endif()
 
 # Propagate the host flags to the host compiler via -Xcompiler
