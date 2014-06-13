@@ -166,11 +166,11 @@ symbol, and compiler support determines what it is expanded to:
     virtual void Execute() = 0;
   };
 
-  struct Concrete Foo_CXX_FINAL {
-    void Execute() Foo_CXX_OVERRIDE;
+  struct Concrete Foo_FINAL {
+    void Execute() Foo_OVERRIDE;
   };
 
-In this case, ``Foo_CXX_FINAL`` will expand to ``final`` if the
+In this case, ``Foo_FINAL`` will expand to ``final`` if the
 compiler supports the keyword, or to empty otherwise.
 
 In this use-case, the CMake code will wish to enable a particular language
@@ -189,13 +189,13 @@ set to influence all following targets:
       cxx_final cxx_override
   )
 
-  # Includes foo_compiler_detection.h and uses the Foo_DECL_CXX_FINAL symbol
+  # Includes foo_compiler_detection.h and uses the Foo_FINAL symbol
   # which will expand to 'final' if the compiler supports the requested
   # CXX_STANDARD.
   add_library(foo foo.cpp)
   set_property(TARGET foo PROPERTY CXX_STANDARD 11)
 
-  # Includes foo_compiler_detection.h and uses the Foo_DECL_CXX_FINAL symbol
+  # Includes foo_compiler_detection.h and uses the Foo_FINAL symbol
   # which will expand to 'final' if the compiler supports the feature,
   # even though CXX_STANDARD is not set explicitly.  The requirement of
   # cxx_constexpr causes CMake to set CXX_STANDARD internally, which

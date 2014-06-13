@@ -99,14 +99,14 @@
 #
 # .. code-block:: c++
 #
-#    class MyClass ClimbingStats_DECL_CXX_FINAL
+#    class MyClass ClimbingStats_FINAL
 #    {
-#        ClimbingStats_DECL_CXX_CONSTEXPR int someInterface() { return 42; }
+#        ClimbingStats_CONSTEXPR int someInterface() { return 42; }
 #    };
 #
-# The ``ClimbingStats_DECL_CXX_FINAL`` macro will expand to ``final`` if the
+# The ``ClimbingStats_FINAL`` macro will expand to ``final`` if the
 # compiler (and its flags) support the ``cxx_final`` feature, and the
-# ``ClimbingStats_DECL_CXX_CONSTEXPR`` macro will expand to ``constexpr``
+# ``ClimbingStats_CONSTEXPR`` macro will expand to ``constexpr``
 # if ``cxx_constexpr`` is supported.
 #
 # The following features generate corresponding symbol defines:
@@ -386,7 +386,7 @@ function(write_compiler_detection_header
 \n")
       endif()
       if (feature STREQUAL cxx_constexpr)
-        set(def_value "${prefix_arg}_DECL_${feature_upper}")
+        set(def_value "${prefix_arg}_CONSTEXPR")
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} constexpr
@@ -396,7 +396,7 @@ function(write_compiler_detection_header
 \n")
       endif()
       if (feature STREQUAL cxx_final)
-        set(def_value "${prefix_arg}_DECL_${feature_upper}")
+        set(def_value "${prefix_arg}_FINAL")
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} final
@@ -406,7 +406,7 @@ function(write_compiler_detection_header
 \n")
       endif()
       if (feature STREQUAL cxx_override)
-        set(def_value "${prefix_arg}_DECL_${feature_upper}")
+        set(def_value "${prefix_arg}_OVERRIDE")
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} override
