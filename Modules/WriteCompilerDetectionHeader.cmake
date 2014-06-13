@@ -428,7 +428,7 @@ function(write_compiler_detection_header
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} alignas(X)
-#  elif ${prefix_arg}_COMPILER_IS_GNU
+#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
 #    define ${def_value} __attribute__ ((__aligned__(X)))
 #  else
 #    define ${def_value}
@@ -440,7 +440,7 @@ function(write_compiler_detection_header
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} alignof(X)
-#  elif ${prefix_arg}_COMPILER_IS_GNU
+#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
 #    define ${def_value} __alignof__(X)
 #  endif
 \n")
@@ -495,10 +495,10 @@ function(write_compiler_detection_header
 #    if ${def_name}
 #      define ${def_value} [[deprecated]]
 #      define ${def_value}_MSG(MSG) [[deprecated(MSG)]]
-#    elif defined(__GNUC__) || defined(__clang__)
+#    elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
 #      define ${def_value} __attribute__((__deprecated__))
 #      define ${def_value}_MSG(MSG) __attribute__((__deprecated__(MSG)))
-#    elif defined(_MSC_VER)
+#    elif ${prefix_arg}_COMPILER_IS_MSVC
 #      define ${def_value} __declspec(deprecated)
 #      define ${def_value}_MSG(MSG) __declspec(deprecated(MSG))
 #    else
