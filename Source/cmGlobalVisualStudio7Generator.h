@@ -150,7 +150,6 @@ protected:
     OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetConfigurations(
     std::ostream& fout,
-    cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets);
 
   void GenerateConfigurations(cmMakefile* mf);

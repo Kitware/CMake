@@ -366,7 +366,6 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
 
 void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   std::ostream& fout,
-  cmLocalGenerator* root,
   OrderedTargetDependSet const& projectTargets)
 {
   // loop over again and write out configurations for each target
@@ -578,7 +577,7 @@ void cmGlobalVisualStudio7Generator
 
   // Write out the configurations for all the targets in the project
   fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
-  this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
+  this->WriteTargetConfigurations(fout, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
   // Write out global sections
