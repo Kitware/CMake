@@ -88,6 +88,11 @@ if(SPHINX_QTHELP)
     COMMAND ${CMAKE_COMMAND} "-DQTHELP_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
       "-DCMake_VERSION=${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/fixup_qthelp_names.cmake"
+
+    # Create proper identifiers. Workaround for
+    # https://bitbucket.org/birkenfeld/sphinx/issue/1491/qthelp-should-generate-identifiers-for
+    COMMAND "${CMAKE_CURRENT_SOURCE_DIR}/create_identifiers.py" "${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
+
     COMMAND qcollectiongenerator ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
   )
 endif()
