@@ -1,7 +1,14 @@
 add_library
 -----------
 
+.. only:: html
+
+   .. contents::
+
 Add a library to the project using the specified source files.
+
+Normal Libraries
+^^^^^^^^^^^^^^^^
 
 ::
 
@@ -44,7 +51,8 @@ the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
 
---------------------------------------------------------------------------
+Imported Libraries
+^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -65,14 +73,15 @@ variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) which specifies the
 location of the main library file on disk.  See documentation of the
 ``IMPORTED_*`` and ``INTERFACE_*`` properties for more information.
 
---------------------------------------------------------------------------
+Object Libraries
+^^^^^^^^^^^^^^^^
 
 ::
 
   add_library(<name> OBJECT <src>...)
 
-Creates a special "object library" target.  An object library compiles
-source files but does not archive or link their object files into a
+Creates an :ref:`Object Library <Object Libraries>`.  An object library
+compiles source files but does not archive or link their object files into a
 library.  Instead other targets created by :command:`add_library` or
 :command:`add_executable` may reference the objects using an expression of the
 form ``$<TARGET_OBJECTS:objlib>`` as a source, where ``objlib`` is the
@@ -93,7 +102,8 @@ systems may not like targets that have only object files, so consider
 adding at least one real source file to any target that references
 ``$<TARGET_OBJECTS:objlib>``.
 
---------------------------------------------------------------------------
+Alias Libraries
+^^^^^^^^^^^^^^^
 
 ::
 
@@ -111,7 +121,8 @@ operand of :command:`set_property`, :command:`set_target_properties`,
 :command:`target_link_libraries` etc.  An ``ALIAS`` target may not be
 installed or exported.
 
---------------------------------------------------------------------------
+Interface Libraries
+^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -124,8 +135,9 @@ imported. Typically the ``INTERFACE_*`` properties are populated on
 the interface target using the :command:`set_property`,
 :command:`target_link_libraries(INTERFACE)`,
 :command:`target_include_directories(INTERFACE)`,
-:command:`target_compile_options(INTERFACE)`
-and :command:`target_compile_definitions(INTERFACE)` commands, and then it
+:command:`target_compile_options(INTERFACE)`,
+:command:`target_compile_definitions(INTERFACE)`,
+and :command:`target_sources(INTERFACE)` commands, and then it
 is used as an argument to :command:`target_link_libraries` like any other
 target.
 

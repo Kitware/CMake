@@ -19,8 +19,8 @@ and the rules for regeneration in response to change.
 Binary Targets
 ==============
 
-Executables and libraries are defined using the :command:`add_library`
-and :command:`add_executable` commands.  The resulting binary files have
+Executables and libraries are defined using the :command:`add_executable`
+and :command:`add_library` commands.  The resulting binary files have
 appropriate prefixes, suffixes and extensions for the platform targeted.
 Dependencies between binary targets are expressed using the
 :command:`target_link_libraries` command:
@@ -37,8 +37,27 @@ is defined as an executable formed by compiling and linking ``zipapp.cpp``.
 When linking the ``zipapp`` executable, the ``archive`` static library is
 linked in.
 
+Binary Executables
+------------------
+
+The :command:`add_executable` command defines an executable target:
+
+.. code-block:: cmake
+
+  add_executable(mytool mytool.cpp)
+
+Commands such as :command:`add_custom_command`, which generates rules to be
+run at build time can transparently use an :prop_tgt:`EXECUTABLE <TYPE>`
+target as a ``COMMAND`` executable.  The buildsystem rules will ensure that
+the executable is built before attempting to run the command.
+
 Binary Library Types
 --------------------
+
+.. _`Normal Libraries`:
+
+Normal Libraries
+^^^^^^^^^^^^^^^^
 
 By default, the :command:`add_library` command defines a static library,
 unless a type is specified.  A type may be specified when using the command:
@@ -66,6 +85,11 @@ It is a type which is loaded as a plugin using runtime techniques.
 
   add_library(archive MODULE 7z.cpp)
 
+.. _`Object Libraries`:
+
+Object Libraries
+^^^^^^^^^^^^^^^^
+
 The ``OBJECT`` library type is also not linked to. It defines a non-archival
 collection of object files resulting from compiling the given source files.
 The object files collection can be used as source inputs to other targets:
@@ -82,11 +106,6 @@ The object files collection can be used as source inputs to other targets:
 they may not be installed, exported, or used in the right hand side of
 :command:`target_link_libraries`.  They also may not be used as the ``TARGET``
 in a use of the :command:`add_custom_command(TARGET)` command signature.
-
-Commands such as :command:`add_custom_command`, which generates rules to be
-run at build time can transparently use an :prop_tgt:`EXECUTABLE <TYPE>`
-target as a ``COMMAND`` executable.  The buildsystem rules will ensure that
-the executable is built before attempting to run the command.
 
 Build Specification and Usage Requirements
 ==========================================
@@ -786,11 +805,12 @@ It may specify usage requirements such as
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS`,
 :prop_tgt:`INTERFACE_COMPILE_OPTIONS`,
 :prop_tgt:`INTERFACE_LINK_LIBRARIES`, and
+:prop_tgt:`INTERFACE_SOURCES`,
 :prop_tgt:`INTERFACE_POSITION_INDEPENDENT_CODE`.
 Only the ``INTERFACE`` modes of the :command:`target_include_directories`,
 :command:`target_compile_definitions`, :command:`target_compile_options`,
-and :command:`target_link_libraries` commands may be used with ``INTERFACE``
-libraries.
+:command:`target_sources`, and :command:`target_link_libraries` commands
+may be used with ``INTERFACE`` libraries.
 
 A primary use-case for ``INTERFACE`` libraries is header-only libraries.
 
