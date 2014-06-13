@@ -518,6 +518,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmParseMumpsCoverage.cxx
   CTest/cmParseCacheCoverage.cxx
   CTest/cmParseGTMCoverage.cxx
+  CTest/cmParseJacocoCoverage.cxx
   CTest/cmParsePHPCoverage.cxx
   CTest/cmParseCoberturaCoverage.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
