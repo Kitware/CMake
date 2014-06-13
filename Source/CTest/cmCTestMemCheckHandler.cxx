@@ -423,17 +423,18 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     {
     this->MemoryTester
       = this->CTest->GetCTestConfiguration("MemoryCheckCommand").c_str();
-
+    std::string testerName =
+      cmSystemTools::GetFilenameName(this->MemoryTester);
     // determine the checker type
-    if ( this->MemoryTester.find("valgrind") != std::string::npos )
+    if ( testerName.find("valgrind") != std::string::npos )
       {
         this->MemoryTesterStyle = cmCTestMemCheckHandler::VALGRIND;
       }
-    else if ( this->MemoryTester.find("purify") != std::string::npos )
+    else if ( testerName.find("purify") != std::string::npos )
       {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::PURIFY;
       }
-    else if ( this->MemoryTester.find("BC") != std::string::npos )
+    else if ( testerName.find("BC") != std::string::npos )
       {
       this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
       }
