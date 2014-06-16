@@ -777,6 +777,7 @@ private:
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,
+                       bool usage_requirements_only,
                        std::vector<cmLinkItem>& items) const;
   void LookupLinkItems(std::vector<std::string> const& names,
                        std::vector<cmLinkItem>& items) const;

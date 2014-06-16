@@ -3688,10 +3688,15 @@ void cmTarget::ExpandLinkItems(std::string const& prop,
                                std::string const& value,
                                std::string const& config,
                                cmTarget const* headTarget,
+                               bool usage_requirements_only,
                                std::vector<cmLinkItem>& items) const
 {
   cmGeneratorExpression ge;
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
+  if(usage_requirements_only)
+    {
+    dagChecker.SetTransitivePropertiesOnly();
+    }
   std::vector<std::string> libs;
   cmSystemTools::ExpandListArgument(ge.Parse(value)->Evaluate(
                                       this->Makefile,
@@ -6135,7 +6140,7 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     iface.Multiplicity = info->Multiplicity;
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
-                          headTarget, iface.Libraries);
+                          headTarget, false, iface.Libraries);
     {
     std::vector<std::string> deps;
     cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
@@ -6341,7 +6346,7 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
     {
     // The interface libraries have been explicitly set.
     this->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
-                          headTarget, iface.Libraries);
+                          headTarget, false, iface.Libraries);
     }
   else if (this->PolicyStatusCMP0022 == cmPolicies::WARN
         || this->PolicyStatusCMP0022 == cmPolicies::OLD)
@@ -6364,7 +6369,7 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
       if(const char* newExplicitLibraries = this->GetProperty(newProp))
         {
         this->ExpandLinkItems(newProp, newExplicitLibraries, config,
-                              headTarget, ifaceLibs);
+                              headTarget, false, ifaceLibs);
         }
       if (ifaceLibs != impl->Libraries)
         {
