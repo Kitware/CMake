@@ -61,8 +61,6 @@ function(compiler_id_detection outvar lang)
     list(APPEND ordered_compilers
       Intel
       PathScale
-      AppleClang
-      Clang
       Embarcadero
       Borland
       Watcom
@@ -84,6 +82,8 @@ function(compiler_id_detection outvar lang)
     endif()
     list(APPEND ordered_compilers
       SCO
+      AppleClang
+      Clang
       GNU
       MSVC
       ADSP

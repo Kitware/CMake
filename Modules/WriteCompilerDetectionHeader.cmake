@@ -99,14 +99,14 @@
 #
 # .. code-block:: c++
 #
-#    class MyClass ClimbingStats_DECL_CXX_FINAL
+#    class MyClass ClimbingStats_FINAL
 #    {
-#        ClimbingStats_DECL_CXX_CONSTEXPR int someInterface() { return 42; }
+#        ClimbingStats_CONSTEXPR int someInterface() { return 42; }
 #    };
 #
-# The ``ClimbingStats_DECL_CXX_FINAL`` macro will expand to ``final`` if the
+# The ``ClimbingStats_FINAL`` macro will expand to ``final`` if the
 # compiler (and its flags) support the ``cxx_final`` feature, and the
-# ``ClimbingStats_DECL_CXX_CONSTEXPR`` macro will expand to ``constexpr``
+# ``ClimbingStats_CONSTEXPR`` macro will expand to ``constexpr``
 # if ``cxx_constexpr`` is supported.
 #
 # The following features generate corresponding symbol defines:
@@ -386,7 +386,7 @@ function(write_compiler_detection_header
 \n")
       endif()
       if (feature STREQUAL cxx_constexpr)
-        set(def_value "${prefix_arg}_DECL_${feature_upper}")
+        set(def_value "${prefix_arg}_CONSTEXPR")
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} constexpr
@@ -396,7 +396,7 @@ function(write_compiler_detection_header
 \n")
       endif()
       if (feature STREQUAL cxx_final)
-        set(def_value "${prefix_arg}_DECL_${feature_upper}")
+        set(def_value "${prefix_arg}_FINAL")
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} final
@@ -406,7 +406,7 @@ function(write_compiler_detection_header
 \n")
       endif()
       if (feature STREQUAL cxx_override)
-        set(def_value "${prefix_arg}_DECL_${feature_upper}")
+        set(def_value "${prefix_arg}_OVERRIDE")
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} override
@@ -428,7 +428,7 @@ function(write_compiler_detection_header
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} alignas(X)
-#  elif ${prefix_arg}_COMPILER_IS_GNU
+#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
 #    define ${def_value} __attribute__ ((__aligned__(X)))
 #  else
 #    define ${def_value}
@@ -440,7 +440,7 @@ function(write_compiler_detection_header
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} alignof(X)
-#  elif ${prefix_arg}_COMPILER_IS_GNU
+#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
 #    define ${def_value} __alignof__(X)
 #  endif
 \n")
@@ -495,10 +495,10 @@ function(write_compiler_detection_header
 #    if ${def_name}
 #      define ${def_value} [[deprecated]]
 #      define ${def_value}_MSG(MSG) [[deprecated(MSG)]]
-#    elif defined(__GNUC__) || defined(__clang__)
+#    elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
 #      define ${def_value} __attribute__((__deprecated__))
 #      define ${def_value}_MSG(MSG) __attribute__((__deprecated__(MSG)))
-#    elif defined(_MSC_VER)
+#    elif ${prefix_arg}_COMPILER_IS_MSVC
 #      define ${def_value} __declspec(deprecated)
 #      define ${def_value}_MSG(MSG) __declspec(deprecated(MSG))
 #    else
