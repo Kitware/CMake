@@ -6123,22 +6123,19 @@ void processILibs(const std::string& config,
                   std::string const& name,
                   std::vector<cmTarget*>& tgts, std::set<cmTarget*>& emitted)
 {
-  if (cmTarget* tgt = headTarget->GetMakefile()
-                                ->FindTargetToUse(name))
+  cmTarget* tgt = headTarget->GetMakefile()
+                                  ->FindTargetToUse(name);
+  if (tgt && emitted.insert(tgt).second)
     {
-    if (emitted.insert(tgt).second)
+    tgts.push_back(tgt);
+    if(cmTarget::LinkInterface const* iface =
+       tgt->GetLinkInterfaceLibraries(config, headTarget))
       {
-      tgts.push_back(tgt);
-      cmTarget::LinkInterface const* iface =
-                          tgt->GetLinkInterfaceLibraries(config, headTarget);
-      if (iface)
+      for(std::vector<std::string>::const_iterator
+          it = iface->Libraries.begin();
+          it != iface->Libraries.end(); ++it)
         {
-        for(std::vector<std::string>::const_iterator
-            it = iface->Libraries.begin();
-            it != iface->Libraries.end(); ++it)
-          {
-          processILibs(config, headTarget, *it, tgts, emitted);
-          }
+        processILibs(config, headTarget, *it, tgts, emitted);
         }
       }
     }
