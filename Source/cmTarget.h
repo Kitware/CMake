@@ -43,6 +43,18 @@ class cmTarget;
 class cmGeneratorTarget;
 class cmTargetTraceDependencies;
 
+// Basic information about each link item.
+class cmLinkItem: public std::string
+{
+  typedef std::string std_string;
+public:
+  cmLinkItem(): std_string(), Target(0) {}
+  cmLinkItem(const std_string& n,
+             cmTarget const* t): std_string(n), Target(t) {}
+  cmLinkItem(cmLinkItem const& r): std_string(r), Target(r.Target) {}
+  cmTarget const* Target;
+};
+
 struct cmTargetLinkInformationMap:
   public std::map<std::string, cmComputeLinkInformation*>
 {
