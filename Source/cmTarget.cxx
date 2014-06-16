@@ -6219,15 +6219,18 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
                                       cmTarget const* headTarget,
                                       std::vector<cmTarget const*> &tgts) const
 {
-  cmTarget::LinkInterface const* iface
-    = this->GetLinkInterfaceLibraries(config, headTarget, false);
-  if (!iface)
-    {
-    return;
-    }
-  if(this->GetType() != STATIC_LIBRARY
-      || this->GetPolicyStatusCMP0022() == cmPolicies::WARN
-      || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
+  // The $<LINK_ONLY> expression may be in a link interface to specify private
+  // link dependencies that are otherwise excluded from usage requirements.
+  // Currently $<LINK_ONLY> is internal to CMake and only ever added by
+  // target_link_libraries for PRIVATE dependencies of STATIC libraries in
+  // INTERFACE_LINK_LIBRARIES which is used under CMP0022 NEW behavior.
+  bool usage_requirements_only =
+    this->GetType() == STATIC_LIBRARY &&
+    this->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
+    this->GetPolicyStatusCMP0022() != cmPolicies::OLD;
+  if(cmTarget::LinkInterface const* iface =
+     this->GetLinkInterfaceLibraries(config, headTarget,
+                                     usage_requirements_only))
     {
     for(std::vector<cmLinkItem>::const_iterator it = iface->Libraries.begin();
         it != iface->Libraries.end(); ++it)
@@ -6236,29 +6239,6 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
         {
         tgts.push_back(it->Target);
         }
-      }
-    return;
-    }
-
-  const char* linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-  const char* interfaceLibs = this->GetProperty(linkIfaceProp);
-
-  if (!interfaceLibs)
-    {
-    return;
-    }
-
-  // The interface libraries have been explicitly set.
-  std::vector<cmLinkItem> libs;
-  this->ExpandLinkItems(linkIfaceProp, interfaceLibs, config,
-                        headTarget, true, libs);
-
-  for(std::vector<cmLinkItem>::const_iterator it = libs.begin();
-      it != libs.end(); ++it)
-    {
-    if (it->Target)
-      {
-      tgts.push_back(it->Target);
       }
     }
 }
