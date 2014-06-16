@@ -261,8 +261,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
       if(emitted.insert(*lib).second)
         {
         this->AddTargetDepend(depender_index, *lib, true);
-        this->AddInterfaceDepends(depender_index, *lib,
-                                  true, emitted);
+        this->AddInterfaceDepends(depender_index, *lib, emitted);
         }
       }
     }
@@ -304,8 +303,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
       if(emitted.insert(*lib).second)
         {
         this->AddTargetDepend(depender_index, *lib, true);
-        this->AddInterfaceDepends(depender_index, *lib,
-                                  true, emitted);
+        this->AddInterfaceDepends(depender_index, *lib, emitted);
         }
       }
     }
@@ -314,7 +312,6 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
 //----------------------------------------------------------------------------
 void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
                                              const std::string& dependee_name,
-                                             bool linking,
                                              std::set<std::string> &emitted)
 {
   cmTarget const* depender = this->Targets[depender_index];
@@ -323,7 +320,7 @@ void cmComputeTargetDepends::AddInterfaceDepends(int depender_index,
   // Skip targets that will not really be linked.  This is probably a
   // name conflict between an external library and an executable
   // within the project.
-  if(linking && dependee &&
+  if(dependee &&
      dependee->GetType() == cmTarget::EXECUTABLE &&
      !dependee->IsExecutableWithExports())
     {

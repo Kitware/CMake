@@ -53,7 +53,7 @@ private:
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index,
                            const std::string& dependee_name,
-                           bool linking, std::set<std::string> &emitted);
+                           std::set<std::string> &emitted);
   void AddInterfaceDepends(int depender_index, cmTarget const* dependee,
                            const std::string& config,
                            std::set<std::string> &emitted);
