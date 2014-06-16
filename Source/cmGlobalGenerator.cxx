@@ -1045,36 +1045,6 @@ void cmGlobalGenerator::ClearEnabledLanguages()
   this->LanguageEnabled.clear();
 }
 
-bool cmGlobalGenerator::IsDependedOn(const std::string& project,
-                                     cmTarget const* targetIn)
-{
-  // Get all local gens for this project
-  std::map<std::string, std::vector<cmLocalGenerator*> >::const_iterator it =
-                                              this->ProjectMap.find(project);
-  if (it == this->ProjectMap.end())
-    {
-    return false;
-    }
-
-  // loop over local gens and get the targets for each one
-  for(std::vector<cmLocalGenerator*>::const_iterator geIt = it->second.begin();
-      geIt != it->second.end(); ++geIt)
-    {
-    cmTargets const& targets = (*geIt)->GetMakefile()->GetTargets();
-    for (cmTargets::const_iterator l = targets.begin();
-         l != targets.end(); l++)
-      {
-      cmTarget const& target = l->second;
-      TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
-      if(tgtdeps.count(targetIn))
-        {
-        return true;
-        }
-      }
-    }
-  return false;
-}
-
 void cmGlobalGenerator::Configure()
 {
   this->FirstTimeProgress = 0.0f;
