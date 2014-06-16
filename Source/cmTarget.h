@@ -764,6 +764,10 @@ private:
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc,
                           cmTarget const* head) const;
 
+  void ExpandLinkItems(std::string const& prop, std::string const& value,
+                       std::string const& config, cmTarget const* headTarget,
+                       std::vector<std::string>& libs) const;
+
   std::string ProcessSourceItemCMP0049(const std::string& s);
 
   void ClearLinkMaps();

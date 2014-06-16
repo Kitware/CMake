@@ -3692,6 +3692,23 @@ void cmTarget::ComputeLinkClosure(const std::string& config, LinkClosure& lc,
 }
 
 //----------------------------------------------------------------------------
+void cmTarget::ExpandLinkItems(std::string const& prop,
+                               std::string const& value,
+                               std::string const& config,
+                               cmTarget const* headTarget,
+                               std::vector<std::string>& libs) const
+{
+  cmGeneratorExpression ge;
+  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
+  cmSystemTools::ExpandListArgument(ge.Parse(value)->Evaluate(
+                                      this->Makefile,
+                                      config,
+                                      false,
+                                      headTarget,
+                                      this, &dagChecker), libs);
+}
+
+//----------------------------------------------------------------------------
 const char* cmTarget::GetSuffixVariableInternal(bool implib) const
 {
   switch(this->GetType())
@@ -5870,19 +5887,8 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     }
   if(propertyLibs)
     {
-    cmGeneratorExpression ge;
-
-    cmGeneratorExpressionDAGChecker dagChecker(
-                                        this->GetName(),
-                                        linkProp, 0, 0);
-    cmSystemTools::ExpandListArgument(ge.Parse(propertyLibs)
-                                       ->Evaluate(this->Makefile,
-                                                  desired_config,
-                                                  false,
-                                                  headTarget,
-                                                  this,
-                                                  &dagChecker),
-                                    info.LinkInterface.Libraries);
+    this->ExpandLinkItems(linkProp, propertyLibs, desired_config,
+                          headTarget, info.LinkInterface.Libraries);
     }
   }
   if(this->GetType() == INTERFACE_LIBRARY)
@@ -6302,15 +6308,8 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    cmGeneratorExpression ge;
-    cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
-                                               linkIfaceProp, 0, 0);
-    cmSystemTools::ExpandListArgument(ge.Parse(explicitLibraries)->Evaluate(
-                                        this->Makefile,
-                                        config,
-                                        false,
-                                        headTarget,
-                                        this, &dagChecker), iface.Libraries);
+    this->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
+                          headTarget, iface.Libraries);
     }
   else if (this->PolicyStatusCMP0022 == cmPolicies::WARN
         || this->PolicyStatusCMP0022 == cmPolicies::OLD)
@@ -6328,19 +6327,13 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
       {
       // Compare the link implementation fallback link interface to the
       // preferred new link interface property and warn if different.
-      cmGeneratorExpression ge;
-      cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
-                                      "INTERFACE_LINK_LIBRARIES", 0, 0);
       std::vector<std::string> ifaceLibs;
-      const char* newExplicitLibraries =
-        this->GetProperty("INTERFACE_LINK_LIBRARIES");
-      cmSystemTools::ExpandListArgument(
-        ge.Parse(newExplicitLibraries)->Evaluate(this->Makefile,
-                                                 config,
-                                                 false,
-                                                 headTarget,
-                                                 this, &dagChecker),
-        ifaceLibs);
+      std::string newProp = "INTERFACE_LINK_LIBRARIES";
+      if(const char* newExplicitLibraries = this->GetProperty(newProp))
+        {
+        this->ExpandLinkItems(newProp, newExplicitLibraries, config,
+                              headTarget, ifaceLibs);
+        }
       if (ifaceLibs != impl->Libraries)
         {
         std::string oldLibraries;
