@@ -4551,9 +4551,12 @@ bool cmTarget::HaveBuildTreeRPATH(const std::string& config) const
     {
     return false;
     }
-  std::vector<std::string> libs;
-  this->GetDirectLinkLibraries(config, libs);
-  return !libs.empty();
+  if(LinkImplementation const* impl =
+     this->GetLinkImplementationLibraries(config))
+    {
+    return !impl->Libraries.empty();
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
