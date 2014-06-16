@@ -169,8 +169,6 @@ public:
   return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
-  void GetDirectLinkLibraries(const std::string& config,
-                              std::vector<std::string> &) const;
 
   /** Compute the link type to use for the given configuration.  */
   LinkLibraryType ComputeLinkType(const std::string& config) const;
@@ -766,9 +764,6 @@ private:
                                             cmTarget const* head,
                                             bool &exists) const;
 
-  void GetDirectLinkLibrariesInternal(const std::string& config,
-                                      std::vector<std::string>& libs,
-                                      cmTarget const* head) const;
   LinkImplementation const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;

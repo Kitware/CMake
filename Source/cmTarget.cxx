@@ -1227,47 +1227,6 @@ bool cmTarget::NameResolvesToFramework(const std::string& libname) const
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetDirectLinkLibraries(const std::string& config,
-                                      std::vector<std::string> &libs) const
-{
-  this->GetDirectLinkLibrariesInternal(config, libs, this);
-}
-
-//----------------------------------------------------------------------------
-void cmTarget::GetDirectLinkLibrariesInternal(const std::string& config,
-                                              std::vector<std::string> &libs,
-                                              cmTarget const* head) const
-{
-  const char *prop = this->GetProperty("LINK_LIBRARIES");
-  if (prop)
-    {
-    cmGeneratorExpression ge;
-    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
-
-    cmGeneratorExpressionDAGChecker dagChecker(
-                                        this->GetName(),
-                                        "LINK_LIBRARIES", 0, 0);
-    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
-                                        config,
-                                        false,
-                                        head,
-                                        &dagChecker),
-                                      libs);
-
-    std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
-    for (std::set<std::string>::const_iterator it = seenProps.begin();
-        it != seenProps.end(); ++it)
-      {
-      if (!this->GetProperty(*it))
-        {
-        this->LinkImplicitNullProperties.insert(*it);
-        }
-      }
-    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
-    }
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt) const
 {
@@ -6634,7 +6593,33 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
 {
   // Collect libraries directly linked in this configuration.
   std::vector<std::string> llibs;
-  this->GetDirectLinkLibrariesInternal(config, llibs, head);
+  if(const char *prop = this->GetProperty("LINK_LIBRARIES"))
+    {
+    cmGeneratorExpression ge;
+    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+
+    cmGeneratorExpressionDAGChecker dagChecker(
+                                        this->GetName(),
+                                        "LINK_LIBRARIES", 0, 0);
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
+                                        config,
+                                        false,
+                                        head,
+                                        &dagChecker),
+                                      llibs);
+
+    std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
+    for (std::set<std::string>::const_iterator it = seenProps.begin();
+        it != seenProps.end(); ++it)
+      {
+      if (!this->GetProperty(*it))
+        {
+        this->LinkImplicitNullProperties.insert(*it);
+        }
+      }
+    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
+    }
+
   for(std::vector<std::string>::const_iterator li = llibs.begin();
       li != llibs.end(); ++li)
     {
