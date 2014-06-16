@@ -421,12 +421,11 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
   if(dependee->IsImported())
     {
     // Skip imported targets but follow their utility dependencies.
-    std::set<std::string> const& utils = dependee->GetUtilities();
-    for(std::set<std::string>::const_iterator i = utils.begin();
+    std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
+    for(std::set<cmLinkItem>::const_iterator i = utils.begin();
         i != utils.end(); ++i)
       {
-      if(cmTarget const* transitive_dependee =
-         dependee->GetMakefile()->FindTargetToUse(*i))
+      if(cmTarget const* transitive_dependee = i->Target)
         {
         this->AddTargetDepend(depender_index, transitive_dependee, false);
         }

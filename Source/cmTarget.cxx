@@ -95,11 +95,13 @@ public:
     : Backtrace(NULL)
     {
     this->PolicyWarnedCMP0022 = false;
+    this->UtilityItemsDone = false;
     }
   cmTargetInternals(cmTargetInternals const&)
     : Backtrace(NULL)
     {
     this->PolicyWarnedCMP0022 = false;
+    this->UtilityItemsDone = false;
     }
   ~cmTargetInternals();
 
@@ -150,6 +152,9 @@ public:
   typedef std::map<TargetConfigPair, std::vector<cmSourceFile*> >
                                                           SourceFilesMapType;
   SourceFilesMapType SourceFilesMap;
+
+  std::set<cmLinkItem> UtilityItems;
+  bool UtilityItemsDone;
 
   struct TargetPropertyEntry {
     TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
@@ -468,6 +473,22 @@ cmListFileBacktrace const* cmTarget::GetUtilityBacktrace(
   if(i == this->UtilityBacktraces.end()) return 0;
 
   return &i->second;
+}
+
+//----------------------------------------------------------------------------
+std::set<cmLinkItem> const& cmTarget::GetUtilityItems() const
+{
+  if(!this->Internal->UtilityItemsDone)
+    {
+    this->Internal->UtilityItemsDone = true;
+    for(std::set<std::string>::const_iterator i = this->Utilities.begin();
+        i != this->Utilities.end(); ++i)
+      {
+      this->Internal->UtilityItems.insert(
+        cmLinkItem(*i, this->Makefile->FindTargetToUse(*i)));
+      }
+    }
+  return this->Internal->UtilityItems;
 }
 
 //----------------------------------------------------------------------------

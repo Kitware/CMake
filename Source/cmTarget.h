@@ -227,6 +227,7 @@ public:
   void AddUtility(const std::string& u, cmMakefile *makefile = 0);
   ///! Get the utilities used by this target
   std::set<std::string>const& GetUtilities() const { return this->Utilities; }
+  std::set<cmLinkItem>const& GetUtilityItems() const;
   cmListFileBacktrace const* GetUtilityBacktrace(const std::string& u) const;
 
   /** Finalize the target at the end of the Configure step.  */
