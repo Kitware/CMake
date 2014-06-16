@@ -1229,29 +1229,6 @@ void cmTarget::GetDirectLinkLibraries(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GetInterfaceLinkLibraries(const std::string& config,
-                                         std::vector<std::string> &libs,
-                                         cmTarget const* head) const
-{
-  const char *prop = this->GetProperty("INTERFACE_LINK_LIBRARIES");
-  if (prop)
-    {
-    cmGeneratorExpression ge;
-    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
-
-    cmGeneratorExpressionDAGChecker dagChecker(
-                                        this->GetName(),
-                                        "INTERFACE_LINK_LIBRARIES", 0, 0);
-    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
-                                        config,
-                                        false,
-                                        head,
-                                        &dagChecker),
-                                      libs);
-    }
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
                                   cmTarget::LinkLibraryType llt) const
 {
