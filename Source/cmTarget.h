@@ -271,8 +271,8 @@ public:
   LinkInterface const* GetLinkInterfaceLibraries(const std::string& config,
                                         cmTarget const* headTarget) const;
   void GetTransitivePropertyTargets(const std::string& config,
-                                        cmTarget const* headTarget,
-                                        std::vector<cmTarget*> &libs) const;
+                                    cmTarget const* headTarget,
+                                    std::vector<cmTarget const*> &libs) const;
   std::vector<cmTarget*> const&
     GetLinkImplementationClosure(const std::string& config) const;
 

@@ -6197,7 +6197,7 @@ cmTarget::GetLinkImplementationClosure(const std::string& config) const
 //----------------------------------------------------------------------------
 void cmTarget::GetTransitivePropertyTargets(const std::string& config,
                                       cmTarget const* headTarget,
-                                      std::vector<cmTarget*> &tgts) const
+                                      std::vector<cmTarget const*> &tgts) const
 {
   cmTarget::LinkInterface const* iface
                         = this->GetLinkInterfaceLibraries(config, headTarget);
@@ -6212,7 +6212,7 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
     for(std::vector<std::string>::const_iterator it = iface->Libraries.begin();
         it != iface->Libraries.end(); ++it)
       {
-      if (cmTarget* tgt = headTarget->GetMakefile()
+      if (cmTarget const* tgt = headTarget->GetMakefile()
                                     ->FindTargetToUse(*it))
         {
         tgts.push_back(tgt);

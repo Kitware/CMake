@@ -799,7 +799,8 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 
 #undef TRANSITIVE_PROPERTY_NAME
 
-std::string getLinkedTargetsContent(const std::vector<cmTarget*> &targets,
+std::string getLinkedTargetsContent(
+                                  const std::vector<cmTarget const*> &targets,
                                   cmTarget const* target,
                                   cmTarget const* headTarget,
                                   cmGeneratorExpressionContext *context,
@@ -810,7 +811,7 @@ std::string getLinkedTargetsContent(const std::vector<cmTarget*> &targets,
 
   std::string sep;
   std::string depString;
-  for (std::vector<cmTarget*>::const_iterator
+  for (std::vector<cmTarget const*>::const_iterator
       it = targets.begin();
       it != targets.end(); ++it)
     {
@@ -847,12 +848,12 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   const std::string &interfacePropertyName)
 {
-  std::vector<cmTarget*> tgts;
+  std::vector<cmTarget const*> tgts;
   for (std::vector<std::string>::const_iterator
       it = libraries.begin();
       it != libraries.end(); ++it)
     {
-    if (cmTarget *tgt = context->Makefile->FindTargetToUse(*it))
+    if (cmTarget const *tgt = context->Makefile->FindTargetToUse(*it))
       {
       tgts.push_back(tgt);
       }
@@ -1082,7 +1083,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                      cmStrCmp(propertyName)) != transEnd)
       {
 
-      std::vector<cmTarget*> tgts;
+      std::vector<cmTarget const*> tgts;
       target->GetTransitivePropertyTargets(context->Config,
                                                  headTarget, tgts);
       if (!tgts.empty())
