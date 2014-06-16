@@ -6235,24 +6235,16 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
     }
 
   // The interface libraries have been explicitly set.
-  cmGeneratorExpression ge;
-  cmGeneratorExpressionDAGChecker dagChecker(this->GetName(),
-                                             linkIfaceProp, 0, 0);
-  dagChecker.SetTransitivePropertiesOnly();
-  std::vector<std::string> libs;
-  cmSystemTools::ExpandListArgument(ge.Parse(interfaceLibs)->Evaluate(
-                                      this->Makefile,
-                                      config,
-                                      false,
-                                      headTarget,
-                                      this, &dagChecker), libs);
+  std::vector<cmLinkItem> libs;
+  this->ExpandLinkItems(linkIfaceProp, interfaceLibs, config,
+                        headTarget, true, libs);
 
-  for(std::vector<std::string>::const_iterator it = libs.begin();
+  for(std::vector<cmLinkItem>::const_iterator it = libs.begin();
       it != libs.end(); ++it)
     {
-    if (cmTarget const* tgt = this->FindTargetToLink(*it))
+    if (it->Target)
       {
-      tgts.push_back(tgt);
+      tgts.push_back(it->Target);
       }
     }
 }
