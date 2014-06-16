@@ -102,6 +102,8 @@ private:
   bool PrintFiles(std::ostream& os, std::string const& pattern);
 
   bool PrintVersion(std::ostream& os);
+  bool PrintUsage(std::ostream& os);
+  bool PrintHelp(std::ostream& os);
   bool PrintHelpFull(std::ostream& os);
   bool PrintHelpOneManual(std::ostream& os);
   bool PrintHelpOneCommand(std::ostream& os);
@@ -115,7 +117,6 @@ private:
   bool PrintHelpListProperties(std::ostream& os);
   bool PrintHelpListVariables(std::ostream& os);
   bool PrintHelpListPolicies(std::ostream& os);
-  bool PrintDocumentationUsage(std::ostream& os);
   bool PrintOldCustomModules(std::ostream& os);
 
   const char* GetNameString() const;
