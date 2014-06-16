@@ -259,10 +259,10 @@ public:
     std::vector<std::string> Languages;
 
     // Libraries listed in the interface.
-    std::vector<std::string> Libraries;
+    std::vector<cmLinkItem> Libraries;
 
     // Shared library dependencies needed for linking on some platforms.
-    std::vector<std::string> SharedDeps;
+    std::vector<cmLinkItem> SharedDeps;
 
     // Number of repetitions of a strongly connected component of two
     // or more static libraries.
@@ -270,7 +270,7 @@ public:
 
     // Libraries listed for other configurations.
     // Needed only for OLD behavior of CMP0003.
-    std::vector<std::string> WrongConfigLibraries;
+    std::vector<cmLinkItem> WrongConfigLibraries;
 
     bool ImplementationIsInterface;
 
@@ -297,11 +297,11 @@ public:
     std::vector<std::string> Languages;
 
     // Libraries linked directly in this configuration.
-    std::vector<std::string> Libraries;
+    std::vector<cmLinkItem> Libraries;
 
     // Libraries linked directly in other configurations.
     // Needed only for OLD behavior of CMP0003.
-    std::vector<std::string> WrongConfigLibraries;
+    std::vector<cmLinkItem> WrongConfigLibraries;
   };
   LinkImplementation const*
     GetLinkImplementation(const std::string& config) const;
@@ -782,7 +782,9 @@ private:
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,
-                       std::vector<std::string>& libs) const;
+                       std::vector<cmLinkItem>& items) const;
+  void LookupLinkItems(std::vector<std::string> const& names,
+                       std::vector<cmLinkItem>& items) const;
 
   std::string ProcessSourceItemCMP0049(const std::string& s);
 

@@ -77,11 +77,11 @@ private:
 
   std::map<std::string, int>::iterator
   AllocateLinkEntry(std::string const& item);
-  int AddLinkEntry(int depender_index, std::string const& item);
+  int AddLinkEntry(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
   void AddLinkEntries(int depender_index,
-                      std::vector<std::string> const& libs);
+                      std::vector<cmLinkItem> const& libs);
   cmTarget const* FindTargetToLink(int depender_index,
                                    const std::string& name);
 
@@ -103,7 +103,7 @@ private:
   // of the interface.
   struct SharedDepEntry
   {
-    std::string Item;
+    cmLinkItem Item;
     int DependerIndex;
   };
   std::queue<SharedDepEntry> SharedDepQueue;
@@ -112,7 +112,7 @@ private:
                         cmTarget::LinkInterface const* iface,
                         bool follow_interface = false);
   void QueueSharedDependencies(int depender_index,
-                               std::vector<std::string> const& deps);
+                               std::vector<cmLinkItem> const& deps);
   void HandleSharedDependency(SharedDepEntry const& dep);
 
   // Dependency inferral for each link item.
@@ -163,7 +163,7 @@ private:
 
   // Compatibility help.
   bool OldLinkDirMode;
-  void CheckWrongConfigItem(int depender_index, std::string const& item);
+  void CheckWrongConfigItem(cmLinkItem const& item);
   std::set<cmTarget const*> OldWrongConfigItems;
 };
 

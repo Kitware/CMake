@@ -2311,7 +2311,7 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
     if(this->Makefile->IsOn("APPLE"))
       {
       LinkImplementation const* impl = this->GetLinkImplementation(config);
-      for(std::vector<std::string>::const_iterator
+      for(std::vector<cmLinkItem>::const_iterator
           it = impl->Libraries.begin();
           it != impl->Libraries.end(); ++it)
         {
@@ -3513,13 +3513,11 @@ public:
     Makefile(target->GetMakefile()), Target(target)
   { this->Visited.insert(target); }
 
-  void Visit(cmTarget const* from, const std::string& name)
+  void Visit(cmLinkItem const& item)
     {
-    cmTarget const *target = from->FindTargetToLink(name);
-
-    if(!target)
+    if(!item.Target)
       {
-      if(name.find("::") != std::string::npos)
+      if(item.find("::") != std::string::npos)
         {
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
@@ -3545,7 +3543,7 @@ public:
         if(!noMessage)
           {
           e << "Target \"" << this->Target->GetName()
-            << "\" links to target \"" << name
+            << "\" links to target \"" << item
             << "\" but the target was not found.  Perhaps a find_package() "
             "call is missing for an IMPORTED target, or an ALIAS target is "
             "missing?";
@@ -3556,13 +3554,13 @@ public:
         }
       return;
       }
-    if(!this->Visited.insert(target).second)
+    if(!this->Visited.insert(item.Target).second)
       {
       return;
       }
 
     cmTarget::LinkInterface const* iface =
-      target->GetLinkInterface(this->Config, this->HeadTarget);
+      item.Target->GetLinkInterface(this->Config, this->HeadTarget);
     if(!iface) { return; }
 
     for(std::vector<std::string>::const_iterator
@@ -3571,10 +3569,10 @@ public:
       this->Languages.insert(*li);
       }
 
-    for(std::vector<std::string>::const_iterator
+    for(std::vector<cmLinkItem>::const_iterator
           li = iface->Libraries.begin(); li != iface->Libraries.end(); ++li)
       {
-      this->Visit(target, *li);
+      this->Visit(*li);
       }
     }
 private:
@@ -3677,10 +3675,10 @@ void cmTarget::ComputeLinkClosure(const std::string& config,
 
   // Add interface languages from linked targets.
   cmTargetCollectLinkLanguages cll(this, config, languages, this);
-  for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
+  for(std::vector<cmLinkItem>::const_iterator li = impl->Libraries.begin();
       li != impl->Libraries.end(); ++li)
     {
-    cll.Visit(this, *li);
+    cll.Visit(*li);
     }
 
   // Store the transitive closure of languages.
@@ -3731,16 +3729,34 @@ void cmTarget::ExpandLinkItems(std::string const& prop,
                                std::string const& value,
                                std::string const& config,
                                cmTarget const* headTarget,
-                               std::vector<std::string>& libs) const
+                               std::vector<cmLinkItem>& items) const
 {
   cmGeneratorExpression ge;
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
+  std::vector<std::string> libs;
   cmSystemTools::ExpandListArgument(ge.Parse(value)->Evaluate(
                                       this->Makefile,
                                       config,
                                       false,
                                       headTarget,
                                       this, &dagChecker), libs);
+  this->LookupLinkItems(libs, items);
+}
+
+//----------------------------------------------------------------------------
+void cmTarget::LookupLinkItems(std::vector<std::string> const& names,
+                               std::vector<cmLinkItem>& items) const
+{
+  for(std::vector<std::string>::const_iterator i = names.begin();
+      i != names.end(); ++i)
+    {
+    std::string name = this->CheckCMP0004(*i);
+    if(name == this->GetName() || name.empty())
+      {
+      continue;
+      }
+    items.push_back(cmLinkItem(name, this->FindTargetToLink(name)));
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -6158,7 +6174,11 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
                           headTarget, iface.Libraries);
-    cmSystemTools::ExpandListArgument(info->SharedDeps, iface.SharedDeps);
+    {
+    std::vector<std::string> deps;
+    cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
+    this->LookupLinkItems(deps, iface.SharedDeps);
+    }
 
     cmTargetInternals::ImportLinkInterfaceMapType::value_type
       entry(key, iface);
@@ -6170,22 +6190,21 @@ cmTarget::GetImportLinkInterface(const std::string& config,
 //----------------------------------------------------------------------------
 void processILibs(const std::string& config,
                   cmTarget const* headTarget,
-                  cmTarget const* curTarget,
-                  std::string const& name,
+                  cmLinkItem const& item,
                   std::vector<cmTarget const*>& tgts,
                   std::set<cmTarget const*>& emitted)
 {
-  if (cmTarget const* tgt = curTarget->FindTargetToLink(name))
+  if (item.Target && emitted.insert(item.Target).second)
     {
-    tgts.push_back(tgt);
+    tgts.push_back(item.Target);
     if(cmTarget::LinkInterface const* iface =
-       tgt->GetLinkInterfaceLibraries(config, headTarget))
+       item.Target->GetLinkInterfaceLibraries(config, headTarget))
       {
-      for(std::vector<std::string>::const_iterator
-          it = iface->Libraries.begin();
+      for(std::vector<cmLinkItem>::const_iterator
+            it = iface->Libraries.begin();
           it != iface->Libraries.end(); ++it)
         {
-        processILibs(config, headTarget, tgt, *it, tgts, emitted);
+        processILibs(config, headTarget, *it, tgts, emitted);
         }
       }
     }
@@ -6205,10 +6224,10 @@ cmTarget::GetLinkImplementationClosure(const std::string& config) const
     cmTarget::LinkImplementation const* impl
       = this->GetLinkImplementationLibraries(config);
 
-    for(std::vector<std::string>::const_iterator it = impl->Libraries.begin();
+    for(std::vector<cmLinkItem>::const_iterator it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
       {
-      processILibs(config, this, this, *it, tgts , emitted);
+      processILibs(config, this, *it, tgts , emitted);
       }
     }
   return tgts;
@@ -6229,12 +6248,12 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
       || this->GetPolicyStatusCMP0022() == cmPolicies::WARN
       || this->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
-    for(std::vector<std::string>::const_iterator it = iface->Libraries.begin();
+    for(std::vector<cmLinkItem>::const_iterator it = iface->Libraries.begin();
         it != iface->Libraries.end(); ++it)
       {
-      if (cmTarget const* tgt = this->FindTargetToLink(*it))
+      if (it->Target)
         {
-        tgts.push_back(tgt);
+        tgts.push_back(it->Target);
         }
       }
     return;
@@ -6378,7 +6397,7 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
       {
       // Compare the link implementation fallback link interface to the
       // preferred new link interface property and warn if different.
-      std::vector<std::string> ifaceLibs;
+      std::vector<cmLinkItem> ifaceLibs;
       std::string newProp = "INTERFACE_LINK_LIBRARIES";
       if(const char* newExplicitLibraries = this->GetProperty(newProp))
         {
@@ -6390,7 +6409,7 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
         std::string oldLibraries;
         std::string newLibraries;
         const char *sep = "";
-        for(std::vector<std::string>::const_iterator it
+        for(std::vector<cmLinkItem>::const_iterator it
               = impl->Libraries.begin(); it != impl->Libraries.end(); ++it)
           {
           oldLibraries += sep;
@@ -6398,7 +6417,7 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
           sep = ";";
           }
         sep = "";
-        for(std::vector<std::string>::const_iterator it
+        for(std::vector<cmLinkItem>::const_iterator it
               = ifaceLibs.begin(); it != ifaceLibs.end(); ++it)
           {
           newLibraries += sep;
@@ -6449,7 +6468,7 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
       // Shared libraries may have runtime implementation dependencies
       // on other shared libraries that are not in the interface.
       std::set<std::string> emitted;
-      for(std::vector<std::string>::const_iterator
+      for(std::vector<cmLinkItem>::const_iterator
           li = iface.Libraries.begin(); li != iface.Libraries.end(); ++li)
         {
         emitted.insert(*li);
@@ -6458,15 +6477,15 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
         {
         cmTarget::LinkImplementation const* impl =
             thisTarget->GetLinkImplementation(config);
-        for(std::vector<std::string>::const_iterator
+        for(std::vector<cmLinkItem>::const_iterator
               li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
           {
           if(emitted.insert(*li).second)
             {
-            if(cmTarget* tgt = thisTarget->Makefile->FindTargetToUse(*li))
+            if(li->Target)
               {
               // This is a runtime dependency on another shared library.
-              if(tgt->GetType() == cmTarget::SHARED_LIBRARY)
+              if(li->Target->GetType() == cmTarget::SHARED_LIBRARY)
                 {
                 iface.SharedDeps.push_back(*li);
                 }
@@ -6617,10 +6636,10 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
       li != llibs.end(); ++li)
     {
     // Skip entries that resolve to the target itself or are empty.
-    std::string item = this->CheckCMP0004(*li);
-    if(item == this->GetName() || item.empty())
+    std::string name = this->CheckCMP0004(*li);
+    if(name == this->GetName() || name.empty())
       {
-      if(item == this->GetName())
+      if(name == this->GetName())
         {
         bool noMessage = false;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
@@ -6659,7 +6678,8 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
       }
 
     // The entry is meant for this configuration.
-    impl.Libraries.push_back(item);
+    impl.Libraries.push_back(
+      cmLinkItem(name, this->FindTargetToLink(name)));
     }
 
   cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
@@ -6669,13 +6689,14 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
     {
     if(li->second != cmTarget::GENERAL && li->second != linkType)
       {
-      std::string item = this->CheckCMP0004(li->first);
-      if(item == this->GetName() || item.empty())
+      std::string name = this->CheckCMP0004(li->first);
+      if(name == this->GetName() || name.empty())
         {
         continue;
         }
       // Support OLD behavior for CMP0003.
-      impl.WrongConfigLibraries.push_back(item);
+      impl.WrongConfigLibraries.push_back(
+        cmLinkItem(name, this->FindTargetToLink(name)));
       }
     }
 }

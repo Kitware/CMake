@@ -292,8 +292,7 @@ cmComputeLinkDepends::AllocateLinkEntry(std::string const& item)
 }
 
 //----------------------------------------------------------------------------
-int cmComputeLinkDepends::AddLinkEntry(int depender_index,
-                                       std::string const& item)
+int cmComputeLinkDepends::AddLinkEntry(cmLinkItem const& item)
 {
   // Check if the item entry has already been added.
   std::map<std::string, int>::iterator lei = this->LinkEntryIndex.find(item);
@@ -310,7 +309,7 @@ int cmComputeLinkDepends::AddLinkEntry(int depender_index,
   int index = lei->second;
   LinkEntry& entry = this->EntryList[index];
   entry.Item = item;
-  entry.Target = this->FindTargetToLink(depender_index, entry.Item);
+  entry.Target = item.Target;
   entry.IsFlag = (!entry.Target && item[0] == '-' && item[1] != 'l' &&
                   item.substr(0, 10) != "-framework");
 
@@ -370,11 +369,11 @@ void cmComputeLinkDepends::FollowLinkEntry(BFSEntry const& qe)
       this->FollowSharedDeps(depender_index, iface);
 
       // Support for CMP0003.
-      for(std::vector<std::string>::const_iterator
+      for(std::vector<cmLinkItem>::const_iterator
             oi = iface->WrongConfigLibraries.begin();
           oi != iface->WrongConfigLibraries.end(); ++oi)
         {
-        this->CheckWrongConfigItem(depender_index, *oi);
+        this->CheckWrongConfigItem(*oi);
         }
       }
     }
@@ -406,9 +405,9 @@ cmComputeLinkDepends
 void
 cmComputeLinkDepends
 ::QueueSharedDependencies(int depender_index,
-                          std::vector<std::string> const& deps)
+                          std::vector<cmLinkItem> const& deps)
 {
-  for(std::vector<std::string>::const_iterator li = deps.begin();
+  for(std::vector<cmLinkItem>::const_iterator li = deps.begin();
       li != deps.end(); ++li)
     {
     SharedDepEntry qe;
@@ -432,8 +431,7 @@ void cmComputeLinkDepends::HandleSharedDependency(SharedDepEntry const& dep)
     // Initialize the item entry.
     LinkEntry& entry = this->EntryList[lei->second];
     entry.Item = dep.Item;
-    entry.Target = this->FindTargetToLink(dep.DependerIndex,
-                                          dep.Item);
+    entry.Target = dep.Item.Target;
 
     // This item was added specifically because it is a dependent
     // shared library.  It may get special treatment
@@ -472,7 +470,7 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
   cmSystemTools::ExpandListArgument(value, deplist);
 
   // Look for entries meant for this configuration.
-  std::vector<std::string> actual_libs;
+  std::vector<cmLinkItem> actual_libs;
   cmTarget::LinkLibraryType llt = cmTarget::GENERAL;
   bool haveLLT = false;
   for(std::vector<std::string>::const_iterator di = deplist.begin();
@@ -520,11 +518,13 @@ void cmComputeLinkDepends::AddVarLinkEntries(int depender_index,
       // If the library is meant for this link type then use it.
       if(llt == cmTarget::GENERAL || llt == this->LinkType)
         {
-        actual_libs.push_back(*di);
+        cmLinkItem item(*di, this->FindTargetToLink(depender_index, *di));
+        actual_libs.push_back(item);
         }
       else if(this->OldLinkDirMode)
         {
-        this->CheckWrongConfigItem(depender_index, *di);
+        cmLinkItem item(*di, this->FindTargetToLink(depender_index, *di));
+        this->CheckWrongConfigItem(item);
         }
 
       // Reset the link type until another explicit type is given.
@@ -544,36 +544,36 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
   cmTarget::LinkImplementation const* impl =
     this->Target->GetLinkImplementation(this->Config);
   this->AddLinkEntries(-1, impl->Libraries);
-  for(std::vector<std::string>::const_iterator
+  for(std::vector<cmLinkItem>::const_iterator
         wi = impl->WrongConfigLibraries.begin();
       wi != impl->WrongConfigLibraries.end(); ++wi)
     {
-    this->CheckWrongConfigItem(-1, *wi);
+    this->CheckWrongConfigItem(*wi);
     }
 }
 
 //----------------------------------------------------------------------------
 void
-cmComputeLinkDepends::AddLinkEntries(int depender_index,
-                                     std::vector<std::string> const& libs)
+cmComputeLinkDepends::AddLinkEntries(
+  int depender_index, std::vector<cmLinkItem> const& libs)
 {
   // Track inferred dependency sets implied by this list.
   std::map<int, DependSet> dependSets;
 
   // Loop over the libraries linked directly by the depender.
-  for(std::vector<std::string>::const_iterator li = libs.begin();
+  for(std::vector<cmLinkItem>::const_iterator li = libs.begin();
       li != libs.end(); ++li)
     {
     // Skip entries that will resolve to the target getting linked or
     // are empty.
-    std::string item = this->Target->CheckCMP0004(*li);
+    cmLinkItem const& item = *li;
     if(item == this->Target->GetName() || item.empty())
       {
       continue;
       }
 
     // Add a link entry for this item.
-    int dependee_index = this->AddLinkEntry(depender_index, item);
+    int dependee_index = this->AddLinkEntry(*li);
 
     // The dependee must come after the depender.
     if(depender_index >= 0)
@@ -961,8 +961,7 @@ void cmComputeLinkDepends::DisplayFinalEntries()
 }
 
 //----------------------------------------------------------------------------
-void cmComputeLinkDepends::CheckWrongConfigItem(int depender_index,
-                                                std::string const& item)
+void cmComputeLinkDepends::CheckWrongConfigItem(cmLinkItem const& item)
 {
   if(!this->OldLinkDirMode)
     {
@@ -972,9 +971,8 @@ void cmComputeLinkDepends::CheckWrongConfigItem(int depender_index,
   // For CMake 2.4 bug-compatibility we need to consider the output
   // directories of targets linked in another configuration as link
   // directories.
-  cmTarget const* tgt = this->FindTargetToLink(depender_index, item);
-  if(tgt && !tgt->IsImported())
+  if(item.Target && !item.Target->IsImported())
     {
-    this->OldWrongConfigItems.insert(tgt);
+    this->OldWrongConfigItems.insert(item.Target);
     }
 }

@@ -800,7 +800,7 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 #undef TRANSITIVE_PROPERTY_NAME
 
 std::string getLinkedTargetsContent(
-                                  const std::vector<cmTarget const*> &targets,
+                                  std::vector<cmTarget const*> &targets,
                                   cmTarget const* target,
                                   cmTarget const* headTarget,
                                   cmGeneratorExpressionContext *context,
@@ -841,7 +841,7 @@ std::string getLinkedTargetsContent(
   return linkedTargetsContent;
 }
 
-std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
+std::string getLinkedTargetsContent(std::vector<cmLinkItem> const &libraries,
                                   cmTarget const* target,
                                   cmTarget const* headTarget,
                                   cmGeneratorExpressionContext *context,
@@ -849,13 +849,13 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
                                   const std::string &interfacePropertyName)
 {
   std::vector<cmTarget const*> tgts;
-  for (std::vector<std::string>::const_iterator
+  for (std::vector<cmLinkItem>::const_iterator
       it = libraries.begin();
       it != libraries.end(); ++it)
     {
-    if (cmTarget const *tgt = target->FindTargetToLink(*it))
+    if (it->Target)
       {
-      tgts.push_back(tgt);
+      tgts.push_back(it->Target);
       }
     }
   return getLinkedTargetsContent(tgts, target, headTarget, context,

@@ -475,10 +475,10 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       }
 
     std::set<cmTarget const*> uniqueDeps;
-    for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
+    for(std::vector<cmLinkItem>::const_iterator li = impl->Libraries.begin();
         li != impl->Libraries.end(); ++li)
       {
-      cmTarget const* tgt = this->Target->FindTargetToLink(*li);
+      cmTarget const* tgt = li->Target;
       if (!tgt)
         {
         continue;
