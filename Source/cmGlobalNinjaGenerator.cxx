@@ -972,7 +972,16 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       {
       knownDependencies.insert( ng->ConvertToNinjaPath( j->c_str() ) );
       }
+    //get list files which are implicit dependencies as well and will be phony
+    //for rebuild manifest
+    std::vector<std::string> const& lf = (*i)->GetMakefile()->GetListFiles();
+    typedef std::vector<std::string>::const_iterator vect_it;
+    for(vect_it j = lf.begin(); j != lf.end(); ++j)
+      {
+      knownDependencies.insert( ng->ConvertToNinjaPath( j->c_str() ) );
+      }
     }
+  knownDependencies.insert( "CMakeCache.txt" );
 
   for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
       li = this->EvaluationFiles.begin();
