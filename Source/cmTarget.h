@@ -308,6 +308,8 @@ public:
   };
   LinkClosure const* GetLinkClosure(const std::string& config) const;
 
+  cmTarget const* FindTargetToLink(std::string const& name) const;
+
   /** Strip off leading and trailing whitespace from an item named in
       the link dependencies of this target.  */
   std::string CheckCMP0004(std::string const& item) const;

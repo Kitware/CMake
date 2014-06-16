@@ -623,40 +623,15 @@ cmTarget const* cmComputeLinkDepends::FindTargetToLink(int depender_index,
                                                  const std::string& name)
 {
   // Look for a target in the scope of the depender.
-  cmMakefile* mf = this->Makefile;
+  cmTarget const* from = this->Target;
   if(depender_index >= 0)
     {
     if(cmTarget const* depender = this->EntryList[depender_index].Target)
       {
-      mf = depender->GetMakefile();
+      from = depender;
       }
     }
-  cmTarget const* tgt = mf->FindTargetToUse(name);
-
-  // Skip targets that will not really be linked.  This is probably a
-  // name conflict between an external library and an executable
-  // within the project.
-  if(tgt && tgt->GetType() == cmTarget::EXECUTABLE &&
-     !tgt->IsExecutableWithExports())
-    {
-    tgt = 0;
-    }
-
-  if(tgt && tgt->GetType() == cmTarget::OBJECT_LIBRARY)
-    {
-    cmOStringStream e;
-    e << "Target \"" << this->Target->GetName() << "\" links to "
-      "OBJECT library \"" << tgt->GetName() << "\" but this is not "
-      "allowed.  "
-      "One may link only to STATIC or SHARED libraries, or to executables "
-      "with the ENABLE_EXPORTS property set.";
-    this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
-                                      this->Target->GetBacktrace());
-    tgt = 0;
-    }
-
-  // Return the target found, if any.
-  return tgt;
+  return from->FindTargetToLink(name);
 }
 
 //----------------------------------------------------------------------------
