@@ -828,7 +828,7 @@ std::string getLinkedTargetsContent(
     sep = ";";
     }
   cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depString);
-  std::string linkedTargetsContent = cge->Evaluate(context->Makefile,
+  std::string linkedTargetsContent = cge->Evaluate(target->GetMakefile(),
                       context->Config,
                       context->Quiet,
                       headTarget,
@@ -853,7 +853,7 @@ std::string getLinkedTargetsContent(const std::vector<std::string> &libraries,
       it = libraries.begin();
       it != libraries.end(); ++it)
     {
-    if (cmTarget const *tgt = context->Makefile->FindTargetToUse(*it))
+    if (cmTarget const *tgt = target->FindTargetToLink(*it))
       {
       tgts.push_back(tgt);
       }

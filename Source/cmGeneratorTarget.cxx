@@ -478,7 +478,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
     for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
         li != impl->Libraries.end(); ++li)
       {
-      cmTarget const* tgt = this->Makefile->FindTargetToUse(*li);
+      cmTarget const* tgt = this->Target->FindTargetToLink(*li);
       if (!tgt)
         {
         continue;
