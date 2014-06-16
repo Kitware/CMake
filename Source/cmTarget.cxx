@@ -64,11 +64,16 @@ struct cmTarget::OutputInfo
 //----------------------------------------------------------------------------
 struct cmTarget::ImportInfo
 {
+  ImportInfo(): NoSOName(false), Multiplicity(0) {}
   bool NoSOName;
+  int Multiplicity;
   std::string Location;
   std::string SOName;
   std::string ImportLibrary;
-  cmTarget::LinkInterface LinkInterface;
+  std::string Languages;
+  std::string Libraries;
+  std::string LibrariesProp;
+  std::string SharedDeps;
 };
 
 //----------------------------------------------------------------------------
@@ -121,11 +126,14 @@ public:
   LinkInterfaceMapType LinkInterfaceMap;
   bool PolicyWarnedCMP0022;
 
+  typedef std::map<TargetConfigPair, cmTarget::LinkInterface>
+                                                    ImportLinkInterfaceMapType;
+  ImportLinkInterfaceMapType ImportLinkInterfaceMap;
+
   typedef std::map<std::string, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
 
-  typedef std::map<TargetConfigPair, cmTarget::ImportInfo>
-                                                            ImportInfoMapType;
+  typedef std::map<std::string, cmTarget::ImportInfo> ImportInfoMapType;
   ImportInfoMapType ImportInfoMap;
 
   typedef std::map<std::string, cmTarget::CompileInfo> CompileInfoMapType;
@@ -481,6 +489,7 @@ void cmTarget::ClearLinkMaps()
   this->LinkImplementationLanguageIsContextDependent = true;
   this->Internal->LinkImplMap.clear();
   this->Internal->LinkInterfaceMap.clear();
+  this->Internal->ImportLinkInterfaceMap.clear();
   this->Internal->LinkClosureMap.clear();
   for (cmTargetLinkInformationMap::const_iterator it
       = this->LinkInformation.begin();
@@ -3853,7 +3862,7 @@ std::string cmTarget::GetSOName(const std::string& config) const
   if(this->IsImported())
     {
     // Lookup the imported soname.
-    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, this))
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
       {
       if(info->NoSOName)
         {
@@ -3921,7 +3930,7 @@ bool cmTarget::HasMacOSXRpathInstallNameDir(const std::string& config) const
   else
     {
     // Lookup the imported soname.
-    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, this))
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
       {
       if(!info->NoSOName && !info->SOName.empty())
         {
@@ -4007,7 +4016,7 @@ bool cmTarget::IsImportedSharedLibWithoutSOName(
 {
   if(this->IsImported() && this->GetType() == cmTarget::SHARED_LIBRARY)
     {
-    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, this))
+    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
       {
       return info->NoSOName;
       }
@@ -4131,7 +4140,7 @@ std::string
 cmTarget::ImportedGetFullPath(const std::string& config, bool implib) const
 {
   std::string result;
-  if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, this))
+  if(cmTarget::ImportInfo const* info = this->GetImportInfo(config))
     {
     result = implib? info->ImportLibrary : info->Location;
     }
@@ -5670,8 +5679,7 @@ bool cmTarget::IsChrpathUsed(const std::string& config) const
 
 //----------------------------------------------------------------------------
 cmTarget::ImportInfo const*
-cmTarget::GetImportInfo(const std::string& config,
-                        cmTarget const* headTarget) const
+cmTarget::GetImportInfo(const std::string& config) const
 {
   // There is no imported information for non-imported targets.
   if(!this->IsImported())
@@ -5690,16 +5698,15 @@ cmTarget::GetImportInfo(const std::string& config,
     {
     config_upper = "NOCONFIG";
     }
-  TargetConfigPair key(headTarget, config_upper);
   typedef cmTargetInternals::ImportInfoMapType ImportInfoMapType;
 
   ImportInfoMapType::const_iterator i =
-    this->Internal->ImportInfoMap.find(key);
+    this->Internal->ImportInfoMap.find(config_upper);
   if(i == this->Internal->ImportInfoMap.end())
     {
     ImportInfo info;
-    this->ComputeImportInfo(config_upper, info, headTarget);
-    ImportInfoMapType::value_type entry(key, info);
+    this->ComputeImportInfo(config_upper, info);
+    ImportInfoMapType::value_type entry(config_upper, info);
     i = this->Internal->ImportInfoMap.insert(entry).first;
     }
 
@@ -5851,8 +5858,7 @@ bool cmTarget::GetMappedConfig(std::string const& desired_config,
 
 //----------------------------------------------------------------------------
 void cmTarget::ComputeImportInfo(std::string const& desired_config,
-                                 ImportInfo& info,
-                                 cmTarget const* headTarget) const
+                                 ImportInfo& info) const
 {
   // This method finds information about an imported target from its
   // properties.  The "IMPORTED_" namespace is reserved for properties
@@ -5891,8 +5897,8 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     }
   if(propertyLibs)
     {
-    this->ExpandLinkItems(linkProp, propertyLibs, desired_config,
-                          headTarget, info.LinkInterface.Libraries);
+    info.LibrariesProp = linkProp;
+    info.Libraries = propertyLibs;
     }
   }
   if(this->GetType() == INTERFACE_LIBRARY)
@@ -5978,13 +5984,12 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
   linkProp += suffix;
   if(const char* config_libs = this->GetProperty(linkProp))
     {
-    cmSystemTools::ExpandListArgument(config_libs,
-                                      info.LinkInterface.SharedDeps);
+    info.SharedDeps = config_libs;
     }
   else if(const char* libs =
           this->GetProperty("IMPORTED_LINK_DEPENDENT_LIBRARIES"))
     {
-    cmSystemTools::ExpandListArgument(libs, info.LinkInterface.SharedDeps);
+    info.SharedDeps = libs;
     }
   }
 
@@ -5995,14 +6000,12 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     linkProp += suffix;
     if(const char* config_libs = this->GetProperty(linkProp))
       {
-      cmSystemTools::ExpandListArgument(config_libs,
-                                        info.LinkInterface.Languages);
+      info.Languages = config_libs;
       }
     else if(const char* libs =
             this->GetProperty("IMPORTED_LINK_INTERFACE_LANGUAGES"))
       {
-      cmSystemTools::ExpandListArgument(libs,
-                                        info.LinkInterface.Languages);
+      info.Languages = libs;
       }
     }
 
@@ -6013,12 +6016,12 @@ void cmTarget::ComputeImportInfo(std::string const& desired_config,
     linkProp += suffix;
     if(const char* config_reps = this->GetProperty(linkProp))
       {
-      sscanf(config_reps, "%u", &info.LinkInterface.Multiplicity);
+      sscanf(config_reps, "%u", &info.Multiplicity);
       }
     else if(const char* reps =
             this->GetProperty("IMPORTED_LINK_INTERFACE_MULTIPLICITY"))
       {
-      sscanf(reps, "%u", &info.LinkInterface.Multiplicity);
+      sscanf(reps, "%u", &info.Multiplicity);
       }
     }
 }
@@ -6031,11 +6034,7 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, head))
-      {
-      return &info->LinkInterface;
-      }
-    return 0;
+    return this->GetImportLinkInterface(config, head);
     }
 
   // Link interfaces are not supported for executables that do not
@@ -6084,11 +6083,7 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
   // Imported targets have their own link interface.
   if(this->IsImported())
     {
-    if(cmTarget::ImportInfo const* info = this->GetImportInfo(config, head))
-      {
-      return &info->LinkInterface;
-      }
-    return 0;
+    return this->GetImportLinkInterface(config, head);
     }
 
   // Link interfaces are not supported for executables that do not
@@ -6119,6 +6114,37 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
     }
 
   return i->second.Exists ? &i->second : 0;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::LinkInterface const*
+cmTarget::GetImportLinkInterface(const std::string& config,
+                                 cmTarget const* headTarget) const
+{
+  cmTarget::ImportInfo const* info = this->GetImportInfo(config);
+  if(!info)
+    {
+    return 0;
+    }
+
+  TargetConfigPair key(headTarget, cmSystemTools::UpperCase(config));
+
+  cmTargetInternals::ImportLinkInterfaceMapType::iterator i =
+    this->Internal->ImportLinkInterfaceMap.find(key);
+  if(i == this->Internal->ImportLinkInterfaceMap.end())
+    {
+    LinkInterface iface;
+    iface.Multiplicity = info->Multiplicity;
+    cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
+    this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
+                          headTarget, iface.Libraries);
+    cmSystemTools::ExpandListArgument(info->SharedDeps, iface.SharedDeps);
+
+    cmTargetInternals::ImportLinkInterfaceMapType::value_type
+      entry(key, iface);
+    i = this->Internal->ImportLinkInterfaceMap.insert(entry).first;
+    }
+  return &i->second;
 }
 
 //----------------------------------------------------------------------------

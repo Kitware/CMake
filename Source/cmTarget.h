@@ -730,10 +730,9 @@ private:
 
   // Cache import information from properties for each configuration.
   struct ImportInfo;
-  ImportInfo const* GetImportInfo(const std::string& config,
-                                        cmTarget const* workingTarget) const;
-  void ComputeImportInfo(std::string const& desired_config, ImportInfo& info,
-                                        cmTarget const* head) const;
+  ImportInfo const* GetImportInfo(const std::string& config) const;
+  void ComputeImportInfo(std::string const& desired_config,
+                         ImportInfo& info) const;
 
   // Cache target compile paths for each configuration.
   struct CompileInfo;
@@ -742,6 +741,10 @@ private:
   mutable cmTargetLinkInformationMap LinkInformation;
   void CheckPropertyCompatibility(cmComputeLinkInformation *info,
                                   const std::string& config) const;
+
+  LinkInterface const*
+    GetImportLinkInterface(const std::string& config,
+                           cmTarget const* head) const;
 
   const char* ComputeLinkInterfaceLibraries(const std::string& config,
                                             LinkInterface& iface,
