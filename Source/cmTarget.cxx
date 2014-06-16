@@ -177,7 +177,7 @@ public:
                                 CachedLinkInterfaceSourcesEntries;
   mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
                                 CachedLinkInterfaceCompileFeaturesEntries;
-  mutable std::map<std::string, std::vector<cmTarget*> >
+  mutable std::map<std::string, std::vector<cmTarget const*> >
                                 CachedLinkImplementationClosure;
 
   mutable std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
@@ -5219,7 +5219,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
   assert((impliedByUse ^ explicitlySet)
       || (!impliedByUse && !explicitlySet));
 
-  std::vector<cmTarget*> const& deps =
+  std::vector<cmTarget const*> const& deps =
     tgt->GetLinkImplementationClosure(config);
 
   if(deps.empty())
@@ -5245,7 +5245,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
     report += "\" property not set.\n";
     }
 
-  for(std::vector<cmTarget*>::const_iterator li =
+  for(std::vector<cmTarget const*>::const_iterator li =
       deps.begin();
       li != deps.end(); ++li)
     {
@@ -5435,7 +5435,7 @@ bool isLinkDependentProperty(cmTarget const* tgt, const std::string &p,
                              const std::string& interfaceProperty,
                              const std::string& config)
 {
-  std::vector<cmTarget*> const& deps =
+  std::vector<cmTarget const*> const& deps =
     tgt->GetLinkImplementationClosure(config);
 
   if(deps.empty())
@@ -5443,8 +5443,7 @@ bool isLinkDependentProperty(cmTarget const* tgt, const std::string &p,
     return false;
     }
 
-  for(std::vector<cmTarget*>::const_iterator li =
-      deps.begin();
+  for(std::vector<cmTarget const*>::const_iterator li = deps.begin();
       li != deps.end(); ++li)
     {
     const char *prop = (*li)->GetProperty(interfaceProperty);
@@ -6151,7 +6150,8 @@ cmTarget::GetImportLinkInterface(const std::string& config,
 void processILibs(const std::string& config,
                   cmTarget const* headTarget,
                   std::string const& name,
-                  std::vector<cmTarget*>& tgts, std::set<cmTarget*>& emitted)
+                  std::vector<cmTarget const*>& tgts,
+                  std::set<cmTarget const*>& emitted)
 {
   cmTarget* tgt = headTarget->GetMakefile()
                                   ->FindTargetToUse(name);
@@ -6172,15 +6172,15 @@ void processILibs(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-std::vector<cmTarget*> const&
+std::vector<cmTarget const*> const&
 cmTarget::GetLinkImplementationClosure(const std::string& config) const
 {
-  std::vector<cmTarget*>& tgts =
+  std::vector<cmTarget const*>& tgts =
     this->Internal->CachedLinkImplementationClosure[config];
   if(!this->Internal->CacheLinkImplementationClosureDone[config])
     {
     this->Internal->CacheLinkImplementationClosureDone[config] = true;
-    std::set<cmTarget*> emitted;
+    std::set<cmTarget const*> emitted;
 
     cmTarget::LinkImplementation const* impl
       = this->GetLinkImplementationLibraries(config);
