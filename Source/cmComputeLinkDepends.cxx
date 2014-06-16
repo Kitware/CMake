@@ -999,12 +999,9 @@ void cmComputeLinkDepends::CheckWrongConfigItem(int depender_index,
   // For CMake 2.4 bug-compatibility we need to consider the output
   // directories of targets linked in another configuration as link
   // directories.
-  if(cmTarget const* tgt
-                      = this->FindTargetToLink(depender_index, item))
+  cmTarget const* tgt = this->FindTargetToLink(depender_index, item);
+  if(tgt && !tgt->IsImported())
     {
-    if(!tgt->IsImported())
-      {
-      this->OldWrongConfigItems.insert(tgt);
-      }
+    this->OldWrongConfigItems.insert(tgt);
     }
 }
