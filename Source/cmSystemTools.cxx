@@ -439,7 +439,7 @@ void cmSystemTools::ParseWindowsCommandLine(const char* command,
       {
       arg.append(backslashes, '\\');
       backslashes = 0;
-      if(isspace(*c))
+      if(((*c & 0x80) == 0 ) && isspace(*c))
         {
         if(in_quotes)
           {
