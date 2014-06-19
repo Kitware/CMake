@@ -174,25 +174,25 @@ public:
   std::vector<TargetPropertyEntry*> SourceEntries;
   std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
 
-  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
-                                CachedLinkInterfaceIncludeDirectoriesEntries;
-  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
-                                CachedLinkInterfaceCompileOptionsEntries;
-  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
-                                CachedLinkInterfaceCompileDefinitionsEntries;
-  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
-                                CachedLinkInterfaceSourcesEntries;
-  mutable std::map<std::string, std::vector<TargetPropertyEntry*> >
-                                CachedLinkInterfaceCompileFeaturesEntries;
-  mutable std::map<std::string, std::vector<cmTarget const*> >
-                                CachedLinkImplementationClosure;
+  std::map<std::string, std::vector<TargetPropertyEntry*> >
+                        CachedLinkInterfaceIncludeDirectoriesEntries;
+  std::map<std::string, std::vector<TargetPropertyEntry*> >
+                        CachedLinkInterfaceCompileOptionsEntries;
+  std::map<std::string, std::vector<TargetPropertyEntry*> >
+                        CachedLinkInterfaceCompileDefinitionsEntries;
+  std::map<std::string, std::vector<TargetPropertyEntry*> >
+                        CachedLinkInterfaceSourcesEntries;
+  std::map<std::string, std::vector<TargetPropertyEntry*> >
+                        CachedLinkInterfaceCompileFeaturesEntries;
+  std::map<std::string, std::vector<cmTarget const*> >
+                        CachedLinkImplementationClosure;
 
-  mutable std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
-  mutable std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
-  mutable std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
-  mutable std::map<std::string, bool> CacheLinkInterfaceSourcesDone;
-  mutable std::map<std::string, bool> CacheLinkInterfaceCompileFeaturesDone;
-  mutable std::map<std::string, bool> CacheLinkImplementationClosureDone;
+  std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
+  std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
+  std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
+  std::map<std::string, bool> CacheLinkInterfaceSourcesDone;
+  std::map<std::string, bool> CacheLinkInterfaceCompileFeaturesDone;
+  std::map<std::string, bool> CacheLinkImplementationClosureDone;
 };
 
 //----------------------------------------------------------------------------
