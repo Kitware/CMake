@@ -144,8 +144,15 @@ public:
   CompileInfoMapType CompileInfoMap;
 
   // Cache link implementation computation from each configuration.
+  struct OptionalLinkImplementation: public cmTarget::LinkImplementation
+  {
+    OptionalLinkImplementation():
+      LibrariesDone(false), LanguagesDone(false) {}
+    bool LibrariesDone;
+    bool LanguagesDone;
+  };
   typedef std::map<TargetConfigPair,
-                   cmTarget::LinkImplementation> LinkImplMapType;
+                   OptionalLinkImplementation> LinkImplMapType;
   LinkImplMapType LinkImplMap;
 
   typedef std::map<std::string, cmTarget::LinkClosure> LinkClosureMapType;
@@ -6519,28 +6526,21 @@ cmTarget::GetLinkImplementation(const std::string& config) const
     return 0;
     }
 
-  // Lookup any existing link implementation for this configuration.
+  // Populate the link implementation for this configuration.
   TargetConfigPair key(this, cmSystemTools::UpperCase(config));
-
-  cmTargetInternals::LinkImplMapType::iterator
-    i = this->Internal->LinkImplMap.find(key);
-  if(i == this->Internal->LinkImplMap.end())
+  cmTargetInternals::OptionalLinkImplementation&
+    impl = this->Internal->LinkImplMap[key];
+  if(!impl.LibrariesDone)
     {
-    // Compute the link implementation for this configuration.
-    LinkImplementation impl;
+    impl.LibrariesDone = true;
     this->ComputeLinkImplementation(config, impl, this);
-    this->ComputeLinkImplementationLanguages(config, impl, this);
-
-    // Store the information for this configuration.
-    cmTargetInternals::LinkImplMapType::value_type entry(key, impl);
-    i = this->Internal->LinkImplMap.insert(entry).first;
     }
-  else if (i->second.Languages.empty())
+  if(!impl.LanguagesDone)
     {
-    this->ComputeLinkImplementationLanguages(config, i->second, this);
+    impl.LanguagesDone = true;
+    this->ComputeLinkImplementationLanguages(config, impl, this);
     }
-
-  return &i->second;
+  return &impl;
 }
 
 //----------------------------------------------------------------------------
@@ -6561,23 +6561,16 @@ cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
     return 0;
     }
 
-  // Lookup any existing link implementation for this configuration.
+  // Populate the link implementation libraries for this configuration.
   TargetConfigPair key(head, cmSystemTools::UpperCase(config));
-
-  cmTargetInternals::LinkImplMapType::iterator
-    i = this->Internal->LinkImplMap.find(key);
-  if(i == this->Internal->LinkImplMap.end())
+  cmTargetInternals::OptionalLinkImplementation&
+    impl = this->Internal->LinkImplMap[key];
+  if(!impl.LibrariesDone)
     {
-    // Compute the link implementation for this configuration.
-    LinkImplementation impl;
-    this->ComputeLinkImplementation(config, impl, head);
-
-    // Store the information for this configuration.
-    cmTargetInternals::LinkImplMapType::value_type entry(key, impl);
-    i = this->Internal->LinkImplMap.insert(entry).first;
+    impl.LibrariesDone = true;
+    this->ComputeLinkImplementation(config, impl, this);
     }
-
-  return &i->second;
+  return &impl;
 }
 
 //----------------------------------------------------------------------------
