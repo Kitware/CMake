@@ -6579,33 +6579,24 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
                                          cmTarget const* head) const
 {
   // Collect libraries directly linked in this configuration.
-  std::vector<std::string> llibs;
-  if(const char *prop = this->GetProperty("LINK_LIBRARIES"))
+  for (std::vector<cmValueWithOrigin>::const_iterator
+      le = this->Internal->LinkImplementationPropertyEntries.begin(),
+      end = this->Internal->LinkImplementationPropertyEntries.end();
+      le != end; ++le)
     {
-    cmGeneratorExpression ge;
-    const cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
-
+    std::vector<std::string> llibs;
     cmGeneratorExpressionDAGChecker dagChecker(
                                         this->GetName(),
                                         "LINK_LIBRARIES", 0, 0);
+    cmGeneratorExpression ge(&le->Backtrace);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
+      ge.Parse(le->Value);
     cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
                                         config,
                                         false,
                                         head,
                                         &dagChecker),
                                       llibs);
-
-    std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
-    for (std::set<std::string>::const_iterator it = seenProps.begin();
-        it != seenProps.end(); ++it)
-      {
-      if (!this->GetProperty(*it))
-        {
-        this->LinkImplicitNullProperties.insert(*it);
-        }
-      }
-    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
-    }
 
     for(std::vector<std::string>::const_iterator li = llibs.begin();
         li != llibs.end(); ++li)
@@ -6655,6 +6646,18 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
       impl.Libraries.push_back(
         cmLinkItem(name, this->FindTargetToLink(name)));
       }
+
+    std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();
+    for (std::set<std::string>::const_iterator it = seenProps.begin();
+        it != seenProps.end(); ++it)
+      {
+      if (!this->GetProperty(*it))
+        {
+        this->LinkImplicitNullProperties.insert(*it);
+        }
+      }
+    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
+    }
 
   cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
   LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
