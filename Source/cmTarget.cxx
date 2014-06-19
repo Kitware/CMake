@@ -774,45 +774,9 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 
   if (!this->Internal->CacheLinkInterfaceSourcesDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string targetResult = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, &dagChecker);
-      if (!this->Makefile->FindTargetToUse(targetResult))
-        {
-        continue;
-        }
-      }
-      std::string sourceGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_SOURCES>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        sourceGenex = "$<$<BOOL:" + it->Value + ">:" + sourceGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                                sourceGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceSourcesEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_SOURCES",
+      this->Internal->CachedLinkInterfaceSourcesEntries[config]);
     }
 
     std::vector<std::string>::size_type numFilesBefore = files.size();
