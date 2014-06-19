@@ -6607,54 +6607,54 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
     cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
     }
 
-  for(std::vector<std::string>::const_iterator li = llibs.begin();
-      li != llibs.end(); ++li)
-    {
-    // Skip entries that resolve to the target itself or are empty.
-    std::string name = this->CheckCMP0004(*li);
-    if(name == this->GetName() || name.empty())
+    for(std::vector<std::string>::const_iterator li = llibs.begin();
+        li != llibs.end(); ++li)
       {
-      if(name == this->GetName())
+      // Skip entries that resolve to the target itself or are empty.
+      std::string name = this->CheckCMP0004(*li);
+      if(name == this->GetName() || name.empty())
         {
-        bool noMessage = false;
-        cmake::MessageType messageType = cmake::FATAL_ERROR;
-        cmOStringStream e;
-        switch(this->GetPolicyStatusCMP0038())
+        if(name == this->GetName())
           {
-          case cmPolicies::WARN:
+          bool noMessage = false;
+          cmake::MessageType messageType = cmake::FATAL_ERROR;
+          cmOStringStream e;
+          switch(this->GetPolicyStatusCMP0038())
             {
-            e << (this->Makefile->GetPolicies()
-                  ->GetPolicyWarning(cmPolicies::CMP0038)) << "\n";
-            messageType = cmake::AUTHOR_WARNING;
+            case cmPolicies::WARN:
+              {
+              e << (this->Makefile->GetPolicies()
+                    ->GetPolicyWarning(cmPolicies::CMP0038)) << "\n";
+              messageType = cmake::AUTHOR_WARNING;
+              }
+              break;
+            case cmPolicies::OLD:
+              noMessage = true;
+            case cmPolicies::REQUIRED_IF_USED:
+            case cmPolicies::REQUIRED_ALWAYS:
+            case cmPolicies::NEW:
+              // Issue the fatal message.
+              break;
             }
-            break;
-          case cmPolicies::OLD:
-            noMessage = true;
-          case cmPolicies::REQUIRED_IF_USED:
-          case cmPolicies::REQUIRED_ALWAYS:
-          case cmPolicies::NEW:
-            // Issue the fatal message.
-            break;
-          }
 
-        if(!noMessage)
-          {
-          e << "Target \"" << this->GetName() << "\" links to itself.";
-          this->Makefile->GetCMakeInstance()->IssueMessage(
-            messageType, e.str(), this->GetBacktrace());
-          if (messageType == cmake::FATAL_ERROR)
+          if(!noMessage)
             {
-            return;
+            e << "Target \"" << this->GetName() << "\" links to itself.";
+            this->Makefile->GetCMakeInstance()->IssueMessage(
+              messageType, e.str(), this->GetBacktrace());
+            if (messageType == cmake::FATAL_ERROR)
+              {
+              return;
+              }
             }
           }
+        continue;
         }
-      continue;
-      }
 
-    // The entry is meant for this configuration.
-    impl.Libraries.push_back(
-      cmLinkItem(name, this->FindTargetToLink(name)));
-    }
+      // The entry is meant for this configuration.
+      impl.Libraries.push_back(
+        cmLinkItem(name, this->FindTargetToLink(name)));
+      }
 
   cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
   LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
