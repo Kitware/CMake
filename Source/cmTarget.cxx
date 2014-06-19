@@ -2430,45 +2430,9 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
 
   if (!this->Internal->CacheLinkInterfaceCompileOptionsDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string targetResult = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(targetResult))
-        {
-        continue;
-        }
-      }
-      std::string optionGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_COMPILE_OPTIONS>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        optionGenex = "$<$<BOOL:" + it->Value + ">:" + optionGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                                optionGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceCompileOptionsEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_COMPILE_OPTIONS",
+      this->Internal->CachedLinkInterfaceCompileOptionsEntries[config]);
     }
 
   processCompileOptions(this,
