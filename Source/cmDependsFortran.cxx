@@ -765,7 +765,11 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
                                      const char* compilerId)
 {
   /*
-  gnu:
+  gnu >= 4.9:
+    A mod file is an ascii file compressed with gzip.
+    Compiling twice produces identical modules.
+
+  gnu < 4.9:
     A mod file is an ascii file.
     <bar.mod>
     FORTRAN module created from /path/to/foo.f90 on Sun Dec 30 22:47:58 2007
@@ -821,21 +825,30 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
    */
   if (strcmp(compilerId, "GNU") == 0 )
     {
-    const char seq[1] = {'\n'};
-    const int seqlen = 1;
-
-    if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+    // GNU Fortran 4.9 and later compress .mod files with gzip
+    // but also do not include a date so we can fall through to
+    // compare them without skipping any prefix.
+    unsigned char hdr[2];
+    bool okay = finModFile.read(reinterpret_cast<char*>(hdr), 2)? true:false;
+    finModFile.seekg(0);
+    if(!(okay && hdr[0] == 0x1f && hdr[1] == 0x8b))
       {
-      // The module is of unexpected format.  Assume it is different.
-      std::cerr << compilerId << " fortran module " << modFile
-                << " has unexpected format." << std::endl;
-      return true;
-      }
+      const char seq[1] = {'\n'};
+      const int seqlen = 1;
 
-    if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
-      {
-      // The stamp must differ if the sequence is not contained.
-      return true;
+      if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+        {
+        // The module is of unexpected format.  Assume it is different.
+        std::cerr << compilerId << " fortran module " << modFile
+                  << " has unexpected format." << std::endl;
+        return true;
+        }
+
+      if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
+        {
+        // The stamp must differ if the sequence is not contained.
+        return true;
+        }
       }
     }
   else if(strcmp(compilerId, "Intel") == 0)
