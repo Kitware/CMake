@@ -6640,9 +6640,8 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
         if(!noMessage)
           {
           e << "Target \"" << this->GetName() << "\" links to itself.";
-          this->Makefile->GetCMakeInstance()->IssueMessage(messageType,
-                                                        e.str(),
-                                                        this->GetBacktrace());
+          this->Makefile->GetCMakeInstance()->IssueMessage(
+            messageType, e.str(), this->GetBacktrace());
           if (messageType == cmake::FATAL_ERROR)
             {
             return;
