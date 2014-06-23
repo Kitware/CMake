@@ -2057,22 +2057,25 @@ bool cmFileInstaller::HandleInstallDestination()
     this->DestDirLength = int(sdestdir.size());
     }
 
-  if ( !cmSystemTools::FileExists(destination.c_str()) )
+  if(this->InstallType != cmInstallType_DIRECTORY)
     {
-    if ( !cmSystemTools::MakeDirectory(destination.c_str()) )
+    if ( !cmSystemTools::FileExists(destination.c_str()) )
       {
-      std::string errstring = "cannot create directory: " + destination +
+      if ( !cmSystemTools::MakeDirectory(destination.c_str()) )
+        {
+        std::string errstring = "cannot create directory: " + destination +
           ". Maybe need administrative privileges.";
+        this->FileCommand->SetError(errstring);
+        return false;
+        }
+      }
+    if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
+      {
+      std::string errstring = "INSTALL destination: " + destination +
+        " is not a directory.";
       this->FileCommand->SetError(errstring);
       return false;
       }
-    }
-  if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
-    {
-    std::string errstring = "INSTALL destination: " + destination +
-        " is not a directory.";
-    this->FileCommand->SetError(errstring);
-    return false;
     }
   return true;
 }
