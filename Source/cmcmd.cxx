@@ -61,6 +61,8 @@ void CMakeCommandUsage(const char* program)
     << "  echo [string]...          - displays arguments as text\n"
     << "  echo_append [string]...   - displays arguments as text but no new "
        "line\n"
+    << "  env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...\n"
+    << "                            - run command in a modified environment\n"
     << "  environment               - display the current environment\n"
     << "  make_directory dir        - create a directory\n"
     << "  md5sum file1 [...]        - compute md5sum of files\n"
@@ -188,6 +190,55 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         space = " ";
         }
       return 0;
+      }
+
+    else if (args[1] == "env" )
+      {
+      std::vector<std::string>::const_iterator ai = args.begin() + 2;
+      std::vector<std::string>::const_iterator ae = args.end();
+      for(; ai != ae; ++ai)
+        {
+        std::string const& a = *ai;
+        if(cmHasLiteralPrefix(a, "--unset="))
+          {
+          // Unset environment variable.
+          cmSystemTools::UnPutEnv(a.c_str() + 8);
+          }
+        else if(!a.empty() && a[0] == '-')
+          {
+          // Environment variable and command names cannot start in '-',
+          // so this must be an unknown option.
+          std::cerr << "cmake -E env: unknown option '" << a << "'"
+                    << std::endl;
+          return 1;
+          }
+        else if(a.find("=") != a.npos)
+          {
+          // Set environment variable.
+          cmSystemTools::PutEnv(a.c_str());
+          }
+        else
+          {
+          // This is the beginning of the command.
+          break;
+          }
+        }
+
+      if(ai == ae)
+        {
+        std::cerr << "cmake -E env: no command given" << std::endl;
+        return 1;
+        }
+
+      // Execute command from remaining arguments.
+      std::vector<std::string> cmd(ai, ae);
+      int retval;
+      if(cmSystemTools::RunSingleCommand(
+           cmd, 0, &retval, NULL, cmSystemTools::OUTPUT_PASSTHROUGH))
+        {
+        return retval;
+        }
+      return 1;
       }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
