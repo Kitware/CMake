@@ -94,6 +94,8 @@ if(MSVC)
         "${MSVC80_CRT_DIR}/msvcp80.dll"
         "${MSVC80_CRT_DIR}/msvcr80.dll"
         )
+    else()
+      set(__install__libs)
     endif()
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
@@ -132,6 +134,8 @@ if(MSVC)
         "${MSVC90_CRT_DIR}/msvcp90.dll"
         "${MSVC90_CRT_DIR}/msvcr90.dll"
         )
+    else()
+      set(__install__libs)
     endif()
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
@@ -168,6 +172,8 @@ if(MSVC)
         "${MSVC${v}_CRT_DIR}/msvcp${v}0.dll"
         "${MSVC${v}_CRT_DIR}/msvcr${v}0.dll"
         )
+    else()
+      set(__install__libs)
     endif()
 
     if(CMAKE_INSTALL_DEBUG_LIBRARIES)
