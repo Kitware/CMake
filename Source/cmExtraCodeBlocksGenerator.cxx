@@ -574,7 +574,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
         }
       }
 
-    const char* buildType = makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    std::string buildType = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     std::string location;
     if ( target->GetType()==cmTarget::OBJECT_LIBRARY)
       {

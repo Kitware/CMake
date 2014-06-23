@@ -1861,7 +1861,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
                              ((useWatcomQuote) ? WATCOMQUOTE : SHELL);
   bool escapeAllowMakeVars = !forResponseFile;
   cmOStringStream fout;
-  const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE");
+  std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
   if(!pcli)
     {
