@@ -1,0 +1,7 @@
+set(src ${CMAKE_CURRENT_SOURCE_DIR}/dir)
+set(dst ${CMAKE_CURRENT_BINARY_DIR}/dir)
+file(REMOVE RECURSE ${dst})
+message(STATUS "Before Installing")
+file(INSTALL FILES ${src}/ DESTINATION ${dst} TYPE DIRECTORY)
+file(INSTALL FILES ${src}/ DESTINATION ${dst} TYPE DIRECTORY)
+message(STATUS "After Installing")

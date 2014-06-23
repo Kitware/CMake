@@ -1613,7 +1613,8 @@ bool cmFileCopier::InstallDirectory(const char* source,
                                     MatchProperties const& match_properties)
 {
   // Inform the user about this directory installation.
-  this->ReportCopy(destination, TypeDir, true);
+  this->ReportCopy(destination, TypeDir,
+                   !cmSystemTools::FileIsDirectory(destination));
 
   // Make sure the destination directory exists.
   if(!cmSystemTools::MakeDirectory(destination))
