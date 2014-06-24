@@ -1,7 +1,14 @@
 install
 -------
 
+.. only:: html
+
+   .. contents::
+
 Specify rules to run at install time.
+
+Introduction
+^^^^^^^^^^^^
 
 This command generates installation rules for a project.  Rules
 specified by calls to this command within a source directory are
@@ -52,7 +59,8 @@ signatures that specify them.  The common options are:
   Specify that it is not an error if the file to be installed does
   not exist.
 
-------------------------------------------------------------------------------
+Installing Targets
+^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -147,7 +155,8 @@ file itself, call ``install(EXPORT)``, documented below.
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
 
-------------------------------------------------------------------------------
+Installing Files
+^^^^^^^^^^^^^^^^
 
 ::
 
@@ -175,7 +184,8 @@ The list of ``files...`` given to ``FILES`` or ``PROGRAMS`` may use
 However, if any item begins in a generator expression it must evaluate
 to a full path.
 
-------------------------------------------------------------------------------
+Installing Directories
+^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -247,7 +257,8 @@ will install the ``icons`` directory to ``share/myproj/icons`` and the
 file permissions, the scripts will be given specific permissions, and any
 ``CVS`` directories will be excluded.
 
-------------------------------------------------------------------------------
+Custom Installation Logic
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -266,7 +277,8 @@ example, the code
 
 will print a message during installation.
 
-------------------------------------------------------------------------------
+Installing Exports
+^^^^^^^^^^^^^^^^^^
 
 ::
 
