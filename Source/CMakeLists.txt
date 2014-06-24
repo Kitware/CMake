@@ -426,6 +426,8 @@ if (WIN32)
       cmGlobalVisualStudio11Generator.cxx
       cmGlobalVisualStudio12Generator.h
       cmGlobalVisualStudio12Generator.cxx
+      cmGlobalVisualStudio14Generator.h
+      cmGlobalVisualStudio14Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmIDEFlagTable.h
