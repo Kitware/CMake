@@ -38,7 +38,7 @@ Options
  For true platform independence, CMake provides a list of commands
  that can be used on all systems.  Run with -E help for the usage
  information.  Commands available are: chdir, compare_files, copy,
- copy_directory, copy_if_different, echo, echo_append, environment,
+ copy_directory, copy_if_different, echo, echo_append, env, environment,
  make_directory, md5sum, remove, remove_directory, rename, sleep, tar, time,
  touch, touch_nocreate.  In addition, some platform specific commands
  are available.  On Windows: delete_regv, write_regv.  On
