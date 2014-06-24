@@ -217,17 +217,14 @@ static cmVS7FlagTable cmVS14LinkFlagTable[] =
   {"LinkDLL", "DLL", "", "true", 0},
 
   //Bool Properties With Argument
-  {"EnableUAC", "MANIFESTUAC:NO", "", "false",
-   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"EnableUAC", "MANIFESTUAC:NO", "Enable User Account Control (UAC)", "",
-   cmVS7FlagTable::UserValueRequired},
+  {"EnableUAC", "MANIFESTUAC:NO", "", "false", 0},
   {"EnableUAC", "MANIFESTUAC:", "", "true",
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"UACUIAccess", "MANIFESTUAC:", "Enable User Account Control (UAC)", "",
    cmVS7FlagTable::UserValueRequired},
   {"GenerateMapFile", "MAP", "", "true",
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"MapFileName", "MAP", "Generate Map File", "",
+  {"MapFileName", "MAP:", "Generate Map File", "",
    cmVS7FlagTable::UserValueRequired},
 
   //String List Properties
