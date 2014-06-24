@@ -60,8 +60,8 @@ public:
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(const std::string& config);
 
-  /** Select message level from CMAKE_INSTALL_MESSAGE.  */
-  static MessageLevel SelectMessageLevel(cmMakefile* mf);
+  /** Select message level from CMAKE_INSTALL_MESSAGE or 'never'.  */
+  static MessageLevel SelectMessageLevel(cmMakefile* mf, bool never = false);
 
 protected:
   virtual void GenerateScript(std::ostream& os);

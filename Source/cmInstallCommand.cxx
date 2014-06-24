@@ -917,6 +917,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   Doing doing = DoingDirs;
   bool in_match_mode = false;
   bool optional = false;
+  bool message_never = false;
   std::vector<std::string> dirs;
   const char* destination = 0;
   std::string permissions_file;
@@ -953,6 +954,21 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
       // Mark the rule as optional.
       optional = true;
+      doing = DoingNone;
+      }
+    else if(args[i] == "MESSAGE_NEVER")
+      {
+      if(in_match_mode)
+        {
+        cmOStringStream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str());
+        return false;
+        }
+
+      // Mark the rule as quiet.
+      message_never = true;
       doing = DoingNone;
       }
     else if(args[i] == "PATTERN")
@@ -1215,7 +1231,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
     }
 
   cmInstallGenerator::MessageLevel message =
-    cmInstallGenerator::SelectMessageLevel(this->Makefile);
+    cmInstallGenerator::SelectMessageLevel(this->Makefile, message_never);
 
   // Create the directory install generator.
   this->Makefile->AddInstallGenerator(

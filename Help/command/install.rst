@@ -196,7 +196,7 @@ Installing Directories
   install(DIRECTORY dirs... DESTINATION <dir>
           [FILE_PERMISSIONS permissions...]
           [DIRECTORY_PERMISSIONS permissions...]
-          [USE_SOURCE_PERMISSIONS] [OPTIONAL]
+          [USE_SOURCE_PERMISSIONS] [OPTIONAL] [MESSAGE_NEVER]
           [CONFIGURATIONS [Debug|Release|...]]
           [COMPONENT <component>] [FILES_MATCHING]
           [[PATTERN <pattern> | REGEX <regex>]
@@ -218,6 +218,8 @@ If no permissions are specified files will be given the default
 permissions specified in the ``FILES`` form of the command, and the
 directories will be given the default permissions specified in the
 ``PROGRAMS`` form of the command.
+
+The ``MESSAGE_NEVER`` option disables file installation status output.
 
 Installation of directories may be controlled with fine granularity
 using the ``PATTERN`` or ``REGEX`` options.  These "match" options specify a

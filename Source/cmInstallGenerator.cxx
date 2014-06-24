@@ -193,8 +193,12 @@ std::string cmInstallGenerator::GetInstallDestination() const
 
 //----------------------------------------------------------------------------
 cmInstallGenerator::MessageLevel
-cmInstallGenerator::SelectMessageLevel(cmMakefile* mf)
+cmInstallGenerator::SelectMessageLevel(cmMakefile* mf, bool never)
 {
+  if(never)
+    {
+    return MessageNever;
+    }
   std::string m = mf->GetSafeDefinition("CMAKE_INSTALL_MESSAGE");
   if(m == "ALWAYS")
     {
