@@ -123,11 +123,11 @@ private:
   void PostProcessValgrindTest(cmCTestTestResult& res, int test);
 
   ///! append MemoryTesterOutputFile to the test log
-  void appendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res,
+  void AppendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res,
                              int test);
 
   ///! generate the output filename for the given test index
-  std::string testOutputFileName(int test);
+  std::string TestOutputFileName(int test);
 };
 
 #endif

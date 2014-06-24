@@ -918,7 +918,7 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessBoundsCheckerTest for : "
              << res.Name << std::endl);
-  std::string ofile = testOutputFileName(test);
+  std::string ofile = this->TestOutputFileName(test);
   if ( ofile.empty() )
     {
     return;
@@ -957,7 +957,7 @@ cmCTestMemCheckHandler::PostProcessPurifyTest(cmCTestTestResult& res,
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessPurifyTest for : "
              << res.Name << std::endl);
-  appendMemTesterOutput(res, test);
+  this->AppendMemTesterOutput(res, test);
 }
 
 void
@@ -967,14 +967,14 @@ cmCTestMemCheckHandler::PostProcessValgrindTest(cmCTestTestResult& res,
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessValgrindTest for : "
              << res.Name << std::endl);
-  appendMemTesterOutput(res, test);
+  this->AppendMemTesterOutput(res, test);
 }
 
 void
-cmCTestMemCheckHandler::appendMemTesterOutput(cmCTestTestResult& res,
+cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
                                               int test)
 {
-  std::string ofile = testOutputFileName(test);
+  std::string ofile = this->TestOutputFileName(test);
 
   if ( ofile.empty() )
     {
@@ -996,7 +996,7 @@ cmCTestMemCheckHandler::appendMemTesterOutput(cmCTestTestResult& res,
 }
 
 std::string
-cmCTestMemCheckHandler::testOutputFileName(int test)
+cmCTestMemCheckHandler::TestOutputFileName(int test)
 {
   std::string index;
   cmOStringStream stream;
