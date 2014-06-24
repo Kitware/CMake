@@ -59,6 +59,10 @@ signatures that specify them.  The common options are:
   Specify that it is not an error if the file to be installed does
   not exist.
 
+Command signatures that install files may print messages during
+installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
+to control which messages are printed.
+
 Installing Targets
 ^^^^^^^^^^^^^^^^^^
 

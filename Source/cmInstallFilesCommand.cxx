@@ -133,7 +133,7 @@ void cmInstallFilesCommand::CreateInstallGenerator() const
                                        "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME");
   std::vector<std::string> no_configurations;
   cmInstallGenerator::MessageLevel message =
-    cmInstallGenerator::MessageDefault;
+    cmInstallGenerator::SelectMessageLevel(this->Makefile);
   this->Makefile->AddInstallGenerator(
     new cmInstallFilesGenerator(this->Makefile, this->Files,
                                 destination.c_str(), false,

@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmInstallGenerator.h"
 
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
@@ -98,6 +99,13 @@ void cmInstallGenerator
     {
     os << " OPTIONAL";
     }
+  switch(this->Message)
+    {
+    case MessageDefault: break;
+    case MessageAlways: os << " MESSAGE_ALWAYS"; break;
+    case MessageLazy:   os << " MESSAGE_LAZY"; break;
+    case MessageNever:  os << " MESSAGE_NEVER"; break;
+    }
   if(permissions_file && *permissions_file)
     {
     os << " PERMISSIONS" << permissions_file;
@@ -181,4 +189,24 @@ std::string cmInstallGenerator::GetInstallDestination() const
     }
   result += this->Destination;
   return result;
+}
+
+//----------------------------------------------------------------------------
+cmInstallGenerator::MessageLevel
+cmInstallGenerator::SelectMessageLevel(cmMakefile* mf)
+{
+  std::string m = mf->GetSafeDefinition("CMAKE_INSTALL_MESSAGE");
+  if(m == "ALWAYS")
+    {
+    return MessageAlways;
+    }
+  if(m == "LAZY")
+    {
+    return MessageLazy;
+    }
+  if(m == "NEVER")
+    {
+    return MessageNever;
+    }
+  return MessageDefault;
 }
