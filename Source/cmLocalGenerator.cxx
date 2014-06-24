@@ -3004,6 +3004,7 @@ public:
   cmInstallTargetGeneratorLocal(cmTarget& t, const char* dest, bool implib):
     cmInstallTargetGenerator(
       t, dest, implib, "", std::vector<std::string>(), "Unspecified",
+      MessageDefault,
       false) {}
 };
 

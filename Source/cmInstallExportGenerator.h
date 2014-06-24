@@ -30,6 +30,7 @@ public:
                            const char* dest, const char* file_permissions,
                            const std::vector<std::string>& configurations,
                            const char* component,
+                           MessageLevel message,
                            const char* filename, const char* name_space,
                            bool exportOld, cmMakefile* mf);
   ~cmInstallExportGenerator();

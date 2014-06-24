@@ -23,9 +23,10 @@ cmInstallFilesGenerator
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
                           const char* component,
+                          MessageLevel message,
                           const char* rename,
                           bool optional):
-  cmInstallGenerator(dest, configurations, component),
+  cmInstallGenerator(dest, configurations, component, message),
   Makefile(mf),
   Files(files), Programs(programs),
   FilePermissions(file_permissions),

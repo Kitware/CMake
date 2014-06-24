@@ -27,6 +27,7 @@ public:
     const char* file_permissions,
     std::vector<std::string> const& configurations,
     const char* component,
+    MessageLevel message,
     bool optional
     );
   virtual ~cmInstallTargetGenerator();

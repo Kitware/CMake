@@ -24,9 +24,15 @@ class cmLocalGenerator;
 class cmInstallGenerator: public cmScriptGenerator
 {
 public:
+  enum MessageLevel
+  {
+    MessageDefault,
+  };
+
   cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
-                     const char* component);
+                     const char* component,
+                     MessageLevel message);
   virtual ~cmInstallGenerator();
 
   void AddInstallRule(
@@ -58,6 +64,7 @@ protected:
   // Information shared by most generator types.
   std::string Destination;
   std::string Component;
+  MessageLevel Message;
 };
 
 #endif

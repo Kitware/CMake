@@ -25,9 +25,12 @@
 static cmInstallTargetGenerator* CreateInstallTargetGenerator(cmTarget& target,
      const cmInstallCommandArguments& args, bool impLib, bool forceOpt = false)
 {
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::MessageDefault;
   return new cmInstallTargetGenerator(target, args.GetDestination().c_str(),
                         impLib, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
+                        message,
                         args.GetOptional() || forceOpt);
 }
 
@@ -36,10 +39,13 @@ static cmInstallFilesGenerator* CreateInstallFilesGenerator(
     const std::vector<std::string>& absFiles,
     const cmInstallCommandArguments& args, bool programs)
 {
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::MessageDefault;
   return new cmInstallFilesGenerator(mf,
                         absFiles, args.GetDestination().c_str(),
                         programs, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
+                        message,
                         args.GetRename().c_str(), args.GetOptional());
 }
 
@@ -1208,6 +1214,9 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
     return false;
     }
 
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::MessageDefault;
+
   // Create the directory install generator.
   this->Makefile->AddInstallGenerator(
     new cmInstallDirectoryGenerator(dirs, destination,
@@ -1215,6 +1224,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
                                     permissions_dir.c_str(),
                                     configurations,
                                     component.c_str(),
+                                    message,
                                     literal_args.c_str(),
                                     optional));
 
@@ -1333,13 +1343,16 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
       }
     }
 
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::MessageDefault;
+
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator =
     new cmInstallExportGenerator(
       exportSet,
       ica.GetDestination().c_str(),
       ica.GetPermissions().c_str(), ica.GetConfigurations(),
-      ica.GetComponent().c_str(), fname.c_str(),
+      ica.GetComponent().c_str(), message, fname.c_str(),
       name_space.GetCString(), exportOld.IsEnabled(), this->Makefile);
   this->Makefile->AddInstallGenerator(exportGenerator);
 

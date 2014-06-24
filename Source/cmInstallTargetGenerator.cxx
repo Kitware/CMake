@@ -24,8 +24,10 @@ cmInstallTargetGenerator
 ::cmInstallTargetGenerator(cmTarget& t, const char* dest, bool implib,
                            const char* file_permissions,
                            std::vector<std::string> const& configurations,
-                           const char* component, bool optional):
-  cmInstallGenerator(dest, configurations, component), Target(&t),
+                           const char* component,
+                           MessageLevel message,
+                           bool optional):
+  cmInstallGenerator(dest, configurations, component, message), Target(&t),
   ImportLibrary(implib), FilePermissions(file_permissions), Optional(optional)
 {
   this->ActionsPerConfig = true;
