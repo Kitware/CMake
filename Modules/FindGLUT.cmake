@@ -2,7 +2,20 @@
 # FindGLUT
 # --------
 #
-# try to find glut library and include files
+# try to find glut library and include files.
+#
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the :prop_tgt:`IMPORTED` targets:
+#
+# ``GLUT::GLUT``
+#  Defined if the system has GLUT.
+#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
+#
+# This module sets the following variables:
 #
 # ::
 #
@@ -42,13 +55,21 @@ if (WIN32)
 else ()
 
   if (APPLE)
-    # These values for Apple could probably do with improvement.
-    find_path( GLUT_INCLUDE_DIR glut.h
-      /System/Library/Frameworks/GLUT.framework/Versions/A/Headers
-      ${OPENGL_LIBRARY_DIR}
-      )
-    set(GLUT_glut_LIBRARY "-framework GLUT" CACHE STRING "GLUT library for OSX")
-    set(GLUT_cocoa_LIBRARY "-framework Cocoa" CACHE STRING "Cocoa framework for OSX")
+    find_path(GLUT_INCLUDE_DIR glut.h ${OPENGL_LIBRARY_DIR})
+    find_library(GLUT_glut_LIBRARY GLUT DOC "GLUT library for OSX")
+    find_library(GLUT_cocoa_LIBRARY Cocoa DOC "Cocoa framework for OSX")
+
+    if(GLUT_cocoa_LIBRARY AND NOT TARGET GLUT::Cocoa)
+      add_library(GLUT::Cocoa UNKNOWN IMPORTED)
+      # Cocoa should always be a Framework, but we check to make sure.
+      if(GLUT_cocoa_LIBRARY MATCHES "/([^/]+)\\.framework$")
+        set_target_properties(GLUT::Cocoa PROPERTIES
+          IMPORTED_LOCATION "${GLUT_cocoa_LIBRARY}/${CMAKE_MATCH_1}")
+      else()
+        set_target_properties(GLUT::Cocoa PROPERTIES
+          IMPORTED_LOCATION "${GLUT_cocoa_LIBRARY}")
+      endif()
+    endif()
   else ()
 
     if (BEOS)
@@ -65,6 +86,18 @@ else ()
       find_library( GLUT_Xmu_LIBRARY Xmu
         /usr/openwin/lib
         )
+
+      if(GLUT_Xi_LIBRARY AND NOT TARGET GLUT::Xi)
+        add_library(GLUT::Xi UNKNOWN IMPORTED)
+        set_target_properties(GLUT::Xi PROPERTIES
+          IMPORTED_LOCATION "${GLUT_Xi_LIBRARY}")
+      endif()
+
+      if(GLUT_Xmu_LIBRARY AND NOT TARGET GLUT::Xmu)
+        add_library(GLUT::Xmu UNKNOWN IMPORTED)
+        set_target_properties(GLUT::Xmu PROPERTIES
+          IMPORTED_LOCATION "${GLUT_Xmu_LIBRARY}")
+      endif()
 
     endif ()
 
@@ -101,6 +134,34 @@ if (GLUT_FOUND)
     ${GLUT_Xi_LIBRARY}
     ${GLUT_cocoa_LIBRARY}
     )
+
+  if(NOT TARGET GLUT::GLUT)
+    add_library(GLUT::GLUT UNKNOWN IMPORTED)
+    set_target_properties(GLUT::GLUT PROPERTIES
+      INTERFACE_INCLUDE_DIRECTORIES "${GLUT_INCLUDE_DIR}")
+    if(GLUT_glut_LIBRARY MATCHES "/([^/]+)\\.framework$")
+      set_target_properties(GLUT::GLUT PROPERTIES
+        IMPORTED_LOCATION "${GLUT_glut_LIBRARY}/${CMAKE_MATCH_1}")
+    else()
+      set_target_properties(GLUT::GLUT PROPERTIES
+        IMPORTED_LOCATION "${GLUT_glut_LIBRARY}")
+    endif()
+
+    if(TARGET GLUT::Xmu)
+      set_property(TARGET GLUT::GLUT APPEND
+        PROPERTY INTERFACE_LINK_LIBRARIES GLUT::Xmu)
+    endif()
+
+    if(TARGET GLUT::Xi)
+      set_property(TARGET GLUT::GLUT APPEND
+        PROPERTY INTERFACE_LINK_LIBRARIES GLUT::Xi)
+    endif()
+
+    if(TARGET GLUT::Cocoa)
+      set_property(TARGET GLUT::GLUT APPEND
+        PROPERTY INTERFACE_LINK_LIBRARIES GLUT::Cocoa)
+    endif()
+  endif()
 
   #The following deprecated settings are for backwards compatibility with CMake1.4
   set (GLUT_LIBRARY ${GLUT_LIBRARIES})
