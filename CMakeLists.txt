@@ -451,7 +451,7 @@ endif()
 # CMAKE_TESTS_CDASH_SERVER: CDash server used by CMake/Tests.
 #
 # If not defined or "", this variable defaults to the server at
-# http://www.cdash.org/CDash.
+# "http://open.cdash.org".
 #
 # If set explicitly to "NOTFOUND", curl tests and ctest tests that use
 # the network are skipped.
@@ -462,7 +462,7 @@ endif()
 # should be run first.
 #
 if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
-  set(CMAKE_TESTS_CDASH_SERVER "http://www.cdash.org/CDash")
+  set(CMAKE_TESTS_CDASH_SERVER "http://open.cdash.org")
 endif()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

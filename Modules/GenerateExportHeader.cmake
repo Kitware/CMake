@@ -213,7 +213,6 @@ macro(_test_compiler_hidden_visibility)
 
   # Exclude XL here because it misinterprets -fvisibility=hidden even though
   # the check_cxx_compiler_flag passes
-  # http://www.cdash.org/CDash/testDetails.php?test=109109951&build=1419259
   if(NOT GCC_TOO_OLD
       AND NOT _INTEL_TOO_OLD
       AND NOT WIN32
