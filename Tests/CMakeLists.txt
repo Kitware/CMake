@@ -2549,7 +2549,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
 
   if (CMAKE_TESTS_CDASH_SERVER)
-    set(regex "^([^:]+)://([^/]+)(/.*)$")
+    set(regex "^([^:]+)://([^/]+)(.*)$")
 
     if ("${CMAKE_TESTS_CDASH_SERVER}" MATCHES "${regex}")
       set(protocol "${CMAKE_MATCH_1}")
