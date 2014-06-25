@@ -57,7 +57,7 @@ macro(SWIG_MODULE_INITIALIZE name language)
   set(SWIG_MODULE_${name}_SWIG_LANGUAGE_FLAG "${swig_lowercase_language}")
 
   set(SWIG_MODULE_${name}_REAL_NAME "${name}")
-  if (CMAKE_SWIG_FLAGS MATCHES "-noproxy")
+  if (";${CMAKE_SWIG_FLAGS};" MATCHES ";-noproxy;")
     set (SWIG_MODULE_${name}_NOPROXY TRUE)
   endif ()
   if("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "UNKNOWN")
