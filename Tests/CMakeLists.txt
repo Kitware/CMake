@@ -2549,7 +2549,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
 
   if (CMAKE_TESTS_CDASH_SERVER)
-    set(regex "^([^:]+)://([^/]+)(/.*)$")
+    set(regex "^([^:]+)://([^/]+)(.*)$")
 
     if ("${CMAKE_TESTS_CDASH_SERVER}" MATCHES "${regex}")
       set(protocol "${CMAKE_MATCH_1}")
@@ -2557,8 +2557,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       set(path "${CMAKE_MATCH_3}")
     else ()
       set(protocol "http")
-      set(server "www.cdash.org")
-      set(path "/CDash")
+      set(server "open.cdash.org")
+      set(path "")
       message("warning: CMAKE_TESTS_CDASH_SERVER does not match expected regex...")
       message("         ...using default url='${protocol}://${server}${path}' for CTestTest[23]")
     endif ()
