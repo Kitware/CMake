@@ -2215,7 +2215,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     }
 #else
   // Bootstrap build knows its source.
-  cmSystemToolsCMakeRoot = CMAKE_ROOT_DIR;
+  cmSystemToolsCMakeRoot = CMAKE_BOOTSTRAP_SOURCE_DIR;
 #endif
 }
 
