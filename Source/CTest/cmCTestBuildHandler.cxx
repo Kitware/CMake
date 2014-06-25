@@ -605,6 +605,9 @@ void cmCTestBuildHandler::GenerateXMLLaunched(std::ostream& os)
   typedef std::set<std::string, FragmentCompare> Fragments;
   Fragments fragments(fragmentCompare);
 
+  // only report the first 50 warnings and first 50 errors
+  int numErrorsAllowed = this->MaxErrors;
+  int numWarningsAllowed = this->MaxWarnings;
   // Identify fragments on disk.
   cmsys::Directory launchDir;
   launchDir.Load(this->CTestLaunchDir.c_str());
@@ -612,13 +615,15 @@ void cmCTestBuildHandler::GenerateXMLLaunched(std::ostream& os)
   for(unsigned long i=0; i < n; ++i)
     {
     const char* fname = launchDir.GetFile(i);
-    if(this->IsLaunchedErrorFile(fname))
+    if(this->IsLaunchedErrorFile(fname) && numErrorsAllowed)
       {
+      numErrorsAllowed--;
       fragments.insert(this->CTestLaunchDir + "/" + fname);
       ++this->TotalErrors;
       }
-    else if(this->IsLaunchedWarningFile(fname))
+    else if(this->IsLaunchedWarningFile(fname) && numWarningsAllowed)
       {
+      numWarningsAllowed--;
       fragments.insert(this->CTestLaunchDir + "/" + fname);
       ++this->TotalWarnings;
       }
