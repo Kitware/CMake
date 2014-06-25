@@ -2163,6 +2163,11 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   cmSystemToolsCMakeCommand = exe_dir;
   cmSystemToolsCMakeCommand += "/cmake";
   cmSystemToolsCMakeCommand += cmSystemTools::GetExecutableExtension();
+#ifndef CMAKE_BUILD_WITH_CMAKE
+  // The bootstrap cmake does not provide the other tools,
+  // so use the directory where they are about to be built.
+  exe_dir = CMAKE_BOOTSTRAP_BINARY_DIR "/bin";
+#endif
   cmSystemToolsCTestCommand = exe_dir;
   cmSystemToolsCTestCommand += "/ctest";
   cmSystemToolsCTestCommand += cmSystemTools::GetExecutableExtension();
