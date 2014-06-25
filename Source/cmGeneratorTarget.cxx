@@ -252,7 +252,7 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
   return 0;
 }
 
-static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
+static void handleSystemIncludesDep(cmMakefile *mf, cmTarget const* depTgt,
                                   const std::string& config,
                                   cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
@@ -449,7 +449,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
   if (iter == this->SystemIncludesCache.end())
     {
     cmTarget::LinkImplementation const* impl
-                  = this->Target->GetLinkImplementation(config, this->Target);
+      = this->Target->GetLinkImplementation(config);
     if(!impl)
       {
       return false;
@@ -474,11 +474,11 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                           &dagChecker), result);
       }
 
-    std::set<cmTarget*> uniqueDeps;
-    for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
+    std::set<cmTarget const*> uniqueDeps;
+    for(std::vector<cmLinkItem>::const_iterator li = impl->Libraries.begin();
         li != impl->Libraries.end(); ++li)
       {
-      cmTarget* tgt = this->Makefile->FindTargetToUse(*li);
+      cmTarget const* tgt = li->Target;
       if (!tgt)
         {
         continue;
@@ -489,10 +489,10 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
         handleSystemIncludesDep(this->Makefile, tgt, config, this->Target,
                                 &dagChecker, result, excludeImported);
 
-        std::vector<cmTarget*> deps;
+        std::vector<cmTarget const*> deps;
         tgt->GetTransitivePropertyTargets(config, this->Target, deps);
 
-        for(std::vector<cmTarget*>::const_iterator di = deps.begin();
+        for(std::vector<cmTarget const*>::const_iterator di = deps.begin();
             di != deps.end(); ++di)
           {
           if (uniqueDeps.insert(*di).second)

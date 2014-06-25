@@ -15,7 +15,9 @@
 #error Expected IFACE_HEADER_BUILDDIR
 #endif
 
+extern int sub();
+
 int main(int,char**)
 {
-  return 0;
+  return sub();
 }

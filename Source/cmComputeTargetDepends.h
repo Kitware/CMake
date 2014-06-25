@@ -20,6 +20,7 @@
 
 class cmComputeComponentGraph;
 class cmGlobalGenerator;
+class cmLinkItem;
 class cmTarget;
 class cmTargetDependSet;
 
@@ -46,14 +47,14 @@ private:
   void CollectDepends();
   void CollectTargetDepends(int depender_index);
   void AddTargetDepend(int depender_index,
-                       const std::string& dependee_name,
+                       cmLinkItem const& dependee_name,
                        bool linking);
   void AddTargetDepend(int depender_index, cmTarget const* dependee,
                        bool linking);
   bool ComputeFinalDepends(cmComputeComponentGraph const& ccg);
   void AddInterfaceDepends(int depender_index,
-                           const std::string& dependee_name,
-                           bool linking, std::set<std::string> &emitted);
+                           cmLinkItem const& dependee_name,
+                           std::set<std::string> &emitted);
   void AddInterfaceDepends(int depender_index, cmTarget const* dependee,
                            const std::string& config,
                            std::set<std::string> &emitted);
