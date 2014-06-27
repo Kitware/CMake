@@ -280,7 +280,8 @@ public:
   LinkInterface const* GetLinkInterface(const std::string& config,
                                         cmTarget const* headTarget) const;
   LinkInterface const* GetLinkInterfaceLibraries(const std::string& config,
-                                        cmTarget const* headTarget) const;
+                                        cmTarget const* headTarget,
+                                        bool usage_requirements_only) const;
   void GetTransitivePropertyTargets(const std::string& config,
                                     cmTarget const* headTarget,
                                     std::vector<cmTarget const*> &libs) const;
@@ -756,12 +757,13 @@ private:
                                   const std::string& config) const;
 
   LinkInterface const*
-    GetImportLinkInterface(const std::string& config,
-                           cmTarget const* head) const;
+    GetImportLinkInterface(const std::string& config, cmTarget const* head,
+                           bool usage_requirements_only) const;
 
   const char* ComputeLinkInterfaceLibraries(const std::string& config,
                                             LinkInterface& iface,
                                             cmTarget const* head,
+                                            bool usage_requirements_only,
                                             bool &exists) const;
 
   LinkImplementation const*
@@ -777,6 +779,7 @@ private:
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config, cmTarget const* headTarget,
+                       bool usage_requirements_only,
                        std::vector<cmLinkItem>& items) const;
   void LookupLinkItems(std::vector<std::string> const& names,
                        std::vector<cmLinkItem>& items) const;
