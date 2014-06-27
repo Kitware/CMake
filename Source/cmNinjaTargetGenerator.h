@@ -114,7 +114,8 @@ protected:
   void WriteLanguageRules(const std::string& language);
   void WriteCompileRule(const std::string& language);
   void WriteObjectBuildStatements();
-  void WriteObjectBuildStatement(cmSourceFile const* source);
+  void WriteObjectBuildStatement(cmSourceFile const* source,
+                                 bool writeOrderDependsTargetForTarget);
   void WriteCustomCommandBuildStatement(cmCustomCommand *cc);
 
   cmNinjaDeps GetObjects() const

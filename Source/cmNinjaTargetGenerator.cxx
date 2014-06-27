@@ -542,22 +542,24 @@ cmNinjaTargetGenerator
                    std::back_inserter(orderOnlyDeps), MapToNinjaPath());
     }
 
-  cmNinjaDeps orderOnlyTarget;
-  orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
-  this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
-                                          "Order-only phony target for "
-                                            + this->GetTargetName(),
-                                          orderOnlyTarget,
-                                          cmNinjaDeps(),
-                                          cmNinjaDeps(),
-                                          orderOnlyDeps);
-
+  if (!orderOnlyDeps.empty())
+    {
+    cmNinjaDeps orderOnlyTarget;
+    orderOnlyTarget.push_back(this->OrderDependsTargetForTarget());
+    this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),
+                                                "Order-only phony target for "
+                                                  + this->GetTargetName(),
+                                                orderOnlyTarget,
+                                                cmNinjaDeps(),
+                                                cmNinjaDeps(),
+                                                orderOnlyDeps);
+    }
   std::vector<cmSourceFile const*> objectSources;
   this->GeneratorTarget->GetObjectSources(objectSources, config);
   for(std::vector<cmSourceFile const*>::const_iterator
         si = objectSources.begin(); si != objectSources.end(); ++si)
     {
-    this->WriteObjectBuildStatement(*si);
+    this->WriteObjectBuildStatement(*si, !orderOnlyDeps.empty());
     }
   std::string def = this->GeneratorTarget->GetModuleDefinitionFile(config);
   if(!def.empty())
@@ -570,7 +572,8 @@ cmNinjaTargetGenerator
 
 void
 cmNinjaTargetGenerator
-::WriteObjectBuildStatement(cmSourceFile const* source)
+::WriteObjectBuildStatement(
+  cmSourceFile const* source, bool writeOrderDependsTargetForTarget)
 {
   std::string comment;
   const std::string language = source->GetLanguage();
@@ -599,7 +602,10 @@ cmNinjaTargetGenerator
   }
 
   cmNinjaDeps orderOnlyDeps;
-  orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
+  if (writeOrderDependsTargetForTarget)
+    {
+    orderOnlyDeps.push_back(this->OrderDependsTargetForTarget());
+    }
 
   // If the source file is GENERATED and does not have a custom command
   // (either attached to this source file or another one), assume that one of
