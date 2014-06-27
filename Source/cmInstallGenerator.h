@@ -16,6 +16,7 @@
 #include "cmScriptGenerator.h"
 
 class cmLocalGenerator;
+class cmMakefile;
 
 /** \class cmInstallGenerator
  * \brief Support class for generating install scripts.
@@ -24,9 +25,18 @@ class cmLocalGenerator;
 class cmInstallGenerator: public cmScriptGenerator
 {
 public:
+  enum MessageLevel
+  {
+    MessageDefault,
+    MessageAlways,
+    MessageLazy,
+    MessageNever
+  };
+
   cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
-                     const char* component);
+                     const char* component,
+                     MessageLevel message);
   virtual ~cmInstallGenerator();
 
   void AddInstallRule(
@@ -50,6 +60,9 @@ public:
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(const std::string& config);
 
+  /** Select message level from CMAKE_INSTALL_MESSAGE or 'never'.  */
+  static MessageLevel SelectMessageLevel(cmMakefile* mf, bool never = false);
+
 protected:
   virtual void GenerateScript(std::ostream& os);
 
@@ -58,6 +71,7 @@ protected:
   // Information shared by most generator types.
   std::string Destination;
   std::string Component;
+  MessageLevel Message;
 };
 
 #endif

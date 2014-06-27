@@ -26,6 +26,7 @@ public:
                               const char* dir_permissions,
                               std::vector<std::string> const& configurations,
                               const char* component,
+                              MessageLevel message,
                               const char* literal_args,
                               bool optional = false);
   virtual ~cmInstallDirectoryGenerator();

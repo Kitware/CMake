@@ -1613,7 +1613,8 @@ bool cmFileCopier::InstallDirectory(const char* source,
                                     MatchProperties const& match_properties)
 {
   // Inform the user about this directory installation.
-  this->ReportCopy(destination, TypeDir, true);
+  this->ReportCopy(destination, TypeDir,
+                   !cmSystemTools::FileIsDirectory(destination));
 
   // Make sure the destination directory exists.
   if(!cmSystemTools::MakeDirectory(destination))
@@ -1704,6 +1705,9 @@ struct cmFileInstaller: public cmFileCopier
     cmFileCopier(command, "INSTALL"),
     InstallType(cmInstallType_FILES),
     Optional(false),
+    MessageAlways(false),
+    MessageLazy(false),
+    MessageNever(false),
     DestDirLength(0)
     {
     // Installation does not use source permissions by default.
@@ -1725,6 +1729,9 @@ struct cmFileInstaller: public cmFileCopier
 protected:
   cmInstallType InstallType;
   bool Optional;
+  bool MessageAlways;
+  bool MessageLazy;
+  bool MessageNever;
   int DestDirLength;
   std::string Rename;
 
@@ -1740,9 +1747,12 @@ protected:
 
   virtual void ReportCopy(const char* toFile, Type type, bool copy)
     {
-    std::string message = (copy? "Installing: " : "Up-to-date: ");
-    message += toFile;
-    this->Makefile->DisplayStatus(message.c_str(), -1);
+    if(!this->MessageNever && (copy || !this->MessageLazy))
+      {
+      std::string message = (copy? "Installing: " : "Up-to-date: ");
+      message += toFile;
+      this->Makefile->DisplayStatus(message.c_str(), -1);
+      }
     if(type != TypeDir)
       {
       // Add the file to the manifest.
@@ -1828,6 +1838,16 @@ bool cmFileInstaller::Parse(std::vector<std::string> const& args)
     return false;
     }
 
+  if(((this->MessageAlways?1:0) +
+      (this->MessageLazy?1:0) +
+      (this->MessageNever?1:0)) > 1)
+    {
+    this->FileCommand->SetError("INSTALL options MESSAGE_ALWAYS, "
+                                "MESSAGE_LAZY, and MESSAGE_NEVER "
+                                "are mutually exclusive.");
+    return false;
+    }
+
   return true;
 }
 
@@ -1877,6 +1897,42 @@ bool cmFileInstaller::CheckKeyword(std::string const& arg)
       {
       this->Doing = DoingNone;
       this->Optional = true;
+      }
+    }
+  else if(arg == "MESSAGE_ALWAYS")
+    {
+    if(this->CurrentMatchRule)
+      {
+      this->NotAfterMatch(arg);
+      }
+    else
+      {
+      this->Doing = DoingNone;
+      this->MessageAlways = true;
+      }
+    }
+  else if(arg == "MESSAGE_LAZY")
+    {
+    if(this->CurrentMatchRule)
+      {
+      this->NotAfterMatch(arg);
+      }
+    else
+      {
+      this->Doing = DoingNone;
+      this->MessageLazy = true;
+      }
+    }
+  else if(arg == "MESSAGE_NEVER")
+    {
+    if(this->CurrentMatchRule)
+      {
+      this->NotAfterMatch(arg);
+      }
+    else
+      {
+      this->Doing = DoingNone;
+      this->MessageNever = true;
       }
     }
   else if(arg == "PERMISSIONS")
@@ -2057,22 +2113,25 @@ bool cmFileInstaller::HandleInstallDestination()
     this->DestDirLength = int(sdestdir.size());
     }
 
-  if ( !cmSystemTools::FileExists(destination.c_str()) )
+  if(this->InstallType != cmInstallType_DIRECTORY)
     {
-    if ( !cmSystemTools::MakeDirectory(destination.c_str()) )
+    if ( !cmSystemTools::FileExists(destination.c_str()) )
       {
-      std::string errstring = "cannot create directory: " + destination +
+      if ( !cmSystemTools::MakeDirectory(destination.c_str()) )
+        {
+        std::string errstring = "cannot create directory: " + destination +
           ". Maybe need administrative privileges.";
+        this->FileCommand->SetError(errstring);
+        return false;
+        }
+      }
+    if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
+      {
+      std::string errstring = "INSTALL destination: " + destination +
+        " is not a directory.";
       this->FileCommand->SetError(errstring);
       return false;
       }
-    }
-  if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
-    {
-    std::string errstring = "INSTALL destination: " + destination +
-        " is not a directory.";
-    this->FileCommand->SetError(errstring);
-    return false;
     }
   return true;
 }

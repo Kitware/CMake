@@ -1,7 +1,14 @@
 install
 -------
 
+.. only:: html
+
+   .. contents::
+
 Specify rules to run at install time.
+
+Introduction
+^^^^^^^^^^^^
 
 This command generates installation rules for a project.  Rules
 specified by calls to this command within a source directory are
@@ -52,7 +59,12 @@ signatures that specify them.  The common options are:
   Specify that it is not an error if the file to be installed does
   not exist.
 
-------------------------------------------------------------------------------
+Command signatures that install files may print messages during
+installation.  Use the :variable:`CMAKE_INSTALL_MESSAGE` variable
+to control which messages are printed.
+
+Installing Targets
+^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -147,7 +159,8 @@ file itself, call ``install(EXPORT)``, documented below.
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
 
-------------------------------------------------------------------------------
+Installing Files
+^^^^^^^^^^^^^^^^
 
 ::
 
@@ -175,14 +188,15 @@ The list of ``files...`` given to ``FILES`` or ``PROGRAMS`` may use
 However, if any item begins in a generator expression it must evaluate
 to a full path.
 
-------------------------------------------------------------------------------
+Installing Directories
+^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
   install(DIRECTORY dirs... DESTINATION <dir>
           [FILE_PERMISSIONS permissions...]
           [DIRECTORY_PERMISSIONS permissions...]
-          [USE_SOURCE_PERMISSIONS] [OPTIONAL]
+          [USE_SOURCE_PERMISSIONS] [OPTIONAL] [MESSAGE_NEVER]
           [CONFIGURATIONS [Debug|Release|...]]
           [COMPONENT <component>] [FILES_MATCHING]
           [[PATTERN <pattern> | REGEX <regex>]
@@ -204,6 +218,8 @@ If no permissions are specified files will be given the default
 permissions specified in the ``FILES`` form of the command, and the
 directories will be given the default permissions specified in the
 ``PROGRAMS`` form of the command.
+
+The ``MESSAGE_NEVER`` option disables file installation status output.
 
 Installation of directories may be controlled with fine granularity
 using the ``PATTERN`` or ``REGEX`` options.  These "match" options specify a
@@ -247,7 +263,8 @@ will install the ``icons`` directory to ``share/myproj/icons`` and the
 file permissions, the scripts will be given specific permissions, and any
 ``CVS`` directories will be excluded.
 
-------------------------------------------------------------------------------
+Custom Installation Logic
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -266,7 +283,8 @@ example, the code
 
 will print a message during installation.
 
-------------------------------------------------------------------------------
+Installing Exports
+^^^^^^^^^^^^^^^^^^
 
 ::
 
