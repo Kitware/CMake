@@ -151,11 +151,6 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
       ++i)
     {
     arguments += " " + EncodeIdent(EncodePath(*i), os);
-
-    //we need to track every dependency that comes in, since we are trying
-    //to find dependencies that are side effects of build commands
-    //
-    this->CombinedBuildExplicitDependencies.insert( EncodePath(*i) );
     }
 
   // Write implicit dependencies.
@@ -280,6 +275,13 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                    cmNinjaDeps(),
                    orderOnly,
                    vars);
+
+  //we need to track every dependency that comes in, since we are trying
+  //to find dependencies that are side effects of build commands
+  for(cmNinjaDeps::const_iterator i = deps.begin(); i != deps.end(); ++i)
+    {
+    this->CombinedCustomCommandExplicitDependencies.insert( EncodePath(*i) );
+    }
 }
 
 void
@@ -1015,17 +1017,17 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   //to keep this data around
   this->CombinedBuildOutputs.clear();
 
-  //now we difference with CombinedBuildExplicitDependencies to find
+  //now we difference with CombinedCustomCommandExplicitDependencies to find
   //the list of items we know nothing about.
-  //We have encoded all the paths in CombinedBuildExplicitDependencies
+  //We have encoded all the paths in CombinedCustomCommandExplicitDependencies
   //and knownDependencies so no matter if unix or windows paths they
   //should all match now.
 
   std::vector<std::string> unkownExplicitDepends;
-  this->CombinedBuildExplicitDependencies.erase("all");
+  this->CombinedCustomCommandExplicitDependencies.erase("all");
 
-  std::set_difference(this->CombinedBuildExplicitDependencies.begin(),
-                      this->CombinedBuildExplicitDependencies.end(),
+  std::set_difference(this->CombinedCustomCommandExplicitDependencies.begin(),
+                      this->CombinedCustomCommandExplicitDependencies.end(),
                       knownDependencies.begin(),
                       knownDependencies.end(),
                       std::back_inserter(unkownExplicitDepends));
