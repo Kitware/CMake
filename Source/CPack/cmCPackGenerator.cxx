@@ -637,8 +637,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       if ( globalGenerator->GetPreinstallTargetName() )
         {
         globalGenerator->FindMakeProgram(this->MakefileMap);
-        const char* cmakeMakeProgram
-          = this->MakefileMap->GetDefinition("CMAKE_MAKE_PROGRAM");
+        std::string cmakeMakeProgram
+          = this->MakefileMap->GetSafeDefinition("CMAKE_MAKE_PROGRAM");
         std::vector<std::string> buildCommand;
         globalGenerator->GenerateBuildCommand(buildCommand, cmakeMakeProgram,
             installProjectName, installDirectory,
