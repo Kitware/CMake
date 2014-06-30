@@ -799,13 +799,14 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 
 #undef TRANSITIVE_PROPERTY_NAME
 
-std::string getLinkedTargetsContent(
-                                  std::vector<cmTarget const*> &targets,
-                                  cmTarget const* target,
-                                  cmTarget const* headTarget,
-                                  cmGeneratorExpressionContext *context,
-                                  cmGeneratorExpressionDAGChecker *dagChecker,
-                                  const std::string &interfacePropertyName)
+std::string
+getLinkedTargetsContent(
+  std::vector<cmTarget const*> &targets,
+  cmTarget const* target,
+  cmTarget const* headTarget,
+  cmGeneratorExpressionContext *context,
+  cmGeneratorExpressionDAGChecker *dagChecker,
+  const std::string &interfacePropertyName)
 {
   cmGeneratorExpression ge(&context->Backtrace);
 
@@ -841,12 +842,14 @@ std::string getLinkedTargetsContent(
   return linkedTargetsContent;
 }
 
-std::string getLinkedTargetsContent(std::vector<cmLinkItem> const &libraries,
-                                  cmTarget const* target,
-                                  cmTarget const* headTarget,
-                                  cmGeneratorExpressionContext *context,
-                                  cmGeneratorExpressionDAGChecker *dagChecker,
-                                  const std::string &interfacePropertyName)
+std::string
+getLinkedTargetsContent(
+  std::vector<cmLinkItem> const &libraries,
+  cmTarget const* target,
+  cmTarget const* headTarget,
+  cmGeneratorExpressionContext *context,
+  cmGeneratorExpressionDAGChecker *dagChecker,
+  const std::string &interfacePropertyName)
 {
   std::vector<cmTarget const*> tgts;
   for (std::vector<cmLinkItem>::const_iterator
