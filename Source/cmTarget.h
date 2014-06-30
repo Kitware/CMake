@@ -54,6 +54,16 @@ public:
   cmLinkItem(cmLinkItem const& r): std_string(r), Target(r.Target) {}
   cmTarget const* Target;
 };
+class cmLinkImplItem: public cmLinkItem
+{
+public:
+  cmLinkImplItem(): cmLinkItem() {}
+  cmLinkImplItem(std::string const& n,
+                 cmTarget const* t):
+    cmLinkItem(n, t) {}
+  cmLinkImplItem(cmLinkImplItem const& r):
+    cmLinkItem(r) {}
+};
 
 struct cmTargetLinkInformationMap:
   public std::map<std::string, cmComputeLinkInformation*>
@@ -296,7 +306,7 @@ public:
     std::vector<std::string> Languages;
 
     // Libraries linked directly in this configuration.
-    std::vector<cmLinkItem> Libraries;
+    std::vector<cmLinkImplItem> Libraries;
 
     // Libraries linked directly in other configurations.
     // Needed only for OLD behavior of CMP0003.

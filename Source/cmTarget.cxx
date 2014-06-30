@@ -2281,7 +2281,7 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
     if(this->Makefile->IsOn("APPLE"))
       {
       LinkImplementation const* impl = this->GetLinkImplementation(config);
-      for(std::vector<cmLinkItem>::const_iterator
+      for(std::vector<cmLinkImplItem>::const_iterator
           it = impl->Libraries.begin();
           it != impl->Libraries.end(); ++it)
         {
@@ -3675,7 +3675,8 @@ void cmTarget::ComputeLinkClosure(const std::string& config,
 
   // Add interface languages from linked targets.
   cmTargetCollectLinkLanguages cll(this, config, languages, this);
-  for(std::vector<cmLinkItem>::const_iterator li = impl->Libraries.begin();
+  for(std::vector<cmLinkImplItem>::const_iterator
+        li = impl->Libraries.begin();
       li != impl->Libraries.end(); ++li)
     {
     cll.Visit(*li);
@@ -6242,7 +6243,8 @@ cmTarget::GetLinkImplementationClosure(const std::string& config) const
     cmTarget::LinkImplementation const* impl
       = this->GetLinkImplementationLibraries(config);
 
-    for(std::vector<cmLinkItem>::const_iterator it = impl->Libraries.begin();
+    for(std::vector<cmLinkImplItem>::const_iterator
+          it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
       {
       processILibs(config, this, *it, tgts , emitted);
@@ -6383,7 +6385,8 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
     // The link implementation is the default link interface.
     LinkImplementation const* impl =
         this->GetLinkImplementationLibrariesInternal(config, headTarget);
-    iface.Libraries = impl->Libraries;
+    std::copy(impl->Libraries.begin(), impl->Libraries.end(),
+              std::back_inserter(iface.Libraries));
     if(this->PolicyStatusCMP0022 == cmPolicies::WARN &&
        !this->Internal->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
@@ -6397,12 +6400,12 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
                               headTarget, usage_requirements_only,
                               ifaceLibs);
         }
-      if (ifaceLibs != impl->Libraries)
+      if (ifaceLibs != iface.Libraries)
         {
         std::string oldLibraries;
         std::string newLibraries;
         const char *sep = "";
-        for(std::vector<cmLinkItem>::const_iterator it
+        for(std::vector<cmLinkImplItem>::const_iterator it
               = impl->Libraries.begin(); it != impl->Libraries.end(); ++it)
           {
           oldLibraries += sep;
@@ -6470,7 +6473,7 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
         {
         cmTarget::LinkImplementation const* impl =
             thisTarget->GetLinkImplementation(config);
-        for(std::vector<cmLinkItem>::const_iterator
+        for(std::vector<cmLinkImplItem>::const_iterator
               li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
           {
           if(emitted.insert(*li).second)
@@ -6674,7 +6677,7 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
 
       // The entry is meant for this configuration.
       impl.Libraries.push_back(
-        cmLinkItem(name, this->FindTargetToLink(name)));
+        cmLinkImplItem(name, this->FindTargetToLink(name)));
       }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();

@@ -844,7 +844,7 @@ getLinkedTargetsContent(
 
 std::string
 getLinkedTargetsContent(
-  std::vector<cmLinkItem> const &libraries,
+  std::vector<cmLinkImplItem> const &libraries,
   cmTarget const* target,
   cmTarget const* headTarget,
   cmGeneratorExpressionContext *context,
@@ -852,7 +852,7 @@ getLinkedTargetsContent(
   const std::string &interfacePropertyName)
 {
   std::vector<cmTarget const*> tgts;
-  for (std::vector<cmLinkItem>::const_iterator
+  for (std::vector<cmLinkImplItem>::const_iterator
       it = libraries.begin();
       it != libraries.end(); ++it)
     {
