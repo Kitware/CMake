@@ -2012,6 +2012,24 @@ static void processIncludeDirectories(cmTarget const* tgt,
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
+    std::string targetName = (*it)->TargetName;
+    bool checkCMP0027 = false;
+    if(!cmGeneratorExpression::IsValidTargetName(targetName)
+       && cmGeneratorExpression::Find(targetName) != std::string::npos)
+      {
+      std::string evaluatedTargetName;
+      cmGeneratorExpression ge;
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+        ge.Parse(targetName);
+      evaluatedTargetName = cge->Evaluate(mf, config, false, tgt, 0, 0);
+      checkCMP0027 = evaluatedTargetName != targetName;
+      targetName = evaluatedTargetName;
+      }
+    cmTarget *dependentTarget = mf->FindTargetToUse(targetName);
+
+    const bool fromImported =
+      dependentTarget && dependentTarget->IsImported();
+
     bool testIsOff = true;
     bool cacheIncludes = false;
     std::vector<std::string>& entryIncludes = (*it)->CachedEntries;
@@ -2037,36 +2055,12 @@ static void processIncludeDirectories(cmTarget const* tgt,
     for(std::vector<std::string>::iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
       {
-      std::string targetName = (*it)->TargetName;
-      std::string evaluatedTargetName;
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(targetName);
-      evaluatedTargetName = cge->Evaluate(mf, config, false, tgt, 0, 0);
-      }
-
-      cmTarget *dependentTarget = mf->FindTargetToUse(targetName);
-
-      const bool fromImported = dependentTarget
-                             && dependentTarget->IsImported();
-
-      cmTarget *evaluatedDependentTarget =
-        (targetName != evaluatedTargetName)
-          ? mf->FindTargetToUse(evaluatedTargetName)
-          : 0;
-
-      targetName = evaluatedTargetName;
-
-      const bool fromEvaluatedImported = evaluatedDependentTarget
-                             && evaluatedDependentTarget->IsImported();
-
-      if ((fromImported || fromEvaluatedImported)
+      if (fromImported
           && !cmSystemTools::FileExists(li->c_str()))
         {
         cmOStringStream e;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
-        if (fromEvaluatedImported)
+        if (checkCMP0027)
           {
           switch(tgt->GetPolicyStatusCMP0027())
             {
