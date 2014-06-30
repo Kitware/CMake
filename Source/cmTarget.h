@@ -57,14 +57,16 @@ public:
 class cmLinkImplItem: public cmLinkItem
 {
 public:
-  cmLinkImplItem(): cmLinkItem(), Backtrace(0) {}
+  cmLinkImplItem(): cmLinkItem(), Backtrace(0), FromGenex(false) {}
   cmLinkImplItem(std::string const& n,
                  cmTarget const* t,
-                 cmListFileBacktrace const& bt):
-    cmLinkItem(n, t), Backtrace(bt) {}
+                 cmListFileBacktrace const& bt,
+                 bool fromGenex):
+    cmLinkItem(n, t), Backtrace(bt), FromGenex(fromGenex) {}
   cmLinkImplItem(cmLinkImplItem const& r):
-    cmLinkItem(r), Backtrace(r.Backtrace) {}
+    cmLinkItem(r), Backtrace(r.Backtrace), FromGenex(r.FromGenex) {}
   cmListFileBacktrace Backtrace;
+  bool FromGenex;
 };
 
 struct cmTargetLinkInformationMap:
