@@ -6677,7 +6677,7 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
 
       // The entry is meant for this configuration.
       impl.Libraries.push_back(
-        cmLinkImplItem(name, this->FindTargetToLink(name)));
+        cmLinkImplItem(name, this->FindTargetToLink(name), le->Backtrace));
       }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();

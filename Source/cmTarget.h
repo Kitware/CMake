@@ -57,12 +57,14 @@ public:
 class cmLinkImplItem: public cmLinkItem
 {
 public:
-  cmLinkImplItem(): cmLinkItem() {}
+  cmLinkImplItem(): cmLinkItem(), Backtrace(0) {}
   cmLinkImplItem(std::string const& n,
-                 cmTarget const* t):
-    cmLinkItem(n, t) {}
+                 cmTarget const* t,
+                 cmListFileBacktrace const& bt):
+    cmLinkItem(n, t), Backtrace(bt) {}
   cmLinkImplItem(cmLinkImplItem const& r):
-    cmLinkItem(r) {}
+    cmLinkItem(r), Backtrace(r.Backtrace) {}
+  cmListFileBacktrace Backtrace;
 };
 
 struct cmTargetLinkInformationMap:
