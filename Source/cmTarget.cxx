@@ -165,14 +165,16 @@ public:
   std::set<cmLinkItem> UtilityItems;
   bool UtilityItemsDone;
 
-  struct TargetPropertyEntry {
+  class TargetPropertyEntry {
+    static cmLinkImplItem NoLinkImplItem;
+  public:
     TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
-      const std::string &targetName = std::string())
-      : ge(cge), TargetName(targetName)
+                        cmLinkImplItem const& item = NoLinkImplItem)
+      : ge(cge), LinkImplItem(item)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
     std::vector<std::string> CachedEntries;
-    const std::string TargetName;
+    cmLinkImplItem const& LinkImplItem;
   };
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
@@ -205,6 +207,8 @@ public:
   std::map<std::string, bool> CacheLinkInterfaceCompileFeaturesDone;
   std::map<std::string, bool> CacheLinkImplementationClosureDone;
 };
+
+cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
 
 //----------------------------------------------------------------------------
 void deleteAndClear(
@@ -2012,24 +2016,10 @@ static void processIncludeDirectories(cmTarget const* tgt,
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
-    std::string targetName = (*it)->TargetName;
-    bool checkCMP0027 = false;
-    if(!cmGeneratorExpression::IsValidTargetName(targetName)
-       && cmGeneratorExpression::Find(targetName) != std::string::npos)
-      {
-      std::string evaluatedTargetName;
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-        ge.Parse(targetName);
-      evaluatedTargetName = cge->Evaluate(mf, config, false, tgt, 0, 0);
-      checkCMP0027 = evaluatedTargetName != targetName;
-      targetName = evaluatedTargetName;
-      }
-    cmTarget *dependentTarget = mf->FindTargetToUse(targetName);
-
-    const bool fromImported =
-      dependentTarget && dependentTarget->IsImported();
-
+    cmLinkImplItem const& item = (*it)->LinkImplItem;
+    std::string const& targetName = item;
+    bool const fromImported = item.Target && item.Target->IsImported();
+    bool const checkCMP0027 = item.FromGenex;
     bool testIsOff = true;
     bool cacheIncludes = false;
     std::vector<std::string>& entryIncludes = (*it)->CachedEntries;
@@ -2200,45 +2190,9 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
 
   if (!this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string result = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(result))
-        {
-        continue;
-        }
-      }
-      std::string includeGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                              includeGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceIncludeDirectoriesEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_INCLUDE_DIRECTORIES",
+      this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries[config]);
 
     if(this->Makefile->IsOn("APPLE"))
       {
