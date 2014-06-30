@@ -179,6 +179,7 @@ Variables that Describe the System
    /variable/MSVC10
    /variable/MSVC11
    /variable/MSVC12
+   /variable/MSVC14
    /variable/MSVC60
    /variable/MSVC70
    /variable/MSVC71

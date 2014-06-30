@@ -40,7 +40,9 @@ public:
     VS9 = 90,
     VS10 = 100,
     VS11 = 110,
-    VS12 = 120
+    VS12 = 120,
+    /* VS13 = 130 was skipped */
+    VS14 = 140
   };
 
   cmLocalVisualStudioGenerator(VSVersion v);

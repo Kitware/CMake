@@ -198,6 +198,10 @@ if(MSVC)
     MSVCRT_FILES_FOR_VERSION(12)
   endif()
 
+  if(MSVC14)
+    MSVCRT_FILES_FOR_VERSION(14)
+  endif()
+
   if(CMAKE_INSTALL_MFC_LIBRARIES)
     if(MSVC70)
       set(__install__libs ${__install__libs}
@@ -366,6 +370,10 @@ if(MSVC)
 
     if(MSVC12)
       MFC_FILES_FOR_VERSION(12)
+    endif()
+
+    if(MSVC14)
+      MFC_FILES_FOR_VERSION(14)
     endif()
   endif()
 

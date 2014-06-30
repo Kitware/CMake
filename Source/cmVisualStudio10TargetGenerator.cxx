@@ -29,6 +29,9 @@
 #include "cmVS12CLFlagTable.h"
 #include "cmVS12LinkFlagTable.h"
 #include "cmVS12LibFlagTable.h"
+#include "cmVS14CLFlagTable.h"
+#include "cmVS14LinkFlagTable.h"
+#include "cmVS14LibFlagTable.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -36,7 +39,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
 {
   cmLocalVisualStudioGenerator::VSVersion
     v = this->LocalGenerator->GetVersion();
-  if(v >= cmLocalVisualStudioGenerator::VS12)
+  if(v >= cmLocalVisualStudioGenerator::VS14)
+    { return cmVS14CLFlagTable; }
+  else if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12CLFlagTable; }
   else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11CLFlagTable; }
@@ -48,7 +53,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
 {
   cmLocalVisualStudioGenerator::VSVersion
     v = this->LocalGenerator->GetVersion();
-  if(v >= cmLocalVisualStudioGenerator::VS12)
+  if(v >= cmLocalVisualStudioGenerator::VS14)
+    { return cmVS14LibFlagTable; }
+  else if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12LibFlagTable; }
   else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LibFlagTable; }
@@ -60,7 +67,9 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
 {
   cmLocalVisualStudioGenerator::VSVersion
     v = this->LocalGenerator->GetVersion();
-  if(v >= cmLocalVisualStudioGenerator::VS12)
+  if(v >= cmLocalVisualStudioGenerator::VS14)
+    { return cmVS14LinkFlagTable; }
+  else if(v >= cmLocalVisualStudioGenerator::VS12)
     { return cmVS12LinkFlagTable; }
   else if(v == cmLocalVisualStudioGenerator::VS11)
     { return cmVS11LinkFlagTable; }
