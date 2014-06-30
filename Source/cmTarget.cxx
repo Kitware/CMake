@@ -181,6 +181,10 @@ public:
   std::vector<TargetPropertyEntry*> SourceEntries;
   std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
 
+  void AddInterfaceEntries(
+    cmTarget const* thisTarget, std::string const& config,
+    std::string const& prop, std::vector<TargetPropertyEntry*>& entries);
+
   std::map<std::string, std::vector<TargetPropertyEntry*> >
                         CachedLinkInterfaceIncludeDirectoriesEntries;
   std::map<std::string, std::vector<TargetPropertyEntry*> >
@@ -6547,6 +6551,31 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
       }
     }
   iface.Complete = true;
+}
+
+//----------------------------------------------------------------------------
+void cmTargetInternals::AddInterfaceEntries(
+  cmTarget const* thisTarget, std::string const& config,
+  std::string const& prop, std::vector<TargetPropertyEntry*>& entries)
+{
+  if(cmTarget::LinkImplementation const* impl =
+     thisTarget->GetLinkImplementationLibraries(config))
+    {
+    for (std::vector<cmLinkImplItem>::const_iterator
+           it = impl->Libraries.begin(), end = impl->Libraries.end();
+         it != end; ++it)
+      {
+      if(it->Target)
+        {
+        std::string genex =
+          "$<TARGET_PROPERTY:" + *it + "," + prop + ">";
+        cmGeneratorExpression ge(&it->Backtrace);
+        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        entries.push_back(
+          new cmTargetInternals::TargetPropertyEntry(cge, *it));
+        }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
