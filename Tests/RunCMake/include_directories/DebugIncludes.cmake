@@ -1,5 +1,5 @@
 
-project(DebugIncludes)
+enable_language(CXX)
 
 set(CMAKE_DEBUG_TARGET_PROPERTIES INCLUDE_DIRECTORIES)
 

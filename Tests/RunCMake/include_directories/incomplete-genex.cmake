@@ -1,4 +1,4 @@
-project(incomplete-genex)
+enable_language(CXX)
 
 cmake_policy(SET CMP0022 NEW)
 cmake_policy(SET CMP0023 NEW)

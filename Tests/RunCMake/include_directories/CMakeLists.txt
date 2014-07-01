@@ -1,3 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
-project(${RunCMake_TEST} CXX)
-include(${RunCMake_TEST}.cmake)
+project(${RunCMake_TEST} NONE)
+if(NOT TEST_FILE)
+  set(TEST_FILE ${RunCMake_TEST}.cmake)
+endif()
+include(${TEST_FILE})

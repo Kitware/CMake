@@ -31,19 +31,22 @@ configure_file(
   "${RunCMake_BINARY_DIR}/copy/SourceDirectoryInInterface.cmake"
   COPYONLY
 )
-set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/copy/SourceDirectoryInInterface/prefix")
-set(RunCMake_TEST_FILE "${RunCMake_BINARY_DIR}/copy/SourceDirectoryInInterface")
+set(RunCMake_TEST_OPTIONS
+  "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/copy/SourceDirectoryInInterface/prefix"
+  "-DTEST_FILE=${RunCMake_BINARY_DIR}/copy/SourceDirectoryInInterface.cmake"
+  )
 set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/copy")
 run_cmake(InstallInSrcDir)
 unset(RunCMake_TEST_SOURCE_DIR)
-unset(RunCMake_TEST_FILE)
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/InstallInBinDir-build/prefix")
+set(RunCMake_TEST_OPTIONS
+  "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/InstallInBinDir-build/prefix"
+  "-DTEST_FILE=${RunCMake_SOURCE_DIR}/BinaryDirectoryInInterface.cmake"
+  )
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/InstallInBinDir-build")
-set(RunCMake_TEST_FILE "${RunCMake_SOURCE_DIR}/BinaryDirectoryInInterface")
 run_cmake(InstallInBinDir)
 unset(RunCMake_TEST_BINARY_DIR)
-unset(RunCMake_TEST_FILE)
 
 configure_file(
   "${RunCMake_SOURCE_DIR}/CMakeLists.txt"
@@ -68,22 +71,25 @@ foreach(policyStatus "" NEW OLD)
     unset(policyOption)
     set(policyStatus WARN)
   endif()
-  set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/prefix" ${policyOption})
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/prefix" ${policyOption}
+    "-DTEST_FILE=${RunCMake_SOURCE_DIR}/BinaryDirectoryInInterface.cmake"
+    )
   # Set the RunCMake_TEST_SOURCE_DIR here to the copy too. This is needed to run
   # the test suite in-source properly.  Otherwise the install directory would be
   # a subdirectory or the source directory, which is allowed and tested separately
   # below.
   set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/prefix/src")
   set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/prefix/BinInInstallPrefix-CMP0052-${policyStatus}-build")
-  set(RunCMake_TEST_FILE "${RunCMake_SOURCE_DIR}/BinaryDirectoryInInterface")
   run_cmake(BinInInstallPrefix-CMP0052-${policyStatus})
   unset(RunCMake_TEST_BINARY_DIR)
-  unset(RunCMake_TEST_FILE)
 
-  set(RunCMake_TEST_FILE "${RunCMake_BINARY_DIR}/prefix/src/SourceDirectoryInInterface")
+  set(RunCMake_TEST_OPTIONS
+    "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/prefix" ${policyOption}
+    "-DTEST_FILE=${RunCMake_BINARY_DIR}/prefix/src/SourceDirectoryInInterface.cmake"
+    )
   run_cmake(SrcInInstallPrefix-CMP0052-${policyStatus})
   unset(RunCMake_TEST_SOURCE_DIR)
-  unset(RunCMake_TEST_FILE)
 endforeach()
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/InstallPrefixInInterface-build/prefix")
@@ -104,12 +110,13 @@ configure_file(
   "${RunCMake_BINARY_DIR}/installToSrc/InstallPrefixInInterface.cmake"
   COPYONLY
 )
-set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/installToSrc/InstallPrefixInInterface/prefix")
-set(RunCMake_TEST_FILE "${RunCMake_BINARY_DIR}/installToSrc/InstallPrefixInInterface")
+set(RunCMake_TEST_OPTIONS
+  "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/installToSrc/InstallPrefixInInterface/prefix"
+  "-DTEST_FILE=${RunCMake_BINARY_DIR}/installToSrc/InstallPrefixInInterface.cmake"
+  )
 set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/installToSrc")
 run_cmake(InstallToPrefixInSrcDirOutOfSource)
 unset(RunCMake_TEST_SOURCE_DIR)
-unset(RunCMake_TEST_FILE)
 
 
 file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}/installToSrcInSrc")
@@ -131,12 +138,13 @@ configure_file(
   COPYONLY
 )
 
-set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/installToSrcInSrc/InstallPrefixInInterface/prefix")
-set(RunCMake_TEST_FILE "${RunCMake_BINARY_DIR}/installToSrcInSrc/InstallPrefixInInterface")
+set(RunCMake_TEST_OPTIONS
+  "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/installToSrcInSrc/InstallPrefixInInterface/prefix"
+  "-DTEST_FILE=${RunCMake_BINARY_DIR}/installToSrcInSrc/InstallPrefixInInterface.cmake"
+  )
 set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/installToSrcInSrc")
 set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/installToSrcInSrc")
 run_cmake(InstallToPrefixInSrcDirInSource)
 unset(RunCMake_TEST_SOURCE_DIR)
 unset(RunCMake_TEST_BINARY_DIR)
-unset(RunCMake_TEST_FILE)
 unset(RunCMake_TEST_NO_CLEAN)

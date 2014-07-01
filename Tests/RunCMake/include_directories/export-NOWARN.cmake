@@ -1,4 +1,4 @@
-
+enable_language(CXX)
 add_library(foo empty.cpp)
 set_property(TARGET foo APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES $<0:>/include/subdir)
 set_property(TARGET foo APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES $<INSTALL_PREFIX>/include/subdir)
