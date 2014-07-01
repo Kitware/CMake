@@ -3172,15 +3172,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  struct stat st;
-  if(::stat(filename.c_str(), &st))
-    {
-    std::string errStr = "UPLOAD cannot stat file '";
-    errStr += filename + "'.";
-    this->SetError(errStr);
-    fclose(fin);
-    return false;
-    }
+  unsigned long file_size = cmsys::SystemTools::FileLength(filename.c_str());
 
   ::CURL *curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -3270,7 +3262,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   // and give the size of the upload (optional)
   res = ::curl_easy_setopt(curl,
-    CURLOPT_INFILESIZE, static_cast<long>(st.st_size));
+    CURLOPT_INFILESIZE, static_cast<long>(file_size));
   check_curl_result(res, "UPLOAD cannot set input file size: ");
 
   res = ::curl_easy_perform(curl);
