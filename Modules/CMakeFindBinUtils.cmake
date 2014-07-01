@@ -66,9 +66,7 @@ else()
 
 endif()
 
-
-# on Apple there really should be install_name_tool
-if(APPLE)
+if(CMAKE_PLATFORM_HAS_INSTALLNAME)
   find_program(CMAKE_INSTALL_NAME_TOOL NAMES install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
 
   if(NOT CMAKE_INSTALL_NAME_TOOL)
