@@ -363,10 +363,11 @@ private:
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
 
-  //The combined explicit dependencies of all build commands that the global
-  //generator has issued. When combined with CombinedBuildOutputs it allows
-  //us to detect the set of explicit dependencies that have
-  std::set<std::string> CombinedBuildExplicitDependencies;
+  /// The combined explicit dependencies of custom build commands
+  std::set<std::string> CombinedCustomCommandExplicitDependencies;
+
+  /// When combined with CombinedCustomCommandExplicitDependencies it allows
+  /// us to detect the set of explicit dependencies that have
   std::set<std::string> CombinedBuildOutputs;
 
   /// The mapping from source file to assumed dependencies.
