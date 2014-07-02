@@ -59,4 +59,10 @@ add_executable(UseABinternal ${dummy}
   $<TARGET_OBJECTS:ABmain> $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:B>
   )
 
+# Test target-level dependencies of executable without sources.
+file(REMOVE ${CMAKE_CURRENT_BINARY_DIR}/UseABinternalDep.cmake)
+add_custom_target(UseABinternalDep COMMAND ${CMAKE_COMMAND} -E touch UseABinternalDep.cmake)
+add_custom_command(TARGET UseABinternal POST_BUILD COMMAND ${CMAKE_COMMAND} -P UseABinternalDep.cmake)
+add_dependencies(UseABinternal UseABinternalDep)
+
 add_subdirectory(ExportLanguages)

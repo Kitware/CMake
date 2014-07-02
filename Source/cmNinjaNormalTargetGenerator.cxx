@@ -608,6 +608,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       std::string(cmake::GetCMakeFilesDirectoryPostSlash())
       + target.GetName() + ".rsp";
 
+  // Gather order-only dependencies.
+  cmNinjaDeps orderOnlyDeps;
+  this->GetLocalGenerator()->AppendTargetDepends(this->GetTarget(),
+    orderOnlyDeps);
+
   // Write the build statement for this target.
   globalGen.WriteBuild(this->GetBuildFileStream(),
                         comment.str(),
@@ -615,7 +620,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                         outputs,
                         explicitDeps,
                         implicitDeps,
-                        emptyDeps,
+                        orderOnlyDeps,
                         vars,
                         rspfile,
                         commandLineLengthLimit);
