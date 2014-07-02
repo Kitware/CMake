@@ -108,7 +108,7 @@ int testDynamicLoader(int argc, char *argv[])
   // Make sure that inexistent lib is giving correct result
   res += TestDynamicLoader("azerty_", "foo_bar",0,0,0);
   // Make sure that random binary file cannot be assimilated as dylib
-  res += TestDynamicLoader(TEST_SYSTEMTOOLS_BIN_FILE, "wp",0,0,0);
+  res += TestDynamicLoader(TEST_SYSTEMTOOLS_SOURCE_DIR "/testSystemTools.bin", "wp",0,0,0);
 #endif
 
 #ifdef __linux__
