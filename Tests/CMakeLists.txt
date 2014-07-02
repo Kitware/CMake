@@ -3,7 +3,7 @@
 macro(ADD_TEST_MACRO NAME COMMAND)
   string(REPLACE "." "/" dir "${NAME}")
   string(REGEX REPLACE "[^.]*\\." "" proj "${NAME}")
-  add_test(${NAME} ${CMAKE_CTEST_COMMAND}
+  add_test(NAME "${NAME}" COMMAND "${CMAKE_CTEST_COMMAND}"
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/${dir}"
     "${CMake_BINARY_DIR}/Tests/${dir}"
