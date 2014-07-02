@@ -6,7 +6,7 @@ add_definitions(-DA_DEF)
 
 add_custom_command(
   OUTPUT a1.c
-  DEPENDS a1.c.in
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/a1.c.in
   COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/a1.c.in
                                    ${CMAKE_CURRENT_BINARY_DIR}/a1.c
   )
