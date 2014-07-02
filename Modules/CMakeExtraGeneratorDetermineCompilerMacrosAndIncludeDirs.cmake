@@ -27,9 +27,9 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
     set(_compilerExecutable "${CMAKE_CXX_COMPILER}")
     set(_arg1 "${CMAKE_CXX_COMPILER_ARG1}")
 
-    if (CMAKE_CXX_FLAGS)
-      string(REGEX MATCH "-stdlib=[^ $]+" _stdlib "${CMAKE_CXX_FLAGS}")
-    endif (CMAKE_CXX_FLAGS)
+    if (CMAKE_CXX_FLAGS MATCHES "(-stdlib=[^ ]+)")
+      set(_stdlib "${CMAKE_MATCH_1}")
+    endif ()
   else ()
     set(_compilerExecutable "${CMAKE_C_COMPILER}")
     set(_arg1 "${CMAKE_C_COMPILER_ARG1}")
