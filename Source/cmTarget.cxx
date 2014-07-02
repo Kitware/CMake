@@ -3265,6 +3265,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
     }
   if(prop == "INCLUDE_DIRECTORIES")
     {
+    if (this->Internal->IncludeDirectoriesEntries.empty())
+      {
+      return 0;
+      }
+
     static std::string output;
     output = "";
     std::string sep;
@@ -3283,6 +3288,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
     }
   if(prop == "COMPILE_OPTIONS")
     {
+    if (this->Internal->CompileOptionsEntries.empty())
+      {
+      return 0;
+      }
+
     static std::string output;
     output = "";
     std::string sep;
@@ -3301,6 +3311,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
     }
   if(prop == "COMPILE_FEATURES")
     {
+    if (this->Internal->CompileFeaturesEntries.empty())
+      {
+      return 0;
+      }
+
     static std::string output;
     output = "";
     std::string sep;
@@ -3319,6 +3334,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
     }
   if(prop == "COMPILE_DEFINITIONS")
     {
+    if (this->Internal->CompileDefinitionsEntries.empty())
+      {
+      return 0;
+      }
+
     static std::string output;
     output = "";
     std::string sep;
@@ -3337,6 +3357,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
     }
   if(prop == "LINK_LIBRARIES")
     {
+    if (this->Internal->LinkImplementationPropertyEntries.empty())
+      {
+      return 0;
+      }
+
     static std::string output;
     output = "";
     std::string sep;
@@ -3359,6 +3384,11 @@ const char *cmTarget::GetProperty(const std::string& prop,
 
   if(prop == "SOURCES")
     {
+    if (this->Internal->SourceEntries.empty())
+      {
+      return 0;
+      }
+
     cmOStringStream ss;
     const char* sep = "";
     typedef cmTargetInternals::TargetPropertyEntry
