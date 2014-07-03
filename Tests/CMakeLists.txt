@@ -1249,6 +1249,21 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set_tests_properties(ExternalProject PROPERTIES
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
+  add_test(ExternalProjectLocal ${CMAKE_CTEST_COMMAND}
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ExternalProjectLocal"
+    "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal"
+    ${build_generator_args}
+    --build-project ExternalProjectLocalTest
+    --build-exe-dir "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal"
+    --force-new-ctest-process
+    --build-options ${build_options}
+    --test-command ${CMAKE_CTEST_COMMAND} -V
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectLocal")
+  set_tests_properties(ExternalProjectLocal PROPERTIES
+    TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
+
   add_test(ExternalProjectUpdateSetup ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate"
