@@ -255,7 +255,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
 
     // A target should not depend on itself.
     emitted.insert(depender->GetName());
-    for(std::vector<cmLinkItem>::const_iterator
+    for(std::vector<cmLinkImplItem>::const_iterator
           lib = impl->Libraries.begin();
         lib != impl->Libraries.end(); ++lib)
       {

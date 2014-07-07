@@ -165,14 +165,16 @@ public:
   std::set<cmLinkItem> UtilityItems;
   bool UtilityItemsDone;
 
-  struct TargetPropertyEntry {
+  class TargetPropertyEntry {
+    static cmLinkImplItem NoLinkImplItem;
+  public:
     TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
-      const std::string &targetName = std::string())
-      : ge(cge), TargetName(targetName)
+                        cmLinkImplItem const& item = NoLinkImplItem)
+      : ge(cge), LinkImplItem(item)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
     std::vector<std::string> CachedEntries;
-    const std::string TargetName;
+    cmLinkImplItem const& LinkImplItem;
   };
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
   std::vector<TargetPropertyEntry*> CompileOptionsEntries;
@@ -180,6 +182,10 @@ public:
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   std::vector<cmValueWithOrigin> LinkImplementationPropertyEntries;
+
+  void AddInterfaceEntries(
+    cmTarget const* thisTarget, std::string const& config,
+    std::string const& prop, std::vector<TargetPropertyEntry*>& entries);
 
   std::map<std::string, std::vector<TargetPropertyEntry*> >
                         CachedLinkInterfaceIncludeDirectoriesEntries;
@@ -201,6 +207,8 @@ public:
   std::map<std::string, bool> CacheLinkInterfaceCompileFeaturesDone;
   std::map<std::string, bool> CacheLinkImplementationClosureDone;
 };
+
+cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
 
 //----------------------------------------------------------------------------
 void deleteAndClear(
@@ -770,45 +778,9 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
 
   if (!this->Internal->CacheLinkInterfaceSourcesDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string targetResult = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, &dagChecker);
-      if (!this->Makefile->FindTargetToUse(targetResult))
-        {
-        continue;
-        }
-      }
-      std::string sourceGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_SOURCES>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        sourceGenex = "$<$<BOOL:" + it->Value + ">:" + sourceGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                                sourceGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceSourcesEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_SOURCES",
+      this->Internal->CachedLinkInterfaceSourcesEntries[config]);
     }
 
     std::vector<std::string>::size_type numFilesBefore = files.size();
@@ -2044,6 +2016,10 @@ static void processIncludeDirectories(cmTarget const* tgt,
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
+    cmLinkImplItem const& item = (*it)->LinkImplItem;
+    std::string const& targetName = item;
+    bool const fromImported = item.Target && item.Target->IsImported();
+    bool const checkCMP0027 = item.FromGenex;
     bool testIsOff = true;
     bool cacheIncludes = false;
     std::vector<std::string>& entryIncludes = (*it)->CachedEntries;
@@ -2069,36 +2045,12 @@ static void processIncludeDirectories(cmTarget const* tgt,
     for(std::vector<std::string>::iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
       {
-      std::string targetName = (*it)->TargetName;
-      std::string evaluatedTargetName;
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(targetName);
-      evaluatedTargetName = cge->Evaluate(mf, config, false, tgt, 0, 0);
-      }
-
-      cmTarget *dependentTarget = mf->FindTargetToUse(targetName);
-
-      const bool fromImported = dependentTarget
-                             && dependentTarget->IsImported();
-
-      cmTarget *evaluatedDependentTarget =
-        (targetName != evaluatedTargetName)
-          ? mf->FindTargetToUse(evaluatedTargetName)
-          : 0;
-
-      targetName = evaluatedTargetName;
-
-      const bool fromEvaluatedImported = evaluatedDependentTarget
-                             && evaluatedDependentTarget->IsImported();
-
-      if ((fromImported || fromEvaluatedImported)
+      if (fromImported
           && !cmSystemTools::FileExists(li->c_str()))
         {
         cmOStringStream e;
         cmake::MessageType messageType = cmake::FATAL_ERROR;
-        if (fromEvaluatedImported)
+        if (checkCMP0027)
           {
           switch(tgt->GetPolicyStatusCMP0027())
             {
@@ -2238,50 +2190,14 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
 
   if (!this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string result = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(result))
-        {
-        continue;
-        }
-      }
-      std::string includeGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_INCLUDE_DIRECTORIES>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        includeGenex = "$<$<BOOL:" + it->Value + ">:" + includeGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                              includeGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceIncludeDirectoriesEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_INCLUDE_DIRECTORIES",
+      this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries[config]);
 
     if(this->Makefile->IsOn("APPLE"))
       {
       LinkImplementation const* impl = this->GetLinkImplementation(config);
-      for(std::vector<cmLinkItem>::const_iterator
+      for(std::vector<cmLinkImplItem>::const_iterator
           it = impl->Libraries.begin();
           it != impl->Libraries.end(); ++it)
         {
@@ -2462,45 +2378,9 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
 
   if (!this->Internal->CacheLinkInterfaceCompileOptionsDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string targetResult = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(targetResult))
-        {
-        continue;
-        }
-      }
-      std::string optionGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_COMPILE_OPTIONS>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        optionGenex = "$<$<BOOL:" + it->Value + ">:" + optionGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                                optionGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceCompileOptionsEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_COMPILE_OPTIONS",
+      this->Internal->CachedLinkInterfaceCompileOptionsEntries[config]);
     }
 
   processCompileOptions(this,
@@ -2572,45 +2452,9 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
 
   if (!this->Internal->CacheLinkInterfaceCompileDefinitionsDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string targetResult = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(targetResult))
-        {
-        continue;
-        }
-      }
-      std::string defsGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_COMPILE_DEFINITIONS>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        defsGenex = "$<$<BOOL:" + it->Value + ">:" + defsGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                                defsGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceCompileDefinitionsEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_COMPILE_DEFINITIONS",
+      this->Internal->CachedLinkInterfaceCompileDefinitionsEntries[config]);
     if (!config.empty())
       {
       std::string configPropName = "COMPILE_DEFINITIONS_"
@@ -2719,45 +2563,9 @@ void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
 
   if (!this->Internal->CacheLinkInterfaceCompileFeaturesDone[config])
     {
-    for (std::vector<cmValueWithOrigin>::const_iterator
-        it = this->Internal->LinkImplementationPropertyEntries.begin(),
-        end = this->Internal->LinkImplementationPropertyEntries.end();
-        it != end; ++it)
-      {
-      if (!cmGeneratorExpression::IsValidTargetName(it->Value)
-          && cmGeneratorExpression::Find(it->Value) == std::string::npos)
-        {
-        continue;
-        }
-      {
-      cmGeneratorExpression ge;
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(it->Value);
-      std::string targetResult = cge->Evaluate(this->Makefile, config,
-                                        false, this, 0, 0);
-      if (!this->Makefile->FindTargetToUse(targetResult))
-        {
-        continue;
-        }
-      }
-      std::string featureGenex = "$<TARGET_PROPERTY:" +
-                              it->Value + ",INTERFACE_COMPILE_FEATURES>";
-      if (cmGeneratorExpression::Find(it->Value) != std::string::npos)
-        {
-        // Because it->Value is a generator expression, ensure that it
-        // evaluates to the non-empty string before being used in the
-        // TARGET_PROPERTY expression.
-        featureGenex = "$<$<BOOL:" + it->Value + ">:" + featureGenex + ">";
-        }
-      cmGeneratorExpression ge(&it->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(
-                                                                featureGenex);
-
-      this->Internal
-        ->CachedLinkInterfaceCompileFeaturesEntries[config].push_back(
-                        new cmTargetInternals::TargetPropertyEntry(cge,
-                                                              it->Value));
-      }
+    this->Internal->AddInterfaceEntries(
+      this, config, "INTERFACE_COMPILE_FEATURES",
+      this->Internal->CachedLinkInterfaceCompileFeaturesEntries[config]);
     }
 
   processCompileFeatures(this,
@@ -3675,7 +3483,8 @@ void cmTarget::ComputeLinkClosure(const std::string& config,
 
   // Add interface languages from linked targets.
   cmTargetCollectLinkLanguages cll(this, config, languages, this);
-  for(std::vector<cmLinkItem>::const_iterator li = impl->Libraries.begin();
+  for(std::vector<cmLinkImplItem>::const_iterator
+        li = impl->Libraries.begin();
       li != impl->Libraries.end(); ++li)
     {
     cll.Visit(*li);
@@ -6242,7 +6051,8 @@ cmTarget::GetLinkImplementationClosure(const std::string& config) const
     cmTarget::LinkImplementation const* impl
       = this->GetLinkImplementationLibraries(config);
 
-    for(std::vector<cmLinkItem>::const_iterator it = impl->Libraries.begin();
+    for(std::vector<cmLinkImplItem>::const_iterator
+          it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
       {
       processILibs(config, this, *it, tgts , emitted);
@@ -6383,7 +6193,8 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
     // The link implementation is the default link interface.
     LinkImplementation const* impl =
         this->GetLinkImplementationLibrariesInternal(config, headTarget);
-    iface.Libraries = impl->Libraries;
+    std::copy(impl->Libraries.begin(), impl->Libraries.end(),
+              std::back_inserter(iface.Libraries));
     if(this->PolicyStatusCMP0022 == cmPolicies::WARN &&
        !this->Internal->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
@@ -6397,12 +6208,12 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
                               headTarget, usage_requirements_only,
                               ifaceLibs);
         }
-      if (ifaceLibs != impl->Libraries)
+      if (ifaceLibs != iface.Libraries)
         {
         std::string oldLibraries;
         std::string newLibraries;
         const char *sep = "";
-        for(std::vector<cmLinkItem>::const_iterator it
+        for(std::vector<cmLinkImplItem>::const_iterator it
               = impl->Libraries.begin(); it != impl->Libraries.end(); ++it)
           {
           oldLibraries += sep;
@@ -6470,7 +6281,7 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
         {
         cmTarget::LinkImplementation const* impl =
             thisTarget->GetLinkImplementation(config);
-        for(std::vector<cmLinkItem>::const_iterator
+        for(std::vector<cmLinkImplItem>::const_iterator
               li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
           {
           if(emitted.insert(*li).second)
@@ -6544,6 +6355,31 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
       }
     }
   iface.Complete = true;
+}
+
+//----------------------------------------------------------------------------
+void cmTargetInternals::AddInterfaceEntries(
+  cmTarget const* thisTarget, std::string const& config,
+  std::string const& prop, std::vector<TargetPropertyEntry*>& entries)
+{
+  if(cmTarget::LinkImplementation const* impl =
+     thisTarget->GetLinkImplementationLibraries(config))
+    {
+    for (std::vector<cmLinkImplItem>::const_iterator
+           it = impl->Libraries.begin(), end = impl->Libraries.end();
+         it != end; ++it)
+      {
+      if(it->Target)
+        {
+        std::string genex =
+          "$<TARGET_PROPERTY:" + *it + "," + prop + ">";
+        cmGeneratorExpression ge(&it->Backtrace);
+        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        entries.push_back(
+          new cmTargetInternals::TargetPropertyEntry(cge, *it));
+        }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -6621,12 +6457,9 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
     cmGeneratorExpression ge(&le->Backtrace);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(le->Value);
-    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile,
-                                        config,
-                                        false,
-                                        head,
-                                        &dagChecker),
-                                      llibs);
+    std::string const evaluated =
+      cge->Evaluate(this->Makefile, config, false, head, &dagChecker);
+    cmSystemTools::ExpandListArgument(evaluated, llibs);
 
     for(std::vector<std::string>::const_iterator li = llibs.begin();
         li != llibs.end(); ++li)
@@ -6674,7 +6507,8 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
 
       // The entry is meant for this configuration.
       impl.Libraries.push_back(
-        cmLinkItem(name, this->FindTargetToLink(name)));
+        cmLinkImplItem(name, this->FindTargetToLink(name),
+                       le->Backtrace, evaluated != le->Value));
       }
 
     std::set<std::string> const& seenProps = cge->GetSeenTargetProperties();

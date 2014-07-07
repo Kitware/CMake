@@ -553,15 +553,16 @@ void cmComputeLinkDepends::AddDirectLinkEntries()
 }
 
 //----------------------------------------------------------------------------
+template <typename T>
 void
 cmComputeLinkDepends::AddLinkEntries(
-  int depender_index, std::vector<cmLinkItem> const& libs)
+  int depender_index, std::vector<T> const& libs)
 {
   // Track inferred dependency sets implied by this list.
   std::map<int, DependSet> dependSets;
 
   // Loop over the libraries linked directly by the depender.
-  for(std::vector<cmLinkItem>::const_iterator li = libs.begin();
+  for(typename std::vector<T>::const_iterator li = libs.begin();
       li != libs.end(); ++li)
     {
     // Skip entries that will resolve to the target getting linked or

@@ -80,8 +80,8 @@ private:
   int AddLinkEntry(cmLinkItem const& item);
   void AddVarLinkEntries(int depender_index, const char* value);
   void AddDirectLinkEntries();
-  void AddLinkEntries(int depender_index,
-                      std::vector<cmLinkItem> const& libs);
+  template <typename T>
+    void AddLinkEntries(int depender_index, std::vector<T> const& libs);
   cmTarget const* FindTargetToLink(int depender_index,
                                    const std::string& name);
 

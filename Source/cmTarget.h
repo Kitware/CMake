@@ -54,6 +54,20 @@ public:
   cmLinkItem(cmLinkItem const& r): std_string(r), Target(r.Target) {}
   cmTarget const* Target;
 };
+class cmLinkImplItem: public cmLinkItem
+{
+public:
+  cmLinkImplItem(): cmLinkItem(), Backtrace(0), FromGenex(false) {}
+  cmLinkImplItem(std::string const& n,
+                 cmTarget const* t,
+                 cmListFileBacktrace const& bt,
+                 bool fromGenex):
+    cmLinkItem(n, t), Backtrace(bt), FromGenex(fromGenex) {}
+  cmLinkImplItem(cmLinkImplItem const& r):
+    cmLinkItem(r), Backtrace(r.Backtrace), FromGenex(r.FromGenex) {}
+  cmListFileBacktrace Backtrace;
+  bool FromGenex;
+};
 
 struct cmTargetLinkInformationMap:
   public std::map<std::string, cmComputeLinkInformation*>
@@ -296,7 +310,7 @@ public:
     std::vector<std::string> Languages;
 
     // Libraries linked directly in this configuration.
-    std::vector<cmLinkItem> Libraries;
+    std::vector<cmLinkImplItem> Libraries;
 
     // Libraries linked directly in other configurations.
     // Needed only for OLD behavior of CMP0003.
