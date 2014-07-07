@@ -235,6 +235,14 @@ function(write_compiler_detection_header
     message(FATAL_ERROR "Unparsed arguments: ${_WCD_UNPARSED_ARGUMENTS}")
   endif()
 
+  if (prefix_arg STREQUAL "")
+    message(FATAL_ERROR "A prefix must be specified")
+  endif()
+  string(MAKE_C_IDENTIFIER ${prefix_arg} cleaned_prefix)
+  if (NOT prefix_arg STREQUAL cleaned_prefix)
+    message(FATAL_ERROR "The prefix must be a valid C identifier.")
+  endif()
+
   if(NOT _WCD_VERSION)
     set(_WCD_VERSION ${CMAKE_MINIMUM_REQUIRED_VERSION})
   endif()
