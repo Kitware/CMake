@@ -392,20 +392,7 @@ void cmCTestRunTest::MemCheckPostProcess()
              << this->TestResult.Name << std::endl);
   cmCTestMemCheckHandler * handler = static_cast<cmCTestMemCheckHandler*>
     (this->TestHandler);
-  switch ( handler->MemoryTesterStyle )
-    {
-    case cmCTestMemCheckHandler::VALGRIND:
-      handler->PostProcessValgrindTest(this->TestResult, this->Index);
-      break;
-    case cmCTestMemCheckHandler::PURIFY:
-      handler->PostProcessPurifyTest(this->TestResult, this->Index);
-      break;
-    case cmCTestMemCheckHandler::BOUNDS_CHECKER:
-      handler->PostProcessBoundsCheckerTest(this->TestResult, this->Index);
-      break;
-    default:
-      break;
-    }
+  handler->PostProcessTest(this->TestResult, this->Index);
 }
 
 //----------------------------------------------------------------------
