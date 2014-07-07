@@ -201,12 +201,6 @@ endmacro()
 #-----------------------------------------------------------------------
 macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
-  # Create the KWIML library for CMake.
-  set(KWIML cmIML)
-  set(KWIML_HEADER_ROOT ${CMake_BINARY_DIR}/Utilities)
-  add_subdirectory(Utilities/KWIML)
-
-  #---------------------------------------------------------------------
   # Create the kwsys library for CMake.
   set(KWSYS_NAMESPACE cmsys)
   set(KWSYS_USE_SystemTools 1)
@@ -464,6 +458,11 @@ endif()
 if("x${CMAKE_TESTS_CDASH_SERVER}" STREQUAL "x")
   set(CMAKE_TESTS_CDASH_SERVER "http://open.cdash.org")
 endif()
+
+# Create the KWIML library for CMake.
+set(KWIML cmIML)
+set(KWIML_HEADER_ROOT ${CMake_BINARY_DIR}/Utilities)
+add_subdirectory(Utilities/KWIML)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   # build the utilities (a macro defined in this file)
