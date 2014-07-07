@@ -317,6 +317,15 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   return retVal;
 }
 
+static void ctestScriptProgressCallback(const char *m, float, void* cd)
+{
+  cmCTest* ctest = static_cast<cmCTest*>(cd);
+  if(m && *m)
+    {
+    cmCTestLog(ctest, HANDLER_OUTPUT, "-- " << m << std::endl);
+    }
+}
+
 void cmCTestScriptHandler::CreateCMake()
 {
   // create a cmake instance to read the configuration script
@@ -333,6 +342,8 @@ void cmCTestScriptHandler::CreateCMake()
 
   this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator();
   this->Makefile = this->LocalGenerator->GetMakefile();
+
+  this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
 
   // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
   // Also, some commands need Makefile->GetCurrentDirectory().
