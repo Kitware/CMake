@@ -249,7 +249,18 @@ public:
    * Replace Windows file system slashes with Unix-style slashes.
    */
   static void ConvertToUnixSlashes(kwsys_stl::string& path);
-  
+
+#ifdef _WIN32
+  /**
+   * Convert the path to an extended length path to avoid MAX_PATH length
+   * limitations on Windows. If the input is a local path the result will be
+   * prefixed with \\?\; if the input is instead a network path, the result
+   * will be prefixed with \\?\UNC\. All output will also be converted to
+   * absolute paths with Windows-style backslashes.
+   **/
+  static kwsys_stl::wstring ConvertToWindowsExtendedPath(const kwsys_stl::string&);
+#endif
+
   /**
    * For windows this calls ConvertToWindowsOutputPath and for unix
    * it calls ConvertToUnixOutputPath
