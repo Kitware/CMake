@@ -27,6 +27,7 @@ public:
   enum Tool
   {
     Compiler,
+    ResourceCompiler,
     Linker,
     FortranCompiler
   };
