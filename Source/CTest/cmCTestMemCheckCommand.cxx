@@ -21,6 +21,8 @@ cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
     = this->CTest->GetInitializedHandler("memcheck");
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
+    "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE");
+  this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "MemoryCheckCommand", "CTEST_MEMORYCHECK_COMMAND");
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
     "MemoryCheckCommandOptions", "CTEST_MEMORYCHECK_COMMAND_OPTIONS");

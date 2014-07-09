@@ -103,6 +103,19 @@ unset(CTEST_EXTRA_CONFIG)
 unset(CTEST_EXTRA_CODE)
 unset(CMAKELISTS_EXTRA_CODE)
 
+# add ThreadSanitizer test
+set(CTEST_EXTRA_CODE
+"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"report_bugs=1 history_size=5 exitcode=55\")
+")
+
+set(CMAKELISTS_EXTRA_CODE
+"add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
+-P \"${CMAKE_CURRENT_SOURCE_DIR}/testThreadSanitizer.cmake\")
+")
+gen_mc_test_internal(DummyThreadSanitizer "" -DMEMCHECK_TYPE=ThreadSanitizer)
+set(CMAKELISTS_EXTRA_CODE )
+set(CTEST_EXTRA_CODE)
+
 gen_mc_test(DummyPurify "\${PSEUDO_PURIFY}")
 gen_mc_test(DummyValgrind "\${PSEUDO_VALGRIND}")
 gen_mc_test(DummyBC "\${PSEUDO_BC}")
@@ -188,6 +201,11 @@ set_tests_properties(CTestTestMemcheckDummyValgrindCustomOptions PROPERTIES
 set_tests_properties(CTestTestMemcheckDummyValgrindTwoTargets PROPERTIES
     PASS_REGULAR_EXPRESSION
     "\nMemory check project ${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindTwoTargets\n.*\n *Start 1: RunCMake\n(.*\n)?Memory check command: .* \"--log-file=${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindTwoTargets/Testing/Temporary/MemoryChecker.1.log\" \"-q\".*\n *Start 2: RunCMakeAgain\n(.*\n)?Memory check command: .* \"--log-file=${CTEST_ESCAPED_CMAKE_CURRENT_BINARY_DIR}/DummyValgrindTwoTargets/Testing/Temporary/MemoryChecker.2.log\" \"-q\".*\n")
+
+set_tests_properties(CTestTestMemcheckDummyThreadSanitizer PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    ".*Memory checking results:.*data race.* - 1.*data race on vptr .ctor/dtor vs virtual call. - 1.*heap-use-after-free - 1.*thread leak - 1.*destroy of a locked mutex - 1.*double lock of a mutex - 1.*unlock of an unlocked mutex .or by a wrong thread. - 1.*read lock of a write locked mutex - 1.*read unlock of a write locked mutex - 1.*signal-unsafe call inside of a signal - 1.*signal handler spoils errno - 1.*lock-order-inversion .potential deadlock. - 1.*")
+
 
 # Xcode 2.x forgets to create the output directory before linking
 # the individual architectures.

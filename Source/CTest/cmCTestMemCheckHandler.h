@@ -15,7 +15,10 @@
 
 
 #include "cmCTestTestHandler.h"
+#include "cmStandardIncludes.h"
 #include "cmListFileCache.h"
+#include <vector>
+#include <string>
 
 class cmMakefile;
 
@@ -45,7 +48,9 @@ private:
     UNKNOWN = 0,
     VALGRIND,
     PURIFY,
-    BOUNDS_CHECKER
+    BOUNDS_CHECKER,
+    // checkers after hear do not use the standard error list
+    THREAD_SANITIZER
   };
 public:
   enum { // Memory faults
@@ -93,7 +98,17 @@ private:
   std::vector<std::string> MemoryTesterOptions;
   int                      MemoryTesterStyle;
   std::string              MemoryTesterOutputFile;
-  int                      MemoryTesterGlobalResults[NO_MEMORY_FAULT];
+  std::string              MemoryTesterEnvironmentVariable;
+  // these are used to store the types of errors that can show up
+  std::vector<std::string> ResultStrings;
+  std::vector<std::string> ResultStringsLong;
+  std::vector<int>         GlobalResults;
+  bool                     LogWithPID; // does log file add pid
+
+  std::vector<int>::size_type FindOrAddWarning(const std::string& warning);
+  // initialize the ResultStrings and ResultStringsLong for
+  // this type of checker
+  void InitializeResultsVectors();
 
   ///! Initialize memory checking subsystem.
   bool InitializeMemoryChecking();
@@ -110,17 +125,22 @@ private:
   //string. After running, log holds the output and results hold the
   //different memmory errors.
   bool ProcessMemCheckOutput(const std::string& str,
-                             std::string& log, int* results);
+                             std::string& log, std::vector<int>& results);
   bool ProcessMemCheckValgrindOutput(const std::string& str,
-                                     std::string& log, int* results);
+                                     std::string& log,
+                                     std::vector<int>& results);
   bool ProcessMemCheckPurifyOutput(const std::string& str,
-                                   std::string& log, int* results);
+                                   std::string& log,
+                                   std::vector<int>& results);
+  bool ProcessMemCheckThreadSanitizerOutput(const std::string& str,
+                                            std::string& log,
+                                            std::vector<int>& results);
   bool ProcessMemCheckBoundsCheckerOutput(const std::string& str,
-                                          std::string& log, int* results);
+                                          std::string& log,
+                                          std::vector<int>& results);
 
-  void PostProcessPurifyTest(cmCTestTestResult& res, int test);
+  void PostProcessTest(cmCTestTestResult& res, int test);
   void PostProcessBoundsCheckerTest(cmCTestTestResult& res, int test);
-  void PostProcessValgrindTest(cmCTestTestResult& res, int test);
 
   ///! append MemoryTesterOutputFile to the test log
   void AppendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res,
