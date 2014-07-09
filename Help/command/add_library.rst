@@ -94,7 +94,8 @@ object library name.  For example:
 
 will include objlib's object files in a library and an executable
 along with those compiled from their own sources.  Object libraries
-may contain only sources (and headers) that compile to object files.
+may contain only sources that compile, header files, and other files
+that would not affect linking of a normal library (e.g. ``.txt``).
 They may contain custom commands generating such sources, but not
 ``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Object libraries
 cannot be imported, exported, installed, or linked.  Some native build

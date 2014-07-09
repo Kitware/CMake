@@ -12,6 +12,7 @@ add_library(Cshared SHARED c.c $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:Bexport>)
 add_executable(UseCshared main.c)
 set_property(TARGET UseCshared PROPERTY COMPILE_DEFINITIONS SHARED_C)
 target_link_libraries(UseCshared Cshared)
+add_custom_command(TARGET UseCshared POST_BUILD COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/A/a.cmake)
 
 add_executable(UseCinternal main.c c.c $<TARGET_OBJECTS:A> $<TARGET_OBJECTS:B>)
 

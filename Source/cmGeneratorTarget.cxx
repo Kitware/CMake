@@ -38,7 +38,8 @@ void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
       {
       e << "  " << (*i)->GetLocation().GetName() << "\n";
       }
-    e << "but may contain only headers and sources that compile.";
+    e << "but may contain only sources that compile, header files, and "
+         "other files that would not affect linking of a normal library.";
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
                      target->GetBacktrace());
     }
@@ -205,10 +206,6 @@ struct TagVisitor
     else
       {
       DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
-      if(this->IsObjLib && ext != "txt")
-        {
-        this->BadObjLibFiles.push_back(sf);
-        }
       }
   }
 };
