@@ -989,7 +989,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
 
   // Choose a source file on which to store the custom command.
   cmSourceFile* file = 0;
-  if(!main_dependency.empty())
+  if(!commandLines.empty() && !main_dependency.empty())
     {
     // The main dependency was specified.  Use it unless a different
     // custom command already used it.
@@ -1010,11 +1010,9 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
         file = 0;
         }
       }
-    else
+    else if (!file)
       {
-      // The main dependency does not have a custom command or we are
-      // allowed to replace it.  Use it to store the command.
-      file = this->GetOrCreateSource(main_dependency);
+      file = this->CreateSource(main_dependency);
       }
     }
 
@@ -1041,8 +1039,11 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       }
 
     // Create a cmSourceFile for the rule file.
-    file = this->GetOrCreateSource(outName, true);
-    file->SetProperty("__CMAKE_RULE", "1");
+    if (!file)
+      {
+      file = this->CreateSource(outName, true);
+      file->SetProperty("__CMAKE_RULE", "1");
+      }
     }
 
   // Always create the output sources and mark them generated.
@@ -1055,16 +1056,16 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       }
     }
 
-  // Construct a complete list of dependencies.
-  std::vector<std::string> depends2(depends);
-  if(!main_dependency.empty())
-    {
-    depends2.push_back(main_dependency);
-    }
-
   // Attach the custom command to the file.
   if(file)
     {
+    // Construct a complete list of dependencies.
+    std::vector<std::string> depends2(depends);
+    if(!main_dependency.empty())
+      {
+      depends2.push_back(main_dependency);
+      }
+
     cmCustomCommand* cc =
       new cmCustomCommand(this, outputs, depends2, commandLines,
                           comment, workingDir);
@@ -1256,28 +1257,31 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
     }
 
   // Store the custom command in the target.
-  std::string force = this->GetStartOutputDirectory();
-  force += cmake::GetCMakeFilesDirectory();
-  force += "/";
-  force += utilityName;
-  std::string no_main_dependency = "";
-  bool no_replace = false;
-  this->AddCustomCommandToOutput(force, depends,
-                                 no_main_dependency,
-                                 commandLines, comment,
-                                 workingDirectory, no_replace,
-                                 escapeOldStyle);
-  cmSourceFile* sf = target->AddSourceCMP0049(force);
+  if (!commandLines.empty() || !depends.empty())
+    {
+    std::string force = this->GetStartOutputDirectory();
+    force += cmake::GetCMakeFilesDirectory();
+    force += "/";
+    force += utilityName;
+    std::string no_main_dependency = "";
+    bool no_replace = false;
+    this->AddCustomCommandToOutput(force, depends,
+                                   no_main_dependency,
+                                   commandLines, comment,
+                                   workingDirectory, no_replace,
+                                   escapeOldStyle);
+    cmSourceFile* sf = target->AddSourceCMP0049(force);
 
-  // The output is not actually created so mark it symbolic.
-  if(sf)
-    {
-    sf->SetProperty("SYMBOLIC", "1");
-    }
-  else
-    {
-    cmSystemTools::Error("Could not get source file entry for ",
-                         force.c_str());
+    // The output is not actually created so mark it symbolic.
+    if(sf)
+      {
+      sf->SetProperty("SYMBOLIC", "1");
+      }
+    else
+      {
+      cmSystemTools::Error("Could not get source file entry for ",
+                          force.c_str());
+      }
     }
   return target;
 }
@@ -3451,6 +3455,19 @@ cmSourceFile* cmMakefile::GetSource(const std::string& sourceName) const
 }
 
 //----------------------------------------------------------------------------
+cmSourceFile* cmMakefile::CreateSource(const std::string& sourceName,
+                                       bool generated)
+{
+  cmSourceFile* sf = new cmSourceFile(this, sourceName);
+  if(generated)
+    {
+    sf->SetProperty("GENERATED", "1");
+    }
+  this->SourceFiles.push_back(sf);
+  return sf;
+}
+
+//----------------------------------------------------------------------------
 cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
                                             bool generated)
 {
@@ -3460,13 +3477,7 @@ cmSourceFile* cmMakefile::GetOrCreateSource(const std::string& sourceName,
     }
   else
     {
-    cmSourceFile* sf = new cmSourceFile(this, sourceName);
-    if(generated)
-      {
-      sf->SetProperty("GENERATED", "1");
-      }
-    this->SourceFiles.push_back(sf);
-    return sf;
+    return this->CreateSource(sourceName, generated);
     }
 }
 

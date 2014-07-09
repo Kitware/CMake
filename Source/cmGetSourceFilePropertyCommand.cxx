@@ -29,7 +29,7 @@ bool cmGetSourceFilePropertyCommand
   // for the location we must create a source file first
   if (!sf && args[2] == "LOCATION")
     {
-    sf = this->Makefile->GetOrCreateSource(file);
+    sf = this->Makefile->CreateSource(file);
     }
   if(sf)
     {
