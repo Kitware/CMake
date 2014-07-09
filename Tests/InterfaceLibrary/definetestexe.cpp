@@ -15,9 +15,10 @@
 #error Expected IFACE_HEADER_BUILDDIR
 #endif
 
+extern int obj();
 extern int sub();
 
 int main(int,char**)
 {
-  return sub();
+  return obj() + sub();
 }

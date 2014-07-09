@@ -6375,6 +6375,7 @@ void cmTargetInternals::AddInterfaceEntries(
           "$<TARGET_PROPERTY:" + *it + "," + prop + ">";
         cmGeneratorExpression ge(&it->Backtrace);
         cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(genex);
+        cge->SetEvaluateForBuildsystem(true);
         entries.push_back(
           new cmTargetInternals::TargetPropertyEntry(cge, *it));
         }

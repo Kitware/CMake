@@ -18,8 +18,12 @@ set_property(TARGET imp::iface APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SOMEPRO
 set_property(TARGET imp::iface PROPERTY INTERFACE_SOMEPROP OFF)
 set_property(TARGET imp::iface PROPERTY INTERFACE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/does_not_exist.cpp)
 
+add_library(objlib OBJECT obj.cpp)
+add_library(iface_objlib INTERFACE)
+target_sources(iface_objlib INTERFACE $<TARGET_OBJECTS:objlib>)
+
 add_executable(InterfaceLibrary definetestexe.cpp)
-target_link_libraries(InterfaceLibrary iface_nodepends headeriface subiface)
+target_link_libraries(InterfaceLibrary iface_nodepends headeriface subiface iface_objlib)
 
 add_subdirectory(libsdir)
 

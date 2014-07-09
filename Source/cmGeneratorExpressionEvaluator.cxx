@@ -1210,6 +1210,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         cmGeneratorExpression ge(&context->Backtrace);
         cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+        cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
         std::string result = cge->Evaluate(context->Makefile,
                             context->Config,
                             context->Quiet,
