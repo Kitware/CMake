@@ -42,7 +42,8 @@ public:
   enum Type
   {
     TypeTAR,
-    TypeZIP
+    TypeZIP,
+    Type7Zip
   };
 
   /** Construct with output stream to which to write archive.  */

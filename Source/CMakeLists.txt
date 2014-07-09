@@ -580,9 +580,11 @@ set(CPACK_SRCS
   CPack/cmCPackIFWGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
   CPack/cmCPackTGZGenerator.cxx
+  CPack/cmCPackTXZGenerator.cxx
   CPack/cmCPackTarBZip2Generator.cxx
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
+  CPack/cmCPack7zGenerator.cxx
   )
 
 if(CYGWIN)
