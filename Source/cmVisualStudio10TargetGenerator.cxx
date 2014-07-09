@@ -21,15 +21,19 @@
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmVS10CLFlagTable.h"
+#include "cmVS10RCFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
 #include "cmVS11CLFlagTable.h"
+#include "cmVS11RCFlagTable.h"
 #include "cmVS11LinkFlagTable.h"
 #include "cmVS11LibFlagTable.h"
 #include "cmVS12CLFlagTable.h"
+#include "cmVS12RCFlagTable.h"
 #include "cmVS12LinkFlagTable.h"
 #include "cmVS12LibFlagTable.h"
 #include "cmVS14CLFlagTable.h"
+#include "cmVS14RCFlagTable.h"
 #include "cmVS14LinkFlagTable.h"
 #include "cmVS14LibFlagTable.h"
 
@@ -47,6 +51,20 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
     { return cmVS11CLFlagTable; }
   else
     { return cmVS10CLFlagTable; }
+}
+
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetRcFlagTable() const
+{
+  cmLocalVisualStudioGenerator::VSVersion
+    v = this->LocalGenerator->GetVersion();
+  if(v >= cmLocalVisualStudioGenerator::VS14)
+    { return cmVS14RCFlagTable; }
+  else if(v >= cmLocalVisualStudioGenerator::VS12)
+    { return cmVS12RCFlagTable; }
+  else if(v == cmLocalVisualStudioGenerator::VS11)
+    { return cmVS11RCFlagTable; }
+  else
+    { return cmVS10RCFlagTable; }
 }
 
 cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
@@ -209,6 +227,10 @@ void cmVisualStudio10TargetGenerator::Generate()
   if(this->Target->GetType() <= cmTarget::OBJECT_LIBRARY)
     {
     if(!this->ComputeClOptions())
+      {
+      return;
+      }
+    if(!this->ComputeRcOptions())
       {
       return;
       }
@@ -1504,15 +1526,69 @@ OutputIncludes(std::vector<std::string> const & includes)
 
 
 
+//----------------------------------------------------------------------------
+bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
+{
+  std::vector<std::string> const* configs =
+    this->GlobalGenerator->GetConfigurations();
+  for(std::vector<std::string>::const_iterator i = configs->begin();
+      i != configs->end(); ++i)
+    {
+    if(!this->ComputeRcOptions(*i))
+      {
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
+  std::string const& configName)
+{
+  cmsys::auto_ptr<Options> pOptions(
+    new Options(this->LocalGenerator, Options::ResourceCompiler,
+                this->GetRcFlagTable()));
+  Options& rcOptions = *pOptions;
+
+  std::string CONFIG = cmSystemTools::UpperCase(configName);
+
+  std::string flags;
+  const char* rcFlags = this->Makefile->GetDefinition("CMAKE_RC_FLAGS");
+  if(rcFlags)
+    {
+    flags += " ";
+    flags += rcFlags;
+    }
+
+  const char* targetRcFlags = this->Target->GetProperty("RC_FLAGS");
+  if(targetRcFlags)
+    {
+    flags += " ";
+    flags += targetRcFlags;
+    }
+
+  rcOptions.Parse(flags.c_str());
+  this->RcOptions[configName] = pOptions.release();
+  return true;
+}
+
 void cmVisualStudio10TargetGenerator::
 WriteRCOptions(std::string const& configName,
                std::vector<std::string> const & includes)
 {
   this->WriteString("<ResourceCompile>\n", 2);
+
+  // Preprocessor definitions and includes are shared with clOptions.
   Options& clOptions = *(this->ClOptions[configName]);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "RC");
   this->OutputIncludes(includes);
+
+  Options& rcOptions = *(this->RcOptions[configName]);
+  rcOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  rcOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+
   this->WriteString("</ResourceCompile>\n", 2);
 }
 
