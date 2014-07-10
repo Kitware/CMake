@@ -112,9 +112,11 @@ public:
   struct OptionalLinkInterface: public cmTarget::LinkInterface
   {
     OptionalLinkInterface():
-      Exists(false), Complete(false), ExplicitLibraries(0) {}
+      LibrariesDone(false), AllDone(false),
+      Exists(false), ExplicitLibraries(0) {}
+    bool LibrariesDone;
+    bool AllDone;
     bool Exists;
-    bool Complete;
     const char* ExplicitLibraries;
   };
   void ComputeLinkInterface(cmTarget const* thisTarget,
@@ -5895,32 +5897,26 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
   // Lookup any existing link interface for this configuration.
   TargetConfigPair key(head, cmSystemTools::UpperCase(config));
 
-  cmTargetInternals::LinkInterfaceMapType::iterator
-    i = this->Internal->LinkInterfaceMap.find(key);
-  if(i == this->Internal->LinkInterfaceMap.end())
+  cmTargetInternals::OptionalLinkInterface&
+    iface = this->Internal->LinkInterfaceMap[key];
+  if(!iface.LibrariesDone)
     {
-    // Compute the link interface for this configuration.
-    cmTargetInternals::OptionalLinkInterface iface;
+    iface.LibrariesDone = true;
     iface.ExplicitLibraries =
       this->ComputeLinkInterfaceLibraries(config, iface, head, false,
                                           iface.Exists);
-    if (iface.Exists)
+    }
+  if(!iface.AllDone)
+    {
+    iface.AllDone = true;
+    if(iface.Exists)
       {
       this->Internal->ComputeLinkInterface(this, config, iface,
                                            head, iface.ExplicitLibraries);
       }
-
-    // Store the information for this configuration.
-    cmTargetInternals::LinkInterfaceMapType::value_type entry(key, iface);
-    i = this->Internal->LinkInterfaceMap.insert(entry).first;
-    }
-  else if(!i->second.Complete && i->second.Exists)
-    {
-    this->Internal->ComputeLinkInterface(this, config, i->second, head,
-                                         i->second.ExplicitLibraries);
     }
 
-  return i->second.Exists ? &i->second : 0;
+  return iface.Exists? &iface : 0;
 }
 
 //----------------------------------------------------------------------------
@@ -5950,22 +5946,17 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
      this->Internal->LinkInterfaceUsageRequirementsOnlyMap :
      this->Internal->LinkInterfaceMap);
 
-  cmTargetInternals::LinkInterfaceMapType::iterator i = lim.find(key);
-  if(i == lim.end())
+  cmTargetInternals::OptionalLinkInterface& iface = lim[key];
+  if(!iface.LibrariesDone)
     {
-    // Compute the link interface for this configuration.
-    cmTargetInternals::OptionalLinkInterface iface;
+    iface.LibrariesDone = true;
     iface.ExplicitLibraries =
       this->ComputeLinkInterfaceLibraries(config, iface, head,
                                           usage_requirements_only,
                                           iface.Exists);
-
-    // Store the information for this configuration.
-    cmTargetInternals::LinkInterfaceMapType::value_type entry(key, iface);
-    i = lim.insert(entry).first;
     }
 
-  return i->second.Exists ? &i->second : 0;
+  return iface.Exists? &iface : 0;
 }
 
 //----------------------------------------------------------------------------
@@ -6348,7 +6339,6 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
       sscanf(reps, "%u", &iface.Multiplicity);
       }
     }
-  iface.Complete = true;
 }
 
 //----------------------------------------------------------------------------
