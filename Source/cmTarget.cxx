@@ -122,14 +122,12 @@ public:
   void ComputeLinkInterface(cmTarget const* thisTarget,
                             const std::string& config,
                             OptionalLinkInterface& iface,
-                            cmTarget const* head,
-                            const char *explicitLibraries) const;
-  const char* ComputeLinkInterfaceLibraries(cmTarget const* thisTarget,
-                                            const std::string& config,
-                                            OptionalLinkInterface& iface,
-                                            cmTarget const* head,
-                                            bool usage_requirements_only,
-                                            bool &exists);
+                            cmTarget const* head) const;
+  void ComputeLinkInterfaceLibraries(cmTarget const* thisTarget,
+                                     const std::string& config,
+                                     OptionalLinkInterface& iface,
+                                     cmTarget const* head,
+                                     bool usage_requirements_only);
 
   typedef std::map<TargetConfigPair, OptionalLinkInterface>
                                                           LinkInterfaceMapType;
@@ -5908,17 +5906,15 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
-    iface.ExplicitLibraries =
-      this->Internal->ComputeLinkInterfaceLibraries(
-        this, config, iface, head, false, iface.Exists);
+    this->Internal->ComputeLinkInterfaceLibraries(
+      this, config, iface, head, false);
     }
   if(!iface.AllDone)
     {
     iface.AllDone = true;
     if(iface.Exists)
       {
-      this->Internal->ComputeLinkInterface(this, config, iface,
-                                           head, iface.ExplicitLibraries);
+      this->Internal->ComputeLinkInterface(this, config, iface, head);
       }
     }
 
@@ -5956,9 +5952,8 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
-    iface.ExplicitLibraries =
-      this->Internal->ComputeLinkInterfaceLibraries(
-        this, config, iface, head, usage_requirements_only, iface.Exists);
+    this->Internal->ComputeLinkInterfaceLibraries(
+      this, config, iface, head, usage_requirements_only);
     }
 
   return iface.Exists? &iface : 0;
@@ -6081,14 +6076,13 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-const char*
+void
 cmTargetInternals::ComputeLinkInterfaceLibraries(
   cmTarget const* thisTarget,
   const std::string& config,
   OptionalLinkInterface& iface,
   cmTarget const* headTarget,
-  bool usage_requirements_only,
-  bool &exists)
+  bool usage_requirements_only)
 {
   // Construct the property name suffix for this configuration.
   std::string suffix = "_";
@@ -6165,10 +6159,10 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
      (thisTarget->GetType() == cmTarget::EXECUTABLE ||
       (thisTarget->GetType() == cmTarget::MODULE_LIBRARY)))
     {
-    exists = false;
-    return 0;
+    return;
     }
-  exists = true;
+  iface.Exists = true;
+  iface.ExplicitLibraries = explicitLibraries;
 
   if(explicitLibraries)
     {
@@ -6247,17 +6241,15 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
         }
       }
     }
-  return explicitLibraries;
 }
 
 //----------------------------------------------------------------------------
 void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
                                              const std::string& config,
                                              OptionalLinkInterface& iface,
-                                             cmTarget const* headTarget,
-                                          const char* explicitLibraries) const
+                                             cmTarget const* headTarget) const
 {
-  if(explicitLibraries)
+  if(iface.ExplicitLibraries)
     {
     if(thisTarget->GetType() == cmTarget::SHARED_LIBRARY
         || thisTarget->GetType() == cmTarget::STATIC_LIBRARY
