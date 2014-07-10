@@ -124,6 +124,12 @@ public:
                             OptionalLinkInterface& iface,
                             cmTarget const* head,
                             const char *explicitLibraries) const;
+  const char* ComputeLinkInterfaceLibraries(cmTarget const* thisTarget,
+                                            const std::string& config,
+                                            OptionalLinkInterface& iface,
+                                            cmTarget const* head,
+                                            bool usage_requirements_only,
+                                            bool &exists);
 
   typedef std::map<TargetConfigPair, OptionalLinkInterface>
                                                           LinkInterfaceMapType;
@@ -5903,8 +5909,8 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
     {
     iface.LibrariesDone = true;
     iface.ExplicitLibraries =
-      this->ComputeLinkInterfaceLibraries(config, iface, head, false,
-                                          iface.Exists);
+      this->Internal->ComputeLinkInterfaceLibraries(
+        this, config, iface, head, false, iface.Exists);
     }
   if(!iface.AllDone)
     {
@@ -5951,9 +5957,8 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
     {
     iface.LibrariesDone = true;
     iface.ExplicitLibraries =
-      this->ComputeLinkInterfaceLibraries(config, iface, head,
-                                          usage_requirements_only,
-                                          iface.Exists);
+      this->Internal->ComputeLinkInterfaceLibraries(
+        this, config, iface, head, usage_requirements_only, iface.Exists);
     }
 
   return iface.Exists? &iface : 0;
@@ -6076,11 +6081,14 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
-                                           LinkInterface& iface,
-                                           cmTarget const* headTarget,
-                                           bool usage_requirements_only,
-                                           bool &exists) const
+const char*
+cmTargetInternals::ComputeLinkInterfaceLibraries(
+  cmTarget const* thisTarget,
+  const std::string& config,
+  OptionalLinkInterface& iface,
+  cmTarget const* headTarget,
+  bool usage_requirements_only,
+  bool &exists)
 {
   // Construct the property name suffix for this configuration.
   std::string suffix = "_";
@@ -6097,15 +6105,15 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
   std::string linkIfaceProp;
-  if(this->PolicyStatusCMP0022 != cmPolicies::OLD &&
-     this->PolicyStatusCMP0022 != cmPolicies::WARN)
+  if(thisTarget->PolicyStatusCMP0022 != cmPolicies::OLD &&
+     thisTarget->PolicyStatusCMP0022 != cmPolicies::WARN)
     {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
-    explicitLibraries = this->GetProperty(linkIfaceProp);
+    explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
     }
-  else if(this->GetType() == cmTarget::SHARED_LIBRARY ||
-          this->IsExecutableWithExports())
+  else if(thisTarget->GetType() == cmTarget::SHARED_LIBRARY ||
+          thisTarget->IsExecutableWithExports())
     {
     // CMP0022 OLD behavior is to use LINK_INTERFACE_LIBRARIES if set on a
     // shared lib or executable.
@@ -6113,31 +6121,32 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
     // Lookup the per-configuration property.
     linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
     linkIfaceProp += suffix;
-    explicitLibraries = this->GetProperty(linkIfaceProp);
+    explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
 
     // If not set, try the generic property.
     if(!explicitLibraries)
       {
       linkIfaceProp = "LINK_INTERFACE_LIBRARIES";
-      explicitLibraries = this->GetProperty(linkIfaceProp);
+      explicitLibraries = thisTarget->GetProperty(linkIfaceProp);
       }
     }
 
-  if(explicitLibraries && this->PolicyStatusCMP0022 == cmPolicies::WARN &&
-     !this->Internal->PolicyWarnedCMP0022)
+  if(explicitLibraries &&
+     thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN &&
+     !this->PolicyWarnedCMP0022)
     {
     // Compare the explicitly set old link interface properties to the
     // preferred new link interface property one and warn if different.
     const char* newExplicitLibraries =
-      this->GetProperty("INTERFACE_LINK_LIBRARIES");
+      thisTarget->GetProperty("INTERFACE_LINK_LIBRARIES");
     if (newExplicitLibraries
         && strcmp(newExplicitLibraries, explicitLibraries) != 0)
       {
       cmOStringStream w;
       w <<
-        (this->Makefile->GetPolicies()
+        (thisTarget->Makefile->GetPolicies()
          ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
-        "Target \"" << this->GetName() << "\" has an "
+        "Target \"" << thisTarget->GetName() << "\" has an "
         "INTERFACE_LINK_LIBRARIES property which differs from its " <<
         linkIfaceProp << " properties."
         "\n"
@@ -6145,16 +6154,16 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
         "  " << newExplicitLibraries << "\n" <<
         linkIfaceProp << ":\n"
         "  " << (explicitLibraries ? explicitLibraries : "(empty)") << "\n";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-      this->Internal->PolicyWarnedCMP0022 = true;
+      thisTarget->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->PolicyWarnedCMP0022 = true;
       }
     }
 
   // There is no implicit link interface for executables or modules
   // so if none was explicitly set then there is no link interface.
   if(!explicitLibraries &&
-     (this->GetType() == cmTarget::EXECUTABLE ||
-      (this->GetType() == cmTarget::MODULE_LIBRARY)))
+     (thisTarget->GetType() == cmTarget::EXECUTABLE ||
+      (thisTarget->GetType() == cmTarget::MODULE_LIBRARY)))
     {
     exists = false;
     return 0;
@@ -6164,34 +6173,34 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
   if(explicitLibraries)
     {
     // The interface libraries have been explicitly set.
-    this->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
-                          headTarget, usage_requirements_only,
-                          iface.Libraries);
+    thisTarget->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
+                                headTarget, usage_requirements_only,
+                                iface.Libraries);
     }
-  else if (this->PolicyStatusCMP0022 == cmPolicies::WARN
-        || this->PolicyStatusCMP0022 == cmPolicies::OLD)
+  else if (thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN
+        || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
     // If CMP0022 is NEW then the plain tll signature sets the
     // INTERFACE_LINK_LIBRARIES, so if we get here then the project
     // cleared the property explicitly and we should not fall back
     // to the link implementation.
     {
     // The link implementation is the default link interface.
-    LinkImplementation const* impl =
-        this->GetLinkImplementationLibrariesInternal(config, headTarget);
+    cmTarget::LinkImplementation const* impl =
+      thisTarget->GetLinkImplementationLibrariesInternal(config, headTarget);
     std::copy(impl->Libraries.begin(), impl->Libraries.end(),
               std::back_inserter(iface.Libraries));
-    if(this->PolicyStatusCMP0022 == cmPolicies::WARN &&
-       !this->Internal->PolicyWarnedCMP0022 && !usage_requirements_only)
+    if(thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN &&
+       !this->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
       // Compare the link implementation fallback link interface to the
       // preferred new link interface property and warn if different.
       std::vector<cmLinkItem> ifaceLibs;
       std::string newProp = "INTERFACE_LINK_LIBRARIES";
-      if(const char* newExplicitLibraries = this->GetProperty(newProp))
+      if(const char* newExplicitLibraries = thisTarget->GetProperty(newProp))
         {
-        this->ExpandLinkItems(newProp, newExplicitLibraries, config,
-                              headTarget, usage_requirements_only,
-                              ifaceLibs);
+        thisTarget->ExpandLinkItems(newProp, newExplicitLibraries, config,
+                                    headTarget, usage_requirements_only,
+                                    ifaceLibs);
         }
       if (ifaceLibs != iface.Libraries)
         {
@@ -6220,9 +6229,9 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
 
         cmOStringStream w;
         w <<
-          (this->Makefile->GetPolicies()
+          (thisTarget->Makefile->GetPolicies()
            ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
-          "Target \"" << this->GetName() << "\" has an "
+          "Target \"" << thisTarget->GetName() << "\" has an "
           "INTERFACE_LINK_LIBRARIES property.  "
           "This should be preferred as the source of the link interface "
           "for this library but because CMP0022 is not set CMake is "
@@ -6233,8 +6242,8 @@ const char* cmTarget::ComputeLinkInterfaceLibraries(const std::string& config,
           "  " << newLibraries << "\n"
           "Link implementation:\n"
           "  " << oldLibraries << "\n";
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
-        this->Internal->PolicyWarnedCMP0022 = true;
+        thisTarget->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        this->PolicyWarnedCMP0022 = true;
         }
       }
     }

@@ -771,12 +771,6 @@ private:
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
                            bool usage_requirements_only) const;
 
-  const char* ComputeLinkInterfaceLibraries(const std::string& config,
-                                            LinkInterface& iface,
-                                            cmTarget const* head,
-                                            bool usage_requirements_only,
-                                            bool &exists) const;
-
   LinkImplementation const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
