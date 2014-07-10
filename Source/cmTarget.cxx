@@ -624,7 +624,6 @@ static bool processSources(cmTarget const* tgt,
       std::vector<std::string> &srcs,
       std::set<std::string> &uniqueSrcs,
       cmGeneratorExpressionDAGChecker *dagChecker,
-      cmTarget const* head,
       std::string const& config, bool debugSources)
 {
   cmMakefile *mf = tgt->GetMakefile();
@@ -641,7 +640,7 @@ static bool processSources(cmTarget const* tgt,
       cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
                                                 config,
                                                 false,
-                                                head ? head : tgt,
+                                                tgt,
                                                 tgt,
                                                 dagChecker),
                                       entrySources);
@@ -771,7 +770,6 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                  files,
                  uniqueSrcs,
                  &dagChecker,
-                 this,
                  config,
                  debugSources);
 
@@ -788,7 +786,6 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                             files,
                             uniqueSrcs,
                             &dagChecker,
-                            this,
                             config,
                             debugSources);
 
