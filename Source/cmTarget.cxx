@@ -158,8 +158,8 @@ public:
   typedef std::map<std::string, cmTarget::LinkClosure> LinkClosureMapType;
   LinkClosureMapType LinkClosureMap;
 
-  typedef std::map<TargetConfigPair, std::vector<cmSourceFile*> >
-                                                          SourceFilesMapType;
+  typedef std::map<std::string, std::vector<cmSourceFile*> >
+                                                       SourceFilesMapType;
   SourceFilesMapType SourceFilesMap;
 
   std::set<cmLinkItem> UtilityItems;
@@ -707,8 +707,7 @@ static bool processSources(cmTarget const* tgt,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetSourceFiles(std::vector<std::string> &files,
-                              const std::string& config,
-                              cmTarget const* head) const
+                              const std::string& config) const
 {
   assert(this->GetType() != INTERFACE_LIBRARY);
 
@@ -772,7 +771,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                  files,
                  uniqueSrcs,
                  &dagChecker,
-                 head,
+                 this,
                  config,
                  debugSources);
 
@@ -789,7 +788,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                             files,
                             uniqueSrcs,
                             &dagChecker,
-                            head,
+                            this,
                             config,
                             debugSources);
 
@@ -868,12 +867,11 @@ cmTarget::GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const
 
 //----------------------------------------------------------------------------
 void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
-                              const std::string& config,
-                              cmTarget const* head) const
+                              const std::string& config) const
 {
 
   // Lookup any existing link implementation for this configuration.
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+  std::string key = cmSystemTools::UpperCase(config);
 
   if(!this->LinkImplementationLanguageIsContextDependent)
     {
@@ -890,7 +888,7 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
   else
     {
     std::vector<std::string> srcs;
-    this->GetSourceFiles(srcs, config, head);
+    this->GetSourceFiles(srcs, config);
 
     std::set<cmSourceFile*> emitted;
 
@@ -5422,7 +5420,7 @@ void cmTarget::GetLanguages(std::set<std::string>& languages,
                             const std::string& config) const
 {
   std::vector<cmSourceFile*> sourceFiles;
-  this->GetSourceFiles(sourceFiles, config, this);
+  this->GetSourceFiles(sourceFiles, config);
   for(std::vector<cmSourceFile*>::const_iterator
         i = sourceFiles.begin(); i != sourceFiles.end(); ++i)
     {
