@@ -1552,21 +1552,11 @@ bool cmVisualStudio10TargetGenerator::ComputeRcOptions(
   Options& rcOptions = *pOptions;
 
   std::string CONFIG = cmSystemTools::UpperCase(configName);
-
-  std::string flags;
-  const char* rcFlags = this->Makefile->GetDefinition("CMAKE_RC_FLAGS");
-  if(rcFlags)
-    {
-    flags += " ";
-    flags += rcFlags;
-    }
-
-  const char* targetRcFlags = this->Target->GetProperty("RC_FLAGS");
-  if(targetRcFlags)
-    {
-    flags += " ";
-    flags += targetRcFlags;
-    }
+  std::string rcConfigFlagsVar = std::string("CMAKE_RC_FLAGS_") + CONFIG;
+  std::string flags =
+      std::string(this->Makefile->GetSafeDefinition("CMAKE_RC_FLAGS")) +
+      std::string(" ") +
+      std::string(this->Makefile->GetSafeDefinition(rcConfigFlagsVar));
 
   rcOptions.Parse(flags.c_str());
   this->RcOptions[configName] = pOptions.release();
