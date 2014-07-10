@@ -491,8 +491,7 @@ public:
   // information to forward these property changes to the targets
   // until we have per-target object file properties.
   void GetLanguages(std::set<std::string>& languages,
-                    std::string const& config,
-                    cmTarget const* head = 0) const;
+                    std::string const& config) const;
 
   /** Return whether this target is an executable with symbol exports
       enabled.  */
