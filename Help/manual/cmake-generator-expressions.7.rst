@@ -116,15 +116,20 @@ than 4.2.0.
 ``$<CONFIG>``
   Configuration name
 ``$<PLATFORM_ID>``
-  The CMake-id of the platform
+  The CMake-id of the platform.
+  See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 ``$<C_COMPILER_ID>``
   The CMake-id of the C compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<CXX_COMPILER_ID>``
   The CMake-id of the CXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION>``
   The version of the C compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CXX_COMPILER_VERSION>``
   The version of the CXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<TARGET_FILE:tgt>``
   Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a target.
 ``$<TARGET_FILE_NAME:tgt>``
