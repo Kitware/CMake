@@ -213,6 +213,20 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
       filesFrom.push_back(from1);
       filesTo.push_back(to1);
       }
+    else if(this->Target->IsCFBundleOnApple())
+      {
+      // Install the whole app bundle directory.
+      type = cmInstallType_DIRECTORY;
+      literal_args += " USE_SOURCE_PERMISSIONS";
+
+      std::string targetNameBase = targetName.substr(0, targetName.find('/'));
+
+      std::string from1 = fromDirConfig + targetNameBase;
+      std::string to1 = toDir + targetName;
+
+      filesFrom.push_back(from1);
+      filesTo.push_back(to1);
+      }
     else
       {
       bool haveNamelink = false;
