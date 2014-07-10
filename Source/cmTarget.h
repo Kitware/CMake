@@ -787,8 +787,7 @@ private:
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
   void ComputeLinkImplementationLanguages(const std::string& config,
-                                          LinkImplementation& impl,
-                                          cmTarget const* head) const;
+                                          LinkImplementation& impl) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,

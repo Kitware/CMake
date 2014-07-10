@@ -6405,7 +6405,7 @@ cmTarget::GetLinkImplementation(const std::string& config) const
   if(!impl.LanguagesDone)
     {
     impl.LanguagesDone = true;
-    this->ComputeLinkImplementationLanguages(config, impl, this);
+    this->ComputeLinkImplementationLanguages(config, impl);
     }
   return &impl;
 }
@@ -6546,13 +6546,12 @@ void cmTarget::ComputeLinkImplementation(const std::string& config,
 //----------------------------------------------------------------------------
 void
 cmTarget::ComputeLinkImplementationLanguages(const std::string& config,
-                                             LinkImplementation& impl,
-                                             cmTarget const* head) const
+                                             LinkImplementation& impl) const
 {
   // This target needs runtime libraries for its source languages.
   std::set<std::string> languages;
   // Get languages used in our source files.
-  this->GetLanguages(languages, config, head);
+  this->GetLanguages(languages, config, this);
   // Copy the set of langauges to the link implementation.
   for(std::set<std::string>::iterator li = languages.begin();
       li != languages.end(); ++li)
