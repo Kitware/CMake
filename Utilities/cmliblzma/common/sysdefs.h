@@ -16,6 +16,10 @@
 #ifndef LZMA_SYSDEFS_H
 #define LZMA_SYSDEFS_H
 
+#if defined(_MSC_VER)
+#  pragma warning(disable: 4028 4244 4761)
+#endif
+
 //////////////
 // Includes //
 //////////////
@@ -45,6 +49,12 @@
 #ifdef HAVE_LIMITS_H
 #	include <limits.h>
 #endif
+
+
+#if defined(_MSC_VER) && (_MSC_VER < 1310)
+#  define UINT64_C(n) n ## ui64
+#endif
+
 
 // Be more compatible with systems that have non-conforming inttypes.h.
 // We assume that int is 32-bit and that long is either 32-bit or 64-bit.
