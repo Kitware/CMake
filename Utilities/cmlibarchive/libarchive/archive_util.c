@@ -49,7 +49,7 @@ __FBSDID("$FreeBSD: head/lib/libarchive/archive_util.c 201098 2009-12-28 02:58:1
 #include <cm_zlib.h>
 #endif
 #ifdef HAVE_LZMA_H
-#include <lzma.h>
+#include <cm_lzma.h>
 #endif
 #ifdef HAVE_BZLIB_H
 #include <cm_bzlib.h>
