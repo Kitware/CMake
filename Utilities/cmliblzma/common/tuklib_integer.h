@@ -41,7 +41,15 @@
 #ifndef TUKLIB_INTEGER_H
 #define TUKLIB_INTEGER_H
 
-#include "tuklib_common.h"
+#include "sysdefs.h"
+
+#if defined(__GNUC__) && defined(__GNUC_MINOR__)
+#   define TUKLIB_GNUC_REQ(major, minor) \
+        ((__GNUC__ == (major) && __GNUC_MINOR__ >= (minor)) \
+            || __GNUC__ > (major))
+#else
+#   define TUKLIB_GNUC_REQ(major, minor) 0
+#endif
 
 
 ////////////////////////////////////////

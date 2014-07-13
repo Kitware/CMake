@@ -9,4 +9,6 @@
 #define MY_NAME "liblzma"
 #define MY_SUFFIX ".dll"
 #define MY_DESC "liblzma data compression library"
+#define PACKAGE_NAME "XZ Utils"
+#define PACKAGE_URL "http://tukaani.org/xz/"
 #include "common_w32res.rc"

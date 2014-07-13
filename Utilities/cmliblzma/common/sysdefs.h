@@ -20,9 +20,7 @@
 // Includes //
 //////////////
 
-#ifdef HAVE_CONFIG_H
-#	include <config.h>
-#endif
+#include "config.h"
 
 // Get standard-compliant stdio functions under MinGW and MinGW-w64.
 #ifdef __MINGW32__
