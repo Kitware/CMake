@@ -75,6 +75,8 @@
 // on all systems I have tried. The size optimized version is sometimes
 // slightly faster, but sometimes it is a lot slower.
 
+#include "config.h"
+
 #ifdef HAVE_SMALL
 #	define get_pos_slot(pos) ((pos) <= 4 ? (pos) : get_pos_slot_2(pos))
 

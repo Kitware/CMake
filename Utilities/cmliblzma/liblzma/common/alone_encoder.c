@@ -78,6 +78,14 @@ static lzma_ret
 alone_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 		const lzma_options_lzma *options)
 {
+	uint32_t d;
+
+	// Initialize the LZMA encoder.
+	const lzma_filter_info filters[2] = {
+	    { 0, &lzma_lzma_encoder_init, (void *)(options) },
+	    { 0, NULL, NULL }
+	};
+
 	lzma_next_coder_init(&alone_encoder_init, next, allocator);
 
 	if (next->coder == NULL) {
@@ -107,7 +115,7 @@ alone_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 	// one is the next unless it is UINT32_MAX. While the header would
 	// allow any 32-bit integer, we do this to keep the decoder of liblzma
 	// accepting the resulting files.
-	uint32_t d = options->dict_size - 1;
+	d = options->dict_size - 1;
 	d |= d >> 2;
 	d |= d >> 3;
 	d |= d >> 4;
@@ -120,16 +128,6 @@ alone_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 
 	// - Uncompressed size (always unknown and using EOPM)
 	memset(next->coder->header + 1 + 4, 0xFF, 8);
-
-	// Initialize the LZMA encoder.
-	const lzma_filter_info filters[2] = {
-		{
-			.init = &lzma_lzma_encoder_init,
-			.options = (void *)(options),
-		}, {
-			.init = NULL,
-		}
-	};
 
 	return lzma_next_filter_init(&next->coder->next, allocator, filters);
 }
@@ -148,7 +146,7 @@ lzma_alone_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern LZMA_API(lzma_ret)
 lzma_alone_encoder(lzma_stream *strm, const lzma_options_lzma *options)
 {
-	lzma_next_strm_init(alone_encoder_init, strm, options);
+	lzma_next_strm_init1(alone_encoder_init, strm, options);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_FINISH] = true;

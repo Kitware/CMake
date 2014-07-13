@@ -126,19 +126,17 @@ alone_decode(lzma_coder *coder,
 	// Fall through
 
 	case SEQ_CODER_INIT: {
+		lzma_ret ret;
+
+		lzma_filter_info filters[2] = {
+			{ 0, &lzma_lzma_decoder_init, &coder->options },
+			{ 0, NULL, NULL }
+		};
+
 		if (coder->memusage > coder->memlimit)
 			return LZMA_MEMLIMIT_ERROR;
 
-		lzma_filter_info filters[2] = {
-			{
-				.init = &lzma_lzma_decoder_init,
-				.options = &coder->options,
-			}, {
-				.init = NULL,
-			}
-		};
-
-		const lzma_ret ret = lzma_next_filter_init(&coder->next,
+		ret = lzma_next_filter_init(&coder->next,
 				allocator, filters);
 		if (ret != LZMA_OK)
 			return ret;
@@ -229,7 +227,7 @@ lzma_alone_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern LZMA_API(lzma_ret)
 lzma_alone_decoder(lzma_stream *strm, uint64_t memlimit)
 {
-	lzma_next_strm_init(lzma_alone_decoder_init, strm, memlimit, false);
+	lzma_next_strm_init2(lzma_alone_decoder_init, strm, memlimit, false);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_FINISH] = true;

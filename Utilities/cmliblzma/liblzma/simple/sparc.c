@@ -26,6 +26,8 @@ sparc_code(lzma_simple *simple lzma_attribute((__unused__)),
 				|| (buffer[i] == 0x7F
 				&& (buffer[i + 1] & 0xC0) == 0xC0)) {
 
+			uint32_t dest;
+
 			uint32_t src = ((uint32_t)buffer[i + 0] << 24)
 					| ((uint32_t)buffer[i + 1] << 16)
 					| ((uint32_t)buffer[i + 2] << 8)
@@ -33,7 +35,6 @@ sparc_code(lzma_simple *simple lzma_attribute((__unused__)),
 
 			src <<= 2;
 
-			uint32_t dest;
 			if (is_encoder)
 				dest = now_pos + (uint32_t)(i) + src;
 			else

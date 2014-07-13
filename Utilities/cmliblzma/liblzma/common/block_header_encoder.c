@@ -17,11 +17,13 @@
 extern LZMA_API(lzma_ret)
 lzma_block_header_size(lzma_block *block)
 {
-	if (block->version != 0)
-		return LZMA_OPTIONS_ERROR;
+	size_t i;
 
 	// Block Header Size + Block Flags + CRC32.
 	uint32_t size = 1 + 1 + 4;
+
+	if (block->version != 0)
+		return LZMA_OPTIONS_ERROR;
 
 	// Compressed Size
 	if (block->compressed_size != LZMA_VLI_UNKNOWN) {
@@ -45,12 +47,13 @@ lzma_block_header_size(lzma_block *block)
 	if (block->filters == NULL || block->filters[0].id == LZMA_VLI_UNKNOWN)
 		return LZMA_PROG_ERROR;
 
-	for (size_t i = 0; block->filters[i].id != LZMA_VLI_UNKNOWN; ++i) {
+	for (i = 0; block->filters[i].id != LZMA_VLI_UNKNOWN; ++i) {
+		uint32_t add;
+
 		// Don't allow too many filters.
 		if (i == LZMA_FILTERS_MAX)
 			return LZMA_PROG_ERROR;
 
-		uint32_t add;
 		return_if_error(lzma_filter_flags_size(&add,
 				block->filters + i));
 
@@ -73,20 +76,23 @@ lzma_block_header_size(lzma_block *block)
 extern LZMA_API(lzma_ret)
 lzma_block_header_encode(const lzma_block *block, uint8_t *out)
 {
+	size_t out_size;
+	size_t out_pos = 2;
+	size_t filter_count = 0;
+
 	// Validate everything but filters.
 	if (lzma_block_unpadded_size(block) == 0
 			|| !lzma_vli_is_valid(block->uncompressed_size))
 		return LZMA_PROG_ERROR;
 
 	// Indicate the size of the buffer _excluding_ the CRC32 field.
-	const size_t out_size = block->header_size - 4;
+	out_size = block->header_size - 4;
 
 	// Store the Block Header Size.
 	out[0] = out_size / 4;
 
 	// We write Block Flags in pieces.
 	out[1] = 0x00;
-	size_t out_pos = 2;
 
 	// Compressed Size
 	if (block->compressed_size != LZMA_VLI_UNKNOWN) {
@@ -108,7 +114,6 @@ lzma_block_header_encode(const lzma_block *block, uint8_t *out)
 	if (block->filters == NULL || block->filters[0].id == LZMA_VLI_UNKNOWN)
 		return LZMA_PROG_ERROR;
 
-	size_t filter_count = 0;
 	do {
 		// There can be a maximum of four filters.
 		if (filter_count == LZMA_FILTERS_MAX)

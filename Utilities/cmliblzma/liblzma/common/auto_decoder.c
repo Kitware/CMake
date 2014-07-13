@@ -177,7 +177,7 @@ auto_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern LZMA_API(lzma_ret)
 lzma_auto_decoder(lzma_stream *strm, uint64_t memlimit, uint32_t flags)
 {
-	lzma_next_strm_init(auto_decoder_init, strm, memlimit, flags);
+	lzma_next_strm_init2(auto_decoder_init, strm, memlimit, flags);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_FINISH] = true;

@@ -43,16 +43,18 @@ struct lzma_coder_s {
 static void
 move_window(lzma_mf *mf)
 {
+	uint32_t move_offset;
+	size_t move_size;
+
 	// Align the move to a multiple of 16 bytes. Some LZ-based encoders
 	// like LZMA use the lowest bits of mf->read_pos to know the
 	// alignment of the uncompressed data. We also get better speed
 	// for memmove() with aligned buffers.
 	assert(mf->read_pos > mf->keep_size_before);
-	const uint32_t move_offset
-		= (mf->read_pos - mf->keep_size_before) & ~UINT32_C(15);
+	move_offset = (mf->read_pos - mf->keep_size_before) & ~UINT32_C(15);
 
 	assert(mf->write_pos > move_offset);
-	const size_t move_size = mf->write_pos - move_offset;
+	move_size = mf->write_pos - move_offset;
 
 	assert(move_offset + move_size <= mf->size);
 
@@ -79,6 +81,9 @@ static lzma_ret
 fill_window(lzma_coder *coder, lzma_allocator *allocator, const uint8_t *in,
 		size_t *in_pos, size_t in_size, lzma_action action)
 {
+	size_t write_pos;
+	lzma_ret ret;
+
 	assert(coder->mf.read_pos <= coder->mf.write_pos);
 
 	// Move the sliding window if needed.
@@ -88,8 +93,7 @@ fill_window(lzma_coder *coder, lzma_allocator *allocator, const uint8_t *in,
 	// Maybe this is ugly, but lzma_mf uses uint32_t for most things
 	// (which I find cleanest), but we need size_t here when filling
 	// the history window.
-	size_t write_pos = coder->mf.write_pos;
-	lzma_ret ret;
+	write_pos = coder->mf.write_pos;
 	if (coder->next.code == NULL) {
 		// Not using a filter, simply memcpy() as much as possible.
 		lzma_bufcpy(in, in_pos, in_size, coder->mf.buffer,
@@ -156,6 +160,8 @@ lz_encode(lzma_coder *coder, lzma_allocator *allocator,
 {
 	while (*out_pos < out_size
 			&& (*in_pos < in_size || action != LZMA_RUN)) {
+		lzma_ret ret;
+
 		// Read more data to coder->mf.buffer if needed.
 		if (coder->mf.action == LZMA_RUN && coder->mf.read_pos
 				>= coder->mf.read_limit)
@@ -163,7 +169,7 @@ lz_encode(lzma_coder *coder, lzma_allocator *allocator,
 					in, in_pos, in_size, action));
 
 		// Encode
-		const lzma_ret ret = coder->lz.code(coder->lz.coder,
+		ret = coder->lz.code(coder->lz.coder,
 				&coder->mf, out, out_pos, out_size);
 		if (ret != LZMA_OK) {
 			// Setting this to LZMA_RUN for cases when we are
@@ -182,6 +188,14 @@ static bool
 lz_encoder_prepare(lzma_mf *mf, lzma_allocator *allocator,
 		const lzma_lz_options *lz_options)
 {
+	bool is_bt;
+	uint32_t new_count;
+	uint32_t reserve;
+	uint32_t old_size;
+	uint32_t hash_bytes;
+	uint32_t hs;
+	uint32_t old_count;
+
 	// For now, the dictionary size is limited to 1.5 GiB. This may grow
 	// in the future if needed, but it needs a little more work than just
 	// changing this check.
@@ -207,14 +221,14 @@ lz_encoder_prepare(lzma_mf *mf, lzma_allocator *allocator,
 	//     to size_t.
 	//   - Memory usage calculation needs something too, e.g. use uint64_t
 	//     for mf->size.
-	uint32_t reserve = lz_options->dict_size / 2;
+	reserve = lz_options->dict_size / 2;
 	if (reserve > (UINT32_C(1) << 30))
 		reserve /= 2;
 
 	reserve += (lz_options->before_size + lz_options->match_len_max
 			+ lz_options->after_size) / 2 + (UINT32_C(1) << 19);
 
-	const uint32_t old_size = mf->size;
+	old_size = mf->size;
 	mf->size = mf->keep_size_before + reserve + mf->keep_size_after;
 
 	// Deallocate the old history buffer if it exists but has different
@@ -284,12 +298,11 @@ lz_encoder_prepare(lzma_mf *mf, lzma_allocator *allocator,
 
 	// Calculate the sizes of mf->hash and mf->son and check that
 	// nice_len is big enough for the selected match finder.
-	const uint32_t hash_bytes = lz_options->match_finder & 0x0F;
+	hash_bytes = lz_options->match_finder & 0x0F;
 	if (hash_bytes > mf->nice_len)
 		return true;
 
-	const bool is_bt = (lz_options->match_finder & 0x10) != 0;
-	uint32_t hs;
+	is_bt = (lz_options->match_finder & 0x10) != 0;
 
 	if (hash_bytes == 2) {
 		hs = 0xFFFF;
@@ -331,13 +344,13 @@ lz_encoder_prepare(lzma_mf *mf, lzma_allocator *allocator,
 	// hash_size_sum + sons_count cannot overflow.
 	assert(hs < UINT32_MAX / 5);
 
-	const uint32_t old_count = mf->hash_size_sum + mf->sons_count;
+	old_count = mf->hash_size_sum + mf->sons_count;
 	mf->hash_size_sum = hs;
 	mf->sons_count = mf->cyclic_size;
 	if (is_bt)
 		mf->sons_count *= 2;
 
-	const uint32_t new_count = mf->hash_size_sum + mf->sons_count;
+	new_count = mf->hash_size_sum + mf->sons_count;
 
 	// Deallocate the old hash array if it exists and has different size
 	// than what is needed now.
@@ -363,6 +376,8 @@ static bool
 lz_encoder_init(lzma_mf *mf, lzma_allocator *allocator,
 		const lzma_lz_options *lz_options)
 {
+	size_t alloc_count;
+
 	// Allocate the history buffer.
 	if (mf->buffer == NULL) {
 		mf->buffer = lzma_alloc(mf->size, allocator);
@@ -382,7 +397,7 @@ lz_encoder_init(lzma_mf *mf, lzma_allocator *allocator,
 	mf->pending = 0;
 
 	// Allocate match finder's hash array.
-	const size_t alloc_count = mf->hash_size_sum + mf->sons_count;
+	alloc_count = mf->hash_size_sum + mf->sons_count;
 
 #if UINT32_MAX >= SIZE_MAX / 4
 	// Check for integer overflow. (Huge dictionaries are not
@@ -442,12 +457,7 @@ extern uint64_t
 lzma_lz_encoder_memusage(const lzma_lz_options *lz_options)
 {
 	// Old buffers must not exist when calling lz_encoder_prepare().
-	lzma_mf mf = {
-		.buffer = NULL,
-		.hash = NULL,
-		.hash_size_sum = 0,
-		.sons_count = 0,
-	};
+	lzma_mf mf = { NULL };
 
 	// Setup the size information into mf.
 	if (lz_encoder_prepare(&mf, NULL, lz_options))
@@ -501,6 +511,8 @@ lzma_lz_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 			lzma_allocator *allocator, const void *options,
 			lzma_lz_options *lz_options))
 {
+	lzma_lz_options lz_options;
+
 #ifdef HAVE_SMALL
 	// We need that the CRC32 table has been initialized.
 	lzma_crc32_init();
@@ -529,7 +541,6 @@ lzma_lz_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 	}
 
 	// Initialize the LZ-based encoder.
-	lzma_lz_options lz_options;
 	return_if_error(lz_init(&next->coder->lz, allocator,
 			filters[0].options, &lz_options));
 

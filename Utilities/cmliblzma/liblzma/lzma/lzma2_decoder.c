@@ -224,6 +224,8 @@ static lzma_ret
 lzma2_decoder_init(lzma_lz_decoder *lz, lzma_allocator *allocator,
 		const void *opt, lzma_lz_options *lz_options)
 {
+	const lzma_options_lzma *options = opt;
+
 	if (lz->coder == NULL) {
 		lz->coder = lzma_alloc(sizeof(lzma_coder), allocator);
 		if (lz->coder == NULL)
@@ -234,8 +236,6 @@ lzma2_decoder_init(lzma_lz_decoder *lz, lzma_allocator *allocator,
 
 		lz->coder->lzma = LZMA_LZ_DECODER_INIT;
 	}
-
-	const lzma_options_lzma *options = opt;
 
 	lz->coder->sequence = SEQ_CONTROL;
 	lz->coder->need_properties = true;
@@ -272,6 +272,8 @@ extern lzma_ret
 lzma_lzma2_props_decode(void **options, lzma_allocator *allocator,
 		const uint8_t *props, size_t props_size)
 {
+	lzma_options_lzma *opt;
+
 	if (props_size != 1)
 		return LZMA_OPTIONS_ERROR;
 
@@ -283,8 +285,7 @@ lzma_lzma2_props_decode(void **options, lzma_allocator *allocator,
 	if (props[0] > 40)
 		return LZMA_OPTIONS_ERROR;
 
-	lzma_options_lzma *opt = lzma_alloc(
-			sizeof(lzma_options_lzma), allocator);
+	opt = lzma_alloc(sizeof(lzma_options_lzma), allocator);
 	if (opt == NULL)
 		return LZMA_MEM_ERROR;
 

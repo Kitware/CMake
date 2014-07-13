@@ -207,7 +207,7 @@ lzma_index_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern LZMA_API(lzma_ret)
 lzma_index_encoder(lzma_stream *strm, const lzma_index *i)
 {
-	lzma_next_strm_init(lzma_index_encoder_init, strm, i);
+	lzma_next_strm_init1(lzma_index_encoder_init, strm, i);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_FINISH] = true;
@@ -220,6 +220,10 @@ extern LZMA_API(lzma_ret)
 lzma_index_buffer_encode(const lzma_index *i,
 		uint8_t *out, size_t *out_pos, size_t out_size)
 {
+	lzma_coder coder;
+	size_t out_start;
+	lzma_ret ret;
+
 	// Validate the arguments.
 	if (i == NULL || out == NULL || out_pos == NULL || *out_pos > out_size)
 		return LZMA_PROG_ERROR;
@@ -230,13 +234,12 @@ lzma_index_buffer_encode(const lzma_index *i,
 
 	// The Index encoder needs just one small data structure so we can
 	// allocate it on stack.
-	lzma_coder coder;
 	index_encoder_reset(&coder, i);
 
 	// Do the actual encoding. This should never fail, but store
 	// the original *out_pos just in case.
-	const size_t out_start = *out_pos;
-	lzma_ret ret = index_encode(&coder, NULL, NULL, NULL, 0,
+	out_start = *out_pos;
+	ret = index_encode(&coder, NULL, NULL, NULL, 0,
 			out, out_pos, out_size, LZMA_RUN);
 
 	if (ret == LZMA_STREAM_END) {

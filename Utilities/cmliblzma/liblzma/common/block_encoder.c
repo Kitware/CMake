@@ -208,7 +208,7 @@ lzma_block_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern LZMA_API(lzma_ret)
 lzma_block_encoder(lzma_stream *strm, lzma_block *block)
 {
-	lzma_next_strm_init(lzma_block_encoder_init, strm, block);
+	lzma_next_strm_init1(lzma_block_encoder_init, strm, block);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_FINISH] = true;

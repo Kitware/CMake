@@ -289,7 +289,7 @@ index_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern LZMA_API(lzma_ret)
 lzma_index_decoder(lzma_stream *strm, lzma_index **i, uint64_t memlimit)
 {
-	lzma_next_strm_init(index_decoder_init, strm, i, memlimit);
+	lzma_next_strm_init2(index_decoder_init, strm, i, memlimit);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_FINISH] = true;
@@ -303,21 +303,23 @@ lzma_index_buffer_decode(
 		lzma_index **i, uint64_t *memlimit, lzma_allocator *allocator,
 		const uint8_t *in, size_t *in_pos, size_t in_size)
 {
+	lzma_coder coder;
+	lzma_ret ret;
+
+	// Store the input start position so that we can restore it in case
+	// of an error.
+	const size_t in_start = *in_pos;
+
 	// Sanity checks
 	if (i == NULL || memlimit == NULL
 			|| in == NULL || in_pos == NULL || *in_pos > in_size)
 		return LZMA_PROG_ERROR;
 
 	// Initialize the decoder.
-	lzma_coder coder;
 	return_if_error(index_decoder_reset(&coder, allocator, i, *memlimit));
 
-	// Store the input start position so that we can restore it in case
-	// of an error.
-	const size_t in_start = *in_pos;
-
 	// Do the actual decoding.
-	lzma_ret ret = index_decode(&coder, allocator, in, in_pos, in_size,
+	ret = index_decode(&coder, allocator, in, in_pos, in_size,
 			NULL, NULL, 0, LZMA_RUN);
 
 	if (ret == LZMA_STREAM_END) {

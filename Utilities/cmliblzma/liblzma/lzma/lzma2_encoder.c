@@ -54,12 +54,13 @@ struct lzma_coder_s {
 static void
 lzma2_header_lzma(lzma_coder *coder)
 {
+	size_t pos;
+	size_t size;
+
 	assert(coder->uncompressed_size > 0);
 	assert(coder->uncompressed_size <= LZMA2_UNCOMPRESSED_MAX);
 	assert(coder->compressed_size > 0);
 	assert(coder->compressed_size <= LZMA2_CHUNK_MAX);
-
-	size_t pos;
 
 	if (coder->need_properties) {
 		pos = 0;
@@ -81,7 +82,7 @@ lzma2_header_lzma(lzma_coder *coder)
 	coder->buf_pos = pos;
 
 	// Uncompressed size
-	size_t size = coder->uncompressed_size - 1;
+	size = coder->uncompressed_size - 1;
 	coder->buf[pos++] += size >> 16;
 	coder->buf[pos++] = (size >> 8) & 0xFF;
 	coder->buf[pos++] = size & 0xFF;
@@ -162,6 +163,9 @@ lzma2_encode(lzma_coder *restrict coder, lzma_mf *restrict mf,
 	// Fall through
 
 	case SEQ_LZMA_ENCODE: {
+		uint32_t read_start;
+		lzma_ret ret;
+
 		// Calculate how much more uncompressed data this chunk
 		// could accept.
 		const uint32_t left = LZMA2_UNCOMPRESSED_MAX
@@ -182,10 +186,10 @@ lzma2_encode(lzma_coder *restrict coder, lzma_mf *restrict mf,
 
 		// Save the start position so that we can update
 		// coder->uncompressed_size.
-		const uint32_t read_start = mf->read_pos - mf->read_ahead;
+		read_start = mf->read_pos - mf->read_ahead;
 
 		// Call the LZMA encoder until the chunk is finished.
-		const lzma_ret ret = lzma_lzma_encode(coder->lzma, mf,
+		ret = lzma_lzma_encode(coder->lzma, mf,
 				coder->buf + LZMA2_HEADER_MAX,
 				&coder->compressed_size,
 				LZMA2_CHUNK_MAX, limit);
@@ -273,6 +277,8 @@ lzma2_encoder_end(lzma_coder *coder, lzma_allocator *allocator)
 static lzma_ret
 lzma2_encoder_options_update(lzma_coder *coder, const lzma_filter *filter)
 {
+	lzma_options_lzma *opt;
+
 	// New options can be set only when there is no incomplete chunk.
 	// This is the case at the beginning of the raw stream and right
 	// after LZMA_SYNC_FLUSH.
@@ -281,7 +287,7 @@ lzma2_encoder_options_update(lzma_coder *coder, const lzma_filter *filter)
 
 	// Look if there are new options. At least for now,
 	// only lc/lp/pb can be changed.
-	const lzma_options_lzma *opt = filter->options;
+	opt = filter->options;
 	if (coder->opt_cur.lc != opt->lc || coder->opt_cur.lp != opt->lp
 			|| coder->opt_cur.pb != opt->pb) {
 		// Validate the options.

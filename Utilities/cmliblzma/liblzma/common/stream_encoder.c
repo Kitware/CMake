@@ -147,6 +147,8 @@ stream_encode(lzma_coder *coder, lzma_allocator *allocator,
 	}
 
 	case SEQ_BLOCK_ENCODE: {
+		lzma_vli unpadded_size;
+
 		static const lzma_action convert[4] = {
 			LZMA_RUN,
 			LZMA_SYNC_FLUSH,
@@ -162,7 +164,7 @@ stream_encode(lzma_coder *coder, lzma_allocator *allocator,
 			return ret;
 
 		// Add a new Index Record.
-		const lzma_vli unpadded_size = lzma_block_unpadded_size(
+		unpadded_size = lzma_block_unpadded_size(
 				&coder->block_options);
 		assert(unpadded_size != 0);
 		return_if_error(lzma_index_append(coder->index, allocator,
@@ -174,6 +176,12 @@ stream_encode(lzma_coder *coder, lzma_allocator *allocator,
 	}
 
 	case SEQ_INDEX_ENCODE: {
+		const lzma_stream_flags stream_flags = {
+			0,
+			lzma_index_size(coder->index),
+			coder->block_options.check,
+		};
+
 		// Call the Index encoder. It doesn't take any input, so
 		// those pointers can be NULL.
 		const lzma_ret ret = coder->index_encoder.code(
@@ -184,11 +192,6 @@ stream_encode(lzma_coder *coder, lzma_allocator *allocator,
 			return ret;
 
 		// Encode the Stream Footer into coder->buffer.
-		const lzma_stream_flags stream_flags = {
-			.version = 0,
-			.backward_size = lzma_index_size(coder->index),
-			.check = coder->block_options.check,
-		};
 
 		if (lzma_stream_footer_encode(&stream_flags, coder->buffer)
 				!= LZMA_OK)
@@ -211,11 +214,13 @@ stream_encode(lzma_coder *coder, lzma_allocator *allocator,
 static void
 stream_encoder_end(lzma_coder *coder, lzma_allocator *allocator)
 {
+	size_t i;
+
 	lzma_next_end(&coder->block_encoder, allocator);
 	lzma_next_end(&coder->index_encoder, allocator);
 	lzma_index_end(coder->index, allocator);
 
-	for (size_t i = 0; coder->filters[i].id != LZMA_VLI_UNKNOWN; ++i)
+	for (i = 0; coder->filters[i].id != LZMA_VLI_UNKNOWN; ++i)
 		lzma_free(coder->filters[i].options, allocator);
 
 	lzma_free(coder, allocator);
@@ -228,14 +233,18 @@ stream_encoder_update(lzma_coder *coder, lzma_allocator *allocator,
 		const lzma_filter *filters,
 		const lzma_filter *reversed_filters)
 {
+	size_t i;
+
 	if (coder->sequence <= SEQ_BLOCK_INIT) {
+		lzma_ret ret;
+
 		// There is no incomplete Block waiting to be finished,
 		// thus we can change the whole filter chain. Start by
 		// trying to initialize the Block encoder with the new
 		// chain. This way we detect if the chain is valid.
 		coder->block_encoder_is_initialized = false;
 		coder->block_options.filters = (lzma_filter *)(filters);
-		const lzma_ret ret = block_encoder_init(coder, allocator);
+		ret = block_encoder_init(coder, allocator);
 		coder->block_options.filters = coder->filters;
 		if (ret != LZMA_OK)
 			return ret;
@@ -255,7 +264,7 @@ stream_encoder_update(lzma_coder *coder, lzma_allocator *allocator,
 	}
 
 	// Free the copy of the old chain and make a copy of the new chain.
-	for (size_t i = 0; coder->filters[i].id != LZMA_VLI_UNKNOWN; ++i)
+	for (i = 0; coder->filters[i].id != LZMA_VLI_UNKNOWN; ++i)
 		lzma_free(coder->filters[i].options, allocator);
 
 	return lzma_filters_copy(filters, coder->filters, allocator);
@@ -266,6 +275,8 @@ extern lzma_ret
 lzma_stream_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 		const lzma_filter *filters, lzma_check check)
 {
+	lzma_stream_flags stream_flags = { 0, 0, check };
+
 	lzma_next_coder_init(&lzma_stream_encoder_init, next, allocator);
 
 	if (filters == NULL)
@@ -298,10 +309,6 @@ lzma_stream_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 		return LZMA_MEM_ERROR;
 
 	// Encode the Stream Header
-	lzma_stream_flags stream_flags = {
-		.version = 0,
-		.check = check,
-	};
 	return_if_error(lzma_stream_header_encode(
 			&stream_flags, next->coder->buffer));
 
@@ -320,7 +327,7 @@ extern LZMA_API(lzma_ret)
 lzma_stream_encoder(lzma_stream *strm,
 		const lzma_filter *filters, lzma_check check)
 {
-	lzma_next_strm_init(lzma_stream_encoder_init, strm, filters, check);
+	lzma_next_strm_init2(lzma_stream_encoder_init, strm, filters, check);
 
 	strm->internal->supported_actions[LZMA_RUN] = true;
 	strm->internal->supported_actions[LZMA_SYNC_FLUSH] = true;

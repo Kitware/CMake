@@ -38,11 +38,11 @@ lzma_version_string(void)
 extern void * lzma_attribute((__malloc__)) lzma_attr_alloc_size(1)
 lzma_alloc(size_t size, lzma_allocator *allocator)
 {
+	void *ptr;
+
 	// Some malloc() variants return NULL if called with size == 0.
 	if (size == 0)
 		size = 1;
-
-	void *ptr;
 
 	if (allocator != NULL && allocator->alloc != NULL)
 		ptr = allocator->alloc(allocator->opaque, 1, size);
@@ -173,6 +173,10 @@ lzma_strm_init(lzma_stream *strm)
 extern LZMA_API(lzma_ret)
 lzma_code(lzma_stream *strm, lzma_action action)
 {
+	size_t in_pos = 0;
+	size_t out_pos = 0;
+	lzma_ret ret;
+
 	// Sanity checks
 	if ((strm->next_in == NULL && strm->avail_in != 0)
 			|| (strm->next_out == NULL && strm->avail_out != 0)
@@ -248,9 +252,7 @@ lzma_code(lzma_stream *strm, lzma_action action)
 		return LZMA_PROG_ERROR;
 	}
 
-	size_t in_pos = 0;
-	size_t out_pos = 0;
-	lzma_ret ret = strm->internal->next.code(
+	ret = strm->internal->next.code(
 			strm->internal->next.coder, strm->allocator,
 			strm->next_in, &in_pos, strm->avail_in,
 			strm->next_out, &out_pos, strm->avail_out, action);

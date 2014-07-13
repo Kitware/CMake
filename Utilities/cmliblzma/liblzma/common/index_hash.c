@@ -124,13 +124,14 @@ static lzma_ret
 hash_append(lzma_index_hash_info *info, lzma_vli unpadded_size,
 		lzma_vli uncompressed_size)
 {
+	const lzma_vli sizes[2] = { unpadded_size, uncompressed_size };
+
 	info->blocks_size += vli_ceil4(unpadded_size);
 	info->uncompressed_size += uncompressed_size;
 	info->index_list_size += lzma_vli_size(unpadded_size)
 			+ lzma_vli_size(uncompressed_size);
 	++info->count;
 
-	const lzma_vli sizes[2] = { unpadded_size, uncompressed_size };
 	lzma_check_update(&info->check, LZMA_CHECK_BEST,
 			(const uint8_t *)(sizes), sizeof(sizes));
 
@@ -173,6 +174,9 @@ extern LZMA_API(lzma_ret)
 lzma_index_hash_decode(lzma_index_hash *index_hash, const uint8_t *in,
 		size_t *in_pos, size_t in_size)
 {
+	size_t in_start;
+	lzma_ret ret;
+
 	// Catch zero input buffer here, because in contrast to Index encoder
 	// and decoder functions, applications call this function directly
 	// instead of via lzma_code(), which does the buffer checking.
@@ -182,8 +186,8 @@ lzma_index_hash_decode(lzma_index_hash *index_hash, const uint8_t *in,
 	// NOTE: This function has many similarities to index_encode() and
 	// index_decode() functions found from index_encoder.c and
 	// index_decoder.c. See the comments especially in index_encoder.c.
-	const size_t in_start = *in_pos;
-	lzma_ret ret = LZMA_OK;
+	in_start = *in_pos;
+	ret = LZMA_OK;
 
 	while (*in_pos < in_size)
 	switch (index_hash->sequence) {

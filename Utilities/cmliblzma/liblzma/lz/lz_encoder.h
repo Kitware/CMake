@@ -218,7 +218,7 @@ typedef struct {
 
 
 /// Get pointer to the first byte not ran through the match finder
-static inline const uint8_t *
+static inline uint8_t *
 mf_ptr(const lzma_mf *mf)
 {
 	return mf->buffer + mf->read_pos;

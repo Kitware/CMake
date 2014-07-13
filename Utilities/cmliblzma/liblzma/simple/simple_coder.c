@@ -71,6 +71,9 @@ simple_code(lzma_coder *coder, lzma_allocator *allocator,
 		size_t in_size, uint8_t *restrict out,
 		size_t *restrict out_pos, size_t out_size, lzma_action action)
 {
+	size_t out_avail;
+	size_t buf_avail;
+
 	// TODO: Add partial support for LZMA_SYNC_FLUSH. We can support it
 	// in cases when the filter is able to filter everything. With most
 	// simple filters it can be done at offset that is a multiple of 2,
@@ -105,9 +108,13 @@ simple_code(lzma_coder *coder, lzma_allocator *allocator,
 	// more data to out[] hopefully filling it completely. Then filter
 	// the data in out[]. This step is where most of the data gets
 	// filtered if the buffer sizes used by the application are reasonable.
-	const size_t out_avail = out_size - *out_pos;
-	const size_t buf_avail = coder->size - coder->pos;
+	out_avail = out_size - *out_pos;
+	buf_avail = coder->size - coder->pos;
 	if (out_avail > buf_avail || buf_avail == 0) {
+		size_t size;
+		size_t filtered;
+		size_t unfiltered;
+
 		// Store the old position so that we know from which byte
 		// to start filtering.
 		const size_t out_start = *out_pos;
@@ -130,11 +137,10 @@ simple_code(lzma_coder *coder, lzma_allocator *allocator,
 		}
 
 		// Filter out[].
-		const size_t size = *out_pos - out_start;
-		const size_t filtered = call_filter(
-				coder, out + out_start, size);
+		size = *out_pos - out_start;
+		filtered = call_filter(coder, out + out_start, size);
 
-		const size_t unfiltered = size - filtered;
+		unfiltered = size - filtered;
 		assert(unfiltered <= coder->allocated / 2);
 
 		// Now we can update coder->pos and coder->size, because

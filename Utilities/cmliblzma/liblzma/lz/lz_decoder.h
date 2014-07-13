@@ -72,14 +72,14 @@ typedef struct {
 } lzma_lz_decoder;
 
 
-#define LZMA_LZ_DECODER_INIT \
-	(lzma_lz_decoder){ \
-		.coder = NULL, \
-		.code = NULL, \
-		.reset = NULL, \
-		.set_uncompressed = NULL, \
-		.end = NULL, \
-	}
+static const lzma_lz_decoder LZMA_LZ_DECODER_INIT =
+	{
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+		NULL,
+	};
 
 
 extern lzma_ret lzma_lz_decoder_init(lzma_next_coder *next,
@@ -151,13 +151,15 @@ dict_repeat(lzma_dict *dict, uint32_t distance, uint32_t *len)
 		dict->pos += left;
 
 	} else {
+		uint32_t copy_pos;
+		uint32_t copy_size;
+
 		// The bigger the dictionary, the more rare this
 		// case occurs. We need to "wrap" the dict, thus
 		// we might need two memcpy() to copy all the data.
 		assert(dict->full == dict->size);
-		const uint32_t copy_pos
-				= dict->pos - distance - 1 + dict->size;
-		uint32_t copy_size = dict->size - copy_pos;
+		copy_pos = dict->pos - distance - 1 + dict->size;
+		copy_size = dict->size - copy_pos;
 
 		if (copy_size < left) {
 			memmove(dict->buf + dict->pos, dict->buf + copy_pos,

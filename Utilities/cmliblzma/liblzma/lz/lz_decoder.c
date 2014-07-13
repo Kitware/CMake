@@ -69,13 +69,17 @@ decode_buffer(lzma_coder *coder,
 		size_t *restrict out_pos, size_t out_size)
 {
 	while (true) {
+		size_t copy_size;
+		size_t dict_start;
+		lzma_ret ret;
+
 		// Wrap the dictionary if needed.
 		if (coder->dict.pos == coder->dict.size)
 			coder->dict.pos = 0;
 
 		// Store the current dictionary position. It is needed to know
 		// where to start copying to the out[] buffer.
-		const size_t dict_start = coder->dict.pos;
+		dict_start = coder->dict.pos;
 
 		// Calculate how much we allow coder->lz.code() to decode.
 		// It must not decode past the end of the dictionary
@@ -86,13 +90,13 @@ decode_buffer(lzma_coder *coder,
 					coder->dict.size - coder->dict.pos);
 
 		// Call the coder->lz.code() to do the actual decoding.
-		const lzma_ret ret = coder->lz.code(
+		ret = coder->lz.code(
 				coder->lz.coder, &coder->dict,
 				in, in_pos, in_size);
 
 		// Copy the decoded data from the dictionary to the out[]
 		// buffer.
-		const size_t copy_size = coder->dict.pos - dict_start;
+		copy_size = coder->dict.pos - dict_start;
 		assert(copy_size <= out_size - *out_pos);
 		memcpy(out + *out_pos, coder->dict.buf + dict_start,
 				copy_size);
@@ -139,13 +143,15 @@ lz_decode(lzma_coder *coder,
 	// We aren't the last coder in the chain, we need to decode
 	// our input to a temporary buffer.
 	while (*out_pos < out_size) {
+		lzma_ret ret;
+
 		// Fill the temporary buffer if it is empty.
 		if (!coder->next_finished
 				&& coder->temp.pos == coder->temp.size) {
 			coder->temp.pos = 0;
 			coder->temp.size = 0;
 
-			const lzma_ret ret = coder->next.code(
+			ret = coder->next.code(
 					coder->next.coder,
 					allocator, in, in_pos, in_size,
 					coder->temp.buffer, &coder->temp.size,
@@ -167,7 +173,7 @@ lz_decode(lzma_coder *coder,
 			return LZMA_OK;
 		}
 
-		const lzma_ret ret = decode_buffer(coder, coder->temp.buffer,
+		ret = decode_buffer(coder, coder->temp.buffer,
 				&coder->temp.pos, coder->temp.size,
 				out, out_pos, out_size);
 
@@ -206,6 +212,8 @@ lzma_lz_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 			lzma_allocator *allocator, const void *options,
 			lzma_lz_options *lz_options))
 {
+	lzma_lz_options lz_options;
+
 	// Allocate the base structure if it isn't already allocated.
 	if (next->coder == NULL) {
 		next->coder = lzma_alloc(sizeof(lzma_coder), allocator);
@@ -223,7 +231,6 @@ lzma_lz_decoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 
 	// Allocate and initialize the LZ-based decoder. It will also give
 	// us the dictionary size.
-	lzma_lz_options lz_options;
 	return_if_error(lz_init(&next->coder->lz, allocator,
 			filters[0].options, &lz_options));
 

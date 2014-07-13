@@ -22,12 +22,12 @@ arm_code(lzma_simple *simple lzma_attribute((__unused__)),
 	size_t i;
 	for (i = 0; i + 4 <= size; i += 4) {
 		if (buffer[i + 3] == 0xEB) {
+			uint32_t dest;
 			uint32_t src = (buffer[i + 2] << 16)
 					| (buffer[i + 1] << 8)
 					| (buffer[i + 0]);
 			src <<= 2;
 
-			uint32_t dest;
 			if (is_encoder)
 				dest = now_pos + (uint32_t)(i) + 8 + src;
 			else

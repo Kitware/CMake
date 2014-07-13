@@ -23,6 +23,7 @@ armthumb_code(lzma_simple *simple lzma_attribute((__unused__)),
 	for (i = 0; i + 4 <= size; i += 2) {
 		if ((buffer[i + 1] & 0xF8) == 0xF0
 				&& (buffer[i + 3] & 0xF8) == 0xF8) {
+			uint32_t dest;
 			uint32_t src = ((buffer[i + 1] & 0x7) << 19)
 					| (buffer[i + 0] << 11)
 					| ((buffer[i + 3] & 0x7) << 8)
@@ -30,7 +31,6 @@ armthumb_code(lzma_simple *simple lzma_attribute((__unused__)),
 
 			src <<= 1;
 
-			uint32_t dest;
 			if (is_encoder)
 				dest = now_pos + (uint32_t)(i) + 4 + src;
 			else

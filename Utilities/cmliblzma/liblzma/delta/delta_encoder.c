@@ -21,9 +21,10 @@ static void
 copy_and_encode(lzma_coder *coder,
 		const uint8_t *restrict in, uint8_t *restrict out, size_t size)
 {
+	size_t i;
 	const size_t distance = coder->distance;
 
-	for (size_t i = 0; i < size; ++i) {
+	for (i = 0; i < size; ++i) {
 		const uint8_t tmp = coder->history[
 				(distance + coder->pos) & 0xFF];
 		coder->history[coder->pos-- & 0xFF] = in[i];
@@ -37,9 +38,10 @@ copy_and_encode(lzma_coder *coder,
 static void
 encode_in_place(lzma_coder *coder, uint8_t *buffer, size_t size)
 {
+	size_t i;
 	const size_t distance = coder->distance;
 
-	for (size_t i = 0; i < size; ++i) {
+	for (i = 0; i < size; ++i) {
 		const uint8_t tmp = coder->history[
 				(distance + coder->pos) & 0xFF];
 		coder->history[coder->pos-- & 0xFF] = buffer[i];
@@ -109,12 +111,13 @@ lzma_delta_encoder_init(lzma_next_coder *next, lzma_allocator *allocator,
 extern lzma_ret
 lzma_delta_props_encode(const void *options, uint8_t *out)
 {
+	const lzma_options_delta *opt = options;
+
 	// The caller must have already validated the options, so it's
 	// LZMA_PROG_ERROR if they are invalid.
 	if (lzma_delta_coder_memusage(options) == UINT64_MAX)
 		return LZMA_PROG_ERROR;
 
-	const lzma_options_delta *opt = options;
 	out[0] = opt->dist - LZMA_DELTA_DIST_MIN;
 
 	return LZMA_OK;

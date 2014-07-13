@@ -20,6 +20,14 @@ extern void
 lzma_lzma_optimum_fast(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		uint32_t *restrict back_res, uint32_t *restrict len_res)
 {
+	const uint8_t *buf;
+	uint32_t buf_avail;
+	uint32_t i;
+	uint32_t rep_len = 0;
+	uint32_t rep_index = 0;
+	uint32_t back_main = 0;
+	uint32_t limit;
+
 	const uint32_t nice_len = mf->nice_len;
 
 	uint32_t len_main;
@@ -32,8 +40,8 @@ lzma_lzma_optimum_fast(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		matches_count = coder->matches_count;
 	}
 
-	const uint8_t *buf = mf_ptr(mf) - 1;
-	const uint32_t buf_avail = my_min(mf_avail(mf) + 1, MATCH_LEN_MAX);
+	buf = mf_ptr(mf) - 1;
+	buf_avail = my_min(mf_avail(mf) + 1, MATCH_LEN_MAX);
 
 	if (buf_avail < 2) {
 		// There's not enough input left to encode a match.
@@ -43,10 +51,9 @@ lzma_lzma_optimum_fast(lzma_coder *restrict coder, lzma_mf *restrict mf,
 	}
 
 	// Look for repeated matches; scan the previous four match distances
-	uint32_t rep_len = 0;
-	uint32_t rep_index = 0;
+	for (i = 0; i < REP_DISTANCES; ++i) {
+		uint32_t len;
 
-	for (uint32_t i = 0; i < REP_DISTANCES; ++i) {
 		// Pointer to the beginning of the match candidate
 		const uint8_t *const buf_back = buf - coder->reps[i] - 1;
 
@@ -57,7 +64,6 @@ lzma_lzma_optimum_fast(lzma_coder *restrict coder, lzma_mf *restrict mf,
 
 		// The first two bytes matched.
 		// Calculate the length of the match.
-		uint32_t len;
 		for (len = 2; len < buf_avail
 				&& buf[len] == buf_back[len]; ++len) ;
 
@@ -86,7 +92,6 @@ lzma_lzma_optimum_fast(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		return;
 	}
 
-	uint32_t back_main = 0;
 	if (len_main >= 2) {
 		back_main = coder->matches[matches_count - 1].dist;
 
@@ -153,15 +158,16 @@ lzma_lzma_optimum_fast(lzma_coder *restrict coder, lzma_mf *restrict mf,
 	// the old buf pointer instead of recalculating it with mf_ptr().
 	++buf;
 
-	const uint32_t limit = len_main - 1;
+	limit = len_main - 1;
 
-	for (uint32_t i = 0; i < REP_DISTANCES; ++i) {
+	for (i = 0; i < REP_DISTANCES; ++i) {
+		uint32_t len;
+
 		const uint8_t *const buf_back = buf - coder->reps[i] - 1;
 
 		if (not_equal_16(buf, buf_back))
 			continue;
 
-		uint32_t len;
 		for (len = 2; len < limit
 				&& buf[len] == buf_back[len]; ++len) ;
 

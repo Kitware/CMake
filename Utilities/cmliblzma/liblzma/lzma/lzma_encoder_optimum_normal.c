@@ -35,12 +35,15 @@ get_literal_price(const lzma_coder *const coder, const uint32_t pos,
 		symbol += UINT32_C(1) << 8;
 
 		do {
+			uint32_t match_bit;
+			uint32_t subcoder_index;
+			uint32_t bit;
+
 			match_byte <<= 1;
 
-			const uint32_t match_bit = match_byte & offset;
-			const uint32_t subcoder_index
-					= offset + match_bit + (symbol >> 8);
-			const uint32_t bit = (symbol >> 7) & 1;
+			match_bit = match_byte & offset;
+			subcoder_index = offset + match_bit + (symbol >> 8);
+			bit = (symbol >> 7) & 1;
 			price += rc_bit_price(subcoder[subcoder_index], bit);
 
 			symbol <<= 1;
@@ -131,7 +134,11 @@ get_pos_len_price(const lzma_coder *const coder, const uint32_t pos,
 static void
 fill_distances_prices(lzma_coder *coder)
 {
-	for (uint32_t len_to_pos_state = 0;
+	uint32_t len_to_pos_state;
+	uint32_t pos_slot;
+	uint32_t i;
+
+	for (len_to_pos_state = 0;
 			len_to_pos_state < LEN_TO_POS_STATES;
 			++len_to_pos_state) {
 
@@ -139,7 +146,7 @@ fill_distances_prices(lzma_coder *coder)
 				= coder->pos_slot_prices[len_to_pos_state];
 
 		// Price to encode the pos_slot.
-		for (uint32_t pos_slot = 0;
+		for (pos_slot = 0;
 				pos_slot < coder->dist_table_size; ++pos_slot)
 			pos_slot_prices[pos_slot] = rc_bittree_price(
 					coder->pos_slot[len_to_pos_state],
@@ -148,7 +155,7 @@ fill_distances_prices(lzma_coder *coder)
 		// For matches with distance >= FULL_DISTANCES, add the price
 		// of the direct bits part of the match distance. (Align bits
 		// are handled by fill_align_prices()).
-		for (uint32_t pos_slot = END_POS_MODEL_INDEX;
+		for (pos_slot = END_POS_MODEL_INDEX;
 				pos_slot < coder->dist_table_size; ++pos_slot)
 			pos_slot_prices[pos_slot] += rc_direct_price(
 					((pos_slot >> 1) - 1) - ALIGN_BITS);
@@ -156,7 +163,7 @@ fill_distances_prices(lzma_coder *coder)
 		// Distances in the range [0, 3] are fully encoded with
 		// pos_slot, so they are used for coder->distances_prices
 		// as is.
-		for (uint32_t i = 0; i < START_POS_MODEL_INDEX; ++i)
+		for (i = 0; i < START_POS_MODEL_INDEX; ++i)
 			coder->distances_prices[len_to_pos_state][i]
 					= pos_slot_prices[i];
 	}
@@ -164,7 +171,7 @@ fill_distances_prices(lzma_coder *coder)
 	// Distances in the range [4, 127] depend on pos_slot and pos_special.
 	// We do this in a loop separate from the above loop to avoid
 	// redundant calls to get_pos_slot().
-	for (uint32_t i = START_POS_MODEL_INDEX; i < FULL_DISTANCES; ++i) {
+	for (i = START_POS_MODEL_INDEX; i < FULL_DISTANCES; ++i) {
 		const uint32_t pos_slot = get_pos_slot(i);
 		const uint32_t footer_bits = ((pos_slot >> 1) - 1);
 		const uint32_t base = (2 | (pos_slot & 1)) << footer_bits;
@@ -172,7 +179,7 @@ fill_distances_prices(lzma_coder *coder)
 				coder->pos_special + base - pos_slot - 1,
 				footer_bits, i - base);
 
-		for (uint32_t len_to_pos_state = 0;
+		for (len_to_pos_state = 0;
 				len_to_pos_state < LEN_TO_POS_STATES;
 				++len_to_pos_state)
 			coder->distances_prices[len_to_pos_state][i]
@@ -188,7 +195,8 @@ fill_distances_prices(lzma_coder *coder)
 static void
 fill_align_prices(lzma_coder *coder)
 {
-	for (uint32_t i = 0; i < ALIGN_TABLE_SIZE; ++i)
+	uint32_t i;
+	for (i = 0; i < ALIGN_TABLE_SIZE; ++i)
 		coder->align_prices[i] = rc_bittree_reverse_price(
 				coder->pos_align, ALIGN_BITS, i);
 
@@ -225,12 +233,15 @@ static void
 backward(lzma_coder *restrict coder, uint32_t *restrict len_res,
 		uint32_t *restrict back_res, uint32_t cur)
 {
-	coder->opts_end_index = cur;
-
 	uint32_t pos_mem = coder->opts[cur].pos_prev;
 	uint32_t back_mem = coder->opts[cur].back_prev;
 
+	coder->opts_end_index = cur;
+
 	do {
+		const uint32_t pos_prev = pos_mem;
+		const uint32_t back_cur = back_mem;
+
 		if (coder->opts[cur].prev_1_is_literal) {
 			make_literal(&coder->opts[pos_mem]);
 			coder->opts[pos_mem].pos_prev = pos_mem - 1;
@@ -244,9 +255,6 @@ backward(lzma_coder *restrict coder, uint32_t *restrict len_res,
 						= coder->opts[cur].back_prev_2;
 			}
 		}
-
-		const uint32_t pos_prev = pos_mem;
-		const uint32_t back_cur = back_mem;
 
 		back_mem = coder->opts[pos_prev].back_prev;
 		pos_mem = coder->opts[pos_prev].pos_prev;
@@ -274,6 +282,23 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		uint32_t *restrict back_res, uint32_t *restrict len_res,
 		uint32_t position)
 {
+	uint32_t buf_avail;
+	const uint8_t *buf;
+	uint32_t rep_lens[REP_DISTANCES];
+	uint32_t rep_max_index = 0;
+	uint32_t i;
+
+	uint8_t current_byte;
+	uint8_t match_byte;
+
+	uint32_t pos_state;
+	uint32_t match_price;
+	uint32_t rep_match_price;
+	uint32_t len_end;
+	uint32_t len;
+
+	uint32_t normal_match_price;
+
 	const uint32_t nice_len = mf->nice_len;
 
 	uint32_t len_main;
@@ -287,19 +312,18 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		matches_count = coder->matches_count;
 	}
 
-	const uint32_t buf_avail = my_min(mf_avail(mf) + 1, MATCH_LEN_MAX);
+	buf_avail = my_min(mf_avail(mf) + 1, MATCH_LEN_MAX);
 	if (buf_avail < 2) {
 		*back_res = UINT32_MAX;
 		*len_res = 1;
 		return UINT32_MAX;
 	}
 
-	const uint8_t *const buf = mf_ptr(mf) - 1;
+	buf = mf_ptr(mf) - 1;
 
-	uint32_t rep_lens[REP_DISTANCES];
-	uint32_t rep_max_index = 0;
+	for (i = 0; i < REP_DISTANCES; ++i) {
+		uint32_t len_test;
 
-	for (uint32_t i = 0; i < REP_DISTANCES; ++i) {
 		const uint8_t *const buf_back = buf - coder->reps[i] - 1;
 
 		if (not_equal_16(buf, buf_back)) {
@@ -307,7 +331,6 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 			continue;
 		}
 
-		uint32_t len_test;
 		for (len_test = 2; len_test < buf_avail
 				&& buf[len_test] == buf_back[len_test];
 				++len_test) ;
@@ -333,8 +356,8 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		return UINT32_MAX;
 	}
 
-	const uint8_t current_byte = *buf;
-	const uint8_t match_byte = *(buf - coder->reps[0] - 1);
+	current_byte = *buf;
+	match_byte = *(buf - coder->reps[0] - 1);
 
 	if (len_main < 2 && current_byte != match_byte
 			&& rep_lens[rep_max_index] < 2) {
@@ -345,7 +368,7 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 
 	coder->opts[0].state = coder->state;
 
-	const uint32_t pos_state = position & coder->pos_mask;
+	pos_state = position & coder->pos_mask;
 
 	coder->opts[1].price = rc_bit_0_price(
 				coder->is_match[coder->state][pos_state])
@@ -355,9 +378,9 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 
 	make_literal(&coder->opts[1]);
 
-	const uint32_t match_price = rc_bit_1_price(
+	match_price = rc_bit_1_price(
 			coder->is_match[coder->state][pos_state]);
-	const uint32_t rep_match_price = match_price
+	rep_match_price = match_price
 			+ rc_bit_1_price(coder->is_rep[coder->state]);
 
 	if (match_byte == current_byte) {
@@ -371,7 +394,7 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		}
 	}
 
-	const uint32_t len_end = my_max(len_main, rep_lens[rep_max_index]);
+	len_end = my_max(len_main, rep_lens[rep_max_index]);
 
 	if (len_end < 2) {
 		*back_res = coder->opts[1].back_prev;
@@ -381,21 +404,23 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 
 	coder->opts[1].pos_prev = 0;
 
-	for (uint32_t i = 0; i < REP_DISTANCES; ++i)
+	for (i = 0; i < REP_DISTANCES; ++i)
 		coder->opts[0].backs[i] = coder->reps[i];
 
-	uint32_t len = len_end;
+	len = len_end;
 	do {
 		coder->opts[len].price = RC_INFINITY_PRICE;
 	} while (--len >= 2);
 
 
-	for (uint32_t i = 0; i < REP_DISTANCES; ++i) {
+	for (i = 0; i < REP_DISTANCES; ++i) {
+		uint32_t price;
+
 		uint32_t rep_len = rep_lens[i];
 		if (rep_len < 2)
 			continue;
 
-		const uint32_t price = rep_match_price + get_pure_rep_price(
+		price = rep_match_price + get_pure_rep_price(
 				coder, i, coder->state, pos_state);
 
 		do {
@@ -414,7 +439,7 @@ helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
 	}
 
 
-	const uint32_t normal_match_price = match_price
+	normal_match_price = match_price
 			+ rc_bit_0_price(coder->is_rep[coder->state]);
 
 	len = rep_lens[0] >= 2 ? rep_lens[0] + 1 : 2;
@@ -456,6 +481,19 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 	uint32_t new_len = coder->longest_match_length;
 	uint32_t pos_prev = coder->opts[cur].pos_prev;
 	lzma_lzma_state state;
+	uint32_t buf_avail;
+	uint32_t rep_index;
+	uint32_t i;
+
+	uint32_t cur_price;
+	uint8_t current_byte;
+	uint8_t match_byte;
+	uint32_t pos_state;
+	uint32_t cur_and_1_price;
+	bool next_is_literal = false;
+	uint32_t match_price;
+	uint32_t rep_match_price;
+	uint32_t start_len = 2;
 
 	if (coder->opts[cur].prev_1_is_literal) {
 		--pos_prev;
@@ -499,9 +537,10 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 		}
 
 		if (pos < REP_DISTANCES) {
+			uint32_t i;
+
 			reps[0] = coder->opts[pos_prev].backs[pos];
 
-			uint32_t i;
 			for (i = 1; i <= pos; ++i)
 				reps[i] = coder->opts[pos_prev].backs[i - 1];
 
@@ -511,29 +550,27 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 		} else {
 			reps[0] = pos - REP_DISTANCES;
 
-			for (uint32_t i = 1; i < REP_DISTANCES; ++i)
+			for (i = 1; i < REP_DISTANCES; ++i)
 				reps[i] = coder->opts[pos_prev].backs[i - 1];
 		}
 	}
 
 	coder->opts[cur].state = state;
 
-	for (uint32_t i = 0; i < REP_DISTANCES; ++i)
+	for (i = 0; i < REP_DISTANCES; ++i)
 		coder->opts[cur].backs[i] = reps[i];
 
-	const uint32_t cur_price = coder->opts[cur].price;
+	cur_price = coder->opts[cur].price;
 
-	const uint8_t current_byte = *buf;
-	const uint8_t match_byte = *(buf - reps[0] - 1);
+	current_byte = *buf;
+	match_byte = *(buf - reps[0] - 1);
 
-	const uint32_t pos_state = position & coder->pos_mask;
+	pos_state = position & coder->pos_mask;
 
-	const uint32_t cur_and_1_price = cur_price
+	cur_and_1_price = cur_price
 			+ rc_bit_0_price(coder->is_match[state][pos_state])
 			+ get_literal_price(coder, position, buf[-1],
 			!is_literal_state(state), match_byte, current_byte);
-
-	bool next_is_literal = false;
 
 	if (cur_and_1_price < coder->opts[cur + 1].price) {
 		coder->opts[cur + 1].price = cur_and_1_price;
@@ -542,9 +579,9 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 		next_is_literal = true;
 	}
 
-	const uint32_t match_price = cur_price
+	match_price = cur_price
 			+ rc_bit_1_price(coder->is_match[state][pos_state]);
-	const uint32_t rep_match_price = match_price
+	rep_match_price = match_price
 			+ rc_bit_1_price(coder->is_rep[state]);
 
 	if (match_byte == current_byte
@@ -565,7 +602,7 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 	if (buf_avail_full < 2)
 		return len_end;
 
-	const uint32_t buf_avail = my_min(buf_avail_full, nice_len);
+	buf_avail = my_min(buf_avail_full, nice_len);
 
 	if (!next_is_literal && match_byte != current_byte) { // speed optimization
 		// try literal + rep0
@@ -579,21 +616,26 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 		--len_test;
 
 		if (len_test >= 2) {
+			uint32_t pos_state_next;
+			uint32_t next_rep_match_price;
+			uint32_t offset;
+			uint32_t cur_and_len_price;
+
 			lzma_lzma_state state_2 = state;
 			update_literal(state_2);
 
-			const uint32_t pos_state_next = (position + 1) & coder->pos_mask;
-			const uint32_t next_rep_match_price = cur_and_1_price
+			pos_state_next = (position + 1) & coder->pos_mask;
+			next_rep_match_price = cur_and_1_price
 					+ rc_bit_1_price(coder->is_match[state_2][pos_state_next])
 					+ rc_bit_1_price(coder->is_rep[state_2]);
 
 			//for (; len_test >= 2; --len_test) {
-			const uint32_t offset = cur + 1 + len_test;
+			offset = cur + 1 + len_test;
 
 			while (len_end < offset)
 				coder->opts[++len_end].price = RC_INFINITY_PRICE;
 
-			const uint32_t cur_and_len_price = next_rep_match_price
+			cur_and_len_price = next_rep_match_price
 					+ get_rep_price(coder, 0, len_test,
 						state_2, pos_state_next);
 
@@ -609,14 +651,14 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 	}
 
 
-	uint32_t start_len = 2; // speed optimization
+	for (rep_index = 0; rep_index < REP_DISTANCES; ++rep_index) {
+		uint32_t len_test, len_test_2, len_test_temp;
+		uint32_t price, limit;
 
-	for (uint32_t rep_index = 0; rep_index < REP_DISTANCES; ++rep_index) {
 		const uint8_t *const buf_back = buf - reps[rep_index] - 1;
 		if (not_equal_16(buf, buf_back))
 			continue;
 
-		uint32_t len_test;
 		for (len_test = 2; len_test < buf_avail
 				&& buf[len_test] == buf_back[len_test];
 				++len_test) ;
@@ -624,8 +666,8 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 		while (len_end < cur + len_test)
 			coder->opts[++len_end].price = RC_INFINITY_PRICE;
 
-		const uint32_t len_test_temp = len_test;
-		const uint32_t price = rep_match_price + get_pure_rep_price(
+		len_test_temp = len_test;
+		price = rep_match_price + get_pure_rep_price(
 				coder, rep_index, state, pos_state);
 
 		do {
@@ -647,8 +689,8 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 			start_len = len_test + 1;
 
 
-		uint32_t len_test_2 = len_test + 1;
-		const uint32_t limit = my_min(buf_avail_full,
+		len_test_2 = len_test + 1;
+		limit = my_min(buf_avail_full,
 				len_test_2 + nice_len);
 		for (; len_test_2 < limit
 				&& buf[len_test_2] == buf_back[len_test_2];
@@ -657,12 +699,18 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 		len_test_2 -= len_test + 1;
 
 		if (len_test_2 >= 2) {
+			uint32_t pos_state_next;
+			uint32_t cur_and_len_literal_price;
+			uint32_t next_rep_match_price;
+			uint32_t offset;
+			uint32_t cur_and_len_price;
+
 			lzma_lzma_state state_2 = state;
 			update_long_rep(state_2);
 
-			uint32_t pos_state_next = (position + len_test) & coder->pos_mask;
+			pos_state_next = (position + len_test) & coder->pos_mask;
 
-			const uint32_t cur_and_len_literal_price = price
+			cur_and_len_literal_price = price
 					+ get_len_price(&coder->rep_len_encoder,
 						len_test, pos_state)
 					+ rc_bit_0_price(coder->is_match[state_2][pos_state_next])
@@ -674,17 +722,17 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 
 			pos_state_next = (position + len_test + 1) & coder->pos_mask;
 
-			const uint32_t next_rep_match_price = cur_and_len_literal_price
+			next_rep_match_price = cur_and_len_literal_price
 					+ rc_bit_1_price(coder->is_match[state_2][pos_state_next])
 					+ rc_bit_1_price(coder->is_rep[state_2]);
 
 			//for(; len_test_2 >= 2; len_test_2--) {
-			const uint32_t offset = cur + len_test + 1 + len_test_2;
+			offset = cur + len_test + 1 + len_test_2;
 
 			while (len_end < offset)
 				coder->opts[++len_end].price = RC_INFINITY_PRICE;
 
-			const uint32_t cur_and_len_price = next_rep_match_price
+			cur_and_len_price = next_rep_match_price
 					+ get_rep_price(coder, 0, len_test_2,
 						state_2, pos_state_next);
 
@@ -715,17 +763,19 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 
 
 	if (new_len >= start_len) {
+		uint32_t len_test;
+		uint32_t i = 0;
+
 		const uint32_t normal_match_price = match_price
 				+ rc_bit_0_price(coder->is_rep[state]);
 
 		while (len_end < cur + new_len)
 			coder->opts[++len_end].price = RC_INFINITY_PRICE;
 
-		uint32_t i = 0;
 		while (start_len > coder->matches[i].len)
 			++i;
 
-		for (uint32_t len_test = start_len; ; ++len_test) {
+		for (len_test = start_len; ; ++len_test) {
 			const uint32_t cur_back = coder->matches[i].dist;
 			uint32_t cur_and_len_price = normal_match_price
 					+ get_pos_len_price(coder,
@@ -753,12 +803,16 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 				len_test_2 -= len_test + 1;
 
 				if (len_test_2 >= 2) {
+					uint32_t pos_state_next;
+					uint32_t cur_and_len_literal_price;
+					uint32_t next_rep_match_price;
+					uint32_t offset;
+
 					lzma_lzma_state state_2 = state;
 					update_match(state_2);
-					uint32_t pos_state_next
-							= (position + len_test) & coder->pos_mask;
+					pos_state_next = (position + len_test) & coder->pos_mask;
 
-					const uint32_t cur_and_len_literal_price = cur_and_len_price
+					cur_and_len_literal_price = cur_and_len_price
 							+ rc_bit_0_price(
 								coder->is_match[state_2][pos_state_next])
 							+ get_literal_price(coder,
@@ -771,14 +825,14 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 					update_literal(state_2);
 					pos_state_next = (pos_state_next + 1) & coder->pos_mask;
 
-					const uint32_t next_rep_match_price
+					next_rep_match_price
 							= cur_and_len_literal_price
 							+ rc_bit_1_price(
 								coder->is_match[state_2][pos_state_next])
 							+ rc_bit_1_price(coder->is_rep[state_2]);
 
 					// for(; len_test_2 >= 2; --len_test_2) {
-					const uint32_t offset = cur + len_test + 1 + len_test_2;
+					offset = cur + len_test + 1 + len_test_2;
 
 					while (len_end < offset)
 						coder->opts[++len_end].price = RC_INFINITY_PRICE;
@@ -815,6 +869,10 @@ lzma_lzma_optimum_normal(lzma_coder *restrict coder, lzma_mf *restrict mf,
 		uint32_t *restrict back_res, uint32_t *restrict len_res,
 		uint32_t position)
 {
+	uint32_t reps[REP_DISTANCES];
+	uint32_t len_end;
+	uint32_t cur;
+
 	// If we have symbols pending, return the next pending symbol.
 	if (coder->opts_end_index != coder->opts_current_index) {
 		assert(mf->read_ahead > 0);
@@ -841,14 +899,13 @@ lzma_lzma_optimum_normal(lzma_coder *restrict coder, lzma_mf *restrict mf,
 	// the original function into two pieces makes it at least a little
 	// more readable, since those two parts don't share many variables.
 
-	uint32_t len_end = helper1(coder, mf, back_res, len_res, position);
+	len_end = helper1(coder, mf, back_res, len_res, position);
 	if (len_end == UINT32_MAX)
 		return;
 
-	uint32_t reps[REP_DISTANCES];
+
 	memcpy(reps, coder->reps, sizeof(reps));
 
-	uint32_t cur;
 	for (cur = 1; cur < len_end; ++cur) {
 		assert(cur < OPTS);
 
