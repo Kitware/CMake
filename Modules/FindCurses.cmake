@@ -15,6 +15,7 @@
 #   CURSES_HAVE_NCURSES_H - true if ncurses.h is available
 #   CURSES_HAVE_NCURSES_NCURSES_H - true if ncurses/ncurses.h is available
 #   CURSES_HAVE_NCURSES_CURSES_H - true if ncurses/curses.h is available
+#   PANEL_LIBRARIES - The libraries needed to use the Curses panel extensions
 #   CURSES_LIBRARY - set for backwards compatibility with 2.4 CMake
 #
 #
@@ -23,7 +24,7 @@
 # NCurses functionality is required.
 
 #=============================================================================
-# Copyright 2001-2009 Kitware, Inc.
+# Copyright 2001-2014 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -157,11 +158,17 @@ endif()
 find_library(CURSES_FORM_LIBRARY form HINTS "${_cursesLibDir}")
 find_library(CURSES_FORM_LIBRARY form )
 
+find_library(CURSES_PANEL_LIBRARY panel HINTS "${_cursesLibDir}")
+find_library(CURSES_PANEL_LIBRARY panel )
+
 # for compatibility with older FindCurses.cmake this has to be in the cache
 # FORCE must not be used since this would break builds which preload a cache
 # qith these variables set
 set(FORM_LIBRARY "${CURSES_FORM_LIBRARY}"
   CACHE FILEPATH "The curses form library")
+
+set(PANEL_LIBRARY "${CURSES_PANEL_LIBRARY}"
+  CACHE FILEPATH "The curses panel library")
 
 # Need to provide the *_LIBRARIES
 set(CURSES_LIBRARIES ${CURSES_LIBRARY})
@@ -172,6 +179,10 @@ endif()
 
 if(CURSES_FORM_LIBRARY)
   set(CURSES_LIBRARIES ${CURSES_LIBRARIES} ${CURSES_FORM_LIBRARY})
+endif()
+
+if(CURSES_PANEL_LIBRARY)
+  set(CURSES_LIBRARIES ${CURSES_LIBRARIES} ${CURSES_PANEL_LIBRARY})
 endif()
 
 # Proper name is *_INCLUDE_DIR
@@ -192,6 +203,7 @@ mark_as_advanced(
   CURSES_NCURSES_LIBRARY
   CURSES_EXTRA_LIBRARY
   FORM_LIBRARY
+  PANEL_LIBRARY
   CURSES_LIBRARIES
   CURSES_INCLUDE_DIR
   CURSES_CURSES_HAS_WSYNCUP
