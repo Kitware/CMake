@@ -72,6 +72,8 @@ private:
   bool ComputeClOptions(std::string const& configName);
   void WriteClOptions(std::string const& config,
                       std::vector<std::string> const & includes);
+  bool ComputeRcOptions();
+  bool ComputeRcOptions(std::string const& config);
   void WriteRCOptions(std::string const& config,
                       std::vector<std::string> const & includes);
   bool ComputeLinkOptions();
@@ -101,6 +103,7 @@ private:
   bool IsResxHeader(const std::string& headerFile);
 
   cmIDEFlagTable const* GetClFlagTable() const;
+  cmIDEFlagTable const* GetRcFlagTable() const;
   cmIDEFlagTable const* GetLibFlagTable() const;
   cmIDEFlagTable const* GetLinkFlagTable() const;
 
@@ -108,6 +111,7 @@ private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef std::map<std::string, Options*> OptionsMap;
   OptionsMap ClOptions;
+  OptionsMap RcOptions;
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
   cmTarget* Target;
