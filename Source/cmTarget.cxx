@@ -135,7 +135,7 @@ public:
   LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
   bool PolicyWarnedCMP0022;
 
-  typedef std::map<TargetConfigPair, cmTarget::LinkInterface>
+  typedef std::map<TargetConfigPair, OptionalLinkInterface>
                                                     ImportLinkInterfaceMapType;
   ImportLinkInterfaceMapType ImportLinkInterfaceMap;
   ImportLinkInterfaceMapType ImportLinkInterfaceUsageRequirementsOnlyMap;
@@ -5977,26 +5977,21 @@ cmTarget::GetImportLinkInterface(const std::string& config,
      this->Internal->ImportLinkInterfaceUsageRequirementsOnlyMap :
      this->Internal->ImportLinkInterfaceMap);
 
-  cmTargetInternals::ImportLinkInterfaceMapType::iterator i = lim.find(key);
-  if(i == lim.end())
+  cmTargetInternals::OptionalLinkInterface& iface = lim[key];
+  if(!iface.AllDone)
     {
-    LinkInterface iface;
+    iface.AllDone = true;
     iface.Multiplicity = info->Multiplicity;
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
                           headTarget, usage_requirements_only,
                           iface.Libraries);
-    {
     std::vector<std::string> deps;
     cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
     this->LookupLinkItems(deps, iface.SharedDeps);
     }
 
-    cmTargetInternals::ImportLinkInterfaceMapType::value_type
-      entry(key, iface);
-    i = lim.insert(entry).first;
-    }
-  return &i->second;
+  return &iface;
 }
 
 //----------------------------------------------------------------------------
