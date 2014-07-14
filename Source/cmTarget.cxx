@@ -258,7 +258,9 @@ cmTarget::cmTarget()
 #undef INITIALIZE_TARGET_POLICY_MEMBER
 
   this->Makefile = 0;
+#if defined(_WIN32) && !defined(__CYGWIN__)
   this->LinkLibrariesForVS6Analyzed = false;
+#endif
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsApple = false;
@@ -517,11 +519,13 @@ void cmTarget::FinishConfigure()
   // invalidation code in this source file is buggy.
   this->ClearLinkMaps();
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
   // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
   if(this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->IsForVS6())
     {
     this->AnalyzeLibDependenciesForVS6(*this->Makefile);
     }
+#endif
 }
 
 //----------------------------------------------------------------------------
@@ -1335,7 +1339,9 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   cmTarget::LibraryID tmp;
   tmp.first = lib;
   tmp.second = llt;
+#if defined(_WIN32) && !defined(__CYGWIN__)
   this->LinkLibrariesForVS6.push_back( tmp );
+#endif
   this->OriginalLinkLibraries.push_back(tmp);
   this->ClearLinkMaps();
 
@@ -1401,6 +1407,7 @@ cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
     }
 }
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
 //----------------------------------------------------------------------------
 void
 cmTarget::AnalyzeLibDependenciesForVS6( const cmMakefile& mf )
@@ -1693,6 +1700,7 @@ void cmTarget::GatherDependenciesForVS6( const cmMakefile& mf,
     this->DeleteDependencyForVS6( dep_map, lib, lib);
     }
 }
+#endif
 
 //----------------------------------------------------------------------------
 static bool whiteListedInterfaceProperty(const std::string& prop)
