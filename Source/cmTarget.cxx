@@ -6435,7 +6435,7 @@ cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementation(config, impl, this);
+    this->ComputeLinkImplementation(config, impl, head);
     }
   return &impl;
 }
