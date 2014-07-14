@@ -179,8 +179,8 @@ public:
   typedef std::pair<std::string, LinkLibraryType> LibraryID;
 
   typedef std::vector<LibraryID > LinkLibraryVectorType;
-  const LinkLibraryVectorType &GetLinkLibraries() const {
-  return this->LinkLibraries;}
+  const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
+  return this->LinkLibrariesForVS6;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
 
@@ -638,16 +638,16 @@ private:
   /**
    * Inserts \a dep at the end of the dependency list of \a lib.
    */
-  void InsertDependency( DependencyMap& depMap,
-                         const LibraryID& lib,
-                         const LibraryID& dep);
+  void InsertDependencyForVS6( DependencyMap& depMap,
+                               const LibraryID& lib,
+                               const LibraryID& dep);
 
   /*
    * Deletes \a dep from the dependency list of \a lib.
    */
-  void DeleteDependency( DependencyMap& depMap,
-                         const LibraryID& lib,
-                         const LibraryID& dep);
+  void DeleteDependencyForVS6( DependencyMap& depMap,
+                               const LibraryID& lib,
+                               const LibraryID& dep);
 
   /**
    * Emits the library \a lib and all its dependencies into link_line.
@@ -657,21 +657,21 @@ private:
    * link_line is in reverse order, in that the dependencies of a
    * library are listed before the library itself.
    */
-  void Emit( const LibraryID lib,
-             const DependencyMap& dep_map,
-             std::set<LibraryID>& emitted,
-             std::set<LibraryID>& visited,
-             DependencyList& link_line);
+  void EmitForVS6( const LibraryID lib,
+                   const DependencyMap& dep_map,
+                   std::set<LibraryID>& emitted,
+                   std::set<LibraryID>& visited,
+                   DependencyList& link_line);
 
   /**
    * Finds the dependencies for \a lib and inserts them into \a
    * dep_map.
    */
-  void GatherDependencies( const cmMakefile& mf,
-                           const LibraryID& lib,
-                           DependencyMap& dep_map);
+  void GatherDependenciesForVS6( const cmMakefile& mf,
+                                 const LibraryID& lib,
+                                 DependencyMap& dep_map);
 
-  void AnalyzeLibDependencies( const cmMakefile& mf );
+  void AnalyzeLibDependenciesForVS6( const cmMakefile& mf );
 
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
@@ -720,9 +720,9 @@ private:
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
   TargetType TargetTypeValue;
-  LinkLibraryVectorType LinkLibraries;
+  LinkLibraryVectorType LinkLibrariesForVS6;
   LinkLibraryVectorType PrevLinkedLibraries;
-  bool LinkLibrariesAnalyzed;
+  bool LinkLibrariesForVS6Analyzed;
   std::vector<std::string> LinkDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;
   bool HaveInstallRule;

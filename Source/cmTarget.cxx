@@ -258,7 +258,7 @@ cmTarget::cmTarget()
 #undef INITIALIZE_TARGET_POLICY_MEMBER
 
   this->Makefile = 0;
-  this->LinkLibrariesAnalyzed = false;
+  this->LinkLibrariesForVS6Analyzed = false;
   this->HaveInstallRule = false;
   this->DLLPlatform = false;
   this->IsApple = false;
@@ -518,7 +518,7 @@ void cmTarget::FinishConfigure()
   this->ClearLinkMaps();
 
   // Do old-style link dependency analysis.
-  this->AnalyzeLibDependencies(*this->Makefile);
+  this->AnalyzeLibDependenciesForVS6(*this->Makefile);
 }
 
 //----------------------------------------------------------------------------
@@ -1332,7 +1332,7 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
   cmTarget::LibraryID tmp;
   tmp.first = lib;
   tmp.second = llt;
-  this->LinkLibraries.push_back( tmp );
+  this->LinkLibrariesForVS6.push_back( tmp );
   this->OriginalLinkLibraries.push_back(tmp);
   this->ClearLinkMaps();
 
@@ -1400,7 +1400,7 @@ cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
 
 //----------------------------------------------------------------------------
 void
-cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
+cmTarget::AnalyzeLibDependenciesForVS6( const cmMakefile& mf )
 {
   // There are two key parts of the dependency analysis: (1)
   // determining the libraries in the link line, and (2) constructing
@@ -1477,8 +1477,8 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
  // eventually be removed.  This code was moved here from the end of
  // old source list processing code which was called just before this
  // method.
- for(LinkLibraryVectorType::iterator p = this->LinkLibraries.begin();
-     p != this->LinkLibraries.end(); ++p)
+ for(LinkLibraryVectorType::iterator p = this->LinkLibrariesForVS6.begin();
+     p != this->LinkLibrariesForVS6.end(); ++p)
    {
    this->Makefile->ExpandVariablesInString(p->first, true, true);
    }
@@ -1490,22 +1490,22 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
  // 1. Build the dependency graph
  //
  for(LinkLibraryVectorType::reverse_iterator lib
-       = this->LinkLibraries.rbegin();
-     lib != this->LinkLibraries.rend(); ++lib)
+       = this->LinkLibrariesForVS6.rbegin();
+     lib != this->LinkLibrariesForVS6.rend(); ++lib)
    {
-   this->GatherDependencies( mf, *lib, dep_map);
+   this->GatherDependenciesForVS6( mf, *lib, dep_map);
    }
 
  // 2. Remove any dependencies that are already satisfied in the original
  // link line.
  //
- for(LinkLibraryVectorType::iterator lib = this->LinkLibraries.begin();
-     lib != this->LinkLibraries.end(); ++lib)
+ for(LinkLibraryVectorType::iterator lib = this->LinkLibrariesForVS6.begin();
+     lib != this->LinkLibrariesForVS6.end(); ++lib)
    {
    for( LinkLibraryVectorType::iterator lib2 = lib;
-        lib2 != this->LinkLibraries.end(); ++lib2)
+        lib2 != this->LinkLibrariesForVS6.end(); ++lib2)
      {
-     this->DeleteDependency( dep_map, *lib, *lib2);
+     this->DeleteDependencyForVS6( dep_map, *lib, *lib2);
      }
    }
 
@@ -1514,43 +1514,43 @@ cmTarget::AnalyzeLibDependencies( const cmMakefile& mf )
  // missing.  Start from the back and keep adding.
  //
  std::set<DependencyMap::key_type> done, visited;
- std::vector<DependencyMap::key_type> newLinkLibraries;
+ std::vector<DependencyMap::key_type> newLinkLibrariesForVS6;
  for(LinkLibraryVectorType::reverse_iterator lib =
-       this->LinkLibraries.rbegin();
-     lib != this->LinkLibraries.rend(); ++lib)
+       this->LinkLibrariesForVS6.rbegin();
+     lib != this->LinkLibrariesForVS6.rend(); ++lib)
    {
    // skip zero size library entries, this may happen
    // if a variable expands to nothing.
    if (lib->first.size() != 0)
      {
-     this->Emit( *lib, dep_map, done, visited, newLinkLibraries );
+     this->EmitForVS6( *lib, dep_map, done, visited, newLinkLibrariesForVS6 );
      }
    }
 
  // 4. Add the new libraries to the link line.
  //
  for( std::vector<DependencyMap::key_type>::reverse_iterator k =
-        newLinkLibraries.rbegin();
-      k != newLinkLibraries.rend(); ++k )
+        newLinkLibrariesForVS6.rbegin();
+      k != newLinkLibrariesForVS6.rend(); ++k )
    {
    // get the llt from the dep_map
-   this->LinkLibraries.push_back( std::make_pair(k->first,k->second) );
+   this->LinkLibrariesForVS6.push_back( std::make_pair(k->first,k->second) );
    }
- this->LinkLibrariesAnalyzed = true;
+ this->LinkLibrariesForVS6Analyzed = true;
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::InsertDependency( DependencyMap& depMap,
-                                 const LibraryID& lib,
-                                 const LibraryID& dep)
+void cmTarget::InsertDependencyForVS6( DependencyMap& depMap,
+                                       const LibraryID& lib,
+                                       const LibraryID& dep)
 {
   depMap[lib].push_back(dep);
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::DeleteDependency( DependencyMap& depMap,
-                                 const LibraryID& lib,
-                                 const LibraryID& dep)
+void cmTarget::DeleteDependencyForVS6( DependencyMap& depMap,
+                                       const LibraryID& lib,
+                                       const LibraryID& dep)
 {
   // Make sure there is an entry in the map for lib. If so, delete all
   // dependencies to dep. There may be repeated entries because of
@@ -1569,11 +1569,11 @@ void cmTarget::DeleteDependency( DependencyMap& depMap,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::Emit(const LibraryID lib,
-                    const DependencyMap& dep_map,
-                    std::set<LibraryID>& emitted,
-                    std::set<LibraryID>& visited,
-                    DependencyList& link_line )
+void cmTarget::EmitForVS6(const LibraryID lib,
+                          const DependencyMap& dep_map,
+                          std::set<LibraryID>& emitted,
+                          std::set<LibraryID>& visited,
+                          DependencyList& link_line )
 {
   // It's already been emitted
   if( emitted.find(lib) != emitted.end() )
@@ -1619,7 +1619,7 @@ void cmTarget::Emit(const LibraryID lib,
           if( emitted.find(*i) == emitted.end() )
             {
             // emit dependencies
-            Emit( *i, dep_map, emitted, visited, link_line );
+            this->EmitForVS6( *i, dep_map, emitted, visited, link_line );
             // emit self
             emitted.insert(*i);
             emitted_here.insert(*i);
@@ -1632,9 +1632,9 @@ void cmTarget::Emit(const LibraryID lib,
 }
 
 //----------------------------------------------------------------------------
-void cmTarget::GatherDependencies( const cmMakefile& mf,
-                                   const LibraryID& lib,
-                                   DependencyMap& dep_map)
+void cmTarget::GatherDependenciesForVS6( const cmMakefile& mf,
+                                         const LibraryID& lib,
+                                         DependencyMap& dep_map)
 {
   // If the library is already in the dependency map, then it has
   // already been fully processed.
@@ -1678,8 +1678,8 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
         else
           {
           LibraryID lib2(l,llt);
-          this->InsertDependency( dep_map, lib, lib2);
-          this->GatherDependencies( mf, lib2, dep_map);
+          this->InsertDependencyForVS6( dep_map, lib, lib2);
+          this->GatherDependenciesForVS6( mf, lib2, dep_map);
           llt = cmTarget::GENERAL;
           }
         }
@@ -1687,7 +1687,7 @@ void cmTarget::GatherDependencies( const cmMakefile& mf,
       end = depline.find( ";", start );
       }
     // cannot depend on itself
-    this->DeleteDependency( dep_map, lib, lib);
+    this->DeleteDependencyForVS6( dep_map, lib, lib);
     }
 }
 

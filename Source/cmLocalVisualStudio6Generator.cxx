@@ -1101,7 +1101,8 @@ void cmLocalVisualStudio6Generator
       }
     }
   // find link libraries
-  const cmTarget::LinkLibraryVectorType& libs = target.GetLinkLibraries();
+  const cmTarget::LinkLibraryVectorType& libs =
+    target.GetLinkLibrariesForVS6();
   cmTarget::LinkLibraryVectorType::const_iterator j;
   for(j = libs.begin(); j != libs.end(); ++j)
     {
