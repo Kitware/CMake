@@ -214,6 +214,9 @@ public:
    */
   virtual void FindMakeProgram(cmMakefile*);
 
+  /** Is this the Visual Studio 6 generator?  */
+  virtual bool IsForVS6() const { return false; }
+
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;

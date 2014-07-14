@@ -517,8 +517,11 @@ void cmTarget::FinishConfigure()
   // invalidation code in this source file is buggy.
   this->ClearLinkMaps();
 
-  // Do old-style link dependency analysis.
-  this->AnalyzeLibDependenciesForVS6(*this->Makefile);
+  // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
+  if(this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->IsForVS6())
+    {
+    this->AnalyzeLibDependenciesForVS6(*this->Makefile);
+    }
 }
 
 //----------------------------------------------------------------------------
