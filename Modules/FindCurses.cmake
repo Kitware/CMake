@@ -199,4 +199,3 @@ mark_as_advanced(
   CURSES_NCURSES_HAS_CBREAK
   CURSES_TINFO_HAS_CBREAK
   )
-
