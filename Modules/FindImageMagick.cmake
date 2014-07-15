@@ -95,14 +95,21 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+find_package(PkgConfig QUIET)
+
 #---------------------------------------------------------------------
 # Helper functions
 #---------------------------------------------------------------------
 function(FIND_IMAGEMAGICK_API component header)
   set(ImageMagick_${component}_FOUND FALSE PARENT_SCOPE)
 
+  pkg_check_modules(PC_${component} QUIET ${component})
+
   find_path(ImageMagick_${component}_INCLUDE_DIR
     NAMES ${header}
+    HINTS
+      ${PC_${component}_INCLUDEDIR}
+      ${PC_${component}_INCLUDE_DIRS}
     PATHS
       ${ImageMagick_INCLUDE_DIRS}
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ImageMagick\\Current;BinPath]/include"
@@ -112,6 +119,9 @@ function(FIND_IMAGEMAGICK_API component header)
     )
   find_library(ImageMagick_${component}_LIBRARY
     NAMES ${ARGN}
+    HINTS
+      ${PC_${component}_LIBDIR}
+      ${PC_${component}_LIB_DIRS}
     PATHS
       "[HKEY_LOCAL_MACHINE\\SOFTWARE\\ImageMagick\\Current;BinPath]/lib"
     DOC "Path to the ImageMagick Magick++ library."
