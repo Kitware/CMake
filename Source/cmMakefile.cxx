@@ -1042,8 +1042,8 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     if (!file)
       {
       file = this->CreateSource(outName, true);
-      file->SetProperty("__CMAKE_RULE", "1");
       }
+    file->SetProperty("__CMAKE_RULE", "1");
     }
 
   // Always create the output sources and mark them generated.
