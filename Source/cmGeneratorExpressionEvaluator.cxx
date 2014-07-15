@@ -1039,8 +1039,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
                                             ASSERT_TRANSITIVE_PROPERTY_METHOD)
           false);
-        }
 #undef ASSERT_TRANSITIVE_PROPERTY_METHOD
+        }
       }
 
     std::string linkedTargetsContent;
@@ -1090,9 +1090,8 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     else if(!interfacePropertyName.empty())
       {
-      const cmTarget::LinkImplementationLibraries *impl
-        = target->GetLinkImplementationLibraries(context->Config);
-      if(impl)
+      if(cmTarget::LinkImplementationLibraries const* impl =
+         target->GetLinkImplementationLibraries(context->Config))
         {
         linkedTargetsContent =
           getLinkedTargetsContent(impl->Libraries, target,
