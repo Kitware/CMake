@@ -841,6 +841,8 @@ getLinkedTargetsContent(
       context->HadContextSensitiveCondition = true;
       }
     }
+  linkedTargetsContent =
+    cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
   return linkedTargetsContent;
 }
 
@@ -1099,9 +1101,6 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
                                   interfacePropertyName);
         }
       }
-
-    linkedTargetsContent =
-          cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
 
     if (!prop)
       {
