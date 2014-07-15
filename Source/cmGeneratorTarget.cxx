@@ -445,13 +445,6 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
 
   if (iter == this->SystemIncludesCache.end())
     {
-    cmTarget::LinkImplementation const* impl
-      = this->Target->GetLinkImplementation(config);
-    if(!impl)
-      {
-      return false;
-      }
-
     cmGeneratorExpressionDAGChecker dagChecker(
                                         this->GetName(),
                                         "SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
@@ -471,35 +464,15 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                           &dagChecker), result);
       }
 
-    std::set<cmTarget const*> uniqueDeps;
-    for(std::vector<cmLinkImplItem>::const_iterator
-          li = impl->Libraries.begin(); li != impl->Libraries.end(); ++li)
+    std::vector<cmTarget const*> const& deps =
+      this->Target->GetLinkImplementationClosure(config);
+    for(std::vector<cmTarget const*>::const_iterator
+          li = deps.begin(), le = deps.end(); li != le; ++li)
       {
-      cmTarget const* tgt = li->Target;
-      if (!tgt)
-        {
-        continue;
-        }
-
-      if (uniqueDeps.insert(tgt).second)
-        {
-        handleSystemIncludesDep(this->Makefile, tgt, config, this->Target,
-                                &dagChecker, result, excludeImported);
-
-        std::vector<cmTarget const*> deps;
-        tgt->GetTransitivePropertyTargets(config, this->Target, deps);
-
-        for(std::vector<cmTarget const*>::const_iterator di = deps.begin();
-            di != deps.end(); ++di)
-          {
-          if (uniqueDeps.insert(*di).second)
-            {
-            handleSystemIncludesDep(this->Makefile, *di, config, this->Target,
-                                    &dagChecker, result, excludeImported);
-            }
-          }
-        }
+      handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
+                              &dagChecker, result, excludeImported);
       }
+
     std::set<std::string> unique;
     for(std::vector<std::string>::iterator li = result.begin();
         li != result.end(); ++li)
