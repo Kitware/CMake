@@ -385,12 +385,9 @@ In this case, the ``ClimbingStatsConfig.cmake`` file could be as simple as:
 
 .. code-block:: cmake
 
-  if(NOT TARGET Upstream::ClimbingStats)
-    include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
-  endif()
+  include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
 
-This allows downstreams to use the ``IMPORTED`` targets, and guards
-against importing the targets more than once.  If any macros
+As this allows downstreams to use the ``IMPORTED`` targets.  If any macros
 should be provided by the ``ClimbingStats`` package, they should
 be in a separate file which is installed to the same location as the
 ``ClimbingStatsConfig.cmake`` file, and included from there.
@@ -457,9 +454,7 @@ dependencies of a package should be found in the ``Config.cmake`` file:
   include(CMakeFindDependencyMacro)
   find_dependency(Stats 2.6.4)
 
-  if(NOT TARGET Upstream::ClimbingStats)
-    include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
-  endif()
+  include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsMacros.cmake")
 
 The ``find_dependency`` macro also sets ``ClimbingStats_FOUND`` to ``False`` if
@@ -476,9 +471,7 @@ be true. This can be tested with logic in the package configuration file:
   include(CMakeFindDependencyMacro)
   find_dependency(Stats 2.6.4)
 
-  if(NOT TARGET Upstream::ClimbingStats)
-    include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
-  endif()
+  include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsTargets.cmake")
   include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStatsMacros.cmake")
 
   set(_supported_components Plot Table)
