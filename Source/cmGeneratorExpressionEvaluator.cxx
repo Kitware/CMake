@@ -1098,10 +1098,20 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
     if (std::find_if(transBegin, transEnd,
                      cmStrCmp(propertyName)) != transEnd)
       {
-
       std::vector<cmTarget const*> tgts;
-      target->GetTransitivePropertyTargets(context->Config,
-                                                 headTarget, tgts);
+      if(cmTarget::LinkInterfaceLibraries const* iface =
+         target->GetLinkInterfaceLibraries(context->Config, headTarget, true))
+        {
+        for(std::vector<cmLinkItem>::const_iterator
+              it = iface->Libraries.begin();
+            it != iface->Libraries.end(); ++it)
+          {
+          if (it->Target)
+            {
+            tgts.push_back(it->Target);
+            }
+          }
+        }
       if (!tgts.empty())
         {
         linkedTargetsContent =
