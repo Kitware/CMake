@@ -71,6 +71,7 @@ Compiler: @CMAKE_CXX_COMPILER@
 PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
+MemoryCheckType: @MEMORYCHECK_TYPE@
 MemoryCheckCommand: @MEMORYCHECK_COMMAND@
 MemoryCheckCommandOptions: @MEMORYCHECK_COMMAND_OPTIONS@
 MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@

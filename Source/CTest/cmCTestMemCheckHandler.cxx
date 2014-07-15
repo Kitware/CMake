@@ -346,8 +346,8 @@ void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile *mf)
   this->CTest->PopulateCustomVector(mf,
                              "CTEST_CUSTOM_MEMCHECK_IGNORE",
                              this->CustomTestsIgnore);
-  this->CTest->SetCTestConfigurationFromCMakeVariable(
-    mf, "CMakeCommand", "CMAKE_COMMAND");
+  std::string cmake = cmSystemTools::GetCMakeCommand();
+  this->CTest->SetCTestConfiguration("CMakeCommand", cmake.c_str());
 }
 
 //----------------------------------------------------------------------
