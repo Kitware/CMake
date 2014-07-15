@@ -203,8 +203,6 @@ macro(WRITE_BASIC_PACKAGE_VERSION_FILE)
   write_basic_config_version_file(${ARGN})
 endmacro()
 
-set(cfpch_dir ${CMAKE_CURRENT_LIST_DIR})
-
 function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
   set(options NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)
   set(oneValueArgs INSTALL_DESTINATION )
