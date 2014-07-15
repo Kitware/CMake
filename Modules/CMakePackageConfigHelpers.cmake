@@ -18,7 +18,8 @@
 #     configure_package_config_file(<input> <output> INSTALL_DESTINATION <path>
 #                                                    [PATH_VARS <var1> <var2> ... <varN>]
 #                                                    [NO_SET_AND_CHECK_MACRO]
-#                                                    [NO_CHECK_REQUIRED_COMPONENTS_MACRO])
+#                                                    [NO_CHECK_REQUIRED_COMPONENTS_MACRO]
+#                                                    [INSTALL_PREFIX <path>])
 #
 #
 # ``configure_package_config_file()`` should be used instead of the plain
@@ -64,8 +65,8 @@
 # same way as in :command:`configure_file()`.
 #
 # The ``<path>`` given to ``INSTALL_DESTINATION`` must be the destination where
-# the ``FooConfig.cmake`` file will be installed to.  This can either be a
-# relative or absolute path, both work.
+# the ``FooConfig.cmake`` file will be installed to.  This path can either be
+# absolute, or relative to the ``INSTALL_PREFIX`` path.
 #
 # The variables ``<var1>`` to ``<varN>`` given as ``PATH_VARS`` are the
 # variables which contain install destinations.  For each of them the macro will
@@ -74,8 +75,15 @@
 # They are calculated by ``configure_package_config_file`` so that they are
 # always relative to the installed location of the package.  This works both for
 # relative and also for absolute locations.  For absolute locations it works
-# only if the absolute location is a subdirectory of
-# :variable:`CMAKE_INSTALL_PREFIX`.
+# only if the absolute location is a subdirectory of ``INSTALL_PREFIX``.
+#
+# If the ``INSTALL_PREFIX`` argument is passed, this is used as base path to
+# calculate all the relative paths.  The ``<path>`` argument must be an absolute
+# path.  If this argument is not passed, the :variable:`CMAKE_INSTALL_PREFIX`
+# variable will be used instead.  The default value is good when generating a
+# FooConfig.cmake file to use your package from the install tree.  When
+# generating a FooConfig.cmake file to use your package from the build tree this
+# option should be used.
 #
 # By default ``configure_package_config_file`` also generates two helper macros,
 # ``set_and_check()`` and ``check_required_components()`` into the
@@ -210,7 +218,7 @@ endmacro()
 
 function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
   set(options NO_SET_AND_CHECK_MACRO NO_CHECK_REQUIRED_COMPONENTS_MACRO)
-  set(oneValueArgs INSTALL_DESTINATION )
+  set(oneValueArgs INSTALL_DESTINATION INSTALL_PREFIX)
   set(multiValueArgs PATH_VARS )
 
   cmake_parse_arguments(CCF "${options}" "${oneValueArgs}" "${multiValueArgs}"  ${ARGN})
@@ -223,20 +231,30 @@ function(CONFIGURE_PACKAGE_CONFIG_FILE _inputFile _outputFile)
     message(FATAL_ERROR "No INSTALL_DESTINATION given to CONFIGURE_PACKAGE_CONFIG_FILE()")
   endif()
 
+  if(DEFINED CCF_INSTALL_PREFIX)
+    if(IS_ABSOLUTE "${CCF_INSTALL_PREFIX}")
+      set(installPrefix "${CCF_INSTALL_PREFIX}")
+    else()
+      message(FATAL_ERROR "INSTALL_PREFIX must be an absolute path")
+    endif()
+  else()
+    set(installPrefix "${CMAKE_INSTALL_PREFIX}")
+  endif()
+
   if(IS_ABSOLUTE "${CCF_INSTALL_DESTINATION}")
     set(absInstallDir "${CCF_INSTALL_DESTINATION}")
   else()
-    set(absInstallDir "${CMAKE_INSTALL_PREFIX}/${CCF_INSTALL_DESTINATION}")
+    set(absInstallDir "${installPrefix}/${CCF_INSTALL_DESTINATION}")
   endif()
 
-  file(RELATIVE_PATH PACKAGE_RELATIVE_PATH "${absInstallDir}" "${CMAKE_INSTALL_PREFIX}" )
+  file(RELATIVE_PATH PACKAGE_RELATIVE_PATH "${absInstallDir}" "${installPrefix}" )
 
   foreach(var ${CCF_PATH_VARS})
     if(NOT DEFINED ${var})
       message(FATAL_ERROR "Variable ${var} does not exist")
     else()
       if(IS_ABSOLUTE "${${var}}")
-        string(REPLACE "${CMAKE_INSTALL_PREFIX}" "\${PACKAGE_PREFIX_DIR}"
+        string(REPLACE "${installPrefix}" "\${PACKAGE_PREFIX_DIR}"
                         PACKAGE_${var} "${${var}}")
       else()
         set(PACKAGE_${var} "\${PACKAGE_PREFIX_DIR}/${${var}}")
@@ -262,7 +280,7 @@ get_filename_component(PACKAGE_PREFIX_DIR \"\${CMAKE_CURRENT_LIST_DIR}/${PACKAGE
 get_filename_component(_realCurr \"\${CMAKE_CURRENT_LIST_DIR}\" REALPATH)
 get_filename_component(_realOrig \"${absInstallDir}\" REALPATH)
 if(_realCurr STREQUAL _realOrig)
-  set(PACKAGE_PREFIX_DIR \"${CMAKE_INSTALL_PREFIX}\")
+  set(PACKAGE_PREFIX_DIR \"${installPrefix}\")
 endif()
 unset(_realOrig)
 unset(_realCurr)
