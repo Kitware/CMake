@@ -6018,7 +6018,7 @@ void processILibs(const std::string& config,
     {
     tgts.push_back(item.Target);
     if(cmTarget::LinkInterface const* iface =
-       item.Target->GetLinkInterfaceLibraries(config, headTarget, false))
+       item.Target->GetLinkInterfaceLibraries(config, headTarget, true))
       {
       for(std::vector<cmLinkItem>::const_iterator
             it = iface->Libraries.begin();
