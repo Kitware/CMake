@@ -108,14 +108,12 @@ void cmExportLibraryDependenciesCommand::ConstFinalPass() const
       std::string targetEntry = target.GetName();
       targetEntry += "_LIB_DEPENDS";
 
-      // Construct the dependency variable value.  It is safe to use
-      // the target GetLinkLibraries method here because this code is
-      // called at the end of configure but before generate so library
-      // dependencies have yet to be analyzed.  Therefore the value
-      // will be the direct link dependencies.
+      // Construct the dependency variable value with the direct link
+      // dependencies.
       std::string valueOld;
       std::string valueNew;
-      cmTarget::LinkLibraryVectorType const& libs = target.GetLinkLibraries();
+      cmTarget::LinkLibraryVectorType const& libs =
+        target.GetOriginalLinkLibraries();
       for(cmTarget::LinkLibraryVectorType::const_iterator li = libs.begin();
           li != libs.end(); ++li)
         {

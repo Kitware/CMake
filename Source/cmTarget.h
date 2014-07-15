@@ -179,8 +179,6 @@ public:
   typedef std::pair<std::string, LinkLibraryType> LibraryID;
 
   typedef std::vector<LibraryID > LinkLibraryVectorType;
-  const LinkLibraryVectorType &GetLinkLibraries() const {
-  return this->LinkLibraries;}
   const LinkLibraryVectorType &GetOriginalLinkLibraries() const
     {return this->OriginalLinkLibraries;}
 
@@ -613,6 +611,11 @@ public:
     return this->MaxLanguageStandards;
   }
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  const LinkLibraryVectorType &GetLinkLibrariesForVS6() const {
+  return this->LinkLibrariesForVS6;}
+#endif
+
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
@@ -622,6 +625,7 @@ private:
 
   std::vector<std::pair<TLLSignature, cmListFileBacktrace> > TLLCommands;
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
    */
@@ -638,16 +642,16 @@ private:
   /**
    * Inserts \a dep at the end of the dependency list of \a lib.
    */
-  void InsertDependency( DependencyMap& depMap,
-                         const LibraryID& lib,
-                         const LibraryID& dep);
+  void InsertDependencyForVS6( DependencyMap& depMap,
+                               const LibraryID& lib,
+                               const LibraryID& dep);
 
   /*
    * Deletes \a dep from the dependency list of \a lib.
    */
-  void DeleteDependency( DependencyMap& depMap,
-                         const LibraryID& lib,
-                         const LibraryID& dep);
+  void DeleteDependencyForVS6( DependencyMap& depMap,
+                               const LibraryID& lib,
+                               const LibraryID& dep);
 
   /**
    * Emits the library \a lib and all its dependencies into link_line.
@@ -657,21 +661,22 @@ private:
    * link_line is in reverse order, in that the dependencies of a
    * library are listed before the library itself.
    */
-  void Emit( const LibraryID lib,
-             const DependencyMap& dep_map,
-             std::set<LibraryID>& emitted,
-             std::set<LibraryID>& visited,
-             DependencyList& link_line);
+  void EmitForVS6( const LibraryID lib,
+                   const DependencyMap& dep_map,
+                   std::set<LibraryID>& emitted,
+                   std::set<LibraryID>& visited,
+                   DependencyList& link_line);
 
   /**
    * Finds the dependencies for \a lib and inserts them into \a
    * dep_map.
    */
-  void GatherDependencies( const cmMakefile& mf,
-                           const LibraryID& lib,
-                           DependencyMap& dep_map);
+  void GatherDependenciesForVS6( const cmMakefile& mf,
+                                 const LibraryID& lib,
+                                 DependencyMap& dep_map);
 
-  void AnalyzeLibDependencies( const cmMakefile& mf );
+  void AnalyzeLibDependenciesForVS6( const cmMakefile& mf );
+#endif
 
   const char* GetSuffixVariableInternal(bool implib) const;
   const char* GetPrefixVariableInternal(bool implib) const;
@@ -720,9 +725,11 @@ private:
   std::vector<cmCustomCommand> PreLinkCommands;
   std::vector<cmCustomCommand> PostBuildCommands;
   TargetType TargetTypeValue;
-  LinkLibraryVectorType LinkLibraries;
   LinkLibraryVectorType PrevLinkedLibraries;
-  bool LinkLibrariesAnalyzed;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  LinkLibraryVectorType LinkLibrariesForVS6;
+  bool LinkLibrariesForVS6Analyzed;
+#endif
   std::vector<std::string> LinkDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;
   bool HaveInstallRule;
