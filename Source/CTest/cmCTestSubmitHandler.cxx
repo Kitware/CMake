@@ -225,8 +225,8 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
       std::string upload_as
         = url + "/" + remoteprefix + cmSystemTools::GetFilenameName(*file);
 
-      struct stat st;
-      if ( ::stat(local_file.c_str(), &st) )
+
+      if ( !cmSystemTools::FileExists(local_file.c_str()) )
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE, "   Cannot find file: "
           << local_file << std::endl);
@@ -234,6 +234,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
         ::curl_global_cleanup();
         return false;
         }
+      unsigned long filelen = cmSystemTools::FileLength(local_file.c_str());
 
       ftpfile = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
       *this->LogFile << "\tUpload file: " << local_file << " to "
@@ -252,7 +253,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
 
       // and give the size of the upload (optional)
       ::curl_easy_setopt(curl, CURLOPT_INFILESIZE,
-        static_cast<long>(st.st_size));
+        static_cast<long>(filelen));
 
       // and give curl the buffer for errors
       ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
@@ -466,8 +467,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         upload_as += md5;
         }
 
-      struct stat st;
-      if ( ::stat(local_file.c_str(), &st) )
+      if( !cmSystemTools::FileExists(local_file.c_str()) )
         {
         cmCTestLog(this->CTest, ERROR_MESSAGE, "   Cannot find file: "
           << local_file << std::endl);
@@ -475,11 +475,12 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         ::curl_global_cleanup();
         return false;
         }
+      unsigned long filelen = cmSystemTools::FileLength(local_file.c_str());
 
       ftpfile = cmsys::SystemTools::Fopen(local_file.c_str(), "rb");
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Upload file: "
         << local_file << " to "
-        << upload_as << " Size: " << st.st_size << std::endl);
+        << upload_as << " Size: " << filelen << std::endl);
 
       // specify target
       ::curl_easy_setopt(curl,CURLOPT_URL, upload_as.c_str());
@@ -489,7 +490,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
 
       // and give the size of the upload (optional)
       ::curl_easy_setopt(curl, CURLOPT_INFILESIZE,
-        static_cast<long>(st.st_size));
+        static_cast<long>(filelen));
 
       // and give curl the buffer for errors
       ::curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, &error_buffer);
