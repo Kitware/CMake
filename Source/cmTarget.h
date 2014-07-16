@@ -161,8 +161,7 @@ public:
    * Get the list of the source files used by this target
    */
   void GetSourceFiles(std::vector<cmSourceFile*> &files,
-                      const std::string& config,
-                      cmTarget const* head = 0) const;
+                      const std::string& config) const;
   bool GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const;
 
   /**
@@ -489,8 +488,7 @@ public:
   // information to forward these property changes to the targets
   // until we have per-target object file properties.
   void GetLanguages(std::set<std::string>& languages,
-                    std::string const& config,
-                    cmTarget const* head = 0) const;
+                    std::string const& config) const;
 
   /** Return whether this target is an executable with symbol exports
       enabled.  */
@@ -717,8 +715,7 @@ private:
                                        bool contentOnly) const;
 
   void GetSourceFiles(std::vector<std::string> &files,
-                      const std::string& config,
-                      cmTarget const* head = 0) const;
+                      const std::string& config) const;
 private:
   std::string Name;
   std::vector<cmCustomCommand> PreBuildCommands;
@@ -781,12 +778,6 @@ private:
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
                            bool usage_requirements_only) const;
 
-  const char* ComputeLinkInterfaceLibraries(const std::string& config,
-                                            LinkInterface& iface,
-                                            cmTarget const* head,
-                                            bool usage_requirements_only,
-                                            bool &exists) const;
-
   LinkImplementation const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
@@ -794,8 +785,7 @@ private:
                                  LinkImplementation& impl,
                                  cmTarget const* head) const;
   void ComputeLinkImplementationLanguages(const std::string& config,
-                                          LinkImplementation& impl,
-                                          cmTarget const* head) const;
+                                          LinkImplementation& impl) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
