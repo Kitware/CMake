@@ -50,7 +50,8 @@ private:
     PURIFY,
     BOUNDS_CHECKER,
     // checkers after hear do not use the standard error list
-    THREAD_SANITIZER
+    THREAD_SANITIZER,
+    ADDRESS_SANITIZER
   };
 public:
   enum { // Memory faults
@@ -132,9 +133,9 @@ private:
   bool ProcessMemCheckPurifyOutput(const std::string& str,
                                    std::string& log,
                                    std::vector<int>& results);
-  bool ProcessMemCheckThreadSanitizerOutput(const std::string& str,
-                                            std::string& log,
-                                            std::vector<int>& results);
+  bool ProcessMemCheckSanitizerOutput(const std::string& str,
+                                      std::string& log,
+                                      std::vector<int>& results);
   bool ProcessMemCheckBoundsCheckerOutput(const std::string& str,
                                           std::string& log,
                                           std::vector<int>& results);
