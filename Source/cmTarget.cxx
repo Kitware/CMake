@@ -164,6 +164,13 @@ public:
   typedef std::map<std::string, cmTarget::LinkClosure> LinkClosureMapType;
   LinkClosureMapType LinkClosureMap;
 
+  struct LinkImplClosure: public std::vector<cmTarget const*>
+  {
+    LinkImplClosure(): Done(false) {}
+    bool Done;
+  };
+  std::map<std::string, LinkImplClosure> LinkImplClosureMap;
+
   typedef std::map<std::string, std::vector<cmSourceFile*> >
                                                        SourceFilesMapType;
   SourceFilesMapType SourceFilesMap;
@@ -203,15 +210,12 @@ public:
                         CachedLinkInterfaceSourcesEntries;
   std::map<std::string, std::vector<TargetPropertyEntry*> >
                         CachedLinkInterfaceCompileFeaturesEntries;
-  std::map<std::string, std::vector<cmTarget const*> >
-                        CachedLinkImplementationClosure;
 
   std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
   std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
   std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
   std::map<std::string, bool> CacheLinkInterfaceSourcesDone;
   std::map<std::string, bool> CacheLinkInterfaceCompileFeaturesDone;
-  std::map<std::string, bool> CacheLinkImplementationClosureDone;
 };
 
 cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
@@ -6034,11 +6038,11 @@ void processILibs(const std::string& config,
 std::vector<cmTarget const*> const&
 cmTarget::GetLinkImplementationClosure(const std::string& config) const
 {
-  std::vector<cmTarget const*>& tgts =
-    this->Internal->CachedLinkImplementationClosure[config];
-  if(!this->Internal->CacheLinkImplementationClosureDone[config])
+  cmTargetInternals::LinkImplClosure& tgts =
+    this->Internal->LinkImplClosureMap[config];
+  if(!tgts.Done)
     {
-    this->Internal->CacheLinkImplementationClosureDone[config] = true;
+    tgts.Done = true;
     std::set<cmTarget const*> emitted;
 
     cmTarget::LinkImplementationLibraries const* impl
