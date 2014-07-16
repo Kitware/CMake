@@ -171,6 +171,13 @@ public:
   };
   std::map<std::string, LinkImplClosure> LinkImplClosureMap;
 
+  struct CompatibleInterfaces: public cmTarget::CompatibleInterfaces
+  {
+    CompatibleInterfaces(): Done(false) {}
+    bool Done;
+  };
+  std::map<std::string, CompatibleInterfaces> CompatibleInterfacesMap;
+
   typedef std::map<std::string, std::vector<cmSourceFile*> >
                                                        SourceFilesMapType;
   SourceFilesMapType SourceFilesMap;
@@ -5303,44 +5310,6 @@ const char * cmTarget::GetLinkInterfaceDependentNumberMaxProperty(
 }
 
 //----------------------------------------------------------------------------
-bool isLinkDependentProperty(cmTarget const* tgt, const std::string &p,
-                             const std::string& interfaceProperty,
-                             const std::string& config)
-{
-  std::vector<cmTarget const*> const& deps =
-    tgt->GetLinkImplementationClosure(config);
-
-  if(deps.empty())
-    {
-    return false;
-    }
-
-  for(std::vector<cmTarget const*>::const_iterator li = deps.begin();
-      li != deps.end(); ++li)
-    {
-    const char *prop = (*li)->GetProperty(interfaceProperty);
-    if (!prop)
-      {
-      continue;
-      }
-
-    std::vector<std::string> props;
-    cmSystemTools::ExpandListArgument(prop, props);
-
-    for(std::vector<std::string>::iterator pi = props.begin();
-        pi != props.end(); ++pi)
-      {
-      if (*pi == p)
-        {
-        return true;
-        }
-      }
-    }
-
-  return false;
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
                                            const std::string& config) const
 {
@@ -5349,9 +5318,7 @@ bool cmTarget::IsLinkInterfaceDependentBoolProperty(const std::string &p,
     {
     return false;
     }
-  return (p == "POSITION_INDEPENDENT_CODE") ||
-    isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_BOOL",
-                                 config);
+  return this->GetCompatibleInterfaces(config).PropsBool.count(p) > 0;
 }
 
 //----------------------------------------------------------------------------
@@ -5363,9 +5330,7 @@ bool cmTarget::IsLinkInterfaceDependentStringProperty(const std::string &p,
     {
     return false;
     }
-  return (p == "AUTOUIC_OPTIONS") ||
-    isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_STRING",
-                                 config);
+  return this->GetCompatibleInterfaces(config).PropsString.count(p) > 0;
 }
 
 //----------------------------------------------------------------------------
@@ -5377,8 +5342,7 @@ bool cmTarget::IsLinkInterfaceDependentNumberMinProperty(const std::string &p,
     {
     return false;
     }
-  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_NUMBER_MIN",
-                                 config);
+  return this->GetCompatibleInterfaces(config).PropsNumberMin.count(p) > 0;
 }
 
 //----------------------------------------------------------------------------
@@ -5390,8 +5354,7 @@ bool cmTarget::IsLinkInterfaceDependentNumberMaxProperty(const std::string &p,
     {
     return false;
     }
-  return isLinkDependentProperty(this, p, "COMPATIBLE_INTERFACE_NUMBER_MAX",
-                                 config);
+  return this->GetCompatibleInterfaces(config).PropsNumberMax.count(p) > 0;
 }
 
 //----------------------------------------------------------------------------
@@ -6056,6 +6019,40 @@ cmTarget::GetLinkImplementationClosure(const std::string& config) const
       }
     }
   return tgts;
+}
+
+//----------------------------------------------------------------------------
+cmTarget::CompatibleInterfaces const&
+cmTarget::GetCompatibleInterfaces(std::string const& config) const
+{
+  cmTargetInternals::CompatibleInterfaces& compat =
+    this->Internal->CompatibleInterfacesMap[config];
+  if(!compat.Done)
+    {
+    compat.Done = true;
+    compat.PropsBool.insert("POSITION_INDEPENDENT_CODE");
+    compat.PropsString.insert("AUTOUIC_OPTIONS");
+    std::vector<cmTarget const*> const& deps =
+      this->GetLinkImplementationClosure(config);
+    for(std::vector<cmTarget const*>::const_iterator li = deps.begin();
+        li != deps.end(); ++li)
+      {
+#define CM_READ_COMPATIBLE_INTERFACE(X, x) \
+      if(const char* prop = (*li)->GetProperty("COMPATIBLE_INTERFACE_" #X)) \
+        { \
+        std::vector<std::string> props; \
+        cmSystemTools::ExpandListArgument(prop, props); \
+        std::copy(props.begin(), props.end(), \
+                  std::inserter(compat.Props##x, compat.Props##x.begin())); \
+        }
+      CM_READ_COMPATIBLE_INTERFACE(BOOL, Bool)
+      CM_READ_COMPATIBLE_INTERFACE(STRING, String)
+      CM_READ_COMPATIBLE_INTERFACE(NUMBER_MIN, NumberMin)
+      CM_READ_COMPATIBLE_INTERFACE(NUMBER_MAX, NumberMax)
+#undef CM_READ_COMPATIBLE_INTERFACE
+      }
+    }
+  return compat;
 }
 
 //----------------------------------------------------------------------------
