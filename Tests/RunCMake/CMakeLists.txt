@@ -18,6 +18,7 @@ endif()
 
 if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 2)
   set(TargetSources_ARGS -DXCODE_BELOW_2=1)
+  set(File_Generate_ARGS -DXCODE_BELOW_2=1)
 endif()
 
 add_RunCMake_test(CMP0019)
