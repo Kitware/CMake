@@ -128,6 +128,13 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
 bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
                                                     cmMakefile* mf)
 {
+  if(this->PlatformName == "Itanium" || this->PlatformName == "x64")
+    {
+    if(this->IsExpressEdition() && !this->Find64BitTools(mf))
+      {
+      return false;
+      }
+    }
   this->AddVSPlatformToolsetDefinition(mf);
   return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
 }
@@ -203,14 +210,6 @@ void cmGlobalVisualStudio10Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
-  if(this->PlatformName == "Itanium" || this->PlatformName == "x64")
-    {
-    if(this->IsExpressEdition() && !this->Find64BitTools(mf))
-      {
-      return;
-      }
-    }
-
   for(std::vector<std::string>::const_iterator it = lang.begin();
       it != lang.end(); ++it)
     {
