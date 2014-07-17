@@ -448,6 +448,14 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     mf->ReadListFile(0,fpath.c_str());
     }
 
+  // Tell the generator about the target system.
+  std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+  if(!this->SetSystemName(system, mf))
+    {
+    cmSystemTools::SetFatalErrorOccured();
+    return;
+    }
+
   // Tell the generator about the toolset, if any.
   std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
   if(!toolset.empty() &&
