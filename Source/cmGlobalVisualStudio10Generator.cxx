@@ -168,7 +168,6 @@ cmLocalGenerator *cmGlobalVisualStudio10Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio10Generator* lg =
     new cmLocalVisualStudio10Generator(cmLocalVisualStudioGenerator::VS10);
-  lg->SetPlatformName(this->GetPlatformName());
   lg->SetGlobalGenerator(this);
   return lg;
 }

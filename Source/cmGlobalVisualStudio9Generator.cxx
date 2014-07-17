@@ -115,7 +115,6 @@ cmLocalGenerator *cmGlobalVisualStudio9Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio7Generator *lg
     = new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9);
-  lg->SetPlatformName(this->GetPlatformName());
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;
