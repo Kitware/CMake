@@ -35,8 +35,6 @@ public:
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 
   /**

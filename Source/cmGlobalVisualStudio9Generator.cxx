@@ -122,14 +122,6 @@ cmLocalGenerator *cmGlobalVisualStudio9Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio9Generator
-::EnableLanguage(std::vector<std::string>const &  lang,
-                 cmMakefile *mf, bool optional)
-{
-  cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
-}
-
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()
 {
   std::string base;
