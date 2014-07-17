@@ -3696,7 +3696,10 @@ void SystemInformationImplementation::SetStackTraceOnError(int enable)
     // install ours
     struct sigaction sa;
     sa.sa_sigaction=(SigAction)StacktraceSignalHandler;
-    sa.sa_flags=SA_SIGINFO|SA_RESTART|SA_RESETHAND;
+    sa.sa_flags=SA_SIGINFO|SA_RESETHAND;
+# ifdef SA_RESTART
+    sa.sa_flags|=SA_RESTART;
+# endif
     sigemptyset(&sa.sa_mask);
 
     sigaction(SIGABRT,&sa,0);
