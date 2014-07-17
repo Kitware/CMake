@@ -125,10 +125,11 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio10Generator::AddPlatformDefinitions(cmMakefile* mf)
+bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
+                                                    cmMakefile* mf)
 {
-  cmGlobalVisualStudio8Generator::AddPlatformDefinitions(mf);
   this->AddVSPlatformToolsetDefinition(mf);
+  return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
 }
 
 //----------------------------------------------------------------------------

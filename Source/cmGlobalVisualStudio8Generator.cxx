@@ -133,10 +133,17 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio8Generator
+::EnableLanguage(std::vector<std::string>const &  lang,
+                 cmMakefile *mf, bool optional)
+{
+  this->AddPlatformDefinitions(mf);
+  cmGlobalVisualStudio7Generator::EnableLanguage(lang, mf, optional);
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  cmGlobalVisualStudio71Generator::AddPlatformDefinitions(mf);
-
   if(this->TargetsWindowsCE())
   {
     mf->AddDefinition("CMAKE_VS_WINCE_VERSION",

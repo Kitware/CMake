@@ -36,6 +36,8 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
+  virtual void EnableLanguage(std::vector<std::string>const& languages,
+                              cmMakefile *, bool optional);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   /**
