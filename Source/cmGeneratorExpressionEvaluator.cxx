@@ -799,70 +799,51 @@ static const char* targetPropertyTransitiveWhitelist[] = {
 
 #undef TRANSITIVE_PROPERTY_NAME
 
+template <typename T>
 std::string
 getLinkedTargetsContent(
-  std::vector<cmTarget const*> &targets,
+  std::vector<T> const &libraries,
   cmTarget const* target,
   cmTarget const* headTarget,
   cmGeneratorExpressionContext *context,
   cmGeneratorExpressionDAGChecker *dagChecker,
   const std::string &interfacePropertyName)
 {
-  cmGeneratorExpression ge(&context->Backtrace);
-
+  std::string linkedTargetsContent;
   std::string sep;
   std::string depString;
-  for (std::vector<cmTarget const*>::const_iterator
-      it = targets.begin();
-      it != targets.end(); ++it)
+  for (typename std::vector<T>::const_iterator it = libraries.begin();
+       it != libraries.end(); ++it)
     {
-    if (*it == target)
+    // Broken code can have a target in its own link interface.
+    // Don't follow such link interface entries so as not to create a
+    // self-referencing loop.
+    if (it->Target && it->Target != target)
       {
-      // Broken code can have a target in its own link interface.
-      // Don't follow such link interface entries so as not to create a
-      // self-referencing loop.
-      continue;
+      depString +=
+        sep + "$<TARGET_PROPERTY:" +
+        it->Target->GetName() + "," + interfacePropertyName + ">";
+      sep = ";";
       }
-    depString +=
-      sep + "$<TARGET_PROPERTY:" +
-        (*it)->GetName() + "," + interfacePropertyName + ">";
-    sep = ";";
     }
-  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depString);
-  std::string linkedTargetsContent = cge->Evaluate(target->GetMakefile(),
-                      context->Config,
-                      context->Quiet,
-                      headTarget,
-                      target,
-                      dagChecker);
-  if (cge->GetHadContextSensitiveCondition())
+  if(!depString.empty())
     {
-    context->HadContextSensitiveCondition = true;
+    cmGeneratorExpression ge(&context->Backtrace);
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depString);
+    linkedTargetsContent = cge->Evaluate(target->GetMakefile(),
+                                         context->Config,
+                                         context->Quiet,
+                                         headTarget,
+                                         target,
+                                         dagChecker);
+    if (cge->GetHadContextSensitiveCondition())
+      {
+      context->HadContextSensitiveCondition = true;
+      }
     }
+  linkedTargetsContent =
+    cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
   return linkedTargetsContent;
-}
-
-std::string
-getLinkedTargetsContent(
-  std::vector<cmLinkImplItem> const &libraries,
-  cmTarget const* target,
-  cmTarget const* headTarget,
-  cmGeneratorExpressionContext *context,
-  cmGeneratorExpressionDAGChecker *dagChecker,
-  const std::string &interfacePropertyName)
-{
-  std::vector<cmTarget const*> tgts;
-  for (std::vector<cmLinkImplItem>::const_iterator
-      it = libraries.begin();
-      it != libraries.end(); ++it)
-    {
-    if (it->Target)
-      {
-      tgts.push_back(it->Target);
-      }
-    }
-  return getLinkedTargetsContent(tgts, target, headTarget, context,
-                                 dagChecker, interfacePropertyName);
 }
 
 //----------------------------------------------------------------------------
@@ -1058,18 +1039,24 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
           CM_FOR_EACH_TRANSITIVE_PROPERTY_METHOD(
                                             ASSERT_TRANSITIVE_PROPERTY_METHOD)
           false);
-        }
 #undef ASSERT_TRANSITIVE_PROPERTY_METHOD
+        }
       }
 
     std::string linkedTargetsContent;
 
     std::string interfacePropertyName;
+    bool isInterfaceProperty = false;
 
 #define POPULATE_INTERFACE_PROPERTY_NAME(prop) \
-    if (propertyName == #prop || propertyName == "INTERFACE_" #prop) \
+    if (propertyName == #prop) \
       { \
       interfacePropertyName = "INTERFACE_" #prop; \
+      } \
+    else if (propertyName == "INTERFACE_" #prop) \
+      { \
+      interfacePropertyName = "INTERFACE_" #prop; \
+      isInterfaceProperty = true; \
       } \
     else
 
@@ -1086,48 +1073,33 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
-
     cmTarget const* headTarget = context->HeadTarget
                                ? context->HeadTarget : target;
 
-    const char * const *transBegin =
-                        cmArrayBegin(targetPropertyTransitiveWhitelist) + 1;
-    const char * const *transEnd =
-                        cmArrayEnd(targetPropertyTransitiveWhitelist);
-
-    if (std::find_if(transBegin, transEnd,
-                     cmStrCmp(propertyName)) != transEnd)
+    if(isInterfaceProperty)
       {
-
-      std::vector<cmTarget const*> tgts;
-      target->GetTransitivePropertyTargets(context->Config,
-                                                 headTarget, tgts);
-      if (!tgts.empty())
+      if(cmTarget::LinkInterfaceLibraries const* iface =
+         target->GetLinkInterfaceLibraries(context->Config, headTarget, true))
         {
         linkedTargetsContent =
-                  getLinkedTargetsContent(tgts, target,
-                                          headTarget,
-                                          context, &dagChecker,
-                                          interfacePropertyName);
+          getLinkedTargetsContent(iface->Libraries, target,
+                                  headTarget,
+                                  context, &dagChecker,
+                                  interfacePropertyName);
         }
       }
-    else if (std::find_if(transBegin, transEnd,
-                          cmStrCmp(interfacePropertyName)) != transEnd)
+    else if(!interfacePropertyName.empty())
       {
-      const cmTarget::LinkImplementation *impl
-        = target->GetLinkImplementationLibraries(context->Config);
-      if(impl)
+      if(cmTarget::LinkImplementationLibraries const* impl =
+         target->GetLinkImplementationLibraries(context->Config))
         {
         linkedTargetsContent =
-                  getLinkedTargetsContent(impl->Libraries, target,
-                                          headTarget,
-                                          context, &dagChecker,
-                                          interfacePropertyName);
+          getLinkedTargetsContent(impl->Libraries, target,
+                                  headTarget,
+                                  context, &dagChecker,
+                                  interfacePropertyName);
         }
       }
-
-    linkedTargetsContent =
-          cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
 
     if (!prop)
       {
@@ -1202,32 +1174,27 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         return propContent ? propContent : "";
         }
       }
-    for (size_t i = 1;
-         i < cmArraySize(targetPropertyTransitiveWhitelist);
-         ++i)
+    if(!interfacePropertyName.empty())
       {
-      if (targetPropertyTransitiveWhitelist[i] == interfacePropertyName)
-        {
-        cmGeneratorExpression ge(&context->Backtrace);
-        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
-        cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
-        std::string result = cge->Evaluate(context->Makefile,
+      cmGeneratorExpression ge(&context->Backtrace);
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+      cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
+      std::string result = cge->Evaluate(context->Makefile,
                             context->Config,
                             context->Quiet,
                             headTarget,
                             target,
                             &dagChecker);
 
-        if (cge->GetHadContextSensitiveCondition())
-          {
-          context->HadContextSensitiveCondition = true;
-          }
-        if (!linkedTargetsContent.empty())
-          {
-          result += (result.empty() ? "" : ";") + linkedTargetsContent;
-          }
-        return result;
+      if (cge->GetHadContextSensitiveCondition())
+        {
+        context->HadContextSensitiveCondition = true;
         }
+      if (!linkedTargetsContent.empty())
+        {
+        result += (result.empty() ? "" : ";") + linkedTargetsContent;
+        }
+      return result;
       }
     return prop;
   }

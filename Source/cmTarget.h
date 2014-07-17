@@ -262,13 +262,15 @@ public:
 
   /** The link interface specifies transitive library dependencies and
       other information needed by targets that link to this target.  */
-  struct LinkInterface
+  struct LinkInterfaceLibraries
+  {
+    // Libraries listed in the interface.
+    std::vector<cmLinkItem> Libraries;
+  };
+  struct LinkInterface: public LinkInterfaceLibraries
   {
     // Languages whose runtime libraries must be linked.
     std::vector<std::string> Languages;
-
-    // Libraries listed in the interface.
-    std::vector<cmLinkItem> Libraries;
 
     // Shared library dependencies needed for linking on some platforms.
     std::vector<cmLinkItem> SharedDeps;
@@ -290,22 +292,28 @@ public:
       if the target cannot be linked.  */
   LinkInterface const* GetLinkInterface(const std::string& config,
                                         cmTarget const* headTarget) const;
-  LinkInterface const* GetLinkInterfaceLibraries(const std::string& config,
-                                        cmTarget const* headTarget,
-                                        bool usage_requirements_only) const;
-  void GetTransitivePropertyTargets(const std::string& config,
-                                    cmTarget const* headTarget,
-                                    std::vector<cmTarget const*> &libs) const;
+  LinkInterfaceLibraries const*
+    GetLinkInterfaceLibraries(const std::string& config,
+                              cmTarget const* headTarget,
+                              bool usage_requirements_only) const;
+
   std::vector<cmTarget const*> const&
     GetLinkImplementationClosure(const std::string& config) const;
 
+  struct CompatibleInterfaces
+  {
+    std::set<std::string> PropsBool;
+    std::set<std::string> PropsString;
+    std::set<std::string> PropsNumberMax;
+    std::set<std::string> PropsNumberMin;
+  };
+  CompatibleInterfaces const&
+    GetCompatibleInterfaces(std::string const& config) const;
+
   /** The link implementation specifies the direct library
       dependencies needed by the object files of the target.  */
-  struct LinkImplementation
+  struct LinkImplementationLibraries
   {
-    // Languages whose runtime libraries must be linked.
-    std::vector<std::string> Languages;
-
     // Libraries linked directly in this configuration.
     std::vector<cmLinkImplItem> Libraries;
 
@@ -313,10 +321,15 @@ public:
     // Needed only for OLD behavior of CMP0003.
     std::vector<cmLinkItem> WrongConfigLibraries;
   };
+  struct LinkImplementation: public LinkImplementationLibraries
+  {
+    // Languages whose runtime libraries must be linked.
+    std::vector<std::string> Languages;
+  };
   LinkImplementation const*
     GetLinkImplementation(const std::string& config) const;
 
-  LinkImplementation const*
+  LinkImplementationLibraries const*
     GetLinkImplementationLibraries(const std::string& config) const;
 
   /** Link information from the transitive closure of the link
@@ -778,12 +791,12 @@ private:
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
                            bool usage_requirements_only) const;
 
-  LinkImplementation const*
+  LinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
-  void ComputeLinkImplementation(const std::string& config,
-                                 LinkImplementation& impl,
-                                 cmTarget const* head) const;
+  void ComputeLinkImplementationLibraries(const std::string& config,
+                                          LinkImplementation& impl,
+                                          cmTarget const* head) const;
   void ComputeLinkImplementationLanguages(const std::string& config,
                                           LinkImplementation& impl) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
