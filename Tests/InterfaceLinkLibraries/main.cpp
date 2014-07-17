@@ -11,9 +11,13 @@
 #error Unexpected BANG_LIBRARY
 #endif
 
-#include "bar.h"
+#ifdef ZOT_LIBRARY
+#error Unexpected ZOT_LIBRARY
+#endif
+
+#include "zot.h"
 
 int main(void)
 {
-  return foo() + bar();
+  return foo() + bar() + zot();
 }

@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
 
 project(CompatibleInterface)
 
@@ -53,6 +53,15 @@ set_property(TARGET iface1 PROPERTY INTERFACE_NUMBER_MAX_PROP2 200)
 
 add_executable(CompatibleInterface main.cpp)
 target_link_libraries(CompatibleInterface iface1)
+
+add_library(foo STATIC foo.cpp)
+add_library(bar SHARED bar.cpp)
+set_property(TARGET foo APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SOMEPROP)
+set_property(TARGET foo PROPERTY INTERFACE_SOMEPROP ON)
+# Use LINK_ONLY to suppress usage requirements and allow the check to pass.
+set_property(TARGET bar PROPERTY INTERFACE_LINK_LIBRARIES $<LINK_ONLY:foo>)
+set_property(TARGET CompatibleInterface PROPERTY SOMEPROP OFF)
+target_link_libraries(CompatibleInterface bar)
 
 set_property(TARGET CompatibleInterface PROPERTY BOOL_PROP2 ON)
 set_property(TARGET CompatibleInterface PROPERTY BOOL_PROP3 ON)

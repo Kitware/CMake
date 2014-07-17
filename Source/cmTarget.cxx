@@ -3555,6 +3555,8 @@ void cmTarget::ExpandLinkItems(std::string const& prop,
 {
   cmGeneratorExpression ge;
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
+  // The $<LINK_ONLY> expression may be in a link interface to specify private
+  // link dependencies that are otherwise excluded from usage requirements.
   if(usage_requirements_only)
     {
     dagChecker.SetTransitivePropertiesOnly();
@@ -6016,7 +6018,7 @@ void processILibs(const std::string& config,
     {
     tgts.push_back(item.Target);
     if(cmTarget::LinkInterface const* iface =
-       item.Target->GetLinkInterfaceLibraries(config, headTarget, false))
+       item.Target->GetLinkInterfaceLibraries(config, headTarget, true))
       {
       for(std::vector<cmLinkItem>::const_iterator
             it = iface->Libraries.begin();
@@ -6057,18 +6059,8 @@ void cmTarget::GetTransitivePropertyTargets(const std::string& config,
                                       cmTarget const* headTarget,
                                       std::vector<cmTarget const*> &tgts) const
 {
-  // The $<LINK_ONLY> expression may be in a link interface to specify private
-  // link dependencies that are otherwise excluded from usage requirements.
-  // Currently $<LINK_ONLY> is internal to CMake and only ever added by
-  // target_link_libraries for PRIVATE dependencies of STATIC libraries in
-  // INTERFACE_LINK_LIBRARIES which is used under CMP0022 NEW behavior.
-  bool usage_requirements_only =
-    this->GetType() == STATIC_LIBRARY &&
-    this->GetPolicyStatusCMP0022() != cmPolicies::WARN &&
-    this->GetPolicyStatusCMP0022() != cmPolicies::OLD;
   if(cmTarget::LinkInterface const* iface =
-     this->GetLinkInterfaceLibraries(config, headTarget,
-                                     usage_requirements_only))
+     this->GetLinkInterfaceLibraries(config, headTarget, true))
     {
     for(std::vector<cmLinkItem>::const_iterator it = iface->Libraries.begin();
         it != iface->Libraries.end(); ++it)

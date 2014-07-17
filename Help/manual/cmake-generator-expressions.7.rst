@@ -188,6 +188,13 @@ property is non-empty::
   Marks ``...`` as being the name of a target.  This is required if exporting
   targets to multiple dependent export sets.  The ``...`` must be a literal
   name of a target- it may not contain generator expressions.
+``$<LINK_ONLY:...>``
+  Content of ``...`` except when evaluated in a link interface while
+  propagating :ref:`Target Usage Requirements`, in which case it is the
+  empty string.
+  Intended for use only in an :prop_tgt:`INTERFACE_LINK_LIBRARIES` target
+  property, perhaps via the :command:`target_link_libraries` command,
+  to specify private link dependencies without other usage requirements.
 ``$<INSTALL_INTERFACE:...>``
   Content of ``...`` when the property is exported using :command:`install(EXPORT)`,
   and empty otherwise.
