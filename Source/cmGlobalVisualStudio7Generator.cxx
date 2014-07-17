@@ -262,7 +262,14 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 //----------------------------------------------------------------------------
 void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
+  if(this->PlatformName == "x64")
+    {
+    mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
+    }
+  else if(this->PlatformName == "Itanium")
+    {
+    mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
+    }
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
                     this->GetIntelProjectVersion());

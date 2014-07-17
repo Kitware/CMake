@@ -31,19 +31,19 @@ public:
     if(!*p)
       {
       return new cmGlobalVisualStudio14Generator(
-        genName, "", "");
+        genName, "");
       }
     if(*p++ != ' ')
       { return 0; }
     if(strcmp(p, "Win64") == 0)
       {
       return new cmGlobalVisualStudio14Generator(
-        genName, "x64", "CMAKE_FORCE_WIN64");
+        genName, "x64");
       }
     if(strcmp(p, "ARM") == 0)
       {
       return new cmGlobalVisualStudio14Generator(
-        genName, "ARM", "");
+        genName, "ARM");
       }
     return 0;
     }
@@ -70,10 +70,8 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio14Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
-  const std::string& name, const std::string& platformName,
-  const std::string& additionalPlatformDefinition)
-  : cmGlobalVisualStudio12Generator(name, platformName,
-                                   additionalPlatformDefinition)
+  const std::string& name, const std::string& platformName)
+  : cmGlobalVisualStudio12Generator(name, platformName)
 {
   std::string vc14Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(

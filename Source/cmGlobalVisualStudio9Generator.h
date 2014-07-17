@@ -25,8 +25,7 @@ class cmGlobalVisualStudio9Generator :
 {
 public:
   cmGlobalVisualStudio9Generator(const std::string& name,
-    const std::string& platformName,
-    const std::string& additionalPlatformDefinition);
+    const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! create the correct local generator

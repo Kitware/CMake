@@ -41,7 +41,6 @@ void cmGlobalVisualStudio6Generator
                  cmMakefile *mf,
                  bool optional)
 {
-  cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   this->GenerateConfigurations(mf);

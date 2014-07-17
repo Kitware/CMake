@@ -46,19 +46,19 @@ public:
     if(!*p)
       {
       return new cmGlobalVisualStudio11Generator(
-        genName, "", "");
+        genName, "");
       }
     if(*p++ != ' ')
       { return 0; }
     if(strcmp(p, "Win64") == 0)
       {
       return new cmGlobalVisualStudio11Generator(
-        genName, "x64", "CMAKE_FORCE_WIN64");
+        genName, "x64");
       }
     if(strcmp(p, "ARM") == 0)
       {
       return new cmGlobalVisualStudio11Generator(
-        genName, "ARM", "");
+        genName, "ARM");
       }
 
     std::set<std::string> installedSDKs =
@@ -70,7 +70,7 @@ public:
       }
 
     cmGlobalVisualStudio11Generator* ret =
-      new cmGlobalVisualStudio11Generator(name, p, NULL);
+      new cmGlobalVisualStudio11Generator(name, p);
     ret->WindowsCEVersion = "8.00";
     return ret;
     }
@@ -105,10 +105,8 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio11Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
-  const std::string& name, const std::string& platformName,
-  const std::string& additionalPlatformDefinition)
-  : cmGlobalVisualStudio10Generator(name, platformName,
-                                   additionalPlatformDefinition)
+  const std::string& name, const std::string& platformName)
+  : cmGlobalVisualStudio10Generator(name, platformName)
 {
   std::string vc11Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
