@@ -44,7 +44,7 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
+  virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);

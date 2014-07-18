@@ -24,8 +24,7 @@ class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
   cmGlobalVisualStudio8Generator(const std::string& name,
-    const std::string& platformName,
-    const std::string& additionalPlatformDefinition);
+    const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
@@ -37,6 +36,8 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
+  virtual void EnableLanguage(std::vector<std::string>const& languages,
+                              cmMakefile *, bool optional);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   /**

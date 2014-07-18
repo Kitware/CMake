@@ -80,7 +80,6 @@ void cmGlobalVisualStudio7Generator
 {
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  this->AddPlatformDefinitions(mf);
   if(!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
     {
     mf->AddCacheDefinition(
@@ -260,12 +259,21 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
+bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
+                                                   cmMakefile* mf)
 {
-  cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
+  if(this->PlatformName == "x64")
+    {
+    mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
+    }
+  else if(this->PlatformName == "Itanium")
+    {
+    mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
+    }
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
                     this->GetIntelProjectVersion());
+  return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
 }
 
 void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)

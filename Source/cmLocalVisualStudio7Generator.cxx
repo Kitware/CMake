@@ -48,7 +48,6 @@ extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator(VSVersion v):
   cmLocalVisualStudioGenerator(v)
 {
-  this->PlatformName = "Win32";
   this->ExtraFlagTable = 0;
   this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
 }
@@ -647,8 +646,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     mfcFlag = "0";
     }
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   fout << "\t\t<Configuration\n"
-       << "\t\t\tName=\"" << configName << "|" << this->PlatformName << "\"\n"
+       << "\t\t\tName=\"" << configName
+       << "|" << gg->GetPlatformName() << "\"\n"
        << "\t\t\tOutputDirectory=\"" << configName << "\"\n";
   // This is an internal type to Visual Studio, it seems that:
   // 4 == static library
@@ -896,11 +898,11 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   fout << "\"\n";
   fout << "\t\t\t\tMkTypLibCompatible=\"false\"\n";
-  if( this->PlatformName == "x64" )
+  if( gg->GetPlatformName() == "x64" )
     {
     fout << "\t\t\t\tTargetEnvironment=\"3\"\n";
     }
-  else if( this->PlatformName == "ia64" )
+  else if( gg->GetPlatformName() == "ia64" )
     {
     fout << "\t\t\t\tTargetEnvironment=\"2\"\n";
     }
@@ -1640,6 +1642,8 @@ bool cmLocalVisualStudio7Generator
              std::ostream &fout, const std::string& libName,
              std::vector<std::string> *configs)
 {
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   const std::vector<const cmSourceFile *> &sourceFiles =
     sg->GetSourceFiles();
   std::vector<cmSourceGroup> const& children  = sg->GetGroupChildren();
@@ -1730,7 +1734,7 @@ bool cmLocalVisualStudio7Generator
           cmLVS7GFileConfig const& fc = fci->second;
           fout << "\t\t\t\t<FileConfiguration\n"
                << "\t\t\t\t\tName=\""  << fci->first
-               << "|" << this->PlatformName << "\"";
+               << "|" << gg->GetPlatformName() << "\"";
           if(fc.ExcludedFromBuild)
             {
             fout << " ExcludedFromBuild=\"true\"";
@@ -1800,6 +1804,9 @@ WriteCustomRule(std::ostream& fout,
                 const cmCustomCommand& command,
                 FCInfo& fcinfo)
 {
+  cmGlobalVisualStudio7Generator* gg =
+    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
+
   // Write the rule for each configuration.
   std::vector<std::string>::iterator i;
   std::vector<std::string> *configs =
@@ -1820,7 +1827,8 @@ WriteCustomRule(std::ostream& fout,
     cmCustomCommandGenerator ccg(command, *i, this->Makefile);
     cmLVS7GFileConfig const& fc = fcinfo.FileConfigMap[*i];
     fout << "\t\t\t\t<FileConfiguration\n";
-    fout << "\t\t\t\t\tName=\"" << *i << "|" << this->PlatformName << "\">\n";
+    fout << "\t\t\t\t\tName=\"" << *i << "|"
+         << gg->GetPlatformName() << "\">\n";
     if(!fc.CompileFlags.empty())
       {
       fout << "\t\t\t\t\t<Tool\n"
@@ -2030,7 +2038,7 @@ cmLocalVisualStudio7Generator
   fout<< "\tKeyword=\"" << keyword << "\">\n"
        << "\tProjectGUID=\"{" << gg->GetGUID(libName.c_str()) << "}\">\n"
        << "\t<Platforms>\n"
-       << "\t\t<Platform\n\t\t\tName=\"" << this->PlatformName << "\"/>\n"
+       << "\t\t<Platform\n\t\t\tName=\"" << gg->GetPlatformName() << "\"/>\n"
        << "\t</Platforms>\n";
 }
 
@@ -2085,7 +2093,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     }
   fout << "\tKeyword=\"" << keyword << "\">\n"
        << "\t<Platforms>\n"
-       << "\t\t<Platform\n\t\t\tName=\"" << this->PlatformName << "\"/>\n"
+       << "\t\t<Platform\n\t\t\tName=\"" << gg->GetPlatformName() << "\"/>\n"
        << "\t</Platforms>\n";
 }
 

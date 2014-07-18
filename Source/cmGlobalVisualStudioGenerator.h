@@ -97,8 +97,6 @@ protected:
 
   virtual const char* GetIDEVersion() = 0;
 
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
-
   virtual bool ComputeTargetDepends();
   class VSDependSet: public std::set<std::string> {};
   class VSDependMap: public std::map<cmTarget const*, VSDependSet> {};
@@ -111,7 +109,6 @@ protected:
   std::string GetUtilityDepend(cmTarget const* target);
   typedef std::map<cmTarget const*, std::string> UtilityDependsMap;
   UtilityDependsMap UtilityDepends;
-  std::string AdditionalPlatformDefinition;
 
 private:
   virtual std::string GetVSMakeProgram() = 0;

@@ -25,13 +25,13 @@ class cmGlobalVisualStudio10Generator :
 {
 public:
   cmGlobalVisualStudio10Generator(const std::string& name,
-    const std::string& platformName,
-    const std::string& additionalPlatformDefinition);
+    const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
+  virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
@@ -43,8 +43,6 @@ public:
     bool fast,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
-
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();

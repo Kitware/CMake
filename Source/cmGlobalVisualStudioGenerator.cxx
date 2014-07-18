@@ -23,7 +23,6 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
-  this->AdditionalPlatformDefinition = "";
 }
 
 //----------------------------------------------------------------------------
@@ -474,15 +473,6 @@ void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
     {
     mf->AddDefinition("CMAKE_MAKE_PROGRAM",
                       this->GetVSMakeProgram().c_str());
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  if(!this->AdditionalPlatformDefinition.empty())
-    {
-    mf->AddDefinition(this->AdditionalPlatformDefinition, "TRUE");
     }
 }
 
