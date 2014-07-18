@@ -213,23 +213,6 @@ public:
   void AddInterfaceEntries(
     cmTarget const* thisTarget, std::string const& config,
     std::string const& prop, std::vector<TargetPropertyEntry*>& entries);
-
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
-                        CachedLinkInterfaceIncludeDirectoriesEntries;
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
-                        CachedLinkInterfaceCompileOptionsEntries;
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
-                        CachedLinkInterfaceCompileDefinitionsEntries;
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
-                        CachedLinkInterfaceSourcesEntries;
-  std::map<std::string, std::vector<TargetPropertyEntry*> >
-                        CachedLinkInterfaceCompileFeaturesEntries;
-
-  std::map<std::string, bool> CacheLinkInterfaceIncludeDirectoriesDone;
-  std::map<std::string, bool> CacheLinkInterfaceCompileDefinitionsDone;
-  std::map<std::string, bool> CacheLinkInterfaceCompileOptionsDone;
-  std::map<std::string, bool> CacheLinkInterfaceSourcesDone;
-  std::map<std::string, bool> CacheLinkInterfaceCompileFeaturesDone;
 };
 
 cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
@@ -249,26 +232,8 @@ static void deleteAndClear(
 }
 
 //----------------------------------------------------------------------------
-static void deleteAndClear(
-  std::map<std::string,
-          std::vector<cmTargetInternals::TargetPropertyEntry*> > &entries)
-{
-  for (std::map<std::string,
-          std::vector<cmTargetInternals::TargetPropertyEntry*> >::iterator
-        it = entries.begin(), end = entries.end(); it != end; ++it)
-    {
-    deleteAndClear(it->second);
-    }
-}
-
-//----------------------------------------------------------------------------
 cmTargetInternals::~cmTargetInternals()
 {
-  deleteAndClear(this->CachedLinkInterfaceIncludeDirectoriesEntries);
-  deleteAndClear(this->CachedLinkInterfaceCompileOptionsEntries);
-  deleteAndClear(this->CachedLinkInterfaceCompileFeaturesEntries);
-  deleteAndClear(this->CachedLinkInterfaceCompileDefinitionsEntries);
-  deleteAndClear(this->CachedLinkInterfaceSourcesEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -810,16 +775,16 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                  config,
                  debugSources);
 
-  if (!this->Internal->CacheLinkInterfaceSourcesDone[config])
-    {
-    this->Internal->AddInterfaceEntries(
-      this, config, "INTERFACE_SOURCES",
-      this->Internal->CachedLinkInterfaceSourcesEntries[config]);
-    }
+  std::vector<cmTargetInternals::TargetPropertyEntry*>
+    linkInterfaceSourcesEntries;
 
-    std::vector<std::string>::size_type numFilesBefore = files.size();
-    bool contextDependentInterfaceSources = processSources(this,
-    this->Internal->CachedLinkInterfaceSourcesEntries[config],
+  this->Internal->AddInterfaceEntries(
+    this, config, "INTERFACE_SOURCES",
+    linkInterfaceSourcesEntries);
+
+  std::vector<std::string>::size_type numFilesBefore = files.size();
+  bool contextDependentInterfaceSources = processSources(this,
+    linkInterfaceSourcesEntries,
                             files,
                             uniqueSrcs,
                             &dagChecker,
@@ -832,14 +797,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
     this->LinkImplementationLanguageIsContextDependent = false;
     }
 
-  if (!this->Makefile->IsGeneratingBuildSystem())
-    {
-    deleteAndClear(this->Internal->CachedLinkInterfaceSourcesEntries);
-    }
-  else
-    {
-    this->Internal->CacheLinkInterfaceSourcesDone[config] = true;
-    }
+  deleteAndClear(linkInterfaceSourcesEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2213,58 +2171,47 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
                             config,
                             debugIncludes);
 
-  if (!this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[config])
+  std::vector<cmTargetInternals::TargetPropertyEntry*>
+    linkInterfaceIncludeDirectoriesEntries;
+  this->Internal->AddInterfaceEntries(
+    this, config, "INTERFACE_INCLUDE_DIRECTORIES",
+    linkInterfaceIncludeDirectoriesEntries);
+
+  if(this->Makefile->IsOn("APPLE"))
     {
-    this->Internal->AddInterfaceEntries(
-      this, config, "INTERFACE_INCLUDE_DIRECTORIES",
-      this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries[config]);
-
-    if(this->Makefile->IsOn("APPLE"))
+    LinkImplementation const* impl = this->GetLinkImplementation(config);
+    for(std::vector<cmLinkImplItem>::const_iterator
+        it = impl->Libraries.begin();
+        it != impl->Libraries.end(); ++it)
       {
-      LinkImplementation const* impl = this->GetLinkImplementation(config);
-      for(std::vector<cmLinkImplItem>::const_iterator
-          it = impl->Libraries.begin();
-          it != impl->Libraries.end(); ++it)
+      std::string libDir = cmSystemTools::CollapseFullPath(it->c_str());
+
+      static cmsys::RegularExpression
+        frameworkCheck("(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
+      if(!frameworkCheck.find(libDir))
         {
-        std::string libDir = cmSystemTools::CollapseFullPath(it->c_str());
-
-        static cmsys::RegularExpression
-          frameworkCheck("(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
-        if(!frameworkCheck.find(libDir))
-          {
-          continue;
-          }
-
-        libDir = frameworkCheck.match(1);
-
-        cmGeneratorExpression ge;
-        cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                  ge.Parse(libDir.c_str());
-        this->Internal
-                ->CachedLinkInterfaceIncludeDirectoriesEntries[config]
-                .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
+        continue;
         }
+
+      libDir = frameworkCheck.match(1);
+
+      cmGeneratorExpression ge;
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                ge.Parse(libDir.c_str());
+      linkInterfaceIncludeDirectoriesEntries
+              .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
       }
     }
 
   processIncludeDirectories(this,
-    this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries[config],
+                            linkInterfaceIncludeDirectoriesEntries,
                             includes,
                             uniqueIncludes,
                             &dagChecker,
                             config,
                             debugIncludes);
 
-  if (!this->Makefile->IsGeneratingBuildSystem())
-    {
-    deleteAndClear(
-                this->Internal->CachedLinkInterfaceIncludeDirectoriesEntries);
-    }
-  else
-    {
-    this->Internal->CacheLinkInterfaceIncludeDirectoriesDone[config]
-                                                                      = true;
-    }
+  deleteAndClear(linkInterfaceIncludeDirectoriesEntries);
 
   return includes;
 }
@@ -2405,29 +2352,22 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                             config,
                             debugOptions);
 
-  if (!this->Internal->CacheLinkInterfaceCompileOptionsDone[config])
-    {
-    this->Internal->AddInterfaceEntries(
-      this, config, "INTERFACE_COMPILE_OPTIONS",
-      this->Internal->CachedLinkInterfaceCompileOptionsEntries[config]);
-    }
+  std::vector<cmTargetInternals::TargetPropertyEntry*>
+    linkInterfaceCompileOptionsEntries;
+
+  this->Internal->AddInterfaceEntries(
+    this, config, "INTERFACE_COMPILE_OPTIONS",
+    linkInterfaceCompileOptionsEntries);
 
   processCompileOptions(this,
-    this->Internal->CachedLinkInterfaceCompileOptionsEntries[config],
+                        linkInterfaceCompileOptionsEntries,
                             result,
                             uniqueOptions,
                             &dagChecker,
                             config,
                             debugOptions);
 
-  if (!this->Makefile->IsGeneratingBuildSystem())
-    {
-    deleteAndClear(this->Internal->CachedLinkInterfaceCompileOptionsEntries);
-    }
-  else
-    {
-    this->Internal->CacheLinkInterfaceCompileOptionsDone[config] = true;
-    }
+  deleteAndClear(linkInterfaceCompileOptionsEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2479,66 +2419,54 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                             config,
                             debugDefines);
 
-  if (!this->Internal->CacheLinkInterfaceCompileDefinitionsDone[config])
+  std::vector<cmTargetInternals::TargetPropertyEntry*>
+    linkInterfaceCompileDefinitionsEntries;
+  this->Internal->AddInterfaceEntries(
+    this, config, "INTERFACE_COMPILE_DEFINITIONS",
+    linkInterfaceCompileDefinitionsEntries);
+  if (!config.empty())
     {
-    this->Internal->AddInterfaceEntries(
-      this, config, "INTERFACE_COMPILE_DEFINITIONS",
-      this->Internal->CachedLinkInterfaceCompileDefinitionsEntries[config]);
-    if (!config.empty())
+    std::string configPropName = "COMPILE_DEFINITIONS_"
+                                        + cmSystemTools::UpperCase(config);
+    const char *configProp = this->GetProperty(configPropName);
+    if (configProp)
       {
-      std::string configPropName = "COMPILE_DEFINITIONS_"
-                                          + cmSystemTools::UpperCase(config);
-      const char *configProp = this->GetProperty(configPropName);
-      if (configProp)
+      switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0043))
         {
-        switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0043))
+        case cmPolicies::WARN:
           {
-          case cmPolicies::WARN:
-            {
-            cmOStringStream e;
-            e << this->Makefile->GetCMakeInstance()->GetPolicies()
-                     ->GetPolicyWarning(cmPolicies::CMP0043);
-            this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-                                         e.str());
-            }
-          case cmPolicies::OLD:
-            {
-            cmGeneratorExpression ge;
-            cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
-                                                        ge.Parse(configProp);
-            this->Internal
-              ->CachedLinkInterfaceCompileDefinitionsEntries[config]
-                  .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
-            }
-            break;
-          case cmPolicies::NEW:
-          case cmPolicies::REQUIRED_ALWAYS:
-          case cmPolicies::REQUIRED_IF_USED:
-            break;
+          cmOStringStream e;
+          e << this->Makefile->GetCMakeInstance()->GetPolicies()
+                   ->GetPolicyWarning(cmPolicies::CMP0043);
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                                       e.str());
           }
+        case cmPolicies::OLD:
+          {
+          cmGeneratorExpression ge;
+          cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+                                                      ge.Parse(configProp);
+          linkInterfaceCompileDefinitionsEntries
+                .push_back(new cmTargetInternals::TargetPropertyEntry(cge));
+          }
+          break;
+        case cmPolicies::NEW:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+          break;
         }
       }
-
     }
 
   processCompileDefinitions(this,
-    this->Internal->CachedLinkInterfaceCompileDefinitionsEntries[config],
+                            linkInterfaceCompileDefinitionsEntries,
                             list,
                             uniqueOptions,
                             &dagChecker,
                             config,
                             debugDefines);
 
-  if (!this->Makefile->IsGeneratingBuildSystem())
-    {
-    deleteAndClear(this->Internal
-                              ->CachedLinkInterfaceCompileDefinitionsEntries);
-    }
-  else
-    {
-    this->Internal->CacheLinkInterfaceCompileDefinitionsDone[config]
-                                                                      = true;
-    }
+  deleteAndClear(linkInterfaceCompileDefinitionsEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -2590,29 +2518,21 @@ void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
                             config,
                             debugFeatures);
 
-  if (!this->Internal->CacheLinkInterfaceCompileFeaturesDone[config])
-    {
-    this->Internal->AddInterfaceEntries(
-      this, config, "INTERFACE_COMPILE_FEATURES",
-      this->Internal->CachedLinkInterfaceCompileFeaturesEntries[config]);
-    }
+  std::vector<cmTargetInternals::TargetPropertyEntry*>
+    linkInterfaceCompileFeaturesEntries;
+  this->Internal->AddInterfaceEntries(
+    this, config, "INTERFACE_COMPILE_FEATURES",
+    linkInterfaceCompileFeaturesEntries);
 
   processCompileFeatures(this,
-    this->Internal->CachedLinkInterfaceCompileFeaturesEntries[config],
+                         linkInterfaceCompileFeaturesEntries,
                             result,
                             uniqueFeatures,
                             &dagChecker,
                             config,
                             debugFeatures);
 
-  if (!this->Makefile->IsGeneratingBuildSystem())
-    {
-    deleteAndClear(this->Internal->CachedLinkInterfaceCompileFeaturesEntries);
-    }
-  else
-    {
-    this->Internal->CacheLinkInterfaceCompileFeaturesDone[config] = true;
-    }
+  deleteAndClear(linkInterfaceCompileFeaturesEntries);
 }
 
 //----------------------------------------------------------------------------
