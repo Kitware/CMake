@@ -41,58 +41,74 @@
 
 cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
 {
-  cmLocalVisualStudioGenerator::VSVersion
-    v = this->LocalGenerator->GetVersion();
-  if(v >= cmLocalVisualStudioGenerator::VS14)
-    { return cmVS14CLFlagTable; }
-  else if(v >= cmLocalVisualStudioGenerator::VS12)
-    { return cmVS12CLFlagTable; }
-  else if(v == cmLocalVisualStudioGenerator::VS11)
-    { return cmVS11CLFlagTable; }
-  else
-    { return cmVS10CLFlagTable; }
+  if(this->MSTools)
+    {
+    cmLocalVisualStudioGenerator::VSVersion
+      v = this->LocalGenerator->GetVersion();
+    if(v >= cmLocalVisualStudioGenerator::VS14)
+      { return cmVS14CLFlagTable; }
+    else if(v >= cmLocalVisualStudioGenerator::VS12)
+      { return cmVS12CLFlagTable; }
+    else if(v == cmLocalVisualStudioGenerator::VS11)
+      { return cmVS11CLFlagTable; }
+    else
+      { return cmVS10CLFlagTable; }
+    }
+  return 0;
 }
 
 cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetRcFlagTable() const
 {
-  cmLocalVisualStudioGenerator::VSVersion
-    v = this->LocalGenerator->GetVersion();
-  if(v >= cmLocalVisualStudioGenerator::VS14)
-    { return cmVS14RCFlagTable; }
-  else if(v >= cmLocalVisualStudioGenerator::VS12)
-    { return cmVS12RCFlagTable; }
-  else if(v == cmLocalVisualStudioGenerator::VS11)
-    { return cmVS11RCFlagTable; }
-  else
-    { return cmVS10RCFlagTable; }
+  if(this->MSTools)
+    {
+    cmLocalVisualStudioGenerator::VSVersion
+      v = this->LocalGenerator->GetVersion();
+    if(v >= cmLocalVisualStudioGenerator::VS14)
+      { return cmVS14RCFlagTable; }
+    else if(v >= cmLocalVisualStudioGenerator::VS12)
+      { return cmVS12RCFlagTable; }
+    else if(v == cmLocalVisualStudioGenerator::VS11)
+      { return cmVS11RCFlagTable; }
+    else
+      { return cmVS10RCFlagTable; }
+    }
+  return 0;
 }
 
 cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
 {
-  cmLocalVisualStudioGenerator::VSVersion
-    v = this->LocalGenerator->GetVersion();
-  if(v >= cmLocalVisualStudioGenerator::VS14)
-    { return cmVS14LibFlagTable; }
-  else if(v >= cmLocalVisualStudioGenerator::VS12)
-    { return cmVS12LibFlagTable; }
-  else if(v == cmLocalVisualStudioGenerator::VS11)
-    { return cmVS11LibFlagTable; }
-  else
-    { return cmVS10LibFlagTable; }
+  if(this->MSTools)
+    {
+    cmLocalVisualStudioGenerator::VSVersion
+      v = this->LocalGenerator->GetVersion();
+    if(v >= cmLocalVisualStudioGenerator::VS14)
+      { return cmVS14LibFlagTable; }
+    else if(v >= cmLocalVisualStudioGenerator::VS12)
+      { return cmVS12LibFlagTable; }
+    else if(v == cmLocalVisualStudioGenerator::VS11)
+      { return cmVS11LibFlagTable; }
+    else
+      { return cmVS10LibFlagTable; }
+    }
+  return 0;
 }
 
 cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
 {
-  cmLocalVisualStudioGenerator::VSVersion
-    v = this->LocalGenerator->GetVersion();
-  if(v >= cmLocalVisualStudioGenerator::VS14)
-    { return cmVS14LinkFlagTable; }
-  else if(v >= cmLocalVisualStudioGenerator::VS12)
-    { return cmVS12LinkFlagTable; }
-  else if(v == cmLocalVisualStudioGenerator::VS11)
-    { return cmVS11LinkFlagTable; }
-  else
-    { return cmVS10LinkFlagTable; }
+  if(this->MSTools)
+    {
+    cmLocalVisualStudioGenerator::VSVersion
+      v = this->LocalGenerator->GetVersion();
+    if(v >= cmLocalVisualStudioGenerator::VS14)
+      { return cmVS14LinkFlagTable; }
+    else if(v >= cmLocalVisualStudioGenerator::VS12)
+      { return cmVS12LinkFlagTable; }
+    else if(v == cmLocalVisualStudioGenerator::VS11)
+      { return cmVS11LinkFlagTable; }
+    else
+      { return cmVS10LinkFlagTable; }
+    }
+  return 0;
 }
 
 static std::string cmVS10EscapeXML(std::string arg)
@@ -142,6 +158,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
+  this->MSTools = true;
   this->BuildFileStream = 0;
 }
 
@@ -532,7 +549,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     configType += "</ConfigurationType>\n";
     this->WriteString(configType.c_str(), 2);
 
-    this->WriteMSToolConfigurationValues(*i);
+    if(this->MSTools)
+      {
+      this->WriteMSToolConfigurationValues(*i);
+      }
 
     this->WriteString("</PropertyGroup>\n", 1);
     }
@@ -1447,17 +1467,23 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
 
   // Get preprocessor definitions for this directory.
   std::string defineFlags = this->Target->GetMakefile()->GetDefineFlags();
-  clOptions.FixExceptionHandlingDefault();
-  clOptions.AddFlag("PrecompiledHeader", "NotUsing");
-  std::string asmLocation = configName + "/";
-  clOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
+  if(this->MSTools)
+    {
+    clOptions.FixExceptionHandlingDefault();
+    clOptions.AddFlag("PrecompiledHeader", "NotUsing");
+    std::string asmLocation = configName + "/";
+    clOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
+    }
   clOptions.Parse(flags.c_str());
   clOptions.Parse(defineFlags.c_str());
   std::vector<std::string> targetDefines;
   this->Target->GetCompileDefinitions(targetDefines, configName.c_str());
   clOptions.AddDefines(targetDefines);
-  clOptions.SetVerboseMakefile(
-    this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
+  if(this->MSTools)
+    {
+    clOptions.SetVerboseMakefile(
+      this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));
+    }
 
   // Add a definition for the configuration name.
   std::string configDefine = "CMAKE_INTDIR=\"";
@@ -1486,24 +1512,27 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
 
-  this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
-
-  // If not in debug mode, write the DebugInformationFormat field
-  // without value so PDBs don't get generated uselessly.
-  if(!clOptions.IsDebug())
+  if(this->MSTools)
     {
-    this->WriteString("<DebugInformationFormat>"
-                      "</DebugInformationFormat>\n", 3);
-    }
+    this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
 
-  // Specify the compiler program database file if configured.
-  std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
-  if(!pdb.empty())
-    {
-    this->ConvertToWindowsSlash(pdb);
-    this->WriteString("<ProgramDataBaseFileName>", 3);
-    *this->BuildFileStream << cmVS10EscapeXML(pdb)
-                           << "</ProgramDataBaseFileName>\n";
+    // If not in debug mode, write the DebugInformationFormat field
+    // without value so PDBs don't get generated uselessly.
+    if(!clOptions.IsDebug())
+      {
+      this->WriteString("<DebugInformationFormat>"
+                        "</DebugInformationFormat>\n", 3);
+      }
+
+    // Specify the compiler program database file if configured.
+    std::string pdb = this->Target->GetCompilePDBPath(configName.c_str());
+    if(!pdb.empty())
+      {
+      this->ConvertToWindowsSlash(pdb);
+      this->WriteString("<ProgramDataBaseFileName>", 3);
+      *this->BuildFileStream << cmVS10EscapeXML(pdb)
+                             << "</ProgramDataBaseFileName>\n";
+      }
     }
 
   this->WriteString("</ClCompile>\n", 2);
@@ -1567,6 +1596,10 @@ void cmVisualStudio10TargetGenerator::
 WriteRCOptions(std::string const& configName,
                std::vector<std::string> const & includes)
 {
+  if(!this->MSTools)
+    {
+    return;
+    }
   this->WriteString("<ResourceCompile>\n", 2);
 
   // Preprocessor definitions and includes are shared with clOptions.
@@ -1754,45 +1787,53 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
                                   config.c_str());
     }
 
-  linkOptions.AddFlag("Version", "");
+  if(this->MSTools)
+    {
+    linkOptions.AddFlag("Version", "");
 
-  if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
-    {
-    linkOptions.AddFlag("SubSystem", "Windows");
-    }
-  else
-    {
-    linkOptions.AddFlag("SubSystem", "Console");
+    if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
+      {
+      linkOptions.AddFlag("SubSystem", "Windows");
+      }
+    else
+      {
+      linkOptions.AddFlag("SubSystem", "Console");
+      }
+
+    if(const char* stackVal =
+       this->Makefile->GetDefinition("CMAKE_"+linkLanguage+"_STACK_SIZE"))
+      {
+      linkOptions.AddFlag("StackReserveSize", stackVal);
+      }
+
+    if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
+      {
+      linkOptions.AddFlag("GenerateDebugInformation", "true");
+      }
+    else
+      {
+      linkOptions.AddFlag("GenerateDebugInformation", "false");
+      }
+    std::string pdb = this->Target->GetPDBDirectory(config.c_str());
+    pdb += "/";
+    pdb += targetNamePDB;
+    std::string imLib = this->Target->GetDirectory(config.c_str(), true);
+    imLib += "/";
+    imLib += targetNameImport;
+
+    linkOptions.AddFlag("ImportLibrary", imLib.c_str());
+    linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
     }
 
-  if(const char* stackVal =
-     this->Makefile->GetDefinition("CMAKE_"+linkLanguage+"_STACK_SIZE"))
-    {
-    linkOptions.AddFlag("StackReserveSize", stackVal);
-    }
-
-  if(linkOptions.IsDebug() || flags.find("/debug") != flags.npos)
-    {
-    linkOptions.AddFlag("GenerateDebugInformation", "true");
-    }
-  else
-    {
-    linkOptions.AddFlag("GenerateDebugInformation", "false");
-    }
-  std::string pdb = this->Target->GetPDBDirectory(config.c_str());
-  pdb += "/";
-  pdb += targetNamePDB;
-  std::string imLib = this->Target->GetDirectory(config.c_str(), true);
-  imLib += "/";
-  imLib += targetNameImport;
-
-  linkOptions.AddFlag("ImportLibrary", imLib.c_str());
-  linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
   linkOptions.Parse(flags.c_str());
-  std::string def = this->GeneratorTarget->GetModuleDefinitionFile("");
-  if(!def.empty())
+
+  if(this->MSTools)
     {
-    linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
+    std::string def = this->GeneratorTarget->GetModuleDefinitionFile("");
+    if(!def.empty())
+      {
+      linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
+      }
     }
 
   this->LinkOptions[config] = pOptions.release();
@@ -1857,6 +1898,11 @@ void cmVisualStudio10TargetGenerator::
 WriteMidlOptions(std::string const& /*config*/,
                  std::vector<std::string> const & includes)
 {
+  if(!this->MSTools)
+    {
+    return;
+    }
+
   // This processes *any* of the .idl files specified in the project's file
   // list (and passed as the item metadata %(Filename) expressing the rule
   // input filename) into output files at the per-config *build* dir
