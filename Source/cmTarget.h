@@ -18,6 +18,9 @@
 #include "cmListFileCache.h"
 
 #include <cmsys/auto_ptr.hxx>
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#include <cmsys/hash_map.hxx>
+#endif
 
 #define CM_FOR_EACH_TARGET_POLICY(F) \
   F(CMP0003) \
@@ -844,7 +847,11 @@ private:
   mutable bool LinkImplementationLanguageIsContextDependent;
 };
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
+typedef cmsys::hash_map<std::string,cmTarget> cmTargets;
+#else
 typedef std::map<std::string,cmTarget> cmTargets;
+#endif
 
 class cmTargetSet: public std::set<std::string> {};
 class cmTargetManifest: public std::map<std::string, cmTargetSet> {};
