@@ -198,6 +198,31 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
       return false;
       }
     }
+  else if(this->SystemName == "Android")
+    {
+    if(this->DefaultPlatformName != "Win32")
+      {
+      cmOStringStream e;
+      e << "CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR "
+        << "specifies a platform too: '" << this->GetName() << "'";
+      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+      }
+    std::string v = this->GetInstalledNsightTegraVersion();
+    if(v.empty())
+      {
+      mf->IssueMessage(cmake::FATAL_ERROR,
+        "CMAKE_SYSTEM_NAME is 'Android' but "
+        "'NVIDIA Nsight Tegra Visual Studio Edition' "
+        "is not installed.");
+      return false;
+      }
+    this->DefaultPlatformName = "Tegra-Android";
+    this->DefaultPlatformToolset = "Default";
+    this->NsightTegraVersion = v;
+    mf->AddDefinition("CMAKE_VS_NsightTegra_VERSION", v.c_str());
+    }
+
   return true;
 }
 
@@ -586,4 +611,20 @@ void cmGlobalVisualStudio10Generator::PathTooLong(
 bool cmGlobalVisualStudio10Generator::UseFolderProperty()
 {
   return IsExpressEdition() ? false : cmGlobalGenerator::UseFolderProperty();
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::IsNsightTegra() const
+{
+  return !this->NsightTegraVersion.empty();
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
+{
+  std::string version;
+  cmSystemTools::ReadRegistryValue(
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\NVIDIA Corporation\\Nsight Tegra;"
+    "Version", version, cmSystemTools::KeyWOW64_32);
+  return version;
 }
