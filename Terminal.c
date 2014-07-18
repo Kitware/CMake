@@ -104,11 +104,11 @@ void kwsysTerminal_cfprintf(int color, FILE* stream, const char* format, ...)
 }
 
 /*--------------------------------------------------------------------------*/
-/* Detect cases when a stream is definately not interactive.  */
+/* Detect cases when a stream is definitely not interactive.  */
 #if !defined(KWSYS_TERMINAL_ISATTY_WORKS)
 static int kwsysTerminalStreamIsNotInteractive(FILE* stream)
 {
-  /* The given stream is definately not interactive if it is a regular
+  /* The given stream is definitely not interactive if it is a regular
      file.  */
   struct stat stream_stat;
   if(fstat(fileno(stream), &stream_stat) == 0)
@@ -212,7 +212,7 @@ static int kwsysTerminalStreamIsVT100(FILE* stream, int default_vt100,
   (void)default_tty;
   return isatty(fileno(stream))? 1:0;
 #else
-  /* Check for cases in which the stream is definately not a tty.  */
+  /* Check for cases in which the stream is definitely not a tty.  */
   if(kwsysTerminalStreamIsNotInteractive(stream))
     {
     return 0;
