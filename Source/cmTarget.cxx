@@ -196,11 +196,9 @@ public:
   public:
     TargetPropertyEntry(cmsys::auto_ptr<cmCompiledGeneratorExpression> cge,
                         cmLinkImplItem const& item = NoLinkImplItem)
-      : ge(cge), Cached(false), LinkImplItem(item)
+      : ge(cge), LinkImplItem(item)
     {}
     const cmsys::auto_ptr<cmCompiledGeneratorExpression> ge;
-    std::vector<std::string> CachedEntries;
-    bool Cached;
     cmLinkImplItem const& LinkImplItem;
   };
   std::vector<TargetPropertyEntry*> IncludeDirectoriesEntries;
@@ -635,49 +633,37 @@ static bool processSources(cmTarget const* tgt,
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
-    bool cacheSources = false;
-    std::vector<std::string> entrySources = (*it)->CachedEntries;
-    if(entrySources.empty())
+    std::vector<std::string> entrySources;
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+                                              config,
+                                              false,
+                                              tgt,
+                                              tgt,
+                                              dagChecker),
+                                    entrySources);
+
+    if ((*it)->ge->GetHadContextSensitiveCondition())
       {
-      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
-                                                config,
-                                                false,
-                                                tgt,
-                                                tgt,
-                                                dagChecker),
-                                      entrySources);
+      contextDependent = true;
+      }
 
-      if ((*it)->ge->GetHadContextSensitiveCondition())
-        {
-        contextDependent = true;
-        }
-      else if (mf->IsGeneratingBuildSystem())
-        {
-        cacheSources = true;
-        }
+    for(std::vector<std::string>::iterator i = entrySources.begin();
+        i != entrySources.end(); ++i)
+      {
+      std::string& src = *i;
 
-      for(std::vector<std::string>::iterator i = entrySources.begin();
-          i != entrySources.end(); ++i)
+      cmSourceFile* sf = mf->GetOrCreateSource(src);
+      std::string e;
+      src = sf->GetFullPath(&e);
+      if(src.empty())
         {
-        std::string& src = *i;
-
-        cmSourceFile* sf = mf->GetOrCreateSource(src);
-        std::string e;
-        src = sf->GetFullPath(&e);
-        if(src.empty())
+        if(!e.empty())
           {
-          if(!e.empty())
-            {
-            cmake* cm = mf->GetCMakeInstance();
-            cm->IssueMessage(cmake::FATAL_ERROR, e,
-                            tgt->GetBacktrace());
-            }
-          return contextDependent;
+          cmake* cm = mf->GetCMakeInstance();
+          cm->IssueMessage(cmake::FATAL_ERROR, e,
+                          tgt->GetBacktrace());
           }
-        }
-      if (cacheSources)
-        {
-        (*it)->CachedEntries = entrySources;
+        return contextDependent;
         }
       }
     std::string usedSources;
@@ -2003,27 +1989,14 @@ static void processIncludeDirectories(cmTarget const* tgt,
     std::string const& targetName = item;
     bool const fromImported = item.Target && item.Target->IsImported();
     bool const checkCMP0027 = item.FromGenex;
-    bool testIsOff = true;
-    bool cacheIncludes = false;
-    std::vector<std::string>& entryIncludes = (*it)->CachedEntries;
-    if(!entryIncludes.empty())
-      {
-      testIsOff = false;
-      }
-    else
-      {
-      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
-                                                config,
-                                                false,
-                                                tgt,
-                                                dagChecker),
-                                      entryIncludes);
-      if (mf->IsGeneratingBuildSystem()
-          && !(*it)->ge->GetHadContextSensitiveCondition())
-        {
-        cacheIncludes = true;
-        }
-      }
+    std::vector<std::string> entryIncludes;
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+                                              config,
+                                              false,
+                                              tgt,
+                                              dagChecker),
+                                    entryIncludes);
+
     std::string usedIncludes;
     for(std::vector<std::string>::iterator
           li = entryIncludes.begin(); li != entryIncludes.end(); ++li)
@@ -2105,7 +2078,7 @@ static void processIncludeDirectories(cmTarget const* tgt,
           }
         }
 
-      if (testIsOff && !cmSystemTools::IsOff(li->c_str()))
+      if (!cmSystemTools::IsOff(li->c_str()))
         {
         cmSystemTools::ConvertToUnixSlashes(*li);
         }
@@ -2119,10 +2092,6 @@ static void processIncludeDirectories(cmTarget const* tgt,
           usedIncludes += " * " + inc + "\n";
           }
         }
-      }
-    if (cacheIncludes)
-      {
-      (*it)->CachedEntries = entryIncludes;
       }
     if (!usedIncludes.empty())
       {
@@ -2229,33 +2198,16 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
-    std::vector<std::string>& entriesRef = (*it)->CachedEntries;
-    std::vector<std::string> localEntries;
-    std::vector<std::string>* entryOptions = &entriesRef;
-    if(!(*it)->Cached)
-      {
-      cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
-                                                config,
-                                                false,
-                                                tgt,
-                                                dagChecker),
-                                      localEntries);
-      if (mf->IsGeneratingBuildSystem()
-          && !(*it)->ge->GetHadContextSensitiveCondition())
-        {
-        // Cache the result.
-        *entryOptions = localEntries;
-        (*it)->Cached = true;
-        }
-      else
-        {
-        // Use the context-sensitive results here.
-        entryOptions = &localEntries;
-        }
-      }
+    std::vector<std::string> entryOptions;
+    cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
+                                              config,
+                                              false,
+                                              tgt,
+                                              dagChecker),
+                                    entryOptions);
     std::string usedOptions;
     for(std::vector<std::string>::iterator
-          li = entryOptions->begin(); li != entryOptions->end(); ++li)
+          li = entryOptions.begin(); li != entryOptions.end(); ++li)
       {
       std::string const& opt = *li;
 
