@@ -70,6 +70,8 @@ if(CMAKE_OSX_DEPLOYMENT_TARGET)
     set(_sdk_ver "${CMAKE_MATCH_1}")
   elseif("${_CMAKE_OSX_SYSROOT_ORIG}" MATCHES "^macosx([0-9]+\\.[0-9]+)$")
     set(_sdk_ver "${CMAKE_MATCH_1}")
+  elseif("${_CMAKE_OSX_SYSROOT_ORIG}" STREQUAL "/")
+    set(_sdk_ver "${_CURRENT_OSX_VERSION}")
   else()
     message(FATAL_ERROR
       "CMAKE_OSX_DEPLOYMENT_TARGET is '${CMAKE_OSX_DEPLOYMENT_TARGET}' "
