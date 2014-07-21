@@ -88,11 +88,6 @@ struct cmTarget::CompileInfo
   std::string CompilePdbDir;
 };
 
-struct TargetConfigPair : public std::pair<cmTarget const* , std::string> {
-  TargetConfigPair(cmTarget const* tgt, const std::string &config)
-    : std::pair<cmTarget const* , std::string>(tgt, config) {}
-};
-
 //----------------------------------------------------------------------------
 class cmTargetInternals
 {
@@ -135,7 +130,9 @@ public:
                                      cmTarget const* head,
                                      bool usage_requirements_only);
 
-  typedef std::map<TargetConfigPair, OptionalLinkInterface>
+  struct HeadToLinkInterfaceMap:
+    public std::map<cmTarget const*, OptionalLinkInterface> {};
+  typedef std::map<std::string, HeadToLinkInterfaceMap>
                                                           LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
   LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
@@ -158,8 +155,10 @@ public:
     bool LibrariesDone;
     bool LanguagesDone;
   };
-  typedef std::map<TargetConfigPair,
-                   OptionalLinkImplementation> LinkImplMapType;
+  struct HeadToLinkImplementationMap:
+    public std::map<cmTarget const*, OptionalLinkImplementation> {};
+  typedef std::map<std::string,
+                   HeadToLinkImplementationMap> LinkImplMapType;
   LinkImplMapType LinkImplMap;
 
   typedef std::map<std::string, cmTarget::LinkClosure> LinkClosureMapType;
@@ -5746,10 +5745,10 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
     }
 
   // Lookup any existing link interface for this configuration.
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+  std::string CONFIG = cmSystemTools::UpperCase(config);
 
   cmTargetInternals::OptionalLinkInterface&
-    iface = this->Internal->LinkInterfaceMap[key];
+    iface = this->Internal->LinkInterfaceMap[CONFIG][head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -5789,13 +5788,13 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
     }
 
   // Lookup any existing link interface for this configuration.
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+  std::string CONFIG = cmSystemTools::UpperCase(config);
   cmTargetInternals::LinkInterfaceMapType& lim =
     (usage_requirements_only ?
      this->Internal->LinkInterfaceUsageRequirementsOnlyMap :
      this->Internal->LinkInterfaceMap);
 
-  cmTargetInternals::OptionalLinkInterface& iface = lim[key];
+  cmTargetInternals::OptionalLinkInterface& iface = lim[CONFIG][head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -5818,13 +5817,13 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     return 0;
     }
 
-  TargetConfigPair key(headTarget, cmSystemTools::UpperCase(config));
   cmTargetInternals::LinkInterfaceMapType& lim =
     (usage_requirements_only ?
      this->Internal->LinkInterfaceUsageRequirementsOnlyMap :
      this->Internal->LinkInterfaceMap);
 
-  cmTargetInternals::OptionalLinkInterface& iface = lim[key];
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  cmTargetInternals::OptionalLinkInterface& iface = lim[CONFIG][headTarget];
   if(!iface.AllDone)
     {
     iface.AllDone = true;
@@ -6226,9 +6225,9 @@ cmTarget::GetLinkImplementation(const std::string& config) const
     }
 
   // Populate the link implementation for this configuration.
-  TargetConfigPair key(this, cmSystemTools::UpperCase(config));
+  std::string CONFIG = cmSystemTools::UpperCase(config);
   cmTargetInternals::OptionalLinkImplementation&
-    impl = this->Internal->LinkImplMap[key];
+    impl = this->Internal->LinkImplMap[CONFIG][this];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
@@ -6261,9 +6260,9 @@ cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
     }
 
   // Populate the link implementation libraries for this configuration.
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+  std::string CONFIG = cmSystemTools::UpperCase(config);
   cmTargetInternals::OptionalLinkImplementation&
-    impl = this->Internal->LinkImplMap[key];
+    impl = this->Internal->LinkImplMap[CONFIG][head];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
