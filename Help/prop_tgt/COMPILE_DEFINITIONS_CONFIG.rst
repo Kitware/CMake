@@ -1,6 +1,8 @@
 COMPILE_DEFINITIONS_<CONFIG>
 ----------------------------
 
+Ignored.  See CMake Policy :policy:`CMP0043`.
+
 Per-configuration preprocessor definitions on a target.
 
 This is the configuration-specific version of :prop_tgt:`COMPILE_DEFINITIONS`
