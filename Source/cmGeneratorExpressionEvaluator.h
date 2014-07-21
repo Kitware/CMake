@@ -41,6 +41,7 @@ struct cmGeneratorExpressionContext
   bool Quiet;
   bool HadError;
   bool HadContextSensitiveCondition;
+  bool HadHeadSensitiveCondition;
   bool EvaluateForBuildsystem;
 };
 
