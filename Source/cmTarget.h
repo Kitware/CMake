@@ -797,11 +797,6 @@ private:
   LinkImplementationLibraries const*
     GetLinkImplementationLibrariesInternal(const std::string& config,
                                            cmTarget const* head) const;
-  void ComputeLinkImplementationLibraries(const std::string& config,
-                                          LinkImplementation& impl,
-                                          cmTarget const* head) const;
-  void ComputeLinkImplementationLanguages(const std::string& config,
-                                          LinkImplementation& impl) const;
   void ComputeLinkClosure(const std::string& config, LinkClosure& lc) const;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
