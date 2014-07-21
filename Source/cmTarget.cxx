@@ -5746,9 +5746,9 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
 
   // Lookup any existing link interface for this configuration.
   std::string CONFIG = cmSystemTools::UpperCase(config);
-
-  cmTargetInternals::OptionalLinkInterface&
-    iface = this->Internal->LinkInterfaceMap[CONFIG][head];
+  cmTargetInternals::HeadToLinkInterfaceMap& hm =
+    this->Internal->LinkInterfaceMap[CONFIG];
+  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -5789,12 +5789,11 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
 
   // Lookup any existing link interface for this configuration.
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::LinkInterfaceMapType& lim =
+  cmTargetInternals::HeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
-     this->Internal->LinkInterfaceUsageRequirementsOnlyMap :
-     this->Internal->LinkInterfaceMap);
-
-  cmTargetInternals::OptionalLinkInterface& iface = lim[CONFIG][head];
+     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
+     this->Internal->LinkInterfaceMap[CONFIG]);
+  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -5817,13 +5816,12 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     return 0;
     }
 
-  cmTargetInternals::LinkInterfaceMapType& lim =
-    (usage_requirements_only ?
-     this->Internal->LinkInterfaceUsageRequirementsOnlyMap :
-     this->Internal->LinkInterfaceMap);
-
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::OptionalLinkInterface& iface = lim[CONFIG][headTarget];
+  cmTargetInternals::HeadToLinkInterfaceMap& hm =
+    (usage_requirements_only ?
+     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
+     this->Internal->LinkInterfaceMap[CONFIG]);
+  cmTargetInternals::OptionalLinkInterface& iface = hm[headTarget];
   if(!iface.AllDone)
     {
     iface.AllDone = true;
@@ -6261,8 +6259,9 @@ cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
 
   // Populate the link implementation libraries for this configuration.
   std::string CONFIG = cmSystemTools::UpperCase(config);
-  cmTargetInternals::OptionalLinkImplementation&
-    impl = this->Internal->LinkImplMap[CONFIG][head];
+  cmTargetInternals::HeadToLinkImplementationMap& hm =
+    this->Internal->LinkImplMap[CONFIG];
+  cmTargetInternals::OptionalLinkImplementation& impl = hm[head];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
