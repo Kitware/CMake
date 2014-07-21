@@ -141,11 +141,6 @@ public:
   LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
   bool PolicyWarnedCMP0022;
 
-  typedef std::map<TargetConfigPair, OptionalLinkInterface>
-                                                    ImportLinkInterfaceMapType;
-  ImportLinkInterfaceMapType ImportLinkInterfaceMap;
-  ImportLinkInterfaceMapType ImportLinkInterfaceUsageRequirementsOnlyMap;
-
   typedef std::map<std::string, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
 
@@ -528,8 +523,6 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkImplMap.clear();
   this->Internal->LinkInterfaceMap.clear();
   this->Internal->LinkInterfaceUsageRequirementsOnlyMap.clear();
-  this->Internal->ImportLinkInterfaceMap.clear();
-  this->Internal->ImportLinkInterfaceUsageRequirementsOnlyMap.clear();
   this->Internal->LinkClosureMap.clear();
   for (cmTargetLinkInformationMap::const_iterator it
       = this->LinkInformation.begin();
@@ -5826,10 +5819,10 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     }
 
   TargetConfigPair key(headTarget, cmSystemTools::UpperCase(config));
-  cmTargetInternals::ImportLinkInterfaceMapType& lim =
+  cmTargetInternals::LinkInterfaceMapType& lim =
     (usage_requirements_only ?
-     this->Internal->ImportLinkInterfaceUsageRequirementsOnlyMap :
-     this->Internal->ImportLinkInterfaceMap);
+     this->Internal->LinkInterfaceUsageRequirementsOnlyMap :
+     this->Internal->LinkInterfaceMap);
 
   cmTargetInternals::OptionalLinkInterface& iface = lim[key];
   if(!iface.AllDone)
