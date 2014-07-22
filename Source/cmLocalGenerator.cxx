@@ -681,7 +681,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
         objVector.push_back(ofname);
         this->AddCustomCommandToCreateObject(ofname.c_str(),
                                              llang, *(*i), target);
-        objs += this->Convert(ofname,START_OUTPUT,MAKERULE);
+        objs += this->Convert(ofname,START_OUTPUT,SHELL);
         objs += " ";
         }
       }
