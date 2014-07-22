@@ -443,12 +443,17 @@ cmDependsFortran
   const char* src = info.Source.c_str();
 
   // Write the include dependencies to the output stream.
-  internalDepends << obj << std::endl;
+  std::string obj_i =
+    this->LocalGenerator->Convert(obj, cmLocalGenerator::HOME_OUTPUT);
+  std::string obj_m =
+    this->LocalGenerator->ConvertToOutputFormat(obj_i,
+                                                cmLocalGenerator::MAKERULE);
+  internalDepends << obj_i << std::endl;
   internalDepends << " " << src << std::endl;
   for(std::set<std::string>::const_iterator i = info.Includes.begin();
       i != info.Includes.end(); ++i)
     {
-    makeDepends << obj << ": " <<
+    makeDepends << obj_m << ": " <<
       this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
                                     cmLocalGenerator::MAKERULE)
@@ -485,7 +490,7 @@ cmDependsFortran
                                             cmLocalGenerator::MAKERULE);
 
       // since we require some things add them to our list of requirements
-      makeDepends << obj << ".requires: " << proxy << std::endl;
+      makeDepends << obj_m << ".requires: " << proxy << std::endl;
       }
 
     // The object file should depend on timestamped files for the
@@ -500,7 +505,7 @@ cmDependsFortran
         this->LocalGenerator->Convert(required->second,
                                       cmLocalGenerator::HOME_OUTPUT,
                                       cmLocalGenerator::MAKERULE);
-      makeDepends << obj << ": " << stampFile << "\n";
+      makeDepends << obj_m << ": " << stampFile << "\n";
       }
     else
       {
@@ -513,7 +518,7 @@ cmDependsFortran
           this->LocalGenerator->Convert(module,
                                         cmLocalGenerator::HOME_OUTPUT,
                                         cmLocalGenerator::MAKERULE);
-        makeDepends << obj << ": " << module << "\n";
+        makeDepends << obj_m << ": " << module << "\n";
         }
       }
     }
@@ -529,7 +534,7 @@ cmDependsFortran
     proxy = this->LocalGenerator->Convert(proxy,
                                           cmLocalGenerator::HOME_OUTPUT,
                                           cmLocalGenerator::MAKERULE);
-    makeDepends << proxy << ": " << obj << ".provides" << std::endl;
+    makeDepends << proxy << ": " << obj_m << ".provides" << std::endl;
     }
 
   // If any modules are provided then they must be converted to stamp files.
@@ -537,7 +542,7 @@ cmDependsFortran
     {
     // Create a target to copy the module after the object file
     // changes.
-    makeDepends << obj << ".provides.build:\n";
+    makeDepends << obj_m << ".provides.build:\n";
     for(std::set<std::string>::const_iterator i = info.Provides.begin();
         i != info.Provides.end(); ++i)
       {
@@ -575,7 +580,7 @@ cmDependsFortran
       }
     // After copying the modules update the timestamp file so that
     // copying will not be done again until the source rebuilds.
-    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj
+    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj_m
                 << ".provides.build\n";
 
     // Make sure the module timestamp rule is evaluated by the time
@@ -585,7 +590,7 @@ cmDependsFortran
     driver = this->LocalGenerator->Convert(driver,
                                            cmLocalGenerator::HOME_OUTPUT,
                                            cmLocalGenerator::MAKERULE);
-    makeDepends << driver << ": " << obj << ".provides.build\n";
+    makeDepends << driver << ": " << obj_m << ".provides.build\n";
     }
 
   return true;
