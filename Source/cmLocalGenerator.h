@@ -106,7 +106,7 @@ public:
    * path setting
    */
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
-  enum OutputFormat { UNCHANGED, MAKEFILE, SHELL, WATCOMQUOTE, RESPONSE };
+  enum OutputFormat { UNCHANGED, MAKERULE, SHELL, WATCOMQUOTE, RESPONSE };
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output);
   std::string Convert(const std::string& remote, RelativeRoot local,

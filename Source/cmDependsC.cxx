@@ -276,7 +276,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
     makeDepends << obj << ": " <<
       this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
-                                    cmLocalGenerator::MAKEFILE)
+                                    cmLocalGenerator::MAKERULE)
                 << std::endl;
     internalDepends << " " << *i << std::endl;
     }

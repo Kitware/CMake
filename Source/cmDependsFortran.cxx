@@ -451,7 +451,7 @@ cmDependsFortran
     makeDepends << obj << ": " <<
       this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
-                                    cmLocalGenerator::MAKEFILE)
+                                    cmLocalGenerator::MAKERULE)
                 << std::endl;
     internalDepends << " " << *i << std::endl;
     }
@@ -482,7 +482,7 @@ cmDependsFortran
       proxy += ".mod.proxy";
       proxy = this->LocalGenerator->Convert(proxy,
                                             cmLocalGenerator::HOME_OUTPUT,
-                                            cmLocalGenerator::MAKEFILE);
+                                            cmLocalGenerator::MAKERULE);
 
       // since we require some things add them to our list of requirements
       makeDepends << obj << ".requires: " << proxy << std::endl;
@@ -499,7 +499,7 @@ cmDependsFortran
       std::string stampFile =
         this->LocalGenerator->Convert(required->second,
                                       cmLocalGenerator::HOME_OUTPUT,
-                                      cmLocalGenerator::MAKEFILE);
+                                      cmLocalGenerator::MAKERULE);
       makeDepends << obj << ": " << stampFile << "\n";
       }
     else
@@ -512,7 +512,7 @@ cmDependsFortran
         module =
           this->LocalGenerator->Convert(module,
                                         cmLocalGenerator::HOME_OUTPUT,
-                                        cmLocalGenerator::MAKEFILE);
+                                        cmLocalGenerator::MAKERULE);
         makeDepends << obj << ": " << module << "\n";
         }
       }
@@ -528,7 +528,7 @@ cmDependsFortran
     proxy += ".mod.proxy";
     proxy = this->LocalGenerator->Convert(proxy,
                                           cmLocalGenerator::HOME_OUTPUT,
-                                          cmLocalGenerator::MAKEFILE);
+                                          cmLocalGenerator::MAKERULE);
     makeDepends << proxy << ": " << obj << ".provides" << std::endl;
     }
 
@@ -584,7 +584,7 @@ cmDependsFortran
     driver += "/build";
     driver = this->LocalGenerator->Convert(driver,
                                            cmLocalGenerator::HOME_OUTPUT,
-                                           cmLocalGenerator::MAKEFILE);
+                                           cmLocalGenerator::MAKERULE);
     makeDepends << driver << ": " << obj << ".provides.build\n";
     }
 

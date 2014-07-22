@@ -218,7 +218,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     << this->LocalGenerator->IncludeDirective << " " << root
     << this->Convert(dependFileNameFull,
                      cmLocalGenerator::HOME_OUTPUT,
-                     cmLocalGenerator::MAKEFILE)
+                     cmLocalGenerator::MAKERULE)
     << "\n\n";
 
   if(!this->NoRuleMessages)
@@ -229,7 +229,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
       << this->LocalGenerator->IncludeDirective << " " << root
       << this->Convert(this->ProgressFileNameFull,
                        cmLocalGenerator::HOME_OUTPUT,
-                       cmLocalGenerator::MAKEFILE)
+                       cmLocalGenerator::MAKERULE)
       << "\n\n";
     }
 
@@ -262,7 +262,7 @@ void cmMakefileTargetGenerator::WriteCommonCodeRules()
     << this->LocalGenerator->IncludeDirective << " " << root
     << this->Convert(this->FlagFileNameFull,
                                      cmLocalGenerator::HOME_OUTPUT,
-                                     cmLocalGenerator::MAKEFILE)
+                                     cmLocalGenerator::MAKERULE)
     << "\n\n";
 }
 

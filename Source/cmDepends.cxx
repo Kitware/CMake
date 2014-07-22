@@ -63,7 +63,7 @@ bool cmDepends::Write(std::ostream &makeDepends,
     // Make sure the object file is relative to the top of the build tree.
     obj = this->LocalGenerator->Convert(obj,
                                         cmLocalGenerator::HOME_OUTPUT,
-                                        cmLocalGenerator::MAKEFILE);
+                                        cmLocalGenerator::MAKERULE);
     dependencies[obj].insert(src);
     }
   for(std::map<std::string, std::set<std::string> >::const_iterator

@@ -530,7 +530,7 @@ cmGlobalUnixMakefileGenerator3
   // Begin the directory-level rules section.
   std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
   dir = lg->Convert(dir, cmLocalGenerator::HOME_OUTPUT,
-                    cmLocalGenerator::MAKEFILE);
+                    cmLocalGenerator::MAKERULE);
   lg->WriteDivider(ruleFileStream);
   ruleFileStream
     << "# Directory level rules for directory "
