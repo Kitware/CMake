@@ -35,3 +35,21 @@ unset(RunCMake_TEST_NO_CLEAN)
 if (NOT timestamp_after STREQUAL timestamp)
   message(SEND_ERROR "WriteIfDifferent changed output file.")
 endif()
+
+if (UNIX AND EXISTS /bin/sh)
+  set(RunCMake_TEST_NO_CLEAN ON)
+  run_cmake(CarryPermissions)
+  execute_process(
+    COMMAND "${RunCMake_BINARY_DIR}/CarryPermissions-build/output_script.sh"
+    OUTPUT_VARIABLE script_output
+    RESULT_VARIABLE script_result
+    ERROR_VARIABLE script_error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+  if (script_result)
+    message(SEND_ERROR "Generated script did not execute correctly: [${script_result}]\n${script_output}\n====\n${script_error}")
+  endif()
+  if (NOT script_output STREQUAL SUCCESS)
+    message(SEND_ERROR "Generated script did not execute correctly:\n${script_output}\n====\n${script_error}")
+  endif()
+endif()
