@@ -61,3 +61,34 @@ if (UNIX AND EXISTS /bin/sh)
     message(SEND_ERROR "Generated script did not execute correctly:\n${script_output}\n====\n${script_error}")
   endif()
 endif()
+
+if (RunCMake_GENERATOR MATCHES Makefiles)
+  file(MAKE_DIRECTORY "${RunCMake_BINARY_DIR}/ReRunCMake-build/")
+  file(WRITE "${RunCMake_BINARY_DIR}/ReRunCMake-build/input_file.txt" "InitialContent\n")
+
+  set(RunCMake_TEST_NO_CLEAN ON)
+  run_cmake(ReRunCMake)
+  unset(RunCMake_TEST_NO_CLEAN)
+  file(TIMESTAMP "${RunCMake_BINARY_DIR}/ReRunCMake-build/output_file.txt" timestamp ${timeformat})
+  if(NOT timestamp)
+    message(SEND_ERROR "Could not get timestamp for \"${RunCMake_BINARY_DIR}/ReRunCMake-build/output_file.txt\"")
+  endif()
+
+  execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 1)
+
+  file(WRITE "${RunCMake_BINARY_DIR}/ReRunCMake-build/input_file.txt" "ChangedContent\n")
+  execute_process(COMMAND ${CMAKE_COMMAND} --build "${RunCMake_BINARY_DIR}/ReRunCMake-build/")
+  file(READ "${RunCMake_BINARY_DIR}/ReRunCMake-build/output_file.txt" out_content)
+
+  if(NOT out_content STREQUAL "ChangedContent\n")
+    message(SEND_ERROR "File did not change: \"${RunCMake_BINARY_DIR}/ReRunCMake-build/output_file.txt\"")
+  endif()
+
+
+  file(REMOVE "${RunCMake_BINARY_DIR}/ReRunCMake-build/output_file.txt")
+  execute_process(COMMAND ${CMAKE_COMMAND} --build "${RunCMake_BINARY_DIR}/ReRunCMake-build/")
+
+  if (NOT EXISTS "${RunCMake_BINARY_DIR}/ReRunCMake-build/output_file.txt")
+    message(SEND_ERROR "File did not re-generate: \"${RunCMake_BINARY_DIR}/ReRunCMake-build/output_file.txt\"")
+  endif()
+endif()
