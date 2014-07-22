@@ -225,7 +225,7 @@ set_tests_properties(CTestTestMemcheckDummyValgrindIgnoreMemcheck
     PASS_REGULAR_EXPRESSION "\n2/2 Test #2: RunCMakeAgain .*${ctest_and_tool_outputs}$")
 
 set_tests_properties(CTestTestMemcheckDummyBC PROPERTIES
-    PASS_REGULAR_EXPRESSION "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n\n100% tests passed, 0 tests failed out of 1\n(.*\n)?Error parsing XML in stream at line 1: no element found\n")
+    PASS_REGULAR_EXPRESSION "\n1/1 MemCheck #1: RunCMake \\.+   Passed +[0-9]+.[0-9]+ sec\n${guard_malloc_lines}\n100% tests passed, 0 tests failed out of 1\n(.*\n)?Error parsing XML in stream at line 1: no element found\n")
 
 set_tests_properties(CTestTestMemcheckDummyValgrindInvalidSupFile PROPERTIES
     PASS_REGULAR_EXPRESSION "\nCannot find memory checker suppression file: ${CTEST_ESCAPED_REALPATH_CMAKE_CURRENT_BINARY_DIR}/does-not-exist\n")
