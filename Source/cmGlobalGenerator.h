@@ -80,7 +80,7 @@ public:
    * basically creates a series of LocalGenerators for each directory and
    * requests that they Generate.
    */
-  virtual void Generate();
+  void DoGenerate();
 
   /**
    * Set/Get and Clear the enabled languages.
@@ -338,6 +338,8 @@ public:
   bool GenerateCPackPropertiesFile();
 
 protected:
+  virtual void Generate();
+
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets

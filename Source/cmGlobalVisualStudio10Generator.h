@@ -47,8 +47,6 @@ public:
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
-  virtual void Generate();
-
   /**
    * Try to determine system infomation such as shared library
    * extension, pthreads, byte order etc.
@@ -93,6 +91,8 @@ public:
   virtual void FindMakeProgram(cmMakefile*);
 
 protected:
+  virtual void Generate();
+
   virtual const char* GetIDEVersion() { return "10.0"; }
 
   std::string const& GetMSBuildCommand();

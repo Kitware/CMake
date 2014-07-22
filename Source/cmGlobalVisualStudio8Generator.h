@@ -45,7 +45,6 @@ public:
    * target.
    */
   virtual void Configure();
-  virtual void Generate();
 
   /**
    * Where does this version of Visual Studio look for macros for the
@@ -69,6 +68,7 @@ public:
     return !this->WindowsCEVersion.empty(); }
 
 protected:
+  virtual void Generate();
   virtual const char* GetIDEVersion() { return "8.0"; }
 
   virtual std::string FindDevEnvCommand();
