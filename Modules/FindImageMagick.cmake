@@ -143,13 +143,20 @@ function(FIND_IMAGEMAGICK_API component header)
   if(ImageMagick_${component}_INCLUDE_DIR AND ImageMagick_${component}_LIBRARY)
     set(ImageMagick_${component}_FOUND TRUE PARENT_SCOPE)
 
-    list(APPEND ImageMagick_INCLUDE_DIRS
+    # Construct per-component include directories.
+    set(ImageMagick_${component}_INCLUDE_DIRS
       ${ImageMagick_${component}_INCLUDE_DIR}
       )
     if(ImageMagick_${component}_ARCH_INCLUDE_DIR)
-      list(APPEND ImageMagick_INCLUDE_DIRS
+      list(APPEND ImageMagick_${component}_INCLUDE_DIRS
         ${ImageMagick_${component}_ARCH_INCLUDE_DIR})
     endif()
+    list(REMOVE_DUPLICATES ImageMagick_${component}_INCLUDE_DIRS)
+    set(ImageMagick_${component}_INCLUDE_DIRS
+      ${ImageMagick_${component}_INCLUDE_DIRS} PARENT_SCOPE)
+
+    # Add the per-component include directories to the full include dirs.
+    list(APPEND ImageMagick_INCLUDE_DIRS ${ImageMagick_${component}_INCLUDE_DIRS})
     list(REMOVE_DUPLICATES ImageMagick_INCLUDE_DIRS)
     set(ImageMagick_INCLUDE_DIRS ${ImageMagick_INCLUDE_DIRS} PARENT_SCOPE)
 
