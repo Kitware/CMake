@@ -5,6 +5,10 @@ message("ASAN_OPTIONS = [$ENV{ASAN_OPTIONS}]")
 string(REGEX REPLACE ".*log_path=\"([^\"]*)\".*" "\\1" LOG_FILE "$ENV{ASAN_OPTIONS}")
 message("LOG_FILE=[${LOG_FILE}]")
 
+# if we are not asked to simulate address sanitizer don't do it
+if(NOT "$ENV{ASAN_OPTIONS}]" MATCHES "simulate_sanitizer.1")
+  return()
+endif()
 # clear the log file
 file(REMOVE "${LOG_FILE}.2343")
 

@@ -121,7 +121,7 @@ set(CTEST_EXTRA_CODE)
 
 # add LeakSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
 ")
 
 set(CMAKELISTS_EXTRA_CODE
@@ -136,7 +136,7 @@ set_tests_properties(CTestTestMemcheckDummyLeakSanitizer PROPERTIES
     ".*Memory checking results:.*Direct leak - 2.*Indirect leak - 1.*")
 # add AddressSanitizer test
 set(CTEST_EXTRA_CODE
-"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"report_bugs=1 history_size=5 exitcode=55\")
+"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
 ")
 
 set(CMAKELISTS_EXTRA_CODE
