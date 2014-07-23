@@ -19,6 +19,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmCPackLog.h"
 #include "cmCPackComponentGroup.h"
+#include "cmTimestamp.h"
 
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Glob.hxx>
@@ -809,16 +810,8 @@ int cmCPackIFWGenerator::IfwCreatePackageFile()
 //----------------------------------------------------------------------
 std::string cmCPackIFWGenerator::IfwCreateCurrentDate()
 {
-  time_t rawtime;
-  struct tm * timeinfo;
-  char buffer[80];
-
-  time (&rawtime);
-  timeinfo = localtime(&rawtime);
-
-  strftime(buffer, 80, "%Y-%m-%d", timeinfo);
-
-  return buffer;
+  cmTimestamp timestamp;
+  return timestamp.CurrentTime("%Y-%m-%d", false);
 }
 
 //----------------------------------------------------------------------
