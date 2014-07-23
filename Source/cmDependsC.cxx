@@ -269,14 +269,20 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
   // written by the original local generator for this directory
   // convert the dependencies to paths relative to the home output
   // directory.  We must do the same here.
-  internalDepends << obj << std::endl;
+  std::string obj_i =
+    this->LocalGenerator->Convert(obj, cmLocalGenerator::HOME_OUTPUT);
+  std::string obj_m =
+    this->LocalGenerator->ConvertToOutputFormat(obj_i,
+                                                cmLocalGenerator::MAKERULE);
+  internalDepends << obj_i << std::endl;
+
   for(std::set<std::string>::const_iterator i=dependencies.begin();
       i != dependencies.end(); ++i)
     {
-    makeDepends << obj << ": " <<
+    makeDepends << obj_m << ": " <<
       this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
-                                    cmLocalGenerator::MAKEFILE)
+                                    cmLocalGenerator::MAKERULE)
                 << std::endl;
     internalDepends << " " << *i << std::endl;
     }

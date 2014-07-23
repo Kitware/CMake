@@ -681,7 +681,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
         objVector.push_back(ofname);
         this->AddCustomCommandToCreateObject(ofname.c_str(),
                                              llang, *(*i), target);
-        objs += this->Convert(ofname,START_OUTPUT,MAKEFILE);
+        objs += this->Convert(ofname,START_OUTPUT,SHELL);
         objs += " ";
         }
       }
@@ -2755,7 +2755,7 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
 {
   std::string result = source;
   // Convert it to an output path.
-  if (output == MAKEFILE)
+  if (output == MAKERULE)
     {
     result = cmSystemTools::ConvertToOutputPath(result.c_str());
     }

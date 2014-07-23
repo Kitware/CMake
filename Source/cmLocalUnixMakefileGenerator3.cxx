@@ -630,7 +630,7 @@ cmLocalUnixMakefileGenerator3
 
   // Construct the left hand side of the rule.
   replace = target;
-  std::string tgt = this->Convert(replace,HOME_OUTPUT,MAKEFILE);
+  std::string tgt = this->Convert(replace,HOME_OUTPUT,MAKERULE);
   const char* space = "";
   if(tgt.size() == 1)
     {
@@ -663,7 +663,7 @@ cmLocalUnixMakefileGenerator3
         dep != depends.end(); ++dep)
       {
       replace = *dep;
-      replace = this->Convert(replace,HOME_OUTPUT,MAKEFILE);
+      replace = this->Convert(replace,HOME_OUTPUT,MAKERULE);
       os << cmMakeSafe(tgt) << space << ": " << cmMakeSafe(replace) << "\n";
       }
     }

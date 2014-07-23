@@ -58,12 +58,7 @@ bool cmDepends::Write(std::ostream &makeDepends,
     // Get the source and object file.
     std::string const& src = *si++;
     if(si == pairs.end()) { break; }
-    std::string obj = *si++;
-
-    // Make sure the object file is relative to the top of the build tree.
-    obj = this->LocalGenerator->Convert(obj,
-                                        cmLocalGenerator::HOME_OUTPUT,
-                                        cmLocalGenerator::MAKEFILE);
+    std::string const& obj = *si++;
     dependencies[obj].insert(src);
     }
   for(std::map<std::string, std::set<std::string> >::const_iterator

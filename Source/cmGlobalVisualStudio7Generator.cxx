@@ -773,7 +773,6 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
                                const char* typeGuid,
                                const std::set<std::string>&)
 {
-  std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project("
        << "\"{"
        << (typeGuid ? typeGuid : this->ExternalProjectType(location))
