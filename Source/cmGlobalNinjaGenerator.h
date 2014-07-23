@@ -182,9 +182,6 @@ public:
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  /// Overloaded methods. @see cmGlobalGenerator::Generate()
-  virtual void Generate();
-
   /// Overloaded methods. @see cmGlobalGenerator::EnableLanguage()
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile* mf,
@@ -301,6 +298,9 @@ public:
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
+
+  /// Overloaded methods. @see cmGlobalGenerator::Generate()
+  virtual void Generate();
 
   /// Overloaded methods.
   /// @see cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()

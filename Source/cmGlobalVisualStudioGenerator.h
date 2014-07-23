@@ -27,11 +27,6 @@ public:
   virtual ~cmGlobalVisualStudioGenerator();
 
   /**
-   * Basic generate implementation for all VS generators.
-   */
-  virtual void Generate();
-
-  /**
    * Configure CMake's Visual Studio macros file into the user's Visual
    * Studio macros directory.
    */
@@ -90,6 +85,8 @@ public:
 
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
+  virtual void Generate();
+
   // Does this VS version link targets to each other if there are
   // dependencies in the SLN file?  This was done for VS versions
   // below 8.

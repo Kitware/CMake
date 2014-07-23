@@ -72,13 +72,6 @@ public:
     );
 
   /**
-   * Generate the all required files for building this project/tree. This
-   * basically creates a series of LocalGenerators for each directory and
-   * requests that they Generate.
-   */
-  virtual void Generate();
-
-  /**
    * Generate the DSW workspace file.
    */
   virtual void OutputSLNFile();
@@ -113,6 +106,7 @@ public:
   virtual std::string Encoding();
 
 protected:
+  virtual void Generate();
   virtual const char* GetIDEVersion() { return "7.0"; }
 
   std::string const& GetDevEnvCommand();
