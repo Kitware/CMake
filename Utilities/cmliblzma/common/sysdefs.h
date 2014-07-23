@@ -17,7 +17,9 @@
 #define LZMA_SYSDEFS_H
 
 #if defined(_MSC_VER)
-#  pragma warning(disable: 4028 4244 4761)
+# pragma warning(push,1)
+# pragma warning(disable: 4142) /* benign redefinition of type */
+# pragma warning(disable: 4761) /* integral size mismatch in argument */
 #endif
 
 //////////////
