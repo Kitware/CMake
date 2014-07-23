@@ -435,6 +435,7 @@ if(NOT CPACK_GENERATOR)
     option(CPACK_BINARY_WIX  "Enable to build WiX packages" OFF)
     option(CPACK_BINARY_ZIP  "Enable to build ZIP packages" OFF)
   endif()
+  option(CPACK_BINARY_IFW "Enable to build IFW packages" OFF)
 
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DRAGNDROP    DragNDrop)
@@ -450,6 +451,7 @@ if(NOT CPACK_GENERATOR)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TZ           TZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_WIX          WIX)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_ZIP          ZIP)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
 
 endif()
 

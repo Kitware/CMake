@@ -59,10 +59,42 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   if(${CPACK_SYSTEM_NAME} MATCHES Windows)
     if(CMAKE_CL_64)
       set(CPACK_SYSTEM_NAME win64-x64)
+      set(CPACK_IFW_TARGET_DIRECTORY "@RootDir@/Program Files/${CMAKE_PROJECT_NAME}")
     else()
       set(CPACK_SYSTEM_NAME win32-x86)
     endif()
   endif()
+
+  # default component for IFW
+  if(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME)
+    set(_CPACK_IFW_COMPONENT_NAME ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
+  else()
+    set(_CPACK_IFW_COMPONENT_NAME Unspecified)
+  endif()
+  string(TOUPPER ${_CPACK_IFW_COMPONENT_NAME} _CPACK_IFW_COMPONENT_UNAME)
+
+  if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
+    if(BUILD_QtDialog)
+      set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/bin/cmake-gui.exe\", \"@StartMenuDir@/CMake (cmake-gui).lnk\");\n")
+    endif()
+    if(SPHINX_HTML)
+      set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/html/index.html\", \"@StartMenuDir@/CMake Documentation.lnk\");\n")
+    endif()
+    configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/installscript.qs.in"
+      "${CMake_BINARY_DIR}/installscript.qs" @ONLY
+    )
+    install(FILES "${CMake_SOURCE_DIR}/Source/QtIFW/cmake.org.html"
+      DESTINATION "."
+    )
+    set(_CPACK_IFW_COMPONENT_SCRIPT "set(CPACK_IFW_COMPONENT_${_CPACK_IFW_COMPONENT_UNAME}_SCRIPT \"${CMake_BINARY_DIR}/installscript.qs\")")
+  endif()
+
+  if(${CMAKE_SYSTEM_NAME} MATCHES Linux)
+    set(CPACK_IFW_TARGET_DIRECTORY "@HomeDir@/${CMAKE_PROJECT_NAME}")
+    set(CPACK_IFW_ADMIN_TARGET_DIRECTORY "@ApplicationsDir@/${CMAKE_PROJECT_NAME}")
+  endif()
+
+  set(_CPACK_IFW_PACKAGE_VERSION ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}.${CMake_VERSION_PATCH})
 
   if(NOT DEFINED CPACK_PACKAGE_FILE_NAME)
     # if the CPACK_PACKAGE_FILE_NAME is not defined by the cache

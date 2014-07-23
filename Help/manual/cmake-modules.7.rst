@@ -55,6 +55,7 @@ All Modules
    /module/CPackCygwin
    /module/CPackDeb
    /module/CPackDMG
+   /module/CPackIFW
    /module/CPackNSIS
    /module/CPackPackageMaker
    /module/CPackRPM
