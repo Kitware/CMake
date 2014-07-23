@@ -301,7 +301,7 @@ cmVisualStudioGeneratorOptions
 {
   if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
-    for(std::map<std::string, std::string>::iterator m = this->FlagMap.begin();
+    for(std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
       {
       fout << indent;
@@ -317,20 +317,34 @@ cmVisualStudioGeneratorOptions
         {
         fout << "<" << m->first << ">";
         }
-      fout  << m->second;
+      const char* sep = "";
+      for(std::vector<std::string>::iterator i = m->second.begin();
+            i != m->second.end(); ++i)
+        {
+        fout << sep << *i;
+        sep = ";";
+        }
       if (m->first == "AdditionalIncludeDirectories")
         {
-        fout  << ";%(AdditionalIncludeDirectories)";
+        fout << sep << "%(AdditionalIncludeDirectories)";
         }
       fout  << "</" << m->first << ">\n";
       }
     }
   else
     {
-    for(std::map<std::string, std::string>::iterator m = this->FlagMap.begin();
+    for(std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
       {
-      fout << indent << m->first << "=\"" << m->second << "\"\n";
+      fout << indent << m->first << "=\"";
+      const char* sep = "";
+      for(std::vector<std::string>::iterator i = m->second.begin();
+            i != m->second.end(); ++i)
+        {
+        fout << sep << *i;
+        sep = ";";
+        }
+      fout << "\"\n";
       }
     }
 }

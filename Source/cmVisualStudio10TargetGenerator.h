@@ -90,7 +90,8 @@ private:
   void WriteGroups();
   void WriteProjectReferences();
   bool OutputSourceSpecificFlags(cmSourceFile const* source);
-  void AddLibraries(cmComputeLinkInformation& cli, std::string& libstring);
+  void AddLibraries(cmComputeLinkInformation& cli,
+                    std::vector<std::string>& libVec);
   void WriteLibOptions(std::string const& config);
   void WriteEvents(std::string const& configName);
   void WriteEvent(const char* name,

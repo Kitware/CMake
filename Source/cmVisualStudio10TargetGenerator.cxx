@@ -1735,6 +1735,9 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     }
   // Replace spaces in libs with ;
   cmSystemTools::ReplaceString(libs, " ", ";");
+  std::vector<std::string> libVec;
+  cmSystemTools::ExpandListArgument(libs, libVec);
+
   cmComputeLinkInformation* pcli =
     this->Target->GetLinkInformation(config.c_str());
   if(!pcli)
@@ -1746,27 +1749,21 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     }
   // add the libraries for the target to libs string
   cmComputeLinkInformation& cli = *pcli;
-  this->AddLibraries(cli, libs);
-  linkOptions.AddFlag("AdditionalDependencies", libs.c_str());
+  this->AddLibraries(cli, libVec);
+  linkOptions.AddFlag("AdditionalDependencies", libVec);
 
   std::vector<std::string> const& ldirs = cli.GetDirectories();
-  const char* sep = "";
-  std::string linkDirs;
+  std::vector<std::string> linkDirs;
   for(std::vector<std::string>::const_iterator d = ldirs.begin();
       d != ldirs.end(); ++d)
     {
     // first just full path
-    linkDirs += sep;
-    linkDirs += *d;
-    sep = ";";
-    linkDirs += sep;
+    linkDirs.push_back(*d);
     // next path with configuration type Debug, Release, etc
-    linkDirs += *d;
-    linkDirs += "/$(Configuration)";
-    linkDirs += sep;
+    linkDirs.push_back(*d + "/$(Configuration)");
     }
-  linkDirs += "%(AdditionalLibraryDirectories)";
-  linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
+  linkDirs.push_back("%(AdditionalLibraryDirectories)");
+  linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs);
 
   std::string targetName;
   std::string targetNameSO;
@@ -1866,11 +1863,10 @@ cmVisualStudio10TargetGenerator::WriteLinkOptions(std::string const& config)
 
 void cmVisualStudio10TargetGenerator::AddLibraries(
   cmComputeLinkInformation& cli,
-  std::string& libstring)
+  std::vector<std::string>& libVec)
 {
   typedef cmComputeLinkInformation::ItemVector ItemVector;
   ItemVector libs = cli.GetItems();
-  const char* sep = ";";
   for(ItemVector::const_iterator l = libs.begin(); l != libs.end(); ++l)
     {
     if(l->IsPath)
@@ -1880,14 +1876,12 @@ void cmVisualStudio10TargetGenerator::AddLibraries(
                 cmLocalGenerator::START_OUTPUT,
                 cmLocalGenerator::UNCHANGED);
       this->ConvertToWindowsSlash(path);
-      libstring += sep;
-      libstring += path;
+      libVec.push_back(path);
       }
     else if (!l->Target
         || l->Target->GetType() != cmTarget::INTERFACE_LIBRARY)
       {
-      libstring += sep;
-      libstring += l->Value;
+      libVec.push_back(l->Value);
       }
     }
 }
