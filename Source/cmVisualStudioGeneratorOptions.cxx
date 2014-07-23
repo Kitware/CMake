@@ -3,9 +3,9 @@
 #include <cmsys/System.h>
 #include "cmVisualStudio10TargetGenerator.h"
 
-inline std::string cmVisualStudio10GeneratorOptionsEscapeForXML(const char* s)
+static
+std::string cmVisualStudio10GeneratorOptionsEscapeForXML(std::string ret)
 {
-  std::string ret = s;
   cmSystemTools::ReplaceString(ret, ";", "%3B");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -13,9 +13,9 @@ inline std::string cmVisualStudio10GeneratorOptionsEscapeForXML(const char* s)
   return ret;
 }
 
-inline std::string cmVisualStudioGeneratorOptionsEscapeForXML(const char* s)
+static
+std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
 {
-  std::string ret = s;
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -269,7 +269,7 @@ cmVisualStudioGeneratorOptions
     // Escape this flag for the IDE.
     if(this->Version >= cmLocalVisualStudioGenerator::VS10)
       {
-      define = cmVisualStudio10GeneratorOptionsEscapeForXML(define.c_str());
+      define = cmVisualStudio10GeneratorOptionsEscapeForXML(define);
 
       if(lang == "RC")
         {
@@ -278,7 +278,7 @@ cmVisualStudioGeneratorOptions
       }
     else
       {
-      define = cmVisualStudioGeneratorOptionsEscapeForXML(define.c_str());
+      define = cmVisualStudioGeneratorOptionsEscapeForXML(define);
       }
     // Store the flag in the project file.
     fout << sep << define;
@@ -379,8 +379,7 @@ cmVisualStudioGeneratorOptions
     else
       {
       fout << prefix << "AdditionalOptions=\"";
-      fout <<
-        cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString.c_str());
+      fout << cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString);
       fout << "\"" << suffix;
       }
     }
