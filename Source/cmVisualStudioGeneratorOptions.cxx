@@ -321,7 +321,7 @@ cmVisualStudioGeneratorOptions
       for(std::vector<std::string>::iterator i = m->second.begin();
             i != m->second.end(); ++i)
         {
-        fout << sep << *i;
+        fout << sep << cmVisualStudio10GeneratorOptionsEscapeForXML(*i);
         sep = ";";
         }
       if (m->first == "AdditionalIncludeDirectories")
@@ -341,7 +341,7 @@ cmVisualStudioGeneratorOptions
       for(std::vector<std::string>::iterator i = m->second.begin();
             i != m->second.end(); ++i)
         {
-        fout << sep << *i;
+        fout << sep << cmVisualStudioGeneratorOptionsEscapeForXML(*i);
         sep = ";";
         }
       fout << "\"\n";
@@ -373,7 +373,7 @@ cmVisualStudioGeneratorOptions
         {
         fout << "<AdditionalOptions>";
         }
-      fout << this->FlagString.c_str()
+      fout << cmVisualStudio10GeneratorOptionsEscapeForXML(this->FlagString)
            << " %(AdditionalOptions)</AdditionalOptions>\n";
       }
     else
