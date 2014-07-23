@@ -343,19 +343,20 @@ void cmVisualStudio10TargetGenerator::Generate()
     }
 
   this->WriteString("<Platform>", 2);
-  (*this->BuildFileStream) << this->Platform << "</Platform>\n";
+  (*this->BuildFileStream) << cmVS10EscapeXML(this->Platform)
+                           << "</Platform>\n";
   const char* projLabel = this->Target->GetProperty("PROJECT_LABEL");
   if(!projLabel)
     {
     projLabel = this->Name.c_str();
     }
   this->WriteString("<ProjectName>", 2);
-  (*this->BuildFileStream) << projLabel << "</ProjectName>\n";
+  (*this->BuildFileStream) << cmVS10EscapeXML(projLabel) << "</ProjectName>\n";
   if(const char* targetFrameworkVersion = this->Target->GetProperty(
        "VS_DOTNET_TARGET_FRAMEWORK_VERSION"))
     {
     this->WriteString("<TargetFrameworkVersion>", 2);
-    (*this->BuildFileStream) << targetFrameworkVersion
+    (*this->BuildFileStream) << cmVS10EscapeXML(targetFrameworkVersion)
                              << "</TargetFrameworkVersion>\n";
     }
   this->WriteString("</PropertyGroup>\n", 1);
@@ -507,7 +508,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
     this->WriteString("<Configuration>", 3);
     (*this->BuildFileStream ) <<  *i << "</Configuration>\n";
     this->WriteString("<Platform>", 3);
-    (*this->BuildFileStream) << this->Platform << "</Platform>\n";
+    (*this->BuildFileStream) << cmVS10EscapeXML(this->Platform)
+                             << "</Platform>\n";
     this->WriteString("</ProjectConfiguration>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
@@ -700,7 +702,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
     (*this->BuildFileStream ) << script << "</Command>\n";
     this->WritePlatformConfigTag("AdditionalInputs", i->c_str(), 3);
 
-    (*this->BuildFileStream ) << source->GetFullPath();
+    (*this->BuildFileStream ) << cmVS10EscapeXML(source->GetFullPath());
     for(std::vector<std::string>::const_iterator d =
           ccg.GetDepends().begin();
         d != ccg.GetDepends().end();
@@ -710,7 +712,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
       if(this->LocalGenerator->GetRealDependency(d->c_str(), i->c_str(), dep))
         {
         this->ConvertToWindowsSlash(dep);
-        (*this->BuildFileStream ) << ";" << dep;
+        (*this->BuildFileStream ) << ";" << cmVS10EscapeXML(dep);
         }
       }
     (*this->BuildFileStream ) << ";%(AdditionalInputs)</AdditionalInputs>\n";
@@ -723,7 +725,7 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
       {
       std::string out = *o;
       this->ConvertToWindowsSlash(out);
-      (*this->BuildFileStream ) << sep << out;
+      (*this->BuildFileStream ) << sep << cmVS10EscapeXML(out);
       sep = ";";
       }
     (*this->BuildFileStream ) << "</Outputs>\n";
@@ -824,7 +826,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       std::string obj = (*oi)->GetFullPath();
       this->WriteString("<EmbeddedResource Include=\"", 2);
       this->ConvertToWindowsSlash(obj);
-      (*this->BuildFileStream ) << obj << "\">\n";
+      (*this->BuildFileStream ) << cmVS10EscapeXML(obj) << "\">\n";
       this->WriteString("<Filter>Resource Files</Filter>\n", 3);
       this->WriteString("</EmbeddedResource>\n", 2);
       }
@@ -843,7 +845,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       std::string obj = *oi;
       this->WriteString("<Object Include=\"", 2);
       this->ConvertToWindowsSlash(obj);
-      (*this->BuildFileStream ) << obj << "\">\n";
+      (*this->BuildFileStream ) << cmVS10EscapeXML(obj) << "\">\n";
       this->WriteString("<Filter>Object Libraries</Filter>\n", 3);
       this->WriteString("</Object>\n", 2);
       }
@@ -978,7 +980,7 @@ WriteGroupSources(const char* name,
     std::string path = this->ConvertPath(source, s->RelativePath);
     this->ConvertToWindowsSlash(path);
     (*this->BuildFileStream) << name << " Include=\""
-                             << path;
+                             << cmVS10EscapeXML(path);
     if(strlen(filter))
       {
       (*this->BuildFileStream) << "\">\n";
@@ -1033,7 +1035,8 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     }
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
-  (*this->BuildFileStream ) << tool << " Include=\"" << sourceFile << "\"";
+  (*this->BuildFileStream ) << tool << " Include=\""
+                            << cmVS10EscapeXML(sourceFile) << "\"";
 
   if(sf->GetExtension() == "h" &&
     this->IsResxHeader(sf->GetFullPath()))
@@ -1165,7 +1168,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
     std::string obj = *oi;
     this->WriteString("<Object Include=\"", 2);
     this->ConvertToWindowsSlash(obj);
-    (*this->BuildFileStream ) << obj << "\" />\n";
+    (*this->BuildFileStream ) << cmVS10EscapeXML(obj) << "\" />\n";
     }
 
   this->WriteString("</ItemGroup>\n", 1);
@@ -2044,7 +2047,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
       path += dt->GetName();
       path += ".vcxproj";
       }
-    (*this->BuildFileStream) << path << "\">\n";
+    (*this->BuildFileStream) << cmVS10EscapeXML(path) << "\">\n";
     this->WriteString("<Project>", 3);
     (*this->BuildFileStream)
       << this->GlobalGenerator->GetGUID(name.c_str())
