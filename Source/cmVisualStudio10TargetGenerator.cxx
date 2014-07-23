@@ -1767,7 +1767,6 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     }
   linkDirs += "%(AdditionalLibraryDirectories)";
   linkOptions.AddFlag("AdditionalLibraryDirectories", linkDirs.c_str());
-  linkOptions.AddFlag("AdditionalDependencies", libs.c_str());
 
   std::string targetName;
   std::string targetNameSO;
