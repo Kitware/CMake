@@ -1509,7 +1509,16 @@ static const struct InstallPrefixNode : public cmGeneratorExpressionNode
 } installPrefixNode;
 
 //----------------------------------------------------------------------------
-template<bool linker, bool soname>
+class ArtifactNameTag;
+class ArtifactLinkerTag;
+class ArtifactSonameTag;
+
+class ArtifactPathTag;
+class ArtifactDirTag;
+class ArtifactNameTag;
+
+//----------------------------------------------------------------------------
+template<typename ArtifactT>
 struct TargetFilesystemArtifactResultCreator
 {
   static std::string Create(cmTarget* target,
@@ -1519,7 +1528,7 @@ struct TargetFilesystemArtifactResultCreator
 
 //----------------------------------------------------------------------------
 template<>
-struct TargetFilesystemArtifactResultCreator<false, true>
+struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
 {
   static std::string Create(cmTarget* target,
                             cmGeneratorExpressionContext *context,
@@ -1549,7 +1558,7 @@ struct TargetFilesystemArtifactResultCreator<false, true>
 
 //----------------------------------------------------------------------------
 template<>
-struct TargetFilesystemArtifactResultCreator<true, false>
+struct TargetFilesystemArtifactResultCreator<ArtifactLinkerTag>
 {
   static std::string Create(cmTarget* target,
                             cmGeneratorExpressionContext *context,
@@ -1570,7 +1579,7 @@ struct TargetFilesystemArtifactResultCreator<true, false>
 
 //----------------------------------------------------------------------------
 template<>
-struct TargetFilesystemArtifactResultCreator<false, false>
+struct TargetFilesystemArtifactResultCreator<ArtifactNameTag>
 {
   static std::string Create(cmTarget* target,
                             cmGeneratorExpressionContext *context,
@@ -1582,7 +1591,7 @@ struct TargetFilesystemArtifactResultCreator<false, false>
 
 
 //----------------------------------------------------------------------------
-template<bool dirQual, bool nameQual>
+template<typename ArtifactT>
 struct TargetFilesystemArtifactResultGetter
 {
   static std::string Get(const std::string &result);
@@ -1590,7 +1599,7 @@ struct TargetFilesystemArtifactResultGetter
 
 //----------------------------------------------------------------------------
 template<>
-struct TargetFilesystemArtifactResultGetter<false, true>
+struct TargetFilesystemArtifactResultGetter<ArtifactNameTag>
 {
   static std::string Get(const std::string &result)
   { return cmSystemTools::GetFilenameName(result); }
@@ -1598,7 +1607,7 @@ struct TargetFilesystemArtifactResultGetter<false, true>
 
 //----------------------------------------------------------------------------
 template<>
-struct TargetFilesystemArtifactResultGetter<true, false>
+struct TargetFilesystemArtifactResultGetter<ArtifactDirTag>
 {
   static std::string Get(const std::string &result)
   { return cmSystemTools::GetFilenamePath(result); }
@@ -1606,14 +1615,14 @@ struct TargetFilesystemArtifactResultGetter<true, false>
 
 //----------------------------------------------------------------------------
 template<>
-struct TargetFilesystemArtifactResultGetter<false, false>
+struct TargetFilesystemArtifactResultGetter<ArtifactPathTag>
 {
   static std::string Get(const std::string &result)
   { return result; }
 };
 
 //----------------------------------------------------------------------------
-template<bool linker, bool soname, bool dirQual, bool nameQual>
+template<typename ArtifactT, typename ComponentT>
 struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
 {
   TargetFilesystemArtifact() {}
@@ -1661,7 +1670,7 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
     context->AllTargets.insert(target);
 
     std::string result =
-                TargetFilesystemArtifactResultCreator<linker, soname>::Create(
+                TargetFilesystemArtifactResultCreator<ArtifactT>::Create(
                           target,
                           context,
                           content);
@@ -1670,29 +1679,32 @@ struct TargetFilesystemArtifact : public cmGeneratorExpressionNode
       return std::string();
       }
     return
-        TargetFilesystemArtifactResultGetter<dirQual, nameQual>::Get(result);
+        TargetFilesystemArtifactResultGetter<ComponentT>::Get(result);
   }
 };
 
 //----------------------------------------------------------------------------
+template<typename ArtifactT>
+struct TargetFilesystemArtifactNodeGroup
+{
+  TargetFilesystemArtifactNodeGroup()
+    {
+    }
+
+  TargetFilesystemArtifact<ArtifactT, ArtifactPathTag> File;
+  TargetFilesystemArtifact<ArtifactT, ArtifactNameTag> FileName;
+  TargetFilesystemArtifact<ArtifactT, ArtifactDirTag> FileDir;
+};
+
+//----------------------------------------------------------------------------
 static const
-TargetFilesystemArtifact<false, false, false, false> targetFileNode;
+TargetFilesystemArtifactNodeGroup<ArtifactNameTag> targetNodeGroup;
+
 static const
-TargetFilesystemArtifact<true, false, false, false> targetLinkerFileNode;
+TargetFilesystemArtifactNodeGroup<ArtifactLinkerTag> targetLinkerNodeGroup;
+
 static const
-TargetFilesystemArtifact<false, true, false, false> targetSoNameFileNode;
-static const
-TargetFilesystemArtifact<false, false, false, true> targetFileNameNode;
-static const
-TargetFilesystemArtifact<true, false, false, true> targetLinkerFileNameNode;
-static const
-TargetFilesystemArtifact<false, true, false, true> targetSoNameFileNameNode;
-static const
-TargetFilesystemArtifact<false, false, true, false> targetFileDirNode;
-static const
-TargetFilesystemArtifact<true, false, true, false> targetLinkerFileDirNode;
-static const
-TargetFilesystemArtifact<false, true, true, false> targetSoNameFileDirNode;
+TargetFilesystemArtifactNodeGroup<ArtifactSonameTag> targetSoNameNodeGroup;
 
 //----------------------------------------------------------------------------
 static const
@@ -1718,15 +1730,15 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     nodeMap["COMPILE_FEATURES"] = &compileFeaturesNode;
     nodeMap["CONFIGURATION"] = &configurationNode;
     nodeMap["CONFIG"] = &configurationTestNode;
-    nodeMap["TARGET_FILE"] = &targetFileNode;
-    nodeMap["TARGET_LINKER_FILE"] = &targetLinkerFileNode;
-    nodeMap["TARGET_SONAME_FILE"] = &targetSoNameFileNode;
-    nodeMap["TARGET_FILE_NAME"] = &targetFileNameNode;
-    nodeMap["TARGET_LINKER_FILE_NAME"] = &targetLinkerFileNameNode;
-    nodeMap["TARGET_SONAME_FILE_NAME"] = &targetSoNameFileNameNode;
-    nodeMap["TARGET_FILE_DIR"] = &targetFileDirNode;
-    nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerFileDirNode;
-    nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameFileDirNode;
+    nodeMap["TARGET_FILE"] = &targetNodeGroup.File;
+    nodeMap["TARGET_LINKER_FILE"] = &targetLinkerNodeGroup.File;
+    nodeMap["TARGET_SONAME_FILE"] = &targetSoNameNodeGroup.File;
+    nodeMap["TARGET_FILE_NAME"] = &targetNodeGroup.FileName;
+    nodeMap["TARGET_LINKER_FILE_NAME"] = &targetLinkerNodeGroup.FileName;
+    nodeMap["TARGET_SONAME_FILE_NAME"] = &targetSoNameNodeGroup.FileName;
+    nodeMap["TARGET_FILE_DIR"] = &targetNodeGroup.FileDir;
+    nodeMap["TARGET_LINKER_FILE_DIR"] = &targetLinkerNodeGroup.FileDir;
+    nodeMap["TARGET_SONAME_FILE_DIR"] = &targetSoNameNodeGroup.FileDir;
     nodeMap["STREQUAL"] = &strEqualNode;
     nodeMap["EQUAL"] = &equalNode;
     nodeMap["LOWER_CASE"] = &lowerCaseNode;
