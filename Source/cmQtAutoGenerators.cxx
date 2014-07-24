@@ -1000,6 +1000,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
 
+  delete gg->GetCurrentLocalGenerator();
   delete gg;
   gg = NULL;
   makefile = NULL;
