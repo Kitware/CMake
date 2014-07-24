@@ -21,6 +21,12 @@ if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 2)
   set(File_Generate_ARGS -DXCODE_BELOW_2=1)
 endif()
 
+# Test MSVC for older host CMake versions, and test
+# WIN32/CMAKE_C_COMPILER_ID to fix check on Intel for Windows.
+if(MSVC OR (WIN32 AND CMAKE_C_COMPILER_ID MATCHES "MSVC|Intel"))
+  set(GeneratorExpression_ARGS -DLINKER_SUPPORTS_PDB=1)
+endif()
+
 add_RunCMake_test(CMP0019)
 add_RunCMake_test(CMP0022)
 add_RunCMake_test(CMP0026)
