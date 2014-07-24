@@ -755,6 +755,7 @@ private:
   mutable cmPropertyMap Properties;
   LinkLibraryVectorType OriginalLinkLibraries;
   bool DLLPlatform;
+  bool IsAndroid;
   bool IsApple;
   bool IsImportedTarget;
   mutable bool DebugIncludesDone;
