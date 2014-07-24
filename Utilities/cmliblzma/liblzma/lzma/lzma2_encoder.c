@@ -134,8 +134,8 @@ lzma2_header_uncompressed(lzma_coder *coder)
 
 
 static lzma_ret
-lzma2_encode(lzma_coder *restrict coder, lzma_mf *restrict mf,
-		uint8_t *restrict out, size_t *restrict out_pos,
+lzma2_encode(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
+		uint8_t *LZMA_RESTRICT out, size_t *LZMA_RESTRICT out_pos,
 		size_t out_size)
 {
 	while (*out_pos < out_size)

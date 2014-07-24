@@ -31,9 +31,9 @@ struct lzma_coder_s {
 
 static lzma_ret
 auto_decode(lzma_coder *coder, lzma_allocator *allocator,
-		const uint8_t *restrict in, size_t *restrict in_pos,
-		size_t in_size, uint8_t *restrict out,
-		size_t *restrict out_pos, size_t out_size, lzma_action action)
+		const uint8_t *LZMA_RESTRICT in, size_t *LZMA_RESTRICT in_pos,
+		size_t in_size, uint8_t *LZMA_RESTRICT out,
+		size_t *LZMA_RESTRICT out_pos, size_t out_size, lzma_action action)
 {
 	switch (coder->sequence) {
 	case SEQ_INIT:

@@ -230,8 +230,8 @@ make_short_rep(lzma_optimal *optimal)
 
 
 static void
-backward(lzma_coder *restrict coder, uint32_t *restrict len_res,
-		uint32_t *restrict back_res, uint32_t cur)
+backward(lzma_coder *LZMA_RESTRICT coder, uint32_t *LZMA_RESTRICT len_res,
+		uint32_t *LZMA_RESTRICT back_res, uint32_t cur)
 {
 	uint32_t pos_mem = coder->opts[cur].pos_prev;
 	uint32_t back_mem = coder->opts[cur].back_prev;
@@ -278,8 +278,8 @@ backward(lzma_coder *restrict coder, uint32_t *restrict len_res,
 //////////
 
 static inline uint32_t
-helper1(lzma_coder *restrict coder, lzma_mf *restrict mf,
-		uint32_t *restrict back_res, uint32_t *restrict len_res,
+helper1(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
+		uint32_t *LZMA_RESTRICT back_res, uint32_t *LZMA_RESTRICT len_res,
 		uint32_t position)
 {
 	uint32_t buf_avail;
@@ -865,8 +865,8 @@ helper2(lzma_coder *coder, uint32_t *reps, const uint8_t *buf,
 
 
 extern void
-lzma_lzma_optimum_normal(lzma_coder *restrict coder, lzma_mf *restrict mf,
-		uint32_t *restrict back_res, uint32_t *restrict len_res,
+lzma_lzma_optimum_normal(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
+		uint32_t *LZMA_RESTRICT back_res, uint32_t *LZMA_RESTRICT len_res,
 		uint32_t position)
 {
 	uint32_t reps[REP_DISTANCES];

@@ -194,9 +194,9 @@ typedef struct {
 	lzma_coder *coder;
 
 	/// Function to encode from *dict to out[]
-	lzma_ret (*code)(lzma_coder *restrict coder,
-			lzma_mf *restrict mf, uint8_t *restrict out,
-			size_t *restrict out_pos, size_t out_size);
+	lzma_ret (*code)(lzma_coder *LZMA_RESTRICT coder,
+			lzma_mf *LZMA_RESTRICT mf, uint8_t *LZMA_RESTRICT out,
+			size_t *LZMA_RESTRICT out_pos, size_t out_size);
 
 	/// Free allocated resources
 	void (*end)(lzma_coder *coder, lzma_allocator *allocator);

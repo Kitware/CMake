@@ -780,7 +780,7 @@ index_cat_helper(const index_cat_info *info, index_stream *this)
 
 
 extern LZMA_API(lzma_ret)
-lzma_index_cat(lzma_index *restrict dest, lzma_index *restrict src,
+lzma_index_cat(lzma_index *LZMA_RESTRICT dest, lzma_index *LZMA_RESTRICT src,
 		lzma_allocator *allocator)
 {
 	index_cat_info info;

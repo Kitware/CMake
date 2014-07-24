@@ -44,9 +44,9 @@ extern lzma_ret lzma_lzma_encoder_reset(
 		lzma_coder *coder, const lzma_options_lzma *options);
 
 
-extern lzma_ret lzma_lzma_encode(lzma_coder *restrict coder,
-		lzma_mf *restrict mf, uint8_t *restrict out,
-		size_t *restrict out_pos, size_t out_size,
+extern lzma_ret lzma_lzma_encode(lzma_coder *LZMA_RESTRICT coder,
+		lzma_mf *LZMA_RESTRICT mf, uint8_t *LZMA_RESTRICT out,
+		size_t *LZMA_RESTRICT out_pos, size_t out_size,
 		uint32_t read_limit);
 
 #endif

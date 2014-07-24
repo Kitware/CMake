@@ -188,10 +188,12 @@ typedef uint64_t uintmax_t;
 
 #ifndef HAVE_RESTRICT
 #  ifdef HAVE___RESTRICT
-#    define restrict __restrict
+#    define LZMA_RESTRICT __restrict
 #  else
-#    define restrict
+#    define LZMA_RESTRICT
 #  endif
+#else
+#  define LZMA_RESTRICT restrict
 #endif /* HAVE_RESTRICT */
 
 #ifndef HAVE_INLINE

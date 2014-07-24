@@ -19,9 +19,9 @@
 /// Copied or encodes/decodes more data to out[].
 static lzma_ret
 copy_or_code(lzma_coder *coder, lzma_allocator *allocator,
-		const uint8_t *restrict in, size_t *restrict in_pos,
-		size_t in_size, uint8_t *restrict out,
-		size_t *restrict out_pos, size_t out_size, lzma_action action)
+		const uint8_t *LZMA_RESTRICT in, size_t *LZMA_RESTRICT in_pos,
+		size_t in_size, uint8_t *LZMA_RESTRICT out,
+		size_t *LZMA_RESTRICT out_pos, size_t out_size, lzma_action action)
 {
 	assert(!coder->end_was_reached);
 
@@ -67,9 +67,9 @@ call_filter(lzma_coder *coder, uint8_t *buffer, size_t size)
 
 static lzma_ret
 simple_code(lzma_coder *coder, lzma_allocator *allocator,
-		const uint8_t *restrict in, size_t *restrict in_pos,
-		size_t in_size, uint8_t *restrict out,
-		size_t *restrict out_pos, size_t out_size, lzma_action action)
+		const uint8_t *LZMA_RESTRICT in, size_t *LZMA_RESTRICT in_pos,
+		size_t in_size, uint8_t *LZMA_RESTRICT out,
+		size_t *LZMA_RESTRICT out_pos, size_t out_size, lzma_action action)
 {
 	size_t out_avail;
 	size_t buf_avail;

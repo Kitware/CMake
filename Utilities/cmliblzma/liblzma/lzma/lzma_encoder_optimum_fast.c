@@ -17,8 +17,8 @@
 
 
 extern void
-lzma_lzma_optimum_fast(lzma_coder *restrict coder, lzma_mf *restrict mf,
-		uint32_t *restrict back_res, uint32_t *restrict len_res)
+lzma_lzma_optimum_fast(lzma_coder *LZMA_RESTRICT coder, lzma_mf *LZMA_RESTRICT mf,
+		uint32_t *LZMA_RESTRICT back_res, uint32_t *LZMA_RESTRICT len_res)
 {
 	const uint8_t *buf;
 	uint32_t buf_avail;

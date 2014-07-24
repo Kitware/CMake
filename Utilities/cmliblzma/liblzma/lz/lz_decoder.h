@@ -56,9 +56,9 @@ typedef struct {
 	lzma_coder *coder;
 
 	/// Function to decode from in[] to *dict
-	lzma_ret (*code)(lzma_coder *restrict coder,
-			lzma_dict *restrict dict, const uint8_t *restrict in,
-			size_t *restrict in_pos, size_t in_size);
+	lzma_ret (*code)(lzma_coder *LZMA_RESTRICT coder,
+			lzma_dict *LZMA_RESTRICT dict, const uint8_t *LZMA_RESTRICT in,
+			size_t *LZMA_RESTRICT in_pos, size_t in_size);
 
 	void (*reset)(lzma_coder *coder, const void *options);
 
@@ -202,9 +202,9 @@ dict_put(lzma_dict *dict, uint8_t byte)
 
 /// Copies arbitrary amount of data into the dictionary.
 static inline void
-dict_write(lzma_dict *restrict dict, const uint8_t *restrict in,
-		size_t *restrict in_pos, size_t in_size,
-		size_t *restrict left)
+dict_write(lzma_dict *LZMA_RESTRICT dict, const uint8_t *LZMA_RESTRICT in,
+		size_t *LZMA_RESTRICT in_pos, size_t in_size,
+		size_t *LZMA_RESTRICT left)
 {
 	// NOTE: If we are being given more data than the size of the
 	// dictionary, it could be possible to optimize the LZ decoder

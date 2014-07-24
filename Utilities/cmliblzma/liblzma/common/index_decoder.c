@@ -55,10 +55,10 @@ struct lzma_coder_s {
 
 static lzma_ret
 index_decode(lzma_coder *coder, lzma_allocator *allocator,
-		const uint8_t *restrict in, size_t *restrict in_pos,
+		const uint8_t *LZMA_RESTRICT in, size_t *LZMA_RESTRICT in_pos,
 		size_t in_size,
-		uint8_t *restrict out lzma_attribute((__unused__)),
-		size_t *restrict out_pos lzma_attribute((__unused__)),
+		uint8_t *LZMA_RESTRICT out lzma_attribute((__unused__)),
+		size_t *LZMA_RESTRICT out_pos lzma_attribute((__unused__)),
 		size_t out_size lzma_attribute((__unused__)),
 		lzma_action action lzma_attribute((__unused__)))
 {
