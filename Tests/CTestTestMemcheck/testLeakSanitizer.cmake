@@ -11,6 +11,7 @@ endif()
 
 # clear the log file
 file(REMOVE "${LOG_FILE}.2343")
+file(REMOVE "${LOG_FILE}.2344")
 
 # create an error of each type of thread santizer
 # these names come from tsan_report.cc in llvm
@@ -23,6 +24,12 @@ Direct leak of 4360 byte(s) in 1 object(s) allocated from:
     #0 0x46c669 in operator new[](unsigned long) (/home/kitware/msan/a.out+0x46c669)
     #1 0x4823b4 in main /home/kitware/msan/memcheck.cxx:12
     #2 0x7fa72bee476c in __libc_start_main /build/buildd/eglibc-2.15/csu/libc-start.c:226
+
+SUMMARY: AddressSanitizer: 4436 byte(s) leaked in 2 allocation(s).
+")
+file(APPEND "${LOG_FILE}.2342"
+"=================================================================
+==25308==ERROR: LeakSanitizer: detected memory leaks
 
 Direct leak of 76 byte(s) in 1 object(s) allocated from:
     #0 0x46c669 in operator new[](unsigned long) (/home/kitware/msan/a.out+0x46c669)
