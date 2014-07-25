@@ -95,6 +95,7 @@
 #                       [SCRIPT <script>]
 #                       [NAME <name>]
 #                       [PRIORITY <priority>]
+#                       [DEPENDS <com_id> ...]
 #                       [LICENSES <display_name> <file_path> ...])
 #
 # This command should be called after cpack_add_component command.
@@ -108,6 +109,8 @@
 # By default used origin component name.
 #
 # ``PRIORITY`` is priority of the component in the tree.
+#
+# ``DEPENDS`` list of dependency component identifiers in QtIFW_ style.
 #
 # ``LICENSES`` pair of <display_name> and <file_path> of license text for this
 # component. You can specify more then one license.
