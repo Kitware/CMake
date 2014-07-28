@@ -435,7 +435,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
   // This edition does not come with 64-bit tools.  Look for them.
   //
   // TODO: Detect available tools?  x64\v100 exists but does not work?
-  // KHLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\4.0;VCTargetsPath
+  // HKLM\\SOFTWARE\\Microsoft\\MSBuild\\ToolsVersions\\4.0;VCTargetsPath
   // c:/Program Files (x86)/MSBuild/Microsoft.Cpp/v4.0/Platforms/
   //   {Itanium,Win32,x64}/PlatformToolsets/{v100,v90,Windows7.1SDK}
   std::string winSDK_7_1;
