@@ -111,6 +111,10 @@ public:
   {
     return this->HadContextSensitiveCondition;
   }
+  bool GetHadHeadSensitiveCondition() const
+  {
+    return this->HadHeadSensitiveCondition;
+  }
 
   void SetEvaluateForBuildsystem(bool eval)
   {
@@ -141,6 +145,7 @@ private:
                                                           MaxLanguageStandard;
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
+  mutable bool HadHeadSensitiveCondition;
   bool EvaluateForBuildsystem;
 };
 

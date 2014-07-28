@@ -88,11 +88,6 @@ struct cmTarget::CompileInfo
   std::string CompilePdbDir;
 };
 
-struct TargetConfigPair : public std::pair<cmTarget const* , std::string> {
-  TargetConfigPair(cmTarget const* tgt, const std::string &config)
-    : std::pair<cmTarget const* , std::string>(tgt, config) {}
-};
-
 //----------------------------------------------------------------------------
 class cmTargetInternals
 {
@@ -119,10 +114,12 @@ public:
   {
     OptionalLinkInterface():
       LibrariesDone(false), AllDone(false),
-      Exists(false), ExplicitLibraries(0) {}
+      Exists(false), HadHeadSensitiveCondition(false),
+      ExplicitLibraries(0) {}
     bool LibrariesDone;
     bool AllDone;
     bool Exists;
+    bool HadHeadSensitiveCondition;
     const char* ExplicitLibraries;
   };
   void ComputeLinkInterface(cmTarget const* thisTarget,
@@ -135,16 +132,13 @@ public:
                                      cmTarget const* head,
                                      bool usage_requirements_only);
 
-  typedef std::map<TargetConfigPair, OptionalLinkInterface>
+  struct HeadToLinkInterfaceMap:
+    public std::map<cmTarget const*, OptionalLinkInterface> {};
+  typedef std::map<std::string, HeadToLinkInterfaceMap>
                                                           LinkInterfaceMapType;
   LinkInterfaceMapType LinkInterfaceMap;
   LinkInterfaceMapType LinkInterfaceUsageRequirementsOnlyMap;
   bool PolicyWarnedCMP0022;
-
-  typedef std::map<TargetConfigPair, OptionalLinkInterface>
-                                                    ImportLinkInterfaceMapType;
-  ImportLinkInterfaceMapType ImportLinkInterfaceMap;
-  ImportLinkInterfaceMapType ImportLinkInterfaceUsageRequirementsOnlyMap;
 
   typedef std::map<std::string, cmTarget::OutputInfo> OutputInfoMapType;
   OutputInfoMapType OutputInfoMap;
@@ -159,12 +153,25 @@ public:
   struct OptionalLinkImplementation: public cmTarget::LinkImplementation
   {
     OptionalLinkImplementation():
-      LibrariesDone(false), LanguagesDone(false) {}
+      LibrariesDone(false), LanguagesDone(false),
+      HadHeadSensitiveCondition(false) {}
     bool LibrariesDone;
     bool LanguagesDone;
+    bool HadHeadSensitiveCondition;
   };
-  typedef std::map<TargetConfigPair,
-                   OptionalLinkImplementation> LinkImplMapType;
+  void ComputeLinkImplementationLibraries(cmTarget const* thisTarget,
+                                          const std::string& config,
+                                          OptionalLinkImplementation& impl,
+                                          cmTarget const* head) const;
+  void ComputeLinkImplementationLanguages(cmTarget const* thisTarget,
+                                          const std::string& config,
+                                          OptionalLinkImplementation& impl
+                                          ) const;
+
+  struct HeadToLinkImplementationMap:
+    public std::map<cmTarget const*, OptionalLinkImplementation> {};
+  typedef std::map<std::string,
+                   HeadToLinkImplementationMap> LinkImplMapType;
   LinkImplMapType LinkImplMap;
 
   typedef std::map<std::string, cmTarget::LinkClosure> LinkClosureMapType;
@@ -528,8 +535,6 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkImplMap.clear();
   this->Internal->LinkInterfaceMap.clear();
   this->Internal->LinkInterfaceUsageRequirementsOnlyMap.clear();
-  this->Internal->ImportLinkInterfaceMap.clear();
-  this->Internal->ImportLinkInterfaceUsageRequirementsOnlyMap.clear();
   this->Internal->LinkClosureMap.clear();
   for (cmTargetLinkInformationMap::const_iterator it
       = this->LinkInformation.begin();
@@ -3434,7 +3439,8 @@ void cmTarget::ExpandLinkItems(std::string const& prop,
                                std::string const& config,
                                cmTarget const* headTarget,
                                bool usage_requirements_only,
-                               std::vector<cmLinkItem>& items) const
+                               std::vector<cmLinkItem>& items,
+                               bool& hadHeadSensitiveCondition) const
 {
   cmGeneratorExpression ge;
   cmGeneratorExpressionDAGChecker dagChecker(this->GetName(), prop, 0, 0);
@@ -3445,13 +3451,15 @@ void cmTarget::ExpandLinkItems(std::string const& prop,
     dagChecker.SetTransitivePropertiesOnly();
     }
   std::vector<std::string> libs;
-  cmSystemTools::ExpandListArgument(ge.Parse(value)->Evaluate(
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(value);
+  cmSystemTools::ExpandListArgument(cge->Evaluate(
                                       this->Makefile,
                                       config,
                                       false,
                                       headTarget,
                                       this, &dagChecker), libs);
   this->LookupLinkItems(libs, items);
+  hadHeadSensitiveCondition = cge->GetHadHeadSensitiveCondition();
 }
 
 //----------------------------------------------------------------------------
@@ -5753,10 +5761,18 @@ cmTarget::LinkInterface const* cmTarget::GetLinkInterface(
     }
 
   // Lookup any existing link interface for this configuration.
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  cmTargetInternals::HeadToLinkInterfaceMap& hm =
+    this->Internal->LinkInterfaceMap[CONFIG];
 
-  cmTargetInternals::OptionalLinkInterface&
-    iface = this->Internal->LinkInterfaceMap[key];
+  // If the link interface does not depend on the head target
+  // then return the one we computed first.
+  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
+    {
+    return &hm.begin()->second;
+    }
+
+  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -5796,13 +5812,20 @@ cmTarget::GetLinkInterfaceLibraries(const std::string& config,
     }
 
   // Lookup any existing link interface for this configuration.
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
-  cmTargetInternals::LinkInterfaceMapType& lim =
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  cmTargetInternals::HeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
-     this->Internal->LinkInterfaceUsageRequirementsOnlyMap :
-     this->Internal->LinkInterfaceMap);
+     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
+     this->Internal->LinkInterfaceMap[CONFIG]);
 
-  cmTargetInternals::OptionalLinkInterface& iface = lim[key];
+  // If the link interface does not depend on the head target
+  // then return the one we computed first.
+  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
+    {
+    return &hm.begin()->second;
+    }
+
+  cmTargetInternals::OptionalLinkInterface& iface = hm[head];
   if(!iface.LibrariesDone)
     {
     iface.LibrariesDone = true;
@@ -5825,13 +5848,20 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     return 0;
     }
 
-  TargetConfigPair key(headTarget, cmSystemTools::UpperCase(config));
-  cmTargetInternals::ImportLinkInterfaceMapType& lim =
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  cmTargetInternals::HeadToLinkInterfaceMap& hm =
     (usage_requirements_only ?
-     this->Internal->ImportLinkInterfaceUsageRequirementsOnlyMap :
-     this->Internal->ImportLinkInterfaceMap);
+     this->Internal->LinkInterfaceUsageRequirementsOnlyMap[CONFIG] :
+     this->Internal->LinkInterfaceMap[CONFIG]);
 
-  cmTargetInternals::OptionalLinkInterface& iface = lim[key];
+  // If the link interface does not depend on the head target
+  // then return the one we computed first.
+  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
+    {
+    return &hm.begin()->second;
+    }
+
+  cmTargetInternals::OptionalLinkInterface& iface = hm[headTarget];
   if(!iface.AllDone)
     {
     iface.AllDone = true;
@@ -5839,7 +5869,8 @@ cmTarget::GetImportLinkInterface(const std::string& config,
     cmSystemTools::ExpandListArgument(info->Languages, iface.Languages);
     this->ExpandLinkItems(info->LibrariesProp, info->Libraries, config,
                           headTarget, usage_requirements_only,
-                          iface.Libraries);
+                          iface.Libraries,
+                          iface.HadHeadSensitiveCondition);
     std::vector<std::string> deps;
     cmSystemTools::ExpandListArgument(info->SharedDeps, deps);
     this->LookupLinkItems(deps, iface.SharedDeps);
@@ -6023,7 +6054,8 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
     // The interface libraries have been explicitly set.
     thisTarget->ExpandLinkItems(linkIfaceProp, explicitLibraries, config,
                                 headTarget, usage_requirements_only,
-                                iface.Libraries);
+                                iface.Libraries,
+                                iface.HadHeadSensitiveCondition);
     }
   else if (thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN
         || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
@@ -6046,9 +6078,10 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
       static const std::string newProp = "INTERFACE_LINK_LIBRARIES";
       if(const char* newExplicitLibraries = thisTarget->GetProperty(newProp))
         {
+        bool hadHeadSensitiveConditionDummy = false;
         thisTarget->ExpandLinkItems(newProp, newExplicitLibraries, config,
                                     headTarget, usage_requirements_only,
-                                    ifaceLibs);
+                                ifaceLibs, hadHeadSensitiveConditionDummy);
         }
       if (ifaceLibs != iface.Libraries)
         {
@@ -6233,18 +6266,19 @@ cmTarget::GetLinkImplementation(const std::string& config) const
     }
 
   // Populate the link implementation for this configuration.
-  TargetConfigPair key(this, cmSystemTools::UpperCase(config));
+  std::string CONFIG = cmSystemTools::UpperCase(config);
   cmTargetInternals::OptionalLinkImplementation&
-    impl = this->Internal->LinkImplMap[key];
+    impl = this->Internal->LinkImplMap[CONFIG][this];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, this);
+    this->Internal
+      ->ComputeLinkImplementationLibraries(this, config, impl, this);
     }
   if(!impl.LanguagesDone)
     {
     impl.LanguagesDone = true;
-    this->ComputeLinkImplementationLanguages(config, impl);
+    this->Internal->ComputeLinkImplementationLanguages(this, config, impl);
     }
   return &impl;
 }
@@ -6268,57 +6302,73 @@ cmTarget::GetLinkImplementationLibrariesInternal(const std::string& config,
     }
 
   // Populate the link implementation libraries for this configuration.
-  TargetConfigPair key(head, cmSystemTools::UpperCase(config));
-  cmTargetInternals::OptionalLinkImplementation&
-    impl = this->Internal->LinkImplMap[key];
+  std::string CONFIG = cmSystemTools::UpperCase(config);
+  cmTargetInternals::HeadToLinkImplementationMap& hm =
+    this->Internal->LinkImplMap[CONFIG];
+
+  // If the link implementation does not depend on the head target
+  // then return the one we computed first.
+  if(!hm.empty() && !hm.begin()->second.HadHeadSensitiveCondition)
+    {
+    return &hm.begin()->second;
+    }
+
+  cmTargetInternals::OptionalLinkImplementation& impl = hm[head];
   if(!impl.LibrariesDone)
     {
     impl.LibrariesDone = true;
-    this->ComputeLinkImplementationLibraries(config, impl, head);
+    this->Internal
+      ->ComputeLinkImplementationLibraries(this, config, impl, head);
     }
   return &impl;
 }
 
 //----------------------------------------------------------------------------
 void
-cmTarget::ComputeLinkImplementationLibraries(const std::string& config,
-                                             LinkImplementation& impl,
-                                             cmTarget const* head) const
+cmTargetInternals::ComputeLinkImplementationLibraries(
+  cmTarget const* thisTarget,
+  const std::string& config,
+  OptionalLinkImplementation& impl,
+  cmTarget const* head) const
 {
   // Collect libraries directly linked in this configuration.
   for (std::vector<cmValueWithOrigin>::const_iterator
-      le = this->Internal->LinkImplementationPropertyEntries.begin(),
-      end = this->Internal->LinkImplementationPropertyEntries.end();
+      le = this->LinkImplementationPropertyEntries.begin(),
+      end = this->LinkImplementationPropertyEntries.end();
       le != end; ++le)
     {
     std::vector<std::string> llibs;
     cmGeneratorExpressionDAGChecker dagChecker(
-                                        this->GetName(),
+                                        thisTarget->GetName(),
                                         "LINK_LIBRARIES", 0, 0);
     cmGeneratorExpression ge(&le->Backtrace);
     cmsys::auto_ptr<cmCompiledGeneratorExpression> const cge =
       ge.Parse(le->Value);
     std::string const evaluated =
-      cge->Evaluate(this->Makefile, config, false, head, &dagChecker);
+      cge->Evaluate(thisTarget->Makefile, config, false, head, &dagChecker);
     cmSystemTools::ExpandListArgument(evaluated, llibs);
+    if(cge->GetHadHeadSensitiveCondition())
+      {
+      impl.HadHeadSensitiveCondition = true;
+      }
 
     for(std::vector<std::string>::const_iterator li = llibs.begin();
         li != llibs.end(); ++li)
       {
       // Skip entries that resolve to the target itself or are empty.
-      std::string name = this->CheckCMP0004(*li);
-      if(name == this->GetName() || name.empty())
+      std::string name = thisTarget->CheckCMP0004(*li);
+      if(name == thisTarget->GetName() || name.empty())
         {
-        if(name == this->GetName())
+        if(name == thisTarget->GetName())
           {
           bool noMessage = false;
           cmake::MessageType messageType = cmake::FATAL_ERROR;
           cmOStringStream e;
-          switch(this->GetPolicyStatusCMP0038())
+          switch(thisTarget->GetPolicyStatusCMP0038())
             {
             case cmPolicies::WARN:
               {
-              e << (this->Makefile->GetPolicies()
+              e << (thisTarget->Makefile->GetPolicies()
                     ->GetPolicyWarning(cmPolicies::CMP0038)) << "\n";
               messageType = cmake::AUTHOR_WARNING;
               }
@@ -6334,9 +6384,9 @@ cmTarget::ComputeLinkImplementationLibraries(const std::string& config,
 
           if(!noMessage)
             {
-            e << "Target \"" << this->GetName() << "\" links to itself.";
-            this->Makefile->GetCMakeInstance()->IssueMessage(
-              messageType, e.str(), this->GetBacktrace());
+            e << "Target \"" << thisTarget->GetName() << "\" links to itself.";
+            thisTarget->Makefile->GetCMakeInstance()->IssueMessage(
+              messageType, e.str(), thisTarget->GetBacktrace());
             if (messageType == cmake::FATAL_ERROR)
               {
               return;
@@ -6348,7 +6398,7 @@ cmTarget::ComputeLinkImplementationLibraries(const std::string& config,
 
       // The entry is meant for this configuration.
       impl.Libraries.push_back(
-        cmLinkImplItem(name, this->FindTargetToLink(name),
+        cmLinkImplItem(name, thisTarget->FindTargetToLink(name),
                        le->Backtrace, evaluated != le->Value));
       }
 
@@ -6356,42 +6406,45 @@ cmTarget::ComputeLinkImplementationLibraries(const std::string& config,
     for (std::set<std::string>::const_iterator it = seenProps.begin();
         it != seenProps.end(); ++it)
       {
-      if (!this->GetProperty(*it))
+      if (!thisTarget->GetProperty(*it))
         {
-        this->LinkImplicitNullProperties.insert(*it);
+        thisTarget->LinkImplicitNullProperties.insert(*it);
         }
       }
-    cge->GetMaxLanguageStandard(this, this->MaxLanguageStandards);
+    cge->GetMaxLanguageStandard(thisTarget, thisTarget->MaxLanguageStandards);
     }
 
-  cmTarget::LinkLibraryType linkType = this->ComputeLinkType(config);
-  LinkLibraryVectorType const& oldllibs = this->GetOriginalLinkLibraries();
+  cmTarget::LinkLibraryType linkType = thisTarget->ComputeLinkType(config);
+  cmTarget::LinkLibraryVectorType const& oldllibs =
+    thisTarget->GetOriginalLinkLibraries();
   for(cmTarget::LinkLibraryVectorType::const_iterator li = oldllibs.begin();
       li != oldllibs.end(); ++li)
     {
     if(li->second != cmTarget::GENERAL && li->second != linkType)
       {
-      std::string name = this->CheckCMP0004(li->first);
-      if(name == this->GetName() || name.empty())
+      std::string name = thisTarget->CheckCMP0004(li->first);
+      if(name == thisTarget->GetName() || name.empty())
         {
         continue;
         }
       // Support OLD behavior for CMP0003.
       impl.WrongConfigLibraries.push_back(
-        cmLinkItem(name, this->FindTargetToLink(name)));
+        cmLinkItem(name, thisTarget->FindTargetToLink(name)));
       }
     }
 }
 
 //----------------------------------------------------------------------------
 void
-cmTarget::ComputeLinkImplementationLanguages(const std::string& config,
-                                             LinkImplementation& impl) const
+cmTargetInternals::ComputeLinkImplementationLanguages(
+  cmTarget const* thisTarget,
+  const std::string& config,
+  OptionalLinkImplementation& impl) const
 {
   // This target needs runtime libraries for its source languages.
   std::set<std::string> languages;
   // Get languages used in our source files.
-  this->GetLanguages(languages, config);
+  thisTarget->GetLanguages(languages, config);
   // Copy the set of langauges to the link implementation.
   for(std::set<std::string>::iterator li = languages.begin();
       li != languages.end(); ++li)
