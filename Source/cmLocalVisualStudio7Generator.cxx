@@ -1013,7 +1013,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   if(!this->ModuleDefinitionFile.empty())
     {
     std::string defFile =
-      this->ConvertToXMLOutputPath(this->ModuleDefinitionFile.c_str());
+      this->ConvertToOptionallyRelativeOutputPath(this->ModuleDefinitionFile);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
     }
   switch(target.GetType())
