@@ -1127,7 +1127,13 @@ cmCTestMemCheckHandler::PostProcessTest(cmCTestTestResult& res,
     }
   else
     {
-    this->AppendMemTesterOutput(res, test);
+    std::vector<std::string> files;
+    this->TestOutputFileNames(test, files);
+    for(std::vector<std::string>::iterator i = files.begin();
+        i != files.end(); ++i)
+      {
+      this->AppendMemTesterOutput(res, *i);
+      }
     }
 }
 
@@ -1141,11 +1147,13 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessBoundsCheckerTest for : "
              << res.Name << std::endl);
-  std::string ofile = this->TestOutputFileName(test);
-  if ( ofile.empty() )
+  std::vector<std::string> files;
+  this->TestOutputFileNames(test, files);
+  if ( files.size() == 0 )
     {
     return;
     }
+  std::string ofile = files[0];
   // put a scope around this to close ifs so the file can be removed
   {
   cmsys::ifstream ifs(ofile.c_str());
@@ -1175,9 +1183,8 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
 
 void
 cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
-                                              int test)
+                                              std::string const& ofile)
 {
-  std::string ofile = this->TestOutputFileName(test);
   if ( ofile.empty() )
     {
     return;
@@ -1205,8 +1212,9 @@ cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
     }
 }
 
-std::string
-cmCTestMemCheckHandler::TestOutputFileName(int test)
+void cmCTestMemCheckHandler::TestOutputFileNames(int test,
+                                                 std::vector<std::string>&
+                                                 files)
 {
   std::string index;
   cmOStringStream stream;
@@ -1229,7 +1237,8 @@ cmCTestMemCheckHandler::TestOutputFileName(int test)
       }
     else
       {
-      ofile = g.GetFiles()[0];
+      files = g.GetFiles();
+      return;
       }
     }
   else if ( !cmSystemTools::FileExists(ofile.c_str()) )
@@ -1239,5 +1248,5 @@ cmCTestMemCheckHandler::TestOutputFileName(int test)
     cmCTestLog(this->CTest, ERROR_MESSAGE, log.c_str() << std::endl);
     ofile = "";
     }
-  return ofile;
+  files.push_back(ofile);
 }

@@ -145,10 +145,10 @@ private:
 
   ///! append MemoryTesterOutputFile to the test log
   void AppendMemTesterOutput(cmCTestTestHandler::cmCTestTestResult& res,
-                             int test);
+                             std::string const& filename);
 
   ///! generate the output filename for the given test index
-  std::string TestOutputFileName(int test);
+  void TestOutputFileNames(int test, std::vector<std::string>& files);
 };
 
 #endif
