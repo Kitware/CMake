@@ -130,6 +130,10 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
 {
   this->SystemName = s;
   this->SystemVersion = mf->GetSafeDefinition("CMAKE_SYSTEM_VERSION");
+  if(!this->InitializeSystem(mf))
+    {
+    return false;
+    }
   if(this->PlatformName == "Itanium" || this->PlatformName == "x64")
     {
     if(this->IsExpressEdition() && !this->Find64BitTools(mf))
@@ -139,6 +143,12 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
     }
   this->AddVSPlatformToolsetDefinition(mf);
   return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile*)
+{
+  return true;
 }
 
 //----------------------------------------------------------------------------

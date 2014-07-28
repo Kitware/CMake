@@ -92,6 +92,7 @@ public:
 
 protected:
   virtual void Generate();
+  virtual bool InitializeSystem(cmMakefile* mf);
 
   virtual const char* GetIDEVersion() { return "10.0"; }
 
