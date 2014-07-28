@@ -2835,8 +2835,16 @@ void cmGlobalXCodeGenerator
         sep = " ";
         linkObjs += this->XCodeEscapePath(oi->c_str());
         }
-      this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
+      if (this->XcodeVersion >= 60)
+        {
+        this->AppendBuildSettingAttribute(target, "OTHER_LIBTOOLFLAGS",
+                                          linkObjs.c_str(), configName);
+        }
+        else
+        {
+          this->AppendBuildSettingAttribute(target, "OTHER_LDFLAGS",
                                         linkObjs.c_str(), configName);
+        }
       }
 
     // Skip link information for object libraries.
