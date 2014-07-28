@@ -1701,6 +1701,8 @@ bool extract_tar(const char* outFileName, bool verbose,
     {
     cmSystemTools::Error("Problem with archive_read_open_file(): ",
                          archive_error_string(a));
+    archive_write_free(ext);
+    archive_read_close(a);
     return false;
     }
   for (;;)
@@ -1776,6 +1778,7 @@ bool extract_tar(const char* outFileName, bool verbose,
         }
       }
     }
+  archive_write_free(ext);
   archive_read_close(a);
   archive_read_finish(a);
   return r == ARCHIVE_EOF || r == ARCHIVE_OK;
