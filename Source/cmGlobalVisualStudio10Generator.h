@@ -107,6 +107,10 @@ public:
 protected:
   virtual void Generate();
   virtual bool InitializeSystem(cmMakefile* mf);
+  virtual bool InitializeWindowsPhone(cmMakefile* mf);
+  virtual bool InitializeWindowsStore(cmMakefile* mf);
+  virtual std::string SelectWindowsPhoneToolset() const { return ""; }
+  virtual std::string SelectWindowsStoreToolset() const { return ""; }
 
   virtual const char* GetIDEVersion() { return "10.0"; }
 

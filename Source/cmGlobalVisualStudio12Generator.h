@@ -39,6 +39,10 @@ public:
   //version number
   virtual const char* GetToolsVersion() { return "12.0"; }
 protected:
+  virtual bool InitializeWindowsPhone(cmMakefile* mf);
+  virtual bool InitializeWindowsStore(cmMakefile* mf);
+  virtual std::string SelectWindowsPhoneToolset() const;
+  virtual std::string SelectWindowsStoreToolset() const;
   virtual const char* GetIDEVersion() { return "12.0"; }
 private:
   class Factory;

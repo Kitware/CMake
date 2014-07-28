@@ -34,6 +34,10 @@ public:
   /** TODO: VS 11 user macro support. */
   virtual std::string GetUserMacrosDirectory() { return ""; }
 protected:
+  virtual bool InitializeWindowsPhone(cmMakefile* mf);
+  virtual bool InitializeWindowsStore(cmMakefile* mf);
+  virtual std::string SelectWindowsPhoneToolset() const;
+  virtual std::string SelectWindowsStoreToolset() const;
   virtual const char* GetIDEVersion() { return "11.0"; }
   bool UseFolderProperty();
   static std::set<std::string> GetInstalledWindowsCESDKs();
