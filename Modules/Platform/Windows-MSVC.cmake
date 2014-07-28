@@ -38,7 +38,7 @@ endif()
 
 set(WIN32 1)
 
-if(CMAKE_SYSTEM_NAME MATCHES "WindowsCE")
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
   set(CMAKE_CREATE_WIN32_EXE "/entry:WinMainCRTStartup")
   set(CMAKE_CREATE_CONSOLE_EXE "/entry:mainACRTStartup")
   set(_PLATFORM_LINK_FLAGS " /subsystem:windowsce")
