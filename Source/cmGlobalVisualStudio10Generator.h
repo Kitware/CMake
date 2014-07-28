@@ -99,6 +99,8 @@ protected:
 
   std::string GeneratorToolset;
   std::string DefaultPlatformToolset;
+  std::string SystemName;
+  std::string SystemVersion;
   bool ExpressEdition;
   bool MasmEnabled;
 

@@ -128,6 +128,8 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
 bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
                                                     cmMakefile* mf)
 {
+  this->SystemName = s;
+  this->SystemVersion = mf->GetSafeDefinition("CMAKE_SYSTEM_VERSION");
   if(this->PlatformName == "Itanium" || this->PlatformName == "x64")
     {
     if(this->IsExpressEdition() && !this->Find64BitTools(mf))
