@@ -19,6 +19,7 @@
 #include "cmCPackZIPGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
+#include "cmCPackIFWGenerator.h"
 
 #ifdef __APPLE__
 #  include "cmCPackDragNDropGenerator.h"
@@ -67,6 +68,11 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
       cmCPackNSISGenerator::CreateGenerator);
     this->RegisterGenerator("NSIS64", "Null Soft Installer (64-bit)",
       cmCPackNSISGenerator::CreateGenerator64);
+    }
+  if (cmCPackIFWGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("IFW", "Qt Installer Framework",
+      cmCPackIFWGenerator::CreateGenerator);
     }
 #ifdef __CYGWIN__
   if (cmCPackCygwinBinaryGenerator::CanGenerate())

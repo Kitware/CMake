@@ -458,6 +458,9 @@ macro(cpack_add_component_group grpname)
   cpack_append_string_variable_set_command(
     CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_DESCRIPTION
     CPACK_ADDGRP_STR)
+  cpack_append_string_variable_set_command(
+    CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_PARENT_GROUP
+    CPACK_ADDGRP_STR)
   cpack_append_option_set_command(
     CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_EXPANDED
     CPACK_ADDGRP_STR)
