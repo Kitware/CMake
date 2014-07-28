@@ -680,14 +680,19 @@ int cmCPackIFWGenerator::IfwCreateConfigFile()
     ifwPkgName = "Your package";
     }
 
-  std::string ifwPkgDescription;
-  if (const char *name = this->GetOption("CPACK_PACKAGE_DESCRIPTION_SUMMARY"))
+  std::string pkgTitle;
+  if (const char *title = this->GetOption("CPACK_IFW_PACKAGE_TITLE"))
     {
-    ifwPkgDescription = name;
+    pkgTitle = title;
+    }
+  else if (const char *description =
+           this->GetOption("CPACK_PACKAGE_DESCRIPTION_SUMMARY"))
+    {
+    pkgTitle = description;
     }
   else
     {
-    ifwPkgDescription = "Your package description";
+    pkgTitle = "Your package description";
     }
 
   std::string ifwPkgVersion;
@@ -711,8 +716,63 @@ int cmCPackIFWGenerator::IfwCreateConfigFile()
   cfg << "<Installer>" << std::endl;
   cfg << "    <Name>" << cmXMLSafe(ifwPkgName).str() << "</Name>" << std::endl;
   cfg << "    <Version>" << ifwPkgVersion << "</Version>" << std::endl;
-  cfg << "    <Title>" << cmXMLSafe(ifwPkgDescription).str() << "</Title>"
+  cfg << "    <Title>" << cmXMLSafe(pkgTitle).str() << "</Title>"
       << std::endl;
+
+  // Publisher
+  std::string ifwPublisher;
+  if(const char *publisher = GetOption("CPACK_IFW_PACKAGE_PUBLISHER"))
+    {
+    ifwPublisher = publisher;
+    }
+  else if(const char *vendor = GetOption("CPACK_PACKAGE_VENDOR"))
+    {
+    ifwPublisher = vendor;
+    }
+  if(!ifwPublisher.empty())
+    {
+    cfg << "    <Publisher>" << cmXMLSafe(ifwPublisher).str()
+        << "</Publisher>" << std::endl;
+    }
+
+  // ProductUrl
+  if(const char *url = GetOption("CPACK_IFW_PRODUCT_URL"))
+    {
+    cfg << "    <ProductUrl>" << url << "</ProductUrl>" << std::endl;
+    }
+
+  // ApplicationIcon
+  const char *pkgApplicationIcon = GetOption("CPACK_IFW_PACKAGE_ICON");
+  if(pkgApplicationIcon && cmSystemTools::FileExists(pkgApplicationIcon))
+    {
+    std::string name = cmSystemTools::GetFilenameName(pkgApplicationIcon);
+    std::string path = this->toplevel + "/config/" + name;
+    name = cmSystemTools::GetFilenameWithoutExtension(name);
+    cmsys::SystemTools::CopyFileIfDifferent(pkgApplicationIcon, path.data());
+    cfg << "    <InstallerApplicationIcon>" << name
+        << "</InstallerApplicationIcon>" << std::endl;
+    }
+
+  // WindowIcon
+  const char *pkgWindowIcon = GetOption("CPACK_IFW_PACKAGE_WINDOW_ICON");
+  if(pkgWindowIcon && cmSystemTools::FileExists(pkgWindowIcon))
+    {
+    std::string name = cmSystemTools::GetFilenameName(pkgWindowIcon);
+    std::string path = this->toplevel + "/config/" + name;
+    cmsys::SystemTools::CopyFileIfDifferent(pkgWindowIcon, path.data());
+    cfg << "    <InstallerWindowIcon>" << name
+        << "</InstallerWindowIcon>" << std::endl;
+    }
+
+  // Logo
+  const char *pkgLogo = GetOption("CPACK_IFW_PACKAGE_LOGO");
+  if(pkgLogo && cmSystemTools::FileExists(pkgLogo))
+    {
+    std::string name = cmSystemTools::GetFilenameName(pkgLogo);
+    std::string path = this->toplevel + "/config/" + name;
+    cmsys::SystemTools::CopyFileIfDifferent(pkgLogo, path.data());
+    cfg << "    <Logo>" << name << "</Logo>" << std::endl;
+    }
 
   // Default target directory for installation
   if (ifwTargetDir)

@@ -29,8 +29,37 @@
 # Variables
 # ^^^^^^^^^
 #
-# Variables that Change Behavior
-# """"""""""""""""""""""""""""""
+# You can use the following variables to change behavior of CPack ``IFW`` generator.
+#
+# Package
+# """""""
+#
+# .. variable:: CPACK_IFW_PACKAGE_TITLE
+#
+#  Name of the installer as displayed on the title bar.
+#  By default used :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
+#
+# .. variable:: CPACK_IFW_PACKAGE_PUBLISHER
+#
+#  Publisher of the software (as shown in the Windows Control Panel).
+#  By default used :variable:`CPACK_PACKAGE_VENDOR`
+#
+# .. variable:: CPACK_IFW_PRODUCT_URL
+#
+#  URL to a page that contains product information on your web site.
+#
+# .. variable:: CPACK_IFW_PACKAGE_ICON
+#
+#  Filename for a custom installer icon. The actual file is '.icns' (Mac OS X),
+#  '.ico' (Windows). No functionality on Unix.
+#
+# .. variable:: CPACK_IFW_PACKAGE_WINDOW_ICON
+#
+#  Filename for a custom window icon in PNG format for the Installer application.
+#
+# .. variable:: CPACK_IFW_PACKAGE_LOGO
+#
+#  Filename for a logo used as QWizard::LogoPixmap.
 #
 # .. variable:: CPACK_IFW_TARGET_DIRECTORY
 #
@@ -45,6 +74,9 @@
 #
 #  You can use predefined variables.
 #
+# Components
+# """"""""""
+#
 # .. variable:: CPACK_IFW_RESOLVE_DUPLICATE_NAMES
 #
 #  Resolve duplicate names when installing components with groups.
@@ -54,8 +86,8 @@
 #  Additional prepared packages dirs that will be used to resolve
 #  dependent components.
 #
-# Advanced Variables
-# """"""""""""""""""
+# Advanced
+# """"""""
 #
 # .. variable:: CPACK_IFW_BINARYCREATOR_EXECUTABLE
 #
