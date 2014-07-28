@@ -148,8 +148,6 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
     {
     return;
     }
-  std::string doc = lang;
-  doc += " compiler.";
   const char* cname = this->GetCMakeInstance()->
     GetCacheManager()->GetCacheValue(langComp);
   std::string changeVars;
@@ -186,8 +184,6 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
         changeVars.c_str());
       }
     }
-  mf->AddCacheDefinition(langComp, path.c_str(),
-                         doc.c_str(), cmCacheManager::FILEPATH);
 }
 
 void cmGlobalGenerator::AddBuildExportSet(cmExportBuildFileGenerator* gen)
