@@ -18,6 +18,7 @@
 #cmakedefine CMAKE_USE_SYSTEM_ZLIB
 #cmakedefine CMAKE_USE_SYSTEM_BZIP2
 #cmakedefine CMAKE_USE_SYSTEM_LIBARCHIVE
+#cmakedefine CMAKE_USE_SYSTEM_LIBLZMA
 #cmakedefine CTEST_USE_XMLRPC
 
 #endif

@@ -42,7 +42,7 @@ __FBSDID("$FreeBSD$");
 #include <unistd.h>
 #endif
 #if HAVE_LZMA_H
-#include <lzma.h>
+#include <cm_lzma.h>
 #elif HAVE_LZMADEC_H
 #include <lzmadec.h>
 #endif

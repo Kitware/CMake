@@ -57,7 +57,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT LIBARCHIVE ZLIB)
+  set(UTILITIES BZIP2 CURL EXPAT LIBARCHIVE LIBLZMA ZLIB)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -93,6 +93,8 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     "${CMAKE_USE_SYSTEM_LIBRARY_ZLIB}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE;NOT CMAKE_USE_SYSTEM_CURL" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_BZIP2 "Use system-installed bzip2"
     "${CMAKE_USE_SYSTEM_LIBRARY_BZIP2}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
+    "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
 
   # Mention to the user what system libraries are being used.
   foreach(util ${UTILITIES})
@@ -301,6 +303,23 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   #---------------------------------------------------------------------
+  # Build or use system liblzma for libarchive.
+  if(CMAKE_USE_SYSTEM_LIBLZMA)
+    find_package(LibLZMA)
+    if(NOT LIBLZMA_FOUND)
+      message(FATAL_ERROR "CMAKE_USE_SYSTEM_LIBLZMA is ON but LibLZMA is not found!")
+    endif()
+    set(LZMA_INCLUDE_DIR ${LIBLZMA_INCLUDE_DIRS})
+    set(LZMA_LIBRARY ${LIBLZMA_LIBRARIES})
+  else()
+    add_subdirectory(Utilities/cmliblzma)
+    CMAKE_SET_TARGET_FOLDER(cmliblzma "Utilities/3rdParty")
+    set(LZMA_INCLUDE_DIR
+      "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/cmliblzma/liblzma/api")
+    set(LZMA_LIBRARY cmliblzma)
+  endif()
+
+  #---------------------------------------------------------------------
   # Build or use system libarchive for CMake and CTest.
   if(CMAKE_USE_SYSTEM_LIBARCHIVE)
     find_package(LibArchive)
@@ -315,7 +334,7 @@ macro (CMAKE_BUILD_UTILITIES)
     add_definitions(-DLIBARCHIVE_STATIC)
     set(ENABLE_NETTLE OFF CACHE INTERNAL "Enable use of Nettle")
     set(ENABLE_OPENSSL ${CMAKE_USE_OPENSSL} CACHE INTERNAL "Enable use of OpenSSL")
-    set(ENABLE_LZMA OFF CACHE INTERNAL "Enable the use of the system found LZMA library if found")
+    set(ENABLE_LZMA ON CACHE INTERNAL "Enable the use of the system found LZMA library if found")
     set(ENABLE_ZLIB ON CACHE INTERNAL "Enable the use of the system found ZLIB library if found")
     set(ENABLE_BZip2 ON CACHE INTERNAL "Enable the use of the system found BZip2 library if found")
     set(ENABLE_EXPAT OFF CACHE INTERNAL "Enable the use of the system found EXPAT library if found")

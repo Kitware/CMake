@@ -76,6 +76,7 @@
 
 #if defined(_MSC_VER)
 #pragma warning(push,1)
+#pragma warning(disable:4142)   /* benign redefinition of type */
 #pragma warning(disable:4761)   /* integral size mismatch in argument; conversion supplied */
 #endif
 #if defined(__BORLANDC__)
