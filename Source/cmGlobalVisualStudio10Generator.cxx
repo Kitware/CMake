@@ -97,6 +97,8 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
+  this->SystemIsWindowsPhone = false;
+  this->SystemIsWindowsStore = false;
   this->MasmEnabled = false;
   this->MSBuildCommandInitialized = false;
 }
@@ -148,6 +150,14 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile*)
 {
+  if(this->SystemName == "WindowsPhone")
+    {
+    this->SystemIsWindowsPhone = true;
+    }
+  else if(this->SystemName == "WindowsStore")
+    {
+    this->SystemIsWindowsStore = true;
+    }
   return true;
 }
 

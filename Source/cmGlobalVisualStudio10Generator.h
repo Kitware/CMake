@@ -70,6 +70,14 @@ public:
   /** Return the CMAKE_SYSTEM_VERSION.  */
   std::string const& GetSystemVersion() const { return this->SystemVersion; }
 
+  /** Return true if building for WindowsPhone */
+  bool TargetsWindowsPhone() const
+    { return this->SystemIsWindowsPhone; }
+
+  /** Return true if building for WindowsStore */
+  bool TargetsWindowsStore() const
+    { return this->SystemIsWindowsStore; }
+
   /**
    * Where does this version of Visual Studio look for macros for the
    * current user? Returns the empty string if this version of Visual
@@ -108,6 +116,8 @@ protected:
   std::string DefaultPlatformToolset;
   std::string SystemName;
   std::string SystemVersion;
+  bool SystemIsWindowsPhone;
+  bool SystemIsWindowsStore;
   bool ExpressEdition;
   bool MasmEnabled;
 
