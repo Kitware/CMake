@@ -92,6 +92,7 @@ public:
 
 protected:
   virtual void Generate();
+  virtual bool InitializeSystem(cmMakefile* mf);
 
   virtual const char* GetIDEVersion() { return "10.0"; }
 
@@ -99,6 +100,8 @@ protected:
 
   std::string GeneratorToolset;
   std::string DefaultPlatformToolset;
+  std::string SystemName;
+  std::string SystemVersion;
   bool ExpressEdition;
   bool MasmEnabled;
 
