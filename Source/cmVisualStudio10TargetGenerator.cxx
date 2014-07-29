@@ -998,7 +998,7 @@ WriteGroupSources(const char* name,
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(
-  const char* tool, cmSourceFile const* sf, const char* end)
+  std::string const& tool, cmSourceFile const* sf, const char* end)
 {
   // Visual Studio tools append relative paths to the current dir, as in:
   //
@@ -1055,7 +1055,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(
 }
 
 void cmVisualStudio10TargetGenerator::WriteSources(
-  const char* tool, std::vector<cmSourceFile const*> const& sources)
+  std::string const& tool, std::vector<cmSourceFile const*> const& sources)
 {
   for(std::vector<cmSourceFile const*>::const_iterator
         si = sources.begin(); si != sources.end(); ++si)
@@ -1086,7 +1086,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       si != objectSources.end(); ++si)
     {
     const std::string& lang = (*si)->GetLanguage();
-    const char* tool = NULL;
+    std::string tool;
     if (lang == "C"|| lang == "CXX")
       {
       tool = "ClCompile";
@@ -1101,7 +1101,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       tool = "ResourceCompile";
       }
 
-    if (tool)
+    if (!tool.empty())
       {
       this->WriteSource(tool, *si, " ");
       if (this->OutputSourceSpecificFlags(*si))
