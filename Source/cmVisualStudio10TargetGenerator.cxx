@@ -999,7 +999,16 @@ WriteGroupSources(const char* name,
 
 void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
 {
-  this->WriteSource("ClInclude", sf);
+  if(this->IsResxHeader(sf->GetFullPath()))
+    {
+    this->WriteSource("ClInclude", sf, ">\n");
+    this->WriteString("<FileType>CppForm</FileType>\n", 3);
+    this->WriteString("</ClInclude>\n", 2);
+    }
+  else
+    {
+    this->WriteSource("ClInclude", sf);
+    }
 }
 
 void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
@@ -1046,19 +1055,8 @@ void cmVisualStudio10TargetGenerator::WriteSource(
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream ) << tool << " Include=\""
-                            << cmVS10EscapeXML(sourceFile) << "\"";
-
-  if(sf->GetExtension() == "h" &&
-    this->IsResxHeader(sf->GetFullPath()))
-    {
-      (*this->BuildFileStream ) << ">\n";
-      this->WriteString("<FileType>CppForm</FileType>\n", 3);
-      this->WriteString("</ClInclude>\n", 2);
-    }
-  else
-    {
-      (*this->BuildFileStream ) << (end? end : " />\n");
-    }
+                            << cmVS10EscapeXML(sourceFile) << "\""
+                            << (end? end : " />\n");
 
   ToolSource toolSource = {sf, forceRelative};
   this->Tools[tool].push_back(toolSource);
