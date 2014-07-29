@@ -242,3 +242,17 @@ cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs()
 
   return ret;
 }
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio11Generator::NeedsDeploy(cmTarget::TargetType type) const
+{
+  if((type == cmTarget::EXECUTABLE ||
+      type == cmTarget::SHARED_LIBRARY) &&
+     (this->SystemIsWindowsPhone ||
+      this->SystemIsWindowsStore))
+    {
+    return true;
+    }
+  return cmGlobalVisualStudio10Generator::NeedsDeploy(type);
+}

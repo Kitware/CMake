@@ -41,6 +41,9 @@ protected:
   virtual const char* GetIDEVersion() { return "11.0"; }
   bool UseFolderProperty();
   static std::set<std::string> GetInstalledWindowsCESDKs();
+
+  /** Return true if the configuration needs to be deployed */
+  virtual bool NeedsDeploy(cmTarget::TargetType type) const;
 private:
   class Factory;
   friend class Factory;
