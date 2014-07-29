@@ -1019,6 +1019,10 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     {
     tool = "AppxManifest";
     }
+  else if(ext == "xml")
+    {
+    tool = "XML";
+    }
   this->WriteSource(tool, sf);
 }
 
