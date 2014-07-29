@@ -1035,9 +1035,49 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     tool = "XML";
     }
 
+  std::string deployContent;
+  if(this->GlobalGenerator->TargetsWindowsPhone() ||
+     this->GlobalGenerator->TargetsWindowsStore())
+    {
+    const char* content = sf->GetProperty("VS_DEPLOYMENT_CONTENT");
+    if(content && *content)
+      {
+      toolHasSettings = true;
+      deployContent = content;
+      }
+    }
+
   if(toolHasSettings)
     {
     this->WriteSource(tool, sf, ">\n");
+
+    if(!deployContent.empty())
+      {
+      std::vector<std::string> const* configs =
+        this->GlobalGenerator->GetConfigurations();
+      cmGeneratorExpression ge;
+      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+        ge.Parse(deployContent);
+      for(size_t i = 0; i != configs->size(); ++i)
+        {
+        if(0 == strcmp(cge->Evaluate(this->Makefile, (*configs)[i]), "1"))
+          {
+          this->WriteString("<DeploymentContent Condition=\""
+                            "'$(Configuration)|$(Platform)'=='", 3);
+          (*this->BuildFileStream) << (*configs)[i] << "|"
+                                   << this->Platform << "'\">true";
+          this->WriteString("</DeploymentContent>\n", 0);
+          }
+        else
+          {
+          this->WriteString("<ExcludedFromBuild Condition=\""
+                            "'$(Configuration)|$(Platform)'=='", 3);
+          (*this->BuildFileStream) << (*configs)[i] << "|"
+                                   << this->Platform << "'\">true";
+          this->WriteString("</ExcludedFromBuild>\n", 0);
+          }
+        }
+      }
 
     this->WriteString("</", 2);
     (*this->BuildFileStream) << tool << ">\n";
