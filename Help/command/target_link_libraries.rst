@@ -18,7 +18,10 @@ If a library name matches that of another target in the project a
 dependency will automatically be added in the build system to make sure
 the library being linked is up-to-date before the target links. Item names
 starting with ``-``, but not ``-l`` or ``-framework``, are treated as
-linker flags.
+linker flags.  Note that such flags will be treated like any other library
+link item for purposes of transitive dependencies, so they are generally
+safe to specify only as private link items that will not propagate to
+dependents of ``<target>``.
 
 A ``debug``, ``optimized``, or ``general`` keyword indicates that the
 library immediately following it is to be used only for the
