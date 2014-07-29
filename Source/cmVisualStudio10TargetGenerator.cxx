@@ -1018,6 +1018,7 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
 
 void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 {
+  bool toolHasSettings = false;
   std::string tool = "None";
   std::string const& ext = sf->GetExtension();
   if(ext == "appxmanifest")
@@ -1033,7 +1034,18 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     {
     tool = "XML";
     }
-  this->WriteSource(tool, sf);
+
+  if(toolHasSettings)
+    {
+    this->WriteSource(tool, sf, ">\n");
+
+    this->WriteString("</", 2);
+    (*this->BuildFileStream) << tool << ">\n";
+    }
+  else
+    {
+    this->WriteSource(tool, sf);
+    }
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(
