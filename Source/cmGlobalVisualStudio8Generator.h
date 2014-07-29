@@ -77,6 +77,9 @@ protected:
 
   bool AddCheckTarget();
 
+  /** Return true if the configuration needs to be deployed */
+  virtual bool NeedsDeploy(cmTarget::TargetType type) const;
+
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void WriteSLNHeader(std::ostream& fout);
   virtual void WriteSolutionConfigurations(std::ostream& fout);

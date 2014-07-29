@@ -398,9 +398,7 @@ cmGlobalVisualStudio8Generator
                platformMapping : this->GetPlatformName())
            << "\n";
       }
-    bool needsDeploy = (type == cmTarget::EXECUTABLE ||
-                        type == cmTarget::SHARED_LIBRARY);
-    if(this->TargetsWindowsCE() && needsDeploy)
+    if(this->NeedsDeploy(type))
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->GetPlatformName() << ".Deploy.0 = " << *i << "|"
@@ -409,6 +407,15 @@ cmGlobalVisualStudio8Generator
            << "\n";
       }
     }
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio8Generator::NeedsDeploy(cmTarget::TargetType type) const
+{
+  bool needsDeploy = (type == cmTarget::EXECUTABLE ||
+                      type == cmTarget::SHARED_LIBRARY);
+  return this->TargetsWindowsCE() && needsDeploy;
 }
 
 //----------------------------------------------------------------------------
