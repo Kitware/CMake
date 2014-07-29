@@ -1013,7 +1013,13 @@ void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
 
 void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 {
-  this->WriteSource("None", sf);
+  std::string tool = "None";
+  std::string const& ext = sf->GetExtension();
+  if(ext == "appxmanifest")
+    {
+    tool = "AppxManifest";
+    }
+  this->WriteSource(tool, sf);
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(
