@@ -1,5 +1,9 @@
 set(WIN32 1)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "WindowsCE")
+  set(WINCE 1)
+endif()
+
 set(CMAKE_STATIC_LIBRARY_PREFIX "")
 set(CMAKE_STATIC_LIBRARY_SUFFIX ".lib")
 set(CMAKE_SHARED_LIBRARY_PREFIX "")          # lib
