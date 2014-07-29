@@ -997,6 +997,11 @@ WriteGroupSources(const char* name,
   this->WriteString("</ItemGroup>\n", 1);
 }
 
+void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
+{
+  this->WriteSource("None", sf);
+}
+
 void cmVisualStudio10TargetGenerator::WriteSource(
   std::string const& tool, cmSourceFile const* sf, const char* end)
 {
@@ -1157,7 +1162,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
   std::vector<cmSourceFile const*> extraSources;
   this->GeneratorTarget->GetExtraSources(extraSources, "");
-  this->WriteSources("None", extraSources);
+  for(std::vector<cmSourceFile const*>::const_iterator
+        si = extraSources.begin(); si != extraSources.end(); ++si)
+    {
+    this->WriteExtraSource(*si);
+    }
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;

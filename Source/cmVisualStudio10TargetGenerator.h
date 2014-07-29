@@ -57,6 +57,7 @@ private:
   void WriteProjectConfigurations();
   void WriteProjectConfigurationValues();
   void WriteMSToolConfigurationValues(std::string const& config);
+  void WriteExtraSource(cmSourceFile const* sf);
   void WriteSource(std::string const& tool, cmSourceFile const* sf,
                    const char* end = 0);
   void WriteSources(std::string const& tool,
