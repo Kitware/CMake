@@ -1019,6 +1019,11 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     {
     tool = "AppxManifest";
     }
+  else if(ext == "jpg" ||
+          ext == "png")
+    {
+    tool = "Image";
+    }
   else if(ext == "xml")
     {
     tool = "XML";
