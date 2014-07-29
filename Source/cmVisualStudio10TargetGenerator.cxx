@@ -1020,10 +1020,21 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 {
   bool toolHasSettings = false;
   std::string tool = "None";
+  std::string shaderType;
   std::string const& ext = sf->GetExtension();
   if(ext == "appxmanifest")
     {
     tool = "AppxManifest";
+    }
+  else if(ext == "hlsl")
+    {
+    tool = "FXCompile";
+    // Figure out the type of shader compiler to use.
+    if(const char* st = sf->GetProperty("VS_SHADER_TYPE"))
+      {
+      shaderType = st;
+      toolHasSettings = true;
+      }
     }
   else if(ext == "jpg" ||
           ext == "png")
@@ -1077,6 +1088,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
           this->WriteString("</ExcludedFromBuild>\n", 0);
           }
         }
+      }
+    if(!shaderType.empty())
+      {
+      this->WriteString("<ShaderType>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(shaderType)
+                               << "</ShaderType>\n";
       }
 
     this->WriteString("</", 2);
