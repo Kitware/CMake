@@ -997,6 +997,11 @@ WriteGroupSources(const char* name,
   this->WriteString("</ItemGroup>\n", 1);
 }
 
+void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
+{
+  this->WriteSource("ClInclude", sf);
+}
+
 void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 {
   this->WriteSource("None", sf);
@@ -1079,7 +1084,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
   std::vector<cmSourceFile const*> headerSources;
   this->GeneratorTarget->GetHeaderSources(headerSources, "");
-  this->WriteSources("ClInclude", headerSources);
+  for(std::vector<cmSourceFile const*>::const_iterator
+        si = headerSources.begin(); si != headerSources.end(); ++si)
+    {
+    this->WriteHeaderSource(*si);
+    }
   std::vector<cmSourceFile const*> idlSources;
   this->GeneratorTarget->GetIDLSources(idlSources, "");
   this->WriteSources("Midl", idlSources);
