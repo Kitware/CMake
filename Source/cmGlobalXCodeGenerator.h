@@ -134,6 +134,7 @@ private:
                                    cmXCodeObject* buildPhases);
   void ForceLinkerLanguages();
   void ForceLinkerLanguage(cmTarget& cmtarget);
+  const char* GetTargetLinkFlagsVar(cmTarget const& cmtarget) const;
   const char* GetTargetFileType(cmTarget& cmtarget);
   const char* GetTargetProductType(cmTarget& cmtarget);
   std::string AddConfigurations(cmXCodeObject* target, cmTarget& cmtarget);
