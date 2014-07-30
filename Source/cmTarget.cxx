@@ -927,10 +927,13 @@ void cmTarget::AddSources(std::vector<std::string> const& srcs)
 
     if(!(src[0] == '$' && src[1] == '<'))
       {
-      filename = this->ProcessSourceItemCMP0049(filename);
-      if (cmSystemTools::GetErrorOccuredFlag())
+      if(!filename.empty())
         {
-        return;
+        filename = this->ProcessSourceItemCMP0049(filename);
+        if(filename.empty())
+          {
+          return;
+          }
         }
       this->Makefile->GetOrCreateSource(filename);
       }
@@ -998,8 +1001,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
 cmSourceFile* cmTarget::AddSourceCMP0049(const std::string& s)
 {
   std::string src = this->ProcessSourceItemCMP0049(s);
-
-  if (cmSystemTools::GetErrorOccuredFlag())
+  if(!s.empty() && src.empty())
     {
     return 0;
     }
