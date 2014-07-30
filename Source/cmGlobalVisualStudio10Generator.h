@@ -64,6 +64,12 @@ public:
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset() const;
 
+  /** Return the CMAKE_SYSTEM_NAME.  */
+  std::string const& GetSystemName() const { return this->SystemName; }
+
+  /** Return the CMAKE_SYSTEM_VERSION.  */
+  std::string const& GetSystemVersion() const { return this->SystemVersion; }
+
   /**
    * Where does this version of Visual Studio look for macros for the
    * current user? Returns the empty string if this version of Visual
