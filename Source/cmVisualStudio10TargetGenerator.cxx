@@ -376,7 +376,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ImportGroup Label=\"PropertySheets\">\n", 1);
   this->WriteString("<Import Project=\"" VS10_USER_PROPS "\""
                     " Condition=\"exists('" VS10_USER_PROPS "')\""
-                    " Label=\"LocalAppDataPlatform\" />", 2);
+                    " Label=\"LocalAppDataPlatform\" />\n", 2);
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<PropertyGroup Label=\"UserMacros\" />\n", 1);
   this->WritePathAndIncrementalLinkOptions();
