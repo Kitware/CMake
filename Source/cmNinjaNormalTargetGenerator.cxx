@@ -187,12 +187,7 @@ cmNinjaNormalTargetGenerator
         responseFlag += rspfile;
 
         // build response file content
-        std::string linkOptionVar = cmakeVarLang;
-        linkOptionVar += "_COMPILER_LINKER_OPTION_FLAG_";
-        linkOptionVar += cmTarget::GetTargetTypeName(targetType);
-        const std::string linkOption =
-                GetMakefile()->GetSafeDefinition(linkOptionVar);
-        rspcontent = "$in_newline "+linkOption+" $LINK_PATH $LINK_LIBRARIES";
+        rspcontent = "$in_newline $LINK_PATH $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
         vars.LinkLibraries = "";
     }
