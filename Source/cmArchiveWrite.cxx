@@ -159,7 +159,15 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
         this->Error += cm_archive_error_string(this->Archive);
         return;
         }
-    break;
+      break;
+    case Type7Zip:
+      if(archive_write_set_format_7zip(this->Archive) != ARCHIVE_OK)
+        {
+        this->Error = "archive_write_set_format_7zip: ";
+        this->Error += cm_archive_error_string(this->Archive);
+        return;
+        }
+      break;
     }
 
   // do not pad the last block!!
