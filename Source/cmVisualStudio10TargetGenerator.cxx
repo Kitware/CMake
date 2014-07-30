@@ -997,8 +997,42 @@ WriteGroupSources(const char* name,
   this->WriteString("</ItemGroup>\n", 1);
 }
 
+void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
+{
+  if(this->IsResxHeader(sf->GetFullPath()))
+    {
+    this->WriteSource("ClInclude", sf, ">\n");
+    this->WriteString("<FileType>CppForm</FileType>\n", 3);
+    this->WriteString("</ClInclude>\n", 2);
+    }
+  else
+    {
+    this->WriteSource("ClInclude", sf);
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
+{
+  std::string tool = "None";
+  std::string const& ext = sf->GetExtension();
+  if(ext == "appxmanifest")
+    {
+    tool = "AppxManifest";
+    }
+  else if(ext == "jpg" ||
+          ext == "png")
+    {
+    tool = "Image";
+    }
+  else if(ext == "xml")
+    {
+    tool = "XML";
+    }
+  this->WriteSource(tool, sf);
+}
+
 void cmVisualStudio10TargetGenerator::WriteSource(
-  const char* tool, cmSourceFile const* sf, const char* end)
+  std::string const& tool, cmSourceFile const* sf, const char* end)
 {
   // Visual Studio tools append relative paths to the current dir, as in:
   //
@@ -1036,26 +1070,15 @@ void cmVisualStudio10TargetGenerator::WriteSource(
   this->ConvertToWindowsSlash(sourceFile);
   this->WriteString("<", 2);
   (*this->BuildFileStream ) << tool << " Include=\""
-                            << cmVS10EscapeXML(sourceFile) << "\"";
-
-  if(sf->GetExtension() == "h" &&
-    this->IsResxHeader(sf->GetFullPath()))
-    {
-      (*this->BuildFileStream ) << ">\n";
-      this->WriteString("<FileType>CppForm</FileType>\n", 3);
-      this->WriteString("</ClInclude>\n", 2);
-    }
-  else
-    {
-      (*this->BuildFileStream ) << (end? end : " />\n");
-    }
+                            << cmVS10EscapeXML(sourceFile) << "\""
+                            << (end? end : " />\n");
 
   ToolSource toolSource = {sf, forceRelative};
   this->Tools[tool].push_back(toolSource);
 }
 
 void cmVisualStudio10TargetGenerator::WriteSources(
-  const char* tool, std::vector<cmSourceFile const*> const& sources)
+  std::string const& tool, std::vector<cmSourceFile const*> const& sources)
 {
   for(std::vector<cmSourceFile const*>::const_iterator
         si = sources.begin(); si != sources.end(); ++si)
@@ -1074,7 +1097,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
   std::vector<cmSourceFile const*> headerSources;
   this->GeneratorTarget->GetHeaderSources(headerSources, "");
-  this->WriteSources("ClInclude", headerSources);
+  for(std::vector<cmSourceFile const*>::const_iterator
+        si = headerSources.begin(); si != headerSources.end(); ++si)
+    {
+    this->WriteHeaderSource(*si);
+    }
   std::vector<cmSourceFile const*> idlSources;
   this->GeneratorTarget->GetIDLSources(idlSources, "");
   this->WriteSources("Midl", idlSources);
@@ -1086,7 +1113,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       si != objectSources.end(); ++si)
     {
     const std::string& lang = (*si)->GetLanguage();
-    const char* tool = NULL;
+    std::string tool;
     if (lang == "C"|| lang == "CXX")
       {
       tool = "ClCompile";
@@ -1101,7 +1128,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       tool = "ResourceCompile";
       }
 
-    if (tool)
+    if (!tool.empty())
       {
       this->WriteSource(tool, *si, " ");
       if (this->OutputSourceSpecificFlags(*si))
@@ -1157,7 +1184,11 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
   std::vector<cmSourceFile const*> extraSources;
   this->GeneratorTarget->GetExtraSources(extraSources, "");
-  this->WriteSources("None", extraSources);
+  for(std::vector<cmSourceFile const*>::const_iterator
+        si = extraSources.begin(); si != extraSources.end(); ++si)
+    {
+    this->WriteExtraSource(*si);
+    }
 
   // Add object library contents as external objects.
   std::vector<std::string> objs;
