@@ -196,6 +196,13 @@ void cmIDEOptions::AddFlag(const char* flag,
 }
 
 //----------------------------------------------------------------------------
+void cmIDEOptions::AppendFlag(std::string const& flag,
+                              std::string const& value)
+{
+  this->FlagMap[flag].push_back(value);
+}
+
+//----------------------------------------------------------------------------
 void cmIDEOptions::RemoveFlag(const char* flag)
 {
   this->FlagMap.erase(flag);
