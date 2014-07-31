@@ -74,6 +74,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   string(TOUPPER ${_CPACK_IFW_COMPONENT_NAME} _CPACK_IFW_COMPONENT_UNAME)
 
   if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
+    set(_CPACK_IFW_PACKAGE_ICON "set(CPACK_IFW_PACKAGE_ICON \"${CMake_SOURCE_DIR}/Source/QtDialog/CMakeSetup.ico\")")
     if(BUILD_QtDialog)
       set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/bin/cmake-gui.exe\", \"@StartMenuDir@/CMake (cmake-gui).lnk\");\n")
     endif()
