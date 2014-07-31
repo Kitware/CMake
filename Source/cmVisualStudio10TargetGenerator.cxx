@@ -1864,6 +1864,8 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       {
       linkOptions.AddFlag("ModuleDefinitionFile", def.c_str());
       }
+    linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries",
+                           "%(IgnoreSpecificDefaultLibraries)");
     }
 
   this->LinkOptions[config] = pOptions.release();
