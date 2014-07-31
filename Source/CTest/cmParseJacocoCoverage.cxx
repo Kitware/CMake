@@ -42,6 +42,9 @@ class cmParseJacocoCoverage::XMLParser: public cmXMLParser
           "/" + this->ModuleName + "/src/main/java/" +
           this->PackageName;
         this->FilePaths.push_back(FilePath);
+        FilePath = this->Coverage.SourceDir +
+         "/src/main/java/" + this->PackageName;
+        this->FilePaths.push_back(FilePath);
         }
       else if(name == "sourcefile")
         {
