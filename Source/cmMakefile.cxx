@@ -3510,7 +3510,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                            const std::string& targetName,
                            bool fast,
                            const std::vector<std::string> *cmakeArgs,
-                           std::string *output)
+                           std::string& output)
 {
   this->Internal->IsSourceFileTryCompile = fast;
   // does the binary directory exist ? If not create it...

@@ -301,7 +301,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     int retVal = cm.GetGlobalGenerator()->Build(
       this->SourceDir, this->BinaryDir,
       this->BuildProject, *tarIt,
-      &output, this->BuildMakeProgram,
+      output, this->BuildMakeProgram,
       config,
       !this->BuildNoClean,
       false, remainingTime);

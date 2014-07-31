@@ -130,7 +130,7 @@ public:
                  const std::string& projectName, const std::string& targetName,
                  bool fast,
                  const std::vector<std::string> *cmakeArgs,
-                 std::string *output);
+                 std::string& output);
 
   bool GetIsSourceFileTryCompile() const;
 

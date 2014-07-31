@@ -489,7 +489,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
                                        targetName,
                                        this->SrcFileSignature,
                                        &cmakeFlags,
-                                       &output);
+                                       output);
   if ( erroroc )
     {
     cmSystemTools::SetErrorOccured();
