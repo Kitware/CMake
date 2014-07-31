@@ -91,6 +91,7 @@ private:
   void WriteCustomCommand(cmSourceFile const* sf);
   void WriteGroups();
   void WriteProjectReferences();
+  void WriteApplicationTypeSettings();
   bool OutputSourceSpecificFlags(cmSourceFile const* source);
   void AddLibraries(cmComputeLinkInformation& cli,
                     std::vector<std::string>& libVec);
