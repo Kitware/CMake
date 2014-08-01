@@ -31,9 +31,15 @@ CHECK_INCLUDE_FILE(strings.h HAVE_STRINGS_H)
 CHECK_INCLUDE_FILE(string.h HAVE_STRING_H)
 CHECK_INCLUDE_FILE(sys/sysctl.h HAVE_SYS_SYSCTL_H)
 
-CHECK_SYMBOL_EXISTS(bswap_16 byteswap.h HAVE_BSWAP_16)
-CHECK_SYMBOL_EXISTS(bswap_32 byteswap.h HAVE_BSWAP_32)
-CHECK_SYMBOL_EXISTS(bswap_64 byteswap.h HAVE_BSWAP_64)
+CHECK_C_SOURCE_COMPILES (
+  "#include<byteswap.h>\nint main(void){bswap_16(0);return 0;}"
+  HAVE_BSWAP_16)
+CHECK_C_SOURCE_COMPILES (
+  "#include<byteswap.h>\nint main(void){bswap_32(0);return 0;}"
+  HAVE_BSWAP_32)
+CHECK_C_SOURCE_COMPILES (
+  "#include<byteswap.h>\nint main(void){bswap_64(0);return 0;}"
+  HAVE_BSWAP_64)
 
 TEST_BIG_ENDIAN(WORDS_BIGENDIAN)
 
