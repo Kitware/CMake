@@ -39,7 +39,7 @@
 
 
 macro(CHECK_CXX_SOURCE_COMPILES SOURCE VAR)
-  if("${VAR}" MATCHES "^${VAR}$")
+  if(NOT DEFINED "${VAR}")
     set(_FAIL_REGEX)
     set(_key)
     foreach(arg ${ARGN})
