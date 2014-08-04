@@ -418,44 +418,44 @@ if(NOT CPACK_GENERATOR)
       if(APPLE)
         option(CPACK_BINARY_BUNDLE       "Enable to build OSX bundles"      OFF)
         option(CPACK_BINARY_DRAGNDROP    "Enable to build OSX Drag And Drop package" OFF)
-        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" OFF)
         option(CPACK_BINARY_OSXX11       "Enable to build OSX X11 packages"      OFF)
+        option(CPACK_BINARY_PACKAGEMAKER "Enable to build PackageMaker packages" OFF)
       else()
         option(CPACK_BINARY_TZ  "Enable to build TZ packages"     ON)
       endif()
-      option(CPACK_BINARY_STGZ "Enable to build STGZ packages"    ON)
-      option(CPACK_BINARY_TGZ  "Enable to build TGZ packages"     ON)
-      option(CPACK_BINARY_TBZ2 "Enable to build TBZ2 packages"    OFF)
-      option(CPACK_BINARY_TXZ  "Enable to build TXZ packages"     OFF)
       option(CPACK_BINARY_DEB  "Enable to build Debian packages"  OFF)
-      option(CPACK_BINARY_RPM  "Enable to build RPM packages"     OFF)
       option(CPACK_BINARY_NSIS "Enable to build NSIS packages"    OFF)
+      option(CPACK_BINARY_RPM  "Enable to build RPM packages"     OFF)
+      option(CPACK_BINARY_STGZ "Enable to build STGZ packages"    ON)
+      option(CPACK_BINARY_TBZ2 "Enable to build TBZ2 packages"    OFF)
+      option(CPACK_BINARY_TGZ  "Enable to build TGZ packages"     ON)
+      option(CPACK_BINARY_TXZ  "Enable to build TXZ packages"     OFF)
     endif()
   else()
+    option(CPACK_BINARY_7Z   "Enable to build 7-Zip packages" OFF)
     option(CPACK_BINARY_NSIS "Enable to build NSIS packages" ON)
     option(CPACK_BINARY_WIX  "Enable to build WiX packages" OFF)
     option(CPACK_BINARY_ZIP  "Enable to build ZIP packages" OFF)
-    option(CPACK_BINARY_7Z   "Enable to build 7-Zip packages" OFF)
   endif()
   option(CPACK_BINARY_IFW "Enable to build IFW packages" OFF)
 
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_7Z           7Z)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_BUNDLE       Bundle)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DRAGNDROP    DragNDrop)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_CYGWIN       CygwinBinary)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DEB          DEB)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_RPM          RPM)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_DRAGNDROP    DragNDrop)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_NSIS         NSIS)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_OSXX11       OSXX11)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_PACKAGEMAKER PackageMaker)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_RPM          RPM)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_STGZ         STGZ)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TGZ          TGZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TBZ2         TBZ2)
+  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TGZ          TGZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TXZ          TXZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_TZ           TZ)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_WIX          WIX)
   cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_ZIP          ZIP)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_IFW          IFW)
-  cpack_optional_append(CPACK_GENERATOR  CPACK_BINARY_7Z           7Z)
 
 endif()
 
@@ -472,29 +472,46 @@ if(NOT CPACK_SOURCE_GENERATOR)
       option(CPACK_SOURCE_ZIP  "Enable to build ZIP source packages"  OFF)
     endif()
   else()
-    option(CPACK_SOURCE_ZIP "Enable to build ZIP source packages" ON)
     option(CPACK_SOURCE_7Z  "Enable to build 7-Zip source packages" ON)
+    option(CPACK_SOURCE_ZIP "Enable to build ZIP source packages" ON)
   endif()
 
+  cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_7Z      7Z)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_CYGWIN  CygwinSource)
-  cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TGZ     TGZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TBZ2    TBZ2)
+  cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TGZ     TGZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TXZ     TXZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_TZ      TZ)
   cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_ZIP     ZIP)
-  cpack_optional_append(CPACK_SOURCE_GENERATOR  CPACK_SOURCE_7Z      7Z)
 endif()
 
 # mark the above options as advanced
-mark_as_advanced(CPACK_BINARY_CYGWIN CPACK_BINARY_PACKAGEMAKER CPACK_BINARY_OSXX11
-                 CPACK_BINARY_STGZ   CPACK_BINARY_TGZ          CPACK_BINARY_TBZ2
-                 CPACK_BINARY_DEB    CPACK_BINARY_RPM          CPACK_BINARY_TZ
-                 CPACK_BINARY_TXZ    CPACK_BINARY_7Z
-                 CPACK_BINARY_NSIS CPACK_BINARY_WIX CPACK_BINARY_ZIP CPACK_BINARY_BUNDLE
-                 CPACK_BINARY_IFW
-                 CPACK_SOURCE_CYGWIN CPACK_SOURCE_TBZ2 CPACK_SOURCE_TGZ
-                 CPACK_SOURCE_TXZ    CPACK_SOURCE_7Z
-                 CPACK_SOURCE_TZ CPACK_SOURCE_ZIP CPACK_BINARY_DRAGNDROP)
+mark_as_advanced(
+  CPACK_BINARY_7Z
+  CPACK_BINARY_BUNDLE
+  CPACK_BINARY_CYGWIN
+  CPACK_BINARY_DEB
+  CPACK_BINARY_DRAGNDROP
+  CPACK_BINARY_IFW
+  CPACK_BINARY_NSIS
+  CPACK_BINARY_OSXX11
+  CPACK_BINARY_PACKAGEMAKER
+  CPACK_BINARY_RPM
+  CPACK_BINARY_STGZ
+  CPACK_BINARY_TBZ2
+  CPACK_BINARY_TGZ
+  CPACK_BINARY_TXZ
+  CPACK_BINARY_TZ
+  CPACK_BINARY_WIX
+  CPACK_BINARY_ZIP
+  CPACK_SOURCE_7Z
+  CPACK_SOURCE_CYGWIN
+  CPACK_SOURCE_TBZ2
+  CPACK_SOURCE_TGZ
+  CPACK_SOURCE_TXZ
+  CPACK_SOURCE_TZ
+  CPACK_SOURCE_ZIP
+  )
 
 # Set some other variables
 cpack_set_if_not_set(CPACK_INSTALL_CMAKE_PROJECTS
