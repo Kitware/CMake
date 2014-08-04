@@ -596,11 +596,29 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   int output_size = 0;
   std::vector<std::string> strings;
   std::string s;
-  int c;
   while((!limit_count || strings.size() < limit_count) &&
         (limit_input < 0 || static_cast<int>(fin.tellg()) < limit_input) &&
-        (c = fin.get(), fin))
+        fin)
     {
+    std::string current_str;
+
+    int c = fin.get();
+
+    if(c == '\r')
+      {
+      // Ignore CR character to make output always have UNIX newlines.
+      continue;
+      }
+
+    else if((c >= 0x20 && c < 0x7F) || c == '\t' ||
+            (c == '\n' && newline_consume))
+      {
+      // This is an ASCII character that may be part of a string.
+      // Cast added to avoid compiler warning. Cast is ok because
+      // c is guaranteed to fit in char by the above if...
+      current_str += static_cast<char>(c);
+      }
+
     if(c == '\n' && !newline_consume)
       {
       // The current line has been terminated.  Check if the current
@@ -621,26 +639,13 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // Reset the string to empty.
       s = "";
       }
-    else if(c == '\r')
+    else if(current_str.empty())
       {
-      // Ignore CR character to make output always have UNIX newlines.
-      }
-    else if((c >= 0x20 && c < 0x7F) || c == '\t' ||
-            (c == '\n' && newline_consume))
-      {
-      // This is an ASCII character that may be part of a string.
-      // Cast added to avoid compiler warning. Cast is ok because
-      // c is guaranteed to fit in char by the above if...
-      s += static_cast<char>(c);
-      }
-    else
-      {
-      // TODO: Support ENCODING option.  See issue #10519.
       // A non-string character has been found.  Check if the current
       // string matches the requirements.  We require that the length
       // be at least one no matter what the user specified.
       if(s.length() >= minlen && s.length() >= 1 &&
-         (!have_regex || regex.find(s.c_str())))
+      (!have_regex || regex.find(s.c_str())))
         {
         output_size += static_cast<int>(s.size()) + 1;
         if(limit_output >= 0 && output_size >= limit_output)
@@ -654,10 +659,15 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // Reset the string to empty.
       s = "";
       }
+    else
+      {
+      s += current_str;
+      }
 
-    // Terminate a string if the maximum length is reached.
+
     if(maxlen > 0 && s.size() == maxlen)
       {
+      // Terminate a string if the maximum length is reached.
       if(s.length() >= minlen &&
          (!have_regex || regex.find(s.c_str())))
         {
