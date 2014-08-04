@@ -932,7 +932,6 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
   double sttime = cmSystemTools::GetTime();
   cmCTestLog(this->CTest, DEBUG, "Start test: " << lines.size() << std::endl);
   std::string::size_type totalOutputSize = 0;
-  bool outputFull = false;
   for ( cc = 0; cc < lines.size(); cc ++ )
     {
     cmCTestLog(this->CTest, DEBUG, "test line "
@@ -1019,32 +1018,30 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
       }
     }
   // Now put all all the non valgrind output into the test output
-  if(!outputFull)
+  // This should be last in case it gets truncated by the output
+  // limiting code
+  for(std::vector<std::string::size_type>::iterator i =
+        nonValGrindOutput.begin(); i != nonValGrindOutput.end(); ++i)
     {
-    for(std::vector<std::string::size_type>::iterator i =
-          nonValGrindOutput.begin(); i != nonValGrindOutput.end(); ++i)
+    totalOutputSize += lines[*i].size();
+    cmCTestLog(this->CTest, DEBUG, "before xml safe "
+               << lines[*i] << std::endl);
+    cmCTestLog(this->CTest, DEBUG, "after  xml safe "
+               <<  cmXMLSafe(lines[*i]) << std::endl);
+    ostr << cmXMLSafe(lines[*i]) << std::endl;
+    if(!unlimitedOutput && totalOutputSize >
+       static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
       {
-      totalOutputSize += lines[*i].size();
-      cmCTestLog(this->CTest, DEBUG, "before xml safe "
-                 << lines[*i] << std::endl);
-      cmCTestLog(this->CTest, DEBUG, "after  xml safe "
-                 <<  cmXMLSafe(lines[*i]) << std::endl);
-
-      ostr << cmXMLSafe(lines[*i]) << std::endl;
-      if(!unlimitedOutput && totalOutputSize >
-         static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
-        {
-        outputFull = true;
-        ostr << "....\n";
-        ostr << "Test Output for this test has been truncated see testing"
-          " machine logs for full output,\n";
-        ostr << "or put CTEST_FULL_OUTPUT in the output of "
-          "this test program.\n";
-        }
+      ostr << "....\n";
+      ostr << "Test Output for this test has been truncated see testing"
+        " machine logs for full output,\n";
+      ostr << "or put CTEST_FULL_OUTPUT in the output of "
+        "this test program.\n";
+      break;  // stop the copy of output if we are full
       }
     }
   cmCTestLog(this->CTest, DEBUG, "End test (elapsed: "
-    << (cmSystemTools::GetTime() - sttime) << std::endl);
+             << (cmSystemTools::GetTime() - sttime) << std::endl);
   log = ostr.str();
   if ( defects )
     {
