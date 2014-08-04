@@ -1616,7 +1616,7 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
                                   const std::string& bindir,
                                   const std::string& projectName,
                                   const std::string& target, bool fast,
-                                  std::string *output, cmMakefile *mf)
+                                  std::string& output, cmMakefile *mf)
 {
   // if this is not set, then this is a first time configure
   // and there is a good chance that the try compile stuff will
@@ -1675,7 +1675,7 @@ void cmGlobalGenerator::GenerateBuildCommand(
 int cmGlobalGenerator::Build(
   const std::string&, const std::string& bindir,
   const std::string& projectName, const std::string& target,
-  std::string *output,
+  std::string& output,
   const std::string& makeCommandCSTR,
   const std::string& config,
   bool clean, bool fast,
@@ -1688,22 +1688,15 @@ int cmGlobalGenerator::Build(
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   cmSystemTools::ChangeDirectory(bindir.c_str());
-  if(output)
-    {
-    *output += "Change Dir: ";
-    *output += bindir;
-    *output += "\n";
-    }
+  output += "Change Dir: ";
+  output += bindir;
+  output += "\n";
 
   int retVal;
   bool hideconsole = cmSystemTools::GetRunCommandHideConsole();
   cmSystemTools::SetRunCommandHideConsole(true);
   std::string outputBuffer;
-  std::string* outputPtr = 0;
-  if(output)
-    {
-    outputPtr = &outputBuffer;
-    }
+  std::string* outputPtr = &outputBuffer;
 
   // should we do a clean first?
   if (clean)
@@ -1711,32 +1704,23 @@ int cmGlobalGenerator::Build(
     std::vector<std::string> cleanCommand;
     this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
                                bindir, "clean", config, fast);
-    if(output)
-      {
-      *output += "\nRun Clean Command:";
-      *output += cmSystemTools::PrintSingleCommand(cleanCommand);
-      *output += "\n";
-      }
+    output += "\nRun Clean Command:";
+    output += cmSystemTools::PrintSingleCommand(cleanCommand);
+    output += "\n";
 
     if (!cmSystemTools::RunSingleCommand(cleanCommand, outputPtr,
                                          &retVal, 0, outputflag, timeout))
       {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
       cmSystemTools::Error("Generator: execution of make clean failed.");
-      if (output)
-        {
-        *output += *outputPtr;
-        *output += "\nGenerator: execution of make clean failed.\n";
-        }
+      output += *outputPtr;
+      output += "\nGenerator: execution of make clean failed.\n";
 
       // return to the original directory
       cmSystemTools::ChangeDirectory(cwd.c_str());
       return 1;
       }
-    if (output)
-      {
-      *output += *outputPtr;
-      }
+    output += *outputPtr;
     }
 
   // now build
@@ -1744,12 +1728,9 @@ int cmGlobalGenerator::Build(
   this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName,
                              bindir, target, config, fast, nativeOptions);
   std::string makeCommandStr = cmSystemTools::PrintSingleCommand(makeCommand);
-  if(output)
-    {
-    *output += "\nRun Build Command:";
-    *output += makeCommandStr;
-    *output += "\n";
-    }
+  output += "\nRun Build Command:";
+  output += makeCommandStr;
+  output += "\n";
 
   if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr,
                                        &retVal, 0, outputflag, timeout))
@@ -1758,27 +1739,21 @@ int cmGlobalGenerator::Build(
     cmSystemTools::Error
       ("Generator: execution of make failed. Make command was: ",
        makeCommandStr.c_str());
-    if (output)
-      {
-      *output += *outputPtr;
-      *output += "\nGenerator: execution of make failed. Make command was: "
+    output += *outputPtr;
+    output += "\nGenerator: execution of make failed. Make command was: "
         + makeCommandStr + "\n";
-      }
 
     // return to the original directory
     cmSystemTools::ChangeDirectory(cwd.c_str());
     return 1;
     }
-  if (output)
-    {
-    *output += *outputPtr;
-    }
+  output += *outputPtr;
   cmSystemTools::SetRunCommandHideConsole(hideconsole);
 
   // The SGI MipsPro 7.3 compiler does not return an error code when
   // the source has a #error in it!  This is a work-around for such
   // compilers.
-  if((retVal == 0) && (output->find("#error") != std::string::npos))
+  if((retVal == 0) && (output.find("#error") != std::string::npos))
     {
     retVal = 1;
     }

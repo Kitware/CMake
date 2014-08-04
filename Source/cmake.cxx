@@ -2757,7 +2757,7 @@ int cmake::Build(const std::string& dir,
   projName = it.GetValue();
   return gen->Build("", dir,
                     projName, target,
-                    &output,
+                    output,
                     "",
                     config, clean, false, 0,
                     cmSystemTools::OUTPUT_PASSTHROUGH,

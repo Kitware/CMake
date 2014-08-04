@@ -116,7 +116,7 @@ public:
   virtual int TryCompile(const std::string& srcdir, const std::string& bindir,
                          const std::string& projectName,
                          const std::string& targetName,
-                         bool fast, std::string *output, cmMakefile* mf);
+                         bool fast, std::string& output, cmMakefile* mf);
 
 
   /**
@@ -127,7 +127,7 @@ public:
    */
   int Build(const std::string& srcdir, const std::string& bindir,
             const std::string& projectName, const std::string& targetName,
-            std::string *output,
+            std::string& output,
             const std::string& makeProgram, const std::string& config,
             bool clean, bool fast,
             double timeout,
