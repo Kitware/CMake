@@ -75,6 +75,11 @@ For instructions how to do this, see documentation on `Running CMake`_.
 
 .. _`Running CMake`: http://www.cmake.org/cmake/help/runningcmake.html
 
+Reporting bugs
+==============
+
+CMake has a bugtracker at http://www.cmake.org/Bug
+
 Contributing
 ============
 
