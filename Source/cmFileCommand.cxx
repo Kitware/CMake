@@ -428,7 +428,8 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
          arg_length_minimum,
          arg_length_maximum,
          arg__maximum,
-         arg_regex };
+         arg_regex,
+         arg_encoding };
   unsigned int minlen = 0;
   unsigned int maxlen = 0;
   int limit_input = -1;
@@ -438,6 +439,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   bool have_regex = false;
   bool newline_consume = false;
   bool hex_conversion_enabled = true;
+  bool utf8_encoding = false;
   int arg_mode = arg_none;
   for(unsigned int i=3; i < args.size(); ++i)
     {
@@ -474,6 +476,10 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       {
       hex_conversion_enabled = false;
       arg_mode = arg_none;
+      }
+    else if(args[i] == "ENCODING")
+      {
+      arg_mode = arg_encoding;
       }
     else if(arg_mode == arg_limit_input)
       {
@@ -556,6 +562,22 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       have_regex = true;
       arg_mode = arg_none;
       }
+    else if(arg_mode == arg_encoding)
+      {
+      if(args[i] == "UTF-8")
+        {
+        utf8_encoding = true;
+        }
+      else
+        {
+        cmOStringStream e;
+        e << "STRINGS option ENCODING \""
+          << args[i] << "\" not recognized.";
+        this->SetError(e.str());
+        return false;
+        }
+      arg_mode = arg_none;
+      }
     else
       {
       cmOStringStream e;
@@ -618,6 +640,52 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // c is guaranteed to fit in char by the above if...
       current_str += static_cast<char>(c);
       }
+    else if(utf8_encoding)
+      {
+      // Check for UTF-8 encoded string (up to 4 octets)
+      static const unsigned char utf8_check_table[3][2] =
+        {
+          {0xE0, 0xC0},
+          {0xF0, 0xE0},
+          {0xF8, 0xF0},
+        };
+
+      // how many octets are there?
+      unsigned int num_utf8_bytes = 0;
+      for(unsigned int j=0; num_utf8_bytes == 0 && j<3; j++)
+        {
+        if((c & utf8_check_table[j][0]) == utf8_check_table[j][1])
+          num_utf8_bytes = j+2;
+        }
+
+      // get subsequent octets and check that they are valid
+      for(unsigned int j=0; j<num_utf8_bytes; j++)
+        {
+        if(j != 0)
+          {
+          c = fin.get();
+          if(!fin || (c & 0xC0) != 0x80)
+            {
+            fin.putback(static_cast<char>(c));
+            break;
+            }
+          }
+        current_str += static_cast<char>(c);
+        }
+
+      // if this was an invalid utf8 sequence, discard the data, and put
+      // back subsequent characters
+      if((current_str.length() != num_utf8_bytes))
+        {
+        for(unsigned int j=0; j<current_str.size()-1; j++)
+          {
+          c = current_str[current_str.size() - 1 - j];
+          fin.putback(static_cast<char>(c));
+          }
+        current_str = "";
+        }
+      }
+
 
     if(c == '\n' && !newline_consume)
       {
