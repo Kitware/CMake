@@ -158,7 +158,9 @@ public:
    * Returns true if str1 starts (respectively ends) with str2
    */
   static bool StringStartsWith(const char* str1, const char* str2);
+  static bool StringStartsWith(const kwsys_stl::string& str1, const char* str2);
   static bool StringEndsWith(const char* str1, const char* str2);
+  static bool StringEndsWith(const kwsys_stl::string& str1, const char* str2);
 
   /**
    * Returns a pointer to the last occurence of str2 in str1
@@ -183,7 +185,7 @@ public:
       s starts with a / then the first element of the returned array will
       be /, so /foo/bar will be [/, foo, bar]
   */  
-  static kwsys_stl::vector<String> SplitString(const char* s, char separator = '/', 
+  static kwsys_stl::vector<String> SplitString(const kwsys_stl::string& s, char separator = '/',
                                                bool isPath = false);
   /**
    * Perform a case-independent string comparison
@@ -201,8 +203,8 @@ public:
    * Split a string on its newlines into multiple lines
    * Return false only if the last line stored had no newline
    */
-  static bool Split(const char* s, kwsys_stl::vector<kwsys_stl::string>& l);
-  static bool Split(const char* s, kwsys_stl::vector<kwsys_stl::string>& l, char separator);
+  static bool Split(const kwsys_stl::string& s, kwsys_stl::vector<kwsys_stl::string>& l);
+  static bool Split(const kwsys_stl::string& s, kwsys_stl::vector<kwsys_stl::string>& l, char separator);
   
   /** 
    * Return string with space added between capitalized words
@@ -265,13 +267,13 @@ public:
    * For windows this calls ConvertToWindowsOutputPath and for unix
    * it calls ConvertToUnixOutputPath
    */
-  static kwsys_stl::string ConvertToOutputPath(const char*);
+  static kwsys_stl::string ConvertToOutputPath(const kwsys_stl::string&);
 
   /**
    * Convert the path to a string that can be used in a unix makefile.
    * double slashes are removed, and spaces are escaped.
    */
-  static kwsys_stl::string ConvertToUnixOutputPath(const char*);
+  static kwsys_stl::string ConvertToUnixOutputPath(const kwsys_stl::string&);
 
   /**
    * Convert the path to string that can be used in a windows project or
@@ -279,7 +281,7 @@ public:
    * the string, the slashes are converted to windows style backslashes, and
    * if there are spaces in the string it is double quoted.
    */
-  static kwsys_stl::string ConvertToWindowsOutputPath(const char*);
+  static kwsys_stl::string ConvertToWindowsOutputPath(const kwsys_stl::string&);
 
   /**
    * Return true if a file exists in the current directory.
@@ -288,7 +290,9 @@ public:
    * if it is a file or a directory.
    */
   static bool FileExists(const char* filename, bool isFile);
+  static bool FileExists(const kwsys_stl::string& filename, bool isFile);
   static bool FileExists(const char* filename);
+  static bool FileExists(const kwsys_stl::string& filename);
 
   /**
    * Converts Cygwin path to Win32 path. Uses dictionary container for
@@ -307,7 +311,7 @@ public:
   /**
      Change the modification time or create a file
   */
-  static bool Touch(const char* filename, bool create);
+  static bool Touch(const kwsys_stl::string& filename, bool create);
   
   /**
    *  Compare file modification times.
@@ -315,7 +319,8 @@ public:
    *  When true is returned, result has -1, 0, +1 for
    *  f1 older, same, or newer than f2.
    */
-  static bool FileTimeCompare(const char* f1, const char* f2,
+  static bool FileTimeCompare(const kwsys_stl::string& f1,
+                              const kwsys_stl::string& f2,
                               int* result);
 
   /**
@@ -377,7 +382,7 @@ public:
    * the event of an error (non-existent path, permissions issue,
    * etc.) the original path is returned.
    */
-  static kwsys_stl::string GetRealPath(const char* path);
+  static kwsys_stl::string GetRealPath(const kwsys_stl::string& path);
 
   /**
    * Split a path name into its root component and the rest of the
@@ -470,6 +475,7 @@ public:
   /**
    * Return whether the path represents a full path (not relative)
    */
+  static bool FileIsFullPath(const kwsys_stl::string&);
   static bool FileIsFullPath(const char*);
   
   /**
@@ -493,7 +499,7 @@ public:
   /**
    * Get the parent directory of the directory or file
    */
-  static kwsys_stl::string GetParentDirectory(const char* fileOrDir);
+  static kwsys_stl::string GetParentDirectory(const kwsys_stl::string& fileOrDir);
 
   /**
    * Check if the given file or directory is in subdirectory of dir
@@ -508,7 +514,7 @@ public:
   /**
    * Open a file considering unicode.
    */
-  static FILE* Fopen(const char* file, const char* mode);
+  static FILE* Fopen(const kwsys_stl::string& file, const char* mode);
 
   /**
    * Make a new directory if it is not there.  This function
@@ -516,35 +522,36 @@ public:
    * prior to calling this function.  
    */
   static bool MakeDirectory(const char* path);
+  static bool MakeDirectory(const kwsys_stl::string& path);
 
   /**
    * Copy the source file to the destination file only
    * if the two files differ.
    */
-  static bool CopyFileIfDifferent(const char* source,
-                                  const char* destination);
+  static bool CopyFileIfDifferent(const kwsys_stl::string& source,
+                                  const kwsys_stl::string& destination);
 
   /**
    * Compare the contents of two files.  Return true if different
    */
-  static bool FilesDiffer(const char* source, const char* destination);
+  static bool FilesDiffer(const kwsys_stl::string& source, const kwsys_stl::string& destination);
 
   /**
    * Return true if the two files are the same file
    */
-  static bool SameFile(const char* file1, const char* file2);
+  static bool SameFile(const kwsys_stl::string& file1, const kwsys_stl::string& file2);
 
   /**
    * Copy a file.
    */
-  static bool CopyFileAlways(const char* source, const char* destination);
+  static bool CopyFileAlways(const kwsys_stl::string& source, const kwsys_stl::string& destination);
 
   /**
    * Copy a file.  If the "always" argument is true the file is always
    * copied.  If it is false, the file is copied only if it is new or
    * has changed.
    */
-  static bool CopyAFile(const char* source, const char* destination,
+  static bool CopyAFile(const kwsys_stl::string& source, const kwsys_stl::string& destination,
                         bool always = true);
 
   /**
@@ -553,18 +560,18 @@ public:
    * always copied.  If it is false, only files that have changed or
    * are new are copied.
    */
-  static bool CopyADirectory(const char* source, const char* destination,
+  static bool CopyADirectory(const kwsys_stl::string& source, const kwsys_stl::string& destination,
                              bool always = true);
   
   /**
    * Remove a file
    */
-  static bool RemoveFile(const char* source);
+  static bool RemoveFile(const kwsys_stl::string& source);
   
   /**
    * Remove a directory
    */
-  static bool RemoveADirectory(const char* source);
+  static bool RemoveADirectory(const kwsys_stl::string& source);
 
   /**
    * Get the maximum full file path length
@@ -594,12 +601,17 @@ public:
    */
   static kwsys_stl::string FindProgram(
     const char* name,
-    const kwsys_stl::vector<kwsys_stl::string>& path = 
+    const kwsys_stl::vector<kwsys_stl::string>& path =
+    kwsys_stl::vector<kwsys_stl::string>(),
+    bool no_system_path = false);
+  static kwsys_stl::string FindProgram(
+    const kwsys_stl::string& name,
+    const kwsys_stl::vector<kwsys_stl::string>& path =
     kwsys_stl::vector<kwsys_stl::string>(),
     bool no_system_path = false);
   static kwsys_stl::string FindProgram(
     const kwsys_stl::vector<kwsys_stl::string>& names,
-    const kwsys_stl::vector<kwsys_stl::string>& path = 
+    const kwsys_stl::vector<kwsys_stl::string>& path =
     kwsys_stl::vector<kwsys_stl::string>(),
     bool no_system_path = false);
 
@@ -607,18 +619,18 @@ public:
    * Find a library in the system PATH, with optional extra paths
    */
   static kwsys_stl::string FindLibrary(
-    const char* name,
+    const kwsys_stl::string& name,
     const kwsys_stl::vector<kwsys_stl::string>& path);
   
   /**
    * Return true if the file is a directory
    */
-  static bool FileIsDirectory(const char* name);
+  static bool FileIsDirectory(const kwsys_stl::string& name);
   
   /**
    * Return true if the file is a symlink
    */
-  static bool FileIsSymlink(const char* name);
+  static bool FileIsSymlink(const kwsys_stl::string& name);
   
   /**
    * Return true if the file has a given signature (first set of bytes)
@@ -686,17 +698,17 @@ public:
       /a/b/c/d to /a/b/c1/d1 -> ../../c1/d1
       from /usr/src to /usr/src/test/blah/foo.cpp -> test/blah/foo.cpp
   */
-  static kwsys_stl::string RelativePath(const char* local, const char* remote);
+  static kwsys_stl::string RelativePath(const kwsys_stl::string& local, const kwsys_stl::string& remote);
 
   /**
    * Return file's modified time
    */
-  static long int ModifiedTime(const char* filename);
+  static long int ModifiedTime(const kwsys_stl::string& filename);
 
   /**
    * Return file's creation time (Win32: works only for NTFS, not FAT)
    */
-  static long int CreationTime(const char* filename);
+  static long int CreationTime(const kwsys_stl::string& filename);
 
   #if defined( _MSC_VER )
   typedef unsigned short mode_t;
@@ -706,7 +718,9 @@ public:
    * Get and set permissions of the file.
    */
   static bool GetPermissions(const char* file, mode_t& mode);
+  static bool GetPermissions(const kwsys_stl::string& file, mode_t& mode);
   static bool SetPermissions(const char* file, mode_t mode);
+  static bool SetPermissions(const kwsys_stl::string& file, mode_t mode);
 
   /** -----------------------------------------------------------------
    *               Time Manipulation Routines
@@ -793,7 +807,7 @@ public:
   /**
    * Change directory to the directory specified
    */
-  static int ChangeDirectory(const char* dir);
+  static int ChangeDirectory(const kwsys_stl::string& dir);
 
   /**
    * Get the result of strerror(errno)
@@ -899,6 +913,11 @@ private:
     {
     return &SystemToolsManagerInstance;
     }
+
+  /**
+   * Actual implementation of FileIsFullPath.
+   */
+  static bool FileIsFullPath(const char*, size_t);
 
   /**
    * Find a filename (file or directory) in the system PATH, with

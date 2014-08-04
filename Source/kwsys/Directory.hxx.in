@@ -13,6 +13,13 @@
 #define @KWSYS_NAMESPACE@_Directory_hxx
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
+#include <@KWSYS_NAMESPACE@/stl/string>
+
+/* Define these macros temporarily to keep the code readable.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# define kwsys_stl @KWSYS_NAMESPACE@_stl
+# define kwsys_ios @KWSYS_NAMESPACE@_ios
+#endif
 
 namespace @KWSYS_NAMESPACE@
 {
@@ -38,7 +45,7 @@ public:
    * in that directory. 0 is returned if the directory can not be
    * opened, 1 if it is opened.
    */
-  bool Load(const char*);
+  bool Load(const kwsys_stl::string&);
 
   /**
    * Return the number of files in the current directory.
@@ -49,7 +56,7 @@ public:
    * Return the number of files in the specified directory.
    * A higher performance static method.
    */
-  static unsigned long GetNumberOfFilesInDirectory(const char*);
+  static unsigned long GetNumberOfFilesInDirectory(const kwsys_stl::string&);
 
   /**
    * Return the file at the given index, the indexing is 0 based
@@ -76,5 +83,11 @@ private:
 }; // End Class: Directory
 
 } // namespace @KWSYS_NAMESPACE@
+
+/* Undefine temporary macros.  */
+#if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
+# undef kwsys_stl
+# undef kwsys_ios
+#endif
 
 #endif
