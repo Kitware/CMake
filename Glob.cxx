@@ -218,7 +218,7 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
   const kwsys_stl::string& dir)
 {
   kwsys::Directory d;
-  if ( !d.Load(dir.c_str()) )
+  if ( !d.Load(dir) )
     {
     return;
     }
@@ -257,8 +257,8 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
       fullname = dir + "/" + fname;
       }
 
-    bool isDir = kwsys::SystemTools::FileIsDirectory(realname.c_str());
-    bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname.c_str());
+    bool isDir = kwsys::SystemTools::FileIsDirectory(realname);
+    bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname);
 
     if ( isDir && (!isSymLink || this->RecurseThroughSymlinks) )
       {
@@ -297,7 +297,7 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     }
 
   kwsys::Directory d;
-  if ( !d.Load(dir.c_str()) )
+  if ( !d.Load(dir) )
     {
     return;
     }
@@ -342,12 +342,12 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     //kwsys_ios::cout << "Full name: " << fullname << kwsys_ios::endl;
 
     if ( !last &&
-      !kwsys::SystemTools::FileIsDirectory(realname.c_str()) )
+      !kwsys::SystemTools::FileIsDirectory(realname) )
       {
       continue;
       }
 
-    if ( this->Internals->Expressions[start].find(fname.c_str()) )
+    if ( this->Internals->Expressions[start].find(fname) )
       {
       if ( last )
         {
@@ -371,7 +371,7 @@ bool Glob::FindFiles(const kwsys_stl::string& inexpr)
   this->Internals->Expressions.clear();
   this->Internals->Files.clear();
 
-  if ( !kwsys::SystemTools::FileIsFullPath(expr.c_str()) )
+  if ( !kwsys::SystemTools::FileIsFullPath(expr) )
     {
     expr = kwsys::SystemTools::GetCurrentWorkingDirectory();
     expr += "/" + inexpr;
