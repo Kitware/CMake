@@ -166,7 +166,8 @@ guaranteed to be acyclic.
 
 The final list of items produced by this procedure consists of the
 original user link line followed by minimal additional items needed to
-satisfy dependencies.
+satisfy dependencies.  The final list is then filtered to de-duplicate
+items that we know the linker will re-use automatically (shared libs).
 
 */
 
@@ -262,10 +263,20 @@ cmComputeLinkDepends::Compute()
   this->OrderLinkEntires();
 
   // Compute the final set of link entries.
+  std::set<int> emmitted;
   for(std::vector<int>::const_iterator li = this->FinalLinkOrder.begin();
       li != this->FinalLinkOrder.end(); ++li)
     {
-    this->FinalLinkEntries.push_back(this->EntryList[*li]);
+    int i = *li;
+    LinkEntry const& e = this->EntryList[i];
+    cmTarget const* t = e.Target;
+    // Entries that we know the linker will re-use for symbols
+    // needed by later entries do not need to be repeated.
+    bool uniquify = t && t->GetType() == cmTarget::SHARED_LIBRARY;
+    if(!uniquify || emmitted.insert(i).second)
+      {
+      this->FinalLinkEntries.push_back(e);
+      }
     }
 
   // Display the final set.
