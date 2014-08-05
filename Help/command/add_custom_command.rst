@@ -116,30 +116,6 @@ Arguments to COMMAND may use "generator expressions" with the syntax
 ``$<...>``.  See the :manual:`cmake-generator-expressions(7)` manual for
 available expressions.
 
-Note that tgt is not added as a dependency of the target this
-expression is evaluated on.
-
-::
-
-  $<TARGET_POLICY:pol>          = '1' if the policy was NEW when the 'head' target was created, else '0'.  If the policy was not set, the warning message for the policy will be emitted.  This generator expression only works for a subset of policies.
-  $<INSTALL_PREFIX>         = Content of the install prefix when the target is exported via INSTALL(EXPORT) and empty otherwise.
-
-Boolean expressions:
-
-::
-
-  $<AND:?[,?]...>           = '1' if all '?' are '1', else '0'
-  $<OR:?[,?]...>            = '0' if all '?' are '0', else '1'
-  $<NOT:?>                  = '0' if '?' is '1', else '1'
-
-where '?' is always either '0' or '1'.
-
-Expressions with an implicit 'this' target:
-
-::
-
-  $<TARGET_PROPERTY:prop>   = The value of the property prop on the target on which the generator expression is evaluated.
-
 References to target names in generator expressions imply target-level
 dependencies, but NOT file-level dependencies.  List target names with
 the DEPENDS option to add file dependencies.
