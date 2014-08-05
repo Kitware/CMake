@@ -343,7 +343,6 @@ int main (int argc, char const* const* argv)
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "CPack generator not specified" << std::endl);
-      parsed = 0;
       }
     else
       {
