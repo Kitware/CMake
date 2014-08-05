@@ -1147,7 +1147,7 @@ int cmCTest::GetTestModelFromString(const char* str)
 //######################################################################
 
 //----------------------------------------------------------------------
-int cmCTest::RunMakeCommand(const char* command, std::string* output,
+int cmCTest::RunMakeCommand(const char* command, std::string& output,
   int* retVal, const char* dir, int timeout, std::ostream& ofs)
 {
   // First generate the command and arguments
@@ -1166,11 +1166,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     }
   argv.push_back(0);
 
-  if ( output )
-    {
-    *output = "";
-    }
-
+  output = "";
   cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "Run command:");
   std::vector<const char*>::iterator ait;
   for ( ait = argv.begin(); ait != argv.end() && *ait; ++ ait )
@@ -1199,27 +1195,25 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     << "    " << std::flush);
   while(cmsysProcess_WaitForData(cp, &data, &length, 0))
     {
-    if ( output )
+    for(int cc =0; cc < length; ++cc)
       {
-      for(int cc =0; cc < length; ++cc)
+      if(data[cc] == 0)
         {
-        if(data[cc] == 0)
-          {
-          data[cc] = '\n';
-          }
+        data[cc] = '\n';
         }
-
-      output->append(data, length);
-      while ( output->size() > (tick * tick_len) )
+      }
+    output.append(data, length);
+    while ( output.size() > (tick * tick_len) )
+      {
+      tick ++;
+      cmCTestLog(this, HANDLER_OUTPUT, "." << std::flush);
+      if ( tick % tick_line_len == 0 && tick > 0 )
         {
-        tick ++;
-        cmCTestLog(this, HANDLER_OUTPUT, "." << std::flush);
-        if ( tick % tick_line_len == 0 && tick > 0 )
-          {
-          cmCTestLog(this, HANDLER_OUTPUT, "  Size: "
-            << int((double(output->size()) / 1024.0) + 1) << "K" << std::endl
-            << "    " << std::flush);
-          }
+        cmCTestLog(this, HANDLER_OUTPUT,
+                   "  Size: "
+                   << int((double(output.size()) / 1024.0) + 1)
+                   << "K" << std::endl
+                   << "    " << std::flush);
         }
       }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, cmCTestLogWrite(data, length));
@@ -1229,7 +1223,7 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
       }
     }
   cmCTestLog(this, OUTPUT, " Size of output: "
-    << int(double(output->size()) / 1024.0) << "K" << std::endl);
+    << int(double(output.size()) / 1024.0) << "K" << std::endl);
 
   cmsysProcess_WaitForExit(cp, 0);
 
@@ -1253,9 +1247,9 @@ int cmCTest::RunMakeCommand(const char* command, std::string* output,
     }
   else if(result == cmsysProcess_State_Error)
     {
-    *output += "\n*** ERROR executing: ";
-    *output += cmsysProcess_GetErrorString(cp);
-    *output += "\n***The build process failed.";
+    output += "\n*** ERROR executing: ";
+    output += cmsysProcess_GetErrorString(cp);
+    output += "\n***The build process failed.";
     cmCTestLog(this, ERROR_MESSAGE, "There was an error: "
       << cmsysProcess_GetErrorString(cp) << std::endl);
     }

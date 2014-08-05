@@ -77,7 +77,7 @@ int cmCTestConfigureHandler::ProcessHandler()
     this->StartLogFile("Configure", ofs);
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Configure with command: "
       << cCommand << std::endl);
-    res = this->CTest->RunMakeCommand(cCommand.c_str(), &output,
+    res = this->CTest->RunMakeCommand(cCommand.c_str(), output,
       &retVal, buildDirectory.c_str(),
       0, ofs);
 
