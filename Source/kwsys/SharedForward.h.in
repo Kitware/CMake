@@ -512,7 +512,7 @@ static void kwsys_shared_forward_execvp(const char* cmd,
   /* Invoke the child process.  */
 #if defined(_MSC_VER)
   _execvp(cmd, argv);
-#elif defined(__MINGW32__)
+#elif defined(__MINGW32__) && !defined(__MINGW64__)
   execvp(cmd, argv);
 #else
   execvp(cmd, (char* const*)argv);

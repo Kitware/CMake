@@ -132,7 +132,7 @@ static bool CheckFileOperations()
     res = false;
     }
 
-  if (!kwsys::SystemTools::MakeDirectory(testNewDir.c_str()))
+  if (!kwsys::SystemTools::MakeDirectory(testNewDir))
     {
     kwsys_ios::cerr
       << "Problem with MakeDirectory for: "
@@ -148,7 +148,7 @@ static bool CheckFileOperations()
     res = false;
     }
 
-  if (!kwsys::SystemTools::RemoveFile(testNewFile.c_str()))
+  if (!kwsys::SystemTools::RemoveFile(testNewFile))
     {
     kwsys_ios::cerr
       << "Problem with RemoveFile: "
@@ -157,7 +157,7 @@ static bool CheckFileOperations()
     }
 
   kwsys::SystemTools::Touch(testNewFile.c_str(), true);
-  if (!kwsys::SystemTools::RemoveADirectory(testNewDir.c_str()))
+  if (!kwsys::SystemTools::RemoveADirectory(testNewDir))
     {
     kwsys_ios::cerr
       << "Problem with RemoveADirectory for: "
@@ -183,7 +183,7 @@ static bool CheckFileOperations()
     "012345678901234567890123456789012345678901234567890123456789"
     "0123456789.txt");
 
-  if (!kwsys::SystemTools::MakeDirectory(testNewLongDir.c_str()))
+  if (!kwsys::SystemTools::MakeDirectory(testNewLongDir))
     {
     kwsys_ios::cerr
       << "Problem with MakeDirectory for: "
@@ -199,7 +199,7 @@ static bool CheckFileOperations()
     res = false;
     }
 
-  if (!kwsys::SystemTools::RemoveFile(testNewLongFile.c_str()))
+  if (!kwsys::SystemTools::RemoveFile(testNewLongFile))
     {
     kwsys_ios::cerr
       << "Problem with RemoveFile: "
@@ -208,7 +208,7 @@ static bool CheckFileOperations()
     }
 
   kwsys::SystemTools::Touch(testNewLongFile.c_str(), true);
-  if (!kwsys::SystemTools::RemoveADirectory(testNewLongDir.c_str()))
+  if (!kwsys::SystemTools::RemoveADirectory(testNewLongDir))
     {
     kwsys_ios::cerr
       << "Problem with RemoveADirectory for: "
