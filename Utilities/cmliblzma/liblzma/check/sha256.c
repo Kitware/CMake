@@ -80,11 +80,7 @@ static const uint32_t SHA256_K[64] = {
 
 
 static void
-#ifndef _MSC_VER
-transform(uint32_t state[static 8], const uint32_t data[static 16])
-#else
 transform(uint32_t state[], const uint32_t data[])
-#endif
 {
 	uint32_t W[16];
 	uint32_t T[8];
