@@ -159,5 +159,7 @@ of the following is specified:
 ``PRE_LINK``
   Run after sources have been compiled but before linking the binary
   or running the librarian or archiver tool of a static library.
+  This is not defined for targets created by the
+  :command:`add_custom_target` command.
 ``POST_BUILD``
   Run after all other rules within the target have been executed.
