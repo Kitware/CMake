@@ -2133,4 +2133,9 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
                         "</MinimumVisualStudioVersion>\n", 2);
       }
     }
+  if (this->Platform == "ARM")
+    {
+    this->WriteString("<WindowsSDKDesktopARMSupport>true"
+                      "</WindowsSDKDesktopARMSupport>", 2);
+    }
 }
