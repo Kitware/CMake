@@ -76,7 +76,7 @@
 #  SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
 #
 # Note that the hashes are used only for unique data identification and
-# download verification.  This is not security software.
+# download verification.
 #
 # Example usage:
 #
