@@ -40,6 +40,7 @@ OUTPUT_DIRECTORY     = "@CMake_BINARY_DIR@/Utilities/Doxygen/doc"
 INPUT                = \
  "@CMake_SOURCE_DIR@/Source" \
  "@CMake_SOURCE_DIR@/Source/CPack" \
+ "@CMake_SOURCE_DIR@/Source/CPack/IFW" \
  "@CMake_SOURCE_DIR@/Source/CTest" \
  "@CMake_SOURCE_DIR@/Source/CursesDialog" \
  "@CMake_SOURCE_DIR@/Source/MFCDialog" \
