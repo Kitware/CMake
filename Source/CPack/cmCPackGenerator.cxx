@@ -1049,7 +1049,6 @@ int cmCPackGenerator::DoPackage()
 
   const char* tempPackageFileName = this->GetOption(
     "CPACK_TEMPORARY_PACKAGE_FILE_NAME");
-  const char* packageFileName = this->GetOption("CPACK_OUTPUT_FILE_PATH");
   const char* tempDirectory = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
 
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
@@ -1114,7 +1113,7 @@ int cmCPackGenerator::DoPackage()
     std::string tmpPF(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
     tempPackageFileName = it->c_str();
     tmpPF += "/"+cmSystemTools::GetFilenameName(*it);
-    packageFileName = tmpPF.c_str();
+    const char* packageFileName = tmpPF.c_str();
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy final package(s): "
         << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
         << " to "
