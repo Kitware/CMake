@@ -123,6 +123,7 @@
 # ::
 #
 #   cpack_ifw_configure_component(<compname>
+#                       [COMMON]
 #                       [VERSION <version>]
 #                       [SCRIPT <script>]
 #                       [NAME <name>]
@@ -132,7 +133,11 @@
 #
 # This command should be called after cpack_add_component command.
 #
-# ``VERSION`` is version of component. By default used :variable:`CPACK_PACKAGE_VERSION`.
+# ``COMMON`` if set, then the component will be packaged and installed as part
+# of a group to which he belongs.
+#
+# ``VERSION`` is version of component.
+# By default used :variable:`CPACK_PACKAGE_VERSION`.
 #
 # ``SCRIPT`` is relative or absolute path to operations script
 # for this component.
@@ -163,7 +168,8 @@
 #
 # This command should be called after cpack_add_component_group command.
 #
-# ``VERSION`` is version of component group. By default used :variable:`CPACK_PACKAGE_VERSION`.
+# ``VERSION`` is version of component group.
+# By default used :variable:`CPACK_PACKAGE_VERSION`.
 #
 # ``NAME`` is used to create domain-like identification for this component group.
 # By default used origin component group name.
@@ -346,7 +352,7 @@ macro(cpack_ifw_configure_component compname)
 
   string(TOUPPER ${compname} _CPACK_IFWCOMP_UNAME)
 
-  set(_IFW_OPT)
+  set(_IFW_OPT COMMON)
   set(_IFW_ARGS VERSION SCRIPT NAME PRIORITY)
   set(_IFW_MULTI_ARGS DEPENDS LICENSES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
@@ -366,6 +372,12 @@ macro(cpack_ifw_configure_component compname)
   _cpack_ifw_resolve_lisenses(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_LICENSES)
 
   set(_CPACK_IFWCOMP_STR "\n# Configuration for IFW component \"${compname}\"\n")
+
+  foreach(_IFW_ARG_NAME ${_IFW_OPT})
+  cpack_append_option_set_command(
+    CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_${_IFW_ARG_NAME}
+    _CPACK_IFWCOMP_STR)
+  endforeach()
 
   foreach(_IFW_ARG_NAME ${_IFW_ARGS})
   cpack_append_string_variable_set_command(
