@@ -519,9 +519,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
     iter = this->SystemIncludesCache.insert(entry).first;
     }
 
-  std::string dirString = dir;
-  return std::binary_search(iter->second.begin(), iter->second.end(),
-                            dirString);
+  return std::binary_search(iter->second.begin(), iter->second.end(), dir);
 }
 
 //----------------------------------------------------------------------------
