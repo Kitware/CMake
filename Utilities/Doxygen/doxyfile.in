@@ -6,6 +6,10 @@
 PROJECT_NAME         = CMake
 
 FULL_PATH_NAMES      = YES
+STRIP_FROM_PATH      = \
+ "@CMake_SOURCE_DIR@/Source/" \
+ "@CMake_BINARY_DIR@/Source/"
+
 WARN_IF_UNDOCUMENTED = NO
 
 GENERATE_TREEVIEW    = NO
