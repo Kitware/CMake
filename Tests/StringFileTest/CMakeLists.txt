@@ -55,6 +55,16 @@ else()
     "file(STRINGS) incorrectly read from srec file [${infile_strings}]")
 endif()
 
+#this file has utf-8 content
+file(STRINGS test.utf8 infile_strings ENCODING UTF-8)
+list(LENGTH infile_strings content_len)
+if(content_len MATCHES "3")
+  message("file(STRINGS) correctly read from utf8 file [${infile_strings}]")
+else()
+  message(SEND_ERROR
+    "file(STRINGS) incorrectly read from utf8 file [${infile_strings}]")
+endif()
+
 # String test
 string(REGEX MATCH "[cC][mM][aA][kK][eE]" rmvar "CMake is great")
 string(REGEX MATCHALL "[cC][mM][aA][kK][eE]" rmallvar "CMake is better than cmake or CMake")

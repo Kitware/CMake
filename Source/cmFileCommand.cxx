@@ -428,7 +428,8 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
          arg_length_minimum,
          arg_length_maximum,
          arg__maximum,
-         arg_regex };
+         arg_regex,
+         arg_encoding };
   unsigned int minlen = 0;
   unsigned int maxlen = 0;
   int limit_input = -1;
@@ -438,6 +439,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   bool have_regex = false;
   bool newline_consume = false;
   bool hex_conversion_enabled = true;
+  bool utf8_encoding = false;
   int arg_mode = arg_none;
   for(unsigned int i=3; i < args.size(); ++i)
     {
@@ -474,6 +476,10 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       {
       hex_conversion_enabled = false;
       arg_mode = arg_none;
+      }
+    else if(args[i] == "ENCODING")
+      {
+      arg_mode = arg_encoding;
       }
     else if(arg_mode == arg_limit_input)
       {
@@ -556,6 +562,22 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       have_regex = true;
       arg_mode = arg_none;
       }
+    else if(arg_mode == arg_encoding)
+      {
+      if(args[i] == "UTF-8")
+        {
+        utf8_encoding = true;
+        }
+      else
+        {
+        cmOStringStream e;
+        e << "STRINGS option ENCODING \""
+          << args[i] << "\" not recognized.";
+        this->SetError(e.str());
+        return false;
+        }
+      arg_mode = arg_none;
+      }
     else
       {
       cmOStringStream e;
@@ -596,11 +618,75 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   int output_size = 0;
   std::vector<std::string> strings;
   std::string s;
-  int c;
   while((!limit_count || strings.size() < limit_count) &&
         (limit_input < 0 || static_cast<int>(fin.tellg()) < limit_input) &&
-        (c = fin.get(), fin))
+        fin)
     {
+    std::string current_str;
+
+    int c = fin.get();
+
+    if(c == '\r')
+      {
+      // Ignore CR character to make output always have UNIX newlines.
+      continue;
+      }
+
+    else if((c >= 0x20 && c < 0x7F) || c == '\t' ||
+            (c == '\n' && newline_consume))
+      {
+      // This is an ASCII character that may be part of a string.
+      // Cast added to avoid compiler warning. Cast is ok because
+      // c is guaranteed to fit in char by the above if...
+      current_str += static_cast<char>(c);
+      }
+    else if(utf8_encoding)
+      {
+      // Check for UTF-8 encoded string (up to 4 octets)
+      static const unsigned char utf8_check_table[3][2] =
+        {
+          {0xE0, 0xC0},
+          {0xF0, 0xE0},
+          {0xF8, 0xF0},
+        };
+
+      // how many octets are there?
+      unsigned int num_utf8_bytes = 0;
+      for(unsigned int j=0; num_utf8_bytes == 0 && j<3; j++)
+        {
+        if((c & utf8_check_table[j][0]) == utf8_check_table[j][1])
+          num_utf8_bytes = j+2;
+        }
+
+      // get subsequent octets and check that they are valid
+      for(unsigned int j=0; j<num_utf8_bytes; j++)
+        {
+        if(j != 0)
+          {
+          c = fin.get();
+          if(!fin || (c & 0xC0) != 0x80)
+            {
+            fin.putback(static_cast<char>(c));
+            break;
+            }
+          }
+        current_str += static_cast<char>(c);
+        }
+
+      // if this was an invalid utf8 sequence, discard the data, and put
+      // back subsequent characters
+      if((current_str.length() != num_utf8_bytes))
+        {
+        for(unsigned int j=0; j<current_str.size()-1; j++)
+          {
+          c = current_str[current_str.size() - 1 - j];
+          fin.putback(static_cast<char>(c));
+          }
+        current_str = "";
+        }
+      }
+
+
     if(c == '\n' && !newline_consume)
       {
       // The current line has been terminated.  Check if the current
@@ -621,26 +707,13 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // Reset the string to empty.
       s = "";
       }
-    else if(c == '\r')
+    else if(current_str.empty())
       {
-      // Ignore CR character to make output always have UNIX newlines.
-      }
-    else if((c >= 0x20 && c < 0x7F) || c == '\t' ||
-            (c == '\n' && newline_consume))
-      {
-      // This is an ASCII character that may be part of a string.
-      // Cast added to avoid compiler warning. Cast is ok because
-      // c is guaranteed to fit in char by the above if...
-      s += static_cast<char>(c);
-      }
-    else
-      {
-      // TODO: Support ENCODING option.  See issue #10519.
       // A non-string character has been found.  Check if the current
       // string matches the requirements.  We require that the length
       // be at least one no matter what the user specified.
       if(s.length() >= minlen && s.length() >= 1 &&
-         (!have_regex || regex.find(s.c_str())))
+      (!have_regex || regex.find(s.c_str())))
         {
         output_size += static_cast<int>(s.size()) + 1;
         if(limit_output >= 0 && output_size >= limit_output)
@@ -654,10 +727,15 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // Reset the string to empty.
       s = "";
       }
+    else
+      {
+      s += current_str;
+      }
 
-    // Terminate a string if the maximum length is reached.
+
     if(maxlen > 0 && s.size() == maxlen)
       {
+      // Terminate a string if the maximum length is reached.
       if(s.length() >= minlen &&
          (!have_regex || regex.find(s.c_str())))
         {

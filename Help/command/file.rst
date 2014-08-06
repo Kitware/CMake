@@ -64,6 +64,9 @@ Parse a list of ASCII strings from ``<filename>`` and store it in
 ``REGEX <regex>``
  Consider only strings that match the given regular expression.
 
+``ENCODING <encoding-type>``
+ Consider strings of a given encoding.  "UTF-8" is currently supported.
+
 For example, the code
 
 .. code-block:: cmake
