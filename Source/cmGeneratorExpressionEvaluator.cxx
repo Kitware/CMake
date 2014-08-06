@@ -1081,7 +1081,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         }
       }
 #undef POPULATE_INTERFACE_PROPERTY_NAME
-    cmTarget const* headTarget = context->HeadTarget
+    cmTarget const* headTarget = context->HeadTarget && isInterfaceProperty
                                ? context->HeadTarget : target;
 
     if(isInterfaceProperty)
@@ -1103,7 +1103,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         {
         linkedTargetsContent =
           getLinkedTargetsContent(impl->Libraries, target,
-                                  headTarget,
+                                  target,
                                   context, &dagChecker,
                                   interfacePropertyName);
         }
