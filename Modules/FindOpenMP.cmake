@@ -16,6 +16,7 @@
 #
 #    OpenMP_C_FLAGS - flags to add to the C compiler for OpenMP support
 #    OpenMP_CXX_FLAGS - flags to add to the CXX compiler for OpenMP support
+#    OpenMP_Fortran_FLAGS - flags to add to the Fortran compiler for OpenMP support
 #    OPENMP_FOUND - true if openmp is detected
 #
 #
@@ -27,6 +28,7 @@
 # Copyright 2009 Kitware, Inc.
 # Copyright 2008-2009 André Rigland Brodtkorb <Andre.Brodtkorb@ifi.uio.no>
 # Copyright 2012 Rolf Eike Beer <eike@sf-mail.de>
+# Copyright 2014 Nicolas Bock <nicolasbock@gmail.com>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -106,6 +108,17 @@ int main() {
 }
 ")
 
+# same in Fortran
+set(OpenMP_Fortran_TEST_SOURCE
+  "
+program test
+use omp_lib
+integer :: n
+n = omp_get_num_threads()
+end program test
+  "
+  )
+
 # check c compiler
 if(CMAKE_C_COMPILER_LOADED)
   # if these are set then do not try to find them again,
@@ -174,6 +187,40 @@ if(CMAKE_CXX_COMPILER_LOADED)
   list(APPEND _OPENMP_REQUIRED_VARS OpenMP_CXX_FLAGS)
   unset(OpenMP_CXX_FLAG_CANDIDATES)
   unset(OpenMP_CXX_TEST_SOURCE)
+endif()
+
+# check Fortran compiler
+if(CMAKE_Fortran_COMPILER_LOADED)
+  # if these are set then do not try to find them again,
+  # by avoiding any try_compiles for the flags
+  if(OpenMP_Fortran_FLAGS)
+    unset(OpenMP_Fortran_FLAG_CANDIDATES)
+  else()
+    _OPENMP_FLAG_CANDIDATES("Fortran")
+    include(${CMAKE_CURRENT_LIST_DIR}/CheckFortranSourceCompiles.cmake)
+  endif()
+
+  foreach(FLAG IN LISTS OpenMP_Fortran_FLAG_CANDIDATES)
+    set(SAFE_CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS}")
+    set(CMAKE_REQUIRED_FLAGS "${FLAG}")
+    unset(OpenMP_FLAG_DETECTED CACHE)
+    if(NOT CMAKE_REQUIRED_QUIET)
+      message(STATUS "Try OpenMP Fortran flag = [${FLAG}]")
+    endif()
+    check_fortran_source_compiles("${OpenMP_Fortran_TEST_SOURCE}" OpenMP_FLAG_DETECTED)
+    set(CMAKE_REQUIRED_FLAGS "${SAFE_CMAKE_REQUIRED_FLAGS}")
+    if(OpenMP_FLAG_DETECTED)
+      set(OpenMP_Fortran_FLAGS_INTERNAL "${FLAG}")
+      break()
+    endif()
+  endforeach()
+
+  set(OpenMP_Fortran_FLAGS "${OpenMP_Fortran_FLAGS_INTERNAL}"
+    CACHE STRING "Fortran compiler flags for OpenMP parallization")
+
+  list(APPEND _OPENMP_REQUIRED_VARS OpenMP_Fortran_FLAGS)
+  unset(OpenMP_Fortran_FLAG_CANDIDATES)
+  unset(OpenMP_Fortran_TEST_SOURCE)
 endif()
 
 set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
