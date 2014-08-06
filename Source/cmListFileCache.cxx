@@ -19,9 +19,6 @@
 
 #include <cmsys/RegularExpression.hxx>
 
-#ifdef __BORLANDC__
-# pragma warn -8060 /* possibly incorrect assignment */
-#endif
 
 //----------------------------------------------------------------------------
 struct cmListFileParser

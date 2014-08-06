@@ -36,9 +36,6 @@
 #include <math.h>
 #include <float.h>
 
-#if defined(__BORLANDC__)
-# pragma warn -8060 /* possibly incorrect assignment */
-#endif
 
 static const char* cmCTestErrorMatches[] = {
   "^[Bb]us [Ee]rror",

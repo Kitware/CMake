@@ -64,12 +64,6 @@ static void cmCommandArgumentError(yyscan_t yyscanner, const char* message);
 #define YYINITDEPTH 10000
 
 /* Disable some warnings in the generated code.  */
-#ifdef __BORLANDC__
-# pragma warn -8004 /* Variable assigned a value that is not used.  */
-# pragma warn -8008 /* condition always returns true */
-# pragma warn -8060 /* possibly incorrect assignment */
-# pragma warn -8066 /* unreachable code */
-#endif
 #ifdef _MSC_VER
 # pragma warning (disable: 4102) /* Unused goto label.  */
 # pragma warning (disable: 4065) /* Switch statement contains default but no

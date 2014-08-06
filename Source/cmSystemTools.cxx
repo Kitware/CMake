@@ -52,8 +52,7 @@
 #include <sys/stat.h>
 
 #if defined(_WIN32) && \
-   (defined(_MSC_VER) || defined(__WATCOMC__) || \
-    defined(__BORLANDC__) || defined(__MINGW32__))
+   (defined(_MSC_VER) || defined(__WATCOMC__) || defined(__MINGW32__))
 # include <io.h>
 #endif
 
@@ -1649,9 +1648,6 @@ namespace{
     fprintf(out, " -> %s", archive_entry_symlink(entry));
     }
 }
-#ifdef __BORLANDC__
-# pragma warn -8066 /* unreachable code */
-#endif
 
 long copy_data(struct archive *ar, struct archive *aw)
 {
