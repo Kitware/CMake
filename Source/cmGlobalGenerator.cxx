@@ -844,6 +844,14 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
       case cmPolicies::OLD:
         // OLD behavior is to convert QCC to GNU.
         mf->AddDefinition(compilerIdVar, "GNU");
+        if(lang == "C")
+          {
+          mf->AddDefinition("CMAKE_COMPILER_IS_GNUCC", "1");
+          }
+        else if(lang == "CXX")
+          {
+          mf->AddDefinition("CMAKE_COMPILER_IS_GNUCXX", "1");
+          }
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
