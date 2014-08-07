@@ -20,6 +20,7 @@
 # include "Encoding.h.in"
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -104,6 +105,7 @@ static int test4(int argc, const char* argv[])
   fprintf(stderr, "Output before crash on stderr from crash test.\n");  
   fflush(stdout);
   fflush(stderr);
+  assert(invalidAddress); /* Quiet Clang scan-build. */
   /* Provoke deliberate crash by writing to the invalid address. */
   *invalidAddress = 0;
   fprintf(stdout, "Output after crash on stdout from crash test.\n");
