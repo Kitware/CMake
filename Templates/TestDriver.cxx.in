@@ -3,6 +3,10 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if defined(_MSC_VER)
+# pragma warning(disable:4996) /* deprecation */
+#endif
+
 @CMAKE_TESTDRIVER_EXTRA_INCLUDES@
 
 
