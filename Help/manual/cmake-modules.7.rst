@@ -115,6 +115,7 @@ All Modules
    /module/FindHg
    /module/FindHSPELL
    /module/FindHTMLHelp
+   /module/FindIce
    /module/FindIcotool
    /module/FindImageMagick
    /module/FindITK
