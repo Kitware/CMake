@@ -1680,7 +1680,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   endif()
 
   if(MSVC AND NOT MSVC_VERSION LESS 1310
-     AND NOT CMAKE_GENERATOR MATCHES "Visual Studio [6789]( |$)")
+     AND NOT CMAKE_GENERATOR MATCHES "Visual Studio [67]( |$)"
+     AND (NOT CMAKE_GENERATOR MATCHES "Visual Studio [89]( |$)"
+          OR CMAKE_SIZEOF_VOID_P EQUAL 4)
+      )
     ADD_TEST_MACRO(VSMASM VSMASM)
   endif()
 

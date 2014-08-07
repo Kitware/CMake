@@ -44,6 +44,16 @@ private:
 
 extern cmVS7FlagTable cmLocalVisualStudio7GeneratorFlagTable[];
 
+static void cmConvertToWindowsSlash(std::string& s)
+{
+  std::string::size_type pos = 0;
+  while((pos = s.find('/', pos)) != std::string::npos)
+    {
+    s[pos] = '\\';
+    pos++;
+    }
+}
+
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7Generator::cmLocalVisualStudio7Generator(VSVersion v):
   cmLocalVisualStudioGenerator(v)
@@ -862,6 +872,31 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
       }
     }
   fout << "/>\n";  // end of <Tool Name=VCCLCompilerTool
+  if(gg->IsMasmEnabled() && !this->FortranProject)
+    {
+    Options masmOptions(this, Options::MasmCompiler, 0, 0);
+    fout <<
+      "\t\t\t<Tool\n"
+      "\t\t\t\tName=\"MASM\"\n"
+      "\t\t\t\tIncludePaths=\""
+      ;
+    const char* sep = "";
+    for(i = includes.begin(); i != includes.end(); ++i)
+      {
+      std::string inc = *i;
+      cmConvertToWindowsSlash(inc);
+      fout << sep << this->EscapeForXML(inc);
+      sep = ";";
+      }
+    fout << "\"\n";
+    // Use same preprocessor definitions as VCCLCompilerTool.
+    targetOptions.OutputPreprocessorDefinitions(fout, "\t\t\t\t", "\n",
+                                                "ASM_MASM");
+    masmOptions.OutputFlagMap(fout, "\t\t\t\t");
+    fout <<
+      "\t\t\t\tObjectFile=\"$(IntDir)\\\"\n"
+      "\t\t\t/>\n";
+    }
   tool = "VCCustomBuildTool";
   if(this->FortranProject)
     {
@@ -1700,6 +1735,7 @@ bool cmLocalVisualStudio7Generator
           {
           aCompilerTool = "VFFortranCompilerTool";
           }
+        std::string const& lang = (*sf)->GetLanguage();
         std::string ext = (*sf)->GetExtension();
         ext = cmSystemTools::LowerCase(ext);
         if(ext == "idl")
@@ -1726,6 +1762,11 @@ bool cmLocalVisualStudio7Generator
             {
             aCompilerTool = "VFCustomBuildTool";
             }
+          }
+        if (gg->IsMasmEnabled() && !this->FortranProject &&
+            lang == "ASM_MASM")
+          {
+          aCompilerTool = "MASM";
           }
         for(std::map<std::string, cmLVS7GFileConfig>::const_iterator
               fci = fcinfo.FileConfigMap.begin();
@@ -2095,6 +2136,16 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
        << "\t<Platforms>\n"
        << "\t\t<Platform\n\t\t\tName=\"" << gg->GetPlatformName() << "\"/>\n"
        << "\t</Platforms>\n";
+  if(gg->IsMasmEnabled())
+    {
+    fout <<
+      "\t<ToolFiles>\n"
+      "\t\t<DefaultToolFile\n"
+      "\t\t\tFileName=\"masm.rules\"\n"
+      "\t\t/>\n"
+      "\t</ToolFiles>\n"
+      ;
+    }
 }
 
 
