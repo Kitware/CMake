@@ -1679,6 +1679,11 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/MFC")
   endif()
 
+  if(MSVC AND NOT MSVC_VERSION LESS 1310
+     AND NOT CMAKE_GENERATOR MATCHES "Visual Studio [6789]( |$)")
+    ADD_TEST_MACRO(VSMASM VSMASM)
+  endif()
+
   if(${CMAKE_GENERATOR} MATCHES "Visual Studio")
     if(NOT MSVC60)
       ADD_TEST_MACRO(SBCS SBCS)
