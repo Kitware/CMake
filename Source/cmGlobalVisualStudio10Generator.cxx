@@ -99,7 +99,6 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
-  this->MasmEnabled = false;
   this->MSBuildCommandInitialized = false;
 }
 
@@ -257,15 +256,6 @@ void cmGlobalVisualStudio10Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
-  for(std::vector<std::string>::const_iterator it = lang.begin();
-      it != lang.end(); ++it)
-    {
-    if(*it == "ASM_MASM")
-      {
-      this->MasmEnabled = true;
-      }
-    }
-
   cmGlobalVisualStudio8Generator::EnableLanguage(lang, mf, optional);
 }
 
