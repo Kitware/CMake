@@ -1695,7 +1695,7 @@ bool cmLocalVisualStudio7Generator
       else if(!fcinfo.FileConfigMap.empty())
         {
         const char* aCompilerTool = "VCCLCompilerTool";
-        const char* lang = "CXX";
+        const char* ppLang = "CXX";
         if(this->FortranProject)
           {
           aCompilerTool = "VFFortranCompilerTool";
@@ -1713,7 +1713,7 @@ bool cmLocalVisualStudio7Generator
         if(ext == "rc")
           {
           aCompilerTool = "VCResourceCompilerTool";
-          lang = "RC";
+          ppLang = "RC";
           if(this->FortranProject)
             {
             aCompilerTool = "VFResourceCompilerTool";
@@ -1763,7 +1763,7 @@ bool cmLocalVisualStudio7Generator
             fileOptions.OutputFlagMap(fout, "\t\t\t\t\t");
             fileOptions.OutputPreprocessorDefinitions(fout,
                                                       "\t\t\t\t\t", "\n",
-                                                      lang);
+                                                      ppLang);
             }
           if(!fc.AdditionalDeps.empty())
             {
