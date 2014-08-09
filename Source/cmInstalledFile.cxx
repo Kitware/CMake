@@ -111,3 +111,14 @@ bool cmInstalledFile::GetPropertyAsBool(const std::string& prop) const
   bool isSet = this->GetProperty(prop, value);
   return isSet && cmSystemTools::IsOn(value.c_str());
 }
+
+//----------------------------------------------------------------------------
+void cmInstalledFile::GetPropertyAsList(const std::string& prop,
+  std::vector<std::string>& list) const
+{
+  std::string value;
+  this->GetProperty(prop, value);
+
+  list.clear();
+  cmSystemTools::ExpandListArgument(value, list);
+}

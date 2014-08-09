@@ -11,6 +11,7 @@
 ============================================================================*/
 
 #include "cmWIXFilesSourceWriter.h"
+#include "cmWIXAccessControlList.h"
 
 #include <cmInstalledFile.h>
 
@@ -173,6 +174,12 @@ std::string cmWIXFilesSourceWriter::EmitComponentFile(
   if(!(fileMode & S_IWRITE))
     {
     AddAttribute("ReadOnly", "yes");
+    }
+
+  if(installedFile)
+    {
+    cmWIXAccessControlList acl(Logger, *installedFile, *this);
+    acl.Apply();
     }
 
   patch.ApplyFragment(fileId, *this);

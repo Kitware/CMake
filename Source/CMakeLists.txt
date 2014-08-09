@@ -604,13 +604,14 @@ endif()
 if(WIN32)
   set(CPACK_SRCS ${CPACK_SRCS}
     CPack/WiX/cmCPackWIXGenerator.cxx
-    CPack/WiX/cmWIXSourceWriter.cxx
+    CPack/WiX/cmWIXAccessControlList.cxx
     CPack/WiX/cmWIXDirectoriesSourceWriter.cxx
     CPack/WiX/cmWIXFeaturesSourceWriter.cxx
     CPack/WiX/cmWIXFilesSourceWriter.cxx
-    CPack/WiX/cmWIXRichTextFormatWriter.cxx
     CPack/WiX/cmWIXPatch.cxx
     CPack/WiX/cmWIXPatchParser.cxx
+    CPack/WiX/cmWIXRichTextFormatWriter.cxx
+    CPack/WiX/cmWIXSourceWriter.cxx
   )
 endif()
 
