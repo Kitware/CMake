@@ -74,6 +74,7 @@ function(compiler_id_detection outvar lang)
       PGI
       Cray
       TI
+      Fujitsu
     )
     if (lang STREQUAL C)
       list(APPEND ordered_compilers
