@@ -1022,11 +1022,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   std::string tool = "None";
   std::string shaderType;
   std::string const& ext = sf->GetExtension();
-  if(ext == "appxmanifest")
-    {
-    tool = "AppxManifest";
-    }
-  else if(ext == "hlsl")
+  if(ext == "hlsl")
     {
     tool = "FXCompile";
     // Figure out the type of shader compiler to use.
@@ -1220,6 +1216,10 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       this->WriteSource("None", *si);
       }
     }
+
+  std::vector<cmSourceFile const*> manifestSources;
+  this->GeneratorTarget->GetAppManifest(manifestSources, "");
+  this->WriteSources("AppxManifest", manifestSources);
 
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects, "");
