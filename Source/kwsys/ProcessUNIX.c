@@ -68,6 +68,7 @@ do.
 #include <signal.h>    /* sigaction */
 #include <dirent.h>    /* DIR, dirent */
 #include <ctype.h>     /* isspace */
+#include <assert.h>    /* assert */
 
 #if defined(__VMS)
 # define KWSYSPE_VMS_NONBLOCK , O_NONBLOCK
@@ -450,6 +451,7 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
       }
     for(i=0; i < n; ++i)
       {
+      assert(command[i]); /* Quiet Clang scan-build. */
       newCommands[cp->NumberOfCommands][i] = strdup(command[i]);
       if(!newCommands[cp->NumberOfCommands][i])
         {
