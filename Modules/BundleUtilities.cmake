@@ -237,6 +237,7 @@ function(get_bundle_main_executable bundle result_var)
     file(READ "${bundle}/Contents/Info.plist" info_plist)
     string(REPLACE ";" "\\;" info_plist "${info_plist}")
     string(REPLACE "\n" "${eol_char};" info_plist "${info_plist}")
+    string(REPLACE "\r" "${eol_char};" info_plist "${info_plist}")
 
     # Scan the lines for "<key>CFBundleExecutable</key>" - the line after that
     # is the name of the main executable.
