@@ -577,7 +577,9 @@ set(CPACK_SRCS
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
   CPack/cmCPackNSISGenerator.cxx
-  CPack/cmCPackIFWGenerator.cxx
+  CPack/IFW/cmCPackIFWPackage.cxx
+  CPack/IFW/cmCPackIFWInstaller.cxx
+  CPack/IFW/cmCPackIFWGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
   CPack/cmCPackTGZGenerator.cxx
   CPack/cmCPackTXZGenerator.cxx

@@ -21,7 +21,7 @@
 #include "cmCPack7zGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
-#include "cmCPackIFWGenerator.h"
+#include "IFW/cmCPackIFWGenerator.h"
 
 #ifdef __APPLE__
 #  include "cmCPackDragNDropGenerator.h"
