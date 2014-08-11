@@ -1982,6 +1982,13 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       // component, then do not generate the metadata here.
       linkOptions.AddFlag("GenerateWindowsMetadata", "false");
       }
+
+    if (this->GlobalGenerator->TargetsWindowsPhone() &&
+        this->GlobalGenerator->GetSystemVersion() == "8.0")
+      {
+      // WindowsPhone 8.0 does not have ole32.
+      linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries", "ole32.lib");
+      }
     }
 
   linkOptions.Parse(flags.c_str());
