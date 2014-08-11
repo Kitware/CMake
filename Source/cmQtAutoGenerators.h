@@ -48,7 +48,7 @@ private:
   bool RunAutogen(cmMakefile* makefile);
   bool GenerateMoc(const std::string& sourceFile,
                    const std::string& mocFileName);
-  bool GenerateUi(const std::string& path, const std::string& uiFileName);
+  bool GenerateUi(const std::string& realName, const std::string& uiFileName);
   bool GenerateQrc();
   void ParseCppFile(const std::string& absFilename,
                     const std::vector<std::string>& headerExtensions,
