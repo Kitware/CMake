@@ -1774,6 +1774,18 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     libOptions.OutputFlagMap(*this->BuildFileStream, "      ");
     this->WriteString("</Lib>\n", 2);
     }
+
+  // We cannot generate metadata for static libraries.  WindowsPhone
+  // and WindowsStore tools look at GenerateWindowsMetadata in the
+  // Link tool options even for static libraries.
+  if(this->GlobalGenerator->TargetsWindowsPhone() ||
+     this->GlobalGenerator->TargetsWindowsStore())
+    {
+    this->WriteString("<Link>\n", 2);
+    this->WriteString("<GenerateWindowsMetadata>false"
+                      "</GenerateWindowsMetadata>\n", 3);
+    this->WriteString("</Link>\n", 2);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -1955,6 +1967,21 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 
     linkOptions.AddFlag("ImportLibrary", imLib.c_str());
     linkOptions.AddFlag("ProgramDataBaseFile", pdb.c_str());
+
+    // A Windows Runtime component uses internal .NET metadata,
+    // so does not have an import library.
+    if(this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT"))
+      {
+      linkOptions.AddFlag("GenerateWindowsMetadata", "true");
+      }
+    else if (this->GlobalGenerator->TargetsWindowsPhone() ||
+             this->GlobalGenerator->TargetsWindowsStore())
+      {
+      // WindowsPhone and WindowsStore components are in an app container
+      // and produce WindowsMetadata.  If we are not producing a WINRT
+      // component, then do not generate the metadata here.
+      linkOptions.AddFlag("GenerateWindowsMetadata", "false");
+      }
     }
 
   linkOptions.Parse(flags.c_str());
