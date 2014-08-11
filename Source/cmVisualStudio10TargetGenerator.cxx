@@ -592,6 +592,8 @@ void cmVisualStudio10TargetGenerator
   if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
       this->ClOptions[config]->UsingUnicode()) ||
      this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
+     this->GlobalGenerator->TargetsWindowsPhone() ||
+     this->GlobalGenerator->TargetsWindowsStore() ||
      this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
     {
     this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
