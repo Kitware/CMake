@@ -107,6 +107,12 @@ bool cmVisualStudioGeneratorOptions::IsDebug() const
 }
 
 //----------------------------------------------------------------------------
+bool cmVisualStudioGeneratorOptions::IsWinRt() const
+{
+  return this->FlagMap.find("CompileAsWinRT") != this->FlagMap.end();
+}
+
+//----------------------------------------------------------------------------
 bool cmVisualStudioGeneratorOptions::UsingUnicode() const
 {
   // Look for the a _UNICODE definition.

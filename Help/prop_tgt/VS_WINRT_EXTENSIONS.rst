@@ -1,6 +1,5 @@
 VS_WINRT_EXTENSIONS
 -------------------
 
-Visual Studio project C++/CX language extensions for Windows Runtime
-
-Can be set to enable C++/CX language extensions.
+Deprecated.  Use :prop_tgt:`VS_WINRT_COMPONENT` instead.
+This property was an experimental partial implementation of that one.

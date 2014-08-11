@@ -591,6 +591,7 @@ void cmVisualStudio10TargetGenerator
 
   if((this->Target->GetType() <= cmTarget::OBJECT_LIBRARY &&
       this->ClOptions[config]->UsingUnicode()) ||
+     this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
      this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
     {
     this->WriteString("<CharacterSet>Unicode</CharacterSet>\n", 2);
@@ -611,7 +612,8 @@ void cmVisualStudio10TargetGenerator
     pts += "</PlatformToolset>\n";
     this->WriteString(pts.c_str(), 2);
     }
-  if(this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
+  if(this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT") ||
+     this->Target->GetPropertyAsBool("VS_WINRT_EXTENSIONS"))
     {
     this->WriteString("<WindowsAppContainer>true"
                       "</WindowsAppContainer>\n", 2);
@@ -1602,6 +1604,29 @@ bool cmVisualStudio10TargetGenerator::ComputeClOptions(
   if(const char* exportMacro = this->Target->GetExportMacro())
     {
     clOptions.AddDefine(exportMacro);
+    }
+
+  if (this->MSTools)
+    {
+    // If we have the VS_WINRT_COMPONENT set then force Compile as WinRT.
+    if (this->Target->GetPropertyAsBool("VS_WINRT_COMPONENT"))
+      {
+      clOptions.AddFlag("CompileAsWinRT", "true");
+      // For WinRT components, add the _WINRT_DLL define to produce a lib
+      if (this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
+          this->Target->GetType() == cmTarget::MODULE_LIBRARY )
+        {
+        clOptions.AddDefine("_WINRT_DLL");
+        }
+      }
+    else if (this->GlobalGenerator->TargetsWindowsStore() ||
+             this->GlobalGenerator->TargetsWindowsPhone())
+      {
+      if (!clOptions.IsWinRt())
+        {
+        clOptions.AddFlag("CompileAsWinRT", "false");
+        }
+      }
     }
 
   this->ClOptions[configName] = pOptions.release();
