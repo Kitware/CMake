@@ -66,6 +66,9 @@ public:
 
   bool GetPropertyAsBool(const std::string& prop) const;
 
+  void GetPropertyAsList(const std::string& prop,
+    std::vector<std::string>& list) const;
+
   void SetName(cmMakefile* mf, const std::string& name);
 
   std::string const& GetName() const;
