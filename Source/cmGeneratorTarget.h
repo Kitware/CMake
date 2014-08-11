@@ -56,6 +56,8 @@ public:
                               const std::string& config) const;
   void GetAppManifest(std::vector<cmSourceFile const*>&,
                       const std::string& config) const;
+  void GetCertificates(std::vector<cmSourceFile const*>&,
+                       const std::string& config) const;
 
   void ComputeObjectMapping();
 

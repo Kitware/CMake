@@ -384,6 +384,7 @@ void cmVisualStudio10TargetGenerator::Generate()
                     " Label=\"LocalAppDataPlatform\" />\n", 2);
   this->WriteString("</ImportGroup>\n", 1);
   this->WriteString("<PropertyGroup Label=\"UserMacros\" />\n", 1);
+  this->WriteWinRTPackageCertificateKeyFile();
   this->WritePathAndIncrementalLinkOptions();
   this->WriteItemDefinitionGroups();
   this->WriteCustomCommands();
@@ -2162,6 +2163,34 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
     this->WriteString("</ProjectReference>\n", 2);
     }
   this->WriteString("</ItemGroup>\n", 1);
+}
+
+void cmVisualStudio10TargetGenerator::WriteWinRTPackageCertificateKeyFile()
+{
+  if((this->GlobalGenerator->TargetsWindowsStore() ||
+      this->GlobalGenerator->TargetsWindowsPhone())
+      && (cmTarget::EXECUTABLE == this->Target->GetType()))
+    {
+    std::string pfxFile;
+    std::vector<cmSourceFile const*> certificates;
+    this->GeneratorTarget->GetCertificates(certificates, "");
+    for(std::vector<cmSourceFile const*>::const_iterator si =
+        certificates.begin(); si != certificates.end(); ++si)
+      {
+      pfxFile = this->ConvertPath((*si)->GetFullPath(), false);
+      this->ConvertToWindowsSlash(pfxFile);
+      break;
+      }
+
+    if(!pfxFile.empty())
+      {
+      this->WriteString("<PropertyGroup>\n", 1);
+      this->WriteString("<", 2);
+      (*this->BuildFileStream) << "PackageCertificateKeyFile>"
+        << pfxFile << "</PackageCertificateKeyFile>\n";
+      this->WriteString("</PropertyGroup>\n", 1);
+      }
+    }
 }
 
 bool cmVisualStudio10TargetGenerator::
