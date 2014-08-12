@@ -74,6 +74,15 @@
 #
 #  You can use predefined variables.
 #
+# .. variable:: CPACK_IFW_PACKAGE_GROUP
+#
+#  The group, which will be used to configure the root package
+#
+# .. variable:: CPACK_IFW_PACKAGE_NAME
+#
+#  The root package name, which will be used if configuration group is not
+#  specified
+#
 # Components
 # """"""""""
 #
@@ -122,11 +131,10 @@
 #
 # ::
 #
-#   cpack_ifw_configure_component(<compname>
-#                       [COMMON]
+#   cpack_ifw_configure_component(<compname> [COMMON]
+#                       [NAME <name>]
 #                       [VERSION <version>]
 #                       [SCRIPT <script>]
-#                       [NAME <name>]
 #                       [PRIORITY <priority>]
 #                       [DEPENDS <com_id> ...]
 #                       [LICENSES <display_name> <file_path> ...])
@@ -163,6 +171,7 @@
 #   cpack_ifw_configure_component_group(<grpname>
 #                       [VERSION <version>]
 #                       [NAME <name>]
+#                       [SCRIPT <script>]
 #                       [PRIORITY <priority>]
 #                       [LICENSES <display_name> <file_path> ...])
 #
@@ -173,6 +182,9 @@
 #
 # ``NAME`` is used to create domain-like identification for this component group.
 # By default used origin component group name.
+#
+# ``SCRIPT`` is relative or absolute path to operations script
+# for this component group.
 #
 # ``PRIORITY`` is priority of the component group in the tree.
 #
@@ -329,6 +341,20 @@ if(NOT __CMAKE_PARSE_ARGUMENTS_INCLUDED)
     include(CMakeParseArguments)
 endif()
 
+# Resolve full filename for script file
+macro(_cpack_ifw_resolve_script _variable)
+  set(_ifw_script_macro ${_variable})
+  set(_ifw_script_file ${${_ifw_script_macro}})
+  if(DEFINED ${_ifw_script_macro})
+    get_filename_component(${_ifw_script_macro} ${_ifw_script_file} ABSOLUTE)
+    set(_ifw_script_file ${${_ifw_script_macro}})
+    if(NOT EXISTS ${_ifw_script_file})
+      message(WARNING "CPack IFW: script file \"${_ifw_script_file}\" is not exists")
+      set(${_ifw_script_macro})
+    endif()
+  endif()
+endmacro()
+
 # Resolve full path to lisense file
 macro(_cpack_ifw_resolve_lisenses _variable)
   if(${_variable})
@@ -357,18 +383,7 @@ macro(cpack_ifw_configure_component compname)
   set(_IFW_MULTI_ARGS DEPENDS LICENSES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
-  # Resolve full filename for script file
-  set(_IFW_SCRIPT_MACRO CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_SCRIPT)
-  set(_IFW_SCRIPT_FILE ${${_IFW_SCRIPT_MACRO}})
-  if(DEFINED ${_IFW_SCRIPT_MACRO})
-    get_filename_component(${_IFW_SCRIPT_MACRO} ${_IFW_SCRIPT_FILE} ABSOLUTE)
-    set(_IFW_SCRIPT_FILE ${${_IFW_SCRIPT_MACRO}})
-    if(NOT EXISTS ${_IFW_SCRIPT_FILE})
-        message(WARNING "CPack IFW: script file \"${_IFW_SCRIPT_FILE}\" for component \"${compname}\" is not exists" )
-        set(${_IFW_SCRIPT_MACRO})
-    endif()
-  endif()
-
+  _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_SCRIPT)
   _cpack_ifw_resolve_lisenses(CPACK_IFW_COMPONENT_${_CPACK_IFWCOMP_UNAME}_LICENSES)
 
   set(_CPACK_IFWCOMP_STR "\n# Configuration for IFW component \"${compname}\"\n")
@@ -403,10 +418,11 @@ macro(cpack_ifw_configure_component_group grpname)
   string(TOUPPER ${grpname} _CPACK_IFWGRP_UNAME)
 
   set(_IFW_OPT)
-  set(_IFW_ARGS VERSION NAME PRIORITY)
+  set(_IFW_ARGS NAME VERSION SCRIPT PRIORITY)
   set(_IFW_MULTI_ARGS LICENSES)
   cmake_parse_arguments(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
 
+  _cpack_ifw_resolve_script(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_SCRIPT)
   _cpack_ifw_resolve_lisenses(CPACK_IFW_COMPONENT_GROUP_${_CPACK_IFWGRP_UNAME}_LICENSES)
 
   set(_CPACK_IFWGRP_STR "\n# Configuration for IFW component group \"${grpname}\"\n")

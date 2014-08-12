@@ -13,7 +13,7 @@
 #ifndef cmCPackIFWPackage_h
 #define cmCPackIFWPackage_h
 
-#include "cmStandardIncludes.h"
+#include <cmStandardIncludes.h>
 
 class cmCPackComponent;
 class cmCPackComponentGroup;
@@ -105,6 +105,7 @@ public: // Configuration
 public: // Internal implementation
 
   const char* GetOption(const std::string& op) const;
+  bool IsOn(const std::string& op) const;
 
   std::string GetComponentName(cmCPackComponent *component);
 
@@ -112,7 +113,8 @@ public: // Internal implementation
 
   int ConfigureFromOptions();
   int ConfigureFromComponent(cmCPackComponent *component);
-  int ConfigureFromComponentGroup(cmCPackComponentGroup *group);
+  int ConfigureFromGroup(cmCPackComponentGroup *group);
+  int ConfigureFromGroup(const std::string &groupName);
 
   void GeneratePackageFile();
 

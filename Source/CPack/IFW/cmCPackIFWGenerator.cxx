@@ -33,8 +33,6 @@
 //----------------------------------------------------------------------------
 cmCPackIFWGenerator::cmCPackIFWGenerator()
 {
-  // Change the default behavior
-  componentPackageMethod = ONE_PACKAGE_PER_COMPONENT;
 }
 
 //----------------------------------------------------------------------------
@@ -374,9 +372,6 @@ cmCPackComponentGroup*
 cmCPackIFWGenerator::GetComponentGroup(const std::string &projectName,
                                        const std::string &groupName)
 {
-  ComponentGoupsMap::iterator git = ComponentGroups.find(groupName);
-  if ( git != ComponentGroups.end() ) return &(git->second);
-
   cmCPackComponentGroup* group
     = cmCPackGenerator::GetComponentGroup(projectName, groupName);
   if(!group) return group;
@@ -388,7 +383,7 @@ cmCPackIFWGenerator::GetComponentGroup(const std::string &projectName,
   cmCPackIFWPackage *package = &Packages[name];
   package->Name = name;
   package->Generator = this;
-  if(package->ConfigureFromComponentGroup(group))
+  if(package->ConfigureFromGroup(group))
     {
     package->Installer = &Installer;
     Installer.Packages.insert(
@@ -436,17 +431,29 @@ bool cmCPackIFWGenerator::IsOnePackage() const
 }
 
 //----------------------------------------------------------------------------
-std::string cmCPackIFWGenerator::GetRootPackageName() const
+std::string cmCPackIFWGenerator::GetRootPackageName()
 {
+  // Default value
   std::string name = "root";
-  if(const char* optIFW_ROOT_PACKAGE_NAME =
-     this->GetOption("CPACK_IFW_ROOT_PACKAGE_NAME"))
+  if (const char* optIFW_PACKAGE_GROUP =
+      this->GetOption("CPACK_IFW_PACKAGE_GROUP"))
     {
-    name = optIFW_ROOT_PACKAGE_NAME;
+    // Configure from root group
+    cmCPackIFWPackage package;
+    package.Generator = this;
+    package.ConfigureFromGroup(optIFW_PACKAGE_GROUP);
+    name = package.Name;
+    }
+  else if (const char* optIFW_PACKAGE_NAME =
+           this->GetOption("CPACK_IFW_PACKAGE_NAME"))
+    {
+    // Configure from root package name
+    name = optIFW_PACKAGE_NAME;
     }
   else if (const char* optPACKAGE_NAME =
            this->GetOption("CPACK_PACKAGE_NAME"))
     {
+    // Configure from package name
     name = optPACKAGE_NAME;
     }
   return name;

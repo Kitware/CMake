@@ -48,9 +48,15 @@ const char *cmCPackIFWInstaller::GetOption(const std::string &op) const
 void cmCPackIFWInstaller::ConfigureFromOptions()
 {
   // Name;
-  if (const char* option = GetOption("CPACK_PACKAGE_NAME"))
+  if (const char* optIFW_PACKAGE_NAME =
+      this->GetOption("CPACK_IFW_PACKAGE_NAME"))
     {
-    Name = option;
+    Name = optIFW_PACKAGE_NAME;
+    }
+  else if (const char* optPACKAGE_NAME =
+           this->GetOption("CPACK_PACKAGE_NAME"))
+    {
+    Name = optPACKAGE_NAME;
     }
   else
     {
@@ -274,7 +280,16 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
     cmCPackIFWPackage package;
     package.Generator = Generator;
     package.Installer = this;
-    package.ConfigureFromOptions();
+    // Check package group
+    if (const char* option = GetOption("CPACK_IFW_PACKAGE_GROUP"))
+      {
+      package.ConfigureFromGroup(option);
+      package.ForcedInstallation = "true";
+      }
+    else
+      {
+      package.ConfigureFromOptions();
+      }
     package.GeneratePackageFile();
     return;
     }
