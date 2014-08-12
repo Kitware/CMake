@@ -507,28 +507,6 @@ static bool CheckStringOperations()
     res = false;    
     }
 
-  int targc;
-  char **targv;
-  kwsys::SystemTools::ConvertWindowsCommandLineToUnixArguments
-    ("\"Local Mojo\\Voodoo.asp\" -CastHex \"D:\\My Secret Mojo\\Voodoo.mp3\"",
-    &targc, &targv);
-  if (targc != 4 || strcmp(targv[1],"Local Mojo\\Voodoo.asp") ||
-      strcmp(targv[2],"-CastHex") || 
-      strcmp(targv[3],"D:\\My Secret Mojo\\Voodoo.mp3"))
-    {
-    kwsys_ios::cerr
-      << "Problem with ConvertWindowsCommandLineToUnixArguments"
-      << "\'\"Local Mojo\\Voodoo.asp\" "
-      << "-CastHex \"D:\\My Secret Mojo\\Voodoo.mp3\"\'"
-      << kwsys_ios::endl;
-    res = false;    
-    }
-  for (;targc >=0; --targc)
-    {
-    delete [] targv[targc];
-    }
-  delete [] targv;
-
   return res;
 }
 

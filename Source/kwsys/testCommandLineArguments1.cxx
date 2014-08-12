@@ -21,6 +21,7 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
+#include <assert.h> /* assert */
 #include <string.h> /* strcmp */
 
 int testCommandLineArguments1(int argc, char* argv[])
@@ -83,6 +84,7 @@ int testCommandLineArguments1(int argc, char* argv[])
     }
   for ( cc = 0; cc < newArgc; ++ cc )
     {
+    assert(newArgv[cc]); /* Quiet Clang scan-build. */
     kwsys_ios::cout << "Unused argument[" << cc << "] = [" << newArgv[cc] << "]"
       << kwsys_ios::endl;
     if ( cc >= 9 )
