@@ -286,6 +286,11 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ProjectGUID>", 2);
   (*this->BuildFileStream) <<  "{" << this->GUID << "}</ProjectGUID>\n";
 
+  if(this->MSTools && this->Target->GetType() <= cmTarget::UTILITY)
+    {
+    this->WriteApplicationTypeSettings();
+    }
+
   const char* vsProjectTypes =
     this->Target->GetProperty("VS_GLOBAL_PROJECT_TYPES");
   if(vsProjectTypes)
@@ -2099,4 +2104,33 @@ bool cmVisualStudio10TargetGenerator::
   std::set<std::string>::const_iterator it =
                                         expectedResxHeaders.find(headerFile);
   return it != expectedResxHeaders.end();
+}
+
+void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
+{
+  bool const isWindowsPhone = this->GlobalGenerator->TargetsWindowsPhone();
+  bool const isWindowsStore = this->GlobalGenerator->TargetsWindowsStore();
+  std::string const& v = this->GlobalGenerator->GetSystemVersion();
+  if(isWindowsPhone || isWindowsStore)
+    {
+    this->WriteString("<ApplicationType>", 2);
+    (*this->BuildFileStream) << (isWindowsPhone ?
+                                 "Windows Phone" : "Windows Store")
+                             << "</ApplicationType>\n";
+    this->WriteString("<ApplicationTypeRevision>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(v)
+                             << "</ApplicationTypeRevision>\n";
+    if(v == "8.1")
+      {
+      // Visual Studio 12.0 is necessary for building 8.1 apps
+      this->WriteString("<MinimumVisualStudioVersion>12.0"
+                        "</MinimumVisualStudioVersion>\n", 2);
+      }
+    else if (v == "8.0")
+      {
+      // Visual Studio 11.0 is necessary for building 8.0 apps
+      this->WriteString("<MinimumVisualStudioVersion>11.0"
+                        "</MinimumVisualStudioVersion>\n", 2);
+      }
+    }
 }

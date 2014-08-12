@@ -129,6 +129,56 @@ cmGlobalVisualStudio11Generator::MatchesGeneratorName(
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
+{
+  this->DefaultPlatformToolset = this->SelectWindowsPhoneToolset();
+  if(this->DefaultPlatformToolset.empty())
+    {
+    cmOStringStream e;
+    e << this->GetName() << " supports Windows Phone '8.0', but not '"
+      << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio11Generator::InitializeWindowsStore(cmMakefile* mf)
+{
+  this->DefaultPlatformToolset = this->SelectWindowsStoreToolset();
+  if(this->DefaultPlatformToolset.empty())
+    {
+    cmOStringStream e;
+    e << this->GetName() << " supports Windows Store '8.0', but not '"
+      << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset() const
+{
+  if(this->SystemVersion == "8.0")
+    {
+    return "v110_wp80";
+    }
+  return this->cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset();
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset() const
+{
+  if(this->SystemVersion == "8.0")
+    {
+    return "v110";
+    }
+  return this->cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset();
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";
@@ -191,4 +241,18 @@ cmGlobalVisualStudio11Generator::GetInstalledWindowsCESDKs()
     }
 
   return ret;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio11Generator::NeedsDeploy(cmTarget::TargetType type) const
+{
+  if((type == cmTarget::EXECUTABLE ||
+      type == cmTarget::SHARED_LIBRARY) &&
+     (this->SystemIsWindowsPhone ||
+      this->SystemIsWindowsStore))
+    {
+    return true;
+    }
+  return cmGlobalVisualStudio10Generator::NeedsDeploy(type);
 }

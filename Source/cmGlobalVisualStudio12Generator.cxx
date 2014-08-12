@@ -109,6 +109,56 @@ cmGlobalVisualStudio12Generator::MatchesGeneratorName(
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
+{
+  this->DefaultPlatformToolset = this->SelectWindowsPhoneToolset();
+  if(this->DefaultPlatformToolset.empty())
+    {
+    cmOStringStream e;
+    e << this->GetName() << " supports Windows Phone '8.0' and '8.1', "
+      "but not '" << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
+{
+  this->DefaultPlatformToolset = this->SelectWindowsStoreToolset();
+  if(this->DefaultPlatformToolset.empty())
+    {
+    cmOStringStream e;
+    e << this->GetName() << " supports Windows Store '8.0' and '8.1', "
+      "but not '" << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset() const
+{
+  if(this->SystemVersion == "8.1")
+    {
+    return "v120_wp81";
+    }
+  return this->cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset();
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset() const
+{
+  if(this->SystemVersion == "8.1")
+    {
+    return "v120";
+    }
+  return this->cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset();
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 12.00\n";

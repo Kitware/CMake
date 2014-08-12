@@ -97,6 +97,8 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
+  this->SystemIsWindowsPhone = false;
+  this->SystemIsWindowsStore = false;
   this->MasmEnabled = false;
   this->MSBuildCommandInitialized = false;
 }
@@ -146,9 +148,43 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
 }
 
 //----------------------------------------------------------------------------
-bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile*)
+bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
 {
+  if(this->SystemName == "WindowsPhone")
+    {
+    this->SystemIsWindowsPhone = true;
+    if(!this->InitializeWindowsPhone(mf))
+      {
+      return false;
+      }
+    }
+  else if(this->SystemName == "WindowsStore")
+    {
+    this->SystemIsWindowsStore = true;
+    if(!this->InitializeWindowsStore(mf))
+      {
+      return false;
+      }
+    }
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
+{
+  cmOStringStream e;
+  e << this->GetName() << " does not support Windows Phone.";
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
+{
+  cmOStringStream e;
+  e << this->GetName() << " does not support Windows Store.";
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  return false;
 }
 
 //----------------------------------------------------------------------------

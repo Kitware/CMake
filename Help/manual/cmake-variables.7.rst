@@ -190,6 +190,8 @@ Variables that Describe the System
    /variable/MSVC_VERSION
    /variable/UNIX
    /variable/WIN32
+   /variable/WINDOWS_PHONE
+   /variable/WINDOWS_STORE
    /variable/XCODE_VERSION
 
 Variables that Control the Build
