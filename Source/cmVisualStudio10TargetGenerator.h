@@ -78,6 +78,10 @@ private:
   bool ComputeRcOptions(std::string const& config);
   void WriteRCOptions(std::string const& config,
                       std::vector<std::string> const & includes);
+  bool ComputeMasmOptions();
+  bool ComputeMasmOptions(std::string const& config);
+  void WriteMasmOptions(std::string const& config,
+                        std::vector<std::string> const& includes);
   bool ComputeLinkOptions();
   bool ComputeLinkOptions(std::string const& config);
   void WriteLinkOptions(std::string const& config);
@@ -109,12 +113,14 @@ private:
   cmIDEFlagTable const* GetRcFlagTable() const;
   cmIDEFlagTable const* GetLibFlagTable() const;
   cmIDEFlagTable const* GetLinkFlagTable() const;
+  cmIDEFlagTable const* GetMasmFlagTable() const;
 
 private:
   typedef cmVisualStudioGeneratorOptions Options;
   typedef std::map<std::string, Options*> OptionsMap;
   OptionsMap ClOptions;
   OptionsMap RcOptions;
+  OptionsMap MasmOptions;
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
   cmTarget* Target;
