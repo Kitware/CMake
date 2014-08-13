@@ -1584,9 +1584,7 @@ OutputIncludes(std::vector<std::string> const & includes)
   for(std::vector<std::string>::const_iterator i =  includes.begin();
       i != includes.end(); ++i)
     {
-    std::string incDir = *i;
-    this->ConvertToWindowsSlash(incDir);
-    *this->BuildFileStream << cmVS10EscapeXML(incDir) << ";";
+    *this->BuildFileStream << cmVS10EscapeXML(*i) << ";";
     }
   this->WriteString("%(AdditionalIncludeDirectories)"
                     "</AdditionalIncludeDirectories>\n", 0);
@@ -1978,6 +1976,11 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->LocalGenerator->GetIncludeDirectories(includes,
                                                 this->GeneratorTarget,
                                                 "C", i->c_str());
+    for(std::vector<std::string>::iterator ii = includes.begin();
+        ii != includes.end(); ++ii)
+      {
+      this->ConvertToWindowsSlash(*ii);
+      }
     this->WritePlatformConfigTag("ItemDefinitionGroup", i->c_str(), 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>
