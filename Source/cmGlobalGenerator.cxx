@@ -620,7 +620,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         "No " << compilerName << " could be found.\n"
         ;
       }
-    else if(strcmp(lang, "RC") != 0)
+    else if(strcmp(lang, "RC") != 0 &&
+            strcmp(lang, "ASM_MASM") != 0)
       {
       if(!cmSystemTools::FileIsFullPath(compilerFile))
         {
