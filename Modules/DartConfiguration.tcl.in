@@ -37,6 +37,9 @@ ConfigureCommand: "@CMAKE_COMMAND@" "@PROJECT_SOURCE_DIR@"
 MakeCommand: @MAKECOMMAND@
 DefaultCTestConfigurationType: @DEFAULT_CTEST_CONFIGURATION_TYPE@
 
+# version control
+UpdateVersionOnly: @CTEST_UPDATE_VERSION_ONLY@
+
 # CVS options
 # Default is "-d -P -A"
 CVSCommand: @CVSCOMMAND@

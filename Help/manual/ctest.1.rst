@@ -668,6 +668,15 @@ Configuration settings to specify the version control tool include:
   * :module:`CTest` module variable: ``UPDATE_TYPE`` if set,
     else ``CTEST_UPDATE_TYPE``
 
+``UpdateVersionOnly``
+  Specify that you want the version control update command to only
+  discover the current version that is checked out, and not to update
+  to a different version.
+
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_ONLY`
+
+
+
 Additional configuration settings include:
 
 ``NightlyStartTime``
