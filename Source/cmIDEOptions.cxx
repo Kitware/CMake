@@ -217,6 +217,12 @@ void cmIDEOptions::RemoveFlag(const char* flag)
 }
 
 //----------------------------------------------------------------------------
+bool cmIDEOptions::HasFlag(std::string const& flag) const
+{
+  return this->FlagMap.find(flag) != this->FlagMap.end();
+}
+
+//----------------------------------------------------------------------------
 const char* cmIDEOptions::GetFlag(const char* flag)
 {
   // This method works only for single-valued flags!
