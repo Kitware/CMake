@@ -70,23 +70,23 @@ static cmVS7FlagTable cmVS12MASMFlagTable[] =
   //Bool Properties With Argument
 
   //String List Properties
-  {"PreprocessorDefinitions", "/D"[value]"",
+  {"PreprocessorDefinitions", "/D",
    "Preprocessor Definitions",
    "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
-  {"IncludePaths", "/I "[value]"",
+  {"IncludePaths", "/I",
    "Include Paths",
    "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
-  {"BrowseFile", "/FR"[value]"",
+  {"BrowseFile", "/FR",
    "Generate Browse Information File",
    "", cmVS7FlagTable::UserValue | cmVS7FlagTable::SemicolonAppendable},
   // Skip [AdditionalDependencies] - no command line Switch.
 
   //String Properties
   // Skip [Inputs] - no command line Switch.
-  {"ObjectFileName", "/Fo"[value]"",
+  {"ObjectFileName", "/Fo",
    "Object File Name",
    "", cmVS7FlagTable::UserValue},
-  {"AssembledCodeListingFile", "/Fl"[value]"",
+  {"AssembledCodeListingFile", "/Fl",
    "Assembled Code Listing File",
    "", cmVS7FlagTable::UserValue},
   // Skip [CommandLineTemplate] - no command line Switch.
