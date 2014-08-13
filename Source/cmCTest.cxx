@@ -488,9 +488,11 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
     {
     cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
     cmCTestLog(this, OUTPUT,
-      "   Site: " << this->GetCTestConfiguration("Site") << std::endl
-      << "   Build name: " << this->GetCTestConfiguration("BuildName")
-      << std::endl);
+               "   Site: " << this->GetCTestConfiguration("Site") << std::endl
+               << "   Build name: "
+               << cmCTest::SafeBuildIdField(
+                 this->GetCTestConfiguration("BuildName"))
+               << std::endl);
     cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
     if ( this->TestModel == cmCTest::NIGHTLY &&
          this->GetCTestConfiguration("NightlyStartTime").empty() )
@@ -1441,7 +1443,7 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
     // Disallow non-filename and non-space whitespace characters.
     // If they occur, replace them with ""
     //
-    const char *disallowed = "\\/:*?\"<>|\n\r\t\f\v";
+    const char *disallowed = "\\:*?\"<>|\n\r\t\f\v";
 
     if (safevalue.find_first_of(disallowed) != value.npos)
       {
@@ -1582,12 +1584,14 @@ void cmCTest::EndXML(std::ostream& ostr)
 int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
   const cmCTest::VectorOfStrings& files)
 {
+  std::string buildname = cmCTest::SafeBuildIdField(
+    this->GetCTestConfiguration("BuildName"));
   cmCTest::VectorOfStrings::const_iterator it;
   os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
      << "<?xml-stylesheet type=\"text/xsl\" "
     "href=\"Dart/Source/Server/XSL/Build.xsl "
     "<file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
-     << "<Site BuildName=\"" << this->GetCTestConfiguration("BuildName")
+     << "<Site BuildName=\"" << buildname
      << "\" BuildStamp=\""
      << this->CurrentTag << "-" << this->GetTestModelString() << "\" Name=\""
      << this->GetCTestConfiguration("Site") << "\" Generator=\"ctest"
