@@ -10,6 +10,7 @@ EN	; This entry point shouldn't be found without fixing
  I '$$T5 W "RETURNED FROM t5",!
  Q
  ; This line not executable
+ D T6^ZZCOVTST
  ;
 T1 ; This line should always be found
  N D
@@ -33,4 +34,10 @@ T4  N D S D=5 W "Shouldn't be executed"
 T5(EQ) ;this entry point is called with a $$ notation
  W "THIS IS THE $$ NOTATION!",!
  Q 0
+T6 ; An entry point to show comments inside of "DO" blocks
+ D
+ . W "This is executable code",!
+ . ;This is a comment inside the do block, not executable
+ . S ZZBLAH="blah"
+ W "Ending T6",!
  ;
