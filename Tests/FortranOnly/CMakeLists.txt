@@ -43,3 +43,25 @@ add_custom_target(checksayhello ALL
   COMMAND ${CMAKE_COMMAND} -P ${FortranOnly_SOURCE_DIR}/checksayhello.cmake
   )
 add_dependencies(checksayhello sayhello)
+
+# Exclude this test on IBM XL for now because the check strangely
+# fails with 'ld: 0706-029 Use a number with the -H flag'.
+if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL XL)
+  set(err_log ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log)
+  file(REMOVE "${err_log}")
+  include(CheckFortranSourceCompiles)
+  unset(HAVE_PRINT CACHE)
+  CHECK_Fortran_SOURCE_COMPILES([[
+      PROGRAM TEST_HAVE_PRINT
+        PRINT *, 'Hello'
+      END
+]] HAVE_PRINT)
+  if(NOT HAVE_PRINT)
+    if(EXISTS "${err_log}")
+      file(READ "${err_log}" err)
+    endif()
+    string(REPLACE "\n" "\n  " err "  ${err}")
+    message(SEND_ERROR "CHECK_Fortran_SOURCE_COMPILES for HAVE_PRINT failed:\n"
+      "${err}")
+  endif()
+endif()

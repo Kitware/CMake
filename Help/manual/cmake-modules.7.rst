@@ -23,6 +23,7 @@ All Modules
    /module/CheckCXXSourceRuns
    /module/CheckCXXSymbolExists
    /module/CheckFortranFunctionExists
+   /module/CheckFortranSourceCompiles
    /module/CheckFunctionExists
    /module/CheckIncludeFileCXX
    /module/CheckIncludeFile
