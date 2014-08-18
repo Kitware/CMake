@@ -286,7 +286,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteString("<ProjectGUID>", 2);
   (*this->BuildFileStream) <<  "{" << this->GUID << "}</ProjectGUID>\n";
 
-  if(this->MSTools && this->Target->GetType() <= cmTarget::UTILITY)
+  if(this->MSTools && this->Target->GetType() <= cmTarget::GLOBAL_TARGET)
     {
     this->WriteApplicationTypeSettings();
     }
