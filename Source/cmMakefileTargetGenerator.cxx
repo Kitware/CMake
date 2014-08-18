@@ -361,9 +361,13 @@ void cmMakefileTargetGenerator::WriteTargetLanguageFlags()
   for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end(); ++l)
     {
-    *this->FlagFileStream << *l << "_FLAGS = " << this->GetFlags(*l) << "\n\n";
-    *this->FlagFileStream << *l << "_DEFINES = " << this->GetDefines(*l) <<
-      "\n\n";
+    std::string flags = this->GetFlags(*l);
+    std::string defines = this->GetDefines(*l);
+    // Escape comment characters so they do not terminate assignment.
+    cmSystemTools::ReplaceString(flags, "#", "\\#");
+    cmSystemTools::ReplaceString(defines, "#", "\\#");
+    *this->FlagFileStream << *l << "_FLAGS = " << flags << "\n\n";
+    *this->FlagFileStream << *l << "_DEFINES = " << defines << "\n\n";
     }
 }
 
