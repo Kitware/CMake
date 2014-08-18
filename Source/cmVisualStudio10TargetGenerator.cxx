@@ -546,9 +546,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
         configType += "Application";
         break;
       case cmTarget::UTILITY:
+      case cmTarget::GLOBAL_TARGET:
         configType += "Utility";
         break;
-      case cmTarget::GLOBAL_TARGET:
       case cmTarget::UNKNOWN_LIBRARY:
       case cmTarget::INTERFACE_LIBRARY:
         break;
