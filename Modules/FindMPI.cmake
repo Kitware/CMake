@@ -522,6 +522,7 @@ endfunction()
 # Most mpi distros have some form of mpiexec which gives us something we can reliably look for.
 find_program(MPIEXEC
   NAMES ${_MPI_EXEC_NAMES}
+  HINTS ${MPI_HOME} $ENV{MPI_HOME}
   PATHS ${_MPI_PREFIX_PATH}
   PATH_SUFFIXES bin
   DOC "Executable for running MPI programs.")
@@ -584,7 +585,9 @@ foreach (lang C CXX Fortran)
 
     find_program(MPI_${lang}_COMPILER
       NAMES  ${_MPI_${lang}_COMPILER_NAMES}
-      PATHS  "${MPI_HOME}/bin" "$ENV{MPI_HOME}/bin" ${_MPI_PREFIX_PATH})
+      HINTS  ${_MPI_BASE_DIR}/bin
+      PATHS  ${_MPI_PREFIX_PATH}
+      )
     interrogate_mpi_compiler(${lang} ${try_libs})
     mark_as_advanced(MPI_${lang}_COMPILER)
 
