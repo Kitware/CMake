@@ -317,3 +317,20 @@ set(CTEST_GIT_UPDATE_CUSTOM \${CTEST_GIT_COMMAND} pull origin master)
 
 # Run the dashboard script with CTest.
 run_dashboard_script(dash-binary-custom)
+
+
+rewind_source(dash-source)
+
+#-----------------------------------------------------------------------------
+# Test no update with a dashboard script.
+message("Running CTest Dashboard Script (No update)...")
+
+create_dashboard_script(dash-binary-no-update
+  "# git command configuration
+set(CTEST_GIT_COMMAND \"${GIT}\")
+set(CTEST_UPDATE_VERSION_ONLY TRUE)
+")
+
+# Run the dashboard script with CTest.
+set(NO_UPDATE 1)
+run_dashboard_script(dash-binary-no-update)

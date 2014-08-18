@@ -362,6 +362,7 @@ Variables for CTest
    /variable/CTEST_TRIGGER_SITE
    /variable/CTEST_UPDATE_COMMAND
    /variable/CTEST_UPDATE_OPTIONS
+   /variable/CTEST_UPDATE_VERSION_ONLY
    /variable/CTEST_USE_LAUNCHERS
 
 Variables for CPack

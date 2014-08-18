@@ -166,10 +166,17 @@ void cmCTestVC::CleanupImpl()
 //----------------------------------------------------------------------------
 bool cmCTestVC::Update()
 {
-  this->NoteOldRevision();
-  this->Log << "--- Begin Update ---\n";
-  bool result = this->UpdateImpl();
-  this->Log << "--- End Update ---\n";
+  bool result = true;
+  // if update version only is on then do not actually update,
+  // just note the current version and finish
+  if(!cmSystemTools::IsOn(
+       this->CTest->GetCTestConfiguration("UpdateVersionOnly").c_str()))
+    {
+    this->NoteOldRevision();
+    this->Log << "--- Begin Update ---\n";
+    result = this->UpdateImpl();
+    this->Log << "--- End Update ---\n";
+    }
   this->NoteNewRevision();
   return result;
 }

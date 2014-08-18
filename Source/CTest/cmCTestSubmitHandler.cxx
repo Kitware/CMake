@@ -1479,8 +1479,10 @@ int cmCTestSubmitHandler::ProcessHandler()
 //----------------------------------------------------------------------------
 std::string cmCTestSubmitHandler::GetSubmitResultsPrefix()
 {
+  std::string buildname = cmCTest::SafeBuildIdField(
+    this->CTest->GetCTestConfiguration("BuildName"));
   std::string name = this->CTest->GetCTestConfiguration("Site") +
-    "___" + this->CTest->GetCTestConfiguration("BuildName") +
+    "___" + buildname +
     "___" + this->CTest->GetCurrentTag() + "-" +
     this->CTest->GetTestModelString() + "___XML___";
   return name;
