@@ -28,6 +28,7 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
      FAIL_REGEX "option.*not supported"                     # Intel
      FAIL_REGEX "invalid argument .*option"                 # Intel
      FAIL_REGEX "ignoring option .*argument required"       # Intel
+     FAIL_REGEX "ignoring option .*argument is of wrong type" # Intel
      FAIL_REGEX "[Uu]nknown option"                         # HP
      FAIL_REGEX "[Ww]arning: [Oo]ption"                     # SunPro
      FAIL_REGEX "command option .* is not recognized"       # XL
