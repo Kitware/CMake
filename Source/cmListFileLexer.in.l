@@ -212,6 +212,13 @@ LEGACY {MAKEVAR}|{UNQUOTED}|\"({MAKEVAR}|{UNQUOTED}|[ \t[=])*\"
   return 1;
 }
 
+\[ {
+  lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
+  cmListFileLexerSetToken(lexer, yytext, yyleng);
+  lexer->column += yyleng;
+  return 1;
+}
+
 \" {
   lexer->token.type = cmListFileLexer_Token_ArgumentQuoted;
   cmListFileLexerSetToken(lexer, "", 0);
