@@ -756,6 +756,9 @@ bool CMakeSetupDialog::setupFirstConfigure()
       QString systemName = dialog.getSystemName();
       m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_NAME",
                         tr("CMake System Name"), systemName, false);
+      QString systemVersion = dialog.getSystemVersion();
+      m->insertProperty(QCMakeProperty::STRING, "CMAKE_SYSTEM_VERSION",
+                        tr("CMake System Version"), systemVersion, false);
       QString cxxCompiler = dialog.getCXXCompiler();
       m->insertProperty(QCMakeProperty::FILEPATH, "CMAKE_CXX_COMPILER",
                         tr("CXX compiler."), cxxCompiler, false);
