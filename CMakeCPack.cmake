@@ -65,16 +65,9 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     endif()
   endif()
 
-  # default component for IFW
-  if(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME)
-    set(_CPACK_IFW_COMPONENT_NAME ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
-  else()
-    set(_CPACK_IFW_COMPONENT_NAME Unspecified)
-  endif()
-  string(TOUPPER ${_CPACK_IFW_COMPONENT_NAME} _CPACK_IFW_COMPONENT_UNAME)
-
   if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
-    set(_CPACK_IFW_PACKAGE_ICON "set(CPACK_IFW_PACKAGE_ICON \"${CMake_SOURCE_DIR}/Source/QtDialog/CMakeSetup.ico\")")
+    set(_CPACK_IFW_PACKAGE_ICON
+        "set(CPACK_IFW_PACKAGE_ICON \"${CMake_SOURCE_DIR}/Source/QtDialog/CMakeSetup.ico\")")
     if(BUILD_QtDialog)
       set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/bin/cmake-gui.exe\", \"@StartMenuDir@/CMake (cmake-gui).lnk\");\n")
     endif()
@@ -87,7 +80,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     install(FILES "${CMake_SOURCE_DIR}/Source/QtIFW/cmake.org.html"
       DESTINATION "."
     )
-    set(_CPACK_IFW_COMPONENT_SCRIPT "set(CPACK_IFW_COMPONENT_${_CPACK_IFW_COMPONENT_UNAME}_SCRIPT \"${CMake_BINARY_DIR}/installscript.qs\")")
+    set(_CPACK_IFW_PACKAGE_SCRIPT "set(CPACK_IFW_COMPONENT_GROUP_CMAKE_SCRIPT \"${CMake_BINARY_DIR}/installscript.qs\")")
   endif()
 
   if(${CMAKE_SYSTEM_NAME} MATCHES Linux)

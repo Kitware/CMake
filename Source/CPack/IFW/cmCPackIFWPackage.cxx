@@ -121,7 +121,14 @@ cmCPackIFWPackage::cmCPackIFWPackage() :
 //----------------------------------------------------------------------------
 const char *cmCPackIFWPackage::GetOption(const std::string &op) const
 {
-  return Generator ? Generator->GetOption(op) : 0;
+  const char *option = Generator ? Generator->GetOption(op) : 0;
+  return option && *option ? option : 0;
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWPackage::IsOn(const std::string &op) const
+{
+  return Generator ? Generator->IsOn(op) : false;
 }
 
 //----------------------------------------------------------------------------
@@ -232,7 +239,6 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent *component)
   // Script
   if (const char* option = GetOption(prefix + "SCRIPT"))
     {
-    // TODO: add check file exist
     Script = option;
     }
 
@@ -306,7 +312,7 @@ int cmCPackIFWPackage::ConfigureFromComponent(cmCPackComponent *component)
 
 //----------------------------------------------------------------------------
 int
-cmCPackIFWPackage::ConfigureFromComponentGroup(cmCPackComponentGroup *group)
+cmCPackIFWPackage::ConfigureFromGroup(cmCPackComponentGroup *group)
 {
   if(!group) return 0;
 
@@ -335,6 +341,12 @@ cmCPackIFWPackage::ConfigureFromComponentGroup(cmCPackComponentGroup *group)
     Version = "1.0.0";
     }
 
+  // Script
+  if (const char* option = GetOption(prefix + "SCRIPT"))
+    {
+    Script = option;
+    }
+
   // Licenses
   if (const char* option = this->GetOption(prefix + "LICENSES"))
     {
@@ -356,6 +368,48 @@ cmCPackIFWPackage::ConfigureFromComponentGroup(cmCPackComponentGroup *group)
     }
 
   return 1;
+}
+
+//----------------------------------------------------------------------------
+int cmCPackIFWPackage::ConfigureFromGroup(const std::string &groupName)
+{
+  // Group configuration
+
+  cmCPackComponentGroup group;
+  std::string prefix = "CPACK_COMPONENT_GROUP_"
+      + cmsys::SystemTools::UpperCase(groupName)
+      + "_";
+
+  if (const char *option = GetOption(prefix + "DISPLAY_NAME"))
+    {
+    group.DisplayName = option;
+    }
+  else
+    {
+    group.DisplayName = group.Name;
+    }
+
+  if (const char* option = GetOption(prefix + "DESCRIPTION"))
+    {
+    group.Description = option;
+    }
+  group.IsBold = IsOn(prefix + "BOLD_TITLE");
+  group.IsExpandedByDefault = IsOn(prefix + "EXPANDED");
+
+  // Package configuration
+
+  group.Name = groupName;
+
+  if(Generator)
+    {
+    Name = Generator->GetGroupPackageName(&group);
+    }
+  else
+    {
+    Name = group.Name;
+    }
+
+  return ConfigureFromGroup(&group);
 }
 
 //----------------------------------------------------------------------------

@@ -97,7 +97,7 @@ protected: // Methods
 
   bool IsOnePackage() const;
 
-  std::string GetRootPackageName() const;
+  std::string GetRootPackageName();
 
   std::string GetGroupPackageName(cmCPackComponentGroup *group) const;
   std::string GetComponentPackageName(cmCPackComponent *component) const;
