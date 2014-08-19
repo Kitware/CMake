@@ -28,13 +28,15 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
       set(CMAKE_FLAGS "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
     endif()
+    if(NOT "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
+      # Avoid adding our own platform standard libraries for compilers
+      # from which we might detect implicit link libraries.
+      list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
+    endif()
     try_compile(CMAKE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
-      CMAKE_FLAGS "${CMAKE_FLAGS}"
-                  "-DCMAKE_${lang}_STANDARD_LIBRARIES="
-                  # We need ignore these warnings because some platforms need
-                  # CMAKE_${lang}_STANDARD_LIBRARIES to link properly and we
-                  # don't care when we are just determining the ABI.
+      CMAKE_FLAGS ${CMAKE_FLAGS}
+                  # Ignore unused flags when we are just determining the ABI.
                   "--no-warn-unused-cli"
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
