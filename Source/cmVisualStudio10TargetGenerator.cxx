@@ -1374,6 +1374,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AddFlag("CompileAs", compileAs);
         }
       clOptions.Parse(flags.c_str());
+      if(clOptions.HasFlag("AdditionalIncludeDirectories"))
+        {
+        clOptions.AppendFlag("AdditionalIncludeDirectories",
+                             "%(AdditionalIncludeDirectories)");
+        }
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
       clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
@@ -1615,7 +1620,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   Options& clOptions = *(this->ClOptions[configName]);
   this->WriteString("<ClCompile>\n", 2);
   clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
-  this->OutputIncludes(includes);
+  clOptions.AppendFlag("AdditionalIncludeDirectories", includes);
+  clOptions.AppendFlag("AdditionalIncludeDirectories",
+                       "%(AdditionalIncludeDirectories)");
   clOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
@@ -1645,23 +1652,6 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 
   this->WriteString("</ClCompile>\n", 2);
 }
-
-void cmVisualStudio10TargetGenerator::
-OutputIncludes(std::vector<std::string> const & includes)
-{
-  this->WriteString("<AdditionalIncludeDirectories>", 3);
-  for(std::vector<std::string>::const_iterator i =  includes.begin();
-      i != includes.end(); ++i)
-    {
-    std::string incDir = *i;
-    this->ConvertToWindowsSlash(incDir);
-    *this->BuildFileStream << cmVS10EscapeXML(incDir) << ";";
-    }
-  this->WriteString("%(AdditionalIncludeDirectories)"
-                    "</AdditionalIncludeDirectories>\n", 0);
-}
-
-
 
 //----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
@@ -1714,9 +1704,11 @@ WriteRCOptions(std::string const& configName,
   Options& clOptions = *(this->ClOptions[configName]);
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "RC");
-  this->OutputIncludes(includes);
 
   Options& rcOptions = *(this->RcOptions[configName]);
+  rcOptions.AppendFlag("AdditionalIncludeDirectories", includes);
+  rcOptions.AppendFlag("AdditionalIncludeDirectories",
+                       "%(AdditionalIncludeDirectories)");
   rcOptions.OutputFlagMap(*this->BuildFileStream, "      ");
   rcOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
 
@@ -2022,7 +2014,14 @@ WriteMidlOptions(std::string const& /*config*/,
   // only).  Perhaps there's something to be done to make this more automatic
   // on the CMake side?
   this->WriteString("<Midl>\n", 2);
-  this->OutputIncludes(includes);
+  this->WriteString("<AdditionalIncludeDirectories>", 3);
+  for(std::vector<std::string>::const_iterator i =  includes.begin();
+      i != includes.end(); ++i)
+    {
+    *this->BuildFileStream << cmVS10EscapeXML(*i) << ";";
+    }
+  this->WriteString("%(AdditionalIncludeDirectories)"
+                    "</AdditionalIncludeDirectories>\n", 0);
   this->WriteString("<OutputDirectory>$(IntDir)</OutputDirectory>\n", 3);
   this->WriteString("<HeaderFileName>%(Filename).h</HeaderFileName>\n", 3);
   this->WriteString(
@@ -2047,6 +2046,11 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->LocalGenerator->GetIncludeDirectories(includes,
                                                 this->GeneratorTarget,
                                                 "C", i->c_str());
+    for(std::vector<std::string>::iterator ii = includes.begin();
+        ii != includes.end(); ++ii)
+      {
+      this->ConvertToWindowsSlash(*ii);
+      }
     this->WritePlatformConfigTag("ItemDefinitionGroup", i->c_str(), 1);
     *this->BuildFileStream << "\n";
     //    output cl compile flags <ClCompile></ClCompile>

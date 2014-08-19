@@ -324,10 +324,6 @@ cmVisualStudioGeneratorOptions
         fout << sep << cmVisualStudio10GeneratorOptionsEscapeForXML(*i);
         sep = ";";
         }
-      if (m->first == "AdditionalIncludeDirectories")
-        {
-        fout << sep << "%(AdditionalIncludeDirectories)";
-        }
       fout  << "</" << m->first << ">\n";
       }
     }

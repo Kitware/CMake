@@ -31,7 +31,10 @@ public:
   void AddFlag(const char* flag, const char* value);
   void AddFlag(const char* flag, std::vector<std::string> const& value);
   void AppendFlag(std::string const& flag, std::string const& value);
+  void AppendFlag(std::string const& flag,
+                  std::vector<std::string> const& value);
   void RemoveFlag(const char* flag);
+  bool HasFlag(std::string const& flag) const;
   const char* GetFlag(const char* flag);
 
 protected:
