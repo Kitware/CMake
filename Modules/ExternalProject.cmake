@@ -26,7 +26,7 @@
 #    [CVS_MODULE mod]            # Module to checkout from CVS repo
 #    [CVS_TAG tag]               # Tag to checkout from CVS repo
 #    [SVN_REPOSITORY url]        # URL of Subversion repo
-#    [SVN_REVISION rev]          # Revision to checkout from Subversion repo
+#    [SVN_REVISION -r<rev>]      # Revision to checkout from Subversion repo
 #    [SVN_USERNAME john ]        # Username for Subversion checkout and update
 #    [SVN_PASSWORD doe ]         # Password for Subversion checkout and update
 #    [SVN_TRUST_CERT 1 ]         # Trust the Subversion server site certificate
