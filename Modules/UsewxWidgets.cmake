@@ -88,8 +88,11 @@ if   (wxWidgets_FOUND)
   endif()
 
   if   (wxWidgets_CXX_FLAGS)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${wxWidgets_CXX_FLAGS}")
-    MSG("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS}")
+    # Flags are expected to be a string here, not a list.
+    string(REPLACE ";" " " wxWidgets_CXX_FLAGS_str "${wxWidgets_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${wxWidgets_CXX_FLAGS_str}")
+    MSG("wxWidgets_CXX_FLAGS=${wxWidgets_CXX_FLAGS_str}")
+    unset(wxWidgets_CXX_FLAGS_str)
   endif()
 
   # DEPRECATED JW
