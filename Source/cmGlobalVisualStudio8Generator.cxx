@@ -136,6 +136,14 @@ void cmGlobalVisualStudio8Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)
 {
+  for(std::vector<std::string>::const_iterator it = lang.begin();
+      it != lang.end(); ++it)
+    {
+    if(*it == "ASM_MASM")
+      {
+      this->MasmEnabled = true;
+      }
+    }
   this->AddPlatformDefinitions(mf);
   cmGlobalVisualStudio7Generator::EnableLanguage(lang, mf, optional);
 }

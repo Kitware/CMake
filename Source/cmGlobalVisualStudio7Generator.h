@@ -102,6 +102,9 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
+  /** Is the Microsoft Assembler enabled?  */
+  bool IsMasmEnabled() const { return this->MasmEnabled; }
+
   // Encoding for Visual Studio files
   virtual std::string Encoding();
 
@@ -173,6 +176,7 @@ protected:
   // There is one SLN file per project.
   std::string CurrentProject;
   std::string PlatformName;
+  bool MasmEnabled;
 
 private:
   char* IntelProjectVersion;

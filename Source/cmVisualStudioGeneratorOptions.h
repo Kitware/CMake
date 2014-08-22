@@ -28,6 +28,7 @@ public:
   {
     Compiler,
     ResourceCompiler,
+    MasmCompiler,
     Linker,
     FortranCompiler
   };

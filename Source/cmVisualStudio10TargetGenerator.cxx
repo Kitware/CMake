@@ -24,18 +24,22 @@
 #include "cmVS10RCFlagTable.h"
 #include "cmVS10LinkFlagTable.h"
 #include "cmVS10LibFlagTable.h"
+#include "cmVS10MASMFlagTable.h"
 #include "cmVS11CLFlagTable.h"
 #include "cmVS11RCFlagTable.h"
 #include "cmVS11LinkFlagTable.h"
 #include "cmVS11LibFlagTable.h"
+#include "cmVS11MASMFlagTable.h"
 #include "cmVS12CLFlagTable.h"
 #include "cmVS12RCFlagTable.h"
 #include "cmVS12LinkFlagTable.h"
 #include "cmVS12LibFlagTable.h"
+#include "cmVS12MASMFlagTable.h"
 #include "cmVS14CLFlagTable.h"
 #include "cmVS14RCFlagTable.h"
 #include "cmVS14LinkFlagTable.h"
 #include "cmVS14LibFlagTable.h"
+#include "cmVS14MASMFlagTable.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -107,6 +111,24 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
       { return cmVS11LinkFlagTable; }
     else
       { return cmVS10LinkFlagTable; }
+    }
+  return 0;
+}
+
+cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetMasmFlagTable() const
+{
+  if(this->MSTools)
+    {
+    cmLocalVisualStudioGenerator::VSVersion
+      v = this->LocalGenerator->GetVersion();
+    if(v >= cmLocalVisualStudioGenerator::VS14)
+      { return cmVS14MASMFlagTable; }
+    else if(v >= cmLocalVisualStudioGenerator::VS12)
+      { return cmVS12MASMFlagTable; }
+    else if(v == cmLocalVisualStudioGenerator::VS11)
+      { return cmVS11MASMFlagTable; }
+    else
+      { return cmVS10MASMFlagTable; }
     }
   return 0;
 }
@@ -248,6 +270,10 @@ void cmVisualStudio10TargetGenerator::Generate()
       return;
       }
     if(!this->ComputeRcOptions())
+      {
+      return;
+      }
+    if(!this->ComputeMasmOptions())
       {
       return;
       }
@@ -1192,7 +1218,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       {
       tool = "ClCompile";
       }
-    else if (lang == "ASM_NASM" &&
+    else if (lang == "ASM_MASM" &&
              this->GlobalGenerator->IsMasmEnabled())
       {
       tool = "MASM";
@@ -1715,6 +1741,71 @@ WriteRCOptions(std::string const& configName,
   this->WriteString("</ResourceCompile>\n", 2);
 }
 
+//----------------------------------------------------------------------------
+bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
+{
+  if(!this->GlobalGenerator->IsMasmEnabled())
+    {
+    return true;
+    }
+  std::vector<std::string> const* configs =
+    this->GlobalGenerator->GetConfigurations();
+  for(std::vector<std::string>::const_iterator i = configs->begin();
+      i != configs->end(); ++i)
+    {
+    if(!this->ComputeMasmOptions(*i))
+      {
+      return false;
+      }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmVisualStudio10TargetGenerator::ComputeMasmOptions(
+  std::string const& configName)
+{
+  cmsys::auto_ptr<Options> pOptions(
+    new Options(this->LocalGenerator, Options::MasmCompiler,
+                this->GetMasmFlagTable()));
+  Options& masmOptions = *pOptions;
+
+  std::string CONFIG = cmSystemTools::UpperCase(configName);
+  std::string configFlagsVar = std::string("CMAKE_ASM_MASM_FLAGS_") + CONFIG;
+  std::string flags =
+      std::string(this->Makefile->GetSafeDefinition("CMAKE_ASM_MASM_FLAGS")) +
+      std::string(" ") +
+      std::string(this->Makefile->GetSafeDefinition(configFlagsVar));
+
+  masmOptions.Parse(flags.c_str());
+  this->MasmOptions[configName] = pOptions.release();
+  return true;
+}
+
+void cmVisualStudio10TargetGenerator::
+WriteMasmOptions(std::string const& configName,
+                 std::vector<std::string> const& includes)
+{
+  if(!this->MSTools || !this->GlobalGenerator->IsMasmEnabled())
+    {
+    return;
+    }
+  this->WriteString("<MASM>\n", 2);
+
+  // Preprocessor definitions and includes are shared with clOptions.
+  Options& clOptions = *(this->ClOptions[configName]);
+  clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
+                                          "\n", "ASM_MASM");
+
+  Options& masmOptions = *(this->MasmOptions[configName]);
+  masmOptions.AppendFlag("IncludePaths", includes);
+  masmOptions.AppendFlag("IncludePaths", "%(IncludePaths)");
+  masmOptions.OutputFlagMap(*this->BuildFileStream, "      ");
+  masmOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
+
+  this->WriteString("</MASM>\n", 2);
+}
+
 
 void
 cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
@@ -2059,6 +2150,7 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
       this->WriteClOptions(*i, includes);
       //    output rc compile flags <ResourceCompile></ResourceCompile>
       this->WriteRCOptions(*i, includes);
+      this->WriteMasmOptions(*i, includes);
       }
     //    output midl flags       <Midl></Midl>
     this->WriteMidlOptions(*i, includes);
