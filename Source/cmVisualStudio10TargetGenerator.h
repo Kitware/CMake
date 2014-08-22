@@ -134,6 +134,7 @@ private:
   std::string GUID;
   std::string Name;
   bool MSTools;
+  bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
