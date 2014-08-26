@@ -50,6 +50,24 @@ if(NOT _INCLUDED_FILE)
   include(Platform/${CMAKE_SYSTEM_NAME}-${CMAKE_BASE_NAME} OPTIONAL)
 endif()
 
+# This should be included before the _INIT variables are
+# used to initialize the cache.  Since the rule variables
+# have if blocks on them, users can still define them here.
+# But, it should still be after the platform file so changes can
+# be made to those values.
+
+if(CMAKE_USER_MAKE_RULES_OVERRIDE)
+  # Save the full path of the file so try_compile can use it.
+  include(${CMAKE_USER_MAKE_RULES_OVERRIDE} RESULT_VARIABLE _override)
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE "${_override}")
+endif()
+
+if(CMAKE_USER_MAKE_RULES_OVERRIDE_ASM)
+  # Save the full path of the file so try_compile can use it.
+  include(${CMAKE_USER_MAKE_RULES_OVERRIDE_ASM} RESULT_VARIABLE _override)
+  set(CMAKE_USER_MAKE_RULES_OVERRIDE_ASM "${_override}")
+endif()
+
 # Set default assembler file extensions:
 if(NOT CMAKE_ASM${ASM_DIALECT}_SOURCE_FILE_EXTENSIONS)
   set(CMAKE_ASM${ASM_DIALECT}_SOURCE_FILE_EXTENSIONS s;S;asm)
