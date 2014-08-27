@@ -229,13 +229,12 @@ else()
 endif()
 
 #=====================================================================
+# Determine whether unix or win32 paths should be used
 #=====================================================================
-if(WIN32 AND NOT CYGWIN AND NOT MSYS)
+if(WIN32 AND NOT CYGWIN AND NOT MSYS AND NOT CMAKE_CROSSCOMPILING)
   set(wxWidgets_FIND_STYLE "win32")
 else()
-  if(UNIX OR MSYS)
-    set(wxWidgets_FIND_STYLE "unix")
-  endif()
+  set(wxWidgets_FIND_STYLE "unix")
 endif()
 
 #=====================================================================
