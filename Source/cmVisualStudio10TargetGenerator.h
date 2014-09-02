@@ -97,6 +97,7 @@ private:
   void WriteLinkOptions(std::string const& config);
   void WriteMidlOptions(std::string const& config,
                         std::vector<std::string> const & includes);
+  void WriteAntBuildOptions(std::string const& config);
   void OutputLinkIncremental(std::string const& configName);
   void WriteCustomRule(cmSourceFile const* source,
                        cmCustomCommand const & command);

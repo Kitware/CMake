@@ -615,7 +615,8 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
         configType += "StaticLibrary";
         break;
       case cmTarget::EXECUTABLE:
-        if(this->NsightTegra)
+        if(this->NsightTegra &&
+           !this->Target->GetPropertyAsBool("ANDROID_GUI"))
           {
           // Android executables are .so too.
           configType += "DynamicLibrary";
@@ -2019,6 +2020,50 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     }
 }
 
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
+  std::string const&)
+{
+  // Look through the sources for AndroidManifest.xml and use
+  // its location as the root source directory.
+  std::string rootDir = this->Makefile->GetCurrentDirectory();
+  {
+  std::vector<cmSourceFile const*> extraSources;
+  this->GeneratorTarget->GetExtraSources(extraSources, "");
+  for(std::vector<cmSourceFile const*>::const_iterator si =
+        extraSources.begin(); si != extraSources.end(); ++si)
+    {
+    if("androidmanifest.xml" == cmSystemTools::LowerCase(
+         (*si)->GetLocation().GetName()))
+      {
+      rootDir = (*si)->GetLocation().GetDirectory();
+      break;
+      }
+    }
+  }
+
+  // Tell MSBuild to launch Ant.
+  {
+  std::string antBuildPath = rootDir;
+  this->WriteString("<AntBuild>\n", 2);
+  this->WriteString("<AntBuildPath>", 3);
+  this->ConvertToWindowsSlash(antBuildPath);
+  (*this->BuildFileStream) <<
+    cmVS10EscapeXML(antBuildPath) << "</AntBuildPath>\n";
+  }
+
+  {
+  std::string manifest_xml = rootDir + "/AndroidManifest.xml";
+  this->ConvertToWindowsSlash(manifest_xml);
+  this->WriteString("<AndroidManifestLocation>", 3);
+  (*this->BuildFileStream) <<
+    cmVS10EscapeXML(manifest_xml) << "</AndroidManifestLocation>\n";
+  }
+
+  this->WriteString("</AntBuild>\n", 2);
+}
+
 //----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 {
@@ -2390,6 +2435,12 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->WriteLinkOptions(*i);
     //    output lib flags       <Lib></Lib>
     this->WriteLibOptions(*i);
+    if(this->NsightTegra &&
+       this->Target->GetType() == cmTarget::EXECUTABLE &&
+       this->Target->GetPropertyAsBool("ANDROID_GUI"))
+      {
+      this->WriteAntBuildOptions(*i);
+      }
     this->WriteString("</ItemDefinitionGroup>\n", 1);
     }
 }
