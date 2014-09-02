@@ -48,7 +48,7 @@ static const char * cmDocumentationOptions[][2] =
   {"--output-on-failure", "Output anything outputted by the test program "
     "if the test should fail."},
   {"-F", "Enable failover."},
-  {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the"
+  {"-j <jobs>, --parallel <jobs>", "Run the tests in parallel using the "
    "given number of jobs."},
   {"-Q,--quiet", "Make ctest quiet."},
   {"-O <file>, --output-log <file>", "Output to log file"},
@@ -98,7 +98,7 @@ static const char * cmDocumentationOptions[][2] =
   {"--test-timeout", "The time limit in seconds, internal use only."},
   {"--tomorrow-tag", "Nightly or experimental starts with next day tag."},
   {"--ctest-config", "The configuration file used to initialize CTest state "
-  "when submitting dashboards."},
+   "when submitting dashboards."},
   {"--overwrite", "Overwrite CTest configuration option."},
   {"--extra-submit <file>[;<file>]", "Submit extra files to the dashboard."},
   {"--force-new-ctest-process", "Run child CTest instances as new processes"},
