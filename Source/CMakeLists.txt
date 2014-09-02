@@ -308,6 +308,7 @@ set(SRCS
   cmTest.h
   cmTestGenerator.cxx
   cmTestGenerator.h
+  cmUuid.cxx
   cmVariableWatch.cxx
   cmVariableWatch.h
   cmVersion.cxx
