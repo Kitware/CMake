@@ -324,6 +324,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Setup default property values.
   if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
     {
+    this->SetPropertyDefault("ANDROID_API", 0);
     this->SetPropertyDefault("INSTALL_NAME_DIR", 0);
     this->SetPropertyDefault("INSTALL_RPATH", "");
     this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");

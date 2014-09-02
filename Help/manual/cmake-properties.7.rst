@@ -79,6 +79,7 @@ Properties on Targets
    :maxdepth: 1
 
    /prop_tgt/ALIASED_TARGET
+   /prop_tgt/ANDROID_API
    /prop_tgt/ANDROID_GUI
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY_CONFIG
    /prop_tgt/ARCHIVE_OUTPUT_DIRECTORY
