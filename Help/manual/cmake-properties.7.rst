@@ -235,6 +235,7 @@ Properties on Targets
    /prop_tgt/VS_SCC_LOCALPATH
    /prop_tgt/VS_SCC_PROJECTNAME
    /prop_tgt/VS_SCC_PROVIDER
+   /prop_tgt/VS_WINRT_COMPONENT
    /prop_tgt/VS_WINRT_EXTENSIONS
    /prop_tgt/VS_WINRT_REFERENCES
    /prop_tgt/WIN32_EXECUTABLE

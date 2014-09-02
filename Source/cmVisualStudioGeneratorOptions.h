@@ -53,6 +53,7 @@ public:
   bool UsingSBCS() const;
 
   bool IsDebug() const;
+  bool IsWinRt() const;
   // Write options to output.
   void OutputPreprocessorDefinitions(std::ostream& fout,
                                      const char* prefix,

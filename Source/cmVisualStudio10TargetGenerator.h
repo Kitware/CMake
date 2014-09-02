@@ -67,8 +67,17 @@ private:
   void WriteDotNetReferences();
   void WriteEmbeddedResourceGroup();
   void WriteWinRTReferences();
+  void WriteWinRTPackageCertificateKeyFile();
   void WritePathAndIncrementalLinkOptions();
   void WriteItemDefinitionGroups();
+  void VerifyNecessaryFiles();
+  void WriteMissingFiles();
+  void WriteMissingFilesWP80();
+  void WriteMissingFilesWP81();
+  void WriteMissingFilesWS80();
+  void WriteMissingFilesWS81();
+  void WriteCommonMissingFiles(const std::string& manifestFile);
+  void WriteTargetSpecificReferences();
 
   bool ComputeClOptions();
   bool ComputeClOptions(std::string const& configName);
@@ -130,10 +139,14 @@ private:
   std::string GUID;
   std::string Name;
   bool MSTools;
+  bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;
   cmLocalVisualStudio7Generator* LocalGenerator;
   std::set<cmSourceFile const*> SourcesVisited;
+  bool IsMissingFiles;
+  std::vector<std::string> AddedFiles;
+  std::string DefaultArtifactDir;
 
   typedef std::map<std::string, ToolSources> ToolSourceMap;
   ToolSourceMap Tools;

@@ -53,6 +53,8 @@ struct ExternalObjectsTag {};
 struct IDLSourcesTag {};
 struct ResxTag {};
 struct ModuleDefinitionFileTag {};
+struct AppManifestTag{};
+struct CertificatesTag{};
 
 #if !defined(_MSC_VER) || _MSC_VER >= 1310
 template<typename Tag, typename OtherTag>
@@ -194,6 +196,14 @@ struct TagVisitor
     else if(ext == "resx")
       {
       DoAccept<IsSameTag<Tag, ResxTag>::Result>::Do(this->Data, sf);
+      }
+    else if (ext == "appxmanifest")
+      {
+      DoAccept<IsSameTag<Tag, AppManifestTag>::Result>::Do(this->Data, sf);
+      }
+    else if (ext == "pfx")
+      {
+      DoAccept<IsSameTag<Tag, CertificatesTag>::Result>::Do(this->Data, sf);
       }
     else if(this->Header.find(sf->GetFullPath().c_str()))
       {
@@ -426,6 +436,24 @@ void cmGeneratorTarget
   ResxData data;
   IMPLEMENT_VISIT_IMPL(Resx, COMMA cmGeneratorTarget::ResxData)
   srcs = data.ResxSources;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget
+::GetAppManifest(std::vector<cmSourceFile const*>& data,
+                 const std::string& config) const
+{
+  IMPLEMENT_VISIT(AppManifest);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget
+::GetCertificates(std::vector<cmSourceFile const*>& data,
+                  const std::string& config) const
+{
+  IMPLEMENT_VISIT(Certificates);
 }
 
 //----------------------------------------------------------------------------

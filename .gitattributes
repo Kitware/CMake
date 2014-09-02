@@ -12,6 +12,8 @@ configure        crlf=input
 *.dsp           -crlf
 *.dsptemplate   -crlf
 *.dsw           -crlf
+*.pfx           -crlf
+*.png           -crlf
 *.sln           -crlf
 *.vcproj        -crlf
 
