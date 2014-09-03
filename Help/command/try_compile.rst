@@ -36,9 +36,10 @@ cleaned automatically.  For debugging, --debug-trycompile can be
 passed to cmake to avoid this clean.  However, multiple sequential
 try_compile operations reuse this single output directory.  If you use
 --debug-trycompile, you can only debug one try_compile call at a time.
-The recommended procedure is to configure with cmake all the way
-through once, then delete the cache entry associated with the
-try_compile call of interest, and then re-run cmake again with
+The recommended procedure is to protect all try_compile calls in your
+project by ``if(NOT DEFINED RESULT_VAR)`` logic, configure with cmake
+all the way through once, then delete the cache entry associated with
+the try_compile call of interest, and then re-run cmake again with
 --debug-trycompile.
 
 Some extra flags that can be included are, INCLUDE_DIRECTORIES,
