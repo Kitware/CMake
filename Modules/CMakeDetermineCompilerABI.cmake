@@ -52,7 +52,7 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       message(STATUS "Detecting ${lang} compiler ABI info - done")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
-      file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 2 REGEX "INFO:[^[]*\\[")
+      file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 2 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
       foreach(info ${ABI_STRINGS})
         if("${info}" MATCHES "INFO:sizeof_dptr\\[0*([^]]*)\\]")
           set(ABI_SIZEOF_DPTR "${CMAKE_MATCH_1}")

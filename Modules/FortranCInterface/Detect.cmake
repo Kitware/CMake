@@ -67,7 +67,7 @@ endif()
 set(FortranCInterface_SYMBOLS)
 if(FortranCInterface_EXE)
   file(STRINGS "${FortranCInterface_EXE}" _info_strings
-    LIMIT_COUNT 8 REGEX "INFO:[^[]*\\[")
+    LIMIT_COUNT 8 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
   foreach(info ${_info_strings})
     if("${info}" MATCHES "INFO:symbol\\[([^]]*)\\]")
       list(APPEND FortranCInterface_SYMBOLS ${CMAKE_MATCH_1})
