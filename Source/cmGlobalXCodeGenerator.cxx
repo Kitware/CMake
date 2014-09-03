@@ -877,7 +877,7 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     // (Xcode 4.6 does not like explicitFileType=folder).
     if(cmSystemTools::FileIsDirectory(fullpath.c_str()))
       {
-      fileType = "folder";
+      fileType = (ext == "xcassets"? "folder.assetcatalog" : "folder");
       useLastKnownFileType = true;
       }
     else
