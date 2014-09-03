@@ -378,7 +378,25 @@ endfunction()
 function(get_bundle_all_executables bundle exes_var)
   set(exes "")
 
-  file(GLOB_RECURSE file_list "${bundle}/*")
+  if(UNIX)
+    find_program(find_cmd "find")
+    mark_as_advanced(find_cmd)
+  endif()
+
+  # find command is much quicker than checking every file one by one on Unix
+  # which can take long time for large bundles, and since anyway we expect
+  # executable to have execute flag set we can narrow the list much quicker.
+  if(find_cmd)
+    execute_process(COMMAND "${find_cmd}" "${bundle}"
+      -type f \( -perm -0100 -o -perm -0010 -o -perm -0001 \)
+      OUTPUT_VARIABLE file_list
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+    string(REPLACE "\n" ";" file_list "${file_list}")
+  else()
+    file(GLOB_RECURSE file_list "${bundle}/*")
+  endif()
+
   foreach(f ${file_list})
     is_file_executable("${f}" is_executable)
     if(is_executable)
