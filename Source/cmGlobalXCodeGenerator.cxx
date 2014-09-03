@@ -864,6 +864,13 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
     }
   if(fileType.empty())
     {
+    // Compute the extension without leading '.'.
+    std::string ext = cmSystemTools::GetFilenameLastExtension(fullpath);
+    if(!ext.empty())
+      {
+      ext = ext.substr(1);
+      }
+
     // If fullpath references a directory, then we need to specify
     // lastKnownFileType as folder in order for Xcode to be able to
     // open the contents of the folder.
@@ -875,13 +882,6 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
       }
     else
       {
-      // Compute the extension without leading '.'.
-      std::string ext = cmSystemTools::GetFilenameLastExtension(fullpath);
-      if(!ext.empty())
-        {
-        ext = ext.substr(1);
-        }
-
       fileType = GetSourcecodeValueFromFileExtension(
         ext, lang, useLastKnownFileType);
       }
