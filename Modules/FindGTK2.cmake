@@ -540,7 +540,11 @@ function(_GTK2_ADD_TARGET _var)
         endif()
 
         if(_${_var}_OPTIONAL_INCLUDES)
-            _GTK2_ADD_TARGET_INCLUDE_DIRS(${_var} ${_${_var}_OPTIONAL_INCLUDES})
+            foreach(_D ${_${_var}_OPTIONAL_INCLUDES})
+                if(_D)
+                    _GTK2_ADD_TARGET_INCLUDE_DIRS(${_var} ${_D})
+                endif()
+            endforeach()
         endif()
 
         if(GTK2_USE_IMPORTED_TARGETS)
