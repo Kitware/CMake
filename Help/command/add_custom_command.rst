@@ -45,7 +45,8 @@ The options are:
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
-  If more than one command is specified they will be executed in order.
+  If more than one ``COMMAND`` is specified they will be executed in order,
+  but *not* necessarily composed into a stateful shell or batch script.
   The optional ``ARGS`` argument is for backward compatibility and
   will be ignored.
 
