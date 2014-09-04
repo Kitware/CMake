@@ -41,7 +41,7 @@
 # ::
 #
 #   GET_PREREQUISITES(<target> <prerequisites_var> <exclude_system> <recurse>
-#                     <exepath> <dirs>)
+#                     <exepath> <dirs> [<rpaths>])
 #
 # Get the list of shared library files required by <target>.  The list
 # in the variable named <prerequisites_var> should be empty on first
@@ -113,7 +113,8 @@
 #
 # ::
 #
-#   GP_RESOLVE_ITEM(<context> <item> <exepath> <dirs> <resolved_item_var>)
+#   GP_RESOLVE_ITEM(<context> <item> <exepath> <dirs> <resolved_item_var>
+#                   [<rpaths>])
 #
 # Resolve an item into an existing full path file.
 #
@@ -122,7 +123,8 @@
 #
 # ::
 #
-#   GP_RESOLVED_FILE_TYPE(<original_file> <file> <exepath> <dirs> <type_var>)
+#   GP_RESOLVED_FILE_TYPE(<original_file> <file> <exepath> <dirs> <type_var>
+#                         [<rpaths>])
 #
 # Return the type of <file> with respect to <original_file>.  String
 # describing type of prerequisite is returned in variable named
@@ -321,6 +323,7 @@ endfunction()
 function(gp_resolve_item context item exepath dirs resolved_item_var)
   set(resolved 0)
   set(resolved_item "${item}")
+  set(rpaths "${ARGV5}")
 
   # Is it already resolved?
   #
@@ -375,9 +378,9 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
       string(REPLACE "@rpath/" "" norpath_item "${item}")
 
       set(ri "ri-NOTFOUND")
-      find_file(ri "${norpath_item}" ${exepath} ${dirs} NO_DEFAULT_PATH)
+      find_file(ri "${norpath_item}" ${exepath} ${dirs} ${rpaths} NO_DEFAULT_PATH)
       if(ri)
-        #message(STATUS "info: 'find_file' in exepath/dirs (${ri})")
+        #message(STATUS "info: 'find_file' in exepath/dirs/rpaths (${ri})")
         set(resolved 1)
         set(resolved_item "${ri}")
         set(ri "ri-NOTFOUND")
@@ -471,6 +474,7 @@ endfunction()
 
 
 function(gp_resolved_file_type original_file file exepath dirs type_var)
+  set(rpaths "${ARGV5}")
   #message(STATUS "**")
 
   if(NOT IS_ABSOLUTE "${original_file}")
@@ -489,7 +493,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
 
   if(NOT is_embedded)
     if(NOT IS_ABSOLUTE "${file}")
-      gp_resolve_item("${original_file}" "${file}" "${exepath}" "${dirs}" resolved_file)
+      gp_resolve_item("${original_file}" "${file}" "${exepath}" "${dirs}" resolved_file "${rpaths}")
     endif()
 
     string(TOLOWER "${original_file}" original_lower)
@@ -612,6 +616,7 @@ endfunction()
 function(get_prerequisites target prerequisites_var exclude_system recurse exepath dirs)
   set(verbose 0)
   set(eol_char "E")
+  set(rpaths "${ARGV6}")
 
   if(NOT IS_ABSOLUTE "${target}")
     message("warning: target '${target}' is not absolute...")
@@ -834,7 +839,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
     if(add_item AND ${exclude_system})
       set(type "")
-      gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type)
+      gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type "${rpaths}")
 
       if("${type}" STREQUAL "system")
         set(add_item 0)
@@ -855,7 +860,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
         # that the analysis tools can simply accept it as input.
         #
         if(NOT list_length_before_append EQUAL list_length_after_append)
-          gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item)
+          gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item "${rpaths}")
           set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
         endif()
       endif()
@@ -874,7 +879,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   if(${recurse})
     set(more_inputs ${unseen_prereqs})
     foreach(input ${more_inputs})
-      get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse} "${exepath}" "${dirs}")
+      get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse} "${exepath}" "${dirs}" "${rpaths}")
     endforeach()
   endif()
 
