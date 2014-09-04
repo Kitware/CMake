@@ -830,16 +830,14 @@ cmGlobalXCodeGenerator::CreateXCodeFileReferenceFromPath(
   const std::string &lang,
   cmSourceFile* sf)
 {
-  std::string fname = fullpath;
-  cmXCodeObject* fileRef = this->FileRefs[fname];
+  std::string key = GetGroupMapKeyFromPath(cmtarget, fullpath);
+  cmXCodeObject* fileRef = this->FileRefs[key];
   if(!fileRef)
     {
     fileRef = this->CreateObject(cmXCodeObject::PBXFileReference);
-    std::string comment = fname;
-    fileRef->SetComment(fname.c_str());
-    this->FileRefs[fname] = fileRef;
+    fileRef->SetComment(fullpath);
+    this->FileRefs[key] = fileRef;
     }
-  std::string key = GetGroupMapKeyFromPath(cmtarget, fullpath);
   cmXCodeObject* group = this->GroupMap[key];
   cmXCodeObject* children = group->GetObject("children");
   if (!children->HasObject(fileRef))
