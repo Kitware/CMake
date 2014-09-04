@@ -21,6 +21,7 @@
 #include "cmTarget.h"
 #include "cmNewLineStyle.h"
 #include "cmGeneratorTarget.h"
+#include "cmExpandedCommandArgument.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -375,7 +376,35 @@ public:
   /**
     * Get the Policies Instance
     */
- cmPolicies *GetPolicies() const;
+  cmPolicies *GetPolicies() const;
+
+  struct cmCMP0054Id
+  {
+    cmCMP0054Id(cmListFileContext const& context):
+        Context(context)
+    {
+
+    }
+
+    bool operator< (cmCMP0054Id const& id) const
+    {
+      if(this->Context.FilePath != id.Context.FilePath)
+        return this->Context.FilePath < id.Context.FilePath;
+
+      return this->Context.Line < id.Context.Line;
+    }
+
+    cmListFileContext Context;
+  };
+
+  mutable std::set<cmCMP0054Id> CMP0054ReportedIds;
+
+  /**
+   * Determine if the given context, name pair has already been reported
+   * in context of CMP0054.
+   */
+  bool HasCMP0054AlreadyBeenReported(
+    cmListFileContext context) const;
 
   /**
    * Add an auxiliary directory to the build.
@@ -770,6 +799,10 @@ public:
    */
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<std::string>& outArgs) const;
+
+  bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
+                       std::vector<cmExpandedCommandArgument>& outArgs) const;
+
   /**
    * Get the instance
    */

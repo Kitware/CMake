@@ -34,7 +34,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
 
       std::string errorString;
 
-      std::vector<std::string> expandedArguments;
+      std::vector<cmExpandedCommandArgument> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
       cmake::MessageType messageType;
 

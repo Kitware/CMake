@@ -15,6 +15,7 @@
 // like to have CMake to build CMake.
 #include "cmCommands.h"
 #include "cmConditionEvaluator.cxx"
+#include "cmExpandedCommandArgument.cxx"
 #include "cmGeneratorExpressionEvaluationFile.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"

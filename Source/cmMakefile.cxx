@@ -3292,6 +3292,7 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
   this->FunctionBlockerBarriers.pop_back();
 }
 
+//----------------------------------------------------------------------------
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
   std::vector<std::string>& outArgs) const
@@ -3322,6 +3323,47 @@ bool cmMakefile::ExpandArguments(
     else
       {
       cmSystemTools::ExpandListArgument(value, outArgs);
+      }
+    }
+  return !cmSystemTools::GetFatalErrorOccured();
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::ExpandArguments(
+  std::vector<cmListFileArgument> const& inArgs,
+  std::vector<cmExpandedCommandArgument>& outArgs) const
+{
+  std::vector<cmListFileArgument>::const_iterator i;
+  std::string value;
+  outArgs.reserve(inArgs.size());
+  for(i = inArgs.begin(); i != inArgs.end(); ++i)
+    {
+    // No expansion in a bracket argument.
+    if(i->Delim == cmListFileArgument::Bracket)
+      {
+      outArgs.push_back(cmExpandedCommandArgument(i->Value, true));
+      continue;
+      }
+    // Expand the variables in the argument.
+    value = i->Value;
+    this->ExpandVariablesInString(value, false, false, false,
+                                  i->FilePath, i->Line,
+                                  false, false);
+
+    // If the argument is quoted, it should be one argument.
+    // Otherwise, it may be a list of arguments.
+    if(i->Delim == cmListFileArgument::Quoted)
+      {
+      outArgs.push_back(cmExpandedCommandArgument(value, true));
+      }
+    else
+      {
+      std::vector<std::string> stringArgs;
+      cmSystemTools::ExpandListArgument(value, stringArgs);
+      for(size_t j = 0; j < stringArgs.size(); ++j)
+        {
+        outArgs.push_back(cmExpandedCommandArgument(stringArgs[j], false));
+        }
       }
     }
   return !cmSystemTools::GetFatalErrorOccured();
@@ -4938,12 +4980,14 @@ void cmMakefile::PopPolicyBarrier(bool reportError)
   this->PolicyBarriers.pop_back();
 }
 
+//----------------------------------------------------------------------------
 bool cmMakefile::SetPolicyVersion(const char *version)
 {
   return this->GetCMakeInstance()->GetPolicies()->
     ApplyPolicyVersion(this,version);
 }
 
+//----------------------------------------------------------------------------
 cmPolicies *cmMakefile::GetPolicies() const
 {
   if (!this->GetCMakeInstance())
@@ -4951,6 +4995,23 @@ cmPolicies *cmMakefile::GetPolicies() const
     return 0;
   }
   return this->GetCMakeInstance()->GetPolicies();
+}
+
+//----------------------------------------------------------------------------
+bool cmMakefile::HasCMP0054AlreadyBeenReported(
+  cmListFileContext context) const
+{
+  cmCMP0054Id id(context);
+
+  bool alreadyReported =
+    this->CMP0054ReportedIds.find(id) != this->CMP0054ReportedIds.end();
+
+  if(!alreadyReported)
+    {
+    this->CMP0054ReportedIds.insert(id);
+    }
+
+  return alreadyReported;
 }
 
 //----------------------------------------------------------------------------

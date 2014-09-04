@@ -14,7 +14,8 @@
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile):
   Makefile(makefile),
-  Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012))
+  Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012)),
+  Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
 {
 
 }
@@ -36,7 +37,7 @@ cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile):
 // directly. AND OR take variables or the values 0 or 1.
 
 bool cmConditionEvaluator::IsTrue(
-  const std::vector<std::string> &args,
+  const std::vector<cmExpandedCommandArgument> &args,
   std::string &errorString,
   cmake::MessageType &status)
 {
@@ -99,22 +100,93 @@ bool cmConditionEvaluator::IsTrue(
 }
 
 //=========================================================================
-const char* cmConditionEvaluator::GetVariableOrString(
-    const std::string& str) const
+const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
+  cmExpandedCommandArgument const& argument) const
 {
-  const char* def = this->Makefile.GetDefinition(str);
-
-  if(!def)
+  if((this->Policy54Status != cmPolicies::WARN &&
+     this->Policy54Status != cmPolicies::OLD) &&
+     argument.WasQuoted())
     {
-    def = str.c_str();
+    return 0;
+    }
+
+  const char* def = this->Makefile.GetDefinition(argument.GetValue());
+
+  if(def && argument.WasQuoted() && this->Policy54Status == cmPolicies::WARN)
+    {
+    bool hasBeenReported = this->Makefile.HasCMP0054AlreadyBeenReported(
+      this->Makefile.GetBacktrace()[0]);
+
+    if(!hasBeenReported)
+      {
+      cmOStringStream e;
+      e << (this->Makefile.GetPolicies()->GetPolicyWarning(
+        cmPolicies::CMP0054)) << "\n";
+      e << "Quoted variables like \"" << argument.GetValue() <<
+        "\" will no longer be dereferenced "
+        "when the policy is set to NEW.  "
+        "Since the policy is not set the OLD behavior will be used.";
+
+      this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      }
     }
 
   return def;
 }
 
 //=========================================================================
+const char* cmConditionEvaluator::GetVariableOrString(
+    const cmExpandedCommandArgument& argument) const
+{
+  const char* def = this->GetDefinitionIfUnquoted(argument);
+
+  if(!def)
+    {
+    def = argument.c_str();
+    }
+
+  return def;
+}
+
+//=========================================================================
+bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
+  cmExpandedCommandArgument& argument) const
+{
+  if((this->Policy54Status != cmPolicies::WARN &&
+     this->Policy54Status != cmPolicies::OLD) &&
+     argument.WasQuoted())
+    {
+    return false;
+    }
+
+  bool isKeyword = argument.GetValue() == keyword;
+
+  if(isKeyword && argument.WasQuoted() &&
+    this->Policy54Status == cmPolicies::WARN)
+    {
+    bool hasBeenReported = this->Makefile.HasCMP0054AlreadyBeenReported(
+      this->Makefile.GetBacktrace()[0]);
+
+    if(!hasBeenReported)
+      {
+      cmOStringStream e;
+      e << (this->Makefile.GetPolicies()->GetPolicyWarning(
+        cmPolicies::CMP0054)) << "\n";
+      e << "Quoted keywords like \"" << argument.GetValue() <<
+        "\" will no longer be interpreted as keywords "
+        "when the policy is set to NEW.  "
+        "Since the policy is not set the OLD behavior will be used.";
+
+      this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      }
+    }
+
+  return isKeyword;
+}
+
+//=========================================================================
 bool cmConditionEvaluator::GetBooleanValue(
-  std::string& arg) const
+  cmExpandedCommandArgument& arg) const
 {
   // Check basic constants.
   if (arg == "0")
@@ -149,14 +221,14 @@ bool cmConditionEvaluator::GetBooleanValue(
     }
 
   // Check definition.
-  const char* def = this->Makefile.GetDefinition(arg);
+  const char* def = this->GetDefinitionIfUnquoted(arg);
   return !cmSystemTools::IsOff(def);
 }
 
 //=========================================================================
 // Boolean value behavior from CMake 2.6.4 and below.
 bool cmConditionEvaluator::GetBooleanValueOld(
-  std::string const& arg, bool one) const
+  cmExpandedCommandArgument const& arg, bool one) const
 {
   if(one)
     {
@@ -166,12 +238,15 @@ bool cmConditionEvaluator::GetBooleanValueOld(
     else if(arg == "1")
       { return true; }
     else
-      { return !cmSystemTools::IsOff(this->Makefile.GetDefinition(arg)); }
+      {
+      const char* def = this->GetDefinitionIfUnquoted(arg);
+      return !cmSystemTools::IsOff(def);
+      }
     }
   else
     {
     // Old GetVariableOrNumber behavior.
-    const char* def = this->Makefile.GetDefinition(arg);
+    const char* def = this->GetDefinitionIfUnquoted(arg);
     if(!def && atoi(arg.c_str()))
       {
       def = arg.c_str();
@@ -183,7 +258,7 @@ bool cmConditionEvaluator::GetBooleanValueOld(
 //=========================================================================
 // returns the resulting boolean value
 bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
-  std::string &newArg,
+  cmExpandedCommandArgument &newArg,
   std::string &errorString,
   cmake::MessageType &status,
   bool oneArg) const
@@ -208,7 +283,7 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
       case cmPolicies::WARN:
         {
         cmPolicies* policies = this->Makefile.GetPolicies();
-        errorString = "An argument named \"" + newArg
+        errorString = "An argument named \"" + newArg.GetValue()
           + "\" appears in a conditional statement.  "
           + policies->GetPolicyWarning(cmPolicies::CMP0012);
         status = cmake::AUTHOR_WARNING;
@@ -219,7 +294,7 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
       case cmPolicies::REQUIRED_ALWAYS:
         {
         cmPolicies* policies = this->Makefile.GetPolicies();
-        errorString = "An argument named \"" + newArg
+        errorString = "An argument named \"" + newArg.GetValue()
           + "\" appears in a conditional statement.  "
           + policies->GetRequiredPolicyError(cmPolicies::CMP0012);
         status = cmake::FATAL_ERROR;
@@ -257,11 +332,11 @@ void cmConditionEvaluator::HandlePredicate(bool value, int &reducible,
 {
   if(value)
     {
-    *arg = "1";
+    *arg = cmExpandedCommandArgument("1", true);
     }
   else
     {
-    *arg = "0";
+    *arg = cmExpandedCommandArgument("0", true);
     }
   newArgs.erase(argP1);
   argP1 = arg;
@@ -279,11 +354,11 @@ void cmConditionEvaluator::HandleBinaryOp(bool value, int &reducible,
 {
   if(value)
     {
-    *arg = "1";
+    *arg = cmExpandedCommandArgument("1", true);
     }
   else
     {
-    *arg = "0";
+    *arg = cmExpandedCommandArgument("0", true);
     }
   newArgs.erase(argP2);
   newArgs.erase(argP1);
@@ -302,23 +377,23 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
   do
     {
     reducible = 0;
-    std::list<std::string>::iterator arg = newArgs.begin();
+    cmArgumentList::iterator arg = newArgs.begin();
     while (arg != newArgs.end())
       {
-      if (*arg == "(")
+      if (IsKeyword("(", *arg))
         {
         // search for the closing paren for this opening one
-        std::list<std::string>::iterator argClose;
+        cmArgumentList::iterator argClose;
         argClose = arg;
         argClose++;
         unsigned int depth = 1;
         while (argClose != newArgs.end() && depth)
           {
-          if (*argClose == "(")
+          if (this->IsKeyword("(", *argClose))
             {
               depth++;
             }
-          if (*argClose == ")")
+          if (this->IsKeyword(")", *argClose))
             {
               depth--;
             }
@@ -331,10 +406,10 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
           return false;
           }
         // store the reduced args in this vector
-        std::vector<std::string> newArgs2;
+        std::vector<cmExpandedCommandArgument> newArgs2;
 
         // copy to the list structure
-        std::list<std::string>::iterator argP1 = arg;
+        cmArgumentList::iterator argP1 = arg;
         argP1++;
         for(; argP1 != argClose; argP1++)
           {
@@ -347,11 +422,11 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
           this->IsTrue(newArgs2, errorString, status);
         if(value)
           {
-          *arg = "1";
+          *arg = cmExpandedCommandArgument("1", true);
           }
         else
           {
-          *arg = "0";
+          *arg = cmExpandedCommandArgument("0", true);
           }
         argP1 = arg;
         argP1++;
@@ -374,77 +449,78 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
   do
     {
     reducible = 0;
-    std::list<std::string>::iterator arg = newArgs.begin();
-    std::list<std::string>::iterator argP1;
-    std::list<std::string>::iterator argP2;
+    cmArgumentList::iterator arg = newArgs.begin();
+    cmArgumentList::iterator argP1;
+    cmArgumentList::iterator argP2;
     while (arg != newArgs.end())
       {
       argP1 = arg;
       this->IncrementArguments(newArgs,argP1,argP2);
       // does a file exist
-      if (*arg == "EXISTS" && argP1  != newArgs.end())
+      if (this->IsKeyword("EXISTS", *arg) && argP1  != newArgs.end())
         {
         this->HandlePredicate(
-          cmSystemTools::FileExists((argP1)->c_str()),
+          cmSystemTools::FileExists(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a directory with this name exist
-      if (*arg == "IS_DIRECTORY" && argP1  != newArgs.end())
+      if (this->IsKeyword("IS_DIRECTORY", *arg) && argP1  != newArgs.end())
         {
         this->HandlePredicate(
-          cmSystemTools::FileIsDirectory((argP1)->c_str()),
+          cmSystemTools::FileIsDirectory(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a symlink with this name exist
-      if (*arg == "IS_SYMLINK" && argP1  != newArgs.end())
+      if (this->IsKeyword("IS_SYMLINK", *arg) && argP1  != newArgs.end())
         {
         this->HandlePredicate(
-          cmSystemTools::FileIsSymlink((argP1)->c_str()),
+          cmSystemTools::FileIsSymlink(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // is the given path an absolute path ?
-      if (*arg == "IS_ABSOLUTE" && argP1  != newArgs.end())
+      if (this->IsKeyword("IS_ABSOLUTE", *arg) && argP1  != newArgs.end())
         {
         this->HandlePredicate(
-          cmSystemTools::FileIsFullPath((argP1)->c_str()),
+          cmSystemTools::FileIsFullPath(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a command exist
-      if (*arg == "COMMAND" && argP1  != newArgs.end())
+      if (this->IsKeyword("COMMAND", *arg) && argP1  != newArgs.end())
         {
         this->HandlePredicate(
-          this->Makefile.CommandExists((argP1)->c_str()),
+          this->Makefile.CommandExists(argP1->c_str()),
           reducible, arg, newArgs, argP1, argP2);
         }
       // does a policy exist
-      if (*arg == "POLICY" && argP1 != newArgs.end())
+      if (this->IsKeyword("POLICY", *arg) && argP1 != newArgs.end())
         {
         cmPolicies::PolicyID pid;
         this->HandlePredicate(
-          this->Makefile.GetPolicies()->GetPolicyID((argP1)->c_str(), pid),
-          reducible, arg, newArgs, argP1, argP2);
+          this->Makefile.GetPolicies()->GetPolicyID(
+            argP1->c_str(), pid),
+            reducible, arg, newArgs, argP1, argP2);
         }
       // does a target exist
-      if (*arg == "TARGET" && argP1 != newArgs.end())
+      if (this->IsKeyword("TARGET", *arg) && argP1 != newArgs.end())
         {
         this->HandlePredicate(
-          this->Makefile.FindTargetToUse(*argP1)?true:false,
+          this->Makefile.FindTargetToUse(argP1->GetValue())?true:false,
           reducible, arg, newArgs, argP1, argP2);
         }
       // is a variable defined
-      if (*arg == "DEFINED" && argP1  != newArgs.end())
+      if (this->IsKeyword("DEFINED", *arg) && argP1  != newArgs.end())
         {
-        size_t argP1len = argP1->size();
+        size_t argP1len = argP1->GetValue().size();
         bool bdef = false;
-        if(argP1len > 4 && argP1->substr(0, 4) == "ENV{" &&
-           argP1->operator[](argP1len-1) == '}')
+        if(argP1len > 4 && argP1->GetValue().substr(0, 4) == "ENV{" &&
+           argP1->GetValue().operator[](argP1len-1) == '}')
           {
-          std::string env = argP1->substr(4, argP1len-5);
+          std::string env = argP1->GetValue().substr(4, argP1len-5);
           bdef = cmSystemTools::GetEnv(env.c_str())?true:false;
           }
         else
           {
-          bdef = this->Makefile.IsDefinitionSet(*(argP1));
+          bdef = this->Makefile.IsDefinitionSet(argP1->GetValue());
           }
         this->HandlePredicate(bdef, reducible, arg, newArgs, argP1, argP2);
         }
@@ -467,18 +543,18 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
   do
     {
     reducible = 0;
-    std::list<std::string>::iterator arg = newArgs.begin();
-    std::list<std::string>::iterator argP1;
-    std::list<std::string>::iterator argP2;
+    cmArgumentList::iterator arg = newArgs.begin();
+    cmArgumentList::iterator argP1;
+    cmArgumentList::iterator argP2;
     while (arg != newArgs.end())
       {
       argP1 = arg;
       this->IncrementArguments(newArgs,argP1,argP2);
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        *(argP1) == "MATCHES")
+        IsKeyword("MATCHES", *argP1))
         {
         def = this->GetVariableOrString(*arg);
-        const char* rex = (argP2)->c_str();
+        const char* rex = argP2->c_str();
         this->Makefile.ClearMatches();
         cmsys::RegularExpression regEntry;
         if ( !regEntry.compile(rex) )
@@ -492,11 +568,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         if (regEntry.find(def))
           {
           this->Makefile.StoreMatches(regEntry);
-          *arg = "1";
+          *arg = cmExpandedCommandArgument("1", true);
           }
         else
           {
-          *arg = "0";
+          *arg = cmExpandedCommandArgument("0", true);
           }
         newArgs.erase(argP2);
         newArgs.erase(argP1);
@@ -505,9 +581,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         reducible = 1;
         }
 
-      if (argP1 != newArgs.end() && *arg == "MATCHES")
+      if (argP1 != newArgs.end() && this->IsKeyword("MATCHES", *arg))
         {
-        *arg = "0";
+        *arg = cmExpandedCommandArgument("0", true);
         newArgs.erase(argP1);
         argP1 = arg;
         this->IncrementArguments(newArgs,argP1,argP2);
@@ -515,8 +591,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (*(argP1) == "LESS" || *(argP1) == "GREATER" ||
-         *(argP1) == "EQUAL"))
+        (this->IsKeyword("LESS", *argP1) ||
+         this->IsKeyword("GREATER", *argP1) ||
+         this->IsKeyword("EQUAL", *argP1)))
         {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -540,14 +617,14 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
           {
           result = (lhs == rhs);
           }
-        HandleBinaryOp(result,
+        this->HandleBinaryOp(result,
           reducible, arg, newArgs, argP1, argP2);
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (*(argP1) == "STRLESS" ||
-         *(argP1) == "STREQUAL" ||
-         *(argP1) == "STRGREATER"))
+        (this->IsKeyword("STRLESS", *argP1) ||
+         this->IsKeyword("STREQUAL", *argP1) ||
+         this->IsKeyword("STRGREATER", *argP1)))
         {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -570,8 +647,9 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         }
 
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-        (*(argP1) == "VERSION_LESS" || *(argP1) == "VERSION_GREATER" ||
-         *(argP1) == "VERSION_EQUAL"))
+        (this->IsKeyword("VERSION_LESS", *argP1) ||
+         this->IsKeyword("VERSION_GREATER", *argP1) ||
+         this->IsKeyword("VERSION_EQUAL", *argP1)))
         {
         def = this->GetVariableOrString(*arg);
         def2 = this->GetVariableOrString(*argP2);
@@ -591,11 +669,11 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
 
       // is file A newer than file B
       if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
-          *(argP1) == "IS_NEWER_THAN")
+          this->IsKeyword("IS_NEWER_THAN", *argP1))
         {
         int fileIsNewer=0;
-        bool success=cmSystemTools::FileTimeCompare(arg->c_str(),
-            (argP2)->c_str(),
+        bool success=cmSystemTools::FileTimeCompare(arg->GetValue(),
+            (argP2)->GetValue(),
             &fileIsNewer);
         this->HandleBinaryOp(
           (success==false || fileIsNewer==1 || fileIsNewer==0),
@@ -619,14 +697,14 @@ bool cmConditionEvaluator::HandleLevel3(cmArgumentList &newArgs,
   do
     {
     reducible = 0;
-    std::list<std::string>::iterator arg = newArgs.begin();
-    std::list<std::string>::iterator argP1;
-    std::list<std::string>::iterator argP2;
+    cmArgumentList::iterator arg = newArgs.begin();
+    cmArgumentList::iterator argP1;
+    cmArgumentList::iterator argP2;
     while (arg != newArgs.end())
       {
       argP1 = arg;
       IncrementArguments(newArgs,argP1,argP2);
-      if (argP1 != newArgs.end() && *arg == "NOT")
+      if (argP1 != newArgs.end() && IsKeyword("NOT", *arg))
         {
         bool rhs = this->GetBooleanValueWithAutoDereference(*argP1,
                                                       errorString,
@@ -652,14 +730,14 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList &newArgs,
   do
     {
     reducible = 0;
-    std::list<std::string>::iterator arg = newArgs.begin();
-    std::list<std::string>::iterator argP1;
-    std::list<std::string>::iterator argP2;
+    cmArgumentList::iterator arg = newArgs.begin();
+    cmArgumentList::iterator argP1;
+    cmArgumentList::iterator argP2;
     while (arg != newArgs.end())
       {
       argP1 = arg;
       IncrementArguments(newArgs,argP1,argP2);
-      if (argP1 != newArgs.end() && *(argP1) == "AND" &&
+      if (argP1 != newArgs.end() && IsKeyword("AND", *argP1) &&
         argP2 != newArgs.end())
         {
         lhs = this->GetBooleanValueWithAutoDereference(*arg,
@@ -672,7 +750,7 @@ bool cmConditionEvaluator::HandleLevel4(cmArgumentList &newArgs,
           reducible, arg, newArgs, argP1, argP2);
         }
 
-      if (argP1 != newArgs.end() && *(argP1) == "OR" &&
+      if (argP1 != newArgs.end() && this->IsKeyword("OR", *argP1) &&
         argP2 != newArgs.end())
         {
         lhs = this->GetBooleanValueWithAutoDereference(*arg,

@@ -13,36 +13,41 @@
 #define cmConditionEvaluator_h
 
 #include "cmCommand.h"
+#include "cmExpandedCommandArgument.h"
 
 class cmConditionEvaluator
 {
 public:
-  typedef std::list<std::string> cmArgumentList;
+  typedef std::list<cmExpandedCommandArgument> cmArgumentList;
 
   cmConditionEvaluator(cmMakefile& makefile);
 
   // this is a shared function for both If and Else to determine if the
   // arguments were valid, and if so, was the response true. If there is
   // an error, the errorString will be set.
-  bool IsTrue(const std::vector<std::string> &args,
+  bool IsTrue(const std::vector<cmExpandedCommandArgument> &args,
       std::string &errorString,
       cmake::MessageType &status);
 
 private:
+  // Filter the given variable definition based on policy CMP0054.
+  const char* GetDefinitionIfUnquoted(
+      const cmExpandedCommandArgument& argument) const;
+
   const char* GetVariableOrString(
-      const std::string& argument) const;
+      const cmExpandedCommandArgument& argument) const;
 
   bool IsKeyword(std::string const& keyword,
-    std::string& argument) const;
+    cmExpandedCommandArgument& argument) const;
 
   bool GetBooleanValue(
-    std::string& arg) const;
+    cmExpandedCommandArgument& arg) const;
 
   bool GetBooleanValueOld(
-    std::string const& arg, bool one) const;
+    cmExpandedCommandArgument const& arg, bool one) const;
 
   bool GetBooleanValueWithAutoDereference(
-    std::string &newArg,
+    cmExpandedCommandArgument &newArg,
     std::string &errorString,
     cmake::MessageType &status,
     bool oneArg = false) const;
@@ -85,6 +90,7 @@ private:
 
   cmMakefile& Makefile;
   cmPolicies::PolicyStatus Policy12Status;
+  cmPolicies::PolicyStatus Policy54Status;
 };
 
 #endif
