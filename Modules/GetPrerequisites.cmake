@@ -329,7 +329,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif()
 
   if(NOT resolved)
-    if(item MATCHES "@executable_path")
+    if(item MATCHES "^@executable_path")
       #
       # @executable_path references are assumed relative to exepath
       #
@@ -347,7 +347,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif()
 
   if(NOT resolved)
-    if(item MATCHES "@loader_path")
+    if(item MATCHES "^@loader_path")
       #
       # @loader_path references are assumed relative to the
       # PATH of the given "context" (presumably another library)
@@ -367,7 +367,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif()
 
   if(NOT resolved)
-    if(item MATCHES "@rpath")
+    if(item MATCHES "^@rpath")
       #
       # @rpath references are relative to the paths built into the binaries with -rpath
       # We handle this case like we do for other Unixes
