@@ -121,7 +121,10 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
                                                      cmMakefile* mf)
 {
   this->GeneratorToolset = ts;
-  this->AddVSPlatformToolsetDefinition(mf);
+  if(const char* toolset = this->GetPlatformToolset())
+    {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
+    }
   return true;
 }
 
@@ -142,7 +145,6 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
       return false;
       }
     }
-  this->AddVSPlatformToolsetDefinition(mf);
   return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
 }
 
@@ -184,16 +186,6 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
   e << this->GetName() << " does not support Windows Store.";
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio10Generator
-::AddVSPlatformToolsetDefinition(cmMakefile* mf) const
-{
-  if(const char* toolset = this->GetPlatformToolset())
-    {
-    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
-    }
 }
 
 //----------------------------------------------------------------------------

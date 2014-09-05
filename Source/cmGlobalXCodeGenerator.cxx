@@ -208,8 +208,11 @@ bool cmGlobalXCodeGenerator::SetGeneratorToolset(std::string const& ts,
   if(this->XcodeVersion >= 30)
     {
     this->GeneratorToolset = ts;
-    mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET",
-                      this->GeneratorToolset.c_str());
+    if(!this->GeneratorToolset.empty())
+      {
+      mf->AddDefinition("CMAKE_XCODE_PLATFORM_TOOLSET",
+                        this->GeneratorToolset.c_str());
+      }
     return true;
     }
   else

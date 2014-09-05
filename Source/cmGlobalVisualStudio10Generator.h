@@ -140,6 +140,5 @@ private:
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
-  void AddVSPlatformToolsetDefinition(cmMakefile* mf) const;
 };
 #endif

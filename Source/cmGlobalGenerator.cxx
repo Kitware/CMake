@@ -79,15 +79,22 @@ cmGlobalGenerator::~cmGlobalGenerator()
 bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
                                             cmMakefile* mf)
 {
-  cmOStringStream e;
-  e <<
-    "Generator\n"
-    "  " << this->GetName() << "\n"
-    "does not support toolset specification, but toolset\n"
-    "  " << ts << "\n"
-    "was specified.";
-  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-  return false;
+  if(ts.empty())
+    {
+    return true;
+    }
+  else
+    {
+    cmOStringStream e;
+    e <<
+      "Generator\n"
+      "  " << this->GetName() << "\n"
+      "does not support toolset specification, but toolset\n"
+      "  " << ts << "\n"
+      "was specified.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
 }
 
 std::string cmGlobalGenerator::SelectMakeProgram(
@@ -454,8 +461,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 
   // Tell the generator about the toolset, if any.
   std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
-  if(!toolset.empty() &&
-     !this->SetGeneratorToolset(toolset, mf))
+  if(!this->SetGeneratorToolset(toolset, mf))
     {
     cmSystemTools::SetFatalErrorOccured();
     return;
