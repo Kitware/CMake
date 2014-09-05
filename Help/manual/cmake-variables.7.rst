@@ -37,6 +37,7 @@ Variables that Provide Information
    /variable/CMAKE_EXTRA_GENERATOR
    /variable/CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES
    /variable/CMAKE_GENERATOR
+   /variable/CMAKE_GENERATOR_PLATFORM
    /variable/CMAKE_GENERATOR_TOOLSET
    /variable/CMAKE_HOME_DIRECTORY
    /variable/CMAKE_IMPORT_LIBRARY_PREFIX

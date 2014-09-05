@@ -191,6 +191,14 @@ class cmake
   ///! Get the names of the current registered generators
   void GetRegisteredGenerators(std::vector<std::string>& names);
 
+  ///! Set the name of the selected generator-specific platform.
+  void SetGeneratorPlatform(std::string const& ts)
+    { this->GeneratorPlatform = ts; }
+
+  ///! Get the name of the selected generator-specific platform.
+  std::string const& GetGeneratorPlatform() const
+    { return this->GeneratorPlatform; }
+
   ///! Set the name of the selected generator-specific toolset.
   void SetGeneratorToolset(std::string const& ts)
     { this->GeneratorToolset = ts; }
@@ -403,6 +411,7 @@ protected:
   std::string StartOutputDirectory;
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
+  std::string GeneratorPlatform;
   std::string GeneratorToolset;
 
   ///! read in a cmake list file to initialize the cache

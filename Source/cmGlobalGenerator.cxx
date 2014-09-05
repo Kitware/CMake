@@ -76,6 +76,27 @@ cmGlobalGenerator::~cmGlobalGenerator()
     }
 }
 
+bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
+                                             cmMakefile* mf)
+{
+  if(p.empty())
+    {
+    return true;
+    }
+  else
+    {
+    cmOStringStream e;
+    e <<
+      "Generator\n"
+      "  " << this->GetName() << "\n"
+      "does not support platform specification, but platform\n"
+      "  " << p << "\n"
+      "was specified.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+}
+
 bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
                                             cmMakefile* mf)
 {
@@ -454,6 +475,14 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // Tell the generator about the target system.
   std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
   if(!this->SetSystemName(system, mf))
+    {
+    cmSystemTools::SetFatalErrorOccured();
+    return;
+    }
+
+  // Tell the generator about the platform, if any.
+  std::string platform = mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM");
+  if(!this->SetGeneratorPlatform(platform, mf))
     {
     cmSystemTools::SetFatalErrorOccured();
     return;

@@ -1445,6 +1445,34 @@ int cmake::ActualConfigure()
                         cmCacheManager::INTERNAL);
     }
 
+  if(const char* platformName =
+     this->CacheManager->GetCacheValue("CMAKE_GENERATOR_PLATFORM"))
+    {
+    if(this->GeneratorPlatform.empty())
+      {
+      this->GeneratorPlatform = platformName;
+      }
+    else if(this->GeneratorPlatform != platformName)
+      {
+      std::string message = "Error: generator platform: ";
+      message += this->GeneratorPlatform;
+      message += "\nDoes not match the platform used previously: ";
+      message += platformName;
+      message +=
+        "\nEither remove the CMakeCache.txt file and CMakeFiles "
+        "directory or choose a different binary directory.";
+      cmSystemTools::Error(message.c_str());
+      return -2;
+      }
+    }
+  else
+    {
+    this->CacheManager->AddCacheEntry("CMAKE_GENERATOR_PLATFORM",
+                                      this->GeneratorPlatform.c_str(),
+                                      "Name of generator platform.",
+                                      cmCacheManager::INTERNAL);
+    }
+
   if(const char* tsName =
      this->CacheManager->GetCacheValue("CMAKE_GENERATOR_TOOLSET"))
     {

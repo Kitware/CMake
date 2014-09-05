@@ -65,6 +65,10 @@ public:
   virtual bool SetSystemName(std::string const&, cmMakefile*)
     { return true; }
 
+  /** Set the generator-specific platform name.  Returns true if platform
+      is supported and false otherwise.  */
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+
   /** Set the generator-specific toolset name.  Returns true if toolset
       is supported and false otherwise.  */
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
