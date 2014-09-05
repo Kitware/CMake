@@ -86,6 +86,7 @@ static const char * cmDocumentationOptions[][2] =
   {"--build-two-config", "Run CMake twice"},
   {"--build-exe-dir", "Specify the directory for the executable."},
   {"--build-generator", "Specify the generator to use."},
+  {"--build-generator-platform", "Specify the generator-specific platform."},
   {"--build-generator-toolset", "Specify the generator-specific toolset."},
   {"--build-project", "Specify the name of the project to build."},
   {"--build-makeprogram", "Specify the make program to use."},
