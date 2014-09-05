@@ -49,6 +49,7 @@
 #    [CONFIGURE_COMMAND cmd...]  # Build tree configuration command
 #    [CMAKE_COMMAND /.../cmake]  # Specify alternative cmake executable
 #    [CMAKE_GENERATOR gen]       # Specify generator for native build
+#    [CMAKE_GENERATOR_PLATFORM p] # Generator-specific platform name
 #    [CMAKE_GENERATOR_TOOLSET t] # Generator-specific toolset name
 #    [CMAKE_ARGS args...]        # Arguments to CMake command line
 #    [CMAKE_CACHE_ARGS args...]  # Initial cache arguments, of the form -Dvar:string=on
@@ -1757,9 +1758,13 @@ function(_ep_add_configure_command name)
     endif()
 
     get_target_property(cmake_generator ${name} _EP_CMAKE_GENERATOR)
+    get_target_property(cmake_generator_platform ${name} _EP_CMAKE_GENERATOR_PLATFORM)
     get_target_property(cmake_generator_toolset ${name} _EP_CMAKE_GENERATOR_TOOLSET)
     if(cmake_generator)
       list(APPEND cmd "-G${cmake_generator}")
+      if(cmake_generator_platform)
+        list(APPEND cmd "-DCMAKE_GENERATOR_PLATFORM=${cmake_generator_platform}")
+      endif()
       if(cmake_generator_toolset)
         list(APPEND cmd "-T${cmake_generator_toolset}")
       endif()
@@ -1768,6 +1773,12 @@ function(_ep_add_configure_command name)
         list(APPEND cmd "-G${CMAKE_EXTRA_GENERATOR} - ${CMAKE_GENERATOR}")
       else()
         list(APPEND cmd "-G${CMAKE_GENERATOR}")
+      endif()
+      if(cmake_generator_platform)
+        message(FATAL_ERROR "Option CMAKE_GENERATOR_PLATFORM not allowed without CMAKE_GENERATOR.")
+      endif()
+      if(CMAKE_GENERATOR_PLATFORM)
+        list(APPEND cmd "-DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}")
       endif()
       if(cmake_generator_toolset)
         message(FATAL_ERROR "Option CMAKE_GENERATOR_TOOLSET not allowed without CMAKE_GENERATOR.")
