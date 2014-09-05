@@ -39,7 +39,7 @@ public:
   static std::string GetActualName() {return "Visual Studio 7";}
 
   ///! Get the name for the platform.
-  const std::string& GetPlatformName() const { return this->PlatformName; }
+  std::string const& GetPlatformName() const;
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
@@ -175,7 +175,7 @@ protected:
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
   std::string CurrentProject;
-  std::string PlatformName;
+  std::string DefaultPlatformName;
   bool MasmEnabled;
 
 private:

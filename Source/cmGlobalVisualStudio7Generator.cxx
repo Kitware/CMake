@@ -27,11 +27,11 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
 
   if (platformName.empty())
     {
-    this->PlatformName = "Win32";
+    this->DefaultPlatformName = "Win32";
     }
   else
     {
-    this->PlatformName = platformName;
+    this->DefaultPlatformName = platformName;
     }
 }
 
@@ -260,14 +260,20 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
+std::string const& cmGlobalVisualStudio7Generator::GetPlatformName() const
+{
+  return this->DefaultPlatformName;
+}
+
+//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
                                                    cmMakefile* mf)
 {
-  if(this->PlatformName == "x64")
+  if(this->GetPlatformName() == "x64")
     {
     mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
     }
-  else if(this->PlatformName == "Itanium")
+  else if(this->GetPlatformName() == "Itanium")
     {
     mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
     }

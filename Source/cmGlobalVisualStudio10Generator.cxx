@@ -125,7 +125,7 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
     {
     return false;
     }
-  if(this->PlatformName == "Itanium" || this->PlatformName == "x64")
+  if(this->GetPlatformName() == "Itanium" || this->GetPlatformName() == "x64")
     {
     if(this->IsExpressEdition() && !this->Find64BitTools(mf))
       {
