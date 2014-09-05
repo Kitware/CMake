@@ -46,6 +46,8 @@ public:
 
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
 
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
@@ -175,6 +177,7 @@ protected:
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
   std::string CurrentProject;
+  std::string GeneratorPlatform;
   std::string DefaultPlatformName;
   bool MasmEnabled;
 

@@ -31,6 +31,7 @@ public:
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
   virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(

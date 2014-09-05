@@ -262,12 +262,25 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 //----------------------------------------------------------------------------
 std::string const& cmGlobalVisualStudio7Generator::GetPlatformName() const
 {
+  if(!this->GeneratorPlatform.empty())
+    {
+    return this->GeneratorPlatform;
+    }
   return this->DefaultPlatformName;
 }
 
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
                                                    cmMakefile* mf)
+{
+  mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
+                    this->GetIntelProjectVersion());
+  return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio7Generator::SetGeneratorPlatform(std::string const& p,
+                                                          cmMakefile* mf)
 {
   if(this->GetPlatformName() == "x64")
     {
@@ -278,9 +291,7 @@ bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
     mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
     }
   mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
-  mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
-                    this->GetIntelProjectVersion());
-  return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
+  return this->cmGlobalVisualStudioGenerator::SetGeneratorPlatform(p, mf);
 }
 
 void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)

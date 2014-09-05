@@ -125,6 +125,18 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
     {
     return false;
     }
+  return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::SetGeneratorPlatform(std::string const& p,
+                                                      cmMakefile* mf)
+{
+  if(!this->cmGlobalVisualStudio8Generator::SetGeneratorPlatform(p, mf))
+    {
+    return false;
+    }
   if(this->GetPlatformName() == "Itanium" || this->GetPlatformName() == "x64")
     {
     if(this->IsExpressEdition() && !this->Find64BitTools(mf))
@@ -132,7 +144,7 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
       return false;
       }
     }
-  return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
+  return true;
 }
 
 //----------------------------------------------------------------------------
