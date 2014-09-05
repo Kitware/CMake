@@ -116,19 +116,6 @@ cmGlobalVisualStudio10Generator::MatchesGeneratorName(
 }
 
 //----------------------------------------------------------------------------
-bool
-cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
-                                                     cmMakefile* mf)
-{
-  this->GeneratorToolset = ts;
-  if(const char* toolset = this->GetPlatformToolset())
-    {
-    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
-    }
-  return true;
-}
-
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
                                                     cmMakefile* mf)
 {
@@ -146,6 +133,19 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
       }
     }
   return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
+                                                     cmMakefile* mf)
+{
+  this->GeneratorToolset = ts;
+  if(const char* toolset = this->GetPlatformToolset())
+    {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
+    }
+  return true;
 }
 
 //----------------------------------------------------------------------------
