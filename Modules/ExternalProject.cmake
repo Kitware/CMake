@@ -607,6 +607,7 @@ Retrying download.
     file(REMOVE \"\${file}\")
     execute_process(COMMAND \${CMAKE_COMMAND} -P \"${download_script}\")
   endif()
+  math(EXPR attempt \"\${attempt} + 1\")
 endwhile()
 
 if(\${succeeded})
