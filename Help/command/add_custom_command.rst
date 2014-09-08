@@ -47,6 +47,9 @@ The options are:
   Specify the command-line(s) to execute at build time.
   If more than one ``COMMAND`` is specified they will be executed in order,
   but *not* necessarily composed into a stateful shell or batch script.
+  (To run a full script, use the :command:`configure_file` command or the
+  :command:`file(GENERATE)` command to create it, and then specify
+  a ``COMMAND`` to launch it.)
   The optional ``ARGS`` argument is for backward compatibility and
   will be ignored.
 
