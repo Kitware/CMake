@@ -505,7 +505,7 @@ ENDIF(NOT HAVE_SIGSETJMP)
 
 # For other curl specific tests, use this macro.
 MACRO(CURL_INTERNAL_TEST CURL_TEST)
-  IF("${CURL_TEST}" MATCHES "^${CURL_TEST}$")
+  IF(NOT DEFINED ${CURL_TEST})
     SET(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${CURL_TEST} ${CMAKE_REQUIRED_FLAGS}")
     IF(CMAKE_REQUIRED_LIBRARIES)
@@ -533,7 +533,7 @@ MACRO(CURL_INTERNAL_TEST CURL_TEST)
         "Performing Curl Test ${CURL_TEST} failed with the following output:\n"
         "${OUTPUT}\n")
     ENDIF(${CURL_TEST})
-  ENDIF("${CURL_TEST}" MATCHES "^${CURL_TEST}$")
+  ENDIF()
 ENDMACRO(CURL_INTERNAL_TEST)
 
 # Do curl specific tests

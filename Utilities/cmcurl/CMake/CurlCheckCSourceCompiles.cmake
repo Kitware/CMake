@@ -13,7 +13,7 @@
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 MACRO(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
-  IF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
+  IF(NOT DEFINED ${VAR} OR ${VAR} MATCHES "UNKNOWN")
     SET(message "${VAR}")
     # If the number of arguments is greater than 2 (SOURCE VAR)
     IF(${ARGC} GREATER 2)
@@ -70,5 +70,5 @@ MACRO(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
         "${OUTPUT}\n"
         "Source file was:\n${src}\n")
     ENDIF(${VAR})
-  ENDIF("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
+  ENDIF()
 ENDMACRO(CURL_CHECK_C_SOURCE_COMPILES)
