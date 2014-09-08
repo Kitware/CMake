@@ -201,7 +201,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # now that we collected all arguments, process them
 
-  if("${FPHSA_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
+  if("x${FPHSA_FAIL_MESSAGE}" STREQUAL "xDEFAULT_MSG")
     set(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
   endif()
 
