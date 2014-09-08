@@ -23,7 +23,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-if("CMAKE_HAS_ANSI_STRING_STREAM" MATCHES "^CMAKE_HAS_ANSI_STRING_STREAM$")
+if(NOT DEFINED CMAKE_HAS_ANSI_STRING_STREAM)
   message(STATUS "Check for sstream")
   try_compile(CMAKE_HAS_ANSI_STRING_STREAM  ${CMAKE_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForSSTREAM.cxx
