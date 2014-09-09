@@ -1392,7 +1392,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     )
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Dependency")
 
-  if("${CMAKE_SYSTEM_NAME}" MATCHES syllable)
+  if(CMAKE_SYSTEM_NAME MATCHES syllable)
 
 # RPATH isn't supported under Syllable, so the tests don't
 # find their libraries. In order to fix that LIBRARY_OUTPUT_DIR

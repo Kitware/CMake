@@ -50,7 +50,7 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
   if(NOT DEFINED CPACK_SYSTEM_NAME)
     # make sure package is not Cygwin-unknown, for Cygwin just
     # cygwin is good for the system name
-    if("${CMAKE_SYSTEM_NAME}" STREQUAL "CYGWIN")
+    if("x${CMAKE_SYSTEM_NAME}" STREQUAL "xCYGWIN")
       set(CPACK_SYSTEM_NAME Cygwin)
     else()
       set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}-${CMAKE_SYSTEM_PROCESSOR})
