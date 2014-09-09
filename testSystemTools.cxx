@@ -562,6 +562,55 @@ static bool CheckEnvironmentOperations()
   return res;
 }
 
+
+static bool CheckRelativePath(
+  const kwsys_stl::string& local,
+  const kwsys_stl::string& remote,
+  const kwsys_stl::string& expected)
+{
+  kwsys_stl::string result = kwsys::SystemTools::RelativePath(local, remote);
+  if(expected != result)
+    {
+    kwsys_ios::cerr << "RelativePath(" << local << ", " << remote
+      << ")  yielded " << result << " instead of " << expected << kwsys_ios::endl;
+    return false;
+    }
+  return true;
+}
+
+static bool CheckRelativePaths()
+{
+  bool res = true;
+  res &= CheckRelativePath("/usr/share", "/bin/bash", "../../bin/bash");
+  res &= CheckRelativePath("/usr/./share/", "/bin/bash", "../../bin/bash");
+  res &= CheckRelativePath("/usr//share/", "/bin/bash", "../../bin/bash");
+  res &= CheckRelativePath("/usr/share/../bin/", "/bin/bash", "../../bin/bash");
+  res &= CheckRelativePath("/usr/share", "/usr/share//bin", "bin");
+  return res;
+}
+
+static bool CheckCollapsePath(
+  const kwsys_stl::string& path,
+  const kwsys_stl::string& expected)
+{
+  kwsys_stl::string result = kwsys::SystemTools::CollapseFullPath(path);
+  if(expected != result)
+    {
+    kwsys_ios::cerr << "CollapseFullPath(" << path
+      << ")  yielded " << result << " instead of " << expected << kwsys_ios::endl;
+    return false;
+    }
+  return true;
+}
+
+static bool CheckCollapsePath()
+{
+  bool res = true;
+  res &= CheckCollapsePath("/usr/share/*", "/usr/share/*");
+  res &= CheckCollapsePath("C:/Windows/*", "C:/Windows/*");
+  return res;
+}
+
 //----------------------------------------------------------------------------
 int testSystemTools(int, char*[])
 {
@@ -592,6 +641,10 @@ int testSystemTools(int, char*[])
   res &= CheckStringOperations();
 
   res &= CheckEnvironmentOperations();
+
+  res &= CheckRelativePaths();
+
+  res &= CheckCollapsePath();
 
   return res ? 0 : 1;
 }
