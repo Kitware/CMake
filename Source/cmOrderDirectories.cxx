@@ -72,7 +72,10 @@ public:
       {
       // Check if this directory conflicts with the entry.
       std::string const& dir = this->OD->OriginalDirectories[i];
-      if(dir != this->Directory && this->FindConflict(dir))
+      if(dir != this->Directory &&
+         cmSystemTools::GetRealPath(dir) !=
+         cmSystemTools::GetRealPath(this->Directory) &&
+         this->FindConflict(dir))
         {
         // The library will be found in this directory but this is not
         // the directory named for it.  Add an entry to make sure the
@@ -90,7 +93,10 @@ public:
       {
       // Check if this directory conflicts with the entry.
       std::string const& dir = this->OD->OriginalDirectories[i];
-      if(dir != this->Directory && this->FindConflict(dir))
+      if(dir != this->Directory &&
+         cmSystemTools::GetRealPath(dir) !=
+         cmSystemTools::GetRealPath(this->Directory) &&
+         this->FindConflict(dir))
         {
         // The library will be found in this directory but it is
         // supposed to be found in an implicit search directory.
