@@ -438,7 +438,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 
   // try and load the CMakeSystem.cmake if it is there
   std::string fpath = rootBin;
-  if(!mf->GetDefinition("CMAKE_SYSTEM_LOADED"))
+  bool const readCMakeSystem = !mf->GetDefinition("CMAKE_SYSTEM_LOADED");
+  if(readCMakeSystem)
     {
     fpath += "/CMakeSystem.cmake";
     if(cmSystemTools::FileExists(fpath.c_str()))
@@ -472,28 +473,31 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     mf->ReadListFile(0,fpath.c_str());
     }
 
-  // Tell the generator about the target system.
-  std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
-  if(!this->SetSystemName(system, mf))
+  if(readCMakeSystem)
     {
-    cmSystemTools::SetFatalErrorOccured();
-    return;
-    }
+    // Tell the generator about the target system.
+    std::string system = mf->GetSafeDefinition("CMAKE_SYSTEM_NAME");
+    if(!this->SetSystemName(system, mf))
+      {
+      cmSystemTools::SetFatalErrorOccured();
+      return;
+      }
 
-  // Tell the generator about the platform, if any.
-  std::string platform = mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM");
-  if(!this->SetGeneratorPlatform(platform, mf))
-    {
-    cmSystemTools::SetFatalErrorOccured();
-    return;
-    }
+    // Tell the generator about the platform, if any.
+    std::string platform = mf->GetSafeDefinition("CMAKE_GENERATOR_PLATFORM");
+    if(!this->SetGeneratorPlatform(platform, mf))
+      {
+      cmSystemTools::SetFatalErrorOccured();
+      return;
+      }
 
-  // Tell the generator about the toolset, if any.
-  std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
-  if(!this->SetGeneratorToolset(toolset, mf))
-    {
-    cmSystemTools::SetFatalErrorOccured();
-    return;
+    // Tell the generator about the toolset, if any.
+    std::string toolset = mf->GetSafeDefinition("CMAKE_GENERATOR_TOOLSET");
+    if(!this->SetGeneratorToolset(toolset, mf))
+      {
+      cmSystemTools::SetFatalErrorOccured();
+      return;
+      }
     }
 
   // **** Load the system specific initialization if not yet loaded
