@@ -242,13 +242,6 @@ function(_Ice_FIND)
 
   message(STATUS "Ice version: ${Ice_VERSION_SLICE2CPP_FULL}")
 
-  # The following searches prefer the version found; note reverse
-  # order due to prepending.
-  if(NOT MSVC)
-    list(INSERT ice_roots 0 "/opt/Ice-${Ice_VERSION_SLICE2CPP_SHORT}")
-    list(INSERT ice_roots 0 "/opt/Ice-${Ice_VERSION_SLICE2CPP_FULL}")
-  endif()
-
   # Find include directory
   find_path(Ice_INCLUDE_DIR
             NAMES "Ice/Ice.h"
