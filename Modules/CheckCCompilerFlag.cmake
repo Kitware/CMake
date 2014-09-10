@@ -10,6 +10,7 @@
 #
 #   <flag> - the compiler flag
 #   <var>  - variable to store the result
+#            Will be created as an internal cache variable.
 #
 # This internally calls the check_c_source_compiles macro and sets
 # CMAKE_REQUIRED_DEFINITIONS to <flag>.  See help for

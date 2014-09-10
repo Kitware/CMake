@@ -10,6 +10,7 @@
 #
 #   FUNCTION - the name of the Fortran function
 #   VARIABLE - variable to store the result
+#              Will be created as an internal cache variable.
 #
 #
 #

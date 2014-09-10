@@ -14,6 +14,7 @@
 #
 #   INCLUDE  - name of include file
 #   VARIABLE - variable to return result
+#              Will be created as an internal cache variable.
 #
 #
 #

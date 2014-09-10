@@ -10,6 +10,7 @@
 #
 #   <code>       - source code to try to compile, must define 'main'
 #   <var>        - variable to store whether the source code compiled
+#                  Will be created as an internal cache variable.
 #   <fail-regex> - fail if test output matches this regex
 #
 # The following variables may be set before calling this macro to modify
