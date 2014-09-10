@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,11 +18,15 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 
-#include "amigaos.h"
+#include "curl_setup.h"
+
+#if defined(__AMIGA__) && !defined(__ixemul__)
+
 #include <amitcp/socketbasetags.h>
+
+#include "amigaos.h"
 
 struct Library *SocketBase = NULL;
 extern int errno, h_errno;
@@ -31,44 +35,43 @@ extern int errno, h_errno;
 #include <stabs.h>
 void __request(const char *msg);
 #else
-# define __request( msg )	Printf( msg "\n\a")
+# define __request( msg )       Printf( msg "\n\a")
 #endif
 
-void amiga_cleanup()
+void Curl_amiga_cleanup()
 {
-	if(SocketBase) {
-		CloseLibrary(SocketBase);
-		SocketBase = NULL;
-	}
+  if(SocketBase) {
+    CloseLibrary(SocketBase);
+    SocketBase = NULL;
+  }
 }
 
-BOOL amiga_init()
+bool Curl_amiga_init()
 {
-	if(!SocketBase)
-		SocketBase = OpenLibrary("bsdsocket.library", 4);
-	
-	if(!SocketBase) {
-		__request("No TCP/IP Stack running!");
-		return FALSE;
-	}
-	
-	if(SocketBaseTags(
-		SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
-//		SBTM_SETVAL(SBTC_HERRNOLONGPTR),	   (ULONG) &h_errno,
-		SBTM_SETVAL(SBTC_LOGTAGPTR),		   (ULONG) "cURL",
-	TAG_DONE)) {
-		
-		__request("SocketBaseTags ERROR");
-		return FALSE;
-	}
-	
+  if(!SocketBase)
+    SocketBase = OpenLibrary("bsdsocket.library", 4);
+
+  if(!SocketBase) {
+    __request("No TCP/IP Stack running!");
+    return FALSE;
+  }
+
+  if(SocketBaseTags(SBTM_SETVAL(SBTC_ERRNOPTR(sizeof(errno))), (ULONG) &errno,
+                    SBTM_SETVAL(SBTC_LOGTAGPTR), (ULONG) "cURL",
+                    TAG_DONE)) {
+    __request("SocketBaseTags ERROR");
+    return FALSE;
+  }
+
 #ifndef __libnix__
-	atexit(amiga_cleanup);
+  atexit(Curl_amiga_cleanup);
 #endif
-	
-	return TRUE;
+
+  return TRUE;
 }
 
 #ifdef __libnix__
-ADD2EXIT(amiga_cleanup,-50);
+ADD2EXIT(Curl_amiga_cleanup,-50);
 #endif
+
+#endif /* __AMIGA__ && ! __ixemul__ */

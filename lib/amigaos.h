@@ -1,3 +1,5 @@
+#ifndef HEADER_CURL_AMIGAOS_H
+#define HEADER_CURL_AMIGAOS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -5,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,41 +20,20 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
+#include "curl_setup.h"
 
-#ifndef LIBCURL_AMIGAOS_H
-#define LIBCURL_AMIGAOS_H
+#if defined(__AMIGA__) && !defined(__ixemul__)
 
-#ifndef __ixemul__
+bool Curl_amiga_init();
+void Curl_amiga_cleanup();
 
-#include <exec/types.h>
-#include <exec/execbase.h>
+#else
 
-#include <proto/exec.h>
-#include <proto/dos.h>
+#define Curl_amiga_init() 1
+#define Curl_amiga_cleanup() Curl_nop_stmt
 
-#include <sys/socket.h>
-
-#include "config-amigaos.h"
-
-#ifndef select
-# define select(args...) WaitSelect( args, NULL)
 #endif
-#ifndef inet_ntoa
-# define inet_ntoa(x)    Inet_NtoA( x ## .s_addr)
-#endif
-#ifndef ioctl
-# define ioctl(a,b,c,d)  IoctlSocket( (LONG)a, (ULONG)b, (char*)c)
-#endif
-#define _AMIGASF        1
 
-extern void amiga_cleanup();
-extern BOOL amiga_init();
+#endif /* HEADER_CURL_AMIGAOS_H */
 
-#else /* __ixemul__ */
-
-#warning compiling with ixemul...
-
-#endif /* __ixemul__ */
-#endif /* LIBCURL_AMIGAOS_H */

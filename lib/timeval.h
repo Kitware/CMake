@@ -1,5 +1,5 @@
-#ifndef __TIMEVAL_H
-#define __TIMEVAL_H
+#ifndef HEADER_CURL_TIMEVAL_H
+#define HEADER_CURL_TIMEVAL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2007, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 
 /*
@@ -28,25 +27,7 @@
  * as well as the library. Do not mix with library internals!
  */
 
-#include "setup.h"
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#ifdef TIME_WITH_SYS_TIME
-#include <time.h>
-#endif
-#else
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-#endif
-
-#ifndef HAVE_STRUCT_TIMEVAL
-struct timeval {
- long tv_sec;
- long tv_usec;
-};
-#endif
+#include "curl_setup.h"
 
 struct timeval curlx_tvnow(void);
 
@@ -73,4 +54,5 @@ long Curl_tvlong(struct timeval t1);
 #define Curl_tvdiff(x,y) curlx_tvdiff(x,y)
 #define Curl_tvdiff_secs(x,y) curlx_tvdiff_secs(x,y)
 
-#endif
+#endif /* HEADER_CURL_TIMEVAL_H */
+

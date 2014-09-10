@@ -1,5 +1,5 @@
-#ifndef __INET_NTOP_H
-#define __INET_NTOP_H
+#ifndef HEADER_CURL_INET_NTOP_H
+#define HEADER_CURL_INET_NTOP_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2005, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2009, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,10 +20,9 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
 char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
 
@@ -31,7 +30,9 @@ char *Curl_inet_ntop(int af, const void *addr, char *buf, size_t size);
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#define Curl_inet_ntop(af,addr,buf,size) inet_ntop(af,addr,buf,size)
+#define Curl_inet_ntop(af,addr,buf,size) \
+        inet_ntop(af,addr,buf,(curl_socklen_t)size)
 #endif
 
-#endif /* __INET_NTOP_H */
+#endif /* HEADER_CURL_INET_NTOP_H */
+

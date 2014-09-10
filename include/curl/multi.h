@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 /*
   This is an "external" header file. Don't give away any internals here!
@@ -65,6 +64,8 @@ typedef enum {
   CURLM_INTERNAL_ERROR,  /* this is a libcurl bug */
   CURLM_BAD_SOCKET,      /* the passed in socket argument did not match */
   CURLM_UNKNOWN_OPTION,  /* curl_multi_setopt() with unsupported option */
+  CURLM_ADDED_ALREADY,   /* an easy handle already added to a multi handle was
+                            attempted to get added - again */
   CURLM_LAST
 } CURLMcode;
 
@@ -89,6 +90,19 @@ struct CURLMsg {
   } data;
 };
 typedef struct CURLMsg CURLMsg;
+
+/* Based on poll(2) structure and values.
+ * We don't use pollfd and POLL* constants explicitly
+ * to cover platforms without poll(). */
+#define CURL_WAIT_POLLIN    0x0001
+#define CURL_WAIT_POLLPRI   0x0002
+#define CURL_WAIT_POLLOUT   0x0004
+
+struct curl_waitfd {
+  curl_socket_t fd;
+  short events;
+  short revents; /* not supported yet */
+};
 
 /*
  * Name:    curl_multi_init()
@@ -133,6 +147,20 @@ CURL_EXTERN CURLMcode curl_multi_fdset(CURLM *multi_handle,
                                        fd_set *write_fd_set,
                                        fd_set *exc_fd_set,
                                        int *max_fd);
+
+/*
+ * Name:     curl_multi_wait()
+ *
+ * Desc:     Poll on all fds within a CURLM set as well as any
+ *           additional fds passed to the function.
+ *
+ * Returns:  CURLMcode type, general multi error code.
+ */
+CURL_EXTERN CURLMcode curl_multi_wait(CURLM *multi_handle,
+                                      struct curl_waitfd extra_fds[],
+                                      unsigned int extra_nfds,
+                                      int timeout_ms,
+                                      int *ret);
 
  /*
   * Name:    curl_multi_perform()
@@ -224,6 +252,10 @@ CURL_EXTERN const char *curl_multi_strerror(CURLMcode);
 
 #define CURL_SOCKET_TIMEOUT CURL_SOCKET_BAD
 
+#define CURL_CSELECT_IN   0x01
+#define CURL_CSELECT_OUT  0x02
+#define CURL_CSELECT_ERR  0x04
+
 typedef int (*curl_socket_callback)(CURL *easy,      /* easy handle */
                                     curl_socket_t s, /* socket */
                                     int what,        /* see above */
@@ -249,8 +281,20 @@ typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
 CURL_EXTERN CURLMcode curl_multi_socket(CURLM *multi_handle, curl_socket_t s,
                                         int *running_handles);
 
+CURL_EXTERN CURLMcode curl_multi_socket_action(CURLM *multi_handle,
+                                               curl_socket_t s,
+                                               int ev_bitmask,
+                                               int *running_handles);
+
 CURL_EXTERN CURLMcode curl_multi_socket_all(CURLM *multi_handle,
                                             int *running_handles);
+
+#ifndef CURL_ALLOW_OLD_MULTI_SOCKET
+/* This macro below was added in 7.16.3 to push users who recompile to use
+   the new curl_multi_socket_action() instead of the old curl_multi_socket()
+*/
+#define curl_multi_socket(x,y,z) curl_multi_socket_action(x,y,0,z)
+#endif
 
 /*
  * Name:    curl_multi_timeout()
@@ -267,7 +311,7 @@ CURL_EXTERN CURLMcode curl_multi_timeout(CURLM *multi_handle,
 #undef CINIT /* re-using the same name as in curl.h */
 
 #ifdef CURL_ISOCPP
-#define CINIT(name,type,number) CURLMOPT_ ## name = CURLOPTTYPE_ ## type + number
+#define CINIT(name,type,num) CURLMOPT_ ## name = CURLOPTTYPE_ ## type + num
 #else
 /* The macro "##" is ISO C, we assume pre-ISO C doesn't support it. */
 #define LONG          CURLOPTTYPE_LONG
@@ -292,6 +336,34 @@ typedef enum {
 
   /* This is the argument passed to the timer callback */
   CINIT(TIMERDATA, OBJECTPOINT, 5),
+
+  /* maximum number of entries in the connection cache */
+  CINIT(MAXCONNECTS, LONG, 6),
+
+  /* maximum number of (pipelining) connections to one host */
+  CINIT(MAX_HOST_CONNECTIONS, LONG, 7),
+
+  /* maximum number of requests in a pipeline */
+  CINIT(MAX_PIPELINE_LENGTH, LONG, 8),
+
+  /* a connection with a content-length longer than this
+     will not be considered for pipelining */
+  CINIT(CONTENT_LENGTH_PENALTY_SIZE, OFF_T, 9),
+
+  /* a connection with a chunk length longer than this
+     will not be considered for pipelining */
+  CINIT(CHUNK_LENGTH_PENALTY_SIZE, OFF_T, 10),
+
+  /* a list of site names(+port) that are blacklisted from
+     pipelining */
+  CINIT(PIPELINING_SITE_BL, OBJECTPOINT, 11),
+
+  /* a list of server types that are blacklisted from
+     pipelining */
+  CINIT(PIPELINING_SERVER_BL, OBJECTPOINT, 12),
+
+  /* maximum number of open connections in total */
+  CINIT(MAX_TOTAL_CONNECTIONS, LONG, 13),
 
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;
