@@ -392,7 +392,8 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
   std::map<std::string, std::string> configUicOptions;
 
   if (target->GetPropertyAsBool("AUTOMOC")
-      || target->GetPropertyAsBool("AUTOUIC"))
+      || target->GetPropertyAsBool("AUTOUIC")
+      || target->GetPropertyAsBool("AUTORCC"))
     {
     this->SetupSourceFiles(target);
     }

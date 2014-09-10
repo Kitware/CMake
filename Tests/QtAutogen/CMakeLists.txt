@@ -37,6 +37,9 @@ else()
 
 endif()
 
+add_executable(rcconly rcconly.cpp second_resource.qrc)
+set_property(TARGET rcconly PROPERTY AUTORCC ON)
+target_link_libraries(rcconly ${QT_QTCORE_TARGET})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
