@@ -3425,9 +3425,12 @@ kwsys_stl::string SystemTools::RelativePath(const kwsys_stl::string& local, cons
     return "";
     }
 
+  kwsys_stl::string l = SystemTools::CollapseFullPath(local);
+  kwsys_stl::string r = SystemTools::CollapseFullPath(remote);
+
   // split up both paths into arrays of strings using / as a separator
-  kwsys_stl::vector<kwsys::String> localSplit = SystemTools::SplitString(local, '/', true);
-  kwsys_stl::vector<kwsys::String> remoteSplit = SystemTools::SplitString(remote, '/', true);
+  kwsys_stl::vector<kwsys::String> localSplit = SystemTools::SplitString(l, '/', true);
+  kwsys_stl::vector<kwsys::String> remoteSplit = SystemTools::SplitString(r, '/', true);
   kwsys_stl::vector<kwsys::String> commonPath; // store shared parts of path in this array
   kwsys_stl::vector<kwsys::String> finalPath;  // store the final relative path here
   // count up how many matching directory names there are from the start
@@ -3532,6 +3535,16 @@ static int GetCasePathName(const kwsys_stl::string & pathIn,
     sep = "/";
     kwsys_stl::string test_str = casePath;
     test_str += path_components[idx];
+
+    // If path component contains wildcards, we skip matching
+    // because these filenames are not allowed on windows,
+    // and we do not want to match a different file.
+    if(path_components[idx].find('*') != kwsys_stl::string::npos ||
+       path_components[idx].find('?') != kwsys_stl::string::npos)
+      {
+      casePath = "";
+      return 0;
+      }
 
     WIN32_FIND_DATAW findData;
     HANDLE hFind = ::FindFirstFileW(Encoding::ToWide(test_str).c_str(),
