@@ -37,7 +37,7 @@ String operations.
   string(MAKE_C_IDENTIFIER <input string> <output variable>)
   string(GENEX_STRIP <input string> <output variable>)
   string(UUID <output variable> NAMESPACE <namespace> NAME <name>
-         TYPE <MD5|SHA1> <UPPER>)
+         TYPE <MD5|SHA1> [UPPER])
 
 REGEX MATCH will match the regular expression once and store the match
 in the output variable.
