@@ -86,6 +86,11 @@ if(BUILD_TESTING)
   set(build_generator_args
     --build-generator ${CMAKE_GENERATOR}
     )
+  if(CMAKE_GENERATOR_PLATFORM)
+    list(APPEND build_generator_args
+      --build-generator-platform ${CMAKE_GENERATOR_PLATFORM}
+      )
+  endif()
   if(CMAKE_GENERATOR_TOOLSET)
     list(APPEND build_generator_args
       --build-generator-toolset ${CMAKE_GENERATOR_TOOLSET}
@@ -508,6 +513,7 @@ if(BUILD_TESTING)
          "${CMake_BINARY_DIR}/Tests/Simple_EclipseGenerator"
          --build-two-config
          --build-generator "Eclipse CDT4 - Unix Makefiles"
+         --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
          --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
          --build-project Simple
          --build-options ${build_options}
@@ -523,6 +529,7 @@ if(BUILD_TESTING)
          "${CMake_BINARY_DIR}/Tests/Simple_CodeBlocksGenerator"
          --build-two-config
          --build-generator "CodeBlocks - Unix Makefiles"
+         --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
          --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
          --build-project Simple
          --build-options ${build_options}
@@ -537,6 +544,7 @@ if(BUILD_TESTING)
          "${CMake_BINARY_DIR}/Tests/Simple_KDevelop3Generator"
          --build-two-config
          --build-generator "KDevelop3 - Unix Makefiles"
+         --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
          --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
          --build-project Simple
          --build-options ${build_options}
@@ -577,6 +585,7 @@ if(BUILD_TESTING)
       "${CMake_SOURCE_DIR}/Tests/SubProject/foo"
       "${CMake_BINARY_DIR}/Tests/SubProject/foo"
       --build-generator ${CMAKE_GENERATOR}
+      --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
       --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
       ${SubProject-Stage2_BUILD_MAKEPROGRAM}
       --build-nocmake
@@ -1288,6 +1297,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     -DExternalProjectUpdate_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate
     -DExternalProjectUpdate_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/ExternalProjectUpdate
     -DCMAKE_GENERATOR=${CMAKE_GENERATOR}
+    -DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
     -DCMAKE_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
     -DCMAKE_CTEST_COMMAND=${CMAKE_CTEST_COMMAND}
     -P ${CMake_SOURCE_DIR}/Tests/ExternalProjectUpdate/ExternalProjectUpdateTest.cmake
@@ -1737,6 +1747,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           --build-two-config
           --build-generator ${CMAKE_GENERATOR}
           --build-makeprogram ${CMake_TEST_DEVENV}
+          --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
           --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
           --build-project VSExcludeFromDefaultBuild
           --test-command ${CMAKE_COMMAND}
@@ -1761,6 +1772,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         "${CMake_BINARY_DIR}/Tests/VSProjectInSubdir"
         --build-two-config
         --build-generator ${CMAKE_GENERATOR}
+        --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
         --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
         --build-project VSProjectInSubdir
         --build-target test)
@@ -1975,6 +1987,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
 
   # A test for ctest_build() with targets in subdirectories
   set(ctest_configure_options)
+  if(CMAKE_GENERATOR_PLATFORM)
+    list(APPEND ctest_configure_options -DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM})
+  endif()
   if(CMAKE_GENERATOR_TOOLSET)
     list(APPEND ctest_configure_options -T ${CMAKE_GENERATOR_TOOLSET})
   endif()

@@ -37,6 +37,7 @@ Variables that Provide Information
    /variable/CMAKE_EXTRA_GENERATOR
    /variable/CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES
    /variable/CMAKE_GENERATOR
+   /variable/CMAKE_GENERATOR_PLATFORM
    /variable/CMAKE_GENERATOR_TOOLSET
    /variable/CMAKE_HOME_DIRECTORY
    /variable/CMAKE_IMPORT_LIBRARY_PREFIX
@@ -73,6 +74,7 @@ Variables that Provide Information
    /variable/CMAKE_VS_INTEL_Fortran_PROJECT_VERSION
    /variable/CMAKE_VS_MSBUILD_COMMAND
    /variable/CMAKE_VS_MSDEV_COMMAND
+   /variable/CMAKE_VS_PLATFORM_NAME
    /variable/CMAKE_VS_PLATFORM_TOOLSET
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT_BINARY_DIR

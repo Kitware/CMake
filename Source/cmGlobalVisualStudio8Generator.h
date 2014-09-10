@@ -40,6 +40,8 @@ public:
                               cmMakefile *, bool optional);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
 
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+
   /**
    * Override Configure and Generate to add the build-system check
    * target.

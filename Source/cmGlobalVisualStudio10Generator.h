@@ -30,8 +30,9 @@ public:
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
-  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
@@ -140,6 +141,5 @@ private:
   virtual std::string FindMSBuildCommand();
   virtual std::string FindDevEnvCommand();
   virtual std::string GetVSMakeProgram() { return this->GetMSBuildCommand(); }
-  void AddVSPlatformToolsetDefinition(cmMakefile* mf) const;
 };
 #endif

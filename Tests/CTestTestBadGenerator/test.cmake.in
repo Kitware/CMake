@@ -9,6 +9,7 @@ set(CTEST_SOURCE_DIRECTORY              "@CMake_SOURCE_DIR@/Tests/CTestTestBadGe
 set(CTEST_BINARY_DIRECTORY              "@CMake_BINARY_DIR@/Tests/CTestTestBadGenerator")
 set(CTEST_CVS_COMMAND                   "@CVSCOMMAND@")
 set(CTEST_CMAKE_GENERATOR               "Bad Generator")
+set(CTEST_CMAKE_GENERATOR_PLATFORM      "")
 set(CTEST_CMAKE_GENERATOR_TOOLSET       "")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
 set(CTEST_COVERAGE_COMMAND              "@COVERAGE_COMMAND@")

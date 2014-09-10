@@ -38,6 +38,7 @@ add_custom_command(
     --build-project Producer
     --build-target install
     --build-generator ${CMAKE_GENERATOR}
+    --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
     --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
     --build-options
       -DCMAKE_VERBOSE_MAKEFILE=1
@@ -71,6 +72,7 @@ add_custom_command(
    --build-project Consumer
    --build-target install
    --build-generator ${CMAKE_GENERATOR}
+   --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
    --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
    --build-options
       "-DCMAKE_FIND_ROOT_PATH=${CMAKE_BINARY_DIR}/ignored"

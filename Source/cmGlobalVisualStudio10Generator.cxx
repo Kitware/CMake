@@ -116,16 +116,6 @@ cmGlobalVisualStudio10Generator::MatchesGeneratorName(
 }
 
 //----------------------------------------------------------------------------
-bool
-cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
-                                                     cmMakefile* mf)
-{
-  this->GeneratorToolset = ts;
-  this->AddVSPlatformToolsetDefinition(mf);
-  return true;
-}
-
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
                                                     cmMakefile* mf)
 {
@@ -135,15 +125,39 @@ bool cmGlobalVisualStudio10Generator::SetSystemName(std::string const& s,
     {
     return false;
     }
-  if(this->PlatformName == "Itanium" || this->PlatformName == "x64")
+  return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::SetGeneratorPlatform(std::string const& p,
+                                                      cmMakefile* mf)
+{
+  if(!this->cmGlobalVisualStudio8Generator::SetGeneratorPlatform(p, mf))
+    {
+    return false;
+    }
+  if(this->GetPlatformName() == "Itanium" || this->GetPlatformName() == "x64")
     {
     if(this->IsExpressEdition() && !this->Find64BitTools(mf))
       {
       return false;
       }
     }
-  this->AddVSPlatformToolsetDefinition(mf);
-  return this->cmGlobalVisualStudio8Generator::SetSystemName(s, mf);
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
+                                                     cmMakefile* mf)
+{
+  this->GeneratorToolset = ts;
+  if(const char* toolset = this->GetPlatformToolset())
+    {
+    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
+    }
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -184,16 +198,6 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
   e << this->GetName() << " does not support Windows Store.";
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
-}
-
-//----------------------------------------------------------------------------
-void cmGlobalVisualStudio10Generator
-::AddVSPlatformToolsetDefinition(cmMakefile* mf) const
-{
-  if(const char* toolset = this->GetPlatformToolset())
-    {
-    mf->AddDefinition("CMAKE_VS_PLATFORM_TOOLSET", toolset);
-    }
 }
 
 //----------------------------------------------------------------------------

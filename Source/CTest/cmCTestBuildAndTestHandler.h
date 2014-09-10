@@ -57,6 +57,7 @@ protected:
   std::string  Output;
 
   std::string              BuildGenerator;
+  std::string              BuildGeneratorPlatform;
   std::string              BuildGeneratorToolset;
   std::vector<std::string> BuildOptions;
   bool                     BuildTwoConfig;

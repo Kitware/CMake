@@ -118,6 +118,15 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += cmakeGeneratorName;
       cmakeConfigureCommand += "\"";
 
+      const char* cmakeGeneratorPlatform =
+        this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
+      if(cmakeGeneratorPlatform && *cmakeGeneratorPlatform)
+        {
+        cmakeConfigureCommand += " \"-DCMAKE_GENERATOR_PLATFORM=";
+        cmakeConfigureCommand += cmakeGeneratorPlatform;
+        cmakeConfigureCommand += "\"";
+        }
+
       const char* cmakeGeneratorToolset =
         this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
       if(cmakeGeneratorToolset && *cmakeGeneratorToolset)
