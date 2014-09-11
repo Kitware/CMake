@@ -460,9 +460,8 @@ cmNinjaTargetGenerator
        i != compileCmds.end(); ++i)
     this->GetLocalGenerator()->ExpandRuleVariables(*i, vars);
 
-  std::string cmdLine =
-    this->GetLocalGenerator()->BuildCommandLine(compileCmds);
-
+  std::string cmdLine = "cmd.exe /C \"" + 
+    this->GetLocalGenerator()->BuildCommandLine(compileCmds) + " \"";
 
   // Write the rule for compiling file of the given language.
   cmOStringStream comment;
