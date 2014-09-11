@@ -11,6 +11,7 @@
 #   <code>   - source code to try to compile
 #   <var>    - variable to store the result
 #              (1 for success, empty for failure)
+#              Will be created as an internal cache variable.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:

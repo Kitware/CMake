@@ -12,6 +12,7 @@
 #   FUNCTION - the name of the function
 #   LOCATION - location where the library should be found
 #   VARIABLE - variable to store the result
+#              Will be created as an internal cache variable.
 #
 #
 #

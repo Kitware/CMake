@@ -12,6 +12,7 @@
 #
 #   INCLUDE  - list of files to include
 #   VARIABLE - variable to return result
+#              Will be created as an internal cache variable.
 #
 #
 #

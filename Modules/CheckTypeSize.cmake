@@ -19,6 +19,9 @@
 #    "0"    = type has arch-dependent size (see below)
 #    ""     = type does not exist
 #
+# Both ``HAVE_${VARIABLE}`` and ``${VARIABLE}`` will be created as internal
+# cache variables.
+#
 # Furthermore, the variable "${VARIABLE}_CODE" holds C preprocessor code
 # to define the macro "${VARIABLE}" to the size of the type, or leave
 # the macro undefined if the type does not exist.

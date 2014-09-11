@@ -10,6 +10,7 @@
 # store the result in a <variable>.  This does not verify that any
 # system header file declares the function, only that it can be found at
 # link time (consider using CheckSymbolExists).
+# <variable> will be created as an internal cache variable.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:

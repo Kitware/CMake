@@ -14,7 +14,7 @@
 #
 #   VAR      - the name of the variable
 #   VARIABLE - variable to store the result
-#
+#              Will be created as an internal cache variable.
 #
 #
 # This macro is only for C variables.

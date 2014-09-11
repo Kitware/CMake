@@ -13,6 +13,7 @@
 #   RETURN - The return value of the function.
 #   HEADER - The header files required.
 #   VARIABLE - The variable to store the result.
+#              Will be created as an internal cache variable.
 #
 # Example:
 #
