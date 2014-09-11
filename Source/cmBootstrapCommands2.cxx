@@ -14,6 +14,7 @@
 // This is sort of a boot strapping approach since you would
 // like to have CMake to build CMake.
 #include "cmCommands.h"
+#include "cmConditionEvaluator.cxx"
 #include "cmGeneratorExpressionEvaluationFile.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"

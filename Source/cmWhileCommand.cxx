@@ -10,7 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmWhileCommand.h"
-#include "cmIfCommand.h"
+#include "cmConditionEvaluator.h"
 
 bool cmWhileFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
@@ -37,9 +37,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       std::vector<std::string> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
       cmake::MessageType messageType;
-      bool isTrue =
-        cmIfCommand::IsTrue(expandedArguments,errorString,
-                            &mf, messageType);
+
+      cmConditionEvaluator conditionEvaluator(mf);
+
+      bool isTrue = conditionEvaluator.IsTrue(
+        expandedArguments, errorString, messageType);
 
       while (isTrue)
         {
@@ -86,9 +88,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
           }
         expandedArguments.clear();
         mf.ExpandArguments(this->Args, expandedArguments);
-        isTrue =
-          cmIfCommand::IsTrue(expandedArguments,errorString,
-                              &mf, messageType);
+        isTrue = conditionEvaluator.IsTrue(
+          expandedArguments, errorString, messageType);
         }
       return true;
       }
