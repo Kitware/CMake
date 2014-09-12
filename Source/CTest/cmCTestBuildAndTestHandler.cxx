@@ -70,7 +70,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     }
   if(!this->BuildGeneratorPlatform.empty())
     {
-    std::string platform = "-DCMAKE_GENERATOR_PLATFORM=";
+    std::string platform = "-A";
     platform += this->BuildGeneratorPlatform;
     args.push_back(platform);
     }
