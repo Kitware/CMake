@@ -53,7 +53,7 @@ function(run_cmake test)
     execute_process(
       COMMAND ${CMAKE_COMMAND} "${RunCMake_TEST_SOURCE_DIR}"
                 -G "${RunCMake_GENERATOR}"
-                "-DCMAKE_GENERATOR_PLATFORM=${RunCMake_GENERATOR_PLATFORM}"
+                -A "${RunCMake_GENERATOR_PLATFORM}"
                 -T "${RunCMake_GENERATOR_TOOLSET}"
                 -DRunCMake_TEST=${test}
                 --no-warn-unused-cli
