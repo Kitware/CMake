@@ -1988,7 +1988,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   # A test for ctest_build() with targets in subdirectories
   set(ctest_configure_options)
   if(CMAKE_GENERATOR_PLATFORM)
-    list(APPEND ctest_configure_options -DCMAKE_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM})
+    list(APPEND ctest_configure_options -A ${CMAKE_GENERATOR_PLATFORM})
   endif()
   if(CMAKE_GENERATOR_TOOLSET)
     list(APPEND ctest_configure_options -T ${CMAKE_GENERATOR_TOOLSET})
