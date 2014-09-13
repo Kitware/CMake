@@ -668,7 +668,6 @@ file(DOWNLOAD
   \"${remote}\"
   \"${local}\"
   ${show_progress}
-  ${hash_args}
   ${timeout_args}
   STATUS status
   LOG log)
