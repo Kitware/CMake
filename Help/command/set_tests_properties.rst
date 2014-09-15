@@ -27,7 +27,7 @@ specified regular expressions, the test will fail.
 
 ::
 
-  Example: PASS_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
+  Example: FAIL_REGULAR_EXPRESSION "[^a-z]Error;ERROR;Failed"
 
 Both PASS_REGULAR_EXPRESSION and FAIL_REGULAR_EXPRESSION expect a list
 of regular expressions.
