@@ -240,7 +240,7 @@ function(_ep_parse_arguments f name ns args)
     set(is_value 1)
 
     if(arg MATCHES "^[A-Z][A-Z0-9_][A-Z0-9_]+$" AND
-        NOT ((arg STREQUAL "${key}") AND (key STREQUAL "COMMAND")) AND
+        NOT (("x${arg}x" STREQUAL "x${key}x") AND ("x${key}x" STREQUAL "xCOMMANDx")) AND
         NOT arg MATCHES "^(TRUE|FALSE)$")
       if(_ep_keywords_${f} AND arg MATCHES "${_ep_keywords_${f}}")
         set(is_value 0)
