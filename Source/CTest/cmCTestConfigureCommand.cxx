@@ -122,7 +122,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
         this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
       if(cmakeGeneratorPlatform && *cmakeGeneratorPlatform)
         {
-        cmakeConfigureCommand += " \"-DCMAKE_GENERATOR_PLATFORM=";
+        cmakeConfigureCommand += " \"-A";
         cmakeConfigureCommand += cmakeGeneratorPlatform;
         cmakeConfigureCommand += "\"";
         }

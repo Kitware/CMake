@@ -639,6 +639,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
 {
   bool directoriesSet = directoriesSetBefore;
   bool haveToolset = false;
+  bool havePlatform = false;
   for(unsigned int i=1; i < args.size(); ++i)
     {
     std::string arg = args[i];
@@ -766,6 +767,27 @@ void cmake::SetArgs(const std::vector<std::string>& args,
       std::cout << "Also check system files when warning about unused and " <<
                    "uninitialized variables.\n";
       this->SetCheckSystemVars(true);
+      }
+    else if(arg.find("-A",0) == 0)
+      {
+      std::string value = arg.substr(2);
+      if(value.size() == 0)
+        {
+        ++i;
+        if(i >= args.size())
+          {
+          cmSystemTools::Error("No platform specified for -A");
+          return;
+          }
+        value = args[i];
+        }
+      if(havePlatform)
+        {
+        cmSystemTools::Error("Multiple -A options not allowed");
+        return;
+        }
+      this->GeneratorPlatform = value;
+      havePlatform = true;
       }
     else if(arg.find("-T",0) == 0)
       {

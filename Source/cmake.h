@@ -476,6 +476,7 @@ private:
   {"-U <globbing_expr>", "Remove matching entries from CMake cache."}, \
   {"-G <generator-name>", "Specify a build system generator."},\
   {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \
+  {"-A <platform-name>", "Specify platform name if supported by generator."}, \
   {"-Wno-dev", "Suppress developer warnings."},\
   {"-Wdev", "Enable developer warnings."}
 
