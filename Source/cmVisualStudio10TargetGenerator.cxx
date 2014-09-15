@@ -2115,11 +2115,27 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
 
     if ( this->Target->GetPropertyAsBool("WIN32_EXECUTABLE") )
       {
-      linkOptions.AddFlag("SubSystem", "Windows");
+      if (this->GlobalGenerator->TargetsWindowsCE())
+        {
+        linkOptions.AddFlag("SubSystem", "WindowsCE");
+        linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
+        }
+      else
+        {
+        linkOptions.AddFlag("SubSystem", "Windows");
+        }
       }
     else
       {
-      linkOptions.AddFlag("SubSystem", "Console");
+      if (this->GlobalGenerator->TargetsWindowsCE())
+        {
+        linkOptions.AddFlag("SubSystem", "WindowsCE");
+        linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
+        }
+      else
+        {
+        linkOptions.AddFlag("SubSystem", "Console");
+        };
       }
 
     if(const char* stackVal =

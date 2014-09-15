@@ -68,6 +68,10 @@ public:
   /** Return the CMAKE_SYSTEM_VERSION.  */
   std::string const& GetSystemVersion() const { return this->SystemVersion; }
 
+  /** Return true if building for WindowsCE */
+  bool TargetsWindowsCE() const
+    { return this->SystemIsWindowsCE; }
+
   /** Return true if building for WindowsPhone */
   bool TargetsWindowsPhone() const
     { return this->SystemIsWindowsPhone; }
@@ -105,8 +109,10 @@ public:
 protected:
   virtual void Generate();
   virtual bool InitializeSystem(cmMakefile* mf);
+  virtual bool InitializeWindowsCE(cmMakefile* mf);
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
+  virtual std::string SelectWindowsCEToolset() const;
   virtual std::string SelectWindowsPhoneToolset() const { return ""; }
   virtual std::string SelectWindowsStoreToolset() const { return ""; }
 
@@ -118,6 +124,7 @@ protected:
   std::string DefaultPlatformToolset;
   std::string SystemName;
   std::string SystemVersion;
+  bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;
   bool ExpressEdition;

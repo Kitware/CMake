@@ -97,6 +97,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\10.0\\Setup\\VC;"
     "ProductDir", vc10Express, cmSystemTools::KeyWOW64_32);
+  this->SystemIsWindowsCE = false;
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
@@ -152,6 +153,16 @@ bool
 cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
                                                      cmMakefile* mf)
 {
+  if (this->SystemIsWindowsCE && ts.empty() &&
+      this->DefaultPlatformToolset.empty())
+    {
+    cmOStringStream e;
+    e << this->GetName() << " Windows CE version '" << this->SystemVersion
+      << "' requires CMAKE_GENERATOR_TOOLSET to be set.";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+
   this->GeneratorToolset = ts;
   if(const char* toolset = this->GetPlatformToolset())
     {
@@ -163,7 +174,15 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
 {
-  if(this->SystemName == "WindowsPhone")
+  if (this->SystemName == "WindowsCE")
+    {
+    this->SystemIsWindowsCE = true;
+    if (!this->InitializeWindowsCE(mf))
+      {
+      return false;
+      }
+    }
+  else if(this->SystemName == "WindowsPhone")
     {
     this->SystemIsWindowsPhone = true;
     if(!this->InitializeWindowsPhone(mf))
@@ -183,6 +202,23 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
+bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
+{
+  if (this->DefaultPlatformName != "Win32")
+    {
+    cmOStringStream e;
+    e << "CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR "
+      << "specifies a platform too: '" << this->GetName() << "'";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+
+  this->DefaultPlatformToolset = this->SelectWindowsCEToolset();
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
   cmOStringStream e;
@@ -198,6 +234,16 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
   e << this->GetName() << " does not support Windows Store.";
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
+{
+  if (this->SystemVersion == "8.0")
+    {
+    return "CE800";
+    }
+  return "";
 }
 
 //----------------------------------------------------------------------------
