@@ -70,17 +70,9 @@ public:
    */
   virtual bool IsScriptable() const { return true; }
 
-  // this is a shared function for both If and Else to determine if the
-  // arguments were valid, and if so, was the response true. If there is
-  // an error, the errorString will be set.
-  static bool IsTrue(const std::vector<std::string> &args,
-    std::string &errorString, cmMakefile *mf,
-    cmake::MessageType &status);
-
-  // Get a definition from the makefile.  If it doesn't exist,
-  // return the original string.
-  static const char* GetVariableOrString(const std::string& str,
-                                         const cmMakefile* mf);
+  // Filter the given variable definition based on policy CMP0054.
+  static const char* GetDefinitionIfUnquoted(
+    const cmMakefile* mf, cmExpandedCommandArgument const& argument);
 
   cmTypeMacro(cmIfCommand, cmCommand);
 };

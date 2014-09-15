@@ -527,7 +527,7 @@ function(_GTK2_ADD_TARGET _var)
             set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${GTK2_${_var}_INCLUDE_DIR}")
         endif()
 
-        if(GTK2_${_var}CONFIG_INCLUDE_DIR AND NOT "${GTK2_${_var}CONFIG_INCLUDE_DIR}" STREQUAL "GTK2_${_var}_INCLUDE_DIR")
+        if(GTK2_${_var}CONFIG_INCLUDE_DIR AND NOT "x${GTK2_${_var}CONFIG_INCLUDE_DIR}" STREQUAL "x${GTK2_${_var}_INCLUDE_DIR}")
             set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${GTK2_${_var}CONFIG_INCLUDE_DIR}")
         endif()
 

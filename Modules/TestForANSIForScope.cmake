@@ -24,7 +24,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-if("CMAKE_ANSI_FOR_SCOPE" MATCHES "^CMAKE_ANSI_FOR_SCOPE$")
+if(NOT DEFINED CMAKE_ANSI_FOR_SCOPE)
   message(STATUS "Check for ANSI scope")
   try_compile(CMAKE_ANSI_FOR_SCOPE  ${CMAKE_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForAnsiForScope.cxx
