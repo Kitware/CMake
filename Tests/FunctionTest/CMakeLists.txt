@@ -92,7 +92,7 @@ endfunction()
 
 STRANGE_FUNCTION(var)
 set(second_var "second_var")
-if("${var}" STREQUAL "strange_function" AND "${second_var}" STREQUAL "second_var")
+if("x${var}" STREQUAL "xstrange_function" AND "x${second_var}" STREQUAL "xsecond_var")
   PASS("Case Test" "(${var} ${second_var})")
 else()
   FAILED("Case test" "(${var} ${second_var})")
