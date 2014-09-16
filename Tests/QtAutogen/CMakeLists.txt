@@ -68,6 +68,7 @@ add_custom_command(
 )
 
 add_executable(QtAutogen main.cpp calwidget.cpp second_widget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
+               multiplewidgets.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
                test.qrc second_resource.qrc resourcetester.cpp generated.cpp
 )
