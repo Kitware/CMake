@@ -88,6 +88,15 @@ private:
 
   std::string GetRccExecutable(cmTarget const* target);
 
+  std::string ListQt5RccInputs(cmSourceFile* sf, cmTarget const* target,
+                               std::vector<std::string>& depends);
+
+  std::string ListQt4RccInputs(cmSourceFile* sf,
+                               std::vector<std::string>& depends);
+
+  bool InputFilesNewerThanQrc(const std::string& qrcFile,
+                              const std::string& rccOutput);
+
   std::string QtMajorVersion;
   std::string Sources;
   std::vector<std::string> RccSources;
@@ -118,6 +127,7 @@ private:
   std::vector<std::string> UicTargetOptions;
   std::map<std::string, std::string> UicOptions;
   std::map<std::string, std::string> RccOptions;
+  std::map<std::string, std::vector<std::string> > RccInputs;
 
   bool Verbose;
   bool ColorOutput;
