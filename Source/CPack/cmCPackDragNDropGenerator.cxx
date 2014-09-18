@@ -399,13 +399,17 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     }
 
   // Optionally add a custom background image ...
+  // Make sure the background file type is the same as the custom image
   if(!cpack_dmg_background_image.empty())
     {
+    const std::string extension =
+        cmSystemTools::GetFilenameLastExtension(cpack_dmg_background_image);
     std::ostringstream package_background_source;
     package_background_source << cpack_dmg_background_image;
 
     std::ostringstream package_background_destination;
-    package_background_destination << staging.str() << "/background.png";
+    package_background_destination << staging.str()
+                                   << "/background" << extension;
 
     if(!this->CopyFile(package_background_source,
         package_background_destination))
