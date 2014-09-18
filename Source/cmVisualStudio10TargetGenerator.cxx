@@ -1330,6 +1330,10 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
   this->GeneratorTarget->GetAppManifest(manifestSources, "");
   this->WriteSources("AppxManifest", manifestSources);
 
+  std::vector<cmSourceFile const*> certificateSources;
+  this->GeneratorTarget->GetCertificates(certificateSources, "");
+  this->WriteSources("None", certificateSources);
+
   std::vector<cmSourceFile const*> externalObjects;
   this->GeneratorTarget->GetExternalObjects(externalObjects, "");
   for(std::vector<cmSourceFile const*>::iterator
