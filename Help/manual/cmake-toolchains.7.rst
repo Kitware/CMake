@@ -192,3 +192,29 @@ value to those supported compilers when compiling:
   set(CMAKE_C_COMPILER_TARGET ${arch})
   set(CMAKE_CXX_COMPILER QCC)
   set(CMAKE_CXX_COMPILER_TARGET ${arch})
+
+Cross Compiling for Windows CE
+------------------------------
+
+Cross compiling for Windows CE requires the corresponding SDK being
+installed on your system.  These SDKs are usually installed under
+``C:/Program Files (x86)/Windows CE Tools/SDKs``.
+
+A toolchain file to configure a Visual Studio generator for
+Windows CE may look like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME WindowsCE)
+
+  set(CMAKE_SYSTEM_VERSION 8.0)
+  set(CMAKE_SYSTEM_PROCESSOR arm)
+
+  set(CMAKE_GENERATOR_TOOLSET CE800) # Can be omitted for 8.0
+  set(CMAKE_GENERATOR_PLATFORM SDK_AM335X_SK_WEC2013_V310)
+
+The :variable:`CMAKE_GENERATOR_PLATFORM` tells the generator which SDK to use.
+Further :variable:`CMAKE_SYSTEM_VERSION` tells the generator what version of
+Windows CE to use.  Currently version 8.0 (Windows Embedded Compact 2013) is
+supported out of the box.  Other versions may require one to set
+:variable:`CMAKE_GENERATOR_TOOLSET` to the correct value.
