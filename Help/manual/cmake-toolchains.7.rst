@@ -218,3 +218,25 @@ Further :variable:`CMAKE_SYSTEM_VERSION` tells the generator what version of
 Windows CE to use.  Currently version 8.0 (Windows Embedded Compact 2013) is
 supported out of the box.  Other versions may require one to set
 :variable:`CMAKE_GENERATOR_TOOLSET` to the correct value.
+
+Cross Compiling for Windows Phone
+---------------------------------
+
+A toolchain file to configure a Visual Studio generator for
+Windows Phone may look like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME WindowsPhone)
+  set(CMAKE_SYSTEM_VERSION 8.1)
+
+Cross Compiling for Windows Store
+---------------------------------
+
+A toolchain file to configure a Visual Studio generator for
+Windows Store may look like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME WindowsStore)
+  set(CMAKE_SYSTEM_VERSION 8.1)
