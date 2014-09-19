@@ -97,12 +97,20 @@ Cross Compiling
 
 If :manual:`cmake(1)` is invoked with the command line parameter
 ``-DCMAKE_TOOLCHAIN_FILE=path/to/file``, the file will be loaded early to set
-values for the compilers. A typical cross-compiling toolchain has content such
+values for the compilers.
+The :variable:`CMAKE_CROSSCOMPILING` variable is set to true when CMake is
+cross-compiling.
+
+Cross Compiling for Linux
+-------------------------
+
+A typical cross-compiling toolchain for Linux has content such
 as:
 
 .. code-block:: cmake
 
   set(CMAKE_SYSTEM_NAME Linux)
+  set(CMAKE_SYSTEM_PROCESSOR arm)
 
   set(CMAKE_SYSROOT /home/devel/rasp-pi-rootfs)
   set(CMAKE_STAGING_PREFIX /home/devel/stage)
@@ -116,6 +124,9 @@ as:
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 The :variable:`CMAKE_SYSTEM_NAME` is the CMake-identifier of the target platform
+to build for.
+
+The :variable:`CMAKE_SYSTEM_PROCESSOR` is the CMake-identifier of the target architecture
 to build for.
 
 The :variable:`CMAKE_SYSROOT` is optional, and may be specified if a sysroot
@@ -139,13 +150,17 @@ target system prefixes, whereas executables which must be run as part of the bui
 should be found only on the host and not on the target. This is the purpose of
 the ``CMAKE_FIND_ROOT_PATH_MODE_*`` variables.
 
-Some compilers are inherently cross compilers, such as Clang and the QNX QCC
-compiler. The :variable:`CMAKE_<LANG>_COMPILER_TARGET` can be set to pass a
+Cross Compiling using Clang
+---------------------------
+
+Some compilers such as Clang are inherently cross compilers.
+The :variable:`CMAKE_<LANG>_COMPILER_TARGET` can be set to pass a
 value to those supported compilers when compiling:
 
 .. code-block:: cmake
 
   set(CMAKE_SYSTEM_NAME Linux)
+  set(CMAKE_SYSTEM_PROCESSOR arm)
 
   set(triple arm-linux-gnueabihf)
 
@@ -154,7 +169,18 @@ value to those supported compilers when compiling:
   set(CMAKE_CXX_COMPILER clang++)
   set(CMAKE_CXX_COMPILER_TARGET ${triple})
 
-Or, for QCC:
+Similarly, some compilers do not ship their own supplementary utilities
+such as linkers, but provide a way to specify the location of the external
+toolchain which will be used by the compiler driver. The
+:variable:`CMAKE_<LANG>_COMPILER_EXTERNAL_TOOLCHAIN` variable can be set in a
+toolchain file to pass the path to the compiler driver.
+
+Cross Compiling for QNX
+-----------------------
+
+As the Clang compiler the QNX QCC compile is inherently a cross compiler.
+And the :variable:`CMAKE_<LANG>_COMPILER_TARGET` can be set to pass a
+value to those supported compilers when compiling:
 
 .. code-block:: cmake
 
@@ -166,13 +192,3 @@ Or, for QCC:
   set(CMAKE_C_COMPILER_TARGET ${arch})
   set(CMAKE_CXX_COMPILER QCC)
   set(CMAKE_CXX_COMPILER_TARGET ${arch})
-
-
-Similarly, some compilers do not ship their own supplementary utilities
-such as linkers, but provide a way to specify the location of the external
-toolchain which will be used by the compiler driver. The
-:variable:`CMAKE_<LANG>_COMPILER_EXTERNAL_TOOLCHAIN` variable can be set in a
-toolchain file to pass the path to the compiler driver.
-
-The :variable:`CMAKE_CROSSCOMPILING` variable is set to true when CMake is
-cross-compiling.
