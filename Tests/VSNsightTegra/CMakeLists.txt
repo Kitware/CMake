@@ -36,3 +36,4 @@ add_executable(twolib-second
   )
 target_include_directories(twolib-second PUBLIC jni)
 target_link_libraries(twolib-second twolib-first)
+target_link_libraries(twolib-second m) # test linking to library by name
