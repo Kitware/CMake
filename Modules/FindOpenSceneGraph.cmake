@@ -203,8 +203,11 @@ foreach(_osg_module ${_osg_modules_to_process})
     find_package(${_osg_module} ${_osg_quiet})
 
     string(TOUPPER ${_osg_module} _osg_module_UC)
-    list(APPEND OPENSCENEGRAPH_INCLUDE_DIR ${${_osg_module_UC}_INCLUDE_DIR})
-    list(APPEND OPENSCENEGRAPH_LIBRARIES ${${_osg_module_UC}_LIBRARIES})
+    # append to list if module was found OR is required
+    if( ${_osg_module_UC}_FOUND OR OpenSceneGraph_FIND_REQUIRED )
+      list(APPEND OPENSCENEGRAPH_INCLUDE_DIR ${${_osg_module_UC}_INCLUDE_DIR})
+      list(APPEND OPENSCENEGRAPH_LIBRARIES ${${_osg_module_UC}_LIBRARIES})
+    endif()
 
     if(OpenSceneGraph_MARK_AS_ADVANCED)
         OSG_MARK_AS_ADVANCED(${_osg_module})
