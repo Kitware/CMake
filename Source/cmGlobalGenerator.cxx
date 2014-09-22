@@ -506,8 +506,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     fpath = mf->GetModulesFile("CMakeSystemSpecificInitialize.cmake");
     if(!mf->ReadListFile(0,fpath.c_str()))
       {
-      cmSystemTools::Error("Could not find cmake module file: ",
-                           fpath.c_str());
+      cmSystemTools::Error("Could not find cmake module file: "
+                           "CMakeSystemSpecificInitialize.cmake");
       }
     }
 
@@ -575,7 +575,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
       if(!mf->ReadListFile(0,determineFile.c_str()))
         {
         cmSystemTools::Error("Could not find cmake module file: ",
-                             determineFile.c_str());
+                             determineCompiler.c_str());
         }
       needTestLanguage[lang] = true;
       // Some generators like visual studio should not use the env variables
@@ -627,8 +627,8 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     fpath = mf->GetModulesFile("CMakeSystemSpecificInformation.cmake");
     if(!mf->ReadListFile(0,fpath.c_str()))
       {
-      cmSystemTools::Error("Could not find cmake module file: ",
-                           fpath.c_str());
+      cmSystemTools::Error("Could not find cmake module file: "
+                           "CMakeSystemSpecificInformation.cmake");
       }
     }
   // loop over languages again loading CMake(LANG)Information.cmake
@@ -744,7 +744,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         if(!mf->ReadListFile(0,ifpath.c_str()))
           {
           cmSystemTools::Error("Could not find cmake module file: ",
-                               ifpath.c_str());
+                               testLang.c_str());
           }
         std::string compilerWorks = "CMAKE_";
         compilerWorks += lang;
