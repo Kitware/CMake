@@ -935,6 +935,29 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
   makefile->AddDefinition("_qt_rcc_options_options",
             cmLocalGenerator::EscapeForCMake(rccFileOptions).c_str());
 
+  makefile->AddDefinition("_qt_rcc_executable",
+                          this->GetRccExecutable(target).c_str());
+}
+
+std::string cmQtAutoGenerators::GetRccExecutable(cmTarget const* target)
+{
+  cmMakefile *makefile = target->GetMakefile();
+  const char *qtVersion = makefile->GetDefinition("_target_qt_version");
+  if (!qtVersion)
+    {
+    qtVersion = makefile->GetDefinition("Qt5Core_VERSION_MAJOR");
+    if (!qtVersion)
+      {
+      qtVersion = makefile->GetDefinition("QT_VERSION_MAJOR");
+      }
+    if (const char *targetQtVersion =
+        target->GetLinkInterfaceDependentStringProperty("QT_MAJOR_VERSION",
+                                                        ""))
+      {
+      qtVersion = targetQtVersion;
+      }
+    }
+
   std::string targetName = target->GetName();
   if (strcmp(qtVersion, "5") == 0)
     {
@@ -943,9 +966,9 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
       {
       cmSystemTools::Error("Qt5::rcc target not found ",
                           targetName.c_str());
-      return;
+      return std::string();
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt5Rcc->GetLocation(""));
+    return qt5Rcc->GetLocation("");
     }
   else if (strcmp(qtVersion, "4") == 0)
     {
@@ -954,15 +977,14 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
       {
       cmSystemTools::Error("Qt4::rcc target not found ",
                           targetName.c_str());
-      return;
+      return std::string();
       }
-    makefile->AddDefinition("_qt_rcc_executable", qt4Rcc->GetLocation(""));
+    return qt4Rcc->GetLocation("");
     }
-  else
-    {
-    cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
-                        "Qt 5 ", targetName.c_str());
-    }
+
+  cmSystemTools::Error("The CMAKE_AUTORCC feature supports only Qt 4 and "
+                      "Qt 5 ", targetName.c_str());
+  return std::string();
 }
 
 static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,

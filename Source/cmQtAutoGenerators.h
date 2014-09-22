@@ -86,6 +86,8 @@ private:
   void MergeRccOptions(std::vector<std::string> &opts,
                        const std::vector<std::string> &fileOpts, bool isQt5);
 
+  std::string GetRccExecutable(cmTarget const* target);
+
   std::string QtMajorVersion;
   std::string Sources;
   std::string RccSources;
