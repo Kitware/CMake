@@ -360,6 +360,29 @@ void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
       includeFile.EndElement("Property");
       }
     }
+
+  if(GetOption("CPACK_WIX_PROPERTY_ARPINSTALLLOCATION") == 0)
+    {
+    includeFile.BeginElement("Property");
+    includeFile.AddAttribute("Id", "INSTALL_ROOT");
+    includeFile.AddAttribute("Secure", "yes");
+
+    includeFile.BeginElement("RegistrySearch");
+    includeFile.AddAttribute("Id", "FindInstallLocation");
+    includeFile.AddAttribute("Root", "HKLM");
+    includeFile.AddAttribute("Key", "Software\\Microsoft\\Windows\\"
+      "CurrentVersion\\Uninstall\\[WIX_UPGRADE_DETECTED]");
+    includeFile.AddAttribute("Name", "InstallLocation");
+    includeFile.AddAttribute("Type", "raw");
+    includeFile.EndElement("RegistrySearch");
+    includeFile.EndElement("Property");
+
+    includeFile.BeginElement("SetProperty");
+    includeFile.AddAttribute("Id", "ARPINSTALLLOCATION");
+    includeFile.AddAttribute("Value", "[INSTALL_ROOT]");
+    includeFile.AddAttribute("After", "CostFinalize");
+    includeFile.EndElement("SetProperty");
+    }
 }
 
 void cmCPackWIXGenerator::CopyDefinition(
