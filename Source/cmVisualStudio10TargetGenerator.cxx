@@ -2122,7 +2122,10 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       if (this->GlobalGenerator->TargetsWindowsCE())
         {
         linkOptions.AddFlag("SubSystem", "WindowsCE");
-        linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
+        if (this->Target->GetType() == cmTarget::EXECUTABLE)
+          {
+          linkOptions.AddFlag("EntryPointSymbol", "WinMainCRTStartup");
+          }
         }
       else
         {
@@ -2134,7 +2137,10 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       if (this->GlobalGenerator->TargetsWindowsCE())
         {
         linkOptions.AddFlag("SubSystem", "WindowsCE");
-        linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
+        if (this->Target->GetType() == cmTarget::EXECUTABLE)
+          {
+          linkOptions.AddFlag("EntryPointSymbol", "mainACRTStartup");
+          }
         }
       else
         {
