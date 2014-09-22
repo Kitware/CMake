@@ -26,7 +26,7 @@
 #     ALL option is used, the translations will also be created when
 #     building the default target.
 #
-# GETTEXT_PROCESS_POT( <potfile> [ALL] [INSTALL_DESTINATION <destdir>]
+# GETTEXT_PROCESS_POT_FILE( <potfile> [ALL] [INSTALL_DESTINATION <destdir>]
 # LANGUAGES <lang1> <lang2> ...  )
 #
 # ::
