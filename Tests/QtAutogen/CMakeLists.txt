@@ -37,6 +37,9 @@ else()
 
 endif()
 
+add_executable(rcconly rcconly.cpp second_resource.qrc)
+set_property(TARGET rcconly PROPERTY AUTORCC ON)
+target_link_libraries(rcconly ${QT_QTCORE_TARGET})
 
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
@@ -71,6 +74,7 @@ if (CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" AND NOT CMAKE_CONFIGURATION_
 endif()
 
 add_executable(QtAutogen main.cpp calwidget.cpp second_widget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
+               multiplewidgets.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
                test.qrc second_resource.qrc resourcetester.cpp generated.cpp ${debug_srcs}
 )
