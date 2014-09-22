@@ -26,7 +26,7 @@ endif()
 
 pkg_check_modules(FOO "${expected_path}")
 
-if(NOT "FOO_FOUND")
+if(NOT FOO_FOUND)
   message(FATAL_ERROR "Expected PKG_CONFIG_PATH: \"${expected_path}\".")
 endif()
 
@@ -36,6 +36,6 @@ set(PKG_CONFIG_USE_CMAKE_PREFIX_PATH TRUE)
 
 pkg_check_modules(BAR "${expected_path}" NO_CMAKE_PATH NO_CMAKE_ENVIRONMENT_PATH)
 
-if(NOT "BAR_FOUND")
+if(NOT BAR_FOUND)
   message(FATAL_ERROR "Expected PKG_CONFIG_PATH: \"${expected_path}\".")
 endif()

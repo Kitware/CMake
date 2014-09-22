@@ -123,7 +123,7 @@ string(STRIP "ST2 " ST2)
 string(STRIP "  ST3" ST3)
 
 foreach(var ST1 ST2 ST3)
-  if("${var}" STREQUAL "${${var}}")
+  if("x${var}" STREQUAL "x${${var}}")
     message("[${var}] == [${${var}}]")
   else()
     message(SEND_ERROR "Problem with the STRIP command for ${var}: [${${var}}]")
