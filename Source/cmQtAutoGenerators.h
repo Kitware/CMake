@@ -90,7 +90,7 @@ private:
 
   std::string QtMajorVersion;
   std::string Sources;
-  std::string RccSources;
+  std::vector<std::string> RccSources;
   std::string SkipMoc;
   std::string SkipUic;
   std::string Headers;

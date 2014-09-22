@@ -1052,7 +1052,10 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
                                      "AM_Qt5Core_VERSION_MAJOR");
     }
   this->Sources = makefile->GetSafeDefinition("AM_SOURCES");
-  this->RccSources = makefile->GetSafeDefinition("AM_RCC_SOURCES");
+  {
+  std::string rccSources = makefile->GetSafeDefinition("AM_RCC_SOURCES");
+  cmSystemTools::ExpandListArgument(rccSources, this->RccSources);
+  }
   this->SkipMoc = makefile->GetSafeDefinition("AM_SKIP_MOC");
   this->SkipUic = makefile->GetSafeDefinition("AM_SKIP_UIC");
   this->Headers = makefile->GetSafeDefinition("AM_HEADERS");
@@ -2074,11 +2077,8 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
 
 bool cmQtAutoGenerators::GenerateQrc()
 {
-  std::vector<std::string> sourceFiles;
-  cmSystemTools::ExpandListArgument(this->RccSources, sourceFiles);
-
-  for(std::vector<std::string>::const_iterator si = sourceFiles.begin();
-      si != sourceFiles.end(); ++si)
+  for(std::vector<std::string>::const_iterator si = this->RccSources.begin();
+      si != this->RccSources.end(); ++si)
     {
     std::string ext = cmsys::SystemTools::GetFilenameLastExtension(*si);
 
