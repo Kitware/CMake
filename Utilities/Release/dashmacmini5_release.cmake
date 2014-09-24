@@ -7,6 +7,7 @@ set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j5")
 set(CPACK_BINARY_GENERATORS "DragNDrop TGZ TZ")
 set(CPACK_SOURCE_GENERATORS "TGZ TZ")
+set(CPACK_DMG_FORMAT "UDBZ") #build using bzip2 for smaller package size
 set(INITIAL_CACHE "
 CMAKE_USE_OPENSSL:BOOL=ON
 OPENSSL_CRYPTO_LIBRARY:FILEPATH=/Users/kitware/openssl-1.0.1g-install/lib/libcrypto.a
