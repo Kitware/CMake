@@ -2769,16 +2769,11 @@ const char* cmTarget::GetLocationForBuild() const
 
   // Now handle the deprecated build-time configuration location.
   location = this->GetDirectory();
-  if(!location.empty())
-    {
-    location += "/";
-    }
   const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if(cfgid && strcmp(cfgid, ".") != 0)
     {
     location += "/";
     location += cfgid;
-    location += "/";
     }
 
   if(this->IsAppBundleOnApple())
