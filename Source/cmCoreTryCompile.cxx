@@ -634,6 +634,10 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName)
     searchDirs.push_back(tmp);
     }
   searchDirs.push_back("/Debug");
+#if defined(__APPLE__)
+  std::string app = "/Debug/" + targetName + ".app";
+  searchDirs.push_back(app);
+#endif
   searchDirs.push_back("/Development");
 
   for(std::vector<std::string>::const_iterator it = searchDirs.begin();
