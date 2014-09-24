@@ -1130,7 +1130,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   bool toolHasSettings = false;
   std::string tool = "None";
   std::string shaderType;
-  std::string const& ext = sf->GetExtension();
+  std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
   if(ext == "hlsl")
     {
     tool = "FXCompile";
