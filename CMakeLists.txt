@@ -552,10 +552,6 @@ endif()
 
 # setup some Testing support (a macro defined in this file)
 CMAKE_SETUP_TESTING()
-configure_file(
-  "${CMAKE_CURRENT_SOURCE_DIR}/DartLocal.conf.in"
-  "${CMAKE_CURRENT_BINARY_DIR}/DartLocal.conf"
-  COPYONLY)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(NOT CMake_VERSION_IS_RELEASE)
