@@ -142,6 +142,7 @@ private:
   std::string Name;
   bool MSTools;
   bool NsightTegra;
+  int  NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;

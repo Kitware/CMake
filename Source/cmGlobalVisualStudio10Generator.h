@@ -61,6 +61,7 @@ public:
 
   /** Generating for Nsight Tegra VS plugin?  */
   bool IsNsightTegra() const;
+  std::string GetNsightTegraVersion() const;
 
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset() const;

@@ -181,6 +181,14 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
   this->NsightTegra = gg->IsNsightTegra();
+  for(int i =
+        sscanf(gg->GetNsightTegraVersion().c_str(), "%u.%u.%u.%u",
+               &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
+               &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
+      i < 4; ++i)
+    {
+    this->NsightTegraVersion[i] = 0;
+    }
   this->MSTools = !this->NsightTegra;
   this->TargetCompileAsWinRT = false;
   this->BuildFileStream = 0;
@@ -316,9 +324,24 @@ void cmVisualStudio10TargetGenerator::Generate()
   if(this->NsightTegra)
     {
     this->WriteString("<PropertyGroup Label=\"NsightTegraProject\">\n", 1);
-    this->WriteString("<NsightTegraProjectRevisionNumber>"
-                      "7"
-                      "</NsightTegraProjectRevisionNumber>\n", 2);
+    if(this->NsightTegraVersion[0] >= 2)
+      {
+      // Nsight Tegra 2.0 uses project revision 8.
+      this->WriteString("<NsightTegraProjectRevisionNumber>"
+                        "8"
+                        "</NsightTegraProjectRevisionNumber>\n", 2);
+      // Tell newer versions to upgrade silently when loading.
+      this->WriteString("<NsightTegraUpgradeOnceWithoutPrompt>"
+                        "true"
+                        "</NsightTegraUpgradeOnceWithoutPrompt>\n", 2);
+      }
+    else
+      {
+      // Require Nsight Tegra 1.6 for JCompile support.
+      this->WriteString("<NsightTegraProjectRevisionNumber>"
+                        "7"
+                        "</NsightTegraProjectRevisionNumber>\n", 2);
+      }
     this->WriteString("</PropertyGroup>\n", 1);
     }
 

@@ -620,6 +620,12 @@ bool cmGlobalVisualStudio10Generator::IsNsightTegra() const
 }
 
 //----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio10Generator::GetNsightTegraVersion() const
+{
+  return this->NsightTegraVersion;
+}
+
+//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio10Generator::GetInstalledNsightTegraVersion()
 {
   std::string version;
