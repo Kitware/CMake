@@ -271,6 +271,28 @@ bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
 }
 
 //----------------------------------------------------------------------
+bool cmCPackDragNDropGenerator::CreateEmptyFile(std::ostringstream& target,
+                                                size_t size)
+{
+  cmsys::ofstream fout(target.str().c_str(),
+                       std::ios::out | std::ios::binary);
+  if(!fout)
+    {
+    return false;
+    }
+  else
+    {
+    // Seek to desired size - 1 byte
+    fout.seekp(size - 1, std::ios_base::beg);
+    char byte = 0;
+    // Write one byte to ensure file grows
+    fout.write(&byte, 1);
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------
 bool cmCPackDragNDropGenerator::RunCommand(std::ostringstream& command,
   std::string* output)
 {
@@ -330,6 +352,10 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   const std::string cpack_dmg_languages =
     this->GetOption("CPACK_DMG_LANGUAGES")
       ? this->GetOption("CPACK_DMG_LANGUAGES") : "";
+
+  const std::string cpack_dmg_ds_store_setup_script =
+    this->GetOption("CPACK_DMG_DS_STORE_SETUP_SCRIPT")
+    ? this->GetOption("CPACK_DMG_DS_STORE_SETUP_SCRIPT") : "";
 
   // only put license on dmg if is user provided
   if(!cpack_license_file.empty() &&
@@ -424,6 +450,25 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       }
     }
 
+  bool remount_image = !cpack_package_icon.empty() ||
+                       !cpack_dmg_ds_store_setup_script.empty();
+
+  // Create 1 MB dummy padding file in staging area when we need to remount
+  // image, so we have enough space for storing changes ...
+  if(remount_image)
+    {
+    std::ostringstream dummy_padding;
+    dummy_padding << staging.str() << "/.dummy-padding-file";
+    if(!this->CreateEmptyFile(dummy_padding, 1048576))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error creating dummy padding file."
+        << std::endl);
+
+      return 0;
+      }
+    }
+
   // Create a temporary read-write disk image ...
   std::string temp_image = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   temp_image += "/temp.dmg";
@@ -447,10 +492,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     return 0;
     }
 
-  // Optionally set the custom icon flag for the image ...
-  if(!cpack_package_icon.empty())
+  if(remount_image)
     {
-    std::ostringstream temp_mount;
+    // Store that we have a failure so that we always unmount the image
+    // before we exit.
+    bool had_error = false;
 
     std::ostringstream attach_command;
     attach_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
@@ -469,20 +515,57 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
     cmsys::RegularExpression mountpoint_regex(".*(/Volumes/[^\n]+)\n.*");
     mountpoint_regex.find(attach_output.c_str());
+    std::ostringstream temp_mount;
     temp_mount << mountpoint_regex.match(1);
 
-    std::ostringstream setfile_command;
-    setfile_command << this->GetOption("CPACK_COMMAND_SETFILE");
-    setfile_command << " -a C";
-    setfile_command << " \"" << temp_mount.str() << "\"";
-
-    if(!this->RunCommand(setfile_command))
+    // Remove dummy padding file so we have enough space on RW image ...
+    std::ostringstream dummy_padding;
+    dummy_padding << temp_mount.str() << "/.dummy-padding-file";
+    if(!cmSystemTools::RemoveFile(dummy_padding.str()))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
-        "Error assigning custom icon to temporary disk image."
+        "Error removing dummy padding file."
         << std::endl);
 
-      return 0;
+      had_error = true;
+      }
+
+    // Optionally set the custom icon flag for the image ...
+    if(!had_error && !cpack_package_icon.empty())
+      {
+      std::ostringstream setfile_command;
+      setfile_command << this->GetOption("CPACK_COMMAND_SETFILE");
+      setfile_command << " -a C";
+      setfile_command << " \"" << temp_mount.str() << "\"";
+
+      if(!this->RunCommand(setfile_command))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Error assigning custom icon to temporary disk image."
+          << std::endl);
+
+        had_error = true;
+        }
+      }
+
+    // Optionally we can execute a custom apple script to generate
+    // the .DS_Store for the volume folder ...
+    if(!had_error && !cpack_dmg_ds_store_setup_script.empty())
+      {
+      std::ostringstream setup_script_command;
+      setup_script_command << "osascript"
+                           << " \"" << cpack_dmg_ds_store_setup_script << "\""
+                           << " \"" << cpack_dmg_volume_name << "\"";
+      std::string error;
+      if(!this->RunCommand(setup_script_command, &error))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Error executing custom script on disk image." << std::endl
+          << error
+          << std::endl);
+
+        had_error = true;
+        }
       }
 
     std::ostringstream detach_command;
@@ -496,6 +579,11 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
         "Error detaching temporary disk image."
         << std::endl);
 
+      return 0;
+      }
+
+    if(had_error)
+      {
       return 0;
       }
     }

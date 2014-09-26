@@ -36,6 +36,7 @@ protected:
 
 
   bool CopyFile(std::ostringstream& source, std::ostringstream& target);
+  bool CreateEmptyFile(std::ostringstream& target, size_t size);
   bool RunCommand(std::ostringstream& command, std::string* output = 0);
 
   std::string
