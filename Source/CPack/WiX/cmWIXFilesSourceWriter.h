@@ -47,7 +47,8 @@ public:
 
   std::string EmitComponentCreateFolder(
     std::string const& directoryId,
-    std::string const& guid);
+    std::string const& guid,
+    cmInstalledFile const* installedFile);
 
   std::string EmitComponentFile(
     std::string const& directoryId,

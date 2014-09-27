@@ -62,6 +62,8 @@ public:
   void AppendProperty(cmMakefile const* mf,
     const std::string& prop, const char* value,bool asString=false);
 
+  bool HasProperty(const std::string& prop) const;
+
   bool GetProperty(const std::string& prop, std::string& value) const;
 
   bool GetPropertyAsBool(const std::string& prop) const;

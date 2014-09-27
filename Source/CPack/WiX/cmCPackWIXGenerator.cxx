@@ -847,13 +847,37 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
 
-  if(dir.GetNumberOfFiles() == 2)
+  std::string relativeDirectoryPath =
+    cmSystemTools::RelativePath(toplevel.c_str(), topdir.c_str());
+
+  cmInstalledFile const* directoryInstalledFile =
+    this->GetInstalledFile(relativeDirectoryPath);
+
+  bool emptyDirectory = dir.GetNumberOfFiles() == 2;
+  bool createDirectory = false;
+
+  if(emptyDirectory)
+    {
+    createDirectory = true;
+    }
+
+  if(directoryInstalledFile)
+    {
+    if(directoryInstalledFile->HasProperty("CPACK_WIX_ACL"))
+      {
+      createDirectory = true;
+      }
+    }
+
+  if(createDirectory)
     {
     std::string componentId = fileDefinitions.EmitComponentCreateFolder(
-      directoryId, GenerateGUID());
-
+      directoryId, GenerateGUID(), directoryInstalledFile);
     featureDefinitions.EmitComponentRef(componentId);
+    }
 
+  if(emptyDirectory)
+    {
     return;
     }
 
