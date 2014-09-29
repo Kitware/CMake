@@ -77,6 +77,13 @@ void cmInstalledFile::AppendProperty(cmMakefile const* mf,
 }
 
 //----------------------------------------------------------------------------
+bool cmInstalledFile::HasProperty(
+  const std::string& prop) const
+{
+  return this->Properties.find(prop) != this->Properties.end();
+}
+
+//----------------------------------------------------------------------------
 bool cmInstalledFile::GetProperty(
   const std::string& prop, std::string& value) const
 {

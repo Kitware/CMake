@@ -113,7 +113,9 @@ void cmWIXFilesSourceWriter::EmitUninstallShortcut(
 }
 
 std::string cmWIXFilesSourceWriter::EmitComponentCreateFolder(
-  std::string const& directoryId, std::string const& guid)
+  std::string const& directoryId,
+  std::string const& guid,
+  cmInstalledFile const* installedFile)
 {
   std::string componentId =
     std::string("CM_C_EMPTY_") + directoryId;
@@ -126,6 +128,12 @@ std::string cmWIXFilesSourceWriter::EmitComponentCreateFolder(
   AddAttribute("Guid", guid);
 
   BeginElement("CreateFolder");
+
+  if(installedFile)
+    {
+    cmWIXAccessControlList acl(Logger, *installedFile, *this);
+    acl.Apply();
+    }
 
   EndElement("CreateFolder");
   EndElement("Component");
