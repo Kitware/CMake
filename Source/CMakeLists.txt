@@ -524,6 +524,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmParseJacocoCoverage.cxx
   CTest/cmParsePHPCoverage.cxx
   CTest/cmParseCoberturaCoverage.cxx
+  CTest/cmParseDelphiCoverage.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx
