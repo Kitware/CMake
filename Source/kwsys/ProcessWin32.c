@@ -36,6 +36,9 @@ a UNIX-style select system call.
 #pragma warning (push, 1)
 #endif
 #include <windows.h> /* Windows API */
+#if defined(_MSC_VER) && _MSC_VER >= 1800
+# define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+#endif
 #include <string.h>  /* strlen, strdup */
 #include <stdio.h>   /* sprintf */
 #include <io.h>      /* _unlink */
@@ -335,7 +338,14 @@ kwsysProcess* kwsysProcess_New(void)
      windows.  */
   ZeroMemory(&osv, sizeof(osv));
   osv.dwOSVersionInfoSize = sizeof(osv);
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (push)
+# pragma warning (disable:4996)
+#endif
   GetVersionEx(&osv);
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (pop)
+#endif
   if(osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
     {
     /* Win9x no longer supported.  */
@@ -2370,7 +2380,14 @@ static kwsysProcess_List* kwsysProcess_List_New(void)
   /* Select an implementation.  */
   ZeroMemory(&osv, sizeof(osv));
   osv.dwOSVersionInfoSize = sizeof(osv);
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (push)
+# pragma warning (disable:4996)
+#endif
   GetVersionEx(&osv);
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (pop)
+#endif
   self->NT4 = (osv.dwPlatformId == VER_PLATFORM_WIN32_NT &&
                osv.dwMajorVersion < 5)? 1:0;
 

@@ -82,6 +82,9 @@
 # ifndef INVALID_FILE_ATTRIBUTES
 #  define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 # endif
+# if defined(_MSC_VER) && _MSC_VER >= 1800
+#  define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# endif
 #elif defined (__CYGWIN__)
 # include <windows.h>
 # undef _WIN32
@@ -4629,6 +4632,10 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
   ZeroMemory(&osvi, sizeof(OSVERSIONINFOEXA));
   osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEXA);
 
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (push)
+# pragma warning (disable:4996)
+#endif
   bOsVersionInfoEx = GetVersionEx((OSVERSIONINFO *)&osvi);
   if (!bOsVersionInfoEx)
     {
@@ -4638,6 +4645,9 @@ kwsys_stl::string SystemTools::GetOperatingSystemNameAndVersion()
       return 0;
       }
     }
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (pop)
+#endif
 
   switch (osvi.dwPlatformId)
     {
