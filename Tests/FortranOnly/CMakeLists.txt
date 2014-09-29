@@ -8,13 +8,14 @@ set_property(TARGET FortranOnlylib PROPERTY Fortran_FORMAT FIXED)
 set_property(SOURCE world.f PROPERTY Fortran_FORMAT FREE)
 
 # create an executable that calls hello and world
-add_executable(FortranOnly testf.f)
-target_link_libraries(FortranOnly FortranOnlylib)
+add_executable(FortranOnly1 testf.f)
+set_property(TARGET FortranOnly1 PROPERTY OUTPUT_NAME FortranOnly)
+target_link_libraries(FortranOnly1 FortranOnlylib)
 
-# create a custom command that runs FortranOnly and puts
+# create a custom command that runs FortranOnly1 and puts
 # the output into the file testfhello.txt
 add_custom_command(OUTPUT ${FortranOnly_BINARY_DIR}/testfhello.txt
-  COMMAND ${FortranOnly_BINARY_DIR}/${CMAKE_CFG_INTDIR}/FortranOnly
+  COMMAND FortranOnly1
   > testfhello.txt)
 # create a second executable FortranOnly2 that has
 # testfhello.txt has an source file so that it will
@@ -27,15 +28,15 @@ add_custom_target(checktestf2 ALL
   COMMAND ${CMAKE_COMMAND}
   -P ${FortranOnly_SOURCE_DIR}/checktestf2.cmake)
 
-# create a custom target that runs FortranOnly exectuable and creates
+# create a custom target that runs FortranOnly1 exectuable and creates
 # a file out.txt that should have hello world in it.
 add_custom_target(sayhello ALL
-  COMMAND ${FortranOnly_BINARY_DIR}/${CMAKE_CFG_INTDIR}/FortranOnly > out.txt
+  COMMAND FortranOnly1 > out.txt
 )
 # make sure stuff is built in the right order
 add_dependencies(checktestf2 FortranOnly2)
-add_dependencies(sayhello FortranOnly)
-add_dependencies(FortranOnly2 FortranOnly)
+add_dependencies(sayhello FortranOnly1)
+add_dependencies(FortranOnly2 FortranOnly1)
 
 # add a custom target that checkes that out.txt has the correct
 # content

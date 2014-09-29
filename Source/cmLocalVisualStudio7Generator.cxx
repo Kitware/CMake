@@ -796,6 +796,20 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
        << "\t\t\tUseOfMFC=\"" << mfcFlag << "\"\n"
        << "\t\t\tATLMinimizesCRunTimeLibraryUsage=\"false\"\n";
 
+  if (this->FortranProject)
+    {
+    // Intel Fortran >= 15.0 uses TargetName property.
+    std::string targetNameFull = target.GetFullName(configName);
+    std::string targetName =
+      cmSystemTools::GetFilenameWithoutLastExtension(targetNameFull);
+    std::string targetExt =
+      cmSystemTools::GetFilenameLastExtension(targetNameFull);
+    fout <<
+      "\t\t\tTargetName=\"" << this->EscapeForXML(targetName) << "\"\n"
+      "\t\t\tTargetExt=\"" << this->EscapeForXML(targetExt) << "\"\n"
+      ;
+    }
+
   // If unicode is enabled change the character set to unicode, if not
   // then default to MBCS.
   if(targetOptions.UsingUnicode())
