@@ -1130,7 +1130,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   bool toolHasSettings = false;
   std::string tool = "None";
   std::string shaderType;
-  std::string const& ext = sf->GetExtension();
+  std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
   if(ext == "hlsl")
     {
     tool = "FXCompile";
@@ -1597,6 +1597,10 @@ void
 cmVisualStudio10TargetGenerator::
 OutputLinkIncremental(std::string const& configName)
 {
+  if(!this->MSTools)
+    {
+    return;
+    }
   // static libraries and things greater than modules do not need
   // to set this option
   if(this->Target->GetType() == cmTarget::STATIC_LIBRARY
