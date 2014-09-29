@@ -6,6 +6,7 @@ set(HOST dashmacmini2)
 set(MAKE_PROGRAM "make")
 set(MAKE "${MAKE_PROGRAM} -j2")
 set(CPACK_BINARY_GENERATORS "DragNDrop TGZ TZ")
+set(CPACK_DMG_FORMAT "UDBZ") #build using bzip2 for smaller package size
 set(INITIAL_CACHE "
 CMAKE_BUILD_TYPE:STRING=Release
 CMAKE_OSX_ARCHITECTURES:STRING=ppc;i386
