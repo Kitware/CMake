@@ -894,15 +894,15 @@ macro(CUDA_GET_SOURCES_AND_OPTIONS _sources _cmake_options _options)
   set( ${_options} )
   set( _found_options FALSE )
   foreach(arg ${ARGN})
-    if(arg STREQUAL "OPTIONS")
+    if("x${arg}" STREQUAL "xOPTIONS")
       set( _found_options TRUE )
     elseif(
-        arg STREQUAL "WIN32" OR
-        arg STREQUAL "MACOSX_BUNDLE" OR
-        arg STREQUAL "EXCLUDE_FROM_ALL" OR
-        arg STREQUAL "STATIC" OR
-        arg STREQUAL "SHARED" OR
-        arg STREQUAL "MODULE"
+        "x${arg}" STREQUAL "xWIN32" OR
+        "x${arg}" STREQUAL "xMACOSX_BUNDLE" OR
+        "x${arg}" STREQUAL "xEXCLUDE_FROM_ALL" OR
+        "x${arg}" STREQUAL "xSTATIC" OR
+        "x${arg}" STREQUAL "xSHARED" OR
+        "x${arg}" STREQUAL "xMODULE"
         )
       list(APPEND ${_cmake_options} ${arg})
     else()
