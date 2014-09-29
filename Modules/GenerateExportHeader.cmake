@@ -217,9 +217,9 @@ macro(_test_compiler_hidden_visibility)
       AND NOT _INTEL_TOO_OLD
       AND NOT WIN32
       AND NOT CYGWIN
-      AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES XL
-      AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI
-      AND NOT "${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
+      AND NOT CMAKE_CXX_COMPILER_ID MATCHES XL
+      AND NOT CMAKE_CXX_COMPILER_ID MATCHES PGI
+      AND NOT CMAKE_CXX_COMPILER_ID MATCHES Watcom)
     check_cxx_compiler_flag(-fvisibility=hidden COMPILER_HAS_HIDDEN_VISIBILITY)
     check_cxx_compiler_flag(-fvisibility-inlines-hidden
       COMPILER_HAS_HIDDEN_INLINE_VISIBILITY)
@@ -230,11 +230,11 @@ macro(_test_compiler_hidden_visibility)
 endmacro()
 
 macro(_test_compiler_has_deprecated)
-  if("${CMAKE_CXX_COMPILER_ID}" MATCHES Borland
-      OR "${CMAKE_CXX_COMPILER_ID}" MATCHES HP
+  if(CMAKE_CXX_COMPILER_ID MATCHES Borland
+      OR CMAKE_CXX_COMPILER_ID MATCHES HP
       OR GCC_TOO_OLD
-      OR "${CMAKE_CXX_COMPILER_ID}" MATCHES PGI
-      OR "${CMAKE_CXX_COMPILER_ID}" MATCHES Watcom)
+      OR CMAKE_CXX_COMPILER_ID MATCHES PGI
+      OR CMAKE_CXX_COMPILER_ID MATCHES Watcom)
     set(COMPILER_HAS_DEPRECATED "" CACHE INTERNAL
       "Compiler support for a deprecated attribute")
   else()
