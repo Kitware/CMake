@@ -59,6 +59,7 @@ private:
   void WriteMSToolConfigurationValues(std::string const& config);
   void WriteHeaderSource(cmSourceFile const* sf);
   void WriteExtraSource(cmSourceFile const* sf);
+  void WriteNsightTegraConfigurationValues(std::string const& config);
   void WriteSource(std::string const& tool, cmSourceFile const* sf,
                    const char* end = 0);
   void WriteSources(std::string const& tool,
@@ -96,6 +97,7 @@ private:
   void WriteLinkOptions(std::string const& config);
   void WriteMidlOptions(std::string const& config,
                         std::vector<std::string> const & includes);
+  void WriteAntBuildOptions(std::string const& config);
   void OutputLinkIncremental(std::string const& configName);
   void WriteCustomRule(cmSourceFile const* source,
                        cmCustomCommand const & command);
@@ -139,6 +141,8 @@ private:
   std::string GUID;
   std::string Name;
   bool MSTools;
+  bool NsightTegra;
+  int  NsightTegraVersion[4];
   bool TargetCompileAsWinRT;
   cmGlobalVisualStudio10Generator* GlobalGenerator;
   cmGeneratedFileStream* BuildFileStream;

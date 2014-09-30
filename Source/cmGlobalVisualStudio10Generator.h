@@ -59,6 +59,10 @@ public:
   /** Is the installed VS an Express edition?  */
   bool IsExpressEdition() const { return this->ExpressEdition; }
 
+  /** Generating for Nsight Tegra VS plugin?  */
+  bool IsNsightTegra() const;
+  std::string GetNsightTegraVersion() const;
+
   /** The toolset name for the target platform.  */
   const char* GetPlatformToolset() const;
 
@@ -106,6 +110,8 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
+  static std::string GetInstalledNsightTegraVersion();
+
 protected:
   virtual void Generate();
   virtual bool InitializeSystem(cmMakefile* mf);
@@ -124,6 +130,7 @@ protected:
   std::string DefaultPlatformToolset;
   std::string SystemName;
   std::string SystemVersion;
+  std::string NsightTegraVersion;
   bool SystemIsWindowsCE;
   bool SystemIsWindowsPhone;
   bool SystemIsWindowsStore;

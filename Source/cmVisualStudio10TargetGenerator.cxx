@@ -180,7 +180,16 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
-  this->MSTools = true;
+  this->NsightTegra = gg->IsNsightTegra();
+  for(int i =
+        sscanf(gg->GetNsightTegraVersion().c_str(), "%u.%u.%u.%u",
+               &this->NsightTegraVersion[0], &this->NsightTegraVersion[1],
+               &this->NsightTegraVersion[2], &this->NsightTegraVersion[3]);
+      i < 4; ++i)
+    {
+    this->NsightTegraVersion[i] = 0;
+    }
+  this->MSTools = !this->NsightTegra;
   this->TargetCompileAsWinRT = false;
   this->BuildFileStream = 0;
   this->IsMissingFiles = false;
@@ -311,6 +320,30 @@ void cmVisualStudio10TargetGenerator::Generate()
   project_defaults.append(
           "xmlns=\"http://schemas.microsoft.com/developer/msbuild/2003\">\n");
   this->WriteString(project_defaults.c_str(),0);
+
+  if(this->NsightTegra)
+    {
+    this->WriteString("<PropertyGroup Label=\"NsightTegraProject\">\n", 1);
+    if(this->NsightTegraVersion[0] >= 2)
+      {
+      // Nsight Tegra 2.0 uses project revision 8.
+      this->WriteString("<NsightTegraProjectRevisionNumber>"
+                        "8"
+                        "</NsightTegraProjectRevisionNumber>\n", 2);
+      // Tell newer versions to upgrade silently when loading.
+      this->WriteString("<NsightTegraUpgradeOnceWithoutPrompt>"
+                        "true"
+                        "</NsightTegraUpgradeOnceWithoutPrompt>\n", 2);
+      }
+    else
+      {
+      // Require Nsight Tegra 1.6 for JCompile support.
+      this->WriteString("<NsightTegraProjectRevisionNumber>"
+                        "7"
+                        "</NsightTegraProjectRevisionNumber>\n", 2);
+      }
+    this->WriteString("</PropertyGroup>\n", 1);
+    }
 
   this->WriteProjectConfigurations();
   this->WriteString("<PropertyGroup Label=\"Globals\">\n", 1);
@@ -605,11 +638,28 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
         configType += "StaticLibrary";
         break;
       case cmTarget::EXECUTABLE:
-        configType += "Application";
+        if(this->NsightTegra &&
+           !this->Target->GetPropertyAsBool("ANDROID_GUI"))
+          {
+          // Android executables are .so too.
+          configType += "DynamicLibrary";
+          }
+        else
+          {
+          configType += "Application";
+          }
         break;
       case cmTarget::UTILITY:
       case cmTarget::GLOBAL_TARGET:
-        configType += "Utility";
+        if(this->NsightTegra)
+          {
+          // Tegra-Android platform does not understand "Utility".
+          configType += "StaticLibrary";
+          }
+        else
+          {
+          configType += "Utility";
+          }
         break;
       case cmTarget::UNKNOWN_LIBRARY:
       case cmTarget::INTERFACE_LIBRARY:
@@ -621,6 +671,10 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
     if(this->MSTools)
       {
       this->WriteMSToolConfigurationValues(*i);
+      }
+    else if(this->NsightTegra)
+      {
+      this->WriteNsightTegraConfigurationValues(*i);
       }
 
     this->WriteString("</PropertyGroup>\n", 1);
@@ -680,6 +734,25 @@ void cmVisualStudio10TargetGenerator
     {
     this->WriteString("<WindowsAppContainer>true"
                       "</WindowsAppContainer>\n", 2);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator
+::WriteNsightTegraConfigurationValues(std::string const&)
+{
+  cmGlobalVisualStudio10Generator* gg =
+    static_cast<cmGlobalVisualStudio10Generator*>(this->GlobalGenerator);
+  const char* toolset = gg->GetPlatformToolset();
+  std::string ntv = "<NdkToolchainVersion>";
+  ntv += toolset? toolset : "Default";
+  ntv += "</NdkToolchainVersion>\n";
+  this->WriteString(ntv.c_str(), 2);
+  if(const char* api = this->Target->GetProperty("ANDROID_API"))
+    {
+    this->WriteString("<AndroidTargetAPI>", 2);
+    (*this->BuildFileStream ) <<
+      "android-" << cmVS10EscapeXML(api) << "</AndroidTargetAPI>\n";
     }
 }
 
@@ -1149,6 +1222,28 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   else if(ext == "xml")
     {
     tool = "XML";
+    }
+  if(this->NsightTegra)
+    {
+    // Nsight Tegra needs specific file types to check up-to-dateness.
+    std::string name =
+      cmSystemTools::LowerCase(sf->GetLocation().GetName());
+    if(name == "androidmanifest.xml" ||
+       name == "build.xml" ||
+       name == "proguard.cfg" ||
+       name == "proguard-project.txt" ||
+       ext == "properties")
+      {
+      tool = "AndroidBuild";
+      }
+    else if(ext == "java")
+      {
+      tool = "JCompile";
+      }
+    else if(ext == "asm" || ext == "s")
+      {
+      tool = "ClCompile";
+      }
     }
 
   std::string deployContent;
@@ -1974,6 +2069,50 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
     }
 }
 
+
+//----------------------------------------------------------------------------
+void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
+  std::string const&)
+{
+  // Look through the sources for AndroidManifest.xml and use
+  // its location as the root source directory.
+  std::string rootDir = this->Makefile->GetCurrentDirectory();
+  {
+  std::vector<cmSourceFile const*> extraSources;
+  this->GeneratorTarget->GetExtraSources(extraSources, "");
+  for(std::vector<cmSourceFile const*>::const_iterator si =
+        extraSources.begin(); si != extraSources.end(); ++si)
+    {
+    if("androidmanifest.xml" == cmSystemTools::LowerCase(
+         (*si)->GetLocation().GetName()))
+      {
+      rootDir = (*si)->GetLocation().GetDirectory();
+      break;
+      }
+    }
+  }
+
+  // Tell MSBuild to launch Ant.
+  {
+  std::string antBuildPath = rootDir;
+  this->WriteString("<AntBuild>\n", 2);
+  this->WriteString("<AntBuildPath>", 3);
+  this->ConvertToWindowsSlash(antBuildPath);
+  (*this->BuildFileStream) <<
+    cmVS10EscapeXML(antBuildPath) << "</AntBuildPath>\n";
+  }
+
+  {
+  std::string manifest_xml = rootDir + "/AndroidManifest.xml";
+  this->ConvertToWindowsSlash(manifest_xml);
+  this->WriteString("<AndroidManifestLocation>", 3);
+  (*this->BuildFileStream) <<
+    cmVS10EscapeXML(manifest_xml) << "</AndroidManifestLocation>\n";
+  }
+
+  this->WriteString("</AntBuild>\n", 2);
+}
+
 //----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
 {
@@ -2198,6 +2337,10 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries", "ole32.lib");
       }
     }
+  else if(this->NsightTegra)
+    {
+    linkOptions.AddFlag("SoName", targetNameSO.c_str());
+    }
 
   linkOptions.Parse(flags.c_str());
 
@@ -2347,6 +2490,12 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
     this->WriteLinkOptions(*i);
     //    output lib flags       <Lib></Lib>
     this->WriteLibOptions(*i);
+    if(this->NsightTegra &&
+       this->Target->GetType() == cmTarget::EXECUTABLE &&
+       this->Target->GetPropertyAsBool("ANDROID_GUI"))
+      {
+      this->WriteAntBuildOptions(*i);
+      }
     this->WriteString("</ItemDefinitionGroup>\n", 1);
     }
 }
