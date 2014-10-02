@@ -45,6 +45,19 @@ if(CMAKE_SYSTEM_NAME MATCHES IRIX AND NOT CMAKE_THREAD_PREFER_PTHREAD)
   CHECK_INCLUDE_FILES("sys/types.h;sys/prctl.h"  CMAKE_HAVE_SPROC_H)
 endif()
 
+# Internal helper macro.
+# Do NOT even think about using it outside of this file!
+macro(_check_threads_lib LIBNAME FUNCNAME VARNAME)
+  if(NOT CMAKE_HAVE_THREADS_LIBRARY)
+     CHECK_LIBRARY_EXISTS(${LIBNAME} ${FUNCNAME} "" ${VARNAME})
+     if(${VARNAME})
+       set(CMAKE_THREAD_LIBS_INIT "-l${LIBNAME}")
+       set(CMAKE_HAVE_THREADS_LIBRARY 1)
+       set(Threads_FOUND TRUE)
+     endif()
+  endif ()
+endmacro()
+
 if(CMAKE_HAVE_SPROC_H AND NOT CMAKE_THREAD_PREFER_PTHREAD)
   # We have sproc
   set(CMAKE_USE_SPROC_INIT 1)
@@ -67,30 +80,11 @@ else()
         set(Threads_FOUND TRUE)
       else()
 
-        # Do we have -lpthreads
-        CHECK_LIBRARY_EXISTS(pthreads pthread_create "" CMAKE_HAVE_PTHREADS_CREATE)
-        if(CMAKE_HAVE_PTHREADS_CREATE)
-          set(CMAKE_THREAD_LIBS_INIT "-lpthreads")
-          set(CMAKE_HAVE_THREADS_LIBRARY 1)
-          set(Threads_FOUND TRUE)
-        else()
-
-          # Ok, how about -lpthread
-          CHECK_LIBRARY_EXISTS(pthread pthread_create "" CMAKE_HAVE_PTHREAD_CREATE)
-          if(CMAKE_HAVE_PTHREAD_CREATE)
-            set(CMAKE_THREAD_LIBS_INIT "-lpthread")
-            set(CMAKE_HAVE_THREADS_LIBRARY 1)
-            set(Threads_FOUND TRUE)
-
-          elseif(CMAKE_SYSTEM_NAME MATCHES "SunOS")
+        _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
+        _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
+        if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
             # On sun also check for -lthread
-            CHECK_LIBRARY_EXISTS(thread thr_create "" CMAKE_HAVE_THR_CREATE)
-            if(CMAKE_HAVE_THR_CREATE)
-              set(CMAKE_THREAD_LIBS_INIT "-lthread")
-              set(CMAKE_HAVE_THREADS_LIBRARY 1)
-              set(Threads_FOUND TRUE)
-            endif()
-          endif()
+            _check_threads_lib(thread thr_create CMAKE_HAVE_THR_CREATE)
         endif()
       endif()
     endif()
