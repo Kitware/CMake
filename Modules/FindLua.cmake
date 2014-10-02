@@ -56,7 +56,7 @@ function(set_lua_version_vars)
 
     if (Lua_FIND_VERSION_EXACT)
         if (Lua_FIND_VERSION_COUNT GREATER 1)
-            set(lua_append_versions ${Lua_FIND_VERSION_MAJOR} ${Lua_FIND_VERSION_MINOR})
+            set(lua_append_versions ${Lua_FIND_VERSION_MAJOR}.${Lua_FIND_VERSION_MINOR})
         endif ()
     elseif (Lua_FIND_VERSION)
         # once there is a different major version supported this should become a loop
