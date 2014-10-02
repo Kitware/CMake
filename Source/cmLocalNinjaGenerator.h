@@ -117,6 +117,7 @@ private:
 
   void WriteBuildFileTop();
   void WriteProjectHeader(std::ostream& os);
+  void WriteNinjaRequiredVersion(std::ostream& os);
   void WriteNinjaFilesInclusion(std::ostream& os);
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);

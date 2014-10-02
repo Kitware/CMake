@@ -1128,6 +1128,16 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   implicitDeps.erase(std::unique(implicitDeps.begin(), implicitDeps.end()),
                      implicitDeps.end());
 
+  cmNinjaVars variables;
+  // Use 'console' pool to get non buffered output of the CMake re-run call
+  // Available since Ninja 1.5
+  if(cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                   ninjaVersion().c_str(),
+                                   "1.5") == false)
+    {
+    variables["pool"] = "console";
+    }
+
   this->WriteBuild(os,
                    "Re-run CMake if any of its inputs changed.",
                    "RERUN_CMAKE",
@@ -1135,7 +1145,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
                    /*explicitDeps=*/ cmNinjaDeps(),
                    implicitDeps,
                    /*orderOnlyDeps=*/ cmNinjaDeps(),
-                   /*variables=*/ cmNinjaVars());
+                   variables);
 
   this->WritePhonyBuild(os,
                         "A missing CMake input file is not an error.",
@@ -1152,6 +1162,17 @@ std::string cmGlobalNinjaGenerator::ninjaCmd() const
                                     cmLocalGenerator::SHELL);
   }
   return "ninja";
+}
+
+std::string cmGlobalNinjaGenerator::ninjaVersion() const
+{
+  std::string version;
+  std::string command = ninjaCmd() + " --version";
+  cmSystemTools::RunSingleCommand(command.c_str(),
+                                  &version, 0, 0,
+                                  cmSystemTools::OUTPUT_NONE);
+
+  return version;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)

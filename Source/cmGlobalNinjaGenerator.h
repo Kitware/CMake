@@ -297,6 +297,8 @@ public:
   void AddTargetAlias(const std::string& alias, cmTarget* target);
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+
+  std::string ninjaVersion() const;
 protected:
 
   /// Overloaded methods. @see cmGlobalGenerator::Generate()
@@ -334,7 +336,6 @@ private:
   void WriteTargetHelp(std::ostream& os);
 
   std::string ninjaCmd() const;
-
 
   /// The file containing the build statement. (the relation ship of the
   /// compilation DAG).
