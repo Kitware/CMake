@@ -824,6 +824,12 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_COMMAND_OPTIONS`
   * :module:`CTest` module variable: ``MEMORYCHECK_COMMAND_OPTIONS``
 
+``MemoryCheckType``
+  Specify the type of memory checking to perform.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_TYPE`
+  * :module:`CTest` module variable: ``MEMORYCHECK_TYPE``
+
 ``MemoryCheckSuppressionFile``
   Specify a file containing suppression rules for the
   ``MemoryCheckCommand`` tool.  It will be passed with options
