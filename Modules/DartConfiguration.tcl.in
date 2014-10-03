@@ -75,6 +75,7 @@ PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
 MemoryCheckType: @MEMORYCHECK_TYPE@
+MemoryCheckSanitizerOptions: @MEMORYCHECK_SANITIZER_OPTIONS@
 MemoryCheckCommand: @MEMORYCHECK_COMMAND@
 MemoryCheckCommandOptions: @MEMORYCHECK_COMMAND_OPTIONS@
 MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@

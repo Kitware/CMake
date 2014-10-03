@@ -686,15 +686,21 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       // TSAN_OPTIONS string with the log_path in it.
       this->MemoryTesterDynamicOptions.push_back("-E");
       this->MemoryTesterDynamicOptions.push_back("env");
-      std::string envVar = "TSAN_OPTIONS";
-      std::string extraOptions;
-      if(this->MemoryTesterStyle == cmCTestMemCheckHandler::ADDRESS_SANITIZER)
+      std::string envVar;
+      std::string extraOptions =
+        this->CTest->GetCTestConfiguration("MemoryCheckSanitizerOptions");
+      if(this->MemoryTesterStyle == cmCTestMemCheckHandler::THREAD_SANITIZER)
+        {
+        envVar = "TSAN_OPTIONS";
+        }
+      else if(this->MemoryTesterStyle ==
+                cmCTestMemCheckHandler::ADDRESS_SANITIZER)
         {
         envVar = "ASAN_OPTIONS";
-        extraOptions = " detect_leaks=1";
+        extraOptions += " detect_leaks=1";
         }
       std::string outputFile = envVar + "=log_path=\""
-        + this->MemoryTesterOutputFile + "\"";
+        + this->MemoryTesterOutputFile + "\" ";
       this->MemoryTesterEnvironmentVariable = outputFile + extraOptions;
       break;
       }
