@@ -51,7 +51,8 @@ private:
     BOUNDS_CHECKER,
     // checkers after here do not use the standard error list
     ADDRESS_SANITIZER,
-    THREAD_SANITIZER
+    THREAD_SANITIZER,
+    UB_SANITIZER
   };
 public:
   enum { // Memory faults

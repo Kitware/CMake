@@ -376,6 +376,9 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
       os << "ThreadSanitizer";
       break;
+    case cmCTestMemCheckHandler::UB_SANITIZER:
+      os << "UndefinedBehaviorSanitizer";
+      break;
     default:
       os << "Unknown";
     }
@@ -552,6 +555,14 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     this->MemoryTesterStyle = cmCTestMemCheckHandler::THREAD_SANITIZER;
     this->LogWithPID = true; // even if we give the log file the pid is added
     }
+  if ( this->CTest->GetCTestConfiguration("MemoryCheckType")
+       == "UndefinedBehaviorSanitizer")
+    {
+    this->MemoryTester
+      = this->CTest->GetCTestConfiguration("CMakeCommand").c_str();
+    this->MemoryTesterStyle = cmCTestMemCheckHandler::UB_SANITIZER;
+    this->LogWithPID = true; // even if we give the log file the pid is added
+    }
   // Check the MemoryCheckType
   if(this->MemoryTesterStyle == cmCTestMemCheckHandler::UNKNOWN)
     {
@@ -677,6 +688,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       // these are almost the same but the env var used is different
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
+    case cmCTestMemCheckHandler::UB_SANITIZER:
       {
       // To pass arguments to ThreadSanitizer the environment variable
       // TSAN_OPTIONS is used. This is done with the cmake -E env command.
@@ -697,6 +709,10 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
               cmCTestMemCheckHandler::THREAD_SANITIZER)
         {
         envVar = "TSAN_OPTIONS";
+        }
+      else if(this->MemoryTesterStyle == cmCTestMemCheckHandler::UB_SANITIZER)
+        {
+        envVar = "UBSAN_OPTIONS";
         }
       std::string outputFile = envVar + "=log_path=\""
         + this->MemoryTesterOutputFile + "\" ";
@@ -735,7 +751,9 @@ ProcessMemCheckOutput(const std::string& str,
   else if ( this->MemoryTesterStyle ==
             cmCTestMemCheckHandler::ADDRESS_SANITIZER ||
             this->MemoryTesterStyle ==
-            cmCTestMemCheckHandler::THREAD_SANITIZER)
+            cmCTestMemCheckHandler::THREAD_SANITIZER ||
+            this->MemoryTesterStyle ==
+            cmCTestMemCheckHandler::UB_SANITIZER)
     {
     return this->ProcessMemCheckSanitizerOutput(str, log, results);
     }
@@ -782,6 +800,9 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
       break;
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
       regex = "WARNING: ThreadSanitizer: (.*) \\(pid=.*\\)";
+      break;
+    case cmCTestMemCheckHandler::UB_SANITIZER:
+      regex = "runtime error: (.*)";
       break;
     default:
       break;
