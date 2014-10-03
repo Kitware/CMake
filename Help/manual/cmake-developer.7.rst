@@ -188,8 +188,8 @@ size_t
 
 Various implementations have differing implementation of ``size_t``.  When
 assigning the result of ``.size()`` on a container for example, the result
-should not be assigned to an ``unsigned int`` or similar. ``std::size_t`` must
-not be used.
+should be assigned to ``size_t`` not to ``std::size_t``, ``unsigned int`` or
+similar types.
 
 Templates
 ---------
