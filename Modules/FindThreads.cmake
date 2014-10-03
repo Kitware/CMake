@@ -101,7 +101,7 @@ else()
         message(STATUS "Check if compiler accepts -pthread")
         try_run(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
           ${CMAKE_BINARY_DIR}
-          ${CMAKE_ROOT}/Modules/CheckForPthreads.c
+          ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c
           CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
           COMPILE_OUTPUT_VARIABLE OUTPUT)
 
