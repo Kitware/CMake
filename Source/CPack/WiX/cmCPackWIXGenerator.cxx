@@ -850,6 +850,11 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   std::string relativeDirectoryPath =
     cmSystemTools::RelativePath(toplevel.c_str(), topdir.c_str());
 
+  if(relativeDirectoryPath.empty())
+    {
+    relativeDirectoryPath = ".";
+    }
+
   cmInstalledFile const* directoryInstalledFile =
     this->GetInstalledFile(relativeDirectoryPath);
 
