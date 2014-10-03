@@ -70,7 +70,7 @@ if(Xerces_INCLUDE_DIR)
   _Xerces_GET_VERSION("${Xerces_INCLUDE_DIR}/xercesc/util/XercesVersion.hpp")
 endif()
 
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Xerces
                                   FOUND_VAR Xerces_FOUND
                                   REQUIRED_VARS Xerces_LIBRARY
