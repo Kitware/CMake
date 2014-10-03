@@ -52,6 +52,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/CMakeFindFrameworks.cmake)
 # Search for the python framework on Apple.
 CMAKE_FIND_FRAMEWORKS(Python)
+set(CMAKE_FIND_FRAMEWORK LAST)
 
 set(_PYTHON1_VERSIONS 1.6 1.5)
 set(_PYTHON2_VERSIONS 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0)
@@ -111,6 +112,14 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
       )
   endif()
 
+  set(PYTHON_FRAMEWORK_LIB)
+  if(Python_FRAMEWORKS)
+    foreach(dir ${Python_FRAMEWORKS})
+      set(PYTHON_FRAMEWORK_LIB ${PYTHON_FRAMEWORK_LIB}
+        ${dir}/Versions/${_CURRENT_VERSION}/lib)
+    endforeach()
+  endif()
+
   find_library(PYTHON_LIBRARY
     NAMES
     python${_CURRENT_VERSION_NO_DOTS}
@@ -119,6 +128,7 @@ foreach(_CURRENT_VERSION ${_Python_VERSIONS})
     python${_CURRENT_VERSION}u
     python${_CURRENT_VERSION}
     PATHS
+      ${PYTHON_FRAMEWORK_LIB}
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs
     # Avoid finding the .dll in the PATH.  We want the .lib.
