@@ -33,8 +33,8 @@ void cmCTestBatchTestHandler::WriteBatchScript()
 {
   this->Script = this->CTest->GetBinaryDir()
     + "/Testing/CTestBatch.txt";
-  std::fstream fout;
-  fout.open(this->Script.c_str(), std::ios::out);
+  cmsys::ofstream fout;
+  fout.open(this->Script.c_str());
   fout << "#!/bin/sh\n";
 
   for(TestMap::iterator i = this->Tests.begin(); i != this->Tests.end(); ++i)
@@ -48,7 +48,7 @@ void cmCTestBatchTestHandler::WriteBatchScript()
 }
 
 //---------------------------------------------------------
-void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::fstream& fout)
+void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
 {
   cmCTestTestHandler::cmCTestTestProperties* properties =
       this->Properties[test];
@@ -79,7 +79,7 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, std::fstream& fout)
 }
 
 //---------------------------------------------------------
-void cmCTestBatchTestHandler::WriteTestCommand(int test, std::fstream& fout)
+void cmCTestBatchTestHandler::WriteTestCommand(int test, cmsys::ofstream& fout)
 {
   std::vector<std::string> args = this->Properties[test]->Args;
   std::vector<std::string> processArgs;

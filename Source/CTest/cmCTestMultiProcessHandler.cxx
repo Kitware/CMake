@@ -319,8 +319,8 @@ void cmCTestMultiProcessHandler::UpdateCostData()
 {
   std::string fname = this->CTest->GetCostDataFile();
   std::string tmpout = fname + ".tmp";
-  std::fstream fout;
-  fout.open(tmpout.c_str(), std::ios::out);
+  cmsys::ofstream fout;
+  fout.open(tmpout.c_str());
 
   PropertiesMap temp = this->Properties;
 
@@ -610,8 +610,8 @@ void cmCTestMultiProcessHandler::WriteCheckpoint(int index)
 {
   std::string fname = this->CTest->GetBinaryDir()
     + "/Testing/Temporary/CTestCheckpoint.txt";
-  std::fstream fout;
-  fout.open(fname.c_str(), std::ios::app | std::ios::out);
+  cmsys::ofstream fout;
+  fout.open(fname.c_str(), std::ios::app);
   fout << index << "\n";
   fout.close();
 }

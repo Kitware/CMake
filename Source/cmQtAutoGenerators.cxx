@@ -1180,9 +1180,9 @@ cmQtAutoGenerators::WriteOldMocDefinitionsFile(
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
-  std::fstream outfile;
+  cmsys::ofstream outfile;
   outfile.open(filename.c_str(),
-               std::ios::out | std::ios::trunc);
+               std::ios::trunc);
   outfile << "set(AM_OLD_COMPILE_SETTINGS "
               << cmLocalGenerator::EscapeForCMake(
                  this->CurrentCompileSettingsStr) << ")\n";
@@ -1451,9 +1451,9 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
     }
 
   // source file that includes all remaining moc files (_automoc.cpp file)
-  std::fstream outfile;
+  cmsys::ofstream outfile;
   outfile.open(this->OutMocCppFilename.c_str(),
-               std::ios::out | std::ios::trunc);
+               std::ios::trunc);
   outfile << automocSource;
   outfile.close();
 
