@@ -223,23 +223,25 @@ int cmCPackIFWGenerator::InitializeInternal()
 {
   // Search Qt Installer Framework tools
 
-  if(!this->IsOn("CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND") ||
-     !this->IsOn("CPACK_IFW_REPOGEN_EXECUTABLE_FOUND"))
+  const std::string BinCreatorOpt = "CPACK_IFW_BINARYCREATOR_EXECUTABLE";
+  const std::string RepoGenOpt = "CPACK_IFW_REPOGEN_EXECUTABLE";
+
+  if(!this->IsSet(BinCreatorOpt) ||
+     !this->IsSet(RepoGenOpt))
     {
     this->ReadListFile("CPackIFW.cmake");
     }
 
   // Look 'binarycreator' executable (needs)
 
-  if(this->IsOn("CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND"))
+  const char *BinCreatorStr = this->GetOption(BinCreatorOpt);
+  if(!BinCreatorStr || cmSystemTools::IsNOTFOUND(BinCreatorStr))
     {
-    const char *ifwBinCreatorStr =
-      this->GetOption("CPACK_IFW_BINARYCREATOR_EXECUTABLE");
-    BinCreator = ifwBinCreatorStr ? ifwBinCreatorStr : "";
+    BinCreator = "";
     }
   else
     {
-    BinCreator = "";
+    BinCreator = BinCreatorStr;
     }
 
   if (BinCreator.empty())
@@ -253,15 +255,14 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Look 'repogen' executable (optional)
 
-  if(this->IsOn("CPACK_IFW_REPOGEN_EXECUTABLE_FOUND"))
+  const char *RepoGenStr = this->GetOption(RepoGenOpt);
+  if(!RepoGenStr || cmSystemTools::IsNOTFOUND(RepoGenStr))
     {
-    const char *ifwRepoGenStr =
-      this->GetOption("CPACK_IFW_REPOGEN_EXECUTABLE");
-    RepoGen = ifwRepoGenStr ? ifwRepoGenStr : "";
+    RepoGen = "";
     }
   else
     {
-    RepoGen = "";
+    RepoGen = RepoGenStr;
     }
 
   // Variables that Change Behavior

@@ -25,6 +25,8 @@
 # and Mac OS X.
 #
 # To use CPack ``IFW`` generator you must also install QtIFW_.
+# If you are not using the default path for the installation, please set
+# the path to the variable ``QTIFWDIR``.
 #
 # Variables
 # ^^^^^^^^^
@@ -95,7 +97,7 @@
 #  Additional prepared packages dirs that will be used to resolve
 #  dependent components.
 #
-# Advanced
+# Tools
 # """"""""
 #
 # .. variable:: CPACK_IFW_BINARYCREATOR_EXECUTABLE
@@ -104,19 +106,11 @@
 #
 #  This variable is cached and can be configured user if need.
 #
-# .. variable:: CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND
-#
-#  True if the "binarycreator" command line client was found.
-#
 # .. variable:: CPACK_IFW_REPOGEN_EXECUTABLE
 #
 #  The path to "repogen" command line client.
 #
 #  This variable is cached and can be configured user if need.
-#
-# .. variable:: CPACK_IFW_REPOGEN_EXECUTABLE_FOUND
-#
-#  True if the "repogen" command line client was found.
 #
 # Commands
 # ^^^^^^^^^
@@ -264,47 +258,40 @@
 
 # Default path
 
+set(_CPACK_IFW_PATHS
+  "${QTIFWDIR}"
+  "$ENV{QTIFWDIR}"
+  "${QTDIR}"
+  "$ENV{QTIFWDIR}")
 if(WIN32)
-        set(_CPACK_IFW_PATHS
-            "$ENV{HOMEDRIVE}/Qt"
-            "C:/Qt"
-        )
+  list(APPEND _CPACK_IFW_PATHS
+    "$ENV{HOMEDRIVE}/Qt"
+    "C:/Qt")
 else()
-        set(_CPACK_IFW_PATHS
-            "$ENV{HOME}/Qt"
-            "/opt/Qt"
-        )
+  list(APPEND _CPACK_IFW_PATHS
+    "$ENV{HOME}/Qt"
+    "/opt/Qt")
 endif()
 
 set(_CPACK_IFW_SUFFIXES
-        "QtIFW-1.7.0/bin"
-        "QtIFW-1.6.0/bin"
-        "QtIFW-1.5.0/bin"
-        "QtIFW-1.4.0/bin"
-        "QtIFW-1.3.0/bin"
-)
+  "bin"
+  "QtIFW-1.7.0/bin"
+  "QtIFW-1.6.0/bin"
+  "QtIFW-1.5.0/bin"
+  "QtIFW-1.4.0/bin"
+  "QtIFW-1.3.0/bin")
 
 # Look for 'binarycreator'
-
-if(NOT CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND)
 
 find_program(CPACK_IFW_BINARYCREATOR_EXECUTABLE
   NAMES binarycreator
   PATHS ${_CPACK_IFW_PATHS}
   PATH_SUFFIXES ${_CPACK_IFW_SUFFIXES}
-  DOC "QtIFW binarycreator command line client"
-  )
+  DOC "QtIFW binarycreator command line client")
+
 mark_as_advanced(CPACK_IFW_BINARYCREATOR_EXECUTABLE)
 
-if(EXISTS ${CPACK_IFW_BINARYCREATOR_EXECUTABLE})
-  set(CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND 1)
-endif()
-
-endif() # NOT CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND
-
 # Look for 'repogen'
-
-if(NOT CPACK_IFW_REPOGEN_EXECUTABLE_FOUND)
 
 find_program(CPACK_IFW_REPOGEN_EXECUTABLE
   NAMES repogen
@@ -313,12 +300,6 @@ find_program(CPACK_IFW_REPOGEN_EXECUTABLE
   DOC "QtIFW repogen command line client"
   )
 mark_as_advanced(CPACK_IFW_REPOGEN_EXECUTABLE)
-
-if(EXISTS ${CPACK_IFW_REPOGEN_EXECUTABLE})
-  set(CPACK_IFW_REPOGEN_EXECUTABLE_FOUND 1)
-endif()
-
-endif() # NOT CPACK_IFW_REPOGEN_EXECUTABLE_FOUND
 
 #
 ## Next code is included only once
