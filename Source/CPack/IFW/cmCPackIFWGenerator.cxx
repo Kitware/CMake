@@ -56,7 +56,7 @@ int cmCPackIFWGenerator::PackageFiles()
   ifwTmpFile += "/IFWOutput.log";
 
   // Run repogen
-  if (!DownloadSite.empty())
+  if (!Installer.Repositories.empty())
     {
     std::string ifwCmd = RepoGen;
     ifwCmd += " -c " + this->toplevel + "/config/config.xml";
@@ -128,7 +128,7 @@ int cmCPackIFWGenerator::PackageFiles()
     {
     ifwCmd += " --online-only";
     }
-  else if (!DownloadedPackages.empty() && !DownloadSite.empty())
+  else if (!DownloadedPackages.empty() && !Installer.Repositories.empty())
     {
     ifwCmd += " -e ";
     std::set<cmCPackIFWPackage*>::iterator it
@@ -278,26 +278,32 @@ int cmCPackIFWGenerator::InitializeInternal()
                                       PkgsDirsVector);
     }
 
-  // Remote repository
+  // Installer
+  Installer.Generator = this;
+  Installer.ConfigureFromOptions();
 
-  if (const char *site = this->GetOption("CPACK_DOWNLOAD_SITE"))
+  if (const char* ifwDownloadAll =
+      this->GetOption("CPACK_IFW_DOWNLOAD_ALL"))
     {
-    DownloadSite = site;
+    OnlineOnly = cmSystemTools::IsOn(ifwDownloadAll);
+    }
+  else if (const char* cpackDownloadAll =
+           this->GetOption("CPACK_DOWNLOAD_ALL"))
+    {
+    OnlineOnly = cmSystemTools::IsOn(cpackDownloadAll);
+    }
+  else
+    {
+    OnlineOnly = false;
     }
 
-  OnlineOnly = this->IsOn("CPACK_DOWNLOAD_ALL") ? true : false;
-
-  if (!DownloadSite.empty() && RepoGen.empty()) {
+  if (!Installer.Repositories.empty() && RepoGen.empty()) {
   cmCPackLogger(cmCPackLog::LOG_ERROR,
                 "Cannot find QtIFW repository generator \"repogen\": "
                 "likely it is not installed, or not in your PATH"
                 << std::endl);
   return 0;
   }
-
-  // Installer
-  Installer.Generator = this;
-  Installer.ConfigureFromOptions();
 
   return this->Superclass::InitializeInternal();
 }

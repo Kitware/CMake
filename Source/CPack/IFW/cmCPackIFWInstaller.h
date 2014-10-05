@@ -27,6 +27,15 @@ public: // Types
 
   typedef std::map<std::string, cmCPackIFWPackage*> PackagesMap;
 
+  struct RepositoryStruct
+  {
+    std::string Url;
+    std::string Enabled;
+    std::string Username;
+    std::string Password;
+    std::string DisplayName;
+  };
+
 public: // Constructor
 
   /**
@@ -69,6 +78,7 @@ public: // Configuration
 public: // Internal implementation
 
   const char* GetOption(const std::string& op) const;
+  bool IsOn(const std::string& op) const;
 
   void ConfigureFromOptions();
 
@@ -78,6 +88,7 @@ public: // Internal implementation
 
   cmCPackIFWGenerator* Generator;
   PackagesMap Packages;
+  std::vector<RepositoryStruct> Repositories;
   std::string Directory;
 };
 

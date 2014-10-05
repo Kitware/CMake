@@ -127,8 +127,6 @@ private:
   std::string RepoGen;
   std::string BinCreator;
 
-  std::string DownloadSite;
-
   bool OnlineOnly;
   bool ResolveDuplicateNames;
   std::vector<std::string> PkgsDirsVector;

@@ -85,6 +85,19 @@
 #  The root package name, which will be used if configuration group is not
 #  specified
 #
+# .. variable:: CPACK_IFW_REPOSITORIES_ALL
+#
+#  The list of remote repositories.
+#
+#  The default value of this variable is computed by CPack and contains
+#  all repositories added with command :command:`cpack_ifw_add_repository`
+#
+# .. variable:: CPACK_IFW_DOWNLOAD_ALL
+#
+#  If this is ``ON`` all components will be downloaded.
+#  By default is ``OFF`` or used value
+#  from :variable:`CPACK_DOWNLOAD_ALL` if set
+#
 # Components
 # """"""""""
 #
@@ -185,6 +198,33 @@
 # ``LICENSES`` pair of <display_name> and <file_path> of license text for this
 # component group. You can specify more then one license.
 #
+# --------------------------------------------------------------------------
+#
+# .. command:: cpack_ifw_add_repository
+#
+# Add QtIFW_ specific remote repository.
+#
+# ::
+#
+#   cpack_ifw_add_repository(<reponame> [DISABLED]
+#                       URL <url>
+#                       [USERNAME <username>]
+#                       [PASSWORD <password>]
+#                       [DISPLAY_NAME <display_name>])
+#
+# This macro will also add the <reponame> repository
+# to a variable :variable:`CPACK_IFW_REPOSITORIES_ALL`
+#
+# ``DISABLED`` if set, then the repository will be disabled by default.
+#
+# ``URL`` is points to a list of available components.
+#
+# ``USERNAME`` is used as user on a protected repository.
+#
+# ``PASSWORD`` is password to use on a protected repository.
+#
+# ``DISPLAY_NAME`` is string to display instead of the URL.
+#
 # Example usage
 # ^^^^^^^^^^^^^
 #
@@ -192,7 +232,7 @@
 #
 #    set(CPACK_PACKAGE_NAME "MyPackage")
 #    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "MyPackage Installation Example")
-#    set(CPACK_PACKAGE_VERSION "1.0.0")
+#    set(CPACK_PACKAGE_VERSION "1.0.0") # Version of installer
 #
 #    include(CPack)
 #    include(CPackIFW)
@@ -201,8 +241,15 @@
 #        DISPLAY_NAME "MyApp"
 #        DESCRIPTION "My Application")
 #    cpack_ifw_configure_component(myapp
-#        VERSION "1.2.3"
+#        VERSION "1.2.3" # Version of component
 #        SCRIPT "operations.qs")
+#    cpack_add_component(mybigplugin
+#        DISPLAY_NAME "MyBigPlugin"
+#        DESCRIPTION "My Big Downloadable Plugin"
+#        DOWNLOADED)
+#    cpack_ifw_add_repository(myrepo
+#        URL "http://example.com/ifw/repo/myapp"
+#        DISPLAY_NAME "My Application Repository")
 #
 #
 # Online installer
@@ -217,8 +264,11 @@
 # Then you would use the command :command:`cpack_configure_downloads`.
 # If you set ``ALL`` option all components will be downloaded.
 #
+# You also can use command :command:`cpack_ifw_add_repository` and
+# variable :variable:`CPACK_IFW_DOWNLOAD_ALL` for more specific configuration.
+#
 # CPack IFW generator create "repository" dir in current binary dir. You
-# would copy content of this dir to specified ``site``.
+# would copy content of this dir to specified ``site`` (``url``).
 #
 # See Also
 # ^^^^^^^^
@@ -423,6 +473,45 @@ macro(cpack_ifw_configure_component_group grpname)
   if(CPack_CMake_INCLUDED)
     file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_IFWGRP_STR}")
   endif()
+endmacro()
+
+# Macro for adding repository
+macro(cpack_ifw_add_repository reponame)
+
+  string(TOUPPER ${reponame} _CPACK_IFWREPO_UNAME)
+
+  set(_IFW_OPT DISABLED)
+  set(_IFW_ARGS URL USERNAME PASSWORD DISPLAY_NAME)
+  set(_IFW_MULTI_ARGS)
+  cmake_parse_arguments(CPACK_IFW_REPOSITORY_${_CPACK_IFWREPO_UNAME} "${_IFW_OPT}" "${_IFW_ARGS}" "${_IFW_MULTI_ARGS}" ${ARGN})
+
+  set(_CPACK_IFWREPO_STR "\n# Configuration for IFW repository \"${reponame}\"\n")
+
+  foreach(_IFW_ARG_NAME ${_IFW_OPT})
+  cpack_append_option_set_command(
+    CPACK_IFW_REPOSITORY_${_CPACK_IFWREPO_UNAME}_${_IFW_ARG_NAME}
+    _CPACK_IFWREPO_STR)
+  endforeach()
+
+  foreach(_IFW_ARG_NAME ${_IFW_ARGS})
+  cpack_append_string_variable_set_command(
+    CPACK_IFW_REPOSITORY_${_CPACK_IFWREPO_UNAME}_${_IFW_ARG_NAME}
+    _CPACK_IFWREPO_STR)
+  endforeach()
+
+  foreach(_IFW_ARG_NAME ${_IFW_MULTI_ARGS})
+  cpack_append_variable_set_command(
+    CPACK_IFW_REPOSITORY_${_CPACK_IFWREPO_UNAME}_${_IFW_ARG_NAME}
+    _CPACK_IFWREPO_STR)
+  endforeach()
+
+  list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})
+  set(_CPACK_IFWREPO_STR "${_CPACK_IFWREPO_STR}list(APPEND CPACK_IFW_REPOSITORIES_ALL ${reponame})\n")
+
+  if(CPack_CMake_INCLUDED)
+    file(APPEND "${CPACK_OUTPUT_CONFIG_FILE}" "${_CPACK_IFWREPO_STR}")
+  endif()
+
 endmacro()
 
 endif() # NOT CPackIFW_CMake_INCLUDED
