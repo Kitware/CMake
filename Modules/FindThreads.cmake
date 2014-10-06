@@ -25,6 +25,17 @@
 # ::
 #
 #   CMAKE_THREAD_PREFER_PTHREAD
+#
+# If the use of the -pthread compiler and linker flag is prefered then the
+# caller can set
+#
+# ::
+#
+#   THREADS_PREFER_PTHREAD_FLAG
+#
+# Please note that the compiler flag can only be used with the imported
+# target. Use of both the imported target as well as this switch is highly
+# recommended for new code.
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
@@ -125,6 +136,13 @@ else()
         set(CMAKE_HAVE_THREADS_LIBRARY 1)
         set(Threads_FOUND TRUE)
       else()
+
+        # Check for -pthread first if enabled. This is the recommended
+        # way, but not backwards compatible as one must also pass -pthread
+        # as compiler flag then.
+        if (THREADS_PREFER_PTHREAD_FLAG)
+           _check_pthreads_flag()
+        endif ()
 
         _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
         _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
