@@ -189,6 +189,7 @@ void cmLocalNinjaGenerator::WriteBuildFileTop()
 {
   // For the build file.
   this->WriteProjectHeader(this->GetBuildFileStream());
+  this->WriteNinjaRequiredVersion(this->GetBuildFileStream());
   this->WriteNinjaFilesInclusion(this->GetBuildFileStream());
 
   // For the rule file.
@@ -203,6 +204,30 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
     << "# Configuration: " << this->ConfigName << std::endl
     ;
   cmGlobalNinjaGenerator::WriteDivider(os);
+}
+
+void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
+{
+  // Default required version
+  // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
+  std::string requiredVersion = "1.3";
+
+  // Ninja generator uses the 'console' pool if available (>= 1.5)
+  std::string usedVersion = this->GetGlobalNinjaGenerator()->ninjaVersion();
+  if(cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                   usedVersion.c_str(),
+                                   "1.5") ==  false)
+    {
+      requiredVersion = "1.5";
+    }
+
+  cmGlobalNinjaGenerator::WriteComment(os,
+                          "Minimal version of Ninja required by this file");
+  os
+    << "ninja_required_version = "
+    << requiredVersion
+    << std::endl << std::endl
+    ;
 }
 
 void cmLocalNinjaGenerator::WritePools(std::ostream& os)
