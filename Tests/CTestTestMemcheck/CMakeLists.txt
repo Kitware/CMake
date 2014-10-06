@@ -152,6 +152,23 @@ set_tests_properties(CTestTestMemcheckDummyAddressSanitizer PROPERTIES
     ".*Memory checking results:.*heap-buffer-overflow - 1.*")
 
 #-----------------------------------------------------------------------------
+# add UndefinedBehaviorSanitizer test
+set(CTEST_EXTRA_CODE
+"set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1\")
+")
+
+set(CMAKELISTS_EXTRA_CODE
+"add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
+-P \"${CMAKE_CURRENT_SOURCE_DIR}/testUndefinedBehaviorSanitizer.cmake\")
+")
+gen_mc_test_internal(DummyUndefinedBehaviorSanitizer "" -DMEMCHECK_TYPE=UndefinedBehaviorSanitizer)
+set(CMAKELISTS_EXTRA_CODE )
+set(CTEST_EXTRA_CODE)
+set_tests_properties(CTestTestMemcheckDummyUndefinedBehaviorSanitizer PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    ".*Memory checking results:.*left shift of negative value -256 - 1.*")
+
+#-----------------------------------------------------------------------------
 
 gen_mc_test(DummyPurify "\${PSEUDO_PURIFY}")
 gen_mc_test(DummyValgrind "\${PSEUDO_VALGRIND}")
