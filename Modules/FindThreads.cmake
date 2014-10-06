@@ -14,6 +14,12 @@
 #   CMAKE_USE_PTHREADS_INIT    - are we using pthreads
 #   CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
 #
+# The following import target is created
+#
+# ::
+#
+#   Threads::Threads
+#
 # For systems with multiple thread libraries, caller can set
 #
 # ::
@@ -178,3 +184,15 @@ endif()
 set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Threads DEFAULT_MSG Threads_FOUND)
+
+if(THREADS_FOUND AND NOT TARGET Threads::Threads)
+  add_library(Threads::Threads INTERFACE IMPORTED)
+
+  if(THREADS_HAVE_PTHREAD_ARG)
+    set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS "-pthread")
+  endif()
+
+  if(CMAKE_THREAD_LIBS_INIT)
+    set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
+  endif()
+endif()
