@@ -71,6 +71,7 @@ protected:
           cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Reading file: "
                      << atts[tagCount+1]<< std::endl);
           std::string filename = atts[tagCount+1];
+          this->CurFileName = "";
           for(size_t i=0;i < FilePaths.size();i++)
             {
             finalpath = FilePaths[i] + "/" + filename;
