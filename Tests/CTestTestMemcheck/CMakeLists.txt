@@ -103,11 +103,11 @@ unset(CTEST_EXTRA_CONFIG)
 unset(CTEST_EXTRA_CODE)
 unset(CMAKELISTS_EXTRA_CODE)
 
+#-----------------------------------------------------------------------------
 # add ThreadSanitizer test
 set(CTEST_EXTRA_CODE
 "set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"report_bugs=1 history_size=5 exitcode=55\")
 ")
-
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
 -P \"${CMAKE_CURRENT_SOURCE_DIR}/testThreadSanitizer.cmake\")
@@ -119,11 +119,11 @@ set_tests_properties(CTestTestMemcheckDummyThreadSanitizer PROPERTIES
 set(CMAKELISTS_EXTRA_CODE )
 set(CTEST_EXTRA_CODE)
 
+#-----------------------------------------------------------------------------
 # add LeakSanitizer test
 set(CTEST_EXTRA_CODE
 "set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
 ")
-
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
 -P \"${CMAKE_CURRENT_SOURCE_DIR}/testLeakSanitizer.cmake\")
@@ -134,11 +134,12 @@ set(CTEST_EXTRA_CODE)
 set_tests_properties(CTestTestMemcheckDummyLeakSanitizer PROPERTIES
     PASS_REGULAR_EXPRESSION
     ".*Memory checking results:.*Direct leak - 2.*Indirect leak - 1.*")
+
+#-----------------------------------------------------------------------------
 # add AddressSanitizer test
 set(CTEST_EXTRA_CODE
 "set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
 ")
-
 set(CMAKELISTS_EXTRA_CODE
 "add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
 -P \"${CMAKE_CURRENT_SOURCE_DIR}/testAddressSanitizer.cmake\")
@@ -150,6 +151,7 @@ set_tests_properties(CTestTestMemcheckDummyAddressSanitizer PROPERTIES
     PASS_REGULAR_EXPRESSION
     ".*Memory checking results:.*heap-buffer-overflow - 1.*")
 
+#-----------------------------------------------------------------------------
 
 gen_mc_test(DummyPurify "\${PSEUDO_PURIFY}")
 gen_mc_test(DummyValgrind "\${PSEUDO_VALGRIND}")
