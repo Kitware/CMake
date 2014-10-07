@@ -370,11 +370,11 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
     case cmCTestMemCheckHandler::BOUNDS_CHECKER:
       os << "BoundsChecker";
       break;
-    case cmCTestMemCheckHandler::THREAD_SANITIZER:
-      os << "ThreadSanitizer";
-      break;
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
       os << "AddressSanitizer";
+      break;
+    case cmCTestMemCheckHandler::THREAD_SANITIZER:
+      os << "ThreadSanitizer";
       break;
     default:
       os << "Unknown";
@@ -537,19 +537,19 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     this->MemoryTesterStyle = cmCTestMemCheckHandler::BOUNDS_CHECKER;
     }
   if ( this->CTest->GetCTestConfiguration("MemoryCheckType")
-       == "ThreadSanitizer")
-    {
-    this->MemoryTester
-      = this->CTest->GetCTestConfiguration("CMakeCommand").c_str();
-    this->MemoryTesterStyle = cmCTestMemCheckHandler::THREAD_SANITIZER;
-    this->LogWithPID = true; // even if we give the log file the pid is added
-    }
-  if ( this->CTest->GetCTestConfiguration("MemoryCheckType")
        == "AddressSanitizer")
     {
     this->MemoryTester
       = this->CTest->GetCTestConfiguration("CMakeCommand").c_str();
     this->MemoryTesterStyle = cmCTestMemCheckHandler::ADDRESS_SANITIZER;
+    this->LogWithPID = true; // even if we give the log file the pid is added
+    }
+  if ( this->CTest->GetCTestConfiguration("MemoryCheckType")
+       == "ThreadSanitizer")
+    {
+    this->MemoryTester
+      = this->CTest->GetCTestConfiguration("CMakeCommand").c_str();
+    this->MemoryTesterStyle = cmCTestMemCheckHandler::THREAD_SANITIZER;
     this->LogWithPID = true; // even if we give the log file the pid is added
     }
   // Check the MemoryCheckType
@@ -674,8 +674,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterOptions.push_back("/M");
       break;
       }
-      // these two are almost the same but the env var used
-      // is different
+      // these are almost the same but the env var used is different
     case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
     case cmCTestMemCheckHandler::THREAD_SANITIZER:
       {
@@ -689,15 +688,15 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       std::string envVar;
       std::string extraOptions =
         this->CTest->GetCTestConfiguration("MemoryCheckSanitizerOptions");
-      if(this->MemoryTesterStyle == cmCTestMemCheckHandler::THREAD_SANITIZER)
-        {
-        envVar = "TSAN_OPTIONS";
-        }
-      else if(this->MemoryTesterStyle ==
-                cmCTestMemCheckHandler::ADDRESS_SANITIZER)
+      if(this->MemoryTesterStyle == cmCTestMemCheckHandler::ADDRESS_SANITIZER)
         {
         envVar = "ASAN_OPTIONS";
         extraOptions += " detect_leaks=1";
+        }
+      else if(this->MemoryTesterStyle ==
+              cmCTestMemCheckHandler::THREAD_SANITIZER)
+        {
+        envVar = "TSAN_OPTIONS";
         }
       std::string outputFile = envVar + "=log_path=\""
         + this->MemoryTesterOutputFile + "\" ";
@@ -734,9 +733,9 @@ ProcessMemCheckOutput(const std::string& str,
     return this->ProcessMemCheckPurifyOutput(str, log, results);
     }
   else if ( this->MemoryTesterStyle ==
-            cmCTestMemCheckHandler::THREAD_SANITIZER ||
+            cmCTestMemCheckHandler::ADDRESS_SANITIZER ||
             this->MemoryTesterStyle ==
-            cmCTestMemCheckHandler::ADDRESS_SANITIZER)
+            cmCTestMemCheckHandler::THREAD_SANITIZER)
     {
     return this->ProcessMemCheckSanitizerOutput(str, log, results);
     }
@@ -776,13 +775,16 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   std::vector<int>& result)
 {
   std::string regex;
-  if(this->MemoryTesterStyle == cmCTestMemCheckHandler::THREAD_SANITIZER)
+  switch ( this->MemoryTesterStyle )
     {
-    regex = "WARNING: ThreadSanitizer: (.*) \\(pid=.*\\)";
-    }
-  else
-    {
-    regex = "ERROR: AddressSanitizer: (.*) on.*";
+    case cmCTestMemCheckHandler::ADDRESS_SANITIZER:
+      regex = "ERROR: AddressSanitizer: (.*) on.*";
+      break;
+    case cmCTestMemCheckHandler::THREAD_SANITIZER:
+      regex = "WARNING: ThreadSanitizer: (.*) \\(pid=.*\\)";
+      break;
+    default:
+      break;
     }
   cmsys::RegularExpression sanitizerWarning(regex);
   cmsys::RegularExpression leakWarning("(Direct|Indirect) leak of .*");
