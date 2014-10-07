@@ -49,7 +49,7 @@ private:
     VALGRIND,
     PURIFY,
     BOUNDS_CHECKER,
-    // checkers after hear do not use the standard error list
+    // checkers after here do not use the standard error list
     THREAD_SANITIZER,
     ADDRESS_SANITIZER
   };

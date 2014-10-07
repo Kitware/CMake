@@ -824,6 +824,18 @@ Configuration settings include:
   * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_COMMAND_OPTIONS`
   * :module:`CTest` module variable: ``MEMORYCHECK_COMMAND_OPTIONS``
 
+``MemoryCheckType``
+  Specify the type of memory checking to perform.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_TYPE`
+  * :module:`CTest` module variable: ``MEMORYCHECK_TYPE``
+
+``MemoryCheckSanitizerOptions``
+  Specify options to sanitizers when running with a sanitize-enabled build.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_SANITIZER_OPTIONS`
+  * :module:`CTest` module variable: ``MEMORYCHECK_SANITIZER_OPTIONS``
+
 ``MemoryCheckSuppressionFile``
   Specify a file containing suppression rules for the
   ``MemoryCheckCommand`` tool.  It will be passed with options
