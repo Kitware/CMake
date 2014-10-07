@@ -56,7 +56,7 @@ int cmCPackIFWGenerator::PackageFiles()
   ifwTmpFile += "/IFWOutput.log";
 
   // Run repogen
-  if (!DownloadSite.empty())
+  if (!Installer.Repositories.empty())
     {
     std::string ifwCmd = RepoGen;
     ifwCmd += " -c " + this->toplevel + "/config/config.xml";
@@ -128,7 +128,7 @@ int cmCPackIFWGenerator::PackageFiles()
     {
     ifwCmd += " --online-only";
     }
-  else if (!DownloadedPackages.empty() && !DownloadSite.empty())
+  else if (!DownloadedPackages.empty() && !Installer.Repositories.empty())
     {
     ifwCmd += " -e ";
     std::set<cmCPackIFWPackage*>::iterator it
@@ -223,23 +223,25 @@ int cmCPackIFWGenerator::InitializeInternal()
 {
   // Search Qt Installer Framework tools
 
-  if(!this->IsOn("CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND") ||
-     !this->IsOn("CPACK_IFW_REPOGEN_EXECUTABLE_FOUND"))
+  const std::string BinCreatorOpt = "CPACK_IFW_BINARYCREATOR_EXECUTABLE";
+  const std::string RepoGenOpt = "CPACK_IFW_REPOGEN_EXECUTABLE";
+
+  if(!this->IsSet(BinCreatorOpt) ||
+     !this->IsSet(RepoGenOpt))
     {
     this->ReadListFile("CPackIFW.cmake");
     }
 
   // Look 'binarycreator' executable (needs)
 
-  if(this->IsOn("CPACK_IFW_BINARYCREATOR_EXECUTABLE_FOUND"))
+  const char *BinCreatorStr = this->GetOption(BinCreatorOpt);
+  if(!BinCreatorStr || cmSystemTools::IsNOTFOUND(BinCreatorStr))
     {
-    const char *ifwBinCreatorStr =
-      this->GetOption("CPACK_IFW_BINARYCREATOR_EXECUTABLE");
-    BinCreator = ifwBinCreatorStr ? ifwBinCreatorStr : "";
+    BinCreator = "";
     }
   else
     {
-    BinCreator = "";
+    BinCreator = BinCreatorStr;
     }
 
   if (BinCreator.empty())
@@ -253,15 +255,14 @@ int cmCPackIFWGenerator::InitializeInternal()
 
   // Look 'repogen' executable (optional)
 
-  if(this->IsOn("CPACK_IFW_REPOGEN_EXECUTABLE_FOUND"))
+  const char *RepoGenStr = this->GetOption(RepoGenOpt);
+  if(!RepoGenStr || cmSystemTools::IsNOTFOUND(RepoGenStr))
     {
-    const char *ifwRepoGenStr =
-      this->GetOption("CPACK_IFW_REPOGEN_EXECUTABLE");
-    RepoGen = ifwRepoGenStr ? ifwRepoGenStr : "";
+    RepoGen = "";
     }
   else
     {
-    RepoGen = "";
+    RepoGen = RepoGenStr;
     }
 
   // Variables that Change Behavior
@@ -277,26 +278,32 @@ int cmCPackIFWGenerator::InitializeInternal()
                                       PkgsDirsVector);
     }
 
-  // Remote repository
+  // Installer
+  Installer.Generator = this;
+  Installer.ConfigureFromOptions();
 
-  if (const char *site = this->GetOption("CPACK_DOWNLOAD_SITE"))
+  if (const char* ifwDownloadAll =
+      this->GetOption("CPACK_IFW_DOWNLOAD_ALL"))
     {
-    DownloadSite = site;
+    OnlineOnly = cmSystemTools::IsOn(ifwDownloadAll);
+    }
+  else if (const char* cpackDownloadAll =
+           this->GetOption("CPACK_DOWNLOAD_ALL"))
+    {
+    OnlineOnly = cmSystemTools::IsOn(cpackDownloadAll);
+    }
+  else
+    {
+    OnlineOnly = false;
     }
 
-  OnlineOnly = this->IsOn("CPACK_DOWNLOAD_ALL") ? true : false;
-
-  if (!DownloadSite.empty() && RepoGen.empty()) {
+  if (!Installer.Repositories.empty() && RepoGen.empty()) {
   cmCPackLogger(cmCPackLog::LOG_ERROR,
                 "Cannot find QtIFW repository generator \"repogen\": "
                 "likely it is not installed, or not in your PATH"
                 << std::endl);
   return 0;
   }
-
-  // Installer
-  Installer.Generator = this;
-  Installer.ConfigureFromOptions();
 
   return this->Superclass::InitializeInternal();
 }

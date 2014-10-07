@@ -45,6 +45,12 @@ const char *cmCPackIFWInstaller::GetOption(const std::string &op) const
 }
 
 //----------------------------------------------------------------------------
+bool cmCPackIFWInstaller::IsOn(const std::string &op) const
+{
+  return Generator ? Generator->IsOn(op) : false;
+}
+
+//----------------------------------------------------------------------------
 void cmCPackIFWInstaller::ConfigureFromOptions()
 {
   // Name;
@@ -167,6 +173,78 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
     {
     AdminTargetDir = option;
     }
+
+  // Repositories
+  Repositories.clear();
+  RepositoryStruct Repo;
+  if (const char *site = this->GetOption("CPACK_DOWNLOAD_SITE"))
+    {
+    Repo.Url = site;
+    Repositories.push_back(Repo);
+    }
+  if(const char *RepoAllStr = this->GetOption("CPACK_IFW_REPOSITORIES_ALL"))
+    {
+    std::vector<std::string> RepoAllVector;
+    cmSystemTools::ExpandListArgument(RepoAllStr,
+                                      RepoAllVector);
+    for(std::vector<std::string>::iterator
+          rit = RepoAllVector.begin(); rit != RepoAllVector.end(); ++rit)
+      {
+        std::string prefix = "CPACK_IFW_REPOSITORY_"
+          + cmsys::SystemTools::UpperCase(*rit)
+          + "_";
+        // Url
+        if (const char* url = GetOption(prefix + "URL"))
+          {
+          Repo.Url = url;
+          }
+        else
+          {
+          Repo.Url = "";
+          }
+        // Enabled
+        if (IsOn(prefix + "DISABLED"))
+          {
+          Repo.Enabled = "0";
+          }
+        else
+          {
+          Repo.Enabled = "";
+          }
+        // Username
+        if (const char* username = GetOption(prefix + "USERNAME"))
+          {
+          Repo.Username = username;
+          }
+        else
+          {
+          Repo.Username = "";
+          }
+        // Password
+        if (const char* password = GetOption(prefix + "PASSWORD"))
+          {
+          Repo.Password = password;
+          }
+        else
+          {
+          Repo.Password = "";
+          }
+        // DisplayName
+        if (const char* displayName = GetOption(prefix + "DISPLAY_NAME"))
+          {
+          Repo.DisplayName = displayName;
+          }
+        else
+          {
+          Repo.DisplayName = "";
+          }
+
+        if(!Repo.Url.empty())
+          {
+          Repositories.push_back(Repo);
+          }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -246,19 +324,43 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
          << "</AdminTargetDir>" << std::endl;
     }
 
-  // Site
-  if (!Generator->DownloadSite.empty())
+  // Remote repositories
+  if (!Repositories.empty())
     {
     xout << "    <RemoteRepositories>" << std::endl;
-    xout << "        <Repository>" << std::endl;
-    xout << "            <Url>" << Generator->DownloadSite
-         << "</Url>" << std::endl;
-    // These properties can not be set from "cpack_configure_downloads"
-    //                 <Enabled>1</Enabled>
-    //                 <Username>user</Username>
-    //                 <Password>password</Password>
-    //                 <DisplayName>Example repository</DisplayName>
-    xout << "        </Repository>" << std::endl;
+    for(std::vector<RepositoryStruct>::iterator
+        rit = Repositories.begin(); rit != Repositories.end(); ++rit)
+      {
+      xout << "        <Repository>" << std::endl;
+      // Url
+      xout << "            <Url>" << rit->Url
+           << "</Url>" << std::endl;
+      // Enabled
+      if(!rit->Enabled.empty())
+        {
+        xout << "            <Enabled>" << rit->Enabled
+             << "</Enabled>" << std::endl;
+        }
+      // Username
+      if(!rit->Username.empty())
+        {
+        xout << "            <Username>" << rit->Username
+             << "</Username>" << std::endl;
+        }
+      // Password
+      if(!rit->Password.empty())
+        {
+        xout << "            <Password>" << rit->Password
+             << "</Password>" << std::endl;
+        }
+      // DisplayName
+      if(!rit->DisplayName.empty())
+        {
+        xout << "            <DisplayName>" << rit->DisplayName
+             << "</DisplayName>" << std::endl;
+        }
+      xout << "        </Repository>" << std::endl;
+      }
     xout << "    </RemoteRepositories>" << std::endl;
     }
 
