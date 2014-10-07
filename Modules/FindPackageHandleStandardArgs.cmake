@@ -284,10 +284,11 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   # version handling:
   set(VERSION_MSG "")
   set(VERSION_OK TRUE)
-  set(VERSION ${${FPHSA_VERSION_VAR}} )
-  if (${_NAME}_FIND_VERSION)
+  set(VERSION ${${FPHSA_VERSION_VAR}})
 
-    if(VERSION)
+  # check with DEFINED here as the requested or found version may be "0"
+  if (DEFINED ${_NAME}_FIND_VERSION)
+    if(DEFINED ${FPHSA_VERSION_VAR})
 
       if(${_NAME}_FIND_VERSION_EXACT)       # exact version required
         # count the dots in the version string
