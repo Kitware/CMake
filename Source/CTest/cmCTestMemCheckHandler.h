@@ -52,6 +52,7 @@ private:
     // checkers after here do not use the standard error list
     ADDRESS_SANITIZER,
     THREAD_SANITIZER,
+    MEMORY_SANITIZER,
     UB_SANITIZER
   };
 public:
