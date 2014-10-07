@@ -205,7 +205,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
       && args.size() + buildstr.size() + assignments.size()
                                                     > (size_t) cmdLineLimit) {
     buildstr += "_RSP_FILE";
-    variable_assignments.clear();
+    variable_assignments.str(std::string());
     cmGlobalNinjaGenerator::WriteVariable(variable_assignments,
                                           "RSP_FILE", rspfile, "", 1);
     assignments += variable_assignments.str();
