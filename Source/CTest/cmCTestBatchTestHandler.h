@@ -17,6 +17,7 @@
 #include <cmCTestTestHandler.h>
 #include <cmCTestMultiProcessHandler.h>
 #include <cmCTestRunTest.h>
+#include <cmsys/FStream.hxx>
 
 /** \class cmCTestBatchTestHandler
  * \brief run parallel ctest
@@ -30,8 +31,8 @@ public:
   virtual void RunTests();
 protected:
   void WriteBatchScript();
-  void WriteSrunArgs(int test, std::fstream& fout);
-  void WriteTestCommand(int test, std::fstream& fout);
+  void WriteSrunArgs(int test, cmsys::ofstream& fout);
+  void WriteTestCommand(int test, cmsys::ofstream& fout);
 
   void SubmitBatchScript();
 
