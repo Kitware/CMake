@@ -152,6 +152,23 @@ set_tests_properties(CTestTestMemcheckDummyAddressSanitizer PROPERTIES
     ".*Memory checking results:.*heap-buffer-overflow - 1.*")
 
 #-----------------------------------------------------------------------------
+# add MemorySanitizer test
+set(CTEST_EXTRA_CODE
+"set(CTEST_MEMORYCHECK_COMMAND_OPTIONS \"simulate_sanitizer=1 report_bugs=1 history_size=5 exitcode=55\")
+")
+
+set(CMAKELISTS_EXTRA_CODE
+"add_test(NAME TestSan COMMAND \"${CMAKE_COMMAND}\"
+-P \"${CMAKE_CURRENT_SOURCE_DIR}/testMemorySanitizer.cmake\")
+")
+gen_mc_test_internal(DummyMemorySanitizer "" -DMEMCHECK_TYPE=MemorySanitizer)
+set(CMAKELISTS_EXTRA_CODE )
+set(CTEST_EXTRA_CODE)
+set_tests_properties(CTestTestMemcheckDummyMemorySanitizer PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    ".*Memory checking results:.*use-of-uninitialized-value - 1.*")
+
+#-----------------------------------------------------------------------------
 # add UndefinedBehaviorSanitizer test
 set(CTEST_EXTRA_CODE
 "set(CTEST_MEMORYCHECK_SANITIZER_OPTIONS \"simulate_sanitizer=1\")
