@@ -138,6 +138,31 @@
 #
 #   rpm -qp --requires file.rpm
 #
+# .. variable:: CPACK_RPM_PACKAGE_REQUIRES_PRE
+#
+#  RPM spec requires(pre) field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set RPM preinstall dependencies (requires(pre)).  Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_REQUIRES_PRE "shadow-utils, initscripts")
+#
+# .. variable:: CPACK_RPM_PACKAGE_REQUIRES_POST
+#
+#  RPM spec requires(post) field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set RPM postinstall dependencies (requires(post)).  Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_REQUIRES_POST "shadow-utils, initscripts")
+#
+#
 # .. variable:: CPACK_RPM_PACKAGE_SUGGESTS
 #
 #  RPM spec suggest field.
@@ -600,7 +625,7 @@ endif()
 # There may be some COMPONENT specific variables as well
 # If component specific var is not provided we use the global one
 # for each component
-foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV)
+foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV REQUIRES_PRE REQUIRES_POST)
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
     endif()
@@ -639,6 +664,11 @@ foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLIC
     string(TOLOWER "${_PACKAGE_HEADER_TAIL}" _PACKAGE_HEADER_TAIL)
     string(SUBSTRING ${_RPM_SPEC_HEADER} 0 1 _PACKAGE_HEADER_NAME)
     set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}${_PACKAGE_HEADER_TAIL}")
+    # The following keywords require parentheses around the "pre" or "post" suffix in the final RPM spec file.
+    if("${_RPM_SPEC_HEADER}" MATCHES "REQUIRES_PRE"  OR  "${_RPM_SPEC_HEADER}" MATCHES "REQUIRES_POST")
+      string(REPLACE "_" "(" _PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}")
+      set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME})")
+    endif()
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
     endif()
@@ -1035,6 +1065,8 @@ Group:          \@CPACK_RPM_PACKAGE_GROUP\@
 Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_URL\@
 \@TMP_RPM_REQUIRES\@
+\@TMP_RPM_REQUIRES_PRE\@
+\@TMP_RPM_REQUIRES_POST\@
 \@TMP_RPM_PROVIDES\@
 \@TMP_RPM_OBSOLETES\@
 \@TMP_RPM_CONFLICTS\@
