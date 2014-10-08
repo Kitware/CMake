@@ -284,18 +284,47 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   # version handling:
   set(VERSION_MSG "")
   set(VERSION_OK TRUE)
-  set(VERSION ${${FPHSA_VERSION_VAR}} )
-  if (${_NAME}_FIND_VERSION)
+  set(VERSION ${${FPHSA_VERSION_VAR}})
 
-    if(VERSION)
+  # check with DEFINED here as the requested or found version may be "0"
+  if (DEFINED ${_NAME}_FIND_VERSION)
+    if(DEFINED ${FPHSA_VERSION_VAR})
 
       if(${_NAME}_FIND_VERSION_EXACT)       # exact version required
-        if (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
-          set(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
-          set(VERSION_OK FALSE)
+        # count the dots in the version string
+        string(REGEX REPLACE "[^.]" "" _VERSION_DOTS "${VERSION}")
+        # add one dot because there is one dot more than there are components
+        string(LENGTH "${_VERSION_DOTS}." _VERSION_DOTS)
+        if (_VERSION_DOTS GREATER ${_NAME}_FIND_VERSION_COUNT)
+          # Because of the C++ implementation of find_package() ${_NAME}_FIND_VERSION_COUNT
+          # is at most 4 here. Therefore a simple lookup table is used.
+          if (${_NAME}_FIND_VERSION_COUNT EQUAL 1)
+            set(_VERSION_REGEX "[^.]*")
+          elseif (${_NAME}_FIND_VERSION_COUNT EQUAL 2)
+            set(_VERSION_REGEX "[^.]*\\.[^.]*")
+          elseif (${_NAME}_FIND_VERSION_COUNT EQUAL 3)
+            set(_VERSION_REGEX "[^.]*\\.[^.]*\\.[^.]*")
+          else ()
+            set(_VERSION_REGEX "[^.]*\\.[^.]*\\.[^.]*\\.[^.]*")
+          endif ()
+          string(REGEX REPLACE "^(${_VERSION_REGEX})\\..*" "\\1" _VERSION_HEAD "${VERSION}")
+          unset(_VERSION_REGEX)
+          if (NOT ${_NAME}_FIND_VERSION VERSION_EQUAL _VERSION_HEAD)
+            set(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
+            set(VERSION_OK FALSE)
+          else ()
+            set(VERSION_MSG "(found suitable exact version \"${VERSION}\")")
+          endif ()
+          unset(_VERSION_HEAD)
         else ()
-          set(VERSION_MSG "(found suitable exact version \"${VERSION}\")")
+          if (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
+            set(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
+            set(VERSION_OK FALSE)
+          else ()
+            set(VERSION_MSG "(found suitable exact version \"${VERSION}\")")
+          endif ()
         endif ()
+        unset(_VERSION_DOTS)
 
       else()     # minimum version specified:
         if ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
