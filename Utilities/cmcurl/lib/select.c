@@ -30,7 +30,7 @@
 #error "We can't compile without select() or poll() support."
 #endif
 
-#if defined(__BEOS__) && !defined(__HAIKU__)
+#if defined(__BEOS__)
 /* BeOS has FD_SET defined in socket.h */
 #include <socket.h>
 #endif
