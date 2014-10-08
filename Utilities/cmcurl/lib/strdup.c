@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2012, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,27 +18,33 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
+/*
+ * This file is 'mem-include-scan' clean. See test 1132.
+ */
+#include "curl_setup.h"
 
-#include "setup.h"
 #include "strdup.h"
 
 #ifndef HAVE_STRDUP
 char *curlx_strdup(const char *str)
 {
-  int len;
+  size_t len;
   char *newstr;
 
-  if (!str)
+  if(!str)
     return (char *)NULL;
 
   len = strlen(str);
-  newstr = (char *) malloc((len+1)*sizeof(char));
-  if (!newstr)
+
+  if(len >= ((size_t)-1) / sizeof(char))
     return (char *)NULL;
 
-  strcpy(newstr,str);
+  newstr = malloc((len+1)*sizeof(char));
+  if(!newstr)
+    return (char *)NULL;
+
+  memcpy(newstr,str,(len+1)*sizeof(char));
 
   return newstr;
 

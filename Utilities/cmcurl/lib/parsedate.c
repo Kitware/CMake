@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2014, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,7 +18,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 /*
   A brief summary of the date string formats this parser groks:
@@ -73,18 +72,17 @@
   20040911 +0200
 
 */
-#include "setup.h"
-#include <stdio.h>
-#include <ctype.h>
-#include <string.h>
 
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h> /* for strtol() */
+#include "curl_setup.h"
+
+#ifdef HAVE_LIMITS_H
+#include <limits.h>
 #endif
 
 #include <curl/curl.h>
-
-static time_t Curl_parsedate(const char *date);
+#include "rawstr.h"
+#include "warnless.h"
+#include "parsedate.h"
 
 const char * const Curl_wkday[] =
 {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
@@ -96,9 +94,27 @@ const char * const Curl_month[]=
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
 
 struct tzinfo {
-  const char *name;
+  char name[5];
   int offset; /* +/- in minutes */
 };
+
+/*
+ * parsedate()
+ *
+ * Returns:
+ *
+ * PARSEDATE_OK     - a fine conversion
+ * PARSEDATE_FAIL   - failed to convert
+ * PARSEDATE_LATER  - time overflow at the far end of time_t
+ * PARSEDATE_SOONER - time underflow at the low end of time_t
+ */
+
+static int parsedate(const char *date, time_t *output);
+
+#define PARSEDATE_OK     0
+#define PARSEDATE_FAIL   -1
+#define PARSEDATE_LATER  1
+#define PARSEDATE_SOONER 2
 
 /* Here's a bunch of frequently used time zone names. These were supported
    by the old getdate parser. */
@@ -147,6 +163,37 @@ static const struct tzinfo tz[]= {
   {"NZST", -720},          /* New Zealand Standard */
   {"NZDT", -720 tDAYZONE}, /* New Zealand Daylight */
   {"IDLE", -720},          /* International Date Line East */
+  /* Next up: Military timezone names. RFC822 allowed these, but (as noted in
+     RFC 1123) had their signs wrong. Here we use the correct signs to match
+     actual military usage.
+   */
+  {"A",  +1 * 60},         /* Alpha */
+  {"B",  +2 * 60},         /* Bravo */
+  {"C",  +3 * 60},         /* Charlie */
+  {"D",  +4 * 60},         /* Delta */
+  {"E",  +5 * 60},         /* Echo */
+  {"F",  +6 * 60},         /* Foxtrot */
+  {"G",  +7 * 60},         /* Golf */
+  {"H",  +8 * 60},         /* Hotel */
+  {"I",  +9 * 60},         /* India */
+  /* "J", Juliet is not used as a timezone, to indicate the observer's local
+     time */
+  {"K", +10 * 60},         /* Kilo */
+  {"L", +11 * 60},         /* Lima */
+  {"M", +12 * 60},         /* Mike */
+  {"N",  -1 * 60},         /* November */
+  {"O",  -2 * 60},         /* Oscar */
+  {"P",  -3 * 60},         /* Papa */
+  {"Q",  -4 * 60},         /* Quebec */
+  {"R",  -5 * 60},         /* Romeo */
+  {"S",  -6 * 60},         /* Sierra */
+  {"T",  -7 * 60},         /* Tango */
+  {"U",  -8 * 60},         /* Uniform */
+  {"V",  -9 * 60},         /* Victor */
+  {"W", -10 * 60},         /* Whiskey */
+  {"X", -11 * 60},         /* X-ray */
+  {"Y", -12 * 60},         /* Yankee */
+  {"Z", 0},                /* Zulu, zero meridian, a.k.a. UTC */
 };
 
 /* returns:
@@ -154,7 +201,7 @@ static const struct tzinfo tz[]= {
    0 monday - 6 sunday
 */
 
-static int checkday(char *check, size_t len)
+static int checkday(const char *check, size_t len)
 {
   int i;
   const char * const *what;
@@ -164,7 +211,7 @@ static int checkday(char *check, size_t len)
   else
     what = &Curl_wkday[0];
   for(i=0; i<7; i++) {
-    if(curl_strequal(check, what[0])) {
+    if(Curl_raw_equal(check, what[0])) {
       found=TRUE;
       break;
     }
@@ -173,7 +220,7 @@ static int checkday(char *check, size_t len)
   return found?i:-1;
 }
 
-static int checkmonth(char *check)
+static int checkmonth(const char *check)
 {
   int i;
   const char * const *what;
@@ -181,7 +228,7 @@ static int checkmonth(char *check)
 
   what = &Curl_month[0];
   for(i=0; i<12; i++) {
-    if(curl_strequal(check, what[0])) {
+    if(Curl_raw_equal(check, what[0])) {
       found=TRUE;
       break;
     }
@@ -193,7 +240,7 @@ static int checkmonth(char *check)
 /* return the time zone offset between GMT and the input one, in number
    of seconds or -1 if the timezone wasn't found/legal */
 
-static int checktz(char *check)
+static int checktz(const char *check)
 {
   unsigned int i;
   const struct tzinfo *what;
@@ -201,7 +248,7 @@ static int checktz(char *check)
 
   what = tz;
   for(i=0; i< sizeof(tz)/sizeof(tz[0]); i++) {
-    if(curl_strequal(check, what->name)) {
+    if(Curl_raw_equal(check, what->name)) {
       found=TRUE;
       break;
     }
@@ -223,7 +270,65 @@ enum assume {
   DATE_TIME
 };
 
-static time_t Curl_parsedate(const char *date)
+/* this is a clone of 'struct tm' but with all fields we don't need or use
+   cut out */
+struct my_tm {
+  int tm_sec;
+  int tm_min;
+  int tm_hour;
+  int tm_mday;
+  int tm_mon;
+  int tm_year;
+};
+
+/* struct tm to time since epoch in GMT time zone.
+ * This is similar to the standard mktime function but for GMT only, and
+ * doesn't suffer from the various bugs and portability problems that
+ * some systems' implementations have.
+ */
+static time_t my_timegm(struct my_tm *tm)
+{
+  static const int month_days_cumulative [12] =
+    { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
+  int month, year, leap_days;
+
+  if(tm->tm_year < 70)
+    /* we don't support years before 1970 as they will cause this function
+       to return a negative value */
+    return -1;
+
+  year = tm->tm_year + 1900;
+  month = tm->tm_mon;
+  if(month < 0) {
+    year += (11 - month) / 12;
+    month = 11 - (11 - month) % 12;
+  }
+  else if(month >= 12) {
+    year -= month / 12;
+    month = month % 12;
+  }
+
+  leap_days = year - (tm->tm_mon <= 1);
+  leap_days = ((leap_days / 4) - (leap_days / 100) + (leap_days / 400)
+               - (1969 / 4) + (1969 / 100) - (1969 / 400));
+
+  return ((((time_t) (year - 1970) * 365
+            + leap_days + month_days_cumulative [month] + tm->tm_mday - 1) * 24
+           + tm->tm_hour) * 60 + tm->tm_min) * 60 + tm->tm_sec;
+}
+
+/*
+ * parsedate()
+ *
+ * Returns:
+ *
+ * PARSEDATE_OK     - a fine conversion
+ * PARSEDATE_FAIL   - failed to convert
+ * PARSEDATE_LATER  - time overflow at the far end of time_t
+ * PARSEDATE_SOONER - time underflow at the low end of time_t
+ */
+
+static int parsedate(const char *date, time_t *output)
 {
   time_t t = 0;
   int wdaynum=-1;  /* day of the week number, 0-6 (mon-sun) */
@@ -234,7 +339,7 @@ static time_t Curl_parsedate(const char *date)
   int secnum=-1;
   int yearnum=-1;
   int tzoff=-1;
-  struct tm tm;
+  struct my_tm tm;
   enum assume dignext = DATE_MDAY;
   const char *indate = date; /* save the original pointer */
   int part = 0; /* max 6 parts */
@@ -248,8 +353,11 @@ static time_t Curl_parsedate(const char *date)
       /* a name coming up */
       char buf[32]="";
       size_t len;
-      sscanf(date, "%31[A-Za-z]", buf);
-      len = strlen(buf);
+      if(sscanf(date, "%31[ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                          "abcdefghijklmnopqrstuvwxyz]", buf))
+        len = strlen(buf);
+      else
+        len = 0;
 
       if(wdaynum == -1) {
         wdaynum = checkday(buf, len);
@@ -270,7 +378,7 @@ static time_t Curl_parsedate(const char *date)
       }
 
       if(!found)
-        return -1; /* bad string */
+        return PARSEDATE_FAIL; /* bad string */
 
       date += len;
     }
@@ -282,18 +390,48 @@ static time_t Curl_parsedate(const char *date)
          (3 == sscanf(date, "%02d:%02d:%02d", &hournum, &minnum, &secnum))) {
         /* time stamp! */
         date += 8;
-        found = TRUE;
+      }
+      else if((secnum == -1) &&
+              (2 == sscanf(date, "%02d:%02d", &hournum, &minnum))) {
+        /* time stamp without seconds */
+        date += 5;
+        secnum = 0;
       }
       else {
-        val = (int)strtol(date, &end, 10);
+        long lval;
+        int error;
+        int old_errno;
+
+        old_errno = ERRNO;
+        SET_ERRNO(0);
+        lval = strtol(date, &end, 10);
+        error = ERRNO;
+        if(error != old_errno)
+          SET_ERRNO(old_errno);
+
+        if(error)
+          return PARSEDATE_FAIL;
+
+#if LONG_MAX != INT_MAX
+        if((lval > (long)INT_MAX) || (lval < (long)INT_MIN))
+          return PARSEDATE_FAIL;
+#endif
+
+        val = curlx_sltosi(lval);
 
         if((tzoff == -1) &&
            ((end - date) == 4) &&
-           (val < 1300) &&
+           (val <= 1400) &&
            (indate< date) &&
            ((date[-1] == '+' || date[-1] == '-'))) {
-          /* four digits and a value less than 1300 and it is preceeded with
-             a plus or minus. This is a time zone indication. */
+          /* four digits and a value less than or equal to 1400 (to take into
+             account all sorts of funny time zone diffs) and it is preceded
+             with a plus or minus. This is a time zone indication.  1400 is
+             picked since +1300 is frequently used and +1400 is mentioned as
+             an edge number in the document "ISO C 200X Proposal: Timezone
+             Functions" at http://david.tribble.com/text/c0xtimezone.html If
+             anyone has a more authoritative source for the exact maximum time
+             zone offsets, please speak up! */
           found = TRUE;
           tzoff = (val/100 * 60 + val%100)*60;
 
@@ -325,7 +463,7 @@ static time_t Curl_parsedate(const char *date)
           yearnum = val;
           found = TRUE;
           if(yearnum < 1900) {
-            if (yearnum > 70)
+            if(yearnum > 70)
               yearnum += 1900;
             else
               yearnum += 2000;
@@ -335,7 +473,7 @@ static time_t Curl_parsedate(const char *date)
         }
 
         if(!found)
-          return -1;
+          return PARSEDATE_FAIL;
 
         date = end;
       }
@@ -351,13 +489,24 @@ static time_t Curl_parsedate(const char *date)
      (-1 == monnum) ||
      (-1 == yearnum))
     /* lacks vital info, fail */
-    return -1;
+    return PARSEDATE_FAIL;
 
 #if SIZEOF_TIME_T < 5
   /* 32 bit time_t can only hold dates to the beginning of 2038 */
-  if(yearnum > 2037)
-    return 0x7fffffff;
+  if(yearnum > 2037) {
+    *output = 0x7fffffff;
+    return PARSEDATE_LATER;
+  }
 #endif
+
+  if(yearnum < 1970) {
+    *output = 0;
+    return PARSEDATE_SOONER;
+  }
+
+  if((mdaynum > 31) || (monnum > 11) ||
+     (hournum > 23) || (minnum > 59) || (secnum > 60))
+    return PARSEDATE_FAIL; /* clearly an illegal date */
 
   tm.tm_sec = secnum;
   tm.tm_min = minnum;
@@ -365,61 +514,70 @@ static time_t Curl_parsedate(const char *date)
   tm.tm_mday = mdaynum;
   tm.tm_mon = monnum;
   tm.tm_year = yearnum - 1900;
-  tm.tm_wday = 0;
-  tm.tm_yday = 0;
-  tm.tm_isdst = 0;
 
-  /* mktime() returns a time_t. time_t is often 32 bits, even on many
+  /* my_timegm() returns a time_t. time_t is often 32 bits, even on many
      architectures that feature 64 bit 'long'.
 
      Some systems have 64 bit time_t and deal with years beyond 2038. However,
-     even some of the systems with 64 bit time_t returns -1 for dates beyond
-     03:14:07 UTC, January 19, 2038. (Such as AIX 5100-06)
+     even on some of the systems with 64 bit time_t mktime() returns -1 for
+     dates beyond 03:14:07 UTC, January 19, 2038. (Such as AIX 5100-06)
   */
-  t = mktime(&tm);
+  t = my_timegm(&tm);
 
   /* time zone adjust (cast t to int to compare to negative one) */
   if(-1 != (int)t) {
-    struct tm *gmt;
-    long delta;
-    time_t t2;
 
-#ifdef HAVE_GMTIME_R
-    /* thread-safe version */
-    struct tm keeptime2;
-    gmt = (struct tm *)gmtime_r(&t, &keeptime2);
-    if(!gmt)
-      return -1; /* illegal date/time */
-    t2 = mktime(gmt);
-#else
-    /* It seems that at least the MSVC version of mktime() doesn't work
-       properly if it gets the 'gmt' pointer passed in (which is a pointer
-       returned from gmtime() pointing to static memory), so instead we copy
-       the tm struct to a local struct and pass a pointer to that struct as
-       input to mktime(). */
-    struct tm gmt2;
-    gmt = gmtime(&t); /* use gmtime_r() if available */
-    if(!gmt)
-      return -1; /* illegal date/time */
-    gmt2 = *gmt;
-    t2 = mktime(&gmt2);
-#endif
+    /* Add the time zone diff between local time zone and GMT. */
+    long delta = (long)(tzoff!=-1?tzoff:0);
 
-    /* Add the time zone diff (between the given timezone and GMT) and the
-       diff between the local time zone and GMT. */
-    delta = (long)((tzoff!=-1?tzoff:0) + (t - t2));
-
-    if((delta>0) && (t + delta < t))
-      return -1; /* time_t overflow */
+    if((delta>0) && (t > LONG_MAX - delta)) {
+      *output = 0x7fffffff;
+      return PARSEDATE_LATER; /* time_t overflow */
+    }
 
     t += delta;
   }
 
-  return t;
+  *output = t;
+
+  return PARSEDATE_OK;
 }
 
 time_t curl_getdate(const char *p, const time_t *now)
 {
-  (void)now;
-  return Curl_parsedate(p);
+  time_t parsed;
+  int rc = parsedate(p, &parsed);
+  (void)now; /* legacy argument from the past that we ignore */
+
+  switch(rc) {
+  case PARSEDATE_OK:
+  case PARSEDATE_LATER:
+  case PARSEDATE_SOONER:
+    return parsed;
+  }
+  /* everything else is fail */
+  return -1;
+}
+
+/*
+ * Curl_gmtime() is a gmtime() replacement for portability. Do not use the
+ * gmtime_r() or gmtime() functions anywhere else but here.
+ *
+ */
+
+CURLcode Curl_gmtime(time_t intime, struct tm *store)
+{
+  const struct tm *tm;
+#ifdef HAVE_GMTIME_R
+  /* thread-safe version */
+  tm = (struct tm *)gmtime_r(&intime, store);
+#else
+  tm = gmtime(&intime);
+  if(tm)
+    *store = *tm; /* copy the pointed struct to the local copy */
+#endif
+
+  if(!tm)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  return CURLE_OK;
 }

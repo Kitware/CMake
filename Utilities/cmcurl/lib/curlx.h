@@ -1,5 +1,5 @@
-#ifndef __CURLX_H
-#define __CURLX_H
+#ifndef HEADER_CURL_CURLX_H
+#define HEADER_CURL_CURLX_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -7,7 +7,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2008, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -20,7 +20,6 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 
 /*
@@ -53,6 +52,17 @@
   curlx_tvdiff_secs()
 */
 
+#include "nonblock.h"
+/* "nonblock.h" provides curlx_nonblock() */
+
+#include "warnless.h"
+/* "warnless.h" provides functions:
+
+  curlx_ultous()
+  curlx_ultouc()
+  curlx_uztosi()
+*/
+
 /* Now setup curlx_ * names for the functions that are to become curlx_ and
    be removed from a future libcurl official API:
    curlx_getenv
@@ -65,6 +75,7 @@
 #define curlx_getenv curl_getenv
 #define curlx_strequal curl_strequal
 #define curlx_strnequal curl_strnequal
+#define curlx_raw_equal Curl_raw_equal
 #define curlx_mvsnprintf curl_mvsnprintf
 #define curlx_msnprintf curl_msnprintf
 #define curlx_maprintf curl_maprintf
@@ -78,7 +89,7 @@
 
 #ifdef ENABLE_CURLX_PRINTF
 /* If this define is set, we define all "standard" printf() functions to use
-   the curlx_* version instead. It makes the source code transparant and
+   the curlx_* version instead. It makes the source code transparent and
    easier to understand/patch. Undefine them first in case _MPRINTF_REPLACE
    is set. */
 # undef printf
@@ -104,4 +115,5 @@
 # define vaprintf curlx_mvaprintf
 #endif /* ENABLE_CURLX_PRINTF */
 
-#endif /* __CURLX_H */
+#endif /* HEADER_CURL_CURLX_H */
+

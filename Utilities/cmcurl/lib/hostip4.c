@@ -5,7 +5,7 @@
  *                            | (__| |_| |  _ <| |___
  *                             \___|\___/|_| \_\_____|
  *
- * Copyright (C) 1998 - 2006, Daniel Stenberg, <daniel@haxx.se>, et al.
+ * Copyright (C) 1998 - 2013, Daniel Stenberg, <daniel@haxx.se>, et al.
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
@@ -18,23 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * $Id$
  ***************************************************************************/
 
-#include "setup.h"
+#include "curl_setup.h"
 
-#include <string.h>
-#include <errno.h>
-
-#ifdef NEED_MALLOC_H
-#include <malloc.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -44,20 +31,9 @@
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>     /* required for free() prototypes */
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>     /* for the close() proto */
-#endif
-#ifdef  VMS
+#ifdef __VMS
 #include <in.h>
 #include <inet.h>
-#include <stdlib.h>
-#endif
-
-#ifdef HAVE_SETJMP_H
-#include <setjmp.h>
 #endif
 
 #ifdef HAVE_PROCESS_H
@@ -76,11 +52,7 @@
 #define _MPRINTF_REPLACE /* use our functions only */
 #include <curl/mprintf.h>
 
-#if defined(HAVE_INET_NTOA_R) && !defined(HAVE_INET_NTOA_R_DECL)
-#include "inet_ntoa_r.h"
-#endif
-
-#include "memory.h"
+#include "curl_memory.h"
 /* The last #include file should be: */
 #include "memdebug.h"
 
@@ -92,16 +64,16 @@
  * Curl_ipvalid() checks what CURL_IPRESOLVE_* requirements that might've
  * been set and returns TRUE if they are OK.
  */
-bool Curl_ipvalid(struct SessionHandle *data)
+bool Curl_ipvalid(struct connectdata *conn)
 {
-  if(data->set.ip_version == CURL_IPRESOLVE_V6)
+  if(conn->ip_version == CURL_IPRESOLVE_V6)
     /* an ipv6 address was requested and we can't get/use one */
     return FALSE;
 
   return TRUE; /* OK, proceed */
 }
 
-#ifdef CURLRES_SYNCH /* the functions below are for synchronous resolves */
+#ifdef CURLRES_SYNCH
 
 /*
  * Curl_getaddrinfo() - the ipv4 synchronous version.
@@ -125,20 +97,63 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                                 int *waitp)
 {
   Curl_addrinfo *ai = NULL;
+
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  (void)conn;
+#endif
+
+  *waitp = 0; /* synchronous response only */
+
+  ai = Curl_ipv4_resolve_r(hostname, port);
+  if(!ai)
+    infof(conn->data, "Curl_ipv4_resolve_r failed for %s\n", hostname);
+
+  return ai;
+}
+#endif /* CURLRES_SYNCH */
+#endif /* CURLRES_IPV4 */
+
+#if defined(CURLRES_IPV4) && !defined(CURLRES_ARES)
+
+/*
+ * Curl_ipv4_resolve_r() - ipv4 threadsafe resolver function.
+ *
+ * This is used for both synchronous and asynchronous resolver builds,
+ * implying that only threadsafe code and function calls may be used.
+ *
+ */
+Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
+                                   int port)
+{
+#if !defined(HAVE_GETADDRINFO_THREADSAFE) && defined(HAVE_GETHOSTBYNAME_R_3)
+  int res;
+#endif
+  Curl_addrinfo *ai = NULL;
   struct hostent *h = NULL;
-  in_addr_t in;
-  struct SessionHandle *data = conn->data;
+  struct in_addr in;
   struct hostent *buf = NULL;
 
-  (void)port; /* unused in IPv4 code */
-
-  *waitp = 0; /* don't wait, we act synchronously */
-
-  if(1 == Curl_inet_pton(AF_INET, hostname, &in))
+  if(Curl_inet_pton(AF_INET, hostname, &in) > 0)
     /* This is a dotted IP address 123.123.123.123-style */
-    return Curl_ip2addr(in, hostname, port);
+    return Curl_ip2addr(AF_INET, &in, hostname, port);
 
-#if defined(HAVE_GETHOSTBYNAME_R)
+#if defined(HAVE_GETADDRINFO_THREADSAFE)
+  else {
+    struct addrinfo hints;
+    char sbuf[12];
+    char *sbufptr = NULL;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = PF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+    if(port) {
+      snprintf(sbuf, sizeof(sbuf), "%d", port);
+      sbufptr = sbuf;
+    }
+
+    (void)Curl_getaddrinfo_ex(hostname, sbufptr, &hints, &ai);
+
+#elif defined(HAVE_GETHOSTBYNAME_R)
   /*
    * gethostbyname_r() is the preferred resolve function for many platforms.
    * Since there are three different versions of it, the following code is
@@ -146,9 +161,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
    */
   else {
     int h_errnop;
-    int res=ERANGE;
 
-    buf = (struct hostent *)calloc(CURL_HOSTENT_SIZE, 1);
+    buf = calloc(1, CURL_HOSTENT_SIZE);
     if(!buf)
       return NULL; /* major failure */
     /*
@@ -157,9 +171,8 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
      * platforms.
      */
 
-#ifdef HAVE_GETHOSTBYNAME_R_5
+#if defined(HAVE_GETHOSTBYNAME_R_5)
     /* Solaris, IRIX and more */
-    (void)res; /* prevent compiler warning */
     h = gethostbyname_r(hostname,
                         (struct hostent *)buf,
                         (char *)buf + sizeof(struct hostent),
@@ -176,11 +189,10 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
       ;
     }
     else
-#endif /* HAVE_GETHOSTBYNAME_R_5 */
-#ifdef HAVE_GETHOSTBYNAME_R_6
+#elif defined(HAVE_GETHOSTBYNAME_R_6)
     /* Linux */
 
-    res=gethostbyname_r(hostname,
+    (void)gethostbyname_r(hostname,
                         (struct hostent *)buf,
                         (char *)buf + sizeof(struct hostent),
                         CURL_HOSTENT_SIZE - sizeof(struct hostent),
@@ -218,8 +230,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
      */
 
     if(!h) /* failure */
-#endif/* HAVE_GETHOSTBYNAME_R_6 */
-#ifdef HAVE_GETHOSTBYNAME_R_3
+#elif defined(HAVE_GETHOSTBYNAME_R_3)
     /* AIX, Digital Unix/Tru64, HPUX 10, more? */
 
     /* For AIX 4.3 or later, we don't use gethostbyname_r() at all, because of
@@ -252,7 +263,7 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
                             (struct hostent *)buf,
                             (struct hostent_data *)((char *)buf +
                                                     sizeof(struct hostent)));
-      h_errnop= errno; /* we don't deal with this, but set it anyway */
+      h_errnop = SOCKERRNO; /* we don't deal with this, but set it anyway */
     }
     else
       res = -1; /* failure, too smallish buffer size */
@@ -271,119 +282,29 @@ Curl_addrinfo *Curl_getaddrinfo(struct connectdata *conn,
        */
     }
     else
-#endif /* HAVE_GETHOSTBYNAME_R_3 */
-      {
-      infof(data, "gethostbyname_r(2) failed for %s\n", hostname);
+#endif /* HAVE_...BYNAME_R_5 || HAVE_...BYNAME_R_6 || HAVE_...BYNAME_R_3 */
+    {
       h = NULL; /* set return code to NULL */
       free(buf);
     }
-#else /* HAVE_GETHOSTBYNAME_R */
+#else /* HAVE_GETADDRINFO_THREADSAFE || HAVE_GETHOSTBYNAME_R */
     /*
-     * Here is code for platforms that don't have gethostbyname_r() or for
-     * which the gethostbyname() is the preferred() function.
+     * Here is code for platforms that don't have a thread safe
+     * getaddrinfo() nor gethostbyname_r() function or for which
+     * gethostbyname() is the preferred one.
      */
   else {
-    h = gethostbyname(hostname);
-    if (!h)
-      infof(data, "gethostbyname(2) failed for %s\n", hostname);
-#endif /*HAVE_GETHOSTBYNAME_R */
+    h = gethostbyname((void*)hostname);
+#endif /* HAVE_GETADDRINFO_THREADSAFE || HAVE_GETHOSTBYNAME_R */
   }
 
   if(h) {
     ai = Curl_he2ai(h, port);
 
-    if (buf) /* used a *_r() function */
+    if(buf) /* used a *_r() function */
       free(buf);
   }
 
   return ai;
 }
-
-#endif /* CURLRES_SYNCH */
-#endif /* CURLRES_IPV4 */
-
-/*
- * Curl_he2ai() translates from a hostent struct to a Curl_addrinfo struct.
- * The Curl_addrinfo is meant to work like the addrinfo struct does for IPv6
- * stacks, but for all hosts and environments.
- *
- *   Curl_addrinfo defined in "lib/hostip.h"
- *
- *     struct Curl_addrinfo {
- *       int                   ai_flags;
- *       int                   ai_family;
- *       int                   ai_socktype;
- *       int                   ai_protocol;
- *       socklen_t             ai_addrlen;   * Follow rfc3493 struct addrinfo *
- *       char                 *ai_canonname;
- *       struct sockaddr      *ai_addr;
- *       struct Curl_addrinfo *ai_next;
- *     };
- *
- *   hostent defined in <netdb.h>
- *
- *     struct hostent {
- *       char    *h_name;
- *       char    **h_aliases;
- *       int     h_addrtype;
- *       int     h_length;
- *       char    **h_addr_list;
- *     };
- *
- *   for backward compatibility:
- *
- *     #define h_addr  h_addr_list[0]
- */
-
-Curl_addrinfo *Curl_he2ai(const struct hostent *he, int port)
-{
-  Curl_addrinfo *ai;
-  Curl_addrinfo *prevai = NULL;
-  Curl_addrinfo *firstai = NULL;
-  struct sockaddr_in *addr;
-  int i;
-  struct in_addr *curr;
-
-  if(!he)
-    /* no input == no output! */
-    return NULL;
-
-  for(i=0; (curr = (struct in_addr *)he->h_addr_list[i]) != NULL; i++) {
-
-    ai = calloc(1, sizeof(Curl_addrinfo) + sizeof(struct sockaddr_in));
-
-    if(!ai)
-      break;
-
-    if(!firstai)
-      /* store the pointer we want to return from this function */
-      firstai = ai;
-
-    if(prevai)
-      /* make the previous entry point to this */
-      prevai->ai_next = ai;
-
-    ai->ai_family = AF_INET;              /* we only support this */
-
-    /* we return all names as STREAM, so when using this address for TFTP
-       the type must be ignored and conn->socktype be used instead! */
-    ai->ai_socktype = SOCK_STREAM;
-
-    ai->ai_addrlen = sizeof(struct sockaddr_in);
-    /* make the ai_addr point to the address immediately following this struct
-       and use that area to store the address */
-    ai->ai_addr = (struct sockaddr *) ((char*)ai + sizeof(Curl_addrinfo));
-
-    /* leave the rest of the struct filled with zero */
-
-    addr = (struct sockaddr_in *)ai->ai_addr; /* storage area for this info */
-
-    memcpy((char *)&(addr->sin_addr), curr, sizeof(struct in_addr));
-    addr->sin_family = he->h_addrtype;
-    addr->sin_port = htons((unsigned short)port);
-
-    prevai = ai;
-  }
-  return firstai;
-}
-
+#endif /* defined(CURLRES_IPV4) && !defined(CURLRES_ARES) */
