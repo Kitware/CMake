@@ -215,6 +215,8 @@ if(BEOS)
   check_library_exists_concat("bnetapi" closesocket HAVE_LIBBNETAPI)
 endif(BEOS)
 
+check_library_exists_concat("network" recv HAVE_LIBNETWORK)
+
 if(NOT NOT_NEED_LIBNSL)
   check_library_exists_concat("nsl"    gethostbyname  HAVE_LIBNSL)
 endif(NOT NOT_NEED_LIBNSL)
