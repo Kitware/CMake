@@ -3790,8 +3790,9 @@ CURLcode ftp_perform(struct connectdata *conn,
 
   infof(conn->data, "ftp_perform ends with SECONDARY: %d\n", *connected);
 
-  if(*dophase_done)
+  if(*dophase_done) {
     DEBUGF(infof(conn->data, "DO phase is complete1\n"));
+  }
 
   return result;
 }
