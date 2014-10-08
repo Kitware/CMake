@@ -17,7 +17,7 @@
 #ifdef CMAKE_USE_SYSTEM_CURL
 # include <curl/curl.h>
 #else
-# include <cmcurl/curl/curl.h>
+# include <cmcurl/include/curl/curl.h>
 #endif
 
 #endif

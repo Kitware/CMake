@@ -34,75 +34,75 @@ INCLUDE (CheckSymbolExists)
 INCLUDE (CheckTypeSize)
 
 SET(libCurl_SRCS
-  #  amigaos.c - does not build on AmigaOS
-  base64.c
-  connect.c
-  content_encoding.c
-  cookie.c
-  dict.c
-  easy.c
-  escape.c
-  file.c
-  formdata.c
-  ftp.c
-  getenv.c
-  getinfo.c
-  gtls.c
-  hash.c
-  hostares.c
-  hostasyn.c
-  hostip4.c
-  hostip6.c
-  hostip.c
-  hostsyn.c
-  hostthre.c
-  http.c
-  http_chunks.c
-  http_digest.c
-  http_negotiate.c
-  http_ntlm.c
-  if2ip.c
-  inet_ntop.c
-  inet_pton.c
-  krb4.c
-  ldap.c
-  llist.c
-  md5.c
-#  memdebug.c -not used
-  mprintf.c
-  multi.c
-  netrc.c
-  # nwlib.c - Not used
-  parsedate.c
-  progress.c
-  security.c
-  select.c
-  sendf.c
-  share.c
-  socks.c
-  speedcheck.c
-  splay.c
-  ssh.c
-  sslgen.c
-  ssluse.c
-  strdup.c
-  strequal.c
-  strerror.c
-  # strtok.c - specify later
-  # strtoofft.c - specify later
-  telnet.c
-  tftp.c
-  timeval.c
-  transfer.c
-  url.c
-  version.c
+  #  lib/amigaos.c - does not build on AmigaOS
+  lib/base64.c
+  lib/connect.c
+  lib/content_encoding.c
+  lib/cookie.c
+  lib/dict.c
+  lib/easy.c
+  lib/escape.c
+  lib/file.c
+  lib/formdata.c
+  lib/ftp.c
+  lib/getenv.c
+  lib/getinfo.c
+  lib/gtls.c
+  lib/hash.c
+  lib/hostares.c
+  lib/hostasyn.c
+  lib/hostip4.c
+  lib/hostip6.c
+  lib/hostip.c
+  lib/hostsyn.c
+  lib/hostthre.c
+  lib/http.c
+  lib/http_chunks.c
+  lib/http_digest.c
+  lib/http_negotiate.c
+  lib/http_ntlm.c
+  lib/if2ip.c
+  lib/inet_ntop.c
+  lib/inet_pton.c
+  lib/krb4.c
+  lib/ldap.c
+  lib/llist.c
+  lib/md5.c
+#  lib/memdebug.c -not used
+  lib/mprintf.c
+  lib/multi.c
+  lib/netrc.c
+  # lib/nwlib.c - Not used
+  lib/parsedate.c
+  lib/progress.c
+  lib/security.c
+  lib/select.c
+  lib/sendf.c
+  lib/share.c
+  lib/socks.c
+  lib/speedcheck.c
+  lib/splay.c
+  lib/ssh.c
+  lib/sslgen.c
+  lib/ssluse.c
+  lib/strdup.c
+  lib/strequal.c
+  lib/strerror.c
+  # lib/strtok.c - specify later
+  # lib/strtoofft.c - specify later
+  lib/telnet.c
+  lib/tftp.c
+  lib/timeval.c
+  lib/transfer.c
+  lib/url.c
+  lib/version.c
   )
 
 SET(CURL_DISABLE_LDAP 1)
 IF(NOT CURL_DISABLE_LDAP)
   SET(libCurl_SRCS
     ${libCurl_SRCS}
-    ldap.c
+    lib/ldap.c
     )
 ENDIF(NOT CURL_DISABLE_LDAP)
 
@@ -110,8 +110,8 @@ ENDIF(NOT CURL_DISABLE_LDAP)
 #OPTION(CURL_KRB4 "Use Kerberos 4" OFF)
 IF(CURL_KRB4)
   SET(libCurl_SRCS ${libCurl_SRCS}
-    krb4.c
-    security.c
+    lib/krb4.c
+    lib/security.c
     )
 ENDIF(CURL_KRB4)
 
@@ -119,7 +119,7 @@ ENDIF(CURL_KRB4)
 MARK_AS_ADVANCED(CURL_MALLOC_DEBUG)
 IF(CURL_MALLOC_DEBUG)
   SET(libCurl_SRCS ${libCurl_SRCS}
-    memdebug.c
+    lib/memdebug.c
     )
 ENDIF(CURL_MALLOC_DEBUG)
 
@@ -169,7 +169,7 @@ ENDIF(NOT CURL_SPECIAL_LIBZ)
 
 # Include the local directories before any others so that we do not end up
 # including system curl's include directory first by mistake.
-INCLUDE_DIRECTORIES(${LIBCURL_SOURCE_DIR})
+INCLUDE_DIRECTORIES(${LIBCURL_SOURCE_DIR}/include)
 INCLUDE_DIRECTORIES(${LIBCURL_BINARY_DIR})
 
 OPTION(CMAKE_USE_OPENSSL "Use OpenSSL code with curl." OFF)
@@ -472,14 +472,14 @@ CHECK_SYMBOL_EXISTS(setrlimit      "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 # only build compat strtok if we need to
 IF (NOT HAVE_STRTOK_R)
   SET(libCurl_SRCS ${libCurl_SRCS}
-    strtok.c
+    lib/strtok.c
     )
 ENDIF (NOT HAVE_STRTOK_R)
 
 # only build compat strtoofft if we need to
 IF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
   SET(libCurl_SRCS ${libCurl_SRCS}
-    strtoofft.c
+    lib/strtoofft.c
     )
 ENDIF(NOT HAVE_STRTOLL AND NOT HAVE__STRTOI64)
 
