@@ -36,6 +36,9 @@ protected:
 
   enum PathType { FullPath, CMakePath, EnvPath };
 
+  /** Generate a full path based on the particular path type */
+  std::string MakeFullPath(const std::string& path, PathType pathType);
+
   /** Place a set of search paths under the search roots.  */
   void RerootPaths(std::vector<std::string>& paths);
 
@@ -44,8 +47,9 @@ protected:
   void GetIgnoredPaths(std::set<std::string>& ignore);
 
   /** Remove paths in the ignore set from the supplied vector.  */
-  void FilterPaths(std::vector<std::string>& paths,
-                   const std::set<std::string>& ignore);
+  void FilterPaths(const std::vector<std::string>& inPaths,
+                   const std::set<std::string>& ignore,
+                   std::vector<std::string>& outPaths);
 
   /** Compute final search path list (reroot + trailing slash).  */
   void ComputeFinalPaths();
@@ -62,12 +66,14 @@ protected:
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
   void AddUserPath(std::string const& p,
-                   std::vector<std::string>& paths);
-  void AddCMakePath(const std::string& variable);
-  void AddEnvPath(const char* variable);
-  void AddPathsInternal(std::vector<std::string> const& in_paths,
-                        PathType pathType);
-  void AddPathInternal(std::string const& in_path, PathType pathType);
+                   std::vector<std::string>& outPaths);
+  void AddCMakePath(const std::string& variable,
+                    std::vector<std::string>& outPaths);
+  void AddEnvPath(const char* variable, std::vector<std::string>& outPaths);
+  void AddPathsInternal(std::vector<std::string> const& inPaths,
+                        PathType pathType, std::vector<std::string>& outPaths);
+  void AddPathInternal(std::string const& inPath,
+                       std::vector<std::string>& outPaths);
 
   void SetMakefile(cmMakefile* makefile);
 
@@ -78,8 +84,16 @@ protected:
   bool NoCMakeSystemPath;
 
   std::vector<std::string> SearchPathSuffixes;
-  std::vector<std::string> UserPaths;
-  std::vector<std::string> UserHints;
+  std::vector<std::string> CMakeVariablePaths;
+  std::vector<std::string> CMakeEnvironmentPaths;
+  std::vector<std::string> UserHintsPaths;
+  std::vector<std::string> SystemEnvironmentPaths;
+  std::vector<std::string> UserRegistryPaths;
+  std::vector<std::string> BuildPaths;
+  std::vector<std::string> CMakeSystemVariablePaths;
+  std::vector<std::string> SystemRegistryPaths;
+  std::vector<std::string> UserGuessPaths;
+
   std::vector<std::string> SearchPaths;
   std::set<std::string> SearchPathsEmitted;
 

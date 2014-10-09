@@ -10,6 +10,8 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFindCommon.h"
+#include <functional>
+#include <algorithm>
 
 //----------------------------------------------------------------------------
 cmFindCommon::cmFindCommon()
@@ -39,6 +41,22 @@ cmFindCommon::cmFindCommon()
 //----------------------------------------------------------------------------
 cmFindCommon::~cmFindCommon()
 {
+}
+
+//----------------------------------------------------------------------------
+std::string cmFindCommon::MakeFullPath(const std::string& path,
+                                       PathType pathType)
+{
+  // Select the base path with which to interpret relative paths.
+  if(pathType == CMakePath)
+    {
+    return cmSystemTools::CollapseFullPath(
+      path, this->Makefile->GetCurrentDirectory());
+    }
+  else
+    {
+    return cmSystemTools::CollapseFullPath(path, 0);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -212,23 +230,19 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::FilterPaths(std::vector<std::string>& paths,
-                               const std::set<std::string>& ignore)
+void cmFindCommon::FilterPaths(const std::vector<std::string>& inPaths,
+                               const std::set<std::string>& ignore,
+                               std::vector<std::string>& outPaths)
 {
-  // Now filter out anything that's in the ignore set.
-  std::vector<std::string> unfiltered;
-  unfiltered.swap(paths);
-
-  for(std::vector<std::string>::iterator pi = unfiltered.begin();
-      pi != unfiltered.end(); ++pi)
+  for(std::vector<std::string>::const_iterator i = inPaths.begin();
+      i != inPaths.end(); ++i)
     {
-    if (ignore.count(*pi) == 0)
+    if(ignore.count(*i) == 0)
       {
-      paths.push_back(*pi);
+      outPaths.push_back(*i);
       }
     }
 }
-
 
 //----------------------------------------------------------------------------
 void cmFindCommon::GetIgnoredPaths(std::vector<std::string>& ignore)
@@ -345,8 +359,8 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddUserPath(std::string const& p,
-                               std::vector<std::string>& paths)
+void cmFindCommon::AddUserPath(std::string const& inPath,
+                               std::vector<std::string>& outPaths)
 {
   // We should view the registry as the target application would view
   // it.
@@ -359,22 +373,23 @@ void cmFindCommon::AddUserPath(std::string const& p,
     }
 
   // Expand using the view of the target application.
-  std::string expanded = p;
+  std::string expanded = inPath;
   cmSystemTools::ExpandRegistryValues(expanded, view);
-  cmSystemTools::GlobDirs(expanded, paths);
+  cmSystemTools::GlobDirs(expanded, outPaths);
 
   // Executables can be either 32-bit or 64-bit, so expand using the
   // alternative view.
-  if(expanded != p && this->CMakePathName == "PROGRAM")
+  if(expanded != inPath && this->CMakePathName == "PROGRAM")
     {
-    expanded = p;
+    expanded = inPath;
     cmSystemTools::ExpandRegistryValues(expanded, other_view);
-    cmSystemTools::GlobDirs(expanded, paths);
+    cmSystemTools::GlobDirs(expanded, outPaths);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddCMakePath(const std::string& variable)
+void cmFindCommon::AddCMakePath(const std::string& variable,
+                                std::vector<std::string>& outPaths)
 {
   // Get a path from a CMake variable.
   if(const char* varPath = this->Makefile->GetDefinition(variable))
@@ -384,77 +399,83 @@ void cmFindCommon::AddCMakePath(const std::string& variable)
 
     // Relative paths are interpreted with respect to the current
     // source directory.
-    this->AddPathsInternal(tmp, CMakePath);
+    this->AddPathsInternal(tmp, CMakePath, outPaths);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddEnvPath(const char* variable)
+void cmFindCommon::AddEnvPath(const char* variable,
+                              std::vector<std::string>& outPaths)
 {
   // Get a path from the environment.
   std::vector<std::string> tmp;
   cmSystemTools::GetPath(tmp, variable);
   // Relative paths are interpreted with respect to the current
   // working directory.
-  this->AddPathsInternal(tmp, EnvPath);
+  this->AddPathsInternal(tmp, EnvPath, outPaths);
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddPathsInternal(std::vector<std::string> const& in_paths,
-                                    PathType pathType)
+void cmFindCommon::AddPathsInternal(std::vector<std::string> const& inPaths,
+                                    PathType pathType,
+                                    std::vector<std::string>& outPaths)
 {
-  for(std::vector<std::string>::const_iterator i = in_paths.begin();
-      i != in_paths.end(); ++i)
+  for(std::vector<std::string>::const_iterator i = inPaths.begin();
+      i != inPaths.end(); ++i)
     {
-    this->AddPathInternal(*i, pathType);
+    this->AddPathInternal(this->MakeFullPath(*i, pathType), outPaths);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddPathInternal(std::string const& in_path,
-                                   PathType pathType)
+void cmFindCommon::AddPathInternal(std::string const& inPath,
+                                   std::vector<std::string>& outPaths)
 {
-  if(in_path.empty())
+  if(inPath.empty())
     {
     return;
     }
 
-  // Select the base path with which to interpret relative paths.
-  const char* relbase = 0;
-  if(pathType == CMakePath)
-    {
-    relbase = this->Makefile->GetCurrentDirectory();
-    }
-
-  // Convert to clean full path.
-  std::string fullPath =
-    cmSystemTools::CollapseFullPath(in_path, relbase);
-
   // Insert the path if has not already been emitted.
-  if(this->SearchPathsEmitted.insert(fullPath).second)
+  if(this->SearchPathsEmitted.insert(inPath).second)
     {
-    this->SearchPaths.push_back(fullPath);
+    outPaths.push_back(inPath);
     }
 }
 
 //----------------------------------------------------------------------------
+void AddTrailingSlash(std::string& s)
+{
+  if(!s.empty() && *s.rbegin() != '/')
+    {
+    s += '/';
+    }
+}
 void cmFindCommon::ComputeFinalPaths()
 {
-  std::vector<std::string>& paths = this->SearchPaths;
+  // Filter out ignored paths from the prefix list
+  std::set<std::string> ignored;
+  this->GetIgnoredPaths(ignored);
+
+  // Combine the seperate path types, filtering out ignores
+  this->SearchPaths.clear();
+  this->FilterPaths(this->CMakeVariablePaths, ignored, this->SearchPaths);
+  this->FilterPaths(this->CMakeEnvironmentPaths, ignored, this->SearchPaths);
+  this->FilterPaths(this->UserHintsPaths, ignored, this->SearchPaths);
+  this->FilterPaths(this->SystemEnvironmentPaths, ignored, this->SearchPaths);
+  this->FilterPaths(this->UserRegistryPaths, ignored, this->SearchPaths);
+  this->FilterPaths(this->BuildPaths, ignored, this->SearchPaths);
+  this->FilterPaths(this->CMakeSystemVariablePaths, ignored,
+                    this->SearchPaths);
+  this->FilterPaths(this->SystemRegistryPaths, ignored, this->SearchPaths);
+  this->FilterPaths(this->UserGuessPaths, ignored, this->SearchPaths);
 
   // Expand list of paths inside all search roots.
-  this->RerootPaths(paths);
+  this->RerootPaths(this->SearchPaths);
 
   // Add a trailing slash to all paths to aid the search process.
-  for(std::vector<std::string>::iterator i = paths.begin();
-      i != paths.end(); ++i)
-    {
-    std::string& p = *i;
-    if(!p.empty() && p[p.size()-1] != '/')
-      {
-      p += "/";
-      }
-    }
+  std::for_each(this->SearchPaths.begin(), this->SearchPaths.end(),
+                &AddTrailingSlash);
 }
 
 //----------------------------------------------------------------------------
