@@ -1042,17 +1042,27 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
                       std::back_inserter(unkownExplicitDepends));
 
 
+  std::string const rootBuildDirectory =
+      this->GetCMakeInstance()->GetHomeOutputDirectory();
   for (std::vector<std::string>::const_iterator
        i = unkownExplicitDepends.begin();
        i != unkownExplicitDepends.end();
        ++i)
     {
-    cmNinjaDeps deps(1,*i);
-    this->WritePhonyBuild(os,
-                          "",
-                          deps,
-                          deps);
-    }
+    //verify the file is in the build directory
+    std::string const absDepPath = cmSystemTools::CollapseFullPath(
+                                     i->c_str(), rootBuildDirectory.c_str());
+    bool const inBuildDir = cmSystemTools::IsSubDirectory(absDepPath.c_str(),
+                                                  rootBuildDirectory.c_str());
+    if(inBuildDir)
+      {
+      cmNinjaDeps deps(1,*i);
+      this->WritePhonyBuild(os,
+                            "",
+                            deps,
+                            deps);
+      }
+   }
 }
 
 void cmGlobalNinjaGenerator::WriteBuiltinTargets(std::ostream& os)
