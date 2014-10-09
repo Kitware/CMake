@@ -111,7 +111,7 @@ Options
 ``-D <dashboard>, --dashboard <dashboard>``
  Execute dashboard test
 
- This option tells ctest to act as a Dart client and perform a
+ This option tells ctest to act as a CDash client and perform a
  dashboard test.  All tests are <Mode><Test>, where Mode can be
  Experimental, Nightly, and Continuous, and Test can be Start,
  Update, Configure, Build, Test, Coverage, and Submit.
@@ -127,14 +127,14 @@ Options
 ``-M <model>, --test-model <model>``
  Sets the model for a dashboard
 
- This option tells ctest to act as a Dart client where the TestModel
+ This option tells ctest to act as a CDash client where the TestModel
  can be Experimental, Nightly, and Continuous.  Combining -M and -T
  is similar to -D
 
 ``-T <action>, --test-action <action>``
  Sets the dashboard action to perform
 
- This option tells ctest to act as a Dart client and perform some
+ This option tells ctest to act as a CDash client and perform some
  action such as start, build, test etc.  Combining -M and -T is
  similar to -D
 
@@ -328,11 +328,8 @@ Options
  used to detect implicit dependencies in a test suite.
 
 ``--submit-index``
- Submit individual dashboard tests with specific index
-
- This option allows performing the same CTest action (such as test)
- multiple times and submit all stages to the same dashboard (Dart2
- required).  Each execution requires different index.
+ Legacy option for old Dart2 dashboard server feature.
+ Do not use.
 
 ``--timeout <seconds>``
  Set a global timeout on all tests.
