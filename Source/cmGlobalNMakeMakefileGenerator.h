@@ -38,7 +38,7 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
