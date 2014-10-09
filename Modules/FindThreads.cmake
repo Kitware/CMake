@@ -14,14 +14,32 @@
 #   CMAKE_USE_PTHREADS_INIT    - are we using pthreads
 #   CMAKE_HP_PTHREADS_INIT     - are we using hp pthreads
 #
+# The following import target is created
+#
+# ::
+#
+#   Threads::Threads
+#
 # For systems with multiple thread libraries, caller can set
 #
 # ::
 #
 #   CMAKE_THREAD_PREFER_PTHREAD
+#
+# If the use of the -pthread compiler and linker flag is prefered then the
+# caller can set
+#
+# ::
+#
+#   THREADS_PREFER_PTHREAD_FLAG
+#
+# Please note that the compiler flag can only be used with the imported
+# target. Use of both the imported target as well as this switch is highly
+# recommended for new code.
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
+# Copyright 2011-2014 Rolf Eike Beer <eike@sf-mail.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -48,7 +66,7 @@ endif()
 # Internal helper macro.
 # Do NOT even think about using it outside of this file!
 macro(_check_threads_lib LIBNAME FUNCNAME VARNAME)
-  if(NOT CMAKE_HAVE_THREADS_LIBRARY)
+  if(NOT Threads_FOUND)
      CHECK_LIBRARY_EXISTS(${LIBNAME} ${FUNCNAME} "" ${VARNAME})
      if(${VARNAME})
        set(CMAKE_THREAD_LIBS_INIT "-l${LIBNAME}")
@@ -56,6 +74,45 @@ macro(_check_threads_lib LIBNAME FUNCNAME VARNAME)
        set(Threads_FOUND TRUE)
      endif()
   endif ()
+endmacro()
+
+# Internal helper macro.
+# Do NOT even think about using it outside of this file!
+macro(_check_pthreads_flag)
+  if(NOT Threads_FOUND)
+    # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
+    if(NOT DEFINED THREADS_HAVE_PTHREAD_ARG)
+      message(STATUS "Check if compiler accepts -pthread")
+      try_run(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
+        ${CMAKE_BINARY_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c
+        CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
+        COMPILE_OUTPUT_VARIABLE OUTPUT)
+
+      if(THREADS_HAVE_PTHREAD_ARG)
+        if(THREADS_PTHREAD_ARG STREQUAL "2")
+          set(Threads_FOUND TRUE)
+          message(STATUS "Check if compiler accepts -pthread - yes")
+        else()
+          message(STATUS "Check if compiler accepts -pthread - no")
+          file(APPEND
+            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "Determining if compiler accepts -pthread returned ${THREADS_PTHREAD_ARG} instead of 2. The compiler had the following output:\n${OUTPUT}\n\n")
+        endif()
+      else()
+        message(STATUS "Check if compiler accepts -pthread - no")
+        file(APPEND
+          ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+          "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
+      endif()
+
+    endif()
+
+    if(THREADS_HAVE_PTHREAD_ARG)
+      set(Threads_FOUND TRUE)
+      set(CMAKE_THREAD_LIBS_INIT "-pthread")
+    endif()
+  endif()
 endmacro()
 
 if(CMAKE_HAVE_SPROC_H AND NOT CMAKE_THREAD_PREFER_PTHREAD)
@@ -80,6 +137,13 @@ else()
         set(Threads_FOUND TRUE)
       else()
 
+        # Check for -pthread first if enabled. This is the recommended
+        # way, but not backwards compatible as one must also pass -pthread
+        # as compiler flag then.
+        if (THREADS_PREFER_PTHREAD_FLAG)
+           _check_pthreads_flag()
+        endif ()
+
         _check_threads_lib(pthreads pthread_create CMAKE_HAVE_PTHREADS_CREATE)
         _check_threads_lib(pthread  pthread_create CMAKE_HAVE_PTHREAD_CREATE)
         if(CMAKE_SYSTEM_NAME MATCHES "SunOS")
@@ -89,41 +153,7 @@ else()
       endif()
     endif()
 
-    if(NOT CMAKE_HAVE_THREADS_LIBRARY)
-      # If we did not found -lpthread, -lpthread, or -lthread, look for -pthread
-      if("x${THREADS_HAVE_PTHREAD_ARG}" STREQUAL "x")
-        message(STATUS "Check if compiler accepts -pthread")
-        try_run(THREADS_PTHREAD_ARG THREADS_HAVE_PTHREAD_ARG
-          ${CMAKE_BINARY_DIR}
-          ${CMAKE_CURRENT_LIST_DIR}/CheckForPthreads.c
-          CMAKE_FLAGS -DLINK_LIBRARIES:STRING=-pthread
-          COMPILE_OUTPUT_VARIABLE OUTPUT)
-
-        if(THREADS_HAVE_PTHREAD_ARG)
-          if(THREADS_PTHREAD_ARG STREQUAL "2")
-            set(Threads_FOUND TRUE)
-            message(STATUS "Check if compiler accepts -pthread - yes")
-          else()
-            message(STATUS "Check if compiler accepts -pthread - no")
-            file(APPEND
-              ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-              "Determining if compiler accepts -pthread returned ${THREADS_PTHREAD_ARG} instead of 2. The compiler had the following output:\n${OUTPUT}\n\n")
-          endif()
-        else()
-          message(STATUS "Check if compiler accepts -pthread - no")
-          file(APPEND
-            ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if compiler accepts -pthread failed with the following output:\n${OUTPUT}\n\n")
-        endif()
-
-      endif()
-
-      if(THREADS_HAVE_PTHREAD_ARG)
-        set(Threads_FOUND TRUE)
-        set(CMAKE_THREAD_LIBS_INIT "-pthread")
-      endif()
-
-    endif()
+    _check_pthreads_flag()
   endif()
 endif()
 
@@ -172,3 +202,15 @@ endif()
 set(CMAKE_REQUIRED_QUIET ${CMAKE_REQUIRED_QUIET_SAVE})
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(Threads DEFAULT_MSG Threads_FOUND)
+
+if(THREADS_FOUND AND NOT TARGET Threads::Threads)
+  add_library(Threads::Threads INTERFACE IMPORTED)
+
+  if(THREADS_HAVE_PTHREAD_ARG)
+    set_property(TARGET Threads::Threads PROPERTY INTERFACE_COMPILE_OPTIONS "-pthread")
+  endif()
+
+  if(CMAKE_THREAD_LIBS_INIT)
+    set_property(TARGET Threads::Threads PROPERTY INTERFACE_LINK_LIBRARIES "${CMAKE_THREAD_LIBS_INIT}")
+  endif()
+endif()
