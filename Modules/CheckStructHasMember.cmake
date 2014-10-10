@@ -70,7 +70,7 @@ ${_INCLUDE_FILES}
 int main()
 {
    ${_STRUCT}* tmp;
-   tmp->${_MEMBER};
+   (void) tmp->${_MEMBER};
    return 0;
 }
 ")
