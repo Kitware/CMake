@@ -18,6 +18,11 @@ if(CMAKE_RC_COMPILER MATCHES windres)
   message(STATUS "CMAKE_RC_COMPILER MATCHES windres")
   add_definitions(/DCMAKE_RCDEFINE=test.txt)
   add_definitions(/DCMAKE_RCDEFINE_NO_QUOTED_STRINGS)
+  if(MSYS AND CMAKE_CURRENT_BINARY_DIR MATCHES " ")
+    # windres cannot handle spaces in include dir, and
+    # for the MSys shell we do not convert to shortpath.
+    set(CMAKE_RC_NO_INCLUDE 1)
+  endif()
 elseif(MSVC60)
   # VS6 rc compiler does not deal well with spaces in a "/D" value, but it can
   # handle the quoting
@@ -30,8 +35,15 @@ else()
   set(TEXTFILE_FROM_SOURCE_DIR "textfile, spaces in name, from binary dir")
   configure_file(${CMAKE_CURRENT_SOURCE_DIR}/test.txt
     "${CMAKE_CURRENT_BINARY_DIR}/test with spaces.txt" @ONLY)
-  include_directories(${CMAKE_CURRENT_BINARY_DIR})
   add_definitions(/DCMAKE_RCDEFINE="test with spaces.txt")
+endif()
+
+if(CMAKE_RC_NO_INCLUDE)
+  add_definitions(/DCMAKE_RC_NO_INCLUDE)
+else()
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include.rc.in
+    "${CMAKE_CURRENT_BINARY_DIR}/include.rc" @ONLY)
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 add_executable(VSResource main.cpp test.rc)

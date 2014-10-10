@@ -160,6 +160,7 @@ public:
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               cmGeneratorTarget* target,
                               const std::string& lang,
+                              bool forceFullPaths = false,
                               bool forResponseFile = false,
                               const std::string& config = "");
 
@@ -215,7 +216,8 @@ public:
                                          OutputFormat format = SHELL);
 
   virtual std::string ConvertToIncludeReference(std::string const& path,
-                                                OutputFormat format = SHELL);
+                                                OutputFormat format = SHELL,
+                                                bool forceFullPaths = false);
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */,

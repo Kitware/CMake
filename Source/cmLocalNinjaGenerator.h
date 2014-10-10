@@ -108,7 +108,8 @@ public:
 
 protected:
   virtual std::string ConvertToIncludeReference(std::string const& path,
-                                                OutputFormat format = SHELL);
+                                                OutputFormat format = SHELL,
+                                                bool forceFullPaths = false);
 
 
 private:

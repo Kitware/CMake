@@ -1,4 +1,7 @@
 #ifdef CMAKE_RCDEFINE
+# ifndef CMAKE_RC_NO_INCLUDE
+#  include <include.rc>
+# endif
 
 // This line can compile with either an unquoted or a quoted string
 1025 TEXTFILE CMAKE_RCDEFINE
