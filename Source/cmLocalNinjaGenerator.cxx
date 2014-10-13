@@ -151,9 +151,10 @@ cmLocalNinjaGenerator::ConvertToLinkReference(std::string const& lib,
 
 std::string
 cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path,
-                                                 OutputFormat format)
+                                                 OutputFormat format,
+                                                 bool forceFullPaths)
 {
-  return this->Convert(path, HOME_OUTPUT, format);
+  return this->Convert(path, forceFullPaths? FULL : HOME_OUTPUT, format);
 }
 
 //----------------------------------------------------------------------------
