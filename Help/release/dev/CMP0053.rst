@@ -1,6 +1,0 @@
-CMP0053
--------
-
-* The :manual:`cmake-language(7)` syntax for :ref:`Variable References` and
-  :ref:`Escape Sequences` was simplified in order to allow a much faster
-  implementation.  See policy :policy:`CMP0053`.
