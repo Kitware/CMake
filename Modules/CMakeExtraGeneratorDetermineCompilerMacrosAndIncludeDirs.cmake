@@ -90,7 +90,7 @@ set(ENV{LANG}        C)
 
 # Now check for C, works for gcc and Intel compiler at least
 if (NOT CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS)
-  if ("${CMAKE_C_COMPILER_ID}" MATCHES GNU  OR  "${CMAKE_C_COMPILER_ID}" MATCHES Intel  OR  "${CMAKE_C_COMPILER_ID}" MATCHES Clang)
+  if (CMAKE_C_COMPILER_ID MATCHES GNU  OR  CMAKE_C_COMPILER_ID MATCHES Intel  OR  CMAKE_C_COMPILER_ID MATCHES Clang)
     _DETERMINE_GCC_SYSTEM_INCLUDE_DIRS(c _dirs _defines)
     set(CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS "${_dirs}" CACHE INTERNAL "C compiler system include directories")
     set(CMAKE_EXTRA_GENERATOR_C_SYSTEM_DEFINED_MACROS "${_defines}" CACHE INTERNAL "C compiler system defined macros")

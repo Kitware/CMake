@@ -71,7 +71,7 @@ endif()
 
 # Generate C symbol sources.
 set(symbol_sources)
-if(NOT "${CMAKE_Fortran_COMPILER_ID}" MATCHES "^(PathScale|Cray)$")
+if(NOT CMAKE_Fortran_COMPILER_ID MATCHES "^(PathScale|Cray)$")
   # Provide mymodule_ and my_module_ init symbols because:
   #  - PGI Fortran uses module init symbols
   # but not for:

@@ -56,10 +56,10 @@ SET(CMAKE_REQUIRED_LIBRARIES)
 SET(CMAKE_REQUIRED_FLAGS)
 
 # Disable warnings to avoid changing 3rd party code.
-IF("${CMAKE_C_COMPILER_ID}" MATCHES
+IF(CMAKE_C_COMPILER_ID MATCHES
     "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-ELSEIF("${CMAKE_C_COMPILER_ID}" MATCHES "^(PathScale)$")
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
 ELSEIF(BORLAND)
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
@@ -666,14 +666,14 @@ ENDMACRO(CHECK_CRYPTO_WIN CRYPTO_LIST)
 MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
   IF(NOT HAVE_ICONV)
     CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
-    IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+    IF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
       #
       # During checking iconv proto type, we should use -Werror to avoid the
       # success of iconv detection with a warnig which success is a miss
       # detection. So this needs for all build mode(even it's a release mode).
       #
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
-    ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+    ENDIF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     IF (MSVC)
       # NOTE: /WX option is the same as gcc's -Werror option.
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} /WX")

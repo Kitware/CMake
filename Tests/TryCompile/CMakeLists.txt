@@ -265,7 +265,7 @@ TEST_FAIL(CXX_RUN_SHOULD_FAIL "CHECK_CXX_SOURCE_RUNS() succeeded, but should hav
 TEST_ASSERT(CXX_RUN_SHOULD_WORK "CHECK_CXX_SOURCE_RUNS() failed")
 
 foreach(lang C CXX)
-  if(NOT "${CMAKE_${lang}_COMPILER_ID}" MATCHES "^(PathScale)$")
+  if(NOT CMAKE_${lang}_COMPILER_ID STREQUAL "PathScale")
     set(${lang}_DD --)
   endif()
 endforeach()
@@ -280,7 +280,7 @@ include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG(${CXX_DD}-_this_is_not_a_flag_ CXX_BOGUS_FLAG)
 TEST_FAIL(CXX_BOGUS_FLAG "CHECK_CXX_COMPILER_FLAG() succeeded, but should have failed")
 
-if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
   unset(C_STRICT_PROTOTYPES CACHE)
   CHECK_C_COMPILER_FLAG("-Werror;-Wstrict-prototypes" C_STRICT_PROTOTYPES)
   TEST_ASSERT(C_STRICT_PROTOTYPES "CHECK_C_COMPILER_FLAG failed -Werror -Wstrict-prototypes")

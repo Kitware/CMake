@@ -13,11 +13,11 @@ message("CMAKE_Fortran_COMPILER = ${CMAKE_Fortran_COMPILER}")
 message("CMAKE_Fortran_FLAGS = ${CMAKE_Fortran_FLAGS}")
 
 set(_SHARED SHARED)
-if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "^(XL|VisualAge)$")
+if(CMAKE_Fortran_COMPILER_ID MATCHES "^(XL|VisualAge)$")
   # We do not implement SHARED Fortran libs on AIX yet!
   # Workaround: Set LINKER_LANGUAGE to C, which uses 'xlc' and Fortran implicits.
   set(_SHARED STATIC)
-elseif("${CMAKE_Fortran_COMPILER_ID}" STREQUAL "GNU")
+elseif(CMAKE_Fortran_COMPILER_ID STREQUAL "GNU")
   # g77 2.96 does not support shared libs on Itanium because g2c is not -fPIC
   execute_process(COMMAND ${CMAKE_Fortran_COMPILER} --version
                   OUTPUT_VARIABLE output ERROR_VARIABLE output)
@@ -29,10 +29,10 @@ endif()
 # Pick a module .def file with the properly mangled symbol name.
 set(world_def "")
 if(WIN32 AND NOT CYGWIN)
-  if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set(world_def world_gnu.def)
-  elseif("${CMAKE_Fortran_COMPILER_ID}" MATCHES "Intel" OR
-      "${CMAKE_GENERATOR}" MATCHES "Visual Studio") # Intel plugin
+  elseif(CMAKE_Fortran_COMPILER_ID MATCHES "Intel" OR
+      CMAKE_GENERATOR MATCHES "Visual Studio") # Intel plugin
     set(world_def world_icl.def)
   endif()
 endif()
@@ -119,7 +119,7 @@ endfunction()
 # call the test_fortran_c_interface_module function
 if("${CMAKE_Fortran_COMPILER_ID}:${CMAKE_C_COMPILER_ID}" MATCHES
     "(Intel:MSVC|Absoft:GNU)"
-    OR ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "${CMAKE_C_COMPILER_ID}" ))
+    OR (CMAKE_Fortran_COMPILER_ID MATCHES CMAKE_C_COMPILER_ID ))
   test_fortran_c_interface_module()
 else()
   message("Fortran does not match c compiler")
@@ -128,7 +128,7 @@ else()
   # hack to make g77 work after CL has been enabled
   # as a languge, cmake needs language specific versions
   # of these variables....
-  if(WIN32 AND "${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+  if(WIN32 AND CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CREATE_CONSOLE_EXE )
     set(CMAKE_LIBRARY_PATH_FLAG "-L")
     set(CMAKE_LINK_LIBRARY_FLAG "-l")
@@ -137,8 +137,8 @@ else()
   # gnu and sunpro do not use the same flags here...
   # however if LDFLAGS is used to set -m64 it causes odd stuf
   # with the fortran build
-  if( ("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
-      AND ("${CMAKE_Fortran_COMPILER_ID}" MATCHES "SunPro"))
+  if( (CMAKE_C_COMPILER_ID MATCHES "GNU")
+      AND (CMAKE_Fortran_COMPILER_ID MATCHES "SunPro"))
     set(CMAKE_EXE_LINKER_FLAGS "")
     set(CMAKE_Fortran_FLAGS "")
   endif()

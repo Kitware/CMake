@@ -555,7 +555,7 @@ CMAKE_SETUP_TESTING()
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   if(NOT CMake_VERSION_IS_RELEASE)
-    if("${CMAKE_C_COMPILER_ID}" STREQUAL "GNU" AND
+    if(CMAKE_C_COMPILER_ID STREQUAL "GNU" AND
         NOT "${CMAKE_C_COMPILER_VERSION}" VERSION_LESS 4.2)
       set(C_FLAGS_LIST -Wcast-align -Werror-implicit-function-declaration -Wchar-subscripts
                        -Wall -W -Wpointer-arith -Wwrite-strings -Wformat-security

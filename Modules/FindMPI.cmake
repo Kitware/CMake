@@ -160,7 +160,7 @@ set(_MPI_XL_Fortran_COMPILER_NAMES         mpixlf95   mpixlf95_r mpxlf95 mpxlf95
 # or if we know it matches the regular compiler.
 foreach (lang C CXX Fortran)
   foreach (id GNU Intel PGI XL)
-    if (NOT CMAKE_${lang}_COMPILER_ID OR "${CMAKE_${lang}_COMPILER_ID}" STREQUAL "${id}")
+    if (NOT CMAKE_${lang}_COMPILER_ID OR CMAKE_${lang}_COMPILER_ID STREQUAL id)
       list(APPEND _MPI_${lang}_COMPILER_NAMES ${_MPI_${id}_${lang}_COMPILER_NAMES})
     endif()
     unset(_MPI_${id}_${lang}_COMPILER_NAMES)    # clean up the namespace here
