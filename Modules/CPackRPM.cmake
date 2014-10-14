@@ -29,6 +29,7 @@
 # However as a handy reminder here comes the list of specific variables:
 #
 # .. variable:: CPACK_RPM_PACKAGE_SUMMARY
+#               CPACK_RPM_<component>_PACKAGE_SUMMARY
 #
 #  The RPM package summary.
 #
@@ -100,11 +101,13 @@
 #  * Default   : -
 #
 # .. variable:: CPACK_RPM_PACKAGE_DESCRIPTION
+#               CPACK_RPM_<component>_PACKAGE_DESCRIPTION
 #
 #  RPM package description.
 #
 #  * Mandatory : YES
-#  * Default : CPACK_PACKAGE_DESCRIPTION_FILE if set or "no package
+#  * Default : CPACK_COMPONENT_<compName>_DESCRIPTION (component based installers
+#    only) if set, CPACK_PACKAGE_DESCRIPTION_FILE if set or "no package
 #    description available"
 #
 # .. variable:: CPACK_RPM_COMPRESSION_TYPE
@@ -414,6 +417,7 @@ endif()
 # Are we packaging components ?
 if(CPACK_RPM_PACKAGE_COMPONENT)
   set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "-${CPACK_RPM_PACKAGE_COMPONENT}")
+  string(TOUPPER ${CPACK_RPM_PACKAGE_COMPONENT} CPACK_RPM_PACKAGE_COMPONENT_UPPER)
 else()
   set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "")
 endif()
@@ -430,12 +434,31 @@ set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACK
 #
 
 # CPACK_RPM_PACKAGE_SUMMARY (mandatory)
+
+# CPACK_RPM_PACKAGE_SUMMARY_ is used only locally so that it can be unset each time before use otherwise
+# component packaging could leak variable content between components
+unset(CPACK_RPM_PACKAGE_SUMMARY_)
+if(CPACK_RPM_PACKAGE_SUMMARY)
+  set(CPACK_RPM_PACKAGE_SUMMARY_ ${CPACK_RPM_PACKAGE_SUMMARY})
+  unset(CPACK_RPM_PACKAGE_SUMMARY)
+endif()
+
+#Check for component summary first.
+#If not set, it will use regular package summary logic.
+if(CPACK_RPM_PACKAGE_COMPONENT)
+  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY)
+    set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY})
+  endif()
+endif()
+
 if(NOT CPACK_RPM_PACKAGE_SUMMARY)
-  # if neither var is defined lets use the name as summary
-  if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_SUMMARY)
-  else()
+  if(CPACK_RPM_PACKAGE_SUMMARY_)
+    set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_PACKAGE_SUMMARY_})
+  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
     set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+  else()
+    # if neither var is defined lets use the name as summary
+    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_SUMMARY)
   endif()
 endif()
 
@@ -508,12 +531,33 @@ endif()
 #     if it is defined
 #   - set to a default value
 #
-if (NOT CPACK_RPM_PACKAGE_DESCRIPTION)
-        if (CPACK_PACKAGE_DESCRIPTION_FILE)
-                file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_RPM_PACKAGE_DESCRIPTION)
-        else ()
-                set(CPACK_RPM_PACKAGE_DESCRIPTION "no package description available")
-        endif ()
+
+# CPACK_RPM_PACKAGE_DESCRIPTION_ is used only locally so that it can be unset each time before use otherwise
+# component packaging could leak variable content between components
+unset(CPACK_RPM_PACKAGE_DESCRIPTION_)
+if(CPACK_RPM_PACKAGE_DESCRIPTION)
+  set(CPACK_RPM_PACKAGE_DESCRIPTION_ ${CPACK_RPM_PACKAGE_DESCRIPTION})
+  unset(CPACK_RPM_PACKAGE_DESCRIPTION)
+endif()
+
+#Check for a component description first.
+#If not set, it will use regular package description logic.
+if(CPACK_RPM_PACKAGE_COMPONENT)
+  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION)
+    set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION})
+  elseif(CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION)
+    set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION})
+  endif()
+endif()
+
+if(NOT CPACK_RPM_PACKAGE_DESCRIPTION)
+  if(CPACK_RPM_PACKAGE_DESCRIPTION_)
+    set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_PACKAGE_DESCRIPTION_})
+  elseif(CPACK_PACKAGE_DESCRIPTION_FILE)
+    file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_RPM_PACKAGE_DESCRIPTION)
+  else ()
+    set(CPACK_RPM_PACKAGE_DESCRIPTION "no package description available")
+  endif ()
 endif ()
 
 # CPACK_RPM_COMPRESSION_TYPE
@@ -1099,4 +1143,16 @@ else()
   if(ALIEN_EXECUTABLE)
     message(FATAL_ERROR "RPM packaging through alien not done (yet)")
   endif()
+endif()
+
+# reset variables from temporary variables
+if(CPACK_RPM_PACKAGE_SUMMARY_)
+  set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_PACKAGE_SUMMARY_})
+else()
+  unset(CPACK_RPM_PACKAGE_SUMMARY)
+endif()
+if(CPACK_RPM_PACKAGE_DESCRIPTION_)
+  set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_PACKAGE_DESCRIPTION_})
+else()
+  unset(CPACK_RPM_PACKAGE_DESCRIPTION)
 endif()
