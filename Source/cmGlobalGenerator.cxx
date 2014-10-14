@@ -318,7 +318,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     // will run xcodebuild and if it sees the error text file busy
     // it will stop forwarding output, and let the build finish.
     // Then it will retry the build.  It will continue this
-    // untill no text file busy errors occur.
+    // until no text file busy errors occur.
     std::string cmakexbuild =
       this->CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_COMMAND");
     cmakexbuild = cmakexbuild.substr(0, cmakexbuild.length()-5);
@@ -1008,9 +1008,9 @@ void cmGlobalGenerator::SetLanguageEnabledMaps(const std::string& l,
     if (sscanf(linkerPref, "%d", &preference)!=1)
       {
       // backward compatibility: before 2.6 LINKER_PREFERENCE
-      // was either "None" or "Prefered", and only the first character was
+      // was either "None" or "Preferred", and only the first character was
       // tested. So if there is a custom language out there and it is
-      // "Prefered", set its preference high
+      // "Preferred", set its preference high
       if (linkerPref[0]=='P')
         {
         preference = 100;

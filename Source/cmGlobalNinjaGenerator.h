@@ -337,7 +337,7 @@ private:
 
   std::string ninjaCmd() const;
 
-  /// The file containing the build statement. (the relation ship of the
+  /// The file containing the build statement. (the relationship of the
   /// compilation DAG).
   cmGeneratedFileStream* BuildFileStream;
   /// The file containing the rule statements. (The action attached to each

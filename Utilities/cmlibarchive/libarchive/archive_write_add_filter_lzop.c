@@ -85,7 +85,7 @@ static int archive_write_lzop_free(struct archive_write_filter *);
 #if defined(HAVE_LZO_LZOCONF_H) && defined(HAVE_LZO_LZO1X_H)
 /* Maximum block size. */
 #define BLOCK_SIZE			(256 * 1024)
-/* Block infomation is composed of uncompressed size(4 bytes),
+/* Block information is composed of uncompressed size(4 bytes),
  * compressed size(4 bytes) and the checksum of uncompressed data(4 bytes)
  * in this lzop writer. */
 #define BLOCK_INfO_SIZE			12

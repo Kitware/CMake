@@ -39,7 +39,7 @@ class cmExportBuildFileGenerator;
 class cmQtAutoGenerators;
 
 /** \class cmGlobalGenerator
- * \brief Responable for overseeing the generation process for the entire tree
+ * \brief Responsible for overseeing the generation process for the entire tree
  *
  * Subclasses of this class generate makefiles for various
  * platforms.
@@ -94,7 +94,7 @@ public:
   void ClearEnabledLanguages();
   void GetEnabledLanguages(std::vector<std::string>& lang) const;
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
@@ -108,7 +108,7 @@ public:
                                bool optional) const;
 
   /**
-   * Try to determine system infomation, get it from another generator
+   * Try to determine system information, get it from another generator
    */
   virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
                                             cmMakefile* mf);
@@ -198,7 +198,7 @@ public:
   std::string GetLanguageFromExtension(const char* ext) const;
   ///! is an extension to be ignored
   bool IgnoreFile(const char* ext) const;
-  ///! What is the preference for linkers and this language (None or Prefered)
+  ///! What is the preference for linkers and this language (None or Preferred)
   int GetLinkerPreference(const std::string& lang) const;
   ///! What is the object file extension for a given source file?
   std::string GetLanguageOutputExtension(cmSourceFile const&) const;
