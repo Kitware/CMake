@@ -34,7 +34,6 @@ public:
 protected:
   void PrintFindStuff();
   void ExpandPaths();
-  void AddPathSuffixes(std::vector<std::string>& paths);
 
   // see if the VariableName is already set in the cache,
   // also copy the documentation from the cache to VariableDocumentation
@@ -61,14 +60,6 @@ private:
   void FillSystemEnvironmentPath();
   void FillCMakeSystemVariablePath();
   void FillUserGuessPath();
-
-  // Helpers.
-  void AddCMakePrefixPath(const std::string& variable,
-                          std::vector<std::string>& outPaths);
-  void AddEnvPrefixPath(const std::string& variable,
-                        std::vector<std::string>& outPaths);
-  void AddPrefixPaths(std::vector<std::string> const& inPaths,
-                      PathType pathType, std::vector<std::string>& outPaths);
 };
 
 

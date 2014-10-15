@@ -15,6 +15,15 @@
 
 //----------------------------------------------------------------------------
 cmFindCommon::cmFindCommon()
+: CMakeVariablePaths(this, "CMAKE"),
+  CMakeEnvironmentPaths(this, "CMAKE_ENVIRONMENT"),
+  UserHintsPaths(this, "HINTS"),
+  SystemEnvironmentPaths(this, "SYSTEM_ENVIRONMENT"),
+  UserRegistryPaths(this, "USER_REGISTRY"),
+  BuildPaths(this, "BUILD"),
+  CMakeSystemVariablePaths(this, "CMAKE_SYSTEM_VARIABLE"),
+  SystemRegistryPaths(this, "SYSTEM_REGISTRY"),
+  UserGuessPaths(this, "GUESS")
 {
   this->FindRootPathMode = RootPathModeBoth;
   this->NoDefaultPath = false;
@@ -44,27 +53,8 @@ cmFindCommon::~cmFindCommon()
 }
 
 //----------------------------------------------------------------------------
-std::string cmFindCommon::MakeFullPath(const std::string& path,
-                                       PathType pathType)
-{
-  // Select the base path with which to interpret relative paths.
-  if(pathType == CMakePath)
-    {
-    return cmSystemTools::CollapseFullPath(
-      path, this->Makefile->GetCurrentDirectory());
-    }
-  else
-    {
-    return cmSystemTools::CollapseFullPath(path, 0);
-    }
-}
-
-//----------------------------------------------------------------------------
 void cmFindCommon::SelectDefaultRootPathMode()
 {
-  // Use both by default.
-  this->FindRootPathMode = RootPathModeBoth;
-
   // Check the policy variable for this find command type.
   std::string findRootPathVar = "CMAKE_FIND_ROOT_PATH_MODE_";
   findRootPathVar += this->CMakePathName;
@@ -72,11 +62,11 @@ void cmFindCommon::SelectDefaultRootPathMode()
     this->Makefile->GetSafeDefinition(findRootPathVar);
   if (rootPathMode=="NEVER")
     {
-    this->FindRootPathMode = RootPathModeNoRootPath;
+    this->FindRootPathMode = RootPathModeNever;
     }
   else if (rootPathMode=="ONLY")
     {
-    this->FindRootPathMode = RootPathModeOnlyRootPath;
+    this->FindRootPathMode = RootPathModeOnly;
     }
   else if (rootPathMode=="BOTH")
     {
@@ -152,7 +142,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
 #endif
 
   // Short-circuit if there is nothing to do.
-  if(this->FindRootPathMode == RootPathModeNoRootPath)
+  if(this->FindRootPathMode == RootPathModeNever)
     {
     return;
     }
@@ -280,8 +270,6 @@ void cmFindCommon::GetIgnoredPaths(std::set<std::string>& ignore)
   ignore.insert(ignoreVec.begin(), ignoreVec.end());
 }
 
-
-
 //----------------------------------------------------------------------------
 bool cmFindCommon::CheckCommonArgument(std::string const& arg)
 {
@@ -307,11 +295,11 @@ bool cmFindCommon::CheckCommonArgument(std::string const& arg)
     }
   else if(arg == "NO_CMAKE_FIND_ROOT_PATH")
     {
-    this->FindRootPathMode = RootPathModeNoRootPath;
+    this->FindRootPathMode = RootPathModeNever;
     }
   else if(arg == "ONLY_CMAKE_FIND_ROOT_PATH")
     {
-    this->FindRootPathMode = RootPathModeOnlyRootPath;
+    this->FindRootPathMode = RootPathModeOnly;
     }
   else if(arg == "CMAKE_FIND_ROOT_PATH_BOTH")
     {
@@ -359,91 +347,6 @@ void cmFindCommon::AddPathSuffix(std::string const& arg)
 }
 
 //----------------------------------------------------------------------------
-void cmFindCommon::AddUserPath(std::string const& inPath,
-                               std::vector<std::string>& outPaths)
-{
-  // We should view the registry as the target application would view
-  // it.
-  cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_32;
-  cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_64;
-  if(this->Makefile->PlatformIs64Bit())
-    {
-    view = cmSystemTools::KeyWOW64_64;
-    other_view = cmSystemTools::KeyWOW64_32;
-    }
-
-  // Expand using the view of the target application.
-  std::string expanded = inPath;
-  cmSystemTools::ExpandRegistryValues(expanded, view);
-  cmSystemTools::GlobDirs(expanded, outPaths);
-
-  // Executables can be either 32-bit or 64-bit, so expand using the
-  // alternative view.
-  if(expanded != inPath && this->CMakePathName == "PROGRAM")
-    {
-    expanded = inPath;
-    cmSystemTools::ExpandRegistryValues(expanded, other_view);
-    cmSystemTools::GlobDirs(expanded, outPaths);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindCommon::AddCMakePath(const std::string& variable,
-                                std::vector<std::string>& outPaths)
-{
-  // Get a path from a CMake variable.
-  if(const char* varPath = this->Makefile->GetDefinition(variable))
-    {
-    std::vector<std::string> tmp;
-    cmSystemTools::ExpandListArgument(varPath, tmp);
-
-    // Relative paths are interpreted with respect to the current
-    // source directory.
-    this->AddPathsInternal(tmp, CMakePath, outPaths);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindCommon::AddEnvPath(const char* variable,
-                              std::vector<std::string>& outPaths)
-{
-  // Get a path from the environment.
-  std::vector<std::string> tmp;
-  cmSystemTools::GetPath(tmp, variable);
-  // Relative paths are interpreted with respect to the current
-  // working directory.
-  this->AddPathsInternal(tmp, EnvPath, outPaths);
-}
-
-//----------------------------------------------------------------------------
-void cmFindCommon::AddPathsInternal(std::vector<std::string> const& inPaths,
-                                    PathType pathType,
-                                    std::vector<std::string>& outPaths)
-{
-  for(std::vector<std::string>::const_iterator i = inPaths.begin();
-      i != inPaths.end(); ++i)
-    {
-    this->AddPathInternal(this->MakeFullPath(*i, pathType), outPaths);
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindCommon::AddPathInternal(std::string const& inPath,
-                                   std::vector<std::string>& outPaths)
-{
-  if(inPath.empty())
-    {
-    return;
-    }
-
-  // Insert the path if has not already been emitted.
-  if(this->SearchPathsEmitted.insert(inPath).second)
-    {
-    outPaths.push_back(inPath);
-    }
-}
-
-//----------------------------------------------------------------------------
 void AddTrailingSlash(std::string& s)
 {
   if(!s.empty() && *s.rbegin() != '/')
@@ -458,17 +361,15 @@ void cmFindCommon::ComputeFinalPaths()
   this->GetIgnoredPaths(ignored);
 
   // Combine the seperate path types, filtering out ignores
-  this->SearchPaths.clear();
-  this->FilterPaths(this->CMakeVariablePaths, ignored, this->SearchPaths);
-  this->FilterPaths(this->CMakeEnvironmentPaths, ignored, this->SearchPaths);
-  this->FilterPaths(this->UserHintsPaths, ignored, this->SearchPaths);
-  this->FilterPaths(this->SystemEnvironmentPaths, ignored, this->SearchPaths);
-  this->FilterPaths(this->UserRegistryPaths, ignored, this->SearchPaths);
-  this->FilterPaths(this->BuildPaths, ignored, this->SearchPaths);
-  this->FilterPaths(this->CMakeSystemVariablePaths, ignored,
-                    this->SearchPaths);
-  this->FilterPaths(this->SystemRegistryPaths, ignored, this->SearchPaths);
-  this->FilterPaths(this->UserGuessPaths, ignored, this->SearchPaths);
+  this->CMakeVariablePaths.ExtractWithout(ignored, this->SearchPaths, true);
+  this->CMakeEnvironmentPaths.ExtractWithout(ignored, this->SearchPaths);
+  this->UserHintsPaths.ExtractWithout(ignored, this->SearchPaths);
+  this->SystemEnvironmentPaths.ExtractWithout(ignored, this->SearchPaths);
+  this->UserRegistryPaths.ExtractWithout(ignored, this->SearchPaths);
+  this->BuildPaths.ExtractWithout(ignored, this->SearchPaths);
+  this->CMakeSystemVariablePaths.ExtractWithout(ignored, this->SearchPaths);
+  this->SystemRegistryPaths.ExtractWithout(ignored, this->SearchPaths);
+  this->UserGuessPaths.ExtractWithout(ignored, this->SearchPaths);
 
   // Expand list of paths inside all search roots.
   this->RerootPaths(this->SearchPaths);

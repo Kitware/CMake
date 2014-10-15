@@ -78,14 +78,13 @@ private:
   void FillPrefixesCMakeSystemVariable();
   void FillPrefixesUserGuess();
   void FillPrefixesUserHints();
-  void LoadPackageRegistryDir(std::string const& dir,
-                              std::vector<std::string>& outPaths);
+  void LoadPackageRegistryDir(std::string const& dir, cmSearchPath& outPaths);
   void LoadPackageRegistryWinUser();
   void LoadPackageRegistryWinSystem();
   void LoadPackageRegistryWin(bool user, unsigned int view,
-                              std::vector<std::string>& outPaths);
+                              cmSearchPath& outPaths);
   bool CheckPackageRegistryEntry(const std::string& fname,
-                                 std::vector<std::string>& outPaths);
+                                 cmSearchPath& outPaths);
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);
   bool FindConfigFile(std::string const& dir, std::string& file);

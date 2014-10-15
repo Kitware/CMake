@@ -248,11 +248,11 @@ bool cmFindPackageCommand
       }
     else if(doing == DoingPaths)
       {
-      this->AddUserPath(args[i], this->UserGuessPaths);
+      this->UserGuessArgs.push_back(args[i]);
       }
     else if(doing == DoingHints)
       {
-      this->AddUserPath(args[i], this->UserHintsPaths);
+      this->UserHintsArgs.push_back(args[i]);
       }
     else if(doing == DoingPathSuffixes)
       {
@@ -1153,25 +1153,20 @@ void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
 {
   // Check the environment variable with the same name as the cache
   // entry.
-  std::string env;
-  if(cmSystemTools::GetEnv(this->Variable.c_str(), env) && env.length() > 0)
-    {
-    cmSystemTools::ConvertToUnixSlashes(env);
-    this->AddPathInternal(MakeFullPath(env, EnvPath),
-                          this->CMakeEnvironmentPaths);
-    }
+  this->CMakeEnvironmentPaths.AddEnvPath(this->Variable);
 
-  this->AddEnvPath("CMAKE_PREFIX_PATH", this->CMakeEnvironmentPaths);
-  this->AddEnvPath("CMAKE_FRAMEWORK_PATH", this->CMakeEnvironmentPaths);
-  this->AddEnvPath("CMAKE_APPBUNDLE_PATH", this->CMakeEnvironmentPaths);
+  // And now the general CMake environment variables
+  this->CMakeEnvironmentPaths.AddEnvPath("CMAKE_PREFIX_PATH");
+  this->CMakeEnvironmentPaths.AddEnvPath("CMAKE_FRAMEWORK_PATH");
+  this->CMakeEnvironmentPaths.AddEnvPath("CMAKE_APPBUNDLE_PATH");
 }
 
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesCMakeVariable()
 {
-  this->AddCMakePath("CMAKE_PREFIX_PATH", this->CMakeVariablePaths);
-  this->AddCMakePath("CMAKE_FRAMEWORK_PATH", this->CMakeVariablePaths);
-  this->AddCMakePath("CMAKE_APPBUNDLE_PATH", this->CMakeVariablePaths);
+  this->CMakeVariablePaths.AddCMakePath("CMAKE_PREFIX_PATH");
+  this->CMakeVariablePaths.AddCMakePath("CMAKE_FRAMEWORK_PATH");
+  this->CMakeVariablePaths.AddCMakePath("CMAKE_APPBUNDLE_PATH");
 }
 
 //----------------------------------------------------------------------------
@@ -1189,14 +1184,12 @@ void cmFindPackageCommand::FillPrefixesSystemEnvironment()
     if((cmHasLiteralSuffix(*i, "/bin")) ||
        (cmHasLiteralSuffix(*i, "/sbin")))
       {
-      this->AddPathInternal(MakeFullPath(cmSystemTools::GetFilenamePath(*i),
-                                         EnvPath),
-                            this->SystemEnvironmentPaths);
+      this->SystemEnvironmentPaths.AddPath(
+        cmSystemTools::GetFilenamePath(*i));
       }
     else
       {
-      this->AddPathInternal(MakeFullPath(*i, EnvPath),
-                            this->SystemEnvironmentPaths);
+      this->SystemEnvironmentPaths.AddPath(*i);
       }
     }
 }
@@ -1280,7 +1273,7 @@ void cmFindPackageCommand::LoadPackageRegistryWinSystem()
 
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::LoadPackageRegistryWin(bool user, unsigned int view,
-  std::vector<std::string>& outPaths)
+                                                  cmSearchPath& outPaths)
 {
   std::wstring key = L"Software\\Kitware\\CMake\\Packages\\";
   key += cmsys::Encoding::ToWide(this->Name);
@@ -1350,7 +1343,7 @@ public:
 
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
-  std::vector<std::string>& outPaths)
+                                                  cmSearchPath& outPaths)
 {
   cmsys::Directory files;
   if(!files.Load(dir))
@@ -1388,7 +1381,7 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
 
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
-  std::vector<std::string>& outPaths)
+                                                     cmSearchPath& outPaths)
 {
   // Parse the content of one package registry entry.
   if(cmSystemTools::FileIsFullPath(fname.c_str()))
@@ -1400,13 +1393,11 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
       // The path exists.  Look for the package here.
       if(!cmSystemTools::FileIsDirectory(fname))
         {
-        this->AddPathInternal(
-          MakeFullPath(cmSystemTools::GetFilenamePath(fname), FullPath),
-          outPaths);
+        outPaths.AddPath(cmSystemTools::GetFilenamePath(fname));
         }
       else
         {
-        this->AddPathInternal(MakeFullPath(fname, FullPath), outPaths);
+        outPaths.AddPath(fname);
         }
       return true;
       }
@@ -1443,7 +1434,7 @@ void cmFindPackageCommand::FillPrefixesBuilds()
     if(cmSystemTools::FileIsFullPath(f.c_str()) &&
        cmSystemTools::FileIsDirectory(f.c_str()))
       {
-      this->AddPathInternal(MakeFullPath(f, FullPath), this->BuildPaths);
+      this->BuildPaths.AddPath(f);
       }
     }
 }
@@ -1451,28 +1442,29 @@ void cmFindPackageCommand::FillPrefixesBuilds()
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
 {
-  this->AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH",
-                     this->CMakeSystemVariablePaths);
-  this->AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH",
-                     this->CMakeSystemVariablePaths);
-  this->AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH",
-                     this->CMakeSystemVariablePaths);
+  this->CMakeSystemVariablePaths.AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH");
+  this->CMakeSystemVariablePaths.AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
+  this->CMakeSystemVariablePaths.AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
 }
 
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesUserGuess()
 {
-  std::vector<std::string> inPaths;
-  inPaths.swap(this->UserGuessPaths);
-  this->AddPathsInternal(inPaths, CMakePath, this->UserGuessPaths);
+  for(std::vector<std::string>::const_iterator p = this->UserGuessArgs.begin();
+      p != this->UserGuessArgs.end(); ++p)
+    {
+    this->UserGuessPaths.AddUserPath(*p);
+    }
 }
 
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::FillPrefixesUserHints()
 {
-  std::vector<std::string> inPaths;
-  inPaths.swap(this->UserHintsPaths);
-  this->AddPathsInternal(inPaths, CMakePath, this->UserHintsPaths);
+  for(std::vector<std::string>::const_iterator p = this->UserHintsArgs.begin();
+      p != this->UserHintsArgs.end(); ++p)
+    {
+    this->UserHintsPaths.AddUserPath(*p);
+    }
 }
 
 //----------------------------------------------------------------------------

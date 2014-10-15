@@ -43,6 +43,7 @@
 #include "cmExecuteProcessCommand.cxx"
 #include "cmExternalMakefileProjectGenerator.cxx"
 #include "cmFindBase.cxx"
+#include "cmSearchPath.cxx"
 #include "cmFindCommon.cxx"
 #include "cmFileCommand.cxx"
 #include "cmFindFileCommand.cxx"

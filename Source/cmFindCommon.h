@@ -13,6 +13,7 @@
 #define cmFindCommon_h
 
 #include "cmCommand.h"
+#include "cmSearchPath.h"
 
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.
@@ -29,15 +30,11 @@ public:
   cmTypeMacro(cmFindCommon, cmCommand);
 
 protected:
+  friend class cmSearchPath;
 
-  enum RootPathMode { RootPathModeBoth,
-                      RootPathModeOnlyRootPath,
-                      RootPathModeNoRootPath };
-
-  enum PathType { FullPath, CMakePath, EnvPath };
-
-  /** Generate a full path based on the particular path type */
-  std::string MakeFullPath(const std::string& path, PathType pathType);
+  enum RootPathMode { RootPathModeNever,
+                      RootPathModeOnly,
+                      RootPathModeBoth };
 
   /** Place a set of search paths under the search roots.  */
   void RerootPaths(std::vector<std::string>& paths);
@@ -60,21 +57,15 @@ protected:
   /** Compute the current default bundle/framework search policy.  */
   void SelectDefaultMacMode();
 
+  // Path arguments prior to path manipulation routines
+  std::vector<std::string> UserHintsArgs;
+  std::vector<std::string> UserGuessArgs;
+
   std::string CMakePathName;
   RootPathMode FindRootPathMode;
 
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
-  void AddUserPath(std::string const& p,
-                   std::vector<std::string>& outPaths);
-  void AddCMakePath(const std::string& variable,
-                    std::vector<std::string>& outPaths);
-  void AddEnvPath(const char* variable, std::vector<std::string>& outPaths);
-  void AddPathsInternal(std::vector<std::string> const& inPaths,
-                        PathType pathType, std::vector<std::string>& outPaths);
-  void AddPathInternal(std::string const& inPath,
-                       std::vector<std::string>& outPaths);
-
   void SetMakefile(cmMakefile* makefile);
 
   bool NoDefaultPath;
@@ -84,15 +75,15 @@ protected:
   bool NoCMakeSystemPath;
 
   std::vector<std::string> SearchPathSuffixes;
-  std::vector<std::string> CMakeVariablePaths;
-  std::vector<std::string> CMakeEnvironmentPaths;
-  std::vector<std::string> UserHintsPaths;
-  std::vector<std::string> SystemEnvironmentPaths;
-  std::vector<std::string> UserRegistryPaths;
-  std::vector<std::string> BuildPaths;
-  std::vector<std::string> CMakeSystemVariablePaths;
-  std::vector<std::string> SystemRegistryPaths;
-  std::vector<std::string> UserGuessPaths;
+  cmSearchPath CMakeVariablePaths;
+  cmSearchPath CMakeEnvironmentPaths;
+  cmSearchPath UserHintsPaths;
+  cmSearchPath SystemEnvironmentPaths;
+  cmSearchPath UserRegistryPaths;
+  cmSearchPath BuildPaths;
+  cmSearchPath CMakeSystemVariablePaths;
+  cmSearchPath SystemRegistryPaths;
+  cmSearchPath UserGuessPaths;
 
   std::vector<std::string> SearchPaths;
   std::set<std::string> SearchPathsEmitted;
