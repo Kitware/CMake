@@ -772,8 +772,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         std::string tLocation = t->GetLocationForBuild();
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         std::string depLocation = cmSystemTools::GetFilenamePath(dep);
-        depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
-        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        depLocation = cmSystemTools::CollapseFullPath(depLocation);
+        tLocation = cmSystemTools::CollapseFullPath(tLocation);
         if(depLocation == tLocation)
           {
           this->Target->AddUtility(util);

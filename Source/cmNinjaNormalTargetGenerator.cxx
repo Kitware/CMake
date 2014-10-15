@@ -375,14 +375,14 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmTarget& target = *this->GetTarget();
   const std::string cfgName = this->GetConfigName();
   std::string targetOutput = ConvertToNinjaPath(
-                               target.GetFullPath(cfgName).c_str());
+                               target.GetFullPath(cfgName));
   std::string targetOutputReal = ConvertToNinjaPath(
                                    target.GetFullPath(cfgName,
                                       /*implib=*/false,
-                                      /*realpath=*/true).c_str());
+                                      /*realpath=*/true));
   std::string targetOutputImplib = ConvertToNinjaPath(
                                      target.GetFullPath(cfgName,
-                                       /*implib=*/true).c_str());
+                                       /*implib=*/true));
 
   if (target.IsAppBundleOnApple())
     {
@@ -394,11 +394,11 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     targetOutput = outpath;
     targetOutput += "/";
     targetOutput += this->TargetNameOut;
-    targetOutput = this->ConvertToNinjaPath(targetOutput.c_str());
+    targetOutput = this->ConvertToNinjaPath(targetOutput);
     targetOutputReal = outpath;
     targetOutputReal += "/";
     targetOutputReal += this->TargetNameReal;
-    targetOutputReal = this->ConvertToNinjaPath(targetOutputReal.c_str());
+    targetOutputReal = this->ConvertToNinjaPath(targetOutputReal);
     }
   else if (target.IsFrameworkOnApple())
     {
@@ -531,7 +531,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
     {
     const std::string objPath = GetTarget()->GetSupportDirectory();
-    vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath.c_str());
+    vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath);
     EnsureDirectoryExists(objPath);
     // ar.exe can't handle backslashes in rsp files (implicitly used by gcc)
     std::string& linkLibraries = vars["LINK_LIBRARIES"];

@@ -56,7 +56,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
   localToplevel += "/"+ component->Name;
   std::string dir = cmSystemTools::GetCurrentWorkingDirectory();
   // Change to local toplevel
-  cmSystemTools::ChangeDirectory(localToplevel.c_str());
+  cmSystemTools::ChangeDirectory(localToplevel);
   std::string filePrefix;
   if (this->IsOn("CPACK_COMPONENT_INCLUDE_TOPLEVEL_DIRECTORY"))
     {
@@ -80,7 +80,7 @@ int cmCPackArchiveGenerator::addOneComponentToArchive(cmArchiveWrite& archive,
       }
     }
   // Go back to previous dir
-  cmSystemTools::ChangeDirectory(dir.c_str());
+  cmSystemTools::ChangeDirectory(dir);
   return 1;
 }
 
@@ -270,7 +270,7 @@ int cmCPackArchiveGenerator::PackageFiles()
   DECLARE_AND_OPEN_ARCHIVE(packageFileNames[0],archive);
   std::vector<std::string>::const_iterator fileIt;
   std::string dir = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(toplevel.c_str());
+  cmSystemTools::ChangeDirectory(toplevel);
   for ( fileIt = files.begin(); fileIt != files.end(); ++ fileIt )
     {
     // Get the relative path to the file
@@ -288,7 +288,7 @@ int cmCPackArchiveGenerator::PackageFiles()
       return 0;
       }
     }
-  cmSystemTools::ChangeDirectory(dir.c_str());
+  cmSystemTools::ChangeDirectory(dir);
   // The destructor of cmArchiveWrite will close and finish the write
   return 1;
 }

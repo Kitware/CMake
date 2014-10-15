@@ -182,9 +182,9 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
       // already inside.  Skip the unrooted path if it is relative to
       // a user home directory or is empty.
       std::string rootedDir;
-      if(cmSystemTools::IsSubDirectory(ui->c_str(), ri->c_str())
+      if(cmSystemTools::IsSubDirectory(*ui, *ri)
           || (stagePrefix
-            && cmSystemTools::IsSubDirectory(ui->c_str(), stagePrefix)))
+            && cmSystemTools::IsSubDirectory(*ui, stagePrefix)))
         {
         rootedDir = *ui;
         }
@@ -195,7 +195,7 @@ void cmFindCommon::RerootPaths(std::vector<std::string>& paths)
         rootedDir += "/";
 
         // Append the original path with its old root removed.
-        rootedDir += cmSystemTools::SplitPathRootComponent(ui->c_str());
+        rootedDir += cmSystemTools::SplitPathRootComponent(*ui);
         }
 
       // Store the new path.
@@ -428,7 +428,7 @@ void cmFindCommon::AddPathInternal(std::string const& in_path,
 
   // Convert to clean full path.
   std::string fullPath =
-    cmSystemTools::CollapseFullPath(in_path.c_str(), relbase);
+    cmSystemTools::CollapseFullPath(in_path, relbase);
 
   // Insert the path if has not already been emitted.
   if(this->SearchPathsEmitted.insert(fullPath).second)

@@ -69,7 +69,7 @@ void cmCursesPathWidget::OnTab(cmCursesMainForm* fm, WINDOW* w)
     cstr = cstr.substr(0, cstr.size()-1);
     }
 
-  if ( cmSystemTools::FileIsDirectory(cstr.c_str()) )
+  if ( cmSystemTools::FileIsDirectory(cstr) )
     {
     cstr += "/";
     }

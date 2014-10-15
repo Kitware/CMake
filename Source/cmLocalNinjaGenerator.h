@@ -74,7 +74,7 @@ public:
     map_to_ninja_path(cmLocalNinjaGenerator *LocalGen)
       : LocalGenerator(LocalGen) {}
     std::string operator()(const std::string &path) {
-      return LocalGenerator->ConvertToNinjaPath(path.c_str());
+      return LocalGenerator->ConvertToNinjaPath(path);
     }
   };
 

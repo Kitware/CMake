@@ -300,7 +300,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     cmSystemTools::SplitProgramPath(makeProgram.c_str(),
                                     dir, file);
     std::string saveFile = file;
-    cmSystemTools::GetShortPath(makeProgram.c_str(), makeProgram);
+    cmSystemTools::GetShortPath(makeProgram, makeProgram);
     cmSystemTools::SplitProgramPath(makeProgram.c_str(),
                                     dir, file);
     makeProgram = dir;
@@ -691,7 +691,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         compilerLangFile += "/CMake";
         compilerLangFile += lang;
         compilerLangFile += "Compiler.cmake";
-        cmSystemTools::RemoveFile(compilerLangFile.c_str());
+        cmSystemTools::RemoveFile(compilerLangFile);
         if(!this->CMakeInstance->GetIsInTryCompile())
           {
           this->PrintCompilerAdvice(noCompiler, lang,
@@ -758,7 +758,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
           compilerLangFile += "/CMake";
           compilerLangFile += lang;
           compilerLangFile += "Compiler.cmake";
-          cmSystemTools::RemoveFile(compilerLangFile.c_str());
+          cmSystemTools::RemoveFile(compilerLangFile);
           }
         } // end if in try compile
       } // end need test language
@@ -1735,7 +1735,7 @@ int cmGlobalGenerator::Build(
    * Run an executable command and put the stdout in output.
    */
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir.c_str());
+  cmSystemTools::ChangeDirectory(bindir);
   output += "Change Dir: ";
   output += bindir;
   output += "\n";
@@ -1765,7 +1765,7 @@ int cmGlobalGenerator::Build(
       output += "\nGenerator: execution of make clean failed.\n";
 
       // return to the original directory
-      cmSystemTools::ChangeDirectory(cwd.c_str());
+      cmSystemTools::ChangeDirectory(cwd);
       return 1;
       }
     output += *outputPtr;
@@ -1792,7 +1792,7 @@ int cmGlobalGenerator::Build(
         + makeCommandStr + "\n";
 
     // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     return 1;
     }
   output += *outputPtr;
@@ -1806,7 +1806,7 @@ int cmGlobalGenerator::Build(
     retVal = 1;
     }
 
-  cmSystemTools::ChangeDirectory(cwd.c_str());
+  cmSystemTools::ChangeDirectory(cwd);
   return retVal;
 }
 
@@ -2723,7 +2723,7 @@ cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
     {
     // Load the directory content from disk.
     cmsys::Directory d;
-    if(d.Load(dir.c_str()))
+    if(d.Load(dir))
       {
       unsigned long n = d.GetNumberOfFiles();
       for(unsigned long i = 0; i < n; ++i)
@@ -2830,8 +2830,8 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
         {
         // The rule has changed.  Delete the output so it will be
         // built again.
-        fname = cmSystemTools::CollapseFullPath(fname.c_str(), home.c_str());
-        cmSystemTools::RemoveFile(fname.c_str());
+        fname = cmSystemTools::CollapseFullPath(fname, home.c_str());
+        cmSystemTools::RemoveFile(fname);
         }
       }
     else
@@ -2843,7 +2843,7 @@ void cmGlobalGenerator::CheckRuleHashes(std::string const& pfile,
       // that if the feature is turned back on and the rule has
       // changed the file is still rebuilt.
       std::string fpath =
-        cmSystemTools::CollapseFullPath(fname.c_str(), home.c_str());
+        cmSystemTools::CollapseFullPath(fname, home.c_str());
       if(cmSystemTools::FileExists(fpath.c_str()))
         {
         RuleHash hash;
@@ -2860,7 +2860,7 @@ void cmGlobalGenerator::WriteRuleHashes(std::string const& pfile)
   // Now generate a new persistence file with the current hashes.
   if(this->RuleHashes.empty())
     {
-    cmSystemTools::RemoveFile(pfile.c_str());
+    cmSystemTools::RemoveFile(pfile);
     }
   else
     {
@@ -2965,7 +2965,7 @@ void cmGlobalGenerator::WriteSummary(cmTarget* target)
     }
   else
     {
-    cmSystemTools::RemoveFile(file.c_str());
+    cmSystemTools::RemoveFile(file);
     }
 }
 

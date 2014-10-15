@@ -221,19 +221,19 @@ void cmLocalGenerator::SetupPathConversions()
   std::string outdir;
   outdir =
     cmSystemTools::CollapseFullPath(this->Makefile->GetHomeDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(), this->HomeDirectoryComponents);
+  cmSystemTools::SplitPath(outdir, this->HomeDirectoryComponents);
   outdir =
     cmSystemTools::CollapseFullPath(this->Makefile->GetStartDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(), this->StartDirectoryComponents);
+  cmSystemTools::SplitPath(outdir, this->StartDirectoryComponents);
 
   outdir = cmSystemTools::CollapseFullPath
     (this->Makefile->GetHomeOutputDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(),
+  cmSystemTools::SplitPath(outdir,
                            this->HomeOutputDirectoryComponents);
 
   outdir = cmSystemTools::CollapseFullPath
     (this->Makefile->GetStartOutputDirectory());
-  cmSystemTools::SplitPath(outdir.c_str(),
+  cmSystemTools::SplitPath(outdir,
                            this->StartOutputDirectoryComponents);
 }
 
@@ -1247,7 +1247,7 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const std::string& remote,
      cmSystemTools::FileExists(remote.c_str()))
     {
     std::string tmp;
-    if(cmSystemTools::GetShortPath(remote.c_str(), tmp))
+    if(cmSystemTools::GetShortPath(remote, tmp))
       {
       return this->Convert(tmp, NONE, format, true);
       }
@@ -1371,7 +1371,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
-      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
       if(emitted.insert(frameworkDir).second)
         {
         if (sysFwSearchFlag && target &&
@@ -1613,10 +1613,10 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
       {
       // Emit this directory only if it is a subdirectory of the
       // top-level source or binary tree.
-      if(cmSystemTools::ComparePath(i->c_str(), topSourceDir) ||
-         cmSystemTools::ComparePath(i->c_str(), topBinaryDir) ||
-         cmSystemTools::IsSubDirectory(i->c_str(), topSourceDir) ||
-         cmSystemTools::IsSubDirectory(i->c_str(), topBinaryDir))
+      if(cmSystemTools::ComparePath(*i, topSourceDir) ||
+         cmSystemTools::ComparePath(*i, topBinaryDir) ||
+         cmSystemTools::IsSubDirectory(*i, topSourceDir) ||
+         cmSystemTools::IsSubDirectory(*i, topBinaryDir))
         {
         if(emitted.insert(*i).second)
           {
@@ -2109,11 +2109,11 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
         {
         tLocation = target->GetLocation(config);
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
-        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        tLocation = cmSystemTools::CollapseFullPath(tLocation);
         }
       std::string depLocation = cmSystemTools::GetFilenamePath(
         std::string(inName));
-      depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
+      depLocation = cmSystemTools::CollapseFullPath(depLocation);
       if(depLocation != tLocation)
         {
         // it is a full path to a depend that has the same name
@@ -2743,7 +2743,7 @@ std::string cmLocalGenerator::Convert(const std::string& source,
                                       result);
         break;
       case FULL:
-        result = cmSystemTools::CollapseFullPath(result.c_str());
+        result = cmSystemTools::CollapseFullPath(result);
         break;
       case NONE:
         break;
@@ -2807,7 +2807,7 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
   if(!local.empty() && (!optional || this->UseRelativePaths))
     {
     std::vector<std::string> components;
-    cmSystemTools::SplitPath(local.c_str(), components);
+    cmSystemTools::SplitPath(local, components);
     std::string result = this->ConvertToRelativePath(components, remotePath);
     return this->ConvertToOutputFormat(result, output);
     }
@@ -2827,7 +2827,7 @@ std::string cmLocalGenerator::FindRelativePathTopSource()
     {
     std::string parentTop = parent->FindRelativePathTopSource();
     if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartDirectory(), parentTop.c_str()))
+         this->Makefile->GetStartDirectory(), parentTop))
       {
       return parentTop;
       }
@@ -2847,7 +2847,7 @@ std::string cmLocalGenerator::FindRelativePathTopBinary()
     {
     std::string parentTop = parent->FindRelativePathTopBinary();
     if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartOutputDirectory(), parentTop.c_str()))
+         this->Makefile->GetStartOutputDirectory(), parentTop))
       {
       return parentTop;
       }
@@ -2933,12 +2933,12 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
   // Identify the longest shared path component between the remote
   // path and the local path.
   std::vector<std::string> remote;
-  cmSystemTools::SplitPath(in_remote.c_str(), remote);
+  cmSystemTools::SplitPath(in_remote, remote);
   unsigned int common=0;
   while(common < remote.size() &&
         common < local.size() &&
-        cmSystemTools::ComparePath(remote[common].c_str(),
-                                   local[common].c_str()))
+        cmSystemTools::ComparePath(remote[common],
+                                   local[common]))
     {
     ++common;
     }

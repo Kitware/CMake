@@ -124,7 +124,7 @@ bool cmCTestStartCommand
     {
     return false;
     }
-  if(!cmSystemTools::FileIsDirectory(sourceDir.c_str()))
+  if(!cmSystemTools::FileIsDirectory(sourceDir))
     {
     cmOStringStream e;
     e << "given source path\n"

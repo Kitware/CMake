@@ -352,7 +352,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
        i != deps.end(); ++i) {
     std::string dep;
     if (this->GetRealDependency(*i, this->GetConfigName(), dep))
-      ninjaDeps.push_back(ConvertToNinjaPath(dep.c_str()));
+      ninjaDeps.push_back(ConvertToNinjaPath(dep));
   }
 }
 

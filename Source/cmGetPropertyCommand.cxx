@@ -259,7 +259,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
       }
 
     // The local generators are associated with collapsed paths.
-    dir = cmSystemTools::CollapseFullPath(dir.c_str());
+    dir = cmSystemTools::CollapseFullPath(dir);
 
     // Lookup the generator.
     if(cmLocalGenerator* lg =

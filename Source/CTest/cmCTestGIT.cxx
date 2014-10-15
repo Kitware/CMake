@@ -158,7 +158,7 @@ std::string cmCTestGIT::FindTopDir()
     {
     top_dir += "/";
     top_dir += cdup;
-    top_dir = cmSystemTools::CollapseFullPath(top_dir.c_str());
+    top_dir = cmSystemTools::CollapseFullPath(top_dir);
     }
   return top_dir;
 }

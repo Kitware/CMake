@@ -1221,10 +1221,10 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
     }
   }
   cmSystemTools::Delay(1000);
-  cmSystemTools::RemoveFile(this->BoundsCheckerDPBDFile.c_str());
+  cmSystemTools::RemoveFile(this->BoundsCheckerDPBDFile);
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
     << this->BoundsCheckerDPBDFile << std::endl);
-  cmSystemTools::RemoveFile(this->BoundsCheckerXMLFile.c_str());
+  cmSystemTools::RemoveFile(this->BoundsCheckerXMLFile);
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
     << this->BoundsCheckerXMLFile << std::endl);
 }
@@ -1255,7 +1255,7 @@ cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
   }
   if(this->LogWithPID)
     {
-    cmSystemTools::RemoveFile(ofile.c_str());
+    cmSystemTools::RemoveFile(ofile);
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "<< ofile <<"\n");
     }
 }

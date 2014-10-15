@@ -1335,7 +1335,7 @@ public:
 void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir)
 {
   cmsys::Directory files;
-  if(!files.Load(dir.c_str()))
+  if(!files.Load(dir))
     {
     return;
     }
@@ -1347,7 +1347,7 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir)
     fname += "/";
     fname += files.GetFile(i);
 
-    if(!cmSystemTools::FileIsDirectory(fname.c_str()))
+    if(!cmSystemTools::FileIsDirectory(fname))
       {
       // Hold this file hostage until it behaves.
       cmFindPackageCommandHoldFile holdFile(fname.c_str());
@@ -1379,7 +1379,7 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(std::istream& is)
     if(cmSystemTools::FileExists(fname.c_str()))
       {
       // The path exists.  Look for the package here.
-      if(!cmSystemTools::FileIsDirectory(fname.c_str()))
+      if(!cmSystemTools::FileIsDirectory(fname))
         {
         fname = cmSystemTools::GetFilenamePath(fname);
         }
@@ -1419,7 +1419,7 @@ void cmFindPackageCommand::AddPrefixesBuilds()
       cmSystemTools::ExpandRegistryValues(f);
       cmSystemTools::ConvertToUnixSlashes(f);
       if(cmSystemTools::FileIsFullPath(f.c_str()) &&
-         cmSystemTools::FileIsDirectory(f.c_str()))
+         cmSystemTools::FileIsDirectory(f))
         {
         this->AddPathInternal(f, FullPath);
         }
@@ -1847,7 +1847,7 @@ private:
     // Construct a list of matches.
     std::vector<std::string> matches;
     cmsys::Directory d;
-    d.Load(parent.c_str());
+    d.Load(parent);
     for(unsigned long i=0; i < d.GetNumberOfFiles(); ++i)
       {
       const char* fname = d.GetFile(i);
@@ -1901,7 +1901,7 @@ private:
     // Construct a list of matches.
     std::vector<std::string> matches;
     cmsys::Directory d;
-    d.Load(parent.c_str());
+    d.Load(parent);
     for(unsigned long i=0; i < d.GetNumberOfFiles(); ++i)
       {
       const char* fname = d.GetFile(i);
@@ -1955,7 +1955,7 @@ private:
     // Look for matching files.
     std::vector<std::string> matches;
     cmsys::Directory d;
-    d.Load(parent.c_str());
+    d.Load(parent);
     for(unsigned long i=0; i < d.GetNumberOfFiles(); ++i)
       {
       const char* fname = d.GetFile(i);
@@ -2007,7 +2007,7 @@ private:
     for(std::vector<std::string>::const_iterator fi = files.begin();
         fi != files.end(); ++fi)
       {
-      if(cmSystemTools::FileIsDirectory(fi->c_str()))
+      if(cmSystemTools::FileIsDirectory(*fi))
         {
         if(this->Consider(*fi, lister))
           {
@@ -2035,7 +2035,7 @@ bool cmFindPackageCommand::SearchPrefix(std::string const& prefix_in)
     }
 
   // Skip this if the prefix does not exist.
-  if(!cmSystemTools::FileIsDirectory(prefix_in.c_str()))
+  if(!cmSystemTools::FileIsDirectory(prefix_in))
     {
     return false;
     }

@@ -1504,7 +1504,7 @@ bool cmFileCopier::Run(std::vector<std::string> const& args)
     {
     // Split the input file into its directory and name components.
     std::vector<std::string> fromPathComponents;
-    cmSystemTools::SplitPath(files[i].c_str(), fromPathComponents);
+    cmSystemTools::SplitPath(files[i], fromPathComponents);
     std::string fromName = *(fromPathComponents.end()-1);
     std::string fromDir = cmSystemTools::JoinPath(fromPathComponents.begin(),
                                                   fromPathComponents.end()-1);
@@ -2203,7 +2203,7 @@ bool cmFileInstaller::HandleInstallDestination()
         return false;
         }
       }
-    if ( !cmSystemTools::FileIsDirectory(destination.c_str()) )
+    if ( !cmSystemTools::FileIsDirectory(destination) )
       {
       std::string errstring = "INSTALL destination: " + destination +
         " is not a directory.";
@@ -2553,14 +2553,14 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
       fileName += "/" + *i;
       }
 
-    if(cmSystemTools::FileIsDirectory(fileName.c_str()) &&
-       !cmSystemTools::FileIsSymlink(fileName.c_str()) && recurse)
+    if(cmSystemTools::FileIsDirectory(fileName) &&
+       !cmSystemTools::FileIsSymlink(fileName) && recurse)
       {
-      cmSystemTools::RemoveADirectory(fileName.c_str());
+      cmSystemTools::RemoveADirectory(fileName);
       }
     else
       {
-      cmSystemTools::RemoveFile(fileName.c_str());
+      cmSystemTools::RemoveFile(fileName);
       }
     }
   return true;
@@ -2584,7 +2584,7 @@ bool cmFileCommand::HandleCMakePathCommand(std::vector<std::string>
 #else
   char pathSep = ':';
 #endif
-  std::vector<cmsys::String> path = cmSystemTools::SplitString(i->c_str(),
+  std::vector<cmsys::String> path = cmSystemTools::SplitString(*i,
                                                              pathSep);
   i++;
   const char* var =  i->c_str();
@@ -3241,7 +3241,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   // Open file for reading:
   //
-  FILE *fin = cmsys::SystemTools::Fopen(filename.c_str(), "rb");
+  FILE *fin = cmsys::SystemTools::Fopen(filename, "rb");
   if(!fin)
     {
     std::string errStr = "UPLOAD cannot open file '";

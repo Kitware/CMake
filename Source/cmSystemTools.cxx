@@ -97,7 +97,7 @@ cm_archive_entry_pathname(struct archive_entry *entry)
 {
 #if cmsys_STL_HAS_WSTRING
   return cmsys::Encoding::ToNarrow(
-    archive_entry_pathname_w(entry)).c_str();
+    archive_entry_pathname_w(entry));
 #else
   return archive_entry_pathname(entry);
 #endif
@@ -881,7 +881,7 @@ std::string cmSystemTools::FileExistsInParentDirectories(const char* fname,
       break;
       }
     prevDir = dir;
-    dir = cmSystemTools::GetParentDirectory(dir.c_str());
+    dir = cmSystemTools::GetParentDirectory(dir);
     }
   return "";
 }
@@ -1014,7 +1014,7 @@ void cmSystemTools::Glob(const std::string& directory,
   cmsys::Directory d;
   cmsys::RegularExpression reg(regexp.c_str());
 
-  if (d.Load(directory.c_str()))
+  if (d.Load(directory))
     {
     size_t numf;
         unsigned int i;
@@ -1044,7 +1044,7 @@ void cmSystemTools::GlobDirs(const std::string& path,
   std::string finishPath = path.substr(pos+2);
 
   cmsys::Directory d;
-  if (d.Load(startPath.c_str()))
+  if (d.Load(startPath))
     {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i)
       {
@@ -1054,7 +1054,7 @@ void cmSystemTools::GlobDirs(const std::string& path,
         std::string fname = startPath;
         fname +="/";
         fname += d.GetFile(i);
-        if(cmSystemTools::FileIsDirectory(fname.c_str()))
+        if(cmSystemTools::FileIsDirectory(fname))
           {
           fname += finishPath;
           cmSystemTools::GlobDirs(fname, files);
@@ -1168,7 +1168,7 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
 
   bool res = false;
   cmsys::Directory d;
-  if (d.Load(path.c_str()))
+  if (d.Load(path))
     {
     for (unsigned int i = 0; i < d.GetNumberOfFiles(); ++i)
       {
@@ -1182,11 +1182,11 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
           }
         fname += d.GetFile(i);
         std::string sfname = d.GetFile(i);
-        if ( type > 0 && cmSystemTools::FileIsDirectory(fname.c_str()) )
+        if ( type > 0 && cmSystemTools::FileIsDirectory(fname) )
           {
           continue;
           }
-        if ( type < 0 && !cmSystemTools::FileIsDirectory(fname.c_str()) )
+        if ( type < 0 && !cmSystemTools::FileIsDirectory(fname) )
           {
           continue;
           }
@@ -1354,8 +1354,8 @@ std::string cmSystemTools::CollapseCombinedPath(std::string const& dir,
 
   std::vector<std::string> dirComponents;
   std::vector<std::string> fileComponents;
-  cmSystemTools::SplitPath(dir.c_str(), dirComponents);
-  cmSystemTools::SplitPath(file.c_str(), fileComponents);
+  cmSystemTools::SplitPath(dir, dirComponents);
+  cmSystemTools::SplitPath(file, fileComponents);
 
   if(fileComponents.empty())
     {
@@ -2176,7 +2176,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
   if(cmSystemTools::FindProgramPath(argv0, exe, errorMsg))
     {
     // remove symlinks
-    exe = cmSystemTools::GetRealPath(exe.c_str());
+    exe = cmSystemTools::GetRealPath(exe);
     exe_dir =
       cmSystemTools::GetFilenamePath(exe);
     }
@@ -2227,7 +2227,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
     cmsys::ifstream fin(src_dir_txt.c_str());
     std::string src_dir;
     if(fin && cmSystemTools::GetLineFromStream(fin, src_dir) &&
-       cmSystemTools::FileIsDirectory(src_dir.c_str()))
+       cmSystemTools::FileIsDirectory(src_dir))
       {
       cmSystemToolsCMakeRoot = src_dir;
       }
@@ -2237,7 +2237,7 @@ void cmSystemTools::FindCMakeResources(const char* argv0)
       src_dir_txt = dir + "/CMakeFiles/CMakeSourceDir.txt";
       cmsys::ifstream fin2(src_dir_txt.c_str());
       if(fin2 && cmSystemTools::GetLineFromStream(fin2, src_dir) &&
-         cmSystemTools::FileIsDirectory(src_dir.c_str()))
+         cmSystemTools::FileIsDirectory(src_dir))
         {
         cmSystemToolsCMakeRoot = src_dir;
         }
@@ -2333,7 +2333,7 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 #endif
 
   // If the file is not a symlink we have no guess for its soname.
-  if(!cmSystemTools::FileIsSymlink(fullPath.c_str()))
+  if(!cmSystemTools::FileIsSymlink(fullPath))
     {
     return false;
     }

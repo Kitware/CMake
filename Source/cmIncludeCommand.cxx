@@ -90,7 +90,7 @@ bool cmIncludeCommand
     }
 
   std::string fname_abs =
-      cmSystemTools::CollapseFullPath(fname.c_str(),
+      cmSystemTools::CollapseFullPath(fname,
                                       this->Makefile->GetStartDirectory());
 
   cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()

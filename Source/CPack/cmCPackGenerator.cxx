@@ -399,7 +399,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
           << inFile << " -> " << filePath << std::endl);
         /* If the file is a symlink we will have to re-create it */
-        if ( cmSystemTools::FileIsSymlink(inFile.c_str()))
+        if ( cmSystemTools::FileIsSymlink(inFile))
           {
           std::string targetFile;
           std::string inFileRelative =
@@ -429,7 +429,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         goToDir  += "/"+subdir;
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
                       "Change dir to: " << goToDir <<std::endl);
-        cmSystemTools::ChangeDirectory(goToDir.c_str());
+        cmSystemTools::ChangeDirectory(goToDir);
         for (symlinkedIt=symlinkedFiles.begin();
              symlinkedIt != symlinkedFiles.end();
              ++symlinkedIt)
@@ -448,7 +448,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           }
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Going back to: "
                       << curDir <<std::endl);
-        cmSystemTools::ChangeDirectory(curDir.c_str());
+        cmSystemTools::ChangeDirectory(curDir);
         }
       }
     }

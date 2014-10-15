@@ -48,8 +48,8 @@ cmCTestLaunch::~cmCTestLaunch()
   cmsysProcess_Delete(this->Process);
   if(!this->Passthru)
     {
-    cmSystemTools::RemoveFile(this->LogOut.c_str());
-    cmSystemTools::RemoveFile(this->LogErr.c_str());
+    cmSystemTools::RemoveFile(this->LogOut);
+    cmSystemTools::RemoveFile(this->LogErr);
     }
 }
 
@@ -434,8 +434,8 @@ void cmCTestLaunch::WriteXMLAction(std::ostream& fxml)
     // If file is in source tree use its relative location.
     if(cmSystemTools::FileIsFullPath(this->SourceDir.c_str()) &&
        cmSystemTools::FileIsFullPath(source.c_str()) &&
-       cmSystemTools::IsSubDirectory(source.c_str(),
-                                     this->SourceDir.c_str()))
+       cmSystemTools::IsSubDirectory(source,
+                                     this->SourceDir))
       {
       source = cmSystemTools::RelativePath(this->SourceDir.c_str(),
                                            source.c_str());

@@ -610,7 +610,7 @@ void cmCTestBuildHandler::GenerateXMLLaunched(std::ostream& os)
   int numWarningsAllowed = this->MaxWarnings;
   // Identify fragments on disk.
   cmsys::Directory launchDir;
-  launchDir.Load(this->CTestLaunchDir.c_str());
+  launchDir.Load(this->CTestLaunchDir);
   unsigned long n = launchDir.GetNumberOfFiles();
   for(unsigned long i=0; i < n; ++i)
     {
@@ -649,7 +649,7 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
   std::string srcdir = this->CTest->GetCTestConfiguration("SourceDirectory");
   // make sure the source dir is in the correct case on windows
   // via a call to collapse full path.
-  srcdir = cmSystemTools::CollapseFullPath(srcdir.c_str());
+  srcdir = cmSystemTools::CollapseFullPath(srcdir);
   srcdir += "/";
   for ( it = ew.begin();
         it != ew.end() && (numErrorsAllowed || numWarningsAllowed); it++ )
@@ -695,7 +695,7 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
             {
             // make sure it is a full path with the correct case
             cm->SourceFile = cmSystemTools::CollapseFullPath(
-              cm->SourceFile.c_str());
+              cm->SourceFile);
             cmSystemTools::ReplaceString(
               cm->SourceFile, srcdir.c_str(), "");
             }
@@ -822,7 +822,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler):
     launchDir += "/Build";
 
     // Clean out any existing launcher fragments.
-    cmSystemTools::RemoveADirectory(launchDir.c_str());
+    cmSystemTools::RemoveADirectory(launchDir);
 
     if(this->Handler->UseCTestLaunch)
       {

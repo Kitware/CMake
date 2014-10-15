@@ -1253,7 +1253,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
 
     std::string tgtName = parameters.front();
     cmGeneratorTarget* gt =
-                context->Makefile->FindGeneratorTargetToUse(tgtName.c_str());
+                context->Makefile->FindGeneratorTargetToUse(tgtName);
     if (!gt)
       {
       cmOStringStream e;

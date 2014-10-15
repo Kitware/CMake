@@ -167,7 +167,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         script += "/";
         script += args[i];
         }
-      if(cmSystemTools::FileIsDirectory(script.c_str()))
+      if(cmSystemTools::FileIsDirectory(script))
         {
         this->SetError("given a directory as value of SCRIPT argument.");
         return false;
@@ -1111,7 +1111,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
       // Make sure the name is a directory.
       if(cmSystemTools::FileExists(dir.c_str()) &&
-         !cmSystemTools::FileIsDirectory(dir.c_str()))
+         !cmSystemTools::FileIsDirectory(dir))
         {
         cmOStringStream e;
         e << args[0] << " given non-directory \""
@@ -1393,7 +1393,7 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
       }
 
     // Make sure the file is not a directory.
-    if(gpos == file.npos && cmSystemTools::FileIsDirectory(file.c_str()))
+    if(gpos == file.npos && cmSystemTools::FileIsDirectory(file))
       {
       cmOStringStream e;
       e << modeName << " given directory \"" << (*fileIt) << "\" to install.";

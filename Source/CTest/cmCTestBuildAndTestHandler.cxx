@@ -109,7 +109,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     out << "Error: cmake execution failed\n";
     out << cmakeOutString << "\n";
     // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     if(outstring)
       {
       *outstring = out.str();
@@ -128,7 +128,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
       out << "Error: cmake execution failed\n";
       out << cmakeOutString << "\n";
       // return to the original directory
-      cmSystemTools::ChangeDirectory(cwd.c_str());
+      cmSystemTools::ChangeDirectory(cwd);
       if(outstring)
         {
         *outstring = out.str();
@@ -241,11 +241,11 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   out << "Internal cmake changing into directory: "
     << this->BinaryDir << std::endl;
-  if (!cmSystemTools::FileIsDirectory(this->BinaryDir.c_str()))
+  if (!cmSystemTools::FileIsDirectory(this->BinaryDir))
     {
     cmSystemTools::MakeDirectory(this->BinaryDir.c_str());
     }
-  cmSystemTools::ChangeDirectory(this->BinaryDir.c_str());
+  cmSystemTools::ChangeDirectory(this->BinaryDir);
 
   if(this->BuildNoCMake)
     {
@@ -374,7 +374,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       cmCTestLog(this->CTest, ERROR_MESSAGE, out.str());
       }
     // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     return 1;
     }
 
@@ -391,7 +391,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   if(this->BuildRunDir.size())
     {
     out << "Run test in directory: " << this->BuildRunDir << "\n";
-    cmSystemTools::ChangeDirectory(this->BuildRunDir.c_str());
+    cmSystemTools::ChangeDirectory(this->BuildRunDir);
     }
   out << "Running test command: \"" << fullPath << "\"";
   for(size_t k=0; k < this->TestCommandArgs.size(); ++k)
@@ -453,9 +453,9 @@ int cmCTestBuildAndTestHandler::ProcessCommandLineArguments(
       // dir must exist before CollapseFullPath is called
       cmSystemTools::MakeDirectory(this->BinaryDir.c_str());
       this->BinaryDir
-        = cmSystemTools::CollapseFullPath(this->BinaryDir.c_str());
+        = cmSystemTools::CollapseFullPath(this->BinaryDir);
       this->SourceDir
-        = cmSystemTools::CollapseFullPath(this->SourceDir.c_str());
+        = cmSystemTools::CollapseFullPath(this->SourceDir);
       }
     else
       {
