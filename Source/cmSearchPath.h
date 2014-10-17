@@ -17,7 +17,7 @@
 class cmFindCommon;
 
 /** \class cmSearchPath
- * \brief Base class for FIND_XXX implementations.
+ * \brief Container for encapsulating a set of search paths
  *
  * cmSearchPath is a container that encapsulates search path construction and
  * management
@@ -25,10 +25,12 @@ class cmFindCommon;
 class cmSearchPath
 {
 public:
-  cmSearchPath(cmFindCommon* findCmd, const std::string& groupLabel);
+  // cmSearchPath must be initialized from a valid pointer.  The only reason
+  // for teh default is to allow it to be easily used in stl containers.
+  // Attempting to initialize with a NULL value will fail an assertion
+  cmSearchPath(cmFindCommon* findCmd = 0);
   ~cmSearchPath();
 
-  const std::string& GetLabel() const { return this->Label; }
   const std::vector<std::string>& GetPaths() const { return this->Paths; }
 
   void ExtractWithout(const std::set<std::string>& ignore,
@@ -48,12 +50,7 @@ protected:
                       const char *base = 0);
   void AddPathInternal(const std::string& path, const char *base = 0);
 
-  // Members collected from the calling find command
-  const std::string& FindName;
-  cmMakefile* const& Makefile;
-  std::set<std::string>& Emitted;
-
-  std::string Label;
+  cmFindCommon *FC;
   std::vector<std::string> Paths;
 };
 

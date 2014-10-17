@@ -14,6 +14,7 @@
 
 #include "cmCommand.h"
 #include "cmSearchPath.h"
+#include "cmPathLabel.h"
 
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.
@@ -32,9 +33,44 @@ public:
 protected:
   friend class cmSearchPath;
 
+/* VS6 is broken and can't pass protected class definitions to child classes */
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+public:
+#endif
+  /** Used to define groups of path labels */
+  class PathGroup : public cmPathLabel
+  {
+  protected:
+    PathGroup();
+  public:
+    PathGroup(const std::string& label) : cmPathLabel(label) { }
+    static PathGroup All;
+  };
+
+  /* Individual path types */
+  class PathLabel : public cmPathLabel
+  {
+  protected:
+    PathLabel();
+  public:
+    PathLabel(const std::string& label) : cmPathLabel(label) { }
+    static PathLabel CMake;
+    static PathLabel CMakeEnvironment;
+    static PathLabel Hints;
+    static PathLabel SystemEnvironment;
+    static PathLabel CMakeSystem;
+    static PathLabel Guess;
+  };
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+protected:
+#endif
+
   enum RootPathMode { RootPathModeNever,
                       RootPathModeOnly,
                       RootPathModeBoth };
+
+  /** Construct the various path groups and labels */
+  void InitializeSearchPathGroups();
 
   /** Place a set of search paths under the search roots.  */
   void RerootPaths(std::vector<std::string>& paths);
@@ -75,15 +111,11 @@ protected:
   bool NoCMakeSystemPath;
 
   std::vector<std::string> SearchPathSuffixes;
-  cmSearchPath CMakeVariablePaths;
-  cmSearchPath CMakeEnvironmentPaths;
-  cmSearchPath UserHintsPaths;
-  cmSearchPath SystemEnvironmentPaths;
-  cmSearchPath UserRegistryPaths;
-  cmSearchPath BuildPaths;
-  cmSearchPath CMakeSystemVariablePaths;
-  cmSearchPath SystemRegistryPaths;
-  cmSearchPath UserGuessPaths;
+
+  std::map<PathGroup, std::vector<PathLabel> > PathGroupLabelMap;
+  std::vector<PathGroup> PathGroupOrder;
+  std::map<std::string, PathLabel> PathLabelStringMap;
+  std::map<PathLabel, cmSearchPath> LabeledPaths;
 
   std::vector<std::string> SearchPaths;
   std::set<std::string> SearchPathsEmitted;

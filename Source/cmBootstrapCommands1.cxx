@@ -43,7 +43,6 @@
 #include "cmExecuteProcessCommand.cxx"
 #include "cmExternalMakefileProjectGenerator.cxx"
 #include "cmFindBase.cxx"
-#include "cmSearchPath.cxx"
 #include "cmFindCommon.cxx"
 #include "cmFileCommand.cxx"
 #include "cmFindFileCommand.cxx"
@@ -53,6 +52,8 @@
 #include "cmFindProgramCommand.cxx"
 #include "cmForEachCommand.cxx"
 #include "cmFunctionCommand.cxx"
+#include "cmPathLabel.cxx"
+#include "cmSearchPath.cxx"
 
 void GetBootstrapCommands1(std::list<cmCommand*>& commands)
 {

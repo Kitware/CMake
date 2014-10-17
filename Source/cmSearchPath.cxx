@@ -14,10 +14,8 @@
 #include "cmFindCommon.h"
 
 //----------------------------------------------------------------------------
-cmSearchPath::cmSearchPath(cmFindCommon* findCmd,
-                           const std::string& groupLabel)
-: FindName(findCmd->CMakePathName), Makefile(findCmd->Makefile),
-  Emitted(findCmd->SearchPathsEmitted), Label(groupLabel)
+cmSearchPath::cmSearchPath(cmFindCommon* findCmd)
+: FC(findCmd)
 {
 }
 
@@ -55,13 +53,15 @@ void cmSearchPath::AddPath(const std::string& path)
 //----------------------------------------------------------------------------
 void cmSearchPath::AddUserPath(const std::string& path)
 {
+  assert(this->FC != NULL);
+
   std::vector<std::string> outPaths;
 
   // We should view the registry as the target application would view
   // it.
   cmSystemTools::KeyWOW64 view = cmSystemTools::KeyWOW64_32;
   cmSystemTools::KeyWOW64 other_view = cmSystemTools::KeyWOW64_64;
-  if(this->Makefile->PlatformIs64Bit())
+  if(this->FC->Makefile->PlatformIs64Bit())
     {
     view = cmSystemTools::KeyWOW64_64;
     other_view = cmSystemTools::KeyWOW64_32;
@@ -74,7 +74,7 @@ void cmSearchPath::AddUserPath(const std::string& path)
 
   // Executables can be either 32-bit or 64-bit, so expand using the
   // alternative view.
-  if(expanded != path && this->FindName == "PROGRAM")
+  if(expanded != path && this->FC->CMakePathName == "PROGRAM")
     {
     expanded = path;
     cmSystemTools::ExpandRegistryValues(expanded, other_view);
@@ -85,15 +85,17 @@ void cmSearchPath::AddUserPath(const std::string& path)
   for(std::vector<std::string>::const_iterator p = outPaths.begin();
       p != outPaths.end(); ++p)
     {
-    this->AddPathInternal(*p, this->Makefile->GetCurrentDirectory());
+    this->AddPathInternal(*p, this->FC->Makefile->GetCurrentDirectory());
     }
 }
 
 //----------------------------------------------------------------------------
 void cmSearchPath::AddCMakePath(const std::string& variable)
 {
+  assert(this->FC != NULL);
+
   // Get a path from a CMake variable.
-  if(const char* value = this->Makefile->GetDefinition(variable))
+  if(const char* value = this->FC->Makefile->GetDefinition(variable))
     {
     std::vector<std::string> expanded;
     cmSystemTools::ExpandListArgument(value, expanded);
@@ -101,7 +103,7 @@ void cmSearchPath::AddCMakePath(const std::string& variable)
     for(std::vector<std::string>::const_iterator p = expanded.begin();
         p!= expanded.end(); ++p)
       {
-      this->AddPathInternal(*p, this->Makefile->GetCurrentDirectory());
+      this->AddPathInternal(*p, this->FC->Makefile->GetCurrentDirectory());
       }
     }
 }
@@ -121,13 +123,15 @@ void cmSearchPath::AddEnvPath(const std::string& variable)
 //----------------------------------------------------------------------------
 void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
 {
+  assert(this->FC != NULL);
+
   // Get a path from a CMake variable.
-  if(const char* value = this->Makefile->GetDefinition(variable))
+  if(const char* value = this->FC->Makefile->GetDefinition(variable))
     {
     std::vector<std::string> expanded;
     cmSystemTools::ExpandListArgument(value, expanded);
 
-    this->AddPrefixPaths(expanded, this->Makefile->GetCurrentDirectory());
+    this->AddPrefixPaths(expanded, this->FC->Makefile->GetCurrentDirectory());
     }
 }
 
@@ -176,18 +180,20 @@ void cmSearchPath::AddSuffixes(const std::vector<std::string>& suffixes)
 void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
                                   const char *base)
 {
+  assert(this->FC != NULL);
+
   // default for programs
   std::string subdir = "bin";
 
-  if (this->FindName == "INCLUDE")
+  if (this->FC->CMakePathName == "INCLUDE")
     {
     subdir = "include";
     }
-  else if (this->FindName == "LIBRARY")
+  else if (this->FC->CMakePathName == "LIBRARY")
     {
     subdir = "lib";
     }
-  else if (this->FindName == "FRAMEWORK")
+  else if (this->FC->CMakePathName == "FRAMEWORK")
     {
     subdir = "";  // ? what to do for frameworks ?
     }
@@ -203,7 +209,7 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
     if(subdir == "include" || subdir == "lib")
       {
       const char* arch =
-        this->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
+        this->FC->Makefile->GetDefinition("CMAKE_LIBRARY_ARCHITECTURE");
       if(arch && *arch)
         {
         this->AddPathInternal(dir+subdir+"/"+arch, base);
@@ -228,6 +234,8 @@ void cmSearchPath::AddPrefixPaths(const std::vector<std::string>& paths,
 //----------------------------------------------------------------------------
 void cmSearchPath::AddPathInternal(const std::string& path, const char *base)
 {
+  assert(this->FC != NULL);
+
   std::string collapsed = cmSystemTools::CollapseFullPath(path, base);
 
    if(collapsed.empty())
@@ -236,7 +244,7 @@ void cmSearchPath::AddPathInternal(const std::string& path, const char *base)
     }
 
   // Insert the path if has not already been emitted.
-  if(this->Emitted.insert(collapsed).second)
+  if(this->FC->SearchPathsEmitted.insert(collapsed).second)
     {
     this->Paths.push_back(collapsed);
     }

@@ -53,6 +53,21 @@ public:
 
   cmTypeMacro(cmFindPackageCommand, cmFindCommon);
 private:
+  class PathLabel : public cmFindCommon::PathLabel
+  {
+  protected:
+    PathLabel();
+  public:
+    PathLabel(const std::string& label) : cmFindCommon::PathLabel(label) { }
+    static PathLabel UserRegistry;
+    static PathLabel Builds;
+    static PathLabel SystemRegistry;
+  };
+
+  // Add additional search path labels and groups not present in the
+  // parent class
+  void AppendSearchPathGroups();
+
   void AppendSuccessInformation();
   void AppendToFoundProperty(bool found);
   void SetModuleVariables(const std::string& components);
