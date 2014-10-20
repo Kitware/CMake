@@ -214,6 +214,12 @@ public:
    */
   void TraceDependencies();
 
+  /** Get the directory in which to place the target compiler .pdb file.
+      If the configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      compiler pdb output directory is given.  */
+  std::string GetCompilePDBDirectory(const std::string& config = "") const;
+
   /** Get sources that must be built before the given source.  */
   std::vector<cmSourceFile*> const*
   GetSourceDepends(cmSourceFile const* sf) const;
