@@ -626,13 +626,6 @@ private:
   void ComputeImportInfo(std::string const& desired_config,
                          ImportInfo& info) const;
 
-  // Cache target compile paths for each configuration.
-  struct CompileInfo
-  {
-    std::string CompilePdbDir;
-  };
-
-  CompileInfo const* GetCompileInfo(const std::string& config) const;
 
   LinkInterface const*
     GetImportLinkInterface(const std::string& config, cmTarget const* head,
