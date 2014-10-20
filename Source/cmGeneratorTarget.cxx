@@ -748,7 +748,7 @@ const char* cmGeneratorTarget::GetLocationForBuild() const
     }
 
   // Now handle the deprecated build-time configuration location.
-  location = this->Target->GetDirectory();
+  location = this->GetDirectory();
   const char* cfgid = this->Makefile->GetDefinition("CMAKE_CFG_INTDIR");
   if(cfgid && strcmp(cfgid, ".") != 0)
     {
@@ -1434,7 +1434,7 @@ cmGeneratorTarget::GetInstallNameDirForBuildTree(
       }
     else
       {
-      dir = this->Target->GetDirectory(config);
+      dir = this->GetDirectory(config);
       }
     dir += "/";
     return dir;
@@ -1735,7 +1735,7 @@ cmGeneratorTarget::GetMacContentDirectory(const std::string& config,
                                           bool implib) const
 {
   // Start with the output directory for the target.
-  std::string fpath = this->Target->GetDirectory(config, implib);
+  std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
   bool contentOnly = true;
   if(this->Target->IsFrameworkOnApple())
@@ -2860,7 +2860,7 @@ void cmGeneratorTarget::ComputeTargetManifest(
     }
 
   // Get the directory.
-  std::string dir = this->Target->GetDirectory(config, false);
+  std::string dir = this->GetDirectory(config, false);
 
   // Add each name.
   std::string f;
@@ -2894,7 +2894,7 @@ void cmGeneratorTarget::ComputeTargetManifest(
     }
   if(!impName.empty())
     {
-    f = this->Target->GetDirectory(config, true);
+    f = this->GetDirectory(config, true);
     f += "/";
     f += impName;
     gg->AddToManifest(f);
@@ -2919,7 +2919,7 @@ std::string cmGeneratorTarget::NormalGetFullPath(const std::string& config,
                                                  bool implib,
                                                  bool realname) const
 {
-  std::string fpath = this->Target->GetDirectory(config, implib);
+  std::string fpath = this->GetDirectory(config, implib);
   fpath += "/";
   if(this->Target->IsAppBundleOnApple())
     {
@@ -4451,6 +4451,26 @@ cmGeneratorTarget::GetLinkInterfaceLibraries(const std::string& config,
     }
 
   return iface.Exists? &iface : 0;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorTarget::GetDirectory(const std::string& config,
+                                   bool implib) const
+{
+  if (this->Target->IsImported())
+    {
+    // Return the directory from which the target is imported.
+    return
+      cmSystemTools::GetFilenamePath(
+      this->Target->ImportedGetFullPath(config, implib));
+    }
+  else if(cmTarget::OutputInfo const* info =
+      this->Target->GetOutputInfo(config))
+    {
+    // Return the directory in which the target will be built.
+    return implib? info->ImpDir : info->OutDir;
+    }
+  return "";
 }
 
 //----------------------------------------------------------------------------

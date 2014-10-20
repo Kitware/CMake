@@ -59,7 +59,7 @@ cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
     {
     // on Windows the output dir is already needed at compile time
     // ensure the directory exists (OutDir test)
-    EnsureDirectoryExists(target->Target->GetDirectory(this->GetConfigName()));
+    EnsureDirectoryExists(target->GetDirectory(this->GetConfigName()));
     }
 
   this->OSXBundleGenerator = new cmOSXBundleGenerator(target,
@@ -413,7 +413,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   if (target.IsAppBundleOnApple())
     {
     // Create the app bundle
-    std::string outpath = target.GetDirectory(cfgName);
+    std::string outpath = gt.GetDirectory(cfgName);
     this->OSXBundleGenerator->CreateAppBundle(this->TargetNameOut, outpath);
 
     // Calculate the output path
@@ -430,13 +430,13 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     {
     // Create the library framework.
     this->OSXBundleGenerator->CreateFramework(this->TargetNameOut,
-                                              target.GetDirectory(cfgName));
+                                              gt.GetDirectory(cfgName));
     }
   else if(target.IsCFBundleOnApple())
     {
     // Create the core foundation bundle.
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut,
-                                             target.GetDirectory(cfgName));
+                                             gt.GetDirectory(cfgName));
     }
 
   // Write comments.

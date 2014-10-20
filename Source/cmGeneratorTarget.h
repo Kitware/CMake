@@ -268,6 +268,13 @@ public:
    */
   void TraceDependencies();
 
+  /** Get the directory in which this target will be built.  If the
+      configuration name is given then the generator will add its
+      subdirectory for that configuration.  Otherwise just the canonical
+      output directory is given.  */
+  std::string GetDirectory(const std::string& config = "",
+                           bool implib = false) const;
+
   /** Get the directory in which to place the target compiler .pdb file.
       If the configuration name is given then the generator will add its
       subdirectory for that configuration.  Otherwise just the canonical

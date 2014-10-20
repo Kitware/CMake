@@ -254,7 +254,7 @@ cmNinjaTargetGenerator
 
 std::string cmNinjaTargetGenerator::GetTargetOutputDir() const
 {
-  std::string dir = this->Target->GetDirectory(this->GetConfigName());
+  std::string dir = this->GeneratorTarget->GetDirectory(this->GetConfigName());
   return ConvertToNinjaPath(dir);
 }
 

@@ -1586,7 +1586,7 @@ struct TargetFilesystemArtifactResultCreator<ArtifactSonameTag>
                     "SHARED libraries.");
       return std::string();
       }
-    std::string result = target->Target->GetDirectory(context->Config);
+    std::string result = target->GetDirectory(context->Config);
     result += "/";
     result += target->GetSOName(context->Config);
     return result;

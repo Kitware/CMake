@@ -805,7 +805,11 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
   // VS6 forgets to create the output directory for archives if it
   // differs from the intermediate directory.
   if(target.GetType() != cmTarget::STATIC_LIBRARY) { return pcc; }
-  std::string outDir = target.GetDirectory(config, false);
+
+  cmGeneratorTarget* gt =
+    this->GlobalGenerator->GetGeneratorTarget(&target);
+
+  std::string outDir = gt->GetDirectory(config, false);
 
   // Add a pre-link event to create the directory.
   cmCustomCommandLine command;
@@ -1363,20 +1367,20 @@ void cmLocalVisualStudio6Generator
 #ifdef CM_USE_OLD_VS6
     outputDirOld =
       removeQuotes(this->ConvertToOutputFormat
-                   (target.GetDirectory().c_str(), SHELL));
+                   (gt->GetDirectory().c_str(), SHELL));
 #endif
     outputDirDebug =
         removeQuotes(this->ConvertToOutputFormat(
-                       target.GetDirectory("Debug").c_str(), SHELL));
+                       gt->GetDirectory("Debug").c_str(), SHELL));
     outputDirRelease =
         removeQuotes(this->ConvertToOutputFormat(
-                 target.GetDirectory("Release").c_str(), SHELL));
+                 gt->GetDirectory("Release").c_str(), SHELL));
     outputDirMinSizeRel =
         removeQuotes(this->ConvertToOutputFormat(
-                 target.GetDirectory("MinSizeRel").c_str(), SHELL));
+                 gt->GetDirectory("MinSizeRel").c_str(), SHELL));
     outputDirRelWithDebInfo =
         removeQuotes(this->ConvertToOutputFormat(
-                 target.GetDirectory("RelWithDebInfo").c_str(), SHELL));
+                 gt->GetDirectory("RelWithDebInfo").c_str(), SHELL));
     }
   else if(target.GetType() == cmTarget::OBJECT_LIBRARY)
     {
@@ -1424,12 +1428,12 @@ void cmLocalVisualStudio6Generator
      target.GetType() == cmTarget::MODULE_LIBRARY ||
      target.GetType() == cmTarget::EXECUTABLE)
     {
-    std::string fullPathImpDebug = target.GetDirectory("Debug", true);
-    std::string fullPathImpRelease = target.GetDirectory("Release", true);
+    std::string fullPathImpDebug = gt->GetDirectory("Debug", true);
+    std::string fullPathImpRelease = gt->GetDirectory("Release", true);
     std::string fullPathImpMinSizeRel =
-      target.GetDirectory("MinSizeRel", true);
+      gt->GetDirectory("MinSizeRel", true);
     std::string fullPathImpRelWithDebInfo =
-      target.GetDirectory("RelWithDebInfo", true);
+      gt->GetDirectory("RelWithDebInfo", true);
     fullPathImpDebug += "/";
     fullPathImpRelease += "/";
     fullPathImpMinSizeRel += "/";

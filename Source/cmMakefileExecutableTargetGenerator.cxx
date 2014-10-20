@@ -99,7 +99,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
      this->ConfigName);
 
   // Construct the full path version of the names.
-  std::string outpath = this->Target->GetDirectory(this->ConfigName);
+  std::string outpath = this->GeneratorTarget->GetDirectory(this->ConfigName);
   if(this->Target->IsAppBundleOnApple())
     {
     this->OSXBundleGenerator->CreateAppBundle(targetName, outpath);
@@ -123,7 +123,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     cmSystemTools::MakeDirectory(outpath.c_str());
     if(!targetNameImport.empty())
       {
-      outpathImp = this->Target->GetDirectory(this->ConfigName, true);
+      outpathImp = this->GeneratorTarget->GetDirectory(this->ConfigName, true);
       cmSystemTools::MakeDirectory(outpathImp.c_str());
       outpathImp += "/";
       }

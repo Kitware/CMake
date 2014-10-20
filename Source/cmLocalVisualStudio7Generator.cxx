@@ -792,7 +792,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     {
     std::string const& outDir =
       target.GetType() == cmTarget::OBJECT_LIBRARY?
-      intermediateDir : target.GetDirectory(configName);
+      intermediateDir : gt->GetDirectory(configName);
     fout << "\t\t\tOutputDirectory=\""
          << this->ConvertToXMLOutputPathSingle(outDir.c_str()) << "\"\n";
     }
@@ -1004,7 +1004,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
 
     // Check if we need the FAT32 workaround.
     // Check the filesystem type where the target will be written.
-    if (cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))
+    if (cmLVS6G_IsFAT(gt->GetDirectory(configName).c_str()))
       {
       // Add a flag telling the manifest tool to use a workaround
       // for FAT32 file systems, which can cause an empty manifest
@@ -1130,7 +1130,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     case cmTarget::STATIC_LIBRARY:
     {
     std::string targetNameFull = gt->GetFullName(configName);
-    std::string libpath = target.GetDirectory(configName);
+    std::string libpath = gt->GetDirectory(configName);
     libpath += "/";
     libpath += targetNameFull;
     const char* tool = "VCLibrarianTool";
@@ -1210,7 +1210,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << " ";
     this->Internal->OutputLibraries(fout, cli.GetItems());
     fout << "\"\n";
-    temp = target.GetDirectory(configName);
+    temp = gt->GetDirectory(configName);
     temp += "/";
     temp += targetNameFull;
     fout << "\t\t\t\tOutputFile=\""
@@ -1248,7 +1248,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tStackReserveSize=\"" << stackVal  << "\"\n";
       }
-    temp = target.GetDirectory(configName, true);
+    temp = gt->GetDirectory(configName, true);
     temp += "/";
     temp += targetNameImport;
     fout << "\t\t\t\tImportLibrary=\""
@@ -1309,7 +1309,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << " ";
     this->Internal->OutputLibraries(fout, cli.GetItems());
     fout << "\"\n";
-    temp = target.GetDirectory(configName);
+    temp = gt->GetDirectory(configName);
     temp += "/";
     temp += targetNameFull;
     fout << "\t\t\t\tOutputFile=\""
@@ -1367,7 +1367,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       {
       fout << "\t\t\t\tStackReserveSize=\"" << stackVal << "\"";
       }
-    temp = target.GetDirectory(configName, true);
+    temp = gt->GetDirectory(configName, true);
     temp += "/";
     temp += targetNameImport;
     fout << "\t\t\t\tImportLibrary=\""

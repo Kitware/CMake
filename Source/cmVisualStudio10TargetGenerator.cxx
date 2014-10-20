@@ -1780,7 +1780,7 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
         }
       else
         {
-        outDir = this->Target->GetDirectory(config->c_str()) + "/";
+        outDir = this->GeneratorTarget->GetDirectory(config->c_str()) + "/";
         targetNameFull = this->GeneratorTarget->GetFullName(config->c_str());
         }
       this->ConvertToWindowsSlash(intermediateDir);
@@ -2584,7 +2584,8 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     std::string pdb = this->Target->GetPDBDirectory(config.c_str());
     pdb += "/";
     pdb += targetNamePDB;
-    std::string imLib = this->Target->GetDirectory(config.c_str(), true);
+    std::string imLib =
+        this->GeneratorTarget->GetDirectory(config.c_str(), true);
     imLib += "/";
     imLib += targetNameImport;
 

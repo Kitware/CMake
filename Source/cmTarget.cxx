@@ -1771,25 +1771,6 @@ cmTarget::OutputInfo const* cmTarget::GetOutputInfo(
 }
 
 //----------------------------------------------------------------------------
-std::string cmTarget::GetDirectory(const std::string& config,
-                                   bool implib) const
-{
-  if (this->IsImported())
-    {
-    // Return the directory from which the target is imported.
-    return
-      cmSystemTools::GetFilenamePath(
-      this->ImportedGetFullPath(config, implib));
-    }
-  else if(OutputInfo const* info = this->GetOutputInfo(config))
-    {
-    // Return the directory in which the target will be built.
-    return implib? info->ImpDir : info->OutDir;
-    }
-  return "";
-}
-
-//----------------------------------------------------------------------------
 std::string cmTarget::GetPDBDirectory(const std::string& config) const
 {
   if(OutputInfo const* info = this->GetOutputInfo(config))
