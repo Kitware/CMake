@@ -69,12 +69,6 @@ struct cmTarget::OutputInfo
 };
 
 //----------------------------------------------------------------------------
-struct cmTarget::CompileInfo
-{
-  std::string CompilePdbDir;
-};
-
-//----------------------------------------------------------------------------
 class cmTargetInternals
 {
 public:
@@ -2668,16 +2662,6 @@ std::string cmTarget::GetPDBDirectory(const std::string& config) const
     {
     // Return the directory in which the target will be built.
     return info->PdbDir;
-    }
-  return "";
-}
-
-//----------------------------------------------------------------------------
-std::string cmTarget::GetCompilePDBDirectory(const std::string& config) const
-{
-  if(CompileInfo const* info = this->GetCompileInfo(config))
-    {
-    return info->CompilePdbDir;
     }
   return "";
 }
