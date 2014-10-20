@@ -743,7 +743,7 @@ cmGeneratorTarget::GetCompilePDBName(const std::string& config) const
 std::string
 cmGeneratorTarget::GetCompilePDBPath(const std::string& config) const
 {
-  std::string dir = this->Target->GetCompilePDBDirectory(config);
+  std::string dir = this->GetCompilePDBDirectory(config);
   std::string name = this->GetCompilePDBName(config);
   if(dir.empty() && !name.empty())
     {
@@ -1822,6 +1822,16 @@ void cmGeneratorTarget::TraceDependencies()
   // Use a helper object to trace the dependencies.
   cmTargetTraceDependencies tracer(this);
   tracer.Trace();
+}
+
+std::string
+cmGeneratorTarget::GetCompilePDBDirectory(const std::string& config) const
+{
+  if(cmTarget::CompileInfo const* info = this->Target->GetCompileInfo(config))
+    {
+    return info->CompilePdbDir;
+    }
+  return "";
 }
 
 //----------------------------------------------------------------------------
