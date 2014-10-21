@@ -2339,6 +2339,23 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       "Process file.*CoverageTest.java.*Total LOC:.*17.*Percentage Coverage: 76.47*"
       ENVIRONMENT COVFILE=)
 
+  # test coverage for Delphi-code-Coverage
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/DartConfiguration.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/DelphiCoverage/DartConfiguration.tcl")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/src"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/DelphiCoverage")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/UTCovTest(UTCovTest.pas).html"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/DelphiCoverage")
+  add_test(NAME CTestDelphiCoverage
+    COMMAND cmake -E chdir
+    ${CMake_BINARY_DIR}/Testing/DelphiCoverage
+    $<TARGET_FILE:ctest> -T Coverage --debug)
+  set_tests_properties(CTestDelphiCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*UTCovTest.pas.*Total LOC:.*20.*Percentage Coverage: 95.*"
+      ENVIRONMENT COVFILE=)
+
   function(add_config_tests cfg)
     set(base "${CMake_BINARY_DIR}/Tests/CTestConfig")
 

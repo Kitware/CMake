@@ -15,6 +15,7 @@
 #include "cmParseGTMCoverage.h"
 #include "cmParseCacheCoverage.h"
 #include "cmParseJacocoCoverage.h"
+#include "cmParseDelphiCoverage.h"
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -423,6 +424,12 @@ int cmCTestCoverageHandler::ProcessHandler()
     return error;
     }
 
+    file_count += this->HandleDelphiCoverage(&cont);
+  error = cont.Error;
+  if ( file_count < 0 )
+    {
+    return error;
+    }
   std::set<std::string> uncovered = this->FindUncoveredFiles(&cont);
 
   if ( file_count == 0 )
@@ -910,7 +917,36 @@ int cmCTestCoverageHandler::HandleJacocoCoverage(
   return static_cast<int>(cont->TotalCoverage.size());
 }
 
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandleDelphiCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+{
+  cmParseDelphiCoverage cov =
+   cmParseDelphiCoverage(*cont, this->CTest);
+  cmsys::Glob g;
+  std::vector<std::string> files;
+  g.SetRecurse(true);
 
+  std::string BinDir
+    = this->CTest->GetBinaryDir();
+  std::string coverageFile = BinDir+ "/*.html";
+
+  g.FindFiles(coverageFile);
+  files=g.GetFiles();
+  if (files.size() > 0)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Found Delphi HTML Files, Performing Coverage" << std::endl);
+    cov.LoadCoverageData(files);
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      " Cannot find Delphi coverage files: " << coverageFile
+      << std::endl);
+    }
+  return static_cast<int>(cont->TotalCoverage.size());
+}
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerContainer* cont)
