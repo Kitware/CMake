@@ -1577,7 +1577,7 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
       {
       std::string frameworkDir = *i;
       frameworkDir += "/../";
-      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir.c_str());
+      frameworkDir = cmSystemTools::CollapseFullPath(frameworkDir);
       emitted.insert(frameworkDir);
       }
     }

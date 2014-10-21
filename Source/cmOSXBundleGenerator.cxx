@@ -112,7 +112,7 @@ void cmOSXBundleGenerator::CreateFramework(
   oldName = frameworkVersion;
   newName = versions;
   newName += "/Current";
-  cmSystemTools::RemoveFile(newName.c_str());
+  cmSystemTools::RemoveFile(newName);
   cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
   this->Makefile->AddCMakeOutputFile(newName);
 
@@ -121,7 +121,7 @@ void cmOSXBundleGenerator::CreateFramework(
   oldName += name;
   newName = contentdir;
   newName += name;
-  cmSystemTools::RemoveFile(newName.c_str());
+  cmSystemTools::RemoveFile(newName);
   cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
   this->Makefile->AddCMakeOutputFile(newName);
 
@@ -132,7 +132,7 @@ void cmOSXBundleGenerator::CreateFramework(
     oldName = "Versions/Current/Resources";
     newName = contentdir;
     newName += "Resources";
-    cmSystemTools::RemoveFile(newName.c_str());
+    cmSystemTools::RemoveFile(newName);
     cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
     this->Makefile->AddCMakeOutputFile(newName);
     }
@@ -144,7 +144,7 @@ void cmOSXBundleGenerator::CreateFramework(
     oldName = "Versions/Current/Headers";
     newName = contentdir;
     newName += "Headers";
-    cmSystemTools::RemoveFile(newName.c_str());
+    cmSystemTools::RemoveFile(newName);
     cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
     this->Makefile->AddCMakeOutputFile(newName);
     }
@@ -156,7 +156,7 @@ void cmOSXBundleGenerator::CreateFramework(
     oldName = "Versions/Current/PrivateHeaders";
     newName = contentdir;
     newName += "PrivateHeaders";
-    cmSystemTools::RemoveFile(newName.c_str());
+    cmSystemTools::RemoveFile(newName);
     cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
     this->Makefile->AddCMakeOutputFile(newName);
     }

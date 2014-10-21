@@ -93,12 +93,12 @@ bool cmCTestSubdirCommand
       fname += *it;
       }
 
-    if ( !cmSystemTools::FileIsDirectory(fname.c_str()) )
+    if ( !cmSystemTools::FileIsDirectory(fname) )
       {
       // No subdirectory? So what...
       continue;
       }
-    cmSystemTools::ChangeDirectory(fname.c_str());
+    cmSystemTools::ChangeDirectory(fname);
     const char* testFilename;
     if( cmSystemTools::FileExists("CTestTestfile.cmake") )
       {
@@ -120,7 +120,7 @@ bool cmCTestSubdirCommand
     bool readit =
       this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),
                                    fname.c_str());
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     if(!readit)
       {
       std::string m = "Could not find include file: ";
@@ -129,7 +129,7 @@ bool cmCTestSubdirCommand
       return false;
       }
     }
-  cmSystemTools::ChangeDirectory(cwd.c_str());
+  cmSystemTools::ChangeDirectory(cwd);
   return true;
 }
 
@@ -175,7 +175,7 @@ bool cmCTestAddSubdirectoryCommand
     }
 
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(cwd.c_str());
+  cmSystemTools::ChangeDirectory(cwd);
   std::string fname = cwd;
   fname += "/";
   fname += args[1];
@@ -185,7 +185,7 @@ bool cmCTestAddSubdirectoryCommand
     // No subdirectory? So what...
     return true;
     }
-  cmSystemTools::ChangeDirectory(fname.c_str());
+  cmSystemTools::ChangeDirectory(fname);
   const char* testFilename;
   if( cmSystemTools::FileExists("CTestTestfile.cmake") )
     {
@@ -200,7 +200,7 @@ bool cmCTestAddSubdirectoryCommand
   else
     {
     // No CTestTestfile? Who cares...
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     return true;
     }
   fname += "/";
@@ -208,7 +208,7 @@ bool cmCTestAddSubdirectoryCommand
   bool readit =
     this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(),
                                  fname.c_str());
-  cmSystemTools::ChangeDirectory(cwd.c_str());
+  cmSystemTools::ChangeDirectory(cwd);
   if(!readit)
     {
     std::string m = "Could not find include file: ";
@@ -1498,9 +1498,9 @@ std::string cmCTestTestHandler
     {
     // first check without exe extension
     if(cmSystemTools::FileExists(attempted[ai].c_str())
-       && !cmSystemTools::FileIsDirectory(attempted[ai].c_str()))
+       && !cmSystemTools::FileIsDirectory(attempted[ai]))
       {
-      fullPath = cmSystemTools::CollapseFullPath(attempted[ai].c_str());
+      fullPath = cmSystemTools::CollapseFullPath(attempted[ai]);
       resultingConfig = attemptedConfigs[ai];
       }
     // then try with the exe extension
@@ -1510,9 +1510,9 @@ std::string cmCTestTestHandler
       tempPath = attempted[ai];
       tempPath += cmSystemTools::GetExecutableExtension();
       if(cmSystemTools::FileExists(tempPath.c_str())
-         && !cmSystemTools::FileIsDirectory(tempPath.c_str()))
+         && !cmSystemTools::FileIsDirectory(tempPath))
         {
-        fullPath = cmSystemTools::CollapseFullPath(tempPath.c_str());
+        fullPath = cmSystemTools::CollapseFullPath(tempPath);
         resultingConfig = attemptedConfigs[ai];
         }
       else
@@ -1746,7 +1746,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
   std::string dirName = this->CTest->GetBinaryDir() + "/Testing/Temporary";
 
   cmsys::Directory directory;
-  if (directory.Load(dirName.c_str()) == 0)
+  if (directory.Load(dirName) == 0)
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Unable to read the contents of "
       << dirName << std::endl);
@@ -1754,7 +1754,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
     }
 
   int numFiles = static_cast<int>
-    (cmsys::Directory::GetNumberOfFilesInDirectory(dirName.c_str()));
+    (cmsys::Directory::GetNumberOfFilesInDirectory(dirName));
   std::string pattern = "LastTestsFailed";
   std::string logName = "";
 
@@ -1777,7 +1777,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
       // if multiple matching logs were found we use the most recently
       // modified one.
       int res;
-      cmSystemTools::FileTimeCompare(logName.c_str(), fileName.c_str(), &res);
+      cmSystemTools::FileTimeCompare(logName, fileName, &res);
       if (res == -1)
         {
         logName = fileName;

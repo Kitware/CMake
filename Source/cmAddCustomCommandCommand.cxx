@@ -300,7 +300,7 @@ bool cmAddCustomCommandCommand
   if(!working.empty())
     {
     const char* build_dir = this->Makefile->GetCurrentOutputDirectory();
-    working = cmSystemTools::CollapseFullPath(working.c_str(), build_dir);
+    working = cmSystemTools::CollapseFullPath(working, build_dir);
     }
 
   // Choose which mode of the command to use.

@@ -140,7 +140,7 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
     {
     // The file conflicts only if it is not the same as the original
     // file due to a symlink or hardlink.
-    return !cmSystemTools::SameFile(this->FullPath.c_str(), file.c_str());
+    return !cmSystemTools::SameFile(this->FullPath, file);
     }
 
   // Check if the file will be built by cmake.

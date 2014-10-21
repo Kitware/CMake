@@ -239,7 +239,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
   copyDest += "-";
   copyDest += this->RunResultVariable;
   copyDest += cmSystemTools::GetFilenameExtension(this->OutputFile);
-  cmSystemTools::CopyFileAlways(this->OutputFile.c_str(), copyDest.c_str());
+  cmSystemTools::CopyFileAlways(this->OutputFile, copyDest);
 
   std::string resultFileName =  this->Makefile->GetHomeOutputDirectory();
   resultFileName += "/TryRunResults.cmake";

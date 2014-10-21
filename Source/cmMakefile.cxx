@@ -1832,7 +1832,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
         {
         if(!cmSystemTools::IsOff(files[cc].c_str()))
           {
-          files[cc] = cmSystemTools::CollapseFullPath(files[cc].c_str());
+          files[cc] = cmSystemTools::CollapseFullPath(files[cc]);
           }
         if ( cc > 0 )
           {
@@ -1937,11 +1937,11 @@ void cmMakefile::CheckForUnused(const char* reason,
       bt.push_back(lfc);
       }
     if (this->CheckSystemVars ||
-        cmSystemTools::IsSubDirectory(path.c_str(),
+        cmSystemTools::IsSubDirectory(path,
                                       this->GetHomeDirectory()) ||
-        (cmSystemTools::IsSubDirectory(path.c_str(),
+        (cmSystemTools::IsSubDirectory(path,
                                       this->GetHomeOutputDirectory()) &&
-        !cmSystemTools::IsSubDirectory(path.c_str(),
+        !cmSystemTools::IsSubDirectory(path,
                                 cmake::GetCMakeFilesDirectory())))
       {
       cmOStringStream msg;
@@ -2878,7 +2878,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                 bt.push_back(lfc);
                 msg << "uninitialized variable \'" << lookup << "\'";
                 this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                       msg.str().c_str(), bt);
+                                                       msg.str(), bt);
                 }
               }
             }
@@ -3556,7 +3556,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
 {
   this->Internal->IsSourceFileTryCompile = fast;
   // does the binary directory exist ? If not create it...
-  if (!cmSystemTools::FileIsDirectory(bindir.c_str()))
+  if (!cmSystemTools::FileIsDirectory(bindir))
     {
     cmSystemTools::MakeDirectory(bindir.c_str());
     }
@@ -3564,7 +3564,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   // change to the tests directory and run cmake
   // use the cmake object instead of calling cmake
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(bindir.c_str());
+  cmSystemTools::ChangeDirectory(bindir);
 
   // make sure the same generator is used
   // use this program as the cmake to be run, it should not
@@ -3579,7 +3579,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     cmSystemTools::Error(
       "Internal CMake error, TryCompile bad GlobalGenerator");
     // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     this->Internal->IsSourceFileTryCompile = false;
     return 1;
     }
@@ -3653,7 +3653,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     cmSystemTools::Error(
       "Internal CMake error, TryCompile configure of cmake failed");
     // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     this->Internal->IsSourceFileTryCompile = false;
     return 1;
     }
@@ -3663,7 +3663,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     cmSystemTools::Error(
       "Internal CMake error, TryCompile generation of cmake failed");
     // return to the original directory
-    cmSystemTools::ChangeDirectory(cwd.c_str());
+    cmSystemTools::ChangeDirectory(cwd);
     this->Internal->IsSourceFileTryCompile = false;
     return 1;
     }
@@ -3677,7 +3677,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
                                                            output,
                                                            this);
 
-  cmSystemTools::ChangeDirectory(cwd.c_str());
+  cmSystemTools::ChangeDirectory(cwd);
   this->Internal->IsSourceFileTryCompile = false;
   return ret;
 }
@@ -4036,7 +4036,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
       {
       cmSystemTools::SetPermissions(soutfile.c_str(), perm);
       }
-    cmSystemTools::RemoveFile(tempOutputFile.c_str());
+    cmSystemTools::RemoveFile(tempOutputFile);
     }
   return res;
 }
@@ -5208,7 +5208,7 @@ HaveCFeatureAvailable(cmTarget const* target, const std::string& feature) const
     cmOStringStream e;
     e << "The C_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCStandard << "\".";
-    this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+    this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
 
@@ -5459,7 +5459,7 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
       cmOStringStream e;
       e << "The C_STANDARD property on target \"" << target->GetName()
         << "\" contained an invalid value: \"" << existingCStandard << "\".";
-      this->IssueMessage(cmake::FATAL_ERROR, e.str().c_str());
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
       return false;
       }
     }

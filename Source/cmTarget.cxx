@@ -2171,7 +2171,7 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
         it = impl->Libraries.begin();
         it != impl->Libraries.end(); ++it)
       {
-      std::string libDir = cmSystemTools::CollapseFullPath(it->c_str());
+      std::string libDir = cmSystemTools::CollapseFullPath(*it);
 
       static cmsys::RegularExpression
         frameworkCheck("(.*\\.framework)(/Versions/[^/]+)?/[^/]+$");
@@ -4555,7 +4555,7 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
   // specified as a relative path.  Treat a relative path as
   // relative to the current output directory for this makefile.
   out = (cmSystemTools::CollapseFullPath
-         (out.c_str(), this->Makefile->GetStartOutputDirectory()));
+         (out, this->Makefile->GetStartOutputDirectory()));
 
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())
@@ -4621,7 +4621,7 @@ bool cmTarget::ComputePDBOutputDir(const std::string& kind,
   // specified as a relative path.  Treat a relative path as
   // relative to the current output directory for this makefile.
   out = (cmSystemTools::CollapseFullPath
-         (out.c_str(), this->Makefile->GetStartOutputDirectory()));
+         (out, this->Makefile->GetStartOutputDirectory()));
 
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())
@@ -5286,7 +5286,7 @@ cmTarget::GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const
           {
           continue;
           }
-        cmTarget *objLib = this->Makefile->FindTargetToUse(objLibName.c_str());
+        cmTarget *objLib = this->Makefile->FindTargetToUse(objLibName);
         if(objLib)
           {
           objlibs.push_back(objLib);

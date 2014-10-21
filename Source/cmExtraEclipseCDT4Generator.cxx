@@ -124,8 +124,8 @@ void cmExtraEclipseCDT4Generator::Generate()
               "Enable CMAKE_ECLIPSE_GENERATE_SOURCE_PROJECT instead.");
     }
 
-  if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
-                                    this->HomeDirectory.c_str()))
+  if (cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
+                                    this->HomeDirectory))
     {
     mf->IssueMessage(cmake::WARNING, "The build directory is a subdirectory "
                      "of the source directory.\n"
@@ -495,8 +495,8 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     std::string linkSourceDirectory = this->GetEclipsePath(
                                                       mf->GetStartDirectory());
     // .project dir can't be subdir of a linked resource dir
-    if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory.c_str(),
-                                         linkSourceDirectory.c_str()))
+    if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
+                                         linkSourceDirectory))
       {
       this->AppendLinkedResource(fout, sourceLinkedResourceName,
                                  this->GetEclipsePath(linkSourceDirectory),
@@ -590,7 +590,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksForTargets(
                 ++fileIt)
               {
               std::string fullPath = (*fileIt)->GetFullPath();
-              if (!cmSystemTools::FileIsDirectory(fullPath.c_str()))
+              if (!cmSystemTools::FileIsDirectory(fullPath))
                 {
                 std::string linkName4 = linkName3;
                 linkName4 += "/";
@@ -635,8 +635,8 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
     // a linked resource must not point to a parent directory of .project or
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
-        !cmSystemTools::IsSubDirectory(baseDir.c_str(),
-                                       linkSourceDirectory.c_str()))
+        !cmSystemTools::IsSubDirectory(baseDir,
+                                       linkSourceDirectory))
       {
       std::string linkName = "[Subprojects]/";
       linkName += it->first;
@@ -663,7 +663,7 @@ void cmExtraEclipseCDT4Generator::AppendIncludeDirectories(
     {
     if (!inc->empty())
       {
-      std::string dir = cmSystemTools::CollapseFullPath(inc->c_str());
+      std::string dir = cmSystemTools::CollapseFullPath(*inc);
 
       // handle framework include dirs on OSX, the remainder after the
       // Frameworks/ part has to be stripped
@@ -819,7 +819,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     // exlude source directory from output search path
     // - only if not named the same as an output directory
     if (!cmSystemTools::FileIsDirectory(
-           std::string(this->HomeOutputDirectory + "/" + *it).c_str()))
+           std::string(this->HomeOutputDirectory + "/" + *it)))
       {
       excludeFromOut += this->EscapeForXML(*it) + "/|";
       }

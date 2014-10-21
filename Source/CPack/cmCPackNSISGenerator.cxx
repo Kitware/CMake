@@ -657,8 +657,8 @@ bool cmCPackNSISGenerator::GetListOfSubdirectories(const char* topdir,
       cmsys_stl::string fullPath = topdir;
       fullPath += "/";
       fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-      if(cmsys::SystemTools::FileIsDirectory(fullPath.c_str()) &&
-        !cmsys::SystemTools::FileIsSymlink(fullPath.c_str()))
+      if(cmsys::SystemTools::FileIsDirectory(fullPath) &&
+        !cmsys::SystemTools::FileIsSymlink(fullPath))
         {
         if (!this->GetListOfSubdirectories(fullPath.c_str(), dirs))
           {
@@ -771,7 +771,7 @@ CreateComponentDescription(cmCPackComponent *component,
                   << archiveFile << std::endl);
     if (cmSystemTools::FileExists(archiveFile.c_str(), true))
       {
-        if (!cmSystemTools::RemoveFile(archiveFile.c_str()))
+        if (!cmSystemTools::RemoveFile(archiveFile))
         {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
           "Unable to remove archive file " << archiveFile

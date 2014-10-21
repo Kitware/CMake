@@ -30,7 +30,7 @@ bool cmParseGTMCoverage::LoadCoverageData(const char* d)
     {
     std::string file = dir.GetFile(i);
     if(file != "." && file != ".."
-       && !cmSystemTools::FileIsDirectory(file.c_str()))
+       && !cmSystemTools::FileIsDirectory(file))
       {
       std::string path = d;
       path += "/";

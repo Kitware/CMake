@@ -58,7 +58,7 @@ int cmCPackDebGenerator::PackageOnePack(std::string initialTopLevel,
   // Begin the archive for this pack
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(
-      cmSystemTools::GetParentDirectory(toplevel.c_str())
+      cmSystemTools::GetParentDirectory(toplevel)
   );
   std::string outputFileName(
       std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
@@ -186,7 +186,7 @@ int cmCPackDebGenerator::PackageComponentsAllInOne()
   // The ALL GROUPS in ONE package case
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(
-      cmSystemTools::GetParentDirectory(toplevel.c_str())
+      cmSystemTools::GetParentDirectory(toplevel)
                              );
   std::string outputFileName(
             std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))
@@ -540,7 +540,7 @@ int cmCPackDebGenerator::createDeb()
       localcopy += filenamename;
       // if we can copy the file, it means it does exist, let's add it:
       if( cmsys::SystemTools::CopyFileIfDifferent(
-            i->c_str(), localcopy.c_str()) )
+            *i, localcopy) )
         {
         // debian is picky and need relative to ./ path in the tar.*
         cmd += " ./";

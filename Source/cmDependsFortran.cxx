@@ -668,7 +668,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     if(cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str(),
                                        compilerId.c_str()))
       {
-      if(!cmSystemTools::CopyFileAlways(mod_upper.c_str(), stamp.c_str()))
+      if(!cmSystemTools::CopyFileAlways(mod_upper, stamp))
         {
         std::cerr << "Error copying Fortran module from \""
                   << mod_upper << "\" to \"" << stamp
@@ -683,7 +683,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     if(cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str(),
                                        compilerId.c_str()))
       {
-      if(!cmSystemTools::CopyFileAlways(mod_lower.c_str(), stamp.c_str()))
+      if(!cmSystemTools::CopyFileAlways(mod_lower, stamp))
         {
         std::cerr << "Error copying Fortran module from \""
                   << mod_lower << "\" to \"" << stamp

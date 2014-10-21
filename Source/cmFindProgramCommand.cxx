@@ -97,7 +97,7 @@ std::string cmFindProgramCommand
       std::string executable = GetBundleExecutable(appPath);
       if (!executable.empty())
         {
-        return cmSystemTools::CollapseFullPath(executable.c_str());
+        return cmSystemTools::CollapseFullPath(executable);
         }
       }
     }

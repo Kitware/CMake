@@ -218,7 +218,7 @@ bool cmAddCustomTargetCommand
     {
     const char* build_dir = this->Makefile->GetCurrentOutputDirectory();
     working_directory =
-      cmSystemTools::CollapseFullPath(working_directory.c_str(), build_dir);
+      cmSystemTools::CollapseFullPath(working_directory, build_dir);
     }
 
   // Add the utility target to the makefile.

@@ -675,7 +675,7 @@ void cmComputeLinkInformation::AddItem(std::string const& item,
     // This is not a CMake target.  Use the name given.
     if(cmSystemTools::FileIsFullPath(item.c_str()))
       {
-      if(cmSystemTools::FileIsDirectory(item.c_str()))
+      if(cmSystemTools::FileIsDirectory(item))
         {
         // This is a directory.
         this->AddDirectoryItem(item);
@@ -1937,10 +1937,10 @@ void cmComputeLinkInformation::GetRPath(std::vector<std::string>& runtimeDirs,
         // Do not add any path inside the source or build tree.
         const char* topSourceDir = this->Makefile->GetHomeDirectory();
         const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
-        if(!cmSystemTools::ComparePath(ri->c_str(), topSourceDir) &&
-           !cmSystemTools::ComparePath(ri->c_str(), topBinaryDir) &&
-           !cmSystemTools::IsSubDirectory(ri->c_str(), topSourceDir) &&
-           !cmSystemTools::IsSubDirectory(ri->c_str(), topBinaryDir))
+        if(!cmSystemTools::ComparePath(*ri, topSourceDir) &&
+           !cmSystemTools::ComparePath(*ri, topBinaryDir) &&
+           !cmSystemTools::IsSubDirectory(*ri, topSourceDir) &&
+           !cmSystemTools::IsSubDirectory(*ri, topBinaryDir))
           {
           std::string d = *ri;
           if (!rootPath.empty() && d.find(rootPath) == 0)

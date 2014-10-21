@@ -277,7 +277,7 @@ std::string
 cmNinjaTargetGenerator
 ::GetSourceFilePath(cmSourceFile const* source) const
 {
-  return ConvertToNinjaPath(source->GetFullPath().c_str());
+  return ConvertToNinjaPath(source->GetFullPath());
 }
 
 std::string
@@ -298,7 +298,7 @@ cmNinjaTargetGenerator
 std::string cmNinjaTargetGenerator::GetTargetOutputDir() const
 {
   std::string dir = this->Target->GetDirectory(this->GetConfigName());
-  return ConvertToNinjaPath(dir.c_str());
+  return ConvertToNinjaPath(dir);
 }
 
 std::string
@@ -346,11 +346,11 @@ bool cmNinjaTargetGenerator::SetMsvcTargetPdbVariable(cmNinjaVars& vars) const
       }
 
     vars["TARGET_PDB"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                          ConvertToNinjaPath(pdbPath.c_str()),
+                          ConvertToNinjaPath(pdbPath),
                           cmLocalGenerator::SHELL);
     vars["TARGET_COMPILE_PDB"] =
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        ConvertToNinjaPath(compilePdbPath.c_str()),
+        ConvertToNinjaPath(compilePdbPath),
         cmLocalGenerator::SHELL);
 
     EnsureParentDirectoryExists(pdbPath);
@@ -564,7 +564,7 @@ cmNinjaTargetGenerator
   std::string def = this->GeneratorTarget->GetModuleDefinitionFile(config);
   if(!def.empty())
     {
-    this->ModuleDefinitionFile = this->ConvertToNinjaPath(def.c_str());
+    this->ModuleDefinitionFile = this->ConvertToNinjaPath(def);
     }
 
   this->GetBuildFileStream() << "\n";
@@ -628,11 +628,11 @@ cmNinjaTargetGenerator
 
   std::string objectDir = this->Target->GetSupportDirectory();
   vars["OBJECT_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                         ConvertToNinjaPath(objectDir.c_str()),
+                         ConvertToNinjaPath(objectDir),
                          cmLocalGenerator::SHELL);
   std::string objectFileDir = cmSystemTools::GetFilenamePath(objectFileName);
   vars["OBJECT_FILE_DIR"] = this->GetLocalGenerator()->ConvertToOutputFormat(
-                              ConvertToNinjaPath(objectFileDir.c_str()),
+                              ConvertToNinjaPath(objectFileDir),
                               cmLocalGenerator::SHELL);
 
   this->addPoolNinjaVariable("JOB_POOL_COMPILE", this->GetTarget(), vars);
@@ -650,7 +650,7 @@ cmNinjaTargetGenerator
     if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str()))
       {
       escapedSourceFileName = cmSystemTools::CollapseFullPath(
-        escapedSourceFileName.c_str(),
+        escapedSourceFileName,
         this->GetGlobalGenerator()->GetCMakeInstance()->
           GetHomeOutputDirectory());
       }
@@ -754,7 +754,7 @@ void
 cmNinjaTargetGenerator
 ::EnsureParentDirectoryExists(const std::string& path) const
 {
-  EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path.c_str()));
+  EnsureDirectoryExists(cmSystemTools::GetParentDirectory(path));
 }
 
 
@@ -775,14 +775,14 @@ cmNinjaTargetGenerator::MacOSXContentGeneratorType::operator()(
   // Get the input file location.
   std::string input = source.GetFullPath();
   input =
-    this->Generator->GetLocalGenerator()->ConvertToNinjaPath(input.c_str());
+    this->Generator->GetLocalGenerator()->ConvertToNinjaPath(input);
 
   // Get the output file location.
   std::string output = macdir;
   output += "/";
   output += cmSystemTools::GetFilenameName(input);
   output =
-    this->Generator->GetLocalGenerator()->ConvertToNinjaPath(output.c_str());
+    this->Generator->GetLocalGenerator()->ConvertToNinjaPath(output);
 
   // Write a build statement to copy the content into the bundle.
   this->Generator->GetGlobalGenerator()->WriteMacOSXContentBuild(input,

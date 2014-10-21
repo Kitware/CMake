@@ -771,7 +771,7 @@ void cmGlobalNinjaGenerator::AddCXXCompileCommand(
   if (!cmSystemTools::FileIsFullPath(sourceFileName.c_str()))
     {
     sourceFileName = cmSystemTools::CollapseFullPath(
-      sourceFileName.c_str(),
+      sourceFileName,
       this->GetCMakeInstance()->GetHomeOutputDirectory());
     }
 
@@ -851,7 +851,7 @@ cmGlobalNinjaGenerator
   case cmTarget::STATIC_LIBRARY:
   case cmTarget::MODULE_LIBRARY:
     outputs.push_back(ng->ConvertToNinjaPath(
-      target->GetFullPath(configName, false, realname).c_str()));
+      target->GetFullPath(configName, false, realname)));
     break;
 
   case cmTarget::OBJECT_LIBRARY:
@@ -970,7 +970,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     typedef std::vector<std::string>::const_iterator vect_it;
     for(vect_it j = files.begin(); j != files.end(); ++j)
       {
-      knownDependencies.insert( ng->ConvertToNinjaPath( j->c_str() ) );
+      knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
       }
     //get list files which are implicit dependencies as well and will be phony
     //for rebuild manifest
@@ -978,7 +978,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     typedef std::vector<std::string>::const_iterator vect_it;
     for(vect_it j = lf.begin(); j != lf.end(); ++j)
       {
-      knownDependencies.insert( ng->ConvertToNinjaPath( j->c_str() ) );
+      knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
       }
     }
   knownDependencies.insert( "CMakeCache.txt" );
@@ -994,7 +994,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     typedef std::vector<std::string>::const_iterator vect_it;
     for(vect_it j = files.begin(); j != files.end(); ++j)
       {
-      knownDependencies.insert( ng->ConvertToNinjaPath( j->c_str() ) );
+      knownDependencies.insert( ng->ConvertToNinjaPath( *j ) );
       }
     }
 
@@ -1002,7 +1002,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       i != this->TargetAliases.end();
       ++i)
     {
-    knownDependencies.insert( ng->ConvertToNinjaPath(i->first.c_str()) );
+    knownDependencies.insert( ng->ConvertToNinjaPath(i->first) );
     }
 
   //remove all source files we know will exist.
@@ -1011,7 +1011,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       i != this->AssumedSourceDependencies.end();
       ++i)
     {
-    knownDependencies.insert( ng->ConvertToNinjaPath(i->first.c_str()) );
+    knownDependencies.insert( ng->ConvertToNinjaPath(i->first) );
     }
 
   //insert outputs from all WirteBuild commands
@@ -1051,9 +1051,9 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     {
     //verify the file is in the build directory
     std::string const absDepPath = cmSystemTools::CollapseFullPath(
-                                     i->c_str(), rootBuildDirectory.c_str());
-    bool const inBuildDir = cmSystemTools::IsSubDirectory(absDepPath.c_str(),
-                                                  rootBuildDirectory.c_str());
+                                     *i, rootBuildDirectory.c_str());
+    bool const inBuildDir = cmSystemTools::IsSubDirectory(absDepPath,
+                                                  rootBuildDirectory);
     if(inBuildDir)
       {
       cmNinjaDeps deps(1,*i);
@@ -1129,7 +1129,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
     for(std::vector<std::string>::const_iterator fi = lf.begin();
         fi != lf.end(); ++fi)
       {
-      implicitDeps.push_back(ng->ConvertToNinjaPath(fi->c_str()));
+      implicitDeps.push_back(ng->ConvertToNinjaPath(*fi));
       }
     }
   implicitDeps.push_back("CMakeCache.txt");
