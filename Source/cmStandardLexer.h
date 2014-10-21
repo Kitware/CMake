@@ -25,25 +25,6 @@
 # pragma warning ( disable : 4786 )
 #endif
 
-#if defined(__BORLANDC__)
-# pragma warn -8008 /* condition always returns true */
-# pragma warn -8066 /* unreachable code */
-#endif
-
-/* Borland system header defines these macros without first undef-ing them. */
-#if defined(__BORLANDC__) && __BORLANDC__ >= 0x580
-# undef INT8_MIN
-# undef INT16_MIN
-# undef INT32_MIN
-# undef INT8_MAX
-# undef INT16_MAX
-# undef INT32_MAX
-# undef UINT8_MAX
-# undef UINT16_MAX
-# undef UINT32_MAX
-# include <stdint.h>
-#endif
-
 /* Make sure SGI termios does not define ECHO differently.  */
 #if defined(__sgi) && !defined(__GNUC__)
 # include <sys/termios.h>

@@ -71,8 +71,6 @@ int cmCPackSTGZGenerator::PackageFiles()
     retval &= cmSystemTools::SetPermissions((*it).c_str(),
 #if defined( _MSC_VER ) || defined( __MINGW32__ )
       S_IREAD | S_IWRITE | S_IEXEC
-#elif defined( __BORLANDC__ )
-      S_IRUSR | S_IWUSR | S_IXUSR
 #else
       S_IRUSR | S_IWUSR | S_IXUSR |
       S_IRGRP | S_IWGRP | S_IXGRP |
