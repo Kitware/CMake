@@ -272,6 +272,8 @@ macro(SWIG_ADD_MODULE name language)
     if(WIN32 AND NOT CYGWIN)
       set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES SUFFIX ".pyd")
     endif()
+  elseif ("${swig_lowercase_language}" STREQUAL "r")
+    set_target_properties(${SWIG_MODULE_${name}_REAL_NAME} PROPERTIES PREFIX "")
   elseif ("${swig_lowercase_language}" STREQUAL "ruby")
     # In ruby you want:
     #      require 'LIBRARY'
