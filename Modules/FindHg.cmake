@@ -66,7 +66,11 @@ if(HG_EXECUTABLE)
   execute_process(COMMAND ${HG_EXECUTABLE} --version
                   OUTPUT_VARIABLE hg_version
                   ERROR_QUIET
+                  RESULT_VARIABLE hg_result
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+  if(hg_result MATCHES "is not a valid Win32 application")
+    set_property(CACHE HG_EXECUTABLE PROPERTY VALUE "HG_EXECUTABLE-NOTFOUND")
+  endif()
   if(hg_version MATCHES "^Mercurial Distributed SCM \\(version ([0-9][^)]*)\\)")
     set(HG_VERSION_STRING "${CMAKE_MATCH_1}")
   endif()
