@@ -28,7 +28,7 @@ include(Platform/UnixPaths)
 
 # eCos can be built only with gcc
 get_property(_IN_TC GLOBAL PROPERTY IN_TRY_COMPILE)
-if(CMAKE_C_COMPILER AND NOT  "${CMAKE_C_COMPILER_ID}" MATCHES "GNU" AND NOT _IN_TC)
+if(CMAKE_C_COMPILER AND NOT  CMAKE_C_COMPILER_ID MATCHES "GNU" AND NOT _IN_TC)
   message(FATAL_ERROR "GNU gcc is required for eCos")
 endif()
 if(CMAKE_CXX_COMPILER AND NOT  "${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU" AND NOT _IN_TC)

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8)
 project(FortranC C Fortran)
 
 # Skip this test for compilers not known to be compatible.
-if(NOT ("${CMAKE_C_COMPILER_ID}" STREQUAL "${CMAKE_Fortran_COMPILER_ID}" OR
+if(NOT (CMAKE_C_COMPILER_ID STREQUAL CMAKE_Fortran_COMPILER_ID OR
         "${CMAKE_C_COMPILER_ID}-${CMAKE_Fortran_COMPILER_ID}" MATCHES "^(MSVC-Intel)$"))
   message(STATUS "${CMAKE_C_COMPILER_ID} C and ${CMAKE_Fortran_COMPILER_ID} Fortran not known to be compatible!")
   return()

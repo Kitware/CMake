@@ -13,7 +13,7 @@ add_custom_command(OUTPUT example_dll_gen.def
 add_library(example_dll_gen SHARED example_dll_gen.c example_dll_gen.def)
 
 # Test /DEF:<file> flag recognition for VS.
-if(MSVC OR "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
+if(MSVC OR CMAKE_C_COMPILER_ID STREQUAL "Intel")
   add_library(example_dll_2 SHARED example_dll_2.c)
   set_property(TARGET example_dll_2 PROPERTY LINK_FLAGS
     /DEF:"${ModuleDefinition_SOURCE_DIR}/example_dll_2.def")

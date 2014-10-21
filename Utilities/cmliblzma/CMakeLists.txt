@@ -201,10 +201,10 @@ INCLUDE_DIRECTORIES(
   )
 
 # Disable warnings to avoid changing 3rd party code.
-IF("${CMAKE_C_COMPILER_ID}" MATCHES
+IF(CMAKE_C_COMPILER_ID MATCHES
     "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-ELSEIF("${CMAKE_C_COMPILER_ID}" MATCHES "^(PathScale)$")
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
 ENDIF()
 
