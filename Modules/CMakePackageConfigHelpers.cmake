@@ -15,12 +15,13 @@
 #
 #  Create a config file for a project::
 #
-#     configure_package_config_file(<input> <output> INSTALL_DESTINATION <path>
-#                                                    [PATH_VARS <var1> <var2> ... <varN>]
-#                                                    [NO_SET_AND_CHECK_MACRO]
-#                                                    [NO_CHECK_REQUIRED_COMPONENTS_MACRO]
-#                                                    [INSTALL_PREFIX <path>])
-#
+#    configure_package_config_file(<input> <output>
+#      INSTALL_DESTINATION <path>
+#      [PATH_VARS <var1> <var2> ... <varN>]
+#      [NO_SET_AND_CHECK_MACRO]
+#      [NO_CHECK_REQUIRED_COMPONENTS_MACRO]
+#      [INSTALL_PREFIX <path>]
+#      )
 #
 # ``configure_package_config_file()`` should be used instead of the plain
 # :command:`configure_file()` command when creating the ``<Name>Config.cmake``
@@ -51,13 +52,13 @@
 # Using ``configure_package_config_file`` helps.  If used correctly, it makes
 # the resulting ``FooConfig.cmake`` file relocatable.  Usage:
 #
-#    1. write a ``FooConfig.cmake.in`` file as you are used to
-#    2. insert a line containing only the string ``@PACKAGE_INIT@``
-#    3. instead of ``set(FOO_DIR "@SOME_INSTALL_DIR@")``, use
-#       ``set(FOO_DIR "@PACKAGE_SOME_INSTALL_DIR@")`` (this must be after the
-#       ``@PACKAGE_INIT@`` line)
-#    4. instead of using the normal :command:`configure_file()`, use
-#       ``configure_package_config_file()``
+# 1. write a ``FooConfig.cmake.in`` file as you are used to
+# 2. insert a line containing only the string ``@PACKAGE_INIT@``
+# 3. instead of ``set(FOO_DIR "@SOME_INSTALL_DIR@")``, use
+#    ``set(FOO_DIR "@PACKAGE_SOME_INSTALL_DIR@")`` (this must be after the
+#    ``@PACKAGE_INIT@`` line)
+# 4. instead of using the normal :command:`configure_file()`, use
+#    ``configure_package_config_file()``
 #
 #
 #
@@ -116,9 +117,9 @@
 #
 #  Create a version file for a project::
 #
-#     write_basic_package_version_file(<filename>
-#                                      [VERSION <major.minor.patch>]
-#                                      COMPATIBILITY <AnyNewerVersion|SameMajorVersion|ExactVersion> )
+#    write_basic_package_version_file(<filename>
+#      [VERSION <major.minor.patch>]
+#      COMPATIBILITY <AnyNewerVersion|SameMajorVersion|ExactVersion> )
 #
 #
 # Writes a file for use as ``<package>ConfigVersion.cmake`` file to
@@ -172,13 +173,16 @@
 #    set(SYSCONFIG_INSTALL_DIR etc/foo/ ... CACHE )
 #    ...
 #    include(CMakePackageConfigHelpers)
-#    configure_package_config_file(FooConfig.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake
-#                                  INSTALL_DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake
-#                                  PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
-#    write_basic_package_version_file(${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
-#                                     VERSION 1.2.3
-#                                     COMPATIBILITY SameMajorVersion )
-#    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake ${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
+#    configure_package_config_file(FooConfig.cmake.in
+#      ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake
+#      INSTALL_DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake
+#      PATH_VARS INCLUDE_INSTALL_DIR SYSCONFIG_INSTALL_DIR)
+#    write_basic_package_version_file(
+#      ${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
+#      VERSION 1.2.3
+#      COMPATIBILITY SameMajorVersion )
+#    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/FooConfig.cmake
+#                  ${CMAKE_CURRENT_BINARY_DIR}/FooConfigVersion.cmake
 #            DESTINATION ${LIB_INSTALL_DIR}/Foo/cmake )
 #
 # ``FooConfig.cmake.in``:

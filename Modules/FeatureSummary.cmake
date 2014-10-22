@@ -55,21 +55,32 @@
 # The WHAT option is the only mandatory option.  Here you specify what
 # information will be printed:
 #
-# ::
-#
-#     ALL: print everything
-#     ENABLED_FEATURES: the list of all features which are enabled
-#     DISABLED_FEATURES: the list of all features which are disabled
-#     PACKAGES_FOUND: the list of all packages which have been found
-#     PACKAGES_NOT_FOUND: the list of all packages which have not been found
-#     OPTIONAL_PACKAGES_FOUND: only those packages which have been found which have the type OPTIONAL
-#     OPTIONAL_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type OPTIONAL
-#     RECOMMENDED_PACKAGES_FOUND: only those packages which have been found which have the type RECOMMENDED
-#     RECOMMENDED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RECOMMENDED
-#     REQUIRED_PACKAGES_FOUND: only those packages which have been found which have the type REQUIRED
-#     REQUIRED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type REQUIRED
-#     RUNTIME_PACKAGES_FOUND: only those packages which have been found which have the type RUNTIME
-#     RUNTIME_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RUNTIME
+# ``ALL``
+#  print everything
+# ``ENABLED_FEATURES``
+#  the list of all features which are enabled
+# ``DISABLED_FEATURES``
+#  the list of all features which are disabled
+# ``PACKAGES_FOUND``
+#  the list of all packages which have been found
+# ``PACKAGES_NOT_FOUND``
+#  the list of all packages which have not been found
+# ``OPTIONAL_PACKAGES_FOUND``
+#  only those packages which have been found which have the type OPTIONAL
+# ``OPTIONAL_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type OPTIONAL
+# ``RECOMMENDED_PACKAGES_FOUND``
+#  only those packages which have been found which have the type RECOMMENDED
+# ``RECOMMENDED_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type RECOMMENDED
+# ``REQUIRED_PACKAGES_FOUND``
+#  only those packages which have been found which have the type REQUIRED
+# ``REQUIRED_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type REQUIRED
+# ``RUNTIME_PACKAGES_FOUND``
+#  only those packages which have been found which have the type RUNTIME
+# ``RUNTIME_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type RUNTIME
 #
 # With the exception of the ``ALL`` value, these values can be combined
 # in order to customize the output. For example:
@@ -118,10 +129,11 @@
 #
 # ::
 #
-#     SET_PACKAGE_PROPERTIES(<name> PROPERTIES [ URL <url> ]
-#                                              [ DESCRIPTION <description> ]
-#                                              [ TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED) ]
-#                                              [ PURPOSE <purpose> ]
+#     SET_PACKAGE_PROPERTIES(<name> PROPERTIES
+#                            [ URL <url> ]
+#                            [ DESCRIPTION <description> ]
+#                            [ TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED) ]
+#                            [ PURPOSE <purpose> ]
 #                           )
 #
 #
@@ -171,26 +183,30 @@
 # ::
 #
 #    find_package(LibXml2)
-#    set_package_properties(LibXml2 PROPERTIES DESCRIPTION "A XML processing library."
-#                                              URL "http://xmlsoft.org/")
+#    set_package_properties(LibXml2 PROPERTIES
+#                           DESCRIPTION "A XML processing library."
+#                           URL "http://xmlsoft.org/")
 #
 #
 #
 # ::
 #
-#    set_package_properties(LibXml2 PROPERTIES TYPE RECOMMENDED
-#                                              PURPOSE "Enables HTML-import in MyWordProcessor")
+#    set_package_properties(LibXml2 PROPERTIES
+#                           TYPE RECOMMENDED
+#                           PURPOSE "Enables HTML-import in MyWordProcessor")
 #    ...
-#    set_package_properties(LibXml2 PROPERTIES TYPE OPTIONAL
-#                                              PURPOSE "Enables odt-export in MyWordProcessor")
+#    set_package_properties(LibXml2 PROPERTIES
+#                           TYPE OPTIONAL
+#                           PURPOSE "Enables odt-export in MyWordProcessor")
 #
 #
 #
 # ::
 #
 #    find_package(DBUS)
-#    set_package_properties(DBUS PROPERTIES TYPE RUNTIME
-#                                              PURPOSE "Necessary to disable the screensaver during a presentation" )
+#    set_package_properties(DBUS PROPERTIES
+#      TYPE RUNTIME
+#      PURPOSE "Necessary to disable the screensaver during a presentation" )
 #
 #
 #

@@ -14,5 +14,6 @@ each of which has to match the following format.
 ``<user>`` and ``<domain>`` specify the windows user and domain for which the
 ``<Permission>`` element should be generated.
 
-``<permission>`` is any of the YesNoType attributes listed here:
-http://wixtoolset.org/documentation/manual/v3/xsd/wix/permission.html
+``<permission>`` is any of the YesNoType attributes listed here::
+
+ http://wixtoolset.org/documentation/manual/v3/xsd/wix/permission.html
