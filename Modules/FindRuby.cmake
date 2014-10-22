@@ -14,19 +14,21 @@
 # It also determines what the name of the library is.  This code sets
 # the following variables:
 #
-# ::
+# ``RUBY_EXECUTABLE``
+#   full path to the ruby binary
+# ``RUBY_INCLUDE_DIRS``
+#   include dirs to be used when using the ruby library
+# ``RUBY_LIBRARY``
+#   full path to the ruby library
+# ``RUBY_VERSION``
+#   the version of ruby which was found, e.g. "1.8.7"
+# ``RUBY_FOUND``
+#   set to true if ruby ws found successfully
 #
-#   RUBY_EXECUTABLE   = full path to the ruby binary
-#   RUBY_INCLUDE_DIRS = include dirs to be used when using the ruby library
-#   RUBY_LIBRARY      = full path to the ruby library
-#   RUBY_VERSION      = the version of ruby which was found, e.g. "1.8.7"
-#   RUBY_FOUND        = set to true if ruby ws found successfully
+# Also:
 #
-#
-#
-# ::
-#
-#   RUBY_INCLUDE_PATH = same as RUBY_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
+# ``RUBY_INCLUDE_PATH``
+#   same as RUBY_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
