@@ -703,18 +703,6 @@ if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
 else()
   set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
 endif()
-if(APPLE)
-  # We need to add the path to cudart to the linker using rpath, since the
-  # library name for the cuda libraries is prepended with @rpath.
-  if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
-    get_filename_component(_cuda_path_to_cudart "${CUDA_CUDARTEMU_LIBRARY}" PATH)
-  else()
-    get_filename_component(_cuda_path_to_cudart "${CUDA_CUDART_LIBRARY}" PATH)
-  endif()
-  if(_cuda_path_to_cudart)
-    list(APPEND CUDA_LIBRARIES -Wl,-rpath "-Wl,${_cuda_path_to_cudart}")
-  endif()
-endif()
 
 # 1.1 toolkit on linux doesn't appear to have a separate library on
 # some platforms.
