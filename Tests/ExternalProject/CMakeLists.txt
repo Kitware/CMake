@@ -372,6 +372,13 @@ if(HG_EXECUTABLE)
   set(do_hg_tests 1)
 endif()
 
+if(do_hg_tests AND NOT UNIX)
+  if("${HG_EXECUTABLE}" MATCHES "cygwin")
+    message(STATUS "No ExternalProject hg tests with cygwin hg outside cygwin!")
+    set(do_hg_tests 0)
+  endif()
+endif()
+
 if(do_hg_tests)
   set(local_hg_repo "../../LocalRepositories/HG")
 
