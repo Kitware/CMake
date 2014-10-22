@@ -655,8 +655,12 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
       if(EXISTS "${resolved_resources}")
         #message(STATUS "copying COMMAND ${CMAKE_COMMAND} -E copy_directory '${resolved_resources}' '${resolved_embedded_resources}'")
         execute_process(COMMAND ${CMAKE_COMMAND} -E copy_directory "${resolved_resources}" "${resolved_embedded_resources}")
-      else()
-        # Otherwise try at least copy Contents/Info.plist to Resources/Info.plist, if it exists:
+      endif()
+
+      # Some frameworks e.g. Qt put Info.plist in wrong place, so when it is
+      # missing in resources, copy it from other well known incorrect locations:
+      if(NOT EXISTS "${resolved_resources}/Info.plist")
+        # Check for Contents/Info.plist in framework root (older Qt SDK):
         string(REGEX REPLACE "^(.*)/[^/]+/[^/]+/[^/]+$" "\\1/Contents/Info.plist" resolved_info_plist "${resolved_item}")
         string(REGEX REPLACE "^(.*)/[^/]+$" "\\1/Resources/Info.plist" resolved_embedded_info_plist "${resolved_embedded_item}")
         if(EXISTS "${resolved_info_plist}")
@@ -673,6 +677,16 @@ function(copy_resolved_framework_into_bundle resolved_item resolved_embedded_ite
         # Ensure Current symlink points to the framework version
         if(NOT EXISTS "${resolved_embedded_versions}/Current")
           execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "${resolved_embedded_version}" "${resolved_embedded_versions}/Current")
+        endif()
+        # Restore symlinks in framework root pointing to current framework
+        # binary and resources:
+        string(REGEX REPLACE "^(.*)/[^/]+/[^/]+/[^/]+$" "\\1" resolved_embedded_root "${resolved_embedded_item}")
+        string(REGEX REPLACE "^.*/([^/]+)$" "\\1" resolved_embedded_item_basename "${resolved_embedded_item}")
+        if(NOT EXISTS "${resolved_embedded_root}/${resolved_embedded_item_basename}")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "Versions/Current/${resolved_embedded_item_basename}" "${resolved_embedded_root}/${resolved_embedded_item_basename}")
+        endif()
+        if(NOT EXISTS "${resolved_embedded_root}/Resources")
+          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink "Versions/Current/Resources" "${resolved_embedded_root}/Resources")
         endif()
       endif()
     endif()
