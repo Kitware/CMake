@@ -1005,7 +1005,8 @@ projects that do not require a high enough CMake version.
 .. code-block:: cmake
 
   if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
-    message(AUTHOR_WARNING "Your project should require at least CMake 3.0.0 to use FindFoo.cmake")
+    message(AUTHOR_WARNING
+      "Your project should require at least CMake 3.0.0 to use FindFoo.cmake")
   endif()
 
 Now the actual libraries and so on have to be found.  The code here will
