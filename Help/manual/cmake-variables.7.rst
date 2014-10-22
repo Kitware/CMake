@@ -260,6 +260,7 @@ Variables that Control the Build
    /variable/CMAKE_USE_RELATIVE_PATHS
    /variable/CMAKE_VISIBILITY_INLINES_HIDDEN
    /variable/CMAKE_WIN32_EXECUTABLE
+   /variable/CMAKE_XCODE_ATTRIBUTE_an-attribute
    /variable/EXECUTABLE_OUTPUT_PATH
    /variable/LIBRARY_OUTPUT_PATH
 
