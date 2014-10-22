@@ -29,7 +29,7 @@
 			);
 			name = CompilerId@id_lang@;
 			productName = CompilerId@id_lang@;
-			productType = "com.apple.product-type.tool";
+			productType = "@id_product_type@";
 		};
 		08FB7793FE84155DC02AAC07 = {
 			isa = PBXProject;
