@@ -5,7 +5,11 @@ Submit results to a dashboard server.
 
 ::
 
-  ctest_submit([PARTS ...] [FILES ...] [RETRY_COUNT count]                [RETRY_DELAY delay][RETURN_VALUE res])
+  ctest_submit([PARTS ...] [FILES ...]
+               [RETRY_COUNT count]
+               [RETRY_DELAY delay]
+               [RETURN_VALUE res]
+               )
 
 By default all available parts are submitted if no PARTS or FILES are
 specified.  The PARTS option lists a subset of parts to be submitted.
