@@ -321,7 +321,7 @@ macro(_Boost_FIND_LIBRARY var)
 
   # If Boost_LIBRARY_DIR is known then search only there.
   if(Boost_LIBRARY_DIR)
-    set(_boost_LIBRARY_SEARCH_DIRS ${Boost_LIBRARY_DIR} NO_DEFAULT_PATH)
+    set(_boost_LIBRARY_SEARCH_DIRS ${Boost_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   endif()
 endmacro()
 
@@ -855,7 +855,7 @@ if(_Boost_CHANGE_LIBDIR AND NOT _Boost_LIBRARY_DIR_CHANGED)
 endif()
 
 if(Boost_LIBRARY_DIR)
-  set(_boost_LIBRARY_SEARCH_DIRS ${Boost_LIBRARY_DIR} NO_DEFAULT_PATH)
+  set(_boost_LIBRARY_SEARCH_DIRS ${Boost_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
 else()
   set(_boost_LIBRARY_SEARCH_DIRS "")
   if(BOOST_LIBRARYDIR)
