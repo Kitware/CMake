@@ -29,7 +29,7 @@
 			);
 			name = CompilerId@id_lang@;
 			productName = CompilerId@id_lang@;
-			productType = "com.apple.product-type.tool";
+			productType = "@id_product_type@";
 		};
 		08FB7793FE84155DC02AAC07 = {
 			isa = PBXProject;
@@ -81,6 +81,7 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				ONLY_ACTIVE_ARCH = YES;
+				@id_code_sign_identity@
 				CONFIGURATION_BUILD_DIR = "$(BUILD_DIR)";
 				SYMROOT = .;
 				@id_toolset@

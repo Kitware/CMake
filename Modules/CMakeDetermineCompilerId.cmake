@@ -261,10 +261,19 @@ Id flags: ${testflags}
     else()
       set(id_deployment_target "")
     endif()
+    set(id_product_type "com.apple.product-type.tool")
     if(CMAKE_OSX_SYSROOT)
       set(id_sdkroot "SDKROOT = \"${CMAKE_OSX_SYSROOT}\";")
+      if(CMAKE_OSX_SYSROOT MATCHES "(^|/)[Ii][Pp][Hh][Oo][Nn][Ee]")
+        set(id_product_type "com.apple.product-type.bundle.unit-test")
+      endif()
     else()
       set(id_sdkroot "")
+    endif()
+    if(CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY)
+      set(id_code_sign_identity "CODE_SIGN_IDENTITY = \"${CMAKE_XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY}\";")
+    else()
+      set(id_code_sign_identity "")
     endif()
     if(NOT ${XCODE_VERSION} VERSION_LESS 3)
       set(v 3)
@@ -298,7 +307,7 @@ Id flags: ${testflags}
     #      ...
     #      /path/to/cc ...CompilerId${lang}/...
     # to extract the compiler front-end for the language.
-    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}/(\\./)?CompilerId${lang}[ \t\n\\\"]")
+    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}(/CompilerId${lang}.xctest)?/(\\./)?CompilerId${lang}[ \t\n\\\"]")
       set(_comp "${CMAKE_MATCH_2}")
       if(EXISTS "${_comp}")
         set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
@@ -366,7 +375,13 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
     # binary dir.
     file(GLOB files
       RELATIVE ${CMAKE_${lang}_COMPILER_ID_DIR}
-      ${CMAKE_${lang}_COMPILER_ID_DIR}/*)
+
+      # normal case
+      ${CMAKE_${lang}_COMPILER_ID_DIR}/*
+
+      # com.apple.package-type.bundle.unit-test
+      ${CMAKE_${lang}_COMPILER_ID_DIR}/*.xctest/*
+      )
     list(REMOVE_ITEM files "${src}")
     set(COMPILER_${lang}_PRODUCED_FILES "")
     foreach(file ${files})
