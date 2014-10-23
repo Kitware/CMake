@@ -276,10 +276,13 @@ properties:
 .. code-block:: cmake
 
   add_library(foo INTERFACE)
+  set(with_variadics ${CMAKE_CURRENT_SOURCE_DIR}/with_variadics)
+  set(no_variadics ${CMAKE_CURRENT_SOURCE_DIR}/no_variadics)
   target_link_libraries(foo
     INTERFACE
-      "$<$<COMPILE_FEATURES:cxx_variadic_templates>:${CMAKE_CURRENT_SOURCE_DIR}/with_variadics>"
-      "$<$<NOT:$<COMPILE_FEATURES:cxx_variadic_templates>>:${CMAKE_CURRENT_SOURCE_DIR}/no_variadics>")
+      "$<$<COMPILE_FEATURES:cxx_variadic_templates>:${with_variadics}>"
+      "$<$<NOT:$<COMPILE_FEATURES:cxx_variadic_templates>>:${no_variadics}>"
+    )
 
 Consuming code then simply links to the ``foo`` target as usual and uses
 the feature-appropriate include directory

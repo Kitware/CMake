@@ -21,7 +21,8 @@
 #
 # ::
 #
-#   SQUISH_INSTALL_DIR              The Squish installation directory (containing bin, lib, etc)
+#   SQUISH_INSTALL_DIR              The Squish installation directory
+#                                   (containing bin, lib, etc)
 #   SQUISH_SERVER_EXECUTABLE        The squishserver executable
 #   SQUISH_CLIENT_EXECUTABLE        The squishrunner executable
 #
@@ -47,21 +48,26 @@
 #
 # The arguments have the following meaning:
 #
-# ::
-#
-#    cmakeTestName: this will be used as the first argument for add_test()
-#    AUT targetName: the name of the cmake target which will be used as AUT, i.e. the
-#                    executable which will be tested.
-#    SUITE suiteName: this is either the full path to the squish suite, or just the
-#                     last directory of the suite, i.e. the suite name. In this case
-#                     the CMakeLists.txt which calls squish_add_test() must be located
-#                     in the parent directory of the suite directory.
-#    TEST squishTestName: the name of the squish test, i.e. the name of the subdirectory
-#                         of the test inside the suite directory.
-#    SETTINGSGROUP group: if specified, the given settings group will be used for executing the test.
-#                         If not specified, the groupname will be "CTest_<username>"
-#    PRE_COMMAND command:  if specified, the given command will be executed before starting the squish test.
-#    POST_COMMAND command: same as PRE_COMMAND, but after the squish test has been executed.
+# ``cmakeTestName``
+#   this will be used as the first argument for add_test()
+# ``AUT targetName``
+#   the name of the cmake target which will be used as AUT, i.e. the
+#   executable which will be tested.
+# ``SUITE suiteName``
+#   this is either the full path to the squish suite, or just the
+#   last directory of the suite, i.e. the suite name. In this case
+#   the CMakeLists.txt which calls squish_add_test() must be located
+#   in the parent directory of the suite directory.
+# ``TEST squishTestName``
+#   the name of the squish test, i.e. the name of the subdirectory
+#   of the test inside the suite directory.
+# ``SETTINGSGROUP group``
+#   if specified, the given settings group will be used for executing the test.
+#   If not specified, the groupname will be "CTest_<username>"
+# ``PRE_COMMAND command``
+#   if specified, the given command will be executed before starting the squish test.
+# ``POST_COMMAND command``
+#   same as PRE_COMMAND, but after the squish test has been executed.
 #
 #
 #
@@ -70,7 +76,12 @@
 #    enable_testing()
 #    find_package(Squish 4.0)
 #    if (SQUISH_FOUND)
-#       squish_v4_add_test(myTestName AUT myApp SUITE ${CMAKE_SOURCE_DIR}/tests/mySuite TEST someSquishTest SETTINGSGROUP myGroup )
+#       squish_v4_add_test(myTestName
+#         AUT myApp
+#         SUITE ${CMAKE_SOURCE_DIR}/tests/mySuite
+#         TEST someSquishTest
+#         SETTINGSGROUP myGroup
+#         )
 #    endif ()
 #
 #

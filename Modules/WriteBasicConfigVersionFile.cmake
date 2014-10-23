@@ -6,7 +6,10 @@
 #
 # ::
 #
-#   WRITE_BASIC_CONFIG_VERSION_FILE( filename [VERSION major.minor.patch] COMPATIBILITY (AnyNewerVersion|SameMajorVersion) )
+#   WRITE_BASIC_CONFIG_VERSION_FILE( filename
+#     [VERSION major.minor.patch]
+#     COMPATIBILITY (AnyNewerVersion|SameMajorVersion)
+#     )
 #
 #
 #

@@ -20,8 +20,9 @@
 #
 # ::
 #
-#     cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
-#                                                CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
+#     cmake_expand_imported_targets(expandedLibs
+#       LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
+#       CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
 
 
 #=============================================================================

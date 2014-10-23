@@ -20,7 +20,8 @@
 #
 # ::
 #
-#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(<name> (DEFAULT_MSG|"Custom failure message") <var1>...<varN> )
+#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(<name>
+#       (DEFAULT_MSG|"Custom failure message") <var1>...<varN> )
 #
 # If the variables <var1> to <varN> are all valid, then
 # <UPPERCASED_NAME>_FOUND will be set to TRUE.  If DEFAULT_MSG is given
@@ -32,14 +33,13 @@
 #
 # ::
 #
-#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [FOUND_VAR <resultVar>]
-#                                            [REQUIRED_VARS <var1>...<varN>]
-#                                            [VERSION_VAR   <versionvar>]
-#                                            [HANDLE_COMPONENTS]
-#                                            [CONFIG_MODE]
-#                                            [FAIL_MESSAGE "Custom failure message"] )
-#
-#
+#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME
+#       [FOUND_VAR <resultVar>]
+#       [REQUIRED_VARS <var1>...<varN>]
+#       [VERSION_VAR   <versionvar>]
+#       [HANDLE_COMPONENTS]
+#       [CONFIG_MODE]
+#       [FAIL_MESSAGE "Custom failure message"] )
 #
 # In this mode, the name of the result-variable can be set either to
 # either <UPPERCASED_NAME>_FOUND or <OriginalCase_Name>_FOUND using the
@@ -75,7 +75,8 @@
 #
 # ::
 #
-#     find_package_handle_standard_args(LibXml2  DEFAULT_MSG  LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR)
+#     find_package_handle_standard_args(LibXml2  DEFAULT_MSG
+#       LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR)
 #
 #
 #
@@ -90,9 +91,10 @@
 #
 # ::
 #
-#     find_package_handle_standard_args(LibXslt FOUND_VAR LibXslt_FOUND
-#                                              REQUIRED_VARS LibXslt_LIBRARIES LibXslt_INCLUDE_DIRS
-#                                              VERSION_VAR LibXslt_VERSION_STRING)
+#     find_package_handle_standard_args(LibXslt
+#       FOUND_VAR LibXslt_FOUND
+#       REQUIRED_VARS LibXslt_LIBRARIES LibXslt_INCLUDE_DIRS
+#       VERSION_VAR LibXslt_VERSION_STRING)
 #
 # In this case, LibXslt is considered to be found if the variable(s)
 # listed after REQUIRED_VAR are all valid, i.e.  LibXslt_LIBRARIES and

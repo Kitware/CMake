@@ -38,6 +38,8 @@ create conditional output::
 expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
 otherwise expands to nothing.
 
+Available logical expressions are:
+
 ``$<0:...>``
   Empty string (ignores ``...``)
 ``$<1:...>``
@@ -110,6 +112,8 @@ These expressions may also may be combined with logical expressions::
 expands to ``OLD_COMPILER`` if the
 :variable:`CMAKE_CXX_COMPILER_VERSION <CMAKE_<LANG>_COMPILER_VERSION>` is less
 than 4.2.0.
+
+Available informational expressions are:
 
 ``$<CONFIGURATION>``
   Configuration name. Deprecated. Use ``CONFIG`` instead.
@@ -185,7 +189,13 @@ property with each entry preceeded by ``-I``. Note that a more-complete use
 in this situation would require first checking if the INCLUDE_DIRECTORIES
 property is non-empty::
 
-  $<$<BOOL:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>>:-I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>>
+  $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
+
+where ``${prop}`` refers to a helper variable::
+
+  set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>")
+
+Available output expressions are:
 
 ``$<JOIN:list,...>``
   Joins the list with the content of ``...``

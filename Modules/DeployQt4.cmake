@@ -37,7 +37,8 @@
 #
 # ::
 #
-#   FIXUP_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
+#   FIXUP_QT4_EXECUTABLE(<executable>
+#     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
 #
 # Copies Qt plugins, writes a Qt configuration file (if needed) and
 # fixes up a Qt4 executable using BundleUtilities so it is standalone
@@ -63,7 +64,8 @@
 #
 # ::
 #
-#   INSTALL_QT4_PLUGIN_PATH(plugin executable copy installed_plugin_path_var <plugins_dir> <component> <configurations>)
+#   INSTALL_QT4_PLUGIN_PATH(plugin executable copy installed_plugin_path_var
+#                           <plugins_dir> <component> <configurations>)
 #
 # Install (or copy) a resolved <plugin> to the default plugins directory
 # (or <plugins_dir>) relative to <executable> and store the result in
@@ -77,7 +79,8 @@
 #
 # ::
 #
-#   INSTALL_QT4_PLUGIN(plugin executable copy installed_plugin_path_var <plugins_dir> <component>)
+#   INSTALL_QT4_PLUGIN(plugin executable copy installed_plugin_path_var
+#                      <plugins_dir> <component>)
 #
 # Install (or copy) an unresolved <plugin> to the default plugins
 # directory (or <plugins_dir>) relative to <executable> and store the
@@ -86,7 +89,8 @@
 #
 # ::
 #
-#   INSTALL_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
+#   INSTALL_QT4_EXECUTABLE(<executable>
+#     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
 #
 # Installs Qt plugins, writes a Qt configuration file (if needed) and
 # fixes up a Qt4 executable using BundleUtilities so it is standalone

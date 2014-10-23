@@ -40,13 +40,14 @@
 # OSG and it's various components.  CMAKE_PREFIX_PATH can also be used
 # for this (see find_library() CMake documentation).
 #
-# ::
-#
-#     <MODULE>_DIR (where MODULE is of the form "OSGVOLUME" and there is a FindosgVolume.cmake file)
-#     OSG_DIR
-#     OSGDIR
-#     OSG_ROOT
-#
+# ``<MODULE>_DIR``
+#   (where MODULE is of the form "OSGVOLUME" and there is a FindosgVolume.cmake file)
+# ``OSG_DIR``
+#   ..
+# ``OSGDIR``
+#   ..
+# ``OSG_ROOT``
+#   ..
 #
 #
 # [CMake 2.8.10]: The CMake variable OSG_DIR can now be used as well to

@@ -8,29 +8,29 @@
 #
 # This module defines the following variables:
 #
-# ::
-#
-#   KDE3_DEFINITIONS         - compiler definitions required for compiling KDE software
-#   KDE3_INCLUDE_DIR         - the KDE include directory
-#   KDE3_INCLUDE_DIRS        - the KDE and the Qt include directory, for use with include_directories()
-#   KDE3_LIB_DIR             - the directory where the KDE libraries are installed, for use with link_directories()
-#   QT_AND_KDECORE_LIBS      - this contains both the Qt and the kdecore library
-#   KDE3_DCOPIDL_EXECUTABLE  - the dcopidl executable
-#   KDE3_DCOPIDL2CPP_EXECUTABLE - the dcopidl2cpp executable
-#   KDE3_KCFGC_EXECUTABLE    - the kconfig_compiler executable
-#   KDE3_FOUND               - set to TRUE if all of the above has been found
-#
-#
+# ``KDE3_DEFINITIONS``
+#   compiler definitions required for compiling KDE software
+# ``KDE3_INCLUDE_DIR``
+#   the KDE include directory
+# ``KDE3_INCLUDE_DIRS``
+#   the KDE and the Qt include directory, for use with include_directories()
+# ``KDE3_LIB_DIR``
+#   the directory where the KDE libraries are installed, for use with link_directories()
+# ``QT_AND_KDECORE_LIBS``
+#   this contains both the Qt and the kdecore library
+# ``KDE3_DCOPIDL_EXECUTABLE``
+#   the dcopidl executable
+# ``KDE3_DCOPIDL2CPP_EXECUTABLE``
+#   the dcopidl2cpp executable
+# ``KDE3_KCFGC_EXECUTABLE``
+#   the kconfig_compiler executable
+# ``KDE3_FOUND``
+#   set to TRUE if all of the above has been found
 #
 # The following user adjustable options are provided:
 #
-# ::
-#
-#   KDE3_BUILD_TESTS - enable this to build KDE testcases
-#
-#
-#
-#
+# ``KDE3_BUILD_TESTS``
+#   enable this to build KDE testcases
 #
 # It also adds the following macros (from KDE3Macros.cmake) SRCS_VAR is
 # always the variable which contains the list of source files for your
@@ -101,7 +101,8 @@
 #
 # ::
 #
-#     Currently identical to add_executable(), may provide some advanced features in the future.
+#     Currently identical to add_executable(), may provide some advanced
+#     features in the future.
 #
 #
 #
@@ -110,7 +111,8 @@
 # ::
 #
 #     Create a KDE plugin (KPart, kioslave, etc.) from the given source files.
-#     If WITH_PREFIX is given, the resulting plugin will have the prefix "lib", otherwise it won't.
+#     If WITH_PREFIX is given, the resulting plugin will have the prefix "lib",
+#     otherwise it won't.
 #     It creates and installs an appropriate libtool la-file.
 #
 #
@@ -120,7 +122,8 @@
 # ::
 #
 #     Create a KDE application in the form of a module loadable via kdeinit.
-#     A library named kdeinit_<name> will be created and a small executable which links to it.
+#     A library named kdeinit_<name> will be created and a small executable
+#     which links to it.
 #
 #
 #
