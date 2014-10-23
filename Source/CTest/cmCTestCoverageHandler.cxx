@@ -16,6 +16,7 @@
 #include "cmParseCacheCoverage.h"
 #include "cmParseJacocoCoverage.h"
 #include "cmParseDelphiCoverage.h"
+#include "cmParseBlanketJSCoverage.h"
 #include "cmCTest.h"
 #include "cmake.h"
 #include "cmMakefile.h"
@@ -418,6 +419,13 @@ int cmCTestCoverageHandler::ProcessHandler()
     }
 
   file_count += this->HandleJacocoCoverage(&cont);
+  error = cont.Error;
+  if ( file_count < 0 )
+    {
+    return error;
+    }
+
+  file_count += this->HandleBlanketJSCoverage(&cont);
   error = cont.Error;
   if ( file_count < 0 )
     {
@@ -927,9 +935,11 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
   std::vector<std::string> files;
   g.SetRecurse(true);
 
+
   std::string BinDir
     = this->CTest->GetBinaryDir();
   std::string coverageFile = BinDir+ "/*.html";
+
 
   g.FindFiles(coverageFile);
   files=g.GetFiles();
@@ -947,6 +957,36 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
     }
   return static_cast<int>(cont->TotalCoverage.size());
 }
+
+//----------------------------------------------------------------------
+int cmCTestCoverageHandler::HandleBlanketJSCoverage(
+  cmCTestCoverageHandlerContainer* cont)
+  {
+  cmParseBlanketJSCoverage cov =
+   cmParseBlanketJSCoverage(*cont, this->CTest);
+  std::string SourceDir
+    = this->CTest->GetCTestConfiguration("SourceDirectory");
+
+  //Look for something other than output.json, still JSON extension.
+  std::string coverageFile = SourceDir+ "/*.json";
+  cmsys::Glob g;
+  std::vector<std::string> files;
+  g.FindFiles(coverageFile);
+  files=g.GetFiles();
+  if (files.size() > 0)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Found BlanketJS output JSON, Performing Coverage" << std::endl);
+    cov.LoadCoverageData(files);
+    }
+  else
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+       " Cannot find BlanketJS coverage files: " << coverageFile
+       << std::endl);
+    }
+  return static_cast<int>(cont->TotalCoverage.size());
+  }
 //----------------------------------------------------------------------
 int cmCTestCoverageHandler::HandleGCovCoverage(
   cmCTestCoverageHandlerContainer* cont)
