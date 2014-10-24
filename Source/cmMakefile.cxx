@@ -4476,7 +4476,7 @@ void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
   if(cmDefinitions* up = cur.GetParent())
     {
     // First localize the definition in the current scope.
-    cur.Pull(var);
+    cur.Get(var);
 
     // Now update the definition in the parent scope.
     up->Set(var, varDef);
