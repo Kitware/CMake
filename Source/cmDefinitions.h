@@ -33,11 +33,9 @@ public:
   /** Returns the parent scope, if any.  */
   cmDefinitions* GetParent() const { return this->Up; }
 
-  /** Get the value associated with a key; null if none. */
-  const char* Get(const std::string& key) const;
-
-  /** Pull a variable from the parent. */
-  void Pull(const std::string& key);
+  /** Get the value associated with a key; null if none.
+      Store the result locally if it came from a parent.  */
+  const char* Get(const std::string& key);
 
   /** Set (or unset if null) a value associated with a key.  */
   const char* Set(const std::string& key, const char* value);
@@ -75,7 +73,7 @@ private:
   MapType Map;
 
   // Internal query and update methods.
-  Def const& GetInternal(const std::string& key) const;
+  Def const& GetInternal(const std::string& key);
   Def const& SetInternal(const std::string& key, Def const& def);
 
   // Implementation of Closure() method.
