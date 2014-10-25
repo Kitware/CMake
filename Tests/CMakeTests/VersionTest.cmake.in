@@ -10,7 +10,9 @@ endif()
 
 set(EQUALV "1 1")
 list(APPEND EQUALV "1.0 1")
+list(APPEND EQUALV "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0 1")
 list(APPEND EQUALV "1.2.3.4.5.6.7 1.2.3.4.5.6.7")
+list(APPEND EQUALV "1.2.3.4.5.6.7.8.9 1.2.3.4.5.6.7.8.9")
 
 foreach(v IN LISTS EQUALV)
   string(REGEX MATCH "(.*) (.*)" _dummy "${v}")

@@ -2634,28 +2634,36 @@ bool cmSystemTools::ChangeRPath(std::string const& file,
 bool cmSystemTools::VersionCompare(cmSystemTools::CompareOp op,
                                    const char* lhss, const char* rhss)
 {
-  // Parse out up to 8 components.
-  unsigned int lhs[8] = {0,0,0,0,0,0,0,0};
-  unsigned int rhs[8] = {0,0,0,0,0,0,0,0};
-  sscanf(lhss, "%u.%u.%u.%u.%u.%u.%u.%u",
-         &lhs[0], &lhs[1], &lhs[2], &lhs[3],
-         &lhs[4], &lhs[5], &lhs[6], &lhs[7]);
-  sscanf(rhss, "%u.%u.%u.%u.%u.%u.%u.%u",
-         &rhs[0], &rhs[1], &rhs[2], &rhs[3],
-         &rhs[4], &rhs[5], &rhs[6], &rhs[7]);
+  const char *endl = lhss;
+  const char *endr = rhss;
+  unsigned long lhs, rhs;
 
-  // Do component-wise comparison.
-  for(unsigned int i=0; i < 8; ++i)
+  while (((*endl >= '0') && (*endl <= '9')) ||
+         ((*endr >= '0') && (*endr <= '9')))
     {
-    if(lhs[i] < rhs[i])
+    // Do component-wise comparison.
+    lhs = strtoul(endl, const_cast<char**>(&endl), 10);
+    rhs = strtoul(endr, const_cast<char**>(&endr), 10);
+
+    if(lhs < rhs)
       {
       // lhs < rhs, so true if operation is LESS
       return op == cmSystemTools::OP_LESS;
       }
-    else if(lhs[i] > rhs[i])
+    else if(lhs > rhs)
       {
       // lhs > rhs, so true if operation is GREATER
       return op == cmSystemTools::OP_GREATER;
+      }
+
+    if (*endr == '.')
+      {
+      endr++;
+      }
+
+    if (*endl == '.')
+      {
+      endl++;
       }
     }
   // lhs == rhs, so true if operation is EQUAL
