@@ -29,7 +29,7 @@ void cmDefinitions::Reset(cmDefinitions* parent)
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const&
-cmDefinitions::GetInternal(const std::string& key) const
+cmDefinitions::GetInternal(const std::string& key)
 {
   MapType::const_iterator i = this->Map.find(key);
   if(i != this->Map.end())
@@ -38,8 +38,9 @@ cmDefinitions::GetInternal(const std::string& key) const
     }
   if(cmDefinitions* up = this->Up)
     {
-    // Query the parent scope.
-    return up->GetInternal(key);
+    // Query the parent scope and store the result locally.
+    Def def = up->GetInternal(key);
+    return this->Map.insert(MapType::value_type(key, def)).first->second;
     }
   return this->NoDef;
 }
@@ -62,23 +63,10 @@ cmDefinitions::SetInternal(const std::string& key, Def const& def)
 }
 
 //----------------------------------------------------------------------------
-const char* cmDefinitions::Get(const std::string& key) const
+const char* cmDefinitions::Get(const std::string& key)
 {
   Def const& def = this->GetInternal(key);
   return def.Exists? def.c_str() : 0;
-}
-
-//----------------------------------------------------------------------------
-void cmDefinitions::Pull(const std::string& key)
-{
-  if (this->Up)
-    {
-    Def const& def = this->Up->GetInternal(key);
-    if (def.Exists)
-      {
-      this->SetInternal(key, def);
-      }
-    }
 }
 
 //----------------------------------------------------------------------------
