@@ -189,7 +189,7 @@ string(CONFIGURE "${infile}" infile+-/out @ONLY)
 set(infile "${infile+-/out}")
 
 # Write include file to a file
-string(REGEX REPLACE "includefile" "${file}" outfile "${infile}")
+string(REGEX REPLACE "includefile" "Includes/Values.h" outfile "${infile}")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h-tmp" "${outfile}")
 file(RENAME "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h-tmp"
             "${CMAKE_CURRENT_BINARY_DIR}/OutputFile.h")
