@@ -138,6 +138,56 @@
 #
 #   rpm -qp --requires file.rpm
 #
+# .. variable:: CPACK_RPM_PACKAGE_REQUIRES_PRE
+#
+#  RPM spec requires(pre) field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set RPM preinstall dependencies (requires(pre)).  Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_REQUIRES_PRE "shadow-utils, initscripts")
+#
+# .. variable:: CPACK_RPM_PACKAGE_REQUIRES_POST
+#
+#  RPM spec requires(post) field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set RPM postinstall dependencies (requires(post)).  Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_REQUIRES_POST "shadow-utils, initscripts")
+#
+#
+# .. variable:: CPACK_RPM_PACKAGE_REQUIRES_POSTUN
+#
+#  RPM spec requires(postun) field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set RPM postuninstall dependencies (requires(postun)).  Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_REQUIRES_POSTUN "shadow-utils, initscripts")
+#
+#
+# .. variable:: CPACK_RPM_PACKAGE_REQUIRES_PREUN
+#
+#  RPM spec requires(preun) field.
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set RPM preuninstall dependencies (requires(preun)).  Note that you must enclose
+#  the complete requires string between quotes, for example::
+#
+#   set(CPACK_RPM_PACKAGE_REQUIRES_PREUN "shadow-utils, initscripts")
+#
 # .. variable:: CPACK_RPM_PACKAGE_SUGGESTS
 #
 #  RPM spec suggest field.
@@ -387,7 +437,7 @@ if(CPACK_RPM_PACKAGE_DEBUG)
                     OUTPUT_VARIABLE _TMP_LSB_RELEASE_OUTPUT
                     ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    string(REPLACE "\n" ", "
+    string(REGEX REPLACE "\n" ", "
            LSB_RELEASE_OUTPUT
            ${_TMP_LSB_RELEASE_OUTPUT})
   else ()
@@ -400,7 +450,7 @@ endif()
 # to shut down warning about space in buildtree
 # some recent RPM version should support space in different places.
 # not checked [yet].
-if(CPACK_TOPLEVEL_DIRECTORY MATCHES " ")
+if(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
   message(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
 endif()
 
@@ -600,7 +650,7 @@ endif()
 # There may be some COMPONENT specific variables as well
 # If component specific var is not provided we use the global one
 # for each component
-foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV)
+foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
     endif()
@@ -639,6 +689,13 @@ foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLIC
     string(TOLOWER "${_PACKAGE_HEADER_TAIL}" _PACKAGE_HEADER_TAIL)
     string(SUBSTRING ${_RPM_SPEC_HEADER} 0 1 _PACKAGE_HEADER_NAME)
     set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}${_PACKAGE_HEADER_TAIL}")
+    # The following keywords require parentheses around the "pre" or "post" suffix in the final RPM spec file.
+    set(SCRIPTS_REQUIREMENTS_LIST REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
+    list(FIND SCRIPTS_REQUIREMENTS_LIST ${_RPM_SPEC_HEADER} IS_SCRIPTS_REQUIREMENT_FOUND)
+    if(NOT ${IS_SCRIPTS_REQUIREMENT_FOUND} EQUAL -1)
+      string(REPLACE "_" "(" _PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}")
+      set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME})")
+    endif()
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
     endif()
@@ -1035,6 +1092,10 @@ Group:          \@CPACK_RPM_PACKAGE_GROUP\@
 Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_URL\@
 \@TMP_RPM_REQUIRES\@
+\@TMP_RPM_REQUIRES_PRE\@
+\@TMP_RPM_REQUIRES_POST\@
+\@TMP_RPM_REQUIRES_PREUN\@
+\@TMP_RPM_REQUIRES_POSTUN\@
 \@TMP_RPM_PROVIDES\@
 \@TMP_RPM_OBSOLETES\@
 \@TMP_RPM_CONFLICTS\@
