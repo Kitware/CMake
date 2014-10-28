@@ -50,6 +50,8 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
+
 find_library(CURSES_CURSES_LIBRARY NAMES curses )
 
 find_library(CURSES_NCURSES_LIBRARY NAMES ncurses )
@@ -81,7 +83,6 @@ endif()
 # prefix as the library was found, if still not found, try curses.h with the
 # default search paths.
 if(CURSES_CURSES_LIBRARY  AND  CURSES_NEED_NCURSES)
-  include(${CMAKE_CURRENT_LIST_DIR}/CheckLibraryExists.cmake)
   include(${CMAKE_CURRENT_LIST_DIR}/CMakePushCheckState.cmake)
   cmake_push_check_state()
   set(CMAKE_REQUIRED_QUIET ${Curses_FIND_QUIETLY})
