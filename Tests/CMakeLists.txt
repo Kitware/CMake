@@ -2339,6 +2339,25 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       "Process file.*CoverageTest.java.*Total LOC:.*17.*Percentage Coverage: 76.47*"
       ENVIRONMENT COVFILE=)
 
+  # Adding a test case for Javascript Coverage
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/JavascriptCoverage/DartConfiguration.tcl.in"
+     "${CMake_BINARY_DIR}/Testing/JavascriptCoverage/DartConfiguration.tcl")
+  configure_file(
+     "${CMake_SOURCE_DIR}/Tests/JavascriptCoverage/output.json.in"
+     "${CMake_BINARY_DIR}/Testing/JavascriptCoverage/output.json")
+  file(COPY "${CMake_SOURCE_DIR}/Tests/JavascriptCoverage/"
+    DESTINATION "${CMake_BINARY_DIR}/Testing/JavascriptCoverage"
+    FILES_MATCHING PATTERN "*.js")
+  add_test(NAME CTestJavascriptCoverage
+    COMMAND cmake -E chdir
+    ${CMake_BINARY_DIR}/Testing/JavascriptCoverage
+    $<TARGET_FILE:ctest> -T Coverage --debug)
+  set_tests_properties(CTestJavascriptCoverage PROPERTIES
+      PASS_REGULAR_EXPRESSION
+      "Process file.*test3.js.*Total LOC:.*49.*Percentage Coverage: 79.59*"
+      ENVIRONMENT COVFILE=)
+
   # test coverage for Delphi-code-Coverage
   configure_file(
      "${CMake_SOURCE_DIR}/Tests/DelphiCoverage/DartConfiguration.tcl.in"

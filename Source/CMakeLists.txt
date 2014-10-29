@@ -522,6 +522,7 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmParseCacheCoverage.cxx
   CTest/cmParseGTMCoverage.cxx
   CTest/cmParseJacocoCoverage.cxx
+  CTest/cmParseBlanketJSCoverage.cxx
   CTest/cmParsePHPCoverage.cxx
   CTest/cmParseCoberturaCoverage.cxx
   CTest/cmParseDelphiCoverage.cxx
