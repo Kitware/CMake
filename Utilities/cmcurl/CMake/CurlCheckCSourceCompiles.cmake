@@ -13,7 +13,7 @@
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
 macro(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
-  if("${VAR}" MATCHES "^${VAR}$" OR "${VAR}" MATCHES "UNKNOWN")
+  if(NOT DEFINED "${VAR}")
     set(message "${VAR}")
     # If the number of arguments is greater than 2 (SOURCE VAR)
     if(${ARGC} GREATER 2)
