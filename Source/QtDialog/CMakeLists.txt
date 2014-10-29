@@ -171,7 +171,7 @@ set(CMAKE_INSTALL_DESTINATION_ARGS
 
 install(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
   # install a desktop file so CMake appears in the application start menu
   # with an icon
   install(FILES CMake.desktop DESTINATION share/applications )
