@@ -60,7 +60,7 @@ html_style = 'cmake.css'
 html_theme = 'default'
 html_title = 'CMake %s Documentation' % release
 html_short_title = '%s Documentation' % release
-html_favicon = 'cmake-favicon.ico'
+html_favicon = '@conf_path@/static/cmake-favicon.ico'
 # Not supported yet by sphinx:
 # https://bitbucket.org/birkenfeld/sphinx/issue/1448/make-qthelp-more-configurable
 # qthelp_namespace = "org.cmake"
