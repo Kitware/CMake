@@ -31,6 +31,8 @@ public:
 protected:
   virtual int InitializeInternal();
   virtual const char* GetPackagingInstallPrefix();
+  int ConstructBundle();
+  int SignBundle(const std::string& src_dir);
   int PackageFiles();
   bool SupportsComponentInstallation() const;
 
