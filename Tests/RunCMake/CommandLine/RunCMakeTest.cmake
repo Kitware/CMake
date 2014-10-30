@@ -43,3 +43,11 @@ run_cmake_command(E_sleep-bad-arg2 ${CMAKE_COMMAND} -E sleep 1 -1)
 run_cmake_command(E_sleep-one-tenth ${CMAKE_COMMAND} -E sleep 0.1)
 
 run_cmake_command(P_directory ${CMAKE_COMMAND} -P ${RunCMake_SOURCE_DIR})
+
+set(RunCMake_TEST_OPTIONS
+  "-DFOO=-DBAR:BOOL=BAZ")
+run_cmake(D_nested_cache)
+
+set(RunCMake_TEST_OPTIONS
+  "-DFOO:STRING=-DBAR:BOOL=BAZ")
+run_cmake(D_typed_nested_cache)

@@ -139,7 +139,7 @@ bool cmCacheManager::ParseEntry(const std::string& entry,
 {
   // input line is:         key:type=value
   static cmsys::RegularExpression reg(
-    "^([^:]*):([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
+    "^([^=:]*):([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
   // input line is:         "key":type=value
   static cmsys::RegularExpression regQuoted(
     "^\"([^\"]*)\":([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
