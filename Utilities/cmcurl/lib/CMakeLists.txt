@@ -1,4 +1,4 @@
-set(LIB_NAME libcurl)
+set(LIB_NAME cmcurl)
 
 configure_file(${CURL_SOURCE_DIR}/include/curl/curlbuild.h.cmake
   ${CURL_BINARY_DIR}/include/curl/curlbuild.h)
@@ -96,14 +96,17 @@ add_library(
 
 target_link_libraries(${LIB_NAME} ${CURL_LIBS})
 
+if(0) # This code not needed for building within CMake.
 if(WIN32)
   add_definitions( -D_USRDLL )
+endif()
 endif()
 
 set_target_properties(${LIB_NAME} PROPERTIES COMPILE_DEFINITIONS BUILDING_LIBCURL)
 
 setup_curl_dependencies(${LIB_NAME})
 
+if(0) # This code not needed for building within CMake.
 # Remove the "lib" prefix since the library is already named "libcurl".
 set_target_properties(${LIB_NAME} PROPERTIES PREFIX "")
 set_target_properties(${LIB_NAME} PROPERTIES IMPORT_PREFIX "")
@@ -116,3 +119,4 @@ if(WIN32)
 endif()
 
 install(TARGETS ${LIB_NAME} DESTINATION lib)
+endif()

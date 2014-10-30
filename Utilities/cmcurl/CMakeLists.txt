@@ -1,3 +1,35 @@
+# Set curl options as needed for CMake build
+set(BUILD_CURL_EXE OFF CACHE INTERNAL "No curl exe")
+set(BUILD_CURL_TESTS OFF CACHE INTERNAL "No curl tests")
+set(BUILD_DASHBOARD_REPORTS OFF CACHE INTERNAL "No curl dashboard reports")
+set(BUILD_RELEASE_DEBUG_DIRS OFF CACHE INTERNAL "No curl release/debug dirs")
+set(CMAKE_USE_LIBSSH2 OFF CACHE INTERNAL "Disable curl libssh2")
+set(CMAKE_USE_OPENLDAP OFF CACHE INTERNAL "No curl OpenLDAP")
+set(CURL_DISABLE_COOKIES OFF CACHE INTERNAL "Do not disable curl cookie support")
+set(CURL_DISABLE_CRYPTO_AUTH OFF CACHE INTERNAL "Do not disable curl crypto auth")
+set(CURL_DISABLE_DICT ON CACHE INTERNAL "Disable curl dict protocol?")
+set(CURL_DISABLE_FILE OFF CACHE INTERNAL "Disable curl file protocol?")
+set(CURL_DISABLE_FTP OFF CACHE INTERNAL "Disable curl ftp protocol?")
+set(CURL_DISABLE_GOPHER ON CACHE INTERNAL "Disable curl gopher protocol?")
+set(CURL_DISABLE_HTTP OFF CACHE INTERNAL "Disable curl http protocol?")
+set(CURL_DISABLE_IMAP ON CACHE INTERNAL "Disable curl imap protocol?")
+set(CURL_DISABLE_LDAP ON CACHE INTERNAL "Disable curl ldap protocol?")
+set(CURL_DISABLE_LDAPS ON CACHE INTERNAL "Disable curl ldaps protocol?")
+set(CURL_DISABLE_POP3 ON CACHE INTERNAL "Disable curl pop3 protocol?")
+set(CURL_DISABLE_RTSP ON CACHE INTERNAL "Disable curl rtsp protocol?")
+set(CURL_DISABLE_SMTP ON CACHE INTERNAL "Disable curl smtp protocol?")
+set(CURL_DISABLE_TELNET ON CACHE INTERNAL "Disable curl telnet protocol?")
+set(CURL_DISABLE_TFTP ON CACHE INTERNAL "Disable curl tftp protocol?")
+set(CURL_DISABLE_VERBOSE_STRING OFF CACHE INTERNAL "Do not disable curl verbosity")
+set(CURL_HIDDEN_SYMBOLS OFF CACHE INTERNAL "No curl hidden symbols")
+set(CURL_LDAP_WIN OFF CACHE INTERNAL "No curl Windows LDAP")
+set(CURL_STATICLIB ON CACHE INTERNAL "Static curl")
+set(CURL_USE_ARES OFF CACHE INTERNAL "No curl c-ares support")
+set(CURL_ZLIB ON CACHE INTERNAL "Enable curl zlib")
+set(DISABLED_THREADSAFE OFF CACHE INTERNAL "Curl can use thread-safe functions")
+set(ENABLE_IPV6 OFF CACHE INTERNAL "Curl IPv6 support")
+set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
+
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -45,7 +77,9 @@ include(Macros)
 
 project( CURL C )
 
+if(0) # This code not needed for building within CMake.
 message(WARNING "the curl cmake build system is poorly maintained. Be aware")
+endif()
 
 file (READ ${CURL_SOURCE_DIR}/include/curl/curlver.h CURL_VERSION_H_CONTENTS)
 string (REGEX MATCH "LIBCURL_VERSION_MAJOR[ \t]+([0-9]+)"
@@ -69,7 +103,9 @@ include_regular_expression("^.*$")    # Sukender: Is it necessary?
 # Setup package meta-data
 # SET(PACKAGE "curl")
 set(CURL_VERSION ${CURL_MAJOR_VERSION}.${CURL_MINOR_VERSION}.${CURL_PATCH_VERSION})
+if(0) # This code not needed for building within CMake.
 message(STATUS "curl version=[${CURL_VERSION}]")
+endif()
 # SET(PACKAGE_TARNAME "curl")
 # SET(PACKAGE_NAME "curl")
 # SET(PACKAGE_VERSION "-")
@@ -361,7 +397,7 @@ if(CURL_ZLIB)
   endif()
 endif()
 
-option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" ON)
+option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" OFF)
 mark_as_advanced(CMAKE_USE_OPENSSL)
 
 set(USE_SSLEAY OFF)
@@ -872,6 +908,7 @@ if(BUILD_CURL_TESTS)
   add_subdirectory(tests)
 endif()
 
+if(0) # This code not needed for building within CMake.
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
   set(CURL_CONFIG_HAS_BEEN_RUN_BEFORE 1 CACHE INTERNAL "Flag to track whether this is the first time running CMake or if CMake has been configured before")
@@ -895,4 +932,5 @@ if(MSVC_VERSION EQUAL 1600)
   if(EXISTS "${CURL_SLN_FILENAME}")
     file(APPEND "${CURL_SLN_FILENAME}" "\n# This should be regenerated!\n")
   endif()
+endif()
 endif()
