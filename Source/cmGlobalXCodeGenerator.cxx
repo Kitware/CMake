@@ -2314,6 +2314,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     group->AddObject(this->CreateString("-Wmost"));
     group->AddObject(this->CreateString("-Wno-four-char-constants"));
     group->AddObject(this->CreateString("-Wno-unknown-pragmas"));
+    group->AddObject(this->CreateString("$(inherited)"));
     buildSettings->AddAttribute("WARNING_CFLAGS", group);
     }
   else
