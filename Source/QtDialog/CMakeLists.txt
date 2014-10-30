@@ -171,11 +171,17 @@ set(CMAKE_INSTALL_DESTINATION_ARGS
 
 install(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
+  foreach (size IN ITEMS 32 128)
+    install(
+      FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
+      DESTINATION "share/icons/hicolor/${size}x${size}/apps"
+      RENAME      "CMakeSetup.png")
+  endforeach ()
+
   # install a desktop file so CMake appears in the application start menu
   # with an icon
   install(FILES CMake.desktop DESTINATION share/applications )
-  install(FILES CMakeSetup32.png DESTINATION share/pixmaps )
   install(FILES cmakecache.xml DESTINATION share/mime/packages )
 endif()
 
