@@ -908,6 +908,18 @@ if(BUILD_CURL_TESTS)
   add_subdirectory(tests)
 endif()
 
+#-----------------------------------------------------------------------------
+# CMake-specific curl code.
+add_executable(LIBCURL curltest.c)
+target_link_libraries(LIBCURL cmcurl)
+
+if(CMAKE_CURL_TEST_URL)
+  add_test(curl LIBCURL ${CMAKE_CURL_TEST_URL})
+endif()
+
+install(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmcurl)
+#-----------------------------------------------------------------------------
+
 if(0) # This code not needed for building within CMake.
 # This needs to be run very last so other parts of the scripts can take advantage of this.
 if(NOT CURL_CONFIG_HAS_BEEN_RUN_BEFORE)
