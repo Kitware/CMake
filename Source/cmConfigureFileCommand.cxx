@@ -74,6 +74,7 @@ bool cmConfigureFileCommand
   this->CopyOnly = false;
   this->EscapeQuotes = false;
 
+  std::string unknown_args;
   this->AtOnly = false;
   for(unsigned int i=2;i < args.size();++i)
     {
@@ -99,6 +100,18 @@ bool cmConfigureFileCommand
       {
       /* Ignore legacy option.  */
       }
+    else
+      {
+      unknown_args += " ";
+      unknown_args += args[i];
+      unknown_args += "\n";
+      }
+    }
+  if (!unknown_args.empty())
+    {
+    std::string msg = "configure_file called with unknown argument(s):\n";
+    msg += unknown_args;
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
     }
 
   if ( !this->ConfigureFile() )
