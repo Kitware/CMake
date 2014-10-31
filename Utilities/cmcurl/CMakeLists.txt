@@ -25,7 +25,6 @@ set(CURL_HIDDEN_SYMBOLS OFF CACHE INTERNAL "No curl hidden symbols")
 set(CURL_LDAP_WIN OFF CACHE INTERNAL "No curl Windows LDAP")
 set(CURL_STATICLIB ON CACHE INTERNAL "Static curl")
 set(CURL_USE_ARES OFF CACHE INTERNAL "No curl c-ares support")
-set(CURL_ZLIB ON CACHE INTERNAL "Enable curl zlib")
 set(DISABLED_THREADSAFE OFF CACHE INTERNAL "Curl can use thread-safe functions")
 set(ENABLE_IPV6 OFF CACHE INTERNAL "Curl IPv6 support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
@@ -383,6 +382,7 @@ check_library_exists("${CURL_LIBS}" dlopen "" HAVE_DLOPEN)
 # For other tests to use the same libraries
 set(CMAKE_REQUIRED_LIBRARIES ${CURL_LIBS})
 
+if(0) # This code not needed for building within CMake.
 option(CURL_ZLIB "Set to ON to enable building cURL with zlib support." ON)
 set(HAVE_LIBZ OFF)
 set(HAVE_ZLIB_H OFF)
@@ -396,6 +396,19 @@ if(CURL_ZLIB)
     list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
   endif()
 endif()
+endif()
+
+#-----------------------------------------------------------------------------
+# CMake-specific curl code.
+
+if(CURL_SPECIAL_LIBZ)
+  set(CURL_LIBS ${CURL_LIBS} "${CURL_SPECIAL_LIBZ}")
+  include_directories(${CURL_SPECIAL_LIBZ_INCLUDES})
+  set(HAVE_LIBZ 0)
+  set(HAVE_ZLIB_H 0)
+endif()
+
+#-----------------------------------------------------------------------------
 
 option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" OFF)
 mark_as_advanced(CMAKE_USE_OPENSSL)
