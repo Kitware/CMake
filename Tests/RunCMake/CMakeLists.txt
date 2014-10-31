@@ -153,3 +153,4 @@ add_RunCMake_test(CommandLine)
 
 add_RunCMake_test(install)
 add_RunCMake_test(CPackInstallProperties)
+add_RunCMake_test(ExternalProject)

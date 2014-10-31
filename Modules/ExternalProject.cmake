@@ -98,9 +98,27 @@ Create custom targets to build projects in external trees
   ``CMAKE_GENERATOR_TOOLSET <toolset>``
     Generator-specific toolset name
   ``CMAKE_ARGS <arg>...``
-    Arguments to CMake command line
+    Arguments to CMake command line.
+    These arguments are passed to CMake command line, and can contain
+    arguments other than cache values, see also
+    :manual:`CMake Options <cmake(1)>`. Arguments in the form
+    ``-Dvar:string=on`` are always passed to the command line, and
+    therefore cannot be changed by the user.
   ``CMAKE_CACHE_ARGS <arg>...``
-    Initial cache arguments, of the form ``-Dvar:string=on``
+    Initial cache arguments, of the form ``-Dvar:string=on``.
+    These arguments are written in a pre-load a script that populates
+    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows to
+    overcome command line length limits.
+    These arguments are :command:`set` using the ``FORCE`` argument,
+    and therefore cannot be changed by the user.
+  ``CMAKE_CACHE_DEFAULT_ARGS <arg>...``
+    Initial default cache arguments, of the form ``-Dvar:string=on``.
+    These arguments are written in a pre-load a script that populates
+    CMake cache, see also :manual:`cmake -C <cmake(1)>`. This allows to
+    overcome command line length limits.
+    These arguments can be used as default value that will be set if no
+    previous value is found in the cache, and that the user can change
+    later.
 
   Build step options are:
 
@@ -986,17 +1004,20 @@ macro(_ep_replace_location_tags target_name)
 endmacro()
 
 
-function(_ep_write_initial_cache target_name script_filename args)
-  # Write out values into an initial cache, that will be passed to CMake with -C
+function(_ep_command_line_to_initial_cache var args force)
   set(script_initial_cache "")
   set(regex "^([^:]+):([^=]+)=(.*)$")
   set(setArg "")
+  set(forceArg "")
+  if(force)
+    set(forceArg "FORCE")
+  endif()
   foreach(line ${args})
     if("${line}" MATCHES "^-D(.*)")
       set(line "${CMAKE_MATCH_1}")
       if(setArg)
         # This is required to build up lists in variables, or complete an entry
-        set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" FORCE)")
+        set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" ${forceArg})")
         set(script_initial_cache "${script_initial_cache}\n${setArg}")
         set(accumulator "")
         set(setArg "")
@@ -1016,9 +1037,15 @@ function(_ep_write_initial_cache target_name script_filename args)
   endforeach()
   # Catch the final line of the args
   if(setArg)
-    set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" FORCE)")
+    set(setArg "${setArg}${accumulator}\" CACHE ${type} \"Initial cache\" ${forceArg})")
     set(script_initial_cache "${script_initial_cache}\n${setArg}")
   endif()
+  set(${var} ${script_initial_cache} PARENT_SCOPE)
+endfunction()
+
+
+function(_ep_write_initial_cache target_name script_filename script_initial_cache)
+  # Write out values into an initial cache, that will be passed to CMake with -C
   # Replace location tags.
   _ep_replace_location_tags(${target_name} script_initial_cache)
   # Write out the initial cache file to the location specified.
@@ -1833,11 +1860,20 @@ function(_ep_add_configure_command name)
     get_property(cmake_args TARGET ${name} PROPERTY _EP_CMAKE_ARGS)
     list(APPEND cmd ${cmake_args})
 
-    # If there are any CMAKE_CACHE_ARGS, write an initial cache and use it
+    # If there are any CMAKE_CACHE_ARGS or CMAKE_CACHE_DEFAULT_ARGS,
+    # write an initial cache and use it
     get_property(cmake_cache_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_ARGS)
-    if(cmake_cache_args)
+    get_property(cmake_cache_default_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_DEFAULT_ARGS)
+
+    if(cmake_cache_args OR cmake_cache_default_args)
       set(_ep_cache_args_script "${tmp_dir}/${name}-cache.cmake")
-      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${cmake_cache_args}")
+      if(cmake_cache_args)
+        _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
+      endif()
+      if(cmake_cache_default_args)
+        _ep_command_line_to_initial_cache(script_initial_cache_default "${cmake_cache_default_args}" 0)
+      endif()
+      _ep_write_initial_cache(${name} "${_ep_cache_args_script}" "${script_initial_cache_force}${script_initial_cache_default}")
       list(APPEND cmd "-C${_ep_cache_args_script}")
     endif()
 
