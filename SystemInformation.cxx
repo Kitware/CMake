@@ -5156,7 +5156,7 @@ bool SystemInformationImplementation::QueryOSInformation()
             }
           }
 
-        sprintf (operatingSystem, "%s (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
+        sprintf (operatingSystem, "%ls (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
         this->OSVersion = operatingSystem;
         }
       else
@@ -5205,7 +5205,7 @@ bool SystemInformationImplementation::QueryOSInformation()
       if (osvi.dwMajorVersion <= 4)
         {
         // NB: NT 4.0 and earlier.
-        sprintf (operatingSystem, "version %ld.%ld %s (Build %ld)",
+        sprintf (operatingSystem, "version %ld.%ld %ls (Build %ld)",
                  osvi.dwMajorVersion,
                  osvi.dwMinorVersion,
                  osvi.szCSDVersion,
@@ -5236,7 +5236,7 @@ bool SystemInformationImplementation::QueryOSInformation()
       else
         {
         // Windows 2000 and everything else.
-        sprintf (operatingSystem,"%s (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
+        sprintf (operatingSystem,"%ls (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
         this->OSVersion = operatingSystem;
         }
       break;

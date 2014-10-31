@@ -40,9 +40,9 @@ namespace KWSYS_NAMESPACE
 {
 
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string& libname )
 {
-  return shl_load(libname, BIND_DEFERRED | DYNAMIC_PATH, 0L);
+  return shl_load(libname.c_str(), BIND_DEFERRED | DYNAMIC_PATH, 0L);
 }
 
 //----------------------------------------------------------------------------
@@ -53,7 +53,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoader::SymbolPointer
-DynamicLoader::GetSymbolAddress(DynamicLoader::LibraryHandle lib, const char* sym)
+DynamicLoader::GetSymbolAddress(DynamicLoader::LibraryHandle lib, const kwsys_stl::string& sym)
 {
   void* addr;
   int status;
@@ -62,7 +62,7 @@ DynamicLoader::GetSymbolAddress(DynamicLoader::LibraryHandle lib, const char* sy
    * TYPE_DATA      Look for a symbol in the data segment (for example, variables).
    * TYPE_UNDEFINED Look for any symbol.
    */
-  status = shl_findsym (&lib, sym, TYPE_UNDEFINED, &addr);
+  status = shl_findsym (&lib, sym.c_str(), TYPE_UNDEFINED, &addr);
   void* result = (status < 0) ? (void*)0 : addr;
 
   // Hack to cast pointer-to-data to pointer-to-function.
@@ -111,18 +111,18 @@ namespace KWSYS_NAMESPACE
 {
 
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string& libname )
 {
   NSObjectFileImageReturnCode rc;
   NSObjectFileImage image = 0;
 
-  rc = NSCreateObjectFileImageFromFile(libname, &image);
+  rc = NSCreateObjectFileImageFromFile(libname.c_str(), &image);
   // rc == NSObjectFileImageInappropriateFile when trying to load a dylib file
   if( rc != NSObjectFileImageSuccess )
     {
     return 0;
     }
-  NSModule handle = NSLinkModule(image, libname,
+  NSModule handle = NSLinkModule(image, libname.c_str(),
     NSLINKMODULE_OPTION_BINDNOW|NSLINKMODULE_OPTION_RETURN_ON_ERROR);
   NSDestroyObjectFileImage(image);
   return handle;
@@ -142,14 +142,14 @@ int DynamicLoader::CloseLibrary( DynamicLoader::LibraryHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const char* sym)
+  DynamicLoader::LibraryHandle lib, const kwsys_stl::string& sym)
 {
   void *result=0;
   // Need to prepend symbols with '_' on Apple-gcc compilers
-  size_t len = strlen(sym);
+  size_t len = sym.size();
   char *rsym = new char[len + 1 + 1];
   strcpy(rsym, "_");
-  strcat(rsym+1, sym);
+  strcat(rsym+1, sym.c_str());
 
   NSSymbol symbol = NSLookupSymbolInModule(lib, rsym);
   if(symbol)
@@ -183,13 +183,13 @@ namespace KWSYS_NAMESPACE
 {
 
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname)
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string& libname)
 {
   DynamicLoader::LibraryHandle lh;
-  int length = MultiByteToWideChar(CP_UTF8, 0, libname, -1, NULL, 0);
+  int length = MultiByteToWideChar(CP_UTF8, 0, libname.c_str(), -1, NULL, 0);
   wchar_t* wchars = new wchar_t[length+1];
   wchars[0] = '\0';
-  MultiByteToWideChar(CP_UTF8, 0, libname, -1, wchars, length);
+  MultiByteToWideChar(CP_UTF8, 0, libname.c_str(), -1, wchars, length);
   lh = LoadLibraryW(wchars);
   delete [] wchars;
   return lh;
@@ -203,7 +203,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const char* sym)
+  DynamicLoader::LibraryHandle lib, const kwsys_stl::string& sym)
 {
   // TODO: The calling convention affects the name of the symbol.  We
   // should have a tool to help get the symbol with the desired
@@ -230,12 +230,12 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
   void *result;
 #if defined(__BORLANDC__) || defined(__WATCOMC__)
   // Need to prepend symbols with '_'
-  size_t len = strlen(sym);
+  size_t len = sym.size();
   char *rsym = new char[len + 1 + 1];
   strcpy(rsym, "_");
-  strcat(rsym, sym);
+  strcat(rsym, sym.c_str());
 #else
-  const char *rsym = sym;
+  const char *rsym = sym.c_str();
 #endif
   result = (void*)GetProcAddress(lib, rsym);
 #if defined(__BORLANDC__) || defined(__WATCOMC__)
@@ -298,11 +298,11 @@ namespace KWSYS_NAMESPACE
 static image_id last_dynamic_err = B_OK;
 
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string& libname )
 {
   // image_id's are integers, errors are negative. Add one just in case we
   //  get a valid image_id of zero (is that even possible?).
-  image_id rc = load_add_on(libname);
+  image_id rc = load_add_on(libname.c_str());
   if (rc < 0)
     {
     last_dynamic_err = rc;
@@ -336,7 +336,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const char* sym)
+  DynamicLoader::LibraryHandle lib, const kwsys_stl::string& sym)
 {
   // Hack to cast pointer-to-data to pointer-to-function.
   union 
@@ -356,7 +356,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
     // !!! FIXME: BeOS can do function-only lookups...does this ever
     // !!! FIXME:  actually _want_ a data symbol lookup, or was this union
     // !!! FIXME:  a leftover of dlsym()? (s/ANY/TEXT for functions only).
-    status_t rc = get_image_symbol(lib-1,sym,B_SYMBOL_TYPE_ANY,&result.pvoid);
+    status_t rc = get_image_symbol(lib-1,sym.c_str(),B_SYMBOL_TYPE_ANY,&result.pvoid);
     if (rc != B_OK)
       {
       last_dynamic_err = rc;
@@ -389,7 +389,7 @@ namespace KWSYS_NAMESPACE
 {
 
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string& libname )
 {
   return 0;
 }
@@ -407,7 +407,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-    DynamicLoader::LibraryHandle lib, const char* sym)
+    DynamicLoader::LibraryHandle lib, const kwsys_stl::string& sym)
 {
   return 0;
 }
@@ -433,12 +433,12 @@ namespace KWSYS_NAMESPACE
 {
 
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string& libname )
 {
-  char *name = (char *)calloc(1, strlen(libname) + 1);
+  char *name = (char *)calloc(1, libname.size() + 1);
   dld_init(program_invocation_name);
-  strncpy(name, libname, strlen(libname));
-  dld_link(libname);
+  strncpy(name, libname.c_str(), libname.size());
+  dld_link(libname.c_str());
   return (void *)name;
 }
 
@@ -452,7 +452,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const char* sym)
+  DynamicLoader::LibraryHandle lib, const kwsys_stl::string& sym)
 {
   // Hack to cast pointer-to-data to pointer-to-function.
   union
@@ -460,7 +460,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
     void* pvoid;
     DynamicLoader::SymbolPointer psym;
   } result;
-  result.pvoid = dld_get_symbol(sym);
+  result.pvoid = dld_get_symbol(sym.c_str());
   return result.psym;
 }
 
@@ -485,9 +485,9 @@ namespace KWSYS_NAMESPACE
 {
 
 //----------------------------------------------------------------------------
-DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const char* libname )
+DynamicLoader::LibraryHandle DynamicLoader::OpenLibrary(const kwsys_stl::string& libname )
 {
-  return dlopen(libname, RTLD_LAZY);
+  return dlopen(libname.c_str(), RTLD_LAZY);
 }
 
 //----------------------------------------------------------------------------
@@ -504,7 +504,7 @@ int DynamicLoader::CloseLibrary(DynamicLoader::LibraryHandle lib)
 
 //----------------------------------------------------------------------------
 DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
-  DynamicLoader::LibraryHandle lib, const char* sym)
+  DynamicLoader::LibraryHandle lib, const kwsys_stl::string& sym)
 {
   // Hack to cast pointer-to-data to pointer-to-function.
   union 
@@ -512,7 +512,7 @@ DynamicLoader::SymbolPointer DynamicLoader::GetSymbolAddress(
     void* pvoid;
     DynamicLoader::SymbolPointer psym;
   } result;
-  result.pvoid = dlsym(lib, sym);
+  result.pvoid = dlsym(lib, sym.c_str());
   return result.psym;
 }
 
