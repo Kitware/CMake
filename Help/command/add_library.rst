@@ -35,7 +35,7 @@ variable :variable:`BUILD_SHARED_LIBS` is ``ON``.  For ``SHARED`` and
 property is set to ``ON`` automatically.
 
 By default the library file will be created in the build tree directory
-corresponding to the source tree directory in which thecommand was
+corresponding to the source tree directory in which the command was
 invoked.  See documentation of the :prop_tgt:`ARCHIVE_OUTPUT_DIRECTORY`,
 :prop_tgt:`LIBRARY_OUTPUT_DIRECTORY`, and
 :prop_tgt:`RUNTIME_OUTPUT_DIRECTORY` target properties to change this
