@@ -18,7 +18,6 @@
 /* Define these macros temporarily to keep the code readable.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # define kwsys_stl @KWSYS_NAMESPACE@_stl
-# define kwsys_ios @KWSYS_NAMESPACE@_ios
 #endif
 
 namespace @KWSYS_NAMESPACE@
@@ -87,7 +86,6 @@ private:
 /* Undefine temporary macros.  */
 #if !defined (KWSYS_NAMESPACE) && !@KWSYS_NAMESPACE@_NAME_IS_KWSYS
 # undef kwsys_stl
-# undef kwsys_ios
 #endif
 
 #endif

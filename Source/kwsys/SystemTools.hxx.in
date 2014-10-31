@@ -89,9 +89,9 @@ public:
    * then an underscore is prepended.  Note that this can produce
    * identifiers that the standard reserves (_[A-Z].* and __.*).
    */
-  static kwsys_stl::string MakeCidentifier(const char* s);
+  static kwsys_stl::string MakeCidentifier(const kwsys_stl::string& s);
 
-  static kwsys_stl::string MakeCindentifier(const char* s)
+  static kwsys_stl::string MakeCindentifier(const kwsys_stl::string& s)
   {
     return MakeCidentifier(s);
   }
@@ -102,6 +102,9 @@ public:
   static void ReplaceString(kwsys_stl::string& source,
                             const char* replace,
                             const char* with);
+  static void ReplaceString(kwsys_stl::string& source,
+                            const kwsys_stl::string& replace,
+                            const kwsys_stl::string& with);
 
   /**
    * Return a capitalized string (i.e the first letter is uppercased,
@@ -306,7 +309,7 @@ public:
   /**
    * Return file length
    */
-  static unsigned long FileLength(const char *filename);
+  static unsigned long FileLength(const kwsys_stl::string& filename);
 
   /**
      Change the modification time or create a file
@@ -335,15 +338,15 @@ public:
    *  does not exist path is returned unchanged.  This does nothing
    *  on unix but return path.
    */
-  static kwsys_stl::string GetActualCaseForPath(const char* path);
+  static kwsys_stl::string GetActualCaseForPath(const kwsys_stl::string& path);
 
   /**
    * Given the path to a program executable, get the directory part of
    * the path with the file stripped off.  If there is no directory
    * part, the empty string is returned.
    */
-  static kwsys_stl::string GetProgramPath(const char*);
-  static bool SplitProgramPath(const char* in_name,
+  static kwsys_stl::string GetProgramPath(const kwsys_stl::string&);
+  static bool SplitProgramPath(const kwsys_stl::string& in_name,
                                kwsys_stl::string& dir,
                                kwsys_stl::string& file,
                                bool errorReport = true);
@@ -376,6 +379,8 @@ public:
   static kwsys_stl::string CollapseFullPath(const kwsys_stl::string& in_relative);
   static kwsys_stl::string CollapseFullPath(const kwsys_stl::string& in_relative,
                                             const char* in_base);
+  static kwsys_stl::string CollapseFullPath(const kwsys_stl::string& in_relative,
+                                            const kwsys_stl::string& in_base);
 
   /** 
    * Get the real path for a given path, removing all symlinks.  In
@@ -446,7 +451,7 @@ public:
    * Split a program from its arguments and handle spaces in the paths
    */
   static void SplitProgramFromArgs(
-    const char* path,
+    const kwsys_stl::string& path,
     kwsys_stl::string& program, kwsys_stl::string& args);
 
   /**
@@ -582,7 +587,7 @@ public:
    * Find a file in the system PATH, with optional extra paths
    */
   static kwsys_stl::string FindFile(
-    const char* name,
+    const kwsys_stl::string& name,
     const kwsys_stl::vector<kwsys_stl::string>& path = 
     kwsys_stl::vector<kwsys_stl::string>(),
     bool no_system_path = false);
@@ -591,7 +596,7 @@ public:
    * Find a directory in the system PATH, with optional extra paths
    */
   static kwsys_stl::string FindDirectory(
-    const char* name,
+    const kwsys_stl::string& name,
     const kwsys_stl::vector<kwsys_stl::string>& path = 
     kwsys_stl::vector<kwsys_stl::string>(),
     bool no_system_path = false);
@@ -662,13 +667,13 @@ public:
    * Create a symbolic link if the platform supports it.  Returns whether
    * creation succeded.
    */
-  static bool CreateSymlink(const char* origName, const char* newName);
+  static bool CreateSymlink(const kwsys_stl::string& origName, const kwsys_stl::string& newName);
 
   /**
    * Read the contents of a symbolic link.  Returns whether reading
    * succeded.
    */
-  static bool ReadSymlink(const char* newName, kwsys_stl::string& origName);
+  static bool ReadSymlink(const kwsys_stl::string& newName, kwsys_stl::string& origName);
 
   /**
    * Try to locate the file 'filename' in the directory 'dir'.
@@ -750,26 +755,26 @@ public:
   /**
    * Get a list of subkeys.
    */
-  static bool GetRegistrySubKeys(const char *key,
+  static bool GetRegistrySubKeys(const kwsys_stl::string& key,
                                  kwsys_stl::vector<kwsys_stl::string>& subkeys,
                                  KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Read a registry value
    */
-  static bool ReadRegistryValue(const char *key, kwsys_stl::string &value,
+  static bool ReadRegistryValue(const kwsys_stl::string& key, kwsys_stl::string &value,
                                 KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Write a registry value
    */
-  static bool WriteRegistryValue(const char *key, const char *value,
+  static bool WriteRegistryValue(const kwsys_stl::string& key, const kwsys_stl::string& value,
                                  KeyWOW64 view = KeyWOW64_Default);
 
   /**
    * Delete a registry value
    */
-  static bool DeleteRegistryValue(const char *key,
+  static bool DeleteRegistryValue(const kwsys_stl::string& key,
                                   KeyWOW64 view = KeyWOW64_Default);
 
   /** -----------------------------------------------------------------
@@ -789,15 +794,17 @@ public:
    * Read an environment variable
    */
   static const char* GetEnv(const char* key);
+  static const char* GetEnv(const kwsys_stl::string& key);
   static bool GetEnv(const char* key, kwsys_stl::string& result);
+  static bool GetEnv(const kwsys_stl::string& key, kwsys_stl::string& result);
 
   /** Put a string into the environment
       of the form var=value */
-  static bool PutEnv(const char* env);
+  static bool PutEnv(const kwsys_stl::string& env);
 
   /** Remove a string from the environment.
       Input is of the form "var" or "var=value" (value is ignored). */
-  static bool UnPutEnv(const char* env);
+  static bool UnPutEnv(const kwsys_stl::string& env);
 
   /**
    * Get current working directory CWD
@@ -906,6 +913,14 @@ private:
     }
 
   /**
+   * Actual implementation of ReplaceString.
+   */
+  static void ReplaceString(kwsys_stl::string& source,
+                            const char* replace,
+                            size_t replaceSize,
+                            const kwsys_stl::string& with);
+
+  /**
    * Actual implementation of FileIsFullPath.
    */
   static bool FileIsFullPath(const char*, size_t);
@@ -915,7 +930,7 @@ private:
    * optional extra paths.
    */
   static kwsys_stl::string FindName(
-    const char* name,
+    const kwsys_stl::string& name,
     const kwsys_stl::vector<kwsys_stl::string>& path = 
     kwsys_stl::vector<kwsys_stl::string>(),
     bool no_system_path = false);

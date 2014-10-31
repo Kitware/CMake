@@ -501,7 +501,7 @@ void Glob::AddFile(kwsys_stl::vector<kwsys_stl::string>& files, const kwsys_stl:
 {
   if ( !this->Relative.empty() )
     {
-    files.push_back(kwsys::SystemTools::RelativePath(this->Relative.c_str(), file.c_str()));
+    files.push_back(kwsys::SystemTools::RelativePath(this->Relative, file));
     }
   else
     {
