@@ -43,7 +43,7 @@
 #
 #   Ice_HOME - the root of the Ice installation
 #
-# The environment variable :envvar:`ICE_HOME` may also be used; the
+# The environment variable ``ICE_HOME`` may also be used; the
 # Ice_HOME variable takes precedence.
 #
 # The following cache variables may also be set::
