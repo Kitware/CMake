@@ -166,6 +166,9 @@ Create custom targets to build projects in external trees
 
   ``STEP_TARGETS <step-target>...``
     Generate custom targets for these steps
+  ``INDEPENDENT_STEP_TARGETS <step-target>...``
+    Generate custom targets for these steps that do not depend on other
+    external projects even if a dependency is set
 
   The ``*_DIR`` options specify directories for the project, with default
   directories computed as follows.  If the ``PREFIX`` option is given to
@@ -260,18 +263,30 @@ not defined.  Behavior of shell operators like ``&&`` is not defined.
   The ``ExternalProject_Add_StepTargets`` function generates custom
   targets for the steps listed::
 
-    ExternalProject_Add_StepTargets(<name> [step1 [step2 [...]]])
+    ExternalProject_Add_StepTargets(<name> [NO_DEPENDS] [step1 [step2 [...]]])
 
-If ``STEP_TARGETS`` is set then ``ExternalProject_Add_StepTargets`` is
-automatically called at the end of matching calls to
-``ExternalProject_Add_Step``.  Pass ``STEP_TARGETS`` explicitly to
+If ``NO_DEPENDS`` is set, the target will not depend on the
+dependencies of the complete project. This is usually safe to use for
+the download, update, and patch steps that do not require that all the
+dependencies are updated and built.  Using ``NO_DEPENDS`` for other
+of the default steps might break parallel builds, so you should avoid,
+it.  For custom steps, you should consider whether or not the custom
+commands requires that the dependencies are configured, built and
+installed.
+
+If ``STEP_TARGETS`` or ``INDEPENDENT_STEP_TARGETS`` is set then
+``ExternalProject_Add_StepTargets`` is automatically called at the end
+of matching calls to ``ExternalProject_Add_Step``.  Pass
+``STEP_TARGETS`` or ``INDEPENDENT_STEP_TARGETS`` explicitly to
 individual ``ExternalProject_Add`` calls, or implicitly to all
-``ExternalProject_Add`` calls by setting the directory property
-``EP_STEP_TARGETS``.
+``ExternalProject_Add`` calls by setting the directory properties
+``EP_STEP_TARGETS`` and ``EP_INDEPENDENT_STEP_TARGETS``.  The
+``INDEPENDENT`` version of the argument and of the property will call
+``ExternalProject_Add_StepTargets`` with the ``NO_DEPENDS`` argument.
 
-If ``STEP_TARGETS`` is not set, clients may still manually call
-``ExternalProject_Add_StepTargets`` after calling
-``ExternalProject_Add`` or ``ExternalProject_Add_Step``.
+If ``STEP_TARGETS`` and ``INDEPENDENT_STEP_TARGETS`` are not set,
+clients may still manually call ``ExternalProject_Add_StepTargets``
+after calling ``ExternalProject_Add`` or ``ExternalProject_Add_Step``.
 
 This functionality is provided to make it easy to drive the steps
 independently of each other by specifying targets on build command
@@ -397,10 +412,19 @@ define_property(DIRECTORY PROPERTY "EP_STEP_TARGETS" INHERITED
   BRIEF_DOCS
   "List of ExternalProject steps that automatically get corresponding targets"
   FULL_DOCS
+  "These targets will be dependent on the main target dependencies"
   "See documentation of the ExternalProject_Add_StepTargets() function in the "
   "ExternalProject module."
   )
 
+define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED
+  BRIEF_DOCS
+  "List of ExternalProject steps that automatically get corresponding targets"
+  FULL_DOCS
+  "These targets will not be dependent on the main target dependencies"
+  "See documentation of the ExternalProject_Add_StepTargets() function in the "
+  "ExternalProject module."
+  )
 
 function(_ep_write_gitclone_script script_filename source_dir git_EXECUTABLE git_repository git_tag git_submodules src_name work_dir gitclone_infofile gitclone_stampfile)
   file(WRITE ${script_filename}
@@ -1283,8 +1307,14 @@ endfunction()
 
 function(ExternalProject_Add_StepTargets name)
   set(steps ${ARGN})
-
+  if("${ARGV1}" STREQUAL "NO_DEPENDS")
+    set(no_deps 1)
+    list(REMOVE_AT steps 0)
+  endif()
   foreach(step ${steps})
+    if(no_deps  AND  "${step}" MATCHES "^(configure|build|install|test)$")
+      message(AUTHOR_WARNING "Using NO_DEPENDS for \"${step}\" step  might break parallel builds")
+    endif()
     _ep_get_step_stampfile(${name} ${step} stamp_file)
     add_custom_target(${name}-${step}
       DEPENDS ${stamp_file})
@@ -1292,10 +1322,12 @@ function(ExternalProject_Add_StepTargets name)
     set_property(TARGET ${name}-${step} PROPERTY FOLDER "ExternalProjectTargets/${name}")
 
     # Depend on other external projects (target-level).
-    get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
-    foreach(arg IN LISTS deps)
-      add_dependencies(${name}-${step} ${arg})
-    endforeach()
+    if(NOT no_deps)
+      get_property(deps TARGET ${name} PROPERTY _EP_DEPENDS)
+      foreach(arg IN LISTS deps)
+        add_dependencies(${name}-${step} ${arg})
+      endforeach()
+    endif()
   endforeach()
 endfunction()
 
@@ -1395,6 +1427,17 @@ function(ExternalProject_Add_Step name step)
   foreach(st ${step_targets})
     if("${st}" STREQUAL "${step}")
       ExternalProject_Add_StepTargets(${name} ${step})
+      break()
+    endif()
+  endforeach()
+
+  get_property(independent_step_targets TARGET ${name} PROPERTY _EP_INDEPENDENT_STEP_TARGETS)
+  if(NOT independent_step_targets)
+    get_property(independent_step_targets DIRECTORY PROPERTY EP_INDEPENDENT_STEP_TARGETS)
+  endif()
+  foreach(st ${independent_step_targets})
+    if("${st}" STREQUAL "${step}")
+      ExternalProject_Add_StepTargets(${name} NO_DEPENDS ${step})
       break()
     endif()
   endforeach()
