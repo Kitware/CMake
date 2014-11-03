@@ -906,10 +906,6 @@
 /* if SSL is enabled */
 #cmakedefine USE_SSLEAY 1
 
-/* Define to 1 if you are building a Windows target without large file
-   support. */
-#cmakedefine USE_WIN32_LARGE_FILES 1
-
 /* to enable SSPI support */
 #cmakedefine USE_WINDOWS_SSPI 1
 

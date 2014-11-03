@@ -345,6 +345,17 @@
   #include <clib.h>
 #endif
 
+/* Default Windows file API selection.  */
+#ifdef _WIN32
+# if defined(_MSC_VER) && (_INTEGRAL_MAX_BITS >= 64)
+#  define USE_WIN32_LARGE_FILES
+# elif defined(__MINGW32__)
+#  define USE_WIN32_LARGE_FILES
+# else
+#  define USE_WIN32_SMALL_FILES
+# endif
+#endif
+
 /*
  * Large file (>2Gb) support using WIN32 functions.
  */
