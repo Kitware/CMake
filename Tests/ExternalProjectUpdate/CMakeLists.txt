@@ -19,6 +19,7 @@ set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
 set(binary_base "${base}/Build")
 set_property(DIRECTORY PROPERTY EP_BASE ${base})
 set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
+set_property(DIRECTORY PROPERTY EP_INDEPENDENT_STEP_TARGETS update)
 
 set(do_git_tests 0)
 
@@ -68,8 +69,8 @@ if(do_git_tests)
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
     INSTALL_COMMAND ""
-    DEPENDS "SetupLocalGITRepository"
   )
+  ExternalProject_Add_StepDependencies(${proj} download SetupLocalGITRepository)
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 endif()
 
