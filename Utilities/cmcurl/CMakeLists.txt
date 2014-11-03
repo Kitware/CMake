@@ -437,6 +437,13 @@ if(CMAKE_USE_OPENSSL)
     check_include_file_concat("openssl/ssl.h"    HAVE_OPENSSL_SSL_H)
     check_include_file_concat("openssl/x509.h"   HAVE_OPENSSL_X509_H)
     check_include_file_concat("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
+
+    # Optionally build with a specific CA cert bundle.
+    set(CURL_CA_BUNDLE "" CACHE FILEPATH "Path to SSL CA Certificate Bundle")
+    mark_as_advanced(CURL_CA_BUNDLE)
+    if(CURL_CA_BUNDLE)
+      add_definitions(-DCURL_CA_BUNDLE="${CURL_CA_BUNDLE}")
+    endif()
   endif(OPENSSL_FOUND)
 endif(CMAKE_USE_OPENSSL)
 
