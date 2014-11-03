@@ -316,7 +316,7 @@ shared library:
   )
   configure_file(cmake/ClimbingStatsConfig.cmake
     "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStats/ClimbingStatsConfig.cmake"
-    COPY_ONLY
+    COPYONLY
   )
 
   set(ConfigPackageLocation lib/cmake/ClimbingStats)
