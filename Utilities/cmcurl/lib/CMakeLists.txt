@@ -88,10 +88,35 @@ else()
   set(CURL_USER_DEFINED_DYNAMIC_OR_STATIC SHARED)
 endif()
 
+# For windows we want to install OPENSSL_LIBRARIES dlls
+# and also copy them into the build tree so that testing
+# can find them.
+if(CMAKE_USE_OPENSSL AND OPENSSL_FOUND AND WIN32)
+  find_file(CMAKE_EAY_DLL NAME libeay32.dll HINTS ${OPENSSL_INCLUDE_DIR}/..)
+  find_file(CMAKE_SSL_DLL NAME ssleay32.dll HINTS ${OPENSSL_INCLUDE_DIR}/..)
+  mark_as_advanced(CMAKE_EAY_DLL CMAKE_SSL_DLL)
+  if(CMAKE_SSL_DLL AND CMAKE_EAY_DLL)
+    set(CMAKE_CURL_SSL_DLLS ${CMake_BIN_DIR}/${CMAKE_CFG_INTDIR}/libeay32.dll
+      ${CMake_BIN_DIR}/${CMAKE_CFG_INTDIR}/ssleay32.dll)
+    add_custom_command(OUTPUT
+      ${CMake_BIN_DIR}/${CMAKE_CFG_INTDIR}/libeay32.dll
+      DEPENDS ${CMAKE_EAY_DLL}
+      COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_EAY_DLL}
+      ${CMake_BIN_DIR}/${CMAKE_CFG_INTDIR}/libeay32.dll)
+    add_custom_command(OUTPUT
+      ${CMake_BIN_DIR}/${CMAKE_CFG_INTDIR}/ssleay32.dll
+      DEPENDS ${CMAKE_SSL_DLL}
+      COMMAND ${CMAKE_COMMAND} -E copy  ${CMAKE_SSL_DLL}
+      ${CMake_BIN_DIR}/${CMAKE_CFG_INTDIR}/ssleay32.dll)
+    install(PROGRAMS ${CMAKE_EAY_DLL} ${CMAKE_SSL_DLL} DESTINATION bin)
+  endif()
+endif()
+
 add_library(
   ${LIB_NAME}
   ${CURL_USER_DEFINED_DYNAMIC_OR_STATIC}
   ${HHEADERS} ${CSOURCES}
+  ${CMAKE_CURL_SSL_DLLS}
   )
 
 target_link_libraries(${LIB_NAME} ${CURL_LIBS})
