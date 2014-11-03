@@ -18,8 +18,8 @@ set(CMAKE_CREATE_CONSOLE_EXE "system nt" )
 set(CMAKE_SHARED_LINKER_FLAGS_INIT "system nt_dll")
 set(CMAKE_MODULE_LINKER_FLAGS_INIT "system nt_dll")
 foreach(type SHARED MODULE EXE)
-  set(CMAKE_${type}_LINKER_FLAGS_DEBUG_INIT "debug all opt map, symfile")
-  set(CMAKE_${type}_LINKER_FLAGS_RELWITHDEBINFO_INIT "debug all opt map, symfile")
+  set(CMAKE_${type}_LINKER_FLAGS_DEBUG_INIT "debug all opt map")
+  set(CMAKE_${type}_LINKER_FLAGS_RELWITHDEBINFO_INIT "debug all opt map")
 endforeach()
 
 set(CMAKE_C_COMPILE_OPTIONS_DLL "-bd") # Note: This variable is a ';' separated list
