@@ -939,7 +939,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
         }
-        context->AllTargets.insert(target);
+      context->AllTargets.insert(target);
       }
 
     if (target == context->HeadTarget)
