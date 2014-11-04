@@ -26,11 +26,18 @@ macro(_DETERMINE_GCC_SYSTEM_INCLUDE_DIRS _lang _resultIncludeDirs _resultDefines
   if (${_lang} STREQUAL "c++")
     set(_compilerExecutable "${CMAKE_CXX_COMPILER}")
     set(_arg1 "${CMAKE_CXX_COMPILER_ARG1}")
+
+    if (CMAKE_CXX_FLAGS MATCHES "(-stdlib=[^ ]+)")
+      set(_stdlib "${CMAKE_MATCH_1}")
+    endif ()
+    if (CMAKE_CXX_FLAGS MATCHES "(-std=[^ ]+)")
+      set(_stdver "${CMAKE_MATCH_1}")
+    endif ()
   else ()
     set(_compilerExecutable "${CMAKE_C_COMPILER}")
     set(_arg1 "${CMAKE_C_COMPILER_ARG1}")
   endif ()
-  execute_process(COMMAND ${_compilerExecutable} ${_arg1} -v -E -x ${_lang} -dD dummy
+  execute_process(COMMAND ${_compilerExecutable} ${_arg1} ${_stdver} ${_stdlib} -v -E -x ${_lang} -dD dummy
                   WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/CMakeFiles
                   ERROR_VARIABLE _gccOutput
                   OUTPUT_VARIABLE _gccStdout )
