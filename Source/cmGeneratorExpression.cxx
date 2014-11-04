@@ -90,6 +90,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   context.HadError = false;
   context.HadContextSensitiveCondition = false;
   context.HadHeadSensitiveCondition = false;
+  context.SourceSensitiveTargets.clear();
   context.HeadTarget = headTarget;
   context.EvaluateForBuildsystem = this->EvaluateForBuildsystem;
   context.CurrentTarget = currentTarget ? currentTarget : headTarget;
@@ -118,6 +119,7 @@ const char *cmCompiledGeneratorExpression::Evaluate(
     {
     this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
     this->HadHeadSensitiveCondition = context.HadHeadSensitiveCondition;
+    this->SourceSensitiveTargets = context.SourceSensitiveTargets;
     }
 
   this->DependTargets = context.DependTargets;

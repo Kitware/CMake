@@ -31,6 +31,8 @@ public:
 
   std::vector<std::string> GetFiles() const { return this->Files; }
 
+  void CreateOutputFile(std::string const& config);
+
 private:
   void Generate(const std::string& config,
               cmCompiledGeneratorExpression* inputExpression,

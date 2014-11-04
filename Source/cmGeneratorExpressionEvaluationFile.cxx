@@ -13,6 +13,9 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 
 #include "cmMakefile.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
+#include "cmSourceFile.h"
 #include "cmGeneratedFileStream.h"
 #include <cmsys/FStream.hxx>
 
@@ -87,6 +90,20 @@ void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
     {
     cmSystemTools::SetPermissions(outputFileName.c_str(), perm);
     }
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
+                                              std::string const& config)
+{
+  std::string name = this->OutputFileExpr->Evaluate(this->Makefile, config);
+  cmSourceFile* sf = this->Makefile->GetOrCreateSource(name);
+  sf->SetProperty("GENERATED", "1");
+
+  cmGlobalGenerator *gg
+                  = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  gg->SetFilenameTargetDepends(sf,
+                          this->OutputFileExpr->GetSourceSensitiveTargets());
 }
 
 //----------------------------------------------------------------------------

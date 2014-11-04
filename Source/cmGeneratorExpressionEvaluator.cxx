@@ -950,6 +950,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       // value for all evaluations.
       context->SeenTargetProperties.insert(propertyName);
       }
+    if (propertyName == "SOURCES")
+      {
+      context->SourceSensitiveTargets.insert(target);
+      }
 
     if (propertyName.empty())
       {

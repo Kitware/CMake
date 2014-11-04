@@ -1253,8 +1253,6 @@ void cmGlobalGenerator::Generate()
   // Create per-target generator information.
   this->CreateGeneratorTargets();
 
-  this->ForceLinkerLanguages();
-
 #ifdef CMAKE_BUILD_WITH_CMAKE
   for (AutogensType::iterator it = autogens.begin(); it != autogens.end();
        ++it)
@@ -1269,6 +1267,8 @@ void cmGlobalGenerator::Generate()
     {
     this->LocalGenerators[i]->TraceDependencies();
     }
+
+  this->ForceLinkerLanguages();
 
   // Compute the manifest of main targets generated.
   for (i = 0; i < this->LocalGenerators.size(); ++i)
@@ -2980,6 +2980,32 @@ std::string cmGlobalGenerator::EscapeJSON(const std::string& s) {
     result += s[i];
   }
   return result;
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::SetFilenameTargetDepends(cmSourceFile* sf,
+                                              std::set<cmTarget const*> tgts)
+{
+  this->FilenameTargetDepends[sf] = tgts;
+}
+
+//----------------------------------------------------------------------------
+std::set<cmTarget const*> const&
+cmGlobalGenerator::GetFilenameTargetDepends(cmSourceFile* sf) const {
+  return this->FilenameTargetDepends[sf];
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalGenerator::CreateEvaluationSourceFiles(
+                                              std::string const& config) const
+{
+  for(std::vector<cmGeneratorExpressionEvaluationFile*>::const_iterator
+      li = this->EvaluationFiles.begin();
+      li != this->EvaluationFiles.end();
+      ++li)
+    {
+    (*li)->CreateOutputFile(config);
+    }
 }
 
 //----------------------------------------------------------------------------

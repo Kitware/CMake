@@ -341,6 +341,13 @@ public:
 
   bool GenerateCPackPropertiesFile();
 
+  void CreateEvaluationSourceFiles(std::string const& config) const;
+
+  void SetFilenameTargetDepends(cmSourceFile* sf,
+                                std::set<cmTarget const*> tgts);
+  std::set<cmTarget const*> const&
+  GetFilenameTargetDepends(cmSourceFile* sf) const;
+
 protected:
   virtual void Generate();
 
@@ -488,6 +495,9 @@ private:
 
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;
+
+  mutable std::map<cmSourceFile*, std::set<cmTarget const*> >
+  FilenameTargetDepends;
 };
 
 #endif
