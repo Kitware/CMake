@@ -29,6 +29,7 @@
 @SIZE_OF_UNSIGNED_CODE@
 @SIZE_OF_UNSIGNED_LONG_CODE@
 @SIZE_OF_UNSIGNED_LONG_LONG_CODE@
+@SIZE_OF_SIZE_T_CODE@
 
 /*
  * If we lack int64_t, define it to the first of __int64, int, long, and long long
@@ -276,9 +277,6 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if the system has the type `_Bool'. */
 #cmakedefine HAVE__BOOL 1
-
-/* The size of `size_t', as computed by sizeof. */
-#cmakedefine SIZEOF_SIZE_T @SIZEOF_SIZE_T@
 
 /* Define to 1 if the system supports fast unaligned access to 16-bit and
    32-bit integers. */
