@@ -124,7 +124,7 @@ static bool CheckFileOperations()
     res = false;
     }
 
-  if (kwsys::SystemTools::FileLength(testBinFile.c_str()) != 766)
+  if (kwsys::SystemTools::FileLength(testBinFile) != 766)
     {
     kwsys_ios::cerr
       << "Problem with FileLength - incorrect length for: "
@@ -512,7 +512,7 @@ static bool CheckStringOperations()
 
 //----------------------------------------------------------------------------
 
-static bool CheckPutEnv(const char* env, const char* name, const char* value)
+static bool CheckPutEnv(const kwsys_stl::string& env, const char* name, const char* value)
 {
   if(!kwsys::SystemTools::PutEnv(env))
     {
