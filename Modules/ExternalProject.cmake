@@ -1423,6 +1423,15 @@ function(ExternalProject_Add_Step name step)
     _ep_write_log_script(${name} ${step} command)
   endif()
 
+  if("${command}" STREQUAL "")
+    # Some generators (i.e. Xcode) will not generate a file level target
+    # if no command is set, and therefore the dependencies on this
+    # target will be broken.
+    # The empty command is replaced by an echo command here in order to
+    # avoid this issue.
+    set(command ${CMAKE_COMMAND} -E echo_append)
+  endif()
+
   add_custom_command(
     OUTPUT ${stamp_file}
     COMMENT ${comment}
