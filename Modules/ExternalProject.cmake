@@ -80,6 +80,8 @@ Create custom targets to build projects in external trees
 
   ``UPDATE_COMMAND <cmd>...``
     Source work-tree update command
+  ``UPDATE_DISCONNECTED 1``
+    Never update automatically from the remote repository
   ``PATCH_COMMAND <cmd>...``
     Command to patch downloaded source
 
@@ -202,6 +204,16 @@ Create custom targets to build projects in external trees
   using one of the ``DOWNLOAD_COMMAND``, ``CVS_*``, ``SVN_*``, or ``URL``
   options.  The ``URL`` option may refer locally to a directory or source
   tarball, or refer to a remote tarball (e.g. ``http://.../src.tgz``).
+
+  If ``UPDATE_DISCONNECTED`` is set, the update step is not executed
+  automatically when building the main target. The update step can still
+  be added as a step target and called manually. This is useful if you
+  want to allow to build the project when you are disconnected from the
+  network (you might still need the network for the download step).
+  This is disabled by default.
+  The directory property ``EP_UPDATE_DISCONNECTED`` can be used to change
+  the default value for all the external projects in the current
+  directory and its subdirectories.
 
 .. command:: ExternalProject_Add_Step
 
@@ -436,6 +448,13 @@ define_property(DIRECTORY PROPERTY "EP_INDEPENDENT_STEP_TARGETS" INHERITED
   FULL_DOCS
   "These targets will not be dependent on the main target dependencies"
   "See documentation of the ExternalProject_Add_StepTargets() function in the "
+  "ExternalProject module."
+  )
+
+define_property(DIRECTORY PROPERTY "EP_UPDATE_DISCONNECTED" INHERITED
+  BRIEF_DOCS "Never update automatically from the remote repo."
+  FULL_DOCS
+  "See documentation of the ExternalProject_Add() function in the "
   "ExternalProject module."
   )
 
@@ -1825,6 +1844,12 @@ function(_ep_add_update_command name)
   get_property(svn_repository TARGET ${name} PROPERTY _EP_SVN_REPOSITORY)
   get_property(git_repository TARGET ${name} PROPERTY _EP_GIT_REPOSITORY)
   get_property(hg_repository  TARGET ${name} PROPERTY _EP_HG_REPOSITORY )
+  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
+  if(update_disconnected_set)
+    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
+  else()
+    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
+  endif()
 
   set(work_dir)
   set(comment)
@@ -1914,10 +1939,26 @@ Update to Mercurial >= 2.1.1.
     COMMENT ${comment}
     COMMAND ${cmd}
     ALWAYS ${always}
+    EXCLUDE_FROM_MAIN ${update_disconnected}
     WORKING_DIRECTORY ${work_dir}
     DEPENDEES download
     ${log}
     )
+
+  if(always AND update_disconnected)
+    _ep_get_step_stampfile(${name} skip-update skip-update_stamp_file)
+    string(REPLACE "Performing" "Skipping" comment "${comment}")
+    ExternalProject_Add_Step(${name} skip-update
+      COMMENT ${comment}
+      ALWAYS 1
+      EXCLUDE_FROM_MAIN 1
+      WORKING_DIRECTORY ${work_dir}
+      DEPENDEES download
+      ${log}
+    )
+    set_property(SOURCE ${skip-update_stamp_file} PROPERTY SYMBOLIC 1)
+  endif()
+
 endfunction()
 
 
@@ -2039,10 +2080,22 @@ function(_ep_add_configure_command name)
     set(log "")
   endif()
 
+  get_property(update_disconnected_set TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED SET)
+  if(update_disconnected_set)
+    get_property(update_disconnected TARGET ${name} PROPERTY _EP_UPDATE_DISCONNECTED)
+  else()
+    get_property(update_disconnected DIRECTORY PROPERTY EP_UPDATE_DISCONNECTED)
+  endif()
+  if(update_disconnected)
+    set(update_dep skip-update)
+  else()
+    set(update_dep update)
+  endif()
+
   ExternalProject_Add_Step(${name} configure
     COMMAND ${cmd}
     WORKING_DIRECTORY ${binary_dir}
-    DEPENDEES update patch
+    DEPENDEES ${update_dep} patch
     DEPENDS ${file_deps}
     ${log}
     )
