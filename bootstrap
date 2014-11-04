@@ -122,17 +122,32 @@ else
   cmake_system_openvms=false
 fi
 
+# Determine whether this is HP-UX
+if echo "${cmake_system}" | grep HP-UX >/dev/null 2>&1; then
+  cmake_system_hpux=true
+else
+  cmake_system_hpux=false
+fi
+
 # Determine whether this is Linux
 if echo "${cmake_system}" | grep Linux >/dev/null 2>&1; then
   cmake_system_linux=true
-  # find out if it is a HP PA-RISC machine
-  if uname -m | grep parisc >/dev/null 2>&1; then
-    cmake_machine_parisc=true
-  else
-    cmake_machine_parisc=false
-  fi
 else
   cmake_system_linux=false
+ fi
+
+# Determine whether this is a PA-RISC machine
+# This only works for Linux or HP-UX, not other PA-RISC OSs (BSD maybe?). Also
+# may falsely detect parisc on HP-UX m68k
+cmake_machine_parisc=false
+if ${cmake_system_linux}; then
+  if uname -m | grep parisc >/dev/null 2>&1; then
+    cmake_machine_parisc=true
+  fi
+elif ${cmake_system_hpux}; then
+  if !(uname -m | grep ia64 >/dev/null 2>&1); then
+    cmake_machine_parisc=true
+  fi
 fi
 
 # Choose the generator to use for bootstrapping.
@@ -744,11 +759,13 @@ if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
 fi
 
-if ${cmake_system_linux}; then
-  # avoid binutils problem with large binaries, e.g. when building CMake in debug mode
-  # See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50230
-  if ${cmake_machine_parisc}; then
-    cmake_ld_flags="${LDFLAGS} -Wl,--unique=.text._*"
+# Workaround for short jump tables on PA-RISC
+if ${cmake_machine_parisc}; then
+  if ${cmake_c_compiler_is_gnu}; then
+    cmake_c_flags="${CFLAGS} -mlong-calls"
+  fi
+  if ${cmake_cxx_compiler_is_gnu}; then
+    cmake_cxx_flags="${CXXFLAGS} -mlong-calls"
   fi
 fi
 
