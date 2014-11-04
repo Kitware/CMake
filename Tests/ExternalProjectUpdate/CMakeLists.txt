@@ -72,6 +72,18 @@ if(do_git_tests)
   )
   ExternalProject_Add_StepDependencies(${proj} download SetupLocalGITRepository)
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  set(proj TutorialStep2-GIT)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_TAG ${TEST_GIT_TAG}
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+    INSTALL_COMMAND ""
+    UPDATE_DISCONNECTED 1
+  )
+  ExternalProject_Add_StepDependencies(${proj} download SetupLocalGITRepository)
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 endif()
 
 
