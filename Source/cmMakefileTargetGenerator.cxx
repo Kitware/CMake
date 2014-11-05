@@ -702,11 +702,12 @@ cmMakefileTargetGenerator
 
   vars.Defines = definesString.c_str();
 
-  // At the moment, it is assumed that C and C++ have both
+  // At the moment, it is assumed that C, C++, and Fortran have both
   // assembly and preprocessor capabilities. The same is true for the
   // ability to export compile commands
   bool lang_has_preprocessor = ((lang == "C") ||
-                                (lang == "CXX"));
+                                (lang == "CXX") ||
+                                (lang == "Fortran"));
   bool const lang_has_assembly = lang_has_preprocessor;
   bool const lang_can_export_cmds = lang_has_preprocessor;
 

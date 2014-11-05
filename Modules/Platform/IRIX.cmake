@@ -31,6 +31,14 @@ if(NOT CMAKE_COMPILER_IS_GNUCXX)
     )
 endif()
 
+if(NOT CMAKE_COMPILER_IS_GNUG77)
+  set (CMAKE_Fortran_CREATE_PREPROCESSED_SOURCE "<CMAKE_Fortran_COMPILER> <FLAGS> -E <SOURCE> > <PREPROCESSED_SOURCE>")
+  set (CMAKE_Fortran_CREATE_ASSEMBLY_SOURCE
+    "<CMAKE_Fortran_COMPILER> <FLAGS> -S <SOURCE>"
+    "mv `basename \"<SOURCE>\" | sed 's/\\.[^./]*$$//'`.s <ASSEMBLY_SOURCE>"
+    )
+endif()
+
 # Initialize C link type selection flags.  These flags are used when
 # building a shared library, shared module, or executable that links
 # to other libraries to select whether to use the static or shared

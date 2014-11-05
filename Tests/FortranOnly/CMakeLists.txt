@@ -66,3 +66,29 @@ if(NOT CMAKE_Fortran_COMPILER_ID STREQUAL XL)
       "${err}")
   endif()
 endif()
+
+# Test generation of preprocessed sources.
+if("${CMAKE_GENERATOR}" MATCHES "Makefile" AND CMAKE_MAKE_PROGRAM)
+  if(CMAKE_Fortran_CREATE_PREPROCESSED_SOURCE)
+    # Skip running this part of the test on certain platforms
+    # until they are fixed.
+    set(MAYBE_ALL ALL)
+    list(LENGTH CMAKE_OSX_ARCHITECTURES ARCH_COUNT)
+    if(ARCH_COUNT GREATER 1)
+      # OSX does not support preprocessing more than one architecture.
+      set(MAYBE_ALL)
+    endif()
+
+    add_executable(preprocess preprocess.F)
+
+    # Custom target to try preprocessing invocation.
+    add_custom_target(test_preprocess ${MAYBE_ALL}
+      COMMAND ${CMAKE_COMMAND} -E remove CMakeFiles/preprocess.dir/preprocess.F.i
+      COMMAND ${CMAKE_MAKE_PROGRAM} preprocess.i
+      COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_SOURCE_DIR}/test_preprocess.cmake
+      # Remove bogus file some compilers leave behind.
+      COMMAND ${CMAKE_COMMAND} -E remove ${CMAKE_CURRENT_SOURCE_DIR}/preprocess.s
+      WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+      )
+  endif()
+endif()

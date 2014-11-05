@@ -322,9 +322,10 @@ void cmLocalUnixMakefileGenerator3::WriteLocalMakefile()
           lo->second.begin(); ei != lo->second.end(); ++ei)
       {
       if(ei->Language == "C" ||
-         ei->Language == "CXX")
+         ei->Language == "CXX" ||
+         ei->Language == "Fortran")
         {
-        // Right now, C and C++ have both a preprocessor and the
+        // Right now, C, C++ and Fortran have both a preprocessor and the
         // ability to generate assembly code
         lang_has_preprocessor = true;
         lang_has_assembly = true;
