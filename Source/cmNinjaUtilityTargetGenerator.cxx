@@ -35,6 +35,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
     &this->GetTarget()->GetPostBuildCommands()
   };
 
+  bool uses_terminal = false;
+
   for (unsigned i = 0; i != 2; ++i) {
     for (std::vector<cmCustomCommand>::const_iterator
          ci = cmdLists[i]->begin(); ci != cmdLists[i]->end(); ++ci) {
@@ -42,6 +44,8 @@ void cmNinjaUtilityTargetGenerator::Generate()
                                    this->GetMakefile());
       this->GetLocalGenerator()->AppendCustomCommandDeps(ccg, deps);
       this->GetLocalGenerator()->AppendCustomCommandLines(ccg, commands);
+      if (ci->GetUsesTerminal())
+        uses_terminal = true;
     }
   }
 
@@ -110,6 +114,7 @@ void cmNinjaUtilityTargetGenerator::Generate()
       command,
       desc,
       "Utility command for " + this->GetTargetName(),
+      uses_terminal,
       cmNinjaDeps(1, utilCommandName),
       deps);
 
