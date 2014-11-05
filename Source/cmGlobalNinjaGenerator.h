@@ -299,6 +299,9 @@ public:
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
   std::string ninjaVersion() const;
+
+  bool SupportsConsolePool() const;
+
 protected:
 
   /// Overloaded methods. @see cmGlobalGenerator::Generate()
