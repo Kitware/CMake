@@ -11,11 +11,15 @@
 ============================================================================*/
 #include "cmInstallDirectoryGenerator.h"
 
+#include "cmGeneratorExpression.h"
 #include "cmTarget.h"
+#include "cmMakefile.h"
+#include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
 cmInstallDirectoryGenerator
-::cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
+::cmInstallDirectoryGenerator(cmMakefile* mf,
+                              std::vector<std::string> const& dirs,
                               const char* dest,
                               const char* file_permissions,
                               const char* dir_permissions,
@@ -25,10 +29,20 @@ cmInstallDirectoryGenerator
                               const char* literal_args,
                               bool optional):
   cmInstallGenerator(dest, configurations, component, message),
+  Makefile(mf),
   Directories(dirs),
   FilePermissions(file_permissions), DirPermissions(dir_permissions),
   LiteralArguments(literal_args), Optional(optional)
 {
+  // We need per-config actions if any files have generator expressions.
+  for(std::vector<std::string>::const_iterator i = dirs.begin();
+      !this->ActionsPerConfig && i != dirs.end(); ++i)
+    {
+    if(cmGeneratorExpression::Find(*i) != std::string::npos)
+      {
+      this->ActionsPerConfig = true;
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -39,16 +53,48 @@ cmInstallDirectoryGenerator
 
 //----------------------------------------------------------------------------
 void
-cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
-                                                   Indent const& indent)
+cmInstallDirectoryGenerator::AddDirectoriesInstallRule(std::ostream& os,
+                                                       Indent const& indent,
+                                                       std::vector<std::string> const& directories)
 {
   // Write code to install the directories.
   const char* no_rename = 0;
   this->AddInstallRule(os, cmInstallType_DIRECTORY,
-                       this->Directories,
+                       directories,
                        this->Optional,
                        this->FilePermissions.c_str(),
                        this->DirPermissions.c_str(),
                        no_rename, this->LiteralArguments.c_str(),
                        indent);
+}
+
+//----------------------------------------------------------------------------
+void cmInstallDirectoryGenerator::GenerateScriptActions(std::ostream& os,
+                                                    Indent const& indent)
+{
+  if(this->ActionsPerConfig)
+    {
+    this->cmInstallGenerator::GenerateScriptActions(os, indent);
+    }
+  else
+    {
+    this->AddDirectoriesInstallRule(os, indent, this->Directories);
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmInstallDirectoryGenerator::GenerateScriptForConfig(std::ostream& os,
+                                                    const std::string& config,
+                                                    Indent const& indent)
+{
+  std::vector<std::string> directories;
+  cmGeneratorExpression ge;
+  for(std::vector<std::string>::const_iterator i = this->Directories.begin();
+      i != this->Directories.end(); ++i)
+    {
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(*i);
+    cmSystemTools::ExpandListArgument(cge->Evaluate(this->Makefile, config),
+                                      directories);
+    }
+  this->AddDirectoriesInstallRule(os, indent, directories);
 }

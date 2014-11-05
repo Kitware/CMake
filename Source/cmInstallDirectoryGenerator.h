@@ -14,13 +14,16 @@
 
 #include "cmInstallGenerator.h"
 
+class cmMakefile;
+
 /** \class cmInstallDirectoryGenerator
  * \brief Generate directory installation rules.
  */
 class cmInstallDirectoryGenerator: public cmInstallGenerator
 {
 public:
-  cmInstallDirectoryGenerator(std::vector<std::string> const& dirs,
+  cmInstallDirectoryGenerator(cmMakefile* mf,
+                              std::vector<std::string> const& dirs,
                               const char* dest,
                               const char* file_permissions,
                               const char* dir_permissions,
@@ -33,6 +36,13 @@ public:
 
 protected:
   virtual void GenerateScriptActions(std::ostream& os, Indent const& indent);
+  virtual void GenerateScriptForConfig(std::ostream& os,
+                                       const std::string& config,
+                                       Indent const& indent);
+  void AddDirectoriesInstallRule(std::ostream& os, Indent const& indent,
+                                 std::vector<std::string> const& directories);
+
+  cmMakefile* Makefile;
   std::vector<std::string> Directories;
   std::string FilePermissions;
   std::string DirPermissions;
