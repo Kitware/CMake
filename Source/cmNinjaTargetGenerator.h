@@ -116,7 +116,6 @@ protected:
   void WriteObjectBuildStatements();
   void WriteObjectBuildStatement(cmSourceFile const* source,
                                  bool writeOrderDependsTargetForTarget);
-  void WriteCustomCommandBuildStatement(cmCustomCommand *cc);
 
   cmNinjaDeps GetObjects() const
   { return this->Objects; }
