@@ -1235,7 +1235,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
   // Create the directory install generator.
   this->Makefile->AddInstallGenerator(
-    new cmInstallDirectoryGenerator(dirs, destination,
+    new cmInstallDirectoryGenerator(this->Makefile, dirs, destination,
                                     permissions_file.c_str(),
                                     permissions_dir.c_str(),
                                     configurations,
