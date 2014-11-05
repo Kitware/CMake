@@ -2207,7 +2207,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       = this->CreateGlobalTarget(this->GetPackageTargetName(),
                                  "Run CPack packaging tool...",
                                  &cpackCommandLines, depends,
-                                 workingDir.c_str());
+                                 workingDir.c_str(), /*uses_terminal*/false);
     }
   // CPack source
   const char* packageSourceTargetName = this->GetPackageSourceTargetName();
@@ -2231,8 +2231,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         = this->CreateGlobalTarget(packageSourceTargetName,
                                    "Run CPack packaging tool for source...",
                                    &cpackCommandLines, depends,
-                                   workingDir.c_str()
-                                   );
+                                   workingDir.c_str(), /*uses_terminal*/false);
       }
     }
 
@@ -2257,7 +2256,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     cpackCommandLines.push_back(singleLine);
     (*targets)[this->GetTestTargetName()]
       = this->CreateGlobalTarget(this->GetTestTargetName(),
-        "Running tests...", &cpackCommandLines, depends, 0);
+        "Running tests...", &cpackCommandLines, depends, 0,
+        /*uses_terminal*/false);
     }
 
   //Edit Cache
@@ -2280,7 +2280,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[editCacheTargetName] =
         this->CreateGlobalTarget(
           editCacheTargetName, "Running CMake cache editor...",
-          &cpackCommandLines, depends, 0);
+          &cpackCommandLines, depends, 0, /*uses_terminal*/true);
       }
     else
       {
@@ -2293,7 +2293,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         this->CreateGlobalTarget(
           editCacheTargetName,
           "No interactive CMake dialog available...",
-          &cpackCommandLines, depends, 0);
+          &cpackCommandLines, depends, 0, /*uses_terminal*/false);
       }
     }
 
@@ -2312,7 +2312,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[rebuildCacheTargetName] =
       this->CreateGlobalTarget(
         rebuildCacheTargetName, "Running CMake to regenerate build system...",
-        &cpackCommandLines, depends, 0);
+        &cpackCommandLines, depends, 0, /*uses_terminal*/false);
     }
 
   //Install
@@ -2352,7 +2352,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)["list_install_components"]
         = this->CreateGlobalTarget("list_install_components",
           ostr.str().c_str(),
-          &cpackCommandLines, depends, 0);
+          &cpackCommandLines, depends, 0, /*uses_terminal*/false);
       }
     std::string cmd = cmakeCommand;
     cpackCommandLines.erase(cpackCommandLines.begin(),
@@ -2393,7 +2393,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[this->GetInstallTargetName()] =
       this->CreateGlobalTarget(
         this->GetInstallTargetName(), "Install the project...",
-        &cpackCommandLines, depends, 0);
+        &cpackCommandLines, depends, 0, /*uses_terminal*/false);
 
     // install_local
     if(const char* install_local = this->GetInstallLocalTargetName())
@@ -2409,7 +2409,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[install_local] =
         this->CreateGlobalTarget(
           install_local, "Installing only the local directory...",
-          &cpackCommandLines, depends, 0);
+          &cpackCommandLines, depends, 0, /*uses_terminal*/false);
       }
 
     // install_strip
@@ -2426,7 +2426,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[install_strip] =
         this->CreateGlobalTarget(
           install_strip, "Installing the project stripped...",
-          &cpackCommandLines, depends, 0);
+          &cpackCommandLines, depends, 0, /*uses_terminal*/false);
       }
     }
 }
@@ -2500,7 +2500,8 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   const std::string& name, const char* message,
   const cmCustomCommandLines* commandLines,
   std::vector<std::string> depends,
-  const char* workingDirectory)
+  const char* workingDirectory,
+  bool uses_terminal)
 {
   // Package
   cmTarget target;
@@ -2513,6 +2514,7 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   // Store the custom command in the target.
   cmCustomCommand cc(0, no_outputs, no_depends, *commandLines, 0,
                      workingDirectory);
+  cc.SetUsesTerminal(uses_terminal);
   target.AddPostBuildCommand(cc);
   target.SetProperty("EchoString", message);
   std::vector<std::string>::iterator dit;
