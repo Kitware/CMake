@@ -59,7 +59,7 @@ bool cmAddCustomTargetCommand
     doing_working_directory,
     doing_comment,
     doing_source,
-    doing_verbatim
+    doing_nothing
   };
   tdoing doing = doing_command;
 
@@ -90,7 +90,7 @@ bool cmAddCustomTargetCommand
       }
     else if(copy == "VERBATIM")
       {
-      doing = doing_verbatim;
+      doing = doing_nothing;
       verbatim = true;
       }
     else if (copy == "COMMENT")
