@@ -483,3 +483,26 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E touch "${gen_file}")
 
 add_library(NormDepends "${gen_file}")
+
+# Test that USES_TERMINAL is parsed correctly.
+# It seems much more difficult to test that USES_TERMINAL actually gives
+# the subprocess console access, as test output is piped through CTest,
+# and CTest itself might not be connected to the console.
+
+set(gen_file "${gen_path}/bar2.cxx")
+
+add_custom_command(
+  OUTPUT "${gen_file}"
+  DEPENDS "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E touch "${gen_file}"
+  VERBATIM
+  USES_TERMINAL
+)
+
+add_library(UseConsole "${gen_file}")
+
+add_custom_target(UseConsoleTarget ALL
+  COMMAND ${CMAKE_COMMAND} -E echo "Custom console target."
+  VERBATIM
+  USES_TERMINAL
+)
