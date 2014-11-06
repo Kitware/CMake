@@ -13,7 +13,7 @@ list(APPEND HHEADERS
   ${CURL_BINARY_DIR}/include/curl/curlbuild.h
   )
 
-if(MSVC)
+if(MSVC AND NOT CURL_STATICLIB)
   list(APPEND CSOURCES libcurl.rc)
 endif()
 
@@ -93,10 +93,6 @@ add_library(
   ${CURL_USER_DEFINED_DYNAMIC_OR_STATIC}
   ${HHEADERS} ${CSOURCES}
   )
-
-if(MSVC AND CURL_STATICLIB)
-  set_target_properties(${LIB_NAME} PROPERTIES STATIC_LIBRARY_FLAGS ${CMAKE_EXE_LINKER_FLAGS})
-endif()
 
 target_link_libraries(${LIB_NAME} ${CURL_LIBS})
 
