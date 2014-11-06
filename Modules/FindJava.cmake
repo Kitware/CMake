@@ -17,7 +17,7 @@
 #   Java_JAVAH_EXECUTABLE   = the full path to the Java header generator
 #   Java_JAVADOC_EXECUTABLE = the full path to the Java documention generator
 #   Java_JAR_EXECUTABLE     = the full path to the Java archiver
-#   Java_VERSION_STRING     = Version of the package found (java version), eg. 1.6.0_12
+#   Java_VERSION_STRING     = Version of java found, eg. 1.6.0_12
 #   Java_VERSION_MAJOR      = The major version of the package found.
 #   Java_VERSION_MINOR      = The minor version of the package found.
 #   Java_VERSION_PATCH      = The patch version of the package found.

@@ -17,10 +17,10 @@
 # Additionally, the following two variables are set (but not required
 # for using xslt):
 #
-# ::
-#
-#   LIBXSLT_EXSLT_LIBRARIES - Link to these if you need to link against the exslt library
-#   LIBXSLT_XSLTPROC_EXECUTABLE - Contains the full path to the xsltproc executable if found
+# ``LIBXSLT_EXSLT_LIBRARIES``
+#   Link to these if you need to link against the exslt library.
+# ``LIBXSLT_XSLTPROC_EXECUTABLE``
+#   Contains the full path to the xsltproc executable if found.
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
