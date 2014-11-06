@@ -3,7 +3,7 @@
 cmake-variables(7)
 ******************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
