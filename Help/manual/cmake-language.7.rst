@@ -3,7 +3,7 @@
 cmake-language(7)
 *****************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -79,6 +79,10 @@ A CMake Language source file consists of zero or more
 `Command Invocations`_ separated by newlines and optionally
 spaces and `Comments`_:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  file: `file_element`*
  file_element: `command_invocation` `line_ending` |
@@ -86,6 +90,10 @@ spaces and `Comments`_:
  line_ending: `line_comment`? `newline`
  space: <match '[ \t]+'>
  newline: <match '\n'>
+
+.. raw:: latex
+
+   \end{small}
 
 Note that any source file line not inside `Command Arguments`_ or
 a `Bracket Comment`_ can end in a `Line Comment`_.
@@ -98,6 +106,10 @@ Command Invocations
 A *command invocation* is a name followed by paren-enclosed arguments
 separated by whitespace:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  command_invocation: `space`* `identifier` `space`* '(' `arguments` ')'
  identifier: <match '[A-Za-z_][A-Za-z0-9_]*'>
@@ -105,6 +117,10 @@ separated by whitespace:
  separated_arguments: `separation`+ `argument`? |
                     : `separation`* '(' `arguments` ')'
  separation: `space` | `line_ending`
+
+.. raw:: latex
+
+   \end{small}
 
 For example:
 
@@ -137,8 +153,16 @@ Command Arguments
 
 There are three types of arguments within `Command Invocations`_:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  argument: `bracket_argument` | `quoted_argument` | `unquoted_argument`
+
+.. raw:: latex
+
+   \end{small}
 
 .. _`Bracket Argument`:
 
@@ -149,12 +173,20 @@ A *bracket argument*, inspired by `Lua`_ long bracket syntax,
 encloses content between opening and closing "brackets" of the
 same length:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  bracket_argument: `bracket_open` `bracket_content` `bracket_close`
  bracket_open: '[' '='{len} '['
  bracket_content: <any text not containing a `bracket_close`
                 :  of the same {len} as the `bracket_open`>
  bracket_close: ']' '='{len} ']'
+
+.. raw:: latex
+
+   \end{small}
 
 An opening bracket of length *len >= 0* is written ``[`` followed
 by *len* ``=`` followed by ``[`` and the corresponding closing
@@ -197,12 +229,20 @@ Quoted Argument
 A *quoted argument* encloses content between opening and closing
 double-quote characters:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  quoted_argument: '"' `quoted_element`* '"'
  quoted_element: <any character except '\' or '"'> |
                  : `escape_sequence` |
                  : `quoted_continuation`
  quoted_continuation: '\' `newline`
+
+.. raw:: latex
+
+   \end{small}
 
 Quoted argument content consists of all text between opening and
 closing quotes.  Both `Escape Sequences`_ and `Variable References`_
@@ -246,11 +286,19 @@ An *unquoted argument* is not enclosed by any quoting syntax.
 It may not contain any whitespace, ``(``, ``)``, ``#``, ``"``, or ``\``
 except when escaped by a backslash:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  unquoted_argument: `unquoted_element`+ | `unquoted_legacy`
  unquoted_element: <any character except whitespace or one of '()#"\'> |
                  : `escape_sequence`
  unquoted_legacy: <see note in text>
+
+.. raw:: latex
+
+   \end{small}
 
 Unquoted argument content consists of all text in a contiguous block
 of allowed or escaped characters.  Both `Escape Sequences`_ and
@@ -294,11 +342,19 @@ Escape Sequences
 
 An *escape sequence* is a ``\`` followed by one character:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  escape_sequence: `escape_identity` | `escape_encoded` | `escape_semicolon`
  escape_identity: '\' <match '[^A-Za-z0-9;]'>
  escape_encoded: '\t' | '\r' | '\n'
  escape_semicolon: '\;'
+
+.. raw:: latex
+
+   \end{small}
 
 A ``\`` followed by a non-alphanumeric character simply encodes the literal
 character without interpreting it as syntax.  A ``\t``, ``\r``, or ``\n``
@@ -348,8 +404,16 @@ Bracket Comment
 A ``#`` immediately followed by a `Bracket Argument`_ forms a
 *bracket comment* consisting of the entire bracket enclosure:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  bracket_comment: '#' `bracket_argument`
+
+.. raw:: latex
+
+   \end{small}
 
 For example:
 
@@ -371,9 +435,17 @@ Line Comment
 A ``#`` not immediately followed by a `Bracket Argument`_ forms a
 *line comment* that runs until the end of the line:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  line_comment: '#' <any text not starting in a `bracket_argument`
              :      and not containing a `newline`>
+
+.. raw:: latex
+
+   \end{small}
 
 For example:
 

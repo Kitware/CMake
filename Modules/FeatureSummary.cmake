@@ -17,7 +17,7 @@
 # ::
 #
 #     -- The following OPTIONAL packages have been found:
-#     LibXml2 (required version >= 2.4) , XML processing library. , <http://xmlsoft.org>
+#     LibXml2 (required version >= 2.4), XML processing lib, <http://xmlsoft.org>
 #        * Enables HTML-import in MyWordProcessor
 #        * Enables odt-export in MyWordProcessor
 #     PNG , A PNG image library. , <http://www.libpng.org/pub/png/>
