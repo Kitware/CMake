@@ -29,6 +29,13 @@ set(DISABLED_THREADSAFE OFF CACHE INTERNAL "Curl can use thread-safe functions")
 set(ENABLE_IPV6 OFF CACHE INTERNAL "Curl IPv6 support")
 set(HTTP_ONLY OFF CACHE INTERNAL "Curl is not http-only")
 
+# Windows Vista and above have inet_pton, but this will link on
+# older versions and then the executable will fail to launch at
+# runtime on older versions because no DLL provides the symbol.
+if(WIN32)
+  set(HAVE_INET_PTON 0 CACHE INTERNAL "Do not use inet_pton")
+endif()
+
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
