@@ -41,8 +41,9 @@
 #
 # ::
 #
-#    squish_v4_add_test(cmakeTestName AUT targetName SUITE suiteName TEST squishTestName
-#                    [SETTINGSGROUP group] [PRE_COMMAND command] [POST_COMMAND command] )
+#    squish_v4_add_test(cmakeTestName
+#      AUT targetName SUITE suiteName TEST squishTestName
+#      [SETTINGSGROUP group] [PRE_COMMAND command] [POST_COMMAND command] )
 #
 #
 #

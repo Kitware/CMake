@@ -52,7 +52,7 @@
 #    [CMAKE_GENERATOR_PLATFORM p] # Generator-specific platform name
 #    [CMAKE_GENERATOR_TOOLSET t] # Generator-specific toolset name
 #    [CMAKE_ARGS args...]        # Arguments to CMake command line
-#    [CMAKE_CACHE_ARGS args...]  # Initial cache arguments, of the form -Dvar:string=on
+#    [CMAKE_CACHE_ARGS args...]  # Initial cache args with form -Dvar:string=on
 #   #--Build step-----------------
 #    [BINARY_DIR dir]            # Specify build dir location
 #    [BUILD_COMMAND cmd...]      # Command to drive the native build

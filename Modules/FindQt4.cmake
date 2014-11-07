@@ -104,9 +104,11 @@
 #   macro QT4_ADD_DBUS_INTERFACES(outfiles inputfile ... )
 #         Create the interface header and implementation files
 #         for all listed interface xml files.
-#         The basename will be automatically determined from the name of the xml file.
+#         The basename will be automatically determined from the name
+#         of the xml file.
 #
-#         The source file properties described for QT4_ADD_DBUS_INTERFACE also apply here.
+#         The source file properties described for
+#         QT4_ADD_DBUS_INTERFACE also apply here.
 #
 #
 # ::
@@ -172,7 +174,7 @@
 #         a class uses the Q_OBJECT macro, moc has to run on it. If you don't
 #         want to use QT4_WRAP_CPP() (which is reliable and mature), you can insert
 #         #include "foo.moc"
-#         in foo.cpp and then give foo.cpp as argument to QT4_AUTOMOC(). This will the
+#         in foo.cpp and then give foo.cpp as argument to QT4_AUTOMOC(). This will
 #         scan all listed files at cmake-time for such included moc files and if it
 #         finds them cause a rule to be generated to run moc at build time on the
 #         accompanying header file foo.h.
@@ -188,8 +190,8 @@
 #         This function is obsolete. Use target_link_libraries with IMPORTED targets
 #         instead.
 #         Make <target> use the <modules> from Qt. Using a Qt module means
-#         to link to the library, add the relevant include directories for the module,
-#         and add the relevant compiler defines for using the module.
+#         to link to the library, add the relevant include directories for the
+#         module, and add the relevant compiler defines for using the module.
 #         Modules are roughly equivalent to components of Qt4, so usage would be
 #         something like:
 #          qt4_use_modules(myexe Core Gui Declarative)
