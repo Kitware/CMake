@@ -21,7 +21,8 @@
 #     flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
 #     This is available mostly for cases this module failed to anticipate for
 #     and you must add additional flags. This is marked as ADVANCED.
-#   SDL_SOUND_VERSION_STRING, human-readable string containing the version of SDL_sound
+#   SDL_SOUND_VERSION_STRING, human-readable string containing the
+#     version of SDL_sound
 #
 #
 #
