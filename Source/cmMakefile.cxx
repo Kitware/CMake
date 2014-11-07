@@ -4426,6 +4426,8 @@ void cmMakefile::PushScope()
   this->Internal->VarStack.push(cmDefinitions(parent));
   this->Internal->VarInitStack.push(init);
   this->Internal->VarUsageStack.push(usage);
+  this->GetLocalGenerator()->GetGlobalGenerator()->
+    GetFileLockPool().PushFunctionScope();
 }
 
 void cmMakefile::PopScope()
@@ -4463,6 +4465,8 @@ void cmMakefile::PopScope()
     {
     this->Internal->VarUsageStack.top().insert(*it);
     }
+  this->GetLocalGenerator()->GetGlobalGenerator()->
+    GetFileLockPool().PopFunctionScope();
 }
 
 void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
