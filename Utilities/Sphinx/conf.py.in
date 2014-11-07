@@ -31,6 +31,8 @@ exclude_patterns = []
 extensions = ['cmake']
 templates_path = ['@conf_path@/templates']
 
+nitpicky = True
+
 cmake_manuals = sorted(glob.glob(r'@conf_docs@/manual/*.rst'))
 cmake_manual_description = re.compile('^\.\. cmake-manual-description:(.*)$')
 man_pages = []

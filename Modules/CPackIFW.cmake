@@ -96,7 +96,7 @@
 #
 #  If this is ``ON`` all components will be downloaded.
 #  By default is ``OFF`` or used value
-#  from :variable:`CPACK_DOWNLOAD_ALL` if set
+#  from ``CPACK_DOWNLOAD_ALL`` if set
 #
 # Components
 # """"""""""
