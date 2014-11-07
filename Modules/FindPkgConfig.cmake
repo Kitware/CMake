@@ -490,9 +490,10 @@ endmacro()
 
     pkg_check_modules (XRENDER REQUIRED xrender)
 
- Defines e.g.:
- ``XRENDER_LIBRARIES=Xrender;X11`` and
- ``XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp``
+ Defines for example::
+
+   XRENDER_LIBRARIES=Xrender;X11``
+   XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
 #]========================================]
 macro(pkg_check_modules _prefix _module0)
   # check cached value

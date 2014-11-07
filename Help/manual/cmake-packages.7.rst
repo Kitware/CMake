@@ -3,7 +3,7 @@
 cmake-packages(7)
 *****************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -479,7 +479,7 @@ be true. This can be tested with logic in the package configuration file:
   foreach(_comp ${ClimbingStats_FIND_COMPONENTS})
     if (NOT ";${_supported_components};" MATCHES _comp)
       set(ClimbingStats_FOUND False)
-      set(ClimbingStats_NOTFOUND_MESSAGE "Specified unsupported component: ${_comp}")
+      set(ClimbingStats_NOTFOUND_MESSAGE "Unsupported component: ${_comp}")
     endif()
     include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStats${_comp}Targets.cmake")
   endforeach()

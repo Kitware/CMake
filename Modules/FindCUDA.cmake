@@ -278,13 +278,13 @@
 #                            Only available for CUDA version 3.2+.
 #   CUDA_cusparse_LIBRARY -- CUDA Sparse Matrix library.
 #                            Only available for CUDA version 3.2+.
-#   CUDA_npp_LIBRARY      -- NVIDIA Performance Primitives library.
+#   CUDA_npp_LIBRARY      -- NVIDIA Performance Primitives lib.
 #                            Only available for CUDA version 4.0+.
-#   CUDA_nppc_LIBRARY      -- NVIDIA Performance Primitives library (core).
+#   CUDA_nppc_LIBRARY     -- NVIDIA Performance Primitives lib (core).
 #                            Only available for CUDA version 5.5+.
-#   CUDA_nppi_LIBRARY      -- NVIDIA Performance Primitives library (image processing).
+#   CUDA_nppi_LIBRARY     -- NVIDIA Performance Primitives lib (image processing).
 #                            Only available for CUDA version 5.5+.
-#   CUDA_npps_LIBRARY      -- NVIDIA Performance Primitives library (signal processing).
+#   CUDA_npps_LIBRARY     -- NVIDIA Performance Primitives lib (signal processing).
 #                            Only available for CUDA version 5.5+.
 #   CUDA_nvcuvenc_LIBRARY -- CUDA Video Encoder library.
 #                            Only available for CUDA version 3.2+.
