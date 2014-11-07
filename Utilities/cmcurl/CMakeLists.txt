@@ -36,6 +36,14 @@ if(WIN32)
   set(HAVE_INET_PTON 0 CACHE INTERNAL "Do not use inet_pton")
 endif()
 
+# Disable warnings to avoid changing 3rd party code.
+if(CMAKE_C_COMPILER_ID MATCHES
+    "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+elseif(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
+endif()
+
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
