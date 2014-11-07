@@ -282,7 +282,8 @@ shared library:
   generate_export_header(ClimbingStats)
   set_property(TARGET ClimbingStats PROPERTY VERSION ${Upstream_VERSION})
   set_property(TARGET ClimbingStats PROPERTY SOVERSION 3)
-  set_property(TARGET ClimbingStats PROPERTY INTERFACE_ClimbingStats_MAJOR_VERSION 3)
+  set_property(TARGET ClimbingStats PROPERTY
+    INTERFACE_ClimbingStats_MAJOR_VERSION 3)
   set_property(TARGET ClimbingStats APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING ClimbingStats_MAJOR_VERSION
   )
