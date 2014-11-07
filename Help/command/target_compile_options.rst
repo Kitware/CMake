@@ -12,8 +12,8 @@ Add compile options to a target.
 Specify compile options to use when compiling a given target.  The
 named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
-:prop_tgt:`IMPORTED Target`.  If ``BEFORE`` is specified, the content will
-be prepended to the property instead of being appended.
+:ref:`IMPORTED Target <Imported Targets>`.  If ``BEFORE`` is specified,
+the content will be prepended to the property instead of being appended.
 
 This command can be used to add any options, but
 alternative commands exist to add preprocessor definitions

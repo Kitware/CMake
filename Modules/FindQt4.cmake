@@ -23,7 +23,7 @@
 # .. note::
 #
 #  When using :prop_tgt:`IMPORTED` targets, the qtmain.lib static library is
-#  automatically linked on Windows for :variable:`WIN32 <WIN32_EXECUTABLE>`
+#  automatically linked on Windows for :prop_tgt:`WIN32 <WIN32_EXECUTABLE>`
 #  executables. To disable that globally, set the
 #  ``QT4_NO_LINK_QTMAIN`` variable before finding Qt4. To disable that
 #  for a particular executable, set the ``QT4_NO_LINK_QTMAIN`` target

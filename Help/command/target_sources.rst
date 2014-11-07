@@ -12,7 +12,7 @@ Add sources to a target.
 Specify sources to use when compiling a given target.  The
 named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
-:prop_tgt:`IMPORTED Target`.
+:ref:`IMPORTED Target <Imported Targets>`.
 
 The ``INTERFACE``, ``PUBLIC`` and ``PRIVATE`` keywords are required to
 specify the scope of the following arguments.  ``PRIVATE`` and ``PUBLIC``
