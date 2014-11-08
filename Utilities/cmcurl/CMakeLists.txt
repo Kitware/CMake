@@ -521,58 +521,12 @@ check_type_size("short"  SIZEOF_SHORT)
 check_type_size("int"  SIZEOF_INT)
 check_type_size("__int64"  SIZEOF___INT64)
 check_type_size("time_t"  SIZEOF_TIME_T)
-if(NOT HAVE_SIZEOF_SSIZE_T)
-  if(SIZEOF_LONG EQUAL SIZEOF_SIZE_T)
-    set(ssize_t long)
-  endif(SIZEOF_LONG EQUAL SIZEOF_SIZE_T)
-  if(NOT ssize_t AND SIZEOF___INT64 EQUAL SIZEOF_SIZE_T)
-    set(ssize_t __int64)
-  endif(NOT ssize_t AND SIZEOF___INT64 EQUAL SIZEOF_SIZE_T)
-endif(NOT HAVE_SIZEOF_SSIZE_T)
+check_type_size("off_t"  SIZEOF_OFF_T)
 
-# Different sizeofs, etc.
-
-#    define CURL_SIZEOF_LONG        4
-#    define CURL_TYPEOF_CURL_OFF_T  long long
-#    define CURL_FORMAT_CURL_OFF_T  "lld"
-#    define CURL_FORMAT_CURL_OFF_TU "llu"
-#    define CURL_FORMAT_OFF_T       "%lld"
-#    define CURL_SIZEOF_CURL_OFF_T  8
-#    define CURL_SUFFIX_CURL_OFF_T  LL
-#    define CURL_SUFFIX_CURL_OFF_TU ULL
-
-set(CURL_SIZEOF_LONG ${SIZEOF_LONG})
-
-if(SIZEOF_LONG EQUAL 8)
-  set(CURL_TYPEOF_CURL_OFF_T long)
-  set(CURL_SIZEOF_CURL_OFF_T 8)
-  set(CURL_FORMAT_CURL_OFF_T "ld")
-  set(CURL_FORMAT_CURL_OFF_TU "lu")
-  set(CURL_FORMAT_OFF_T "%ld")
-  set(CURL_SUFFIX_CURL_OFF_T L)
-  set(CURL_SUFFIX_CURL_OFF_TU UL)
-endif(SIZEOF_LONG EQUAL 8)
-
-if(SIZEOF_LONG_LONG EQUAL 8)
-  set(CURL_TYPEOF_CURL_OFF_T "long long")
-  set(CURL_SIZEOF_CURL_OFF_T 8)
-  set(CURL_FORMAT_CURL_OFF_T "lld")
-  set(CURL_FORMAT_CURL_OFF_TU "llu")
-  set(CURL_FORMAT_OFF_T "%lld")
-  set(CURL_SUFFIX_CURL_OFF_T LL)
-  set(CURL_SUFFIX_CURL_OFF_TU ULL)
-endif(SIZEOF_LONG_LONG EQUAL 8)
-
-if(NOT CURL_TYPEOF_CURL_OFF_T)
-  set(CURL_TYPEOF_CURL_OFF_T ${ssize_t})
-  set(CURL_SIZEOF_CURL_OFF_T ${SIZEOF_SSIZE_T})
-  # TODO: need adjustment here.
-  set(CURL_FORMAT_CURL_OFF_T "ld")
-  set(CURL_FORMAT_CURL_OFF_TU "lu")
-  set(CURL_FORMAT_OFF_T "%ld")
-  set(CURL_SUFFIX_CURL_OFF_T L)
-  set(CURL_SUFFIX_CURL_OFF_TU LU)
-endif(NOT CURL_TYPEOF_CURL_OFF_T)
+# Make public versions of some type sizes for curlbuild.h.
+foreach(t INT LONG LONG_LONG SSIZE_T)
+  string(REPLACE "SIZEOF_" "CURL_SIZEOF_" CURL_SIZEOF_${t}_CODE "${SIZEOF_${t}_CODE}")
+endforeach()
 
 if(HAVE_SIZEOF_LONG_LONG)
   set(HAVE_LONGLONG 1)
@@ -835,6 +789,7 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
 endif(CMAKE_COMPILER_IS_GNUCC AND APPLE)
 
 if(HAVE_SOCKLEN_T)
+  set(CURL_HAVE_SOCKLEN_T 1)
   set(CURL_TYPEOF_CURL_SOCKLEN_T "socklen_t")
   if(WIN32)
     set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h;ws2tcpip.h")
@@ -848,8 +803,7 @@ if(HAVE_SOCKLEN_T)
      "Check for sizeof socklen_t failed, see CMakeFiles/CMakerror.log")
   endif()
 else()
-  set(CURL_TYPEOF_CURL_SOCKLEN_T int)
-  set(CURL_SIZEOF_CURL_SOCKLEN_T ${SIZEOF_INT})
+  set(CURL_HAVE_SOCKLEN_T 0)
 endif()
 
 # TODO test which of these headers are required for the typedefs used in curlbuild.h

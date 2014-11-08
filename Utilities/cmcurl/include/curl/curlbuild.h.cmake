@@ -158,40 +158,61 @@
 #  include <sys/poll.h>
 #endif
 
-/* The size of `long', as computed by sizeof. */
-#define CURL_SIZEOF_LONG ${CURL_SIZEOF_LONG}
+/* The size of `int', as computed by sizeof. */
+@CURL_SIZEOF_INT_CODE@
 
+/* The size of `long', as computed by sizeof. */
+@CURL_SIZEOF_LONG_CODE@
+
+/* The size of `long long', as computed by sizeof. */
+@CURL_SIZEOF_LONG_LONG_CODE@
+
+/* The size of `ssize_t', as computed by sizeof. */
+@CURL_SIZEOF_SSIZE_T_CODE@
+
+#define CURL_HAVE_SOCKLEN_T @CURL_HAVE_SOCKLEN_T@
+#if CURL_HAVE_SOCKLEN_T
 /* Integral data type used for curl_socklen_t. */
-#define CURL_TYPEOF_CURL_SOCKLEN_T ${CURL_TYPEOF_CURL_SOCKLEN_T}
+#define CURL_TYPEOF_CURL_SOCKLEN_T socklen_t
 
 /* The size of `curl_socklen_t', as computed by sizeof. */
-#define CURL_SIZEOF_CURL_SOCKLEN_T ${CURL_SIZEOF_CURL_SOCKLEN_T}
+@CURL_SIZEOF_CURL_SOCKLEN_T_CODE@
+#else
+# define CURL_TYPEOF_CURL_SOCKLEN_T int
+# define CURL_SIZEOF_CURL_SOCKLEN_T CURL_SIZEOF_INT
+#endif
 
 /* Data type definition of curl_socklen_t. */
 typedef CURL_TYPEOF_CURL_SOCKLEN_T curl_socklen_t;
 
-/* Signed integral data type used for curl_off_t. */
-#define CURL_TYPEOF_CURL_OFF_T ${CURL_TYPEOF_CURL_OFF_T}
+#if CURL_SIZEOF_LONG == 8
+# define CURL_TYPEOF_CURL_OFF_T long
+# define CURL_SIZEOF_CURL_OFF_T 8
+# define CURL_FORMAT_CURL_OFF_T "ld"
+# define CURL_FORMAT_CURL_OFF_TU "lu"
+# define CURL_FORMAT_OFF_T "%ld"
+# define CURL_SUFFIX_CURL_OFF_T L
+# define CURL_SUFFIX_CURL_OFF_TU UL
+#elif CURL_SIZEOF_LONG_LONG == 8
+# define CURL_TYPEOF_CURL_OFF_T long long
+# define CURL_SIZEOF_CURL_OFF_T 8
+# define CURL_FORMAT_CURL_OFF_T "lld"
+# define CURL_FORMAT_CURL_OFF_TU "llu"
+# define CURL_FORMAT_OFF_T "%lld"
+# define CURL_SUFFIX_CURL_OFF_T LL
+# define CURL_SUFFIX_CURL_OFF_TU ULL
+#else
+# define CURL_TYPEOF_CURL_OFF_T ssize_t
+# define CURL_SIZEOF_CURL_OFF_T CURL_SIZEOF_SSIZE_T
+/* TODO: need adjustment here. */
+# define CURL_FORMAT_CURL_OFF_T "ld"
+# define CURL_FORMAT_CURL_OFF_TU "lu"
+# define CURL_FORMAT_OFF_T "%ld"
+# define CURL_SUFFIX_CURL_OFF_T L
+# define CURL_SUFFIX_CURL_OFF_TU UL
+#endif
 
 /* Data type definition of curl_off_t. */
 typedef CURL_TYPEOF_CURL_OFF_T curl_off_t;
-
-/* curl_off_t formatting string directive without "%" conversion specifier. */
-#define CURL_FORMAT_CURL_OFF_T "${CURL_FORMAT_CURL_OFF_T}"
-
-/* unsigned curl_off_t formatting string without "%" conversion specifier. */
-#define CURL_FORMAT_CURL_OFF_TU "${CURL_FORMAT_CURL_OFF_TU}"
-
-/* curl_off_t formatting string directive with "%" conversion specifier. */
-#define CURL_FORMAT_OFF_T "${CURL_FORMAT_OFF_T}"
-
-/* The size of `curl_off_t', as computed by sizeof. */
-#define CURL_SIZEOF_CURL_OFF_T ${CURL_SIZEOF_CURL_OFF_T}
-
-/* curl_off_t constant suffix. */
-#define CURL_SUFFIX_CURL_OFF_T ${CURL_SUFFIX_CURL_OFF_T}
-
-/* unsigned curl_off_t constant suffix. */
-#define CURL_SUFFIX_CURL_OFF_TU ${CURL_SUFFIX_CURL_OFF_TU}
 
 #endif /* __CURL_CURLBUILD_H */
