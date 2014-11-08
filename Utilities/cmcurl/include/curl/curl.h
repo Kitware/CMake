@@ -2323,6 +2323,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #include "typecheck-gcc.h"
 #else
 #if defined(__STDC__) && (__STDC__ >= 1)
+#if 0 /* Triggers clang -Wdisabled-macro-expansion, skip for CMake.  */
 /* This preprocessor magic that replaces a call with the exact same call is
    only done to make sure application authors pass exactly three arguments
    to these functions. */
@@ -2330,6 +2331,7 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #define curl_easy_getinfo(handle,info,arg) curl_easy_getinfo(handle,info,arg)
 #define curl_share_setopt(share,opt,param) curl_share_setopt(share,opt,param)
 #define curl_multi_setopt(handle,opt,param) curl_multi_setopt(handle,opt,param)
+#endif
 #endif /* __STDC__ >= 1 */
 #endif /* gcc >= 4.3 && !__cplusplus */
 
