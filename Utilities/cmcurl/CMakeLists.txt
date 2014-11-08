@@ -204,7 +204,13 @@ if(WIN32)
 endif(WIN32)
 
 # Check for all needed libraries
+if(0) # This code not needed for building within CMake.
 check_library_exists_concat("dl"     dlopen       HAVE_LIBDL)
+else()
+  # Use the cmake-defined dl libs as dl is should not be used
+  # on HPUX, but rather dld this avoids a warning
+  list(APPEND CURL_LIBS ${CMAKE_DL_LIBS})
+endif()
 check_library_exists_concat("socket" connect      HAVE_LIBSOCKET)
 check_library_exists("c" gethostbyname "" NOT_NEED_LIBNSL)
 
