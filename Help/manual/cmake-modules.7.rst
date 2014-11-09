@@ -118,6 +118,7 @@ All Modules
    /module/FindIce
    /module/FindIcotool
    /module/FindImageMagick
+   /module/FindIntl
    /module/FindITK
    /module/FindJasper
    /module/FindJava
