@@ -307,7 +307,7 @@ Id flags: ${testflags}
     #      ...
     #      /path/to/cc ...CompilerId${lang}/...
     # to extract the compiler front-end for the language.
-    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}(/CompilerId${lang}.xctest)?/(\\./)?CompilerId${lang}[ \t\n\\\"]")
+    if("${CMAKE_${lang}_COMPILER_ID_OUTPUT}" MATCHES "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerId${lang}/(\\./)?(CompilerId${lang}.xctest/)?CompilerId${lang}[ \t\n\\\"]")
       set(_comp "${CMAKE_MATCH_2}")
       if(EXISTS "${_comp}")
         set(CMAKE_${lang}_COMPILER_ID_TOOL "${_comp}" PARENT_SCOPE)
