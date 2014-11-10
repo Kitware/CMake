@@ -12,42 +12,39 @@
 #  CMAKE_REQUIRED_INCLUDES = list of include directories
 #  CMAKE_REQUIRED_LIBRARIES = list of libraries to link
 
-MACRO(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
-  IF(NOT DEFINED ${VAR} OR ${VAR} MATCHES "UNKNOWN")
-    SET(message "${VAR}")
+macro(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
+  if(NOT DEFINED "${VAR}")
+    set(message "${VAR}")
     # If the number of arguments is greater than 2 (SOURCE VAR)
-    IF(${ARGC} GREATER 2)
+    if(${ARGC} GREATER 2)
       # then add the third argument as a message
-      SET(message "${ARGV2} (${VAR})")
-    ENDIF(${ARGC} GREATER 2)
-    SET(MACRO_CHECK_FUNCTION_DEFINITIONS
+      set(message "${ARGV2} (${VAR})")
+    endif()
+    set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
-    IF(CMAKE_REQUIRED_LIBRARIES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
+    if(CMAKE_REQUIRED_LIBRARIES)
+      set(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
-    ELSE(CMAKE_REQUIRED_LIBRARIES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES)
-    ENDIF(CMAKE_REQUIRED_LIBRARIES)
-    IF(CMAKE_REQUIRED_INCLUDES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
+    endif()
+    if(CMAKE_REQUIRED_INCLUDES)
+      set(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES
         "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_REQUIRED_INCLUDES}")
-    ELSE(CMAKE_REQUIRED_INCLUDES)
-      SET(CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES)
-    ENDIF(CMAKE_REQUIRED_INCLUDES)
-    SET(src "")
-    FOREACH(def ${EXTRA_DEFINES})
-      SET(src "${src}#define ${def} 1\n")
-    ENDFOREACH(def)
-    FOREACH(inc ${HEADER_INCLUDES})
-      SET(src "${src}#include <${inc}>\n")
-    ENDFOREACH(inc)
+    endif()
+    set(src "")
+    foreach(def ${EXTRA_DEFINES})
+      set(src "${src}#define ${def} 1\n")
+    endforeach(def)
+    foreach(inc ${HEADER_INCLUDES})
+      set(src "${src}#include <${inc}>\n")
+    endforeach(inc)
 
-    SET(src "${src}\nint main() { ${SOURCE} ; return 0; }")
-    SET(CMAKE_CONFIGURABLE_FILE_CONTENT "${src}")
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/CMake/CMakeConfigurableFile.in
-      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c")
-    MESSAGE(STATUS "Performing Test ${message}")
-    TRY_COMPILE(${VAR}
+    set(src "${src}\nint main() { ${SOURCE} ; return 0; }")
+    set(CMAKE_CONFIGURABLE_FILE_CONTENT "${src}")
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/CMake/CMakeConfigurableFile.in
+      "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c"
+      IMMEDIATE)
+    message(STATUS "Performing Test ${message}")
+    try_compile(${VAR}
       ${CMAKE_BINARY_DIR}
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/src.c
       COMPILE_DEFINITIONS ${CMAKE_REQUIRED_DEFINITIONS}
@@ -55,20 +52,20 @@ MACRO(CURL_CHECK_C_SOURCE_COMPILES SOURCE VAR)
       "${CURL_CHECK_C_SOURCE_COMPILES_ADD_LIBRARIES}"
       "${CURL_CHECK_C_SOURCE_COMPILES_ADD_INCLUDES}"
       OUTPUT_VARIABLE OUTPUT)
-    IF(${VAR})
-      SET(${VAR} 1 CACHE INTERNAL "Test ${message}")
-      MESSAGE(STATUS "Performing Test ${message} - Success")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+    if(${VAR})
+      set(${VAR} 1 CACHE INTERNAL "Test ${message}")
+      message(STATUS "Performing Test ${message} - Success")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test ${message} succeded with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${src}\n")
-    ELSE(${VAR})
-      MESSAGE(STATUS "Performing Test ${message} - Failed")
-      SET(${VAR} "" CACHE INTERNAL "Test ${message}")
-      FILE(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+    else()
+      message(STATUS "Performing Test ${message} - Failed")
+      set(${VAR} "" CACHE INTERNAL "Test ${message}")
+      file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing C SOURCE FILE Test ${message} failed with the following output:\n"
         "${OUTPUT}\n"
         "Source file was:\n${src}\n")
-    ENDIF(${VAR})
-  ENDIF()
-ENDMACRO(CURL_CHECK_C_SOURCE_COMPILES)
+    endif()
+  endif()
+endmacro()
