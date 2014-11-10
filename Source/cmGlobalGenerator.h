@@ -21,6 +21,7 @@
 #include "cmExportSetMap.h" // For cmExportSetMap
 #include "cmGeneratorTarget.h"
 #include "cmGeneratorExpression.h"
+#include "cmFileLockPool.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include <cmsys/hash_map.hxx>
@@ -341,6 +342,8 @@ public:
 
   bool GenerateCPackPropertiesFile();
 
+  cmFileLockPool& GetFileLockPool() { return FileLockPool; }
+
 protected:
   virtual void Generate();
 
@@ -488,6 +491,9 @@ private:
 
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;
+
+  // Pool of file locks
+  cmFileLockPool FileLockPool;
 };
 
 #endif

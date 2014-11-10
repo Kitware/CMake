@@ -79,9 +79,11 @@ public:
     this->GG = lg->GetGlobalGenerator();
     this->LG = this->GG->GetCurrentLocalGenerator();
     this->GG->SetCurrentLocalGenerator(lg);
+    this->GG->GetFileLockPool().PushFileScope();
     }
   ~cmLocalGeneratorCurrent()
     {
+    this->GG->GetFileLockPool().PopFileScope();
     this->GG->SetCurrentLocalGenerator(this->LG);
     }
 };

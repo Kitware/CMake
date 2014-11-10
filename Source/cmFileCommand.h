@@ -75,6 +75,7 @@ protected:
 
   bool HandleTimestampCommand(std::vector<std::string> const& args);
   bool HandleGenerateCommand(std::vector<std::string> const& args);
+  bool HandleLockCommand(std::vector<std::string> const& args);
 
 private:
   void AddEvaluationFile(const std::string &inputName,
