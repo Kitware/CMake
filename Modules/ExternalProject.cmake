@@ -772,6 +772,17 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
     set(show_progress "SHOW_PROGRESS")
   endif()
 
+  if("${hash}" MATCHES "${_ep_hash_regex}")
+    if(EXISTS "${local}")
+      file("${CMAKE_MATCH_1}" "${local}" hash_value)
+      if(hash_value STREQUAL CMAKE_MATCH_2)
+        # File with expected hash already exists.
+        file(WRITE "${script_filename}" "")
+        return()
+      endif()
+    endif()
+  endif()
+
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
     set(tls_verify "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
@@ -803,6 +814,10 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
 ${tls_verify}
 ${tls_cainfo}
 
+# Do not check file's hash here!
+# Download retry logic:
+# * fetch file without hash check - on mismatch exit with successful code (= 0)
+# * retry will be triggered by _ep_write_verifyfile_script
 file(DOWNLOAD
   \"${remote}\"
   \"${local}\"
