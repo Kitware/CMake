@@ -628,6 +628,19 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
     set(show_progress "SHOW_PROGRESS")
   endif()
 
+  if("${hash}" MATCHES "${_ep_hash_regex}")
+    string(CONCAT hash_check
+      "if(EXISTS \"${local}\")\n"
+      "  file(\"${CMAKE_MATCH_1}\" \"${local}\" hash_value)\n"
+      "  if(\"x\${hash_value}\" STREQUAL \"x${CMAKE_MATCH_2}\")\n"
+      "    return()\n"
+      "  endif()\n"
+      "endif()\n"
+      )
+  else()
+    set(hash_check "")
+  endif()
+
   # check for curl globals in the project
   if(DEFINED CMAKE_TLS_VERIFY)
     set(tls_verify "set(CMAKE_TLS_VERIFY ${CMAKE_TLS_VERIFY})")
@@ -651,7 +664,7 @@ function(_ep_write_downloadfile_script script_filename remote local timeout no_p
   endif()
 
   file(WRITE ${script_filename}
-"message(STATUS \"downloading...
+"${hash_check}message(STATUS \"downloading...
      src='${remote}'
      dst='${local}'
      timeout='${timeout_msg}'\")
