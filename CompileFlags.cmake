@@ -65,6 +65,16 @@ if(CMAKE_SYSTEM_NAME MATCHES "HP-UX" AND CMAKE_CXX_COMPILER_ID MATCHES "HP")
   endif()
 endif()
 
+# Workaround for short jump tables on PA-RISC
+if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
+  if(CMAKE_COMPILER_IS_GNUC)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -mlong-calls")
+  endif()
+  if(CMAKE_COMPILER_IS_GNUCXX)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mlong-calls")
+  endif()
+endif()
+
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")
@@ -72,12 +82,6 @@ endif ()
 
 if (CMAKE_ANSI_CFLAGS)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
-endif ()
-
-# avoid binutils problem with large binaries, e.g. when building CMake in debug mode
-# See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50230
-if (CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_SYSTEM_PROCESSOR STREQUAL parisc)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--unique=.text._*")
 endif ()
 
 include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
