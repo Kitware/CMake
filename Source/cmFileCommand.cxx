@@ -33,6 +33,7 @@
 #include <cmsys/Glob.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Encoding.hxx>
 
 // Table of permissions flags.
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -59,6 +60,35 @@ static mode_t mode_world_write = S_IWOTH;
 static mode_t mode_world_execute = S_IXOTH;
 static mode_t mode_setuid = S_ISUID;
 static mode_t mode_setgid = S_ISGID;
+#endif
+
+#if defined(WIN32) && defined(CMAKE_ENCODING_UTF8)
+// libcurl doesn't support file:// urls for unicode filenames on Windows.
+// Convert string from UTF-8 to ACP if this is a file:// URL.
+static std::string fix_file_url_windows(const std::string& url)
+{
+  std::string ret = url;
+  if(strncmp(url.c_str(), "file://", 7) == 0)
+    {
+    cmsys_stl::wstring wurl = cmsys::Encoding::ToWide(url);
+    if(!wurl.empty())
+      {
+      int mblen = WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1,
+                                   NULL, 0, NULL, NULL);
+      if(mblen > 0)
+        {
+        std::vector<char> chars(mblen);
+        mblen = WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1,
+                                   &chars[0], mblen, NULL, NULL);
+        if(mblen > 0)
+          {
+          ret = &chars[0];
+          }
+        }
+      }
+    }
+  return ret;
+}
 #endif
 
 // cmLibraryCommand
@@ -2988,6 +3018,10 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     return false;
     }
 
+#if defined(WIN32) && defined(CMAKE_ENCODING_UTF8)
+  url = fix_file_url_windows(url);
+#endif
+
   ::CURL *curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);
   curl = ::curl_easy_init();
@@ -3249,6 +3283,10 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     }
 
   unsigned long file_size = cmsys::SystemTools::FileLength(filename.c_str());
+
+#if defined(WIN32) && defined(CMAKE_ENCODING_UTF8)
+  url = fix_file_url_windows(url);
+#endif
 
   ::CURL *curl;
   ::curl_global_init(CURL_GLOBAL_DEFAULT);
