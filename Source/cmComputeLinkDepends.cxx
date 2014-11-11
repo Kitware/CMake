@@ -263,21 +263,26 @@ cmComputeLinkDepends::Compute()
   this->OrderLinkEntires();
 
   // Compute the final set of link entries.
+  // Iterate in reverse order so we can keep only the last occurrence
+  // of a shared library.
   std::set<int> emmitted;
-  for(std::vector<int>::const_iterator li = this->FinalLinkOrder.begin();
-      li != this->FinalLinkOrder.end(); ++li)
+  for(std::vector<int>::const_reverse_iterator
+        li = this->FinalLinkOrder.rbegin(),
+        le = this->FinalLinkOrder.rend();
+      li != le; ++li)
     {
     int i = *li;
     LinkEntry const& e = this->EntryList[i];
     cmTarget const* t = e.Target;
-    // Entries that we know the linker will re-use for symbols
-    // needed by later entries do not need to be repeated.
+    // Entries that we know the linker will re-use do not need to be repeated.
     bool uniquify = t && t->GetType() == cmTarget::SHARED_LIBRARY;
     if(!uniquify || emmitted.insert(i).second)
       {
       this->FinalLinkEntries.push_back(e);
       }
     }
+  // Reverse the resulting order since we iterated in reverse.
+  std::reverse(this->FinalLinkEntries.begin(), this->FinalLinkEntries.end());
 
   // Display the final set.
   if(this->DebugMode)
