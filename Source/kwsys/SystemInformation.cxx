@@ -3913,7 +3913,7 @@ bool SystemInformationImplementation::QueryCygwinMemory()
 
 bool SystemInformationImplementation::QueryAIXMemory()
 {
-#if defined(_AIX)
+#if defined(_AIX) && defined(_SC_AIX_REALMEM)
   long c = sysconf(_SC_AIX_REALMEM);
   if (c <= 0)
     {
