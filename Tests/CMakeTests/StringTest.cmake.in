@@ -63,7 +63,7 @@ check_cmake_test(String
 # Execute each test listed in StringTestScript.cmake:
 #
 set(scriptname "@CMAKE_CURRENT_SOURCE_DIR@/StringTestScript.cmake")
-set(number_of_tests_expected 69)
+set(number_of_tests_expected 70)
 
 include("@CMAKE_CURRENT_SOURCE_DIR@/ExecuteScriptTests.cmake")
 execute_all_script_tests(${scriptname} number_of_tests_executed)
@@ -75,6 +75,6 @@ message(STATUS "scriptname='${scriptname}'")
 message(STATUS "number_of_tests_executed='${number_of_tests_executed}'")
 message(STATUS "number_of_tests_expected='${number_of_tests_expected}'")
 
-if(number_of_tests_executed LESS number_of_tests_expected)
+if(NOT number_of_tests_executed EQUAL number_of_tests_expected)
   message(FATAL_ERROR "error: some test cases were skipped")
 endif()

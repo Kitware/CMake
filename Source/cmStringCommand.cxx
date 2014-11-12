@@ -711,12 +711,10 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
     this->SetError(ostr.str());
     return false;
     }
-  int leftOverLength = intStringLength - begin;
-  if ( end < -1 || end > leftOverLength )
+  if ( end < -1 )
     {
     cmOStringStream ostr;
-    ostr << "end index: " << end << " is out of range -1 - "
-         << leftOverLength;
+    ostr << "end index: " << end << " should be -1 or greater";
     this->SetError(ostr.str());
     return false;
     }
