@@ -386,3 +386,7 @@ Other Changes
   the Open Watcom external version numbering.  The external
   version numbers are lower than the internal version number
   by 11.
+
+* The ``cmake-mode.el`` major Emacs editing mode no longer
+  treats ``_`` as part of words, making it more consistent
+  with other major modes.

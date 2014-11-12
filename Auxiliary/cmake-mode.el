@@ -202,7 +202,7 @@ the indentation.  Otherwise it retains the same position on the line"
 ;; Keyword highlighting regex-to-face map.
 ;;
 (defconst cmake-font-lock-keywords
-  (list '("^[ \t]*\\(\\w+\\)[ \t]*(" 1 font-lock-function-name-face))
+  (list '("^[ \t]*\\([[:word:]_]+\\)[ \t]*(" 1 font-lock-function-name-face))
   "Highlighting expressions for CMAKE mode."
   )
 
@@ -241,7 +241,6 @@ the indentation.  Otherwise it retains the same position on the line"
   ; Create the syntax table
   (setq cmake-mode-syntax-table (make-syntax-table))
   (set-syntax-table cmake-mode-syntax-table)
-  (modify-syntax-entry ?_  "w" cmake-mode-syntax-table)
   (modify-syntax-entry ?\(  "()" cmake-mode-syntax-table)
   (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
   (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
