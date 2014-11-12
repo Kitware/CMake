@@ -34,7 +34,7 @@ for line in lines:
 
   for domain_object_string, domain_object_type in mapping:
     if "<keyword name=\"" + domain_object_string + "\"" in line:
-      if not "id=\"" in line:
+      if not "id=\"" in line and not "#index-" in line:
         prefix = "<keyword name=\"" + domain_object_string + "\" "
         part1, part2 = line.split(prefix)
         head, tail = part2.split("#" + domain_object_type + ":")

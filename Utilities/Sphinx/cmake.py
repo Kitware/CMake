@@ -130,8 +130,8 @@ class _cmake_index_entry:
     def __init__(self, desc):
         self.desc = desc
 
-    def __call__(self, title, targetid):
-        return ('pair', u'%s ; %s' % (self.desc, title), targetid, 'main')
+    def __call__(self, title, targetid, main = 'main'):
+        return ('pair', u'%s ; %s' % (self.desc, title), targetid, main)
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
@@ -257,6 +257,49 @@ class CMakeXRefRole(XRefRole):
                 break
         return XRefRole.__call__(self, typ, rawtext, text, *args, **keys)
 
+    # We cannot insert index nodes using the result_nodes method
+    # because CMakeXRefRole is processed before substitution_reference
+    # nodes are evaluated so target nodes (with 'ids' fields) would be
+    # duplicated in each evaluted substitution replacement.  The
+    # docutils substitution transform does not allow this.  Instead we
+    # use our own CMakeXRefTransform below to add index entries after
+    # substitutions are completed.
+    #
+    # def result_nodes(self, document, env, node, is_ref):
+    #     pass
+
+class CMakeXRefTransform(Transform):
+
+    # Run this transform early since we insert nodes we want
+    # treated as if they were written in the documents, but
+    # after the sphinx (210) and docutils (220) substitutions.
+    default_priority = 221
+
+    def apply(self):
+        env = self.document.settings.env
+
+        # Find CMake cross-reference nodes and add index and target
+        # nodes for them.
+        for ref in self.document.traverse(addnodes.pending_xref):
+            if not ref['refdomain'] == 'cmake':
+                continue
+
+            objtype = ref['reftype']
+            make_index_entry = _cmake_index_objs.get(objtype)
+            if not make_index_entry:
+                continue
+
+            objname = ref['reftarget']
+            targetnum = env.new_serialno('index-%s:%s' % (objtype, objname))
+
+            targetid = 'index-%s-%s:%s' % (targetnum, objtype, objname)
+            targetnode = nodes.target('', '', ids=[targetid])
+            self.document.note_explicit_target(targetnode)
+
+            indexnode = addnodes.index()
+            indexnode['entries'] = [make_index_entry(objname, targetid, '')]
+            ref.replace_self([indexnode, targetnode, ref])
+
 class CMakeDomain(Domain):
     """CMake domain."""
     name = 'cmake'
@@ -336,4 +379,5 @@ class CMakeDomain(Domain):
 def setup(app):
     app.add_directive('cmake-module', CMakeModule)
     app.add_transform(CMakeTransform)
+    app.add_transform(CMakeXRefTransform)
     app.add_domain(CMakeDomain)
