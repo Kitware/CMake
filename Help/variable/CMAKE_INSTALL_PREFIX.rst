@@ -27,3 +27,8 @@ which cannot be prepended with some other prefix.
 The installation prefix is also added to CMAKE_SYSTEM_PREFIX_PATH so
 that find_package, find_program, find_library, find_path, and
 find_file will search the prefix for other software.
+
+.. note::
+
+  Use the :module:`GNUInstallDirs` module to provide GNU-style
+  options for the layout of directories within the installation.
