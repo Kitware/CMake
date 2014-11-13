@@ -194,12 +194,7 @@ cmNinjaNormalTargetGenerator
 
     vars.ObjectDir = "$OBJECT_DIR";
 
-    // TODO:
-    // Makefile generator expands <TARGET> to the plain target name
-    // with suffix. $out expands to a relative path. This difference
-    // could make trouble when switching to Ninja generator. Maybe
-    // using TARGET_NAME and RuleVariables::TargetName is a fix.
-    vars.Target = "$out";
+    vars.Target = "$TARGET_FILE";
 
     vars.SONameFlag = "$SONAME_FLAG";
     vars.TargetSOName = "$SONAME";
@@ -252,7 +247,7 @@ cmNinjaNormalTargetGenerator
             << this->GetVisibleTypeName() << ".";
     cmOStringStream description;
     description << "Linking " << this->TargetLinkLanguage << " "
-                << this->GetVisibleTypeName() << " $out";
+                << this->GetVisibleTypeName() << " $TARGET_FILE";
     this->GetGlobalGenerator()->AddRule(ruleName,
                                         linkCmd,
                                         description.str(),
@@ -326,7 +321,7 @@ cmNinjaNormalTargetGenerator
         this->GetLocalGenerator()->ConvertToOutputFormat(
           mf->GetRequiredDefinition("CMAKE_COMMAND"),
           cmLocalGenerator::SHELL);
-      linkCmds.push_back(cmakeCommand + " -E remove $out");
+      linkCmds.push_back(cmakeCommand + " -E remove $TARGET_FILE");
       }
       // TODO: Use ARCHIVE_APPEND for archives over a certain size.
       {
@@ -450,6 +445,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                     this->GetConfigName());
   bool useWatcomQuote = mf->IsOn(createRule+"_USE_WATCOM_QUOTE");
   cmLocalNinjaGenerator& localGen = *this->GetLocalGenerator();
+
+  vars["TARGET_FILE"] =
+    localGen.ConvertToOutputFormat(targetOutputReal, cmLocalGenerator::SHELL);
+
   localGen.GetTargetFlags(vars["LINK_LIBRARIES"],
                           vars["FLAGS"],
                           vars["LINK_FLAGS"],
@@ -509,6 +508,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                               cmLocalGenerator::SHELL);
     vars["TARGET_IMPLIB"] = impLibPath;
     EnsureParentDirectoryExists(impLibPath);
+    if(target.HasImportLibrary())
+      {
+      outputs.push_back(targetOutputImplib);
+      }
     }
 
   if (!this->SetMsvcTargetPdbVariable(vars))
@@ -657,16 +660,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                   emptyDeps,
                                   symlinkVars);
       }
-    }
-
-  if (!this->TargetNameImport.empty())
-    {
-    // Since using multiple outputs would mess up the $out variable, use an
-    // alias for the import library.
-    globalGen.WritePhonyBuild(this->GetBuildFileStream(),
-                              "Alias for import library.",
-                              cmNinjaDeps(1, targetOutputImplib),
-                              cmNinjaDeps(1, targetOutputReal));
     }
 
   // Add aliases for the file name and the target name.
