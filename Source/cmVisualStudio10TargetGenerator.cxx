@@ -326,9 +326,9 @@ void cmVisualStudio10TargetGenerator::Generate()
     this->WriteString("<PropertyGroup Label=\"NsightTegraProject\">\n", 1);
     if(this->NsightTegraVersion[0] >= 2)
       {
-      // Nsight Tegra 2.0 uses project revision 8.
+      // Nsight Tegra 2.0 uses project revision 9.
       this->WriteString("<NsightTegraProjectRevisionNumber>"
-                        "8"
+                        "9"
                         "</NsightTegraProjectRevisionNumber>\n", 2);
       // Tell newer versions to upgrade silently when loading.
       this->WriteString("<NsightTegraUpgradeOnceWithoutPrompt>"
