@@ -59,6 +59,102 @@ was expected."
   if( EXISTS ${FETCH_HEAD_file} AND NOT ${fetch_expected})
     message( FATAL_ERROR "Fetch DID occur when it was not expected.")
   endif()
+
+  message( STATUS "Checking ExternalProjectUpdate to tag: ${desired_tag} (disconnected)" )
+
+  # Remove the FETCH_HEAD file, so we can check if it gets replaced with a 'git
+  # fetch'.
+  set( FETCH_HEAD_file ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep2-GIT/.git/FETCH_HEAD )
+  file( REMOVE ${FETCH_HEAD_file} )
+
+  # Check initial SHA
+  execute_process(COMMAND ${GIT_EXECUTABLE}
+    rev-list --max-count=1 HEAD
+    WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep2-GIT
+    RESULT_VARIABLE error_code
+    OUTPUT_VARIABLE initial_sha
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+
+  # Configure
+  execute_process(COMMAND ${CMAKE_COMMAND}
+    -G ${CMAKE_GENERATOR} -T "${CMAKE_GENERATOR_TOOLSET}"
+    -A "${CMAKE_GENERATOR_PLATFORM}"
+    -DTEST_GIT_TAG:STRING=${desired_tag}
+    ${ExternalProjectUpdate_SOURCE_DIR}
+    WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}
+    RESULT_VARIABLE error_code
+    )
+  if(error_code)
+    message(FATAL_ERROR "Could not configure the project.")
+  endif()
+
+  # Build
+  execute_process(COMMAND ${CMAKE_COMMAND}
+    --build ${ExternalProjectUpdate_BINARY_DIR}
+    RESULT_VARIABLE error_code
+    )
+  if(error_code)
+    message(FATAL_ERROR "Could not build the project.")
+  endif()
+
+  if( EXISTS ${FETCH_HEAD_file} )
+    message( FATAL_ERROR "Fetch occured when it was not expected.")
+  endif()
+
+  # Check the resulting SHA
+  execute_process(COMMAND ${GIT_EXECUTABLE}
+    rev-list --max-count=1 HEAD
+    WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep2-GIT
+    RESULT_VARIABLE error_code
+    OUTPUT_VARIABLE tag_sha
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(error_code)
+    message(FATAL_ERROR "Could not check the sha.")
+  endif()
+
+  if(NOT (${tag_sha} STREQUAL ${initial_sha}))
+    message(FATAL_ERROR "Update occurred when it was not expected.")
+  endif()
+
+  # Update
+  execute_process(COMMAND ${CMAKE_COMMAND}
+    --build ${ExternalProjectUpdate_BINARY_DIR}
+    --target TutorialStep2-GIT-update
+    RESULT_VARIABLE error_code
+    )
+  if(error_code)
+    message(FATAL_ERROR "Could not build the project.")
+  endif()
+
+  # Check the resulting SHA
+  execute_process(COMMAND ${GIT_EXECUTABLE}
+    rev-list --max-count=1 HEAD
+    WORKING_DIRECTORY ${ExternalProjectUpdate_BINARY_DIR}/CMakeExternals/Source/TutorialStep2-GIT
+    RESULT_VARIABLE error_code
+    OUTPUT_VARIABLE tag_sha
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    )
+  if(error_code)
+    message(FATAL_ERROR "Could not check the sha.")
+  endif()
+
+  if(NOT (${tag_sha} STREQUAL ${resulting_sha}))
+    message(FATAL_ERROR "UPDATE_COMMAND produced
+  ${tag_sha}
+when
+  ${resulting_sha}
+was expected."
+    )
+  endif()
+
+  if( NOT EXISTS ${FETCH_HEAD_file} AND ${fetch_expected})
+    message( FATAL_ERROR "Fetch did NOT occur when it was expected.")
+  endif()
+  if( EXISTS ${FETCH_HEAD_file} AND NOT ${fetch_expected})
+    message( FATAL_ERROR "Fetch DID occur when it was not expected.")
+  endif()
 endmacro()
 
 find_package(Git)
