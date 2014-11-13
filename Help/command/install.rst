@@ -268,7 +268,8 @@ Custom Installation Logic
 
 ::
 
-  install([[SCRIPT <file>] [CODE <code>]] [...])
+  install([[SCRIPT <file>] [CODE <code>]]
+          [COMPONENT <component>] [...])
 
 The ``SCRIPT`` form will invoke the given CMake script files during
 installation.  If the script file name is a relative path it will be
