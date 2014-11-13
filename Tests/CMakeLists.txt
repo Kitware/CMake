@@ -690,7 +690,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     FAIL_REGULAR_EXPRESSION "Unexpected: ")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ArgumentExpansion")
 
-  add_test(GeneratorExpression  ${CMAKE_CTEST_COMMAND}
+  add_test(GeneratorExpression
+    ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/GeneratorExpression"
     "${CMake_BINARY_DIR}/Tests/GeneratorExpression"
@@ -950,7 +951,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
       foreach(CPackComponentWay ${CWAYLST})
         set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
-        add_test(CPackComponentsForAll-${CPackGen}-${CPackComponentWay} ${CMAKE_CTEST_COMMAND}
+        add_test(CPackComponentsForAll-${CPackGen}-${CPackComponentWay}
+          ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
           --build-and-test
           "${CMake_SOURCE_DIR}/Tests/CPackComponentsForAll"
           "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}"
@@ -2041,7 +2043,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     PASS_REGULAR_EXPRESSION "uninitialized variable 'USED_VARIABLE'")
   list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/WarnUninitialized")
 
-  add_test(TestsWorkingDirectory ${CMAKE_CTEST_COMMAND}
+  add_test(TestsWorkingDirectory
+    ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/TestsWorkingDirectory"
     "${CMake_BINARY_DIR}/Tests/TestsWorkingDirectory"
