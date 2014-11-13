@@ -88,7 +88,7 @@ void cmFindLibraryCommand::AddArchitecturePaths(const char* suffix)
 {
   std::vector<std::string> original;
   original.swap(this->SearchPaths);
-  for(std::vector<std::string>::iterator i = original.begin();
+  for(std::vector<std::string>::const_iterator i = original.begin();
       i != original.end(); ++i)
     {
     this->AddArchitecturePath(*i, 0, suffix);

@@ -13,6 +13,8 @@
 #define cmFindCommon_h
 
 #include "cmCommand.h"
+#include "cmSearchPath.h"
+#include "cmPathLabel.h"
 
 /** \class cmFindCommon
  * \brief Base class for FIND_XXX implementations.
@@ -29,12 +31,46 @@ public:
   cmTypeMacro(cmFindCommon, cmCommand);
 
 protected:
+  friend class cmSearchPath;
 
-  enum RootPathMode { RootPathModeBoth,
-                      RootPathModeOnlyRootPath,
-                      RootPathModeNoRootPath };
+/* VS6 is broken and can't pass protected class definitions to child classes */
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+public:
+#endif
+  /** Used to define groups of path labels */
+  class PathGroup : public cmPathLabel
+  {
+  protected:
+    PathGroup();
+  public:
+    PathGroup(const std::string& label) : cmPathLabel(label) { }
+    static PathGroup All;
+  };
 
-  enum PathType { FullPath, CMakePath, EnvPath };
+  /* Individual path types */
+  class PathLabel : public cmPathLabel
+  {
+  protected:
+    PathLabel();
+  public:
+    PathLabel(const std::string& label) : cmPathLabel(label) { }
+    static PathLabel CMake;
+    static PathLabel CMakeEnvironment;
+    static PathLabel Hints;
+    static PathLabel SystemEnvironment;
+    static PathLabel CMakeSystem;
+    static PathLabel Guess;
+  };
+#if defined(_MSC_VER) && (_MSC_VER < 1300)
+protected:
+#endif
+
+  enum RootPathMode { RootPathModeNever,
+                      RootPathModeOnly,
+                      RootPathModeBoth };
+
+  /** Construct the various path groups and labels */
+  void InitializeSearchPathGroups();
 
   /** Place a set of search paths under the search roots.  */
   void RerootPaths(std::vector<std::string>& paths);
@@ -44,8 +80,9 @@ protected:
   void GetIgnoredPaths(std::set<std::string>& ignore);
 
   /** Remove paths in the ignore set from the supplied vector.  */
-  void FilterPaths(std::vector<std::string>& paths,
-                   const std::set<std::string>& ignore);
+  void FilterPaths(const std::vector<std::string>& inPaths,
+                   const std::set<std::string>& ignore,
+                   std::vector<std::string>& outPaths);
 
   /** Compute final search path list (reroot + trailing slash).  */
   void ComputeFinalPaths();
@@ -56,19 +93,15 @@ protected:
   /** Compute the current default bundle/framework search policy.  */
   void SelectDefaultMacMode();
 
+  // Path arguments prior to path manipulation routines
+  std::vector<std::string> UserHintsArgs;
+  std::vector<std::string> UserGuessArgs;
+
   std::string CMakePathName;
   RootPathMode FindRootPathMode;
 
   bool CheckCommonArgument(std::string const& arg);
   void AddPathSuffix(std::string const& arg);
-  void AddUserPath(std::string const& p,
-                   std::vector<std::string>& paths);
-  void AddCMakePath(const std::string& variable);
-  void AddEnvPath(const char* variable);
-  void AddPathsInternal(std::vector<std::string> const& in_paths,
-                        PathType pathType);
-  void AddPathInternal(std::string const& in_path, PathType pathType);
-
   void SetMakefile(cmMakefile* makefile);
 
   bool NoDefaultPath;
@@ -78,8 +111,12 @@ protected:
   bool NoCMakeSystemPath;
 
   std::vector<std::string> SearchPathSuffixes;
-  std::vector<std::string> UserPaths;
-  std::vector<std::string> UserHints;
+
+  std::map<PathGroup, std::vector<PathLabel> > PathGroupLabelMap;
+  std::vector<PathGroup> PathGroupOrder;
+  std::map<std::string, PathLabel> PathLabelStringMap;
+  std::map<PathLabel, cmSearchPath> LabeledPaths;
+
   std::vector<std::string> SearchPaths;
   std::set<std::string> SearchPathsEmitted;
 

@@ -26,6 +26,14 @@
 #endif
 
 //----------------------------------------------------------------------------
+cmFindPackageCommand::PathLabel
+  cmFindPackageCommand::PathLabel::UserRegistry("PACKAGE_REGISTRY");
+cmFindPackageCommand::PathLabel
+  cmFindPackageCommand::PathLabel::Builds("BUILDS");
+cmFindPackageCommand::PathLabel
+  cmFindPackageCommand::PathLabel::SystemRegistry("SYSTEM_PACKAGE_REGISTRY");
+
+//----------------------------------------------------------------------------
 cmFindPackageCommand::cmFindPackageCommand()
 {
   this->CMakePathName = "PACKAGE";
@@ -51,6 +59,33 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->VersionFoundTweak = 0;
   this->VersionFoundCount = 0;
   this->RequiredCMakeVersion = 0;
+
+  this->AppendSearchPathGroups();
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::AppendSearchPathGroups()
+{
+  std::vector<cmFindCommon::PathLabel>* labels;
+
+  // Update the All group with new paths
+  labels = &this->PathGroupLabelMap[PathGroup::All];
+  labels->insert(std::find(labels->begin(), labels->end(),
+                           PathLabel::CMakeSystem),
+                 PathLabel::UserRegistry);
+  labels->insert(std::find(labels->begin(), labels->end(),
+                           PathLabel::CMakeSystem),
+                 PathLabel::Builds);
+  labels->insert(std::find(labels->begin(), labels->end(), PathLabel::Guess),
+                 PathLabel::SystemRegistry);
+
+  // Create the new path objects
+  this->LabeledPaths.insert(std::make_pair(PathLabel::UserRegistry,
+    cmSearchPath(this)));
+  this->LabeledPaths.insert(std::make_pair(PathLabel::Builds,
+    cmSearchPath(this)));
+  this->LabeledPaths.insert(std::make_pair(PathLabel::SystemRegistry,
+    cmSearchPath(this)));
 }
 
 //----------------------------------------------------------------------------
@@ -248,11 +283,11 @@ bool cmFindPackageCommand
       }
     else if(doing == DoingPaths)
       {
-      this->AddUserPath(args[i], this->UserPaths);
+      this->UserGuessArgs.push_back(args[i]);
       }
     else if(doing == DoingHints)
       {
-      this->AddUserPath(args[i], this->UserHints);
+      this->UserHintsArgs.push_back(args[i]);
       }
     else if(doing == DoingPathSuffixes)
       {
@@ -1111,86 +1146,97 @@ void cmFindPackageCommand::AppendSuccessInformation()
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::ComputePrefixes()
 {
-  this->AddPrefixesCMakeVariable();
-  this->AddPrefixesCMakeEnvironment();
-  this->AddPrefixesUserHints();
-  this->AddPrefixesSystemEnvironment();
-  this->AddPrefixesUserRegistry();
-  this->AddPrefixesBuilds();
-  this->AddPrefixesCMakeSystemVariable();
-  this->AddPrefixesSystemRegistry();
-  this->AddPrefixesUserGuess();
+  if(!this->NoDefaultPath)
+    {
+    if(!this->NoCMakePath)
+      {
+      this->FillPrefixesCMakeVariable();
+      }
+    if(!this->NoCMakeEnvironmentPath)
+      {
+      this->FillPrefixesCMakeEnvironment();
+      }
+    if(!this->NoSystemEnvironmentPath)
+      {
+      this->FillPrefixesSystemEnvironment();
+      }
+    if(!this->NoUserRegistry)
+      {
+      this->FillPrefixesUserRegistry();
+      }
+    if(!this->NoBuilds)
+      {
+      this->FillPrefixesBuilds();
+      }
+    if(!this->NoCMakeSystemPath)
+      {
+      this->FillPrefixesCMakeSystemVariable();
+      }
+    if(!this->NoSystemRegistry)
+      {
+      this->FillPrefixesSystemRegistry();
+      }
+    }
+  this->FillPrefixesUserHints();
+  this->FillPrefixesUserGuess();
+
   this->ComputeFinalPaths();
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesCMakeEnvironment()
+void cmFindPackageCommand::FillPrefixesCMakeEnvironment()
 {
-  if(!this->NoCMakeEnvironmentPath && !this->NoDefaultPath)
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::CMakeEnvironment];
+
+  // Check the environment variable with the same name as the cache
+  // entry.
+  paths.AddEnvPath(this->Variable);
+
+  // And now the general CMake environment variables
+  paths.AddEnvPath("CMAKE_PREFIX_PATH");
+  paths.AddEnvPath("CMAKE_FRAMEWORK_PATH");
+  paths.AddEnvPath("CMAKE_APPBUNDLE_PATH");
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::FillPrefixesCMakeVariable()
+{
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::CMake];
+
+  paths.AddCMakePath("CMAKE_PREFIX_PATH");
+  paths.AddCMakePath("CMAKE_FRAMEWORK_PATH");
+  paths.AddCMakePath("CMAKE_APPBUNDLE_PATH");
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::FillPrefixesSystemEnvironment()
+{
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::SystemEnvironment];
+
+  // Use the system search path to generate prefixes.
+  // Relative paths are interpreted with respect to the current
+  // working directory.
+  std::vector<std::string> tmp;
+  cmSystemTools::GetPath(tmp);
+  for(std::vector<std::string>::iterator i = tmp.begin();
+      i != tmp.end(); ++i)
     {
-    // Check the environment variable with the same name as the cache
-    // entry.
-    std::string env;
-    if(cmSystemTools::GetEnv(this->Variable.c_str(), env) && env.length() > 0)
+    // If the path is a PREFIX/bin case then add its parent instead.
+    if((cmHasLiteralSuffix(*i, "/bin")) ||
+       (cmHasLiteralSuffix(*i, "/sbin")))
       {
-      cmSystemTools::ConvertToUnixSlashes(env);
-      this->AddPathInternal(env, EnvPath);
+      paths.AddPath(cmSystemTools::GetFilenamePath(*i));
       }
-
-    this->AddEnvPath("CMAKE_PREFIX_PATH");
-    this->AddEnvPath("CMAKE_FRAMEWORK_PATH");
-    this->AddEnvPath("CMAKE_APPBUNDLE_PATH");
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesCMakeVariable()
-{
-  if(!this->NoCMakePath && !this->NoDefaultPath)
-    {
-    this->AddCMakePath("CMAKE_PREFIX_PATH");
-    this->AddCMakePath("CMAKE_FRAMEWORK_PATH");
-    this->AddCMakePath("CMAKE_APPBUNDLE_PATH");
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesSystemEnvironment()
-{
-  if(!this->NoSystemEnvironmentPath && !this->NoDefaultPath)
-    {
-    // Use the system search path to generate prefixes.
-    // Relative paths are interpreted with respect to the current
-    // working directory.
-    std::vector<std::string> tmp;
-    cmSystemTools::GetPath(tmp);
-    for(std::vector<std::string>::iterator i = tmp.begin();
-        i != tmp.end(); ++i)
+    else
       {
-      std::string const& d = *i;
-
-      // If the path is a PREFIX/bin case then add its parent instead.
-      if((cmHasLiteralSuffix(d, "/bin")) ||
-         (cmHasLiteralSuffix(d, "/sbin")))
-        {
-        this->AddPathInternal(cmSystemTools::GetFilenamePath(d), EnvPath);
-        }
-      else
-        {
-        this->AddPathInternal(d, EnvPath);
-        }
+      paths.AddPath(*i);
       }
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesUserRegistry()
+void cmFindPackageCommand::FillPrefixesUserRegistry()
 {
-  if(this->NoUserRegistry || this->NoDefaultPath)
-    {
-    return;
-    }
-
 #if defined(_WIN32) && !defined(__CYGWIN__)
   this->LoadPackageRegistryWinUser();
 #elif defined(__HAIKU__)
@@ -1201,7 +1247,8 @@ void cmFindPackageCommand::AddPrefixesUserRegistry()
     std::string fname = dir;
     fname += "/cmake/packages/";
     fname += Name;
-    this->LoadPackageRegistryDir(fname);
+    this->LoadPackageRegistryDir(fname,
+                                 this->LabeledPaths[PathLabel::UserRegistry]);
     }
 #else
   if(const char* home = cmSystemTools::GetEnv("HOME"))
@@ -1209,13 +1256,14 @@ void cmFindPackageCommand::AddPrefixesUserRegistry()
     std::string dir = home;
     dir += "/.cmake/packages/";
     dir += this->Name;
-    this->LoadPackageRegistryDir(dir);
+    this->LoadPackageRegistryDir(dir,
+                                 this->LabeledPaths[PathLabel::UserRegistry]);
     }
 #endif
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesSystemRegistry()
+void cmFindPackageCommand::FillPrefixesSystemRegistry()
 {
   if(this->NoSystemRegistry || this->NoDefaultPath)
     {
@@ -1241,29 +1289,32 @@ void cmFindPackageCommand::AddPrefixesSystemRegistry()
 void cmFindPackageCommand::LoadPackageRegistryWinUser()
 {
   // HKEY_CURRENT_USER\\Software shares 32-bit and 64-bit views.
-  this->LoadPackageRegistryWin(true, 0);
+  this->LoadPackageRegistryWin(true, 0,
+                               this->LabeledPaths[PathLabel::UserRegistry]);
 }
 
 //----------------------------------------------------------------------------
 void cmFindPackageCommand::LoadPackageRegistryWinSystem()
 {
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::SystemRegistry];
+
   // HKEY_LOCAL_MACHINE\\SOFTWARE has separate 32-bit and 64-bit views.
   // Prefer the target platform view first.
   if(this->Makefile->PlatformIs64Bit())
     {
-    this->LoadPackageRegistryWin(false, KEY_WOW64_64KEY);
-    this->LoadPackageRegistryWin(false, KEY_WOW64_32KEY);
+    this->LoadPackageRegistryWin(false, KEY_WOW64_64KEY, paths);
+    this->LoadPackageRegistryWin(false, KEY_WOW64_32KEY, paths);
     }
   else
     {
-    this->LoadPackageRegistryWin(false, KEY_WOW64_32KEY);
-    this->LoadPackageRegistryWin(false, KEY_WOW64_64KEY);
+    this->LoadPackageRegistryWin(false, KEY_WOW64_32KEY, paths);
+    this->LoadPackageRegistryWin(false, KEY_WOW64_64KEY, paths);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
-                                                  unsigned int view)
+void cmFindPackageCommand::LoadPackageRegistryWin(bool user, unsigned int view,
+                                                  cmSearchPath& outPaths)
 {
   std::wstring key = L"Software\\Kitware\\CMake\\Packages\\";
   key += cmsys::Encoding::ToWide(this->Name);
@@ -1289,8 +1340,8 @@ void cmFindPackageCommand::LoadPackageRegistryWin(bool user,
           if(valueType == REG_SZ)
             {
             data[dataSize] = 0;
-            cmsys_ios::stringstream ss(cmsys::Encoding::ToNarrow(&data[0]));
-            if(!this->CheckPackageRegistryEntry(ss))
+            if(!this->CheckPackageRegistryEntry(
+                  cmsys::Encoding::ToNarrow(&data[0]), outPaths))
               {
               // The entry is invalid.
               bad.insert(name);
@@ -1332,7 +1383,8 @@ public:
 };
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir)
+void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir,
+                                                  cmSearchPath& outPaths)
 {
   cmsys::Directory files;
   if(!files.Load(dir))
@@ -1354,7 +1406,9 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir)
 
       // Load the file.
       cmsys::ifstream fin(fname.c_str(), std::ios::in | cmsys_ios_binary);
-      if(fin && this->CheckPackageRegistryEntry(fin))
+      std::string fentry;
+      if(fin && cmSystemTools::GetLineFromStream(fin, fentry) &&
+         this->CheckPackageRegistryEntry(fentry, outPaths))
         {
         // The file references an existing package, so release it.
         holdFile.Release();
@@ -1367,12 +1421,11 @@ void cmFindPackageCommand::LoadPackageRegistryDir(std::string const& dir)
 #endif
 
 //----------------------------------------------------------------------------
-bool cmFindPackageCommand::CheckPackageRegistryEntry(std::istream& is)
+bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
+                                                     cmSearchPath& outPaths)
 {
   // Parse the content of one package registry entry.
-  std::string fname;
-  if(cmSystemTools::GetLineFromStream(is, fname) &&
-     cmSystemTools::FileIsFullPath(fname.c_str()))
+  if(cmSystemTools::FileIsFullPath(fname.c_str()))
     {
     // The first line in the stream is the full path to a file or
     // directory containing the package.
@@ -1381,9 +1434,12 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(std::istream& is)
       // The path exists.  Look for the package here.
       if(!cmSystemTools::FileIsDirectory(fname))
         {
-        fname = cmSystemTools::GetFilenamePath(fname);
+        outPaths.AddPath(cmSystemTools::GetFilenamePath(fname));
         }
-      this->AddPathInternal(fname, FullPath);
+      else
+        {
+        outPaths.AddPath(fname);
+        }
       return true;
       }
     else
@@ -1404,52 +1460,60 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(std::istream& is)
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesBuilds()
+void cmFindPackageCommand::FillPrefixesBuilds()
 {
-  if(!this->NoBuilds && !this->NoDefaultPath)
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::Builds];
+
+  // It is likely that CMake will have recently built the project.
+  for(int i=0; i <= 10; ++i)
     {
-    // It is likely that CMake will have recently built the project.
-    for(int i=0; i <= 10; ++i)
+    cmOStringStream r;
+    r <<
+      "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\"
+      "Settings\\StartPath;WhereBuild" << i << "]";
+    std::string f = r.str();
+    cmSystemTools::ExpandRegistryValues(f);
+    cmSystemTools::ConvertToUnixSlashes(f);
+    if(cmSystemTools::FileIsFullPath(f.c_str()) &&
+       cmSystemTools::FileIsDirectory(f.c_str()))
       {
-      cmOStringStream r;
-      r <<
-        "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\"
-        "Settings\\StartPath;WhereBuild" << i << "]";
-      std::string f = r.str();
-      cmSystemTools::ExpandRegistryValues(f);
-      cmSystemTools::ConvertToUnixSlashes(f);
-      if(cmSystemTools::FileIsFullPath(f.c_str()) &&
-         cmSystemTools::FileIsDirectory(f))
-        {
-        this->AddPathInternal(f, FullPath);
-        }
+      paths.AddPath(f);
       }
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesCMakeSystemVariable()
+void cmFindPackageCommand::FillPrefixesCMakeSystemVariable()
 {
-  if(!this->NoCMakeSystemPath && !this->NoDefaultPath)
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::CMakeSystem];
+
+  paths.AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH");
+  paths.AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
+  paths.AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
+}
+
+//----------------------------------------------------------------------------
+void cmFindPackageCommand::FillPrefixesUserGuess()
+{
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::Guess];
+
+  for(std::vector<std::string>::const_iterator p = this->UserGuessArgs.begin();
+      p != this->UserGuessArgs.end(); ++p)
     {
-    this->AddCMakePath("CMAKE_SYSTEM_PREFIX_PATH");
-    this->AddCMakePath("CMAKE_SYSTEM_FRAMEWORK_PATH");
-    this->AddCMakePath("CMAKE_SYSTEM_APPBUNDLE_PATH");
+    paths.AddUserPath(*p);
     }
 }
 
 //----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesUserGuess()
+void cmFindPackageCommand::FillPrefixesUserHints()
 {
-  // Add guesses specified by the caller.
-  this->AddPathsInternal(this->UserPaths, CMakePath);
-}
+  cmSearchPath &paths = this->LabeledPaths[PathLabel::Hints];
 
-//----------------------------------------------------------------------------
-void cmFindPackageCommand::AddPrefixesUserHints()
-{
-  // Add hints specified by the caller.
-  this->AddPathsInternal(this->UserHints, CMakePath);
+  for(std::vector<std::string>::const_iterator p = this->UserHintsArgs.begin();
+      p != this->UserHintsArgs.end(); ++p)
+    {
+    paths.AddUserPath(*p);
+    }
 }
 
 //----------------------------------------------------------------------------
