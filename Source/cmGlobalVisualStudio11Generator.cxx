@@ -131,12 +131,20 @@ cmGlobalVisualStudio11Generator::MatchesGeneratorName(
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
-  this->DefaultPlatformToolset = this->SelectWindowsPhoneToolset();
-  if(this->DefaultPlatformToolset.empty())
+  if(!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset))
     {
     cmOStringStream e;
-    e << this->GetName() << " supports Windows Phone '8.0', but not '"
-      << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    if(this->DefaultPlatformToolset.empty())
+      {
+      e << this->GetName() << " supports Windows Phone '8.0', but not '"
+        << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+      }
+    else
+      {
+      e << "A Windows Phone component with CMake requires both the Windows "
+        << "Desktop SDK as well as the Windows Phone '" << this->SystemVersion
+        << "' SDK. Please make sure that you have both installed";
+      }
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
@@ -146,12 +154,20 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsPhone(cmMakefile* mf)
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio11Generator::InitializeWindowsStore(cmMakefile* mf)
 {
-  this->DefaultPlatformToolset = this->SelectWindowsStoreToolset();
-  if(this->DefaultPlatformToolset.empty())
+  if(!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset))
     {
     cmOStringStream e;
-    e << this->GetName() << " supports Windows Store '8.0', but not '"
-      << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    if(this->DefaultPlatformToolset.empty())
+      {
+      e << this->GetName() << " supports Windows Store '8.0', but not '"
+        << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+      }
+    else
+      {
+      e << "A Windows Store component with CMake requires both the Windows "
+        << "Desktop SDK as well as the Windows Store '" << this->SystemVersion
+        << "' SDK. Please make sure that you have both installed";
+      }
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
@@ -159,23 +175,47 @@ bool cmGlobalVisualStudio11Generator::InitializeWindowsStore(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset() const
+bool
+cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(
+  std::string& toolset) const
 {
   if(this->SystemVersion == "8.0")
     {
-    return "v110_wp80";
+    if (this->IsWindowsPhoneToolsetInstalled() &&
+        this->IsWindowsDesktopToolsetInstalled())
+      {
+      toolset = "v110_wp80";
+      return true;
+      }
+    else
+      {
+      return false;
+      }
     }
-  return this->cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset();
+  return
+    this->cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(toolset);
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset() const
+bool
+cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(
+  std::string& toolset) const
 {
   if(this->SystemVersion == "8.0")
     {
-    return "v110";
+    if(this->IsWindowsStoreToolsetInstalled() &&
+       this->IsWindowsDesktopToolsetInstalled())
+      {
+      toolset = "v110";
+      return true;
+      }
+    else
+      {
+      return false;
+      }
     }
-  return this->cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset();
+  return
+    this->cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset(toolset);
 }
 
 //----------------------------------------------------------------------------
@@ -255,4 +295,55 @@ cmGlobalVisualStudio11Generator::NeedsDeploy(cmTarget::TargetType type) const
     return true;
     }
   return cmGlobalVisualStudio10Generator::NeedsDeploy(type);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio11Generator::IsWindowsDesktopToolsetInstalled() const
+{
+  const char desktop80Key[] =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+    "VisualStudio\\11.0\\VC\\Libraries\\Extended";
+  const char VS2012DesktopExpressKey[] =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+    "WDExpress\\11.0;InstallDir";
+
+  std::vector<std::string> subkeys;
+  std::string path;
+  return cmSystemTools::ReadRegistryValue(VS2012DesktopExpressKey,
+                                          path,
+                                          cmSystemTools::KeyWOW64_32) ||
+         cmSystemTools::GetRegistrySubKeys(desktop80Key,
+                                           subkeys,
+                                           cmSystemTools::KeyWOW64_32);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio11Generator::IsWindowsPhoneToolsetInstalled() const
+{
+  const char wp80Key[] =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+    "Microsoft SDKs\\WindowsPhone\\v8.0\\"
+    "Install Path;Install Path";
+
+  std::string path;
+  cmSystemTools::ReadRegistryValue(wp80Key,
+                                   path,
+                                   cmSystemTools::KeyWOW64_32);
+  return !path.empty();
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio11Generator::IsWindowsStoreToolsetInstalled() const
+{
+  const char win80Key[] =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+    "VisualStudio\\11.0\\VC\\Libraries\\Core\\Arm";
+
+  std::vector<std::string> subkeys;
+  return cmSystemTools::GetRegistrySubKeys(win80Key,
+                                           subkeys,
+                                           cmSystemTools::KeyWOW64_32);
 }

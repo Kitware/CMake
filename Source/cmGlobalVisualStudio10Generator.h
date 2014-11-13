@@ -118,9 +118,10 @@ protected:
   virtual bool InitializeWindowsCE(cmMakefile* mf);
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
+
   virtual std::string SelectWindowsCEToolset() const;
-  virtual std::string SelectWindowsPhoneToolset() const { return ""; }
-  virtual std::string SelectWindowsStoreToolset() const { return ""; }
+  virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
+  virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
 
   virtual const char* GetIDEVersion() { return "10.0"; }
 
