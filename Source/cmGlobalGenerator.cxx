@@ -2510,10 +2510,11 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
   target.SetProperty("EXCLUDE_FROM_ALL","TRUE");
 
   std::vector<std::string> no_outputs;
+  std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   // Store the custom command in the target.
-  cmCustomCommand cc(0, no_outputs, no_depends, *commandLines, 0,
-                     workingDirectory);
+  cmCustomCommand cc(0, no_outputs, no_byproducts, no_depends,
+                     *commandLines, 0, workingDirectory);
   cc.SetUsesTerminal(uses_terminal);
   target.AddPostBuildCommand(cc);
   target.SetProperty("EchoString", message);

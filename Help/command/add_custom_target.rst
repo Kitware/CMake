@@ -8,6 +8,7 @@ Add a target with no output so it will always be built.
   add_custom_target(Name [ALL] [command1 [args1...]]
                     [COMMAND command2 [args2...] ...]
                     [DEPENDS depend depend depend ... ]
+                    [BYPRODUCTS [files...]]
                     [WORKING_DIRECTORY dir]
                     [COMMENT comment]
                     [VERBATIM] [USES_TERMINAL]
@@ -27,6 +28,27 @@ The options are:
   Indicate that this target should be added to the default build
   target so that it will be run every time (the command cannot be
   called ``ALL``).
+
+``BYPRODUCTS``
+  Specify the files the command is expected to produce but whose
+  modification time may or may not be updated on subsequent builds.
+  If a byproduct name is a relative path it will be interpreted
+  relative to the build tree directory corresponding to the
+  current source directory.
+  Each byproduct file will be marked with the :prop_sf:`GENERATED`
+  source file property automatically.
+
+  Explicit specification of byproducts is supported by the
+  :generator:`Ninja` generator to tell the ``ninja`` build tool
+  how to regenerate byproducts when they are missing.  It is
+  also useful when other build rules (e.g. custom commands)
+  depend on the byproducts.  Ninja requires a build rule for any
+  generated file on which another rule depends even if there are
+  order-only dependencies to ensure the byproducts will be
+  available before their dependents build.
+
+  The ``BYPRODUCTS`` option is ignored on non-Ninja generators
+  except to mark byproducts ``GENERATED``.
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.

@@ -27,8 +27,11 @@ cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() {}
 
 void cmNinjaUtilityTargetGenerator::Generate()
 {
+  std::string utilCommandName = cmake::GetCMakeFilesDirectoryPostSlash();
+  utilCommandName += this->GetTargetName() + ".util";
+
   std::vector<std::string> commands;
-  cmNinjaDeps deps, outputs;
+  cmNinjaDeps deps, outputs, util_outputs(1, utilCommandName);
 
   const std::vector<cmCustomCommand> *cmdLists[2] = {
     &this->GetTarget()->GetPreBuildCommands(),
@@ -44,6 +47,9 @@ void cmNinjaUtilityTargetGenerator::Generate()
                                    this->GetMakefile());
       this->GetLocalGenerator()->AppendCustomCommandDeps(ccg, deps);
       this->GetLocalGenerator()->AppendCustomCommandLines(ccg, commands);
+      std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
+      std::transform(ccByproducts.begin(), ccByproducts.end(),
+                     std::back_inserter(util_outputs), MapToNinjaPath());
       if (ci->GetUsesTerminal())
         uses_terminal = true;
     }
@@ -64,7 +70,10 @@ void cmNinjaUtilityTargetGenerator::Generate()
 
       // Depend on all custom command outputs.
       const std::vector<std::string>& ccOutputs = ccg.GetOutputs();
+      const std::vector<std::string>& ccByproducts = ccg.GetByproducts();
       std::transform(ccOutputs.begin(), ccOutputs.end(),
+                     std::back_inserter(deps), MapToNinjaPath());
+      std::transform(ccByproducts.begin(), ccByproducts.end(),
                      std::back_inserter(deps), MapToNinjaPath());
       }
     }
@@ -107,15 +116,19 @@ void cmNinjaUtilityTargetGenerator::Generate()
     if (command.find('$') != std::string::npos)
       return;
 
-    std::string utilCommandName = cmake::GetCMakeFilesDirectoryPostSlash();
-    utilCommandName += this->GetTargetName() + ".util";
+    for (cmNinjaDeps::const_iterator
+           oi = util_outputs.begin(), oe = util_outputs.end();
+         oi != oe; ++oi)
+      {
+      this->GetGlobalGenerator()->SeenCustomCommandOutput(*oi);
+      }
 
     this->GetGlobalGenerator()->WriteCustomCommandBuild(
       command,
       desc,
       "Utility command for " + this->GetTargetName(),
       uses_terminal,
-      cmNinjaDeps(1, utilCommandName),
+      util_outputs,
       deps);
 
     this->GetGlobalGenerator()->WritePhonyBuild(this->GetBuildFileStream(),

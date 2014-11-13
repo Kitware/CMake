@@ -440,10 +440,18 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
 
   const std::vector<std::string> &outputs = ccg.GetOutputs();
-  cmNinjaDeps ninjaOutputs(outputs.size()), ninjaDeps;
+  const std::vector<std::string> &byproducts = ccg.GetByproducts();
+  cmNinjaDeps ninjaOutputs(outputs.size()+byproducts.size()), ninjaDeps;
 
+#if 0
+#error TODO: Once CC in an ExternalProject target must provide the \
+    file of each imported target that has an add_dependencies pointing \
+    at us.  How to know which ExternalProject step actually provides it?
+#endif
   std::transform(outputs.begin(), outputs.end(),
                  ninjaOutputs.begin(), MapToNinjaPath());
+  std::transform(byproducts.begin(), byproducts.end(),
+                 ninjaOutputs.begin() + outputs.size(), MapToNinjaPath());
   this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
   for (cmNinjaDeps::iterator i = ninjaOutputs.begin(); i != ninjaOutputs.end();

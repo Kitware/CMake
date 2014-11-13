@@ -45,7 +45,7 @@ bool cmAddCustomTargetCommand
   cmCustomCommandLines commandLines;
 
   // Accumulate dependencies.
-  std::vector<std::string> depends;
+  std::vector<std::string> depends, byproducts;
   std::string working_directory;
   bool verbatim = false;
   bool uses_terminal = false;
@@ -57,6 +57,7 @@ bool cmAddCustomTargetCommand
   enum tdoing {
     doing_command,
     doing_depends,
+    doing_byproducts,
     doing_working_directory,
     doing_comment,
     doing_source,
@@ -84,6 +85,10 @@ bool cmAddCustomTargetCommand
     if(copy == "DEPENDS")
       {
       doing = doing_depends;
+      }
+    else if(copy == "BYPRODUCTS")
+      {
+      doing = doing_byproducts;
       }
     else if(copy == "WORKING_DIRECTORY")
       {
@@ -127,6 +132,19 @@ bool cmAddCustomTargetCommand
           break;
         case doing_command:
           currentLine.push_back(copy);
+          break;
+        case doing_byproducts:
+          {
+          std::string filename;
+          if (!cmSystemTools::FileIsFullPath(copy.c_str()))
+            {
+            filename = this->Makefile->GetCurrentOutputDirectory();
+            filename += "/";
+            }
+          filename += copy;
+          cmSystemTools::ConvertToUnixSlashes(filename);
+          byproducts.push_back(filename);
+          }
           break;
         case doing_depends:
           {
@@ -227,6 +245,12 @@ bool cmAddCustomTargetCommand
       cmSystemTools::CollapseFullPath(working_directory, build_dir);
     }
 
+  if (commandLines.empty() && !byproducts.empty())
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      "BYPRODUCTS may not be specified without any COMMAND");
+    return true;
+    }
   if (commandLines.empty() && uses_terminal)
     {
     this->Makefile->IssueMessage(cmake::FATAL_ERROR,
@@ -238,7 +262,8 @@ bool cmAddCustomTargetCommand
   bool escapeOldStyle = !verbatim;
   cmTarget* target =
     this->Makefile->AddUtilityCommand(targetName, excludeFromAll,
-                                      working_directory.c_str(), depends,
+                                      working_directory.c_str(),
+                                      byproducts, depends,
                                       commandLines, escapeOldStyle, comment,
                                       uses_terminal);
 

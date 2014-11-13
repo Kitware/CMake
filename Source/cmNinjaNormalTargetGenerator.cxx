@@ -256,7 +256,7 @@ cmNinjaNormalTargetGenerator
                                         /*deptype*/ "",
                                         rspfile,
                                         rspcontent,
-                                        /*restat*/ "",
+                                        /*restat*/ "$RESTAT",
                                         /*generator*/ false);
   }
 
@@ -556,6 +556,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     &postBuildCmdLines
   };
 
+  cmNinjaDeps byproducts;
   for (unsigned i = 0; i != 3; ++i)
     {
     for (std::vector<cmCustomCommand>::const_iterator
@@ -564,6 +565,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
       {
       cmCustomCommandGenerator ccg(*ci, cfgName, mf);
       localGen.AppendCustomCommandLines(ccg, *cmdLineLists[i]);
+      std::vector<std::string> const& ccByproducts = ccg.GetByproducts();
+      std::transform(ccByproducts.begin(), ccByproducts.end(),
+                     std::back_inserter(byproducts), MapToNinjaPath());
       }
     }
 
@@ -610,6 +614,17 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmNinjaDeps orderOnlyDeps;
   this->GetLocalGenerator()->AppendTargetDepends(this->GetTarget(),
     orderOnlyDeps);
+
+  // Ninja should restat after linking if and only if there are byproducts.
+  vars["RESTAT"] = byproducts.empty()? "" : "1";
+
+  for (cmNinjaDeps::const_iterator oi = byproducts.begin(),
+         oe = byproducts.end();
+       oi != oe; ++oi)
+    {
+    this->GetGlobalGenerator()->SeenCustomCommandOutput(*oi);
+    outputs.push_back(*oi);
+    }
 
   // Write the build statement for this target.
   globalGen.WriteBuild(this->GetBuildFileStream(),

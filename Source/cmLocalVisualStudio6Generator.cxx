@@ -821,10 +821,12 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
   command.push_back("make_directory");
   command.push_back(outDir);
   std::vector<std::string> no_output;
+  std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   cmCustomCommandLines commands;
   commands.push_back(command);
-  pcc.reset(new cmCustomCommand(0, no_output, no_depends, commands, 0, 0));
+  pcc.reset(new cmCustomCommand(0, no_output, no_byproducts,
+                                no_depends, commands, 0, 0));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;

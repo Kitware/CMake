@@ -28,6 +28,7 @@ cmCustomCommand::cmCustomCommand()
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
   Outputs(r.Outputs),
+  Byproducts(r.Byproducts),
   Depends(r.Depends),
   CommandLines(r.CommandLines),
   HaveComment(r.HaveComment),
@@ -49,6 +50,7 @@ cmCustomCommand& cmCustomCommand::operator=(cmCustomCommand const& r)
     }
 
   this->Outputs = r.Outputs;
+  this->Byproducts= r.Byproducts;
   this->Depends = r.Depends;
   this->CommandLines = r.CommandLines;
   this->HaveComment = r.HaveComment;
@@ -66,11 +68,13 @@ cmCustomCommand& cmCustomCommand::operator=(cmCustomCommand const& r)
 //----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  const std::vector<std::string>& outputs,
+                                 const std::vector<std::string>& byproducts,
                                  const std::vector<std::string>& depends,
                                  const cmCustomCommandLines& commandLines,
                                  const char* comment,
                                  const char* workingDirectory):
   Outputs(outputs),
+  Byproducts(byproducts),
   Depends(depends),
   CommandLines(commandLines),
   HaveComment(comment?true:false),
@@ -97,6 +101,12 @@ cmCustomCommand::~cmCustomCommand()
 const std::vector<std::string>& cmCustomCommand::GetOutputs() const
 {
   return this->Outputs;
+}
+
+//----------------------------------------------------------------------------
+const std::vector<std::string>& cmCustomCommand::GetByproducts() const
+{
+  return this->Byproducts;
 }
 
 //----------------------------------------------------------------------------

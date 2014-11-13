@@ -477,7 +477,9 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
           this->PostBuildMakeTarget(target.GetName(), "$(CONFIGURATION)");
         cmCustomCommandLines commandLines;
         commandLines.push_back(makeHelper);
+        std::vector<std::string> no_byproducts;
         lg->GetMakefile()->AddCustomCommandToTarget(target.GetName(),
+                                                    no_byproducts,
                                                     no_depends,
                                                     commandLines,
                                                     cmTarget::POST_BUILD,
@@ -1366,6 +1368,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     cmd[0].push_back(str_link_file);
 
     cmCustomCommand command(this->CurrentMakefile,
+      std::vector<std::string>(),
       std::vector<std::string>(),
       std::vector<std::string>(),
       cmd,

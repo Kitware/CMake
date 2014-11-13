@@ -91,6 +91,12 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
+{
+  return this->CC.GetByproducts();
+}
+
+//----------------------------------------------------------------------------
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
   if (!this->DependsDone)
