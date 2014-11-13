@@ -1,1 +1,2 @@
-include(Compiler/Clang-C)
+include(Compiler/Clang)
+__compiler_clang(C)
