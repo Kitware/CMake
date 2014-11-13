@@ -646,6 +646,17 @@ cmTargetTraceDependencies
           si != sources.end(); ++si)
         {
         cmSourceFile* sf = *si;
+        const std::set<cmTarget const*> tgts =
+                          this->GlobalGenerator->GetFilenameTargetDepends(sf);
+        if (tgts.find(this->Target) != tgts.end())
+          {
+          cmOStringStream e;
+          e << "Evaluation output file\n  \"" << sf->GetFullPath()
+            << "\"\ndepends on the sources of a target it is used in.  This "
+              "is a dependency loop and is not allowed.";
+          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+          return;
+          }
         if(emitted.insert(sf).second && this->SourcesQueued.insert(sf).second)
           {
           this->SourceQueue.push(sf);

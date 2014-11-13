@@ -259,6 +259,17 @@ void cmLocalGenerator::ConfigureFinalPass()
 
 void cmLocalGenerator::TraceDependencies()
 {
+  std::vector<std::string> configs;
+  this->Makefile->GetConfigurations(configs);
+  if (configs.empty())
+    {
+    configs.push_back("");
+    }
+  for(std::vector<std::string>::const_iterator ci = configs.begin();
+      ci != configs.end(); ++ci)
+    {
+    this->GlobalGenerator->CreateEvaluationSourceFiles(*ci);
+    }
   // Generate the rule files for each target.
   cmGeneratorTargetsType targets = this->Makefile->GetGeneratorTargets();
   for(cmGeneratorTargetsType::iterator t = targets.begin();

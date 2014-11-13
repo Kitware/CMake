@@ -939,7 +939,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
         reportError(context, content->GetOriginalExpression(), e.str());
         return std::string();
         }
-        context->AllTargets.insert(target);
+      context->AllTargets.insert(target);
       }
 
     if (target == context->HeadTarget)
@@ -949,6 +949,10 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       // will check this to ensure that properties have one consistent
       // value for all evaluations.
       context->SeenTargetProperties.insert(propertyName);
+      }
+    if (propertyName == "SOURCES")
+      {
+      context->SourceSensitiveTargets.insert(target);
       }
 
     if (propertyName.empty())

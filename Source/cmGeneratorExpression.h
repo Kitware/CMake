@@ -115,6 +115,10 @@ public:
   {
     return this->HadHeadSensitiveCondition;
   }
+  std::set<cmTarget const*> GetSourceSensitiveTargets() const
+  {
+    return this->SourceSensitiveTargets;
+  }
 
   void SetEvaluateForBuildsystem(bool eval)
   {
@@ -146,6 +150,7 @@ private:
   mutable std::string Output;
   mutable bool HadContextSensitiveCondition;
   mutable bool HadHeadSensitiveCondition;
+  mutable std::set<cmTarget const*>  SourceSensitiveTargets;
   bool EvaluateForBuildsystem;
 };
 
