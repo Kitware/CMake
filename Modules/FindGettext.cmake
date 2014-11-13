@@ -50,6 +50,9 @@
 #      (by default use share/locale/).
 #      If ALL is specified, the po files are processed when building the all traget.
 #      It creates a custom target "pofiles".
+#
+# .. note::
+#   If you wish to use the Gettext library (libintl), use :module:`FindIntl`.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
