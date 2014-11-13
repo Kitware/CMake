@@ -125,7 +125,7 @@ public:
                         const std::string& deptype,
                         const std::string& rspfile,
                         const std::string& rspcontent,
-                        bool restat,
+                        const std::string& restat,
                         bool generator);
 
   /**
@@ -245,7 +245,7 @@ public:
                const std::string& deptype,
                const std::string& rspfile,
                const std::string& rspcontent,
-               bool restat,
+               const std::string& restat,
                bool generator);
 
   bool HasRule(const std::string& name);

@@ -477,7 +477,7 @@ cmNinjaTargetGenerator
                                       deptype,
                                       /*rspfile*/ "",
                                       /*rspcontent*/ "",
-                                      /*restat*/ false,
+                                      /*restat*/ "",
                                       /*generator*/ false);
 }
 

@@ -256,7 +256,7 @@ cmNinjaNormalTargetGenerator
                                         /*deptype*/ "",
                                         rspfile,
                                         rspcontent,
-                                        /*restat*/ false,
+                                        /*restat*/ "",
                                         /*generator*/ false);
   }
 
@@ -278,7 +278,7 @@ cmNinjaNormalTargetGenerator
                                           /*deptype*/ "",
                                           /*rspfile*/ "",
                                           /*rspcontent*/ "",
-                                          /*restat*/ false,
+                                          /*restat*/ "",
                                           /*generator*/ false);
     else
       this->GetGlobalGenerator()->AddRule("CMAKE_SYMLINK_LIBRARY",
@@ -292,7 +292,7 @@ cmNinjaNormalTargetGenerator
                                           /*deptype*/ "",
                                           /*rspfile*/ "",
                                           /*rspcontent*/ "",
-                                          /*restat*/ false,
+                                          /*restat*/ "",
                                           /*generator*/ false);
   }
 }
