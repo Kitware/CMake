@@ -114,6 +114,8 @@ The options are:
   If an output name is a relative path it will be interpreted
   relative to the build tree directory corresponding to the
   current source directory.
+  Each output file will be marked with the :prop_sf:`GENERATED`
+  source file property automatically.
   If the output of the custom command is not actually created
   as a file on disk it should be marked with the :prop_sf:`SYMBOLIC`
   source file property.
