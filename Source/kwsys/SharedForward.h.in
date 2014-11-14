@@ -813,7 +813,7 @@ static void kwsys_shared_forward_print_failure(char const* const* argv)
 }
 
 /* Static storage space to store the updated environment variable.  */
-static char kwsys_shared_forward_ldpath[KWSYS_SHARED_FORWARD_MAXPATH*16] = KWSYS_SHARED_FORWARD_LDPATH "=";
+static char kwsys_shared_forward_ldpath[65535] = KWSYS_SHARED_FORWARD_LDPATH "=";
 
 /*--------------------------------------------------------------------------*/
 /* Main driver function to be called from main.  */
