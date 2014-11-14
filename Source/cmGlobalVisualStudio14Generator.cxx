@@ -13,21 +13,36 @@
 #include "cmLocalVisualStudio10Generator.h"
 #include "cmMakefile.h"
 
-static const char vs14generatorName[] = "Visual Studio 14";
+static const char vs14generatorName[] = "Visual Studio 14 2015";
+
+// Map generator name without year to name with year.
+static const char* cmVS14GenName(const std::string& name, std::string& genName)
+{
+  if(strncmp(name.c_str(), vs14generatorName,
+             sizeof(vs14generatorName)-6) != 0)
+    {
+    return 0;
+    }
+  const char* p = name.c_str() + sizeof(vs14generatorName) - 6;
+  if(cmHasLiteralPrefix(p, " 2015"))
+    {
+    p += 5;
+    }
+  genName = std::string(vs14generatorName) + p;
+  return p;
+}
 
 class cmGlobalVisualStudio14Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
   virtual cmGlobalGenerator* CreateGlobalGenerator(
-    const std::string& genName) const
+                                                const std::string& name) const
     {
-    if(strncmp(genName.c_str(), vs14generatorName,
-               sizeof(vs14generatorName) - 1) != 0)
-      {
-      return 0;
-      }
-    const char* p = genName.c_str() + sizeof(vs14generatorName) - 1;
+    std::string genName;
+    const char* p = cmVS14GenName(name, genName);
+    if(!p)
+      { return 0; }
     if(!*p)
       {
       return new cmGlobalVisualStudio14Generator(
@@ -51,7 +66,7 @@ public:
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
     {
     entry.Name = vs14generatorName;
-    entry.Brief = "Generates Visual Studio 14 project files.";
+    entry.Brief = "Generates Visual Studio 14 (VS 2015) project files.";
     }
 
   virtual void GetGenerators(std::vector<std::string>& names) const
@@ -85,7 +100,12 @@ bool
 cmGlobalVisualStudio14Generator::MatchesGeneratorName(
                                                 const std::string& name) const
 {
-  return name == this->GetName();
+  std::string genName;
+  if(cmVS14GenName(name, genName))
+    {
+    return genName == this->GetName();
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
