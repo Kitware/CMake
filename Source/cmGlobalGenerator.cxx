@@ -2372,7 +2372,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         depends.push_back(this->GetAllTargetName());
         }
       }
-    if(mf->GetDefinition("CMake_BINARY_DIR"))
+    if(mf->GetDefinition("CMake_BINARY_DIR") &&
+       !mf->IsOn("CMAKE_CROSSCOMPILING"))
       {
       // We are building CMake itself.  We cannot use the original
       // executable to install over itself.  The generator will
