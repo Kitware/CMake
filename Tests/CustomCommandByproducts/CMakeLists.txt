@@ -79,6 +79,29 @@ add_custom_command(OUTPUT timestamp8.txt
     ${CMAKE_CURRENT_SOURCE_DIR}/byproduct8.c.in
   )
 
+# Generate the library file of an imported target as a byproduct
+# of an external project.
+if(CMAKE_CONFIGURATION_TYPES)
+  set(cfg /${CMAKE_CFG_INTDIR})
+else()
+  set(cfg)
+endif()
+set(ExternalLibrary_LIBRARY
+  ${CMAKE_CURRENT_BINARY_DIR}/External-build${cfg}/${CMAKE_STATIC_LIBRARY_PREFIX}ExternalLibrary${CMAKE_STATIC_LIBRARY_SUFFIX}
+  )
+include(ExternalProject)
+ExternalProject_Add(ExternalTarget
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/External"
+  BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/External-build"
+  PREFIX     "${CMAKE_CURRENT_BINARY_DIR}/External-build/root"
+  DOWNLOAD_COMMAND ""
+  INSTALL_COMMAND ""
+  BUILD_BYPRODUCTS "${ExternalLibrary_LIBRARY}"
+  )
+add_library(ExternalLibrary STATIC IMPORTED)
+set_property(TARGET ExternalLibrary PROPERTY IMPORTED_LOCATION ${ExternalLibrary_LIBRARY})
+add_dependencies(ExternalLibrary ExternalTarget)
+
 # Add an executable consuming all the byproducts.
 add_executable(CustomCommandByproducts
   CustomCommandByproducts.c
@@ -94,6 +117,7 @@ add_executable(CustomCommandByproducts
 add_dependencies(CustomCommandByproducts Producer2)
 add_dependencies(CustomCommandByproducts Producer3_4)
 add_dependencies(CustomCommandByproducts ProducerExe)
+target_link_libraries(CustomCommandByproducts ExternalLibrary)
 
 if(CMAKE_GENERATOR STREQUAL "Ninja")
   add_custom_target(CheckNinja ALL
