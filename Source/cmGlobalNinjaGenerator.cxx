@@ -242,7 +242,7 @@ void cmGlobalNinjaGenerator::AddCustomCommandRule()
                 /*deptype*/ "",
                 /*rspfile*/ "",
                 /*rspcontent*/ "",
-                /*restat*/ true,
+                /*restat*/ "1",
                 /*generator*/ false);
 }
 
@@ -309,7 +309,7 @@ cmGlobalNinjaGenerator::AddMacOSXContentRule()
                 /*deptype*/ "",
                 /*rspfile*/ "",
                 /*rspcontent*/ "",
-                /*restat*/ false,
+                /*restat*/ "",
                 /*generator*/ false);
 }
 
@@ -344,7 +344,7 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
                                        const std::string& deptype,
                                        const std::string& rspfile,
                                        const std::string& rspcontent,
-                                       bool restat,
+                                       const std::string& restat,
                                        bool generator)
 {
   // Make sure the rule has a name.
@@ -408,10 +408,10 @@ void cmGlobalNinjaGenerator::WriteRule(std::ostream& os,
     os << "rspfile_content = " << rspcontent << "\n";
     }
 
-  if(restat)
+  if(!restat.empty())
     {
     cmGlobalNinjaGenerator::Indent(os, 1);
-    os << "restat = 1\n";
+    os << "restat = " << restat << "\n";
     }
 
   if(generator)
@@ -607,7 +607,7 @@ void cmGlobalNinjaGenerator::AddRule(const std::string& name,
                                      const std::string& deptype,
                                      const std::string& rspfile,
                                      const std::string& rspcontent,
-                                     bool restat,
+                                     const std::string& restat,
                                      bool generator)
 {
   // Do not add the same rule twice.
@@ -1122,7 +1122,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
             /*deptype=*/ "",
             /*rspfile=*/ "",
             /*rspcontent*/ "",
-            /*restat=*/ false,
+            /*restat=*/ "",
             /*generator=*/ true);
 
   cmLocalNinjaGenerator *ng = static_cast<cmLocalNinjaGenerator *>(lg);
@@ -1206,7 +1206,7 @@ void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)
             /*deptype=*/ "",
             /*rspfile=*/ "",
             /*rspcontent*/ "",
-            /*restat=*/ false,
+            /*restat=*/ "",
             /*generator=*/ false);
   WriteBuild(os,
              "Clean all the built files.",
@@ -1229,7 +1229,7 @@ void cmGlobalNinjaGenerator::WriteTargetHelp(std::ostream& os)
             /*deptype=*/ "",
             /*rspfile=*/ "",
             /*rspcontent*/ "",
-            /*restat=*/ false,
+            /*restat=*/ "",
             /*generator=*/ false);
   WriteBuild(os,
              "Print all primary targets available.",
