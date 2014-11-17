@@ -2036,7 +2036,8 @@ WriteMasmOptions(std::string const& configName,
 void
 cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
 {
-  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY)
+  if(this->Target->GetType() != cmTarget::STATIC_LIBRARY &&
+     this->Target->GetType() != cmTarget::OBJECT_LIBRARY)
     {
     return;
     }

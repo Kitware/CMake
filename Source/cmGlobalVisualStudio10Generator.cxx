@@ -262,6 +262,24 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::SelectWindowsPhoneToolset(
+  std::string& toolset) const
+{
+  toolset = "";
+  return false;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio10Generator::SelectWindowsStoreToolset(
+  std::string& toolset) const
+{
+  toolset = "";
+  return false;
+}
+
+//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio10Generator::SelectWindowsCEToolset() const
 {
   if (this->SystemVersion == "8.0")
