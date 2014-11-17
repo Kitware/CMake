@@ -77,7 +77,29 @@ foreach(lang CXX C)
   endif()
 endforeach()
 
+if (CMAKE_C_COMPILE_FEATURES)
+  string(FIND "${CMAKE_C_FLAGS}" "-std=" std_flag_idx)
+  if (std_flag_idx EQUAL -1)
+    add_executable(default_dialect_C default_dialect.c)
+    target_compile_definitions(default_dialect_C PRIVATE
+      DEFAULT_C11=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},11>
+      DEFAULT_C99=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},99>
+      DEFAULT_C90=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},90>
+    )
+  endif()
+endif()
+
 if (CMAKE_CXX_COMPILE_FEATURES)
+  string(FIND "${CMAKE_CXX_FLAGS}" "-std=" std_flag_idx)
+  if (std_flag_idx EQUAL -1)
+    add_executable(default_dialect default_dialect.cpp)
+    target_compile_definitions(default_dialect PRIVATE
+      DEFAULT_CXX14=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},14>
+      DEFAULT_CXX11=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},11>
+      DEFAULT_CXX98=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},98>
+    )
+  endif()
+
   add_executable(CompileFeatures main.cpp)
   set_property(TARGET CompileFeatures
     PROPERTY COMPILE_FEATURES "cxx_auto_type"
