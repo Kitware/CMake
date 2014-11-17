@@ -63,12 +63,13 @@ static bool LogErrorsAsMessages;
     { \
     if (LogErrorsAsMessages) \
       { \
-      std::ostringstream oss; \
-      oss.flags(std::ios::hex); \
-      oss << context << " failed HRESULT, hr = 0x" << hr << std::endl; \
-      oss.flags(std::ios::dec); \
-      oss << __FILE__ << "(" << __LINE__ << ")"; \
-      cmSystemTools::Message(oss.str().c_str()); \
+      std::ostringstream _hresult_oss; \
+      _hresult_oss.flags(std::ios::hex); \
+      _hresult_oss << context << " failed HRESULT, hr = 0x" \
+                   << hr << std::endl; \
+      _hresult_oss.flags(std::ios::dec); \
+      _hresult_oss << __FILE__ << "(" << __LINE__ << ")"; \
+      cmSystemTools::Message(_hresult_oss.str().c_str()); \
       } \
     }
 

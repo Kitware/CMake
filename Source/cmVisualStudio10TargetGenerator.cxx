@@ -307,7 +307,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->BuildFileStream->SetCopyIfDifferent(true);
 
   // Write the encoding header into the file
-  char magic[] = {0xEF,0xBB, 0xBF};
+  char magic[] = {char(0xEF), char(0xBB), char(0xBF)};
   this->BuildFileStream->write(magic, 3);
 
   //get the tools version to use
@@ -937,7 +937,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   path += ".vcxproj.filters";
   cmGeneratedFileStream fout(path.c_str());
   fout.SetCopyIfDifferent(true);
-  char magic[] = {0xEF,0xBB, 0xBF};
+  char magic[] = {char(0xEF), char(0xBB), char(0xBF)};
   fout.write(magic, 3);
   cmGeneratedFileStream* save = this->BuildFileStream;
   this->BuildFileStream = & fout;
