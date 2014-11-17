@@ -64,7 +64,7 @@ one may launch CMake from any environment.
    /generator/Visual Studio 10 2010
    /generator/Visual Studio 11 2012
    /generator/Visual Studio 12 2013
-   /generator/Visual Studio 14
+   /generator/Visual Studio 14 2015
    /generator/Xcode
 
 Extra Generators
