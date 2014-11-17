@@ -203,6 +203,7 @@ class CMakeTransform(Transform):
             # Insert the object link target.
             targetid = '%s:%s' % (objtype, title)
             targetnode = nodes.target('', '', ids=[targetid])
+            self.document.note_explicit_target(targetnode)
             self.document.insert(0, targetnode)
             # Insert the object index entry.
             indexnode = addnodes.index()
