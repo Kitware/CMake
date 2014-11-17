@@ -73,8 +73,13 @@ TOUPPER/TOLOWER will convert string to upper/lower characters.
 
 LENGTH will return a given string's length.
 
-SUBSTRING will return a substring of a given string.  If length is -1
+SUBSTRING will return a substring of a given string. If length is -1
 the remainder of the string starting at begin will be returned.
+If string is shorter than length then end of string is used instead.
+
+.. note::
+  CMake 3.1 and below reported an error if length pointed past
+  the end of string.
 
 STRIP will return a substring of a given string with leading and
 trailing spaces removed.
