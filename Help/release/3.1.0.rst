@@ -18,7 +18,7 @@ New Features
 Generators
 ----------
 
-* A :generator:`Visual Studio 14` generator was added.
+* The :generator:`Visual Studio 14 2015` generator was added.
 
 Windows Phone and Windows Store
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

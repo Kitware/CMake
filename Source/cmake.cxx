@@ -1401,7 +1401,7 @@ int cmake::ActualConfigure()
         {"10.0", "Visual Studio 10 2010"},
         {"11.0", "Visual Studio 11 2012"},
         {"12.0", "Visual Studio 12 2013"},
-        {"14.0", "Visual Studio 14"},
+        {"14.0", "Visual Studio 14 2015"},
         {0, 0}};
       for(int i=0; version[i].MSVersion != 0; i++)
         {
