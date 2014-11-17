@@ -468,6 +468,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       this->BuildCommandLine(cmdLines),
       this->ConstructComment(ccg),
       "Custom command for " + ninjaOutputs[0],
+      cc->GetUsesTerminal(),
       ninjaOutputs,
       ninjaDeps,
       orderOnlyDeps);

@@ -885,7 +885,8 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
                                      cmTarget::CustomCommandType type,
                                      const char* comment,
                                      const char* workingDir,
-                                     bool escapeOldStyle) const
+                                     bool escapeOldStyle,
+                                     bool uses_terminal) const
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
@@ -941,6 +942,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
                      commandLines, comment, workingDir);
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
+  cc.SetUsesTerminal(uses_terminal);
   switch(type)
     {
     case cmTarget::PRE_BUILD:
@@ -964,7 +966,8 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                                      const char* comment,
                                      const char* workingDir,
                                      bool replace,
-                                     bool escapeOldStyle)
+                                     bool escapeOldStyle,
+                                     bool uses_terminal)
 {
   // Make sure there is at least one output.
   if(outputs.empty())
@@ -1071,6 +1074,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
                           comment, workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
+    cc->SetUsesTerminal(uses_terminal);
     file->SetCustomCommand(cc);
     this->UpdateOutputToSourceMap(outputs, file);
     }
@@ -1119,13 +1123,15 @@ cmMakefile::AddCustomCommandToOutput(const std::string& output,
                                      const char* comment,
                                      const char* workingDir,
                                      bool replace,
-                                     bool escapeOldStyle)
+                                     bool escapeOldStyle,
+                                     bool uses_terminal)
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
   return this->AddCustomCommandToOutput(outputs, depends, main_dependency,
                                         commandLines, comment, workingDir,
-                                        replace, escapeOldStyle);
+                                        replace, escapeOldStyle,
+                                        uses_terminal);
 }
 
 //----------------------------------------------------------------------------
@@ -1242,7 +1248,8 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               const char* workingDirectory,
                               const std::vector<std::string>& depends,
                               const cmCustomCommandLines& commandLines,
-                              bool escapeOldStyle, const char* comment)
+                              bool escapeOldStyle, const char* comment,
+                              bool uses_terminal)
 {
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName);
@@ -1269,7 +1276,7 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                                    no_main_dependency,
                                    commandLines, comment,
                                    workingDirectory, no_replace,
-                                   escapeOldStyle);
+                                   escapeOldStyle, uses_terminal);
     cmSourceFile* sf = target->AddSourceCMP0049(force);
 
     // The output is not actually created so mark it symbolic.

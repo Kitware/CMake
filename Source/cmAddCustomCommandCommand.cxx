@@ -35,6 +35,7 @@ bool cmAddCustomCommandCommand
   std::vector<std::string> depends, outputs, output;
   bool verbatim = false;
   bool append = false;
+  bool uses_terminal = false;
   std::string implicit_depends_lang;
   cmCustomCommand::ImplicitDependsList implicit_depends;
 
@@ -101,6 +102,10 @@ bool cmAddCustomCommandCommand
     else if(copy == "APPEND")
       {
       append = true;
+      }
+    else if(copy == "USES_TERMINAL")
+      {
+      uses_terminal = true;
       }
     else if(copy == "TARGET")
       {
@@ -312,7 +317,7 @@ bool cmAddCustomCommandCommand
     this->Makefile->AddCustomCommandToTarget(target, no_depends,
                                              commandLines, cctype,
                                              comment, working.c_str(),
-                                             escapeOldStyle);
+                                             escapeOldStyle, uses_terminal);
     }
   else if(target.empty())
     {
@@ -321,7 +326,7 @@ bool cmAddCustomCommandCommand
                                              main_dependency,
                                              commandLines, comment,
                                              working.c_str(), false,
-                                             escapeOldStyle);
+                                             escapeOldStyle, uses_terminal);
 
     // Add implicit dependency scanning requests if any were given.
     if(!implicit_depends.empty())
@@ -345,6 +350,11 @@ bool cmAddCustomCommandCommand
         return false;
         }
       }
+    }
+  else if (uses_terminal)
+    {
+    this->SetError("USES_TERMINAL may not be used with SOURCE signatures");
+    return false;
     }
   else
     {

@@ -385,7 +385,8 @@ protected:
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
     const cmCustomCommandLines* commandLines,
-    std::vector<std::string> depends, const char* workingDir);
+    std::vector<std::string> depends, const char* workingDir,
+    bool uses_terminal);
 
   bool NeedSymbolicMark;
   bool UseLinkScript;

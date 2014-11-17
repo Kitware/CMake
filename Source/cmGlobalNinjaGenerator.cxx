@@ -250,6 +250,7 @@ void
 cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
                                                 const std::string& description,
                                                 const std::string& comment,
+                                                bool uses_terminal,
                                                 const cmNinjaDeps& outputs,
                                                 const cmNinjaDeps& deps,
                                                 const cmNinjaDeps& orderOnly)
@@ -266,6 +267,10 @@ cmGlobalNinjaGenerator::WriteCustomCommandBuild(const std::string& command,
   cmNinjaVars vars;
   vars["COMMAND"] = cmd;
   vars["DESC"] = EncodeLiteral(description);
+  if (uses_terminal && SupportsConsolePool())
+    {
+    vars["pool"] = "console";
+    }
 
   this->WriteBuild(*this->BuildFileStream,
                    comment,
@@ -826,6 +831,7 @@ void cmGlobalNinjaGenerator::WriteAssumedSourceDependencies()
     std::copy(i->second.begin(), i->second.end(), std::back_inserter(deps));
     WriteCustomCommandBuild(/*command=*/"", /*description=*/"",
                             "Assume dependencies for generated source file.",
+                            /*uses_terminal*/false,
                             cmNinjaDeps(1, i->first), deps);
   }
 }
@@ -1141,9 +1147,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmNinjaVars variables;
   // Use 'console' pool to get non buffered output of the CMake re-run call
   // Available since Ninja 1.5
-  if(cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
-                                   ninjaVersion().c_str(),
-                                   "1.5") == false)
+  if(SupportsConsolePool())
     {
     variables["pool"] = "console";
     }
@@ -1183,6 +1187,12 @@ std::string cmGlobalNinjaGenerator::ninjaVersion() const
                                   cmSystemTools::OUTPUT_NONE);
 
   return version;
+}
+
+bool cmGlobalNinjaGenerator::SupportsConsolePool() const
+{
+  return cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                       ninjaVersion().c_str(), "1.5") == false;
 }
 
 void cmGlobalNinjaGenerator::WriteTargetClean(std::ostream& os)

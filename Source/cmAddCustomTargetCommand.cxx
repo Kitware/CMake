@@ -48,6 +48,7 @@ bool cmAddCustomTargetCommand
   std::vector<std::string> depends;
   std::string working_directory;
   bool verbatim = false;
+  bool uses_terminal = false;
   std::string comment_buffer;
   const char* comment = 0;
   std::vector<std::string> sources;
@@ -59,7 +60,7 @@ bool cmAddCustomTargetCommand
     doing_working_directory,
     doing_comment,
     doing_source,
-    doing_verbatim
+    doing_nothing
   };
   tdoing doing = doing_command;
 
@@ -90,8 +91,13 @@ bool cmAddCustomTargetCommand
       }
     else if(copy == "VERBATIM")
       {
-      doing = doing_verbatim;
+      doing = doing_nothing;
       verbatim = true;
+      }
+    else if(copy == "USES_TERMINAL")
+      {
+      doing = doing_nothing;
+      uses_terminal = true;
       }
     else if (copy == "COMMENT")
       {
@@ -221,12 +227,20 @@ bool cmAddCustomTargetCommand
       cmSystemTools::CollapseFullPath(working_directory, build_dir);
     }
 
+  if (commandLines.empty() && uses_terminal)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      "USES_TERMINAL may not be specified without any COMMAND");
+    return true;
+    }
+
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target =
     this->Makefile->AddUtilityCommand(targetName, excludeFromAll,
                                       working_directory.c_str(), depends,
-                                      commandLines, escapeOldStyle, comment);
+                                      commandLines, escapeOldStyle, comment,
+                                      uses_terminal);
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

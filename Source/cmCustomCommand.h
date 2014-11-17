@@ -79,6 +79,11 @@ public:
   void AppendImplicitDepends(ImplicitDependsList const&);
   ImplicitDependsList const& GetImplicitDepends() const;
 
+  /** Set/Get whether this custom command should be given access to the
+      real console (if possible).  */
+  bool GetUsesTerminal() const;
+  void SetUsesTerminal(bool b);
+
 private:
   std::vector<std::string> Outputs;
   std::vector<std::string> Depends;
@@ -90,6 +95,7 @@ private:
   bool EscapeOldStyle;
   cmListFileBacktrace Backtrace;
   ImplicitDependsList ImplicitDepends;
+  bool UsesTerminal;
 };
 
 #endif

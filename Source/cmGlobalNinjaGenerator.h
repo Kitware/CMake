@@ -103,6 +103,7 @@ public:
   void WriteCustomCommandBuild(const std::string& command,
                                const std::string& description,
                                const std::string& comment,
+                               bool uses_terminal,
                                const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
                                const cmNinjaDeps& orderOnly = cmNinjaDeps());
@@ -299,6 +300,9 @@ public:
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
   std::string ninjaVersion() const;
+
+  bool SupportsConsolePool() const;
+
 protected:
 
   /// Overloaded methods. @see cmGlobalGenerator::Generate()

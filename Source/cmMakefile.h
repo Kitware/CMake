@@ -174,7 +174,8 @@ public:
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir,
-                                bool escapeOldStyle = true) const;
+                                bool escapeOldStyle = true,
+                                bool uses_terminal = false) const;
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
     const std::vector<std::string>& depends,
@@ -182,7 +183,8 @@ public:
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
-    bool escapeOldStyle = true);
+    bool escapeOldStyle = true,
+    bool uses_terminal = false);
   cmSourceFile* AddCustomCommandToOutput(
     const std::string& output,
     const std::vector<std::string>& depends,
@@ -190,7 +192,8 @@ public:
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
-    bool escapeOldStyle = true);
+    bool escapeOldStyle = true,
+    bool uses_terminal = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -237,7 +240,8 @@ public:
                               const std::vector<std::string>& depends,
                               const cmCustomCommandLines& commandLines,
                               bool escapeOldStyle = true,
-                              const char* comment = 0);
+                              const char* comment = 0,
+                              bool uses_terminal = false);
 
   /**
    * Add a link library to the build.
