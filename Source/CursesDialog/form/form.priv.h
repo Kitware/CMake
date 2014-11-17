@@ -34,7 +34,7 @@
 #include "form.h"
 
 /* get around odd bug on aCC and itanium */
-#if defined(__hpux) && defined(__ia64)
+#if defined(__hpux)
 #define getmaxx __getmaxx
 #define getmaxy __getmaxy
 #endif
