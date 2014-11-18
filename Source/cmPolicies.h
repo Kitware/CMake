@@ -111,6 +111,7 @@ public:
     CMP0053, ///< Simplify variable reference and escape sequence evaluation
     CMP0054, ///< Only interpret if() arguments as variables
     /// or keywords when unquoted.
+    CMP0055, ///< Strict checking for break() command.
 
     /** \brief Always the last entry.
      *
