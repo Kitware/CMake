@@ -57,7 +57,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT LIBARCHIVE LIBLZMA ZLIB)
+  set(UTILITIES BZIP2 CURL EXPAT FORM LIBARCHIVE LIBLZMA ZLIB)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -95,6 +95,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
     "${CMAKE_USE_SYSTEM_LIBRARY_BZIP2}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
+  option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
 
   # Mention to the user what system libraries are being used.
   foreach(util ${UTILITIES})
@@ -394,7 +395,11 @@ macro (CMAKE_BUILD_UTILITIES)
     set(BUILD_CursesDialog 0)
   endif ()
   if(BUILD_CursesDialog)
-    add_subdirectory(Source/CursesDialog/form)
+    if(NOT CMAKE_USE_SYSTEM_FORM)
+      add_subdirectory(Source/CursesDialog/form)
+    elseif(NOT CURSES_FORM_LIBRARY)
+      message( FATAL_ERROR "CMAKE_USE_SYSTEM_FORM in ON but CURSES_FORM_LIBRARY is not set!" )
+    endif()
   endif()
 endmacro ()
 
