@@ -77,36 +77,38 @@ foreach(lang CXX C)
   endif()
 endforeach()
 
-add_executable(CompileFeatures main.cpp)
-set_property(TARGET CompileFeatures
-  PROPERTY COMPILE_FEATURES "cxx_auto_type"
-)
-set_property(TARGET CompileFeatures
-  PROPERTY CXX_STANDARD_REQUIRED TRUE
-)
+if (CMAKE_CXX_COMPILE_FEATURES)
+  add_executable(CompileFeatures main.cpp)
+  set_property(TARGET CompileFeatures
+    PROPERTY COMPILE_FEATURES "cxx_auto_type"
+  )
+  set_property(TARGET CompileFeatures
+    PROPERTY CXX_STANDARD_REQUIRED TRUE
+  )
 
-add_executable(GenexCompileFeatures main.cpp)
-set_property(TARGET GenexCompileFeatures
-  PROPERTY COMPILE_FEATURES "$<1:cxx_auto_type>;$<0:not_a_feature>"
-)
+  add_executable(GenexCompileFeatures main.cpp)
+  set_property(TARGET GenexCompileFeatures
+    PROPERTY COMPILE_FEATURES "$<1:cxx_auto_type>;$<0:not_a_feature>"
+  )
 
-add_library(iface INTERFACE)
-set_property(TARGET iface
-  PROPERTY INTERFACE_COMPILE_FEATURES "cxx_auto_type"
-)
-add_executable(IfaceCompileFeatures main.cpp)
-target_link_libraries(IfaceCompileFeatures iface)
+  add_library(iface INTERFACE)
+  set_property(TARGET iface
+    PROPERTY INTERFACE_COMPILE_FEATURES "cxx_auto_type"
+  )
+  add_executable(IfaceCompileFeatures main.cpp)
+  target_link_libraries(IfaceCompileFeatures iface)
 
-add_executable(CompileFeaturesGenex genex_test.cpp)
-set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
-target_compile_definitions(CompileFeaturesGenex PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
+  add_executable(CompileFeaturesGenex genex_test.cpp)
+  set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
+  target_compile_definitions(CompileFeaturesGenex PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
 
-add_executable(CompileFeaturesGenex2 genex_test.cpp)
-target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_constexpr)
-target_compile_definitions(CompileFeaturesGenex2 PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
+  add_executable(CompileFeaturesGenex2 genex_test.cpp)
+  target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_constexpr)
+  target_compile_definitions(CompileFeaturesGenex2 PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
 
-add_library(noexcept_iface INTERFACE)
-target_compile_features(noexcept_iface INTERFACE cxx_noexcept)
-add_executable(CompileFeaturesGenex3 genex_test.cpp)
-target_link_libraries(CompileFeaturesGenex3 PRIVATE noexcept_iface)
-target_compile_definitions(CompileFeaturesGenex3 PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
+  add_library(noexcept_iface INTERFACE)
+  target_compile_features(noexcept_iface INTERFACE cxx_noexcept)
+  add_executable(CompileFeaturesGenex3 genex_test.cpp)
+  target_link_libraries(CompileFeaturesGenex3 PRIVATE noexcept_iface)
+  target_compile_definitions(CompileFeaturesGenex3 PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
+endif()
