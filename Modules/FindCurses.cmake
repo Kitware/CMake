@@ -179,11 +179,6 @@ if(NOT DEFINED CURSES_HAVE_CURSES_H)
   endif()
 endif()
 
-if (NOT CURSES_TINFO_HAS_CBREAK)
-  find_library(CURSES_EXTRA_LIBRARY cur_colr HINTS "${_cursesLibDir}")
-  find_library(CURSES_EXTRA_LIBRARY cur_colr )
-endif()
-
 find_library(CURSES_FORM_LIBRARY form HINTS "${_cursesLibDir}")
 find_library(CURSES_FORM_LIBRARY form )
 
