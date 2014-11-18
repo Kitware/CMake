@@ -27,6 +27,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endofreach for this statement
     if (!this->Depth)
       {
+      cmMakefile::LoopBlockPop loopBlockPop(&mf);
+
       // Remove the function blocker for this scope or bail.
       cmsys::auto_ptr<cmFunctionBlocker>
         fb(mf.RemoveFunctionBlocker(this, lff));
@@ -73,6 +75,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
             }
           }
         }
+
       // restore the variable to its prior value
       mf.AddDefinition(this->Args[0],oldDef.c_str());
       return true;
@@ -199,6 +202,8 @@ bool cmForEachCommand
     }
   this->Makefile->AddFunctionBlocker(f);
 
+  this->Makefile->PushLoopBlock();
+
   return true;
 }
 
@@ -242,5 +247,8 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     }
 
   this->Makefile->AddFunctionBlocker(f.release()); // TODO: pass auto_ptr
+
+  this->Makefile->PushLoopBlock();
+
   return true;
 }

@@ -34,6 +34,8 @@
 # include <cmsys/hash_map.hxx>
 #endif
 
+#include <stack>
+
 class cmFunctionBlocker;
 class cmCommand;
 class cmInstallGenerator;
@@ -122,6 +124,15 @@ public:
     bool ReportError;
   };
   friend class LexicalPushPop;
+
+  class LoopBlockPop
+  {
+  public:
+    LoopBlockPop(cmMakefile* mf) { this->Makefile = mf; }
+    ~LoopBlockPop() { this->Makefile->PopLoopBlock(); }
+  private:
+    cmMakefile* Makefile;
+  };
 
   /**
    * Try running cmake and building a file. This is used for dynalically
@@ -900,6 +911,10 @@ public:
   void PopScope();
   void RaiseScope(const std::string& var, const char *value);
 
+  // push and pop loop scopes
+  void PushLoopBlockBarrier();
+  void PopLoopBlockBarrier();
+
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop
   {
@@ -959,6 +974,10 @@ public:
 
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
+
+  void PushLoopBlock();
+  void PopLoopBlock();
+  bool IsLoopBlock() const;
 
 protected:
   // add link libraries and directories to the target
@@ -1053,6 +1072,8 @@ private:
   std::vector<FunctionBlockersType::size_type> FunctionBlockerBarriers;
   void PushFunctionBlockerBarrier();
   void PopFunctionBlockerBarrier(bool reportError = true);
+
+  std::stack<int> LoopBlockCounter;
 
   typedef std::map<std::string, std::string> StringStringMap;
   StringStringMap MacrosMap;
