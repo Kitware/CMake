@@ -111,12 +111,20 @@ cmGlobalVisualStudio12Generator::MatchesGeneratorName(
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
-  this->DefaultPlatformToolset = this->SelectWindowsPhoneToolset();
-  if(this->DefaultPlatformToolset.empty())
+  if(!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset))
     {
     cmOStringStream e;
-    e << this->GetName() << " supports Windows Phone '8.0' and '8.1', "
-      "but not '" << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    if(this->DefaultPlatformToolset.empty())
+      {
+      e << this->GetName() << " supports Windows Phone '8.0' and '8.1', but "
+        "not '" << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+      }
+    else
+      {
+      e << "A Windows Phone component with CMake requires both the Windows "
+        << "Desktop SDK as well as the Windows Phone '" << this->SystemVersion
+        << "' SDK. Please make sure that you have both installed";
+      }
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
@@ -126,12 +134,20 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
 {
-  this->DefaultPlatformToolset = this->SelectWindowsStoreToolset();
-  if(this->DefaultPlatformToolset.empty())
+  if(!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset))
     {
     cmOStringStream e;
-    e << this->GetName() << " supports Windows Store '8.0' and '8.1', "
-      "but not '" << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+    if(this->DefaultPlatformToolset.empty())
+      {
+      e << this->GetName() << " supports Windows Store '8.0' and '8.1', but "
+        "not '" << this->SystemVersion << "'.  Check CMAKE_SYSTEM_VERSION.";
+      }
+    else
+      {
+      e << "A Windows Store component with CMake requires both the Windows "
+        << "Desktop SDK as well as the Windows Store '" << this->SystemVersion
+        << "' SDK. Please make sure that you have both installed";
+      }
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
@@ -139,23 +155,47 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset() const
+bool
+cmGlobalVisualStudio12Generator::SelectWindowsPhoneToolset(
+  std::string& toolset) const
 {
   if(this->SystemVersion == "8.1")
     {
-    return "v120_wp81";
+    if (this->IsWindowsPhoneToolsetInstalled() &&
+        this->IsWindowsDesktopToolsetInstalled())
+      {
+      toolset = "v120_wp81";
+      return true;
+      }
+    else
+      {
+      return false;
+      }
     }
-  return this->cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset();
+  return
+    this->cmGlobalVisualStudio11Generator::SelectWindowsPhoneToolset(toolset);
 }
 
 //----------------------------------------------------------------------------
-std::string cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset() const
+bool
+cmGlobalVisualStudio12Generator::SelectWindowsStoreToolset(
+  std::string& toolset) const
 {
   if(this->SystemVersion == "8.1")
     {
-    return "v120";
+    if(this->IsWindowsStoreToolsetInstalled() &&
+       this->IsWindowsDesktopToolsetInstalled())
+      {
+      toolset = "v120";
+      return true;
+      }
+    else
+      {
+      return false;
+      }
     }
-  return this->cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset();
+  return
+    this->cmGlobalVisualStudio11Generator::SelectWindowsStoreToolset(toolset);
 }
 
 //----------------------------------------------------------------------------
@@ -179,4 +219,47 @@ cmLocalGenerator *cmGlobalVisualStudio12Generator::CreateLocalGenerator()
     new cmLocalVisualStudio10Generator(cmLocalVisualStudioGenerator::VS12);
   lg->SetGlobalGenerator(this);
   return lg;
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio12Generator::IsWindowsDesktopToolsetInstalled() const
+{
+  const char desktop81Key[] =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+    "VisualStudio\\12.0\\VC\\LibraryDesktop";
+
+  std::vector<std::string> subkeys;
+  return cmSystemTools::GetRegistrySubKeys(desktop81Key,
+                                           subkeys,
+                                           cmSystemTools::KeyWOW64_32);
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio12Generator::IsWindowsPhoneToolsetInstalled() const
+{
+  const char wp81Key[] =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+    "Microsoft SDKs\\WindowsPhone\\v8.1\\Install Path;Install Path";
+
+  std::string path;
+  cmSystemTools::ReadRegistryValue(wp81Key,
+                                   path,
+                                   cmSystemTools::KeyWOW64_32);
+  return !path.empty();
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio12Generator::IsWindowsStoreToolsetInstalled() const
+{
+  const char win81Key[] =
+    "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\"
+    "VisualStudio\\12.0\\VC\\Libraries\\Core\\Arm";
+
+  std::vector<std::string> subkeys;
+  return cmSystemTools::GetRegistrySubKeys(win81Key,
+                                           subkeys,
+                                           cmSystemTools::KeyWOW64_32);
 }
