@@ -18,8 +18,8 @@ if(__WINDOWS_CLANG)
 endif()
 set(__WINDOWS_CLANG 1)
 
-if(CMAKE_C_SIMULATE_ID STREQUAL "MSVC"
-    OR CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
+if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
+    OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
   include(Platform/Windows-MSVC)
   macro(__windows_compiler_clang lang)
     __windows_compiler_msvc(${lang})
