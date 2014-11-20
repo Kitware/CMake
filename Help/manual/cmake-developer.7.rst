@@ -147,7 +147,7 @@ A loop must be used instead:
     theSet.insert(*it);
     }
 
-.. MSVC6, SunCC 5.9
+.. SunCC 5.9
 
 Template Parameter Defaults
 ---------------------------
@@ -176,12 +176,6 @@ this does not work with other ancient compilers:
     }
 
 and invoke it with the value ``0`` explicitly in all cases.
-
-std::min and std::max
----------------------
-
-``min`` and ``max`` are defined as macros on some systems. ``std::min`` and
-``std::max`` may not be used.  Use ``cmMinimum`` and ``cmMaximum`` instead.
 
 size_t
 ------
