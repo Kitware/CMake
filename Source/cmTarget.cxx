@@ -4798,11 +4798,7 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
 {
   char *pEnd;
 
-#if defined(_MSC_VER)
-  static const char* const null_ptr = 0;
-#else
-# define null_ptr 0
-#endif
+  const char* const null_ptr = 0;
 
   long lnum = strtol(lhs, &pEnd, 0);
   if (pEnd == lhs || *pEnd != '\0' || errno == ERANGE)
@@ -4815,10 +4811,6 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
     {
     return std::pair<bool, const char*>(false, null_ptr);
     }
-
-#if !defined(_MSC_VER)
-#undef null_ptr
-#endif
 
   if (t == NumberMaxType)
     {
@@ -4849,11 +4841,7 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
     return std::make_pair(true, lhs);
     }
 
-#if defined(_MSC_VER)
-  static const char* const null_ptr = 0;
-#else
-# define null_ptr 0
-#endif
+  const char* const null_ptr = 0;
 
   switch(t)
   {
@@ -4868,11 +4856,6 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
   }
   assert(!"Unreachable!");
   return std::pair<bool, const char*>(false, null_ptr);
-
-#if !defined(_MSC_VER)
-#undef null_ptr
-#endif
-
 }
 
 template<typename PropertyType>
