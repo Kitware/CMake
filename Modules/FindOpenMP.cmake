@@ -111,11 +111,11 @@ int main() {
 # same in Fortran
 set(OpenMP_Fortran_TEST_SOURCE
   "
-program test
-use omp_lib
-integer :: n
-n = omp_get_num_threads()
-end program test
+      program test
+      use omp_lib
+      integer :: n
+      n = omp_get_num_threads()
+      end program test
   "
   )
 
