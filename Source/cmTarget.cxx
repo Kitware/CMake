@@ -4781,16 +4781,6 @@ std::pair<bool, const char*> consistentStringProperty(const char *lhs,
   return std::make_pair(b, b ? lhs : 0);
 }
 
-#if defined(_MSC_VER) && _MSC_VER <= 1200
-template<typename T> const T&
-cmMaximum(const T& l, const T& r) {return l > r ? l : r;}
-template<typename T> const T&
-cmMinimum(const T& l, const T& r) {return l < r ? l : r;}
-#else
-#define cmMinimum std::min
-#define cmMaximum std::max
-#endif
-
 //----------------------------------------------------------------------------
 std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
                                                       const char *rhs,
@@ -4822,11 +4812,11 @@ std::pair<bool, const char*> consistentNumberProperty(const char *lhs,
 
   if (t == NumberMaxType)
     {
-    return std::make_pair(true, cmMaximum(lnum, rnum) == lnum ? lhs : rhs);
+    return std::make_pair(true, std::max(lnum, rnum) == lnum ? lhs : rhs);
     }
   else
     {
-    return std::make_pair(true, cmMinimum(lnum, rnum) == lnum ? lhs : rhs);
+    return std::make_pair(true, std::min(lnum, rnum) == lnum ? lhs : rhs);
     }
 }
 
