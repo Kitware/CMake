@@ -73,28 +73,6 @@ The return value of ``find()`` must be assigned to an intermediate
     // ...
     }
 
-Char Array to ``string`` Conversions with Algorithms
-----------------------------------------------------
-
-In some implementations, algorithms operating on iterators to a container of
-``std::string`` can not accept a ``const char*`` value:
-
-.. code-block:: c++
-
-  const char* dir = /*...*/;
-  std::vector<std::string> vec;
-  // ...
-  std::binary_search(vec.begin(), vec.end(), dir); // Wrong
-
-The ``std::string`` may need to be explicitly constructed:
-
-.. code-block:: c++
-
-  const char* dir = /*...*/;
-  std::vector<std::string> vec;
-  // ...
-  std::binary_search(vec.begin(), vec.end(), std::string(dir)); // Ok
-
 std::auto_ptr
 -------------
 
