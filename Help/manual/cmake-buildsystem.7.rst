@@ -270,7 +270,7 @@ be specified in the order ``lib3`` ``lib1`` ``lib2``:
 
   target_link_libraries(myExe lib1 lib2 lib3)
   target_include_directories(myExe
-    PRIVATE $<TARGET_PROPERTY:INTERFACE_INCLUDE_DIRECTORIES:lib3>)
+    PRIVATE $<TARGET_PROPERTY:lib3,INTERFACE_INCLUDE_DIRECTORIES>)
 
 .. _`Compatible Interface Properties`:
 
