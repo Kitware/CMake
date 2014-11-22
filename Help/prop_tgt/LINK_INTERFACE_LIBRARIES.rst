@@ -8,7 +8,8 @@ targets with which the library itself was linked.  For an executable
 with exports (see the :prop_tgt:`ENABLE_EXPORTS` target property) no
 default transitive link dependencies are used.  This property replaces the default
 transitive link dependencies with an explicit list.  When the target
-is linked into another target the libraries listed (and recursively
+is linked into another target using the :command:`target_link_libraries`
+command, the libraries listed (and recursively
 their link interface libraries) will be provided to the other target
 also.  If the list is empty then no transitive link dependencies will
 be incorporated when this target is linked into another target even if
