@@ -47,11 +47,8 @@ bool cmInstallFilesCommand
   else
     {
     this->IsFilesForm = false;
-    std::vector<std::string>::const_iterator s = args.begin();
-    for (++s;s != args.end(); ++s)
-      {
-      this->FinalArgs.push_back(*s);
-      }
+    this->FinalArgs.insert(this->FinalArgs.end(),
+                           args.begin() + 1, args.end());
     }
 
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()

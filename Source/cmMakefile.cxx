@@ -2567,12 +2567,7 @@ std::vector<std::string> cmMakefile
     }
 
   std::vector<std::string> res;
-
-  std::set<std::string>::iterator fit;
-  for ( fit = definitions.begin(); fit != definitions.end(); fit ++ )
-    {
-    res.push_back(*fit);
-    }
+  res.insert(res.end(), definitions.begin(), definitions.end());
   return res;
 }
 

@@ -526,11 +526,8 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
 
     TestList sortedCopy;
 
-    for(TestSet::const_iterator j = currentSet.begin();
-      j != currentSet.end(); ++j)
-      {
-      sortedCopy.push_back(*j);
-      }
+    sortedCopy.insert(sortedCopy.end(),
+                      currentSet.begin(), currentSet.end());
 
     std::stable_sort(sortedCopy.begin(), sortedCopy.end(), comp);
 

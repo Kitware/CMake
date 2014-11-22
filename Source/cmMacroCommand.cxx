@@ -328,11 +328,7 @@ bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
 
   // create a function blocker
   cmMacroFunctionBlocker *f = new cmMacroFunctionBlocker();
-  for(std::vector<std::string>::const_iterator j = args.begin();
-      j != args.end(); ++j)
-    {
-    f->Args.push_back(*j);
-    }
+  f->Args.insert(f->Args.end(), args.begin(), args.end());
   this->Makefile->AddFunctionBlocker(f);
   return true;
 }

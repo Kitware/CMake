@@ -489,11 +489,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       unique.insert(*li);
       }
     result.clear();
-    for(std::set<std::string>::iterator li = unique.begin();
-        li != unique.end(); ++li)
-      {
-      result.push_back(*li);
-      }
+    result.insert(result.end(), unique.begin(), unique.end());
 
     IncludeCacheType::value_type entry(config_upper, result);
     iter = this->SystemIncludesCache.insert(entry).first;

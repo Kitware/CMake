@@ -2188,24 +2188,12 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
 
     std::vector<std::string> command;
     command.push_back(this->MocExecutable);
-    for (std::list<std::string>::const_iterator it = this->MocIncludes.begin();
-         it != this->MocIncludes.end();
-         ++it)
-      {
-      command.push_back(*it);
-      }
-    for(std::list<std::string>::const_iterator it=this->MocDefinitions.begin();
-        it != this->MocDefinitions.end();
-        ++it)
-      {
-      command.push_back(*it);
-      }
-    for(std::vector<std::string>::const_iterator it=this->MocOptions.begin();
-        it != this->MocOptions.end();
-        ++it)
-      {
-      command.push_back(*it);
-      }
+    command.insert(command.end(),
+                   this->MocIncludes.begin(), this->MocIncludes.end());
+    command.insert(command.end(),
+                   this->MocDefinitions.begin(), this->MocDefinitions.end());
+    command.insert(command.end(),
+                   this->MocOptions.begin(), this->MocOptions.end());
 #ifdef _WIN32
     command.push_back("-DWIN32");
 #endif
@@ -2277,12 +2265,7 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
       cmSystemTools::ExpandListArgument(optionIt->second, fileOpts);
       this->MergeUicOptions(opts, fileOpts, this->QtMajorVersion == "5");
       }
-    for(std::vector<std::string>::const_iterator optIt = opts.begin();
-        optIt != opts.end();
-        ++optIt)
-      {
-      command.push_back(*optIt);
-      }
+    command.insert(command.end(), opts.begin(), opts.end());
 
     command.push_back("-o");
     command.push_back(this->Builddir + ui_output_file);
