@@ -17,7 +17,7 @@ installation prefix.  For example:
 
 .. code-block:: cmake
 
-  set_property(TARGET mylib APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+  target_include_directories(mylib INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/mylib>
     $<INSTALL_INTERFACE:include/mylib>  # <prefix>/include/mylib
-    )
+  )
