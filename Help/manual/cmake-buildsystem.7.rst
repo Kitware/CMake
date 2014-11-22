@@ -272,6 +272,10 @@ be specified in the order ``lib3`` ``lib1`` ``lib2``:
   target_include_directories(myExe
     PRIVATE $<TARGET_PROPERTY:lib3,INTERFACE_INCLUDE_DIRECTORIES>)
 
+Note that care must be taken when specifying usage requirements for targets
+which will be exported for installation using the :command:`install(EXPORT)`
+command.  See :ref:`Creating Packages` for more.
+
 .. _`Compatible Interface Properties`:
 
 Compatible Interface Properties

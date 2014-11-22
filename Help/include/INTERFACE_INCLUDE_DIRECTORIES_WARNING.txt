@@ -1,0 +1,30 @@
+
+Note that it is not advisable to populate the ``INSTALL_INTERFACE`` of the
+|INTERFACE_PROPERTY_LINK| of a target with paths for dependencies.
+That would hard-code into installed packages the include directory paths
+for dependencies **as found on the machine the package was made on**.
+
+The ``INSTALL_INTERFACE`` of the |INTERFACE_PROPERTY_LINK| is only
+suitable for specifying the required include directories of the target itself,
+not its dependencies.
+
+That is, code like this is incorrect for targets which will be used to
+generate :manual:`cmake-packages(7)`:
+
+.. code-block:: cmake
+
+  target_include_directories(mylib INTERFACE
+    $<INSTALL_INTERFACE:${Boost_INCLUDE_DIRS};${OtherDep_INCLUDE_DIRS}>
+  )
+
+Dependencies must provide their own :ref:`IMPORTED targets <Imported Targets>`
+which have their own |INTERFACE_PROPERTY_LINK| populated
+appropriately.  Those :ref:`IMPORTED targets <Imported Targets>` may then be
+used with the :command:`target_link_libraries` command for ``mylib``.
+
+That way, when a consumer uses the installed package, the
+consumer will run the appropriate :command:`find_package` command to find
+the dependencies on their own machine and populate the
+:ref:`IMPORTED targets <Imported Targets>` with appropriate paths.  See
+:ref:`Creating Packages` for more.  Note that many modules currently shipped
+with CMake do not currently provide :ref:`IMPORTED targets <Imported Targets>`.

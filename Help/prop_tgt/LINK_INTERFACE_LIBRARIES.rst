@@ -23,3 +23,6 @@ property if policy :policy:`CMP0022` is ``NEW``.
 
 This property is deprecated.  Use :prop_tgt:`INTERFACE_LINK_LIBRARIES`
 instead.
+
+.. |INTERFACE_PROPERTY_LINK| replace:: ``LINK_INTERFACE_LIBRARIES``
+.. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.txt
