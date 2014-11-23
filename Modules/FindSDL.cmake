@@ -85,9 +85,10 @@
 find_path(SDL_INCLUDE_DIR SDL.h
   HINTS
     ENV SDLDIR
-  PATH_SUFFIXES SDL SDL12 SDL11
+    ENV SDL2DIR
+  PATH_SUFFIXES SDL SDL12 SDL11 SDL2
                 # path suffixes to search inside ENV{SDLDIR}
-                include/SDL include/SDL12 include/SDL11 include
+                include/SDL include/SDL12 include/SDL11 include/SDL2 include
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -99,9 +100,10 @@ endif()
 # SDL-1.1 is the name used by FreeBSD ports...
 # don't confuse it for the version number.
 find_library(SDL_LIBRARY_TEMP
-  NAMES SDL SDL-1.1
+  NAMES SDL SDL-1.1 SDL2
   HINTS
     ENV SDLDIR
+    ENV SDL2DIR
   PATH_SUFFIXES lib ${VC_LIB_PATH_SUFFIX}
 )
 
