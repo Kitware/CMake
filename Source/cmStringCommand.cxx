@@ -780,7 +780,7 @@ bool cmStringCommand
   const std::string& variableName = args[2];
 
   this->Makefile->AddDefinition(variableName,
-                      cmSystemTools::MakeCidentifier(input.c_str()).c_str());
+                      cmSystemTools::MakeCidentifier(input).c_str());
   return true;
 }
 

@@ -78,7 +78,7 @@ public:
           * information in the local vector
           */
           FileLinesType& CoverageVector =
-              this->Coverage.TotalCoverage[filename.c_str()];
+              this->Coverage.TotalCoverage[filename];
           CoverageVector = localCoverageVector;
           localCoverageVector.clear();
           foundFile=false;
@@ -98,7 +98,7 @@ public:
         *  FoundFile and foundSource ensure that
         *  only the value of the line coverage is captured
         */
-        std::string result = getValue(line,1).c_str();
+        std::string result = getValue(line,1);
         result = result.substr(2,result.npos);
         if(result == "\"\"")
           {
@@ -120,7 +120,7 @@ public:
 
     // On exit, capture end of last file covered.
     FileLinesType& CoverageVector =
-        this->Coverage.TotalCoverage[filename.c_str()];
+        this->Coverage.TotalCoverage[filename];
     CoverageVector = localCoverageVector;
     foundFile=false;
     localCoverageVector.clear();

@@ -43,7 +43,7 @@ bool cmSetCommand
       if (!currValue || strcmp(currValue,args[1].c_str()))
         {
         putEnvArg += args[1];
-        cmSystemTools::PutEnv(putEnvArg.c_str());
+        cmSystemTools::PutEnv(putEnvArg);
         }
       return true;
       }
@@ -51,7 +51,7 @@ bool cmSetCommand
     // if it will be cleared, then clear it if it isn;t already clear
     if (currValue)
       {
-      cmSystemTools::PutEnv(putEnvArg.c_str());
+      cmSystemTools::PutEnv(putEnvArg);
       }
     return true;
     }

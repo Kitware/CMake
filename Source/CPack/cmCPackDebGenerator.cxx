@@ -390,7 +390,7 @@ int cmCPackDebGenerator::createDeb()
               packageFiles.begin();
               fileIt != packageFiles.end(); ++ fileIt )
         {
-        totalSize += cmSystemTools::FileLength(fileIt->c_str());
+        totalSize += cmSystemTools::FileLength(*fileIt);
         }
     }
     out << "Installed-Size: " << (totalSize + 1023) / 1024 << "\n";

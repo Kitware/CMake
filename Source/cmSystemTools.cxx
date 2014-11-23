@@ -1409,7 +1409,7 @@ void cmSystemTools::AppendEnv(std::vector<std::string> const& env)
   for(std::vector<std::string>::const_iterator eit = env.begin();
       eit != env.end(); ++eit)
     {
-    cmSystemTools::PutEnv(eit->c_str());
+    cmSystemTools::PutEnv(*eit);
     }
 }
 
@@ -2333,7 +2333,7 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
     {
     return false;
     }
-  if(!cmSystemTools::ReadSymlink(fullPath.c_str(), soname))
+  if(!cmSystemTools::ReadSymlink(fullPath, soname))
     {
     return false;
     }

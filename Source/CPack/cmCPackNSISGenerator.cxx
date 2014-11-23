@@ -825,7 +825,7 @@ CreateComponentDescription(cmCPackComponent *component,
           }
         out << std::endl;
 
-        totalSize += cmSystemTools::FileLength((dirName + *fileIt).c_str());
+        totalSize += cmSystemTools::FileLength(dirName + *fileIt);
         }
     }
 

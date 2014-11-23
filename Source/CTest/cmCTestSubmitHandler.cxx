@@ -234,7 +234,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
         ::curl_global_cleanup();
         return false;
         }
-      unsigned long filelen = cmSystemTools::FileLength(local_file.c_str());
+      unsigned long filelen = cmSystemTools::FileLength(local_file);
 
       ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
       *this->LogFile << "\tUpload file: " << local_file << " to "
@@ -475,7 +475,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         ::curl_global_cleanup();
         return false;
         }
-      unsigned long filelen = cmSystemTools::FileLength(local_file.c_str());
+      unsigned long filelen = cmSystemTools::FileLength(local_file);
 
       ftpfile = cmsys::SystemTools::Fopen(local_file, "rb");
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "   Upload file: "

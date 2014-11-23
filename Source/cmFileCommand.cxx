@@ -1640,7 +1640,7 @@ bool cmFileCopier::InstallSymlink(const char* fromFile, const char* toFile)
     cmSystemTools::RemoveFile(toFile);
 
     // Create the symlink.
-    if(!cmSystemTools::CreateSymlink(symlinkTarget.c_str(), toFile))
+    if(!cmSystemTools::CreateSymlink(symlinkTarget, toFile))
       {
       cmOStringStream e;
       e << this->Name <<  " cannot duplicate symlink \"" << fromFile
@@ -3282,7 +3282,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  unsigned long file_size = cmsys::SystemTools::FileLength(filename.c_str());
+  unsigned long file_size = cmsys::SystemTools::FileLength(filename);
 
 #if defined(WIN32) && defined(CMAKE_ENCODING_UTF8)
   url = fix_file_url_windows(url);

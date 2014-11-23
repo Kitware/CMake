@@ -30,7 +30,7 @@ unsigned long cmCPackComponent::GetInstalledSize(
     std::string path = installDir;
     path += '/';
     path += *fileIt;
-    this->TotalSize += cmSystemTools::FileLength(path.c_str());
+    this->TotalSize += cmSystemTools::FileLength(path);
     }
 
   return this->TotalSize;

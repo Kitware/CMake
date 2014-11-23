@@ -1939,7 +1939,7 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
         cmCTest::CleanString(measurementfile.match(5));
       if ( cmSystemTools::FileExists(filename.c_str()) )
         {
-        long len = cmSystemTools::FileLength(filename.c_str());
+        long len = cmSystemTools::FileLength(filename);
         if ( len == 0 )
           {
           std::string k1 = measurementfile.match(1);

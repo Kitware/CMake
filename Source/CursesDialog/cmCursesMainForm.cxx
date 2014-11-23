@@ -47,7 +47,7 @@ cmCursesMainForm::cmCursesMainForm(std::vector<std::string> const& args,
     cmSystemTools::GetCMakeCursesCommand());
 
   // create the arguments for the cmake object
-  std::string whereCMake = cmSystemTools::GetProgramPath(this->Args[0].c_str());
+  std::string whereCMake = cmSystemTools::GetProgramPath(this->Args[0]);
   whereCMake += "/cmake";
   this->Args[0] = whereCMake;
   this->CMakeInstance->SetArgs(this->Args);

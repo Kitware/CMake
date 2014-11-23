@@ -79,7 +79,7 @@ bool cmGetFilenameComponentCommand
           }
         }
       }
-    cmSystemTools::SplitProgramFromArgs(filename.c_str(),
+    cmSystemTools::SplitProgramFromArgs(filename,
                                         result, programArgs);
     }
   else if (args[2] == "EXT")
