@@ -72,7 +72,7 @@
 #    write_compiler_detection_header(
 #      FILE climbingstats_compiler_detection.h
 #      PREFIX ClimbingStats
-#      COMPILERS GNU Clang MSVC
+#      COMPILERS GNU Clang
 #      FEATURES cxx_variadic_templates
 #    )
 #
