@@ -98,7 +98,7 @@ cmCTestUpdateHandlerLocale::~cmCTestUpdateHandlerLocale()
     {
     std::string put = "LC_MESSAGES=";
     put += saveLCMessages;
-    cmSystemTools::PutEnv(put.c_str());
+    cmSystemTools::PutEnv(put);
     }
   else
     {

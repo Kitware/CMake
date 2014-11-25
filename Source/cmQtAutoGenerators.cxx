@@ -178,7 +178,7 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
   command.push_back("--list");
 
   std::string absFile = cmsys::SystemTools::GetRealPath(
-                                              sf->GetFullPath().c_str());
+                                              sf->GetFullPath());
 
   command.push_back(absFile);
 
@@ -394,7 +394,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
       {
       cmSourceFile* sf = *fileIt;
       std::string absFile = cmsys::SystemTools::GetRealPath(
-                                                sf->GetFullPath().c_str());
+                                                sf->GetFullPath());
 
       std::string ext = sf->GetExtension();
 
@@ -2322,8 +2322,8 @@ bool cmQtAutoGenerators::InputFilesNewerThanQrc(const std::string& qrcFile,
        it != files.end(); ++it)
     {
     int inputNewerThanQrc = 0;
-    bool success = cmsys::SystemTools::FileTimeCompare(it->c_str(),
-                                                      rccOutput.c_str(),
+    bool success = cmsys::SystemTools::FileTimeCompare(*it,
+                                                      rccOutput,
                                                       &inputNewerThanQrc);
     if (!success || inputNewerThanQrc >= 0)
       {
@@ -2356,7 +2356,7 @@ bool cmQtAutoGenerators::GenerateQrc()
 
     int sourceNewerThanQrc = 0;
     bool generateQrc = !cmsys::SystemTools::FileTimeCompare(*si,
-                                                      rcc_output_file.c_str(),
+                                                      rcc_output_file,
                                                       &sourceNewerThanQrc);
     generateQrc = generateQrc || (sourceNewerThanQrc >= 0);
     generateQrc = generateQrc || this->InputFilesNewerThanQrc(*si,

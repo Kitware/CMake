@@ -215,7 +215,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         else if(a.find("=") != a.npos)
           {
           // Set environment variable.
-          cmSystemTools::PutEnv(a.c_str());
+          cmSystemTools::PutEnv(a);
           }
         else
           {
@@ -549,7 +549,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           "' because existing path cannot be removed: " << emsg << "\n";
         return 1;
         }
-      if(!cmSystemTools::CreateSymlink(args[2].c_str(), args[3].c_str()))
+      if(!cmSystemTools::CreateSymlink(args[2], args[3]))
         {
         std::string emsg = cmSystemTools::GetLastSystemError();
         std::cerr <<
@@ -893,7 +893,7 @@ bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
   return cmSystemTools::CopyFileAlways(file.c_str(), link.c_str());
 #else
   std::string linktext = cmSystemTools::GetFilenameName(file);
-  return cmSystemTools::CreateSymlink(linktext.c_str(), link.c_str());
+  return cmSystemTools::CreateSymlink(linktext, link);
 #endif
 }
 

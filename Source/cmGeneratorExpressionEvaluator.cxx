@@ -329,7 +329,7 @@ static const struct MakeCIdentifierNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    return cmSystemTools::MakeCidentifier(parameters.front().c_str());
+    return cmSystemTools::MakeCidentifier(parameters.front());
   }
 } makeCIdentifierNode;
 

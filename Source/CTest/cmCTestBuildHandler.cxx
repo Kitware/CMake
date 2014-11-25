@@ -828,7 +828,7 @@ cmCTestBuildHandler::LaunchHelper::LaunchHelper(cmCTestBuildHandler* handler):
       this->WriteLauncherConfig();
       std::string launchEnv = "CTEST_LAUNCH_LOGS=";
       launchEnv += launchDir;
-      cmSystemTools::PutEnv(launchEnv.c_str());
+      cmSystemTools::PutEnv(launchEnv);
       }
     }
 

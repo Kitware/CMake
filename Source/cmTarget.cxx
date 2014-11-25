@@ -4713,7 +4713,7 @@ const char* cmTarget::GetExportMacro() const
       {
       std::string in = this->GetName();
       in += "_EXPORTS";
-      this->ExportMacro = cmSystemTools::MakeCindentifier(in.c_str());
+      this->ExportMacro = cmSystemTools::MakeCindentifier(in);
       }
     return this->ExportMacro.c_str();
     }

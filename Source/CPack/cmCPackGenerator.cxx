@@ -217,7 +217,7 @@ int cmCPackGenerator::InstallProject()
     {
     std::string destDir = "DESTDIR=";
     destDir += tempInstallDirectory;
-    cmSystemTools::PutEnv(destDir.c_str());
+    cmSystemTools::PutEnv(destDir);
     }
   else
     {
@@ -277,7 +277,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
     {
     std::string tempInstallDirectoryEnv = "CMAKE_INSTALL_PREFIX=";
     tempInstallDirectoryEnv += tempInstallDirectory;
-    cmSystemTools::PutEnv(tempInstallDirectoryEnv.c_str());
+    cmSystemTools::PutEnv(tempInstallDirectoryEnv);
     std::vector<std::string> installCommandsVector;
     cmSystemTools::ExpandListArgument(installCommands,installCommandsVector);
     std::vector<std::string>::iterator it;
@@ -404,7 +404,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           std::string targetFile;
           std::string inFileRelative =
              cmSystemTools::RelativePath(top.c_str(),inFile.c_str());
-          cmSystemTools::ReadSymlink(inFile.c_str(),targetFile);
+          cmSystemTools::ReadSymlink(inFile,targetFile);
           symlinkedFiles.push_back(std::pair<std::string,
                                    std::string>(targetFile,inFileRelative));
           }
@@ -437,8 +437,8 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
                          << symlinkedIt->second << "--> "
                          << symlinkedIt->first << std::endl);
-          if (!cmSystemTools::CreateSymlink((symlinkedIt->first).c_str(),
-                                            (symlinkedIt->second).c_str()))
+          if (!cmSystemTools::CreateSymlink(symlinkedIt->first,
+                                            symlinkedIt->second))
             {
             cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create symlink: "
                             << symlinkedIt->second << "--> "
@@ -787,7 +787,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
            *       in order to put things in subdirs...
            */
           cmSystemTools::PutEnv(
-              (std::string("DESTDIR=")+tempInstallDirectory).c_str()
+              std::string("DESTDIR=")+tempInstallDirectory
                                );
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Creating directory: '" << dir << "'" << std::endl);

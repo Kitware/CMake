@@ -1135,13 +1135,13 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
       {
       env += this->CCEnvironment;
       }
-    cmSystemTools::PutEnv(env.c_str());
+    cmSystemTools::PutEnv(env);
     env = "CXX=";
     if(this->CXXEnvironment.size())
       {
       env += this->CXXEnvironment;
       }
-    cmSystemTools::PutEnv(env.c_str());
+    cmSystemTools::PutEnv(env);
     }
 
   // set the new

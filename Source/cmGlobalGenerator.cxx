@@ -300,11 +300,11 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     {
     std::string dir;
     std::string file;
-    cmSystemTools::SplitProgramPath(makeProgram.c_str(),
+    cmSystemTools::SplitProgramPath(makeProgram,
                                     dir, file);
     std::string saveFile = file;
     cmSystemTools::GetShortPath(makeProgram, makeProgram);
-    cmSystemTools::SplitProgramPath(makeProgram.c_str(),
+    cmSystemTools::SplitProgramPath(makeProgram,
                                     dir, file);
     makeProgram = dir;
     makeProgram += "/";
@@ -607,7 +607,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         std::string env = envVar;
         env += "=";
         env += envVarValue;
-        cmSystemTools::PutEnv(env.c_str());
+        cmSystemTools::PutEnv(env);
         }
 
       // if determineLanguage was called then load the file it
@@ -2469,7 +2469,7 @@ void cmGlobalGenerator::EnableMinGWLanguage(cmMakefile *mf)
   this->FindMakeProgram(mf);
   std::string makeProgram = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::vector<std::string> locations;
-  locations.push_back(cmSystemTools::GetProgramPath(makeProgram.c_str()));
+  locations.push_back(cmSystemTools::GetProgramPath(makeProgram));
   locations.push_back("/mingw/bin");
   locations.push_back("c:/mingw/bin");
   std::string tgcc = cmSystemTools::FindProgram("gcc", locations);

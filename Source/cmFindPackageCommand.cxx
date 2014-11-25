@@ -1475,7 +1475,7 @@ void cmFindPackageCommand::FillPrefixesBuilds()
     cmSystemTools::ExpandRegistryValues(f);
     cmSystemTools::ConvertToUnixSlashes(f);
     if(cmSystemTools::FileIsFullPath(f.c_str()) &&
-       cmSystemTools::FileIsDirectory(f.c_str()))
+       cmSystemTools::FileIsDirectory(f))
       {
       paths.AddPath(f);
       }
