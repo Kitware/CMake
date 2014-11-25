@@ -33,12 +33,6 @@
 #include "mf_common.h"
 #include "form.h"
 
-/* get around odd bug on aCC and itanium */
-#if defined(__hpux) && defined(__ia64)
-#define getmaxx __getmaxx
-#define getmaxy __getmaxy
-#endif
-
 /* form  status values */
 #define _OVLMODE         (0x04) /* Form is in overlay mode                */
 #define _WINDOW_MODIFIED (0x10) /* Current field window has been modified */
