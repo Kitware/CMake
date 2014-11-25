@@ -12,8 +12,11 @@ if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
   set(CMAKE_C11_EXTENSION_COMPILE_OPTION "-std=gnu11")
 endif()
 
-# This may change in a future GNU version.
-set(CMAKE_C_STANDARD_DEFAULT 90)
+if (NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0)
+  set(CMAKE_C_STANDARD_DEFAULT 11)
+else(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
+  set(CMAKE_C_STANDARD_DEFAULT 90)
+endif()
 
 macro(cmake_record_c_compile_features)
   macro(_get_gcc_features std_version list)
