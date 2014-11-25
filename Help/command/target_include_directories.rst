@@ -54,3 +54,6 @@ installation prefix.  For example:
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/mylib>
     $<INSTALL_INTERFACE:include/mylib>  # <prefix>/include/mylib
   )
+
+.. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
+.. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.txt

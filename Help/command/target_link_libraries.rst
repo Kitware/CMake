@@ -49,6 +49,9 @@ CMake will also propagate :ref:`usage requirements <Target Usage Requirements>`
 from linked library targets.  Usage requirements of dependencies affect
 compilation of sources in the ``<target>``.
 
+.. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+.. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.txt
+
 If an ``<item>`` is a library in a Mac OX framework, the ``Headers``
 directory of the framework will also be processed as a
 :ref:`usage requirement <Target Usage Requirements>`.  This has the same
