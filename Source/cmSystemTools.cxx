@@ -9,9 +9,7 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#if defined(_MSC_VER) && _MSC_VER < 1300
-# define _WIN32_WINNT 0x0400 /* for wincrypt.h */
-#endif
+
 #include "cmSystemTools.h"
 #include <ctype.h>
 #include <errno.h>
