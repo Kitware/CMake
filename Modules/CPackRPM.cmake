@@ -678,6 +678,8 @@ foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLIC
         endif()
     endif()
 
+  # Do not forget to unset previously set header (from previous component)
+  unset(TMP_RPM_${_RPM_SPEC_HEADER})
   # Treat the RPM Spec keyword iff it has been properly defined
   if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
     # Transform NAME --> Name e.g. PROVIDES --> Provides
@@ -698,9 +700,7 @@ foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLIC
       message("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
     endif()
     set(TMP_RPM_${_RPM_SPEC_HEADER} "${_PACKAGE_HEADER_NAME}: ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
-  else()
-    # Do not forget to unset previously set header (from previous component)
-    unset(TMP_RPM_${_RPM_SPEC_HEADER})
+    unset(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
   endif()
 endforeach()
 
