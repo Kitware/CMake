@@ -54,53 +54,6 @@ Some implementations have a ``std::auto_ptr`` which can not be used as a
 return value from a function. ``std::auto_ptr`` may not be used. Use
 ``cmsys::auto_ptr`` instead.
 
-std::vector::insert and std::set
---------------------------------
-
-Use of ``std::vector::insert`` with an iterator whose ``element_type`` requires
-conversion is not allowed:
-
-.. code-block:: c++
-
-  std::set<const char*> theSet;
-  std::vector<std::string> theVector;
-  theVector.insert(theVector.end(), theSet.begin(), theSet.end()); // Wrong
-
-A loop must be used instead:
-
-.. code-block:: c++
-
-  std::set<const char*> theSet;
-  std::vector<std::string> theVector;
-  for(std::set<const char*>::iterator li = theSet.begin();
-      li != theSet.end(); ++li)
-    {
-    theVector.push_back(*li);
-    }
-
-std::set::insert
-----------------
-
-Use of ``std::set::insert`` is not allowed with any source container:
-
-.. code-block:: c++
-
-  std::set<cmTarget*> theSet;
-  theSet.insert(targets.begin(), targets.end()); // Wrong
-
-A loop must be used instead:
-
-.. code-block:: c++
-
-  ConstIterator it = targets.begin();
-  const ConstIterator end = targets.end();
-  for ( ; it != end; ++it)
-    {
-    theSet.insert(*it);
-    }
-
-.. SunCC 5.9
-
 Template Parameter Defaults
 ---------------------------
 
