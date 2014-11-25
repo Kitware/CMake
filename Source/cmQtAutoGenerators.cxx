@@ -1482,7 +1482,7 @@ void cmQtAutoGenerators::Init()
     {
     const std::string &path = *it;
     this->MocIncludes.push_back("-I" + path);
-    if (this->EndsWith(path, ".framework/Headers"))
+    if (cmHasLiteralSuffix(path, ".framework/Headers"))
       {
       // Go up twice to get to the framework root
       std::vector<std::string> pathComponents;
@@ -1503,7 +1503,7 @@ void cmQtAutoGenerators::Init()
 
     if (this->IncludeProjectDirsBefore)
       {
-      const std::string &binDir = "-I" + this->ProjectBinaryDir;
+      const std::string binDir = "-I" + this->ProjectBinaryDir;
 
       const std::string srcDir = "-I" + this->ProjectSourceDir;
 
@@ -1774,7 +1774,7 @@ void cmQtAutoGenerators::ParseCppFile(const std::string& absFilename,
 
       std::string basename = cmsys::SystemTools::
                                    GetFilenameWithoutLastExtension(currentMoc);
-      const bool moc_style = this->StartsWith(basename, "moc_");
+      const bool moc_style = cmHasLiteralPrefix(basename, "moc_");
 
       // If the moc include is of the moc_foo.cpp style we expect
       // the Q_OBJECT class declaration in a header file.
@@ -1956,7 +1956,7 @@ void cmQtAutoGenerators::StrictParseCppFile(const std::string& absFilename,
 
       std::string basename = cmsys::SystemTools::
                                    GetFilenameWithoutLastExtension(currentMoc);
-      const bool mocUnderscoreStyle = this->StartsWith(basename, "moc_");
+      const bool mocUnderscoreStyle = cmHasLiteralPrefix(basename, "moc_");
 
       // If the moc include is of the moc_foo.cpp style we expect
       // the Q_OBJECT class declaration in a header file.
