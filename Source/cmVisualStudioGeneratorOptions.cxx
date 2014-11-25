@@ -28,6 +28,26 @@ std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
 cmVisualStudioGeneratorOptions
 ::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
                                  Tool tool,
+                                 cmVisualStudio10TargetGenerator* g):
+  cmIDEOptions(),
+  LocalGenerator(lg), Version(lg->GetVersion()), CurrentTool(tool),
+  TargetGenerator(g)
+{
+  // Preprocessor definitions are not allowed for linker tools.
+  this->AllowDefine = (tool != Linker);
+
+  // Slash options are allowed for VS.
+  this->AllowSlash = true;
+
+  this->FortranRuntimeDebug = false;
+  this->FortranRuntimeDLL = false;
+  this->FortranRuntimeMT = false;
+}
+
+//----------------------------------------------------------------------------
+cmVisualStudioGeneratorOptions
+::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
+                                 Tool tool,
                                  cmVS7FlagTable const* table,
                                  cmVS7FlagTable const* extraTable,
                                  cmVisualStudio10TargetGenerator* g):
@@ -36,9 +56,8 @@ cmVisualStudioGeneratorOptions
   TargetGenerator(g)
 {
   // Store the given flag tables.
-  cmIDEFlagTable const** ft = this->FlagTable;
-  if(table) { *ft++ = table; }
-  if(extraTable) { *ft++ = extraTable; }
+  this->AddTable(table);
+  this->AddTable(extraTable);
 
   // Preprocessor definitions are not allowed for linker tools.
   this->AllowDefine = (tool != Linker);
@@ -49,6 +68,22 @@ cmVisualStudioGeneratorOptions
   this->FortranRuntimeDebug = false;
   this->FortranRuntimeDLL = false;
   this->FortranRuntimeMT = false;
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
+{
+  if(table)
+    {
+    for(int i=0; i < FlagTableCount; ++i)
+      {
+      if (!this->FlagTable[i])
+        {
+        this->FlagTable[i] = table;
+        break;
+        }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------

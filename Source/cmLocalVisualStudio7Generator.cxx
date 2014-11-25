@@ -592,6 +592,15 @@ cmVS7FlagTable cmLocalVisualStudio7GeneratorLinkFlagTable[] =
   {0,0,0,0,0}
 };
 
+cmVS7FlagTable cmLocalVisualStudio7GeneratorFortranLinkFlagTable[] =
+{
+  {"LinkIncremental", "INCREMENTAL:NO", "link incremental",
+   "linkIncrementalNo", 0},
+  {"LinkIncremental", "INCREMENTAL:YES", "link incremental",
+   "linkIncrementalYes", 0},
+  {0,0,0,0,0}
+};
+
 //----------------------------------------------------------------------------
 // Helper class to write build event <Tool .../> elements.
 class cmLocalVisualStudio7Generator::EventWriter
@@ -1056,8 +1065,13 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     extraLinkOptions += " ";
     extraLinkOptions += targetLinkFlags;
     }
-  Options linkOptions(this, Options::Linker,
-                      cmLocalVisualStudio7GeneratorLinkFlagTable);
+  Options linkOptions(this, Options::Linker);
+  if(this->FortranProject)
+    {
+    linkOptions.AddTable(cmLocalVisualStudio7GeneratorFortranLinkFlagTable);
+    }
+  linkOptions.AddTable(cmLocalVisualStudio7GeneratorLinkFlagTable);
+
   linkOptions.Parse(extraLinkOptions.c_str());
   if(!this->ModuleDefinitionFile.empty())
     {
