@@ -2923,3 +2923,11 @@ std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
     }
   return tokens;
 }
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::StringToInt(const char* str, int* value)
+{
+  char *endp;
+  *value = static_cast<int>(strtol(str, &endp, 10));
+  return (*endp == '\0') && (endp != str);
+}
