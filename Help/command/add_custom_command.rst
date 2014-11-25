@@ -15,6 +15,7 @@ The first signature is for adding a custom command to produce an output::
                      [COMMAND command2 [ARGS] [args2...] ...]
                      [MAIN_DEPENDENCY depend]
                      [DEPENDS [depends...]]
+                     [BYPRODUCTS [files...]]
                      [IMPLICIT_DEPENDS <lang1> depend1
                                       [<lang2> depend2] ...]
                      [WORKING_DIRECTORY dir]
@@ -43,6 +44,27 @@ The options are:
   The ``COMMENT``, ``MAIN_DEPENDENCY``, and ``WORKING_DIRECTORY``
   options are currently ignored when APPEND is given, but may be
   used in the future.
+
+``BYPRODUCTS``
+  Specify the files the command is expected to produce but whose
+  modification time may or may not be newer than the dependencies.
+  If a byproduct name is a relative path it will be interpreted
+  relative to the build tree directory corresponding to the
+  current source directory.
+  Each byproduct file will be marked with the :prop_sf:`GENERATED`
+  source file property automatically.
+
+  Explicit specification of byproducts is supported by the
+  :generator:`Ninja` generator to tell the ``ninja`` build tool
+  how to regenerate byproducts when they are missing.  It is
+  also useful when other build rules (e.g. custom commands)
+  depend on the byproducts.  Ninja requires a build rule for any
+  generated file on which another rule depends even if there are
+  order-only dependencies to ensure the byproducts will be
+  available before their dependents build.
+
+  The ``BYPRODUCTS`` option is ignored on non-Ninja generators
+  except to mark byproducts ``GENERATED``.
 
 ``COMMAND``
   Specify the command-line(s) to execute at build time.
@@ -156,6 +178,7 @@ target is already built, the command will not execute.
                      PRE_BUILD | PRE_LINK | POST_BUILD
                      COMMAND command1 [ARGS] [args1...]
                      [COMMAND command2 [ARGS] [args2...] ...]
+                     [BYPRODUCTS [files...]]
                      [WORKING_DIRECTORY dir]
                      [COMMENT comment]
                      [VERBATIM] [USES_TERMINAL])

@@ -341,9 +341,10 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // overwritten by the CreateVCProjBuildRule.
   // (this could be avoided with per-target source files)
   std::string no_main_dependency = "";
+  std::vector<std::string> no_byproducts;
   if(cmSourceFile* file =
      mf->AddCustomCommandToOutput(
-       stamps, listFiles,
+       stamps, no_byproducts, listFiles,
        no_main_dependency, commandLines, "Checking Build System",
        no_working_directory, true))
     {

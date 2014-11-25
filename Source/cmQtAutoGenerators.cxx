@@ -438,7 +438,8 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
     // rejection in cmMakefile::AddCustomCommandToTarget because we know
     // PRE_BUILD will work for an OBJECT_LIBRARY in this specific case.
     std::vector<std::string> no_output;
-    cmCustomCommand cc(makefile, no_output, depends,
+    std::vector<std::string> no_byproducts;
+    cmCustomCommand cc(makefile, no_output, no_byproducts, depends,
                        commandLines, autogenComment.c_str(),
                        workingDirectory.c_str());
     cc.SetEscapeOldStyle(false);
@@ -451,7 +452,9 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
     cmTarget* autogenTarget = 0;
     if (!rcc_output.empty())
       {
-      makefile->AddCustomCommandToOutput(rcc_output, depends, "",
+      std::vector<std::string> no_byproducts;
+      makefile->AddCustomCommandToOutput(rcc_output, no_byproducts,
+                                         depends, "",
                                          commandLines, 0,
                                          workingDirectory.c_str(),
                                          false, false);

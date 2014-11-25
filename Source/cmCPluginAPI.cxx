@@ -353,10 +353,11 @@ void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
     }
 
   // Pass the call to the makefile instance.
+  std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   const char* no_comment = 0;
   const char* no_working_dir = 0;
-  mf->AddCustomCommandToTarget(target, no_depends, commandLines,
+  mf->AddCustomCommandToTarget(target, no_byproducts, no_depends, commandLines,
                                cctype, no_comment, no_working_dir);
 }
 

@@ -880,13 +880,14 @@ void cmMakefile::ConfigureFinalPass()
 //----------------------------------------------------------------------------
 void
 cmMakefile::AddCustomCommandToTarget(const std::string& target,
+                                   const std::vector<std::string>& byproducts,
                                      const std::vector<std::string>& depends,
                                      const cmCustomCommandLines& commandLines,
                                      cmTarget::CustomCommandType type,
                                      const char* comment,
                                      const char* workingDir,
                                      bool escapeOldStyle,
-                                     bool uses_terminal) const
+                                     bool uses_terminal)
 {
   // Find the target to which to add the custom command.
   cmTargets::iterator ti = this->Targets.find(target);
@@ -936,9 +937,20 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
+
+  // Always create the byproduct sources and mark them generated.
+  for(std::vector<std::string>::const_iterator o = byproducts.begin();
+      o != byproducts.end(); ++o)
+    {
+    if(cmSourceFile* out = this->GetOrCreateSource(*o, true))
+      {
+      out->SetProperty("GENERATED", "1");
+      }
+    }
+
   // Add the command to the appropriate build step for the target.
   std::vector<std::string> no_output;
-  cmCustomCommand cc(this, no_output, depends,
+  cmCustomCommand cc(this, no_output, byproducts, depends,
                      commandLines, comment, workingDir);
   cc.SetEscapeOldStyle(escapeOldStyle);
   cc.SetEscapeAllowMakeVars(true);
@@ -960,6 +972,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
 //----------------------------------------------------------------------------
 cmSourceFile*
 cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
+                                  const std::vector<std::string>& byproducts,
                                      const std::vector<std::string>& depends,
                                      const std::string& main_dependency,
                                      const cmCustomCommandLines& commandLines,
@@ -1058,6 +1071,14 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       out->SetProperty("GENERATED", "1");
       }
     }
+  for(std::vector<std::string>::const_iterator o = byproducts.begin();
+      o != byproducts.end(); ++o)
+    {
+    if(cmSourceFile* out = this->GetOrCreateSource(*o, true))
+      {
+      out->SetProperty("GENERATED", "1");
+      }
+    }
 
   // Attach the custom command to the file.
   if(file)
@@ -1070,8 +1091,8 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
       }
 
     cmCustomCommand* cc =
-      new cmCustomCommand(this, outputs, depends2, commandLines,
-                          comment, workingDir);
+      new cmCustomCommand(this, outputs, byproducts, depends2,
+                          commandLines, comment, workingDir);
     cc->SetEscapeOldStyle(escapeOldStyle);
     cc->SetEscapeAllowMakeVars(true);
     cc->SetUsesTerminal(uses_terminal);
@@ -1128,7 +1149,9 @@ cmMakefile::AddCustomCommandToOutput(const std::string& output,
 {
   std::vector<std::string> outputs;
   outputs.push_back(output);
-  return this->AddCustomCommandToOutput(outputs, depends, main_dependency,
+  std::vector<std::string> no_byproducts;
+  return this->AddCustomCommandToOutput(outputs, no_byproducts,
+                                        depends, main_dependency,
                                         commandLines, comment, workingDir,
                                         replace, escapeOldStyle,
                                         uses_terminal);
@@ -1150,7 +1173,9 @@ cmMakefile::AddCustomCommandOldStyle(const std::string& target,
     // In the old-style signature if the source and target were the
     // same then it added a post-build rule to the target.  Preserve
     // this behavior.
-    this->AddCustomCommandToTarget(target, depends, commandLines,
+    std::vector<std::string> no_byproducts;
+    this->AddCustomCommandToTarget(target, no_byproducts,
+                                   depends, commandLines,
                                    cmTarget::POST_BUILD, comment, 0);
     return;
     }
@@ -1251,6 +1276,23 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
                               bool escapeOldStyle, const char* comment,
                               bool uses_terminal)
 {
+  std::vector<std::string> no_byproducts;
+  return this->AddUtilityCommand(utilityName, excludeFromAll, workingDirectory,
+                                 no_byproducts, depends, commandLines,
+                                 escapeOldStyle, comment, uses_terminal);
+}
+
+//----------------------------------------------------------------------------
+cmTarget*
+cmMakefile::AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              const char* workingDirectory,
+                              const std::vector<std::string>& byproducts,
+                              const std::vector<std::string>& depends,
+                              const cmCustomCommandLines& commandLines,
+                              bool escapeOldStyle, const char* comment,
+                              bool uses_terminal)
+{
   // Create a target instance for this utility.
   cmTarget* target = this->AddNewTarget(cmTarget::UTILITY, utilityName);
   if (excludeFromAll)
@@ -1270,10 +1312,12 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
     force += cmake::GetCMakeFilesDirectory();
     force += "/";
     force += utilityName;
+    std::vector<std::string> forced;
+    forced.push_back(force);
     std::string no_main_dependency = "";
     bool no_replace = false;
-    this->AddCustomCommandToOutput(force, depends,
-                                   no_main_dependency,
+    this->AddCustomCommandToOutput(forced, byproducts,
+                                   depends, no_main_dependency,
                                    commandLines, comment,
                                    workingDirectory, no_replace,
                                    escapeOldStyle, uses_terminal);
@@ -1288,6 +1332,16 @@ cmMakefile::AddUtilityCommand(const std::string& utilityName,
       {
       cmSystemTools::Error("Could not get source file entry for ",
                           force.c_str());
+      }
+
+    // Always create the byproduct sources and mark them generated.
+    for(std::vector<std::string>::const_iterator o = byproducts.begin();
+        o != byproducts.end(); ++o)
+      {
+      if(cmSourceFile* out = this->GetOrCreateSource(*o, true))
+        {
+        out->SetProperty("GENERATED", "1");
+        }
       }
     }
   return target;

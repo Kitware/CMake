@@ -170,14 +170,16 @@ public:
 
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(const std::string& target,
+                                const std::vector<std::string>& byproducts,
                                 const std::vector<std::string>& depends,
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir,
                                 bool escapeOldStyle = true,
-                                bool uses_terminal = false) const;
+                                bool uses_terminal = false);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
+    const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines,
@@ -237,6 +239,15 @@ public:
   cmTarget* AddUtilityCommand(const std::string& utilityName,
                               bool excludeFromAll,
                               const char* workingDirectory,
+                              const std::vector<std::string>& depends,
+                              const cmCustomCommandLines& commandLines,
+                              bool escapeOldStyle = true,
+                              const char* comment = 0,
+                              bool uses_terminal = false);
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              const char* workingDirectory,
+                              const std::vector<std::string>& byproducts,
                               const std::vector<std::string>& depends,
                               const cmCustomCommandLines& commandLines,
                               bool escapeOldStyle = true,

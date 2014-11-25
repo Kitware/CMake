@@ -32,6 +32,7 @@ public:
   /** Main constructor specifies all information for the command.  */
   cmCustomCommand(cmMakefile const* mf,
                   const std::vector<std::string>& outputs,
+                  const std::vector<std::string>& byproducts,
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
@@ -41,6 +42,9 @@ public:
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
+
+  /** Get the extra files produced by the command.  */
+  const std::vector<std::string>& GetByproducts() const;
 
   /** Get the vector that holds the list of dependencies.  */
   const std::vector<std::string>& GetDepends() const;
@@ -86,6 +90,7 @@ public:
 
 private:
   std::vector<std::string> Outputs;
+  std::vector<std::string> Byproducts;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
   bool HaveComment;

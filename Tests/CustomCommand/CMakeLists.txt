@@ -117,6 +117,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1pre.txt to doc2post.txt."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1pre.txt
                                    ${PROJECT_BINARY_DIR}/doc2post.txt
+  BYPRODUCTS ${PROJECT_BINARY_DIR}/doc2post.txt
   COMMENT "Running TDocument post-build commands"
   )
 
