@@ -4522,10 +4522,20 @@ void cmMakefile::PushScope()
   this->Internal->VarUsageStack.push(usage);
 
   this->PushLoopBlockBarrier();
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetLocalGenerator()->GetGlobalGenerator()->
+    GetFileLockPool().PushFunctionScope();
+#endif
 }
 
 void cmMakefile::PopScope()
 {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetLocalGenerator()->GetGlobalGenerator()->
+    GetFileLockPool().PopFunctionScope();
+#endif
+
   this->PopLoopBlockBarrier();
 
   cmDefinitions* current = &this->Internal->VarStack.top();

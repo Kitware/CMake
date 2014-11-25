@@ -79,9 +79,15 @@ public:
     this->GG = lg->GetGlobalGenerator();
     this->LG = this->GG->GetCurrentLocalGenerator();
     this->GG->SetCurrentLocalGenerator(lg);
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PushFileScope();
+#endif
     }
   ~cmLocalGeneratorCurrent()
     {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PopFileScope();
+#endif
     this->GG->SetCurrentLocalGenerator(this->LG);
     }
 };

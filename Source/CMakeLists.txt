@@ -219,6 +219,12 @@ set(SRCS
   cmExtraKateGenerator.h
   cmExtraSublimeTextGenerator.cxx
   cmExtraSublimeTextGenerator.h
+  cmFileLock.cxx
+  cmFileLock.h
+  cmFileLockPool.cxx
+  cmFileLockPool.h
+  cmFileLockResult.cxx
+  cmFileLockResult.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
