@@ -424,12 +424,8 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     const std::set<std::string> parentSystemIncludes =
                                 this->Makefile->GetSystemIncludeDirectories();
 
-    for (std::set<std::string>::const_iterator it
-          = parentSystemIncludes.begin();
-          it != parentSystemIncludes.end(); ++it)
-      {
-      this->SystemIncludeDirectories.insert(*it);
-      }
+    this->SystemIncludeDirectories.insert(parentSystemIncludes.begin(),
+                                          parentSystemIncludes.end());
 
     const std::vector<cmValueWithOrigin> parentOptions =
                                 this->Makefile->GetCompileOptionsEntries();
@@ -1397,22 +1393,14 @@ void cmTarget::AddLinkLibrary(cmMakefile& mf,
 void
 cmTarget::AddSystemIncludeDirectories(const std::set<std::string> &incs)
 {
-  for(std::set<std::string>::const_iterator li = incs.begin();
-      li != incs.end(); ++li)
-    {
-    this->SystemIncludeDirectories.insert(*li);
-    }
+  this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 }
 
 //----------------------------------------------------------------------------
 void
 cmTarget::AddSystemIncludeDirectories(const std::vector<std::string> &incs)
 {
-  for(std::vector<std::string>::const_iterator li = incs.begin();
-      li != incs.end(); ++li)
-    {
-    this->SystemIncludeDirectories.insert(*li);
-    }
+  this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 }
 
 #if defined(_WIN32) && !defined(__CYGWIN__)

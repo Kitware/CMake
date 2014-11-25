@@ -899,12 +899,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   std::set<std::string> skipped;
   std::vector<std::string> skipVec;
   cmSystemTools::ExpandListArgument(this->SkipUic, skipVec);
-
-  for (std::vector<std::string>::const_iterator li = skipVec.begin();
-       li != skipVec.end(); ++li)
-    {
-    skipped.insert(*li);
-    }
+  skipped.insert(skipVec.begin(), skipVec.end());
 
   makefile->AddDefinition("_skip_uic",
           cmLocalGenerator::EscapeForCMake(this->SkipUic).c_str());
@@ -1622,12 +1617,7 @@ bool cmQtAutoGenerators::RunAutogen(cmMakefile* makefile)
 
   std::vector<std::string> headerFilesVec;
   cmSystemTools::ExpandListArgument(this->Headers, headerFilesVec);
-  for (std::vector<std::string>::const_iterator it = headerFilesVec.begin();
-       it != headerFilesVec.end();
-       ++it)
-    {
-    headerFiles.insert(*it);
-    }
+  headerFiles.insert(headerFilesVec.begin(), headerFilesVec.end());
 
   // key = moc source filepath, value = moc output filename
   std::map<std::string, std::string> notIncludedMocs;

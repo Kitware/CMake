@@ -1150,12 +1150,7 @@ void cmCPackWIXGenerator::CollectExtensions(
 
   std::vector<std::string> list;
   cmSystemTools::ExpandListArgument(variableContent, list);
-
-  for(std::vector<std::string>::const_iterator i = list.begin();
-    i != list.end(); ++i)
-    {
-    extensions.insert(*i);
-    }
+  extensions.insert(list.begin(), list.end());
 }
 
 void cmCPackWIXGenerator::AddCustomFlags(

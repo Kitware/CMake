@@ -818,11 +818,7 @@ cmTargetTraceDependencies
                                                               = ge.Parse(*cli);
       cge->Evaluate(this->Makefile, "", true);
       std::set<cmTarget*> geTargets = cge->GetTargets();
-      for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
-          it != geTargets.end(); ++it)
-        {
-        targets.insert(*it);
-        }
+      targets.insert(geTargets.begin(), geTargets.end());
       }
     }
 

@@ -615,12 +615,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     std::vector<std::string> includes;
     target->GetMakefile()->GetLocalGenerator()->
       GetIncludeDirectories(includes, gtgt, "C", buildType);
-    for(std::vector<std::string>::const_iterator dirIt=includes.begin();
-        dirIt != includes.end();
-        ++dirIt)
-      {
-      uniqIncludeDirs.insert(*dirIt);
-      }
+
+    uniqIncludeDirs.insert(includes.begin(), includes.end());
 
     std::string systemIncludeDirs = makefile->GetSafeDefinition(
                               "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
@@ -628,12 +624,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
-          dirIt != dirs.end();
-          ++dirIt)
-        {
-        uniqIncludeDirs.insert(*dirIt);
-        }
+      uniqIncludeDirs.insert(dirs.begin(), dirs.end());
       }
 
     systemIncludeDirs = makefile->GetSafeDefinition(
@@ -642,12 +633,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
-          dirIt != dirs.end();
-          ++dirIt)
-        {
-        uniqIncludeDirs.insert(*dirIt);
-        }
+      uniqIncludeDirs.insert(dirs.begin(), dirs.end());
       }
 
     for(std::set<std::string>::const_iterator dirIt=uniqIncludeDirs.begin();

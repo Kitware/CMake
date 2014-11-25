@@ -162,12 +162,9 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
 //---------------------------------------------------------
 void cmCTestMultiProcessHandler::LockResources(int index)
 {
-  for(std::set<std::string>::iterator i =
-      this->Properties[index]->LockedResources.begin();
-      i != this->Properties[index]->LockedResources.end(); ++i)
-    {
-    this->LockedResources.insert(*i);
-    }
+  this->LockedResources.insert(
+      this->Properties[index]->LockedResources.begin(),
+      this->Properties[index]->LockedResources.end());
 }
 
 //---------------------------------------------------------
@@ -499,11 +496,7 @@ void cmCTestMultiProcessHandler::CreateParallelTestCostList()
       i != previousSet.end(); ++i)
       {
       TestSet const& dependencies = this->Tests[*i];
-      for(TestSet::const_iterator j = dependencies.begin();
-        j != dependencies.end(); ++j)
-        {
-        currentSet.insert(*j);
-        }
+      currentSet.insert(dependencies.begin(), dependencies.end());
       }
 
     for(TestSet::const_iterator i = currentSet.begin();

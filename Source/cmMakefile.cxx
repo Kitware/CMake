@@ -1822,11 +1822,7 @@ void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
 void
 cmMakefile::AddSystemIncludeDirectories(const std::set<std::string> &incs)
 {
-  for(std::set<std::string>::const_iterator li = incs.begin();
-      li != incs.end(); ++li)
-    {
-    this->SystemIncludeDirectories.insert(*li);
-    }
+  this->SystemIncludeDirectories.insert(incs.begin(), incs.end());
 
   for (cmTargets::iterator l = this->Targets.begin();
        l != this->Targets.end(); ++l)
@@ -4556,16 +4552,8 @@ void cmMakefile::PopScope()
   this->Internal->VarInitStack.pop();
   this->Internal->VarUsageStack.pop();
   // Push initialization and usage up to the parent scope.
-  it = init.begin();
-  for (; it != init.end(); ++it)
-    {
-    this->Internal->VarInitStack.top().insert(*it);
-    }
-  it = usage.begin();
-  for (; it != usage.end(); ++it)
-    {
-    this->Internal->VarUsageStack.top().insert(*it);
-    }
+  this->Internal->VarInitStack.top().insert(init.begin(), init.end());
+  this->Internal->VarUsageStack.top().insert(usage.begin(), usage.end());
 }
 
 void cmMakefile::RaiseScope(const std::string& var, const char *varDef)

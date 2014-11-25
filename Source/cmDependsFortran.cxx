@@ -319,17 +319,13 @@ void cmDependsFortran::LocateModules()
       infoI != objInfo.end(); ++infoI)
     {
     cmDependsFortranSourceInfo const& info = infoI->second;
-    for(std::set<std::string>::const_iterator i = info.Provides.begin();
-        i != info.Provides.end(); ++i)
-      {
-      // Include this module in the set provided by this target.
-      this->Internal->TargetProvides.insert(*i);
-      }
+    // Include this module in the set provided by this target.
+    this->Internal->TargetProvides.insert(info.Provides.begin(),
+                                          info.Provides.end());
 
     for(std::set<std::string>::const_iterator i = info.Requires.begin();
         i != info.Requires.end(); ++i)
       {
-      // Include this module in the set required by this target.
       this->Internal->TargetRequires[*i] = "";
       }
     }

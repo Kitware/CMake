@@ -50,13 +50,8 @@ void cmCommandArgument::FollowsGroup(const cmCommandArgumentGroup* group)
   if (group!=0)
     {
     this->ArgumentsBeforeEmpty = false;
-    for(std::vector<cmCommandArgument*>::const_iterator
-        argIt= group->ContainedArguments.begin();
-        argIt != group->ContainedArguments.end();
-        ++argIt)
-      {
-      this->ArgumentsBefore.insert(*argIt);
-      }
+    this->ArgumentsBefore.insert(group->ContainedArguments.begin(),
+                                 group->ContainedArguments.end());
     }
 }
 
