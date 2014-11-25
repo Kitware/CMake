@@ -23,6 +23,21 @@ add_executable(consumer
   "${CMAKE_CURRENT_SOURCE_DIR}/consumer.cpp"
 )
 
+if (NOT CMAKE_GENERATOR MATCHES "Visual Studio")
+  target_sources(consumer PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/consumer.c"
+  )
+  target_compile_options(consumer
+    PRIVATE
+      -DCONSUMER_LANG_$<COMPILE_LANGUAGE>
+      -DLANG_IS_CXX=$<COMPILE_LANGUAGE:CXX>
+      -DLANG_IS_C=$<COMPILE_LANGUAGE:C>
+  )
+  target_compile_definitions(consumer
+    PRIVATE -DTEST_LANG_DEFINES
+  )
+endif()
+
 target_compile_options(consumer
   PRIVATE $<$<CXX_COMPILER_ID:GNU>:$<TARGET_PROPERTY:target_compile_options,INTERFACE_COMPILE_OPTIONS>>
 )

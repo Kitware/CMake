@@ -23,6 +23,7 @@ run_cmake(COMPILE_LANGUAGE-target_sources)
 run_cmake(COMPILE_LANGUAGE-add_executable)
 run_cmake(COMPILE_LANGUAGE-add_library)
 run_cmake(COMPILE_LANGUAGE-add_test)
+run_cmake(COMPILE_LANGUAGE-unknown-lang)
 
 if(LINKER_SUPPORTS_PDB)
   run_cmake(NonValidTarget-TARGET_PDB_FILE)

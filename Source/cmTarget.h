@@ -577,7 +577,8 @@ public:
   void AppendBuildInterfaceIncludes();
 
   void GetCompileOptions(std::vector<std::string> &result,
-                         const std::string& config) const;
+                         const std::string& config,
+                         const std::string& language) const;
   void GetAutoUicOptions(std::vector<std::string> &result,
                          const std::string& config) const;
   void GetCompileFeatures(std::vector<std::string> &features,

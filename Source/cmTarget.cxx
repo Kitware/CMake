@@ -2192,7 +2192,8 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
       std::vector<std::string> &options,
       UNORDERED_SET<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
-      const std::string& config, bool debugOptions, const char *logName)
+      const std::string& config, bool debugOptions, const char *logName,
+      std::string const& language)
 {
   cmMakefile *mf = tgt->GetMakefile();
 
@@ -2204,7 +2205,8 @@ static void processCompileOptionsInternal(cmTarget const* tgt,
                                               config,
                                               false,
                                               tgt,
-                                              dagChecker),
+                                              dagChecker,
+                                              language),
                                     entryOptions);
     std::string usedOptions;
     for(std::vector<std::string>::iterator
@@ -2238,10 +2240,12 @@ static void processCompileOptions(cmTarget const* tgt,
       std::vector<std::string> &options,
       UNORDERED_SET<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
-      const std::string& config, bool debugOptions)
+      const std::string& config, bool debugOptions,
+      std::string const& language)
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
-                                dagChecker, config, debugOptions, "options");
+                                dagChecker, config, debugOptions, "options",
+                                language);
 }
 
 //----------------------------------------------------------------------------
@@ -2271,7 +2275,8 @@ void cmTarget::GetAutoUicOptions(std::vector<std::string> &result,
 
 //----------------------------------------------------------------------------
 void cmTarget::GetCompileOptions(std::vector<std::string> &result,
-                                 const std::string& config) const
+                                 const std::string& config,
+                                 const std::string& language) const
 {
   UNORDERED_SET<std::string> uniqueOptions;
 
@@ -2303,7 +2308,8 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                             uniqueOptions,
                             &dagChecker,
                             config,
-                            debugOptions);
+                            debugOptions,
+                            language);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>
     linkInterfaceCompileOptionsEntries;
@@ -2318,7 +2324,8 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                             uniqueOptions,
                             &dagChecker,
                             config,
-                            debugOptions);
+                            debugOptions,
+                            language);
 
   deleteAndClear(linkInterfaceCompileOptionsEntries);
 }
@@ -2333,7 +2340,7 @@ static void processCompileDefinitions(cmTarget const* tgt,
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions,
-                                "definitions");
+                                "definitions", std::string());
 }
 
 //----------------------------------------------------------------------------
@@ -2431,7 +2438,8 @@ static void processCompileFeatures(cmTarget const* tgt,
       const std::string& config, bool debugOptions)
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
-                                dagChecker, config, debugOptions, "features");
+                                dagChecker, config, debugOptions, "features",
+                                std::string());
 }
 
 //----------------------------------------------------------------------------
