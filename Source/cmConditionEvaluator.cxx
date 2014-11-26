@@ -11,6 +11,7 @@
 ============================================================================*/
 
 #include "cmConditionEvaluator.h"
+#include "cmStringCommand.h"
 
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile):
   Makefile(makefile),
@@ -555,7 +556,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         {
         def = this->GetVariableOrString(*arg);
         const char* rex = argP2->c_str();
-        this->Makefile.ClearMatches();
+        cmStringCommand::ClearMatches(&this->Makefile);
         cmsys::RegularExpression regEntry;
         if ( !regEntry.compile(rex) )
           {
@@ -567,7 +568,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
           }
         if (regEntry.find(def))
           {
-          this->Makefile.StoreMatches(regEntry);
+          cmStringCommand::StoreMatches(&this->Makefile, regEntry);
           *arg = cmExpandedCommandArgument("1", true);
           }
         else
