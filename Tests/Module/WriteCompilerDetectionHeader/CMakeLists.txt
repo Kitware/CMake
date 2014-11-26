@@ -74,6 +74,22 @@ add_executable(WriteCompilerDetectionHeader main.cpp)
 set_property(TARGET WriteCompilerDetectionHeader PROPERTY CXX_STANDARD 98)
 set_defines(WriteCompilerDetectionHeader "${true_defs}" "${false_defs}")
 
+write_compiler_detection_header(
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files/multi_file_compiler_detection.h"
+  PREFIX MULTI
+  OUTPUT_FILES_VAR multi_files
+  OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files/compiler_support"
+  COMPILERS GNU Clang
+  VERSION 3.1
+  FEATURES
+    ${cxx_known_features} ${c_known_features}
+)
+
+add_executable(multi_files multi_files.cpp)
+set_property(TARGET multi_files PROPERTY CXX_STANDARD 98)
+target_include_directories(multi_files PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+set_defines(multi_files "${true_defs}" "${false_defs}")
+
 if(MSVC)
   return() # MSVC has only one mode.
 endif()
@@ -93,3 +109,8 @@ endif()
 add_executable(WriteCompilerDetectionHeader_11 main.cpp)
 set_property(TARGET WriteCompilerDetectionHeader_11 PROPERTY CXX_STANDARD 11)
 set_defines(WriteCompilerDetectionHeader_11 "${true_defs}" "${false_defs}")
+
+add_executable(multi_files_11 multi_files.cpp)
+set_property(TARGET multi_files_11 PROPERTY CXX_STANDARD 11)
+target_include_directories(multi_files_11 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+set_defines(multi_files_11 "${true_defs}" "${false_defs}")

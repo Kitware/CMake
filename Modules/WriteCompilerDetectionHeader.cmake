@@ -11,6 +11,7 @@
 #    write_compiler_detection_header(
 #              FILE <file>
 #              PREFIX <prefix>
+#              [OUTPUT_FILES_VAR <output_files_var> OUTPUT_DIR <output_dir>]
 #              COMPILERS <compiler> [...]
 #              FEATURES <feature> [...]
 #              [VERSION <version>]
@@ -20,6 +21,33 @@
 #
 # The ``write_compiler_detection_header`` function generates the
 # file ``<file>`` with macros which all have the prefix ``<prefix>``.
+#
+# By default, all content is written directly to the ``<file>``.  The
+# ``OUTPUT_FILES_VAR`` may be specified to cause the compiler-specific
+# content to be written to separate files.  The separate files are then
+# available in the ``<output_files_var>`` and may be consumed by the caller
+# for installation for example.  The ``OUTPUT_DIR`` specifies a relative
+# path from the main ``<file>`` to the compiler-specific files. For example:
+#
+# .. code-block:: cmake
+#
+#    write_compiler_detection_header(
+#      FILE climbingstats_compiler_detection.h
+#      PREFIX ClimbingStats
+#      OUTPUT_FILES_VAR support_files
+#      OUTPUT_DIR compilers
+#      COMPILERS GNU Clang
+#      FEATURES cxx_variadic_templates
+#    )
+#    install(FILES
+#      ${CMAKE_CURRENT_BINARY_DIR}/climbingstats_compiler_detection.h
+#      DESTINATION include
+#    )
+#    install(FILES
+#      ${support_files}
+#      DESTINATION include/compilers
+#    )
+#
 #
 # ``VERSION`` may be used to specify the API version to be generated.
 # Future versions of CMake may introduce alternative APIs.  A given
@@ -220,7 +248,7 @@ function(write_compiler_detection_header
     message(FATAL_ERROR "write_compiler_detection_header: PREFIX parameter missing.")
   endif()
   set(options)
-  set(oneValueArgs VERSION EPILOG PROLOG)
+  set(oneValueArgs VERSION EPILOG PROLOG OUTPUT_FILES_VAR OUTPUT_DIR)
   set(multiValueArgs COMPILERS FEATURES)
   cmake_parse_arguments(_WCD "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -253,6 +281,35 @@ function(write_compiler_detection_header
     set(err "${err}  Either set the VERSION parameter to the write_compiler_detection_header function, or update")
     set(err "${err} your minimum required CMake version with the cmake_minimum_required command.")
     message(FATAL_ERROR "${err}")
+  endif()
+
+  if(_WCD_OUTPUT_FILES_VAR)
+    if(NOT _WCD_OUTPUT_DIR)
+      message(FATAL_ERROR "If OUTPUT_FILES_VAR is specified, then OUTPUT_DIR must also be specified.")
+    endif()
+  endif()
+  if(_WCD_OUTPUT_DIR)
+    if(NOT _WCD_OUTPUT_FILES_VAR)
+      message(FATAL_ERROR "If OUTPUT_DIR is specified, then OUTPUT_FILES_VAR must also be specified.")
+    endif()
+    get_filename_component(main_file_dir ${file_arg} DIRECTORY)
+    if (NOT IS_ABSOLUTE ${main_file_dir})
+      set(main_file_dir "${CMAKE_CURRENT_BINARY_DIR}/${main_file_dir}")
+    endif()
+    if (NOT IS_ABSOLUTE ${_WCD_OUTPUT_DIR})
+      set(_WCD_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/${_WCD_OUTPUT_DIR}")
+    endif()
+    get_filename_component(out_file_dir ${_WCD_OUTPUT_DIR} ABSOLUTE)
+    string(FIND ${out_file_dir} ${main_file_dir} idx)
+    if (NOT idx EQUAL 0)
+      message(FATAL_ERROR "The compiler-specific output directory must be within the same directory as the main file.")
+    endif()
+
+    if (main_file_dir STREQUAL out_file_dir)
+      unset(_WCD_OUTPUT_DIR)
+    else()
+      string(REPLACE "${main_file_dir}/" "" _WCD_OUTPUT_DIR "${out_file_dir}/")
+    endif()
   endif()
 
   set(compilers
@@ -314,6 +371,14 @@ function(write_compiler_detection_header
   endforeach()
   list(REMOVE_DUPLICATES _langs)
 
+  if(_WCD_OUTPUT_FILES_VAR)
+    get_filename_component(main_file_name ${file_arg} NAME)
+    set(compiler_file_content_
+"#ifndef ${prefix_arg}_COMPILER_DETECTION_H
+#  error This file may only be included from ${main_file_name}
+#endif\n")
+  endif()
+
   foreach(_lang ${_langs})
 
     get_property(known_features GLOBAL PROPERTY CMAKE_${_lang}_KNOWN_FEATURES)
@@ -340,7 +405,19 @@ function(write_compiler_detection_header
     foreach(compiler ${_WCD_COMPILERS})
       _load_compiler_variables(${compiler} ${_lang} ${${_lang}_features})
       set(file_content "${file_content}\n#  ${pp_if} ${prefix_arg}_COMPILER_IS_${compiler}\n")
-      set(file_content "${file_content}
+
+      if(_WCD_OUTPUT_FILES_VAR)
+        set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}.h")
+        set(file_content "${file_content}\n#    include \"${compile_file_name}\"\n")
+      endif()
+
+      if(_WCD_OUTPUT_FILES_VAR)
+        set(compiler_file_content compiler_file_content_${compiler})
+      else()
+        set(compiler_file_content file_content)
+      endif()
+
+      set(${compiler_file_content} "${${compiler_file_content}}
 #    if !(${_cmake_oldestSupported_${compiler}})
 #      error Unsupported compiler version
 #    endif\n")
@@ -354,7 +431,7 @@ function(write_compiler_detection_header
         set(MACRO_HEX)
       endif()
       string(CONFIGURE "${_compiler_id_version_compute_${compiler}}" VERSION_BLOCK @ONLY)
-      set(file_content "${file_content}${VERSION_BLOCK}\n")
+      set(${compiler_file_content} "${${compiler_file_content}}${VERSION_BLOCK}\n")
       set(PREFIX)
       set(MACRO_DEC)
       set(MACRO_HEX)
@@ -370,7 +447,7 @@ function(write_compiler_detection_header
           set(_define_item "\n#      define ${prefix_arg}_${feature_PP} 0\n")
           set(_define_item "\n#    if ${_cmake_feature_test_${compiler}_${feature}}\n#      define ${prefix_arg}_${feature_PP} 1\n#    else${_define_item}#    endif\n")
         endif()
-        set(file_content "${file_content}${_define_item}")
+        set(${compiler_file_content} "${${compiler_file_content}}${_define_item}")
       endforeach()
     endforeach()
     if(pp_if STREQUAL "elif")
@@ -521,6 +598,22 @@ function(write_compiler_detection_header
     set(file_content "${file_content}#endif\n")
 
   endforeach()
+
+  if(_WCD_OUTPUT_FILES_VAR)
+    foreach(compiler ${_WCD_COMPILERS})
+      set(CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_}")
+      set(CMAKE_CONFIGURABLE_FILE_CONTENT "${CMAKE_CONFIGURABLE_FILE_CONTENT}${compiler_file_content_${compiler}}")
+
+      set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}.h")
+      set(full_path "${main_file_dir}/${compile_file_name}")
+      list(APPEND ${_WCD_OUTPUT_FILES_VAR} ${full_path})
+      configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
+        "${full_path}"
+        @ONLY
+      )
+    endforeach()
+    set(${_WCD_OUTPUT_FILES_VAR} ${${_WCD_OUTPUT_FILES_VAR}} PARENT_SCOPE)
+  endif()
 
   if (_WCD_EPILOG)
     set(file_content "${file_content}\n${_WCD_EPILOG}\n")
