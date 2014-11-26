@@ -21,29 +21,37 @@ specifies the variable in which to store the result.  The second
 argument determines the scope from which to get the property.  It must
 be one of the following:
 
-GLOBAL scope is unique and does not accept a name.
+``GLOBAL``
+  Scope is unique and does not accept a name.
 
-DIRECTORY scope defaults to the current directory but another
-directory (already processed by CMake) may be named by full or
-relative path.
+``DIRECTORY``
+  Scope defaults to the current directory but another
+  directory (already processed by CMake) may be named by full or
+  relative path.
 
-TARGET scope must name one existing target.
+``TARGET``
+  Scope must name one existing target.
 
-SOURCE scope must name one source file.
+``SOURCE``
+  Scope must name one source file.
 
-TEST scope must name one existing test.
+``TEST``
+  Scope must name one existing test.
 
-CACHE scope must name one cache entry.
+``CACHE``
+  Scope must name one cache entry.
 
-VARIABLE scope is unique and does not accept a name.
+``VARIABLE``
+  Scope is unique and does not accept a name.
 
-The required PROPERTY option is immediately followed by the name of
+The required ``PROPERTY`` option is immediately followed by the name of
 the property to get.  If the property is not set an empty value is
-returned.  If the SET option is given the variable is set to a boolean
-value indicating whether the property has been set.  If the DEFINED
+returned.  If the ``SET`` option is given the variable is set to a boolean
+value indicating whether the property has been set.  If the ``DEFINED``
 option is given the variable is set to a boolean value indicating
-whether the property has been defined such as with define_property.
-If BRIEF_DOCS or FULL_DOCS is given then the variable is set to a
+whether the property has been defined such as with the
+:command:`define_property` command.
+If ``BRIEF_DOCS`` or ``FULL_DOCS`` is given then the variable is set to a
 string containing documentation for the requested property.  If
 documentation is requested for a property that has not been defined
-NOTFOUND is returned.
+``NOTFOUND`` is returned.
