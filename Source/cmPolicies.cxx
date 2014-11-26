@@ -364,6 +364,11 @@ cmPolicies::cmPolicies()
     CMP0054, "CMP0054",
     "Only interpret if() arguments as variables or keywords when unquoted.",
     3,1,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0055, "CMP0055",
+    "Strict checking for break() command.",
+    3,2,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
