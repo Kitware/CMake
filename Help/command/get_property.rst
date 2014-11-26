@@ -10,6 +10,7 @@ Get a property.
                 DIRECTORY [dir]    |
                 TARGET    <target> |
                 SOURCE    <source> |
+                INSTALL   <file>   |
                 TEST      <test>   |
                 CACHE     <entry>  |
                 VARIABLE>
@@ -34,6 +35,9 @@ be one of the following:
 
 ``SOURCE``
   Scope must name one source file.
+
+``INSTALL``
+  Scope must name one installed file path.
 
 ``TEST``
   Scope must name one existing test.
