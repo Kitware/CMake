@@ -21,32 +21,6 @@ CMake is required to build with ancient C++ compilers and standard library
 implementations.  Some common C++ constructs may not be used in CMake in order
 to build with such toolchains.
 
-std::vector::at
----------------
-
-The ``at()`` member function of ``std::vector`` may not be used. Use
-``operator[]`` instead:
-
-.. code-block:: c++
-
-  std::vector<int> someVec = getVec();
-  int i1 = someVec.at(5); // Wrong
-  int i2 = someVec[5];    // Ok
-
-std::string::append and std::string::clear
-------------------------------------------
-
-The ``append()`` and ``clear()`` member functions of ``std::string`` may not
-be used. Use ``operator+=`` and ``operator=`` instead:
-
-.. code-block:: c++
-
-  std::string stringBuilder;
-  stringBuilder.append("chunk"); // Wrong
-  stringBuilder.clear(); // Wrong
-  stringBuilder += "chunk";      // Ok
-  stringBuilder = "";      // Ok
-
 std::set const iterators
 ------------------------
 
