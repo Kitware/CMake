@@ -63,6 +63,13 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
   list(APPEND false_defs EXPECTED_COMPILER_CXX_VARIADIC_TEMPLATES)
 endif()
 
+if (CMAKE_C_COMPILER_ID STREQUAL GNU
+    OR CMAKE_C_COMPILER_ID STREQUAL Clang)
+  add_executable(C_undefined c_undefined.c)
+  set_property(TARGET C_undefined PROPERTY CXX_STANDARD 90)
+  target_compile_options(C_undefined PRIVATE -Werror=undef)
+endif()
+
 add_executable(WriteCompilerDetectionHeader main.cpp)
 set_property(TARGET WriteCompilerDetectionHeader PROPERTY CXX_STANDARD 98)
 set_defines(WriteCompilerDetectionHeader "${true_defs}" "${false_defs}")
