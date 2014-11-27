@@ -649,6 +649,8 @@ static bool processSources(cmTarget const* tgt,
   for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
       it = entries.begin(), end = entries.end(); it != end; ++it)
     {
+    cmLinkImplItem const& item = (*it)->LinkImplItem;
+    std::string const& targetName = item;
     std::vector<std::string> entrySources;
     cmSystemTools::ExpandListArgument((*it)->ge->Evaluate(mf,
                                               config,
@@ -667,11 +669,10 @@ static bool processSources(cmTarget const* tgt,
         i != entrySources.end(); ++i)
       {
       std::string& src = *i;
-
       cmSourceFile* sf = mf->GetOrCreateSource(src);
       std::string e;
-      src = sf->GetFullPath(&e);
-      if(src.empty())
+      std::string fullPath = sf->GetFullPath(&e);
+      if(fullPath.empty())
         {
         if(!e.empty())
           {
@@ -681,6 +682,25 @@ static bool processSources(cmTarget const* tgt,
           }
         return contextDependent;
         }
+
+      if (!targetName.empty() && !cmSystemTools::FileIsFullPath(src.c_str()))
+        {
+        cmOStringStream err;
+        if (!targetName.empty())
+          {
+          err << "Target \"" << targetName << "\" contains relative "
+            "path in its INTERFACE_SOURCES:\n"
+            "  \"" << src << "\"";
+          }
+        else
+          {
+          err << "Found relative path while evaluating sources of "
+          "\"" << tgt->GetName() << "\":\n  \"" << src << "\"\n";
+          }
+        tgt->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, err.str());
+        return contextDependent;
+        }
+      src = fullPath;
       }
     std::string usedSources;
     for(std::vector<std::string>::iterator
