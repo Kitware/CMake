@@ -58,7 +58,7 @@ Options
  will have no effect.
 
 ``-j <jobs>, --parallel <jobs>``
- Run the tests in parallel using thegiven number of jobs.
+ Run the tests in parallel using the given number of jobs.
 
  This option tells ctest to run the tests in parallel using given
  number of jobs.  This option can also be set by setting the
