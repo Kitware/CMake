@@ -68,6 +68,16 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       tei != this->Exports.end(); ++tei)
     {
     cmTarget* te = *tei;
+    if (te->GetProperty("INTERFACE_SOURCES"))
+      {
+      cmOStringStream e;
+      e << "Target \""
+        << te->GetName()
+        << "\" has a populated INTERFACE_SOURCES property.  This is not "
+          "currently supported.";
+      cmSystemTools::Error(e.str().c_str());
+      return false;
+      }
     this->GenerateImportTargetCode(os, te);
 
     te->AppendBuildInterfaceIncludes();

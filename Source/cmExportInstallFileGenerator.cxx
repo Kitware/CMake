@@ -123,6 +123,17 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     {
     cmTarget* te = (*tei)->Target;
 
+    if (te->GetProperty("INTERFACE_SOURCES"))
+      {
+      cmOStringStream e;
+      e << "Target \""
+        << te->GetName()
+        << "\" has a populated INTERFACE_SOURCES property.  This is not "
+          "currently supported.";
+      cmSystemTools::Error(e.str().c_str());
+      return false;
+      }
+
     requiresConfigFiles = requiresConfigFiles
                               || te->GetType() != cmTarget::INTERFACE_LIBRARY;
 
