@@ -192,6 +192,9 @@ add_RunCMake_test(ExternalProject)
 set(IfacePaths_INCLUDE_DIRECTORIES_ARGS -DTEST_PROP=INCLUDE_DIRECTORIES)
 add_RunCMake_test(IfacePaths_INCLUDE_DIRECTORIES TEST_DIR IfacePaths)
 
+set(IfacePaths_SOURCES_ARGS -DTEST_PROP=SOURCES)
+add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
+
 if(RPMBUILD)
   add_RunCMake_test(CPackRPM)
 endif()

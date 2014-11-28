@@ -1,1 +1,0 @@
-CMake Error: Target "iface" has a populated INTERFACE_SOURCES property.  This is not currently supported.
