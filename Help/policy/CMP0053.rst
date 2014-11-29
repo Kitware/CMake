@@ -28,7 +28,7 @@ cleaned up to simplify the behavior.  Specifically:
   so improper variable reference syntax is always an error.
 
 * More characters are allowed to be escaped in variable names.
-  Previously, only ``()#" \#@^`` were valid characters to
+  Previously, only ``()#" \@^`` were valid characters to
   escape. Now any non-alphanumeric, non-semicolon, non-NUL
   character may be escaped following the ``escape_identity``
   production in the :ref:`Escape Sequences` section of the
