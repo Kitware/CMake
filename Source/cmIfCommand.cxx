@@ -151,6 +151,11 @@ IsFunctionBlocked(const cmListFileFunction& lff,
             inStatus.SetBreakInvoked(true);
             return true;
             }
+          if (status.GetContinueInvoked())
+            {
+            inStatus.SetContinueInvoked(true);
+            return true;
+            }
           }
         }
       return true;

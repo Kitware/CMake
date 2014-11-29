@@ -28,6 +28,7 @@
 #include "cmCMakePolicyCommand.cxx"
 #include "cmCommandArgumentsHelper.cxx"
 #include "cmConfigureFileCommand.cxx"
+#include "cmContinueCommand.cxx"
 #include "cmCoreTryCompile.cxx"
 #include "cmCreateTestSourceList.cxx"
 #include "cmDefinePropertyCommand.cxx"
@@ -70,6 +71,7 @@ void GetBootstrapCommands1(std::list<cmCommand*>& commands)
   commands.push_back(new cmCMakeMinimumRequired);
   commands.push_back(new cmCMakePolicyCommand);
   commands.push_back(new cmConfigureFileCommand);
+  commands.push_back(new cmContinueCommand);
   commands.push_back(new cmCreateTestSourceList);
   commands.push_back(new cmDefinePropertyCommand);
   commands.push_back(new cmElseCommand);
