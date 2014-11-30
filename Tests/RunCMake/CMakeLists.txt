@@ -188,6 +188,7 @@ add_RunCMake_test(CommandLine)
 add_RunCMake_test(install)
 add_RunCMake_test(CPackInstallProperties)
 add_RunCMake_test(ExternalProject)
+add_RunCMake_test(IfacePaths)
 
 if(RPMBUILD)
   add_RunCMake_test(CPackRPM)
