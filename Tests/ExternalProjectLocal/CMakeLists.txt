@@ -71,6 +71,31 @@ if(can_build_tutorial_step5)
     LOG_TEST 1
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "Local")
+
+  set(proj TutorialStep5-Local-TestExcludeFromMainBefore)
+  ExternalProject_Add(${proj}
+    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>  -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+    CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
+    TEST_BEFORE_INSTALL 1
+    TEST_EXCLUDE_FROM_MAIN 1
+    STEP_TARGETS test
+    LOG_TEST 1
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
+
+  set(proj TutorialStep5-Local-TestExcludeFromMainAfter)
+  ExternalProject_Add(${proj}
+    URL "${CMAKE_CURRENT_SOURCE_DIR}/../Tutorial/Step5"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>  -G ${CMAKE_GENERATOR} <SOURCE_DIR>
+    CMAKE_CACHE_DEFAULT_ARGS -DUSE_MYMATH:BOOL=OFF
+    TEST_AFTER_INSTALL 1
+    TEST_EXCLUDE_FROM_MAIN 1
+    STEP_TARGETS test
+    LOG_TEST 1
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "Local")
+
 endif()
 
 
