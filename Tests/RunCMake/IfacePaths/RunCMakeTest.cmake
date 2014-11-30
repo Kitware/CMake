@@ -1,5 +1,10 @@
 include(RunCMake)
 
+macro(run_cmake test)
+  list(APPEND RunCMake_TEST_OPTIONS -DTEST_PROP=${TEST_PROP})
+  _run_cmake(${test})
+endmacro()
+
 run_cmake(RelativePathInInterface)
 run_cmake(RelativePathInGenex)
 run_cmake(export-NOWARN)
@@ -57,12 +62,15 @@ configure_file(
   COPYONLY
 )
 
-foreach(policyStatus "" NEW OLD)
-  if (NOT "${policyStatus}" STREQUAL "")
-    set(policyOption -DCMAKE_POLICY_DEFAULT_CMP0052=${policyStatus})
-  else()
-    unset(policyOption)
-    set(policyStatus WARN)
+foreach(policyStatus NEW OLD "")
+  if (TEST_PROP STREQUAL INCLUDE_DIRECTORIES)
+    if (NOT "${policyStatus}" STREQUAL "")
+      set(policyOption -DCMAKE_POLICY_DEFAULT_CMP0052=${policyStatus})
+    else()
+      unset(policyOption)
+      set(policyStatus WARN)
+    endif()
+    set(policySuffix -CMP0052-${policyStatus})
   endif()
   set(RunCMake_TEST_OPTIONS
     "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/prefix" ${policyOption}
@@ -73,16 +81,20 @@ foreach(policyStatus "" NEW OLD)
   # a subdirectory or the source directory, which is allowed and tested separately
   # below.
   set(RunCMake_TEST_SOURCE_DIR "${RunCMake_BINARY_DIR}/prefix/src")
-  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/prefix/BinInInstallPrefix-CMP0052-${policyStatus}-build")
-  run_cmake(BinInInstallPrefix-CMP0052-${policyStatus})
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/prefix/BinInInstallPrefix${policySuffix}-build")
+  run_cmake(BinInInstallPrefix${policySuffix})
   unset(RunCMake_TEST_BINARY_DIR)
 
   set(RunCMake_TEST_OPTIONS
     "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/prefix" ${policyOption}
     "-DTEST_FILE=${RunCMake_BINARY_DIR}/prefix/src/SourceDirectoryInInterface.cmake"
     )
-  run_cmake(SrcInInstallPrefix-CMP0052-${policyStatus})
+  run_cmake(SrcInInstallPrefix${policySuffix})
   unset(RunCMake_TEST_SOURCE_DIR)
+
+  if (NOT TEST_PROP STREQUAL INCLUDE_DIRECTORIES)
+    break()
+  endif()
 endforeach()
 
 set(RunCMake_TEST_OPTIONS "-DCMAKE_INSTALL_PREFIX=${RunCMake_BINARY_DIR}/InstallPrefixInInterface-build/prefix")
