@@ -2,6 +2,7 @@ include(RunCMake)
 
 macro(run_cmake test)
   list(APPEND RunCMake_TEST_OPTIONS -DTEST_PROP=${TEST_PROP})
+  set(RunCMake-stderr-file ${test}-stderr_${TEST_PROP}.txt)
   _run_cmake(${test})
 endmacro()
 
