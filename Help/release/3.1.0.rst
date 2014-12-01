@@ -69,8 +69,14 @@ Commands
   :variable:`CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY`
   variables to skip searching the package registries.
 
+* The :command:`get_property` command learned a new ``INSTALL`` scope
+  for properties.
+
 * The :command:`install` command learned a ``MESSAGE_NEVER`` option
   to avoid output during installation.
+
+* The :command:`set_property` command learned a new ``INSTALL`` scope
+  for properties.
 
 * The :command:`string` command learned a new ``GENEX_STRIP`` subcommand
   which removes
