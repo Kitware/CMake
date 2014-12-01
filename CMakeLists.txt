@@ -36,6 +36,10 @@ if("${CMake_SOURCE_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
   endmacro()
 endif()
 
+# Use most-recent available language dialects with GNU and Clang
+set(CMAKE_C_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
+
 # option to set the internal encoding of CMake to UTF-8
 option(CMAKE_ENCODING_UTF8 "Use UTF-8 encoding internally (experimental)." OFF)
 mark_as_advanced(CMAKE_ENCODING_UTF8)
