@@ -69,7 +69,40 @@ struct cmGeneratorExpressionNode
                                const GeneratorExpressionContent *content,
                                cmGeneratorExpressionDAGChecker *dagChecker
                               ) const = 0;
+
+  static std::string EvaluateDependentExpression(
+    std::string const& prop, cmMakefile *makefile,
+    cmGeneratorExpressionContext *context,
+    cmTarget const* headTarget, cmTarget const* currentTarget,
+    cmGeneratorExpressionDAGChecker *dagChecker);
 };
+
+//----------------------------------------------------------------------------
+std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
+    std::string const& prop, cmMakefile *makefile,
+    cmGeneratorExpressionContext *context,
+    cmTarget const* headTarget, cmTarget const* currentTarget,
+    cmGeneratorExpressionDAGChecker *dagChecker)
+{
+  cmGeneratorExpression ge(&context->Backtrace);
+  cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
+  cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
+  std::string result = cge->Evaluate(makefile,
+                        context->Config,
+                        context->Quiet,
+                        headTarget,
+                        currentTarget,
+                        dagChecker);
+  if (cge->GetHadContextSensitiveCondition())
+    {
+    context->HadContextSensitiveCondition = true;
+    }
+  if (cge->GetHadHeadSensitiveCondition())
+    {
+    context->HadHeadSensitiveCondition = true;
+    }
+  return result;
+}
 
 //----------------------------------------------------------------------------
 static const struct ZeroNode : public cmGeneratorExpressionNode
@@ -825,22 +858,10 @@ getLinkedTargetsContent(
     }
   if(!depString.empty())
     {
-    cmGeneratorExpression ge(&context->Backtrace);
-    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(depString);
-    linkedTargetsContent = cge->Evaluate(target->GetMakefile(),
-                                         context->Config,
-                                         context->Quiet,
-                                         headTarget,
-                                         target,
-                                         dagChecker);
-    if (cge->GetHadContextSensitiveCondition())
-      {
-      context->HadContextSensitiveCondition = true;
-      }
-    if (cge->GetHadHeadSensitiveCondition())
-      {
-      context->HadHeadSensitiveCondition = true;
-      }
+    linkedTargetsContent =
+        cmGeneratorExpressionNode::EvaluateDependentExpression(depString,
+                                        target->GetMakefile(), context,
+                                        headTarget, target, dagChecker);
     }
   linkedTargetsContent =
     cmGeneratorExpression::StripEmptyListElements(linkedTargetsContent);
@@ -1185,24 +1206,9 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
       }
     if(!interfacePropertyName.empty())
       {
-      cmGeneratorExpression ge(&context->Backtrace);
-      cmsys::auto_ptr<cmCompiledGeneratorExpression> cge = ge.Parse(prop);
-      cge->SetEvaluateForBuildsystem(context->EvaluateForBuildsystem);
-      std::string result = cge->Evaluate(context->Makefile,
-                            context->Config,
-                            context->Quiet,
-                            headTarget,
-                            target,
-                            &dagChecker);
-
-      if (cge->GetHadContextSensitiveCondition())
-        {
-        context->HadContextSensitiveCondition = true;
-        }
-      if (cge->GetHadHeadSensitiveCondition())
-        {
-        context->HadHeadSensitiveCondition = true;
-        }
+      std::string result = this->EvaluateDependentExpression(prop,
+                                        context->Makefile, context,
+                                        headTarget, target, &dagChecker);
       if (!linkedTargetsContent.empty())
         {
         result += (result.empty() ? "" : ";") + linkedTargetsContent;
