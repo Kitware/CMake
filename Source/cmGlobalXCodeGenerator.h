@@ -241,6 +241,7 @@ private:
   std::map<std::string, cmXCodeObject* > GroupNameMap;
   std::map<std::string, cmXCodeObject* > TargetGroup;
   std::map<std::string, cmXCodeObject* > FileRefs;
+  std::map<cmTarget const*, cmXCodeObject* > XCodeObjectMap;
   std::vector<std::string> Architectures;
   std::string GeneratorToolset;
 };
