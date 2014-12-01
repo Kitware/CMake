@@ -12,6 +12,10 @@ When target dependencies are specified using :command:`target_link_libraries`,
 CMake will read this property from all target dependencies to determine the
 sources of the consumer.
 
+Targets with ``INTERFACE_SOURCES`` may not be exported with the
+:command:`export` or :command:`install(EXPORT)` commands. This limitation may be
+lifted in a future version of CMake.
+
 Contents of ``INTERFACE_SOURCES`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`

@@ -22,6 +22,10 @@ items will populate the :prop_tgt:`SOURCES` property of
 following arguments specify sources.  Repeated calls for the same
 ``<target>`` append items in the order called.
 
+Targets with :prop_tgt:`INTERFACE_SOURCES` may not be exported with the
+:command:`export` or :command:`install(EXPORT)` commands. This limitation may be
+lifted in a future version of CMake.
+
 Arguments to ``target_sources`` may use "generator expressions"
 with the syntax ``$<...>``. See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
