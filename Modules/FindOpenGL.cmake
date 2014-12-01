@@ -138,19 +138,6 @@ else()
   unset(_OPENGL_INCLUDE_PATH)
   unset(_OPENGL_LIB_PATH)
 
-  # On Unix OpenGL most certainly always requires X11.
-  # Feel free to tighten up these conditions if you don't
-  # think this is always true.
-
-  if (OPENGL_gl_LIBRARY)
-    if(NOT X11_FOUND)
-      include(${CMAKE_CURRENT_LIST_DIR}/FindX11.cmake)
-    endif()
-    if (X11_FOUND)
-      set (OPENGL_LIBRARIES ${X11_LIBRARIES})
-    endif ()
-  endif ()
-
   find_library(OPENGL_glu_LIBRARY
     NAMES GLU MesaGLU
     PATHS ${OPENGL_gl_LIBRARY}
