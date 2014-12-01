@@ -9,6 +9,10 @@ targets can add entries to their own :prop_tgt:`SOURCES` property
 such as ``$<TARGET_PROPERTY:foo,INTERFACE_SOURCES>`` to use the
 sources specified in the interface of ``foo``.
 
+Targets with ``INTERFACE_SOURCES`` may not be exported with the
+:command:`export` or :command:`install(EXPORT)` commands. This limitation may be
+lifted in a future version of CMake.
+
 Contents of ``INTERFACE_SOURCES`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
