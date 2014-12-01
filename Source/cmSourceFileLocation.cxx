@@ -216,7 +216,8 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
     // Both extensions are similarly ambiguous.  Since only the old fixed set
     // of extensions will be tried, the names must match at this point to be
     // the same file.
-    if(this->Name.size() != loc.Name.size() || this->Name != loc.Name)
+    if(this->Name.size() != loc.Name.size() ||
+      !cmSystemTools::ComparePath(this->Name, loc.Name))
       {
       return false;
       }
