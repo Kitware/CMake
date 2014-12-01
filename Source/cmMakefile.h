@@ -972,9 +972,6 @@ public:
                        std::string const& lhs,
                        std::string const& rhs);
 
-  void ClearMatches();
-  void StoreMatches(cmsys::RegularExpression& re);
-
   void PushLoopBlock();
   void PopLoopBlock();
   bool IsLoopBlock() const;
@@ -1185,8 +1182,6 @@ private:
                                cmSourceFile* source);
 
   std::vector<cmSourceFile*> QtUiFilesWithOptions;
-
-  unsigned int NumLastMatches;
 
   bool AddRequiredTargetCFeature(cmTarget *target,
                                  const std::string& feature) const;
