@@ -22,8 +22,11 @@ add_library(objlib OBJECT obj.cpp)
 add_library(iface_objlib INTERFACE)
 target_sources(iface_objlib INTERFACE $<TARGET_OBJECTS:objlib>)
 
+add_library(intermediate INTERFACE)
+target_link_libraries(intermediate INTERFACE iface_objlib)
+
 add_executable(InterfaceLibrary definetestexe.cpp)
-target_link_libraries(InterfaceLibrary iface_nodepends headeriface subiface iface_objlib)
+target_link_libraries(InterfaceLibrary iface_nodepends headeriface subiface intermediate)
 
 add_subdirectory(libsdir)
 
