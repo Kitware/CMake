@@ -47,6 +47,7 @@ Variables that Provide Information
    /variable/CMAKE_LINK_LIBRARY_SUFFIX
    /variable/CMAKE_MAJOR_VERSION
    /variable/CMAKE_MAKE_PROGRAM
+   /variable/CMAKE_MATCH_COUNT
    /variable/CMAKE_MINIMUM_REQUIRED_VERSION
    /variable/CMAKE_MINOR_VERSION
    /variable/CMAKE_PARENT_LIST_FILE

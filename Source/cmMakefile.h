@@ -976,6 +976,9 @@ public:
   void PopLoopBlock();
   bool IsLoopBlock() const;
 
+  void ClearMatches();
+  void StoreMatches(cmsys::RegularExpression& re);
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
