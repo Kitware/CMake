@@ -1853,7 +1853,7 @@ cmMakefileTargetGenerator
                           useWatcomQuote);
   linkLibs = frameworkPath + linkPath + linkLibs;
 
-  if(useResponseFile)
+  if(useResponseFile && linkLibs.find_first_not_of(" ") != linkLibs.npos)
     {
     // Lookup the response file reference flag.
     std::string responseFlagVar = "CMAKE_";
