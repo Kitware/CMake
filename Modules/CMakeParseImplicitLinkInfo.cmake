@@ -66,7 +66,8 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
           set(log "${log}    arg [${arg}] ==> dir [${dir}]\n")
         elseif("${arg}" MATCHES "^-l([^:].*)$")
           # Unix library.
-          list(APPEND implicit_libs_tmp ${CMAKE_MATCH_1})
+          set(lib "${CMAKE_MATCH_1}")
+          list(APPEND implicit_libs_tmp ${lib})
           set(log "${log}    arg [${arg}] ==> lib [${lib}]\n")
         elseif("${arg}" MATCHES "^(.:)?[/\\].*\\.a$")
           # Unix library full path.
