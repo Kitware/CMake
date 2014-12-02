@@ -6,7 +6,7 @@
   <Properties>
     <DisplayName>@SHORT_NAME@</DisplayName>
     <PublisherDisplayName>mgong</PublisherDisplayName>
-    <Logo>StoreLogo.png</Logo>
+    <Logo>Assets/StoreLogo.png</Logo>
   </Properties>
   <Prerequisites>
     <OSMinVersion>6.3.1</OSMinVersion>
@@ -22,14 +22,14 @@
         Description="@SHORT_NAME@"
         BackgroundColor="#336699"
         ForegroundText="light"
-        Square150x150Logo="Logo.png"
-        Square30x30Logo="SmallLogo.png">
+        Square150x150Logo="Assets/Logo.png"
+        Square30x30Logo="Assets/SmallLogo.png">
         <m2:DefaultTile ShortName="@SHORT_NAME@">
           <m2:ShowNameOnTiles>
             <m2:ShowOn Tile="square150x150Logo" />
           </m2:ShowNameOnTiles>
         </m2:DefaultTile>
-        <m2:SplashScreen Image="SplashScreen.png" />
+        <m2:SplashScreen Image="Assets/SplashScreen.png" />
       </m2:VisualElements>
     </Application>
   </Applications>
