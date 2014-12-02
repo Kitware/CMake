@@ -28,7 +28,7 @@ CMake knows are known to the compiler, regardless of language standard
 or compile flags needed to use them.
 
 Features known to CMake are named mostly following the same convention
-as the Clang feature test macros.  The are some execptions, such as
+as the Clang feature test macros.  The are some exceptions, such as
 CMake using ``cxx_final`` and ``cxx_override`` instead of the single
 ``cxx_override_control`` used by Clang.
 
