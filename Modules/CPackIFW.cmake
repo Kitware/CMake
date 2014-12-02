@@ -14,19 +14,19 @@
 # Overview
 # ^^^^^^^^
 #
-# CPack ``IFW`` generator helps you create online and offline
+# CPack ``IFW`` generator helps you to create online and offline
 # binary cross-platform installers with a graphical user interface.
 #
-# CPack IFW generator prepare project installation and generate configuration
+# CPack IFW generator prepares project installation and generates configuration
 # and meta information for QtIFW_ tools.
 #
 # The QtIFW_ provides a set of tools and utilities to create
 # installers for the supported desktop Qt platforms: Linux, Microsoft Windows,
 # and Mac OS X.
 #
-# To use CPack ``IFW`` generator you must also install QtIFW_.
-# If you are not using the default path for the installation, please set
-# the path to the variable ``QTIFWDIR``.
+# You should also install QtIFW_ to use CPack ``IFW`` generator.
+# If you don't use a default path for the installation, please set
+# the used path in the variable ``QTIFWDIR``.
 #
 # Variables
 # ^^^^^^^^^
@@ -61,7 +61,7 @@
 #
 # .. variable:: CPACK_IFW_PACKAGE_LOGO
 #
-#  Filename for a logo used as QWizard::LogoPixmap.
+#  Filename for a logo is used as QWizard::LogoPixmap.
 #
 # .. variable:: CPACK_IFW_TARGET_DIRECTORY
 #
@@ -149,12 +149,12 @@
 # This command should be called after cpack_add_component command.
 #
 # ``COMMON`` if set, then the component will be packaged and installed as part
-# of a group to which he belongs.
+# of a group to which it belongs.
 #
 # ``VERSION`` is version of component.
 # By default used :variable:`CPACK_PACKAGE_VERSION`.
 #
-# ``SCRIPT`` is relative or absolute path to operations script
+# ``SCRIPT`` is a relative or absolute path to operations script
 # for this component.
 #
 # ``NAME`` is used to create domain-like identification for this component.
@@ -190,7 +190,7 @@
 # ``NAME`` is used to create domain-like identification for this component group.
 # By default used origin component group name.
 #
-# ``SCRIPT`` is relative or absolute path to operations script
+# ``SCRIPT`` is a relative or absolute path to operations script
 # for this component group.
 #
 # ``PRIORITY`` is priority of the component group in the tree.
@@ -255,7 +255,7 @@
 # Online installer
 # ^^^^^^^^^^^^^^^^
 #
-# By defaul CPack IFW generator make offline installer. This means that all
+# By default CPack IFW generator makes offline installer. This means that all
 # components will be packaged into a binary file.
 #
 # To make a component downloaded, you must set the ``DOWNLOADED`` option in
@@ -267,7 +267,7 @@
 # You also can use command :command:`cpack_ifw_add_repository` and
 # variable :variable:`CPACK_IFW_DOWNLOAD_ALL` for more specific configuration.
 #
-# CPack IFW generator create "repository" dir in current binary dir. You
+# CPack IFW generator creates "repository" dir in current binary dir. You
 # would copy content of this dir to specified ``site`` (``url``).
 #
 # See Also
