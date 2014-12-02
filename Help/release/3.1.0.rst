@@ -310,8 +310,10 @@ Other
 
 * The Visual Studio generators learned to treat ``.hlsl`` source
   files as High Level Shading Language sources (using ``FXCompile``
-  in ``.vcxproj`` files).  A :prop_sf:`VS_SHADER_TYPE` source file
-  property was added to specify the Shader Type.
+  in ``.vcxproj`` files).  Source file properties
+  :prop_sf:`VS_SHADER_TYPE`, :prop_sf:`VS_SHADER_MODEL`, and
+  :prop_sf:`VS_SHADER_ENTRYPOINT` were added added to specify the
+  shader type, model, and entry point name.
 
 New Diagnostics
 ===============
