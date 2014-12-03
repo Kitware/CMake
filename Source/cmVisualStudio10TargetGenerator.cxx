@@ -1203,6 +1203,8 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   bool toolHasSettings = false;
   std::string tool = "None";
   std::string shaderType;
+  std::string shaderEntryPoint;
+  std::string shaderModel;
   std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
   if(ext == "hlsl")
     {
@@ -1211,6 +1213,18 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     if(const char* st = sf->GetProperty("VS_SHADER_TYPE"))
       {
       shaderType = st;
+      toolHasSettings = true;
+      }
+    // Figure out which entry point to use if any
+    if (const char* se = sf->GetProperty("VS_SHADER_ENTRYPOINT"))
+      {
+      shaderEntryPoint = se;
+      toolHasSettings = true;
+      }
+    // Figure out which entry point to use if any
+    if (const char* sm = sf->GetProperty("VS_SHADER_MODEL"))
+      {
+      shaderModel = sm;
       toolHasSettings = true;
       }
     }
@@ -1295,7 +1309,18 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       (*this->BuildFileStream) << cmVS10EscapeXML(shaderType)
                                << "</ShaderType>\n";
       }
-
+    if(!shaderEntryPoint.empty())
+      {
+      this->WriteString("<EntryPointName>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(shaderEntryPoint)
+                               << "</EntryPointName>\n";
+      }
+    if(!shaderModel.empty())
+      {
+      this->WriteString("<ShaderModel>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(shaderModel)
+                               << "</ShaderModel>\n";
+      }
     this->WriteString("</", 2);
     (*this->BuildFileStream) << tool << ">\n";
     }
