@@ -145,7 +145,7 @@ The features known to this version of CMake are:
   .. _N2672: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2008/n2672.htm
 
 ``cxx_generic_lambdas``
-  Generic lambdas, ss defined in N3649_.
+  Generic lambdas, as defined in N3649_.
 
   .. _N3649: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2013/n3649.html
 
