@@ -291,6 +291,7 @@ Properties on Source Files
    /prop_sf/OBJECT_OUTPUTS
    /prop_sf/SYMBOLIC
    /prop_sf/VS_DEPLOYMENT_CONTENT
+   /prop_sf/VS_DEPLOYMENT_LOCATION
    /prop_sf/VS_SHADER_ENTRYPOINT
    /prop_sf/VS_SHADER_MODEL
    /prop_sf/VS_SHADER_TYPE

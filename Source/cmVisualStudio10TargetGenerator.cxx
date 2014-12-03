@@ -1261,6 +1261,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     }
 
   std::string deployContent;
+  std::string deployLocation;
   if(this->GlobalGenerator->TargetsWindowsPhone() ||
      this->GlobalGenerator->TargetsWindowsStore())
     {
@@ -1269,6 +1270,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       {
       toolHasSettings = true;
       deployContent = content;
+
+      const char* location = sf->GetProperty("VS_DEPLOYMENT_LOCATION");
+      if(location && *location)
+        {
+        deployLocation = location;
+        }
       }
     }
 
@@ -1283,6 +1290,14 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       cmGeneratorExpression ge;
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
         ge.Parse(deployContent);
+      // Deployment location cannot be set on a configuration basis
+      if(!deployLocation.empty())
+        {
+        this->WriteString("<Link>", 3);
+        (*this->BuildFileStream) << deployLocation
+                                 << "\\%(FileName)%(Extension)";
+        this->WriteString("</Link>\n", 0);
+        }
       for(size_t i = 0; i != configs->size(); ++i)
         {
         if(0 == strcmp(cge->Evaluate(this->Makefile, (*configs)[i]), "1"))

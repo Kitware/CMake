@@ -165,6 +165,10 @@ Properties
   to tell the Visual Studio generators to mark content for deployment
   in Windows Phone and Windows Store projects.
 
+* A :prop_sf:`VS_DEPLOYMENT_LOCATION` source file property was added
+  to tell the Visual Studio generators the relative location of content
+  marked for deployment in Windows Phone and Windows Store projects.
+
 * The :prop_tgt:`VS_WINRT_COMPONENT` target property was created to
   tell Visual Studio generators to compile a shared library as a
   Windows Runtime (WinRT) component.
