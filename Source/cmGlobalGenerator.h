@@ -23,6 +23,7 @@
 #include "cmGeneratorExpression.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+# include "cmFileLockPool.h"
 # include <cmsys/hash_map.hxx>
 #endif
 
@@ -348,6 +349,10 @@ public:
   std::set<cmTarget const*> const&
   GetFilenameTargetDepends(cmSourceFile* sf) const;
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  cmFileLockPool& GetFileLockPool() { return FileLockPool; }
+#endif
+
 protected:
   virtual void Generate();
 
@@ -499,6 +504,11 @@ private:
 
   mutable std::map<cmSourceFile*, std::set<cmTarget const*> >
   FilenameTargetDepends;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  // Pool of file locks
+  cmFileLockPool FileLockPool;
+#endif
 };
 
 #endif

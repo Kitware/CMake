@@ -21,6 +21,7 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cm_curl.h"
+#include "cmFileLockResult.h"
 #endif
 
 #undef GetCurrentDirectory
@@ -201,6 +202,10 @@ bool cmFileCommand
   else if ( subCommand == "GENERATE" )
     {
     return this->HandleGenerateCommand(args);
+    }
+  else if ( subCommand == "LOCK" )
+    {
+    return this->HandleLockCommand(args);
     }
 
   std::string e = "does not recognize sub-command "+subCommand;
@@ -3499,6 +3504,204 @@ bool cmFileCommand::HandleGenerateCommand(
 
   this->AddEvaluationFile(input, output, condition, inputIsContent);
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmFileCommand::HandleLockCommand(
+  std::vector<std::string> const& args)
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  // Default values
+  bool directory = false;
+  bool release = false;
+  enum Guard {
+    GUARD_FUNCTION,
+    GUARD_FILE,
+    GUARD_PROCESS
+  };
+  Guard guard = GUARD_PROCESS;
+  std::string resultVariable;
+  unsigned timeout = static_cast<unsigned>(-1);
+
+  // Parse arguments
+  if(args.size() < 2)
+    {
+    this->Makefile->IssueMessage(
+        cmake::FATAL_ERROR,
+        "sub-command LOCK requires at least two arguments.");
+    return false;
+    }
+
+  std::string path = args[1];
+  for (unsigned i = 2; i < args.size(); ++i)
+    {
+    if (args[i] == "DIRECTORY")
+      {
+      directory = true;
+      }
+    else if (args[i] == "RELEASE")
+      {
+      release = true;
+      }
+    else if (args[i] == "GUARD")
+      {
+      ++i;
+      const char* merr = "expected FUNCTION, FILE or PROCESS after GUARD";
+      if (i >= args.size())
+        {
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, merr);
+        return false;
+        }
+      else
+        {
+        if (args[i] == "FUNCTION")
+          {
+          guard = GUARD_FUNCTION;
+          }
+        else if (args[i] == "FILE")
+          {
+          guard = GUARD_FILE;
+          }
+        else if (args[i] == "PROCESS")
+          {
+          guard = GUARD_PROCESS;
+          }
+        else
+          {
+          cmOStringStream e;
+          e << merr << ", but got:\n  \"" << args[i] << "\".";
+          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+          return false;
+          }
+        }
+      }
+    else if (args[i] == "RESULT_VARIABLE")
+      {
+      ++i;
+      if (i >= args.size())
+        {
+        this->Makefile->IssueMessage(
+            cmake::FATAL_ERROR,
+            "expected variable name after RESULT_VARIABLE");
+        return false;
+        }
+      resultVariable = args[i];
+      }
+    else if (args[i] == "TIMEOUT")
+      {
+      ++i;
+      if (i >= args.size())
+        {
+        this->Makefile->IssueMessage(
+            cmake::FATAL_ERROR,
+            "expected timeout value after TIMEOUT");
+        return false;
+        }
+      int scanned;
+      if(!cmSystemTools::StringToInt(args[i].c_str(), &scanned) || scanned < 0)
+        {
+        cmOStringStream e;
+        e << "TIMEOUT value \"" << args[i] << "\" is not an unsigned integer.";
+        this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+        return false;
+        }
+      timeout = static_cast<unsigned>(scanned);
+      }
+    else
+      {
+      cmOStringStream e;
+      e << "expected DIRECTORY, RELEASE, GUARD, RESULT_VARIABLE or TIMEOUT\n";
+      e << "but got: \"" << args[i] << "\".";
+      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      return false;
+      }
+    }
+
+  if (directory)
+    {
+    path += "/cmake.lock";
+    }
+
+  if (!cmsys::SystemTools::FileIsFullPath(path))
+    {
+    path = this->Makefile->GetCurrentDirectory() + ("/" + path);
+    }
+
+  // Unify path (remove '//', '/../', ...)
+  path = cmSystemTools::CollapseFullPath(path);
+
+  // Create file and directories if needed
+  std::string parentDir = cmSystemTools::GetParentDirectory(path);
+  if (!cmSystemTools::MakeDirectory(parentDir))
+    {
+    cmOStringStream e;
+    e << "directory\n  \"" << parentDir << "\"\ncreation failed ";
+    e << "(check permissions).";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+  FILE *file = cmsys::SystemTools::Fopen(path, "w");
+  if (!file)
+    {
+    cmOStringStream e;
+    e << "file\n  \"" << path << "\"\ncreation failed (check permissions).";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+  fclose(file);
+
+  // Actual lock/unlock
+  cmFileLockPool& lockPool = this->Makefile->GetLocalGenerator()->
+      GetGlobalGenerator()->GetFileLockPool();
+
+  cmFileLockResult fileLockResult(cmFileLockResult::MakeOk());
+  if (release)
+    {
+    fileLockResult = lockPool.Release(path);
+    }
+  else
+    {
+    switch (guard)
+      {
+      case GUARD_FUNCTION:
+        fileLockResult = lockPool.LockFunctionScope(path, timeout);
+        break;
+      case GUARD_FILE:
+        fileLockResult = lockPool.LockFileScope(path, timeout);
+        break;
+      case GUARD_PROCESS:
+        fileLockResult = lockPool.LockProcessScope(path, timeout);
+        break;
+      default:
+        cmSystemTools::SetFatalErrorOccured();
+        return false;
+      }
+    }
+
+  const std::string result = fileLockResult.GetOutputMessage();
+
+  if (resultVariable.empty() && !fileLockResult.IsOk())
+    {
+    cmOStringStream e;
+    e << "error locking file\n  \"" << path << "\"\n" << result << ".";
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+    cmSystemTools::SetFatalErrorOccured();
+    return false;
+    }
+
+  if (!resultVariable.empty())
+    {
+    this->Makefile->AddDefinition(resultVariable, result.c_str());
+    }
+
+  return true;
+#else
+  static_cast<void>(args);
+  this->SetError("sub-command LOCK not implemented in bootstrap cmake");
+  return false;
+#endif
 }
 
 //----------------------------------------------------------------------------
