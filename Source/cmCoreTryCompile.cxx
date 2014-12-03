@@ -331,6 +331,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n", li->c_str(), li->c_str());
       }
+    fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"
+            " ${EXE_LINKER_FLAGS}\")\n");
     fprintf(fout, "include_directories(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "set(CMAKE_SUPPRESS_REGENERATION 1)\n");
     fprintf(fout, "link_directories(${LINK_DIRECTORIES})\n");
