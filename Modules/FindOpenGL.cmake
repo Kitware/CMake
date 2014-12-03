@@ -4,16 +4,6 @@
 #
 # FindModule for OpenGL and GLU.
 #
-# IMPORTED Targets
-# ^^^^^^^^^^^^^^^^
-#
-# This module defines the :prop_tgt:`IMPORTED` targets:
-#
-# ``OpenGL::GL``
-#  Defined if the system has OpenGL.
-# ``OpenGL::GLU``
-#  Defined if the system has GLU.
-#
 # Result Variables
 # ^^^^^^^^^^^^^^^^
 #
@@ -177,36 +167,6 @@ set(OPENGL_INCLUDE_PATH ${OPENGL_INCLUDE_DIR})
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(OpenGL REQUIRED_VARS ${_OpenGL_REQUIRED_VARS})
 unset(_OpenGL_REQUIRED_VARS)
-
-# OpenGL:: targets
-if(OPENGL_FOUND)
-  if(NOT TARGET OpenGL::GL)
-    add_library(OpenGL::GL UNKNOWN IMPORTED)
-    set_target_properties(OpenGL::GL PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${OPENGL_INCLUDE_DIR}")
-    if(OPENGL_gl_LIBRARY MATCHES "/([^/]+)\\.framework$")
-      set_target_properties(OpenGL::GL PROPERTIES
-        IMPORTED_LOCATION "${OPENGL_gl_LIBRARY}/${CMAKE_MATCH_1}")
-    else()
-      set_target_properties(OpenGL::GL PROPERTIES
-        IMPORTED_LOCATION "${OPENGL_gl_LIBRARY}")
-    endif()
-  endif()
-
-  if(OPENGL_GLU_FOUND AND NOT TARGET OpenGL::GLU)
-    add_library(OpenGL::GLU UNKNOWN IMPORTED)
-    set_target_properties(OpenGL::GLU PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${OPENGL_INCLUDE_DIR}"
-      INTERFACE_LINK_LIBRARIES OpenGL::GL)
-    if(OPENGL_glu_LIBRARY MATCHES "/([^/]+)\\.framework$")
-      set_target_properties(OpenGL::GLU PROPERTIES
-        IMPORTED_LOCATION "${OPENGL_glu_LIBRARY}/${CMAKE_MATCH_1}")
-    else()
-      set_target_properties(OpenGL::GLU PROPERTIES
-        IMPORTED_LOCATION "${OPENGL_glu_LIBRARY}")
-    endif()
-  endif()
-endif()
 
 mark_as_advanced(
   OPENGL_INCLUDE_DIR
