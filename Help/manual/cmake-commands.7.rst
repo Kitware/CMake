@@ -31,6 +31,7 @@ These commands may be used freely in CMake projects.
    /command/cmake_minimum_required
    /command/cmake_policy
    /command/configure_file
+   /command/continue
    /command/create_test_sourcelist
    /command/define_property
    /command/elseif

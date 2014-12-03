@@ -469,8 +469,10 @@ Loops
 
 The :command:`foreach`/:command:`endforeach` and
 :command:`while`/:command:`endwhile` commands delimit code
-blocks to be executed in a loop.  The :command:`break` command
-may be used inside such blocks to terminate the loop early.
+blocks to be executed in a loop.  Inside such blocks the
+:command:`break` command may be used to terminate the loop
+early whereas the :command:`continue` command may be used
+to start with the next iteration immediately.
 
 Command Definitions
 -------------------

@@ -69,6 +69,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
             mf.AddDefinition(this->Args[0],oldDef.c_str());
             return true;
             }
+          if (status.GetContinueInvoked())
+            {
+            break;
+            }
           if(cmSystemTools::GetFatalErrorOccured() )
             {
             return true;
