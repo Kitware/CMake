@@ -291,6 +291,7 @@ if(BUILD_TESTING)
     ADD_TEST_MACRO(ConfigSources ConfigSources)
   endif()
   ADD_TEST_MACRO(SourcesProperty SourcesProperty)
+  ADD_TEST_MACRO(SourceFileProperty SourceFileProperty)
   if(CMAKE_CXX_COMPILER_ID STREQUAL GNU
       AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
     set(runCxxDialectTest 1)
