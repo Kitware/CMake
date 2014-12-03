@@ -241,3 +241,20 @@ Windows Store may look like this:
 
   set(CMAKE_SYSTEM_NAME WindowsStore)
   set(CMAKE_SYSTEM_VERSION 8.1)
+
+Cross Compiling using NVIDIA Nsight Tegra
+-----------------------------------------
+
+A toolchain file to configure a Visual Studio generator to
+build using NVIDIA Nsight Tegra targeting Android may look
+like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME Android)
+
+The :variable:`CMAKE_GENERATOR_TOOLSET` may be set to select
+the Nsight Tegra "Toolchain Version" value.
+
+See the :prop_tgt:`ANDROID_API` and :prop_tgt:`ANDROID_GUI`
+target properties to configure targets within the project.
