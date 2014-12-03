@@ -15,3 +15,5 @@ run_cmake(BadSources1)
 run_cmake(BadSources2)
 run_cmake(NonSourceCopyFile)
 run_cmake(NonSourceCompileDefinitions)
+
+run_cmake(CMP0056)

@@ -9,6 +9,8 @@ warn by default:
   policy :policy:`CMP0025`.
 * ``CMAKE_POLICY_WARNING_CMP0047`` controls the warning for
   policy :policy:`CMP0047`.
+* ``CMAKE_POLICY_WARNING_CMP0056`` controls the warning for
+  policy :policy:`CMP0056`.
 
 This variable should not be set by a project in CMake code.  Project
 developers running CMake may set this variable in their cache to
