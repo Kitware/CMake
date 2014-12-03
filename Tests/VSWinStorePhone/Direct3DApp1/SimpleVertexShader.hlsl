@@ -17,7 +17,7 @@ struct VertexShaderOutput
   float3 color : COLOR0;
 };
 
-VertexShaderOutput main(VertexShaderInput input)
+VertexShaderOutput mainVS(VertexShaderInput input)
 {
   VertexShaderOutput output;
   float4 pos = float4(input.pos, 1.0f);
