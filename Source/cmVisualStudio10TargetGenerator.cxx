@@ -1221,7 +1221,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       shaderEntryPoint = se;
       toolHasSettings = true;
       }
-    // Figure out which entry point to use if any
+    // Figure out which shader model to use if any
     if (const char* sm = sf->GetProperty("VS_SHADER_MODEL"))
       {
       shaderModel = sm;
