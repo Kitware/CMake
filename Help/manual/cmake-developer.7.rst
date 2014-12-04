@@ -876,7 +876,10 @@ To prevent users being overwhelmed with settings to configure, try to
 keep as many options as possible out of the cache, leaving at least one
 option which can be used to disable use of the module, or locate a
 not-found library (e.g. ``Xxx_ROOT_DIR``).  For the same reason, mark
-most cache options as advanced.
+most cache options as advanced.  For packages which provide both debug
+and release binaries, it is common to create cache variables with a
+``_LIBRARY_<CONFIG>`` suffix, such as ``Foo_LIBRARY_RELEASE`` and
+``Foo_LIBRARY_DEBUG``.
 
 While these are the standard variable names, you should provide
 backwards compatibility for any old names that were actually in use.
@@ -1048,6 +1051,42 @@ similar properties should only contain information about the target itself, and
 not any of its dependencies.  Instead, those dependencies should also be
 targets, and CMake should be told that they are dependencies of this target.
 CMake will then combine all the necessary information automatically.
+
+If the library is available with multiple configurations, the
+:prop_tgt:`IMPORTED_CONFIGURATIONS` target property should also be
+populated:
+
+.. code-block:: cmake
+
+  if(Foo_FOUND)
+    if (NOT TARGET Foo::Foo)
+      add_library(Foo::Foo UNKNOWN IMPORTED)
+    endif()
+    if (Foo_LIBRARY_RELEASE)
+      set_property(TARGET Foo::Foo APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE
+      )
+      set_target_properties(Foo::Foo PROPERTIES
+        IMPORTED_LOCATION_RELEASE "${Foo_LIBRARY_RELEASE}"
+      )
+    endif()
+    if (Foo_LIBRARY_DEBUG)
+      set_property(TARGET Foo::Foo APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG
+      )
+      set_target_properties(Foo::Foo PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${Foo_LIBRARY_DEBUG}"
+      )
+    endif()
+    set_target_properties(Foo::Foo PROPERTIES
+      INTERFACE_COMPILE_OPTIONS "${PC_Foo_CFLAGS_OTHER}"
+      INTERFACE_INCLUDE_DIRECTORIES "${Foo_INCLUDE_DIR}"
+    )
+  endif()
+
+The ``RELEASE`` variant should be listed first in the property
+so that that variant is chosen if the user uses a configuration which is
+not an exact match for any listed ``IMPORTED_CONFIGURATIONS``.
 
 We should also provide some information about the package, such as where to
 download it.
