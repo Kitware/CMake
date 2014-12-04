@@ -201,7 +201,11 @@ class CMakeTransform(Transform):
         if make_index_entry:
             title = self.parse_title(env.docname)
             # Insert the object link target.
-            targetid = '%s:%s' % (objtype, title)
+            if objtype == 'command':
+                targetname = title.lower()
+            else:
+                targetname = title
+            targetid = '%s:%s' % (objtype, targetname)
             targetnode = nodes.target('', '', ids=[targetid])
             self.document.note_explicit_target(targetnode)
             self.document.insert(0, targetnode)
@@ -220,7 +224,11 @@ class CMakeObject(ObjectDescription):
         return sig
 
     def add_target_and_index(self, name, sig, signode):
-        targetid = '%s:%s' % (self.objtype, name)
+        if self.objtype == 'command':
+           targetname = name.lower()
+        else:
+           targetname = name
+        targetid = '%s:%s' % (self.objtype, targetname)
         if targetid not in self.state.document.ids:
             signode['names'].append(targetid)
             signode['ids'].append(targetid)
