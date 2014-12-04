@@ -18,7 +18,7 @@
 #   LATEX2HTML_CONVERTER: path to the LaTeX2Html converter
 
 #=============================================================================
-# Copyright 2002-2009 Kitware, Inc.
+# Copyright 2002-2014 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -130,4 +130,10 @@ mark_as_advanced(
   DVIPDF_CONVERTER
   PS2PDF_CONVERTER
   LATEX2HTML_CONVERTER
+)
+
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
+find_package_handle_standard_args(Latex
+  REQUIRED_VARS LATEX_COMPILER PDFLATEX_COMPILER BIBTEX_COMPILER 
+    MAKEINDEX_COMPILER DVIPS_CONVERTER PS2PDF_CONVERTER LATEX2HTML_CONVERTER
 )
