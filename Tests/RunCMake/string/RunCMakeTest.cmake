@@ -10,3 +10,5 @@ run_cmake(UuidBadNamespace)
 run_cmake(UuidMissingNameValue)
 run_cmake(UuidMissingTypeValue)
 run_cmake(UuidBadType)
+
+run_cmake(RegexClear)

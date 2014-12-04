@@ -4851,6 +4851,64 @@ std::vector<cmSourceFile*> cmMakefile::GetQtUiFilesWithOptions() const
   return this->QtUiFilesWithOptions;
 }
 
+static std::string const matchVariables[] = {
+  "CMAKE_MATCH_0",
+  "CMAKE_MATCH_1",
+  "CMAKE_MATCH_2",
+  "CMAKE_MATCH_3",
+  "CMAKE_MATCH_4",
+  "CMAKE_MATCH_5",
+  "CMAKE_MATCH_6",
+  "CMAKE_MATCH_7",
+  "CMAKE_MATCH_8",
+  "CMAKE_MATCH_9"
+};
+
+static std::string const nMatchesVariable = "CMAKE_MATCH_COUNT";
+
+//----------------------------------------------------------------------------
+void cmMakefile::ClearMatches()
+{
+  const char* nMatchesStr = this->GetDefinition(nMatchesVariable);
+  if (!nMatchesStr)
+    {
+    return;
+    }
+  int nMatches = atoi(nMatchesStr);
+  for (int i=0; i<=nMatches; i++)
+    {
+    std::string const& var = matchVariables[i];
+    std::string const& s = this->GetSafeDefinition(var);
+    if(!s.empty())
+      {
+      this->AddDefinition(var, "");
+      this->MarkVariableAsUsed(var);
+      }
+    }
+  this->AddDefinition(nMatchesVariable, "0");
+  this->MarkVariableAsUsed(nMatchesVariable);
+}
+
+//----------------------------------------------------------------------------
+void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
+{
+  char highest = 0;
+  for (int i=0; i<10; i++)
+    {
+    std::string const& m = re.match(i);
+    if(!m.empty())
+      {
+      std::string const& var = matchVariables[i];
+      this->AddDefinition(var, m.c_str());
+      this->MarkVariableAsUsed(var);
+      highest = static_cast<char>('0' + i);
+      }
+    }
+  char nMatches[] = {highest, '\0'};
+  this->AddDefinition(nMatchesVariable, nMatches);
+  this->MarkVariableAsUsed(nMatchesVariable);
+}
+
 //----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
