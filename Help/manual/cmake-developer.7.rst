@@ -1052,6 +1052,11 @@ not any of its dependencies.  Instead, those dependencies should also be
 targets, and CMake should be told that they are dependencies of this target.
 CMake will then combine all the necessary information automatically.
 
+The type of the :prop_tgt:`IMPORTED` target created in the
+:command:`add_library` command can always be specified as ``UNKNOWN``
+type.  This simplifies the code in cases where static or shared variants may
+be found, and CMake will determine the type by inspecting the files.
+
 If the library is available with multiple configurations, the
 :prop_tgt:`IMPORTED_CONFIGURATIONS` target property should also be
 populated:
