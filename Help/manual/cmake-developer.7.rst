@@ -720,7 +720,9 @@ by the :command:`find_package` command when invoked for ``<package>``.
 The primary task of a find module is to determine whether a package
 exists on the system, set the ``<package>_FOUND`` variable to reflect
 this and provide any variables, macros and imported targets required to
-use the package.
+use the package.  A find module is useful in cases where an upstream
+library does not provide a
+:ref:`config file package <Config File Packages>`.
 
 The traditional approach is to use variables for everything, including
 libraries and executables: see the `Standard Variable Names`_ section
