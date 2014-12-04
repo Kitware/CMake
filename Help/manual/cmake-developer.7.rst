@@ -730,10 +730,9 @@ below.  This is what most of the existing find modules provided by CMake
 do.
 
 The more modern approach is to behave as much like
-``<package>Config.cmake`` files as possible, by providing imported
-targets.  As well as matching how ``*Config.cmake`` files work, the
-libraries, include directories and compile definitions are all set just
-by using the target in a :command:`target_link_libraries` call.
+:ref:`config file packages <Config File Packages>` files as possible, by
+providing :ref:`imported target <Imported targets>`.  This has the advantage
+of propagating :ref:`Target Usage Requirements` to consumers.
 
 In either case (or even when providing both variables and imported
 targets), find modules should provide backwards compatibility with old
