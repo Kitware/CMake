@@ -733,10 +733,7 @@ The more modern approach is to behave as much like
 ``<package>Config.cmake`` files as possible, by providing imported
 targets.  As well as matching how ``*Config.cmake`` files work, the
 libraries, include directories and compile definitions are all set just
-by using the target in a :command:`target_link_libraries` call.   The
-disadvantage is that ``*Config.cmake`` files of projects that use
-imported targets from find modules may require more work to make sure
-those imported targets that are in the link interface are available.
+by using the target in a :command:`target_link_libraries` call.
 
 In either case (or even when providing both variables and imported
 targets), find modules should provide backwards compatibility with old
