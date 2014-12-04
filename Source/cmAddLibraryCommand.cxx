@@ -328,9 +328,8 @@ bool cmAddLibraryCommand
     CMAKE_${LANG}_CREATE_SHARED_LIBRARY is defined and if not default to
     STATIC. But at this point we know only the name of the target, but not
     yet its linker language. */
-  if ((type != cmTarget::STATIC_LIBRARY) &&
-      (type != cmTarget::OBJECT_LIBRARY) &&
-      (type != cmTarget::INTERFACE_LIBRARY) &&
+  if ((type == cmTarget::SHARED_LIBRARY ||
+       type == cmTarget::MODULE_LIBRARY) &&
        (this->Makefile->GetCMakeInstance()->GetPropertyAsBool(
                                       "TARGET_SUPPORTS_SHARED_LIBS") == false))
     {
