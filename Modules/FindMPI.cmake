@@ -194,6 +194,12 @@ function (_mpi_check_compiler compiler options cmdvar resvar)
     OUTPUT_VARIABLE  cmdline OUTPUT_STRIP_TRAILING_WHITESPACE
     ERROR_VARIABLE   cmdline ERROR_STRIP_TRAILING_WHITESPACE
     RESULT_VARIABLE  success)
+  # Intel MPI 5.0.1 will return a zero return code even when the
+  # argument to the MPI compiler wrapper is unknown.  Attempt to
+  # catch this case.
+  if("${cmdline}" MATCHES "undefined reference")
+    set(success 255 )
+  endif()
   set(${cmdvar} "${cmdline}" PARENT_SCOPE)
   set(${resvar} "${success}" PARENT_SCOPE)
 endfunction()
