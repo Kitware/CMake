@@ -21,6 +21,12 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
 
+#ifdef _WIN32
+#include <io.h> // for _setmode
+#include <fcntl.h> // for _O_BINARY
+#include <stdio.h> // for std{out,err} and fileno
+#endif
+
 //----------------------------------------------------------------------------
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
 {
@@ -258,6 +264,13 @@ void cmCTestLaunch::RunChild()
     ferr.open(this->LogErr.c_str(),
               std::ios::out | std::ios::binary);
     }
+
+#ifdef _WIN32
+  // Do this so that newline transformation is not done when writing to cout
+  // and cerr below.
+  _setmode(fileno(stdout), _O_BINARY);
+  _setmode(fileno(stderr), _O_BINARY);
+#endif
 
   // Run the real command.
   cmsysProcess_Execute(cp);
