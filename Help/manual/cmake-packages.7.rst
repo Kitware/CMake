@@ -76,6 +76,8 @@ By setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to
 ``TRUE``, the ``PackageName`` package will not be searched, and will always
 be ``NOTFOUND``.
 
+.. _`Config File Packages`:
+
 Config-file Packages
 --------------------
 

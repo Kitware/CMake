@@ -720,7 +720,9 @@ by the :command:`find_package` command when invoked for ``<package>``.
 The primary task of a find module is to determine whether a package
 exists on the system, set the ``<package>_FOUND`` variable to reflect
 this and provide any variables, macros and imported targets required to
-use the package.
+use the package.  A find module is useful in cases where an upstream
+library does not provide a
+:ref:`config file package <Config File Packages>`.
 
 The traditional approach is to use variables for everything, including
 libraries and executables: see the `Standard Variable Names`_ section
@@ -728,13 +730,9 @@ below.  This is what most of the existing find modules provided by CMake
 do.
 
 The more modern approach is to behave as much like
-``<package>Config.cmake`` files as possible, by providing imported
-targets.  As well as matching how ``*Config.cmake`` files work, the
-libraries, include directories and compile definitions are all set just
-by using the target in a :command:`target_link_libraries` call.   The
-disadvantage is that ``*Config.cmake`` files of projects that use
-imported targets from find modules may require more work to make sure
-those imported targets that are in the link interface are available.
+:ref:`config file packages <Config File Packages>` files as possible, by
+providing :ref:`imported target <Imported targets>`.  This has the advantage
+of propagating :ref:`Target Usage Requirements` to consumers.
 
 In either case (or even when providing both variables and imported
 targets), find modules should provide backwards compatibility with old
@@ -878,7 +876,10 @@ To prevent users being overwhelmed with settings to configure, try to
 keep as many options as possible out of the cache, leaving at least one
 option which can be used to disable use of the module, or locate a
 not-found library (e.g. ``Xxx_ROOT_DIR``).  For the same reason, mark
-most cache options as advanced.
+most cache options as advanced.  For packages which provide both debug
+and release binaries, it is common to create cache variables with a
+``_LIBRARY_<CONFIG>`` suffix, such as ``Foo_LIBRARY_RELEASE`` and
+``Foo_LIBRARY_DEBUG``.
 
 While these are the standard variable names, you should provide
 backwards compatibility for any old names that were actually in use.
@@ -944,16 +945,6 @@ licence notice block
   #=============================================================================
   # (To distribute this file outside of CMake, substitute the full
   #  License text for the above reference.)
-
-If the module is new to CMake, you may want to provide a warning for
-projects that do not require a high enough CMake version.
-
-.. code-block:: cmake
-
-  if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
-    message(AUTHOR_WARNING
-      "Your project should require at least CMake 3.0.0 to use FindFoo.cmake")
-  endif()
 
 Now the actual libraries and so on have to be found.  The code here will
 obviously vary from module to module (dealing with that, after all, is the
@@ -1060,6 +1051,47 @@ similar properties should only contain information about the target itself, and
 not any of its dependencies.  Instead, those dependencies should also be
 targets, and CMake should be told that they are dependencies of this target.
 CMake will then combine all the necessary information automatically.
+
+The type of the :prop_tgt:`IMPORTED` target created in the
+:command:`add_library` command can always be specified as ``UNKNOWN``
+type.  This simplifies the code in cases where static or shared variants may
+be found, and CMake will determine the type by inspecting the files.
+
+If the library is available with multiple configurations, the
+:prop_tgt:`IMPORTED_CONFIGURATIONS` target property should also be
+populated:
+
+.. code-block:: cmake
+
+  if(Foo_FOUND)
+    if (NOT TARGET Foo::Foo)
+      add_library(Foo::Foo UNKNOWN IMPORTED)
+    endif()
+    if (Foo_LIBRARY_RELEASE)
+      set_property(TARGET Foo::Foo APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE
+      )
+      set_target_properties(Foo::Foo PROPERTIES
+        IMPORTED_LOCATION_RELEASE "${Foo_LIBRARY_RELEASE}"
+      )
+    endif()
+    if (Foo_LIBRARY_DEBUG)
+      set_property(TARGET Foo::Foo APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG
+      )
+      set_target_properties(Foo::Foo PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${Foo_LIBRARY_DEBUG}"
+      )
+    endif()
+    set_target_properties(Foo::Foo PROPERTIES
+      INTERFACE_COMPILE_OPTIONS "${PC_Foo_CFLAGS_OTHER}"
+      INTERFACE_INCLUDE_DIRECTORIES "${Foo_INCLUDE_DIR}"
+    )
+  endif()
+
+The ``RELEASE`` variant should be listed first in the property
+so that that variant is chosen if the user uses a configuration which is
+not an exact match for any listed ``IMPORTED_CONFIGURATIONS``.
 
 We should also provide some information about the package, such as where to
 download it.
