@@ -118,8 +118,7 @@ private:
   void CreateCustomRulesMakefile(const char* makefileBasename,
                                  cmTarget& target,
                                  std::vector<cmCustomCommand> const & commands,
-                                 const std::string& configName,
-                                 bool& haveMultipleOutputPairs);
+                                 const std::string& configName);
 
   cmXCodeObject* FindXCodeTarget(cmTarget const*);
   std::string GetOrCreateId(const std::string& name, const std::string& id);
