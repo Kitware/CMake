@@ -209,7 +209,7 @@ All Modules
    /module/FindWish
    /module/FindwxWidgets
    /module/FindwxWindows
-   /module/FindXerces
+   /module/FindXercesC
    /module/FindX11
    /module/FindXMLRPC
    /module/FindZLIB
