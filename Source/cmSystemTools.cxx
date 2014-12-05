@@ -2925,9 +2925,10 @@ std::vector<std::string> cmSystemTools::tokenize(const std::string& str,
 }
 
 //----------------------------------------------------------------------------
-bool cmSystemTools::StringToInt(const char* str, int* value)
+bool cmSystemTools::StringToLong(const char* str, long* value)
 {
+  errno = 0;
   char *endp;
-  *value = static_cast<int>(strtol(str, &endp, 10));
-  return (*endp == '\0') && (endp != str);
+  *value = strtol(str, &endp, 10);
+  return (*endp == '\0') && (endp != str) && (errno == 0);
 }

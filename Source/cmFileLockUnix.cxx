@@ -66,7 +66,7 @@ cmFileLockResult cmFileLock::LockWithoutTimeout()
     }
 }
 
-cmFileLockResult cmFileLock::LockWithTimeout(unsigned seconds)
+cmFileLockResult cmFileLock::LockWithTimeout(unsigned long seconds)
 {
   while (true)
     {

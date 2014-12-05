@@ -37,7 +37,7 @@ class cmFileLock
     * @brief Lock the file.
     * @param timeoutSec Lock timeout. If -1 try until success or fatal error.
     */
-  cmFileLockResult Lock(const std::string& filename, unsigned timeoutSec);
+  cmFileLockResult Lock(const std::string& filename, unsigned long timeoutSec);
 
   /**
     * @brief Unlock the file.
@@ -57,7 +57,7 @@ class cmFileLock
 
   cmFileLockResult OpenFile();
   cmFileLockResult LockWithoutTimeout();
-  cmFileLockResult LockWithTimeout(unsigned timeoutSec);
+  cmFileLockResult LockWithTimeout(unsigned long timeoutSec);
 
 #if defined(_WIN32)
   typedef HANDLE FileId;
