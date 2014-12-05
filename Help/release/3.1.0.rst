@@ -245,6 +245,8 @@ Modules
 * The :module:`FindPkgConfig` module learned to use the ``PKG_CONFIG``
   environment variable value as the ``pkg-config`` executable, if set.
 
+* The :module:`FindXercesC` module was introduced.
+
 * The :module:`FindZLIB` module now provides imported targets.
 
 * The :module:`GenerateExportHeader` module ``generate_export_header``
