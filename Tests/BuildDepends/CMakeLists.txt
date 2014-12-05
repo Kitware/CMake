@@ -65,6 +65,7 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_exe.h
 set(link_depends_no_shared_check_txt ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_check.txt)
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external original\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi1-in.txt "multi1-in original\n")
 
 help_xcode_depends()
 
@@ -177,6 +178,19 @@ else()
     "external.out is missing")
 endif()
 
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt)
+  file(STRINGS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt multi1_out)
+  if("${multi1_out}" STREQUAL "multi1-in original")
+    message(STATUS "multi1-out2-copy.txt contains '${multi1_out}'")
+  else()
+    message(SEND_ERROR "Project did not initially build properly: "
+      "multi1-out2-copy.txt contains '${multi1_out}'")
+  endif()
+else()
+  message(SEND_ERROR "Project did not initially build properly: "
+    "multi1-out2-copy.txt is missing")
+endif()
+
 message("Waiting 3 seconds...")
 execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 3)
 
@@ -202,6 +216,7 @@ if(TEST_LINK_DEPENDS)
 endif()
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external changed\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi1-in.txt "multi1-in changed\n")
 
 help_xcode_depends()
 
@@ -318,4 +333,17 @@ if(EXISTS ${BuildDepends_BINARY_DIR}/Project/external.out)
 else()
   message(SEND_ERROR "Project did not rebuild properly: "
     "external.out is missing")
+endif()
+
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt)
+  file(STRINGS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt multi1_out)
+  if("${multi1_out}" STREQUAL "multi1-in changed")
+    message(STATUS "multi1-out2-copy.txt contains '${multi1_out}'")
+  else()
+    message(SEND_ERROR "Project did not rebuild properly: "
+      "multi1-out2-copy.txt contains '${multi1_out}'")
+  endif()
+else()
+  message(SEND_ERROR "Project did not rebuild properly: "
+    "multi1-out2-copy.txt is missing")
 endif()
