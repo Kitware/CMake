@@ -247,7 +247,9 @@ the ``<format>`` and ``UTC`` options.
 
 ::
 
-  file(GENERATE <options>...)
+  file(GENERATE OUTPUT output-file
+       <INPUT input-file|CONTENT content>
+       [CONDITION expression])
 
 Generate an output file for each build configuration supported by the current
 :manual:`CMake Generator <cmake-generators(7)>`.  Evaluate
