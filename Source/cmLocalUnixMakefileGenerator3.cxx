@@ -92,6 +92,7 @@ cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
   this->SkipAssemblySourceRules = false;
   this->MakeCommandEscapeTargetTwice = false;
   this->BorlandMakeCurlyHack = false;
+  this->NoMultiOutputMultiDepRules = false;
 }
 
 //----------------------------------------------------------------------------
@@ -695,6 +696,19 @@ cmLocalUnixMakefileGenerator3
     {
     // No dependencies.  The commands will always run.
     os << cmMakeSafe(tgt) << space << ":\n";
+    }
+  else if(this->NoMultiOutputMultiDepRules && outputs.size() >= 2)
+    {
+    // Borland make does not understand multiple dependency rules when
+    // there are multiple outputs, so write them all on one line.
+    os << cmMakeSafe(tgt) << space << ":";
+    for(std::vector<std::string>::const_iterator dep = depends.begin();
+        dep != depends.end(); ++dep)
+      {
+      replace = this->Convert(*dep, HOME_OUTPUT, MAKERULE);
+      os << " " << cmMakeSafe(replace);
+      }
+    os << "\n";
     }
   else
     {

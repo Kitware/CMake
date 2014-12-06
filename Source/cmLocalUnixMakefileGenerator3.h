@@ -161,6 +161,9 @@ public:
   void SetBorlandMakeCurlyHack(bool b)
     { this->BorlandMakeCurlyHack = b; }
 
+  void SetNoMultiOutputMultiDepRules(bool b)
+    { this->NoMultiOutputMultiDepRules = b; }
+
   // used in writing out Cmake files such as WriteDirectoryInformation
   static void WriteCMakeArgument(std::ostream& os, const char* s);
 
@@ -345,6 +348,7 @@ private:
   bool PassMakeflags;
   bool MakeCommandEscapeTargetTwice;
   bool BorlandMakeCurlyHack;
+  bool NoMultiOutputMultiDepRules;
   //==========================================================================
 
   std::string HomeRelativeOutputPath;
