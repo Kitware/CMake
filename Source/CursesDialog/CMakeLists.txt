@@ -47,4 +47,4 @@ else()
   target_link_libraries(ccmake cmForm)
 endif()
 
-install(TARGETS ccmake DESTINATION bin)
+install(TARGETS ccmake DESTINATION bin COMPONENT ccmake)

@@ -65,22 +65,48 @@ if(EXISTS "${CMAKE_ROOT}/Modules/CPack.cmake")
     endif()
   endif()
 
+  # Components
+  set(_CPACK_IFW_COMPONENTS_ALL cmake ctest cpack)
+  list(APPEND _CPACK_IFW_COMPONENTS_ALL data)
+  if(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME)
+    set(_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME
+      ${CMAKE_INSTALL_DEFAULT_COMPONENT_NAME})
+  else()
+    set(_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME Unspecified)
+  endif()
+  list(APPEND _CPACK_IFW_COMPONENTS_ALL ${_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME})
+  string(TOUPPER "${_CPACK_IFW_COMPONENT_UNSPECIFIED_NAME}"
+    _CPACK_IFW_COMPONENT_UNSPECIFIED_UNAME)
+  if(BUILD_CursesDialog)
+    list(APPEND _CPACK_IFW_COMPONENTS_ALL ccmake)
+  endif()
+  if(BUILD_QtDialog)
+    list(APPEND _CPACK_IFW_COMPONENTS_ALL cmake-gui)
+  endif()
+  if(SPHINX_HTML)
+    list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-html)
+  endif()
+  if(SPHINX_SINGLEHTML)
+    list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-singlehtml)
+  endif()
+  if(SPHINX_QTHELP)
+    list(APPEND _CPACK_IFW_COMPONENTS_ALL sphinx-qthelp)
+  endif()
+
+  # Components scripts configuration
+  foreach(_script
+    CMake
+    CMake.Documentation.SphinxHTML)
+    configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/${_script}.qs.in"
+      "${CMake_BINARY_DIR}/${_script}.qs" @ONLY)
+  endforeach()
+
   if(${CMAKE_SYSTEM_NAME} MATCHES Windows)
     set(_CPACK_IFW_PACKAGE_ICON
         "set(CPACK_IFW_PACKAGE_ICON \"${CMake_SOURCE_DIR}/Source/QtDialog/CMakeSetup.ico\")")
-    if(BUILD_QtDialog)
-      set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/bin/cmake-gui.exe\", \"@StartMenuDir@/CMake (cmake-gui).lnk\");\n")
-    endif()
-    if(SPHINX_HTML)
-      set(_CPACK_IFW_SHORTCUT_OPTIONAL "${_CPACK_IFW_SHORTCUT_OPTIONAL}component.addOperation(\"CreateShortcut\", \"@TargetDir@/doc/cmake-${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}/html/index.html\", \"@StartMenuDir@/CMake Documentation.lnk\");\n")
-    endif()
-    configure_file("${CMake_SOURCE_DIR}/Source/QtIFW/installscript.qs.in"
-      "${CMake_BINARY_DIR}/installscript.qs" @ONLY
-    )
     install(FILES "${CMake_SOURCE_DIR}/Source/QtIFW/cmake.org.html"
-      DESTINATION "."
+      DESTINATION "${CMAKE_DOC_DIR}"
     )
-    set(_CPACK_IFW_PACKAGE_SCRIPT "set(CPACK_IFW_COMPONENT_GROUP_CMAKE_SCRIPT \"${CMake_BINARY_DIR}/installscript.qs\")")
   endif()
 
   if(${CMAKE_SYSTEM_NAME} MATCHES Linux)

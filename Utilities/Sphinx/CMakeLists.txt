@@ -162,6 +162,7 @@ endif()
 if(SPHINX_HTML)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
           DESTINATION ${CMAKE_DOC_DIR}
+          COMPONENT sphinx-html
           PATTERN .buildinfo EXCLUDE
           )
 endif()
@@ -169,12 +170,13 @@ endif()
 if(SPHINX_SINGLEHTML)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/singlehtml
           DESTINATION ${CMAKE_DOC_DIR}
+          COMPONENT sphinx-singlehtml
           PATTERN .buildinfo EXCLUDE
           )
 endif()
 
 if(SPHINX_QTHELP)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake-${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}.qch
-          DESTINATION ${CMAKE_DOC_DIR}
+          DESTINATION ${CMAKE_DOC_DIR} COMPONENT sphinx-qthelp
           )
 endif()
