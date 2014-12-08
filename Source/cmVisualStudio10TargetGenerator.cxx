@@ -1637,6 +1637,11 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
         clOptions.AppendFlag("AdditionalIncludeDirectories",
                              "%(AdditionalIncludeDirectories)");
         }
+      if(clOptions.HasFlag("DisableSpecificWarnings"))
+        {
+        clOptions.AppendFlag("DisableSpecificWarnings",
+                             "%(DisableSpecificWarnings)");
+        }
       clOptions.AddDefines(configDefines.c_str());
       clOptions.SetConfiguration((*config).c_str());
       clOptions.OutputAdditionalOptions(*this->BuildFileStream, "      ", "");
