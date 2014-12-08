@@ -149,6 +149,8 @@ Create custom targets to build projects in external trees
     Add test step executed before install step
   ``TEST_AFTER_INSTALL 1``
     Add test step executed after install step
+  ``TEST_EXCLUDE_FROM_MAIN 1``
+    Main target does not depend on the test step
   ``TEST_COMMAND <cmd>...``
     Command to drive test
 
@@ -2193,12 +2195,13 @@ function(_ep_add_test_command name)
 
   get_property(before TARGET ${name} PROPERTY _EP_TEST_BEFORE_INSTALL)
   get_property(after TARGET ${name} PROPERTY _EP_TEST_AFTER_INSTALL)
+  get_property(exclude TARGET ${name} PROPERTY _EP_TEST_EXCLUDE_FROM_MAIN)
   get_property(cmd_set TARGET ${name} PROPERTY _EP_TEST_COMMAND SET)
 
   # Only actually add the test step if one of the test related properties is
   # explicitly set. (i.e. the test step is omitted unless requested...)
   #
-  if(cmd_set OR before OR after)
+  if(cmd_set OR before OR after OR exclude)
     if(cmd_set)
       get_property(cmd TARGET ${name} PROPERTY _EP_TEST_COMMAND)
     else()
@@ -2206,9 +2209,21 @@ function(_ep_add_test_command name)
     endif()
 
     if(before)
-      set(dep_args DEPENDEES build DEPENDERS install)
+      set(dependees_args DEPENDEES build)
     else()
-      set(dep_args DEPENDEES install)
+      set(dependees_args DEPENDEES install)
+    endif()
+
+    if(exclude)
+      set(dependers_args "")
+      set(exclude_args EXCLUDE_FROM_MAIN 1)
+    else()
+      if(before)
+        set(dependers_args DEPENDERS install)
+      else()
+        set(dependers_args "")
+      endif()
+      set(exclude_args "")
     endif()
 
     get_property(log TARGET ${name} PROPERTY _EP_LOG_TEST)
@@ -2221,7 +2236,9 @@ function(_ep_add_test_command name)
     ExternalProject_Add_Step(${name} test
       COMMAND ${cmd}
       WORKING_DIRECTORY ${binary_dir}
-      ${dep_args}
+      ${dependees_args}
+      ${dependers_args}
+      ${exclude_args}
       ${log}
       )
   endif()
