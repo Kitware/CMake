@@ -752,25 +752,22 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                            this->Target);
     }
 
-  // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      targetFullPathReal,
-                                      depends, commands, false);
-
-  // Some targets have more than one output file.  Create rules to
-  // drive the build if any extra outputs are missing.
-  std::vector<std::string> extraOutputs;
+  // Compute the list of outputs.
+  std::vector<std::string> outputs(1, targetFullPathReal);
   if(targetNameSO != targetNameReal)
     {
-    this->GenerateExtraOutput(targetFullPathSO.c_str(),
-                              targetFullPathReal.c_str());
+    outputs.push_back(targetFullPathSO);
     }
   if(targetName != targetNameSO &&
      targetName != targetNameReal)
     {
-    this->GenerateExtraOutput(targetFullPath.c_str(),
-                              targetFullPathReal.c_str());
+    outputs.push_back(targetFullPath);
     }
+
+  // Write the build rule.
+  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
+                                      outputs, depends, commands, false);
+
 
   // Write the main driver rule to build everything in this target.
   this->WriteTargetDriverRule(targetFullPath, relink);

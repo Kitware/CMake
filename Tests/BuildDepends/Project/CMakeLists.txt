@@ -151,3 +151,16 @@ ExternalProject_Add(ExternalBuild
     -Dexternal_out=${CMAKE_CURRENT_BINARY_DIR}/external.out
   INSTALL_COMMAND ""
   )
+
+add_custom_command(
+  OUTPUT multi1-out1.txt multi1-out2.txt
+  COMMAND ${CMAKE_COMMAND} -E copy multi1-in.txt multi1-out1.txt
+  COMMAND ${CMAKE_COMMAND} -E copy multi1-in.txt multi1-out2.txt
+  DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/multi1-in.txt
+  )
+add_custom_command(
+  OUTPUT multi1-out2-copy.txt
+  COMMAND ${CMAKE_COMMAND} -E copy multi1-out2.txt multi1-out2-copy.txt
+  DEPENDS multi1-out2.txt
+  )
+add_custom_target(multi1 ALL DEPENDS multi1-out2-copy.txt)
