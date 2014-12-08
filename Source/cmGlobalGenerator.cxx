@@ -2725,7 +2725,9 @@ void cmGlobalGenerator::AddToManifest(const std::string& config,
   // Add to the content listing for the file's directory.
   std::string dir = cmSystemTools::GetFilenamePath(f);
   std::string file = cmSystemTools::GetFilenameName(f);
-  this->DirectoryContentMap[dir].insert(file);
+  DirectoryContent& dc = this->DirectoryContentMap[dir];
+  dc.Generated.insert(file);
+  dc.All.insert(file);
 }
 
 //----------------------------------------------------------------------------
@@ -2733,25 +2735,32 @@ std::set<std::string> const&
 cmGlobalGenerator::GetDirectoryContent(std::string const& dir, bool needDisk)
 {
   DirectoryContent& dc = this->DirectoryContentMap[dir];
-  if(needDisk && !dc.LoadedFromDisk)
+  if(needDisk)
     {
-    // Load the directory content from disk.
-    cmsys::Directory d;
-    if(d.Load(dir))
+    long mt = cmSystemTools::ModifiedTime(dir);
+    if (mt != dc.LastDiskTime)
       {
-      unsigned long n = d.GetNumberOfFiles();
-      for(unsigned long i = 0; i < n; ++i)
+      // Reset to non-loaded directory content.
+      dc.All = dc.Generated;
+
+      // Load the directory content from disk.
+      cmsys::Directory d;
+      if(d.Load(dir))
         {
-        const char* f = d.GetFile(i);
-        if(strcmp(f, ".") != 0 && strcmp(f, "..") != 0)
+        unsigned long n = d.GetNumberOfFiles();
+        for(unsigned long i = 0; i < n; ++i)
           {
-          dc.insert(f);
+          const char* f = d.GetFile(i);
+          if(strcmp(f, ".") != 0 && strcmp(f, "..") != 0)
+            {
+            dc.All.insert(f);
+            }
           }
         }
+      dc.LastDiskTime = mt;
       }
-    dc.LoadedFromDisk = true;
     }
-  return dc;
+  return dc.All;
 }
 
 //----------------------------------------------------------------------------
