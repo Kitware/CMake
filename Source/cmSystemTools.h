@@ -458,8 +458,8 @@ public:
   static std::vector<std::string> tokenize(const std::string& str,
                                            const std::string& sep);
 
-  /** Convert string to int. Expected that the whole string is an integer */
-  static bool StringToInt(const char* str, int* value);
+  /** Convert string to long. Expected that the whole string is an integer */
+  static bool StringToLong(const char* str, long* value);
 
 #ifdef _WIN32
   struct WindowsFileRetry

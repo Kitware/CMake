@@ -60,7 +60,7 @@ void cmFileLockPool::PopFileScope()
 }
 
 cmFileLockResult cmFileLockPool::LockFunctionScope(
-    const std::string& filename, unsigned timeoutSec)
+    const std::string& filename, unsigned long timeoutSec)
 {
   if (this->IsAlreadyLocked(filename))
     {
@@ -74,7 +74,7 @@ cmFileLockResult cmFileLockPool::LockFunctionScope(
 }
 
 cmFileLockResult cmFileLockPool::LockFileScope(
-    const std::string& filename, unsigned timeoutSec)
+    const std::string& filename, unsigned long timeoutSec)
 {
   if (this->IsAlreadyLocked(filename))
     {
@@ -85,7 +85,7 @@ cmFileLockResult cmFileLockPool::LockFileScope(
 }
 
 cmFileLockResult cmFileLockPool::LockProcessScope(
-    const std::string& filename, unsigned timeoutSec)
+    const std::string& filename, unsigned long timeoutSec)
 {
   if (this->IsAlreadyLocked(filename))
     {
@@ -155,7 +155,7 @@ cmFileLockPool::ScopePool::~ScopePool()
 }
 
 cmFileLockResult cmFileLockPool::ScopePool::Lock(
-    const std::string& filename, unsigned timeoutSec)
+    const std::string& filename, unsigned long timeoutSec)
 {
   cmFileLock *lock = new cmFileLock();
   const cmFileLockResult result = lock->Lock(filename, timeoutSec);

@@ -45,13 +45,13 @@ class cmFileLockPool
     * @param timeoutSec Lock timeout. If -1 try until success or fatal error.
     */
   cmFileLockResult LockFunctionScope(
-      const std::string& filename, unsigned timeoutSec
+      const std::string& filename, unsigned long timeoutSec
   );
   cmFileLockResult LockFileScope(
-      const std::string& filename, unsigned timeoutSec
+      const std::string& filename, unsigned long timeoutSec
   );
   cmFileLockResult LockProcessScope(
-      const std::string& filename, unsigned timeoutSec
+      const std::string& filename, unsigned long timeoutSec
   );
   //@}
 
@@ -72,7 +72,9 @@ class cmFileLockPool
     ScopePool();
     ~ScopePool();
 
-    cmFileLockResult Lock(const std::string& filename, unsigned timeoutSec);
+    cmFileLockResult Lock(
+        const std::string& filename, unsigned long timeoutSec
+    );
     cmFileLockResult Release(const std::string& filename);
     bool IsAlreadyLocked(const std::string& filename) const;
 
