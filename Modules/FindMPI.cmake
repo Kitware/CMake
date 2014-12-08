@@ -188,6 +188,21 @@ foreach(SystemPrefixDir ${CMAKE_SYSTEM_PREFIX_PATH})
   endforeach()
 endforeach()
 
+function (_mpi_check_compiler compiler options cmdvar resvar)
+  execute_process(
+    COMMAND "${compiler}" ${options}
+    OUTPUT_VARIABLE  cmdline OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_VARIABLE   cmdline ERROR_STRIP_TRAILING_WHITESPACE
+    RESULT_VARIABLE  success)
+  # Intel MPI 5.0.1 will return a zero return code even when the
+  # argument to the MPI compiler wrapper is unknown.  Attempt to
+  # catch this case.
+  if("${cmdline}" MATCHES "undefined reference")
+    set(success 255 )
+  endif()
+  set(${cmdvar} "${cmdline}" PARENT_SCOPE)
+  set(${resvar} "${success}" PARENT_SCOPE)
+endfunction()
 
 #
 # interrogate_mpi_compiler(lang try_libs)
@@ -220,12 +235,7 @@ function (interrogate_mpi_compiler lang try_libs)
     if (MPI_${lang}_COMPILER)
       # Check whether the -showme:compile option works. This indicates that we have either OpenMPI
       # or a newer version of LAM-MPI, and implies that -showme:link will also work.
-      execute_process(
-        COMMAND ${MPI_${lang}_COMPILER} -showme:compile
-        OUTPUT_VARIABLE  MPI_COMPILE_CMDLINE OUTPUT_STRIP_TRAILING_WHITESPACE
-        ERROR_VARIABLE   MPI_COMPILE_CMDLINE ERROR_STRIP_TRAILING_WHITESPACE
-        RESULT_VARIABLE  MPI_COMPILER_RETURN)
-
+      _mpi_check_compiler("${MPI_${lang}_COMPILER}" "-showme:compile" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
       if (MPI_COMPILER_RETURN EQUAL 0)
         # If we appear to have -showme:compile, then we should
         # also have -showme:link. Try it.
@@ -257,20 +267,12 @@ function (interrogate_mpi_compiler lang try_libs)
 
       # Older versions of LAM-MPI have "-showme". Try to find that.
       if (NOT MPI_COMPILER_RETURN EQUAL 0)
-        execute_process(
-          COMMAND ${MPI_${lang}_COMPILER} -showme
-          OUTPUT_VARIABLE  MPI_COMPILE_CMDLINE OUTPUT_STRIP_TRAILING_WHITESPACE
-          ERROR_VARIABLE   MPI_COMPILE_CMDLINE ERROR_STRIP_TRAILING_WHITESPACE
-          RESULT_VARIABLE  MPI_COMPILER_RETURN)
+        _mpi_check_compiler("${MPI_${lang}_COMPILER}" "-showme" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
       endif()
 
       # MVAPICH uses -compile-info and -link-info.  Try them.
       if (NOT MPI_COMPILER_RETURN EQUAL 0)
-        execute_process(
-          COMMAND ${MPI_${lang}_COMPILER} -compile-info
-          OUTPUT_VARIABLE  MPI_COMPILE_CMDLINE OUTPUT_STRIP_TRAILING_WHITESPACE
-          ERROR_VARIABLE   MPI_COMPILE_CMDLINE ERROR_STRIP_TRAILING_WHITESPACE
-          RESULT_VARIABLE  MPI_COMPILER_RETURN)
+        _mpi_check_compiler("${MPI_${lang}_COMPILER}" "-compile-info" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
 
         # If we have compile-info, also have link-info.
         if (MPI_COMPILER_RETURN EQUAL 0)
@@ -290,11 +292,7 @@ function (interrogate_mpi_compiler lang try_libs)
 
       # MPICH just uses "-show". Try it.
       if (NOT MPI_COMPILER_RETURN EQUAL 0)
-        execute_process(
-          COMMAND ${MPI_${lang}_COMPILER} -show
-          OUTPUT_VARIABLE  MPI_COMPILE_CMDLINE OUTPUT_STRIP_TRAILING_WHITESPACE
-          ERROR_VARIABLE   MPI_COMPILE_CMDLINE ERROR_STRIP_TRAILING_WHITESPACE
-          RESULT_VARIABLE  MPI_COMPILER_RETURN)
+        _mpi_check_compiler("${MPI_${lang}_COMPILER}" "-show" MPI_COMPILE_CMDLINE MPI_COMPILER_RETURN)
       endif()
 
       if (MPI_COMPILER_RETURN EQUAL 0)
