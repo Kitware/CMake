@@ -1093,17 +1093,6 @@ The ``RELEASE`` variant should be listed first in the property
 so that that variant is chosen if the user uses a configuration which is
 not an exact match for any listed ``IMPORTED_CONFIGURATIONS``.
 
-We should also provide some information about the package, such as where to
-download it.
-
-.. code-block:: cmake
-
-  include(FeatureSummary)
-  set_package_properties(Foo PROPERTIES
-    URL "http://www.foo.example.com/"
-    DESCRIPTION "A library for doing useful things"
-  )
-
 Most of the cache variables should be hidden in the ``ccmake`` interface unless
 the user explicitly asks to edit them.
 
