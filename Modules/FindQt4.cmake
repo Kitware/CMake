@@ -1321,7 +1321,7 @@ endif()
 
 if (NOT QT_VERSION_MAJOR EQUAL 4)
     set(VERSION_MSG "Found unsuitable Qt version \"${QTVERSION}\" from ${QT_QMAKE_EXECUTABLE}")
-    set(QT4_FOUND FALSE)
+    set(Qt4_FOUND FALSE)
     if(Qt4_FIND_REQUIRED)
        message( FATAL_ERROR "${VERSION_MSG}, this code requires Qt 4.x")
     else()
