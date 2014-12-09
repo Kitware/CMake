@@ -1115,17 +1115,6 @@ not any of its dependencies.  Instead, those dependencies should also be
 targets, and CMake should be told that they are dependencies of this target.
 CMake will then combine all the necessary information automatically.
 
-We should also provide some information about the package, such as where to
-download it.
-
-.. code-block:: cmake
-
-  include(FeatureSummary)
-  set_package_properties(Foo PROPERTIES
-    URL "http://www.foo.example.com/"
-    DESCRIPTION "A library for doing useful things"
-  )
-
 Most of the cache variables should be hidden in the ``ccmake`` interface unless
 the user explicitly asks to edit them.
 
