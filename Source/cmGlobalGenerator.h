@@ -255,9 +255,9 @@ public:
   cmTargetManifest const& GetTargetManifest() const
     { return this->TargetManifest; }
 
-  /** Get the content of a directory.  Directory listings are loaded
-      from disk at most once and cached.  During the generation step
-      the content will include the target files to be built even if
+  /** Get the content of a directory.  Directory listings are cached
+      and re-loaded from disk only when modified.  During the generation
+      step the content will include the target files to be built even if
       they do not yet exist.  */
   std::set<std::string> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
@@ -486,13 +486,14 @@ private:
   virtual const char* GetBuildIgnoreErrorsFlag() const { return 0; }
 
   // Cache directory content and target files to be built.
-  struct DirectoryContent: public std::set<std::string>
+  struct DirectoryContent
   {
-    typedef std::set<std::string> derived;
-    bool LoadedFromDisk;
-    DirectoryContent(): LoadedFromDisk(false) {}
+    long LastDiskTime;
+    std::set<std::string> All;
+    std::set<std::string> Generated;
+    DirectoryContent(): LastDiskTime(-1) {}
     DirectoryContent(DirectoryContent const& dc):
-      derived(dc), LoadedFromDisk(dc.LoadedFromDisk) {}
+      LastDiskTime(dc.LastDiskTime), All(dc.All), Generated(dc.Generated) {}
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 
