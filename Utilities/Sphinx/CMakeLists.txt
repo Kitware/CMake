@@ -154,7 +154,8 @@ if(SPHINX_MAN)
       set(name "${CMAKE_MATCH_1}")
       set(sec "${CMAKE_MATCH_2}")
       install(FILES ${CMAKE_CURRENT_BINARY_DIR}/man/${name}.${sec}
-              DESTINATION ${CMAKE_MAN_DIR}/man${sec})
+              DESTINATION ${CMAKE_MAN_DIR}/man${sec}
+              COMPONENT sphinx-man)
     endif()
   endforeach()
 endif()
