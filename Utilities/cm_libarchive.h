@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cm_libarchive_h
-#define __cm_libarchive_h
+#ifndef cm_libarchive_h
+#define cm_libarchive_h
 
 /* Use the libarchive configured for CMake.  */
 #include "cmThirdParty.h"

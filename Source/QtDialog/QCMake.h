@@ -10,8 +10,8 @@
   See the License for more information.
 ============================================================================*/
 
-#ifndef __QCMake_h
-#define __QCMake_h
+#ifndef QCMake_h
+#define QCMake_h
 #ifdef _MSC_VER
 #pragma warning ( disable : 4127 )
 #pragma warning ( disable : 4512 )
@@ -152,5 +152,5 @@ protected:
   QAtomicInt InterruptFlag;
 };
 
-#endif // __QCMake_h
+#endif // QCMake_h
 

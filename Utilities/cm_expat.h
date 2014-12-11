@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cm_expat_h
-#define __cm_expat_h
+#ifndef cm_expat_h
+#define cm_expat_h
 
 /* Use the expat library configured for CMake.  */
 #include "cmThirdParty.h"

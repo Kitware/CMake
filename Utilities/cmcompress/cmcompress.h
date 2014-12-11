@@ -35,8 +35,8 @@
  * SUCH DAMAGE.
  */
 
-#ifndef __cmcompress__h_
-#define __cmcompress__h_
+#ifndef cmcompress__h_
+#define cmcompress__h_
 
 #include <stdio.h>
 
@@ -192,4 +192,4 @@ extern "C"
 #endif
 
 
-#endif /* __cmcompress__h_ */
+#endif /* cmcompress__h_ */

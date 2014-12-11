@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cmCursesFilePathWidget_h
-#define __cmCursesFilePathWidget_h
+#ifndef cmCursesFilePathWidget_h
+#define cmCursesFilePathWidget_h
 
 #include "cmCursesPathWidget.h"
 
@@ -25,4 +25,4 @@ protected:
 
 };
 
-#endif // __cmCursesFilePathWidget_h
+#endif // cmCursesFilePathWidget_h

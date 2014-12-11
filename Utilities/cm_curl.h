@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cm_curl_h
-#define __cm_curl_h
+#ifndef cm_curl_h
+#define cm_curl_h
 
 /* Use the curl library configured for CMake.  */
 #include "cmThirdParty.h"

@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cmCursesPathWidget_h
-#define __cmCursesPathWidget_h
+#ifndef cmCursesPathWidget_h
+#define cmCursesPathWidget_h
 
 #include "cmCursesStringWidget.h"
 
@@ -37,4 +37,4 @@ protected:
   std::string::size_type CurrentIndex;
 };
 
-#endif // __cmCursesPathWidget_h
+#endif // cmCursesPathWidget_h

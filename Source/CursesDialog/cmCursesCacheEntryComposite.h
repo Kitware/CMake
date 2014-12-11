@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cmCursesCacheEntryComposite_h
-#define __cmCursesCacheEntryComposite_h
+#ifndef cmCursesCacheEntryComposite_h
+#define cmCursesCacheEntryComposite_h
 
 #include "../cmCacheManager.h"
 #include "cmCursesLabelWidget.h"
@@ -40,4 +40,4 @@ protected:
   int EntryWidth;
 };
 
-#endif // __cmCursesCacheEntryComposite_h
+#endif // cmCursesCacheEntryComposite_h
