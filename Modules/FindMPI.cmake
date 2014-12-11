@@ -174,6 +174,7 @@ set(_MPI_EXEC_NAMES                        mpiexec mpirun lamexec srun)
 # Grab the path to MPI from the registry if we're on windows.
 set(_MPI_PREFIX_PATH)
 if(WIN32)
+  list(APPEND _MPI_PREFIX_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MPI;InstallRoot]/Bin")
   list(APPEND _MPI_PREFIX_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH\\SMPD;binary]/..")
   list(APPEND _MPI_PREFIX_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MPICH2;Path]")
   list(APPEND _MPI_PREFIX_PATH "$ENV{ProgramW6432}/MPICH2/")
