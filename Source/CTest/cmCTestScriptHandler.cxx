@@ -183,7 +183,7 @@ int cmCTestScriptHandler::ProcessHandler()
   for (size_t i=0; i <  this->ConfigurationScripts.size(); ++i)
     {
     // for each script run it
-    res += this->RunConfigurationScript
+    res |= this->RunConfigurationScript
       (cmSystemTools::CollapseFullPath(this->ConfigurationScripts[i]),
        this->ScriptProcessScope[i]);
     }
