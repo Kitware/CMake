@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cm_bzlib_h
-#define __cm_bzlib_h
+#ifndef cm_bzlib_h
+#define cm_bzlib_h
 
 /* Use the bzip2 library configured for CMake.  */
 #include "cmThirdParty.h"

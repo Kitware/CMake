@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cmCursesLabelWidget_h
-#define __cmCursesLabelWidget_h
+#ifndef cmCursesLabelWidget_h
+#define cmCursesLabelWidget_h
 
 #include "cmCursesWidget.h"
 #include "cmCursesStandardIncludes.h"
@@ -35,4 +35,4 @@ protected:
   void operator=(const cmCursesLabelWidget&);
 };
 
-#endif // __cmCursesLabelWidget_h
+#endif // cmCursesLabelWidget_h

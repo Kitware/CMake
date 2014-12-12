@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cmThirdParty_h
-#define __cmThirdParty_h
+#ifndef cmThirdParty_h
+#define cmThirdParty_h
 
 /* Whether CMake is using its own utility libraries.  */
 #cmakedefine CMAKE_USE_SYSTEM_CURL

@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cm_lzma_h
-#define __cm_lzma_h
+#ifndef cm_lzma_h
+#define cm_lzma_h
 
 /* Use the liblzma configured for CMake.  */
 #include "cmThirdParty.h"

@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cm_xmlrpc_h
-#define __cm_xmlrpc_h
+#ifndef cm_xmlrpc_h
+#define cm_xmlrpc_h
 
 /* Use the xmlrpc library configured for CMake.  */
 #include "cmThirdParty.h"
