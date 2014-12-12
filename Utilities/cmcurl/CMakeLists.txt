@@ -460,7 +460,11 @@ if(CMAKE_USE_OPENSSL)
       add_definitions(-DCURL_CA_BUNDLE="${CURL_CA_BUNDLE}")
     endif()
   endif(OPENSSL_FOUND)
-endif(CMAKE_USE_OPENSSL)
+elseif(WIN32)
+  # Use Windows SSL/TLS native implementation.
+  add_definitions(-DUSE_SCHANNEL)
+  set(USE_WINDOWS_SSPI 1)
+endif()
 
 #libSSH2
 option(CMAKE_USE_LIBSSH2 "Use libSSH2" ON)
