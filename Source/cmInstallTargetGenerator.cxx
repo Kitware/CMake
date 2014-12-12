@@ -95,7 +95,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     case cmTarget::INTERFACE_LIBRARY:
       // Not reachable. We never create a cmInstallTargetGenerator for
       // an INTERFACE_LIBRARY.
-      assert(!"INTERFACE_LIBRARY targets have no installable outputs.");
+      assert(0 && "INTERFACE_LIBRARY targets have no installable outputs.");
       break;
     case cmTarget::OBJECT_LIBRARY:
     case cmTarget::UTILITY:

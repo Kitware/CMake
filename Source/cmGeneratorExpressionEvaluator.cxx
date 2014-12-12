@@ -1429,7 +1429,7 @@ cmPolicies::PolicyStatus statusForTarget(cmTarget const* tgt,
 
 #undef RETURN_POLICY
 
-  assert("!Unreachable code. Not a valid policy");
+  assert(0 && "Unreachable code. Not a valid policy");
   return cmPolicies::WARN;
 }
 
@@ -1445,7 +1445,7 @@ cmPolicies::PolicyID policyForString(const char *policy_id)
 
 #undef RETURN_POLICY_ID
 
-  assert("!Unreachable code. Not a valid policy");
+  assert(0 && "Unreachable code. Not a valid policy");
   return cmPolicies::CMP0002;
 }
 

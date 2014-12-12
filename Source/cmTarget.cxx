@@ -4856,7 +4856,7 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
   switch(t)
   {
   case BoolType:
-    assert(!"consistentProperty for strings called with BoolType");
+    assert(0 && "consistentProperty for strings called with BoolType");
     return std::pair<bool, const char*>(false, null_ptr);
   case StringType:
     return consistentStringProperty(lhs, rhs);
@@ -4864,7 +4864,7 @@ std::pair<bool, const char*> consistentProperty(const char *lhs,
   case NumberMaxType:
     return consistentNumberProperty(lhs, rhs, t);
   }
-  assert(!"Unreachable!");
+  assert(0 && "Unreachable!");
   return std::pair<bool, const char*>(false, null_ptr);
 }
 
@@ -4949,7 +4949,7 @@ std::string compatibilityType(CompatibleType t)
     case NumberMinType:
       return "Numeric minimum compatibility";
     }
-  assert(!"Unreachable!");
+  assert(0 && "Unreachable!");
   return "";
 }
 
@@ -4965,7 +4965,7 @@ std::string compatibilityAgree(CompatibleType t, bool dominant)
     case NumberMinType:
       return dominant ? "(Dominant)\n" : "(Ignored)\n";
     }
-  assert(!"Unreachable!");
+  assert(0 && "Unreachable!");
   return "";
 }
 
@@ -6578,7 +6578,7 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
   switch(t)
   {
   case BoolType:
-    assert(!"String compatibility check function called for boolean");
+    assert(0 && "String compatibility check function called for boolean");
     return 0;
   case StringType:
     return tgt->GetLinkInterfaceDependentStringProperty(prop, config);
@@ -6587,7 +6587,7 @@ const char * getLinkInterfaceDependentProperty(cmTarget const* tgt,
   case NumberMaxType:
     return tgt->GetLinkInterfaceDependentNumberMaxProperty(prop, config);
   }
-  assert(!"Unreachable!");
+  assert(0 && "Unreachable!");
   return 0;
 }
 
