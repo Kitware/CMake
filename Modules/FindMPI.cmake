@@ -364,7 +364,7 @@ function (interrogate_mpi_compiler lang try_libs)
         endif()
 
         # Extract linker flags from the link command line
-        string(REGEX MATCHALL "(^| )-Wl,([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
+        string(REGEX MATCHALL "(^| )(-Wl,|-Xlinker )([^\" ]+|\"[^\"]+\")" MPI_ALL_LINK_FLAGS "${MPI_LINK_CMDLINE}")
         set(MPI_LINK_FLAGS_WORK)
         foreach(FLAG ${MPI_ALL_LINK_FLAGS})
           if (MPI_LINK_FLAGS_WORK)
