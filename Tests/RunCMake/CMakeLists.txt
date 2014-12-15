@@ -1,7 +1,7 @@
 # See adjacent README.rst for documentation of this test infrastructure.
 
 macro(add_RunCMake_test test)
-  add_test(RunCMake.${test} ${CMAKE_CMAKE_COMMAND}
+  add_test(NAME RunCMake.${test} COMMAND ${CMAKE_CMAKE_COMMAND}
     -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
     -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
     -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
