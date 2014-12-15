@@ -1241,7 +1241,7 @@ function(_ep_write_log_script name step cmd_var)
 
   set(make "")
   set(code_cygpath_make "")
-  if("${command}" MATCHES "^\\$\\(MAKE\\)")
+  if(command MATCHES "^\\$\\(MAKE\\)")
     # GNU make recognizes the string "$(MAKE)" as recursive make, so
     # ensure that it appears directly in the makefile.
     string(REGEX REPLACE "^\\$\\(MAKE\\)" "\${make}" command "${command}")
@@ -1273,7 +1273,7 @@ endif()
 
   # Wrap multiple 'COMMAND' lines up into a second-level wrapper
   # script so all output can be sent to one log file.
-  if("${command}" MATCHES ";COMMAND;")
+  if(command MATCHES ";COMMAND;")
     set(code_execute_process "
 ${code_cygpath_make}
 execute_process(COMMAND \${command} RESULT_VARIABLE result)
