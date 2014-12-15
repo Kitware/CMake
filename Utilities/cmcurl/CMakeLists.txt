@@ -464,6 +464,25 @@ elseif(WIN32)
   # Use Windows SSL/TLS native implementation.
   add_definitions(-DUSE_SCHANNEL)
   set(USE_WINDOWS_SSPI 1)
+elseif(APPLE)
+  # Use OS X SSL/TLS native implementation if available on target version.
+  if(CMAKE_OSX_DEPLOYMENT_TARGET)
+    set(OSX_VERSION ${CMAKE_OSX_DEPLOYMENT_TARGET})
+  else()
+    execute_process(
+      COMMAND sw_vers -productVersion
+      OUTPUT_VARIABLE OSX_VERSION
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif()
+  if(NOT OSX_VERSION VERSION_LESS 10.6 AND
+     CMAKE_C_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+    add_definitions(-DUSE_DARWINSSL)
+    list(APPEND CURL_LIBS
+      "-framework CoreFoundation"
+      "-framework Security"
+      )
+  endif()
 endif()
 
 #libSSH2
