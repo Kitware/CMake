@@ -9,6 +9,7 @@ macro(add_RunCMake_test test)
     -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test}
     -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${test}
     ${${test}_ARGS}
+    ${ARGN}
     -P "${CMAKE_CURRENT_SOURCE_DIR}/${test}/RunCMakeTest.cmake"
     )
 endmacro()
@@ -131,8 +132,7 @@ if (QT4_FOUND AND Qt5Core_FOUND AND NOT Qt5Core_VERSION VERSION_LESS 5.1.0)
   add_RunCMake_test(IncompatibleQt)
 endif()
 if (QT4_FOUND)
-  set(ObsoleteQtMacros_ARGS -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE})
-  add_RunCMake_test(ObsoleteQtMacros)
+  add_RunCMake_test(ObsoleteQtMacros -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE})
 endif()
 
 find_package(PkgConfig QUIET)
