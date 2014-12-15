@@ -508,3 +508,18 @@ export(TARGETS testExe2 testLib4 testLib5 testLib6 testExe3 testExe2lib
   )
 
 add_subdirectory(Interface)
+
+#-----------------------------------------------------------------------------
+# Install export with absolute destination but relative pieces.
+add_library(testLibAbs1 STATIC testLibAbs1.c)
+target_include_directories(testLibAbs1 INTERFACE
+  "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/abs/1a;include/abs/1b>"
+  )
+install(
+  TARGETS testLibAbs1
+  EXPORT expAbs
+  ARCHIVE DESTINATION lib
+  INCLUDES DESTINATION include/abs
+  )
+install(DIRECTORY include/abs DESTINATION include)
+install(EXPORT expAbs NAMESPACE expAbs_ DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/expAbs)

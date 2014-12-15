@@ -96,6 +96,16 @@ foreach(c DEBUG RELWITHDEBINFO)
 endforeach()
 
 #-----------------------------------------------------------------------------
+include(${CMAKE_INSTALL_PREFIX}/lib/expAbs/expAbs.cmake)
+
+add_executable(imp_testExeAbs1
+  imp_testExeAbs1.c
+  )
+target_link_libraries(imp_testExeAbs1
+  expAbs_testLibAbs1
+  )
+
+#-----------------------------------------------------------------------------
 # Create a custom target to generate a header for the libraries below.
 # Drive the header generation through an indirect chain of imported
 # target dependencies.
