@@ -82,6 +82,9 @@ The options are:
   (``CMakeLists.txt`` file).  They will be brought up to date when
   the target is built.
 
+  Use the :command:`add_dependencies` command to add dependencies
+  on other targets.
+
 ``SOURCES``
   Specify additional source files to be included in the custom target.
   Specified source files will be added to IDE project files for
