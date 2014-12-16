@@ -23,7 +23,7 @@ target_link_libraries(memcheck_fail CMakeLib)
 # Binaries that are used as memchecker that do not write the expected
 # output file. Need to be in their own subdirectory as they have the
 # same filenames.
-add_subdirectory(NoLogDummyChecker)
+add_subdirectory(NoLog)
 
 # Xcode 2.x forgets to create the output directory before linking
 # the individual architectures.
