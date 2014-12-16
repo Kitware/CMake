@@ -1,0 +1,3 @@
+^((^|
+)(BullseyeCoverage|==|ctest\([0-9]+\) malloc:)[^
+]*)*$
