@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0)
 project(VSNsightTegra C CXX)
 
+set(CMAKE_ANDROID_API_MIN 9)
 set(CMAKE_ANDROID_API 15)
 set(CMAKE_ANDROID_GUI 1)
 

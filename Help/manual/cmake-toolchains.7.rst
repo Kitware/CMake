@@ -256,5 +256,6 @@ like this:
 The :variable:`CMAKE_GENERATOR_TOOLSET` may be set to select
 the Nsight Tegra "Toolchain Version" value.
 
-See the :prop_tgt:`ANDROID_API` and :prop_tgt:`ANDROID_GUI`
-target properties to configure targets within the project.
+See the :prop_tgt:`ANDROID_API_MIN`, :prop_tgt:`ANDROID_API`
+and :prop_tgt:`ANDROID_GUI` target properties to configure
+targets within the project.
