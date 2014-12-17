@@ -136,8 +136,6 @@ public:
         break;
         }
       pos = lastoffset+1;
-      endnamepos = 0;
-      lastoffset =0;
       }
     /*
     *  Glob through the source directory for the

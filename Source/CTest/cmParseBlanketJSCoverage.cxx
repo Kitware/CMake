@@ -81,7 +81,6 @@ public:
               this->Coverage.TotalCoverage[filename];
           CoverageVector = localCoverageVector;
           localCoverageVector.clear();
-          foundFile=false;
           }
         foundFile= true;
         inSource = false;
@@ -122,7 +121,6 @@ public:
     FileLinesType& CoverageVector =
         this->Coverage.TotalCoverage[filename];
     CoverageVector = localCoverageVector;
-    foundFile=false;
     localCoverageVector.clear();
     return true;
     }
