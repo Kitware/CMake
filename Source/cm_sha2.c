@@ -663,7 +663,7 @@ void SHA1_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 			context->s1.bitcount += freespace << 3;
 			len -= freespace;
 			data += freespace;
-			SHA1_Internal_Transform(context, (sha_word32*)context->s1.buffer);
+			SHA1_Internal_Transform(context, (const sha_word32*)context->s1.buffer);
 		} else {
 			/* The buffer is not yet full */
 			MEMCPY_BCOPY(&context->s1.buffer[usedspace], data, len);
@@ -675,7 +675,7 @@ void SHA1_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 	}
 	while (len >= 64) {
 		/* Process as many complete blocks as we can */
-		SHA1_Internal_Transform(context, (sha_word32*)data);
+		SHA1_Internal_Transform(context, (const sha_word32*)data);
 		context->s1.bitcount += 512;
 		len -= 64;
 		data += 64;
@@ -724,7 +724,7 @@ void SHA1_Final(sha_byte digest[], SHA_CTX* context) {
 				MEMSET_BZERO(&context->s1.buffer[usedspace], 64 - usedspace);
 			}
 			/* Do second-to-last transform: */
-			SHA1_Internal_Transform(context, (sha_word32*)context->s1.buffer);
+			SHA1_Internal_Transform(context, (const sha_word32*)context->s1.buffer);
 
 			/* And set-up for the last transform: */
 			MEMSET_BZERO(context->s1.buffer, 56);
@@ -741,7 +741,7 @@ void SHA1_Final(sha_byte digest[], SHA_CTX* context) {
 		     sizeof(sha_word64));
 
 	/* Final transform: */
-	SHA1_Internal_Transform(context, (sha_word32*)context->s1.buffer);
+	SHA1_Internal_Transform(context, (const sha_word32*)context->s1.buffer);
 
 	/* Save the hash data for output: */
 #if BYTE_ORDER == LITTLE_ENDIAN
@@ -1004,7 +1004,7 @@ void SHA256_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 			context->s256.bitcount += freespace << 3;
 			len -= freespace;
 			data += freespace;
-			SHA256_Internal_Transform(context, (sha_word32*)context->s256.buffer);
+			SHA256_Internal_Transform(context, (const sha_word32*)context->s256.buffer);
 		} else {
 			/* The buffer is not yet full */
 			MEMCPY_BCOPY(&context->s256.buffer[usedspace], data, len);
@@ -1016,7 +1016,7 @@ void SHA256_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 	}
 	while (len >= 64) {
 		/* Process as many complete blocks as we can */
-		SHA256_Internal_Transform(context, (sha_word32*)data);
+		SHA256_Internal_Transform(context, (const sha_word32*)data);
 		context->s256.bitcount += 512;
 		len -= 64;
 		data += 64;
@@ -1050,7 +1050,7 @@ void SHA256_Internal_Last(SHA_CTX* context) {
 				MEMSET_BZERO(&context->s256.buffer[usedspace], 64 - usedspace);
 			}
 			/* Do second-to-last transform: */
-			SHA256_Internal_Transform(context, (sha_word32*)context->s256.buffer);
+			SHA256_Internal_Transform(context, (const sha_word32*)context->s256.buffer);
 
 			/* And set-up for the last transform: */
 			MEMSET_BZERO(context->s256.buffer, 56);
@@ -1069,7 +1069,7 @@ void SHA256_Internal_Last(SHA_CTX* context) {
 		     sizeof(sha_word64));
 
 	/* Final transform: */
-	SHA256_Internal_Transform(context, (sha_word32*)context->s256.buffer);
+	SHA256_Internal_Transform(context, (const sha_word32*)context->s256.buffer);
 }
 
 void SHA256_Final(sha_byte digest[], SHA_CTX* context) {
@@ -1412,7 +1412,7 @@ void SHA512_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 			ADDINC128(context->s512.bitcount, freespace << 3);
 			len -= freespace;
 			data += freespace;
-			SHA512_Internal_Transform(context, (sha_word64*)context->s512.buffer);
+			SHA512_Internal_Transform(context, (const sha_word64*)context->s512.buffer);
 		} else {
 			/* The buffer is not yet full */
 			MEMCPY_BCOPY(&context->s512.buffer[usedspace], data, len);
@@ -1424,7 +1424,7 @@ void SHA512_Update(SHA_CTX* context, const sha_byte *data, size_t len) {
 	}
 	while (len >= 128) {
 		/* Process as many complete blocks as we can */
-		SHA512_Internal_Transform(context, (sha_word64*)data);
+		SHA512_Internal_Transform(context, (const sha_word64*)data);
 		ADDINC128(context->s512.bitcount, 1024);
 		len -= 128;
 		data += 128;
@@ -1459,7 +1459,7 @@ void SHA512_Internal_Last(SHA_CTX* context) {
 				MEMSET_BZERO(&context->s512.buffer[usedspace], 128 - usedspace);
 			}
 			/* Do second-to-last transform: */
-			SHA512_Internal_Transform(context, (sha_word64*)context->s512.buffer);
+			SHA512_Internal_Transform(context, (const sha_word64*)context->s512.buffer);
 
 			/* And set-up for the last transform: */
 			MEMSET_BZERO(context->s512.buffer, 112);
@@ -1480,7 +1480,7 @@ void SHA512_Internal_Last(SHA_CTX* context) {
 		     sizeof(sha_word64));
 
 	/* Final transform: */
-	SHA512_Internal_Transform(context, (sha_word64*)context->s512.buffer);
+	SHA512_Internal_Transform(context, (const sha_word64*)context->s512.buffer);
 }
 
 void SHA512_Final(sha_byte digest[], SHA_CTX* context) {
