@@ -1202,6 +1202,10 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
     return;
     }
   std::string ofile = files[0];
+  if ( ofile.empty() )
+    {
+    return;
+    }
   // put a scope around this to close ifs so the file can be removed
   {
   cmsys::ifstream ifs(ofile.c_str());
