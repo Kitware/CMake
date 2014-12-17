@@ -203,13 +203,18 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const kwsys_stl::string& na
 #include <sys/types.h>
 #include <dirent.h>
 
-/* There is a problem with the Portland compiler, large file
-support and glibc/Linux system headers: 
-http://www.pgroup.com/userforum/viewtopic.php?
-p=1992&sid=f16167f51964f1a68fe5041b8eb213b6
-*/
-#if defined(__PGI) && defined(__USE_FILE_OFFSET64)
-# define dirent dirent64
+// PGI with glibc has trouble with dirent and large file support:
+//  http://www.pgroup.com/userforum/viewtopic.php?
+//  p=1992&sid=f16167f51964f1a68fe5041b8eb213b6
+// Work around the problem by mapping dirent the same way as readdir.
+#if defined(__PGI) && defined(__GLIBC__)
+# define kwsys_dirent_readdir dirent
+# define kwsys_dirent_readdir64 dirent64
+# define kwsys_dirent kwsys_dirent_lookup(readdir)
+# define kwsys_dirent_lookup(x) kwsys_dirent_lookup_delay(x)
+# define kwsys_dirent_lookup_delay(x) kwsys_dirent_##x
+#else
+# define kwsys_dirent dirent
 #endif
 
 namespace KWSYS_NAMESPACE
@@ -226,7 +231,7 @@ bool Directory::Load(const kwsys_stl::string& name)
     return 0;
     }
 
-  for (dirent* d = readdir(dir); d; d = readdir(dir) )
+  for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir) )
     {
     this->Internal->Files.push_back(d->d_name);
     }
@@ -240,7 +245,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const kwsys_stl::string& na
   DIR* dir = opendir(name.c_str());
 
   unsigned long count = 0;
-  for (dirent* d = readdir(dir); d; d = readdir(dir) )
+  for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir) )
     {
     count++;
     }

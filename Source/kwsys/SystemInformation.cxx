@@ -443,7 +443,7 @@ public:
     };
 
 protected:
-  // Functions.
+  // For windows
   bool RetrieveCPUFeatures();
   bool RetrieveCPUIdentity();
   bool RetrieveCPUCacheDetails();
@@ -457,6 +457,7 @@ protected:
   bool RetrieveClassicalCPUIdentity();
   bool RetrieveExtendedCPUIdentity();
 
+  // Processor information
   Manufacturer  ChipManufacturer;
   CPUFeatures   Features;
   ID            ChipID;
@@ -464,11 +465,11 @@ protected:
   unsigned int  NumberOfLogicalCPU;
   unsigned int  NumberOfPhysicalCPU;
 
-  int CPUCount();
+  int CPUCount(); // For windows
   unsigned char LogicalCPUPerPhysicalCPU();
-  unsigned char GetAPICId();
+  unsigned char GetAPICId(); // For windows
   bool IsHyperThreadingSupported();
-  static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int);
+  static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int); // For windows
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
   bool RetreiveInformationFromCpuInfoFile();
@@ -3753,9 +3754,9 @@ bool SystemInformationImplementation::QueryWindowsMemory()
   }
 #  define MEM_VAL(value) ull##value
 # endif
-  tv = ms.MEM_VAL(TotalVirtual);
+  tv = ms.MEM_VAL(TotalPageFile);
   tp = ms.MEM_VAL(TotalPhys);
-  av = ms.MEM_VAL(AvailVirtual);
+  av = ms.MEM_VAL(AvailPageFile);
   ap = ms.MEM_VAL(AvailPhys);
   this->TotalVirtualMemory = tv>>10>>10;
   this->TotalPhysicalMemory = tp>>10>>10;
