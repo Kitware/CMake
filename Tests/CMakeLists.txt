@@ -1247,6 +1247,10 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endif()
 
+  if(CMake_TEST_FindGSL)
+    add_subdirectory(FindGSL)
+  endif()
+
   find_package(GTK2 QUIET)
   if(GTK2_FOUND)
     add_subdirectory(FindGTK2)

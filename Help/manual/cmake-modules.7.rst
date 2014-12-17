@@ -108,6 +108,7 @@ All Modules
    /module/FindGLUT
    /module/FindGnuplot
    /module/FindGnuTLS
+   /module/FindGSL
    /module/FindGTest
    /module/FindGTK2
    /module/FindGTK
