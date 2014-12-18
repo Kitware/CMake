@@ -8,8 +8,13 @@ set(MAKE "${MAKE_PROGRAM} -j5")
 set(CPACK_BINARY_GENERATORS "DragNDrop TGZ TZ")
 set(CPACK_SOURCE_GENERATORS "TGZ TZ")
 set(CPACK_DMG_FORMAT "UDBZ") #build using bzip2 for smaller package size
+if(CMAKE_CREATE_VERSION STREQUAL "nightly")
+  set(CMAKE_USE_OPENSSL OFF)
+else()
+  set(CMAKE_USE_OPENSSL ON)
+endif()
 set(INITIAL_CACHE "
-CMAKE_USE_OPENSSL:BOOL=ON
+CMAKE_USE_OPENSSL:BOOL=${CMAKE_USE_OPENSSL}
 OPENSSL_CRYPTO_LIBRARY:FILEPATH=/Users/kitware/openssl-1.0.1g-install/lib/libcrypto.a
 OPENSSL_INCLUDE_DIR:PATH=/Users/kitware/openssl-1.0.1g-install/include
 OPENSSL_SSL_LIBRARY:FILEPATH=/Users/kitware/openssl-1.0.1g-install/lib/libssl.a
