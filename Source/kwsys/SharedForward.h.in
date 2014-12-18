@@ -65,6 +65,15 @@
   See the comments below for specific explanations of each macro.
 */
 
+/* Disable -Wcast-qual warnings since they are too hard to fix in a
+   cross-platform way.  */
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wcast-qual")
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wcast-qual"
+# endif
+#endif
+
 /*--------------------------------------------------------------------------*/
 
 /* Full path to the directory in which this executable is built.  Do
@@ -916,6 +925,13 @@ static int @KWSYS_NAMESPACE@_shared_forward_to_real(int argc, char** argv_in)
   /* Exit with failure.  */
   return 1;
 }
+
+/* Restore warning stack.  */
+#if defined(__clang__) && defined(__has_warning)
+# if __has_warning("-Wcast-qual")
+#  pragma clang diagnostic pop
+# endif
+#endif
 
 #else
 # error "@KWSYS_NAMESPACE@/SharedForward.h should be included only once."
