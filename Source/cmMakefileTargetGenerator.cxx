@@ -1193,13 +1193,7 @@ void cmMakefileTargetGenerator
   depends.push_back(source.GetFullPath());
   if(const char* objectDeps = source.GetProperty("OBJECT_DEPENDS"))
     {
-    std::vector<std::string> deps;
-    cmSystemTools::ExpandListArgument(objectDeps, deps);
-    for(std::vector<std::string>::iterator i = deps.begin();
-        i != deps.end(); ++i)
-      {
-      depends.push_back(*i);
-      }
+    cmSystemTools::ExpandListArgument(objectDeps, depends);
     }
 }
 

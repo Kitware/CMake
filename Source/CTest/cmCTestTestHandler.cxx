@@ -2153,25 +2153,11 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           if ( key == "ATTACHED_FILES" )
             {
-            std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
-
-            for(std::vector<std::string>::iterator f = lval.begin();
-                f != lval.end(); ++f)
-              {
-              rtit->AttachedFiles.push_back(*f);
-              }
+            cmSystemTools::ExpandListArgument(val, rtit->AttachedFiles);
             }
           if ( key == "ATTACHED_FILES_ON_FAIL" )
             {
-            std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
-
-            for(std::vector<std::string>::iterator f = lval.begin();
-                f != lval.end(); ++f)
-              {
-              rtit->AttachOnFail.push_back(*f);
-              }
+            cmSystemTools::ExpandListArgument(val, rtit->AttachOnFail);
             }
           if ( key == "RESOURCE_LOCK" )
             {
@@ -2195,14 +2181,7 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           if ( key == "REQUIRED_FILES" )
             {
-            std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
-
-            for(std::vector<std::string>::iterator f = lval.begin();
-                f != lval.end(); ++f)
-              {
-              rtit->RequiredFiles.push_back(*f);
-              }
+            cmSystemTools::ExpandListArgument(val, rtit->RequiredFiles);
             }
           if ( key == "RUN_SERIAL" )
             {
@@ -2239,33 +2218,15 @@ bool cmCTestTestHandler::SetTestsProperties(
             }
           if ( key == "DEPENDS" )
             {
-            std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
-            std::vector<std::string>::iterator crit;
-            for ( crit = lval.begin(); crit != lval.end(); ++ crit )
-              {
-              rtit->Depends.push_back(*crit);
-              }
+            cmSystemTools::ExpandListArgument(val, rtit->Depends);
             }
           if ( key == "ENVIRONMENT" )
             {
-            std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
-            std::vector<std::string>::iterator crit;
-            for ( crit = lval.begin(); crit != lval.end(); ++ crit )
-              {
-              rtit->Environment.push_back(*crit);
-              }
+            cmSystemTools::ExpandListArgument(val, rtit->Environment);
             }
           if ( key == "LABELS" )
             {
-            std::vector<std::string> lval;
-            cmSystemTools::ExpandListArgument(val, lval);
-            std::vector<std::string>::iterator crit;
-            for ( crit = lval.begin(); crit != lval.end(); ++ crit )
-              {
-              rtit->Labels.push_back(*crit);
-              }
+            cmSystemTools::ExpandListArgument(val, rtit->Labels);
             }
           if ( key == "MEASUREMENT" )
             {
