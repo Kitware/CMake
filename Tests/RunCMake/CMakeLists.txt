@@ -52,6 +52,19 @@ add_RunCMake_test(CMP0053)
 add_RunCMake_test(CMP0054)
 add_RunCMake_test(CMP0055)
 add_RunCMake_test(CTest)
+
+if(NOT CMake_TEST_EXTERNAL_CMAKE)
+  add_RunCMake_test(CTestMemcheck
+    -DPSEUDO_BC=$<TARGET_FILE:pseudo_BC>
+    -DPSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
+    -DPSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
+    -DPSEUDO_BC_NOLOG=$<TARGET_FILE:pseudonl_BC>
+    -DPSEUDO_PURIFY_NOLOG=$<TARGET_FILE:pseudonl_purify>
+    -DPSEUDO_VALGRIND_NOLOG=$<TARGET_FILE:pseudonl_valgrind>
+    -DMEMCHECK_FAIL=$<TARGET_FILE:memcheck_fail>
+    )
+endif()
+
 if(UNIX AND "${CMAKE_GENERATOR}" MATCHES "Unix Makefiles|Ninja")
   add_RunCMake_test(CompilerChange)
 endif()

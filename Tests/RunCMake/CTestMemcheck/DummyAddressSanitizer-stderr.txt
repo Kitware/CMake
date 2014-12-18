@@ -1,0 +1,2 @@
+Cannot find memory tester output file: .*/Tests/RunCMake/CTestMemcheck/DummyAddressSanitizer-build/Testing/Temporary/MemoryChecker.1.log\.\*
+Error in read script: .*/Tests/RunCMake/CTestMemcheck/DummyAddressSanitizer/test.cmake

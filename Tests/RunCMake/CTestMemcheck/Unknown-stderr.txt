@@ -1,0 +1,2 @@
+Do not understand memory checker: .*/cmake.*
+Error in read script: .*/Tests/RunCMake/CTestMemcheck/Unknown/test.cmake

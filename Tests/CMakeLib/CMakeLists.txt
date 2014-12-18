@@ -48,3 +48,5 @@ if(TEST_CompileCommandOutput)
   add_executable(runcompilecommands run_compile_commands.cxx)
   target_link_libraries(runcompilecommands CMakeLib)
 endif()
+
+add_subdirectory(PseudoMemcheck)

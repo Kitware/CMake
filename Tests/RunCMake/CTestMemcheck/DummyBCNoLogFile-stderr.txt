@@ -1,0 +1,3 @@
+Cannot find memory tester output file: .*/Tests/RunCMake/CTestMemcheck/DummyBCNoLogFile-build/Testing/Temporary/MemoryChecker.1.log
+.*Error parsing XML in stream at line 1: no element found
+Error in read script: .*/Tests/RunCMake/CTestMemcheck/DummyBCNoLogFile/test.cmake

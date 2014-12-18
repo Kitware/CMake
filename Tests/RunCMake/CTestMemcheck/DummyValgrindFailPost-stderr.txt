@@ -1,0 +1,3 @@
+Problem running command: .*memcheck_fail.*
+Problem executing post-memcheck command\(s\).
+Error in read script: .*/Tests/RunCMake/CTestMemcheck/DummyValgrindFailPost/test.cmake

@@ -110,10 +110,6 @@ if(BUILD_TESTING)
 
   add_subdirectory(FindPackageModeMakefileTest)
 
-  if(NOT CMake_TEST_EXTERNAL_CMAKE)
-    add_subdirectory(CTestTestMemcheck)
-  endif()
-
   # Collect a list of all test build directories.
   set(TEST_BUILD_DIRS)
 
