@@ -206,6 +206,7 @@ Variables that Control the Build
    :maxdepth: 1
 
    /variable/CMAKE_ANDROID_API
+   /variable/CMAKE_ANDROID_API_MIN
    /variable/CMAKE_ANDROID_GUI
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    /variable/CMAKE_AUTOMOC_MOC_OPTIONS

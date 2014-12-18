@@ -748,6 +748,12 @@ void cmVisualStudio10TargetGenerator
   ntv += toolset? toolset : "Default";
   ntv += "</NdkToolchainVersion>\n";
   this->WriteString(ntv.c_str(), 2);
+  if(const char* minApi = this->Target->GetProperty("ANDROID_API_MIN"))
+    {
+    this->WriteString("<AndroidMinAPI>", 2);
+    (*this->BuildFileStream ) <<
+      "android-" << cmVS10EscapeXML(minApi) << "</AndroidMinAPI>\n";
+    }
   if(const char* api = this->Target->GetProperty("ANDROID_API"))
     {
     this->WriteString("<AndroidTargetAPI>", 2);
