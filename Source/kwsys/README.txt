@@ -8,3 +8,5 @@ details.
 You are probably reading this file in the source tree of a surrounding
 project.  In that case, see "../README.kwsys" for details of using
 KWSys in your project.
+
+See CONTRIBUTING.rst for instructions to contribute KWSys changes.
