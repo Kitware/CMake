@@ -83,13 +83,9 @@ protected:
                                  std::set<std::string>& importedLocations
                                 );
 
-  void ComplainAboutImportPrefix(cmInstallTargetGenerator* itgen);
-
   std::string InstallNameDir(cmTarget* target, const std::string& config);
 
   cmInstallExportGenerator* IEGen;
-
-  std::string ImportPrefix;
 
   // The import file generated for each configuration.
   std::map<std::string, std::string> ConfigImportFiles;
