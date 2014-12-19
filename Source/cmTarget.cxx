@@ -4057,15 +4057,8 @@ void cmTarget::GetFullNameInternal(const std::string& config,
 
   if(this->IsCFBundleOnApple())
     {
-    fw_prefix = this->GetOutputName(config, false);
-    fw_prefix += ".";
-    const char *ext = this->GetProperty("BUNDLE_EXTENSION");
-    if (!ext)
-      {
-      ext = "bundle";
-      }
-    fw_prefix += ext;
-    fw_prefix += "/Contents/MacOS/";
+    fw_prefix = this->GetCFBundleDirectory(config, false);
+    fw_prefix += "/";
     targetPrefix = fw_prefix.c_str();
     targetSuffix = 0;
     }
