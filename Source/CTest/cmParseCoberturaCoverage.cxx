@@ -12,9 +12,11 @@ public:
   XMLParser(cmCTest* ctest, cmCTestCoverageHandlerContainer& cont)
     : CTest(ctest), Coverage(cont)
   {
-   this->InSources = false;
-   this->InSource  = false;
+   this->InSources     = false;
+   this->InSource      = false;
+   this->SkipThisClass = false;
    this->FilePaths.push_back(this->Coverage.SourceDir);
+   this->FilePaths.push_back(this->Coverage.BinaryDir);
    this->CurFileName = "";
   }
 
@@ -35,6 +37,10 @@ protected:
      {
      this->InSources=false;
      }
+    else if(name == "class")
+      {
+      this->SkipThisClass = false;
+      }
   }
 
   virtual void CharacterDataHandler(const char* data, int length)
@@ -72,15 +78,33 @@ protected:
                      << atts[tagCount+1]<< std::endl);
           std::string filename = atts[tagCount+1];
           this->CurFileName = "";
+
+          // Check if this is an absolute path that falls within our
+          // source or binary directories.
           for(size_t i=0;i < FilePaths.size();i++)
             {
-            finalpath = FilePaths[i] + "/" + filename;
-            if(cmSystemTools::FileExists(finalpath.c_str()))
+            if (filename.find(FilePaths[i]) == 0)
               {
-              this->CurFileName = finalpath;
+              this->CurFileName = filename;
               break;
               }
             }
+
+          if (this->CurFileName == "")
+            {
+            // Check if this is a path that is relative to our source or
+            // binary directories.
+            for(size_t i=0;i < FilePaths.size();i++)
+              {
+              finalpath = FilePaths[i] + "/" + filename;
+              if(cmSystemTools::FileExists(finalpath.c_str()))
+                {
+                this->CurFileName = finalpath;
+                break;
+                }
+              }
+            }
+
           cmsys::ifstream fin(this->CurFileName.c_str());
           if(this->CurFileName == "" || !fin )
           {
@@ -89,10 +113,11 @@ protected:
             fin.open(this->CurFileName.c_str());
             if (!fin)
             {
-              cmCTestLog(this->CTest, ERROR_MESSAGE,
-                         "Python Coverage: Error opening " << this->CurFileName
-                         << std::endl);
-              this->Coverage.Error++;
+              cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                         "Skipping system file " << filename <<
+                         std::endl);
+
+              this->SkipThisClass = true;
               break;
             }
           }
@@ -117,6 +142,10 @@ protected:
       int curHits = -1;
       while(true)
       {
+        if(this->SkipThisClass)
+          {
+          break;
+          }
         if(strcmp(atts[tagCount], "hits") == 0)
         {
           curHits = atoi(atts[tagCount+1]);
@@ -144,6 +173,7 @@ private:
 
   bool InSources;
   bool InSource;
+  bool SkipThisClass;
   std::vector<std::string> FilePaths;
   typedef cmCTestCoverageHandlerContainer::SingleFileCoverageVector
      FileLinesType;
