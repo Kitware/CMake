@@ -145,7 +145,7 @@ if ${cmake_system_linux}; then
     cmake_machine_parisc=true
   fi
 elif ${cmake_system_hpux}; then
-  if !(uname -m | grep ia64 >/dev/null 2>&1); then
+  if uname -m | grep ia64 >/dev/null 2>&1; then : ; else
     cmake_machine_parisc=true
   fi
 fi
