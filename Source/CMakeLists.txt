@@ -39,6 +39,10 @@ else()
   set(CMAKE_USE_ELF_PARSER)
 endif()
 
+if(APPLE)
+  set(CMAKE_USE_MACH_PARSER 1)
+endif()
+
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
 # ensure Unicode friendly APIs are used on Windows
@@ -138,6 +142,11 @@ endif()
 # Check if we can build the ELF parser.
 if(CMAKE_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
+endif()
+
+# Check if we can build the Mach-O parser.
+if(CMAKE_USE_MACH_PARSER)
+  set(MACH_SRCS cmMachO.h cmMachO.cxx)
 endif()
 
 #
@@ -267,6 +276,7 @@ set(SRCS
   cmLocalGenerator.cxx
   cmLocalGenerator.h
   cmLocalUnixMakefileGenerator3.cxx
+  ${MACH_SRCS}
   cmMakeDepend.cxx
   cmMakeDepend.h
   cmMakefile.cxx
