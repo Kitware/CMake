@@ -964,6 +964,7 @@ cmCPackPackageMakerGenerator::CreateChoice(const cmCPackComponent& component,
   std::string dirName = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
   dirName += '/';
   dirName += component.Name;
+  dirName += this->GetOption("CPACK_PACKAGING_INSTALL_PREFIX");
   unsigned long installedSize
     = component.GetInstalledSizeInKbytes(dirName.c_str());
 
