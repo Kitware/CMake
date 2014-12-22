@@ -63,6 +63,10 @@
 # include "cmELF.h"
 #endif
 
+#if defined(CMAKE_USE_MACH_PARSER)
+# include "cmMachO.h"
+#endif
+
 class cmSystemToolsFileTime
 {
 public:
@@ -2357,31 +2361,17 @@ bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
 bool cmSystemTools::GuessLibraryInstallName(std::string const& fullPath,
                                        std::string& soname)
 {
-  std::vector<std::string> cmds;
-  cmds.push_back("otool");
-  cmds.push_back("-D");
-  cmds.push_back(fullPath);
-
-  std::string output;
-  if(!RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE))
+#if defined(CMAKE_USE_MACH_PARSER)
+  cmMachO macho(fullPath.c_str());
+  if(macho)
     {
-    cmds.insert(cmds.begin(), "-r");
-    cmds.insert(cmds.begin(), "xcrun");
-    if(!RunSingleCommand(cmds, &output, 0, 0, OUTPUT_NONE))
-      {
-      return false;
-      }
+    return macho.GetInstallName(soname);
     }
+#else
+  (void)fullPath;
+  (void)soname;
+#endif
 
-  std::vector<std::string> strs = cmSystemTools::tokenize(output, "\n");
-  // otool returns extra lines reporting multiple install names
-  // in case the binary is multi-arch and none of the architectures
-  // is native (e.g. i386;ppc on x86_64)
-  if(strs.size() >= 2)
-    {
-    soname = strs[1];
-    return true;
-    }
   return false;
 }
 
