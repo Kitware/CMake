@@ -110,7 +110,7 @@
 #
 # DESCRIPTION is an extended description of the component, used in
 # graphical installers to give the user additional information about the
-# component.  Descriptions can span multiple lines using "\n" as the
+# component.  Descriptions can span multiple lines using ``\n`` as the
 # line separator.  Typically, these descriptions should be no more than
 # a few lines long.
 #
@@ -185,7 +185,7 @@
 # DESCRIPTION is an extended description of the component group, used in
 # graphical installers to give the user additional information about the
 # components within that group.  Descriptions can span multiple lines
-# using "\n" as the line separator.  Typically, these descriptions
+# using ``\n`` as the line separator.  Typically, these descriptions
 # should be no more than a few lines long.
 #
 # PARENT_GROUP, if supplied, names the parent group of this group.
