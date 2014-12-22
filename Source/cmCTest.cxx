@@ -1688,7 +1688,7 @@ std::string cmCTest::Base64GzipEncodeFile(std::string file)
 //----------------------------------------------------------------------
 std::string cmCTest::Base64EncodeFile(std::string file)
 {
-  long len = cmSystemTools::FileLength(file);
+  size_t const len = cmSystemTools::FileLength(file);
   cmsys::ifstream ifs(file.c_str(), std::ios::in
 #ifdef _WIN32
     | std::ios::binary
@@ -1699,8 +1699,7 @@ std::string cmCTest::Base64EncodeFile(std::string file)
   ifs.close();
 
   unsigned char *encoded_buffer
-    = new unsigned char [ static_cast<int>(
-        static_cast<double>(len) * 1.5 + 5.0) ];
+    = new unsigned char [ (len * 3) / 2 + 5 ];
 
   unsigned long rlen
     = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
@@ -3192,7 +3191,7 @@ bool cmCTest::CompressString(std::string& str)
 
   // Now base64 encode the resulting binary string
   unsigned char* base64EncodedBuffer
-    = new unsigned char[static_cast<int>(outSize * 1.5)];
+    = new unsigned char[(outSize * 3) / 2];
 
   unsigned long rlen
     = cmsysBase64_Encode(out, strm.total_out, base64EncodedBuffer, 1);
