@@ -1317,7 +1317,7 @@ void cmCTestTestHandler::AttachFiles(std::ostream& os,
       result->Properties->AttachedFiles.begin();
       file != result->Properties->AttachedFiles.end(); ++file)
     {
-    std::string base64 = this->CTest->Base64GzipEncodeFile(*file);
+    const std::string &base64 = this->CTest->Base64GzipEncodeFile(*file);
     std::string fname = cmSystemTools::GetFilenameName(*file);
     os << "\t\t<NamedMeasurement name=\"Attached File\" encoding=\"base64\" "
       "compression=\"tar/gzip\" filename=\"" << fname << "\" type=\"file\">"
