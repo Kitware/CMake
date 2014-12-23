@@ -585,7 +585,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     if ( cmSystemTools::GetLineFromStream(ifs, line) )
       {
       cmOStringStream ostr;
-      ostr <<  "Looks like there are more lines in the file: " << line;
+      ostr <<  "Looks like there are more lines in the file: " << fullFileName;
       errorsWhileAccumulating.push_back(ostr.str());
       }
     float cper = 0;
