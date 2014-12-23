@@ -6,17 +6,36 @@
 #
 # This module finds an installed Latex and determines the location
 # of the compiler.  Additionally the module looks for Latex-related
-# software like BibTeX.  This code sets the following variables:
+# software like BibTeX.
 #
-# ::
+# This module sets the following result variables::
 #
+#   LATEX_FOUND:          whether found Latex and requested components
+#   LATEX_<component>_FOUND:  whether found <component>
 #   LATEX_COMPILER:       path to the LaTeX compiler
 #   PDFLATEX_COMPILER:    path to the PdfLaTeX compiler
 #   BIBTEX_COMPILER:      path to the BibTeX compiler
 #   MAKEINDEX_COMPILER:   path to the MakeIndex compiler
 #   DVIPS_CONVERTER:      path to the DVIPS converter
+#   DVIPDF_CONVERTER:     path to the DVIPDF converter
 #   PS2PDF_CONVERTER:     path to the PS2PDF converter
 #   LATEX2HTML_CONVERTER: path to the LaTeX2Html converter
+#
+# Possible components are::
+#
+#   PDFLATEX
+#   BIBTEX
+#   MAKEINDEX
+#   DVIPS
+#   DVIPDF
+#   PS2PDF
+#   LATEX2HTML
+#
+# Example Usages::
+#
+#   find_package(LATEX)
+#   find_package(LATEX COMPONENTS PDFLATEX)
+#   find_package(LATEX COMPONENTS BIBTEX PS2PDF)
 
 #=============================================================================
 # Copyright 2002-2014 Kitware, Inc.
@@ -32,9 +51,7 @@
 #  License text for the above reference.)
 
 if (WIN32)
-
   # Try to find the MikTex binary path (look for its package manager).
-
   find_path(MIKTEX_BINARY_PATH mpm.exe
     "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MiK\\MiKTeX\\CurrentVersion\\MiKTeX;Install Root]/miktex/bin"
     DOC
@@ -43,7 +60,6 @@ if (WIN32)
   mark_as_advanced(MIKTEX_BINARY_PATH)
 
   # Try to find the GhostScript binary path (look for gswin32).
-
   get_filename_component(GHOSTSCRIPT_BINARY_PATH_FROM_REGISTERY_8_00
      "[HKEY_LOCAL_MACHINE\\SOFTWARE\\AFPL Ghostscript\\8.00;GS_DLL]" PATH
   )
@@ -64,45 +80,76 @@ if (WIN32)
     DOC "Path to the GhostScript library directory."
   )
   mark_as_advanced(GHOSTSCRIPT_LIBRARY_PATH)
-
 endif ()
 
+# try to find Latex and the related programs
 find_program(LATEX_COMPILER
   NAMES latex
   PATHS ${MIKTEX_BINARY_PATH}
         /usr/bin
 )
 
+# find pdflatex
 find_program(PDFLATEX_COMPILER
   NAMES pdflatex
   PATHS ${MIKTEX_BINARY_PATH}
         /usr/bin
 )
+if (PDFLATEX_COMPILER)
+  set(LATEX_PDFLATEX_FOUND TRUE)
+else()
+  set(LATEX_PDFLATEX_FOUND FALSE)
+endif()
 
+# find bibtex
 find_program(BIBTEX_COMPILER
   NAMES bibtex
   PATHS ${MIKTEX_BINARY_PATH}
         /usr/bin
 )
+if (BIBTEX_COMPILER)
+  set(LATEX_BIBTEX_FOUND TRUE)
+else()
+  set(LATEX_BIBTEX_FOUND FALSE)
+endif()
 
+# find makeindex
 find_program(MAKEINDEX_COMPILER
   NAMES makeindex
   PATHS ${MIKTEX_BINARY_PATH}
         /usr/bin
 )
+if (MAKEINDEX_COMPILER)
+  set(LATEX_MAKEINDEX_FOUND TRUE)
+else()
+  set(LATEX_MAKEINDEX_FOUND FALSE)
+endif()
 
+# find dvips
 find_program(DVIPS_CONVERTER
   NAMES dvips
   PATHS ${MIKTEX_BINARY_PATH}
         /usr/bin
 )
+if (DVIPS_CONVERTER)
+  set(LATEX_DVIPS_FOUND TRUE)
+else()
+  set(LATEX_DVIPS_FOUND FALSE)
+endif()
 
+# find dvipdf
 find_program(DVIPDF_CONVERTER
   NAMES dvipdfm dvipdft dvipdf
   PATHS ${MIKTEX_BINARY_PATH}
         /usr/bin
 )
+if (DVIPDF_CONVERTER)
+  set(LATEX_DVIPDF_FOUND TRUE)
+else()
+  set(LATEX_DVIPDF_FOUND FALSE)
+endif()
 
+# find ps2pdf
 if (WIN32)
   find_program(PS2PDF_CONVERTER
     NAMES ps2pdf14.bat ps2pdf14 ps2pdf
@@ -114,12 +161,23 @@ else ()
     NAMES ps2pdf14 ps2pdf
   )
 endif ()
+if (PS2PDF_CONVERTER)
+  set(LATEX_PS2PDF_FOUND TRUE)
+else()
+  set(LATEX_PS2PDF_FOUND FALSE)
+endif()
 
+# find latex2html
 find_program(LATEX2HTML_CONVERTER
   NAMES latex2html
   PATHS ${MIKTEX_BINARY_PATH}
         /usr/bin
 )
+if (LATEX2HTML_CONVERTER)
+  set(LATEX_LATEX2HTML_FOUND TRUE)
+else()
+  set(LATEX_LATEX2HTML_FOUND FALSE)
+endif()
 
 
 mark_as_advanced(
@@ -133,7 +191,9 @@ mark_as_advanced(
   LATEX2HTML_CONVERTER
 )
 
+# handle variables for found Latex and its components
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-find_package_handle_standard_args(Latex
+find_package_handle_standard_args(LATEX
   REQUIRED_VARS LATEX_COMPILER
+  HANDLE_COMPONENTS
 )
