@@ -14,6 +14,8 @@
 
 #include <@KWSYS_NAMESPACE@/Configure.h>
 
+#include <stddef.h> /* size_t */
+
 /* Redefine all public interface symbol names to be in the proper
    namespace.  These macros are used internally to kwsys only, and are
    not visible to user code.  Use kwsysHeaderDump.pl to reproduce
@@ -68,10 +70,10 @@ kwsysEXPORT void kwsysBase64_Encode1(const unsigned char *src,
  * the extra padding needed to complete the encode 4 bytes will stop
  * the decoding anyway).
  */
-kwsysEXPORT unsigned long kwsysBase64_Encode(const unsigned char *input,
-                                             unsigned long length,
-                                             unsigned char *output,
-                                             int mark_end);
+kwsysEXPORT size_t kwsysBase64_Encode(const unsigned char *input,
+                                      size_t length,
+                                      unsigned char *output,
+                                      int mark_end);
 
 /**
  * Decode 4 bytes into a 3 byte string.  Returns the number of bytes
@@ -92,10 +94,10 @@ kwsysEXPORT int kwsysBase64_Decode3(const unsigned char *src,
  * much decoded data to expect (of course, the buffer must be large
  * enough).
  */
-kwsysEXPORT unsigned long kwsysBase64_Decode(const unsigned char *input, 
-                                             unsigned long length,
-                                             unsigned char *output,
-                                             unsigned long max_input_length);
+kwsysEXPORT size_t kwsysBase64_Decode(const unsigned char *input,
+                                      size_t length,
+                                      unsigned char *output,
+                                      size_t max_input_length);
 
 #if defined(__cplusplus)
 } /* extern "C" */

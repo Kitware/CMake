@@ -115,10 +115,10 @@ void kwsysBase64_Encode1(const unsigned char *src, unsigned char *dest)
    actually knowing how much data to expect (if the input is not a multiple of
    3 bytes then the extra padding needed to complete the encode 4 bytes will
    stop the decoding anyway).  */
-unsigned long kwsysBase64_Encode(const unsigned char *input,
-                                 unsigned long length,
-                                 unsigned char *output,
-                                 int mark_end)
+size_t kwsysBase64_Encode(const unsigned char *input,
+                          size_t length,
+                          unsigned char *output,
+                          int mark_end)
 {
   const unsigned char *ptr = input;
   const unsigned char *end = input + length;
@@ -157,7 +157,7 @@ unsigned long kwsysBase64_Encode(const unsigned char *input,
     optr += 4;
     }
 
-  return (unsigned long)(optr - output);
+  return (size_t)(optr - output);
 }
 
 /*--------------------------------------------------------------------------*/
@@ -207,10 +207,10 @@ int kwsysBase64_Decode3(const unsigned char *src, unsigned char *dest)
    'length' parameter is ignored. This enables the caller to decode a stream
    without actually knowing how much decoded data to expect (of course, the
    buffer must be large enough). */
-unsigned long kwsysBase64_Decode(const unsigned char *input, 
-                                 unsigned long length,
-                                 unsigned char *output,
-                                 unsigned long max_input_length)
+size_t kwsysBase64_Decode(const unsigned char *input,
+                          size_t length,
+                          unsigned char *output,
+                          size_t max_input_length)
 {
   const unsigned char *ptr = input;
   unsigned char *optr = output;
@@ -226,7 +226,7 @@ unsigned long kwsysBase64_Decode(const unsigned char *input,
       optr += len;
       if(len < 3)
         {
-        return (unsigned long)(optr - output);
+        return (size_t)(optr - output);
         }
       ptr += 4;
       }
@@ -240,7 +240,7 @@ unsigned long kwsysBase64_Decode(const unsigned char *input,
       optr += len;
       if(len < 3)
         {
-        return (unsigned long)(optr - output);
+        return (size_t)(optr - output);
         }
       ptr += 4;
       }
@@ -275,5 +275,5 @@ unsigned long kwsysBase64_Decode(const unsigned char *input,
       }
     }
 
-  return (unsigned long)(optr - output);
+  return (size_t)(optr - output);
 }
