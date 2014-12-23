@@ -2368,14 +2368,7 @@ bool cmQtAutoGenerators::GenerateQrc()
               = this->RccOptions.find(*si);
       if (optionIt != this->RccOptions.end())
         {
-        std::vector<std::string> opts;
-        cmSystemTools::ExpandListArgument(optionIt->second, opts);
-        for(std::vector<std::string>::const_iterator optIt = opts.begin();
-            optIt != opts.end();
-            ++optIt)
-          {
-          command.push_back(*optIt);
-          }
+        cmSystemTools::ExpandListArgument(optionIt->second, command);
         }
 
       command.push_back("-name");
