@@ -116,10 +116,10 @@ void cmCTestRunTest::CompressOutput()
   unsigned char *encoded_buffer
     = new unsigned char[static_cast<int>(outSize * 1.5)];
 
-  unsigned long rlen
+  size_t rlen
     = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
 
-  for(unsigned long i = 0; i < rlen; i++)
+  for(size_t i = 0; i < rlen; i++)
     {
     this->CompressedOutput += encoded_buffer[i];
     }

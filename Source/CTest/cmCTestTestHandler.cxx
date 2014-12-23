@@ -1976,9 +1976,8 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
             = new unsigned char [ static_cast<int>(
                 static_cast<double>(len) * 1.5 + 5.0) ];
 
-          unsigned long rlen
+          size_t rlen
             = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
-          unsigned long cc;
 
           ostr
             << "\t\t\t<NamedMeasurement"
@@ -1988,7 +1987,7 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
             << measurementfile.match(4) << "\""
             << " encoding=\"base64\""
             << ">" << std::endl << "\t\t\t\t<Value>";
-          for ( cc = 0; cc < rlen; cc ++ )
+          for (size_t cc = 0; cc < rlen; cc ++ )
             {
             ostr << encoded_buffer[cc];
             if ( cc % 60 == 0 && cc )
