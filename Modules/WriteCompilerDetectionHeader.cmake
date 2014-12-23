@@ -100,7 +100,7 @@
 #    write_compiler_detection_header(
 #      FILE climbingstats_compiler_detection.h
 #      PREFIX ClimbingStats
-#      COMPILERS GNU Clang
+#      COMPILERS GNU Clang AppleClang
 #      FEATURES cxx_variadic_templates
 #    )
 #
@@ -315,6 +315,7 @@ function(write_compiler_detection_header
   set(compilers
     GNU
     Clang
+    AppleClang
   )
 
   set(_hex_compilers ADSP Borland Embarcadero SunPro)
@@ -513,7 +514,7 @@ function(write_compiler_detection_header
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} alignas(X)
-#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
+#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
 #    define ${def_value} __attribute__ ((__aligned__(X)))
 #  else
 #    define ${def_value}
@@ -525,7 +526,7 @@ function(write_compiler_detection_header
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} alignof(X)
-#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang
+#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
 #    define ${def_value} __alignof__(X)
 #  endif
 \n")
