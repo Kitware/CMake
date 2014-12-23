@@ -454,7 +454,10 @@ cmNinjaTargetGenerator
   std::vector<std::string> compileCmds;
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
-  compileCmds.front().insert(0, cldeps);
+  if (!compileCmds.empty())
+    {
+    compileCmds.front().insert(0, cldeps);
+    }
 
   for (std::vector<std::string>::iterator i = compileCmds.begin();
        i != compileCmds.end(); ++i)
