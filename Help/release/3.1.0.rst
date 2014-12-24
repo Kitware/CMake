@@ -353,6 +353,28 @@ Deprecated and Removed Features
 
   CMake 3.1 again requires the quotes for this to work correctly.
 
+* Prior to CMake 3.1 the Makefile generators did not escape ``#``
+  correctly inside make variable assignments used in generated
+  makefiles, causing them to be treated as comments.  This made
+  code like::
+
+    add_compile_options(-Wno-#pragma-messages)
+
+  not work in Makefile generators, but work in other generators.
+  Now it is escaped correctly, making the behavior consistent
+  across generators.  However, some projects may have tried to
+  workaround the original bug with code like::
+
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-\\#pragma-messages")
+
+  This added the needed escape for Makefile generators but also
+  caused other generators to pass ``-Wno-\#pragma-messages`` to
+  the shell, which would work only in POSIX shells.
+  Unfortunately the escaping fix could not be made in a compatible
+  way so this platform- and generator-specific workaround no
+  longer works.  Project code may test the :variable:`CMAKE_VERSION`
+  variable value to make the workaround version-specific too.
+
 * Callbacks established by the :command:`variable_watch` command will no
   longer receive the ``ALLOWED_UNKNOWN_READ_ACCESS`` access type when
   the undocumented ``CMAKE_ALLOW_UNKNOWN_VARIABLE_READ_ACCESS`` variable is
