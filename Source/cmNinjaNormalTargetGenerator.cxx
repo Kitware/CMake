@@ -110,13 +110,26 @@ void cmNinjaNormalTargetGenerator::WriteLanguagesRules()
     << "\n\n";
 #endif
 
+  // Write rules for languages compiled in this target.
   std::set<std::string> languages;
-  this->GetTarget()->GetLanguages(languages,
-                  this->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+  std::vector<cmSourceFile*> sourceFiles;
+  this->GetTarget()->GetSourceFiles(sourceFiles,
+    this->GetMakefile()->GetSafeDefinition("CMAKE_BUILD_TYPE"));
+  for(std::vector<cmSourceFile*>::const_iterator
+        i = sourceFiles.begin(); i != sourceFiles.end(); ++i)
+    {
+    const std::string& lang = (*i)->GetLanguage();
+    if(!lang.empty())
+      {
+      languages.insert(lang);
+      }
+    }
   for(std::set<std::string>::const_iterator l = languages.begin();
       l != languages.end();
       ++l)
+    {
     this->WriteLanguageRules(*l);
+    }
 }
 
 const char *cmNinjaNormalTargetGenerator::GetVisibleTypeName() const
