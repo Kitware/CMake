@@ -240,7 +240,7 @@ bool cmParseDelphiCoverage::LoadCoverageData(
       }
     }
   return true;
-  };
+  }
 
 bool cmParseDelphiCoverage::ReadDelphiHTML(const char* file)
   {
@@ -248,4 +248,4 @@ bool cmParseDelphiCoverage::ReadDelphiHTML(const char* file)
      parser(this->CTest, this->Coverage);
   parser.ParseFile(file);
   return true;
-  };
+  }
