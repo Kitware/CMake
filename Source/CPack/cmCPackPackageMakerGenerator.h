@@ -117,7 +117,7 @@ protected:
   cmCPackComponent PostFlightComponent;
 
   double PackageMakerVersion;
-  double PackageCompatibilityVersion;
+  unsigned int PackageCompatibilityVersion;
 };
 
 #endif
