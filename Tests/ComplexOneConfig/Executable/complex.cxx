@@ -716,14 +716,14 @@ int main()
   // the file was removed the last time 'complex' was run, and it is
   // only created during a build.
 
-  TestAndRemoveFile(BINARY_DIR "/Library/prebuild.txt");
-  TestAndRemoveFile(BINARY_DIR "/Library/prelink.txt");
-  TestAndRemoveFile(BINARY_DIR "/Library/postbuild.txt");
-  TestAndRemoveFile(BINARY_DIR "/Library/postbuild2.txt");
-  TestAndRemoveFile(BINARY_DIR "/Executable/prebuild.txt");
-  TestAndRemoveFile(BINARY_DIR "/Executable/prelink.txt");
-  TestAndRemoveFile(BINARY_DIR "/Executable/postbuild.txt");
-  TestAndRemoveFile(BINARY_DIR "/Executable/postbuild2.txt");
+  TestAndRemoveFile("Library/prebuild.txt");
+  TestAndRemoveFile("Library/prelink.txt");
+  TestAndRemoveFile("Library/postbuild.txt");
+  TestAndRemoveFile("Library/postbuild2.txt");
+  TestAndRemoveFile("Executable/prebuild.txt");
+  TestAndRemoveFile("Executable/prelink.txt");
+  TestAndRemoveFile("Executable/postbuild.txt");
+  TestAndRemoveFile("Executable/postbuild2.txt");
 
   // ----------------------------------------------------------------------
   // A custom target has been created (see Library/).
@@ -733,12 +733,12 @@ int main()
   // the file was removed the last time 'complex' was run, and it is
   // only created during a build.
 
-  TestAndRemoveFile(BINARY_DIR "/Library/custom_target1.txt");
+  TestAndRemoveFile("Library/custom_target1.txt");
 
   // ----------------------------------------------------------------------
   // A directory has been created.
 
-  TestDir(BINARY_DIR "/make_dir");
+  TestDir("make_dir");
 
   // ----------------------------------------------------------------------
   // Test OUTPUT_REQUIRED_FILES
@@ -749,7 +749,7 @@ int main()
   // the file was removed the last time 'complex' was run, and it is
   // only created during a build.
 
-  TestAndRemoveFile(BINARY_DIR "/Executable/Temp/complex-required.txt");
+  TestAndRemoveFile("Executable/Temp/complex-required.txt");
 
   // ----------------------------------------------------------------------
   // Test FIND_LIBRARY
