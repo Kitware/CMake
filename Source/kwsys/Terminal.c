@@ -175,6 +175,7 @@ static const char* kwsysTerminalVT100Names[] =
   "xterm-88color",
   "xterm-color",
   "xterm-debian",
+  "xterm-termite",
   0
 };
 
