@@ -493,6 +493,14 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
           this->Makefile.FindTargetToUse(argP1->GetValue())?true:false,
           reducible, arg, newArgs, argP1, argP2);
         }
+      // does a test exist
+      if (this->IsKeyword("TEST", *arg) && argP1 != newArgs.end())
+        {
+        const cmTest* haveTest = this->Makefile.GetTest(argP1->c_str());
+        this->HandlePredicate(
+          haveTest?true:false,
+          reducible, arg, newArgs, argP1, argP2);
+        }
       // is a variable defined
       if (this->IsKeyword("DEFINED", *arg) && argP1 != newArgs.end())
         {
