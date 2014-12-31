@@ -64,12 +64,6 @@ assigning the result of ``.size()`` on a container for example, the result
 should be assigned to ``size_t`` not to ``std::size_t``, ``unsigned int`` or
 similar types.
 
-Templates
----------
-
-Some template code is permitted, but with some limitations. Member templates
-may not be used, and template friends may not be used.
-
 Adding Compile Features
 =======================
 
