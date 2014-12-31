@@ -21,32 +21,6 @@ CMake is required to build with ancient C++ compilers and standard library
 implementations.  Some common C++ constructs may not be used in CMake in order
 to build with such toolchains.
 
-std::set const iterators
-------------------------
-
-The ``find()`` member function of a ``const`` ``std::set`` instance may not be
-used in a comparison with the iterator returned by ``end()``:
-
-.. code-block:: c++
-
-  const std::set<std::string>& someSet = getSet();
-  if (someSet.find("needle") == someSet.end()) // Wrong
-    {
-    // ...
-    }
-
-The return value of ``find()`` must be assigned to an intermediate
-``const_iterator`` for comparison:
-
-.. code-block:: c++
-
-  const std::set<std::string>& someSet;
-  const std::set<std::string>::const_iterator i = someSet.find("needle");
-  if (i != propSet.end()) // Ok
-    {
-    // ...
-    }
-
 std::auto_ptr
 -------------
 
