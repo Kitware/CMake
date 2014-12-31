@@ -1154,6 +1154,35 @@ if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
   cmake_test_flags=
 fi
 
+
+if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
+  # Are we SolarisStudio?
+
+  TMPFILE=`cmake_tmp_file`
+  echo '
+  #if defined(__SUNPRO_CC)
+  #include <iostream>
+  int main() { std::cout << "This is SolarisStudio" << std::endl; return 0;}
+  #endif
+  ' > ${TMPFILE}.cxx
+  cmake_cxx_compiler_is_solarisstudio=0
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} " "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+    cmake_cxx_compiler_is_solarisstudio=1
+  fi
+  if [ "x${cmake_cxx_compiler_is_solarisstudio}" = "x1" ]; then
+    echo "${cmake_cxx_compiler} is SolarisStudio compiler"
+  else
+    echo "${cmake_cxx_compiler} is not SolarisStudio compiler"
+  fi
+  rm -f "${TMPFILE}.cxx"
+
+  if [ "x${cmake_cxx_compiler_is_solarisstudio}" = "x1" ]; then
+    cmake_cxx_flags="${cmake_cxx_flags} -library=stlport4"
+  fi
+fi
+
+
 # Test for kwsys features
 KWSYS_NAME_IS_KWSYS=0
 KWSYS_BUILD_SHARED=0

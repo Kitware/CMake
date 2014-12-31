@@ -75,6 +75,14 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "^parisc")
   endif()
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro)
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
+  else()
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
+  endif()
+endif()
+
 # use the ansi CXX compile flag for building cmake
 if (CMAKE_ANSI_CXXFLAGS)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${CMAKE_ANSI_CXXFLAGS}")
