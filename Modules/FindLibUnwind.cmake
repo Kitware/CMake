@@ -31,7 +31,7 @@
 
 find_path(LIBUNWIND_INCLUDE_DIR libunwind.h )
 if(NOT EXISTS "${LIBUNWIND_INCLUDE_DIR}/unwind.h")
-  MESSAGE(FATAL_ERROR "found libunwind.h but corresponding unwind.h is absent!")
+  MESSAGE("Found libunwind.h but corresponding unwind.h is absent!")
   SET(LIBUNWIND_INCLUDE_DIR "")
 endif()
 
