@@ -6058,8 +6058,8 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
     // The link implementation is the default link interface.
     cmTarget::LinkImplementationLibraries const* impl =
       thisTarget->GetLinkImplementationLibrariesInternal(config, headTarget);
-    std::copy(impl->Libraries.begin(), impl->Libraries.end(),
-              std::back_inserter(iface.Libraries));
+    iface.Libraries.insert(iface.Libraries.end(),
+                           impl->Libraries.begin(), impl->Libraries.end());
     if(thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN &&
        !this->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
