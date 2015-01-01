@@ -1,5 +1,5 @@
 CMake - Cross Platform Makefile Generator
-Copyright 2000-2014 Kitware, Inc.
+Copyright 2000-2015 Kitware, Inc.
 Copyright 2000-2011 Insight Software Consortium
 All rights reserved.
 
