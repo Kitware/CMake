@@ -194,6 +194,7 @@
 # ``cxx_static_assert``          ``<PREFIX>_STATIC_ASSERT_MSG``   ``static_assert``
 # ``cxx_attribute_deprecated``   ``<PREFIX>_DEPRECATED``          ``[[deprecated]]``
 # ``cxx_attribute_deprecated``   ``<PREFIX>_DEPRECATED_MSG``      ``[[deprecated]]``
+# ``cxx_thread_local``           ``<PREFIX>_THREAD_LOCAL``        ``thread_local``
 # ============================= ================================ =====================
 #
 # A use-case which arises with such deprecation macros is the deprecation
@@ -570,6 +571,20 @@ function(write_compiler_detection_header
 #    define ${def_value} nullptr
 #  else
 #    define ${def_value} static_cast<void*>(0)
+#  endif
+\n")
+      endif()
+      if (feature STREQUAL cxx_thread_local)
+        set(def_value "${prefix_arg}_THREAD_LOCAL")
+        set(file_content "${file_content}
+#  if ${def_name}
+#    define ${def_value} thread_local
+#  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
+#    define ${def_value} __thread
+#  elif ${prefix_arg}_COMPILER_IS_MSVC
+#    define ${def_value} __declspec(thread)
+#  else
+// ${def_value} not defined for this configuration.
 #  endif
 \n")
       endif()
