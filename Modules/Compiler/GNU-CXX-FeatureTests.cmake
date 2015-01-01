@@ -1,8 +1,15 @@
 
 # Reference: http://gcc.gnu.org/projects/cxx0x.html
+# http://gcc.gnu.org/projects/cxx1y.html
 
 set(_cmake_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 407")
 
+set(GNU50_CXX14 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 500 && __cplusplus >= 201402L")
+set(_cmake_feature_test_cxx_variable_templates "${GNU50_CXX14}")
+
+# GNU 4.9 in c++14 mode sets __cplusplus to 201300L, so don't test for the
+# correct value of it below.
+# https://patchwork.ozlabs.org/patch/382470/
 set(GNU49_CXX14 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 409 && __cplusplus > 201103L")
 set(_cmake_feature_test_cxx_contextual_conversions "${GNU49_CXX14}")
 set(_cmake_feature_test_cxx_attribute_deprecated "${GNU49_CXX14}")
