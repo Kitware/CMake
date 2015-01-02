@@ -628,6 +628,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       cmGlobalGenerator* globalGenerator
         = this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
           cmakeGenerator);
+      if ( !globalGenerator )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Specified package generator not found. "
+                    "CPACK_CMAKE_GENERATOR value is invalid."
+                    << std::endl);
+      return 0;
+      }
       // set the global flag for unix style paths on cmSystemTools as
       // soon as the generator is set.  This allows gmake to be used
       // on windows.
