@@ -48,7 +48,8 @@ bool cmTryRunCommand
       {
       ++i;
       while (i < argv.size() && argv[i] != "COMPILE_DEFINITIONS" &&
-             argv[i] != "CMAKE_FLAGS")
+             argv[i] != "CMAKE_FLAGS" &&
+             argv[i] != "LINK_LIBRARIES")
         {
         runArgs += " ";
         runArgs += argv[i];
