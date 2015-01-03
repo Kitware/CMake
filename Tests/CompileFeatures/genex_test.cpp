@@ -17,6 +17,17 @@ struct B final : A
 
 #endif
 
+#if !HAVE_NULLPTR
+#error "Expect nullptr feature"
+#else
+
+const char* getString()
+{
+  return nullptr;
+}
+
+#endif
+
 int main()
 {
 
