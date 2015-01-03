@@ -33,6 +33,8 @@ endforeach()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
     AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+  # The cxx_alignof feature happens to work (for *this* testcase) with
+  # GNU 4.7, but it is first documented as available with GNU 4.8.
   list(REMOVE_ITEM CXX_non_features
     cxx_alignof
   )
