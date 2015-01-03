@@ -120,6 +120,8 @@ if (CMAKE_CXX_COMPILE_FEATURES)
   add_executable(IfaceCompileFeatures main.cpp)
   target_link_libraries(IfaceCompileFeatures iface)
 
+  add_definitions(-DEXPECT_OVERRIDE_CONTROL=1)
+
   add_executable(CompileFeaturesGenex genex_test.cpp)
   set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
   target_compile_definitions(CompileFeaturesGenex PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)

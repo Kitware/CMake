@@ -1,6 +1,8 @@
 
 #if !HAVE_OVERRIDE_CONTROL
+#if EXPECT_OVERRIDE_CONTROL
 #error "Expect override control feature"
+#endif
 #else
 
 struct A
