@@ -539,12 +539,7 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkInterfaceUsageRequirementsOnlyMap.clear();
   this->Internal->LinkClosureMap.clear();
   this->Internal->SourceFilesMap.clear();
-  for (cmTargetLinkInformationMap::const_iterator it
-      = this->LinkInformation.begin();
-      it != this->LinkInformation.end(); ++it)
-    {
-    delete it->second;
-    }
+  cmDeleteAll(this->LinkInformation);
   this->LinkInformation.clear();
 }
 
@@ -6874,10 +6869,7 @@ cmTargetLinkInformationMap
 //----------------------------------------------------------------------------
 cmTargetLinkInformationMap::~cmTargetLinkInformationMap()
 {
-  for(derived::iterator i = this->begin(); i != this->end(); ++i)
-    {
-    delete i->second;
-    }
+  cmDeleteAll(*this);
 }
 
 //----------------------------------------------------------------------------
