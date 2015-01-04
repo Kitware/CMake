@@ -34,21 +34,16 @@ cmVariableWatch::cmVariableWatch()
 {
 }
 
+template<typename C>
+void deleteAllSecond(typename C::value_type it)
+{
+  cmDeleteAll(it.second);
+}
+
 cmVariableWatch::~cmVariableWatch()
 {
-  cmVariableWatch::StringToVectorOfPairs::iterator svp_it;
-
-  for ( svp_it = this->WatchMap.begin();
-        svp_it != this->WatchMap.end(); ++svp_it )
-    {
-    cmVariableWatch::VectorOfPairs::iterator p_it;
-
-    for ( p_it = svp_it->second.begin();
-          p_it != svp_it->second.end(); ++p_it )
-      {
-      delete *p_it;
-      }
-    }
+  std::for_each(this->WatchMap.begin(), this->WatchMap.end(),
+                deleteAllSecond<cmVariableWatch::StringToVectorOfPairs>);
 }
 
 bool cmVariableWatch::AddWatch(const std::string& variable,
