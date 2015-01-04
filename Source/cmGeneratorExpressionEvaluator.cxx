@@ -2045,30 +2045,9 @@ std::string GeneratorExpressionContent::EvaluateParameters(
 }
 
 //----------------------------------------------------------------------------
-static void deleteAll(const std::vector<cmGeneratorExpressionEvaluator*> &c)
-{
-  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
-                                                  = c.begin();
-  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
-                                                  = c.end();
-  for ( ; it != end; ++it)
-    {
-    delete *it;
-    }
-}
-
-//----------------------------------------------------------------------------
 GeneratorExpressionContent::~GeneratorExpressionContent()
 {
-  deleteAll(this->IdentifierChildren);
-
-  typedef std::vector<cmGeneratorExpressionEvaluator*> EvaluatorVector;
-  std::vector<EvaluatorVector>::const_iterator pit =
-                                                  this->ParamChildren.begin();
-  const std::vector<EvaluatorVector>::const_iterator pend =
-                                                  this->ParamChildren.end();
-  for ( ; pit != pend; ++pit)
-    {
-    deleteAll(*pit);
-    }
+  cmDeleteAll(this->IdentifierChildren);
+  std::for_each(this->ParamChildren.begin(), this->ParamChildren.end(),
+                cmDeleteAll<std::vector<cmGeneratorExpressionEvaluator*> >);
 }
