@@ -194,45 +194,13 @@ bool cmMakefile::NeedCacheCompatibility(int major, int minor) const
 
 cmMakefile::~cmMakefile()
 {
-  for(std::vector<cmInstallGenerator*>::iterator
-        i = this->InstallGenerators.begin();
-      i != this->InstallGenerators.end(); ++i)
-    {
-    delete *i;
-    }
-  for(std::vector<cmTestGenerator*>::iterator
-        i = this->TestGenerators.begin();
-      i != this->TestGenerators.end(); ++i)
-    {
-    delete *i;
-    }
-  for(std::vector<cmSourceFile*>::iterator i = this->SourceFiles.begin();
-      i != this->SourceFiles.end(); ++i)
-    {
-    delete *i;
-    }
-  for(std::map<std::string, cmTest*>::iterator i = this->Tests.begin();
-      i != this->Tests.end(); ++i)
-    {
-    delete i->second;
-    }
-  for(std::vector<cmTarget*>::iterator
-        i = this->ImportedTargetsOwned.begin();
-      i != this->ImportedTargetsOwned.end(); ++i)
-    {
-    delete *i;
-    }
-  for(unsigned int i=0; i < this->FinalPassCommands.size(); i++)
-    {
-    delete this->FinalPassCommands[i];
-    }
-  std::vector<cmFunctionBlocker*>::iterator pos;
-  for (pos = this->FunctionBlockers.begin();
-       pos != this->FunctionBlockers.end(); ++pos)
-    {
-    cmFunctionBlocker* b = *pos;
-    delete b;
-    }
+  cmDeleteAll(this->InstallGenerators);
+  cmDeleteAll(this->TestGenerators);
+  cmDeleteAll(this->SourceFiles);
+  cmDeleteAll(this->Tests);
+  cmDeleteAll(this->ImportedTargetsOwned);
+  cmDeleteAll(this->FinalPassCommands);
+  cmDeleteAll(this->FunctionBlockers);
   this->FunctionBlockers.clear();
   if (this->PolicyStack.size() != 1)
   {

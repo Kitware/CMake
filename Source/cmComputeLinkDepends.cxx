@@ -200,12 +200,7 @@ cmComputeLinkDepends
 //----------------------------------------------------------------------------
 cmComputeLinkDepends::~cmComputeLinkDepends()
 {
-  for(std::vector<DependSetList*>::iterator
-        i = this->InferredDependSets.begin();
-      i != this->InferredDependSets.end(); ++i)
-    {
-    delete *i;
-    }
+  cmDeleteAll(this->InferredDependSets);
   delete this->CCG;
 }
 

@@ -87,12 +87,7 @@ cmDocumentation::cmDocumentation()
 //----------------------------------------------------------------------------
 cmDocumentation::~cmDocumentation()
 {
-  for(std::map<std::string,cmDocumentationSection *>::iterator i =
-        this->AllSections.begin();
-      i != this->AllSections.end(); ++i)
-    {
-    delete i->second;
-    }
+  cmDeleteAll(this->AllSections);
 }
 
 //----------------------------------------------------------------------------

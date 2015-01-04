@@ -378,13 +378,7 @@ cmCTest::cmCTest()
 //----------------------------------------------------------------------
 cmCTest::~cmCTest()
 {
-  cmCTest::t_TestingHandlers::iterator it;
-  for ( it = this->TestingHandlers.begin();
-    it != this->TestingHandlers.end(); ++ it )
-    {
-    delete it->second;
-    it->second = 0;
-    }
+  cmDeleteAll(this->TestingHandlers);
   this->SetOutputLogFileName(0);
 }
 

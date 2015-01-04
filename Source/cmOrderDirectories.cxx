@@ -291,18 +291,8 @@ cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
 //----------------------------------------------------------------------------
 cmOrderDirectories::~cmOrderDirectories()
 {
-  for(std::vector<cmOrderDirectoriesConstraint*>::iterator
-        i = this->ConstraintEntries.begin();
-      i != this->ConstraintEntries.end(); ++i)
-    {
-    delete *i;
-    }
-  for(std::vector<cmOrderDirectoriesConstraint*>::iterator
-        i = this->ImplicitDirEntries.begin();
-      i != this->ImplicitDirEntries.end(); ++i)
-    {
-    delete *i;
-    }
+  cmDeleteAll(this->ConstraintEntries);
+  cmDeleteAll(this->ImplicitDirEntries);
 }
 
 //----------------------------------------------------------------------------

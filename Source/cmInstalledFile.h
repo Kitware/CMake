@@ -38,11 +38,7 @@ public:
 
     ~Property()
     {
-      for(ExpressionVectorType::iterator i = ValueExpressions.begin();
-        i != ValueExpressions.end(); ++i)
-        {
-        delete *i;
-        }
+      cmDeleteAll(this->ValueExpressions);
     }
 
     ExpressionVectorType ValueExpressions;

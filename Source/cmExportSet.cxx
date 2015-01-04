@@ -15,10 +15,7 @@
 
 cmExportSet::~cmExportSet()
 {
-  for(unsigned int i = 0; i < this->TargetExports.size(); ++ i)
-    {
-    delete this->TargetExports[i];
-    }
+  cmDeleteAll(this->TargetExports);
 }
 
 void cmExportSet::AddTargetExport(cmTargetExport* te)
