@@ -43,7 +43,6 @@
 // support the large integer types.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include <cmsys/IOStream.hxx>
-# undef GetCurrentDirectory // Borland <iosfwd> includes windows.h
 #endif
 
 // Avoid warnings in system headers.
