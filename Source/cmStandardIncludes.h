@@ -25,7 +25,6 @@
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )
 #pragma warning ( disable : 4512 ) /* operator=() could not be generated */
-#define CMAKE_NO_ANSI_FOR_SCOPE
 #endif
 
 
@@ -91,12 +90,6 @@
 // if std:: is not supported, then just #define it away
 #ifdef CMAKE_NO_STD_NAMESPACE
 #define std
-#endif
-
-// if the compiler does not support ansi for scoping of vars use a
-// #define hack
-#ifdef CMAKE_NO_ANSI_FOR_SCOPE
-#define for if(false) {} else for
 #endif
 
 #if defined( _MSC_VER )
