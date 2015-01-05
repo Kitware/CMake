@@ -83,5 +83,3 @@ endif ()
 if (CMAKE_ANSI_CFLAGS)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
 endif ()
-
-include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)
