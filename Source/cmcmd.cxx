@@ -753,7 +753,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         {
         if ( !cmSystemTools::ListTar(outFile.c_str(), gzip, verbose) )
           {
-          cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
+          cmSystemTools::Error("Problem listing tar: ", outFile.c_str());
           return 1;
           }
         }
