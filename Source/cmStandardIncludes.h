@@ -109,16 +109,6 @@ private:
   cmOStringStream(const cmOStringStream&);
   void operator=(const cmOStringStream&);
 };
-class cmIStringStream: public std::istringstream
-{
-public:
-  typedef std::istringstream Superclass;
-  cmIStringStream() {}
-  cmIStringStream(const std::string& s): Superclass(s) {}
-private:
-  cmIStringStream(const cmIStringStream&);
-  void operator=(const cmIStringStream&);
-};
 #else
 class cmOStrStreamCleanup
 {
@@ -146,27 +136,6 @@ public:
 private:
   cmOStringStream(const cmOStringStream&);
   void operator=(const cmOStringStream&);
-};
-
-class cmIStringStream: private std::string, public std::istrstream
-{
-public:
-  typedef std::string StdString;
-  typedef std::istrstream IStrStream;
-  cmIStringStream(): StdString(), IStrStream(StdString::c_str()) {}
-  cmIStringStream(const std::string& s):
-    StdString(s), IStrStream(StdString::c_str()) {}
-  std::string str() const { return *this; }
-  void str(const std::string& s)
-    {
-    // Very dangerous.  If this throws, the object is hosed.  When the
-    // destructor is later called, the program is hosed too.
-    this->~cmIStringStream();
-    new (this) cmIStringStream(s);
-    }
-private:
-  cmIStringStream(const cmIStringStream&);
-  void operator=(const cmIStringStream&);
 };
 #endif
 
