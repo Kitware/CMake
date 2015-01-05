@@ -87,11 +87,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// if std:: is not supported, then just #define it away
-#ifdef CMAKE_NO_STD_NAMESPACE
-#define std
-#endif
-
 #if defined( _MSC_VER )
 typedef unsigned short mode_t;
 #endif
