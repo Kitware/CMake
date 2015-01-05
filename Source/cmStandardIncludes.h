@@ -16,8 +16,6 @@
 #ifndef cmStandardIncludes_h
 #define cmStandardIncludes_h
 
-// include configure generated  header to define CMAKE_NO_ANSI_STREAM_HEADERS,
-// CMAKE_NO_STD_NAMESPACE, and other macros.
 #include <cmConfigure.h>
 #include <cmsys/Configure.hxx>
 
@@ -49,23 +47,10 @@
 # pragma warning (push,1)
 #endif
 
-#ifndef CMAKE_NO_ANSI_STREAM_HEADERS
-#  include <fstream>
-#  include <iostream>
-#  include <iomanip>
-#else
-#  include <fstream.h>
-#  include <iostream.h>
-#  include <iomanip.h>
-#endif
-
-#if !defined(CMAKE_NO_ANSI_STRING_STREAM)
-#  include <sstream>
-#elif !defined(CMAKE_NO_ANSI_STREAM_HEADERS)
-#  include <strstream>
-#else
-#  include <strstream.h>
-#endif
+#include <fstream>
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 
 // we must have stl with the standard include style
 #include <vector>
@@ -96,48 +81,6 @@ typedef unsigned short mode_t;
 // when combined with a map or set, the symbols can be > 2000 chars!
 #include <cmsys/String.hxx>
 //typedef cmsys::String std::string;
-
-// Define cmOStringStream and cmIStringStream wrappers to hide
-// differences between std::stringstream and the old strstream.
-#if !defined(CMAKE_NO_ANSI_STRING_STREAM)
-class cmOStringStream: public std::ostringstream
-{
-public:
-  cmOStringStream();
-  ~cmOStringStream();
-private:
-  cmOStringStream(const cmOStringStream&);
-  void operator=(const cmOStringStream&);
-};
-#else
-class cmOStrStreamCleanup
-{
-public:
-  cmOStrStreamCleanup(std::ostrstream& ostr): OStrStream(ostr) {}
-  ~cmOStrStreamCleanup() { this->OStrStream.rdbuf()->freeze(0); }
-  static void IgnoreUnusedVariable(const cmOStrStreamCleanup&) {}
-protected:
-  std::ostrstream& OStrStream;
-};
-
-class cmOStringStream: public std::ostrstream
-{
-public:
-  typedef std::ostrstream Superclass;
-  cmOStringStream() {}
-  std::string str()
-    {
-    cmOStrStreamCleanup cleanup(*this);
-    cmOStrStreamCleanup::IgnoreUnusedVariable(cleanup);
-    int pcount = this->pcount();
-    const char* ptr = this->Superclass::str();
-    return std::string(ptr?ptr:"", pcount);
-    }
-private:
-  cmOStringStream(const cmOStringStream&);
-  void operator=(const cmOStringStream&);
-};
-#endif
 
 /* Poison this operator to avoid common mistakes.  */
 extern void operator << (std::ostream&, const std::ostringstream&);
