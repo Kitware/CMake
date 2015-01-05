@@ -99,58 +99,9 @@
 #define for if(false) {} else for
 #endif
 
-#ifdef __DECCXX_VER
-# if __DECCXX_VER <= 60390008
-#  define CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
-# endif
-#endif
-
 #if defined( _MSC_VER )
 typedef unsigned short mode_t;
 #endif
-
-
-#ifdef CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
-// some compilers have std:: but not for the stream library,
-// so we have to bring it into the std namespace by hand.
-namespace std {
-using ::ostream;
-using ::istream;
-using ::ios;
-using ::cout;
-using ::cerr;
-using ::cin;
-using ::ifstream;
-using ::ofstream;
-
-#if !defined(CMAKE_NO_ANSI_STRING_STREAM)
-  using ::ostringstream;
-  using ::istringstream;
-#else
-  using ::ostrstream;
-  using ::istrstream;
-#endif
-
-using ::endl;
-using ::ends;
-using ::flush;
-using ::dec;
-using ::hex;
-using ::setw;
-using ::setiosflags;
-using ::setfill;
-using ::setprecision;
-}
-// The string class is missing these operators so add them
-#if !defined(cmsys_STL_STRING_NEQ_CHAR_DEFINED)
-# define cmsys_STL_STRING_NO_NEQ_CHAR
-inline bool operator!=(std::string const& a, const char* b)
-{ return !(a==std::string(b)); }
-#endif
-
-inline bool operator==(std::string const& a, const char* b)
-{ return (a==std::string(b)); }
-# endif  // end CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
 
 // use this class to shrink the size of symbols in .o files
 // std::string is really basic_string<....lots of stuff....>
