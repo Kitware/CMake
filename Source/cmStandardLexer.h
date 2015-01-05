@@ -25,12 +25,6 @@
 # pragma warning ( disable : 4786 )
 #endif
 
-/* Make sure SGI termios does not define ECHO differently.  */
-#if defined(__sgi) && !defined(__GNUC__)
-# include <sys/termios.h>
-# undef ECHO
-#endif
-
 /* Define isatty on windows.  */
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # include <io.h>

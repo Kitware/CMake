@@ -37,28 +37,6 @@
 // Provide fixed-size integer types.
 #include <cmIML/INT.h>
 
-#include <stdarg.h> // Work-around for SGI MIPSpro 7.4.2m header bug
-
-// This is a hack to prevent warnings about these functions being
-// declared but not referenced.
-#if defined(__sgi) && !defined(__GNUC__)
-# pragma set woff 3970 /* conversion from pointer to same-sized */
-# include <sys/termios.h>
-class cmStandardIncludesHack
-{
-public:
-  enum
-  {
-    Ref1 = sizeof(cfgetospeed(0)),
-    Ref2 = sizeof(cfgetispeed(0)),
-    Ref3 = sizeof(tcgetattr(0, 0)),
-    Ref4 = sizeof(tcsetattr(0, 0, 0)),
-    Ref5 = sizeof(cfsetospeed(0,0)),
-    Ref6 = sizeof(cfsetispeed(0,0))
-  };
-};
-#endif
-
 // Include stream compatibility layer from KWSys.
 // This is needed to work with large file support
 // on some platforms whose stream operators do not
@@ -146,17 +124,6 @@ extern int putenv (char *__string) __THROW;
 #define for if(false) {} else for
 #endif
 
-// check for the 720 compiler on the SGI
-// which has some strange properties that I don't think are worth
-// checking for in a general way in configure
-#if defined(__sgi) && !defined(__GNUC__)
-#  if   (_COMPILER_VERSION >= 730)
-#   define CM_SGI_CC_730
-#  elif (_COMPILER_VERSION >= 720)
-#   define CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
-#  endif
-#endif
-
 #ifdef __DECCXX_VER
 # if __DECCXX_VER <= 60390008
 #  define CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
@@ -208,11 +175,7 @@ inline bool operator!=(std::string const& a, const char* b)
 
 inline bool operator==(std::string const& a, const char* b)
 { return (a==std::string(b)); }
-# endif  // end CM_SGI_CC_720
-
-#if defined(__sgi) && !defined(__GNUC__)
-# pragma set woff 1375 /* base class destructor not virtual */
-#endif
+# endif  // end CM_HAS_STD_BUT_NOT_FOR_IOSTREAM
 
 // use this class to shrink the size of symbols in .o files
 // std::string is really basic_string<....lots of stuff....>
@@ -326,10 +289,6 @@ public:
   typedef Superclass::iterator iterator;
   typedef Superclass::const_iterator const_iterator;
 };
-
-#if defined(__sgi) && !defined(__GNUC__)
-# pragma reset woff 1375 /* base class destructor not virtual */
-#endif
 
 // All subclasses of cmCommand or cmCTestGenericHandler should
 // invoke this macro.
