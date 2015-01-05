@@ -299,7 +299,7 @@ int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
   cmsysProcess_Delete(cp);
   if(failed)
     {
-    cmOStringStream message;
+    std::ostringstream message;
     message << "Error running command: [";
     message << result << "] ";
     for(std::vector<const char*>::iterator i = argv.begin();

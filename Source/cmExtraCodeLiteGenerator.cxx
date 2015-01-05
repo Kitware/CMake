@@ -454,7 +454,7 @@ cmExtraCodeLiteGenerator::GetBuildCommand(const cmMakefile* mf) const
   else if ( generator == "MinGW Makefiles" ||
             generator == "Unix Makefiles" )
     {
-    cmOStringStream ss;
+    std::ostringstream ss;
     ss << make << " -j " << this->CpuCount;
     buildCommand = ss.str();
     }
@@ -482,7 +482,7 @@ cmExtraCodeLiteGenerator::GetSingleFileBuildCommand
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   if ( generator == "Unix Makefiles" || generator == "MinGW Makefiles" )
     {
-    cmOStringStream ss;
+    std::ostringstream ss;
     ss << make << " -f$(ProjectPath)/Makefile $(CurrentFileName).cpp.o";
     buildCommand = ss.str();
     }

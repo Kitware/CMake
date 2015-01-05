@@ -150,7 +150,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
     else
       {
-      cmOStringStream m;
+      std::ostringstream m;
       m << "try_compile given unknown argument \"" << argv[i] << "\".";
       this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
       }
@@ -220,7 +220,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   // do not allow recursive try Compiles
   if (this->BinaryDirectory == this->Makefile->GetHomeOutputDirectory())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Attempt at a recursive or nested TRY_COMPILE in directory\n"
       << "  " << this->BinaryDirectory << "\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -256,7 +256,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         }
       else
         {
-        cmOStringStream err;
+        std::ostringstream err;
         err << "Unknown extension \"" << ext << "\" for file\n"
             << "  " << *si << "\n"
             << "try_compile() works only for enabled languages.  "
@@ -282,7 +282,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     FILE *fout = cmsys::SystemTools::Fopen(outFileName,"w");
     if (!fout)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Failed to open\n"
         << "  " << outFileName << "\n"
         << cmSystemTools::GetLastSystemError();
@@ -337,7 +337,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         if(this->Makefile->PolicyOptionalWarningEnabled(
              "CMAKE_POLICY_WARNING_CMP0056"))
           {
-          cmOStringStream w;
+          std::ostringstream w;
           w << (this->Makefile->GetCMakeInstance()->GetPolicies()
                 ->GetPolicyWarning(cmPolicies::CMP0056)) << "\n"
             "For compatibility with older versions of CMake, try_compile "
@@ -553,7 +553,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
          !cmSystemTools::CopyFileAlways(this->OutputFile,
                                         copyFile))
         {
-        cmOStringStream emsg;
+        std::ostringstream emsg;
         emsg << "Cannot copy output executable\n"
              << "  '" << this->OutputFile << "'\n"
              << "to destination specified by COPY_FILE:\n"
@@ -691,7 +691,7 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName)
       }
     }
 
-  cmOStringStream emsg;
+  std::ostringstream emsg;
   emsg << "Unable to find the executable at any of:\n";
   for (unsigned int i = 0; i < searchDirs.size(); ++i)
     {

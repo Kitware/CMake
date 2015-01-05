@@ -202,7 +202,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
       }
     }
 
-  cmOStringStream e;
+  std::ostringstream e;
   std::string missing = this->Location.GetDirectory();
   if(!missing.empty())
     {

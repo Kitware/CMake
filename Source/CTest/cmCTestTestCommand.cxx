@@ -53,7 +53,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if ( this->Values[ctt_START] || this->Values[ctt_END] ||
     this->Values[ctt_STRIDE] )
     {
-    cmOStringStream testsToRunString;
+    std::ostringstream testsToRunString;
     if ( this->Values[ctt_START] )
       {
       testsToRunString << this->Values[ctt_START];

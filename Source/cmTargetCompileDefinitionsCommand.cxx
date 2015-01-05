@@ -20,7 +20,7 @@ bool cmTargetCompileDefinitionsCommand
 void cmTargetCompileDefinitionsCommand
 ::HandleImportedTarget(const std::string &tgt)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify compile definitions for imported target \""
     << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -29,7 +29,7 @@ void cmTargetCompileDefinitionsCommand
 void cmTargetCompileDefinitionsCommand
 ::HandleMissingTarget(const std::string &name)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify compile definitions for target \"" << name << "\" "
        "which is not built by this project.";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());

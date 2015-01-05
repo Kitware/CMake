@@ -668,7 +668,7 @@ void cmCTestMultiProcessHandler::PrintTestList()
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "  Test");
       }
-    cmOStringStream indexStr;
+    std::ostringstream indexStr;
     indexStr << " #" << p.Index << ":";
     cmCTestLog(this->CTest, HANDLER_OUTPUT,
       std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))

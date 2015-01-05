@@ -25,7 +25,7 @@ bool cmTargetIncludeDirectoriesCommand
 void cmTargetIncludeDirectoriesCommand
 ::HandleImportedTarget(const std::string &tgt)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify include directories for imported target \""
     << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -35,7 +35,7 @@ void cmTargetIncludeDirectoriesCommand
 void cmTargetIncludeDirectoriesCommand
 ::HandleMissingTarget(const std::string &name)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify include directories for target \"" << name << "\" "
        "which is not built by this project.";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());

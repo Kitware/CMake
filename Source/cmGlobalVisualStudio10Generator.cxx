@@ -156,7 +156,7 @@ cmGlobalVisualStudio10Generator::SetGeneratorToolset(std::string const& ts,
   if (this->SystemIsWindowsCE && ts.empty() &&
       this->DefaultPlatformToolset.empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << this->GetName() << " Windows CE version '" << this->SystemVersion
       << "' requires CMAKE_GENERATOR_TOOLSET to be set.";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -202,7 +202,7 @@ bool cmGlobalVisualStudio10Generator::InitializeSystem(cmMakefile* mf)
     {
     if(this->DefaultPlatformName != "Win32")
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "CMAKE_SYSTEM_NAME is 'Android' but CMAKE_GENERATOR "
         << "specifies a platform too: '" << this->GetName() << "'";
       mf->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -231,7 +231,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 {
   if (this->DefaultPlatformName != "Win32")
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "CMAKE_SYSTEM_NAME is 'WindowsCE' but CMAKE_GENERATOR "
       << "specifies a platform too: '" << this->GetName() << "'";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -246,7 +246,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsCE(cmMakefile* mf)
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << this->GetName() << " does not support Windows Phone.";
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
@@ -255,7 +255,7 @@ bool cmGlobalVisualStudio10Generator::InitializeWindowsPhone(cmMakefile* mf)
 //----------------------------------------------------------------------------
 bool cmGlobalVisualStudio10Generator::InitializeWindowsStore(cmMakefile* mf)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << this->GetName() << " does not support Windows Store.";
   mf->IssueMessage(cmake::FATAL_ERROR, e.str());
   return false;
@@ -320,7 +320,7 @@ void cmGlobalVisualStudio10Generator::Generate()
   if(this->LongestSource.Length > 0)
     {
     cmMakefile* mf = this->LongestSource.Target->GetMakefile();
-    cmOStringStream e;
+    std::ostringstream e;
     e <<
       "The binary and/or source directory paths may be too long to generate "
       "Visual Studio 10 files for this project.  "
@@ -574,7 +574,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
        "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Microsoft SDKs\\"
        "Windows\\v7.1;InstallationFolder", winSDK_7_1))
     {
-    cmOStringStream m;
+    std::ostringstream m;
     m << "Found Windows SDK v7.1: " << winSDK_7_1;
     mf->DisplayStatus(m.str().c_str(), -1);
     this->DefaultPlatformToolset = "Windows7.1SDK";
@@ -582,7 +582,7 @@ bool cmGlobalVisualStudio10Generator::Find64BitTools(cmMakefile* mf)
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Cannot enable 64-bit tools with Visual Studio 2010 Express.\n"
       << "Install the Microsoft Windows SDK v7.1 to get 64-bit tools:\n"
       << "  http://msdn.microsoft.com/en-us/windows/bb980924.aspx";

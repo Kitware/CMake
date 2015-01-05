@@ -54,7 +54,7 @@ bool cmCTestRunScriptCommand
       int ret;
       cmCTestScriptHandler::RunScript(this->CTest, args[i].c_str(), !np,
         &ret);
-      cmOStringStream str;
+      std::ostringstream str;
       str << ret;
       this->Makefile->AddDefinition(returnVariable, str.str().c_str());
       }

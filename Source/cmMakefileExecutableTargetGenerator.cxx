@@ -371,8 +371,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetVersionMajor;
   std::string targetVersionMinor;
   {
-  cmOStringStream majorStream;
-  cmOStringStream minorStream;
+  std::ostringstream majorStream;
+  std::ostringstream minorStream;
   int major;
   int minor;
   this->Target->GetTargetVersion(major, minor);

@@ -47,7 +47,7 @@ void cmInstallTargetGenerator::GenerateScript(std::ostream& os)
   // Warn if installing an exclude-from-all target.
   if(this->Target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     msg << "WARNING: Target \"" << this->Target->GetName()
         << "\" has EXCLUDE_FROM_ALL set and will not be built by default "
         << "but an install rule has been provided for it.  CMake does "
@@ -424,7 +424,7 @@ cmInstallTargetGenerator
 ::AddTweak(std::ostream& os, Indent const& indent, const std::string& config,
            std::string const& file, TweakMethod tweak)
 {
-  cmOStringStream tw;
+  std::ostringstream tw;
   (this->*tweak)(tw, indent.Next(), config, file);
   std::string tws = tw.str();
   if(!tws.empty())
@@ -450,7 +450,7 @@ cmInstallTargetGenerator
   else
     {
     // Generate a foreach loop to tweak multiple files.
-    cmOStringStream tw;
+    std::ostringstream tw;
     this->AddTweak(tw, indent.Next(), config, "${file}", tweak);
     std::string tws = tw.str();
     if(!tws.empty())
@@ -699,7 +699,7 @@ cmInstallTargetGenerator
        (!oldRuntimeDirs.empty() || !newRuntimeDirs.empty())
       )
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "WARNING: Target \"" << this->Target->GetName()
         << "\" has runtime paths which cannot be changed during install.  "
         << "To change runtime paths, OS X version 10.6 or newer is required.  "

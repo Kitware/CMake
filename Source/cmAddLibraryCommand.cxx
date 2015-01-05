@@ -51,7 +51,7 @@ bool cmAddLibraryCommand
       {
       if (type == cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting STATIC type.";
         this->SetError(e.str());
         return false;
@@ -64,7 +64,7 @@ bool cmAddLibraryCommand
       {
       if (type == cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting SHARED type.";
         this->SetError(e.str());
         return false;
@@ -77,7 +77,7 @@ bool cmAddLibraryCommand
       {
       if (type == cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting MODULE type.";
         this->SetError(e.str());
         return false;
@@ -90,7 +90,7 @@ bool cmAddLibraryCommand
       {
       if (type == cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting OBJECT type.";
         this->SetError(e.str());
         return false;
@@ -103,7 +103,7 @@ bool cmAddLibraryCommand
       {
       if (type == cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting UNKNOWN type.";
         this->SetError(e.str());
         return false;
@@ -116,7 +116,7 @@ bool cmAddLibraryCommand
       {
       if (type == cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting ALIAS type.";
         this->SetError(e.str());
         return false;
@@ -128,21 +128,21 @@ bool cmAddLibraryCommand
       {
       if (haveSpecifiedType)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting/multiple types.";
         this->SetError(e.str());
         return false;
         }
       if (isAlias)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library specified with conflicting ALIAS type.";
         this->SetError(e.str());
         return false;
         }
       if (excludeFromAll)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
         this->SetError(e.str());
         return false;
@@ -155,7 +155,7 @@ bool cmAddLibraryCommand
       {
       if (type == cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INTERFACE library may not be used with EXCLUDE_FROM_ALL.";
         this->SetError(e.str());
         return false;
@@ -175,7 +175,7 @@ bool cmAddLibraryCommand
       }
     else if(type == cmTarget::INTERFACE_LIBRARY && *s == "GLOBAL")
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "GLOBAL option may only be used with IMPORTED libraries.";
       this->SetError(e.str());
       return false;
@@ -190,14 +190,14 @@ bool cmAddLibraryCommand
     {
     if (s != args.end())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "INTERFACE library requires no source arguments.";
       this->SetError(e.str());
       return false;
       }
     if (importGlobal && !importTarget)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "INTERFACE library specified as GLOBAL, but not as IMPORTED.";
       this->SetError(e.str());
       return false;
@@ -214,7 +214,7 @@ bool cmAddLibraryCommand
   if (!nameOk)
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-    cmOStringStream e;
+    std::ostringstream e;
     bool issueMessage = false;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
@@ -267,7 +267,7 @@ bool cmAddLibraryCommand
       }
     if(args.size() != 3)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "ALIAS requires exactly one target argument.";
       this->SetError(e.str());
       return false;
@@ -276,7 +276,7 @@ bool cmAddLibraryCommand
     const char *aliasedName = s->c_str();
     if(this->Makefile->IsAlias(aliasedName))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" is itself an ALIAS.";
       this->SetError(e.str());
@@ -286,7 +286,7 @@ bool cmAddLibraryCommand
                     this->Makefile->FindTargetToUse(aliasedName, true);
     if(!aliasedTarget)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" does not already "
         "exist.";
@@ -300,7 +300,7 @@ bool cmAddLibraryCommand
         && aliasedType != cmTarget::OBJECT_LIBRARY
         && aliasedType != cmTarget::INTERFACE_LIBRARY)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" is not a library.";
       this->SetError(e.str());
@@ -308,7 +308,7 @@ bool cmAddLibraryCommand
       }
     if(aliasedTarget->IsImported())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << libName
         << "\" because target \"" << aliasedName << "\" is IMPORTED.";
       this->SetError(e.str());
@@ -333,7 +333,7 @@ bool cmAddLibraryCommand
        (this->Makefile->GetCMakeInstance()->GetPropertyAsBool(
                                       "TARGET_SUPPORTS_SHARED_LIBS") == false))
     {
-    cmOStringStream w;
+    std::ostringstream w;
     w <<
       "ADD_LIBRARY called with " <<
       (type==cmTarget::SHARED_LIBRARY ? "SHARED" : "MODULE") <<
@@ -364,7 +364,7 @@ bool cmAddLibraryCommand
       {
       if (!cmGeneratorExpression::IsValidTargetName(libName))
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "Invalid name for IMPORTED INTERFACE library target: " << libName;
         this->SetError(e.str());
         return false;
@@ -374,7 +374,7 @@ bool cmAddLibraryCommand
     // Make sure the target does not already exist.
     if(this->Makefile->FindTargetToUse(libName))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create imported target \"" << libName
         << "\" because another target with the same name already exists.";
       this->SetError(e.str());
@@ -413,7 +413,7 @@ bool cmAddLibraryCommand
     if (!cmGeneratorExpression::IsValidTargetName(libName)
         || libName.find("::") != std::string::npos)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Invalid name for INTERFACE library target: " << libName;
       this->SetError(e.str());
       return false;

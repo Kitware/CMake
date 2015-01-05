@@ -56,7 +56,7 @@ bool cmCMakePolicyCommand
     return this->HandleVersionMode(args);
     }
 
-  cmOStringStream e;
+  std::ostringstream e;
   e << "given unknown first argument \"" << args[0] << "\"";
   this->SetError(e.str());
   return false;
@@ -82,7 +82,7 @@ bool cmCMakePolicyCommand::HandleSetMode(std::vector<std::string> const& args)
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "SET given unrecognized policy status \"" << args[2] << "\"";
     this->SetError(e.str());
     return false;
@@ -113,7 +113,7 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
   cmPolicies::PolicyID pid;
   if(!this->Makefile->GetPolicies()->GetPolicyID(id.c_str(), pid))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "GET given policy \"" << id << "\" which is not known to this "
       << "version of CMake.";
     this->SetError(e.str());
@@ -140,7 +140,7 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
     case cmPolicies::REQUIRED_ALWAYS:
       // The policy is required to be set before anything needs it.
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << this->Makefile->GetPolicies()->GetRequiredPolicyError(pid)
         << "\n"
         << "The call to cmake_policy(GET " << id << " ...) at which this "

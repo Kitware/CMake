@@ -769,7 +769,7 @@ void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
       }
     }
 
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot find source file \"" << pathname << "\"";
   e << "\n\nTried extensions";
   for( std::vector<std::string>::const_iterator ext = sourceExts.begin();

@@ -73,7 +73,7 @@ bool cmGetPropertyCommand
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given invalid scope " << args[1] << ".  "
       << "Valid scopes are "
       << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE, INSTALL.";
@@ -122,7 +122,7 @@ bool cmGetPropertyCommand
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given invalid argument \"" << args[i] << "\".";
       this->SetError(e.str());
       return false;
@@ -312,7 +312,7 @@ bool cmGetPropertyCommand::HandleTargetMode()
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "could not find TARGET " << this->Name
       << ".  Perhaps it has not yet been created.";
     this->SetError(e.str());
@@ -338,7 +338,7 @@ bool cmGetPropertyCommand::HandleSourceMode()
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given SOURCE name that could not be found or created: "
       << this->Name;
     this->SetError(e.str());
@@ -362,7 +362,7 @@ bool cmGetPropertyCommand::HandleTestMode()
     }
 
   // If not found it is an error.
-  cmOStringStream e;
+  std::ostringstream e;
   e << "given TEST name that does not exist: " << this->Name;
   this->SetError(e.str());
   return false;
@@ -423,7 +423,7 @@ bool cmGetPropertyCommand::HandleInstallMode()
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given INSTALL name that could not be found or created: "
       << this->Name;
     this->SetError(e.str());

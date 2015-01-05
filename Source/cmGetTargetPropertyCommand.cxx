@@ -47,7 +47,7 @@ bool cmGetTargetPropertyCommand
   else
     {
     bool issueMessage = false;
-    cmOStringStream e;
+    std::ostringstream e;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0045))
       {

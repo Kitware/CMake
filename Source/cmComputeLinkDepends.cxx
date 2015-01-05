@@ -710,7 +710,7 @@ void cmComputeLinkDepends::CleanConstraintGraph()
 void cmComputeLinkDepends::DisplayConstraintGraph()
 {
   // Display the graph nodes and their edges.
-  cmOStringStream e;
+  std::ostringstream e;
   for(unsigned int i=0; i < this->EntryConstraintGraph.size(); ++i)
     {
     EdgeList const& nl = this->EntryConstraintGraph[i];

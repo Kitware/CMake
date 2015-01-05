@@ -126,7 +126,7 @@ bool cmCTestStartCommand
     }
   if(!cmSystemTools::FileIsDirectory(sourceDir))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given source path\n"
       << "  " << sourceDir << "\n"
       << "which is not an existing directory.  "

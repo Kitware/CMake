@@ -451,7 +451,7 @@ void cmMakefileTargetGenerator
     }
   else
     {
-    cmOStringStream err;
+    std::ostringstream err;
     err << "Warning: Source file \""
         << source.GetFullPath()
         << "\" is listed multiple times for target \""
@@ -1101,7 +1101,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
 
   // Add a command to call CMake to scan dependencies.  CMake will
   // touch the corresponding depends file after scanning dependencies.
-  cmOStringStream depCmd;
+  std::ostringstream depCmd;
   // TODO: Account for source file properties and directory-level
   // definitions when scanning for dependencies.
 #if !defined(_WIN32) || defined(__CYGWIN__)
@@ -1217,7 +1217,7 @@ void cmMakefileTargetGenerator
     }
 
   // Now append the actual user-specified commands.
-  cmOStringStream content;
+  std::ostringstream content;
   this->LocalGenerator->AppendCustomCommand(commands, ccg, this->Target, false,
                                             cmLocalGenerator::HOME_OUTPUT,
                                             &content);
@@ -1279,7 +1279,7 @@ cmMakefileTargetGenerator::AppendProgress(std::vector<std::string>& commands)
     }
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
-  cmOStringStream progCmd;
+  std::ostringstream progCmd;
   progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
   progCmd << this->LocalGenerator->Convert(progressDir,
                                            cmLocalGenerator::FULL,

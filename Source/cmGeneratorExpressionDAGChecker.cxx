@@ -106,7 +106,7 @@ void cmGeneratorExpressionDAGChecker::ReportError(
 
   if (parent && !parent->Parent)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Error evaluating generator expression:\n"
       << "  " << expr << "\n"
       << "Self reference on target \""
@@ -118,7 +118,7 @@ void cmGeneratorExpressionDAGChecker::ReportError(
     }
 
   {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Error evaluating generator expression:\n"
     << "  " << expr << "\n"
     << "Dependency loop found.";
@@ -130,7 +130,7 @@ void cmGeneratorExpressionDAGChecker::ReportError(
   int loopStep = 1;
   while (parent)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Loop step " << loopStep << "\n"
       << "  "
       << (parent->Content ? parent->Content->GetOriginalExpression() : expr)

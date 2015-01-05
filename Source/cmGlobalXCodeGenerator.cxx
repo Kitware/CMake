@@ -1170,7 +1170,7 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
           this->CreateString("2147483647"));
         copyFilesBuildPhase->AddAttribute("dstSubfolderSpec",
           this->CreateString("6"));
-        cmOStringStream ostr;
+        std::ostringstream ostr;
         if (cmtarget.IsFrameworkOnApple())
           {
           // dstPath in frameworks is relative to Versions/<version>
@@ -1581,7 +1581,7 @@ void  cmGlobalXCodeGenerator
         }
       else
         {
-        cmOStringStream str;
+        std::ostringstream str;
         str << "_buildpart_" << count++ ;
         tname[&ccg.GetCC()] = std::string(target.GetName()) + str.str();
         makefileStream << "\\\n\t" << tname[&ccg.GetCC()];
@@ -2299,7 +2299,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
     // VERSION -> current_version
     target.GetTargetVersion(false, major, minor, patch);
-    cmOStringStream v;
+    std::ostringstream v;
 
     // Xcode always wants at least 1.0.0 or nothing
     if(!(major == 0 && minor == 0 && patch == 0))
@@ -2311,7 +2311,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
     // SOVERSION -> compatibility_version
     target.GetTargetVersion(true, major, minor, patch);
-    cmOStringStream vso;
+    std::ostringstream vso;
 
     // Xcode always wants at least 1.0.0 or nothing
     if(!(major == 0 && minor == 0 && patch == 0))

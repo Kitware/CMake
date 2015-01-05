@@ -305,7 +305,7 @@ bool cmAddCustomCommandCommand
       }
 
     // No command for this output exists.
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given APPEND option with output \"" << output[0]
       << "\" which is not already a custom command output.";
     this->SetError(e.str());
@@ -354,7 +354,7 @@ bool cmAddCustomCommandCommand
         }
       if(!okay)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "could not locate source file with a custom command producing \""
           << output[0] << "\" even though this command tried to create it!";
         this->SetError(e.str());
@@ -375,7 +375,7 @@ bool cmAddCustomCommandCommand
   else
     {
     bool issueMessage = true;
-    cmOStringStream e;
+    std::ostringstream e;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0050))
     {
@@ -436,7 +436,7 @@ cmAddCustomCommandCommand
     std::string::size_type pos = o->find_first_of("#<>");
     if(pos != o->npos)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "called with OUTPUT containing a \"" << (*o)[pos]
           << "\".  This character is not allowed.";
       this->SetError(msg.str());

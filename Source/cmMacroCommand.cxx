@@ -107,7 +107,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
   cmMakefile::PolicyPushPop polScope(this->Makefile, true, this->Policies);
 
   // set the value of argc
-  cmOStringStream argcDefStream;
+  std::ostringstream argcDefStream;
   argcDefStream << expandedArgs.size();
   std::string argcDef = argcDefStream.str();
 

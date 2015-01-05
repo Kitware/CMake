@@ -11,6 +11,6 @@
 ============================================================================*/
 #include "cmStandardIncludes.h"
 #if !defined(CMAKE_NO_ANSI_STRING_STREAM)
-cmOStringStream::cmOStringStream() {}
-cmOStringStream::~cmOStringStream() {}
+std::ostringstream::cmOStringStream() {}
+std::ostringstream::~cmOStringStream() {}
 #endif

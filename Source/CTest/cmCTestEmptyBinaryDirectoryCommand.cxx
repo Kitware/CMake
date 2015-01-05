@@ -24,7 +24,7 @@ bool cmCTestEmptyBinaryDirectoryCommand
 
   if ( !cmCTestScriptHandler::EmptyBinaryDirectory(args[0].c_str()) )
     {
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     ostr << "problem removing the binary directory: " << args[0];
     this->SetError(ostr.str());
     return false;

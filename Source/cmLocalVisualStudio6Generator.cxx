@@ -1321,7 +1321,7 @@ void cmLocalVisualStudio6Generator
     int major;
     int minor;
     target.GetTargetVersion(major, minor);
-    cmOStringStream targetVersionStream;
+    std::ostringstream targetVersionStream;
     targetVersionStream << "/version:" << major << "." << minor;
     targetVersionFlag = targetVersionStream.str();
     }
@@ -1998,7 +1998,7 @@ cmLocalVisualStudio6Generator
   if(define.find_first_of(" ") != define.npos &&
      define.find_first_of("\"$;") != define.npos)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "WARNING: The VS6 IDE does not support preprocessor definition "
       << "values with spaces and '\"', '$', or ';'.\n"
       << "CMake is dropping a preprocessor definition: " << define << "\n"

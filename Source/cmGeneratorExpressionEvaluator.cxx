@@ -36,7 +36,7 @@ void reportError(cmGeneratorExpressionContext *context,
     return;
     }
 
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Error evaluating generator expression:\n"
     << "  " << expr << "\n"
     << result;
@@ -456,7 +456,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
         {
         case cmPolicies::WARN:
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << context->Makefile->GetPolicies()
                       ->GetPolicyWarning(cmPolicies::CMP0044);
           context->Makefile->GetCMakeInstance()
@@ -953,7 +953,7 @@ static const struct TargetPropertyNode : public cmGeneratorExpressionNode
 
       if (!target)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "Target \""
           << targetName
           << "\" not found.";
@@ -1253,7 +1253,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
   {
     if (!context->EvaluateForBuildsystem)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "The evaluation of the TARGET_OBJECTS generator expression "
         "is only suitable for consumption by CMake.  It is not suitable "
         "for writing out elsewhere.";
@@ -1266,7 +1266,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
                 context->Makefile->FindGeneratorTargetToUse(tgtName);
     if (!gt)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Objects of target \"" << tgtName
         << "\" referenced but no such target exists.";
       reportError(context, content->GetOriginalExpression(), e.str());
@@ -1274,7 +1274,7 @@ static const struct TargetObjectsNode : public cmGeneratorExpressionNode
       }
     if (gt->GetType() != cmTarget::OBJECT_LIBRARY)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Objects of target \"" << tgtName
         << "\" referenced but is not an OBJECT library.";
       reportError(context, content->GetOriginalExpression(), e.str());
@@ -2028,7 +2028,7 @@ std::string GeneratorExpressionContent::EvaluateParameters(
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "$<" + identifier + "> expression requires "
         << numExpected
         << " comma separated parameters, but got "

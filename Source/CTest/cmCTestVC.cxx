@@ -105,7 +105,7 @@ bool cmCTestVC::RunChild(char const* const* cmd, OutputParser* out,
 //----------------------------------------------------------------------------
 std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
 {
-  cmOStringStream line;
+  std::ostringstream line;
   const char* sep = "";
   for(const char* const* arg = cmd; *arg; ++arg)
     {

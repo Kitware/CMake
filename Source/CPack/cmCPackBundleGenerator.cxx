@@ -112,24 +112,24 @@ int cmCPackBundleGenerator::ConstructBundle()
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
-  cmOStringStream staging;
+  std::ostringstream staging;
   staging << toplevel;
 
-  cmOStringStream contents;
+  std::ostringstream contents;
   contents << staging.str() << "/" << cpack_bundle_name
     << ".app/" << "Contents";
 
-  cmOStringStream application;
+  std::ostringstream application;
   application << contents.str() << "/" << "MacOS";
 
-  cmOStringStream resources;
+  std::ostringstream resources;
   resources << contents.str() << "/" << "Resources";
 
   // Install a required, user-provided bundle metadata file ...
-  cmOStringStream plist_source;
+  std::ostringstream plist_source;
   plist_source << cpack_bundle_plist;
 
-  cmOStringStream plist_target;
+  std::ostringstream plist_target;
   plist_target << contents.str() << "/" << "Info.plist";
 
   if(!this->CopyFile(plist_source, plist_target))
@@ -142,10 +142,10 @@ int cmCPackBundleGenerator::ConstructBundle()
     }
 
   // Install a user-provided bundle icon ...
-  cmOStringStream icon_source;
+  std::ostringstream icon_source;
   icon_source << cpack_bundle_icon;
 
-  cmOStringStream icon_target;
+  std::ostringstream icon_target;
   icon_target << resources.str() << "/" << cpack_bundle_name << ".icns";
 
   if(!this->CopyFile(icon_source, icon_target))
@@ -161,10 +161,10 @@ int cmCPackBundleGenerator::ConstructBundle()
   // executable or a script) ...
   if(!cpack_bundle_startup_command.empty())
     {
-    cmOStringStream command_source;
+    std::ostringstream command_source;
     command_source << cpack_bundle_startup_command;
 
-    cmOStringStream command_target;
+    std::ostringstream command_target;
     command_target << application.str() << "/" << cpack_bundle_name;
 
     if(!this->CopyFile(command_source, command_target))
@@ -231,7 +231,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
     for(std::vector<std::string>::iterator it = relFiles.begin();
       it != relFiles.end(); ++it)
       {
-      cmOStringStream temp_sign_file_cmd;
+      std::ostringstream temp_sign_file_cmd;
       temp_sign_file_cmd << this->GetOption("CPACK_COMMAND_CODESIGN");
       temp_sign_file_cmd << " --deep -f -s \"" << cpack_apple_cert_app;
       temp_sign_file_cmd << "\" -i ";
@@ -251,7 +251,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       }
 
     // sign main binary
-    cmOStringStream temp_sign_binary_cmd;
+    std::ostringstream temp_sign_binary_cmd;
     temp_sign_binary_cmd << this->GetOption("CPACK_COMMAND_CODESIGN");
     temp_sign_binary_cmd << " --deep -f -s \"" << cpack_apple_cert_app;
     temp_sign_binary_cmd << "\" \"" << bundle_path << "\"";
@@ -266,7 +266,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       }
 
     // sign app bundle
-    cmOStringStream temp_codesign_cmd;
+    std::ostringstream temp_codesign_cmd;
     temp_codesign_cmd << this->GetOption("CPACK_COMMAND_CODESIGN");
     temp_codesign_cmd << " --deep -f -s \"" << cpack_apple_cert_app << "\"";
     if(this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS"))

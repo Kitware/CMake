@@ -21,7 +21,7 @@ bool cmTargetCompileFeaturesCommand::InitialPass(
 void cmTargetCompileFeaturesCommand
 ::HandleImportedTarget(const std::string &tgt)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify compile features for imported target \""
     << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -30,7 +30,7 @@ void cmTargetCompileFeaturesCommand
 void cmTargetCompileFeaturesCommand
 ::HandleMissingTarget(const std::string &name)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify compile features for target \"" << name << "\" "
        "which is not built by this project.";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());

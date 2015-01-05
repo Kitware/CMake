@@ -1865,7 +1865,7 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
     SPACE_REGEX "*>([^<]*)</DartMeasurementFile>");
 
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   bool done = false;
   std::string cxml = xml;
   while ( ! done )
@@ -2098,7 +2098,7 @@ bool cmCTestTestHandler::CleanTestOutput(std::string& output, size_t length)
   output = output.substr(0, current - begin);
 
   // Append truncation message.
-  cmOStringStream msg;
+  std::ostringstream msg;
   msg << "...\n"
     "The rest of the test output was removed since it exceeds the threshold "
     "of " << length << " bytes.\n";

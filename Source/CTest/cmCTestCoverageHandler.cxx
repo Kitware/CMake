@@ -544,7 +544,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     cmsys::ifstream ifs(fullFileName.c_str());
     if ( !ifs)
       {
-      cmOStringStream ostr;
+      std::ostringstream ostr;
       ostr <<  "Cannot open source file: " << fullFileName;
       errorsWhileAccumulating.push_back(ostr.str());
       error ++;
@@ -563,7 +563,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       if ( !cmSystemTools::GetLineFromStream(ifs, line) &&
         cc != fcov.size() -1 )
         {
-        cmOStringStream ostr;
+        std::ostringstream ostr;
         ostr << "Problem reading source file: " << fullFileName
              << " line:" << cc << "  out total: " << fcov.size()-1;
         errorsWhileAccumulating.push_back(ostr.str());
@@ -584,7 +584,7 @@ int cmCTestCoverageHandler::ProcessHandler()
       }
     if ( cmSystemTools::GetLineFromStream(ifs, line) )
       {
-      cmOStringStream ostr;
+      std::ostringstream ostr;
       ostr <<  "Looks like there are more lines in the file: " << fullFileName;
       errorsWhileAccumulating.push_back(ostr.str());
       }
@@ -633,7 +633,7 @@ int cmCTestCoverageHandler::ProcessHandler()
     cmsys::ifstream ifs(fullPath.c_str());
     if (!ifs)
       {
-      cmOStringStream ostr;
+      std::ostringstream ostr;
       ostr <<  "Cannot open source file: " << fullPath;
       errorsWhileAccumulating.push_back(ostr.str());
       error ++;

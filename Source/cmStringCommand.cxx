@@ -122,7 +122,7 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   if(args.size() != 3)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " requires an output variable and an input string";
     this->SetError(e.str());
     return false;
@@ -137,7 +137,7 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
     }
   return false;
 #else
-  cmOStringStream e;
+  std::ostringstream e;
   e << args[0] << " not available during bootstrap";
   this->SetError(e.str().c_str());
   return false;
@@ -233,7 +233,7 @@ bool cmStringCommand::HandleConfigureCommand(
       }
     else
       {
-      cmOStringStream err;
+      std::ostringstream err;
       err << "Unrecognized argument \"" << args[i] << "\"";
       this->SetError(err.str());
       return false;
@@ -591,7 +591,7 @@ bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
     }
   if(std::string::npos != pos)
     {
-    cmOStringStream s;
+    std::ostringstream s;
     s << pos;
     this->Makefile->AddDefinition(outvar, s.str().c_str());
     return true;
@@ -705,7 +705,7 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
   int intStringLength = static_cast<int>(stringLength);
   if ( begin < 0 || begin > intStringLength )
     {
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     ostr << "begin index: " << begin << " is out of range 0 - "
          << stringLength;
     this->SetError(ostr.str());
@@ -713,7 +713,7 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
     }
   if ( end < -1 )
     {
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     ostr << "end index: " << end << " should be -1 or greater";
     this->SetError(ostr.str());
     return false;
@@ -1089,7 +1089,7 @@ bool cmStringCommand
   this->Makefile->AddDefinition(outputVariable, uuid.c_str());
   return true;
 #else
-  cmOStringStream e;
+  std::ostringstream e;
   e << args[0] << " not available during bootstrap";
   this->SetError(e.str().c_str());
   return false;

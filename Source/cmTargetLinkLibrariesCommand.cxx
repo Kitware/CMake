@@ -43,7 +43,7 @@ bool cmTargetLinkLibrariesCommand
   if(!this->Target)
     {
     cmake::MessageType t = cmake::FATAL_ERROR;  // fail by default
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Cannot specify link libraries for target \"" << args[0] << "\" "
       << "which is not built by this project.";
     // The bad target is the only argument. Check how policy CMP0016 is set,
@@ -92,7 +92,7 @@ bool cmTargetLinkLibrariesCommand
 
   if(this->Target->GetType() == cmTarget::OBJECT_LIBRARY)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Object library target \"" << args[0] << "\" "
       << "may not link to anything.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -102,7 +102,7 @@ bool cmTargetLinkLibrariesCommand
 
   if (this->Target->GetType() == cmTarget::UTILITY)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     const char *modal = 0;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0039))
@@ -311,7 +311,7 @@ bool cmTargetLinkLibrariesCommand
   // Make sure the last argument was not a library type specifier.
   if(haveLLT)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "The \"" << this->LinkLibraryTypeNames[llt]
       << "\" argument must be followed by a library.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -342,7 +342,7 @@ void
 cmTargetLinkLibrariesCommand
 ::LinkLibraryTypeSpecifierWarning(int left, int right)
 {
-  cmOStringStream w;
+  std::ostringstream w;
   w << "Link library type specifier \""
     << this->LinkLibraryTypeNames[left] << "\" is followed by specifier \""
     << this->LinkLibraryTypeNames[right] << "\" instead of a library name.  "
@@ -373,7 +373,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
         ? cmTarget::KeywordTLLSignature : cmTarget::PlainTLLSignature;
   if (!this->Target->PushTLLCommandTrace(sig))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     const char *modal = 0;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0023))

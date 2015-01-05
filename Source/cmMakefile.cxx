@@ -363,7 +363,7 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
 //----------------------------------------------------------------------------
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
-  cmOStringStream msg;
+  std::ostringstream msg;
   msg << lff.FilePath << "(" << lff.Line << "):  ";
   msg << lff.Name << "(";
   for(std::vector<cmListFileArgument>::const_iterator i =
@@ -556,7 +556,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     case cmPolicies::WARN:
       // Warn because the user did not set this policy.
       {
-      cmOStringStream w;
+      std::ostringstream w;
       w << policies->GetPolicyWarning(cmPolicies::CMP0011) << "\n"
         << "The included script\n  " << this->File << "\n"
         << "affects policy settings.  "
@@ -568,7 +568,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << policies->GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
         << "The included script\n  " << this->File << "\n"
         << "affects policy settings, so it requires this policy to be set.";
@@ -741,7 +741,7 @@ void cmMakefile::EnforceDirectoryLevelRules() const
   // Diagnose a violation of CMP0000 if necessary.
   if(this->CheckCMP0000)
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     msg << "No cmake_minimum_required command is present.  "
         << "A line of code such as\n"
         << "  cmake_minimum_required(VERSION "
@@ -897,7 +897,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
-    cmOStringStream e;
+    std::ostringstream e;
     switch(this->GetPolicyStatus(cmPolicies::CMP0040))
       {
       case cmPolicies::WARN:
@@ -924,7 +924,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
 
   if(ti->second.GetType() == cmTarget::OBJECT_LIBRARY)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Target \"" << target << "\" is an OBJECT library "
       "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -932,7 +932,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     }
   if(ti->second.GetType() == cmTarget::INTERFACE_LIBRARY)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Target \"" << target << "\" is an INTERFACE library "
       "that may not have PRE_BUILD, PRE_LINK, or POST_BUILD commands.";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -997,7 +997,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
     cmCustomCommandLine const& cl = *i;
     if(!cl.empty() && !cl[0].empty() && cl[0][0] == '"')
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "COMMAND may not contain literal quotes:\n  " << cl[0] << "\n";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
       return 0;
@@ -1555,7 +1555,7 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
            (tgt->GetType() == cmTarget::INTERFACE_LIBRARY) ||
            tgt->IsExecutableWithExports()))
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "Target \"" << lib << "\" of type "
           << cmTarget::GetTargetTypeName(tgt->GetType())
           << " may not be linked into another target.  "
@@ -1568,7 +1568,7 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Attempt to add link library \""
       << lib << "\" to target \""
       << target << "\" which is not built in this directory.";
@@ -1584,7 +1584,7 @@ void cmMakefile::AddLinkDirectoryForTarget(const std::string& target,
     {
     if(this->IsAlias(target))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "ALIAS target \"" << target << "\" "
         << "may not be linked into another target.";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -2006,7 +2006,7 @@ void cmMakefile::CheckForUnused(const char* reason,
         !cmSystemTools::IsSubDirectory(path,
                                 cmake::GetCMakeFilesDirectory())))
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "unused variable (" << reason << ") \'" << name << "\'";
       this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
                                              msg.str(),
@@ -2311,7 +2311,7 @@ void cmMakefile::ExpandVariablesCMP0019()
     {
     return;
     }
-  cmOStringStream w;
+  std::ostringstream w;
 
   const char *includeDirs = this->GetProperty("INCLUDE_DIRECTORIES");
   if(mightExpandVariablesCMP0019(includeDirs))
@@ -2389,7 +2389,7 @@ void cmMakefile::ExpandVariablesCMP0019()
 
   if(!w.str().empty())
     {
-    cmOStringStream m;
+    std::ostringstream m;
     m << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0019)
       << "\n"
       << "The following variable evaluations were encountered:\n"
@@ -2782,7 +2782,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
   else
     {
     // Construct the main error message.
-    cmOStringStream error;
+    std::ostringstream error;
     error << "Syntax error in cmake code ";
     if(filename && line > 0)
       {
@@ -2890,7 +2890,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
             case NORMAL:
               if(filename && lookup == lineVar)
                 {
-                cmOStringStream ostr;
+                std::ostringstream ostr;
                 ostr << line;
                 varresult = ostr.str();
                 }
@@ -2932,7 +2932,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                   cmSystemTools::IsSubDirectory(filename,
                                              this->GetHomeOutputDirectory()))
                 {
-                cmOStringStream msg;
+                std::ostringstream msg;
                 cmListFileBacktrace bt(this->GetLocalGenerator());
                 cmListFileContext lfc;
                 lfc.FilePath = filename;
@@ -3126,7 +3126,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
 
   if(error)
     {
-    cmOStringStream emsg;
+    std::ostringstream emsg;
     emsg << "Syntax error in cmake code ";
     if(filename)
       {
@@ -3341,7 +3341,7 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
       {
       // Report the context in which the unclosed block was opened.
       cmListFileContext const& lfc = fb->GetStartingContext();
-      cmOStringStream e;
+      std::ostringstream e;
       e << "A logical block opening on the line\n"
         << "  " << lfc << "\n"
         << "is not closed.";
@@ -3499,7 +3499,7 @@ cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
       if(!(*pos)->ShouldRemove(lff, *this))
         {
         cmListFileContext const& lfc = fb->GetStartingContext();
-        cmOStringStream e;
+        std::ostringstream e;
         e << "A logical block opening on the line\n"
           << "  " << lfc << "\n"
           << "closes on the line\n"
@@ -3559,14 +3559,14 @@ void cmMakefile::SetScriptModeFile(const char* scriptfile)
 
 void cmMakefile::SetArgcArgv(const std::vector<std::string>& args)
 {
-  cmOStringStream strStream;
+  std::ostringstream strStream;
   strStream << args.size();
   this->AddDefinition("CMAKE_ARGC", strStream.str().c_str());
   //this->MarkVariableAsUsed("CMAKE_ARGC");
 
   for (unsigned int t = 0; t < args.size(); ++t)
   {
-    cmOStringStream tmpStream;
+    std::ostringstream tmpStream;
     tmpStream << "CMAKE_ARGV" << t;
     this->AddDefinition(tmpStream.str(), args[t].c_str());
     //this->MarkVariableAsUsed(tmpStream.str().c_str());
@@ -3918,7 +3918,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
         {
         case cmPolicies::WARN:
         {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "File " << currentFile << " includes "
             << moduleInCMakeModulePath
             << " (found via CMAKE_MODULE_PATH) which shadows "
@@ -4098,7 +4098,7 @@ int cmMakefile::ConfigureFile(const char* infile, const char* outfile,
     if(bom != cmsys::FStream::BOM_None &&
        bom != cmsys::FStream::BOM_UTF8)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "File starts with a Byte-Order-Mark that is not UTF-8:\n  "
         << sinfile;
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -4310,7 +4310,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LINK_DIRECTORIES")
     {
-    cmOStringStream str;
+    std::ostringstream str;
     for (std::vector<std::string>::const_iterator
          it = this->GetLinkDirectories().begin();
          it != this->GetLinkDirectories().end();
@@ -4488,7 +4488,7 @@ void cmMakefile::AddCMakeDependFilesFromUser()
 
 std::string cmMakefile::GetListFileStack() const
 {
-  cmOStringStream tmp;
+  std::ostringstream tmp;
   size_t depth = this->ListFileStack.size();
   if (depth > 0)
     {
@@ -4606,7 +4606,7 @@ void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
     }
   else
     {
-    cmOStringStream m;
+    std::ostringstream m;
     m << "Cannot set \"" << var << "\": current scope has no parent.";
     this->IssueMessage(cmake::AUTHOR_WARNING, m.str());
     }
@@ -4701,7 +4701,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 {
   if(this->IsAlias(name))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "cannot create target \"" << name
       << "\" because an alias with the same name already exists.";
     msg = e.str();
@@ -4715,7 +4715,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       {
       // Imported targets were not supported in previous versions.
       // This is new code, so we can make it an error.
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create target \"" << name
         << "\" because an imported target with the same name already exists.";
       msg = e.str();
@@ -4754,7 +4754,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 
       // Produce an error that tells the user how to work around the
       // problem.
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create target \"" << name
         << "\" because another target with the same name already exists.  "
         << "The existing target is ";
@@ -4800,7 +4800,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
     {
     return true;
     }
-  cmOStringStream e;
+  std::ostringstream e;
   switch (this->GetPolicyStatus(cmPolicies::CMP0013))
     {
     case cmPolicies::WARN:
@@ -4985,7 +4985,7 @@ bool cmMakefile::SetPolicy(const char *id,
   cmPolicies::PolicyID pid;
   if (!this->GetPolicies()->GetPolicyID(id, /* out */ pid))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Policy \"" << id << "\" is not known to this version of CMake.";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
@@ -5200,7 +5200,7 @@ AddRequiredTargetFeature(cmTarget *target, const std::string& feature,
                 availableFeatures.end(),
                 feature) == availableFeatures.end())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "The compiler feature \"" << feature
       << "\" is not known to " << lang << " compiler\n\""
       << this->GetDefinition("CMAKE_" + lang + "_COMPILER_ID")
@@ -5240,7 +5240,7 @@ CompileFeatureKnown(cmTarget const* target, const std::string& feature,
     lang = "CXX";
     return true;
     }
-  cmOStringStream e;
+  std::ostringstream e;
   if (error)
     {
     e << "specified";
@@ -5271,7 +5271,7 @@ CompileFeaturesAvailable(const std::string& lang, std::string *error) const
 
   if (!featuresKnown || !*featuresKnown)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     if (error)
       {
       e << "no";
@@ -5326,7 +5326,7 @@ HaveCFeatureAvailable(cmTarget const* target, const std::string& feature) const
   if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
                 cmStrCmp(existingCStandard)) == cmArrayEnd(C_STANDARDS))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "The C_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCStandard << "\".";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -5403,7 +5403,7 @@ bool cmMakefile::HaveCxxFeatureAvailable(cmTarget const* target,
   if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
                 cmStrCmp(existingCxxStandard)) == cmArrayEnd(CXX_STANDARDS))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "The CXX_STANDARD property on target \"" << target->GetName()
       << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
     this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -5478,7 +5478,7 @@ AddRequiredTargetCxxFeature(cmTarget *target,
     if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
                   cmStrCmp(existingCxxStandard)) == cmArrayEnd(CXX_STANDARDS))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "The CXX_STANDARD property on target \"" << target->GetName()
         << "\" contained an invalid value: \"" << existingCxxStandard << "\".";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -5577,7 +5577,7 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
     if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
                   cmStrCmp(existingCStandard)) == cmArrayEnd(C_STANDARDS))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "The C_STANDARD property on target \"" << target->GetName()
         << "\" contained an invalid value: \"" << existingCStandard << "\".";
       this->IssueMessage(cmake::FATAL_ERROR, e.str());

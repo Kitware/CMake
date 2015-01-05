@@ -212,7 +212,7 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Part name \"" << arg << "\" is invalid.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       this->ArgumentDoing = ArgumentDoingError;
@@ -229,7 +229,7 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "File \"" << filename << "\" does not exist. Cannot submit "
           << "a non-existent file.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());

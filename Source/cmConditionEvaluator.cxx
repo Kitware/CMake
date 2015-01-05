@@ -119,7 +119,7 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
 
     if(!hasBeenReported)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << (this->Makefile.GetPolicies()->GetPolicyWarning(
         cmPolicies::CMP0054)) << "\n";
       e << "Quoted variables like \"" << argument.GetValue() <<
@@ -169,7 +169,7 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
 
     if(!hasBeenReported)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << (this->Makefile.GetPolicies()->GetPolicyWarning(
         cmPolicies::CMP0054)) << "\n";
       e << "Quoted keywords like \"" << argument.GetValue() <<
@@ -559,7 +559,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         cmsys::RegularExpression regEntry;
         if ( !regEntry.compile(rex) )
           {
-          cmOStringStream error;
+          std::ostringstream error;
           error << "Regular expression \"" << rex << "\" cannot compile";
           errorString = error.str();
           status = cmake::FATAL_ERROR;

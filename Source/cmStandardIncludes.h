@@ -140,7 +140,7 @@ private:
 #endif
 
 /* Poison this operator to avoid common mistakes.  */
-extern void operator << (std::ostream&, const cmOStringStream&);
+extern void operator << (std::ostream&, const std::ostringstream&);
 
 /** Standard documentation entry for cmDocumentation's formatting.  */
 struct cmDocumentationEntry

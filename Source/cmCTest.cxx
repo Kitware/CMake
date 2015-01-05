@@ -240,7 +240,7 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
 //----------------------------------------------------------------------
 std::string cmCTest::MakeURLSafe(const std::string& str)
 {
-  cmOStringStream ost;
+  std::ostringstream ost;
   char buffer[10];
   for ( std::string::size_type pos = 0; pos < str.size(); pos ++ )
     {
@@ -1302,7 +1302,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     inst.TimeOut = timeout;
 
     // Capture output of the child ctest.
-    cmOStringStream oss;
+    std::ostringstream oss;
     inst.SetStreams(&oss, &oss);
 
     std::vector<std::string> args;
@@ -1316,7 +1316,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
         if (strcmp(argv[i],"--build-generator") == 0 && timeout > 0)
           {
           args.push_back("--test-timeout");
-          cmOStringStream msg;
+          std::ostringstream msg;
           msg << timeout;
           args.push_back(msg.str());
           }

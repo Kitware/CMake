@@ -103,7 +103,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
       }
     return this->EmptyVariable;
     }
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Syntax $" << key << "{} is not supported.  "
     << "Only ${}, $ENV{}, and $CACHE{} are allowed.";
   this->SetError(e.str());
@@ -118,7 +118,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
     }
   if(this->FileLine >= 0 && strcmp(var, "CMAKE_CURRENT_LIST_LINE") == 0)
     {
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     ostr << this->FileLine;
     return this->AddString(ostr.str());
     }
@@ -136,7 +136,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
           cmSystemTools::IsSubDirectory(this->FileName,
                                      this->Makefile->GetHomeOutputDirectory()))
         {
-        cmOStringStream msg;
+        std::ostringstream msg;
         cmListFileBacktrace bt(this->Makefile->GetLocalGenerator());
         cmListFileContext lfc;
         lfc.FilePath = this->FileName;
@@ -253,7 +253,7 @@ bool cmCommandArgumentParserHelper::HandleEscapeSymbol
     break;
   default:
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Invalid escape sequence \\" << symbol;
     this->SetError(e.str());
     }
@@ -335,7 +335,7 @@ int cmCommandArgumentParserHelper::LexInput(char* buf, int maxlen)
 void cmCommandArgumentParserHelper::Error(const char* str)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   ostr << str << " (" << pos << ")";
   this->SetError(ostr.str());
 }

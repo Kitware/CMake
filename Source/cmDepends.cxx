@@ -123,7 +123,7 @@ void cmDepends::Clear(const char *file)
   // Print verbose output.
   if(this->Verbose)
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     msg << "Clearing dependencies in \"" << file << "\"." << std::endl;
     cmSystemTools::Stdout(msg.str().c_str());
     }
@@ -213,7 +213,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
       // Print verbose output.
       if(this->Verbose)
         {
-        cmOStringStream msg;
+        std::ostringstream msg;
         msg << "Dependee \"" << dependee
             << "\" does not exist for depender \""
             << depender << "\"." << std::endl;
@@ -235,7 +235,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
           // Print verbose output.
           if(this->Verbose)
             {
-            cmOStringStream msg;
+            std::ostringstream msg;
             msg << "Dependee \"" << dependee
                 << "\" is newer than depender \""
                 << depender << "\"." << std::endl;
@@ -257,7 +257,7 @@ bool cmDepends::CheckDependencies(std::istream& internalDepends,
           // Print verbose output.
           if(this->Verbose)
             {
-            cmOStringStream msg;
+            std::ostringstream msg;
             msg << "Dependee \"" << dependee
                 << "\" is newer than depends file \""
                 << internalDependsFileName << "\"." << std::endl;
