@@ -10,7 +10,7 @@ struct A
   virtual int getA() { return 7; }
 };
 
-struct B final : A
+struct B : A
 {
   int getA() override { return 42; }
 };
