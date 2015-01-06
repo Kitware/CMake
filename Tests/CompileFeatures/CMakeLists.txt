@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 project(CompileFeatures)
 
@@ -31,7 +31,7 @@ foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
   # The cxx_alignof feature happens to work (for *this* testcase) with
   # GNU 4.7, but it is first documented as available with GNU 4.8.
@@ -39,7 +39,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
     cxx_alignof
   )
 endif()
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
   # GNU prior to 4.9 does not set any preprocessor define to distinguish
   # c++1y from c++11, so CMake does not support c++1y features before GNU 4.9.
