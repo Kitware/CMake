@@ -780,7 +780,6 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       std::vector<std::string> dirs = includesArgs.GetIncludeDirs();
       if(!dirs.empty())
         {
-        std::string dirString;
         const char *sep = "";
         for (std::vector<std::string>::const_iterator it = dirs.begin();
             it != dirs.end(); ++it)
