@@ -2320,14 +2320,7 @@ const char *cmake::GetProperty(const std::string& prop,
       {
       std::vector<std::string> enLangs;
       this->GlobalGenerator->GetEnabledLanguages(enLangs);
-      const char* sep = "";
-      for(std::vector<std::string>::iterator i = enLangs.begin();
-          i != enLangs.end(); ++i)
-        {
-        lang += sep;
-        sep = ";";
-        lang += *i;
-        }
+      lang = cmJoin(enLangs, ";");
       }
     this->SetProperty("ENABLED_LANGUAGES", lang.c_str());
     }

@@ -224,16 +224,7 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
       }
     }
   depends.insert(depends.end(), qrcEntries.begin(), qrcEntries.end());
-  std::string entriesList;
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator it = qrcEntries.begin();
-      it != qrcEntries.end(); ++it)
-    {
-    entriesList += sep;
-    entriesList += *it;
-    sep = "@list_sep@";
-    }
-  return entriesList;
+  return cmJoin(qrcEntries, "@list_sep@");
 }
 
 std::string cmQtAutoGenerators::ListQt4RccInputs(cmSourceFile* sf,
@@ -512,29 +503,13 @@ static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
   // Get the include dirs for this target, without stripping the implicit
   // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
   localGen->GetIncludeDirectories(includeDirs, gtgt, "CXX", config, false);
-  const char* sep = "";
-  incs = "";
-  for(std::vector<std::string>::const_iterator incDirIt = includeDirs.begin();
-      incDirIt != includeDirs.end();
-      ++incDirIt)
-    {
-    incs += sep;
-    sep = ";";
-    incs += *incDirIt;
-    }
+
+  incs = cmJoin(includeDirs, ";");
 
   std::set<std::string> defines;
   localGen->AddCompileDefinitions(defines, target, config);
 
-  sep = "";
-  for(std::set<std::string>::const_iterator defIt = defines.begin();
-      defIt != defines.end();
-      ++defIt)
-    {
-    defs += sep;
-    sep = ";";
-    defs += *defIt;
-    }
+  defs += cmJoin(defines, ";");
 }
 
 void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
@@ -879,16 +854,7 @@ static void GetUicOpts(cmTarget const* target, const std::string& config,
 {
   std::vector<std::string> opts;
   target->GetAutoUicOptions(opts, config);
-
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator optIt = opts.begin();
-      optIt != opts.end();
-      ++optIt)
-    {
-    optString += sep;
-    sep = ";";
-    optString += *optIt;
-    }
+  optString = cmJoin(opts, ";");
 }
 
 void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,

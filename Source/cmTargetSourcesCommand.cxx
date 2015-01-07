@@ -44,15 +44,7 @@ void cmTargetSourcesCommand
 std::string cmTargetSourcesCommand
 ::Join(const std::vector<std::string> &content)
 {
-  std::string srcs;
-  std::string sep;
-  for(std::vector<std::string>::const_iterator it = content.begin();
-    it != content.end(); ++it)
-    {
-    srcs += sep + *it;
-    sep = ";";
-    }
-  return srcs;
+  return cmJoin(content, ";");
 }
 
 //----------------------------------------------------------------------------

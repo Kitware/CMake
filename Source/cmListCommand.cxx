@@ -353,15 +353,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     cnt ++;
     }
 
-  std::string value;
-  const char* sep = "";
-  for ( cc = 0; cc < varArgsExpanded.size(); cc ++ )
-    {
-    value += sep;
-    value += varArgsExpanded[cc];
-    sep = ";";
-    }
-
+  std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
 }
@@ -402,15 +394,8 @@ bool cmListCommand
       }
     }
 
-  std::string value;
-  const char* sep = "";
-  for ( cc = 0; cc < varArgsExpanded.size(); cc ++ )
-    {
-    value += sep;
-    value += varArgsExpanded[cc];
-    sep = ";";
-    }
 
+  std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
 }
@@ -518,16 +503,7 @@ bool cmListCommand
 
   std::sort(varArgsExpanded.begin(), varArgsExpanded.end());
 
-  std::string value;
-  std::vector<std::string>::iterator it;
-  const char* sep = "";
-  for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
-    {
-    value += sep;
-    value += it->c_str();
-    sep = ";";
-    }
-
+  std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
 }

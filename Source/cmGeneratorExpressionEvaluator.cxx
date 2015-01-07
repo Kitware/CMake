@@ -803,18 +803,9 @@ static const struct JoinNode : public cmGeneratorExpressionNode
                        const GeneratorExpressionContent *,
                        cmGeneratorExpressionDAGChecker *) const
   {
-    std::string result;
-
     std::vector<std::string> list;
     cmSystemTools::ExpandListArgument(parameters.front(), list);
-    std::string sep;
-    for(std::vector<std::string>::const_iterator li = list.begin();
-      li != list.end(); ++li)
-      {
-      result += sep + *li;
-      sep = parameters[1];
-      }
-    return result;
+    return cmJoin(list, parameters[1]);
   }
 } joinNode;
 

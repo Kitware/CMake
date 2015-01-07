@@ -417,14 +417,7 @@ void cmRST::ProcessDirectiveReplace()
 {
   // Record markup lines as replacement text.
   std::string& replacement = this->Replace[this->ReplaceName];
-  const char* sep = "";
-  for(std::vector<std::string>::iterator i = this->MarkupLines.begin();
-      i != this->MarkupLines.end(); ++i)
-    {
-    replacement += sep;
-    replacement += *i;
-    sep = " ";
-    }
+  replacement += cmJoin(this->MarkupLines, " ");
   this->ReplaceName = "";
 }
 

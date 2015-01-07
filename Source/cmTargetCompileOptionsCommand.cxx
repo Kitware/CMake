@@ -39,15 +39,7 @@ void cmTargetCompileOptionsCommand
 std::string cmTargetCompileOptionsCommand
 ::Join(const std::vector<std::string> &content)
 {
-  std::string defs;
-  std::string sep;
-  for(std::vector<std::string>::const_iterator it = content.begin();
-    it != content.end(); ++it)
-    {
-    defs += sep + *it;
-    sep = ";";
-    }
-  return defs;
+  return cmJoin(content, ";");
 }
 
 //----------------------------------------------------------------------------
