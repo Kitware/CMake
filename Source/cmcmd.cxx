@@ -71,7 +71,7 @@ void CMakeCommandUsage(const char* program)
     << "  remove_directory dir      - remove a directory and its contents\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
-    << "  tar [cxt][vf][zj] file.tar [file/dir1 file/dir2 ...]\n"
+    << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  time command [args] ...   - run command and return elapsed time\n"
@@ -735,10 +735,15 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       bool gzip = false;
       bool bzip2 = false;
+      bool xz = false;
       bool verbose = false;
       if ( flags.find_first_of('j') != flags.npos )
         {
         bzip2 = true;
+        }
+      if ( flags.find_first_of('J') != flags.npos )
+        {
+        xz = true;
         }
       if ( flags.find_first_of('z') != flags.npos )
         {
@@ -760,7 +765,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       else if ( flags.find_first_of('c') != flags.npos )
         {
         if ( !cmSystemTools::CreateTar(
-               outFile.c_str(), files, gzip, bzip2, verbose) )
+               outFile.c_str(), files, gzip, bzip2, xz, verbose) )
           {
           cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
           return 1;

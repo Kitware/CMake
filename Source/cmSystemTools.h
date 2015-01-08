@@ -387,7 +387,7 @@ public:
                       bool gzip, bool verbose);
   static bool CreateTar(const char* outFileName,
                         const std::vector<std::string>& files, bool gzip,
-                        bool bzip2, bool verbose);
+                        bool bzip2, bool xz, bool verbose);
   static bool ExtractTar(const char* inFileName, bool gzip,
                          bool verbose);
   // This should be called first thing in main
