@@ -42,11 +42,12 @@ Possible expressions are:
  or a non-zero number.  False if the constant is ``0``, ``OFF``,
  ``NO``, ``FALSE``, ``N``, ``IGNORE``, ``NOTFOUND``, the empty string,
  or ends in the suffix ``-NOTFOUND``.  Named boolean constants are
- case-insensitive.  If the argument is not one of these constants, it
- is treated as a variable.
+ case-insensitive.  If the argument is not one of these specific
+ constants, it is treated as a variable or string and the following
+ signature is used.
 
-``if(<variable>)``
- True if the variable is defined to a value that is not a false
+``if(<variable|string>)``
+ True if given a variable that is defined to a value that is not a false
  constant.  False otherwise.  (Note macro arguments are not variables.)
 
 ``if(NOT <expression>)``
