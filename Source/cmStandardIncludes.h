@@ -146,11 +146,6 @@ extern int putenv (char *__string) __THROW;
 #define for if(false) {} else for
 #endif
 
-// Provide std::ios_base on ancient GCC 2.9x
-#if defined(__GNUC__) && __GNUC__ < 3
-namespace std { typedef ios ios_base; }
-#endif
-
 // check for the 720 compiler on the SGI
 // which has some strange properties that I don't think are worth
 // checking for in a general way in configure
@@ -393,20 +388,6 @@ inline bool cmHasLiteralSuffixImpl(const char* str1,
   return len >= N && strcmp(str1 + len - N, str2) == 0;
 }
 
-#if defined(__GNUC__) && __GNUC__ < 3
-
-#define cmArrayBegin(a) a
-#define cmArraySize(a) (sizeof(a)/sizeof(*a))
-#define cmArrayEnd(a) a + cmArraySize(a)
-
-#define cmHasLiteralPrefix(STR1, STR2) \
-  cmHasLiteralPrefixImpl(STR1, "" STR2 "", sizeof(STR2) - 1)
-
-#define cmHasLiteralSuffix(STR1, STR2) \
-  cmHasLiteralSuffixImpl(STR1, "" STR2 "", sizeof(STR2) - 1)
-
-#else
-
 template<typename T, size_t N>
 const T* cmArrayBegin(const T (&a)[N]) { return a; }
 template<typename T, size_t N>
@@ -425,8 +406,6 @@ bool cmHasLiteralSuffix(T str1, const char (&str2)[N])
 {
   return cmHasLiteralSuffixImpl(str1, str2, N - 1);
 }
-
-#endif
 
 struct cmStrCmp {
   cmStrCmp(const char *test) : m_test(test) {}
