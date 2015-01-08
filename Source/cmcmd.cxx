@@ -71,7 +71,7 @@ void CMakeCommandUsage(const char* program)
     << "  remove_directory dir      - remove a directory and its contents\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
-    << "  tar [cxt][vfz][cvfj] file.tar [file/dir1 file/dir2 ...]\n"
+    << "  tar [cxt][vf][zj] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  time command [args] ...   - run command and return elapsed time\n"
