@@ -6,4 +6,4 @@ CMake Error at LINK_LANGUAGE-genex.cmake:[0-9]+ \(target_link_libraries\):
   LINKER_LANGUAGE target property can not be used while evaluating link
   libraries for a static library
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

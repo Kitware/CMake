@@ -6,4 +6,4 @@ CMake Error at link-libraries-TARGET_FILE-genex.cmake:[0-9]+ \(target_link_libra
   Expressions which require the linker language may not be used while
   evaluating link libraries
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
