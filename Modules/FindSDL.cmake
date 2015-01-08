@@ -106,7 +106,7 @@ find_library(SDL_LIBRARY_TEMP
 )
 
 if(NOT SDL_BUILDING_LIBRARY)
-  if(NOT ${SDL_INCLUDE_DIR} MATCHES ".framework")
+  if(NOT SDL_INCLUDE_DIR MATCHES ".framework")
     # Non-OS X framework versions expect you to also dynamically link to
     # SDLmain. This is mainly for Windows and OS X. Other (Unix) platforms
     # seem to provide SDLmain for compatibility even though they don't
