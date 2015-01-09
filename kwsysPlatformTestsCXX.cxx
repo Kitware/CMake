@@ -548,6 +548,10 @@ int main()
 #if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
 # define _GNU_SOURCE
 #endif
+#if defined(__SUNPRO_CC) && __SUNPRO_CC >= 0x5130 \
+     && __linux && __SUNPRO_CC_COMPAT == 'G'
+#  include <iostream>
+#endif
 #include <cxxabi.h>
 int main()
 {
