@@ -283,9 +283,7 @@ function(from_hex HEX DEC)
 endfunction()
 
 if (OPENSSL_INCLUDE_DIR)
-  if (_OPENSSL_VERSION)
-    set(OPENSSL_VERSION "${_OPENSSL_VERSION}")
-  elseif(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
+  if(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
     file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str
          REGEX "^#define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-fA-F])+.*")
 
