@@ -31,6 +31,26 @@ foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
+    AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.1)
+  # AppleClang prior to 5.1 does not set any preprocessor define to distinguish
+  # c++1y from c++11, so CMake does not support c++1y features before AppleClang 5.1.
+  list(REMOVE_ITEM CXX_non_features
+    cxx_attribute_deprecated
+    cxx_binary_literals
+  )
+endif()
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
+    AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.2)
+  # AppleClang prior to 4.1 reports false for __has_feature(cxx_local_type_template_args)
+  # and __has_feature(cxx_unrestricted_unions) but it happens to pass these tests.
+  list(REMOVE_ITEM CXX_non_features
+    cxx_local_type_template_args
+    cxx_unrestricted_unions
+  )
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
   # The cxx_alignof feature happens to work (for *this* testcase) with
