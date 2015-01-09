@@ -736,17 +736,27 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       cmSystemTools::cmTarCompression compress =
         cmSystemTools::TarCompressNone;
       bool verbose = false;
+      int nCompress = 0;
       if ( flags.find_first_of('j') != flags.npos )
         {
         compress = cmSystemTools::TarCompressBZip2;
+        ++nCompress;
         }
       if ( flags.find_first_of('J') != flags.npos )
         {
         compress = cmSystemTools::TarCompressXZ;
+        ++nCompress;
         }
       if ( flags.find_first_of('z') != flags.npos )
         {
         compress = cmSystemTools::TarCompressGZip;
+        ++nCompress;
+        }
+      if ( nCompress > 1 )
+        {
+        cmSystemTools::Error("Can only compress a tar file one way; "
+                             "at most one flag of z, j, or J may be used");
+        return 1;
         }
       if ( flags.find_first_of('v') != flags.npos )
         {
