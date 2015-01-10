@@ -2,7 +2,7 @@
 # Reference: http://gcc.gnu.org/projects/cxx0x.html
 # http://gcc.gnu.org/projects/cxx1y.html
 
-set(_cmake_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 407")
+set(_cmake_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 406")
 
 set(GNU50_CXX14 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 500 && __cplusplus >= 201402L")
 set(_cmake_feature_test_cxx_variable_templates "${GNU50_CXX14}")
@@ -60,7 +60,7 @@ set(_cmake_feature_test_cxx_user_literals "${GNU47_CXX11}")
 # defined in the future.
 set(GNU_CXX0X_DEFINED "(__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))")
 # TODO: Should be supported by GNU 4.6
-set(GNU46_CXX11 "${_cmake_oldestSupported} && ${GNU_CXX0X_DEFINED}")
+set(GNU46_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ${GNU_CXX0X_DEFINED}")
 set(_cmake_feature_test_cxx_constexpr "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_defaulted_move_initializers "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_enum_forward_declarations "${GNU46_CXX11}")

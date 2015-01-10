@@ -29,7 +29,7 @@ macro(cmake_record_c_compile_features)
   endmacro()
 
   set(_result 0)
-  if (UNIX AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
+  if (UNIX AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
     _get_gcc_features(${CMAKE_C11_STANDARD_COMPILE_OPTION} CMAKE_C11_COMPILE_FEATURES)
     if (_result EQUAL 0)
       _get_gcc_features(${CMAKE_C99_STANDARD_COMPILE_OPTION} CMAKE_C99_COMPILE_FEATURES)
