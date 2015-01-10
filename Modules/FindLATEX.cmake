@@ -15,7 +15,9 @@
 #   LATEX_COMPILER:       path to the LaTeX compiler
 #   PDFLATEX_COMPILER:    path to the PdfLaTeX compiler
 #   BIBTEX_COMPILER:      path to the BibTeX compiler
+#   BIBER_COMPILER:       path to the Biber compiler
 #   MAKEINDEX_COMPILER:   path to the MakeIndex compiler
+#   XINDY_COMPILER:       path to the xindy compiler
 #   DVIPS_CONVERTER:      path to the DVIPS converter
 #   DVIPDF_CONVERTER:     path to the DVIPDF converter
 #   PS2PDF_CONVERTER:     path to the PS2PDF converter
@@ -27,7 +29,9 @@
 #
 #   PDFLATEX
 #   BIBTEX
+#   BIBER
 #   MAKEINDEX
+#   XINDY
 #   DVIPS
 #   DVIPDF
 #   PS2PDF
@@ -117,6 +121,18 @@ else()
   set(LATEX_BIBTEX_FOUND FALSE)
 endif()
 
+# find biber
+find_program(BIBER_COMPILER
+  NAMES biber
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+if (BIBER_COMPILER)
+  set(LATEX_BIBER_FOUND TRUE)
+else()
+  set(LATEX_BIBER_FOUND FALSE)
+endif()
+
 # find makeindex
 find_program(MAKEINDEX_COMPILER
   NAMES makeindex
@@ -127,6 +143,18 @@ if (MAKEINDEX_COMPILER)
   set(LATEX_MAKEINDEX_FOUND TRUE)
 else()
   set(LATEX_MAKEINDEX_FOUND FALSE)
+endif()
+
+# find xindy
+find_program(XINDY_COMPILER
+  NAMES xindy
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+if (XINDY_COMPILER)
+   set(LATEX_XINDY_FOUND TRUE)
+else()
+  set(LATEX_XINDY_FOUND FALSE)
 endif()
 
 # find dvips
@@ -212,7 +240,9 @@ mark_as_advanced(
   LATEX_COMPILER
   PDFLATEX_COMPILER
   BIBTEX_COMPILER
+  BIBER_COMPILER
   MAKEINDEX_COMPILER
+  XINDY_COMPILER
   DVIPS_CONVERTER
   DVIPDF_CONVERTER
   PS2PDF_CONVERTER
