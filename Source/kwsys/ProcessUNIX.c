@@ -547,7 +547,7 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int prPipe, const char* file)
     }
   if(file)
     {
-    *pfile = malloc(strlen(file)+1);
+    *pfile = (char*)malloc(strlen(file)+1);
     if(!*pfile)
       {
       return 0;
@@ -1468,7 +1468,7 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
     cp->RealWorkingDirectoryLength = 4096;
 #endif
     cp->RealWorkingDirectory =
-      malloc((size_t)(cp->RealWorkingDirectoryLength));
+      (char*)malloc((size_t)(cp->RealWorkingDirectoryLength));
     if(!cp->RealWorkingDirectory)
       {
       return 0;
