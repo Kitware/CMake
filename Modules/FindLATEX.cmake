@@ -14,6 +14,8 @@
 #   LATEX_<component>_FOUND:  whether found <component>
 #   LATEX_COMPILER:       path to the LaTeX compiler
 #   PDFLATEX_COMPILER:    path to the PdfLaTeX compiler
+#   XELATEX_COMPILER:     path to the XeLaTeX compiler
+#   LUALATEX_COMPILER:    path to the LuaLaTeX compiler
 #   BIBTEX_COMPILER:      path to the BibTeX compiler
 #   BIBER_COMPILER:       path to the Biber compiler
 #   MAKEINDEX_COMPILER:   path to the MakeIndex compiler
@@ -28,6 +30,8 @@
 # Possible components are::
 #
 #   PDFLATEX
+#   XELATEX
+#   LUALATEX
 #   BIBTEX
 #   BIBER
 #   MAKEINDEX
@@ -46,7 +50,8 @@
 #   find_package(LATEX COMPONENTS BIBTEX PS2PDF)
 
 #=============================================================================
-# Copyright 2002-2014 Kitware, Inc.
+# Copyright 2002-2015 Kitware, Inc.
+# Copyright 2014-2015 Christoph Grüninger <foss@grueninger.de>
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -107,6 +112,30 @@ if (PDFLATEX_COMPILER)
   set(LATEX_PDFLATEX_FOUND TRUE)
 else()
   set(LATEX_PDFLATEX_FOUND FALSE)
+endif()
+
+# find xelatex
+find_program(XELATEX_COMPILER
+  NAMES xelatex
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+if (XELATEX_COMPILER)
+  set(LATEX_XELATEX_FOUND TRUE)
+else()
+  set(LATEX_XELATEX_FOUND FALSE)
+endif()
+
+# find lualatex
+find_program(LUALATEX_COMPILER
+  NAMES lualatex
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+if (LUALATEX_COMPILER)
+  set(LATEX_LUALATEX_FOUND TRUE)
+else()
+  set(LATEX_LUALATEX_FOUND FALSE)
 endif()
 
 # find bibtex
@@ -239,6 +268,8 @@ endif()
 mark_as_advanced(
   LATEX_COMPILER
   PDFLATEX_COMPILER
+  XELATEX_COMPILER
+  LUALATEX_COMPILER
   BIBTEX_COMPILER
   BIBER_COMPILER
   MAKEINDEX_COMPILER
