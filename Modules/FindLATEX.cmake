@@ -19,7 +19,9 @@
 #   DVIPS_CONVERTER:      path to the DVIPS converter
 #   DVIPDF_CONVERTER:     path to the DVIPDF converter
 #   PS2PDF_CONVERTER:     path to the PS2PDF converter
+#   PDFTOPS_CONVERTER:    path to the pdftops converter
 #   LATEX2HTML_CONVERTER: path to the LaTeX2Html converter
+#   HTLATEX_COMPILER:     path to the htlatex compiler
 #
 # Possible components are::
 #
@@ -29,7 +31,9 @@
 #   DVIPS
 #   DVIPDF
 #   PS2PDF
+#   PDFTOPS
 #   LATEX2HTML
+#   HTLATEX
 #
 # Example Usages::
 #
@@ -167,6 +171,18 @@ else()
   set(LATEX_PS2PDF_FOUND FALSE)
 endif()
 
+# find pdftops
+find_program(PDFTOPS_CONVERTER
+  NAMES pdftops
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+if (PDFTOPS_CONVERTER)
+  set(LATEX_PDFTOPS_FOUND TRUE)
+else()
+  set(LATEX_PDFTOPS_FOUND FALSE)
+endif()
+
 # find latex2html
 find_program(LATEX2HTML_CONVERTER
   NAMES latex2html
@@ -179,6 +195,18 @@ else()
   set(LATEX_LATEX2HTML_FOUND FALSE)
 endif()
 
+# find htlatex
+find_program(HTLATEX_COMPILER
+  NAMES htlatex
+  PATHS ${MIKTEX_BINARY_PATH}
+        /usr/bin
+)
+if (HTLATEX_COMPILER)
+  set(LATEX_HTLATEX_FOUND TRUE)
+else()
+  set(LATEX_HTLATEX_FOUND FALSE)
+endif()
+
 
 mark_as_advanced(
   LATEX_COMPILER
@@ -188,7 +216,9 @@ mark_as_advanced(
   DVIPS_CONVERTER
   DVIPDF_CONVERTER
   PS2PDF_CONVERTER
+  PDFTOPS_CONVERTER
   LATEX2HTML_CONVERTER
+  HTLATEX_COMPILER
 )
 
 # handle variables for found Latex and its components
