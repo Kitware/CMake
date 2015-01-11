@@ -1,5 +1,5 @@
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.1)
 
 project(CompileFeatures)
 
@@ -31,13 +31,15 @@ foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+  # The cxx_alignof feature happens to work (for *this* testcase) with
+  # GNU 4.7, but it is first documented as available with GNU 4.8.
   list(REMOVE_ITEM CXX_non_features
     cxx_alignof
   )
 endif()
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9)
   # GNU prior to 4.9 does not set any preprocessor define to distinguish
   # c++1y from c++11, so CMake does not support c++1y features before GNU 4.9.
@@ -120,17 +122,28 @@ if (CMAKE_CXX_COMPILE_FEATURES)
   add_executable(IfaceCompileFeatures main.cpp)
   target_link_libraries(IfaceCompileFeatures iface)
 
+  add_definitions(-DEXPECT_OVERRIDE_CONTROL=1)
+
   add_executable(CompileFeaturesGenex genex_test.cpp)
   set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
-  target_compile_definitions(CompileFeaturesGenex PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
+  target_compile_definitions(CompileFeaturesGenex PRIVATE
+    HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
+    HAVE_NULLPTR=$<COMPILE_FEATURES:cxx_nullptr>
+  )
 
   add_executable(CompileFeaturesGenex2 genex_test.cpp)
-  target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_constexpr)
-  target_compile_definitions(CompileFeaturesGenex2 PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
+  target_compile_features(CompileFeaturesGenex2 PRIVATE cxx_static_assert)
+  target_compile_definitions(CompileFeaturesGenex2 PRIVATE
+    HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
+    HAVE_NULLPTR=$<COMPILE_FEATURES:cxx_nullptr>
+  )
 
-  add_library(noexcept_iface INTERFACE)
-  target_compile_features(noexcept_iface INTERFACE cxx_noexcept)
+  add_library(static_assert_iface INTERFACE)
+  target_compile_features(static_assert_iface INTERFACE cxx_static_assert)
   add_executable(CompileFeaturesGenex3 genex_test.cpp)
-  target_link_libraries(CompileFeaturesGenex3 PRIVATE noexcept_iface)
-  target_compile_definitions(CompileFeaturesGenex3 PRIVATE HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>)
+  target_link_libraries(CompileFeaturesGenex3 PRIVATE static_assert_iface)
+  target_compile_definitions(CompileFeaturesGenex3 PRIVATE
+    HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
+    HAVE_NULLPTR=$<COMPILE_FEATURES:cxx_nullptr>
+  )
 endif()

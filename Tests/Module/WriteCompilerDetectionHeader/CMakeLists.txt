@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.1.0)
 project(WriteCompilerDetectionHeader)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -56,17 +56,17 @@ macro(set_defines target true_defs false_defs)
   )
 endmacro()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL GNU
-    OR CMAKE_CXX_COMPILER_ID STREQUAL Clang
-    OR CMAKE_CXX_COMPILER_ID STREQUAL AppleClang)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
+    OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
+    OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
   # False for C++98 mode.
   list(APPEND false_defs EXPECTED_COMPILER_CXX_DELEGATING_CONSTRUCTORS)
   list(APPEND false_defs EXPECTED_COMPILER_CXX_VARIADIC_TEMPLATES)
 endif()
 
-if (CMAKE_C_COMPILER_ID STREQUAL GNU
-    OR CMAKE_C_COMPILER_ID STREQUAL Clang
-    OR CMAKE_C_COMPILER_ID STREQUAL AppleClang)
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
+    OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
+    OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   add_executable(C_undefined c_undefined.c)
   set_property(TARGET C_undefined PROPERTY CXX_STANDARD 90)
   target_compile_options(C_undefined PRIVATE -Werror=undef)
