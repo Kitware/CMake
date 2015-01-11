@@ -26,7 +26,18 @@ get_property(c_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
 foreach(feature ${c_features})
   run_test(${feature} C)
 endforeach()
+
 get_property(cxx_features GLOBAL PROPERTY CMAKE_CXX_KNOWN_FEATURES)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  list(REMOVE_ITEM cxx_features
+    # This test requires auto return type deduction to work properly, but
+    # that is not supported by all versions of MSVC that support decltype
+    # incomplete return types.
+    cxx_decltype_incomplete_return_types
+    )
+endif()
+
 foreach(feature ${cxx_features})
   run_test(${feature} CXX)
 endforeach()
@@ -51,6 +62,17 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     cxx_lambda_init_captures
     cxx_return_type_deduction
   )
+endif()
+
+set(MSVC_)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND
+   MSVC_VERSION LESS 1800)
+  list(REMOVE_ITEM CXX_non_features
+    # Microsoft only officially supports this feature in VS2013 and above, due
+    # to new wording of the proposal. We don't test for this with MSVC because
+    # older compiler pass the test but might not actually conform
+    cxx_contextual_conversions
+    )
 endif()
 
 set(C_ext c)
@@ -126,6 +148,7 @@ if (CMAKE_CXX_COMPILE_FEATURES)
 
   add_executable(CompileFeaturesGenex genex_test.cpp)
   set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
+
   target_compile_definitions(CompileFeaturesGenex PRIVATE
     HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
     HAVE_NULLPTR=$<COMPILE_FEATURES:cxx_nullptr>
