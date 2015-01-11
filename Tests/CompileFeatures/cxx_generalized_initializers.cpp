@@ -8,6 +8,7 @@ namespace std {
     const _E* __begin_;
     size_t    __size_;
 
+    initializer_list(const int*, long unsigned int) {}
   };
 }
 
