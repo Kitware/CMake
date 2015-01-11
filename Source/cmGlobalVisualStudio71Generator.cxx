@@ -93,6 +93,11 @@ void cmGlobalVisualStudio71Generator
                cmLocalGenerator* root,
                std::vector<cmLocalGenerator*>& generators)
 {
+#ifdef CMAKE_ENCODING_UTF8
+  // Add UTF-8 BOM for .sln file to indicate encoding
+  const unsigned char utf8_bom[3] = {0xEF,0xBB,0xBF};
+  fout.write(reinterpret_cast<const char*>(utf8_bom), 3);
+#endif
   // Write out the header for a SLN file
   this->WriteSLNHeader(fout);
 
