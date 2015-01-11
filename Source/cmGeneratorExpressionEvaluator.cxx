@@ -1376,7 +1376,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       for (std::vector<std::string>::const_iterator it = lit->second.begin();
           it != lit->second.end(); ++it)
         {
-        if (!context->Makefile->HaveFeatureAvailable(target,
+        if (!context->Makefile->HaveStandardAvailable(target,
                                                       lit->first, *it))
           {
           if (evalLL)
