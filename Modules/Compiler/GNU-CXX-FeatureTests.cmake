@@ -102,4 +102,4 @@ set(_cmake_feature_test_cxx_extern_templates "${_cmake_oldestSupported} && __cpl
 # TODO: Should be supported forever?
 set(_cmake_feature_test_cxx_func_identifier "${_cmake_oldestSupported} && __cplusplus >= 201103L")
 set(_cmake_feature_test_cxx_variadic_macros "${_cmake_oldestSupported} && __cplusplus >= 201103L")
-set(_cmake_feature_test_cxx_template_template_parameters "${_cmake_oldestSupported} && __cplusplus >= 199711L")
+set(_cmake_feature_test_cxx_template_template_parameters "${_cmake_oldestSupported} && __cplusplus")
