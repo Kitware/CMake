@@ -1373,9 +1373,16 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
     for (LangMap::const_iterator lit = testedFeatures.begin();
           lit != testedFeatures.end(); ++lit)
       {
+      std::vector<std::string> const& langAvailable
+                                              = availableFeatures[lit->first];
       for (std::vector<std::string>::const_iterator it = lit->second.begin();
           it != lit->second.end(); ++it)
         {
+        if (std::find(langAvailable.begin(), langAvailable.end(), *it)
+                                                      == langAvailable.end())
+          {
+          return "0";
+          }
         if (!context->Makefile->HaveStandardAvailable(target,
                                                       lit->first, *it))
           {
