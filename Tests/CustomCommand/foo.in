@@ -1,6 +1,5 @@
 #include "doc1.h"
 #include "foo.h"
-#include "config.h"
 
 #include <stdio.h>
 
@@ -11,7 +10,7 @@ int main ()
 {
   if (generated()*wrapped()*doc() == 3*5*7)
     {
-    FILE* fin = fopen(PROJECT_BINARY_DIR "/not_included.h", "r");
+    FILE* fin = fopen("not_included.h", "r");
     if(fin)
       {
       fclose(fin);

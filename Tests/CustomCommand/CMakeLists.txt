@@ -164,13 +164,6 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/not_included.h
                                    ${PROJECT_BINARY_DIR}/not_included.h
   )
 
-# Tell the executable where to find not_included.h.
-configure_file(
-  ${PROJECT_SOURCE_DIR}/config.h.in
-  ${PROJECT_BINARY_DIR}/config.h
-  @ONLY
-  )
-
 # add the executable
 add_executable(CustomCommand
   ${PROJECT_BINARY_DIR}/foo.h
