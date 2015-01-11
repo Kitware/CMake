@@ -7,7 +7,7 @@ Set a property of the tests.
 
   set_tests_properties(test1 [test2...] PROPERTIES prop1 value1 prop2 value2)
 
-Set a property for the tests.  If the property is not found, CMake
+Set a property for the tests.  If the test is not found, CMake
 will report an error.  Generator expressions will be expanded the same
 as supported by the test's add_test call.  The properties include:
 
