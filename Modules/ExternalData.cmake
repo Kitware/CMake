@@ -2,7 +2,14 @@
 ExternalData
 ------------
 
+.. only:: html
+
+   .. contents::
+
 Manage data files stored outside source tree
+
+Introduction
+^^^^^^^^^^^^
 
 Use this module to unambiguously reference data files stored outside
 the source tree and fetch them at build time from arbitrary local and
@@ -19,50 +26,56 @@ For example, the argument ``DATA{img.png}`` may be satisfied by either a
 real ``img.png`` file in the current source directory or a ``img.png.md5``
 file containing its MD5 sum.
 
-The ``ExternalData_Expand_Arguments`` function evaluates ``DATA{}``
-references in its arguments and constructs a new list of arguments:
+Module Functions
+^^^^^^^^^^^^^^^^
 
-.. code-block:: cmake
+.. command:: ExternalData_Expand_Arguments
 
- ExternalData_Expand_Arguments(
-   <target>   # Name of data management target
-   <outVar>   # Output variable
-   [args...]  # Input arguments, DATA{} allowed
-   )
+  The ``ExternalData_Expand_Arguments`` function evaluates ``DATA{}``
+  references in its arguments and constructs a new list of arguments::
 
-It replaces each ``DATA{}`` reference in an argument with the full path of
-a real data file on disk that will exist after the ``<target>`` builds.
+    ExternalData_Expand_Arguments(
+      <target>   # Name of data management target
+      <outVar>   # Output variable
+      [args...]  # Input arguments, DATA{} allowed
+      )
 
-The ``ExternalData_Add_Test`` function wraps around the CMake
-:command:`add_test` command but supports ``DATA{}`` references in
-its arguments:
+  It replaces each ``DATA{}`` reference in an argument with the full path of
+  a real data file on disk that will exist after the ``<target>`` builds.
 
-.. code-block:: cmake
+.. command:: ExternalData_Add_Test
 
- ExternalData_Add_Test(
-   <target>   # Name of data management target
-   ...        # Arguments of add_test(), DATA{} allowed
-   )
+  The ``ExternalData_Add_Test`` function wraps around the CMake
+  :command:`add_test` command but supports ``DATA{}`` references in
+  its arguments::
 
-It passes its arguments through ``ExternalData_Expand_Arguments`` and then
-invokes the :command:`add_test` command using the results.
+    ExternalData_Add_Test(
+      <target>   # Name of data management target
+      ...        # Arguments of add_test(), DATA{} allowed
+      )
 
-The ``ExternalData_Add_Target`` function creates a custom target to
-manage local instances of data files stored externally:
+  It passes its arguments through ``ExternalData_Expand_Arguments`` and then
+  invokes the :command:`add_test` command using the results.
 
-.. code-block:: cmake
+.. command:: ExternalData_Add_Target
 
- ExternalData_Add_Target(
-   <target>   # Name of data management target
-   )
+  The ``ExternalData_Add_Target`` function creates a custom target to
+  manage local instances of data files stored externally::
 
-It creates custom commands in the target as necessary to make data
-files available for each ``DATA{}`` reference previously evaluated by
-other functions provided by this module.  A list of URL templates may
-be provided in the variable ``ExternalData_URL_TEMPLATES`` using the
-placeholders ``%(algo)`` and ``%(hash)`` in each template.  Data fetch
-rules try each URL template in order by substituting the hash
-algorithm name for ``%(algo)`` and the hash value for ``%(hash)``.
+    ExternalData_Add_Target(
+      <target>   # Name of data management target
+      )
+
+  It creates custom commands in the target as necessary to make data
+  files available for each ``DATA{}`` reference previously evaluated by
+  other functions provided by this module.  A list of URL templates may
+  be provided in the variable ``ExternalData_URL_TEMPLATES`` using the
+  placeholders ``%(algo)`` and ``%(hash)`` in each template.  Data fetch
+  rules try each URL template in order by substituting the hash
+  algorithm name for ``%(algo)`` and the hash value for ``%(hash)``.
+
+Hash Algorithms
+^^^^^^^^^^^^^^^
 
 The following hash algorithms are supported::
 
@@ -78,7 +91,8 @@ The following hash algorithms are supported::
 Note that the hashes are used only for unique data identification and
 download verification.
 
-Example usage:
+Example Usage
+^^^^^^^^^^^^^
 
 .. code-block:: cmake
 
@@ -97,6 +111,9 @@ replaced by the full path to a real instance of the data file
 ``MyInput.png`` on disk.  If the source tree contains a content link
 such as ``MyInput.png.md5`` then the ``MyData`` target creates a real
 ``MyInput.png`` in the build tree.
+
+Referencing File Series
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The ``DATA{}`` syntax can be told to fetch a file series using the form
 ``DATA{<name>,:}``, where the ``:`` is literal.  If the source tree
@@ -126,6 +143,9 @@ Configure series number matching with a regex that matches the
 Note that the ``<suffix>`` of a series does not include a hash-algorithm
 extension.
 
+Referencing Associated Files
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 The ``DATA{}`` syntax can alternatively match files associated with the
 named file and contained in the same directory.  Associated files may
 be specified by options using the syntax
@@ -139,6 +159,9 @@ syntax ``REGEX:<regex>``.  For example, the arguments::
 will pass ``MyInput.mha`` and ``MyFrames00.png`` on the command line but
 ensure that the associated files are present next to them.
 
+Referencing Directories
+^^^^^^^^^^^^^^^^^^^^^^^
+
 The ``DATA{}`` syntax may reference a directory using a trailing slash and
 a list of associated files.  The form ``DATA{<name>/,<opt1>,<opt2>,...}``
 adds rules to fetch any files in the directory that match one of the
@@ -148,39 +171,60 @@ directory on the command line and ensure that the directory contains
 files corresponding to every file or content link in the ``MyDataDir``
 source directory.
 
-The variable ``ExternalData_LINK_CONTENT`` may be set to the name of a
-supported hash algorithm to enable automatic conversion of real data
-files referenced by the ``DATA{}`` syntax into content links.  For each
-such ``<file>`` a content link named ``<file><ext>`` is created.  The
-original file is renamed to the form ``.ExternalData_<algo>_<hash>`` to
-stage it for future transmission to one of the locations in the list
-of URL templates (by means outside the scope of this module).  The
-data fetch rule created for the content link will use the staged
-object if it cannot be found using any URL template.
+Module Variables
+^^^^^^^^^^^^^^^^
 
-The variable ``ExternalData_OBJECT_STORES`` may be set to a list of local
-directories that store objects using the layout ``<dir>/%(algo)/%(hash)``.
-These directories will be searched first for a needed object.  If the
-object is not available in any store then it will be fetched remotely
-using the URL templates and added to the first local store listed.  If
-no stores are specified the default is a location inside the build
-tree.
+The following variables configure behavior.  They should be set before
+calling any of the functions provided by this module.
 
-The variable ``ExternalData_SOURCE_ROOT`` may be set to the highest source
-directory containing any path named by a ``DATA{}`` reference.  The
-default is ``CMAKE_SOURCE_DIR``.  ``ExternalData_SOURCE_ROOT`` and
-``CMAKE_SOURCE_DIR`` must refer to directories within a single source
-distribution (e.g.  they come together in one tarball).
+.. variable:: ExternalData_LINK_CONTENT
 
-The variable ``ExternalData_BINARY_ROOT`` may be set to the directory to
-hold the real data files named by expanded ``DATA{}`` references.  The
-default is ``CMAKE_BINARY_DIR``.  The directory layout will mirror that of
-content links under ``ExternalData_SOURCE_ROOT``.
+  The ``ExternalData_LINK_CONTENT`` variable may be set to the name of a
+  supported hash algorithm to enable automatic conversion of real data
+  files referenced by the ``DATA{}`` syntax into content links.  For each
+  such ``<file>`` a content link named ``<file><ext>`` is created.  The
+  original file is renamed to the form ``.ExternalData_<algo>_<hash>`` to
+  stage it for future transmission to one of the locations in the list
+  of URL templates (by means outside the scope of this module).  The
+  data fetch rule created for the content link will use the staged
+  object if it cannot be found using any URL template.
 
-Variables ``ExternalData_TIMEOUT_INACTIVITY`` and
-``ExternalData_TIMEOUT_ABSOLUTE`` set the download inactivity and absolute
-timeouts, in seconds.  The defaults are 60 seconds and 300 seconds,
-respectively.  Set either timeout to 0 seconds to disable enforcement.
+.. variable:: ExternalData_OBJECT_STORES
+
+  The ``ExternalData_OBJECT_STORES`` variable may be set to a list of local
+  directories that store objects using the layout ``<dir>/%(algo)/%(hash)``.
+  These directories will be searched first for a needed object.  If the
+  object is not available in any store then it will be fetched remotely
+  using the URL templates and added to the first local store listed.  If
+  no stores are specified the default is a location inside the build
+  tree.
+
+.. variable:: ExternalData_SOURCE_ROOT
+
+  The ``ExternalData_SOURCE_ROOT`` variable may be set to the highest source
+  directory containing any path named by a ``DATA{}`` reference.  The
+  default is ``CMAKE_SOURCE_DIR``.  ``ExternalData_SOURCE_ROOT`` and
+  ``CMAKE_SOURCE_DIR`` must refer to directories within a single source
+  distribution (e.g.  they come together in one tarball).
+
+.. variable:: ExternalData_BINARY_ROOT
+
+  The ``ExternalData_BINARY_ROOT`` variable may be set to the directory to
+  hold the real data files named by expanded ``DATA{}`` references.  The
+  default is ``CMAKE_BINARY_DIR``.  The directory layout will mirror that of
+  content links under ``ExternalData_SOURCE_ROOT``.
+
+.. variable:: ExternalData_TIMEOUT_INACTIVITY
+
+  The ``ExternalData_TIMEOUT_INACTIVITY`` variable sets the download
+  inactivity timeout, in seconds, with a default of ``60`` seconds.
+  Set to ``0`` to disable enforcement.
+
+.. variable:: ExternalData_TIMEOUT_ABSOLUTE
+
+  The ``ExternalData_TIMEOUT_ABSOLUTE`` variable sets the download
+  absolute timeout, in seconds, with a default of ``300`` seconds.
+  Set to ``0`` to disable enforcement.
 #]=======================================================================]
 
 #=============================================================================
