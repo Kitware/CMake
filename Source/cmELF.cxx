@@ -532,7 +532,7 @@ cmELFInternalImpl<Types>
         break;
         }
 #endif
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Unknown ELF file type " << eti;
       this->SetErrorMessage(e.str().c_str());
       return;

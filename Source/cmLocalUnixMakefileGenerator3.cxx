@@ -1554,7 +1554,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
     {
     if(verbose)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "Dependee \"" << tgtInfo
           << "\" is newer than depender \""
           << internalDependFile << "\"." << std::endl;
@@ -1577,7 +1577,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
     {
     if(verbose)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "Dependee \"" << dirInfoFile
           << "\" is newer than depender \""
           << internalDependFile << "\"." << std::endl;
@@ -1788,7 +1788,7 @@ void cmLocalUnixMakefileGenerator3::CheckMultipleOutputs(bool verbose)
       {
       if(verbose)
         {
-        cmOStringStream msg;
+        std::ostringstream msg;
         msg << "Deleting primary custom command output \"" << dependee
             << "\" because another output \""
             << depender << "\" does not exist." << std::endl;
@@ -1913,7 +1913,7 @@ void cmLocalUnixMakefileGenerator3
   std::string progressDir = this->Makefile->GetHomeOutputDirectory();
   progressDir += cmake::GetCMakeFilesDirectory();
     {
-    cmOStringStream progCmd;
+    std::ostringstream progCmd;
     progCmd <<
       "$(CMAKE_COMMAND) -E cmake_progress_start ";
     progCmd << this->Convert(progressDir,
@@ -1937,7 +1937,7 @@ void cmLocalUnixMakefileGenerator3
                         this->Makefile->GetHomeOutputDirectory(),
                         cmLocalGenerator::START_OUTPUT);
     {
-    cmOStringStream progCmd;
+    std::ostringstream progCmd;
     progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
     progCmd << this->Convert(progressDir,
                              cmLocalGenerator::FULL,

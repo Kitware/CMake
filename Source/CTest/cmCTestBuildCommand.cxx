@@ -148,7 +148,7 @@ cmCTestGenericHandler* cmCTestBuildCommand::InitializeHandler()
       }
     else
       {
-      cmOStringStream ostr;
+      std::ostringstream ostr;
       ostr << "has no project to build. If this is a "
         "\"built with CMake\" project, verify that CTEST_CMAKE_GENERATOR "
         "and CTEST_PROJECT_NAME are set."
@@ -181,7 +181,7 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
   bool ret =  cmCTestHandlerCommand::InitialPass(args, status);
   if ( this->Values[ctb_NUMBER_ERRORS] && *this->Values[ctb_NUMBER_ERRORS])
     {
-    cmOStringStream str;
+    std::ostringstream str;
     str << this->Handler->GetTotalErrors();
     this->Makefile->AddDefinition(
       this->Values[ctb_NUMBER_ERRORS], str.str().c_str());
@@ -189,7 +189,7 @@ bool cmCTestBuildCommand::InitialPass(std::vector<std::string> const& args,
   if ( this->Values[ctb_NUMBER_WARNINGS]
        && *this->Values[ctb_NUMBER_WARNINGS])
     {
-    cmOStringStream str;
+    std::ostringstream str;
     str << this->Handler->GetTotalWarnings();
     this->Makefile->AddDefinition(
       this->Values[ctb_NUMBER_WARNINGS], str.str().c_str());

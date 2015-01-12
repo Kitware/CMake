@@ -413,7 +413,7 @@ bool cmCTestUpdateHandler::SelectVCS()
       }
     if (this->UpdateCommand.empty())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Cannot find UpdateCommand ";
       if (key)
         {

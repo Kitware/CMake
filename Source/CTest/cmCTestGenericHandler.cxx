@@ -103,7 +103,7 @@ bool cmCTestGenericHandler::StartResultingXML(cmCTest::Part part,
       << std::endl;);
     return false;
     }
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   ostr << name;
   if ( this->SubmitIndex > 0 )
     {
@@ -142,7 +142,7 @@ bool cmCTestGenericHandler::StartLogFile(const char* name,
       "Cannot create log file without providing the name" << std::endl;);
     return false;
     }
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   ostr << "Last" << name;
   if ( this->SubmitIndex > 0 )
     {

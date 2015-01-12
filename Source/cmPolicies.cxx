@@ -41,7 +41,7 @@ public:
 
   std::string GetVersionString()
   {
-    cmOStringStream v;
+    std::ostringstream v;
     v << this->MajorVersionIntroduced << "." << this->MinorVersionIntroduced;
     if(this->PatchVersionIntroduced > 0)
       {
@@ -432,7 +432,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   if(sscanf(ver.c_str(), "%u.%u.%u.%u",
             &majorVer, &minorVer, &patchVer, &tweakVer) < 2)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Invalid policy version value \"" << ver << "\".  "
       << "A numeric major.minor[.patch[.tweak]] must be given.";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -462,7 +462,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
        patchVer == cmVersion::GetPatchVersion() &&
        tweakVer > cmVersion::GetTweakVersion()))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "An attempt was made to set the policy version of CMake to \""
       << version << "\" which is greater than this version of CMake.  "
       << "This is not allowed because the greater version may have new "
@@ -534,7 +534,7 @@ bool cmPolicies::GetPolicyDefault(cmMakefile* mf, std::string const& policy,
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << defaultVar << " has value \"" << defaultValue
       << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -584,7 +584,7 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
     return "Request for warning text for undefined policy!";
     }
 
-  cmOStringStream msg;
+  std::ostringstream msg;
   msg <<
     "Policy " << pos->second->IDString << " is not set: "
     "" << pos->second->ShortDescription << "  "
@@ -608,7 +608,7 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
     return "Request for error text for undefined policy!";
     }
 
-  cmOStringStream error;
+  std::ostringstream error;
   error <<
     "Policy " << pos->second->IDString << " is not set to NEW: "
     "" << pos->second->ShortDescription << "  "
@@ -645,7 +645,7 @@ std::string
 cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
 {
   std::string pid = this->GetPolicyIDString(id);
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Policy " << pid << " may not be set to OLD behavior because this "
     << "version of CMake no longer supports it.  "
     << "The policy was introduced in "
@@ -667,7 +667,7 @@ cmPolicies::DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
                                     unsigned int patchVer,
                                     cmMakefile* mf)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "The project requests behavior compatible with CMake version \""
     << majorVer << "." << minorVer << "." << patchVer
     << "\", which requires the OLD behavior for some policies:\n";

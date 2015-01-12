@@ -240,7 +240,6 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
-  cmStandardIncludes \
   cmake  \
   cmakemain \
   cmcmd  \
@@ -1490,35 +1489,6 @@ cmake_compiler_settings_comment="/*
 "
 
 cmake_report cmConfigure.h${_tmp} "${cmake_compiler_settings_comment}"
-
-if [ "x$KWSYS_STL_HAVE_STD" = "x1" ]; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_STD_NAMESPACE */"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_STD_NAMESPACE 1"
-fi
-
-if [ "x$KWSYS_IOS_USE_ANSI" = "x1" ]; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
-fi
-
-if [ "x$KWSYS_IOS_USE_SSTREAM" = "x1" ]; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_STRING_STREAM */"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_STRING_STREAM 1"
-fi
-
-# Test for ansi FOR scope
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags}" \
-  "${cmake_source_dir}/Modules/TestForAnsiForScope.cxx" >> cmake_bootstrap.log 2>&1; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_FOR_SCOPE */"
-  echo "${cmake_cxx_compiler} has ANSI for scoping"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_FOR_SCOPE 1"
-  echo "${cmake_cxx_compiler} does not have ANSI for scoping"
-fi
 
 # When bootstrapping on MinGW with MSYS we must convert the source
 # directory to a windows path.

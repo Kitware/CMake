@@ -160,7 +160,7 @@ int cmCPackGenerator::PrepareNames()
         "Cannot open description file name: " << descFileName << std::endl);
       return 0;
       }
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     std::string line;
 
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,

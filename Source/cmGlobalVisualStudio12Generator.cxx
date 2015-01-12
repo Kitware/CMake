@@ -113,7 +113,7 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsPhone(cmMakefile* mf)
 {
   if(!this->SelectWindowsPhoneToolset(this->DefaultPlatformToolset))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     if(this->DefaultPlatformToolset.empty())
       {
       e << this->GetName() << " supports Windows Phone '8.0' and '8.1', but "
@@ -136,7 +136,7 @@ bool cmGlobalVisualStudio12Generator::InitializeWindowsStore(cmMakefile* mf)
 {
   if(!this->SelectWindowsStoreToolset(this->DefaultPlatformToolset))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     if(this->DefaultPlatformToolset.empty())
       {
       e << this->GetName() << " supports Windows Store '8.0' and '8.1', but "

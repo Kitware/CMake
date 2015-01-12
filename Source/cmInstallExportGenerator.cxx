@@ -121,7 +121,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   // Skip empty sets.
   if(ExportSet->GetTargetExports()->empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "INSTALL(EXPORT) given unknown export \""
       << ExportSet->GetName() << "\"";
     cmSystemTools::Error(e.str().c_str());

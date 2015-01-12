@@ -36,7 +36,7 @@
 
 void CMakeCommandUsage(const char* program)
 {
-  cmOStringStream errorStream;
+  std::ostringstream errorStream;
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
   errorStream

@@ -9,10 +9,6 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#cmakedefine CMAKE_NO_STD_NAMESPACE
-#cmakedefine CMAKE_NO_ANSI_STREAM_HEADERS
-#cmakedefine CMAKE_NO_ANSI_STRING_STREAM
-#cmakedefine CMAKE_NO_ANSI_FOR_SCOPE
 #cmakedefine HAVE_ENVIRON_NOT_REQUIRE_PROTOTYPE
 #cmakedefine HAVE_UNSETENV
 #cmakedefine CMAKE_USE_ELF_PARSER

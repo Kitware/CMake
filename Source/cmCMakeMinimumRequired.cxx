@@ -78,7 +78,7 @@ bool cmCMakeMinimumRequired
             &required_major, &required_minor,
             &required_patch, &required_tweak) < 2)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "could not parse VERSION \"" << version_string << "\".";
     this->SetError(e.str());
     return false;
@@ -97,7 +97,7 @@ bool cmCMakeMinimumRequired
       current_tweak < required_tweak))
     {
     // The current version is too low.
-    cmOStringStream e;
+    std::ostringstream e;
     e << "CMake " << version_string
       << " or higher is required.  You are running version "
       << cmVersion::GetCMakeVersion();
@@ -132,7 +132,7 @@ bool cmCMakeMinimumRequired::EnforceUnknownArguments()
 {
   if(!this->UnknownArguments.empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "called with unknown argument \""
       << this->UnknownArguments[0] << "\".";
     this->SetError(e.str());

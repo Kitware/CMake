@@ -29,7 +29,7 @@
 
 #define cmCPackLogger(logType, msg) \
   do { \
-    cmOStringStream cmCPackLog_msg; \
+    std::ostringstream cmCPackLog_msg; \
     cmCPackLog_msg << msg; \
     this->Logger->Log(logType, __FILE__, __LINE__,\
                       cmCPackLog_msg.str().c_str());\

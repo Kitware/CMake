@@ -88,7 +88,7 @@ bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e <<
       "Generator\n"
       "  " << this->GetName() << "\n"
@@ -109,7 +109,7 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e <<
       "Generator\n"
       "  " << this->GetName() << "\n"
@@ -284,7 +284,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
   if(!mf->GetDefinition("CMAKE_MAKE_PROGRAM")
      || cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
     {
-    cmOStringStream err;
+    std::ostringstream err;
     err << "CMake was unable to find a build program corresponding to \""
         << this->GetName() << "\".  CMAKE_MAKE_PROGRAM is not set.  You "
         << "probably need to select a different build tool.";
@@ -405,7 +405,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         const char* lang = li->c_str();
         if(this->LanguagesReady.find(lang) == this->LanguagesReady.end())
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "The test project needs language "
             << lang << " which is not enabled.";
           this->TryCompileOuterMakefile
@@ -467,7 +467,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (pop)
 #endif
-    cmOStringStream windowsVersionString;
+    std::ostringstream windowsVersionString;
     windowsVersionString << osvi.dwMajorVersion << "." << osvi.dwMinorVersion;
     windowsVersionString.str();
     mf->AddDefinition("CMAKE_HOST_SYSTEM_VERSION",
@@ -660,7 +660,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
     std::string compilerEnv = "CMAKE_";
     compilerEnv += lang;
     compilerEnv += "_COMPILER_ENV_VAR";
-    cmOStringStream noCompiler;
+    std::ostringstream noCompiler;
     const char* compilerFile = mf->GetDefinition(compilerName);
     if(!compilerFile || !*compilerFile ||
        cmSystemTools::IsNOTFOUND(compilerFile))
@@ -852,7 +852,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
         if(!this->CMakeInstance->GetIsInTryCompile() &&
            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0025"))
           {
-          cmOStringStream w;
+          std::ostringstream w;
           w << policies->GetPolicyWarning(cmPolicies::CMP0025) << "\n"
             "Converting " << lang <<
             " compiler id \"AppleClang\" to \"Clang\" for compatibility."
@@ -884,7 +884,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
         if(!this->CMakeInstance->GetIsInTryCompile() &&
            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0047"))
           {
-          cmOStringStream w;
+          std::ostringstream w;
           w << policies->GetPolicyWarning(cmPolicies::CMP0047) << "\n"
             "Converting " << lang <<
             " compiler id \"QCC\" to \"GNU\" for compatibility."
@@ -1147,7 +1147,7 @@ void cmGlobalGenerator::Configure()
 
   if ( this->CMakeInstance->GetWorkingMode() == cmake::NORMAL_MODE)
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     if(cmSystemTools::GetErrorOccuredFlag())
       {
       msg << "Configuring incomplete, errors occurred!";
@@ -1196,7 +1196,7 @@ bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
     }
 
   // This generator does not support duplicate custom targets.
-  cmOStringStream e;
+  std::ostringstream e;
   e << "This project has enabled the ALLOW_DUPLICATE_CUSTOM_TARGETS "
     << "global property.  "
     << "The \"" << this->GetName() << "\" generator does not support "
@@ -1346,7 +1346,7 @@ void cmGlobalGenerator::Generate()
 
   if(!this->CMP0042WarnTargets.empty())
     {
-    cmOStringStream w;
+    std::ostringstream w;
     w <<
       (this->GetCMakeInstance()->GetPolicies()->
        GetPolicyWarning(cmPolicies::CMP0042)) << "\n";
@@ -2331,7 +2331,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       cpackCommandLines.erase(cpackCommandLines.begin(),
         cpackCommandLines.end());
       depends.erase(depends.begin(), depends.end());
-      cmOStringStream ostr;
+      std::ostringstream ostr;
       if ( componentsSet->size() > 0 )
         {
         ostr << "Available install components are:";

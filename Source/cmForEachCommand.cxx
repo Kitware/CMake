@@ -170,7 +170,7 @@ bool cmForEachCommand
         step == 0
         )
         {
-        cmOStringStream str;
+        std::ostringstream str;
         str << "called with incorrect range specification: start ";
         str << start << ", stop " << stop << ", step " << step;
         this->SetError(str.str());
@@ -243,7 +243,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Unknown argument:\n" << "  " << args[i] << "\n";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return true;

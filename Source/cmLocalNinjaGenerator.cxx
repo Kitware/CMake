@@ -369,7 +369,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     return ":";
 #endif
 
-  cmOStringStream cmd;
+  std::ostringstream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
        li != cmdLines.end(); ++li)
 #ifdef _WIN32
@@ -409,7 +409,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
     if (wd.empty())
       wd = this->GetMakefile()->GetStartOutputDirectory();
 
-    cmOStringStream cdCmd;
+    std::ostringstream cdCmd;
 #ifdef _WIN32
         std::string cdStr = "cd /D ";
 #else

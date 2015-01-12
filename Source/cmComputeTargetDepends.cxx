@@ -361,7 +361,7 @@ void cmComputeTargetDepends::AddTargetDepend(
     cmMakefile *makefile = depender->GetMakefile();
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
-    cmOStringStream e;
+    std::ostringstream e;
     switch(depender->GetPolicyStatusCMP0046())
       {
       case cmPolicies::WARN:
@@ -539,7 +539,7 @@ cmComputeTargetDepends
                             bool strong)
 {
   // Construct the error message.
-  cmOStringStream e;
+  std::ostringstream e;
   e << "The inter-target dependency graph contains the following "
     << "strongly connected component (cycle):\n";
   std::vector<NodeList> const& components = ccg.GetComponents();

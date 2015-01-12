@@ -18,7 +18,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const &args,
   if(!this->Makefile->IsLoopBlock())
     {
     bool issueMessage = true;
-    cmOStringStream e;
+    std::ostringstream e;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0055))
       {
@@ -53,7 +53,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const &args,
   if(!args.empty())
     {
     bool issueMessage = true;
-    cmOStringStream e;
+    std::ostringstream e;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0055))
       {

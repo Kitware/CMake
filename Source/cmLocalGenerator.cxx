@@ -153,7 +153,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
         }
       else
         {
-        cmOStringStream w;
+        std::ostringstream w;
         w << "CMAKE_OBJECT_PATH_MAX is set to " << pmax
           << ", which is less than the minimum of 128.  "
           << "The value will be ignored.";
@@ -162,7 +162,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
       }
     else
       {
-      cmOStringStream w;
+      std::ostringstream w;
       w << "CMAKE_OBJECT_PATH_MAX is set to \"" << plen
         << "\", which fails to parse as a positive integer.  "
         << "The value will be ignored.";
@@ -191,7 +191,7 @@ void cmLocalGenerator::ReadInputFile()
 
   // The file is missing.  Check policy CMP0014.
   cmMakefile* mf = this->Parent->GetMakefile();
-  cmOStringStream e;
+  std::ostringstream e;
   e << "The source directory\n"
     << "  " << this->Makefile->GetStartDirectory() << "\n"
     << "does not contain a CMakeLists.txt file.";
@@ -1237,7 +1237,7 @@ void cmLocalGenerator::InsertRuleLauncher(std::string& s, cmTarget* target,
 {
   if(const char* val = this->GetRuleLauncher(target, prop))
     {
-    cmOStringStream wrapped;
+    std::ostringstream wrapped;
     wrapped << val << " " << s;
     s = wrapped.str();
     }
@@ -1318,7 +1318,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
     }
 
   OutputFormat shellFormat = forResponseFile? RESPONSE : SHELL;
-  cmOStringStream includeFlags;
+  std::ostringstream includeFlags;
 
   std::string flagVar = "CMAKE_INCLUDE_FLAG_";
   flagVar += lang;
@@ -1513,7 +1513,7 @@ void cmLocalGenerator::AddCompileOptions(
       }
     if (this->Makefile->IsLaterStandard(it->first, standard, it->second))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "The COMPILE_FEATURES property of target \""
         << target->GetName() << "\" was evaluated when computing the link "
         "implementation, and the \"" << it->first << "_STANDARD\" was \""
@@ -1872,7 +1872,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   OutputFormat shellFormat = (forResponseFile) ? RESPONSE :
                              ((useWatcomQuote) ? WATCOMQUOTE : SHELL);
   bool escapeAllowMakeVars = !forResponseFile;
-  cmOStringStream fout;
+  std::ostringstream fout;
   std::string config = this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
   cmComputeLinkInformation* pcli = tgt.Target->GetLinkInformation(config);
   if(!pcli)
@@ -2234,7 +2234,7 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     const char *opt = target->GetMakefile()->GetDefinition(option_flag);
     if (!opt)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Target \"" << target->GetName() << "\" requires the language "
            "dialect \"" << lang << standardProp << "\" "
         << (ext ? "(with compiler extensions)" : "") << ", but CMake "
@@ -2319,7 +2319,7 @@ static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
       && strcmp(prop, "protected") != 0
       && strcmp(prop, "internal") != 0 )
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Target " << target->GetName() << " uses unsupported value \""
       << prop << "\" for " << flagDefine << ".";
     cmSystemTools::Error(e.str().c_str());
@@ -2434,7 +2434,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
         {
         case cmPolicies::WARN:
         {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "Variable " << flagsVar << " has been modified. CMake "
             "will ignore the POSITION_INDEPENDENT_CODE target property for "
             "shared libraries and will use the " << flagsVar << " variable "
@@ -3243,7 +3243,7 @@ cmLocalGenerator
       // Warn if this is the first time the path has been seen.
       if(this->ObjectMaxPathViolations.insert(dir_max).second)
         {
-        cmOStringStream m;
+        std::ostringstream m;
         m << "The object file directory\n"
           << "  " << dir_max << "\n"
           << "has " << dir_max.size() << " characters.  "
@@ -3641,7 +3641,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
     }
   if(function_style)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "WARNING: Function-style preprocessor definitions may not be "
       << "passed on the compiler command line because many compilers "
       << "do not support it.\n"
@@ -3654,7 +3654,7 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
   // Many compilers do not support # in the value so we disable it.
   if(define.find_first_of("#") != define.npos)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "WARNING: Preprocessor definitions containing '#' may not be "
       << "passed on the compiler command line because many compilers "
       << "do not support it.\n"
@@ -3696,7 +3696,7 @@ void cmLocalGenerator::GenerateAppleInfoPList(cmTarget* target,
     }
   if(!cmSystemTools::FileExists(inFile.c_str(), true))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Target " << target->GetName() << " Info.plist template \""
       << inFile << "\" could not be found.";
     cmSystemTools::Error(e.str().c_str());
@@ -3740,7 +3740,7 @@ void cmLocalGenerator::GenerateFrameworkInfoPList(cmTarget* target,
     }
   if(!cmSystemTools::FileExists(inFile.c_str(), true))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Target " << target->GetName() << " Info.plist template \""
       << inFile << "\" could not be found.";
     cmSystemTools::Error(e.str().c_str());

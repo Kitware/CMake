@@ -75,7 +75,7 @@ public:
         this->ParseError(atts);
         }
       // Create the log
-      cmOStringStream ostr;
+      std::ostringstream ostr;
       ostr << name << ":\n";
       int i = 0;
       for(; atts[i] != 0; i+=2)
@@ -198,7 +198,7 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
 {
   std::vector<std::string>::size_type pp;
   std::string index;
-  cmOStringStream stream;
+  std::ostringstream stream;
   std::string memcheckcommand
     = cmSystemTools::ConvertToOutputPath(this->MemoryTester.c_str());
   stream << test;
@@ -834,7 +834,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
   int defects = 0;
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   log = "";
   for( std::vector<std::string>::iterator i = lines.begin();
        i != lines.end(); ++i)
@@ -878,7 +878,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckPurifyOutput(
 {
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   log = "";
 
   cmsys::RegularExpression pfW("^\\[[WEI]\\] ([A-Z][A-Z][A-Z][A-Z]*): ");
@@ -941,7 +941,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
 
   std::string::size_type cc;
 
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   log = "";
 
   int defects = 0;
@@ -1269,7 +1269,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(int test,
                                                  files)
 {
   std::string index;
-  cmOStringStream stream;
+  std::ostringstream stream;
   stream << test;
   index = stream.str();
   std::string ofile = this->MemoryTesterOutputFile;

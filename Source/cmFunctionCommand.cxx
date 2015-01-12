@@ -103,7 +103,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   cmMakefile::PolicyPushPop polScope(this->Makefile, true, this->Policies);
 
   // set the value of argc
-  cmOStringStream strStream;
+  std::ostringstream strStream;
   strStream << expandedArgs.size();
   this->Makefile->AddDefinition("ARGC",strStream.str().c_str());
   this->Makefile->MarkVariableAsUsed("ARGC");
@@ -111,7 +111,7 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   // set the values for ARGV0 ARGV1 ...
   for (unsigned int t = 0; t < expandedArgs.size(); ++t)
     {
-    cmOStringStream tmpStream;
+    std::ostringstream tmpStream;
     tmpStream << "ARGV" << t;
     this->Makefile->AddDefinition(tmpStream.str(),
                                   expandedArgs[t].c_str());

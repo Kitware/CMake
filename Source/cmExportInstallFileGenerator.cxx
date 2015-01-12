@@ -56,7 +56,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "install(EXPORT \""
         << this->IEGen->GetExportSet()->GetName()
         << "\" ...) " << "includes target \"" << te->Target->GetName()
@@ -133,7 +133,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
 
     if (te->GetProperty("INTERFACE_SOURCES"))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Target \""
         << te->GetName()
         << "\" has a populated INTERFACE_SOURCES property.  This is not "
@@ -290,7 +290,7 @@ cmExportInstallFileGenerator::GenerateImportFileConfig(
   if(!exportFileStream)
     {
     std::string se = cmSystemTools::GetLastSystemError();
-    cmOStringStream e;
+    std::ostringstream e;
     e << "cannot write to file \"" << fileName
       << "\": " << se;
     cmSystemTools::Error(e.str().c_str());
@@ -516,7 +516,7 @@ cmExportInstallFileGenerator
                              cmTarget* dependee,
                              int occurrences)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "install(EXPORT \""
     << this->IEGen->GetExportSet()->GetName()
     << "\" ...) "

@@ -71,7 +71,7 @@ std::string cmGlobalNinjaGenerator::EncodeIdent(const std::string &ident,
   if (std::find_if(ident.begin(), ident.end(),
                    std::not1(std::ptr_fun(IsIdentChar))) != ident.end()) {
     static unsigned VarNum = 0;
-    cmOStringStream names;
+    std::ostringstream names;
     names << "ident" << VarNum++;
     vars << names.str() << " = " << ident << "\n";
     return "$" + names.str();
@@ -191,7 +191,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   build += " " + rule;
 
   // Write the variables bound to this build statement.
-  cmOStringStream variable_assignments;
+  std::ostringstream variable_assignments;
   for(cmNinjaVars::const_iterator i = variables.begin();
       i != variables.end(); ++i)
     cmGlobalNinjaGenerator::WriteVariable(variable_assignments,
@@ -295,7 +295,7 @@ cmGlobalNinjaGenerator::AddMacOSXContentRule()
   cmLocalGenerator *lg = this->LocalGenerators[0];
   cmMakefile* mfRoot = lg->GetMakefile();
 
-  cmOStringStream cmd;
+  std::ostringstream cmd;
   cmd << lg->ConvertToOutputFormat(
            mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
            cmLocalGenerator::SHELL)
@@ -1100,7 +1100,7 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmLocalGenerator *lg = this->LocalGenerators[0];
   cmMakefile* mfRoot = lg->GetMakefile();
 
-  cmOStringStream cmd;
+  std::ostringstream cmd;
   cmd << lg->ConvertToOutputFormat(
            mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
            cmLocalGenerator::SHELL)

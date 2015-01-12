@@ -1338,7 +1338,7 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
   // Try to separate the framework name and path.
   if(!this->SplitFramework.find(item.c_str()))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Could not parse framework path \"" << item << "\" "
       << "linked by target " << this->Target->GetName() << ".";
     cmSystemTools::Error(e.str().c_str());
@@ -1385,7 +1385,7 @@ void cmComputeLinkInformation::DropDirectoryItem(std::string const& item)
 {
   // A full path to a directory was found as a link item.  Warn the
   // user.
-  cmOStringStream e;
+  std::ostringstream e;
   e << "WARNING: Target \"" << this->Target->GetName()
     << "\" requests linking to directory \"" << item << "\".  "
     << "Targets may link only to libraries.  "
@@ -1498,7 +1498,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
       if(!this->CMakeInstance->GetPropertyAsBool(wid))
         {
         this->CMakeInstance->SetProperty(wid, "1");
-        cmOStringStream w;
+        std::ostringstream w;
         w << (this->Makefile->GetPolicies()
               ->GetPolicyWarning(cmPolicies::CMP0008)) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
@@ -1517,7 +1517,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << (this->Makefile->GetPolicies()->
             GetRequiredPolicyError(cmPolicies::CMP0008)) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
@@ -1547,7 +1547,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
       if(!this->CMakeInstance->GetPropertyAsBool("CMP0003-WARNING-GIVEN"))
         {
         this->CMakeInstance->SetProperty("CMP0003-WARNING-GIVEN", "1");
-        cmOStringStream w;
+        std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
                                           this->Target->GetBacktrace());
@@ -1562,7 +1562,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << (this->Makefile->GetPolicies()->
             GetRequiredPolicyError(cmPolicies::CMP0003)) << "\n";
       this->PrintLinkPolicyDiagnosis(e);

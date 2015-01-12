@@ -1182,7 +1182,7 @@ int cmake::DoPreConfigureChecks()
   srcList += "/CMakeLists.txt";
   if(!cmSystemTools::FileExists(srcList.c_str()))
     {
-    cmOStringStream err;
+    std::ostringstream err;
     if(cmSystemTools::FileIsDirectory(this->GetHomeDirectory()))
       {
       err << "The source directory \"" << this->GetHomeDirectory()
@@ -1250,7 +1250,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     }
   cmCacheManager::CacheIterator ci = this->CacheManager->NewIterator();
   std::vector<SaveCacheEntry> saved;
-  cmOStringStream warning;
+  std::ostringstream warning;
   warning
     << "You have changed variables that require your cache to be deleted.\n"
     << "Configure will be re-run and you may have to reset some variables.\n"
@@ -1971,7 +1971,7 @@ int cmake::CheckBuildSystem()
     {
     if(verbose)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "Re-run cmake no build system arguments\n";
       cmSystemTools::Stdout(msg.str().c_str());
       }
@@ -1983,7 +1983,7 @@ int cmake::CheckBuildSystem()
     {
     if(verbose)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "Re-run cmake missing file: "
           << this->CheckBuildSystemArgument << "\n";
       cmSystemTools::Stdout(msg.str().c_str());
@@ -2003,7 +2003,7 @@ int cmake::CheckBuildSystem()
     {
     if(verbose)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "Re-run cmake error reading : "
           << this->CheckBuildSystemArgument << "\n";
       cmSystemTools::Stdout(msg.str().c_str());
@@ -2045,7 +2045,7 @@ int cmake::CheckBuildSystem()
       {
       if(verbose)
         {
-        cmOStringStream msg;
+        std::ostringstream msg;
         msg << "Re-run cmake, missing byproduct: " << *pi << "\n";
         cmSystemTools::Stdout(msg.str().c_str());
         }
@@ -2068,7 +2068,7 @@ int cmake::CheckBuildSystem()
     // Not enough information was provided to do the test.  Just rerun.
     if(verbose)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "Re-run cmake no CMAKE_MAKEFILE_DEPENDS "
         "or CMAKE_MAKEFILE_OUTPUTS :\n";
       cmSystemTools::Stdout(msg.str().c_str());
@@ -2094,7 +2094,7 @@ int cmake::CheckBuildSystem()
       {
       if(verbose)
         {
-        cmOStringStream msg;
+        std::ostringstream msg;
         msg << "Re-run cmake: build system dependency is missing\n";
         cmSystemTools::Stdout(msg.str().c_str());
         }
@@ -2120,7 +2120,7 @@ int cmake::CheckBuildSystem()
       {
       if(verbose)
         {
-        cmOStringStream msg;
+        std::ostringstream msg;
         msg << "Re-run cmake: build system output is missing\n";
         cmSystemTools::Stdout(msg.str().c_str());
         }
@@ -2138,7 +2138,7 @@ int cmake::CheckBuildSystem()
     {
     if(verbose)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "Re-run cmake file: " << out_oldest
           << " older than: " << dep_newest << "\n";
       cmSystemTools::Stdout(msg.str().c_str());
@@ -2563,7 +2563,7 @@ static bool cmakeCheckStampFile(const char* stampName)
 
   // The build system is up to date.  The stamp file has been removed
   // by the VS IDE due to a "rebuild" request.  Restore it atomically.
-  cmOStringStream stampTempStream;
+  std::ostringstream stampTempStream;
   stampTempStream << stampName << ".tmp" << cmSystemTools::RandomSeed();
   std::string stampTempString = stampTempStream.str();
   const char* stampTemp = stampTempString.c_str();
@@ -2627,7 +2627,7 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   cmListFileBacktrace backtrace = bt;
   backtrace.MakeRelative();
 
-  cmOStringStream msg;
+  std::ostringstream msg;
   bool isError = false;
   // Construct the message header.
   if(t == cmake::FATAL_ERROR)
@@ -2835,7 +2835,7 @@ void cmake::RunCheckForUnusedVariables()
 {
 #ifdef CMAKE_BUILD_WITH_CMAKE
   bool haveUnused = false;
-  cmOStringStream msg;
+  std::ostringstream msg;
   msg << "Manually-specified variables were not used by the project:";
   for(std::map<std::string, bool>::const_iterator
         it = this->UsedCliVariables.begin();

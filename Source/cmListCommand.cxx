@@ -225,7 +225,7 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
       }
     if ( item < 0 || nitem <= (size_t)item )
       {
-      cmOStringStream str;
+      std::ostringstream str;
       str << "index: " << item << " out of range (-"
           << varArgsExpanded.size() << ", "
           << varArgsExpanded.size()-1 << ")";
@@ -322,7 +322,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
   if((!this->GetList(varArgsExpanded, listName)
       || varArgsExpanded.empty()) && item != 0)
     {
-    cmOStringStream str;
+    std::ostringstream str;
     str << "index: " << item << " out of range (0, 0)";
     this->SetError(str.str());
     return false;
@@ -337,7 +337,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
       }
     if ( item < 0 || nitem <= (size_t)item )
       {
-      cmOStringStream str;
+      std::ostringstream str;
       str << "index: " << item << " out of range (-"
         << varArgsExpanded.size() << ", "
         << (varArgsExpanded.size() == 0?0:(varArgsExpanded.size()-1)) << ")";
@@ -570,7 +570,7 @@ bool cmListCommand::HandleRemoveAtCommand(
       }
     if ( item < 0 || nitem <= (size_t)item )
       {
-      cmOStringStream str;
+      std::ostringstream str;
       str << "index: " << item << " out of range (-"
           << varArgsExpanded.size() << ", "
           << varArgsExpanded.size()-1 << ")";

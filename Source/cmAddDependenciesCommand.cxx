@@ -26,7 +26,7 @@ bool cmAddDependenciesCommand
   std::string target_name = args[0];
   if(this->Makefile->IsAlias(target_name))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Cannot add target-level dependencies to alias target \""
       << target_name << "\".\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -35,7 +35,7 @@ bool cmAddDependenciesCommand
     {
     if (target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Cannot add target-level dependencies to INTERFACE library "
         "target \"" << target_name << "\".\n";
       this->SetError(e.str());
@@ -51,7 +51,7 @@ bool cmAddDependenciesCommand
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Cannot add target-level dependencies to non-existent target \""
       << target_name << "\".\n"
       << "The add_dependencies works for top-level logical targets created "

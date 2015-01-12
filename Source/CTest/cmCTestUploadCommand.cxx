@@ -55,7 +55,7 @@ bool cmCTestUploadCommand::CheckArgumentValue(std::string const& arg)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "File \"" << filename << "\" does not exist. Cannot submit "
           << "a non-existent file.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());

@@ -45,8 +45,8 @@ int cmCPackOSXX11Generator::PackageFiles()
     {
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "The cpackPackageExecutables: "
       << cpackPackageExecutables << "." << std::endl);
-    cmOStringStream str;
-    cmOStringStream deleteStr;
+    std::ostringstream str;
+    std::ostringstream deleteStr;
     std::vector<std::string> cpackPackageExecutablesVector;
     cmSystemTools::ExpandListArgument(cpackPackageExecutables,
       cpackPackageExecutablesVector);
@@ -165,7 +165,7 @@ int cmCPackOSXX11Generator::PackageFiles()
   std::string output;
   std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   tmpFile += "/hdiutilOutput.log";
-  cmOStringStream dmgCmd;
+  std::ostringstream dmgCmd;
   dmgCmd << "\"" << this->GetOption("CPACK_INSTALLER_PROGRAM_DISK_IMAGE")
          << "\" create -ov -format UDZO -srcfolder \""
          << diskImageDirectory.c_str()

@@ -71,7 +71,7 @@ int cmCPackNSISGenerator::PackageFiles()
   tmpFile += "/NSISOutput.log";
   std::string nsisInstallOptions = nsisFileName + "/NSIS.InstallOptions.ini";
   nsisFileName += "/project.nsi";
-  cmOStringStream str;
+  std::ostringstream str;
   std::vector<std::string>::const_iterator it;
   for ( it = files.begin(); it != files.end(); ++ it )
     {
@@ -91,7 +91,7 @@ int cmCPackNSISGenerator::PackageFiles()
   std::vector<std::string> dirs;
   this->GetListOfSubdirectories(toplevel.c_str(), dirs);
   std::vector<std::string>::const_iterator sit;
-  cmOStringStream dstr;
+  std::ostringstream dstr;
   for ( sit = dirs.begin(); sit != dirs.end(); ++ sit )
     {
     std::string componentName;
@@ -190,7 +190,7 @@ int cmCPackNSISGenerator::PackageFiles()
     std::string groupDescriptions;
     std::string installTypesCode;
     std::string defines;
-    cmOStringStream macrosOut;
+    std::ostringstream macrosOut;
     bool anyDownloadedComponents = false;
 
     // Create installation types. The order is significant, so we first fill
@@ -503,8 +503,8 @@ int cmCPackNSISGenerator::InitializeInternal()
                   << "not set" << std::endl);
     }
 
-  cmOStringStream str;
-  cmOStringStream deleteStr;
+  std::ostringstream str;
+  std::ostringstream deleteStr;
 
   if ( cpackPackageExecutables )
     {
@@ -565,8 +565,8 @@ int cmCPackNSISGenerator::InitializeInternal()
 }
 
 //----------------------------------------------------------------------
-void cmCPackNSISGenerator::CreateMenuLinks( cmOStringStream& str,
-                                            cmOStringStream& deleteStr)
+void cmCPackNSISGenerator::CreateMenuLinks( std::ostringstream& str,
+                                            std::ostringstream& deleteStr)
 {
   const char* cpackMenuLinks
     = this->GetOption("CPACK_NSIS_MENU_LINKS");
@@ -694,7 +694,7 @@ bool cmCPackNSISGenerator::SupportsComponentInstallation() const
 std::string
 cmCPackNSISGenerator::
 CreateComponentDescription(cmCPackComponent *component,
-                           cmOStringStream& macrosOut)
+                           std::ostringstream& macrosOut)
 {
   // Basic description of the component
   std::string componentCode = "Section ";
@@ -714,7 +714,7 @@ CreateComponentDescription(cmCPackComponent *component,
     }
   else if (!component->InstallationTypes.empty())
     {
-    cmOStringStream out;
+    std::ostringstream out;
     std::vector<cmCPackInstallationType *>::iterator installTypeIter;
     for (installTypeIter = component->InstallationTypes.begin();
          installTypeIter != component->InstallationTypes.end();
@@ -734,7 +734,7 @@ CreateComponentDescription(cmCPackComponent *component,
       // Compute the name of the archive.
       std::string packagesDir = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
       packagesDir += ".dummy";
-      cmOStringStream out;
+      std::ostringstream out;
       out << cmSystemTools::GetFilenameWithoutLastExtension(packagesDir)
         << "-" << component->Name << ".zip";
       component->ArchiveFile = out.str();
@@ -859,7 +859,7 @@ CreateComponentDescription(cmCPackComponent *component,
       {
       totalSizeInKbytes = 1;
       }
-    cmOStringStream out;
+    std::ostringstream out;
     out << "  AddSize " << totalSizeInKbytes << "\n"
         << "  Push \"" << component->ArchiveFile << "\"\n"
         << "  Call DownloadFile\n"
@@ -935,7 +935,7 @@ std::string cmCPackNSISGenerator::CreateSelectionDependenciesDescription
     }
   visited.insert(component);
 
-  cmOStringStream out;
+  std::ostringstream out;
   std::vector<cmCPackComponent *>::iterator dependIt;
   for (dependIt = component->Dependencies.begin();
        dependIt != component->Dependencies.end();
@@ -967,7 +967,7 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription
     }
   visited.insert(component);
 
-  cmOStringStream out;
+  std::ostringstream out;
   std::vector<cmCPackComponent *>::iterator dependIt;
   for (dependIt = component->ReverseDependencies.begin();
        dependIt != component->ReverseDependencies.end();
@@ -992,7 +992,7 @@ std::string cmCPackNSISGenerator::CreateDeselectionDependenciesDescription
 std::string
 cmCPackNSISGenerator::
 CreateComponentGroupDescription(cmCPackComponentGroup *group,
-                                cmOStringStream& macrosOut)
+                                std::ostringstream& macrosOut)
 {
   if (group->Components.empty() && group->Subgroups.empty())
     {

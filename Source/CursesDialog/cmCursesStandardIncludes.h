@@ -22,25 +22,6 @@
 
 #include <form.h>
 
-// This is a hack to prevent warnings about these functions being
-// declared but not referenced.
-#if defined(__sgi) && !defined(__GNUC__)
-class cmCursesStandardIncludesHack
-{
-public:
-  enum
-  {
-    Ref1 = sizeof(cfgetospeed(0)),
-    Ref2 = sizeof(cfgetispeed(0)),
-    Ref3 = sizeof(tcgetattr(0, 0)),
-    Ref4 = sizeof(tcsetattr(0, 0, 0)),
-    Ref5 = sizeof(cfsetospeed(0,0)),
-    Ref6 = sizeof(cfsetispeed(0,0))
-  };
-};
-#endif
-
-
 // on some machines move erase and clear conflict with stl
 // so remove them from the namespace
 inline void curses_move(unsigned int x, unsigned int y)

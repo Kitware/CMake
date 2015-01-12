@@ -84,30 +84,30 @@ protected:
   // dependency attributes for inter-component dependencies.
   void AddDependencyAttributes(const cmCPackComponent& component,
                                std::set<const cmCPackComponent *>& visited,
-                               cmOStringStream& out);
+                               std::ostringstream& out);
 
   // Subroutine of WriteDistributionFile that writes out the
   // reverse dependency attributes for inter-component dependencies.
   void
   AddReverseDependencyAttributes(const cmCPackComponent& component,
                                  std::set<const cmCPackComponent *>& visited,
-                                 cmOStringStream& out);
+                                 std::ostringstream& out);
 
   // Generates XML that encodes the hierarchy of component groups and
   // their components in a form that can be used by distribution
   // metapackages.
   void CreateChoiceOutline(const cmCPackComponentGroup& group,
-                           cmOStringStream& out);
+                           std::ostringstream& out);
 
   /// Create the "choice" XML element to describe a component group
   /// for the installer GUI.
   void CreateChoice(const cmCPackComponentGroup& group,
-                    cmOStringStream& out);
+                    std::ostringstream& out);
 
   /// Create the "choice" XML element to describe a component for the
   /// installer GUI.
   void CreateChoice(const cmCPackComponent& component,
-                    cmOStringStream& out);
+                    std::ostringstream& out);
 
   // Escape the given string to make it usable as an XML attribute
   // value.

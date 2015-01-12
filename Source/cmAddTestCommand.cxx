@@ -47,7 +47,7 @@ bool cmAddTestCommand
     // allow it to be duplicated.
     if(!test->GetOldStyle())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << " given test name \"" << args[0]
         << "\" which already exists in this directory.";
       this->SetError(e.str());
@@ -131,7 +131,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << " given unknown argument:\n  " << args[i] << "\n";
       this->SetError(e.str());
       return false;
@@ -155,7 +155,7 @@ bool cmAddTestCommand::HandleNameMode(std::vector<std::string> const& args)
   // Require a unique test name within the directory.
   if(this->Makefile->GetTest(name))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << " given test NAME \"" << name
       << "\" which already exists in this directory.";
     this->SetError(e.str());

@@ -27,7 +27,7 @@ class cmCTestStartCommand;
 
 #define cmCTestLog(ctSelf, logType, msg) \
   do { \
-  cmOStringStream cmCTestLog_msg; \
+  std::ostringstream cmCTestLog_msg; \
   cmCTestLog_msg << msg; \
   (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,\
                 cmCTestLog_msg.str().c_str());\

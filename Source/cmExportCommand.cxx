@@ -89,7 +89,7 @@ bool cmExportCommand
     if(cmSystemTools::GetFilenameLastExtension(this->Filename.GetCString())
       != ".cmake")
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "FILE option given filename \"" << this->Filename.GetString()
         << "\" which does not have an extension of \".cmake\".\n";
       this->SetError(e.str());
@@ -103,7 +103,7 @@ bool cmExportCommand
     {
     if(!this->Makefile->CanIWriteThisFile(fname.c_str()))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "FILE option given filename \"" << fname
         << "\" which is in the source tree.\n";
       this->SetError(e.str());
@@ -126,7 +126,7 @@ bool cmExportCommand
     {
     if (this->Append.IsEnabled())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "EXPORT signature does not recognise the APPEND option.";
       this->SetError(e.str());
       return false;
@@ -134,7 +134,7 @@ bool cmExportCommand
 
     if (this->ExportOld.IsEnabled())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "EXPORT signature does not recognise the "
         "EXPORT_LINK_INTERFACE_LIBRARIES option.";
       this->SetError(e.str());
@@ -145,7 +145,7 @@ bool cmExportCommand
     std::string setName = this->ExportSetName.GetString();
     if (setMap.find(setName) == setMap.end())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Export set \"" << setName << "\" not found.";
       this->SetError(e.str());
       return false;
@@ -161,7 +161,7 @@ bool cmExportCommand
       {
       if (this->Makefile->IsAlias(*currentTarget))
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "given ALIAS target \"" << *currentTarget
           << "\" which may not be exported.";
         this->SetError(e.str());
@@ -172,7 +172,7 @@ bool cmExportCommand
         {
         if(target->GetType() == cmTarget::OBJECT_LIBRARY)
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "given OBJECT library \"" << *currentTarget
             << "\" which may not be exported.";
           this->SetError(e.str());
@@ -181,7 +181,7 @@ bool cmExportCommand
         }
       else
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "given target \"" << *currentTarget
           << "\" which is not built by this project.";
         this->SetError(e.str());
@@ -261,7 +261,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "PACKAGE given unknown argument: " << args[i];
       this->SetError(e.str());
       return false;
@@ -278,7 +278,7 @@ bool cmExportCommand::HandlePackage(std::vector<std::string> const& args)
   cmsys::RegularExpression packageRegex(packageExpr);
   if(!packageRegex.find(package.c_str()))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "PACKAGE given invalid package name \"" << package << "\".  "
       << "Package names must match \"" << packageExpr << "\".";
     this->SetError(e.str());
@@ -314,7 +314,7 @@ void cmExportCommand::ReportRegistryError(std::string const& msg,
                                           std::string const& key,
                                           long err)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << msg << "\n"
     << "  HKEY_CURRENT_USER\\" << key << "\n";
   wchar_t winmsg[1024];
@@ -355,7 +355,7 @@ void cmExportCommand::StorePackageRegistryWin(std::string const& package,
   RegCloseKey(hKey);
   if(err != ERROR_SUCCESS)
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     msg << "Cannot set registry value \"" << hash << "\" under key";
     this->ReportRegistryError(msg.str(), key, err);
     return;
@@ -400,7 +400,7 @@ void cmExportCommand::StorePackageRegistryDir(std::string const& package,
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Cannot create package registry file:\n"
         << "  " << fname << "\n"
         << cmSystemTools::GetLastSystemError() << "\n";

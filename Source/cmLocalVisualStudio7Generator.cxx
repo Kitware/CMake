@@ -1115,7 +1115,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
 
     if(this->GetVersion() < VS8 || this->FortranProject)
       {
-      cmOStringStream libdeps;
+      std::ostringstream libdeps;
       this->Internal->OutputObjects(libdeps, &target);
       if(!libdeps.str().empty())
         {
@@ -1713,7 +1713,7 @@ bool cmLocalVisualStudio7Generator
 
   // Write the children to temporary output.
   bool hasChildrenWithSources = false;
-  cmOStringStream tmpOut;
+  std::ostringstream tmpOut;
   for(unsigned int i=0;i<children.size();++i)
     {
     if(this->WriteGroup(&children[i], target, tmpOut, libName, configs))

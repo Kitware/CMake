@@ -468,9 +468,9 @@ cmNinjaTargetGenerator
 
 
   // Write the rule for compiling file of the given language.
-  cmOStringStream comment;
+  std::ostringstream comment;
   comment << "Rule for compiling " << lang << " files.";
-  cmOStringStream description;
+  std::ostringstream description;
   description << "Building " << lang << " object $out";
   this->GetGlobalGenerator()->AddRule(this->LanguageCompilerRule(lang),
                                       cmdLine,

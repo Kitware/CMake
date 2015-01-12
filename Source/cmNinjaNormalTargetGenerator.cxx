@@ -218,8 +218,8 @@ cmNinjaNormalTargetGenerator
     std::string targetVersionMajor;
     std::string targetVersionMinor;
     {
-    cmOStringStream majorStream;
-    cmOStringStream minorStream;
+    std::ostringstream majorStream;
+    std::ostringstream minorStream;
     int major;
     int minor;
     this->GetTarget()->GetTargetVersion(major, minor);
@@ -255,10 +255,10 @@ cmNinjaNormalTargetGenerator
       this->GetLocalGenerator()->BuildCommandLine(linkCmds);
 
     // Write the linker rule with response file if needed.
-    cmOStringStream comment;
+    std::ostringstream comment;
     comment << "Rule for linking " << this->TargetLinkLanguage << " "
             << this->GetVisibleTypeName() << ".";
-    cmOStringStream description;
+    std::ostringstream description;
     description << "Linking " << this->TargetLinkLanguage << " "
                 << this->GetVisibleTypeName() << " $TARGET_FILE";
     this->GetGlobalGenerator()->AddRule(ruleName,
@@ -435,7 +435,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
   cmNinjaVars vars;
 
   // Compute the comment.
-  cmOStringStream comment;
+  std::ostringstream comment;
   comment <<
     "Link the " << this->GetVisibleTypeName() << " " << targetOutputReal;
 

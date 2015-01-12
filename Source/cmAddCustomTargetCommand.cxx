@@ -30,7 +30,7 @@ bool cmAddCustomTargetCommand
   // Check the target name.
   if(targetName.find_first_of("/\\") != targetName.npos)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "called with invalid target name \"" << targetName
       << "\".  Target names may not contain a slash.  "
       << "Use ADD_CUSTOM_COMMAND to generate files.";
@@ -170,7 +170,7 @@ bool cmAddCustomTargetCommand
   std::string::size_type pos = targetName.find_first_of("#<>");
   if(pos != targetName.npos)
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     msg << "called with target name containing a \"" << targetName[pos]
         << "\".  This character is not allowed.";
     this->SetError(msg.str());
@@ -189,7 +189,7 @@ bool cmAddCustomTargetCommand
   if (!nameOk)
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-    cmOStringStream e;
+    std::ostringstream e;
     bool issueMessage = false;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {

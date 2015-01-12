@@ -79,7 +79,7 @@ bool cmAddExecutableCommand
   if (!nameOk)
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-    cmOStringStream e;
+    std::ostringstream e;
     bool issueMessage = false;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
@@ -149,7 +149,7 @@ bool cmAddExecutableCommand
       }
     if(args.size() != 3)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "ALIAS requires exactly one target argument.";
       this->SetError(e.str());
       return false;
@@ -158,7 +158,7 @@ bool cmAddExecutableCommand
     const char *aliasedName = s->c_str();
     if(this->Makefile->IsAlias(aliasedName))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" is itself an ALIAS.";
       this->SetError(e.str());
@@ -168,7 +168,7 @@ bool cmAddExecutableCommand
                     this->Makefile->FindTargetToUse(aliasedName, true);
     if(!aliasedTarget)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" does not already "
         "exist.";
@@ -178,7 +178,7 @@ bool cmAddExecutableCommand
     cmTarget::TargetType type = aliasedTarget->GetType();
     if(type != cmTarget::EXECUTABLE)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" is not an "
         "executable.";
@@ -187,7 +187,7 @@ bool cmAddExecutableCommand
       }
     if(aliasedTarget->IsImported())
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create ALIAS target \"" << exename
         << "\" because target \"" << aliasedName << "\" is IMPORTED.";
       this->SetError(e.str());
@@ -203,7 +203,7 @@ bool cmAddExecutableCommand
     // Make sure the target does not already exist.
     if(this->Makefile->FindTargetToUse(exename))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "cannot create imported target \"" << exename
         << "\" because another target with the same name already exists.";
       this->SetError(e.str());

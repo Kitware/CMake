@@ -81,7 +81,7 @@ bool cmAddSubDirectoryCommand::InitialPass
     if(!cmSystemTools::IsSubDirectory(srcPath,
                                       this->Makefile->GetCurrentDirectory()))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "not given a binary directory but the given source directory "
         << "\"" << srcPath << "\" is not a subdirectory of \""
         << this->Makefile->GetCurrentDirectory() << "\".  "

@@ -426,7 +426,7 @@ int main (int argc, char const* const* argv)
                 = mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
               const char* projVersionPatch
                 = mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
-              cmOStringStream ostr;
+              std::ostringstream ostr;
               ostr << projVersionMajor << "." << projVersionMinor << "."
                 << projVersionPatch;
               mf->AddDefinition("CPACK_PACKAGE_VERSION",

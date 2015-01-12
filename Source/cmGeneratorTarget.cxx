@@ -31,7 +31,7 @@ void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
 {
   if(!badObjLib.empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "OBJECT library \"" << target->GetName() << "\" contains:\n";
     for(std::vector<cmSourceFile*>::const_iterator i = badObjLib.begin();
         i != badObjLib.end(); ++i)
@@ -626,7 +626,7 @@ cmTargetTraceDependencies
                           this->GlobalGenerator->GetFilenameTargetDepends(sf);
         if (tgts.find(this->Target) != tgts.end())
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "Evaluation output file\n  \"" << sf->GetFullPath()
             << "\"\ndepends on the sources of a target it is used in.  This "
               "is a dependency loop and is not allowed.";

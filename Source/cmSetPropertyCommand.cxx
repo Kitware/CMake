@@ -67,7 +67,7 @@ bool cmSetPropertyCommand
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given invalid scope " << *arg << ".  "
       << "Valid scopes are GLOBAL, DIRECTORY, "
         "TARGET, SOURCE, TEST, CACHE, INSTALL.";
@@ -117,7 +117,7 @@ bool cmSetPropertyCommand
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given invalid argument \"" << *arg << "\".";
       this->SetError(e.str());
       return false;
@@ -265,7 +265,7 @@ bool cmSetPropertyCommand::HandleTargetMode()
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "could not find TARGET " << *ni
         << ".  Perhaps it has not yet been created.";
       this->SetError(e.str());
@@ -316,7 +316,7 @@ bool cmSetPropertyCommand::HandleSourceMode()
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given SOURCE name that could not be found or created: " << *ni;
       this->SetError(e.str());
       return false;
@@ -373,7 +373,7 @@ bool cmSetPropertyCommand::HandleTestMode()
   // Names that are still left were not found.
   if(!this->Names.empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given TEST names that do not exist:\n";
     for(std::set<std::string>::const_iterator ni = this->Names.begin();
         ni != this->Names.end(); ++ni)
@@ -417,7 +417,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
        !cmSystemTools::IsOn(this->PropertyValue.c_str()) &&
        !cmSystemTools::IsOff(this->PropertyValue.c_str()))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given non-boolean value \"" << this->PropertyValue
         << "\" for CACHE property \"ADVANCED\".  ";
       this->SetError(e.str());
@@ -428,7 +428,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
     {
     if(!cmCacheManager::IsType(this->PropertyValue.c_str()))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given invalid CACHE entry TYPE \"" << this->PropertyValue << "\"";
       this->SetError(e.str());
       return false;
@@ -438,7 +438,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
           this->PropertyName != "STRINGS" &&
           this->PropertyName != "VALUE")
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given invalid CACHE property " << this->PropertyName << ".  "
       << "Settable CACHE properties are: "
       << "ADVANCED, HELPSTRING, STRINGS, TYPE, and VALUE.";
@@ -463,7 +463,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "could not find CACHE variable " << *ni
         << ".  Perhaps it has not yet been created.";
       this->SetError(e.str());
@@ -513,7 +513,7 @@ bool cmSetPropertyCommand::HandleInstallMode()
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given INSTALL name that could not be found or created: " << *i;
       this->SetError(e.str());
       return false;

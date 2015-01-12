@@ -55,7 +55,7 @@ int cmCTestBuildAndTestHandler::ProcessHandler()
 
 //----------------------------------------------------------------------
 int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
-  cmOStringStream &out, std::string &cmakeOutString, std::string &cwd,
+  std::ostringstream &out, std::string &cmakeOutString, std::string &cwd,
   cmake *cm)
 {
   unsigned int k;
@@ -209,7 +209,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::string cmakeOutString;
   cmCTestBuildAndTestCaptureRAII captureRAII(cm, cmakeOutString);
   static_cast<void>(captureRAII);
-  cmOStringStream out;
+  std::ostringstream out;
 
   if ( this->CTest->GetConfigType().size() == 0 &&
        this->ConfigSample.size())

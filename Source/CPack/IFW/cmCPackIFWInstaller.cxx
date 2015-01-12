@@ -24,7 +24,7 @@
 #endif
 #define cmCPackLogger(logType, msg)                                     \
   do {                                                                  \
-  cmOStringStream cmCPackLog_msg;                                       \
+  std::ostringstream cmCPackLog_msg;                                    \
   cmCPackLog_msg << msg;                                                \
   if(Generator) {                                                       \
   Generator->Logger->Log(logType, __FILE__, __LINE__,                   \

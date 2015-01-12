@@ -298,7 +298,7 @@ bool cmFindPackageCommand
       if(args[i].find_first_of(":/\\") != args[i].npos ||
          cmSystemTools::GetFilenameLastExtension(args[i]) != ".cmake")
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "given CONFIGS option followed by invalid file name \""
           << args[i] << "\".  The names given must be file names without "
           << "a path and with a \".cmake\" extension.";
@@ -314,7 +314,7 @@ bool cmFindPackageCommand
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "called with invalid argument \"" << args[i] << "\"";
       this->SetError(e.str());
       return false;
@@ -327,7 +327,7 @@ bool cmFindPackageCommand
                         std::back_inserter(doubledComponents));
   if(!doubledComponents.empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "called with components that are both required and optional:\n";
     for(unsigned int i=0; i<doubledComponents.size(); ++i)
       {
@@ -342,7 +342,7 @@ bool cmFindPackageCommand
   this->UseConfigFiles = moduleArgs.empty();
   if(!this->UseFindModules && !this->UseConfigFiles)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given options exclusive to Module mode:\n";
     for(std::set<unsigned int>::const_iterator si = moduleArgs.begin();
         si != moduleArgs.end(); ++si)
@@ -424,7 +424,7 @@ bool cmFindPackageCommand
     {
     if (this->Required)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "for module " << this->Name << " called with REQUIRED, but "
         << disableFindPackageVar
         << " is enabled. A REQUIRED package cannot be disabled.";
@@ -457,7 +457,7 @@ bool cmFindPackageCommand
   if(this->UseFindModules && this->UseConfigFiles &&
      this->Makefile->IsOn("CMAKE_FIND_PACKAGE_WARN_NO_MODULE"))
     {
-    cmOStringStream aw;
+    std::ostringstream aw;
     if(this->RequiredCMakeVersion >= CMake_VERSION_ENCODE(2,8,8))
       {
       aw << "find_package called without either MODULE or CONFIG option and "
@@ -748,8 +748,8 @@ bool cmFindPackageCommand::HandlePackageMode()
   if (result && !found && (!this->Quiet || this->Required))
     {
     // The variable is not set.
-    cmOStringStream e;
-    cmOStringStream aw;
+    std::ostringstream e;
+    std::ostringstream aw;
     if (configFileSetFOUNDFalse)
       {
       e << "Found package configuration file:\n"
@@ -1467,7 +1467,7 @@ void cmFindPackageCommand::FillPrefixesBuilds()
   // It is likely that CMake will have recently built the project.
   for(int i=0; i <= 10; ++i)
     {
-    cmOStringStream r;
+    std::ostringstream r;
     r <<
       "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\"
       "Settings\\StartPath;WhereBuild" << i << "]";

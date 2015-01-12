@@ -16,9 +16,6 @@
 if(CMAKE_GENERATOR MATCHES "Visual Studio 7")
   set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
 endif()
-if(CMAKE_GENERATOR MATCHES "Visual Studio 6")
-  set(CMAKE_SKIP_COMPATIBILITY_TESTS 1)
-endif()
 
 if(WIN32 AND CMAKE_C_COMPILER_ID STREQUAL "Intel")
   set(_INTEL_WINDOWS 1)
@@ -91,5 +88,3 @@ endif ()
 if (CMAKE_ANSI_CFLAGS)
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_ANSI_CFLAGS}")
 endif ()
-
-include (${CMAKE_ROOT}/Modules/CMakeBackwardCompatibilityCXX.cmake)

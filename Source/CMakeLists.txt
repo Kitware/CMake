@@ -153,7 +153,6 @@ endif()
 # Sources for CMakeLib
 #
 set(SRCS
-  cmStandardIncludes.cxx
   cmArchiveWrite.cxx
   cmBootstrapCommands1.cxx
   cmBootstrapCommands2.cxx

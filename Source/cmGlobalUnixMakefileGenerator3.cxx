@@ -783,7 +783,7 @@ cmGlobalUnixMakefileGenerator3
         lg->GetMakefile()->GetHomeOutputDirectory();
       progressDir += cmake::GetCMakeFilesDirectory();
         {
-        cmOStringStream progCmd;
+        std::ostringstream progCmd;
         progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
         // all target counts
         progCmd << lg->Convert(progressDir,
@@ -824,7 +824,7 @@ cmGlobalUnixMakefileGenerator3
 
       {
       // TODO: Convert the total progress count to a make variable.
-      cmOStringStream progCmd;
+      std::ostringstream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
       // # in target
       progCmd << lg->Convert(progressDir,
@@ -841,7 +841,7 @@ cmGlobalUnixMakefileGenerator3
       commands.push_back(lg->GetRecursiveMakeCall
                           (tmp.c_str(),localName));
       {
-      cmOStringStream progCmd;
+      std::ostringstream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
       progCmd << lg->Convert(progressDir,
                               cmLocalGenerator::FULL,

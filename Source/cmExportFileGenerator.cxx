@@ -81,7 +81,7 @@ bool cmExportFileGenerator::GenerateImportFile()
   if(!foutPtr.get() || !*foutPtr)
     {
     std::string se = cmSystemTools::GetLastSystemError();
-    cmOStringStream e;
+    std::ostringstream e;
     e << "cannot write to file \"" << this->MainImportFile
       << "\": " << se;
     cmSystemTools::Error(e.str().c_str());
@@ -247,7 +247,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
       continue;
       }
     cmake::MessageType messageType = cmake::FATAL_ERROR;
-    cmOStringStream e;
+    std::ostringstream e;
     if (genexPos != std::string::npos)
       {
       switch (target->GetPolicyStatusCMP0041())
@@ -295,7 +295,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
           {
           case cmPolicies::WARN:
             {
-            cmOStringStream s;
+            std::ostringstream s;
             s << target->GetMakefile()->GetPolicies()
                       ->GetPolicyWarning(cmPolicies::CMP0052) << "\n";
             s << "Directory:\n    \"" << *li << "\"\nin "
@@ -391,7 +391,7 @@ void cmExportFileGenerator::PopulateIncludeDirectoriesInterface(
   if (cge->GetHadContextSensitiveCondition())
     {
     cmMakefile* mf = target->GetMakefile();
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Target \"" << target->GetName() << "\" is installed with "
     "INCLUDES DESTINATION set to a context sensitive path.  Paths which "
     "depend on the configuration, policy values or the link interface are "
@@ -469,7 +469,7 @@ void getCompatibleInterfaceProperties(cmTarget *target,
   if (!info)
     {
     cmMakefile* mf = target->GetMakefile();
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Exporting the target \"" << target->GetName() << "\" is not "
         "allowed since its linker language cannot be determined";
     mf->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -769,7 +769,7 @@ cmExportFileGenerator
   if(newCMP0022Behavior && !this->ExportOld)
     {
     cmMakefile *mf = target->GetMakefile();
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Target \"" << target->GetName() << "\" has policy CMP0022 enabled, "
          "but also has old-style LINK_INTERFACE_LIBRARIES properties "
          "populated, but it was exported without the "
@@ -853,7 +853,7 @@ cmExportFileGenerator
       {
       std::string prop = "IMPORTED_LINK_INTERFACE_MULTIPLICITY";
       prop += suffix;
-      cmOStringStream m;
+      std::ostringstream m;
       m << iface->Multiplicity;
       properties[prop] = m.str();
       }
