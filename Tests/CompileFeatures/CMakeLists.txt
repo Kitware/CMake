@@ -144,11 +144,56 @@ if (CMAKE_CXX_COMPILE_FEATURES)
 
   add_definitions(-DEXPECT_OVERRIDE_CONTROL=1)
 
+  if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
+      add_definitions(
+        -DEXPECT_INHERITING_CONSTRUCTORS=1
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+      )
+    elseif (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.7)
+      add_definitions(
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    else()
+      add_definitions(
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=0
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    endif()
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    add_definitions(
+      -DEXPECT_INHERITING_CONSTRUCTORS=1
+      -DEXPECT_FINAL=1
+      -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+    )
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.0)
+      add_definitions(
+        -DEXPECT_INHERITING_CONSTRUCTORS=1
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+      )
+    else()
+      add_definitions(
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    endif()
+  endif()
+
   add_executable(CompileFeaturesGenex genex_test.cpp)
   set_property(TARGET CompileFeaturesGenex PROPERTY CXX_STANDARD 11)
   target_compile_definitions(CompileFeaturesGenex PRIVATE
     HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
     HAVE_NULLPTR=$<COMPILE_FEATURES:cxx_nullptr>
+    HAVE_INHERITING_CONSTRUCTORS=$<COMPILE_FEATURES:cxx_inheriting_constructors>
+    HAVE_FINAL=$<COMPILE_FEATURES:cxx_final>
+    HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
   )
 
   add_executable(CompileFeaturesGenex2 genex_test.cpp)
@@ -156,6 +201,9 @@ if (CMAKE_CXX_COMPILE_FEATURES)
   target_compile_definitions(CompileFeaturesGenex2 PRIVATE
     HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
     HAVE_NULLPTR=$<COMPILE_FEATURES:cxx_nullptr>
+    HAVE_INHERITING_CONSTRUCTORS=$<COMPILE_FEATURES:cxx_inheriting_constructors>
+    HAVE_FINAL=$<COMPILE_FEATURES:cxx_final>
+    HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
   )
 
   add_library(static_assert_iface INTERFACE)
@@ -165,5 +213,8 @@ if (CMAKE_CXX_COMPILE_FEATURES)
   target_compile_definitions(CompileFeaturesGenex3 PRIVATE
     HAVE_OVERRIDE_CONTROL=$<COMPILE_FEATURES:cxx_final,cxx_override>
     HAVE_NULLPTR=$<COMPILE_FEATURES:cxx_nullptr>
+    HAVE_INHERITING_CONSTRUCTORS=$<COMPILE_FEATURES:cxx_inheriting_constructors>
+    HAVE_FINAL=$<COMPILE_FEATURES:cxx_final>
+    HAVE_INHERITING_CONSTRUCTORS_AND_FINAL=$<COMPILE_FEATURES:cxx_inheriting_constructors,cxx_final>
   )
 endif()
