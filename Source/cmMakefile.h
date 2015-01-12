@@ -35,6 +35,7 @@
 #endif
 
 #include <stack>
+#include <deque>
 
 class cmFunctionBlocker;
 class cmCommand;

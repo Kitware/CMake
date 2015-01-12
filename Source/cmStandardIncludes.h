@@ -55,7 +55,6 @@
 #include <map>
 #include <list>
 #include <set>
-#include <deque>
 
 // include the "c" string header
 #include <string.h>

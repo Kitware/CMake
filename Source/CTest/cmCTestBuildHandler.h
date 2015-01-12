@@ -19,6 +19,8 @@
 
 #include <cmsys/RegularExpression.hxx>
 
+#include <deque>
+
 class cmMakefile;
 
 /** \class cmCTestBuildHandler
