@@ -103,6 +103,8 @@
 
 #include <sys/stat.h> // struct stat
 
+#include <list>
+
 static bool cmakeCheckStampFile(const char* stampName);
 static bool cmakeCheckStampList(const char* stampName);
 

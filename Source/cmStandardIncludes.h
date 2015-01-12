@@ -53,7 +53,6 @@
 #include <algorithm>
 #include <functional>
 #include <map>
-#include <list>
 #include <set>
 
 // include the "c" string header

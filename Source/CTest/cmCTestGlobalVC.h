@@ -14,6 +14,8 @@
 
 #include "cmCTestVC.h"
 
+#include <list>
+
 /** \class cmCTestGlobalVC
  * \brief Base class for handling globally-versioned trees
  *

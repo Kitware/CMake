@@ -14,6 +14,8 @@
 
 #include "cmStandardIncludes.h"
 
+#include <list>
+
 class cmFileLockResult;
 class cmFileLock;
 
