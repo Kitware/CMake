@@ -71,7 +71,7 @@ void CMakeCommandUsage(const char* program)
     << "  remove_directory dir      - remove a directory and its contents\n"
     << "  rename oldname newname    - rename a file or directory "
        "(on one volume)\n"
-    << "  tar [cxt][vfz][cvfj] file.tar [file/dir1 file/dir2 ...]\n"
+    << "  tar [cxt][vf][zjJ] file.tar [file/dir1 file/dir2 ...]\n"
     << "                            - create or extract a tar or zip archive\n"
     << "  sleep <number>...         - sleep for given number of seconds\n"
     << "  time command [args] ...   - run command and return elapsed time\n"
@@ -733,16 +733,30 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         {
         files.push_back(args[cc]);
         }
-      bool gzip = false;
-      bool bzip2 = false;
+      cmSystemTools::cmTarCompression compress =
+        cmSystemTools::TarCompressNone;
       bool verbose = false;
+      int nCompress = 0;
       if ( flags.find_first_of('j') != flags.npos )
         {
-        bzip2 = true;
+        compress = cmSystemTools::TarCompressBZip2;
+        ++nCompress;
+        }
+      if ( flags.find_first_of('J') != flags.npos )
+        {
+        compress = cmSystemTools::TarCompressXZ;
+        ++nCompress;
         }
       if ( flags.find_first_of('z') != flags.npos )
         {
-        gzip = true;
+        compress = cmSystemTools::TarCompressGZip;
+        ++nCompress;
+        }
+      if ( nCompress > 1 )
+        {
+        cmSystemTools::Error("Can only compress a tar file one way; "
+                             "at most one flag of z, j, or J may be used");
+        return 1;
         }
       if ( flags.find_first_of('v') != flags.npos )
         {
@@ -751,7 +765,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 
       if ( flags.find_first_of('t') != flags.npos )
         {
-        if ( !cmSystemTools::ListTar(outFile.c_str(), gzip, verbose) )
+        if ( !cmSystemTools::ListTar(outFile.c_str(), verbose) )
           {
           cmSystemTools::Error("Problem listing tar: ", outFile.c_str());
           return 1;
@@ -760,7 +774,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       else if ( flags.find_first_of('c') != flags.npos )
         {
         if ( !cmSystemTools::CreateTar(
-               outFile.c_str(), files, gzip, bzip2, verbose) )
+               outFile.c_str(), files, compress, verbose) )
           {
           cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
           return 1;
@@ -769,7 +783,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       else if ( flags.find_first_of('x') != flags.npos )
         {
         if ( !cmSystemTools::ExtractTar(
-            outFile.c_str(), gzip, verbose) )
+            outFile.c_str(), verbose) )
           {
           cmSystemTools::Error("Problem extracting tar: ", outFile.c_str());
           return 1;
