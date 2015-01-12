@@ -68,11 +68,11 @@ Module Functions
 
   It creates custom commands in the target as necessary to make data
   files available for each ``DATA{}`` reference previously evaluated by
-  other functions provided by this module.  A list of URL templates may
-  be provided in the variable ``ExternalData_URL_TEMPLATES`` using the
-  placeholders ``%(algo)`` and ``%(hash)`` in each template.  Data fetch
-  rules try each URL template in order by substituting the hash
-  algorithm name for ``%(algo)`` and the hash value for ``%(hash)``.
+  other functions provided by this module.
+  Data files may be fetched from one of the URL templates specified in
+  the ``ExternalData_URL_TEMPLATES`` variable, or may be found locally
+  in one of the paths specified in the ``ExternalData_OBJECT_STORES``
+  variable.
 
 Hash Algorithms
 ^^^^^^^^^^^^^^^
@@ -177,6 +177,14 @@ Module Variables
 The following variables configure behavior.  They should be set before
 calling any of the functions provided by this module.
 
+.. variable:: ExternalData_URL_TEMPLATES
+
+  The ``ExternalData_URL_TEMPLATES`` may be set to provide a list of
+  of URL templates using the placeholders ``%(algo)`` and ``%(hash)``
+  in each template.  Data fetch rules try each URL template in order
+  by substituting the hash algorithm name for ``%(algo)`` and the hash
+  value for ``%(hash)``.
+
 .. variable:: ExternalData_LINK_CONTENT
 
   The ``ExternalData_LINK_CONTENT`` variable may be set to the name of a
@@ -225,6 +233,14 @@ calling any of the functions provided by this module.
   The ``ExternalData_TIMEOUT_ABSOLUTE`` variable sets the download
   absolute timeout, in seconds, with a default of ``300`` seconds.
   Set to ``0`` to disable enforcement.
+
+.. variable:: ExternalData_SERIES_PARSE
+              ExternalData_SERIES_PARSE_PREFIX
+              ExternalData_SERIES_PARSE_NUMBER
+              ExternalData_SERIES_PARSE_SUFFIX
+              ExternalData_SERIES_MATCH
+
+  See `Referencing File Series`_.
 #]=======================================================================]
 
 #=============================================================================
