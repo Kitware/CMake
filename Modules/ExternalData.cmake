@@ -18,16 +18,7 @@ recognize arguments with the syntax ``DATA{<name>}`` as references to
 external data, replace them with full paths to local copies of those
 data, and create build rules to fetch and update the local copies.
 
-The ``DATA{}`` syntax is literal and the ``<name>`` is a full or relative path
-within the source tree.  The source tree must contain either a real
-data file at ``<name>`` or a "content link" at ``<name><ext>`` containing a
-hash of the real file using a hash algorithm corresponding to ``<ext>``.
-For example, the argument ``DATA{img.png}`` may be satisfied by either a
-real ``img.png`` file in the current source directory or a ``img.png.md5``
-file containing its MD5 sum.
-
-Example Usage
-^^^^^^^^^^^^^
+For example:
 
 .. code-block:: cmake
 
@@ -166,8 +157,22 @@ calling any of the functions provided by this module.
   by substituting the hash algorithm name for ``%(algo)`` and the hash
   value for ``%(hash)``.
 
+Referencing Files
+^^^^^^^^^^^^^^^^^
+
+Referencing Single Files
+""""""""""""""""""""""""
+
+The ``DATA{}`` syntax is literal and the ``<name>`` is a full or relative path
+within the source tree.  The source tree must contain either a real
+data file at ``<name>`` or a "content link" at ``<name><ext>`` containing a
+hash of the real file using a hash algorithm corresponding to ``<ext>``.
+For example, the argument ``DATA{img.png}`` may be satisfied by either a
+real ``img.png`` file in the current source directory or a ``img.png.md5``
+file containing its MD5 sum.
+
 Referencing File Series
-^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""
 
 The ``DATA{}`` syntax can be told to fetch a file series using the form
 ``DATA{<name>,:}``, where the ``:`` is literal.  If the source tree
@@ -198,7 +203,7 @@ Note that the ``<suffix>`` of a series does not include a hash-algorithm
 extension.
 
 Referencing Associated Files
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+""""""""""""""""""""""""""""
 
 The ``DATA{}`` syntax can alternatively match files associated with the
 named file and contained in the same directory.  Associated files may
@@ -214,7 +219,7 @@ will pass ``MyInput.mha`` and ``MyFrames00.png`` on the command line but
 ensure that the associated files are present next to them.
 
 Referencing Directories
-^^^^^^^^^^^^^^^^^^^^^^^
+"""""""""""""""""""""""
 
 The ``DATA{}`` syntax may reference a directory using a trailing slash and
 a list of associated files.  The form ``DATA{<name>/,<opt1>,<opt2>,...}``
