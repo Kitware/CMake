@@ -547,6 +547,7 @@ void cmTarget::ClearLinkMaps()
   this->Internal->LinkInterfaceMap.clear();
   this->Internal->LinkInterfaceUsageRequirementsOnlyMap.clear();
   this->Internal->LinkClosureMap.clear();
+  this->Internal->SourceFilesMap.clear();
   for (cmTargetLinkInformationMap::const_iterator it
       = this->LinkInformation.begin();
       it != this->LinkInformation.end(); ++it)
