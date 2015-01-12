@@ -312,6 +312,8 @@ When loading a find module or package configuration file ``find_package``
 defines variables to provide information about the call arguments (and
 restores their original state before returning):
 
+``CMAKE_FIND_PACKAGE_NAME``
+  the ``<package>`` name which is searched for
 ``<package>_FIND_REQUIRED``
   true if ``REQUIRED`` option was given
 ``<package>_FIND_QUIETLY``
