@@ -919,16 +919,7 @@ void cmTarget::GetSourceFiles(std::vector<cmSourceFile*> &files,
 //----------------------------------------------------------------------------
 void cmTarget::AddTracedSources(std::vector<std::string> const& srcs)
 {
-  std::string srcFiles;
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator i = srcs.begin();
-      i != srcs.end(); ++i)
-    {
-    std::string filename = *i;
-    srcFiles += sep;
-    srcFiles += filename;
-    sep = ";";
-    }
+  std::string srcFiles = cmJoin(srcs, ";");
   if (!srcFiles.empty())
     {
     this->Internal->SourceFilesMap.clear();
@@ -6076,24 +6067,8 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
         }
       if (ifaceLibs != iface.Libraries)
         {
-        std::string oldLibraries;
-        std::string newLibraries;
-        const char *sep = "";
-        for(std::vector<cmLinkImplItem>::const_iterator it
-              = impl->Libraries.begin(); it != impl->Libraries.end(); ++it)
-          {
-          oldLibraries += sep;
-          oldLibraries += *it;
-          sep = ";";
-          }
-        sep = "";
-        for(std::vector<cmLinkItem>::const_iterator it
-              = ifaceLibs.begin(); it != ifaceLibs.end(); ++it)
-          {
-          newLibraries += sep;
-          newLibraries += *it;
-          sep = ";";
-          }
+        std::string oldLibraries = cmJoin(impl->Libraries, ";");
+        std::string newLibraries = cmJoin(ifaceLibs, ";");
         if(oldLibraries.empty())
           { oldLibraries = "(empty)"; }
         if(newLibraries.empty())

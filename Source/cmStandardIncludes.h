@@ -143,6 +143,33 @@ static thisClass* SafeDownCast(cmObject *c) \
 } \
 class cmTypeMacro_UseTrailingSemicolon
 
+template<typename Range>
+std::string cmJoin(Range const& r, const char* delimiter)
+{
+  if (r.empty())
+    {
+    return std::string();
+    }
+  std::ostringstream os;
+  typedef typename Range::value_type ValueType;
+  typedef typename Range::const_iterator InputIt;
+  InputIt first = r.begin();
+  InputIt last = r.end();
+  --last;
+  std::copy(first, last,
+      std::ostream_iterator<ValueType>(os, delimiter));
+
+  os << *last;
+
+  return os.str();
+}
+
+template<typename Range>
+std::string cmJoin(Range const& r, std::string delimiter)
+{
+  return cmJoin(r, delimiter.c_str());
+};
+
 inline bool cmHasLiteralPrefixImpl(const std::string &str1,
                                  const char *str2,
                                  size_t N)

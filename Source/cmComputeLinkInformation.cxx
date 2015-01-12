@@ -444,18 +444,7 @@ std::string cmComputeLinkInformation::GetRPathLinkString()
     }
 
   // Construct the linker runtime search path.
-  std::string rpath_link;
-  const char* sep = "";
-  std::vector<std::string> const& dirs =
-    this->OrderDependentRPath->GetOrderedDirectories();
-  for(std::vector<std::string>::const_iterator di = dirs.begin();
-      di != dirs.end(); ++di)
-    {
-    rpath_link += sep;
-    sep = ":";
-    rpath_link += *di;
-    }
-  return rpath_link;
+  return cmJoin(this->OrderDependentRPath->GetOrderedDirectories(), ":");
 }
 
 //----------------------------------------------------------------------------
@@ -1988,18 +1977,7 @@ std::string cmComputeLinkInformation::GetRPathString(bool for_install)
   this->GetRPath(runtimeDirs, for_install);
 
   // Concatenate the paths.
-  std::string rpath;
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator ri = runtimeDirs.begin();
-      ri != runtimeDirs.end(); ++ri)
-    {
-    // Separate from previous path.
-    rpath += sep;
-    sep = this->GetRuntimeSep().c_str();
-
-    // Add this path.
-    rpath += *ri;
-    }
+  std::string rpath = cmJoin(runtimeDirs, this->GetRuntimeSep());
 
   // If the rpath will be replaced at install time, prepare space.
   if(!for_install && this->RuntimeUseChrpath)

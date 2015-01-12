@@ -824,18 +824,12 @@ bool cmSystemTools::RunSingleCommand(
 std::string
 cmSystemTools::PrintSingleCommand(std::vector<std::string> const& command)
 {
-  std::string commandStr;
-  const char* sep = "";
-  for(std::vector<std::string>::const_iterator i = command.begin();
-      i != command.end(); ++i)
+  if (command.empty())
     {
-    commandStr += sep;
-    commandStr += "\"";
-    commandStr += *i;
-    commandStr += "\"";
-    sep = " ";
+    return std::string();
     }
-  return commandStr;
+
+  return "\"" + cmJoin(command, "\" \"") + "\"";
 }
 
 bool cmSystemTools::DoesFileExistWithExtensions(
