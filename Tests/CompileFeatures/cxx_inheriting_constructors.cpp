@@ -13,6 +13,6 @@ struct B : public A
 
 void someFunc()
 {
-  int i;
+  int i = 0;
   B b(i);
 }
