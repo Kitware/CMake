@@ -27,11 +27,7 @@ bool cmInstallProgramsCommand
 
   this->Destination = args[0];
 
-  std::vector<std::string>::const_iterator s = args.begin();
-  for (++s;s != args.end(); ++s)
-    {
-    this->FinalArgs.push_back(*s);
-    }
+  this->FinalArgs.insert(this->FinalArgs.end(), args.begin() + 1, args.end());
 
   this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
                        ->AddInstallComponent(this->Makefile->GetSafeDefinition(

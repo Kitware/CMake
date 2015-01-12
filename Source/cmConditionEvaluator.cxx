@@ -53,10 +53,7 @@ bool cmConditionEvaluator::IsTrue(
   cmArgumentList newArgs;
 
   // copy to the list structure
-  for(unsigned int i = 0; i < args.size(); ++i)
-    {
-    newArgs.push_back(args[i]);
-    }
+  newArgs.insert(newArgs.end(), args.begin(), args.end());
 
   // now loop through the arguments and see if we can reduce any of them
   // we do this multiple times. Once for each level of precedence
@@ -411,10 +408,7 @@ bool cmConditionEvaluator::HandleLevel0(cmArgumentList &newArgs,
         // copy to the list structure
         cmArgumentList::iterator argP1 = arg;
         argP1++;
-        for(; argP1 != argClose; argP1++)
-          {
-          newArgs2.push_back(*argP1);
-          }
+        newArgs2.insert(newArgs2.end(), argP1, argClose);
         newArgs2.pop_back();
         // now recursively invoke IsTrue to handle the values inside the
         // parenthetical expression

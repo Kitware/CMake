@@ -489,11 +489,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       unique.insert(*li);
       }
     result.clear();
-    for(std::set<std::string>::iterator li = unique.begin();
-        li != unique.end(); ++li)
-      {
-      result.push_back(*li);
-      }
+    result.insert(result.end(), unique.begin(), unique.end());
 
     IncludeCacheType::value_type entry(config_upper, result);
     iter = this->SystemIncludesCache.insert(entry).first;
@@ -822,11 +818,7 @@ cmTargetTraceDependencies
                                                               = ge.Parse(*cli);
       cge->Evaluate(this->Makefile, "", true);
       std::set<cmTarget*> geTargets = cge->GetTargets();
-      for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
-          it != geTargets.end(); ++it)
-        {
-        targets.insert(*it);
-        }
+      targets.insert(geTargets.begin(), geTargets.end());
       }
     }
 

@@ -1021,12 +1021,9 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
     }
 
   //insert outputs from all WirteBuild commands
-  for(std::set<std::string>::iterator i = this->CombinedBuildOutputs.begin();
-      i != this->CombinedBuildOutputs.end(); ++i)
-    {
-    //these paths have already be encoded when added to CombinedBuildOutputs
-    knownDependencies.insert(*i);
-    }
+  //these paths have already be encoded when added to CombinedBuildOutputs
+  knownDependencies.insert(this->CombinedBuildOutputs.begin(),
+                           this->CombinedBuildOutputs.end());
 
   //after we have combined the data into knownDependencies we have no need
   //to keep this data around

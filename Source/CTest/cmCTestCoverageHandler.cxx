@@ -2498,11 +2498,7 @@ void cmCTestCoverageHandler::LoadLabels(const char* dir)
 
       // Label the source with the target labels.
       LabelSet& labelSet = this->SourceLabels[source];
-      for(std::vector<int>::const_iterator li = targetLabels.begin();
-          li != targetLabels.end(); ++li)
-        {
-        labelSet.insert(*li);
-        }
+      labelSet.insert(targetLabels.begin(), targetLabels.end());
       }
     }
 }

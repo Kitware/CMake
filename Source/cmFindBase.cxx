@@ -184,10 +184,8 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
     std::vector<std::string> shortArgs = this->Names;
     this->Names.clear(); // clear out any values in Names
     this->Names.push_back(shortArgs[0]);
-    for(unsigned int j = 1; j < shortArgs.size(); ++j)
-      {
-      this->UserGuessArgs.push_back(shortArgs[j]);
-      }
+    this->UserGuessArgs.insert(this->UserGuessArgs.end(),
+                               shortArgs.begin() + 1, shortArgs.end());
     }
   this->ExpandPaths();
 

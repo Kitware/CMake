@@ -125,11 +125,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
                                                     this->ValidDeps->find(obj);
     if (tmpIt!= this->ValidDeps->end())
       {
-      for(DependencyVector::const_iterator i=tmpIt->second.begin();
-         i != tmpIt->second.end(); ++i)
-        {
-        dependencies.insert(*i);
-        }
+      dependencies.insert(tmpIt->second.begin(), tmpIt->second.end());
       haveDeps = true;
       }
     }

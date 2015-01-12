@@ -36,11 +36,7 @@ bool cmAddTestCommand
 
   // Collect the command with arguments.
   std::vector<std::string> command;
-  for(std::vector<std::string>::const_iterator it = args.begin() + 1;
-      it != args.end(); ++it)
-    {
-    command.push_back(*it);
-    }
+  command.insert(command.end(), args.begin() + 1, args.end());
 
   // Create the test but add a generator only the first time it is
   // seen.  This preserves behavior from before test generators.

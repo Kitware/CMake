@@ -21,85 +21,12 @@ CMake is required to build with ancient C++ compilers and standard library
 implementations.  Some common C++ constructs may not be used in CMake in order
 to build with such toolchains.
 
-std::set const iterators
-------------------------
-
-The ``find()`` member function of a ``const`` ``std::set`` instance may not be
-used in a comparison with the iterator returned by ``end()``:
-
-.. code-block:: c++
-
-  const std::set<std::string>& someSet = getSet();
-  if (someSet.find("needle") == someSet.end()) // Wrong
-    {
-    // ...
-    }
-
-The return value of ``find()`` must be assigned to an intermediate
-``const_iterator`` for comparison:
-
-.. code-block:: c++
-
-  const std::set<std::string>& someSet;
-  const std::set<std::string>::const_iterator i = someSet.find("needle");
-  if (i != propSet.end()) // Ok
-    {
-    // ...
-    }
-
 std::auto_ptr
 -------------
 
 Some implementations have a ``std::auto_ptr`` which can not be used as a
 return value from a function. ``std::auto_ptr`` may not be used. Use
 ``cmsys::auto_ptr`` instead.
-
-std::vector::insert and std::set
---------------------------------
-
-Use of ``std::vector::insert`` with an iterator whose ``element_type`` requires
-conversion is not allowed:
-
-.. code-block:: c++
-
-  std::set<const char*> theSet;
-  std::vector<std::string> theVector;
-  theVector.insert(theVector.end(), theSet.begin(), theSet.end()); // Wrong
-
-A loop must be used instead:
-
-.. code-block:: c++
-
-  std::set<const char*> theSet;
-  std::vector<std::string> theVector;
-  for(std::set<const char*>::iterator li = theSet.begin();
-      li != theSet.end(); ++li)
-    {
-    theVector.push_back(*li);
-    }
-
-std::set::insert
-----------------
-
-Use of ``std::set::insert`` is not allowed with any source container:
-
-.. code-block:: c++
-
-  std::set<cmTarget*> theSet;
-  theSet.insert(targets.begin(), targets.end()); // Wrong
-
-A loop must be used instead:
-
-.. code-block:: c++
-
-  ConstIterator it = targets.begin();
-  const ConstIterator end = targets.end();
-  for ( ; it != end; ++it)
-    {
-    theSet.insert(*it);
-    }
-
-.. SunCC 5.9
 
 Template Parameter Defaults
 ---------------------------
@@ -136,12 +63,6 @@ Various implementations have differing implementation of ``size_t``.  When
 assigning the result of ``.size()`` on a container for example, the result
 should be assigned to ``size_t`` not to ``std::size_t``, ``unsigned int`` or
 similar types.
-
-Templates
----------
-
-Some template code is permitted, but with some limitations. Member templates
-may not be used, and template friends may not be used.
 
 Adding Compile Features
 =======================

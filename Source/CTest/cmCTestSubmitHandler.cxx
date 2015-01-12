@@ -1160,11 +1160,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     {
     // Submit the explicitly selected files:
     //
-    cmCTest::SetOfStrings::const_iterator it;
-    for (it = this->Files.begin(); it != this->Files.end(); ++it)
-      {
-      files.insert(*it);
-      }
+    files.insert(this->Files.begin(), this->Files.end());
     }
 
   // Add to the list of files to submit from any selected, existing parts:
@@ -1219,11 +1215,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
     // Submit files from this part.
     std::vector<std::string> const& pfiles = this->CTest->GetSubmitFiles(p);
-    for(std::vector<std::string>::const_iterator pi = pfiles.begin();
-        pi != pfiles.end(); ++pi)
-      {
-      files.insert(*pi);
-      }
+    files.insert(pfiles.begin(), pfiles.end());
     }
 
   if ( ofs )
@@ -1503,9 +1495,5 @@ void cmCTestSubmitHandler::SelectParts(std::set<cmCTest::Part> const& parts)
 //----------------------------------------------------------------------------
 void cmCTestSubmitHandler::SelectFiles(cmCTest::SetOfStrings const& files)
 {
-  cmCTest::SetOfStrings::const_iterator it;
-  for (it = files.begin(); it != files.end(); ++it)
-    {
-    this->Files.insert(*it);
-    }
+  this->Files.insert(files.begin(), files.end());
 }

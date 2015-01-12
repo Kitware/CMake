@@ -349,11 +349,7 @@ void cmCTestP4::SetP4Options(std::vector<char const*> &CommandOptions)
     std::vector<std::string> args =
             cmSystemTools::ParseArguments(opts.c_str());
 
-    for(std::vector<std::string>::const_iterator ai = args.begin();
-        ai != args.end(); ++ai)
-      {
-      P4Options.push_back(*ai);
-      }
+    P4Options.insert(P4Options.end(), args.begin(), args.end());
     }
 
   CommandOptions.clear();

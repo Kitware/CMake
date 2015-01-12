@@ -408,11 +408,7 @@ cmComputeLinkInformation
     // Construct a mask to not bother with this behavior for link
     // directories already specified by the user.
     std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
-    for(std::vector<std::string>::const_iterator di = dirs.begin();
-        di != dirs.end(); ++di)
-      {
-      this->OldLinkDirMask.insert(*di);
-      }
+    this->OldLinkDirMask.insert(dirs.begin(), dirs.end());
     }
 }
 
@@ -1420,11 +1416,8 @@ void cmComputeLinkInformation::ComputeFrameworkInfo()
     cmSystemTools::ExpandListArgument(implicitDirs, implicitDirVec);
     }
 
-  for(std::vector<std::string>::const_iterator i = implicitDirVec.begin();
-      i != implicitDirVec.end(); ++i)
-    {
-    this->FrameworkPathsEmmitted.insert(*i);
-    }
+  this->FrameworkPathsEmmitted.insert(implicitDirVec.begin(),
+                                      implicitDirVec.end());
 
   // Regular expression to extract a framework path and name.
   this->SplitFramework.compile("(.*)/(.*)\\.framework$");
@@ -1694,11 +1687,7 @@ void cmComputeLinkInformation::LoadImplicitLinkInfo()
     }
 
   // Store implicit link directories.
-  for(std::vector<std::string>::const_iterator i = implicitDirVec.begin();
-      i != implicitDirVec.end(); ++i)
-    {
-    this->ImplicitLinkDirs.insert(*i);
-    }
+  this->ImplicitLinkDirs.insert(implicitDirVec.begin(), implicitDirVec.end());
 
   // Get language-specific implicit libraries.
   std::vector<std::string> implicitLibVec;
