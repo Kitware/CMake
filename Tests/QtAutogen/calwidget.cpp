@@ -50,6 +50,9 @@
  #include "calwidget.h"
 
  #include "ui_calwidget.h"
+ #ifdef UI_CALWIDGET_H
+ #error Definition of UI_CALWIDGET_H should be disabled by file option.
+ #endif
 
  Window::Window()
   : ui(new Ui::Window)
