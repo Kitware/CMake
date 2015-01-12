@@ -26,6 +26,27 @@ For example, the argument ``DATA{img.png}`` may be satisfied by either a
 real ``img.png`` file in the current source directory or a ``img.png.md5``
 file containing its MD5 sum.
 
+Example Usage
+^^^^^^^^^^^^^
+
+.. code-block:: cmake
+
+ include(ExternalData)
+ set(ExternalData_URL_TEMPLATES "file:///local/%(algo)/%(hash)"
+                                "file:////host/share/%(algo)/%(hash)"
+                                "http://data.org/%(algo)/%(hash)")
+ ExternalData_Add_Test(MyData
+   NAME MyTest
+   COMMAND MyExe DATA{MyInput.png}
+   )
+ ExternalData_Add_Target(MyData)
+
+When test ``MyTest`` runs the ``DATA{MyInput.png}`` argument will be
+replaced by the full path to a real instance of the data file
+``MyInput.png`` on disk.  If the source tree contains a content link
+such as ``MyInput.png.md5`` then the ``MyData`` target creates a real
+``MyInput.png`` in the build tree.
+
 Module Functions
 ^^^^^^^^^^^^^^^^
 
@@ -74,43 +95,76 @@ Module Functions
   in one of the paths specified in the ``ExternalData_OBJECT_STORES``
   variable.
 
-Hash Algorithms
-^^^^^^^^^^^^^^^
+Module Variables
+^^^^^^^^^^^^^^^^
 
-The following hash algorithms are supported::
+The following variables configure behavior.  They should be set before
+calling any of the functions provided by this module.
 
- %(algo)     <ext>     Description
- -------     -----     -----------
- MD5         .md5      Message-Digest Algorithm 5, RFC 1321
- SHA1        .sha1     US Secure Hash Algorithm 1, RFC 3174
- SHA224      .sha224   US Secure Hash Algorithms, RFC 4634
- SHA256      .sha256   US Secure Hash Algorithms, RFC 4634
- SHA384      .sha384   US Secure Hash Algorithms, RFC 4634
- SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
+.. variable:: ExternalData_BINARY_ROOT
 
-Note that the hashes are used only for unique data identification and
-download verification.
+  The ``ExternalData_BINARY_ROOT`` variable may be set to the directory to
+  hold the real data files named by expanded ``DATA{}`` references.  The
+  default is ``CMAKE_BINARY_DIR``.  The directory layout will mirror that of
+  content links under ``ExternalData_SOURCE_ROOT``.
 
-Example Usage
-^^^^^^^^^^^^^
+.. variable:: ExternalData_LINK_CONTENT
 
-.. code-block:: cmake
+  The ``ExternalData_LINK_CONTENT`` variable may be set to the name of a
+  supported hash algorithm to enable automatic conversion of real data
+  files referenced by the ``DATA{}`` syntax into content links.  For each
+  such ``<file>`` a content link named ``<file><ext>`` is created.  The
+  original file is renamed to the form ``.ExternalData_<algo>_<hash>`` to
+  stage it for future transmission to one of the locations in the list
+  of URL templates (by means outside the scope of this module).  The
+  data fetch rule created for the content link will use the staged
+  object if it cannot be found using any URL template.
 
- include(ExternalData)
- set(ExternalData_URL_TEMPLATES "file:///local/%(algo)/%(hash)"
-                                "file:////host/share/%(algo)/%(hash)"
-                                "http://data.org/%(algo)/%(hash)")
- ExternalData_Add_Test(MyData
-   NAME MyTest
-   COMMAND MyExe DATA{MyInput.png}
-   )
- ExternalData_Add_Target(MyData)
+.. variable:: ExternalData_OBJECT_STORES
 
-When test ``MyTest`` runs the ``DATA{MyInput.png}`` argument will be
-replaced by the full path to a real instance of the data file
-``MyInput.png`` on disk.  If the source tree contains a content link
-such as ``MyInput.png.md5`` then the ``MyData`` target creates a real
-``MyInput.png`` in the build tree.
+  The ``ExternalData_OBJECT_STORES`` variable may be set to a list of local
+  directories that store objects using the layout ``<dir>/%(algo)/%(hash)``.
+  These directories will be searched first for a needed object.  If the
+  object is not available in any store then it will be fetched remotely
+  using the URL templates and added to the first local store listed.  If
+  no stores are specified the default is a location inside the build
+  tree.
+
+.. variable:: ExternalData_SERIES_PARSE
+              ExternalData_SERIES_PARSE_PREFIX
+              ExternalData_SERIES_PARSE_NUMBER
+              ExternalData_SERIES_PARSE_SUFFIX
+              ExternalData_SERIES_MATCH
+
+  See `Referencing File Series`_.
+
+.. variable:: ExternalData_SOURCE_ROOT
+
+  The ``ExternalData_SOURCE_ROOT`` variable may be set to the highest source
+  directory containing any path named by a ``DATA{}`` reference.  The
+  default is ``CMAKE_SOURCE_DIR``.  ``ExternalData_SOURCE_ROOT`` and
+  ``CMAKE_SOURCE_DIR`` must refer to directories within a single source
+  distribution (e.g.  they come together in one tarball).
+
+.. variable:: ExternalData_TIMEOUT_ABSOLUTE
+
+  The ``ExternalData_TIMEOUT_ABSOLUTE`` variable sets the download
+  absolute timeout, in seconds, with a default of ``300`` seconds.
+  Set to ``0`` to disable enforcement.
+
+.. variable:: ExternalData_TIMEOUT_INACTIVITY
+
+  The ``ExternalData_TIMEOUT_INACTIVITY`` variable sets the download
+  inactivity timeout, in seconds, with a default of ``60`` seconds.
+  Set to ``0`` to disable enforcement.
+
+.. variable:: ExternalData_URL_TEMPLATES
+
+  The ``ExternalData_URL_TEMPLATES`` may be set to provide a list of
+  of URL templates using the placeholders ``%(algo)`` and ``%(hash)``
+  in each template.  Data fetch rules try each URL template in order
+  by substituting the hash algorithm name for ``%(algo)`` and the hash
+  value for ``%(hash)``.
 
 Referencing File Series
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -171,76 +225,22 @@ directory on the command line and ensure that the directory contains
 files corresponding to every file or content link in the ``MyDataDir``
 source directory.
 
-Module Variables
-^^^^^^^^^^^^^^^^
+Hash Algorithms
+^^^^^^^^^^^^^^^
 
-The following variables configure behavior.  They should be set before
-calling any of the functions provided by this module.
+The following hash algorithms are supported::
 
-.. variable:: ExternalData_URL_TEMPLATES
+ %(algo)     <ext>     Description
+ -------     -----     -----------
+ MD5         .md5      Message-Digest Algorithm 5, RFC 1321
+ SHA1        .sha1     US Secure Hash Algorithm 1, RFC 3174
+ SHA224      .sha224   US Secure Hash Algorithms, RFC 4634
+ SHA256      .sha256   US Secure Hash Algorithms, RFC 4634
+ SHA384      .sha384   US Secure Hash Algorithms, RFC 4634
+ SHA512      .sha512   US Secure Hash Algorithms, RFC 4634
 
-  The ``ExternalData_URL_TEMPLATES`` may be set to provide a list of
-  of URL templates using the placeholders ``%(algo)`` and ``%(hash)``
-  in each template.  Data fetch rules try each URL template in order
-  by substituting the hash algorithm name for ``%(algo)`` and the hash
-  value for ``%(hash)``.
-
-.. variable:: ExternalData_LINK_CONTENT
-
-  The ``ExternalData_LINK_CONTENT`` variable may be set to the name of a
-  supported hash algorithm to enable automatic conversion of real data
-  files referenced by the ``DATA{}`` syntax into content links.  For each
-  such ``<file>`` a content link named ``<file><ext>`` is created.  The
-  original file is renamed to the form ``.ExternalData_<algo>_<hash>`` to
-  stage it for future transmission to one of the locations in the list
-  of URL templates (by means outside the scope of this module).  The
-  data fetch rule created for the content link will use the staged
-  object if it cannot be found using any URL template.
-
-.. variable:: ExternalData_OBJECT_STORES
-
-  The ``ExternalData_OBJECT_STORES`` variable may be set to a list of local
-  directories that store objects using the layout ``<dir>/%(algo)/%(hash)``.
-  These directories will be searched first for a needed object.  If the
-  object is not available in any store then it will be fetched remotely
-  using the URL templates and added to the first local store listed.  If
-  no stores are specified the default is a location inside the build
-  tree.
-
-.. variable:: ExternalData_SOURCE_ROOT
-
-  The ``ExternalData_SOURCE_ROOT`` variable may be set to the highest source
-  directory containing any path named by a ``DATA{}`` reference.  The
-  default is ``CMAKE_SOURCE_DIR``.  ``ExternalData_SOURCE_ROOT`` and
-  ``CMAKE_SOURCE_DIR`` must refer to directories within a single source
-  distribution (e.g.  they come together in one tarball).
-
-.. variable:: ExternalData_BINARY_ROOT
-
-  The ``ExternalData_BINARY_ROOT`` variable may be set to the directory to
-  hold the real data files named by expanded ``DATA{}`` references.  The
-  default is ``CMAKE_BINARY_DIR``.  The directory layout will mirror that of
-  content links under ``ExternalData_SOURCE_ROOT``.
-
-.. variable:: ExternalData_TIMEOUT_INACTIVITY
-
-  The ``ExternalData_TIMEOUT_INACTIVITY`` variable sets the download
-  inactivity timeout, in seconds, with a default of ``60`` seconds.
-  Set to ``0`` to disable enforcement.
-
-.. variable:: ExternalData_TIMEOUT_ABSOLUTE
-
-  The ``ExternalData_TIMEOUT_ABSOLUTE`` variable sets the download
-  absolute timeout, in seconds, with a default of ``300`` seconds.
-  Set to ``0`` to disable enforcement.
-
-.. variable:: ExternalData_SERIES_PARSE
-              ExternalData_SERIES_PARSE_PREFIX
-              ExternalData_SERIES_PARSE_NUMBER
-              ExternalData_SERIES_PARSE_SUFFIX
-              ExternalData_SERIES_MATCH
-
-  See `Referencing File Series`_.
+Note that the hashes are used only for unique data identification and
+download verification.
 #]=======================================================================]
 
 #=============================================================================
