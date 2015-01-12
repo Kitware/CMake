@@ -73,6 +73,12 @@ if (CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" AND NOT CMAKE_CONFIGURATION_
   add_definitions(-DTEST_DEBUG_CLASS)
 endif()
 
+# The -no-protection option disables the generation of include guards.  Verify
+# that setting the source file property has an effect by using this and
+# issue an error in the preprocessor in calwidget.cpp if the include guard
+# is defined.
+set_source_files_properties(calwidget.ui PROPERTIES AUTOUIC_OPTIONS "-no-protection")
+
 add_executable(QtAutogen main.cpp calwidget.cpp second_widget.cpp foo.cpp blub.cpp bar.cpp abc.cpp
                multiplewidgets.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
