@@ -195,14 +195,18 @@ Value::CZString& Value::CZString::operator=(CZString other) {
 }
 
 bool Value::CZString::operator<(const CZString& other) const {
-  if (cstr_)
+  if (cstr_) {
+    assert(other.cstr_);
     return strcmp(cstr_, other.cstr_) < 0;
+  }
   return index_ < other.index_;
 }
 
 bool Value::CZString::operator==(const CZString& other) const {
-  if (cstr_)
+  if (cstr_) {
+    assert(other.cstr_);
     return strcmp(cstr_, other.cstr_) == 0;
+  }
   return index_ == other.index_;
 }
 
