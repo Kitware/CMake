@@ -21,6 +21,13 @@
 #define snprintf _snprintf
 #endif
 
+// Ancient glibc
+#if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 2
+# if !defined(isfinite)
+#  define isfinite __finite
+# endif
+#endif
+
 #if defined(_MSC_VER) && _MSC_VER >= 1400 // VC++ 8.0
 // Disable warning about strdup being deprecated.
 #pragma warning(disable : 4996)
