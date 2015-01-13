@@ -372,6 +372,11 @@ macro (CMAKE_BUILD_UTILITIES)
   endif()
 
   #---------------------------------------------------------------------
+  # Build jsoncpp library.
+  add_subdirectory(Utilities/cmjsoncpp)
+  CMAKE_SET_TARGET_FOLDER(cmjsoncpp "Utilities/3rdParty")
+
+  #---------------------------------------------------------------------
   # Build XMLRPC library for CMake and CTest.
   if(CTEST_USE_XMLRPC)
     find_package(XMLRPC QUIET REQUIRED libwww-client)
