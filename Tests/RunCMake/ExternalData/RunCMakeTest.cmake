@@ -1,5 +1,9 @@
 include(RunCMake)
 
+run_cmake(BadCustom1)
+run_cmake(BadCustom2)
+run_cmake(BadCustom3)
+run_cmake(BadCustom4)
 run_cmake(BadHashAlgo1)
 run_cmake(BadOption1)
 run_cmake(BadOption2)

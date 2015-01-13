@@ -99,6 +99,12 @@ calling any of the functions provided by this module.
   default is ``CMAKE_BINARY_DIR``.  The directory layout will mirror that of
   content links under ``ExternalData_SOURCE_ROOT``.
 
+.. variable:: ExternalData_CUSTOM_SCRIPT_<key>
+
+  Specify a full path to a ``.cmake`` custom fetch script identified by
+  ``<key>`` in entries of the ``ExternalData_URL_TEMPLATES`` list.
+  See `Custom Fetch Scripts`_.
+
 .. variable:: ExternalData_LINK_CONTENT
 
   The ``ExternalData_LINK_CONTENT`` variable may be set to the name of a
@@ -246,6 +252,44 @@ The following hash algorithms are supported::
 
 Note that the hashes are used only for unique data identification and
 download verification.
+
+Custom Fetch Scripts
+^^^^^^^^^^^^^^^^^^^^
+
+When a data file must be fetched from one of the URL templates
+specified in the ``ExternalData_URL_TEMPLATES`` variable, it is
+normally downloaded using the :command:`file(DOWNLOAD)` command.
+One may specify usage of a custom fetch script by using a URL
+template of the form ``ExternalDataCustomScript://<key>/<loc>``.
+The ``<key>`` must be a C identifier, and the ``<loc>`` must
+contain the ``%(algo)`` and ``%(hash)`` placeholders.
+A variable corresponding to the key, ``ExternalData_CUSTOM_SCRIPT_<key>``,
+must be set to the full path to a ``.cmake`` script file.  The script
+will be included to perform the actual fetch, and provided with
+the following variables:
+
+.. variable:: ExternalData_CUSTOM_LOCATION
+
+  When a custom fetch script is loaded, this variable is set to the
+  location part of the URL, which will contain the substituted hash
+  algorithm name and content hash value.
+
+.. variable:: ExternalData_CUSTOM_FILE
+
+  When a custom fetch script is loaded, this variable is set to the
+  full path to a file in which the script must store the fetched
+  content.  The name of the file is unspecified and should not be
+  interpreted in any way.
+
+The custom fetch script is expected to store fetched content in the
+file or set a variable:
+
+.. variable:: ExternalData_CUSTOM_ERROR
+
+  When a custom fetch script fails to fetch the requested content,
+  it must set this variable to a short one-line message describing
+  the reason for failure.
+
 #]=======================================================================]
 
 #=============================================================================
@@ -275,6 +319,37 @@ function(ExternalData_add_target target)
   if(NOT ExternalData_OBJECT_STORES)
     set(ExternalData_OBJECT_STORES ${CMAKE_BINARY_DIR}/ExternalData/Objects)
   endif()
+  set(_ExternalData_CONFIG_CODE "")
+
+  # Store custom script configuration.
+  foreach(url_template IN LISTS ExternalData_URL_TEMPLATES)
+    if("${url_template}" MATCHES "^ExternalDataCustomScript://([^/]*)/(.*)$")
+      set(key "${CMAKE_MATCH_1}")
+      if(key MATCHES "^[A-Za-z_][A-Za-z0-9_]*$")
+        if(ExternalData_CUSTOM_SCRIPT_${key})
+          if(IS_ABSOLUTE "${ExternalData_CUSTOM_SCRIPT_${key}}")
+            string(CONCAT _ExternalData_CONFIG_CODE "${_ExternalData_CONFIG_CODE}\n"
+              "set(ExternalData_CUSTOM_SCRIPT_${key} \"${ExternalData_CUSTOM_SCRIPT_${key}}\")")
+          else()
+            message(FATAL_ERROR
+              "No ExternalData_CUSTOM_SCRIPT_${key} is not set to a full path:\n"
+              " ${ExternalData_CUSTOM_SCRIPT_${key}}")
+          endif()
+        else()
+          message(FATAL_ERROR
+            "No ExternalData_CUSTOM_SCRIPT_${key} is set for URL template:\n"
+            " ${url_template}")
+        endif()
+      else()
+        message(FATAL_ERROR
+          "Bad ExternalDataCustomScript key '${key}' in URL template:\n"
+          " ${url_template}\n"
+          "The key must be a valid C identifier.")
+      endif()
+    endif()
+  endforeach()
+
+  # Store configuration for use by build-time script.
   set(config ${CMAKE_CURRENT_BINARY_DIR}/${target}_config.cmake)
   configure_file(${_ExternalData_SELF_DIR}/ExternalData_config.cmake.in ${config} @ONLY)
 
@@ -781,6 +856,30 @@ function(_ExternalData_download_file url file err_var msg_var)
   set("${msg_var}" "${msg}" PARENT_SCOPE)
 endfunction()
 
+function(_ExternalData_custom_fetch key loc file err_var msg_var)
+  if(NOT ExternalData_CUSTOM_SCRIPT_${key})
+    set(err 1)
+    set(msg "No ExternalData_CUSTOM_SCRIPT_${key} set!")
+  elseif(NOT EXISTS "${ExternalData_CUSTOM_SCRIPT_${key}}")
+    set(err 1)
+    set(msg "No '${ExternalData_CUSTOM_SCRIPT_${key}}' exists!")
+  else()
+    set(ExternalData_CUSTOM_LOCATION "${loc}")
+    set(ExternalData_CUSTOM_FILE "${file}")
+    unset(ExternalData_CUSTOM_ERROR)
+    include("${ExternalData_CUSTOM_SCRIPT_${key}}")
+    if(DEFINED ExternalData_CUSTOM_ERROR)
+      set(err 1)
+      set(msg "${ExternalData_CUSTOM_ERROR}")
+    else()
+      set(err 0)
+      set(msg "no error")
+    endif()
+  endif()
+  set("${err_var}" "${err}" PARENT_SCOPE)
+  set("${msg_var}" "${msg}" PARENT_SCOPE)
+endfunction()
+
 function(_ExternalData_download_object name hash algo var_obj)
   # Search all object stores for an existing object.
   foreach(dir ${ExternalData_OBJECT_STORES})
@@ -804,7 +903,11 @@ function(_ExternalData_download_object name hash algo var_obj)
     string(REPLACE "%(hash)" "${hash}" url_tmp "${url_template}")
     string(REPLACE "%(algo)" "${algo}" url "${url_tmp}")
     message(STATUS "Fetching \"${url}\"")
-    _ExternalData_download_file("${url}" "${tmp}" err errMsg)
+    if(url MATCHES "^ExternalDataCustomScript://([A-Za-z_][A-Za-z0-9_]*)/(.*)$")
+      _ExternalData_custom_fetch("${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}" "${tmp}" err errMsg)
+    else()
+      _ExternalData_download_file("${url}" "${tmp}" err errMsg)
+    endif()
     set(tried "${tried}\n  ${url}")
     if(err)
       set(tried "${tried} (${errMsg})")
