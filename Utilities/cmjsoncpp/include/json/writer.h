@@ -9,6 +9,7 @@
 #if !defined(JSON_IS_AMALGAMATION)
 #include "value.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+#include <iosfwd>
 #include <vector>
 #include <string>
 
