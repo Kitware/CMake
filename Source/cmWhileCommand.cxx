@@ -120,7 +120,7 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
     {
     // if the endwhile has arguments, then make sure
     // they match the arguments of the matching while
-    if (lff.Arguments.size() == 0 ||
+    if (lff.Arguments.empty() ||
         lff.Arguments == this->Args)
       {
       return true;

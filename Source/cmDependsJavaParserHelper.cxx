@@ -251,7 +251,7 @@ void cmDependsJavaParserHelper::EndClass()
 
 void cmDependsJavaParserHelper::PrintClasses()
 {
-  if ( this->ClassStack.size() == 0 )
+  if (this->ClassStack.empty())
     {
     std::cerr << "Error when parsing. No classes on class stack" << std::endl;
     abort();

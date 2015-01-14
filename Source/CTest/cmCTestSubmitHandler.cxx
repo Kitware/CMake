@@ -1067,7 +1067,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 
   const std::string &buildDirectory
     = this->CTest->GetCTestConfiguration("BuildDirectory");
-  if ( buildDirectory.size() == 0 )
+  if (buildDirectory.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find BuildDirectory  key in the DartConfiguration.tcl"

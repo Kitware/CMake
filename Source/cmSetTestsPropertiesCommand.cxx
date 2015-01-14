@@ -62,7 +62,7 @@ bool cmSetTestsPropertiesCommand
       return false;
       }
     }
-  if(propertyPairs.size() == 0)
+  if(propertyPairs.empty())
     {
     this->SetError("called with illegal arguments, maybe "
                    "missing a PROPERTIES specifier?");

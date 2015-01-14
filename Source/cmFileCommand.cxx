@@ -3151,7 +3151,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   if (hash.get())
     {
     std::string actualHash = hash->HashFile(file);
-    if (actualHash.size() == 0)
+    if (actualHash.empty())
       {
       this->SetError("DOWNLOAD cannot compute hash on downloaded file");
       return false;

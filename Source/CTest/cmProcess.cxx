@@ -39,7 +39,7 @@ void cmProcess::SetCommandArguments(std::vector<std::string> const& args)
 
 bool cmProcess::StartProcess()
 {
-  if(this->Command.size() == 0)
+  if(this->Command.empty())
     {
     return false;
     }

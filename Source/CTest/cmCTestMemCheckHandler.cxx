@@ -592,7 +592,7 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
       this->MemoryTesterStyle = cmCTestMemCheckHandler::VALGRIND;
       }
     }
-  if(this->MemoryTester.size() == 0 )
+  if(this->MemoryTester.empty())
     {
     cmCTestLog(this->CTest, WARNING,
                "Memory checker (MemoryCheckCommand) "
@@ -851,7 +851,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
     if(resultFound.size())
       {
       std::vector<int>::size_type idx = this->FindOrAddWarning(resultFound);
-      if(result.size() == 0 || idx > result.size()-1)
+      if(result.empty() || idx > result.size()-1)
         {
         result.push_back(1);
         }
@@ -1197,7 +1197,7 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
              << res.Name << std::endl);
   std::vector<std::string> files;
   this->TestOutputFileNames(test, files);
-  if ( files.size() == 0 )
+  if (files.empty())
     {
     return;
     }
@@ -1280,7 +1280,7 @@ void cmCTestMemCheckHandler::TestOutputFileNames(int test,
     ofile += ".*";
     cmsys::Glob g;
     g.FindFiles(ofile);
-    if(g.GetFiles().size() == 0)
+    if(g.GetFiles().empty())
       {
       std::string log = "Cannot find memory tester output file: "
         + ofile;

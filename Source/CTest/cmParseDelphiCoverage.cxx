@@ -147,7 +147,7 @@ public:
     std::string glob = Coverage.SourceDir + "*/" + filename;
     gl.FindFiles(glob);
     std::vector<std::string> const& files = gl.GetFiles();
-    if(files.size() == 0)
+    if(files.empty())
       {
       /*
       *  If that doesn't find any matching files

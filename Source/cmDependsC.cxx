@@ -285,7 +285,7 @@ bool cmDependsC::WriteDependencies(const std::set<std::string>& sources,
 //----------------------------------------------------------------------------
 void cmDependsC::ReadCacheFile()
 {
-  if(this->CacheFileName.size() == 0)
+  if(this->CacheFileName.empty())
     {
     return;
     }
@@ -374,7 +374,7 @@ void cmDependsC::ReadCacheFile()
 //----------------------------------------------------------------------------
 void cmDependsC::WriteCacheFile() const
 {
-  if(this->CacheFileName.size() == 0)
+  if(this->CacheFileName.empty())
     {
     return;
     }

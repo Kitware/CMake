@@ -203,7 +203,7 @@ int main(int ac, char const* const* av)
 
 int do_cmake(int ac, char const* const* av)
 {
-  if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
+  if (cmSystemTools::GetCurrentWorkingDirectory().empty())
     {
     std::cerr << "Current working directory cannot be established."
               << std::endl;

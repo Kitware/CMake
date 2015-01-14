@@ -1037,7 +1037,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
   this->FindGCovFiles(files);
   std::vector<std::string>::iterator it;
 
-  if ( files.size() == 0 )
+  if (files.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       " Cannot find any GCov coverage files."
@@ -1131,7 +1131,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
       cmCTestLog(this->CTest, DEBUG, "Line: [" << *line << "]"
         << std::endl);
 
-      if ( line->size() == 0 )
+      if (line->empty())
         {
         // Ignore empty line; probably style 2
         }
@@ -1456,7 +1456,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
   this->FindLCovFiles(files);
   std::vector<std::string>::iterator it;
 
-  if ( files.size() == 0 )
+  if (files.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       " Cannot find any LCov coverage files."
@@ -1538,7 +1538,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
       std::string sourceFile;
       std::string lcovFile;
 
-      if ( line->size() == 0 )
+      if (line->empty())
         {
         // Ignore empty line
         }
@@ -1759,7 +1759,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
   gl.FindFiles(daGlob);
   std::vector<std::string> files = gl.GetFiles();
 
-  if ( files.size() == 0 )
+  if (files.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       " Cannot find any Python Trace.py coverage files."
@@ -2076,7 +2076,7 @@ int cmCTestCoverageHandler::RunBullseyeCommand(
   std::string& outputFile)
 {
   std::string program = cmSystemTools::FindProgram(cmd);
-  if(program.size() == 0)
+  if(program.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Cannot find :" << cmd << "\n");
     return 0;

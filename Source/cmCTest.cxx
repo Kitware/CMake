@@ -580,7 +580,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
           }
         tfin.close();
         }
-      if (tag.size() == 0 || (0 != command) || this->Parts[PartStart])
+      if (tag.empty() || (0 != command) || this->Parts[PartStart])
         {
         cmCTestLog(this, DEBUG, "TestModel: " << this->GetTestModelString()
           << std::endl);
@@ -772,7 +772,7 @@ bool cmCTest::UpdateCTestConfiguration()
       fin.getline(buffer, 1023);
       buffer[1023] = 0;
       std::string line = cmCTest::CleanString(buffer);
-      if(line.size() == 0)
+      if(line.empty())
         {
         continue;
         }
@@ -1653,7 +1653,7 @@ int cmCTest::GenerateNotesFile(const char* cfiles)
   cmCTestLog(this, OUTPUT, "Create notes file" << std::endl);
 
   files = cmSystemTools::SplitString(cfiles, ';');
-  if ( files.size() == 0 )
+  if (files.empty())
     {
     return 1;
     }
@@ -1744,7 +1744,7 @@ bool cmCTest::SubmitExtraFiles(const char* cfiles)
   cmCTestLog(this, OUTPUT, "Submit extra files" << std::endl);
 
   files = cmSystemTools::SplitString(cfiles, ';');
-  if ( files.size() == 0 )
+  if (files.empty())
     {
     return 1;
     }

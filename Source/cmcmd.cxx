@@ -1228,7 +1228,7 @@ int cmcmd::ParseVisualStudioLinkCommand(std::vector<std::string>& args,
       targetName = i->substr(5);
       }
     }
-  if(targetName.size() == 0 || command.size() == 0)
+  if(targetName.empty() || command.empty())
     {
     return -1;
     }

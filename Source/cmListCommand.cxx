@@ -98,7 +98,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
     return false;
     }
   // if the size of the list
-  if(listString.size() == 0)
+  if(listString.empty())
     {
     return true;
     }
@@ -109,7 +109,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
   for(std::vector<std::string>::iterator i = list.begin();
       i != list.end(); ++i)
     {
-    if(i->size() == 0)
+    if(i->empty())
       {
       hasEmpty = true;
       break;

@@ -174,7 +174,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
     {
     path = name;
     }
-  if((path.size() == 0 || !cmSystemTools::FileExists(path.c_str()))
+  if((path.empty() || !cmSystemTools::FileExists(path.c_str()))
       && (optional==false))
     {
     return;
@@ -265,7 +265,7 @@ cmGlobalGenerator::IsExportedTargetsFile(const std::string &filename) const
 // Find the make program for the generator, required for try compiles
 void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
 {
-  if(this->FindMakeProgramFile.size() == 0)
+  if(this->FindMakeProgramFile.empty())
     {
     cmSystemTools::Error(
       "Generator implementation error, "
@@ -383,7 +383,7 @@ void
 cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
                                   cmMakefile *mf, bool optional)
 {
-  if(languages.size() == 0)
+  if(languages.empty())
     {
     cmSystemTools::Error("EnableLanguage must have a lang specified!");
     cmSystemTools::SetFatalErrorOccured();

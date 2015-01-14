@@ -211,7 +211,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   static_cast<void>(captureRAII);
   std::ostringstream out;
 
-  if ( this->CTest->GetConfigType().size() == 0 &&
+  if ( this->CTest->GetConfigType().empty() &&
        this->ConfigSample.size())
     {
     // use the config sample to set the ConfigType
@@ -269,7 +269,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 
   // do the build
   std::vector<std::string>::iterator tarIt;
-  if ( this->BuildTargets.size() == 0 )
+  if (this->BuildTargets.empty())
     {
     this->BuildTargets.push_back("");
     }

@@ -324,7 +324,7 @@ private:
 //----------------------------------------------------------------------------
 void cmCTestP4::SetP4Options(std::vector<char const*> &CommandOptions)
 {
-  if(P4Options.size() == 0)
+  if(P4Options.empty())
     {
     const char* p4 = this->CommandLineTool.c_str();
     P4Options.push_back(p4);
@@ -447,7 +447,7 @@ void cmCTestP4::LoadRevisions()
   ChangeLists.clear();
   this->RunChild(&p4_changes[0], &out, &err);
 
-  if(ChangeLists.size() == 0)
+  if(ChangeLists.empty())
       return;
 
   //p4 describe -s ...@1111111,2222222

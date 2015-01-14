@@ -2968,7 +2968,7 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
   // If the entire path is in common except for a trailing slash then
   // just return a "./".
   if(common+1 == remote.size() &&
-     remote[common].size() == 0 &&
+     remote[common].empty() &&
      common == local.size())
     {
     return "./";

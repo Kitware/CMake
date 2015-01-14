@@ -136,7 +136,7 @@ int main (int argc, char const* const* argv)
 
   cmCTest inst;
 
-  if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
+  if (cmSystemTools::GetCurrentWorkingDirectory().empty())
     {
     cmCTestLog(&inst, ERROR_MESSAGE,
       "Current working directory cannot be established." << std::endl);

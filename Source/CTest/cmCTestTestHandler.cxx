@@ -738,7 +738,7 @@ void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
     }
   // if there are no labels and we are filtering by labels
   // then exclude the test as it does not have the label
-  if(it.Labels.size() == 0 )
+  if(it.Labels.empty())
     {
     it.IsInBasedOnREOptions = false;
     return;
@@ -772,7 +772,7 @@ void cmCTestTestHandler::CheckLabelFilterExclude(cmCTestTestProperties& it)
     }
   // if there are no labels and we are excluding by labels
   // then do nothing as a no label can not be a match
-  if(it.Labels.size() == 0 )
+  if(it.Labels.empty())
     {
     return;
     }
@@ -1474,7 +1474,7 @@ std::string cmCTestTestHandler
 
   // if extraPaths are provided and we were not passed a full path, try them,
   // try any extra paths
-  if (filepath.size() == 0)
+  if (filepath.empty())
     {
     for (unsigned int i = 0; i < extraPaths.size(); ++i)
       {
@@ -1494,7 +1494,7 @@ std::string cmCTestTestHandler
 
   // now look in the paths we specified above
   for(unsigned int ai=0;
-      ai < attempted.size() && fullPath.size() == 0; ++ai)
+      ai < attempted.size() && fullPath.empty(); ++ai)
     {
     // first check without exe extension
     if(cmSystemTools::FileExists(attempted[ai].c_str())
@@ -1524,7 +1524,7 @@ std::string cmCTestTestHandler
 
   // if everything else failed, check the users path, but only if a full path
   // wasn't specified
-  if (fullPath.size() == 0 && filepath.size() == 0)
+  if (fullPath.empty() && filepath.empty())
     {
     std::string path = cmSystemTools::FindProgram(filename.c_str());
     if (path != "")
@@ -1533,7 +1533,7 @@ std::string cmCTestTestHandler
       return path;
       }
     }
-  if(fullPath.size() == 0)
+  if(fullPath.empty())
     {
     cmCTestLog(ctest, HANDLER_OUTPUT,
                "Could not find executable " << testCommand << "\n"

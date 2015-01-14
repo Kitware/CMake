@@ -3852,7 +3852,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   // from which we are being called is located itself in CMAKE_ROOT, then
   // prefer results from CMAKE_ROOT depending on the policy setting.
   result = moduleInCMakeModulePath;
-  if (result.size() == 0)
+  if (result.empty())
     {
     result = moduleInCMakeRoot;
     }

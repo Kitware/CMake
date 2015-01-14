@@ -265,7 +265,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
 bool cmCTestMultiProcessHandler::CheckOutput()
 {
   // no more output we are done
-  if(this->RunningTests.size() == 0)
+  if(this->RunningTests.empty())
     {
     return false;
     }

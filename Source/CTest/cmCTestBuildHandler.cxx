@@ -344,7 +344,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   // Determine build command and build directory
   std::string makeCommand = this->GetMakeCommand();
-  if ( makeCommand.size() == 0 )
+  if (makeCommand.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find MakeCommand key in the DartConfiguration.tcl"
@@ -354,7 +354,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   const std::string &buildDirectory
     = this->CTest->GetCTestConfiguration("BuildDirectory");
-  if ( buildDirectory.size() == 0 )
+  if (buildDirectory.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find BuildDirectory  key in the DartConfiguration.tcl"

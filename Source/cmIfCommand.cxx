@@ -177,7 +177,7 @@ bool cmIfFunctionBlocker::ShouldRemove(const cmListFileFunction& lff,
     {
     // if the endif has arguments, then make sure
     // they match the arguments of the matching if
-    if (lff.Arguments.size() == 0 ||
+    if (lff.Arguments.empty() ||
         lff.Arguments == this->Args)
       {
       return true;

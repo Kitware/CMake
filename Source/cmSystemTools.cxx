@@ -1152,7 +1152,7 @@ bool cmSystemTools::SimpleGlob(const std::string& glob,
   std::string path = cmSystemTools::GetFilenamePath(glob);
   std::string ppath = cmSystemTools::GetFilenameName(glob);
   ppath = ppath.substr(0, ppath.size()-1);
-  if ( path.size() == 0 )
+  if (path.empty())
     {
     path = "/";
     }

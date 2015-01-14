@@ -316,7 +316,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     if(arg.find("-D",0) == 0)
       {
       std::string entry = arg.substr(2);
-      if(entry.size() == 0)
+      if(entry.empty())
         {
         ++i;
         if(i < args.size())
@@ -380,7 +380,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     else if(arg.find("-U",0) == 0)
       {
       std::string entryPattern = arg.substr(2);
-      if(entryPattern.size() == 0)
+      if(entryPattern.empty())
         {
         ++i;
         if(i < args.size())
@@ -424,7 +424,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
     else if(arg.find("-C",0) == 0)
       {
       std::string path = arg.substr(2);
-      if ( path.size() == 0 )
+      if (path.empty())
         {
         ++i;
         if(i < args.size())
@@ -449,7 +449,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         return false;
         }
       std::string path = args[i];
-      if ( path.size() == 0 )
+      if (path.empty())
         {
         cmSystemTools::Error("No cmake script provided.");
         return false;
@@ -763,7 +763,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     else if(arg.find("-A",0) == 0)
       {
       std::string value = arg.substr(2);
-      if(value.size() == 0)
+      if(value.empty())
         {
         ++i;
         if(i >= args.size())
@@ -784,7 +784,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     else if(arg.find("-T",0) == 0)
       {
       std::string value = arg.substr(2);
-      if(value.size() == 0)
+      if(value.empty())
         {
         ++i;
         if(i >= args.size())
@@ -805,7 +805,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     else if(arg.find("-G",0) == 0)
       {
       std::string value = arg.substr(2);
-      if(value.size() == 0)
+      if(value.empty())
         {
         ++i;
         if(i >= args.size())
@@ -1959,7 +1959,7 @@ int cmake::CheckBuildSystem()
   // determine whether CMake should rerun.
 
   // If no file is provided for the check, we have to rerun.
-  if(this->CheckBuildSystemArgument.size() == 0)
+  if(this->CheckBuildSystemArgument.empty())
     {
     if(verbose)
       {
@@ -2395,7 +2395,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     else if(arg.find("-G",0) == 0)
       {
       std::string value = arg.substr(2);
-      if(value.size() == 0)
+      if(value.empty())
         {
         ++i;
         if(i >= args.size())
@@ -2450,7 +2450,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
     }
 
   // do we write to a file or to stdout?
-  if (resultFile.size() == 0)
+  if (resultFile.empty())
     {
     resultFile = cwd;
     resultFile += "/__cmake_systeminformation/results.txt";
