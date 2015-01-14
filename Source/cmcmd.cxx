@@ -729,9 +729,31 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string flags = args[2];
       std::string outFile = args[3];
       std::vector<std::string> files;
+      std::string mtime;
+      bool doing_options = true;
       for (std::string::size_type cc = 4; cc < args.size(); cc ++)
         {
-        files.push_back(args[cc]);
+        std::string const& arg = args[cc];
+        if (doing_options && cmHasLiteralPrefix(arg, "--"))
+          {
+          if (arg == "--")
+            {
+            doing_options = false;
+            }
+          else if (cmHasLiteralPrefix(arg, "--mtime="))
+            {
+            mtime = arg.substr(8);
+            }
+          else
+            {
+            cmSystemTools::Error("Unknown option to -E tar: ", arg.c_str());
+            return 1;
+            }
+          }
+        else
+          {
+          files.push_back(arg);
+          }
         }
       cmSystemTools::cmTarCompression compress =
         cmSystemTools::TarCompressNone;
@@ -774,7 +796,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       else if ( flags.find_first_of('c') != flags.npos )
         {
         if ( !cmSystemTools::CreateTar(
-               outFile.c_str(), files, compress, verbose) )
+               outFile.c_str(), files, compress, verbose, mtime) )
           {
           cmSystemTools::Error("Problem creating tar: ", outFile.c_str());
           return 1;

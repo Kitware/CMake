@@ -16,6 +16,7 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
 #include <cm_libarchive.h>
+#include "cm_get_date.h"
 
 //----------------------------------------------------------------------------
 static std::string cm_archive_error_string(struct archive* a)
@@ -276,6 +277,20 @@ bool cmArchiveWrite::AddFile(const char* file,
     this->Error += "': ";
     this->Error += cm_archive_error_string(this->Disk);
     return false;
+    }
+  if (!this->MTime.empty())
+    {
+    time_t now;
+    time(&now);
+    time_t t = cm_get_date(now, this->MTime.c_str());
+    if (t == -1)
+      {
+      this->Error = "unable to parse mtime '";
+      this->Error += this->MTime;
+      this->Error += "'";
+      return false;
+      }
+    archive_entry_set_mtime(e, t, 0);
     }
   // Clear acl and xattr fields not useful for distribution.
   archive_entry_acl_clear(e);
