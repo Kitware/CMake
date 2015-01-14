@@ -34,11 +34,7 @@ bool cmOptionCommand
   if(argError)
     {
     std::string m = "called with incorrect number of arguments: ";
-    for(size_t i =0; i < args.size(); ++i)
-      {
-      m += args[i];
-      m += " ";
-      }
+    m += cmJoin(args, " ");
     this->SetError(m);
     return false;
     }

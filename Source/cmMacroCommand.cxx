@@ -197,14 +197,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
               {
               argvDef += ";";
               }
-            const char* sep = "";
-            std::vector<std::string>::const_iterator eit;
-            for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
-              {
-              argvDef += sep;
-              argvDef += *eit;
-              sep = ";";
-              }
+            argvDef += cmJoin(expandedArgs, ";");
             argvDefInitialized = true;
             }
           cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());

@@ -1064,26 +1064,11 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
     }
 
 
-  std::string tmp;
-  const char* sep ="";
-  for(size_t i=0; i<foundContents.size(); i++)
-    {
-    tmp += sep;
-    tmp += foundContents[i];
-    sep = ";";
-    }
-
+  std::string tmp = cmJoin(foundContents, ";");
   this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_FOUND",
                                                   tmp.c_str());
 
-  tmp = "";
-  sep = "";
-  for(size_t i=0; i<notFoundContents.size(); i++)
-    {
-    tmp += sep;
-    tmp += notFoundContents[i];
-    sep = ";";
-    }
+  tmp = cmJoin(notFoundContents, ";");
   this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_NOT_FOUND",
                                                   tmp.c_str());
 }

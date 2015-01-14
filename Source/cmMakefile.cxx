@@ -4202,15 +4202,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LISTFILE_STACK")
     {
-    const char* sep = "";
-    for (std::deque<std::string>::const_iterator
-        i = this->ListFileStack.begin();
-        i != this->ListFileStack.end(); ++i)
-      {
-      output += sep;
-      output += *i;
-      sep = ";";
-      }
+    output = cmJoin(this->ListFileStack, ";");
     return output.c_str();
     }
   else if (prop == "VARIABLES" || prop == "CACHE_VARIABLES")
@@ -4220,14 +4212,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
       {
       cacheonly = 1;
       }
-    std::vector<std::string> vars = this->GetDefinitions(cacheonly);
-    const char* sep = "";
-    for (unsigned int cc = 0; cc < vars.size(); cc ++ )
-      {
-      output += sep;
-      output += vars[cc];
-      sep = ";";
-      }
+    output = cmJoin(this->GetDefinitions(cacheonly), ";");
     return output.c_str();
     }
   else if (prop == "MACROS")
@@ -4242,16 +4227,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LINK_DIRECTORIES")
     {
-    const char* sep = "";
-    for (std::vector<std::string>::const_iterator
-         it = this->GetLinkDirectories().begin();
-         it != this->GetLinkDirectories().end();
-         ++ it )
-      {
-      output += sep;
-      output += *it;
-      sep = ";";
-      }
+    output = cmJoin(this->GetLinkDirectories(), ";");
     return output.c_str();
     }
   else if (prop == "INCLUDE_DIRECTORIES")
