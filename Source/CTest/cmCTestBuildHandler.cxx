@@ -702,12 +702,12 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
         }
       if ( !cm->SourceFile.empty() && cm->LineNumber >= 0 )
         {
-        if ( cm->SourceFile.size() > 0 )
+        if (!cm->SourceFile.empty())
           {
           os << "\t\t<SourceFile>" << cm->SourceFile << "</SourceFile>"
             << std::endl;
           }
-        if ( cm->SourceFileTail.size() > 0 )
+        if (!cm->SourceFileTail.empty())
           {
           os << "\t\t<SourceFileTail>" << cm->SourceFileTail
             << "</SourceFileTail>" << std::endl;

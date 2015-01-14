@@ -106,7 +106,7 @@ class cmParseJacocoCoverage::XMLParser: public cmXMLParser
             {
             FileLinesType& curFileLines=
               this->Coverage.TotalCoverage[this->CurFileName];
-            if(curFileLines.size() > 0)
+            if(!curFileLines.empty())
                {
                curFileLines[nr-1] = ci;
                }

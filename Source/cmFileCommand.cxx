@@ -336,14 +336,14 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 
   // is there a limit?
   long sizeLimit = -1;
-  if (limitArg.GetString().size() > 0)
+  if (!limitArg.GetString().empty())
     {
     sizeLimit = atoi(limitArg.GetCString());
     }
 
   // is there an offset?
   long offset = 0;
-  if (offsetArg.GetString().size() > 0)
+  if (!offsetArg.GetString().empty())
     {
     offset = atoi(offsetArg.GetCString());
     }
@@ -899,7 +899,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       {
       std::string expr = this->Makefile->GetCurrentDirectory();
       // Handle script mode
-      if ( expr.size() > 0 )
+      if (!expr.empty())
         {
         expr += "/" + *i;
         g.FindFiles(expr);

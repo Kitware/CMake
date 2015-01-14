@@ -40,7 +40,7 @@ bool cmIncludeCommand
       }
     else if(args[i] == "RESULT_VARIABLE")
       {
-      if (resultVarName.size() > 0)
+      if (!resultVarName.empty())
         {
         this->SetError("called with invalid arguments: "
             "only one result variable allowed");

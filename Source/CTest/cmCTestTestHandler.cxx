@@ -578,7 +578,7 @@ int cmCTestTestHandler::ProcessHandler()
       }
 
     float percent = float(passed.size()) * 100.0f / float(total);
-    if ( failed.size() > 0 &&  percent > 99)
+    if (!failed.empty() && percent > 99)
       {
       percent = 99;
       }

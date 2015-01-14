@@ -763,7 +763,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     // If there are files in ConsideredConfigs, it means that FooConfig.cmake
     // have been found, but they didn't have appropriate versions.
-    else if (this->ConsideredConfigs.size() > 0)
+    else if (!this->ConsideredConfigs.empty())
       {
       e << "Could not find a configuration file for package \""
         << this->Name << "\" that "

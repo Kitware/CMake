@@ -2318,7 +2318,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         cpackCommandLines.end());
       depends.erase(depends.begin(), depends.end());
       std::ostringstream ostr;
-      if ( componentsSet->size() > 0 )
+      if (!componentsSet->empty())
         {
         ostr << "Available install components are:";
         std::set<std::string>::iterator it;

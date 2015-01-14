@@ -1608,7 +1608,7 @@ void cmake::PreLoadCMakeFiles()
 {
   std::vector<std::string> args;
   std::string pre_load = this->GetHomeDirectory();
-  if ( pre_load.size() > 0 )
+  if (!pre_load.empty())
     {
     pre_load += "/PreLoad.cmake";
     if ( cmSystemTools::FileExists(pre_load.c_str()) )
@@ -1617,7 +1617,7 @@ void cmake::PreLoadCMakeFiles()
       }
     }
   pre_load = this->GetHomeOutputDirectory();
-  if ( pre_load.size() > 0 )
+  if (!pre_load.empty())
     {
     pre_load += "/PreLoad.cmake";
     if ( cmSystemTools::FileExists(pre_load.c_str()) )

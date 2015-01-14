@@ -101,7 +101,7 @@ bool cmCreateTestSourceList
       break;
       }
     std::string func_name;
-    if (cmSystemTools::GetFilenamePath(*i).size() > 0)
+    if (!cmSystemTools::GetFilenamePath(*i).empty())
       {
       func_name = cmSystemTools::GetFilenamePath(*i) + "/" +
         cmSystemTools::GetFilenameWithoutLastExtension(*i);
@@ -126,7 +126,7 @@ bool cmCreateTestSourceList
   for(i = testsBegin, j = tests_func_name.begin(); i != tests.end(); ++i, ++j)
     {
     std::string func_name;
-    if (cmSystemTools::GetFilenamePath(*i).size() > 0)
+    if (!cmSystemTools::GetFilenamePath(*i).empty())
       {
       func_name = cmSystemTools::GetFilenamePath(*i) + "/" +
         cmSystemTools::GetFilenameWithoutLastExtension(*i);

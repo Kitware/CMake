@@ -82,7 +82,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     }
 
   const char* config = 0;
-  if ( this->CTest->GetConfigType().size() > 0 )
+  if (!this->CTest->GetConfigType().empty())
     {
     config = this->CTest->GetConfigType().c_str();
     }
@@ -291,7 +291,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       }
     std::string output;
     const char* config = 0;
-    if ( this->CTest->GetConfigType().size() > 0 )
+    if (!this->CTest->GetConfigType().empty())
       {
       config = this->CTest->GetConfigType().c_str();
       }

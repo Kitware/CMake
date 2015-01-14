@@ -665,7 +665,7 @@ int cmCTestCoverageHandler::ProcessHandler()
 
   this->EndCoverageLogFile(covLogFile, logFileCount);
 
-  if ( errorsWhileAccumulating.size() > 0 )
+  if (!errorsWhileAccumulating.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, std::endl);
     cmCTestLog(this->CTest, ERROR_MESSAGE,
@@ -910,7 +910,7 @@ int cmCTestCoverageHandler::HandleJacocoCoverage(
 
   g.FindFiles(coverageFile);
   files=g.GetFiles();
-  if (files.size() > 0)
+  if (!files.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Found Jacoco Files, Performing Coverage" << std::endl);
@@ -943,7 +943,7 @@ int cmCTestCoverageHandler::HandleDelphiCoverage(
 
   g.FindFiles(coverageFile);
   files=g.GetFiles();
-  if (files.size() > 0)
+  if (!files.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Found Delphi HTML Files, Performing Coverage" << std::endl);
@@ -973,7 +973,7 @@ int cmCTestCoverageHandler::HandleBlanketJSCoverage(
   std::vector<std::string> files;
   g.FindFiles(coverageFile);
   files=g.GetFiles();
-  if (files.size() > 0)
+  if (!files.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Found BlanketJS output JSON, Performing Coverage" << std::endl);

@@ -537,7 +537,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
                                      "Result of TRY_COMPILE",
                                      cmCacheManager::INTERNAL);
 
-  if ( outputVariable.size() > 0 )
+  if (!outputVariable.empty())
     {
     this->Makefile->AddDefinition(outputVariable, output.c_str());
     }

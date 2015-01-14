@@ -872,7 +872,7 @@ bool cmCTest::OpenOutputFile(const std::string& path,
                      bool compress)
 {
   std::string testingDir = this->BinaryDir + "/Testing";
-  if ( path.size() > 0 )
+  if (!path.empty())
     {
     testingDir += "/" + path;
     }
@@ -1067,7 +1067,7 @@ int cmCTest::ProcessTests()
         if ( cmSystemTools::FileExists(fullname.c_str()) &&
           !cmSystemTools::FileIsDirectory(fullname) )
           {
-          if ( this->NotesFiles.size() > 0 )
+          if (!this->NotesFiles.empty())
             {
             this->NotesFiles += ";";
             }
@@ -1266,7 +1266,7 @@ int cmCTest::RunTest(std::vector<const char*> argv,
                      std::ostream* log, double testTimeOut,
                      std::vector<std::string>* environment)
 {
-  bool modifyEnv = (environment && environment->size()>0);
+  bool modifyEnv = (environment && !environment->empty());
 
   // determine how much time we have
   double timeout = this->GetRemainingTimeAllowed() - 120;
@@ -2936,11 +2936,11 @@ bool cmCTest::RunCommand(
     }
 
   cmsysProcess_WaitForExit(cp, 0);
-  if ( tempOutput.size() > 0 )
+  if (!tempOutput.empty())
     {
     stdOut->append(&*tempOutput.begin(), tempOutput.size());
     }
-  if ( tempError.size() > 0 )
+  if (!tempError.empty())
     {
     stdErr->append(&*tempError.begin(), tempError.size());
     }

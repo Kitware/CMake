@@ -170,7 +170,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
               {
               if ( cnt >= this->Args.size()-1 )
                 {
-                if ( argnDef.size() > 0 )
+                if (!argnDef.empty())
                   {
                   argnDef += ";";
                   }
@@ -195,7 +195,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
             std::vector<std::string>::const_iterator eit;
             for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
               {
-              if ( argvDef.size() > 0 )
+              if (!argvDef.empty())
                 {
                 argvDef += ";";
                 }

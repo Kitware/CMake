@@ -3857,7 +3857,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
     result = moduleInCMakeRoot;
     }
 
-  if ((moduleInCMakeModulePath.size()>0) && (moduleInCMakeRoot.size()>0))
+  if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty())
     {
     const char* currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmakeRoot + std::string("/Modules/");
