@@ -17,7 +17,7 @@ char const* info_simulate = "INFO" ":" "simulate[" SIMULATE_ID "]";
 #endif
 
 #ifdef __QNXNTO__
-char const* qnxnto = "INFO" ":" "qnxnto";
+char const* qnxnto = "INFO" ":" "qnxnto[]";
 #endif
 
 @CMAKE_CXX_COMPILER_ID_PLATFORM_CONTENT@
