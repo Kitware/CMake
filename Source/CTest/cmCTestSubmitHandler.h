@@ -41,6 +41,11 @@ public:
   /** Specify a set of files to submit.  */
   void SelectFiles(cmCTest::SetOfStrings const& files);
 
+  // handle the cdash file upload protocol
+  int HandleCDashUploadFile(std::string const& file, std::string const& type);
+
+  void ConstructCDashURL(std::string& dropMethod, std::string& url);
+
 private:
   void SetLogFile(std::ostream* ost) { this->LogFile = ost; }
 

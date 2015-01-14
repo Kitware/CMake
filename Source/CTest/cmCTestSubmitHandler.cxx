@@ -10,7 +10,8 @@
   See the License for more information.
 ============================================================================*/
 #include "cmCTestSubmitHandler.h"
-
+#include "cmCTestScriptHandler.h"
+#include "cmake.h"
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmGeneratedFileStream.h"
@@ -23,8 +24,10 @@
 // For XML-RPC submission
 #include "cm_xmlrpc.h"
 
+#include <cm_jsoncpp_reader.h>
 // For curl submission
 #include "cm_curl.h"
+#include "cmCTestCurl.h"
 
 #include <sys/stat.h>
 
@@ -1055,9 +1058,165 @@ bool cmCTestSubmitHandler::SubmitUsingXMLRPC(std::string const&,
 }
 #endif
 
+void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
+                                             std::string& url)
+{
+  dropMethod = this->CTest->GetCTestConfiguration("DropMethod");
+  url = dropMethod;
+  url += "://";
+  if ( this->CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
+    {
+    url += this->CTest->GetCTestConfiguration("DropSiteUser");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT,
+               this->CTest->GetCTestConfiguration("DropSiteUser").c_str());
+    if ( this->CTest->GetCTestConfiguration("DropSitePassword").size() > 0 )
+      {
+      url += ":" + this->CTest->GetCTestConfiguration("DropSitePassword");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, ":******");
+      }
+    url += "@";
+    }
+  url += this->CTest->GetCTestConfiguration("DropSite") +
+    this->CTest->GetCTestConfiguration("DropLocation");
+}
+
+
+int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
+                                                std::string const& typeString)
+{
+  if(!cmSystemTools::FileExists(file))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Upload file not found: " << file << "\n");
+    return -1;
+    }
+  cmCTestCurl curl(this->CTest);
+  std::string curlopt(this->CTest->GetCTestConfiguration("CurlOptions"));
+  std::vector<std::string> args;
+  cmSystemTools::ExpandListArgument(curlopt, args);
+  curl.SetCurlOptions(args);
+  curl.SetTimeOutSeconds(SUBMIT_TIMEOUT_IN_SECONDS_DEFAULT);
+  std::string dropMethod;
+  std::string url;
+  this->ConstructCDashURL(dropMethod, url);
+  std::string::size_type pos = url.find("submit.php?");
+  url = url.substr(0, pos+10);
+  if ( ! (dropMethod == "http" || dropMethod == "https" ) )
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Only http and https are supported for CDASH_UPLOAD\n");
+    return -1;
+    }
+  char md5sum[33];
+  md5sum[32] = 0;
+  cmSystemTools::ComputeFileMD5(file, md5sum);
+  // 1. request the buildid and check to see if the file
+  //    has already been uploaded
+  // TODO I added support for subproject. You would need to add
+  // a "&subproject=subprojectname" to the first POST.
+  cmCTestScriptHandler* ch =
+    static_cast<cmCTestScriptHandler*>(this->CTest->GetHandler("script"));
+  cmake* cm =  ch->GetCMake();
+  const char* subproject = cm->GetProperty("SubProject", cmProperty::GLOBAL);
+  std::ostringstream str;
+  str << "project="
+      << this->CTest->GetCTestConfiguration("ProjectName") << "&";
+  if(subproject)
+    {
+    str << "subproject=" << subproject << "&";
+    }
+  str << "stamp=" << this->CTest->GetCurrentTag() << "-"
+      << this->CTest->GetTestModelString() << "&"
+      << "model=" << this->CTest->GetTestModelString() << "&"
+      << "build=" << this->CTest->GetCTestConfiguration("BuildName") << "&"
+      << "site=" << this->CTest->GetCTestConfiguration("Site") << "&"
+      << "track=" << this->CTest->GetTestModelString() << "&"
+      << "starttime=" << (int)cmSystemTools::GetTime() << "&"
+      << "endtime=" << (int)cmSystemTools::GetTime() << "&"
+      << "datafilesmd5[0]=" << md5sum << "&"
+      << "type=" << typeString;
+  std::string fields = str.str();
+  cmCTestLog(this->CTest, DEBUG, "fields: " << fields << "\nurl:"
+             << url << "\nfile: " << file << "\n");
+  std::string response;
+  if(!curl.HttpRequest(url, fields, response))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Error in HttpRequest\n" << response);
+    return -1;
+    }
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "Request upload response: [" << response << "]\n");
+  Json::Value json;
+  Json::Reader reader;
+  if(!reader.parse(response, json))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "error parsing json string [" << response << "]\n"
+               << reader.getFormattedErrorMessages() << "\n");
+    return -1;
+    }
+  if(json["status"].asInt() != 0)
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Bad status returned from CDash: "
+               << json["status"].asInt());
+    return -1;
+    }
+  if(json["datafilesmd5"].isArray())
+    {
+    int datares = json["datafilesmd5"][0].asInt();
+    if(datares == 1)
+      {
+      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+                 "File already exists on CDash, skip upload "
+                 << file << "\n");
+      return 0;
+      }
+    }
+  else
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "bad datafilesmd5 value in response "
+               << response << "\n");
+    return -1;
+    }
+
+  std::string upload_as = cmSystemTools::GetFilenameName(file);
+  std::ostringstream fstr;
+  fstr << "type=" << typeString << "&"
+       << "md5=" << md5sum << "&"
+       << "filename=" << upload_as << "&"
+       << "buildid=" << json["buildid"].asString();
+  if(!curl.UploadFile(file, url, fstr.str(), response))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "error uploading to CDash. "
+               << file << " " << url << " " << fstr.str());
+    return -1;
+    }
+  if(!reader.parse(response, json))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "error parsing json string [" << response << "]\n"
+               << reader.getFormattedErrorMessages() << "\n");
+    return -1;
+    }
+  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+             "Upload file response: [" << response << "]\n");
+  return 0;
+}
+
 //----------------------------------------------------------------------------
 int cmCTestSubmitHandler::ProcessHandler()
 {
+  const char* cdashUploadFile = this->GetOption("CDashUploadFile");
+  const char* cdashUploadType = this->GetOption("CDashUploadType");
+  if(cdashUploadFile && cdashUploadType)
+    {
+    return this->HandleCDashUploadFile(std::string(cdashUploadFile),
+                                       std::string(cdashUploadType));
+    }
   std::string iscdash = this->CTest->GetCTestConfiguration("IsCDash");
   // cdash does not need to trigger so just return true
   if(!iscdash.empty())

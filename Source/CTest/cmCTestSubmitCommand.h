@@ -64,6 +64,8 @@ protected:
     ArgumentDoingFiles,
     ArgumentDoingRetryDelay,
     ArgumentDoingRetryCount,
+    ArgumentDoingCDashUpload,
+    ArgumentDoingCDashUploadType,
     ArgumentDoingLast2
   };
 
@@ -74,6 +76,8 @@ protected:
   cmCTest::SetOfStrings Files;
   std::string RetryCount;
   std::string RetryDelay;
+  std::string CDashUploadFile;
+  std::string CDashUploadType;
 };
 
 
