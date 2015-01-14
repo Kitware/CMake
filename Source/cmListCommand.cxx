@@ -340,7 +340,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
       std::ostringstream str;
       str << "index: " << item << " out of range (-"
         << varArgsExpanded.size() << ", "
-        << (varArgsExpanded.size() == 0?0:(varArgsExpanded.size()-1)) << ")";
+        << (varArgsExpanded.empty() ? 0 : (varArgsExpanded.size() - 1)) << ")";
       this->SetError(str.str());
       return false;
       }
