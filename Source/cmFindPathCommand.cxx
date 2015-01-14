@@ -48,7 +48,7 @@ bool cmFindPathCommand
     }
 
   std::string result = this->FindHeader();
-  if(result.size() != 0)
+  if(!result.empty())
     {
     this->Makefile->AddCacheDefinition
       (this->VariableName, result.c_str(),

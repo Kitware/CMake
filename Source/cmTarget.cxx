@@ -1513,7 +1513,7 @@ cmTarget::AnalyzeLibDependenciesForVS6( const cmMakefile& mf )
    {
    // skip zero size library entries, this may happen
    // if a variable expands to nothing.
-   if (lib->first.size() != 0)
+   if (!lib->first.empty())
      {
      this->EmitForVS6( *lib, dep_map, done, visited, newLinkLibrariesForVS6 );
      }
@@ -1653,7 +1653,7 @@ void cmTarget::GatherDependenciesForVS6( const cmMakefile& mf,
     while( end != std::string::npos )
       {
       std::string l = depline.substr( start, end-start );
-      if( l.size() != 0 )
+      if(!l.empty())
         {
         if (l == "debug")
           {

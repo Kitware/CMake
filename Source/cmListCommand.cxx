@@ -328,7 +328,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  if ( varArgsExpanded.size() != 0 )
+  if (!varArgsExpanded.empty())
     {
     size_t nitem = varArgsExpanded.size();
     if ( item < 0 )

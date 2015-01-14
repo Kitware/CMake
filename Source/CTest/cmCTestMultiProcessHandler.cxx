@@ -92,7 +92,7 @@ void cmCTestMultiProcessHandler::RunTests()
     }
   this->TestHandler->SetMaxIndex(this->FindMaxIndex());
   this->StartNextTests();
-  while(this->Tests.size() != 0)
+  while(!this->Tests.empty())
     {
     if(this->StopTimePassed)
       {

@@ -668,7 +668,7 @@ void cmCTestTestHandler::PrintLabelSummary()
   for(; it != this->TestList.end(); ++it)
     {
     cmCTestTestProperties& p = *it;
-    if(p.Labels.size() != 0)
+    if(!p.Labels.empty())
       {
       for(std::vector<std::string>::iterator l = p.Labels.begin();
           l !=  p.Labels.end(); ++l)
@@ -688,7 +688,7 @@ void cmCTestTestHandler::PrintLabelSummary()
     {
     cmCTestTestResult &result = *ri;
     cmCTestTestProperties& p = *result.Properties;
-    if(p.Labels.size() != 0)
+    if(!p.Labels.empty())
       {
       for(std::vector<std::string>::iterator l = p.Labels.begin();
           l !=  p.Labels.end(); ++l)
