@@ -345,13 +345,9 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
       return false;
       }
     }
-  size_t cc;
-  size_t cnt = 0;
-  for ( cc = 3; cc < args.size(); ++ cc )
-    {
-    varArgsExpanded.insert(varArgsExpanded.begin()+item+cnt, args[cc]);
-    cnt ++;
-    }
+
+  varArgsExpanded.insert(varArgsExpanded.begin()+item,
+                         args.begin() + 3, args.end());
 
   std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
