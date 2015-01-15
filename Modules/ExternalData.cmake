@@ -253,6 +253,8 @@ The following hash algorithms are supported::
 Note that the hashes are used only for unique data identification and
 download verification.
 
+.. _`ExternalData Custom Fetch Scripts`:
+
 Custom Fetch Scripts
 ^^^^^^^^^^^^^^^^^^^^
 
