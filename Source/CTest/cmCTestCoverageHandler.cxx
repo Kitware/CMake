@@ -87,7 +87,7 @@ public:
         }
       args.push_back(0); // null terminate
       cmsysProcess_SetCommand(this->Process, &*args.begin());
-      if(this->WorkingDirectory.size())
+      if(!this->WorkingDirectory.empty())
         {
         cmsysProcess_SetWorkingDirectory(this->Process,
                                          this->WorkingDirectory.c_str());
@@ -270,7 +270,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
   std::string ndc
     = cmSystemTools::FileExistsInParentDirectories(".NoDartCoverage",
       fFile.c_str(), checkDir.c_str());
-  if ( ndc.size() )
+  if (!ndc.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Found: " << ndc
       << " so skip coverage of " << file << std::endl);
@@ -281,7 +281,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
   // Get the relative path to the file an apply it to the opposite directory.
   // If it is the same as fileDir, then ignore, otherwise check.
   std::string relPath;
-  if(checkDir.size() )
+  if(!checkDir.empty())
     {
     relPath = cmSystemTools::RelativePath(checkDir.c_str(),
                                           fFile.c_str());
@@ -309,7 +309,7 @@ bool cmCTestCoverageHandler::ShouldIDoCoverage(const char* file,
 
   ndc = cmSystemTools::FileExistsInParentDirectories(".NoDartCoverage",
     fFile.c_str(), checkDir.c_str());
-  if ( ndc.size() )
+  if (!ndc.empty())
     {
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Found: " << ndc
       << " so skip coverage of: " << file << std::endl);
@@ -2183,7 +2183,7 @@ int cmCTestCoverageHandler::RunBullseyeSourceSummary(
   while(cmSystemTools::GetLineFromStream(fin, stdline))
     {
     // if we have a line of output from stdout
-    if(stdline.size())
+    if(!stdline.empty())
       {
       // parse the comma separated output
       this->ParseBullsEyeCovsrcLine(stdline,
@@ -2596,7 +2596,7 @@ std::set<std::string> cmCTestCoverageHandler::FindUncoveredFiles(
       }
     }
 
-  if(extraMatches.size())
+  if(!extraMatches.empty())
     {
     for(cmCTestCoverageHandlerContainer::TotalCoverageMap::iterator i =
         cont->TotalCoverage.begin(); i != cont->TotalCoverage.end(); ++i)

@@ -113,7 +113,7 @@ bool cmGetFilenameComponentCommand
 
   if(args.size() == 4 && args[3] == "CACHE")
     {
-    if(programArgs.size() && storeArgs.size())
+    if(!programArgs.empty() && !storeArgs.empty())
       {
       this->Makefile->AddCacheDefinition
         (storeArgs, programArgs.c_str(),
@@ -127,7 +127,7 @@ bool cmGetFilenameComponentCommand
     }
   else
     {
-    if(programArgs.size() && storeArgs.size())
+    if(!programArgs.empty() && !storeArgs.empty())
       {
       this->Makefile->AddDefinition(storeArgs, programArgs.c_str());
       }

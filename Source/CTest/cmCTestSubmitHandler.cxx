@@ -61,7 +61,7 @@ private:
   std::string GetCurrentValue()
     {
     std::string val;
-    if(this->CurrentValue.size())
+    if(!this->CurrentValue.empty())
       {
       val.assign(&this->CurrentValue[0], this->CurrentValue.size());
       }
@@ -301,7 +301,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
                        << error_buffer << std::endl
                        << "   Curl output was: ";
         // avoid dereference of empty vector
-        if(chunk.size())
+        if(!chunk.empty())
           {
           *this->LogFile << cmCTestLogWrite(&*chunk.begin(), chunk.size());
           cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
@@ -605,7 +605,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
                        << "   Error message was: " << error_buffer
                        << std::endl;
         // avoid deref of begin for zero size array
-        if(chunk.size())
+        if(!chunk.empty())
           {
           *this->LogFile << "   Curl output was: "
                          << cmCTestLogWrite(&*chunk.begin(), chunk.size())
@@ -766,7 +766,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
                        << std::endl
                        << "   Error message was: " << error_buffer
                        << std::endl;
-        if(chunk.size())
+        if(!chunk.empty())
           {
           *this->LogFile
             << "   Curl output was: "
@@ -1060,7 +1060,7 @@ int cmCTestSubmitHandler::ProcessHandler()
 {
   std::string iscdash = this->CTest->GetCTestConfiguration("IsCDash");
   // cdash does not need to trigger so just return true
-  if(iscdash.size())
+  if(!iscdash.empty())
     {
     this->CDash = true;
     }

@@ -318,7 +318,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile
       << "----------------------------------------------------------"
       << std::endl;
-    if(this->TestResult.Reason.size())
+    if(!this->TestResult.Reason.empty())
       {
       *this->TestHandler->LogFile << reasonType << ":\n"
         << this->TestResult.Reason << "\n";

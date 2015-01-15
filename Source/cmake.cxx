@@ -1123,13 +1123,13 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
     // restore the original environment variables CXX and CC
     // Restore CC
     std::string env = "CC=";
-    if(this->CCEnvironment.size())
+    if(!this->CCEnvironment.empty())
       {
       env += this->CCEnvironment;
       }
     cmSystemTools::PutEnv(env);
     env = "CXX=";
-    if(this->CXXEnvironment.size())
+    if(!this->CXXEnvironment.empty())
       {
       env += this->CXXEnvironment;
       }
@@ -2277,7 +2277,7 @@ const char *cmake::GetProperty(const std::string& prop,
       this->GetCacheManager()->GetCacheIterator();
     for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
       {
-      if ( output.size() )
+      if (!output.empty())
         {
         output += ";";
         }

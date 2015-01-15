@@ -47,7 +47,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
 
       while (isTrue)
         {
-        if (errorString.size())
+        if (!errorString.empty())
           {
           std::string err = "had incorrect arguments: ";
           unsigned int i;

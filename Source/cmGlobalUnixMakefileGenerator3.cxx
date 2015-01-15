@@ -572,7 +572,7 @@ void cmGlobalUnixMakefileGenerator3
   if (!targetName.empty())
     {
     cmLocalUnixMakefileGenerator3 *lg;
-    if (this->LocalGenerators.size())
+    if (!this->LocalGenerators.empty())
       {
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
         (this->LocalGenerators[0]);

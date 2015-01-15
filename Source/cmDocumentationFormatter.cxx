@@ -201,7 +201,7 @@ void cmDocumentationFormatter
   for(std::vector<cmDocumentationEntry>::const_iterator op = entries.begin();
       op != entries.end(); ++op)
     {
-    if(op->Name.size())
+    if(!op->Name.empty())
       {
       os << "  " << op->Name;
       this->TextIndent = "                                ";

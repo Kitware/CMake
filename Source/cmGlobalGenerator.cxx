@@ -276,7 +276,7 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
     {
     std::string setMakeProgram =
       mf->GetModulesFile(this->FindMakeProgramFile.c_str());
-    if(setMakeProgram.size())
+    if(!setMakeProgram.empty())
       {
       mf->ReadListFile(0, setMakeProgram.c_str());
       }
@@ -426,7 +426,7 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
   // If the configuration files path has been set,
   // then we are in a try compile and need to copy the enable language
   // files from the parent cmake bin dir, into the try compile bin dir
-  if(this->ConfiguredFilesPath.size())
+  if(!this->ConfiguredFilesPath.empty())
     {
     rootBin = this->ConfiguredFilesPath;
     }
@@ -1636,7 +1636,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
         static_cast<float>(this->LocalGenerators.size()));
     }
 
-  if(notFoundMap.size())
+  if(!notFoundMap.empty())
     {
     std::string notFoundVars;
     for(std::map<std::string, std::string>::const_iterator
@@ -2460,19 +2460,19 @@ void cmGlobalGenerator::EnableMinGWLanguage(cmMakefile *mf)
   locations.push_back("c:/mingw/bin");
   std::string tgcc = cmSystemTools::FindProgram("gcc", locations);
   std::string gcc = "gcc.exe";
-  if(tgcc.size())
+  if(!tgcc.empty())
     {
     gcc = tgcc;
     }
   std::string tgxx = cmSystemTools::FindProgram("g++", locations);
   std::string gxx = "g++.exe";
-  if(tgxx.size())
+  if(!tgxx.empty())
     {
     gxx = tgxx;
     }
   std::string trc = cmSystemTools::FindProgram("windres", locations);
   std::string rc = "windres.exe";
-  if(trc.size())
+  if(!trc.empty())
     {
     rc = trc;
     }

@@ -1160,7 +1160,7 @@ cmLocalUnixMakefileGenerator3
     {
     // Build the command line in a single string.
     std::string cmd = ccg.GetCommand(c);
-    if (cmd.size())
+    if (!cmd.empty())
       {
       // Use "call " before any invocations of .bat or .cmd files
       // invoked as custom commands in the WindowsShell.
@@ -2173,7 +2173,7 @@ cmLocalUnixMakefileGenerator3
   cmd += " ";
 
   // Pass down verbosity level.
-  if(this->GetMakeSilentFlag().size())
+  if(!this->GetMakeSilentFlag().empty())
     {
     cmd += this->GetMakeSilentFlag();
     cmd += " ";

@@ -57,7 +57,7 @@ bool cmRemoveCommand
       }
     if (!found)
       {
-      if (value.size())
+      if (!value.empty())
         {
         value += ";";
         }

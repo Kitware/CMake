@@ -37,7 +37,7 @@ bool cmSetCommand
     delete [] varName;
 
     // will it be set to something, then set it
-    if (args.size() > 1 && args[1].size())
+    if (args.size() > 1 && !args[1].empty())
       {
       // but only if it is different from current value
       if (!currValue || strcmp(currValue,args[1].c_str()))

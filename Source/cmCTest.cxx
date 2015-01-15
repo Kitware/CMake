@@ -212,7 +212,7 @@ int cmCTest::HTTPRequest(std::string url, HTTPMethod method,
       ::curl_easy_setopt(curl, CURLOPT_INFILE, file);
       //fall through to append GET fields
     case cmCTest::HTTP_GET:
-      if(fields.size())
+      if(!fields.empty())
         {
         url += "?" + fields;
         }
@@ -1080,7 +1080,7 @@ int cmCTest::ProcessTests()
   if (this->Parts[PartNotes])
     {
     this->UpdateCTestConfiguration();
-    if ( this->NotesFiles.size() )
+    if (!this->NotesFiles.empty())
       {
       this->GenerateNotesFile(this->NotesFiles.c_str());
       }
@@ -3136,7 +3136,7 @@ double cmCTest::GetRemainingTimeAllowed()
 void cmCTest::OutputTestErrors(std::vector<char> const &process_output)
 {
   std::string test_outputs("\n*** Test Failed:\n");
-  if(process_output.size())
+  if(!process_output.empty())
     {
     test_outputs.append(&*process_output.begin(), process_output.size());
     }

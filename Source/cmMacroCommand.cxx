@@ -116,7 +116,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
   std::string argnDef;
   bool argnDefInitialized = false;
   bool argvDefInitialized = false;
-  if( this->Functions.size())
+  if(!this->Functions.empty())
     {
     this->FilePath = this->Functions[0].FilePath;
     }

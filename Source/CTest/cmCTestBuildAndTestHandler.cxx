@@ -62,7 +62,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
   std::vector<std::string> args;
   args.push_back(cmSystemTools::GetCMakeCommand());
   args.push_back(this->SourceDir);
-  if(this->BuildGenerator.size())
+  if(!this->BuildGenerator.empty())
     {
     std::string generator = "-G";
     generator += this->BuildGenerator;
@@ -74,7 +74,7 @@ int cmCTestBuildAndTestHandler::RunCMake(std::string* outstring,
     platform += this->BuildGeneratorPlatform;
     args.push_back(platform);
     }
-  if(this->BuildGeneratorToolset.size())
+  if(!this->BuildGeneratorToolset.empty())
     {
     std::string toolset = "-T";
     toolset += this->BuildGeneratorToolset;
@@ -212,7 +212,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::ostringstream out;
 
   if ( this->CTest->GetConfigType().empty() &&
-       this->ConfigSample.size())
+       !this->ConfigSample.empty())
     {
     // use the config sample to set the ConfigType
     std::string fullPath;
@@ -225,7 +225,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
                                          resultingConfig,
                                          extraPaths,
                                          failed);
-    if (fullPath.size() && resultingConfig.size())
+    if (!fullPath.empty() && !resultingConfig.empty())
       {
       this->CTest->SetConfigType(resultingConfig.c_str());
       }
@@ -340,7 +340,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::string resultingConfig;
   std::vector<std::string> extraPaths;
   // if this->ExecutableDirectory is set try that as well
-  if (this->ExecutableDirectory.size())
+  if (!this->ExecutableDirectory.empty())
     {
     std::string tempPath = this->ExecutableDirectory;
     tempPath += "/";
@@ -388,7 +388,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
   std::string outs;
   int retval = 0;
   // run the test from the this->BuildRunDir if set
-  if(this->BuildRunDir.size())
+  if(!this->BuildRunDir.empty())
     {
     out << "Run test in directory: " << this->BuildRunDir << "\n";
     cmSystemTools::ChangeDirectory(this->BuildRunDir);

@@ -223,7 +223,7 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
     this->MemoryTesterEnvironmentVariable;
   for ( pp = 0; pp < this->MemoryTesterOptions.size(); pp ++ )
     {
-    if(memTesterEnvironmentVariable.size())
+    if(!memTesterEnvironmentVariable.empty())
       {
       // If we are using env to pass options, append all the options to
       // this string with space separation.
@@ -241,7 +241,7 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
     }
   // if this is an env option type, then add the env string as a single
   // argument.
-  if(memTesterEnvironmentVariable.size())
+  if(!memTesterEnvironmentVariable.empty())
     {
     std::string::size_type pos = memTesterEnvironmentVariable.find("??");
     if (pos != std::string::npos)
@@ -848,7 +848,7 @@ bool cmCTestMemCheckHandler::ProcessMemCheckSanitizerOutput(
       {
       resultFound = sanitizerWarning.match(1);
       }
-    if(resultFound.size())
+    if(!resultFound.empty())
       {
       std::vector<int>::size_type idx = this->FindOrAddWarning(resultFound);
       if(result.empty() || idx > result.size()-1)

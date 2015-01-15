@@ -936,7 +936,7 @@ cmLocalGenerator::ExpandRuleVariable(std::string const& variable,
     if(variable == "TARGET_QUOTED")
       {
       std::string targetQuoted = replaceValues.Target;
-      if(targetQuoted.size() && targetQuoted[0] != '\"')
+      if(!targetQuoted.empty() && targetQuoted[0] != '\"')
         {
         targetQuoted = '\"';
         targetQuoted += replaceValues.Target;
@@ -1414,12 +1414,12 @@ std::string cmLocalGenerator::GetIncludeFlags(
       }
     std::string includePath =
       this->ConvertToIncludeReference(*i, shellFormat, forceFullPaths);
-    if(quotePaths && includePath.size() && includePath[0] != '\"')
+    if(quotePaths && !includePath.empty() && includePath[0] != '\"')
       {
       includeFlags << "\"";
       }
     includeFlags << includePath;
-    if(quotePaths && includePath.size() && includePath[0] != '\"')
+    if(quotePaths && !includePath.empty() && includePath[0] != '\"')
       {
       includeFlags << "\"";
       }
@@ -2514,7 +2514,7 @@ void cmLocalGenerator::AppendFlags(std::string& flags,
 {
   if(!newFlags.empty())
     {
-    if(flags.size())
+    if(!flags.empty())
       {
       flags += " ";
       }

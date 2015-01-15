@@ -1150,7 +1150,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
         {
         // This is not an error or warning.
         // So, figure out if this is a post-context line
-        if ( this->ErrorsAndWarnings.size() &&
+        if ( !this->ErrorsAndWarnings.empty() &&
              this->LastErrorOrWarning != this->ErrorsAndWarnings.end() &&
              this->PostContextCount < this->MaxPostContext )
           {

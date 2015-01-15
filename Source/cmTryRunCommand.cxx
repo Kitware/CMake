@@ -104,8 +104,8 @@ bool cmTryRunCommand
   // although they could be used together, don't allow it, because
   // using OUTPUT_VARIABLE makes crosscompiling harder
   if (this->OutputVariable.size()
-      && ((this->RunOutputVariable.size())
-       || (this->CompileOutputVariable.size())))
+      && (!this->RunOutputVariable.empty()
+       || !this->CompileOutputVariable.empty()))
     {
     cmSystemTools::Error(
       "You cannot use OUTPUT_VARIABLE together with COMPILE_OUTPUT_VARIABLE "
@@ -115,18 +115,18 @@ bool cmTryRunCommand
     }
 
   bool captureRunOutput = false;
-  if (this->OutputVariable.size())
+  if (!this->OutputVariable.empty())
     {
     captureRunOutput = true;
     tryCompile.push_back("OUTPUT_VARIABLE");
     tryCompile.push_back(this->OutputVariable);
     }
-  if (this->CompileOutputVariable.size())
+  if (!this->CompileOutputVariable.empty())
     {
     tryCompile.push_back("OUTPUT_VARIABLE");
     tryCompile.push_back(this->CompileOutputVariable);
     }
-  if (this->RunOutputVariable.size())
+  if (!this->RunOutputVariable.empty())
     {
     captureRunOutput = true;
     }
@@ -160,13 +160,13 @@ bool cmTryRunCommand
         }
 
       // now put the output into the variables
-      if(this->RunOutputVariable.size())
+      if(!this->RunOutputVariable.empty())
         {
         this->Makefile->AddDefinition(this->RunOutputVariable,
                                       runOutputContents.c_str());
         }
 
-      if(this->OutputVariable.size())
+      if(!this->OutputVariable.empty())
         {
         // if the TryCompileCore saved output in this outputVariable then
         // prepend that output to this output
@@ -196,7 +196,7 @@ void cmTryRunCommand::RunExecutable(const std::string& runArgs,
   int retVal = -1;
   std::string finalCommand = cmSystemTools::ConvertToRunCommandPath(
                                this->OutputFile.c_str());
-  if (runArgs.size())
+  if (!runArgs.empty())
     {
     finalCommand += runArgs;
     }

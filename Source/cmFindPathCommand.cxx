@@ -108,7 +108,7 @@ cmFindPathCommand::FindHeaderInFramework(std::string const& file,
       fileName = file;
       frameWorkName = "";
       }
-    if(frameWorkName.size())
+    if(!frameWorkName.empty())
       {
       std::string fpath = dir;
       fpath += frameWorkName;
@@ -134,7 +134,7 @@ cmFindPathCommand::FindHeaderInFramework(std::string const& file,
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
-  if(files.size())
+  if(!files.empty())
     {
     std::string fheader = cmSystemTools::CollapseFullPath(files[0]);
     if(this->IncludeFileInPath)

@@ -257,7 +257,7 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
   size_t cc;
   for ( cc = 2; cc < args.size(); ++ cc )
     {
-    if(listString.size())
+    if(!listString.empty())
       {
       listString += ";";
       }

@@ -622,7 +622,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
   module += this->Name;
   module += ".cmake";
   std::string mfile = this->Makefile->GetModulesFile(module.c_str());
-  if ( mfile.size() )
+  if (!mfile.empty())
     {
     // Load the module we found, and set "<name>_FIND_MODULE" to true
     // while inside it.

@@ -236,7 +236,7 @@ bool cmGlobalKdevelopGenerator
     // make it relative to the project dir
     cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
     // only put relative paths
-    if (tmp.size() && tmp[0] != '/')
+    if (!tmp.empty() && tmp[0] != '/')
       {
       fout << tmp.c_str() <<"\n";
       }

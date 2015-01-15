@@ -83,7 +83,7 @@ bool cmIncludeCommand
     std::string module = fname;
     module += ".cmake";
     std::string mfile = this->Makefile->GetModulesFile(module.c_str());
-    if ( mfile.size() )
+    if (!mfile.empty())
       {
       fname = mfile.c_str();
       }
@@ -137,7 +137,7 @@ bool cmIncludeCommand
                                   noPolicyScope);
 
   // add the location of the included file if a result variable was given
-  if (resultVarName.size())
+  if (!resultVarName.empty())
     {
       this->Makefile->AddDefinition(resultVarName,
                                     readit?fullFilePath.c_str():"NOTFOUND");

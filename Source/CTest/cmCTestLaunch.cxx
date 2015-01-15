@@ -720,7 +720,7 @@ bool cmCTestLaunch::Match(std::string const& line,
 //----------------------------------------------------------------------------
 bool cmCTestLaunch::MatchesFilterPrefix(std::string const& line) const
 {
-  if(this->OptionFilterPrefix.size() && cmSystemTools::StringStartsWith(
+  if(!this->OptionFilterPrefix.empty() && cmSystemTools::StringStartsWith(
       line.c_str(), this->OptionFilterPrefix.c_str()))
     {
     return true;
