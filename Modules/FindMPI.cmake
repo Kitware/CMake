@@ -175,7 +175,9 @@ set(_MPI_EXEC_NAMES                        mpiexec mpirun lamexec srun)
 set(_MPI_PREFIX_PATH)
 if(WIN32)
   # MSMPI
-  list(APPEND _MPI_PREFIX_PATH "$ENV{MSMPI_BIN}")
+  file(TO_CMAKE_PATH "$ENV{MSMPI_BIN}" msmpi_bin_path) # The default path ends with a '\' and doesn't mix with ';' when appending.
+  list(APPEND _MPI_PREFIX_PATH "${msmpi_bin_path}")
+  unset(msmpi_bin_path)
   list(APPEND _MPI_PREFIX_PATH "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\MPI;InstallRoot]/Bin")
   list(APPEND _MPI_PREFIX_PATH "$ENV{MSMPI_INC}/..") # The SDK is installed separately from the runtime
   # MPICH
