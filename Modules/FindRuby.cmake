@@ -58,7 +58,7 @@
 set(_RUBY_POSSIBLE_EXECUTABLE_NAMES ruby)
 
 # if 1.9 is required, don't look for ruby18 and ruby1.8, default to version 1.8
-if(Ruby_FIND_VERSION_MAJOR  AND  Ruby_FIND_VERSION_MINOR)
+if(DEFINED Ruby_FIND_VERSION_MAJOR AND DEFINED Ruby_FIND_VERSION_MINOR)
    set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${RUBY_FIND_VERSION_MINOR}")
    # we can't construct that if only major version is given
    set(_RUBY_POSSIBLE_EXECUTABLE_NAMES
