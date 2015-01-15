@@ -523,7 +523,7 @@ cmInstallTargetGenerator
   std::string installNameTool =
     this->Target->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_NAME_TOOL");
 
-  if(!installNameTool.size())
+  if(installNameTool.empty())
     {
     return;
     }

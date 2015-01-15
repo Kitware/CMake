@@ -193,7 +193,7 @@ public:
 int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
 {
   // if the generator and make program are not specified then it is an error
-  if (!this->BuildGenerator.size())
+  if (this->BuildGenerator.empty())
     {
     if(outstring)
       {
@@ -329,7 +329,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     }
 
   // if no test was specified then we are done
-  if (!this->TestCommand.size())
+  if (this->TestCommand.empty())
     {
     return 0;
     }

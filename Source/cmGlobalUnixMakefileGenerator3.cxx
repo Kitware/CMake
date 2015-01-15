@@ -597,7 +597,7 @@ void cmGlobalUnixMakefileGenerator3
     tname = lg->Convert(tname,cmLocalGenerator::HOME_OUTPUT);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(tname);
-    if (!this->LocalGenerators.size())
+    if (this->LocalGenerators.empty())
       {
       delete lg;
       }

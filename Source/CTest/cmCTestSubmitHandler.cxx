@@ -812,8 +812,8 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
   const std::string& remoteprefix,
   const std::string& url)
 {
-  if ( !scp_command.size() || !localprefix.size() ||
-    !files.size() || !remoteprefix.size() || !url.size() )
+  if ( scp_command.empty() || localprefix.empty() ||
+    files.empty() || remoteprefix.empty() || url.empty() )
     {
     return 0;
     }
@@ -912,8 +912,8 @@ bool cmCTestSubmitHandler::SubmitUsingCP(
   const std::string& remoteprefix,
   const std::string& destination)
 {
-  if ( !localprefix.size() ||
-    !files.size() || !remoteprefix.size() || !destination.size() )
+  if ( localprefix.empty() ||
+    files.empty() || remoteprefix.empty() || destination.empty() )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Missing arguments for submit via cp:\n"

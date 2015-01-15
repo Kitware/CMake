@@ -898,7 +898,7 @@ bool cmStringCommand
         }
       }
     }
-  if ( !alphabet.size() )
+  if (alphabet.empty())
     {
     alphabet = cmStringCommandDefaultAlphabet;
     }

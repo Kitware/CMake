@@ -1311,7 +1311,7 @@ int cmCTestCoverageHandler::HandleGCovCoverage(
             //TODO: Handle gcov 3.0 non-coverage lines
 
             // Skip empty lines
-            if ( !nl.size() )
+            if (nl.empty())
               {
               continue;
               }
@@ -1627,7 +1627,7 @@ int cmCTestCoverageHandler::HandleLCovCoverage(
               cnt ++;
 
               // Skip empty lines
-              if ( !nl.size() )
+              if (nl.empty())
                 {
                 continue;
                 }
@@ -1813,7 +1813,7 @@ int cmCTestCoverageHandler::HandleTracePyCoverage(
         cnt ++;
 
         // Skip empty lines
-        if ( !nl.size() )
+        if (nl.empty())
           {
           continue;
           }
