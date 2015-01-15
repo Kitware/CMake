@@ -24,11 +24,20 @@
 #include <cmsys/Glob.hxx>
 #include <cmsys/FStream.hxx>
 
+#include <assert.h>
+
+static inline
+unsigned int getVersion(unsigned int major, unsigned int minor)
+{
+  assert(major < 256 && minor < 256);
+  return ((major & 0xFF) << 16 | minor);
+}
+
 //----------------------------------------------------------------------
 cmCPackPackageMakerGenerator::cmCPackPackageMakerGenerator()
 {
   this->PackageMakerVersion = 0.0;
-  this->PackageCompatibilityVersion = 10.4;
+  this->PackageCompatibilityVersion = getVersion(10, 4);
 }
 
 //----------------------------------------------------------------------
@@ -39,7 +48,7 @@ cmCPackPackageMakerGenerator::~cmCPackPackageMakerGenerator()
 //----------------------------------------------------------------------
 bool cmCPackPackageMakerGenerator::SupportsComponentInstallation() const
 {
-  return this->PackageCompatibilityVersion >= 10.4;
+  return this->PackageCompatibilityVersion >= getVersion(10, 4);
 }
 
 //----------------------------------------------------------------------
@@ -241,7 +250,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
       std::string packageFile;
       if (compIt->second.IsDownloaded)
         {
-        if (this->PackageCompatibilityVersion >= 10.5 &&
+        if (this->PackageCompatibilityVersion >= getVersion(10, 5) &&
             this->PackageMakerVersion >= 3.0)
           {
           // Build this package within the upload directory.
@@ -260,7 +269,7 @@ int cmCPackPackageMakerGenerator::PackageFiles()
           }
         else if (!warnedAboutDownloadCompatibility)
           {
-          if (this->PackageCompatibilityVersion < 10.5)
+            if (this->PackageCompatibilityVersion < getVersion(10, 5))
             {
             cmCPackLogger(
               cmCPackLog::LOG_WARNING,
@@ -520,22 +529,29 @@ int cmCPackPackageMakerGenerator::InitializeInternal()
   const char *packageCompat = this->GetOption("CPACK_OSX_PACKAGE_VERSION");
   if (packageCompat && *packageCompat)
     {
-    this->PackageCompatibilityVersion = atof(packageCompat);
+    unsigned int majorVersion = 10;
+    unsigned int minorVersion = 5;
+    int res = sscanf(packageCompat, "%u.%u", &majorVersion, &minorVersion);
+    if (res == 2)
+      {
+      this->PackageCompatibilityVersion =
+        getVersion(majorVersion, minorVersion);
+      }
     }
   else if (this->GetOption("CPACK_DOWNLOAD_SITE"))
     {
     this->SetOption("CPACK_OSX_PACKAGE_VERSION", "10.5");
-    this->PackageCompatibilityVersion = 10.5;
+    this->PackageCompatibilityVersion = getVersion(10, 5);
     }
   else if (this->GetOption("CPACK_COMPONENTS_ALL"))
     {
     this->SetOption("CPACK_OSX_PACKAGE_VERSION", "10.4");
-    this->PackageCompatibilityVersion = 10.4;
+    this->PackageCompatibilityVersion = getVersion(10, 4);
     }
   else
     {
     this->SetOption("CPACK_OSX_PACKAGE_VERSION", "10.3");
-    this->PackageCompatibilityVersion = 10.3;
+    this->PackageCompatibilityVersion = getVersion(10, 3);
     }
 
   std::vector<std::string> no_paths;
@@ -712,7 +728,7 @@ GenerateComponentPackage(const char *packageFile,
   // The command that will be used to run PackageMaker
   std::ostringstream pkgCmd;
 
-  if (this->PackageCompatibilityVersion < 10.5 ||
+  if (this->PackageCompatibilityVersion < getVersion(10, 5) ||
       this->PackageMakerVersion < 3.0)
     {
     // Create Description.plist and Info.plist files for normal Mac OS
