@@ -1,7 +1,7 @@
 include(Compiler/Clang)
 __compiler_clang(C)
 
-if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.1)
+if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0)
   set(CMAKE_C90_STANDARD_COMPILE_OPTION "-std=c90")
   set(CMAKE_C90_EXTENSION_COMPILE_OPTION "-std=gnu90")
 
@@ -19,7 +19,7 @@ macro(cmake_record_c_compile_features)
     record_compiler_features(C "${std_version}" ${list})
   endmacro()
 
-  if (UNIX AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.1)
+  if (UNIX AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0)
     _get_appleclang_features(${CMAKE_C11_STANDARD_COMPILE_OPTION} CMAKE_C11_COMPILE_FEATURES)
     if (_result EQUAL 0)
       _get_appleclang_features(${CMAKE_C99_STANDARD_COMPILE_OPTION} CMAKE_C99_COMPILE_FEATURES)
