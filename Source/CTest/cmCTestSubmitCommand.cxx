@@ -145,7 +145,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   static_cast<cmCTestSubmitHandler*>(handler)->SetOption("InternalTest",
     this->InternalTest ? "ON" : "OFF");
 
-  if(this->CDashUploadFile.size())
+  if (this->CDashUpload)
     {
     static_cast<cmCTestSubmitHandler*>(handler)->
       SetOption("CDashUploadFile", this->CDashUploadFile.c_str());
@@ -155,51 +155,65 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   return handler;
 }
 
+//----------------------------------------------------------------------------
+bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
+                                       cmExecutionStatus& status)
+{
+  this->CDashUpload = !args.empty() && args[0] == "CDASH_UPLOAD";
+  return this->cmCTestHandlerCommand::InitialPass(args, status);
+}
 
 //----------------------------------------------------------------------------
 bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
 {
-  // Look for arguments specific to this command.
-  if(arg == "PARTS")
+  if (this->CDashUpload)
     {
-    this->ArgumentDoing = ArgumentDoingParts;
-    this->PartsMentioned = true;
-    return true;
-    }
+    if(arg == "CDASH_UPLOAD")
+      {
+      this->ArgumentDoing = ArgumentDoingCDashUpload;
+      return true;
+      }
 
-  if(arg == "FILES")
-    {
-    this->ArgumentDoing = ArgumentDoingFiles;
-    this->FilesMentioned = true;
-    return true;
+    if(arg == "CDASH_UPLOAD_TYPE")
+      {
+      this->ArgumentDoing = ArgumentDoingCDashUploadType;
+      return true;
+      }
     }
+  else
+    {
+    // Look for arguments specific to this command.
+    if(arg == "PARTS")
+      {
+      this->ArgumentDoing = ArgumentDoingParts;
+      this->PartsMentioned = true;
+      return true;
+      }
 
-  if(arg == "RETRY_COUNT")
-    {
-    this->ArgumentDoing = ArgumentDoingRetryCount;
-    return true;
-    }
+    if(arg == "FILES")
+      {
+      this->ArgumentDoing = ArgumentDoingFiles;
+      this->FilesMentioned = true;
+      return true;
+      }
 
-  if(arg == "RETRY_DELAY")
-    {
-    this->ArgumentDoing = ArgumentDoingRetryDelay;
-    return true;
-    }
+    if(arg == "RETRY_COUNT")
+      {
+      this->ArgumentDoing = ArgumentDoingRetryCount;
+      return true;
+      }
 
-  if(arg == "CDASH_UPLOAD")
-    {
-    this->ArgumentDoing = ArgumentDoingCDashUpload;
-    return true;
-    }
-  if(arg == "CDASH_UPLOAD_TYPE")
-    {
-    this->ArgumentDoing = ArgumentDoingCDashUploadType;
-    return true;
-    }
-  if(arg == "INTERNAL_TEST_CHECKSUM")
-    {
-    this->InternalTest = true;
-    return true;
+    if(arg == "RETRY_DELAY")
+      {
+      this->ArgumentDoing = ArgumentDoingRetryDelay;
+      return true;
+      }
+
+    if(arg == "INTERNAL_TEST_CHECKSUM")
+      {
+      this->InternalTest = true;
+      return true;
+      }
     }
 
   // Look for other arguments.
@@ -260,11 +274,14 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
 
   if(this->ArgumentDoing == ArgumentDoingCDashUpload)
     {
+    this->ArgumentDoing = ArgumentDoingNone;
     this->CDashUploadFile = arg;
     return true;
     }
+
   if(this->ArgumentDoing == ArgumentDoingCDashUploadType)
     {
+    this->ArgumentDoing = ArgumentDoingNone;
     this->CDashUploadType = arg;
     return true;
     }

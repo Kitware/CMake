@@ -32,6 +32,7 @@ public:
     this->InternalTest = false;
     this->RetryCount = "";
     this->RetryDelay = "";
+    this->CDashUpload = false;
     }
 
   /**
@@ -44,6 +45,9 @@ public:
     ni->CTestScriptHandler = this->CTestScriptHandler;
     return ni;
     }
+
+  virtual bool InitialPass(std::vector<std::string> const& args,
+                           cmExecutionStatus &status);
 
   /**
    * The name of the command as specified in CMakeList.txt.
@@ -76,6 +80,7 @@ protected:
   cmCTest::SetOfStrings Files;
   std::string RetryCount;
   std::string RetryDelay;
+  bool CDashUpload;
   std::string CDashUploadFile;
   std::string CDashUploadType;
 };

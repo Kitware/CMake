@@ -1084,10 +1084,16 @@ void cmCTestSubmitHandler::ConstructCDashURL(std::string& dropMethod,
 int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
                                                 std::string const& typeString)
 {
-  if(!cmSystemTools::FileExists(file))
+  if (file.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
-               "Upload file not found: " << file << "\n");
+               "Upload file not specified\n");
+    return -1;
+    }
+  if (!cmSystemTools::FileExists(file))
+    {
+    cmCTestLog(this->CTest, ERROR_MESSAGE,
+               "Upload file not found: '" << file << "'\n");
     return -1;
     }
   cmCTestCurl curl(this->CTest);
@@ -1118,6 +1124,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
     static_cast<cmCTestScriptHandler*>(this->CTest->GetHandler("script"));
   cmake* cm =  ch->GetCMake();
   const char* subproject = cm->GetProperty("SubProject", cmProperty::GLOBAL);
+  // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   str << "project="
       << this->CTest->GetCTestConfiguration("ProjectName") << "&";
@@ -1214,8 +1221,7 @@ int cmCTestSubmitHandler::ProcessHandler()
   const char* cdashUploadType = this->GetOption("CDashUploadType");
   if(cdashUploadFile && cdashUploadType)
     {
-    return this->HandleCDashUploadFile(std::string(cdashUploadFile),
-                                       std::string(cdashUploadType));
+    return this->HandleCDashUploadFile(cdashUploadFile, cdashUploadType);
     }
   std::string iscdash = this->CTest->GetCTestConfiguration("IsCDash");
   // cdash does not need to trigger so just return true
