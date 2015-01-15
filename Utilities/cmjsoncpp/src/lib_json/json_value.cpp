@@ -14,8 +14,8 @@
 #include <math.h>
 #include <sstream>
 #include <utility>
-#include <cstring>
-#include <cassert>
+#include <string.h>
+#include <assert.h>
 #ifdef JSON_USE_CPPTL
 #include <cpptl/conststring.h>
 #endif

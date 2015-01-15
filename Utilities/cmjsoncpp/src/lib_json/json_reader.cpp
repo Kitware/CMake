@@ -10,9 +10,9 @@
 #include "json_tool.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
 #include <utility>
-#include <cstdio>
-#include <cassert>
-#include <cstring>
+#include <stdio.h>
+#include <assert.h>
+#include <string.h>
 #include <istream>
 
 #if defined(_MSC_VER) && _MSC_VER < 1500 // VC++ 8.0 and below
