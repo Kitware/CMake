@@ -6,11 +6,11 @@
 #ifndef CPPTL_JSON_ASSERTIONS_H_INCLUDED
 #define CPPTL_JSON_ASSERTIONS_H_INCLUDED
 
-#include <stdlib.h>
-
 #if !defined(JSON_IS_AMALGAMATION)
 #include "config.h"
 #endif // if !defined(JSON_IS_AMALGAMATION)
+
+#include <stdlib.h>
 
 #if JSON_USE_EXCEPTION
 #include <stdexcept>
