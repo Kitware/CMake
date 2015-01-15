@@ -150,15 +150,7 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
 //----------------------------------------------------------------------------
 cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 {
-  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
-                                                  = this->Evaluators.begin();
-  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
-                                                  = this->Evaluators.end();
-
-  for ( ; it != end; ++it)
-    {
-    delete *it;
-    }
+  cmDeleteAll(this->Evaluators);
 }
 
 //----------------------------------------------------------------------------

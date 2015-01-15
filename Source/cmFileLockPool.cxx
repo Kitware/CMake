@@ -23,16 +23,8 @@ cmFileLockPool::cmFileLockPool()
 
 cmFileLockPool::~cmFileLockPool()
 {
-  for (It i = this->FunctionScopes.begin();
-      i != this->FunctionScopes.end(); ++i)
-    {
-    delete *i;
-    }
-
-  for (It i = this->FileScopes.begin(); i != this->FileScopes.end(); ++i)
-    {
-    delete *i;
-    }
+  cmDeleteAll(this->FunctionScopes);
+  cmDeleteAll(this->FileScopes);
 }
 
 void cmFileLockPool::PushFunctionScope()
@@ -148,10 +140,7 @@ cmFileLockPool::ScopePool::ScopePool()
 
 cmFileLockPool::ScopePool::~ScopePool()
 {
-  for (It i = this->Locks.begin(); i != this->Locks.end(); ++i)
-    {
-    delete *i;
-    }
+  cmDeleteAll(this->Locks);
 }
 
 cmFileLockResult cmFileLockPool::ScopePool::Lock(

@@ -90,12 +90,7 @@ cmDependsC::cmDependsC(cmLocalGenerator* lg,
 cmDependsC::~cmDependsC()
 {
   this->WriteCacheFile();
-
-  for (std::map<std::string, cmIncludeLines*>::iterator it=
-         this->FileCache.begin(); it!=this->FileCache.end(); ++it)
-    {
-    delete it->second;
-    }
+  cmDeleteAll(this->FileCache);
 }
 
 //----------------------------------------------------------------------------

@@ -226,13 +226,7 @@ cmLinkImplItem cmTargetInternals::TargetPropertyEntry::NoLinkImplItem;
 static void deleteAndClear(
       std::vector<cmTargetInternals::TargetPropertyEntry*> &entries)
 {
-  for (std::vector<cmTargetInternals::TargetPropertyEntry*>::const_iterator
-      it = entries.begin(),
-      end = entries.end();
-      it != end; ++it)
-    {
-      delete *it;
-    }
+  cmDeleteAll(entries);
   entries.clear();
 }
 

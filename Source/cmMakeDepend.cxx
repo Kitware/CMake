@@ -34,12 +34,7 @@ cmMakeDepend::cmMakeDepend()
 
 cmMakeDepend::~cmMakeDepend()
 {
-  for(DependInformationMapType::iterator i =
-        this->DependInformationMap.begin();
-      i != this->DependInformationMap.end(); ++i)
-    {
-    delete i->second;
-    }
+  cmDeleteAll(this->DependInformationMap);
 }
 
 

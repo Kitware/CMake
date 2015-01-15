@@ -237,4 +237,31 @@ private:
   const std::string m_test;
 };
 
+namespace ContainerAlgorithms {
+
+template<typename Container>
+struct DefaultDeleter
+{
+  void operator()(typename Container::value_type value) {
+    delete value;
+  }
+};
+
+template<typename K, typename V>
+struct DefaultDeleter<std::map<K, V> >
+{
+  void operator()(typename std::map<K, V>::value_type value) {
+    delete value.second;
+  }
+};
+
+}
+
+template<typename Container>
+void cmDeleteAll(Container const& c)
+{
+  std::for_each(c.begin(), c.end(),
+                ContainerAlgorithms::DefaultDeleter<Container>());
+}
+
 #endif

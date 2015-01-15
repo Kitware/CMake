@@ -158,11 +158,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 //----------------------------------------------------------------------
 cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 {
-  std::vector<cmCPackGenerator*>::iterator it;
-  for ( it = this->Generators.begin(); it != this->Generators.end(); ++ it )
-    {
-    delete *it;
-    }
+  cmDeleteAll(this->Generators);
 }
 
 //----------------------------------------------------------------------

@@ -171,16 +171,8 @@ cmake::~cmake()
     delete this->GlobalGenerator;
     this->GlobalGenerator = 0;
     }
-  for(RegisteredCommandsMap::iterator j = this->Commands.begin();
-      j != this->Commands.end(); ++j)
-    {
-    delete (*j).second;
-    }
-  for(RegisteredGeneratorsVector::iterator j = this->Generators.begin();
-      j != this->Generators.end(); ++j)
-    {
-    delete *j;
-    }
+  cmDeleteAll(this->Commands);
+  cmDeleteAll(this->Generators);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete this->VariableWatch;
 #endif

@@ -378,13 +378,7 @@ cmPolicies::cmPolicies()
 
 cmPolicies::~cmPolicies()
 {
-  // free the policies
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
-    = this->Policies.begin();
-  for (;i != this->Policies.end(); ++i)
-    {
-    delete i->second;
-    }
+  cmDeleteAll(this->Policies);
 }
 
 void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,

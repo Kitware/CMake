@@ -69,11 +69,7 @@ cmCursesMainForm::~cmCursesMainForm()
   // Clean-up composites
   if (this->Entries)
     {
-    std::vector<cmCursesCacheEntryComposite*>::iterator it;
-    for (it = this->Entries->begin(); it != this->Entries->end(); ++it)
-      {
-      delete *it;
-      }
+    cmDeleteAll(*this->Entries);
     }
   delete this->Entries;
   if (this->CMakeInstance)
@@ -188,12 +184,7 @@ void cmCursesMainForm::InitializeUI()
   // Clean old entries
   if (this->Entries)
     {
-    // Have to call delete on each pointer
-    std::vector<cmCursesCacheEntryComposite*>::iterator it;
-    for (it = this->Entries->begin(); it != this->Entries->end(); ++it)
-      {
-      delete *it;
-      }
+    cmDeleteAll(*this->Entries);
     }
   delete this->Entries;
   this->Entries = newEntries;
