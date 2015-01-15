@@ -2531,7 +2531,7 @@ static bool cmakeCheckStampFile(const char* stampName)
   while(cmSystemTools::GetLineFromStream(fin, dep))
     {
     int result;
-    if(dep.length() >= 1 && dep[0] != '#' &&
+    if(!dep.empty() && dep[0] != '#' &&
        (!ftc.FileTimeCompare(stampDepends.c_str(), dep.c_str(), &result)
         || result < 0))
       {

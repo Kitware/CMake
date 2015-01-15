@@ -745,7 +745,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // A non-string character has been found.  Check if the current
       // string matches the requirements.  We require that the length
       // be at least one no matter what the user specified.
-      if(s.length() >= minlen && s.length() >= 1 &&
+      if(s.length() >= minlen && !s.empty() &&
       (!have_regex || regex.find(s.c_str())))
         {
         output_size += static_cast<int>(s.size()) + 1;
