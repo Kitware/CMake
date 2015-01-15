@@ -21,6 +21,12 @@
 #define snprintf _snprintf
 #endif
 
+// Solaris
+#if defined(__sun)
+# include <ieeefp.h>
+# define isfinite finite
+#endif
+
 // Ancient glibc
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 2
 # if !defined(isfinite)
