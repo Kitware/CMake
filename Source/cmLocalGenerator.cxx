@@ -335,7 +335,7 @@ void cmLocalGenerator::GenerateTestFiles()
     {
     (*gi)->Generate(fout, config, configurationTypes);
     }
-  if ( this->Children.size())
+  if (!this->Children.empty())
     {
     size_t i;
     for(i = 0; i < this->Children.size(); ++i)

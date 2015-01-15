@@ -46,7 +46,7 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
         preformatted.append(1, '\n');
         }
       }
-    if(preformatted.length())
+    if(!preformatted.empty())
       {
       this->PrintPreformatted(os, preformatted.c_str());
       }
@@ -62,7 +62,7 @@ void cmDocumentationFormatter::PrintFormatted(std::ostream& os,
       ++ptr;
       paragraph.append(1, '\n');
       }
-    if(paragraph.length())
+    if(!paragraph.empty())
       {
       this->PrintParagraph(os, paragraph.c_str());
       }

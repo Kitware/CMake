@@ -50,7 +50,7 @@ bool cmBuildNameCommand
     {
     buildname = "";
     cmSystemTools::RunSingleCommand("uname -a", &buildname);
-    if(buildname.length())
+    if(!buildname.empty())
       {
       std::string RegExp = "([^ ]*) [^ ]* ([^ ]*) ";
       cmsys::RegularExpression reg( RegExp.c_str() );
