@@ -2297,7 +2297,7 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
     for(unsigned int i=1; i < components.size(); ++i)
       {
       // Only the last component can be empty to avoid double slashes.
-      if(components[i].length() > 0 || (i == (components.size()-1)))
+      if(!components[i].empty() || (i == (components.size()-1)))
         {
         if(!first)
           {

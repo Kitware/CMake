@@ -909,7 +909,7 @@ void cmake::SetDirectoriesFromFile(const char* arg)
     }
 
   // If there is a CMakeCache.txt file, use its settings.
-  if(cachePath.length() > 0)
+  if(!cachePath.empty())
     {
     cmCacheManager* cachem = this->GetCacheManager();
     cmCacheManager::CacheIterator it = cachem->NewIterator();
@@ -925,7 +925,7 @@ void cmake::SetDirectoriesFromFile(const char* arg)
     }
 
   // If there is a CMakeLists.txt file, use it as the source tree.
-  if(listPath.length() > 0)
+  if(!listPath.empty())
     {
     this->SetHomeDirectory(listPath);
     this->SetStartDirectory(listPath);
