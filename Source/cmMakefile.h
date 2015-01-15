@@ -965,7 +965,7 @@ public:
   const char* CompileFeaturesAvailable(const std::string& lang,
                                        std::string *error) const;
 
-  bool HaveFeatureAvailable(cmTarget const* target, std::string const& lang,
+  bool HaveStandardAvailable(cmTarget const* target, std::string const& lang,
                             const std::string& feature) const;
 
   bool IsLaterStandard(std::string const& lang,
@@ -1197,9 +1197,9 @@ private:
   void CheckNeededCxxLanguage(const std::string& feature, bool& needCxx98,
                               bool& needCxx11, bool& needCxx14) const;
 
-  bool HaveCFeatureAvailable(cmTarget const* target,
+  bool HaveCStandardAvailable(cmTarget const* target,
                              const std::string& feature) const;
-  bool HaveCxxFeatureAvailable(cmTarget const* target,
+  bool HaveCxxStandardAvailable(cmTarget const* target,
                                const std::string& feature) const;
 
   mutable bool SuppressWatches;

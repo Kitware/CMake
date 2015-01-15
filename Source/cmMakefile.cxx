@@ -5271,18 +5271,19 @@ CompileFeaturesAvailable(const std::string& lang, std::string *error) const
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::HaveFeatureAvailable(cmTarget const* target,
+bool cmMakefile::HaveStandardAvailable(cmTarget const* target,
                                       std::string const& lang,
                                       const std::string& feature) const
 {
   return lang == "C"
-      ? this->HaveCFeatureAvailable(target, feature)
-      : this->HaveCxxFeatureAvailable(target, feature);
+      ? this->HaveCStandardAvailable(target, feature)
+      : this->HaveCxxStandardAvailable(target, feature);
 }
 
 //----------------------------------------------------------------------------
 bool cmMakefile::
-HaveCFeatureAvailable(cmTarget const* target, const std::string& feature) const
+HaveCStandardAvailable(cmTarget const* target,
+                       const std::string& feature) const
 {
   bool needC90 = false;
   bool needC99 = false;
@@ -5359,7 +5360,7 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
 }
 
 //----------------------------------------------------------------------------
-bool cmMakefile::HaveCxxFeatureAvailable(cmTarget const* target,
+bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
                                          const std::string& feature) const
 {
   bool needCxx98 = false;
