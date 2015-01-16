@@ -16,7 +16,7 @@
 " Version:      $Revision$
 "
 " Licence:      The CMake license applies to this file. See
-"               http://www.cmake.org/HTML/Copyright.html
+"               http://www.cmake.org/licensing
 "               This implies that distribution with Vim is allowed
 
 if exists("b:did_indent")

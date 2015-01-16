@@ -16,7 +16,7 @@
 " Version:      $Revision$
 "
 " Licence:      The CMake license applies to this file. See
-"               http://www.cmake.org/HTML/Copyright.html
+"               http://www.cmake.org/licensing
 "               This implies that distribution with Vim is allowed
 
 " For version 5.x: Clear all syntax items
