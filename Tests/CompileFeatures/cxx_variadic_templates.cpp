@@ -1,4 +1,4 @@
-template<int I, int... Is>
+template<int... Is>
 struct Interface;
 
 template<int I>
@@ -11,7 +11,7 @@ struct Interface<I>
 };
 
 template<int I, int... Is>
-struct Interface
+struct Interface<I, Is...>
 {
   static int accumulate()
   {
