@@ -38,6 +38,8 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include <cmsys/MD5.h>
+# include "cm_jsoncpp_value.h"
+# include "cm_jsoncpp_writer.h"
 #endif
 
 #include <stdlib.h> // required for atof
@@ -2911,10 +2913,21 @@ void cmGlobalGenerator::WriteSummary(cmTarget* target)
   std::string dir = target->GetSupportDirectory();
   std::string file = dir;
   file += "/Labels.txt";
+  std::string json_file = dir + "/Labels.json";
 
+#ifdef CMAKE_BUILD_WITH_CMAKE
   // Check whether labels are enabled for this target.
   if(const char* value = target->GetProperty("LABELS"))
     {
+    Json::Value lj_root(Json::objectValue);
+    Json::Value& lj_target =
+      lj_root["target"] = Json::objectValue;
+    lj_target["name"] = target->GetName();
+    Json::Value& lj_target_labels =
+      lj_target["labels"] = Json::arrayValue;
+    Json::Value& lj_sources =
+      lj_root["sources"] = Json::arrayValue;
+
     cmSystemTools::MakeDirectory(dir.c_str());
     cmGeneratedFileStream fout(file.c_str());
 
@@ -2929,6 +2942,7 @@ void cmGlobalGenerator::WriteSummary(cmTarget* target)
           li != labels.end(); ++li)
         {
         fout << " " << *li << "\n";
+        lj_target_labels.append(*li);
         }
       }
 
@@ -2954,23 +2968,33 @@ void cmGlobalGenerator::WriteSummary(cmTarget* target)
         {
         continue;
         }
+      Json::Value& lj_source = lj_sources.append(Json::objectValue);
       cmSourceFile* sf = *si;
-      fout << sf->GetFullPath() << "\n";
+      std::string const& sfp = sf->GetFullPath();
+      fout << sfp << "\n";
+      lj_source["file"] = sfp;
       if(const char* svalue = sf->GetProperty("LABELS"))
         {
         labels.clear();
+        Json::Value& lj_source_labels =
+          lj_source["labels"] = Json::arrayValue;
         cmSystemTools::ExpandListArgument(svalue, labels);
         for(std::vector<std::string>::const_iterator li = labels.begin();
             li != labels.end(); ++li)
           {
           fout << " " << *li << "\n";
+          lj_source_labels.append(*li);
           }
         }
       }
+    cmGeneratedFileStream json_fout(json_file.c_str());
+    json_fout << lj_root;
     }
   else
+#endif
     {
     cmSystemTools::RemoveFile(file);
+    cmSystemTools::RemoveFile(json_file);
     }
 }
 

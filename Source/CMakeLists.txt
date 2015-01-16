@@ -500,7 +500,9 @@ add_library(CMakeLib ${SRCS})
 target_link_libraries(CMakeLib cmsys
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
   ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
-  ${CMAKE_CURL_LIBRARIES} )
+  ${CMAKE_CURL_LIBRARIES}
+  cmjsoncpp
+  )
 
 # On Apple we need CoreFoundation
 if(APPLE)
