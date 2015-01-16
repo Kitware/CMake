@@ -2331,7 +2331,7 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
   cmVS7XMLParser parser;
   parser.ParseFile(path);
   // if we can not find a GUID then we will generate one later
-  if(parser.GUID.size() == 0)
+  if(parser.GUID.empty())
     {
     return;
     }

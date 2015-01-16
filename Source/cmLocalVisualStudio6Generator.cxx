@@ -988,7 +988,7 @@ void cmLocalVisualStudio6Generator
     {
     std::string lpath =
       this->ConvertToOutputFormat(libPath.c_str(), SHELL);
-    if(lpath.size() == 0)
+    if(lpath.empty())
       {
       lpath = ".";
       }
@@ -1021,7 +1021,7 @@ void cmLocalVisualStudio6Generator
     {
     std::string lpath =
       this->ConvertToOutputFormat(exePath.c_str(), SHELL);
-    if(lpath.size() == 0)
+    if(lpath.empty())
       {
       lpath = ".";
       }
@@ -1062,7 +1062,7 @@ void cmLocalVisualStudio6Generator
       }
     std::string lpath =
       this->ConvertToOutputFormat(path.c_str(), SHELL);
-    if(lpath.size() == 0)
+    if(lpath.empty())
       {
       lpath = ".";
       }

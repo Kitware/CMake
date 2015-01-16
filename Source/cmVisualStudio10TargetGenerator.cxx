@@ -2783,7 +2783,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
   std::vector<cmCustomCommand> const& commands,
   std::string const& configName)
 {
-  if(commands.size() == 0)
+  if(commands.empty())
     {
     return;
     }

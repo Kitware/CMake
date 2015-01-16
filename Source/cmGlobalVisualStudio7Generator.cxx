@@ -359,7 +359,7 @@ void cmGlobalVisualStudio7Generator
 ::OutputSLNFile(cmLocalGenerator* root,
                 std::vector<cmLocalGenerator*>& generators)
 {
-  if(generators.size() == 0)
+  if(generators.empty())
     {
     return;
     }
@@ -736,7 +736,7 @@ cmGlobalVisualStudio7Generator
     {
     const char* name = di->c_str();
     std::string guid = this->GetGUID(name);
-    if(guid.size() == 0)
+    if(guid.empty())
       {
       std::string m = "Target: ";
       m += target.GetName();
