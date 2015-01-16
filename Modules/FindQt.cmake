@@ -13,6 +13,9 @@
 # or FindQt4 module is included.  Once the user sets DESIRED_QT_VERSION,
 # then the FindQt3 or FindQt4 module is included.
 #
+# This module can only detect and switch between Qt versions 3 and 4. It
+# cannot handle Qt5 or any later versions.
+#
 # ::
 #
 #   QT_REQUIRED if this is set to TRUE then if CMake can
