@@ -191,7 +191,7 @@ int cmCPackIFWGenerator::PackageFiles()
       }
     }
   // TODO: set correct name for multipackages
-  if (this->packageFileNames.size() > 0)
+  if (!this->packageFileNames.empty())
     {
     ifwCmd += " " + packageFileNames[0];
     }

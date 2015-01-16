@@ -265,7 +265,7 @@ cmGlobalVisualStudioGenerator
         {
         std::vector<std::string> filenames;
         this->GetFilesReplacedDuringGenerate(filenames);
-        if (filenames.size() > 0)
+        if (!filenames.empty())
           {
           // Convert vector to semi-colon delimited string of filenames:
           std::string projects;

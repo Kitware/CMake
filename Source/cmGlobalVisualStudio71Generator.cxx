@@ -250,7 +250,7 @@ void cmGlobalVisualStudio71Generator
     std::set<std::string>::const_iterator it;
     for(it = depends.begin(); it != depends.end(); ++it)
       {
-      if(it->size() > 0)
+      if(!it->empty())
         {
         fout << "\t\t{"
              << this->GetGUID(it->c_str())
