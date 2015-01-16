@@ -966,6 +966,23 @@ struct cmSourceFilePathCompare
 };
 
 //----------------------------------------------------------------------------
+struct cmCompareTargets
+{
+  bool operator () (std::string const& a, std::string const& b) const
+  {
+    if (a == "ALL_BUILD")
+      {
+      return true;
+      }
+    if (b == "ALL_BUILD")
+      {
+      return false;
+      }
+    return strcmp(a.c_str(), b.c_str()) < 0;
+  }
+};
+
+//----------------------------------------------------------------------------
 bool
 cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
                                            std::vector<cmXCodeObject*>&
@@ -973,9 +990,16 @@ cmGlobalXCodeGenerator::CreateXCodeTargets(cmLocalGenerator* gen,
 {
   this->SetCurrentLocalGenerator(gen);
   cmTargets &tgts = this->CurrentMakefile->GetTargets();
+  typedef std::map<std::string, cmTarget*, cmCompareTargets> cmSortedTargets;
+  cmSortedTargets sortedTargets;
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
-    cmTarget& cmtarget = l->second;
+    sortedTargets[l->first] = &l->second;
+    }
+  for(cmSortedTargets::iterator l = sortedTargets.begin();
+      l != sortedTargets.end(); l++)
+    {
+    cmTarget& cmtarget = *l->second;
     cmGeneratorTarget* gtgt = this->GetGeneratorTarget(&cmtarget);
 
     // make sure ALL_BUILD, INSTALL, etc are only done once
