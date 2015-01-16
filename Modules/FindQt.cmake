@@ -79,7 +79,11 @@ endif()
 set(GLOB_TEMP_VAR)
 
 if (Qt_FIND_VERSION)
-  set(DESIRED_QT_VERSION "${Qt_FIND_VERSION}")
+  if (Qt_FIND_VERSION MATCHES "^([34])(\\.[0-9]+.*)?$")
+    set(DESIRED_QT_VERSION ${CMAKE_MATCH_1})
+  else ()
+    message(FATAL_ERROR "FindQt was called with invalid version '${Qt_FIND_VERSION}'. Only Qt major versions 3 or 4 are supported. If you do not need to support both Qt3 and Qt4 in your source consider calling find_package(Qt3) or find_package(Qt4) instead of find_package(Qt) instead.")
+  endif ()
 endif ()
 
 # now find qmake
