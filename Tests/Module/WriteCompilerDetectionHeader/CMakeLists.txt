@@ -11,7 +11,7 @@ get_property(c_known_features GLOBAL PROPERTY CMAKE_C_KNOWN_FEATURES)
 write_compiler_detection_header(
   FILE "${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h"
   PREFIX TEST
-  COMPILERS GNU Clang AppleClang
+  COMPILERS GNU Clang AppleClang SunPro
   VERSION 3.1
   PROLOG "// something"
   EPILOG "// more"
@@ -58,7 +58,8 @@ endmacro()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
-    OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+    OR CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
+    OR CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
   # False for C++98 mode.
   list(APPEND false_defs EXPECTED_COMPILER_CXX_DELEGATING_CONSTRUCTORS)
   list(APPEND false_defs EXPECTED_COMPILER_CXX_VARIADIC_TEMPLATES)
@@ -81,7 +82,7 @@ write_compiler_detection_header(
   PREFIX MULTI
   OUTPUT_FILES_VAR multi_files
   OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files/compiler_support"
-  COMPILERS GNU Clang AppleClang
+  COMPILERS GNU Clang AppleClang SunPro
   VERSION 3.1
   FEATURES
     ${cxx_known_features} ${c_known_features}

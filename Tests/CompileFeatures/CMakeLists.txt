@@ -51,6 +51,17 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"
   )
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro)
+  list(REMOVE_ITEM CXX_non_features
+    cxx_attribute_deprecated
+    cxx_contextual_conversions
+    cxx_extended_friend_declarations
+    cxx_long_long_type
+    cxx_sizeof_member
+    cxx_variadic_macros
+  )
+endif()
+
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
     AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.8)
   # The cxx_alignof feature happens to work (for *this* testcase) with
@@ -188,6 +199,13 @@ if (CMAKE_CXX_COMPILE_FEATURES)
         -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
       )
     endif()
+  elseif (CMAKE_CXX_COMPILER_ID STREQUAL "SunPro")
+    add_definitions(
+      -DEXPECT_OVERRIDE_CONTROL=1
+      -DEXPECT_INHERITING_CONSTRUCTORS=1
+      -DEXPECT_FINAL=1
+      -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+    )
   endif()
 
   add_executable(CompileFeaturesGenex genex_test.cpp)
