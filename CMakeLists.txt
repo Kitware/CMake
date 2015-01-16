@@ -45,7 +45,7 @@ if(NOT DEFINED CMAKE_CXX_STANDARD)
 endif()
 
 # option to set the internal encoding of CMake to UTF-8
-option(CMAKE_ENCODING_UTF8 "Use UTF-8 encoding internally (experimental)." OFF)
+option(CMAKE_ENCODING_UTF8 "Use UTF-8 encoding internally." ON)
 mark_as_advanced(CMAKE_ENCODING_UTF8)
 if(CMAKE_ENCODING_UTF8)
   set(KWSYS_ENCODING_DEFAULT_CODEPAGE CP_UTF8)

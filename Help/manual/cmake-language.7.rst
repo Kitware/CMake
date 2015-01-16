@@ -60,14 +60,16 @@ Syntax
 Encoding
 --------
 
-A CMake Language source file must be written in 7-bit ASCII text
-to be portable across all supported platforms.  Newlines may be
+A CMake Language source file may be written in 7-bit ASCII text for
+maximum portability across all supported platforms.  Newlines may be
 encoded as either ``\n`` or ``\r\n`` but will be converted to ``\n``
 as input files are read.
 
 Note that the implementation is 8-bit clean so source files may
 be encoded as UTF-8 on platforms with system APIs supporting this
-encoding.  Furthermore, CMake 3.0 and above allow a leading UTF-8
+encoding.  In addition, CMake 3.2 and above support source files
+encoded in UTF-8 on Windows (using UTF-16 to call system APIs).
+Furthermore, CMake 3.0 and above allow a leading UTF-8
 `Byte-Order Mark`_ in source files.
 
 .. _`Byte-Order Mark`: http://en.wikipedia.org/wiki/Byte_order_mark
