@@ -33,7 +33,7 @@ class cmVS10XMLParser : public cmXMLParser
   virtual void StartElement(const std::string& name, const char**)
     {
       // once the GUID is found do nothing
-      if(this->GUID.size())
+      if(!this->GUID.empty())
         {
         return;
         }

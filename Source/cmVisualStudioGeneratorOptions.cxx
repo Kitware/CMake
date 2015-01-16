@@ -274,7 +274,7 @@ cmVisualStudioGeneratorOptions
     {
     // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions
-    if(this->Configuration.size())
+    if(!this->Configuration.empty())
       {
       fout << prefix;
       this->TargetGenerator->WritePlatformConfigTag(
@@ -346,7 +346,7 @@ cmVisualStudioGeneratorOptions
         m != this->FlagMap.end(); ++m)
       {
       fout << indent;
-      if(this->Configuration.size())
+      if(!this->Configuration.empty())
         {
         this->TargetGenerator->WritePlatformConfigTag(
           m->first.c_str(),
@@ -398,7 +398,7 @@ cmVisualStudioGeneratorOptions
     if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
       {
       fout << prefix;
-      if(this->Configuration.size())
+      if(!this->Configuration.empty())
         {
         this->TargetGenerator->WritePlatformConfigTag(
           "AdditionalOptions",

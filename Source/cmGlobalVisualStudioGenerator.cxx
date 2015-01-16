@@ -81,7 +81,7 @@ bool cmGlobalVisualStudioGenerator::Compute()
     {
     std::vector<cmLocalGenerator*>& gen = it->second;
     // add the ALL_BUILD to the first local generator of each project
-    if(gen.size())
+    if(!gen.empty())
       {
       // Use no actual command lines so that the target itself is not
       // considered always out of date.

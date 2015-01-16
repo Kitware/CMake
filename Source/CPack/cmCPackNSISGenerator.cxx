@@ -536,7 +536,7 @@ int cmCPackNSISGenerator::InitializeInternal()
         << ".lnk\"" << std::endl;
       // see if CPACK_CREATE_DESKTOP_LINK_ExeName is on
       // if so add a desktop link
-      if(cpackPackageDesktopLinksVector.size() &&
+      if(!cpackPackageDesktopLinksVector.empty() &&
          std::find(cpackPackageDesktopLinksVector.begin(),
                    cpackPackageDesktopLinksVector.end(),
                    execName)

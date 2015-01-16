@@ -1656,7 +1656,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
   // for the first time we need a new line if there is something
   // produced here.
   const char* firstString = ">\n";
-  if(objectName.size())
+  if(!objectName.empty())
     {
     (*this->BuildFileStream ) << firstString;
     firstString = "";
@@ -1675,7 +1675,7 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     defPropName += configUpper;
     if(const char* ccdefs = sf.GetProperty(defPropName.c_str()))
       {
-      if(configDefines.size())
+      if(!configDefines.empty())
         {
         configDefines += ";";
         }

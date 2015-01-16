@@ -128,7 +128,7 @@ void cmWIXSourceWriter::AddAttribute(
 void cmWIXSourceWriter::AddAttributeUnlessEmpty(
     std::string const& key, std::string const& value)
 {
-  if(value.size())
+  if(!value.empty())
     {
     AddAttribute(key, value);
     }

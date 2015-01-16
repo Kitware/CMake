@@ -2283,7 +2283,7 @@ public:
   virtual void StartElement(const std::string& name, const char** atts)
     {
       // once the GUID is found do nothing
-      if(this->GUID.size())
+      if(!this->GUID.empty())
         {
         return;
         }
