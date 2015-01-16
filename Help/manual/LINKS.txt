@@ -11,12 +11,12 @@ Frequently Asked Questions
  A Wiki is provided containing answers to frequently asked questions.
 
 Online Documentation
- http://www.cmake.org/HTML/Documentation.html
+ http://www.cmake.org/documentation
 
  Links to available documentation may be found on this web page.
 
 Mailing List
- http://www.cmake.org/HTML/MailingLists.html
+ http://www.cmake.org/mailing-lists
 
  For help and discussion about using cmake, a mailing list is
  provided at cmake@cmake.org.  The list is member-post-only but one
