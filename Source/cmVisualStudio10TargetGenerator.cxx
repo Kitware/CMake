@@ -2422,7 +2422,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     libs = this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
   // Remove trailing spaces from libs
   std::string::size_type pos = libs.size()-1;
-  if(libs.size() != 0)
+  if(!libs.empty())
     {
     while(libs[pos] == ' ')
       {
