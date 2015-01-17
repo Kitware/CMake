@@ -419,12 +419,12 @@ function(write_compiler_detection_header
       set(file_content "${file_content}\n#  ${pp_if} ${prefix_arg}_COMPILER_IS_${compiler}\n")
 
       if(_WCD_OUTPUT_FILES_VAR)
-        set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}.h")
+        set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}_${_lang}.h")
         set(file_content "${file_content}\n#    include \"${compile_file_name}\"\n")
       endif()
 
       if(_WCD_OUTPUT_FILES_VAR)
-        set(compiler_file_content compiler_file_content_${compiler})
+        set(compiler_file_content compiler_file_content_${compiler}_${_lang})
       else()
         set(compiler_file_content file_content)
       endif()
@@ -627,16 +627,20 @@ function(write_compiler_detection_header
 
   if(_WCD_OUTPUT_FILES_VAR)
     foreach(compiler ${_WCD_COMPILERS})
-      set(CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_}")
-      set(CMAKE_CONFIGURABLE_FILE_CONTENT "${CMAKE_CONFIGURABLE_FILE_CONTENT}${compiler_file_content_${compiler}}")
+      foreach(_lang ${_langs})
+        if(compiler_file_content_${compiler}_${_lang})
+          set(CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_}")
+          set(CMAKE_CONFIGURABLE_FILE_CONTENT "${CMAKE_CONFIGURABLE_FILE_CONTENT}${compiler_file_content_${compiler}_${_lang}}")
 
-      set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}.h")
-      set(full_path "${main_file_dir}/${compile_file_name}")
-      list(APPEND ${_WCD_OUTPUT_FILES_VAR} ${full_path})
-      configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-        "${full_path}"
-        @ONLY
-      )
+          set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}_${_lang}.h")
+          set(full_path "${main_file_dir}/${compile_file_name}")
+          list(APPEND ${_WCD_OUTPUT_FILES_VAR} ${full_path})
+          configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
+            "${full_path}"
+            @ONLY
+          )
+        endif()
+      endforeach()
     endforeach()
     set(${_WCD_OUTPUT_FILES_VAR} ${${_WCD_OUTPUT_FILES_VAR}} PARENT_SCOPE)
   endif()
