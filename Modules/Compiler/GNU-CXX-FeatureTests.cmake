@@ -59,7 +59,6 @@ set(_cmake_feature_test_cxx_user_literals "${GNU47_CXX11}")
 # __GXX_EXPERIMENTAL_CXX0X__ is defined in prior versions, but may not be
 # defined in the future.
 set(GNU_CXX0X_DEFINED "(__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))")
-# TODO: Should be supported by GNU 4.6
 set(GNU46_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ${GNU_CXX0X_DEFINED}")
 set(_cmake_feature_test_cxx_constexpr "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_defaulted_move_initializers "${GNU46_CXX11}")
