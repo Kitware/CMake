@@ -3011,13 +3011,17 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
   // trailing slash in the input then the last iteration of the loop
   // will add a slash followed by an empty string which will preserve
   // the trailing slash in the output.
+
+  if(!relative.empty() && !remote.empty())
+    {
+    relative += "/";
+    }
+  const char* sep = "";
   for(unsigned int i=common; i < remote.size(); ++i)
     {
-    if(!relative.empty())
-      {
-      relative += "/";
-      }
+    relative += sep;
     relative += remote[i];
+    sep = "/";
     }
 
   // Finally return the path.

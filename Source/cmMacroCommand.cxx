@@ -166,15 +166,17 @@ bool cmMacroHelperCommand::InvokeInitialPass
             {
             if (expandedArgs.size() > this->Args.size() - 1)
               {
+              if (!argnDef.empty() && !expandedArgs.empty())
+                {
+                argnDef += ";";
+                }
               std::vector<std::string>::const_iterator eit
                   = expandedArgs.begin() + (this->Args.size() - 1);
+              const char* sep = "";
               for( ; eit != expandedArgs.end(); ++eit)
                 {
-                if (!argnDef.empty())
-                  {
-                  argnDef += ";";
-                  }
-                argnDef += *eit;
+                argnDef += sep + *eit;
+                sep = ";";
                 }
               }
             argnDefInitialized = true;
@@ -191,14 +193,17 @@ bool cmMacroHelperCommand::InvokeInitialPass
           // repleace ARGV, compute it only once
           if (!argvDefInitialized)
             {
+            if (!argvDef.empty() && !expandedArgs.empty())
+              {
+              argvDef += ";";
+              }
+            const char* sep = "";
             std::vector<std::string>::const_iterator eit;
             for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
               {
-              if (!argvDef.empty())
-                {
-                argvDef += ";";
-                }
+              argvDef += sep;
               argvDef += *eit;
+              sep = ";";
               }
             argvDefInitialized = true;
             }
