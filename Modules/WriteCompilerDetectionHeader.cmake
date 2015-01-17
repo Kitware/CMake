@@ -234,7 +234,11 @@ function(_load_compiler_variables CompilerId lang)
   foreach(feature ${ARGN})
     set(_cmake_feature_test_${CompilerId}_${feature} ${_cmake_feature_test_${feature}} PARENT_SCOPE)
   endforeach()
-  include("${CMAKE_ROOT}/Modules/Compiler/${CompilerId}-DetermineCompiler.cmake" OPTIONAL)
+  include("${CMAKE_ROOT}/Modules/Compiler/${CompilerId}-${lang}-DetermineCompiler.cmake" OPTIONAL
+      RESULT_VARIABLE determinedCompiler)
+  if (NOT determinedCompiler)
+    include("${CMAKE_ROOT}/Modules/Compiler/${CompilerId}-DetermineCompiler.cmake" OPTIONAL)
+  endif()
   set(_compiler_id_version_compute_${CompilerId} ${_compiler_id_version_compute} PARENT_SCOPE)
 endfunction()
 
