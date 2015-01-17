@@ -25,7 +25,6 @@ bool cmGetCMakePropertyCommand
     return false;
     }
 
-  std::vector<std::string>::size_type cc;
   std::string variable = args[0];
   std::string output = "NOTFOUND";
 
@@ -35,12 +34,15 @@ bool cmGetCMakePropertyCommand
     std::vector<std::string> vars = this->Makefile->GetDefinitions(cacheonly);
     if (!vars.empty())
       {
-      output = vars[0];
-      }
-    for ( cc = 1; cc < vars.size(); ++cc )
-      {
-      output += ";";
-      output += vars[cc];
+      output = "";
+      const char* sep = "";
+      std::vector<std::string>::size_type cc;
+      for ( cc = 0; cc < vars.size(); ++cc )
+        {
+        output += sep;
+        output += vars[cc];
+        sep = ";";
+        }
       }
     }
   else if ( args[1] == "MACROS" )
@@ -54,13 +56,12 @@ bool cmGetCMakePropertyCommand
         ->GetInstallComponents();
     std::set<std::string>::const_iterator compIt;
     output = "";
+    const char* sep = "";
     for (compIt = components->begin(); compIt != components->end(); ++compIt)
       {
-      if (compIt != components->begin())
-        {
-        output += ";";
-        }
+      output += sep;
       output += *compIt;
+      sep = ";";
       }
     }
   else
