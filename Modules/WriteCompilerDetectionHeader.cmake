@@ -386,6 +386,13 @@ function(write_compiler_detection_header
   endif()
 
   foreach(_lang ${_langs})
+    set(target_compilers)
+    foreach(compiler ${_WCD_COMPILERS})
+      _load_compiler_variables(${compiler} ${_lang} ${${_lang}_features})
+      if(_cmake_oldestSupported_${compiler})
+        list(APPEND target_compilers ${compiler})
+      endif()
+    endforeach()
 
     get_property(known_features GLOBAL PROPERTY CMAKE_${_lang}_KNOWN_FEATURES)
     foreach(feature ${${_lang}_features})
@@ -408,8 +415,7 @@ function(write_compiler_detection_header
     set(file_content "${file_content}${ID_CONTENT}\n")
 
     set(pp_if "if")
-    foreach(compiler ${_WCD_COMPILERS})
-      _load_compiler_variables(${compiler} ${_lang} ${${_lang}_features})
+    foreach(compiler ${target_compilers})
       set(file_content "${file_content}\n#  ${pp_if} ${prefix_arg}_COMPILER_IS_${compiler}\n")
 
       if(_WCD_OUTPUT_FILES_VAR)
