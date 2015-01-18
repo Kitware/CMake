@@ -96,11 +96,9 @@ static const char * cmDocumentationOptions[][2] =
 static int do_command(int ac, char const* const* av)
 {
   std::vector<std::string> args;
+  args.reserve(ac - 1);
   args.push_back(av[0]);
-  for(int i = 2; i < ac; ++i)
-    {
-    args.push_back(av[i]);
-    }
+  args.insert(args.end(), av + 2, av + ac);
   return cmcmd::ExecuteCMakeCommand(args);
 }
 
