@@ -9,7 +9,7 @@ target_link_libraries(empty1
   # When starting, $<COMPILE_FEATURES:cxx_nullptr> is '0', so 'freeze' the
   # CXX_STANDARD at 98 during computation.
   $<$<COMPILE_FEATURES:cxx_nullptr>:empty2>
-  # This would add cxx_constexpr, but that would require CXX_STANDARD = 11,
+  # This would add cxx_static_assert, but that would require CXX_STANDARD = 11,
   # which is not allowed after freeze.  Report an error.
   empty3
 )
