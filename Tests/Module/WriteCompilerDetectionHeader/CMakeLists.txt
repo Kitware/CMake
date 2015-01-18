@@ -25,12 +25,14 @@ if (NOT CMAKE_CXX_COMPILE_FEATURES AND NOT CMAKE_C_COMPILE_FEATURES)
   )
   add_executable(WriteCompilerDetectionHeader "${CMAKE_CURRENT_BINARY_DIR}/dummy.cpp")
 
-  include(CheckCXXSourceCompiles)
-  check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h\"\nint main() { return 0; }\n"
-    file_include_works
-  )
-  if (file_include_works)
-    message(SEND_ERROR "Inclusion of ${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h was expected to cause an error, but did not.")
+  if(UNIX OR NOT CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    include(CheckCXXSourceCompiles)
+    check_cxx_source_compiles("#include \"${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h\"\nint main() { return 0; }\n"
+      file_include_works
+    )
+    if (file_include_works)
+      message(SEND_ERROR "Inclusion of ${CMAKE_CURRENT_BINARY_DIR}/test_compiler_detection.h was expected to cause an error, but did not.")
+    endif()
   endif()
   return()
 endif()
