@@ -219,11 +219,7 @@ int do_cmake(int ac, char const* const* av)
 
     // the command line args are processed here so that you can do
     // -DCMAKE_MODULE_PATH=/some/path and have this value accessible here
-    std::vector<std::string> args;
-    for(int i =0; i < ac; ++i)
-      {
-      args.push_back(av[i]);
-      }
+    std::vector<std::string> args(av, av + ac);
     hcm.SetCacheArgs(args);
 
     std::vector<cmDocumentationEntry> generators;
