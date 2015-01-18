@@ -438,15 +438,14 @@ void CCONV cmExpandSourceListArguments(void *arg,
                                  char ***resArgv,
                                  unsigned int startArgumentIndex)
 {
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  (void)arg;
+  (void)startArgumentIndex;
   std::vector<std::string> result;
-  std::vector<std::string> args2;
   int i;
   for (i = 0; i < numArgs; ++i)
     {
-    args2.push_back(args[i]);
+    result.push_back(args[i]);
     }
-  mf->ExpandSourceListArguments(args2, result, startArgumentIndex);
   int resargc = static_cast<int>(result.size());
   char **resargv = 0;
   if (resargc)

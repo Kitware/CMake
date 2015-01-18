@@ -12,18 +12,14 @@
 #include "cmQTWrapUICommand.h"
 
 // cmQTWrapUICommand
-bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
+bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
                                     cmExecutionStatus &)
 {
-  if(argsIn.size() < 4 )
+  if(args.size() < 4 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
-  // This command supports source list inputs for compatibility.
-  std::vector<std::string> args;
-  this->Makefile->ExpandSourceListArguments(argsIn, args, 3);
 
   // Get the uic and moc executables to run in the custom commands.
   const char* uic_exe =
@@ -40,7 +36,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& argsIn,
     this->Makefile->GetSafeDefinition(sourceList);
 
   // Create rules for all sources listed.
-  for(std::vector<std::string>::iterator j = (args.begin() + 3);
+  for(std::vector<std::string>::const_iterator j = (args.begin() + 3);
       j != args.end(); ++j)
     {
     cmSourceFile *curr = this->Makefile->GetSource(*j);
