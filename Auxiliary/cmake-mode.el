@@ -320,9 +320,13 @@ and store the result as a list in LISTVAR."
       ))
   )
 
-(require 'thingatpt)
+(defun cmake-symbol-at-point ()
+  (let ((symbol (symbol-at-point)))
+    (and (not (null symbol))
+         (symbol-name symbol))))
+
 (defun cmake-help-type (type)
-  (let* ((default-entry (word-at-point))
+  (let* ((default-entry (cmake-symbol-at-point))
          (history (car (cdr (cdr (assoc type cmake-string-to-list-symbol)))))
          (input (completing-read
                  (format "CMake %s: " type) ; prompt
@@ -365,7 +369,7 @@ and store the result as a list in LISTVAR."
 (defun cmake-help ()
   "Queries for any of the four available help topics and prints out the approriate page."
   (interactive)
-  (let* ((default-entry (word-at-point))
+  (let* ((default-entry (cmake-symbol-at-point))
          (command-list (cmake-get-list "command"))
          (variable-list (cmake-get-list "variable"))
          (module-list (cmake-get-list "module"))
