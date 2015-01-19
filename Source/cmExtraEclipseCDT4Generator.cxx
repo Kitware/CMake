@@ -62,6 +62,7 @@ void cmExtraEclipseCDT4Generator
     if (*lit == "CXX")
       {
       this->Natures.insert("org.eclipse.cdt.core.ccnature");
+      this->Natures.insert("org.eclipse.cdt.core.cnature");
       }
     else if (*lit == "C")
       {
