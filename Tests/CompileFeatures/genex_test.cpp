@@ -17,9 +17,9 @@ struct B final : A
 
 #endif
 
-#if !HAVE_NULLPTR
-#error "Expect nullptr feature"
-#else
+#if !HAVE_AUTO_TYPE
+#  error Expect cxx_auto_type support
+#endif
 
 #if !HAVE_INHERITING_CONSTRUCTORS
 #  if EXPECT_INHERITING_CONSTRUCTORS
@@ -49,13 +49,6 @@ struct B final : A
 #  if !EXPECT_INHERITING_CONSTRUCTORS_AND_FINAL
 #    error Expect no combined cxx_inheriting_constructors and cxx_final support
 #  endif
-#endif
-
-const char* getString()
-{
-  return nullptr;
-}
-
 #endif
 
 int main()

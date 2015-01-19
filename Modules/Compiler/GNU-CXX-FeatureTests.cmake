@@ -2,7 +2,7 @@
 # Reference: http://gcc.gnu.org/projects/cxx0x.html
 # http://gcc.gnu.org/projects/cxx1y.html
 
-set(_cmake_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 406")
+set(_cmake_oldestSupported "(__GNUC__ * 100 + __GNUC_MINOR__) >= 404")
 
 set(GNU50_CXX14 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 500 && __cplusplus >= 201402L")
 set(_cmake_feature_test_cxx_variable_templates "${GNU50_CXX14}")
@@ -59,7 +59,6 @@ set(_cmake_feature_test_cxx_user_literals "${GNU47_CXX11}")
 # __GXX_EXPERIMENTAL_CXX0X__ is defined in prior versions, but may not be
 # defined in the future.
 set(GNU_CXX0X_DEFINED "(__cplusplus >= 201103L || (defined(__GXX_EXPERIMENTAL_CXX0X__) && __GXX_EXPERIMENTAL_CXX0X__))")
-# TODO: Should be supported by GNU 4.6
 set(GNU46_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 406 && ${GNU_CXX0X_DEFINED}")
 set(_cmake_feature_test_cxx_constexpr "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_defaulted_move_initializers "${GNU46_CXX11}")
@@ -68,14 +67,12 @@ set(_cmake_feature_test_cxx_noexcept "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_nullptr "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_range_for "${GNU46_CXX11}")
 set(_cmake_feature_test_cxx_unrestricted_unions "${GNU46_CXX11}")
-# TODO: Should be supported by GNU 4.5
-set(GNU45_CXX11 "${_cmake_oldestSupported} && ${GNU_CXX0X_DEFINED}")
+set(GNU45_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 405 && ${GNU_CXX0X_DEFINED}")
 set(_cmake_feature_test_cxx_explicit_conversions "${GNU45_CXX11}")
 set(_cmake_feature_test_cxx_lambdas "${GNU45_CXX11}")
 set(_cmake_feature_test_cxx_local_type_template_args "${GNU45_CXX11}")
 set(_cmake_feature_test_cxx_raw_string_literals "${GNU45_CXX11}")
-# TODO: Should be supported by GNU 4.4
-set(GNU44_CXX11 "${_cmake_oldestSupported} && ${GNU_CXX0X_DEFINED}")
+set(GNU44_CXX11 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && ${GNU_CXX0X_DEFINED}")
 set(_cmake_feature_test_cxx_auto_type "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_defaulted_functions "${GNU44_CXX11}")
 set(_cmake_feature_test_cxx_deleted_functions "${GNU44_CXX11}")
