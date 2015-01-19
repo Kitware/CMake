@@ -100,6 +100,31 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
   )
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18.0)
+    list(REMOVE_ITEM CXX_non_features
+      # The cxx_contextual_conversions feature happens to work
+      # (for *this* testcase) with VS 2010 and VS 2012, but
+      # they do not document support until VS 2013.
+      cxx_contextual_conversions
+      )
+  elseif (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0)
+    list(REMOVE_ITEM CXX_non_features
+      # The cxx_deleted_functions and cxx_nonstatic_member_init
+      # features happen to work (for *this* testcase) with VS 2013,
+      # but they do not document support until VS 2015.
+      cxx_deleted_functions
+      cxx_nonstatic_member_init
+      )
+  else()
+    list(REMOVE_ITEM CXX_non_features
+      # The cxx_constexpr feature happens to work (for *this* testcase)
+      # with VS 2015, but they document only partial support.
+      cxx_constexpr
+      )
+  endif()
+endif()
+
 set(C_ext c)
 set(C_standard_flag 11)
 set(CXX_ext cpp)
@@ -217,6 +242,29 @@ if (CMAKE_CXX_COMPILE_FEATURES)
         -DEXPECT_OVERRIDE_CONTROL=1
         -DEXPECT_INHERITING_CONSTRUCTORS=0
         -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    endif()
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0)
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS=1
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+      )
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    else()
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=0
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=0
         -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
       )
     endif()

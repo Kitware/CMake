@@ -36,7 +36,7 @@
 #      PREFIX ClimbingStats
 #      OUTPUT_FILES_VAR support_files
 #      OUTPUT_DIR compilers
-#      COMPILERS GNU Clang
+#      COMPILERS GNU Clang MSVC
 #      FEATURES cxx_variadic_templates
 #    )
 #    install(FILES
@@ -100,7 +100,7 @@
 #    write_compiler_detection_header(
 #      FILE climbingstats_compiler_detection.h
 #      PREFIX ClimbingStats
-#      COMPILERS GNU Clang AppleClang
+#      COMPILERS GNU Clang AppleClang MSVC
 #      FEATURES cxx_variadic_templates
 #    )
 #
@@ -321,6 +321,7 @@ function(write_compiler_detection_header
     GNU
     Clang
     AppleClang
+    MSVC
     SunPro
   )
 
@@ -528,6 +529,8 @@ function(write_compiler_detection_header
 #    define ${def_value} alignas(X)
 #  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
 #    define ${def_value} __attribute__ ((__aligned__(X)))
+#  elif ${prefix_arg}_COMPILER_IS_MSVC
+#    define ${def_value} __declspec(align(X))
 #  else
 #    define ${def_value}
 #  endif
@@ -540,6 +543,8 @@ function(write_compiler_detection_header
 #    define ${def_value} alignof(X)
 #  elif ${prefix_arg}_COMPILER_IS_GNU || ${prefix_arg}_COMPILER_IS_Clang || ${prefix_arg}_COMPILER_IS_AppleClang
 #    define ${def_value} __alignof__(X)
+#  elif ${prefix_arg}_COMPILER_IS_MSVC
+#    define ${def_value} __alignof(X)
 #  endif
 \n")
       endif()
