@@ -96,11 +96,9 @@ static const char * cmDocumentationOptions[][2] =
 static int do_command(int ac, char const* const* av)
 {
   std::vector<std::string> args;
+  args.reserve(ac - 1);
   args.push_back(av[0]);
-  for(int i = 2; i < ac; ++i)
-    {
-    args.push_back(av[i]);
-    }
+  args.insert(args.end(), av + 2, av + ac);
   return cmcmd::ExecuteCMakeCommand(args);
 }
 
@@ -221,11 +219,7 @@ int do_cmake(int ac, char const* const* av)
 
     // the command line args are processed here so that you can do
     // -DCMAKE_MODULE_PATH=/some/path and have this value accessible here
-    std::vector<std::string> args;
-    for(int i =0; i < ac; ++i)
-      {
-      args.push_back(av[i]);
-      }
+    std::vector<std::string> args(av, av + ac);
     hcm.SetCacheArgs(args);
 
     std::vector<cmDocumentationEntry> generators;

@@ -676,11 +676,8 @@ void cmComputeLinkDepends::InferDependencies()
       }
 
     // Add the inferred dependencies to the graph.
-    for(DependSet::const_iterator j = common.begin(); j != common.end(); ++j)
-      {
-      int dependee_index = *j;
-      this->EntryConstraintGraph[depender_index].push_back(dependee_index);
-      }
+    cmGraphEdgeList& edges = this->EntryConstraintGraph[depender_index];
+    edges.insert(edges.end(), common.begin(), common.end());
     }
 }
 

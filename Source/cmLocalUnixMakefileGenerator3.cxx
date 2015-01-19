@@ -738,11 +738,8 @@ cmLocalUnixMakefileGenerator3
   // Add the output to the local help if requested.
   if(in_help)
     {
-    for (std::vector<std::string>::const_iterator i = outputs.begin();
-         i != outputs.end(); ++i)
-      {
-      this->LocalHelp.push_back(*i);
-      }
+    this->LocalHelp.insert(this->LocalHelp.end(),
+                           outputs.begin(), outputs.end());
     }
 }
 
