@@ -271,7 +271,9 @@ bool cmArchiveWrite::AddFile(const char* file,
   cm_archive_entry_copy_pathname(e, dest);
   if(archive_read_disk_entry_from_file(this->Disk, e, -1, 0) != ARCHIVE_OK)
     {
-    this->Error = "archive_read_disk_entry_from_file: ";
+    this->Error = "archive_read_disk_entry_from_file '";
+    this->Error += file;
+    this->Error += "': ";
     this->Error += cm_archive_error_string(this->Disk);
     return false;
     }
