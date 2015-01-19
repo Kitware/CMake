@@ -25,12 +25,7 @@ cmExportSet* cmExportSetMap::operator[](const std::string &name)
 
 void cmExportSetMap::clear()
 {
-  for(std::map<std::string, cmExportSet*>::iterator it = this->begin();
-      it != this->end();
-      ++ it)
-    {
-    delete it->second;
-    }
+  cmDeleteAll(*this);
   this->derived::clear();
 }
 

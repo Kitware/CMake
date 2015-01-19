@@ -239,7 +239,20 @@ private:
 
 namespace ContainerAlgorithms {
 
-template<typename Container>
+template<typename T>
+struct cmIsPair
+{
+  enum { value = false };
+};
+
+template<typename K, typename V>
+struct cmIsPair<std::pair<K, V> >
+{
+  enum { value = true };
+};
+
+template<typename Container,
+    bool valueTypeIsPair = cmIsPair<typename Container::value_type>::value>
 struct DefaultDeleter
 {
   void operator()(typename Container::value_type value) {
@@ -247,10 +260,10 @@ struct DefaultDeleter
   }
 };
 
-template<typename K, typename V>
-struct DefaultDeleter<std::map<K, V> >
+template<typename Container>
+struct DefaultDeleter<Container, /* valueTypeIsPair = */ true>
 {
-  void operator()(typename std::map<K, V>::value_type value) {
+  void operator()(typename Container::value_type value) {
     delete value.second;
   }
 };

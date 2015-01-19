@@ -1510,11 +1510,7 @@ void cmGlobalGenerator::CreateGeneratorTargets()
 //----------------------------------------------------------------------------
 void cmGlobalGenerator::ClearGeneratorMembers()
 {
-  for(cmGeneratorTargetsType::iterator i = this->GeneratorTargets.begin();
-      i != this->GeneratorTargets.end(); ++i)
-    {
-    delete i->second;
-    }
+  cmDeleteAll(this->GeneratorTargets);
   this->GeneratorTargets.clear();
 
   cmDeleteAll(this->EvaluationFiles);
