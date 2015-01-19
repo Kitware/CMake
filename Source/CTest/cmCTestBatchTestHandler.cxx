@@ -58,7 +58,7 @@ void cmCTestBatchTestHandler::WriteSrunArgs(int test, cmsys::ofstream& fout)
   fout << "-J=" << properties->Name << " ";
 
   //Write dependency information
-  /*if(this->Tests[test].size() > 0)
+  /*if(!this->Tests[test].empty())
     {
       fout << "-P=afterany";
       for(TestSet::iterator i = this->Tests[test].begin();

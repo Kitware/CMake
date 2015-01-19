@@ -132,14 +132,14 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   unsigned int cnt = 0;
   for ( eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit )
     {
-    if ( argvDef.size() > 0 )
+    if (!argvDef.empty())
       {
       argvDef += ";";
       }
     argvDef += *eit;
     if ( cnt >= this->Args.size()-1 )
       {
-      if ( argnDef.size() > 0 )
+      if (!argnDef.empty())
         {
         argnDef += ";";
         }

@@ -336,14 +336,14 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
 
   // is there a limit?
   long sizeLimit = -1;
-  if (limitArg.GetString().size() > 0)
+  if (!limitArg.GetString().empty())
     {
     sizeLimit = atoi(limitArg.GetCString());
     }
 
   // is there an offset?
   long offset = 0;
-  if (offsetArg.GetString().size() > 0)
+  if (!offsetArg.GetString().empty())
     {
     offset = atoi(offsetArg.GetCString());
     }
@@ -745,7 +745,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // A non-string character has been found.  Check if the current
       // string matches the requirements.  We require that the length
       // be at least one no matter what the user specified.
-      if(s.length() >= minlen && s.length() >= 1 &&
+      if(s.length() >= minlen && !s.empty() &&
       (!have_regex || regex.find(s.c_str())))
         {
         output_size += static_cast<int>(s.size()) + 1;
@@ -899,7 +899,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       {
       std::string expr = this->Makefile->GetCurrentDirectory();
       // Handle script mode
-      if ( expr.size() > 0 )
+      if (!expr.empty())
         {
         expr += "/" + *i;
         g.FindFiles(expr);
@@ -2992,7 +2992,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       msg = "returning early; file already exists with expected ";
       msg += hashMatchMSG;
       msg += "\"";
-      if(statusVar.size())
+      if(!statusVar.empty())
         {
         std::ostringstream result;
         result << (int)0 << ";\"" << msg;
@@ -3085,7 +3085,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   check_curl_result(res, "DOWNLOAD cannot set follow-redirect option: ");
 
-  if(verboseLog.size())
+  if(!verboseLog.empty())
     {
     res = ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
     check_curl_result(res, "DOWNLOAD cannot set verbose: ");
@@ -3131,7 +3131,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   g_curl.release();
   ::curl_easy_cleanup(curl);
 
-  if(statusVar.size())
+  if(!statusVar.empty())
     {
     std::ostringstream result;
     result << (int)res << ";\"" << ::curl_easy_strerror(res) << "\"";
@@ -3151,7 +3151,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   if (hash.get())
     {
     std::string actualHash = hash->HashFile(file);
-    if (actualHash.size() == 0)
+    if (actualHash.empty())
       {
       this->SetError("DOWNLOAD cannot compute hash on downloaded file");
       return false;
@@ -3172,14 +3172,14 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       }
     }
 
-  if(chunkDebug.size())
+  if(!chunkDebug.empty())
     {
     chunkDebug.push_back(0);
     if(CURLE_OPERATION_TIMEOUTED == res)
       {
       std::string output = &*chunkDebug.begin();
 
-      if(verboseLog.size())
+      if(!verboseLog.empty())
         {
         this->Makefile->AddDefinition(verboseLog,
                                       &*chunkDebug.begin());
@@ -3335,7 +3335,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   check_curl_result(res, "UPLOAD cannot set follow-redirect option: ");
 
-  if(logVar.size())
+  if(!logVar.empty())
     {
     res = ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
     check_curl_result(res, "UPLOAD cannot set verbose: ");
@@ -3390,7 +3390,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   g_curl.release();
   ::curl_easy_cleanup(curl);
 
-  if(statusVar.size())
+  if(!statusVar.empty())
     {
     std::ostringstream result;
     result << (int)res << ";\"" << ::curl_easy_strerror(res) << "\"";
@@ -3403,11 +3403,11 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
   fclose(fin);
   fin = NULL;
 
-  if(logVar.size())
+  if(!logVar.empty())
     {
     std::string log;
 
-    if(chunkResponse.size())
+    if(!chunkResponse.empty())
       {
       chunkResponse.push_back(0);
       log += "Response:\n";
@@ -3415,7 +3415,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
       log += "\n";
       }
 
-    if(chunkDebug.size())
+    if(!chunkDebug.empty())
       {
       chunkDebug.push_back(0);
       log += "Debug:\n";

@@ -39,7 +39,7 @@ void cmGeneratorExpressionParser::Parse(
 static void extendText(std::vector<cmGeneratorExpressionEvaluator*> &result,
                   std::vector<cmGeneratorExpressionToken>::const_iterator it)
 {
-  if (result.size() > 0
+  if (!result.empty()
       && (*(result.end() - 1))->GetType()
                                   == cmGeneratorExpressionEvaluator::Text)
     {
@@ -57,7 +57,7 @@ static void extendText(std::vector<cmGeneratorExpressionEvaluator*> &result,
 static void extendResult(std::vector<cmGeneratorExpressionEvaluator*> &result,
                 const std::vector<cmGeneratorExpressionEvaluator*> &contents)
 {
-  if (result.size() > 0
+  if (!result.empty()
       && (*(result.end() - 1))->GetType()
                                   == cmGeneratorExpressionEvaluator::Text
       && (*contents.begin())->GetType()
@@ -256,7 +256,7 @@ void cmGeneratorExpressionParser::ParseContent(
     {
       if (this->NestingLevel == 0)
         {
-        if (result.size() > 0
+        if (!result.empty()
             && (*(result.end() - 1))->GetType()
                                       == cmGeneratorExpressionEvaluator::Text)
           {

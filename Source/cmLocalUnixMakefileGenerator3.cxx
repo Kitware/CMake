@@ -1157,7 +1157,7 @@ cmLocalUnixMakefileGenerator3
     {
     // Build the command line in a single string.
     std::string cmd = ccg.GetCommand(c);
-    if (cmd.size())
+    if (!cmd.empty())
       {
       // Use "call " before any invocations of .bat or .cmd files
       // invoked as custom commands in the WindowsShell.
@@ -2170,7 +2170,7 @@ cmLocalUnixMakefileGenerator3
   cmd += " ";
 
   // Pass down verbosity level.
-  if(this->GetMakeSilentFlag().size())
+  if(!this->GetMakeSilentFlag().empty())
     {
     cmd += this->GetMakeSilentFlag();
     cmd += " ";
@@ -2294,7 +2294,7 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
     for(unsigned int i=1; i < components.size(); ++i)
       {
       // Only the last component can be empty to avoid double slashes.
-      if(components[i].length() > 0 || (i == (components.size()-1)))
+      if(!components[i].empty() || (i == (components.size()-1)))
         {
         if(!first)
           {

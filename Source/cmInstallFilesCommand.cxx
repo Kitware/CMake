@@ -80,7 +80,7 @@ void cmInstallFilesCommand::FinalPass()
       {
       // replace any variables
       std::string temps = *s;
-      if (cmSystemTools::GetFilenamePath(temps).size() > 0)
+      if (!cmSystemTools::GetFilenamePath(temps).empty())
         {
           testf = cmSystemTools::GetFilenamePath(temps) + "/" +
             cmSystemTools::GetFilenameWithoutLastExtension(temps) + ext;

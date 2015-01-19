@@ -152,10 +152,10 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     }
 
-  if(this->VariableDocumentation.size() == 0)
+  if(this->VariableDocumentation.empty())
     {
     this->VariableDocumentation = "Where can ";
-    if(this->Names.size() == 0)
+    if(this->Names.empty())
       {
       this->VariableDocumentation += "the (unknown) library be found";
       }

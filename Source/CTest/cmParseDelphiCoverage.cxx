@@ -61,7 +61,7 @@ public:
         continue;
         }
       else if((line.find("end;") != line.npos)
-         && (beginSet.size() > 0))
+         && !beginSet.empty())
         {
         beginSet.pop_back();
         coverageVector.push_back(-1);
@@ -80,7 +80,7 @@ public:
           }
         }
       //Based up what was found, add a line to the coverageVector
-      if((beginSet.size() > 0) && line != ""  && !blockComFlag
+      if(!beginSet.empty() && line != ""  && !blockComFlag
          && !lineComFlag)
         {
         coverageVector.push_back(0);
@@ -147,7 +147,7 @@ public:
     std::string glob = Coverage.SourceDir + "*/" + filename;
     gl.FindFiles(glob);
     std::vector<std::string> const& files = gl.GetFiles();
-    if(files.size() == 0)
+    if(files.empty())
       {
       /*
       *  If that doesn't find any matching files

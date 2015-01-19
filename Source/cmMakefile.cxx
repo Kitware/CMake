@@ -1798,7 +1798,7 @@ void cmMakefile::AddDefinition(const std::string& name, const char* value)
     }
 
   this->Internal->VarStack.top().Set(name, value);
-  if (this->Internal->VarUsageStack.size() &&
+  if (!this->Internal->VarUsageStack.empty() &&
       this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
@@ -1873,7 +1873,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
 void cmMakefile::AddDefinition(const std::string& name, bool value)
 {
   this->Internal->VarStack.top().Set(name, value? "ON" : "OFF");
-  if (this->Internal->VarUsageStack.size() &&
+  if (!this->Internal->VarUsageStack.empty() &&
       this->VariableInitialized(name))
     {
     this->CheckForUnused("changing definition", name);
@@ -1937,7 +1937,7 @@ void cmMakefile::CheckForUnused(const char* reason,
     {
     std::string path;
     cmListFileBacktrace bt(this->GetLocalGenerator());
-    if (this->CallStack.size())
+    if (!this->CallStack.empty())
       {
       const cmListFileContext* file = this->CallStack.back().Context;
       bt.push_back(*file);
@@ -1972,7 +1972,7 @@ void cmMakefile::CheckForUnused(const char* reason,
 void cmMakefile::RemoveDefinition(const std::string& name)
 {
   this->Internal->VarStack.top().Set(name, 0);
-  if (this->Internal->VarUsageStack.size() &&
+  if (!this->Internal->VarUsageStack.empty() &&
       this->VariableInitialized(name))
     {
     this->CheckForUnused("unsetting", name);
@@ -3852,12 +3852,12 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
   // from which we are being called is located itself in CMAKE_ROOT, then
   // prefer results from CMAKE_ROOT depending on the policy setting.
   result = moduleInCMakeModulePath;
-  if (result.size() == 0)
+  if (result.empty())
     {
     result = moduleInCMakeRoot;
     }
 
-  if ((moduleInCMakeModulePath.size()>0) && (moduleInCMakeRoot.size()>0))
+  if (!moduleInCMakeModulePath.empty() && !moduleInCMakeRoot.empty())
     {
     const char* currentFile = this->GetDefinition("CMAKE_CURRENT_LIST_FILE");
     std::string mods = cmakeRoot + std::string("/Modules/");

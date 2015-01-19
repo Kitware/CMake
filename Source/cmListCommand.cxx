@@ -98,7 +98,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
     return false;
     }
   // if the size of the list
-  if(listString.size() == 0)
+  if(listString.empty())
     {
     return true;
     }
@@ -109,7 +109,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
   for(std::vector<std::string>::iterator i = list.begin();
       i != list.end(); ++i)
     {
-    if(i->size() == 0)
+    if(i->empty())
       {
       hasEmpty = true;
       break;
@@ -257,7 +257,7 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
   size_t cc;
   for ( cc = 2; cc < args.size(); ++ cc )
     {
-    if(listString.size())
+    if(!listString.empty())
       {
       listString += ";";
       }
@@ -328,7 +328,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
     return false;
     }
 
-  if ( varArgsExpanded.size() != 0 )
+  if (!varArgsExpanded.empty())
     {
     size_t nitem = varArgsExpanded.size();
     if ( item < 0 )
@@ -340,7 +340,7 @@ bool cmListCommand::HandleInsertCommand(std::vector<std::string> const& args)
       std::ostringstream str;
       str << "index: " << item << " out of range (-"
         << varArgsExpanded.size() << ", "
-        << (varArgsExpanded.size() == 0?0:(varArgsExpanded.size()-1)) << ")";
+        << (varArgsExpanded.empty() ? 0 : (varArgsExpanded.size() - 1)) << ")";
       this->SetError(str.str());
       return false;
       }

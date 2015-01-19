@@ -564,7 +564,7 @@ int cmCTestTestHandler::ProcessHandler()
     }
   else
     {
-    if (this->HandlerVerbose && passed.size() &&
+    if (this->HandlerVerbose && !passed.empty() &&
       (this->UseIncludeRegExpFlag || this->UseExcludeRegExpFlag))
       {
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
@@ -578,7 +578,7 @@ int cmCTestTestHandler::ProcessHandler()
       }
 
     float percent = float(passed.size()) * 100.0f / float(total);
-    if ( failed.size() > 0 &&  percent > 99)
+    if (!failed.empty() && percent > 99)
       {
       percent = 99;
       }
@@ -596,7 +596,7 @@ int cmCTestTestHandler::ProcessHandler()
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "\nTotal Test time (real) = "
                << realBuf << "\n" );
 
-    if (failed.size())
+    if (!failed.empty())
       {
       cmGeneratedFileStream ofs;
       cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl
@@ -668,7 +668,7 @@ void cmCTestTestHandler::PrintLabelSummary()
   for(; it != this->TestList.end(); ++it)
     {
     cmCTestTestProperties& p = *it;
-    if(p.Labels.size() != 0)
+    if(!p.Labels.empty())
       {
       for(std::vector<std::string>::iterator l = p.Labels.begin();
           l !=  p.Labels.end(); ++l)
@@ -688,7 +688,7 @@ void cmCTestTestHandler::PrintLabelSummary()
     {
     cmCTestTestResult &result = *ri;
     cmCTestTestProperties& p = *result.Properties;
-    if(p.Labels.size() != 0)
+    if(!p.Labels.empty())
       {
       for(std::vector<std::string>::iterator l = p.Labels.begin();
           l !=  p.Labels.end(); ++l)
@@ -698,7 +698,7 @@ void cmCTestTestHandler::PrintLabelSummary()
       }
     }
   // now print times
-  if(labels.size())
+  if(!labels.empty())
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "\nLabel Time Summary:");
     }
@@ -717,7 +717,7 @@ void cmCTestTestHandler::PrintLabelSummary()
                      << buf << "\n";
       }
     }
-  if(labels.size())
+  if(!labels.empty())
     {
     if(this->LogFile)
       {
@@ -738,7 +738,7 @@ void cmCTestTestHandler::CheckLabelFilterInclude(cmCTestTestProperties& it)
     }
   // if there are no labels and we are filtering by labels
   // then exclude the test as it does not have the label
-  if(it.Labels.size() == 0 )
+  if(it.Labels.empty())
     {
     it.IsInBasedOnREOptions = false;
     return;
@@ -772,7 +772,7 @@ void cmCTestTestHandler::CheckLabelFilterExclude(cmCTestTestProperties& it)
     }
   // if there are no labels and we are excluding by labels
   // then do nothing as a no label can not be a match
-  if(it.Labels.size() == 0 )
+  if(it.Labels.empty())
     {
     return;
     }
@@ -850,7 +850,7 @@ void cmCTestTestHandler::ComputeTestList()
     if (this->UseUnion)
       {
       // if it is not in the list and not in the regexp then skip
-      if ((this->TestsToRun.size() &&
+      if ((!this->TestsToRun.empty() &&
            std::find(this->TestsToRun.begin(), this->TestsToRun.end(), cnt)
            == this->TestsToRun.end()) && !it->IsInBasedOnREOptions)
         {
@@ -860,7 +860,7 @@ void cmCTestTestHandler::ComputeTestList()
     else
       {
       // is this test in the list of tests to run? If not then skip it
-      if ((this->TestsToRun.size() &&
+      if ((!this->TestsToRun.empty() &&
            std::find(this->TestsToRun.begin(),
                      this->TestsToRun.end(), inREcnt)
            == this->TestsToRun.end()) || !it->IsInBasedOnREOptions)
@@ -891,7 +891,7 @@ void cmCTestTestHandler::ComputeTestListForRerunFailed()
     cnt ++;
 
     // if this test is not in our list of tests to run, then skip it.
-    if ((this->TestsToRun.size() &&
+    if ((!this->TestsToRun.empty() &&
          std::find(this->TestsToRun.begin(), this->TestsToRun.end(), cnt)
          == this->TestsToRun.end()))
       {
@@ -1094,7 +1094,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string> &passed,
       p.Timeout = this->CTest->GetGlobalTimeout();
       }
 
-    if(p.Depends.size())
+    if(!p.Depends.empty())
       {
       for(std::vector<std::string>::iterator i = p.Depends.begin();
           i != p.Depends.end(); ++i)
@@ -1192,7 +1192,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
         << "name=\"Execution Time\"><Value>"
         << result->ExecutionTime
         << "</Value></NamedMeasurement>\n";
-      if(result->Reason.size())
+      if(!result->Reason.empty())
         {
         const char* reasonType = "Pass Reason";
         if(result->Status != cmCTestTestHandler::COMPLETED &&
@@ -1376,7 +1376,7 @@ void cmCTestTestHandler
 {
   std::string tempPath;
 
-  if (filepath.size() &&
+  if (!filepath.empty() &&
       filepath[filepath.size()-1] != '/')
     {
     filepath += "/";
@@ -1385,7 +1385,7 @@ void cmCTestTestHandler
   attempted.push_back(tempPath);
   attemptedConfigs.push_back("");
 
-  if(ctest->GetConfigType().size())
+  if(!ctest->GetConfigType().empty())
     {
     tempPath = filepath;
     tempPath += ctest->GetConfigType();
@@ -1463,7 +1463,7 @@ std::string cmCTestTestHandler
 
   // even if a fullpath was specified also try it relative to the current
   // directory
-  if (filepath.size() && filepath[0] == '/')
+  if (!filepath.empty() && filepath[0] == '/')
     {
     std::string localfilepath = filepath.substr(1,filepath.size()-1);
     cmCTestTestHandler::AddConfigurations(ctest, attempted,
@@ -1474,7 +1474,7 @@ std::string cmCTestTestHandler
 
   // if extraPaths are provided and we were not passed a full path, try them,
   // try any extra paths
-  if (filepath.size() == 0)
+  if (filepath.empty())
     {
     for (unsigned int i = 0; i < extraPaths.size(); ++i)
       {
@@ -1494,7 +1494,7 @@ std::string cmCTestTestHandler
 
   // now look in the paths we specified above
   for(unsigned int ai=0;
-      ai < attempted.size() && fullPath.size() == 0; ++ai)
+      ai < attempted.size() && fullPath.empty(); ++ai)
     {
     // first check without exe extension
     if(cmSystemTools::FileExists(attempted[ai].c_str())
@@ -1524,7 +1524,7 @@ std::string cmCTestTestHandler
 
   // if everything else failed, check the users path, but only if a full path
   // wasn't specified
-  if (fullPath.size() == 0 && filepath.size() == 0)
+  if (fullPath.empty() && filepath.empty())
     {
     std::string path = cmSystemTools::FindProgram(filename.c_str());
     if (path != "")
@@ -1533,7 +1533,7 @@ std::string cmCTestTestHandler
       return path;
       }
     }
-  if(fullPath.size() == 0)
+  if(fullPath.empty())
     {
     cmCTestLog(ctest, HANDLER_OUTPUT,
                "Could not find executable " << testCommand << "\n"

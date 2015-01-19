@@ -622,7 +622,7 @@ bool cmFindPackageCommand::FindModule(bool& found)
   module += this->Name;
   module += ".cmake";
   std::string mfile = this->Makefile->GetModulesFile(module.c_str());
-  if ( mfile.size() )
+  if (!mfile.empty())
     {
     // Load the module we found, and set "<name>_FIND_MODULE" to true
     // while inside it.
@@ -763,7 +763,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       }
     // If there are files in ConsideredConfigs, it means that FooConfig.cmake
     // have been found, but they didn't have appropriate versions.
-    else if (this->ConsideredConfigs.size() > 0)
+    else if (!this->ConsideredConfigs.empty())
       {
       e << "Could not find a configuration file for package \""
         << this->Name << "\" that "

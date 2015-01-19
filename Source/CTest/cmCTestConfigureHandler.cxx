@@ -38,7 +38,7 @@ int cmCTestConfigureHandler::ProcessHandler()
   cmCTestLog(this->CTest, HANDLER_OUTPUT, "Configure project" << std::endl);
   std::string cCommand
     = this->CTest->GetCTestConfiguration("ConfigureCommand");
-  if ( cCommand.size() == 0 )
+  if (cCommand.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find ConfigureCommand key in the DartConfiguration.tcl"
@@ -48,7 +48,7 @@ int cmCTestConfigureHandler::ProcessHandler()
 
   std::string buildDirectory
     = this->CTest->GetCTestConfiguration("BuildDirectory");
-  if ( buildDirectory.size() == 0 )
+  if (buildDirectory.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find BuildDirectory  key in the DartConfiguration.tcl"

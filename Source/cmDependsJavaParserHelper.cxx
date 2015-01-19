@@ -226,7 +226,7 @@ void cmDependsJavaParserHelper::EndClass()
 {
   CurrentClass* parent = 0;
   CurrentClass* current = 0;
-  if ( this->ClassStack.size() > 0 )
+  if (!this->ClassStack.empty())
     {
     current = &(*(this->ClassStack.end() - 1));
     if ( this->ClassStack.size() > 1 )
@@ -251,7 +251,7 @@ void cmDependsJavaParserHelper::EndClass()
 
 void cmDependsJavaParserHelper::PrintClasses()
 {
-  if ( this->ClassStack.size() == 0 )
+  if (this->ClassStack.empty())
     {
     std::cerr << "Error when parsing. No classes on class stack" << std::endl;
     abort();
@@ -305,13 +305,13 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
 
   if ( verb )
     {
-    if ( this->CurrentPackage.size() > 0 )
+    if (!this->CurrentPackage.empty())
       {
       std::cout << "Current package is: " <<
         this->CurrentPackage << std::endl;
       }
     std::cout << "Imports packages:";
-    if ( this->PackagesImport.size() > 0 )
+    if (!this->PackagesImport.empty())
       {
       std::vector<std::string>::iterator it;
       for ( it = this->PackagesImport.begin();
@@ -323,7 +323,7 @@ int cmDependsJavaParserHelper::ParseString(const char* str, int verb)
       }
     std::cout << std::endl;
     std::cout << "Depends on:";
-    if ( this->ClassesFound.size() > 0 )
+    if (!this->ClassesFound.empty())
       {
       std::vector<std::string>::iterator it;
       for ( it = this->ClassesFound.begin();

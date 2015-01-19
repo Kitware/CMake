@@ -415,7 +415,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   this->UpdateElapsedTime();
 
   // add the script arg if defined
-  if (script_arg.size())
+  if (!script_arg.empty())
     {
     this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg.c_str());
     }

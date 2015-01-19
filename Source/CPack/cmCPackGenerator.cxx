@@ -421,7 +421,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           }
         }
       /* rebuild symlinks in the installed tree */
-      if (symlinkedFiles.size()>0)
+      if (!symlinkedFiles.empty())
         {
         std::list< std::pair<std::string,std::string> >::iterator symlinkedIt;
         std::string curDir = cmSystemTools::GetCurrentWorkingDirectory();
@@ -926,7 +926,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
 
         if (NULL !=mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
-          if (absoluteDestFiles.length()>0) {
+          if (!absoluteDestFiles.empty()) {
             absoluteDestFiles +=";";
           }
           absoluteDestFiles +=
@@ -1356,7 +1356,7 @@ int cmCPackGenerator::PrepareGroupingKind()
      groupingType = this->GetOption("CPACK_COMPONENTS_GROUPING");
   }
 
-  if (groupingType.length()>0)
+  if (!groupingType.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
         << this->Name << "]"

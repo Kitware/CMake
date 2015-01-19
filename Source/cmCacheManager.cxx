@@ -609,7 +609,7 @@ void cmCacheManager::OutputKey(std::ostream& fout, std::string const& key)
 void cmCacheManager::OutputValue(std::ostream& fout, std::string const& value)
 {
   // if value has trailing space or tab, enclose it in single quotes
-  if (value.size() &&
+  if (!value.empty() &&
       (value[value.size() - 1] == ' ' ||
        value[value.size() - 1] == '\t'))
     {

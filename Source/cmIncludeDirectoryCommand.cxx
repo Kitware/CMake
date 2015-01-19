@@ -47,7 +47,7 @@ bool cmIncludeDirectoryCommand
       system = true;
       continue;
       }
-    if(i->size() == 0)
+    if(i->empty())
       {
       this->SetError("given empty-string as include directory.");
       return false;

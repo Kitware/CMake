@@ -80,7 +80,7 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
     // no need to search the file if we just did it
     if(function == lastfunction && lastroutine == routine)
       {
-      if(lastpath.size())
+      if(!lastpath.empty())
         {
         this->Coverage.TotalCoverage[lastpath][lastoffset + linenumber]
           += count;

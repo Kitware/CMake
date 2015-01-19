@@ -33,7 +33,7 @@ bool cmGetCMakePropertyCommand
     {
     int cacheonly = 0;
     std::vector<std::string> vars = this->Makefile->GetDefinitions(cacheonly);
-    if (vars.size()>0)
+    if (!vars.empty())
       {
       output = vars[0];
       }

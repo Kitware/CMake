@@ -61,7 +61,7 @@ private:
   std::string GetCurrentValue()
     {
     std::string val;
-    if(this->CurrentValue.size())
+    if(!this->CurrentValue.empty())
       {
       val.assign(&this->CurrentValue[0], this->CurrentValue.size());
       }
@@ -273,13 +273,13 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
       // Now run off and do what you've been told!
       res = ::curl_easy_perform(curl);
 
-      if ( chunk.size() > 0 )
+      if (!chunk.empty())
         {
         cmCTestLog(this->CTest, DEBUG, "CURL output: ["
           << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
           << std::endl);
         }
-      if ( chunkDebug.size() > 0 )
+      if (!chunkDebug.empty())
         {
         cmCTestLog(this->CTest, DEBUG, "CURL debug output: ["
           << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
@@ -301,7 +301,7 @@ bool cmCTestSubmitHandler::SubmitUsingFTP(const std::string& localprefix,
                        << error_buffer << std::endl
                        << "   Curl output was: ";
         // avoid dereference of empty vector
-        if(chunk.size())
+        if(!chunk.empty())
           {
           *this->LogFile << cmCTestLogWrite(&*chunk.begin(), chunk.size());
           cmCTestLog(this->CTest, ERROR_MESSAGE, "CURL output: ["
@@ -390,7 +390,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
           break;
         default:
           curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-          if (this->HTTPProxyAuth.size() > 0)
+          if (!this->HTTPProxyAuth.empty())
             {
             curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD,
               this->HTTPProxyAuth.c_str());
@@ -523,14 +523,14 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
         chunk.assign(mock_output.begin(), mock_output.end());
         }
 
-      if ( chunk.size() > 0 )
+      if (!chunk.empty())
         {
         cmCTestLog(this->CTest, DEBUG, "CURL output: ["
           << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
           << std::endl);
         this->ParseResponse(chunk);
         }
-      if ( chunkDebug.size() > 0 )
+      if (!chunkDebug.empty())
         {
         cmCTestLog(this->CTest, DEBUG, "CURL debug output: ["
           << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size()) << "]"
@@ -576,7 +576,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
 
           res = ::curl_easy_perform(curl);
 
-          if ( chunk.size() > 0 )
+          if (!chunk.empty())
             {
             cmCTestLog(this->CTest, DEBUG, "CURL output: ["
               << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
@@ -605,7 +605,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
                        << "   Error message was: " << error_buffer
                        << std::endl;
         // avoid deref of begin for zero size array
-        if(chunk.size())
+        if(!chunk.empty())
           {
           *this->LogFile << "   Curl output was: "
                          << cmCTestLogWrite(&*chunk.begin(), chunk.size())
@@ -697,7 +697,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
           break;
         default:
           curl_easy_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-          if (this->HTTPProxyAuth.size() > 0)
+          if (!this->HTTPProxyAuth.empty())
             {
             curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD,
               this->HTTPProxyAuth.c_str());
@@ -766,7 +766,7 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
                        << std::endl
                        << "   Error message was: " << error_buffer
                        << std::endl;
-        if(chunk.size())
+        if(!chunk.empty())
           {
           *this->LogFile
             << "   Curl output was: "
@@ -780,13 +780,13 @@ bool cmCTestSubmitHandler::TriggerUsingHTTP(
         return false;
         }
 
-      if ( chunk.size() > 0 )
+      if (!chunk.empty())
         {
         cmCTestLog(this->CTest, DEBUG, "CURL output: ["
           << cmCTestLogWrite(&*chunk.begin(), chunk.size()) << "]"
           << std::endl);
         }
-      if ( chunkDebug.size() > 0 )
+      if (!chunkDebug.empty())
         {
         cmCTestLog(this->CTest, DEBUG, "CURL debug output: ["
           << cmCTestLogWrite(&*chunkDebug.begin(), chunkDebug.size())
@@ -812,8 +812,8 @@ bool cmCTestSubmitHandler::SubmitUsingSCP(
   const std::string& remoteprefix,
   const std::string& url)
 {
-  if ( !scp_command.size() || !localprefix.size() ||
-    !files.size() || !remoteprefix.size() || !url.size() )
+  if ( scp_command.empty() || localprefix.empty() ||
+    files.empty() || remoteprefix.empty() || url.empty() )
     {
     return 0;
     }
@@ -912,8 +912,8 @@ bool cmCTestSubmitHandler::SubmitUsingCP(
   const std::string& remoteprefix,
   const std::string& destination)
 {
-  if ( !localprefix.size() ||
-    !files.size() || !remoteprefix.size() || !destination.size() )
+  if ( localprefix.empty() ||
+    files.empty() || remoteprefix.empty() || destination.empty() )
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
                "Missing arguments for submit via cp:\n"
@@ -1060,14 +1060,14 @@ int cmCTestSubmitHandler::ProcessHandler()
 {
   std::string iscdash = this->CTest->GetCTestConfiguration("IsCDash");
   // cdash does not need to trigger so just return true
-  if(iscdash.size())
+  if(!iscdash.empty())
     {
     this->CDash = true;
     }
 
   const std::string &buildDirectory
     = this->CTest->GetCTestConfiguration("BuildDirectory");
-  if ( buildDirectory.size() == 0 )
+  if (buildDirectory.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find BuildDirectory  key in the DartConfiguration.tcl"
@@ -1140,12 +1140,12 @@ int cmCTestSubmitHandler::ProcessHandler()
       }
     }
 
-  if ( this->HTTPProxy.size() > 0 )
+  if (!this->HTTPProxy.empty())
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Use HTTP Proxy: "
       << this->HTTPProxy << std::endl);
     }
-  if ( this->FTPProxy.size() > 0 )
+  if (!this->FTPProxy.empty())
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Use FTP Proxy: "
       << this->FTPProxy << std::endl);
@@ -1256,12 +1256,12 @@ int cmCTestSubmitHandler::ProcessHandler()
       this->CTest->GetCTestConfiguration("DropSite") +
       cmCTest::MakeURLSafe(
         this->CTest->GetCTestConfiguration("DropLocation"));
-    if ( this->CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
+    if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty())
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
         this->CTest->GetCTestConfiguration(
           "DropSiteUser").c_str());
-      if ( this->CTest->GetCTestConfiguration("DropSitePassword").size() > 0 )
+      if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty())
         {
         cmCTestLog(this->CTest, HANDLER_OUTPUT, ":******");
         }
@@ -1310,12 +1310,12 @@ int cmCTestSubmitHandler::ProcessHandler()
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Using HTTP submit method"
       << std::endl
       << "   Drop site:" << url);
-     if ( this->CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
+     if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty())
       {
       url += this->CTest->GetCTestConfiguration("DropSiteUser");
       cmCTestLog(this->CTest, HANDLER_OUTPUT,
         this->CTest->GetCTestConfiguration("DropSiteUser").c_str());
-      if ( this->CTest->GetCTestConfiguration("DropSitePassword").size() > 0 )
+      if (!this->CTest->GetCTestConfiguration("DropSitePassword").empty())
         {
         url += ":" + this->CTest->GetCTestConfiguration("DropSitePassword");
         cmCTestLog(this->CTest, HANDLER_OUTPUT, ":******");
@@ -1400,7 +1400,7 @@ int cmCTestSubmitHandler::ProcessHandler()
     {
     std::string url;
     std::string oldWorkingDirectory;
-    if ( this->CTest->GetCTestConfiguration("DropSiteUser").size() > 0 )
+    if (!this->CTest->GetCTestConfiguration("DropSiteUser").empty())
       {
       url += this->CTest->GetCTestConfiguration("DropSiteUser") + "@";
       }

@@ -386,7 +386,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
       this->SetError(e);
       return false;
       }
-    if(output.length() > 0)
+    if(!output.empty())
       {
       output += ";";
       }
@@ -898,7 +898,7 @@ bool cmStringCommand
         }
       }
     }
-  if ( !alphabet.size() )
+  if (alphabet.empty())
     {
     alphabet = cmStringCommandDefaultAlphabet;
     }

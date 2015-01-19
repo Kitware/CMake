@@ -344,7 +344,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   // Determine build command and build directory
   std::string makeCommand = this->GetMakeCommand();
-  if ( makeCommand.size() == 0 )
+  if (makeCommand.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find MakeCommand key in the DartConfiguration.tcl"
@@ -354,7 +354,7 @@ int cmCTestBuildHandler::ProcessHandler()
 
   const std::string &buildDirectory
     = this->CTest->GetCTestConfiguration("BuildDirectory");
-  if ( buildDirectory.size() == 0 )
+  if (buildDirectory.empty())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "Cannot find BuildDirectory  key in the DartConfiguration.tcl"
@@ -702,12 +702,12 @@ void cmCTestBuildHandler::GenerateXMLLogScraped(std::ostream& os)
         }
       if ( !cm->SourceFile.empty() && cm->LineNumber >= 0 )
         {
-        if ( cm->SourceFile.size() > 0 )
+        if (!cm->SourceFile.empty())
           {
           os << "\t\t<SourceFile>" << cm->SourceFile << "</SourceFile>"
             << std::endl;
           }
-        if ( cm->SourceFileTail.size() > 0 )
+        if (!cm->SourceFileTail.empty())
           {
           os << "\t\t<SourceFileTail>" << cm->SourceFileTail
             << "</SourceFileTail>" << std::endl;
@@ -1150,7 +1150,7 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
         {
         // This is not an error or warning.
         // So, figure out if this is a post-context line
-        if ( this->ErrorsAndWarnings.size() &&
+        if ( !this->ErrorsAndWarnings.empty() &&
              this->LastErrorOrWarning != this->ErrorsAndWarnings.end() &&
              this->PostContextCount < this->MaxPostContext )
           {
