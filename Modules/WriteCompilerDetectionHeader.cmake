@@ -234,7 +234,11 @@ function(_load_compiler_variables CompilerId lang)
   foreach(feature ${ARGN})
     set(_cmake_feature_test_${CompilerId}_${feature} ${_cmake_feature_test_${feature}} PARENT_SCOPE)
   endforeach()
-  include("${CMAKE_ROOT}/Modules/Compiler/${CompilerId}-DetermineCompiler.cmake" OPTIONAL)
+  include("${CMAKE_ROOT}/Modules/Compiler/${CompilerId}-${lang}-DetermineCompiler.cmake" OPTIONAL
+      RESULT_VARIABLE determinedCompiler)
+  if (NOT determinedCompiler)
+    include("${CMAKE_ROOT}/Modules/Compiler/${CompilerId}-DetermineCompiler.cmake" OPTIONAL)
+  endif()
   set(_compiler_id_version_compute_${CompilerId} ${_compiler_id_version_compute} PARENT_SCOPE)
 endfunction()
 
@@ -382,6 +386,13 @@ function(write_compiler_detection_header
   endif()
 
   foreach(_lang ${_langs})
+    set(target_compilers)
+    foreach(compiler ${_WCD_COMPILERS})
+      _load_compiler_variables(${compiler} ${_lang} ${${_lang}_features})
+      if(_cmake_oldestSupported_${compiler})
+        list(APPEND target_compilers ${compiler})
+      endif()
+    endforeach()
 
     get_property(known_features GLOBAL PROPERTY CMAKE_${_lang}_KNOWN_FEATURES)
     foreach(feature ${${_lang}_features})
@@ -404,17 +415,16 @@ function(write_compiler_detection_header
     set(file_content "${file_content}${ID_CONTENT}\n")
 
     set(pp_if "if")
-    foreach(compiler ${_WCD_COMPILERS})
-      _load_compiler_variables(${compiler} ${_lang} ${${_lang}_features})
+    foreach(compiler ${target_compilers})
       set(file_content "${file_content}\n#  ${pp_if} ${prefix_arg}_COMPILER_IS_${compiler}\n")
 
       if(_WCD_OUTPUT_FILES_VAR)
-        set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}.h")
+        set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}_${_lang}.h")
         set(file_content "${file_content}\n#    include \"${compile_file_name}\"\n")
       endif()
 
       if(_WCD_OUTPUT_FILES_VAR)
-        set(compiler_file_content compiler_file_content_${compiler})
+        set(compiler_file_content compiler_file_content_${compiler}_${_lang})
       else()
         set(compiler_file_content file_content)
       endif()
@@ -617,16 +627,20 @@ function(write_compiler_detection_header
 
   if(_WCD_OUTPUT_FILES_VAR)
     foreach(compiler ${_WCD_COMPILERS})
-      set(CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_}")
-      set(CMAKE_CONFIGURABLE_FILE_CONTENT "${CMAKE_CONFIGURABLE_FILE_CONTENT}${compiler_file_content_${compiler}}")
+      foreach(_lang ${_langs})
+        if(compiler_file_content_${compiler}_${_lang})
+          set(CMAKE_CONFIGURABLE_FILE_CONTENT "${compiler_file_content_}")
+          set(CMAKE_CONFIGURABLE_FILE_CONTENT "${CMAKE_CONFIGURABLE_FILE_CONTENT}${compiler_file_content_${compiler}_${_lang}}")
 
-      set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}.h")
-      set(full_path "${main_file_dir}/${compile_file_name}")
-      list(APPEND ${_WCD_OUTPUT_FILES_VAR} ${full_path})
-      configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
-        "${full_path}"
-        @ONLY
-      )
+          set(compile_file_name "${_WCD_OUTPUT_DIR}${prefix_arg}_COMPILER_INFO_${compiler}_${_lang}.h")
+          set(full_path "${main_file_dir}/${compile_file_name}")
+          list(APPEND ${_WCD_OUTPUT_FILES_VAR} ${full_path})
+          configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
+            "${full_path}"
+            @ONLY
+          )
+        endif()
+      endforeach()
     endforeach()
     set(${_WCD_OUTPUT_FILES_VAR} ${${_WCD_OUTPUT_FILES_VAR}} PARENT_SCOPE)
   endif()
