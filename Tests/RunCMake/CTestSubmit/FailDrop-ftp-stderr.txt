@@ -1,0 +1,3 @@
+Error message was: .*
+   Problems when submitting via FTP
+Error in read script: .*/Tests/RunCMake/CTestSubmit/FailDrop-ftp/test.cmake
