@@ -31,3 +31,24 @@ set(CMAKE_CXX_CREATE_ASSEMBLY_SOURCE "<CMAKE_CXX_COMPILER> <FLAGS> -S <SOURCE> -
 set(CMAKE_CXX_CREATE_STATIC_LIBRARY
   "<CMAKE_CXX_COMPILER> -xar -o <TARGET> <OBJECTS> "
   "<CMAKE_RANLIB> <TARGET> ")
+
+if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
+  set(CMAKE_CXX11_STANDARD_COMPILE_OPTION "-std=c++11")
+  set(CMAKE_CXX11_EXTENSION_COMPILE_OPTION "-std=c++11")
+endif()
+
+set(CMAKE_CXX_STANDARD_DEFAULT 98)
+
+macro(cmake_record_cxx_compile_features)
+  macro(_get_solaris_studio_features std_version list)
+    record_compiler_features(CXX "${std_version}" ${list})
+  endmacro()
+
+  set(_result 0)
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
+    _get_solaris_studio_features(${CMAKE_CXX11_STANDARD_COMPILE_OPTION} CMAKE_CXX11_COMPILE_FEATURES)
+    if (_result EQUAL 0)
+      _get_solaris_studio_features("" CMAKE_CXX98_COMPILE_FEATURES)
+    endif()
+  endif()
+endmacro()

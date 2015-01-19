@@ -1,5 +1,23 @@
+#if defined(__GNUC__) && ((__GNUC__ * 100 + __GNUC_MINOR__) < 407)
+#define OLD_GNU
+#endif
+
+#ifdef OLD_GNU
 template<int... Is>
 struct Interface;
+#endif
+
+template<int I, int... Is>
+struct Interface
+#ifdef OLD_GNU
+                <I, Is...>
+#endif
+{
+  static int accumulate()
+  {
+    return I + Interface<Is...>::accumulate();
+  }
+};
 
 template<int I>
 struct Interface<I>
@@ -7,15 +25,6 @@ struct Interface<I>
   static int accumulate()
   {
     return I;
-  }
-};
-
-template<int I, int... Is>
-struct Interface<I, Is...>
-{
-  static int accumulate()
-  {
-    return I + Interface<Is...>::accumulate();
   }
 };
 
