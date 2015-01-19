@@ -52,6 +52,7 @@ add_RunCMake_test(CMP0053)
 add_RunCMake_test(CMP0054)
 add_RunCMake_test(CMP0055)
 add_RunCMake_test(CTest)
+add_RunCMake_test(CTestSubmit)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
   add_RunCMake_test(CTestMemcheck
