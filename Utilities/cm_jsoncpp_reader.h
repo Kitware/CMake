@@ -13,6 +13,11 @@
 #define cm_jsoncpp_reader_h
 
 /* Use the jsoncpp library configured for CMake.  */
-#include <cmjsoncpp/include/json/reader.h>
+#include "cmThirdParty.h"
+#ifdef CMAKE_USE_SYSTEM_JSONCPP
+# include <json/reader.h>
+#else
+# include <cmjsoncpp/include/json/reader.h>
+#endif
 
 #endif

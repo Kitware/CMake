@@ -20,6 +20,7 @@
 #cmakedefine CMAKE_USE_SYSTEM_LIBARCHIVE
 #cmakedefine CMAKE_USE_SYSTEM_LIBLZMA
 #cmakedefine CMAKE_USE_SYSTEM_FORM
+#cmakedefine CMAKE_USE_SYSTEM_JSONCPP
 #cmakedefine CTEST_USE_XMLRPC
 
 #endif
