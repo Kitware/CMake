@@ -106,9 +106,7 @@ public:
    *         the parsed document. An empty string is returned if no error
    * occurred
    *         during parsing.
-   * \deprecated Use getFormattedErrorMessages() instead (typo fix).
    */
-  JSONCPP_DEPRECATED("Use getFormattedErrorMessages instead")
   std::string getFormatedErrorMessages() const;
 
   /** \brief Returns a user friendly string that list errors in the parsed
