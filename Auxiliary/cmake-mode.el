@@ -320,6 +320,7 @@ and store the result as a list in LISTVAR."
       ))
   )
 
+(require 'thingatpt)
 (defun cmake-symbol-at-point ()
   (let ((symbol (symbol-at-point)))
     (and (not (null symbol))
