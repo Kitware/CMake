@@ -130,9 +130,11 @@ The features known to this version of CMake are:
   .. _N1987: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2006/n1987.htm
 
 ``cxx_final``
-  Override control ``final`` keyword, as defined in N2928_.
+  Override control ``final`` keyword, as defined in N2928_, N3206_ and N3272_.
 
   .. _N2928: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2009/n2928.htm
+  .. _N3206: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3206.htm
+  .. _N3272: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3272.htm
 
 ``cxx_func_identifier``
   Predefined ``__func__`` identifier, as defined in N2340_.
@@ -195,9 +197,12 @@ The features known to this version of CMake are:
   .. _N2431: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2007/n2431.pdf
 
 ``cxx_override``
-  Override control ``override`` keyword, as defined in N2928_.
+  Override control ``override`` keyword, as defined in N2928_, N3206_
+  and N3272_.
 
   .. _N2928: http://www.open-std.org/JTC1/SC22/WG21/docs/papers/2009/n2928.htm
+  .. _N3206: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2010/n3206.htm
+  .. _N3272: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2011/n3272.htm
 
 ``cxx_range_for``
   Range-based for, as defined in N2930_.
