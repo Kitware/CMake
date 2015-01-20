@@ -1,5 +1,11 @@
 include(RunCMake)
 
+run_cmake_command(E_tar-bad-opt1   ${CMAKE_COMMAND} -E tar cvf bad.tar --bad)
+run_cmake_command(E_tar-bad-mtime1 ${CMAKE_COMMAND} -E tar cvf bad.tar --mtime=bad .)
+run_cmake_command(E_tar-end-opt1   ${CMAKE_COMMAND} -E tar cvf bad.tar -- --bad)
+run_cmake_command(E_tar-end-opt2   ${CMAKE_COMMAND} -E tar cvf bad.tar --)
+run_cmake_command(E_tar-mtime      ${CMAKE_COMMAND} -E tar cvf bad.tar "--mtime=1970-01-01 00:00:00 UTC")
+
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
 run_cmake_command(build-no-generator
