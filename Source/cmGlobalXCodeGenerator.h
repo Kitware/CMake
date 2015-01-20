@@ -91,7 +91,7 @@ private:
                                      cmSourceGroup* sg);
   cmXCodeObject* CreatePBXGroup(cmXCodeObject *parent,
                                 std::string name);
-  void CreateGroups(cmLocalGenerator* root,
+  bool CreateGroups(cmLocalGenerator* root,
                     std::vector<cmLocalGenerator*>&
                     generators);
   std::string XCodeEscapePath(const char* p);
@@ -150,7 +150,7 @@ private:
   std::string ExtractFlag(const char* flag, std::string& flags);
   // delete all objects in the this->XCodeObjects vector.
   void ClearXCodeObjects();
-  void CreateXCodeObjects(cmLocalGenerator* root,
+  bool CreateXCodeObjects(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
   void OutputXCodeProject(cmLocalGenerator* root,
                           std::vector<cmLocalGenerator*>& generators);
@@ -169,7 +169,7 @@ private:
   cmXCodeObject* CreateXCodeSourceFile(cmLocalGenerator* gen,
                                        cmSourceFile* sf,
                                        cmTarget& cmtarget);
-  void CreateXCodeTargets(cmLocalGenerator* gen,
+  bool CreateXCodeTargets(cmLocalGenerator* gen,
                           std::vector<cmXCodeObject*>&);
   bool IsHeaderFile(cmSourceFile*);
   void AddDependTarget(cmXCodeObject* target,
