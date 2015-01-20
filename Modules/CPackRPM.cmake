@@ -379,6 +379,34 @@
 #
 #  May be used to add more exclude path (directories or files) from the initial
 #  default list of excluded paths. See CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST.
+#
+# .. variable:: CPACK_RPM_RELOCATION_PATHS
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to specify more than one relocation path per relocatable RPM.
+#  Variable contains a list of relocation paths that if relative are prefixed
+#  by the value of CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX or by the value of
+#  CPACK_PACKAGING_INSTALL_PREFIX if the component version is not provided.
+#  Variable is not component based as its content can be used to set a different
+#  path prefix for e.g. binary dir and documentation dir at the same time.
+#  Only prefixes that are required by a certain component are added to that
+#  component - component must contain at least one file/directory/symbolic link
+#  with CPACK_RPM_RELOCATION_PATHS prefix for a certain relocation path
+#  to be added. Package will not contain any relocation paths if there are no
+#  files/directories/symbolic links on any of the provided prefix locations.
+#  Packages that either do not contain any relocation paths or contain
+#  files/directories/symbolic links that are outside relocation paths print
+#  out an AUTHOR_WARNING that RPM will be partially relocatable.
+#
+# .. variable:: CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX
+#
+#  * Mandatory : NO
+#  * Default   : CPACK_PACKAGING_INSTALL_PREFIX
+#
+#  May be used to set per component CPACK_PACKAGING_INSTALL_PREFIX for
+#  relocatable RPM packages.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -394,6 +422,62 @@
 #  License text for the above reference.)
 
 # Author: Eric Noulard with the help of Alexander Neundorf.
+
+function(cpack_rpm_prepare_relocation_paths)
+  # set appropriate prefix, remove possible trailing slash and convert backslashes to slashes
+  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX)
+    file(TO_CMAKE_PATH "${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_PREFIX}" PATH_PREFIX)
+  else()
+    file(TO_CMAKE_PATH "${CPACK_PACKAGING_INSTALL_PREFIX}" PATH_PREFIX)
+  endif()
+
+  set(RPM_RELOCATION_PATHS "${CPACK_RPM_RELOCATION_PATHS}")
+  list(REMOVE_DUPLICATES RPM_RELOCATION_PATHS)
+
+  # set base path prefix
+  if(EXISTS "${WDIR}/${PATH_PREFIX}")
+    set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}Prefix: ${PATH_PREFIX}\n")
+    list(APPEND RPM_USED_PACKAGE_PREFIXES "${PATH_PREFIX}")
+  endif()
+
+  # set other path prefixes
+  foreach(RELOCATION_PATH ${RPM_RELOCATION_PATHS})
+    if(IS_ABSOLUTE "${RELOCATE_PATH}")
+      set(PREPARED_RELOCATION_PATH "${RELOCATION_PATH}")
+    else()
+      set(PREPARED_RELOCATION_PATH "${PATH_PREFIX}/${RELOCATION_PATH}")
+    endif()
+
+    if(EXISTS "${WDIR}/${PREPARED_RELOCATION_PATH}")
+      set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}Prefix: ${PREPARED_RELOCATION_PATH}\n")
+      list(APPEND RPM_USED_PACKAGE_PREFIXES "${PREPARED_RELOCATION_PATH}")
+    endif()
+  endforeach()
+
+  # warn about all the paths that are not relocatable
+  file(GLOB_RECURSE FILE_PATHS_ "${WDIR}/*")
+  foreach(TMP_PATH ${FILE_PATHS_})
+    string(LENGTH "${WDIR}" WDIR_LEN)
+    string(SUBSTRING "${TMP_PATH}" ${WDIR_LEN} -1 TMP_PATH)
+    unset(TMP_PATH_FOUND_)
+
+    foreach(RELOCATION_PATH ${RPM_USED_PACKAGE_PREFIXES})
+      file(RELATIVE_PATH REL_PATH_ "${RELOCATION_PATH}" "${TMP_PATH}")
+      string(SUBSTRING "${REL_PATH_}" 0 2 PREFIX_)
+
+      if(NOT "${PREFIX_}" STREQUAL "..")
+        set(TPM_PATH_FOUND_ TRUE)
+        break()
+      endif()
+    endforeach()
+
+    if(NOT TPM_PATH_FOUND_)
+      message(AUTHOR_WARNING "CPackRPM:Warning: Path ${TMP_PATH} is not on one of the relocatable paths! Package will be partially relocatable.")
+    endif()
+  endforeach()
+
+  set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}" PARENT_SCOPE)
+endfunction()
 
 if(CMAKE_BINARY_DIR)
   message(FATAL_ERROR "CPackRPM.cmake may only be used by CPack internally.")
@@ -636,13 +720,16 @@ if(CPACK_PACKAGE_RELOCATABLE)
   set(CPACK_RPM_PACKAGE_RELOCATABLE TRUE)
 endif()
 if(CPACK_RPM_PACKAGE_RELOCATABLE)
+  unset(TMP_RPM_PREFIXES)
+
   if(CPACK_RPM_PACKAGE_DEBUG)
     message("CPackRPM:Debug: Trying to build a relocatable package")
   endif()
   if(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
     message("CPackRPM:Warning: CPACK_SET_DESTDIR is set (=${CPACK_SET_DESTDIR}) while requesting a relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, the package won't be relocatable.")
   else()
-    set(CPACK_RPM_PACKAGE_PREFIX ${CPACK_PACKAGING_INSTALL_PREFIX})
+    set(CPACK_RPM_PACKAGE_PREFIX ${CPACK_PACKAGING_INSTALL_PREFIX}) # kept for back compatibility (provided external RPM spec files)
+    cpack_rpm_prepare_relocation_paths()
   endif()
 endif()
 
@@ -856,15 +943,21 @@ if(CPACK_RPM_PACKAGE_RELOCATABLE)
   # get a list of the elements in CPACK_RPM_PACKAGE_PREFIX and remove
   # the final element (so the install-prefix dir itself is not omitted
   # from the RPM's content-list)
-  string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${CPACK_RPM_PACKAGE_PREFIX}")
-  list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
-  # Now generate all of the parent dirs of CPACK_RPM_PACKAGE_PREFIX
-  foreach(_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
-    list(APPEND _TMP_LIST "${_ELEM}")
-    string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
-    set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
-    separate_arguments(_OMIT_DIR)
-    list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
+  foreach(CPACK_RPM_PACKAGE_PREFIX ${RPM_PACKAGE_PREFIXES})
+    string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${CPACK_RPM_PACKAGE_PREFIX}")
+    list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
+    unset(_TMP_LIST)
+    # Now generate all of the parent dirs of CPACK_RPM_PACKAGE_PREFIX
+    foreach(_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
+      list(APPEND _TMP_LIST "${_ELEM}")
+      string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
+      list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
+      if(_DUPLICATE_FOUND EQUAL -1)
+        set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
+        separate_arguments(_OMIT_DIR)
+        list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
+      endif()
+    endforeach()
   endforeach()
 endif()
 
@@ -1101,7 +1194,7 @@ Vendor:         \@CPACK_RPM_PACKAGE_VENDOR\@
 \@TMP_RPM_AUTOREQ\@
 \@TMP_RPM_AUTOREQPROV\@
 \@TMP_RPM_BUILDARCH\@
-\@TMP_RPM_PREFIX\@
+\@TMP_RPM_PREFIXES\@
 
 %define _rpmdir \@CPACK_RPM_DIRECTORY\@
 %define _rpmfilename \@CPACK_RPM_FILE_NAME\@

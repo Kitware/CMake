@@ -6,15 +6,17 @@ if(CPACK_GENERATOR MATCHES "ZIP")
 endif()
 
 if(CPACK_GENERATOR MATCHES "RPM")
-   set(CPACK_RPM_COMPONENT_INSTALL "ON")
-   set(CPACK_RPM_applications_PACKAGE_REQUIRES "mylib-libraries")
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
 
-   # test package summary override
-   set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
-   set(CPACK_RPM_libraries_PACKAGE_SUMMARY "libraries summary")
+  set(CPACK_RPM_COMPONENT_INSTALL "ON")
+  set(CPACK_RPM_applications_PACKAGE_REQUIRES "mylib-libraries")
 
-   # test package description override
-   set(CPACK_RPM_libraries_PACKAGE_DESCRIPTION "libraries description")
+  # test package summary override
+  set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
+  set(CPACK_RPM_libraries_PACKAGE_SUMMARY "libraries summary")
+
+  # test package description override
+  set(CPACK_RPM_libraries_PACKAGE_DESCRIPTION "libraries description")
 endif()
 
 if(CPACK_GENERATOR MATCHES "DEB")
