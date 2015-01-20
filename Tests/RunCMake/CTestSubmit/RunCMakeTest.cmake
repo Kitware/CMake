@@ -2,6 +2,7 @@ include(RunCMake)
 
 # Default case parameters.
 set(CASE_DROP_METHOD "http")
+set(CASE_DROP_SITE "-no-site-")
 set(CASE_CTEST_SUBMIT_ARGS "")
 
 function(run_ctest CASE_NAME)
