@@ -13,6 +13,11 @@
 #define cm_jsoncpp_value_h
 
 /* Use the jsoncpp library configured for CMake.  */
-#include <cmjsoncpp/include/json/value.h>
+#include "cmThirdParty.h"
+#ifdef CMAKE_USE_SYSTEM_JSONCPP
+# include <json/value.h>
+#else
+# include <cmjsoncpp/include/json/value.h>
+#endif
 
 #endif

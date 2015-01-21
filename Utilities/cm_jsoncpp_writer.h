@@ -13,6 +13,11 @@
 #define cm_jsoncpp_writer_h
 
 /* Use the jsoncpp library configured for CMake.  */
-#include <cmjsoncpp/include/json/writer.h>
+#include "cmThirdParty.h"
+#ifdef CMAKE_USE_SYSTEM_JSONCPP
+# include <json/writer.h>
+#else
+# include <cmjsoncpp/include/json/writer.h>
+#endif
 
 #endif

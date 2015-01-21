@@ -65,7 +65,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
 
   # Allow the user to enable/disable all system utility library options by
   # defining CMAKE_USE_SYSTEM_LIBRARIES or CMAKE_USE_SYSTEM_LIBRARY_${util}.
-  set(UTILITIES BZIP2 CURL EXPAT FORM LIBARCHIVE LIBLZMA ZLIB)
+  set(UTILITIES BZIP2 CURL EXPAT FORM JSONCPP LIBARCHIVE LIBLZMA ZLIB)
   foreach(util ${UTILITIES})
     if(NOT DEFINED CMAKE_USE_SYSTEM_LIBRARY_${util}
         AND DEFINED CMAKE_USE_SYSTEM_LIBRARIES)
@@ -104,6 +104,7 @@ macro(CMAKE_HANDLE_SYSTEM_LIBRARIES)
   CMAKE_DEPENDENT_OPTION(CMAKE_USE_SYSTEM_LIBLZMA "Use system-installed liblzma"
     "${CMAKE_USE_SYSTEM_LIBRARY_LIBLZMA}" "NOT CMAKE_USE_SYSTEM_LIBARCHIVE" ON)
   option(CMAKE_USE_SYSTEM_FORM "Use system-installed libform" "${CMAKE_USE_SYSTEM_LIBRARY_FORM}")
+  option(CMAKE_USE_SYSTEM_JSONCPP "Use system-installed jsoncpp" "${CMAKE_USE_SYSTEM_LIBRARY_JSONCPP}")
 
   # Mention to the user what system libraries are being used.
   foreach(util ${UTILITIES})
@@ -373,8 +374,24 @@ macro (CMAKE_BUILD_UTILITIES)
 
   #---------------------------------------------------------------------
   # Build jsoncpp library.
-  add_subdirectory(Utilities/cmjsoncpp)
-  CMAKE_SET_TARGET_FOLDER(cmjsoncpp "Utilities/3rdParty")
+  if(CMAKE_USE_SYSTEM_JSONCPP)
+    if(EXISTS ${CMAKE_ROOT}/Modules/FindJsonCpp.cmake)
+      find_package(JsonCpp)
+    elseif(NOT CMAKE_VERSION VERSION_LESS 3.0)
+      include(${CMake_SOURCE_DIR}/Modules/FindJsonCpp.cmake)
+    else()
+      message(FATAL_ERROR "CMAKE_USE_SYSTEM_JSONCPP requires CMake >= 3.0")
+    endif()
+    if(NOT JsonCpp_FOUND)
+      message(FATAL_ERROR
+        "CMAKE_USE_SYSTEM_JSONCPP is ON but a JsonCpp is not found!")
+    endif()
+    set(CMAKE_JSONCPP_LIBRARIES JsonCpp::JsonCpp)
+  else()
+    set(CMAKE_JSONCPP_LIBRARIES cmjsoncpp)
+    add_subdirectory(Utilities/cmjsoncpp)
+    CMAKE_SET_TARGET_FOLDER(cmjsoncpp "Utilities/3rdParty")
+  endif()
 
   #---------------------------------------------------------------------
   # Build XMLRPC library for CMake and CTest.
