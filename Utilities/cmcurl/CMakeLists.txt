@@ -425,9 +425,6 @@ endif()
 
 #-----------------------------------------------------------------------------
 
-option(CMAKE_USE_OPENSSL "Use OpenSSL code. Experimental" OFF)
-mark_as_advanced(CMAKE_USE_OPENSSL)
-
 set(USE_SSLEAY OFF)
 set(USE_OPENSSL OFF)
 set(HAVE_LIBCRYPTO OFF)
@@ -454,10 +451,12 @@ if(CMAKE_USE_OPENSSL)
     check_include_file("openssl/rand.h"   HAVE_OPENSSL_RAND_H)
 
     # Optionally build with a specific CA cert bundle.
-    set(CURL_CA_BUNDLE "" CACHE FILEPATH "Path to SSL CA Certificate Bundle")
-    mark_as_advanced(CURL_CA_BUNDLE)
     if(CURL_CA_BUNDLE)
       add_definitions(-DCURL_CA_BUNDLE="${CURL_CA_BUNDLE}")
+    endif()
+    # Optionally build with a specific CA cert dir.
+    if(CURL_CA_PATH)
+      add_definitions(-DCURL_CA_PATH="${CURL_CA_PATH}")
     endif()
   endif(OPENSSL_FOUND)
 elseif(WIN32)
