@@ -2,6 +2,7 @@ include(RunCMake)
 
 # Default case parameters.
 set(CASE_DROP_METHOD "http")
+set(CASE_DROP_SITE "-no-site-")
 set(CASE_CTEST_SUBMIT_ARGS "")
 
 function(run_ctest CASE_NAME)
@@ -40,4 +41,9 @@ function(run_ctest_submit_FailDrop CASE_DROP_METHOD)
   run_ctest(FailDrop-${CASE_DROP_METHOD})
 endfunction()
 
-# TODO: call run_ctest_submit_FailDrop() for each submission protocol
+run_ctest_submit_FailDrop(cp)
+run_ctest_submit_FailDrop(ftp)
+run_ctest_submit_FailDrop(http)
+run_ctest_submit_FailDrop(https)
+run_ctest_submit_FailDrop(scp)
+run_ctest_submit_FailDrop(xmlrpc)

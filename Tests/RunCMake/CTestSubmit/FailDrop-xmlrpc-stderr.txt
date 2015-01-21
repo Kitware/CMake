@@ -1,0 +1,2 @@
+   (Problems when submitting via XML-RPC|Submission method "xmlrpc" not compiled into CTest!)
+Error in read script: .*/Tests/RunCMake/CTestSubmit/FailDrop-xmlrpc/test.cmake
