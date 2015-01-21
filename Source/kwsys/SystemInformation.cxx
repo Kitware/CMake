@@ -5069,7 +5069,11 @@ bool SystemInformationImplementation::QueryOSInformation()
   osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEXW);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (push)
-# pragma warning (disable:4996)
+# ifdef __INTEL_COMPILER
+#  pragma warning (disable:1478)
+# else
+#  pragma warning (disable:4996)
+# endif
 #endif
   bOsVersionInfoEx = GetVersionExW ((OSVERSIONINFOW*)&osvi);
   if (!bOsVersionInfoEx)
