@@ -26,7 +26,7 @@
 
 #include <cm_jsoncpp_reader.h>
 // For curl submission
-#include "cm_curl.h"
+#include "cmCurl.h"
 #include "cmCTestCurl.h"
 
 #include <sys/stat.h>
@@ -366,6 +366,7 @@ bool cmCTestSubmitHandler::SubmitUsingHTTP(const std::string& localprefix,
     curl = curl_easy_init();
     if(curl)
       {
+      cmCurlSetCAInfo(curl);
       if(verifyPeerOff)
         {
         cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
