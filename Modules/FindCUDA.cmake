@@ -276,6 +276,8 @@
 #                            Only available for CUDA version 4.0+.
 #   CUDA_curand_LIBRARY   -- CUDA Random Number Generation library.
 #                            Only available for CUDA version 3.2+.
+#   CUDA_cusolver_LIBRARY -- CUDA Direct Solver library.
+#                            Only available for CUDA version 7.0+.
 #   CUDA_cusparse_LIBRARY -- CUDA Sparse Matrix library.
 #                            Only available for CUDA version 3.2+.
 #   CUDA_npp_LIBRARY      -- NVIDIA Performance Primitives lib.
@@ -518,6 +520,7 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_cufft_LIBRARY CACHE)
   unset(CUDA_cufftemu_LIBRARY CACHE)
   unset(CUDA_curand_LIBRARY CACHE)
+  unset(CUDA_cusolver_LIBRARY CACHE)
   unset(CUDA_cusparse_LIBRARY CACHE)
   unset(CUDA_npp_LIBRARY CACHE)
   unset(CUDA_nppc_LIBRARY CACHE)
@@ -753,6 +756,10 @@ if(CUDA_VERSION VERSION_GREATER "5.0")
   set(CUDA_npp_LIBRARY "${CUDA_nppc_LIBRARY};${CUDA_nppi_LIBRARY};${CUDA_npps_LIBRARY}")
 elseif(NOT CUDA_VERSION VERSION_LESS "4.0")
   find_cuda_helper_libs(npp)
+endif()
+if(NOT CUDA_VERSION VERSION_LESS "7.0")
+  # cusolver showed up in version 7.0
+  find_cuda_helper_libs(cusolver)
 endif()
 
 if (CUDA_BUILD_EMULATION)
