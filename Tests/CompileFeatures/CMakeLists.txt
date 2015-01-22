@@ -103,8 +103,9 @@ foreach(lang CXX C)
       try_compile(${feature}_works
         "${CMAKE_CURRENT_BINARY_DIR}/${feature}_test"
         "${CMAKE_CURRENT_SOURCE_DIR}/feature_test.${${lang}_ext}"
-        COMPILE_DEFINITIONS "-DTEST=${CMAKE_CURRENT_SOURCE_DIR}/${feature}.${${lang}_ext}"
+        COMPILE_DEFINITIONS "-DTEST=${feature}.${${lang}_ext}"
         CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD=${${lang}_standard_flag}"
+          "-DINCLUDE_DIRECTORIES=${CMAKE_CURRENT_SOURCE_DIR}"
         OUTPUT_VARIABLE OUTPUT
       )
       if (${feature}_works)
