@@ -27,7 +27,8 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     = this->Makefile->GetDefinition("CTEST_TRIGGER_SITE");
   bool ctestDropSiteCDash
     = this->Makefile->IsOn("CTEST_DROP_SITE_CDASH");
-
+  const char* ctestProjectName
+    = this->Makefile->GetDefinition("CTEST_PROJECT_NAME");
   if ( !ctestDropMethod )
     {
     ctestDropMethod = "http";
@@ -43,7 +44,7 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     // error: CDash requires CTEST_DROP_LOCATION definition
     // in CTestConfig.cmake
     }
-
+  this->CTest->SetCTestConfiguration("ProjectName", ctestProjectName);
   this->CTest->SetCTestConfiguration("DropMethod", ctestDropMethod);
   this->CTest->SetCTestConfiguration("DropSite", ctestDropSite);
   this->CTest->SetCTestConfiguration("DropLocation", ctestDropLocation);
@@ -144,44 +145,75 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
   static_cast<cmCTestSubmitHandler*>(handler)->SetOption("InternalTest",
     this->InternalTest ? "ON" : "OFF");
 
+  if (this->CDashUpload)
+    {
+    static_cast<cmCTestSubmitHandler*>(handler)->
+      SetOption("CDashUploadFile", this->CDashUploadFile.c_str());
+    static_cast<cmCTestSubmitHandler*>(handler)->
+      SetOption("CDashUploadType", this->CDashUploadType.c_str());
+    }
   return handler;
 }
 
+//----------------------------------------------------------------------------
+bool cmCTestSubmitCommand::InitialPass(std::vector<std::string> const& args,
+                                       cmExecutionStatus& status)
+{
+  this->CDashUpload = !args.empty() && args[0] == "CDASH_UPLOAD";
+  return this->cmCTestHandlerCommand::InitialPass(args, status);
+}
 
 //----------------------------------------------------------------------------
 bool cmCTestSubmitCommand::CheckArgumentKeyword(std::string const& arg)
 {
-  // Look for arguments specific to this command.
-  if(arg == "PARTS")
+  if (this->CDashUpload)
     {
-    this->ArgumentDoing = ArgumentDoingParts;
-    this->PartsMentioned = true;
-    return true;
-    }
+    if(arg == "CDASH_UPLOAD")
+      {
+      this->ArgumentDoing = ArgumentDoingCDashUpload;
+      return true;
+      }
 
-  if(arg == "FILES")
-    {
-    this->ArgumentDoing = ArgumentDoingFiles;
-    this->FilesMentioned = true;
-    return true;
+    if(arg == "CDASH_UPLOAD_TYPE")
+      {
+      this->ArgumentDoing = ArgumentDoingCDashUploadType;
+      return true;
+      }
     }
-
-  if(arg == "RETRY_COUNT")
+  else
     {
-    this->ArgumentDoing = ArgumentDoingRetryCount;
-    return true;
-    }
+    // Look for arguments specific to this command.
+    if(arg == "PARTS")
+      {
+      this->ArgumentDoing = ArgumentDoingParts;
+      this->PartsMentioned = true;
+      return true;
+      }
 
-  if(arg == "RETRY_DELAY")
-    {
-    this->ArgumentDoing = ArgumentDoingRetryDelay;
-    return true;
-    }
+    if(arg == "FILES")
+      {
+      this->ArgumentDoing = ArgumentDoingFiles;
+      this->FilesMentioned = true;
+      return true;
+      }
 
-  if(arg == "INTERNAL_TEST_CHECKSUM")
-    {
-    this->InternalTest = true;
-    return true;
+    if(arg == "RETRY_COUNT")
+      {
+      this->ArgumentDoing = ArgumentDoingRetryCount;
+      return true;
+      }
+
+    if(arg == "RETRY_DELAY")
+      {
+      this->ArgumentDoing = ArgumentDoingRetryDelay;
+      return true;
+      }
+
+    if(arg == "INTERNAL_TEST_CHECKSUM")
+      {
+      this->InternalTest = true;
+      return true;
+      }
     }
 
   // Look for other arguments.
@@ -237,6 +269,20 @@ bool cmCTestSubmitCommand::CheckArgumentValue(std::string const& arg)
   if(this->ArgumentDoing == ArgumentDoingRetryDelay)
     {
     this->RetryDelay = arg;
+    return true;
+    }
+
+  if(this->ArgumentDoing == ArgumentDoingCDashUpload)
+    {
+    this->ArgumentDoing = ArgumentDoingNone;
+    this->CDashUploadFile = arg;
+    return true;
+    }
+
+  if(this->ArgumentDoing == ArgumentDoingCDashUploadType)
+    {
+    this->ArgumentDoing = ArgumentDoingNone;
+    this->CDashUploadType = arg;
     return true;
     }
 
