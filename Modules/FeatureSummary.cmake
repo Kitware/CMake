@@ -40,7 +40,7 @@
 #                      [FATAL_ON_MISSING_REQUIRED_PACKAGES]
 #                      [DESCRIPTION "Found packages:"]
 #                      WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
-#                           | ENABLED_FEATURES | DISABLED_FEATURES]
+#                           | ENABLED_FEATURES | DISABLED_FEATURES)
 #                    )
 #
 #
@@ -265,7 +265,7 @@
 # Does the same as SET_PACKAGE_INFO(<name> <description> <url> )
 
 #=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
+# Copyright 2007-2015 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
