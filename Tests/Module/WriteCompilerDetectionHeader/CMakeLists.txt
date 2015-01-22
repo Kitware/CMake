@@ -71,7 +71,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
     OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
     OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
   add_executable(C_undefined c_undefined.c)
-  set_property(TARGET C_undefined PROPERTY CXX_STANDARD 90)
+  set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
   target_compile_options(C_undefined PRIVATE -Werror=undef)
 endif()
 
