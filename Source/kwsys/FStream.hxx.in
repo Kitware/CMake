@@ -18,6 +18,11 @@
 namespace @KWSYS_NAMESPACE@
 {
 #if defined(_MSC_VER) && _MSC_VER >= 1400
+# if defined(_NOEXCEPT)
+#  define @KWSYS_NAMESPACE@_FStream_NOEXCEPT _NOEXCEPT
+# else
+#  define @KWSYS_NAMESPACE@_FStream_NOEXCEPT
+# endif
   template<typename CharType,typename Traits>
   class basic_filebuf : public std::basic_filebuf<CharType,Traits>
   {
@@ -85,7 +90,7 @@ namespace @KWSYS_NAMESPACE@
       return buf_;
     }
 
-    ~basic_ifstream()
+    ~basic_ifstream() @KWSYS_NAMESPACE@_FStream_NOEXCEPT
     {
       buf_->close();
       delete buf_;
@@ -147,7 +152,7 @@ class basic_ofstream : public std::basic_ostream<CharType,Traits>
   {
     return buf_.get();
   }
-  ~basic_ofstream()
+  ~basic_ofstream() @KWSYS_NAMESPACE@_FStream_NOEXCEPT
   {
     buf_->close();
     delete buf_;
@@ -160,6 +165,7 @@ class basic_ofstream : public std::basic_ostream<CharType,Traits>
   typedef basic_ifstream<char> ifstream;
   typedef basic_ofstream<char> ofstream;
 
+# undef @KWSYS_NAMESPACE@_FStream_NOEXCEPT
 #else
   using @KWSYS_NAMESPACE@_ios_namespace::ofstream;
   using @KWSYS_NAMESPACE@_ios_namespace::ifstream;

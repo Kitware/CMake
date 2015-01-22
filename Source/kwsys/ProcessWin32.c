@@ -340,7 +340,11 @@ kwsysProcess* kwsysProcess_New(void)
   osv.dwOSVersionInfoSize = sizeof(osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (push)
-# pragma warning (disable:4996)
+# ifdef __INTEL_COMPILER
+#  pragma warning (disable:1478)
+# else
+#  pragma warning (disable:4996)
+# endif
 #endif
   GetVersionEx(&osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
@@ -2382,7 +2386,11 @@ static kwsysProcess_List* kwsysProcess_List_New(void)
   osv.dwOSVersionInfoSize = sizeof(osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
 # pragma warning (push)
-# pragma warning (disable:4996)
+# ifdef __INTEL_COMPILER
+#  pragma warning (disable:1478)
+# else
+#  pragma warning (disable:4996)
+# endif
 #endif
   GetVersionEx(&osv);
 #ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
