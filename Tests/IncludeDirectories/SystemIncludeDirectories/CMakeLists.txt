@@ -14,8 +14,14 @@ target_include_directories(upstream SYSTEM PUBLIC
   $<TARGET_PROPERTY:systemlib,INTERFACE_INCLUDE_DIRECTORIES>
 )
 
+add_library(config_specific INTERFACE)
+set(testConfig ${CMAKE_BUILD_TYPE})
+target_include_directories(config_specific SYSTEM INTERFACE
+  "$<$<CONFIG:${testConfig}>:${CMAKE_CURRENT_SOURCE_DIR}/config_specific>"
+)
+
 add_library(consumer consumer.cpp)
-target_link_libraries(consumer upstream)
+target_link_libraries(consumer upstream config_specific)
 target_compile_options(consumer PRIVATE -Werror=unused-variable)
 
 add_library(iface IMPORTED INTERFACE)
