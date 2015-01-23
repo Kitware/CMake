@@ -170,8 +170,10 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
     std::string includeFlags =
       this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
                                             language,
-      language == "RC" ? true : false); // full include paths for RC
+      language == "RC" ? true : false,  // full include paths for RC
                                         // needed by cmcldeps
+                                            false,
+                                            this->GetConfigName());
     if(cmGlobalNinjaGenerator::IsMinGW())
       cmSystemTools::ReplaceString(includeFlags, "\\", "/");
 

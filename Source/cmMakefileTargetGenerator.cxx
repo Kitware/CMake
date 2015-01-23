@@ -1870,7 +1870,8 @@ void cmMakefileTargetGenerator::AddIncludeFlags(std::string& flags,
 
   std::string includeFlags =
     this->LocalGenerator->GetIncludeFlags(includes, this->GeneratorTarget,
-                                          lang, false, useResponseFile);
+                                          lang, false, useResponseFile,
+                                          config);
   if(includeFlags.empty())
     {
     return;
