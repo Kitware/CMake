@@ -2299,24 +2299,18 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
       {
       // Now add the rest of the components separated by the proper slash
       // direction for this platform.
-      bool first = true;
+      const char* sep = "";
       for(unsigned int i=1; i < components.size() - 1; ++i)
         {
         if(!components[i].empty())
           {
-          if(!first)
-            {
-            result += slash;
-            }
+          result += sep;
           result += components[i];
-          first = false;
+          sep = slash;
           }
         }
       // Only the last component can be empty to avoid double slashes.
-      if(!first)
-        {
-        result += slash;
-        }
+      result += slash;
       result += components.back();
       }
     }
