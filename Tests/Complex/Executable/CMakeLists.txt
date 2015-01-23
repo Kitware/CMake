@@ -21,7 +21,7 @@ if(TARGET NotATarget)
   message(FATAL_ERROR "if(TARGET NotATarget) returned true!")
 endif()
 
-  # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to
+# Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to
 set(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 link_libraries(${COMPLEX_LIBS})
 
