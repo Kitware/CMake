@@ -239,6 +239,11 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const kwsys_stl::string& na
 {
   DIR* dir = opendir(name.c_str());
 
+  if (!dir)
+    {
+    return 0;
+    }
+
   unsigned long count = 0;
   for (dirent* d = readdir(dir); d; d = readdir(dir) )
     {
