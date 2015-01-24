@@ -2191,7 +2191,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       = this->CreateGlobalTarget(this->GetPackageTargetName(),
                                  "Run CPack packaging tool...",
                                  &cpackCommandLines, depends,
-                                 workingDir.c_str(), /*uses_terminal*/false);
+                                 workingDir.c_str(), /*uses_terminal*/true);
     }
   // CPack source
   const char* packageSourceTargetName = this->GetPackageSourceTargetName();
@@ -2215,7 +2215,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
         = this->CreateGlobalTarget(packageSourceTargetName,
                                    "Run CPack packaging tool for source...",
                                    &cpackCommandLines, depends,
-                                   workingDir.c_str(), /*uses_terminal*/false);
+                                   workingDir.c_str(), /*uses_terminal*/true);
       }
     }
 
@@ -2241,7 +2241,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[this->GetTestTargetName()]
       = this->CreateGlobalTarget(this->GetTestTargetName(),
         "Running tests...", &cpackCommandLines, depends, 0,
-        /*uses_terminal*/false);
+        /*uses_terminal*/true);
     }
 
   //Edit Cache
@@ -2296,7 +2296,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[rebuildCacheTargetName] =
       this->CreateGlobalTarget(
         rebuildCacheTargetName, "Running CMake to regenerate build system...",
-        &cpackCommandLines, depends, 0, /*uses_terminal*/false);
+        &cpackCommandLines, depends, 0, /*uses_terminal*/true);
     }
 
   //Install
@@ -2377,7 +2377,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     (*targets)[this->GetInstallTargetName()] =
       this->CreateGlobalTarget(
         this->GetInstallTargetName(), "Install the project...",
-        &cpackCommandLines, depends, 0, /*uses_terminal*/false);
+        &cpackCommandLines, depends, 0, /*uses_terminal*/true);
 
     // install_local
     if(const char* install_local = this->GetInstallLocalTargetName())
@@ -2393,7 +2393,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[install_local] =
         this->CreateGlobalTarget(
           install_local, "Installing only the local directory...",
-          &cpackCommandLines, depends, 0, /*uses_terminal*/false);
+          &cpackCommandLines, depends, 0, /*uses_terminal*/true);
       }
 
     // install_strip
@@ -2410,7 +2410,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       (*targets)[install_strip] =
         this->CreateGlobalTarget(
           install_strip, "Installing the project stripped...",
-          &cpackCommandLines, depends, 0, /*uses_terminal*/false);
+          &cpackCommandLines, depends, 0, /*uses_terminal*/true);
       }
     }
 }
