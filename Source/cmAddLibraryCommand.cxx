@@ -435,11 +435,7 @@ bool cmAddLibraryCommand
     cmSystemTools::Message(msg.c_str() ,"Warning");
     }
 
-  while (s != args.end())
-    {
-    srclists.push_back(*s);
-    ++s;
-    }
+  srclists.insert(srclists.end(), s, args.end());
 
   this->Makefile->AddLibrary(libName, type, srclists, excludeFromAll);
 
