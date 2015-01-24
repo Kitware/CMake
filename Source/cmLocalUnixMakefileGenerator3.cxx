@@ -2299,16 +2299,12 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
       {
       // Now add the rest of the components separated by the proper slash
       // direction for this platform.
-      const char* sep = "";
-      for(unsigned int i=1; i < components.size() - 1; ++i)
-        {
-        if(!components[i].empty())
-          {
-          result += sep;
-          result += components[i];
-          sep = slash;
-          }
-        }
+      std::vector<std::string>::const_iterator compEnd
+          = std::remove(components.begin() + 1, components.end() - 1,
+                          std::string());
+      std::vector<std::string>::const_iterator compStart
+          = components.begin() + 1;
+      result += cmJoin(cmRange(compStart, compEnd), slash);
       // Only the last component can be empty to avoid double slashes.
       result += slash;
       result += components.back();
