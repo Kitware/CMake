@@ -4,6 +4,9 @@
 #error "Expect override control feature"
 #endif
 #else
+#if !EXPECT_OVERRIDE_CONTROL
+#error "Expect no override control feature"
+#endif
 
 struct A
 {
