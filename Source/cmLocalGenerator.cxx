@@ -3204,11 +3204,7 @@ cmLocalGenerator
     std::string ssin = sin;
 
     // Avoid full paths by removing leading slashes.
-    std::string::size_type pos = 0;
-    for(;pos < ssin.size() && ssin[pos] == '/'; ++pos)
-      {
-      }
-    ssin = ssin.substr(pos);
+    ssin.erase(0, ssin.find_first_not_of("/"));
 
     // Avoid full paths by removing colons.
     cmSystemTools::ReplaceString(ssin, ":", "_");
