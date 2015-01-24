@@ -48,6 +48,9 @@ function(run_cmake test)
   if(APPLE)
     list(APPEND RunCMake_TEST_OPTIONS -DCMAKE_POLICY_DEFAULT_CMP0025=NEW)
   endif()
+  if(RunCMake_MAKE_PROGRAM)
+    list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}")
+  endif()
   if(RunCMake_TEST_COMMAND)
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
