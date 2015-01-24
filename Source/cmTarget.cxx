@@ -5919,8 +5919,7 @@ cmTarget::GetCompatibleInterfaces(std::string const& config) const
         { \
         std::vector<std::string> props; \
         cmSystemTools::ExpandListArgument(prop, props); \
-        std::copy(props.begin(), props.end(), \
-                  std::inserter(compat.Props##x, compat.Props##x.begin())); \
+        compat.Props##x.insert(props.begin(), props.end()); \
         }
       CM_READ_COMPATIBLE_INTERFACE(BOOL, Bool)
       CM_READ_COMPATIBLE_INTERFACE(STRING, String)
