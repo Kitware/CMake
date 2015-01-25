@@ -172,12 +172,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
                 }
               std::vector<std::string>::const_iterator eit
                   = expandedArgs.begin() + (this->Args.size() - 1);
-              const char* sep = "";
-              for( ; eit != expandedArgs.end(); ++eit)
-                {
-                argnDef += sep + *eit;
-                sep = ";";
-                }
+              argnDef += cmJoin(cmRange(eit, expandedArgs.end()), ";");
               }
             argnDefInitialized = true;
             }

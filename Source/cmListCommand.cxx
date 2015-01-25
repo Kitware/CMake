@@ -259,14 +259,7 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
     {
     listString += ";";
     }
-  const char* sep = "";
-  size_t cc;
-  for ( cc = 2; cc < args.size(); ++ cc )
-    {
-    listString += sep;
-    listString += args[cc];
-    sep = ";";
-    }
+  listString += cmJoin(cmRange(args).advance(2), ";");
 
   this->Makefile->AddDefinition(listName, listString.c_str());
   return true;

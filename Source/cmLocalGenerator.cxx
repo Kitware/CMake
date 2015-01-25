@@ -3016,13 +3016,7 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
     {
     relative += "/";
     }
-  const char* sep = "";
-  for(unsigned int i=common; i < remote.size(); ++i)
-    {
-    relative += sep;
-    relative += remote[i];
-    sep = "/";
-    }
+  relative += cmJoin(cmRange(remote).advance(common), "/");
 
   // Finally return the path.
   return relative;

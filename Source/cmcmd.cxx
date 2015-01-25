@@ -406,12 +406,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Clock command
     else if (args[1] == "time" && args.size() > 2)
       {
-      std::string command = args[2];
-      for (std::string::size_type cc = 3; cc < args.size(); cc ++)
-        {
-        command += " ";
-        command += args[cc];
-        }
+      std::string command = cmJoin(cmRange(args).advance(2), " ");
 
       clock_t clock_start, clock_finish;
       time_t time_start, time_finish;
@@ -473,14 +468,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
 
       std::string command = "\"";
-      command += args[3];
+      command += cmJoin(cmRange(args).advance(3), "\" \"");
       command += "\"";
-      for (std::string::size_type cc = 4; cc < args.size(); cc ++)
-        {
-        command += " \"";
-        command += args[cc];
-        command += "\"";
-        }
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, &retval,
