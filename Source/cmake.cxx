@@ -437,7 +437,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           return false;
           }
         }
-      std::cerr << "loading initial cache file " << path << "\n";
+      std::cout << "loading initial cache file " << path << "\n";
       this->ReadListFile(args, path.c_str());
       }
     else if(arg.find("-P",0) == 0)
