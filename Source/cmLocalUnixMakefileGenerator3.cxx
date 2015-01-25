@@ -2395,14 +2395,11 @@ void cmLocalUnixMakefileGenerator3
     // each command.
     std::string outputForExisting =
                           this->ConvertToOutputForExisting(tgtDir, relRetDir);
+    std::string prefix = cd_cmd + outputForExisting + " && ";
     std::vector<std::string>::iterator i = commands.begin();
     for (; i != commands.end(); ++i)
       {
-      std::string cmd = cd_cmd;
-      cmd += outputForExisting;
-      cmd += " && ";
-      cmd += *i;
-      *i = cmd;
+      *i = prefix + *i;
       }
     }
 }
