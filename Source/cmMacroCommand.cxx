@@ -164,20 +164,23 @@ bool cmMacroHelperCommand::InvokeInitialPass
           {
           if (!argnDefInitialized)
             {
-            std::vector<std::string>::const_iterator eit
-                = expandedArgs.begin();
-            std::vector<std::string>::size_type cnt = 0;
-            for( ; eit != expandedArgs.end(); ++eit)
+            if (expandedArgs.size() > this->Args.size() - 1)
               {
-              if ( cnt >= this->Args.size()-1 )
+              std::vector<std::string>::const_iterator eit
+                  = expandedArgs.begin();
+              std::vector<std::string>::size_type cnt = 0;
+              for( ; eit != expandedArgs.end(); ++eit)
                 {
-                if (!argnDef.empty())
+                if ( cnt >= this->Args.size()-1 )
                   {
-                  argnDef += ";";
+                  if (!argnDef.empty())
+                    {
+                    argnDef += ";";
+                    }
+                  argnDef += *eit;
                   }
-                argnDef += *eit;
+                cnt ++;
                 }
-              cnt ++;
               }
             argnDefInitialized = true;
             }
