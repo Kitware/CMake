@@ -599,17 +599,6 @@ public:
    */
   void AddSystemIncludeDirectories(const std::set<std::string> &incs);
 
-  /** Expand out any arguements in the vector that have ; separated
-   *  strings into multiple arguements.  A new vector is created
-   *  containing the expanded versions of all arguments in argsIn.
-   * This method differes from the one in cmSystemTools in that if
-   * the CmakeLists file is version 1.2 or earlier it will check for
-   * source lists being used without ${} around them
-   */
-  void ExpandSourceListArguments(std::vector<std::string> const& argsIn,
-                                 std::vector<std::string>& argsOut,
-                                 unsigned int startArgumentIndex) const;
-
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then a null pointer is returned.
    */

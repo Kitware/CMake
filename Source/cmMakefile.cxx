@@ -3576,19 +3576,6 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang,
                                                              optional);
 }
 
-void cmMakefile::ExpandSourceListArguments(
-  std::vector<std::string> const& arguments,
-  std::vector<std::string>& newargs, unsigned int /* start */) const
-{
-  // now expand the args
-  unsigned int i;
-  for(i = 0; i < arguments.size(); ++i)
-    {
-    // List expansion will have been done already.
-    newargs.push_back(arguments[i]);
-    }
-}
-
 int cmMakefile::TryCompile(const std::string& srcdir,
                            const std::string& bindir,
                            const std::string& projectName,
