@@ -1153,15 +1153,11 @@ cmTarget::LinkLibraryType cmTarget::ComputeLinkType(
 
   // Check if any entry in the list matches this configuration.
   std::string configUpper = cmSystemTools::UpperCase(config);
-  for(std::vector<std::string>::const_iterator i = debugConfigs.begin();
-      i != debugConfigs.end(); ++i)
+  if (std::find(debugConfigs.begin(), debugConfigs.end(), configUpper) !=
+      debugConfigs.end())
     {
-    if(*i == configUpper)
-      {
-      return cmTarget::DEBUG;
-      }
+    return cmTarget::DEBUG;
     }
-
   // The current configuration is not a debug configuration.
   return cmTarget::OPTIMIZED;
 }
