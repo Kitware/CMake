@@ -36,15 +36,15 @@ bool cmSetTestsPropertiesCommand
       doingFiles = false;
       // now loop through the rest of the arguments, new style
       ++j;
+      if (std::distance(j, args.end()) % 2 != 0)
+        {
+        this->SetError("called with incorrect number of arguments.");
+        return false;
+        }
       while (j != args.end())
         {
         propertyPairs.push_back(*j);
         ++j;
-        if(j == args.end())
-          {
-          this->SetError("called with incorrect number of arguments.");
-          return false;
-          }
         propertyPairs.push_back(*j);
         ++j;
         }
