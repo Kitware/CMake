@@ -6,7 +6,7 @@ run_cmake(NotAFeatureTransitive)
 run_cmake(NotAFeature_OriginDebug)
 run_cmake(NotAFeature_OriginDebugGenex)
 run_cmake(NotAFeature_OriginDebugTransitive)
-run_cmake(NotAFeature_OriginDebug_target_compile_features)
+run_cmake(NotAFeature_OriginDebugCommand)
 
 run_cmake(generate_feature_list)
 file(READ
