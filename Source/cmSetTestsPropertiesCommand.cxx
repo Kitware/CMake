@@ -41,14 +41,7 @@ bool cmSetTestsPropertiesCommand
         this->SetError("called with incorrect number of arguments.");
         return false;
         }
-      while (j != args.end())
-        {
-        propertyPairs.push_back(*j);
-        ++j;
-        propertyPairs.push_back(*j);
-        ++j;
-        }
-      // break out of the loop because j is already == end
+      propertyPairs.insert(propertyPairs.end(), j, args.end());
       break;
       }
     else if (doingFiles)
