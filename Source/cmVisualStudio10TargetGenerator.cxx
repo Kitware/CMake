@@ -1211,6 +1211,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
   std::string shaderType;
   std::string shaderEntryPoint;
   std::string shaderModel;
+  std::string shaderAdditionalFlags;
   std::string ext = cmSystemTools::LowerCase(sf->GetExtension());
   if(ext == "hlsl")
     {
@@ -1231,6 +1232,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
     if (const char* sm = sf->GetProperty("VS_SHADER_MODEL"))
       {
       shaderModel = sm;
+      toolHasSettings = true;
+      }
+    // Figure out if there's any additional flags to use
+    if (const char* saf = sf->GetProperty("VS_SHADER_FLAGS"))
+      {
+      shaderAdditionalFlags = saf;
       toolHasSettings = true;
       }
     }
@@ -1341,6 +1348,12 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
       this->WriteString("<ShaderModel>", 3);
       (*this->BuildFileStream) << cmVS10EscapeXML(shaderModel)
                                << "</ShaderModel>\n";
+      }
+    if(!shaderAdditionalFlags.empty())
+      {
+      this->WriteString("<AdditionalOptions>", 3);
+      (*this->BuildFileStream) << cmVS10EscapeXML(shaderAdditionalFlags)
+                               << "</AdditionalOptions>\n";
       }
     this->WriteString("</", 2);
     (*this->BuildFileStream) << tool << ">\n";
