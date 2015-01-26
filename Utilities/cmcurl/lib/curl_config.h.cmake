@@ -3,12 +3,6 @@
 /* when building libcurl itself */
 #cmakedefine BUILDING_LIBCURL 1
 
-/* Location of default ca bundle */
-#cmakedefine CURL_CA_BUNDLE ${CURL_CA_BUNDLE}
-
-/* Location of default ca path */
-#cmakedefine CURL_CA_PATH ${CURL_CA_PATH}
-
 /* to disable cookies support */
 #cmakedefine CURL_DISABLE_COOKIES 1
 

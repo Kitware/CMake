@@ -175,6 +175,8 @@ set(SRCS
   cmCPackPropertiesGenerator.cxx
   cmCryptoHash.cxx
   cmCryptoHash.h
+  cmCurl.cxx
+  cmCurl.h
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmCustomCommandGenerator.cxx
@@ -496,6 +498,12 @@ if(WIN32 AND NOT CYGWIN)
   target_link_libraries(cmcldeps CMakeLib)
   install(TARGETS cmcldeps DESTINATION bin)
 endif()
+
+foreach(v CURL_CA_BUNDLE CURL_CA_PATH)
+  if(${v})
+    set_property(SOURCE cmCurl.cxx APPEND PROPERTY COMPILE_DEFINITIONS ${v}="${${v}}")
+  endif()
+endforeach()
 
 # create a library used by the command line and the GUI
 add_library(CMakeLib ${SRCS})

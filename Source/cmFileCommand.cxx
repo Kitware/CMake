@@ -20,7 +20,7 @@
 #include "cmTimestamp.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include "cm_curl.h"
+#include "cmCurl.h"
 #include "cmFileLockResult.h"
 #endif
 
@@ -3068,10 +3068,11 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
     }
   // check to see if a CAINFO file has been specified
   // command arg comes first
-  if(cainfo && *cainfo)
+  std::string const& cainfo_err = cmCurlSetCAInfo(curl, cainfo);
+  if (!cainfo_err.empty())
     {
-    res = ::curl_easy_setopt(curl, CURLOPT_CAINFO, cainfo);
-    check_curl_result(res, "Unable to set TLS/SSL Verify CAINFO: ");
+    this->SetError(cainfo_err);
+    return false;
     }
 
   cmFileCommandVectorOfChar chunkDebug;
