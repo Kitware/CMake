@@ -1,16 +1,19 @@
 link_libraries
 --------------
 
-Deprecated. Use the target_link_libraries() command instead.
-
 Link libraries to all targets added later.
 
 ::
 
-  link_libraries(library1 <debug | optimized> library2 ...)
+  link_libraries([item1 [item2 [...]]]
+                 [[debug|optimized|general] <item>] ...)
 
-Specify a list of libraries to be linked into any following targets
-(typically added with the add_executable or add_library calls).  This
-command is passed down to all subdirectories.  The debug and optimized
-strings may be used to indicate that the next library listed is to be
-used only for that specific type of build.
+Specify libraries or flags to use when linking any targets created later in
+the current directory or below by commands such as :command:`add_executable`
+or :command:`add_library`.  See the :command:`target_link_libraries` command
+for meaning of arguments.
+
+.. note::
+  The :command:`target_link_libraries` command should be preferred whenever
+  possible.  Library dependencies are chained automatically, so directory-wide
+  specification of link libraries is rarely needed.
