@@ -11,7 +11,7 @@ Synopsis
  cmake [<options>] (<path-to-source> | <path-to-existing-build>)
  cmake [(-D<var>=<value>)...] -P <cmake-script-file>
  cmake --build <dir> [<options>] [-- <build-tool-options>...]
- cmake -E <command> [<options>]
+ cmake -E <command> [<options>...]
  cmake --find-package <options>...
 
 Description
@@ -32,17 +32,8 @@ Options
 
 .. include:: OPTIONS_BUILD.txt
 
-``-E``
- CMake command mode.
-
- For true platform independence, CMake provides a list of commands
- that can be used on all systems.  Run with -E help for the usage
- information.  Commands available are: chdir, compare_files, copy,
- copy_directory, copy_if_different, echo, echo_append, env, environment,
- make_directory, md5sum, remove, remove_directory, rename, sleep, tar, time,
- touch, touch_nocreate.  In addition, some platform specific commands
- are available.  On Windows: delete_regv, write_regv.  On
- UNIX: create_symlink.
+``-E <command> [<options>...]``
+ See `Command-Line Tool Mode`_.
 
 ``-L[A][H]``
  List non-advanced cached variables.
@@ -155,6 +146,111 @@ Options
  warn about other files as well.
 
 .. include:: OPTIONS_HELP.txt
+
+Command-Line Tool Mode
+======================
+
+CMake provides builtin command-line tools through the signature::
+
+ cmake -E <command> [<options>...]
+
+Run ``cmake -E`` or ``cmake -E help`` for a summary of commands.
+Available commands are:
+
+``chdir <dir> <cmd> [<arg>...]``
+  Change the current working directory and run a command.
+
+``compare_files <file1> <file2>``
+  Check if file1 is same as file2.
+
+``copy <file> <destination>``
+  Copy file to destination (either file or directory).
+
+``copy_directory <source> <destination>``
+  Copy directory 'source' content to directory 'destination'.
+
+``copy_if_different <in-file> <out-file>``
+  Copy file if input has changed.
+
+``echo [<string>...]``
+  Displays arguments as text.
+
+``echo_append [<string>...]``
+  Displays arguments as text but no new line.
+
+``env [--unset=NAME]... [NAME=VALUE]... COMMAND [ARG]...``
+  Run command in a modified environment.
+
+``environment``
+  Display the current environment.
+
+``make_directory <dir>``
+  Create a directory.
+
+``md5sum [<file>...]``
+  Compute md5sum of files.
+
+``remove [-f] [<file>...]``
+  Remove the file(s), use ``-f`` to force it.
+
+``remove_directory <dir>``
+  Remove a directory and its contents.
+
+``rename <oldname> <newname>``
+  Rename a file or directory (on one volume).
+
+``sleep <number>...``
+  Sleep for given number of seconds.
+
+``tar [cxt][vf][zjJ] file.tar [<options>...] [--] [<file>...]``
+  Create or extract a tar or zip archive.  Options are:
+
+  ``--``
+    Stop interpreting options and treat all remaining arguments
+    as file names even if they start in ``-``.
+  ``--files-from=<file>``
+    Read file names from the given file, one per line.
+    Blank lines are ignored.  Lines may not start in ``-``
+    except for ``--add-file=<name>`` to add files whose
+    names start in ``-``.
+  ``--mtime=<date>``
+    Specify modification time recorded in tarball entries.
+
+``time <command> [<args>...]``
+  Run command and return elapsed time.
+
+``touch <file>``
+  Touch a file.
+
+``touch_nocreate <file>``
+  Touch a file if it exists but do not create it.
+
+UNIX-specific Command-Line Tools
+--------------------------------
+
+The following ``cmake -E`` commands are available only on UNIX:
+
+``create_symlink <old> <new>``
+  Create a symbolic link ``<new>`` naming ``<old>``.
+
+Windows-specific Command-Line Tools
+-----------------------------------
+
+The following ``cmake -E`` commands are available only on Windows:
+
+``delete_regv <key>``
+  Delete Windows registry value.
+
+``env_vs8_wince <sdkname>``
+  Displays a batch file which sets the environment for the provided
+  Windows CE SDK installed in VS2005.
+
+``env_vs9_wince <sdkname>``
+  Displays a batch file which sets the environment for the provided
+  Windows CE SDK installed in VS2008.
+
+``write_regv <key> <value>``
+  Write Windows registry value.
 
 See Also
 ========
