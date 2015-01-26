@@ -6,8 +6,9 @@ Try compiling and then running some code.
 ::
 
   try_run(RUN_RESULT_VAR COMPILE_RESULT_VAR
-          bindir srcfile [CMAKE_FLAGS <Flags>]
+          bindir srcfile [CMAKE_FLAGS <flags>]
           [COMPILE_DEFINITIONS <flags>]
+          [LINK_LIBRARIES <libs>]
           [COMPILE_OUTPUT_VARIABLE comp]
           [RUN_OUTPUT_VARIABLE run]
           [OUTPUT_VARIABLE var]
@@ -21,6 +22,12 @@ set to FAILED_TO_RUN.  COMPILE_OUTPUT_VARIABLE specifies the variable
 where the output from the compile step goes.  RUN_OUTPUT_VARIABLE
 specifies the variable where the output from the running executable
 goes.
+
+The srcfile signature also accepts a LINK_LIBRARIES argument which may
+contain a list of libraries or IMPORTED targets which will be linked
+to in the generated project.  If LINK_LIBRARIES is specified as a
+parameter to try_run, then any LINK_LIBRARIES passed as
+CMAKE_FLAGS will be ignored.
 
 For compatibility reasons OUTPUT_VARIABLE is still supported, which
 gives you the output from the compile and run step combined.
