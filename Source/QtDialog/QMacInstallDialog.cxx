@@ -15,11 +15,11 @@ QMacInstallDialog::QMacInstallDialog(QWidget*w)
 {
   this->Internals = new QMacInstallDialogInternals;
   this->Internals->setupUi(this);
-  QObject::connect(this->Internals->choosePathButton, SIGNAL(pressed()),
+  QObject::connect(this->Internals->choosePathButton, SIGNAL(clicked(bool)),
                    this, SLOT(ShowBrowser()));
-  QObject::connect(this->Internals->skipInstallButton, SIGNAL(pressed()),
+  QObject::connect(this->Internals->skipInstallButton, SIGNAL(clicked(bool)),
                    this, SLOT(SkipInstall()));
-  QObject::connect(this->Internals->doInstallButton, SIGNAL(pressed()),
+  QObject::connect(this->Internals->doInstallButton, SIGNAL(clicked(bool)),
                    this, SLOT(DoInstall()));
   this->Internals->InstallPrefix->setText("/usr/bin/");
 
