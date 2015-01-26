@@ -2207,6 +2207,13 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     {
     return;
     }
+  const char* defaultStd
+      = this->Makefile->GetDefinition("CMAKE_" + lang + "_STANDARD_DEFAULT");
+  if (defaultStd && !*defaultStd)
+    {
+    // This compiler has no notion of language standard levels.
+    return;
+    }
   std::string stdProp = lang + "_STANDARD";
   const char *standardProp = target->GetProperty(stdProp);
   if (!standardProp)
@@ -2269,8 +2276,6 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
                                 std::find(stds.begin(), stds.end(), standard);
   assert(stdIt != stds.end());
 
-  const char* defaultStd
-      = this->Makefile->GetDefinition("CMAKE_" + lang + "_STANDARD_DEFAULT");
   std::vector<std::string>::const_iterator defaultStdIt;
   if (defaultStd)
     {

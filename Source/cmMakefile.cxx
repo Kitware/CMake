@@ -5253,6 +5253,27 @@ bool cmMakefile::
 HaveCStandardAvailable(cmTarget const* target,
                        const std::string& feature) const
 {
+  const char* defaultCStandard =
+    this->GetDefinition("CMAKE_C_STANDARD_DEFAULT");
+  if (!defaultCStandard)
+    {
+    std::ostringstream e;
+    e << "CMAKE_C_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
+      "not fully configured for this compiler.";
+    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    // Return true so the caller does not try to lookup the default standard.
+    return true;
+    }
+  if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
+                cmStrCmp(defaultCStandard)) == cmArrayEnd(C_STANDARDS))
+    {
+    std::ostringstream e;
+    e << "The CMAKE_C_STANDARD_DEFAULT variable contains an "
+         "invalid value: \"" << defaultCStandard << "\".";
+    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    return false;
+    }
+
   bool needC90 = false;
   bool needC99 = false;
   bool needC11 = false;
@@ -5262,7 +5283,7 @@ HaveCStandardAvailable(cmTarget const* target,
   const char *existingCStandard = target->GetProperty("C_STANDARD");
   if (!existingCStandard)
     {
-    existingCStandard = this->GetDefinition("CMAKE_C_STANDARD_DEFAULT");
+    existingCStandard = defaultCStandard;
     }
 
   if (std::find_if(cmArrayBegin(C_STANDARDS), cmArrayEnd(C_STANDARDS),
@@ -5331,6 +5352,27 @@ bool cmMakefile::IsLaterStandard(std::string const& lang,
 bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
                                          const std::string& feature) const
 {
+  const char* defaultCxxStandard =
+    this->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+  if (!defaultCxxStandard)
+    {
+    std::ostringstream e;
+    e << "CMAKE_CXX_STANDARD_DEFAULT is not set.  COMPILE_FEATURES support "
+      "not fully configured for this compiler.";
+    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    // Return true so the caller does not try to lookup the default standard.
+    return true;
+    }
+  if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
+                cmStrCmp(defaultCxxStandard)) == cmArrayEnd(CXX_STANDARDS))
+    {
+    std::ostringstream e;
+    e << "The CMAKE_CXX_STANDARD_DEFAULT variable contains an "
+         "invalid value: \"" << defaultCxxStandard << "\".";
+    this->IssueMessage(cmake::INTERNAL_ERROR, e.str());
+    return false;
+    }
+
   bool needCxx98 = false;
   bool needCxx11 = false;
   bool needCxx14 = false;
@@ -5339,7 +5381,7 @@ bool cmMakefile::HaveCxxStandardAvailable(cmTarget const* target,
   const char *existingCxxStandard = target->GetProperty("CXX_STANDARD");
   if (!existingCxxStandard)
     {
-    existingCxxStandard = this->GetDefinition("CMAKE_CXX_STANDARD_DEFAULT");
+    existingCxxStandard = defaultCxxStandard;
     }
 
   if (std::find_if(cmArrayBegin(CXX_STANDARDS), cmArrayEnd(CXX_STANDARDS),
