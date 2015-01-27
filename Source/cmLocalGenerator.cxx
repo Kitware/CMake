@@ -3641,24 +3641,20 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
 bool cmLocalGenerator::CheckDefinition(std::string const& define) const
 {
   // Many compilers do not support -DNAME(arg)=sdf so we disable it.
-  bool function_style = false;
-
   std::string::size_type pos = define.find_first_of("(=");
   if (pos != std::string::npos)
     {
-    function_style = define[pos] == '(';
-    }
-
-  if(function_style)
-    {
-    std::ostringstream e;
-    e << "WARNING: Function-style preprocessor definitions may not be "
-      << "passed on the compiler command line because many compilers "
-      << "do not support it.\n"
-      << "CMake is dropping a preprocessor definition: " << define << "\n"
-      << "Consider defining the macro in a (configured) header file.\n";
-    cmSystemTools::Message(e.str().c_str());
-    return false;
+    if (define[pos] == '(')
+      {
+      std::ostringstream e;
+      e << "WARNING: Function-style preprocessor definitions may not be "
+        << "passed on the compiler command line because many compilers "
+        << "do not support it.\n"
+        << "CMake is dropping a preprocessor definition: " << define << "\n"
+        << "Consider defining the macro in a (configured) header file.\n";
+      cmSystemTools::Message(e.str().c_str());
+      return false;
+      }
     }
 
   // Many compilers do not support # in the value so we disable it.
