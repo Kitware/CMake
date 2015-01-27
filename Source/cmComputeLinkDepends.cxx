@@ -692,8 +692,7 @@ void cmComputeLinkDepends::CleanConstraintGraph()
     std::sort(i->begin(), i->end());
 
     // Make the edge list unique.
-    EdgeList::iterator last = std::unique(i->begin(), i->end());
-    i->erase(last, i->end());
+    i->erase(std::unique(i->begin(), i->end()), i->end());
     }
 }
 
