@@ -676,6 +676,14 @@ void cmTargetTraceDependencies::Trace()
       {
       std::vector<std::string> objDeps;
       cmSystemTools::ExpandListArgument(additionalDeps, objDeps);
+      for(std::vector<std::string>::iterator odi = objDeps.begin();
+          odi != objDeps.end(); ++odi)
+        {
+        if (cmSystemTools::FileIsFullPath(*odi))
+          {
+          *odi = cmSystemTools::CollapseFullPath(*odi);
+          }
+        }
       this->FollowNames(objDeps);
       }
 

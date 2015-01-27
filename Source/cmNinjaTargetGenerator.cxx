@@ -600,6 +600,14 @@ cmNinjaTargetGenerator
   if(const char* objectDeps = source->GetProperty("OBJECT_DEPENDS")) {
     std::vector<std::string> depList;
     cmSystemTools::ExpandListArgument(objectDeps, depList);
+    for(std::vector<std::string>::iterator odi = depList.begin();
+        odi != depList.end(); ++odi)
+      {
+      if (cmSystemTools::FileIsFullPath(*odi))
+        {
+        *odi = cmSystemTools::CollapseFullPath(*odi);
+        }
+      }
     std::transform(depList.begin(), depList.end(),
                    std::back_inserter(implicitDeps), MapToNinjaPath());
   }
