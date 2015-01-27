@@ -67,6 +67,7 @@ if(NOT _CTEST_TARGETS_ADDED)
   foreach(mode Experimental Nightly Continuous NightlyMemoryCheck)
     add_custom_target(${mode}
       ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}
+      USES_TERMINAL
       )
     set_property(TARGET ${mode} PROPERTY RULE_LAUNCH_CUSTOM "")
     set_property(TARGET ${mode} PROPERTY FOLDER "CTestDashboardTargets")
@@ -82,6 +83,7 @@ if(NOT _CTEST_TARGETS_ADDED)
           )
         add_custom_target(${mode}${testtype}
           ${CMAKE_CTEST_COMMAND} ${__conf_types} -D ${mode}${testtype}
+          USES_TERMINAL
           )
         set_property(TARGET ${mode}${testtype} PROPERTY RULE_LAUNCH_CUSTOM "")
         set_property(TARGET ${mode}${testtype} PROPERTY FOLDER "CTestDashboardTargets")
@@ -94,6 +96,7 @@ if(NOT _CTEST_TARGETS_ADDED)
   if(CTEST_TEST_TARGET_ALIAS)
     add_custom_target(${CTEST_TEST_TARGET_ALIAS}
       ${CMAKE_CTEST_COMMAND} ${__conf_types}
+      USES_TERMINAL
       )
   endif()
 endif()
