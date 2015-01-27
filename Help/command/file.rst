@@ -65,7 +65,10 @@ Parse a list of ASCII strings from ``<filename>`` and store it in
  Consider only strings that match the given regular expression.
 
 ``ENCODING <encoding-type>``
- Consider strings of a given encoding.  "UTF-8" is currently supported.
+ Consider strings of a given encoding.  Currently supported encodings are:
+ UTF-8, UTF-16LE, UTF-16BE, UTF-32LE, UTF-32BE.  If the ENCODING option
+ is not provided and the file has a Byte Order Mark, the ENCODING option
+ will be defaulted to respect the Byte Order Mark.
 
 For example, the code
 

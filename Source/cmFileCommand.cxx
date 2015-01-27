@@ -472,7 +472,13 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   bool have_regex = false;
   bool newline_consume = false;
   bool hex_conversion_enabled = true;
-  bool utf8_encoding = false;
+  enum { encoding_none = cmsys::FStream::BOM_None,
+         encoding_utf8 = cmsys::FStream::BOM_UTF8,
+         encoding_utf16le = cmsys::FStream::BOM_UTF16LE,
+         encoding_utf16be = cmsys::FStream::BOM_UTF16BE,
+         encoding_utf32le = cmsys::FStream::BOM_UTF32LE,
+         encoding_utf32be = cmsys::FStream::BOM_UTF32BE};
+  int encoding = encoding_none;
   int arg_mode = arg_none;
   for(unsigned int i=3; i < args.size(); ++i)
     {
@@ -599,7 +605,23 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       {
       if(args[i] == "UTF-8")
         {
-        utf8_encoding = true;
+        encoding = encoding_utf8;
+        }
+      else if(args[i] == "UTF-16LE")
+        {
+        encoding = encoding_utf16le;
+        }
+      else if(args[i] == "UTF-16BE")
+        {
+        encoding = encoding_utf16be;
+        }
+      else if(args[i] == "UTF-32LE")
+        {
+        encoding = encoding_utf32le;
+        }
+      else if(args[i] == "UTF-32BE")
+        {
+        encoding = encoding_utf32be;
         }
       else
         {
@@ -647,6 +669,23 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
     return false;
     }
 
+  //If BOM is found and encoding was not specified, use the BOM
+  int bom_found = cmsys::FStream::ReadBOM(fin);
+  if(encoding == encoding_none && bom_found != cmsys::FStream::BOM_None)
+    {
+    encoding = bom_found;
+    }
+
+  unsigned int bytes_rem = 0;
+  if(encoding == encoding_utf16le || encoding == encoding_utf16be)
+    {
+    bytes_rem = 1;
+    }
+  if(encoding == encoding_utf32le || encoding == encoding_utf32be)
+    {
+    bytes_rem = 3;
+    }
+
   // Parse strings out of the file.
   int output_size = 0;
   std::vector<std::string> strings;
@@ -658,6 +697,25 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
     std::string current_str;
 
     int c = fin.get();
+    for(unsigned int i=0; i<bytes_rem; ++i)
+      {
+      int c1 = fin.get();
+      if(!fin)
+        {
+        fin.putback(static_cast<char>(c1));
+        break;
+        }
+      c = (c << 8) | c1;
+      }
+    if(encoding == encoding_utf16le)
+      {
+      c = ((c & 0xFF) << 8) | ((c & 0xFF00) >> 8);
+      }
+    else if(encoding == encoding_utf32le)
+      {
+       c = (((c & 0xFF) << 24) | ((c & 0xFF00) << 8) |
+          ((c & 0xFF0000) >> 8) | ((c & 0xFF000000) >> 24));
+      }
 
     if(c == '\r')
       {
@@ -673,7 +731,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
       // c is guaranteed to fit in char by the above if...
       current_str += static_cast<char>(c);
       }
-    else if(utf8_encoding)
+    else if(encoding == encoding_utf8)
       {
       // Check for UTF-8 encoded string (up to 4 octets)
       static const unsigned char utf8_check_table[3][2] =
