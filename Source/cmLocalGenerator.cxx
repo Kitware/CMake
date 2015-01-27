@@ -3642,14 +3642,13 @@ bool cmLocalGenerator::CheckDefinition(std::string const& define) const
 {
   // Many compilers do not support -DNAME(arg)=sdf so we disable it.
   bool function_style = false;
-  for(const char* c = define.c_str(); *c && *c != '='; ++c)
+
+  std::string::size_type pos = define.find_first_of("(=");
+  if (pos != std::string::npos)
     {
-    if(*c == '(')
-      {
-      function_style = true;
-      break;
-      }
+    function_style = define[pos] == '(';
     }
+
   if(function_style)
     {
     std::ostringstream e;
