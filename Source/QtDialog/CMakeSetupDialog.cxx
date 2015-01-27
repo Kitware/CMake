@@ -119,7 +119,7 @@ CMakeSetupDialog::CMakeSetupDialog()
   QAction* showChangesAction = ToolsMenu->addAction(tr("&Show My Changes"));
   QObject::connect(showChangesAction, SIGNAL(triggered(bool)),
                    this, SLOT(showUserChanges()));
-#if defined(Q_WS_MAC)
+#if defined(Q_WS_MAC) || defined(Q_OS_MAC)
   this->InstallForCommandLineAction
     = ToolsMenu->addAction(tr("&Install For Command Line Use"));
   QObject::connect(this->InstallForCommandLineAction, SIGNAL(triggered(bool)),
