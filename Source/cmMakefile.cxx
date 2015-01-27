@@ -1472,18 +1472,11 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       cmSystemTools::ExpandListArgument(cdefs, defs);
 
       // Recompose the list without the definition.
-      std::string ndefs;
-      const char* sep = "";
-      for(std::vector<std::string>::const_iterator di = defs.begin();
-          di != defs.end(); ++di)
-        {
-        if(*di != define)
-          {
-          ndefs += sep;
-          sep = ";";
-          ndefs += *di;
-          }
-        }
+      std::vector<std::string>::const_iterator defEnd =
+          std::remove(defs.begin(), defs.end(), define);
+      std::vector<std::string>::const_iterator defBegin =
+          defs.begin();
+      std::string ndefs = cmJoin(cmRange(defBegin, defEnd), ";");
 
       // Store the new list.
       this->SetProperty("COMPILE_DEFINITIONS", ndefs.c_str());
