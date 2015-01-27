@@ -366,6 +366,10 @@ bool cmSystemTools::IsInternallyOn(const char* val)
     return false;
     }
   std::basic_string<char> v = val;
+  if (v.size() > 4)
+    {
+    return false;
+    }
 
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
