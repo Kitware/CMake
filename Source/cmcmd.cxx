@@ -94,6 +94,51 @@ void CMakeCommandUsage(const char* program)
   cmSystemTools::Error(errorStream.str().c_str());
 }
 
+static bool cmTarFilesFrom(std::string const& file,
+                           std::vector<std::string>& files)
+{
+  if (cmSystemTools::FileIsDirectory(file))
+    {
+    std::ostringstream e;
+    e << "-E tar --files-from= file '" << file << "' is a directory";
+    cmSystemTools::Error(e.str().c_str());
+    return false;
+    }
+  cmsys::ifstream fin(file.c_str());
+  if (!fin)
+    {
+    std::ostringstream e;
+    e << "-E tar --files-from= file '" << file << "' not found";
+    cmSystemTools::Error(e.str().c_str());
+    return false;
+    }
+  std::string line;
+  while (cmSystemTools::GetLineFromStream(fin, line))
+    {
+    if (line.empty())
+      {
+      continue;
+      }
+    if (cmHasLiteralPrefix(line, "--add-file="))
+      {
+      files.push_back(line.substr(11));
+      }
+    else if (cmHasLiteralPrefix(line, "-"))
+      {
+      std::ostringstream e;
+      e << "-E tar --files-from='" << file << "' file invalid line:\n"
+        << line << "\n";
+      cmSystemTools::Error(e.str().c_str());
+      return false;
+      }
+    else
+      {
+      files.push_back(line);
+      }
+    }
+  return true;
+}
+
 int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 {
   // IF YOU ADD A NEW COMMAND, DOCUMENT IT ABOVE and in cmakemain.cxx
@@ -743,6 +788,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           else if (cmHasLiteralPrefix(arg, "--mtime="))
             {
             mtime = arg.substr(8);
+            }
+          else if (cmHasLiteralPrefix(arg, "--files-from="))
+            {
+            std::string const& files_from = arg.substr(13);
+            if (!cmTarFilesFrom(files_from, files))
+              {
+              return 1;
+              }
             }
           else
             {
