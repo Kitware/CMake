@@ -376,7 +376,7 @@ bool cmSystemTools::IsInternallyOn(const char* val)
     {
     *c = static_cast<char>(toupper(*c));
     }
-  return (v == "I_ON" || v == "i_on");
+  return v == "I_ON";
 }
 
 bool cmSystemTools::IsOn(const char* val)
