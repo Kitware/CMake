@@ -1,9 +1,24 @@
+#ifndef EXPECT_FINAL
+# error EXPECT_FINAL not defined
+#endif
+#ifndef EXPECT_INHERITING_CONSTRUCTORS
+# error EXPECT_INHERITING_CONSTRUCTORS not defined
+#endif
+#ifndef EXPECT_INHERITING_CONSTRUCTORS_AND_FINAL
+# error EXPECT_INHERITING_CONSTRUCTORS_AND_FINAL not defined
+#endif
+#ifndef EXPECT_OVERRIDE_CONTROL
+# error EXPECT_OVERRIDE_CONTROL not defined
+#endif
 
 #if !HAVE_OVERRIDE_CONTROL
 #if EXPECT_OVERRIDE_CONTROL
 #error "Expect override control feature"
 #endif
 #else
+#if !EXPECT_OVERRIDE_CONTROL
+#error "Expect no override control feature"
+#endif
 
 struct A
 {
