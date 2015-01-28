@@ -315,25 +315,6 @@ void cmGlobalGenerator::FindMakeProgram(cmMakefile* mf)
                            "make program",
                            cmCacheManager::FILEPATH);
     }
-
-  if(makeProgram.find("xcodebuild") != makeProgram.npos)
-    {
-    // due to the text file busy /bin/sh problem with xcodebuild
-    // use the cmakexbuild wrapper instead.  This program
-    // will run xcodebuild and if it sees the error text file busy
-    // it will stop forwarding output, and let the build finish.
-    // Then it will retry the build.  It will continue this
-    // until no text file busy errors occur.
-    std::string cmakexbuild =
-      this->CMakeInstance->GetCacheManager()->GetCacheValue("CMAKE_COMMAND");
-    cmakexbuild = cmakexbuild.substr(0, cmakexbuild.length()-5);
-    cmakexbuild += "cmakexbuild";
-
-    mf->AddCacheDefinition("CMAKE_MAKE_PROGRAM",
-                           cmakexbuild.c_str(),
-                           "make program",
-                           cmCacheManager::FILEPATH);
-    }
 }
 
 // enable the given language

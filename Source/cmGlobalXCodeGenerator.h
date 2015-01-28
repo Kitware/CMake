@@ -70,6 +70,8 @@ public:
                                         const std::string& suffix,
                                         std::string& dir);
 
+  virtual void FindMakeProgram(cmMakefile*);
+
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const;
   ///! expand CFGIntDir

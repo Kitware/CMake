@@ -23,8 +23,15 @@ to configure the project:
   otherwise undocumented ``cmakexbuild`` wrapper implementing some
   workarounds).
 
-  This generator stores ``CMAKE_MAKE_PROGRAM`` in the CMake cache
-  so that it may be edited by the user.
+  This generator prefers to lookup the build tool at build time
+  rather than to store ``CMAKE_MAKE_PROGRAM`` in the CMake cache
+  ahead of time.  This is because ``xcodebuild`` is easy to find,
+  the ``cmakexbuild`` wrapper is needed only for older Xcode versions,
+  and the path to ``cmakexbuild`` may be outdated if CMake itself moves.
+
+  For compatibility with versions of CMake prior to 3.2, if
+  a user or project explicitly adds ``CMAKE_MAKE_PROGRAM`` to
+  the CMake cache then CMake will use the specified value.
 
 * The Visual Studio generators set this to the full path to
   ``MSBuild.exe`` (VS >= 10), ``devenv.com`` (VS 7,8,9),

@@ -136,7 +136,6 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
   sscanf(this->VersionString.c_str(), "%u.%u", &v[0], &v[1]);
   this->XcodeVersion = 10*v[0] + v[1];
 
-  this->FindMakeProgramFile = "CMakeFindXCode.cmake";
   this->RootObject = 0;
   this->MainGroupChildren = 0;
   this->SourcesGroupChildren = 0;
@@ -200,6 +199,19 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
     "default to Xcode 1.5\n";
   return new cmGlobalXCodeGenerator;
 #endif
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
+{
+  // The Xcode generator knows how to lookup its build tool
+  // directly instead of needing a helper module to do it, so we
+  // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
+  if(cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
+    {
+    mf->AddDefinition("CMAKE_MAKE_PROGRAM",
+                      this->GetXcodeBuildCommand().c_str());
+    }
 }
 
 //----------------------------------------------------------------------------
