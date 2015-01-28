@@ -153,6 +153,19 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/foo.c
   )
 
+# Test using OBJECT_DEPENDS to bring in a custom command.
+# Use a path that can be simplified to make sure paths
+# are consistently normalized.
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subdir/../subdir/subdir.h
+  COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_SOURCE_DIR}/subdir.h.in
+            ${CMAKE_CURRENT_BINARY_DIR}/subdir/subdir.h
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/subdir.h.in
+  )
+set_property(SOURCE ${PROJECT_BINARY_DIR}/foo.c PROPERTY
+  OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subdir/../subdir/subdir.h)
+
 # Add custom command to generate not_included.h, which is a header
 # file that is not included by any source in this project.  This will
 # test whether all custom command outputs explicitly listed as sources
