@@ -303,7 +303,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
 {
   // now build the test
   makeCommand.push_back(
-    this->SelectMakeProgram(makeProgram, "xcodebuild")
+    this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand())
     );
 
   makeCommand.push_back("-project");
