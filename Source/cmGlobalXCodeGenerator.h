@@ -212,6 +212,11 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  std::string const& GetXcodeBuildCommand();
+  std::string FindXcodeBuildCommand();
+  std::string XcodeBuildCommand;
+  bool XcodeBuildCommandInitialized;
+
   void PrintCompilerAdvice(std::ostream&, std::string const&,
                            const char*) const {}
 

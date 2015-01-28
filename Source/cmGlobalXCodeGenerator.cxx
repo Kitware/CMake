@@ -143,6 +143,7 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
   this->ResourcesGroupChildren = 0;
   this->CurrentMakefile = 0;
   this->CurrentLocalGenerator = 0;
+  this->XcodeBuildCommandInitialized = false;
 }
 
 //----------------------------------------------------------------------------
@@ -199,6 +200,36 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
     "default to Xcode 1.5\n";
   return new cmGlobalXCodeGenerator;
 #endif
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmGlobalXCodeGenerator::GetXcodeBuildCommand()
+{
+  if(!this->XcodeBuildCommandInitialized)
+    {
+    this->XcodeBuildCommandInitialized = true;
+    this->XcodeBuildCommand = this->FindXcodeBuildCommand();
+    }
+  return this->XcodeBuildCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
+{
+  if (this->XcodeVersion >= 40)
+    {
+    std::string makeProgram = cmSystemTools::FindProgram("xcodebuild");
+    if (makeProgram.empty())
+      {
+      makeProgram = "xcodebuild";
+      }
+    return makeProgram;
+    }
+  else
+    {
+    // Use cmakexbuild wrapper to suppress environment dump from output.
+    return cmSystemTools::GetCMakeCommand() + "xbuild";
+    }
 }
 
 //----------------------------------------------------------------------------
