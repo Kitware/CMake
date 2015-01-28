@@ -130,9 +130,16 @@ function(ctest_coverage_collect_gcov)
   # tar up the coverage info with the same date so that the md5
   # sum will be the same for the tar file independent of file time
   # stamps
+  string(REPLACE ";" "\n" gcov_files "${gcov_files}")
+  string(REPLACE ";" "\n" label_files "${label_files}")
+  file(WRITE "${coverage_dir}/coverage_file_list.txt"
+    "${gcov_files}
+${coverage_dir}/data.json
+${label_files}
+")
   execute_process(COMMAND
     ${CMAKE_COMMAND} -E tar cvfj ${GCOV_TARBALL}
-    "--mtime=1970-01-01 0:0:0 UTC" ${gcov_files}
-    ${coverage_dir}/data.json  ${label_files}
+    "--mtime=1970-01-01 0:0:0 UTC"
+    --files-from=${coverage_dir}/coverage_file_list.txt
     WORKING_DIRECTORY ${binary_dir})
 endfunction()
