@@ -1,4 +1,4 @@
-CMake Error at NotAFeature_OriginDebug_target_compile_features.cmake:4 \(target_compile_features\):
+CMake Error at NotAFeature_OriginDebugCommand.cmake:4 \(target_compile_features\):
   target_compile_features specified unknown feature "not_a_feature" for
   target "somelib".
 Call Stack \(most recent call first\):

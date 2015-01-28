@@ -15,7 +15,7 @@ endif()
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER
   "CMakePredefinedTargets-in-ExternalProjectTest")
 
-set(base "${CMAKE_BINARY_DIR}/CMakeExternals")
+set(base "${CMAKE_BINARY_DIR}/Ext")
 set(binary_base "${base}/Build")
 set_property(DIRECTORY PROPERTY EP_BASE ${base})
 set_property(DIRECTORY PROPERTY EP_STEP_TARGETS configure build test)
