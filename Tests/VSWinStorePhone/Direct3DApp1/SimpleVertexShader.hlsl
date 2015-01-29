@@ -1,3 +1,7 @@
+#if !defined(FLAGS_ADDED)
+# error FLAGS_ADDED not defined
+#endif
+
 cbuffer ModelViewProjectionConstantBuffer : register(b0)
 {
   matrix model;

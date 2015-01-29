@@ -294,6 +294,7 @@ Properties on Source Files
    /prop_sf/VS_DEPLOYMENT_CONTENT
    /prop_sf/VS_DEPLOYMENT_LOCATION
    /prop_sf/VS_SHADER_ENTRYPOINT
+   /prop_sf/VS_SHADER_FLAGS
    /prop_sf/VS_SHADER_MODEL
    /prop_sf/VS_SHADER_TYPE
    /prop_sf/WRAP_EXCLUDE

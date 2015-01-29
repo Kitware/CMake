@@ -1,3 +1,7 @@
+#if !defined(FLAGS_ADDED)
+# error FLAGS_ADDED not defined
+#endif
+
 struct PixelShaderInput
 {
   float4 pos : SV_POSITION;
