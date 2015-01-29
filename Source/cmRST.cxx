@@ -490,7 +490,6 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
     {
     ++leadingEmpty;
     }
-  lines.erase(lines.begin(), lines.begin()+leadingEmpty);
 
   // Drop trailing blank lines.
   size_t trailingEmpty = 0;
@@ -498,5 +497,6 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
     {
     ++trailingEmpty;
     }
+  lines.erase(lines.begin(), lines.begin()+leadingEmpty);
   lines.erase(lines.end()-trailingEmpty, lines.end());
 }
