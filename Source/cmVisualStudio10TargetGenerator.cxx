@@ -2762,6 +2762,8 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
     this->WriteString("<ApplicationTypeRevision>", 2);
     (*this->BuildFileStream) << cmVS10EscapeXML(v)
                              << "</ApplicationTypeRevision>\n";
+    this->WriteString("<DefaultLanguage>en-US"
+                      "</DefaultLanguage>\n", 2);
     if(v == "8.1")
       {
       // Visual Studio 12.0 is necessary for building 8.1 apps
