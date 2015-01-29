@@ -2796,12 +2796,12 @@ void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
   if(isAppContainer)
     {
     this->WriteString("<AppContainerApplication>true"
-                      "</AppContainerApplication>", 2);
+                      "</AppContainerApplication>\n", 2);
     }
   else if (this->Platform == "ARM")
     {
     this->WriteString("<WindowsSDKDesktopARMSupport>true"
-                      "</WindowsSDKDesktopARMSupport>", 2);
+                      "</WindowsSDKDesktopARMSupport>\n", 2);
     }
 }
 
