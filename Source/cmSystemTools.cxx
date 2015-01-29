@@ -2695,7 +2695,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
     }
   if(se_count == 2 && se[1]->IndexInSection < se[0]->IndexInSection)
     {
-    cmsys_stl::swap(se[0], se[1]);
+    std::swap(se[0], se[1]);
     }
 
   // Get the size of the dynamic section header.

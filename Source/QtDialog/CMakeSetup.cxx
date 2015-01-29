@@ -149,10 +149,10 @@ int main(int argc, char** argv)
     QStringList args = app.arguments();
     if(args.count() == 2)
       {
-      cmsys_stl::string filePath = cmSystemTools::CollapseFullPath(args[1].toLocal8Bit().data());
+      std::string filePath = cmSystemTools::CollapseFullPath(args[1].toLocal8Bit().data());
 
       // check if argument is a directory containing CMakeCache.txt
-      cmsys_stl::string buildFilePath =
+      std::string buildFilePath =
         cmSystemTools::CollapseFullPath("CMakeCache.txt", filePath.c_str());
 
       // check if argument is a CMakeCache.txt file
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
         }
 
       // check if argument is a directory containing CMakeLists.txt
-      cmsys_stl::string srcFilePath =
+      std::string srcFilePath =
         cmSystemTools::CollapseFullPath("CMakeLists.txt", filePath.c_str());
 
       if(cmSystemTools::FileExists(buildFilePath.c_str()))

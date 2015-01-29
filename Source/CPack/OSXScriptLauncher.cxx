@@ -26,7 +26,7 @@
 int main(int argc, char* argv[])
 {
   //if ( cmsys::SystemTools::FileExists(
-  cmsys_stl::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
+  std::string cwd = cmsys::SystemTools::GetCurrentWorkingDirectory();
   cmsys::ofstream ofs("/tmp/output.txt");
 
   CFStringRef fileName;
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
   //dispose of the CF variable
   CFRelease(scriptFileURL);
 
-  cmsys_stl::string fullScriptPath = reinterpret_cast<char*>(path);
+  std::string fullScriptPath = reinterpret_cast<char*>(path);
   delete [] path;
 
 
@@ -75,10 +75,10 @@ int main(int argc, char* argv[])
     return 1;
     }
 
-  cmsys_stl::string scriptDirectory = cmsys::SystemTools::GetFilenamePath(
+  std::string scriptDirectory = cmsys::SystemTools::GetFilenamePath(
     fullScriptPath);
   ofs << fullScriptPath.c_str() << cmsys_ios::endl;
-  cmsys_stl::vector<const char*> args;
+  std::vector<const char*> args;
   args.push_back(fullScriptPath.c_str());
   int cc;
   for ( cc = 1; cc < argc; ++ cc )

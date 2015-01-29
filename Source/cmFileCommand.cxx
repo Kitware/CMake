@@ -71,7 +71,7 @@ static std::string fix_file_url_windows(const std::string& url)
   std::string ret = url;
   if(strncmp(url.c_str(), "file://", 7) == 0)
     {
-    cmsys_stl::wstring wurl = cmsys::Encoding::ToWide(url);
+    std::wstring wurl = cmsys::Encoding::ToWide(url);
     if(!wurl.empty())
       {
       int mblen = WideCharToMultiByte(CP_ACP, 0, wurl.c_str(), -1,
@@ -1843,7 +1843,7 @@ bool cmFileCopier::InstallDirectory(const char* source,
     if(!(strcmp(dir.GetFile(fileNum), ".") == 0 ||
          strcmp(dir.GetFile(fileNum), "..") == 0))
       {
-      cmsys_stl::string fromPath = source;
+      std::string fromPath = source;
       fromPath += "/";
       fromPath += dir.GetFile(fileNum);
       std::string toPath = destination;
