@@ -437,6 +437,18 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
                          << symlinkedIt->second << "--> "
                          << symlinkedIt->first << std::endl);
+          // make sure directory exists for symlink
+          std::string destDir =
+            cmSystemTools::GetFilenamePath(symlinkedIt->second);
+          if(!destDir.empty() && !cmSystemTools::MakeDirectory(destDir))
+            {
+            cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create dir: "
+                          << destDir
+                          << "\nTrying to create symlink: "
+                          << symlinkedIt->second << "--> "
+                          << symlinkedIt->first
+                          << std::endl);
+            }
           if (!cmSystemTools::CreateSymlink((symlinkedIt->first).c_str(),
                                             (symlinkedIt->second).c_str()))
             {
