@@ -136,13 +136,13 @@ cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
   sscanf(this->VersionString.c_str(), "%u.%u", &v[0], &v[1]);
   this->XcodeVersion = 10*v[0] + v[1];
 
-  this->FindMakeProgramFile = "CMakeFindXCode.cmake";
   this->RootObject = 0;
   this->MainGroupChildren = 0;
   this->SourcesGroupChildren = 0;
   this->ResourcesGroupChildren = 0;
   this->CurrentMakefile = 0;
   this->CurrentLocalGenerator = 0;
+  this->XcodeBuildCommandInitialized = false;
 }
 
 //----------------------------------------------------------------------------
@@ -199,6 +199,49 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
     "default to Xcode 1.5\n";
   return new cmGlobalXCodeGenerator;
 #endif
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::FindMakeProgram(cmMakefile* mf)
+{
+  // The Xcode generator knows how to lookup its build tool
+  // directly instead of needing a helper module to do it, so we
+  // do not actually need to put CMAKE_MAKE_PROGRAM into the cache.
+  if(cmSystemTools::IsOff(mf->GetDefinition("CMAKE_MAKE_PROGRAM")))
+    {
+    mf->AddDefinition("CMAKE_MAKE_PROGRAM",
+                      this->GetXcodeBuildCommand().c_str());
+    }
+}
+
+//----------------------------------------------------------------------------
+std::string const& cmGlobalXCodeGenerator::GetXcodeBuildCommand()
+{
+  if(!this->XcodeBuildCommandInitialized)
+    {
+    this->XcodeBuildCommandInitialized = true;
+    this->XcodeBuildCommand = this->FindXcodeBuildCommand();
+    }
+  return this->XcodeBuildCommand;
+}
+
+//----------------------------------------------------------------------------
+std::string cmGlobalXCodeGenerator::FindXcodeBuildCommand()
+{
+  if (this->XcodeVersion >= 40)
+    {
+    std::string makeProgram = cmSystemTools::FindProgram("xcodebuild");
+    if (makeProgram.empty())
+      {
+      makeProgram = "xcodebuild";
+      }
+    return makeProgram;
+    }
+  else
+    {
+    // Use cmakexbuild wrapper to suppress environment dump from output.
+    return cmSystemTools::GetCMakeCommand() + "xbuild";
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -272,7 +315,7 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
 {
   // now build the test
   makeCommand.push_back(
-    this->SelectMakeProgram(makeProgram, "xcodebuild")
+    this->SelectMakeProgram(makeProgram, this->GetXcodeBuildCommand())
     );
 
   makeCommand.push_back("-project");

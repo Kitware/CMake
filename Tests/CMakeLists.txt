@@ -51,7 +51,7 @@ if(BUILD_TESTING)
     set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
 
-  if(CMAKE_GENERATOR MATCHES "Visual Studio")
+  if(CMAKE_GENERATOR MATCHES "Visual Studio|Xcode")
     set(CMake_TEST_EXPLICIT_MAKE_PROGRAM "")
   else()
     set(CMake_TEST_EXPLICIT_MAKE_PROGRAM "${CMAKE_MAKE_PROGRAM}")

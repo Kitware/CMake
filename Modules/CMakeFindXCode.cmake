@@ -12,9 +12,5 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-find_program(CMAKE_MAKE_PROGRAM
-  NAMES xcodebuild
-  PATHS
-  /usr/bin
-  )
-mark_as_advanced(CMAKE_MAKE_PROGRAM)
+# Empty placeholder for input dependencies in existing
+# build trees produced by older versions of CMake.

@@ -70,6 +70,8 @@ public:
                                         const std::string& suffix,
                                         std::string& dir);
 
+  virtual void FindMakeProgram(cmMakefile*);
+
   ///! What is the configurations directory variable called?
   virtual const char* GetCMakeCFGIntDir() const;
   ///! expand CFGIntDir
@@ -212,6 +214,11 @@ protected:
   std::vector<cmXCodeObject*> XCodeObjects;
   cmXCodeObject* RootObject;
 private:
+  std::string const& GetXcodeBuildCommand();
+  std::string FindXcodeBuildCommand();
+  std::string XcodeBuildCommand;
+  bool XcodeBuildCommandInitialized;
+
   void PrintCompilerAdvice(std::ostream&, std::string const&,
                            const char*) const {}
 
