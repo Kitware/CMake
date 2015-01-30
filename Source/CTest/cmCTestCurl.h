@@ -22,6 +22,7 @@ class cmCTestCurl
 {
 public:
   cmCTestCurl(cmCTest*);
+  ~cmCTestCurl();
   bool UploadFile(std::string const& url,
                   std::string const& file,
                   std::string const& fields,
@@ -34,6 +35,7 @@ public:
   void SetCurlOptions(std::vector<std::string> const& args);
   void SetUseHttp10On() { this->UseHttp10 = true;}
   void SetTimeOutSeconds(int s) { this->TimeOutSeconds = s;}
+  std::string Escape(std::string const& source);
 protected:
   void SetProxyType();
   bool InitCurl();

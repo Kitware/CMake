@@ -1128,21 +1128,24 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   str << "project="
-      << this->CTest->GetCTestConfiguration("ProjectName") << "&";
+      << curl.Escape(this->CTest->GetCTestConfiguration("ProjectName")) << "&";
   if(subproject)
     {
-    str << "subproject=" << subproject << "&";
+    str << "subproject=" << curl.Escape(subproject) << "&";
     }
-  str << "stamp=" << this->CTest->GetCurrentTag() << "-"
-      << this->CTest->GetTestModelString() << "&"
-      << "model=" << this->CTest->GetTestModelString() << "&"
-      << "build=" << this->CTest->GetCTestConfiguration("BuildName") << "&"
-      << "site=" << this->CTest->GetCTestConfiguration("Site") << "&"
-      << "track=" << this->CTest->GetTestModelString() << "&"
+  str << "stamp=" << curl.Escape(this->CTest->GetCurrentTag()) << "-"
+      << curl.Escape(this->CTest->GetTestModelString()) << "&"
+      << "model=" << curl.Escape(this->CTest->GetTestModelString()) << "&"
+      << "build="
+      << curl.Escape(this->CTest->GetCTestConfiguration("BuildName")) << "&"
+      << "site="
+      << curl.Escape(this->CTest->GetCTestConfiguration("Site")) << "&"
+      << "track="
+      << curl.Escape(this->CTest->GetTestModelString()) << "&"
       << "starttime=" << (int)cmSystemTools::GetTime() << "&"
       << "endtime=" << (int)cmSystemTools::GetTime() << "&"
       << "datafilesmd5[0]=" << md5sum << "&"
-      << "type=" << typeString;
+      << "type=" << curl.Escape(typeString);
   std::string fields = str.str();
   cmCTestLog(this->CTest, DEBUG, "fields: " << fields << "\nurl:"
              << url << "\nfile: " << file << "\n");
@@ -1192,9 +1195,9 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
 
   std::string upload_as = cmSystemTools::GetFilenameName(file);
   std::ostringstream fstr;
-  fstr << "type=" << typeString << "&"
+  fstr << "type=" << curl.Escape(typeString) << "&"
        << "md5=" << md5sum << "&"
-       << "filename=" << upload_as << "&"
+       << "filename=" << curl.Escape(upload_as) << "&"
        << "buildid=" << json["buildid"].asString();
   if(!curl.UploadFile(file, url, fstr.str(), response))
     {
