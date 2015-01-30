@@ -80,7 +80,9 @@ When adding the first supported feature to a particular CompilerId, it is
 necessary to list support for all features known to cmake (See
 :variable:`CMAKE_C_COMPILE_FEATURES` and
 :variable:`CMAKE_CXX_COMPILE_FEATURES` as appropriate), where available for
-the compiler.
+the compiler.  Furthermore, set ``CMAKE_<LANG>_STANDARD_DEFAULT`` to the
+default language standard level the compiler uses, or to the empty string
+if the compiler has no notion of standard levels (such as ``MSVC``).
 
 It is sensible to record the features for the most recent version of a
 particular CompilerId first, and then work backwards.  It is sensible to

@@ -1370,6 +1370,8 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
       {
       std::vector<std::string> const& langAvailable
                                               = availableFeatures[lit->first];
+      const char* standardDefault = context->Makefile
+        ->GetDefinition("CMAKE_" + lit->first + "_STANDARD_DEFAULT");
       for (std::vector<std::string>::const_iterator it = lit->second.begin();
           it != lit->second.end(); ++it)
         {
@@ -1377,6 +1379,12 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
                                                       == langAvailable.end())
           {
           return "0";
+          }
+        if (standardDefault && !*standardDefault)
+          {
+          // This compiler has no notion of language standard levels.
+          // All features known for the language are always available.
+          continue;
           }
         if (!context->Makefile->HaveStandardAvailable(target,
                                                       lit->first, *it))
@@ -1386,8 +1394,7 @@ static const struct CompileFeaturesNode : public cmGeneratorExpressionNode
             const char* l = target->GetProperty(lit->first + "_STANDARD");
             if (!l)
               {
-              l = context->Makefile
-                  ->GetDefinition("CMAKE_" + lit->first + "_STANDARD_DEFAULT");
+              l = standardDefault;
               }
             assert(l);
             context->MaxLanguageStandard[target][lit->first] = l;

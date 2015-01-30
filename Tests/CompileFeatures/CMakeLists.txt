@@ -100,6 +100,31 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU"
   )
 endif()
 
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 18.0)
+    list(REMOVE_ITEM CXX_non_features
+      # The cxx_contextual_conversions feature happens to work
+      # (for *this* testcase) with VS 2010 and VS 2012, but
+      # they do not document support until VS 2013.
+      cxx_contextual_conversions
+      )
+  elseif (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0)
+    list(REMOVE_ITEM CXX_non_features
+      # The cxx_deleted_functions and cxx_nonstatic_member_init
+      # features happen to work (for *this* testcase) with VS 2013,
+      # but they do not document support until VS 2015.
+      cxx_deleted_functions
+      cxx_nonstatic_member_init
+      )
+  else()
+    list(REMOVE_ITEM CXX_non_features
+      # The cxx_constexpr feature happens to work (for *this* testcase)
+      # with VS 2015, but they document only partial support.
+      cxx_constexpr
+      )
+  endif()
+endif()
+
 set(C_ext c)
 set(C_standard_flag 11)
 set(CXX_ext cpp)
@@ -128,26 +153,30 @@ foreach(lang CXX C)
 endforeach()
 
 if (CMAKE_C_COMPILE_FEATURES)
-  string(FIND "${CMAKE_C_FLAGS}" "-std=" std_flag_idx)
-  if (std_flag_idx EQUAL -1)
-    add_executable(default_dialect_C default_dialect.c)
-    target_compile_definitions(default_dialect_C PRIVATE
-      DEFAULT_C11=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},11>
-      DEFAULT_C99=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},99>
-      DEFAULT_C90=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},90>
-    )
+  if (CMAKE_C_STANDARD_DEFAULT)
+    string(FIND "${CMAKE_C_FLAGS}" "-std=" std_flag_idx)
+    if (std_flag_idx EQUAL -1)
+      add_executable(default_dialect_C default_dialect.c)
+      target_compile_definitions(default_dialect_C PRIVATE
+        DEFAULT_C11=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},11>
+        DEFAULT_C99=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},99>
+        DEFAULT_C90=$<EQUAL:${CMAKE_C_STANDARD_DEFAULT},90>
+      )
+    endif()
   endif()
 endif()
 
 if (CMAKE_CXX_COMPILE_FEATURES)
-  string(FIND "${CMAKE_CXX_FLAGS}" "-std=" std_flag_idx)
-  if (std_flag_idx EQUAL -1)
-    add_executable(default_dialect default_dialect.cpp)
-    target_compile_definitions(default_dialect PRIVATE
-      DEFAULT_CXX14=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},14>
-      DEFAULT_CXX11=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},11>
-      DEFAULT_CXX98=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},98>
-    )
+  if (CMAKE_CXX_STANDARD_DEFAULT)
+    string(FIND "${CMAKE_CXX_FLAGS}" "-std=" std_flag_idx)
+    if (std_flag_idx EQUAL -1)
+      add_executable(default_dialect default_dialect.cpp)
+      target_compile_definitions(default_dialect PRIVATE
+        DEFAULT_CXX14=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},14>
+        DEFAULT_CXX11=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},11>
+        DEFAULT_CXX98=$<EQUAL:${CMAKE_CXX_STANDARD_DEFAULT},98>
+      )
+    endif()
   endif()
 
   add_executable(CompileFeatures main.cpp)
@@ -213,6 +242,29 @@ if (CMAKE_CXX_COMPILE_FEATURES)
         -DEXPECT_OVERRIDE_CONTROL=1
         -DEXPECT_INHERITING_CONSTRUCTORS=0
         -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    endif()
+  elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.0)
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS=1
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=1
+      )
+    elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 17.0)
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=1
+        -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
+      )
+    else()
+      add_definitions(
+        -DEXPECT_OVERRIDE_CONTROL=0
+        -DEXPECT_INHERITING_CONSTRUCTORS=0
+        -DEXPECT_FINAL=0
         -DEXPECT_INHERITING_CONSTRUCTORS_AND_FINAL=0
       )
     endif()

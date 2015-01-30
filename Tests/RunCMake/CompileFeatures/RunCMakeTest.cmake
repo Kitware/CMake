@@ -17,6 +17,8 @@ file(READ
   "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx_features.txt"
   CXX_FEATURES
 )
+include("${RunCMake_BINARY_DIR}/generate_feature_list-build/c_standard_default.cmake")
+include("${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx_standard_default.cmake")
 
 if (NOT C_FEATURES)
   run_cmake(NoSupportedCFeatures)
@@ -27,7 +29,9 @@ if (NOT CXX_FEATURES)
   run_cmake(NoSupportedCxxFeatures)
   run_cmake(NoSupportedCxxFeaturesGenex)
 else()
-  run_cmake(LinkImplementationFeatureCycle)
+  if(CXX_STANDARD_DEFAULT)
+    run_cmake(LinkImplementationFeatureCycle)
+  endif()
   run_cmake(LinkImplementationFeatureCycleSolved)
 
   if (";${CXX_FEATURES};" MATCHES ";cxx_final;")
@@ -38,17 +42,19 @@ else()
   unset(RunCMake_TEST_OPTIONS)
 endif()
 
-foreach(standard 98 11)
-  file(READ
-    "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx${standard}_flag.txt"
-    CXX${standard}_FLAG
-  )
-  if (CXX${standard}_FLAG STREQUAL NOTFOUND)
-    run_cmake(RequireCXX${standard})
-    run_cmake(RequireCXX${standard}Variable)
-  endif()
-  if (CXX${standard}EXT_FLAG STREQUAL NOTFOUND)
-    run_cmake(RequireCXX${standard}Ext)
-    run_cmake(RequireCXX${standard}ExtVariable)
-  endif()
-endforeach()
+if(CXX_STANDARD_DEFAULT)
+  foreach(standard 98 11)
+    file(READ
+      "${RunCMake_BINARY_DIR}/generate_feature_list-build/cxx${standard}_flag.txt"
+      CXX${standard}_FLAG
+    )
+    if (CXX${standard}_FLAG STREQUAL NOTFOUND)
+      run_cmake(RequireCXX${standard})
+      run_cmake(RequireCXX${standard}Variable)
+    endif()
+    if (CXX${standard}EXT_FLAG STREQUAL NOTFOUND)
+      run_cmake(RequireCXX${standard}Ext)
+      run_cmake(RequireCXX${standard}ExtVariable)
+    endif()
+  endforeach()
+endif()
