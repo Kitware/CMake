@@ -42,7 +42,7 @@ public:
 
   std::string GetTargetName() const;
 
-  bool needsDepFile(const std::string& lang);
+  bool NeedDepTypeMSVC(const std::string& lang) const;
 
 protected:
 
