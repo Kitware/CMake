@@ -484,19 +484,12 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
       }
     }
 
-  // Drop leading blank lines.
-  size_t leadingEmpty = 0;
-  for(size_t i = 0; i < lines.size() && lines[i].empty(); ++i)
-    {
-    ++leadingEmpty;
-    }
+  std::vector<std::string>::const_iterator it = lines.begin();
+  size_t leadingEmpty = std::distance(it, cmFindNot(lines, std::string()));
 
-  // Drop trailing blank lines.
-  size_t trailingEmpty = 0;
-  for(size_t i = lines.size(); i > 0 && lines[i-1].empty(); --i)
-    {
-    ++trailingEmpty;
-    }
+  std::vector<std::string>::const_reverse_iterator rit = lines.rbegin();
+  size_t trailingEmpty = std::distance(rit,
+                            cmFindNot(cmReverseRange(lines), std::string()));
 
   std::vector<std::string>::iterator contentEnd
       = cmRotate(lines.begin(),
