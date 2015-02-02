@@ -461,6 +461,7 @@ void cmVisualStudio10TargetGenerator::Generate()
   this->WriteAllSources();
   this->WriteDotNetReferences();
   this->WriteEmbeddedResourceGroup();
+  this->WriteXamlGroup();
   this->WriteWinRTReferences();
   this->WriteProjectReferences();
   this->WriteString(
@@ -541,6 +542,39 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
         }
 
       this->WriteString("</EmbeddedResource>\n", 2);
+      }
+    this->WriteString("</ItemGroup>\n", 1);
+    }
+}
+
+void cmVisualStudio10TargetGenerator::WriteXamlGroup()
+{
+  bool relative = this->GlobalGenerator->GetSystemVersion() == "8.0";
+
+  std::vector<cmSourceFile const*> xamlObjs;
+    this->GeneratorTarget->GetXamlSources(xamlObjs, "");
+  if(!xamlObjs.empty())
+    {
+    this->WriteString("<ItemGroup>\n", 1);
+    for(std::vector<cmSourceFile const*>::const_iterator oi = xamlObjs.begin();
+        oi != xamlObjs.end(); ++oi)
+      {
+        const char* applicationDefinition = (*oi)->GetProperty("VS_APPLICATION_DEFINITION");
+        std::string tool;
+        if (applicationDefinition && strlen(applicationDefinition))
+          {
+          tool = "ApplicationDefinition";
+          }
+        else
+          {
+          tool = "Page";
+          }
+
+      this->WriteSource(tool, *oi, ">\n", relative);
+      this->WriteString("<SubType>Designer</SubType>\n", 3);
+
+      this->WriteString("</", 2);
+      (*this->BuildFileStream ) << tool << ">\n";
       }
     this->WriteString("</ItemGroup>\n", 1);
     }
@@ -1192,10 +1226,27 @@ WriteGroupSources(const char* name,
 
 void cmVisualStudio10TargetGenerator::WriteHeaderSource(cmSourceFile const* sf)
 {
-  if(this->IsResxHeader(sf->GetFullPath()))
+  const std::string& fullPath = sf->GetFullPath();
+  if(this->IsResxHeader(fullPath))
     {
     this->WriteSource("ClInclude", sf, ">\n");
     this->WriteString("<FileType>CppForm</FileType>\n", 3);
+    this->WriteString("</ClInclude>\n", 2);
+    }
+  else if(this->IsXamlHeader(fullPath))
+    {
+    bool relative = this->GlobalGenerator->GetSystemVersion() == "8.0";
+    this->WriteSource("ClInclude", sf, ">\n", relative);
+    this->WriteString("<DependentUpon>", 3);
+    std::string hFileName;
+    if (relative)
+        hFileName = this->ConvertPath(sf->GetFullPath(), true);
+    else
+        hFileName = sf->GetFullPath();
+    hFileName = hFileName.substr(0, hFileName.find_last_of("."));
+    this->ConvertToWindowsSlash(hFileName);
+    (*this->BuildFileStream ) << hFileName;
+    this->WriteString("</DependentUpon>\n", 0);
     this->WriteString("</ClInclude>\n", 2);
     }
   else
@@ -1365,7 +1416,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 }
 
 void cmVisualStudio10TargetGenerator::WriteSource(
-  std::string const& tool, cmSourceFile const* sf, const char* end)
+  std::string const& tool, cmSourceFile const* sf, const char* end, bool relative)
 {
   // Visual Studio tools append relative paths to the current dir, as in:
   //
@@ -1373,10 +1424,10 @@ void cmVisualStudio10TargetGenerator::WriteSource(
   //
   // and fail if this exceeds the maximum allowed path length.  Our path
   // conversion uses full paths when possible to allow deeper trees.
-  bool forceRelative = false;
+  bool forceRelative = relative;
   std::string sourceFile = this->ConvertPath(sf->GetFullPath(), false);
-  if(this->LocalGenerator->GetVersion() == cmLocalVisualStudioGenerator::VS10
-     && cmSystemTools::FileIsFullPath(sourceFile.c_str()))
+  if((this->LocalGenerator->GetVersion() == cmLocalVisualStudioGenerator::VS10
+     && cmSystemTools::FileIsFullPath(sourceFile.c_str())) || relative)
     {
     // Normal path conversion resulted in a full path.  VS 10 (but not 11)
     // refuses to show the property page in the IDE for a source file with a
@@ -1388,7 +1439,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     // when the combined path will not be too long so property pages appear.
     std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
     size_t const maxLen = 250;
-    if(sf->GetCustomCommand() ||
+    if(relative || sf->GetCustomCommand() ||
        ((strlen(this->Makefile->GetCurrentOutputDirectory()) + 1 +
          sourceRel.length()) <= maxLen))
       {
@@ -1463,9 +1514,27 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
 
     if (!tool.empty())
       {
+      const std::string& fullPath = (*si)->GetFullPath();
+      bool isXamlSource = this->IsXamlSource(fullPath);
+
       this->WriteSource(tool, *si, " ");
-      if (this->OutputSourceSpecificFlags(*si))
+      if (this->OutputSourceSpecificFlags(*si) || isXamlSource)
         {
+        if(isXamlSource)
+          {
+          bool relative = this->GlobalGenerator->GetSystemVersion() == "8.0";
+          this->WriteString("<DependentUpon>", 3);
+          std::string hFileName;
+          if (relative)
+            hFileName = this->ConvertPath(fullPath, true);
+          else
+            hFileName = fullPath;
+          hFileName = hFileName.substr(0, hFileName.find_last_of("."));
+          this->ConvertToWindowsSlash(hFileName);
+          (*this->BuildFileStream ) << hFileName;
+          this->WriteString("</DependentUpon>\n", 0);
+        }
+
         this->WriteString("</", 2);
         (*this->BuildFileStream ) << tool << ">\n";
         }
@@ -2745,6 +2814,28 @@ bool cmVisualStudio10TargetGenerator::
   std::set<std::string>::const_iterator it =
                                         expectedResxHeaders.find(headerFile);
   return it != expectedResxHeaders.end();
+}
+
+bool cmVisualStudio10TargetGenerator::
+  IsXamlHeader(const std::string& headerFile)
+{
+  std::set<std::string> expectedXamlHeaders;
+  this->GeneratorTarget->GetExpectedXamlHeaders(expectedXamlHeaders, "");
+
+  std::set<std::string>::const_iterator it =
+                                        expectedXamlHeaders.find(headerFile);
+  return it != expectedXamlHeaders.end();
+}
+
+bool cmVisualStudio10TargetGenerator::
+  IsXamlSource(const std::string& sourceFile)
+{
+  std::set<std::string> expectedXamlSources;
+  this->GeneratorTarget->GetExpectedXamlSources(expectedXamlSources, "");
+
+  std::set<std::string>::const_iterator it =
+                                        expectedXamlSources.find(sourceFile);
+  return it != expectedXamlSources.end();
 }
 
 void cmVisualStudio10TargetGenerator::WriteApplicationTypeSettings()
