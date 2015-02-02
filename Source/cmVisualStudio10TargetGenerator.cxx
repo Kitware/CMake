@@ -524,7 +524,7 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
       this->WriteString("<DependentUpon>", 3);
       std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
       (*this->BuildFileStream ) << hFileName;
-      this->WriteString("</DependentUpon>\n", 3);
+      this->WriteString("</DependentUpon>\n", 0);
 
       std::vector<std::string> const * configs =
         this->GlobalGenerator->GetConfigurations();
