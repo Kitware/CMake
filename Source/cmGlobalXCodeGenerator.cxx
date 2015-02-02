@@ -3427,6 +3427,7 @@ bool cmGlobalXCodeGenerator
 
   // Put this last so it can override existing settings
   // Convert "CMAKE_XCODE_ATTRIBUTE_*" variables directly.
+  bool haveCustomSymRoot = false;
   {
     std::vector<std::string> vars = this->CurrentMakefile->GetDefinitions();
     for(std::vector<std::string>::const_iterator i = vars.begin();
@@ -3437,13 +3438,19 @@ bool cmGlobalXCodeGenerator
         buildSettings->AddAttribute(i->substr(22).c_str(),
           this->CreateString(
             this->CurrentMakefile->GetDefinition(i->c_str())));
+
+        if (false == haveCustomSymRoot && "CMAKE_XCODE_ATTRIBUTE_SYMROOT")
+            haveCustomSymRoot = true;
       }
     }
   }
 
-  std::string symroot = root->GetMakefile()->GetCurrentOutputDirectory();
-  symroot += "/build";
-  buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
+  if (false == haveCustomSymRoot)
+  {
+    std::string symroot = root->GetMakefile()->GetCurrentOutputDirectory();
+    symroot += "/build";
+    buildSettings->AddAttribute("SYMROOT", this->CreateString(symroot.c_str()));
+  }
 
   for( std::vector<cmXCodeObject*>::iterator i = configs.begin();
        i != configs.end(); ++i)
