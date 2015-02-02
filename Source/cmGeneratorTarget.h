@@ -44,6 +44,8 @@ public:
                       const std::string& config) const;
   void GetXamlSources(std::vector<cmSourceFile const*>&,
                       const std::string& config) const;
+  void GetReswSources(std::vector<cmSourceFile const*>&,
+                      const std::string& config) const;
   void GetIDLSources(std::vector<cmSourceFile const*>&,
                      const std::string& config) const;
   void GetExternalObjects(std::vector<cmSourceFile const*>&,
@@ -143,6 +145,10 @@ public:
     mutable std::set<std::string> ExpectedXamlHeaders;
     mutable std::set<std::string> ExpectedXamlSources;
     mutable std::vector<cmSourceFile const*> XamlSources;
+  };
+
+  struct ReswData {
+    mutable std::vector<cmSourceFile const*> ReswResources;
   };
 private:
   friend class cmTargetTraceDependencies;

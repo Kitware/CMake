@@ -68,6 +68,7 @@ private:
   void WriteDotNetReferences();
   void WriteEmbeddedResourceGroup();
   void WriteXamlGroup();
+  void WriteReswGroup();
   void WriteWinRTReferences();
   void WriteWinRTPackageCertificateKeyFile();
   void WritePathAndIncrementalLinkOptions();

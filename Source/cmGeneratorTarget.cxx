@@ -53,6 +53,7 @@ struct ExternalObjectsTag {};
 struct IDLSourcesTag {};
 struct ResxTag {};
 struct XamlTag {};
+struct ReswTag {};
 struct ModuleDefinitionFileTag {};
 struct AppManifestTag{};
 struct CertificatesTag{};
@@ -111,6 +112,10 @@ struct DoAccept<true>
     std::string hSourceFileName = xaml + ".cpp";
     data.ExpectedXamlSources.insert(hSourceFileName);
     data.XamlSources.push_back(f);
+    }
+  static void Do(cmGeneratorTarget::ReswData& data, cmSourceFile* f)
+    {
+    data.ReswResources.push_back(f);
     }
   static void Do(std::string& data, cmSourceFile* f)
     {
@@ -195,6 +200,10 @@ struct TagVisitor
     else if(ext == "xaml")
       {
       DoAccept<IsSameTag<Tag, XamlTag>::Result>::Do(this->Data, sf);
+      }
+    else if(ext == "resw")
+      {
+      DoAccept<IsSameTag<Tag, ReswTag>::Result>::Do(this->Data, sf);
       }
     else if (ext == "appxmanifest")
       {
@@ -465,6 +474,16 @@ void cmGeneratorTarget
   XamlData data;
   IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
   srcs = data.XamlSources;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget
+::GetReswSources(std::vector<cmSourceFile const*>& srcs,
+                 const std::string& config) const
+{
+  ReswData data;
+  IMPLEMENT_VISIT_IMPL(Resw, COMMA cmGeneratorTarget::ReswData)
+  srcs = data.ReswResources;
 }
 
 //----------------------------------------------------------------------------
