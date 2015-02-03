@@ -110,6 +110,12 @@ set(CPACK_COMPONENT_LIBRARIES_INSTALL_TYPES Developer Full)
 set(CPACK_COMPONENT_HEADERS_INSTALL_TYPES Developer Full)
 set(CPACK_COMPONENT_APPLICATIONS_INSTALL_TYPES Full)
 
+# set CPACK_RPM_RELOCATION_PATHS here as GNUInstallDirs script
+# can not be used in CPack scripts due to CMAKE_SIZEOF_VOID_P
+# variable not being set
+set(CPACK_RPM_RELOCATION_PATHS "${CMAKE_INSTALL_INCLUDEDIR}"
+  "${CMAKE_INSTALL_LIBDIR}" "${CMAKE_INSTALL_BINDIR}")
+
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way
 # (Behavior would be different for RPM or TGZ or DEB ...)
