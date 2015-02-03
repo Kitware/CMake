@@ -21,9 +21,9 @@
 
 macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
    set(${_VAR}
-     FAIL_REGEX "unrecognized .*option"                     # GNU
+     FAIL_REGEX "[Uu]nrecogni[sz]ed .*option"               # GNU, NAG
      FAIL_REGEX "unknown .*option"                          # Clang
-     FAIL_REGEX "ignoring unknown option"                   # MSVC
+     FAIL_REGEX "ignoring unknown option"                   # MSVC, Intel
      FAIL_REGEX "warning D9002"                             # MSVC, any lang
      FAIL_REGEX "option.*not supported"                     # Intel
      FAIL_REGEX "invalid argument .*option"                 # Intel
@@ -35,6 +35,7 @@ macro (CHECK_COMPILER_FLAG_COMMON_PATTERNS _VAR)
      FAIL_REGEX "command option .* contains an incorrect subargument" # XL
      FAIL_REGEX "not supported in this configuration. ignored"       # AIX
      FAIL_REGEX "File with unknown suffix passed to linker" # PGI
+     FAIL_REGEX "[Uu]nknown switch"                         # PGI
      FAIL_REGEX "WARNING: unknown flag:"                    # Open64
      FAIL_REGEX "Incorrect command line option:"            # Borland
      FAIL_REGEX "Warning: illegal option"                   # SunStudio 12
