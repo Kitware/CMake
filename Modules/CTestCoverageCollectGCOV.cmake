@@ -90,7 +90,8 @@ function(ctest_coverage_collect_gcov)
   # look for gcda files in the target directories
   # could do a glob from the top of the binary tree but
   # this will be faster and only look where the files will be
-  file(STRINGS "${binary_dir}/CMakeFiles/TargetDirectories.txt" target_dirs)
+  file(STRINGS "${binary_dir}/CMakeFiles/TargetDirectories.txt" target_dirs
+       ENCODING UTF-8)
   foreach(target_dir ${target_dirs})
     file(GLOB_RECURSE gfiles RELATIVE ${binary_dir} "${target_dir}/*.gcda")
     list(LENGTH gfiles len)
