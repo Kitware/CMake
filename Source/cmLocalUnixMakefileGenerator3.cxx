@@ -1826,7 +1826,7 @@ void cmLocalUnixMakefileGenerator3
     std::vector<std::string> no_depends;
     this->WriteMakeRule(ruleFileStream,
       "Allow only one \"make -f Makefile2\" at a time, but pass parallelism.",
-      ".NOTPARALLEL", no_depends, no_commands, true);
+      ".NOTPARALLEL", no_depends, no_commands, false);
     }
   }
 
