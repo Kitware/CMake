@@ -84,6 +84,15 @@ if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
   add_executable(C_undefined c_undefined.c)
   set_property(TARGET C_undefined PROPERTY C_STANDARD 90)
   target_compile_options(C_undefined PRIVATE -Werror=undef)
+
+  add_executable(WriteCompilerDetectionHeader_C main.c)
+  set_property(TARGET WriteCompilerDetectionHeader_C PROPERTY C_STANDARD 90)
+  set_defines(WriteCompilerDetectionHeader_C "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
+
+  add_executable(WriteCompilerDetectionHeader_C_multi main_multi.c)
+  set_property(TARGET WriteCompilerDetectionHeader_C_multi PROPERTY C_STANDARD 90)
+  set_defines(WriteCompilerDetectionHeader_C_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES" "EXPECTED_COMPILER_C_RESTRICT")
+  target_include_directories(WriteCompilerDetectionHeader_C_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
 endif()
 
 add_executable(WriteCompilerDetectionHeader main.cpp)
@@ -130,3 +139,16 @@ add_executable(multi_files_11 multi_files.cpp)
 set_property(TARGET multi_files_11 PROPERTY CXX_STANDARD 11)
 target_include_directories(multi_files_11 PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
 set_defines(multi_files_11 "${true_defs}" "${false_defs}")
+
+if (CMAKE_C_COMPILER_ID STREQUAL "GNU"
+    OR CMAKE_C_COMPILER_ID STREQUAL "Clang"
+    OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang")
+  add_executable(WriteCompilerDetectionHeader_C11 main.c)
+  set_property(TARGET WriteCompilerDetectionHeader_C11 PROPERTY C_STANDARD 11)
+  set_defines(WriteCompilerDetectionHeader_C11 "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
+
+  add_executable(WriteCompilerDetectionHeader_C11_multi main_multi.c)
+  set_property(TARGET WriteCompilerDetectionHeader_C11_multi PROPERTY C_STANDARD 11)
+  set_defines(WriteCompilerDetectionHeader_C11_multi "EXPECTED_COMPILER_C_FUNCTION_PROTOTYPES;EXPECTED_COMPILER_C_RESTRICT" "")
+  target_include_directories(WriteCompilerDetectionHeader_C11_multi PRIVATE ${CMAKE_CURRENT_BINARY_DIR}/compiler_multi_files)
+endif()
