@@ -61,12 +61,14 @@ private:
   void WriteExtraSource(cmSourceFile const* sf);
   void WriteNsightTegraConfigurationValues(std::string const& config);
   void WriteSource(std::string const& tool, cmSourceFile const* sf,
-                   const char* end = 0);
+                   const char* end = 0, bool relative = false);
   void WriteSources(std::string const& tool,
                     std::vector<cmSourceFile const*> const&);
   void WriteAllSources();
   void WriteDotNetReferences();
   void WriteEmbeddedResourceGroup();
+  void WriteXamlGroup();
+  void WriteReswGroup();
   void WriteWinRTReferences();
   void WriteWinRTPackageCertificateKeyFile();
   void WritePathAndIncrementalLinkOptions();
@@ -119,6 +121,8 @@ private:
   void AddMissingSourceGroups(std::set<cmSourceGroup*>& groupsUsed,
                               const std::vector<cmSourceGroup>& allGroups);
   bool IsResxHeader(const std::string& headerFile);
+  bool IsXamlHeader(const std::string& headerFile);
+  bool IsXamlSource(const std::string& sourceFile);
 
   cmIDEFlagTable const* GetClFlagTable() const;
   cmIDEFlagTable const* GetRcFlagTable() const;
