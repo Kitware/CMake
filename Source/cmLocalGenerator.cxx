@@ -407,27 +407,23 @@ void cmLocalGenerator::GenerateInstallRules()
     this->Makefile->GetConfigurations(configurationTypes, false);
 
   // Choose a default install configuration.
-  const char* default_config = config.c_str();
+  std::string default_config = config;
   const char* default_order[] = {"RELEASE", "MINSIZEREL",
                                  "RELWITHDEBINFO", "DEBUG", 0};
-  for(const char** c = default_order; *c && !default_config; ++c)
+  for(const char** c = default_order; *c && default_config.empty(); ++c)
     {
     for(std::vector<std::string>::iterator i = configurationTypes.begin();
         i != configurationTypes.end(); ++i)
       {
       if(cmSystemTools::UpperCase(*i) == *c)
         {
-        default_config = i->c_str();
+        default_config = *i;
         }
       }
     }
-  if(!default_config && !configurationTypes.empty())
+  if(default_config.empty() && !configurationTypes.empty())
     {
-    default_config = configurationTypes[0].c_str();
-    }
-  if(!default_config)
-    {
-    default_config = "Release";
+    default_config = configurationTypes[0];
     }
 
   // Create the install script file.
