@@ -1,0 +1,249 @@
+CMake 3.2.0 Release Notes
+*************************
+
+.. only:: html
+
+  .. contents::
+
+Changes made since CMake 3.1.0 include the following.
+
+* A new :command:`continue` command was added that can be called inside loop
+  contexts to end the current iteration and start the next one at the top of
+  the loop block.
+
+* A :module:`FindGSL` module was introduced to find the
+  GNU Scientific Library.
+
+* The :module:`FindIntl` module was added to find the Gettext ``libintl``
+  library.
+
+* A :module:`FindJsonCpp` module was introduced to find the
+  JsonCpp package.
+
+* The :command:`ctest_coverage` learned to support Javascript coverage.
+
+* The :manual:`cmake(1)` ``-E tar`` command now supports creating
+  ``.xz``-compressed archives with the ``J`` flag.
+
+* On OS X with Makefile and Ninja generators, when a compiler is found
+  in ``/usr/bin`` it is now mapped to the corresponding compiler inside
+  the Xcode application folder, if any.  This allows such build
+  trees to continue to work with their original compiler even when
+  ``xcode-select`` switches to a different Xcode installation.
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by GNU compilers on OS X.
+
+* The :command:`break` command now rejects calls outside of a loop
+  context or that pass arguments to the command.
+  See policy :policy:`CMP0055`.
+
+* Add :variable:`CMAKE_MATCH_COUNT` for the number of matches made in the last
+  regular expression.
+
+* The :manual:`cmake(1)` ``-E tar`` command learned a new
+  ``--files-from=<file>`` option to specify file names using
+  lines in a file to overcome command-line length limits.
+
+* The :manual:`cmake(1)` ``-E tar`` command learned a new
+  ``--mtime=<date>`` option to specify the modification time
+  recorded in tarball entries.
+
+* The :command:`add_custom_command` and :command:`add_custom_target`
+  commands learned a new ``USES_TERMINAL`` option to request that
+  the command be given direct access to the terminal if possible.
+  The :generator:`Ninja` generator will places such commands in the
+  ``console`` pool.  Build targets provided by CMake that are meant
+  for individual interactive use, such as ``install``, are now
+  placed in this pool.
+
+* The :module:`CPackRPM` module learned options to set per-component
+  descriptions and summaries.  See the
+  :variable:`CPACK_RPM_<component>_PACKAGE_DESCRIPTION` and
+  :variable:`CPACK_RPM_<component>_PACKAGE_SUMMARY` variables.
+
+* The :module:`CPackRPM` module learned options to specify
+  requirements for pre- and post-install scripts.  See the
+  :variable:`CPACK_RPM_PACKAGE_REQUIRES_PRE` and
+  :variable:`CPACK_RPM_PACKAGE_REQUIRES_POST` variables.
+
+* The :module:`CPackRPM` module learned options to specify
+  requirements for pre- and post-uninstall scripts.  See the
+  :variable:`CPACK_RPM_PACKAGE_REQUIRES_PREUN` and
+  :variable:`CPACK_RPM_PACKAGE_REQUIRES_POSTUN` variables.
+
+* The :module:`CTestCoverageCollectGCOV` module was introduced as an
+  alternative to the :command:`ctest_coverage` command for collecting
+  ``gcov`` results for submission to CDash.
+
+* The :command:`ctest_coverage` learned to support Delphi coverage.
+
+* On OS X, commands supporting network communication, such as
+  :command:`file(DOWNLOAD)`, :command:`file(UPLOAD)`, and
+  :command:`ctest_submit`, now support SSL/TLS even when CMake
+  is not built against OpenSSL.  The OS X native SSL/TLS
+  implementation is used by default.  OS-configured certificate
+  authorities will be trusted automatically.
+
+* When CMake is built with OpenSSL on systems other than Windows
+  and OS X, commands supporting network communication via ``https``,
+  such as :command:`file(DOWNLOAD)`, :command:`file(UPLOAD)`, and
+  :command:`ctest_submit`, now search for OS-configured certificate
+  authorities in a few ``/etc`` paths to be trusted automatically.
+
+* On Windows, commands supporting network communication, such as
+  :command:`file(DOWNLOAD)`, :command:`file(UPLOAD)`, and
+  :command:`ctest_submit`, now support SSL/TLS even when CMake
+  is not built against OpenSSL.  The Windows native SSL/TLS
+  implementation is used by default.  OS-configured certificate
+  authorities will be trusted automatically.
+
+* The :command:`add_custom_command` and :command:`add_custom_target`
+  commands learned a new ``BYPRODUCTS`` option to specify files
+  produced as side effects of the custom commands.  These are not
+  outputs because they do not always have to be newer than inputs.
+
+* The :module:`ExternalData` module learned to support
+  :ref:`Custom Fetch Scripts <ExternalData Custom Fetch Scripts>`.
+  This allows projects to specify custom ``.cmake`` scripts for
+  fetching data objects during the build.
+
+* The :module:`ExternalProject` module ``ExternalProject_Add`` function
+  learned a new ``CMAKE_CACHE_DEFAULT_ARGS`` option to initialize cache
+  values in the external project without setting them on future builds.
+
+* The :module:`ExternalProject` module learned options to create
+  independent external project step targets that do not depend
+  on the builtin steps.
+
+* The :module:`ExternalProject` module :command:`ExternalProject_Add`
+  command learned a ``TEST_EXCLUDE_FROM_MAIN`` option to exclude tests
+  from the main build.
+
+* The :module:`ExternalProject` module ``ExternalProject_Add`` command
+  learned an ``UPDATE_DISCONNECTED`` option to avoid automatically
+  updating the source tree checkout from version control.
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by Microsoft Visual Studio (``MSVC``).
+
+* The :command:`file(LOCK)` subcommand was created to allow CMake
+  processes to synchronize through file and directory locks.
+
+* The :command:`file(STRINGS)` now supports UTF-16LE, UTF-16BE,
+  UTF-32LE, UTF-32BE as ``ENCODING`` options.
+
+* The :module:`FindCUDA` module learned about the ``cusolver``
+  library in CUDA 7.0.
+
+* The :module:`FindGit` module learned to find the ``git`` command-line tool
+  that comes with GitHub for Windows installed in user home directories.
+
+* The :module:`FindLATEX` module learned to support components.
+
+* The :module:`FindMPI` module learned to find MS-MPI on Windows.
+
+* The :module:`FindOpenGL` module no longer explicitly searches
+  for any dependency on X11 libraries with the :module:`FindX11`
+  module.  Such dependencies should not need to be explicit.
+  Applications using X11 APIs themselves should find and link
+  to X11 libraries explicitly.
+
+* The :module:`FindOpenSSL` module now reports ``crypto`` and ``ssl``
+  libraries separately in ``OPENSSL_CRYPTO_LIBRARY`` and
+  ``OPENSSL_SSL_LIBRARY``, respectively, to allow applications to
+  link to one without the other.
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by GNU 4.4 to 4.6 compilers.
+
+* The :command:`install(EXPORT)` command now works with an absolute
+  ``DESTINATION`` even if targets in the export set are installed
+  with a destination or usage requirements specified relative to the
+  install prefix.  The value of the :variable:`CMAKE_INSTALL_PREFIX`
+  variable is hard-coded into the installed export file as the base
+  for relative references.
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by GNU compiler version 5.0.
+
+* The :module:`CPackRPM` module learned a new
+  :variable:`CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX` variable to
+  specify a component-specific value to use instead of
+  :variable:`CPACK_PACKAGING_INSTALL_PREFIX`.
+
+* The :module:`CPackRPM` module learned a new
+  :variable:`CPACK_RPM_RELOCATION_PATHS` variable to
+  specify multiple relocation prefixes for a single rpm package.
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by Oracle SolarisStudio (``SunPro``).
+
+* The :command:`try_compile` command source file signature now honors
+  link flags (e.g. :variable:`CMAKE_EXE_LINKER_FLAGS`) in the generated
+  test project.  See policy :policy:`CMP0056`.
+
+* The :command:`try_run` command learned to honor the ``LINK_LIBRARIES``
+  option just as :command:`try_compile` already does.
+
+* The implementation of CMake relies on some C++ compiler features which are
+  not supported by some older compilers.  As a result, those old compilers
+  can no longer be used to build CMake itself.  CMake continues to be able to
+  generate Makefiles and project files for users of those old compilers
+  however.  The compilers known to no longer be capable of building CMake
+  are:
+
+  * MSVC 6 and 7.0 - superceded by VisualStudio 7.1 and newer compilers.
+  * GCC 2.95 - superceded by GCC 3 and newer compilers.
+  * Borland compilers - superceded by other Windows compilers.
+  * Compaq compilers - superceded by other compilers.
+  * Comeau compilers - superceded by other compilers.
+  * SGI compilers - IRIX was dropped as a host platform.
+
+  When building using SolarisStudio 12, the default ``libCStd`` standard
+  library is not sufficient to build CMake.  The SolarisStudio distribution
+  supports compiler options to use ``STLPort4`` or ``libstdc++``.  An
+  appropriate option to select the standard library is now added
+  automatically when building CMake with SolarisStudio compilers.
+
+* A :prop_tgt:`ANDROID_API_MIN` target property was introduced to
+  specify the minimum version to be targeted by the toolchain.
+
+* A :prop_sf:`VS_SHADER_FLAGS` source file property was added to specify
+  additional shader flags to ``.hlsl`` files, for the Visual Studio generators.
+
+* The :module:`WriteCompilerDetectionHeader` module learned to
+  create a define for portability of the cxx_thread_local feature. The define
+  expands to either the C++11 ``thread_local`` keyword, or a
+  pre-standardization compiler-specific equivalent, as appropriate.
+
+* On Windows, CMake learned to support international characters.
+  This allows use of characters from multiple (spoken) languages
+  in CMake code, paths to source files, configured files such as
+  ``.h.in`` files, and other files read and written by CMake.
+  Because CMake interoperates with many other tools, there may
+  still be some limitations when using certain international
+  characters.
+
+  Files written in the :manual:`cmake-language(7)`, such as
+  ``CMakeLists.txt`` or ``*.cmake`` files, are expected to be
+  encoded as UTF-8.  If files are already ASCII, they will be
+  compatible.  If files were in a different encoding, including
+  Latin 1, they will need to be converted.
+
+  The Visual Studio generators now write solution and project
+  files in UTF-8 instead of Windows-1252.  Windows-1252 supported
+  Latin 1 languages such as those found in North and South America
+  and Western Europe.  With UTF-8, additional languages are now
+  supported.
+
+* The :module:`WriteCompilerDetectionHeader` module learned to create
+  multiple output files per compiler and per language, instead of creating
+  one large file.
+
+* The :manual:`Compile Features <cmake-compile-features(7)>` functionality
+  is now aware of features supported by Apple Clang (``AppleClang``).
+
+* The :generator:`Xcode` generator no longer requires a value for
+  the :variable:`CMAKE_MAKE_PROGRAM` variable to be located up front.
+  It now locates ``xcodebuild`` when needed at build time.
