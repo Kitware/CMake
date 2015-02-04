@@ -103,7 +103,7 @@ The options are:
 ``USES_TERMINAL``
   The command will be given direct access to the terminal if possible.
   With the :generator:`Ninja` generator, this places the command in
-  the ``console`` pool.
+  the ``console`` :prop_gbl:`pool <JOB_POOLS>`.
 
 ``WORKING_DIRECTORY``
   Execute the command with the given current working directory.

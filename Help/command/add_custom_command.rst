@@ -147,7 +147,7 @@ The options are:
 ``USES_TERMINAL``
   The command will be given direct access to the terminal if possible.
   With the :generator:`Ninja` generator, this places the command in
-  the ``console`` pool.
+  the ``console`` :prop_gbl:`pool <JOB_POOLS>`.
 
 ``VERBATIM``
   All arguments to the commands will be escaped properly for the

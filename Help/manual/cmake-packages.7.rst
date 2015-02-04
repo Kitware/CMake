@@ -358,7 +358,7 @@ and a ``cmake/ClimbingStatsConfig.cmake`` are installed to the same location,
 completing the package.
 
 The generated :prop_tgt:`IMPORTED` targets have appropriate properties set
-to define their usage requirements, such as
+to define their :ref:`usage requirements <Target Usage Requirements>`, such as
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and other relevant built-in
 ``INTERFACE_`` properties.  The ``INTERFACE`` variant of user-defined
