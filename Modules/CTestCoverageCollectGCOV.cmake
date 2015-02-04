@@ -19,6 +19,7 @@
 #     ctest_coverage_collect_gcov(TARBALL <tarfile>
 #       [SOURCE <source_dir>][BUILD <build_dir>]
 #       [GCOV_COMMAND <gcov_command>]
+#       [GCOV_OPTIONS <options>...]
 #       )
 #
 #   Run gcov and package a tar file for CDash.  The options are:
@@ -39,6 +40,11 @@
 #   ``GCOV_COMMAND <gcov_command>``
 #     Specify the full path to the ``gcov`` command on the machine.
 #     Default is the value of :variable:`CTEST_COVERAGE_COMMAND`.
+#
+#   ``GCOV_OPTIONS <options>...``
+#     Specify options to be passed to gcov.  The ``gcov`` command
+#     is run as ``gcov <options>... -o <gcov-dir> <file>.gcda``.
+#     If not specified, the default option is just ``-b``.
 
 #=============================================================================
 # Copyright 2014-2015 Kitware, Inc.
@@ -56,7 +62,7 @@ include(CMakeParseArguments)
 function(ctest_coverage_collect_gcov)
   set(options "")
   set(oneValueArgs TARBALL SOURCE BUILD GCOV_COMMAND)
-  set(multiValueArgs "")
+  set(multiValueArgs GCOV_OPTIONS)
   cmake_parse_arguments(GCOV  "${options}" "${oneValueArgs}"
     "${multiValueArgs}" "" ${ARGN} )
   if(NOT DEFINED GCOV_TARBALL)
@@ -84,7 +90,8 @@ function(ctest_coverage_collect_gcov)
   # look for gcda files in the target directories
   # could do a glob from the top of the binary tree but
   # this will be faster and only look where the files will be
-  file(STRINGS "${binary_dir}/CMakeFiles/TargetDirectories.txt" target_dirs)
+  file(STRINGS "${binary_dir}/CMakeFiles/TargetDirectories.txt" target_dirs
+       ENCODING UTF-8)
   foreach(target_dir ${target_dirs})
     file(GLOB_RECURSE gfiles RELATIVE ${binary_dir} "${target_dir}/*.gcda")
     list(LENGTH gfiles len)
@@ -113,11 +120,18 @@ function(ctest_coverage_collect_gcov)
     get_filename_component(gcov_dir ${gcda_file} DIRECTORY)
     # run gcov, this will produce the .gcov file in the current
     # working directory
+    if(NOT DEFINED GCOV_GCOV_OPTIONS)
+      set(GCOV_GCOV_OPTIONS -b)
+    endif()
     execute_process(COMMAND
-      ${gcov_command} -b -o ${gcov_dir} ${gcda_file}
+      ${gcov_command} ${GCOV_GCOV_OPTIONS} -o ${gcov_dir} ${gcda_file}
       OUTPUT_VARIABLE out
+      RESULT_VARIABLE res
       WORKING_DIRECTORY ${coverage_dir})
   endforeach()
+  if(NOT "${res}" EQUAL 0)
+    message(STATUS "Error running gcov: ${res} ${out}")
+  endif()
   # create json file with project information
   file(WRITE ${coverage_dir}/data.json
     "{
@@ -130,9 +144,16 @@ function(ctest_coverage_collect_gcov)
   # tar up the coverage info with the same date so that the md5
   # sum will be the same for the tar file independent of file time
   # stamps
+  string(REPLACE ";" "\n" gcov_files "${gcov_files}")
+  string(REPLACE ";" "\n" label_files "${label_files}")
+  file(WRITE "${coverage_dir}/coverage_file_list.txt"
+    "${gcov_files}
+${coverage_dir}/data.json
+${label_files}
+")
   execute_process(COMMAND
     ${CMAKE_COMMAND} -E tar cvfj ${GCOV_TARBALL}
-    "--mtime=1970-01-01 0:0:0 UTC" ${gcov_files}
-    ${coverage_dir}/data.json  ${label_files}
+    "--mtime=1970-01-01 0:0:0 UTC"
+    --files-from=${coverage_dir}/coverage_file_list.txt
     WORKING_DIRECTORY ${binary_dir})
 endfunction()

@@ -2269,6 +2269,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     PASS_REGULAR_EXPRESSION "Upload\\.xml")
 
   configure_file(
+    "${CMake_SOURCE_DIR}/Tests/CTestCoverageCollectGCOV/test.cmake.in"
+    "${CMake_BINARY_DIR}/Tests/CTestCoverageCollectGCOV/test.cmake"
+    @ONLY ESCAPE_QUOTES)
+  add_test(CTestCoverageCollectGCOV ${CMAKE_CTEST_COMMAND}
+    -S "${CMake_BINARY_DIR}/Tests/CTestCoverageCollectGCOV/test.cmake" -VV
+    --output-log "${CMake_BINARY_DIR}/Tests/CTestCoverageCollectGCOV/testOut.log"
+    )
+  set_tests_properties(CTestCoverageCollectGCOV PROPERTIES
+    PASS_REGULAR_EXPRESSION
+    "PASSED with correct output.*Testing/CoverageInfo/echoargs.gcov")
+
+  configure_file(
     "${CMake_SOURCE_DIR}/Tests/CTestTestEmptyBinaryDirectory/test.cmake.in"
     "${CMake_BINARY_DIR}/Tests/CTestTestEmptyBinaryDirectory/test.cmake"
     @ONLY ESCAPE_QUOTES)
