@@ -18,3 +18,6 @@ Defined pools could be used globally by setting
 :variable:`CMAKE_JOB_POOL_COMPILE` and :variable:`CMAKE_JOB_POOL_LINK`
 or per target by setting the target properties
 :prop_tgt:`JOB_POOL_COMPILE` and :prop_tgt:`JOB_POOL_LINK`.
+
+Build targets provided by CMake that are meant for individual interactive
+use, such as ``install``, are placed in the ``console`` pool automatically.
