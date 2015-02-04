@@ -352,8 +352,8 @@ if(CPACK_NSIS_MODIFY_PATH)
 endif()
 
 set(__cpack_system_name ${CMAKE_SYSTEM_NAME})
-if(${__cpack_system_name} MATCHES Windows)
-  if(CMAKE_CL_64)
+if(__cpack_system_name MATCHES "Windows")
+  if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(__cpack_system_name win64)
   else()
     set(__cpack_system_name win32)
@@ -363,7 +363,12 @@ cpack_set_if_not_set(CPACK_SYSTEM_NAME "${__cpack_system_name}")
 
 # Root dir: default value should be the string literal "$PROGRAMFILES"
 # for backwards compatibility. Projects may set this value to anything.
-set(__cpack_root_default "$PROGRAMFILES")
+# When creating 64 bit binaries we set the default value to "$PROGRAMFILES64"
+if("x${__cpack_system_name}" STREQUAL "xwin64")
+  set(__cpack_root_default "$PROGRAMFILES64")
+else()
+  set(__cpack_root_default "$PROGRAMFILES")
+endif()
 cpack_set_if_not_set(CPACK_NSIS_INSTALL_ROOT "${__cpack_root_default}")
 
 # <project>-<major>.<minor>.<patch>-<release>-<platform>.<pkgtype>
