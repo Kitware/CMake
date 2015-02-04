@@ -211,6 +211,10 @@ Other
   * Microsoft Visual Studio (``MSVC``) for versions 2010 through 2015.
   * Oracle SolarisStudio (``SunPro``) version 12.4.
 
+* The :ref:`Qt AUTORCC` feature now tracks files listed in ``.qrc`` files
+  as dependencies. If an input file to the ``rcc`` tool is changed, the tool
+  is automatically re-run.
+
 New Diagnostics
 ===============
 
