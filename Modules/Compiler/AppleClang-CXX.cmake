@@ -27,7 +27,7 @@ macro(cmake_record_cxx_compile_features)
   endmacro()
 
   set(_result 0)
-  if (UNIX AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.0)
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.0)
     set(_result 0)
     if(CMAKE_CXX14_STANDARD_COMPILE_OPTION)
       _get_appleclang_features(${CMAKE_CXX14_STANDARD_COMPILE_OPTION} CMAKE_CXX14_COMPILE_FEATURES)
