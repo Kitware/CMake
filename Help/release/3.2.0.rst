@@ -63,6 +63,13 @@ Commands
 * The :command:`try_run` command learned to honor the ``LINK_LIBRARIES``
   option just as :command:`try_compile` already does.
 
+* The :command:`file(GENERATE)` command now generates the output file with
+  the same permissions as the input file if set.
+
+* The :command:`file(GENERATE)` command can now generate files which are
+  used as source files for buildsystem targets.  Generated files
+  automatically get their :prop_sf:`GENERATED` property set to ``TRUE``.
+
 Variables
 ---------
 
