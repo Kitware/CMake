@@ -12,7 +12,9 @@ if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0)
   set(CMAKE_C11_EXTENSION_COMPILE_OPTION "-std=gnu11")
 endif()
 
-set(CMAKE_C_STANDARD_DEFAULT 99)
+if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0)
+  set(CMAKE_C_STANDARD_DEFAULT 99)
+endif()
 
 macro(cmake_record_c_compile_features)
   macro(_get_appleclang_features std_version list)
