@@ -2243,7 +2243,8 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
     if (!result || retVal)
       {
       std::cerr << "AUTOUIC: error: process for " << ui_output_file <<
-                " failed:\n" << output << std::endl;
+                " needed by\n \"" << realName << "\"\nfailed:\n" << output
+                << std::endl;
       this->RunUicFailed = true;
       cmSystemTools::RemoveFile(ui_output_file);
       return false;
