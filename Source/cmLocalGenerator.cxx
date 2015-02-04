@@ -2287,7 +2287,21 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     return;
     }
 
-  for ( ; stdIt <= defaultStdIt; ++stdIt)
+  // Greater or equal because the standards are stored in
+  // backward chronological order.
+  if (stdIt >= defaultStdIt)
+    {
+    std::string option_flag =
+              "CMAKE_" + lang + *stdIt
+                      + "_" + type + "_COMPILE_OPTION";
+
+    const char *opt =
+        target->GetMakefile()->GetRequiredDefinition(option_flag);
+    this->AppendFlagEscape(flags, opt);
+    return;
+    }
+
+  for ( ; stdIt < defaultStdIt; ++stdIt)
     {
     std::string option_flag =
               "CMAKE_" + lang + *stdIt
