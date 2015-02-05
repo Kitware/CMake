@@ -1,11 +1,11 @@
-CMake 3.2.0 Release Notes
-*************************
+CMake 3.2 Release Notes
+***********************
 
 .. only:: html
 
   .. contents::
 
-Changes made since CMake 3.1.0 include the following.
+Changes made since CMake 3.1 include the following.
 
 New Features
 ============
