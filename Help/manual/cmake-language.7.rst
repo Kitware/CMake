@@ -57,6 +57,8 @@ variable.
 Syntax
 ======
 
+.. _`CMake Language Encoding`:
+
 Encoding
 --------
 
