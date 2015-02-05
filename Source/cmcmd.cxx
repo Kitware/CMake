@@ -18,12 +18,12 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.
-# include <cmsys/Terminal.h>
 #endif
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/Process.h>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Terminal.h>
 
 #if defined(CMAKE_HAVE_VS_GENERATORS)
 #include "cmCallVisualStudioMacro.h"
@@ -753,12 +753,12 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       return cmcmd::VisualStudioLink(args, 2);
       }
-#ifdef CMAKE_BUILD_WITH_CMAKE
     // Internal CMake color makefile support.
     else if (args[1] == "cmake_echo_color")
       {
       return cmcmd::ExecuteEchoColor(args);
       }
+#ifdef CMAKE_BUILD_WITH_CMAKE
     else if (args[1] == "cmake_autogen" && args.size() >= 4)
       {
         cmQtAutoGenerators autogen;
@@ -987,7 +987,6 @@ bool cmcmd::SymlinkInternal(std::string const& file, std::string const& link)
 }
 
 //----------------------------------------------------------------------------
-#ifdef CMAKE_BUILD_WITH_CMAKE
 int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
 {
   // The arguments are
@@ -1073,12 +1072,6 @@ int cmcmd::ExecuteEchoColor(std::vector<std::string>& args)
 
   return 0;
 }
-#else
-int cmcmd::ExecuteEchoColor(std::vector<std::string>&)
-{
-  return 1;
-}
-#endif
 
 //----------------------------------------------------------------------------
 int cmcmd::ExecuteLinkScript(std::vector<std::string>& args)

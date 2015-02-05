@@ -27,10 +27,10 @@
 #ifdef CMAKE_BUILD_WITH_CMAKE
 # include "cmDependsFortran.h"
 # include "cmDependsJava.h"
-# include <cmsys/Terminal.h>
 #endif
 
 #include <cmsys/auto_ptr.hxx>
+#include <cmsys/Terminal.h>
 
 #include <queue>
 
@@ -1351,7 +1351,6 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
 {
   // Choose the color for the text.
   std::string color_name;
-#ifdef CMAKE_BUILD_WITH_CMAKE
   if(this->GlobalGenerator->GetToolSupportsColor() && this->ColorMakefile)
     {
     // See cmake::ExecuteEchoColor in cmake.cxx for these options.
@@ -1377,9 +1376,6 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         break;
       }
     }
-#else
-  (void)color;
-#endif
 
   // Echo one line at a time.
   std::string line;
@@ -1617,14 +1613,10 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
     targetName = targetName.substr(0, targetName.length()-4);
     std::string message = "Scanning dependencies of target ";
     message += targetName;
-#ifdef CMAKE_BUILD_WITH_CMAKE
     cmSystemTools::MakefileColorEcho(
       cmsysTerminal_Color_ForegroundMagenta |
       cmsysTerminal_Color_ForegroundBold,
       message.c_str(), true, color);
-#else
-    fprintf(stdout, "%s\n", message.c_str());
-#endif
 
     return this->ScanDependencies(dir.c_str(), validDependencies);
     }

@@ -333,13 +333,15 @@ if ${cmake_system_mingw}; then
     EncodingC \
     ProcessWin32 \
     String \
-    System"
+    System \
+    Terminal"
 else
   KWSYS_C_SOURCES="\
     EncodingC \
     ProcessUNIX \
     String \
-    System"
+    System \
+    Terminal"
 fi
 
 KWSYS_CXX_SOURCES="\
@@ -362,7 +364,8 @@ KWSYS_FILES="\
   String.h \
   String.hxx \
   System.h \
-  SystemTools.hxx"
+  SystemTools.hxx \
+  Terminal.h"
 
 KWSYS_IOS_FILES="
   fstream \

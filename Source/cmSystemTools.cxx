@@ -27,10 +27,10 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmArchiveWrite.h"
 # include <cm_libarchive.h>
-# include <cmsys/Terminal.h>
 #endif
 #include <cmsys/stl/algorithm>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Terminal.h>
 
 #if defined(_WIN32)
 # include <windows.h>
@@ -2284,7 +2284,6 @@ std::string const& cmSystemTools::GetCMakeRoot()
 }
 
 //----------------------------------------------------------------------------
-#if defined(CMAKE_BUILD_WITH_CMAKE)
 void cmSystemTools::MakefileColorEcho(int color, const char* message,
                                       bool newline, bool enabled)
 {
@@ -2314,7 +2313,6 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
     fprintf(stdout, "%s%s", message, newline? "\n" : "");
     }
 }
-#endif
 
 //----------------------------------------------------------------------------
 bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
