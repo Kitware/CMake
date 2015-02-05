@@ -2205,7 +2205,7 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     }
   const char* defaultStd
       = this->Makefile->GetDefinition("CMAKE_" + lang + "_STANDARD_DEFAULT");
-  if (defaultStd && !*defaultStd)
+  if (!defaultStd || !*defaultStd)
     {
     // This compiler has no notion of language standard levels.
     return;
@@ -2272,18 +2272,32 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
                                 std::find(stds.begin(), stds.end(), standard);
   assert(stdIt != stds.end());
 
-  std::vector<std::string>::const_iterator defaultStdIt;
-  if (defaultStd)
+  std::vector<std::string>::const_iterator defaultStdIt =
+    std::find(stds.begin(), stds.end(), defaultStd);
+  if (defaultStdIt == stds.end())
     {
-    defaultStdIt = std::find(stds.begin(), stds.end(), defaultStd);
-    assert(defaultStdIt != stds.end());
-    }
-  else
-    {
-    defaultStdIt = stds.end() - 1;
+    std::string e =
+      "CMAKE_" + lang + "_STANDARD_DEFAULT is set to invalid value '" +
+      std::string(defaultStd) + "'";
+    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR, e);
+    return;
     }
 
-  for ( ; stdIt <= defaultStdIt; ++stdIt)
+  // Greater or equal because the standards are stored in
+  // backward chronological order.
+  if (stdIt >= defaultStdIt)
+    {
+    std::string option_flag =
+              "CMAKE_" + lang + *stdIt
+                      + "_" + type + "_COMPILE_OPTION";
+
+    const char *opt =
+        target->GetMakefile()->GetRequiredDefinition(option_flag);
+    this->AppendFlagEscape(flags, opt);
+    return;
+    }
+
+  for ( ; stdIt < defaultStdIt; ++stdIt)
     {
     std::string option_flag =
               "CMAKE_" + lang + *stdIt

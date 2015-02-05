@@ -13,5 +13,5 @@ set(GNU44_C99 "(__GNUC__ * 100 + __GNUC_MINOR__) >= 404 && defined(__STDC_VERSIO
 set(_cmake_feature_test_c_restrict "${GNU44_C99}")
 set(_cmake_feature_test_c_variadic_macros "${GNU44_C99}")
 
-set(GNU_C90 "${_cmake_oldestSupported} && !defined(__STDC_VERSION__)")
+set(GNU_C90 "${_cmake_oldestSupported}")
 set(_cmake_feature_test_c_function_prototypes "${GNU_C90}")

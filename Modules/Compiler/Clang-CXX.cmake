@@ -31,7 +31,9 @@ elseif(NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
   set(CMAKE_CXX14_EXTENSION_COMPILE_OPTION "-std=gnu++1y")
 endif()
 
-set(CMAKE_CXX_STANDARD_DEFAULT 98)
+if(UNIX AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 3.4)
+  set(CMAKE_CXX_STANDARD_DEFAULT 98)
+endif()
 
 macro(cmake_record_cxx_compile_features)
   macro(_get_clang_features std_version list)

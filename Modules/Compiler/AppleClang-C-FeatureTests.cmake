@@ -7,5 +7,5 @@ set(AppleClang_C99 "${_cmake_oldestSupported} && defined(__STDC_VERSION__) && __
 set(_cmake_feature_test_c_restrict "${AppleClang_C99}")
 set(_cmake_feature_test_c_variadic_macros "${AppleClang_C99}")
 
-set(AppleClang_C90 "${_cmake_oldestSupported} && !defined(__STDC_VERSION__)")
+set(AppleClang_C90 "${_cmake_oldestSupported}")
 set(_cmake_feature_test_c_function_prototypes "${AppleClang_C90}")
