@@ -1,11 +1,11 @@
-CMake 3.0.0 Release Notes
-*************************
+CMake 3.0 Release Notes
+***********************
 
 .. only:: html
 
   .. contents::
 
-Changes made since CMake 2.8.12.2 include the following.
+Changes made since CMake 2.8.12 include the following.
 
 Documentation Changes
 =====================
