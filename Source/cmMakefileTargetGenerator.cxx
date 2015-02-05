@@ -618,16 +618,19 @@ cmMakefileTargetGenerator
   std::vector<std::string> commands;
 
   // add in a progress call if needed
-  this->AppendProgress(commands);
+  this->NumberOfProgressActions++;
 
   if(!this->NoRuleMessages)
     {
+    cmLocalUnixMakefileGenerator3::EchoProgress progress;
+    this->MakeEchoProgress(progress);
     std::string buildEcho = "Building ";
     buildEcho += lang;
     buildEcho += " object ";
     buildEcho += relativeObj;
     this->LocalGenerator->AppendEcho
-      (commands, buildEcho.c_str(), cmLocalUnixMakefileGenerator3::EchoBuild);
+      (commands, buildEcho.c_str(), cmLocalUnixMakefileGenerator3::EchoBuild,
+       &progress);
     }
 
   std::string targetOutPathReal;
@@ -1200,12 +1203,15 @@ void cmMakefileTargetGenerator
   if(!comment.empty())
     {
     // add in a progress call if needed
-    this->AppendProgress(commands);
+    this->NumberOfProgressActions++;
     if(!this->NoRuleMessages)
       {
+      cmLocalUnixMakefileGenerator3::EchoProgress progress;
+      this->MakeEchoProgress(progress);
       this->LocalGenerator
         ->AppendEcho(commands, comment.c_str(),
-                     cmLocalUnixMakefileGenerator3::EchoGenerate);
+                     cmLocalUnixMakefileGenerator3::EchoGenerate,
+                     &progress);
       }
     }
 
@@ -1263,22 +1269,14 @@ void cmMakefileTargetGenerator
 
 //----------------------------------------------------------------------------
 void
-cmMakefileTargetGenerator::AppendProgress(std::vector<std::string>& commands)
+cmMakefileTargetGenerator
+::MakeEchoProgress(cmLocalUnixMakefileGenerator3::EchoProgress& progress) const
 {
-  this->NumberOfProgressActions++;
-  if(this->NoRuleMessages)
-    {
-    return;
-    }
-  std::string progressDir = this->Makefile->GetHomeOutputDirectory();
-  progressDir += cmake::GetCMakeFilesDirectory();
-  std::ostringstream progCmd;
-  progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-  progCmd << this->LocalGenerator->Convert(progressDir,
-                                           cmLocalGenerator::FULL,
-                                           cmLocalGenerator::SHELL);
-  progCmd << " $(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";
-  commands.push_back(progCmd.str());
+  progress.Dir = this->Makefile->GetHomeOutputDirectory();
+  progress.Dir += cmake::GetCMakeFilesDirectory();
+  std::ostringstream progressArg;
+  progressArg << "$(CMAKE_PROGRESS_" << this->NumberOfProgressActions << ")";
+  progress.Arg = progressArg.str();
 }
 
 //----------------------------------------------------------------------------

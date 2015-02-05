@@ -779,29 +779,24 @@ cmGlobalUnixMakefileGenerator3
       localName += "/all";
       depends.clear();
 
-      std::string progressDir =
-        lg->GetMakefile()->GetHomeOutputDirectory();
-      progressDir += cmake::GetCMakeFilesDirectory();
+      cmLocalUnixMakefileGenerator3::EchoProgress progress;
+      progress.Dir = lg->GetMakefile()->GetHomeOutputDirectory();
+      progress.Dir += cmake::GetCMakeFilesDirectory();
+      {
+      std::ostringstream progressArg;
+      const char* sep = "";
+      std::vector<unsigned long>& progFiles =
+        this->ProgressMap[gtarget->Target].Marks;
+      for (std::vector<unsigned long>::iterator i = progFiles.begin();
+           i != progFiles.end(); ++i)
         {
-        std::ostringstream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-        // all target counts
-        progCmd << lg->Convert(progressDir,
-                                cmLocalGenerator::FULL,
-                                cmLocalGenerator::SHELL);
-        progCmd << " ";
-        std::vector<unsigned long>& progFiles =
-          this->ProgressMap[gtarget->Target].Marks;
-        for (std::vector<unsigned long>::iterator i = progFiles.begin();
-              i != progFiles.end(); ++i)
-          {
-          progCmd << " " << *i;
-          }
-        commands.push_back(progCmd.str());
+        progressArg << sep << *i;
+        sep = ",";
         }
-      progressDir = "Built target ";
-      progressDir += name;
-      lg->AppendEcho(commands,progressDir.c_str());
+      progress.Arg = progressArg.str();
+      }
+      lg->AppendEcho(commands, "Built target " + name,
+        cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
 
       this->AppendGlobalTargetDepends(depends,*gtarget->Target);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
@@ -819,15 +814,13 @@ cmGlobalUnixMakefileGenerator3
 
       // Write the rule.
       commands.clear();
-      progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
-      progressDir += cmake::GetCMakeFilesDirectory();
 
       {
       // TODO: Convert the total progress count to a make variable.
       std::ostringstream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
       // # in target
-      progCmd << lg->Convert(progressDir,
+      progCmd << lg->Convert(progress.Dir,
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       //
@@ -843,7 +836,7 @@ cmGlobalUnixMakefileGenerator3
       {
       std::ostringstream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-      progCmd << lg->Convert(progressDir,
+      progCmd << lg->Convert(progress.Dir,
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       progCmd << " 0";

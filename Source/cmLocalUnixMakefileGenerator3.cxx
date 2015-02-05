@@ -1346,8 +1346,9 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
-                                          const char* text,
-                                          EchoColor color)
+                                          std::string const& text,
+                                          EchoColor color,
+                                          EchoProgress const* progress)
 {
   // Choose the color for the text.
   std::string color_name;
@@ -1380,7 +1381,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
   // Echo one line at a time.
   std::string line;
   line.reserve(200);
-  for(const char* c = text;; ++c)
+  for(const char* c = text.c_str();; ++c)
     {
     if(*c == '\n' || *c == '\0')
       {
@@ -1389,7 +1390,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         {
         // Add a command to echo this line.
         std::string cmd;
-        if(color_name.empty())
+        if(color_name.empty() && !progress)
           {
           // Use the native echo command.
           cmd = "@echo ";
@@ -1400,6 +1401,17 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
           // Use cmake to echo the text in color.
           cmd = "@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) ";
           cmd += color_name;
+          if (progress)
+            {
+            cmd += "--progress-dir=";
+            cmd += this->Convert(progress->Dir,
+                                 cmLocalGenerator::FULL,
+                                 cmLocalGenerator::SHELL);
+            cmd += " ";
+            cmd += "--progress-num=";
+            cmd += progress->Arg;
+            cmd += " ";
+            }
           cmd += this->EscapeForShell(line);
           }
         commands.push_back(cmd);
@@ -1407,6 +1419,9 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
 
       // Reset the line to emtpy.
       line = "";
+
+      // Progress appears only on first line.
+      progress = 0;
 
       // Terminate on end-of-string.
       if(*c == '\0')
