@@ -24,6 +24,10 @@ This facilitates creating functions with optional arguments.
 Additionally ``ARGV`` holds the list of all arguments given to the
 function and ``ARGN`` holds the list of arguments past the last expected
 argument.
+Referencing to ``ARGV#`` arguments beyond ``ARGC`` have undefined
+behavior. Checking that ``ARGC`` is greater than ``#`` is the only way
+to ensure that ``ARGV#`` was passed to the function as an extra
+argument.
 
 A function opens a new scope: see :command:`set(var PARENT_SCOPE)` for
 details.

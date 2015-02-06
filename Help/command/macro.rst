@@ -24,6 +24,10 @@ This facilitates creating macros with optional arguments.
 Additionally ``${ARGV}`` holds the list of all arguments given to the
 macro and ``${ARGN}`` holds the list of arguments past the last expected
 argument.
+Referencing to ``${ARGV#}`` arguments beyond ``${ARGC}`` have undefined
+behavior. Checking that ``${ARGC}`` is greater than ``#`` is the only
+way to ensure that ``${ARGV#}`` was passed to the function as an extra
+argument.
 
 See the :command:`cmake_policy()` command documentation for the behavior
 of policies inside macros.
@@ -37,10 +41,15 @@ replacements much like the C preprocessor would do with a macro.
 Therefore you will NOT be able to use commands like::
 
  if(ARGV1) # ARGV1 is not a variable
+ if(DEFINED ARGV2) # ARGV2 is not a variable
+ if(ARGC GREATER 2) # ARGC is not a variable
  foreach(loop_var IN LISTS ARGN) # ARGN is not a variable
 
-In the first case you can use ``if(${ARGV1})``, in the second case, you can
-use ``foreach(loop_var ${ARGN})`` but this will skip empty arguments.
+In the first case, you can use ``if(${ARGV1})``.
+In the second and third case, the proper way to check if an optional
+variable was passed to the macro is to use ``if(${ARGC} GREATER 2)``.
+In the last case, you can use ``foreach(loop_var ${ARGN})`` but this
+will skip empty arguments.
 If you need to include them, you can use::
 
  set(list_var "${ARGN}")
