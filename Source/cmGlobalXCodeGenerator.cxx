@@ -2250,6 +2250,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
                                   this->CreateString(flags.c_str()));
       }
+    else if (*li == "Fortran")
+      {
+      buildSettings->AddAttribute("IFORT_OTHER_FLAGS",
+                                  this->CreateString(flags.c_str()));
+      }
     else if (*li == "C")
       {
       buildSettings->AddAttribute("OTHER_CFLAGS",
