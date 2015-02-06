@@ -2304,13 +2304,19 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
 
   if(enabled)
     {
-    cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s%s",
-                           message, newline? "\n" : "");
+    // Print with color.  Delay the newline until later so that
+    // all color restore sequences appear before it.
+    cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s", message);
     }
   else
     {
     // Color is disabled.  Print without color.
-    fprintf(stdout, "%s%s", message, newline? "\n" : "");
+    fprintf(stdout, "%s", message);
+    }
+
+  if(newline)
+    {
+    fprintf(stdout, "\n");
     }
 }
 
