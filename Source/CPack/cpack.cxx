@@ -26,7 +26,6 @@
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Encoding.hxx>
-#include <locale.h>
 
 //----------------------------------------------------------------------------
 static const char * cmDocumentationName[][2] =
@@ -101,7 +100,6 @@ int cpackDefinitionArgument(const char* argument, const char* cValue,
 // this is CPack.
 int main (int argc, char const* const* argv)
 {
-  setlocale(LC_CTYPE, "");
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(argc, argv);
   argc = args.argc();
