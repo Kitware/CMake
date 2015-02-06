@@ -1775,8 +1775,8 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       AddCompileOptions(flags, &target, lang, configName);
     }
 
-  std::string lang = target.GetLinkerLanguage(configName);
-  if(binary && lang.empty())
+  std::string llang = target.GetLinkerLanguage(configName);
+  if(binary && llang.empty())
     {
     cmSystemTools::Error
       ("CMake can not determine linker language for target: ",
@@ -2001,7 +2001,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       // in many ways as an application bundle, as far as
       // link flags go
       std::string createFlags =
-        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", lang, "_FLAGS",
+        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS",
                           "-bundle");
       if(!createFlags.empty())
         {
@@ -2029,7 +2029,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                   this->CreateString("NO"));
       // Add the flags to create an executable.
       std::string createFlags =
-        this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
+        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", "");
       if(!createFlags.empty())
         {
         extraLinkOptions += " ";
@@ -2040,7 +2040,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       {
       // Add the flags to create a module.
       std::string createFlags =
-        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", lang, "_FLAGS",
+        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS",
                           "-bundle");
       if(!createFlags.empty())
         {
@@ -2074,7 +2074,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       {
       // Add the flags to create a shared library.
       std::string createFlags =
-        this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", lang, "_FLAGS",
+        this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS",
                           "-dynamiclib");
       if(!createFlags.empty())
         {
@@ -2091,7 +2091,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     // Add the flags to create an executable.
     std::string createFlags =
-      this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
+      this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", "");
     if(!createFlags.empty())
       {
       extraLinkOptions += " ";
