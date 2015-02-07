@@ -1367,7 +1367,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         color_name = "--green ";
         break;
       case EchoLink:
-        color_name = "--red --bold ";
+        color_name = "--green --bold ";
         break;
       case EchoGenerate:
         color_name = "--blue --bold ";
