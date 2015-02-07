@@ -72,6 +72,7 @@ cmake_bootstrap_qt_gui=""
 cmake_bootstrap_qt_qmake=""
 cmake_sphinx_man=""
 cmake_sphinx_html=""
+cmake_sphinx_qthelp=""
 cmake_sphinx_build=""
 
 # Determine whether this is a Cygwin environment.
@@ -410,6 +411,7 @@ Configuration:
 
   --sphinx-man            build man pages with Sphinx
   --sphinx-html           build html help with Sphinx
+  --sphinx-qthelp         build qch help with Sphinx
   --sphinx-build=<sb>     use <sb> as the sphinx-build executable
 
 Directory and file names:
@@ -646,6 +648,7 @@ while test $# != 0; do
   --qt-qmake=*) cmake_bootstrap_qt_qmake=`cmake_arg "$1"` ;;
   --sphinx-man) cmake_sphinx_man="1" ;;
   --sphinx-html) cmake_sphinx_html="1" ;;
+  --sphinx-qthelp) cmake_sphinx_qthelp="1" ;;
   --sphinx-build=*) cmake_sphinx_build=`cmake_arg "$1"` ;;
   --help) cmake_usage ;;
   --version) cmake_version_display ; exit 2 ;;
@@ -1659,6 +1662,11 @@ fi
 if [ "x${cmake_sphinx_html}" != "x" ]; then
   echo '
 set (SPHINX_HTML "'"${cmake_sphinx_html}"'" CACHE FILEPATH "Build html help with Sphinx" FORCE)
+' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
+fi
+if [ "x${cmake_sphinx_qthelp}" != "x" ]; then
+  echo '
+set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE FILEPATH "Build qch help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_build}" != "x" ]; then
