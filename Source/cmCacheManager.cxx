@@ -186,11 +186,7 @@ void cmCacheManager::CleanCMakeFiles(const std::string& path)
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
-  for(std::vector<std::string>::iterator i = files.begin();
-      i != files.end(); ++i)
-    {
-    cmSystemTools::RemoveFile(*i);
-    }
+  std::for_each(files.begin(), files.end(), cmSystemTools::RemoveFile);
 }
 
 bool cmCacheManager::LoadCache(const std::string& path,
