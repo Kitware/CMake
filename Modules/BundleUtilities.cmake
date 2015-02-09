@@ -776,7 +776,12 @@ function(fixup_bundle_item resolved_embedded_item exepath dirs)
   # to install_name_tool:
   #
   if(changes)
-    execute_process(COMMAND install_name_tool ${changes} "${resolved_embedded_item}")
+    set(cmd install_name_tool ${changes} "${resolved_embedded_item}")
+    execute_process(COMMAND ${cmd} RESULT_VARIABLE install_name_tool_result)
+    if(NOT install_name_tool_result EQUAL 0)
+      string(REPLACE ";" "' '" msg "'${cmd}'")
+      message(FATAL_ERROR "Command failed:\n ${msg}")
+    endif()
   endif()
 endfunction()
 
