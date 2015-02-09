@@ -28,34 +28,6 @@ Some implementations have a ``std::auto_ptr`` which can not be used as a
 return value from a function. ``std::auto_ptr`` may not be used. Use
 ``cmsys::auto_ptr`` instead.
 
-Template Parameter Defaults
----------------------------
-
-On ancient compilers, C++ template must use template parameters in function
-arguments.  If no parameter of that type is needed, the common workaround is
-to add a defaulted pointer to the type to the templated function. However,
-this does not work with other ancient compilers:
-
-.. code-block:: c++
-
-  template<typename PropertyType>
-  PropertyType getTypedProperty(cmTarget* tgt, const char* prop,
-                                PropertyType* = 0) // Wrong
-    {
-
-    }
-
-.. code-block:: c++
-
-  template<typename PropertyType>
-  PropertyType getTypedProperty(cmTarget* tgt, const char* prop,
-                                PropertyType*) // Ok
-    {
-
-    }
-
-and invoke it with the value ``0`` explicitly in all cases.
-
 size_t
 ------
 

@@ -4711,13 +4711,11 @@ bool cmTarget::IsNullImpliedByLinkLibraries(const std::string &p) const
 
 //----------------------------------------------------------------------------
 template<typename PropertyType>
-PropertyType getTypedProperty(cmTarget const* tgt, const std::string& prop,
-                              PropertyType *);
+PropertyType getTypedProperty(cmTarget const* tgt, const std::string& prop);
 
 //----------------------------------------------------------------------------
 template<>
-bool getTypedProperty<bool>(cmTarget const* tgt, const std::string& prop,
-                            bool *)
+bool getTypedProperty<bool>(cmTarget const* tgt, const std::string& prop)
 {
   return tgt->GetPropertyAsBool(prop);
 }
@@ -4725,8 +4723,7 @@ bool getTypedProperty<bool>(cmTarget const* tgt, const std::string& prop,
 //----------------------------------------------------------------------------
 template<>
 const char *getTypedProperty<const char *>(cmTarget const* tgt,
-                                           const std::string& prop,
-                                           const char **)
+                                           const std::string& prop)
 {
   return tgt->GetProperty(prop);
 }
@@ -4937,8 +4934,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
                                           CompatibleType t,
                                           PropertyType *)
 {
-  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p,
-                                                            0);
+  PropertyType propContent = getTypedProperty<PropertyType>(tgt, p);
   const bool explicitlySet = tgt->GetProperties()
                                   .find(p)
                                   != tgt->GetProperties().end();
@@ -4991,7 +4987,7 @@ PropertyType checkInterfacePropertyCompatibility(cmTarget const* tgt,
                             != theTarget->GetProperties().end();
     PropertyType ifacePropContent =
                     getTypedProperty<PropertyType>(theTarget,
-                              interfaceProperty, 0);
+                              interfaceProperty);
 
     std::string reportEntry;
     if (ifaceIsSet)
