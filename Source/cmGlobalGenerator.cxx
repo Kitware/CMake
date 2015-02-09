@@ -74,11 +74,7 @@ cmGlobalGenerator::cmGlobalGenerator()
 cmGlobalGenerator::~cmGlobalGenerator()
 {
   this->ClearGeneratorMembers();
-
-  if (this->ExtraGenerator)
-    {
-    delete this->ExtraGenerator;
-    }
+  delete this->ExtraGenerator;
 }
 
 bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
