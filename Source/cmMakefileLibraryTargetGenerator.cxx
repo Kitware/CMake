@@ -341,8 +341,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     this->Convert(targetFullPathImport,cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
 
+  this->NumberOfProgressActions++;
   if(!this->NoRuleMessages)
     {
+    cmLocalUnixMakefileGenerator3::EchoProgress progress;
+    this->MakeEchoProgress(progress);
     // Add the link message.
     std::string buildEcho = "Linking ";
     buildEcho += linkLanguage;
@@ -365,7 +368,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       }
     buildEcho += targetOutPath.c_str();
     this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                     cmLocalUnixMakefileGenerator3::EchoLink);
+                                     cmLocalUnixMakefileGenerator3::EchoLink,
+                                     &progress);
     }
 
   const char* forbiddenFlagVar = 0;

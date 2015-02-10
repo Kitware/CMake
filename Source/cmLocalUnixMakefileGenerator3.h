@@ -184,8 +184,9 @@ public:
   // append an echo command
   enum EchoColor { EchoNormal, EchoDepend, EchoBuild, EchoLink,
                    EchoGenerate, EchoGlobal };
-  void AppendEcho(std::vector<std::string>& commands, const char* text,
-                  EchoColor color = EchoNormal);
+  struct EchoProgress { std::string Dir; std::string Arg; };
+  void AppendEcho(std::vector<std::string>& commands, std::string const& text,
+                  EchoColor color = EchoNormal, EchoProgress const* = 0);
 
   /** Get whether the makefile is to have color.  */
   bool GetColorMakefile() const { return this->ColorMakefile; }

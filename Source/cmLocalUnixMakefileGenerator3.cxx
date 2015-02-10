@@ -27,10 +27,10 @@
 #ifdef CMAKE_BUILD_WITH_CMAKE
 # include "cmDependsFortran.h"
 # include "cmDependsJava.h"
-# include <cmsys/Terminal.h>
 #endif
 
 #include <cmsys/auto_ptr.hxx>
+#include <cmsys/Terminal.h>
 
 #include <queue>
 
@@ -1346,12 +1346,12 @@ cmLocalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 void
 cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
-                                          const char* text,
-                                          EchoColor color)
+                                          std::string const& text,
+                                          EchoColor color,
+                                          EchoProgress const* progress)
 {
   // Choose the color for the text.
   std::string color_name;
-#ifdef CMAKE_BUILD_WITH_CMAKE
   if(this->GlobalGenerator->GetToolSupportsColor() && this->ColorMakefile)
     {
     // See cmake::ExecuteEchoColor in cmake.cxx for these options.
@@ -1367,7 +1367,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         color_name = "--green ";
         break;
       case EchoLink:
-        color_name = "--red --bold ";
+        color_name = "--green --bold ";
         break;
       case EchoGenerate:
         color_name = "--blue --bold ";
@@ -1377,14 +1377,11 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         break;
       }
     }
-#else
-  (void)color;
-#endif
 
   // Echo one line at a time.
   std::string line;
   line.reserve(200);
-  for(const char* c = text;; ++c)
+  for(const char* c = text.c_str();; ++c)
     {
     if(*c == '\n' || *c == '\0')
       {
@@ -1393,7 +1390,7 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
         {
         // Add a command to echo this line.
         std::string cmd;
-        if(color_name.empty())
+        if(color_name.empty() && !progress)
           {
           // Use the native echo command.
           cmd = "@echo ";
@@ -1404,6 +1401,17 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
           // Use cmake to echo the text in color.
           cmd = "@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) ";
           cmd += color_name;
+          if (progress)
+            {
+            cmd += "--progress-dir=";
+            cmd += this->Convert(progress->Dir,
+                                 cmLocalGenerator::FULL,
+                                 cmLocalGenerator::SHELL);
+            cmd += " ";
+            cmd += "--progress-num=";
+            cmd += progress->Arg;
+            cmd += " ";
+            }
           cmd += this->EscapeForShell(line);
           }
         commands.push_back(cmd);
@@ -1411,6 +1419,9 @@ cmLocalUnixMakefileGenerator3::AppendEcho(std::vector<std::string>& commands,
 
       // Reset the line to emtpy.
       line = "";
+
+      // Progress appears only on first line.
+      progress = 0;
 
       // Terminate on end-of-string.
       if(*c == '\0')
@@ -1617,14 +1628,10 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
     targetName = targetName.substr(0, targetName.length()-4);
     std::string message = "Scanning dependencies of target ";
     message += targetName;
-#ifdef CMAKE_BUILD_WITH_CMAKE
     cmSystemTools::MakefileColorEcho(
       cmsysTerminal_Color_ForegroundMagenta |
       cmsysTerminal_Color_ForegroundBold,
       message.c_str(), true, color);
-#else
-    fprintf(stdout, "%s\n", message.c_str());
-#endif
 
     return this->ScanDependencies(dir.c_str(), validDependencies);
     }

@@ -428,11 +428,9 @@ public:
   static std::string const& GetCMakeCursesCommand();
   static std::string const& GetCMakeRoot();
 
-#if defined(CMAKE_BUILD_WITH_CMAKE)
   /** Echo a message in color using KWSys's Terminal cprintf.  */
   static void MakefileColorEcho(int color, const char* message,
                                 bool newLine, bool enabled);
-#endif
 
   /** Try to guess the soname of a shared library.  */
   static bool GuessLibrarySOName(std::string const& fullPath,

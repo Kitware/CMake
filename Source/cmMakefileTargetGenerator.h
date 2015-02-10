@@ -109,7 +109,7 @@ protected:
   void GenerateExtraOutput(const char* out, const char* in,
                            bool symbolic = false);
 
-  void AppendProgress(std::vector<std::string>& commands);
+  void MakeEchoProgress(cmLocalUnixMakefileGenerator3::EchoProgress&) const;
 
   // write out the variable that lists the objects for this target
   void WriteObjectsVariable(std::string& variableName,

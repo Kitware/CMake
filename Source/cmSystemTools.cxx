@@ -28,10 +28,10 @@
 # include "cmArchiveWrite.h"
 # include "cmLocale.h"
 # include <cm_libarchive.h>
-# include <cmsys/Terminal.h>
 #endif
 #include <cmsys/stl/algorithm>
 #include <cmsys/FStream.hxx>
+#include <cmsys/Terminal.h>
 
 #if defined(_WIN32)
 # include <windows.h>
@@ -2287,7 +2287,6 @@ std::string const& cmSystemTools::GetCMakeRoot()
 }
 
 //----------------------------------------------------------------------------
-#if defined(CMAKE_BUILD_WITH_CMAKE)
 void cmSystemTools::MakefileColorEcho(int color, const char* message,
                                       bool newline, bool enabled)
 {
@@ -2308,16 +2307,21 @@ void cmSystemTools::MakefileColorEcho(int color, const char* message,
 
   if(enabled)
     {
-    cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s%s",
-                           message, newline? "\n" : "");
+    // Print with color.  Delay the newline until later so that
+    // all color restore sequences appear before it.
+    cmsysTerminal_cfprintf(color | assumeTTY, stdout, "%s", message);
     }
   else
     {
     // Color is disabled.  Print without color.
-    fprintf(stdout, "%s%s", message, newline? "\n" : "");
+    fprintf(stdout, "%s", message);
+    }
+
+  if(newline)
+    {
+    fprintf(stdout, "\n");
     }
 }
-#endif
 
 //----------------------------------------------------------------------------
 bool cmSystemTools::GuessLibrarySOName(std::string const& fullPath,
