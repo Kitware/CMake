@@ -122,6 +122,17 @@ struct Range
   const_iterator begin() const { return Begin; }
   const_iterator end() const { return End; }
   bool empty() const { return std::distance(Begin, End) == 0; }
+  Range& advance(cmIML_INT_intptr_t amount)
+  {
+    std::advance(Begin, amount);
+    return *this;
+  }
+
+  Range& retreat(cmIML_INT_intptr_t amount)
+  {
+    std::advance(End, -amount);
+    return *this;
+  }
 private:
   const_iterator Begin;
   const_iterator End;
@@ -133,6 +144,14 @@ template<typename Iter1, typename Iter2>
 ContainerAlgorithms::Range<Iter1> cmRange(Iter1 begin, Iter2 end)
 {
   return ContainerAlgorithms::Range<Iter1>(begin, end);
+}
+
+template<typename Range>
+ContainerAlgorithms::Range<typename Range::const_iterator>
+cmRange(Range const& range)
+{
+  return ContainerAlgorithms::Range<typename Range::const_iterator>(
+      range.begin(), range.end());
 }
 
 template<typename Container>
