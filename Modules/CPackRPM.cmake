@@ -442,7 +442,7 @@ function(cpack_rpm_prepare_relocation_paths)
 
   # set other path prefixes
   foreach(RELOCATION_PATH ${RPM_RELOCATION_PATHS})
-    if(IS_ABSOLUTE "${RELOCATE_PATH}")
+    if(IS_ABSOLUTE "${RELOCATION_PATH}")
       set(PREPARED_RELOCATION_PATH "${RELOCATION_PATH}")
     else()
       set(PREPARED_RELOCATION_PATH "${PATH_PREFIX}/${RELOCATION_PATH}")
