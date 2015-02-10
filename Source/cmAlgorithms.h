@@ -112,6 +112,27 @@ struct DefaultDeleter<Container, /* valueTypeIsPair = */ true>
   }
 };
 
+template<typename const_iterator_>
+struct Range
+{
+  typedef const_iterator_ const_iterator;
+  typedef typename std::iterator_traits<const_iterator>::value_type value_type;
+  Range(const_iterator begin_, const_iterator end_)
+    : Begin(begin_), End(end_) {}
+  const_iterator begin() const { return Begin; }
+  const_iterator end() const { return End; }
+  bool empty() const { return std::distance(Begin, End) == 0; }
+private:
+  const_iterator Begin;
+  const_iterator End;
+};
+
+}
+
+template<typename Iter1, typename Iter2>
+ContainerAlgorithms::Range<Iter1> cmRange(Iter1 begin, Iter2 end)
+{
+  return ContainerAlgorithms::Range<Iter1>(begin, end);
 }
 
 template<typename Container>
