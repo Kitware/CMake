@@ -1743,7 +1743,6 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     return;
     }
 
-  std::string flags;
   std::string defFlags;
   bool shared = ((target.GetType() == cmTarget::SHARED_LIBRARY) ||
                  (target.GetType() == cmTarget::MODULE_LIBRARY));
@@ -1752,19 +1751,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                  (target.GetType() == cmTarget::EXECUTABLE) ||
                  shared);
 
-  std::string lang = target.GetLinkerLanguage(configName);
-  std::string cflags;
-  if(!lang.empty())
+  // Compute the compilation flags for each language.
+  std::set<std::string> languages;
+  target.GetLanguages(languages, configName);
+  std::map<std::string, std::string> cflags;
+  for (std::set<std::string>::iterator li = languages.begin();
+       li != languages.end(); ++li)
     {
-    // for c++ projects get the c flags as well
-    if(lang == "CXX")
-      {
-      this->CurrentLocalGenerator->AddLanguageFlags(cflags, "C", configName);
-      this->CurrentLocalGenerator->AddCMP0018Flags(cflags, &target,
-                                                   "C", configName);
-      this->CurrentLocalGenerator->
-        AddCompileOptions(cflags, &target, "C", configName);
-      }
+    std::string const& lang = *li;
+    std::string& flags = cflags[lang];
 
     // Add language-specific flags.
     this->CurrentLocalGenerator->AddLanguageFlags(flags, lang, configName);
@@ -1779,13 +1774,15 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     this->CurrentLocalGenerator->
       AddCompileOptions(flags, &target, lang, configName);
     }
-  else if(binary)
-  {
+
+  std::string llang = target.GetLinkerLanguage(configName);
+  if(binary && llang.empty())
+    {
     cmSystemTools::Error
       ("CMake can not determine linker language for target: ",
        target.GetName().c_str());
     return;
-  }
+    }
 
   // Add define flags
   this->CurrentLocalGenerator->
@@ -2004,7 +2001,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       // in many ways as an application bundle, as far as
       // link flags go
       std::string createFlags =
-        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", lang, "_FLAGS",
+        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS",
                           "-bundle");
       if(!createFlags.empty())
         {
@@ -2032,7 +2029,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                                   this->CreateString("NO"));
       // Add the flags to create an executable.
       std::string createFlags =
-        this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
+        this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", "");
       if(!createFlags.empty())
         {
         extraLinkOptions += " ";
@@ -2043,7 +2040,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       {
       // Add the flags to create a module.
       std::string createFlags =
-        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", lang, "_FLAGS",
+        this->LookupFlags("CMAKE_SHARED_MODULE_CREATE_", llang, "_FLAGS",
                           "-bundle");
       if(!createFlags.empty())
         {
@@ -2077,7 +2074,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
       {
       // Add the flags to create a shared library.
       std::string createFlags =
-        this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", lang, "_FLAGS",
+        this->LookupFlags("CMAKE_SHARED_LIBRARY_CREATE_", llang, "_FLAGS",
                           "-dynamiclib");
       if(!createFlags.empty())
         {
@@ -2094,7 +2091,7 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     {
     // Add the flags to create an executable.
     std::string createFlags =
-      this->LookupFlags("CMAKE_", lang, "_LINK_FLAGS", "");
+      this->LookupFlags("CMAKE_", llang, "_LINK_FLAGS", "");
     if(!createFlags.empty())
       {
       extraLinkOptions += " ";
@@ -2178,53 +2175,58 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
     buildSettings->AddAttribute("HEADER_SEARCH_PATHS",
                                 dirs.CreateList());
     }
-  std::string oflagc = this->ExtractFlag("-O", cflags);
+
+  bool same_gflags = true;
+  std::map<std::string, std::string> gflags;
+  std::string const* last_gflag = 0;
   char optLevel[2];
   optLevel[0] = '0';
   optLevel[1] = 0;
-  if(oflagc.size() == 3)
+
+  // Minimal map of flags to build settings.
+  for (std::set<std::string>::iterator li = languages.begin();
+       li != languages.end(); ++li)
     {
-    optLevel[0] = oflagc[2];
+    std::string& flags = cflags[*li];
+    std::string& gflag = gflags[*li];
+    std::string oflag = this->ExtractFlag("-O", flags);
+    if(oflag.size() == 3)
+      {
+      optLevel[0] = oflag[2];
+      }
+    if(oflag.size() == 2)
+      {
+      optLevel[0] = '1';
+      }
+    gflag = this->ExtractFlag("-g", flags);
+    // put back gdwarf-2 if used since there is no way
+    // to represent it in the gui, but we still want debug yes
+    if(gflag == "-gdwarf-2")
+      {
+      flags += " ";
+      flags += gflag;
+      }
+    if (last_gflag && *last_gflag != gflag)
+      {
+      same_gflags = false;
+      }
+    last_gflag = &gflag;
     }
-  if(oflagc.size() == 2)
-    {
-    optLevel[0] = '1';
-    }
-  std::string oflag = this->ExtractFlag("-O", flags);
-  if(oflag.size() == 3)
-    {
-    optLevel[0] = oflag[2];
-    }
-  if(oflag.size() == 2)
-    {
-    optLevel[0] = '1';
-    }
-  std::string gflagc = this->ExtractFlag("-g", cflags);
-  // put back gdwarf-2 if used since there is no way
-  // to represent it in the gui, but we still want debug yes
-  if(gflagc == "-gdwarf-2")
-    {
-    cflags += " ";
-    cflags += gflagc;
-    }
-  std::string gflag = this->ExtractFlag("-g", flags);
-  if(gflag == "-gdwarf-2")
-    {
-    flags += " ";
-    flags += gflag;
-    }
+
   const char* debugStr = "YES";
-  // We can't set the Xcode flag differently depending on the language,
-  // so put them back in this case.
-  if( (lang == "CXX") && gflag != gflagc )
+  if (!same_gflags)
     {
-    cflags += " ";
-    cflags += gflagc;
-    flags += " ";
-    flags += gflag;
+    // We can't set the Xcode flag differently depending on the language,
+    // so put them back in this case.
+    for (std::set<std::string>::iterator li = languages.begin();
+         li != languages.end(); ++li)
+      {
+      cflags[*li] += " ";
+      cflags[*li] += gflags[*li];
+      }
     debugStr = "NO";
     }
-  if( gflag == "-g0" || gflag.size() == 0 )
+  else if (last_gflag && (last_gflag->empty() || *last_gflag == "-g0"))
     {
     debugStr = "NO";
     }
@@ -2239,24 +2241,25 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
                               this->CreateString("NO"));
   buildSettings->AddAttribute("GCC_INLINES_ARE_PRIVATE_EXTERN",
                               this->CreateString("NO"));
-  if(lang == "CXX")
+  for (std::set<std::string>::iterator li = languages.begin();
+       li != languages.end(); ++li)
     {
-    flags += " ";
-    flags += defFlags;
-    buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
-                                this->CreateString(flags.c_str()));
-    cflags += " ";
-    cflags += defFlags;
-    buildSettings->AddAttribute("OTHER_CFLAGS",
-                                this->CreateString(cflags.c_str()));
-
-    }
-  else
-    {
-    flags += " ";
-    flags += defFlags;
-    buildSettings->AddAttribute("OTHER_CFLAGS",
-                                this->CreateString(flags.c_str()));
+    std::string flags = cflags[*li] + " " + defFlags;
+    if (*li == "CXX")
+      {
+      buildSettings->AddAttribute("OTHER_CPLUSPLUSFLAGS",
+                                  this->CreateString(flags.c_str()));
+      }
+    else if (*li == "Fortran")
+      {
+      buildSettings->AddAttribute("IFORT_OTHER_FLAGS",
+                                  this->CreateString(flags.c_str()));
+      }
+    else if (*li == "C")
+      {
+      buildSettings->AddAttribute("OTHER_CFLAGS",
+                                  this->CreateString(flags.c_str()));
+      }
     }
 
   // Add Fortran source format attribute if property is set.
