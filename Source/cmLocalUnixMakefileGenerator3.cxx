@@ -1132,7 +1132,7 @@ cmLocalUnixMakefileGenerator3
   if(echo_comment)
     {
     const char* comment = ccg.GetComment();
-    if(comment && !*comment)
+    if(comment && *comment)
       {
       this->AppendEcho(commands, comment,
                        cmLocalUnixMakefileGenerator3::EchoGenerate);
