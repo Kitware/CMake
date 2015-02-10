@@ -262,11 +262,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     if (!this->Depth)
       {
       std::string name = this->Args[0];
-      std::vector<std::string>::size_type cc;
       name += "(";
-      for ( cc = 0; cc < this->Args.size(); cc ++ )
+      if (!this->Args.empty())
         {
-        name += " " + this->Args[cc];
+        name += " ";
+        name += cmJoin(this->Args, " ");
         }
       name += " )";
       mf.AddMacro(this->Args[0].c_str(), name.c_str());
