@@ -108,17 +108,7 @@ bool cmSetCommand
     }
 
   // collect any values into a single semi-colon separated value list
-  if(static_cast<unsigned short>(args.size()) >
-     static_cast<unsigned short>(1 + ignoreLastArgs))
-    {
-    value = args[1];
-    size_t endPos = args.size() - ignoreLastArgs;
-    for(size_t i = 2; i < endPos; ++i)
-      {
-      value += ";";
-      value += args[i];
-      }
-    }
+  value = cmJoin(cmRange(args).advance(1).retreat(ignoreLastArgs), ";");
 
   if (parentScope)
     {
