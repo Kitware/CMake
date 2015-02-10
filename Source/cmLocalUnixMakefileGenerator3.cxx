@@ -2295,23 +2295,23 @@ cmLocalUnixMakefileGenerator3::ConvertToQuotedOutputPath(const char* p,
     // Begin the quoted result with the root component.
     result += components[0];
 
-    // Now add the rest of the components separated by the proper slash
-    // direction for this platform.
-    bool first = true;
-    for(unsigned int i=1; i < components.size() - 1; ++i)
-      {
-      if(!components[i].empty())
-        {
-        if(!first)
-          {
-          result += slash;
-          }
-        result += components[i];
-        first = false;
-        }
-      }
     if (components.size() > 1)
       {
+      // Now add the rest of the components separated by the proper slash
+      // direction for this platform.
+      bool first = true;
+      for(unsigned int i=1; i < components.size() - 1; ++i)
+        {
+        if(!components[i].empty())
+          {
+          if(!first)
+            {
+            result += slash;
+            }
+          result += components[i];
+          first = false;
+          }
+        }
       // Only the last component can be empty to avoid double slashes.
       if(!first)
         {
