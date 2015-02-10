@@ -15,6 +15,8 @@
 #include "cmCommand.h"
 #include "cmExpandedCommandArgument.h"
 
+#include <list>
+
 class cmConditionEvaluator
 {
 public:

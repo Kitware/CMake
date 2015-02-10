@@ -22,7 +22,6 @@
 #ifdef _MSC_VER
 #pragma warning ( disable : 4786 )
 #pragma warning ( disable : 4503 )
-#pragma warning ( disable : 4512 ) /* operator=() could not be generated */
 #endif
 
 
@@ -42,11 +41,6 @@
 # include <cmsys/IOStream.hxx>
 #endif
 
-// Avoid warnings in system headers.
-#if defined(_MSC_VER)
-# pragma warning (push,1)
-#endif
-
 #include <fstream>
 #include <iostream>
 #include <iomanip>
@@ -59,13 +53,7 @@
 #include <algorithm>
 #include <functional>
 #include <map>
-#include <list>
 #include <set>
-#include <deque>
-
-#if defined(_MSC_VER)
-# pragma warning(pop)
-#endif
 
 // include the "c" string header
 #include <string.h>

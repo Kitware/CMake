@@ -16,6 +16,7 @@
 #include "cmSystemTools.h"
 #include <stdlib.h>
 #include <stack>
+#include <list>
 #include <float.h>
 #include <cmsys/FStream.hxx>
 

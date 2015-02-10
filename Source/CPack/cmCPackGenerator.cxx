@@ -25,6 +25,7 @@
 #include <cmsys/Glob.hxx>
 #include <cmsys/FStream.hxx>
 #include <algorithm>
+#include <list>
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>

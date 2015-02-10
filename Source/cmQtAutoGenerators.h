@@ -14,6 +14,8 @@
 #ifndef cmQtAutoGenerators_h
 #define cmQtAutoGenerators_h
 
+#include <list>
+
 class cmGlobalGenerator;
 class cmMakefile;
 
