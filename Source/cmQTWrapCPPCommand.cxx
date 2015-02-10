@@ -12,18 +12,14 @@
 #include "cmQTWrapCPPCommand.h"
 
 // cmQTWrapCPPCommand
-bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
+bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
                                      cmExecutionStatus &)
 {
-  if(argsIn.size() < 3 )
+  if(args.size() < 3 )
     {
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-
-  // This command supports source list inputs for compatibility.
-  std::vector<std::string> args;
-  this->Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
   // Get the moc executable to run in the custom command.
   const char* moc_exe =
@@ -35,7 +31,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& argsIn,
     this->Makefile->GetSafeDefinition(sourceList);
 
   // Create a rule for all sources listed.
-  for(std::vector<std::string>::iterator j = (args.begin() + 2);
+  for(std::vector<std::string>::const_iterator j = (args.begin() + 2);
       j != args.end(); ++j)
     {
     cmSourceFile *curr = this->Makefile->GetSource(*j);

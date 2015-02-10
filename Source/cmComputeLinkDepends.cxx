@@ -669,7 +669,7 @@ void cmComputeLinkDepends::InferDependencies()
     for(++i; i != sets->end(); ++i)
       {
       DependSet intersection;
-      cmsys_stl::set_intersection
+      std::set_intersection
         (common.begin(), common.end(), i->begin(), i->end(),
          std::inserter(intersection, intersection.begin()));
       common = intersection;
@@ -689,11 +689,10 @@ void cmComputeLinkDepends::CleanConstraintGraph()
     {
     // Sort the outgoing edges for each graph node so that the
     // original order will be preserved as much as possible.
-    cmsys_stl::sort(i->begin(), i->end());
+    std::sort(i->begin(), i->end());
 
     // Make the edge list unique.
-    EdgeList::iterator last = cmsys_stl::unique(i->begin(), i->end());
-    i->erase(last, i->end());
+    i->erase(std::unique(i->begin(), i->end()), i->end());
     }
 }
 

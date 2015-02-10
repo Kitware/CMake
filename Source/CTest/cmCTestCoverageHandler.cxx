@@ -2542,10 +2542,10 @@ bool cmCTestCoverageHandler::IntersectsFilter(LabelSet const& labels)
     }
 
   std::vector<int> ids;
-  cmsys_stl::set_intersection
+  std::set_intersection
     (labels.begin(), labels.end(),
      this->LabelFilter.begin(), this->LabelFilter.end(),
-     cmsys_stl::back_inserter(ids));
+     std::back_inserter(ids));
   return !ids.empty();
 }
 

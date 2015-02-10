@@ -3204,11 +3204,7 @@ cmLocalGenerator
     std::string ssin = sin;
 
     // Avoid full paths by removing leading slashes.
-    std::string::size_type pos = 0;
-    for(;pos < ssin.size() && ssin[pos] == '/'; ++pos)
-      {
-      }
-    ssin = ssin.substr(pos);
+    ssin.erase(0, ssin.find_first_not_of("/"));
 
     // Avoid full paths by removing colons.
     cmSystemTools::ReplaceString(ssin, ":", "_");
@@ -3645,25 +3641,20 @@ bool cmLocalGenerator::NeedBackwardsCompatibility_2_4()
 bool cmLocalGenerator::CheckDefinition(std::string const& define) const
 {
   // Many compilers do not support -DNAME(arg)=sdf so we disable it.
-  bool function_style = false;
-  for(const char* c = define.c_str(); *c && *c != '='; ++c)
+  std::string::size_type pos = define.find_first_of("(=");
+  if (pos != std::string::npos)
     {
-    if(*c == '(')
+    if (define[pos] == '(')
       {
-      function_style = true;
-      break;
+      std::ostringstream e;
+      e << "WARNING: Function-style preprocessor definitions may not be "
+        << "passed on the compiler command line because many compilers "
+        << "do not support it.\n"
+        << "CMake is dropping a preprocessor definition: " << define << "\n"
+        << "Consider defining the macro in a (configured) header file.\n";
+      cmSystemTools::Message(e.str().c_str());
+      return false;
       }
-    }
-  if(function_style)
-    {
-    std::ostringstream e;
-    e << "WARNING: Function-style preprocessor definitions may not be "
-      << "passed on the compiler command line because many compilers "
-      << "do not support it.\n"
-      << "CMake is dropping a preprocessor definition: " << define << "\n"
-      << "Consider defining the macro in a (configured) header file.\n";
-    cmSystemTools::Message(e.str().c_str());
-    return false;
     }
 
   // Many compilers do not support # in the value so we disable it.

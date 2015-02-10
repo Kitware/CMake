@@ -367,13 +367,17 @@ bool cmSystemTools::IsInternallyOn(const char* val)
     return false;
     }
   std::basic_string<char> v = val;
+  if (v.size() > 4)
+    {
+    return false;
+    }
 
   for(std::basic_string<char>::iterator c = v.begin();
       c != v.end(); c++)
     {
     *c = static_cast<char>(toupper(*c));
     }
-  return (v == "I_ON" || v == "i_on");
+  return v == "I_ON";
 }
 
 bool cmSystemTools::IsOn(const char* val)
@@ -2702,7 +2706,7 @@ bool cmSystemTools::RemoveRPath(std::string const& file, std::string* emsg,
     }
   if(se_count == 2 && se[1]->IndexInSection < se[0]->IndexInSection)
     {
-    cmsys_stl::swap(se[0], se[1]);
+    std::swap(se[0], se[1]);
     }
 
   // Get the size of the dynamic section header.

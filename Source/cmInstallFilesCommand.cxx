@@ -15,9 +15,9 @@
 
 // cmExecutableCommand
 bool cmInstallFilesCommand
-::InitialPass(std::vector<std::string> const& argsIn, cmExecutionStatus &)
+::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
 {
-  if(argsIn.size() < 2)
+  if(args.size() < 2)
     {
     this->SetError("called with incorrect number of arguments");
     return false;
@@ -26,9 +26,6 @@ bool cmInstallFilesCommand
   // Enable the install target.
   this->Makefile->GetLocalGenerator()
     ->GetGlobalGenerator()->EnableInstallTarget();
-
-  std::vector<std::string> args;
-  this->Makefile->ExpandSourceListArguments(argsIn, args, 2);
 
   this->Destination = args[0];
 

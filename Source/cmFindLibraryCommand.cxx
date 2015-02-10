@@ -195,12 +195,12 @@ struct cmFindLibraryHelper
   void RegexFromList(std::string& out, std::vector<std::string> const& in);
   size_type GetPrefixIndex(std::string const& prefix)
     {
-    return cmsys_stl::find(this->Prefixes.begin(), this->Prefixes.end(),
+    return std::find(this->Prefixes.begin(), this->Prefixes.end(),
                            prefix) - this->Prefixes.begin();
     }
   size_type GetSuffixIndex(std::string const& suffix)
     {
-    return cmsys_stl::find(this->Suffixes.begin(), this->Suffixes.end(),
+    return std::find(this->Suffixes.begin(), this->Suffixes.end(),
                            suffix) - this->Suffixes.begin();
     }
   bool HasValidSuffix(std::string const& name);

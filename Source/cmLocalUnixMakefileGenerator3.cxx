@@ -2400,14 +2400,10 @@ void cmLocalUnixMakefileGenerator3
     // On UNIX we must construct a single shell command to change
     // directory and build because make resets the directory between
     // each command.
-    std::vector<std::string>::iterator i = commands.begin();
-    for (; i != commands.end(); ++i)
-      {
-      std::string cmd = cd_cmd;
-      cmd += this->ConvertToOutputForExisting(tgtDir, relRetDir);
-      cmd += " && ";
-      cmd += *i;
-      *i = cmd;
-      }
+    std::string outputForExisting =
+                          this->ConvertToOutputForExisting(tgtDir, relRetDir);
+    std::string prefix = cd_cmd + outputForExisting + " && ";
+    std::transform(commands.begin(), commands.end(), commands.begin(),
+                   std::bind1st(std::plus<std::string>(), prefix));
     }
 }

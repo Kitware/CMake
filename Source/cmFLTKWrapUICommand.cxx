@@ -31,9 +31,6 @@ bool cmFLTKWrapUICommand
   // get parameter for the command
   this->Target = args[0];  // Target that will use the generated files
 
-  std::vector<std::string> newArgs;
-  this->Makefile->ExpandSourceListArguments(args,newArgs, 1);
-
   // get the list of GUI files from which .cxx and .h will be generated
   std::string outputDirectory = this->Makefile->GetCurrentOutputDirectory();
 
@@ -45,8 +42,8 @@ bool cmFLTKWrapUICommand
   this->Makefile->AddIncludeDirectories( outputDirectories );
   }
 
-  for(std::vector<std::string>::iterator i = (newArgs.begin() + 1);
-      i != newArgs.end(); i++)
+  for(std::vector<std::string>::const_iterator i = (args.begin() + 1);
+      i != args.end(); i++)
     {
     cmSourceFile *curr = this->Makefile->GetSource(*i);
     // if we should use the source GUI

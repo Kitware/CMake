@@ -2731,11 +2731,10 @@ std::vector<std::string> const& cmake::GetDebugConfigs()
       {
       // Expand the specified list and convert to upper-case.
       cmSystemTools::ExpandListArgument(config_list, this->DebugConfigs);
-      for(std::vector<std::string>::iterator i = this->DebugConfigs.begin();
-          i != this->DebugConfigs.end(); ++i)
-        {
-        *i = cmSystemTools::UpperCase(*i);
-        }
+      std::transform(this->DebugConfigs.begin(),
+                     this->DebugConfigs.end(),
+                     this->DebugConfigs.begin(),
+                     cmSystemTools::UpperCase);
       }
     // If no configurations were specified, use a default list.
     if(this->DebugConfigs.empty())
