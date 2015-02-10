@@ -25,7 +25,6 @@
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include <cmsys/Encoding.hxx>
-#include <locale.h>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 //----------------------------------------------------------------------------
@@ -173,7 +172,6 @@ static void cmakemainProgressCallback(const char *m, float prog,
 
 int main(int ac, char const* const* av)
 {
-  setlocale(LC_CTYPE, "");
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   ac = args.argc();

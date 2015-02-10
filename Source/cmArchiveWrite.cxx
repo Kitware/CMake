@@ -12,6 +12,7 @@
 #include "cmArchiveWrite.h"
 
 #include "cmSystemTools.h"
+#include "cmLocale.h"
 #include <cmsys/ios/iostream>
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>
@@ -259,6 +260,9 @@ bool cmArchiveWrite::AddFile(const char* file,
     return true;
     }
   const char* out = file + skip;
+
+  cmLocaleRAII localeRAII;
+  static_cast<void>(localeRAII);
 
   // Meta-data.
   std::string dest = prefix? prefix : "";

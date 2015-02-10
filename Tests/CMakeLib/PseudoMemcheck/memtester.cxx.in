@@ -1,14 +1,12 @@
 #include <cmSystemTools.h>
 #include <cmsys/Encoding.hxx>
 #include <string>
-#include <locale.h>
 
 #define RETVAL @_retval@
 
 int
 main(int ac, char **av)
 {
-  setlocale(LC_CTYPE, "");
   cmsys::Encoding::CommandLineArguments args =
     cmsys::Encoding::CommandLineArguments::Main(ac, av);
   int argc = args.argc();
