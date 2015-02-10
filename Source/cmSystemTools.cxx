@@ -11,6 +11,7 @@
 ============================================================================*/
 
 #include "cmSystemTools.h"
+#include "cmAlgorithms.h"
 #include <ctype.h>
 #include <errno.h>
 #include <time.h>
