@@ -49,7 +49,8 @@
 # and saves search results persistently in CMake cache entries::
 #
 #   Boost_INCLUDE_DIR         - Directory containing Boost headers
-#   Boost_LIBRARY_DIR         - Directory containing Boost libraries
+#   Boost_LIBRARY_DIR_RELEASE - Directory containing release Boost libraries
+#   Boost_LIBRARY_DIR_DEBUG   - Directory containing debug Boost libraries
 #   Boost_<C>_LIBRARY_DEBUG   - Component <C> library debug variant
 #   Boost_<C>_LIBRARY_RELEASE - Component <C> library release variant
 #
@@ -65,7 +66,8 @@
 # using the above hints (excluding BOOST_INCLUDEDIR and
 # Boost_ADDITIONAL_VERSIONS), "lib" directories near Boost_INCLUDE_DIR,
 # and the library name configuration settings below.  It saves the
-# library directory in Boost_LIBRARY_DIR and individual library
+# library directories in Boost_LIBRARY_DIR_DEBUG and
+# Boost_LIBRARY_DIR_RELEASE and individual library
 # locations in Boost_<C>_LIBRARY_DEBUG and Boost_<C>_LIBRARY_RELEASE.
 # When one changes settings used by previous searches in the same build
 # tree (excluding environment variables) this module discards previous
@@ -118,6 +120,8 @@
 #                              "/usr/lib/libboost_system.so".  This does not
 #                              affect linking and should not be enabled unless
 #                              the user needs this information.
+#   Boost_LIBRARY_DIR        - Default value for Boost_LIBRARY_DIR_RELEASE and
+#                              Boost_LIBRARY_DIR_DEBUG.
 #
 # On Visual Studio and Borland compilers Boost headers request automatic
 # linking to corresponding libraries.  This requires matching libraries
@@ -283,6 +287,14 @@ macro(_Boost_ADJUST_LIB_VARS basename)
   )
 endmacro()
 
+# Detect changes in used variables.
+# Compares the current variable value with the last one.
+# In short form:
+# v != v_LAST                      -> CHANGED = 1
+# v is defined, v_LAST not         -> CHANGED = 1
+# v is not defined, but v_LAST is  -> CHANGED = 1
+# otherwise                        -> CHANGED = 0
+# CHANGED is returned in variable named ${changed_var}
 macro(_Boost_CHANGE_DETECT changed_var)
   set(${changed_var} 0)
   foreach(v ${ARGN})
@@ -305,23 +317,33 @@ macro(_Boost_CHANGE_DETECT changed_var)
   endforeach()
 endmacro()
 
-macro(_Boost_FIND_LIBRARY var)
+#
+# Find the given library (var).
+# Use 'build_type' to support different lib paths for RELEASE or DEBUG builds
+#
+macro(_Boost_FIND_LIBRARY var build_type)
+
   find_library(${var} ${ARGN})
 
   if(${var})
-    # If this is the first library found then save Boost_LIBRARY_DIR.
-    if(NOT Boost_LIBRARY_DIR)
+    # If this is the first library found then save Boost_LIBRARY_DIR_[RELEASE,DEBUG].
+    if(NOT Boost_LIBRARY_DIR_${build_type})
       get_filename_component(_dir "${${var}}" PATH)
-      set(Boost_LIBRARY_DIR "${_dir}" CACHE PATH "Boost library directory" FORCE)
+      set(Boost_LIBRARY_DIR_${build_type} "${_dir}" CACHE PATH "Boost library directory ${build_type}" FORCE)
     endif()
   elseif(_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT)
-    # Try component-specific hints but do not save Boost_LIBRARY_DIR.
+    # Try component-specific hints but do not save Boost_LIBRARY_DIR_[RELEASE,DEBUG].
     find_library(${var} HINTS ${_Boost_FIND_LIBRARY_HINTS_FOR_COMPONENT} ${ARGN})
   endif()
 
-  # If Boost_LIBRARY_DIR is known then search only there.
-  if(Boost_LIBRARY_DIR)
-    set(_boost_LIBRARY_SEARCH_DIRS ${Boost_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+  # If Boost_LIBRARY_DIR_[RELEASE,DEBUG] is known then search only there.
+  if(Boost_LIBRARY_DIR_${build_type})
+    set(_boost_LIBRARY_SEARCH_DIRS_${build_type} ${Boost_LIBRARY_DIR_${build_type}} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
+    if(Boost_DEBUG)
+      message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
+        " Boost_LIBRARY_DIR_${build_type} = ${Boost_LIBRARY_DIR_${build_type}}"
+        " _boost_LIBRARY_SEARCH_DIRS_${build_type} = ${_boost_LIBRARY_SEARCH_DIRS_${build_type}}")
+    endif()
   endif()
 endmacro()
 
@@ -455,6 +477,16 @@ endfunction()
 #-------------------------------------------------------------------------------
 # main.
 #-------------------------------------------------------------------------------
+
+
+# If the user sets Boost_LIBRARY_DIR, use it as the default for both
+# configurations.
+if(NOT Boost_LIBRARY_DIR_RELEASE AND Boost_LIBRARY_DIR)
+  set(Boost_LIBRARY_DIR_RELEASE "${Boost_LIBRARY_DIR}")
+endif()
+if(NOT Boost_LIBRARY_DIR_DEBUG AND Boost_LIBRARY_DIR)
+  set(Boost_LIBRARY_DIR_DEBUG   "${Boost_LIBRARY_DIR}")
+endif()
 
 if(NOT DEFINED Boost_USE_MULTITHREADED)
     set(Boost_USE_MULTITHREADED TRUE)
@@ -846,49 +878,54 @@ endif()
 # ------------------------------------------------------------------------
 #  Begin finding boost libraries
 # ------------------------------------------------------------------------
-set(_Boost_VARS_LIB BOOST_LIBRARYDIR Boost_LIBRARY_DIR)
-_Boost_CHANGE_DETECT(_Boost_CHANGE_LIBDIR ${_Boost_VARS_DIR} ${_Boost_VARS_LIB} Boost_INCLUDE_DIR)
-# Clear Boost_LIBRARY_DIR if it did not change but other input affecting the
-# location did.  We will find a new one based on the new inputs.
-if(_Boost_CHANGE_LIBDIR AND NOT _Boost_LIBRARY_DIR_CHANGED)
-  unset(Boost_LIBRARY_DIR CACHE)
-endif()
 
-if(Boost_LIBRARY_DIR)
-  set(_boost_LIBRARY_SEARCH_DIRS ${Boost_LIBRARY_DIR} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
-else()
-  set(_boost_LIBRARY_SEARCH_DIRS "")
-  if(BOOST_LIBRARYDIR)
-    list(APPEND _boost_LIBRARY_SEARCH_DIRS ${BOOST_LIBRARYDIR})
-  elseif(_ENV_BOOST_LIBRARYDIR)
-    list(APPEND _boost_LIBRARY_SEARCH_DIRS ${_ENV_BOOST_LIBRARYDIR})
+foreach(c DEBUG RELEASE)
+  set(_Boost_VARS_LIB_${c} BOOST_LIBRARYDIR Boost_LIBRARY_DIR_${c})
+  _Boost_CHANGE_DETECT(_Boost_CHANGE_LIBDIR_${c} ${_Boost_VARS_DIR} ${_Boost_VARS_LIB_${c}} Boost_INCLUDE_DIR)
+  # Clear Boost_LIBRARY_DIR_${c} if it did not change but other input affecting the
+  # location did.  We will find a new one based on the new inputs.
+  if(_Boost_CHANGE_LIBDIR_${c} AND NOT _Boost_LIBRARY_DIR_${c}_CHANGED)
+    unset(Boost_LIBRARY_DIR_${c} CACHE)
   endif()
 
-  if(BOOST_ROOT)
-    list(APPEND _boost_LIBRARY_SEARCH_DIRS ${BOOST_ROOT}/lib ${BOOST_ROOT}/stage/lib)
-  elseif(_ENV_BOOST_ROOT)
-    list(APPEND _boost_LIBRARY_SEARCH_DIRS ${_ENV_BOOST_ROOT}/lib ${_ENV_BOOST_ROOT}/stage/lib)
-  endif()
-
-  list(APPEND _boost_LIBRARY_SEARCH_DIRS
-    ${Boost_INCLUDE_DIR}/lib
-    ${Boost_INCLUDE_DIR}/../lib
-    ${Boost_INCLUDE_DIR}/stage/lib
-    )
-  if( Boost_NO_SYSTEM_PATHS )
-    list(APPEND _boost_LIBRARY_SEARCH_DIRS NO_CMAKE_SYSTEM_PATH)
+  # If Boost_LIBRARY_DIR_[RELEASE,DEBUG] is set, prefer its value.
+  if(Boost_LIBRARY_DIR_${c})
+    set(_boost_LIBRARY_SEARCH_DIRS_${c} ${Boost_LIBRARY_DIR_${c}} NO_DEFAULT_PATH NO_CMAKE_FIND_ROOT_PATH)
   else()
-    list(APPEND _boost_LIBRARY_SEARCH_DIRS PATHS
-      C:/boost/lib
-      C:/boost
-      /sw/local/lib
+    set(_boost_LIBRARY_SEARCH_DIRS_${c} "")
+    if(BOOST_LIBRARYDIR)
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} ${BOOST_LIBRARYDIR})
+    elseif(_ENV_BOOST_LIBRARYDIR)
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} ${_ENV_BOOST_LIBRARYDIR})
+    endif()
+
+    if(BOOST_ROOT)
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} ${BOOST_ROOT}/lib ${BOOST_ROOT}/stage/lib)
+    elseif(_ENV_BOOST_ROOT)
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} ${_ENV_BOOST_ROOT}/lib ${_ENV_BOOST_ROOT}/stage/lib)
+    endif()
+
+    list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c}
+      ${Boost_INCLUDE_DIR}/lib
+      ${Boost_INCLUDE_DIR}/../lib
+      ${Boost_INCLUDE_DIR}/stage/lib
       )
+    if( Boost_NO_SYSTEM_PATHS )
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} NO_CMAKE_SYSTEM_PATH)
+    else()
+      list(APPEND _boost_LIBRARY_SEARCH_DIRS_${c} PATHS
+        C:/boost/lib
+        C:/boost
+        /sw/local/lib
+        )
+    endif()
   endif()
-endif()
+endforeach()
 
 if(Boost_DEBUG)
   message(STATUS "[ ${CMAKE_CURRENT_LIST_FILE}:${CMAKE_CURRENT_LIST_LINE} ] "
-    "_boost_LIBRARY_SEARCH_DIRS = ${_boost_LIBRARY_SEARCH_DIRS}")
+    "_boost_LIBRARY_SEARCH_DIRS_RELEASE = ${_boost_LIBRARY_SEARCH_DIRS_RELEASE}"
+    "_boost_LIBRARY_SEARCH_DIRS_DEBUG   = ${_boost_LIBRARY_SEARCH_DIRS_DEBUG}")
 endif()
 
 # Support preference of static libs by adjusting CMAKE_FIND_LIBRARY_SUFFIXES
@@ -1002,10 +1039,16 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
                    "Searching for ${UPPERCOMPONENT}_LIBRARY_RELEASE: ${_boost_RELEASE_NAMES}")
   endif()
 
-  # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
-  string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS}")
+  # if Boost_LIBRARY_DIR_RELEASE is not defined,
+  # but Boost_LIBRARY_DIR_DEBUG is, look there first for RELEASE libs
+  if(NOT Boost_LIBRARY_DIR_RELEASE AND Boost_LIBRARY_DIR_DEBUG)
+    list(INSERT _boost_LIBRARY_SEARCH_DIRS_RELEASE 0 ${Boost_LIBRARY_DIR_DEBUG})
+  endif()
 
-  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE
+  # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
+  string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS_RELEASE}")
+
+  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_RELEASE RELEASE
     NAMES ${_boost_RELEASE_NAMES}
     HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
     NAMES_PER_DIR
@@ -1038,10 +1081,16 @@ foreach(COMPONENT ${Boost_FIND_COMPONENTS})
                    "Searching for ${UPPERCOMPONENT}_LIBRARY_DEBUG: ${_boost_DEBUG_NAMES}")
   endif()
 
-  # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
-  string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS}")
+  # if Boost_LIBRARY_DIR_DEBUG is not defined,
+  # but Boost_LIBRARY_DIR_RELEASE is, look there first for DEBUG libs
+  if(NOT Boost_LIBRARY_DIR_DEBUG AND Boost_LIBRARY_DIR_RELEASE)
+    list(INSERT _boost_LIBRARY_SEARCH_DIRS_DEBUG 0 ${Boost_LIBRARY_DIR_RELEASE})
+  endif()
 
-  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG
+  # Avoid passing backslashes to _Boost_FIND_LIBRARY due to macro re-parsing.
+  string(REPLACE "\\" "/" _boost_LIBRARY_SEARCH_DIRS_tmp "${_boost_LIBRARY_SEARCH_DIRS_DEBUG}")
+
+  _Boost_FIND_LIBRARY(Boost_${UPPERCOMPONENT}_LIBRARY_DEBUG DEBUG
     NAMES ${_boost_DEBUG_NAMES}
     HINTS ${_boost_LIBRARY_SEARCH_DIRS_tmp}
     NAMES_PER_DIR
@@ -1067,7 +1116,16 @@ endif()
 # ------------------------------------------------------------------------
 
 set(Boost_INCLUDE_DIRS ${Boost_INCLUDE_DIR})
-set(Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIR})
+set(Boost_LIBRARY_DIRS)
+if(Boost_LIBRARY_DIR_RELEASE)
+  list(APPEND Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIR_RELEASE})
+endif()
+if(Boost_LIBRARY_DIR_DEBUG)
+  list(APPEND Boost_LIBRARY_DIRS ${Boost_LIBRARY_DIR_DEBUG})
+endif()
+if(Boost_LIBRARY_DIRS)
+  list(REMOVE_DUPLICATES Boost_LIBRARY_DIRS)
+endif()
 
 # The above setting of Boost_FOUND was based only on the header files.
 # Update it for the requested component libraries.
