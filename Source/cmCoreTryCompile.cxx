@@ -383,8 +383,8 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
 
     /* Use a random file name to avoid rapid creation and deletion
        of the same executable name (some filesystems fail on that).  */
-    sprintf(targetNameBuf, "cmTryCompileExec%u",
-            cmSystemTools::RandomSeed());
+    sprintf(targetNameBuf, "cmTC_%05x",
+            cmSystemTools::RandomSeed() & 0xFFFFF);
     targetName = targetNameBuf;
 
     if (!targets.empty())
