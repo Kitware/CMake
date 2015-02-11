@@ -234,11 +234,16 @@ if(WIN32)
      set( _RUBY_MSVC_RUNTIME "90" )
    endif()
 
+   set(_RUBY_ARCH_PREFIX "")
+   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+     set(_RUBY_ARCH_PREFIX "x64-")
+   endif()
+
    list(APPEND _RUBY_POSSIBLE_LIB_NAMES
-               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}"
-               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}-static"
-               "msvcrt-ruby${_RUBY_NODOT_VERSION}"
-               "msvcrt-ruby${_RUBY_NODOT_VERSION}-static" )
+               "${_RUBY_ARCH_PREFIX}msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}"
+               "${_RUBY_ARCH_PREFIX}msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}-static"
+               "${_RUBY_ARCH_PREFIX}msvcrt-ruby${_RUBY_NODOT_VERSION}"
+               "${_RUBY_ARCH_PREFIX}msvcrt-ruby${_RUBY_NODOT_VERSION}-static" )
 endif()
 
 find_library(RUBY_LIBRARY NAMES ${_RUBY_POSSIBLE_LIB_NAMES} HINTS ${RUBY_POSSIBLE_LIB_DIR} )
