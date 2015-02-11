@@ -60,6 +60,9 @@ public:
   cmTarget* GetTarget() const { return this->Target; }
   bool IsImportLibrary() const { return this->ImportLibrary; }
 
+  std::string const& GetDestination() const
+    { return this->Destination; }
+
 protected:
   virtual void GenerateScript(std::ostream& os);
   virtual void GenerateScriptForConfig(std::ostream& os,
