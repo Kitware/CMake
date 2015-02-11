@@ -398,7 +398,7 @@ cmExportInstallFileGenerator
   cmTarget* target = itgen->GetTarget();
 
   // Construct the installed location of the target.
-  std::string dest = itgen->GetDestination();
+  std::string dest = itgen->GetDestination(config);
   std::string value;
   if(!cmSystemTools::FileIsFullPath(dest.c_str()))
     {

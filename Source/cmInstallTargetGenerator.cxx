@@ -12,6 +12,7 @@
 #include "cmInstallTargetGenerator.h"
 
 #include "cmComputeLinkInformation.h"
+#include "cmGeneratorExpression.h"
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
@@ -78,7 +79,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
     fromDirConfig += "/";
     }
   std::string toDir =
-    this->ConvertToAbsoluteDestination(this->Destination);
+    this->ConvertToAbsoluteDestination(this->GetDestination(config));
   toDir += "/";
 
   // Compute the list of files to install for this target.
@@ -323,7 +324,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   const char* no_dir_permissions = 0;
   const char* no_rename = 0;
   bool optional = this->Optional || this->ImportLibrary;
-  this->AddInstallRule(os, this->Destination,
+  this->AddInstallRule(os, this->GetDestination(config),
                        type, filesFrom, optional,
                        this->FilePermissions.c_str(), no_dir_permissions,
                        no_rename, literal_args.c_str(),
@@ -332,6 +333,15 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   // Add post-installation tweaks.
   this->AddTweak(os, indent, config, filesTo,
                  &cmInstallTargetGenerator::PostReplacementTweaks);
+}
+
+//----------------------------------------------------------------------------
+std::string
+cmInstallTargetGenerator::GetDestination(std::string const& config) const
+{
+  cmGeneratorExpression ge;
+  return ge.Parse(this->Destination)
+    ->Evaluate(this->Target->GetMakefile(), config);
 }
 
 //----------------------------------------------------------------------------
