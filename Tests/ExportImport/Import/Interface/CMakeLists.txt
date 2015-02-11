@@ -82,6 +82,14 @@ endmacro()
 
 do_try_compile(bld)
 
+add_executable(source_target_test_bld source_target_test.cpp)
+target_link_libraries(source_target_test_bld bld::source_target)
+target_compile_definitions(source_target_test_bld PRIVATE USE_FROM_BUILD_DIR)
+
+add_executable(source_target_test_exp source_target_test.cpp)
+target_link_libraries(source_target_test_exp exp::source_target)
+target_compile_definitions(source_target_test_exp PRIVATE USE_FROM_INSTALL_DIR)
+
 add_executable(headeronlytest_exp headeronlytest.cpp)
 target_link_libraries(headeronlytest_exp exp::headeronly)
 
