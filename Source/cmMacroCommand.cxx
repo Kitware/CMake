@@ -164,10 +164,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
           std::string argnDef;
           if (expandedArgs.size() > this->Args.size() - 1)
             {
-            if (!argnDef.empty() && !expandedArgs.empty())
-              {
-              argnDef += ";";
-              }
             argnDef += expandedArgn;
             }
           cmSystemTools::ReplaceString(tmps, "${ARGN}", argnDef.c_str());
@@ -180,10 +176,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
           char argvName[60];
 
           std::string argvDef;
-          if (!argvDef.empty() && !expandedArgs.empty())
-            {
-            argvDef += ";";
-            }
           argvDef += expandedArgv;
           cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
 
