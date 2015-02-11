@@ -117,6 +117,14 @@ bool cmMacroHelperCommand::InvokeInitialPass
     {
     variables.push_back("${" + this->Args[j] + "}");
     }
+  std::vector<std::string> argVs;
+  argVs.reserve(expandedArgs.size());
+  char argvName[60];
+  for (unsigned int j = 0; j < expandedArgs.size(); ++j)
+    {
+    sprintf(argvName,"${ARGV%i}",j);
+    argVs.push_back(argvName);
+    }
   if(!this->Functions.empty())
     {
     this->FilePath = this->Functions[0].FilePath;
@@ -166,12 +174,9 @@ bool cmMacroHelperCommand::InvokeInitialPass
         // then try replacing ARGV values
         if (tmps.find("${ARGV") != std::string::npos)
           {
-          char argvName[60];
-          // also replace the ARGV1 ARGV2 ... etc
           for (unsigned int t = 0; t < expandedArgs.size(); ++t)
             {
-            sprintf(argvName,"${ARGV%i}",t);
-            cmSystemTools::ReplaceString(tmps, argvName,
+            cmSystemTools::ReplaceString(tmps, argVs[t].c_str(),
                                          expandedArgs[t].c_str());
             }
           }
