@@ -137,17 +137,13 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     argvDef += *eit;
     }
   std::string argnDef;
-  unsigned int cnt = 0;
-  for ( eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit )
-    if ( cnt >= this->Args.size()-1 )
+  eit = expandedArgs.begin() + (this->Args.size()-1);
+  for ( ; eit != expandedArgs.end(); ++eit)
+    if (!argnDef.empty())
       {
-      if (!argnDef.empty())
-        {
-        argnDef += ";";
-        }
-      argnDef += *eit;
+      argnDef += ";";
       }
-    cnt ++;
+    argnDef += *eit;
     }
   this->Makefile->AddDefinition("ARGV", argvDef.c_str());
   this->Makefile->MarkVariableAsUsed("ARGV");
