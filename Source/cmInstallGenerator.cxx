@@ -37,6 +37,7 @@ cmInstallGenerator
 void cmInstallGenerator
 ::AddInstallRule(
                  std::ostream& os,
+                 std::string const& dest,
                  cmInstallType type,
                  std::vector<std::string> const& files,
                  bool optional /* = false */,
@@ -60,7 +61,6 @@ void cmInstallGenerator
     case cmInstallType_FILES:          stype = "FILE"; break;
     }
   os << indent;
-  std::string const& dest = this->Destination;
   if (cmSystemTools::FileIsFullPath(dest.c_str()))
      {
      os << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n";

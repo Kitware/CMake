@@ -323,8 +323,8 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   const char* no_dir_permissions = 0;
   const char* no_rename = 0;
   bool optional = this->Optional || this->ImportLibrary;
-  this->AddInstallRule(os, type, filesFrom,
-                       optional,
+  this->AddInstallRule(os, this->Destination,
+                       type, filesFrom, optional,
                        this->FilePermissions.c_str(), no_dir_permissions,
                        no_rename, literal_args.c_str(),
                        indent);

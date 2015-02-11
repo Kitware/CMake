@@ -40,7 +40,9 @@ public:
   virtual ~cmInstallGenerator();
 
   void AddInstallRule(
-    std::ostream& os, cmInstallType type,
+    std::ostream& os,
+    std::string const& dest,
+    cmInstallType type,
     std::vector<std::string> const& files,
     bool optional = false,
     const char* permissions_file = 0,
