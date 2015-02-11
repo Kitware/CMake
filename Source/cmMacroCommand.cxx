@@ -86,7 +86,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
 
   std::string tmps;
   cmListFileArgument arg;
-  std::string variable;
 
   // make sure the number of arguments passed is at least the number
   // required by the signature
@@ -119,10 +118,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
   variables.reserve(this->Args.size() - 1);
   for (unsigned int j = 1; j < this->Args.size(); ++j)
     {
-    std::string variable = "${";
-    variable += this->Args[j];
-    variable += "}";
-    variables.push_back(variable);
+    variables.push_back("${" + this->Args[j] + "}");
     }
   if(!this->Functions.empty())
     {
