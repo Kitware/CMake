@@ -463,10 +463,7 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
       }
 
     // Truncate indentation to match that on this line.
-    if(line.size() < indentEnd)
-      {
-      indentEnd = line.size();
-      }
+    indentEnd = std::min(indentEnd, line.size());
     for(std::string::size_type j = 0; j != indentEnd; ++j)
       {
       if(line[j] != indentText[j])
