@@ -455,7 +455,12 @@ function(cpack_rpm_prepare_relocation_paths)
   endforeach()
 
   # warn about all the paths that are not relocatable
-  file(GLOB_RECURSE FILE_PATHS_ "${WDIR}/*")
+  cmake_policy(PUSH)
+    # Tell file(GLOB_RECURSE) not to follow directory symlinks
+    # even if the project does not set this policy to NEW.
+    cmake_policy(SET CMP0009 NEW)
+    file(GLOB_RECURSE FILE_PATHS_ "${WDIR}/*")
+  cmake_policy(POP)
   foreach(TMP_PATH ${FILE_PATHS_})
     string(LENGTH "${WDIR}" WDIR_LEN)
     string(SUBSTRING "${TMP_PATH}" ${WDIR_LEN} -1 TMP_PATH)
