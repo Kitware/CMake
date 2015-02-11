@@ -111,15 +111,10 @@ bool cmMacroHelperCommand::InvokeInitialPass
   argcDefStream << expandedArgs.size();
   std::string argcDef = argcDefStream.str();
 
-  // declare varuiables for ARGV ARGN but do not compute until needed
-  std::string argvDef;
-  std::string argnDef;
   std::vector<std::string>::const_iterator eit
       = expandedArgs.begin() + (this->Args.size() - 1);
   std::string expandedArgn = cmJoin(cmRange(eit, expandedArgs.end()), ";");
   std::string expandedArgv = cmJoin(expandedArgs, ";");
-  bool argnDefInitialized = false;
-  bool argvDefInitialized = false;
   if(!this->Functions.empty())
     {
     this->FilePath = this->Functions[0].FilePath;
@@ -166,17 +161,14 @@ bool cmMacroHelperCommand::InvokeInitialPass
         // repleace ARGN
         if (tmps.find("${ARGN}") != std::string::npos)
           {
-          if (!argnDefInitialized)
+          std::string argnDef;
+          if (expandedArgs.size() > this->Args.size() - 1)
             {
-            if (expandedArgs.size() > this->Args.size() - 1)
+            if (!argnDef.empty() && !expandedArgs.empty())
               {
-              if (!argnDef.empty() && !expandedArgs.empty())
-                {
-                argnDef += ";";
-                }
-              argnDef += expandedArgn;
+              argnDef += ";";
               }
-            argnDefInitialized = true;
+            argnDef += expandedArgn;
             }
           cmSystemTools::ReplaceString(tmps, "${ARGN}", argnDef.c_str());
           }
@@ -187,16 +179,12 @@ bool cmMacroHelperCommand::InvokeInitialPass
           {
           char argvName[60];
 
-          // repleace ARGV, compute it only once
-          if (!argvDefInitialized)
+          std::string argvDef;
+          if (!argvDef.empty() && !expandedArgs.empty())
             {
-            if (!argvDef.empty() && !expandedArgs.empty())
-              {
-              argvDef += ";";
-              }
-            argvDef += expandedArgv;
-            argvDefInitialized = true;
+            argvDef += ";";
             }
+          argvDef += expandedArgv;
           cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
 
           // also replace the ARGV1 ARGV2 ... etc
