@@ -115,6 +115,15 @@ bool cmMacroHelperCommand::InvokeInitialPass
       = expandedArgs.begin() + (this->Args.size() - 1);
   std::string expandedArgn = cmJoin(cmRange(eit, expandedArgs.end()), ";");
   std::string expandedArgv = cmJoin(expandedArgs, ";");
+  std::vector<std::string> variables;
+  variables.reserve(this->Args.size() - 1);
+  for (unsigned int j = 1; j < this->Args.size(); ++j)
+    {
+    std::string variable = "${";
+    variable += this->Args[j];
+    variable += "}";
+    variables.push_back(variable);
+    }
   if(!this->Functions.empty())
     {
     this->FilePath = this->Functions[0].FilePath;
@@ -147,13 +156,10 @@ bool cmMacroHelperCommand::InvokeInitialPass
         {
         tmps = k->Value;
         // replace formal arguments
-        for (unsigned int j = 1; j < this->Args.size(); ++j)
+        for (unsigned int j = 0; j < variables.size(); ++j)
           {
-          variable = "${";
-          variable += this->Args[j];
-          variable += "}";
-          cmSystemTools::ReplaceString(tmps, variable.c_str(),
-                                       expandedArgs[j-1].c_str());
+          cmSystemTools::ReplaceString(tmps, variables[j].c_str(),
+                                       expandedArgs[j].c_str());
           }
         // replace argc
         cmSystemTools::ReplaceString(tmps, "${ARGC}",argcDef.c_str());
