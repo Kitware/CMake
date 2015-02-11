@@ -85,7 +85,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
   this->Makefile->ExpandArguments(args, expandedArgs);
 
   std::string tmps;
-  cmListFileArgument arg;
 
   // make sure the number of arguments passed is at least the number
   // required by the signature
@@ -144,6 +143,8 @@ bool cmMacroHelperCommand::InvokeInitialPass
       // Set the FilePath on the arguments to match the function since it is
       // not stored and the original values may be freed
       k->FilePath = this->FilePath.c_str();
+
+      cmListFileArgument arg;
       if(k->Delim == cmListFileArgument::Bracket)
         {
         arg.Value = k->Value;
