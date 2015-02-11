@@ -114,6 +114,10 @@ bool cmMacroHelperCommand::InvokeInitialPass
   // declare varuiables for ARGV ARGN but do not compute until needed
   std::string argvDef;
   std::string argnDef;
+  std::vector<std::string>::const_iterator eit
+      = expandedArgs.begin() + (this->Args.size() - 1);
+  std::string expandedArgn = cmJoin(cmRange(eit, expandedArgs.end()), ";");
+  std::string expandedArgv = cmJoin(expandedArgs, ";");
   bool argnDefInitialized = false;
   bool argvDefInitialized = false;
   if(!this->Functions.empty())
@@ -170,9 +174,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
                 {
                 argnDef += ";";
                 }
-              std::vector<std::string>::const_iterator eit
-                  = expandedArgs.begin() + (this->Args.size() - 1);
-              argnDef += cmJoin(cmRange(eit, expandedArgs.end()), ";");
+              argnDef += expandedArgn;
               }
             argnDefInitialized = true;
             }
@@ -192,7 +194,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
               {
               argvDef += ";";
               }
-            argvDef += cmJoin(expandedArgs, ";");
+            argvDef += expandedArgv;
             argvDefInitialized = true;
             }
           cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
