@@ -151,37 +151,33 @@ bool cmMacroHelperCommand::InvokeInitialPass
       k->FilePath = this->FilePath.c_str();
 
       cmListFileArgument arg;
-      if(k->Delim == cmListFileArgument::Bracket)
+      arg.Value = k->Value;
+      if(k->Delim != cmListFileArgument::Bracket)
         {
-        arg.Value = k->Value;
-        }
-      else
-        {
-        std::string tmps = k->Value;
         // replace formal arguments
         for (unsigned int j = 0; j < variables.size(); ++j)
           {
-          cmSystemTools::ReplaceString(tmps, variables[j].c_str(),
+          cmSystemTools::ReplaceString(arg.Value, variables[j].c_str(),
                                        expandedArgs[j].c_str());
           }
         // replace argc
-        cmSystemTools::ReplaceString(tmps, "${ARGC}",argcDef.c_str());
+        cmSystemTools::ReplaceString(arg.Value, "${ARGC}",argcDef.c_str());
 
-        cmSystemTools::ReplaceString(tmps, "${ARGN}", expandedArgn.c_str());
-        cmSystemTools::ReplaceString(tmps, "${ARGV}", expandedArgv.c_str());
+        cmSystemTools::ReplaceString(arg.Value, "${ARGN}",
+                                     expandedArgn.c_str());
+        cmSystemTools::ReplaceString(arg.Value, "${ARGV}",
+                                     expandedArgv.c_str());
 
         // if the current argument of the current function has ${ARGV in it
         // then try replacing ARGV values
-        if (tmps.find("${ARGV") != std::string::npos)
+        if (arg.Value.find("${ARGV") != std::string::npos)
           {
           for (unsigned int t = 0; t < expandedArgs.size(); ++t)
             {
-            cmSystemTools::ReplaceString(tmps, argVs[t].c_str(),
+            cmSystemTools::ReplaceString(arg.Value, argVs[t].c_str(),
                                          expandedArgs[t].c_str());
             }
           }
-
-        arg.Value = tmps;
         }
       arg.Delim = k->Delim;
       arg.FilePath = k->FilePath;
