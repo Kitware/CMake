@@ -84,8 +84,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
   std::vector<std::string> expandedArgs;
   this->Makefile->ExpandArguments(args, expandedArgs);
 
-  std::string tmps;
-
   // make sure the number of arguments passed is at least the number
   // required by the signature
   if (expandedArgs.size() < this->Args.size() - 1)
@@ -151,7 +149,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
         }
       else
         {
-        tmps = k->Value;
+        std::string tmps = k->Value;
         // replace formal arguments
         for (unsigned int j = 0; j < variables.size(); ++j)
           {
