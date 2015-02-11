@@ -2436,8 +2436,11 @@ void cmGlobalXCodeGenerator::CreateBuildSettings(cmTarget& target,
 
       if (!attribute.empty())
         {
+        cmGeneratorExpression ge;
+        std::string processed = ge.Parse(i->second.GetValue())
+          ->Evaluate(this->CurrentMakefile, configName);
         buildSettings->AddAttribute(attribute.c_str(),
-                                    this->CreateString(i->second.GetValue()));
+                                    this->CreateString(processed));
         }
       }
     }
