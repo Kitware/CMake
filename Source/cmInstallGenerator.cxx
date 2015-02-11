@@ -60,7 +60,7 @@ void cmInstallGenerator
     case cmInstallType_FILES:          stype = "FILE"; break;
     }
   os << indent;
-  std::string dest = this->GetInstallDestination();
+  std::string dest = this->ConvertToAbsoluteDestination(this->Destination);
   if (cmSystemTools::FileIsFullPath(dest.c_str()))
      {
      os << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n";
@@ -179,15 +179,16 @@ bool cmInstallGenerator::InstallsForConfig(const std::string& config)
 }
 
 //----------------------------------------------------------------------------
-std::string cmInstallGenerator::GetInstallDestination() const
+std::string
+cmInstallGenerator::ConvertToAbsoluteDestination(std::string const& dest) const
 {
   std::string result;
-  if(!this->Destination.empty() &&
-     !cmSystemTools::FileIsFullPath(this->Destination.c_str()))
+  if(!dest.empty() &&
+     !cmSystemTools::FileIsFullPath(dest.c_str()))
     {
     result = "${CMAKE_INSTALL_PREFIX}/";
     }
-  result += this->Destination;
+  result += dest;
   return result;
 }
 

@@ -199,7 +199,7 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
 {
   // Remove old per-configuration export files if the main changes.
   std::string installedDir = "$ENV{DESTDIR}";
-  installedDir += this->GetInstallDestination();
+  installedDir += this->ConvertToAbsoluteDestination(this->Destination);
   installedDir += "/";
   std::string installedFile = installedDir;
   installedFile += this->FileName;

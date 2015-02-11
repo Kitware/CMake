@@ -52,7 +52,7 @@ public:
 
   /** Get the install destination as it should appear in the
       installation script.  */
-  std::string GetInstallDestination() const;
+  std::string ConvertToAbsoluteDestination(std::string const& dest) const;
 
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(const std::string& config);
