@@ -162,10 +162,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
         if (tmps.find("${ARGN}") != std::string::npos)
           {
           std::string argnDef;
-          if (expandedArgs.size() > this->Args.size() - 1)
-            {
-            argnDef += expandedArgn;
-            }
+          argnDef += expandedArgn;
           cmSystemTools::ReplaceString(tmps, "${ARGN}", argnDef.c_str());
           }
 
