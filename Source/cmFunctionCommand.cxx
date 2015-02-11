@@ -128,8 +128,6 @@ bool cmFunctionHelperCommand::InvokeInitialPass
   // define ARGV and ARGN
   std::vector<std::string>::const_iterator eit;
   std::string argvDef;
-  std::string argnDef;
-  unsigned int cnt = 0;
   for ( eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit )
     {
     if (!argvDef.empty())
@@ -137,6 +135,10 @@ bool cmFunctionHelperCommand::InvokeInitialPass
       argvDef += ";";
       }
     argvDef += *eit;
+    }
+  std::string argnDef;
+  unsigned int cnt = 0;
+  for ( eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit )
     if ( cnt >= this->Args.size()-1 )
       {
       if (!argnDef.empty())
