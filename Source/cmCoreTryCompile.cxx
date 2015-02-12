@@ -260,14 +260,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         err << "Unknown extension \"" << ext << "\" for file\n"
             << "  " << *si << "\n"
             << "try_compile() works only for enabled languages.  "
-            << "Currently these are:\n ";
+            << "Currently these are:\n  ";
         std::vector<std::string> langs;
         gg->GetEnabledLanguages(langs);
-        for(std::vector<std::string>::iterator l = langs.begin();
-            l != langs.end(); ++l)
-          {
-          err << " " << *l;
-          }
+        err << cmJoin(langs, " ");
         err << "\nSee project() command to enable other languages.";
         this->Makefile->IssueMessage(cmake::FATAL_ERROR, err.str());
         return -1;
@@ -373,12 +369,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     // handle any compile flags we need to pass on
     if (!compileDefs.empty())
       {
-      fprintf(fout, "add_definitions( ");
-      for (size_t i = 0; i < compileDefs.size(); ++i)
-        {
-        fprintf(fout,"%s ",compileDefs[i].c_str());
-        }
-      fprintf(fout, ")\n");
+      fprintf(fout, "add_definitions(%s)\n", cmJoin(compileDefs, " ").c_str());
       }
 
     /* Use a random file name to avoid rapid creation and deletion
