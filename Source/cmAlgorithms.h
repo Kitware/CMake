@@ -138,6 +138,22 @@ private:
   const_iterator End;
 };
 
+template<typename BiDirIt>
+BiDirIt Rotate(BiDirIt first, BiDirIt middle, BiDirIt last)
+{
+  typename std::iterator_traits<BiDirIt>::difference_type dist =
+      std::distance(first, middle);
+  std::rotate(first, middle, last);
+  std::advance(last, -dist);
+  return last;
+}
+
+template<typename Iter>
+Iter RemoveN(Iter i1, Iter i2, size_t n)
+{
+  return ContainerAlgorithms::Rotate(i1, i1 + n, i2);
+}
+
 }
 
 template<typename Iter1, typename Iter2>
@@ -187,5 +203,27 @@ std::string cmJoin(Range const& r, std::string delimiter)
 {
   return cmJoin(r, delimiter.c_str());
 };
+
+template<typename Range>
+typename Range::const_iterator cmRemoveN(Range& r, size_t n)
+{
+  return ContainerAlgorithms::RemoveN(r.begin(), r.end(), n);
+}
+
+template<typename Range, typename InputRange>
+typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
+{
+  typename InputRange::const_iterator remIt = rem.begin();
+
+  typename Range::iterator writer = r.begin() + *remIt;
+  ++remIt;
+  size_t count = 1;
+  for ( ; writer != r.end() && remIt != rem.end(); ++count, ++remIt)
+    {
+    writer = ContainerAlgorithms::RemoveN(writer, r.begin() + *remIt, count);
+    }
+  writer = ContainerAlgorithms::RemoveN(writer, r.end(), count);
+  return writer;
+}
 
 #endif
