@@ -211,3 +211,8 @@ if(RPMBUILD_EXECUTABLE)
 endif()
 
 add_RunCMake_test(COMPILE_LANGUAGE-genex)
+
+# Matlab module related tests
+if(CMake_TEST_FindMatlab)
+  add_RunCMake_test(FindMatlab)
+endif()

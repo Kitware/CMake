@@ -1256,6 +1256,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     add_subdirectory(FindJsonCpp)
   endif()
 
+  # Matlab module
+  if(CMake_TEST_FindMatlab)
+    ADD_TEST_MACRO(FindMatlab.basic_checks      ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>)
+    ADD_TEST_MACRO(FindMatlab.versions_checks   ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>)
+  endif()
+
   find_package(GTK2 QUIET)
   if(GTK2_FOUND)
     add_subdirectory(FindGTK2)
