@@ -685,8 +685,7 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName)
     command += tmpOutputFile;
     if(cmSystemTools::FileExists(command.c_str()))
       {
-      tmpOutputFile = cmSystemTools::CollapseFullPath(command);
-      this->OutputFile = tmpOutputFile;
+      this->OutputFile = cmSystemTools::CollapseFullPath(command);
       return;
       }
     }
