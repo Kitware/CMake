@@ -2571,17 +2571,12 @@ bool cmGlobalGenerator::IsReservedTarget(std::string const& name)
     "test", "RUN_TESTS",
     "package", "PACKAGE",
     "package_source",
-    "ZERO_CHECK",
-    0
+    "ZERO_CHECK"
   };
 
-  for(const char** reservedTarget = reservedTargets;
-    *reservedTarget; ++reservedTarget)
-    {
-    if(name == *reservedTarget) return true;
-    }
-
-  return false;
+  return std::find(cmArrayBegin(reservedTargets),
+                   cmArrayEnd(reservedTargets), name)
+      != cmArrayEnd(reservedTargets);
 }
 
 void cmGlobalGenerator::SetExternalMakefileProjectGenerator(
