@@ -57,6 +57,7 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
   // Write code to install the files.
   const char* no_dir_permissions = 0;
   this->AddInstallRule(os,
+                       this->Destination,
                        (this->Programs
                         ? cmInstallType_PROGRAMS
                         : cmInstallType_FILES),

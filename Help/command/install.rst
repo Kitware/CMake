@@ -159,6 +159,10 @@ file itself, call ``install(EXPORT)``, documented below.
 Installing a target with the :prop_tgt:`EXCLUDE_FROM_ALL` target property
 set to ``TRUE`` has undefined behavior.
 
+The install destination given to the target install ``DESTINATION`` may
+use "generator expressions" with the syntax ``$<...>``.  See the
+:manual:`cmake-generator-expressions(7)` manual for available expressions.
+
 Installing Files
 ^^^^^^^^^^^^^^^^
 

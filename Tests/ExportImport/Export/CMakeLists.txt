@@ -68,6 +68,11 @@ add_library(testLib5 SHARED testLib5.c)
 
 add_library(testLib6 STATIC testLib6.cxx testLib6c.c)
 
+add_library(testLibPerConfigDest STATIC testLibPerConfigDest.c)
+install(TARGETS testLibPerConfigDest EXPORT exp
+  DESTINATION lib/$<$<BOOL:$<CONFIG>>:$<CONFIG>>$<$<NOT:$<BOOL:$<CONFIG>>>:NoConfig>
+  )
+
 # Work-around: Visual Studio 6 does not support per-target object files.
 set(VS6)
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
@@ -446,9 +451,9 @@ install(
   cmp0022NEW cmp0022OLD
   systemlib
   EXPORT exp
-  RUNTIME DESTINATION bin
-  LIBRARY DESTINATION lib NAMELINK_SKIP
-  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION $<1:bin>
+  LIBRARY DESTINATION $<1:lib> NAMELINK_SKIP
+  ARCHIVE DESTINATION $<1:lib>
   FRAMEWORK DESTINATION Frameworks
   BUNDLE DESTINATION Applications
   )
@@ -503,6 +508,7 @@ export(TARGETS testExe1 testLib1 testLib2 testLib3
 export(TARGETS testExe2 testLib4 testLib5 testLib6 testExe3 testExe2lib
   testLib4lib testLib4libdbg testLib4libopt
   testLibCycleA testLibCycleB
+  testLibPerConfigDest
   NAMESPACE bld_
   APPEND FILE ExportBuildTree.cmake
   )

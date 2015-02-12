@@ -41,6 +41,9 @@ public:
 
   const std::string& GetNamespace() const { return this->Namespace; }
 
+  std::string const& GetDestination() const
+    { return this->Destination; }
+
 protected:
   virtual void GenerateScript(std::ostream& os);
   virtual void GenerateScriptConfigs(std::ostream& os, Indent const& indent);

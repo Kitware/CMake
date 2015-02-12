@@ -40,7 +40,9 @@ public:
   virtual ~cmInstallGenerator();
 
   void AddInstallRule(
-    std::ostream& os, cmInstallType type,
+    std::ostream& os,
+    std::string const& dest,
+    cmInstallType type,
     std::vector<std::string> const& files,
     bool optional = false,
     const char* permissions_file = 0,
@@ -50,12 +52,9 @@ public:
     Indent const& indent = Indent()
     );
 
-  const char* GetDestination() const
-    { return this->Destination.c_str(); }
-
   /** Get the install destination as it should appear in the
       installation script.  */
-  std::string GetInstallDestination() const;
+  std::string ConvertToAbsoluteDestination(std::string const& dest) const;
 
   /** Test if this generator installs something for a given configuration.  */
   bool InstallsForConfig(const std::string& config);

@@ -73,8 +73,8 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
   // to reference if they are relative to the install prefix.
   std::string installPrefix =
     this->IEGen->GetMakefile()->GetSafeDefinition("CMAKE_INSTALL_PREFIX");
-  const char* installDest = this->IEGen->GetDestination();
-  if(cmSystemTools::FileIsFullPath(installDest))
+  std::string const& expDest = this->IEGen->GetDestination();
+  if(cmSystemTools::FileIsFullPath(expDest))
     {
     // The export file is being installed to an absolute path so the
     // package is not relocatable.  Use the configured install prefix.
@@ -87,7 +87,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
     {
     // Add code to compute the installation prefix relative to the
     // import file location.
-    std::string absDest = installPrefix + "/" + installDest;
+    std::string absDest = installPrefix + "/" + expDest;
     std::string absDestS = absDest + "/";
     os << "# Compute the installation prefix relative to this file.\n"
        << "get_filename_component(_IMPORT_PREFIX"
@@ -109,7 +109,7 @@ bool cmExportInstallFileGenerator::GenerateMainFile(std::ostream& os)
         "unset(_realOrig)\n"
         "unset(_realCurr)\n";
       }
-    std::string dest = installDest;
+    std::string dest = expDest;
     while(!dest.empty())
       {
       os <<
@@ -398,7 +398,7 @@ cmExportInstallFileGenerator
   cmTarget* target = itgen->GetTarget();
 
   // Construct the installed location of the target.
-  std::string dest = itgen->GetDestination();
+  std::string dest = itgen->GetDestination(config);
   std::string value;
   if(!cmSystemTools::FileIsFullPath(dest.c_str()))
     {
