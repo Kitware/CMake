@@ -2256,10 +2256,9 @@ int cmCTest::Run(std::vector<std::string> &args, std::string* output)
   bool SRArgumentSpecified = false;
 
   // copy the command line
-  for(size_t i=0; i < args.size(); ++i)
-    {
-    this->InitialCommandLineArguments.push_back(args[i]);
-    }
+  this->InitialCommandLineArguments.insert(
+      this->InitialCommandLineArguments.end(),
+      args.begin(), args.end());
 
   // process the command line arguments
   for(size_t i=1; i < args.size(); ++i)
