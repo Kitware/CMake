@@ -104,19 +104,8 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
     }
   // expand the variable into a list
   cmSystemTools::ExpandListArgument(listString, list, true);
-  // check the list for empty values
-  bool hasEmpty = false;
-  for(std::vector<std::string>::iterator i = list.begin();
-      i != list.end(); ++i)
-    {
-    if(i->empty())
-      {
-      hasEmpty = true;
-      break;
-      }
-    }
   // if no empty elements then just return
-  if(!hasEmpty)
+  if (std::find(list.begin(), list.end(), std::string()) == list.end())
     {
     return true;
     }
