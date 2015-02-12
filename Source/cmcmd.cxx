@@ -287,8 +287,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       }
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-    // Command to create a symbolic link.  Fails on platforms not
-    // supporting them.
     else if (args[1] == "environment" )
       {
       std::vector<std::string> env = cmSystemTools::GetEnvironmentVariables();
@@ -352,8 +350,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       {
       for (std::string::size_type cc = 2; cc < args.size(); cc ++)
         {
-        // Complain if the file could not be removed, still exists,
-        // and the -f option was not given.
         if(!cmSystemTools::Touch(args[cc], true))
           {
           return 1;
