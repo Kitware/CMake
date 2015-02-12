@@ -193,12 +193,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     if (!this->Depth)
       {
       std::string name = this->Args[0];
-      std::vector<std::string>::size_type cc;
-      name += "(";
-      for ( cc = 0; cc < this->Args.size(); cc ++ )
-        {
-        name += " " + this->Args[cc];
-        }
+      name += "( ";
+      name += cmJoin(this->Args, " ");
       name += " )";
 
       // create a new command and add it to cmake

@@ -254,15 +254,12 @@ bool cmListCommand::HandleAppendCommand(std::vector<std::string> const& args)
   // expand the variable
   std::string listString;
   this->GetListString(listString, listName);
-  size_t cc;
-  for ( cc = 2; cc < args.size(); ++ cc )
+
+  if(!listString.empty() && !args.empty())
     {
-    if(!listString.empty())
-      {
-      listString += ";";
-      }
-    listString += args[cc];
+    listString += ";";
     }
+  listString += cmJoin(cmRange(args).advance(2), ";");
 
   this->Makefile->AddDefinition(listName, listString.c_str());
   return true;

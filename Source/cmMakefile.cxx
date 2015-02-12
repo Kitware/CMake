@@ -3752,15 +3752,12 @@ void cmMakefile::GetListOfMacros(std::string& macros) const
 {
   StringStringMap::const_iterator it;
   macros = "";
-  int cc = 0;
+  const char* sep = "";
   for ( it = this->MacrosMap.begin(); it != this->MacrosMap.end(); ++it )
     {
-    if ( cc > 0 )
-      {
-      macros += ";";
-      }
+    macros += sep;
     macros += it->first;
-    cc ++;
+    sep = "";
     }
 }
 
@@ -4205,16 +4202,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LISTFILE_STACK")
     {
-    for (std::deque<std::string>::const_iterator
-        i = this->ListFileStack.begin();
-        i != this->ListFileStack.end(); ++i)
-      {
-      if (i != this->ListFileStack.begin())
-        {
-        output += ";";
-        }
-      output += *i;
-      }
+    output = cmJoin(this->ListFileStack, ";");
     return output.c_str();
     }
   else if (prop == "VARIABLES" || prop == "CACHE_VARIABLES")
@@ -4224,15 +4212,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
       {
       cacheonly = 1;
       }
-    std::vector<std::string> vars = this->GetDefinitions(cacheonly);
-    for (unsigned int cc = 0; cc < vars.size(); cc ++ )
-      {
-      if ( cc > 0 )
-        {
-        output += ";";
-        }
-      output += vars[cc];
-      }
+    output = cmJoin(this->GetDefinitions(cacheonly), ";");
     return output.c_str();
     }
   else if (prop == "MACROS")
@@ -4247,19 +4227,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "LINK_DIRECTORIES")
     {
-    std::ostringstream str;
-    for (std::vector<std::string>::const_iterator
-         it = this->GetLinkDirectories().begin();
-         it != this->GetLinkDirectories().end();
-         ++ it )
-      {
-      if ( it != this->GetLinkDirectories().begin())
-        {
-        str << ";";
-        }
-      str << it->c_str();
-      }
-    output = str.str();
+    output = cmJoin(this->GetLinkDirectories(), ";");
     return output.c_str();
     }
   else if (prop == "INCLUDE_DIRECTORIES")

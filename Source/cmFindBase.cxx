@@ -166,11 +166,9 @@ bool cmFindBase::ParseArguments(std::vector<std::string> const& argsIn)
       }
     else
       {
-      this->VariableDocumentation += "one of the " + this->Names[0];
-      for (unsigned int j = 1; j < this->Names.size() - 1; ++j)
-        {
-        this->VariableDocumentation += ", " + this->Names[j];
-        }
+      this->VariableDocumentation += "one of the ";
+      this->VariableDocumentation += cmJoin(cmRange(this->Names).retreat(1),
+                                            ", ");
       this->VariableDocumentation += " or "
         + this->Names[this->Names.size() - 1] + " libraries be found";
       }

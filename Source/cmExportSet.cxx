@@ -12,6 +12,7 @@
 
 #include "cmExportSet.h"
 #include "cmTargetExport.h"
+#include "cmAlgorithms.h"
 
 cmExportSet::~cmExportSet()
 {

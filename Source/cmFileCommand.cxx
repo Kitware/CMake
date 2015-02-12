@@ -217,7 +217,6 @@ bool cmFileCommand
 bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   bool append)
 {
-  std::string message;
   std::vector<std::string>::const_iterator i = args.begin();
 
   i++; // Get rid of subcommand
@@ -231,10 +230,6 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
 
   i++;
 
-  for(;i != args.end(); ++i)
-    {
-    message += *i;
-    }
   if ( !this->Makefile->CanIWriteThisFile(fileName.c_str()) )
     {
     std::string e
@@ -272,6 +267,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
     this->SetError(error);
     return false;
     }
+  std::string message = cmJoin(cmRange(i, args.end()), std::string());
   file << message;
   file.close();
   if(mode)

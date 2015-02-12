@@ -13,6 +13,7 @@
 #define cmInstalledFile_h
 
 #include "cmGeneratorExpression.h"
+#include "cmAlgorithms.h"
 
 /** \class cmInstalledFile
  * \brief Represents a file intended for installation.

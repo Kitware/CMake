@@ -6687,40 +6687,33 @@ void cmTarget::CheckPropertyCompatibility(cmComputeLinkInformation *info,
 
   if (!prop.empty())
     {
-    // Use a std::set to keep the error message sorted.
-    std::set<std::string> props;
+    // Use a sorted std::vector to keep the error message sorted.
+    std::vector<std::string> props;
     std::set<std::string>::const_iterator i = emittedBools.find(prop);
     if (i != emittedBools.end())
       {
-      props.insert(strBool);
+      props.push_back(strBool);
       }
     i = emittedStrings.find(prop);
     if (i != emittedStrings.end())
       {
-      props.insert(strString);
+      props.push_back(strString);
       }
     i = emittedMinNumbers.find(prop);
     if (i != emittedMinNumbers.end())
       {
-      props.insert(strNumMin);
+      props.push_back(strNumMin);
       }
     i = emittedMaxNumbers.find(prop);
     if (i != emittedMaxNumbers.end())
       {
-      props.insert(strNumMax);
+      props.push_back(strNumMax);
       }
+    std::sort(props.begin(), props.end());
 
-    std::string propsString = *props.begin();
-    props.erase(props.begin());
-    while (props.size() > 1)
-      {
-      propsString += ", " + *props.begin();
-      props.erase(props.begin());
-      }
-   if (props.size() == 1)
-     {
-     propsString += " and the " + *props.begin();
-     }
+    std::string propsString = cmJoin(cmRange(props).retreat(1), ", ");
+    propsString += " and the " + props.back();
+
     std::ostringstream e;
     e << "Property \"" << prop << "\" appears in both the "
       << propsString <<

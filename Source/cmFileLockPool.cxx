@@ -16,6 +16,7 @@
 
 #include "cmFileLock.h"
 #include "cmFileLockResult.h"
+#include "cmAlgorithms.h"
 
 cmFileLockPool::cmFileLockPool()
 {

@@ -303,13 +303,6 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
   std::string regex = args[2];
   std::string outvar = args[3];
 
-  // Concatenate all the last arguments together.
-  std::string input = args[4];
-  for(unsigned int i=5; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
-
   this->Makefile->ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
@@ -320,6 +313,9 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
     this->SetError(e);
     return false;
     }
+
+  // Concatenate all the last arguments together.
+  std::string input = cmJoin(cmRange(args).advance(4), std::string());
 
   // Scan through the input for all matches.
   std::string output;
@@ -352,13 +348,6 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   std::string regex = args[2];
   std::string outvar = args[3];
 
-  // Concatenate all the last arguments together.
-  std::string input = args[4];
-  for(unsigned int i=5; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
-
   this->Makefile->ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
@@ -370,6 +359,9 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
     this->SetError(e);
     return false;
     }
+
+  // Concatenate all the last arguments together.
+  std::string input = cmJoin(cmRange(args).advance(4), std::string());
 
   // Scan through the input for all matches.
   std::string output;
@@ -456,13 +448,6 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     l = r;
     }
 
-  // Concatenate all the last arguments together.
-  std::string input = args[5];
-  for(unsigned int i=6; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
-
   this->Makefile->ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
@@ -474,6 +459,9 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     this->SetError(e);
     return false;
     }
+
+  // Concatenate all the last arguments together.
+  std::string input = cmJoin(cmRange(args).advance(5), std::string());
 
   // Scan through the input for all matches.
   std::string output;
@@ -673,11 +661,7 @@ bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const&
   const std::string& replaceExpression = args[2];
   const std::string& variableName = args[3];
 
-  std::string input = args[4];
-  for(unsigned int i=5; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
+  std::string input = cmJoin(cmRange(args).advance(4), std::string());
 
   cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(),
                                     replaceExpression.c_str());
@@ -756,11 +740,7 @@ bool cmStringCommand
     }
 
   std::string const& variableName = args[1];
-  std::string value;
-  for(unsigned int i = 2; i < args.size(); ++i)
-    {
-    value += args[i];
-    }
+  std::string value = cmJoin(cmRange(args).advance(2), std::string());
 
   this->Makefile->AddDefinition(variableName, value.c_str());
   return true;

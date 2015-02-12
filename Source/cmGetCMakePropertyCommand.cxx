@@ -25,7 +25,6 @@ bool cmGetCMakePropertyCommand
     return false;
     }
 
-  std::vector<std::string>::size_type cc;
   std::string variable = args[0];
   std::string output = "NOTFOUND";
 
@@ -35,12 +34,7 @@ bool cmGetCMakePropertyCommand
     std::vector<std::string> vars = this->Makefile->GetDefinitions(cacheonly);
     if (!vars.empty())
       {
-      output = vars[0];
-      }
-    for ( cc = 1; cc < vars.size(); ++cc )
-      {
-      output += ";";
-      output += vars[cc];
+      output = cmJoin(vars, ";");
       }
     }
   else if ( args[1] == "MACROS" )
@@ -52,16 +46,7 @@ bool cmGetCMakePropertyCommand
     const std::set<std::string>* components
       = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
         ->GetInstallComponents();
-    std::set<std::string>::const_iterator compIt;
-    output = "";
-    for (compIt = components->begin(); compIt != components->end(); ++compIt)
-      {
-      if (compIt != components->begin())
-        {
-        output += ";";
-        }
-      output += *compIt;
-      }
+    output = cmJoin(*components, ";");
     }
   else
     {

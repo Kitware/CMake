@@ -20,7 +20,6 @@ bool cmMessageCommand
     this->SetError("called with incorrect number of arguments");
     return false;
     }
-  std::string message;
   std::vector<std::string>::const_iterator i = args.begin();
 
   cmake::MessageType type = cmake::MESSAGE;
@@ -70,10 +69,7 @@ bool cmMessageCommand
     ++i;
     }
 
-  for(;i != args.end(); ++i)
-    {
-    message += *i;
-    }
+  std::string message = cmJoin(cmRange(i, args.end()), std::string());
 
   if (type != cmake::MESSAGE)
     {

@@ -46,6 +46,7 @@
 #endif
 
 #include "cmCPackLog.h"
+#include "cmAlgorithms.h"
 
 
 //----------------------------------------------------------------------

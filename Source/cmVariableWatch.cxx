@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmVariableWatch.h"
 
+#include "cmAlgorithms.h"
+
 static const char* const cmVariableWatchAccessStrings[] =
 {
     "READ_ACCESS",

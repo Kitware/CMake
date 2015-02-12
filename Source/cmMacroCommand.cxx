@@ -164,19 +164,15 @@ bool cmMacroHelperCommand::InvokeInitialPass
           {
           if (!argnDefInitialized)
             {
-            std::vector<std::string>::const_iterator eit;
-            std::vector<std::string>::size_type cnt = 0;
-            for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
+            if (expandedArgs.size() > this->Args.size() - 1)
               {
-              if ( cnt >= this->Args.size()-1 )
+              if (!argnDef.empty() && !expandedArgs.empty())
                 {
-                if (!argnDef.empty())
-                  {
-                  argnDef += ";";
-                  }
-                argnDef += *eit;
+                argnDef += ";";
                 }
-              cnt ++;
+              std::vector<std::string>::const_iterator eit
+                  = expandedArgs.begin() + (this->Args.size() - 1);
+              argnDef += cmJoin(cmRange(eit, expandedArgs.end()), ";");
               }
             argnDefInitialized = true;
             }
@@ -192,15 +188,11 @@ bool cmMacroHelperCommand::InvokeInitialPass
           // repleace ARGV, compute it only once
           if (!argvDefInitialized)
             {
-            std::vector<std::string>::const_iterator eit;
-            for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
+            if (!argvDef.empty() && !expandedArgs.empty())
               {
-              if (!argvDef.empty())
-                {
-                argvDef += ";";
-                }
-              argvDef += *eit;
+              argvDef += ";";
               }
+            argvDef += cmJoin(expandedArgs, ";");
             argvDefInitialized = true;
             }
           cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
@@ -262,11 +254,11 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     if (!this->Depth)
       {
       std::string name = this->Args[0];
-      std::vector<std::string>::size_type cc;
       name += "(";
-      for ( cc = 0; cc < this->Args.size(); cc ++ )
+      if (!this->Args.empty())
         {
-        name += " " + this->Args[cc];
+        name += " ";
+        name += cmJoin(this->Args, " ");
         }
       name += " )";
       mf.AddMacro(this->Args[0].c_str(), name.c_str());
