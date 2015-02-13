@@ -126,27 +126,10 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     }
 
   // define ARGV and ARGN
-  std::vector<std::string>::const_iterator eit;
-  std::string argvDef;
-  std::string argnDef;
-  unsigned int cnt = 0;
-  for ( eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit )
-    {
-    if (!argvDef.empty())
-      {
-      argvDef += ";";
-      }
-    argvDef += *eit;
-    if ( cnt >= this->Args.size()-1 )
-      {
-      if (!argnDef.empty())
-        {
-        argnDef += ";";
-        }
-      argnDef += *eit;
-      }
-    cnt ++;
-    }
+  std::string argvDef = cmJoin(expandedArgs, ";");
+  std::vector<std::string>::const_iterator eit
+      = expandedArgs.begin() + (this->Args.size()-1);
+  std::string argnDef = cmJoin(cmRange(eit, expandedArgs.end()), ";");
   this->Makefile->AddDefinition("ARGV", argvDef.c_str());
   this->Makefile->MarkVariableAsUsed("ARGV");
   this->Makefile->AddDefinition("ARGN", argnDef.c_str());
