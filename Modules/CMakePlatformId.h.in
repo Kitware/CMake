@@ -1,3 +1,6 @@
+#define STRINGIFY_HELPER(X) #X
+#define STRINGIFY(X) STRINGIFY_HELPER(X)
+
 /* Identify known platforms by name.  */
 #if defined(__linux) || defined(__linux__) || defined(linux)
 # define PLATFORM_ID "Linux"
@@ -112,7 +115,13 @@
 #  define ARCHITECTURE_ID "X86"
 
 # elif defined(_M_ARM)
-#  define ARCHITECTURE_ID "ARM"
+#  if _M_ARM == 4
+#   define ARCHITECTURE_ID "ARMV4I"
+#  elif _M_ARM == 5
+#   define ARCHITECTURE_ID "ARMV5I"
+#  else
+#   define ARCHITECTURE_ID "ARMV" STRINGIFY(_M_ARM)
+#  endif
 
 # elif defined(_M_MIPS)
 #  define ARCHITECTURE_ID "MIPS"
