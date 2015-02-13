@@ -159,7 +159,18 @@ if(WINCE)
   set(_PLATFORM_DEFINES_CXX " /D${_MSVC_CXX_ARCHITECTURE_FAMILY} /D_${_MSVC_CXX_ARCHITECTURE_FAMILY_UPPER}_")
 
   set(_RTC1 "")
+  set(_FLAGS_C "")
   set(_FLAGS_CXX " /GR /EHsc")
+
+  foreach(lang C CXX)
+    if(_MSVC_${lang}_ARCHITECTURE_FAMILY STREQUAL "ARM")
+      set(_PLATFORM_DEFINES_${lang} "${_PLATFORM_DEFINES_${lang}} /D${MSVC_${lang}_ARCHITECTURE_ID}")
+      if(MSVC_${lang}_ARCHITECTURE_ID MATCHES "^ARMV([45])I$")
+        set(_FLAGS_${lang} "${_FLAGS_${lang}} /QRarch${CMAKE_MATCH_1}T")
+      endif()
+    endif()
+  endforeach()
+
   set(CMAKE_C_STANDARD_LIBRARIES_INIT "coredll.lib ole32.lib oleaut32.lib uuid.lib commctrl.lib")
   set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} /NODEFAULTLIB:libc.lib /NODEFAULTLIB:oldnames.lib")
 
