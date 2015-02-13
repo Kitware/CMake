@@ -131,12 +131,6 @@ Modules
 
 * The :module:`FindMPI` module learned to find MS-MPI on Windows.
 
-* The :module:`FindOpenGL` module no longer explicitly searches
-  for any dependency on X11 libraries with the :module:`FindX11`
-  module.  Such dependencies should not need to be explicit.
-  Applications using X11 APIs themselves should find and link
-  to X11 libraries explicitly.
-
 * The :module:`FindOpenSSL` module now reports ``crypto`` and ``ssl``
   libraries separately in ``OPENSSL_CRYPTO_LIBRARY`` and
   ``OPENSSL_SSL_LIBRARY``, respectively, to allow applications to
@@ -230,6 +224,12 @@ Deprecated and Removed Features
   encoded as UTF-8.  If files are already ASCII, they will be
   compatible.  If files were in a different encoding, including
   Latin 1, they will need to be converted.
+
+* The :module:`FindOpenGL` module no longer explicitly searches
+  for any dependency on X11 libraries with the :module:`FindX11`
+  module.  Such dependencies should not need to be explicit.
+  Applications using X11 APIs themselves should find and link
+  to X11 libraries explicitly.
 
 * The implementation of CMake now relies on some C++ compiler features which
   are not supported by some older compilers.  As a result, those old compilers
