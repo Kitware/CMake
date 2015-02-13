@@ -9,38 +9,103 @@ Copy a file to another location and modify its contents.
                  [COPYONLY] [ESCAPE_QUOTES] [@ONLY]
                  [NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 
-Copies a file <input> to file <output> and substitutes variable values
-referenced in the file content.  If <input> is a relative path it is
-evaluated with respect to the current source directory.  The <input>
-must be a file, not a directory.  If <output> is a relative path it is
-evaluated with respect to the current binary directory.  If <output>
-names an existing directory the input file is placed in that directory
-with its original name.
+Copies an ``<input>`` file to an ``<output>`` file and substitutes
+variable values referenced as ``@VAR@`` or ``${VAR}`` in the input
+file content.  Each variable reference will be replaced with the
+current value of the variable, or the empty string if the variable
+is not defined.  Furthermore, input lines of the form::
 
-If the <input> file is modified the build system will re-run CMake to
+  #cmakedefine VAR ...
+
+will be replaced with either::
+
+  #define VAR ...
+
+or::
+
+  /* #undef VAR */
+
+depending on whether ``VAR`` is set in CMake to any value not considered
+a false constant by the :command:`if` command.  The "..." content on the
+line after the variable name, if any, is processed as above.
+Input file lines of the form ``#cmakedefine01 VAR`` will be replaced with
+either ``#define VAR 1`` or ``#define VAR 0`` similarly.
+
+If the input file is modified the build system will re-run CMake to
 re-configure the file and generate the build system again.
 
-This command replaces any variables in the input file referenced as
-${VAR} or @VAR@ with their values as determined by CMake.  If a
-variable is not defined, it will be replaced with nothing.  If
-COPYONLY is specified, then no variable expansion will take place.  If
-ESCAPE_QUOTES is specified then any substituted quotes will be C-style
-escaped.  The file will be configured with the current values of CMake
-variables.  If @ONLY is specified, only variables of the form @VAR@
-will be replaced and ${VAR} will be ignored.  This is useful for
-configuring scripts that use ${VAR}.
+The arguments are:
 
-Input file lines of the form "#cmakedefine VAR ..." will be replaced
-with either "#define VAR ..." or ``/* #undef VAR */`` depending on
-whether VAR is set in CMake to any value not considered a false
-constant by the if() command.  (Content of "...", if any, is processed
-as above.) Input file lines of the form "#cmakedefine01 VAR" will be
-replaced with either "#define VAR 1" or "#define VAR 0" similarly.
+``<input>``
+  Path to the input file.  A relative path is treated with respect to
+  the value of :variable:`CMAKE_CURRENT_SOURCE_DIR`.  The input path
+  must be a file, not a directory.
 
-With NEWLINE_STYLE the line ending could be adjusted:
+``<output>``
+  Path to the output file or directory.  A relative path is treated
+  with respect to the value of :variable:`CMAKE_CURRENT_BINARY_DIR`.
+  If the path names an existing directory the output file is placed
+  in that directory with the same file name as the input file.
 
-::
+``COPYONLY``
+  Copy the file without replacing any variable references or other
+  content.  This option may not be used with ``NEWLINE_STYLE``.
 
-    'UNIX' or 'LF' for \n, 'DOS', 'WIN32' or 'CRLF' for \r\n.
+``ESCAPE_QUOTES``
+  Escape any substituted quotes with backslashes (C-style).
 
-COPYONLY must not be used with NEWLINE_STYLE.
+``@ONLY``
+  Restrict variable replacement to references of the form ``@VAR@``.
+  This is useful for configuring scripts that use ``${VAR}`` syntax.
+
+``NEWLINE_STYLE <style>``
+  Specify the newline style for the output file.  Specify
+  ``UNIX`` or ``LF`` for ``\n`` newlines, or specify
+  ``DOS``, ``WIN32``, or ``CRLF`` for ``\r\n`` newlines.
+  This option may not be used with ``COPYONLY``.
+
+Example
+^^^^^^^
+
+Consider a source tree containing a ``foo.h.in`` file:
+
+.. code-block:: c
+
+  #cmakedefine FOO_ENABLE
+  #cmakedefine FOO_STRING "@FOO_STRING@"
+
+An adjacent ``CMakeLists.txt`` may use ``configure_file`` to
+configure the header:
+
+.. code-block:: cmake
+
+  option(FOO_ENABLE "Enable Foo" ON)
+  if(FOO_ENABLE)
+    set(FOO_STRING "foo")
+  endif()
+  configure_file(foo.h.in foo.h @ONLY)
+
+This creates a ``foo.h`` in the build directory corresponding to
+this source directory.  If the ``FOO_ENABLE`` option is on, the
+configured file will contain:
+
+.. code-block:: c
+
+  #define FOO_ENABLE
+  #define FOO_STRING "foo"
+
+Otherwise it will contain:
+
+.. code-block:: c
+
+  /* #undef FOO_ENABLE */
+  /* #undef FOO_STRING */
+
+One may then use the :command:`include_directories` command to
+specify the output directory as an include directory:
+
+.. code-block:: cmake
+
+  include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+so that sources may include the header as ``#include <foo.h>``.
