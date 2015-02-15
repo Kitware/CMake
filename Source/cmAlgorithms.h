@@ -250,4 +250,33 @@ typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
                         ContainerAlgorithms::BinarySearcher<MatchRange>(m));
 }
 
+template<typename Range>
+typename Range::const_iterator cmRemoveDuplicates(Range& r)
+{
+  std::vector<typename Range::value_type> unique;
+  unique.reserve(r.size());
+  std::vector<size_t> indices;
+  size_t count = 0;
+  for(typename Range::const_iterator it = r.begin();
+      it != r.end(); ++it, ++count)
+    {
+    typename Range::iterator low =
+        std::lower_bound(unique.begin(), unique.end(), *it);
+    if (low == unique.end() || *low != *it)
+      {
+      unique.insert(low, *it);
+      }
+    else
+      {
+      indices.push_back(count);
+      }
+    }
+  if (indices.empty())
+    {
+    return r.end();
+    }
+  std::sort(indices.begin(), indices.end());
+  return cmRemoveIndices(r, indices);
+}
+
 #endif
