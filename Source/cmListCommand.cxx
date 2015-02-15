@@ -410,15 +410,8 @@ bool cmListCommand
     return false;
     }
 
-  std::string value;
-  std::vector<std::string>::reverse_iterator it;
-  const char* sep = "";
-  for ( it = varArgsExpanded.rbegin(); it != varArgsExpanded.rend(); ++ it )
-    {
-    value += sep;
-    value += it->c_str();
-    sep = ";";
-    }
+  std::reverse(varArgsExpanded.begin(), varArgsExpanded.end());
+  std::string value = cmJoin(varArgsExpanded, ";");
 
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
