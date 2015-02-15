@@ -81,6 +81,16 @@ private:
   const std::string m_test;
 };
 
+template<typename BiDirIt>
+BiDirIt cmRotate(BiDirIt first, BiDirIt middle, BiDirIt last)
+{
+  typename std::iterator_traits<BiDirIt>::difference_type dist =
+      std::distance(first, middle);
+  std::rotate(first, middle, last);
+  std::advance(last, -dist);
+  return last;
+}
+
 namespace ContainerAlgorithms {
 
 template<typename T>
@@ -138,20 +148,10 @@ private:
   const_iterator End;
 };
 
-template<typename BiDirIt>
-BiDirIt Rotate(BiDirIt first, BiDirIt middle, BiDirIt last)
-{
-  typename std::iterator_traits<BiDirIt>::difference_type dist =
-      std::distance(first, middle);
-  std::rotate(first, middle, last);
-  std::advance(last, -dist);
-  return last;
-}
-
 template<typename Iter>
 Iter RemoveN(Iter i1, Iter i2, size_t n)
 {
-  return ContainerAlgorithms::Rotate(i1, i1 + n, i2);
+  return cmRotate(i1, i1 + n, i2);
 }
 
 template<typename Range>
