@@ -1542,12 +1542,9 @@ void cmTarget::DeleteDependencyForVS6( DependencyMap& depMap,
   if( map_itr != depMap.end() )
     {
     DependencyList& depList = map_itr->second;
-    DependencyList::iterator itr;
-    while( (itr = std::find(depList.begin(), depList.end(), dep)) !=
-           depList.end() )
-      {
-      depList.erase( itr );
-      }
+    DependencyList::iterator begin =
+        std::remove(depList.begin(), depList.end(), dep);
+    depList.erase(begin, depList.end());
     }
 }
 
