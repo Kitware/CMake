@@ -35,11 +35,18 @@ public:
 
   /// @return the name of this generator.
   static std::string GetActualName() { return "Green Hills MULTI"; }
+
   ///! Get the name for this generator
   virtual std::string GetName() const { return this->GetActualName(); }
 
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry &entry);
+
+  /**
+   * Utilized by the generator factory to determine if this generator
+   * supports toolsets.
+   */
+  static bool SupportsToolset() { return false; }
 
   /**
   * Try to determine system information such as shared library

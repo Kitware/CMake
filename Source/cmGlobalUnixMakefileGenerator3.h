@@ -64,6 +64,12 @@ public:
     return cmGlobalUnixMakefileGenerator3::GetActualName();}
   static std::string GetActualName() {return "Unix Makefiles";}
 
+  /**
+   * Utilized by the generator factory to determine if this generator
+   * supports toolsets.
+   */
+  static bool SupportsToolset() { return false; }
+
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 

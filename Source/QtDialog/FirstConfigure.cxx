@@ -15,6 +15,11 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
   l->addWidget(new QLabel(tr("Specify the generator for this project")));
   this->GeneratorOptions = new QComboBox(this);
   l->addWidget(this->GeneratorOptions);
+
+  // Add the ability to specify toolset (-T parameter)
+  ToolsetFrame = CreateToolsetWidgets();
+  l->addWidget(ToolsetFrame);
+
   l->addSpacing(6);
 
   this->CompilerSetupOptions[0] = new QRadioButton(tr("Use default native compilers"), this);
@@ -36,17 +41,51 @@ StartCompilerSetup::StartCompilerSetup(QWidget* p)
                    this, SLOT(onSelectionChanged(bool)));
   QObject::connect(this->CompilerSetupOptions[3], SIGNAL(toggled(bool)),
                    this, SLOT(onSelectionChanged(bool)));
+  QObject::connect(GeneratorOptions,
+                   SIGNAL(currentIndexChanged(QString const&)),
+                   this, SLOT(onGeneratorChanged(QString const&)));
+}
+
+QFrame* StartCompilerSetup::CreateToolsetWidgets()
+{
+  QFrame* frame = new QFrame(this);
+  QVBoxLayout* l = new QVBoxLayout(frame);
+  l->setContentsMargins(0, 0, 0, 0);
+
+  ToolsetLabel = new QLabel(tr("Optional toolset to use (-T parameter)"));
+  l->addWidget(ToolsetLabel);
+
+  Toolset = new QLineEdit(frame);
+  l->addWidget(Toolset);
+
+  return frame;
 }
 
 StartCompilerSetup::~StartCompilerSetup()
 {
 }
 
-void StartCompilerSetup::setGenerators(const QStringList& gens)
+void StartCompilerSetup::setGenerators(
+  std::vector<cmake::GeneratorInfo> const& gens)
 {
   this->GeneratorOptions->clear();
-  this->GeneratorOptions->addItems(gens);
-};
+
+  QStringList generator_list;
+
+  std::vector<cmake::GeneratorInfo>::const_iterator it;
+  for (it = gens.begin(); it != gens.end(); ++it)
+    {
+    generator_list.append(QString::fromLocal8Bit(it->name.c_str()));
+
+    if (it->supportsToolset)
+      {
+      this->GeneratorsSupportingToolset.append(
+        QString::fromLocal8Bit(it->name.c_str()));
+      }
+    }
+
+  this->GeneratorOptions->addItems(generator_list);
+}
 
 void StartCompilerSetup::setCurrentGenerator(const QString& gen)
 {
@@ -60,6 +99,11 @@ void StartCompilerSetup::setCurrentGenerator(const QString& gen)
 QString StartCompilerSetup::getGenerator() const
 {
   return this->GeneratorOptions->currentText();
+};
+
+QString StartCompilerSetup::getToolset() const
+{
+  return this->Toolset->text();
 };
 
 bool StartCompilerSetup::defaultSetup() const
@@ -86,6 +130,18 @@ void StartCompilerSetup::onSelectionChanged(bool on)
 {
   if(on)
     selectionChanged();
+}
+
+void StartCompilerSetup::onGeneratorChanged(QString const& name)
+{
+  if (GeneratorsSupportingToolset.contains(name))
+    {
+    ToolsetFrame->show();
+    }
+  else
+    {
+    ToolsetFrame->hide();
+    }
 }
 
 int StartCompilerSetup::nextId() const
@@ -325,7 +381,8 @@ FirstConfigure::~FirstConfigure()
 {
 }
 
-void FirstConfigure::setGenerators(const QStringList& gens)
+void FirstConfigure::setGenerators(
+  std::vector<cmake::GeneratorInfo> const& gens)
 {
   this->mStartCompilerSetupPage->setGenerators(gens);
 }
@@ -333,6 +390,11 @@ void FirstConfigure::setGenerators(const QStringList& gens)
 QString FirstConfigure::getGenerator() const
 {
   return this->mStartCompilerSetupPage->getGenerator();
+}
+
+QString FirstConfigure::getToolset() const
+{
+  return this->mStartCompilerSetupPage->getToolset();
 }
 
 void FirstConfigure::loadFromSettings()

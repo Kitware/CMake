@@ -53,6 +53,12 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   /**
+   * Utilized by the generator factory to determine if this generator
+   * supports toolsets.
+   */
+  static bool SupportsToolset() { return false; }
+
+  /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */

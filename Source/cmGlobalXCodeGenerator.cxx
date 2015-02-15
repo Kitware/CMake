@@ -125,6 +125,8 @@ public:
 
   virtual void GetGenerators(std::vector<std::string>& names) const {
     names.push_back(cmGlobalXCodeGenerator::GetActualName()); }
+
+  virtual bool SupportsToolset() const { return true; }
 };
 
 //----------------------------------------------------------------------------

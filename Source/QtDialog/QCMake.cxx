@@ -15,7 +15,6 @@
 #include <QDir>
 #include <QCoreApplication>
 
-#include "cmake.h"
 #include "cmState.h"
 #include "cmSystemTools.h"
 #include "cmExternalMakefileProjectGenerator.h"
@@ -46,21 +45,23 @@ QCMake::QCMake(QObject* p)
 
   cmSystemTools::SetInterruptCallback(QCMake::interruptCallback, this);
 
-  std::vector<std::string> generators;
+  std::vector<cmake::GeneratorInfo> generators;
   this->CMakeInstance->GetRegisteredGenerators(generators);
-  std::vector<std::string>::iterator iter;
-  for(iter = generators.begin(); iter != generators.end(); ++iter)
+
+  std::vector<cmake::GeneratorInfo>::const_iterator it;
+  for(it = generators.begin(); it != generators.end(); ++it)
     {
     // Skip the generator "KDevelop3", since there is also
     // "KDevelop3 - Unix Makefiles", which is the full and official name.
     // The short name is actually only still there since this was the name
     // in CMake 2.4, to keep "command line argument compatibility", but
     // this is not necessary in the GUI.
-    if (*iter == "KDevelop3")
+    if (it->name == "KDevelop3")
       {
       continue;
       }
-    this->AvailableGenerators.append(QString::fromLocal8Bit(iter->c_str()));
+
+    this->AvailableGenerators.push_back(*it);
     }
 }
 
@@ -96,6 +97,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     emit this->binaryDirChanged(this->BinaryDirectory);
     cmState* state = this->CMakeInstance->GetState();
     this->setGenerator(QString());
+    this->setToolset(QString());
     if(!this->CMakeInstance->LoadCache(
       this->BinaryDirectory.toLocal8Bit().data()))
       {
@@ -124,6 +126,12 @@ void QCMake::setBinaryDirectory(const QString& _dir)
         CreateFullGeneratorName(gen, extraGen? extraGen : "");
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
       }
+
+    const char* toolset = state->GetCacheEntryValue("CMAKE_GENERATOR_TOOLSET");
+    if (toolset)
+      {
+      this->setToolset(QString::fromLocal8Bit(toolset));
+      }
     }
 }
 
@@ -134,6 +142,15 @@ void QCMake::setGenerator(const QString& gen)
     {
     this->Generator = gen;
     emit this->generatorChanged(this->Generator);
+    }
+}
+
+void QCMake::setToolset(const QString& toolset)
+{
+  if(this->Toolset != toolset)
+    {
+    this->Toolset = toolset;
+    emit this->toolsetChanged(this->Toolset);
     }
 }
 
@@ -148,7 +165,7 @@ void QCMake::configure()
   this->CMakeInstance->SetGlobalGenerator(
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toLocal8Bit().data()));
   this->CMakeInstance->SetGeneratorPlatform("");
-  this->CMakeInstance->SetGeneratorToolset("");
+  this->CMakeInstance->SetGeneratorToolset(this->Toolset.toLocal8Bit().data());
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetSuppressDevWarnings(this->SuppressDevWarnings);
   this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
@@ -396,9 +413,9 @@ QString QCMake::generator() const
   return this->Generator;
 }
 
-QStringList QCMake::availableGenerators() const
+std::vector<cmake::GeneratorInfo> const& QCMake::availableGenerators() const
 {
-  return this->AvailableGenerators;
+  return AvailableGenerators;
 }
 
 void QCMake::deleteCache()
@@ -409,6 +426,7 @@ void QCMake::deleteCache()
   this->CMakeInstance->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
   // emit no generator and no properties
   this->setGenerator(QString());
+  this->setToolset(QString());
   QCMakePropertyList props = this->properties();
   emit this->propertiesChanged(props);
 }

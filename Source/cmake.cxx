@@ -957,18 +957,32 @@ void cmake::AddDefaultExtraGenerators()
 
 
 //----------------------------------------------------------------------------
-void cmake::GetRegisteredGenerators(std::vector<std::string>& names)
+void cmake::GetRegisteredGenerators(std::vector<GeneratorInfo>& generators)
 {
-  for(RegisteredGeneratorsVector::const_iterator i = this->Generators.begin();
-      i != this->Generators.end(); ++i)
+  for (RegisteredGeneratorsVector::const_iterator
+       i = this->Generators.begin(), e = this->Generators.end();
+       i != e; ++i)
     {
+    std::vector<std::string> names;
     (*i)->GetGenerators(names);
+
+    for (size_t j = 0; j < names.size(); ++j)
+      {
+      GeneratorInfo info;
+      info.supportsToolset = (*i)->SupportsToolset();
+      info.name = names[j];
+      generators.push_back(info);
+      }
     }
-  for(RegisteredExtraGeneratorsMap::const_iterator
-      i = this->ExtraGenerators.begin();
-      i != this->ExtraGenerators.end(); ++i)
+
+  for (RegisteredExtraGeneratorsMap::const_iterator
+       i = this->ExtraGenerators.begin(), e = this->ExtraGenerators.end();
+       i != e; ++i)
     {
-    names.push_back(i->first);
+    GeneratorInfo info;
+    info.name = i->first;
+    info.supportsToolset = false;
+    generators.push_back(info);
     }
 }
 
