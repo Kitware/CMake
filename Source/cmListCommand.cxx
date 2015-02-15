@@ -418,24 +418,9 @@ bool cmListCommand
     return false;
     }
 
-  std::string value;
-
-
-  std::set<std::string> unique;
-  std::vector<std::string>::iterator it;
-  const char* sep = "";
-  for ( it = varArgsExpanded.begin(); it != varArgsExpanded.end(); ++ it )
-    {
-    if (unique.find(*it) != unique.end())
-      {
-      continue;
-      }
-    unique.insert(*it);
-    value += sep;
-    value += it->c_str();
-    sep = ";";
-    }
-
+  varArgsExpanded.erase(cmRemoveDuplicates(varArgsExpanded),
+                        varArgsExpanded.end());
+  std::string value = cmJoin(varArgsExpanded, ";");
 
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
