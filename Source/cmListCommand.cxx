@@ -527,26 +527,19 @@ bool cmListCommand::HandleRemoveAtCommand(
     removed.push_back(static_cast<size_t>(item));
     }
 
+  std::sort(removed.begin(), removed.end());
+  removed.erase(std::unique(removed.begin(), removed.end()), removed.end());
+
+  varArgsExpanded.erase(cmRemoveIndices(varArgsExpanded, removed),
+                        varArgsExpanded.end());
+
   std::string value;
   const char* sep = "";
   for ( cc = 0; cc < varArgsExpanded.size(); ++ cc )
     {
-    size_t kk;
-    bool found = false;
-    for ( kk = 0; kk < removed.size(); ++ kk )
-      {
-      if ( cc == removed[kk] )
-        {
-        found = true;
-        }
-      }
-
-    if ( !found )
-      {
-      value += sep;
-      value += varArgsExpanded[cc];
-      sep = ";";
-      }
+    value += sep;
+    value += varArgsExpanded[cc];
+    sep = ";";
     }
 
   this->Makefile->AddDefinition(listName, value.c_str());
