@@ -533,14 +533,8 @@ bool cmListCommand::HandleRemoveAtCommand(
   varArgsExpanded.erase(cmRemoveIndices(varArgsExpanded, removed),
                         varArgsExpanded.end());
 
-  std::string value;
-  const char* sep = "";
-  for ( cc = 0; cc < varArgsExpanded.size(); ++ cc )
-    {
-    value += sep;
-    value += varArgsExpanded[cc];
-    sep = ";";
-    }
+  std::string value = cmJoin(varArgsExpanded, ";");
+
 
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
