@@ -355,23 +355,13 @@ bool cmListCommand
     return false;
     }
 
-  size_t cc;
-  for ( cc = 2; cc < args.size(); ++ cc )
-    {
-    size_t kk = 0;
-    while ( kk < varArgsExpanded.size() )
-      {
-      if ( varArgsExpanded[kk] == args[cc] )
-        {
-        varArgsExpanded.erase(varArgsExpanded.begin()+kk);
-        }
-      else
-        {
-        kk ++;
-        }
-      }
-    }
+  std::vector<std::string> remove(args.begin() + 2, args.end());
+  std::sort(remove.begin(), remove.end());
+  remove.erase(std::unique(remove.begin(), remove.end()), remove.end());
 
+  varArgsExpanded.erase(
+      cmRemoveMatching(varArgsExpanded, remove),
+      varArgsExpanded.end());
 
   std::string value = cmJoin(varArgsExpanded, ";");
   this->Makefile->AddDefinition(listName, value.c_str());
