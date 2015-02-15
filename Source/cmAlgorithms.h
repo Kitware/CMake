@@ -154,6 +154,23 @@ Iter RemoveN(Iter i1, Iter i2, size_t n)
   return ContainerAlgorithms::Rotate(i1, i1 + n, i2);
 }
 
+template<typename Range>
+struct BinarySearcher
+{
+  typedef typename Range::value_type argument_type;
+  BinarySearcher(Range const& r)
+    : m_range(r)
+  {
+  }
+
+  bool operator()(argument_type const& item)
+  {
+    return std::binary_search(m_range.begin(), m_range.end(), item);
+  }
+private:
+  Range const& m_range;
+};
+
 }
 
 template<typename Iter1, typename Iter2>
@@ -224,6 +241,13 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
     }
   writer = ContainerAlgorithms::RemoveN(writer, r.end(), count);
   return writer;
+}
+
+template<typename Range, typename MatchRange>
+typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
+{
+  return std::remove_if(r.begin(), r.end(),
+                        ContainerAlgorithms::BinarySearcher<MatchRange>(m));
 }
 
 #endif
