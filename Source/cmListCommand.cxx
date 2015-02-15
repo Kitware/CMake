@@ -357,13 +357,14 @@ bool cmListCommand
 
   std::vector<std::string> remove(args.begin() + 2, args.end());
   std::sort(remove.begin(), remove.end());
-  remove.erase(std::unique(remove.begin(), remove.end()), remove.end());
+  std::vector<std::string>::const_iterator remEnd =
+      std::unique(remove.begin(), remove.end());
+  std::vector<std::string>::const_iterator remBegin = remove.begin();
 
-  varArgsExpanded.erase(
-      cmRemoveMatching(varArgsExpanded, remove),
-      varArgsExpanded.end());
-
-  std::string value = cmJoin(varArgsExpanded, ";");
+  std::vector<std::string>::const_iterator argsEnd =
+      cmRemoveMatching(varArgsExpanded, cmRange(remBegin, remEnd));
+  std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
+  std::string value = cmJoin(cmRange(argsBegin, argsEnd), ";");
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
 }
@@ -418,9 +419,11 @@ bool cmListCommand
     return false;
     }
 
-  varArgsExpanded.erase(cmRemoveDuplicates(varArgsExpanded),
-                        varArgsExpanded.end());
-  std::string value = cmJoin(varArgsExpanded, ";");
+  std::vector<std::string>::const_iterator argsEnd =
+      cmRemoveDuplicates(varArgsExpanded);
+  std::vector<std::string>::const_iterator argsBegin =
+      varArgsExpanded.begin();
+  std::string value = cmJoin(cmRange(argsBegin, argsEnd), ";");
 
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
@@ -503,13 +506,14 @@ bool cmListCommand::HandleRemoveAtCommand(
     }
 
   std::sort(removed.begin(), removed.end());
-  removed.erase(std::unique(removed.begin(), removed.end()), removed.end());
+  std::vector<size_t>::const_iterator remEnd =
+      std::unique(removed.begin(), removed.end());
+  std::vector<size_t>::const_iterator remBegin = removed.begin();
 
-  varArgsExpanded.erase(cmRemoveIndices(varArgsExpanded, removed),
-                        varArgsExpanded.end());
-
-  std::string value = cmJoin(varArgsExpanded, ";");
-
+  std::vector<std::string>::const_iterator argsEnd =
+      cmRemoveIndices(varArgsExpanded, cmRange(remBegin, remEnd));
+  std::vector<std::string>::const_iterator argsBegin = varArgsExpanded.begin();
+  std::string value = cmJoin(cmRange(argsBegin, argsEnd), ";");
 
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
