@@ -138,6 +138,39 @@ private:
   const_iterator End;
 };
 
+template<typename BiDirIt>
+BiDirIt Rotate(BiDirIt first, BiDirIt middle, BiDirIt last)
+{
+  typename std::iterator_traits<BiDirIt>::difference_type dist =
+      std::distance(first, middle);
+  std::rotate(first, middle, last);
+  std::advance(last, -dist);
+  return last;
+}
+
+template<typename Iter>
+Iter RemoveN(Iter i1, Iter i2, size_t n)
+{
+  return ContainerAlgorithms::Rotate(i1, i1 + n, i2);
+}
+
+template<typename Range>
+struct BinarySearcher
+{
+  typedef typename Range::value_type argument_type;
+  BinarySearcher(Range const& r)
+    : m_range(r)
+  {
+  }
+
+  bool operator()(argument_type const& item)
+  {
+    return std::binary_search(m_range.begin(), m_range.end(), item);
+  }
+private:
+  Range const& m_range;
+};
+
 }
 
 template<typename Iter1, typename Iter2>
@@ -187,5 +220,63 @@ std::string cmJoin(Range const& r, std::string delimiter)
 {
   return cmJoin(r, delimiter.c_str());
 };
+
+template<typename Range>
+typename Range::const_iterator cmRemoveN(Range& r, size_t n)
+{
+  return ContainerAlgorithms::RemoveN(r.begin(), r.end(), n);
+}
+
+template<typename Range, typename InputRange>
+typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
+{
+  typename InputRange::const_iterator remIt = rem.begin();
+
+  typename Range::iterator writer = r.begin() + *remIt;
+  ++remIt;
+  size_t count = 1;
+  for ( ; writer != r.end() && remIt != rem.end(); ++count, ++remIt)
+    {
+    writer = ContainerAlgorithms::RemoveN(writer, r.begin() + *remIt, count);
+    }
+  writer = ContainerAlgorithms::RemoveN(writer, r.end(), count);
+  return writer;
+}
+
+template<typename Range, typename MatchRange>
+typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
+{
+  return std::remove_if(r.begin(), r.end(),
+                        ContainerAlgorithms::BinarySearcher<MatchRange>(m));
+}
+
+template<typename Range>
+typename Range::const_iterator cmRemoveDuplicates(Range& r)
+{
+  std::vector<typename Range::value_type> unique;
+  unique.reserve(r.size());
+  std::vector<size_t> indices;
+  size_t count = 0;
+  for(typename Range::const_iterator it = r.begin();
+      it != r.end(); ++it, ++count)
+    {
+    typename Range::iterator low =
+        std::lower_bound(unique.begin(), unique.end(), *it);
+    if (low == unique.end() || *low != *it)
+      {
+      unique.insert(low, *it);
+      }
+    else
+      {
+      indices.push_back(count);
+      }
+    }
+  if (indices.empty())
+    {
+    return r.end();
+    }
+  std::sort(indices.begin(), indices.end());
+  return cmRemoveIndices(r, indices);
+}
 
 #endif
