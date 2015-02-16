@@ -2741,10 +2741,11 @@ void cmCTest::DetermineNextDayStop()
 }
 
 //----------------------------------------------------------------------
-void cmCTest::SetCTestConfiguration(const char *name, const char* value)
+void cmCTest::SetCTestConfiguration(const char *name, const char* value,
+                                    bool suppress)
 {
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, "SetCTestConfiguration:"
-    << name << ":" << (value ? value : "(null)") << "\n");
+  cmCTestOptionalLog(this, HANDLER_VERBOSE_OUTPUT, "SetCTestConfiguration:"
+    << name << ":" << (value ? value : "(null)") << "\n", suppress);
 
   if ( !name )
     {
@@ -2858,7 +2859,7 @@ void cmCTest::SetConfigType(const char* ct)
 
 //----------------------------------------------------------------------
 bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
-  const char* dconfig, const std::string& cmake_var)
+  const char* dconfig, const std::string& cmake_var, bool suppress)
 {
   const char* ctvar;
   ctvar = mf->GetDefinition(cmake_var);
@@ -2866,10 +2867,10 @@ bool cmCTest::SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
     {
     return false;
     }
-  cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-             "SetCTestConfigurationFromCMakeVariable:"
-             << dconfig << ":" << cmake_var << std::endl);
-  this->SetCTestConfiguration(dconfig, ctvar);
+  cmCTestOptionalLog(this, HANDLER_VERBOSE_OUTPUT,
+    "SetCTestConfigurationFromCMakeVariable:" << dconfig << ":" <<
+    cmake_var << std::endl, suppress);
+  this->SetCTestConfiguration(dconfig, ctvar, suppress);
   return true;
 }
 
@@ -3034,9 +3035,14 @@ void cmCTest::InitStreams()
   this->StreamErr = &std::cerr;
 }
 
-void cmCTest::Log(int logType, const char* file, int line, const char* msg)
+void cmCTest::Log(int logType, const char* file, int line, const char* msg,
+                  bool suppress)
 {
   if ( !msg || !*msg )
+    {
+    return;
+    }
+  if ( suppress && logType != cmCTest::ERROR_MESSAGE )
     {
     return;
     }
