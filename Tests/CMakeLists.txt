@@ -102,6 +102,17 @@ if(BUILD_TESTING)
     list(APPEND build_options -DCMAKE_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM})
   endif()
 
+  # Look for rpmbuild to use for tests.
+  # The tool does not work with spaces in the path.
+  if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
+    find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
+  else()
+    set(RPMBUILD_EXECUTABLE "RPMBUILD_EXECUTABLE-NOTFOUND")
+  endif()
+
+  #---------------------------------------------------------------------------
+  # Add tests below here.
+
   if(NOT CMake_TEST_EXTERNAL_CMAKE)
     add_subdirectory(CMakeLib)
   endif()
@@ -826,11 +837,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
   set(CTEST_RUN_CPackComponentsForAll ${CTEST_TEST_CPACK})
 
-  if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
-    find_program(RPMBUILD NAMES rpmbuild)
-  endif()
   # Do not try to build RPM
-  if (NOT RPMBUILD)
+  if (NOT RPMBUILD_EXECUTABLE)
     set(CPACK_BINARY_RPM OFF)
   endif()
 
@@ -912,7 +920,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   if(CTEST_RUN_CPackComponentsForAll)
     # Check whether if rpmbuild command is found
     # before adding RPM tests
-    find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
     if(RPMBUILD_EXECUTABLE)
       list(APPEND ACTIVE_CPACK_GENERATORS RPM)
     endif()
@@ -931,11 +938,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(APPLE)
       list(APPEND GENLST "DragNDrop")
     endif()
-    if (NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
-      list(FIND ACTIVE_CPACK_GENERATORS "RPM" RPM_ACTIVE)
-      if (NOT ${RPM_ACTIVE} EQUAL -1)
-        list(APPEND GENLST "RPM")
-      endif()
+    list(FIND ACTIVE_CPACK_GENERATORS "RPM" RPM_ACTIVE)
+    if (NOT ${RPM_ACTIVE} EQUAL -1)
+      list(APPEND GENLST "RPM")
     endif()
     list(FIND ACTIVE_CPACK_GENERATORS "DEB" DEB_ACTIVE)
     if (NOT ${DEB_ACTIVE} EQUAL -1)
