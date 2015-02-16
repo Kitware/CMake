@@ -1441,7 +1441,8 @@ cmLocalVisualStudio7Generator
 
     // First search a configuration-specific subdirectory and then the
     // original directory.
-    fout << comma << this->ConvertToXMLOutputPath((dir+"/$(OutDir)").c_str())
+    fout << comma
+         << this->ConvertToXMLOutputPath((dir+"/$(ConfigurationName)").c_str())
          << "," << this->ConvertToXMLOutputPath(dir.c_str());
     comma = ",";
     }
