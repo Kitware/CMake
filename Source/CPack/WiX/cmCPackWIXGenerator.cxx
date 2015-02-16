@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2014 Kitware, Inc., Insight Software Consortium
+  Copyright 2012-2015 Kitware, Inc., Insight Software Consortium
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -257,6 +257,7 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
 
   CreateWiXVariablesIncludeFile();
   CreateWiXPropertiesIncludeFile();
+  CreateWiXProductFragmentIncludeFile();
 
   if(!CreateWiXSourceFiles())
     {
@@ -383,6 +384,17 @@ void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
     includeFile.AddAttribute("After", "CostFinalize");
     includeFile.EndElement("SetProperty");
     }
+}
+
+void cmCPackWIXGenerator::CreateWiXProductFragmentIncludeFile()
+{
+    std::string includeFilename =
+      this->CPackTopLevel + "/product_fragment.wxi";
+
+    cmWIXSourceWriter includeFile(
+      this->Logger, includeFilename, true);
+
+    this->Patch->ApplyFragment("#PRODUCT", includeFile);
 }
 
 void cmCPackWIXGenerator::CopyDefinition(

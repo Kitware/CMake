@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2012 Kitware, Inc.
+  Copyright 2012-2015 Kitware, Inc.
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -75,6 +75,8 @@ private:
   void CreateWiXVariablesIncludeFile();
 
   void CreateWiXPropertiesIncludeFile();
+
+  void CreateWiXProductFragmentIncludeFile();
 
   void CopyDefinition(
     cmWIXSourceWriter &source, std::string const& name);
