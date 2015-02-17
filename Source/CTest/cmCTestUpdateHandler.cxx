@@ -122,11 +122,13 @@ void cmCTestUpdateHandler::Initialize()
 //----------------------------------------------------------------------
 int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
 {
-  cmCTestLog(this->CTest, DEBUG, "Determine update type from command: " << cmd
-    << " and type: " << type << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG,
+    "Determine update type from command: " << cmd << " and type: " << type <<
+    std::endl, this->Quiet);
   if ( type && *type )
     {
-    cmCTestLog(this->CTest, DEBUG, "Type specified: " << type << std::endl);
+    cmCTestOptionalLog(this->CTest, DEBUG, "Type specified: " << type <<
+      std::endl, this->Quiet);
     std::string stype = cmSystemTools::LowerCase(type);
     if ( stype.find("cvs") != std::string::npos )
       {
@@ -155,8 +157,8 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
     }
   else
     {
-    cmCTestLog(this->CTest, DEBUG, "Type not specified, check command: "
-      << cmd << std::endl);
+    cmCTestOptionalLog(this->CTest, DEBUG,
+      "Type not specified, check command: " << cmd << std::endl, this->Quiet);
     std::string stype = cmSystemTools::LowerCase(cmd);
     if ( stype.find("cvs") != std::string::npos )
       {
@@ -211,18 +213,19 @@ int cmCTestUpdateHandler::ProcessHandler()
     this->StartLogFile("Update", ofs);
     }
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Updating the repository: "
-    << sourceDirectory << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+    "   Updating the repository: " << sourceDirectory << std::endl,
+    this->Quiet);
 
   if(!this->SelectVCS())
     {
     return -1;
     }
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Use "
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "   Use "
     << cmCTestUpdateHandlerUpdateToString(this->UpdateType)
     << " repository type"
-    << std::endl;);
+    << std::endl;, this->Quiet);
 
   // Create an object to interact with the VCS tool.
   cmsys::auto_ptr<cmCTestVC> vc;
@@ -283,23 +286,23 @@ int cmCTestUpdateHandler::ProcessHandler()
   int numUpdated = vc->GetPathCount(cmCTestVC::PathUpdated);
   if(numUpdated)
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   Found " << numUpdated << " updated files\n");
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+      "   Found " << numUpdated << " updated files\n", this->Quiet);
     }
   if(int numModified = vc->GetPathCount(cmCTestVC::PathModified))
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   Found " << numModified << " locally modified files\n");
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+      "   Found " << numModified << " locally modified files\n", this->Quiet);
     localModifications += numModified;
     }
   if(int numConflicting = vc->GetPathCount(cmCTestVC::PathConflicting))
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-               "   Found " << numConflicting << " conflicting files\n");
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+    "   Found " << numConflicting << " conflicting files\n", this->Quiet);
     localModifications += numConflicting;
     }
 
-  cmCTestLog(this->CTest, DEBUG, "End" << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
   std::string end_time = this->CTest->CurrentTime();
   os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
      << "\t<EndTime>" << static_cast<unsigned int>(cmSystemTools::GetTime())
@@ -331,8 +334,8 @@ int cmCTestUpdateHandler::ProcessHandler()
 int cmCTestUpdateHandler::DetectVCS(const char* dir)
 {
   std::string sourceDirectory = dir;
-  cmCTestLog(this->CTest, DEBUG, "Check directory: "
-    << sourceDirectory << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG, "Check directory: "
+    << sourceDirectory << std::endl, this->Quiet);
   sourceDirectory += "/.svn";
   if ( cmSystemTools::FileExists(sourceDirectory.c_str()) )
     {
