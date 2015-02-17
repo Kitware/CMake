@@ -33,8 +33,16 @@
         PRINT *, 'INFO:simulate_version[013.00]'
 #  endif
 # endif
-#elif defined(__SUNPRO_F90) || defined(__SUNPRO_F95)
+#elif defined(__SUNPRO_F95)
         PRINT *, 'INFO:compiler[SunPro]'
+# define COMPILER_VERSION_MAJOR HEX(__SUNPRO_F95>>8)
+# define COMPILER_VERSION_MINOR HEX(__SUNPRO_F95>>4 & 0xF)
+# define COMPILER_VERSION_PATCH HEX(__SUNPRO_F95    & 0xF)
+#elif defined(__SUNPRO_F90)
+        PRINT *, 'INFO:compiler[SunPro]'
+# define COMPILER_VERSION_MAJOR HEX(__SUNPRO_F90>>8)
+# define COMPILER_VERSION_MINOR HEX(__SUNPRO_F90>>4 & 0xF)
+# define COMPILER_VERSION_PATCH HEX(__SUNPRO_F90    & 0xF)
 #elif defined(_CRAYFTN)
         PRINT *, 'INFO:compiler[Cray]'
 #elif defined(__G95__)
