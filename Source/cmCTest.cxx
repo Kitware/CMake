@@ -294,6 +294,7 @@ cmCTest::cmCTest()
   this->LabelSummary           = true;
   this->ParallelLevel          = 1;
   this->ParallelLevelSetInCli  = false;
+  this->MaxLoad                = 0;
   this->SubmitIndex            = 0;
   this->Failover               = false;
   this->BatchJobs              = false;
@@ -391,6 +392,11 @@ cmCTest::~cmCTest()
 void cmCTest::SetParallelLevel(int level)
 {
   this->ParallelLevel = level < 1 ? 1 : level;
+}
+
+void cmCTest::SetMaxLoad(int max)
+{
+  this->MaxLoad = max < 1 ? 0 : max;
 }
 
 //----------------------------------------------------------------------------
@@ -2049,6 +2055,13 @@ bool cmCTest::HandleCommandLineArguments(size_t &i,
       {
       this->RepeatUntilFail = true;
       }
+    }
+
+  if(this->CheckArgument(arg, "--max-load") && i < args.size() - 1)
+    {
+    i++;
+    int max = atoi(args[i].c_str());
+    this->SetMaxLoad(max);
     }
 
   if(this->CheckArgument(arg, "--no-compress-output"))

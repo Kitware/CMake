@@ -2955,3 +2955,107 @@ bool cmSystemTools::StringToLong(const char* str, long* value)
   *value = strtol(str, &endp, 10);
   return (*endp == '\0') && (endp != str) && (errno == 0);
 }
+
+//----------------------------------------------------------------------------
+namespace{
+int get_processor_count()
+{
+#ifdef _WIN32
+  SYSTEM_INFO info;
+  GetSystemInfo(&info);
+  return info.dwNumberOfProcessors;
+#else
+  return sysconf(_SC_NPROCESSORS_ONLN);
+#endif
+}
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+double calculate_processor_load(uint64_t idleTicks, uint64_t totalTicks)
+{
+  static uint64_t previousIdleTicks = 0;
+  static uint64_t previousTotalTicks = 0;
+  static double previousLoad = -0.0;
+
+  uint64_t idleTicksSinceLastTime = idleTicks - previousIdleTicks;
+  uint64_t totalTicksSinceLastTime = totalTicks - previousTotalTicks;
+
+  bool firstCall = (previousTotalTicks == 0);
+  bool ticksNotUpdatedSinceLastCall = (totalTicksSinceLastTime == 0);
+
+  double load;
+  if (firstCall || ticksNotUpdatedSinceLastCall)
+    {
+    load = previousLoad;
+    }
+  else
+    {
+    // Calculate load.
+    double idleToTotalRatio =
+      ((double)idleTicksSinceLastTime) / totalTicksSinceLastTime;
+    double loadSinceLastCall = 1.0 - idleToTotalRatio;
+
+    // Filter/smooth result when possible.
+    if (previousLoad > 0)
+      {
+      load = 0.9 * previousLoad + 0.1 * loadSinceLastCall;
+      }
+    else
+      {
+      load = loadSinceLastCall;
+      }
+    }
+
+  previousLoad = load;
+  previousTotalTicks = totalTicks;
+  previousIdleTicks = idleTicks;
+
+  return load;
+}
+
+uint64_t file_time_to_tick_count(const FILETIME & ft)
+{
+  uint64_t high = (((uint64_t)(ft.dwHighDateTime)) << 32);
+  uint64_t low = ft.dwLowDateTime;
+  return (high | low);
+}
+#endif
+
+}  // namespace
+
+#if defined(_WIN32) || defined(__CYGWIN__)
+double cmSystemTools::GetLoadAverage()
+{
+  FILETIME idleTime, kernelTime, userTime;
+  BOOL getSystemTimeSucceeded =
+    GetSystemTimes(&idleTime, &kernelTime, &userTime);
+
+  double posixCompatibleLoad;
+  if (getSystemTimeSucceeded)
+    {
+    uint64_t idleTicks = file_time_to_tick_count(idleTime);
+
+    // kernelTime from GetSystemTimes already includes idleTime.
+    uint64_t totalTicks = file_time_to_tick_count(kernelTime) +
+                            file_time_to_tick_count(userTime);
+
+    double processorLoad = calculate_processor_load(idleTicks, totalTicks);
+    posixCompatibleLoad = processorLoad * get_processor_count();
+    }
+  else
+    {
+    posixCompatibleLoad = -0.0;
+    }
+  return posixCompatibleLoad;
+}
+#else
+double cmSystemTools::GetLoadAverage()
+{
+  double loadavg[3] = { 0.0f, 0.0f, 0.0f };
+  if (getloadavg(loadavg, 3) < 0)
+    {
+    // Return error here instead?
+    return -0.0f;
+    }
+  return loadavg[0];
+}
+#endif

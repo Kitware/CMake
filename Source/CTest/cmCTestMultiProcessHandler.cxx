@@ -13,6 +13,7 @@
 #include "cmProcess.h"
 #include "cmStandardIncludes.h"
 #include "cmCTest.h"
+#include "cmCTestScriptHandler.h"
 #include "cmSystemTools.h"
 #include <stdlib.h>
 #include <stack>
@@ -40,6 +41,7 @@ private:
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
   this->ParallelLevel = 1;
+  this->MaxLoad = 0;
   this->Completed = 0;
   this->RunningCount = 0;
   this->StopTimePassed = false;
@@ -81,6 +83,11 @@ cmCTestMultiProcessHandler::SetTests(TestMap& tests,
 void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
 {
   this->ParallelLevel = level < 1 ? 1 : level;
+}
+
+void cmCTestMultiProcessHandler::SetMaxLoad(size_t max)
+{
+  this->MaxLoad = max < 1 ? 0 : max;
 }
 
 //---------------------------------------------------------
@@ -209,6 +216,12 @@ inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
   return processors;
 }
 
+std::string cmCTestMultiProcessHandler::GetName(int test)
+{
+  return this->Properties[test]->Name;
+}
+
+
 //---------------------------------------------------------
 bool cmCTestMultiProcessHandler::StartTest(int test)
 {
@@ -248,23 +261,53 @@ void cmCTestMultiProcessHandler::StartNextTests()
     return;
     }
 
+  bool allTestsFailedMaxLoadCheck = true;
+  size_t minProcessorsRequired = this->ParallelLevel;
+  std::string testWithMinProcessors = "";
+
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
     size_t processors = GetProcessorsUsed(*test);
 
-    if(processors <= numToStart && this->StartTest(*test))
+    const bool maxLoadOk = (this->MaxLoad > 0) ?
+      processors <= (this->MaxLoad - cmSystemTools::GetLoadAverage()) : true;
+
+    allTestsFailedMaxLoadCheck &= !maxLoadOk;
+    if (processors <= minProcessorsRequired)
       {
-        if(this->StopTimePassed)
-          {
-          return;
-          }
-        numToStart -= processors;
+      minProcessorsRequired = processors;
+      testWithMinProcessors = GetName(*test);
+      }
+
+    if(maxLoadOk && processors <= numToStart && this->StartTest(*test))
+      {
+      if(this->StopTimePassed)
+        {
+        return;
+        }
+      numToStart -= processors;
       }
     else if(numToStart == 0)
       {
       return;
       }
+    }
+
+  if (allTestsFailedMaxLoadCheck)
+    {
+    cmCTestLog(this->CTest, DEBUG, "Time: " << this->CTest->CurrentTime()
+      << std::endl);
+    cmCTestLog(this->CTest, DEBUG, "Current Load: "
+      << cmSystemTools::GetLoadAverage() << std::endl);
+    cmCTestLog(this->CTest, DEBUG, "Max Load: " << this->MaxLoad << std::endl);
+    cmCTestLog(this->CTest, DEBUG, " Smallest test " << testWithMinProcessors
+      << " requries " << minProcessorsRequired
+      << " cores/processes and can't be run without violating the max load."
+      << std::endl);
+
+    // Wait before trying again...
+    cmCTestScriptHandler::SleepInSeconds(1);
     }
 }
 
