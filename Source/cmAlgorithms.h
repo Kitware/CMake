@@ -275,7 +275,6 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
     {
     return r.end();
     }
-  std::sort(indices.begin(), indices.end());
   return cmRemoveIndices(r, indices);
 }
 
