@@ -49,6 +49,11 @@
         PRINT *, 'INFO:compiler[G95]'
 #elif defined(__PATHSCALE__)
         PRINT *, 'INFO:compiler[PathScale]'
+# define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
+# define COMPILER_VERSION_MINOR DEC(__PATHCC_MINOR__)
+# if defined(__PATHCC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__PATHCC_PATCHLEVEL__)
+# endif
 #elif defined(__ABSOFT__)
         PRINT *, 'INFO:compiler[Absoft]'
 #elif defined(__GNUC__)
