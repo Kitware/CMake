@@ -302,4 +302,12 @@ typename Range::const_iterator cmFindNot(Range const& r, T const& t)
                       std::bind1st(std::not_equal_to<T>(), t));
 }
 
+template<typename Range>
+ContainerAlgorithms::Range<typename Range::const_reverse_iterator>
+cmReverseRange(Range const& range)
+{
+  return ContainerAlgorithms::Range<typename Range::const_reverse_iterator>(
+      range.rbegin(), range.rend());
+}
+
 #endif

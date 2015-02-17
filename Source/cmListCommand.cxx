@@ -390,8 +390,7 @@ bool cmListCommand
     return false;
     }
 
-  std::reverse(varArgsExpanded.begin(), varArgsExpanded.end());
-  std::string value = cmJoin(varArgsExpanded, ";");
+  std::string value = cmJoin(cmReverseRange(varArgsExpanded), ";");
 
   this->Makefile->AddDefinition(listName, value.c_str());
   return true;
