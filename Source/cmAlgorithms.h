@@ -99,7 +99,7 @@ template<typename Container,
     bool valueTypeIsPair = cmIsPair<typename Container::value_type>::value>
 struct DefaultDeleter
 {
-  void operator()(typename Container::value_type value) {
+  void operator()(typename Container::value_type value) const {
     delete value;
   }
 };
@@ -107,7 +107,7 @@ struct DefaultDeleter
 template<typename Container>
 struct DefaultDeleter<Container, /* valueTypeIsPair = */ true>
 {
-  void operator()(typename Container::value_type value) {
+  void operator()(typename Container::value_type value) const {
     delete value.second;
   }
 };
@@ -163,7 +163,7 @@ struct BinarySearcher
   {
   }
 
-  bool operator()(argument_type const& item)
+  bool operator()(argument_type const& item) const
   {
     return std::binary_search(m_range.begin(), m_range.end(), item);
   }
