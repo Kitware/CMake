@@ -463,7 +463,13 @@ cmCTest::Part cmCTest::GetPartFromName(const char* name)
 //----------------------------------------------------------------------
 int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
 {
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+  bool quiet = false;
+  if (command && command->ShouldBeQuiet())
+    {
+    quiet = true;
+    }
+
+  cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
   if(!this->InteractiveDebugMode)
     {
     this->BlockTestErrorDiagnostics();
@@ -478,24 +484,23 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
 
   this->UpdateCTestConfiguration();
 
-  cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+  cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
   if ( this->ProduceXML )
     {
-    cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
-    cmCTestLog(this, OUTPUT,
-               "   Site: " << this->GetCTestConfiguration("Site") << std::endl
-               << "   Build name: "
-               << cmCTest::SafeBuildIdField(
-                 this->GetCTestConfiguration("BuildName"))
-               << std::endl);
-    cmCTestLog(this, DEBUG, "Produce XML is on" << std::endl);
+    cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl, quiet);
+    cmCTestOptionalLog(this, OUTPUT,
+      "   Site: " << this->GetCTestConfiguration("Site") << std::endl <<
+      "   Build name: " << cmCTest::SafeBuildIdField(
+      this->GetCTestConfiguration("BuildName")) << std::endl, quiet);
+    cmCTestOptionalLog(this, DEBUG, "Produce XML is on" << std::endl, quiet);
     if ( this->TestModel == cmCTest::NIGHTLY &&
          this->GetCTestConfiguration("NightlyStartTime").empty() )
       {
-      cmCTestLog(this, WARNING,
-                 "WARNING: No nightly start time found please set in"
-                 " CTestConfig.cmake or DartConfig.cmake" << std::endl);
-      cmCTestLog(this, DEBUG, "Here: " << __LINE__ << std::endl);
+      cmCTestOptionalLog(this, WARNING,
+        "WARNING: No nightly start time found please set in CTestConfig.cmake"
+        " or DartConfig.cmake" << std::endl, quiet);
+      cmCTestOptionalLog(this, DEBUG, "Here: " << __LINE__ << std::endl,
+        quiet);
       return 0;
       }
     }
@@ -507,8 +512,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
   cmMakefile *mf = lg->GetMakefile();
   if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), mf) )
     {
-    cmCTestLog(this, DEBUG, "Cannot find custom configuration file tree"
-      << std::endl);
+    cmCTestOptionalLog(this, DEBUG,
+      "Cannot find custom configuration file tree" << std::endl, quiet);
     return 0;
     }
 
@@ -583,9 +588,10 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         }
       if (tag.empty() || (0 != command) || this->Parts[PartStart])
         {
-        cmCTestLog(this, DEBUG, "TestModel: " << this->GetTestModelString()
-          << std::endl);
-        cmCTestLog(this, DEBUG, "TestModel: " << this->TestModel << std::endl);
+        cmCTestOptionalLog(this, DEBUG, "TestModel: " <<
+          this->GetTestModelString() << std::endl, quiet);
+        cmCTestOptionalLog(this, DEBUG, "TestModel: " <<
+          this->TestModel << std::endl, quiet);
         if ( this->TestModel == cmCTest::NIGHTLY )
           {
           lctime = this->GetNightlyTime(
@@ -609,8 +615,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         ofs.close();
         if ( 0 == command )
           {
-          cmCTestLog(this, OUTPUT, "Create new tag: " << tag << " - "
-            << this->GetTestModelString() << std::endl);
+          cmCTestOptionalLog(this, OUTPUT, "Create new tag: " << tag << " - "
+            << this->GetTestModelString() << std::endl, quiet);
           }
         }
       }
@@ -630,8 +636,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
         return 0;
         }
 
-      cmCTestLog(this, OUTPUT, "  Use existing tag: " << tag << " - "
-        << this->GetTestModelString() << std::endl);
+      cmCTestOptionalLog(this, OUTPUT, "  Use existing tag: " << tag << " - "
+        << this->GetTestModelString() << std::endl, quiet);
       }
 
     this->CurrentTag = tag;
@@ -675,8 +681,8 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
 
   if ( !fname.empty() )
     {
-    cmCTestLog(this, OUTPUT, "   Reading ctest configuration file: "
-      << fname << std::endl);
+    cmCTestOptionalLog(this, OUTPUT, "   Reading ctest configuration file: "
+      << fname << std::endl, command->ShouldBeQuiet());
     bool readit = mf->ReadListFile(mf->GetCurrentListFile(),
       fname.c_str() );
     if(!readit)
@@ -689,19 +695,20 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     }
   else
     {
-    cmCTestLog(this, WARNING,
+    cmCTestOptionalLog(this, WARNING,
       "Cannot locate CTest configuration: in BuildDirectory: "
-      << bld_dir_fname << std::endl);
-    cmCTestLog(this, WARNING,
+      << bld_dir_fname << std::endl, command->ShouldBeQuiet());
+    cmCTestOptionalLog(this, WARNING,
       "Cannot locate CTest configuration: in SourceDirectory: "
-      << src_dir_fname << std::endl);
+      << src_dir_fname << std::endl, command->ShouldBeQuiet());
     }
 
   this->SetCTestConfigurationFromCMakeVariable(mf, "NightlyStartTime",
-    "CTEST_NIGHTLY_START_TIME");
-  this->SetCTestConfigurationFromCMakeVariable(mf, "Site", "CTEST_SITE");
+    "CTEST_NIGHTLY_START_TIME", command->ShouldBeQuiet());
+  this->SetCTestConfigurationFromCMakeVariable(mf, "Site", "CTEST_SITE",
+    command->ShouldBeQuiet());
   this->SetCTestConfigurationFromCMakeVariable(mf, "BuildName",
-    "CTEST_BUILD_NAME");
+    "CTEST_BUILD_NAME", command->ShouldBeQuiet());
   const char* dartVersion = mf->GetDefinition("CTEST_DART_SERVER_VERSION");
   if ( dartVersion )
     {
@@ -720,8 +727,9 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     {
     return false;
     }
-  cmCTestLog(this, OUTPUT, "   Use " << this->GetTestModelString()
-    << " tag: " << this->GetCurrentTag() << std::endl);
+  cmCTestOptionalLog(this, OUTPUT, "   Use " << this->GetTestModelString()
+    << " tag: " << this->GetCurrentTag() << std::endl,
+    command->ShouldBeQuiet());
   return true;
 }
 

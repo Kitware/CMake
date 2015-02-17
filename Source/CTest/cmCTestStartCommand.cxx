@@ -20,6 +20,7 @@
 cmCTestStartCommand::cmCTestStartCommand()
 {
   this->CreateNewTag = true;
+  this->Quiet = false;
 }
 
 bool cmCTestStartCommand
@@ -55,6 +56,14 @@ bool cmCTestStartCommand
       {
       cnt ++;
       this->CreateNewTag = false;
+      }
+    }
+  if (cnt < args.size())
+    {
+    if (args[cnt] == "QUIET")
+      {
+      cnt ++;
+      this->Quiet = true;
       }
     }
 
@@ -95,18 +104,20 @@ bool cmCTestStartCommand
 
   std::string sourceDir = cmSystemTools::CollapseFullPath(src_dir);
   std::string binaryDir = cmSystemTools::CollapseFullPath(bld_dir);
-  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir.c_str());
-  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir.c_str());
+  this->CTest->SetCTestConfiguration("SourceDirectory", sourceDir.c_str(),
+    this->Quiet);
+  this->CTest->SetCTestConfiguration("BuildDirectory", binaryDir.c_str(),
+    this->Quiet);
 
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Run dashboard with model "
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Run dashboard with model "
     << smodel << std::endl
     << "   Source directory: " << src_dir << std::endl
-    << "   Build directory: " << bld_dir << std::endl);
+    << "   Build directory: " << bld_dir << std::endl, this->Quiet);
   const char* track = this->CTest->GetSpecificTrack();
   if ( track )
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT,
-      "   Track: " << track << std::endl);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+      "   Track: " << track << std::endl, this->Quiet);
     }
 
   // Log startup actions.
