@@ -35,7 +35,8 @@ void cmCTestConfigureHandler::Initialize()
 //functions and commented...
 int cmCTestConfigureHandler::ProcessHandler()
 {
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Configure project" << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+    "Configure project" << std::endl, this->Quiet);
   std::string cCommand
     = this->CTest->GetCTestConfiguration("ConfigureCommand");
   if (cCommand.empty())
@@ -75,8 +76,8 @@ int cmCTestConfigureHandler::ProcessHandler()
 
     cmGeneratedFileStream ofs;
     this->StartLogFile("Configure", ofs);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Configure with command: "
-      << cCommand << std::endl);
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Configure with command: " << cCommand << std::endl, this->Quiet);
     res = this->CTest->RunMakeCommand(cCommand.c_str(), output,
       &retVal, buildDirectory.c_str(),
       0, ofs);
@@ -101,7 +102,7 @@ int cmCTestConfigureHandler::ProcessHandler()
         }
       os << "<ConfigureCommand>" << cCommand << "</ConfigureCommand>"
         << std::endl;
-      cmCTestLog(this->CTest, DEBUG, "End" << std::endl);
+      cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
       os << "<Log>" << cmXMLSafe(output) << "</Log>" << std::endl;
       std::string end_time = this->CTest->CurrentTime();
       os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
@@ -119,8 +120,8 @@ int cmCTestConfigureHandler::ProcessHandler()
     }
   else
     {
-    cmCTestLog(this->CTest, DEBUG, "Configure with command: " << cCommand
-      << std::endl);
+    cmCTestOptionalLog(this->CTest, DEBUG,
+      "Configure with command: " << cCommand << std::endl, this->Quiet);
     }
   if (! res || retVal )
     {
