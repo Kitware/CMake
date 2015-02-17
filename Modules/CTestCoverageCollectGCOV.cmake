@@ -45,6 +45,10 @@
 #     Specify options to be passed to gcov.  The ``gcov`` command
 #     is run as ``gcov <options>... -o <gcov-dir> <file>.gcda``.
 #     If not specified, the default option is just ``-b``.
+#
+#   ``QUIET``
+#     Suppress non-error messages that otherwise would have been
+#     printed out by this function.
 
 #=============================================================================
 # Copyright 2014-2015 Kitware, Inc.
@@ -60,7 +64,7 @@
 #  License text for the above reference.)
 include(CMakeParseArguments)
 function(ctest_coverage_collect_gcov)
-  set(options "")
+  set(options QUIET)
   set(oneValueArgs TARBALL SOURCE BUILD GCOV_COMMAND)
   set(multiValueArgs GCOV_OPTIONS)
   cmake_parse_arguments(GCOV  "${options}" "${oneValueArgs}"
@@ -106,8 +110,10 @@ function(ctest_coverage_collect_gcov)
   # return early if no coverage files were found
   list(LENGTH gcda_files len)
   if(len EQUAL 0)
-    message("ctest_coverage_collect_gcov: No .gcda files found, "
-      "ignoring coverage request.")
+    if (NOT GCOV_QUIET)
+      message("ctest_coverage_collect_gcov: No .gcda files found, "
+        "ignoring coverage request.")
+    endif()
     return()
   endif()
   # setup the dir for the coverage files
@@ -130,7 +136,9 @@ function(ctest_coverage_collect_gcov)
       WORKING_DIRECTORY ${coverage_dir})
   endforeach()
   if(NOT "${res}" EQUAL 0)
-    message(STATUS "Error running gcov: ${res} ${out}")
+    if (NOT GCOV_QUIET)
+      message(STATUS "Error running gcov: ${res} ${out}")
+    endif()
   endif()
   # create json file with project information
   file(WRITE ${coverage_dir}/data.json
@@ -151,8 +159,15 @@ function(ctest_coverage_collect_gcov)
 ${coverage_dir}/data.json
 ${label_files}
 ")
+
+  if (GCOV_QUIET)
+    set(tar_opts "cfj")
+  else()
+    set(tar_opts "cvfj")
+  endif()
+
   execute_process(COMMAND
-    ${CMAKE_COMMAND} -E tar cvfj ${GCOV_TARBALL}
+    ${CMAKE_COMMAND} -E tar ${tar_opts} ${GCOV_TARBALL}
     "--mtime=1970-01-01 0:0:0 UTC"
     --files-from=${coverage_dir}/coverage_file_list.txt
     WORKING_DIRECTORY ${binary_dir})

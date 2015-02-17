@@ -71,9 +71,9 @@ void cmParseCacheCoverage::RemoveUnCoveredFiles()
       }
     if(nothing)
       {
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "No coverage found in: " << ci->first
-                 << std::endl);
+                 << std::endl, this->Coverage.Quiet);
       this->Coverage.TotalCoverage.erase(ci++);
       }
     else

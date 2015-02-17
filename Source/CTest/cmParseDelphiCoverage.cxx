@@ -122,8 +122,9 @@ public:
       lastoffset = line.find('(',pos);
       if(lastoffset==line.npos)
         {
-        cmCTestLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
-           endnamepos << "File not found  " << lastoffset  << std::endl);
+        cmCTestOptionalLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
+           endnamepos << "File not found  " << lastoffset  << std::endl,
+           this->Coverage.Quiet);
         return false;
         }
       endnamepos = line.find(')',lastoffset);
@@ -131,8 +132,9 @@ public:
          (endnamepos-1)-lastoffset);
       if(filename.find(".pas") != filename.npos)
         {
-        cmCTestLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
-           "Coverage found for file:  " << filename  << std::endl);
+        cmCTestOptionalLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
+           "Coverage found for file:  " << filename  << std::endl,
+           this->Coverage.Quiet);
         break;
         }
       pos = lastoffset+1;
@@ -153,8 +155,9 @@ public:
       *  If that doesn't find any matching files
       *  return a failure.
       */
-      cmCTestLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
-         "Unable to find file matching" << glob << std::endl);
+      cmCTestOptionalLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
+         "Unable to find file matching" << glob << std::endl,
+         this->Coverage.Quiet);
       return false;
       }
     FileLinesType&  coverageVector =
@@ -229,8 +232,8 @@ bool cmParseDelphiCoverage::LoadCoverageData(
     {
     path = files[i];
 
-    cmCTestLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
-       "Reading HTML File " << path  << std::endl);
+    cmCTestOptionalLog(this->CTest,HANDLER_VERBOSE_OUTPUT,
+       "Reading HTML File " << path  << std::endl, this->Coverage.Quiet);
     if(cmSystemTools::GetFilenameLastExtension(path) == ".html")
       {
       if(!this->ReadDelphiHTML(path.c_str()))
