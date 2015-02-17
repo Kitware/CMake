@@ -81,14 +81,14 @@ private:
   const std::string m_test;
 };
 
-template<typename BiDirIt>
-BiDirIt cmRotate(BiDirIt first, BiDirIt middle, BiDirIt last)
+template<typename FwdIt>
+FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
 {
-  typename std::iterator_traits<BiDirIt>::difference_type dist =
-      std::distance(first, middle);
+  typename std::iterator_traits<FwdIt>::difference_type dist =
+      std::distance(middle, last);
   std::rotate(first, middle, last);
-  std::advance(last, -dist);
-  return last;
+  std::advance(first, dist);
+  return first;
 }
 
 namespace ContainerAlgorithms {
