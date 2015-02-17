@@ -669,8 +669,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     static_cast<cmGlobalVisualStudio7Generator*>(this->GlobalGenerator);
   fout << "\t\t<Configuration\n"
        << "\t\t\tName=\"" << configName
-       << "|" << gg->GetPlatformName() << "\"\n"
-       << "\t\t\tOutputDirectory=\"" << configName << "\"\n";
+       << "|" << gg->GetPlatformName() << "\"\n";
   // This is an internal type to Visual Studio, it seems that:
   // 4 == static library
   // 2 == dll
@@ -798,6 +797,16 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   std::string intermediateDir = this->GetTargetDirectory(target);
   intermediateDir += "/";
   intermediateDir += configName;
+
+  if (target.GetType() < cmTarget::UTILITY)
+    {
+    std::string const& outDir =
+      target.GetType() == cmTarget::OBJECT_LIBRARY?
+      intermediateDir : target.GetDirectory(configName);
+    fout << "\t\t\tOutputDirectory=\""
+         << this->ConvertToXMLOutputPathSingle(outDir.c_str()) << "\"\n";
+    }
+
   fout << "\t\t\tIntermediateDirectory=\""
        << this->ConvertToXMLOutputPath(intermediateDir.c_str())
        << "\"\n"
@@ -1441,7 +1450,8 @@ cmLocalVisualStudio7Generator
 
     // First search a configuration-specific subdirectory and then the
     // original directory.
-    fout << comma << this->ConvertToXMLOutputPath((dir+"/$(OutDir)").c_str())
+    fout << comma
+         << this->ConvertToXMLOutputPath((dir+"/$(ConfigurationName)").c_str())
          << "," << this->ConvertToXMLOutputPath(dir.c_str());
     comma = ",";
     }
