@@ -8,11 +8,20 @@
 #
 # ::
 #
-#   CURL_INCLUDE_DIRS   - where to find curl/curl.h, etc.
-#   CURL_EXECUTABLE     - path of curl executable
+#   CURL_INCLUDE_DIRS   - Where to find curl/curl.h, etc.
+#   CURL_EXECUTABLE     - Path of curl executable
 #   CURL_LIBRARIES      - List of libraries when using curl.
 #   CURL_FOUND          - True if curl found.
 #   CURL_VERSION_STRING - the version of curl found (since CMake 2.8.8)
+# ::
+#
+#
+# Hints
+# ^^^^^
+#
+# This module reads hints about search locations from variables:
+#  CURL_ROOT           - Preferred installation prefix
+# 
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
