@@ -47,6 +47,8 @@
         PRINT *, 'INFO:compiler[Cray]'
 #elif defined(__G95__)
         PRINT *, 'INFO:compiler[G95]'
+# define COMPILER_VERSION_MAJOR DEC(__G95__)
+# define COMPILER_VERSION_MINOR DEC(__G95_MINOR__)
 #elif defined(__PATHSCALE__)
         PRINT *, 'INFO:compiler[PathScale]'
 # define COMPILER_VERSION_MAJOR DEC(__PATHCC__)
