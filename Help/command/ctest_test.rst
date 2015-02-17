@@ -31,3 +31,9 @@ tests should all stop running.
 The APPEND option marks results for append to those previously
 submitted to a dashboard server since the last ctest_start.  Append
 semantics are defined by the dashboard server in use.
+
+The QUIET option suppresses any CTest-specific non-error messages
+that would have otherwise been printed to the console.  Output from
+the underlying test command is not affected.  Summary info detailing
+the percentage of passing tests is also unaffected by the QUIET
+option.

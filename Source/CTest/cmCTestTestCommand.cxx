@@ -103,6 +103,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     {
     this->CTest->SetStopTime(this->Values[ctt_STOP_TIME]);
     }
+  handler->SetQuiet(this->Quiet);
   return handler;
 }
 
