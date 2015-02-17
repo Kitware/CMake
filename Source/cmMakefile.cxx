@@ -1340,11 +1340,11 @@ void cmMakefile::AddDefineFlag(const char* flag)
 void cmMakefile::AddDefineFlag(const char* flag, std::string& dflags)
 {
   // remove any \n\r
-  std::string ret = flag;
-  std::replace(ret.begin(), ret.end(), '\n', ' ');
-  std::replace(ret.begin(), ret.end(), '\r', ' ');
-  dflags += " ";
-  dflags += ret;
+  std::string::size_type initSize = dflags.size();
+  dflags += std::string(" ") + flag;
+  std::string::iterator flagStart = dflags.begin() + initSize + 1;
+  std::replace(flagStart, dflags.end(), '\n', ' ');
+  std::replace(flagStart, dflags.end(), '\r', ' ');
 }
 
 
