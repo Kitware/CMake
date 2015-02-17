@@ -58,6 +58,11 @@
         PRINT *, 'INFO:compiler[Absoft]'
 #elif defined(__GNUC__)
         PRINT *, 'INFO:compiler[GNU]'
+# define COMPILER_VERSION_MAJOR DEC(__GNUC__)
+# define COMPILER_VERSION_MINOR DEC(__GNUC_MINOR__)
+# if defined(__GNUC_PATCHLEVEL__)
+#  define COMPILER_VERSION_PATCH DEC(__GNUC_PATCHLEVEL__)
+# endif
 #elif defined(__IBMC__)
 # if defined(__COMPILER_VER__)
         PRINT *, 'INFO:compiler[zOS]'
