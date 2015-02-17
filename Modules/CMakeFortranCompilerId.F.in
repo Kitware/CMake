@@ -134,4 +134,26 @@
         PRINT *, 'INFO:arch[X86]'
 # endif
 #endif
+
+#if 0
+! Encode compiler version digits
+#endif
+#define DEC_8(n) (((n) / 10000000) % 10)
+#define DEC_7(n) (((n) / 1000000)  % 10)
+#define DEC_6(n) (((n) / 100000)   % 10)
+#define DEC_5(n) (((n) / 10000)    % 10)
+#define DEC_4(n) (((n) / 1000)     % 10)
+#define DEC_3(n) (((n) / 100)      % 10)
+#define DEC_2(n) (((n) / 10)       % 10)
+#define DEC_1(n) (((n)    )        % 10)
+#define HEX_8(n) ((n)>>28 & 0xF)
+#define HEX_7(n) ((n)>>24 & 0xF)
+#define HEX_6(n) ((n)>>20 & 0xF)
+#define HEX_5(n) ((n)>>16 & 0xF)
+#define HEX_4(n) ((n)>>12 & 0xF)
+#define HEX_3(n) ((n)>>8  & 0xF)
+#define HEX_2(n) ((n)>>4  & 0xF)
+#define HEX_1(n) ((n)     & 0xF)
+@CMAKE_Fortran_COMPILER_ID_VERSION_INFO@
+
       END
