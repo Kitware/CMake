@@ -520,8 +520,8 @@ if(APPLE)
   target_link_libraries(CMakeLib "-framework CoreFoundation")
 endif()
 
-# On some platforms we need the rpcrt4 library for the VS 7 generators.
 if(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
+  # We need the rpcrt4 library for at least the VS7-VC10 generators.
   target_link_libraries(CMakeLib rpcrt4)
 endif()
 

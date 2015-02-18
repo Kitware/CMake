@@ -1952,14 +1952,13 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
   // Write the library flags to the build rule.
   fout << linkLibs;
 
-  // Get the RPATH entries.
-  std::vector<std::string> runtimeDirs;
-  cli.GetRPath(runtimeDirs, relink);
-
   // Check what kind of rpath flags to use.
   if(cli.GetRuntimeSep().empty())
     {
     // Each rpath entry gets its own option ("-R a -R b -R c")
+    std::vector<std::string> runtimeDirs;
+    cli.GetRPath(runtimeDirs, relink);
+
     std::string rpath;
     for(std::vector<std::string>::iterator ri = runtimeDirs.begin();
         ri != runtimeDirs.end(); ++ri)

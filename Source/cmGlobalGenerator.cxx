@@ -74,11 +74,7 @@ cmGlobalGenerator::cmGlobalGenerator()
 cmGlobalGenerator::~cmGlobalGenerator()
 {
   this->ClearGeneratorMembers();
-
-  if (this->ExtraGenerator)
-    {
-    delete this->ExtraGenerator;
-    }
+  delete this->ExtraGenerator;
 }
 
 bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
@@ -1391,7 +1387,7 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
           cmQtAutoGenerators autogen;
           if(autogen.InitializeAutogenTarget(&target))
             {
-            autogens.push_back(AutogensType::value_type(autogen, &target));
+            autogens.push_back(std::make_pair(autogen, &target));
             }
           }
         }

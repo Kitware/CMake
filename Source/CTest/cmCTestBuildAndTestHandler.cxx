@@ -32,8 +32,7 @@ cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
 //----------------------------------------------------------------------
 void cmCTestBuildAndTestHandler::Initialize()
 {
-  this->BuildTargets.erase(
-    this->BuildTargets.begin(), this->BuildTargets.end());
+  this->BuildTargets.clear();
   this->Superclass::Initialize();
 }
 

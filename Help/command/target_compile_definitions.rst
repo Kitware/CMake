@@ -9,7 +9,7 @@ Add compile definitions to a target.
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specify compile definitions to use when compiling a given <target.  The
+Specify compile definitions to use when compiling a given ``<target>``.  The
 named ``<target>`` must have been created by a command such as
 :command:`add_executable` or :command:`add_library` and must not be an
 :ref:`Imported Target <Imported Targets>`.

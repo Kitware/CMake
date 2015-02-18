@@ -202,12 +202,12 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
   std::string value;
   size_t cc;
   const char* sep = "";
+  size_t nitem = varArgsExpanded.size();
   for ( cc = 2; cc < args.size()-1; cc ++ )
     {
     int item = atoi(args[cc].c_str());
     value += sep;
     sep = ";";
-    size_t nitem = varArgsExpanded.size();
     if ( item < 0 )
       {
       item = (int)nitem + item;
@@ -216,8 +216,8 @@ bool cmListCommand::HandleGetCommand(std::vector<std::string> const& args)
       {
       std::ostringstream str;
       str << "index: " << item << " out of range (-"
-          << varArgsExpanded.size() << ", "
-          << varArgsExpanded.size()-1 << ")";
+          << nitem << ", "
+          << nitem - 1 << ")";
       this->SetError(str.str());
       return false;
       }
@@ -485,10 +485,10 @@ bool cmListCommand::HandleRemoveAtCommand(
 
   size_t cc;
   std::vector<size_t> removed;
+  size_t nitem = varArgsExpanded.size();
   for ( cc = 2; cc < args.size(); ++ cc )
     {
     int item = atoi(args[cc].c_str());
-    size_t nitem = varArgsExpanded.size();
     if ( item < 0 )
       {
       item = (int)nitem + item;
@@ -497,8 +497,8 @@ bool cmListCommand::HandleRemoveAtCommand(
       {
       std::ostringstream str;
       str << "index: " << item << " out of range (-"
-          << varArgsExpanded.size() << ", "
-          << varArgsExpanded.size()-1 << ")";
+          << nitem << ", "
+          << nitem - 1 << ")";
       this->SetError(str.str());
       return false;
       }
