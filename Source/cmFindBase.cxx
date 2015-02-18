@@ -355,11 +355,7 @@ void cmFindBase::PrintFindStuff()
   std::cerr << "SearchPathSuffixes  ";
   std::cerr << cmJoin(this->SearchPathSuffixes, "\n") << "\n";
   std::cerr << "SearchPaths\n";
-  for(std::vector<std::string>::const_iterator i = this->SearchPaths.begin();
-      i != this->SearchPaths.end(); ++i)
-    {
-    std::cerr << "[" << *i << "]\n";
-    }
+  std::cerr << cmWrap("[", this->SearchPaths, "]", "\n") << "\n";
 }
 
 bool cmFindBase::CheckForVariableInCache()

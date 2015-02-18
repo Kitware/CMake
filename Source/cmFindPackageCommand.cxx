@@ -329,10 +329,7 @@ bool cmFindPackageCommand
     {
     std::ostringstream e;
     e << "called with components that are both required and optional:\n";
-    for(unsigned int i=0; i<doubledComponents.size(); ++i)
-      {
-      e << "  " << doubledComponents[i] << "\n";
-      }
+    e << cmWrap("  ", doubledComponents, "", "\n") << "\n";
     this->SetError(e.str());
     return false;
     }
@@ -808,13 +805,8 @@ bool cmFindPackageCommand::HandlePackageMode()
           {
           e << "Could not find a package configuration file provided by \""
             << this->Name << "\"" << requestedVersionString
-            << " with any of the following names:\n";
-          for(std::vector<std::string>::const_iterator ci =
-                this->Configs.begin();
-              ci != this->Configs.end(); ++ci)
-            {
-            e << "  " << *ci << "\n";
-            }
+            << " with any of the following names:\n"
+            << cmWrap("  ", this->Configs, "", "\n") << "\n";
           }
 
         e << "Add the installation prefix of \"" << this->Name << "\" to "

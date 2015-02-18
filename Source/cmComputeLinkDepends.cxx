@@ -705,10 +705,7 @@ void cmComputeLinkDepends::DisplayConstraintGraph()
     {
     EdgeList const& nl = this->EntryConstraintGraph[i];
     e << "item " << i << " is [" << this->EntryList[i].Item << "]\n";
-    for(EdgeList::const_iterator j = nl.begin(); j != nl.end(); ++j)
-      {
-      e << "  item " << *j << " must follow it\n";
-      }
+    e << cmWrap("  item ", nl, " must follow it", "\n") << "\n";
     }
   fprintf(stderr, "%s\n", e.str().c_str());
 }
