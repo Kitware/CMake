@@ -528,23 +528,22 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs,
   std::vector<cmSourceFile const*> objectFiles;
   this->GetExternalObjects(objectFiles, config);
   std::vector<cmTarget*> objectLibraries;
-  std::set<cmTarget*> emitted;
   for(std::vector<cmSourceFile const*>::const_iterator
       it = objectFiles.begin(); it != objectFiles.end(); ++it)
     {
     std::string objLib = (*it)->GetObjectLibrary();
     if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
       {
-      if (emitted.insert(tgt).second)
-        {
-        objectLibraries.push_back(tgt);
-        }
+      objectLibraries.push_back(tgt);
       }
     }
 
+  std::vector<cmTarget*>::const_iterator end
+      = cmRemoveDuplicates(objectLibraries);
+
   for(std::vector<cmTarget*>::const_iterator
         ti = objectLibraries.begin();
-      ti != objectLibraries.end(); ++ti)
+      ti != end; ++ti)
     {
     cmTarget* objLib = *ti;
     cmGeneratorTarget* ogt =
