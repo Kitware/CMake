@@ -114,6 +114,7 @@ if(_JAVA_HOME)
   JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
     ${_JAVA_HOME}/jre/lib/{libarch}
     ${_JAVA_HOME}/jre/lib
+    ${_JAVA_HOME}/lib/{libarch}
     ${_JAVA_HOME}/lib
     ${_JAVA_HOME}
     )
