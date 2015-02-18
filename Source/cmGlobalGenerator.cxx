@@ -2937,14 +2937,11 @@ void cmGlobalGenerator::WriteSummary(cmTarget* target)
       {
       target->GetSourceFiles(sources, *ci);
       }
-    std::set<cmSourceFile*> emitted;
+    std::vector<cmSourceFile*>::const_iterator sourcesEnd
+        = cmRemoveDuplicates(sources);
     for(std::vector<cmSourceFile*>::const_iterator si = sources.begin();
-        si != sources.end(); ++si)
+        si != sourcesEnd; ++si)
       {
-      if (!emitted.insert(*si).second)
-        {
-        continue;
-        }
       Json::Value& lj_source = lj_sources.append(Json::objectValue);
       cmSourceFile* sf = *si;
       std::string const& sfp = sf->GetFullPath();
