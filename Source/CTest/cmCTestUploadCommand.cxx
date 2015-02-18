@@ -26,6 +26,7 @@ cmCTestGenericHandler* cmCTestUploadCommand::InitializeHandler()
     }
   static_cast<cmCTestUploadHandler*>(handler)->SetFiles(this->Files);
 
+  handler->SetQuiet(this->Quiet);
   return handler;
 }
 
@@ -36,6 +37,12 @@ bool cmCTestUploadCommand::CheckArgumentKeyword(std::string const& arg)
   if(arg == "FILES")
     {
     this->ArgumentDoing = ArgumentDoingFiles;
+    return true;
+    }
+  if(arg == "QUIET")
+    {
+    this->ArgumentDoing = ArgumentDoingNone;
+    this->Quiet = true;
     return true;
     }
   return false;
