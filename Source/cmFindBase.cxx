@@ -275,6 +275,7 @@ void cmFindBase::FillSystemEnvironmentPath()
   if(!this->EnvironmentPath.empty())
     {
     paths.AddEnvPath(this->EnvironmentPath);
+    paths.AddEnvPrefixPath("PATH", true);
     }
   // Add PATH
   paths.AddEnvPath("PATH");

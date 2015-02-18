@@ -136,10 +136,30 @@ void cmSearchPath::AddCMakePrefixPath(const std::string& variable)
 }
 
 //----------------------------------------------------------------------------
-void cmSearchPath::AddEnvPrefixPath(const std::string& variable)
+static std::string cmSearchPathStripBin(std::string const& s)
+{
+  // If the path is a PREFIX/bin case then add its parent instead.
+  if((cmHasLiteralSuffix(s, "/bin")) ||
+     (cmHasLiteralSuffix(s, "/sbin")))
+    {
+    return cmSystemTools::GetFilenamePath(s);
+    }
+  else
+    {
+    return s;
+    }
+}
+
+//----------------------------------------------------------------------------
+void cmSearchPath::AddEnvPrefixPath(const std::string& variable, bool stripBin)
 {
   std::vector<std::string> expanded;
   cmSystemTools::GetPath(expanded, variable.c_str());
+  if (stripBin)
+    {
+    std::transform(expanded.begin(), expanded.end(), expanded.begin(),
+                   cmSearchPathStripBin);
+    }
   this->AddPrefixPaths(expanded);
 }
 

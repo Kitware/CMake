@@ -53,6 +53,10 @@ If NO_DEFAULT_PATH is not specified, the search process is as follows:
 .. |CMAKE_PREFIX_PATH_XXX_SUBDIR| replace::
    <prefix>/|XXX_SUBDIR| for each <prefix> in CMAKE_PREFIX_PATH
 
+.. |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR| replace::
+   <prefix>/|XXX_SUBDIR| for each <prefix>/[s]bin in PATH, and
+   <entry>/|XXX_SUBDIR| for other entries in PATH
+
 .. |CMAKE_SYSTEM_PREFIX_PATH_XXX_SUBDIR| replace::
    <prefix>/|XXX_SUBDIR| for each <prefix> in CMAKE_SYSTEM_PREFIX_PATH
 

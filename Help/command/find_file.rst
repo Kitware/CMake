@@ -13,7 +13,10 @@ find_file
 .. |CMAKE_XXX_PATH| replace:: CMAKE_INCLUDE_PATH
 .. |CMAKE_XXX_MAC_PATH| replace:: CMAKE_FRAMEWORK_PATH
 
-.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: PATH and INCLUDE
+.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: Directories in INCLUDE,
+   <prefix>/include/<arch> if CMAKE_LIBRARY_ARCHITECTURE is set, and
+   |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR|,
+   and the directories in PATH itself.
 
 .. |CMAKE_SYSTEM_PREFIX_PATH_XXX| replace::
    <prefix>/include/<arch> if CMAKE_LIBRARY_ARCHITECTURE is set, and
