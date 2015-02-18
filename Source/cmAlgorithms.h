@@ -278,4 +278,21 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
   return cmRemoveIndices(r, indices);
 }
 
+template<typename Range>
+std::string cmWrap(std::string prefix, Range const& r, std::string suffix,
+                   std::string sep)
+{
+  if (r.empty())
+    {
+    return std::string();
+    }
+  return prefix + cmJoin(r, (suffix + sep + prefix).c_str()) + suffix;
+}
+
+template<typename Range>
+std::string cmWrap(char prefix, Range const& r, char suffix, std::string sep)
+{
+  return cmWrap(std::string(1, prefix), r, std::string(1, suffix), sep);
+}
+
 #endif

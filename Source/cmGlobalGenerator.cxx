@@ -2295,15 +2295,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       std::ostringstream ostr;
       if (!componentsSet->empty())
         {
-        ostr << "Available install components are:";
-        std::set<std::string>::iterator it;
-        for (
-          it = componentsSet->begin();
-          it != componentsSet->end();
-          ++ it )
-          {
-          ostr << " \"" << *it << "\"";
-          }
+        ostr << "Available install components are: ";
+        ostr << cmWrap('"', *componentsSet, '"', " ");
         }
       else
         {

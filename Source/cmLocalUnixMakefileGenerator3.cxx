@@ -724,12 +724,7 @@ cmLocalUnixMakefileGenerator3
     }
 
   // Write the list of commands.
-  for(std::vector<std::string>::const_iterator i = commands.begin();
-      i != commands.end(); ++i)
-    {
-    replace = *i;
-    os << "\t" << replace << "\n";
-    }
+  os << cmWrap("\t", commands, "", "\n") << "\n";
   if(symbolic && !this->WatcomWMake)
     {
     os << ".PHONY : " << cmMakeSafe(tgt) << "\n";
