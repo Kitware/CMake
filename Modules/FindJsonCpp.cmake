@@ -2,7 +2,9 @@
 FindJsonCpp
 -----------
 
-Find JsonCpp includes and library.
+Find JsonCpp includes and library. If JsonCpp was built with the
+``JSONCPP_WITH_CMAKE_PACKAGE`` option enabled, generating a config file,
+it is used preferentially.
 
 Imported Targets
 ^^^^^^^^^^^^^^^^
@@ -42,6 +44,8 @@ This module uses the following cache variables:
   The location of the JsonCpp include directory containing ``json/json.h``.
 
 The cache variables should not be used by project code.
+They may not be set (or may be set to ``...-NOTFOUND``) if the config
+file method was used successfully to find the library.
 They may be set by end users to point at JsonCpp components.
 #]=======================================================================]
 
@@ -59,16 +63,23 @@ They may be set by end users to point at JsonCpp components.
 #  License text for the above reference.)
 
 #-----------------------------------------------------------------------------
-find_library(JsonCpp_LIBRARY
-  NAMES jsoncpp
-  )
-mark_as_advanced(JsonCpp_LIBRARY)
 
-find_path(JsonCpp_INCLUDE_DIR
-  NAMES json/json.h
-  PATH_SUFFIXES jsoncpp
-  )
-mark_as_advanced(JsonCpp_INCLUDE_DIR)
+find_package(jsoncpp QUIET CONFIG)
+if(TARGET jsoncpp_lib)
+  get_target_property(JsonCpp_INCLUDE_DIR jsoncpp_lib INTERFACE_INCLUDE_DIRECTORIES)
+  set(JsonCpp_LIBRARY jsoncpp_lib)
+else()
+  find_library(JsonCpp_LIBRARY
+    NAMES jsoncpp
+    )
+  mark_as_advanced(JsonCpp_LIBRARY)
+
+  find_path(JsonCpp_INCLUDE_DIR
+    NAMES json/json.h
+    PATH_SUFFIXES jsoncpp
+    )
+  mark_as_advanced(JsonCpp_INCLUDE_DIR)
+endif()
 
 #-----------------------------------------------------------------------------
 # Extract version number if possible.
@@ -94,11 +105,20 @@ unset(_JsonCpp_H)
 
 #-----------------------------------------------------------------------------
 include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(JsonCpp
-  FOUND_VAR JsonCpp_FOUND
-  REQUIRED_VARS JsonCpp_LIBRARY JsonCpp_INCLUDE_DIR
-  VERSION_VAR JsonCpp_VERSION_STRING
-  )
+
+if(TARGET jsoncpp_lib)
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(JsonCpp
+    FOUND_VAR JsonCpp_FOUND
+    REQUIRED_VARS JsonCpp_INCLUDE_DIR
+    VERSION_VAR JsonCpp_VERSION_STRING
+    )
+else()
+  FIND_PACKAGE_HANDLE_STANDARD_ARGS(JsonCpp
+    FOUND_VAR JsonCpp_FOUND
+    REQUIRED_VARS JsonCpp_LIBRARY JsonCpp_INCLUDE_DIR
+    VERSION_VAR JsonCpp_VERSION_STRING
+    )
+endif()
 set(JSONCPP_FOUND ${JsonCpp_FOUND})
 
 #-----------------------------------------------------------------------------
@@ -107,11 +127,17 @@ if(JsonCpp_FOUND)
   set(JsonCpp_INCLUDE_DIRS ${JsonCpp_INCLUDE_DIR})
   set(JsonCpp_LIBRARIES ${JsonCpp_LIBRARY})
   if(NOT TARGET JsonCpp::JsonCpp)
-    add_library(JsonCpp::JsonCpp UNKNOWN IMPORTED)
-    set_target_properties(JsonCpp::JsonCpp PROPERTIES
-      IMPORTED_LOCATION "${JsonCpp_LIBRARY}"
-      INTERFACE_INCLUDE_DIRECTORIES "${JsonCpp_INCLUDE_DIRS}"
-      IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
-      )
+    if(TARGET jsoncpp_lib)
+      add_library(JsonCpp::JsonCpp UNKNOWN IMPORTED)
+      set_target_properties(JsonCpp::JsonCpp PROPERTIES
+        INTERFACE_LINK_LIBRARIES "jsoncpp_lib")
+    else()
+      add_library(JsonCpp::JsonCpp UNKNOWN IMPORTED)
+      set_target_properties(JsonCpp::JsonCpp PROPERTIES
+        IMPORTED_LOCATION "${JsonCpp_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${JsonCpp_INCLUDE_DIRS}"
+        IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+        )
+    endif()
   endif()
 endif()
