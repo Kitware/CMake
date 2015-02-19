@@ -51,6 +51,7 @@
 #  * Default   : CPACK_PACKAGE_VERSION
 #
 # .. variable:: CPACK_RPM_PACKAGE_ARCHITECTURE
+#               CPACK_RPM_<component>_PACKAGE_ARCHITECTURE
 #
 #  The RPM package architecture.
 #
@@ -631,6 +632,16 @@ else()
 endif()
 
 set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_PACKAGE_ARCHITECTURE})
+
+#prefer component architecture
+if(CPACK_RPM_PACKAGE_COMPONENT)
+  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE)
+    set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE})
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: using component build arch = ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
+    endif()
+  endif()
+endif()
 if(${_CPACK_RPM_PACKAGE_ARCHITECTURE} STREQUAL "noarch")
   set(TMP_RPM_BUILDARCH "Buildarch: ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
 else()
