@@ -1,0 +1,2 @@
+Cannot find memory tester output file: .*/Tests/RunCMake/ctest_memcheck/DummyValgrindCustomOptions-build/Testing/Temporary/MemoryChecker.1.log
+Error in read script: .*/Tests/RunCMake/ctest_memcheck/DummyValgrindCustomOptions/test.cmake

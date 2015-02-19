@@ -66,7 +66,7 @@ add_RunCMake_test(CMP0055)
 add_RunCMake_test(CTest)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
-  add_RunCMake_test(CTestMemcheck
+  add_RunCMake_test(ctest_memcheck
     -DPSEUDO_BC=$<TARGET_FILE:pseudo_BC>
     -DPSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
     -DPSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>

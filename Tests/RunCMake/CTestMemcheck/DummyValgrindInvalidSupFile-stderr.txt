@@ -1,2 +1,0 @@
-Cannot find memory checker suppression file: .*/Tests/RunCMake/CTestMemcheck/DummyValgrindInvalidSupFile-build/does-not-exist
-Error in read script: .*/Tests/RunCMake/CTestMemcheck/DummyValgrindInvalidSupFile/test.cmake
