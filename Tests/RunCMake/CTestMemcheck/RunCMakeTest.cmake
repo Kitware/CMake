@@ -4,18 +4,18 @@ set(SITE test-site)
 set(BUILDNAME test-build)
 set(COVERAGE_COMMAND "")
 
-function(run_mc_test SUBTEST_NAME CHECKER_COMMAND)
+function(run_mc_test CASE_NAME CHECKER_COMMAND)
   configure_file(${RunCMake_SOURCE_DIR}/test.cmake.in
-                 ${RunCMake_BINARY_DIR}/${SUBTEST_NAME}/test.cmake @ONLY)
+                 ${RunCMake_BINARY_DIR}/${CASE_NAME}/test.cmake @ONLY)
   configure_file(${RunCMake_SOURCE_DIR}/CTestConfig.cmake.in
-                 ${RunCMake_BINARY_DIR}/${SUBTEST_NAME}/CTestConfig.cmake @ONLY)
+                 ${RunCMake_BINARY_DIR}/${CASE_NAME}/CTestConfig.cmake @ONLY)
   configure_file(${RunCMake_SOURCE_DIR}/CMakeLists.txt.in
-                 ${RunCMake_BINARY_DIR}/${SUBTEST_NAME}/CMakeLists.txt @ONLY)
-  run_cmake_command(${SUBTEST_NAME} ${CMAKE_CTEST_COMMAND}
+                 ${RunCMake_BINARY_DIR}/${CASE_NAME}/CMakeLists.txt @ONLY)
+  run_cmake_command(${CASE_NAME} ${CMAKE_CTEST_COMMAND}
     -C Debug
-    -S ${RunCMake_BINARY_DIR}/${SUBTEST_NAME}/test.cmake
+    -S ${RunCMake_BINARY_DIR}/${CASE_NAME}/test.cmake
     -V
-    --output-log ${RunCMake_BINARY_DIR}/${SUBTEST_NAME}-build/testOutput.log
+    --output-log ${RunCMake_BINARY_DIR}/${CASE_NAME}-build/testOutput.log
     ${ARGN}
     )
 endfunction()

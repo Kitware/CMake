@@ -2,10 +2,10 @@ cmake_minimum_required(VERSION 2.8.9)
 
 # Settings:
 set(CTEST_SITE                          "@SITE@")
-set(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-Memcheck@SUBTEST_NAME@")
+set(CTEST_BUILD_NAME                    "CTestTest-@BUILDNAME@-Memcheck@CASE_NAME@")
 
-set(CTEST_SOURCE_DIRECTORY              "@RunCMake_BINARY_DIR@/@SUBTEST_NAME@")
-set(CTEST_BINARY_DIRECTORY              "@RunCMake_BINARY_DIR@/@SUBTEST_NAME@-build")
+set(CTEST_SOURCE_DIRECTORY              "@RunCMake_BINARY_DIR@/@CASE_NAME@")
+set(CTEST_BINARY_DIRECTORY              "@RunCMake_BINARY_DIR@/@CASE_NAME@-build")
 set(CTEST_CMAKE_GENERATOR               "@RunCMake_GENERATOR@")
 set(CTEST_CMAKE_GENERATOR_PLATFORM      "@RunCMake_GENERATOR_PLATFORM@")
 set(CTEST_CMAKE_GENERATOR_TOOLSET       "@RunCMake_GENERATOR_TOOLSET@")
