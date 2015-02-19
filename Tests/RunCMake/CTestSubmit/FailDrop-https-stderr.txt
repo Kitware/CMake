@@ -1,3 +1,0 @@
-Error message was: .*
-   Problems when submitting via HTTP
-Error in read script: .*/Tests/RunCMake/CTestSubmit/FailDrop-https/test.cmake
