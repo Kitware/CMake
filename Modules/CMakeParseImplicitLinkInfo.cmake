@@ -124,7 +124,7 @@ function(CMAKE_PARSE_IMPLICIT_LINK_INFO text lib_var dir_var fwk_var log_var obj
   # We remove items that are not language-specific.
   set(implicit_libs "")
   foreach(lib IN LISTS implicit_libs_tmp)
-    if("${lib}" MATCHES "^(crt.*\\.o|gcc.*|System.*)$")
+    if("x${lib}" MATCHES "^x(crt.*\\.o|gcc.*|System.*)$")
       set(log "${log}  remove lib [${lib}]\n")
     elseif(IS_ABSOLUTE "${lib}")
       get_filename_component(abs "${lib}" ABSOLUTE)
