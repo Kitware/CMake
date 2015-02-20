@@ -128,8 +128,6 @@ if(CURSES_USE_NCURSES)
   if(NOT CURSES_NCURSES_HAS_CBREAK)
     find_library(CURSES_EXTRA_LIBRARY tinfo HINTS "${_cursesLibDir}")
     find_library(CURSES_EXTRA_LIBRARY tinfo )
-    CHECK_LIBRARY_EXISTS("${CURSES_EXTRA_LIBRARY}"
-      cbreak "" CURSES_TINFO_HAS_CBREAK)
   endif()
 else()
   get_filename_component(_cursesLibDir "${CURSES_CURSES_LIBRARY}" PATH)
