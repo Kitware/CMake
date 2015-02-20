@@ -154,7 +154,9 @@ private:
 template<typename Iter>
 Iter RemoveN(Iter i1, Iter i2, size_t n)
 {
-  return cmRotate(i1, i1 + n, i2);
+  Iter m = i1;
+  std::advance(m, n);
+  return cmRotate(i1, m, i2);
 }
 
 template<typename Range>
