@@ -84,7 +84,7 @@ private:
 template<typename FwdIt>
 FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
 {
-  typename std::iterator_traits<FwdIt>::difference_type dist =
+  const typename std::iterator_traits<FwdIt>::difference_type dist =
       std::distance(middle, last);
   std::rotate(first, middle, last);
   std::advance(first, dist);
@@ -204,7 +204,7 @@ std::string cmJoin(Range const& r, const char* delimiter)
   std::ostringstream os;
   typedef typename Range::value_type ValueType;
   typedef typename Range::const_iterator InputIt;
-  InputIt first = r.begin();
+  const InputIt first = r.begin();
   InputIt last = r.end();
   --last;
   std::copy(first, last,
@@ -260,7 +260,7 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
   for(typename Range::const_iterator it = r.begin();
       it != r.end(); ++it, ++count)
     {
-    typename Range::iterator low =
+    const typename Range::iterator low =
         std::lower_bound(unique.begin(), unique.end(), *it);
     if (low == unique.end() || *low != *it)
       {
