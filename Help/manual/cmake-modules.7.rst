@@ -126,7 +126,6 @@ All Modules
    /module/FindJava
    /module/FindJNI
    /module/FindJPEG
-   /module/FindJsonCpp
    /module/FindKDE3
    /module/FindKDE4
    /module/FindLAPACK

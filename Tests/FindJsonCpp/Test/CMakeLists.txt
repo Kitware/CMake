@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.1)
 project(TestFindJsonCpp CXX)
 include(CTest)
 
+# CMake does not actually provide FindJsonCpp publicly.
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../../Source/Modules)
+
 find_package(JsonCpp REQUIRED)
 
 add_executable(test_jsoncpp_tgt main.cxx)
