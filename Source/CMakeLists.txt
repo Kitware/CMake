@@ -638,14 +638,24 @@ endif()
 if(WIN32)
   set(CPACK_SRCS ${CPACK_SRCS}
     CPack/WiX/cmCPackWIXGenerator.cxx
+    CPack/WiX/cmCPackWIXGenerator.h
     CPack/WiX/cmWIXAccessControlList.cxx
+    CPack/WiX/cmWIXAccessControlList.h
     CPack/WiX/cmWIXDirectoriesSourceWriter.cxx
+    CPack/WiX/cmWIXDirectoriesSourceWriter.h
     CPack/WiX/cmWIXFeaturesSourceWriter.cxx
+    CPack/WiX/cmWIXFeaturesSourceWriter.h
     CPack/WiX/cmWIXFilesSourceWriter.cxx
+    CPack/WiX/cmWIXFilesSourceWriter.h
     CPack/WiX/cmWIXPatch.cxx
+    CPack/WiX/cmWIXPatch.h
     CPack/WiX/cmWIXPatchParser.cxx
+    CPack/WiX/cmWIXPatchParser.h
     CPack/WiX/cmWIXRichTextFormatWriter.cxx
+    CPack/WiX/cmWIXRichTextFormatWriter.h
+    CPack/WiX/cmWIXShortcut.h
     CPack/WiX/cmWIXSourceWriter.cxx
+    CPack/WiX/cmWIXSourceWriter.h
   )
 endif()
 
