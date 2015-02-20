@@ -249,8 +249,7 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
     prevRem = *remIt;
     writer = ContainerAlgorithms::RemoveN(writer, pivot, count);
     }
-  writer = ContainerAlgorithms::RemoveN(writer, r.end(), count);
-  return writer;
+  return ContainerAlgorithms::RemoveN(writer, r.end(), count);
 }
 
 template<typename Range, typename MatchRange>
