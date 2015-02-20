@@ -214,6 +214,7 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
   // codesign the application.
   if(!cpack_apple_cert_app.empty())
     {
+    std::string output;
     std::string bundle_path;
     bundle_path = src_dir + "/";
     bundle_path += this->GetOption("CPACK_BUNDLE_NAME");
@@ -240,11 +241,11 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       temp_sign_file_cmd << bundle_path;
       temp_sign_file_cmd << it->c_str() << "\"";
 
-      if(!this->RunCommand(temp_sign_file_cmd))
+      if(!this->RunCommand(temp_sign_file_cmd, &output))
         {
         cmCPackLogger(cmCPackLog::LOG_ERROR,
           "Error signing file:"
-          << bundle_path << it->c_str() << std::endl);
+          << bundle_path << it->c_str() << std::endl << output << std::endl);
 
         return 0;
         }
@@ -256,11 +257,11 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
     temp_sign_binary_cmd << " --deep -f -s \"" << cpack_apple_cert_app;
     temp_sign_binary_cmd << "\" \"" << bundle_path << "\"";
 
-    if(!this->RunCommand(temp_sign_binary_cmd))
+    if(!this->RunCommand(temp_sign_binary_cmd, &output))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Error signing the application binary."
-        << std::endl);
+        << std::endl << output << std::endl);
 
       return 0;
       }
@@ -276,11 +277,11 @@ int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
       }
     temp_codesign_cmd << " \"" << bundle_path << "\"";
 
-    if(!this->RunCommand(temp_codesign_cmd))
+    if(!this->RunCommand(temp_codesign_cmd, &output))
       {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
         "Error signing the application package."
-        << std::endl);
+        << std::endl << output << std::endl);
 
       return 0;
       }
