@@ -105,19 +105,19 @@ struct cmIsPair<std::pair<K, V> >
   enum { value = true };
 };
 
-template<typename Container,
-    bool valueTypeIsPair = cmIsPair<typename Container::value_type>::value>
+template<typename Range,
+    bool valueTypeIsPair = cmIsPair<typename Range::value_type>::value>
 struct DefaultDeleter
 {
-  void operator()(typename Container::value_type value) const {
+  void operator()(typename Range::value_type value) const {
     delete value;
   }
 };
 
-template<typename Container>
-struct DefaultDeleter<Container, /* valueTypeIsPair = */ true>
+template<typename Range>
+struct DefaultDeleter<Range, /* valueTypeIsPair = */ true>
 {
-  void operator()(typename Container::value_type value) const {
+  void operator()(typename Range::value_type value) const {
     delete value.second;
   }
 };
@@ -187,11 +187,11 @@ cmRange(Range const& range)
       range.begin(), range.end());
 }
 
-template<typename Container>
-void cmDeleteAll(Container const& c)
+template<typename Range>
+void cmDeleteAll(Range const& r)
 {
-  std::for_each(c.begin(), c.end(),
-                ContainerAlgorithms::DefaultDeleter<Container>());
+  std::for_each(r.begin(), r.end(),
+                ContainerAlgorithms::DefaultDeleter<Range>());
 }
 
 template<typename Range>
