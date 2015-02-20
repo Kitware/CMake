@@ -258,14 +258,15 @@ typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
 template<typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  std::vector<typename Range::value_type> unique;
+  typedef std::vector<typename Range::value_type> UniqueVector;
+  UniqueVector unique;
   unique.reserve(r.size());
   std::vector<size_t> indices;
   size_t count = 0;
   for(typename Range::const_iterator it = r.begin();
       it != r.end(); ++it, ++count)
     {
-    const typename Range::iterator low =
+    const typename UniqueVector::iterator low =
         std::lower_bound(unique.begin(), unique.end(), *it);
     if (low == unique.end() || *low != *it)
       {
