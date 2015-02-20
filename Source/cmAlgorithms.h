@@ -236,6 +236,7 @@ template<typename Range, typename InputRange>
 typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
 {
   typename InputRange::const_iterator remIt = rem.begin();
+  typename InputRange::const_iterator remEnd = rem.end();
 
   typename Range::iterator writer = r.begin();
   std::advance(writer, *remIt);
@@ -243,13 +244,14 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
   typename InputRange::value_type prevRem = *remIt;
   ++remIt;
   size_t count = 1;
-  for ( ; writer != r.end() && remIt != rem.end(); ++count, ++remIt)
+  const typename Range::iterator rangeEnd = r.end();
+  for ( ; writer != rangeEnd && remIt != remEnd; ++count, ++remIt)
     {
     std::advance(pivot, *remIt - prevRem);
     prevRem = *remIt;
     writer = ContainerAlgorithms::RemoveN(writer, pivot, count);
     }
-  return ContainerAlgorithms::RemoveN(writer, r.end(), count);
+  return ContainerAlgorithms::RemoveN(writer, rangeEnd, count);
 }
 
 template<typename Range, typename MatchRange>
@@ -267,8 +269,9 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
   unique.reserve(r.size());
   std::vector<size_t> indices;
   size_t count = 0;
+  const typename Range::iterator end = r.end();
   for(typename Range::const_iterator it = r.begin();
-      it != r.end(); ++it, ++count)
+      it != end; ++it, ++count)
     {
     const typename UniqueVector::iterator low =
         std::lower_bound(unique.begin(), unique.end(), *it);
@@ -283,7 +286,7 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
     }
   if (indices.empty())
     {
-    return r.end();
+    return end;
     }
   return cmRemoveIndices(r, indices);
 }
