@@ -237,12 +237,15 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
 {
   typename InputRange::const_iterator remIt = rem.begin();
 
-  typename Range::iterator writer = r.begin() + *remIt;
+  typename Range::iterator writer = r.begin();
+  std::advance(writer, *remIt);
   ++remIt;
   size_t count = 1;
   for ( ; writer != r.end() && remIt != rem.end(); ++count, ++remIt)
     {
-    writer = ContainerAlgorithms::RemoveN(writer, r.begin() + *remIt, count);
+    typename Range::iterator pivot = r.begin();
+    std::advance(pivot, *remIt);
+    writer = ContainerAlgorithms::RemoveN(writer, pivot, count);
     }
   writer = ContainerAlgorithms::RemoveN(writer, r.end(), count);
   return writer;
