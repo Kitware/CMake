@@ -127,11 +127,14 @@ struct Range
 {
   typedef const_iterator_ const_iterator;
   typedef typename std::iterator_traits<const_iterator>::value_type value_type;
+  typedef typename std::iterator_traits<const_iterator>::difference_type
+    difference_type;
   Range(const_iterator begin_, const_iterator end_)
     : Begin(begin_), End(end_) {}
   const_iterator begin() const { return Begin; }
   const_iterator end() const { return End; }
   bool empty() const { return std::distance(Begin, End) == 0; }
+  difference_type size() const { return std::distance(Begin, End); }
   Range& advance(cmIML_INT_intptr_t amount)
   {
     std::advance(Begin, amount);
