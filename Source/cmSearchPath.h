@@ -42,7 +42,7 @@ public:
   void AddCMakePath(const std::string& variable);
   void AddEnvPath(const std::string& variable);
   void AddCMakePrefixPath(const std::string& variable);
-  void AddEnvPrefixPath(const std::string& variable);
+  void AddEnvPrefixPath(const std::string& variable, bool stripBin = false);
   void AddSuffixes(const std::vector<std::string>& suffixes);
 
 protected:

@@ -13,7 +13,10 @@ find_library
 .. |CMAKE_XXX_PATH| replace:: CMAKE_LIBRARY_PATH
 .. |CMAKE_XXX_MAC_PATH| replace:: CMAKE_FRAMEWORK_PATH
 
-.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: PATH and LIB
+.. |SYSTEM_ENVIRONMENT_PATH_XXX| replace:: Directories in LIB,
+   <prefix>/lib/<arch> if CMAKE_LIBRARY_ARCHITECTURE is set, and
+   |SYSTEM_ENVIRONMENT_PREFIX_PATH_XXX_SUBDIR|,
+   and the directories in PATH itself.
 
 .. |CMAKE_SYSTEM_PREFIX_PATH_XXX| replace::
    <prefix>/lib/<arch> if CMAKE_LIBRARY_ARCHITECTURE is set, and
