@@ -151,10 +151,10 @@ private:
   const_iterator End;
 };
 
-template<typename Iter>
-Iter RemoveN(Iter i1, Iter i2, size_t n)
+template<typename FwdIt>
+FwdIt RemoveN(FwdIt i1, FwdIt i2, size_t n)
 {
-  Iter m = i1;
+  FwdIt m = i1;
   std::advance(m, n);
   return cmRotate(i1, m, i2);
 }
