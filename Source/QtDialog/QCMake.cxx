@@ -147,6 +147,8 @@ void QCMake::configure()
   this->CMakeInstance->SetStartOutputDirectory(this->BinaryDirectory.toLocal8Bit().data());
   this->CMakeInstance->SetGlobalGenerator(
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toLocal8Bit().data()));
+  this->CMakeInstance->SetGeneratorPlatform("");
+  this->CMakeInstance->SetGeneratorToolset("");
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetSuppressDevWarnings(this->SuppressDevWarnings);
   this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
