@@ -841,7 +841,7 @@ public:
    * Add a macro to the list of macros. The arguments should be name of the
    * macro and a documentation signature of it
    */
-  void AddMacro(const char* name, const char* signature);
+  void AddMacro(const char* name);
 
   ///! Add a new cmTest to the list of tests for this makefile.
   cmTest* CreateTest(const std::string& testName);
@@ -1065,8 +1065,7 @@ private:
 
   std::stack<int> LoopBlockCounter;
 
-  typedef std::map<std::string, std::string> StringStringMap;
-  StringStringMap MacrosMap;
+  std::vector<std::string> MacrosList;
 
   std::map<std::string, bool> SubDirectoryOrder;
 

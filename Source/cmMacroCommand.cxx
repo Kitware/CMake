@@ -224,15 +224,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endmacro for this macro then execute
     if (!this->Depth)
       {
-      std::string name = this->Args[0];
-      name += "(";
-      if (!this->Args.empty())
-        {
-        name += " ";
-        name += cmJoin(this->Args, " ");
-        }
-      name += " )";
-      mf.AddMacro(this->Args[0].c_str(), name.c_str());
+      mf.AddMacro(this->Args[0].c_str());
       // create a new command and add it to cmake
       cmMacroHelperCommand *f = new cmMacroHelperCommand();
       f->Args = this->Args;
