@@ -653,6 +653,7 @@ if(WIN32)
     CPack/WiX/cmWIXPatchParser.h
     CPack/WiX/cmWIXRichTextFormatWriter.cxx
     CPack/WiX/cmWIXRichTextFormatWriter.h
+    CPack/WiX/cmWIXShortcut.cxx
     CPack/WiX/cmWIXShortcut.h
     CPack/WiX/cmWIXSourceWriter.cxx
     CPack/WiX/cmWIXSourceWriter.h

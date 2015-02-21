@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2014 Kitware, Inc.
+  Copyright 2014-2015 Kitware, Inc.
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -28,18 +28,9 @@ cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
 void cmWIXFilesSourceWriter::EmitShortcut(
   std::string const& id,
   cmWIXShortcut const& shortcut,
-  bool desktop)
+  std::string const& shortcutPrefix)
 {
-  std::string shortcutId;
-
-  if(desktop)
-    {
-    shortcutId = "CM_DS";
-    }
-  else
-    {
-    shortcutId = "CM_S";
-    }
+  std::string shortcutId = shortcutPrefix;
 
   shortcutId += id;
 
@@ -47,7 +38,7 @@ void cmWIXFilesSourceWriter::EmitShortcut(
 
   BeginElement("Shortcut");
   AddAttribute("Id", shortcutId);
-  AddAttribute("Name", shortcut.textLabel);
+  AddAttribute("Name", shortcut.label);
   std::string target = "[#" + fileId + "]";
   AddAttribute("Target", target);
   AddAttribute("WorkingDirectory", shortcut.workingDirectoryId);
@@ -60,20 +51,6 @@ void cmWIXFilesSourceWriter::EmitRemoveFolder(std::string const& id)
   AddAttribute("Id", id);
   AddAttribute("On", "uninstall");
   EndElement("RemoveFolder");
-}
-
-void cmWIXFilesSourceWriter::EmitStartMenuShortcutRegistryValue(
-  std::string const& registryKey,
-  std::string const& cpackComponentName)
-{
-  EmitInstallRegistryValue(registryKey, cpackComponentName, std::string());
-}
-
-void cmWIXFilesSourceWriter::EmitDesktopShortcutRegistryValue(
-  std::string const& registryKey,
-  std::string const& cpackComponentName)
-{
-  EmitInstallRegistryValue(registryKey, cpackComponentName, "_desktop");
 }
 
 void cmWIXFilesSourceWriter::EmitInstallRegistryValue(

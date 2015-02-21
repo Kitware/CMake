@@ -65,7 +65,6 @@ protected:
 private:
   typedef std::map<std::string, std::string> id_map_t;
   typedef std::map<std::string, size_t> ambiguity_map_t;
-  typedef std::map<std::string, cmWIXShortcut> shortcut_map_t;
   typedef std::set<std::string> extension_set_t;
 
   bool InitializeWiXConfiguration();
@@ -99,12 +98,23 @@ private:
     cmWIXDirectoriesSourceWriter& directoryDefinitions,
     cmWIXFilesSourceWriter& fileDefinitions,
     cmWIXFeaturesSourceWriter& featureDefinitions,
-    shortcut_map_t& shortcutMap);
+    cmWIXShortcuts& shortcuts);
 
-  bool CreateStartMenuShortcuts(
+  bool CreateShortcuts(
     std::string const& cpackComponentName,
     std::string const& featureId,
-    shortcut_map_t& shortcutMap,
+    cmWIXShortcuts const& shortcuts,
+    bool emitUninstallShortcut,
+    cmWIXFilesSourceWriter& fileDefinitions,
+    cmWIXFeaturesSourceWriter& featureDefinitions);
+
+  bool CreateShortcutsOfSpecificType(
+    cmWIXShortcuts::Type type,
+    std::string const& cpackComponentName,
+    std::string const& featureId,
+    std::string const& idPrefix,
+    cmWIXShortcuts const& shortcuts,
+    bool emitUninstallShortcut,
     cmWIXFilesSourceWriter& fileDefinitions,
     cmWIXFeaturesSourceWriter& featureDefinitions);
 
@@ -126,9 +136,9 @@ private:
     cmWIXDirectoriesSourceWriter& directoryDefinitions,
     cmWIXFilesSourceWriter& fileDefinitions,
     cmWIXFeaturesSourceWriter& featureDefinitions,
-    const std::vector<std::string>& pkgExecutables,
-    const std::vector<std::string>& desktopExecutables,
-    shortcut_map_t& shortcutMap);
+    std::vector<std::string> const& pkgExecutables,
+    std::vector<std::string> const& desktopExecutables,
+    cmWIXShortcuts& shortcuts);
 
   bool RequireOption(std::string const& name, std::string& value) const;
 
@@ -164,8 +174,6 @@ private:
 
   extension_set_t CandleExtensions;
   extension_set_t LightExtensions;
-
-  bool HasDesktopShortcuts;
 
   std::string CPackTopLevel;
 
