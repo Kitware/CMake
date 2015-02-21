@@ -175,11 +175,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endfunction for this function then execute
     if (!this->Depth)
       {
-      std::string name = this->Args[0];
-      name += "( ";
-      name += cmJoin(this->Args, " ");
-      name += " )";
-
       // create a new command and add it to cmake
       cmFunctionHelperCommand *f = new cmFunctionHelperCommand();
       f->Args = this->Args;
