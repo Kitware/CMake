@@ -34,7 +34,8 @@ public:
   enum Type
   {
     START_MENU,
-    DESKTOP
+    DESKTOP,
+    STARTUP
   };
 
   typedef std::vector<cmWIXShortcut> shortcut_list_t;

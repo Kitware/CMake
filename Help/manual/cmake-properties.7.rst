@@ -324,6 +324,7 @@ Properties on Installed Files
    /prop_inst/CPACK_NEVER_OVERWRITE.rst
    /prop_inst/CPACK_PERMANENT.rst
    /prop_inst/CPACK_START_MENU_SHORTCUTS.rst
+   /prop_inst/CPACK_STARTUP_SHORTCUTS.rst
    /prop_inst/CPACK_WIX_ACL.rst
 
 

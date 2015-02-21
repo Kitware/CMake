@@ -557,6 +557,12 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     directoryDefinitions.EmitDesktopFolder();
     }
 
+  if(emittedShortcutTypes.find(cmWIXShortcuts::STARTUP) !=
+      emittedShortcutTypes.end())
+    {
+    directoryDefinitions.EmitStartupFolder();
+    }
+
   directoryDefinitions.EndElement("Directory");
   directoryDefinitions.EndElement("Fragment");
 
@@ -714,6 +720,17 @@ bool cmCPackWIXGenerator::CreateShortcuts(
       }
     }
 
+  if(!shortcuts.empty(cmWIXShortcuts::STARTUP))
+    {
+    if(!this->CreateShortcutsOfSpecificType(cmWIXShortcuts::STARTUP,
+      cpackComponentName, featureId, "STARTUP",
+      shortcuts, false,
+      fileDefinitions, featureDefinitions))
+      {
+      return false;
+      }
+    }
+
   return true;
 }
 
@@ -735,6 +752,9 @@ bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
       break;
     case cmWIXShortcuts::DESKTOP:
       directoryId = "DesktopFolder";
+      break;
+    case cmWIXShortcuts::STARTUP:
+      directoryId = "StartupFolder";
       break;
     default:
       return false;

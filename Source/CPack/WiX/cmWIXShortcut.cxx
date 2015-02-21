@@ -52,6 +52,10 @@ bool cmWIXShortcuts::EmitShortcuts(
       shortcutPrefix = "CM_DS";
       registrySuffix = "_desktop";
       break;
+    case STARTUP:
+      shortcutPrefix = "CM_SS";
+      registrySuffix = "_startup";
+      break;
     default:
       return false;
     }
@@ -96,6 +100,9 @@ void cmWIXShortcuts::CreateFromProperties(
 
   CreateFromProperty("CPACK_DESKTOP_SHORTCUTS",
     DESKTOP, id, directoryId, installedFile);
+
+  CreateFromProperty("CPACK_STARTUP_SHORTCUTS",
+    STARTUP, id, directoryId, installedFile);
 }
 
 void cmWIXShortcuts::CreateFromProperty(
