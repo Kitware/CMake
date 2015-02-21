@@ -136,7 +136,7 @@ private:
     cmWIXDirectoriesSourceWriter& directoryDefinitions,
     cmWIXFilesSourceWriter& fileDefinitions,
     cmWIXFeaturesSourceWriter& featureDefinitions,
-    std::vector<std::string> const& pkgExecutables,
+    std::vector<std::string> const& packageExecutables,
     std::vector<std::string> const& desktopExecutables,
     cmWIXShortcuts& shortcuts);
 

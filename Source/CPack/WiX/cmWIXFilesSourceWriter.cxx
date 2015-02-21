@@ -28,16 +28,21 @@ cmWIXFilesSourceWriter::cmWIXFilesSourceWriter(cmCPackLog* logger,
 void cmWIXFilesSourceWriter::EmitShortcut(
   std::string const& id,
   cmWIXShortcut const& shortcut,
-  std::string const& shortcutPrefix)
+  std::string const& shortcutPrefix,
+  size_t shortcutIndex)
 {
-  std::string shortcutId = shortcutPrefix;
+  std::stringstream shortcutId;
+  shortcutId << shortcutPrefix << id;
 
-  shortcutId += id;
+  if(shortcutIndex > 0)
+    {
+    shortcutId << "_"  << shortcutIndex;
+    }
 
   std::string fileId = std::string("CM_F") + id;
 
   BeginElement("Shortcut");
-  AddAttribute("Id", shortcutId);
+  AddAttribute("Id", shortcutId.str());
   AddAttribute("Name", shortcut.label);
   std::string target = "[#" + fileId + "]";
   AddAttribute("Target", target);

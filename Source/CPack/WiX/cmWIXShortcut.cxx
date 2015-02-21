@@ -62,11 +62,12 @@ bool cmWIXShortcuts::EmitShortcuts(
     std::string const& id = j->first;
     shortcut_list_t const& shortcutList = j->second;
 
-    for(shortcut_list_t::const_iterator k = shortcutList.begin();
-      k != shortcutList.end(); ++k)
+    for(size_t shortcutListIndex = 0;
+      shortcutListIndex < shortcutList.size(); ++shortcutListIndex)
       {
-      cmWIXShortcut const& shortcut = *k;
-      fileDefinitions.EmitShortcut(id, shortcut, shortcutPrefix);
+      cmWIXShortcut const& shortcut = shortcutList[shortcutListIndex];
+      fileDefinitions.EmitShortcut(id, shortcut,
+        shortcutPrefix, shortcutListIndex);
       }
     }
 
@@ -82,5 +83,36 @@ void cmWIXShortcuts::AddShortcutTypes(std::set<Type>& types)
     i != this->Shortcuts.end(); ++i)
     {
     types.insert(i->first);
+    }
+}
+
+void cmWIXShortcuts::CreateFromProperties(
+  std::string const& id,
+  std::string const& directoryId,
+  cmInstalledFile const& installedFile)
+{
+  CreateFromProperty("CPACK_START_MENU_SHORTCUTS",
+    START_MENU, id, directoryId, installedFile);
+
+  CreateFromProperty("CPACK_DESKTOP_SHORTCUTS",
+    DESKTOP, id, directoryId, installedFile);
+}
+
+void cmWIXShortcuts::CreateFromProperty(
+  std::string const& propertyName,
+  Type type,
+  std::string const& id,
+  std::string const& directoryId,
+  cmInstalledFile const& installedFile)
+{
+  std::vector<std::string> list;
+  installedFile.GetPropertyAsList(propertyName, list);
+
+  for(size_t i = 0; i < list.size(); ++i)
+    {
+    cmWIXShortcut shortcut;
+    shortcut.label = list[i];
+    shortcut.workingDirectoryId = directoryId;
+    insert(type, id, shortcut);
     }
 }

@@ -31,7 +31,8 @@ public:
   void EmitShortcut(
       std::string const& id,
       cmWIXShortcut const& shortcut,
-      std::string const& shortcutPrefix);
+      std::string const& shortcutPrefix,
+      size_t shortcutIndex);
 
   void EmitRemoveFolder(std::string const& id);
 

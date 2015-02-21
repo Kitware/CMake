@@ -856,8 +856,8 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmWIXDirectoriesSourceWriter& directoryDefinitions,
   cmWIXFilesSourceWriter& fileDefinitions,
   cmWIXFeaturesSourceWriter& featureDefinitions,
-  const std::vector<std::string>& packageExecutables,
-  const std::vector<std::string>& desktopExecutables,
+  std::vector<std::string> const& packageExecutables,
+  std::vector<std::string> const& desktopExecutables,
   cmWIXShortcuts& shortcuts)
 {
   cmsys::Directory dir;
@@ -942,6 +942,11 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
       {
       cmInstalledFile const* installedFile =
         this->GetInstalledFile(relativePath);
+
+      if(installedFile)
+        {
+        shortcuts.CreateFromProperties(id, directoryId, *installedFile);
+        }
 
       std::string componentId = fileDefinitions.EmitComponentFile(
         directoryId, id, fullPath, *(this->Patch), installedFile);
