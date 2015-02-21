@@ -3757,7 +3757,7 @@ void cmMakefile::GetListOfMacros(std::string& macros) const
     {
     macros += sep;
     macros += it->first;
-    sep = "";
+    sep = ";";
     }
 }
 
