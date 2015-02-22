@@ -176,7 +176,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio [^6]")
 endif()
 
 if(XCODE_VERSION AND NOT "${XCODE_VERSION}" VERSION_LESS 3)
-  add_RunCMake_test(XcodeProject)
+  add_RunCMake_test(XcodeProject -DXCODE_VERSION=${XCODE_VERSION})
 endif()
 
 add_RunCMake_test(File_Generate)
