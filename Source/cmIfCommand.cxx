@@ -45,7 +45,7 @@ IsFunctionBlocked(const cmListFileFunction& lff,
     {
     this->ScopeDepth++;
     }
-  if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
+  else if (!cmSystemTools::Strucmp(lff.Name.c_str(),"endif"))
     {
     this->ScopeDepth--;
     // if this is the endif for this if statement, then start executing
