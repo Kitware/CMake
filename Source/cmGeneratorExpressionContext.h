@@ -23,7 +23,13 @@ class cmTarget;
 //----------------------------------------------------------------------------
 struct cmGeneratorExpressionContext
 {
-  cmGeneratorExpressionContext();
+  cmGeneratorExpressionContext(cmMakefile* mf, std::string const& config,
+                               bool quiet, cmTarget const* headTarget,
+                               cmTarget const* currentTarget,
+                               bool evaluateForBuildsystem,
+                               cmListFileBacktrace const& backtrace,
+                               std::string const& language);
+
 
   cmListFileBacktrace Backtrace;
   std::set<cmTarget*> DependTargets;

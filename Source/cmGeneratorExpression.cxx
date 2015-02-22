@@ -72,19 +72,10 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   cmGeneratorExpressionDAGChecker *dagChecker,
   std::string const& language) const
 {
-  cmGeneratorExpressionContext context;
-  context.Makefile = mf;
-  context.Config = config;
-  context.Quiet = quiet;
-  context.HadError = false;
-  context.HadContextSensitiveCondition = false;
-  context.HadHeadSensitiveCondition = false;
-  context.SourceSensitiveTargets.clear();
-  context.HeadTarget = headTarget;
-  context.EvaluateForBuildsystem = this->EvaluateForBuildsystem;
-  context.CurrentTarget = currentTarget ? currentTarget : headTarget;
-  context.Backtrace = this->Backtrace;
-  context.Language = language;
+  cmGeneratorExpressionContext context(mf, config, quiet, headTarget,
+                                  currentTarget ? currentTarget : headTarget,
+                                  this->EvaluateForBuildsystem,
+                                  this->Backtrace, language);
 
   return this->EvaluateWithContext(context, dagChecker);
 }
