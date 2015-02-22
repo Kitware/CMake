@@ -24,6 +24,7 @@ class cmMakefile;
 class cmListFileBacktrace;
 
 struct cmGeneratorExpressionEvaluator;
+struct cmGeneratorExpressionContext;
 struct cmGeneratorExpressionDAGChecker;
 
 class cmCompiledGeneratorExpression;
@@ -131,6 +132,9 @@ public:
                     std::map<std::string, std::string>& mapping);
 
 private:
+  const char* EvaluateWithContext(cmGeneratorExpressionContext& context,
+                           cmGeneratorExpressionDAGChecker *dagChecker) const;
+
   cmCompiledGeneratorExpression(cmListFileBacktrace const& backtrace,
               const std::string& input);
 

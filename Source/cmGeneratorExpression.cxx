@@ -72,18 +72,6 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   cmGeneratorExpressionDAGChecker *dagChecker,
   std::string const& language) const
 {
-  if (!this->NeedsEvaluation)
-    {
-    return this->Input.c_str();
-    }
-
-  this->Output = "";
-
-  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
-                                                  = this->Evaluators.begin();
-  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
-                                                  = this->Evaluators.end();
-
   cmGeneratorExpressionContext context;
   context.Makefile = mf;
   context.Config = config;
@@ -97,6 +85,26 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   context.CurrentTarget = currentTarget ? currentTarget : headTarget;
   context.Backtrace = this->Backtrace;
   context.Language = language;
+
+  return this->EvaluateWithContext(context, dagChecker);
+}
+
+//----------------------------------------------------------------------------
+const char* cmCompiledGeneratorExpression::EvaluateWithContext(
+                            cmGeneratorExpressionContext& context,
+                            cmGeneratorExpressionDAGChecker *dagChecker) const
+{
+  if (!this->NeedsEvaluation)
+    {
+    return this->Input.c_str();
+    }
+
+  this->Output = "";
+
+  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
+                                                  = this->Evaluators.begin();
+  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
+                                                  = this->Evaluators.end();
 
   for ( ; it != end; ++it)
     {
