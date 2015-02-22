@@ -40,10 +40,6 @@ otherwise expands to nothing.
 
 Available logical expressions are:
 
-``$<0:...>``
-  Empty string (ignores ``...``)
-``$<1:...>``
-  Content of ``...``
 ``$<BOOL:...>``
   ``1`` if the ``...`` is true, else ``0``
 ``$<AND:?[,?]...>``
@@ -241,6 +237,10 @@ where ``${prop}`` refers to a helper variable::
 
 Available output expressions are:
 
+``$<0:...>``
+  Empty string (ignores ``...``)
+``$<1:...>``
+  Content of ``...``
 ``$<JOIN:list,...>``
   Joins the list with the content of ``...``
 ``$<ANGLE-R>``
