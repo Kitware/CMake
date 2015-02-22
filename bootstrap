@@ -270,6 +270,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionDAGChecker \
   cmGeneratorExpressionEvaluator \
   cmGeneratorExpressionLexer \
+  cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
   cmGeneratorExpression \
   cmGlobalGenerator \

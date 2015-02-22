@@ -244,6 +244,8 @@ set(SRCS
   cmGeneratorExpressionEvaluator.h
   cmGeneratorExpressionLexer.cxx
   cmGeneratorExpressionLexer.h
+  cmGeneratorExpressionNode.cxx
+  cmGeneratorExpressionNode.h
   cmGeneratorExpressionParser.cxx
   cmGeneratorExpressionParser.h
   cmGeneratorExpression.cxx
