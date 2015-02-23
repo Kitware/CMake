@@ -351,25 +351,12 @@ void cmFindBase::PrintFindStuff()
   std::cerr << "NoCMakeSystemPath " << this->NoCMakeSystemPath << "\n";
   std::cerr << "EnvironmentPath " << this->EnvironmentPath << "\n";
   std::cerr << "CMakePathName " << this->CMakePathName << "\n";
-  std::cerr << "Names  ";
-  for(unsigned int i =0; i < this->Names.size(); ++i)
-    {
-    std::cerr << this->Names[i] << " ";
-    }
-  std::cerr << "\n";
+  std::cerr << "Names  " << cmJoin(this->Names, " ") << "\n";
   std::cerr << "\n";
   std::cerr << "SearchPathSuffixes  ";
-  for(unsigned int i =0; i < this->SearchPathSuffixes.size(); ++i)
-    {
-    std::cerr << this->SearchPathSuffixes[i] << "\n";
-    }
-  std::cerr << "\n";
+  std::cerr << cmJoin(this->SearchPathSuffixes, "\n") << "\n";
   std::cerr << "SearchPaths\n";
-  for(std::vector<std::string>::const_iterator i = this->SearchPaths.begin();
-      i != this->SearchPaths.end(); ++i)
-    {
-    std::cerr << "[" << *i << "]\n";
-    }
+  std::cerr << cmWrap("[", this->SearchPaths, "]", "\n") << "\n";
 }
 
 bool cmFindBase::CheckForVariableInCache()

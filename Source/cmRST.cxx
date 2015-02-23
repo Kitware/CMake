@@ -463,10 +463,7 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
       }
 
     // Truncate indentation to match that on this line.
-    if(line.size() < indentEnd)
-      {
-      indentEnd = line.size();
-      }
+    indentEnd = std::min(indentEnd, line.size());
     for(std::string::size_type j = 0; j != indentEnd; ++j)
       {
       if(line[j] != indentText[j])
@@ -487,19 +484,16 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
       }
     }
 
-  // Drop leading blank lines.
-  size_t leadingEmpty = 0;
-  for(size_t i = 0; i < lines.size() && lines[i].empty(); ++i)
-    {
-    ++leadingEmpty;
-    }
-  lines.erase(lines.begin(), lines.begin()+leadingEmpty);
+  std::vector<std::string>::const_iterator it = lines.begin();
+  size_t leadingEmpty = std::distance(it, cmFindNot(lines, std::string()));
 
-  // Drop trailing blank lines.
-  size_t trailingEmpty = 0;
-  for(size_t i = lines.size(); i > 0 && lines[i-1].empty(); --i)
-    {
-    ++trailingEmpty;
-    }
-  lines.erase(lines.end()-trailingEmpty, lines.end());
+  std::vector<std::string>::const_reverse_iterator rit = lines.rbegin();
+  size_t trailingEmpty = std::distance(rit,
+                            cmFindNot(cmReverseRange(lines), std::string()));
+
+  std::vector<std::string>::iterator contentEnd
+      = cmRotate(lines.begin(),
+                 lines.begin() + leadingEmpty,
+                 lines.end() - trailingEmpty);
+  lines.erase(contentEnd, lines.end());
 }

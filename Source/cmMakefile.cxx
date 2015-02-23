@@ -213,13 +213,7 @@ cmMakefile::~cmMakefile()
 void cmMakefile::PrintStringVector(const char* s,
                                    const std::vector<std::string>& v) const
 {
-  std::cout << s << ": ( \n";
-  for(std::vector<std::string>::const_iterator i = v.begin();
-      i != v.end(); ++i)
-    {
-    std::cout << *i << " ";
-    }
-  std::cout << " )\n";
+  std::cout << s << ": ( \n" << cmWrap('"', v, '"', " ") << ")\n";
 }
 
 void cmMakefile
@@ -1340,22 +1334,11 @@ void cmMakefile::AddDefineFlag(const char* flag)
 void cmMakefile::AddDefineFlag(const char* flag, std::string& dflags)
 {
   // remove any \n\r
-  std::string ret = flag;
-  std::string::size_type pos = 0;
-  while((pos = ret.find('\n', pos)) != std::string::npos)
-    {
-    ret[pos] = ' ';
-    pos++;
-    }
-  pos = 0;
-  while((pos = ret.find('\r', pos)) != std::string::npos)
-    {
-    ret[pos] = ' ';
-    pos++;
-    }
-
-  dflags += " ";
-  dflags += ret;
+  std::string::size_type initSize = dflags.size();
+  dflags += std::string(" ") + flag;
+  std::string::iterator flagStart = dflags.begin() + initSize + 1;
+  std::replace(flagStart, dflags.end(), '\n', ' ');
+  std::replace(flagStart, dflags.end(), '\r', ' ');
 }
 
 
@@ -1472,18 +1455,11 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       cmSystemTools::ExpandListArgument(cdefs, defs);
 
       // Recompose the list without the definition.
-      std::string ndefs;
-      const char* sep = "";
-      for(std::vector<std::string>::const_iterator di = defs.begin();
-          di != defs.end(); ++di)
-        {
-        if(*di != define)
-          {
-          ndefs += sep;
-          sep = ";";
-          ndefs += *di;
-          }
-        }
+      std::vector<std::string>::const_iterator defEnd =
+          std::remove(defs.begin(), defs.end(), define);
+      std::vector<std::string>::const_iterator defBegin =
+          defs.begin();
+      std::string ndefs = cmJoin(cmRange(defBegin, defEnd), ";");
 
       // Store the new list.
       this->SetProperty("COMPILE_DEFINITIONS", ndefs.c_str());

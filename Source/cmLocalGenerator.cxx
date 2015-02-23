@@ -2800,12 +2800,7 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
       }
     if(this->WindowsShell)
       {
-      std::string::size_type pos = 0;
-      while((pos = result.find('/', pos)) != std::string::npos)
-        {
-        result[pos] = '\\';
-        pos++;
-        }
+      std::replace(result.begin(), result.end(), '/', '\\');
       }
     result = this->EscapeForShell(result, true, false, output == WATCOMQUOTE);
     }

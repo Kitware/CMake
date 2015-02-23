@@ -213,27 +213,14 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
     // Echo string
     else if (args[1] == "echo" )
       {
-      unsigned int cc;
-      const char* space = "";
-      for ( cc = 2; cc < args.size(); cc ++ )
-        {
-        std::cout << space << args[cc];
-        space = " ";
-        }
-      std::cout << std::endl;
+      std::cout << cmJoin(cmRange(args).advance(2), " ") << std::endl;
       return 0;
       }
 
     // Echo string no new line
     else if (args[1] == "echo_append" )
       {
-      unsigned int cc;
-      const char* space = "";
-      for ( cc = 2; cc < args.size(); cc ++ )
-        {
-        std::cout << space << args[cc];
-        space = " ";
-        }
+      std::cout << cmJoin(cmRange(args).advance(2), " ");
       return 0;
       }
 
@@ -463,9 +450,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         return 1;
         }
 
-      std::string command = "\"";
-      command += cmJoin(cmRange(args).advance(3), "\" \"");
-      command += "\"";
+      std::string command = cmWrap('"', cmRange(args).advance(3), '"', " ");
       int retval = 0;
       int timeout = 0;
       if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, &retval,
@@ -1329,12 +1314,7 @@ bool cmcmd::RunCommand(const char* comment,
   if(verbose)
     {
     std::cout << comment << ":\n";
-    for(std::vector<std::string>::iterator i = command.begin();
-        i != command.end(); ++i)
-      {
-      std::cout << *i << " ";
-      }
-    std::cout << "\n";
+    std::cout << cmJoin(command, " ") << "\n";
     }
   std::string output;
   int retCode =0;

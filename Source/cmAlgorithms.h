@@ -81,6 +81,16 @@ private:
   const std::string m_test;
 };
 
+template<typename FwdIt>
+FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
+{
+  typename std::iterator_traits<FwdIt>::difference_type dist =
+      std::distance(middle, last);
+  std::rotate(first, middle, last);
+  std::advance(first, dist);
+  return first;
+}
+
 namespace ContainerAlgorithms {
 
 template<typename T>
@@ -138,20 +148,10 @@ private:
   const_iterator End;
 };
 
-template<typename BiDirIt>
-BiDirIt Rotate(BiDirIt first, BiDirIt middle, BiDirIt last)
-{
-  typename std::iterator_traits<BiDirIt>::difference_type dist =
-      std::distance(first, middle);
-  std::rotate(first, middle, last);
-  std::advance(last, -dist);
-  return last;
-}
-
 template<typename Iter>
 Iter RemoveN(Iter i1, Iter i2, size_t n)
 {
-  return ContainerAlgorithms::Rotate(i1, i1 + n, i2);
+  return cmRotate(i1, i1 + n, i2);
 }
 
 template<typename Range>
@@ -276,6 +276,38 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
     return r.end();
     }
   return cmRemoveIndices(r, indices);
+}
+
+template<typename Range>
+std::string cmWrap(std::string prefix, Range const& r, std::string suffix,
+                   std::string sep)
+{
+  if (r.empty())
+    {
+    return std::string();
+    }
+  return prefix + cmJoin(r, (suffix + sep + prefix).c_str()) + suffix;
+}
+
+template<typename Range>
+std::string cmWrap(char prefix, Range const& r, char suffix, std::string sep)
+{
+  return cmWrap(std::string(1, prefix), r, std::string(1, suffix), sep);
+}
+
+template<typename Range, typename T>
+typename Range::const_iterator cmFindNot(Range const& r, T const& t)
+{
+  return std::find_if(r.begin(), r.end(),
+                      std::bind1st(std::not_equal_to<T>(), t));
+}
+
+template<typename Range>
+ContainerAlgorithms::Range<typename Range::const_reverse_iterator>
+cmReverseRange(Range const& range)
+{
+  return ContainerAlgorithms::Range<typename Range::const_reverse_iterator>(
+      range.rbegin(), range.rend());
 }
 
 #endif
