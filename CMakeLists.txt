@@ -382,10 +382,8 @@ macro (CMAKE_BUILD_UTILITIES)
   #---------------------------------------------------------------------
   # Build jsoncpp library.
   if(CMAKE_USE_SYSTEM_JSONCPP)
-    if(EXISTS ${CMAKE_ROOT}/Modules/FindJsonCpp.cmake)
-      find_package(JsonCpp)
-    elseif(NOT CMAKE_VERSION VERSION_LESS 3.0)
-      include(${CMake_SOURCE_DIR}/Modules/FindJsonCpp.cmake)
+    if(NOT CMAKE_VERSION VERSION_LESS 3.0)
+      include(${CMake_SOURCE_DIR}/Source/Modules/FindJsonCpp.cmake)
     else()
       message(FATAL_ERROR "CMAKE_USE_SYSTEM_JSONCPP requires CMake >= 3.0")
     endif()
