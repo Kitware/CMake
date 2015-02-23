@@ -51,11 +51,12 @@
 #  * Default   : CPACK_PACKAGE_VERSION
 #
 # .. variable:: CPACK_RPM_PACKAGE_ARCHITECTURE
+#               CPACK_RPM_<component>_PACKAGE_ARCHITECTURE
 #
 #  The RPM package architecture.
 #
-#  * Mandatory : NO
-#  * Default   : -
+#  * Mandatory : YES
+#  * Default   : Native architecture output by "uname -m"
 #
 #  This may be set to "noarch" if you know you are building a noarch package.
 #
@@ -619,12 +620,30 @@ endif()
 # RPM "Version" from RPM "Release"
 string(REPLACE "-" "_" CPACK_RPM_PACKAGE_VERSION ${CPACK_RPM_PACKAGE_VERSION})
 
-# CPACK_RPM_PACKAGE_ARCHITECTURE (optional)
-if(CPACK_RPM_PACKAGE_ARCHITECTURE)
-  set(TMP_RPM_BUILDARCH "Buildarch: ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
+# CPACK_RPM_PACKAGE_ARCHITECTURE (mandatory)
+if(NOT CPACK_RPM_PACKAGE_ARCHITECTURE)
+  execute_process(COMMAND uname "-m"
+                  OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+else()
   if(CPACK_RPM_PACKAGE_DEBUG)
     message("CPackRPM:Debug: using user-specified build arch = ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
   endif()
+endif()
+
+set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_PACKAGE_ARCHITECTURE})
+
+#prefer component architecture
+if(CPACK_RPM_PACKAGE_COMPONENT)
+  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE)
+    set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE})
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: using component build arch = ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
+    endif()
+  endif()
+endif()
+if(${_CPACK_RPM_PACKAGE_ARCHITECTURE} STREQUAL "noarch")
+  set(TMP_RPM_BUILDARCH "Buildarch: ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
 else()
   set(TMP_RPM_BUILDARCH "")
 endif()
@@ -934,7 +953,7 @@ file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SOURCES)
 file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SPECS)
 file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SRPMS)
 
-#set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
+#set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${_CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
 set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
 # it seems rpmbuild can't handle spaces in the path
 # neither escaping (as below) nor putting quotes around the path seem to help
@@ -1282,6 +1301,7 @@ if(RPMBUILD_EXECUTABLE)
     COMMAND "${RPMBUILD_EXECUTABLE}" -bb
             --define "_topdir ${CPACK_RPM_DIRECTORY}"
             --buildroot "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
+            --target "${_CPACK_RPM_PACKAGE_ARCHITECTURE}"
             "${CPACK_RPM_BINARY_SPECFILE}"
     WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
     RESULT_VARIABLE CPACK_RPMBUILD_EXEC_RESULT

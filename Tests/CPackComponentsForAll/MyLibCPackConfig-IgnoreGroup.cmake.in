@@ -11,6 +11,12 @@ if(CPACK_GENERATOR MATCHES "RPM")
   set(CPACK_RPM_COMPONENT_INSTALL "ON")
   set(CPACK_RPM_applications_PACKAGE_REQUIRES "mylib-libraries")
 
+  # test a "noarch" rpm
+  set(CPACK_RPM_headers_PACKAGE_ARCHITECTURE "noarch")
+
+  # test cross-built rpm
+  set(CPACK_RPM_applications_PACKAGE_ARCHITECTURE "armv7hf")
+
   # test package summary override
   set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
   set(CPACK_RPM_libraries_PACKAGE_SUMMARY "libraries summary")
