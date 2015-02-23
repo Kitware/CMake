@@ -104,7 +104,7 @@ if(BUILD_TESTING)
 
   # Look for rpmbuild to use for tests.
   # The tool does not work with spaces in the path.
-  if (CMAKE_SYSTEM_NAME MATCHES "Linux" AND NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
+  if(NOT CMAKE_CURRENT_BINARY_DIR MATCHES " ")
     find_program(RPMBUILD_EXECUTABLE NAMES rpmbuild)
   else()
     set(RPMBUILD_EXECUTABLE "RPMBUILD_EXECUTABLE-NOTFOUND")
