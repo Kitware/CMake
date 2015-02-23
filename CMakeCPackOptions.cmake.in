@@ -87,4 +87,26 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   if(patch MATCHES "^[0-9]+$" AND patch LESS 65535)
     set(CPACK_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}.${patch}")
   endif()
+
+  set(CPACK_WIX_PROPERTY_ARPURLINFOABOUT "http://www.cmake.org")
+
+  set(CPACK_WIX_PROPERTY_ARPCONTACT "@CPACK_PACKAGE_CONTACT@")
+
+  set(CPACK_WIX_PROPERTY_ARPCOMMENTS
+    "CMake is a cross-platform, open-source build system."
+  )
+
+  set(CPACK_WIX_PRODUCT_ICON
+    "@CMake_SOURCE_DIR@/Utilities/Release/CMakeLogo.ico"
+  )
+
+  set_property(INSTALL "@CMAKE_DOC_DIR@/html/index.html" PROPERTY
+    CPACK_START_MENU_SHORTCUTS "CMake Documentation"
+  )
+
+  set_property(INSTALL "cmake.org.html" PROPERTY
+    CPACK_START_MENU_SHORTCUTS "CMake Web Site"
+  )
+
+  set(CPACK_WIX_LIGHT_EXTRA_FLAGS "-dcl:high")
 endif()

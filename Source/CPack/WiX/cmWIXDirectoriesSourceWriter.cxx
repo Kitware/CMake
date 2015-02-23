@@ -41,6 +41,14 @@ void cmWIXDirectoriesSourceWriter::EmitDesktopFolder()
   EndElement("Directory");
 }
 
+void cmWIXDirectoriesSourceWriter::EmitStartupFolder()
+{
+  BeginElement("Directory");
+  AddAttribute("Id", "StartupFolder");
+  AddAttribute("Name", "Startup");
+  EndElement("Directory");
+}
+
 size_t cmWIXDirectoriesSourceWriter::BeginInstallationPrefixDirectory(
   std::string const& programFilesFolderId,
   std::string const& installRootString)

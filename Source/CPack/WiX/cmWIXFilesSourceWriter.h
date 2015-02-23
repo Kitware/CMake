@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2014 Kitware, Inc.
+  Copyright 2014-2015 Kitware, Inc.
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -31,17 +31,15 @@ public:
   void EmitShortcut(
       std::string const& id,
       cmWIXShortcut const& shortcut,
-      bool desktop);
+      std::string const& shortcutPrefix,
+      size_t shortcutIndex);
 
   void EmitRemoveFolder(std::string const& id);
 
-  void EmitStartMenuShortcutRegistryValue(
+  void EmitInstallRegistryValue(
     std::string const& registryKey,
-    std::string const& cpackComponentName);
-
-  void EmitDesktopShortcutRegistryValue(
-    std::string const& registryKey,
-    std::string const& cpackComponentName);
+    std::string const& cpackComponentName,
+    std::string const& suffix);
 
   void EmitUninstallShortcut(std::string const& packageName);
 
@@ -56,12 +54,6 @@ public:
     std::string const& filePath,
     cmWIXPatch &patch,
     cmInstalledFile const* installedFile);
-
-private:
-  void EmitInstallRegistryValue(
-    std::string const& registryKey,
-    std::string const& cpackComponentName,
-    std::string const& suffix);
 };
 
 
