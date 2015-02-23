@@ -143,7 +143,7 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
 
   this->LocalGenerator = mf.LocalGenerator;
   this->FunctionBlockers = mf.FunctionBlockers;
-  this->MacrosMap = mf.MacrosMap;
+  this->MacrosList = mf.MacrosList;
   this->SubDirectoryOrder = mf.SubDirectoryOrder;
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
@@ -3715,26 +3715,16 @@ cmVariableWatch *cmMakefile::GetVariableWatch() const
 }
 #endif
 
-void cmMakefile::AddMacro(const char* name, const char* signature)
+void cmMakefile::AddMacro(const char* name)
 {
-  if ( !name || !signature )
-    {
-    return;
-    }
-  this->MacrosMap[name] = signature;
+  assert(name);
+  this->MacrosList.push_back(name);
 }
 
 void cmMakefile::GetListOfMacros(std::string& macros) const
 {
-  StringStringMap::const_iterator it;
-  macros = "";
-  const char* sep = "";
-  for ( it = this->MacrosMap.begin(); it != this->MacrosMap.end(); ++it )
-    {
-    macros += sep;
-    macros += it->first;
-    sep = "";
-    }
+  assert(macros.empty());
+  macros = cmJoin(this->MacrosList, ";");
 }
 
 cmCacheManager *cmMakefile::GetCacheManager() const

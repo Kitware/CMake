@@ -39,6 +39,7 @@ bool cmGetCMakePropertyCommand
     }
   else if ( args[1] == "MACROS" )
     {
+    output.clear();
     this->Makefile->GetListOfMacros(output);
     }
   else if ( args[1] == "COMPONENTS" )

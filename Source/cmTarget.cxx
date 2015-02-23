@@ -6872,11 +6872,11 @@ cmTargetInternalPointer
 //----------------------------------------------------------------------------
 cmTargetInternalPointer::~cmTargetInternalPointer()
 {
-  deleteAndClear(this->Pointer->IncludeDirectoriesEntries);
-  deleteAndClear(this->Pointer->CompileOptionsEntries);
-  deleteAndClear(this->Pointer->CompileFeaturesEntries);
-  deleteAndClear(this->Pointer->CompileDefinitionsEntries);
-  deleteAndClear(this->Pointer->SourceEntries);
+  cmDeleteAll(this->Pointer->IncludeDirectoriesEntries);
+  cmDeleteAll(this->Pointer->CompileOptionsEntries);
+  cmDeleteAll(this->Pointer->CompileFeaturesEntries);
+  cmDeleteAll(this->Pointer->CompileDefinitionsEntries);
+  cmDeleteAll(this->Pointer->SourceEntries);
   delete this->Pointer;
 }
 
