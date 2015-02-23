@@ -45,12 +45,18 @@ endif()
 
 find_package(SomePackage)
 if(NOT SomePackage_FOUND)
-  message(SEND_ERROR "SomePackage with FOUND_VAR SomePackage_FOUND not found !")
+  message(SEND_ERROR "SomePackage not found !")
+endif()
+if(NOT SOMEPACKAGE_FOUND)
+  message(SEND_ERROR "SomePackage compatibility name SOMEPACKAGE_FOUND not set!")
 endif()
 
 find_package(UpperCasePackage)
+if(NOT UpperCasePackage_FOUND)
+  message(SEND_ERROR "UpperCasePackage not found!")
+endif()
 if(NOT UPPERCASEPACKAGE_FOUND)
-  message(SEND_ERROR "UpperCasePackage with FOUND_VAR UPPERCASEPACKAGE_FOUND not found !")
+  message(SEND_ERROR "SomePackage compatibility name SOMEPACKAGE_FOUND not set!")
 endif()
 
 #-----------------------------------------------------------------------------
