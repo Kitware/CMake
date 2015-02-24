@@ -84,7 +84,7 @@ private:
 template<typename FwdIt>
 FwdIt cmRotate(FwdIt first, FwdIt middle, FwdIt last)
 {
-  typename std::iterator_traits<FwdIt>::difference_type dist =
+  const typename std::iterator_traits<FwdIt>::difference_type dist =
       std::distance(middle, last);
   std::rotate(first, middle, last);
   std::advance(first, dist);
@@ -105,19 +105,19 @@ struct cmIsPair<std::pair<K, V> >
   enum { value = true };
 };
 
-template<typename Container,
-    bool valueTypeIsPair = cmIsPair<typename Container::value_type>::value>
+template<typename Range,
+    bool valueTypeIsPair = cmIsPair<typename Range::value_type>::value>
 struct DefaultDeleter
 {
-  void operator()(typename Container::value_type value) const {
+  void operator()(typename Range::value_type value) const {
     delete value;
   }
 };
 
-template<typename Container>
-struct DefaultDeleter<Container, /* valueTypeIsPair = */ true>
+template<typename Range>
+struct DefaultDeleter<Range, /* valueTypeIsPair = */ true>
 {
-  void operator()(typename Container::value_type value) const {
+  void operator()(typename Range::value_type value) const {
     delete value.second;
   }
 };
@@ -127,11 +127,14 @@ struct Range
 {
   typedef const_iterator_ const_iterator;
   typedef typename std::iterator_traits<const_iterator>::value_type value_type;
+  typedef typename std::iterator_traits<const_iterator>::difference_type
+    difference_type;
   Range(const_iterator begin_, const_iterator end_)
     : Begin(begin_), End(end_) {}
   const_iterator begin() const { return Begin; }
   const_iterator end() const { return End; }
   bool empty() const { return std::distance(Begin, End) == 0; }
+  difference_type size() const { return std::distance(Begin, End); }
   Range& advance(cmIML_INT_intptr_t amount)
   {
     std::advance(Begin, amount);
@@ -148,10 +151,12 @@ private:
   const_iterator End;
 };
 
-template<typename Iter>
-Iter RemoveN(Iter i1, Iter i2, size_t n)
+template<typename FwdIt>
+FwdIt RemoveN(FwdIt i1, FwdIt i2, size_t n)
 {
-  return cmRotate(i1, i1 + n, i2);
+  FwdIt m = i1;
+  std::advance(m, n);
+  return cmRotate(i1, m, i2);
 }
 
 template<typename Range>
@@ -187,11 +192,11 @@ cmRange(Range const& range)
       range.begin(), range.end());
 }
 
-template<typename Container>
-void cmDeleteAll(Container const& c)
+template<typename Range>
+void cmDeleteAll(Range const& r)
 {
-  std::for_each(c.begin(), c.end(),
-                ContainerAlgorithms::DefaultDeleter<Container>());
+  std::for_each(r.begin(), r.end(),
+                ContainerAlgorithms::DefaultDeleter<Range>());
 }
 
 template<typename Range>
@@ -204,7 +209,7 @@ std::string cmJoin(Range const& r, const char* delimiter)
   std::ostringstream os;
   typedef typename Range::value_type ValueType;
   typedef typename Range::const_iterator InputIt;
-  InputIt first = r.begin();
+  const InputIt first = r.begin();
   InputIt last = r.end();
   --last;
   std::copy(first, last,
@@ -231,16 +236,22 @@ template<typename Range, typename InputRange>
 typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
 {
   typename InputRange::const_iterator remIt = rem.begin();
+  typename InputRange::const_iterator remEnd = rem.end();
 
-  typename Range::iterator writer = r.begin() + *remIt;
+  typename Range::iterator writer = r.begin();
+  std::advance(writer, *remIt);
+  typename Range::iterator pivot = writer;
+  typename InputRange::value_type prevRem = *remIt;
   ++remIt;
   size_t count = 1;
-  for ( ; writer != r.end() && remIt != rem.end(); ++count, ++remIt)
+  const typename Range::iterator rangeEnd = r.end();
+  for ( ; writer != rangeEnd && remIt != remEnd; ++count, ++remIt)
     {
-    writer = ContainerAlgorithms::RemoveN(writer, r.begin() + *remIt, count);
+    std::advance(pivot, *remIt - prevRem);
+    prevRem = *remIt;
+    writer = ContainerAlgorithms::RemoveN(writer, pivot, count);
     }
-  writer = ContainerAlgorithms::RemoveN(writer, r.end(), count);
-  return writer;
+  return ContainerAlgorithms::RemoveN(writer, rangeEnd, count);
 }
 
 template<typename Range, typename MatchRange>
@@ -253,14 +264,16 @@ typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
 template<typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  std::vector<typename Range::value_type> unique;
+  typedef std::vector<typename Range::value_type> UniqueVector;
+  UniqueVector unique;
   unique.reserve(r.size());
   std::vector<size_t> indices;
   size_t count = 0;
+  const typename Range::iterator end = r.end();
   for(typename Range::const_iterator it = r.begin();
-      it != r.end(); ++it, ++count)
+      it != end; ++it, ++count)
     {
-    typename Range::iterator low =
+    const typename UniqueVector::iterator low =
         std::lower_bound(unique.begin(), unique.end(), *it);
     if (low == unique.end() || *low != *it)
       {
@@ -273,7 +286,7 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
     }
   if (indices.empty())
     {
-    return r.end();
+    return end;
     }
   return cmRemoveIndices(r, indices);
 }
