@@ -43,7 +43,7 @@ install(TARGETS mylibapp
 # CPACK_MONOLITHIC_INSTALL=1 is set (at cmake time).
 install(TARGETS mylibapp2
   RUNTIME
-  DESTINATION bin)
+  DESTINATION bin/@in@_@path@@with\\@and\\@/\@in_path\@) # test @ char in path
 
 install(FILES mylib.h
   DESTINATION include
