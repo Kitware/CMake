@@ -21,16 +21,20 @@ cmCTestGenericHandler* cmCTestMemCheckCommand::InitializeActualHandler()
     = this->CTest->GetInitializedHandler("memcheck");
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE");
+    "MemoryCheckType", "CTEST_MEMORYCHECK_TYPE", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "MemoryCheckSanitizerOptions", "CTEST_MEMORYCHECK_SANITIZER_OPTIONS");
+    "MemoryCheckSanitizerOptions", "CTEST_MEMORYCHECK_SANITIZER_OPTIONS",
+    this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "MemoryCheckCommand", "CTEST_MEMORYCHECK_COMMAND");
+    "MemoryCheckCommand", "CTEST_MEMORYCHECK_COMMAND", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "MemoryCheckCommandOptions", "CTEST_MEMORYCHECK_COMMAND_OPTIONS");
+    "MemoryCheckCommandOptions", "CTEST_MEMORYCHECK_COMMAND_OPTIONS",
+    this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "MemoryCheckSuppressionFile", "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE");
+    "MemoryCheckSuppressionFile", "CTEST_MEMORYCHECK_SUPPRESSIONS_FILE",
+    this->Quiet);
 
+  handler->SetQuiet(this->Quiet);
   return handler;
 }
 

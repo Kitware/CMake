@@ -18,3 +18,8 @@ files labeled with at least one of the labels specified.
 The APPEND option marks results for append to those previously
 submitted to a dashboard server since the last ctest_start.  Append
 semantics are defined by the dashboard server in use.
+
+The QUIET option suppresses any CTest-specific non-error output
+that would have been printed to the console otherwise.  The summary
+indicating how many lines of code were covered is unaffected by this
+option.

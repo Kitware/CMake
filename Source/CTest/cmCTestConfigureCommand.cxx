@@ -45,7 +45,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
   if ( ctestConfigureCommand && *ctestConfigureCommand )
     {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
-      ctestConfigureCommand);
+      ctestConfigureCommand, this->Quiet);
     }
   else
     {
@@ -141,7 +141,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += "\"";
 
       this->CTest->SetCTestConfiguration("ConfigureCommand",
-        cmakeConfigureCommand.c_str());
+        cmakeConfigureCommand.c_str(), this->Quiet);
       }
     else
       {
@@ -160,5 +160,6 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       "internal CTest error. Cannot instantiate configure handler");
     return 0;
     }
+  handler->SetQuiet(this->Quiet);
   return handler;
 }

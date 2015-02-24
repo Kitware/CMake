@@ -386,10 +386,11 @@ void cmCTestRunTest::MemCheckPostProcess()
     {
     return;
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
-             << ": process test output now: "
-             << this->TestProperties->Name << " "
-             << this->TestResult.Name << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
+    << ": process test output now: "
+    << this->TestProperties->Name << " "
+    << this->TestResult.Name << std::endl,
+    this->TestHandler->GetQuiet());
   cmCTestMemCheckHandler * handler = static_cast<cmCTestMemCheckHandler*>
     (this->TestHandler);
   handler->PostProcessTest(this->TestResult, this->Index);
@@ -661,8 +662,9 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
     {
     timeout = 0;
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ": "
-             << "Test timeout computed to be: " << timeout << "\n");
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ": "
+    << "Test timeout computed to be: " << timeout << "\n",
+    this->TestHandler->GetQuiet());
 
   this->TestProcess->SetTimeout(timeout);
 

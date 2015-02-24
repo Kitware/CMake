@@ -13,6 +13,9 @@ function(run_child)
     message(FATAL_ERROR "Child failed (${FAILED}), output is\n  ${OUTPUT}\n"
       "Command = [${ARGN}]\n")
   endif()
+
+  # Pass output back up to the parent scope for possible further inspection.
+  set(OUTPUT "${OUTPUT}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------
@@ -269,6 +272,9 @@ function(run_dashboard_script bin_dir)
       Updated{subdir/bar.txt}
       )
   endif()
+
+  # Pass console output up to the parent, in case they'd like to inspect it.
+  set(OUTPUT "${OUTPUT}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------

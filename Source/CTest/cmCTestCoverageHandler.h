@@ -30,9 +30,10 @@ public:
   typedef std::map<std::string, SingleFileCoverageVector> TotalCoverageMap;
   TotalCoverageMap TotalCoverage;
   std::ostream* OFS;
+  bool Quiet;
 };
 /** \class cmCTestCoverageHandler
- * \brief A class that handles coverage computaiton for ctest
+ * \brief A class that handles coverage computation for ctest
  *
  */
 class cmCTestCoverageHandler : public cmCTestGenericHandler

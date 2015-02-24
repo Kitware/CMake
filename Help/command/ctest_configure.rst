@@ -6,7 +6,7 @@ Configure the project build tree.
 ::
 
   ctest_configure([BUILD build_dir] [SOURCE source_dir] [APPEND]
-                  [OPTIONS options] [RETURN_VALUE res])
+                  [OPTIONS options] [RETURN_VALUE res] [QUIET])
 
 Configures the given build directory and stores results in
 Configure.xml.  If no BUILD is given, the CTEST_BINARY_DIRECTORY
@@ -19,3 +19,7 @@ build tool.
 The APPEND option marks results for append to those previously
 submitted to a dashboard server since the last ctest_start.  Append
 semantics are defined by the dashboard server in use.
+
+The QUIET option suppresses any CTest-specific non-error messages
+that would have otherwise been printed to the console.  Output from
+the underlying configure command is not affected.

@@ -251,8 +251,8 @@ void cmCTestMemCheckHandler::GenerateTestCommand(
     memcheckcommand += " " + memTesterEnvironmentVariable;
     args.push_back(memTesterEnvironmentVariable);
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Memory check command: "
-    << memcheckcommand << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+    "Memory check command: " << memcheckcommand << std::endl, this->Quiet);
 }
 
 //----------------------------------------------------------------------
@@ -347,7 +347,8 @@ void cmCTestMemCheckHandler::PopulateCustomVectors(cmMakefile *mf)
                              "CTEST_CUSTOM_MEMCHECK_IGNORE",
                              this->CustomTestsIgnore);
   std::string cmake = cmSystemTools::GetCMakeCommand();
-  this->CTest->SetCTestConfiguration("CMakeCommand", cmake.c_str());
+  this->CTest->SetCTestConfiguration("CMakeCommand", cmake.c_str(),
+    this->Quiet);
 }
 
 //----------------------------------------------------------------------
@@ -400,8 +401,8 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
       << "</Test>" << std::endl;
     }
   os << "\t</TestList>\n";
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
-    "-- Processing memory checking output: ");
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
+    "-- Processing memory checking output: ", this->Quiet);
   size_t total = this->TestResults.size();
   size_t step = total / 10;
   size_t current = 0;
@@ -451,13 +452,14 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
     this->WriteTestResultFooter(os, result);
     if ( current < cc )
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "#" << std::flush);
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "#" << std::flush,
+        this->Quiet);
       current += step;
       }
     }
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, std::endl);
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Memory checking results:"
-    << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, std::endl, this->Quiet);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Memory checking results:"
+    << std::endl, this->Quiet);
   os << "\t<DefectList>" << std::endl;
   for ( cc = 0; cc < this->GlobalResults.size(); cc ++ )
     {
@@ -468,9 +470,9 @@ void cmCTestMemCheckHandler::GenerateDartOutput(std::ostream& os)
 #endif
       std::cerr.width(35);
 #define cerr no_cerr
-      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
         this->ResultStringsLong[cc] << " - "
-        << this->GlobalResults[cc] << std::endl);
+        << this->GlobalResults[cc] << std::endl, this->Quiet);
       os << "\t\t<Defect Type=\"" << this->ResultStringsLong[cc]
         << "\"/>" << std::endl;
       }
@@ -594,10 +596,10 @@ bool cmCTestMemCheckHandler::InitializeMemoryChecking()
     }
   if(this->MemoryTester.empty())
     {
-    cmCTestLog(this->CTest, WARNING,
+    cmCTestOptionalLog(this->CTest, WARNING,
                "Memory checker (MemoryCheckCommand) "
                "not set, or cannot find the specified program."
-               << std::endl);
+               << std::endl, this->Quiet);
     return false;
     }
 
@@ -981,17 +983,18 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
     "locked by a different thread");
   std::vector<std::string::size_type> nonValGrindOutput;
   double sttime = cmSystemTools::GetTime();
-  cmCTestLog(this->CTest, DEBUG, "Start test: " << lines.size() << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG,
+    "Start test: " << lines.size() << std::endl, this->Quiet);
   std::string::size_type totalOutputSize = 0;
   for ( cc = 0; cc < lines.size(); cc ++ )
     {
-    cmCTestLog(this->CTest, DEBUG, "test line "
-               << lines[cc] << std::endl);
+    cmCTestOptionalLog(this->CTest, DEBUG, "test line "
+               << lines[cc] << std::endl, this->Quiet);
 
     if ( valgrindLine.find(lines[cc]) )
       {
-      cmCTestLog(this->CTest, DEBUG, "valgrind  line "
-                 << lines[cc] << std::endl);
+      cmCTestOptionalLog(this->CTest, DEBUG, "valgrind  line "
+                 << lines[cc] << std::endl, this->Quiet);
       int failure = cmCTestMemCheckHandler::NO_MEMORY_FAULT;
       if ( vgFIM.find(lines[cc]) )
         {
@@ -1075,10 +1078,10 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
         nonValGrindOutput.begin(); i != nonValGrindOutput.end(); ++i)
     {
     totalOutputSize += lines[*i].size();
-    cmCTestLog(this->CTest, DEBUG, "before xml safe "
-               << lines[*i] << std::endl);
-    cmCTestLog(this->CTest, DEBUG, "after  xml safe "
-               <<  cmXMLSafe(lines[*i]) << std::endl);
+    cmCTestOptionalLog(this->CTest, DEBUG, "before xml safe "
+               << lines[*i] << std::endl, this->Quiet);
+    cmCTestOptionalLog(this->CTest, DEBUG, "after  xml safe "
+               <<  cmXMLSafe(lines[*i]) << std::endl, this->Quiet);
     ostr << cmXMLSafe(lines[*i]) << std::endl;
     if(!unlimitedOutput && totalOutputSize >
        static_cast<size_t>(this->CustomMaximumFailedTestOutputSize))
@@ -1091,8 +1094,8 @@ bool cmCTestMemCheckHandler::ProcessMemCheckValgrindOutput(
       break;  // stop the copy of output if we are full
       }
     }
-  cmCTestLog(this->CTest, DEBUG, "End test (elapsed: "
-             << (cmSystemTools::GetTime() - sttime) << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG, "End test (elapsed: "
+             << (cmSystemTools::GetTime() - sttime) << std::endl, this->Quiet);
   log = ostr.str();
   if ( defects )
     {
@@ -1112,7 +1115,8 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
   double sttime = cmSystemTools::GetTime();
   std::vector<std::string> lines;
   cmSystemTools::Split(str.c_str(), lines);
-  cmCTestLog(this->CTest, DEBUG, "Start test: " << lines.size() << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG,
+    "Start test: " << lines.size() << std::endl, this->Quiet);
   std::vector<std::string>::size_type cc;
   for ( cc = 0; cc < lines.size(); cc ++ )
     {
@@ -1148,8 +1152,8 @@ bool cmCTestMemCheckHandler::ProcessMemCheckBoundsCheckerOutput(
     results[parser.Errors[cc]]++;
     defects++;
     }
-  cmCTestLog(this->CTest, DEBUG, "End test (elapsed: "
-    << (cmSystemTools::GetTime() - sttime) << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG, "End test (elapsed: "
+    << (cmSystemTools::GetTime() - sttime) << std::endl, this->Quiet);
   if(defects)
     {
     // only put the output of Bounds Checker if there were
@@ -1165,9 +1169,9 @@ void
 cmCTestMemCheckHandler::PostProcessTest(cmCTestTestResult& res,
                                         int test)
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessTest memcheck results for : "
-             << res.Name << std::endl);
+             << res.Name << std::endl, this->Quiet);
   if(this->MemoryTesterStyle
      == cmCTestMemCheckHandler::BOUNDS_CHECKER)
     {
@@ -1192,9 +1196,9 @@ void
 cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
                                                      int test)
 {
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
              "PostProcessBoundsCheckerTest for : "
-             << res.Name << std::endl);
+             << res.Name << std::endl, this->Quiet);
   std::vector<std::string> files;
   this->TestOutputFileNames(test, files);
   if (files.empty())
@@ -1226,11 +1230,11 @@ cmCTestMemCheckHandler::PostProcessBoundsCheckerTest(cmCTestTestResult& res,
   }
   cmSystemTools::Delay(1000);
   cmSystemTools::RemoveFile(this->BoundsCheckerDPBDFile);
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
-    << this->BoundsCheckerDPBDFile << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
+    << this->BoundsCheckerDPBDFile << std::endl, this->Quiet);
   cmSystemTools::RemoveFile(this->BoundsCheckerXMLFile);
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
-    << this->BoundsCheckerXMLFile << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "
+    << this->BoundsCheckerXMLFile << std::endl, this->Quiet);
 }
 
 void
@@ -1260,7 +1264,8 @@ cmCTestMemCheckHandler::AppendMemTesterOutput(cmCTestTestResult& res,
   if(this->LogWithPID)
     {
     cmSystemTools::RemoveFile(ofile);
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Remove: "<< ofile <<"\n");
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Remove: "<< ofile <<"\n", this->Quiet);
     }
 }
 

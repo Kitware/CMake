@@ -9,6 +9,7 @@ Submit results to a dashboard server.
                [RETRY_COUNT count]
                [RETRY_DELAY delay]
                [RETURN_VALUE res]
+               [QUIET]
                )
 
 By default all available parts are submitted if no PARTS or FILES are
@@ -37,6 +38,9 @@ timed-out submission before attempting to re-submit.
 
 The RETRY_COUNT option specifies how many times to retry a timed-out
 submission.
+
+The QUIET option suppresses all non-error messages that would have
+otherwise been printed by this call to ctest_submit().
 
 Submit to CDash Upload API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^

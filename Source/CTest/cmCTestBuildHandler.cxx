@@ -286,9 +286,9 @@ std::string cmCTestBuildHandler::GetMakeCommand()
 {
   std::string makeCommand
     = this->CTest->GetCTestConfiguration("MakeCommand");
-  cmCTestLog(this->CTest,
-             HANDLER_VERBOSE_OUTPUT, "MakeCommand:" << makeCommand <<
-             "\n");
+  cmCTestOptionalLog(this->CTest,
+    HANDLER_VERBOSE_OUTPUT, "MakeCommand:" << makeCommand << "\n",
+    this->Quiet);
 
   std::string configType = this->CTest->GetConfigType();
   if (configType == "")
@@ -312,7 +312,8 @@ std::string cmCTestBuildHandler::GetMakeCommand()
 //functions and commented...
 int cmCTestBuildHandler::ProcessHandler()
 {
-  cmCTestLog(this->CTest, HANDLER_OUTPUT, "Build project" << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "Build project" << std::endl,
+    this->Quiet);
 
   // do we have time for this
   if (this->CTest->GetRemainingTimeAllowed() < 120)
@@ -401,12 +402,12 @@ int cmCTestBuildHandler::ProcessHandler()
 
 #define cmCTestBuildHandlerPopulateRegexVector(strings, regexes) \
   regexes.clear(); \
-    cmCTestLog(this->CTest, DEBUG, this << "Add " #regexes \
-    << std::endl); \
+    cmCTestOptionalLog(this->CTest, DEBUG, this << "Add " #regexes \
+    << std::endl, this->Quiet); \
   for ( it = strings.begin(); it != strings.end(); ++it ) \
     { \
-    cmCTestLog(this->CTest, DEBUG, "Add " #strings ": " \
-    << *it << std::endl); \
+    cmCTestOptionalLog(this->CTest, DEBUG, "Add " #strings ": " \
+    << *it << std::endl, this->Quiet); \
     regexes.push_back(it->c_str()); \
     }
   cmCTestBuildHandlerPopulateRegexVector(
@@ -472,8 +473,8 @@ int cmCTestBuildHandler::ProcessHandler()
     }
   else
     {
-    cmCTestLog(this->CTest, DEBUG, "Build with command: " << makeCommand
-      << std::endl);
+    cmCTestOptionalLog(this->CTest, DEBUG, "Build with command: " <<
+      makeCommand << std::endl, this->Quiet);
     }
 
   // Remember end build time and calculate elapsed time
@@ -906,13 +907,16 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     }
   argv.push_back(0);
 
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run command:");
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run command:",
+    this->Quiet);
   std::vector<const char*>::iterator ait;
   for ( ait = argv.begin(); ait != argv.end() && *ait; ++ ait )
     {
-    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " \"" << *ait << "\"");
+    cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, " \"" << *ait <<
+      "\"", this->Quiet);
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl,
+    this->Quiet);
 
   // Optionally use make rule launchers to record errors and warnings.
   LaunchHelper launchHelper(this);
@@ -932,12 +936,12 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
 
   char* data;
   int length;
-  cmCTestLog(this->CTest, HANDLER_OUTPUT,
+  cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT,
     "   Each symbol represents " << tick_len << " bytes of output."
     << std::endl
     << (this->UseCTestLaunch? "" :
         "   '!' represents an error and '*' a warning.\n")
-    << "    " << std::flush);
+    << "    " << std::flush, this->Quiet);
 
   // Initialize building structures
   this->BuildProcessingQueue.clear();
@@ -980,8 +984,9 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
   this->ProcessBuffer(0, 0, tick, tick_len, ofs, &this->BuildProcessingQueue);
   this->ProcessBuffer(0, 0, tick, tick_len, ofs,
     &this->BuildProcessingErrorQueue);
-  cmCTestLog(this->CTest, OUTPUT, " Size of output: "
-    << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl);
+  cmCTestOptionalLog(this->CTest, OUTPUT, " Size of output: "
+    << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl,
+    this->Quiet);
 
   // Properly handle output of the build command
   cmsysProcess_WaitForExit(cp, 0);
@@ -992,8 +997,8 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     if (retVal)
       {
       *retVal = cmsysProcess_GetExitValue(cp);
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
-      "Command exited with the value: " << *retVal << std::endl);
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      "Command exited with the value: " << *retVal << std::endl, this->Quiet);
       // if a non zero return value
       if (*retVal)
         {
@@ -1017,13 +1022,14 @@ int cmCTestBuildHandler::RunMakeCommand(const char* command,
     if (retVal)
       {
       *retVal = cmsysProcess_GetExitException(cp);
-      cmCTestLog(this->CTest, WARNING, "There was an exception: " << *retVal
-                 << std::endl);
+      cmCTestOptionalLog(this->CTest, WARNING, "There was an exception: " <<
+        *retVal << std::endl, this->Quiet);
       }
     }
   else if(result == cmsysProcess_State_Expired)
     {
-    cmCTestLog(this->CTest, WARNING, "There was a timeout" << std::endl);
+    cmCTestOptionalLog(this->CTest, WARNING, "There was a timeout" <<
+      std::endl, this->Quiet);
     }
   else if(result == cmsysProcess_State_Error)
     {
@@ -1185,13 +1191,14 @@ void cmCTestBuildHandler::ProcessBuffer(const char* data, int length,
   while ( this->BuildOutputLogSize > (tick * tick_len) )
     {
     tick ++;
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, this->LastTickChar);
+    cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, this->LastTickChar,
+      this->Quiet);
     tickDisplayed = true;
     if ( tick % tick_line_len == 0 && tick > 0 )
       {
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "  Size: "
+      cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "  Size: "
         << ((this->BuildOutputLogSize + 512) / 1024) << "K" << std::endl
-        << "    ");
+        << "    ", this->Quiet);
       }
     }
   if ( tickDisplayed )
@@ -1216,7 +1223,8 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
     return b_REGULAR_LINE;
     }
 
-  cmCTestLog(this->CTest, DEBUG, "Line: [" << data << "]" << std::endl);
+  cmCTestOptionalLog(this->CTest, DEBUG, "Line: [" << data << "]" <<
+    std::endl, this->Quiet);
 
   std::vector<cmsys::RegularExpression>::iterator it;
 
@@ -1236,9 +1244,9 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
       if ( it->find(data) )
         {
         errorLine = 1;
-        cmCTestLog(this->CTest, DEBUG, "  Error Line: " << data
+        cmCTestOptionalLog(this->CTest, DEBUG, "  Error Line: " << data
           << " (matches: " << this->CustomErrorMatches[wrxCnt] << ")"
-          << std::endl);
+          << std::endl, this->Quiet);
         break;
         }
       wrxCnt ++;
@@ -1252,9 +1260,9 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
       if ( it->find(data) )
         {
         errorLine = 0;
-        cmCTestLog(this->CTest, DEBUG, "  Not an error Line: " << data
+        cmCTestOptionalLog(this->CTest, DEBUG, "  Not an error Line: " << data
           << " (matches: " << this->CustomErrorExceptions[wrxCnt] << ")"
-          << std::endl);
+          << std::endl, this->Quiet);
         break;
         }
       wrxCnt ++;
@@ -1271,10 +1279,10 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
       if ( it->find(data) )
         {
         warningLine = 1;
-        cmCTestLog(this->CTest, DEBUG,
+        cmCTestOptionalLog(this->CTest, DEBUG,
           "  Warning Line: " << data
           << " (matches: " << this->CustomWarningMatches[wrxCnt] << ")"
-          << std::endl);
+          << std::endl, this->Quiet);
         break;
         }
       wrxCnt ++;
@@ -1289,9 +1297,9 @@ int cmCTestBuildHandler::ProcessSingleLine(const char* data)
       if ( it->find(data) )
         {
         warningLine = 0;
-        cmCTestLog(this->CTest, DEBUG, "  Not a warning Line: " << data
+        cmCTestOptionalLog(this->CTest, DEBUG, "  Not a warning Line: " << data
           << " (matches: " << this->CustomWarningExceptions[wrxCnt] << ")"
-          << std::endl);
+          << std::endl, this->Quiet);
         break;
         }
       wrxCnt ++;

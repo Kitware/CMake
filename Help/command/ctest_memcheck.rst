@@ -26,3 +26,7 @@ the number of tests to be run in parallel.
 The APPEND option marks results for append to those previously
 submitted to a dashboard server since the last ctest_start.  Append
 semantics are defined by the dashboard server in use.
+
+The QUIET option suppresses any CTest-specific non-error messages
+that would have otherwise been printed to the console.  Output from
+the underlying tests are not affected.

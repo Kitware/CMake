@@ -44,29 +44,33 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     // error: CDash requires CTEST_DROP_LOCATION definition
     // in CTestConfig.cmake
     }
-  this->CTest->SetCTestConfiguration("ProjectName", ctestProjectName);
-  this->CTest->SetCTestConfiguration("DropMethod", ctestDropMethod);
-  this->CTest->SetCTestConfiguration("DropSite", ctestDropSite);
-  this->CTest->SetCTestConfiguration("DropLocation", ctestDropLocation);
+  this->CTest->SetCTestConfiguration("ProjectName", ctestProjectName,
+    this->Quiet);
+  this->CTest->SetCTestConfiguration("DropMethod", ctestDropMethod,
+    this->Quiet);
+  this->CTest->SetCTestConfiguration("DropSite", ctestDropSite, this->Quiet);
+  this->CTest->SetCTestConfiguration("DropLocation", ctestDropLocation,
+    this->Quiet);
 
   this->CTest->SetCTestConfiguration("IsCDash",
-    ctestDropSiteCDash ? "TRUE" : "FALSE");
+    ctestDropSiteCDash ? "TRUE" : "FALSE", this->Quiet);
 
   // Only propagate TriggerSite for non-CDash projects:
   //
   if ( !ctestDropSiteCDash )
     {
-    this->CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite);
+    this->CTest->SetCTestConfiguration("TriggerSite",  ctestTriggerSite,
+      this->Quiet);
     }
 
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "CurlOptions", "CTEST_CURL_OPTIONS");
+    "CurlOptions", "CTEST_CURL_OPTIONS", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "DropSiteUser", "CTEST_DROP_SITE_USER");
+    "DropSiteUser", "CTEST_DROP_SITE_USER", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "DropSitePassword", "CTEST_DROP_SITE_PASSWORD");
+    "DropSitePassword", "CTEST_DROP_SITE_PASSWORD", this->Quiet);
   this->CTest->SetCTestConfigurationFromCMakeVariable(this->Makefile,
-    "ScpCommand", "CTEST_SCP_COMMAND");
+    "ScpCommand", "CTEST_SCP_COMMAND", this->Quiet);
 
   const char* notesFilesVariable
     = this->Makefile->GetDefinition("CTEST_NOTES_FILES");
@@ -144,6 +148,8 @@ cmCTestGenericHandler* cmCTestSubmitCommand::InitializeHandler()
     this->RetryCount.c_str());
   static_cast<cmCTestSubmitHandler*>(handler)->SetOption("InternalTest",
     this->InternalTest ? "ON" : "OFF");
+
+  handler->SetQuiet(this->Quiet);
 
   if (this->CDashUpload)
     {

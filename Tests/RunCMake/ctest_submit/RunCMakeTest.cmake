@@ -24,6 +24,7 @@ run_ctest_submit(CDashUploadFILES CDASH_UPLOAD bad-upload FILES)
 run_ctest_submit(CDashUploadRETRY_COUNT CDASH_UPLOAD bad-upload RETRY_COUNT)
 run_ctest_submit(CDashUploadRETRY_DELAY CDASH_UPLOAD bad-upload RETRY_DELAY)
 run_ctest_submit(CDashUploadNone CDASH_UPLOAD)
+run_ctest_submit(CDashSubmitQuiet QUIET)
 
 function(run_ctest_CDashUploadFTP)
   set(CASE_DROP_METHOD ftp)
