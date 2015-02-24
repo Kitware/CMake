@@ -64,10 +64,9 @@ add_RunCMake_test(CMP0053)
 add_RunCMake_test(CMP0054)
 add_RunCMake_test(CMP0055)
 add_RunCMake_test(CTest)
-add_RunCMake_test(CTestSubmit)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)
-  add_RunCMake_test(CTestMemcheck
+  add_RunCMake_test(ctest_memcheck
     -DPSEUDO_BC=$<TARGET_FILE:pseudo_BC>
     -DPSEUDO_PURIFY=$<TARGET_FILE:pseudo_purify>
     -DPSEUDO_VALGRIND=$<TARGET_FILE:pseudo_valgrind>
@@ -130,6 +129,7 @@ add_RunCMake_test(build_command)
 add_RunCMake_test(export)
 add_RunCMake_test(cmake_minimum_required)
 add_RunCMake_test(continue)
+add_RunCMake_test(ctest_submit)
 add_RunCMake_test(file)
 add_RunCMake_test(find_file)
 add_RunCMake_test(find_library)

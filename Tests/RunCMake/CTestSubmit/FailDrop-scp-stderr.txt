@@ -1,2 +1,0 @@
-   Problems when submitting via SCP
-Error in read script: .*/Tests/RunCMake/CTestSubmit/FailDrop-scp/test.cmake

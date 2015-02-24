@@ -22,6 +22,16 @@ but do not actually build anything.  To add a test:
 
    to fully customize the test case command-line.
 
+   Alternatively, if the test is to cover running ``ctest -S`` then use::
+
+    include(RunCTest)
+    run_ctest(SubTest1)
+    ...
+    run_ctest(SubTestN)
+
+   and create ``test.cmake.in``, ``CTestConfig.cmake.in``, and
+   ``CMakeLists.txt.in`` files to be configured for each case.
+
 4. Create file ``<Test>/CMakeLists.txt`` in the directory containing::
 
     cmake_minimum_required(...)
