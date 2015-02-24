@@ -125,4 +125,3 @@ mark_as_advanced(
   MATLAB_FOUND
   MATLAB_ROOT
 )
-
