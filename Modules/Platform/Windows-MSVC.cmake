@@ -271,5 +271,9 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
   set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
 
+  if(NOT CMAKE_RC_FLAGS_INIT)
+    set(CMAKE_RC_FLAGS_INIT "${_PLATFORM_DEFINES} ${_PLATFORM_DEFINES_${lang}}")
+  endif()
+
   enable_language(RC)
 endmacro()
