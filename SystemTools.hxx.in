@@ -385,9 +385,12 @@ public:
   /** 
    * Get the real path for a given path, removing all symlinks.  In
    * the event of an error (non-existent path, permissions issue,
-   * etc.) the original path is returned.
+   * etc.) the original path is returned if errorMessage pointer is
+   * NULL.  Otherwise empty string is returned and errorMessage
+   * contains error description.
    */
-  static kwsys_stl::string GetRealPath(const kwsys_stl::string& path);
+  static kwsys_stl::string GetRealPath(const kwsys_stl::string& path,
+                                       kwsys_stl::string* errorMessage = 0);
 
   /**
    * Split a path name into its root component and the rest of the

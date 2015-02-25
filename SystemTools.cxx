@@ -250,16 +250,45 @@ inline int Chdir(const kwsys_stl::string& dir)
   return _wchdir(KWSYS_NAMESPACE::Encoding::ToWide(dir).c_str());
   #endif
 }
-inline void Realpath(const kwsys_stl::string& path, kwsys_stl::string & resolved_path)
+inline void Realpath(const kwsys_stl::string& path,
+                     kwsys_stl::string& resolved_path,
+                     kwsys_stl::string* errorMessage = 0)
 {
   kwsys_stl::wstring tmp = KWSYS_NAMESPACE::Encoding::ToWide(path);
   wchar_t *ptemp;
   wchar_t fullpath[MAX_PATH];
-  if( GetFullPathNameW(tmp.c_str(), sizeof(fullpath)/sizeof(fullpath[0]),
-                       fullpath, &ptemp) )
+  DWORD bufferLen = GetFullPathNameW(tmp.c_str(),
+      sizeof(fullpath) / sizeof(fullpath[0]),
+      fullpath, &ptemp);
+  if( bufferLen < sizeof(fullpath)/sizeof(fullpath[0]) )
     {
     resolved_path = KWSYS_NAMESPACE::Encoding::ToNarrow(fullpath);
     KWSYS_NAMESPACE::SystemTools::ConvertToUnixSlashes(resolved_path);
+    }
+  else if(errorMessage)
+    {
+    if(bufferLen)
+      {
+      *errorMessage = "Destination path buffer size too small.";
+      }
+    else if(unsigned int errorId = GetLastError())
+      {
+      LPSTR message = NULL;
+      DWORD size = FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER
+                                   | FORMAT_MESSAGE_FROM_SYSTEM
+                                   | FORMAT_MESSAGE_IGNORE_INSERTS,
+                                   NULL, errorId,
+                                   MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+                                   (LPSTR)&message, 0, NULL);
+      *errorMessage = std::string(message, size);
+      LocalFree(message);
+      }
+    else
+      {
+      *errorMessage = "Unknown error.";
+      }
+
+    resolved_path = "";
     }
   else
     {
@@ -287,14 +316,30 @@ inline int Chdir(const kwsys_stl::string& dir)
 {
   return chdir(dir.c_str());
 }
-inline void Realpath(const kwsys_stl::string& path, kwsys_stl::string & resolved_path)
+inline void Realpath(const kwsys_stl::string& path,
+                     kwsys_stl::string& resolved_path,
+                     kwsys_stl::string* errorMessage = 0)
 {
   char resolved_name[KWSYS_SYSTEMTOOLS_MAXPATH];
 
+  errno = 0;
   char *ret = realpath(path.c_str(), resolved_name);
   if(ret)
     {
     resolved_path = ret;
+    }
+  else if(errorMessage)
+    {
+    if(errno)
+      {
+      *errorMessage = strerror(errno);
+      }
+    else
+      {
+      *errorMessage = "Unknown error.";
+      }
+
+    resolved_path = "";
     }
   else
     {
@@ -3046,10 +3091,11 @@ kwsys_stl::string SystemTools
   return "";
 }
 
-kwsys_stl::string SystemTools::GetRealPath(const kwsys_stl::string& path)
+kwsys_stl::string SystemTools::GetRealPath(const kwsys_stl::string& path,
+                                           kwsys_stl::string* errorMessage)
 {
   kwsys_stl::string ret;
-  Realpath(path, ret);
+  Realpath(path, ret, errorMessage);
   return ret;
 }
 
