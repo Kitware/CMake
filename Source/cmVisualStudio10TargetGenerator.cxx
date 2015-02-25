@@ -2522,7 +2522,8 @@ WriteMidlOptions(std::string const& /*config*/,
     }
   this->WriteString("%(AdditionalIncludeDirectories)"
                     "</AdditionalIncludeDirectories>\n", 0);
-  this->WriteString("<OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>\n", 3);
+  this->WriteString("<OutputDirectory>$(ProjectDir)/$(IntDir)"
+                    "</OutputDirectory>\n", 3);
   this->WriteString("<HeaderFileName>%(Filename).h</HeaderFileName>\n", 3);
   this->WriteString(
     "<TypeLibraryName>%(Filename).tlb</TypeLibraryName>\n", 3);
