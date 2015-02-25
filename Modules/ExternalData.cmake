@@ -155,13 +155,23 @@ calling any of the functions provided by this module.
   inactivity timeout, in seconds, with a default of ``60`` seconds.
   Set to ``0`` to disable enforcement.
 
+.. variable:: ExternalData_URL_ALGO_<algo>_<key>
+
+  Specify a custom URL component to be substituted for URL template
+  placeholders of the form ``%(algo:<key>)``, where ``<key>`` is a
+  valid C identifier, when fetching an object referenced via hash
+  algorithm ``<algo>``.  If not defined, the default URL component
+  is just ``<algo>`` for any ``<key>``.
+
 .. variable:: ExternalData_URL_TEMPLATES
 
   The ``ExternalData_URL_TEMPLATES`` may be set to provide a list of
   of URL templates using the placeholders ``%(algo)`` and ``%(hash)``
   in each template.  Data fetch rules try each URL template in order
   by substituting the hash algorithm name for ``%(algo)`` and the hash
-  value for ``%(hash)``.
+  value for ``%(hash)``.  Alternatively one may use ``%(algo:<key>)``
+  with ``ExternalData_URL_ALGO_<algo>_<key>`` variables to gain more
+  flexibility in remote URLs.
 
 Referencing Files
 ^^^^^^^^^^^^^^^^^
@@ -347,6 +357,25 @@ function(ExternalData_add_target target)
           "Bad ExternalDataCustomScript key '${key}' in URL template:\n"
           " ${url_template}\n"
           "The key must be a valid C identifier.")
+      endif()
+    endif()
+
+    # Store custom algorithm name to URL component maps.
+    if("${url_template}" MATCHES "%\\(algo:([^)]*)\\)")
+      set(key "${CMAKE_MATCH_1}")
+      if(key MATCHES "^[A-Za-z_][A-Za-z0-9_]*$")
+        string(REPLACE "|" ";" _algos "${_ExternalData_REGEX_ALGO}")
+        foreach(algo ${_algos})
+          if(DEFINED ExternalData_URL_ALGO_${algo}_${key})
+            string(CONCAT _ExternalData_CONFIG_CODE "${_ExternalData_CONFIG_CODE}\n"
+              "set(ExternalData_URL_ALGO_${algo}_${key} \"${ExternalData_URL_ALGO_${algo}_${key}}\")")
+          endif()
+        endforeach()
+      else()
+        message(FATAL_ERROR
+          "Bad %(algo:${key}) in URL template:\n"
+          " ${url_template}\n"
+          "The transform name must be a valid C identifier.")
       endif()
     endif()
   endforeach()
@@ -904,6 +933,16 @@ function(_ExternalData_download_object name hash algo var_obj)
   foreach(url_template IN LISTS ExternalData_URL_TEMPLATES)
     string(REPLACE "%(hash)" "${hash}" url_tmp "${url_template}")
     string(REPLACE "%(algo)" "${algo}" url "${url_tmp}")
+    if(url MATCHES "^(.*)%\\(algo:([A-Za-z_][A-Za-z0-9_]*)\\)(.*)$")
+      set(lhs "${CMAKE_MATCH_1}")
+      set(key "${CMAKE_MATCH_2}")
+      set(rhs "${CMAKE_MATCH_3}")
+      if(DEFINED ExternalData_URL_ALGO_${algo}_${key})
+        set(url "${lhs}${ExternalData_URL_ALGO_${algo}_${key}}${rhs}")
+      else()
+        set(url "${lhs}${algo}${rhs}")
+      endif()
+    endif()
     message(STATUS "Fetching \"${url}\"")
     if(url MATCHES "^ExternalDataCustomScript://([A-Za-z_][A-Za-z0-9_]*)/(.*)$")
       _ExternalData_custom_fetch("${CMAKE_MATCH_1}" "${CMAKE_MATCH_2}" "${tmp}" err errMsg)
