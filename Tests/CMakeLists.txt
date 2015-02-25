@@ -2743,48 +2743,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     --output-log "${CMake_BINARY_DIR}/Tests/CTestTestFdSetSize/testOutput.log"
     )
 
-  function(add_failed_submit_test name source build in out log regex)
-    configure_file("${in}" "${out}" @ONLY)
-    add_test(${name} ${CMAKE_CTEST_COMMAND} -S "${out}" -V --output-log "${log}")
-    set_tests_properties(${name} PROPERTIES PASS_REGULAR_EXPRESSION "${regex}")
-  endfunction()
-
-  set(regex "(Problems when submitting via S*CP")
-  set(regex "${regex}|Error message was: ")
-  set(regex "${regex}([Cc]ould *n.t resolve host")
-  set(regex "${regex}|[Cc]ould *n.t connect to host")
-  set(regex "${regex}|Failed *t*o* connect to")
-  set(regex "${regex}|Connection timed out after [0-9]+ milliseconds")
-  set(regex "${regex}|Empty reply from server")
-  set(regex "${regex}|The requested URL returned error")
-  set(regex "${regex}|libcurl was built with SSL disabled. https: not supported)")
-  set(regex "${regex}|Submission method .xmlrpc. not compiled into CTest")
-  set(regex "${regex}|Submission problem")
-  set(regex "${regex}|Submission successful)")
-
-  set(ctest_coverage_labels_args "")
-
-  foreach(drop_method cp ftp http https scp xmlrpc)
-    # Cycle through these values each time through the loop:
-    if(ctest_coverage_labels_args STREQUAL "")
-      set(ctest_coverage_labels_args "LABELS Everything")
-    elseif(ctest_coverage_labels_args STREQUAL "LABELS Everything")
-      set(ctest_coverage_labels_args "LABELS 0ArgTest")
-    else()
-      set(ctest_coverage_labels_args "")
-    endif()
-
-    add_failed_submit_test(CTestTestFailedSubmit-${drop_method}
-      "${CMake_SOURCE_DIR}/Tests/CTestTest/SmallAndFast"
-      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/${drop_method}"
-      "${CMake_SOURCE_DIR}/Tests/CTestTestFailedSubmits/test.cmake.in"
-      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/test-${drop_method}.cmake"
-      "${CMake_BINARY_DIR}/Tests/CTestTestFailedSubmits/test-${drop_method}.log"
-      "${regex}"
-      )
-  endforeach()
-
-
   if (CMAKE_TESTS_CDASH_SERVER)
     set(regex "^([^:]+)://([^/]+)(.*)$")
 
