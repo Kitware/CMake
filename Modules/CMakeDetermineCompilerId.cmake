@@ -508,8 +508,6 @@ function(CMAKE_DETERMINE_COMPILER_ID_CHECK lang file)
         set(ARCHITECTURE_ID "SH4")
       elseif(peheader STREQUAL "50450000a801")
         set(ARCHITECTURE_ID "SH5")
-      elseif(peheader STREQUAL "50450000c201")
-        set(ARCHITECTURE_ID "THUMB")
       endif()
     endif()
 
