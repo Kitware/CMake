@@ -61,8 +61,6 @@ if(NOT CMAKE_GENERATOR_RC AND CMAKE_GENERATOR MATCHES "Unix Makefiles")
   set(CMAKE_GENERATOR_RC windres)
 endif()
 
-enable_language(RC)
-
 macro(__windows_compiler_gnu lang)
 
   if(MSYS OR MINGW)
@@ -139,6 +137,8 @@ macro(__windows_compiler_gnu lang)
         )
     endforeach()
   endif()
+
+  enable_language(RC)
 endmacro()
 
 macro(__windows_compiler_gnu_abi lang)
