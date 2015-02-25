@@ -55,7 +55,6 @@ endif()
 
 # make sure to enable languages after setting configuration types
 enable_language(RC)
-set(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
 
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(MSVC_IDE 1)
