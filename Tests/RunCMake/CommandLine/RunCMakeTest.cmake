@@ -18,6 +18,22 @@ run_cmake_command(build-no-generator
 run_cmake_command(build-bad-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
 
+if(RunCMake_GENERATOR STREQUAL "Ninja")
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/Build-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  set(RunCMake_TEST_OPTIONS -DCMAKE_VERBOSE_MAKEFILE=1)
+  run_cmake(Build)
+  unset(RunCMake_TEST_OPTIONS)
+  run_cmake_command(Build-ninja-v ${CMAKE_COMMAND} --build .)
+
+  unset(RunCMake_TEST_BINARY_DIR)
+  unset(RunCMake_TEST_NO_CLEAN)
+endif()
+
 if(UNIX)
   run_cmake_command(E_create_symlink-missing-dir
     ${CMAKE_COMMAND} -E create_symlink T missing-dir/L
