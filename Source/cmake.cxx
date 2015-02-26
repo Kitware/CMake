@@ -2789,11 +2789,16 @@ int cmake::Build(const std::string& dir,
     return 1;
     }
   projName = it.GetValue();
+  bool verbose = false;
+  if(it.Find("CMAKE_VERBOSE_MAKEFILE"))
+    {
+    verbose = it.GetValueAsBool();
+    }
   return gen->Build("", dir,
                     projName, target,
                     output,
                     "",
-                    config, clean, false, 0,
+                    config, clean, false, verbose, 0,
                     cmSystemTools::OUTPUT_PASSTHROUGH,
                     nativeOptions);
 }

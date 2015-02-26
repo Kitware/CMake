@@ -310,7 +310,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
       output, this->BuildMakeProgram,
       config,
       !this->BuildNoClean,
-      false, remainingTime);
+      false, false, remainingTime);
     out << output;
     // if the build failed then return
     if (retVal)

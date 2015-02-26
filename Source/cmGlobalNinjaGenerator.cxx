@@ -574,11 +574,17 @@ void cmGlobalNinjaGenerator
                        const std::string& targetName,
                        const std::string& /*config*/,
                        bool /*fast*/,
+                       bool verbose,
                        std::vector<std::string> const& makeOptions)
 {
   makeCommand.push_back(
     this->SelectMakeProgram(makeProgram)
     );
+
+  if(verbose)
+    {
+    makeCommand.push_back("-v");
+    }
 
   makeCommand.insert(makeCommand.end(),
                      makeOptions.begin(), makeOptions.end());

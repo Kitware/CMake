@@ -134,7 +134,7 @@ public:
             const std::string& projectName, const std::string& targetName,
             std::string& output,
             const std::string& makeProgram, const std::string& config,
-            bool clean, bool fast,
+            bool clean, bool fast, bool verbose,
             double timeout,
             cmSystemTools::OutputOption outputflag=cmSystemTools::OUTPUT_NONE,
             std::vector<std::string> const& nativeOptions =
@@ -144,7 +144,8 @@ public:
     std::vector<std::string>& makeCommand,
     const std::string& makeProgram,
     const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
+    const std::string& targetName, const std::string& config,
+    bool fast, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
 
