@@ -192,7 +192,11 @@ if(CPackGen MATCHES "RPM")
         set(spec_regex "*Unspecified*")
         set(check_content_list "^/usr/foo/bar
 /usr/foo/bar/bin
-/usr/foo/bar/bin/mylibapp2$")
+/usr/foo/bar/bin/@in@_@path@@with
+/usr/foo/bar/bin/@in@_@path@@with/@and
+/usr/foo/bar/bin/@in@_@path@@with/@and/@
+/usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@
+/usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@/mylibapp2$")
       else()
         message(FATAL_ERROR "error: unexpected rpm package '${check_file}'")
       endif()
@@ -242,30 +246,6 @@ if(CPackGen MATCHES "RPM")
         endif()
 
         message(FATAL_ERROR "error: '${check_file}' rpm package content does not match expected value - regex '${check_content_list}'; RPM output: '${check_package_content}'; generated spec file: '${spec_file_content}'")
-      endif()
-    endforeach()
-
-    # test package content
-    foreach(check_file ${expected_file})
-      string(REGEX MATCH ".*Unspecified.*" check_file_Unspecified_match ${check_file})
-
-      if(check_file_Unspecified_match)
-        execute_process(COMMAND ${RPM_EXECUTABLE} -pql ${check_file}
-            OUTPUT_VARIABLE check_file_content
-            ERROR_QUIET
-            OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-        string(REGEX MATCH ".*bin/@in@_@path@@with/@and/@/@in_path@/mylibapp2$" check_at_in_path ${check_file_content})
-
-        if(NOT check_at_in_path)
-          file(GLOB_RECURSE spec_file "${CPackComponentsForAll_BINARY_DIR}/*Unspecified*.spec")
-
-          if(spec_file)
-            file(READ ${spec_file} spec_file_content)
-          endif()
-
-          message(FATAL_ERROR "error: '${check_file}' rpm package path with @ characters is missing or invalid. RPM output: '${check_file_content}'; generated spec file: '${spec_file_content}'")
-        endif()
       endif()
     endforeach()
   endif()
