@@ -1,9 +1,7 @@
 macro
 -----
 
-Start recording a macro for later invocation as a command.
-
-::
+Start recording a macro for later invocation as a command::
 
   macro(<name> [arg1 [arg2 [arg3 ...]]])
     COMMAND1(ARGS ...)
@@ -11,22 +9,24 @@ Start recording a macro for later invocation as a command.
     ...
   endmacro(<name>)
 
-Define a macro named <name> that takes arguments named arg1 arg2 arg3
-(...).  Commands listed after macro, but before the matching endmacro,
-are not invoked until the macro is invoked.  When it is invoked, the
-commands recorded in the macro are first modified by replacing formal
-parameters (``${arg1}``) with the arguments passed, and then invoked as
-normal commands.  In addition to referencing the formal parameters you
-can reference the values ``${ARGC}`` which will be set to the number of
-arguments passed into the function as well as ``${ARGV0}`` ``${ARGV1}``
-``${ARGV2}`` ...  which will have the actual values of the arguments
-passed in.  This facilitates creating macros with optional arguments.
+Define a macro named ``<name>`` that takes arguments named ``arg1``,
+``arg2``, ``arg3``, (...).
+Commands listed after macro, but before the matching
+:command:`endmacro()`, are not invoked until the macro is invoked.
+When it is invoked, the commands recorded in the macro are first
+modified by replacing formal parameters (``${arg1}``) with the arguments
+passed, and then invoked as normal commands.
+In addition to referencing the formal parameters you can reference the
+values ``${ARGC}`` which will be set to the number of arguments passed
+into the function as well as ``${ARGV0}``, ``${ARGV1}``, ``${ARGV2}``,
+...  which will have the actual values of the arguments passed in.
+This facilitates creating macros with optional arguments.
 Additionally ``${ARGV}`` holds the list of all arguments given to the
 macro and ``${ARGN}`` holds the list of arguments past the last expected
 argument.
 
-See the cmake_policy() command documentation for the behavior of
-policies inside macros.
+See the :command:`cmake_policy()` command documentation for the behavior
+of policies inside macros.
 
 Macro Argument Caveats
 ^^^^^^^^^^^^^^^^^^^^^^
