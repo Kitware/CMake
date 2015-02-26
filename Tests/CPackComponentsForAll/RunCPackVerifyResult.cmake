@@ -144,7 +144,7 @@ if(CPackGen MATCHES "RPM")
     # CMAKE_SIZEOF_VOID_P is not set here but lib is prefix of lib64 so
     # relocation path test won't fail on OSes with lib64 library location
     include(GNUInstallDirs)
-    set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+    set(CPACK_PACKAGING_INSTALL_PREFIX "/usr/foo/bar")
 
     foreach(check_file ${expected_file})
       string(REGEX MATCH ".*libraries.*" check_file_libraries_match ${check_file})
@@ -157,30 +157,44 @@ if(CPackGen MATCHES "RPM")
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+      execute_process(COMMAND ${RPM_EXECUTABLE} -pql ${check_file}
+          OUTPUT_VARIABLE check_package_content
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
       if(check_file_libraries_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_libraries_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_RPM_libraries_PACKAGE_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
         set(spec_regex "*libraries*")
+        set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/lib.*\n/usr/foo/bar/lib.*/libmylib.a$")
       elseif(check_file_headers_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_COMPONENT_HEADERS_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
         set(spec_regex "*headers*")
+        set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/include\n/usr/foo/bar/include/mylib.h$")
       elseif(check_file_applications_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_COMPONENT_APPLICATIONS_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
         set(spec_regex "*applications*")
+        set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/bin\n/usr/foo/bar/bin/mylibapp$")
       elseif(check_file_Unspecified_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*DESCRIPTION.*")
         set(check_file_match_expected_relocation_path "Relocations : ${CPACK_PACKAGING_INSTALL_PREFIX} ${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
         set(spec_regex "*Unspecified*")
+        set(check_content_list "^/usr/foo/bar
+/usr/foo/bar/bin
+/usr/foo/bar/bin/mylibapp2$")
       else()
         message(FATAL_ERROR "error: unexpected rpm package '${check_file}'")
       endif()
 
+      #######################
+      # test package info
+      #######################
       string(REGEX MATCH ${check_file_match_expected_summary} check_file_match_summary ${check_file_content})
 
       if(NOT check_file_match_summary)
@@ -203,6 +217,21 @@ if(CPackGen MATCHES "RPM")
         endif()
 
         message(FATAL_ERROR "error: '${check_file}' rpm package relocation path does not match expected value - regex '${check_file_match_expected_relocation_path}'; RPM output: '${check_file_content}'; generated spec file: '${spec_file_content}'")
+      endif()
+
+      #######################
+      # test package content
+      #######################
+      string(REGEX MATCH "${check_content_list}" expected_content_list "${check_package_content}")
+
+      if(NOT expected_content_list)
+        file(GLOB_RECURSE spec_file "${CPackComponentsForAll_BINARY_DIR}/${spec_regex}.spec")
+
+        if(spec_file)
+          file(READ ${spec_file} spec_file_content)
+        endif()
+
+        message(FATAL_ERROR "error: '${check_file}' rpm package content does not match expected value - regex '${check_content_list}'; RPM output: '${check_package_content}'; generated spec file: '${spec_file_content}'")
       endif()
     endforeach()
   elseif(${CPackComponentWay} STREQUAL "IgnoreGroup")

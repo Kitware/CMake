@@ -6,9 +6,14 @@ if(CPACK_GENERATOR MATCHES "ZIP")
 endif()
 
 if(CPACK_GENERATOR MATCHES "RPM")
-  set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
-
   set(CPACK_RPM_COMPONENT_INSTALL "ON")
+
+  # test that /usr and /usr/foo get omitted in relocatable
+  # rpms as shortest relocation path is treated as base of
+  # package (/usr/foo/bar is relocatable and must exist)
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/usr/foo/bar")
+
+  # test requires
   set(CPACK_RPM_applications_PACKAGE_REQUIRES "mylib-libraries")
 
   # test package summary override
