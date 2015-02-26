@@ -470,10 +470,6 @@ public:
   /** Convert string to long. Expected that the whole string is an integer */
   static bool StringToLong(const char* str, long* value);
 
-  /** Return the load average of the machine. A negative value is returned on
-      error.  */
-  static double GetLoadAverage();
-
 #ifdef _WIN32
   struct WindowsFileRetry
   {

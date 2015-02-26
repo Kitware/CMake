@@ -20,6 +20,7 @@
 #include <list>
 #include <float.h>
 #include <cmsys/FStream.hxx>
+#include <cmsys/SystemInformation.hxx>
 
 class TestComparator
 {
@@ -265,13 +266,15 @@ void cmCTestMultiProcessHandler::StartNextTests()
   size_t minProcessorsRequired = this->ParallelLevel;
   std::string testWithMinProcessors = "";
 
+  cmsys::SystemInformation info;
+
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
     size_t processors = GetProcessorsUsed(*test);
-
+    const double systemLoad = info.GetLoadAverage();
     const bool maxLoadOk = (this->MaxLoad > 0) ?
-      processors <= (this->MaxLoad - cmSystemTools::GetLoadAverage()) : true;
+      processors <= (this->MaxLoad - systemLoad) : true;
 
     allTestsFailedMaxLoadCheck &= !maxLoadOk;
     if (processors <= minProcessorsRequired)
@@ -286,6 +289,23 @@ void cmCTestMultiProcessHandler::StartNextTests()
         {
         return;
         }
+
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** STARTED TEST : "
+        << GetName(*test)  << ",");
+      time_t currenttime = time(0);
+      struct tm* t = localtime(&currenttime);
+      char current_time[1024];
+      strftime(current_time, 1000, "%s", t);
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Time: "
+        << current_time << ",");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Load: "
+        << systemLoad << ",");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Max Allowed Load: "
+        << this->MaxLoad << ",");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Test Processors: "
+        << processors);
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
+
       numToStart -= processors;
       }
     else if(numToStart == 0)
@@ -296,15 +316,20 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
   if (allTestsFailedMaxLoadCheck)
     {
-    cmCTestLog(this->CTest, DEBUG, "Time: " << this->CTest->CurrentTime()
-      << std::endl);
-    cmCTestLog(this->CTest, DEBUG, "Current Load: "
-      << cmSystemTools::GetLoadAverage() << std::endl);
-    cmCTestLog(this->CTest, DEBUG, "Max Load: " << this->MaxLoad << std::endl);
-    cmCTestLog(this->CTest, DEBUG, " Smallest test " << testWithMinProcessors
-      << " requries " << minProcessorsRequired
-      << " cores/processes and can't be run without violating the max load."
-      << std::endl);
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** WAITING,");
+    time_t currenttime = time(0);
+    struct tm* t = localtime(&currenttime);
+    char current_time[1024];
+    strftime(current_time, 1000, "%s", t);
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Time: "
+      << current_time << ",");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Load: "
+      << info.GetLoadAverage() << ",");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Max Allowed Load: "
+      << this->MaxLoad << ",");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Smallest test "
+      << testWithMinProcessors << " requries " << minProcessorsRequired);
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
 
     // Wait before trying again...
     cmCTestScriptHandler::SleepInSeconds(1);
