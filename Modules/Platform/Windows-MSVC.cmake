@@ -53,10 +53,6 @@ if(NOT CMAKE_NO_BUILD_TYPE AND CMAKE_GENERATOR MATCHES "Visual Studio")
   set (CMAKE_NO_BUILD_TYPE 1)
 endif()
 
-# make sure to enable languages after setting configuration types
-enable_language(RC)
-set(CMAKE_COMPILE_RESOURCE "rc <FLAGS> /fo<OBJECT> <SOURCE>")
-
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(MSVC_IDE 1)
 else()
@@ -301,4 +297,10 @@ macro(__windows_compiler_msvc lang)
   set(CMAKE_${lang}_FLAGS_RELWITHDEBINFO_INIT "/MD /Zi /O2 /Ob1 /D NDEBUG")
   set(CMAKE_${lang}_FLAGS_MINSIZEREL_INIT "/MD /O1 /Ob1 /D NDEBUG")
   set(CMAKE_${lang}_LINKER_SUPPORTS_PDB ON)
+
+  if(NOT CMAKE_RC_FLAGS_INIT)
+    set(CMAKE_RC_FLAGS_INIT "${_PLATFORM_DEFINES} ${_PLATFORM_DEFINES_${lang}}")
+  endif()
+
+  enable_language(RC)
 endmacro()
