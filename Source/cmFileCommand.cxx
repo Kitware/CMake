@@ -1907,7 +1907,10 @@ protected:
   std::string Manifest;
   void ManifestAppend(std::string const& file)
     {
-    this->Manifest += ";";
+    if (!this->Manifest.empty())
+      {
+      this->Manifest += ";";
+      }
     this->Manifest += file.substr(this->DestDirLength);
     }
 
