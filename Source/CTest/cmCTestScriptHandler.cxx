@@ -454,12 +454,8 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   if (!this->Makefile->ReadListFile(0, script.c_str()) ||
     cmSystemTools::GetErrorOccuredFlag())
     {
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read script: "
-               << script
-               << std::endl);
     // Reset the error flag so that it can run more than
-    // one script with an error when you
-    // use ctest_run_script
+    // one script with an error when you use ctest_run_script.
     cmSystemTools::ResetErrorOccuredFlag();
     return 2;
     }

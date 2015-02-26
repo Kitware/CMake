@@ -1,3 +1,2 @@
 Problem running command: .*memcheck_fail.*
 Problem executing pre-memcheck command\(s\).
-Error in read script: .*/Tests/RunCMake/ctest_memcheck/DummyValgrindFailPre/test.cmake
