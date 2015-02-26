@@ -535,17 +535,12 @@ void cmLocalGenerator::GenerateInstallRules()
       "${CMAKE_INSTALL_COMPONENT}.txt\")\n"
       "else()\n"
       "  set(CMAKE_INSTALL_MANIFEST \"install_manifest.txt\")\n"
-      "endif()\n\n";
-    fout
-      << "file(WRITE \""
-      << homedir << "/${CMAKE_INSTALL_MANIFEST}\" "
-      << "\"\")" << std::endl;
-    fout
-      << "foreach(file ${CMAKE_INSTALL_MANIFEST_FILES})" << std::endl
-      << "  file(APPEND \""
-      << homedir << "/${CMAKE_INSTALL_MANIFEST}\" "
-      << "\"${file}\\n\")" << std::endl
-      << "endforeach()" << std::endl;
+      "endif()\n"
+      "\n"
+      "string(REPLACE \";\" \"\\n\" CMAKE_INSTALL_MANIFEST_CONTENT\n"
+      "       \"${CMAKE_INSTALL_MANIFEST_FILES}\")\n"
+      "file(WRITE \"" << homedir << "/${CMAKE_INSTALL_MANIFEST}\"\n"
+      "     \"${CMAKE_INSTALL_MANIFEST_CONTENT}\")\n";
     }
 }
 
