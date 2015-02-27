@@ -1,4 +1,3 @@
 Missing arguments for submit via cp:
 .*
    Problems when submitting via CP
-Error in read script: .*/Tests/RunCMake/ctest_submit/FailDrop-cp/test.cmake
