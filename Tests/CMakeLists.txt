@@ -172,6 +172,7 @@ if(BUILD_TESTING)
     ON)
   mark_as_advanced(CTEST_TEST_CPACK)
   set(CTEST_TEST_OSX_ARCH 0)
+  set(CMake_TEST_XCODE_VERSION 0)
   if(APPLE)
     execute_process(
       COMMAND sw_vers -productVersion
@@ -184,6 +185,17 @@ if(BUILD_TESTING)
       set(CTEST_TEST_CPACK OFF)
     else()
       set(CTEST_TEST_OSX_ARCH 1)
+    endif()
+    if(XCODE_VERSION)
+      set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
+    else()
+      execute_process(
+        COMMAND xcodebuild -version
+        OUTPUT_VARIABLE _version ERROR_VARIABLE _version
+        )
+      if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
+        set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
+      endif()
     endif()
   endif()
 
