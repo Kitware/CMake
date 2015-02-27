@@ -223,7 +223,6 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
     return;
     }
   unsigned long cc;
-  kwsys_stl::string fullname;
   kwsys_stl::string realname;
   kwsys_stl::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
@@ -247,15 +246,6 @@ void Glob::RecurseDirectory(kwsys_stl::string::size_type start,
     // On Windows and apple, no difference between lower and upper case
     fname = kwsys::SystemTools::LowerCase(fname);
 #endif
-
-    if ( start == 0 )
-      {
-      fullname = dir + fname;
-      }
-    else
-      {
-      fullname = dir + "/" + fname;
-      }
 
     bool isDir = kwsys::SystemTools::FileIsDirectory(realname);
     bool isSymLink = kwsys::SystemTools::FileIsSymlink(realname);
@@ -302,7 +292,6 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     return;
     }
   unsigned long cc;
-  kwsys_stl::string fullname;
   kwsys_stl::string realname;
   kwsys_stl::string fname;
   for ( cc = 0; cc < d.GetNumberOfFiles(); cc ++ )
@@ -327,19 +316,10 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
     fname = kwsys::SystemTools::LowerCase(fname);
 #endif
 
-    if ( start == 0 )
-      {
-      fullname = dir + fname;
-      }
-    else
-      {
-      fullname = dir + "/" + fname;
-      }
-
     //kwsys_ios::cout << "Look at file: " << fname << kwsys_ios::endl;
     //kwsys_ios::cout << "Match: "
     // << this->Internals->TextExpressions[start].c_str() << kwsys_ios::endl;
-    //kwsys_ios::cout << "Full name: " << fullname << kwsys_ios::endl;
+    //kwsys_ios::cout << "Real name: " << realname << kwsys_ios::endl;
 
     if ( !last &&
       !kwsys::SystemTools::FileIsDirectory(realname) )
@@ -355,7 +335,7 @@ void Glob::ProcessDirectory(kwsys_stl::string::size_type start,
         }
       else
         {
-        this->ProcessDirectory(start+1, realname + "/");
+        this->ProcessDirectory(start+1, realname);
         }
       }
     }
