@@ -482,6 +482,7 @@ function(cpack_rpm_prepare_relocation_paths)
     endif()
   endforeach()
 
+  set(RPM_USED_PACKAGE_PREFIXES "${RPM_USED_PACKAGE_PREFIXES}" PARENT_SCOPE)
   set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}" PARENT_SCOPE)
 endfunction()
 
@@ -964,24 +965,31 @@ set(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 # CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
 # which is passed to the find command that generates the content-list
 if(CPACK_RPM_PACKAGE_RELOCATABLE)
-  # get a list of the elements in CPACK_RPM_PACKAGE_PREFIX and remove
-  # the final element (so the install-prefix dir itself is not omitted
+  # get a list of the elements in CPACK_RPM_PACKAGE_PREFIXES that are
+  # destinct parent paths of other relocation paths and remove the
+  # final element (so the install-prefix dir itself is not omitted
   # from the RPM's content-list)
-  foreach(CPACK_RPM_PACKAGE_PREFIX ${RPM_PACKAGE_PREFIXES})
-    string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${CPACK_RPM_PACKAGE_PREFIX}")
-    list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
-    unset(_TMP_LIST)
-    # Now generate all of the parent dirs of CPACK_RPM_PACKAGE_PREFIX
-    foreach(_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
-      list(APPEND _TMP_LIST "${_ELEM}")
-      string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
-      list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
-      if(_DUPLICATE_FOUND EQUAL -1)
-        set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
-        separate_arguments(_OMIT_DIR)
-        list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
-      endif()
-    endforeach()
+  list(SORT RPM_USED_PACKAGE_PREFIXES)
+  set(_DISTINCT_PATH "NOT_SET")
+  foreach(_RPM_RELOCATION_PREFIX ${RPM_USED_PACKAGE_PREFIXES})
+    if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
+      set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
+
+      string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${_RPM_RELOCATION_PREFIX}")
+      list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
+      unset(_TMP_LIST)
+      # Now generate all of the parent dirs of the relocation path
+      foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
+        list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
+        string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
+        list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
+        if(_DUPLICATE_FOUND EQUAL -1)
+          set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
+          separate_arguments(_OMIT_DIR)
+          list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
+        endif()
+      endforeach()
+    endif()
   endforeach()
 endif()
 
