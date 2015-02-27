@@ -1677,14 +1677,14 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
     mf->GetSafeDefinition("CMAKE_TRY_COMPILE_CONFIGURATION");
   return this->Build(srcdir,bindir,projectName,
                      newTarget,
-                     output,"",config,false,fast,
+                     output,"",config,false,fast,false,
                      this->TryCompileTimeout);
 }
 
 void cmGlobalGenerator::GenerateBuildCommand(
   std::vector<std::string>& makeCommand, const std::string&,
   const std::string&, const std::string&, const std::string&,
-  const std::string&, bool,
+  const std::string&, bool, bool,
   std::vector<std::string> const&)
 {
   makeCommand.push_back(
@@ -1697,7 +1697,7 @@ int cmGlobalGenerator::Build(
   std::string& output,
   const std::string& makeCommandCSTR,
   const std::string& config,
-  bool clean, bool fast,
+  bool clean, bool fast, bool verbose,
   double timeout,
   cmSystemTools::OutputOption outputflag,
   std::vector<std::string> const& nativeOptions)
@@ -1722,7 +1722,7 @@ int cmGlobalGenerator::Build(
     {
     std::vector<std::string> cleanCommand;
     this->GenerateBuildCommand(cleanCommand, makeCommandCSTR, projectName,
-                               bindir, "clean", config, fast);
+                               bindir, "clean", config, fast, verbose);
     output += "\nRun Clean Command:";
     output += cmSystemTools::PrintSingleCommand(cleanCommand);
     output += "\n";
@@ -1745,7 +1745,8 @@ int cmGlobalGenerator::Build(
   // now build
   std::vector<std::string> makeCommand;
   this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName,
-                             bindir, target, config, fast, nativeOptions);
+                             bindir, target, config, fast, verbose,
+                             nativeOptions);
   std::string makeCommandStr = cmSystemTools::PrintSingleCommand(makeCommand);
   output += "\nRun Build Command:";
   output += makeCommandStr;

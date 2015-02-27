@@ -459,7 +459,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
   const std::string& projectDir,
   const std::string& targetName,
   const std::string& config,
-  bool fast,
+  bool fast, bool verbose,
   std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else MSBuild.
@@ -507,7 +507,7 @@ void cmGlobalVisualStudio10Generator::GenerateBuildCommand(
     // Use devenv to build solutions containing Intel Fortran projects.
     cmGlobalVisualStudio7Generator::GenerateBuildCommand(
       makeCommand, makeProgram, projectName, projectDir,
-      targetName, config, fast, makeOptions);
+      targetName, config, fast, verbose, makeOptions);
     return;
     }
 

@@ -664,7 +664,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         globalGenerator->GenerateBuildCommand(buildCommand, cmakeMakeProgram,
             installProjectName, installDirectory,
             globalGenerator->GetPreinstallTargetName(),
-            buildConfig, false);
+            buildConfig, false, false);
         std::string buildCommandStr =
           cmSystemTools::PrintSingleCommand(buildCommand);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
