@@ -2265,7 +2265,14 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
 
   std::vector<std::string>::const_iterator stdIt =
                                 std::find(stds.begin(), stds.end(), standard);
-  assert(stdIt != stds.end());
+  if (stdIt == stds.end())
+    {
+    std::string e =
+      lang + "_STANDARD is set to invalid value '" + standard + "'";
+    this->GetGlobalGenerator()->GetCMakeInstance()
+      ->IssueMessage(cmake::FATAL_ERROR, e, target->GetBacktrace());
+    return;
+    }
 
   std::vector<std::string>::const_iterator defaultStdIt =
     std::find(stds.begin(), stds.end(), defaultStd);
