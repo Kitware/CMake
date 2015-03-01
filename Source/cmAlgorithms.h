@@ -176,6 +176,12 @@ private:
   Range const& m_range;
 };
 
+struct IterLess
+{
+  template<typename It>
+  bool operator()(It const& a, It const& b) const { return *a < *b; }
+};
+
 }
 
 template<typename Iter1, typename Iter2>
@@ -264,8 +270,8 @@ typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
 template<typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  typedef std::vector<typename Range::value_type> UniqueVector;
-  UniqueVector unique;
+  typedef typename Range::const_iterator T;
+  std::vector<T> unique;
   unique.reserve(r.size());
   std::vector<size_t> indices;
   size_t count = 0;
@@ -273,11 +279,12 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
   for(typename Range::const_iterator it = r.begin();
       it != end; ++it, ++count)
     {
-    const typename UniqueVector::iterator low =
-        std::lower_bound(unique.begin(), unique.end(), *it);
-    if (low == unique.end() || *low != *it)
+    const typename std::vector<T>::iterator low =
+        std::lower_bound(unique.begin(), unique.end(), it,
+                         ContainerAlgorithms::IterLess());
+    if (low == unique.end() || **low != *it)
       {
-      unique.insert(low, *it);
+      unique.insert(low, it);
       }
     else
       {
