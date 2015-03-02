@@ -72,37 +72,37 @@ public:
   cmCTestUpdateHandlerLocale();
   ~cmCTestUpdateHandlerLocale();
 private:
-  std::string saveLCMessages;
+  std::string saveLCAll;
 };
 
 cmCTestUpdateHandlerLocale::cmCTestUpdateHandlerLocale()
 {
-  const char* lcmess = cmSystemTools::GetEnv("LC_MESSAGES");
-  if(lcmess)
+  const char* lcall = cmSystemTools::GetEnv("LC_ALL");
+  if(lcall)
     {
-    saveLCMessages = lcmess;
+    saveLCAll = lcall;
     }
-  // if LC_MESSAGES is not set to C, then
+  // if LC_ALL is not set to C, then
   // set it, so that svn/cvs info will be in english ascii
-  if(! (lcmess && strcmp(lcmess, "C") == 0))
+  if(! (lcall && strcmp(lcall, "C") == 0))
     {
-    cmSystemTools::PutEnv("LC_MESSAGES=C");
+    cmSystemTools::PutEnv("LC_ALL=C");
     }
 }
 
 cmCTestUpdateHandlerLocale::~cmCTestUpdateHandlerLocale()
 {
-  // restore the value of LC_MESSAGES after running the version control
+  // restore the value of LC_ALL after running the version control
   // commands
-  if(!saveLCMessages.empty())
+  if(!saveLCAll.empty())
     {
-    std::string put = "LC_MESSAGES=";
-    put += saveLCMessages;
+    std::string put = "LC_ALL=";
+    put += saveLCAll;
     cmSystemTools::PutEnv(put);
     }
   else
     {
-    cmSystemTools::UnsetEnv("LC_MESSAGES");
+    cmSystemTools::UnsetEnv("LC_ALL");
     }
 }
 
