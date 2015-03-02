@@ -2330,6 +2330,10 @@ bool SystemTools::CopyFileAlways(const kwsys_stl::string& source, const kwsys_st
       {
       fout.write(buffer, fin.gcount());
       }
+    else
+      {
+      break;
+      }
     }
 
   // Make sure the operating system has finished writing the file
