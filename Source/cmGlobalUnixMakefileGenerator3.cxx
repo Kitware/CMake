@@ -563,7 +563,7 @@ void cmGlobalUnixMakefileGenerator3
 
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
-  if ( this->GetName() == "NMake Makefiles" )
+  if (cmHasLiteralPrefix(this->GetName(), "NMake Makefiles"))
     {
     makeCommand.push_back("/NOLOGO");
     }
