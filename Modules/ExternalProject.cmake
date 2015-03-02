@@ -1360,7 +1360,7 @@ endfunction()
 
 function(ExternalProject_Add_StepTargets name)
   set(steps ${ARGN})
-  if("${ARGV1}" STREQUAL "NO_DEPENDS")
+  if(ARGC GREATER 1 AND "${ARGV1}" STREQUAL "NO_DEPENDS")
     set(no_deps 1)
     list(REMOVE_AT steps 0)
   endif()

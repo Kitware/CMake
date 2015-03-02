@@ -395,7 +395,7 @@ function(add_compiler_export_flags)
 
   # Either return the extra flags needed in the supplied argument, or to the
   # CMAKE_CXX_FLAGS if no argument is supplied.
-  if(ARGV0)
+  if(ARGC GREATER 0)
     set(${ARGV0} "${EXTRA_FLAGS}" PARENT_SCOPE)
   else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS}" PARENT_SCOPE)

@@ -457,7 +457,11 @@ endfunction()
 
 
 function(set_bundle_key_values keys_var context item exepath dirs copyflag)
-  set(rpaths "${ARGV6}")
+  if(ARGC GREATER 6)
+    set(rpaths "${ARGV6}")
+  else()
+    set(rpaths "")
+  endif()
   get_filename_component(item_name "${item}" NAME)
 
   get_item_key("${item}" key)
