@@ -38,9 +38,13 @@
 #   Set to TRUE to disable warnings about required library files that
 #   do not exist.  (For example, Visual Studio Express editions may
 #   not provide the redistributable files.)
+#
+# ``CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT``
+#   Specify the :command:`install(PROGRAMS)` command ``COMPONENT``
+#   option.  If not specified, no such option will be used.
 
 #=============================================================================
-# Copyright 2006-2009 Kitware, Inc.
+# Copyright 2006-2015 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -486,7 +490,13 @@ if(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS)
         set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION lib)
       endif()
     endif()
+    if(CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT)
+      set(_CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT
+        COMPONENT ${CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT})
+    endif()
     install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
-      DESTINATION ${CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION})
+      DESTINATION ${CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION}
+      ${_CMAKE_INSTALL_SYSTEM_RUNTIME_COMPONENT}
+      )
   endif()
 endif()
