@@ -314,7 +314,7 @@ macro(cpack_encode_variables)
   set(_CPACK_OTHER_VARIABLES_)
   get_cmake_property(res VARIABLES)
   foreach(var ${res})
-    if("xxx${var}" MATCHES "xxxCPACK")
+    if(var MATCHES "^CPACK")
       set(_CPACK_OTHER_VARIABLES_
         "${_CPACK_OTHER_VARIABLES_}\nSET(${var} \"${${var}}\")")
       endif()
