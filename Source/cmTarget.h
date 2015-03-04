@@ -496,7 +496,8 @@ public:
   const char* GetExportMacro() const;
 
   void GetCompileDefinitions(std::vector<std::string> &result,
-                             const std::string& config) const;
+                             const std::string& config,
+                             const std::string& language) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change

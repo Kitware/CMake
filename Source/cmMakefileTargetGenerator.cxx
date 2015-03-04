@@ -329,7 +329,7 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
-                            this->LocalGenerator->ConfigurationName);
+                            this->LocalGenerator->ConfigurationName, l);
 
     std::string definesString;
     this->LocalGenerator->JoinDefines(defines, definesString, lang);

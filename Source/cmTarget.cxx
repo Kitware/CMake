@@ -2336,16 +2336,18 @@ static void processCompileDefinitions(cmTarget const* tgt,
       std::vector<std::string> &options,
       UNORDERED_SET<std::string> &uniqueOptions,
       cmGeneratorExpressionDAGChecker *dagChecker,
-      const std::string& config, bool debugOptions)
+      const std::string& config, bool debugOptions,
+      std::string const& language)
 {
   processCompileOptionsInternal(tgt, entries, options, uniqueOptions,
                                 dagChecker, config, debugOptions,
-                                "definitions", std::string());
+                                "definitions", language);
 }
 
 //----------------------------------------------------------------------------
 void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
-                                            const std::string& config) const
+                                            const std::string& config,
+                                            const std::string& language) const
 {
   UNORDERED_SET<std::string> uniqueOptions;
 
@@ -2377,7 +2379,8 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                             uniqueOptions,
                             &dagChecker,
                             config,
-                            debugDefines);
+                            debugDefines,
+                            language);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>
     linkInterfaceCompileDefinitionsEntries;
@@ -2424,7 +2427,8 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                             uniqueOptions,
                             &dagChecker,
                             config,
-                            debugDefines);
+                            debugDefines,
+                            language);
 
   deleteAndClear(linkInterfaceCompileDefinitionsEntries);
 }

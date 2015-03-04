@@ -239,7 +239,8 @@ public:
                          const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmTarget const* target,
-                             const std::string& config);
+                             const std::string& config,
+                             const std::string& lang);
 
   /** Compute the language used to compile the given source file.  */
   std::string GetSourceFileLanguage(const cmSourceFile& source);

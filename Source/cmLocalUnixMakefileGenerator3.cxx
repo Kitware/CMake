@@ -2094,26 +2094,26 @@ void cmLocalUnixMakefileGenerator3
         << "set(CMAKE_" << l->first << "_COMPILER_ID \""
         << cid << "\")\n";
       }
-    }
 
-  // Build a list of preprocessor definitions for the target.
-  std::set<std::string> defines;
-  this->AddCompileDefinitions(defines, &target,
-                               this->ConfigurationName);
-  if(!defines.empty())
-    {
-    cmakefileStream
-      << "\n"
-      << "# Preprocessor definitions for this target.\n"
-      << "set(CMAKE_TARGET_DEFINITIONS\n";
-    for(std::set<std::string>::const_iterator di = defines.begin();
-        di != defines.end(); ++di)
+    // Build a list of preprocessor definitions for the target.
+    std::set<std::string> defines;
+    this->AddCompileDefinitions(defines, &target,
+                                this->ConfigurationName, l->first);
+    if(!defines.empty())
       {
       cmakefileStream
-        << "  " << this->EscapeForCMake(*di) << "\n";
+        << "\n"
+        << "# Preprocessor definitions for this target.\n"
+        << "set(CMAKE_TARGET_DEFINITIONS_" << l->first << "\n";
+      for(std::set<std::string>::const_iterator di = defines.begin();
+          di != defines.end(); ++di)
+        {
+        cmakefileStream
+          << "  " << this->EscapeForCMake(*di) << "\n";
+        }
+      cmakefileStream
+        << "  )\n";
       }
-    cmakefileStream
-      << "  )\n";
     }
 
   // Store include transform rule properties.  Write the directory

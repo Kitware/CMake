@@ -1428,11 +1428,11 @@ std::string cmLocalGenerator::GetIncludeFlags(
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              cmTarget const* target,
-                                             const std::string& config)
+                                             const std::string& config,
+                                             const std::string& lang)
 {
   std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines,
-                               config);
+  target->GetCompileDefinitions(targetDefines, config, lang);
   this->AppendDefines(defines, targetDefines);
 }
 
