@@ -1979,7 +1979,8 @@ static void processIncludeDirectories(cmTarget const* tgt,
       std::vector<std::string> &includes,
       UNORDERED_SET<std::string> &uniqueIncludes,
       cmGeneratorExpressionDAGChecker *dagChecker,
-      const std::string& config, bool debugIncludes)
+      const std::string& config, bool debugIncludes,
+      const std::string& language)
 {
   cmMakefile *mf = tgt->GetMakefile();
 
@@ -1995,7 +1996,7 @@ static void processIncludeDirectories(cmTarget const* tgt,
                                               config,
                                               false,
                                               tgt,
-                                              dagChecker),
+                                              dagChecker, language),
                                     entryIncludes);
 
     std::string usedIncludes;
@@ -2106,7 +2107,8 @@ static void processIncludeDirectories(cmTarget const* tgt,
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmTarget::GetIncludeDirectories(const std::string& config) const
+cmTarget::GetIncludeDirectories(const std::string& config,
+                                const std::string& language) const
 {
   std::vector<std::string> includes;
   UNORDERED_SET<std::string> uniqueIncludes;
@@ -2139,7 +2141,8 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
                             uniqueIncludes,
                             &dagChecker,
                             config,
-                            debugIncludes);
+                            debugIncludes,
+                            language);
 
   std::vector<cmTargetInternals::TargetPropertyEntry*>
     linkInterfaceIncludeDirectoriesEntries;
@@ -2179,7 +2182,8 @@ cmTarget::GetIncludeDirectories(const std::string& config) const
                             uniqueIncludes,
                             &dagChecker,
                             config,
-                            debugIncludes);
+                            debugIncludes,
+                            language);
 
   deleteAndClear(linkInterfaceIncludeDirectoriesEntries);
 

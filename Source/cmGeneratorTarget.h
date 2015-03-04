@@ -85,7 +85,7 @@ public:
 
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(
-      const std::string& config) const;
+      const std::string& config, const std::string& lang) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config) const;

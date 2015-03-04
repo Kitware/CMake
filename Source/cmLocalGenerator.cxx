@@ -1600,7 +1600,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Get the target-specific include directories.
   std::vector<std::string> includes;
 
-  includes = target->GetIncludeDirectories(config);
+  includes = target->GetIncludeDirectories(config, lang);
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.

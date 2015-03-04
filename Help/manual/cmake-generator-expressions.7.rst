@@ -121,13 +121,17 @@ Available logical expressions are:
     target_link_libraries(myapp myapp_c myapp_cxx)
 
   The ``Makefile`` and ``Ninja`` based generators can also use this
-  expression to specify compile-language specific compile definitions:
+  expression to specify compile-language specific compile definitions
+  and include directories:
 
   .. code-block:: cmake
 
     add_executable(myapp main.cpp foo.c bar.cpp)
     target_compile_definitions(myapp
       PRIVATE $<$<COMPILE_LANGUAGE:CXX>:COMPILING_CXX>
+    )
+    target_include_directories(myapp
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/opt/foo/cxx_headers>
     )
 
 Informational Expressions

@@ -960,9 +960,10 @@ cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmGeneratorTarget::GetIncludeDirectories(const std::string& config) const
+cmGeneratorTarget::GetIncludeDirectories(const std::string& config,
+                                         const std::string& lang) const
 {
-  return this->Target->GetIncludeDirectories(config);
+  return this->Target->GetIncludeDirectories(config, lang);
 }
 
 //----------------------------------------------------------------------------

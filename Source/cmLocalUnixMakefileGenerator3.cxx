@@ -2114,6 +2114,32 @@ void cmLocalUnixMakefileGenerator3
       cmakefileStream
         << "  )\n";
       }
+
+    // Target-specific include directories:
+    cmakefileStream
+      << "\n"
+      << "# The include file search paths:\n";
+    cmakefileStream
+      << "set(CMAKE_" << l->first << "_TARGET_INCLUDE_PATH\n";
+    std::vector<std::string> includes;
+
+    cmGeneratorTarget* gt = this->GetGlobalGenerator()
+                                ->GetGeneratorTarget(&target);
+
+    const std::string& config =
+      this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
+    this->GetIncludeDirectories(includes, gt,
+                                l->first, config);
+    for(std::vector<std::string>::iterator i = includes.begin();
+        i != includes.end(); ++i)
+      {
+      cmakefileStream
+        << "  \""
+        << this->Convert(*i, cmLocalGenerator::HOME_OUTPUT)
+        << "\"\n";
+      }
+    cmakefileStream
+      << "  )\n";
     }
 
   // Store include transform rule properties.  Write the directory
