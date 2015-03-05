@@ -75,6 +75,8 @@ static const char * cmDocumentationOptions[][2] =
    "Run a specific number of tests by number."},
   {"-U, --union", "Take the Union of -I and -R"},
   {"--rerun-failed", "Run only the tests that failed previously"},
+  {"--repeat-until-fail <n>", "Require each test to run <n> "
+   "times without failing in order to pass"},
   {"--max-width <width>", "Set the max width for a test name to output"},
   {"--interactive-debug-mode [0|1]", "Set the interactive mode to 0 or 1."},
   {"--no-label-summary", "Disable timing summary information for labels."},

@@ -121,6 +121,11 @@ void cmCTestMultiProcessHandler::StartTestProcess(int test)
   this->RunningCount += GetProcessorsUsed(test);
 
   cmCTestRunTest* testRun = new cmCTestRunTest(this->TestHandler);
+  if(this->CTest->GetRepeatUntilFail())
+    {
+    testRun->SetRunUntilFailOn();
+    testRun->SetNumberOfRuns(this->CTest->GetTestRepeat());
+    }
   testRun->SetIndex(test);
   testRun->SetTestProperties(this->Properties[test]);
 
@@ -289,7 +294,13 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     cmCTestRunTest* p = *i;
     int test = p->GetIndex();
 
-    if(p->EndTest(this->Completed, this->Total, true))
+    bool testResult = p->EndTest(this->Completed, this->Total, true);
+    if(p->StartAgain())
+      {
+      this->Completed--; // remove the completed test because run again
+      continue;
+      }
+    if(testResult)
       {
       this->Passed->push_back(p->GetTestProperties()->Name);
       }
