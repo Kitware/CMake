@@ -237,6 +237,11 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
 {
   typename InputRange::const_iterator remIt = rem.begin();
   typename InputRange::const_iterator remEnd = rem.end();
+  const typename Range::iterator rangeEnd = r.end();
+  if (remIt == remEnd)
+    {
+    return rangeEnd;
+    }
 
   typename Range::iterator writer = r.begin();
   std::advance(writer, *remIt);
@@ -244,7 +249,6 @@ typename Range::const_iterator cmRemoveIndices(Range& r, InputRange const& rem)
   typename InputRange::value_type prevRem = *remIt;
   ++remIt;
   size_t count = 1;
-  const typename Range::iterator rangeEnd = r.end();
   for ( ; writer != rangeEnd && remIt != remEnd; ++count, ++remIt)
     {
     std::advance(pivot, *remIt - prevRem);
