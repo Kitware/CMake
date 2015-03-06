@@ -2409,6 +2409,8 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
      "${CMake_BINARY_DIR}/Testing/JacocoCoverage/DartConfiguration.tcl")
   file(COPY "${CMake_SOURCE_DIR}/Tests/JacocoCoverage/Coverage"
     DESTINATION "${CMake_BINARY_DIR}/Testing/JacocoCoverage")
+  configure_file("${CMake_BINARY_DIR}/Testing/JacocoCoverage/Coverage/target/site/jacoco.xml.in"
+    "${CMake_BINARY_DIR}/Testing/JacocoCoverage/Coverage/target/site/jacoco.xml")
   add_test(NAME CTestJacocoCoverage
     COMMAND cmake -E chdir
     ${CMake_BINARY_DIR}/Testing/JacocoCoverage
