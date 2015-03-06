@@ -171,18 +171,20 @@ the indentation.  Otherwise it retains the same position on the line"
 
 ;;
 ;; Helper functions for buffer
-;;
-(defun unscreamify-cmake-buffer ()
+;; 
+(defun cmake-unscreamify-buffer ()
   "Convert all CMake commands to lowercase in buffer."
   (interactive)
-  (goto-char (point-min))
-  (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
-    (replace-match
-     (concat
-      (match-string 1)
-      (downcase (match-string 2))
-      (match-string 3))
-     t))
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
+      (replace-match 
+       (concat 
+        (match-string 1) 
+        (downcase (match-string 2)) 
+        (match-string 3)) 
+       t))
+    )
   )
 
 ;------------------------------------------------------------------------------
