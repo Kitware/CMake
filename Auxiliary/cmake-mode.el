@@ -43,7 +43,14 @@ set the path with these commands:
  (setenv \"PATH\" (concat (getenv \"PATH\") \":/usr/local/cmake/bin\"))"
   :type 'file
   :group 'cmake)
-;;
+
+;; Keywords
+(defconst cmake-keywords-block-open '("IF" "MACRO" "FOREACH" "ELSE" "ELSEIF" "WHILE" "FUNCTION"))
+(defconst cmake-keywords-block-close '("ENDIF" "ENDFOREACH" "ENDMACRO" "ELSE" "ELSEIF" "ENDWHILE" "ENDFUNCTION"))
+(defconst cmake-keywords
+  (let ((kwds (append cmake-keywords-block-open cmake-keywords-block-close nil)))
+    (delete-dups kwds)))
+
 ;; Regular expressions used by line indentation function.
 ;;
 (defconst cmake-regex-blank "^[ \t]*$")
@@ -51,23 +58,25 @@ set the path with these commands:
 (defconst cmake-regex-paren-left "(")
 (defconst cmake-regex-paren-right ")")
 (defconst cmake-regex-argument-quoted
-  "\"\\([^\"\\\\]\\|\\\\\\(.\\|\n\\)\\)*\"")
+  (rx (syntax string-quote)
+      (* (and (or (not (any ?\" ?\\)) (and ?\\ anything))))
+      (syntax string-quote)))
 (defconst cmake-regex-argument-unquoted
-  "\\([^ \t\r\n()#\"\\\\]\\|\\\\.\\)\\([^ \t\r\n()#\\\\]\\|\\\\.\\)*")
-(defconst cmake-regex-token (concat "\\(" cmake-regex-comment
-                                    "\\|" cmake-regex-paren-left
-                                    "\\|" cmake-regex-paren-right
-                                    "\\|" cmake-regex-argument-unquoted
-                                    "\\|" cmake-regex-argument-quoted
-                                    "\\)"))
-(defconst cmake-regex-indented (concat "^\\("
-                                       cmake-regex-token
-                                       "\\|" "[ \t\r\n]"
-                                       "\\)*"))
+  (rx (or (not (any space "()#\"\\")) (and ?\\ anything))
+      (* (and (or (not (any space "()#\\")) (and ?\\ anything))))))
+(defconst cmake-regex-token
+  (rx-to-string `(group (or (regexp ,cmake-regex-comment)
+                            ?( ?)
+                            (regexp ,cmake-regex-argument-unquoted)
+                            (regexp ,cmake-regex-argument-quoted)))))
+(defconst cmake-regex-indented
+  (rx-to-string `(and bol (* (group (or (regexp ,cmake-regex-token) (any space)))))))
 (defconst cmake-regex-block-open
-  "^\\(if\\|macro\\|foreach\\|else\\|elseif\\|while\\|function\\)$")
+  (rx-to-string `(and bow (or ,@(append cmake-keywords-block-open
+                                        (mapcar 'downcase cmake-keywords-block-open))) eow)))
 (defconst cmake-regex-block-close
-  "^[ \t]*\\(endif\\|endforeach\\|endmacro\\|else\\|elseif\\|endwhile\\|endfunction\\)[ \t]*(")
+  (rx-to-string `(and bow (or ,@(append cmake-keywords-block-close
+                                        (mapcar 'downcase cmake-keywords-block-close))) eow)))
 
 ;------------------------------------------------------------------------------
 
