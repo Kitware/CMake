@@ -39,6 +39,10 @@ public:
 
   virtual void Generate();
 private:
+  struct CbpUnit
+  {
+    std::vector<const cmTarget*> Targets;
+  };
 
   void CreateProjectFile(const std::vector<cmLocalGenerator*>& lgs);
 
