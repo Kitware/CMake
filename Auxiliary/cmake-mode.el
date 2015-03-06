@@ -193,9 +193,17 @@ the indentation.  Otherwise it retains the same position on the line"
 ;; Keyword highlighting regex-to-face map.
 ;;
 (defconst cmake-font-lock-keywords
-  (list '("^[ \t]*\\([[:word:]_]+\\)[ \t]*(" 1 font-lock-function-name-face))
-  "Highlighting expressions for CMAKE mode."
-  )
+  `((,(rx-to-string `(and symbol-start
+                          (or ,@cmake-keywords
+                              ,@(mapcar #'downcase cmake-keywords))
+                          symbol-end))
+     . font-lock-keyword-face)
+    (,(rx symbol-start (group (+ (or word (syntax symbol)))) ?\()
+     1 font-lock-function-name-face)
+    ("\\${?\\([[:alpha:]_][[:alnum:]_]*\\|[0-9]+\\|[$*_]\\)"
+     1 font-lock-variable-name-face t)
+    )
+  "Highlighting expressions for CMake mode.")
 
 ;------------------------------------------------------------------------------
 
