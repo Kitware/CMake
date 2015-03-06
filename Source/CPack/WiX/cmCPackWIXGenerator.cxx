@@ -265,13 +265,30 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
 
   AppendUserSuppliedExtraSources();
 
+  std::set<std::string> usedBaseNames;
+
   std::stringstream objectFiles;
   for(size_t i = 0; i < this->WixSources.size(); ++i)
     {
     std::string const& sourceFilename = this->WixSources[i];
 
+    std::string baseName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sourceFilename);
+
+    unsigned int counter = 0;
+    std::string uniqueBaseName = baseName;
+
+    while(usedBaseNames.find(uniqueBaseName) != usedBaseNames.end())
+      {
+      std::stringstream tmp;
+      tmp << baseName << ++counter;
+      uniqueBaseName = tmp.str();
+      }
+
+    usedBaseNames.insert(uniqueBaseName);
+
     std::string objectFilename =
-      cmSystemTools::GetFilenameWithoutExtension(sourceFilename) + ".wixobj";
+      this->CPackTopLevel + "/" + uniqueBaseName + ".wixobj";
 
     if(!RunCandleCommand(sourceFilename, objectFilename))
       {
