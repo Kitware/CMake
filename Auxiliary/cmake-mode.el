@@ -226,12 +226,18 @@ the indentation.  Otherwise it retains the same position on the line"
 
 ;------------------------------------------------------------------------------
 
-;;
-;; Syntax table for this mode.  Initialize to nil so that it is
-;; regenerated when the cmake-mode function is called.
-;;
-(defvar cmake-mode-syntax-table nil "Syntax table for cmake-mode.")
-(setq cmake-mode-syntax-table nil)
+;; Syntax table for this mode.
+(defvar cmake-mode-syntax-table nil
+  "Syntax table for CMake mode.")
+(or cmake-mode-syntax-table
+    (setq cmake-mode-syntax-table
+          (let ((table (make-syntax-table)))
+            (modify-syntax-entry ?\(  "()" table)
+            (modify-syntax-entry ?\)  ")(" table)
+            (modify-syntax-entry ?# "<" table)
+            (modify-syntax-entry ?\n ">" table)
+            (modify-syntax-entry ?$ "'" table)
+            table)))
 
 ;;
 ;; User hook entry point.
@@ -245,39 +251,23 @@ the indentation.  Otherwise it retains the same position on the line"
 
 ;------------------------------------------------------------------------------
 
-;;
-;; CMake mode startup function.
+;; For compatibility with Emacs < 24
+(defalias 'cmake--parent-mode
+  (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
+
+;;------------------------------------------------------------------------------
+;; Mode definition.
 ;;
 ;;;###autoload
-(defun cmake-mode ()
-  "Major mode for editing CMake listfiles."
-  (interactive)
-  (kill-all-local-variables)
-  (setq major-mode 'cmake-mode)
-  (setq mode-name "CMAKE")
-
-  ; Create the syntax table
-  (setq cmake-mode-syntax-table (make-syntax-table))
-  (set-syntax-table cmake-mode-syntax-table)
-  (modify-syntax-entry ?\(  "()" cmake-mode-syntax-table)
-  (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
-  (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" cmake-mode-syntax-table)
+(define-derived-mode cmake-mode cmake--parent-mode "CMake"
+  "Major mode for editing CMake source files."
 
   ; Setup font-lock mode.
-  (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(cmake-font-lock-keywords))
-
+  (set (make-local-variable 'font-lock-defaults) '(cmake-font-lock-keywords))
   ; Setup indentation function.
-  (make-local-variable 'indent-line-function)
-  (setq indent-line-function 'cmake-indent)
-
+  (set (make-local-variable 'indent-line-function) 'cmake-indent)
   ; Setup comment syntax.
-  (make-local-variable 'comment-start)
-  (setq comment-start "#")
-
-  ; Run user hooks.
-  (run-hooks 'cmake-mode-hook))
+  (set (make-local-variable 'comment-start) "#"))
 
 ; Help mode starts here
 
