@@ -765,9 +765,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
 
   // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      outputs, depends, commands, false);
-
+  this->WriteMakeRule(*this->BuildFileStream, 0, outputs,
+                      depends, commands, false);
 
   // Write the main driver rule to build everything in this target.
   this->WriteTargetDriverRule(targetFullPath, relink);
