@@ -263,7 +263,7 @@ typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
 
 namespace ContainerAlgorithms {
 
-template<typename Range>
+template<typename Range, typename T = typename Range::value_type>
 struct RemoveDuplicatesAPI
 {
   typedef typename Range::const_iterator const_iterator;
@@ -273,6 +273,18 @@ struct RemoveDuplicatesAPI
   static value_type uniqueValue(const_iterator a) { return a; }
   template<typename It>
   static bool valueCompare(It it, const_iterator it2) { return **it != *it2; }
+};
+
+template<typename Range, typename T>
+struct RemoveDuplicatesAPI<Range, T*>
+{
+  typedef typename Range::const_iterator const_iterator;
+  typedef T* value_type;
+
+  static bool lessThan(value_type a, value_type b) { return a < b; }
+  static value_type uniqueValue(const_iterator a) { return *a; }
+  template<typename It>
+  static bool valueCompare(It it, const_iterator it2) { return *it != *it2; }
 };
 
 }
