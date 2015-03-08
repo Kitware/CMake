@@ -269,7 +269,7 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
   unique.reserve(r.size());
   std::vector<size_t> indices;
   size_t count = 0;
-  const typename Range::iterator end = r.end();
+  const typename Range::const_iterator end = r.end();
   for(typename Range::const_iterator it = r.begin();
       it != end; ++it, ++count)
     {
