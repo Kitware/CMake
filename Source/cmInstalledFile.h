@@ -13,7 +13,6 @@
 #define cmInstalledFile_h
 
 #include "cmGeneratorExpression.h"
-#include "cmAlgorithms.h"
 
 /** \class cmInstalledFile
  * \brief Represents a file intended for installation.
@@ -32,15 +31,8 @@ public:
 
   struct Property
   {
-    Property()
-    {
-
-    }
-
-    ~Property()
-    {
-      cmDeleteAll(this->ValueExpressions);
-    }
+    Property();
+    ~Property();
 
     ExpressionVectorType ValueExpressions;
   };
