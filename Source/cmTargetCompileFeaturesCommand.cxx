@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmTargetCompileFeaturesCommand.h"
 
+#include "cmAlgorithms.h"
+
 bool cmTargetCompileFeaturesCommand::InitialPass(
   std::vector<std::string> const& args,
   cmExecutionStatus &)

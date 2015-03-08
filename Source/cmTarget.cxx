@@ -19,6 +19,7 @@
 #include "cmListFileCache.h"
 #include "cmGeneratorExpression.h"
 #include "cmGeneratorExpressionDAGChecker.h"
+#include "cmAlgorithms.h"
 #include <cmsys/RegularExpression.hxx>
 #include <map>
 #include <set>

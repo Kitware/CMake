@@ -15,6 +15,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmQtAutoGenerators.h"
 #include "cmVersion.h"
+#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmDependsFortran.h" // For -E cmake_copy_f90_mod callback.

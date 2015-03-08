@@ -13,6 +13,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 
 #include "cmMakefile.h"
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmGeneratorExpressionDAGChecker::cmGeneratorExpressionDAGChecker(

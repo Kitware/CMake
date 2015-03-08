@@ -25,6 +25,7 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmVersion.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # define CM_LG_ENCODE_OBJECT_NAMES

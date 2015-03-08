@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
+#include "cmAlgorithms.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # include "cmLocalVisualStudioGenerator.h"

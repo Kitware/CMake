@@ -22,6 +22,7 @@
 #include "cmTargetExport.h"
 #include "cmVersion.h"
 #include "cmComputeLinkInformation.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/auto_ptr.hxx>
 #include <cmsys/FStream.hxx>

@@ -20,6 +20,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <queue>
 

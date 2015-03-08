@@ -19,6 +19,7 @@
 #include "cmMakefile.h"
 #include "cmTarget.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 #include <ctype.h>
 

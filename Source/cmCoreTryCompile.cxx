@@ -14,6 +14,7 @@
 #include "cmCacheManager.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include <cmsys/Directory.hxx>
 
