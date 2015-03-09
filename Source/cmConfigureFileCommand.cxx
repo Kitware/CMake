@@ -100,6 +100,13 @@ bool cmConfigureFileCommand
       {
       /* Ignore legacy option.  */
       }
+    else if(args[i] == "NEWLINE_STYLE" ||
+            args[i] == "LF" || args[i] == "UNIX" ||
+            args[i] == "CRLF" || args[i] == "WIN32" ||
+            args[i] == "DOS")
+      {
+      /* Options handled by NewLineStyle member above.  */
+      }
     else
       {
       unknown_args += " ";

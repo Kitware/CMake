@@ -1,4 +1,4 @@
-set(file_name  ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureFile-NewLineStyle.txt)
+set(file_name  ${CMAKE_CURRENT_BINARY_DIR}/NewLineStyle.txt)
 
 function(test_eol style in out)
     file(WRITE ${file_name} "${in}")
