@@ -148,8 +148,10 @@
 #  Currently fragments can be injected into most
 #  Component, File and Directory elements.
 #
-#  The special Id ``#PRODUCT`` can be used to inject content
-#  into the ``<Product>`` element.
+#  The following additional special Ids can be used:
+#
+#  * ``#PRODUCT`` for the ``<Product>`` element.
+#  * ``#PRODUCTFEATURE`` for the root ``<Feature>`` element.
 #
 #  The following example illustrates how this works.
 #
