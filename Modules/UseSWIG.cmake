@@ -76,16 +76,16 @@ macro(SWIG_MODULE_INITIALIZE name language)
   if (";${CMAKE_SWIG_FLAGS};" MATCHES ";-noproxy;")
     set (SWIG_MODULE_${name}_NOPROXY TRUE)
   endif ()
-  if("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "UNKNOWN")
+  if("x${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "xUNKNOWN")
     message(FATAL_ERROR "SWIG Error: Language \"${language}\" not found")
-  elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PYTHON" AND NOT SWIG_MODULE_${name}_NOPROXY)
+  elseif("x${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "xPYTHON" AND NOT SWIG_MODULE_${name}_NOPROXY)
     # swig will produce a module.py containing an 'import _modulename' statement,
     # which implies having a corresponding _modulename.so (*NIX), _modulename.pyd (Win32),
     # unless the -noproxy flag is used
     set(SWIG_MODULE_${name}_REAL_NAME "_${name}")
-  elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "PERL")
+  elseif("x${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "xPERL")
     set(SWIG_MODULE_${name}_EXTRA_FLAGS "-shadow")
-  elseif("${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "CSHARP")
+  elseif("x${SWIG_MODULE_${name}_LANGUAGE}" STREQUAL "xCSHARP")
     # This makes sure that the name used in the generated DllImport
     # matches the library name created by CMake
     set(SWIG_MODULE_${name}_EXTRA_FLAGS "-dllimport;${name}")
