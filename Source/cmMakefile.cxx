@@ -985,6 +985,33 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
         }
       else
         {
+        std::ostringstream e;
+        cmake::MessageType messageType = cmake::AUTHOR_WARNING;
+        bool issueMessage = false;
+
+        switch(this->GetPolicyStatus(cmPolicies::CMP0057))
+          {
+          case cmPolicies::WARN:
+            e << (this->GetPolicies()->
+              GetPolicyWarning(cmPolicies::CMP0057)) << "\n";
+            issueMessage = true;
+          case cmPolicies::OLD:
+            break;
+          case cmPolicies::NEW:
+          case cmPolicies::REQUIRED_IF_USED:
+          case cmPolicies::REQUIRED_ALWAYS:
+            issueMessage = true;
+            messageType = cmake::FATAL_ERROR;
+            break;
+          }
+
+        if(issueMessage)
+          {
+          e << "\"" << main_dependency << "\" can only be specified as a "
+            "custom command MAIN_DEPENDENCY once.";
+          IssueMessage(messageType, e.str());
+          }
+
         // The existing custom command is different.  We need to
         // generate a rule file for this new command.
         file = 0;

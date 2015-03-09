@@ -113,6 +113,8 @@ public:
     /// or keywords when unquoted.
     CMP0055, ///< Strict checking for break() command.
     CMP0056, ///< Honor link flags in try_compile() source-file signature.
+    CMP0057, ///< Disallow multiple MAIN_DEPENDENCY specifications
+    /// for the same file.
 
     /** \brief Always the last entry.
      *
