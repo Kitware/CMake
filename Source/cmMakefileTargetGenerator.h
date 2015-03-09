@@ -222,6 +222,16 @@ protected:
   // Set of extra output files to be driven by the build.
   std::set<std::string> ExtraFiles;
 
+  typedef std::map<std::string, std::string> MultipleOutputPairsType;
+  MultipleOutputPairsType MultipleOutputPairs;
+  void WriteMakeRule(std::ostream& os,
+                     const char* comment,
+                     const std::vector<std::string>& outputs,
+                     const std::vector<std::string>& depends,
+                     const std::vector<std::string>& commands,
+                     bool symbolic,
+                     bool in_help = false);
+
   // Target name info.
   std::string TargetNameOut;
   std::string TargetNameSO;
