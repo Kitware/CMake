@@ -130,7 +130,7 @@ public:
   std::string ConvertToOptionallyRelativeOutputPath(const std::string& remote);
 
   ///! set/get the parent generator
-  cmLocalGenerator* GetParent(){return this->Parent;}
+  cmLocalGenerator* GetParent() const {return this->Parent;}
   void SetParent(cmLocalGenerator* g) { this->Parent = g; g->AddChild(this); }
 
   ///! set/get the children
