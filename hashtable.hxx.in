@@ -408,7 +408,7 @@ enum { _stl_num_primes = 31 };
 
 // create a function with a static local to that function that returns
 // the static
-inline const unsigned long* get_stl_prime_list() {
+static inline const unsigned long* get_stl_prime_list() {
 
 static const unsigned long _stl_prime_list[_stl_num_primes] =
 {
@@ -423,7 +423,7 @@ static const unsigned long _stl_prime_list[_stl_num_primes] =
 
 return &_stl_prime_list[0]; }
 
-inline size_t _stl_next_prime(size_t __n)
+static inline size_t _stl_next_prime(size_t __n)
 {
   const unsigned long* __first = get_stl_prime_list();
   const unsigned long* __last = get_stl_prime_list() + (int)_stl_num_primes;
