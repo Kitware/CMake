@@ -4,6 +4,9 @@
 #include "interfaceinclude.h"
 #include "relative_dir.h"
 #include "consumer.h"
+#ifdef TEST_LANG_DEFINES
+  #include "cxx_only.h"
+#endif
 
 #ifdef PRIVATEINCLUDE_DEFINE
 #error Unexpected PRIVATEINCLUDE_DEFINE
@@ -27,6 +30,12 @@
 
 #ifndef CONSUMER_DEFINE
 #error Expected CONSUMER_DEFINE
+#endif
+
+#ifdef TEST_LANG_DEFINES
+  #ifndef CXX_ONLY_DEFINE
+  #error Expected CXX_ONLY_DEFINE
+  #endif
 #endif
 
 int main() { return 0; }

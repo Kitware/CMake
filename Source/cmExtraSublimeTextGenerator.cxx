@@ -436,7 +436,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
     }
 
   // Add preprocessor definitions for this target and configuration.
-  lg->AddCompileDefinitions(defines, target, config);
+  lg->AddCompileDefinitions(defines, target, config, language);
   lg->AppendDefines(defines, source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";

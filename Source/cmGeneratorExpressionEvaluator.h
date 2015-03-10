@@ -36,6 +36,7 @@ struct cmGeneratorExpressionContext
                                                           MaxLanguageStandard;
   cmMakefile *Makefile;
   std::string Config;
+  std::string Language;
   cmTarget const* HeadTarget; // The target whose property is being evaluated.
   cmTarget const* CurrentTarget; // The dependent of HeadTarget which appears
                                  // directly or indirectly in the property.

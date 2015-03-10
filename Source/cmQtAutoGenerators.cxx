@@ -507,7 +507,7 @@ static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
   incs = cmJoin(includeDirs, ";");
 
   std::set<std::string> defines;
-  localGen->AddCompileDefinitions(defines, target, config);
+  localGen->AddCompileDefinitions(defines, target, config, "CXX");
 
   defs += cmJoin(defines, ";");
 }

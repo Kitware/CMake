@@ -16,6 +16,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmGeneratorExpression.h"
 #include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
 #include "cmSourceFile.h"
 
 #include <cmsys/String.h>
@@ -89,7 +90,8 @@ std::string cmGeneratorExpressionNode::EvaluateDependentExpression(
                         context->Quiet,
                         headTarget,
                         currentTarget,
-                        dagChecker);
+                        dagChecker,
+                        context->Language);
   if (cge->GetHadContextSensitiveCondition())
     {
     context->HadContextSensitiveCondition = true;
@@ -805,6 +807,77 @@ static const struct JoinNode : public cmGeneratorExpressionNode
     return cmJoin(list, parameters[1]);
   }
 } joinNode;
+
+static const struct CompileLanguageNode : public cmGeneratorExpressionNode
+{
+  CompileLanguageNode() {}
+
+  virtual int NumExpectedParameters() const { return OneOrZeroParameters; }
+
+  std::string Evaluate(const std::vector<std::string> &parameters,
+                       cmGeneratorExpressionContext *context,
+                       const GeneratorExpressionContent *content,
+                       cmGeneratorExpressionDAGChecker *dagChecker) const
+  {
+    if(context->Language.empty())
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<COMPILE_LANGUAGE:...> may only be used to specify include "
+          "directories compile definitions, compile options and to evaluate "
+          "components of the file(GENERATE) command.");
+      return std::string();
+      }
+
+    std::vector<std::string> enabledLanguages;
+    cmGlobalGenerator* gg
+        = context->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+    gg->GetEnabledLanguages(enabledLanguages);
+    if (!parameters.empty() &&
+          std::find(enabledLanguages.begin(), enabledLanguages.end(),
+                  parameters.front()) == enabledLanguages.end())
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<COMPILE_LANGUAGE:...> Unknown language.");
+      return std::string();
+      }
+
+    std::string genName = gg->GetName();
+    if (genName.find("Visual Studio") != std::string::npos)
+      {
+      reportError(context, content->GetOriginalExpression(),
+          "$<COMPILE_LANGUAGE:...> may not be used with Visual Studio "
+          "generators.");
+      return std::string();
+      }
+    else if (genName.find("Xcode") != std::string::npos)
+      {
+      if (dagChecker && (dagChecker->EvaluatingCompileDefinitions()
+          || dagChecker->EvaluatingIncludeDirectories()))
+        {
+        reportError(context, content->GetOriginalExpression(),
+            "$<COMPILE_LANGUAGE:...> may only be used with COMPILE_OPTIONS "
+            "with the Xcode generator.");
+        return std::string();
+        }
+      }
+    else
+      {
+      if(genName.find("Makefiles") == std::string::npos &&
+              genName.find("Ninja") == std::string::npos &&
+              genName.find("Watcom WMake") == std::string::npos)
+        {
+        reportError(context, content->GetOriginalExpression(),
+            "$<COMPILE_LANGUAGE:...> not supported for this generator.");
+        return std::string();
+        }
+      }
+    if (parameters.empty())
+      {
+      return context->Language;
+      }
+    return context->Language == parameters.front() ? "1" : "0";
+  }
+} languageNode;
 
 #define TRANSITIVE_PROPERTY_NAME(PROPERTY) \
   , "INTERFACE_" #PROPERTY
@@ -1829,6 +1902,7 @@ cmGeneratorExpressionNode* GetNode(const std::string &identifier)
     nodeMap["INSTALL_PREFIX"] = &installPrefixNode;
     nodeMap["JOIN"] = &joinNode;
     nodeMap["LINK_ONLY"] = &linkOnlyNode;
+    nodeMap["COMPILE_LANGUAGE"] = &languageNode;
     }
   NodeMap::const_iterator i = nodeMap.find(identifier);
   if (i == nodeMap.end())

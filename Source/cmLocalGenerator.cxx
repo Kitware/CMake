@@ -1428,11 +1428,11 @@ std::string cmLocalGenerator::GetIncludeFlags(
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddCompileDefinitions(std::set<std::string>& defines,
                                              cmTarget const* target,
-                                             const std::string& config)
+                                             const std::string& config,
+                                             const std::string& lang)
 {
   std::vector<std::string> targetDefines;
-  target->GetCompileDefinitions(targetDefines,
-                               config);
+  target->GetCompileDefinitions(targetDefines, config, lang);
   this->AppendDefines(defines, targetDefines);
 }
 
@@ -1453,7 +1453,7 @@ void cmLocalGenerator::AddCompileOptions(
       {
       cmSystemTools::ParseWindowsCommandLine(targetFlags, opts);
       }
-    target->GetCompileOptions(opts, config);
+    target->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {
@@ -1474,7 +1474,7 @@ void cmLocalGenerator::AddCompileOptions(
       this->AppendFlags(flags, targetFlags);
       }
     std::vector<std::string> opts;
-    target->GetCompileOptions(opts, config);
+    target->GetCompileOptions(opts, config, lang);
     for(std::vector<std::string>::const_iterator i = opts.begin();
         i != opts.end(); ++i)
       {
@@ -1600,7 +1600,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // Get the target-specific include directories.
   std::vector<std::string> includes;
 
-  includes = target->GetIncludeDirectories(config);
+  includes = target->GetIncludeDirectories(config, lang);
 
   // Support putting all the in-project include directories first if
   // it is requested by the project.

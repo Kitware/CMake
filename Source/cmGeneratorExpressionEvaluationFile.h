@@ -34,7 +34,7 @@ public:
   void CreateOutputFile(std::string const& config);
 
 private:
-  void Generate(const std::string& config,
+  void Generate(const std::string& config, const std::string& lang,
               cmCompiledGeneratorExpression* inputExpression,
               std::map<std::string, std::string> &outputFiles, mode_t perm);
 

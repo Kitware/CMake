@@ -329,7 +329,7 @@ std::string cmMakefileTargetGenerator::GetDefines(const std::string &l)
 
     // Add preprocessor definitions for this target and configuration.
     this->LocalGenerator->AddCompileDefinitions(defines, this->Target,
-                            this->LocalGenerator->ConfigurationName);
+                            this->LocalGenerator->ConfigurationName, l);
 
     std::string definesString;
     this->LocalGenerator->JoinDefines(defines, definesString, lang);
@@ -1125,40 +1125,6 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
       << "# Fortran module output directory.\n"
       << "set(CMAKE_Fortran_TARGET_MODULE_DIR \"" << mdir << "\")\n";
     }
-
-  // Target-specific include directories:
-  *this->InfoFileStream
-    << "\n"
-    << "# The include file search paths:\n";
-  *this->InfoFileStream
-    << "set(CMAKE_C_TARGET_INCLUDE_PATH\n";
-  std::vector<std::string> includes;
-
-  const std::string& config =
-    this->Makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
-  this->LocalGenerator->GetIncludeDirectories(includes,
-                                              this->GeneratorTarget,
-                                              "C", config);
-  for(std::vector<std::string>::iterator i = includes.begin();
-      i != includes.end(); ++i)
-    {
-    *this->InfoFileStream
-      << "  \""
-      << this->LocalGenerator->Convert(*i,
-                                       cmLocalGenerator::HOME_OUTPUT)
-      << "\"\n";
-    }
-  *this->InfoFileStream
-    << "  )\n";
-  *this->InfoFileStream
-    << "set(CMAKE_CXX_TARGET_INCLUDE_PATH "
-    << "${CMAKE_C_TARGET_INCLUDE_PATH})\n";
-  *this->InfoFileStream
-    << "set(CMAKE_Fortran_TARGET_INCLUDE_PATH "
-    << "${CMAKE_C_TARGET_INCLUDE_PATH})\n";
-  *this->InfoFileStream
-    << "set(CMAKE_ASM_TARGET_INCLUDE_PATH "
-    << "${CMAKE_C_TARGET_INCLUDE_PATH})\n";
 
   // and now write the rule to use it
   std::vector<std::string> depends;

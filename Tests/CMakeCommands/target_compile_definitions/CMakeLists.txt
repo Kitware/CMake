@@ -26,6 +26,21 @@ target_compile_definitions(consumer
   PRIVATE
 )
 
+if (CMAKE_GENERATOR MATCHES "Makefiles" OR CMAKE_GENERATOR MATCHES "Ninja")
+  target_sources(consumer PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/consumer.c"
+  )
+  target_compile_definitions(consumer
+    PRIVATE
+      CONSUMER_LANG_$<COMPILE_LANGUAGE>
+      LANG_IS_CXX=$<COMPILE_LANGUAGE:CXX>
+      LANG_IS_C=$<COMPILE_LANGUAGE:C>
+  )
+  target_compile_definitions(consumer
+    PRIVATE -DTEST_LANG_DEFINES
+  )
+endif()
+
 add_definitions(-DSOME_DEF)
 add_library(imp UNKNOWN IMPORTED)
 get_target_property(_res imp COMPILE_DEFINITIONS)

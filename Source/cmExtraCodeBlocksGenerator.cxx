@@ -604,7 +604,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
 
     // the compilerdefines for this target
     std::vector<std::string> cdefs;
-    target->GetCompileDefinitions(cdefs, buildType);
+    target->GetCompileDefinitions(cdefs, buildType, "C");
 
     // Expand the list.
     for(std::vector<std::string>::const_iterator di = cdefs.begin();

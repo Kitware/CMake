@@ -496,7 +496,8 @@ public:
   const char* GetExportMacro() const;
 
   void GetCompileDefinitions(std::vector<std::string> &result,
-                             const std::string& config) const;
+                             const std::string& config,
+                             const std::string& language) const;
 
   // Compute the set of languages compiled by the target.  This is
   // computed every time it is called because the languages can change
@@ -567,7 +568,8 @@ public:
                                     bool contentOnly) const;
 
   std::vector<std::string> GetIncludeDirectories(
-                     const std::string& config) const;
+                     const std::string& config,
+                     const std::string& language) const;
   void InsertInclude(const cmValueWithOrigin &entry,
                      bool before = false);
   void InsertCompileOption(const cmValueWithOrigin &entry,
@@ -577,7 +579,8 @@ public:
   void AppendBuildInterfaceIncludes();
 
   void GetCompileOptions(std::vector<std::string> &result,
-                         const std::string& config) const;
+                         const std::string& config,
+                         const std::string& language) const;
   void GetAutoUicOptions(std::vector<std::string> &result,
                          const std::string& config) const;
   void GetCompileFeatures(std::vector<std::string> &features,

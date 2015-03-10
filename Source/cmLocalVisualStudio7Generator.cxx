@@ -775,7 +775,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   cmGeneratorTarget* gt =
     this->GlobalGenerator->GetGeneratorTarget(&target);
   std::vector<std::string> targetDefines;
-  target.GetCompileDefinitions(targetDefines, configName);
+  target.GetCompileDefinitions(targetDefines, configName, "CXX");
   targetOptions.AddDefines(targetDefines);
   targetOptions.SetVerboseMakefile(
     this->Makefile->IsOn("CMAKE_VERBOSE_MAKEFILE"));

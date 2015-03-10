@@ -208,3 +208,5 @@ add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
 if(RPMBUILD_EXECUTABLE)
   add_RunCMake_test(CPackRPM)
 endif()
+
+add_RunCMake_test(COMPILE_LANGUAGE-genex)

@@ -80,11 +80,13 @@ public:
                        bool quiet = false,
                        cmTarget const* headTarget = 0,
                        cmTarget const* currentTarget = 0,
-                       cmGeneratorExpressionDAGChecker *dagChecker = 0) const;
+                       cmGeneratorExpressionDAGChecker *dagChecker = 0,
+                       std::string const& language = std::string()) const;
   const char* Evaluate(cmMakefile* mf, const std::string& config,
                        bool quiet,
                        cmTarget const* headTarget,
-                       cmGeneratorExpressionDAGChecker *dagChecker) const;
+                       cmGeneratorExpressionDAGChecker *dagChecker,
+                       std::string const& language = std::string()) const;
 
   /** Get set of targets found during evaluations.  */
   std::set<cmTarget*> const& GetTargets() const
