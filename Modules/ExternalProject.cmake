@@ -251,8 +251,8 @@ Create custom targets to build projects in external trees
   ``LOG 1``
     Wrap step in script to log output
 
-  The command line, comment, and working directory of every standard and
-  custom step is processed to replace tokens ``<SOURCE_DIR>``,
+  The command line, comment, working directory, and byproducts of every
+  standard and custom step are processed to replace tokens ``<SOURCE_DIR>``,
   ``<BINARY_DIR>``, ``<INSTALL_DIR>``, and ``<TMP_DIR>`` with
   corresponding property values.
 
@@ -1443,7 +1443,7 @@ function(ExternalProject_Add_Step name step)
   endif()
 
   # Replace location tags.
-  _ep_replace_location_tags(${name} comment command work_dir)
+  _ep_replace_location_tags(${name} comment command work_dir byproducts)
 
   # Custom comment?
   get_property(comment_set TARGET ${name} PROPERTY _EP_${step}_COMMENT SET)
