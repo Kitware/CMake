@@ -52,6 +52,11 @@
 #  list the main application folder, or the main executable. You should
 #  list any frameworks and plugins that are included in your app bundle.
 #
+# .. variable:: CPACK_BUNDLE_APPLE_CODESIGN_PARAMETER
+#
+#  Additional parameter that will passed to codesign.
+#  Default value: "--deep -f"
+#
 # .. variable:: CPACK_COMMAND_CODESIGN
 #
 #  Path to the codesign(1) command used to sign applications with an
