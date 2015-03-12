@@ -24,6 +24,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmAlgorithms.h"
 #include <cmsys/Encoding.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

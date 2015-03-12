@@ -14,6 +14,7 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmRST.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>

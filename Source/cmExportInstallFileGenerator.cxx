@@ -19,6 +19,7 @@
 #include "cmInstallExportGenerator.h"
 #include "cmInstallTargetGenerator.h"
 #include "cmTargetExport.h"
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmExportInstallFileGenerator

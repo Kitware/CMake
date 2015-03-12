@@ -19,6 +19,7 @@
 #include "cmOSXBundleGenerator.h"
 #include "cmGeneratorTarget.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <assert.h>
 #include <algorithm>

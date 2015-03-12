@@ -18,6 +18,7 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmGeneratorTarget.h"
+#include "cmAlgorithms.h"
 
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 {

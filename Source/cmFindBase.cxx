@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmFindBase.h"
 
+#include "cmAlgorithms.h"
+
 cmFindBase::cmFindBase()
 {
   this->AlreadyInCache = false;

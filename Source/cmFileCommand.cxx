@@ -16,6 +16,7 @@
 #include "cmInstallType.h"
 #include "cmFileTimeComparison.h"
 #include "cmCryptoHash.h"
+#include "cmAlgorithms.h"
 
 #include "cmTimestamp.h"
 

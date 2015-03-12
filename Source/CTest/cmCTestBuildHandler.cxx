@@ -20,6 +20,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmXMLSafe.h"
 #include "cmFileTimeComparison.h"
+#include "cmAlgorithms.h"
 
 //#include <cmsys/RegularExpression.hxx>
 #include <cmsys/Process.h>

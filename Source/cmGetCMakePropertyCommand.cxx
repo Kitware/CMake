@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 // cmGetCMakePropertyCommand
 bool cmGetCMakePropertyCommand

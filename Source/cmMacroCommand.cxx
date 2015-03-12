@@ -12,6 +12,7 @@
 #include "cmMacroCommand.h"
 
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 // define the class for macro commands
 class cmMacroHelperCommand : public cmCommand

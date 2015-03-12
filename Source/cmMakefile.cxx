@@ -30,6 +30,7 @@
 #include "cmInstallGenerator.h"
 #include "cmTestGenerator.h"
 #include "cmDefinitions.h"
+#include "cmAlgorithms.h"
 #include "cmake.h"
 #include <stdlib.h> // required for atoi
 

@@ -12,6 +12,7 @@
 #include "cmListCommand.h"
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
+#include "cmAlgorithms.h"
 
 #include <stdlib.h> // required for atoi
 #include <ctype.h>

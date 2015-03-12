@@ -14,6 +14,7 @@
 #include "cmMakefile.h"
 #include "cmTarget.h"
 #include "assert.h"
+#include "cmAlgorithms.h"
 
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"

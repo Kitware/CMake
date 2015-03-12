@@ -32,6 +32,7 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 #include "cmExportBuildFileGenerator.h"
 #include "cmCPackPropertiesGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/FStream.hxx>

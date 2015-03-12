@@ -20,6 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmTest.h"
 #include "cmDocumentationFormatter.h"
+#include "cmAlgorithms.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmGraphVizWriter.h"

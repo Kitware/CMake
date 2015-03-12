@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 #include <assert.h>
 

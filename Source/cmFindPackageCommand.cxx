@@ -14,6 +14,7 @@
 #include <cmsys/Directory.hxx>
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/Encoding.hxx>
+#include "cmAlgorithms.h"
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
 #include "cmVariableWatch.h"

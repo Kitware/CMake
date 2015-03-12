@@ -12,6 +12,7 @@
 #include "cmInstalledFile.h"
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmInstalledFile::cmInstalledFile():
@@ -27,6 +28,16 @@ cmInstalledFile::~cmInstalledFile()
     {
     delete NameExpression;
     }
+}
+
+cmInstalledFile::Property::Property()
+{
+
+}
+
+cmInstalledFile::Property::~Property()
+{
+  cmDeleteAll(this->ValueExpressions);
 }
 
 //----------------------------------------------------------------------------

@@ -12,6 +12,7 @@
 #include "cmMakeDepend.h"
 #include "cmSystemTools.h"
 #include "cmGeneratorExpression.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>

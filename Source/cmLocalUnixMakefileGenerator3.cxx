@@ -20,6 +20,7 @@
 #include "cmVersion.h"
 #include "cmFileTimeComparison.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 // Include dependency scanners for supported languages.  Only the
 // C/C++ scanner is needed for bootstrapping CMake.

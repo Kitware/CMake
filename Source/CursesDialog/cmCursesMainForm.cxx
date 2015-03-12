@@ -22,6 +22,7 @@
 #include "cmCursesDummyWidget.h"
 #include "cmCursesCacheEntryComposite.h"
 #include "cmCursesLongMessageForm.h"
+#include "cmAlgorithms.h"
 
 
 inline int ctrl(int z)

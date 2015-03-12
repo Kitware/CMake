@@ -17,6 +17,7 @@
 #include "cmVisualStudioSlnData.h"
 #include "cmVisualStudioSlnParser.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 static const char vs10generatorName[] = "Visual Studio 10 2010";
 
