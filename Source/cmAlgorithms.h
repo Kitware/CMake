@@ -265,11 +265,40 @@ typename Range::const_iterator cmRemoveMatching(Range &r, MatchRange const& m)
                         ContainerAlgorithms::BinarySearcher<MatchRange>(m));
 }
 
+namespace ContainerAlgorithms {
+
+template<typename Range, typename T = typename Range::value_type>
+struct RemoveDuplicatesAPI
+{
+  typedef typename Range::const_iterator const_iterator;
+  typedef typename Range::const_iterator value_type;
+
+  static bool lessThan(value_type a, value_type b) { return *a < *b; }
+  static value_type uniqueValue(const_iterator a) { return a; }
+  template<typename It>
+  static bool valueCompare(It it, const_iterator it2) { return **it != *it2; }
+};
+
+template<typename Range, typename T>
+struct RemoveDuplicatesAPI<Range, T*>
+{
+  typedef typename Range::const_iterator const_iterator;
+  typedef T* value_type;
+
+  static bool lessThan(value_type a, value_type b) { return a < b; }
+  static value_type uniqueValue(const_iterator a) { return *a; }
+  template<typename It>
+  static bool valueCompare(It it, const_iterator it2) { return *it != *it2; }
+};
+
+}
+
 template<typename Range>
 typename Range::const_iterator cmRemoveDuplicates(Range& r)
 {
-  typedef std::vector<typename Range::value_type> UniqueVector;
-  UniqueVector unique;
+  typedef typename ContainerAlgorithms::RemoveDuplicatesAPI<Range> API;
+  typedef typename API::value_type T;
+  std::vector<T> unique;
   unique.reserve(r.size());
   std::vector<size_t> indices;
   size_t count = 0;
@@ -277,11 +306,12 @@ typename Range::const_iterator cmRemoveDuplicates(Range& r)
   for(typename Range::const_iterator it = r.begin();
       it != end; ++it, ++count)
     {
-    const typename UniqueVector::iterator low =
-        std::lower_bound(unique.begin(), unique.end(), *it);
-    if (low == unique.end() || *low != *it)
+    const typename std::vector<T>::iterator low =
+        std::lower_bound(unique.begin(), unique.end(),
+                         API::uniqueValue(it), API::lessThan);
+    if (low == unique.end() || API::valueCompare(low, it))
       {
-      unique.insert(low, *it);
+      unique.insert(low, API::uniqueValue(it));
       }
     else
       {
