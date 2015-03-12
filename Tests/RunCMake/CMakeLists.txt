@@ -63,6 +63,7 @@ add_RunCMake_test(CMP0051)
 add_RunCMake_test(CMP0053)
 add_RunCMake_test(CMP0054)
 add_RunCMake_test(CMP0055)
+add_RunCMake_test(CMP0057)
 add_RunCMake_test(CTest)
 
 if(NOT CMake_TEST_EXTERNAL_CMAKE)

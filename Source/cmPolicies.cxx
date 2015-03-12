@@ -374,6 +374,11 @@ cmPolicies::cmPolicies()
     CMP0056, "CMP0056",
     "Honor link flags in try_compile() source-file signature.",
     3,2,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0057, "CMP0057",
+    "Disallow multiple MAIN_DEPENDENCY specifications for the same file.",
+    3,3,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
