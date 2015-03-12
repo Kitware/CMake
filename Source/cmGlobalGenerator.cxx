@@ -1718,6 +1718,19 @@ int cmGlobalGenerator::Build(
   std::string outputBuffer;
   std::string* outputPtr = &outputBuffer;
 
+  std::vector<std::string> makeCommand;
+  this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName,
+                             bindir, target, config, fast, verbose,
+                             nativeOptions);
+
+  // Workaround to convince VCExpress.exe to produce output.
+  if (outputflag == cmSystemTools::OUTPUT_PASSTHROUGH &&
+      !makeCommand.empty() && cmSystemTools::LowerCase(
+        cmSystemTools::GetFilenameName(makeCommand[0])) == "vcexpress.exe")
+    {
+    outputflag = cmSystemTools::OUTPUT_NORMAL;
+    }
+
   // should we do a clean first?
   if (clean)
     {
@@ -1744,10 +1757,6 @@ int cmGlobalGenerator::Build(
     }
 
   // now build
-  std::vector<std::string> makeCommand;
-  this->GenerateBuildCommand(makeCommand, makeCommandCSTR, projectName,
-                             bindir, target, config, fast, verbose,
-                             nativeOptions);
   std::string makeCommandStr = cmSystemTools::PrintSingleCommand(makeCommand);
   output += "\nRun Build Command:";
   output += makeCommandStr;
