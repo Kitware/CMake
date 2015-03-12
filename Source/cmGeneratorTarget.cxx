@@ -278,6 +278,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
   , DebugCompileDefinitionsDone(false)
   , DebugLinkOptionsDone(false)
   , DebugLinkDirectoriesDone(false)
+  , DebugPrecompileHeadersDone(false)
   , DebugSourcesDone(false)
   , LinkImplementationLanguageIsContextDependent(true)
   , UtilityItemsDone(false)
@@ -312,6 +313,10 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
                                      t->GetLinkDirectoriesBacktraces(),
                                      this->LinkDirectoriesEntries);
 
+  CreatePropertyGeneratorExpressions(t->GetPrecompileHeadersEntries(),
+                                     t->GetPrecompileHeadersBacktraces(),
+                                     this->PrecompileHeadersEntries);
+
   CreatePropertyGeneratorExpressions(t->GetSourceEntries(),
                                      t->GetSourceBacktraces(),
                                      this->SourceEntries, true);
@@ -327,6 +332,7 @@ cmGeneratorTarget::~cmGeneratorTarget()
   cmDeleteAll(this->CompileDefinitionsEntries);
   cmDeleteAll(this->LinkOptionsEntries);
   cmDeleteAll(this->LinkDirectoriesEntries);
+  cmDeleteAll(this->PrecompileHeadersEntries);
   cmDeleteAll(this->SourceEntries);
   cmDeleteAll(this->LinkInformation);
 }
@@ -3308,6 +3314,43 @@ std::vector<BT<std::string>> cmGeneratorTarget::GetCompileDefinitions(
 
   processOptions(this, entries, list, uniqueOptions, debugDefines,
                  "compile definitions", OptionsParse::None);
+
+  return list;
+}
+
+std::vector<BT<std::string>> cmGeneratorTarget::GetPrecompileHeaders(
+  const std::string& config, const std::string& language) const
+{
+  std::unordered_set<std::string> uniqueOptions;
+
+  cmGeneratorExpressionDAGChecker dagChecker(this, "PRECOMPILE_HEADERS",
+                                             nullptr, nullptr);
+
+  std::vector<std::string> debugProperties;
+  const char* debugProp =
+    this->Makefile->GetDefinition("CMAKE_DEBUG_TARGET_PROPERTIES");
+  if (debugProp) {
+    cmExpandList(debugProp, debugProperties);
+  }
+
+  bool debugDefines = !this->DebugPrecompileHeadersDone &&
+    std::find(debugProperties.begin(), debugProperties.end(),
+              "PRECOMPILE_HEADERS") != debugProperties.end();
+
+  if (this->GlobalGenerator->GetConfigureDoneCMP0026()) {
+    this->DebugPrecompileHeadersDone = true;
+  }
+
+  std::vector<EvaluatedTargetPropertyEntry> entries =
+    EvaluateTargetPropertyEntries(this, config, language, &dagChecker,
+                                  this->PrecompileHeadersEntries);
+
+  AddInterfaceEntries(this, config, "INTERFACE_PRECOMPILE_HEADERS", language,
+                      &dagChecker, entries);
+
+  std::vector<BT<std::string>> list;
+  processOptions(this, entries, list, uniqueOptions, debugDefines,
+                 "precompile headers", OptionsParse::None);
 
   return list;
 }

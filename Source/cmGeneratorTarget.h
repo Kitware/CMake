@@ -455,6 +455,9 @@ public:
   std::vector<BT<std::string>> GetLinkDepends(
     std::string const& config, std::string const& language) const;
 
+  std::vector<BT<std::string>> GetPrecompileHeaders(
+    const std::string& config, const std::string& language) const;
+
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config,
                                 const std::string& language) const;
@@ -867,8 +870,11 @@ private:
   std::vector<TargetPropertyEntry*> CompileDefinitionsEntries;
   std::vector<TargetPropertyEntry*> LinkOptionsEntries;
   std::vector<TargetPropertyEntry*> LinkDirectoriesEntries;
+  std::vector<TargetPropertyEntry*> PrecompileHeadersEntries;
   std::vector<TargetPropertyEntry*> SourceEntries;
   mutable std::set<std::string> LinkImplicitNullProperties;
+  mutable std::map<std::string, std::string> PchHeaders;
+  mutable std::map<std::string, std::string> PchSources;
 
   void ExpandLinkItems(std::string const& prop, std::string const& value,
                        std::string const& config,
@@ -922,6 +928,7 @@ private:
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugLinkOptionsDone;
   mutable bool DebugLinkDirectoriesDone;
+  mutable bool DebugPrecompileHeadersDone;
   mutable bool DebugSourcesDone;
   mutable bool LinkImplementationLanguageIsContextDependent;
   mutable bool UtilityItemsDone;

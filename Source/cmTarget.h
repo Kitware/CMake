@@ -216,6 +216,8 @@ public:
                         cmListFileBacktrace const& bt, bool before = false);
   void InsertLinkDirectory(std::string const& entry,
                            cmListFileBacktrace const& bt, bool before = false);
+  void InsertPrecompileHeader(std::string const& entry,
+                              cmListFileBacktrace const& bt);
 
   void AppendBuildInterfaceIncludes();
 
@@ -236,6 +238,9 @@ public:
 
   cmStringRange GetCompileDefinitionsEntries() const;
   cmBacktraceRange GetCompileDefinitionsBacktraces() const;
+
+  cmStringRange GetPrecompileHeadersEntries() const;
+  cmBacktraceRange GetPrecompileHeadersBacktraces() const;
 
   cmStringRange GetSourceEntries() const;
   cmBacktraceRange GetSourceBacktraces() const;

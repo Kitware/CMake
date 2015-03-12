@@ -190,6 +190,8 @@ public:
   std::vector<cmListFileBacktrace> CompileFeaturesBacktraces;
   std::vector<std::string> CompileDefinitionsEntries;
   std::vector<cmListFileBacktrace> CompileDefinitionsBacktraces;
+  std::vector<std::string> PrecompileHeadersEntries;
+  std::vector<cmListFileBacktrace> PrecompileHeadersBacktraces;
   std::vector<std::string> SourceEntries;
   std::vector<cmListFileBacktrace> SourceBacktraces;
   std::vector<std::string> LinkOptionsEntries;
@@ -348,6 +350,7 @@ cmTarget::cmTarget(std::string const& name, cmStateEnums::TargetType type,
     initProp("FOLDER");
     initProp("Swift_MODULE_DIRECTORY");
     initProp("VS_JUST_MY_CODE_DEBUGGING");
+    initProp("DISABLE_PRECOMPILE_HEADERS");
 #ifdef __APPLE__
     if (this->GetGlobalGenerator()->IsXcode()) {
       initProp("XCODE_GENERATE_SCHEME");
@@ -1017,6 +1020,16 @@ cmBacktraceRange cmTarget::GetCompileDefinitionsBacktraces() const
   return cmMakeRange(impl->CompileDefinitionsBacktraces);
 }
 
+cmStringRange cmTarget::GetPrecompileHeadersEntries() const
+{
+  return cmMakeRange(impl->PrecompileHeadersEntries);
+}
+
+cmBacktraceRange cmTarget::GetPrecompileHeadersBacktraces() const
+{
+  return cmMakeRange(impl->PrecompileHeadersBacktraces);
+}
+
 cmStringRange cmTarget::GetSourceEntries() const
 {
   return cmMakeRange(impl->SourceEntries);
@@ -1068,6 +1081,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(COMPILE_FEATURES);
   MAKE_STATIC_PROP(COMPILE_OPTIONS);
+  MAKE_STATIC_PROP(PRECOMPILE_HEADERS);
   MAKE_STATIC_PROP(CUDA_PTX_COMPILATION);
   MAKE_STATIC_PROP(EXPORT_NAME);
   MAKE_STATIC_PROP(IMPORTED_GLOBAL);
@@ -1165,6 +1179,14 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
       impl->LinkDirectoriesEntries.emplace_back(value);
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkDirectoriesBacktraces.push_back(lfbt);
+    }
+  } else if (prop == propPRECOMPILE_HEADERS) {
+    impl->PrecompileHeadersEntries.clear();
+    impl->PrecompileHeadersBacktraces.clear();
+    if (value) {
+      impl->PrecompileHeadersEntries.emplace_back(value);
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
+      impl->PrecompileHeadersBacktraces.push_back(lfbt);
     }
   } else if (prop == propLINK_LIBRARIES) {
     impl->LinkImplementationPropertyEntries.clear();
@@ -1282,6 +1304,12 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
       impl->LinkDirectoriesBacktraces.push_back(lfbt);
     }
+  } else if (prop == "PRECOMPILE_HEADERS") {
+    if (value && *value) {
+      impl->PrecompileHeadersEntries.emplace_back(value);
+      cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
+      impl->PrecompileHeadersBacktraces.push_back(lfbt);
+    }
   } else if (prop == "LINK_LIBRARIES") {
     if (value && *value) {
       cmListFileBacktrace lfbt = impl->Makefile->GetBacktrace();
@@ -1391,6 +1419,13 @@ void cmTarget::InsertLinkDirectory(std::string const& entry,
 
   impl->LinkDirectoriesEntries.insert(position, entry);
   impl->LinkDirectoriesBacktraces.insert(btPosition, bt);
+}
+
+void cmTarget::InsertPrecompileHeader(std::string const& entry,
+                                      cmListFileBacktrace const& bt)
+{
+  impl->PrecompileHeadersEntries.push_back(entry);
+  impl->PrecompileHeadersBacktraces.push_back(bt);
 }
 
 static void cmTargetCheckLINK_INTERFACE_LIBRARIES(const std::string& prop,
@@ -1513,6 +1548,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
   MAKE_STATIC_PROP(COMPILE_DEFINITIONS);
   MAKE_STATIC_PROP(LINK_OPTIONS);
   MAKE_STATIC_PROP(LINK_DIRECTORIES);
+  MAKE_STATIC_PROP(PRECOMPILE_HEADERS);
   MAKE_STATIC_PROP(IMPORTED);
   MAKE_STATIC_PROP(IMPORTED_GLOBAL);
   MAKE_STATIC_PROP(MANUALLY_ADDED_DEPENDENCIES);
@@ -1528,6 +1564,7 @@ const char* cmTarget::GetProperty(const std::string& prop) const
     propCOMPILE_FEATURES,
     propCOMPILE_OPTIONS,
     propCOMPILE_DEFINITIONS,
+    propPRECOMPILE_HEADERS,
     propLINK_OPTIONS,
     propLINK_DIRECTORIES,
     propIMPORTED,
@@ -1614,6 +1651,15 @@ const char* cmTarget::GetProperty(const std::string& prop) const
 
       static std::string output;
       output = cmJoin(impl->Utilities, ";");
+      return output.c_str();
+    }
+    if (prop == propPRECOMPILE_HEADERS) {
+      if (impl->PrecompileHeadersEntries.empty()) {
+        return nullptr;
+      }
+
+      static std::string output;
+      output = cmJoin(impl->PrecompileHeadersEntries, ";");
       return output.c_str();
     }
     if (prop == propIMPORTED) {
