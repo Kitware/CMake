@@ -78,6 +78,7 @@
 #include "cmTargetCompileOptionsCommand.h"
 #include "cmTargetIncludeDirectoriesCommand.h"
 #include "cmTargetLinkLibrariesCommand.h"
+#include "cmTargetPrecompileHeadersCommand.h"
 #include "cmTargetSourcesCommand.h"
 #include "cmTryCompileCommand.h"
 #include "cmTryRunCommand.h"
@@ -277,6 +278,9 @@ void GetProjectCommands(cmState* state)
   state->AddBuiltinCommand("try_compile",
                            cm::make_unique<cmTryCompileCommand>());
   state->AddBuiltinCommand("try_run", cm::make_unique<cmTryRunCommand>());
+  state->AddBuiltinCommand(
+    "target_precompile_headers",
+    cm::make_unique<cmTargetPrecompileHeadersCommand>());
 
 #if !defined(CMAKE_BOOTSTRAP)
   state->AddBuiltinCommand("add_compile_definitions",
