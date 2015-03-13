@@ -586,7 +586,7 @@ function(write_compiler_detection_header
 #  if ${def_name}
 #    define ${def_value} nullptr
 #  else
-#    define ${def_value} static_cast<void*>(0)
+#    define ${def_value} 0
 #  endif
 \n")
       endif()
