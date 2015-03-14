@@ -33,7 +33,7 @@
 #
 # ::
 #
-#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME
+#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(<NAME>
 #       [FOUND_VAR <resultVar>]
 #       [REQUIRED_VARS <var1>...<varN>]
 #       [VERSION_VAR   <versionvar>]
