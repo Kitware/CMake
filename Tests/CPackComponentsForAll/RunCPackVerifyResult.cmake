@@ -158,6 +158,12 @@ if(CPackGen MATCHES "RPM")
           ERROR_QUIET
           OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+      execute_process(COMMAND ${RPM_EXECUTABLE} -pqa ${check_file}
+          RESULT_VARIABLE check_package_architecture_result
+          OUTPUT_VARIABLE check_package_architecture
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+
       execute_process(COMMAND ${RPM_EXECUTABLE} -pql ${check_file}
           OUTPUT_VARIABLE check_package_content
           ERROR_QUIET
@@ -169,28 +175,28 @@ if(CPackGen MATCHES "RPM")
         set(check_file_match_expected_summary ".*${CPACK_RPM_libraries_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_RPM_libraries_PACKAGE_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_applications_PACKAGE_ARCHITECTURE}")
+        set(check_file_match_expected_architecture "") # we don't explicitly set this value so it is different on each platform - ignore it
         set(spec_regex "*libraries*")
         set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/lib.*\n/usr/foo/bar/lib.*/libmylib.a$")
       elseif(check_file_headers_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_COMPONENT_HEADERS_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_libraries_PACKAGE_ARCHITECTURE}")
+        set(check_file_match_expected_architecture "noarch")
         set(spec_regex "*headers*")
         set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/include\n/usr/foo/bar/include/mylib.h$")
       elseif(check_file_applications_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*${CPACK_COMPONENT_APPLICATIONS_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}.*")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_headers_PACKAGE_ARCHITECTURE}")
+        set(check_file_match_expected_architecture "armv7hf")
         set(spec_regex "*applications*")
         set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/bin\n/usr/foo/bar/bin/mylibapp$")
       elseif(check_file_Unspecified_match)
         set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
         set(check_file_match_expected_description ".*DESCRIPTION.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_BINDIR}")
-        set(check_file_match_expected_architecture "Architecture: ${CPACK_RPM_Unspecified_PACKAGE_ARCHITECTURE}")
+        set(check_file_match_expected_architecture "") # we don't explicitly set this value so it is different on each platform - ignore it
         set(spec_regex "*Unspecified*")
         set(check_content_list "^/usr/foo/bar
 /usr/foo/bar/bin
@@ -230,9 +236,22 @@ if(CPackGen MATCHES "RPM")
         message(FATAL_ERROR "error: '${check_file}' rpm package relocation path does not match expected value - regex '${check_file_match_expected_relocation_path}'; RPM output: '${check_file_content}'; generated spec file: '${spec_file_content}'")
       endif()
 
-      string(REGEX MATCH ${check_file_match_expected_architecture} check_file_match_architecture ${check_file_content})
-      if (NOT check_file_match_architecture)
+      #######################
+      # test package architecture
+      #######################
+      string(REGEX MATCH "Architecture${whitespaces}:" check_info_contains_arch ${check_file_content})
+      if(check_info_contains_arch) # test for rpm versions that contain architecture in package info (e.g. 4.11.x)
+        string(REGEX MATCH "Architecture${whitespaces}:${whitespaces}${check_file_match_expected_architecture}" check_file_match_architecture ${check_file_content})
+        if(NOT check_file_match_architecture)
           message(FATAL_ERROR "error: '${check_file}' Architecture does not match expected value - '${check_file_match_expected_architecture}'; RPM output: '${check_file_content}'; generated spec file: '${spec_file_content}'")
+        endif()
+      elseif(NOT check_package_architecture_result) # test result only on platforms that support -pqa rpm query
+        # test for rpm versions that do not contain architecture in package info (e.g. 4.8.x)
+        string(REGEX MATCH ".*${check_file_match_expected_architecture}" check_file_match_architecture "${check_package_architecture}")
+        if(NOT check_file_match_architecture)
+          message(FATAL_ERROR "error: '${check_file}' Architecture does not match expected value - '${check_file_match_expected_architecture}'; RPM output: '${check_package_architecture}'; generated spec file: '${spec_file_content}'")
+        endif()
+      # else rpm version too old (e.g. 4.4.x) - skip test
       endif()
 
       #######################
