@@ -536,11 +536,26 @@ void cmCTestRunTest::ComputeArguments()
     }
   this->TestResult.FullCommandLine = testCommand;
 
+  // Print the test command in verbose mode
   cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, std::endl
              << this->Index << ": "
              << (this->TestHandler->MemCheck?"MemCheck":"Test")
              << " command: " << testCommand
              << std::endl);
+
+  // Print any test-specific env vars in verbose mode
+  if (this->TestProperties->Environment.size())
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ": "
+               << "Environment variables: " << std::endl);
+    }
+  for(std::vector<std::string>::const_iterator e =
+      this->TestProperties->Environment.begin();
+      e != this->TestProperties->Environment.end(); ++e)
+    {
+    cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ":  " << *e
+               << std::endl);
+    }
 }
 
 //----------------------------------------------------------------------
