@@ -494,709 +494,687 @@ if(NOT UNIX)
   message(FATAL_ERROR "CPackRPM.cmake may only be used under UNIX.")
 endif()
 
-# rpmbuild is the basic command for building RPM package
-# it may be a simple (symbolic) link to rpm command.
-find_program(RPMBUILD_EXECUTABLE rpmbuild)
+function(cpack_rpm_generate_package)
+  # rpmbuild is the basic command for building RPM package
+  # it may be a simple (symbolic) link to rpm command.
+  find_program(RPMBUILD_EXECUTABLE rpmbuild)
 
-# Check version of the rpmbuild tool this would be easier to
-# track bugs with users and CPackRPM debug mode.
-# We may use RPM version in order to check for available version dependent features
-if(RPMBUILD_EXECUTABLE)
-  execute_process(COMMAND ${RPMBUILD_EXECUTABLE} --version
-                  OUTPUT_VARIABLE _TMP_VERSION
-                  ERROR_QUIET
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-  string(REGEX REPLACE "^.* " ""
-         RPMBUILD_EXECUTABLE_VERSION
-         ${_TMP_VERSION})
-  if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: rpmbuild version is <${RPMBUILD_EXECUTABLE_VERSION}>")
-  endif()
-endif()
-
-if(NOT RPMBUILD_EXECUTABLE)
-  message(FATAL_ERROR "RPM package requires rpmbuild executable")
-endif()
-
-# Display lsb_release output if DEBUG mode enable
-# This will help to diagnose problem with CPackRPM
-# because we will know on which kind of Linux we are
-if(CPACK_RPM_PACKAGE_DEBUG)
-  find_program(LSB_RELEASE_EXECUTABLE lsb_release)
-  if(LSB_RELEASE_EXECUTABLE)
-    execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -a
-                    OUTPUT_VARIABLE _TMP_LSB_RELEASE_OUTPUT
+  # Check version of the rpmbuild tool this would be easier to
+  # track bugs with users and CPackRPM debug mode.
+  # We may use RPM version in order to check for available version dependent features
+  if(RPMBUILD_EXECUTABLE)
+    execute_process(COMMAND ${RPMBUILD_EXECUTABLE} --version
+                    OUTPUT_VARIABLE _TMP_VERSION
                     ERROR_QUIET
                     OUTPUT_STRIP_TRAILING_WHITESPACE)
-    string(REGEX REPLACE "\n" ", "
-           LSB_RELEASE_OUTPUT
-           ${_TMP_LSB_RELEASE_OUTPUT})
-  else ()
-    set(LSB_RELEASE_OUTPUT "lsb_release not installed/found!")
-  endif()
-  message("CPackRPM:Debug: LSB_RELEASE  = ${LSB_RELEASE_OUTPUT}")
-endif()
-
-# We may use RPM version in the future in order
-# to shut down warning about space in buildtree
-# some recent RPM version should support space in different places.
-# not checked [yet].
-if(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
-  message(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
-endif()
-
-# If rpmbuild is found
-# we try to discover alien since we may be on non RPM distro like Debian.
-# In this case we may try to to use more advanced features
-# like generating RPM directly from DEB using alien.
-# FIXME feature not finished (yet)
-find_program(ALIEN_EXECUTABLE alien)
-if(ALIEN_EXECUTABLE)
-  message(STATUS "alien found, we may be on a Debian based distro.")
-endif()
-
-# Are we packaging components ?
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "-${CPACK_RPM_PACKAGE_COMPONENT}")
-  string(TOUPPER ${CPACK_RPM_PACKAGE_COMPONENT} CPACK_RPM_PACKAGE_COMPONENT_UPPER)
-else()
-  set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "")
-endif()
-
-set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
-
-#
-# Use user-defined RPM specific variables value
-# or generate reasonable default value from
-# CPACK_xxx generic values.
-# The variables comes from the needed (mandatory or not)
-# values found in the RPM specification file aka ".spec" file.
-# The variables which may/should be defined are:
-#
-
-# CPACK_RPM_PACKAGE_SUMMARY (mandatory)
-
-# CPACK_RPM_PACKAGE_SUMMARY_ is used only locally so that it can be unset each time before use otherwise
-# component packaging could leak variable content between components
-unset(CPACK_RPM_PACKAGE_SUMMARY_)
-if(CPACK_RPM_PACKAGE_SUMMARY)
-  set(CPACK_RPM_PACKAGE_SUMMARY_ ${CPACK_RPM_PACKAGE_SUMMARY})
-  unset(CPACK_RPM_PACKAGE_SUMMARY)
-endif()
-
-#Check for component summary first.
-#If not set, it will use regular package summary logic.
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY)
-    set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY})
-  endif()
-endif()
-
-if(NOT CPACK_RPM_PACKAGE_SUMMARY)
-  if(CPACK_RPM_PACKAGE_SUMMARY_)
-    set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_PACKAGE_SUMMARY_})
-  elseif(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-    set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
-  else()
-    # if neither var is defined lets use the name as summary
-    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_SUMMARY)
-  endif()
-endif()
-
-# CPACK_RPM_PACKAGE_NAME (mandatory)
-if(NOT CPACK_RPM_PACKAGE_NAME)
-  string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_NAME)
-endif()
-
-# CPACK_RPM_PACKAGE_VERSION (mandatory)
-if(NOT CPACK_RPM_PACKAGE_VERSION)
-  if(NOT CPACK_PACKAGE_VERSION)
-    message(FATAL_ERROR "RPM package requires a package version")
-  endif()
-  set(CPACK_RPM_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
-endif()
-# Replace '-' in version with '_'
-# '-' character is  an Illegal RPM version character
-# it is illegal because it is used to separate
-# RPM "Version" from RPM "Release"
-string(REPLACE "-" "_" CPACK_RPM_PACKAGE_VERSION ${CPACK_RPM_PACKAGE_VERSION})
-
-# CPACK_RPM_PACKAGE_ARCHITECTURE (mandatory)
-if(NOT CPACK_RPM_PACKAGE_ARCHITECTURE)
-  execute_process(COMMAND uname "-m"
-                  OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
-                  OUTPUT_STRIP_TRAILING_WHITESPACE)
-else()
-  if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: using user-specified build arch = ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
-  endif()
-endif()
-
-set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_PACKAGE_ARCHITECTURE})
-
-#prefer component architecture
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE)
-    set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE})
+    string(REGEX REPLACE "^.* " ""
+           RPMBUILD_EXECUTABLE_VERSION
+           ${_TMP_VERSION})
     if(CPACK_RPM_PACKAGE_DEBUG)
-      message("CPackRPM:Debug: using component build arch = ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
+      message("CPackRPM:Debug: rpmbuild version is <${RPMBUILD_EXECUTABLE_VERSION}>")
     endif()
   endif()
-endif()
-if(${_CPACK_RPM_PACKAGE_ARCHITECTURE} STREQUAL "noarch")
-  set(TMP_RPM_BUILDARCH "Buildarch: ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
-else()
-  set(TMP_RPM_BUILDARCH "")
-endif()
 
-# CPACK_RPM_PACKAGE_RELEASE
-# The RPM release is the numbering of the RPM package ITSELF
-# this is the version of the PACKAGING and NOT the version
-# of the CONTENT of the package.
-# You may well need to generate a new RPM package release
-# without changing the version of the packaged software.
-# This is the case when the packaging is buggy (not) the software :=)
-# If not set, 1 is a good candidate
-if(NOT CPACK_RPM_PACKAGE_RELEASE)
-  set(CPACK_RPM_PACKAGE_RELEASE 1)
-endif()
-
-# CPACK_RPM_PACKAGE_LICENSE
-if(NOT CPACK_RPM_PACKAGE_LICENSE)
-  set(CPACK_RPM_PACKAGE_LICENSE "unknown")
-endif()
-
-# CPACK_RPM_PACKAGE_GROUP
-if(NOT CPACK_RPM_PACKAGE_GROUP)
-  set(CPACK_RPM_PACKAGE_GROUP "unknown")
-endif()
-
-# CPACK_RPM_PACKAGE_VENDOR
-if(NOT CPACK_RPM_PACKAGE_VENDOR)
-  if(CPACK_PACKAGE_VENDOR)
-    set(CPACK_RPM_PACKAGE_VENDOR "${CPACK_PACKAGE_VENDOR}")
-  else()
-    set(CPACK_RPM_PACKAGE_VENDOR "unknown")
+  if(NOT RPMBUILD_EXECUTABLE)
+    message(FATAL_ERROR "RPM package requires rpmbuild executable")
   endif()
-endif()
 
-# CPACK_RPM_PACKAGE_SOURCE
-# The name of the source tarball in case we generate a source RPM
-
-# CPACK_RPM_PACKAGE_DESCRIPTION
-# The variable content may be either
-#   - explicitly given by the user or
-#   - filled with the content of CPACK_PACKAGE_DESCRIPTION_FILE
-#     if it is defined
-#   - set to a default value
-#
-
-# CPACK_RPM_PACKAGE_DESCRIPTION_ is used only locally so that it can be unset each time before use otherwise
-# component packaging could leak variable content between components
-unset(CPACK_RPM_PACKAGE_DESCRIPTION_)
-if(CPACK_RPM_PACKAGE_DESCRIPTION)
-  set(CPACK_RPM_PACKAGE_DESCRIPTION_ ${CPACK_RPM_PACKAGE_DESCRIPTION})
-  unset(CPACK_RPM_PACKAGE_DESCRIPTION)
-endif()
-
-#Check for a component description first.
-#If not set, it will use regular package description logic.
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION)
-    set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION})
-  elseif(CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION)
-    set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION})
-  endif()
-endif()
-
-if(NOT CPACK_RPM_PACKAGE_DESCRIPTION)
-  if(CPACK_RPM_PACKAGE_DESCRIPTION_)
-    set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_PACKAGE_DESCRIPTION_})
-  elseif(CPACK_PACKAGE_DESCRIPTION_FILE)
-    file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_RPM_PACKAGE_DESCRIPTION)
-  else ()
-    set(CPACK_RPM_PACKAGE_DESCRIPTION "no package description available")
-  endif ()
-endif ()
-
-# CPACK_RPM_COMPRESSION_TYPE
-#
-if (CPACK_RPM_COMPRESSION_TYPE)
-   if(CPACK_RPM_PACKAGE_DEBUG)
-     message("CPackRPM:Debug: User Specified RPM compression type: ${CPACK_RPM_COMPRESSION_TYPE}")
-   endif()
-   if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "lzma")
-     set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.lzdio")
-   endif()
-   if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "xz")
-     set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w7.xzdio")
-   endif()
-   if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "bzip2")
-     set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.bzdio")
-   endif()
-   if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "gzip")
-     set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.gzdio")
-   endif()
-else()
-   set(CPACK_RPM_COMPRESSION_TYPE_TMP "")
-endif()
-
-if(CPACK_PACKAGE_RELOCATABLE)
-  set(CPACK_RPM_PACKAGE_RELOCATABLE TRUE)
-endif()
-if(CPACK_RPM_PACKAGE_RELOCATABLE)
-  unset(TMP_RPM_PREFIXES)
-
+  # Display lsb_release output if DEBUG mode enable
+  # This will help to diagnose problem with CPackRPM
+  # because we will know on which kind of Linux we are
   if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: Trying to build a relocatable package")
-  endif()
-  if(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
-    message("CPackRPM:Warning: CPACK_SET_DESTDIR is set (=${CPACK_SET_DESTDIR}) while requesting a relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, the package won't be relocatable.")
-  else()
-    set(CPACK_RPM_PACKAGE_PREFIX ${CPACK_PACKAGING_INSTALL_PREFIX}) # kept for back compatibility (provided external RPM spec files)
-    cpack_rpm_prepare_relocation_paths()
-  endif()
-endif()
-
-# Check if additional fields for RPM spec header are given
-# There may be some COMPONENT specific variables as well
-# If component specific var is not provided we use the global one
-# for each component
-foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
-    if(CPACK_RPM_PACKAGE_DEBUG)
-      message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
+    find_program(LSB_RELEASE_EXECUTABLE lsb_release)
+    if(LSB_RELEASE_EXECUTABLE)
+      execute_process(COMMAND ${LSB_RELEASE_EXECUTABLE} -a
+                      OUTPUT_VARIABLE _TMP_LSB_RELEASE_OUTPUT
+                      ERROR_QUIET
+                      OUTPUT_STRIP_TRAILING_WHITESPACE)
+      string(REGEX REPLACE "\n" ", "
+             LSB_RELEASE_OUTPUT
+             ${_TMP_LSB_RELEASE_OUTPUT})
+    else ()
+      set(LSB_RELEASE_OUTPUT "lsb_release not installed/found!")
     endif()
-    if(CPACK_RPM_PACKAGE_COMPONENT)
-        if(DEFINED CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER})
-            if(CPACK_RPM_PACKAGE_DEBUG)
-              message("CPackRPM:Debug: using CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}")
-            endif()
-            set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}})
-        else()
-            if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
-              if(CPACK_RPM_PACKAGE_DEBUG)
-                message("CPackRPM:Debug: CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER} not defined")
-                message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
-              endif()
-              set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
-            endif()
-        endif()
+    message("CPackRPM:Debug: LSB_RELEASE  = ${LSB_RELEASE_OUTPUT}")
+  endif()
+
+  # We may use RPM version in the future in order
+  # to shut down warning about space in buildtree
+  # some recent RPM version should support space in different places.
+  # not checked [yet].
+  if(CPACK_TOPLEVEL_DIRECTORY MATCHES ".* .*")
+    message(FATAL_ERROR "${RPMBUILD_EXECUTABLE} can't handle paths with spaces, use a build directory without spaces for building RPMs.")
+  endif()
+
+  # If rpmbuild is found
+  # we try to discover alien since we may be on non RPM distro like Debian.
+  # In this case we may try to to use more advanced features
+  # like generating RPM directly from DEB using alien.
+  # FIXME feature not finished (yet)
+  find_program(ALIEN_EXECUTABLE alien)
+  if(ALIEN_EXECUTABLE)
+    message(STATUS "alien found, we may be on a Debian based distro.")
+  endif()
+
+  # Are we packaging components ?
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "-${CPACK_RPM_PACKAGE_COMPONENT}")
+    string(TOUPPER ${CPACK_RPM_PACKAGE_COMPONENT} CPACK_RPM_PACKAGE_COMPONENT_UPPER)
+  else()
+    set(CPACK_RPM_PACKAGE_COMPONENT_PART_NAME "")
+  endif()
+
+  set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}")
+
+  #
+  # Use user-defined RPM specific variables value
+  # or generate reasonable default value from
+  # CPACK_xxx generic values.
+  # The variables comes from the needed (mandatory or not)
+  # values found in the RPM specification file aka ".spec" file.
+  # The variables which may/should be defined are:
+  #
+
+  # CPACK_RPM_PACKAGE_SUMMARY (mandatory)
+
+  #Check for component summary first.
+  #If not set, it will use regular package summary logic.
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY)
+      set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_SUMMARY})
+    endif()
+  endif()
+
+  if(NOT CPACK_RPM_PACKAGE_SUMMARY)
+    if(CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+      set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
     else()
-        if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
-          if(CPACK_RPM_PACKAGE_DEBUG)
-            message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
-          endif()
-          set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
-        endif()
+      # if neither var is defined lets use the name as summary
+      string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_SUMMARY)
     endif()
+  endif()
 
-  # Do not forget to unset previously set header (from previous component)
-  unset(TMP_RPM_${_RPM_SPEC_HEADER})
-  # Treat the RPM Spec keyword iff it has been properly defined
-  if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
-    # Transform NAME --> Name e.g. PROVIDES --> Provides
-    # The Upper-case first letter and lowercase tail is the
-    # appropriate value required in the final RPM spec file.
-    string(SUBSTRING ${_RPM_SPEC_HEADER} 1 -1 _PACKAGE_HEADER_TAIL)
-    string(TOLOWER "${_PACKAGE_HEADER_TAIL}" _PACKAGE_HEADER_TAIL)
-    string(SUBSTRING ${_RPM_SPEC_HEADER} 0 1 _PACKAGE_HEADER_NAME)
-    set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}${_PACKAGE_HEADER_TAIL}")
-    # The following keywords require parentheses around the "pre" or "post" suffix in the final RPM spec file.
-    set(SCRIPTS_REQUIREMENTS_LIST REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
-    list(FIND SCRIPTS_REQUIREMENTS_LIST ${_RPM_SPEC_HEADER} IS_SCRIPTS_REQUIREMENT_FOUND)
-    if(NOT ${IS_SCRIPTS_REQUIREMENT_FOUND} EQUAL -1)
-      string(REPLACE "_" "(" _PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}")
-      set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME})")
+  # CPACK_RPM_PACKAGE_NAME (mandatory)
+  if(NOT CPACK_RPM_PACKAGE_NAME)
+    string(TOLOWER "${CPACK_PACKAGE_NAME}" CPACK_RPM_PACKAGE_NAME)
+  endif()
+
+  # CPACK_RPM_PACKAGE_VERSION (mandatory)
+  if(NOT CPACK_RPM_PACKAGE_VERSION)
+    if(NOT CPACK_PACKAGE_VERSION)
+      message(FATAL_ERROR "RPM package requires a package version")
     endif()
+    set(CPACK_RPM_PACKAGE_VERSION ${CPACK_PACKAGE_VERSION})
+  endif()
+  # Replace '-' in version with '_'
+  # '-' character is  an Illegal RPM version character
+  # it is illegal because it is used to separate
+  # RPM "Version" from RPM "Release"
+  string(REPLACE "-" "_" CPACK_RPM_PACKAGE_VERSION ${CPACK_RPM_PACKAGE_VERSION})
+
+  # CPACK_RPM_PACKAGE_ARCHITECTURE (mandatory)
+  if(NOT CPACK_RPM_PACKAGE_ARCHITECTURE)
+    execute_process(COMMAND uname "-m"
+                    OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
+                    OUTPUT_STRIP_TRAILING_WHITESPACE)
+  else()
     if(CPACK_RPM_PACKAGE_DEBUG)
-      message("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
+      message("CPackRPM:Debug: using user-specified build arch = ${CPACK_RPM_PACKAGE_ARCHITECTURE}")
     endif()
-    set(TMP_RPM_${_RPM_SPEC_HEADER} "${_PACKAGE_HEADER_NAME}: ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
-    unset(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
   endif()
-endforeach()
 
-# CPACK_RPM_SPEC_INSTALL_POST
-# May be used to define a RPM post intallation script
-# for example setting it to "/bin/true" may prevent
-# rpmbuild from stripping binaries.
-if(CPACK_RPM_SPEC_INSTALL_POST)
-  if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: User defined CPACK_RPM_SPEC_INSTALL_POST = ${CPACK_RPM_SPEC_INSTALL_POST}")
+  set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_PACKAGE_ARCHITECTURE})
+
+  #prefer component architecture
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE)
+      set(_CPACK_RPM_PACKAGE_ARCHITECTURE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_ARCHITECTURE})
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: using component build arch = ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
+      endif()
+    endif()
   endif()
-  set(TMP_RPM_SPEC_INSTALL_POST "%define __spec_install_post ${CPACK_RPM_SPEC_INSTALL_POST}")
-endif()
+  if(${_CPACK_RPM_PACKAGE_ARCHITECTURE} STREQUAL "noarch")
+    set(TMP_RPM_BUILDARCH "Buildarch: ${_CPACK_RPM_PACKAGE_ARCHITECTURE}")
+  else()
+    set(TMP_RPM_BUILDARCH "")
+  endif()
 
-# CPACK_RPM_POST_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE)
-# CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE)
-# May be used to embed a post (un)installation script in the spec file.
-# The refered script file(s) will be read and directly
-# put after the %post or %postun section
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_INSTALL_SCRIPT_FILE)
-    set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_INSTALL_SCRIPT_FILE})
+  # CPACK_RPM_PACKAGE_RELEASE
+  # The RPM release is the numbering of the RPM package ITSELF
+  # this is the version of the PACKAGING and NOT the version
+  # of the CONTENT of the package.
+  # You may well need to generate a new RPM package release
+  # without changing the version of the packaged software.
+  # This is the case when the packaging is buggy (not) the software :=)
+  # If not set, 1 is a good candidate
+  if(NOT CPACK_RPM_PACKAGE_RELEASE)
+    set(CPACK_RPM_PACKAGE_RELEASE 1)
+  endif()
+
+  # CPACK_RPM_PACKAGE_LICENSE
+  if(NOT CPACK_RPM_PACKAGE_LICENSE)
+    set(CPACK_RPM_PACKAGE_LICENSE "unknown")
+  endif()
+
+  # CPACK_RPM_PACKAGE_GROUP
+  if(NOT CPACK_RPM_PACKAGE_GROUP)
+    set(CPACK_RPM_PACKAGE_GROUP "unknown")
+  endif()
+
+  # CPACK_RPM_PACKAGE_VENDOR
+  if(NOT CPACK_RPM_PACKAGE_VENDOR)
+    if(CPACK_PACKAGE_VENDOR)
+      set(CPACK_RPM_PACKAGE_VENDOR "${CPACK_PACKAGE_VENDOR}")
+    else()
+      set(CPACK_RPM_PACKAGE_VENDOR "unknown")
+    endif()
+  endif()
+
+  # CPACK_RPM_PACKAGE_SOURCE
+  # The name of the source tarball in case we generate a source RPM
+
+  # CPACK_RPM_PACKAGE_DESCRIPTION
+  # The variable content may be either
+  #   - explicitly given by the user or
+  #   - filled with the content of CPACK_PACKAGE_DESCRIPTION_FILE
+  #     if it is defined
+  #   - set to a default value
+  #
+
+  #Check for a component description first.
+  #If not set, it will use regular package description logic.
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION)
+      set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_DESCRIPTION})
+    elseif(CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION)
+      set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_COMPONENT_${CPACK_RPM_PACKAGE_COMPONENT_UPPER}_DESCRIPTION})
+    endif()
+  endif()
+
+  if(NOT CPACK_RPM_PACKAGE_DESCRIPTION)
+    if(CPACK_PACKAGE_DESCRIPTION_FILE)
+      file(READ ${CPACK_PACKAGE_DESCRIPTION_FILE} CPACK_RPM_PACKAGE_DESCRIPTION)
+    else ()
+      set(CPACK_RPM_PACKAGE_DESCRIPTION "no package description available")
+    endif ()
+  endif ()
+
+  # CPACK_RPM_COMPRESSION_TYPE
+  #
+  if (CPACK_RPM_COMPRESSION_TYPE)
+     if(CPACK_RPM_PACKAGE_DEBUG)
+       message("CPackRPM:Debug: User Specified RPM compression type: ${CPACK_RPM_COMPRESSION_TYPE}")
+     endif()
+     if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "lzma")
+       set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.lzdio")
+     endif()
+     if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "xz")
+       set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w7.xzdio")
+     endif()
+     if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "bzip2")
+       set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.bzdio")
+     endif()
+     if(CPACK_RPM_COMPRESSION_TYPE STREQUAL "gzip")
+       set(CPACK_RPM_COMPRESSION_TYPE_TMP "%define _binary_payload w9.gzdio")
+     endif()
+  else()
+     set(CPACK_RPM_COMPRESSION_TYPE_TMP "")
+  endif()
+
+  if(CPACK_PACKAGE_RELOCATABLE)
+    set(CPACK_RPM_PACKAGE_RELOCATABLE TRUE)
+  endif()
+  if(CPACK_RPM_PACKAGE_RELOCATABLE)
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: Trying to build a relocatable package")
+    endif()
+    if(CPACK_SET_DESTDIR AND (NOT CPACK_SET_DESTDIR STREQUAL "I_ON"))
+      message("CPackRPM:Warning: CPACK_SET_DESTDIR is set (=${CPACK_SET_DESTDIR}) while requesting a relocatable package (CPACK_RPM_PACKAGE_RELOCATABLE is set): this is not supported, the package won't be relocatable.")
+    else()
+      set(CPACK_RPM_PACKAGE_PREFIX ${CPACK_PACKAGING_INSTALL_PREFIX}) # kept for back compatibility (provided external RPM spec files)
+      cpack_rpm_prepare_relocation_paths()
+    endif()
+  endif()
+
+  # Check if additional fields for RPM spec header are given
+  # There may be some COMPONENT specific variables as well
+  # If component specific var is not provided we use the global one
+  # for each component
+  foreach(_RPM_SPEC_HEADER URL REQUIRES SUGGESTS PROVIDES OBSOLETES PREFIX CONFLICTS AUTOPROV AUTOREQ AUTOREQPROV REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: processing ${_RPM_SPEC_HEADER}")
+      endif()
+      if(CPACK_RPM_PACKAGE_COMPONENT)
+          if(DEFINED CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER})
+              if(CPACK_RPM_PACKAGE_DEBUG)
+                message("CPackRPM:Debug: using CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}")
+              endif()
+              set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER}})
+          else()
+              if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
+                if(CPACK_RPM_PACKAGE_DEBUG)
+                  message("CPackRPM:Debug: CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PACKAGE_${_RPM_SPEC_HEADER} not defined")
+                  message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
+                endif()
+                set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
+              endif()
+          endif()
+      else()
+          if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER})
+            if(CPACK_RPM_PACKAGE_DEBUG)
+              message("CPackRPM:Debug: using CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}")
+            endif()
+            set(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}})
+          endif()
+      endif()
+
+    # Treat the RPM Spec keyword iff it has been properly defined
+    if(DEFINED CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
+      # Transform NAME --> Name e.g. PROVIDES --> Provides
+      # The Upper-case first letter and lowercase tail is the
+      # appropriate value required in the final RPM spec file.
+      string(SUBSTRING ${_RPM_SPEC_HEADER} 1 -1 _PACKAGE_HEADER_TAIL)
+      string(TOLOWER "${_PACKAGE_HEADER_TAIL}" _PACKAGE_HEADER_TAIL)
+      string(SUBSTRING ${_RPM_SPEC_HEADER} 0 1 _PACKAGE_HEADER_NAME)
+      set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}${_PACKAGE_HEADER_TAIL}")
+      # The following keywords require parentheses around the "pre" or "post" suffix in the final RPM spec file.
+      set(SCRIPTS_REQUIREMENTS_LIST REQUIRES_PRE REQUIRES_POST REQUIRES_PREUN REQUIRES_POSTUN)
+      list(FIND SCRIPTS_REQUIREMENTS_LIST ${_RPM_SPEC_HEADER} IS_SCRIPTS_REQUIREMENT_FOUND)
+      if(NOT ${IS_SCRIPTS_REQUIREMENT_FOUND} EQUAL -1)
+        string(REPLACE "_" "(" _PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME}")
+        set(_PACKAGE_HEADER_NAME "${_PACKAGE_HEADER_NAME})")
+      endif()
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: User defined ${_PACKAGE_HEADER_NAME}:\n ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
+      endif()
+      set(TMP_RPM_${_RPM_SPEC_HEADER} "${_PACKAGE_HEADER_NAME}: ${CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP}")
+      unset(CPACK_RPM_PACKAGE_${_RPM_SPEC_HEADER}_TMP)
+    endif()
+  endforeach()
+
+  # CPACK_RPM_SPEC_INSTALL_POST
+  # May be used to define a RPM post intallation script
+  # for example setting it to "/bin/true" may prevent
+  # rpmbuild from stripping binaries.
+  if(CPACK_RPM_SPEC_INSTALL_POST)
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: User defined CPACK_RPM_SPEC_INSTALL_POST = ${CPACK_RPM_SPEC_INSTALL_POST}")
+    endif()
+    set(TMP_RPM_SPEC_INSTALL_POST "%define __spec_install_post ${CPACK_RPM_SPEC_INSTALL_POST}")
+  endif()
+
+  # CPACK_RPM_POST_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_INSTALL_SCRIPT_FILE)
+  # CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_POST_UNINSTALL_SCRIPT_FILE)
+  # May be used to embed a post (un)installation script in the spec file.
+  # The refered script file(s) will be read and directly
+  # put after the %post or %postun section
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_INSTALL_SCRIPT_FILE)
+      set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_INSTALL_SCRIPT_FILE})
+    else()
+      set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
+    endif()
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_UNINSTALL_SCRIPT_FILE)
+      set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_UNINSTALL_SCRIPT_FILE})
+    else()
+      set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
+    endif()
   else()
     set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
-  endif()
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_UNINSTALL_SCRIPT_FILE)
-    set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_POST_UNINSTALL_SCRIPT_FILE})
-  else()
     set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
   endif()
-else()
-  set(CPACK_RPM_POST_INSTALL_READ_FILE ${CPACK_RPM_POST_INSTALL_SCRIPT_FILE})
-  set(CPACK_RPM_POST_UNINSTALL_READ_FILE ${CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE})
-endif()
 
-# Handle post-install file if it has been specified
-if(CPACK_RPM_POST_INSTALL_READ_FILE)
-  if(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
-    file(READ ${CPACK_RPM_POST_INSTALL_READ_FILE} CPACK_RPM_SPEC_POSTINSTALL)
+  # Handle post-install file if it has been specified
+  if(CPACK_RPM_POST_INSTALL_READ_FILE)
+    if(EXISTS ${CPACK_RPM_POST_INSTALL_READ_FILE})
+      file(READ ${CPACK_RPM_POST_INSTALL_READ_FILE} CPACK_RPM_SPEC_POSTINSTALL)
+    else()
+      message("CPackRPM:Warning: CPACK_RPM_POST_INSTALL_SCRIPT_FILE <${CPACK_RPM_POST_INSTALL_READ_FILE}> does not exists - ignoring")
+    endif()
   else()
-    message("CPackRPM:Warning: CPACK_RPM_POST_INSTALL_SCRIPT_FILE <${CPACK_RPM_POST_INSTALL_READ_FILE}> does not exists - ignoring")
+    # reset SPEC var value if no post install file has been specified
+    # (either globally or component-wise)
+    set(CPACK_RPM_SPEC_POSTINSTALL "")
   endif()
-else()
-  # reset SPEC var value if no post install file has been specified
-  # (either globally or component-wise)
-  set(CPACK_RPM_SPEC_POSTINSTALL "")
-endif()
 
-# Handle post-uninstall file if it has been specified
-if(CPACK_RPM_POST_UNINSTALL_READ_FILE)
-  if(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
-    file(READ ${CPACK_RPM_POST_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_POSTUNINSTALL)
+  # Handle post-uninstall file if it has been specified
+  if(CPACK_RPM_POST_UNINSTALL_READ_FILE)
+    if(EXISTS ${CPACK_RPM_POST_UNINSTALL_READ_FILE})
+      file(READ ${CPACK_RPM_POST_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_POSTUNINSTALL)
+    else()
+      message("CPackRPM:Warning: CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_POST_UNINSTALL_READ_FILE}> does not exists - ignoring")
+    endif()
   else()
-    message("CPackRPM:Warning: CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_POST_UNINSTALL_READ_FILE}> does not exists - ignoring")
+    # reset SPEC var value if no post uninstall file has been specified
+    # (either globally or component-wise)
+    set(CPACK_RPM_SPEC_POSTUNINSTALL "")
   endif()
-else()
-  # reset SPEC var value if no post uninstall file has been specified
-  # (either globally or component-wise)
-  set(CPACK_RPM_SPEC_POSTUNINSTALL "")
-endif()
 
-# CPACK_RPM_PRE_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE)
-# CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE)
-# May be used to embed a pre (un)installation script in the spec file.
-# The refered script file(s) will be read and directly
-# put after the %pre or %preun section
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_INSTALL_SCRIPT_FILE)
-    set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_INSTALL_SCRIPT_FILE})
+  # CPACK_RPM_PRE_INSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_INSTALL_SCRIPT_FILE)
+  # CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE (or CPACK_RPM_<COMPONENT>_PRE_UNINSTALL_SCRIPT_FILE)
+  # May be used to embed a pre (un)installation script in the spec file.
+  # The refered script file(s) will be read and directly
+  # put after the %pre or %preun section
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_INSTALL_SCRIPT_FILE)
+      set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_INSTALL_SCRIPT_FILE})
+    else()
+      set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
+    endif()
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_UNINSTALL_SCRIPT_FILE)
+      set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_UNINSTALL_SCRIPT_FILE})
+    else()
+      set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
+    endif()
   else()
     set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
-  endif()
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_UNINSTALL_SCRIPT_FILE)
-    set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_PRE_UNINSTALL_SCRIPT_FILE})
-  else()
     set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
   endif()
-else()
-  set(CPACK_RPM_PRE_INSTALL_READ_FILE ${CPACK_RPM_PRE_INSTALL_SCRIPT_FILE})
-  set(CPACK_RPM_PRE_UNINSTALL_READ_FILE ${CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE})
-endif()
 
-# Handle pre-install file if it has been specified
-if(CPACK_RPM_PRE_INSTALL_READ_FILE)
-  if(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
-    file(READ ${CPACK_RPM_PRE_INSTALL_READ_FILE} CPACK_RPM_SPEC_PREINSTALL)
-  else()
-    message("CPackRPM:Warning: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_INSTALL_READ_FILE}> does not exists - ignoring")
-  endif()
-else()
-  # reset SPEC var value if no pre-install file has been specified
-  # (either globally or component-wise)
-  set(CPACK_RPM_SPEC_PREINSTALL "")
-endif()
-
-# Handle pre-uninstall file if it has been specified
-if(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
-  if(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
-    file(READ ${CPACK_RPM_PRE_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_PREUNINSTALL)
-  else()
-    message("CPackRPM:Warning: CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_UNINSTALL_READ_FILE}> does not exists - ignoring")
-  endif()
-else()
-  # reset SPEC var value if no pre-uninstall file has been specified
-  # (either globally or component-wise)
-  set(CPACK_RPM_SPEC_PREUNINSTALL "")
-endif()
-
-# CPACK_RPM_CHANGELOG_FILE
-# May be used to embed a changelog in the spec file.
-# The refered file will be read and directly put after the %changelog section
-if(CPACK_RPM_CHANGELOG_FILE)
-  if(EXISTS ${CPACK_RPM_CHANGELOG_FILE})
-    file(READ ${CPACK_RPM_CHANGELOG_FILE} CPACK_RPM_SPEC_CHANGELOG)
-  else()
-    message(SEND_ERROR "CPackRPM:Warning: CPACK_RPM_CHANGELOG_FILE <${CPACK_RPM_CHANGELOG_FILE}> does not exists - ignoring")
-  endif()
-else()
-  set(CPACK_RPM_SPEC_CHANGELOG "* Sun Jul 4 2010 Eric Noulard <eric.noulard@gmail.com> - ${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}\n  Generated by CPack RPM (no Changelog file were provided)")
-endif()
-
-# CPACK_RPM_SPEC_MORE_DEFINE
-# This is a generated spec rpm file spaceholder
-if(CPACK_RPM_SPEC_MORE_DEFINE)
-  if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: User defined more define spec line specified:\n ${CPACK_RPM_SPEC_MORE_DEFINE}")
-  endif()
-endif()
-
-# Now we may create the RPM build tree structure
-set(CPACK_RPM_ROOTDIR "${CPACK_TOPLEVEL_DIRECTORY}")
-message(STATUS "CPackRPM:Debug: Using CPACK_RPM_ROOTDIR=${CPACK_RPM_ROOTDIR}")
-# Prepare RPM build tree
-file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR})
-file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/tmp)
-file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/BUILD)
-file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/RPMS)
-file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SOURCES)
-file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SPECS)
-file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SRPMS)
-
-#set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${_CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
-set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
-# it seems rpmbuild can't handle spaces in the path
-# neither escaping (as below) nor putting quotes around the path seem to help
-#string(REGEX REPLACE " " "\\\\ " CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
-set(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
-
-# if we are creating a relocatable package, omit parent directories of
-# CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
-# which is passed to the find command that generates the content-list
-if(CPACK_RPM_PACKAGE_RELOCATABLE)
-  # get a list of the elements in CPACK_RPM_PACKAGE_PREFIXES that are
-  # destinct parent paths of other relocation paths and remove the
-  # final element (so the install-prefix dir itself is not omitted
-  # from the RPM's content-list)
-  list(SORT RPM_USED_PACKAGE_PREFIXES)
-  set(_DISTINCT_PATH "NOT_SET")
-  foreach(_RPM_RELOCATION_PREFIX ${RPM_USED_PACKAGE_PREFIXES})
-    if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
-      set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
-
-      string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${_RPM_RELOCATION_PREFIX}")
-      list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
-      unset(_TMP_LIST)
-      # Now generate all of the parent dirs of the relocation path
-      foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
-        list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
-        string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
-        list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
-        if(_DUPLICATE_FOUND EQUAL -1)
-          set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
-          separate_arguments(_OMIT_DIR)
-          list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
-        endif()
-      endforeach()
+  # Handle pre-install file if it has been specified
+  if(CPACK_RPM_PRE_INSTALL_READ_FILE)
+    if(EXISTS ${CPACK_RPM_PRE_INSTALL_READ_FILE})
+      file(READ ${CPACK_RPM_PRE_INSTALL_READ_FILE} CPACK_RPM_SPEC_PREINSTALL)
+    else()
+      message("CPackRPM:Warning: CPACK_RPM_PRE_INSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_INSTALL_READ_FILE}> does not exists - ignoring")
     endif()
-  endforeach()
-endif()
-
-if (CPACK_RPM_PACKAGE_DEBUG)
-   message("CPackRPM:Debug: Initial list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
-endif()
-
-if (NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
-  set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include)
-  if (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
-    message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
-    list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST "${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION}")
+  else()
+    # reset SPEC var value if no pre-install file has been specified
+    # (either globally or component-wise)
+    set(CPACK_RPM_SPEC_PREINSTALL "")
   endif()
-endif()
 
-if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+  # Handle pre-uninstall file if it has been specified
+  if(CPACK_RPM_PRE_UNINSTALL_READ_FILE)
+    if(EXISTS ${CPACK_RPM_PRE_UNINSTALL_READ_FILE})
+      file(READ ${CPACK_RPM_PRE_UNINSTALL_READ_FILE} CPACK_RPM_SPEC_PREUNINSTALL)
+    else()
+      message("CPackRPM:Warning: CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE <${CPACK_RPM_PRE_UNINSTALL_READ_FILE}> does not exists - ignoring")
+    endif()
+  else()
+    # reset SPEC var value if no pre-uninstall file has been specified
+    # (either globally or component-wise)
+    set(CPACK_RPM_SPEC_PREUNINSTALL "")
+  endif()
+
+  # CPACK_RPM_CHANGELOG_FILE
+  # May be used to embed a changelog in the spec file.
+  # The refered file will be read and directly put after the %changelog section
+  if(CPACK_RPM_CHANGELOG_FILE)
+    if(EXISTS ${CPACK_RPM_CHANGELOG_FILE})
+      file(READ ${CPACK_RPM_CHANGELOG_FILE} CPACK_RPM_SPEC_CHANGELOG)
+    else()
+      message(SEND_ERROR "CPackRPM:Warning: CPACK_RPM_CHANGELOG_FILE <${CPACK_RPM_CHANGELOG_FILE}> does not exists - ignoring")
+    endif()
+  else()
+    set(CPACK_RPM_SPEC_CHANGELOG "* Sun Jul 4 2010 Eric Noulard <eric.noulard@gmail.com> - ${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}\n  Generated by CPack RPM (no Changelog file were provided)")
+  endif()
+
+  # CPACK_RPM_SPEC_MORE_DEFINE
+  # This is a generated spec rpm file spaceholder
+  if(CPACK_RPM_SPEC_MORE_DEFINE)
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: User defined more define spec line specified:\n ${CPACK_RPM_SPEC_MORE_DEFINE}")
+    endif()
+  endif()
+
+  # Now we may create the RPM build tree structure
+  set(CPACK_RPM_ROOTDIR "${CPACK_TOPLEVEL_DIRECTORY}")
+  message(STATUS "CPackRPM:Debug: Using CPACK_RPM_ROOTDIR=${CPACK_RPM_ROOTDIR}")
+  # Prepare RPM build tree
+  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR})
+  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/tmp)
+  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/BUILD)
+  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/RPMS)
+  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SOURCES)
+  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SPECS)
+  file(MAKE_DIRECTORY ${CPACK_RPM_ROOTDIR}/SRPMS)
+
+  #set(CPACK_RPM_FILE_NAME "${CPACK_RPM_PACKAGE_NAME}-${CPACK_RPM_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}-${_CPACK_RPM_PACKAGE_ARCHITECTURE}.rpm")
+  set(CPACK_RPM_FILE_NAME "${CPACK_OUTPUT_FILE_NAME}")
+  # it seems rpmbuild can't handle spaces in the path
+  # neither escaping (as below) nor putting quotes around the path seem to help
+  #string(REGEX REPLACE " " "\\\\ " CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
+  set(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
+
+  # if we are creating a relocatable package, omit parent directories of
+  # CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
+  # which is passed to the find command that generates the content-list
+  if(CPACK_RPM_PACKAGE_RELOCATABLE)
+    # get a list of the elements in CPACK_RPM_PACKAGE_PREFIXES that are
+    # destinct parent paths of other relocation paths and remove the
+    # final element (so the install-prefix dir itself is not omitted
+    # from the RPM's content-list)
+    list(SORT RPM_USED_PACKAGE_PREFIXES)
+    set(_DISTINCT_PATH "NOT_SET")
+    foreach(_RPM_RELOCATION_PREFIX ${RPM_USED_PACKAGE_PREFIXES})
+      if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
+        set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
+
+        string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${_RPM_RELOCATION_PREFIX}")
+        list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
+        unset(_TMP_LIST)
+        # Now generate all of the parent dirs of the relocation path
+        foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
+          list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
+          string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
+          list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
+          if(_DUPLICATE_FOUND EQUAL -1)
+            set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
+            separate_arguments(_OMIT_DIR)
+            list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
+          endif()
+        endforeach()
+      endif()
+    endforeach()
+  endif()
+
   if (CPACK_RPM_PACKAGE_DEBUG)
-   message("CPackRPM:Debug: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST= ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST}")
- endif()
-  foreach(_DIR ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
-    list(APPEND _RPM_DIRS_TO_OMIT "-o;-path;.${_DIR}")
-  endforeach()
-endif()
-if (CPACK_RPM_PACKAGE_DEBUG)
-   message("CPackRPM:Debug: Final list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
-endif()
+     message("CPackRPM:Debug: Initial list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
+  endif()
 
-# Use files tree to construct files command (spec file)
-# We should not forget to include symlinks (thus -o -type l)
-# We should include directory as well (thus -type d)
-#   but not the main local dir "." (thus -a -not -name ".")
-# We must remove the './' due to the local search and escape the
-# file name by enclosing it between double quotes (thus the sed)
-# Then we must authorize any man pages extension (adding * at the end)
-# because rpmbuild may automatically compress those files
-execute_process(COMMAND find . -type f -o -type l -o (-type d -a -not ( -name "." ${_RPM_DIRS_TO_OMIT} ) )
-                COMMAND sed s:.*/man.*/.*:&*:
-                COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
-                WORKING_DIRECTORY "${WDIR}"
-                OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
+  if (NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include)
+    if (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
+      message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
+      list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST "${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION}")
+    endif()
+  endif()
 
-# In component case, put CPACK_ABSOLUTE_DESTINATION_FILES_<COMPONENT>
-#                   into CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
-#         otherwise, put CPACK_ABSOLUTE_DESTINATION_FILES
-# This must be done BEFORE the CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL handling
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  if(CPACK_ABSOLUTE_DESTINATION_FILES)
-   set(COMPONENT_FILES_TAG "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT}")
-   set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${${COMPONENT_FILES_TAG}}")
-   if(CPACK_RPM_PACKAGE_DEBUG)
-     message("CPackRPM:Debug: Handling Absolute Destination Files: <${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}>")
-     message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
+  if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+    if (CPACK_RPM_PACKAGE_DEBUG)
+     message("CPackRPM:Debug: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST= ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST}")
    endif()
+    foreach(_DIR ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
+      list(APPEND _RPM_DIRS_TO_OMIT "-o;-path;.${_DIR}")
+    endforeach()
   endif()
-else()
-  if(CPACK_ABSOLUTE_DESTINATION_FILES)
-    set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${CPACK_ABSOLUTE_DESTINATION_FILES}")
+  if (CPACK_RPM_PACKAGE_DEBUG)
+     message("CPackRPM:Debug: Final list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
   endif()
-endif()
 
-# In component case, set CPACK_RPM_USER_FILELIST_INTERNAL with CPACK_RPM_<COMPONENT>_USER_FILELIST.
-if(CPACK_RPM_PACKAGE_COMPONENT)
-  if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST)
-    set(CPACK_RPM_USER_FILELIST_INTERNAL ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST})
+  # Use files tree to construct files command (spec file)
+  # We should not forget to include symlinks (thus -o -type l)
+  # We should include directory as well (thus -type d)
+  #   but not the main local dir "." (thus -a -not -name ".")
+  # We must remove the './' due to the local search and escape the
+  # file name by enclosing it between double quotes (thus the sed)
+  # Then we must authorize any man pages extension (adding * at the end)
+  # because rpmbuild may automatically compress those files
+  execute_process(COMMAND find . -type f -o -type l -o (-type d -a -not ( -name "." ${_RPM_DIRS_TO_OMIT} ) )
+                  COMMAND sed s:.*/man.*/.*:&*:
+                  COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
+                  WORKING_DIRECTORY "${WDIR}"
+                  OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
+
+  # In component case, put CPACK_ABSOLUTE_DESTINATION_FILES_<COMPONENT>
+  #                   into CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
+  #         otherwise, put CPACK_ABSOLUTE_DESTINATION_FILES
+  # This must be done BEFORE the CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL handling
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_ABSOLUTE_DESTINATION_FILES)
+     set(COMPONENT_FILES_TAG "CPACK_ABSOLUTE_DESTINATION_FILES_${CPACK_RPM_PACKAGE_COMPONENT}")
+     set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${${COMPONENT_FILES_TAG}}")
+     if(CPACK_RPM_PACKAGE_DEBUG)
+       message("CPackRPM:Debug: Handling Absolute Destination Files: <${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}>")
+       message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
+     endif()
+    endif()
+  else()
+    if(CPACK_ABSOLUTE_DESTINATION_FILES)
+      set(CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL "${CPACK_ABSOLUTE_DESTINATION_FILES}")
+    endif()
+  endif()
+
+  # In component case, set CPACK_RPM_USER_FILELIST_INTERNAL with CPACK_RPM_<COMPONENT>_USER_FILELIST.
+  if(CPACK_RPM_PACKAGE_COMPONENT)
+    if(CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST)
+      set(CPACK_RPM_USER_FILELIST_INTERNAL ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_FILELIST})
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
+        message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
+      endif()
+    else()
+      set(CPACK_RPM_USER_FILELIST_INTERNAL "")
+    endif()
+  else()
+    if(CPACK_RPM_USER_FILELIST)
+      set(CPACK_RPM_USER_FILELIST_INTERNAL "${CPACK_RPM_USER_FILELIST}")
+    else()
+      set(CPACK_RPM_USER_FILELIST_INTERNAL "")
+    endif()
+  endif()
+
+  # Handle user specified file line list in CPACK_RPM_USER_FILELIST_INTERNAL
+  # Remove those files from CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
+  #                      or CPACK_RPM_INSTALL_FILES,
+  # hence it must be done before these auto-generated lists are processed.
+  if(CPACK_RPM_USER_FILELIST_INTERNAL)
     if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
-      message("CPackRPM:Debug: in component = ${CPACK_RPM_PACKAGE_COMPONENT}")
+    endif()
+
+    # Create CMake list from CPACK_RPM_INSTALL_FILES
+    string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
+    string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST
+                            "${CPACK_RPM_INSTALL_FILES_LIST}")
+    string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST
+                            "${CPACK_RPM_INSTALL_FILES_LIST}")
+
+    set(CPACK_RPM_USER_INSTALL_FILES "")
+    foreach(F IN LISTS CPACK_RPM_USER_FILELIST_INTERNAL)
+      string(REGEX REPLACE "%[A-Za-z0-9\(\),-]* " "" F_PATH ${F})
+      string(REGEX MATCH "%[A-Za-z0-9\(\),-]*" F_PREFIX ${F})
+
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: F_PREFIX=<${F_PREFIX}>, F_PATH=<${F_PATH}>")
+      endif()
+      if(F_PREFIX)
+        set(F_PREFIX "${F_PREFIX} ")
+      endif()
+      # Rebuild the user list file
+      set(CPACK_RPM_USER_INSTALL_FILES "${CPACK_RPM_USER_INSTALL_FILES}${F_PREFIX}\"${F_PATH}\"\n")
+
+      # Remove from CPACK_RPM_INSTALL_FILES and CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
+      list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${F_PATH})
+      # ABSOLUTE destination files list may not exists at all
+      if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+        list(REMOVE_ITEM CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL ${F_PATH})
+      endif()
+
+    endforeach()
+
+    # Rebuild CPACK_RPM_INSTALL_FILES
+    set(CPACK_RPM_INSTALL_FILES "")
+    foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
+      set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
+    endforeach()
+  else()
+    set(CPACK_RPM_USER_INSTALL_FILES "")
+  endif()
+
+  if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: Handling Absolute Destination Files: ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}")
+    endif()
+    # Remove trailing space
+    string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
+    # Transform endline separated - string into CMake List
+    string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
+    # Remove unecessary quotes
+    string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
+    # Remove ABSOLUTE install file from INSTALL FILE LIST
+    list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL})
+    # Rebuild INSTALL_FILES
+    set(CPACK_RPM_INSTALL_FILES "")
+    foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
+      set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
+    endforeach()
+    # Build ABSOLUTE_INSTALL_FILES
+    set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
+    foreach(F IN LISTS CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+      set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "${CPACK_RPM_ABSOLUTE_INSTALL_FILES}%config \"${F}\"\n")
+    endforeach()
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: CPACK_RPM_ABSOLUTE_INSTALL_FILES=${CPACK_RPM_ABSOLUTE_INSTALL_FILES}")
+      message("CPackRPM:Debug: CPACK_RPM_INSTALL_FILES=${CPACK_RPM_INSTALL_FILES}")
     endif()
   else()
-    set(CPACK_RPM_USER_FILELIST_INTERNAL "")
-  endif()
-else()
-  if(CPACK_RPM_USER_FILELIST)
-    set(CPACK_RPM_USER_FILELIST_INTERNAL "${CPACK_RPM_USER_FILELIST}")
-  else()
-    set(CPACK_RPM_USER_FILELIST_INTERNAL "")
-  endif()
-endif()
-
-# Handle user specified file line list in CPACK_RPM_USER_FILELIST_INTERNAL
-# Remove those files from CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
-#                      or CPACK_RPM_INSTALL_FILES,
-# hence it must be done before these auto-generated lists are processed.
-if(CPACK_RPM_USER_FILELIST_INTERNAL)
-  if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: Handling User Filelist: <${CPACK_RPM_USER_FILELIST_INTERNAL}>")
+    # reset vars in order to avoid leakage of value(s) from one component to another
+    set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
   endif()
 
-  # Create CMake list from CPACK_RPM_INSTALL_FILES
+
+  # Prepend directories in ${CPACK_RPM_INSTALL_FILES} with %dir
+  # This is necessary to avoid duplicate files since rpmbuild do
+  # recursion on its own when encountering a pathname which is a directory
+  # which is not flagged as %dir
   string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
   string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST
                           "${CPACK_RPM_INSTALL_FILES_LIST}")
   string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST
                           "${CPACK_RPM_INSTALL_FILES_LIST}")
-
-  set(CPACK_RPM_USER_INSTALL_FILES "")
-  foreach(F IN LISTS CPACK_RPM_USER_FILELIST_INTERNAL)
-    string(REGEX REPLACE "%[A-Za-z0-9\(\),-]* " "" F_PATH ${F})
-    string(REGEX MATCH "%[A-Za-z0-9\(\),-]*" F_PREFIX ${F})
-
-    if(CPACK_RPM_PACKAGE_DEBUG)
-      message("CPackRPM:Debug: F_PREFIX=<${F_PREFIX}>, F_PATH=<${F_PATH}>")
-    endif()
-    if(F_PREFIX)
-      set(F_PREFIX "${F_PREFIX} ")
-    endif()
-    # Rebuild the user list file
-    set(CPACK_RPM_USER_INSTALL_FILES "${CPACK_RPM_USER_INSTALL_FILES}${F_PREFIX}\"${F_PATH}\"\n")
-
-    # Remove from CPACK_RPM_INSTALL_FILES and CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
-    list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${F_PATH})
-    # ABSOLUTE destination files list may not exists at all
-    if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
-      list(REMOVE_ITEM CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL ${F_PATH})
-    endif()
-
-  endforeach()
-
-  # Rebuild CPACK_RPM_INSTALL_FILES
   set(CPACK_RPM_INSTALL_FILES "")
   foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
-    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
+    if(IS_DIRECTORY "${WDIR}/${F}")
+      set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}%dir \"${F}\"\n")
+    else()
+      set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
+    endif()
   endforeach()
-else()
-  set(CPACK_RPM_USER_INSTALL_FILES "")
-endif()
+  set(CPACK_RPM_INSTALL_FILES_LIST "")
 
-if (CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
+  # The name of the final spec file to be used by rpmbuild
+  set(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.spec")
+
+  # Print out some debug information if we were asked for that
   if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: Handling Absolute Destination Files: ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL}")
+     message("CPackRPM:Debug: CPACK_TOPLEVEL_DIRECTORY          = ${CPACK_TOPLEVEL_DIRECTORY}")
+     message("CPackRPM:Debug: CPACK_TOPLEVEL_TAG                = ${CPACK_TOPLEVEL_TAG}")
+     message("CPackRPM:Debug: CPACK_TEMPORARY_DIRECTORY         = ${CPACK_TEMPORARY_DIRECTORY}")
+     message("CPackRPM:Debug: CPACK_OUTPUT_FILE_NAME            = ${CPACK_OUTPUT_FILE_NAME}")
+     message("CPackRPM:Debug: CPACK_OUTPUT_FILE_PATH            = ${CPACK_OUTPUT_FILE_PATH}")
+     message("CPackRPM:Debug: CPACK_PACKAGE_FILE_NAME           = ${CPACK_PACKAGE_FILE_NAME}")
+     message("CPackRPM:Debug: CPACK_RPM_BINARY_SPECFILE         = ${CPACK_RPM_BINARY_SPECFILE}")
+     message("CPackRPM:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = ${CPACK_PACKAGE_INSTALL_DIRECTORY}")
+     message("CPackRPM:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
   endif()
-  # Remove trailing space
-  string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
-  # Transform endline separated - string into CMake List
-  string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
-  # Remove unecessary quotes
-  string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST "${CPACK_RPM_INSTALL_FILES_LIST}")
-  # Remove ABSOLUTE install file from INSTALL FILE LIST
-  list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES_LIST ${CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL})
-  # Rebuild INSTALL_FILES
-  set(CPACK_RPM_INSTALL_FILES "")
-  foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
-    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
-  endforeach()
-  # Build ABSOLUTE_INSTALL_FILES
-  set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
-  foreach(F IN LISTS CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL)
-    set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "${CPACK_RPM_ABSOLUTE_INSTALL_FILES}%config \"${F}\"\n")
-  endforeach()
-  if(CPACK_RPM_PACKAGE_DEBUG)
-    message("CPackRPM:Debug: CPACK_RPM_ABSOLUTE_INSTALL_FILES=${CPACK_RPM_ABSOLUTE_INSTALL_FILES}")
-    message("CPackRPM:Debug: CPACK_RPM_INSTALL_FILES=${CPACK_RPM_INSTALL_FILES}")
+
+  #
+  # USER generated/provided spec file handling.
+  #
+
+  # We can have a component specific spec file.
+  if(CPACK_RPM_PACKAGE_COMPONENT AND CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE)
+    set(CPACK_RPM_USER_BINARY_SPECFILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE})
   endif()
-else()
-  # reset vars in order to avoid leakage of value(s) from one component to another
-  set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
-endif()
 
-# Prepend directories in ${CPACK_RPM_INSTALL_FILES} with %dir
-# This is necessary to avoid duplicate files since rpmbuild do
-# recursion on its own when encountering a pathname which is a directory
-# which is not flagged as %dir
-string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
-string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST
-                        "${CPACK_RPM_INSTALL_FILES_LIST}")
-string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST
-                        "${CPACK_RPM_INSTALL_FILES_LIST}")
-set(CPACK_RPM_INSTALL_FILES "")
-foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
-  if(IS_DIRECTORY "${WDIR}/${F}")
-    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}%dir \"${F}\"\n")
-  else()
-    set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
-  endif()
-endforeach()
-set(CPACK_RPM_INSTALL_FILES_LIST "")
-
-# The name of the final spec file to be used by rpmbuild
-set(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.spec")
-
-# Print out some debug information if we were asked for that
-if(CPACK_RPM_PACKAGE_DEBUG)
-   message("CPackRPM:Debug: CPACK_TOPLEVEL_DIRECTORY          = ${CPACK_TOPLEVEL_DIRECTORY}")
-   message("CPackRPM:Debug: CPACK_TOPLEVEL_TAG                = ${CPACK_TOPLEVEL_TAG}")
-   message("CPackRPM:Debug: CPACK_TEMPORARY_DIRECTORY         = ${CPACK_TEMPORARY_DIRECTORY}")
-   message("CPackRPM:Debug: CPACK_OUTPUT_FILE_NAME            = ${CPACK_OUTPUT_FILE_NAME}")
-   message("CPackRPM:Debug: CPACK_OUTPUT_FILE_PATH            = ${CPACK_OUTPUT_FILE_PATH}")
-   message("CPackRPM:Debug: CPACK_PACKAGE_FILE_NAME           = ${CPACK_PACKAGE_FILE_NAME}")
-   message("CPackRPM:Debug: CPACK_RPM_BINARY_SPECFILE         = ${CPACK_RPM_BINARY_SPECFILE}")
-   message("CPackRPM:Debug: CPACK_PACKAGE_INSTALL_DIRECTORY   = ${CPACK_PACKAGE_INSTALL_DIRECTORY}")
-   message("CPackRPM:Debug: CPACK_TEMPORARY_PACKAGE_FILE_NAME = ${CPACK_TEMPORARY_PACKAGE_FILE_NAME}")
-endif()
-
-#
-# USER generated/provided spec file handling.
-#
-
-# We can have a component specific spec file.
-if(CPACK_RPM_PACKAGE_COMPONENT AND CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE)
-  set(CPACK_RPM_USER_BINARY_SPECFILE ${CPACK_RPM_${CPACK_RPM_PACKAGE_COMPONENT}_USER_BINARY_SPECFILE})
-endif()
-
-# We should generate a USER spec file template:
-#  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
-#  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
-if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
-   file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
+  # We should generate a USER spec file template:
+  #  - either because the user asked for it : CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE
+  #  - or the user did not provide one : NOT CPACK_RPM_USER_BINARY_SPECFILE
+  if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE OR NOT CPACK_RPM_USER_BINARY_SPECFILE)
+     file(WRITE ${CPACK_RPM_BINARY_SPECFILE}.in
       "# -*- rpm-spec -*-
 BuildRoot:      \@CPACK_RPM_DIRECTORY\@/\@CPACK_PACKAGE_FILE_NAME\@\@CPACK_RPM_PACKAGE_COMPONENT_PART_PATH\@
 Summary:        \@CPACK_RPM_PACKAGE_SUMMARY\@
@@ -1271,63 +1249,54 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 %changelog
 \@CPACK_RPM_SPEC_CHANGELOG\@
 ")
-  # Stop here if we were asked to only generate a template USER spec file
-  # The generated file may then be used as a template by user who wants
-  # to customize their own spec file.
-  if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE)
-     message(FATAL_ERROR "CPackRPM: STOP here Generated USER binary spec file templare is: ${CPACK_RPM_BINARY_SPECFILE}.in")
+    # Stop here if we were asked to only generate a template USER spec file
+    # The generated file may then be used as a template by user who wants
+    # to customize their own spec file.
+    if(CPACK_RPM_GENERATE_USER_BINARY_SPECFILE_TEMPLATE)
+       message(FATAL_ERROR "CPackRPM: STOP here Generated USER binary spec file templare is: ${CPACK_RPM_BINARY_SPECFILE}.in")
+    endif()
   endif()
-endif()
 
-# After that we may either use a user provided spec file
-# or generate one using appropriate variables value.
-if(CPACK_RPM_USER_BINARY_SPECFILE)
-  # User may have specified SPECFILE just use it
-  message("CPackRPM: Will use USER specified spec file: ${CPACK_RPM_USER_BINARY_SPECFILE}")
-  # The user provided file is processed for @var replacement
-  configure_file(${CPACK_RPM_USER_BINARY_SPECFILE} ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
-else()
-  # No User specified spec file, will use the generated spec file
-  message("CPackRPM: Will use GENERATED spec file: ${CPACK_RPM_BINARY_SPECFILE}")
-  # Note the just created file is processed for @var replacement
-  configure_file(${CPACK_RPM_BINARY_SPECFILE}.in ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
-endif()
-
-if(RPMBUILD_EXECUTABLE)
-  # Now call rpmbuild using the SPECFILE
-  execute_process(
-    COMMAND "${RPMBUILD_EXECUTABLE}" -bb
-            --define "_topdir ${CPACK_RPM_DIRECTORY}"
-            --buildroot "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
-            --target "${_CPACK_RPM_PACKAGE_ARCHITECTURE}"
-            "${CPACK_RPM_BINARY_SPECFILE}"
-    WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
-    RESULT_VARIABLE CPACK_RPMBUILD_EXEC_RESULT
-    ERROR_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err"
-    OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out")
-  if(CPACK_RPM_PACKAGE_DEBUG OR CPACK_RPMBUILD_EXEC_RESULT)
-    file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err RPMBUILDERR)
-    file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out RPMBUILDOUT)
-    message("CPackRPM:Debug: You may consult rpmbuild logs in: ")
-    message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err")
-    message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
-    message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out")
-    message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
+  # After that we may either use a user provided spec file
+  # or generate one using appropriate variables value.
+  if(CPACK_RPM_USER_BINARY_SPECFILE)
+    # User may have specified SPECFILE just use it
+    message("CPackRPM: Will use USER specified spec file: ${CPACK_RPM_USER_BINARY_SPECFILE}")
+    # The user provided file is processed for @var replacement
+    configure_file(${CPACK_RPM_USER_BINARY_SPECFILE} ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
+  else()
+    # No User specified spec file, will use the generated spec file
+    message("CPackRPM: Will use GENERATED spec file: ${CPACK_RPM_BINARY_SPECFILE}")
+    # Note the just created file is processed for @var replacement
+    configure_file(${CPACK_RPM_BINARY_SPECFILE}.in ${CPACK_RPM_BINARY_SPECFILE} @ONLY)
   endif()
-else()
-  if(ALIEN_EXECUTABLE)
-    message(FATAL_ERROR "RPM packaging through alien not done (yet)")
-  endif()
-endif()
 
-# reset variables from temporary variables
-if(CPACK_RPM_PACKAGE_SUMMARY_)
-  set(CPACK_RPM_PACKAGE_SUMMARY ${CPACK_RPM_PACKAGE_SUMMARY_})
-else()
-  unset(CPACK_RPM_PACKAGE_SUMMARY)
-endif()
-if(CPACK_RPM_PACKAGE_DESCRIPTION_)
-  set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_RPM_PACKAGE_DESCRIPTION_})
-else()
-  unset(CPACK_RPM_PACKAGE_DESCRIPTION)
-endif()
+  if(RPMBUILD_EXECUTABLE)
+    # Now call rpmbuild using the SPECFILE
+    execute_process(
+      COMMAND "${RPMBUILD_EXECUTABLE}" -bb
+              --define "_topdir ${CPACK_RPM_DIRECTORY}"
+              --buildroot "${CPACK_RPM_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
+              --target "${_CPACK_RPM_PACKAGE_ARCHITECTURE}"
+              "${CPACK_RPM_BINARY_SPECFILE}"
+      WORKING_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_PATH}"
+      RESULT_VARIABLE CPACK_RPMBUILD_EXEC_RESULT
+      ERROR_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err"
+      OUTPUT_FILE "${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out")
+    if(CPACK_RPM_PACKAGE_DEBUG OR CPACK_RPMBUILD_EXEC_RESULT)
+      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err RPMBUILDERR)
+      file(READ ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out RPMBUILDOUT)
+      message("CPackRPM:Debug: You may consult rpmbuild logs in: ")
+      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err")
+      message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
+      message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out")
+      message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
+    endif()
+  else()
+    if(ALIEN_EXECUTABLE)
+      message(FATAL_ERROR "RPM packaging through alien not done (yet)")
+    endif()
+  endif()
+endfunction()
+
+cpack_rpm_generate_package()
