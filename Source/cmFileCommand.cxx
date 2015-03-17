@@ -920,6 +920,35 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
   bool first = true;
   for ( ; i != args.end(); ++i )
     {
+    if( *i == "LIST_DIRECTORIES" )
+      {
+      ++i;
+      if(i != args.end())
+        {
+        if(cmSystemTools::IsOn(i->c_str()))
+          {
+          g.SetListDirs(true);
+          g.SetRecurseListDirs(true);
+          }
+        else if(cmSystemTools::IsOff(i->c_str()))
+          {
+          g.SetListDirs(false);
+          g.SetRecurseListDirs(false);
+          }
+        else
+          {
+          this->SetError("LIST_DIRECTORIES missing bool value.");
+          return false;
+          }
+        }
+      else
+        {
+        this->SetError("LIST_DIRECTORIES missing bool value.");
+        return false;
+        }
+      ++i;
+      }
+
     if ( recurse && (*i == "FOLLOW_SYMLINKS") )
       {
       explicitFollowSymlinks = true;
@@ -950,6 +979,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         }
       }
 
+    cmsys::Glob::GlobMessages globMessages;
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
       std::string expr = this->Makefile->GetCurrentDirectory();
@@ -957,16 +987,42 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
       if (!expr.empty())
         {
         expr += "/" + *i;
-        g.FindFiles(expr);
+        g.FindFiles(expr, &globMessages);
         }
       else
         {
-        g.FindFiles(*i);
+        g.FindFiles(*i, &globMessages);
         }
       }
     else
       {
-      g.FindFiles(*i);
+      g.FindFiles(*i, &globMessages);
+      }
+
+    if(!globMessages.empty())
+      {
+      bool shouldExit = false;
+      for(cmsys::Glob::GlobMessagesIterator it=globMessages.begin();
+        it != globMessages.end(); ++it)
+        {
+        if(it->type == cmsys::Glob::cyclicRecursion)
+          {
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+            "Cyclic recursion detected while globbing for '"
+            + *i + "':\n" + it->content);
+          }
+        else
+          {
+          this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+            "Error has occured while globbing for '"
+            + *i + "' - " + it->content);
+          shouldExit = true;
+          }
+        }
+      if(shouldExit)
+        {
+          return false;
+        }
       }
 
     std::vector<std::string>::size_type cc;
