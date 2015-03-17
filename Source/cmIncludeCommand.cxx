@@ -40,7 +40,7 @@ bool cmIncludeCommand
       }
     else if(args[i] == "RESULT_VARIABLE")
       {
-      if (resultVarName.size() > 0)
+      if (!resultVarName.empty())
         {
         this->SetError("called with invalid arguments: "
             "only one result variable allowed");
@@ -83,14 +83,14 @@ bool cmIncludeCommand
     std::string module = fname;
     module += ".cmake";
     std::string mfile = this->Makefile->GetModulesFile(module.c_str());
-    if ( mfile.size() )
+    if (!mfile.empty())
       {
       fname = mfile.c_str();
       }
     }
 
   std::string fname_abs =
-      cmSystemTools::CollapseFullPath(fname.c_str(),
+      cmSystemTools::CollapseFullPath(fname,
                                       this->Makefile->GetStartDirectory());
 
   cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
@@ -98,7 +98,7 @@ bool cmIncludeCommand
   if (gg->IsExportedTargetsFile(fname_abs))
     {
     const char *modal = 0;
-    cmOStringStream e;
+    std::ostringstream e;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
 
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0024))
@@ -137,7 +137,7 @@ bool cmIncludeCommand
                                   noPolicyScope);
 
   // add the location of the included file if a result variable was given
-  if (resultVarName.size())
+  if (!resultVarName.empty())
     {
       this->Makefile->AddDefinition(resultVarName,
                                     readit?fullFilePath.c_str():"NOTFOUND");

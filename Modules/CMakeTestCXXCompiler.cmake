@@ -66,6 +66,9 @@ else()
   # Try to identify the ABI and configure it into CMakeCXXCompiler.cmake
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
   CMAKE_DETERMINE_COMPILER_ABI(CXX ${CMAKE_ROOT}/Modules/CMakeCXXCompilerABI.cpp)
+  # Try to identify the compiler features
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
+  CMAKE_DETERMINE_COMPILE_FEATURES(CXX)
 
   # Re-configure to save learned information.
   configure_file(

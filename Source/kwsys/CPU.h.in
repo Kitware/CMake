@@ -80,6 +80,10 @@
 #elif defined(__mips) || defined(__mips__) || defined(__MIPS__)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
 
+/* OpenRISC 1000 */
+#elif defined(__or1k__)
+# define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
+
 /* RS/6000 */
 #elif defined(__THW_RS600) || defined(_IBMR2) || defined(_POWER)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG

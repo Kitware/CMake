@@ -35,13 +35,7 @@
 * Routines to handle external names of menu requests                       *
 ***************************************************************************/
 
-#if defined(__hpux)
- #define _XOPEN_SOURCE_EXTENDED
-#endif
 #include "form.priv.h"
-#if defined(__hpux)
- #undef _XOPEN_SOURCE_EXTENDED
-#endif
 
 MODULE_ID("$Id$")
 

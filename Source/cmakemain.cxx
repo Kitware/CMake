@@ -24,6 +24,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
+#include "cmAlgorithms.h"
 #include <cmsys/Encoding.hxx>
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
@@ -41,6 +42,18 @@ static const char * cmDocumentationUsage[][2] =
   {0,
    "  cmake [options] <path-to-source>\n"
    "  cmake [options] <path-to-existing-build>"},
+  {0,
+   "Specify a source directory to (re-)generate a build system for "
+   "it in the current working directory.  Specify an existing build "
+   "directory to re-generate its build system."},
+  {0,0}
+};
+
+//----------------------------------------------------------------------------
+static const char * cmDocumentationUsageNote[][2] =
+{
+  {0,
+   "Run 'cmake --help' for more information."},
   {0,0}
 };
 
@@ -83,11 +96,9 @@ static const char * cmDocumentationOptions[][2] =
 static int do_command(int ac, char const* const* av)
 {
   std::vector<std::string> args;
+  args.reserve(ac - 1);
   args.push_back(av[0]);
-  for(int i = 2; i < ac; ++i)
-    {
-    args.push_back(av[i]);
-    }
+  args.insert(args.end(), av + 2, av + ac);
   return cmcmd::ExecuteCMakeCommand(args);
 }
 
@@ -129,8 +140,8 @@ static std::string cmakemainGetStack(void *clientdata)
   return msg;
 }
 
-static void cmakemainErrorCallback(const char* m, const char*, bool&,
-                                   void *clientdata)
+static void cmakemainMessageCallback(const char* m, const char*, bool&,
+                                     void *clientdata)
 {
   std::cerr << m << cmakemainGetStack(clientdata) << std::endl << std::flush;
 }
@@ -189,7 +200,7 @@ int main(int ac, char const* const* av)
 
 int do_cmake(int ac, char const* const* av)
 {
-  if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
+  if (cmSystemTools::GetCurrentWorkingDirectory().empty())
     {
     std::cerr << "Current working directory cannot be established."
               << std::endl;
@@ -207,11 +218,7 @@ int do_cmake(int ac, char const* const* av)
 
     // the command line args are processed here so that you can do
     // -DCMAKE_MODULE_PATH=/some/path and have this value accessible here
-    std::vector<std::string> args;
-    for(int i =0; i < ac; ++i)
-      {
-      args.push_back(av[i]);
-      }
+    std::vector<std::string> args(av, av + ac);
     hcm.SetCacheArgs(args);
 
     std::vector<cmDocumentationEntry> generators;
@@ -221,6 +228,10 @@ int do_cmake(int ac, char const* const* av)
     doc.SetName("cmake");
     doc.SetSection("Name",cmDocumentationName);
     doc.SetSection("Usage",cmDocumentationUsage);
+    if ( ac == 1 )
+      {
+      doc.AppendSection("Usage",cmDocumentationUsageNote);
+      }
     doc.AppendSection("Generators",generators);
     doc.PrependSection("Options",cmDocumentationOptions);
 
@@ -310,7 +321,7 @@ int do_cmake(int ac, char const* const* av)
     return ret;
     }
   cmake cm;
-  cmSystemTools::SetErrorCallback(cmakemainErrorCallback, (void *)&cm);
+  cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void *)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void *)&cm);
   cm.SetWorkingMode(workingMode);
 

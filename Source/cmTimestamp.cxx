@@ -33,15 +33,13 @@ std::string cmTimestamp::CurrentTime(
 std::string cmTimestamp::FileModificationTime(const char* path,
   const std::string& formatString, bool utcFlag)
 {
-  struct stat info;
-  memset(&info, 0, sizeof(info));
-
-  if(stat(path, &info) != 0)
+  if(!cmsys::SystemTools::FileExists(path))
     {
     return std::string();
     }
 
-  return CreateTimestampFromTimeT(info.st_mtime, formatString, utcFlag);
+  time_t mtime = cmsys::SystemTools::ModifiedTime(path);
+  return CreateTimestampFromTimeT(mtime, formatString, utcFlag);
 }
 
 //----------------------------------------------------------------------------

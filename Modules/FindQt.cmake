@@ -13,6 +13,9 @@
 # or FindQt4 module is included.  Once the user sets DESIRED_QT_VERSION,
 # then the FindQt3 or FindQt4 module is included.
 #
+# This module can only detect and switch between Qt versions 3 and 4. It
+# cannot handle Qt5 or any later versions.
+#
 # ::
 #
 #   QT_REQUIRED if this is set to TRUE then if CMake can
@@ -79,7 +82,11 @@ endif()
 set(GLOB_TEMP_VAR)
 
 if (Qt_FIND_VERSION)
-  set(DESIRED_QT_VERSION "${Qt_FIND_VERSION}")
+  if (Qt_FIND_VERSION MATCHES "^([34])(\\.[0-9]+.*)?$")
+    set(DESIRED_QT_VERSION ${CMAKE_MATCH_1})
+  else ()
+    message(FATAL_ERROR "FindQt was called with invalid version '${Qt_FIND_VERSION}'. Only Qt major versions 3 or 4 are supported. If you do not need to support both Qt3 and Qt4 in your source consider calling find_package(Qt3) or find_package(Qt4) instead of find_package(Qt) instead.")
+  endif ()
 endif ()
 
 # now find qmake
@@ -87,7 +94,7 @@ find_program(QT_QMAKE_EXECUTABLE_FINDQT NAMES qmake PATHS "${QT_SEARCH_PATH}/bin
 if(QT_QMAKE_EXECUTABLE_FINDQT)
   exec_program(${QT_QMAKE_EXECUTABLE_FINDQT} ARGS "-query QT_VERSION"
     OUTPUT_VARIABLE QTVERSION)
-  if(QTVERSION MATCHES "4.*")
+  if(QTVERSION MATCHES "4")
     set(QT_QMAKE_EXECUTABLE ${QT_QMAKE_EXECUTABLE_FINDQT} CACHE PATH "Qt4 qmake program.")
     set(QT4_INSTALLED TRUE)
   endif()
@@ -154,12 +161,12 @@ else()
   endif()
 endif()
 
-if(DESIRED_QT_VERSION MATCHES 3)
+if(DESIRED_QT_VERSION EQUAL 3)
   set(Qt3_FIND_REQUIRED ${Qt_FIND_REQUIRED})
   set(Qt3_FIND_QUIETLY  ${Qt_FIND_QUIETLY})
   include(${CMAKE_CURRENT_LIST_DIR}/FindQt3.cmake)
 endif()
-if(DESIRED_QT_VERSION MATCHES 4)
+if(DESIRED_QT_VERSION EQUAL 4)
   set(Qt4_FIND_REQUIRED ${Qt_FIND_REQUIRED})
   set(Qt4_FIND_QUIETLY  ${Qt_FIND_QUIETLY})
   include(${CMAKE_CURRENT_LIST_DIR}/FindQt4.cmake)
@@ -179,9 +186,9 @@ else()
   endif()
   if(NOT QT_FOUND AND DESIRED_QT_VERSION)
     if(QT_REQUIRED)
-      message(FATAL_ERROR "CMake was unable to find Qt version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE, if those are set then QT_QT_LIBRARY or QT_LIBRARY_DIR.")
+      message(FATAL_ERROR "CMake was unable to find Qt version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_H_FILE, if those are set then QT_QT_LIBRARY or QT_LIBRARY_DIR.")
     else()
-      message( "CMake was unable to find desired Qt version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_FILE.")
+      message( "CMake was unable to find desired Qt version: ${DESIRED_QT_VERSION}. Set advanced values QT_QMAKE_EXECUTABLE and QT${DESIRED_QT_VERSION}_QGLOBAL_H_FILE.")
     endif()
   endif()
 endif()

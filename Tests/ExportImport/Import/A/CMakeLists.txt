@@ -34,6 +34,7 @@ target_link_libraries(imp_testExe1
   exp_testLib5
   exp_testLib6
   exp_testLibCycleA
+  exp_testLibPerConfigDest
   )
 
 # Try building a plugin to an executable imported from the install tree.
@@ -66,6 +67,7 @@ target_link_libraries(imp_testExe1b
   bld_testLib5
   bld_testLib6
   bld_testLibCycleA
+  bld_testLibPerConfigDest
   )
 
 add_custom_target(check_testLib1_genex ALL
@@ -94,6 +96,16 @@ foreach(c DEBUG RELWITHDEBINFO)
   set_property(TARGET imp_testExe1 PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
   set_property(TARGET imp_testExe1b PROPERTY COMPILE_DEFINITIONS_${c} EXE_DBG)
 endforeach()
+
+#-----------------------------------------------------------------------------
+include(${CMAKE_INSTALL_PREFIX}/lib/expAbs/expAbs.cmake)
+
+add_executable(imp_testExeAbs1
+  imp_testExeAbs1.c
+  )
+target_link_libraries(imp_testExeAbs1
+  expAbs_testLibAbs1
+  )
 
 #-----------------------------------------------------------------------------
 # Create a custom target to generate a header for the libraries below.
@@ -301,6 +313,21 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       message(SEND_ERROR "EXP_ERROR_VARIABLE try_compile failed, but it was expected to succeed ${OUTPUT}.")
     endif()
 
+    if(NOT CMAKE_CROSSCOMPILING)
+      unset(EXP_RUN_VAR CACHE)
+      unset(EXP_COMPILE_VAR CACHE)
+      try_run(EXP_RUN_VAR EXP_COMPILE_VAR
+        "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+        "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+        COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
+        LINK_LIBRARIES exp_systemlib
+        OUTPUT_VARIABLE OUTPUT
+        )
+      if(NOT EXP_COMPILE_VAR)
+        message(SEND_ERROR "try_run compile failed, but it was expected to succeed ${OUTPUT}.")
+      endif()
+    endif()
+
     add_executable(test_system_bld test_system.cpp)
     target_link_libraries(test_system_bld bld_systemlib)
     target_compile_options(test_system_bld PRIVATE -Wunused-variable -Werror=unused-variable)
@@ -315,6 +342,21 @@ if (((CMAKE_C_COMPILER_ID STREQUAL GNU AND CMAKE_C_COMPILER_VERSION VERSION_GREA
       )
     if(NOT BLD_ERROR_VARIABLE)
       message(SEND_ERROR "BLD_ERROR_VARIABLE try_compile failed, but it was expected to succeed.")
+    endif()
+
+    if(NOT CMAKE_CROSSCOMPILING)
+      unset(BLD_RUN_VAR CACHE)
+      unset(BLD_COMPILE_VAR CACHE)
+      try_run(BLD_RUN_VAR BLD_COMPILE_VAR
+        "${CMAKE_CURRENT_SOURCE_DIR}/test_system"
+        "${CMAKE_CURRENT_SOURCE_DIR}/test_system.cpp"
+        COMPILE_DEFINITIONS "-Wunused-variable -Werror=unused-variable"
+        LINK_LIBRARIES bld_systemlib
+        OUTPUT_VARIABLE OUTPUT
+        )
+      if(NOT BLD_COMPILE_VAR)
+        message(SEND_ERROR "try_run compile failed, but it was expected to succeed ${OUTPUT}.")
+      endif()
     endif()
   endif()
 endif()

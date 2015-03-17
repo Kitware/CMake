@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2014 Kitware, Inc., Insight Software Consortium
+  Copyright 2012-2015 Kitware, Inc., Insight Software Consortium
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -15,6 +15,7 @@
 #include <cmSystemTools.h>
 #include <cmGeneratedFileStream.h>
 #include <cmCryptoHash.h>
+#include <cmInstalledFile.h>
 #include <CPack/cmCPackLog.h>
 #include <CPack/cmCPackComponentGroup.h>
 
@@ -32,15 +33,23 @@
 #include <rpc.h> // for GUID generation
 
 cmCPackWIXGenerator::cmCPackWIXGenerator():
-  HasDesktopShortcuts(false),
-  Patch(Logger)
+  Patch(0)
 {
 
+}
+
+cmCPackWIXGenerator::~cmCPackWIXGenerator()
+{
+  if(this->Patch)
+    {
+    delete this->Patch;
+    }
 }
 
 int cmCPackWIXGenerator::InitializeInternal()
 {
   componentPackageMethod = ONE_PACKAGE;
+  this->Patch = new cmWIXPatch(this->Logger);
 
   return this->Superclass::InitializeInternal();
 }
@@ -232,7 +241,7 @@ bool cmCPackWIXGenerator::InitializeWiXConfiguration()
   const char* patchFilePath = GetOption("CPACK_WIX_PATCH_FILE");
   if(patchFilePath)
     {
-    this->Patch.LoadFragments(patchFilePath);
+    this->Patch->LoadFragments(patchFilePath);
     }
 
   return true;
@@ -247,6 +256,7 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
 
   CreateWiXVariablesIncludeFile();
   CreateWiXPropertiesIncludeFile();
+  CreateWiXProductFragmentIncludeFile();
 
   if(!CreateWiXSourceFiles())
     {
@@ -255,13 +265,30 @@ bool cmCPackWIXGenerator::PackageFilesImpl()
 
   AppendUserSuppliedExtraSources();
 
+  std::set<std::string> usedBaseNames;
+
   std::stringstream objectFiles;
   for(size_t i = 0; i < this->WixSources.size(); ++i)
     {
     std::string const& sourceFilename = this->WixSources[i];
 
+    std::string baseName =
+      cmSystemTools::GetFilenameWithoutLastExtension(sourceFilename);
+
+    unsigned int counter = 0;
+    std::string uniqueBaseName = baseName;
+
+    while(usedBaseNames.find(uniqueBaseName) != usedBaseNames.end())
+      {
+      std::stringstream tmp;
+      tmp << baseName << ++counter;
+      uniqueBaseName = tmp.str();
+      }
+
+    usedBaseNames.insert(uniqueBaseName);
+
     std::string objectFilename =
-      cmSystemTools::GetFilenameWithoutExtension(sourceFilename) + ".wixobj";
+      this->CPackTopLevel + "/" + uniqueBaseName + ".wixobj";
 
     if(!RunCandleCommand(sourceFilename, objectFilename))
       {
@@ -350,6 +377,40 @@ void cmCPackWIXGenerator::CreateWiXPropertiesIncludeFile()
       includeFile.EndElement("Property");
       }
     }
+
+  if(GetOption("CPACK_WIX_PROPERTY_ARPINSTALLLOCATION") == 0)
+    {
+    includeFile.BeginElement("Property");
+    includeFile.AddAttribute("Id", "INSTALL_ROOT");
+    includeFile.AddAttribute("Secure", "yes");
+
+    includeFile.BeginElement("RegistrySearch");
+    includeFile.AddAttribute("Id", "FindInstallLocation");
+    includeFile.AddAttribute("Root", "HKLM");
+    includeFile.AddAttribute("Key", "Software\\Microsoft\\Windows\\"
+      "CurrentVersion\\Uninstall\\[WIX_UPGRADE_DETECTED]");
+    includeFile.AddAttribute("Name", "InstallLocation");
+    includeFile.AddAttribute("Type", "raw");
+    includeFile.EndElement("RegistrySearch");
+    includeFile.EndElement("Property");
+
+    includeFile.BeginElement("SetProperty");
+    includeFile.AddAttribute("Id", "ARPINSTALLLOCATION");
+    includeFile.AddAttribute("Value", "[INSTALL_ROOT]");
+    includeFile.AddAttribute("After", "CostFinalize");
+    includeFile.EndElement("SetProperty");
+    }
+}
+
+void cmCPackWIXGenerator::CreateWiXProductFragmentIncludeFile()
+{
+    std::string includeFilename =
+      this->CPackTopLevel + "/product_fragment.wxi";
+
+    cmWIXSourceWriter includeFile(
+      this->Logger, includeFilename, true);
+
+    this->Patch->ApplyFragment("#PRODUCT", includeFile);
 }
 
 void cmCPackWIXGenerator::CopyDefinition(
@@ -430,6 +491,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.AddAttribute("Title", cpackPackageName);
   featureDefinitions.AddAttribute("Level", "1");
+  this->Patch->ApplyFragment("#PRODUCTFEATURE", featureDefinitions);
 
   const char* package = GetOption("CPACK_WIX_CMAKE_PACKAGE_REGISTRY");
   if(package)
@@ -445,18 +507,16 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
   featureDefinitions.EndElement("Feature");
 
-  bool hasShortcuts = false;
+  std::set<cmWIXShortcuts::Type> emittedShortcutTypes;
 
-  shortcut_map_t globalShortcuts;
+  cmWIXShortcuts globalShortcuts;
   if(Components.empty())
     {
     AddComponentsToFeature(toplevel, "ProductFeature",
       directoryDefinitions, fileDefinitions, featureDefinitions,
       globalShortcuts);
-    if(globalShortcuts.size())
-      {
-      hasShortcuts = true;
-      }
+
+    globalShortcuts.AddShortcutTypes(emittedShortcutTypes);
     }
   else
     {
@@ -471,33 +531,29 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
 
       std::string componentFeatureId = "CM_C_" + component.Name;
 
-      shortcut_map_t featureShortcuts;
+      cmWIXShortcuts featureShortcuts;
       AddComponentsToFeature(componentPath, componentFeatureId,
         directoryDefinitions, fileDefinitions,
         featureDefinitions, featureShortcuts);
-      if(featureShortcuts.size())
-        {
-        hasShortcuts = true;
-        }
 
-      if(featureShortcuts.size())
+      featureShortcuts.AddShortcutTypes(emittedShortcutTypes);
+
+      if(!CreateShortcuts(component.Name, componentFeatureId,
+        featureShortcuts, false, fileDefinitions, featureDefinitions))
         {
-        if(!CreateStartMenuShortcuts(component.Name, componentFeatureId,
-          featureShortcuts, fileDefinitions, featureDefinitions))
-          {
-          return false;
-          }
+        return false;
         }
       }
     }
 
-  if(hasShortcuts)
+  bool emitUninstallShortcut = emittedShortcutTypes.find(
+    cmWIXShortcuts::START_MENU) != emittedShortcutTypes.end();
+
+  if(!CreateShortcuts(std::string(), "ProductFeature",
+      globalShortcuts, emitUninstallShortcut,
+      fileDefinitions, featureDefinitions))
     {
-    if(!CreateStartMenuShortcuts(std::string(), "ProductFeature",
-        globalShortcuts, fileDefinitions, featureDefinitions))
-      {
-      return false;
-      }
+    return false;
     }
 
   featureDefinitions.EndElement("Fragment");
@@ -506,15 +562,23 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
   directoryDefinitions.EndInstallationPrefixDirectory(
     installRootSize);
 
-  if(hasShortcuts)
+  if(emittedShortcutTypes.find(cmWIXShortcuts::START_MENU) !=
+      emittedShortcutTypes.end())
     {
     directoryDefinitions.EmitStartMenuFolder(
       GetOption("CPACK_WIX_PROGRAM_MENU_FOLDER"));
     }
 
-  if(this->HasDesktopShortcuts)
+  if(emittedShortcutTypes.find(cmWIXShortcuts::DESKTOP) !=
+      emittedShortcutTypes.end())
     {
     directoryDefinitions.EmitDesktopFolder();
+    }
+
+  if(emittedShortcutTypes.find(cmWIXShortcuts::STARTUP) !=
+      emittedShortcutTypes.end())
+    {
+    directoryDefinitions.EmitStartupFolder();
     }
 
   directoryDefinitions.EndElement("Directory");
@@ -525,7 +589,7 @@ bool cmCPackWIXGenerator::CreateWiXSourceFiles()
     return false;
     }
 
-  return this->Patch.CheckForUnappliedFragments();
+  return this->Patch->CheckForUnappliedFragments();
 }
 
 std::string cmCPackWIXGenerator::GetProgramFilesFolderId() const
@@ -604,7 +668,7 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
   cmWIXDirectoriesSourceWriter& directoryDefinitions,
   cmWIXFilesSourceWriter& fileDefinitions,
   cmWIXFeaturesSourceWriter& featureDefinitions,
-  shortcut_map_t& shortcutMap)
+  cmWIXShortcuts& shortcuts)
 {
   featureDefinitions.BeginElement("FeatureRef");
   featureDefinitions.AddAttribute("Id", featureId);
@@ -637,21 +701,82 @@ bool cmCPackWIXGenerator::AddComponentsToFeature(
     rootPath, "INSTALL_ROOT",
     directoryDefinitions, fileDefinitions, featureDefinitions,
     cpackPackageExecutablesList, cpackPackageDesktopLinksList,
-    shortcutMap);
+    shortcuts);
 
   featureDefinitions.EndElement("FeatureRef");
 
   return true;
 }
 
-bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
+bool cmCPackWIXGenerator::CreateShortcuts(
   std::string const& cpackComponentName,
   std::string const& featureId,
-  shortcut_map_t& shortcutMap,
+  cmWIXShortcuts const& shortcuts,
+  bool emitUninstallShortcut,
   cmWIXFilesSourceWriter& fileDefinitions,
   cmWIXFeaturesSourceWriter& featureDefinitions)
 {
-  bool thisHasDesktopShortcuts = false;
+  if(!shortcuts.empty(cmWIXShortcuts::START_MENU))
+    {
+    if(!this->CreateShortcutsOfSpecificType(cmWIXShortcuts::START_MENU,
+      cpackComponentName, featureId, "",
+      shortcuts, emitUninstallShortcut,
+      fileDefinitions, featureDefinitions))
+      {
+      return false;
+      }
+    }
+
+  if(!shortcuts.empty(cmWIXShortcuts::DESKTOP))
+    {
+    if(!this->CreateShortcutsOfSpecificType(cmWIXShortcuts::DESKTOP,
+      cpackComponentName, featureId, "DESKTOP",
+      shortcuts, false,
+      fileDefinitions, featureDefinitions))
+      {
+      return false;
+      }
+    }
+
+  if(!shortcuts.empty(cmWIXShortcuts::STARTUP))
+    {
+    if(!this->CreateShortcutsOfSpecificType(cmWIXShortcuts::STARTUP,
+      cpackComponentName, featureId, "STARTUP",
+      shortcuts, false,
+      fileDefinitions, featureDefinitions))
+      {
+      return false;
+      }
+    }
+
+  return true;
+}
+
+bool cmCPackWIXGenerator::CreateShortcutsOfSpecificType(
+  cmWIXShortcuts::Type type,
+  std::string const& cpackComponentName,
+  std::string const& featureId,
+  std::string const& idPrefix,
+  cmWIXShortcuts const& shortcuts,
+  bool emitUninstallShortcut,
+  cmWIXFilesSourceWriter& fileDefinitions,
+  cmWIXFeaturesSourceWriter& featureDefinitions)
+{
+  std::string directoryId;
+  switch(type)
+    {
+    case cmWIXShortcuts::START_MENU:
+      directoryId = "PROGRAM_MENU_FOLDER";
+      break;
+    case cmWIXShortcuts::DESKTOP:
+      directoryId = "DesktopFolder";
+      break;
+    case cmWIXShortcuts::STARTUP:
+      directoryId = "StartupFolder";
+      break;
+    default:
+      return false;
+    }
 
   featureDefinitions.BeginElement("FeatureRef");
   featureDefinitions.AddAttribute("Id", featureId);
@@ -675,80 +800,42 @@ bool cmCPackWIXGenerator::CreateStartMenuShortcuts(
       idSuffix += cpackComponentName;
     }
 
-  std::string componentId = "CM_SHORTCUT" + idSuffix;
+  std::string componentId = "CM_SHORTCUT";
+  if(idPrefix.size())
+    {
+    componentId += "_" + idPrefix;
+    }
+
+  componentId += idSuffix;
 
   fileDefinitions.BeginElement("DirectoryRef");
-  fileDefinitions.AddAttribute("Id", "PROGRAM_MENU_FOLDER");
+  fileDefinitions.AddAttribute("Id", directoryId);
 
   fileDefinitions.BeginElement("Component");
   fileDefinitions.AddAttribute("Id", componentId);
   fileDefinitions.AddAttribute("Guid", "*");
 
-  for(shortcut_map_t::const_iterator
-    i = shortcutMap.begin(); i != shortcutMap.end(); ++i)
+  std::string registryKey = std::string("Software\\") +
+    cpackVendor + "\\" + cpackPackageName;
+
+  shortcuts.EmitShortcuts(type, registryKey,
+    cpackComponentName, fileDefinitions);
+
+  if(type == cmWIXShortcuts::START_MENU)
     {
-    std::string const& id = i->first;
-    cmWIXShortcut const& shortcut = i->second;
-
-    fileDefinitions.EmitShortcut(id, shortcut, false);
-
-    if(shortcut.desktop)
-      {
-      thisHasDesktopShortcuts = true;
-      }
+    fileDefinitions.EmitRemoveFolder(
+      "CM_REMOVE_PROGRAM_MENU_FOLDER" + idSuffix);
     }
 
-  if(cpackComponentName.empty())
+  if(emitUninstallShortcut)
     {
     fileDefinitions.EmitUninstallShortcut(cpackPackageName);
     }
-
-  fileDefinitions.EmitRemoveFolder(
-    "CM_REMOVE_PROGRAM_MENU_FOLDER" + idSuffix);
-
-  std::string registryKey =
-    std::string("Software\\") + cpackVendor + "\\" + cpackPackageName;
-
-  fileDefinitions.EmitStartMenuShortcutRegistryValue(
-    registryKey, cpackComponentName);
 
   fileDefinitions.EndElement("Component");
   fileDefinitions.EndElement("DirectoryRef");
 
   featureDefinitions.EmitComponentRef(componentId);
-
-  if(thisHasDesktopShortcuts)
-    {
-    this->HasDesktopShortcuts = true;
-    componentId = "CM_DESKTOP_SHORTCUT" + idSuffix;
-
-    fileDefinitions.BeginElement("DirectoryRef");
-    fileDefinitions.AddAttribute("Id", "DesktopFolder");
-    fileDefinitions.BeginElement("Component");
-    fileDefinitions.AddAttribute("Id", componentId);
-    fileDefinitions.AddAttribute("Guid", "*");
-
-    for(shortcut_map_t::const_iterator
-      i = shortcutMap.begin(); i != shortcutMap.end(); ++i)
-      {
-      std::string const& id = i->first;
-      cmWIXShortcut const& shortcut = i->second;
-
-      if (!shortcut.desktop)
-        continue;
-
-      fileDefinitions.EmitShortcut(id, shortcut, true);
-      }
-
-    fileDefinitions.EmitDesktopShortcutRegistryValue(
-      registryKey, cpackComponentName);
-
-    fileDefinitions.EndElement("Component");
-    fileDefinitions.EndElement("DirectoryRef");
-
-    featureDefinitions.EmitComponentRef(componentId);
-    }
-
   featureDefinitions.EndElement("FeatureRef");
 
   return true;
@@ -807,20 +894,49 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
   cmWIXDirectoriesSourceWriter& directoryDefinitions,
   cmWIXFilesSourceWriter& fileDefinitions,
   cmWIXFeaturesSourceWriter& featureDefinitions,
-  const std::vector<std::string>& packageExecutables,
-  const std::vector<std::string>& desktopExecutables,
-  shortcut_map_t& shortcutMap)
+  std::vector<std::string> const& packageExecutables,
+  std::vector<std::string> const& desktopExecutables,
+  cmWIXShortcuts& shortcuts)
 {
   cmsys::Directory dir;
   dir.Load(topdir.c_str());
 
-  if(dir.GetNumberOfFiles() == 2)
+  std::string relativeDirectoryPath =
+    cmSystemTools::RelativePath(toplevel.c_str(), topdir.c_str());
+
+  if(relativeDirectoryPath.empty())
+    {
+    relativeDirectoryPath = ".";
+    }
+
+  cmInstalledFile const* directoryInstalledFile =
+    this->GetInstalledFile(relativeDirectoryPath);
+
+  bool emptyDirectory = dir.GetNumberOfFiles() == 2;
+  bool createDirectory = false;
+
+  if(emptyDirectory)
+    {
+    createDirectory = true;
+    }
+
+  if(directoryInstalledFile)
+    {
+    if(directoryInstalledFile->HasProperty("CPACK_WIX_ACL"))
+      {
+      createDirectory = true;
+      }
+    }
+
+  if(createDirectory)
     {
     std::string componentId = fileDefinitions.EmitComponentCreateFolder(
-      directoryId, GenerateGUID());
-
+      directoryId, GenerateGUID(), directoryInstalledFile);
     featureDefinitions.EmitComponentRef(componentId);
+    }
 
+  if(emptyDirectory)
+    {
     return;
     }
 
@@ -855,15 +971,23 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         featureDefinitions,
         packageExecutables,
         desktopExecutables,
-        shortcutMap);
+        shortcuts);
 
-      this->Patch.ApplyFragment(subDirectoryId, directoryDefinitions);
+      this->Patch->ApplyFragment(subDirectoryId, directoryDefinitions);
       directoryDefinitions.EndElement("Directory");
       }
     else
       {
+      cmInstalledFile const* installedFile =
+        this->GetInstalledFile(relativePath);
+
+      if(installedFile)
+        {
+        shortcuts.CreateFromProperties(id, directoryId, *installedFile);
+        }
+
       std::string componentId = fileDefinitions.EmitComponentFile(
-        directoryId, id, fullPath, this->Patch);
+        directoryId, id, fullPath, *(this->Patch), installedFile);
 
       featureDefinitions.EmitComponentRef(componentId);
 
@@ -875,9 +999,10 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
         if(cmSystemTools::LowerCase(fileName) ==
             cmSystemTools::LowerCase(executableName) + ".exe")
           {
-          cmWIXShortcut &shortcut = shortcutMap[id];
-          shortcut.textLabel= textLabel;
+          cmWIXShortcut shortcut;
+          shortcut.label= textLabel;
           shortcut.workingDirectoryId = directoryId;
+          shortcuts.insert(cmWIXShortcuts::START_MENU, id, shortcut);
 
           if(desktopExecutables.size() &&
              std::find(desktopExecutables.begin(),
@@ -885,7 +1010,7 @@ void cmCPackWIXGenerator::AddDirectoryAndFileDefinitons(
                        executableName)
              != desktopExecutables.end())
             {
-              shortcut.desktop = true;
+              shortcuts.insert(cmWIXShortcuts::DESKTOP, id, shortcut);
             }
           }
         }
@@ -1085,12 +1210,7 @@ void cmCPackWIXGenerator::CollectExtensions(
 
   std::vector<std::string> list;
   cmSystemTools::ExpandListArgument(variableContent, list);
-
-  for(std::vector<std::string>::const_iterator i = list.begin();
-    i != list.end(); ++i)
-    {
-    extensions.insert(*i);
-    }
+  extensions.insert(list.begin(), list.end());
 }
 
 void cmCPackWIXGenerator::AddCustomFlags(

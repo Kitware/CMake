@@ -16,7 +16,7 @@ this automatic linking will need to be disabled as per the
 documentation.
 
 The OLD behavior for this policy is not to link executables to
-qtmain.lib automatically when they link to the QtCore IMPORTEDtarget.
+qtmain.lib automatically when they link to the QtCore IMPORTED target.
 The NEW behavior for this policy is to link executables to qtmain.lib
 automatically when they link to QtCore IMPORTED target.
 

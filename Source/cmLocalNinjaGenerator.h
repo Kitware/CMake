@@ -67,14 +67,14 @@ public:
   std::string GetHomeRelativeOutputPath() const
   { return this->HomeRelativeOutputPath; }
 
-  std::string ConvertToNinjaPath(const char *path);
+  std::string ConvertToNinjaPath(const std::string& path);
 
   struct map_to_ninja_path {
     cmLocalNinjaGenerator *LocalGenerator;
     map_to_ninja_path(cmLocalNinjaGenerator *LocalGen)
       : LocalGenerator(LocalGen) {}
     std::string operator()(const std::string &path) {
-      return LocalGenerator->ConvertToNinjaPath(path.c_str());
+      return LocalGenerator->ConvertToNinjaPath(path);
     }
   };
 
@@ -108,7 +108,8 @@ public:
 
 protected:
   virtual std::string ConvertToIncludeReference(std::string const& path,
-                                                OutputFormat format = SHELL);
+                                                OutputFormat format = SHELL,
+                                                bool forceFullPaths = false);
 
 
 private:
@@ -117,6 +118,7 @@ private:
 
   void WriteBuildFileTop();
   void WriteProjectHeader(std::ostream& os);
+  void WriteNinjaRequiredVersion(std::ostream& os);
   void WriteNinjaFilesInclusion(std::ostream& os);
   void WriteProcessedMakefile(std::ostream& os);
   void WritePools(std::ostream& os);

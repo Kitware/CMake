@@ -202,7 +202,7 @@ the indentation.  Otherwise it retains the same position on the line"
 ;; Keyword highlighting regex-to-face map.
 ;;
 (defconst cmake-font-lock-keywords
-  (list '("^[ \t]*\\(\\w+\\)[ \t]*(" 1 font-lock-function-name-face))
+  (list '("^[ \t]*\\([[:word:]_]+\\)[ \t]*(" 1 font-lock-function-name-face))
   "Highlighting expressions for CMAKE mode."
   )
 
@@ -241,7 +241,6 @@ the indentation.  Otherwise it retains the same position on the line"
   ; Create the syntax table
   (setq cmake-mode-syntax-table (make-syntax-table))
   (set-syntax-table cmake-mode-syntax-table)
-  (modify-syntax-entry ?_  "w" cmake-mode-syntax-table)
   (modify-syntax-entry ?\(  "()" cmake-mode-syntax-table)
   (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
   (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
@@ -322,8 +321,13 @@ and store the result as a list in LISTVAR."
   )
 
 (require 'thingatpt)
+(defun cmake-symbol-at-point ()
+  (let ((symbol (symbol-at-point)))
+    (and (not (null symbol))
+         (symbol-name symbol))))
+
 (defun cmake-help-type (type)
-  (let* ((default-entry (word-at-point))
+  (let* ((default-entry (cmake-symbol-at-point))
          (history (car (cdr (cdr (assoc type cmake-string-to-list-symbol)))))
          (input (completing-read
                  (format "CMake %s: " type) ; prompt
@@ -366,7 +370,7 @@ and store the result as a list in LISTVAR."
 (defun cmake-help ()
   "Queries for any of the four available help topics and prints out the approriate page."
   (interactive)
-  (let* ((default-entry (word-at-point))
+  (let* ((default-entry (cmake-symbol-at-point))
          (command-list (cmake-get-list "command"))
          (variable-list (cmake-get-list "variable"))
          (module-list (cmake-get-list "module"))

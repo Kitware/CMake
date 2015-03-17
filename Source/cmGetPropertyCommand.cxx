@@ -67,12 +67,16 @@ bool cmGetPropertyCommand
     {
     scope = cmProperty::CACHE;
     }
+  else if(args[1] == "INSTALL")
+    {
+    scope = cmProperty::INSTALL;
+    }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given invalid scope " << args[1] << ".  "
       << "Valid scopes are "
-      << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE.";
+      << "GLOBAL, DIRECTORY, TARGET, SOURCE, TEST, VARIABLE, CACHE, INSTALL.";
     this->SetError(e.str());
     return false;
     }
@@ -118,7 +122,7 @@ bool cmGetPropertyCommand
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given invalid argument \"" << args[i] << "\".";
       this->SetError(e.str());
       return false;
@@ -190,6 +194,7 @@ bool cmGetPropertyCommand
       case cmProperty::TEST:        return this->HandleTestMode();
       case cmProperty::VARIABLE:    return this->HandleVariableMode();
       case cmProperty::CACHE:       return this->HandleCacheMode();
+      case cmProperty::INSTALL:       return this->HandleInstallMode();
 
       case cmProperty::CACHED_VARIABLE:
         break; // should never happen
@@ -254,7 +259,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
       }
 
     // The local generators are associated with collapsed paths.
-    dir = cmSystemTools::CollapseFullPath(dir.c_str());
+    dir = cmSystemTools::CollapseFullPath(dir);
 
     // Lookup the generator.
     if(cmLocalGenerator* lg =
@@ -302,11 +307,12 @@ bool cmGetPropertyCommand::HandleTargetMode()
     }
   if(cmTarget* target = this->Makefile->FindTargetToUse(this->Name))
     {
-    return this->StoreResult(target->GetProperty(this->PropertyName));
+    return this->StoreResult(target->GetProperty(this->PropertyName,
+                                                 this->Makefile));
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "could not find TARGET " << this->Name
       << ".  Perhaps it has not yet been created.";
     this->SetError(e.str());
@@ -332,7 +338,7 @@ bool cmGetPropertyCommand::HandleSourceMode()
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given SOURCE name that could not be found or created: "
       << this->Name;
     this->SetError(e.str());
@@ -356,7 +362,7 @@ bool cmGetPropertyCommand::HandleTestMode()
     }
 
   // If not found it is an error.
-  cmOStringStream e;
+  std::ostringstream e;
   e << "given TEST name that does not exist: " << this->Name;
   this->SetError(e.str());
   return false;
@@ -393,4 +399,34 @@ bool cmGetPropertyCommand::HandleCacheMode()
     }
   this->StoreResult(value);
   return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmGetPropertyCommand::HandleInstallMode()
+{
+  if(this->Name.empty())
+    {
+    this->SetError("not given name for INSTALL scope.");
+    return false;
+    }
+
+  // Get the installed file.
+  cmake* cm = this->Makefile->GetCMakeInstance();
+
+  if(cmInstalledFile* file = cm->GetOrCreateInstalledFile(
+    this->Makefile, this->Name))
+    {
+    std::string value;
+    bool isSet = file->GetProperty(this->PropertyName, value);
+
+    return this->StoreResult(isSet ? value.c_str() : 0);
+    }
+  else
+    {
+    std::ostringstream e;
+    e << "given INSTALL name that could not be found or created: "
+      << this->Name;
+    this->SetError(e.str());
+    return false;
+    }
 }

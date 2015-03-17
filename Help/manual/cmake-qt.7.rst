@@ -3,7 +3,7 @@
 cmake-qt(7)
 ***********
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -54,7 +54,7 @@ CMake.  Target dependencies may be added to that custom target by adding them
 to the :prop_tgt:`AUTOGEN_TARGET_DEPENDS` target property.
 
 AUTOMOC
-'''''''
+^^^^^^^
 
 The :prop_tgt:`AUTOMOC` target property controls whether :manual:`cmake(1)`
 inspects the C++ files in the target to determine if they require ``moc`` to
@@ -84,7 +84,7 @@ variable may be populated to pre-set the options for all following targets.
 .. _`Qt AUTOUIC`:
 
 AUTOUIC
-'''''''
+^^^^^^^
 
 The :prop_tgt:`AUTOUIC` target property controls whether :manual:`cmake(1)`
 inspects the C++ files in the target to determine if they require ``uic`` to
@@ -147,7 +147,7 @@ result of linking with the :prop_tgt:`IMPORTED` target:
 .. _`Qt AUTORCC`:
 
 AUTORCC
-'''''''
+^^^^^^^
 
 The :prop_tgt:`AUTORCC` target property controls whether :manual:`cmake(1)`
 creates rules to execute ``rcc`` at the appropriate time on source files

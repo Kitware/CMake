@@ -54,6 +54,10 @@ public:
                          const std::string& config) const;
   void GetExpectedResxHeaders(std::set<std::string>&,
                               const std::string& config) const;
+  void GetAppManifest(std::vector<cmSourceFile const*>&,
+                      const std::string& config) const;
+  void GetCertificates(std::vector<cmSourceFile const*>&,
+                       const std::string& config) const;
 
   void ComputeObjectMapping();
 
@@ -75,13 +79,13 @@ public:
   void GetAppleArchs(const std::string& config,
                      std::vector<std::string>& archVec) const;
 
-  ///! Return the rule variable used to create this type of target,
-  //  need to add CMAKE_(LANG) for full name.
-  const char* GetCreateRuleVariable() const;
+  /** Return the rule variable used to create this type of target.  */
+  std::string GetCreateRuleVariable(std::string const& lang,
+                                    std::string const& config) const;
 
   /** Get the include directories for this target.  */
   std::vector<std::string> GetIncludeDirectories(
-      const std::string& config) const;
+      const std::string& config, const std::string& lang) const;
 
   bool IsSystemIncludeDirectory(const std::string& dir,
                                 const std::string& config) const;

@@ -14,6 +14,7 @@
 #include "cmSystemTools.h"
 #include "cmVersion.h"
 #include "cmRST.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/Directory.hxx>
 #include <cmsys/Glob.hxx>
@@ -30,6 +31,8 @@ static const char *cmDocumentationStandardOptions[][2] =
    "Print usage information and exit."},
   {"--version,-version,/V [<f>]",
    "Print version number and exit."},
+  {"--help-full [<f>]",
+   "Print all help manuals and exit."},
   {"--help-manual <man> [<f>]",
    "Print one help manual and exit."},
   {"--help-manual-list [<f>]",
@@ -85,12 +88,7 @@ cmDocumentation::cmDocumentation()
 //----------------------------------------------------------------------------
 cmDocumentation::~cmDocumentation()
 {
-  for(std::map<std::string,cmDocumentationSection *>::iterator i =
-        this->AllSections.begin();
-      i != this->AllSections.end(); ++i)
-    {
-    delete i->second;
-    }
+  cmDeleteAll(this->AllSections);
 }
 
 //----------------------------------------------------------------------------
@@ -100,7 +98,7 @@ bool cmDocumentation::PrintVersion(std::ostream& os)
     this->GetNameString() <<
     " version " << cmVersion::GetCMakeVersion() << "\n"
     "\n"
-    "CMake suite maintained by Kitware, Inc. (kitware.com).\n"
+    "CMake suite maintained and supported by Kitware (kitware.com/cmake).\n"
     ;
   return true;
 }
@@ -111,7 +109,11 @@ bool cmDocumentation::PrintDocumentation(Type ht, std::ostream& os)
   switch (ht)
     {
     case cmDocumentation::Usage:
-      return this->PrintDocumentationUsage(os);
+      return this->PrintUsage(os);
+    case cmDocumentation::Help:
+      return this->PrintHelp(os);
+    case cmDocumentation::Full:
+      return this->PrintHelpFull(os);
     case cmDocumentation::OneManual:
       return this->PrintHelpOneManual(os);
     case cmDocumentation::OneCommand:
@@ -161,7 +163,7 @@ bool cmDocumentation::PrintRequestedDocumentation(std::ostream& os)
     // given stream.
     cmsys::ofstream* fout = 0;
     std::ostream* s = &os;
-    if(i->Filename.length() > 0)
+    if(!i->Filename.empty())
       {
       fout = new cmsys::ofstream(i->Filename.c_str(), std::ios::out);
       if(fout)
@@ -296,7 +298,7 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
        (strcmp(argv[i], "-h") == 0) ||
        (strcmp(argv[i], "-H") == 0))
       {
-      help.HelpType = cmDocumentation::Usage;
+      help.HelpType = cmDocumentation::Help;
       GET_OPT_ARGUMENT(help.Argument);
       help.Argument = cmSystemTools::LowerCase(help.Argument);
       // special case for single command
@@ -364,9 +366,9 @@ bool cmDocumentation::CheckOptions(int argc, const char* const* argv,
       }
     else if(strcmp(argv[i], "--help-full") == 0)
       {
+      help.HelpType = cmDocumentation::Full;
       GET_OPT_ARGUMENT(help.Filename);
-      cmSystemTools::Message("Warning: --help-full no longer supported");
-      return true;
+      this->WarnFormFromFilename(help, result);
       }
     else if(strcmp(argv[i], "--help-html") == 0)
       {
@@ -678,6 +680,12 @@ bool cmDocumentation::PrintFiles(std::ostream& os,
 }
 
 //----------------------------------------------------------------------------
+bool cmDocumentation::PrintHelpFull(std::ostream& os)
+{
+  return this->PrintFiles(os, "index");
+}
+
+//----------------------------------------------------------------------------
 bool cmDocumentation::PrintHelpOneManual(std::ostream& os)
 {
   std::string mname = this->CurrentArgument;
@@ -831,7 +839,19 @@ bool cmDocumentation::PrintHelpListVariables(std::ostream& os)
 }
 
 //----------------------------------------------------------------------------
-bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
+bool cmDocumentation::PrintUsage(std::ostream& os)
+{
+  std::map<std::string,cmDocumentationSection*>::iterator si;
+  si = this->AllSections.find("Usage");
+  if(si != this->AllSections.end())
+    {
+    this->Formatter.PrintSection(os, *si->second);
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+bool cmDocumentation::PrintHelp(std::ostream& os)
 {
   std::map<std::string,cmDocumentationSection*>::iterator si;
   si = this->AllSections.find("Usage");
@@ -858,7 +878,7 @@ bool cmDocumentation::PrintDocumentationUsage(std::ostream& os)
 //----------------------------------------------------------------------------
 const char* cmDocumentation::GetNameString() const
 {
-  if(this->NameString.length() > 0)
+  if(!this->NameString.empty())
     {
     return this->NameString.c_str();
     }

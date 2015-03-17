@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cm_zlib_h
-#define __cm_zlib_h
+#ifndef cm_zlib_h
+#define cm_zlib_h
 
 /* Use the zlib library configured for CMake.  */
 #include "cmThirdParty.h"

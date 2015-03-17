@@ -1,11 +1,4 @@
 CMake Debug Log:
-  Boolean compatibility of property "BOOL_PROP7" for target
-  "CompatibleInterface" \(result: "FALSE"\):
-
-   \* Target "CompatibleInterface" property is implied by use.
-   \* Target "iface1" property value "FALSE" \(Agree\)
-+
-CMake Debug Log:
   Boolean compatibility of property "BOOL_PROP1" for target
   "CompatibleInterface" \(result: "TRUE"\):
 
@@ -45,6 +38,13 @@ CMake Debug Log:
    \* Target "CompatibleInterface" property not set.
    \* Target "iface1" property value "FALSE" \(Interface set\)
    \* Target "iface2" property value "FALSE" \(Agree\)
++
+CMake Debug Log:
+  Boolean compatibility of property "BOOL_PROP7" for target
+  "CompatibleInterface" \(result: "FALSE"\):
+
+   \* Target "CompatibleInterface" property is implied by use.
+   \* Target "iface1" property value "FALSE" \(Agree\)
 +
 CMake Debug Log:
   String compatibility of property "STRING_PROP1" for target

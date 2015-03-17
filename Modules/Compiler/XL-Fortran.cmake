@@ -12,6 +12,6 @@ set(CMAKE_Fortran_DEFINE_FLAG "-WF,-D")
 # -qhalt=e       = Halt on error messages (rather than just severe errors)
 set(CMAKE_Fortran_FLAGS_INIT "-qthreaded -qhalt=e")
 
-# We require updates to CMake C++ code to support preprocessing rules for Fortran.
+# xlf: 1501-214 (W) command option E reserved for future use - ignored
 set(CMAKE_Fortran_CREATE_PREPROCESSED_SOURCE)
 set(CMAKE_Fortran_CREATE_ASSEMBLY_SOURCE)

@@ -21,6 +21,7 @@
 # include "kwsys_ios_iostream.h.in"
 #endif
 
+#include <assert.h> /* assert */
 #include <string.h> /* strcmp */
 
 int testCommandLineArguments1(int argc, char* argv[])
@@ -57,12 +58,12 @@ int testCommandLineArguments1(int argc, char* argv[])
     }
   if ( p != "1" )
     {
-    kwsys_ios::cout << "Problem setting P. Value of P: " << p.c_str() << kwsys_ios::endl;
+    kwsys_ios::cout << "Problem setting P. Value of P: " << p << kwsys_ios::endl;
     res = 1;
     }
   kwsys_ios::cout << "Value of N: " << n << kwsys_ios::endl;
   kwsys_ios::cout << "Value of M: " << m << kwsys_ios::endl;
-  kwsys_ios::cout << "Value of P: " << p.c_str() << kwsys_ios::endl;
+  kwsys_ios::cout << "Value of P: " << p << kwsys_ios::endl;
   if ( m )
     {
     delete [] m;
@@ -83,6 +84,7 @@ int testCommandLineArguments1(int argc, char* argv[])
     }
   for ( cc = 0; cc < newArgc; ++ cc )
     {
+    assert(newArgv[cc]); /* Quiet Clang scan-build. */
     kwsys_ios::cout << "Unused argument[" << cc << "] = [" << newArgv[cc] << "]"
       << kwsys_ios::endl;
     if ( cc >= 9 )

@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2014 Kitware, Inc.
+  Copyright 2014-2015 Kitware, Inc.
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -31,35 +31,29 @@ public:
   void EmitShortcut(
       std::string const& id,
       cmWIXShortcut const& shortcut,
-      bool desktop);
+      std::string const& shortcutPrefix,
+      size_t shortcutIndex);
 
   void EmitRemoveFolder(std::string const& id);
 
-  void EmitStartMenuShortcutRegistryValue(
+  void EmitInstallRegistryValue(
     std::string const& registryKey,
-    std::string const& cpackComponentName);
-
-  void EmitDesktopShortcutRegistryValue(
-    std::string const& registryKey,
-    std::string const& cpackComponentName);
+    std::string const& cpackComponentName,
+    std::string const& suffix);
 
   void EmitUninstallShortcut(std::string const& packageName);
 
   std::string EmitComponentCreateFolder(
     std::string const& directoryId,
-    std::string const& guid);
+    std::string const& guid,
+    cmInstalledFile const* installedFile);
 
   std::string EmitComponentFile(
     std::string const& directoryId,
     std::string const& id,
     std::string const& filePath,
-    cmWIXPatch &patch);
-
-private:
-  void EmitInstallRegistryValue(
-    std::string const& registryKey,
-    std::string const& cpackComponentName,
-    std::string const& suffix);
+    cmWIXPatch &patch,
+    cmInstalledFile const* installedFile);
 };
 
 

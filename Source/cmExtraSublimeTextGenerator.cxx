@@ -399,7 +399,7 @@ cmExtraSublimeTextGenerator::ComputeFlagsForObject(cmSourceFile* source,
   lg->GetIncludeDirectories(includes, gtgt, language, config);
   std::string includeFlags =
     lg->GetIncludeFlags(includes, gtgt, language, true); // full include paths
-  lg->AppendFlags(flags, includeFlags.c_str());
+  lg->AppendFlags(flags, includeFlags);
   }
 
   // Append old-style preprocessor definition flags.
@@ -436,7 +436,7 @@ ComputeDefines(cmSourceFile *source, cmLocalGenerator* lg, cmTarget *target,
     }
 
   // Add preprocessor definitions for this target and configuration.
-  lg->AddCompileDefinitions(defines, target, config);
+  lg->AddCompileDefinitions(defines, target, config, language);
   lg->AppendDefines(defines, source->GetProperty("COMPILE_DEFINITIONS"));
   {
   std::string defPropName = "COMPILE_DEFINITIONS_";

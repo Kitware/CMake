@@ -36,10 +36,16 @@ public:
   virtual bool GetBreakInvoked()
   { return this->BreakInvoked; }
 
+  virtual void SetContinueInvoked(bool val)
+  { this->ContinueInvoked = val; }
+  virtual bool GetContinueInvoked()
+  { return this->ContinueInvoked; }
+
   virtual void Clear()
     {
     this->ReturnInvoked = false;
     this->BreakInvoked = false;
+    this->ContinueInvoked = false;
     this->NestedError = false;
     }
   virtual void SetNestedError(bool val) { this->NestedError = val; }
@@ -49,6 +55,7 @@ public:
 protected:
   bool ReturnInvoked;
   bool BreakInvoked;
+  bool ContinueInvoked;
   bool NestedError;
 };
 

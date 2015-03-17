@@ -9,6 +9,7 @@
 # Check that the <symbol> is available after including given header
 # <files> and store the result in a <variable>.  Specify the list of
 # files in one argument as a semicolon-separated list.
+# <variable> will be created as an internal cache variable.
 #
 # If the header files define the symbol as a macro it is considered
 # available and assumed to work.  If the header files declare the symbol
@@ -50,7 +51,7 @@ macro(CHECK_SYMBOL_EXISTS SYMBOL FILES VARIABLE)
 endmacro()
 
 macro(_CHECK_SYMBOL_EXISTS SOURCEFILE SYMBOL FILES VARIABLE)
-  if("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  if(NOT DEFINED "${VARIABLE}" OR "x${${VARIABLE}}" STREQUAL "x${VARIABLE}")
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "/* */\n")
     set(MACRO_CHECK_SYMBOL_EXISTS_FLAGS ${CMAKE_REQUIRED_FLAGS})
     if(CMAKE_REQUIRED_LIBRARIES)

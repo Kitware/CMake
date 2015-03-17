@@ -821,10 +821,12 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
   command.push_back("make_directory");
   command.push_back(outDir);
   std::vector<std::string> no_output;
+  std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   cmCustomCommandLines commands;
   commands.push_back(command);
-  pcc.reset(new cmCustomCommand(0, no_output, no_depends, commands, 0, 0));
+  pcc.reset(new cmCustomCommand(0, no_output, no_byproducts,
+                                no_depends, commands, 0, 0));
   pcc->SetEscapeOldStyle(false);
   pcc->SetEscapeAllowMakeVars(true);
   return pcc;
@@ -1101,7 +1103,8 @@ void cmLocalVisualStudio6Generator
       }
     }
   // find link libraries
-  const cmTarget::LinkLibraryVectorType& libs = target.GetLinkLibraries();
+  const cmTarget::LinkLibraryVectorType& libs =
+    target.GetLinkLibrariesForVS6();
   cmTarget::LinkLibraryVectorType::const_iterator j;
   for(j = libs.begin(); j != libs.end(); ++j)
     {
@@ -1318,7 +1321,7 @@ void cmLocalVisualStudio6Generator
     int major;
     int minor;
     target.GetTargetVersion(major, minor);
-    cmOStringStream targetVersionStream;
+    std::ostringstream targetVersionStream;
     targetVersionStream << "/version:" << major << "." << minor;
     targetVersionFlag = targetVersionStream.str();
     }
@@ -1698,15 +1701,15 @@ void cmLocalVisualStudio6Generator
       = this->Makefile->GetDefinition("CMAKE_DEBUG_POSTFIX");
     cmSystemTools::ReplaceString(line, "DEBUG_POSTFIX",
                                  debugPostfix?debugPostfix:"");
-    // store flags for each configuration
-    std::string flags = " ";
-    std::string flagsRelease = " ";
-    std::string flagsMinSizeRel = " ";
-    std::string flagsDebug = " ";
-    std::string flagsRelWithDebInfo = " ";
     if(target.GetType() >= cmTarget::EXECUTABLE &&
        target.GetType() <= cmTarget::OBJECT_LIBRARY)
       {
+      // store flags for each configuration
+      std::string flags = " ";
+      std::string flagsRelease = " ";
+      std::string flagsMinSizeRel = " ";
+      std::string flagsDebug = " ";
+      std::string flagsRelWithDebInfo = " ";
       std::vector<std::string> configs;
       target.GetMakefile()->GetConfigurations(configs);
       std::vector<std::string>::const_iterator it = configs.begin();
@@ -1757,72 +1760,77 @@ void cmLocalVisualStudio6Generator
                               "MinSizeRel");
       this->AddCompileOptions(flagsRelWithDebInfo, &target, linkLanguage,
                               "RelWithDebInfo");
+
+      // if _UNICODE and _SBCS are not found, then add -D_MBCS
+      std::string defs = this->Makefile->GetDefineFlags();
+      if(flags.find("D_UNICODE") == flags.npos &&
+         defs.find("D_UNICODE") == flags.npos &&
+         flags.find("D_SBCS") == flags.npos &&
+         defs.find("D_SBCS") == flags.npos)
+        {
+        flags += " /D \"_MBCS\"";
+        }
+
+      // Add per-target and per-configuration preprocessor definitions.
+      std::set<std::string> definesSet;
+      std::set<std::string> debugDefinesSet;
+      std::set<std::string> releaseDefinesSet;
+      std::set<std::string> minsizeDefinesSet;
+      std::set<std::string> debugrelDefinesSet;
+
+      this->AddCompileDefinitions(definesSet, &target, "", linkLanguage);
+      this->AddCompileDefinitions(debugDefinesSet, &target,
+                                  "DEBUG", linkLanguage);
+      this->AddCompileDefinitions(releaseDefinesSet, &target,
+                                  "RELEASE", linkLanguage);
+      this->AddCompileDefinitions(minsizeDefinesSet, &target,
+                                  "MINSIZEREL", linkLanguage);
+      this->AddCompileDefinitions(debugrelDefinesSet, &target,
+                                  "RELWITHDEBINFO", linkLanguage);
+
+      std::string defines = " ";
+      std::string debugDefines = " ";
+      std::string releaseDefines = " ";
+      std::string minsizeDefines = " ";
+      std::string debugrelDefines = " ";
+
+      this->JoinDefines(definesSet, defines, "");
+      this->JoinDefines(debugDefinesSet, debugDefines, "");
+      this->JoinDefines(releaseDefinesSet, releaseDefines, "");
+      this->JoinDefines(minsizeDefinesSet, minsizeDefines, "");
+      this->JoinDefines(debugrelDefinesSet, debugrelDefines, "");
+
+      flags += defines;
+      flagsDebug += debugDefines;
+      flagsRelease += releaseDefines;
+      flagsMinSizeRel += minsizeDefines;
+      flagsRelWithDebInfo += debugrelDefines;
+
+      // The template files have CXX FLAGS in them, that need to be replaced.
+      // There are not separate CXX and C template files, so we use the same
+      // variable names.   The previous code sets up flags* variables to
+      // contain the correct C or CXX flags
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL",
+                                   flagsMinSizeRel.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG",
+                                   flagsDebug.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
+                                   flagsRelWithDebInfo.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE",
+                                   flagsRelease.c_str());
+      cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
+
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZEREL",
+                                   minsizeDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_DEBUG",
+                                   debugDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELWITHDEBINFO",
+                                   debugrelDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELEASE",
+                                   releaseDefines.c_str());
+      cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS",
+                                   defines.c_str());
       }
-
-    // if _UNICODE and _SBCS are not found, then add -D_MBCS
-    std::string defs = this->Makefile->GetDefineFlags();
-    if(flags.find("D_UNICODE") == flags.npos &&
-       defs.find("D_UNICODE") == flags.npos &&
-       flags.find("D_SBCS") == flags.npos &&
-       defs.find("D_SBCS") == flags.npos)
-      {
-      flags += " /D \"_MBCS\"";
-      }
-
-    // Add per-target and per-configuration preprocessor definitions.
-    std::set<std::string> definesSet;
-    std::set<std::string> debugDefinesSet;
-    std::set<std::string> releaseDefinesSet;
-    std::set<std::string> minsizeDefinesSet;
-    std::set<std::string> debugrelDefinesSet;
-
-    this->AddCompileDefinitions(definesSet, &target, "");
-    this->AddCompileDefinitions(debugDefinesSet, &target, "DEBUG");
-    this->AddCompileDefinitions(releaseDefinesSet, &target, "RELEASE");
-    this->AddCompileDefinitions(minsizeDefinesSet, &target, "MINSIZEREL");
-    this->AddCompileDefinitions(debugrelDefinesSet, &target, "RELWITHDEBINFO");
-
-    std::string defines = " ";
-    std::string debugDefines = " ";
-    std::string releaseDefines = " ";
-    std::string minsizeDefines = " ";
-    std::string debugrelDefines = " ";
-
-    this->JoinDefines(definesSet, defines, "");
-    this->JoinDefines(debugDefinesSet, debugDefines, "");
-    this->JoinDefines(releaseDefinesSet, releaseDefines, "");
-    this->JoinDefines(minsizeDefinesSet, minsizeDefines, "");
-    this->JoinDefines(debugrelDefinesSet, debugrelDefines, "");
-
-    flags += defines;
-    flagsDebug += debugDefines;
-    flagsRelease += releaseDefines;
-    flagsMinSizeRel += minsizeDefines;
-    flagsRelWithDebInfo += debugrelDefines;
-
-    // The template files have CXX FLAGS in them, that need to be replaced.
-    // There are not separate CXX and C template files, so we use the same
-    // variable names.   The previous code sets up flags* variables to contain
-    // the correct C or CXX flags
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_MINSIZEREL",
-                                 flagsMinSizeRel.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_DEBUG",
-                                 flagsDebug.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELWITHDEBINFO",
-                                 flagsRelWithDebInfo.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS_RELEASE",
-                                 flagsRelease.c_str());
-    cmSystemTools::ReplaceString(line, "CMAKE_CXX_FLAGS", flags.c_str());
-
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_MINSIZEREL",
-                                 minsizeDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_DEBUG",
-                                 debugDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELWITHDEBINFO",
-                                 debugrelDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS_RELEASE",
-                                 releaseDefines.c_str());
-    cmSystemTools::ReplaceString(line, "COMPILE_DEFINITIONS", defines.c_str());
 
     fout << line.c_str() << std::endl;
     }
@@ -1995,7 +2003,7 @@ cmLocalVisualStudio6Generator
   if(define.find_first_of(" ") != define.npos &&
      define.find_first_of("\"$;") != define.npos)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "WARNING: The VS6 IDE does not support preprocessor definition "
       << "values with spaces and '\"', '$', or ';'.\n"
       << "CMake is dropping a preprocessor definition: " << define << "\n"

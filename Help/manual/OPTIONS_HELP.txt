@@ -11,6 +11,12 @@
  If a file is specified, the version is written into it.
  |file|
 
+``--help-full [<f>]``
+ Print all help manuals and exit.
+
+ All manuals are printed in a human-readable text format.
+ |file|
+
 ``--help-manual <man> [<f>]``
  Print one help manual and exit.
 

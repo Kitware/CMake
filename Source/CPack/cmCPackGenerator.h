@@ -29,7 +29,7 @@
 
 #define cmCPackLogger(logType, msg) \
   do { \
-    cmOStringStream cmCPackLog_msg; \
+    std::ostringstream cmCPackLog_msg; \
     cmCPackLog_msg << msg; \
     this->Logger->Log(logType, __FILE__, __LINE__,\
                       cmCPackLog_msg.str().c_str());\
@@ -47,6 +47,7 @@
 
 class cmMakefile;
 class cmCPackLog;
+class cmInstalledFile;
 
 /** \class cmCPackGenerator
  * \brief A superclass of all CPack Generators
@@ -128,6 +129,8 @@ protected:
   int InstallProject();
 
   int CleanTemporaryDirectory();
+
+  cmInstalledFile const* GetInstalledFile(std::string const& name) const;
 
   virtual const char* GetOutputExtension() { return ".cpack"; }
   virtual const char* GetOutputPostfix() { return 0; }

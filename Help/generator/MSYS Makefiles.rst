@@ -1,7 +1,11 @@
 MSYS Makefiles
 --------------
 
-Generates MSYS makefiles.
+Generates makefiles for use with MSYS ``make`` under the MSYS shell.
 
-The makefiles use /bin/sh as the shell.  They require msys to be
-installed on the machine.
+Use this generator in a MSYS shell prompt and using ``make`` as the build
+tool.  The generated makefiles use ``/bin/sh`` as the shell to launch build
+rules.  They are not compatible with a Windows command prompt.
+
+To build under a Windows command prompt, use the
+:generator:`MinGW Makefiles` generator.

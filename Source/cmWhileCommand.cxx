@@ -10,7 +10,7 @@
   See the License for more information.
 ============================================================================*/
 #include "cmWhileCommand.h"
-#include "cmIfCommand.h"
+#include "cmConditionEvaluator.h"
 
 bool cmWhileFunctionBlocker::
 IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
@@ -27,6 +27,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endwhile for this while loop then execute
     if (!this->Depth)
       {
+      cmMakefile::LoopBlockPop loopBlockPop(&mf);
+
       // Remove the function blocker for this scope or bail.
       cmsys::auto_ptr<cmFunctionBlocker>
         fb(mf.RemoveFunctionBlocker(this, lff));
@@ -34,16 +36,18 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
 
       std::string errorString;
 
-      std::vector<std::string> expandedArguments;
+      std::vector<cmExpandedCommandArgument> expandedArguments;
       mf.ExpandArguments(this->Args, expandedArguments);
       cmake::MessageType messageType;
-      bool isTrue =
-        cmIfCommand::IsTrue(expandedArguments,errorString,
-                            &mf, messageType);
+
+      cmConditionEvaluator conditionEvaluator(mf);
+
+      bool isTrue = conditionEvaluator.IsTrue(
+        expandedArguments, errorString, messageType);
 
       while (isTrue)
         {
-        if (errorString.size())
+        if (!errorString.empty())
           {
           std::string err = "had incorrect arguments: ";
           unsigned int i;
@@ -79,6 +83,10 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
             {
             return true;
             }
+          if (status.GetContinueInvoked())
+            {
+            break;
+            }
           if(cmSystemTools::GetFatalErrorOccured() )
             {
             return true;
@@ -86,9 +94,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
           }
         expandedArguments.clear();
         mf.ExpandArguments(this->Args, expandedArguments);
-        isTrue =
-          cmIfCommand::IsTrue(expandedArguments,errorString,
-                              &mf, messageType);
+        isTrue = conditionEvaluator.IsTrue(
+          expandedArguments, errorString, messageType);
         }
       return true;
       }
@@ -113,7 +120,7 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile& )
     {
     // if the endwhile has arguments, then make sure
     // they match the arguments of the matching while
-    if (lff.Arguments.size() == 0 ||
+    if (lff.Arguments.empty() ||
         lff.Arguments == this->Args)
       {
       return true;
@@ -136,6 +143,8 @@ bool cmWhileCommand
   cmWhileFunctionBlocker *f = new cmWhileFunctionBlocker();
   f->Args = args;
   this->Makefile->AddFunctionBlocker(f);
+
+  this->Makefile->PushLoopBlock();
 
   return true;
 }

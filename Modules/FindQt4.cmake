@@ -1,9 +1,9 @@
 #.rst:
 # FindQt4
-# *******
+# -------
 #
 # Finding and Using Qt4
-# =====================
+# ^^^^^^^^^^^^^^^^^^^^^
 #
 # This module can be used to find Qt4.  The most important issue is that
 # the Qt4 qmake is available via the system path.  This qmake is then
@@ -23,14 +23,14 @@
 # .. note::
 #
 #  When using :prop_tgt:`IMPORTED` targets, the qtmain.lib static library is
-#  automatically linked on Windows for :variable:`WIN32 <WIN32_EXECUTABLE>`
+#  automatically linked on Windows for :prop_tgt:`WIN32 <WIN32_EXECUTABLE>`
 #  executables. To disable that globally, set the
 #  ``QT4_NO_LINK_QTMAIN`` variable before finding Qt4. To disable that
 #  for a particular executable, set the ``QT4_NO_LINK_QTMAIN`` target
 #  property to ``TRUE`` on the executable.
 #
 # Qt Build Tools
-# ==============
+# ^^^^^^^^^^^^^^
 #
 # Qt relies on some bundled tools for code generation, such as ``moc`` for
 # meta-object code generation,``uic`` for widget layout and population,
@@ -39,7 +39,7 @@
 # are met.  See :manual:`cmake-qt(7)` for more.
 #
 # Qt Macros
-# =========
+# ^^^^^^^^^
 #
 # In some cases it can be necessary or useful to invoke the Qt build tools in a
 # more-manual way. Several macros are available to add targets for such uses.
@@ -104,19 +104,23 @@
 #   macro QT4_ADD_DBUS_INTERFACES(outfiles inputfile ... )
 #         Create the interface header and implementation files
 #         for all listed interface xml files.
-#         The basename will be automatically determined from the name of the xml file.
+#         The basename will be automatically determined from the name
+#         of the xml file.
 #
-#         The source file properties described for QT4_ADD_DBUS_INTERFACE also apply here.
+#         The source file properties described for
+#         QT4_ADD_DBUS_INTERFACE also apply here.
 #
 #
 # ::
 #
-#   macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname [basename] [classname])
+#   macro QT4_ADD_DBUS_ADAPTOR(outfiles xmlfile parentheader parentclassname
+#                              [basename] [classname])
 #         create a dbus adaptor (header and implementation file) from the xml file
 #         describing the interface, and add it to the list of sources. The adaptor
 #         forwards the calls to a parent class, defined in parentheader and named
 #         parentclassname. The name of the generated files will be
-#         <basename>adaptor.{cpp,h} where basename defaults to the basename of the xml file.
+#         <basename>adaptor.{cpp,h} where basename defaults to the basename of the
+#         xml file.
 #         If <classname> is provided, then it will be used as the classname of the
 #         adaptor itself.
 #
@@ -128,7 +132,8 @@
 #         If the optional argument interfacename is omitted, the name of the
 #         interface file is constructed from the basename of the header with
 #         the suffix .xml appended.
-#         Options may be given to qdbuscpp2xml, such as those found when executing "qdbuscpp2xml --help"
+#         Options may be given to qdbuscpp2xml, such as those found when
+#         executing "qdbuscpp2xml --help"
 #
 #
 # ::
@@ -169,11 +174,12 @@
 #         a class uses the Q_OBJECT macro, moc has to run on it. If you don't
 #         want to use QT4_WRAP_CPP() (which is reliable and mature), you can insert
 #         #include "foo.moc"
-#         in foo.cpp and then give foo.cpp as argument to QT4_AUTOMOC(). This will the
-#         scan all listed files at cmake-time for such included moc files and if it finds
-#         them cause a rule to be generated to run moc at build time on the
+#         in foo.cpp and then give foo.cpp as argument to QT4_AUTOMOC(). This will
+#         scan all listed files at cmake-time for such included moc files and if it
+#         finds them cause a rule to be generated to run moc at build time on the
 #         accompanying header file foo.h.
-#         If a source file has the SKIP_AUTOMOC property set it will be ignored by this macro.
+#         If a source file has the SKIP_AUTOMOC property set it will be ignored by
+#         this macro.
 #         If the <tgt> is specified, the INTERFACE_INCLUDE_DIRECTORIES and
 #         INTERFACE_COMPILE_DEFINITIONS from the <tgt> are passed to moc.
 #
@@ -181,20 +187,21 @@
 # ::
 #
 #  function QT4_USE_MODULES( target [link_type] modules...)
-#         This function is obsolete. Use target_link_libraries with IMPORTED targets instead.
+#         This function is obsolete. Use target_link_libraries with IMPORTED targets
+#         instead.
 #         Make <target> use the <modules> from Qt. Using a Qt module means
-#         to link to the library, add the relevant include directories for the module,
-#         and add the relevant compiler defines for using the module.
+#         to link to the library, add the relevant include directories for the
+#         module, and add the relevant compiler defines for using the module.
 #         Modules are roughly equivalent to components of Qt4, so usage would be
 #         something like:
 #          qt4_use_modules(myexe Core Gui Declarative)
-#         to use QtCore, QtGui and QtDeclarative. The optional <link_type> argument can
-#         be specified as either LINK_PUBLIC or LINK_PRIVATE to specify the same argument
-#         to the target_link_libraries call.
+#         to use QtCore, QtGui and QtDeclarative. The optional <link_type> argument
+#         can be specified as either LINK_PUBLIC or LINK_PRIVATE to specify the
+#         same argument to the target_link_libraries call.
 #
 #
 # IMPORTED Targets
-# ================
+# ^^^^^^^^^^^^^^^^
 #
 # A particular Qt library may be used by using the corresponding
 # :prop_tgt:`IMPORTED` target with the :command:`target_link_libraries`
@@ -271,7 +278,7 @@
 #  The phonon target
 #
 # Result Variables
-# ================
+# ^^^^^^^^^^^^^^^^
 #
 #   Below is a detailed list of variables that FindQt4.cmake sets.
 #
@@ -518,7 +525,8 @@ set(QT4_INSTALLED_VERSION_TOO_OLD FALSE)
 set(_QT4_QMAKE_NAMES qmake qmake4 qmake-qt4 qmake-mac)
 _qt4_find_qmake("${_QT4_QMAKE_NAMES}" QT_QMAKE_EXECUTABLE QTVERSION)
 
-if (QT_QMAKE_EXECUTABLE AND QTVERSION)
+if (QT_QMAKE_EXECUTABLE AND
+  QTVERSION VERSION_GREATER 3 AND QTVERSION VERSION_LESS 5)
 
   if (Qt5Core_FOUND)
     # Qt5CoreConfig sets QT_MOC_EXECUTABLE as a non-cache variable to the Qt 5
@@ -1137,17 +1145,17 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
     endif()
   endmacro()
 
-  _find_qt4_program(QT_MOC_EXECUTABLE Qt4::moc moc-qt4 moc moc4)
-  _find_qt4_program(QT_UIC_EXECUTABLE Qt4::uic uic-qt4 uic uic4)
+  _find_qt4_program(QT_MOC_EXECUTABLE Qt4::moc moc-qt4 moc4 moc)
+  _find_qt4_program(QT_UIC_EXECUTABLE Qt4::uic uic-qt4 uic4 uic)
   _find_qt4_program(QT_UIC3_EXECUTABLE Qt4::uic3 uic3)
   _find_qt4_program(QT_RCC_EXECUTABLE Qt4::rcc rcc)
   _find_qt4_program(QT_DBUSCPP2XML_EXECUTABLE Qt4::qdbuscpp2xml qdbuscpp2xml)
   _find_qt4_program(QT_DBUSXML2CPP_EXECUTABLE Qt4::qdbusxml2cpp qdbusxml2cpp)
-  _find_qt4_program(QT_LUPDATE_EXECUTABLE Qt4::lupdate lupdate-qt4 lupdate lupdate4)
-  _find_qt4_program(QT_LRELEASE_EXECUTABLE Qt4::lrelease lrelease-qt4 lrelease lrelease4)
+  _find_qt4_program(QT_LUPDATE_EXECUTABLE Qt4::lupdate lupdate-qt4 lupdate4 lupdate)
+  _find_qt4_program(QT_LRELEASE_EXECUTABLE Qt4::lrelease lrelease-qt4 lrelease4 lrelease)
   _find_qt4_program(QT_QCOLLECTIONGENERATOR_EXECUTABLE Qt4::qcollectiongenerator qcollectiongenerator-qt4 qcollectiongenerator)
-  _find_qt4_program(QT_DESIGNER_EXECUTABLE Qt4::designer designer-qt4 designer designer4)
-  _find_qt4_program(QT_LINGUIST_EXECUTABLE Qt4::linguist linguist-qt4 linguist linguist4)
+  _find_qt4_program(QT_DESIGNER_EXECUTABLE Qt4::designer designer-qt4 designer4 designer)
+  _find_qt4_program(QT_LINGUIST_EXECUTABLE Qt4::linguist linguist-qt4 linguist4 linguist)
 
   if (NOT TARGET Qt4::qmake)
     add_executable(Qt4::qmake IMPORTED)
@@ -1192,14 +1200,14 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   set( QT_PLUGIN_TYPES accessible bearer codecs decorations designer gfxdrivers graphicssystems iconengines imageformats inputmethods mousedrivers phonon_backend script sqldrivers )
 
   set( QT_ACCESSIBLE_PLUGINS qtaccessiblecompatwidgets qtaccessiblewidgets )
-  set( QT_BEARER_PLUGINS qcorewlanbearer qgenericbearer )
+  set( QT_BEARER_PLUGINS qcorewlanbearer qgenericbearer qnativewifibearer )
   set( QT_CODECS_PLUGINS qcncodecs qjpcodecs qkrcodecs qtwcodecs )
   set( QT_DECORATIONS_PLUGINS qdecorationdefault qdecorationwindows )
   set( QT_DESIGNER_PLUGINS arthurplugin containerextension customwidgetplugin phononwidgets qdeclarativeview qt3supportwidgets qwebview taskmenuextension worldtimeclockplugin )
   set( QT_GRAPHICSDRIVERS_PLUGINS qgfxtransformed qgfxvnc qscreenvfb )
   set( QT_GRAPHICSSYSTEMS_PLUGINS qglgraphicssystem qtracegraphicssystem )
   set( QT_ICONENGINES_PLUGINS qsvgicon )
-  set( QT_IMAGEFORMATS_PLUGINS qgif qjpeg qmng qico qsvg qtiff  )
+  set( QT_IMAGEFORMATS_PLUGINS qgif qjpeg qmng qico qsvg qtiff qtga )
   set( QT_INPUTMETHODS_PLUGINS qimsw_multi )
   set( QT_MOUSEDRIVERS_PLUGINS qwstslibmousehandler )
   if(APPLE)
@@ -1213,7 +1221,7 @@ if (QT_QMAKE_EXECUTABLE AND QTVERSION)
   set( QT_PHONON_PLUGINS ${QT_PHONON_BACKEND_PLUGINS} )
   set( QT_QT3SUPPORT_PLUGINS qtaccessiblecompatwidgets )
   set( QT_QTCORE_PLUGINS ${QT_BEARER_PLUGINS} ${QT_CODECS_PLUGINS} )
-  set( QT_QTGUI_PLUGINS qtaccessiblewidgets qgif qjpeg qmng qico qtiff ${QT_DECORATIONS_PLUGINS} ${QT_GRAPHICSDRIVERS_PLUGINS} ${QT_GRAPHICSSYSTEMS_PLUGINS} ${QT_INPUTMETHODS_PLUGINS} ${QT_MOUSEDRIVERS_PLUGINS} )
+  set( QT_QTGUI_PLUGINS qtaccessiblewidgets ${QT_IMAGEFORMATS_PLUGINS} ${QT_DECORATIONS_PLUGINS} ${QT_GRAPHICSDRIVERS_PLUGINS} ${QT_GRAPHICSSYSTEMS_PLUGINS} ${QT_INPUTMETHODS_PLUGINS} ${QT_MOUSEDRIVERS_PLUGINS} )
   set( QT_QTSCRIPT_PLUGINS ${QT_SCRIPT_PLUGINS} )
   set( QT_QTSQL_PLUGINS ${QT_SQLDRIVERS_PLUGINS} )
   set( QT_QTSVG_PLUGINS qsvg qsvgicon )
@@ -1313,7 +1321,7 @@ endif()
 
 if (NOT QT_VERSION_MAJOR EQUAL 4)
     set(VERSION_MSG "Found unsuitable Qt version \"${QTVERSION}\" from ${QT_QMAKE_EXECUTABLE}")
-    set(QT4_FOUND FALSE)
+    set(Qt4_FOUND FALSE)
     if(Qt4_FIND_REQUIRED)
        message( FATAL_ERROR "${VERSION_MSG}, this code requires Qt 4.x")
     else()

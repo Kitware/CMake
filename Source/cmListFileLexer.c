@@ -369,8 +369,8 @@ static void yy_fatal_error (yyconst char msg[] ,yyscan_t yyscanner );
         *yy_cp = '\0'; \
         yyg->yy_c_buf_p = yy_cp;
 
-#define YY_NUM_RULES 23
-#define YY_END_OF_BUFFER 24
+#define YY_NUM_RULES 24
+#define YY_END_OF_BUFFER 25
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -381,10 +381,10 @@ struct yy_trans_info
 static yyconst flex_int16_t yy_accept[77] =
     {   0,
         0,    0,    0,    0,    0,    0,    0,    0,    4,    4,
-       24,   13,   21,    1,   15,    3,   13,    5,    6,    7,
-       22,   22,   16,   18,   19,   20,   10,   11,    8,   12,
-        9,    4,   13,    0,   13,    0,   21,    0,    0,    7,
-       13,    0,   13,    0,    2,    0,   13,   16,    0,   17,
+       25,   13,   22,    1,   16,    3,   13,    5,    6,    7,
+       15,   23,   17,   19,   20,   21,   10,   11,    8,   12,
+        9,    4,   13,    0,   13,    0,   22,    0,    0,    7,
+       13,    0,   13,    0,    2,    0,   13,   17,    0,   18,
        10,    8,    4,    0,   14,    0,    0,    0,    0,   14,
         0,    0,   14,    0,    0,    0,    2,   14,    0,    0,
         0,    0,    0,    0,    0,    0
@@ -523,10 +523,10 @@ static yyconst flex_int16_t yy_chk[253] =
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static yyconst flex_int32_t yy_rule_can_match_eol[24] =
+static yyconst flex_int32_t yy_rule_can_match_eol[25] =
     {   0,
-1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0,
-    0, 0, 0, 0,     };
+1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1,
+    0, 0, 0, 0, 0,     };
 
 /* The intent behind this definition is that it'll catch
  * any uses of REJECT which flex missed.
@@ -615,7 +615,7 @@ static void cmListFileLexerDestroy(cmListFileLexer* lexer);
 
 
 
-#line 621 "cmListFileLexer.c"
+#line 628 "cmListFileLexer.c"
 
 #define INITIAL 0
 #define STRING 1
@@ -850,7 +850,7 @@ YY_DECL
 #line 91 "cmListFileLexer.in.l"
 
 
-#line 858 "cmListFileLexer.c"
+#line 865 "cmListFileLexer.c"
 
         if ( !yyg->yy_init )
                 {
@@ -1111,75 +1111,84 @@ case 15:
 YY_RULE_SETUP
 #line 215 "cmListFileLexer.in.l"
 {
+  lexer->token.type = cmListFileLexer_Token_ArgumentUnquoted;
+  cmListFileLexerSetToken(lexer, yytext, yyleng);
+  lexer->column += yyleng;
+  return 1;
+}
+case 16:
+YY_RULE_SETUP
+#line 222 "cmListFileLexer.in.l"
+{
   lexer->token.type = cmListFileLexer_Token_ArgumentQuoted;
   cmListFileLexerSetToken(lexer, "", 0);
   lexer->column += yyleng;
   BEGIN(STRING);
 }
         YY_BREAK
-case 16:
+case 17:
 YY_RULE_SETUP
-#line 222 "cmListFileLexer.in.l"
+#line 229 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
         YY_BREAK
-case 17:
-/* rule 17 can match eol */
+case 18:
+/* rule 18 can match eol */
 YY_RULE_SETUP
-#line 227 "cmListFileLexer.in.l"
+#line 234 "cmListFileLexer.in.l"
 {
   /* Continuation: text is not part of string */
   ++lexer->line;
   lexer->column = 1;
 }
         YY_BREAK
-case 18:
-/* rule 18 can match eol */
+case 19:
+/* rule 19 can match eol */
 YY_RULE_SETUP
-#line 233 "cmListFileLexer.in.l"
+#line 240 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   ++lexer->line;
   lexer->column = 1;
 }
         YY_BREAK
-case 19:
+case 20:
 YY_RULE_SETUP
-#line 239 "cmListFileLexer.in.l"
+#line 246 "cmListFileLexer.in.l"
 {
   lexer->column += yyleng;
   BEGIN(INITIAL);
   return 1;
 }
-case 20:
+case 21:
 YY_RULE_SETUP
-#line 245 "cmListFileLexer.in.l"
+#line 252 "cmListFileLexer.in.l"
 {
   cmListFileLexerAppend(lexer, yytext, yyleng);
   lexer->column += yyleng;
 }
         YY_BREAK
 case YY_STATE_EOF(STRING):
-#line 250 "cmListFileLexer.in.l"
+#line 257 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadString;
   BEGIN(INITIAL);
   return 1;
 }
-case 21:
+case 22:
 YY_RULE_SETUP
-#line 256 "cmListFileLexer.in.l"
+#line 263 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_Space;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
   lexer->column += yyleng;
   return 1;
 }
-case 22:
+case 23:
 YY_RULE_SETUP
-#line 263 "cmListFileLexer.in.l"
+#line 270 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_BadCharacter;
   cmListFileLexerSetToken(lexer, yytext, yyleng);
@@ -1188,18 +1197,18 @@ YY_RULE_SETUP
 }
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(COMMENT):
-#line 270 "cmListFileLexer.in.l"
+#line 277 "cmListFileLexer.in.l"
 {
   lexer->token.type = cmListFileLexer_Token_None;
   cmListFileLexerSetToken(lexer, 0, 0);
   return 0;
 }
-case 23:
+case 24:
 YY_RULE_SETUP
-#line 276 "cmListFileLexer.in.l"
+#line 283 "cmListFileLexer.in.l"
 ECHO;
         YY_BREAK
-#line 1220 "cmListFileLexer.c"
+#line 1238 "cmListFileLexer.c"
 
         case YY_END_OF_BUFFER:
                 {
@@ -2320,7 +2329,7 @@ void cmListFileLexer_yyfree (void * ptr , yyscan_t yyscanner)
 
 #define YYTABLES_NAME "yytables"
 
-#line 276 "cmListFileLexer.in.l"
+#line 282 "cmListFileLexer.in.l"
 
 
 

@@ -58,7 +58,7 @@ Options
  will have no effect.
 
 ``-j <jobs>, --parallel <jobs>``
- Run the tests in parallel using thegiven number of jobs.
+ Run the tests in parallel using the given number of jobs.
 
  This option tells ctest to run the tests in parallel using given
  number of jobs.  This option can also be set by setting the
@@ -111,7 +111,7 @@ Options
 ``-D <dashboard>, --dashboard <dashboard>``
  Execute dashboard test
 
- This option tells ctest to act as a Dart client and perform a
+ This option tells ctest to act as a CDash client and perform a
  dashboard test.  All tests are <Mode><Test>, where Mode can be
  Experimental, Nightly, and Continuous, and Test can be Start,
  Update, Configure, Build, Test, Coverage, and Submit.
@@ -127,14 +127,14 @@ Options
 ``-M <model>, --test-model <model>``
  Sets the model for a dashboard
 
- This option tells ctest to act as a Dart client where the TestModel
+ This option tells ctest to act as a CDash client where the TestModel
  can be Experimental, Nightly, and Continuous.  Combining -M and -T
  is similar to -D
 
 ``-T <action>, --test-action <action>``
  Sets the dashboard action to perform
 
- This option tells ctest to act as a Dart client and perform some
+ This option tells ctest to act as a CDash client and perform some
  action such as start, build, test etc.  Combining -M and -T is
  similar to -D
 
@@ -258,6 +258,9 @@ Options
 ``--build-generator``
  Specify the generator to use.
 
+``--build-generator-platform``
+ Specify the generator-specific platform.
+
 ``--build-generator-toolset``
  Specify the generator-specific toolset.
 
@@ -325,11 +328,8 @@ Options
  used to detect implicit dependencies in a test suite.
 
 ``--submit-index``
- Submit individual dashboard tests with specific index
-
- This option allows performing the same CTest action (such as test)
- multiple times and submit all stages to the same dashboard (Dart2
- required).  Each execution requires different index.
+ Legacy option for old Dart2 dashboard server feature.
+ Do not use.
 
 ``--timeout <seconds>``
  Set a global timeout on all tests.
@@ -364,6 +364,628 @@ Options
  all labels associated with the test set.
 
 .. include:: OPTIONS_HELP.txt
+
+Dashboard Client
+================
+
+CTest can operate as a client for the `CDash`_ software quality dashboard
+application.  As a dashboard client, CTest performs a sequence of steps
+to configure, build, and test software, and then submits the results to
+a `CDash`_ server.
+
+.. _`CDash`: http://cdash.org/
+
+Dashboard Client Steps
+----------------------
+
+CTest defines an ordered list of testing steps of which some or all may
+be run as a dashboard client:
+
+``Start``
+  Start a new dashboard submission to be composed of results recorded
+  by the following steps.
+  See the `CTest Start Step`_ section below.
+
+``Update``
+  Update the source tree from its version control repository.
+  Record the old and new versions and the list of updated source files.
+  See the `CTest Update Step`_ section below.
+
+``Configure``
+  Configure the software by running a command in the build tree.
+  Record the configuration output log.
+  See the `CTest Configure Step`_ section below.
+
+``Build``
+  Build the software by running a command in the build tree.
+  Record the build output log and detect warnings and errors.
+  See the `CTest Build Step`_ section below.
+
+``Test``
+  Test the software by loading a ``CTestTestfile.cmake``
+  from the build tree and executing the defined tests.
+  Record the output and result of each test.
+  See the `CTest Test Step`_ section below.
+
+``Coverage``
+  Compute coverage of the source code by running a coverage
+  analysis tool and recording its output.
+  See the `CTest Coverage Step`_ section below.
+
+``MemCheck``
+  Run the software test suite through a memory check tool.
+  Record the test output, results, and issues reported by the tool.
+  See the `CTest MemCheck Step`_ section below.
+
+``Submit``
+  Submit results recorded from other testing steps to the
+  software quality dashboard server.
+  See the `CTest Submit Step`_ section below.
+
+Dashboard Client Modes
+----------------------
+
+CTest defines three modes of operation as a dashboard client:
+
+``Nightly``
+  This mode is intended to be invoked once per day, typically at night.
+  It enables the ``Start``, ``Update``, ``Configure``, ``Build``, ``Test``,
+  ``Coverage``, and ``Submit`` steps by default.  Selected steps run even
+  if the ``Update`` step reports no changes to the source tree.
+
+``Continuous``
+  This mode is intended to be invoked repeatedly throughout the day.
+  It enables the ``Start``, ``Update``, ``Configure``, ``Build``, ``Test``,
+  ``Coverage``, and ``Submit`` steps by default, but exits after the
+  ``Update`` step if it reports no changes to the source tree.
+
+``Experimental``
+  This mode is intended to be invoked by a developer to test local changes.
+  It enables the ``Start``, ``Configure``, ``Build``, ``Test``, ``Coverage``,
+  and ``Submit`` steps by default.
+
+Dashboard Client via CTest Command-Line
+---------------------------------------
+
+CTest can perform testing on an already-generated build tree.
+Run the ``ctest`` command with the current working directory set
+to the build tree and use one of these signatures::
+
+  ctest -D <mode>[<step>]
+  ctest -M <mode> [ -T <step> ]...
+
+The ``<mode>`` must be one of the above `Dashboard Client Modes`_,
+and each ``<step>`` must be one of the above `Dashboard Client Steps`_.
+
+CTest reads the `Dashboard Client Configuration`_ settings from
+a file in the build tree called either ``CTestConfiguration.ini``
+or ``DartConfiguration.tcl`` (the names are historical).  The format
+of the file is::
+
+  # Lines starting in '#' are comments.
+  # Other non-blank lines are key-value pairs.
+  <setting>: <value>
+
+where ``<setting>`` is the setting name and ``<value>`` is the
+setting value.
+
+In build trees generated by CMake, this configuration file is
+generated by the :module:`CTest` module if included by the project.
+The module uses variables to obtain a value for each setting
+as documented with the settings below.
+
+.. _`CTest Script`:
+
+Dashboard Client via CTest Script
+---------------------------------
+
+CTest can perform testing driven by a :manual:`cmake-language(7)`
+script that creates and maintains the source and build tree as
+well as performing the testing steps.  Run the ``ctest`` command
+with the current working directory set outside of any build tree
+and use one of these signatures::
+
+  ctest -S <script>
+  ctest -SP <script>
+
+The ``<script>`` file must call :ref:`CTest Commands` commands
+to run testing steps explicitly as documented below.  The commands
+obtain `Dashboard Client Configuration`_ settings from their
+arguments or from variables set in the script.
+
+Dashboard Client Configuration
+==============================
+
+The `Dashboard Client Steps`_ may be configured by named
+settings as documented in the following sections.
+
+.. _`CTest Start Step`:
+
+CTest Start Step
+----------------
+
+Start a new dashboard submission to be composed of results recorded
+by the following steps.
+
+In a `CTest Script`_, the :command:`ctest_start` command runs this step.
+Arguments to the command may specify some of the step settings.
+The command first runs the command-line specified by the
+``CTEST_CHECKOUT_COMMAND`` variable, if set, to initialize the source
+directory.
+
+Configuration settings include:
+
+``BuildDirectory``
+  The full path to the project build tree.
+
+  * `CTest Script`_ variable: :variable:`CTEST_BINARY_DIRECTORY`
+  * :module:`CTest` module variable: :variable:`PROJECT_BINARY_DIR`
+
+``SourceDirectory``
+  The full path to the project source tree.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SOURCE_DIRECTORY`
+  * :module:`CTest` module variable: :variable:`PROJECT_SOURCE_DIR`
+
+.. _`CTest Update Step`:
+
+CTest Update Step
+-----------------
+
+In a `CTest Script`_, the :command:`ctest_update` command runs this step.
+Arguments to the command may specify some of the step settings.
+
+Configuration settings to specify the version control tool include:
+
+``BZRCommand``
+  ``bzr`` command-line tool to use if source tree is managed by Bazaar.
+
+  * `CTest Script`_ variable: :variable:`CTEST_BZR_COMMAND`
+  * :module:`CTest` module variable: none
+
+``BZRUpdateOptions``
+  Command-line options to the ``BZRCommand`` when updating the source.
+
+  * `CTest Script`_ variable: :variable:`CTEST_BZR_UPDATE_OPTIONS`
+  * :module:`CTest` module variable: none
+
+``CVSCommand``
+  ``cvs`` command-line tool to use if source tree is managed by CVS.
+
+  * `CTest Script`_ variable: :variable:`CTEST_CVS_COMMAND`
+  * :module:`CTest` module variable: ``CVSCOMMAND``
+
+``CVSUpdateOptions``
+  Command-line options to the ``CVSCommand`` when updating the source.
+
+  * `CTest Script`_ variable: :variable:`CTEST_CVS_UPDATE_OPTIONS`
+  * :module:`CTest` module variable: ``CVS_UPDATE_OPTIONS``
+
+``GITCommand``
+  ``git`` command-line tool to use if source tree is managed by Git.
+
+  * `CTest Script`_ variable: :variable:`CTEST_GIT_COMMAND`
+  * :module:`CTest` module variable: ``GITCOMMAND``
+
+``GITUpdateCustom``
+  Specify a semicolon-separated list of custom command lines to run
+  in the source tree (Git work tree) to update it instead of running
+  the ``GITCommand``.
+
+  * `CTest Script`_ variable: :variable:`CTEST_GIT_UPDATE_CUSTOM`
+  * :module:`CTest` module variable: ``CTEST_GIT_UPDATE_CUSTOM``
+
+``GITUpdateOptions``
+  Command-line options to the ``GITCommand`` when updating the source.
+
+  * `CTest Script`_ variable: :variable:`CTEST_GIT_UPDATE_OPTIONS`
+  * :module:`CTest` module variable: ``GIT_UPDATE_OPTIONS``
+
+``HGCommand``
+  ``hg`` command-line tool to use if source tree is managed by Mercurial.
+
+  * `CTest Script`_ variable: :variable:`CTEST_HG_COMMAND`
+  * :module:`CTest` module variable: none
+
+``HGUpdateOptions``
+  Command-line options to the ``HGCommand`` when updating the source.
+
+  * `CTest Script`_ variable: :variable:`CTEST_HG_UPDATE_OPTIONS`
+  * :module:`CTest` module variable: none
+
+``P4Client``
+  Value of the ``-c`` option to the ``P4Command``.
+
+  * `CTest Script`_ variable: :variable:`CTEST_P4_CLIENT`
+  * :module:`CTest` module variable: ``CTEST_P4_CLIENT``
+
+``P4Command``
+  ``p4`` command-line tool to use if source tree is managed by Perforce.
+
+  * `CTest Script`_ variable: :variable:`CTEST_P4_COMMAND`
+  * :module:`CTest` module variable: ``P4COMMAND``
+
+``P4Options``
+  Command-line options to the ``P4Command`` for all invocations.
+
+  * `CTest Script`_ variable: :variable:`CTEST_P4_OPTIONS`
+  * :module:`CTest` module variable: ``CTEST_P4_OPTIONS``
+
+``P4UpdateCustom``
+  Specify a semicolon-separated list of custom command lines to run
+  in the source tree (Perforce tree) to update it instead of running
+  the ``P4Command``.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``CTEST_P4_UPDATE_CUSTOM``
+
+``P4UpdateOptions``
+  Command-line options to the ``P4Command`` when updating the source.
+
+  * `CTest Script`_ variable: :variable:`CTEST_P4_UPDATE_OPTIONS`
+  * :module:`CTest` module variable: ``CTEST_P4_UPDATE_OPTIONS``
+
+``SVNCommand``
+  ``svn`` command-line tool to use if source tree is managed by Subversion.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SVN_COMMAND`
+  * :module:`CTest` module variable: ``SVNCOMMAND``
+
+``SVNOptions``
+  Command-line options to the ``SVNCommand`` for all invocations.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SVN_OPTIONS`
+  * :module:`CTest` module variable: ``CTEST_SVN_OPTIONS``
+
+``SVNUpdateOptions``
+  Command-line options to the ``SVNCommand`` when updating the source.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SVN_UPDATE_OPTIONS`
+  * :module:`CTest` module variable: ``SVN_UPDATE_OPTIONS``
+
+``UpdateCommand``
+  Specify the version-control command-line tool to use without
+  detecting the VCS that manages the source tree.
+
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_COMMAND`
+  * :module:`CTest` module variable: ``<VCS>COMMAND``
+    when ``UPDATE_TYPE`` is ``<vcs>``, else ``UPDATE_COMMAND``
+
+``UpdateOptions``
+  Command-line options to the ``UpdateCommand``.
+
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_OPTIONS`
+  * :module:`CTest` module variable: ``<VCS>_UPDATE_OPTIONS``
+    when ``UPDATE_TYPE`` is ``<vcs>``, else ``UPDATE_OPTIONS``
+
+``UpdateType``
+  Specify the version-control system that manages the source
+  tree if it cannot be detected automatically.
+  The value may be ``bzr``, ``cvs``, ``git``, ``hg``,
+  ``p4``, or ``svn``.
+
+  * `CTest Script`_ variable: none, detected from source tree
+  * :module:`CTest` module variable: ``UPDATE_TYPE`` if set,
+    else ``CTEST_UPDATE_TYPE``
+
+``UpdateVersionOnly``
+  Specify that you want the version control update command to only
+  discover the current version that is checked out, and not to update
+  to a different version.
+
+  * `CTest Script`_ variable: :variable:`CTEST_UPDATE_VERSION_ONLY`
+
+
+
+Additional configuration settings include:
+
+``NightlyStartTime``
+  In the ``Nightly`` dashboard mode, specify the "nightly start time".
+  With centralized version control systems (``cvs`` and ``svn``),
+  the ``Update`` step checks out the version of the software as of
+  this time so that multiple clients choose a common version to test.
+  This is not well-defined in distributed version-control systems so
+  the setting is ignored.
+
+  * `CTest Script`_ variable: :variable:`CTEST_NIGHTLY_START_TIME`
+  * :module:`CTest` module variable: ``NIGHTLY_START_TIME`` if set,
+    else ``CTEST_NIGHTLY_START_TIME``
+
+.. _`CTest Configure Step`:
+
+CTest Configure Step
+--------------------
+
+In a `CTest Script`_, the :command:`ctest_configure` command runs this step.
+Arguments to the command may specify some of the step settings.
+
+Configuration settings include:
+
+``ConfigureCommand``
+  Command-line to launch the software configuration process.
+  It will be executed in the location specified by the
+  ``BuildDirectory`` setting.
+
+  * `CTest Script`_ variable: :variable:`CTEST_CONFIGURE_COMMAND`
+  * :module:`CTest` module variable: :variable:`CMAKE_COMMAND`
+    followed by :variable:`PROJECT_SOURCE_DIR`
+
+.. _`CTest Build Step`:
+
+CTest Build Step
+----------------
+
+In a `CTest Script`_, the :command:`ctest_build` command runs this step.
+Arguments to the command may specify some of the step settings.
+
+Configuration settings include:
+
+``DefaultCTestConfigurationType``
+  When the build system to be launched allows build-time selection
+  of the configuration (e.g. ``Debug``, ``Release``), this specifies
+  the default configuration to be built when no ``-C`` option is
+  given to the ``ctest`` command.  The value will be substituted into
+  the value of ``MakeCommand`` to replace the literal string
+  ``${CTEST_CONFIGURATION_TYPE}`` if it appears.
+
+  * `CTest Script`_ variable: :variable:`CTEST_CONFIGURATION_TYPE`
+  * :module:`CTest` module variable: ``DEFAULT_CTEST_CONFIGURATION_TYPE``,
+    initialized by the ``CMAKE_CONFIG_TYPE`` environment variable
+
+``MakeCommand``
+  Command-line to launch the software build process.
+  It will be executed in the location specified by the
+  ``BuildDirectory`` setting.
+
+  * `CTest Script`_ variable: :variable:`CTEST_BUILD_COMMAND`
+  * :module:`CTest` module variable: ``MAKECOMMAND``,
+    initialized by the :command:`build_command` command
+
+``UseLaunchers``
+  For build trees generated by CMake using a Makefile generator
+  or the :generator:`Ninja` generator, specify whether the
+  ``CTEST_USE_LAUNCHERS`` feature is enabled by the
+  :module:`CTestUseLaunchers` module (also included by the
+  :module:`CTest` module).  When enabled, the generated build
+  system wraps each invocation of the compiler, linker, or
+  custom command line with a "launcher" that communicates
+  with CTest via environment variables and files to report
+  granular build warning and error information.  Otherwise,
+  CTest must "scrape" the build output log for diagnostics.
+
+  * `CTest Script`_ variable: :variable:`CTEST_USE_LAUNCHERS`
+  * :module:`CTest` module variable: ``CTEST_USE_LAUNCHERS``
+
+.. _`CTest Test Step`:
+
+CTest Test Step
+---------------
+
+In a `CTest Script`_, the :command:`ctest_test` command runs this step.
+Arguments to the command may specify some of the step settings.
+
+Configuration settings include:
+
+``TimeOut``
+  The default timeout for each test if not specified by the
+  :prop_test:`TIMEOUT` test property.
+
+  * `CTest Script`_ variable: :variable:`CTEST_TEST_TIMEOUT`
+  * :module:`CTest` module variable: ``DART_TESTING_TIMEOUT``
+
+.. _`CTest Coverage Step`:
+
+CTest Coverage Step
+-------------------
+
+In a `CTest Script`_, the :command:`ctest_coverage` command runs this step.
+Arguments to the command may specify some of the step settings.
+
+Configuration settings include:
+
+``CoverageCommand``
+  Command-line tool to perform software coverage analysis.
+  It will be executed in the location specified by the
+  ``BuildDirectory`` setting.
+
+  * `CTest Script`_ variable: :variable:`CTEST_COVERAGE_COMMAND`
+  * :module:`CTest` module variable: ``COVERAGE_COMMAND``
+
+``CoverageExtraFlags``
+  Specify command-line options to the ``CoverageCommand`` tool.
+
+  * `CTest Script`_ variable: :variable:`CTEST_COVERAGE_EXTRA_FLAGS`
+  * :module:`CTest` module variable: ``COVERAGE_EXTRA_FLAGS``
+
+.. _`CTest MemCheck Step`:
+
+CTest MemCheck Step
+-------------------
+
+In a `CTest Script`_, the :command:`ctest_memcheck` command runs this step.
+Arguments to the command may specify some of the step settings.
+
+Configuration settings include:
+
+``MemoryCheckCommand``
+  Command-line tool to perform dynamic analysis.  Test command lines
+  will be launched through this tool.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_COMMAND`
+  * :module:`CTest` module variable: ``MEMORYCHECK_COMMAND``
+
+``MemoryCheckCommandOptions``
+  Specify command-line options to the ``MemoryCheckCommand`` tool.
+  They will be placed prior to the test command line.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_COMMAND_OPTIONS`
+  * :module:`CTest` module variable: ``MEMORYCHECK_COMMAND_OPTIONS``
+
+``MemoryCheckType``
+  Specify the type of memory checking to perform.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_TYPE`
+  * :module:`CTest` module variable: ``MEMORYCHECK_TYPE``
+
+``MemoryCheckSanitizerOptions``
+  Specify options to sanitizers when running with a sanitize-enabled build.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_SANITIZER_OPTIONS`
+  * :module:`CTest` module variable: ``MEMORYCHECK_SANITIZER_OPTIONS``
+
+``MemoryCheckSuppressionFile``
+  Specify a file containing suppression rules for the
+  ``MemoryCheckCommand`` tool.  It will be passed with options
+  appropriate to the tool.
+
+  * `CTest Script`_ variable: :variable:`CTEST_MEMORYCHECK_SUPPRESSIONS_FILE`
+  * :module:`CTest` module variable: ``MEMORYCHECK_SUPPRESSIONS_FILE``
+
+Additional configuration settings include:
+
+``BoundsCheckerCommand``
+  Specify a ``MemoryCheckCommand`` that is known to be command-line
+  compatible with Bounds Checker.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: none
+
+``PurifyCommand``
+  Specify a ``MemoryCheckCommand`` that is known to be command-line
+  compatible with Purify.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``PURIFYCOMMAND``
+
+``ValgrindCommand``
+  Specify a ``MemoryCheckCommand`` that is known to be command-line
+  compatible with Valgrind.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``VALGRIND_COMMAND``
+
+``ValgrindCommandOptions``
+  Specify command-line options to the ``ValgrindCommand`` tool.
+  They will be placed prior to the test command line.
+
+  * `CTest Script`_ variable: none
+  * :module:`CTest` module variable: ``VALGRIND_COMMAND_OPTIONS``
+
+.. _`CTest Submit Step`:
+
+CTest Submit Step
+-----------------
+
+In a `CTest Script`_, the :command:`ctest_submit` command runs this step.
+Arguments to the command may specify some of the step settings.
+
+Configuration settings include:
+
+``BuildName``
+  Describe the dashboard client platform with a short string.
+  (Operating system, compiler, etc.)
+
+  * `CTest Script`_ variable: :variable:`CTEST_BUILD_NAME`
+  * :module:`CTest` module variable: ``BUILDNAME``
+
+``CDashVersion``
+  Specify the version of `CDash`_ on the server.
+
+  * `CTest Script`_ variable: none, detected from server
+  * :module:`CTest` module variable: ``CTEST_CDASH_VERSION``
+
+``CTestSubmitRetryCount``
+  Specify a number of attempts to retry submission on network failure.
+
+  * `CTest Script`_ variable: none,
+    use the :command:`ctest_submit` ``RETRY_COUNT`` option.
+  * :module:`CTest` module variable: ``CTEST_SUBMIT_RETRY_COUNT``
+
+``CTestSubmitRetryDelay``
+  Specify a delay before retrying submission on network failure.
+
+  * `CTest Script`_ variable: none,
+    use the :command:`ctest_submit` ``RETRY_DELAY`` option.
+  * :module:`CTest` module variable: ``CTEST_SUBMIT_RETRY_DELAY``
+
+``CurlOptions``
+  Specify a semicolon-separated list of options to control the
+  Curl library that CTest uses internally to connect to the
+  server.  Possible options are ``CURLOPT_SSL_VERIFYPEER_OFF``
+  and ``CURLOPT_SSL_VERIFYHOST_OFF``.
+
+  * `CTest Script`_ variable: :variable:`CTEST_CURL_OPTIONS`
+  * :module:`CTest` module variable: ``CTEST_CURL_OPTIONS``
+
+``DropLocation``
+  The path on the dashboard server to send the submission.
+
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_LOCATION`
+  * :module:`CTest` module variable: ``DROP_LOCATION`` if set,
+    else ``CTEST_DROP_LOCATION``
+
+``DropMethod``
+  Specify the method by which results should be submitted to the
+  dashboard server.  The value may be ``cp``, ``ftp``, ``http``,
+  ``https``, ``scp``, or ``xmlrpc`` (if CMake was built with
+  support for it).
+
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_METHOD`
+  * :module:`CTest` module variable: ``DROP_METHOD`` if set,
+    else ``CTEST_DROP_METHOD``
+
+``DropSite``
+  The dashboard server name
+  (for ``ftp``, ``http``, and ``https``, ``scp``, and ``xmlrpc``).
+
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE`
+  * :module:`CTest` module variable: ``DROP_SITE`` if set,
+    else ``CTEST_DROP_SITE``
+
+``DropSitePassword``
+  The dashboard server login password, if any
+  (for ``ftp``, ``http``, and ``https``).
+
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_PASSWORD`
+  * :module:`CTest` module variable: ``DROP_SITE_PASSWORD`` if set,
+    else ``CTEST_DROP_SITE_PASWORD``
+
+``DropSiteUser``
+  The dashboard server login user name, if any
+  (for ``ftp``, ``http``, and ``https``).
+
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_USER`
+  * :module:`CTest` module variable: ``DROP_SITE_USER`` if set,
+    else ``CTEST_DROP_SITE_USER``
+
+``IsCDash``
+  Specify whether the dashboard server is `CDash`_ or an older
+  dashboard server implementation requiring ``TriggerSite``.
+
+  * `CTest Script`_ variable: :variable:`CTEST_DROP_SITE_CDASH`
+  * :module:`CTest` module variable: ``CTEST_DROP_SITE_CDASH``
+
+``ScpCommand``
+  ``scp`` command-line tool to use when ``DropMethod`` is ``scp``.
+
+  * `CTest Script`_ variable: :variable:`CTEST_SCP_COMMAND`
+  * :module:`CTest` module variable: ``SCPCOMMAND``
+
+``Site``
+  Describe the dashboard client host site with a short string.
+  (Hostname, domain, etc.)
+
+  * `CTest Script`_ variable: :variable:`CTEST_SITE`
+  * :module:`CTest` module variable: ``SITE``,
+    initialized by the :command:`site_name` command
+
+``TriggerSite``
+  Legacy option to support older dashboard server implementations.
+  Not used when ``IsCDash`` is true.
+
+  * `CTest Script`_ variable: :variable:`CTEST_TRIGGER_SITE`
+  * :module:`CTest` module variable: ``TRIGGER_SITE`` if set,
+    else ``CTEST_TRIGGER_SITE``
 
 See Also
 ========

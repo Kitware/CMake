@@ -37,7 +37,8 @@
 #
 # ::
 #
-#   FIXUP_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
+#   FIXUP_QT4_EXECUTABLE(<executable>
+#     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf>])
 #
 # Copies Qt plugins, writes a Qt configuration file (if needed) and
 # fixes up a Qt4 executable using BundleUtilities so it is standalone
@@ -63,7 +64,8 @@
 #
 # ::
 #
-#   INSTALL_QT4_PLUGIN_PATH(plugin executable copy installed_plugin_path_var <plugins_dir> <component> <configurations>)
+#   INSTALL_QT4_PLUGIN_PATH(plugin executable copy installed_plugin_path_var
+#                           <plugins_dir> <component> <configurations>)
 #
 # Install (or copy) a resolved <plugin> to the default plugins directory
 # (or <plugins_dir>) relative to <executable> and store the result in
@@ -77,7 +79,8 @@
 #
 # ::
 #
-#   INSTALL_QT4_PLUGIN(plugin executable copy installed_plugin_path_var <plugins_dir> <component>)
+#   INSTALL_QT4_PLUGIN(plugin executable copy installed_plugin_path_var
+#                      <plugins_dir> <component>)
 #
 # Install (or copy) an unresolved <plugin> to the default plugins
 # directory (or <plugins_dir>) relative to <executable> and store the
@@ -86,7 +89,8 @@
 #
 # ::
 #
-#   INSTALL_QT4_EXECUTABLE(<executable> [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
+#   INSTALL_QT4_EXECUTABLE(<executable>
+#     [<qtplugins> <libs> <dirs> <plugins_dir> <request_qt_conf> <component>])
 #
 # Installs Qt plugins, writes a Qt configuration file (if needed) and
 # fixes up a Qt4 executable using BundleUtilities so it is standalone
@@ -122,7 +126,10 @@ function(write_qt4_conf qt_conf_dir qt_conf_contents)
 endfunction()
 
 function(resolve_qt4_paths paths_var)
-        set(executable_path ${ARGV1})
+        unset(executable_path)
+        if(ARGC GREATER 1)
+                set(executable_path ${ARGV1})
+        endif()
 
         set(paths_resolved)
         foreach(path ${${paths_var}})
@@ -140,11 +147,26 @@ function(resolve_qt4_paths paths_var)
 endfunction()
 
 function(fixup_qt4_executable executable)
-        set(qtplugins ${ARGV1})
-        set(libs ${ARGV2})
-        set(dirs ${ARGV3})
-        set(plugins_dir ${ARGV4})
-        set(request_qt_conf ${ARGV5})
+        unset(qtplugins)
+        if(ARGC GREATER 1)
+                set(qtplugins ${ARGV1})
+        endif()
+        unset(libs)
+        if(ARGC GREATER 2)
+                set(libs ${ARGV2})
+        endif()
+        unset(dirs)
+        if(ARGC GREATER 3)
+                set(dirs ${ARGV3})
+        endif()
+        unset(plugins_dir)
+        if(ARGC GREATER 4)
+                set(plugins_dir ${ARGV4})
+        endif()
+        unset(request_qt_conf)
+        if(ARGC GREATER 5)
+                set(request_qt_conf ${ARGV5})
+        endif()
 
         message(STATUS "fixup_qt4_executable")
         message(STATUS "  executable='${executable}'")
@@ -165,7 +187,7 @@ function(fixup_qt4_executable executable)
                 set(qt_conf_dir "${executable}/Contents/Resources")
                 set(executable_path "${executable}")
                 set(write_qt_conf TRUE)
-                if(NOT plugins_dir)
+                if(NOT DEFINED plugins_dir)
                         set(plugins_dir "${DeployQt4_apple_plugins_dir}")
                 endif()
         else()
@@ -200,9 +222,19 @@ function(fixup_qt4_executable executable)
 endfunction()
 
 function(install_qt4_plugin_path plugin executable copy installed_plugin_path_var)
-        set(plugins_dir ${ARGV4})
-        set(component ${ARGV5})
-        set(configurations ${ARGV6})
+        unset(plugins_dir)
+        if(ARGC GREATER 4)
+                set(plugins_dir ${ARGV4})
+        endif()
+        unset(component)
+        if(ARGC GREATER 5)
+                set(component ${ARGV5})
+        endif()
+        unset(configurations)
+        if(ARGC GREATER 6)
+                set(configurations ${ARGV6})
+        endif()
+
         if(EXISTS "${plugin}")
                 if(APPLE)
                         if(NOT plugins_dir)
@@ -249,8 +281,15 @@ function(install_qt4_plugin_path plugin executable copy installed_plugin_path_va
 endfunction()
 
 function(install_qt4_plugin plugin executable copy installed_plugin_path_var)
-        set(plugins_dir ${ARGV4})
-        set(component ${ARGV5})
+        unset(plugins_dir)
+        if(ARGC GREATER 4)
+                set(plugins_dir ${ARGV4})
+        endif()
+        unset(component)
+        if(ARGC GREATER 5)
+                set(component ${ARGV5})
+        endif()
+
         if(EXISTS "${plugin}")
                 install_qt4_plugin_path("${plugin}" "${executable}" "${copy}" "${installed_plugin_path_var}" "${plugins_dir}" "${component}")
         else()
@@ -283,12 +322,31 @@ function(install_qt4_plugin plugin executable copy installed_plugin_path_var)
 endfunction()
 
 function(install_qt4_executable executable)
-        set(qtplugins ${ARGV1})
-        set(libs ${ARGV2})
-        set(dirs ${ARGV3})
-        set(plugins_dir ${ARGV4})
-        set(request_qt_conf ${ARGV5})
-        set(component ${ARGV6})
+        unset(qtplugins)
+        if(ARGC GREATER 1)
+                set(qtplugins ${ARGV1})
+        endif()
+        unset(libs)
+        if(ARGC GREATER 2)
+                set(libs ${ARGV2})
+        endif()
+        unset(dirs)
+        if(ARGC GREATER 3)
+                set(dirs ${ARGV3})
+        endif()
+        unset(plugins_dir)
+        if(ARGC GREATER 4)
+                set(plugins_dir ${ARGV4})
+        endif()
+        unset(request_qt_conf)
+        if(ARGC GREATER 5)
+                set(request_qt_conf ${ARGV5})
+        endif()
+        unset(component)
+        if(ARGC GREATER 6)
+                set(component ${ARGV6})
+        endif()
+
         if(QT_LIBRARY_DIR)
                 list(APPEND dirs "${QT_LIBRARY_DIR}")
         endif()

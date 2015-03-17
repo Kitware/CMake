@@ -51,6 +51,17 @@
 
  See native build system documentation for allowed toolset names.
 
+``-A <platform-name>``
+ Specify platform name if supported by generator.
+
+ Some CMake generators support a platform name to be given to the
+ native build system to choose a compiler or SDK.  This is supported only on
+ specific generators::
+
+   Visual Studio >= 8
+
+ See native build system documentation for allowed platform names.
+
 ``-Wno-dev``
  Suppress developer warnings.
 

@@ -45,7 +45,7 @@ public:
 
   void SetMakefile(cmMakefile *mf) {
     this->Makefile = mf;
-    this->Makefile->GetBacktrace(this->Backtrace);
+    this->Backtrace = this->Makefile->GetBacktrace();
   }
 
 protected:

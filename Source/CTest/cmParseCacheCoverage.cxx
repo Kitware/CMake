@@ -31,7 +31,7 @@ bool cmParseCacheCoverage::LoadCoverageData(const char* d)
     {
     std::string file = dir.GetFile(i);
     if(file != "." && file != ".."
-       && !cmSystemTools::FileIsDirectory(file.c_str()))
+       && !cmSystemTools::FileIsDirectory(file))
       {
       std::string path = d;
       path += "/";
@@ -71,9 +71,9 @@ void cmParseCacheCoverage::RemoveUnCoveredFiles()
       }
     if(nothing)
       {
-      cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
+      cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
                  "No coverage found in: " << ci->first
-                 << std::endl);
+                 << std::endl, this->Coverage.Quiet);
       this->Coverage.TotalCoverage.erase(ci++);
       }
     else
@@ -163,7 +163,7 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
       }
     // if we do not have a routine yet, then it should be
     // the first argument in the vector
-    if(routine.size() == 0)
+    if(routine.empty())
       {
       routine = separateLine[0];
       // Find the full path to the file
@@ -191,7 +191,7 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
     // move to next line. We should have already warned
     // after the call to FindMumpsFile that we did not find
     // it, so don't report again to cut down on output
-    if(filepath.size() == 0)
+    if(filepath.empty())
       {
       continue;
       }
@@ -215,7 +215,19 @@ bool cmParseCacheCoverage::ReadCMCovFile(const char* file)
       {
       coverageVector.push_back(-1);
       }
-    coverageVector[linenumber] += count;
+    // Accounts for lines that were previously marked
+    // as non-executable code (-1). if the parser comes back with
+    // a non-zero count, increase the count by 1 to push the line
+    // into the executable code set in addition to the count found.
+    if(coverageVector[linenumber] == -1 &&
+        count > 0)
+      {
+        coverageVector[linenumber] += count+1;
+      }
+    else
+      {
+        coverageVector[linenumber] += count;
+      }
     }
   return true;
 }

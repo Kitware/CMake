@@ -69,8 +69,7 @@ macro (CHECK_STRUCT_HAS_MEMBER _STRUCT _MEMBER _HEADER _RESULT)
 ${_INCLUDE_FILES}
 int main()
 {
-   ${_STRUCT}* tmp;
-   tmp->${_MEMBER};
+   (void)sizeof(((${_STRUCT} *)0)->${_MEMBER});
    return 0;
 }
 ")

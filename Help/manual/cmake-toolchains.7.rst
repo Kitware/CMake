@@ -3,7 +3,7 @@
 cmake-toolchains(7)
 *******************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -97,18 +97,27 @@ Cross Compiling
 
 If :manual:`cmake(1)` is invoked with the command line parameter
 ``-DCMAKE_TOOLCHAIN_FILE=path/to/file``, the file will be loaded early to set
-values for the compilers. A typical cross-compiling toolchain has content such
+values for the compilers.
+The :variable:`CMAKE_CROSSCOMPILING` variable is set to true when CMake is
+cross-compiling.
+
+Cross Compiling for Linux
+-------------------------
+
+A typical cross-compiling toolchain for Linux has content such
 as:
 
 .. code-block:: cmake
 
   set(CMAKE_SYSTEM_NAME Linux)
+  set(CMAKE_SYSTEM_PROCESSOR arm)
 
   set(CMAKE_SYSROOT /home/devel/rasp-pi-rootfs)
   set(CMAKE_STAGING_PREFIX /home/devel/stage)
 
-  set(CMAKE_C_COMPILER /home/devel/gcc-4.7-linaro-rpi-gnueabihf/bin/arm-linux-gnueabihf-gcc)
-  set(CMAKE_CXX_COMPILER /home/devel/gcc-4.7-linaro-rpi-gnueabihf/bin/arm-linux-gnueabihf-g++)
+  set(tools /home/devel/gcc-4.7-linaro-rpi-gnueabihf)
+  set(CMAKE_C_COMPILER ${tools}/bin/arm-linux-gnueabihf-gcc)
+  set(CMAKE_CXX_COMPILER ${tools}/bin/arm-linux-gnueabihf-g++)
 
   set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
   set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
@@ -116,6 +125,9 @@ as:
   set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 The :variable:`CMAKE_SYSTEM_NAME` is the CMake-identifier of the target platform
+to build for.
+
+The :variable:`CMAKE_SYSTEM_PROCESSOR` is the CMake-identifier of the target architecture
 to build for.
 
 The :variable:`CMAKE_SYSROOT` is optional, and may be specified if a sysroot
@@ -139,13 +151,17 @@ target system prefixes, whereas executables which must be run as part of the bui
 should be found only on the host and not on the target. This is the purpose of
 the ``CMAKE_FIND_ROOT_PATH_MODE_*`` variables.
 
-Some compilers are inherently cross compilers, such as Clang and the QNX QCC
-compiler. The :variable:`CMAKE_<LANG>_COMPILER_TARGET` can be set to pass a
+Cross Compiling using Clang
+---------------------------
+
+Some compilers such as Clang are inherently cross compilers.
+The :variable:`CMAKE_<LANG>_COMPILER_TARGET` can be set to pass a
 value to those supported compilers when compiling:
 
 .. code-block:: cmake
 
   set(CMAKE_SYSTEM_NAME Linux)
+  set(CMAKE_SYSTEM_PROCESSOR arm)
 
   set(triple arm-linux-gnueabihf)
 
@@ -154,7 +170,18 @@ value to those supported compilers when compiling:
   set(CMAKE_CXX_COMPILER clang++)
   set(CMAKE_CXX_COMPILER_TARGET ${triple})
 
-Or, for QCC:
+Similarly, some compilers do not ship their own supplementary utilities
+such as linkers, but provide a way to specify the location of the external
+toolchain which will be used by the compiler driver. The
+:variable:`CMAKE_<LANG>_COMPILER_EXTERNAL_TOOLCHAIN` variable can be set in a
+toolchain file to pass the path to the compiler driver.
+
+Cross Compiling for QNX
+-----------------------
+
+As the Clang compiler the QNX QCC compile is inherently a cross compiler.
+And the :variable:`CMAKE_<LANG>_COMPILER_TARGET` can be set to pass a
+value to those supported compilers when compiling:
 
 .. code-block:: cmake
 
@@ -167,12 +194,68 @@ Or, for QCC:
   set(CMAKE_CXX_COMPILER QCC)
   set(CMAKE_CXX_COMPILER_TARGET ${arch})
 
+Cross Compiling for Windows CE
+------------------------------
 
-Similarly, some compilers do not ship their own supplementary utilities
-such as linkers, but provide a way to specify the location of the external
-toolchain which will be used by the compiler driver. The
-:variable:`CMAKE_<LANG>_COMPILER_EXTERNAL_TOOLCHAIN` variable can be set in a
-toolchain file to pass the path to the compiler driver.
+Cross compiling for Windows CE requires the corresponding SDK being
+installed on your system.  These SDKs are usually installed under
+``C:/Program Files (x86)/Windows CE Tools/SDKs``.
 
-The :variable:`CMAKE_CROSSCOMPILING` variable is set to true when CMake is
-cross-compiling.
+A toolchain file to configure a Visual Studio generator for
+Windows CE may look like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME WindowsCE)
+
+  set(CMAKE_SYSTEM_VERSION 8.0)
+  set(CMAKE_SYSTEM_PROCESSOR arm)
+
+  set(CMAKE_GENERATOR_TOOLSET CE800) # Can be omitted for 8.0
+  set(CMAKE_GENERATOR_PLATFORM SDK_AM335X_SK_WEC2013_V310)
+
+The :variable:`CMAKE_GENERATOR_PLATFORM` tells the generator which SDK to use.
+Further :variable:`CMAKE_SYSTEM_VERSION` tells the generator what version of
+Windows CE to use.  Currently version 8.0 (Windows Embedded Compact 2013) is
+supported out of the box.  Other versions may require one to set
+:variable:`CMAKE_GENERATOR_TOOLSET` to the correct value.
+
+Cross Compiling for Windows Phone
+---------------------------------
+
+A toolchain file to configure a Visual Studio generator for
+Windows Phone may look like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME WindowsPhone)
+  set(CMAKE_SYSTEM_VERSION 8.1)
+
+Cross Compiling for Windows Store
+---------------------------------
+
+A toolchain file to configure a Visual Studio generator for
+Windows Store may look like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME WindowsStore)
+  set(CMAKE_SYSTEM_VERSION 8.1)
+
+Cross Compiling using NVIDIA Nsight Tegra
+-----------------------------------------
+
+A toolchain file to configure a Visual Studio generator to
+build using NVIDIA Nsight Tegra targeting Android may look
+like this:
+
+.. code-block:: cmake
+
+  set(CMAKE_SYSTEM_NAME Android)
+
+The :variable:`CMAKE_GENERATOR_TOOLSET` may be set to select
+the Nsight Tegra "Toolchain Version" value.
+
+See the :prop_tgt:`ANDROID_API_MIN`, :prop_tgt:`ANDROID_API`
+and :prop_tgt:`ANDROID_GUI` target properties to configure
+targets within the project.

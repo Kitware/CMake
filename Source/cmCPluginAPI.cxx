@@ -353,10 +353,11 @@ void CCONV cmAddCustomCommandToTarget(void *arg, const char* target,
     }
 
   // Pass the call to the makefile instance.
+  std::vector<std::string> no_byproducts;
   std::vector<std::string> no_depends;
   const char* no_comment = 0;
   const char* no_working_dir = 0;
-  mf->AddCustomCommandToTarget(target, no_depends, commandLines,
+  mf->AddCustomCommandToTarget(target, no_byproducts, no_depends, commandLines,
                                cctype, no_comment, no_working_dir);
 }
 
@@ -437,15 +438,14 @@ void CCONV cmExpandSourceListArguments(void *arg,
                                  char ***resArgv,
                                  unsigned int startArgumentIndex)
 {
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
+  (void)arg;
+  (void)startArgumentIndex;
   std::vector<std::string> result;
-  std::vector<std::string> args2;
   int i;
   for (i = 0; i < numArgs; ++i)
     {
-    args2.push_back(args[i]);
+    result.push_back(args[i]);
     }
-  mf->ExpandSourceListArguments(args2, result, startArgumentIndex);
   int resargc = static_cast<int>(result.size());
   char **resargv = 0;
   if (resargc)
@@ -768,7 +768,7 @@ void CCONV cmSourceFileSetName(void *arg, const char* name, const char* dir,
       }
     }
 
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot find source file \"" << pathname << "\"";
   e << "\n\nTried extensions";
   for( std::vector<std::string>::const_iterator ext = sourceExts.begin();

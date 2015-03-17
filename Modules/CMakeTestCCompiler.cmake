@@ -73,6 +73,9 @@ else()
   # Try to identify the ABI and configure it into CMakeCCompiler.cmake
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerABI.cmake)
   CMAKE_DETERMINE_COMPILER_ABI(C ${CMAKE_ROOT}/Modules/CMakeCCompilerABI.c)
+  # Try to identify the compiler features
+  include(${CMAKE_ROOT}/Modules/CMakeDetermineCompileFeatures.cmake)
+  CMAKE_DETERMINE_COMPILE_FEATURES(C)
 
   # Re-configure to save learned information.
   configure_file(

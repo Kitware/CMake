@@ -14,6 +14,8 @@
 
 #include "cmCTestGlobalVC.h"
 
+#include <list>
+
 /** \class cmCTestSVN
  * \brief Interaction with subversion command-line tool
  *

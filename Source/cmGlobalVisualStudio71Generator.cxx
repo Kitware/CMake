@@ -118,7 +118,7 @@ void cmGlobalVisualStudio71Generator
   fout << "\tGlobalSection(" << this->ProjectConfigurationSectionName
        << ") = postSolution\n";
   // Write out the configurations for all the targets in the project
-  this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
+  this->WriteTargetConfigurations(fout, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
   if (useFolderProperty)

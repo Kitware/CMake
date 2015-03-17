@@ -12,6 +12,7 @@
 #include "cmInstallFilesGenerator.h"
 
 #include "cmGeneratorExpression.h"
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
@@ -22,9 +23,10 @@ cmInstallFilesGenerator
                           const char* file_permissions,
                           std::vector<std::string> const& configurations,
                           const char* component,
+                          MessageLevel message,
                           const char* rename,
                           bool optional):
-  cmInstallGenerator(dest, configurations, component),
+  cmInstallGenerator(dest, configurations, component, message),
   Makefile(mf),
   Files(files), Programs(programs),
   FilePermissions(file_permissions),
@@ -55,6 +57,7 @@ void cmInstallFilesGenerator::AddFilesInstallRule(
   // Write code to install the files.
   const char* no_dir_permissions = 0;
   this->AddInstallRule(os,
+                       this->Destination,
                        (this->Programs
                         ? cmInstallType_PROGRAMS
                         : cmInstallType_FILES),
@@ -84,8 +87,7 @@ void cmInstallFilesGenerator::GenerateScriptForConfig(std::ostream& os,
                                                     Indent const& indent)
 {
   std::vector<std::string> files;
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
+  cmGeneratorExpression ge;
   for(std::vector<std::string>::const_iterator i = this->Files.begin();
       i != this->Files.end(); ++i)
     {

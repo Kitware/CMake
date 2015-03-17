@@ -103,6 +103,7 @@ public:
   void WriteCustomCommandBuild(const std::string& command,
                                const std::string& description,
                                const std::string& comment,
+                               bool uses_terminal,
                                const cmNinjaDeps& outputs,
                                const cmNinjaDeps& deps = cmNinjaDeps(),
                                const cmNinjaDeps& orderOnly = cmNinjaDeps());
@@ -124,7 +125,7 @@ public:
                         const std::string& deptype,
                         const std::string& rspfile,
                         const std::string& rspcontent,
-                        bool restat,
+                        const std::string& restat,
                         bool generator);
 
   /**
@@ -182,9 +183,6 @@ public:
   /// Overloaded methods. @see cmGlobalGenerator::GetDocumentation()
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  /// Overloaded methods. @see cmGlobalGenerator::Generate()
-  virtual void Generate();
-
   /// Overloaded methods. @see cmGlobalGenerator::EnableLanguage()
   virtual void EnableLanguage(std::vector<std::string>const& languages,
                               cmMakefile* mf,
@@ -198,7 +196,7 @@ public:
     const std::string& projectDir,
     const std::string& targetName,
     const std::string& config,
-    bool fast,
+    bool fast, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
 
@@ -247,7 +245,7 @@ public:
                const std::string& deptype,
                const std::string& rspfile,
                const std::string& rspcontent,
-               bool restat,
+               const std::string& restat,
                bool generator);
 
   bool HasRule(const std::string& name);
@@ -300,7 +298,15 @@ public:
   void AddTargetAlias(const std::string& alias, cmTarget* target);
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+
+  std::string ninjaVersion() const;
+
+  bool SupportsConsolePool() const;
+
 protected:
+
+  /// Overloaded methods. @see cmGlobalGenerator::Generate()
+  virtual void Generate();
 
   /// Overloaded methods.
   /// @see cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS()
@@ -335,8 +341,7 @@ private:
 
   std::string ninjaCmd() const;
 
-
-  /// The file containing the build statement. (the relation ship of the
+  /// The file containing the build statement. (the relationship of the
   /// compilation DAG).
   cmGeneratedFileStream* BuildFileStream;
   /// The file containing the rule statements. (The action attached to each
@@ -363,10 +368,11 @@ private:
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
 
-  //The combined explicit dependencies of all build commands that the global
-  //generator has issued. When combined with CombinedBuildOutputs it allows
-  //us to detect the set of explicit dependencies that have
-  std::set<std::string> CombinedBuildExplicitDependencies;
+  /// The combined explicit dependencies of custom build commands
+  std::set<std::string> CombinedCustomCommandExplicitDependencies;
+
+  /// When combined with CombinedCustomCommandExplicitDependencies it allows
+  /// us to detect the set of explicit dependencies that have
   std::set<std::string> CombinedBuildOutputs;
 
   /// The mapping from source file to assumed dependencies.

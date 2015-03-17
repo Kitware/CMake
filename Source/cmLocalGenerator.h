@@ -106,7 +106,7 @@ public:
    * path setting
    */
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
-  enum OutputFormat { UNCHANGED, MAKEFILE, SHELL, WATCOMQUOTE, RESPONSE };
+  enum OutputFormat { UNCHANGED, MAKERULE, SHELL, WATCOMQUOTE, RESPONSE };
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output);
   std::string Convert(const std::string& remote, RelativeRoot local,
@@ -130,7 +130,7 @@ public:
   std::string ConvertToOptionallyRelativeOutputPath(const std::string& remote);
 
   ///! set/get the parent generator
-  cmLocalGenerator* GetParent(){return this->Parent;}
+  cmLocalGenerator* GetParent() const {return this->Parent;}
   void SetParent(cmLocalGenerator* g) { this->Parent = g; g->AddChild(this); }
 
   ///! set/get the children
@@ -149,7 +149,10 @@ public:
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const std::string& config);
+  void AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
+                                  const std::string& lang);
   ///! Append flags to a string.
+  virtual void AppendFlags(std::string& flags, const std::string& newFlags);
   virtual void AppendFlags(std::string& flags, const char* newFlags);
   virtual void AppendFlagEscape(std::string& flags,
                                 const std::string& rawFlag);
@@ -157,6 +160,7 @@ public:
   std::string GetIncludeFlags(const std::vector<std::string> &includes,
                               cmGeneratorTarget* target,
                               const std::string& lang,
+                              bool forceFullPaths = false,
                               bool forResponseFile = false,
                               const std::string& config = "");
 
@@ -212,7 +216,8 @@ public:
                                          OutputFormat format = SHELL);
 
   virtual std::string ConvertToIncludeReference(std::string const& path,
-                                                OutputFormat format = SHELL);
+                                                OutputFormat format = SHELL,
+                                                bool forceFullPaths = false);
 
   /** Called from command-line hook to clear dependencies.  */
   virtual void ClearDependencies(cmMakefile* /* mf */,
@@ -234,7 +239,8 @@ public:
                          const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
                              cmTarget const* target,
-                             const std::string& config);
+                             const std::string& config,
+                             const std::string& lang);
 
   /** Compute the language used to compile the given source file.  */
   std::string GetSourceFileLanguage(const cmSourceFile& source);
@@ -266,6 +272,7 @@ public:
     const char* Output;
     const char* Object;
     const char* ObjectDir;
+    const char* ObjectFileDir;
     const char* Flags;
     const char* ObjectsQuoted;
     const char* SONameFlag;

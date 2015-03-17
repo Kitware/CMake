@@ -122,14 +122,17 @@ elseif(testname STREQUAL substring_not_enough_args) # fail
 elseif(testname STREQUAL substring_begin_too_large) # fail
   string(SUBSTRING "abcdefg" 25 100 v)
 
-elseif(testname STREQUAL substring_end_too_large) # fail
+elseif(testname STREQUAL substring_end_larger_than_strlen) # pass
   string(SUBSTRING "abcdefg" 1 100 v)
 
 elseif(testname STREQUAL substring_begin_less_than_zero) # fail
-  string(SUBSTRING "abcdefg" -2 4 v)
+  string(SUBSTRING "abcdefg" -1 4 v)
 
-elseif(testname STREQUAL substring_end_less_than_begin) # fail
-  string(SUBSTRING "abcdefg" 6 3 v)
+elseif(testname STREQUAL substring_end_less_than_zero) # pass
+  string(SUBSTRING "abcdefg" 0 -1 v)
+
+elseif(testname STREQUAL substring_end_less_than_begin) # pass
+  string(SUBSTRING "abcdefg" 6 0 v)
 
 elseif(testname STREQUAL length_not_enough_args) # fail
   string(LENGTH)

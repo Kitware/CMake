@@ -44,14 +44,15 @@ int cmCTestUploadHandler::ProcessHandler()
       "Cannot open Upload.xml file" << std::endl);
     return -1;
     }
-
+  std::string buildname = cmCTest::SafeBuildIdField(
+    this->CTest->GetCTestConfiguration("BuildName"));
   cmCTest::SetOfStrings::const_iterator it;
   ofs << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
      << "<?xml-stylesheet type=\"text/xsl\" "
     "href=\"Dart/Source/Server/XSL/Build.xsl "
     "<file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
      << "<Site BuildName=\""
-     << this->CTest->GetCTestConfiguration("BuildName")
+     << buildname
      << "\" BuildStamp=\""
      << this->CTest->GetCurrentTag() << "-"
      << this->CTest->GetTestModelString() << "\" Name=\""
@@ -63,8 +64,8 @@ int cmCTestUploadHandler::ProcessHandler()
 
   for ( it = this->Files.begin(); it != this->Files.end(); it ++ )
     {
-    cmCTestLog(this->CTest, OUTPUT,
-               "\tUpload file: " << *it << std::endl);
+    cmCTestOptionalLog(this->CTest, OUTPUT,
+      "\tUpload file: " << *it << std::endl, this->Quiet);
     ofs << "<File filename=\"" << cmXMLSafe(*it) << "\">\n"
        << "<Content encoding=\"base64\">\n";
     ofs << this->CTest->Base64EncodeFile(*it);

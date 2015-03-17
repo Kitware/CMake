@@ -226,7 +226,7 @@ bool cmLoadCommandCommand
   std::string fullPath = cmSystemTools::FindFile(moduleName.c_str(), path);
   if (fullPath == "")
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Attempt to load command failed from file \""
       << moduleName << "\"";
     this->SetError(e.str());

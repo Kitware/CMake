@@ -21,6 +21,12 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
 
+#ifdef _WIN32
+#include <io.h> // for _setmode
+#include <fcntl.h> // for _O_BINARY
+#include <stdio.h> // for std{out,err} and fileno
+#endif
+
 //----------------------------------------------------------------------------
 cmCTestLaunch::cmCTestLaunch(int argc, const char* const* argv)
 {
@@ -48,8 +54,8 @@ cmCTestLaunch::~cmCTestLaunch()
   cmsysProcess_Delete(this->Process);
   if(!this->Passthru)
     {
-    cmSystemTools::RemoveFile(this->LogOut.c_str());
-    cmSystemTools::RemoveFile(this->LogErr.c_str());
+    cmSystemTools::RemoveFile(this->LogOut);
+    cmSystemTools::RemoveFile(this->LogErr);
     }
 }
 
@@ -259,6 +265,13 @@ void cmCTestLaunch::RunChild()
               std::ios::out | std::ios::binary);
     }
 
+#ifdef _WIN32
+  // Do this so that newline transformation is not done when writing to cout
+  // and cerr below.
+  _setmode(fileno(stdout), _O_BINARY);
+  _setmode(fileno(stderr), _O_BINARY);
+#endif
+
   // Run the real command.
   cmsysProcess_Execute(cp);
 
@@ -434,8 +447,8 @@ void cmCTestLaunch::WriteXMLAction(std::ostream& fxml)
     // If file is in source tree use its relative location.
     if(cmSystemTools::FileIsFullPath(this->SourceDir.c_str()) &&
        cmSystemTools::FileIsFullPath(source.c_str()) &&
-       cmSystemTools::IsSubDirectory(source.c_str(),
-                                     this->SourceDir.c_str()))
+       cmSystemTools::IsSubDirectory(source,
+                                     this->SourceDir))
       {
       source = cmSystemTools::RelativePath(this->SourceDir.c_str(),
                                            source.c_str());
@@ -707,7 +720,7 @@ bool cmCTestLaunch::Match(std::string const& line,
 //----------------------------------------------------------------------------
 bool cmCTestLaunch::MatchesFilterPrefix(std::string const& line) const
 {
-  if(this->OptionFilterPrefix.size() && cmSystemTools::StringStartsWith(
+  if(!this->OptionFilterPrefix.empty() && cmSystemTools::StringStartsWith(
       line.c_str(), this->OptionFilterPrefix.c_str()))
     {
     return true;

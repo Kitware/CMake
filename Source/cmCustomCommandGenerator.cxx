@@ -21,7 +21,7 @@ cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmCustomCommand const& cc, const std::string& config, cmMakefile* mf):
   CC(cc), Config(config), Makefile(mf), LG(mf->GetLocalGenerator()),
   OldStyle(cc.GetEscapeOldStyle()), MakeVars(cc.GetEscapeAllowMakeVars()),
-  GE(new cmGeneratorExpression(cc.GetBacktrace())), DependsDone(false)
+  GE(new cmGeneratorExpression(&cc.GetBacktrace())), DependsDone(false)
 {
 }
 
@@ -91,6 +91,12 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetOutputs() const
 }
 
 //----------------------------------------------------------------------------
+std::vector<std::string> const& cmCustomCommandGenerator::GetByproducts() const
+{
+  return this->CC.GetByproducts();
+}
+
+//----------------------------------------------------------------------------
 std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
 {
   if (!this->DependsDone)
@@ -103,8 +109,18 @@ std::vector<std::string> const& cmCustomCommandGenerator::GetDepends() const
       {
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge
                                               = this->GE->Parse(*i);
+      std::vector<std::string> result;
       cmSystemTools::ExpandListArgument(
-                  cge->Evaluate(this->Makefile, this->Config), this->Depends);
+                  cge->Evaluate(this->Makefile, this->Config), result);
+      for (std::vector<std::string>::iterator it = result.begin();
+          it != result.end(); ++it)
+        {
+        if (cmSystemTools::FileIsFullPath(it->c_str()))
+          {
+          *it = cmSystemTools::CollapseFullPath(*it);
+          }
+        }
+      this->Depends.insert(this->Depends.end(), result.begin(), result.end());
       }
     }
   return this->Depends;

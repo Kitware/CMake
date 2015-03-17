@@ -62,6 +62,8 @@ private:
   bool HandleTest(cmTest* test);
   bool HandleCacheMode();
   bool HandleCacheEntry(cmCacheManager::CacheIterator&);
+  bool HandleInstallMode();
+  bool HandleInstall(cmInstalledFile* file);
 };
 
 

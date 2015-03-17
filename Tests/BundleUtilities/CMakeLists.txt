@@ -109,7 +109,8 @@ if(APPLE AND NOT CMAKE_SYSTEM_VERSION VERSION_LESS 9.0)
   target_link_libraries(testbundleutils3 shared-3 framework-3 ${CMAKE_DL_LIBS})
 
   set_target_properties(testbundleutils3 module3 PROPERTIES
-                        LINK_FLAGS "-Wl,-rpath,@loader_path/")
+                        LINK_FLAGS "-Wl,-rpath,@loader_path/"
+                        BUILD_WITH_INSTALL_RPATH 1)
 
   # add custom target to install and test the app
   add_custom_target(testbundleutils3_test  ALL

@@ -3,9 +3,9 @@
 #include <cmsys/System.h>
 #include "cmVisualStudio10TargetGenerator.h"
 
-inline std::string cmVisualStudio10GeneratorOptionsEscapeForXML(const char* s)
+static
+std::string cmVisualStudio10GeneratorOptionsEscapeForXML(std::string ret)
 {
-  std::string ret = s;
   cmSystemTools::ReplaceString(ret, ";", "%3B");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -13,15 +13,35 @@ inline std::string cmVisualStudio10GeneratorOptionsEscapeForXML(const char* s)
   return ret;
 }
 
-inline std::string cmVisualStudioGeneratorOptionsEscapeForXML(const char* s)
+static
+std::string cmVisualStudioGeneratorOptionsEscapeForXML(std::string ret)
 {
-  std::string ret = s;
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
   cmSystemTools::ReplaceString(ret, ">", "&gt;");
   cmSystemTools::ReplaceString(ret, "\n", "&#x0D;&#x0A;");
   return ret;
+}
+
+//----------------------------------------------------------------------------
+cmVisualStudioGeneratorOptions
+::cmVisualStudioGeneratorOptions(cmLocalVisualStudioGenerator* lg,
+                                 Tool tool,
+                                 cmVisualStudio10TargetGenerator* g):
+  cmIDEOptions(),
+  LocalGenerator(lg), Version(lg->GetVersion()), CurrentTool(tool),
+  TargetGenerator(g)
+{
+  // Preprocessor definitions are not allowed for linker tools.
+  this->AllowDefine = (tool != Linker);
+
+  // Slash options are allowed for VS.
+  this->AllowSlash = true;
+
+  this->FortranRuntimeDebug = false;
+  this->FortranRuntimeDLL = false;
+  this->FortranRuntimeMT = false;
 }
 
 //----------------------------------------------------------------------------
@@ -36,9 +56,8 @@ cmVisualStudioGeneratorOptions
   TargetGenerator(g)
 {
   // Store the given flag tables.
-  cmIDEFlagTable const** ft = this->FlagTable;
-  if(table) { *ft++ = table; }
-  if(extraTable) { *ft++ = extraTable; }
+  this->AddTable(table);
+  this->AddTable(extraTable);
 
   // Preprocessor definitions are not allowed for linker tools.
   this->AllowDefine = (tool != Linker);
@@ -49,6 +68,22 @@ cmVisualStudioGeneratorOptions
   this->FortranRuntimeDebug = false;
   this->FortranRuntimeDLL = false;
   this->FortranRuntimeMT = false;
+}
+
+//----------------------------------------------------------------------------
+void cmVisualStudioGeneratorOptions::AddTable(cmVS7FlagTable const* table)
+{
+  if(table)
+    {
+    for(int i=0; i < FlagTableCount; ++i)
+      {
+      if (!this->FlagTable[i])
+        {
+        this->FlagTable[i] = table;
+        break;
+        }
+      }
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -68,6 +103,7 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
     case cmLocalVisualStudioGenerator::VS10:
     case cmLocalVisualStudioGenerator::VS11:
     case cmLocalVisualStudioGenerator::VS12:
+    case cmLocalVisualStudioGenerator::VS14:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default
@@ -103,6 +139,12 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
 bool cmVisualStudioGeneratorOptions::IsDebug() const
 {
   return this->FlagMap.find("DebugInformationFormat") != this->FlagMap.end();
+}
+
+//----------------------------------------------------------------------------
+bool cmVisualStudioGeneratorOptions::IsWinRt() const
+{
+  return this->FlagMap.find("CompileAsWinRT") != this->FlagMap.end();
 }
 
 //----------------------------------------------------------------------------
@@ -268,7 +310,7 @@ cmVisualStudioGeneratorOptions
     // Escape this flag for the IDE.
     if(this->Version >= cmLocalVisualStudioGenerator::VS10)
       {
-      define = cmVisualStudio10GeneratorOptionsEscapeForXML(define.c_str());
+      define = cmVisualStudio10GeneratorOptionsEscapeForXML(define);
 
       if(lang == "RC")
         {
@@ -277,7 +319,7 @@ cmVisualStudioGeneratorOptions
       }
     else
       {
-      define = cmVisualStudioGeneratorOptionsEscapeForXML(define.c_str());
+      define = cmVisualStudioGeneratorOptionsEscapeForXML(define);
       }
     // Store the flag in the project file.
     fout << sep << define;
@@ -300,7 +342,7 @@ cmVisualStudioGeneratorOptions
 {
   if(this->Version >= cmLocalVisualStudioGenerator::VS10)
     {
-    for(std::map<std::string, std::string>::iterator m = this->FlagMap.begin();
+    for(std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
       {
       fout << indent;
@@ -316,20 +358,30 @@ cmVisualStudioGeneratorOptions
         {
         fout << "<" << m->first << ">";
         }
-      fout  << m->second;
-      if (m->first == "AdditionalIncludeDirectories")
+      const char* sep = "";
+      for(std::vector<std::string>::iterator i = m->second.begin();
+            i != m->second.end(); ++i)
         {
-        fout  << ";%(AdditionalIncludeDirectories)";
+        fout << sep << cmVisualStudio10GeneratorOptionsEscapeForXML(*i);
+        sep = ";";
         }
       fout  << "</" << m->first << ">\n";
       }
     }
   else
     {
-    for(std::map<std::string, std::string>::iterator m = this->FlagMap.begin();
+    for(std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
       {
-      fout << indent << m->first << "=\"" << m->second << "\"\n";
+      fout << indent << m->first << "=\"";
+      const char* sep = "";
+      for(std::vector<std::string>::iterator i = m->second.begin();
+            i != m->second.end(); ++i)
+        {
+        fout << sep << cmVisualStudioGeneratorOptionsEscapeForXML(*i);
+        sep = ";";
+        }
+      fout << "\"\n";
       }
     }
 }
@@ -358,14 +410,13 @@ cmVisualStudioGeneratorOptions
         {
         fout << "<AdditionalOptions>";
         }
-      fout << this->FlagString.c_str()
+      fout << cmVisualStudio10GeneratorOptionsEscapeForXML(this->FlagString)
            << " %(AdditionalOptions)</AdditionalOptions>\n";
       }
     else
       {
       fout << prefix << "AdditionalOptions=\"";
-      fout <<
-        cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString.c_str());
+      fout << cmVisualStudioGeneratorOptionsEscapeForXML(this->FlagString);
       fout << "\"" << suffix;
       }
     }

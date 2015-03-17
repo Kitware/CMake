@@ -53,3 +53,8 @@ set_property(TARGET target_prop_mixed_executable APPEND PROPERTY COMPILE_DEFINIT
     "LINK_LANGUAGE_IS_$<TARGET_PROPERTY:LINKER_LANGUAGE>"
     "C_EXECUTABLE_LINK_LANGUAGE_IS_$<TARGET_PROPERTY:target_prop_c_executable,LINKER_LANGUAGE>"
     )
+
+add_library(tgt STATIC IMPORTED)
+set_property(TARGET tgt APPEND PROPERTY COMPILE_DEFINITIONS TGT_DEF TGT_TYPE_$<TARGET_PROPERTY:TYPE>)
+add_executable(usetgt usetgt.c)
+target_compile_definitions(usetgt PRIVATE $<TARGET_PROPERTY:tgt,COMPILE_DEFINITIONS>)

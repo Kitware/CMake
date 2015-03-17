@@ -12,6 +12,7 @@
 #
 #   INCLUDE  - list of files to include
 #   VARIABLE - variable to return result
+#              Will be created as an internal cache variable.
 #
 #
 #
@@ -39,7 +40,7 @@
 #  License text for the above reference.)
 
 macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
-  if("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  if(NOT DEFINED "${VARIABLE}")
     set(CMAKE_CONFIGURABLE_FILE_CONTENT "/* */\n")
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_INCLUDE_FILES_INCLUDE_DIRS "-DINCLUDE_DIRECTORIES=${CMAKE_REQUIRED_INCLUDES}")
@@ -53,7 +54,7 @@ macro(CHECK_INCLUDE_FILES INCLUDE VARIABLE)
         "${CMAKE_CONFIGURABLE_FILE_CONTENT}#include <${FILE}>\n")
     endforeach()
     set(CMAKE_CONFIGURABLE_FILE_CONTENT
-      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(){return 0;}\n")
+      "${CMAKE_CONFIGURABLE_FILE_CONTENT}\n\nint main(void){return 0;}\n")
     configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
       "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFiles.c" @ONLY)
 

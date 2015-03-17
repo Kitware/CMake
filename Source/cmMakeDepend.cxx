@@ -12,6 +12,7 @@
 #include "cmMakeDepend.h"
 #include "cmSystemTools.h"
 #include "cmGeneratorExpression.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
@@ -34,12 +35,7 @@ cmMakeDepend::cmMakeDepend()
 
 cmMakeDepend::~cmMakeDepend()
 {
-  for(DependInformationMapType::iterator i =
-        this->DependInformationMap.begin();
-      i != this->DependInformationMap.end(); ++i)
-    {
-    delete i->second;
-    }
+  cmDeleteAll(this->DependInformationMap);
 }
 
 
@@ -180,7 +176,7 @@ void cmMakeDepend::GenerateDependInformation(cmDependInformation* info)
             t != this->IncludeDirectories.end(); ++t)
           {
           std::string incpath = *t;
-          if (incpath.size() && incpath[incpath.size() - 1] != '/')
+          if (!incpath.empty() && incpath[incpath.size() - 1] != '/')
             {
             incpath = incpath + "/";
             }
@@ -323,15 +319,15 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
       i != this->IncludeDirectories.end(); ++i)
     {
     std::string path = *i;
-    if (path.size() && path[path.size() - 1] != '/')
+    if (!path.empty() && path[path.size() - 1] != '/')
       {
       path = path + "/";
       }
     path = path + fname;
     if(cmSystemTools::FileExists(path.c_str(), true)
-       && !cmSystemTools::FileIsDirectory(path.c_str()))
+       && !cmSystemTools::FileIsDirectory(path))
       {
-      std::string fp = cmSystemTools::CollapseFullPath(path.c_str());
+      std::string fp = cmSystemTools::CollapseFullPath(path);
       this->DirectoryToFileToPathMap[extraPath? extraPath: ""][fname] = fp;
       return fp;
       }
@@ -340,15 +336,15 @@ std::string cmMakeDepend::FullPath(const char* fname, const char *extraPath)
   if (extraPath)
     {
     std::string path = extraPath;
-    if (path.size() && path[path.size() - 1] != '/')
+    if (!path.empty() && path[path.size() - 1] != '/')
       {
       path = path + "/";
       }
     path = path + fname;
     if(cmSystemTools::FileExists(path.c_str(), true)
-       && !cmSystemTools::FileIsDirectory(path.c_str()))
+       && !cmSystemTools::FileIsDirectory(path))
       {
-      std::string fp = cmSystemTools::CollapseFullPath(path.c_str());
+      std::string fp = cmSystemTools::CollapseFullPath(path);
       this->DirectoryToFileToPathMap[extraPath][fname] = fp;
       return fp;
       }

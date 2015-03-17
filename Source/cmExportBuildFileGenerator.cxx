@@ -18,6 +18,7 @@
 
 //----------------------------------------------------------------------------
 cmExportBuildFileGenerator::cmExportBuildFileGenerator()
+  : Backtrace(NULL)
 {
   this->Makefile = 0;
   this->ExportSet = 0;
@@ -44,7 +45,7 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given target \"" << te->GetName() << "\" more than once.";
       this->Makefile->GetCMakeInstance()
           ->IssueMessage(cmake::FATAL_ERROR, e.str(), this->Backtrace);
@@ -76,6 +77,9 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
     this->PopulateInterfaceProperty("INTERFACE_INCLUDE_DIRECTORIES", te,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_SOURCES", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_COMPILE_DEFINITIONS", te,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
@@ -83,6 +87,9 @@ bool cmExportBuildFileGenerator::GenerateMainFile(std::ostream& os)
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_AUTOUIC_OPTIONS", te,
+                                    cmGeneratorExpression::BuildInterface,
+                                    properties, missingTargets);
+    this->PopulateInterfaceProperty("INTERFACE_COMPILE_FEATURES", te,
                                     cmGeneratorExpression::BuildInterface,
                                     properties, missingTargets);
     this->PopulateInterfaceProperty("INTERFACE_POSITION_INDEPENDENT_CODE",
@@ -299,7 +306,7 @@ cmExportBuildFileGenerator
     return;
     }
 
-  cmOStringStream e;
+  std::ostringstream e;
   e << "export called with target \"" << depender->GetName()
     << "\" which requires target \"" << dependee->GetName() << "\" ";
   if (occurrences == 0)

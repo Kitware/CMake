@@ -12,11 +12,11 @@ values:
 
 ::
 
-  $(IntDir)        = Visual Studio 6
-  $(OutDir)        = Visual Studio 7, 8, 9
-  $(Configuration) = Visual Studio 10
-  $(CONFIGURATION) = Xcode
-  .                = Make-based tools
+  $(IntDir)            = Visual Studio 6
+  $(ConfigurationName) = Visual Studio 7, 8, 9
+  $(Configuration)     = Visual Studio 10
+  $(CONFIGURATION)     = Xcode
+  .                    = Make-based tools
 
 Since these values are evaluated by the native build system, this
 variable is suitable only for use in command lines that will be

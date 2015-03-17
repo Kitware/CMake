@@ -11,6 +11,7 @@
 #   <code>   - source code to try to compile
 #   <var>    - variable to store the result
 #              (1 for success, empty for failure)
+#              Will be created as an internal cache variable.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
@@ -39,7 +40,7 @@
 
 
 macro(CHECK_C_SOURCE_RUNS SOURCE VAR)
-  if("${VAR}" MATCHES "^${VAR}$")
+  if(NOT DEFINED "${VAR}")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-D${VAR} ${CMAKE_REQUIRED_FLAGS}")
     if(CMAKE_REQUIRED_LIBRARIES)

@@ -37,13 +37,13 @@ bool cmSetCommand
     delete [] varName;
 
     // will it be set to something, then set it
-    if (args.size() > 1 && args[1].size())
+    if (args.size() > 1 && !args[1].empty())
       {
       // but only if it is different from current value
       if (!currValue || strcmp(currValue,args[1].c_str()))
         {
         putEnvArg += args[1];
-        cmSystemTools::PutEnv(putEnvArg.c_str());
+        cmSystemTools::PutEnv(putEnvArg);
         }
       return true;
       }
@@ -51,7 +51,7 @@ bool cmSetCommand
     // if it will be cleared, then clear it if it isn;t already clear
     if (currValue)
       {
-      cmSystemTools::PutEnv(putEnvArg.c_str());
+      cmSystemTools::PutEnv(putEnvArg);
       }
     return true;
     }
@@ -108,17 +108,7 @@ bool cmSetCommand
     }
 
   // collect any values into a single semi-colon separated value list
-  if(static_cast<unsigned short>(args.size()) >
-     static_cast<unsigned short>(1 + ignoreLastArgs))
-    {
-    value = args[1];
-    size_t endPos = args.size() - ignoreLastArgs;
-    for(size_t i = 2; i < endPos; ++i)
-      {
-      value += ";";
-      value += args[i];
-      }
-    }
+  value = cmJoin(cmRange(args).advance(1).retreat(ignoreLastArgs), ";");
 
   if (parentScope)
     {

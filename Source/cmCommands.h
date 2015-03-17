@@ -13,6 +13,8 @@
 #define cmCommands_h
 #include "cmStandardIncludes.h"
 
+#include <list>
+
 class cmCommand;
 /**
  * Global function to return all compiled in commands.

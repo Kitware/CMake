@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 #include <assert.h>
 
@@ -39,8 +40,8 @@ public:
 
     if(file.rfind(".framework") != std::string::npos)
       {
-      cmsys::RegularExpression splitFramework;
-      splitFramework.compile("^(.*)/(.*).framework/(.*)$");
+      static cmsys::RegularExpression
+        splitFramework("^(.*)/(.*).framework/(.*)$");
       if(splitFramework.find(file) &&
         (std::string::npos !=
          splitFramework.match(3).find(splitFramework.match(2))))
@@ -72,7 +73,10 @@ public:
       {
       // Check if this directory conflicts with the entry.
       std::string const& dir = this->OD->OriginalDirectories[i];
-      if(dir != this->Directory && this->FindConflict(dir))
+      if(dir != this->Directory &&
+         cmSystemTools::GetRealPath(dir) !=
+         cmSystemTools::GetRealPath(this->Directory) &&
+         this->FindConflict(dir))
         {
         // The library will be found in this directory but this is not
         // the directory named for it.  Add an entry to make sure the
@@ -83,14 +87,17 @@ public:
       }
     }
 
-  void FindImplicitConflicts(cmOStringStream& w)
+  void FindImplicitConflicts(std::ostringstream& w)
     {
     bool first = true;
     for(unsigned int i=0; i < this->OD->OriginalDirectories.size(); ++i)
       {
       // Check if this directory conflicts with the entry.
       std::string const& dir = this->OD->OriginalDirectories[i];
-      if(dir != this->Directory && this->FindConflict(dir))
+      if(dir != this->Directory &&
+         cmSystemTools::GetRealPath(dir) !=
+         cmSystemTools::GetRealPath(this->Directory) &&
+         this->FindConflict(dir))
         {
         // The library will be found in this directory but it is
         // supposed to be found in an implicit search directory.
@@ -134,7 +141,7 @@ bool cmOrderDirectoriesConstraint::FileMayConflict(std::string const& dir,
     {
     // The file conflicts only if it is not the same as the original
     // file due to a symlink or hardlink.
-    return !cmSystemTools::SameFile(this->FullPath.c_str(), file.c_str());
+    return !cmSystemTools::SameFile(this->FullPath, file);
     }
 
   // Check if the file will be built by cmake.
@@ -285,18 +292,8 @@ cmOrderDirectories::cmOrderDirectories(cmGlobalGenerator* gg,
 //----------------------------------------------------------------------------
 cmOrderDirectories::~cmOrderDirectories()
 {
-  for(std::vector<cmOrderDirectoriesConstraint*>::iterator
-        i = this->ConstraintEntries.begin();
-      i != this->ConstraintEntries.end(); ++i)
-    {
-    delete *i;
-    }
-  for(std::vector<cmOrderDirectoriesConstraint*>::iterator
-        i = this->ImplicitDirEntries.begin();
-      i != this->ImplicitDirEntries.end(); ++i)
-    {
-    delete *i;
-    }
+  cmDeleteAll(this->ConstraintEntries);
+  cmDeleteAll(this->ImplicitDirEntries);
 }
 
 //----------------------------------------------------------------------------
@@ -326,8 +323,8 @@ void cmOrderDirectories::AddRuntimeLibrary(std::string const& fullPath,
 
       if(fullPath.rfind(".framework") != std::string::npos)
         {
-        cmsys::RegularExpression splitFramework;
-        splitFramework.compile("^(.*)/(.*).framework/(.*)$");
+        static cmsys::RegularExpression
+          splitFramework("^(.*)/(.*).framework/(.*)$");
         if(splitFramework.find(fullPath) &&
           (std::string::npos !=
            splitFramework.match(3).find(splitFramework.match(2))))
@@ -535,7 +532,7 @@ void cmOrderDirectories::FindImplicitConflicts()
 {
   // Check for items in implicit link directories that have conflicts
   // in the explicit directories.
-  cmOStringStream conflicts;
+  std::ostringstream conflicts;
   for(unsigned int i=0; i < this->ImplicitDirEntries.size(); ++i)
     {
     this->ImplicitDirEntries[i]->FindImplicitConflicts(conflicts);
@@ -549,7 +546,7 @@ void cmOrderDirectories::FindImplicitConflicts()
     }
 
   // Warn about the conflicts.
-  cmOStringStream w;
+  std::ostringstream w;
   w << "Cannot generate a safe " << this->Purpose
     << " for target " << this->Target->GetName()
     << " because files in some directories may conflict with "
@@ -618,7 +615,7 @@ void cmOrderDirectories::DiagnoseCycle()
   this->CycleDiagnosed = true;
 
   // Construct the message.
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot generate a safe " << this->Purpose
     << " for target " << this->Target->GetName()
     << " because there is a cycle in the constraint graph:\n";

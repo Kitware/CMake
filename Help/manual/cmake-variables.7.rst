@@ -3,7 +3,7 @@
 cmake-variables(7)
 ******************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -36,7 +36,9 @@ Variables that Provide Information
    /variable/CMAKE_EXECUTABLE_SUFFIX
    /variable/CMAKE_EXTRA_GENERATOR
    /variable/CMAKE_EXTRA_SHARED_LIBRARY_SUFFIXES
+   /variable/CMAKE_FIND_PACKAGE_NAME
    /variable/CMAKE_GENERATOR
+   /variable/CMAKE_GENERATOR_PLATFORM
    /variable/CMAKE_GENERATOR_TOOLSET
    /variable/CMAKE_HOME_DIRECTORY
    /variable/CMAKE_IMPORT_LIBRARY_PREFIX
@@ -46,6 +48,7 @@ Variables that Provide Information
    /variable/CMAKE_LINK_LIBRARY_SUFFIX
    /variable/CMAKE_MAJOR_VERSION
    /variable/CMAKE_MAKE_PROGRAM
+   /variable/CMAKE_MATCH_COUNT
    /variable/CMAKE_MINIMUM_REQUIRED_VERSION
    /variable/CMAKE_MINOR_VERSION
    /variable/CMAKE_PARENT_LIST_FILE
@@ -73,6 +76,8 @@ Variables that Provide Information
    /variable/CMAKE_VS_INTEL_Fortran_PROJECT_VERSION
    /variable/CMAKE_VS_MSBUILD_COMMAND
    /variable/CMAKE_VS_MSDEV_COMMAND
+   /variable/CMAKE_VS_NsightTegra_VERSION
+   /variable/CMAKE_VS_PLATFORM_NAME
    /variable/CMAKE_VS_PLATFORM_TOOLSET
    /variable/CMAKE_XCODE_PLATFORM_TOOLSET
    /variable/PROJECT_BINARY_DIR
@@ -109,10 +114,13 @@ Variables that Change Behavior
    /variable/CMAKE_DISABLE_FIND_PACKAGE_PackageName
    /variable/CMAKE_ERROR_DEPRECATED
    /variable/CMAKE_ERROR_ON_ABSOLUTE_INSTALL_DESTINATION
+   /variable/CMAKE_EXPORT_NO_PACKAGE_REGISTRY
    /variable/CMAKE_SYSROOT
    /variable/CMAKE_FIND_LIBRARY_PREFIXES
    /variable/CMAKE_FIND_LIBRARY_SUFFIXES
    /variable/CMAKE_FIND_NO_INSTALL_PREFIX
+   /variable/CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY
+   /variable/CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY
    /variable/CMAKE_FIND_PACKAGE_WARN_NO_MODULE
    /variable/CMAKE_FIND_ROOT_PATH
    /variable/CMAKE_FIND_ROOT_PATH_MODE_INCLUDE
@@ -125,6 +133,7 @@ Variables that Change Behavior
    /variable/CMAKE_INCLUDE_DIRECTORIES_BEFORE
    /variable/CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE
    /variable/CMAKE_INSTALL_DEFAULT_COMPONENT_NAME
+   /variable/CMAKE_INSTALL_MESSAGE
    /variable/CMAKE_INSTALL_PREFIX
    /variable/CMAKE_LIBRARY_PATH
    /variable/CMAKE_MFC_FLAG
@@ -172,9 +181,11 @@ Variables that Describe the System
    /variable/CMAKE_SYSTEM_VERSION
    /variable/CYGWIN
    /variable/ENV
+   /variable/MINGW
    /variable/MSVC10
    /variable/MSVC11
    /variable/MSVC12
+   /variable/MSVC14
    /variable/MSVC60
    /variable/MSVC70
    /variable/MSVC71
@@ -185,6 +196,9 @@ Variables that Describe the System
    /variable/MSVC_VERSION
    /variable/UNIX
    /variable/WIN32
+   /variable/WINCE
+   /variable/WINDOWS_PHONE
+   /variable/WINDOWS_STORE
    /variable/XCODE_VERSION
 
 Variables that Control the Build
@@ -193,6 +207,9 @@ Variables that Control the Build
 .. toctree::
    :maxdepth: 1
 
+   /variable/CMAKE_ANDROID_API
+   /variable/CMAKE_ANDROID_API_MIN
+   /variable/CMAKE_ANDROID_GUI
    /variable/CMAKE_ARCHIVE_OUTPUT_DIRECTORY
    /variable/CMAKE_AUTOMOC_MOC_OPTIONS
    /variable/CMAKE_AUTOMOC
@@ -247,6 +264,7 @@ Variables that Control the Build
    /variable/CMAKE_USE_RELATIVE_PATHS
    /variable/CMAKE_VISIBILITY_INLINES_HIDDEN
    /variable/CMAKE_WIN32_EXECUTABLE
+   /variable/CMAKE_XCODE_ATTRIBUTE_an-attribute
    /variable/EXECUTABLE_OUTPUT_PATH
    /variable/LIBRARY_OUTPUT_PATH
 
@@ -257,6 +275,14 @@ Variables for Languages
    :maxdepth: 1
 
    /variable/CMAKE_COMPILER_IS_GNULANG
+   /variable/CMAKE_C_COMPILE_FEATURES
+   /variable/CMAKE_C_EXTENSIONS
+   /variable/CMAKE_C_STANDARD
+   /variable/CMAKE_C_STANDARD_REQUIRED
+   /variable/CMAKE_CXX_COMPILE_FEATURES
+   /variable/CMAKE_CXX_EXTENSIONS
+   /variable/CMAKE_CXX_STANDARD
+   /variable/CMAKE_CXX_STANDARD_REQUIRED
    /variable/CMAKE_Fortran_MODDIR_DEFAULT
    /variable/CMAKE_Fortran_MODDIR_FLAG
    /variable/CMAKE_Fortran_MODOUT_FLAG
@@ -296,6 +322,60 @@ Variables for Languages
    /variable/CMAKE_LANG_SIZEOF_DATA_PTR
    /variable/CMAKE_LANG_SOURCE_FILE_EXTENSIONS
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE_LANG
+
+Variables for CTest
+===================
+
+.. toctree::
+   :maxdepth: 1
+
+   /variable/CTEST_BINARY_DIRECTORY
+   /variable/CTEST_BUILD_COMMAND
+   /variable/CTEST_BUILD_NAME
+   /variable/CTEST_BZR_COMMAND
+   /variable/CTEST_BZR_UPDATE_OPTIONS
+   /variable/CTEST_CHECKOUT_COMMAND
+   /variable/CTEST_CONFIGURATION_TYPE
+   /variable/CTEST_CONFIGURE_COMMAND
+   /variable/CTEST_COVERAGE_COMMAND
+   /variable/CTEST_COVERAGE_EXTRA_FLAGS
+   /variable/CTEST_CURL_OPTIONS
+   /variable/CTEST_CVS_CHECKOUT
+   /variable/CTEST_CVS_COMMAND
+   /variable/CTEST_CVS_UPDATE_OPTIONS
+   /variable/CTEST_DROP_LOCATION
+   /variable/CTEST_DROP_METHOD
+   /variable/CTEST_DROP_SITE
+   /variable/CTEST_DROP_SITE_CDASH
+   /variable/CTEST_DROP_SITE_PASSWORD
+   /variable/CTEST_DROP_SITE_USER
+   /variable/CTEST_GIT_COMMAND
+   /variable/CTEST_GIT_UPDATE_CUSTOM
+   /variable/CTEST_GIT_UPDATE_OPTIONS
+   /variable/CTEST_HG_COMMAND
+   /variable/CTEST_HG_UPDATE_OPTIONS
+   /variable/CTEST_MEMORYCHECK_COMMAND
+   /variable/CTEST_MEMORYCHECK_COMMAND_OPTIONS
+   /variable/CTEST_MEMORYCHECK_SANITIZER_OPTIONS
+   /variable/CTEST_MEMORYCHECK_SUPPRESSIONS_FILE
+   /variable/CTEST_MEMORYCHECK_TYPE
+   /variable/CTEST_NIGHTLY_START_TIME
+   /variable/CTEST_P4_CLIENT
+   /variable/CTEST_P4_COMMAND
+   /variable/CTEST_P4_OPTIONS
+   /variable/CTEST_P4_UPDATE_OPTIONS
+   /variable/CTEST_SCP_COMMAND
+   /variable/CTEST_SITE
+   /variable/CTEST_SOURCE_DIRECTORY
+   /variable/CTEST_SVN_COMMAND
+   /variable/CTEST_SVN_OPTIONS
+   /variable/CTEST_SVN_UPDATE_OPTIONS
+   /variable/CTEST_TEST_TIMEOUT
+   /variable/CTEST_TRIGGER_SITE
+   /variable/CTEST_UPDATE_COMMAND
+   /variable/CTEST_UPDATE_OPTIONS
+   /variable/CTEST_UPDATE_VERSION_ONLY
+   /variable/CTEST_USE_LAUNCHERS
 
 Variables for CPack
 ===================

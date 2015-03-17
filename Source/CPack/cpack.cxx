@@ -115,7 +115,7 @@ int main (int argc, char const* const* argv)
 
   cmSystemTools::EnableMSVCDebugHook();
 
-  if ( cmSystemTools::GetCurrentWorkingDirectory().size() == 0 )
+  if (cmSystemTools::GetCurrentWorkingDirectory().empty())
     {
     cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
       "Current working directory cannot be established." << std::endl);
@@ -257,10 +257,15 @@ int main (int argc, char const* const* argv)
       return 1;
       }
 
+    if ( !cpackBuildConfig.empty() )
+      {
+      globalMF->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
+      }
+
     if ( cmSystemTools::FileExists(cpackConfigFile.c_str()) )
       {
       cpackConfigFile =
-        cmSystemTools::CollapseFullPath(cpackConfigFile.c_str());
+        cmSystemTools::CollapseFullPath(cpackConfigFile);
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
         "Read CPack configuration file: " << cpackConfigFile
         << std::endl);
@@ -317,10 +322,6 @@ int main (int argc, char const* const* argv)
                                 cpackProjectDirectory.c_str());
         }
       }
-    if ( !cpackBuildConfig.empty() )
-      {
-      globalMF->AddDefinition("CPACK_BUILD_CONFIG", cpackBuildConfig.c_str());
-      }
     cpackDefinitions::MapType::iterator cdit;
     for ( cdit = definitions.Map.begin();
       cdit != definitions.Map.end();
@@ -340,7 +341,6 @@ int main (int argc, char const* const* argv)
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "CPack generator not specified" << std::endl);
-      parsed = 0;
       }
     else
       {
@@ -424,7 +424,7 @@ int main (int argc, char const* const* argv)
                 = mf->GetDefinition("CPACK_PACKAGE_VERSION_MINOR");
               const char* projVersionPatch
                 = mf->GetDefinition("CPACK_PACKAGE_VERSION_PATCH");
-              cmOStringStream ostr;
+              std::ostringstream ostr;
               ostr << projVersionMajor << "." << projVersionMinor << "."
                 << projVersionPatch;
               mf->AddDefinition("CPACK_PACKAGE_VERSION",

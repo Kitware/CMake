@@ -14,11 +14,14 @@
 
 #include "cmCPackGenerator.h"
 #include "cmCPackTGZGenerator.h"
+#include "cmCPackTXZGenerator.h"
 #include "cmCPackTarBZip2Generator.h"
 #include "cmCPackTarCompressGenerator.h"
 #include "cmCPackZIPGenerator.h"
+#include "cmCPack7zGenerator.h"
 #include "cmCPackSTGZGenerator.h"
 #include "cmCPackNSISGenerator.h"
+#include "IFW/cmCPackIFWGenerator.h"
 
 #ifdef __APPLE__
 #  include "cmCPackDragNDropGenerator.h"
@@ -43,10 +46,8 @@
 #endif
 
 #include "cmCPackLog.h"
+#include "cmAlgorithms.h"
 
-#if defined(__BORLANDC__)
-# pragma warn -8008 /* condition is always true */
-#endif
 
 //----------------------------------------------------------------------
 cmCPackGeneratorFactory::cmCPackGeneratorFactory()
@@ -55,6 +56,11 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     {
     this->RegisterGenerator("TGZ", "Tar GZip compression",
       cmCPackTGZGenerator::CreateGenerator);
+    }
+  if (cmCPackTXZGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("TXZ", "Tar XZ compression",
+      cmCPackTXZGenerator::CreateGenerator);
     }
   if (cmCPackSTGZGenerator::CanGenerate())
     {
@@ -67,6 +73,11 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
       cmCPackNSISGenerator::CreateGenerator);
     this->RegisterGenerator("NSIS64", "Null Soft Installer (64-bit)",
       cmCPackNSISGenerator::CreateGenerator64);
+    }
+  if (cmCPackIFWGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("IFW", "Qt Installer Framework",
+      cmCPackIFWGenerator::CreateGenerator);
     }
 #ifdef __CYGWIN__
   if (cmCPackCygwinBinaryGenerator::CanGenerate())
@@ -85,6 +96,11 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
     {
     this->RegisterGenerator("ZIP", "ZIP file format",
       cmCPackZIPGenerator::CreateGenerator);
+    }
+  if (cmCPack7zGenerator::CanGenerate())
+    {
+    this->RegisterGenerator("7Z", "7-Zip file format",
+      cmCPack7zGenerator::CreateGenerator);
     }
 #ifdef _WIN32
   if (cmCPackWIXGenerator::CanGenerate())
@@ -143,11 +159,7 @@ cmCPackGeneratorFactory::cmCPackGeneratorFactory()
 //----------------------------------------------------------------------
 cmCPackGeneratorFactory::~cmCPackGeneratorFactory()
 {
-  std::vector<cmCPackGenerator*>::iterator it;
-  for ( it = this->Generators.begin(); it != this->Generators.end(); ++ it )
-    {
-    delete *it;
-    }
+  cmDeleteAll(this->Generators);
 }
 
 //----------------------------------------------------------------------

@@ -11,3 +11,9 @@
     <a href="{{ pathto(master_doc) }}">{{ shorttitle|e }}</a>{{ reldelim1 }}
   </li>
 {% endblock %}
+
+{# Put some context in the html title element. Workaround for #}
+{# https://bitbucket.org/birkenfeld/sphinx/issue/1492/qthelp-generate-html-title-element-should #}
+{% block htmltitle %}
+  <title>{{ title|striptags|e }} {{ "&mdash;"|safe }} {{ docstitle|e }}</title>
+{% endblock %}

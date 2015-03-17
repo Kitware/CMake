@@ -28,10 +28,6 @@ function(help_xcode_depends)
   endif()
 endfunction()
 
-if("${CMAKE_GENERATOR}" MATCHES "Ninja")
-  set(HELP_NINJA 1) # TODO Why is this needed?
-endif()
-
 # The Intel compiler causes the MSVC linker to crash during
 # incremental linking, so avoid the /INCREMENTAL:YES flag.
 if(WIN32 AND "${CMAKE_CXX_COMPILER_ID}" MATCHES "Intel")
@@ -69,6 +65,7 @@ file(WRITE ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_exe.h
 set(link_depends_no_shared_check_txt ${BuildDepends_BINARY_DIR}/Project/link_depends_no_shared_check.txt)
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external original\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi1-in.txt "multi1-in original\n")
 
 help_xcode_depends()
 
@@ -181,9 +178,21 @@ else()
     "external.out is missing")
 endif()
 
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt)
+  file(STRINGS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt multi1_out)
+  if("${multi1_out}" STREQUAL "multi1-in original")
+    message(STATUS "multi1-out2-copy.txt contains '${multi1_out}'")
+  else()
+    message(SEND_ERROR "Project did not initially build properly: "
+      "multi1-out2-copy.txt contains '${multi1_out}'")
+  endif()
+else()
+  message(SEND_ERROR "Project did not initially build properly: "
+    "multi1-out2-copy.txt is missing")
+endif()
+
 message("Waiting 3 seconds...")
-# any additional argument will cause ${bar} to wait forever
-execute_process(COMMAND ${bar} -infinite TIMEOUT 3 OUTPUT_VARIABLE out)
+execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 3)
 
 message("Modifying Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
@@ -207,6 +216,7 @@ if(TEST_LINK_DEPENDS)
 endif()
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external changed\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi1-in.txt "multi1-in changed\n")
 
 help_xcode_depends()
 
@@ -219,7 +229,7 @@ try_compile(RESULT
   OUTPUT_VARIABLE OUTPUT)
 
 # Xcode is in serious need of help here
-if(HELP_XCODE OR HELP_NINJA)
+if(HELP_XCODE)
   try_compile(RESULT
     ${BuildDepends_BINARY_DIR}/Project
     ${BuildDepends_SOURCE_DIR}/Project
@@ -323,4 +333,17 @@ if(EXISTS ${BuildDepends_BINARY_DIR}/Project/external.out)
 else()
   message(SEND_ERROR "Project did not rebuild properly: "
     "external.out is missing")
+endif()
+
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt)
+  file(STRINGS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt multi1_out)
+  if("${multi1_out}" STREQUAL "multi1-in changed")
+    message(STATUS "multi1-out2-copy.txt contains '${multi1_out}'")
+  else()
+    message(SEND_ERROR "Project did not rebuild properly: "
+      "multi1-out2-copy.txt contains '${multi1_out}'")
+  endif()
+else()
+  message(SEND_ERROR "Project did not rebuild properly: "
+    "multi1-out2-copy.txt is missing")
 endif()

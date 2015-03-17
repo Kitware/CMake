@@ -40,8 +40,14 @@ enum {
 
 #include "iface2.h"
 
+int foo();
+#ifdef _WIN32
+__declspec(dllimport)
+#endif
+int bar();
+
 int main(int argc, char **argv)
 {
   Iface2 if2;
-  return if2.foo();
+  return if2.foo() + foo() + bar();
 }

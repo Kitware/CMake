@@ -15,11 +15,5 @@ int main(int argc, char** argv)
   /* Print out the string that should have been regenerated.  */
   printf("%s\n", regen_string);
   fflush(stdout);
-  // if any argument is used, wait forever
-  if (argc>1)
-    {
-    // wait that we get killed...
-    for(;;);
-    }
   return 0;
 }

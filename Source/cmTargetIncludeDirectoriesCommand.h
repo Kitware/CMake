@@ -45,7 +45,7 @@ private:
   virtual void HandleImportedTarget(const std::string &tgt);
   virtual void HandleMissingTarget(const std::string &name);
 
-  virtual void HandleDirectContent(cmTarget *tgt,
+  virtual bool HandleDirectContent(cmTarget *tgt,
                                    const std::vector<std::string> &content,
                                    bool prepend, bool system);
   virtual void HandleInterfaceContent(cmTarget *tgt,

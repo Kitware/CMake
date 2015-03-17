@@ -23,14 +23,15 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
 {
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
+  this->MasmEnabled = false;
 
   if (platformName.empty())
     {
-    this->PlatformName = "Win32";
+    this->DefaultPlatformName = "Win32";
     }
   else
     {
-    this->PlatformName = platformName;
+    this->DefaultPlatformName = platformName;
     }
 }
 
@@ -80,7 +81,6 @@ void cmGlobalVisualStudio7Generator
 {
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
-  this->AddPlatformDefinitions(mf);
   if(!mf->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
     {
     mf->AddCacheDefinition(
@@ -191,7 +191,7 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
   const std::string& /*projectDir*/,
   const std::string& targetName,
   const std::string& config,
-  bool /*fast*/,
+  bool /*fast*/, bool /*verbose*/,
   std::vector<std::string> const& makeOptions)
 {
   // Select the caller- or user-preferred make program, else devenv.
@@ -260,12 +260,38 @@ cmLocalGenerator *cmGlobalVisualStudio7Generator::CreateLocalGenerator()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudio7Generator::AddPlatformDefinitions(cmMakefile* mf)
+std::string const& cmGlobalVisualStudio7Generator::GetPlatformName() const
 {
-  cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
-  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
+  if(!this->GeneratorPlatform.empty())
+    {
+    return this->GeneratorPlatform;
+    }
+  return this->DefaultPlatformName;
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio7Generator::SetSystemName(std::string const& s,
+                                                   cmMakefile* mf)
+{
   mf->AddDefinition("CMAKE_VS_INTEL_Fortran_PROJECT_VERSION",
                     this->GetIntelProjectVersion());
+  return this->cmGlobalVisualStudioGenerator::SetSystemName(s, mf);
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio7Generator::SetGeneratorPlatform(std::string const& p,
+                                                          cmMakefile* mf)
+{
+  if(this->GetPlatformName() == "x64")
+    {
+    mf->AddDefinition("CMAKE_FORCE_WIN64", "TRUE");
+    }
+  else if(this->GetPlatformName() == "Itanium")
+    {
+    mf->AddDefinition("CMAKE_FORCE_IA64", "TRUE");
+    }
+  mf->AddDefinition("CMAKE_VS_PLATFORM_NAME", this->GetPlatformName().c_str());
+  return this->cmGlobalVisualStudioGenerator::SetGeneratorPlatform(p, mf);
 }
 
 void cmGlobalVisualStudio7Generator::GenerateConfigurations(cmMakefile* mf)
@@ -366,7 +392,6 @@ void cmGlobalVisualStudio7Generator::OutputSLNFile()
 
 void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   std::ostream& fout,
-  cmLocalGenerator* root,
   OrderedTargetDependSet const& projectTargets)
 {
   // loop over again and write out configurations for each target
@@ -392,8 +417,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
     else
       {
       const std::set<std::string>& configsPartOfDefaultBuild =
-        this->IsPartOfDefaultBuild(root->GetMakefile()->GetProjectName(),
-                                   target);
+        this->IsPartOfDefaultBuild(projectTargets, target);
       const char *vcprojName =
         target->GetProperty("GENERATOR_FILE_NAME");
       if (vcprojName)
@@ -579,7 +603,7 @@ void cmGlobalVisualStudio7Generator
 
   // Write out the configurations for all the targets in the project
   fout << "\tGlobalSection(ProjectConfiguration) = postSolution\n";
-  this->WriteTargetConfigurations(fout, root, orderedProjectTargets);
+  this->WriteTargetConfigurations(fout, orderedProjectTargets);
   fout << "\tEndGlobalSection\n";
 
   // Write out global sections
@@ -767,7 +791,6 @@ void cmGlobalVisualStudio7Generator::WriteExternalProject(std::ostream& fout,
                                const char* typeGuid,
                                const std::set<std::string>&)
 {
-  std::string d = cmSystemTools::ConvertToOutputPath(location);
   fout << "Project("
        << "\"{"
        << (typeGuid ? typeGuid : this->ExternalProjectType(location))
@@ -981,8 +1004,7 @@ cmGlobalVisualStudio7Generator
 
 std::set<std::string>
 cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
-                                                    const std::string& project,
-                                                    cmTarget const* target)
+  OrderedTargetDependSet const& projectTargets, cmTarget const* target)
 {
   std::set<std::string> activeConfigs;
   // if it is a utilitiy target then only make it part of the
@@ -992,7 +1014,7 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
     {
     return activeConfigs;
     }
-  if(type == cmTarget::UTILITY && !this->IsDependedOn(project, target))
+  if(type == cmTarget::UTILITY && !this->IsDependedOn(projectTargets, target))
     {
     return activeConfigs;
     }
@@ -1010,6 +1032,24 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   return activeConfigs;
 }
 
+bool
+cmGlobalVisualStudio7Generator
+::IsDependedOn(OrderedTargetDependSet const& projectTargets,
+               cmTarget const* targetIn)
+{
+  for (OrderedTargetDependSet::const_iterator l = projectTargets.begin();
+       l != projectTargets.end(); ++l)
+    {
+    cmTarget const& target = **l;
+    TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
+    if(tgtdeps.count(targetIn))
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
 //----------------------------------------------------------------------------
 static cmVS7FlagTable cmVS7ExtraFlagTable[] =
 {
@@ -1024,11 +1064,11 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] =
    cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
   {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
    cmVS7FlagTable::UserValueRequired},
-  {"WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "TRUE", 0},
+  {"WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "true", 0},
 
   // Exception handling mode.  If no entries match, it will be FALSE.
-  {"ExceptionHandling", "GX", "enable c++ exceptions", "TRUE", 0},
-  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "TRUE", 0},
+  {"ExceptionHandling", "GX", "enable c++ exceptions", "true", 0},
+  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "true", 0},
   // The EHa option does not have an IDE setting.  Let it go to false,
   // and have EHa passed on the command line by leaving out the table
   // entry.

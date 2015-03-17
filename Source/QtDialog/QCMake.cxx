@@ -35,7 +35,9 @@ QCMake::QCMake(QObject* p)
 
   cmSystemTools::DisableRunCommandOutput();
   cmSystemTools::SetRunCommandHideConsole(true);
-  cmSystemTools::SetErrorCallback(QCMake::errorCallback, this);
+  cmSystemTools::SetMessageCallback(QCMake::messageCallback, this);
+  cmSystemTools::SetStdoutCallback(QCMake::stdoutCallback, this);
+  cmSystemTools::SetStderrCallback(QCMake::stderrCallback, this);
 
   this->CMakeInstance = new cmake;
   this->CMakeInstance->SetCMakeEditCommand(
@@ -145,6 +147,8 @@ void QCMake::configure()
   this->CMakeInstance->SetStartOutputDirectory(this->BinaryDirectory.toLocal8Bit().data());
   this->CMakeInstance->SetGlobalGenerator(
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toLocal8Bit().data()));
+  this->CMakeInstance->SetGeneratorPlatform("");
+  this->CMakeInstance->SetGeneratorToolset("");
   this->CMakeInstance->LoadCache();
   this->CMakeInstance->SetSuppressDevWarnings(this->SuppressDevWarnings);
   this->CMakeInstance->SetWarnUninitialized(this->WarnUninitializedMode);
@@ -348,11 +352,25 @@ void QCMake::progressCallback(const char* msg, float percent, void* cd)
   QCoreApplication::processEvents();
 }
 
-void QCMake::errorCallback(const char* msg, const char* /*title*/,
-                           bool& /*stop*/, void* cd)
+void QCMake::messageCallback(const char* msg, const char* /*title*/,
+                             bool& /*stop*/, void* cd)
 {
   QCMake* self = reinterpret_cast<QCMake*>(cd);
   emit self->errorMessage(QString::fromLocal8Bit(msg));
+  QCoreApplication::processEvents();
+}
+
+void QCMake::stdoutCallback(const char* msg, size_t len, void* cd)
+{
+  QCMake* self = reinterpret_cast<QCMake*>(cd);
+  emit self->outputMessage(QString::fromLocal8Bit(msg,int(len)));
+  QCoreApplication::processEvents();
+}
+
+void QCMake::stderrCallback(const char* msg, size_t len, void* cd)
+{
+  QCMake* self = reinterpret_cast<QCMake*>(cd);
+  emit self->outputMessage(QString::fromLocal8Bit(msg,int(len)));
   QCoreApplication::processEvents();
 }
 

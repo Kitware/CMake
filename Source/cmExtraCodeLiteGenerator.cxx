@@ -23,8 +23,8 @@
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/SystemInformation.hxx>
 #include <cmsys/Directory.hxx>
+#include "cmStandardIncludes.h"
 #include "cmXMLSafe.h"
-#include <sstream>
 
 //----------------------------------------------------------------------------
 void cmExtraCodeLiteGenerator::GetDocumentation(cmDocumentationEntry& entry,
@@ -443,26 +443,22 @@ cmExtraCodeLiteGenerator::GetConfigurationName(const cmMakefile* mf) const
 std::string
 cmExtraCodeLiteGenerator::GetBuildCommand(const cmMakefile* mf) const
 {
-  std::stringstream ss;
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   std::string buildCommand = make; // Default
-  if ( generator == "NMake Makefiles" )
+  if ( generator == "NMake Makefiles" ||
+       generator == "Ninja" )
     {
     buildCommand = make;
     }
   else if ( generator == "MinGW Makefiles" ||
             generator == "Unix Makefiles" )
     {
+    std::ostringstream ss;
     ss << make << " -j " << this->CpuCount;
     buildCommand = ss.str();
     }
-  else if ( generator == "Ninja" )
-    {
-    ss << make;
-    buildCommand = ss.str();
-    }
-    return buildCommand;
+  return buildCommand;
 }
 
 std::string
@@ -486,7 +482,7 @@ cmExtraCodeLiteGenerator::GetSingleFileBuildCommand
   std::string generator = mf->GetSafeDefinition("CMAKE_GENERATOR");
   if ( generator == "Unix Makefiles" || generator == "MinGW Makefiles" )
     {
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << make << " -f$(ProjectPath)/Makefile $(CurrentFileName).cpp.o";
     buildCommand = ss.str();
     }

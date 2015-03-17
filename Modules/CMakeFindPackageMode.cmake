@@ -7,15 +7,24 @@
 # This file is executed by cmake when invoked with --find-package.  It
 # expects that the following variables are set using -D:
 #
-# ::
-#
-#    NAME = name of the package
-#    COMPILER_ID = the CMake compiler ID for which the result is, i.e. GNU/Intel/Clang/MSVC, etc.
-#    LANGUAGE = language for which the result will be used, i.e. C/CXX/Fortan/ASM
-#    MODE = EXIST : only check for existence of the given package
-#           COMPILE : print the flags needed for compiling an object file which uses the given package
-#           LINK : print the flags needed for linking when using the given package
-#    QUIET = if TRUE, don't print anything
+# ``NAME``
+#   name of the package
+# ``COMPILER_ID``
+#   the CMake compiler ID for which the result is,
+#   i.e. GNU/Intel/Clang/MSVC, etc.
+# ``LANGUAGE``
+#   language for which the result will be used,
+#   i.e. C/CXX/Fortan/ASM
+# ``MODE``
+#   ``EXIST``
+#     only check for existence of the given package
+#   ``COMPILE``
+#     print the flags needed for compiling an object file which uses
+#     the given package
+#   ``LINK``
+#     print the flags needed for linking when using the given package
+# ``QUIET``
+#   if TRUE, don't print anything
 
 #=============================================================================
 # Copyright 2006-2011 Alexander Neundorf, <neundorf@kde.org>
@@ -93,14 +102,17 @@ if(UNIX)
 
   # guess Debian multiarch if it has not been set:
   if(EXISTS /etc/debian_version)
-    if(NOT CMAKE_${LANGUAGE}_LANGUAGE_ARCHITECTURE )
+    if(NOT CMAKE_${LANGUAGE}_LIBRARY_ARCHITECTURE )
       file(GLOB filesInLib RELATIVE /lib /lib/*-linux-gnu* )
       foreach(file ${filesInLib})
         if("${file}" MATCHES "${CMAKE_LIBRARY_ARCHITECTURE_REGEX}")
-          set(CMAKE_${LANGUAGE}_LANGUAGE_ARCHITECTURE ${file})
+          set(CMAKE_${LANGUAGE}_LIBRARY_ARCHITECTURE ${file})
           break()
         endif()
       endforeach()
+    endif()
+    if(NOT CMAKE_LIBRARY_ARCHITECTURE)
+      set(CMAKE_LIBRARY_ARCHITECTURE ${CMAKE_${LANGUAGE}_LIBRARY_ARCHITECTURE})
     endif()
   endif()
 

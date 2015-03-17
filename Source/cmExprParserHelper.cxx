@@ -99,7 +99,7 @@ int cmExprParserHelper::LexInput(char* buf, int maxlen)
 void cmExprParserHelper::Error(const char* str)
 {
   unsigned long pos = static_cast<unsigned long>(this->InputBufferPos);
-  cmOStringStream ostr;
+  std::ostringstream ostr;
   ostr << str << " (" << pos << ")";
   this->ErrorString = ostr.str();
 }

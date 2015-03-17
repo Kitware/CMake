@@ -6,6 +6,10 @@
 PROJECT_NAME         = CMake
 
 FULL_PATH_NAMES      = YES
+STRIP_FROM_PATH      = \
+ "@CMake_SOURCE_DIR@/Source/" \
+ "@CMake_BINARY_DIR@/Source/"
+
 WARN_IF_UNDOCUMENTED = NO
 
 GENERATE_TREEVIEW    = NO
@@ -40,6 +44,7 @@ OUTPUT_DIRECTORY     = "@CMake_BINARY_DIR@/Utilities/Doxygen/doc"
 INPUT                = \
  "@CMake_SOURCE_DIR@/Source" \
  "@CMake_SOURCE_DIR@/Source/CPack" \
+ "@CMake_SOURCE_DIR@/Source/CPack/IFW" \
  "@CMake_SOURCE_DIR@/Source/CTest" \
  "@CMake_SOURCE_DIR@/Source/CursesDialog" \
  "@CMake_SOURCE_DIR@/Source/MFCDialog" \

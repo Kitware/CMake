@@ -27,10 +27,18 @@ class cmCTestStartCommand;
 
 #define cmCTestLog(ctSelf, logType, msg) \
   do { \
-  cmOStringStream cmCTestLog_msg; \
+  std::ostringstream cmCTestLog_msg; \
   cmCTestLog_msg << msg; \
   (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,\
                 cmCTestLog_msg.str().c_str());\
+  } while ( 0 )
+
+#define cmCTestOptionalLog(ctSelf, logType, msg, suppress) \
+  do { \
+  std::ostringstream cmCTestLog_msg; \
+  cmCTestLog_msg << msg; \
+  (ctSelf)->Log(cmCTest::logType, __FILE__, __LINE__,\
+                cmCTestLog_msg.str().c_str(), suppress);\
   } while ( 0 )
 
 #ifdef cerr
@@ -173,7 +181,8 @@ public:
   static int GetTestModelFromString(const char* str);
   static std::string CleanString(const std::string& str);
   std::string GetCTestConfiguration(const std::string& name);
-  void SetCTestConfiguration(const char *name, const char* value);
+  void SetCTestConfiguration(const char *name, const char* value,
+    bool suppress=false);
   void EmptyCTestConfiguration();
 
   /**
@@ -271,7 +280,7 @@ public:
 
   //! Run command specialized for make and configure. Returns process status
   // and retVal is return value or exception.
-  int RunMakeCommand(const char* command, std::string* output,
+  int RunMakeCommand(const char* command, std::string& output,
     int* retVal, const char* dir, int timeout,
     std::ostream& ofs);
 
@@ -332,7 +341,7 @@ public:
    * Set the CTest variable from CMake variable
    */
   bool SetCTestConfigurationFromCMakeVariable(cmMakefile* mf,
-    const char* dconfig, const std::string& cmake_var);
+    const char* dconfig, const std::string& cmake_var, bool suppress=false);
 
   //! Make string safe to be send as an URL
   static std::string MakeURLSafe(const std::string&);
@@ -376,7 +385,8 @@ public:
   };
 
   //! Add log to the output
-  void Log(int logType, const char* file, int line, const char* msg);
+  void Log(int logType, const char* file, int line, const char* msg,
+           bool suppress=false);
 
   //! Get the version of dart server
   int GetDartVersion() { return this->DartVersion; }

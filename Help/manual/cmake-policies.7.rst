@@ -3,7 +3,7 @@
 cmake-policies(7)
 *****************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -19,6 +19,12 @@ It is also possible to request ``NEW``, or non-backward compatible behavior
 for a policy, also avoiding the warning.  Each policy can also be set to
 either ``NEW`` or ``OLD`` behavior explicitly on the command line with the
 :variable:`CMAKE_POLICY_DEFAULT_CMP<NNNN>` variable.
+
+Note that policies are not reliable feature toggles.  A policy should
+almost never be set to ``OLD``, except to silence warnings in an otherwise
+frozen or stable codebase, or temporarily as part of a larger migration
+path. The ``OLD`` behavior of each policy is undesirable and will be
+replaced with an error condition in a future release.
 
 The :command:`cmake_minimum_required` command does more than report an
 error if a too-old version of CMake is used to build a project.  It
@@ -104,3 +110,8 @@ All Policies
    /policy/CMP0050
    /policy/CMP0051
    /policy/CMP0052
+   /policy/CMP0053
+   /policy/CMP0054
+   /policy/CMP0055
+   /policy/CMP0056
+   /policy/CMP0057

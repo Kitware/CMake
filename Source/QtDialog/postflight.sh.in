@@ -1,3 +1,0 @@
-#!/bin/bash
-"$2@CMAKE_INSTALL_SUBDIR@/CMake.app/Contents/MacOS/CMake" --mac-install
-exit 0

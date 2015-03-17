@@ -33,8 +33,8 @@ protected:
   bool SupportsComponentInstallation() const;
 
 
-  bool CopyFile(cmOStringStream& source, cmOStringStream& target);
-  bool RunCommand(cmOStringStream& command, std::string* output = 0);
+  bool CopyFile(std::ostringstream& source, std::ostringstream& target);
+  bool RunCommand(std::ostringstream& command, std::string* output = 0);
 
   std::string
   GetComponentInstallDirNameSuffix(const std::string& componentName);

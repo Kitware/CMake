@@ -25,7 +25,7 @@ bool cmTargetIncludeDirectoriesCommand
 void cmTargetIncludeDirectoriesCommand
 ::HandleImportedTarget(const std::string &tgt)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify include directories for imported target \""
     << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -35,7 +35,7 @@ void cmTargetIncludeDirectoriesCommand
 void cmTargetIncludeDirectoriesCommand
 ::HandleMissingTarget(const std::string &name)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify include directories for target \"" << name << "\" "
        "which is not built by this project.";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -66,18 +66,18 @@ std::string cmTargetIncludeDirectoriesCommand
 }
 
 //----------------------------------------------------------------------------
-void cmTargetIncludeDirectoriesCommand
+bool cmTargetIncludeDirectoriesCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                       bool prepend, bool system)
 {
-  cmListFileBacktrace lfbt;
-  this->Makefile->GetBacktrace(lfbt);
+  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
   cmValueWithOrigin entry(this->Join(content), lfbt);
   tgt->InsertInclude(entry, prepend);
   if (system)
     {
     tgt->AddSystemIncludeDirectories(content);
     }
+  return true;
 }
 
 //----------------------------------------------------------------------------
@@ -91,15 +91,7 @@ void cmTargetIncludeDirectoriesCommand
 
   if (system)
     {
-    std::string joined;
-    std::string sep;
-    for(std::vector<std::string>::const_iterator it = content.begin();
-      it != content.end(); ++it)
-      {
-      joined += sep;
-      sep = ";";
-      joined += *it;
-      }
+    std::string joined = cmJoin(content, ";");
     tgt->AppendProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES",
                         joined.c_str());
     }

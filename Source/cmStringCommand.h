@@ -53,8 +53,6 @@ public:
   virtual std::string GetName() const { return "string";}
 
   cmTypeMacro(cmStringCommand, cmCommand);
-  static void ClearMatches(cmMakefile* mf);
-  static void StoreMatches(cmMakefile* mf, cmsys::RegularExpression& re);
 protected:
   bool HandleConfigureCommand(std::vector<std::string> const& args);
   bool HandleAsciiCommand(std::vector<std::string> const& args);
@@ -76,6 +74,7 @@ protected:
   bool HandleTimestampCommand(std::vector<std::string> const& args);
   bool HandleMakeCIdentifierCommand(std::vector<std::string> const& args);
   bool HandleGenexStripCommand(std::vector<std::string> const& args);
+  bool HandleUuidCommand(std::vector<std::string> const& args);
 
   class RegexReplacement
   {

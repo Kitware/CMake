@@ -42,5 +42,6 @@
         <UIRef Id="$(var.CPACK_WIX_UI_REF)" />
 
         <?include "properties.wxi"?>
+        <?include "product_fragment.wxi"?>
     </Product>
 </Wix>

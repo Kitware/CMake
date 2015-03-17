@@ -24,7 +24,7 @@ bool cmTargetSourcesCommand
 void cmTargetSourcesCommand
 ::HandleImportedTarget(const std::string &tgt)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify sources for imported target \""
     << tgt << "\".";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -34,7 +34,7 @@ void cmTargetSourcesCommand
 void cmTargetSourcesCommand
 ::HandleMissingTarget(const std::string &name)
 {
-  cmOStringStream e;
+  std::ostringstream e;
   e << "Cannot specify sources for target \"" << name << "\" "
        "which is not built by this project.";
   this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -44,21 +44,14 @@ void cmTargetSourcesCommand
 std::string cmTargetSourcesCommand
 ::Join(const std::vector<std::string> &content)
 {
-  std::string srcs;
-  std::string sep;
-  for(std::vector<std::string>::const_iterator it = content.begin();
-    it != content.end(); ++it)
-    {
-    srcs += sep + *it;
-    sep = ";";
-    }
-  return srcs;
+  return cmJoin(content, ";");
 }
 
 //----------------------------------------------------------------------------
-void cmTargetSourcesCommand
+bool cmTargetSourcesCommand
 ::HandleDirectContent(cmTarget *tgt, const std::vector<std::string> &content,
                       bool, bool)
 {
   tgt->AppendProperty("SOURCES", this->Join(content).c_str());
+  return true;
 }

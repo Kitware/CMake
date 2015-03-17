@@ -13,6 +13,10 @@
 #include "cmGeneratorExpressionEvaluationFile.h"
 
 #include "cmMakefile.h"
+#include "cmLocalGenerator.h"
+#include "cmGlobalGenerator.h"
+#include "cmSourceFile.h"
+#include "cmGeneratedFileStream.h"
 #include <cmsys/FStream.hxx>
 
 #include <assert.h>
@@ -34,20 +38,22 @@ cmGeneratorExpressionEvaluationFile::cmGeneratorExpressionEvaluationFile(
 
 //----------------------------------------------------------------------------
 void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
+              const std::string& lang,
               cmCompiledGeneratorExpression* inputExpression,
-              std::map<std::string, std::string> &outputFiles)
+              std::map<std::string, std::string> &outputFiles, mode_t perm)
 {
   std::string rawCondition = this->Condition->GetInput();
   if (!rawCondition.empty())
     {
-    std::string condResult = this->Condition->Evaluate(this->Makefile, config);
+    std::string condResult = this->Condition->Evaluate(this->Makefile, config,
+                                                       false, 0, 0, 0, lang);
     if (condResult == "0")
       {
       return;
       }
     if (condResult != "1")
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Evaluation file condition \"" << rawCondition << "\" did "
           "not evaluate to valid content. Got \"" << condResult << "\".";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -56,9 +62,11 @@ void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
     }
 
   const std::string outputFileName
-                    = this->OutputFileExpr->Evaluate(this->Makefile, config);
+                    = this->OutputFileExpr->Evaluate(this->Makefile, config,
+                                                     false, 0, 0, 0, lang);
   const std::string outputContent
-                          = inputExpression->Evaluate(this->Makefile, config);
+                          = inputExpression->Evaluate(this->Makefile, config,
+                                                      false, 0, 0, 0, lang);
 
   std::map<std::string, std::string>::iterator it
                                           = outputFiles.find(outputFileName);
@@ -69,34 +77,53 @@ void cmGeneratorExpressionEvaluationFile::Generate(const std::string& config,
       {
       return;
       }
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Evaluation file to be written multiple times for different "
-         "configurations with different content:\n  " << outputFileName;
+         "configurations or languages with different content:\n  "
+      << outputFileName;
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
     return;
     }
 
+  this->Makefile->AddCMakeOutputFile(outputFileName.c_str());
   this->Files.push_back(outputFileName);
   outputFiles[outputFileName] = outputContent;
 
-  cmsys::ofstream fout(outputFileName.c_str());
-
-  if(!fout)
-    {
-    cmOStringStream e;
-    e << "Evaluation file \"" << outputFileName << "\" cannot be written.";
-    this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return;
-    }
-
+  cmGeneratedFileStream fout(outputFileName.c_str());
+  fout.SetCopyIfDifferent(true);
   fout << outputContent;
+  if (fout.Close() && perm)
+    {
+    cmSystemTools::SetPermissions(outputFileName.c_str(), perm);
+    }
+}
 
-  fout.close();
+//----------------------------------------------------------------------------
+void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
+                                              std::string const& config)
+{
+  std::vector<std::string> enabledLanguages;
+  cmGlobalGenerator *gg
+                  = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  gg->GetEnabledLanguages(enabledLanguages);
+
+  for(std::vector<std::string>::const_iterator le = enabledLanguages.begin();
+      le != enabledLanguages.end(); ++le)
+    {
+    std::string name = this->OutputFileExpr->Evaluate(this->Makefile, config,
+                                                      false, 0, 0, 0, *le);
+    cmSourceFile* sf = this->Makefile->GetOrCreateSource(name);
+    sf->SetProperty("GENERATED", "1");
+
+    gg->SetFilenameTargetDepends(sf,
+                          this->OutputFileExpr->GetSourceSensitiveTargets());
+    }
 }
 
 //----------------------------------------------------------------------------
 void cmGeneratorExpressionEvaluationFile::Generate()
 {
+  mode_t perm = 0;
   std::string inputContent;
   if (this->InputIsContent)
     {
@@ -104,10 +131,12 @@ void cmGeneratorExpressionEvaluationFile::Generate()
     }
   else
     {
+    this->Makefile->AddCMakeDependFile(this->Input.c_str());
+    cmSystemTools::GetPermissions(this->Input.c_str(), perm);
     cmsys::ifstream fin(this->Input.c_str());
     if(!fin)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Evaluation file \"" << this->Input << "\" cannot be read.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
@@ -124,7 +153,7 @@ void cmGeneratorExpressionEvaluationFile::Generate()
     }
 
   cmListFileBacktrace lfbt = this->OutputFileExpr->GetBacktrace();
-  cmGeneratorExpression contentGE(lfbt);
+  cmGeneratorExpression contentGE(&lfbt);
   cmsys::auto_ptr<cmCompiledGeneratorExpression> inputExpression
                                               = contentGE.Parse(inputContent);
 
@@ -137,13 +166,23 @@ void cmGeneratorExpressionEvaluationFile::Generate()
     {
     allConfigs.push_back("");
     }
-  for(std::vector<std::string>::const_iterator li = allConfigs.begin();
-      li != allConfigs.end(); ++li)
+
+  std::vector<std::string> enabledLanguages;
+  cmGlobalGenerator *gg
+                  = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  gg->GetEnabledLanguages(enabledLanguages);
+
+  for(std::vector<std::string>::const_iterator le = enabledLanguages.begin();
+      le != enabledLanguages.end(); ++le)
     {
-    this->Generate(*li, inputExpression.get(), outputFiles);
-    if(cmSystemTools::GetFatalErrorOccured())
+    for(std::vector<std::string>::const_iterator li = allConfigs.begin();
+        li != allConfigs.end(); ++li)
       {
-      return;
+      this->Generate(*li, *le, inputExpression.get(), outputFiles, perm);
+      if(cmSystemTools::GetFatalErrorOccured())
+        {
+        return;
+        }
       }
     }
 }

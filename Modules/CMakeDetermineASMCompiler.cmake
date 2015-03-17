@@ -18,7 +18,7 @@ include(${CMAKE_ROOT}/Modules/CMakeDetermineCompiler.cmake)
 
 if(NOT CMAKE_ASM${ASM_DIALECT}_COMPILER)
   # prefer the environment variable ASM
-  if($ENV{ASM${ASM_DIALECT}} MATCHES ".+")
+  if(NOT $ENV{ASM${ASM_DIALECT}} STREQUAL "")
     set(CMAKE_ASM${ASM_DIALECT}_COMPILER_INIT "$ENV{ASM${ASM_DIALECT}}")
   endif()
 

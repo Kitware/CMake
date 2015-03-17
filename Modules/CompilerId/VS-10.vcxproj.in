@@ -10,6 +10,9 @@
     <ProjectGuid>{CAE07175-D007-4FC3-BFE8-47B392814159}</ProjectGuid>
     <RootNamespace>CompilerId@id_lang@</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    @id_system@
+    @id_system_version@
+    @id_WindowsSDKDesktopARMSupport@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|@id_platform@'" Label="Configuration">

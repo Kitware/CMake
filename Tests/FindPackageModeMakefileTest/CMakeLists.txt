@@ -10,7 +10,7 @@ if(UNIX  AND  "${CMAKE_GENERATOR}" MATCHES "Makefile")
                   ERROR_QUIET
                   TIMEOUT 10)
   string(TOUPPER "${makeVersionOutput}" MAKE_VERSION_OUTPUT)
-  if("${MAKE_VERSION_OUTPUT}" MATCHES ".*GNU MAKE.*")
+  if("${MAKE_VERSION_OUTPUT}" MATCHES "GNU MAKE")
 
     # build a library which we can search during the test
     add_library(foo STATIC foo.cpp)

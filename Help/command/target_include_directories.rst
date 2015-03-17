@@ -9,8 +9,8 @@ Add include directories to a target.
     <INTERFACE|PUBLIC|PRIVATE> [items1...]
     [<INTERFACE|PUBLIC|PRIVATE> [items2...] ...])
 
-Specify include directories or targets to use when compiling a given
-target.  The named ``<target>`` must have been created by a command such
+Specify include directories to use when compiling a given target.
+The named ``<target>`` must have been created by a command such
 as :command:`add_executable` or :command:`add_library` and must not be an
 :prop_tgt:`IMPORTED` target.
 
@@ -40,3 +40,20 @@ Arguments to ``target_include_directories`` may use "generator expressions"
 with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
+
+Include directories usage requirements commonly differ between the build-tree
+and the install-tree.  The ``BUILD_INTERFACE`` and ``INSTALL_INTERFACE``
+generator expressions can be used to describe separate usage requirements
+based on the usage location.  Relative paths are allowed within the
+``INSTALL_INTERFACE`` expression and are interpreted relative to the
+installation prefix.  For example:
+
+.. code-block:: cmake
+
+  target_include_directories(mylib PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include/mylib>
+    $<INSTALL_INTERFACE:include/mylib>  # <prefix>/include/mylib
+  )
+
+.. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
+.. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.txt

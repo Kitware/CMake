@@ -87,6 +87,8 @@ public:
   int GetSubmitIndex() { return this->SubmitIndex; }
 
   void SetAppendXML(bool b) { this->AppendXML = b; }
+  void SetQuiet(bool b) { this->Quiet = b; }
+  bool GetQuiet() { return this->Quiet; }
 
 protected:
   bool StartResultingXML(cmCTest::Part part,
@@ -94,6 +96,7 @@ protected:
   bool StartLogFile(const char* name, cmGeneratedFileStream& xofs);
 
   bool AppendXML;
+  bool Quiet;
   cmSystemTools::OutputOption HandlerVerbose;
   cmCTest *CTest;
   t_StringToString Options;

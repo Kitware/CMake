@@ -21,7 +21,7 @@ if(TARGET NotATarget)
   message(FATAL_ERROR "if(TARGET NotATarget) returned true!")
 endif()
 
-  # Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to
+# Use LINK_LIBRARIES instead of TARGET_LINK_LIBRARIES to
 set(COMPLEX_LIBS CMakeTestLibrary;CMakeTestLibraryShared;CMakeTestCLibraryShared)
 link_libraries(${COMPLEX_LIBS})
 
@@ -89,18 +89,22 @@ remove_definitions(-DCOMPLEX_DEFINED)
 # Test pre-build/pre-link/post-build rules for an executable.
 add_custom_command(TARGET complex PRE_BUILD
                    COMMAND ${CREATE_FILE_EXE}
-                   ARGS "${Complex_BINARY_DIR}/Executable/prebuild.txt")
+                   ARGS "Executable/prebuild.txt"
+                   WORKING_DIRECTORY "${Complex_BINARY_DIR}")
 add_custom_command(TARGET complex PRE_LINK
                    COMMAND ${CREATE_FILE_EXE}
-                   ARGS "${Complex_BINARY_DIR}/Executable/prelink.txt")
+                   ARGS "Executable/prelink.txt"
+                   WORKING_DIRECTORY "${Complex_BINARY_DIR}")
 add_custom_command(TARGET complex POST_BUILD
                    COMMAND ${CREATE_FILE_EXE}
-                   ARGS "${Complex_BINARY_DIR}/Executable/postbuild.txt")
+                   ARGS "Executable/postbuild.txt"
+                   WORKING_DIRECTORY "${Complex_BINARY_DIR}")
 add_custom_command(TARGET complex POST_BUILD
                    COMMAND ${CMAKE_COMMAND}
                    ARGS -E copy
-                        "${Complex_BINARY_DIR}/Executable/postbuild.txt"
-                        "${Complex_BINARY_DIR}/Executable/postbuild2.txt")
+                        "Executable/postbuild.txt"
+                        "Executable/postbuild2.txt"
+                   WORKING_DIRECTORY "${Complex_BINARY_DIR}")
 
 set_source_files_properties(complex
   COMPILE_FLAGS

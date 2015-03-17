@@ -51,7 +51,7 @@ bool cmSeparateArgumentsCommand
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given unknown argument " << args[i];
       this->SetError(e.str());
       return false;

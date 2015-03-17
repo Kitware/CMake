@@ -30,7 +30,7 @@ bool cmParseGTMCoverage::LoadCoverageData(const char* d)
     {
     std::string file = dir.GetFile(i);
     if(file != "." && file != ".."
-       && !cmSystemTools::FileIsDirectory(file.c_str()))
+       && !cmSystemTools::FileIsDirectory(file))
       {
       std::string path = d;
       path += "/";
@@ -80,7 +80,7 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
     // no need to search the file if we just did it
     if(function == lastfunction && lastroutine == routine)
       {
-      if(lastpath.size())
+      if(!lastpath.empty())
         {
         this->Coverage.TotalCoverage[lastpath][lastoffset + linenumber]
           += count;
@@ -106,7 +106,19 @@ bool cmParseGTMCoverage::ReadMCovFile(const char* file)
         {
         cmCTestCoverageHandlerContainer::SingleFileCoverageVector&
           coverageVector = this->Coverage.TotalCoverage[filepath];
-        coverageVector[lineoffset + linenumber] += count;
+        // This section accounts for lines that were previously marked
+        // as non-executable code (-1), if the parser comes back with
+        // a non-zero count, increase the count by 1 to push the line
+        // into the executable code set in addtion to the count found.
+        if(coverageVector[lineoffset + linenumber] == -1 &&
+           count > 0)
+          {
+          coverageVector[lineoffset + linenumber] += count+1;
+          }
+        else
+          {
+          coverageVector[lineoffset + linenumber] += count;
+          }
         lastoffset = lineoffset;
         }
       }
@@ -141,7 +153,7 @@ bool cmParseGTMCoverage::FindFunctionInMumpsFile(std::string const& filepath,
     if(pos == 0)
       {
       char nextchar = line[function.size()];
-      if(nextchar == ' ' || nextchar == '(')
+      if(nextchar == ' ' || nextchar == '('|| nextchar == '\t')
         {
         lineoffset = linenum;
         return true;
@@ -261,7 +273,11 @@ bool cmParseGTMCoverage::ParseMCOVLine(std::string const& line,
   // ^COVERAGE("%RSEL","SRC"), the line offset is 0
   if(args.size() == 2)
     {
-    linenumber = 0;
+    // To avoid double counting of line 0 of each entry point,
+    // Don't count the lines that do not give an explicit line
+    // number.
+    routine="";
+    function="";
     }
   else
     {

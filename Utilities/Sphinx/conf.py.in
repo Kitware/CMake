@@ -31,6 +31,8 @@ exclude_patterns = []
 extensions = ['cmake']
 templates_path = ['@conf_path@/templates']
 
+nitpicky = True
+
 cmake_manuals = sorted(glob.glob(r'@conf_docs@/manual/*.rst'))
 cmake_manual_description = re.compile('^\.\. cmake-manual-description:(.*)$')
 man_pages = []
@@ -50,7 +52,7 @@ for fpath in cmake_manuals:
                               name, desc, [], int(sec)))
         else:
             sys.stderr.write("ERROR: No cmake-manual-description in '%s'\n" % fpath)
-    except Exception, e:
+    except Exception as e:
         sys.stderr.write("ERROR: %s\n" % str(e))
 man_show_urls = False
 
@@ -60,7 +62,7 @@ html_style = 'cmake.css'
 html_theme = 'default'
 html_title = 'CMake %s Documentation' % release
 html_short_title = '%s Documentation' % release
-html_favicon = 'cmake-favicon.ico'
+html_favicon = '@conf_path@/static/cmake-favicon.ico'
 # Not supported yet by sphinx:
 # https://bitbucket.org/birkenfeld/sphinx/issue/1448/make-qthelp-more-configurable
 # qthelp_namespace = "org.cmake"

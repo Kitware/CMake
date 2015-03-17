@@ -110,10 +110,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
 
   // Prepare the table of variables to read.
   this->Prefix = args[2];
-  for(unsigned int i=3; i < args.size(); ++i)
-    {
-    this->VariablesToRead.insert(args[i]);
-    }
+  this->VariablesToRead.insert(args.begin() + 3, args.end());
 
   // Read the cache file.
   cmsys::ifstream fin(cacheFile.c_str());
@@ -160,7 +157,7 @@ bool cmLoadCacheCommand::ReadWithPrefix(std::vector<std::string> const& args)
         }
       }
     }
-  if(line.length())
+  if(!line.empty())
     {
     // Partial last line.
     this->CheckLine(line.c_str());
@@ -184,7 +181,7 @@ void cmLoadCacheCommand::CheckLine(const char* line)
       // This was requested.  Set this variable locally with the given
       // prefix.
       var = this->Prefix + var;
-      if(value.length())
+      if(!value.empty())
         {
         this->Makefile->AddDefinition(var, value.c_str());
         }

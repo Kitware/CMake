@@ -1,4 +1,1 @@
-int bar()
-{
-  return 10;
-}
+#include "gen.cxx"

@@ -10,3 +10,11 @@
 # usually begin with CPACK_<GENNAME>_xxxx.
 
 @_CPACK_OTHER_VARIABLES_@
+
+if(NOT CPACK_PROPERTIES_FILE)
+  set(CPACK_PROPERTIES_FILE "@CMAKE_BINARY_DIR@/CPackProperties.cmake")
+endif()
+
+if(EXISTS ${CPACK_PROPERTIES_FILE})
+  include(${CPACK_PROPERTIES_FILE})
+endif()

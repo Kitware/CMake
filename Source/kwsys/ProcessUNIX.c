@@ -68,6 +68,7 @@ do.
 #include <signal.h>    /* sigaction */
 #include <dirent.h>    /* DIR, dirent */
 #include <ctype.h>     /* isspace */
+#include <assert.h>    /* assert */
 
 #if defined(__VMS)
 # define KWSYSPE_VMS_NONBLOCK , O_NONBLOCK
@@ -450,6 +451,7 @@ int kwsysProcess_AddCommand(kwsysProcess* cp, char const* const* command)
       }
     for(i=0; i < n; ++i)
       {
+      assert(command[i]); /* Quiet Clang scan-build. */
       newCommands[cp->NumberOfCommands][i] = strdup(command[i]);
       if(!newCommands[cp->NumberOfCommands][i])
         {
@@ -545,7 +547,7 @@ int kwsysProcess_SetPipeFile(kwsysProcess* cp, int prPipe, const char* file)
     }
   if(file)
     {
-    *pfile = malloc(strlen(file)+1);
+    *pfile = (char*)malloc(strlen(file)+1);
     if(!*pfile)
       {
       return 0;
@@ -1466,7 +1468,7 @@ static int kwsysProcessInitialize(kwsysProcess* cp)
     cp->RealWorkingDirectoryLength = 4096;
 #endif
     cp->RealWorkingDirectory =
-      malloc((size_t)(cp->RealWorkingDirectoryLength));
+      (char*)malloc((size_t)(cp->RealWorkingDirectoryLength));
     if(!cp->RealWorkingDirectory)
       {
       return 0;
@@ -2412,6 +2414,12 @@ static void kwsysProcessKill(pid_t process_id)
 
   /* Suspend the process to be sure it will not create more children.  */
   kill(process_id, SIGSTOP);
+
+#if defined(__CYGWIN__)
+  /* Some Cygwin versions seem to need help here.  Give up our time slice
+     so that the child can process SIGSTOP before we send SIGKILL.  */
+  usleep(1);
+#endif
 
   /* Kill all children if we can find them.  */
 #if defined(__linux__) || defined(__CYGWIN__)

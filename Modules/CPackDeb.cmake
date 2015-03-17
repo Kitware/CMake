@@ -240,7 +240,7 @@ if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
 
   # Check version of the dpkg-shlibdeps tool using CPackRPM method
   if(SHLIBDEPS_EXECUTABLE)
-    execute_process(COMMAND ${SHLIBDEPS_EXECUTABLE} --version
+    execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
       OUTPUT_VARIABLE _TMP_VERSION
       ERROR_QUIET
       OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -259,7 +259,7 @@ if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
       OUTPUT_VARIABLE CPACK_DEB_INSTALL_FILES)
 
     # Convert to CMake list
-    string(REGEX REPLACE "\n" ";" CPACK_DEB_INSTALL_FILES ${CPACK_DEB_INSTALL_FILES})
+    string(REPLACE "\n" ";" CPACK_DEB_INSTALL_FILES ${CPACK_DEB_INSTALL_FILES})
 
     # Only dynamically linked ELF files are included
     # Extract only file name infront of ":"

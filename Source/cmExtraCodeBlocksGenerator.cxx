@@ -276,7 +276,7 @@ void cmExtraCodeBlocksGenerator
                          it->second[0]->GetMakefile()->GetHomeDirectory(),
                          jt->c_str());
       std::vector<std::string> splitted;
-      cmSystemTools::SplitPath(relative.c_str(), splitted, false);
+      cmSystemTools::SplitPath(relative, splitted, false);
       // Split filename from path
       std::string fileName = *(splitted.end()-1);
       splitted.erase(splitted.end() - 1, splitted.end());
@@ -376,11 +376,13 @@ void cmExtraCodeBlocksGenerator
   fout<<"      </Build>\n";
 
 
-  // Collect all used source files in the project
-  // Sort them into two containers, one for C/C++ implementation files
-  // which may have an acompanying header, one for all other files
-  std::map<std::string, cmSourceFile*> cFiles;
-  std::set<std::string> otherFiles;
+  // Collect all used source files in the project.
+  // Keep a list of C/C++ source files which might have an acompanying header
+  // that should be looked for.
+  typedef std::map<std::string, CbpUnit> all_files_map_t;
+  all_files_map_t allFiles;
+  std::vector<std::string> cFiles;
+
   for (std::vector<cmLocalGenerator*>::const_iterator lg=lgs.begin();
        lg!=lgs.end(); lg++)
     {
@@ -429,15 +431,15 @@ void cmExtraCodeBlocksGenerator
                 }
               }
 
-            // then put it accordingly into one of the two containers
-            if (isCFile)
+            std::string fullPath = (*si)->GetFullPath();
+
+            if(isCFile)
               {
-              cFiles[(*si)->GetFullPath()] = *si ;
+              cFiles.push_back(fullPath);
               }
-            else
-              {
-              otherFiles.insert((*si)->GetFullPath());
-              }
+
+            CbpUnit &cbpUnit = allFiles[fullPath];
+            cbpUnit.Targets.push_back(&(ti->second));
             }
           }
         default:  // intended fallthrough
@@ -447,19 +449,21 @@ void cmExtraCodeBlocksGenerator
     }
 
   // The following loop tries to add header files matching to implementation
-  // files to the project. It does that by iterating over all source files,
+  // files to the project. It does that by iterating over all
+  // C/C++ source files,
   // replacing the file name extension with ".h" and checks whether such a
   // file exists. If it does, it is inserted into the map of files.
   // A very similar version of that code exists also in the kdevelop
   // project generator.
-  for (std::map<std::string, cmSourceFile*>::const_iterator
+  for (std::vector<std::string>::const_iterator
        sit=cFiles.begin();
        sit!=cFiles.end();
        ++sit)
     {
-    std::string headerBasename=cmSystemTools::GetFilenamePath(sit->first);
+    std::string const& fileName = *sit;
+    std::string headerBasename=cmSystemTools::GetFilenamePath(fileName);
     headerBasename+="/";
-    headerBasename+=cmSystemTools::GetFilenameWithoutExtension(sit->first);
+    headerBasename+=cmSystemTools::GetFilenameWithoutExtension(fileName);
 
     // check if there's a matching header around
     for(std::vector<std::string>::const_iterator
@@ -471,37 +475,38 @@ void cmExtraCodeBlocksGenerator
       hname += ".";
       hname += *ext;
       // if it's already in the set, don't check if it exists on disk
-      std::set<std::string>::const_iterator headerIt=otherFiles.find(hname);
-      if (headerIt != otherFiles.end())
+      if (allFiles.find(hname) != allFiles.end())
         {
         break;
         }
 
       if(cmSystemTools::FileExists(hname.c_str()))
         {
-        otherFiles.insert(hname);
+        allFiles[hname].Targets = allFiles[fileName].Targets;
         break;
         }
       }
     }
 
   // insert all source files in the CodeBlocks project
-  // first the C/C++ implementation files, then all others
-  for (std::map<std::string, cmSourceFile*>::const_iterator
-       sit=cFiles.begin();
-       sit!=cFiles.end();
+  for (all_files_map_t::const_iterator
+       sit=allFiles.begin();
+       sit!=allFiles.end();
        ++sit)
     {
-    fout<<"      <Unit filename=\""<< sit->first <<"\">\n"
-          "      </Unit>\n";
-    }
-  for (std::set<std::string>::const_iterator
-       sit=otherFiles.begin();
-       sit!=otherFiles.end();
-       ++sit)
-    {
-    fout<<"      <Unit filename=\""<< *sit <<"\">\n"
-          "      </Unit>\n";
+    std::string const& unitFilename = sit->first;
+    CbpUnit const& unit = sit->second;
+
+    fout<<"      <Unit filename=\""<< cmXMLSafe(unitFilename) <<"\">\n";
+
+    for(std::vector<const cmTarget*>::const_iterator ti = unit.Targets.begin();
+      ti != unit.Targets.end(); ++ti)
+      {
+      std::string const& targetName = (*ti)->GetName();
+      fout<<"         <Option target=\""<< cmXMLSafe(targetName) <<"\"/>\n";
+      }
+
+    fout<<"      </Unit>\n";
     }
 
   // Add CMakeLists.txt
@@ -574,7 +579,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
         }
       }
 
-    const char* buildType = makefile->GetDefinition("CMAKE_BUILD_TYPE");
+    std::string buildType = makefile->GetSafeDefinition("CMAKE_BUILD_TYPE");
     std::string location;
     if ( target->GetType()==cmTarget::OBJECT_LIBRARY)
       {
@@ -599,7 +604,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
 
     // the compilerdefines for this target
     std::vector<std::string> cdefs;
-    target->GetCompileDefinitions(cdefs, buildType);
+    target->GetCompileDefinitions(cdefs, buildType, "C");
 
     // Expand the list.
     for(std::vector<std::string>::const_iterator di = cdefs.begin();
@@ -615,12 +620,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     std::vector<std::string> includes;
     target->GetMakefile()->GetLocalGenerator()->
       GetIncludeDirectories(includes, gtgt, "C", buildType);
-    for(std::vector<std::string>::const_iterator dirIt=includes.begin();
-        dirIt != includes.end();
-        ++dirIt)
-      {
-      uniqIncludeDirs.insert(*dirIt);
-      }
+
+    uniqIncludeDirs.insert(includes.begin(), includes.end());
 
     std::string systemIncludeDirs = makefile->GetSafeDefinition(
                               "CMAKE_EXTRA_GENERATOR_C_SYSTEM_INCLUDE_DIRS");
@@ -628,12 +629,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
-          dirIt != dirs.end();
-          ++dirIt)
-        {
-        uniqIncludeDirs.insert(*dirIt);
-        }
+      uniqIncludeDirs.insert(dirs.begin(), dirs.end());
       }
 
     systemIncludeDirs = makefile->GetSafeDefinition(
@@ -642,12 +638,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
       {
       std::vector<std::string> dirs;
       cmSystemTools::ExpandListArgument(systemIncludeDirs, dirs);
-      for(std::vector<std::string>::const_iterator dirIt=dirs.begin();
-          dirIt != dirs.end();
-          ++dirIt)
-        {
-        uniqIncludeDirs.insert(*dirIt);
-        }
+      uniqIncludeDirs.insert(dirs.begin(), dirs.end());
       }
 
     for(std::set<std::string>::const_iterator dirIt=uniqIncludeDirs.begin();

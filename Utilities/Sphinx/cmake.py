@@ -80,12 +80,12 @@ class CMakeModule(Directive):
             settings.record_dependencies.add(path)
             f = io.FileInput(source_path=path, encoding=encoding,
                              error_handler=e_handler)
-        except UnicodeEncodeError, error:
+        except UnicodeEncodeError as error:
             raise self.severe('Problems with "%s" directive path:\n'
                               'Cannot encode input file path "%s" '
                               '(wrong locale?).' %
                               (self.name, SafeString(path)))
-        except IOError, error:
+        except IOError as error:
             raise self.severe('Problems with "%s" directive path:\n%s.' %
                       (self.name, ErrorString(error)))
         raw_lines = f.read().splitlines()
@@ -130,8 +130,8 @@ class _cmake_index_entry:
     def __init__(self, desc):
         self.desc = desc
 
-    def __call__(self, title, targetid):
-        return ('pair', u'%s ; %s' % (self.desc, title), targetid, 'main')
+    def __call__(self, title, targetid, main = 'main'):
+        return ('pair', u'%s ; %s' % (self.desc, title), targetid, main)
 
 _cmake_index_objs = {
     'command':    _cmake_index_entry('command'),
@@ -142,6 +142,7 @@ _cmake_index_objs = {
     'prop_cache': _cmake_index_entry('cache property'),
     'prop_dir':   _cmake_index_entry('directory property'),
     'prop_gbl':   _cmake_index_entry('global property'),
+    'prop_inst':  _cmake_index_entry('installed file property'),
     'prop_sf':    _cmake_index_entry('source file property'),
     'prop_test':  _cmake_index_entry('test property'),
     'prop_tgt':   _cmake_index_entry('target property'),
@@ -200,8 +201,13 @@ class CMakeTransform(Transform):
         if make_index_entry:
             title = self.parse_title(env.docname)
             # Insert the object link target.
-            targetid = '%s:%s' % (objtype, title)
+            if objtype == 'command':
+                targetname = title.lower()
+            else:
+                targetname = title
+            targetid = '%s:%s' % (objtype, targetname)
             targetnode = nodes.target('', '', ids=[targetid])
+            self.document.note_explicit_target(targetnode)
             self.document.insert(0, targetnode)
             # Insert the object index entry.
             indexnode = addnodes.index()
@@ -218,7 +224,11 @@ class CMakeObject(ObjectDescription):
         return sig
 
     def add_target_and_index(self, name, sig, signode):
-        targetid = '%s:%s' % (self.objtype, name)
+        if self.objtype == 'command':
+           targetname = name.lower()
+        else:
+           targetname = name
+        targetid = '%s:%s' % (self.objtype, targetname)
         if targetid not in self.state.document.ids:
             signode['names'].append(targetid)
             signode['ids'].append(targetid)
@@ -256,6 +266,49 @@ class CMakeXRefRole(XRefRole):
                 break
         return XRefRole.__call__(self, typ, rawtext, text, *args, **keys)
 
+    # We cannot insert index nodes using the result_nodes method
+    # because CMakeXRefRole is processed before substitution_reference
+    # nodes are evaluated so target nodes (with 'ids' fields) would be
+    # duplicated in each evaluted substitution replacement.  The
+    # docutils substitution transform does not allow this.  Instead we
+    # use our own CMakeXRefTransform below to add index entries after
+    # substitutions are completed.
+    #
+    # def result_nodes(self, document, env, node, is_ref):
+    #     pass
+
+class CMakeXRefTransform(Transform):
+
+    # Run this transform early since we insert nodes we want
+    # treated as if they were written in the documents, but
+    # after the sphinx (210) and docutils (220) substitutions.
+    default_priority = 221
+
+    def apply(self):
+        env = self.document.settings.env
+
+        # Find CMake cross-reference nodes and add index and target
+        # nodes for them.
+        for ref in self.document.traverse(addnodes.pending_xref):
+            if not ref['refdomain'] == 'cmake':
+                continue
+
+            objtype = ref['reftype']
+            make_index_entry = _cmake_index_objs.get(objtype)
+            if not make_index_entry:
+                continue
+
+            objname = ref['reftarget']
+            targetnum = env.new_serialno('index-%s:%s' % (objtype, objname))
+
+            targetid = 'index-%s-%s:%s' % (targetnum, objtype, objname)
+            targetnode = nodes.target('', '', ids=[targetid])
+            self.document.note_explicit_target(targetnode)
+
+            indexnode = addnodes.index()
+            indexnode['entries'] = [make_index_entry(objname, targetid, '')]
+            ref.replace_self([indexnode, targetnode, ref])
+
 class CMakeDomain(Domain):
     """CMake domain."""
     name = 'cmake'
@@ -269,6 +322,7 @@ class CMakeDomain(Domain):
         'prop_cache': ObjType('prop_cache', 'prop_cache'),
         'prop_dir':   ObjType('prop_dir',   'prop_dir'),
         'prop_gbl':   ObjType('prop_gbl',   'prop_gbl'),
+        'prop_inst':  ObjType('prop_inst',  'prop_inst'),
         'prop_sf':    ObjType('prop_sf',    'prop_sf'),
         'prop_test':  ObjType('prop_test',  'prop_test'),
         'prop_tgt':   ObjType('prop_tgt',   'prop_tgt'),
@@ -284,6 +338,7 @@ class CMakeDomain(Domain):
         # 'prop_cache': CMakeObject,
         # 'prop_dir':   CMakeObject,
         # 'prop_gbl':   CMakeObject,
+        # 'prop_inst':  CMakeObject,
         # 'prop_sf':    CMakeObject,
         # 'prop_test':  CMakeObject,
         # 'prop_tgt':   CMakeObject,
@@ -298,6 +353,7 @@ class CMakeDomain(Domain):
         'prop_cache': CMakeXRefRole(),
         'prop_dir':   CMakeXRefRole(),
         'prop_gbl':   CMakeXRefRole(),
+        'prop_inst':  CMakeXRefRole(),
         'prop_sf':    CMakeXRefRole(),
         'prop_test':  CMakeXRefRole(),
         'prop_tgt':   CMakeXRefRole(),
@@ -308,9 +364,12 @@ class CMakeDomain(Domain):
     }
 
     def clear_doc(self, docname):
+        to_clear = set()
         for fullname, (fn, _) in self.data['objects'].items():
             if fn == docname:
-                del self.data['objects'][fullname]
+                to_clear.add(fullname)
+        for fullname in to_clear:
+            del self.data['objects'][fullname]
 
     def resolve_xref(self, env, fromdocname, builder,
                      typ, target, node, contnode):
@@ -323,10 +382,11 @@ class CMakeDomain(Domain):
                             contnode, target)
 
     def get_objects(self):
-        for refname, (docname, type) in self.data['objects'].iteritems():
+        for refname, (docname, type) in self.data['objects'].items():
             yield (refname, refname, type, docname, refname, 1)
 
 def setup(app):
     app.add_directive('cmake-module', CMakeModule)
     app.add_transform(CMakeTransform)
+    app.add_transform(CMakeXRefTransform)
     app.add_domain(CMakeDomain)

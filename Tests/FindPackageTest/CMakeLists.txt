@@ -320,23 +320,61 @@ endif()
 
 #-----------------------------------------------------------------------------
 # Test export(PACKAGE) with find_package.
+
+# Choose a unique version.
+string(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
+string(RANDOM LENGTH 4 ALPHABET "0123456789" v)
+set(version "${version}.${v}")
+
 message(STATUS "Preparing export(PACKAGE) test project")
 try_compile(EXPORTER_COMPILED
-  ${FindPackageTest_BINARY_DIR}/Exporter
+  ${FindPackageTest_BINARY_DIR}/Exporter-build
   ${FindPackageTest_SOURCE_DIR}/Exporter
   CMakeTestExportPackage dummy
+  CMAKE_FLAGS "-UCMAKE_EXPORT_NO_PACKAGE_REGISTRY"
+    -Dversion=${version}
   OUTPUT_VARIABLE output)
 message(STATUS "Searching for export(PACKAGE) test project")
 set(CMakeTestExportPackage_DIR "" CACHE FILEPATH
   "Wipe out find results for testing." FORCE)
-string(REGEX REPLACE "-.*$" "" version ${CMAKE_VERSION})
 find_package(CMakeTestExportPackage 1.${version} EXACT REQUIRED)
+
+message(STATUS "Searching for export(PACKAGE) test project with CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=TRUE")
+set(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY TRUE)
+set(CMakeTestExportPackage_DIR "" CACHE FILEPATH
+  "Wipe out find results for testing." FORCE)
+find_package(CMakeTestExportPackage  1.${version} EXACT QUIET)
+if(CMakeTestExportPackage_FOUND)
+  message(SEND_ERROR "CMakeTestExportPackage should not be FOUND!")
+endif()
+unset(CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY)
+
+message(STATUS "Remove export(PACKAGE) test project")
+file(REMOVE_RECURSE ${FindPackageTest_BINARY_DIR}/Exporter-build)
+set(CMakeTestExportPackage_DIR "" CACHE FILEPATH
+  "Wipe out find results for testing." FORCE)
+find_package(CMakeTestExportPackage QUIET) # Should clean the user package cache
+#
+message(STATUS "Preparing export(PACKAGE) test project with CMAKE_EXPORT_NO_PACKAGE_REGISTRY=TRUE")
+try_compile(EXPORTER_COMPILED
+  ${FindPackageTest_BINARY_DIR}/Exporter-build
+  ${FindPackageTest_SOURCE_DIR}/Exporter
+  CMakeTestExportPackage dummy
+  CMAKE_FLAGS "-DCMAKE_EXPORT_NO_PACKAGE_REGISTRY:BOOL=TRUE"
+    -Dversion=${version}
+  OUTPUT_VARIABLE output)
+message(STATUS "Searching for export(PACKAGE) test project")
+find_package(CMakeTestExportPackage 1.${version} EXACT QUIET)
+if(CMakeTestExportPackage_FOUND)
+  message(SEND_ERROR "CMakeTestExportPackage should not be FOUND!")
+endif()
 
 #-----------------------------------------------------------------------------
 # Test configure_package_config_file().
 
 include(CMakePackageConfigHelpers)
 
+# Generate a config file ready to be installed.
 set(INCLUDE_INSTALL_DIR include )
 set(SHARE_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/share/" )
 set(CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
@@ -369,6 +407,43 @@ endif()
 if(Relocatable_FOUND)
   message(SEND_ERROR "Relocatable_FOUND set to TRUE !")
 endif()
+
+# Generate a config file for the build tree.
+set(INCLUDE_INSTALL_DIR include )
+set(SHARE_INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/share/" )
+set(CURRENT_BUILD_DIR "${CMAKE_CURRENT_BINARY_DIR}" )
+
+configure_package_config_file(RelocatableConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/RelocatableConfig.cmake"
+                              INSTALL_DESTINATION "${CMAKE_CURRENT_BINARY_DIR}"
+                              PATH_VARS INCLUDE_INSTALL_DIR SHARE_INSTALL_DIR CURRENT_BUILD_DIR
+                              INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
+                             )
+
+set(Relocatable_FIND_COMPONENTS AComp BComp CComp)
+set(Relocatable_FIND_REQUIRED_BComp 1)
+include("${CMAKE_CURRENT_BINARY_DIR}/RelocatableConfig.cmake")
+
+if(NOT "${RELOC_INCLUDE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/include")
+  message(SEND_ERROR "RELOC_INCLUDE_DIR set by configure_package_config_file() is set to \"${RELOC_INCLUDE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/include\")")
+endif()
+
+if(NOT "${RELOC_SHARE_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}/share/")
+  message(SEND_ERROR "RELOC_SHARE_DIR set by configure_package_config_file() is set to \"${RELOC_SHARE_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}/share/\")")
+endif()
+
+if(NOT "${RELOC_BUILD_DIR}" STREQUAL "${CMAKE_CURRENT_BINARY_DIR}")
+  message(SEND_ERROR "RELOC_BUILD_DIR set by configure_package_config_file() is set to \"${RELOC_BUILD_DIR}\" (expected \"${CMAKE_CURRENT_BINARY_DIR}\")")
+endif()
+
+if(NOT DEFINED Relocatable_FOUND)
+  message(SEND_ERROR "Relocatable_FOUND not defined !")
+endif()
+
+if(Relocatable_FOUND)
+  message(SEND_ERROR "Relocatable_FOUND set to TRUE !")
+endif()
+
+
 
 #-----------------------------------------------------------------------------
 # Test write_basic_config_version_file().

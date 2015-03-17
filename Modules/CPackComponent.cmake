@@ -110,7 +110,7 @@
 #
 # DESCRIPTION is an extended description of the component, used in
 # graphical installers to give the user additional information about the
-# component.  Descriptions can span multiple lines using "\n" as the
+# component.  Descriptions can span multiple lines using ``\n`` as the
 # line separator.  Typically, these descriptions should be no more than
 # a few lines long.
 #
@@ -185,7 +185,7 @@
 # DESCRIPTION is an extended description of the component group, used in
 # graphical installers to give the user additional information about the
 # components within that group.  Descriptions can span multiple lines
-# using "\n" as the line separator.  Typically, these descriptions
+# using ``\n`` as the line separator.  Typically, these descriptions
 # should be no more than a few lines long.
 #
 # PARENT_GROUP, if supplied, names the parent group of this group.
@@ -457,6 +457,9 @@ macro(cpack_add_component_group grpname)
     CPACK_ADDGRP_STR)
   cpack_append_string_variable_set_command(
     CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_DESCRIPTION
+    CPACK_ADDGRP_STR)
+  cpack_append_string_variable_set_command(
+    CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_PARENT_GROUP
     CPACK_ADDGRP_STR)
   cpack_append_option_set_command(
     CPACK_COMPONENT_GROUP_${CPACK_ADDGRP_UNAME}_EXPANDED

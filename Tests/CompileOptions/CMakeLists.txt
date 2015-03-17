@@ -22,6 +22,12 @@ set_property(TARGET CompileOptions PROPERTY COMPILE_OPTIONS
   ${cxx_tests}
   )
 
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|Borland")
+  set_property(TARGET CompileOptions APPEND PROPERTY COMPILE_OPTIONS
+    "-DTEST_OCTOTHORPE=\"#\""
+    )
+endif()
+
 target_link_libraries(CompileOptions testlib)
 
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")

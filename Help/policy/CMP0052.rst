@@ -10,6 +10,9 @@ the installation prefix.  This makes the installation depend on the
 existence of the source dir or binary dir, and the installation will be
 broken if either are removed after installation.
 
+See :ref:`Include Directories and Usage Requirements` for more on
+specifying include directories for targets.
+
 The OLD behavior for this policy is to export the content of the
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` with the source or binary
 directory.  The NEW behavior for this

@@ -17,6 +17,7 @@
 #
 #
 # Additionally it provides the following macros:
+#
 # GETTEXT_CREATE_TRANSLATIONS ( outputFile [ALL] file1 ...  fileN )
 #
 # ::
@@ -26,14 +27,15 @@
 #     ALL option is used, the translations will also be created when
 #     building the default target.
 #
-# GETTEXT_PROCESS_POT( <potfile> [ALL] [INSTALL_DESTINATION <destdir>]
+# GETTEXT_PROCESS_POT_FILE( <potfile> [ALL] [INSTALL_DESTINATION <destdir>]
 # LANGUAGES <lang1> <lang2> ...  )
 #
 # ::
 #
 #      Process the given pot file to mo files.
-#      If INSTALL_DESTINATION is given then automatically install rules will be created,
-#      the language subdirectory will be taken into account (by default use share/locale/).
+#      If INSTALL_DESTINATION is given then automatically install rules will
+#      be created, the language subdirectory will be taken into account
+#      (by default use share/locale/).
 #      If ALL is specified, the pot file is processed when building the all traget.
 #      It creates a custom target "potfile".
 #
@@ -43,10 +45,14 @@
 # ::
 #
 #      Process the given po files to mo files for the given language.
-#      If INSTALL_DESTINATION is given then automatically install rules will be created,
-#      the language subdirectory will be taken into account (by default use share/locale/).
+#      If INSTALL_DESTINATION is given then automatically install rules will
+#      be created, the language subdirectory will be taken into account
+#      (by default use share/locale/).
 #      If ALL is specified, the po files are processed when building the all traget.
 #      It creates a custom target "pofiles".
+#
+# .. note::
+#   If you wish to use the Gettext library (libintl), use :module:`FindIntl`.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -71,8 +77,8 @@ if(GETTEXT_MSGMERGE_EXECUTABLE)
                   OUTPUT_VARIABLE gettext_version
                   ERROR_QUIET
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
-   if (gettext_version MATCHES "^msgmerge \\(.*\\) [0-9]")
-      string(REGEX REPLACE "^msgmerge \\([^\\)]*\\) ([0-9\\.]+[^ \n]*).*" "\\1" GETTEXT_VERSION_STRING "${gettext_version}")
+   if (gettext_version MATCHES "^msgmerge \\([^\\)]*\\) ([0-9\\.]+[^ \n]*)")
+      set(GETTEXT_VERSION_STRING "${CMAKE_MATCH_1}")
    endif()
    unset(gettext_version)
 endif()

@@ -88,7 +88,7 @@ std::string cmFindProgramCommand
     {
 
     std::string appName = *name + std::string(".app");
-    std::string appPath = cmSystemTools::FindDirectory(appName.c_str(),
+    std::string appPath = cmSystemTools::FindDirectory(appName,
                                                        this->SearchPaths,
                                                        true);
 
@@ -97,7 +97,7 @@ std::string cmFindProgramCommand
       std::string executable = GetBundleExecutable(appPath);
       if (!executable.empty())
         {
-        return cmSystemTools::CollapseFullPath(executable.c_str());
+        return cmSystemTools::CollapseFullPath(executable);
         }
       }
     }

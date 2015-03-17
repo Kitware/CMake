@@ -6,36 +6,47 @@
 #
 # Provides install directory variables as defined for GNU software:
 #
-# ::
-#
 #   http://www.gnu.org/prep/standards/html_node/Directory-Variables.html
 #
 # Inclusion of this module defines the following variables:
 #
-# ::
-#
-#   CMAKE_INSTALL_<dir>      - destination for files of a given type
-#   CMAKE_INSTALL_FULL_<dir> - corresponding absolute path
+# ``CMAKE_INSTALL_<dir>``
+#   destination for files of a given type
+# ``CMAKE_INSTALL_FULL_<dir>``
+#   corresponding absolute path
 #
 # where <dir> is one of:
 #
-# ::
-#
-#   BINDIR           - user executables (bin)
-#   SBINDIR          - system admin executables (sbin)
-#   LIBEXECDIR       - program executables (libexec)
-#   SYSCONFDIR       - read-only single-machine data (etc)
-#   SHAREDSTATEDIR   - modifiable architecture-independent data (com)
-#   LOCALSTATEDIR    - modifiable single-machine data (var)
-#   LIBDIR           - object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
-#   INCLUDEDIR       - C header files (include)
-#   OLDINCLUDEDIR    - C header files for non-gcc (/usr/include)
-#   DATAROOTDIR      - read-only architecture-independent data root (share)
-#   DATADIR          - read-only architecture-independent data (DATAROOTDIR)
-#   INFODIR          - info documentation (DATAROOTDIR/info)
-#   LOCALEDIR        - locale-dependent data (DATAROOTDIR/locale)
-#   MANDIR           - man documentation (DATAROOTDIR/man)
-#   DOCDIR           - documentation root (DATAROOTDIR/doc/PROJECT_NAME)
+# ``BINDIR``
+#   user executables (bin)
+# ``SBINDIR``
+#   system admin executables (sbin)
+# ``LIBEXECDIR``
+#   program executables (libexec)
+# ``SYSCONFDIR``
+#   read-only single-machine data (etc)
+# ``SHAREDSTATEDIR``
+#   modifiable architecture-independent data (com)
+# ``LOCALSTATEDIR``
+#   modifiable single-machine data (var)
+# ``LIBDIR``
+#   object code libraries (lib or lib64 or lib/<multiarch-tuple> on Debian)
+# ``INCLUDEDIR``
+#   C header files (include)
+# ``OLDINCLUDEDIR``
+#   C header files for non-gcc (/usr/include)
+# ``DATAROOTDIR``
+#   read-only architecture-independent data root (share)
+# ``DATADIR``
+#   read-only architecture-independent data (DATAROOTDIR)
+# ``INFODIR``
+#   info documentation (DATAROOTDIR/info)
+# ``LOCALEDIR``
+#   locale-dependent data (DATAROOTDIR/locale)
+# ``MANDIR``
+#   man documentation (DATAROOTDIR/man)
+# ``DOCDIR``
+#   documentation root (DATAROOTDIR/doc/PROJECT_NAME)
 #
 # Each CMAKE_INSTALL_<dir> value may be passed to the DESTINATION
 # options of install() commands for the corresponding file type.  If the
@@ -192,19 +203,31 @@ if(NOT CMAKE_INSTALL_DATADIR)
   set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_DATAROOTDIR}")
 endif()
 
-if(NOT CMAKE_INSTALL_INFODIR)
-  set(CMAKE_INSTALL_INFODIR "" CACHE PATH "info documentation (DATAROOTDIR/info)")
-  set(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info")
+if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+  if(NOT CMAKE_INSTALL_INFODIR)
+    set(CMAKE_INSTALL_INFODIR "" CACHE PATH "info documentation (info)")
+    set(CMAKE_INSTALL_INFODIR "info")
+  endif()
+
+  if(NOT CMAKE_INSTALL_MANDIR)
+    set(CMAKE_INSTALL_MANDIR "" CACHE PATH "man documentation (man)")
+    set(CMAKE_INSTALL_MANDIR "man")
+  endif()
+else()
+  if(NOT CMAKE_INSTALL_INFODIR)
+    set(CMAKE_INSTALL_INFODIR "" CACHE PATH "info documentation (DATAROOTDIR/info)")
+    set(CMAKE_INSTALL_INFODIR "${CMAKE_INSTALL_DATAROOTDIR}/info")
+  endif()
+
+  if(NOT CMAKE_INSTALL_MANDIR)
+    set(CMAKE_INSTALL_MANDIR "" CACHE PATH "man documentation (DATAROOTDIR/man)")
+    set(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man")
+  endif()
 endif()
 
 if(NOT CMAKE_INSTALL_LOCALEDIR)
   set(CMAKE_INSTALL_LOCALEDIR "" CACHE PATH "locale-dependent data (DATAROOTDIR/locale)")
   set(CMAKE_INSTALL_LOCALEDIR "${CMAKE_INSTALL_DATAROOTDIR}/locale")
-endif()
-
-if(NOT CMAKE_INSTALL_MANDIR)
-  set(CMAKE_INSTALL_MANDIR "" CACHE PATH "man documentation (DATAROOTDIR/man)")
-  set(CMAKE_INSTALL_MANDIR "${CMAKE_INSTALL_DATAROOTDIR}/man")
 endif()
 
 if(NOT CMAKE_INSTALL_DOCDIR)

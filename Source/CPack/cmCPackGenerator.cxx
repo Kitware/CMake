@@ -25,6 +25,7 @@
 #include <cmsys/Glob.hxx>
 #include <cmsys/FStream.hxx>
 #include <algorithm>
+#include <list>
 
 #if defined(__HAIKU__)
 #include <FindDirectory.h>
@@ -160,7 +161,7 @@ int cmCPackGenerator::PrepareNames()
         "Cannot open description file name: " << descFileName << std::endl);
       return 0;
       }
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     std::string line;
 
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,
@@ -217,7 +218,7 @@ int cmCPackGenerator::InstallProject()
     {
     std::string destDir = "DESTDIR=";
     destDir += tempInstallDirectory;
-    cmSystemTools::PutEnv(destDir.c_str());
+    cmSystemTools::PutEnv(destDir);
     }
   else
     {
@@ -277,7 +278,7 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
     {
     std::string tempInstallDirectoryEnv = "CMAKE_INSTALL_PREFIX=";
     tempInstallDirectoryEnv += tempInstallDirectory;
-    cmSystemTools::PutEnv(tempInstallDirectoryEnv.c_str());
+    cmSystemTools::PutEnv(tempInstallDirectoryEnv);
     std::vector<std::string> installCommandsVector;
     cmSystemTools::ExpandListArgument(installCommands,installCommandsVector);
     std::vector<std::string>::iterator it;
@@ -399,12 +400,12 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy file: "
           << inFile << " -> " << filePath << std::endl);
         /* If the file is a symlink we will have to re-create it */
-        if ( cmSystemTools::FileIsSymlink(inFile.c_str()))
+        if ( cmSystemTools::FileIsSymlink(inFile))
           {
           std::string targetFile;
           std::string inFileRelative =
              cmSystemTools::RelativePath(top.c_str(),inFile.c_str());
-          cmSystemTools::ReadSymlink(inFile.c_str(),targetFile);
+          cmSystemTools::ReadSymlink(inFile,targetFile);
           symlinkedFiles.push_back(std::pair<std::string,
                                    std::string>(targetFile,inFileRelative));
           }
@@ -421,7 +422,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           }
         }
       /* rebuild symlinks in the installed tree */
-      if (symlinkedFiles.size()>0)
+      if (!symlinkedFiles.empty())
         {
         std::list< std::pair<std::string,std::string> >::iterator symlinkedIt;
         std::string curDir = cmSystemTools::GetCurrentWorkingDirectory();
@@ -429,7 +430,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
         goToDir  += "/"+subdir;
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
                       "Change dir to: " << goToDir <<std::endl);
-        cmSystemTools::ChangeDirectory(goToDir.c_str());
+        cmSystemTools::ChangeDirectory(goToDir);
         for (symlinkedIt=symlinkedFiles.begin();
              symlinkedIt != symlinkedFiles.end();
              ++symlinkedIt)
@@ -437,8 +438,20 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           cmCPackLogger(cmCPackLog::LOG_DEBUG, "Will create a symlink: "
                          << symlinkedIt->second << "--> "
                          << symlinkedIt->first << std::endl);
-          if (!cmSystemTools::CreateSymlink((symlinkedIt->first).c_str(),
-                                            (symlinkedIt->second).c_str()))
+          // make sure directory exists for symlink
+          std::string destDir =
+            cmSystemTools::GetFilenamePath(symlinkedIt->second);
+          if(!destDir.empty() && !cmSystemTools::MakeDirectory(destDir))
+            {
+            cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create dir: "
+                          << destDir
+                          << "\nTrying to create symlink: "
+                          << symlinkedIt->second << "--> "
+                          << symlinkedIt->first
+                          << std::endl);
+            }
+          if (!cmSystemTools::CreateSymlink(symlinkedIt->first,
+                                            symlinkedIt->second))
             {
             cmCPackLogger(cmCPackLog::LOG_ERROR, "Cannot create symlink: "
                             << symlinkedIt->second << "--> "
@@ -448,7 +461,7 @@ int cmCPackGenerator::InstallProjectViaInstalledDirectories(
           }
         cmCPackLogger(cmCPackLog::LOG_DEBUG, "Going back to: "
                       << curDir <<std::endl);
-        cmSystemTools::ChangeDirectory(curDir.c_str());
+        cmSystemTools::ChangeDirectory(curDir);
         }
       }
     }
@@ -628,6 +641,14 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       cmGlobalGenerator* globalGenerator
         = this->MakefileMap->GetCMakeInstance()->CreateGlobalGenerator(
           cmakeGenerator);
+      if ( !globalGenerator )
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+                    "Specified package generator not found. "
+                    "CPACK_CMAKE_GENERATOR value is invalid."
+                    << std::endl);
+      return 0;
+      }
       // set the global flag for unix style paths on cmSystemTools as
       // soon as the generator is set.  This allows gmake to be used
       // on windows.
@@ -637,13 +658,13 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       if ( globalGenerator->GetPreinstallTargetName() )
         {
         globalGenerator->FindMakeProgram(this->MakefileMap);
-        const char* cmakeMakeProgram
-          = this->MakefileMap->GetDefinition("CMAKE_MAKE_PROGRAM");
+        std::string cmakeMakeProgram
+          = this->MakefileMap->GetSafeDefinition("CMAKE_MAKE_PROGRAM");
         std::vector<std::string> buildCommand;
         globalGenerator->GenerateBuildCommand(buildCommand, cmakeMakeProgram,
             installProjectName, installDirectory,
             globalGenerator->GetPreinstallTargetName(),
-            buildConfig, false);
+            buildConfig, false, false);
         std::string buildCommandStr =
           cmSystemTools::PrintSingleCommand(buildCommand);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
@@ -787,7 +808,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
            *       in order to put things in subdirs...
            */
           cmSystemTools::PutEnv(
-              (std::string("DESTDIR=")+tempInstallDirectory).c_str()
+              std::string("DESTDIR=")+tempInstallDirectory
                                );
           cmCPackLogger(cmCPackLog::LOG_DEBUG,
                         "- Creating directory: '" << dir << "'" << std::endl);
@@ -918,7 +939,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
 
         if (NULL !=mf->GetDefinition("CPACK_ABSOLUTE_DESTINATION_FILES")) {
-          if (absoluteDestFiles.length()>0) {
+          if (!absoluteDestFiles.empty()) {
             absoluteDestFiles +=";";
           }
           absoluteDestFiles +=
@@ -1049,7 +1070,6 @@ int cmCPackGenerator::DoPackage()
 
   const char* tempPackageFileName = this->GetOption(
     "CPACK_TEMPORARY_PACKAGE_FILE_NAME");
-  const char* packageFileName = this->GetOption("CPACK_OUTPUT_FILE_PATH");
   const char* tempDirectory = this->GetOption("CPACK_TEMPORARY_DIRECTORY");
 
   cmCPackLogger(cmCPackLog::LOG_DEBUG, "Find files" << std::endl);
@@ -1114,7 +1134,7 @@ int cmCPackGenerator::DoPackage()
     std::string tmpPF(this->GetOption("CPACK_OUTPUT_FILE_PREFIX"));
     tempPackageFileName = it->c_str();
     tmpPF += "/"+cmSystemTools::GetFilenameName(*it);
-    packageFileName = tmpPF.c_str();
+    const char* packageFileName = tmpPF.c_str();
     cmCPackLogger(cmCPackLog::LOG_DEBUG, "Copy final package(s): "
         << (tempPackageFileName ? tempPackageFileName : "(NULL)" )
         << " to "
@@ -1314,6 +1334,14 @@ int cmCPackGenerator::CleanTemporaryDirectory()
 }
 
 //----------------------------------------------------------------------
+cmInstalledFile const* cmCPackGenerator::GetInstalledFile(
+  std::string const& name) const
+{
+  cmake const* cm = this->MakefileMap->GetCMakeInstance();
+  return cm->GetInstalledFile(name);
+}
+
+//----------------------------------------------------------------------
 int cmCPackGenerator::PrepareGroupingKind()
 {
   // find a component package method specified by the user
@@ -1341,7 +1369,7 @@ int cmCPackGenerator::PrepareGroupingKind()
      groupingType = this->GetOption("CPACK_COMPONENTS_GROUPING");
   }
 
-  if (groupingType.length()>0)
+  if (!groupingType.empty())
     {
     cmCPackLogger(cmCPackLog::LOG_VERBOSE,  "["
         << this->Name << "]"

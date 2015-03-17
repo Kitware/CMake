@@ -1,6 +1,4 @@
-
 cmake_minimum_required(VERSION 2.8)
-
 project(CompileDefinitions)
 
 if ("${CMAKE_GENERATOR}" STREQUAL "Visual Studio 6")
@@ -19,8 +17,8 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS
   "BUILD_CONFIG_NAME=\"$<CONFIGURATION>\""
   )
 
-add_subdirectory(add_definitions_command)
+add_subdirectory(add_def_cmd)
 add_subdirectory(target_prop)
-add_subdirectory(add_definitions_command_with_target_prop)
+add_subdirectory(add_def_cmd_tprop)
 
 add_executable(CompileDefinitions runtest.c)

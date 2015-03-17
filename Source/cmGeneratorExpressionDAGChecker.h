@@ -26,7 +26,8 @@
   SELECT(F, EvaluatingCompileDefinitions,       COMPILE_DEFINITIONS) \
   SELECT(F, EvaluatingCompileOptions,           COMPILE_OPTIONS) \
   SELECT(F, EvaluatingAutoUicOptions,           AUTOUIC_OPTIONS) \
-  SELECT(F, EvaluatingSources,                  SOURCES)
+  SELECT(F, EvaluatingSources,                  SOURCES) \
+  SELECT(F, EvaluatingCompileFeatures,          COMPILE_FEATURES)
 
 #define CM_FOR_EACH_TRANSITIVE_PROPERTY(F) \
   CM_FOR_EACH_TRANSITIVE_PROPERTY_IMPL(F, CM_SELECT_BOTH)
@@ -42,6 +43,10 @@ struct cmGeneratorExpressionDAGChecker
 {
   cmGeneratorExpressionDAGChecker(const cmListFileBacktrace &backtrace,
                                   const std::string &target,
+                                  const std::string &property,
+                                  const GeneratorExpressionContent *content,
+                                  cmGeneratorExpressionDAGChecker *parent);
+  cmGeneratorExpressionDAGChecker(const std::string &target,
                                   const std::string &property,
                                   const GeneratorExpressionContent *content,
                                   cmGeneratorExpressionDAGChecker *parent);
@@ -75,6 +80,7 @@ struct cmGeneratorExpressionDAGChecker
 
 private:
   Result CheckGraph() const;
+  void Initialize();
 
 private:
   const cmGeneratorExpressionDAGChecker * const Parent;

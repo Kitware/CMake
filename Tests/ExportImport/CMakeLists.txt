@@ -44,6 +44,7 @@ add_custom_command(
     --build-project Export
     --build-target install
     --build-generator ${CMAKE_GENERATOR}
+    --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
     --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
     --build-options -C${ExportImport_BINARY_DIR}/InitialCache.cmake
   VERBATIM
@@ -65,6 +66,7 @@ add_custom_command(
    --build-noclean
    --build-project Import
    --build-generator ${CMAKE_GENERATOR}
+   --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
    --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
    --build-options -C${ExportImport_BINARY_DIR}/InitialCache.cmake
   VERBATIM

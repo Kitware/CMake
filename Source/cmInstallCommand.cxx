@@ -25,9 +25,12 @@
 static cmInstallTargetGenerator* CreateInstallTargetGenerator(cmTarget& target,
      const cmInstallCommandArguments& args, bool impLib, bool forceOpt = false)
 {
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(target.GetMakefile());
   return new cmInstallTargetGenerator(target, args.GetDestination().c_str(),
                         impLib, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
+                        message,
                         args.GetOptional() || forceOpt);
 }
 
@@ -36,10 +39,13 @@ static cmInstallFilesGenerator* CreateInstallFilesGenerator(
     const std::vector<std::string>& absFiles,
     const cmInstallCommandArguments& args, bool programs)
 {
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(mf);
   return new cmInstallFilesGenerator(mf,
                         absFiles, args.GetDestination().c_str(),
                         programs, args.GetPermissions().c_str(),
                         args.GetConfigurations(), args.GetComponent().c_str(),
+                        message,
                         args.GetRename().c_str(), args.GetOptional());
 }
 
@@ -161,7 +167,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
         script += "/";
         script += args[i];
         }
-      if(cmSystemTools::FileIsDirectory(script.c_str()))
+      if(cmSystemTools::FileIsDirectory(script))
         {
         this->SetError("given a directory as value of SCRIPT argument.");
         return false;
@@ -267,7 +273,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
   if(!unknownArgs.empty())
     {
     // Unknown argument.
-    cmOStringStream e;
+    std::ostringstream e;
     e << "TARGETS given unknown argument \"" << unknownArgs[0] << "\".";
     this->SetError(e.str());
     return false;
@@ -367,7 +373,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
 
     if (this->Makefile->IsAlias(*targetIt))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "TARGETS given target \"" << (*targetIt)
         << "\" which is an alias.";
       this->SetError(e.str());
@@ -384,7 +390,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
          target->GetType() != cmTarget::OBJECT_LIBRARY &&
          target->GetType() != cmTarget::INTERFACE_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "TARGETS given target \"" << (*targetIt)
           << "\" which is not an executable, library, or module.";
         this->SetError(e.str());
@@ -392,7 +398,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
         }
       else if(target->GetType() == cmTarget::OBJECT_LIBRARY)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "TARGETS given OBJECT library \"" << (*targetIt)
           << "\" which may not be installed.";
         this->SetError(e.str());
@@ -404,7 +410,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
     else
       {
       // Did not find the target.
-      cmOStringStream e;
+      std::ostringstream e;
       e << "TARGETS given target \"" << (*targetIt)
         << "\" which does not exist in this directory.";
       this->SetError(e.str());
@@ -496,7 +502,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
               }
             else
               {
-              cmOStringStream e;
+              std::ostringstream e;
               e << "TARGETS given no FRAMEWORK DESTINATION for shared library "
                 "FRAMEWORK target \"" << target.GetName() << "\".";
               this->SetError(e.str());
@@ -516,7 +522,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
               }
             else
               {
-              cmOStringStream e;
+              std::ostringstream e;
               e << "TARGETS given no LIBRARY DESTINATION for shared library "
                 "target \"" << target.GetName() << "\".";
               this->SetError(e.str());
@@ -536,7 +542,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         else
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "TARGETS given no ARCHIVE DESTINATION for static library "
             "target \"" << target.GetName() << "\".";
           this->SetError(e.str());
@@ -557,7 +563,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         else
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "TARGETS given no LIBRARY DESTINATION for module target \""
             << target.GetName() << "\".";
           this->SetError(e.str());
@@ -592,7 +598,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             }
           if(!bundleGenerator)
             {
-            cmOStringStream e;
+            std::ostringstream e;
             e << "TARGETS given no BUNDLE DESTINATION for MACOSX_BUNDLE "
                  "executable target \"" << target.GetName() << "\".";
             this->SetError(e.str());
@@ -609,7 +615,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
             }
           else
             {
-            cmOStringStream e;
+            std::ostringstream e;
             e << "TARGETS given no RUNTIME DESTINATION for executable "
                  "target \"" << target.GetName() << "\".";
             this->SetError(e.str());
@@ -675,7 +681,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         else
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "INSTALL TARGETS - target " << target.GetName() << " has "
             << "PRIVATE_HEADER files but no PRIVATE_HEADER DESTINATION.";
           cmSystemTools::Message(e.str().c_str(), "Warning");
@@ -702,7 +708,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         else
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "INSTALL TARGETS - target " << target.GetName() << " has "
             << "PUBLIC_HEADER files but no PUBLIC_HEADER DESTINATION.";
           cmSystemTools::Message(e.str().c_str(), "Warning");
@@ -728,7 +734,7 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
           }
         else
           {
-          cmOStringStream e;
+          std::ostringstream e;
           e << "INSTALL TARGETS - target " << target.GetName() << " has "
             << "RESOURCE files but no RESOURCE DESTINATION.";
           cmSystemTools::Message(e.str().c_str(), "Warning");
@@ -771,19 +777,8 @@ bool cmInstallCommand::HandleTargetsMode(std::vector<std::string> const& args)
       this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
         ->GetExportSets()[exports.GetString()]->AddTargetExport(te);
 
-      std::vector<std::string> dirs = includesArgs.GetIncludeDirs();
-      if(!dirs.empty())
-        {
-        std::string dirString;
-        const char *sep = "";
-        for (std::vector<std::string>::const_iterator it = dirs.begin();
-            it != dirs.end(); ++it)
-          {
-          te->InterfaceIncludeDirectories += sep;
-          te->InterfaceIncludeDirectories += *it;
-          sep = ";";
-          }
-        }
+      te->InterfaceIncludeDirectories =
+          cmJoin(includesArgs.GetIncludeDirs(), ";");
       }
     }
 
@@ -849,7 +844,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   if(!unknownArgs.empty())
     {
     // Unknown argument.
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given unknown argument \"" << unknownArgs[0] << "\".";
     this->SetError(e.str());
     return false;
@@ -864,7 +859,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   if(!ica.GetRename().empty() && files.GetVector().size() > 1)
     {
     // The rename option works only with one file.
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given RENAME option with more than one file.";
     this->SetError(e.str());
     return false;
@@ -884,7 +879,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
   if(ica.GetDestination().empty())
     {
     // A destination is required.
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given no DESTINATION!";
     this->SetError(e.str());
     return false;
@@ -911,6 +906,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   Doing doing = DoingDirs;
   bool in_match_mode = false;
   bool optional = false;
+  bool message_never = false;
   std::vector<std::string> dirs;
   const char* destination = 0;
   std::string permissions_file;
@@ -924,7 +920,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -938,7 +934,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -947,6 +943,21 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
       // Mark the rule as optional.
       optional = true;
+      doing = DoingNone;
+      }
+    else if(args[i] == "MESSAGE_NEVER")
+      {
+      if(in_match_mode)
+        {
+        std::ostringstream e;
+        e << args[0] << " does not allow \""
+          << args[i] << "\" after PATTERN or REGEX.";
+        this->SetError(e.str());
+        return false;
+        }
+
+      // Mark the rule as quiet.
+      message_never = true;
       doing = DoingNone;
       }
     else if(args[i] == "PATTERN")
@@ -966,7 +977,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       // Add this property to the current match rule.
       if(!in_match_mode || doing == DoingPattern || doing == DoingRegex)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" before a PATTERN or REGEX is given.";
         this->SetError(e.str());
@@ -979,7 +990,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(!in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" before a PATTERN or REGEX is given.";
         this->SetError(e.str());
@@ -994,7 +1005,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -1008,7 +1019,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -1022,7 +1033,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -1037,7 +1048,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -1052,7 +1063,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -1066,7 +1077,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       {
       if(in_match_mode)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " does not allow \""
           << args[i] << "\" after PATTERN or REGEX.";
         this->SetError(e.str());
@@ -1089,9 +1100,9 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
 
       // Make sure the name is a directory.
       if(cmSystemTools::FileExists(dir.c_str()) &&
-         !cmSystemTools::FileIsDirectory(dir.c_str()))
+         !cmSystemTools::FileIsDirectory(dir))
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " given non-directory \""
           << args[i] << "\" to install.";
         this->SetError(e.str());
@@ -1147,7 +1158,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
      // Check the requested permission.
      if(!cmInstallCommandArguments::CheckPermissions(args[i],permissions_file))
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " given invalid file permission \""
           << args[i] << "\".";
         this->SetError(e.str());
@@ -1159,7 +1170,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       // Check the requested permission.
       if(!cmInstallCommandArguments::CheckPermissions(args[i],permissions_dir))
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " given invalid directory permission \""
           << args[i] << "\".";
         this->SetError(e.str());
@@ -1171,7 +1182,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       // Check the requested permission.
       if(!cmInstallCommandArguments::CheckPermissions(args[i], literal_args))
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << args[0] << " given invalid permission \""
           << args[i] << "\".";
         this->SetError(e.str());
@@ -1181,7 +1192,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
     else
       {
       // Unknown argument.
-      cmOStringStream e;
+      std::ostringstream e;
       e << args[0] << " given unknown argument \"" << args[i] << "\".";
       this->SetError(e.str());
       return false;
@@ -1202,11 +1213,14 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
   if(!destination)
     {
     // A destination is required.
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given no DESTINATION!";
     this->SetError(e.str());
     return false;
     }
+
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(this->Makefile, message_never);
 
   // Create the directory install generator.
   this->Makefile->AddInstallGenerator(
@@ -1215,6 +1229,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
                                     permissions_dir.c_str(),
                                     configurations,
                                     component.c_str(),
+                                    message,
                                     literal_args.c_str(),
                                     optional));
 
@@ -1245,7 +1260,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   if (!unknownArgs.empty())
     {
     // Unknown argument.
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given unknown argument \"" << unknownArgs[0] << "\".";
     this->SetError(e.str());
     return false;
@@ -1260,7 +1275,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   if(ica.GetDestination().empty())
     {
     // A destination is required.
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given no DESTINATION!";
     this->SetError(e.str());
     return false;
@@ -1270,7 +1285,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   std::string fname = filename.GetString();
   if(fname.find_first_of(":/\\") != fname.npos)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given invalid export file name \"" << fname << "\".  "
       << "The FILE argument may not contain a path.  "
       << "Specify the path in the DESTINATION argument.";
@@ -1282,7 +1297,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
   if(!fname.empty() &&
      cmSystemTools::GetFilenameLastExtension(fname) != ".cmake")
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " given invalid export file name \"" << fname << "\".  "
       << "The FILE argument must specify a name ending in \".cmake\".";
     this->SetError(e.str());
@@ -1297,7 +1312,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
     if(fname.find_first_of(":/\\") != fname.npos)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << args[0] << " given export name \"" << exp.GetString() << "\".  "
         << "This name cannot be safely converted to a file name.  "
         << "Specify a different export name or use the FILE option to set "
@@ -1322,7 +1337,7 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
 
       if(!newCMP0022Behavior)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "INSTALL(EXPORT) given keyword \""
           << "EXPORT_LINK_INTERFACE_LIBRARIES" << "\", but target \""
           << te->Target->GetName()
@@ -1333,13 +1348,16 @@ bool cmInstallCommand::HandleExportMode(std::vector<std::string> const& args)
       }
     }
 
+  cmInstallGenerator::MessageLevel message =
+    cmInstallGenerator::SelectMessageLevel(this->Makefile);
+
   // Create the export install generator.
   cmInstallExportGenerator* exportGenerator =
     new cmInstallExportGenerator(
       exportSet,
       ica.GetDestination().c_str(),
       ica.GetPermissions().c_str(), ica.GetConfigurations(),
-      ica.GetComponent().c_str(), fname.c_str(),
+      ica.GetComponent().c_str(), message, fname.c_str(),
       name_space.GetCString(), exportOld.IsEnabled(), this->Makefile);
   this->Makefile->AddInstallGenerator(exportGenerator);
 
@@ -1364,9 +1382,9 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
       }
 
     // Make sure the file is not a directory.
-    if(gpos == file.npos && cmSystemTools::FileIsDirectory(file.c_str()))
+    if(gpos == file.npos && cmSystemTools::FileIsDirectory(file))
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << modeName << " given directory \"" << (*fileIt) << "\" to install.";
       this->SetError(e.str());
       return false;

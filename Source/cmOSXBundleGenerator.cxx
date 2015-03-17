@@ -112,8 +112,8 @@ void cmOSXBundleGenerator::CreateFramework(
   oldName = frameworkVersion;
   newName = versions;
   newName += "/Current";
-  cmSystemTools::RemoveFile(newName.c_str());
-  cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+  cmSystemTools::RemoveFile(newName);
+  cmSystemTools::CreateSymlink(oldName, newName);
   this->Makefile->AddCMakeOutputFile(newName);
 
   // foo -> Versions/Current/foo
@@ -121,8 +121,8 @@ void cmOSXBundleGenerator::CreateFramework(
   oldName += name;
   newName = contentdir;
   newName += name;
-  cmSystemTools::RemoveFile(newName.c_str());
-  cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+  cmSystemTools::RemoveFile(newName);
+  cmSystemTools::CreateSymlink(oldName, newName);
   this->Makefile->AddCMakeOutputFile(newName);
 
   // Resources -> Versions/Current/Resources
@@ -132,8 +132,8 @@ void cmOSXBundleGenerator::CreateFramework(
     oldName = "Versions/Current/Resources";
     newName = contentdir;
     newName += "Resources";
-    cmSystemTools::RemoveFile(newName.c_str());
-    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+    cmSystemTools::RemoveFile(newName);
+    cmSystemTools::CreateSymlink(oldName, newName);
     this->Makefile->AddCMakeOutputFile(newName);
     }
 
@@ -144,8 +144,8 @@ void cmOSXBundleGenerator::CreateFramework(
     oldName = "Versions/Current/Headers";
     newName = contentdir;
     newName += "Headers";
-    cmSystemTools::RemoveFile(newName.c_str());
-    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+    cmSystemTools::RemoveFile(newName);
+    cmSystemTools::CreateSymlink(oldName, newName);
     this->Makefile->AddCMakeOutputFile(newName);
     }
 
@@ -156,8 +156,8 @@ void cmOSXBundleGenerator::CreateFramework(
     oldName = "Versions/Current/PrivateHeaders";
     newName = contentdir;
     newName += "PrivateHeaders";
-    cmSystemTools::RemoveFile(newName.c_str());
-    cmSystemTools::CreateSymlink(oldName.c_str(), newName.c_str());
+    cmSystemTools::RemoveFile(newName);
+    cmSystemTools::CreateSymlink(oldName, newName);
     this->Makefile->AddCMakeOutputFile(newName);
     }
 }
@@ -181,8 +181,9 @@ void cmOSXBundleGenerator::CreateCFBundle(const std::string& targetName,
   std::string plist = root + "/" +
     this->GT->Target->GetCFBundleDirectory(this->ConfigName, true);
   plist += "/Info.plist";
+  std::string name = cmSystemTools::GetFilenameName(targetName);
   this->LocalGenerator->GenerateAppleInfoPList(this->GT->Target,
-                                               targetName,
+                                               name,
                                                plist.c_str());
   this->Makefile->AddCMakeOutputFile(plist);
 }

@@ -14,8 +14,7 @@
 #include "cmMakefile.h"
 #include "cmTarget.h"
 #include "assert.h"
-
-#include <cmsys/String.h>
+#include "cmAlgorithms.h"
 
 #include "cmGeneratorExpressionEvaluator.h"
 #include "cmGeneratorExpressionLexer.h"
@@ -24,7 +23,7 @@
 
 //----------------------------------------------------------------------------
 cmGeneratorExpression::cmGeneratorExpression(
-  cmListFileBacktrace const& backtrace):
+  cmListFileBacktrace const* backtrace):
   Backtrace(backtrace)
 {
 }
@@ -34,9 +33,9 @@ cmsys::auto_ptr<cmCompiledGeneratorExpression>
 cmGeneratorExpression::Parse(std::string const& input)
 {
   return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
-                                      new cmCompiledGeneratorExpression(
-                                        this->Backtrace,
-                                        input));
+    new cmCompiledGeneratorExpression(
+      this->Backtrace ? *this->Backtrace : cmListFileBacktrace(NULL),
+      input));
 }
 
 //----------------------------------------------------------------------------
@@ -54,14 +53,16 @@ cmGeneratorExpression::~cmGeneratorExpression()
 const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
-  cmGeneratorExpressionDAGChecker *dagChecker) const
+  cmGeneratorExpressionDAGChecker *dagChecker,
+                       std::string const& language) const
 {
   return this->Evaluate(mf,
                         config,
                         quiet,
                         headTarget,
                         headTarget,
-                        dagChecker);
+                        dagChecker,
+                        language);
 }
 
 //----------------------------------------------------------------------------
@@ -69,7 +70,21 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   cmMakefile* mf, const std::string& config, bool quiet,
   cmTarget const* headTarget,
   cmTarget const* currentTarget,
-  cmGeneratorExpressionDAGChecker *dagChecker) const
+  cmGeneratorExpressionDAGChecker *dagChecker,
+  std::string const& language) const
+{
+  cmGeneratorExpressionContext context(mf, config, quiet, headTarget,
+                                  currentTarget ? currentTarget : headTarget,
+                                  this->EvaluateForBuildsystem,
+                                  this->Backtrace, language);
+
+  return this->EvaluateWithContext(context, dagChecker);
+}
+
+//----------------------------------------------------------------------------
+const char* cmCompiledGeneratorExpression::EvaluateWithContext(
+                            cmGeneratorExpressionContext& context,
+                            cmGeneratorExpressionDAGChecker *dagChecker) const
 {
   if (!this->NeedsEvaluation)
     {
@@ -83,36 +98,26 @@ const char *cmCompiledGeneratorExpression::Evaluate(
   const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
                                                   = this->Evaluators.end();
 
-  cmGeneratorExpressionContext context;
-  context.Makefile = mf;
-  context.Config = config;
-  context.Quiet = quiet;
-  context.HadError = false;
-  context.HadContextSensitiveCondition = false;
-  context.HeadTarget = headTarget;
-  context.EvaluateForBuildsystem = this->EvaluateForBuildsystem;
-  context.CurrentTarget = currentTarget ? currentTarget : headTarget;
-  context.Backtrace = this->Backtrace;
-
   for ( ; it != end; ++it)
     {
     this->Output += (*it)->Evaluate(&context, dagChecker);
 
-    for(std::set<std::string>::const_iterator
-          p = context.SeenTargetProperties.begin();
-          p != context.SeenTargetProperties.end(); ++p)
-      {
-      this->SeenTargetProperties.insert(*p);
-      }
+    this->SeenTargetProperties.insert(context.SeenTargetProperties.begin(),
+                                      context.SeenTargetProperties.end());
     if (context.HadError)
       {
       this->Output = "";
       break;
       }
     }
+
+  this->MaxLanguageStandard = context.MaxLanguageStandard;
+
   if (!context.HadError)
     {
     this->HadContextSensitiveCondition = context.HadContextSensitiveCondition;
+    this->HadHeadSensitiveCondition = context.HadHeadSensitiveCondition;
+    this->SourceSensitiveTargets = context.SourceSensitiveTargets;
     }
 
   this->DependTargets = context.DependTargets;
@@ -126,6 +131,7 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
               const std::string& input)
   : Backtrace(backtrace), Input(input),
     HadContextSensitiveCondition(false),
+    HadHeadSensitiveCondition(false),
     EvaluateForBuildsystem(false)
 {
   cmGeneratorExpressionLexer l;
@@ -144,15 +150,7 @@ cmCompiledGeneratorExpression::cmCompiledGeneratorExpression(
 //----------------------------------------------------------------------------
 cmCompiledGeneratorExpression::~cmCompiledGeneratorExpression()
 {
-  std::vector<cmGeneratorExpressionEvaluator*>::const_iterator it
-                                                  = this->Evaluators.begin();
-  const std::vector<cmGeneratorExpressionEvaluator*>::const_iterator end
-                                                  = this->Evaluators.end();
-
-  for ( ; it != end; ++it)
-    {
-    delete *it;
-    }
+  cmDeleteAll(this->Evaluators);
 }
 
 //----------------------------------------------------------------------------
@@ -439,7 +437,7 @@ std::string cmGeneratorExpression::Preprocess(const std::string &input,
     return stripExportInterface(input, context, resolveRelative);
     }
 
-  assert(!"cmGeneratorExpression::Preprocess called with invalid args");
+  assert(0 && "cmGeneratorExpression::Preprocess called with invalid args");
   return std::string();
 }
 
@@ -458,10 +456,23 @@ std::string::size_type cmGeneratorExpression::Find(const std::string &input)
 //----------------------------------------------------------------------------
 bool cmGeneratorExpression::IsValidTargetName(const std::string &input)
 {
-  cmsys::RegularExpression targetNameValidator;
   // The ':' is supported to allow use with IMPORTED targets. At least
   // Qt 4 and 5 IMPORTED targets use ':' as the namespace delimiter.
-  targetNameValidator.compile("^[A-Za-z0-9_.:+-]+$");
+  static cmsys::RegularExpression targetNameValidator("^[A-Za-z0-9_.:+-]+$");
 
-  return targetNameValidator.find(input.c_str());
+  return targetNameValidator.find(input);
+}
+
+//----------------------------------------------------------------------------
+void
+cmCompiledGeneratorExpression::GetMaxLanguageStandard(cmTarget const* tgt,
+                  std::map<std::string, std::string>& mapping)
+{
+  typedef std::map<cmTarget const*,
+                   std::map<std::string, std::string> > MapType;
+  MapType::const_iterator it = this->MaxLanguageStandard.find(tgt);
+  if (it != this->MaxLanguageStandard.end())
+    {
+    mapping = it->second;
+    }
 }

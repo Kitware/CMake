@@ -3,7 +3,7 @@
 cmake-developer(7)
 ******************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -21,80 +21,6 @@ CMake is required to build with ancient C++ compilers and standard library
 implementations.  Some common C++ constructs may not be used in CMake in order
 to build with such toolchains.
 
-std::vector::at
----------------
-
-The ``at()`` member function of ``std::vector`` may not be used. Use
-``operator[]`` instead:
-
-.. code-block:: c++
-
-  std::vector<int> someVec = getVec();
-  int i1 = someVec.at(5); // Wrong
-  int i2 = someVec[5];    // Ok
-
-std::string::append and std::string::clear
-------------------------------------------
-
-The ``append()`` and ``clear()`` member functions of ``std::string`` may not
-be used. Use ``operator+=`` and ``operator=`` instead:
-
-.. code-block:: c++
-
-  std::string stringBuilder;
-  stringBuilder.append("chunk"); // Wrong
-  stringBuilder.clear(); // Wrong
-  stringBuilder += "chunk";      // Ok
-  stringBuilder = "";      // Ok
-
-std::set const iterators
-------------------------
-
-The ``find()`` member function of a ``const`` ``std::set`` instance may not be
-used in a comparison with the iterator returned by ``end()``:
-
-.. code-block:: c++
-
-  const std::set<std::string>& someSet = getSet();
-  if (someSet.find("needle") == someSet.end()) // Wrong
-    {
-    // ...
-    }
-
-The return value of ``find()`` must be assigned to an intermediate
-``const_iterator`` for comparison:
-
-.. code-block:: c++
-
-  const std::set<std::string>& someSet;
-  const std::set<std::string>::const_iterator i = someSet.find("needle");
-  if (i != propSet.end()) // Ok
-    {
-    // ...
-    }
-
-Char Array to ``string`` Conversions with Algorithms
-----------------------------------------------------
-
-In some implementations, algorithms operating on iterators to a container of
-``std::string`` can not accept a ``const char*`` value:
-
-.. code-block:: c++
-
-  const char* dir = /*...*/;
-  std::vector<std::string> vec;
-  // ...
-  std::binary_search(vec.begin(), vec.end(), dir); // Wrong
-
-The ``std::string`` may need to be explicitly constructed:
-
-.. code-block:: c++
-
-  const char* dir = /*...*/;
-  std::vector<std::string> vec;
-  // ...
-  std::binary_search(vec.begin(), vec.end(), std::string(dir)); // Ok
-
 std::auto_ptr
 -------------
 
@@ -102,100 +28,60 @@ Some implementations have a ``std::auto_ptr`` which can not be used as a
 return value from a function. ``std::auto_ptr`` may not be used. Use
 ``cmsys::auto_ptr`` instead.
 
-std::vector::insert and std::set
---------------------------------
-
-Use of ``std::vector::insert`` with an iterator whose ``element_type`` requires
-conversion is not allowed:
-
-.. code-block:: c++
-
-  std::set<const char*> theSet;
-  std::vector<std::string> theVector;
-  theVector.insert(theVector.end(), theSet.begin(), theSet.end()); // Wrong
-
-A loop must be used instead:
-
-.. code-block:: c++
-
-  std::set<const char*> theSet;
-  std::vector<std::string> theVector;
-  for(std::set<const char*>::iterator li = theSet.begin();
-      li != theSet.end(); ++li)
-    {
-    theVector.push_back(*li);
-    }
-
-std::set::insert
-----------------
-
-Use of ``std::set::insert`` is not allowed with any source container:
-
-.. code-block:: c++
-
-  std::set<cmTarget*> theSet;
-  theSet.insert(targets.begin(), targets.end()); // Wrong
-
-A loop must be used instead:
-
-.. code-block:: c++
-
-  ConstIterator it = targets.begin();
-  const ConstIterator end = targets.end();
-  for ( ; it != end; ++it)
-    {
-    theSet.insert(*it);
-    }
-
-.. MSVC6, SunCC 5.9
-
-Template Parameter Defaults
----------------------------
-
-On ancient compilers, C++ template must use template parameters in function
-arguments.  If no parameter of that type is needed, the common workaround is
-to add a defaulted pointer to the type to the templated function. However,
-this does not work with other ancient compilers:
-
-.. code-block:: c++
-
-  template<typename PropertyType>
-  PropertyType getTypedProperty(cmTarget* tgt, const char* prop,
-                                PropertyType* = 0) // Wrong
-    {
-
-    }
-
-.. code-block:: c++
-
-  template<typename PropertyType>
-  PropertyType getTypedProperty(cmTarget* tgt, const char* prop,
-                                PropertyType*) // Ok
-    {
-
-    }
-
-and invoke it with the value ``0`` explicitly in all cases.
-
-std::min and std::max
----------------------
-
-``min`` and ``max`` are defined as macros on some systems. ``std::min`` and
-``std::max`` may not be used.  Use ``cmMinimum`` and ``cmMaximum`` instead.
-
 size_t
 ------
 
 Various implementations have differing implementation of ``size_t``.  When
 assigning the result of ``.size()`` on a container for example, the result
-should not be assigned to an ``unsigned int`` or similar. ``std::size_t`` must
-not be used.
+should be assigned to ``size_t`` not to ``std::size_t``, ``unsigned int`` or
+similar types.
 
-Templates
----------
+Adding Compile Features
+=======================
 
-Some template code is permitted, but with some limitations. Member templates
-may not be used, and template friends may not be used.
+CMake reports an error if a compiler whose features are known does not report
+support for a particular requested feature.  A compiler is considered to have
+known features if it reports support for at least one feature.
+
+When adding a new compile feature to CMake, it is therefore necessary to list
+support for the feature for all CompilerIds which already have one or more
+feature supported, if the new feature is available for any version of the
+compiler.
+
+When adding the first supported feature to a particular CompilerId, it is
+necessary to list support for all features known to cmake (See
+:variable:`CMAKE_C_COMPILE_FEATURES` and
+:variable:`CMAKE_CXX_COMPILE_FEATURES` as appropriate), where available for
+the compiler.  Furthermore, set ``CMAKE_<LANG>_STANDARD_DEFAULT`` to the
+default language standard level the compiler uses, or to the empty string
+if the compiler has no notion of standard levels (such as ``MSVC``).
+
+It is sensible to record the features for the most recent version of a
+particular CompilerId first, and then work backwards.  It is sensible to
+try to create a continuous range of versions of feature releases of the
+compiler.  Gaps in the range indicate incorrect features recorded for
+intermediate releases.
+
+Generally, features are made available for a particular version if the
+compiler vendor documents availability of the feature with that
+version.  Note that sometimes partially implemented features appear to
+be functional in previous releases (such as ``cxx_constexpr`` in GNU 4.6,
+though availability is documented in GNU 4.7), and sometimes compiler vendors
+document availability of features, though supporting infrastructure is
+not available (such as ``__has_feature(cxx_generic_lambdas)`` indicating
+non-availability in Clang 3.4, though it is documented as available, and
+fixed in Clang 3.5).  Similar cases for other compilers and versions
+need to be investigated when extending CMake to support them.
+
+When a vendor releases a new version of a known compiler which supports
+a previously unsupported feature, and there are already known features for
+that compiler, the feature should be listed as supported in CMake for
+that version of the compiler as soon as reasonably possible.
+
+Standard-specific/compiler-specific variables such
+``CMAKE_CXX98_COMPILE_FEATURES`` are deliberately not documented.  They
+only exist for the compiler-specific implementation of adding the ``-std``
+compile flag for compilers which need that.
 
 Help
 ====
@@ -331,10 +217,10 @@ documentation:
  See the :manual:`cmake-policies(7)` manual
  and the :command:`cmake_policy` command.
 
-``prop_cache, prop_dir, prop_gbl, prop_sf, prop_test, prop_tgt``
- A CMake cache, directory, global, source file, test, or target
- property, respectively.  See the :manual:`cmake-properties(7)` manual
- and the :command:`set_property` command.
+``prop_cache, prop_dir, prop_gbl, prop_sf, prop_inst, prop_test, prop_tgt``
+ A CMake cache, directory, global, source file, installed file, test,
+ or target property, respectively.  See the :manual:`cmake-properties(7)`
+ manual and the :command:`set_property` command.
 
 ``variable``
  A CMake language variable.
@@ -420,168 +306,196 @@ with an explicit target.
 Style
 -----
 
-1)
-  Command signatures should be marked up as plain literal blocks, not as
-  cmake ``code-blocks``.
+Style: Section Headers
+^^^^^^^^^^^^^^^^^^^^^^
 
-2)
-  Signatures are separated from preceding content by a horizontal
-  line. That is, use:
+When marking section titles, make the section decoration line as long as
+the title text.  Use only a line below the title, not above. For
+example:
 
-  .. code-block:: rst
+.. code-block:: rst
 
-    ... preceding paragraph.
+  Title Text
+  ----------
 
-    ---------------------------------------------------------------------
+Capitalize the first letter of each non-minor word in the title.
 
-    ::
+The section header underline character hierarchy is
 
-      add_library(<lib> ...)
+* ``#``: Manual group (part) in the master document
+* ``*``: Manual (chapter) title
+* ``=``: Section within a manual
+* ``-``: Subsection or `CMake Domain`_ object document title
+* ``^``: Subsubsection or `CMake Domain`_ object document section
+* ``"``: Paragraph or `CMake Domain`_ object document subsection
 
-    This signature is used for ...
+Style: Whitespace
+^^^^^^^^^^^^^^^^^
 
-3)
-  Use "``OFF``" and "``ON``" for boolean values which can be modified by
-  the user, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`. Such properties
-  may be "enabled" and "disabled". Use "``True``" and "``False``" for
-  inherent values which can't be modified after being set, such as the
-  :prop_tgt:`IMPORTED` property of a build target.
+Use two spaces for indentation.  Use two spaces between sentences in
+prose.
 
-4)
-  Use two spaces for indentation.  Use two spaces between sentences in
-  prose.
+Style: Line Length
+^^^^^^^^^^^^^^^^^^
 
-5)
-  Prefer to mark the start of literal blocks with ``::`` at the end of
-  the preceding paragraph. In cases where the following block gets
-  a ``code-block`` marker, put a single ``:`` at the end of the preceding
-  paragraph.
+Prefer to restrict the width of lines to 75-80 columns.  This is not a
+hard restriction, but writing new paragraphs wrapped at 75 columns
+allows space for adding minor content without significant re-wrapping of
+content.
 
-6)
-  Prefer to restrict the width of lines to 75-80 columns.  This is not a
-  hard restriction, but writing new paragraphs wrapped at 75 columns
-  allows space for adding minor content without significant re-wrapping of
-  content.
+Style: Prose
+^^^^^^^^^^^^
 
-7)
-  Mark up self-references with  ``inline-literal`` syntax. For example,
-  within the add_executable command documentation, use
+Use American English spellings in prose.
 
-  .. code-block:: rst
+Style: Starting Literal Blocks
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    ``add_executable``
+Prefer to mark the start of literal blocks with ``::`` at the end of
+the preceding paragraph. In cases where the following block gets
+a ``code-block`` marker, put a single ``:`` at the end of the preceding
+paragraph.
 
-  not
+Style: CMake Command Signatures
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+Command signatures should be marked up as plain literal blocks, not as
+cmake ``code-blocks``.
 
-    :command:`add_executable`
+Signatures are separated from preceding content by a section header.
+That is, use:
 
-  which is used elsewhere.
+.. code-block:: rst
 
-8)
-  Mark up all other linkable references as links, including repeats. An
-  alternative, which is used by wikipedia (`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
-  is to link to a reference only once per article. That style is not used
-  in CMake documentation.
+  ... preceding paragraph.
 
-9)
-  Mark up references to keywords in signatures, file names, and other
-  technical terms with ``inline-literl`` syntax, for example:
+  Normal Libraries
+  ^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+  ::
 
-    If ``WIN32`` is used with :command:`add_executable`, the
-    :prop_tgt:`WIN32_EXECUTABLE` target property is enabled. That command
-    creates the file ``<name>.exe`` on Windows.
+    add_library(<lib> ...)
 
+  This signature is used for ...
 
-10)
-  If referring to a concept which corresponds to a property, and that
-  concept is described in a high-level manual, prefer to link to the
-  manual section instead of the property. For example:
+Signatures of commands should wrap optional parts with square brackets,
+and should mark list of optional arguments with an ellipsis (``...``).
+Elements of the signature which are specified by the user should be
+specified with angle brackets, and may be referred to in prose using
+``inline-literal`` syntax.
 
-  .. code-block:: rst
+Style: Boolean Constants
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-    This command creates an :ref:`Imported Target <Imported Targets>`.
+Use "``OFF``" and "``ON``" for boolean values which can be modified by
+the user, such as :prop_tgt:`POSITION_INDEPENDENT_CODE`. Such properties
+may be "enabled" and "disabled". Use "``True``" and "``False``" for
+inherent values which can't be modified after being set, such as the
+:prop_tgt:`IMPORTED` property of a build target.
 
-  instead of:
+Style: Inline Literals
+^^^^^^^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+Mark up references to keywords in signatures, file names, and other
+technical terms with ``inline-literal`` syntax, for example:
 
-    This command creates an :prop_tgt:`IMPORTED` target.
+.. code-block:: rst
 
-  The latter should be used only when referring specifically to the
-  property.
+  If ``WIN32`` is used with :command:`add_executable`, the
+  :prop_tgt:`WIN32_EXECUTABLE` target property is enabled. That command
+  creates the file ``<name>.exe`` on Windows.
 
-  References to manual sections are not automatically created by creating
-  a section, but code such as:
+Style: Cross-References
+^^^^^^^^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+Mark up linkable references as links, including repeats.
+An alternative, which is used by wikipedia
+(`<http://en.wikipedia.org/wiki/WP:REPEATLINK>`_),
+is to link to a reference only once per article. That style is not used
+in CMake documentation.
 
-    .. _`Imported Targets`:
+Style: Referencing CMake Concepts
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  creates a suitable anchor.  Use an anchor name which matches the name
-  of the corresponding section.  Refer to the anchor using a
-  cross-reference with specified text.
+If referring to a concept which corresponds to a property, and that
+concept is described in a high-level manual, prefer to link to the
+manual section instead of the property. For example:
 
-  Imported Targets need the ``IMPORTED`` term marked up with care in
-  particular because the term may refer to a command keyword
-  (``IMPORTED``), a target property (:prop_tgt:`IMPORTED`), or a
-  concept (:ref:`Imported Targets`).
+.. code-block:: rst
 
-11)
-  Where a property, command or variable is related conceptually to others,
-  by for example, being related to the buildsystem description, generator
-  expressions or Qt, each relevant property, command or variable should
-  link to the primary manual, which provides high-level information.  Only
-  particular information relating to the command should be in the
-  documentation of the command.
+  This command creates an :ref:`Imported Target <Imported Targets>`.
 
-12)
-  When marking section titles, make the section decoration line as long as
-  the title text.  Use only a line below the title, not above. For
-  example:
+instead of:
 
-  .. code-block:: rst
+.. code-block:: rst
 
-    Title Text
-    ----------
+  This command creates an :prop_tgt:`IMPORTED` target.
 
-  Capitalize the first letter of each non-minor word in the title.
+The latter should be used only when referring specifically to the
+property.
 
-13)
-  When referring to properties, variables, commands etc, prefer to link
-  to the target object and follow that with the type of object it is.
-  For example:
+References to manual sections are not automatically created by creating
+a section, but code such as:
 
-  .. code-block:: rst
+.. code-block:: rst
 
-    Set the :prop_tgt:`AUTOMOC` target property to ``ON``.
+  .. _`Imported Targets`:
 
-  Instead of
+creates a suitable anchor.  Use an anchor name which matches the name
+of the corresponding section.  Refer to the anchor using a
+cross-reference with specified text.
 
-  .. code-block:: rst
+Imported Targets need the ``IMPORTED`` term marked up with care in
+particular because the term may refer to a command keyword
+(``IMPORTED``), a target property (:prop_tgt:`IMPORTED`), or a
+concept (:ref:`Imported Targets`).
 
-    Set the target property :prop_tgt:`AUTOMOC` to ``ON``.
+Where a property, command or variable is related conceptually to others,
+by for example, being related to the buildsystem description, generator
+expressions or Qt, each relevant property, command or variable should
+link to the primary manual, which provides high-level information.  Only
+particular information relating to the command should be in the
+documentation of the command.
 
-  The ``policy`` directive is an exception, and the type us usually
-  referred to before the link:
+Style: Referencing CMake Domain Objects
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-  .. code-block:: rst
+When referring to `CMake Domain`_ objects such as properties, variables,
+commands etc, prefer to link to the target object and follow that with
+the type of object it is.  For example:
 
-    If policy :prop_tgt:`CMP0022` is set to ``NEW`` the behavior is ...
+.. code-block:: rst
 
-14)
-  Signatures of commands should wrap optional parts with square brackets,
-  and should mark list of optional arguments with an ellipsis (``...``).
-  Elements of the signature which are specified by the user should be
-  specified with angle brackets, and may be referred to in prose using
-  ``inline-literal`` syntax.
+  Set the :prop_tgt:`AUTOMOC` target property to ``ON``.
 
-15)
-  Use American English spellings in prose.
+Instead of
 
+.. code-block:: rst
+
+  Set the target property :prop_tgt:`AUTOMOC` to ``ON``.
+
+The ``policy`` directive is an exception, and the type us usually
+referred to before the link:
+
+.. code-block:: rst
+
+  If policy :prop_tgt:`CMP0022` is set to ``NEW`` the behavior is ...
+
+However, markup self-references with ``inline-literal`` syntax.
+For example, within the :command:`add_executable` command
+documentation, use
+
+.. code-block:: rst
+
+  ``add_executable``
+
+not
+
+.. code-block:: rst
+
+  :command:`add_executable`
+
+which is used elsewhere.
 
 Modules
 =======
@@ -701,7 +615,9 @@ by the :command:`find_package` command when invoked for ``<package>``.
 The primary task of a find module is to determine whether a package
 exists on the system, set the ``<package>_FOUND`` variable to reflect
 this and provide any variables, macros and imported targets required to
-use the package.
+use the package.  A find module is useful in cases where an upstream
+library does not provide a
+:ref:`config file package <Config File Packages>`.
 
 The traditional approach is to use variables for everything, including
 libraries and executables: see the `Standard Variable Names`_ section
@@ -709,13 +625,9 @@ below.  This is what most of the existing find modules provided by CMake
 do.
 
 The more modern approach is to behave as much like
-``<package>Config.cmake`` files as possible, by providing imported
-targets.  As well as matching how ``*Config.cmake`` files work, the
-libraries, include directories and compile definitions are all set just
-by using the target in a :command:`target_link_libraries` call.   The
-disadvantage is that ``*Config.cmake`` files of projects that use
-imported targets from find modules may require more work to make sure
-those imported targets that are in the link interface are available.
+:ref:`config file packages <Config File Packages>` files as possible, by
+providing :ref:`imported target <Imported targets>`.  This has the advantage
+of propagating :ref:`Target Usage Requirements` to consumers.
 
 In either case (or even when providing both variables and imported
 targets), find modules should provide backwards compatibility with old
@@ -763,7 +675,7 @@ Documentation`_ section above.
 
 
 Standard Variable Names
-~~~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^^^
 
 For a ``FindXxx.cmake`` module that takes the approach of setting
 variables (either instead of or in addition to creating imported
@@ -859,7 +771,10 @@ To prevent users being overwhelmed with settings to configure, try to
 keep as many options as possible out of the cache, leaving at least one
 option which can be used to disable use of the module, or locate a
 not-found library (e.g. ``Xxx_ROOT_DIR``).  For the same reason, mark
-most cache options as advanced.
+most cache options as advanced.  For packages which provide both debug
+and release binaries, it is common to create cache variables with a
+``_LIBRARY_<CONFIG>`` suffix, such as ``Foo_LIBRARY_RELEASE`` and
+``Foo_LIBRARY_DEBUG``.
 
 While these are the standard variable names, you should provide
 backwards compatibility for any old names that were actually in use.
@@ -869,7 +784,7 @@ them.
 
 
 A Sample Find Module
-~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^
 
 We will describe how to create a simple find module for a library
 ``Foo``.
@@ -925,15 +840,6 @@ licence notice block
   #=============================================================================
   # (To distribute this file outside of CMake, substitute the full
   #  License text for the above reference.)
-
-If the module is new to CMake, you may want to provide a warning for
-projects that do not require a high enough CMake version.
-
-.. code-block:: cmake
-
-  if(CMAKE_MINIMUM_REQUIRED_VERSION VERSION_LESS 3.0.0)
-    message(AUTHOR_WARNING "Your project should require at least CMake 3.0.0 to use FindFoo.cmake")
-  endif()
 
 Now the actual libraries and so on have to be found.  The code here will
 obviously vary from module to module (dealing with that, after all, is the
@@ -1041,16 +947,46 @@ not any of its dependencies.  Instead, those dependencies should also be
 targets, and CMake should be told that they are dependencies of this target.
 CMake will then combine all the necessary information automatically.
 
-We should also provide some information about the package, such as where to
-download it.
+The type of the :prop_tgt:`IMPORTED` target created in the
+:command:`add_library` command can always be specified as ``UNKNOWN``
+type.  This simplifies the code in cases where static or shared variants may
+be found, and CMake will determine the type by inspecting the files.
+
+If the library is available with multiple configurations, the
+:prop_tgt:`IMPORTED_CONFIGURATIONS` target property should also be
+populated:
 
 .. code-block:: cmake
 
-  include(FeatureSummary)
-  set_package_properties(Foo PROPERTIES
-    URL "http://www.foo.example.com/"
-    DESCRIPTION "A library for doing useful things"
-  )
+  if(Foo_FOUND)
+    if (NOT TARGET Foo::Foo)
+      add_library(Foo::Foo UNKNOWN IMPORTED)
+    endif()
+    if (Foo_LIBRARY_RELEASE)
+      set_property(TARGET Foo::Foo APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS RELEASE
+      )
+      set_target_properties(Foo::Foo PROPERTIES
+        IMPORTED_LOCATION_RELEASE "${Foo_LIBRARY_RELEASE}"
+      )
+    endif()
+    if (Foo_LIBRARY_DEBUG)
+      set_property(TARGET Foo::Foo APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS DEBUG
+      )
+      set_target_properties(Foo::Foo PROPERTIES
+        IMPORTED_LOCATION_DEBUG "${Foo_LIBRARY_DEBUG}"
+      )
+    endif()
+    set_target_properties(Foo::Foo PROPERTIES
+      INTERFACE_COMPILE_OPTIONS "${PC_Foo_CFLAGS_OTHER}"
+      INTERFACE_INCLUDE_DIRECTORIES "${Foo_INCLUDE_DIR}"
+    )
+  endif()
+
+The ``RELEASE`` variant should be listed first in the property
+so that that variant is chosen if the user uses a configuration which is
+not an exact match for any listed ``IMPORTED_CONFIGURATIONS``.
 
 Most of the cache variables should be hidden in the ``ccmake`` interface unless
 the user explicitly asks to edit them.

@@ -10,6 +10,7 @@
 # store the result in a <variable>.  This does not verify that any
 # system header file declares the function, only that it can be found at
 # link time (consider using CheckSymbolExists).
+# <variable> will be created as an internal cache variable.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
@@ -38,7 +39,7 @@
 
 
 macro(CHECK_FUNCTION_EXISTS FUNCTION VARIABLE)
-  if("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  if(NOT DEFINED "${VARIABLE}" OR "x${${VARIABLE}}" STREQUAL "x${VARIABLE}")
     set(MACRO_CHECK_FUNCTION_DEFINITIONS
       "-DCHECK_FUNCTION_EXISTS=${FUNCTION} ${CMAKE_REQUIRED_FLAGS}")
     if(NOT CMAKE_REQUIRED_QUIET)

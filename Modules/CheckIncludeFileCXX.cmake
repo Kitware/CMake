@@ -14,6 +14,7 @@
 #
 #   INCLUDE  - name of include file
 #   VARIABLE - variable to return result
+#              Will be created as an internal cache variable.
 #
 #
 #
@@ -44,7 +45,7 @@
 #  License text for the above reference.)
 
 macro(CHECK_INCLUDE_FILE_CXX INCLUDE VARIABLE)
-  if("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  if(NOT DEFINED "${VARIABLE}" OR "x${${VARIABLE}}" STREQUAL "x${VARIABLE}")
     if(CMAKE_REQUIRED_INCLUDES)
       set(CHECK_INCLUDE_FILE_CXX_INCLUDE_DIRS "-DINCLUDE_DIRECTORIES=${CMAKE_REQUIRED_INCLUDES}")
     else()

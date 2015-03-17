@@ -20,6 +20,7 @@
 #include "cmGeneratorExpressionDAGChecker.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <queue>
 
@@ -31,14 +32,15 @@ void reportBadObjLib(std::vector<cmSourceFile*> const& badObjLib,
 {
   if(!badObjLib.empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "OBJECT library \"" << target->GetName() << "\" contains:\n";
     for(std::vector<cmSourceFile*>::const_iterator i = badObjLib.begin();
         i != badObjLib.end(); ++i)
       {
       e << "  " << (*i)->GetLocation().GetName() << "\n";
       }
-    e << "but may contain only headers and sources that compile.";
+    e << "but may contain only sources that compile, header files, and "
+         "other files that would not affect linking of a normal library.";
     cm->IssueMessage(cmake::FATAL_ERROR, e.str(),
                      target->GetBacktrace());
     }
@@ -52,8 +54,9 @@ struct ExternalObjectsTag {};
 struct IDLSourcesTag {};
 struct ResxTag {};
 struct ModuleDefinitionFileTag {};
+struct AppManifestTag{};
+struct CertificatesTag{};
 
-#if !defined(_MSC_VER) || _MSC_VER >= 1310
 template<typename Tag, typename OtherTag>
 struct IsSameTag
 {
@@ -69,25 +72,6 @@ struct IsSameTag<Tag, Tag>
     Result = true
   };
 };
-#else
-struct IsSameTagBase
-{
-  typedef char (&no_type)[1];
-  typedef char (&yes_type)[2];
-  template<typename T> struct Check;
-  template<typename T> static yes_type check(Check<T>*, Check<T>*);
-  static no_type check(...);
-};
-template<typename Tag1, typename Tag2>
-struct IsSameTag: public IsSameTagBase
-{
-  enum {
-    Result = (sizeof(check(static_cast< Check<Tag1>* >(0),
-                           static_cast< Check<Tag2>* >(0))) ==
-              sizeof(yes_type))
-  };
-};
-#endif
 
 template<bool>
 struct DoAccept
@@ -194,6 +178,14 @@ struct TagVisitor
       {
       DoAccept<IsSameTag<Tag, ResxTag>::Result>::Do(this->Data, sf);
       }
+    else if (ext == "appxmanifest")
+      {
+      DoAccept<IsSameTag<Tag, AppManifestTag>::Result>::Do(this->Data, sf);
+      }
+    else if (ext == "pfx")
+      {
+      DoAccept<IsSameTag<Tag, CertificatesTag>::Result>::Do(this->Data, sf);
+      }
     else if(this->Header.find(sf->GetFullPath().c_str()))
       {
       DoAccept<IsSameTag<Tag, HeaderSourcesTag>::Result>::Do(this->Data, sf);
@@ -205,10 +197,6 @@ struct TagVisitor
     else
       {
       DoAccept<IsSameTag<Tag, ExtraSourcesTag>::Result>::Do(this->Data, sf);
-      if(this->IsObjLib && ext != "txt")
-        {
-        this->BadObjLibFiles.push_back(sf);
-        }
       }
   }
 };
@@ -252,19 +240,17 @@ cmGeneratorTarget::GetSourceDepends(cmSourceFile const* sf) const
   return 0;
 }
 
-static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
+static void handleSystemIncludesDep(cmMakefile *mf, cmTarget const* depTgt,
                                   const std::string& config,
                                   cmTarget *headTarget,
                                   cmGeneratorExpressionDAGChecker *dagChecker,
                                   std::vector<std::string>& result,
                                   bool excludeImported)
 {
-  cmListFileBacktrace lfbt;
-
   if (const char* dirs =
           depTgt->GetProperty("INTERFACE_SYSTEM_INCLUDE_DIRECTORIES"))
     {
-    cmGeneratorExpression ge(lfbt);
+    cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
                                       ->Evaluate(mf,
                                       config, false, headTarget,
@@ -278,7 +264,7 @@ static void handleSystemIncludesDep(cmMakefile *mf, cmTarget* depTgt,
   if (const char* dirs =
                 depTgt->GetProperty("INTERFACE_INCLUDE_DIRECTORIES"))
     {
-    cmGeneratorExpression ge(lfbt);
+    cmGeneratorExpression ge;
     cmSystemTools::ExpandListArgument(ge.Parse(dirs)
                                       ->Evaluate(mf,
                                       config, false, headTarget,
@@ -434,6 +420,24 @@ void cmGeneratorTarget
 }
 
 //----------------------------------------------------------------------------
+void
+cmGeneratorTarget
+::GetAppManifest(std::vector<cmSourceFile const*>& data,
+                 const std::string& config) const
+{
+  IMPLEMENT_VISIT(AppManifest);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget
+::GetCertificates(std::vector<cmSourceFile const*>& data,
+                  const std::string& config) const
+{
+  IMPLEMENT_VISIT(Certificates);
+}
+
+//----------------------------------------------------------------------------
 bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
                                               const std::string& config) const
 {
@@ -450,15 +454,7 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
 
   if (iter == this->SystemIncludesCache.end())
     {
-    cmTarget::LinkImplementation const* impl
-                  = this->Target->GetLinkImplementation(config, this->Target);
-    if(!impl)
-      {
-      return false;
-      }
-
-    cmListFileBacktrace lfbt;
-    cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+    cmGeneratorExpressionDAGChecker dagChecker(
                                         this->GetName(),
                                         "SYSTEM_INCLUDE_DIRECTORIES", 0, 0);
 
@@ -470,42 +466,22 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
         it = this->Target->GetSystemIncludeDirectories().begin();
         it != this->Target->GetSystemIncludeDirectories().end(); ++it)
       {
-      cmGeneratorExpression ge(lfbt);
+      cmGeneratorExpression ge;
       cmSystemTools::ExpandListArgument(ge.Parse(*it)
                                           ->Evaluate(this->Makefile,
                                           config, false, this->Target,
                                           &dagChecker), result);
       }
 
-    std::set<cmTarget*> uniqueDeps;
-    for(std::vector<std::string>::const_iterator li = impl->Libraries.begin();
-        li != impl->Libraries.end(); ++li)
+    std::vector<cmTarget const*> const& deps =
+      this->Target->GetLinkImplementationClosure(config);
+    for(std::vector<cmTarget const*>::const_iterator
+          li = deps.begin(), le = deps.end(); li != le; ++li)
       {
-      cmTarget* tgt = this->Makefile->FindTargetToUse(*li);
-      if (!tgt)
-        {
-        continue;
-        }
-
-      if (uniqueDeps.insert(tgt).second)
-        {
-        handleSystemIncludesDep(this->Makefile, tgt, config, this->Target,
-                                &dagChecker, result, excludeImported);
-
-        std::vector<cmTarget*> deps;
-        tgt->GetTransitivePropertyTargets(config, this->Target, deps);
-
-        for(std::vector<cmTarget*>::const_iterator di = deps.begin();
-            di != deps.end(); ++di)
-          {
-          if (uniqueDeps.insert(*di).second)
-            {
-            handleSystemIncludesDep(this->Makefile, *di, config, this->Target,
-                                    &dagChecker, result, excludeImported);
-            }
-          }
-        }
+      handleSystemIncludesDep(this->Makefile, *li, config, this->Target,
+                              &dagChecker, result, excludeImported);
       }
+
     std::set<std::string> unique;
     for(std::vector<std::string>::iterator li = result.begin();
         li != result.end(); ++li)
@@ -514,19 +490,13 @@ bool cmGeneratorTarget::IsSystemIncludeDirectory(const std::string& dir,
       unique.insert(*li);
       }
     result.clear();
-    for(std::set<std::string>::iterator li = unique.begin();
-        li != unique.end(); ++li)
-      {
-      result.push_back(*li);
-      }
+    result.insert(result.end(), unique.begin(), unique.end());
 
     IncludeCacheType::value_type entry(config_upper, result);
     iter = this->SystemIncludesCache.insert(entry).first;
     }
 
-  std::string dirString = dir;
-  return std::binary_search(iter->second.begin(), iter->second.end(),
-                            dirString);
+  return std::binary_search(iter->second.begin(), iter->second.end(), dir);
 }
 
 //----------------------------------------------------------------------------
@@ -559,23 +529,22 @@ cmGeneratorTarget::UseObjectLibraries(std::vector<std::string>& objs,
   std::vector<cmSourceFile const*> objectFiles;
   this->GetExternalObjects(objectFiles, config);
   std::vector<cmTarget*> objectLibraries;
-  std::set<cmTarget*> emitted;
   for(std::vector<cmSourceFile const*>::const_iterator
       it = objectFiles.begin(); it != objectFiles.end(); ++it)
     {
     std::string objLib = (*it)->GetObjectLibrary();
     if (cmTarget* tgt = this->Makefile->FindTargetToUse(objLib))
       {
-      if (emitted.insert(tgt).second)
-        {
-        objectLibraries.push_back(tgt);
-        }
+      objectLibraries.push_back(tgt);
       }
     }
 
+  std::vector<cmTarget*>::const_iterator end
+      = cmRemoveDuplicates(objectLibraries);
+
   for(std::vector<cmTarget*>::const_iterator
         ti = objectLibraries.begin();
-      ti != objectLibraries.end(); ++ti)
+      ti != end; ++ti)
     {
     cmTarget* objLib = *ti;
     cmGeneratorTarget* ogt =
@@ -653,6 +622,17 @@ cmTargetTraceDependencies
           si != sources.end(); ++si)
         {
         cmSourceFile* sf = *si;
+        const std::set<cmTarget const*> tgts =
+                          this->GlobalGenerator->GetFilenameTargetDepends(sf);
+        if (tgts.find(this->Target) != tgts.end())
+          {
+          std::ostringstream e;
+          e << "Evaluation output file\n  \"" << sf->GetFullPath()
+            << "\"\ndepends on the sources of a target it is used in.  This "
+              "is a dependency loop and is not allowed.";
+          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+          return;
+          }
         if(emitted.insert(sf).second && this->SourcesQueued.insert(sf).second)
           {
           this->SourceQueue.push(sf);
@@ -683,6 +663,14 @@ void cmTargetTraceDependencies::Trace()
       {
       std::vector<std::string> objDeps;
       cmSystemTools::ExpandListArgument(additionalDeps, objDeps);
+      for(std::vector<std::string>::iterator odi = objDeps.begin();
+          odi != objDeps.end(); ++odi)
+        {
+        if (cmSystemTools::FileIsFullPath(*odi))
+          {
+          *odi = cmSystemTools::CollapseFullPath(*odi);
+          }
+        }
       this->FollowNames(objDeps);
       }
 
@@ -779,8 +767,8 @@ bool cmTargetTraceDependencies::IsUtility(std::string const& dep)
         std::string tLocation = t->GetLocationForBuild();
         tLocation = cmSystemTools::GetFilenamePath(tLocation);
         std::string depLocation = cmSystemTools::GetFilenamePath(dep);
-        depLocation = cmSystemTools::CollapseFullPath(depLocation.c_str());
-        tLocation = cmSystemTools::CollapseFullPath(tLocation.c_str());
+        depLocation = cmSystemTools::CollapseFullPath(depLocation);
+        tLocation = cmSystemTools::CollapseFullPath(tLocation);
         if(depLocation == tLocation)
           {
           this->Target->AddUtility(util);
@@ -808,7 +796,7 @@ cmTargetTraceDependencies
 {
   // Transform command names that reference targets built in this
   // project to corresponding target-level dependencies.
-  cmGeneratorExpression ge(cc.GetBacktrace());
+  cmGeneratorExpression ge(&cc.GetBacktrace());
 
   // Add target-level dependencies referenced by generator expressions.
   std::set<cmTarget*> targets;
@@ -838,11 +826,7 @@ cmTargetTraceDependencies
                                                               = ge.Parse(*cli);
       cge->Evaluate(this->Makefile, "", true);
       std::set<cmTarget*> geTargets = cge->GetTargets();
-      for(std::set<cmTarget*>::const_iterator it = geTargets.begin();
-          it != geTargets.end(); ++it)
-        {
-        targets.insert(*it);
-        }
+      targets.insert(geTargets.begin(), geTargets.end());
       }
     }
 
@@ -943,18 +927,32 @@ void cmGeneratorTarget::GetAppleArchs(const std::string& config,
 }
 
 //----------------------------------------------------------------------------
-const char* cmGeneratorTarget::GetCreateRuleVariable() const
+std::string
+cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
+                                         std::string const& config) const
 {
   switch(this->GetType())
     {
     case cmTarget::STATIC_LIBRARY:
-      return "_CREATE_STATIC_LIBRARY";
+      {
+      std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
+      if(this->Target->GetFeatureAsBool(
+           "INTERPROCEDURAL_OPTIMIZATION", config))
+        {
+        std::string varIPO = var + "_IPO";
+        if(this->Makefile->GetDefinition(varIPO))
+          {
+          return varIPO;
+          }
+        }
+      return var;
+      }
     case cmTarget::SHARED_LIBRARY:
-      return "_CREATE_SHARED_LIBRARY";
+      return "CMAKE_" + lang + "_CREATE_SHARED_LIBRARY";
     case cmTarget::MODULE_LIBRARY:
-      return "_CREATE_SHARED_MODULE";
+      return "CMAKE_" + lang + "_CREATE_SHARED_MODULE";
     case cmTarget::EXECUTABLE:
-      return "_LINK_EXECUTABLE";
+      return "CMAKE_" + lang + "_LINK_EXECUTABLE";
     default:
       break;
     }
@@ -963,9 +961,10 @@ const char* cmGeneratorTarget::GetCreateRuleVariable() const
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmGeneratorTarget::GetIncludeDirectories(const std::string& config) const
+cmGeneratorTarget::GetIncludeDirectories(const std::string& config,
+                                         const std::string& lang) const
 {
-  return this->Target->GetIncludeDirectories(config);
+  return this->Target->GetIncludeDirectories(config, lang);
 }
 
 //----------------------------------------------------------------------------

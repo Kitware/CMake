@@ -108,6 +108,14 @@ public:
     CMP0052, ///< Reject source and build dirs in installed
     /// INTERFACE_INCLUDE_DIRECTORIES
 
+    CMP0053, ///< Simplify variable reference and escape sequence evaluation
+    CMP0054, ///< Only interpret if() arguments as variables
+    /// or keywords when unquoted.
+    CMP0055, ///< Strict checking for break() command.
+    CMP0056, ///< Honor link flags in try_compile() source-file signature.
+    CMP0057, ///< Disallow multiple MAIN_DEPENDENCY specifications
+    /// for the same file.
+
     /** \brief Always the last entry.
      *
      * Useful mostly to avoid adding a comma the last policy when adding a new

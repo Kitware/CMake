@@ -2,17 +2,24 @@
 # FindZLIB
 # --------
 #
-# Find zlib
+# Find the native ZLIB includes and library.
 #
-# Find the native ZLIB includes and library.  Once done this will define
+# IMPORTED Targets
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines :prop_tgt:`IMPORTED` target ``ZLIB::ZLIB``, if
+# ZLIB has been found.
+#
+# Result Variables
+# ^^^^^^^^^^^^^^^^
+#
+# This module defines the following variables:
 #
 # ::
 #
 #   ZLIB_INCLUDE_DIRS   - where to find zlib.h, etc.
 #   ZLIB_LIBRARIES      - List of libraries when using zlib.
 #   ZLIB_FOUND          - True if zlib found.
-#
-#
 #
 # ::
 #
@@ -22,7 +29,8 @@
 #   ZLIB_VERSION_PATCH  - The patch version of zlib
 #   ZLIB_VERSION_TWEAK  - The tweak version of zlib
 #
-#
+# Backward Compatibility
+# ^^^^^^^^^^^^^^^^^^^^^^
 #
 # The following variable are provided for backward compatibility
 #
@@ -32,9 +40,10 @@
 #   ZLIB_MINOR_VERSION  - The minor version of zlib
 #   ZLIB_PATCH_VERSION  - The patch version of zlib
 #
+# Hints
+# ^^^^^
 #
-#
-# An includer may set ZLIB_ROOT to a zlib installation root to tell this
+# A user may set ``ZLIB_ROOT`` to a zlib installation root to tell this
 # module where to look.
 
 #=============================================================================
@@ -85,7 +94,7 @@ if(ZLIB_INCLUDE_DIR AND EXISTS "${ZLIB_INCLUDE_DIR}/zlib.h")
 
     # only append a TWEAK version if it exists:
     set(ZLIB_VERSION_TWEAK "")
-    if( "${ZLIB_H}" MATCHES "^.*ZLIB_VERSION \"[0-9]+\\.[0-9]+\\.[0-9]+\\.([0-9]+).*$")
+    if( "${ZLIB_H}" MATCHES "ZLIB_VERSION \"[0-9]+\\.[0-9]+\\.[0-9]+\\.([0-9]+)")
         set(ZLIB_VERSION_TWEAK "${CMAKE_MATCH_1}")
         set(ZLIB_VERSION_STRING "${ZLIB_VERSION_STRING}.${ZLIB_VERSION_TWEAK}")
     endif()
@@ -104,5 +113,11 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB REQUIRED_VARS ZLIB_LIBRARY ZLIB_INCLUDE_D
 if(ZLIB_FOUND)
     set(ZLIB_INCLUDE_DIRS ${ZLIB_INCLUDE_DIR})
     set(ZLIB_LIBRARIES ${ZLIB_LIBRARY})
-endif()
 
+    if(NOT TARGET ZLIB::ZLIB)
+      add_library(ZLIB::ZLIB UNKNOWN IMPORTED)
+      set_target_properties(ZLIB::ZLIB PROPERTIES
+        IMPORTED_LOCATION "${ZLIB_LIBRARY}"
+        INTERFACE_INCLUDE_DIRECTORIES "${ZLIB_INCLUDE_DIRS}")
+    endif()
+endif()

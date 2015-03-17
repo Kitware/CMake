@@ -285,9 +285,7 @@ endif()
           OUTPUT_VARIABLE FLTK_IMAGES_LDFLAGS)
         set(FLTK_LIBS_EXTRACT_REGEX ".*-lfltk_images (.*) -lfltk.*")
         if("${FLTK_IMAGES_LDFLAGS}" MATCHES "${FLTK_LIBS_EXTRACT_REGEX}")
-          string(REGEX REPLACE "${FLTK_LIBS_EXTRACT_REGEX}" "\\1"
-            FLTK_IMAGES_LIBS "${FLTK_IMAGES_LDFLAGS}")
-          string(REGEX REPLACE " +" ";" FLTK_IMAGES_LIBS "${FLTK_IMAGES_LIBS}")
+          string(REGEX REPLACE " +" ";" FLTK_IMAGES_LIBS "${CMAKE_MATCH_1}")
           # The EXEC_PROGRAM will not be inherited into subdirectories from
           # the file that originally included this module.  Save the answer.
           set(FLTK_IMAGES_LIBS "${FLTK_IMAGES_LIBS}" CACHE INTERNAL

@@ -34,7 +34,7 @@ int testXMLSafe(int, char*[])
   for(test_pair const* p = pairs; p->in; ++p)
     {
     cmXMLSafe xs(p->in);
-    cmOStringStream oss;
+    std::ostringstream oss;
     oss << xs;
     std::string out = oss.str();
     if(out != p->out)

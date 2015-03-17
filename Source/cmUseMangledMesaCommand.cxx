@@ -44,7 +44,7 @@ bool cmUseMangledMesaCommand
   const char* destDir = args[1].c_str();
   std::vector<std::string> files;
   cmSystemTools::Glob(inputDir, "\\.h$", files);
-  if(files.size() == 0)
+  if(files.empty())
     {
     cmSystemTools::Error("Could not open Mesa Directory ", inputDir);
     return false;

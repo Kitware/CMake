@@ -63,12 +63,7 @@ int post_form(FORM * form)
     RETURN(E_NOT_CONNECTED);
   
   formwin = Get_Form_Window(form);
-#if defined(__LSB_VERSION__)
   getmaxyx(formwin, height, width);
-#else
-  width  = getmaxx(formwin);
-  height = getmaxy(formwin);
-#endif
   if ((form->cols > width) || (form->rows > height))
     RETURN(E_NO_ROOM);
 

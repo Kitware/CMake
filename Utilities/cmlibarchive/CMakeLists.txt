@@ -28,11 +28,12 @@ STRING(REGEX REPLACE "[0]*([^0]*[0-9])$" "\\1" _trimmed_revision ${_revision})
 SET(VERSION                    "${_major}.${_trimmed_minor}.${_trimmed_revision}${_quality}")
 SET(BSDCPIO_VERSION_STRING     "${VERSION}")
 SET(BSDTAR_VERSION_STRING      "${VERSION}")
+SET(BSDCAT_VERSION_STRING      "${VERSION}")
 SET(LIBARCHIVE_VERSION_NUMBER  "${_version_number}")
 SET(LIBARCHIVE_VERSION_STRING  "${VERSION}")
 
 # INTERFACE_VERSION increments with every release
-# libarchive 2.7 == interface version 9 = 2 + 7 
+# libarchive 2.7 == interface version 9 = 2 + 7
 # libarchive 2.8 == interface version 10 = 2 + 8
 # libarchive 2.9 == interface version 11 = 2 + 9
 # libarchive 3.0 == interface version 12
@@ -55,13 +56,11 @@ SET(CMAKE_REQUIRED_LIBRARIES)
 SET(CMAKE_REQUIRED_FLAGS)
 
 # Disable warnings to avoid changing 3rd party code.
-IF("${CMAKE_C_COMPILER_ID}" MATCHES
+IF(CMAKE_C_COMPILER_ID MATCHES
     "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
-ELSEIF("${CMAKE_C_COMPILER_ID}" MATCHES "^(PathScale)$")
+ELSEIF(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
   SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
-ELSEIF(BORLAND)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w-")
 ENDIF()
 
 # Enable CTest/CDash support
@@ -69,6 +68,13 @@ include(CTest)
 
 OPTION(ENABLE_NETTLE "Enable use of Nettle" ON)
 OPTION(ENABLE_OPENSSL "Enable use of OpenSSL" ON)
+OPTION(ENABLE_LZMA "Enable the use of the system found LZMA library if found" ON)
+OPTION(ENABLE_ZLIB "Enable the use of the system found ZLIB library if found" ON)
+OPTION(ENABLE_BZip2 "Enable the use of the system found BZip2 library if found" ON)
+OPTION(ENABLE_EXPAT "Enable the use of the system found EXPAT library if found" ON)
+OPTION(ENABLE_PCREPOSIX "Enable the use of the system found PCREPOSIX library if found" ON)
+OPTION(ENABLE_LibGCC "Enable the use of the system found LibGCC library if found" ON)
+
 OPTION(ENABLE_XATTR "Enable extended attribute support" ON)
 OPTION(ENABLE_ACL "Enable ACL support" ON)
 OPTION(ENABLE_ICONV "Enable iconv support" ON)
@@ -190,7 +196,7 @@ IF(DEFINED __GNUWIN32PATH AND EXISTS "${__GNUWIN32PATH}")
   #--- zconf.h.orig	2005-07-21 00:40:26.000000000
   #+++ zconf.h	2009-01-19 11:39:10.093750000
   #@@ -286,7 +286,7 @@
-  # 
+  #
   # #if 1           /* HAVE_UNISTD_H -- this line is updated by ./configure */
   # #  include <sys/types.h> /* for off_t */
   #-#  include <unistd.h>    /* for SEEK_* and off_t */
@@ -204,7 +210,11 @@ SET(ADDITIONAL_LIBS "")
 #
 # Find ZLIB
 #
-FIND_PACKAGE(ZLIB)
+IF(ENABLE_ZLIB)
+  FIND_PACKAGE(ZLIB)
+ELSE()
+  SET(ZLIB_FOUND FALSE) # Override cached value
+ENDIF()
 IF(ZLIB_FOUND)
   SET(HAVE_LIBZ 1)
   SET(HAVE_ZLIB_H 1)
@@ -239,7 +249,11 @@ ENDIF(ZLIB_FOUND)
 #
 # Find BZip2
 #
-FIND_PACKAGE(BZip2)
+IF(ENABLE_BZip2)
+  FIND_PACKAGE(BZip2)
+ELSE()
+  SET(BZIP2_FOUND FALSE) # Override cached value
+ENDIF()
 IF(BZIP2_FOUND)
   SET(HAVE_LIBBZ2 1)
   SET(HAVE_BZLIB_H 1)
@@ -259,31 +273,43 @@ IF(BZIP2_FOUND)
 ENDIF(BZIP2_FOUND)
 MARK_AS_ADVANCED(CLEAR BZIP2_INCLUDE_DIR)
 MARK_AS_ADVANCED(CLEAR BZIP2_LIBRARIES)
-IF(0) # CMake does not need LZMA or LZO2 support in libarchive
 #
 # Find LZMA
 #
-FIND_PACKAGE(LZMA)
+IF(ENABLE_LZMA)
+  FIND_PACKAGE(LZMA)
+ELSE()
+  SET(LZMA_FOUND FALSE) # Override cached value
+  SET(LZMADEC_FOUND FALSE) # Override cached value
+ENDIF()
+
 IF(LZMA_FOUND)
   SET(HAVE_LIBLZMA 1)
   SET(HAVE_LZMA_H 1)
   INCLUDE_DIRECTORIES(${LZMA_INCLUDE_DIR})
   LIST(APPEND ADDITIONAL_LIBS ${LZMA_LIBRARIES})
-  # Test if a macro is needed for the library.
-  TRY_MACRO_FOR_LIBRARY(
-    "${LZMA_INCLUDE_DIR}" "${LZMA_LIBRARIES}"
-    COMPILES
-    "#include <lzma.h>\nint main() {return (int)lzma_version_number(); }"
-    "WITHOUT_LZMA_API_STATIC;LZMA_API_STATIC")
-  IF(NOT WITHOUT_LZMA_API_STATIC AND LZMA_API_STATIC)
+  IF(CMAKE_USE_SYSTEM_LIBLZMA)
+    # Test if a macro is needed for the library.
+    TRY_MACRO_FOR_LIBRARY(
+      "${LZMA_INCLUDE_DIR}" "${LZMA_LIBRARIES}"
+      COMPILES
+      "#include <lzma.h>\nint main() {return (int)lzma_version_number(); }"
+      "WITHOUT_LZMA_API_STATIC;LZMA_API_STATIC")
+    IF(NOT WITHOUT_LZMA_API_STATIC AND LZMA_API_STATIC)
+      ADD_DEFINITIONS(-DLZMA_API_STATIC)
+    ENDIF(NOT WITHOUT_LZMA_API_STATIC AND LZMA_API_STATIC)
+  ELSE()
     ADD_DEFINITIONS(-DLZMA_API_STATIC)
-  ENDIF(NOT WITHOUT_LZMA_API_STATIC AND LZMA_API_STATIC)
+  ENDIF()
 ELSEIF(LZMADEC_FOUND)
   SET(HAVE_LIBLZMADEC 1)
   SET(HAVE_LZMADEC_H 1)
   INCLUDE_DIRECTORIES(${LZMADEC_INCLUDE_DIR})
   LIST(APPEND ADDITIONAL_LIBS ${LZMADEC_LIBRARIES})
+ELSE(LZMA_FOUND)
+# LZMA not found and will not be used.
 ENDIF(LZMA_FOUND)
+IF(0) # CMake does not need LZO2 support in libarchive
 #
 # Find LZO2
 #
@@ -327,7 +353,11 @@ ENDMACRO (LA_CHECK_INCLUDE_FILE)
 LA_CHECK_INCLUDE_FILE("sys/types.h" HAVE_SYS_TYPES_H)
 
 # Alphabetize the rest unless there's a compelling reason
-LA_CHECK_INCLUDE_FILE("acl/libacl.h" HAVE_ACL_LIBACL_H)
+IF(ENABLE_ACL)
+  LA_CHECK_INCLUDE_FILE("acl/libacl.h" HAVE_ACL_LIBACL_H)
+ELSE(ENABLE_ACL)
+  SET(HAVE_ACL_LIBACL_H FALSE)
+ENDIF(ENABLE_ACL)
 LA_CHECK_INCLUDE_FILE("ctype.h" HAVE_CTYPE_H)
 LA_CHECK_INCLUDE_FILE("copyfile.h" HAVE_COPYFILE_H)
 LA_CHECK_INCLUDE_FILE("direct.h" HAVE_DIRECT_H)
@@ -510,16 +540,10 @@ main(int argc, char **argv)
 	FILE(WRITE "${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/check_crypto_md.c" "${SOURCE}")
 	MESSAGE(STATUS "Checking support for ARCHIVE_CRYPTO_${ALGORITHM}_${IMPLEMENTATION}")
 
-    IF(CMAKE_REQUIRED_LINKER_FLAGS)
-      SET(CHECK_CRYPTO_ADD_LINKER_FLAGS
-        "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_REQUIRED_LINKER_FLAGS} -DCMAKE_SHARED_LINKER_FLAGS:STRING=${CMAKE_REQUIRED_LINKER_FLAGS} -DCMAKE_MODULE_LINKER_FLAGS:STRING=${CMAKE_REQUIRED_LINKER_FLAGS}")
-    ELSE(CMAKE_REQUIRED_LINKER_FLAGS)
-      SET(CHECK_CRYPTO_ADD_LINKER_FLAGS)
-    ENDIF(CMAKE_REQUIRED_LINKER_FLAGS)
 	TRY_COMPILE(ARCHIVE_CRYPTO_${ALGORITHM}_${IMPLEMENTATION}
 	  ${CMAKE_BINARY_DIR}
 	  ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/check_crypto_md.c
-	  CMAKE_FLAGS ${CHECK_CRYPTO_ADD_LINKER_FLAGS}
+	  CMAKE_FLAGS
 	   "${TRY_CRYPTO_REQUIRED_LIBS}"
 	   "${TRY_CRYPTO_REQUIRED_INCLUDES}"
 	  OUTPUT_VARIABLE OUTPUT)
@@ -604,16 +628,10 @@ main(int argc, char **argv)
 	FILE(WRITE "${SOURCE_FILE}" "${SOURCE}")
 	MESSAGE(STATUS "Checking support for ARCHIVE_CRYPTO_${CRYPTO}_WIN")
 
-    IF(CMAKE_REQUIRED_LINKER_FLAGS)
-      SET(CHECK_CRYPTO_WIN_ADD_LINKER_FLAGS
-        "-DCMAKE_EXE_LINKER_FLAGS:STRING=${CMAKE_REQUIRED_LINKER_FLAGS} -DCMAKE_SHARED_LINKER_FLAGS:STRING=${CMAKE_REQUIRED_LINKER_FLAGS} -DCMAKE_MODULE_LINKER_FLAGS:STRING=${CMAKE_REQUIRED_LINKER_FLAGS}")
-    ELSE(CMAKE_REQUIRED_LINKER_FLAGS)
-      SET(CHECK_CRYPTO_WIN_ADD_LINKER_FLAGS)
-    ENDIF(CMAKE_REQUIRED_LINKER_FLAGS)
 	TRY_COMPILE(ARCHIVE_CRYPTO_${CRYPTO}_WIN
 	  ${CMAKE_BINARY_DIR}
 	  ${SOURCE_FILE}
-	  CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}/libarchive" ${CHECK_CRYPTO_WIN_ADD_LINKER_FLAGS}
+	  CMAKE_FLAGS "-DINCLUDE_DIRECTORIES:STRING=${CMAKE_BINARY_DIR};${CMAKE_CURRENT_SOURCE_DIR}/libarchive"
 	  OUTPUT_VARIABLE OUTPUT)
 
 	IF (ARCHIVE_CRYPTO_${CRYPTO}_WIN)
@@ -646,14 +664,14 @@ ENDMACRO(CHECK_CRYPTO_WIN CRYPTO_LIST)
 MACRO(CHECK_ICONV LIB TRY_ICONV_CONST)
   IF(NOT HAVE_ICONV)
     CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
-    IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+    IF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
       #
       # During checking iconv proto type, we should use -Werror to avoid the
       # success of iconv detection with a warnig which success is a miss
       # detection. So this needs for all build mode(even it's a release mode).
       #
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -Werror")
-    ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+    ENDIF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
     IF (MSVC)
       # NOTE: /WX option is the same as gcc's -Werror option.
       SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} /WX")
@@ -820,14 +838,14 @@ ENDIF()
 # Check functions
 #
 CMAKE_PUSH_CHECK_STATE()	# Save the state of the variables
-IF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+IF (CMAKE_C_COMPILER_ID STREQUAL "GNU")
   #
   # During checking functions, we should use -fno-builtin to avoid the
   # failure of function detection which failure is an error "conflicting
   # types for built-in function" caused by using -Werror option.
   #
   SET(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -fno-builtin")
-ENDIF ("CMAKE_C_COMPILER_ID" MATCHES "^GNU$")
+ENDIF ()
 CHECK_SYMBOL_EXISTS(_CrtSetReportMode "crtdbg.h" HAVE__CrtSetReportMode)
 CHECK_FUNCTION_EXISTS_GLIBC(chflags HAVE_CHFLAGS)
 CHECK_FUNCTION_EXISTS_GLIBC(chown HAVE_CHOWN)
@@ -1030,13 +1048,13 @@ CHECK_TYPE_SIZE("unsigned long long" SIZE_OF_UNSIGNED_LONG_LONG)
 CHECK_TYPE_SIZE("__int64" __INT64)
 CHECK_TYPE_SIZE("unsigned __int64" UNSIGNED___INT64)
 
-CHECK_TYPE_SIZE(int16_t INT16_T) 
+CHECK_TYPE_SIZE(int16_t INT16_T)
 CHECK_TYPE_SIZE(int32_t INT32_T)
 CHECK_TYPE_SIZE(int64_t INT64_T)
 CHECK_TYPE_SIZE(intmax_t INTMAX_T)
-CHECK_TYPE_SIZE(uint8_t UINT8_T) 
-CHECK_TYPE_SIZE(uint16_t UINT16_T) 
-CHECK_TYPE_SIZE(uint32_t UINT32_T) 
+CHECK_TYPE_SIZE(uint8_t UINT8_T)
+CHECK_TYPE_SIZE(uint16_t UINT16_T)
+CHECK_TYPE_SIZE(uint32_t UINT32_T)
 CHECK_TYPE_SIZE(uint64_t UINT64_T)
 CHECK_TYPE_SIZE(uintmax_t UINTMAX_T)
 

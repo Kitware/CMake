@@ -22,6 +22,11 @@
 #include "cmGeneratorTarget.h"
 #include "cmGeneratorExpression.h"
 
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+# include "cmFileLockPool.h"
+# include <cmsys/hash_map.hxx>
+#endif
+
 class cmake;
 class cmGeneratorTarget;
 class cmGeneratorExpressionEvaluationFile;
@@ -35,7 +40,7 @@ class cmExportBuildFileGenerator;
 class cmQtAutoGenerators;
 
 /** \class cmGlobalGenerator
- * \brief Responable for overseeing the generation process for the entire tree
+ * \brief Responsible for overseeing the generation process for the entire tree
  *
  * Subclasses of this class generate makefiles for various
  * platforms.
@@ -57,9 +62,17 @@ public:
   virtual bool MatchesGeneratorName(const std::string& name) const
   { return this->GetName() == name; }
 
+  /** Tell the generator about the target system.  */
+  virtual bool SetSystemName(std::string const&, cmMakefile*)
+    { return true; }
+
+  /** Set the generator-specific platform name.  Returns true if platform
+      is supported and false otherwise.  */
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+
   /** Set the generator-specific toolset name.  Returns true if toolset
       is supported and false otherwise.  */
-  virtual bool SetGeneratorToolset(std::string const& ts);
+  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   /**
    * Create LocalGenerators and process the CMakeLists files. This does not
@@ -72,7 +85,7 @@ public:
    * basically creates a series of LocalGenerators for each directory and
    * requests that they Generate.
    */
-  virtual void Generate();
+  void DoGenerate();
 
   /**
    * Set/Get and Clear the enabled languages.
@@ -82,7 +95,7 @@ public:
   void ClearEnabledLanguages();
   void GetEnabledLanguages(std::vector<std::string>& lang) const;
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
@@ -96,7 +109,7 @@ public:
                                bool optional) const;
 
   /**
-   * Try to determine system infomation, get it from another generator
+   * Try to determine system information, get it from another generator
    */
   virtual void EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
                                             cmMakefile* mf);
@@ -108,7 +121,7 @@ public:
   virtual int TryCompile(const std::string& srcdir, const std::string& bindir,
                          const std::string& projectName,
                          const std::string& targetName,
-                         bool fast, std::string *output, cmMakefile* mf);
+                         bool fast, std::string& output, cmMakefile* mf);
 
 
   /**
@@ -119,9 +132,9 @@ public:
    */
   int Build(const std::string& srcdir, const std::string& bindir,
             const std::string& projectName, const std::string& targetName,
-            std::string *output,
+            std::string& output,
             const std::string& makeProgram, const std::string& config,
-            bool clean, bool fast,
+            bool clean, bool fast, bool verbose,
             double timeout,
             cmSystemTools::OutputOption outputflag=cmSystemTools::OUTPUT_NONE,
             std::vector<std::string> const& nativeOptions =
@@ -131,7 +144,8 @@ public:
     std::vector<std::string>& makeCommand,
     const std::string& makeProgram,
     const std::string& projectName, const std::string& projectDir,
-    const std::string& targetName, const std::string& config, bool fast,
+    const std::string& targetName, const std::string& config,
+    bool fast, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
 
@@ -186,7 +200,7 @@ public:
   std::string GetLanguageFromExtension(const char* ext) const;
   ///! is an extension to be ignored
   bool IgnoreFile(const char* ext) const;
-  ///! What is the preference for linkers and this language (None or Prefered)
+  ///! What is the preference for linkers and this language (None or Preferred)
   int GetLinkerPreference(const std::string& lang) const;
   ///! What is the object file extension for a given source file?
   std::string GetLanguageOutputExtension(cmSourceFile const&) const;
@@ -210,6 +224,11 @@ public:
    */
   virtual void FindMakeProgram(cmMakefile*);
 
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  /** Is this the Visual Studio 6 generator?  */
+  virtual bool IsForVS6() const { return false; }
+#endif
+
   ///! Find a target by name by searching the local generators.
   cmTarget* FindTarget(const std::string& name,
                        bool excludeAliases = false) const;
@@ -221,9 +240,6 @@ public:
       that is a framework. */
   bool NameResolvesToFramework(const std::string& libname) const;
 
-  /** If check to see if the target is linked to by any other
-      target in the project */
-  bool IsDependedOn(const std::string& project, cmTarget const* target);
   ///! Find a local generator by its startdirectory
   cmLocalGenerator* FindLocalGenerator(const std::string& start_dir) const;
 
@@ -240,9 +256,9 @@ public:
   cmTargetManifest const& GetTargetManifest() const
     { return this->TargetManifest; }
 
-  /** Get the content of a directory.  Directory listings are loaded
-      from disk at most once and cached.  During the generation step
-      the content will include the target files to be built even if
+  /** Get the content of a directory.  Directory listings are cached
+      and re-loaded from disk only when modified.  During the generation
+      step the content will include the target files to be built even if
       they do not yet exist.  */
   std::set<std::string> const& GetDirectoryContent(std::string const& dir,
                                                    bool needDisk = true);
@@ -325,7 +341,22 @@ public:
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
+  bool GenerateCPackPropertiesFile();
+
+  void CreateEvaluationSourceFiles(std::string const& config) const;
+
+  void SetFilenameTargetDepends(cmSourceFile* sf,
+                                std::set<cmTarget const*> tgts);
+  std::set<cmTarget const*> const&
+  GetFilenameTargetDepends(cmSourceFile* sf) const;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  cmFileLockPool& GetFileLockPool() { return FileLockPool; }
+#endif
+
 protected:
+  virtual void Generate();
+
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
@@ -360,7 +391,8 @@ protected:
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
     const cmCustomCommandLines* commandLines,
-    std::vector<std::string> depends, const char* workingDir);
+    std::vector<std::string> depends, const char* workingDir,
+    bool uses_terminal);
 
   bool NeedSymbolicMark;
   bool UseLinkScript;
@@ -389,9 +421,14 @@ protected:
   cmTargetManifest TargetManifest;
 
   // All targets in the entire project.
-  std::map<std::string,cmTarget *> TotalTargets;
-  std::map<std::string,cmTarget *> AliasTargets;
-  std::map<std::string,cmTarget *> ImportedTargets;
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
+#else
+  typedef std::map<std::string,cmTarget *> TargetMap;
+#endif
+  TargetMap TotalTargets;
+  TargetMap AliasTargets;
+  TargetMap ImportedTargets;
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
   virtual const char* GetPredefinedTargetsFolder();
@@ -450,13 +487,14 @@ private:
   virtual const char* GetBuildIgnoreErrorsFlag() const { return 0; }
 
   // Cache directory content and target files to be built.
-  struct DirectoryContent: public std::set<std::string>
+  struct DirectoryContent
   {
-    typedef std::set<std::string> derived;
-    bool LoadedFromDisk;
-    DirectoryContent(): LoadedFromDisk(false) {}
+    long LastDiskTime;
+    std::set<std::string> All;
+    std::set<std::string> Generated;
+    DirectoryContent(): LastDiskTime(-1) {}
     DirectoryContent(DirectoryContent const& dc):
-      derived(dc), LoadedFromDisk(dc.LoadedFromDisk) {}
+      LastDiskTime(dc.LastDiskTime), All(dc.All), Generated(dc.Generated) {}
   };
   std::map<std::string, DirectoryContent> DirectoryContentMap;
 
@@ -465,6 +503,14 @@ private:
 
   // track targets to issue CMP0042 warning for.
   std::set<std::string> CMP0042WarnTargets;
+
+  mutable std::map<cmSourceFile*, std::set<cmTarget const*> >
+  FilenameTargetDepends;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  // Pool of file locks
+  cmFileLockPool FileLockPool;
+#endif
 };
 
 #endif

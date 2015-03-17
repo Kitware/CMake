@@ -43,7 +43,7 @@ install(TARGETS mylibapp
 # CPACK_MONOLITHIC_INSTALL=1 is set (at cmake time).
 install(TARGETS mylibapp2
   RUNTIME
-  DESTINATION bin)
+  DESTINATION bin/@in@_@path@@with\\@and\\@/\@in_path\@) # test @ char in path
 
 install(FILES mylib.h
   DESTINATION include
@@ -109,6 +109,12 @@ set(CPACK_INSTALL_TYPE_FULL_DISPLAY_NAME "Everything")
 set(CPACK_COMPONENT_LIBRARIES_INSTALL_TYPES Developer Full)
 set(CPACK_COMPONENT_HEADERS_INSTALL_TYPES Developer Full)
 set(CPACK_COMPONENT_APPLICATIONS_INSTALL_TYPES Full)
+
+# set CPACK_RPM_RELOCATION_PATHS here as GNUInstallDirs script
+# can not be used in CPack scripts due to CMAKE_SIZEOF_VOID_P
+# variable not being set
+set(CPACK_RPM_RELOCATION_PATHS "${CMAKE_INSTALL_INCLUDEDIR}"
+  "${CMAKE_INSTALL_LIBDIR}" "${CMAKE_INSTALL_BINDIR}")
 
 # We may use the CPack specific config file in order
 # to tailor CPack behavior on a CPack generator specific way

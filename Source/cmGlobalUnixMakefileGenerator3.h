@@ -71,7 +71,7 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
@@ -114,7 +114,7 @@ public:
     const std::string& projectDir,
     const std::string& targetName,
     const std::string& config,
-    bool fast,
+    bool fast, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
 

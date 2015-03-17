@@ -21,6 +21,7 @@
 #include "cmTarget.h"
 #include "cmNewLineStyle.h"
 #include "cmGeneratorTarget.h"
+#include "cmExpandedCommandArgument.h"
 #include "cmake.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -32,6 +33,9 @@
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include <cmsys/hash_map.hxx>
 #endif
+
+#include <stack>
+#include <deque>
 
 class cmFunctionBlocker;
 class cmCommand;
@@ -122,6 +126,15 @@ public:
   };
   friend class LexicalPushPop;
 
+  class LoopBlockPop
+  {
+  public:
+    LoopBlockPop(cmMakefile* mf) { this->Makefile = mf; }
+    ~LoopBlockPop() { this->Makefile->PopLoopBlock(); }
+  private:
+    cmMakefile* Makefile;
+  };
+
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
@@ -130,7 +143,7 @@ public:
                  const std::string& projectName, const std::string& targetName,
                  bool fast,
                  const std::vector<std::string> *cmakeArgs,
-                 std::string *output);
+                 std::string& output);
 
   bool GetIsSourceFileTryCompile() const;
 
@@ -169,19 +182,23 @@ public:
 
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(const std::string& target,
+                                const std::vector<std::string>& byproducts,
                                 const std::vector<std::string>& depends,
                                 const cmCustomCommandLines& commandLines,
                                 cmTarget::CustomCommandType type,
                                 const char* comment, const char* workingDir,
-                                bool escapeOldStyle = true) const;
+                                bool escapeOldStyle = true,
+                                bool uses_terminal = false);
   cmSourceFile* AddCustomCommandToOutput(
     const std::vector<std::string>& outputs,
+    const std::vector<std::string>& byproducts,
     const std::vector<std::string>& depends,
     const std::string& main_dependency,
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
-    bool escapeOldStyle = true);
+    bool escapeOldStyle = true,
+    bool uses_terminal = false);
   cmSourceFile* AddCustomCommandToOutput(
     const std::string& output,
     const std::vector<std::string>& depends,
@@ -189,7 +206,8 @@ public:
     const cmCustomCommandLines& commandLines,
     const char* comment, const char* workingDir,
     bool replace = false,
-    bool escapeOldStyle = true);
+    bool escapeOldStyle = true,
+    bool uses_terminal = false);
   void AddCustomCommandOldStyle(const std::string& target,
                                 const std::vector<std::string>& outputs,
                                 const std::vector<std::string>& depends,
@@ -236,7 +254,17 @@ public:
                               const std::vector<std::string>& depends,
                               const cmCustomCommandLines& commandLines,
                               bool escapeOldStyle = true,
-                              const char* comment = 0);
+                              const char* comment = 0,
+                              bool uses_terminal = false);
+  cmTarget* AddUtilityCommand(const std::string& utilityName,
+                              bool excludeFromAll,
+                              const char* workingDirectory,
+                              const std::vector<std::string>& byproducts,
+                              const std::vector<std::string>& depends,
+                              const cmCustomCommandLines& commandLines,
+                              bool escapeOldStyle = true,
+                              const char* comment = 0,
+                              bool uses_terminal = false);
 
   /**
    * Add a link library to the build.
@@ -375,7 +403,35 @@ public:
   /**
     * Get the Policies Instance
     */
- cmPolicies *GetPolicies() const;
+  cmPolicies *GetPolicies() const;
+
+  struct cmCMP0054Id
+  {
+    cmCMP0054Id(cmListFileContext const& context):
+        Context(context)
+    {
+
+    }
+
+    bool operator< (cmCMP0054Id const& id) const
+    {
+      if(this->Context.FilePath != id.Context.FilePath)
+        return this->Context.FilePath < id.Context.FilePath;
+
+      return this->Context.Line < id.Context.Line;
+    }
+
+    cmListFileContext Context;
+  };
+
+  mutable std::set<cmCMP0054Id> CMP0054ReportedIds;
+
+  /**
+   * Determine if the given context, name pair has already been reported
+   * in context of CMP0054.
+   */
+  bool HasCMP0054AlreadyBeenReported(
+    cmListFileContext context) const;
 
   /**
    * Add an auxiliary directory to the build.
@@ -437,7 +493,7 @@ public:
       this->cmStartDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
       this->cmStartDirectory =
-        cmSystemTools::CollapseFullPath(this->cmStartDirectory.c_str());
+        cmSystemTools::CollapseFullPath(this->cmStartDirectory);
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
                           this->cmStartDirectory.c_str());
     }
@@ -450,7 +506,7 @@ public:
       this->StartOutputDirectory = lib;
       cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
       this->StartOutputDirectory =
-        cmSystemTools::CollapseFullPath(this->StartOutputDirectory.c_str());
+        cmSystemTools::CollapseFullPath(this->StartOutputDirectory);
       cmSystemTools::MakeDirectory(this->StartOutputDirectory.c_str());
       this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
                           this->StartOutputDirectory.c_str());
@@ -544,21 +600,17 @@ public:
    */
   void AddSystemIncludeDirectories(const std::set<std::string> &incs);
 
-  /** Expand out any arguements in the vector that have ; separated
-   *  strings into multiple arguements.  A new vector is created
-   *  containing the expanded versions of all arguments in argsIn.
-   * This method differes from the one in cmSystemTools in that if
-   * the CmakeLists file is version 1.2 or earlier it will check for
-   * source lists being used without ${} around them
-   */
-  void ExpandSourceListArguments(std::vector<std::string> const& argsIn,
-                                 std::vector<std::string>& argsOut,
-                                 unsigned int startArgumentIndex) const;
-
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then a null pointer is returned.
    */
   cmSourceFile* GetSource(const std::string& sourceName) const;
+
+  /** Create the source file and return it. generated
+   * indicates if it is a generated file, this is used in determining
+   * how to create the source file instance e.g. name
+   */
+  cmSourceFile* CreateSource(const std::string& sourceName,
+                             bool generated = false);
 
   /** Get a cmSourceFile pointer for a given source name, if the name is
    *  not found, then create the source file and return it. generated
@@ -655,7 +707,7 @@ public:
   /**
    * Get the current context backtrace.
    */
-  bool GetBacktrace(cmListFileBacktrace& backtrace) const;
+  cmListFileBacktrace GetBacktrace() const;
 
   /**
    * Get the vector of  files created by this makefile
@@ -679,7 +731,7 @@ public:
                                       const char* filename = 0,
                                       long line = -1,
                                       bool removeEmpty = false,
-                                      bool replaceAt = true) const;
+                                      bool replaceAt = false) const;
 
   /**
    * Remove any remaining variables in the string. Anything with ${var} or
@@ -763,6 +815,10 @@ public:
    */
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
                        std::vector<std::string>& outArgs) const;
+
+  bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
+                       std::vector<cmExpandedCommandArgument>& outArgs) const;
+
   /**
    * Get the instance
    */
@@ -785,7 +841,7 @@ public:
    * Add a macro to the list of macros. The arguments should be name of the
    * macro and a documentation signature of it
    */
-  void AddMacro(const char* name, const char* signature);
+  void AddMacro(const char* name);
 
   ///! Add a new cmTest to the list of tests for this makefile.
   cmTest* CreateTest(const std::string& testName);
@@ -845,6 +901,10 @@ public:
   void PopScope();
   void RaiseScope(const std::string& var, const char *value);
 
+  // push and pop loop scopes
+  void PushLoopBlockBarrier();
+  void PopLoopBlockBarrier();
+
   /** Helper class to push and pop scopes automatically.  */
   class ScopePushPop
   {
@@ -885,6 +945,30 @@ public:
 
   bool PolicyOptionalWarningEnabled(std::string const& var);
 
+  bool AddRequiredTargetFeature(cmTarget *target,
+                                const std::string& feature,
+                                std::string *error = 0) const;
+
+  bool CompileFeatureKnown(cmTarget const* target, const std::string& feature,
+                           std::string& lang, std::string *error) const;
+
+  const char* CompileFeaturesAvailable(const std::string& lang,
+                                       std::string *error) const;
+
+  bool HaveStandardAvailable(cmTarget const* target, std::string const& lang,
+                            const std::string& feature) const;
+
+  bool IsLaterStandard(std::string const& lang,
+                       std::string const& lhs,
+                       std::string const& rhs);
+
+  void PushLoopBlock();
+  void PopLoopBlock();
+  bool IsLoopBlock() const;
+
+  void ClearMatches();
+  void StoreMatches(cmsys::RegularExpression& re);
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
@@ -905,7 +989,12 @@ protected:
 
   // libraries, classes, and executables
   mutable cmTargets Targets;
-  std::map<std::string, cmTarget*> AliasTargets;
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
+#else
+  typedef std::map<std::string, cmTarget*> TargetMap;
+#endif
+  TargetMap AliasTargets;
   cmGeneratorTargetsType GeneratorTargets;
   std::vector<cmSourceFile*> SourceFiles;
 
@@ -974,14 +1063,16 @@ private:
   void PushFunctionBlockerBarrier();
   void PopFunctionBlockerBarrier(bool reportError = true);
 
-  typedef std::map<std::string, std::string> StringStringMap;
-  StringStringMap MacrosMap;
+  std::stack<int> LoopBlockCounter;
+
+  std::vector<std::string> MacrosList;
 
   std::map<std::string, bool> SubDirectoryOrder;
 
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
   mutable cmsys::RegularExpression cmAtVarRegex;
+  mutable cmsys::RegularExpression cmNamedCurly;
 
   cmPropertyMap Properties;
 
@@ -1006,7 +1097,7 @@ private:
   friend class cmMakefileCall;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
-  std::map<std::string, cmTarget*> ImportedTargets;
+  TargetMap ImportedTargets;
 
   // Internal policy stack management.
   void PushPolicy(bool weak = false,
@@ -1038,6 +1129,28 @@ private:
   // Enforce rules about CMakeLists.txt files.
   void EnforceDirectoryLevelRules() const;
 
+  // CMP0053 == old
+  cmake::MessageType ExpandVariablesInStringOld(
+                                  std::string& errorstr,
+                                  std::string& source,
+                                  bool escapeQuotes,
+                                  bool noEscapes,
+                                  bool atOnly,
+                                  const char* filename,
+                                  long line,
+                                  bool removeEmpty,
+                                  bool replaceAt) const;
+  // CMP0053 == new
+  cmake::MessageType ExpandVariablesInStringNew(
+                                  std::string& errorstr,
+                                  std::string& source,
+                                  bool escapeQuotes,
+                                  bool noEscapes,
+                                  bool atOnly,
+                                  const char* filename,
+                                  long line,
+                                  bool removeEmpty,
+                                  bool replaceAt) const;
   bool GeneratingBuildSystem;
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
@@ -1061,6 +1174,24 @@ private:
                                cmSourceFile* source);
 
   std::vector<cmSourceFile*> QtUiFilesWithOptions;
+
+  bool AddRequiredTargetCFeature(cmTarget *target,
+                                 const std::string& feature) const;
+
+  bool AddRequiredTargetCxxFeature(cmTarget *target,
+                                   const std::string& feature) const;
+
+  void CheckNeededCLanguage(const std::string& feature, bool& needC90,
+                            bool& needC99, bool& needC11) const;
+  void CheckNeededCxxLanguage(const std::string& feature, bool& needCxx98,
+                              bool& needCxx11, bool& needCxx14) const;
+
+  bool HaveCStandardAvailable(cmTarget const* target,
+                             const std::string& feature) const;
+  bool HaveCxxStandardAvailable(cmTarget const* target,
+                               const std::string& feature) const;
+
+  mutable bool SuppressWatches;
 };
 
 //----------------------------------------------------------------------------

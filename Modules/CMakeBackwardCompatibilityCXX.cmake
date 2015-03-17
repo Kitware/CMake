@@ -31,15 +31,15 @@ if(NOT CMAKE_SKIP_COMPATIBILITY_TESTS)
   if(NOT CMAKE_COMPILER_IS_GNUCXX)
     include(TestCXXAcceptsFlag)
     set(CMAKE_TRY_ANSI_CXX_FLAGS "")
-    if(CMAKE_SYSTEM MATCHES "IRIX.*")
+    if(CMAKE_SYSTEM_NAME MATCHES "IRIX")
       set(CMAKE_TRY_ANSI_CXX_FLAGS "-LANG:std")
     endif()
-    if(CMAKE_SYSTEM MATCHES "OSF.*")
+    if(CMAKE_SYSTEM_NAME MATCHES "OSF")
       set(CMAKE_TRY_ANSI_CXX_FLAGS "-std strict_ansi -nopure_cname")
     endif()
     # if CMAKE_TRY_ANSI_CXX_FLAGS has something in it, see
     # if the compiler accepts it
-    if( CMAKE_TRY_ANSI_CXX_FLAGS MATCHES ".+")
+    if(NOT CMAKE_TRY_ANSI_CXX_FLAGS STREQUAL "")
       CHECK_CXX_ACCEPTS_FLAG(${CMAKE_TRY_ANSI_CXX_FLAGS} CMAKE_CXX_ACCEPTS_FLAGS)
       # if the compiler liked the flag then set CMAKE_ANSI_CXXFLAGS
       # to the flag

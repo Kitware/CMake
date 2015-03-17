@@ -882,13 +882,6 @@ void         regdump ();
 static char* regprop ();
 #endif
 
-bool RegularExpression::find (kwsys_stl::string const& s) 
-{
-  return find(s.c_str());
-}
-
-
-
 // find -- Matches the regular expression to the given string.
 // Returns true if found, and sets start and end indexes accordingly.
 

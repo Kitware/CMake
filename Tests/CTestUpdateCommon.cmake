@@ -9,10 +9,13 @@ function(run_child)
     ERROR_STRIP_TRAILING_WHITESPACE
     )
   if(FAILED)
-    string(REGEX REPLACE "\n" "\n  " OUTPUT "${OUTPUT}")
+    string(REPLACE "\n" "\n  " OUTPUT "${OUTPUT}")
     message(FATAL_ERROR "Child failed (${FAILED}), output is\n  ${OUTPUT}\n"
       "Command = [${ARGN}]\n")
   endif()
+
+  # Pass output back up to the parent scope for possible further inspection.
+  set(OUTPUT "${OUTPUT}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------
@@ -108,7 +111,7 @@ function(check_updates build)
       ${TOP}/${build}/Testing/Temporary/LastUpdate*.log)
     if(UPDATE_LOG_FILE)
       file(READ ${UPDATE_LOG_FILE} UPDATE_LOG LIMIT ${max_update_xml_size})
-      string(REGEX REPLACE "\n" "\n  " UPDATE_LOG "${UPDATE_LOG}")
+      string(REPLACE "\n" "\n  " UPDATE_LOG "${UPDATE_LOG}")
       set(MSG "${MSG}Update log:\n  ${UPDATE_LOG}")
     else()
       set(MSG "${MSG}No update log found!")
@@ -219,6 +222,36 @@ function(run_dashboard_command_line bin_dir)
 endfunction()
 
 #-----------------------------------------------------------------------------
+# Function to find the Update.xml file and make sure
+# it only has the Revision in it and no updates
+function(check_no_update bin_dir)
+  set(PATTERN ${TOP}/${bin_dir}/Testing/*/Update.xml)
+  file(GLOB UPDATE_XML_FILE RELATIVE ${TOP} ${PATTERN})
+  string(REGEX REPLACE "//Update.xml$" "/Update.xml"
+    UPDATE_XML_FILE "${UPDATE_XML_FILE}")
+  message(" found ${UPDATE_XML_FILE}")
+  set(rev_regex "Revision|PriorRevision")
+  file(STRINGS ${TOP}/${UPDATE_XML_FILE} UPDATE_XML_REVISIONS
+    REGEX "^\t<(${rev_regex})>[^<\n]+</(${rev_regex})>$"
+    )
+  set(found_revisons FALSE)
+  foreach(r IN LISTS UPDATE_XML_REVISIONS)
+    if("${r}" MATCHES "PriorRevision")
+      message(FATAL_ERROR "Found PriorRevision in no update test")
+    endif()
+    if("${r}" MATCHES "<Revision>")
+      set(found_revisons TRUE)
+    endif()
+  endforeach()
+  if(found_revisons)
+    message(" found <Revision> in no update test")
+  else()
+    message(FATAL_ERROR " missing <Revision> in no update test")
+  endif()
+endfunction()
+
+
+#-----------------------------------------------------------------------------
 # Function to run the dashboard through a script
 function(run_dashboard_script bin_dir)
   run_child(
@@ -228,13 +261,20 @@ function(run_dashboard_script bin_dir)
 
   # Verify the updates reported by CTest.
   list(APPEND UPDATE_MAYBE Updated{subdir} Updated{CTestConfig.cmake})
-  check_updates(${bin_dir}
-    Updated{foo.txt}
-    Updated{bar.txt}
-    Updated{zot.txt}
-    Updated{subdir/foo.txt}
-    Updated{subdir/bar.txt}
-    )
+  if(NO_UPDATE)
+    check_no_update(${bin_dir})
+  else()
+    check_updates(${bin_dir}
+      Updated{foo.txt}
+      Updated{bar.txt}
+      Updated{zot.txt}
+      Updated{subdir/foo.txt}
+      Updated{subdir/bar.txt}
+      )
+  endif()
+
+  # Pass console output up to the parent, in case they'd like to inspect it.
+  set(OUTPUT "${OUTPUT}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------

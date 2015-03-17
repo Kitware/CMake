@@ -8,8 +8,25 @@ target_compile_definitions(iface_nodepends INTERFACE IFACE_DEFINE)
 
 add_subdirectory(headerdir)
 
+# Add an interface target in a subdirectory that uses an imported interface.
+add_subdirectory(ifacedir)
+
+# Poison an imported interface with the same name as that in the subdir
+# to ensure that the transitive lookup occurs in the subdir.
+add_library(imp::iface INTERFACE IMPORTED)
+set_property(TARGET imp::iface APPEND PROPERTY COMPATIBLE_INTERFACE_BOOL SOMEPROP)
+set_property(TARGET imp::iface PROPERTY INTERFACE_SOMEPROP OFF)
+set_property(TARGET imp::iface PROPERTY INTERFACE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/does_not_exist.cpp)
+
+add_library(objlib OBJECT obj.cpp)
+add_library(iface_objlib INTERFACE)
+target_sources(iface_objlib INTERFACE $<TARGET_OBJECTS:objlib>)
+
+add_library(intermediate INTERFACE)
+target_link_libraries(intermediate INTERFACE iface_objlib)
+
 add_executable(InterfaceLibrary definetestexe.cpp)
-target_link_libraries(InterfaceLibrary iface_nodepends headeriface)
+target_link_libraries(InterfaceLibrary iface_nodepends headeriface subiface intermediate)
 
 add_subdirectory(libsdir)
 

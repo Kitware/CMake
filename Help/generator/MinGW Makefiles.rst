@@ -1,7 +1,12 @@
 MinGW Makefiles
 ---------------
 
-Generates a make file for use with mingw32-make.
+Generates makefiles for use with ``mingw32-make`` under a Windows command
+prompt.
 
-The makefiles generated use cmd.exe as the shell.  They do not require
-msys or a unix shell.
+Use this generator under a Windows command prompt with MinGW in the ``PATH``
+and using ``mingw32-make`` as the build tool.  The generated makefiles use
+``cmd.exe`` as the shell to launch build rules.  They are not compatible with
+MSYS or a unix shell.
+
+To build under the MSYS shell, use the :generator:`MSYS Makefiles` generator.

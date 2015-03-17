@@ -53,8 +53,6 @@ public:
    */
   void SetBuildType(BuildType,const std::string& name);
 
-  void SetPlatformName(const std::string& n) { this->PlatformName = n;}
-
   void SetExtraFlagTable(cmVS7FlagTable const* table)
     { this->ExtraFlagTable = table; }
   virtual std::string GetTargetDirectory(cmTarget const&) const;
@@ -124,7 +122,6 @@ private:
   std::string ModuleDefinitionFile;
   bool FortranProject;
   bool WindowsCEProject;
-  std::string PlatformName; // Win32 or x64
   cmLocalVisualStudio7GeneratorInternals* Internal;
 };
 

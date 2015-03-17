@@ -34,15 +34,6 @@ endif()
 if("${CMAKE_GENERATOR}" MATCHES "Visual Studio")
   set(PP_VS 1)
 endif()
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 10")
-  set(PP_VS100 1)
-endif()
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 11")
-  set(PP_VS110 1)
-endif()
-if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 12")
-  set(PP_VS120 1)
-endif()
 
 # Some tests below check the PP_* variables set above.  They are meant
 # to test the case that the build tool is at fault.  Other tests below
@@ -123,7 +114,7 @@ endif()
 
 set(EXPR_OP1 "/")
 if((NOT MSVC OR PP_NMAKE) AND
-   NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
+   NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   # MSVC cl, Intel icl: %
   # When the cl compiler is invoked from the command line then % must
   # be written %% (to distinguish from %ENV% syntax).  However cl does

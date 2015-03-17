@@ -9,8 +9,8 @@ function(check_cmake_test_single prefix test testfile)
     ERROR_VARIABLE stderr
     RESULT_VARIABLE result
     )
-  string(REGEX REPLACE "\n" "\n out> " out " out> ${stdout}")
-  string(REGEX REPLACE "\n" "\n err> " err " err> ${stderr}")
+  string(REPLACE "\n" "\n out> " out " out> ${stdout}")
+  string(REPLACE "\n" "\n err> " err " err> ${stderr}")
   if(NOT "${result}" STREQUAL "${${test}-RESULT}")
     message(FATAL_ERROR
       "Test ${test} result is [${result}], not [${${test}-RESULT}].\n"

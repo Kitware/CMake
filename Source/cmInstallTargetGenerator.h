@@ -24,11 +24,11 @@ class cmInstallTargetGenerator: public cmInstallGenerator
 public:
   cmInstallTargetGenerator(
     cmTarget& t, const char* dest, bool implib,
-    const char* file_permissions = "",
-    std::vector<std::string> const& configurations
-    = std::vector<std::string>(),
-    const char* component = "Unspecified",
-    bool optional = false
+    const char* file_permissions,
+    std::vector<std::string> const& configurations,
+    const char* component,
+    MessageLevel message,
+    bool optional
     );
   virtual ~cmInstallTargetGenerator();
 
@@ -59,6 +59,8 @@ public:
 
   cmTarget* GetTarget() const { return this->Target; }
   bool IsImportLibrary() const { return this->ImportLibrary; }
+
+  std::string GetDestination(std::string const& config) const;
 
 protected:
   virtual void GenerateScript(std::ostream& os);

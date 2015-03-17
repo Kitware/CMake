@@ -3,7 +3,7 @@
 cmake-language(7)
 *****************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -57,17 +57,21 @@ variable.
 Syntax
 ======
 
+.. _`CMake Language Encoding`:
+
 Encoding
 --------
 
-A CMake Language source file must be written in 7-bit ASCII text
-to be portable across all supported platforms.  Newlines may be
+A CMake Language source file may be written in 7-bit ASCII text for
+maximum portability across all supported platforms.  Newlines may be
 encoded as either ``\n`` or ``\r\n`` but will be converted to ``\n``
 as input files are read.
 
 Note that the implementation is 8-bit clean so source files may
 be encoded as UTF-8 on platforms with system APIs supporting this
-encoding.  Furthermore, CMake 3.0 and above allow a leading UTF-8
+encoding.  In addition, CMake 3.2 and above support source files
+encoded in UTF-8 on Windows (using UTF-16 to call system APIs).
+Furthermore, CMake 3.0 and above allow a leading UTF-8
 `Byte-Order Mark`_ in source files.
 
 .. _`Byte-Order Mark`: http://en.wikipedia.org/wiki/Byte_order_mark
@@ -79,6 +83,10 @@ A CMake Language source file consists of zero or more
 `Command Invocations`_ separated by newlines and optionally
 spaces and `Comments`_:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  file: `file_element`*
  file_element: `command_invocation` `line_ending` |
@@ -86,6 +94,10 @@ spaces and `Comments`_:
  line_ending: `line_comment`? `newline`
  space: <match '[ \t]+'>
  newline: <match '\n'>
+
+.. raw:: latex
+
+   \end{small}
 
 Note that any source file line not inside `Command Arguments`_ or
 a `Bracket Comment`_ can end in a `Line Comment`_.
@@ -98,6 +110,10 @@ Command Invocations
 A *command invocation* is a name followed by paren-enclosed arguments
 separated by whitespace:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  command_invocation: `space`* `identifier` `space`* '(' `arguments` ')'
  identifier: <match '[A-Za-z_][A-Za-z0-9_]*'>
@@ -105,6 +121,10 @@ separated by whitespace:
  separated_arguments: `separation`+ `argument`? |
                     : `separation`* '(' `arguments` ')'
  separation: `space` | `line_ending`
+
+.. raw:: latex
+
+   \end{small}
 
 For example:
 
@@ -137,8 +157,16 @@ Command Arguments
 
 There are three types of arguments within `Command Invocations`_:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  argument: `bracket_argument` | `quoted_argument` | `unquoted_argument`
+
+.. raw:: latex
+
+   \end{small}
 
 .. _`Bracket Argument`:
 
@@ -149,12 +177,20 @@ A *bracket argument*, inspired by `Lua`_ long bracket syntax,
 encloses content between opening and closing "brackets" of the
 same length:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  bracket_argument: `bracket_open` `bracket_content` `bracket_close`
  bracket_open: '[' '='{len} '['
  bracket_content: <any text not containing a `bracket_close`
                 :  of the same {len} as the `bracket_open`>
  bracket_close: ']' '='{len} ']'
+
+.. raw:: latex
+
+   \end{small}
 
 An opening bracket of length *len >= 0* is written ``[`` followed
 by *len* ``=`` followed by ``[`` and the corresponding closing
@@ -197,12 +233,20 @@ Quoted Argument
 A *quoted argument* encloses content between opening and closing
 double-quote characters:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  quoted_argument: '"' `quoted_element`* '"'
  quoted_element: <any character except '\' or '"'> |
                  : `escape_sequence` |
                  : `quoted_continuation`
  quoted_continuation: '\' `newline`
+
+.. raw:: latex
+
+   \end{small}
 
 Quoted argument content consists of all text between opening and
 closing quotes.  Both `Escape Sequences`_ and `Variable References`_
@@ -246,11 +290,19 @@ An *unquoted argument* is not enclosed by any quoting syntax.
 It may not contain any whitespace, ``(``, ``)``, ``#``, ``"``, or ``\``
 except when escaped by a backslash:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  unquoted_argument: `unquoted_element`+ | `unquoted_legacy`
  unquoted_element: <any character except whitespace or one of '()#"\'> |
                  : `escape_sequence`
  unquoted_legacy: <see note in text>
+
+.. raw:: latex
+
+   \end{small}
 
 Unquoted argument content consists of all text in a contiguous block
 of allowed or escaped characters.  Both `Escape Sequences`_ and
@@ -287,23 +339,37 @@ For example:
  Instead use a `Quoted Argument`_ or a `Bracket Argument`_ to
  represent the content.
 
+.. _`Escape Sequences`:
+
 Escape Sequences
 ----------------
 
 An *escape sequence* is a ``\`` followed by one character:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  escape_sequence: `escape_identity` | `escape_encoded` | `escape_semicolon`
- escape_identity: '\(' | '\)' | '\#' | '\"' | '\ ' |
-                : '\\' | '\$' | '\@' | '\^'
+ escape_identity: '\' <match '[^A-Za-z0-9;]'>
  escape_encoded: '\t' | '\r' | '\n'
  escape_semicolon: '\;'
 
-A ``\`` followed by one of ``()#" \#@^`` simply encodes the literal
+.. raw:: latex
+
+   \end{small}
+
+A ``\`` followed by a non-alphanumeric character simply encodes the literal
 character without interpreting it as syntax.  A ``\t``, ``\r``, or ``\n``
-encodes a tab, carriage return, or newline character, respectively.
-A ``\;`` encodes itself but may be used in an `Unquoted Argument`_
-to encode the ``;`` without dividing the argument value on it.
+encodes a tab, carriage return, or newline character, respectively. A ``\;``
+outside of any `Variable References`_  encodes itself but may be used in an
+`Unquoted Argument`_ to encode the ``;`` without dividing the argument
+value on it.  A ``\;`` inside `Variable References`_ encodes the literal
+``;`` character.  (See also policy :policy:`CMP0053` documentation for
+historical considerations.)
+
+.. _`Variable References`:
 
 Variable References
 -------------------
@@ -314,6 +380,11 @@ A variable reference is replaced by the value of the variable,
 or by the empty string if the variable is not set.
 Variable references can nest and are evaluated from the
 inside out, e.g. ``${outer_${inner_variable}_variable}``.
+
+Literal variable references may consist of alphanumeric characters,
+the characters ``/_.+-``, and `Escape Sequences`_.  Nested references
+may be used to evaluate variables of any name.  (See also policy
+:policy:`CMP0053` documentation for historical considerations.)
 
 The `Variables`_ section documents the scope of variable names
 and how their values are set.
@@ -337,8 +408,16 @@ Bracket Comment
 A ``#`` immediately followed by a `Bracket Argument`_ forms a
 *bracket comment* consisting of the entire bracket enclosure:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  bracket_comment: '#' `bracket_argument`
+
+.. raw:: latex
+
+   \end{small}
 
 For example:
 
@@ -360,9 +439,17 @@ Line Comment
 A ``#`` not immediately followed by a `Bracket Argument`_ forms a
 *line comment* that runs until the end of the line:
 
+.. raw:: latex
+
+   \begin{small}
+
 .. productionlist::
  line_comment: '#' <any text not starting in a `bracket_argument`
              :      and not containing a `newline`>
+
+.. raw:: latex
+
+   \end{small}
 
 For example:
 
@@ -386,8 +473,10 @@ Loops
 
 The :command:`foreach`/:command:`endforeach` and
 :command:`while`/:command:`endwhile` commands delimit code
-blocks to be executed in a loop.  The :command:`break` command
-may be used inside such blocks to terminate the loop early.
+blocks to be executed in a loop.  Inside such blocks the
+:command:`break` command may be used to terminate the loop
+early whereas the :command:`continue` command may be used
+to start with the next iteration immediately.
 
 Command Definitions
 -------------------

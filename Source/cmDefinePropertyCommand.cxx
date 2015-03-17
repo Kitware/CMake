@@ -53,7 +53,7 @@ bool cmDefinePropertyCommand
     }
   else
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given invalid scope " << args[0] << ".  "
       << "Valid scopes are "
       << "GLOBAL, DIRECTORY, TARGET, SOURCE, "
@@ -100,7 +100,7 @@ bool cmDefinePropertyCommand
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "given invalid argument \"" << args[i] << "\".";
       this->SetError(e.str());
       return false;

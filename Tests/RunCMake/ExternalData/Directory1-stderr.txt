@@ -7,7 +7,7 @@ CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
 
     Directory1
 
-  that does not exist as a file \(with or without an extension\)!
+  that is directory instead of a file!
 Call Stack \(most recent call first\):
   .*
   Directory1.cmake:3 \(ExternalData_Add_Test\)

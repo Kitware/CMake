@@ -24,8 +24,7 @@ class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
   cmGlobalVisualStudio8Generator(const std::string& name,
-    const std::string& platformName,
-    const std::string& additionalPlatformDefinition);
+    const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
@@ -37,14 +36,17 @@ public:
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
+  virtual void EnableLanguage(std::vector<std::string>const& languages,
+                              cmMakefile *, bool optional);
   virtual void AddPlatformDefinitions(cmMakefile* mf);
+
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
 
   /**
    * Override Configure and Generate to add the build-system check
    * target.
    */
   virtual void Configure();
-  virtual void Generate();
 
   /**
    * Where does this version of Visual Studio look for macros for the
@@ -68,6 +70,7 @@ public:
     return !this->WindowsCEVersion.empty(); }
 
 protected:
+  virtual void Generate();
   virtual const char* GetIDEVersion() { return "8.0"; }
 
   virtual std::string FindDevEnvCommand();
@@ -75,6 +78,9 @@ protected:
   virtual bool VSLinksDependencies() const { return false; }
 
   bool AddCheckTarget();
+
+  /** Return true if the configuration needs to be deployed */
+  virtual bool NeedsDeploy(cmTarget::TargetType type) const;
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void WriteSLNHeader(std::ostream& fout);

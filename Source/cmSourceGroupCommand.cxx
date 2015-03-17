@@ -90,7 +90,7 @@ bool cmSourceGroupCommand
       }
     else
       {
-      cmOStringStream err;
+      std::ostringstream err;
       err << "Unknown argument \"" << args[i] << "\".  "
           << "Perhaps the FILES keyword is missing.\n";
       this->SetError(err.str());

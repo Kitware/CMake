@@ -10,7 +10,7 @@
 # CMake
 # can generate graphviz files, showing the dependencies between the
 # targets in a project and also external libraries which are linked
-# against.  When CMake is run with the --graphiz=foo option, it will
+# against.  When CMake is run with the --graphviz=foo option, it will
 # produce
 #
 # * a foo.dot file showing all dependencies in the project

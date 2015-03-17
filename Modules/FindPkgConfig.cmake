@@ -143,7 +143,7 @@ endmacro()
 #  - _pkgconfig_add_extra_path(_extra_paths ENV VAR)
 function(_pkgconfig_add_extra_path _extra_paths_var _var)
   set(_is_env 0)
-  if(_var STREQUAL "ENV")
+  if(ARGC GREATER 2 AND _var STREQUAL "ENV")
     set(_var ${ARGV2})
     set(_is_env 1)
   endif()
@@ -277,10 +277,10 @@ macro(_pkg_check_modules_internal _is_required _is_silent _no_cmake_path _no_cma
       set(_pkg_check_modules_exist_query)
 
       # check whether version is given
-      if (_pkg_check_modules_pkg MATCHES ".*(>=|=|<=).*")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\1" _pkg_check_modules_pkg_name "${_pkg_check_modules_pkg}")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\2" _pkg_check_modules_pkg_op   "${_pkg_check_modules_pkg}")
-        string(REGEX REPLACE "(.*[^><])(>=|=|<=)(.*)" "\\3" _pkg_check_modules_pkg_ver  "${_pkg_check_modules_pkg}")
+      if (_pkg_check_modules_pkg MATCHES "(.*[^><])(>=|=|<=)(.*)")
+        set(_pkg_check_modules_pkg_name "${CMAKE_MATCH_1}")
+        set(_pkg_check_modules_pkg_op "${CMAKE_MATCH_2}")
+        set(_pkg_check_modules_pkg_ver "${CMAKE_MATCH_3}")
       else()
         set(_pkg_check_modules_pkg_name "${_pkg_check_modules_pkg}")
         set(_pkg_check_modules_pkg_op)
@@ -490,9 +490,10 @@ endmacro()
 
     pkg_check_modules (XRENDER REQUIRED xrender)
 
- Defines e.g.:
- ``XRENDER_LIBRARIES=Xrender;X11`` and
- ``XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp``
+ Defines for example::
+
+   XRENDER_LIBRARIES=Xrender;X11``
+   XRENDER_STATIC_LIBRARIES=Xrender;X11;pthread;Xau;Xdmcp
 #]========================================]
 macro(pkg_check_modules _prefix _module0)
   # check cached value

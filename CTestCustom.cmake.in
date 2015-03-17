@@ -19,6 +19,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "Utilities.cmbzip2."
   "Source.CTest.Curl"
   "Source.CursesDialog.form"
+  "Source.cm_sha2.*warning.*cast increases required alignment of target type"
   "Utilities.cmcurl"
   "Utilities.cmexpat."
   "Utilities.cmlibarchive"
@@ -55,6 +56,8 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
   "note: in expansion of macro" # diagnostic context note
+  "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*rand.*isn.*t random" # we do not do crypto
+  "cm(StringCommand|CTestTestHandler)\\.cxx.*warning.*srand.*seed choices are.*poor" # we do not do crypto
 
   # Ignore clang's summary warning, assuming prior text has matched some
   # other warning expression:

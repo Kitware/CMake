@@ -16,10 +16,12 @@
 #
 # ::
 #
-#   OPENSSL_FOUND - system has the OpenSSL library
-#   OPENSSL_INCLUDE_DIR - the OpenSSL include directory
-#   OPENSSL_LIBRARIES - The libraries needed to use OpenSSL
-#   OPENSSL_VERSION - This is set to $major.$minor.$revision$path (eg. 0.9.8s)
+#   OPENSSL_FOUND - System has the OpenSSL library
+#   OPENSSL_INCLUDE_DIR - The OpenSSL include directory
+#   OPENSSL_CRYPTO_LIBRARY - The OpenSSL crypto library
+#   OPENSSL_SSL_LIBRARY - The OpenSSL SSL library
+#   OPENSSL_LIBRARIES - All OpenSSL libraries
+#   OPENSSL_VERSION - This is set to $major.$minor.$revision$patch (eg. 0.9.8s)
 
 #=============================================================================
 # Copyright 2006-2009 Kitware, Inc.
@@ -153,6 +155,8 @@ if(WIN32 AND NOT CYGWIN)
 
     mark_as_advanced(LIB_EAY_LIBRARY_DEBUG LIB_EAY_LIBRARY_RELEASE
                      SSL_EAY_LIBRARY_DEBUG SSL_EAY_LIBRARY_RELEASE)
+    set( OPENSSL_SSL_LIBRARY ${SSL_EAY_LIBRARY} )
+    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY_LIBRARY} )
     set( OPENSSL_LIBRARIES ${SSL_EAY_LIBRARY} ${LIB_EAY_LIBRARY} )
   elseif(MINGW)
     # same player, for MinGW
@@ -181,6 +185,8 @@ if(WIN32 AND NOT CYGWIN)
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
+    set( OPENSSL_SSL_LIBRARY ${SSL_EAY} )
+    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
     unset(LIB_EAY_NAMES)
     unset(SSL_EAY_NAMES)
@@ -207,6 +213,8 @@ if(WIN32 AND NOT CYGWIN)
     )
 
     mark_as_advanced(SSL_EAY LIB_EAY)
+    set( OPENSSL_SSL_LIBRARY ${SSL_EAY} )
+    set( OPENSSL_CRYPTO_LIBRARY ${LIB_EAY} )
     set( OPENSSL_LIBRARIES ${SSL_EAY} ${LIB_EAY} )
   endif()
 else()
@@ -275,11 +283,9 @@ function(from_hex HEX DEC)
 endfunction()
 
 if (OPENSSL_INCLUDE_DIR)
-  if (_OPENSSL_VERSION)
-    set(OPENSSL_VERSION "${_OPENSSL_VERSION}")
-  elseif(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
+  if(OPENSSL_INCLUDE_DIR AND EXISTS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h")
     file(STRINGS "${OPENSSL_INCLUDE_DIR}/openssl/opensslv.h" openssl_version_str
-         REGEX "^#define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-fA-F])+.*")
+         REGEX "^# *define[\t ]+OPENSSL_VERSION_NUMBER[\t ]+0x([0-9a-fA-F])+.*")
 
     # The version number is encoded as 0xMNNFFPPS: major minor fix patch status
     # The status gives if this is a developer or prerelease and is ignored here.

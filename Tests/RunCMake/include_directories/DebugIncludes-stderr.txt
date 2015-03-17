@@ -5,7 +5,7 @@ CMake Debug Log at DebugIncludes.cmake:8 \(include_directories\):
    \* .*/Tests/RunCMake/include_directories/two
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at DebugIncludes.cmake:13 \(set_property\):
   Used includes for target lll:
@@ -13,7 +13,7 @@ CMake Debug Log at DebugIncludes.cmake:13 \(set_property\):
    \* .*/Tests/RunCMake/include_directories/three
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at DebugIncludes.cmake:18 \(include_directories\):
   Used includes for target lll:
@@ -21,7 +21,7 @@ CMake Debug Log at DebugIncludes.cmake:18 \(include_directories\):
    \* .*/Tests/RunCMake/include_directories/four
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at DebugIncludes.cmake:33 \(set_property\):
   Used includes for target lll:
@@ -33,7 +33,7 @@ CMake Debug Log at DebugIncludes.cmake:33 \(set_property\):
 Call Stack \(most recent call first\):
   DebugIncludes.cmake:44 \(some_macro\)
   DebugIncludes.cmake:47 \(some_function\)
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at DebugIncludes.cmake:30 \(target_link_libraries\):
   Used includes for target lll:
@@ -41,7 +41,7 @@ CMake Debug Log at DebugIncludes.cmake:30 \(target_link_libraries\):
    \* .*/Tests/RunCMake/include_directories/eight
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)
 +
 CMake Debug Log at DebugIncludes.cmake:55 \(set_property\):
   Used includes for target lll:
@@ -50,4 +50,4 @@ CMake Debug Log at DebugIncludes.cmake:55 \(set_property\):
    \* .*/Tests/RunCMake/include_directories/ten
 
 Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
+  CMakeLists.txt:[0-9]+ \(include\)

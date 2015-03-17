@@ -34,8 +34,6 @@ static bool LogErrorsAsMessages;
 // Copied from a correct comdef.h to avoid problems with deficient versions
 // of comdef.h that exist in the wild... Fixes issue #7533.
 //
-#if ( _MSC_VER >= 1300 )
-// VS7 and later:
 #ifdef _NATIVE_WCHAR_T_DEFINED
 # ifdef _DEBUG
 # pragma comment(lib, "comsuppwd.lib")
@@ -49,10 +47,6 @@ static bool LogErrorsAsMessages;
 # pragma comment(lib, "comsupp.lib")
 # endif
 #endif
-#else
-// VS6 only had comsupp.lib:
-# pragma comment(lib, "comsupp.lib")
-#endif
 
 
 //----------------------------------------------------------------------------
@@ -63,12 +57,13 @@ static bool LogErrorsAsMessages;
     { \
     if (LogErrorsAsMessages) \
       { \
-      std::ostringstream oss; \
-      oss.flags(std::ios::hex); \
-      oss << context << " failed HRESULT, hr = 0x" << hr << std::endl; \
-      oss.flags(std::ios::dec); \
-      oss << __FILE__ << "(" << __LINE__ << ")"; \
-      cmSystemTools::Message(oss.str().c_str()); \
+      std::ostringstream _hresult_oss; \
+      _hresult_oss.flags(std::ios::hex); \
+      _hresult_oss << context << " failed HRESULT, hr = 0x" \
+                   << hr << std::endl; \
+      _hresult_oss.flags(std::ios::dec); \
+      _hresult_oss << __FILE__ << "(" << __LINE__ << ")"; \
+      cmSystemTools::Message(_hresult_oss.str().c_str()); \
       } \
     }
 

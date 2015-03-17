@@ -51,4 +51,7 @@ projects find and use a package from the current project's build tree
 without help from the user.  Note that the entry in the package
 registry that this command creates works only in conjunction with a
 package configuration file (<name>Config.cmake) that works with the
-build tree.
+build tree. In some cases, for example for packaging and for system
+wide installations, it is not desirable to write the user package
+registry. If the :variable:`CMAKE_EXPORT_NO_PACKAGE_REGISTRY` variable
+is enabled, the ``export(PACKAGE)`` command will do nothing.

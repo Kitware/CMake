@@ -272,7 +272,9 @@ enabled.
    (This step is implemented only on Windows.)
 
 6. Search paths stored in the CMake :ref:`User Package Registry`.
-   This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed.
+   This can be skipped if ``NO_CMAKE_PACKAGE_REGISTRY`` is passed or by
+   setting the :variable:`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY`
+   to ``TRUE``.
    See the :manual:`cmake-packages(7)` manual for details on the user
    package registry.
 
@@ -285,7 +287,9 @@ enabled.
      CMAKE_SYSTEM_APPBUNDLE_PATH
 
 8. Search paths stored in the CMake :ref:`System Package Registry`.
-   This can be skipped if ``NO_CMAKE_SYSTEM_PACKAGE_REGISTRY`` is passed.
+   This can be skipped if ``NO_CMAKE_SYSTEM_PACKAGE_REGISTRY`` is passed
+   or by setting the
+   :variable:`CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY` to ``TRUE``.
    See the :manual:`cmake-packages(7)` manual for details on the system
    package registry.
 
@@ -308,6 +312,8 @@ When loading a find module or package configuration file ``find_package``
 defines variables to provide information about the call arguments (and
 restores their original state before returning):
 
+``CMAKE_FIND_PACKAGE_NAME``
+  the ``<package>`` name which is searched for
 ``<package>_FIND_REQUIRED``
   true if ``REQUIRED`` option was given
 ``<package>_FIND_QUIETLY``

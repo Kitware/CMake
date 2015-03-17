@@ -3,7 +3,7 @@
 cmake-packages(7)
 *****************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -75,6 +75,8 @@ package.
 By setting the :variable:`CMAKE_DISABLE_FIND_PACKAGE_<PackageName>` variable to
 ``TRUE``, the ``PackageName`` package will not be searched, and will always
 be ``NOTFOUND``.
+
+.. _`Config File Packages`:
 
 Config-file Packages
 --------------------
@@ -260,6 +262,8 @@ The variables report the version of the package that was actually found.
 The ``<package>`` part of their name matches the argument given to the
 :command:`find_package` command.
 
+.. _`Creating Packages`:
+
 Creating Packages
 =================
 
@@ -282,7 +286,8 @@ shared library:
   generate_export_header(ClimbingStats)
   set_property(TARGET ClimbingStats PROPERTY VERSION ${Upstream_VERSION})
   set_property(TARGET ClimbingStats PROPERTY SOVERSION 3)
-  set_property(TARGET ClimbingStats PROPERTY INTERFACE_ClimbingStats_MAJOR_VERSION 3)
+  set_property(TARGET ClimbingStats PROPERTY
+    INTERFACE_ClimbingStats_MAJOR_VERSION 3)
   set_property(TARGET ClimbingStats APPEND PROPERTY
     COMPATIBLE_INTERFACE_STRING ClimbingStats_MAJOR_VERSION
   )
@@ -316,7 +321,7 @@ shared library:
   )
   configure_file(cmake/ClimbingStatsConfig.cmake
     "${CMAKE_CURRENT_BINARY_DIR}/ClimbingStats/ClimbingStatsConfig.cmake"
-    COPY_ONLY
+    COPYONLY
   )
 
   set(ConfigPackageLocation lib/cmake/ClimbingStats)
@@ -353,7 +358,7 @@ and a ``cmake/ClimbingStatsConfig.cmake`` are installed to the same location,
 completing the package.
 
 The generated :prop_tgt:`IMPORTED` targets have appropriate properties set
-to define their usage requirements, such as
+to define their :ref:`usage requirements <Target Usage Requirements>`, such as
 :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`,
 :prop_tgt:`INTERFACE_COMPILE_DEFINITIONS` and other relevant built-in
 ``INTERFACE_`` properties.  The ``INTERFACE`` variant of user-defined
@@ -367,6 +372,38 @@ defined user property in this version and in the next version of
 attempt to use version 3 together with version 4.  Packages can choose to
 employ such a pattern if different major versions of the package are designed
 to be incompatible.
+
+Note that it is not advisable to populate any properties which may contain
+paths, such as :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` and
+:prop_tgt:`INTERFACE_LINK_LIBRARIES`, with paths relevnt to dependencies.
+That would hard-code into installed packages the include directory or library
+paths for dependencies **as found on the machine the package was made on**.
+
+That is, code like this is incorrect for targets which will be used to
+generate config file packages:
+
+.. code-block:: cmake
+
+  target_link_libraries(ClimbingStats INTERFACE
+    ${Boost_LIBRARIES};${OtherDep_LIBRARIES}>
+  )
+  target_include_directories(ClimbingStats INTERFACE
+    $<INSTALL_INTERFACE:${Boost_INCLUDE_DIRS};${OtherDep_INCLUDE_DIRS}>
+  )
+
+Dependencies must provide their own :ref:`IMPORTED targets <Imported Targets>`
+which have their own :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` and
+:prop_tgt:`IMPORTED_LOCATION` populated appropriately.  Those
+:ref:`IMPORTED targets <Imported Targets>` may then be
+used with the :command:`target_link_libraries` command for ``ClimbingStats``.
+
+That way, when a consumer uses the installed package, the
+consumer will run the appropriate :command:`find_package` command (via the
+find_dependency macro described below) to find
+the dependencies on their own machine and populate the
+:ref:`IMPORTED targets <Imported Targets>` with appropriate paths. Note that
+many modules currently shipped with CMake do not currently provide
+:ref:`IMPORTED targets <Imported Targets>`.
 
 A ``NAMESPACE`` with double-colons is specified when exporting the targets
 for installation.  This convention of double-colons gives CMake a hint that
@@ -479,7 +516,7 @@ be true. This can be tested with logic in the package configuration file:
   foreach(_comp ${ClimbingStats_FIND_COMPONENTS})
     if (NOT ";${_supported_components};" MATCHES _comp)
       set(ClimbingStats_FOUND False)
-      set(ClimbingStats_NOTFOUND_MESSAGE "Specified unsupported component: ${_comp}")
+      set(ClimbingStats_NOTFOUND_MESSAGE "Unsupported component: ${_comp}")
     endif()
     include("${CMAKE_CURRENT_LIST_DIR}/ClimbingStats${_comp}Targets.cmake")
   endforeach()
@@ -563,6 +600,21 @@ as a ``REG_SZ`` value, with arbitrary name, that specifies the directory
 containing the package configuration file.
 
 There is no system package registry on non-Windows platforms.
+
+.. _`Disabling the Package Registry`:
+
+Disabling the Package Registry
+------------------------------
+
+In some cases using the Package Registries is not desirable. CMake
+allows to disable them using the following variables:
+
+ * :variable:`CMAKE_EXPORT_NO_PACKAGE_REGISTRY` disables the
+   :command:`export(PACKAGE)` command.
+ * :variable:`CMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY` disables the
+   User Package Registry in all the :command:`find_package` calls.
+ * :variable:`CMAKE_FIND_PACKAGE_NO_SYSTEM_PACKAGE_REGISTRY` disables
+   the System Package Registry in all the :command:`find_package` calls.
 
 Package Registry Example
 ------------------------

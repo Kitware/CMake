@@ -319,17 +319,13 @@ void cmDependsFortran::LocateModules()
       infoI != objInfo.end(); ++infoI)
     {
     cmDependsFortranSourceInfo const& info = infoI->second;
-    for(std::set<std::string>::const_iterator i = info.Provides.begin();
-        i != info.Provides.end(); ++i)
-      {
-      // Include this module in the set provided by this target.
-      this->Internal->TargetProvides.insert(*i);
-      }
+    // Include this module in the set provided by this target.
+    this->Internal->TargetProvides.insert(info.Provides.begin(),
+                                          info.Provides.end());
 
     for(std::set<std::string>::const_iterator i = info.Requires.begin();
         i != info.Requires.end(); ++i)
       {
-      // Include this module in the set required by this target.
       this->Internal->TargetRequires[*i] = "";
       }
     }
@@ -443,15 +439,20 @@ cmDependsFortran
   const char* src = info.Source.c_str();
 
   // Write the include dependencies to the output stream.
-  internalDepends << obj << std::endl;
+  std::string obj_i =
+    this->LocalGenerator->Convert(obj, cmLocalGenerator::HOME_OUTPUT);
+  std::string obj_m =
+    this->LocalGenerator->ConvertToOutputFormat(obj_i,
+                                                cmLocalGenerator::MAKERULE);
+  internalDepends << obj_i << std::endl;
   internalDepends << " " << src << std::endl;
   for(std::set<std::string>::const_iterator i = info.Includes.begin();
       i != info.Includes.end(); ++i)
     {
-    makeDepends << obj << ": " <<
+    makeDepends << obj_m << ": " <<
       this->LocalGenerator->Convert(*i,
                                     cmLocalGenerator::HOME_OUTPUT,
-                                    cmLocalGenerator::MAKEFILE)
+                                    cmLocalGenerator::MAKERULE)
                 << std::endl;
     internalDepends << " " << *i << std::endl;
     }
@@ -482,10 +483,10 @@ cmDependsFortran
       proxy += ".mod.proxy";
       proxy = this->LocalGenerator->Convert(proxy,
                                             cmLocalGenerator::HOME_OUTPUT,
-                                            cmLocalGenerator::MAKEFILE);
+                                            cmLocalGenerator::MAKERULE);
 
       // since we require some things add them to our list of requirements
-      makeDepends << obj << ".requires: " << proxy << std::endl;
+      makeDepends << obj_m << ".requires: " << proxy << std::endl;
       }
 
     // The object file should depend on timestamped files for the
@@ -499,8 +500,8 @@ cmDependsFortran
       std::string stampFile =
         this->LocalGenerator->Convert(required->second,
                                       cmLocalGenerator::HOME_OUTPUT,
-                                      cmLocalGenerator::MAKEFILE);
-      makeDepends << obj << ": " << stampFile << "\n";
+                                      cmLocalGenerator::MAKERULE);
+      makeDepends << obj_m << ": " << stampFile << "\n";
       }
     else
       {
@@ -512,8 +513,8 @@ cmDependsFortran
         module =
           this->LocalGenerator->Convert(module,
                                         cmLocalGenerator::HOME_OUTPUT,
-                                        cmLocalGenerator::MAKEFILE);
-        makeDepends << obj << ": " << module << "\n";
+                                        cmLocalGenerator::MAKERULE);
+        makeDepends << obj_m << ": " << module << "\n";
         }
       }
     }
@@ -528,8 +529,8 @@ cmDependsFortran
     proxy += ".mod.proxy";
     proxy = this->LocalGenerator->Convert(proxy,
                                           cmLocalGenerator::HOME_OUTPUT,
-                                          cmLocalGenerator::MAKEFILE);
-    makeDepends << proxy << ": " << obj << ".provides" << std::endl;
+                                          cmLocalGenerator::MAKERULE);
+    makeDepends << proxy << ": " << obj_m << ".provides" << std::endl;
     }
 
   // If any modules are provided then they must be converted to stamp files.
@@ -537,7 +538,7 @@ cmDependsFortran
     {
     // Create a target to copy the module after the object file
     // changes.
-    makeDepends << obj << ".provides.build:\n";
+    makeDepends << obj_m << ".provides.build:\n";
     for(std::set<std::string>::const_iterator i = info.Provides.begin();
         i != info.Provides.end(); ++i)
       {
@@ -575,7 +576,7 @@ cmDependsFortran
       }
     // After copying the modules update the timestamp file so that
     // copying will not be done again until the source rebuilds.
-    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj
+    makeDepends << "\t$(CMAKE_COMMAND) -E touch " << obj_m
                 << ".provides.build\n";
 
     // Make sure the module timestamp rule is evaluated by the time
@@ -584,8 +585,8 @@ cmDependsFortran
     driver += "/build";
     driver = this->LocalGenerator->Convert(driver,
                                            cmLocalGenerator::HOME_OUTPUT,
-                                           cmLocalGenerator::MAKEFILE);
-    makeDepends << driver << ": " << obj << ".provides.build\n";
+                                           cmLocalGenerator::MAKERULE);
+    makeDepends << driver << ": " << obj_m << ".provides.build\n";
     }
 
   return true;
@@ -663,7 +664,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     if(cmDependsFortran::ModulesDiffer(mod_upper.c_str(), stamp.c_str(),
                                        compilerId.c_str()))
       {
-      if(!cmSystemTools::CopyFileAlways(mod_upper.c_str(), stamp.c_str()))
+      if(!cmSystemTools::CopyFileAlways(mod_upper, stamp))
         {
         std::cerr << "Error copying Fortran module from \""
                   << mod_upper << "\" to \"" << stamp
@@ -678,7 +679,7 @@ bool cmDependsFortran::CopyModule(const std::vector<std::string>& args)
     if(cmDependsFortran::ModulesDiffer(mod_lower.c_str(), stamp.c_str(),
                                        compilerId.c_str()))
       {
-      if(!cmSystemTools::CopyFileAlways(mod_lower.c_str(), stamp.c_str()))
+      if(!cmSystemTools::CopyFileAlways(mod_lower, stamp))
         {
         std::cerr << "Error copying Fortran module from \""
                   << mod_lower << "\" to \"" << stamp
@@ -765,7 +766,11 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
                                      const char* compilerId)
 {
   /*
-  gnu:
+  gnu >= 4.9:
+    A mod file is an ascii file compressed with gzip.
+    Compiling twice produces identical modules.
+
+  gnu < 4.9:
     A mod file is an ascii file.
     <bar.mod>
     FORTRAN module created from /path/to/foo.f90 on Sun Dec 30 22:47:58 2007
@@ -821,21 +826,30 @@ bool cmDependsFortran::ModulesDiffer(const char* modFile,
    */
   if (strcmp(compilerId, "GNU") == 0 )
     {
-    const char seq[1] = {'\n'};
-    const int seqlen = 1;
-
-    if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+    // GNU Fortran 4.9 and later compress .mod files with gzip
+    // but also do not include a date so we can fall through to
+    // compare them without skipping any prefix.
+    unsigned char hdr[2];
+    bool okay = finModFile.read(reinterpret_cast<char*>(hdr), 2)? true:false;
+    finModFile.seekg(0);
+    if(!(okay && hdr[0] == 0x1f && hdr[1] == 0x8b))
       {
-      // The module is of unexpected format.  Assume it is different.
-      std::cerr << compilerId << " fortran module " << modFile
-                << " has unexpected format." << std::endl;
-      return true;
-      }
+      const char seq[1] = {'\n'};
+      const int seqlen = 1;
 
-    if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
-      {
-      // The stamp must differ if the sequence is not contained.
-      return true;
+      if(!cmDependsFortranStreamContainsSequence(finModFile, seq, seqlen))
+        {
+        // The module is of unexpected format.  Assume it is different.
+        std::cerr << compilerId << " fortran module " << modFile
+                  << " has unexpected format." << std::endl;
+        return true;
+        }
+
+      if(!cmDependsFortranStreamContainsSequence(finStampFile, seq, seqlen))
+        {
+        // The stamp must differ if the sequence is not contained.
+        return true;
+        }
       }
     }
   else if(strcmp(compilerId, "Intel") == 0)

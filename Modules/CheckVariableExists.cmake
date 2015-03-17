@@ -14,7 +14,7 @@
 #
 #   VAR      - the name of the variable
 #   VARIABLE - variable to store the result
-#
+#              Will be created as an internal cache variable.
 #
 #
 # This macro is only for C variables.
@@ -45,7 +45,7 @@
 
 
 macro(CHECK_VARIABLE_EXISTS VAR VARIABLE)
-  if("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  if(NOT DEFINED "${VARIABLE}")
     set(MACRO_CHECK_VARIABLE_DEFINITIONS
       "-DCHECK_VARIABLE_EXISTS=${VAR} ${CMAKE_REQUIRED_FLAGS}")
     if(NOT CMAKE_REQUIRED_QUIET)

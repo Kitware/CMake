@@ -2,32 +2,38 @@
 # FindOpenGL
 # ----------
 #
-# Try to find OpenGL
+# FindModule for OpenGL and GLU.
 #
-# Once done this will define
+# Result Variables
+# ^^^^^^^^^^^^^^^^
 #
-# ::
+# This module sets the following variables:
 #
-#   OPENGL_FOUND        - system has OpenGL
-#   OPENGL_XMESA_FOUND  - system has XMESA
-#   OPENGL_GLU_FOUND    - system has GLU
-#   OPENGL_INCLUDE_DIR  - the GL include directory
-#   OPENGL_LIBRARIES    - Link these to use OpenGL and GLU
+# ``OPENGL_FOUND``
+#  True, if the system has OpenGL.
+# ``OPENGL_XMESA_FOUND``
+#  True, if the system has XMESA.
+# ``OPENGL_GLU_FOUND``
+#  True, if the system has GLU.
+# ``OPENGL_INCLUDE_DIR``
+#  Path to the OpenGL include directory.
+# ``OPENGL_LIBRARIES``
+#  Paths to the OpenGL and GLU libraries.
 #
+# If you want to use just GL you can use these values:
 #
+# ``OPENGL_gl_LIBRARY``
+#  Path to the OpenGL library.
+# ``OPENGL_glu_LIBRARY``
+#  Path to the GLU library.
 #
-# If you want to use just GL you can use these values
+# OSX Specific
+# ^^^^^^^^^^^^
 #
-# ::
-#
-#   OPENGL_gl_LIBRARY   - Path to OpenGL Library
-#   OPENGL_glu_LIBRARY  - Path to GLU Library
-#
-#
-#
-# On OSX default to using the framework version of opengl People will
+# On OSX default to using the framework version of OpenGL. People will
 # have to change the cache values of OPENGL_glu_LIBRARY and
-# OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX
+# OPENGL_gl_LIBRARY to use OpenGL with X11 on OSX.
+
 
 #=============================================================================
 # Copyright 2001-2009 Kitware, Inc.
@@ -121,19 +127,6 @@ else()
 
   unset(_OPENGL_INCLUDE_PATH)
   unset(_OPENGL_LIB_PATH)
-
-  # On Unix OpenGL most certainly always requires X11.
-  # Feel free to tighten up these conditions if you don't
-  # think this is always true.
-
-  if (OPENGL_gl_LIBRARY)
-    if(NOT X11_FOUND)
-      include(${CMAKE_CURRENT_LIST_DIR}/FindX11.cmake)
-    endif()
-    if (X11_FOUND)
-      set (OPENGL_LIBRARIES ${X11_LIBRARIES})
-    endif ()
-  endif ()
 
   find_library(OPENGL_glu_LIBRARY
     NAMES GLU MesaGLU

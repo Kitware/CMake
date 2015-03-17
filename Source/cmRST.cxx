@@ -12,6 +12,7 @@
 #include "cmRST.h"
 
 #include "cmSystemTools.h"
+#include "cmAlgorithms.h"
 #include "cmVersion.h"
 #include <cmsys/FStream.hxx>
 #include <ctype.h>
@@ -39,7 +40,8 @@ cmRST::cmRST(std::ostream& os, std::string const& docroot):
   ModuleRST("^#\\[(=*)\\[\\.rst:$"),
   CMakeRole("(:cmake)?:("
             "command|generator|variable|module|policy|"
-            "prop_cache|prop_dir|prop_gbl|prop_sf|prop_test|prop_tgt|"
+            "prop_cache|prop_dir|prop_gbl|prop_inst|prop_sf|"
+            "prop_test|prop_tgt|"
             "manual"
             "):`(<*([^`<]|[^` \t]<)*)([ \t]+<[^`]*>)?`"),
   Substitution("(^|[^A-Za-z0-9_])"
@@ -416,14 +418,7 @@ void cmRST::ProcessDirectiveReplace()
 {
   // Record markup lines as replacement text.
   std::string& replacement = this->Replace[this->ReplaceName];
-  const char* sep = "";
-  for(std::vector<std::string>::iterator i = this->MarkupLines.begin();
-      i != this->MarkupLines.end(); ++i)
-    {
-    replacement += sep;
-    replacement += *i;
-    sep = " ";
-    }
+  replacement += cmJoin(this->MarkupLines, " ");
   this->ReplaceName = "";
 }
 
@@ -468,10 +463,7 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
       }
 
     // Truncate indentation to match that on this line.
-    if(line.size() < indentEnd)
-      {
-      indentEnd = line.size();
-      }
+    indentEnd = std::min(indentEnd, line.size());
     for(std::string::size_type j = 0; j != indentEnd; ++j)
       {
       if(line[j] != indentText[j])
@@ -492,19 +484,16 @@ void cmRST::UnindentLines(std::vector<std::string>& lines)
       }
     }
 
-  // Drop leading blank lines.
-  size_t leadingEmpty = 0;
-  for(size_t i = 0; i < lines.size() && lines[i].empty(); ++i)
-    {
-    ++leadingEmpty;
-    }
-  lines.erase(lines.begin(), lines.begin()+leadingEmpty);
+  std::vector<std::string>::const_iterator it = lines.begin();
+  size_t leadingEmpty = std::distance(it, cmFindNot(lines, std::string()));
 
-  // Drop trailing blank lines.
-  size_t trailingEmpty = 0;
-  for(size_t i = lines.size(); i > 0 && lines[i-1].empty(); --i)
-    {
-    ++trailingEmpty;
-    }
-  lines.erase(lines.end()-trailingEmpty, lines.end());
+  std::vector<std::string>::const_reverse_iterator rit = lines.rbegin();
+  size_t trailingEmpty = std::distance(rit,
+                            cmFindNot(cmReverseRange(lines), std::string()));
+
+  std::vector<std::string>::iterator contentEnd
+      = cmRotate(lines.begin(),
+                 lines.begin() + leadingEmpty,
+                 lines.end() - trailingEmpty);
+  lines.erase(contentEnd, lines.end());
 }

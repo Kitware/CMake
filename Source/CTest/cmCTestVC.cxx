@@ -105,7 +105,7 @@ bool cmCTestVC::RunChild(char const* const* cmd, OutputParser* out,
 //----------------------------------------------------------------------------
 std::string cmCTestVC::ComputeCommandLine(char const* const* cmd)
 {
-  cmOStringStream line;
+  std::ostringstream line;
   const char* sep = "";
   for(const char* const* arg = cmd; *arg; ++arg)
     {
@@ -166,10 +166,17 @@ void cmCTestVC::CleanupImpl()
 //----------------------------------------------------------------------------
 bool cmCTestVC::Update()
 {
-  this->NoteOldRevision();
-  this->Log << "--- Begin Update ---\n";
-  bool result = this->UpdateImpl();
-  this->Log << "--- End Update ---\n";
+  bool result = true;
+  // if update version only is on then do not actually update,
+  // just note the current version and finish
+  if(!cmSystemTools::IsOn(
+       this->CTest->GetCTestConfiguration("UpdateVersionOnly").c_str()))
+    {
+    this->NoteOldRevision();
+    this->Log << "--- Begin Update ---\n";
+    result = this->UpdateImpl();
+    this->Log << "--- End Update ---\n";
+    }
   this->NoteNewRevision();
   return result;
 }

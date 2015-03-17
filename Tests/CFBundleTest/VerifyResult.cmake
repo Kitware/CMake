@@ -14,13 +14,10 @@ message(STATUS "CTEST_CONFIGURATION_TYPE='${CTEST_CONFIGURATION_TYPE}'")
 message(STATUS "dir='${dir}'")
 message(STATUS "gen='${gen}'")
 
-if(gen MATCHES "Make" OR
-   "${CTEST_CONFIGURATION_TYPE}" STREQUAL "" OR
-   "${CTEST_CONFIGURATION_TYPE}" STREQUAL "." OR
-   "${CTEST_CONFIGURATION_TYPE}" STREQUAL "NoConfig")
-  set(expected_filename "${dir}/CFBundleTest.plugin/Contents/MacOS/CFBundleTest")
-else()
+if(gen STREQUAL "Xcode")
   set(expected_filename "${dir}/${CTEST_CONFIGURATION_TYPE}/CFBundleTest.plugin/Contents/MacOS/CFBundleTest")
+else()
+  set(expected_filename "${dir}/CFBundleTest.plugin/Contents/MacOS/CFBundleTest")
 endif()
 
 if(NOT EXISTS "${expected_filename}")

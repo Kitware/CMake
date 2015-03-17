@@ -25,13 +25,14 @@ class cmGlobalVisualStudio10Generator :
 {
 public:
   cmGlobalVisualStudio10Generator(const std::string& name,
-    const std::string& platformName,
-    const std::string& additionalPlatformDefinition);
+    const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   virtual bool MatchesGeneratorName(const std::string& name) const;
 
-  virtual bool SetGeneratorToolset(std::string const& ts);
+  virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
+  virtual bool SetGeneratorToolset(std::string const& ts, cmMakefile* mf);
 
   virtual void GenerateBuildCommand(
     std::vector<std::string>& makeCommand,
@@ -40,19 +41,15 @@ public:
     const std::string& projectDir,
     const std::string& targetName,
     const std::string& config,
-    bool fast,
+    bool fast, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
-
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
-  virtual void Generate();
-
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
@@ -62,11 +59,30 @@ public:
   /** Is the installed VS an Express edition?  */
   bool IsExpressEdition() const { return this->ExpressEdition; }
 
-  /** Is the Microsoft Assembler enabled?  */
-  bool IsMasmEnabled() const { return this->MasmEnabled; }
+  /** Generating for Nsight Tegra VS plugin?  */
+  bool IsNsightTegra() const;
+  std::string GetNsightTegraVersion() const;
 
   /** The toolset name for the target platform.  */
-  const char* GetPlatformToolset();
+  const char* GetPlatformToolset() const;
+
+  /** Return the CMAKE_SYSTEM_NAME.  */
+  std::string const& GetSystemName() const { return this->SystemName; }
+
+  /** Return the CMAKE_SYSTEM_VERSION.  */
+  std::string const& GetSystemVersion() const { return this->SystemVersion; }
+
+  /** Return true if building for WindowsCE */
+  bool TargetsWindowsCE() const
+    { return this->SystemIsWindowsCE; }
+
+  /** Return true if building for WindowsPhone */
+  bool TargetsWindowsPhone() const
+    { return this->SystemIsWindowsPhone; }
+
+  /** Return true if building for WindowsStore */
+  bool TargetsWindowsStore() const
+    { return this->SystemIsWindowsStore; }
 
   /**
    * Where does this version of Visual Studio look for macros for the
@@ -94,14 +110,32 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
+  static std::string GetInstalledNsightTegraVersion();
+
 protected:
+  virtual void Generate();
+  virtual bool InitializeSystem(cmMakefile* mf);
+  virtual bool InitializeWindowsCE(cmMakefile* mf);
+  virtual bool InitializeWindowsPhone(cmMakefile* mf);
+  virtual bool InitializeWindowsStore(cmMakefile* mf);
+
+  virtual std::string SelectWindowsCEToolset() const;
+  virtual bool SelectWindowsPhoneToolset(std::string& toolset) const;
+  virtual bool SelectWindowsStoreToolset(std::string& toolset) const;
+
   virtual const char* GetIDEVersion() { return "10.0"; }
 
   std::string const& GetMSBuildCommand();
 
-  std::string PlatformToolset;
+  std::string GeneratorToolset;
+  std::string DefaultPlatformToolset;
+  std::string SystemName;
+  std::string SystemVersion;
+  std::string NsightTegraVersion;
+  bool SystemIsWindowsCE;
+  bool SystemIsWindowsPhone;
+  bool SystemIsWindowsStore;
   bool ExpressEdition;
-  bool MasmEnabled;
 
   bool UseFolderProperty();
 

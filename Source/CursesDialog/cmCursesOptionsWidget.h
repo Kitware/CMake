@@ -9,8 +9,8 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#ifndef __cmCursesOptionsWidget_h
-#define __cmCursesOptionsWidget_h
+#ifndef cmCursesOptionsWidget_h
+#define cmCursesOptionsWidget_h
 
 #include "cmCursesWidget.h"
 class cmCursesMainForm;
@@ -36,4 +36,4 @@ protected:
   std::vector<std::string>::size_type CurrentOption;
 };
 
-#endif // __cmCursesOptionsWidget_h
+#endif // cmCursesOptionsWidget_h

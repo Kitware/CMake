@@ -70,7 +70,7 @@ static void cmVariableWatchCommandVariableAccessed(
       {
       arg.FilePath =  "Unknown";
       arg.Line = 0;
-      cmOStringStream error;
+      std::ostringstream error;
       error << "Error in cmake code at\n"
         << arg.FilePath << ":" << arg.Line << ":\n"
         << "A command failed during the invocation of callback \""
@@ -83,7 +83,7 @@ static void cmVariableWatchCommandVariableAccessed(
     }
   if ( !processed )
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     msg << "Variable \"" << variable << "\" was accessed using "
         << accessString << " with value \"" << (newValue?newValue:"") << "\".";
     makefile->IssueMessage(cmake::LOG, msg.str());
@@ -135,7 +135,7 @@ bool cmVariableWatchCommand
     }
   if ( variable == "CMAKE_CURRENT_LIST_FILE" )
     {
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     ostr << "cannot be set on the variable: " << variable;
     this->SetError(ostr.str());
     return false;

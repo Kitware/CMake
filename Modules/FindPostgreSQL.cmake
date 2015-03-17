@@ -145,12 +145,22 @@ find_library( PostgreSQL_LIBRARY
 )
 get_filename_component(PostgreSQL_LIBRARY_DIR ${PostgreSQL_LIBRARY} PATH)
 
-if (PostgreSQL_INCLUDE_DIR AND EXISTS "${PostgreSQL_INCLUDE_DIR}/pg_config.h")
-  file(STRINGS "${PostgreSQL_INCLUDE_DIR}/pg_config.h" pgsql_version_str
-       REGEX "^#define[\t ]+PG_VERSION[\t ]+\".*\"")
-
-  string(REGEX REPLACE "^#define[\t ]+PG_VERSION[\t ]+\"([^\"]*)\".*" "\\1"
-         PostgreSQL_VERSION_STRING "${pgsql_version_str}")
+if (PostgreSQL_INCLUDE_DIR)
+  # Some platforms include multiple pg_config.hs for multi-lib configurations
+  # This is a temporary workaround.  A better solution would be to compile
+  # a dummy c file and extract the value of the symbol.
+  file(GLOB _PG_CONFIG_HEADERS "${PostgreSQL_INCLUDE_DIR}/pg_config*.h")
+  foreach(_PG_CONFIG_HEADER ${_PG_CONFIG_HEADERS})
+    if(EXISTS "${_PG_CONFIG_HEADER}")
+      file(STRINGS "${_PG_CONFIG_HEADER}" pgsql_version_str
+           REGEX "^#define[\t ]+PG_VERSION[\t ]+\".*\"")
+      if(pgsql_version_str)
+        string(REGEX REPLACE "^#define[\t ]+PG_VERSION[\t ]+\"([^\"]*)\".*"
+               "\\1" PostgreSQL_VERSION_STRING "${pgsql_version_str}")
+        break()
+      endif()
+    endif()
+  endforeach()
   unset(pgsql_version_str)
 endif()
 

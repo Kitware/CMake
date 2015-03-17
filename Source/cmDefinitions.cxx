@@ -15,7 +15,8 @@
 cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
-cmDefinitions::cmDefinitions(cmDefinitions* parent): Up(parent)
+cmDefinitions::cmDefinitions(cmDefinitions* parent)
+  : Up(parent)
 {
 }
 
@@ -35,7 +36,7 @@ cmDefinitions::GetInternal(const std::string& key)
     {
     return i->second;
     }
-  else if(cmDefinitions* up = this->Up)
+  if(cmDefinitions* up = this->Up)
     {
     // Query the parent scope and store the result locally.
     Def def = up->GetInternal(key);
@@ -51,16 +52,7 @@ cmDefinitions::SetInternal(const std::string& key, Def const& def)
   if(this->Up || def.Exists)
     {
     // In lower scopes we store keys, defined or not.
-    MapType::iterator i = this->Map.find(key);
-    if(i == this->Map.end())
-      {
-      i = this->Map.insert(MapType::value_type(key, def)).first;
-      }
-    else
-      {
-      i->second = def;
-      }
-    return i->second;
+    return (this->Map[key] = def);
     }
   else
     {

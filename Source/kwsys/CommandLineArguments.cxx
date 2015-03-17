@@ -178,7 +178,7 @@ bool CommandLineArguments::GetMatchedArguments(
       matches->push_back(parg);
       }
     }
-  return matches->size() > 0;
+  return !matches->empty();
 }
 
 //----------------------------------------------------------------------------
@@ -235,7 +235,7 @@ int CommandLineArguments::Parse()
           return 0;
           }
         CommandLineArguments_DEBUG("This is a space argument: " << arg
-          << " value: " << this->Internals->Argv[cc+1].c_str());
+          << " value: " << this->Internals->Argv[cc+1]);
         // Value is the next argument
         if ( !this->PopulateVariable(cs, this->Internals->Argv[cc+1].c_str()) )
           {
@@ -244,7 +244,7 @@ int CommandLineArguments::Parse()
         cc ++;
         break;
       case EQUAL_ARGUMENT:
-        if ( arg.size() == sarg.size() || *(arg.c_str() + sarg.size()) != '=' )
+        if ( arg.size() == sarg.size() || arg.at(sarg.size()) != '=' )
           {
           this->Internals->LastArgument --;
           return 0;
@@ -309,11 +309,11 @@ int CommandLineArguments::Parse()
       else if ( this->StoreUnusedArgumentsFlag )
         {
         CommandLineArguments_DEBUG("Store unused argument " << arg);
-        this->Internals->UnusedArguments.push_back(arg.c_str());
+        this->Internals->UnusedArguments.push_back(arg);
         }
       else
         {
-        kwsys_ios::cerr << "Got unknown argument: \"" << arg.c_str() << "\"" << kwsys_ios::endl;
+        kwsys_ios::cerr << "Got unknown argument: \"" << arg << "\"" << kwsys_ios::endl;
         this->Internals->LastArgument --;
         return 0;
         }

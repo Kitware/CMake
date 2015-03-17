@@ -747,6 +747,59 @@ archive_read_header_position(struct archive *_a)
 }
 
 /*
+ * Returns 1 if the archive contains at least one encrypted entry.
+ * If the archive format not support encryption at all
+ * ARCHIVE_READ_FORMAT_ENCRYPTION_UNSUPPORTED is returned.
+ * If for any other reason (e.g. not enough data read so far)
+ * we cannot say whether there are encrypted entries, then
+ * ARCHIVE_READ_FORMAT_ENCRYPTION_DONT_KNOW is returned.
+ * In general, this function will return values below zero when the
+ * reader is uncertain or totally uncapable of encryption support.
+ * When this function returns 0 you can be sure that the reader
+ * supports encryption detection but no encrypted entries have
+ * been found yet.
+ *
+ * NOTE: If the metadata/header of an archive is also encrypted, you
+ * cannot rely on the number of encrypted entries. That is why this
+ * function does not return the number of encrypted entries but#
+ * just shows that there are some.
+ */
+int
+archive_read_has_encrypted_entries(struct archive *_a)
+{
+	struct archive_read *a = (struct archive_read *)_a;
+	int format_supports_encryption = archive_read_format_capabilities(_a)
+			& (ARCHIVE_READ_FORMAT_CAPS_ENCRYPT_DATA | ARCHIVE_READ_FORMAT_CAPS_ENCRYPT_METADATA);
+
+	if (!_a || !format_supports_encryption) {
+		/* Format in general doesn't support encryption */
+		return ARCHIVE_READ_FORMAT_ENCRYPTION_UNSUPPORTED;
+	}
+
+	/* A reader potentially has read enough data now. */
+	if (a->format && a->format->has_encrypted_entries) {
+		return (a->format->has_encrypted_entries)(a);
+	}
+
+	/* For any other reason we cannot say how many entries are there. */
+	return ARCHIVE_READ_FORMAT_ENCRYPTION_DONT_KNOW;
+}
+
+/*
+ * Returns a bitmask of capabilities that are supported by the archive format reader.
+ * If the reader has no special capabilities, ARCHIVE_READ_FORMAT_CAPS_NONE is returned.
+ */
+int
+archive_read_format_capabilities(struct archive *_a)
+{
+	struct archive_read *a = (struct archive_read *)_a;
+	if (a && a->format && a->format->format_capabilties) {
+		return (a->format->format_capabilties)(a);
+	}
+	return ARCHIVE_READ_FORMAT_CAPS_NONE;
+}
+
+/*
  * Read data from an archive entry, using a read(2)-style interface.
  * This is a convenience routine that just calls
  * archive_read_data_block and copies the results into the client
@@ -1094,7 +1147,9 @@ __archive_read_register_format(struct archive_read *a,
     int (*read_data)(struct archive_read *, const void **, size_t *, int64_t *),
     int (*read_data_skip)(struct archive_read *),
     int64_t (*seek_data)(struct archive_read *, int64_t, int),
-    int (*cleanup)(struct archive_read *))
+    int (*cleanup)(struct archive_read *),
+    int (*format_capabilities)(struct archive_read *),
+    int (*has_encrypted_entries)(struct archive_read *))
 {
 	int i, number_slots;
 
@@ -1117,6 +1172,8 @@ __archive_read_register_format(struct archive_read *a,
 			a->formats[i].cleanup = cleanup;
 			a->formats[i].data = format_data;
 			a->formats[i].name = name;
+			a->formats[i].format_capabilties = format_capabilities;
+			a->formats[i].has_encrypted_entries = has_encrypted_entries;
 			return (ARCHIVE_OK);
 		}
 	}
@@ -1557,10 +1614,9 @@ __archive_read_filter_seek(struct archive_read_filter *filter, int64_t offset,
 			client->dataset[++cursor].begin_position = r;
 		}
 		offset -= client->dataset[cursor].begin_position;
-		if (offset < 0)
-			offset = 0;
-		else if (offset > client->dataset[cursor].total_size - 1)
-			offset = client->dataset[cursor].total_size - 1;
+		if (offset < 0
+		    || offset > client->dataset[cursor].total_size)
+			return ARCHIVE_FATAL;
 		if ((r = client_seek_proxy(filter, offset, SEEK_SET)) < 0)
 			return r;
 		break;

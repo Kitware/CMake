@@ -1973,7 +1973,7 @@ tree_dup(int fd)
 	static volatile int can_dupfd_cloexec = 1;
 
 	if (can_dupfd_cloexec) {
-		new_fd = fcntl(fd, F_DUPFD_CLOEXEC);
+		new_fd = fcntl(fd, F_DUPFD_CLOEXEC, 0);
 		if (new_fd != -1)
 			return (new_fd);
 		/* Linux 2.6.18 - 2.6.23 declare F_DUPFD_CLOEXEC,

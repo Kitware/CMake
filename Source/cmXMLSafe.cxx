@@ -28,7 +28,7 @@ cmXMLSafe::cmXMLSafe(const char* s):
 }
 
 //----------------------------------------------------------------------------
-cmXMLSafe::cmXMLSafe(cmsys_stl::string const& s):
+cmXMLSafe::cmXMLSafe(std::string const& s):
     Data(s.c_str()),
     Size(static_cast<unsigned long>(s.length())),
     DoQuotes(true)
@@ -43,7 +43,7 @@ cmXMLSafe& cmXMLSafe::Quotes(bool b)
 }
 
 //----------------------------------------------------------------------------
-cmsys_stl::string cmXMLSafe::str()
+std::string cmXMLSafe::str()
 {
   cmsys_ios::ostringstream ss;
   ss << *this;

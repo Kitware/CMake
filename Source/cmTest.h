@@ -14,8 +14,8 @@
 
 #include "cmCustomCommand.h"
 #include "cmPropertyMap.h"
+#include "cmListFileCache.h"
 class cmMakefile;
-class cmListFileBacktrace;
 
 /** \class cmTest
  * \brief Represent a test
@@ -71,7 +71,7 @@ private:
   bool OldStyle;
 
   cmMakefile* Makefile;
-  cmListFileBacktrace* Backtrace;
+  cmListFileBacktrace Backtrace;
 };
 
 #endif

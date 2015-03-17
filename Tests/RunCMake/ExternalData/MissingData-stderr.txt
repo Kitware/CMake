@@ -1,4 +1,4 @@
-CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
+CMake Warning \(dev\) at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
   Data file referenced by argument
 
     DATA{MissingData.txt}
@@ -10,5 +10,6 @@ CMake Error at .*/Modules/ExternalData.cmake:[0-9]+ \(message\):
   that does not exist as a file \(with or without an extension\)!
 Call Stack \(most recent call first\):
   .*
-  MissingData.cmake:2 \(ExternalData_Add_Test\)
+  MissingData.cmake:4 \(ExternalData_Expand_Arguments\)
   CMakeLists.txt:3 \(include\)
+This warning is for project developers.  Use -Wno-dev to suppress it.

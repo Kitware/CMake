@@ -10,8 +10,8 @@
   See the License for more information.
 ============================================================================*/
 
-#ifndef __QCMake_h
-#define __QCMake_h
+#ifndef QCMake_h
+#define QCMake_h
 #ifdef _MSC_VER
 #pragma warning ( disable : 4127 )
 #pragma warning ( disable : 4512 )
@@ -136,8 +136,10 @@ protected:
 
   static bool interruptCallback(void*);
   static void progressCallback(const char* msg, float percent, void* cd);
-  static void errorCallback(const char* msg, const char* title,
-                            bool&, void* cd);
+  static void messageCallback(const char* msg, const char* title,
+                              bool&, void* cd);
+  static void stdoutCallback(const char* msg, size_t len, void* cd);
+  static void stderrCallback(const char* msg, size_t len, void* cd);
   bool SuppressDevWarnings;
   bool WarnUninitializedMode;
   bool WarnUnusedMode;
@@ -150,5 +152,5 @@ protected:
   QAtomicInt InterruptFlag;
 };
 
-#endif // __QCMake_h
+#endif // QCMake_h
 

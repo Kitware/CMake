@@ -19,8 +19,12 @@ _ctest()
             _filedir
             return
             ;;
-        -L|--label-regex|-LE|--label-exclude|--track|-I|--tests-information|\
-        --max-width|--timeout|--stop-time)
+        -L|--label-regex|-LE|--label-exclude)
+            COMPREPLY=( $( compgen -W '$( ctest --print-labels 2>/dev/null |
+                grep "^  " 2>/dev/null | cut -d" " -f 3 )' -- "$cur" ) )
+            return
+            ;;
+        --track|-I|--tests-information|--max-width|--timeout|--stop-time)
             # argument required but no completions available
             return
             ;;

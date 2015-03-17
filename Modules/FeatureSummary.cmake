@@ -17,7 +17,7 @@
 # ::
 #
 #     -- The following OPTIONAL packages have been found:
-#     LibXml2 (required version >= 2.4) , XML processing library. , <http://xmlsoft.org>
+#     LibXml2 (required version >= 2.4), XML processing lib, <http://xmlsoft.org>
 #        * Enables HTML-import in MyWordProcessor
 #        * Enables odt-export in MyWordProcessor
 #     PNG , A PNG image library. , <http://www.libpng.org/pub/png/>
@@ -40,7 +40,7 @@
 #                      [FATAL_ON_MISSING_REQUIRED_PACKAGES]
 #                      [DESCRIPTION "Found packages:"]
 #                      WHAT (ALL | PACKAGES_FOUND | PACKAGES_NOT_FOUND
-#                           | ENABLED_FEATURES | DISABLED_FEATURES]
+#                           | ENABLED_FEATURES | DISABLED_FEATURES)
 #                    )
 #
 #
@@ -55,21 +55,32 @@
 # The WHAT option is the only mandatory option.  Here you specify what
 # information will be printed:
 #
-# ::
-#
-#     ALL: print everything
-#     ENABLED_FEATURES: the list of all features which are enabled
-#     DISABLED_FEATURES: the list of all features which are disabled
-#     PACKAGES_FOUND: the list of all packages which have been found
-#     PACKAGES_NOT_FOUND: the list of all packages which have not been found
-#     OPTIONAL_PACKAGES_FOUND: only those packages which have been found which have the type OPTIONAL
-#     OPTIONAL_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type OPTIONAL
-#     RECOMMENDED_PACKAGES_FOUND: only those packages which have been found which have the type RECOMMENDED
-#     RECOMMENDED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RECOMMENDED
-#     REQUIRED_PACKAGES_FOUND: only those packages which have been found which have the type REQUIRED
-#     REQUIRED_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type REQUIRED
-#     RUNTIME_PACKAGES_FOUND: only those packages which have been found which have the type RUNTIME
-#     RUNTIME_PACKAGES_NOT_FOUND: only those packages which have not been found which have the type RUNTIME
+# ``ALL``
+#  print everything
+# ``ENABLED_FEATURES``
+#  the list of all features which are enabled
+# ``DISABLED_FEATURES``
+#  the list of all features which are disabled
+# ``PACKAGES_FOUND``
+#  the list of all packages which have been found
+# ``PACKAGES_NOT_FOUND``
+#  the list of all packages which have not been found
+# ``OPTIONAL_PACKAGES_FOUND``
+#  only those packages which have been found which have the type OPTIONAL
+# ``OPTIONAL_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type OPTIONAL
+# ``RECOMMENDED_PACKAGES_FOUND``
+#  only those packages which have been found which have the type RECOMMENDED
+# ``RECOMMENDED_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type RECOMMENDED
+# ``REQUIRED_PACKAGES_FOUND``
+#  only those packages which have been found which have the type REQUIRED
+# ``REQUIRED_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type REQUIRED
+# ``RUNTIME_PACKAGES_FOUND``
+#  only those packages which have been found which have the type RUNTIME
+# ``RUNTIME_PACKAGES_NOT_FOUND``
+#  only those packages which have not been found which have the type RUNTIME
 #
 # With the exception of the ``ALL`` value, these values can be combined
 # in order to customize the output. For example:
@@ -118,10 +129,11 @@
 #
 # ::
 #
-#     SET_PACKAGE_PROPERTIES(<name> PROPERTIES [ URL <url> ]
-#                                              [ DESCRIPTION <description> ]
-#                                              [ TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED) ]
-#                                              [ PURPOSE <purpose> ]
+#     SET_PACKAGE_PROPERTIES(<name> PROPERTIES
+#                            [ URL <url> ]
+#                            [ DESCRIPTION <description> ]
+#                            [ TYPE (RUNTIME|OPTIONAL|RECOMMENDED|REQUIRED) ]
+#                            [ PURPOSE <purpose> ]
 #                           )
 #
 #
@@ -171,26 +183,30 @@
 # ::
 #
 #    find_package(LibXml2)
-#    set_package_properties(LibXml2 PROPERTIES DESCRIPTION "A XML processing library."
-#                                              URL "http://xmlsoft.org/")
+#    set_package_properties(LibXml2 PROPERTIES
+#                           DESCRIPTION "A XML processing library."
+#                           URL "http://xmlsoft.org/")
 #
 #
 #
 # ::
 #
-#    set_package_properties(LibXml2 PROPERTIES TYPE RECOMMENDED
-#                                              PURPOSE "Enables HTML-import in MyWordProcessor")
+#    set_package_properties(LibXml2 PROPERTIES
+#                           TYPE RECOMMENDED
+#                           PURPOSE "Enables HTML-import in MyWordProcessor")
 #    ...
-#    set_package_properties(LibXml2 PROPERTIES TYPE OPTIONAL
-#                                              PURPOSE "Enables odt-export in MyWordProcessor")
+#    set_package_properties(LibXml2 PROPERTIES
+#                           TYPE OPTIONAL
+#                           PURPOSE "Enables odt-export in MyWordProcessor")
 #
 #
 #
 # ::
 #
 #    find_package(DBUS)
-#    set_package_properties(DBUS PROPERTIES TYPE RUNTIME
-#                                              PURPOSE "Necessary to disable the screensaver during a presentation" )
+#    set_package_properties(DBUS PROPERTIES
+#      TYPE RUNTIME
+#      PURPOSE "Necessary to disable the screensaver during a presentation" )
 #
 #
 #
@@ -249,7 +265,7 @@
 # Does the same as SET_PACKAGE_INFO(<name> <description> <url> )
 
 #=============================================================================
-# Copyright 2007-2009 Kitware, Inc.
+# Copyright 2007-2015 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -363,6 +379,9 @@ function(_FS_GET_FEATURE_SUMMARY _property _var _includeQuiet)
 
   set(_currentFeatureText "")
   get_property(_EnabledFeatures  GLOBAL PROPERTY ${_property})
+  if(_EnabledFeatures)
+    list(REMOVE_DUPLICATES _EnabledFeatures)
+  endif(_EnabledFeatures)
 
   foreach(_currentFeature ${_EnabledFeatures})
 
@@ -543,13 +562,19 @@ endfunction()
 # The stuff below is only kept for compatibility
 
 function(SET_PACKAGE_INFO _name _desc)
-  set(_url "${ARGV2}")
-  set(_purpose "${ARGV3}")
+  unset(_url)
+  unset(_purpose)
+  if(ARGC GREATER 2)
+    set(_url "${ARGV2}")
+  endif()
+  if(ARGC GREATER 3)
+    set(_purpose "${ARGV3}")
+  endif()
   set_property(GLOBAL PROPERTY _CMAKE_${_name}_DESCRIPTION "${_desc}" )
-  if(_url MATCHES ".+")
+  if(NOT _url STREQUAL "")
     set_property(GLOBAL PROPERTY _CMAKE_${_name}_URL "${_url}" )
   endif()
-  if(_purpose MATCHES ".+")
+  if(NOT _purpose STREQUAL "")
     set_property(GLOBAL APPEND PROPERTY _CMAKE_${_name}_PURPOSE "${_purpose}" )
   endif()
 endfunction()

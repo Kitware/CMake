@@ -42,7 +42,7 @@ public:
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
@@ -59,16 +59,9 @@ public:
     const std::string& projectDir,
     const std::string& targetName,
     const std::string& config,
-    bool fast,
+    bool fast, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
-
-  /**
-   * Generate the all required files for building this project/tree. This
-   * basically creates a series of LocalGenerators for each directory and
-   * requests that they Generate.
-   */
-  virtual void Generate();
 
   /**
    * Generate the DSW workspace file.
@@ -91,7 +84,10 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
+  virtual bool IsForVS6() const { return true; }
+
 protected:
+  virtual void Generate();
   virtual const char* GetIDEVersion() { return "6.0"; }
 private:
   virtual std::string GetVSMakeProgram() { return this->GetMSDevCommand(); }

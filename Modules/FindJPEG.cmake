@@ -33,7 +33,7 @@
 
 find_path(JPEG_INCLUDE_DIR jpeglib.h)
 
-set(JPEG_NAMES ${JPEG_NAMES} jpeg)
+set(JPEG_NAMES ${JPEG_NAMES} jpeg libjpeg)
 find_library(JPEG_LIBRARY NAMES ${JPEG_NAMES} )
 
 # handle the QUIETLY and REQUIRED arguments and set JPEG_FOUND to TRUE if

@@ -13,9 +13,11 @@
 #ifndef cmake_h
 #define cmake_h
 
+#include "cmListFileCache.h"
 #include "cmSystemTools.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
+#include "cmInstalledFile.h"
 
 class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
@@ -28,7 +30,6 @@ class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
 class cmDocumentationSection;
 class cmPolicies;
-class cmListFileBacktrace;
 class cmTarget;
 class cmGeneratedFileStream;
 
@@ -92,6 +93,7 @@ class cmake
     FIND_PACKAGE_MODE
   };
   typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
+  typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
   cmake();
@@ -189,6 +191,14 @@ class cmake
   ///! Get the names of the current registered generators
   void GetRegisteredGenerators(std::vector<std::string>& names);
 
+  ///! Set the name of the selected generator-specific platform.
+  void SetGeneratorPlatform(std::string const& ts)
+    { this->GeneratorPlatform = ts; }
+
+  ///! Get the name of the selected generator-specific platform.
+  std::string const& GetGeneratorPlatform() const
+    { return this->GeneratorPlatform; }
+
   ///! Set the name of the selected generator-specific toolset.
   void SetGeneratorToolset(std::string const& ts)
     { this->GeneratorToolset = ts; }
@@ -280,6 +290,15 @@ class cmake
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; }
 
+  ///! Get or create an cmInstalledFile instance and return a pointer to it
+  cmInstalledFile *GetOrCreateInstalledFile(
+    cmMakefile* mf, const std::string& name);
+
+  cmInstalledFile const* GetInstalledFile(const std::string& name) const;
+
+  InstalledFilesMap const& GetInstalledFiles() const
+    { return this->InstalledFiles; }
+
   ///! Do all the checks before running configure
   int DoPreConfigureChecks();
 
@@ -349,7 +368,7 @@ class cmake
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
-                    cmListFileBacktrace const& backtrace);
+        cmListFileBacktrace const& backtrace = cmListFileBacktrace(NULL));
   ///! run the --build option
   int Build(const std::string& dir,
             const std::string& target,
@@ -392,6 +411,7 @@ protected:
   std::string StartOutputDirectory;
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
+  std::string GeneratorPlatform;
   std::string GeneratorToolset;
 
   ///! read in a cmake list file to initialize the cache
@@ -445,6 +465,7 @@ private:
   cmFileTimeComparison* FileComparison;
   std::string GraphVizFile;
   std::vector<std::string> DebugConfigs;
+  InstalledFilesMap InstalledFiles;
 
   void UpdateConversionPathTable();
 };
@@ -455,7 +476,73 @@ private:
   {"-U <globbing_expr>", "Remove matching entries from CMake cache."}, \
   {"-G <generator-name>", "Specify a build system generator."},\
   {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \
+  {"-A <platform-name>", "Specify platform name if supported by generator."}, \
   {"-Wno-dev", "Suppress developer warnings."},\
   {"-Wdev", "Enable developer warnings."}
+
+#define FOR_EACH_C_FEATURE(F) \
+  F(c_function_prototypes) \
+  F(c_restrict) \
+  F(c_static_assert) \
+  F(c_variadic_macros)
+
+#define FOR_EACH_CXX_FEATURE(F) \
+  F(cxx_aggregate_default_initializers) \
+  F(cxx_alias_templates) \
+  F(cxx_alignas) \
+  F(cxx_alignof) \
+  F(cxx_attributes) \
+  F(cxx_attribute_deprecated) \
+  F(cxx_auto_type) \
+  F(cxx_binary_literals) \
+  F(cxx_constexpr) \
+  F(cxx_contextual_conversions) \
+  F(cxx_decltype) \
+  F(cxx_decltype_auto) \
+  F(cxx_decltype_incomplete_return_types) \
+  F(cxx_default_function_template_args) \
+  F(cxx_defaulted_functions) \
+  F(cxx_defaulted_move_initializers) \
+  F(cxx_delegating_constructors) \
+  F(cxx_deleted_functions) \
+  F(cxx_digit_separators) \
+  F(cxx_enum_forward_declarations) \
+  F(cxx_explicit_conversions) \
+  F(cxx_extended_friend_declarations) \
+  F(cxx_extern_templates) \
+  F(cxx_final) \
+  F(cxx_func_identifier) \
+  F(cxx_generalized_initializers) \
+  F(cxx_generic_lambdas) \
+  F(cxx_inheriting_constructors) \
+  F(cxx_inline_namespaces) \
+  F(cxx_lambdas) \
+  F(cxx_lambda_init_captures) \
+  F(cxx_local_type_template_args) \
+  F(cxx_long_long_type) \
+  F(cxx_noexcept) \
+  F(cxx_nonstatic_member_init) \
+  F(cxx_nullptr) \
+  F(cxx_override) \
+  F(cxx_range_for) \
+  F(cxx_raw_string_literals) \
+  F(cxx_reference_qualified_functions) \
+  F(cxx_relaxed_constexpr) \
+  F(cxx_return_type_deduction) \
+  F(cxx_right_angle_brackets) \
+  F(cxx_rvalue_references) \
+  F(cxx_sizeof_member) \
+  F(cxx_static_assert) \
+  F(cxx_strong_enums) \
+  F(cxx_template_template_parameters) \
+  F(cxx_thread_local) \
+  F(cxx_trailing_return_types) \
+  F(cxx_unicode_literals) \
+  F(cxx_uniform_initialization) \
+  F(cxx_unrestricted_unions) \
+  F(cxx_user_literals) \
+  F(cxx_variable_templates) \
+  F(cxx_variadic_macros) \
+  F(cxx_variadic_templates)
 
 #endif

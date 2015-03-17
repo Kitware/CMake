@@ -39,6 +39,10 @@ else()
   set(CMAKE_USE_ELF_PARSER)
 endif()
 
+if(APPLE)
+  set(CMAKE_USE_MACH_PARSER 1)
+endif()
+
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
 # ensure Unicode friendly APIs are used on Windows
@@ -140,11 +144,15 @@ if(CMAKE_USE_ELF_PARSER)
   set(ELF_SRCS cmELF.h cmELF.cxx)
 endif()
 
+# Check if we can build the Mach-O parser.
+if(CMAKE_USE_MACH_PARSER)
+  set(MACH_SRCS cmMachO.h cmMachO.cxx)
+endif()
+
 #
 # Sources for CMakeLib
 #
 set(SRCS
-  cmStandardIncludes.cxx
   cmArchiveWrite.cxx
   cmBootstrapCommands1.cxx
   cmBootstrapCommands2.cxx
@@ -163,8 +171,12 @@ set(SRCS
   cmComputeLinkInformation.h
   cmComputeTargetDepends.h
   cmComputeTargetDepends.cxx
+  cmCPackPropertiesGenerator.h
+  cmCPackPropertiesGenerator.cxx
   cmCryptoHash.cxx
   cmCryptoHash.h
+  cmCurl.cxx
+  cmCurl.h
   cmCustomCommand.cxx
   cmCustomCommand.h
   cmCustomCommandGenerator.cxx
@@ -217,15 +229,25 @@ set(SRCS
   cmExtraKateGenerator.h
   cmExtraSublimeTextGenerator.cxx
   cmExtraSublimeTextGenerator.h
+  cmFileLock.cxx
+  cmFileLock.h
+  cmFileLockPool.cxx
+  cmFileLockPool.h
+  cmFileLockResult.cxx
+  cmFileLockResult.h
   cmFileTimeComparison.cxx
   cmFileTimeComparison.h
   cmGeneratedFileStream.cxx
+  cmGeneratorExpressionContext.cxx
+  cmGeneratorExpressionContext.h
   cmGeneratorExpressionDAGChecker.cxx
   cmGeneratorExpressionDAGChecker.h
   cmGeneratorExpressionEvaluator.cxx
   cmGeneratorExpressionEvaluator.h
   cmGeneratorExpressionLexer.cxx
   cmGeneratorExpressionLexer.h
+  cmGeneratorExpressionNode.cxx
+  cmGeneratorExpressionNode.h
   cmGeneratorExpressionParser.cxx
   cmGeneratorExpressionParser.h
   cmGeneratorExpression.cxx
@@ -243,6 +265,8 @@ set(SRCS
   cmInstallGenerator.h
   cmInstallGenerator.cxx
   cmInstallExportGenerator.cxx
+  cmInstalledFile.h
+  cmInstalledFile.cxx
   cmInstallFilesGenerator.h
   cmInstallFilesGenerator.cxx
   cmInstallScriptGenerator.h
@@ -257,6 +281,8 @@ set(SRCS
   cmLocalGenerator.cxx
   cmLocalGenerator.h
   cmLocalUnixMakefileGenerator3.cxx
+  cmLocale.h
+  ${MACH_SRCS}
   cmMakeDepend.cxx
   cmMakeDepend.h
   cmMakefile.cxx
@@ -304,6 +330,7 @@ set(SRCS
   cmTest.h
   cmTestGenerator.cxx
   cmTestGenerator.h
+  cmUuid.cxx
   cmVariableWatch.cxx
   cmVariableWatch.h
   cmVersion.cxx
@@ -315,6 +342,8 @@ set(SRCS
   cmake.cxx
   cmake.h
 
+  cm_get_date.h
+  cm_get_date.c
   cm_sha2.h
   cm_sha2.c
   cm_utf8.h
@@ -346,6 +375,7 @@ foreach(command_file
     cmSourceGroupCommand
     cmSubdirDependsCommand
     cmTargetCompileDefinitionsCommand
+    cmTargetCompileFeaturesCommand
     cmTargetCompileOptionsCommand
     cmTargetIncludeDirectoriesCommand
     cmTargetSourcesCommand
@@ -421,6 +451,8 @@ if (WIN32)
       cmGlobalVisualStudio11Generator.cxx
       cmGlobalVisualStudio12Generator.h
       cmGlobalVisualStudio12Generator.cxx
+      cmGlobalVisualStudio14Generator.h
+      cmGlobalVisualStudio14Generator.cxx
       cmGlobalVisualStudioGenerator.cxx
       cmGlobalVisualStudioGenerator.h
       cmIDEFlagTable.h
@@ -443,7 +475,7 @@ if (WIN32)
 endif ()
 
 # Watcom support
-if(WIN32 OR "${CMAKE_SYSTEM_NAME}" STREQUAL "Linux")
+if(WIN32 OR CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set_property(SOURCE cmake.cxx APPEND PROPERTY COMPILE_DEFINITIONS CMAKE_USE_WMAKE)
   list(APPEND SRCS
     cmGlobalWatcomWMakeGenerator.cxx
@@ -465,27 +497,35 @@ set(SRCS ${SRCS}
   cmNinjaUtilityTargetGenerator.cxx
   cmNinjaUtilityTargetGenerator.h
   )
-if(WIN32 AND NOT CYGWIN AND NOT BORLAND)
+if(WIN32 AND NOT CYGWIN)
   set_source_files_properties(cmcldeps.cxx PROPERTIES COMPILE_DEFINITIONS _WIN32_WINNT=0x0501)
   add_executable(cmcldeps cmcldeps.cxx)
   target_link_libraries(cmcldeps CMakeLib)
   install(TARGETS cmcldeps DESTINATION bin)
 endif()
 
+foreach(v CURL_CA_BUNDLE CURL_CA_PATH)
+  if(${v})
+    set_property(SOURCE cmCurl.cxx APPEND PROPERTY COMPILE_DEFINITIONS ${v}="${${v}}")
+  endif()
+endforeach()
+
 # create a library used by the command line and the GUI
 add_library(CMakeLib ${SRCS})
 target_link_libraries(CMakeLib cmsys
   ${CMAKE_EXPAT_LIBRARIES} ${CMAKE_ZLIB_LIBRARIES}
   ${CMAKE_TAR_LIBRARIES} ${CMAKE_COMPRESS_LIBRARIES}
-  ${CMAKE_CURL_LIBRARIES} )
+  ${CMAKE_CURL_LIBRARIES}
+  ${CMAKE_JSONCPP_LIBRARIES}
+  )
 
 # On Apple we need CoreFoundation
 if(APPLE)
   target_link_libraries(CMakeLib "-framework CoreFoundation")
 endif()
 
-# On some platforms we need the rpcrt4 library for the VS 7 generators.
 if(CMAKE_BUILD_ON_VISUAL_STUDIO OR MINGW)
+  # We need the rpcrt4 library for at least the VS7-VC10 generators.
   target_link_libraries(CMakeLib rpcrt4)
 endif()
 
@@ -510,11 +550,15 @@ set(CTEST_SRCS cmCTest.cxx
   CTest/cmCTestConfigureHandler.cxx
   CTest/cmCTestCoverageCommand.cxx
   CTest/cmCTestCoverageHandler.cxx
+  CTest/cmCTestCurl.cxx
   CTest/cmParseMumpsCoverage.cxx
   CTest/cmParseCacheCoverage.cxx
   CTest/cmParseGTMCoverage.cxx
+  CTest/cmParseJacocoCoverage.cxx
+  CTest/cmParseBlanketJSCoverage.cxx
   CTest/cmParsePHPCoverage.cxx
-  CTest/cmParsePythonCoverage.cxx
+  CTest/cmParseCoberturaCoverage.cxx
+  CTest/cmParseDelphiCoverage.cxx
   CTest/cmCTestEmptyBinaryDirectoryCommand.cxx
   CTest/cmCTestGenericHandler.cxx
   CTest/cmCTestHandlerCommand.cxx
@@ -569,11 +613,16 @@ set(CPACK_SRCS
   CPack/cmCPackGenerator.cxx
   CPack/cmCPackLog.cxx
   CPack/cmCPackNSISGenerator.cxx
+  CPack/IFW/cmCPackIFWPackage.cxx
+  CPack/IFW/cmCPackIFWInstaller.cxx
+  CPack/IFW/cmCPackIFWGenerator.cxx
   CPack/cmCPackSTGZGenerator.cxx
   CPack/cmCPackTGZGenerator.cxx
+  CPack/cmCPackTXZGenerator.cxx
   CPack/cmCPackTarBZip2Generator.cxx
   CPack/cmCPackTarCompressGenerator.cxx
   CPack/cmCPackZIPGenerator.cxx
+  CPack/cmCPack7zGenerator.cxx
   )
 
 if(CYGWIN)
@@ -593,13 +642,25 @@ endif()
 if(WIN32)
   set(CPACK_SRCS ${CPACK_SRCS}
     CPack/WiX/cmCPackWIXGenerator.cxx
-    CPack/WiX/cmWIXSourceWriter.cxx
+    CPack/WiX/cmCPackWIXGenerator.h
+    CPack/WiX/cmWIXAccessControlList.cxx
+    CPack/WiX/cmWIXAccessControlList.h
     CPack/WiX/cmWIXDirectoriesSourceWriter.cxx
+    CPack/WiX/cmWIXDirectoriesSourceWriter.h
     CPack/WiX/cmWIXFeaturesSourceWriter.cxx
+    CPack/WiX/cmWIXFeaturesSourceWriter.h
     CPack/WiX/cmWIXFilesSourceWriter.cxx
-    CPack/WiX/cmWIXRichTextFormatWriter.cxx
+    CPack/WiX/cmWIXFilesSourceWriter.h
     CPack/WiX/cmWIXPatch.cxx
+    CPack/WiX/cmWIXPatch.h
     CPack/WiX/cmWIXPatchParser.cxx
+    CPack/WiX/cmWIXPatchParser.h
+    CPack/WiX/cmWIXRichTextFormatWriter.cxx
+    CPack/WiX/cmWIXRichTextFormatWriter.h
+    CPack/WiX/cmWIXShortcut.cxx
+    CPack/WiX/cmWIXShortcut.h
+    CPack/WiX/cmWIXSourceWriter.cxx
+    CPack/WiX/cmWIXSourceWriter.h
   )
 endif()
 

@@ -78,7 +78,7 @@ bool cmBuildCommand
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "unknown argument \"" << args[i] << "\"";
       this->SetError(e.str());
       return false;

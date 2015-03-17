@@ -249,7 +249,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
 
   // Create set of linking flags.
   std::string linkFlags;
-  this->LocalGenerator->AppendFlags(linkFlags, extraFlags.c_str());
+  this->LocalGenerator->AppendFlags(linkFlags, extraFlags);
 
   // Add OSX version flags, if any.
   if(this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
@@ -341,8 +341,11 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     this->Convert(targetFullPathImport,cmLocalGenerator::START_OUTPUT,
                   cmLocalGenerator::SHELL);
 
+  this->NumberOfProgressActions++;
   if(!this->NoRuleMessages)
     {
+    cmLocalUnixMakefileGenerator3::EchoProgress progress;
+    this->MakeEchoProgress(progress);
     // Add the link message.
     std::string buildEcho = "Linking ";
     buildEcho += linkLanguage;
@@ -365,7 +368,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       }
     buildEcho += targetOutPath.c_str();
     this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                     cmLocalUnixMakefileGenerator3::EchoLink);
+                                     cmLocalUnixMakefileGenerator3::EchoLink,
+                                     &progress);
     }
 
   const char* forbiddenFlagVar = 0;
@@ -566,8 +570,8 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   std::string targetVersionMajor;
   std::string targetVersionMinor;
   {
-  cmOStringStream majorStream;
-  cmOStringStream minorStream;
+  std::ostringstream majorStream;
+  std::ostringstream minorStream;
   int major;
   int minor;
   this->Target->GetTargetVersion(major, minor);
@@ -752,25 +756,21 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                            this->Target);
     }
 
-  // Write the build rule.
-  this->LocalGenerator->WriteMakeRule(*this->BuildFileStream, 0,
-                                      targetFullPathReal,
-                                      depends, commands, false);
-
-  // Some targets have more than one output file.  Create rules to
-  // drive the build if any extra outputs are missing.
-  std::vector<std::string> extraOutputs;
+  // Compute the list of outputs.
+  std::vector<std::string> outputs(1, targetFullPathReal);
   if(targetNameSO != targetNameReal)
     {
-    this->GenerateExtraOutput(targetFullPathSO.c_str(),
-                              targetFullPathReal.c_str());
+    outputs.push_back(targetFullPathSO);
     }
   if(targetName != targetNameSO &&
      targetName != targetNameReal)
     {
-    this->GenerateExtraOutput(targetFullPath.c_str(),
-                              targetFullPathReal.c_str());
+    outputs.push_back(targetFullPath);
     }
+
+  // Write the build rule.
+  this->WriteMakeRule(*this->BuildFileStream, 0, outputs,
+                      depends, commands, false);
 
   // Write the main driver rule to build everything in this target.
   this->WriteTargetDriverRule(targetFullPath, relink);
@@ -808,8 +808,8 @@ cmMakefileLibraryTargetGenerator
   if(major > 0 || minor > 0 || patch > 0)
     {
     // Append the flag since a non-zero version is specified.
-    cmOStringStream vflag;
+    std::ostringstream vflag;
     vflag << flag << major << "." << minor << "." << patch;
-    this->LocalGenerator->AppendFlags(flags, vflag.str().c_str());
+    this->LocalGenerator->AppendFlags(flags, vflag.str());
     }
 }

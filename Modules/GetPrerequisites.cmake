@@ -41,7 +41,7 @@
 # ::
 #
 #   GET_PREREQUISITES(<target> <prerequisites_var> <exclude_system> <recurse>
-#                     <exepath> <dirs>)
+#                     <exepath> <dirs> [<rpaths>])
 #
 # Get the list of shared library files required by <target>.  The list
 # in the variable named <prerequisites_var> should be empty on first
@@ -113,7 +113,8 @@
 #
 # ::
 #
-#   GP_RESOLVE_ITEM(<context> <item> <exepath> <dirs> <resolved_item_var>)
+#   GP_RESOLVE_ITEM(<context> <item> <exepath> <dirs> <resolved_item_var>
+#                   [<rpaths>])
 #
 # Resolve an item into an existing full path file.
 #
@@ -122,7 +123,8 @@
 #
 # ::
 #
-#   GP_RESOLVED_FILE_TYPE(<original_file> <file> <exepath> <dirs> <type_var>)
+#   GP_RESOLVED_FILE_TYPE(<original_file> <file> <exepath> <dirs> <type_var>
+#                         [<rpaths>])
 #
 # Return the type of <file> with respect to <original_file>.  String
 # describing type of prerequisite is returned in variable named
@@ -177,7 +179,7 @@ function(gp_append_unique list_var value)
   set(contains 0)
 
   foreach(item ${${list_var}})
-    if("${item}" STREQUAL "${value}")
+    if(item STREQUAL "${value}")
       set(contains 1)
       break()
     endif()
@@ -258,6 +260,13 @@ function(is_file_executable file result_var)
         return()
       endif()
 
+      # "file" version 5.22 does not print "(used shared libraries)"
+      # but uses "interpreter"
+      if("${file_ov}" MATCHES "shared object.*interpreter")
+        set(${result_var} 1 PARENT_SCOPE)
+        return()
+      endif()
+
     else()
       message(STATUS "warning: No 'file' command, skipping execute_process...")
     endif()
@@ -321,6 +330,11 @@ endfunction()
 function(gp_resolve_item context item exepath dirs resolved_item_var)
   set(resolved 0)
   set(resolved_item "${item}")
+  if(ARGC GREATER 5)
+    set(rpaths "${ARGV5}")
+  else()
+    set(rpaths "")
+  endif()
 
   # Is it already resolved?
   #
@@ -329,7 +343,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif()
 
   if(NOT resolved)
-    if(item MATCHES "@executable_path")
+    if(item MATCHES "^@executable_path")
       #
       # @executable_path references are assumed relative to exepath
       #
@@ -347,7 +361,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif()
 
   if(NOT resolved)
-    if(item MATCHES "@loader_path")
+    if(item MATCHES "^@loader_path")
       #
       # @loader_path references are assumed relative to the
       # PATH of the given "context" (presumably another library)
@@ -367,7 +381,7 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
   endif()
 
   if(NOT resolved)
-    if(item MATCHES "@rpath")
+    if(item MATCHES "^@rpath")
       #
       # @rpath references are relative to the paths built into the binaries with -rpath
       # We handle this case like we do for other Unixes
@@ -375,9 +389,9 @@ function(gp_resolve_item context item exepath dirs resolved_item_var)
       string(REPLACE "@rpath/" "" norpath_item "${item}")
 
       set(ri "ri-NOTFOUND")
-      find_file(ri "${norpath_item}" ${exepath} ${dirs} NO_DEFAULT_PATH)
+      find_file(ri "${norpath_item}" ${exepath} ${dirs} ${rpaths} NO_DEFAULT_PATH)
       if(ri)
-        #message(STATUS "info: 'find_file' in exepath/dirs (${ri})")
+        #message(STATUS "info: 'find_file' in exepath/dirs/rpaths (${ri})")
         set(resolved 1)
         set(resolved_item "${ri}")
         set(ri "ri-NOTFOUND")
@@ -471,6 +485,11 @@ endfunction()
 
 
 function(gp_resolved_file_type original_file file exepath dirs type_var)
+  if(ARGC GREATER 5)
+    set(rpaths "${ARGV5}")
+  else()
+    set(rpaths "")
+  endif()
   #message(STATUS "**")
 
   if(NOT IS_ABSOLUTE "${original_file}")
@@ -489,7 +508,7 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
 
   if(NOT is_embedded)
     if(NOT IS_ABSOLUTE "${file}")
-      gp_resolve_item("${original_file}" "${file}" "${exepath}" "${dirs}" resolved_file)
+      gp_resolve_item("${original_file}" "${file}" "${exepath}" "${dirs}" resolved_file "${rpaths}")
     endif()
 
     string(TOLOWER "${original_file}" original_lower)
@@ -509,10 +528,10 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
 
     if(WIN32)
       string(TOLOWER "$ENV{SystemRoot}" sysroot)
-      string(REGEX REPLACE "\\\\" "/" sysroot "${sysroot}")
+      file(TO_CMAKE_PATH "${sysroot}" sysroot)
 
       string(TOLOWER "$ENV{windir}" windir)
-      string(REGEX REPLACE "\\\\" "/" windir "${windir}")
+      file(TO_CMAKE_PATH "${windir}" windir)
 
       if(lower MATCHES "^(${sysroot}/sys(tem|wow)|${windir}/sys(tem|wow)|(.*/)*msvc[^/]+dll)")
         set(is_system 1)
@@ -542,14 +561,14 @@ function(gp_resolved_file_type original_file file exepath dirs type_var)
     if(NOT is_system)
       get_filename_component(original_path "${original_lower}" PATH)
       get_filename_component(path "${lower}" PATH)
-      if("${original_path}" STREQUAL "${path}")
+      if(original_path STREQUAL path)
         set(is_local 1)
       else()
         string(LENGTH "${original_path}/" original_length)
         string(LENGTH "${lower}" path_length)
         if(${path_length} GREATER ${original_length})
           string(SUBSTRING "${lower}" 0 ${original_length} path)
-          if("${original_path}/" STREQUAL "${path}")
+          if("${original_path}/" STREQUAL path)
             set(is_embedded 1)
           endif()
         endif()
@@ -612,6 +631,11 @@ endfunction()
 function(get_prerequisites target prerequisites_var exclude_system recurse exepath dirs)
   set(verbose 0)
   set(eol_char "E")
+  if(ARGC GREATER 6)
+    set(rpaths "${ARGV6}")
+  else()
+    set(rpaths "")
+  endif()
 
   if(NOT IS_ABSOLUTE "${target}")
     message("warning: target '${target}' is not absolute...")
@@ -637,7 +661,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   # Try to choose the right tool by default. Caller can set gp_tool prior to
   # calling this function to force using a different tool.
   #
-  if("${gp_tool}" STREQUAL "")
+  if(NOT gp_tool)
     set(gp_tool "ldd")
 
     if(APPLE)
@@ -661,45 +685,31 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     return()
   endif()
 
-  set(gp_tool_known 0)
-
-  if("${gp_tool}" STREQUAL "ldd")
+  if(gp_tool STREQUAL "ldd")
     set(gp_cmd_args "")
     set(gp_regex "^[\t ]*[^\t ]+ => ([^\t\(]+) .*${eol_char}$")
     set(gp_regex_error "not found${eol_char}$")
     set(gp_regex_fallback "^[\t ]*([^\t ]+) => ([^\t ]+).*${eol_char}$")
     set(gp_regex_cmp_count 1)
-    set(gp_tool_known 1)
-  endif()
-
-  if("${gp_tool}" STREQUAL "otool")
+  elseif(gp_tool STREQUAL "otool")
     set(gp_cmd_args "-L")
     set(gp_regex "^\t([^\t]+) \\(compatibility version ([0-9]+.[0-9]+.[0-9]+), current version ([0-9]+.[0-9]+.[0-9]+)\\)${eol_char}$")
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 3)
-    set(gp_tool_known 1)
-  endif()
-
-  if("${gp_tool}" STREQUAL "dumpbin")
+  elseif(gp_tool STREQUAL "dumpbin")
     set(gp_cmd_args "/dependents")
     set(gp_regex "^    ([^ ].*[Dd][Ll][Ll])${eol_char}$")
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
-    set(gp_tool_known 1)
-  endif()
-
-  if("${gp_tool}" STREQUAL "objdump")
+  elseif(gp_tool STREQUAL "objdump")
     set(gp_cmd_args "-p")
     set(gp_regex "^\t*DLL Name: (.*\\.[Dd][Ll][Ll])${eol_char}$")
     set(gp_regex_error "")
     set(gp_regex_fallback "")
     set(gp_regex_cmp_count 1)
-    set(gp_tool_known 1)
-  endif()
-
-  if(NOT gp_tool_known)
+  else()
     message(STATUS "warning: gp_tool='${gp_tool}' is an unknown tool...")
     message(STATUS "CMake function get_prerequisites needs more code to handle '${gp_tool}'")
     message(STATUS "Valid gp_tool values are dumpbin, ldd, objdump and otool.")
@@ -707,7 +717,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   endif()
 
 
-  if("${gp_tool}" STREQUAL "dumpbin")
+  if(gp_tool STREQUAL "dumpbin")
     # When running dumpbin, it also needs the "Common7/IDE" directory in the
     # PATH. It will already be in the PATH if being run from a Visual Studio
     # command prompt. Add it to the PATH here in case we are running from a
@@ -722,7 +732,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
       set(gp_found_cmd_dlls_dir 0)
       file(TO_CMAKE_PATH "$ENV{PATH}" env_path)
       foreach(gp_env_path_element ${env_path})
-        if("${gp_env_path_element}" STREQUAL "${gp_cmd_dlls_dir}")
+        if(gp_env_path_element STREQUAL gp_cmd_dlls_dir)
           set(gp_found_cmd_dlls_dir 1)
         endif()
       endforeach()
@@ -736,7 +746,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   #
   # </setup-gp_tool-vars>
 
-  if("${gp_tool}" STREQUAL "ldd")
+  if(gp_tool STREQUAL "ldd")
     set(old_ld_env "$ENV{LD_LIBRARY_PATH}")
     set(new_ld_env "${exepath}")
     foreach(dir ${dirs})
@@ -758,7 +768,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     OUTPUT_VARIABLE gp_cmd_ov
     )
 
-  if("${gp_tool}" STREQUAL "ldd")
+  if(gp_tool STREQUAL "ldd")
     set(ENV{LD_LIBRARY_PATH} "${old_ld_env}")
   endif()
 
@@ -772,13 +782,13 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
 
   # Convert to a list of lines:
   #
-  string(REGEX REPLACE ";" "\\\\;" candidates "${gp_cmd_ov}")
-  string(REGEX REPLACE "\n" "${eol_char};" candidates "${candidates}")
+  string(REPLACE ";" "\\;" candidates "${gp_cmd_ov}")
+  string(REPLACE "\n" "${eol_char};" candidates "${candidates}")
 
   # check for install id and remove it from list, since otool -L can include a
   # reference to itself
   set(gp_install_id)
-  if("${gp_tool}" STREQUAL "otool")
+  if(gp_tool STREQUAL "otool")
     execute_process(
       COMMAND otool -D ${target}
       OUTPUT_VARIABLE gp_install_id_ov
@@ -828,15 +838,15 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
     #
     set(add_item 1)
 
-    if("${item}" STREQUAL "${gp_install_id}")
+    if(item STREQUAL gp_install_id)
       set(add_item 0)
     endif()
 
     if(add_item AND ${exclude_system})
       set(type "")
-      gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type)
+      gp_resolved_file_type("${target}" "${item}" "${exepath}" "${dirs}" type "${rpaths}")
 
-      if("${type}" STREQUAL "system")
+      if(type STREQUAL "system")
         set(add_item 0)
       endif()
     endif()
@@ -855,7 +865,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
         # that the analysis tools can simply accept it as input.
         #
         if(NOT list_length_before_append EQUAL list_length_after_append)
-          gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item)
+          gp_resolve_item("${target}" "${item}" "${exepath}" "${dirs}" resolved_item "${rpaths}")
           set(unseen_prereqs ${unseen_prereqs} "${resolved_item}")
         endif()
       endif()
@@ -874,7 +884,7 @@ function(get_prerequisites target prerequisites_var exclude_system recurse exepa
   if(${recurse})
     set(more_inputs ${unseen_prereqs})
     foreach(input ${more_inputs})
-      get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse} "${exepath}" "${dirs}")
+      get_prerequisites("${input}" ${prerequisites_var} ${exclude_system} ${recurse} "${exepath}" "${dirs}" "${rpaths}")
     endforeach()
   endif()
 
@@ -883,22 +893,22 @@ endfunction()
 
 
 function(list_prerequisites target)
-  if("${ARGV1}" STREQUAL "")
-    set(all 1)
-  else()
+  if(ARGC GREATER 1 AND NOT "${ARGV1}" STREQUAL "")
     set(all "${ARGV1}")
+  else()
+    set(all 1)
   endif()
 
-  if("${ARGV2}" STREQUAL "")
-    set(exclude_system 0)
-  else()
+  if(ARGC GREATER 2 AND NOT "${ARGV2}" STREQUAL "")
     set(exclude_system "${ARGV2}")
+  else()
+    set(exclude_system 0)
   endif()
 
-  if("${ARGV3}" STREQUAL "")
-    set(verbose 0)
-  else()
+  if(ARGC GREATER 3 AND NOT "${ARGV3}" STREQUAL "")
     set(verbose "${ARGV3}")
+  else()
+    set(verbose 0)
   endif()
 
   set(count 0)

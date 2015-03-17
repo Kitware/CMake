@@ -53,6 +53,21 @@ public:
 
   cmTypeMacro(cmFindPackageCommand, cmFindCommon);
 private:
+  class PathLabel : public cmFindCommon::PathLabel
+  {
+  protected:
+    PathLabel();
+  public:
+    PathLabel(const std::string& label) : cmFindCommon::PathLabel(label) { }
+    static PathLabel UserRegistry;
+    static PathLabel Builds;
+    static PathLabel SystemRegistry;
+  };
+
+  // Add additional search path labels and groups not present in the
+  // parent class
+  void AppendSearchPathGroups();
+
   void AppendSuccessInformation();
   void AppendToFoundProperty(bool found);
   void SetModuleVariables(const std::string& components);
@@ -69,20 +84,22 @@ private:
   void StoreVersionFound();
 
   void ComputePrefixes();
-  void AddPrefixesCMakeEnvironment();
-  void AddPrefixesCMakeVariable();
-  void AddPrefixesSystemEnvironment();
-  void AddPrefixesUserRegistry();
-  void AddPrefixesSystemRegistry();
-  void AddPrefixesBuilds();
-  void AddPrefixesCMakeSystemVariable();
-  void AddPrefixesUserGuess();
-  void AddPrefixesUserHints();
-  void LoadPackageRegistryDir(std::string const& dir);
+  void FillPrefixesCMakeEnvironment();
+  void FillPrefixesCMakeVariable();
+  void FillPrefixesSystemEnvironment();
+  void FillPrefixesUserRegistry();
+  void FillPrefixesSystemRegistry();
+  void FillPrefixesBuilds();
+  void FillPrefixesCMakeSystemVariable();
+  void FillPrefixesUserGuess();
+  void FillPrefixesUserHints();
+  void LoadPackageRegistryDir(std::string const& dir, cmSearchPath& outPaths);
   void LoadPackageRegistryWinUser();
   void LoadPackageRegistryWinSystem();
-  void LoadPackageRegistryWin(bool user, unsigned int view);
-  bool CheckPackageRegistryEntry(std::istream& is);
+  void LoadPackageRegistryWin(bool user, unsigned int view,
+                              cmSearchPath& outPaths);
+  bool CheckPackageRegistryEntry(const std::string& fname,
+                                 cmSearchPath& outPaths);
   bool SearchDirectory(std::string const& dir);
   bool CheckDirectory(std::string const& dir);
   bool FindConfigFile(std::string const& dir, std::string& file);

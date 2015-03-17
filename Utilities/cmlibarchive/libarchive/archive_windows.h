@@ -76,6 +76,7 @@
 
 #if defined(_MSC_VER)
 #pragma warning(push,1)
+#pragma warning(disable:4142)   /* benign redefinition of type */
 #pragma warning(disable:4761)   /* integral size mismatch in argument; conversion supplied */
 #endif
 #if defined(__BORLANDC__)
@@ -93,7 +94,7 @@
 
 /* Alias the Windows _function to the POSIX equivalent. */
 #define	close		_close
-#define	fcntl(fd, cmd, flg)	/* No operation. */		
+#define	fcntl(fd, cmd, flg)	/* No operation. */
 #ifndef fileno
 #define	fileno		_fileno
 #endif
@@ -113,13 +114,14 @@
 #define	lstat		__la_stat
 #define	open		__la_open
 #define	read		__la_read
-#if !defined(__BORLANDC__)
+#if !defined(__BORLANDC__) && !defined(__WATCOMC__)
 #define setmode		_setmode
 #endif
 #ifdef stat
 #undef stat
 #endif
 #define	stat(path,stref)		__la_stat(path,stref)
+#if !defined(__WATCOMC__)
 #if !defined(__BORLANDC__)
 #define	strdup		_strdup
 #endif
@@ -127,8 +129,11 @@
 #if !defined(__BORLANDC__)
 #define	umask		_umask
 #endif
+#endif
 #define	waitpid		__la_waitpid
 #define	write		__la_write
+
+#if !defined(__WATCOMC__)
 
 #ifndef O_RDONLY
 #define	O_RDONLY	_O_RDONLY
@@ -189,8 +194,6 @@
 #define	S_ISREG(m)	(((m) & S_IFMT) == S_IFREG)	/* regular file */
 #endif
 
-#if !defined(__WATCOMC__) 
-
 #define	S_ISLNK(m)  (((m) & S_IFMT) == S_IFLNK) /* Symbolic link */
 #define	S_ISSOCK(m) (((m) & S_IFMT) == S_IFSOCK) /* Socket */
 
@@ -210,7 +213,7 @@
 #define	_S_IXGRP        (_S_IXUSR >> 3) /* read permission, group */
 #define	_S_IWGRP        (_S_IWUSR >> 3) /* write permission, group */
 #define	_S_IRGRP        (_S_IRUSR >> 3) /* execute/search permission, group */
-#define	_S_IRWXO        (_S_IRWXG >> 3) 
+#define	_S_IRWXO        (_S_IRWXG >> 3)
 #define	_S_IXOTH        (_S_IXGRP >> 3) /* read permission, other */
 #define	_S_IWOTH        (_S_IWGRP >> 3) /* write permission, other */
 #define	_S_IROTH        (_S_IRGRP  >> 3) /* execute/search permission, other */

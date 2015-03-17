@@ -116,10 +116,10 @@ void cmCTestRunTest::CompressOutput()
   unsigned char *encoded_buffer
     = new unsigned char[static_cast<int>(outSize * 1.5)];
 
-  unsigned long rlen
+  size_t rlen
     = cmsysBase64_Encode(out, strm.total_out, encoded_buffer, 1);
 
-  for(unsigned long i = 0; i < rlen; i++)
+  for(size_t i = 0; i < rlen; i++)
     {
     this->CompressedOutput += encoded_buffer[i];
     }
@@ -155,7 +155,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     std::string> >::iterator passIt;
   bool forceFail = false;
   bool outputTestErrorsToConsole = false;
-  if ( this->TestProperties->RequiredRegularExpressions.size() > 0 )
+  if (!this->TestProperties->RequiredRegularExpressions.empty())
     {
     bool found = false;
     for ( passIt = this->TestProperties->RequiredRegularExpressions.begin();
@@ -184,7 +184,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
       }
     reason += "]";
     }
-  if ( this->TestProperties->ErrorRegularExpressions.size() > 0 )
+  if (!this->TestProperties->ErrorRegularExpressions.empty())
     {
     for ( passIt = this->TestProperties->ErrorRegularExpressions.begin();
           passIt != this->TestProperties->ErrorRegularExpressions.end();
@@ -280,12 +280,12 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
 
   // Set the working directory to the tests directory
   std::string oldpath = cmSystemTools::GetCurrentWorkingDirectory();
-  cmSystemTools::ChangeDirectory(this->TestProperties->Directory.c_str());
+  cmSystemTools::ChangeDirectory(this->TestProperties->Directory);
 
   this->DartProcessing();
 
   // restore working directory
-  cmSystemTools::ChangeDirectory(oldpath.c_str());
+  cmSystemTools::ChangeDirectory(oldpath);
 
 
   // if this is doing MemCheck then all the output needs to be put into
@@ -318,7 +318,7 @@ bool cmCTestRunTest::EndTest(size_t completed, size_t total, bool started)
     *this->TestHandler->LogFile
       << "----------------------------------------------------------"
       << std::endl;
-    if(this->TestResult.Reason.size())
+    if(!this->TestResult.Reason.empty())
       {
       *this->TestHandler->LogFile << reasonType << ":\n"
         << this->TestResult.Reason << "\n";
@@ -386,26 +386,14 @@ void cmCTestRunTest::MemCheckPostProcess()
     {
     return;
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
-             << ": process test output now: "
-             << this->TestProperties->Name << " "
-             << this->TestResult.Name << std::endl);
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index
+    << ": process test output now: "
+    << this->TestProperties->Name << " "
+    << this->TestResult.Name << std::endl,
+    this->TestHandler->GetQuiet());
   cmCTestMemCheckHandler * handler = static_cast<cmCTestMemCheckHandler*>
     (this->TestHandler);
-  switch ( handler->MemoryTesterStyle )
-    {
-    case cmCTestMemCheckHandler::VALGRIND:
-      handler->PostProcessValgrindTest(this->TestResult, this->Index);
-      break;
-    case cmCTestMemCheckHandler::PURIFY:
-      handler->PostProcessPurifyTest(this->TestResult, this->Index);
-      break;
-    case cmCTestMemCheckHandler::BOUNDS_CHECKER:
-      handler->PostProcessBoundsCheckerTest(this->TestResult, this->Index);
-      break;
-    default:
-      break;
-    }
+  handler->PostProcessTest(this->TestResult, this->Index);
 }
 
 //----------------------------------------------------------------------
@@ -674,8 +662,9 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
     {
     timeout = 0;
     }
-  cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ": "
-             << "Test timeout computed to be: " << timeout << "\n");
+  cmCTestOptionalLog(this->CTest, HANDLER_VERBOSE_OUTPUT, this->Index << ": "
+    << "Test timeout computed to be: " << timeout << "\n",
+    this->TestHandler->GetQuiet());
 
   this->TestProcess->SetTimeout(timeout);
 
@@ -683,7 +672,7 @@ bool cmCTestRunTest::ForkProcess(double testTimeOut, bool explicitTimeout,
   cmSystemTools::SaveRestoreEnvironment sre;
 #endif
 
-  if (environment && environment->size()>0)
+  if (environment && !environment->empty())
     {
     cmSystemTools::AppendEnv(*environment);
     }
@@ -707,7 +696,7 @@ void cmCTestRunTest::WriteLogOutputTop(size_t completed, size_t total)
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "Test");
     }
 
-  cmOStringStream indexStr;
+  std::ostringstream indexStr;
   indexStr << " #" << this->Index << ":";
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              std::setw(3 + getNumWidth(this->TestHandler->GetMaxIndex()))

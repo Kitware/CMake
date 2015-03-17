@@ -1152,7 +1152,7 @@ set_timefilter_pathname_mbs(struct archive_match *a, int timetype,
 {
 	/* NOTE: stat() on Windows cannot handle nano seconds. */
 	HANDLE h;
-	WIN32_FIND_DATA d;
+	WIN32_FIND_DATAA d;
 
 	if (path == NULL || *path == '\0') {
 		archive_set_error(&(a->archive), EINVAL, "pathname is empty");

@@ -1,7 +1,14 @@
 add_library
 -----------
 
+.. only:: html
+
+   .. contents::
+
 Add a library to the project using the specified source files.
+
+Normal Libraries
+^^^^^^^^^^^^^^^^
 
 ::
 
@@ -28,7 +35,7 @@ variable :variable:`BUILD_SHARED_LIBS` is ``ON``.  For ``SHARED`` and
 property is set to ``ON`` automatically.
 
 By default the library file will be created in the build tree directory
-corresponding to the source tree directory in which thecommand was
+corresponding to the source tree directory in which the command was
 invoked.  See documentation of the :prop_tgt:`ARCHIVE_OUTPUT_DIRECTORY`,
 :prop_tgt:`LIBRARY_OUTPUT_DIRECTORY`, and
 :prop_tgt:`RUNTIME_OUTPUT_DIRECTORY` target properties to change this
@@ -44,7 +51,8 @@ the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
 
---------------------------------------------------------------------------
+Imported Libraries
+^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -65,14 +73,15 @@ variant :prop_tgt:`IMPORTED_LOCATION_<CONFIG>`) which specifies the
 location of the main library file on disk.  See documentation of the
 ``IMPORTED_*`` and ``INTERFACE_*`` properties for more information.
 
---------------------------------------------------------------------------
+Object Libraries
+^^^^^^^^^^^^^^^^
 
 ::
 
   add_library(<name> OBJECT <src>...)
 
-Creates a special "object library" target.  An object library compiles
-source files but does not archive or link their object files into a
+Creates an :ref:`Object Library <Object Libraries>`.  An object library
+compiles source files but does not archive or link their object files into a
 library.  Instead other targets created by :command:`add_library` or
 :command:`add_executable` may reference the objects using an expression of the
 form ``$<TARGET_OBJECTS:objlib>`` as a source, where ``objlib`` is the
@@ -85,7 +94,8 @@ object library name.  For example:
 
 will include objlib's object files in a library and an executable
 along with those compiled from their own sources.  Object libraries
-may contain only sources (and headers) that compile to object files.
+may contain only sources that compile, header files, and other files
+that would not affect linking of a normal library (e.g. ``.txt``).
 They may contain custom commands generating such sources, but not
 ``PRE_BUILD``, ``PRE_LINK``, or ``POST_BUILD`` commands.  Object libraries
 cannot be imported, exported, installed, or linked.  Some native build
@@ -93,7 +103,8 @@ systems may not like targets that have only object files, so consider
 adding at least one real source file to any target that references
 ``$<TARGET_OBJECTS:objlib>``.
 
---------------------------------------------------------------------------
+Alias Libraries
+^^^^^^^^^^^^^^^
 
 ::
 
@@ -111,7 +122,8 @@ operand of :command:`set_property`, :command:`set_target_properties`,
 :command:`target_link_libraries` etc.  An ``ALIAS`` target may not be
 installed or exported.
 
---------------------------------------------------------------------------
+Interface Libraries
+^^^^^^^^^^^^^^^^^^^
 
 ::
 
@@ -121,13 +133,17 @@ Creates an :ref:`Interface Library <Interface Libraries>`.  An ``INTERFACE``
 library target does not directly create build output, though it may
 have properties set on it and it may be installed, exported and
 imported. Typically the ``INTERFACE_*`` properties are populated on
-the interface target using the :command:`set_property`,
-:command:`target_link_libraries(INTERFACE)`,
-:command:`target_include_directories(INTERFACE)`,
-:command:`target_compile_options(INTERFACE)`
-and :command:`target_compile_definitions(INTERFACE)` commands, and then it
-is used as an argument to :command:`target_link_libraries` like any other
-target.
+the interface target using the commands:
+
+* :command:`set_property`,
+* :command:`target_link_libraries(INTERFACE)`,
+* :command:`target_include_directories(INTERFACE)`,
+* :command:`target_compile_options(INTERFACE)`,
+* :command:`target_compile_definitions(INTERFACE)`, and
+* :command:`target_sources(INTERFACE)`,
+
+and then it is used as an argument to :command:`target_link_libraries`
+like any other target.
 
 An ``INTERFACE`` :ref:`Imported Target <Imported Targets>` may also be
 created with this signature.  An ``IMPORTED`` library target references a

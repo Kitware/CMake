@@ -139,7 +139,7 @@ bool cmCacheManager::ParseEntry(const std::string& entry,
 {
   // input line is:         key:type=value
   static cmsys::RegularExpression reg(
-    "^([^:]*):([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
+    "^([^=:]*):([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
   // input line is:         "key":type=value
   static cmsys::RegularExpression regQuoted(
     "^\"([^\"]*)\":([^=]*)=(.*[^\r\t ]|[\r\t ]*)[\r\t ]*$");
@@ -186,11 +186,7 @@ void cmCacheManager::CleanCMakeFiles(const std::string& path)
   cmsys::Glob globIt;
   globIt.FindFiles(glob);
   std::vector<std::string> files = globIt.GetFiles();
-  for(std::vector<std::string>::iterator i = files.begin();
-      i != files.end(); ++i)
-    {
-    cmSystemTools::RemoveFile(i->c_str());
-    }
+  std::for_each(files.begin(), files.end(), cmSystemTools::RemoveFile);
 }
 
 bool cmCacheManager::LoadCache(const std::string& path,
@@ -336,7 +332,7 @@ bool cmCacheManager::LoadCache(const std::string& path,
     cmSystemTools::ConvertToUnixSlashes(currentcwd);
     currentcwd += "/CMakeCache.txt";
     oldcwd += "/CMakeCache.txt";
-    if(!cmSystemTools::SameFile(oldcwd.c_str(), currentcwd.c_str()))
+    if(!cmSystemTools::SameFile(oldcwd, currentcwd))
       {
       std::string message =
         std::string("The current CMakeCache.txt directory ") +
@@ -586,13 +582,13 @@ bool cmCacheManager::DeleteCache(const std::string& path)
   cacheFile += "/CMakeCache.txt";
   if(cmSystemTools::FileExists(cacheFile.c_str()))
     {
-    cmSystemTools::RemoveFile(cacheFile.c_str());
+    cmSystemTools::RemoveFile(cacheFile);
     // now remove the files in the CMakeFiles directory
     // this cleans up language cache files
     cmakeFiles += cmake::GetCMakeFilesDirectory();
-    if(cmSystemTools::FileIsDirectory(cmakeFiles.c_str()))
+    if(cmSystemTools::FileIsDirectory(cmakeFiles))
       {
-      cmSystemTools::RemoveADirectory(cmakeFiles.c_str());
+      cmSystemTools::RemoveADirectory(cmakeFiles);
       }
     }
   return true;
@@ -609,7 +605,7 @@ void cmCacheManager::OutputKey(std::ostream& fout, std::string const& key)
 void cmCacheManager::OutputValue(std::ostream& fout, std::string const& value)
 {
   // if value has trailing space or tab, enclose it in single quotes
-  if (value.size() &&
+  if (!value.empty() &&
       (value[value.size() - 1] == ' ' ||
        value[value.size() - 1] == '\t'))
     {
@@ -751,11 +747,7 @@ void cmCacheManager::AddCacheEntry(const std::string& key,
     }
   e.SetProperty("HELPSTRING", helpString? helpString :
                 "(This variable does not exist and should not be used)");
-  if (this->Cache[key].Value == e.Value)
-    {
-    this->CMakeInstance->UnwatchUnusedCli(key);
-    }
-  this->Cache[key] = e;
+  this->CMakeInstance->UnwatchUnusedCli(key);
 }
 
 bool cmCacheManager::CacheIterator::IsAtEnd() const

@@ -2,7 +2,7 @@ cmake_minimum_required (VERSION 2.6)
 project(PrecompiledHeader C)
 
 # Make sure the proper compiler is in use.
-if(NOT MSVC AND NOT "${CMAKE_C_COMPILER_ID}" MATCHES "^(Intel)$")
+if(NOT MSVC AND NOT CMAKE_C_COMPILER_ID STREQUAL "Intel")
   message(FATAL_ERROR "The PrecompiledHeader test works only with MSVC or Intel")
 endif()
 

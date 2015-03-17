@@ -23,7 +23,7 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
-if("CMAKE_STD_NAMESPACE" MATCHES "^CMAKE_STD_NAMESPACE$")
+if(NOT DEFINED CMAKE_STD_NAMESPACE)
   message(STATUS "Check for STD namespace")
   try_compile(CMAKE_STD_NAMESPACE  ${CMAKE_BINARY_DIR}
     ${CMAKE_ROOT}/Modules/TestForSTDNamespace.cxx

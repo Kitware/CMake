@@ -37,6 +37,9 @@ ConfigureCommand: "@CMAKE_COMMAND@" "@PROJECT_SOURCE_DIR@"
 MakeCommand: @MAKECOMMAND@
 DefaultCTestConfigurationType: @DEFAULT_CTEST_CONFIGURATION_TYPE@
 
+# version control
+UpdateVersionOnly: @CTEST_UPDATE_VERSION_ONLY@
+
 # CVS options
 # Default is "-d -P -A"
 CVSCommand: @CVSCOMMAND@
@@ -71,6 +74,8 @@ Compiler: @CMAKE_CXX_COMPILER@
 PurifyCommand: @PURIFYCOMMAND@
 ValgrindCommand: @VALGRIND_COMMAND@
 ValgrindCommandOptions: @VALGRIND_COMMAND_OPTIONS@
+MemoryCheckType: @MEMORYCHECK_TYPE@
+MemoryCheckSanitizerOptions: @MEMORYCHECK_SANITIZER_OPTIONS@
 MemoryCheckCommand: @MEMORYCHECK_COMMAND@
 MemoryCheckCommandOptions: @MEMORYCHECK_COMMAND_OPTIONS@
 MemoryCheckSuppressionFile: @MEMORYCHECK_SUPPRESSIONS_FILE@

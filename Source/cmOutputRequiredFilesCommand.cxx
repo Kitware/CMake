@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmOutputRequiredFilesCommand.h"
 #include "cmMakeDepend.h"
+#include "cmAlgorithms.h"
 #include <cmsys/FStream.hxx>
 
 class cmLBDepend : public cmMakeDepend

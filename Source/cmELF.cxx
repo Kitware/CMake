@@ -124,7 +124,7 @@ public:
   virtual unsigned int GetNumberOfSections() const = 0;
   virtual unsigned int GetDynamicEntryCount() = 0;
   virtual unsigned long GetDynamicEntryPosition(int j) = 0;
-  virtual StringEntry const* GetDynamicSectionString(int tag) = 0;
+  virtual StringEntry const* GetDynamicSectionString(unsigned int tag) = 0;
   virtual void PrintInfo(std::ostream& os) const = 0;
 
   bool ReadBytes(unsigned long pos, unsigned long size, char* buf)
@@ -187,7 +187,7 @@ protected:
     }
 
   // Store string table entry states.
-  std::map<int, StringEntry> DynamicSectionStrings;
+  std::map<unsigned int, StringEntry> DynamicSectionStrings;
 };
 
 //----------------------------------------------------------------------------
@@ -198,6 +198,7 @@ struct cmELFTypes32
   typedef Elf32_Shdr ELF_Shdr;
   typedef Elf32_Dyn  ELF_Dyn;
   typedef Elf32_Half ELF_Half;
+  typedef cmIML_INT_uint32_t tagtype;
   static const char* GetName() { return "32-bit"; }
 };
 
@@ -208,6 +209,7 @@ struct cmELFTypes64
   typedef Elf64_Shdr ELF_Shdr;
   typedef Elf64_Dyn  ELF_Dyn;
   typedef Elf64_Half ELF_Half;
+  typedef cmIML_INT_uint64_t tagtype;
   static const char* GetName() { return "64-bit"; }
 };
 
@@ -222,6 +224,7 @@ public:
   typedef typename Types::ELF_Shdr ELF_Shdr;
   typedef typename Types::ELF_Dyn  ELF_Dyn;
   typedef typename Types::ELF_Half ELF_Half;
+  typedef typename Types::tagtype tagtype;
 
   // Construct with a stream and byte swap indicator.
   cmELFInternalImpl(cmELF* external,
@@ -239,7 +242,7 @@ public:
   virtual unsigned long GetDynamicEntryPosition(int j);
 
   // Lookup a string from the dynamic section with the given tag.
-  virtual StringEntry const* GetDynamicSectionString(int tag);
+  virtual StringEntry const* GetDynamicSectionString(unsigned int tag);
 
   // Print information about the ELF file.
   virtual void PrintInfo(std::ostream& os) const
@@ -529,7 +532,7 @@ cmELFInternalImpl<Types>
         break;
         }
 #endif
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Unknown ELF file type " << eti;
       this->SetErrorMessage(e.str().c_str());
       return;
@@ -624,10 +627,10 @@ unsigned long cmELFInternalImpl<Types>::GetDynamicEntryPosition(int j)
 //----------------------------------------------------------------------------
 template <class Types>
 cmELF::StringEntry const*
-cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
+cmELFInternalImpl<Types>::GetDynamicSectionString(unsigned int tag)
 {
   // Short-circuit if already checked.
-  std::map<int, StringEntry>::iterator dssi =
+  std::map<unsigned int, StringEntry>::iterator dssi =
     this->DynamicSectionStrings.find(tag);
   if(dssi != this->DynamicSectionStrings.end())
     {
@@ -665,7 +668,7 @@ cmELFInternalImpl<Types>::GetDynamicSectionString(int tag)
       di != this->DynamicSectionEntries.end(); ++di)
     {
     ELF_Dyn& dyn = *di;
-    if(dyn.d_tag == tag)
+    if(static_cast<tagtype>(dyn.d_tag) == static_cast<tagtype>(tag))
       {
       // We found the tag requested.
       // Make sure the position given is within the string section.

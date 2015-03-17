@@ -152,18 +152,7 @@ void cmIDEOptions::FlagMapUpdate(cmIDEFlagTable const* entry,
     }
   else if(entry->special & cmIDEFlagTable::SemicolonAppendable)
     {
-    std::map<std::string,std::string>::iterator itr;
-    itr = this->FlagMap.find(entry->IDEName);
-    if(itr != this->FlagMap.end())
-      {
-      // Append to old value (if present) with semicolons;
-      itr->second += ";";
-      itr->second += new_value;
-      }
-    else
-      {
-      this->FlagMap[entry->IDEName] = new_value;
-      }
+    this->FlagMap[entry->IDEName].push_back(new_value);
     }
   else
     {
@@ -200,18 +189,47 @@ void cmIDEOptions::AddFlag(const char* flag, const char* value)
 }
 
 //----------------------------------------------------------------------------
+void cmIDEOptions::AddFlag(const char* flag,
+                           std::vector<std::string> const& value)
+{
+  this->FlagMap[flag] = value;
+}
+
+//----------------------------------------------------------------------------
+void cmIDEOptions::AppendFlag(std::string const& flag,
+                              std::string const& value)
+{
+  this->FlagMap[flag].push_back(value);
+}
+
+//----------------------------------------------------------------------------
+void cmIDEOptions::AppendFlag(std::string const& flag,
+                              std::vector<std::string> const& value)
+{
+  FlagValue& fv = this->FlagMap[flag];
+  std::copy(value.begin(), value.end(), std::back_inserter(fv));
+}
+
+//----------------------------------------------------------------------------
 void cmIDEOptions::RemoveFlag(const char* flag)
 {
   this->FlagMap.erase(flag);
 }
 
 //----------------------------------------------------------------------------
+bool cmIDEOptions::HasFlag(std::string const& flag) const
+{
+  return this->FlagMap.find(flag) != this->FlagMap.end();
+}
+
+//----------------------------------------------------------------------------
 const char* cmIDEOptions::GetFlag(const char* flag)
 {
-  std::map<std::string, std::string>::iterator i = this->FlagMap.find(flag);
-  if(i != this->FlagMap.end())
+  // This method works only for single-valued flags!
+  std::map<std::string, FlagValue>::iterator i = this->FlagMap.find(flag);
+  if(i != this->FlagMap.end() && i->second.size() == 1)
     {
-    return i->second.c_str();
+    return i->second[0].c_str();
     }
   return 0;
 }

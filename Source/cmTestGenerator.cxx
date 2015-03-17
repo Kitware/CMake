@@ -70,7 +70,7 @@ void cmTestGenerator::GenerateScriptForConfig(std::ostream& os,
   this->TestGenerated = true;
 
   // Set up generator expression evaluation context.
-  cmGeneratorExpression ge(this->Test->GetBacktrace());
+  cmGeneratorExpression ge(&this->Test->GetBacktrace());
 
   // Start the test command.
   os << indent << "add_test(" << this->Test->GetName() << " ";

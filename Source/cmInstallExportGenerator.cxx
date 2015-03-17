@@ -32,10 +32,11 @@ cmInstallExportGenerator::cmInstallExportGenerator(
   const char* file_permissions,
   std::vector<std::string> const& configurations,
   const char* component,
+  MessageLevel message,
   const char* filename, const char* name_space,
   bool exportOld,
   cmMakefile* mf)
-  :cmInstallGenerator(destination, configurations, component)
+  :cmInstallGenerator(destination, configurations, component, message)
   ,ExportSet(exportSet)
   ,FilePermissions(file_permissions)
   ,FileName(filename)
@@ -120,7 +121,7 @@ void cmInstallExportGenerator::GenerateScript(std::ostream& os)
   // Skip empty sets.
   if(ExportSet->GetTargetExports()->empty())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "INSTALL(EXPORT) given unknown export \""
       << ExportSet->GetName() << "\"";
     cmSystemTools::Error(e.str().c_str());
@@ -184,7 +185,8 @@ cmInstallExportGenerator::GenerateScriptConfigs(std::ostream& os,
     files.push_back(i->second);
     std::string config_test = this->CreateConfigTest(i->first);
     os << indent << "if(" << config_test << ")\n";
-    this->AddInstallRule(os, cmInstallType_FILES, files, false,
+    this->AddInstallRule(os, this->Destination,
+                         cmInstallType_FILES, files, false,
                          this->FilePermissions.c_str(), 0, 0, 0,
                          indent.Next());
     os << indent << "endif()\n";
@@ -198,7 +200,7 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
 {
   // Remove old per-configuration export files if the main changes.
   std::string installedDir = "$ENV{DESTDIR}";
-  installedDir += this->GetInstallDestination();
+  installedDir += this->ConvertToAbsoluteDestination(this->Destination);
   installedDir += "/";
   std::string installedFile = installedDir;
   installedFile += this->FileName;
@@ -223,6 +225,7 @@ void cmInstallExportGenerator::GenerateScriptActions(std::ostream& os,
   // Install the main export file.
   std::vector<std::string> files;
   files.push_back(this->MainImportFile);
-  this->AddInstallRule(os, cmInstallType_FILES, files, false,
+  this->AddInstallRule(os, this->Destination,
+                       cmInstallType_FILES, files, false,
                        this->FilePermissions.c_str(), 0, 0, 0, indent);
 }

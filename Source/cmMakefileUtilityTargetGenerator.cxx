@@ -54,7 +54,7 @@ void cmMakefileUtilityTargetGenerator::WriteRuleFiles()
       << this->LocalGenerator->IncludeDirective << " " << root
       << this->Convert(this->ProgressFileNameFull,
                        cmLocalGenerator::HOME_OUTPUT,
-                       cmLocalGenerator::MAKEFILE)
+                       cmLocalGenerator::MAKERULE)
       << "\n\n";
     }
 

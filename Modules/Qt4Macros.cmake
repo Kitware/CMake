@@ -65,8 +65,8 @@ macro (QT4_MAKE_OUTPUT_FILE infile prefix ext outfile )
   else()
     file(RELATIVE_PATH rel ${CMAKE_CURRENT_SOURCE_DIR} ${infile})
   endif()
-  if(WIN32 AND rel MATCHES "^[a-zA-Z]:") # absolute path
-    string(REGEX REPLACE "^([a-zA-Z]):(.*)$" "\\1_\\2" rel "${rel}")
+  if(WIN32 AND rel MATCHES "^([a-zA-Z]):(.*)$") # absolute path
+    set(rel "${CMAKE_MATCH_1}_${CMAKE_MATCH_2}")
   endif()
   set(_outfile "${CMAKE_CURRENT_BINARY_DIR}/${rel}")
   string(REPLACE ".." "__" _outfile ${_outfile})
@@ -135,7 +135,9 @@ function (QT4_CREATE_MOC_COMMAND infile outfile moc_flags moc_options moc_target
     set(targetincludes)
     set(targetdefines)
   else()
-    file(WRITE ${_moc_parameters_file} "${_moc_parameters}\n")
+    set(CMAKE_CONFIGURABLE_FILE_CONTENT "${_moc_parameters}")
+    configure_file("${CMAKE_ROOT}/Modules/CMakeConfigurableFile.in"
+                   "${_moc_parameters_file}" @ONLY)
   endif()
 
   set(_moc_extra_parameters_file @${_moc_parameters_file})
@@ -156,7 +158,7 @@ macro (QT4_GENERATE_MOC infile outfile )
      set(_outfile "${CMAKE_CURRENT_BINARY_DIR}/${outfile}")
    endif()
 
-   if ("x${ARGV2}" STREQUAL "xTARGET")
+   if (${ARGC} GREATER 3 AND "x${ARGV2}" STREQUAL "xTARGET")
       set(moc_target ${ARGV3})
    endif()
    QT4_CREATE_MOC_COMMAND(${abs_infile} ${_outfile} "${moc_flags}" "" "${moc_target}")
@@ -230,7 +232,7 @@ macro (QT4_ADD_RESOURCES outfiles )
       # let's make a configured file and add it as a dependency so cmake is run
       # again when dependencies need to be recomputed.
       QT4_MAKE_OUTPUT_FILE("${infile}" "" "qrc.depends" out_depends)
-      configure_file("${infile}" "${out_depends}" COPY_ONLY)
+      configure_file("${infile}" "${out_depends}" COPYONLY)
     else()
       # The .qrc file does not exist (yet). Let's add a dependency and hope
       # that it will be generated later
@@ -327,7 +329,10 @@ endmacro()
 macro(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optionalBasename _optionalClassName)
   get_filename_component(_infile ${_xml_file} ABSOLUTE)
 
-  set(_optionalBasename "${ARGV4}")
+  unset(_optionalBasename)
+  if(${ARGC} GREATER 4)
+    set(_optionalBasename "${ARGV4}")
+  endif()
   if (_optionalBasename)
     set(_basename ${_optionalBasename} )
   else ()
@@ -335,7 +340,10 @@ macro(QT4_ADD_DBUS_ADAPTOR _sources _xml_file _include _parentClass) # _optional
     string(TOLOWER ${_basename} _basename)
   endif ()
 
-  set(_optionalClassName "${ARGV5}")
+  unset(_optionalClassName)
+  if(${ARGC} GREATER 5)
+    set(_optionalClassName "${ARGV5}")
+  endif()
   set(_header "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.h")
   set(_impl   "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.cpp")
   set(_moc    "${CMAKE_CURRENT_BINARY_DIR}/${_basename}.moc")

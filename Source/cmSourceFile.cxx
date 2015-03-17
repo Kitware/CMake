@@ -24,6 +24,8 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
   this->CustomCommand = 0;
   this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
   this->FindFullPathFailed = false;
+  this->IsUiFile = (".ui" ==
+          cmSystemTools::GetFilenameLastExtension(this->Location.GetName()));
 }
 
 //----------------------------------------------------------------------------
@@ -37,6 +39,8 @@ std::string const& cmSourceFile::GetExtension() const
 {
   return this->Extension;
 }
+
+const std::string cmSourceFile::propLANGUAGE = "LANGUAGE";
 
 //----------------------------------------------------------------------------
 void cmSourceFile::SetObjectLibrary(std::string const& objlib)
@@ -54,7 +58,7 @@ std::string cmSourceFile::GetObjectLibrary() const
 std::string cmSourceFile::GetLanguage()
 {
   // If the language was set explicitly by the user then use it.
-  if(const char* lang = this->GetProperty("LANGUAGE"))
+  if(const char* lang = this->GetProperty(propLANGUAGE))
     {
     return lang;
     }
@@ -91,7 +95,7 @@ std::string cmSourceFile::GetLanguage()
 std::string cmSourceFile::GetLanguage() const
 {
   // If the language was set explicitly by the user then use it.
-  if(const char* lang = this->GetProperty("LANGUAGE"))
+  if(const char* lang = this->GetProperty(propLANGUAGE))
     {
     return lang;
     }
@@ -175,7 +179,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
       tryPath += "/";
       }
     tryPath += this->Location.GetName();
-    tryPath = cmSystemTools::CollapseFullPath(tryPath.c_str(), *di);
+    tryPath = cmSystemTools::CollapseFullPath(tryPath, *di);
     if(this->TryFullPath(tryPath, ""))
       {
       return true;
@@ -198,7 +202,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
       }
     }
 
-  cmOStringStream e;
+  std::ostringstream e;
   std::string missing = this->Location.GetDirectory();
   if(!missing.empty())
     {
@@ -297,9 +301,7 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
   this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
 
-  std::string ext =
-          cmSystemTools::GetFilenameLastExtension(this->Location.GetName());
-  if (ext == ".ui")
+  if (this->IsUiFile)
     {
     cmMakefile const* mf = this->Location.GetMakefile();
     if (prop == "AUTOUIC_OPTIONS")

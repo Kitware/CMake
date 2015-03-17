@@ -26,15 +26,17 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
     set(BIN "${CMAKE_PLATFORM_INFO_DIR}/CMakeDetermineCompilerABI_${lang}.bin")
     set(CMAKE_FLAGS )
     if(DEFINED CMAKE_${lang}_VERBOSE_FLAG)
-      set(CMAKE_FLAGS "-DCMAKE_EXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
+      set(CMAKE_FLAGS "-DEXE_LINKER_FLAGS=${CMAKE_${lang}_VERBOSE_FLAG}")
+    endif()
+    if(NOT "x${CMAKE_${lang}_COMPILER_ID}" STREQUAL "xMSVC")
+      # Avoid adding our own platform standard libraries for compilers
+      # from which we might detect implicit link libraries.
+      list(APPEND CMAKE_FLAGS "-DCMAKE_${lang}_STANDARD_LIBRARIES=")
     endif()
     try_compile(CMAKE_${lang}_ABI_COMPILED
       ${CMAKE_BINARY_DIR} ${src}
-      CMAKE_FLAGS "${CMAKE_FLAGS}"
-                  "-DCMAKE_${lang}_STANDARD_LIBRARIES="
-                  # We need ignore these warnings because some platforms need
-                  # CMAKE_${lang}_STANDARD_LIBRARIES to link properly and we
-                  # don't care when we are just determining the ABI.
+      CMAKE_FLAGS ${CMAKE_FLAGS}
+                  # Ignore unused flags when we are just determining the ABI.
                   "--no-warn-unused-cli"
       OUTPUT_VARIABLE OUTPUT
       COPY_FILE "${BIN}"
@@ -50,13 +52,13 @@ function(CMAKE_DETERMINE_COMPILER_ABI lang src)
       message(STATUS "Detecting ${lang} compiler ABI info - done")
       file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Detecting ${lang} compiler ABI info compiled with the following output:\n${OUTPUT}\n\n")
-      file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 2 REGEX "INFO:[^[]*\\[")
+      file(STRINGS "${BIN}" ABI_STRINGS LIMIT_COUNT 2 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
       foreach(info ${ABI_STRINGS})
-        if("${info}" MATCHES ".*INFO:sizeof_dptr\\[0*([^]]*)\\].*")
-          string(REGEX REPLACE ".*INFO:sizeof_dptr\\[0*([^]]*)\\].*" "\\1" ABI_SIZEOF_DPTR "${info}")
+        if("${info}" MATCHES "INFO:sizeof_dptr\\[0*([^]]*)\\]")
+          set(ABI_SIZEOF_DPTR "${CMAKE_MATCH_1}")
         endif()
-        if("${info}" MATCHES ".*INFO:abi\\[([^]]*)\\].*")
-          string(REGEX REPLACE ".*INFO:abi\\[([^]]*)\\].*" "\\1" ABI_NAME "${info}")
+        if("${info}" MATCHES "INFO:abi\\[([^]]*)\\]")
+          set(ABI_NAME "${CMAKE_MATCH_1}")
         endif()
       endforeach()
 

@@ -12,15 +12,13 @@
 #include "cmListFileCache.h"
 
 #include "cmListFileLexer.h"
+#include "cmLocalGenerator.h"
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmVersion.h"
 
 #include <cmsys/RegularExpression.hxx>
 
-#ifdef __BORLANDC__
-# pragma warn -8060 /* possibly incorrect assignment */
-#endif
 
 //----------------------------------------------------------------------------
 struct cmListFileParser
@@ -70,7 +68,7 @@ bool cmListFileParser::ParseFile()
      bom != cmListFileLexer_BOM_UTF8)
     {
     cmListFileLexer_SetFileName(this->Lexer, 0, 0);
-    cmOStringStream m;
+    std::ostringstream m;
     m << "File\n  " << this->FileName << "\n"
       << "starts with a Byte-Order-Mark that is not UTF-8.";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
@@ -110,7 +108,7 @@ bool cmListFileParser::ParseFile()
         }
       else
         {
-        cmOStringStream error;
+        std::ostringstream error;
         error << "Error in cmake code at\n"
               << this->FileName << ":" << token->line << ":\n"
               << "Parse error.  Expected a newline, got "
@@ -122,7 +120,7 @@ bool cmListFileParser::ParseFile()
       }
     else
       {
-      cmOStringStream error;
+      std::ostringstream error;
       error << "Error in cmake code at\n"
             << this->FileName << ":" << token->line << ":\n"
             << "Parse error.  Expected a command name, got "
@@ -141,7 +139,8 @@ bool cmListFile::ParseFile(const char* filename,
                            bool topLevel,
                            cmMakefile *mf)
 {
-  if(!cmSystemTools::FileExists(filename))
+  if(!cmSystemTools::FileExists(filename) ||
+     cmSystemTools::FileIsDirectory(filename))
     {
     return false;
     }
@@ -269,7 +268,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
         token->type == cmListFileLexer_Token_Space) {}
   if(!token)
     {
-    cmOStringStream error;
+    std::ostringstream error;
     error << "Error in cmake code at\n" << this->FileName << ":"
           << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
           << "Parse error.  Function missing opening \"(\".";
@@ -278,7 +277,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     }
   if(token->type != cmListFileLexer_Token_ParenLeft)
     {
-    cmOStringStream error;
+    std::ostringstream error;
     error << "Error in cmake code at\n" << this->FileName << ":"
           << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
           << "Parse error.  Expected \"(\", got "
@@ -356,7 +355,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
     else
       {
       // Error.
-      cmOStringStream error;
+      std::ostringstream error;
       error << "Error in cmake code at\n" << this->FileName << ":"
             << cmListFileLexer_GetCurrentLine(this->Lexer) << ":\n"
             << "Parse error.  Function missing ending \")\".  "
@@ -368,7 +367,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
       }
     }
 
-  cmOStringStream error;
+  std::ostringstream error;
   error << "Error in cmake code at\n"
         << this->FileName << ":" << lastLine << ":\n"
         << "Parse error.  Function missing ending \")\".  "
@@ -390,7 +389,7 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     }
   bool isError = (this->Separation == SeparationError ||
                   delim == cmListFileArgument::Bracket);
-  cmOStringStream m;
+  std::ostringstream m;
   m << "Syntax " << (isError? "Error":"Warning") << " in cmake code at\n"
     << "  " << this->FileName << ":" << token->line << ":"
     << token->column << "\n"
@@ -406,6 +405,23 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     return true;
     }
 }
+
+//----------------------------------------------------------------------------
+void cmListFileBacktrace::MakeRelative()
+{
+  if (this->Relative)
+    {
+    return;
+    }
+  for (cmListFileBacktrace::iterator i = this->begin();
+       i != this->end(); ++i)
+    {
+    i->FilePath = this->LocalGenerator->Convert(i->FilePath,
+                                                cmLocalGenerator::HOME);
+    }
+  this->Relative = true;
+}
+
 
 //----------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)

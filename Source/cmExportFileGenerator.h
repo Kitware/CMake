@@ -95,9 +95,11 @@ protected:
                                  std::string const& suffix, cmTarget* target,
                                  ImportPropertyMap& properties,
                                  std::vector<std::string>& missingTargets);
+
+  template <typename T>
   void SetImportLinkProperty(std::string const& suffix,
                              cmTarget* target, const std::string& propName,
-                             std::vector<std::string> const& entries,
+                             std::vector<T> const& entries,
                              ImportPropertyMap& properties,
                              std::vector<std::string>& missingTargets);
 
@@ -133,6 +135,11 @@ protected:
   void GenerateInterfaceProperties(cmTarget const* target, std::ostream& os,
                                    const ImportPropertyMap &properties);
   void PopulateIncludeDirectoriesInterface(
+                      cmTargetExport *target,
+                      cmGeneratorExpression::PreprocessContext preprocessRule,
+                      ImportPropertyMap &properties,
+                      std::vector<std::string> &missingTargets);
+  void PopulateSourcesInterface(
                       cmTargetExport *target,
                       cmGeneratorExpression::PreprocessContext preprocessRule,
                       ImportPropertyMap &properties,

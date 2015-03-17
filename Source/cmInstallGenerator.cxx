@@ -11,16 +11,19 @@
 ============================================================================*/
 #include "cmInstallGenerator.h"
 
+#include "cmMakefile.h"
 #include "cmSystemTools.h"
 
 //----------------------------------------------------------------------------
 cmInstallGenerator
 ::cmInstallGenerator(const char* destination,
                      std::vector<std::string> const& configurations,
-                     const char* component):
+                     const char* component,
+                     MessageLevel message):
   cmScriptGenerator("CMAKE_INSTALL_CONFIG_NAME", configurations),
   Destination(destination? destination:""),
-  Component(component? component:"")
+  Component(component? component:""),
+  Message(message)
 {
 }
 
@@ -34,6 +37,7 @@ cmInstallGenerator
 void cmInstallGenerator
 ::AddInstallRule(
                  std::ostream& os,
+                 std::string const& dest,
                  cmInstallType type,
                  std::vector<std::string> const& files,
                  bool optional /* = false */,
@@ -57,7 +61,6 @@ void cmInstallGenerator
     case cmInstallType_FILES:          stype = "FILE"; break;
     }
   os << indent;
-  std::string dest = this->GetInstallDestination();
   if (cmSystemTools::FileIsFullPath(dest.c_str()))
      {
      os << "list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES\n";
@@ -91,10 +94,18 @@ void cmInstallGenerator
         << "${CMAKE_ABSOLUTE_DESTINATION_FILES}\")\n";
      os << indent << "endif()\n";
      }
-  os << "file(INSTALL DESTINATION \"" << dest << "\" TYPE " << stype;
+  std::string absDest = this->ConvertToAbsoluteDestination(dest);
+  os << "file(INSTALL DESTINATION \"" << absDest << "\" TYPE " << stype;
   if(optional)
     {
     os << " OPTIONAL";
+    }
+  switch(this->Message)
+    {
+    case MessageDefault: break;
+    case MessageAlways: os << " MESSAGE_ALWAYS"; break;
+    case MessageLazy:   os << " MESSAGE_LAZY"; break;
+    case MessageNever:  os << " MESSAGE_NEVER"; break;
     }
   if(permissions_file && *permissions_file)
     {
@@ -169,14 +180,39 @@ bool cmInstallGenerator::InstallsForConfig(const std::string& config)
 }
 
 //----------------------------------------------------------------------------
-std::string cmInstallGenerator::GetInstallDestination() const
+std::string
+cmInstallGenerator::ConvertToAbsoluteDestination(std::string const& dest) const
 {
   std::string result;
-  if(!this->Destination.empty() &&
-     !cmSystemTools::FileIsFullPath(this->Destination.c_str()))
+  if(!dest.empty() &&
+     !cmSystemTools::FileIsFullPath(dest.c_str()))
     {
     result = "${CMAKE_INSTALL_PREFIX}/";
     }
-  result += this->Destination;
+  result += dest;
   return result;
+}
+
+//----------------------------------------------------------------------------
+cmInstallGenerator::MessageLevel
+cmInstallGenerator::SelectMessageLevel(cmMakefile* mf, bool never)
+{
+  if(never)
+    {
+    return MessageNever;
+    }
+  std::string m = mf->GetSafeDefinition("CMAKE_INSTALL_MESSAGE");
+  if(m == "ALWAYS")
+    {
+    return MessageAlways;
+    }
+  if(m == "LAZY")
+    {
+    return MessageLazy;
+    }
+  if(m == "NEVER")
+    {
+    return MessageNever;
+    }
+  return MessageDefault;
 }

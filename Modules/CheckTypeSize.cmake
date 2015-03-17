@@ -19,6 +19,9 @@
 #    "0"    = type has arch-dependent size (see below)
 #    ""     = type does not exist
 #
+# Both ``HAVE_${VARIABLE}`` and ``${VARIABLE}`` will be created as internal
+# cache variables.
+#
 # Furthermore, the variable "${VARIABLE}_CODE" holds C preprocessor code
 # to define the macro "${VARIABLE}" to the size of the type, or leave
 # the macro undefined if the type does not exist.
@@ -79,7 +82,7 @@ include(CheckIncludeFile)
 include(CheckIncludeFileCXX)
 
 cmake_policy(PUSH)
-cmake_minimum_required(VERSION 2.6 FATAL_ERROR)
+cmake_policy(VERSION 3.0)
 
 get_filename_component(__check_type_size_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
@@ -142,7 +145,7 @@ function(__check_type_size_impl type var map builtin language)
     foreach(info ${strings})
       if("${info}" MATCHES "${regex_size}")
         # Get the type size.
-        string(REGEX REPLACE "${regex_size}" "\\1" size "${info}")
+        set(size "${CMAKE_MATCH_1}")
         if(first)
           set(${var} ${size})
         elseif(NOT "${size}" STREQUAL "${${var}}")

@@ -29,8 +29,8 @@ endif()
 
 # Verify that the implementation files are named correctly.
 foreach(lib pcStatic pcShared)
-  file(STRINGS "${${lib}_file}" info LIMIT_COUNT 1 REGEX "INFO:[^[]*\\[")
-  if(NOT "${info}" MATCHES ".*INFO:symbol\\[${lib}\\].*")
+  file(STRINGS "${${lib}_file}" info LIMIT_COUNT 1 REGEX "INFO:[A-Za-z0-9_]+\\[[^]]*\\]")
+  if(NOT "${info}" MATCHES "INFO:symbol\\[${lib}\\]")
     message(SEND_ERROR "No INFO:symbol[${lib}] found in:\n  ${${lib}_file}")
   endif()
 endforeach()

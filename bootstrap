@@ -72,6 +72,7 @@ cmake_bootstrap_qt_gui=""
 cmake_bootstrap_qt_qmake=""
 cmake_sphinx_man=""
 cmake_sphinx_html=""
+cmake_sphinx_qthelp=""
 cmake_sphinx_build=""
 
 # Determine whether this is a Cygwin environment.
@@ -122,17 +123,32 @@ else
   cmake_system_openvms=false
 fi
 
+# Determine whether this is HP-UX
+if echo "${cmake_system}" | grep HP-UX >/dev/null 2>&1; then
+  cmake_system_hpux=true
+else
+  cmake_system_hpux=false
+fi
+
 # Determine whether this is Linux
 if echo "${cmake_system}" | grep Linux >/dev/null 2>&1; then
   cmake_system_linux=true
-  # find out if it is a HP PA-RISC machine
-  if uname -m | grep parisc >/dev/null 2>&1; then
-    cmake_machine_parisc=true
-  else
-    cmake_machine_parisc=false
-  fi
 else
   cmake_system_linux=false
+ fi
+
+# Determine whether this is a PA-RISC machine
+# This only works for Linux or HP-UX, not other PA-RISC OSs (BSD maybe?). Also
+# may falsely detect parisc on HP-UX m68k
+cmake_machine_parisc=false
+if ${cmake_system_linux}; then
+  if uname -m | grep parisc >/dev/null 2>&1; then
+    cmake_machine_parisc=true
+  fi
+elif ${cmake_system_hpux}; then
+  if uname -m | grep ia64 >/dev/null 2>&1; then : ; else
+    cmake_machine_parisc=true
+  fi
 fi
 
 # Choose the generator to use for bootstrapping.
@@ -225,13 +241,13 @@ CMAKE_UNUSED_SOURCES="\
 "
 
 CMAKE_CXX_SOURCES="\
-  cmStandardIncludes \
   cmake  \
   cmakemain \
   cmcmd  \
   cmCommandArgumentLexer \
   cmCommandArgumentParser \
   cmCommandArgumentParserHelper \
+  cmCPackPropertiesGenerator \
   cmDefinitions \
   cmDepends \
   cmDependsC \
@@ -251,13 +267,16 @@ CMAKE_CXX_SOURCES="\
   cmInstallDirectoryGenerator \
   cmGeneratedFileStream \
   cmGeneratorTarget \
+  cmGeneratorExpressionContext \
   cmGeneratorExpressionDAGChecker \
   cmGeneratorExpressionEvaluator \
   cmGeneratorExpressionLexer \
+  cmGeneratorExpressionNode \
   cmGeneratorExpressionParser \
   cmGeneratorExpression \
   cmGlobalGenerator \
   cmLocalGenerator \
+  cmInstalledFile \
   cmInstallGenerator \
   cmInstallExportGenerator \
   cmInstallFilesGenerator \
@@ -317,13 +336,15 @@ if ${cmake_system_mingw}; then
     EncodingC \
     ProcessWin32 \
     String \
-    System"
+    System \
+    Terminal"
 else
   KWSYS_C_SOURCES="\
     EncodingC \
     ProcessUNIX \
     String \
-    System"
+    System \
+    Terminal"
 fi
 
 KWSYS_CXX_SOURCES="\
@@ -346,7 +367,8 @@ KWSYS_FILES="\
   String.h \
   String.hxx \
   System.h \
-  SystemTools.hxx"
+  SystemTools.hxx \
+  Terminal.h"
 
 KWSYS_IOS_FILES="
   fstream \
@@ -381,6 +403,8 @@ Configuration:
   --no-system-curl        use cmake-provided curl library (default)
   --system-expat          use system-installed expat library
   --no-system-expat       use cmake-provided expat library (default)
+  --system-jsoncpp        use system-installed jsoncpp library
+  --no-system-jsoncpp     use cmake-provided jsoncpp library (default)
   --system-zlib           use system-installed zlib library
   --no-system-zlib        use cmake-provided zlib library (default)
   --system-bzip2          use system-installed bzip2 library
@@ -394,6 +418,7 @@ Configuration:
 
   --sphinx-man            build man pages with Sphinx
   --sphinx-html           build html help with Sphinx
+  --sphinx-qthelp         build qch help with Sphinx
   --sphinx-build=<sb>     use <sb> as the sphinx-build executable
 
 Directory and file names:
@@ -619,10 +644,10 @@ while test $# != 0; do
   --init=*) cmake_init_file=`cmake_arg "$1"` ;;
   --system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=1" ;;
   --no-system-libs) cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARIES=0" ;;
-  --system-bzip2|--system-curl|--system-expat|--system-libarchive|--system-zlib)
+  --system-bzip2|--system-curl|--system-expat|--system-jsoncpp|--system-libarchive|--system-zlib)
     lib=`cmake_arg "$1" "--system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=1" ;;
-  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-libarchive|--no-system-zlib)
+  --no-system-bzip2|--no-system-curl|--no-system-expat|--no-system-jsoncpp|--no-system-libarchive|--no-system-zlib)
     lib=`cmake_arg "$1" "--no-system-"`
     cmake_bootstrap_system_libs="${cmake_bootstrap_system_libs} -DCMAKE_USE_SYSTEM_LIBRARY_`cmake_toupper $lib`=0" ;;
   --qt-gui) cmake_bootstrap_qt_gui="1" ;;
@@ -630,6 +655,7 @@ while test $# != 0; do
   --qt-qmake=*) cmake_bootstrap_qt_qmake=`cmake_arg "$1"` ;;
   --sphinx-man) cmake_sphinx_man="1" ;;
   --sphinx-html) cmake_sphinx_html="1" ;;
+  --sphinx-qthelp) cmake_sphinx_qthelp="1" ;;
   --sphinx-build=*) cmake_sphinx_build=`cmake_arg "$1"` ;;
   --help) cmake_usage ;;
   --version) cmake_version_display ; exit 2 ;;
@@ -742,11 +768,13 @@ if ${cmake_system_haiku}; then
   cmake_ld_flags="${LDFLAGS} -lroot -lbe"
 fi
 
-if ${cmake_system_linux}; then
-  # avoid binutils problem with large binaries, e.g. when building CMake in debug mode
-  # See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=50230
-  if ${cmake_machine_parisc}; then
-    cmake_ld_flags="${LDFLAGS} -Wl,--unique=.text._*"
+# Workaround for short jump tables on PA-RISC
+if ${cmake_machine_parisc}; then
+  if ${cmake_c_compiler_is_gnu}; then
+    cmake_c_flags="${CFLAGS} -mlong-calls"
+  fi
+  if ${cmake_cxx_compiler_is_gnu}; then
+    cmake_cxx_flags="${CXXFLAGS} -mlong-calls"
   fi
 fi
 
@@ -1135,6 +1163,35 @@ if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
   cmake_test_flags=
 fi
 
+
+if [ "x${cmake_cxx_compiler_is_gnu}" != "x1" ]; then
+  # Are we SolarisStudio?
+
+  TMPFILE=`cmake_tmp_file`
+  echo '
+  #if defined(__SUNPRO_CC)
+  #include <iostream>
+  int main() { std::cout << "This is SolarisStudio" << std::endl; return 0;}
+  #endif
+  ' > ${TMPFILE}.cxx
+  cmake_cxx_compiler_is_solarisstudio=0
+  if cmake_try_run "${cmake_cxx_compiler}" \
+    "${cmake_cxx_flags} " "${TMPFILE}.cxx" >> cmake_bootstrap.log 2>&1; then
+    cmake_cxx_compiler_is_solarisstudio=1
+  fi
+  if [ "x${cmake_cxx_compiler_is_solarisstudio}" = "x1" ]; then
+    echo "${cmake_cxx_compiler} is SolarisStudio compiler"
+  else
+    echo "${cmake_cxx_compiler} is not SolarisStudio compiler"
+  fi
+  rm -f "${TMPFILE}.cxx"
+
+  if [ "x${cmake_cxx_compiler_is_solarisstudio}" = "x1" ]; then
+    cmake_cxx_flags="${cmake_cxx_flags} -library=stlport4"
+  fi
+fi
+
+
 # Test for kwsys features
 KWSYS_NAME_IS_KWSYS=0
 KWSYS_BUILD_SHARED=0
@@ -1443,41 +1500,14 @@ cmake_compiler_settings_comment="/*
 
 cmake_report cmConfigure.h${_tmp} "${cmake_compiler_settings_comment}"
 
-if [ "x$KWSYS_STL_HAVE_STD" = "x1" ]; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_STD_NAMESPACE */"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_STD_NAMESPACE 1"
-fi
-
-if [ "x$KWSYS_IOS_USE_ANSI" = "x1" ]; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_STREAM_HEADERS */"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_STREAM_HEADERS 1"
-fi
-
-if [ "x$KWSYS_IOS_USE_SSTREAM" = "x1" ]; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_STRING_STREAM */"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_STRING_STREAM 1"
-fi
-
-# Test for ansi FOR scope
-if cmake_try_run "${cmake_cxx_compiler}" \
-  "${cmake_cxx_flags}" \
-  "${cmake_source_dir}/Modules/TestForAnsiForScope.cxx" >> cmake_bootstrap.log 2>&1; then
-  cmake_report cmConfigure.h${_tmp} "/* #undef CMAKE_NO_ANSI_FOR_SCOPE */"
-  echo "${cmake_cxx_compiler} has ANSI for scoping"
-else
-  cmake_report cmConfigure.h${_tmp} "#define CMAKE_NO_ANSI_FOR_SCOPE 1"
-  echo "${cmake_cxx_compiler} does not have ANSI for scoping"
-fi
-
 # When bootstrapping on MinGW with MSYS we must convert the source
 # directory to a windows path.
 if ${cmake_system_mingw}; then
-    cmake_root_dir=`cd "${cmake_source_dir}"; pwd -W`
+    CMAKE_BOOTSTRAP_SOURCE_DIR=`cd "${cmake_source_dir}"; pwd -W`
+    CMAKE_BOOTSTRAP_BINARY_DIR=`cd "${cmake_binary_dir}"; pwd -W`
 else
-    cmake_root_dir="${cmake_source_dir}"
+    CMAKE_BOOTSTRAP_SOURCE_DIR="${cmake_source_dir}"
+    CMAKE_BOOTSTRAP_BINARY_DIR="${cmake_binary_dir}"
 fi
 
 # Write CMake version
@@ -1485,7 +1515,8 @@ cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_MAJOR ${cmake_versi
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_MINOR ${cmake_version_minor}"
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION_PATCH ${cmake_version_patch}"
 cmake_report cmVersionConfig.h${_tmp} "#define CMake_VERSION \"${cmake_version}\""
-cmake_report cmConfigure.h${_tmp} "#define CMAKE_ROOT_DIR \"${cmake_root_dir}\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_SOURCE_DIR \"${CMAKE_BOOTSTRAP_SOURCE_DIR}\""
+cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP_BINARY_DIR \"${CMAKE_BOOTSTRAP_BINARY_DIR}\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_DATA_DIR \"/bootstrap-not-insalled\""
 cmake_report cmConfigure.h${_tmp} "#define CMAKE_BOOTSTRAP"
 
@@ -1638,6 +1669,11 @@ fi
 if [ "x${cmake_sphinx_html}" != "x" ]; then
   echo '
 set (SPHINX_HTML "'"${cmake_sphinx_html}"'" CACHE FILEPATH "Build html help with Sphinx" FORCE)
+' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
+fi
+if [ "x${cmake_sphinx_qthelp}" != "x" ]; then
+  echo '
+set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE FILEPATH "Build qch help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_build}" != "x" ]; then

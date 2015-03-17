@@ -36,7 +36,7 @@ public:
     if(p[0] == '\0')
       {
       return new cmGlobalVisualStudio8Generator(
-        name, "", "");
+        name, "");
       }
 
     if(p[0] != ' ')
@@ -49,7 +49,7 @@ public:
     if(!strcmp(p, "Win64"))
       {
       return new cmGlobalVisualStudio8Generator(
-        name, "x64", "CMAKE_FORCE_WIN64");
+        name, "x64");
       }
 
     cmVisualStudioWCEPlatformParser parser(p);
@@ -60,7 +60,7 @@ public:
       }
 
     cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
-      name, p, "");
+      name, p);
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -93,17 +93,11 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
-  const std::string& name, const std::string& platformName,
-  const std::string& additionalPlatformDefinition)
+  const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio71Generator(platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
-
-  if (!additionalPlatformDefinition.empty())
-    {
-    this->AdditionalPlatformDefinition = additionalPlatformDefinition;
-    }
 }
 
 //----------------------------------------------------------------------------
@@ -132,22 +126,51 @@ cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
 {
   cmLocalVisualStudio7Generator *lg =
     new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS8);
-  lg->SetPlatformName(this->GetPlatformName());
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;
 }
 
 //----------------------------------------------------------------------------
+void cmGlobalVisualStudio8Generator
+::EnableLanguage(std::vector<std::string>const &  lang,
+                 cmMakefile *mf, bool optional)
+{
+  for(std::vector<std::string>::const_iterator it = lang.begin();
+      it != lang.end(); ++it)
+    {
+    if(*it == "ASM_MASM")
+      {
+      this->MasmEnabled = true;
+      }
+    }
+  this->AddPlatformDefinitions(mf);
+  cmGlobalVisualStudio7Generator::EnableLanguage(lang, mf, optional);
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator::AddPlatformDefinitions(cmMakefile* mf)
 {
-  cmGlobalVisualStudio71Generator::AddPlatformDefinitions(mf);
-
   if(this->TargetsWindowsCE())
   {
     mf->AddDefinition("CMAKE_VS_WINCE_VERSION",
       this->WindowsCEVersion.c_str());
   }
+}
+
+//----------------------------------------------------------------------------
+bool cmGlobalVisualStudio8Generator::SetGeneratorPlatform(std::string const& p,
+                                                          cmMakefile* mf)
+{
+  if(this->DefaultPlatformName == "Win32")
+    {
+    this->GeneratorPlatform = p;
+    return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform("", mf);
+    }
+  else
+    {
+    return this->cmGlobalVisualStudio7Generator::SetGeneratorPlatform(p, mf);
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -318,9 +341,10 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // overwritten by the CreateVCProjBuildRule.
   // (this could be avoided with per-target source files)
   std::string no_main_dependency = "";
+  std::vector<std::string> no_byproducts;
   if(cmSourceFile* file =
      mf->AddCustomCommandToOutput(
-       stamps, listFiles,
+       stamps, no_byproducts, listFiles,
        no_main_dependency, commandLines, "Checking Build System",
        no_working_directory, true))
     {
@@ -341,7 +365,7 @@ void cmGlobalVisualStudio8Generator::Generate()
   if(this->AddCheckTarget())
     {
     // All targets depend on the build-system check target.
-    for(std::map<std::string,cmTarget *>::const_iterator
+    for(TargetMap::const_iterator
           ti = this->TotalTargets.begin();
         ti != this->TotalTargets.end(); ++ti)
       {
@@ -398,9 +422,7 @@ cmGlobalVisualStudio8Generator
                platformMapping : this->GetPlatformName())
            << "\n";
       }
-    bool needsDeploy = (type == cmTarget::EXECUTABLE ||
-                        type == cmTarget::SHARED_LIBRARY);
-    if(this->TargetsWindowsCE() && needsDeploy)
+    if(this->NeedsDeploy(type))
       {
       fout << "\t\t{" << guid << "}." << *i
            << "|" << this->GetPlatformName() << ".Deploy.0 = " << *i << "|"
@@ -409,6 +431,15 @@ cmGlobalVisualStudio8Generator
            << "\n";
       }
     }
+}
+
+//----------------------------------------------------------------------------
+bool
+cmGlobalVisualStudio8Generator::NeedsDeploy(cmTarget::TargetType type) const
+{
+  bool needsDeploy = (type == cmTarget::EXECUTABLE ||
+                      type == cmTarget::SHARED_LIBRARY);
+  return this->TargetsWindowsCE() && needsDeploy;
 }
 
 //----------------------------------------------------------------------------

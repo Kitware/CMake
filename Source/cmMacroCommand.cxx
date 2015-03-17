@@ -12,6 +12,7 @@
 #include "cmMacroCommand.h"
 
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 // define the class for macro commands
 class cmMacroHelperCommand : public cmCommand
@@ -84,10 +85,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
   std::vector<std::string> expandedArgs;
   this->Makefile->ExpandArguments(args, expandedArgs);
 
-  std::string tmps;
-  cmListFileArgument arg;
-  std::string variable;
-
   // make sure the number of arguments passed is at least the number
   // required by the signature
   if (expandedArgs.size() < this->Args.size() - 1)
@@ -107,16 +104,29 @@ bool cmMacroHelperCommand::InvokeInitialPass
   cmMakefile::PolicyPushPop polScope(this->Makefile, true, this->Policies);
 
   // set the value of argc
-  cmOStringStream argcDefStream;
+  std::ostringstream argcDefStream;
   argcDefStream << expandedArgs.size();
   std::string argcDef = argcDefStream.str();
 
-  // declare varuiables for ARGV ARGN but do not compute until needed
-  std::string argvDef;
-  std::string argnDef;
-  bool argnDefInitialized = false;
-  bool argvDefInitialized = false;
-  if( this->Functions.size())
+  std::vector<std::string>::const_iterator eit
+      = expandedArgs.begin() + (this->Args.size() - 1);
+  std::string expandedArgn = cmJoin(cmRange(eit, expandedArgs.end()), ";");
+  std::string expandedArgv = cmJoin(expandedArgs, ";");
+  std::vector<std::string> variables;
+  variables.reserve(this->Args.size() - 1);
+  for (unsigned int j = 1; j < this->Args.size(); ++j)
+    {
+    variables.push_back("${" + this->Args[j] + "}");
+    }
+  std::vector<std::string> argVs;
+  argVs.reserve(expandedArgs.size());
+  char argvName[60];
+  for (unsigned int j = 0; j < expandedArgs.size(); ++j)
+    {
+    sprintf(argvName,"${ARGV%i}",j);
+    argVs.push_back(argvName);
+    }
+  if(!this->Functions.empty())
     {
     this->FilePath = this->Functions[0].FilePath;
     }
@@ -140,81 +150,35 @@ bool cmMacroHelperCommand::InvokeInitialPass
       // Set the FilePath on the arguments to match the function since it is
       // not stored and the original values may be freed
       k->FilePath = this->FilePath.c_str();
-      if(k->Delim == cmListFileArgument::Bracket)
+
+      cmListFileArgument arg;
+      arg.Value = k->Value;
+      if(k->Delim != cmListFileArgument::Bracket)
         {
-        arg.Value = k->Value;
-        }
-      else
-        {
-        tmps = k->Value;
         // replace formal arguments
-        for (unsigned int j = 1; j < this->Args.size(); ++j)
+        for (unsigned int j = 0; j < variables.size(); ++j)
           {
-          variable = "${";
-          variable += this->Args[j];
-          variable += "}";
-          cmSystemTools::ReplaceString(tmps, variable.c_str(),
-                                       expandedArgs[j-1].c_str());
+          cmSystemTools::ReplaceString(arg.Value, variables[j].c_str(),
+                                       expandedArgs[j].c_str());
           }
         // replace argc
-        cmSystemTools::ReplaceString(tmps, "${ARGC}",argcDef.c_str());
+        cmSystemTools::ReplaceString(arg.Value, "${ARGC}",argcDef.c_str());
 
-        // repleace ARGN
-        if (tmps.find("${ARGN}") != std::string::npos)
-          {
-          if (!argnDefInitialized)
-            {
-            std::vector<std::string>::const_iterator eit;
-            std::vector<std::string>::size_type cnt = 0;
-            for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
-              {
-              if ( cnt >= this->Args.size()-1 )
-                {
-                if ( argnDef.size() > 0 )
-                  {
-                  argnDef += ";";
-                  }
-                argnDef += *eit;
-                }
-              cnt ++;
-              }
-            argnDefInitialized = true;
-            }
-          cmSystemTools::ReplaceString(tmps, "${ARGN}", argnDef.c_str());
-          }
+        cmSystemTools::ReplaceString(arg.Value, "${ARGN}",
+                                     expandedArgn.c_str());
+        cmSystemTools::ReplaceString(arg.Value, "${ARGV}",
+                                     expandedArgv.c_str());
 
         // if the current argument of the current function has ${ARGV in it
         // then try replacing ARGV values
-        if (tmps.find("${ARGV") != std::string::npos)
+        if (arg.Value.find("${ARGV") != std::string::npos)
           {
-          char argvName[60];
-
-          // repleace ARGV, compute it only once
-          if (!argvDefInitialized)
-            {
-            std::vector<std::string>::const_iterator eit;
-            for(eit = expandedArgs.begin(); eit != expandedArgs.end(); ++eit)
-              {
-              if ( argvDef.size() > 0 )
-                {
-                argvDef += ";";
-                }
-              argvDef += *eit;
-              }
-            argvDefInitialized = true;
-            }
-          cmSystemTools::ReplaceString(tmps, "${ARGV}", argvDef.c_str());
-
-          // also replace the ARGV1 ARGV2 ... etc
           for (unsigned int t = 0; t < expandedArgs.size(); ++t)
             {
-            sprintf(argvName,"${ARGV%i}",t);
-            cmSystemTools::ReplaceString(tmps, argvName,
+            cmSystemTools::ReplaceString(arg.Value, argVs[t].c_str(),
                                          expandedArgs[t].c_str());
             }
           }
-
-        arg.Value = tmps;
         }
       arg.Delim = k->Delim;
       arg.FilePath = k->FilePath;
@@ -261,15 +225,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endmacro for this macro then execute
     if (!this->Depth)
       {
-      std::string name = this->Args[0];
-      std::vector<std::string>::size_type cc;
-      name += "(";
-      for ( cc = 0; cc < this->Args.size(); cc ++ )
-        {
-        name += " " + this->Args[cc];
-        }
-      name += " )";
-      mf.AddMacro(this->Args[0].c_str(), name.c_str());
+      mf.AddMacro(this->Args[0].c_str());
       // create a new command and add it to cmake
       cmMacroHelperCommand *f = new cmMacroHelperCommand();
       f->Args = this->Args;
@@ -328,11 +284,7 @@ bool cmMacroCommand::InitialPass(std::vector<std::string> const& args,
 
   // create a function blocker
   cmMacroFunctionBlocker *f = new cmMacroFunctionBlocker();
-  for(std::vector<std::string>::const_iterator j = args.begin();
-      j != args.end(); ++j)
-    {
-    f->Args.push_back(*j);
-    }
+  f->Args.insert(f->Args.end(), args.begin(), args.end());
   this->Makefile->AddFunctionBlocker(f);
   return true;
 }

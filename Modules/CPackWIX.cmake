@@ -148,6 +148,11 @@
 #  Currently fragments can be injected into most
 #  Component, File and Directory elements.
 #
+#  The following additional special Ids can be used:
+#
+#  * ``#PRODUCT`` for the ``<Product>`` element.
+#  * ``#PRODUCTFEATURE`` for the root ``<Feature>`` element.
+#
 #  The following example illustrates how this works.
 #
 #  Given that the WiX generator creates the following XML element:
@@ -233,7 +238,7 @@
 #  * ARPSIZE - Size (in kilobytes) of the application
 
 #=============================================================================
-# Copyright 2014 Kitware, Inc.
+# Copyright 2014-2015 Kitware, Inc.
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.

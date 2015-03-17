@@ -45,7 +45,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
   if ( ctestConfigureCommand && *ctestConfigureCommand )
     {
     this->CTest->SetCTestConfiguration("ConfigureCommand",
-      ctestConfigureCommand);
+      ctestConfigureCommand, this->Quiet);
     }
   else
     {
@@ -66,7 +66,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       const std::string cmakelists_file = source_dir + "/CMakeLists.txt";
       if ( !cmSystemTools::FileExists(cmakelists_file.c_str()) )
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "CMakeLists.txt file does not exist ["
           << cmakelists_file << "]";
         this->SetError(e.str());
@@ -118,6 +118,15 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += cmakeGeneratorName;
       cmakeConfigureCommand += "\"";
 
+      const char* cmakeGeneratorPlatform =
+        this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_PLATFORM");
+      if(cmakeGeneratorPlatform && *cmakeGeneratorPlatform)
+        {
+        cmakeConfigureCommand += " \"-A";
+        cmakeConfigureCommand += cmakeGeneratorPlatform;
+        cmakeConfigureCommand += "\"";
+        }
+
       const char* cmakeGeneratorToolset =
         this->Makefile->GetDefinition("CTEST_CMAKE_GENERATOR_TOOLSET");
       if(cmakeGeneratorToolset && *cmakeGeneratorToolset)
@@ -132,7 +141,7 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       cmakeConfigureCommand += "\"";
 
       this->CTest->SetCTestConfiguration("ConfigureCommand",
-        cmakeConfigureCommand.c_str());
+        cmakeConfigureCommand.c_str(), this->Quiet);
       }
     else
       {
@@ -151,5 +160,6 @@ cmCTestGenericHandler* cmCTestConfigureCommand::InitializeHandler()
       "internal CTest error. Cannot instantiate configure handler");
     return 0;
     }
+  handler->SetQuiet(this->Quiet);
   return handler;
 }

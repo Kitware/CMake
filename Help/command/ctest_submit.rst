@@ -5,7 +5,12 @@ Submit results to a dashboard server.
 
 ::
 
-  ctest_submit([PARTS ...] [FILES ...] [RETRY_COUNT count]                [RETRY_DELAY delay][RETURN_VALUE res])
+  ctest_submit([PARTS ...] [FILES ...]
+               [RETRY_COUNT count]
+               [RETRY_DELAY delay]
+               [RETURN_VALUE res]
+               [QUIET]
+               )
 
 By default all available parts are submitted if no PARTS or FILES are
 specified.  The PARTS option lists a subset of parts to be submitted.
@@ -33,3 +38,19 @@ timed-out submission before attempting to re-submit.
 
 The RETRY_COUNT option specifies how many times to retry a timed-out
 submission.
+
+The QUIET option suppresses all non-error messages that would have
+otherwise been printed by this call to ctest_submit().
+
+Submit to CDash Upload API
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+::
+
+  ctest_submit(CDASH_UPLOAD <file> [CDASH_UPLOAD_TYPE <type>])
+
+This second signature is used to upload files to CDash via the CDash
+file upload API. The api first sends a request to upload to CDash along
+with a content hash of the file. If CDash does not already have the file,
+then it is uploaded. Along with the file, a CDash type string is specified
+to tell CDash which handler to use to process the data.

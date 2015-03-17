@@ -70,7 +70,7 @@ macro(CMAKE_FORCE_C_COMPILER compiler id)
   set(CMAKE_C_COMPILER_FORCED TRUE)
 
   # Set old compiler id variables.
-  if("${CMAKE_C_COMPILER_ID}" MATCHES "GNU")
+  if(CMAKE_C_COMPILER_ID MATCHES "GNU")
     set(CMAKE_COMPILER_IS_GNUCC 1)
   endif()
 endmacro()
@@ -94,7 +94,7 @@ macro(CMAKE_FORCE_Fortran_COMPILER compiler id)
   set(CMAKE_Fortran_COMPILER_FORCED TRUE)
 
   # Set old compiler id variables.
-  if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set(CMAKE_COMPILER_IS_GNUG77 1)
   endif()
 endmacro()

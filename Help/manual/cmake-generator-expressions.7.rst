@@ -3,7 +3,7 @@
 cmake-generator-expressions(7)
 ******************************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -38,10 +38,8 @@ create conditional output::
 expands to ``DEBUG_MODE`` when the ``Debug`` configuration is used, and
 otherwise expands to nothing.
 
-``$<0:...>``
-  Empty string (ignores ``...``)
-``$<1:...>``
-  Content of ``...``
+Available logical expressions are:
+
 ``$<BOOL:...>``
   ``1`` if the ``...`` is true, else ``0``
 ``$<AND:?[,?]...>``
@@ -83,6 +81,54 @@ otherwise expands to nothing.
   else ``0``.  If the policy was not set, the warning message for the policy
   will be emitted. This generator expression only works for a subset of
   policies.
+``$<COMPILE_FEATURES:feature[,feature]...>``
+  ``1`` if all of the ``feature`` features are available for the 'head'
+  target, and ``0`` otherwise. If this expression is used while evaluating
+  the link implementation of a target and if any dependency transitively
+  increases the required :prop_tgt:`C_STANDARD` or :prop_tgt:`CXX_STANDARD`
+  for the 'head' target, an error is reported.  See the
+  :manual:`cmake-compile-features(7)` manual for information on
+  compile features.
+``$<COMPILE_LANGUAGE:lang>``
+  ``1`` when the language used for compilation unit matches ``lang``,
+  otherwise ``0``.  This expression used to specify compile options for
+  source files of a particular language in a target. For example, to specify
+  the use of the ``-fno-exceptions`` compile option (compiler id checks
+  elided):
+
+  .. code-block:: cmake
+
+    add_executable(myapp main.cpp foo.c bar.cpp)
+    target_compile_options(myapp
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-fno-exceptions>
+    )
+
+  This generator expression has limited use because it is not possible to
+  use it with the Visual Studio generators.  Portable buildsystems would
+  not use this expression, and would create separate libraries for each
+  source file language instead:
+
+  .. code-block:: cmake
+
+    add_library(myapp_c foo.c)
+    add_library(myapp_cxx foo.c)
+    target_compile_options(myapp_cxx PUBLIC -fno-exceptions)
+    add_executable(myapp main.cpp)
+    target_link_libraries(myapp myapp_c myapp_cxx)
+
+  The ``Makefile`` and ``Ninja`` based generators can also use this
+  expression to specify compile-language specific compile definitions
+  and include directories:
+
+  .. code-block:: cmake
+
+    add_executable(myapp main.cpp foo.c bar.cpp)
+    target_compile_definitions(myapp
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:COMPILING_CXX>
+    )
+    target_include_directories(myapp
+      PRIVATE $<$<COMPILE_LANGUAGE:CXX>:/opt/foo/cxx_headers>
+    )
 
 Informational Expressions
 =========================
@@ -103,20 +149,27 @@ expands to ``OLD_COMPILER`` if the
 :variable:`CMAKE_CXX_COMPILER_VERSION <CMAKE_<LANG>_COMPILER_VERSION>` is less
 than 4.2.0.
 
+Available informational expressions are:
+
 ``$<CONFIGURATION>``
   Configuration name. Deprecated. Use ``CONFIG`` instead.
 ``$<CONFIG>``
   Configuration name
 ``$<PLATFORM_ID>``
-  The CMake-id of the platform
+  The CMake-id of the platform.
+  See also the :variable:`CMAKE_SYSTEM_NAME` variable.
 ``$<C_COMPILER_ID>``
   The CMake-id of the C compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<CXX_COMPILER_ID>``
   The CMake-id of the CXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_ID` variable.
 ``$<C_COMPILER_VERSION>``
   The version of the C compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<CXX_COMPILER_VERSION>``
   The version of the CXX compiler used.
+  See also the :variable:`CMAKE_<LANG>_COMPILER_VERSION` variable.
 ``$<TARGET_FILE:tgt>``
   Full path to main file (.exe, .so.1.2, .a) where ``tgt`` is the name of a target.
 ``$<TARGET_FILE_NAME:tgt>``
@@ -135,6 +188,17 @@ than 4.2.0.
   Name of file with soname (.so.3).
 ``$<TARGET_SONAME_FILE_DIR:tgt>``
   Directory of with soname (.so.3).
+``$<TARGET_PDB_FILE:tgt>``
+  Full path to the linker generated program database file (.pdb)
+  where ``tgt`` is the name of a target.
+
+  See also the :prop_tgt:`PDB_NAME` and :prop_tgt:`PDB_OUTPUT_DIRECTORY`
+  target properties and their configuration specific variants
+  :prop_tgt:`PDB_NAME_<CONFIG>` and :prop_tgt:`PDB_OUTPUT_DIRECTORY_<CONFIG>`.
+``$<TARGET_PDB_FILE_NAME:tgt>``
+  Name of the linker generated program database file (.pdb).
+``$<TARGET_PDB_FILE_DIR:tgt>``
+  Directory of the linker generated program database file (.pdb).
 ``$<TARGET_PROPERTY:tgt,prop>``
   Value of the property ``prop`` on the target ``tgt``.
 
@@ -146,6 +210,10 @@ than 4.2.0.
 ``$<INSTALL_PREFIX>``
   Content of the install prefix when the target is exported via
   :command:`install(EXPORT)` and empty otherwise.
+``$<COMPILE_LANGUAGE>``
+  The compile language of source files when evaluating compile options. See
+  the unary version for notes about portability of this generator
+  expression.
 
 Output Expressions
 ==================
@@ -161,8 +229,18 @@ property with each entry preceeded by ``-I``. Note that a more-complete use
 in this situation would require first checking if the INCLUDE_DIRECTORIES
 property is non-empty::
 
-  $<$<BOOL:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>>:-I$<JOIN:$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>, -I>>
+  $<$<BOOL:${prop}>:-I$<JOIN:${prop}, -I>>
 
+where ``${prop}`` refers to a helper variable::
+
+  set(prop "$<TARGET_PROPERTY:INCLUDE_DIRECTORIES>")
+
+Available output expressions are:
+
+``$<0:...>``
+  Empty string (ignores ``...``)
+``$<1:...>``
+  Content of ``...``
 ``$<JOIN:list,...>``
   Joins the list with the content of ``...``
 ``$<ANGLE-R>``
@@ -175,6 +253,13 @@ property is non-empty::
   Marks ``...`` as being the name of a target.  This is required if exporting
   targets to multiple dependent export sets.  The ``...`` must be a literal
   name of a target- it may not contain generator expressions.
+``$<LINK_ONLY:...>``
+  Content of ``...`` except when evaluated in a link interface while
+  propagating :ref:`Target Usage Requirements`, in which case it is the
+  empty string.
+  Intended for use only in an :prop_tgt:`INTERFACE_LINK_LIBRARIES` target
+  property, perhaps via the :command:`target_link_libraries` command,
+  to specify private link dependencies without other usage requirements.
 ``$<INSTALL_INTERFACE:...>``
   Content of ``...`` when the property is exported using :command:`install(EXPORT)`,
   and empty otherwise.

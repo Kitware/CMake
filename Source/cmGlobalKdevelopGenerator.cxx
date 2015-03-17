@@ -222,7 +222,7 @@ bool cmGlobalKdevelopGenerator
        it!=files.end(); it++)
     {
     // get the full path to the file
-    tmp=cmSystemTools::CollapseFullPath(it->c_str(), projectDir.c_str());
+    tmp=cmSystemTools::CollapseFullPath(*it, projectDir.c_str());
     // just select the first source file
     if (fileToOpen.empty())
     {
@@ -236,7 +236,7 @@ bool cmGlobalKdevelopGenerator
     // make it relative to the project dir
     cmSystemTools::ReplaceString(tmp, projectDir.c_str(), "");
     // only put relative paths
-    if (tmp.size() && tmp[0] != '/')
+    if (!tmp.empty() && tmp[0] != '/')
       {
       fout << tmp.c_str() <<"\n";
       }
@@ -274,7 +274,7 @@ void cmGlobalKdevelopGenerator
     // kdevelop blacklist so they are not monitored for added or removed files
     // since this is handled by adding files to the cmake files
     cmsys::Directory d;
-    if (d.Load(projectDir.c_str()))
+    if (d.Load(projectDir))
       {
       size_t numf = d.GetNumberOfFiles();
       for (unsigned int i = 0; i < numf; i++)
@@ -285,7 +285,7 @@ void cmGlobalKdevelopGenerator
           std::string tmp = projectDir;
           tmp += "/";
           tmp += nextFile;
-          if (cmSystemTools::FileIsDirectory(tmp.c_str()))
+          if (cmSystemTools::FileIsDirectory(tmp))
             {
             tmp += "/CMakeCache.txt";
             if ((nextFile == "CMakeFiles")

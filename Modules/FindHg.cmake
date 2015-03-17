@@ -63,10 +63,24 @@ find_program(HG_EXECUTABLE
 mark_as_advanced(HG_EXECUTABLE)
 
 if(HG_EXECUTABLE)
+  set(_saved_lc_all "$ENV{LC_ALL}")
+  set(ENV{LC_ALL} "C")
+
+  set(_saved_language "$ENV{LANGUAGE}")
+  set(ENV{LANGUAGE})
+
   execute_process(COMMAND ${HG_EXECUTABLE} --version
                   OUTPUT_VARIABLE hg_version
                   ERROR_QUIET
+                  RESULT_VARIABLE hg_result
                   OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+  set(ENV{LC_ALL} ${_saved_lc_all})
+  set(ENV{LANGUAGE} ${_saved_language})
+
+  if(hg_result MATCHES "is not a valid Win32 application")
+    set_property(CACHE HG_EXECUTABLE PROPERTY VALUE "HG_EXECUTABLE-NOTFOUND")
+  endif()
   if(hg_version MATCHES "^Mercurial Distributed SCM \\(version ([0-9][^)]*)\\)")
     set(HG_VERSION_STRING "${CMAKE_MATCH_1}")
   endif()

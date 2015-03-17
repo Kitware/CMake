@@ -30,12 +30,13 @@
 #  License text for the above reference.)
 
 # if it's the MS C/CXX compiler, search for link
-if("${CMAKE_C_SIMULATE_ID}" STREQUAL "MSVC"
-   OR "${CMAKE_CXX_SIMULATE_ID}" STREQUAL "MSVC"
-   OR "${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "MSVC"
-   OR "${CMAKE_C_COMPILER_ID}" STREQUAL "MSVC"
-   OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "MSVC"
-   OR "${CMAKE_GENERATOR}" MATCHES "Visual Studio")
+if("x${CMAKE_C_SIMULATE_ID}" STREQUAL "xMSVC"
+   OR "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC"
+   OR "x${CMAKE_Fortran_SIMULATE_ID}" STREQUAL "xMSVC"
+   OR "x${CMAKE_C_COMPILER_ID}" STREQUAL "xMSVC"
+   OR "x${CMAKE_CXX_COMPILER_ID}" STREQUAL "xMSVC"
+   OR (CMAKE_GENERATOR MATCHES "Visual Studio"
+       AND NOT CMAKE_VS_PLATFORM_NAME STREQUAL "Tegra-Android"))
 
   find_program(CMAKE_LINKER NAMES link HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
 
@@ -66,9 +67,7 @@ else()
 
 endif()
 
-
-# on Apple there really should be install_name_tool
-if(APPLE)
+if(CMAKE_PLATFORM_HAS_INSTALLNAME)
   find_program(CMAKE_INSTALL_NAME_TOOL NAMES install_name_tool HINTS ${_CMAKE_TOOLCHAIN_LOCATION})
 
   if(NOT CMAKE_INSTALL_NAME_TOOL)

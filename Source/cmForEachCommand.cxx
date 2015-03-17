@@ -27,6 +27,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
     // if this is the endofreach for this statement
     if (!this->Depth)
       {
+      cmMakefile::LoopBlockPop loopBlockPop(&mf);
+
       // Remove the function blocker for this scope or bail.
       cmsys::auto_ptr<cmFunctionBlocker>
         fb(mf.RemoveFunctionBlocker(this, lff));
@@ -67,12 +69,17 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
             mf.AddDefinition(this->Args[0],oldDef.c_str());
             return true;
             }
+          if (status.GetContinueInvoked())
+            {
+            break;
+            }
           if(cmSystemTools::GetFatalErrorOccured() )
             {
             return true;
             }
           }
         }
+
       // restore the variable to its prior value
       mf.AddDefinition(this->Args[0],oldDef.c_str());
       return true;
@@ -163,7 +170,7 @@ bool cmForEachCommand
         step == 0
         )
         {
-        cmOStringStream str;
+        std::ostringstream str;
         str << "called with incorrect range specification: start ";
         str << start << ", stop " << stop << ", step " << step;
         this->SetError(str.str());
@@ -198,6 +205,8 @@ bool cmForEachCommand
     f->Args = args;
     }
   this->Makefile->AddFunctionBlocker(f);
+
+  this->Makefile->PushLoopBlock();
 
   return true;
 }
@@ -234,7 +243,7 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
       }
     else
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Unknown argument:\n" << "  " << args[i] << "\n";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       return true;
@@ -242,5 +251,8 @@ bool cmForEachCommand::HandleInMode(std::vector<std::string> const& args)
     }
 
   this->Makefile->AddFunctionBlocker(f.release()); // TODO: pass auto_ptr
+
+  this->Makefile->PushLoopBlock();
+
   return true;
 }

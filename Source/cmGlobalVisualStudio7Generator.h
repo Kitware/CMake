@@ -39,18 +39,20 @@ public:
   static std::string GetActualName() {return "Visual Studio 7";}
 
   ///! Get the name for the platform.
-  const std::string& GetPlatformName() const { return this->PlatformName; }
+  std::string const& GetPlatformName() const;
 
   ///! Create a local generator appropriate to this Global Generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
-  virtual void AddPlatformDefinitions(cmMakefile* mf);
+  virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
+
+  virtual bool SetGeneratorPlatform(std::string const& p, cmMakefile* mf);
 
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
   virtual void EnableLanguage(std::vector<std::string>const& languages,
@@ -67,16 +69,9 @@ public:
     const std::string& projectDir,
     const std::string& targetName,
     const std::string& config,
-    bool fast,
+    bool fast, bool verbose,
     std::vector<std::string> const& makeOptions = std::vector<std::string>()
     );
-
-  /**
-   * Generate the all required files for building this project/tree. This
-   * basically creates a series of LocalGenerators for each directory and
-   * requests that they Generate.
-   */
-  virtual void Generate();
 
   /**
    * Generate the DSW workspace file.
@@ -99,7 +94,8 @@ public:
                                         std::string& dir);
 
   ///! What is the configurations directory variable called?
-  virtual const char* GetCMakeCFGIntDir() const { return "$(OutDir)"; }
+  virtual const char* GetCMakeCFGIntDir() const
+    { return "$(ConfigurationName)"; }
 
   /** Return true if the target project file should have the option
       LinkLibraryDependencies and link to .sln dependencies. */
@@ -109,10 +105,14 @@ public:
 
   virtual void FindMakeProgram(cmMakefile*);
 
+  /** Is the Microsoft Assembler enabled?  */
+  bool IsMasmEnabled() const { return this->MasmEnabled; }
+
   // Encoding for Visual Studio files
   virtual std::string Encoding();
 
 protected:
+  virtual void Generate();
   virtual const char* GetIDEVersion() { return "7.0"; }
 
   std::string const& GetDevEnvCommand();
@@ -150,7 +150,6 @@ protected:
     OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetConfigurations(
     std::ostream& fout,
-    cmLocalGenerator* root,
     OrderedTargetDependSet const& projectTargets);
 
   void GenerateConfigurations(cmMakefile* mf);
@@ -164,8 +163,11 @@ protected:
 
   std::string ConvertToSolutionPath(const char* path);
 
-  std::set<std::string> IsPartOfDefaultBuild(const std::string& project,
-                                             cmTarget const* target);
+  std::set<std::string>
+    IsPartOfDefaultBuild(OrderedTargetDependSet const& projectTargets,
+                         cmTarget const* target);
+  bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
+                    cmTarget const* target);
   std::vector<std::string> Configurations;
   std::map<std::string, std::string> GUIDMap;
 
@@ -176,7 +178,9 @@ protected:
   // Set during OutputSLNFile with the name of the current project.
   // There is one SLN file per project.
   std::string CurrentProject;
-  std::string PlatformName;
+  std::string GeneratorPlatform;
+  std::string DefaultPlatformName;
+  bool MasmEnabled;
 
 private:
   char* IntelProjectVersion;

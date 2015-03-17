@@ -50,11 +50,18 @@ public:
   virtual int ParseChunk(const char* inputString,
                          std::string::size_type length);
   virtual int CleanupParser();
-
+  typedef void (*ReportFunction)(int, const char*, void*);
+  void SetErrorCallback(ReportFunction f, void* d)
+    {
+      this->ReportCallback = f;
+      this->ReportCallbackData = d;
+    }
 protected:
   //! This variable is true if there was a parse error while parsing in
   //chunks.
   int ParseError;
+  ReportFunction ReportCallback;
+  void* ReportCallbackData;
 
   //1 Expat parser structure.  Exists only during call to Parse().
   void* Parser;

@@ -60,6 +60,7 @@ private:
   bool HandleTestMode();
   bool HandleVariableMode();
   bool HandleCacheMode();
+  bool HandleInstallMode();
 };
 
 #endif

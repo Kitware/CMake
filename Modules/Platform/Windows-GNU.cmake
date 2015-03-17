@@ -35,7 +35,7 @@ endif()
 
 if(MINGW)
   set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll" ".dll.a" ".a" ".lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
   set(CMAKE_C_STANDARD_LIBRARIES_INIT "-lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32")
   set(CMAKE_CXX_STANDARD_LIBRARIES_INIT "${CMAKE_C_STANDARD_LIBRARIES_INIT}")
 endif()
@@ -61,14 +61,12 @@ if(NOT CMAKE_GENERATOR_RC AND CMAKE_GENERATOR MATCHES "Unix Makefiles")
   set(CMAKE_GENERATOR_RC windres)
 endif()
 
-enable_language(RC)
-
 macro(__windows_compiler_gnu lang)
 
   if(MSYS OR MINGW)
     # Create archiving rules to support large object file lists for static libraries.
-    set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> cr <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> r  <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_${lang}_ARCHIVE_CREATE "<CMAKE_AR> cq <TARGET> <LINK_FLAGS> <OBJECTS>")
+    set(CMAKE_${lang}_ARCHIVE_APPEND "<CMAKE_AR> q  <TARGET> <LINK_FLAGS> <OBJECTS>")
     set(CMAKE_${lang}_ARCHIVE_FINISH "<CMAKE_RANLIB> <TARGET>")
 
     # Initialize C link type selection flags.  These flags are used when
@@ -113,9 +111,9 @@ macro(__windows_compiler_gnu lang)
 
   # Binary link rules.
   set(CMAKE_${lang}_CREATE_SHARED_MODULE
-    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_MODULE_${lang}_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_MODULE_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_MODULE_CREATE_${lang}_FLAGS> -o <TARGET> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_CREATE_SHARED_LIBRARY
-    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+    "<CMAKE_${lang}_COMPILER> <CMAKE_SHARED_LIBRARY_${lang}_FLAGS> <LANGUAGE_COMPILE_FLAGS> <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_${lang}_FLAGS> -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
   set(CMAKE_${lang}_LINK_EXECUTABLE
     "<CMAKE_${lang}_COMPILER> <FLAGS> <CMAKE_${lang}_LINK_FLAGS> <LINK_FLAGS> <OBJECTS>  -o <TARGET> -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <LINK_LIBRARIES>")
 
@@ -139,6 +137,8 @@ macro(__windows_compiler_gnu lang)
         )
     endforeach()
   endif()
+
+  enable_language(RC)
 endmacro()
 
 macro(__windows_compiler_gnu_abi lang)
@@ -154,6 +154,7 @@ macro(__windows_compiler_gnu_abi lang)
       find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvars32.bat
         DOC "Visual Studio vcvars32.bat"
         PATHS
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0\\Setup\\VC;ProductDir]/bin"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VC;ProductDir]/bin"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/bin"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VC;ProductDir]/bin"
@@ -163,9 +164,10 @@ macro(__windows_compiler_gnu_abi lang)
         )
       set(CMAKE_GNUtoMS_ARCH x86)
     elseif("${CMAKE_SIZEOF_VOID_P}" EQUAL 8)
-      find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvarsamd64.bat
+      find_program(CMAKE_GNUtoMS_VCVARS NAMES vcvars64.bat vcvarsamd64.bat
         DOC "Visual Studio vcvarsamd64.bat"
         PATHS
+        "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\12.0\\Setup\\VC;ProductDir]/bin/amd64"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\11.0\\Setup\\VC;ProductDir]/bin/amd64"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\10.0\\Setup\\VC;ProductDir]/bin/amd64"
         "[HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VisualStudio\\9.0\\Setup\\VC;ProductDir]/bin/amd64"

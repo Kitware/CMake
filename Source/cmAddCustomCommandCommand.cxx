@@ -32,9 +32,10 @@ bool cmAddCustomCommandCommand
   std::string source, target, main_dependency, working;
   std::string comment_buffer;
   const char* comment = 0;
-  std::vector<std::string> depends, outputs, output;
+  std::vector<std::string> depends, outputs, output, byproducts;
   bool verbatim = false;
   bool append = false;
+  bool uses_terminal = false;
   std::string implicit_depends_lang;
   cmCustomCommand::ImplicitDependsList implicit_depends;
 
@@ -56,6 +57,7 @@ bool cmAddCustomCommandCommand
     doing_main_dependency,
     doing_output,
     doing_outputs,
+    doing_byproducts,
     doing_comment,
     doing_working_directory,
     doing_nothing
@@ -102,6 +104,10 @@ bool cmAddCustomCommandCommand
       {
       append = true;
       }
+    else if(copy == "USES_TERMINAL")
+      {
+      uses_terminal = true;
+      }
     else if(copy == "TARGET")
       {
       doing = doing_target;
@@ -121,6 +127,10 @@ bool cmAddCustomCommandCommand
     else if (copy == "OUTPUT")
       {
       doing = doing_output;
+      }
+    else if (copy == "BYPRODUCTS")
+      {
+      doing = doing_byproducts;
       }
     else if (copy == "WORKING_DIRECTORY")
       {
@@ -145,6 +155,7 @@ bool cmAddCustomCommandCommand
         {
         case doing_output:
         case doing_outputs:
+        case doing_byproducts:
           if (!cmSystemTools::FileIsFullPath(copy.c_str()))
             {
             // This is an output to be generated, so it should be
@@ -173,6 +184,10 @@ bool cmAddCustomCommandCommand
           break;
         }
 
+      if (cmSystemTools::FileIsFullPath(filename.c_str()))
+        {
+        filename = cmSystemTools::CollapseFullPath(filename);
+        }
        switch (doing)
          {
          case doing_working_directory:
@@ -224,6 +239,9 @@ bool cmAddCustomCommandCommand
          case doing_outputs:
            outputs.push_back(filename);
            break;
+         case doing_byproducts:
+           byproducts.push_back(filename);
+           break;
          case doing_comment:
            comment_buffer = copy;
            comment = comment_buffer.c_str();
@@ -263,7 +281,9 @@ bool cmAddCustomCommandCommand
     }
 
   // Make sure the output names and locations are safe.
-  if(!this->CheckOutputs(output) || !this->CheckOutputs(outputs))
+  if(!this->CheckOutputs(output) ||
+     !this->CheckOutputs(outputs) ||
+     !this->CheckOutputs(byproducts))
     {
     return false;
     }
@@ -285,7 +305,7 @@ bool cmAddCustomCommandCommand
       }
 
     // No command for this output exists.
-    cmOStringStream e;
+    std::ostringstream e;
     e << "given APPEND option with output \"" << output[0]
       << "\" which is not already a custom command output.";
     this->SetError(e.str());
@@ -296,7 +316,7 @@ bool cmAddCustomCommandCommand
   if(!working.empty())
     {
     const char* build_dir = this->Makefile->GetCurrentOutputDirectory();
-    working = cmSystemTools::CollapseFullPath(working.c_str(), build_dir);
+    working = cmSystemTools::CollapseFullPath(working, build_dir);
     }
 
   // Choose which mode of the command to use.
@@ -305,19 +325,19 @@ bool cmAddCustomCommandCommand
     {
     // Source is empty, use the target.
     std::vector<std::string> no_depends;
-    this->Makefile->AddCustomCommandToTarget(target, no_depends,
+    this->Makefile->AddCustomCommandToTarget(target, byproducts, no_depends,
                                              commandLines, cctype,
                                              comment, working.c_str(),
-                                             escapeOldStyle);
+                                             escapeOldStyle, uses_terminal);
     }
   else if(target.empty())
     {
     // Target is empty, use the output.
-    this->Makefile->AddCustomCommandToOutput(output, depends,
-                                             main_dependency,
+    this->Makefile->AddCustomCommandToOutput(output, byproducts,
+                                             depends, main_dependency,
                                              commandLines, comment,
                                              working.c_str(), false,
-                                             escapeOldStyle);
+                                             escapeOldStyle, uses_terminal);
 
     // Add implicit dependency scanning requests if any were given.
     if(!implicit_depends.empty())
@@ -334,7 +354,7 @@ bool cmAddCustomCommandCommand
         }
       if(!okay)
         {
-        cmOStringStream e;
+        std::ostringstream e;
         e << "could not locate source file with a custom command producing \""
           << output[0] << "\" even though this command tried to create it!";
         this->SetError(e.str());
@@ -342,10 +362,20 @@ bool cmAddCustomCommandCommand
         }
       }
     }
+  else if (!byproducts.empty())
+    {
+    this->SetError("BYPRODUCTS may not be specified with SOURCE signatures");
+    return false;
+    }
+  else if (uses_terminal)
+    {
+    this->SetError("USES_TERMINAL may not be used with SOURCE signatures");
+    return false;
+    }
   else
     {
     bool issueMessage = true;
-    cmOStringStream e;
+    std::ostringstream e;
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0050))
     {
@@ -406,7 +436,7 @@ cmAddCustomCommandCommand
     std::string::size_type pos = o->find_first_of("#<>");
     if(pos != o->npos)
       {
-      cmOStringStream msg;
+      std::ostringstream msg;
       msg << "called with OUTPUT containing a \"" << (*o)[pos]
           << "\".  This character is not allowed.";
       this->SetError(msg.str());

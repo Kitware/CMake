@@ -18,7 +18,7 @@
 
 if(NOT CMAKE_Java_COMPILER)
   # prefer the environment variable CC
-  if($ENV{JAVA_COMPILER} MATCHES ".+")
+  if(NOT $ENV{JAVA_COMPILER} STREQUAL "")
     get_filename_component(CMAKE_Java_COMPILER_INIT $ENV{JAVA_COMPILER} PROGRAM PROGRAM_ARGS CMAKE_Java_FLAGS_ENV_INIT)
     if(CMAKE_Java_FLAGS_ENV_INIT)
       set(CMAKE_Java_COMPILER_ARG1 "${CMAKE_Java_FLAGS_ENV_INIT}" CACHE STRING "First argument to Java compiler")
@@ -28,14 +28,14 @@ if(NOT CMAKE_Java_COMPILER)
     endif()
   endif()
 
-  if($ENV{JAVA_RUNTIME} MATCHES ".+")
+  if(NOT $ENV{JAVA_RUNTIME} STREQUAL "")
     get_filename_component(CMAKE_Java_RUNTIME_INIT $ENV{JAVA_RUNTIME} PROGRAM PROGRAM_ARGS CMAKE_Java_FLAGS_ENV_INIT)
     if(NOT EXISTS ${CMAKE_Java_RUNTIME_INIT})
       message(SEND_ERROR "Could not find compiler set in environment variable JAVA_RUNTIME:\n$ENV{JAVA_RUNTIME}.")
     endif()
   endif()
 
-  if($ENV{JAVA_ARCHIVE} MATCHES ".+")
+  if(NOT $ENV{JAVA_ARCHIVE} STREQUAL "")
     get_filename_component(CMAKE_Java_ARCHIVE_INIT $ENV{JAVA_ARCHIVE} PROGRAM PROGRAM_ARGS CMAKE_Java_FLAGS_ENV_INIT)
     if(NOT EXISTS ${CMAKE_Java_ARCHIVE_INIT})
       message(SEND_ERROR "Could not find compiler set in environment variable JAVA_ARCHIVE:\n$ENV{JAVA_ARCHIVE}.")

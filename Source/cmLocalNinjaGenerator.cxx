@@ -151,9 +151,10 @@ cmLocalNinjaGenerator::ConvertToLinkReference(std::string const& lib,
 
 std::string
 cmLocalNinjaGenerator::ConvertToIncludeReference(std::string const& path,
-                                                 OutputFormat format)
+                                                 OutputFormat format,
+                                                 bool forceFullPaths)
 {
-  return this->Convert(path, HOME_OUTPUT, format);
+  return this->Convert(path, forceFullPaths? FULL : HOME_OUTPUT, format);
 }
 
 //----------------------------------------------------------------------------
@@ -181,14 +182,14 @@ cmake* cmLocalNinjaGenerator::GetCMakeInstance()
 
 bool cmLocalNinjaGenerator::isRootMakefile() const
 {
-  return (strcmp(this->Makefile->GetCurrentDirectory(),
-                 this->GetCMakeInstance()->GetHomeDirectory()) == 0);
+  return !this->GetParent();
 }
 
 void cmLocalNinjaGenerator::WriteBuildFileTop()
 {
   // For the build file.
   this->WriteProjectHeader(this->GetBuildFileStream());
+  this->WriteNinjaRequiredVersion(this->GetBuildFileStream());
   this->WriteNinjaFilesInclusion(this->GetBuildFileStream());
 
   // For the rule file.
@@ -203,6 +204,30 @@ void cmLocalNinjaGenerator::WriteProjectHeader(std::ostream& os)
     << "# Configuration: " << this->ConfigName << std::endl
     ;
   cmGlobalNinjaGenerator::WriteDivider(os);
+}
+
+void cmLocalNinjaGenerator::WriteNinjaRequiredVersion(std::ostream& os)
+{
+  // Default required version
+  // Ninja generator uses 'deps' and 'msvc_deps_prefix' introduced in 1.3
+  std::string requiredVersion = "1.3";
+
+  // Ninja generator uses the 'console' pool if available (>= 1.5)
+  std::string usedVersion = this->GetGlobalNinjaGenerator()->ninjaVersion();
+  if(cmSystemTools::VersionCompare(cmSystemTools::OP_LESS,
+                                   usedVersion.c_str(),
+                                   "1.5") ==  false)
+    {
+      requiredVersion = "1.5";
+    }
+
+  cmGlobalNinjaGenerator::WriteComment(os,
+                          "Minimal version of Ninja required by this file");
+  os
+    << "ninja_required_version = "
+    << requiredVersion
+    << std::endl << std::endl
+    ;
 }
 
 void cmLocalNinjaGenerator::WritePools(std::ostream& os)
@@ -294,7 +319,7 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
   os << std::endl;
 }
 
-std::string cmLocalNinjaGenerator::ConvertToNinjaPath(const char *path)
+std::string cmLocalNinjaGenerator::ConvertToNinjaPath(const std::string& path)
 {
   std::string convPath = this->Convert(path, cmLocalGenerator::HOME_OUTPUT);
 #ifdef _WIN32
@@ -326,7 +351,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandDeps(
        i != deps.end(); ++i) {
     std::string dep;
     if (this->GetRealDependency(*i, this->GetConfigName(), dep))
-      ninjaDeps.push_back(ConvertToNinjaPath(dep.c_str()));
+      ninjaDeps.push_back(ConvertToNinjaPath(dep));
   }
 }
 
@@ -343,7 +368,7 @@ std::string cmLocalNinjaGenerator::BuildCommandLine(
     return ":";
 #endif
 
-  cmOStringStream cmd;
+  std::ostringstream cmd;
   for (std::vector<std::string>::const_iterator li = cmdLines.begin();
        li != cmdLines.end(); ++li)
 #ifdef _WIN32
@@ -383,7 +408,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
     if (wd.empty())
       wd = this->GetMakefile()->GetStartOutputDirectory();
 
-    cmOStringStream cdCmd;
+    std::ostringstream cdCmd;
 #ifdef _WIN32
         std::string cdStr = "cd /D ";
 #else
@@ -414,10 +439,18 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
   cmCustomCommandGenerator ccg(*cc, this->GetConfigName(), this->Makefile);
 
   const std::vector<std::string> &outputs = ccg.GetOutputs();
-  cmNinjaDeps ninjaOutputs(outputs.size()), ninjaDeps;
+  const std::vector<std::string> &byproducts = ccg.GetByproducts();
+  cmNinjaDeps ninjaOutputs(outputs.size()+byproducts.size()), ninjaDeps;
 
+#if 0
+#error TODO: Once CC in an ExternalProject target must provide the \
+    file of each imported target that has an add_dependencies pointing \
+    at us.  How to know which ExternalProject step actually provides it?
+#endif
   std::transform(outputs.begin(), outputs.end(),
                  ninjaOutputs.begin(), MapToNinjaPath());
+  std::transform(byproducts.begin(), byproducts.end(),
+                 ninjaOutputs.begin() + outputs.size(), MapToNinjaPath());
   this->AppendCustomCommandDeps(ccg, ninjaDeps);
 
   for (cmNinjaDeps::iterator i = ninjaOutputs.begin(); i != ninjaOutputs.end();
@@ -442,6 +475,7 @@ cmLocalNinjaGenerator::WriteCustomCommandBuildStatement(
       this->BuildCommandLine(cmdLines),
       this->ConstructComment(ccg),
       "Custom command for " + ninjaOutputs[0],
+      cc->GetUsesTerminal(),
       ninjaOutputs,
       ninjaDeps,
       orderOnlyDeps);

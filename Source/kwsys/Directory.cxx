@@ -103,7 +103,7 @@ void Directory::Clear()
 namespace KWSYS_NAMESPACE
 {
 
-bool Directory::Load(const char* name)
+bool Directory::Load(const kwsys_stl::string& name)
 {
   this->Clear();
 #if _MSC_VER < 1300
@@ -112,16 +112,25 @@ bool Directory::Load(const char* name)
   intptr_t srchHandle;
 #endif
   char* buf;
-  size_t n = strlen(name);
-  if ( name[n - 1] == '/' )
+  size_t n = name.size();
+  if ( *name.rbegin() == '/' || *name.rbegin() == '\\' )
     {
     buf = new char[n + 1 + 1];
-    sprintf(buf, "%s*", name);
+    sprintf(buf, "%s*", name.c_str());
     }
   else
     {
+    // Make sure the slashes in the wildcard suffix are consistent with the
+    // rest of the path
     buf = new char[n + 2 + 1];
-    sprintf(buf, "%s/*", name);
+    if ( name.find('\\') != name.npos )
+      {
+      sprintf(buf, "%s\\*", name.c_str());
+      }
+    else
+      {
+      sprintf(buf, "%s/*", name.c_str());
+      }
     }
   struct _wfinddata_t data;      // data of current file
 
@@ -144,7 +153,7 @@ bool Directory::Load(const char* name)
   return _findclose(srchHandle) != -1;
 }
 
-unsigned long Directory::GetNumberOfFilesInDirectory(const char* name)
+unsigned long Directory::GetNumberOfFilesInDirectory(const kwsys_stl::string& name)
 {
 #if _MSC_VER < 1300
   long srchHandle;
@@ -152,16 +161,16 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const char* name)
   intptr_t srchHandle;
 #endif
   char* buf;
-  size_t n = strlen(name);
-  if ( name[n - 1] == '/' )
+  size_t n = name.size();
+  if ( *name.rbegin() == '/' )
     {
     buf = new char[n + 1 + 1];
-    sprintf(buf, "%s*", name);
+    sprintf(buf, "%s*", name.c_str());
     }
   else
     {
     buf = new char[n + 2 + 1];
-    sprintf(buf, "%s/*", name);
+    sprintf(buf, "%s/*", name.c_str());
     }
   struct _wfinddata_t data;      // data of current file
 
@@ -194,34 +203,35 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const char* name)
 #include <sys/types.h>
 #include <dirent.h>
 
-/* There is a problem with the Portland compiler, large file
-support and glibc/Linux system headers: 
-http://www.pgroup.com/userforum/viewtopic.php?
-p=1992&sid=f16167f51964f1a68fe5041b8eb213b6
-*/
-#if defined(__PGI) && defined(__USE_FILE_OFFSET64)
-# define dirent dirent64
+// PGI with glibc has trouble with dirent and large file support:
+//  http://www.pgroup.com/userforum/viewtopic.php?
+//  p=1992&sid=f16167f51964f1a68fe5041b8eb213b6
+// Work around the problem by mapping dirent the same way as readdir.
+#if defined(__PGI) && defined(__GLIBC__)
+# define kwsys_dirent_readdir dirent
+# define kwsys_dirent_readdir64 dirent64
+# define kwsys_dirent kwsys_dirent_lookup(readdir)
+# define kwsys_dirent_lookup(x) kwsys_dirent_lookup_delay(x)
+# define kwsys_dirent_lookup_delay(x) kwsys_dirent_##x
+#else
+# define kwsys_dirent dirent
 #endif
 
 namespace KWSYS_NAMESPACE
 {
 
-bool Directory::Load(const char* name)
+bool Directory::Load(const kwsys_stl::string& name)
 {
   this->Clear();
    
-  if (!name)
-    {
-    return 0;
-    }
-  DIR* dir = opendir(name);
+  DIR* dir = opendir(name.c_str());
 
   if (!dir)
     {
     return 0;
     }
 
-  for (dirent* d = readdir(dir); d; d = readdir(dir) )
+  for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir) )
     {
     this->Internal->Files.push_back(d->d_name);
     }
@@ -230,9 +240,9 @@ bool Directory::Load(const char* name)
   return 1;
 }
 
-unsigned long Directory::GetNumberOfFilesInDirectory(const char* name)
+unsigned long Directory::GetNumberOfFilesInDirectory(const kwsys_stl::string& name)
 {
-  DIR* dir = opendir(name);
+  DIR* dir = opendir(name.c_str());
 
   if (!dir)
     {
@@ -240,7 +250,7 @@ unsigned long Directory::GetNumberOfFilesInDirectory(const char* name)
     }
 
   unsigned long count = 0;
-  for (dirent* d = readdir(dir); d; d = readdir(dir) )
+  for (kwsys_dirent* d = readdir(dir); d; d = readdir(dir) )
     {
     count++;
     }

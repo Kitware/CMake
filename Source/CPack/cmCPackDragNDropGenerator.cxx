@@ -169,8 +169,8 @@ int cmCPackDragNDropGenerator::PackageFiles()
 }
 
 //----------------------------------------------------------------------
-bool cmCPackDragNDropGenerator::CopyFile(cmOStringStream& source,
-  cmOStringStream& target)
+bool cmCPackDragNDropGenerator::CopyFile(std::ostringstream& source,
+  std::ostringstream& target)
 {
   if(!cmSystemTools::CopyFileIfDifferent(
     source.str().c_str(),
@@ -190,7 +190,7 @@ bool cmCPackDragNDropGenerator::CopyFile(cmOStringStream& source,
 }
 
 //----------------------------------------------------------------------
-bool cmCPackDragNDropGenerator::RunCommand(cmOStringStream& command,
+bool cmCPackDragNDropGenerator::RunCommand(std::ostringstream& command,
   std::string* output)
 {
   int exit_code = 1;
@@ -255,12 +255,12 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
-  cmOStringStream staging;
+  std::ostringstream staging;
   staging << src_dir;
 
   // Add a symlink to /Applications so users can drag-and-drop the bundle
   // into it
-  cmOStringStream application_link;
+  std::ostringstream application_link;
   application_link << staging.str() << "/Applications";
   cmSystemTools::CreateSymlink("/Applications",
     application_link.str().c_str());
@@ -268,10 +268,10 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   // Optionally add a custom volume icon ...
   if(!cpack_package_icon.empty())
     {
-    cmOStringStream package_icon_source;
+    std::ostringstream package_icon_source;
     package_icon_source << cpack_package_icon;
 
-    cmOStringStream package_icon_destination;
+    std::ostringstream package_icon_destination;
     package_icon_destination << staging.str() << "/.VolumeIcon.icns";
 
     if(!this->CopyFile(package_icon_source, package_icon_destination))
@@ -289,10 +289,10 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   // (e.g. for setting background/layout) ...
   if(!cpack_dmg_ds_store.empty())
     {
-    cmOStringStream package_settings_source;
+    std::ostringstream package_settings_source;
     package_settings_source << cpack_dmg_ds_store;
 
-    cmOStringStream package_settings_destination;
+    std::ostringstream package_settings_destination;
     package_settings_destination << staging.str() << "/.DS_Store";
 
     if(!this->CopyFile(package_settings_source, package_settings_destination))
@@ -309,10 +309,10 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   // Optionally add a custom background image ...
   if(!cpack_dmg_background_image.empty())
     {
-    cmOStringStream package_background_source;
+    std::ostringstream package_background_source;
     package_background_source << cpack_dmg_background_image;
 
-    cmOStringStream package_background_destination;
+    std::ostringstream package_background_destination;
     package_background_destination << staging.str() << "/background.png";
 
     if(!this->CopyFile(package_background_source,
@@ -326,7 +326,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       return 0;
       }
 
-    cmOStringStream temp_background_hiding_command;
+    std::ostringstream temp_background_hiding_command;
     temp_background_hiding_command << this->GetOption("CPACK_COMMAND_SETFILE");
     temp_background_hiding_command << " -a V \"";
     temp_background_hiding_command << package_background_destination.str();
@@ -346,7 +346,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   std::string temp_image = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
   temp_image += "/temp.dmg";
 
-  cmOStringStream temp_image_command;
+  std::ostringstream temp_image_command;
   temp_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
   temp_image_command << " create";
   temp_image_command << " -ov";
@@ -368,9 +368,9 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
   // Optionally set the custom icon flag for the image ...
   if(!cpack_package_icon.empty())
     {
-    cmOStringStream temp_mount;
+    std::ostringstream temp_mount;
 
-    cmOStringStream attach_command;
+    std::ostringstream attach_command;
     attach_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     attach_command << " attach";
     attach_command << " \"" << temp_image << "\"";
@@ -389,7 +389,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     mountpoint_regex.find(attach_output.c_str());
     temp_mount << mountpoint_regex.match(1);
 
-    cmOStringStream setfile_command;
+    std::ostringstream setfile_command;
     setfile_command << this->GetOption("CPACK_COMMAND_SETFILE");
     setfile_command << " -a C";
     setfile_command << " \"" << temp_mount.str() << "\"";
@@ -403,7 +403,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       return 0;
       }
 
-    cmOStringStream detach_command;
+    std::ostringstream detach_command;
     detach_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     detach_command << " detach";
     detach_command << " \"" << temp_mount.str() << "\"";
@@ -471,7 +471,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
     std::string temp_udco = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
     temp_udco += "/temp-udco.dmg";
 
-    cmOStringStream udco_image_command;
+    std::ostringstream udco_image_command;
     udco_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     udco_image_command << " convert \"" << temp_image << "\"";
     udco_image_command << " -format UDCO";
@@ -488,7 +488,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       }
 
     // unflatten dmg
-    cmOStringStream unflatten_command;
+    std::ostringstream unflatten_command;
     unflatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     unflatten_command << " unflatten ";
     unflatten_command << "\"" << temp_udco << "\"";
@@ -503,7 +503,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       }
 
     // Rez the SLA
-    cmOStringStream embed_sla_command;
+    std::ostringstream embed_sla_command;
     embed_sla_command << this->GetOption("CPACK_COMMAND_REZ");
     const char* sysroot = this->GetOption("CPACK_OSX_SYSROOT");
     if(sysroot && sysroot[0] != '\0')
@@ -524,7 +524,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
       }
 
     // flatten dmg
-    cmOStringStream flatten_command;
+    std::ostringstream flatten_command;
     flatten_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
     flatten_command << " flatten ";
     flatten_command << "\"" << temp_udco << "\"";
@@ -543,7 +543,7 @@ int cmCPackDragNDropGenerator::CreateDMG(const std::string& src_dir,
 
 
   // Create the final compressed read-only disk image ...
-  cmOStringStream final_image_command;
+  std::ostringstream final_image_command;
   final_image_command << this->GetOption("CPACK_COMMAND_HDIUTIL");
   final_image_command << " convert \"" << temp_image << "\"";
   final_image_command << " -format ";

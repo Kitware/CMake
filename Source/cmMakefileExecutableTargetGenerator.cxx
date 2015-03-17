@@ -171,15 +171,19 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     return;
     }
 
+  this->NumberOfProgressActions++;
   if(!this->NoRuleMessages)
     {
+    cmLocalUnixMakefileGenerator3::EchoProgress progress;
+    this->MakeEchoProgress(progress);
     // Add the link message.
     std::string buildEcho = "Linking ";
     buildEcho += linkLanguage;
     buildEcho += " executable ";
     buildEcho += targetOutPath;
     this->LocalGenerator->AppendEcho(commands, buildEcho.c_str(),
-                                     cmLocalUnixMakefileGenerator3::EchoLink);
+                                     cmLocalUnixMakefileGenerator3::EchoLink,
+                                     &progress);
     }
 
   // Build a list of compiler flags and linker flags.
@@ -371,8 +375,8 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string targetVersionMajor;
   std::string targetVersionMinor;
   {
-  cmOStringStream majorStream;
-  cmOStringStream minorStream;
+  std::ostringstream majorStream;
+  std::ostringstream minorStream;
   int major;
   int minor;
   this->Target->GetTargetVersion(major, minor);

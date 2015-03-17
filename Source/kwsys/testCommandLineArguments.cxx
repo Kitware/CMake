@@ -171,7 +171,7 @@ int testCommandLineArguments(int argc, char* argv[])
   CompareTwoLists(strings_argument, valid_strings, 4);
   CompareTwoLists(stl_strings_argument, valid_stl_strings, 4);
 
-  kwsys_ios::cout << "Some STL String variable was set to: " << some_stl_string_variable.c_str() << kwsys_ios::endl;
+  kwsys_ios::cout << "Some STL String variable was set to: " << some_stl_string_variable << kwsys_ios::endl;
   kwsys_ios::cout << "Some bool variable was set to: " << some_bool_variable << kwsys_ios::endl;
   kwsys_ios::cout << "Some bool variable was set to: " << some_bool_variable1 << kwsys_ios::endl;
   kwsys_ios::cout << "bool_arg1 variable was set to: " << bool_arg1 << kwsys_ios::endl;

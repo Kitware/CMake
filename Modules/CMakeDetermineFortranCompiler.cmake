@@ -32,7 +32,7 @@ elseif("${CMAKE_GENERATOR}" MATCHES "Xcode")
 else()
   if(NOT CMAKE_Fortran_COMPILER)
     # prefer the environment variable CC
-    if($ENV{FC} MATCHES ".+")
+    if(NOT $ENV{FC} STREQUAL "")
       get_filename_component(CMAKE_Fortran_COMPILER_INIT $ENV{FC} PROGRAM PROGRAM_ARGS CMAKE_Fortran_FLAGS_ENV_INIT)
       if(CMAKE_Fortran_FLAGS_ENV_INIT)
         set(CMAKE_Fortran_COMPILER_ARG1 "${CMAKE_Fortran_FLAGS_ENV_INIT}" CACHE STRING "First argument to Fortran compiler")
@@ -119,6 +119,47 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_NAG "-V")
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_NAG "NAG Fortran Compiler")
 
+  set(_version_info "")
+  foreach(m MAJOR MINOR PATCH TWEAK)
+    set(_COMP "_${m}")
+    set(_version_info "${_version_info}
+#if defined(COMPILER_VERSION${_COMP})")
+    foreach(d 1 2 3 4 5 6 7 8)
+      set(_version_info "${_version_info}
+# undef DEC
+# undef HEX
+# define DEC(n) DEC_${d}(n)
+# define HEX(n) HEX_${d}(n)
+# if COMPILER_VERSION${_COMP} == 0
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[0]'
+# elif COMPILER_VERSION${_COMP} == 1
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[1]'
+# elif COMPILER_VERSION${_COMP} == 2
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[2]'
+# elif COMPILER_VERSION${_COMP} == 3
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[3]'
+# elif COMPILER_VERSION${_COMP} == 4
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[4]'
+# elif COMPILER_VERSION${_COMP} == 5
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[5]'
+# elif COMPILER_VERSION${_COMP} == 6
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[6]'
+# elif COMPILER_VERSION${_COMP} == 7
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[7]'
+# elif COMPILER_VERSION${_COMP} == 8
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[8]'
+# elif COMPILER_VERSION${_COMP} == 9
+        PRINT *, 'INFO:compiler_version${_COMP}_digit_${d}[9]'
+# endif
+")
+    endforeach()
+    set(_version_info "${_version_info}
+#endif")
+  endforeach()
+  set(CMAKE_Fortran_COMPILER_ID_VERSION_INFO "${_version_info}")
+  unset(_version_info)
+  unset(_COMP)
+
   # Try to identify the compiler.
   set(CMAKE_Fortran_COMPILER_ID)
   include(${CMAKE_ROOT}/Modules/CMakeDetermineCompilerId.cmake)
@@ -130,7 +171,7 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
       ARGS ${CMAKE_Fortran_COMPILER_ID_FLAGS_LIST} -E "\"${CMAKE_ROOT}/Modules/CMakeTestGNU.c\""
       OUTPUT_VARIABLE CMAKE_COMPILER_OUTPUT RETURN_VALUE CMAKE_COMPILER_RETURN)
     if(NOT CMAKE_COMPILER_RETURN)
-      if("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_GNU.*" )
+      if("${CMAKE_COMPILER_OUTPUT}" MATCHES "THIS_IS_GNU")
         set(CMAKE_Fortran_COMPILER_ID "GNU")
         file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
           "Determining if the Fortran compiler is GNU succeeded with "
@@ -141,10 +182,10 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
           "the following output:\n${CMAKE_COMPILER_OUTPUT}\n\n")
       endif()
       if(NOT CMAKE_Fortran_PLATFORM_ID)
-        if("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_MINGW.*" )
+        if("${CMAKE_COMPILER_OUTPUT}" MATCHES "THIS_IS_MINGW")
           set(CMAKE_Fortran_PLATFORM_ID "MinGW")
         endif()
-        if("${CMAKE_COMPILER_OUTPUT}" MATCHES ".*THIS_IS_CYGWIN.*" )
+        if("${CMAKE_COMPILER_OUTPUT}" MATCHES "THIS_IS_CYGWIN")
           set(CMAKE_Fortran_PLATFORM_ID "Cygwin")
         endif()
       endif()
@@ -152,12 +193,12 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   endif()
 
   # Set old compiler and platform id variables.
-  if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     set(CMAKE_COMPILER_IS_GNUG77 1)
   endif()
-  if("${CMAKE_Fortran_PLATFORM_ID}" MATCHES "MinGW")
+  if(CMAKE_Fortran_PLATFORM_ID MATCHES "MinGW")
     set(CMAKE_COMPILER_IS_MINGW 1)
-  elseif("${CMAKE_Fortran_PLATFORM_ID}" MATCHES "Cygwin")
+  elseif(CMAKE_Fortran_PLATFORM_ID MATCHES "Cygwin")
     set(CMAKE_COMPILER_IS_CYGWIN 1)
   endif()
 endif()
@@ -175,7 +216,7 @@ endif ()
 # "arm-unknown-nto-qnx6" instead of the correct "arm-unknown-nto-qnx6.3.0-"
 if (CMAKE_CROSSCOMPILING  AND NOT _CMAKE_TOOLCHAIN_PREFIX)
 
-  if("${CMAKE_Fortran_COMPILER_ID}" MATCHES "GNU")
+  if(CMAKE_Fortran_COMPILER_ID MATCHES "GNU")
     get_filename_component(COMPILER_BASENAME "${CMAKE_Fortran_COMPILER}" NAME)
     if (COMPILER_BASENAME MATCHES "^(.+-)g?fortran(-[0-9]+\\.[0-9]+\\.[0-9]+)?(\\.exe)?$")
       set(_CMAKE_TOOLCHAIN_PREFIX ${CMAKE_MATCH_1})

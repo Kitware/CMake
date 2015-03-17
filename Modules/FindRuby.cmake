@@ -14,19 +14,21 @@
 # It also determines what the name of the library is.  This code sets
 # the following variables:
 #
-# ::
+# ``RUBY_EXECUTABLE``
+#   full path to the ruby binary
+# ``RUBY_INCLUDE_DIRS``
+#   include dirs to be used when using the ruby library
+# ``RUBY_LIBRARY``
+#   full path to the ruby library
+# ``RUBY_VERSION``
+#   the version of ruby which was found, e.g. "1.8.7"
+# ``RUBY_FOUND``
+#   set to true if ruby ws found successfully
 #
-#   RUBY_EXECUTABLE   = full path to the ruby binary
-#   RUBY_INCLUDE_DIRS = include dirs to be used when using the ruby library
-#   RUBY_LIBRARY      = full path to the ruby library
-#   RUBY_VERSION      = the version of ruby which was found, e.g. "1.8.7"
-#   RUBY_FOUND        = set to true if ruby ws found successfully
+# Also:
 #
-#
-#
-# ::
-#
-#   RUBY_INCLUDE_PATH = same as RUBY_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
+# ``RUBY_INCLUDE_PATH``
+#   same as RUBY_INCLUDE_DIRS, only provided for compatibility reasons, don't use it
 
 #=============================================================================
 # Copyright 2004-2009 Kitware, Inc.
@@ -56,7 +58,7 @@
 set(_RUBY_POSSIBLE_EXECUTABLE_NAMES ruby)
 
 # if 1.9 is required, don't look for ruby18 and ruby1.8, default to version 1.8
-if(Ruby_FIND_VERSION_MAJOR  AND  Ruby_FIND_VERSION_MINOR)
+if(DEFINED Ruby_FIND_VERSION_MAJOR AND DEFINED Ruby_FIND_VERSION_MINOR)
    set(Ruby_FIND_VERSION_SHORT_NODOT "${Ruby_FIND_VERSION_MAJOR}${RUBY_FIND_VERSION_MINOR}")
    # we can't construct that if only major version is given
    set(_RUBY_POSSIBLE_EXECUTABLE_NAMES
@@ -88,7 +90,7 @@ if(RUBY_EXECUTABLE  AND NOT  RUBY_VERSION_MAJOR)
       RESULT_VARIABLE _RUBY_SUCCESS
       OUTPUT_VARIABLE _RUBY_OUTPUT
       ERROR_QUIET)
-    if(_RUBY_SUCCESS OR NOT _RUBY_OUTPUT)
+    if(_RUBY_SUCCESS OR _RUBY_OUTPUT STREQUAL "")
       execute_process(COMMAND ${RUBY_EXECUTABLE} -r rbconfig -e "print Config::CONFIG['${RBVAR}']"
         RESULT_VARIABLE _RUBY_SUCCESS
         OUTPUT_VARIABLE _RUBY_OUTPUT
@@ -232,11 +234,16 @@ if(WIN32)
      set( _RUBY_MSVC_RUNTIME "90" )
    endif()
 
+   set(_RUBY_ARCH_PREFIX "")
+   if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+     set(_RUBY_ARCH_PREFIX "x64-")
+   endif()
+
    list(APPEND _RUBY_POSSIBLE_LIB_NAMES
-               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}"
-               "msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}-static"
-               "msvcrt-ruby${_RUBY_NODOT_VERSION}"
-               "msvcrt-ruby${_RUBY_NODOT_VERSION}-static" )
+               "${_RUBY_ARCH_PREFIX}msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}"
+               "${_RUBY_ARCH_PREFIX}msvcr${_RUBY_MSVC_RUNTIME}-ruby${_RUBY_NODOT_VERSION}-static"
+               "${_RUBY_ARCH_PREFIX}msvcrt-ruby${_RUBY_NODOT_VERSION}"
+               "${_RUBY_ARCH_PREFIX}msvcrt-ruby${_RUBY_NODOT_VERSION}-static" )
 endif()
 
 find_library(RUBY_LIBRARY NAMES ${_RUBY_POSSIBLE_LIB_NAMES} HINTS ${RUBY_POSSIBLE_LIB_DIR} )

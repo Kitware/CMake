@@ -11,10 +11,10 @@ For full documentation visit the `CMake Home Page`_ and the
 .. _`CMake Home Page`: http://www.cmake.org
 .. _`CMake Documentation Page`: http://www.cmake.org/cmake/help/documentation.html
 
-CMake is maintained by `Kitware, Inc.`_ and developed in
+CMake is maintained and supported by `Kitware`_ and developed in
 collaboration with a productive community of contributors.
 
-.. _`Kitware, Inc.`: http://www.kitware.com
+.. _`Kitware`: http://www.kitware.com/cmake
 
 License
 =======
@@ -74,6 +74,22 @@ options and generators. Then build it and install it.
 For instructions how to do this, see documentation on `Running CMake`_.
 
 .. _`Running CMake`: http://www.cmake.org/cmake/help/runningcmake.html
+
+Reporting Bugs
+==============
+
+If you have found a bug:
+
+1. If you have a patch, please read the `CONTRIBUTING.rst`_ document.
+
+2. Otherwise, please join the the `CMake Users List`_ and ask about
+   the expected and observed behaviors to determine if it is really
+   a bug.
+
+3. Finally, if the issue is not resolved by the above steps, open
+   an entry in the `CMake Issue Tracker`_.
+
+.. _`CMake Issue Tracker`: http://www.cmake.org/Bug
 
 Contributing
 ============

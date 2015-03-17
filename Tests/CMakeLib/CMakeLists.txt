@@ -13,6 +13,8 @@ set(CMakeLib_TESTS
   testXMLSafe
   )
 
+set(testRST_ARGS ${CMAKE_CURRENT_SOURCE_DIR})
+
 if(WIN32)
   list(APPEND CMakeLib_TESTS
     testVisualStudioSlnParser
@@ -39,10 +41,12 @@ if(CMAKE_OSX_ARCHITECTURES AND XCODE
 endif()
 
 foreach(test ${CMakeLib_TESTS})
-  add_test(CMakeLib.${test} CMakeLibTests ${test})
+  add_test(CMakeLib.${test} CMakeLibTests ${test} ${${test}_ARGS})
 endforeach()
 
 if(TEST_CompileCommandOutput)
   add_executable(runcompilecommands run_compile_commands.cxx)
   target_link_libraries(runcompilecommands CMakeLib)
 endif()
+
+add_subdirectory(PseudoMemcheck)

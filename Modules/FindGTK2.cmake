@@ -267,6 +267,8 @@ function(_GTK2_FIND_INCLUDE_DIR _var _hdr)
             /usr/local/lib
             /usr/lib64
             /usr/lib
+            /usr/X11R6/include
+            /usr/X11R6/lib
             /opt/gnome/include
             /opt/gnome/lib
             /opt/openwin/include
@@ -525,7 +527,7 @@ function(_GTK2_ADD_TARGET _var)
             set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${GTK2_${_var}_INCLUDE_DIR}")
         endif()
 
-        if(GTK2_${_var}CONFIG_INCLUDE_DIR AND NOT "${GTK2_${_var}CONFIG_INCLUDE_DIR}" STREQUAL "GTK2_${_var}_INCLUDE_DIR")
+        if(GTK2_${_var}CONFIG_INCLUDE_DIR AND NOT "x${GTK2_${_var}CONFIG_INCLUDE_DIR}" STREQUAL "x${GTK2_${_var}_INCLUDE_DIR}")
             set_property(TARGET GTK2::${_basename} APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${GTK2_${_var}CONFIG_INCLUDE_DIR}")
         endif()
 
@@ -538,7 +540,11 @@ function(_GTK2_ADD_TARGET _var)
         endif()
 
         if(_${_var}_OPTIONAL_INCLUDES)
-            _GTK2_ADD_TARGET_INCLUDE_DIRS(${_var} ${_${_var}_OPTIONAL_INCLUDES})
+            foreach(_D ${_${_var}_OPTIONAL_INCLUDES})
+                if(_D)
+                    _GTK2_ADD_TARGET_INCLUDE_DIRS(${_var} ${_D})
+                endif()
+            endforeach()
         endif()
 
         if(GTK2_USE_IMPORTED_TARGETS)
@@ -570,7 +576,6 @@ endif()
 # If specified, enforce version number
 #
 if(GTK2_FIND_VERSION)
-    cmake_minimum_required(VERSION 2.6.2)
     set(GTK2_FAILED_VERSION_CHECK true)
     if(GTK2_DEBUG)
         message(STATUS "[FindGTK2.cmake:${CMAKE_CURRENT_LIST_LINE}] "
@@ -641,6 +646,10 @@ endif()
 
 foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
     if(_GTK2_component STREQUAL "gtk")
+        # Left for compatibility with previous versions.
+        _GTK2_FIND_INCLUDE_DIR(FONTCONFIG fontconfig/fontconfig.h)
+        _GTK2_FIND_INCLUDE_DIR(X11 X11/Xlib.h)
+
         _GTK2_FIND_INCLUDE_DIR(GLIB glib.h)
         _GTK2_FIND_INCLUDE_DIR(GLIBCONFIG glibconfig.h)
         _GTK2_FIND_LIBRARY    (GLIB glib false true)
@@ -680,11 +689,15 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
 
         _GTK2_FIND_LIBRARY    (PANGOFT2 pangoft2 false true)
         _GTK2_ADD_TARGET      (PANGOFT2 GTK2_DEPENDS pango gobject glib
-                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                          ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                          ${GTK2_X11_INCLUDE_DIR})
 
         _GTK2_FIND_LIBRARY    (PANGOXFT pangoxft false true)
         _GTK2_ADD_TARGET      (PANGOXFT GTK2_DEPENDS pangoft2 pango gobject glib
-                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                        OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                          ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                          ${GTK2_X11_INCLUDE_DIR})
 
         _GTK2_FIND_INCLUDE_DIR(GDK gdk/gdk.h)
         _GTK2_FIND_INCLUDE_DIR(GDKCONFIG gdkconfig.h)
@@ -715,9 +728,6 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_ADD_TARGET (GTK GTK2_DEPENDS gdk atk pangoft2 pango gdk_pixbuf gthread gobject glib
                               GTK2_OPTIONAL_DEPENDS gio pangocairo cairo)
 
-        # Left for compatibility with previous versions. It doesn't seem to be required
-        _GTK2_FIND_INCLUDE_DIR(FONTCONFIG fontconfig/fontconfig.h)
-
     elseif(_GTK2_component STREQUAL "gtkmm")
 
         _GTK2_FIND_INCLUDE_DIR(SIGC++ sigc++/sigc++.h)
@@ -743,29 +753,36 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_INCLUDE_DIR(CAIROMMCONFIG cairommconfig.h)
         _GTK2_FIND_LIBRARY    (CAIROMM cairomm true true)
         _GTK2_ADD_TARGET      (CAIROMM GTK2_DEPENDS cairo sigc++
-                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                         ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                         ${GTK2_X11_INCLUDE_DIR})
 
         _GTK2_FIND_INCLUDE_DIR(PANGOMM pangomm.h)
         _GTK2_FIND_INCLUDE_DIR(PANGOMMCONFIG pangommconfig.h)
         _GTK2_FIND_LIBRARY    (PANGOMM pangomm true true)
         _GTK2_ADD_TARGET      (PANGOMM GTK2_DEPENDS glibmm sigc++ pango gobject glib
                                        GTK2_OPTIONAL_DEPENDS cairomm pangocairo cairo
-                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
-
+                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                         ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                         ${GTK2_X11_INCLUDE_DIR})
 
         _GTK2_FIND_INCLUDE_DIR(GDKMM gdkmm.h)
         _GTK2_FIND_INCLUDE_DIR(GDKMMCONFIG gdkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GDKMM gdkmm true true)
         _GTK2_ADD_TARGET      (GDKMM GTK2_DEPENDS pangomm gtk glibmm sigc++ gdk atk pangoft2 gdk_pixbuf pango gobject glib
                                      GTK2_OPTIONAL_DEPENDS giomm cairomm gio pangocairo cairo
-                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                       ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                       ${GTK2_X11_INCLUDE_DIR})
 
         _GTK2_FIND_INCLUDE_DIR(GTKMM gtkmm.h)
         _GTK2_FIND_INCLUDE_DIR(GTKMMCONFIG gtkmmconfig.h)
         _GTK2_FIND_LIBRARY    (GTKMM gtkmm true true)
         _GTK2_ADD_TARGET      (GTKMM GTK2_DEPENDS atkmm gdkmm pangomm gtk glibmm sigc++ gdk atk pangoft2 gdk_pixbuf pango gthread gobject glib
                                      GTK2_OPTIONAL_DEPENDS giomm cairomm gio pangocairo cairo
-                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                       ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                       ${GTK2_X11_INCLUDE_DIR})
 
     elseif(_GTK2_component STREQUAL "glade")
 
@@ -773,7 +790,9 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_LIBRARY    (GLADE glade false true)
         _GTK2_ADD_TARGET      (GLADE GTK2_DEPENDS gtk gdk atk gio pangoft2 gdk_pixbuf pango gobject glib
                                      GTK2_OPTIONAL_DEPENDS pangocairo cairo
-                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                     OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                       ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                       ${GTK2_X11_INCLUDE_DIR})
 
     elseif(_GTK2_component STREQUAL "glademm")
 
@@ -782,7 +801,9 @@ foreach(_GTK2_component ${GTK2_FIND_COMPONENTS})
         _GTK2_FIND_LIBRARY    (GLADEMM glademm true true)
         _GTK2_ADD_TARGET      (GLADEMM GTK2_DEPENDS gtkmm glade atkmm gdkmm giomm pangomm glibmm sigc++ gtk gdk atk pangoft2 gdk_pixbuf pango gthread gobject glib
                                        GTK2_OPTIONAL_DEPENDS giomm cairomm gio pangocairo cairo
-                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2})
+                                       OPTIONAL_INCLUDES ${FREETYPE_INCLUDE_DIR_ft2build} ${FREETYPE_INCLUDE_DIR_freetype2}
+                                                         ${GTK2_FONTCONFIG_INCLUDE_DIR}
+                                                         ${GTK2_X11_INCLUDE_DIR})
 
     else()
         message(FATAL_ERROR "Unknown GTK2 component ${_component}")

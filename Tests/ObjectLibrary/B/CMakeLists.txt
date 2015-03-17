@@ -5,10 +5,7 @@ if("${CMAKE_GENERATOR}" MATCHES "Visual Studio 6")
 endif()
 
 # Add -fPIC so objects can be used in shared libraries.
-# TODO: Need property for this.
-if(CMAKE_SHARED_LIBRARY_C_FLAGS AND NOT WATCOM)
-  set(CMAKE_C_FLAGS "${CMAKE_SHARED_LIBRARY_C_FLAGS} ${CMAKE_C_FLAGS}")
-endif()
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 add_library(B OBJECT b1.c b2.c)
 target_include_directories(B PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

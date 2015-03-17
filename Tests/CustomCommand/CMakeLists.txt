@@ -117,6 +117,7 @@ add_custom_command(
   COMMAND ${CMAKE_COMMAND} -E echo " Copying doc1pre.txt to doc2post.txt."
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_BINARY_DIR}/doc1pre.txt
                                    ${PROJECT_BINARY_DIR}/doc2post.txt
+  BYPRODUCTS ${PROJECT_BINARY_DIR}/doc2post.txt
   COMMENT "Running TDocument post-build commands"
   )
 
@@ -153,6 +154,19 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/foo.c
   ${PROJECT_BINARY_DIR}/foo.c
   )
 
+# Test using OBJECT_DEPENDS to bring in a custom command.
+# Use a path that can be simplified to make sure paths
+# are consistently normalized.
+add_custom_command(
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/subdir/../subdir/subdir.h
+  COMMAND ${CMAKE_COMMAND} -E copy
+            ${CMAKE_CURRENT_SOURCE_DIR}/subdir.h.in
+            ${CMAKE_CURRENT_BINARY_DIR}/subdir/subdir.h
+  DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/subdir.h.in
+  )
+set_property(SOURCE ${PROJECT_BINARY_DIR}/foo.c PROPERTY
+  OBJECT_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/subdir/../subdir/subdir.h)
+
 # Add custom command to generate not_included.h, which is a header
 # file that is not included by any source in this project.  This will
 # test whether all custom command outputs explicitly listed as sources
@@ -161,13 +175,6 @@ add_custom_command(OUTPUT ${PROJECT_BINARY_DIR}/not_included.h
   DEPENDS ${PROJECT_SOURCE_DIR}/foo.h.in
   COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/foo.h.in
                                    ${PROJECT_BINARY_DIR}/not_included.h
-  )
-
-# Tell the executable where to find not_included.h.
-configure_file(
-  ${PROJECT_SOURCE_DIR}/config.h.in
-  ${PROJECT_BINARY_DIR}/config.h
-  @ONLY
   )
 
 # add the executable
@@ -367,8 +374,8 @@ endif()
 
 foreach(arg ${CHECK_ARGS} "")
   set(ARG "${arg}")
-  string(REGEX REPLACE "\\\\" "\\\\\\\\" ARG "${ARG}")
-  string(REGEX REPLACE "\"" "\\\\\"" ARG "${ARG}")
+  string(REPLACE "\\" "\\\\" ARG "${ARG}")
+  string(REPLACE "\"" "\\\"" ARG "${ARG}")
   set(EXPECTED_ARGUMENTS
     "${EXPECTED_ARGUMENTS}  \"${ARG}\",
 ")
@@ -455,4 +462,54 @@ add_custom_target(perconfig_target ALL
 add_custom_target(source_in_custom_target SOURCES source_in_custom_target.cpp)
 set_property(SOURCE source_in_custom_target
   PROPERTY COMPILE_DEFINITIONS "TEST"
+)
+
+set(gen_path "${CMAKE_CURRENT_BINARY_DIR}//./foo")
+set(gen_file "${gen_path}/foo.cxx")
+
+add_custom_command(
+  OUTPUT "${gen_file}"
+  # Make sure the output directory exists before trying to write to it.
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E touch "${gen_file}"
+)
+
+add_library(NormOutput "${gen_file}")
+
+set(gen_path "${gen_path}/bar")
+set(gen_file "${gen_path}/bar.cxx")
+
+add_custom_command(
+  OUTPUT "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${gen_path}"
+)
+
+add_custom_command(
+  OUTPUT "${gen_file}"
+  DEPENDS "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E touch "${gen_file}")
+
+add_library(NormDepends "${gen_file}")
+
+# Test that USES_TERMINAL is parsed correctly.
+# It seems much more difficult to test that USES_TERMINAL actually gives
+# the subprocess console access, as test output is piped through CTest,
+# and CTest itself might not be connected to the console.
+
+set(gen_file "${gen_path}/bar2.cxx")
+
+add_custom_command(
+  OUTPUT "${gen_file}"
+  DEPENDS "${gen_path}"
+  COMMAND ${CMAKE_COMMAND} -E touch "${gen_file}"
+  VERBATIM
+  USES_TERMINAL
+)
+
+add_library(UseConsole "${gen_file}")
+
+add_custom_target(UseConsoleTarget ALL
+  COMMAND ${CMAKE_COMMAND} -E echo "Custom console target."
+  VERBATIM
+  USES_TERMINAL
 )

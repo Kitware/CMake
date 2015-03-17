@@ -1,5 +1,13 @@
 PROJECT(CMZLIB)
 
+# Disable warnings to avoid changing 3rd party code.
+if(CMAKE_C_COMPILER_ID MATCHES
+    "^(GNU|Clang|AppleClang|XL|VisualAge|SunPro|MIPSpro|HP|Intel)$")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -w")
+elseif(CMAKE_C_COMPILER_ID STREQUAL "PathScale")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -woffall")
+endif()
+
 INCLUDE_DIRECTORIES(
   "${CMZLIB_SOURCE_DIR}"
   "${CMZLIB_SOURCE_DIR}/.."
@@ -18,12 +26,10 @@ IF(WIN32)
   IF(BUILD_SHARED_LIBS)
     SET(ZLIB_DLL 1)
     IF(NOT UNIX)
-      IF(NOT BORLAND)
-        IF(NOT MINGW)
-          SET(ZLIB_SRCS ${ZLIB_SRCS} zlib.def zlib.rc  )
-        ENDIF(NOT MINGW)
-      ENDIF(NOT BORLAND) 
-    ENDIF(NOT UNIX)   
+      IF(NOT MINGW)
+        SET(ZLIB_SRCS ${ZLIB_SRCS} zlib.def zlib.rc  )
+      ENDIF(NOT MINGW)
+    ENDIF(NOT UNIX)
   ENDIF(BUILD_SHARED_LIBS)
 ENDIF(WIN32)
 

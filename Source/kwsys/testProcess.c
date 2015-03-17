@@ -11,13 +11,16 @@
 ============================================================================*/
 #include "kwsysPrivate.h"
 #include KWSYS_HEADER(Process.h)
+#include KWSYS_HEADER(Encoding.h)
 
 /* Work-around CMake dependency scanning limitation.  This must
    duplicate the above list of headers.  */
 #if 0
 # include "Process.h.in"
+# include "Encoding.h.in"
 #endif
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -102,6 +105,7 @@ static int test4(int argc, const char* argv[])
   fprintf(stderr, "Output before crash on stderr from crash test.\n");  
   fflush(stdout);
   fflush(stderr);
+  assert(invalidAddress); /* Quiet Clang scan-build. */
   /* Provoke deliberate crash by writing to the invalid address. */
   *invalidAddress = 0;
   fprintf(stdout, "Output after crash on stdout from crash test.\n");
@@ -393,6 +397,19 @@ int runChild(const char* cmd[], int state, int exception, int value,
 int main(int argc, const char* argv[])
 {
   int n = 0;
+
+#ifdef _WIN32
+  int i;
+  char new_args[10][_MAX_PATH];
+  LPWSTR* w_av = CommandLineToArgvW(GetCommandLineW(), &argc);
+  for(i=0; i<argc; i++)
+  {
+    kwsysEncoding_wcstombs(new_args[i], w_av[i], _MAX_PATH);
+    argv[i] = new_args[i];
+  }
+  LocalFree(w_av);
+#endif
+
 #if 0
     {
     HANDLE out = GetStdHandle(STD_OUTPUT_HANDLE);

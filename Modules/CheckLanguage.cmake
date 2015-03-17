@@ -47,7 +47,7 @@ macro(check_language lang)
     message(STATUS ${_desc})
     file(REMOVE_RECURSE ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang})
     file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/Check${lang}/CMakeLists.txt"
-      "cmake_minimum_required(VERSION 2.8)
+      "cmake_minimum_required(VERSION ${CMAKE_VERSION})
 project(Check${lang} ${lang})
 file(WRITE \"\${CMAKE_CURRENT_BINARY_DIR}/result.cmake\"
   \"set(CMAKE_${lang}_COMPILER \\\"\${CMAKE_${lang}_COMPILER}\\\")\\n\"

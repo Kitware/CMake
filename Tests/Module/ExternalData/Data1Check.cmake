@@ -8,6 +8,40 @@ if(DEFINED DataSpace)
     message(SEND_ERROR "Input file:\n  ${DataSpace}\ndoes not have expected content, but [[${lines}]]")
   endif()
 endif()
+file(STRINGS "${DataScript}" lines LIMIT_INPUT 1024)
+if(NOT "x${lines}" STREQUAL "xDataScript")
+  message(SEND_ERROR "Input file:\n  ${DataScript}\ndoes not have expected content, but [[${lines}]]")
+endif()
+file(STRINGS "${DataAlgoMapA}" lines LIMIT_INPUT 1024)
+if(NOT "x${lines}" STREQUAL "xDataAlgoMap")
+  message(SEND_ERROR "Input file:\n  ${DataAlgoMapA}\ndoes not have expected content, but [[${lines}]]")
+endif()
+file(STRINGS "${DataAlgoMapB}" lines LIMIT_INPUT 1024)
+if(NOT "x${lines}" STREQUAL "xDataAlgoMap")
+  message(SEND_ERROR "Input file:\n  ${DataAlgoMapB}\ndoes not have expected content, but [[${lines}]]")
+endif()
+if(DataMissing)
+  if(EXISTS "${DataMissing}")
+    message(SEND_ERROR
+      "Input file:\n"
+      "  ${DataMissing}\n"
+      "exists but should not."
+      )
+  endif()
+else()
+  message(SEND_ERROR "DataMissing is not set!")
+endif()
+if(DataMissingWithAssociated)
+  if(EXISTS "${DataMissingWithAssociated}")
+    message(SEND_ERROR
+      "Input file:\n"
+      "  ${DataMissingWithAssociated}\n"
+      "exists but should not."
+      )
+  endif()
+else()
+  message(SEND_ERROR "DataMissingWithAssociated is not set!")
+endif()
 set(SeriesAn1 "1\\.dat")
 set(SeriesBn1 "_1\\.dat")
 set(SeriesCn1 "\\.1\\.dat")

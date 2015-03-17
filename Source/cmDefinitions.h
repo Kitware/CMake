@@ -13,6 +13,9 @@
 #define cmDefinitions_h
 
 #include "cmStandardIncludes.h"
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+#include "cmsys/hash_map.hxx"
+#endif
 
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.
@@ -69,7 +72,11 @@ private:
   cmDefinitions* Up;
 
   // Local definitions, set or unset.
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  typedef cmsys::hash_map<std::string, Def> MapType;
+#else
   typedef std::map<std::string, Def> MapType;
+#endif
   MapType Map;
 
   // Internal query and update methods.

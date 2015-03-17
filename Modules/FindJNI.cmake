@@ -55,7 +55,7 @@ macro(java_append_library_directories _var)
         # endianess of the underlying system.
         set(_java_libarch "${CMAKE_SYSTEM_PROCESSOR}" "mips" "mipsel" "mipseb")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64le")
-        set(_java_libarch "ppc64le")
+        set(_java_libarch "ppc64" "ppc64le")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)64")
         set(_java_libarch "ppc64" "ppc")
     elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "^(powerpc|ppc)")
@@ -114,6 +114,7 @@ if(_JAVA_HOME)
   JAVA_APPEND_LIBRARY_DIRECTORIES(JAVA_AWT_LIBRARY_DIRECTORIES
     ${_JAVA_HOME}/jre/lib/{libarch}
     ${_JAVA_HOME}/jre/lib
+    ${_JAVA_HOME}/lib/{libarch}
     ${_JAVA_HOME}/lib
     ${_JAVA_HOME}
     )

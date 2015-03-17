@@ -12,6 +12,7 @@
 #   FUNCTION - the name of the function
 #   LOCATION - location where the library should be found
 #   VARIABLE - variable to store the result
+#              Will be created as an internal cache variable.
 #
 #
 #
@@ -41,7 +42,7 @@
 
 
 macro(CHECK_LIBRARY_EXISTS LIBRARY FUNCTION LOCATION VARIABLE)
-  if("${VARIABLE}" MATCHES "^${VARIABLE}$")
+  if(NOT DEFINED "${VARIABLE}")
     set(MACRO_CHECK_LIBRARY_EXISTS_DEFINITION
       "-DCHECK_FUNCTION_EXISTS=${FUNCTION} ${CMAKE_REQUIRED_FLAGS}")
     if(NOT CMAKE_REQUIRED_QUIET)

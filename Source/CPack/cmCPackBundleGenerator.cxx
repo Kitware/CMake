@@ -39,6 +39,21 @@ int cmCPackBundleGenerator::InitializeInternal()
     return 0;
     }
 
+  if(this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP"))
+    {
+    const std::string codesign_path = cmSystemTools::FindProgram("codesign",
+       std::vector<std::string>(), false);
+
+    if(codesign_path.empty())
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Cannot locate codesign command"
+        << std::endl);
+      return 0;
+      }
+    this->SetOptionIfNotSet("CPACK_COMMAND_CODESIGN", codesign_path.c_str());
+    }
+
   return this->Superclass::InitializeInternal();
 }
 
@@ -53,7 +68,7 @@ const char* cmCPackBundleGenerator::GetPackagingInstallPrefix()
 }
 
 //----------------------------------------------------------------------
-int cmCPackBundleGenerator::PackageFiles()
+int cmCPackBundleGenerator::ConstructBundle()
 {
 
   // Get required arguments ...
@@ -97,24 +112,24 @@ int cmCPackBundleGenerator::PackageFiles()
 
   // The staging directory contains everything that will end-up inside the
   // final disk image ...
-  cmOStringStream staging;
+  std::ostringstream staging;
   staging << toplevel;
 
-  cmOStringStream contents;
+  std::ostringstream contents;
   contents << staging.str() << "/" << cpack_bundle_name
     << ".app/" << "Contents";
 
-  cmOStringStream application;
+  std::ostringstream application;
   application << contents.str() << "/" << "MacOS";
 
-  cmOStringStream resources;
+  std::ostringstream resources;
   resources << contents.str() << "/" << "Resources";
 
   // Install a required, user-provided bundle metadata file ...
-  cmOStringStream plist_source;
+  std::ostringstream plist_source;
   plist_source << cpack_bundle_plist;
 
-  cmOStringStream plist_target;
+  std::ostringstream plist_target;
   plist_target << contents.str() << "/" << "Info.plist";
 
   if(!this->CopyFile(plist_source, plist_target))
@@ -127,10 +142,10 @@ int cmCPackBundleGenerator::PackageFiles()
     }
 
   // Install a user-provided bundle icon ...
-  cmOStringStream icon_source;
+  std::ostringstream icon_source;
   icon_source << cpack_bundle_icon;
 
-  cmOStringStream icon_target;
+  std::ostringstream icon_target;
   icon_target << resources.str() << "/" << cpack_bundle_name << ".icns";
 
   if(!this->CopyFile(icon_source, icon_target))
@@ -146,10 +161,10 @@ int cmCPackBundleGenerator::PackageFiles()
   // executable or a script) ...
   if(!cpack_bundle_startup_command.empty())
     {
-    cmOStringStream command_source;
+    std::ostringstream command_source;
     command_source << cpack_bundle_startup_command;
 
-    cmOStringStream command_target;
+    std::ostringstream command_target;
     command_target << application.str() << "/" << cpack_bundle_name;
 
     if(!this->CopyFile(command_source, command_target))
@@ -165,10 +180,120 @@ int cmCPackBundleGenerator::PackageFiles()
     cmSystemTools::SetPermissions(command_target.str().c_str(), 0777);
     }
 
+  return 1;
+}
+
+//----------------------------------------------------------------------
+int cmCPackBundleGenerator::PackageFiles()
+{
+  if(!this->ConstructBundle())
+    {
+    return 0;
+    }
+
+  if(!this->SignBundle(toplevel))
+    {
+    return 0;
+    }
+
   return this->CreateDMG(toplevel, packageFileNames[0]);
 }
 
 bool cmCPackBundleGenerator::SupportsComponentInstallation() const
 {
   return false;
+}
+
+
+int cmCPackBundleGenerator::SignBundle(const std::string& src_dir)
+{
+  const std::string cpack_apple_cert_app =
+    this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP")
+    ? this->GetOption("CPACK_BUNDLE_APPLE_CERT_APP") : "";
+
+  // codesign the application.
+  if(!cpack_apple_cert_app.empty())
+    {
+    std::string output;
+    std::string bundle_path;
+    bundle_path = src_dir + "/";
+    bundle_path += this->GetOption("CPACK_BUNDLE_NAME");
+    bundle_path += ".app";
+
+    // A list of additional files to sign, ie. frameworks and plugins.
+    const std::string sign_files =
+      this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_FILES")
+      ? this->GetOption("CPACK_BUNDLE_APPLE_CODESIGN_FILES") : "";
+
+    std::vector<std::string> relFiles;
+    cmSystemTools::ExpandListArgument(sign_files, relFiles);
+
+    // sign the files supplied by the user, ie. frameworks.
+    for(std::vector<std::string>::iterator it = relFiles.begin();
+      it != relFiles.end(); ++it)
+      {
+      std::ostringstream temp_sign_file_cmd;
+      temp_sign_file_cmd << this->GetOption("CPACK_COMMAND_CODESIGN");
+      temp_sign_file_cmd << " --deep -f -s \"" << cpack_apple_cert_app;
+      temp_sign_file_cmd << "\" -i ";
+      temp_sign_file_cmd << this->GetOption("CPACK_APPLE_BUNDLE_ID");
+      temp_sign_file_cmd << " \"";
+      temp_sign_file_cmd << bundle_path;
+      temp_sign_file_cmd << it->c_str() << "\"";
+
+      if(!this->RunCommand(temp_sign_file_cmd, &output))
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR,
+          "Error signing file:"
+          << bundle_path << it->c_str() << std::endl << output << std::endl);
+
+        return 0;
+        }
+      }
+
+    // sign main binary
+    std::ostringstream temp_sign_binary_cmd;
+    temp_sign_binary_cmd << this->GetOption("CPACK_COMMAND_CODESIGN");
+    temp_sign_binary_cmd << " --deep -f -s \"" << cpack_apple_cert_app;
+    temp_sign_binary_cmd << "\" \"" << bundle_path << "\"";
+
+    if(!this->RunCommand(temp_sign_binary_cmd, &output))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error signing the application binary."
+        << std::endl << output << std::endl);
+
+      return 0;
+      }
+
+    // sign app bundle
+    std::ostringstream temp_codesign_cmd;
+    temp_codesign_cmd << this->GetOption("CPACK_COMMAND_CODESIGN");
+    temp_codesign_cmd << " --deep -f -s \"" << cpack_apple_cert_app << "\"";
+    if(this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS"))
+      {
+      temp_codesign_cmd << " --entitlements ";
+      temp_codesign_cmd << this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS");
+      }
+    temp_codesign_cmd << " \"" << bundle_path << "\"";
+
+    if(!this->RunCommand(temp_codesign_cmd, &output))
+      {
+      cmCPackLogger(cmCPackLog::LOG_ERROR,
+        "Error signing the application package."
+        << std::endl << output << std::endl);
+
+      return 0;
+      }
+
+    cmCPackLogger(cmCPackLog::LOG_OUTPUT,
+      "- Application has been codesigned"
+      << std::endl);
+    cmCPackLogger(cmCPackLog::LOG_VERBOSE,
+       (this->GetOption("CPACK_BUNDLE_APPLE_ENTITLEMENTS")
+         ? "with entitlement sandboxing" : "without entitlement sandboxing")
+       << std::endl);
+  }
+
+  return 1;
 }

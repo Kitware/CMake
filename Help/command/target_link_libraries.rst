@@ -18,7 +18,10 @@ If a library name matches that of another target in the project a
 dependency will automatically be added in the build system to make sure
 the library being linked is up-to-date before the target links. Item names
 starting with ``-``, but not ``-l`` or ``-framework``, are treated as
-linker flags.
+linker flags.  Note that such flags will be treated like any other library
+link item for purposes of transitive dependencies, so they are generally
+safe to specify only as private link items that will not propagate to
+dependents of ``<target>``.
 
 A ``debug``, ``optimized``, or ``general`` keyword indicates that the
 library immediately following it is to be used only for the
@@ -45,6 +48,9 @@ exclusively by this signature private.
 CMake will also propagate :ref:`usage requirements <Target Usage Requirements>`
 from linked library targets.  Usage requirements of dependencies affect
 compilation of sources in the ``<target>``.
+
+.. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_LINK_LIBRARIES`
+.. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.txt
 
 If an ``<item>`` is a library in a Mac OX framework, the ``Headers``
 directory of the framework will also be processed as a

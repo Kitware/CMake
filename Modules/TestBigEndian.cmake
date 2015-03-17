@@ -25,7 +25,7 @@
 #  License text for the above reference.)
 
 macro(TEST_BIG_ENDIAN VARIABLE)
-  if("HAVE_${VARIABLE}" MATCHES "^HAVE_${VARIABLE}$")
+  if(NOT DEFINED HAVE_${VARIABLE})
     message(STATUS "Check if the system is big endian")
     message(STATUS "Searching 16 bit integer")
 

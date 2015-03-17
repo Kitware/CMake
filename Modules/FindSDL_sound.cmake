@@ -21,7 +21,8 @@
 #     flags to SDL_SOUND_LIBRARIES. This is prepended to SDL_SOUND_LIBRARIES.
 #     This is available mostly for cases this module failed to anticipate for
 #     and you must add additional flags. This is marked as ADVANCED.
-#   SDL_SOUND_VERSION_STRING, human-readable string containing the version of SDL_sound
+#   SDL_SOUND_VERSION_STRING, human-readable string containing the
+#     version of SDL_sound
 #
 #
 #
@@ -183,7 +184,7 @@ if(SDL_FOUND AND SDL_SOUND_INCLUDE_DIR AND SDL_SOUND_LIBRARY)
    # in the SDL_LIBRARY string after the "-framework".
    # But if I quote the stuff in INCLUDE_DIRECTORIES, it doesn't work.
    file(WRITE ${PROJECT_BINARY_DIR}/CMakeTmp/CMakeLists.txt
-     "cmake_minimum_required(VERSION 2.8)
+     "cmake_minimum_required(VERSION ${CMAKE_VERSION})
         project(DetermineSoundLibs)
         include_directories(${SDL_INCLUDE_DIR} ${SDL_SOUND_INCLUDE_DIR})
         add_executable(DetermineSoundLibs DetermineSoundLibs.c)

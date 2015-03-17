@@ -13,8 +13,8 @@
 #define cmCustomCommand_h
 
 #include "cmStandardIncludes.h"
+#include "cmListFileCache.h"
 class cmMakefile;
-class cmListFileBacktrace;
 
 /** \class cmCustomCommand
  * \brief A class to encapsulate a custom command
@@ -32,6 +32,7 @@ public:
   /** Main constructor specifies all information for the command.  */
   cmCustomCommand(cmMakefile const* mf,
                   const std::vector<std::string>& outputs,
+                  const std::vector<std::string>& byproducts,
                   const std::vector<std::string>& depends,
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
@@ -41,6 +42,9 @@ public:
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
+
+  /** Get the extra files produced by the command.  */
+  const std::vector<std::string>& GetByproducts() const;
 
   /** Get the vector that holds the list of dependencies.  */
   const std::vector<std::string>& GetDepends() const;
@@ -79,8 +83,14 @@ public:
   void AppendImplicitDepends(ImplicitDependsList const&);
   ImplicitDependsList const& GetImplicitDepends() const;
 
+  /** Set/Get whether this custom command should be given access to the
+      real console (if possible).  */
+  bool GetUsesTerminal() const;
+  void SetUsesTerminal(bool b);
+
 private:
   std::vector<std::string> Outputs;
+  std::vector<std::string> Byproducts;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
   bool HaveComment;
@@ -88,8 +98,9 @@ private:
   std::string WorkingDirectory;
   bool EscapeAllowMakeVars;
   bool EscapeOldStyle;
-  cmListFileBacktrace* Backtrace;
+  cmListFileBacktrace Backtrace;
   ImplicitDependsList ImplicitDepends;
+  bool UsesTerminal;
 };
 
 #endif

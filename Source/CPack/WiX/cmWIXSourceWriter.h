@@ -45,6 +45,9 @@ public:
 
   static std::string WindowsCodepageToUtf8(std::string const& value);
 
+protected:
+   cmCPackLog* Logger;
+
 private:
   enum State
   {
@@ -57,8 +60,6 @@ private:
   void Indent(size_t count);
 
   static std::string EscapeAttributeValue(std::string const& value);
-
-  cmCPackLog* Logger;
 
   cmsys::ofstream File;
 

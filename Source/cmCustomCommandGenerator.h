@@ -42,6 +42,7 @@ public:
   const char* GetComment() const;
   std::string GetWorkingDirectory() const;
   std::vector<std::string> const& GetOutputs() const;
+  std::vector<std::string> const& GetByproducts() const;
   std::vector<std::string> const& GetDepends() const;
 };
 

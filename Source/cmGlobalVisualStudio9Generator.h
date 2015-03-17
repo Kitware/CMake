@@ -25,19 +25,16 @@ class cmGlobalVisualStudio9Generator :
 {
 public:
   cmGlobalVisualStudio9Generator(const std::string& name,
-    const std::string& platformName,
-    const std::string& additionalPlatformDefinition);
+    const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
   /**
-   * Try to determine system infomation such as shared library
+   * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.
    */
-  virtual void EnableLanguage(std::vector<std::string>const& languages,
-                              cmMakefile *, bool optional);
   virtual void WriteSLNHeader(std::ostream& fout);
 
   /**

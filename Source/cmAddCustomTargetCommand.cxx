@@ -30,7 +30,7 @@ bool cmAddCustomTargetCommand
   // Check the target name.
   if(targetName.find_first_of("/\\") != targetName.npos)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "called with invalid target name \"" << targetName
       << "\".  Target names may not contain a slash.  "
       << "Use ADD_CUSTOM_COMMAND to generate files.";
@@ -45,9 +45,10 @@ bool cmAddCustomTargetCommand
   cmCustomCommandLines commandLines;
 
   // Accumulate dependencies.
-  std::vector<std::string> depends;
+  std::vector<std::string> depends, byproducts;
   std::string working_directory;
   bool verbatim = false;
+  bool uses_terminal = false;
   std::string comment_buffer;
   const char* comment = 0;
   std::vector<std::string> sources;
@@ -56,10 +57,11 @@ bool cmAddCustomTargetCommand
   enum tdoing {
     doing_command,
     doing_depends,
+    doing_byproducts,
     doing_working_directory,
     doing_comment,
     doing_source,
-    doing_verbatim
+    doing_nothing
   };
   tdoing doing = doing_command;
 
@@ -84,14 +86,23 @@ bool cmAddCustomTargetCommand
       {
       doing = doing_depends;
       }
+    else if(copy == "BYPRODUCTS")
+      {
+      doing = doing_byproducts;
+      }
     else if(copy == "WORKING_DIRECTORY")
       {
       doing = doing_working_directory;
       }
     else if(copy == "VERBATIM")
       {
-      doing = doing_verbatim;
+      doing = doing_nothing;
       verbatim = true;
+      }
+    else if(copy == "USES_TERMINAL")
+      {
+      doing = doing_nothing;
+      uses_terminal = true;
       }
     else if (copy == "COMMENT")
       {
@@ -122,6 +133,19 @@ bool cmAddCustomTargetCommand
         case doing_command:
           currentLine.push_back(copy);
           break;
+        case doing_byproducts:
+          {
+          std::string filename;
+          if (!cmSystemTools::FileIsFullPath(copy.c_str()))
+            {
+            filename = this->Makefile->GetCurrentOutputDirectory();
+            filename += "/";
+            }
+          filename += copy;
+          cmSystemTools::ConvertToUnixSlashes(filename);
+          byproducts.push_back(filename);
+          }
+          break;
         case doing_depends:
           {
           std::string dep = copy;
@@ -146,7 +170,7 @@ bool cmAddCustomTargetCommand
   std::string::size_type pos = targetName.find_first_of("#<>");
   if(pos != targetName.npos)
     {
-    cmOStringStream msg;
+    std::ostringstream msg;
     msg << "called with target name containing a \"" << targetName[pos]
         << "\".  This character is not allowed.";
     this->SetError(msg.str());
@@ -165,7 +189,7 @@ bool cmAddCustomTargetCommand
   if (!nameOk)
     {
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
-    cmOStringStream e;
+    std::ostringstream e;
     bool issueMessage = false;
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
@@ -218,15 +242,30 @@ bool cmAddCustomTargetCommand
     {
     const char* build_dir = this->Makefile->GetCurrentOutputDirectory();
     working_directory =
-      cmSystemTools::CollapseFullPath(working_directory.c_str(), build_dir);
+      cmSystemTools::CollapseFullPath(working_directory, build_dir);
+    }
+
+  if (commandLines.empty() && !byproducts.empty())
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      "BYPRODUCTS may not be specified without any COMMAND");
+    return true;
+    }
+  if (commandLines.empty() && uses_terminal)
+    {
+    this->Makefile->IssueMessage(cmake::FATAL_ERROR,
+      "USES_TERMINAL may not be specified without any COMMAND");
+    return true;
     }
 
   // Add the utility target to the makefile.
   bool escapeOldStyle = !verbatim;
   cmTarget* target =
     this->Makefile->AddUtilityCommand(targetName, excludeFromAll,
-                                      working_directory.c_str(), depends,
-                                      commandLines, escapeOldStyle, comment);
+                                      working_directory.c_str(),
+                                      byproducts, depends,
+                                      commandLines, escapeOldStyle, comment,
+                                      uses_terminal);
 
   // Add additional user-specified source files to the target.
   target->AddSources(sources);

@@ -20,8 +20,9 @@
 #
 # ::
 #
-#     cmake_expand_imported_targets(expandedLibs LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
-#                                                CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
+#     cmake_expand_imported_targets(expandedLibs
+#       LIBRARIES ${CMAKE_REQUIRED_LIBRARIES}
+#       CONFIGURATION "${CMAKE_TRY_COMPILE_CONFIGURATION}" )
 
 
 #=============================================================================
@@ -71,7 +72,11 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
       set(_CCSR_NEW_REQ_LIBS )
       set(_CHECK_FOR_IMPORTED_TARGETS FALSE)
       foreach(_CURRENT_LIB ${_CCSR_REQ_LIBS})
-         get_target_property(_importedConfigs "${_CURRENT_LIB}" IMPORTED_CONFIGURATIONS)
+         if(TARGET "${_CURRENT_LIB}")
+           get_target_property(_importedConfigs "${_CURRENT_LIB}" IMPORTED_CONFIGURATIONS)
+         else()
+           set(_importedConfigs "")
+         endif()
          if (_importedConfigs)
 #            message(STATUS "Detected imported target ${_CURRENT_LIB}")
             # Ok, so this is an imported target.
@@ -123,7 +128,11 @@ function(CMAKE_EXPAND_IMPORTED_TARGETS _RESULT )
    # all remaining imported target names (there shouldn't be any left anyway).
    set(_CCSR_NEW_REQ_LIBS )
    foreach(_CURRENT_LIB ${_CCSR_REQ_LIBS})
-      get_target_property(_importedConfigs "${_CURRENT_LIB}" IMPORTED_CONFIGURATIONS)
+      if(TARGET "${_CURRENT_LIB}")
+        get_target_property(_importedConfigs "${_CURRENT_LIB}" IMPORTED_CONFIGURATIONS)
+      else()
+        set(_importedConfigs "")
+      endif()
       if (NOT _importedConfigs)
          list(APPEND _CCSR_NEW_REQ_LIBS "${_CURRENT_LIB}" )
 #         message(STATUS "final: appending ${_CURRENT_LIB}")

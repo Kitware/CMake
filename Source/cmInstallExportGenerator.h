@@ -30,6 +30,7 @@ public:
                            const char* dest, const char* file_permissions,
                            const std::vector<std::string>& configurations,
                            const char* component,
+                           MessageLevel message,
                            const char* filename, const char* name_space,
                            bool exportOld, cmMakefile* mf);
   ~cmInstallExportGenerator();
@@ -39,6 +40,9 @@ public:
   cmMakefile* GetMakefile() const { return this->Makefile; }
 
   const std::string& GetNamespace() const { return this->Namespace; }
+
+  std::string const& GetDestination() const
+    { return this->Destination; }
 
 protected:
   virtual void GenerateScript(std::ostream& os);

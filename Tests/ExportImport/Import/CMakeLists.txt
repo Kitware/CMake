@@ -1,4 +1,5 @@
 cmake_minimum_required (VERSION 2.7.20090711)
+cmake_policy(SET CMP0025 NEW)
 project(Import C CXX)
 
 # Import everything in a subdirectory.

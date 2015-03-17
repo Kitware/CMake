@@ -292,6 +292,9 @@ typedef uint64_t uintmax_t;
 /* Version number of bsdtar */
 #cmakedefine BSDTAR_VERSION_STRING "${BSDTAR_VERSION_STRING}"
 
+/* Version number of bsdcat */
+#cmakedefine BSDCAT_VERSION_STRING "${BSDCAT_VERSION_STRING}"
+
 /* Define to 1 if you have the `acl_create_entry' function. */
 #cmakedefine HAVE_ACL_CREATE_ENTRY 1
 
@@ -1112,8 +1115,13 @@ typedef uint64_t uintmax_t;
 #cmakedefine _LARGE_FILES ${_LARGE_FILES}
 
 /* Define for Windows to use Windows 2000+ APIs. */
+#ifndef _WIN32_WINNT
 #cmakedefine _WIN32_WINNT ${_WIN32_WINNT}
+#endif // _WIN32_WINNT
+
+#ifndef WINVER
 #cmakedefine WINVER ${WINVER}
+#endif // WINVER
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #cmakedefine const ${const}

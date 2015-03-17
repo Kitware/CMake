@@ -125,7 +125,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
 
   this->TargetsToIgnoreRegex.clear();
-  if (ignoreTargetsRegexes.size() > 0)
+  if (!ignoreTargetsRegexes.empty())
     {
     std::vector<std::string> ignoreTargetsRegExVector;
     cmSystemTools::ExpandListArgument(ignoreTargetsRegexes,
@@ -497,7 +497,7 @@ int cmGraphVizWriter::CollectAllTargets()
         continue;
         }
       //std::cout << "Found target: " << tit->first.c_str() << std::endl;
-      cmOStringStream ostr;
+      std::ostringstream ostr;
       ostr << this->GraphNodePrefix << cnt++;
       this->TargetNamesNodes[realTargetName] = ostr.str();
       this->TargetPtrs[realTargetName] = &tit->second;
@@ -544,7 +544,7 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
                                                 this->TargetPtrs.find(libName);
         if ( tarIt == this->TargetPtrs.end() )
           {
-          cmOStringStream ostr;
+          std::ostringstream ostr;
           ostr << this->GraphNodePrefix << cnt++;
           this->TargetNamesNodes[libName] = ostr.str();
           this->TargetPtrs[libName] = NULL;

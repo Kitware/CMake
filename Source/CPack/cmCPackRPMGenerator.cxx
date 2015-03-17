@@ -57,7 +57,7 @@ int cmCPackRPMGenerator::PackageOnePack(std::string initialToplevel,
   // Begin the archive for this pack
   std::string localToplevel(initialToplevel);
   std::string packageFileName(
-      cmSystemTools::GetParentDirectory(toplevel.c_str())
+      cmSystemTools::GetParentDirectory(toplevel)
                              );
   std::string outputFileName(
    GetComponentPackageFileName(this->GetOption("CPACK_PACKAGE_FILE_NAME"),
@@ -166,7 +166,7 @@ int cmCPackRPMGenerator::PackageComponentsAllInOne()
   // The ALL GROUPS in ONE package case
   std::string localToplevel(initialTopLevel);
   std::string packageFileName(
-      cmSystemTools::GetParentDirectory(toplevel.c_str())
+      cmSystemTools::GetParentDirectory(toplevel)
                              );
   std::string outputFileName(
             std::string(this->GetOption("CPACK_PACKAGE_FILE_NAME"))

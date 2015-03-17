@@ -1,5 +1,0 @@
-file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/ConfigureFile-DirOutput.txt "DirOutput test file\n")
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/ConfigureFile-DirOutput)
-configure_file(ConfigureFile-DirOutput.txt ConfigureFile-DirOutput)
-file(READ ${CMAKE_CURRENT_BINARY_DIR}/ConfigureFile-DirOutput/ConfigureFile-DirOutput.txt out)
-message("${out}")

@@ -13,6 +13,7 @@
 #   RETURN - The return value of the function.
 #   HEADER - The header files required.
 #   VARIABLE - The variable to store the result.
+#              Will be created as an internal cache variable.
 #
 # Example:
 #
@@ -56,7 +57,7 @@ get_filename_component(__check_proto_def_dir "${CMAKE_CURRENT_LIST_FILE}" PATH)
 
 function(CHECK_PROTOTYPE_DEFINITION _FUNCTION _PROTOTYPE _RETURN _HEADER _VARIABLE)
 
-  if ("${_VARIABLE}" MATCHES "^${_VARIABLE}$")
+  if (NOT DEFINED ${_VARIABLE})
     set(CHECK_PROTOTYPE_DEFINITION_CONTENT "/* */\n")
 
     set(CHECK_PROTOTYPE_DEFINITION_FLAGS ${CMAKE_REQUIRED_FLAGS})

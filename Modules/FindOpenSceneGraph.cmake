@@ -40,13 +40,14 @@
 # OSG and it's various components.  CMAKE_PREFIX_PATH can also be used
 # for this (see find_library() CMake documentation).
 #
-# ::
-#
-#     <MODULE>_DIR (where MODULE is of the form "OSGVOLUME" and there is a FindosgVolume.cmake file)
-#     OSG_DIR
-#     OSGDIR
-#     OSG_ROOT
-#
+# ``<MODULE>_DIR``
+#   (where MODULE is of the form "OSGVOLUME" and there is a FindosgVolume.cmake file)
+# ``OSG_DIR``
+#   ..
+# ``OSGDIR``
+#   ..
+# ``OSG_ROOT``
+#   ..
 #
 #
 # [CMake 2.8.10]: The CMake variable OSG_DIR can now be used as well to
@@ -203,8 +204,11 @@ foreach(_osg_module ${_osg_modules_to_process})
     find_package(${_osg_module} ${_osg_quiet})
 
     string(TOUPPER ${_osg_module} _osg_module_UC)
-    list(APPEND OPENSCENEGRAPH_INCLUDE_DIR ${${_osg_module_UC}_INCLUDE_DIR})
-    list(APPEND OPENSCENEGRAPH_LIBRARIES ${${_osg_module_UC}_LIBRARIES})
+    # append to list if module was found OR is required
+    if( ${_osg_module_UC}_FOUND OR OpenSceneGraph_FIND_REQUIRED )
+      list(APPEND OPENSCENEGRAPH_INCLUDE_DIR ${${_osg_module_UC}_INCLUDE_DIR})
+      list(APPEND OPENSCENEGRAPH_LIBRARIES ${${_osg_module_UC}_LIBRARIES})
+    endif()
 
     if(OpenSceneGraph_MARK_AS_ADVANCED)
         OSG_MARK_AS_ADVANCED(${_osg_module})

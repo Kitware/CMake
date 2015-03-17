@@ -15,8 +15,8 @@
 // libraries into a process.
 
 
-#ifndef __cmDynamicLoader_h
-#define __cmDynamicLoader_h
+#ifndef cmDynamicLoader_h
+#define cmDynamicLoader_h
 
 #include "cmStandardIncludes.h"
 

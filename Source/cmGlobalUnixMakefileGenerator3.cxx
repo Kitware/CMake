@@ -18,6 +18,7 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmGeneratorTarget.h"
+#include "cmAlgorithms.h"
 
 cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 {
@@ -530,7 +531,7 @@ cmGlobalUnixMakefileGenerator3
   // Begin the directory-level rules section.
   std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
   dir = lg->Convert(dir, cmLocalGenerator::HOME_OUTPUT,
-                    cmLocalGenerator::MAKEFILE);
+                    cmLocalGenerator::MAKERULE);
   lg->WriteDivider(ruleFileStream);
   ruleFileStream
     << "# Directory level rules for directory "
@@ -554,7 +555,7 @@ void cmGlobalUnixMakefileGenerator3
                        const std::string& /*projectDir*/,
                        const std::string& targetName,
                        const std::string& /*config*/,
-                       bool fast,
+                       bool fast, bool /*verbose*/,
                        std::vector<std::string> const& makeOptions)
 {
   makeCommand.push_back(
@@ -563,7 +564,7 @@ void cmGlobalUnixMakefileGenerator3
 
   // Since we have full control over the invocation of nmake, let us
   // make it quiet.
-  if ( this->GetName() == "NMake Makefiles" )
+  if (cmHasLiteralPrefix(this->GetName(), "NMake Makefiles"))
     {
     makeCommand.push_back("/NOLOGO");
     }
@@ -572,7 +573,7 @@ void cmGlobalUnixMakefileGenerator3
   if (!targetName.empty())
     {
     cmLocalUnixMakefileGenerator3 *lg;
-    if (this->LocalGenerators.size())
+    if (!this->LocalGenerators.empty())
       {
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
         (this->LocalGenerators[0]);
@@ -597,7 +598,7 @@ void cmGlobalUnixMakefileGenerator3
     tname = lg->Convert(tname,cmLocalGenerator::HOME_OUTPUT);
     cmSystemTools::ConvertToOutputSlashes(tname);
     makeCommand.push_back(tname);
-    if (!this->LocalGenerators.size())
+    if (this->LocalGenerators.empty())
       {
       delete lg;
       }
@@ -779,29 +780,24 @@ cmGlobalUnixMakefileGenerator3
       localName += "/all";
       depends.clear();
 
-      std::string progressDir =
-        lg->GetMakefile()->GetHomeOutputDirectory();
-      progressDir += cmake::GetCMakeFilesDirectory();
+      cmLocalUnixMakefileGenerator3::EchoProgress progress;
+      progress.Dir = lg->GetMakefile()->GetHomeOutputDirectory();
+      progress.Dir += cmake::GetCMakeFilesDirectory();
+      {
+      std::ostringstream progressArg;
+      const char* sep = "";
+      std::vector<unsigned long>& progFiles =
+        this->ProgressMap[gtarget->Target].Marks;
+      for (std::vector<unsigned long>::iterator i = progFiles.begin();
+           i != progFiles.end(); ++i)
         {
-        cmOStringStream progCmd;
-        progCmd << "$(CMAKE_COMMAND) -E cmake_progress_report ";
-        // all target counts
-        progCmd << lg->Convert(progressDir,
-                                cmLocalGenerator::FULL,
-                                cmLocalGenerator::SHELL);
-        progCmd << " ";
-        std::vector<unsigned long>& progFiles =
-          this->ProgressMap[gtarget->Target].Marks;
-        for (std::vector<unsigned long>::iterator i = progFiles.begin();
-              i != progFiles.end(); ++i)
-          {
-          progCmd << " " << *i;
-          }
-        commands.push_back(progCmd.str());
+        progressArg << sep << *i;
+        sep = ",";
         }
-      progressDir = "Built target ";
-      progressDir += name;
-      lg->AppendEcho(commands,progressDir.c_str());
+      progress.Arg = progressArg.str();
+      }
+      lg->AppendEcho(commands, "Built target " + name,
+        cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
 
       this->AppendGlobalTargetDepends(depends,*gtarget->Target);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
@@ -819,15 +815,13 @@ cmGlobalUnixMakefileGenerator3
 
       // Write the rule.
       commands.clear();
-      progressDir = lg->GetMakefile()->GetHomeOutputDirectory();
-      progressDir += cmake::GetCMakeFilesDirectory();
 
       {
       // TODO: Convert the total progress count to a make variable.
-      cmOStringStream progCmd;
+      std::ostringstream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start ";
       // # in target
-      progCmd << lg->Convert(progressDir,
+      progCmd << lg->Convert(progress.Dir,
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       //
@@ -841,9 +835,9 @@ cmGlobalUnixMakefileGenerator3
       commands.push_back(lg->GetRecursiveMakeCall
                           (tmp.c_str(),localName));
       {
-      cmOStringStream progCmd;
+      std::ostringstream progCmd;
       progCmd << "$(CMAKE_COMMAND) -E cmake_progress_start "; // # 0
-      progCmd << lg->Convert(progressDir,
+      progCmd << lg->Convert(progress.Dir,
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       progCmd << " 0";

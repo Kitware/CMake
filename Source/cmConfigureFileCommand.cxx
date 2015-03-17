@@ -32,9 +32,9 @@ bool cmConfigureFileCommand
   this->InputFile += inFile;
 
   // If the input location is a directory, error out.
-  if(cmSystemTools::FileIsDirectory(this->InputFile.c_str()))
+  if(cmSystemTools::FileIsDirectory(this->InputFile))
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "input location\n"
       << "  " << this->InputFile << "\n"
       << "is a directory but a file was expected.";
@@ -51,7 +51,7 @@ bool cmConfigureFileCommand
   this->OutputFile += outFile;
 
   // If the output location is already a directory put the file in it.
-  if(cmSystemTools::FileIsDirectory(this->OutputFile.c_str()))
+  if(cmSystemTools::FileIsDirectory(this->OutputFile))
     {
     this->OutputFile += "/";
     this->OutputFile += cmSystemTools::GetFilenameName(inFile);
@@ -74,6 +74,7 @@ bool cmConfigureFileCommand
   this->CopyOnly = false;
   this->EscapeQuotes = false;
 
+  std::string unknown_args;
   this->AtOnly = false;
   for(unsigned int i=2;i < args.size();++i)
     {
@@ -99,6 +100,25 @@ bool cmConfigureFileCommand
       {
       /* Ignore legacy option.  */
       }
+    else if(args[i] == "NEWLINE_STYLE" ||
+            args[i] == "LF" || args[i] == "UNIX" ||
+            args[i] == "CRLF" || args[i] == "WIN32" ||
+            args[i] == "DOS")
+      {
+      /* Options handled by NewLineStyle member above.  */
+      }
+    else
+      {
+      unknown_args += " ";
+      unknown_args += args[i];
+      unknown_args += "\n";
+      }
+    }
+  if (!unknown_args.empty())
+    {
+    std::string msg = "configure_file called with unknown argument(s):\n";
+    msg += unknown_args;
+    this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, msg);
     }
 
   if ( !this->ConfigureFile() )

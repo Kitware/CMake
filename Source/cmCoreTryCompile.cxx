@@ -14,6 +14,7 @@
 #include "cmCacheManager.h"
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
+#include "cmAlgorithms.h"
 #include "cmExportTryCompileFileGenerator.h"
 #include <cmsys/Directory.hxx>
 
@@ -109,7 +110,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
               }
           default:
             this->Makefile->IssueMessage(cmake::FATAL_ERROR,
-              "Only libraries may be used as try_compile IMPORTED "
+              "Only libraries may be used as try_compile or try_run IMPORTED "
               "LINK_LIBRARIES.  Got " + std::string(tgt->GetName()) + " of "
               "type " + tgt->GetTargetTypeName(tgt->GetType()) + ".");
             return -1;
@@ -150,7 +151,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       }
     else
       {
-      cmOStringStream m;
+      std::ostringstream m;
       m << "try_compile given unknown argument \"" << argv[i] << "\".";
       this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, m.str());
       }
@@ -201,13 +202,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   else
     {
     // only valid for srcfile signatures
-    if (compileDefs.size())
+    if (!compileDefs.empty())
       {
       this->Makefile->IssueMessage(cmake::FATAL_ERROR,
         "COMPILE_DEFINITIONS specified on a srcdir type TRY_COMPILE");
       return -1;
       }
-    if (copyFile.size())
+    if (!copyFile.empty())
       {
       this->Makefile->IssueMessage(cmake::FATAL_ERROR,
         "COPY_FILE specified on a srcdir type TRY_COMPILE");
@@ -220,7 +221,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
   // do not allow recursive try Compiles
   if (this->BinaryDirectory == this->Makefile->GetHomeOutputDirectory())
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << "Attempt at a recursive or nested TRY_COMPILE in directory\n"
       << "  " << this->BinaryDirectory << "\n";
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -233,7 +234,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     {
     // remove any CMakeCache.txt files so we will have a clean test
     std::string ccFile = this->BinaryDirectory + "/CMakeCache.txt";
-    cmSystemTools::RemoveFile(ccFile.c_str());
+    cmSystemTools::RemoveFile(ccFile);
 
     // Choose sources.
     if(!useSources)
@@ -256,18 +257,14 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
         }
       else
         {
-        cmOStringStream err;
+        std::ostringstream err;
         err << "Unknown extension \"" << ext << "\" for file\n"
             << "  " << *si << "\n"
             << "try_compile() works only for enabled languages.  "
-            << "Currently these are:\n ";
+            << "Currently these are:\n  ";
         std::vector<std::string> langs;
         gg->GetEnabledLanguages(langs);
-        for(std::vector<std::string>::iterator l = langs.begin();
-            l != langs.end(); ++l)
-          {
-          err << " " << *l;
-          }
+        err << cmJoin(langs, " ");
         err << "\nSee project() command to enable other languages.";
         this->Makefile->IssueMessage(cmake::FATAL_ERROR, err.str());
         return -1;
@@ -279,10 +276,10 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     sourceDirectory = this->BinaryDirectory.c_str();
 
     // now create a CMakeLists.txt file in that directory
-    FILE *fout = cmsys::SystemTools::Fopen(outFileName.c_str(),"w");
+    FILE *fout = cmsys::SystemTools::Fopen(outFileName,"w");
     if (!fout)
       {
-      cmOStringStream e;
+      std::ostringstream e;
       e << "Failed to open\n"
         << "  " << outFileName << "\n"
         << cmSystemTools::GetLastSystemError();
@@ -296,7 +293,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
             cmVersion::GetPatchVersion(), cmVersion::GetTweakVersion());
     if(def)
       {
-      fprintf(fout, "set(CMAKE_MODULE_PATH %s)\n", def);
+      fprintf(fout, "set(CMAKE_MODULE_PATH \"%s\")\n", def);
       }
 
     std::string projectLangs;
@@ -331,24 +328,55 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       fprintf(fout, "set(CMAKE_%s_FLAGS \"${CMAKE_%s_FLAGS}"
               " ${COMPILE_DEFINITIONS}\")\n", li->c_str(), li->c_str());
       }
+    switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0056))
+      {
+      case cmPolicies::WARN:
+        if(this->Makefile->PolicyOptionalWarningEnabled(
+             "CMAKE_POLICY_WARNING_CMP0056"))
+          {
+          std::ostringstream w;
+          w << (this->Makefile->GetCMakeInstance()->GetPolicies()
+                ->GetPolicyWarning(cmPolicies::CMP0056)) << "\n"
+            "For compatibility with older versions of CMake, try_compile "
+            "is not honoring caller link flags (e.g. CMAKE_EXE_LINKER_FLAGS) "
+            "in the test project."
+            ;
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+          }
+      case cmPolicies::OLD:
+        // OLD behavior is to do nothing.
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        this->Makefile->IssueMessage(
+          cmake::FATAL_ERROR,
+          this->Makefile->GetCMakeInstance()->GetPolicies()
+          ->GetRequiredPolicyError(cmPolicies::CMP0056)
+          );
+      case cmPolicies::NEW:
+        // NEW behavior is to pass linker flags.
+        {
+        const char* exeLinkFlags =
+          this->Makefile->GetDefinition("CMAKE_EXE_LINKER_FLAGS");
+        fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS %s)\n",
+                lg->EscapeForCMake(exeLinkFlags?exeLinkFlags:"").c_str());
+        } break;
+      }
+    fprintf(fout, "set(CMAKE_EXE_LINKER_FLAGS \"${CMAKE_EXE_LINKER_FLAGS}"
+            " ${EXE_LINKER_FLAGS}\")\n");
     fprintf(fout, "include_directories(${INCLUDE_DIRECTORIES})\n");
     fprintf(fout, "set(CMAKE_SUPPRESS_REGENERATION 1)\n");
     fprintf(fout, "link_directories(${LINK_DIRECTORIES})\n");
     // handle any compile flags we need to pass on
-    if (compileDefs.size())
+    if (!compileDefs.empty())
       {
-      fprintf(fout, "add_definitions( ");
-      for (size_t i = 0; i < compileDefs.size(); ++i)
-        {
-        fprintf(fout,"%s ",compileDefs[i].c_str());
-        }
-      fprintf(fout, ")\n");
+      fprintf(fout, "add_definitions(%s)\n", cmJoin(compileDefs, " ").c_str());
       }
 
     /* Use a random file name to avoid rapid creation and deletion
        of the same executable name (some filesystems fail on that).  */
-    sprintf(targetNameBuf, "cmTryCompileExec%u",
-            cmSystemTools::RandomSeed());
+    sprintf(targetNameBuf, "cmTC_%05x",
+            cmSystemTools::RandomSeed() & 0xFFFFF);
     targetName = targetNameBuf;
 
     if (!targets.empty())
@@ -489,7 +517,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
                                        targetName,
                                        this->SrcFileSignature,
                                        &cmakeFlags,
-                                       &output);
+                                       output);
   if ( erroroc )
     {
     cmSystemTools::SetErrorOccured();
@@ -501,7 +529,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
                                      "Result of TRY_COMPILE",
                                      cmCacheManager::INTERNAL);
 
-  if ( outputVariable.size() > 0 )
+  if (!outputVariable.empty())
     {
     this->Makefile->AddDefinition(outputVariable, output.c_str());
     }
@@ -511,13 +539,13 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
     std::string copyFileErrorMessage;
     this->FindOutputFile(targetName);
 
-    if ((res==0) && (copyFile.size()))
+    if ((res==0) && !copyFile.empty())
       {
       if(this->OutputFile.empty() ||
-         !cmSystemTools::CopyFileAlways(this->OutputFile.c_str(),
-                                        copyFile.c_str()))
+         !cmSystemTools::CopyFileAlways(this->OutputFile,
+                                        copyFile))
         {
-        cmOStringStream emsg;
+        std::ostringstream emsg;
         emsg << "Cannot copy output executable\n"
              << "  '" << this->OutputFile << "'\n"
              << "to destination specified by COPY_FILE:\n"
@@ -580,10 +608,10 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
         std::string fullPath = binDir;
         fullPath += "/";
         fullPath += dir.GetFile(static_cast<unsigned long>(fileNum));
-        if(cmSystemTools::FileIsDirectory(fullPath.c_str()))
+        if(cmSystemTools::FileIsDirectory(fullPath))
           {
           this->CleanupFiles(fullPath.c_str());
-          cmSystemTools::RemoveADirectory(fullPath.c_str());
+          cmSystemTools::RemoveADirectory(fullPath);
           }
         else
           {
@@ -599,7 +627,7 @@ void cmCoreTryCompile::CleanupFiles(const char* binDir)
             }
           if(retry.Count == 0)
 #else
-          if(!cmSystemTools::RemoveFile(fullPath.c_str()))
+          if(!cmSystemTools::RemoveFile(fullPath))
 #endif
             {
             std::string m = "Remove failed on file: " + fullPath;
@@ -634,6 +662,10 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName)
     searchDirs.push_back(tmp);
     }
   searchDirs.push_back("/Debug");
+#if defined(__APPLE__)
+  std::string app = "/Debug/" + targetName + ".app";
+  searchDirs.push_back(app);
+#endif
   searchDirs.push_back("/Development");
 
   for(std::vector<std::string>::const_iterator it = searchDirs.begin();
@@ -645,19 +677,16 @@ void cmCoreTryCompile::FindOutputFile(const std::string& targetName)
     command += tmpOutputFile;
     if(cmSystemTools::FileExists(command.c_str()))
       {
-      tmpOutputFile = cmSystemTools::CollapseFullPath(command.c_str());
-      this->OutputFile = tmpOutputFile;
+      this->OutputFile = cmSystemTools::CollapseFullPath(command);
       return;
       }
     }
 
-  cmOStringStream emsg;
+  std::ostringstream emsg;
   emsg << "Unable to find the executable at any of:\n";
-  for (unsigned int i = 0; i < searchDirs.size(); ++i)
-    {
-    emsg << "  " << this->BinaryDirectory << searchDirs[i]
-         << tmpOutputFile << "\n";
-    }
+  emsg << cmWrap("  " + this->BinaryDirectory,
+                 searchDirs,
+                 tmpOutputFile, "\n") << "\n";
   this->FindErrorMessage = emsg.str();
   return;
 }

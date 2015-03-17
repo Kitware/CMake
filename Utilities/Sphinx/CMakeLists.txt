@@ -24,6 +24,7 @@ project(CMakeHelp NONE)
 
 option(SPHINX_MAN "Build man pages with Sphinx" OFF)
 option(SPHINX_HTML "Build html help with Sphinx" OFF)
+option(SPHINX_SINGLEHTML "Build html single page help with Sphinx" OFF)
 option(SPHINX_QTHELP "Build Qt help with Sphinx" OFF)
 option(SPHINX_TEXT "Build text help with Sphinx (not installed)" OFF)
 find_program(SPHINX_EXECUTABLE
@@ -33,7 +34,7 @@ find_program(SPHINX_EXECUTABLE
 
 mark_as_advanced(SPHINX_TEXT)
 
-if(NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT)
+if(NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT)
   return()
 elseif(NOT SPHINX_EXECUTABLE)
   message(FATAL_ERROR "SPHINX_EXECUTABLE (sphinx-build) is not found!")
@@ -61,10 +62,15 @@ endif()
 if(SPHINX_MAN)
   list(APPEND doc_formats man)
 endif()
+if(SPHINX_SINGLEHTML)
+  list(APPEND doc_formats singlehtml)
+endif()
 if(SPHINX_TEXT)
   list(APPEND doc_formats text)
 endif()
 if(SPHINX_QTHELP)
+  find_package(PythonInterp REQUIRED)
+
   find_program(QCOLLECTIONGENERATOR_EXECUTABLE
     NAMES qcollectiongenerator
     DOC "qcollectiongenerator tool"
@@ -84,7 +90,15 @@ if(SPHINX_QTHELP)
     COMMAND ${CMAKE_COMMAND} "-DQTHELP_DIR=${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
       "-DCMake_VERSION=${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}"
       -P "${CMAKE_CURRENT_SOURCE_DIR}/fixup_qthelp_names.cmake"
-    COMMAND qcollectiongenerator ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
+
+    # Create proper identifiers. Workaround for
+    # https://bitbucket.org/birkenfeld/sphinx/issue/1491/qthelp-should-generate-identifiers-for
+    COMMAND "${PYTHON_EXECUTABLE}"
+      "${CMAKE_CURRENT_SOURCE_DIR}/create_identifiers.py"
+      "${CMAKE_CURRENT_BINARY_DIR}/qthelp/"
+
+    COMMAND ${QCOLLECTIONGENERATOR_EXECUTABLE}
+      ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qhcp
   )
 endif()
 
@@ -148,8 +162,17 @@ if(SPHINX_HTML)
           PATTERN objects.inv EXCLUDE
           )
 endif()
+
+if(SPHINX_SINGLEHTML)
+  install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/singlehtml
+          DESTINATION ${CMAKE_DOC_DIR}
+          PATTERN .buildinfo EXCLUDE
+          PATTERN objects.inv EXCLUDE
+          )
+endif()
+
 if(SPHINX_QTHELP)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake.qch
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/qthelp/CMake-${CMake_VERSION_MAJOR}${CMake_VERSION_MINOR}${CMake_VERSION_PATCH}.qch
           DESTINATION ${CMAKE_DOC_DIR}
           )
 endif()

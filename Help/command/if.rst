@@ -42,11 +42,12 @@ Possible expressions are:
  or a non-zero number.  False if the constant is ``0``, ``OFF``,
  ``NO``, ``FALSE``, ``N``, ``IGNORE``, ``NOTFOUND``, the empty string,
  or ends in the suffix ``-NOTFOUND``.  Named boolean constants are
- case-insensitive.  If the argument is not one of these constants, it
- is treated as a variable.
+ case-insensitive.  If the argument is not one of these specific
+ constants, it is treated as a variable or string and the following
+ signature is used.
 
-``if(<variable>)``
- True if the variable is defined to a value that is not a false
+``if(<variable|string>)``
+ True if given a variable that is defined to a value that is not a false
  constant.  False otherwise.  (Note macro arguments are not variables.)
 
 ``if(NOT <expression>)``
@@ -199,3 +200,9 @@ above-documented signature accepts ``<variable|string>``:
 * The left and right hand arguments to ``AND`` and ``OR`` are independently
   tested to see if they are boolean constants, if so they are used as
   such, otherwise they are assumed to be variables and are dereferenced.
+
+To prevent ambiguity, potential variable or keyword names can be
+specified in a :ref:`Quoted Argument` or a :ref:`Bracket Argument`.
+A quoted or bracketed variable or keyword will be interpreted as a
+string and not dereferenced or interpreted.
+See policy :policy:`CMP0054`.

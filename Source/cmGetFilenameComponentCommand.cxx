@@ -79,7 +79,7 @@ bool cmGetFilenameComponentCommand
           }
         }
       }
-    cmSystemTools::SplitProgramFromArgs(filename.c_str(),
+    cmSystemTools::SplitProgramFromArgs(filename,
                                         result, programArgs);
     }
   else if (args[2] == "EXT")
@@ -97,11 +97,11 @@ bool cmGetFilenameComponentCommand
     // If the path given is relative evaluate it relative to the
     // current source directory.
     result = cmSystemTools::CollapseFullPath(
-      filename.c_str(), this->Makefile->GetCurrentDirectory());
+      filename, this->Makefile->GetCurrentDirectory());
     if(args[2] == "REALPATH")
       {
       // Resolve symlinks if possible
-      result = cmSystemTools::GetRealPath(result.c_str());
+      result = cmSystemTools::GetRealPath(result);
       }
     }
   else
@@ -113,7 +113,7 @@ bool cmGetFilenameComponentCommand
 
   if(args.size() == 4 && args[3] == "CACHE")
     {
-    if(programArgs.size() && storeArgs.size())
+    if(!programArgs.empty() && !storeArgs.empty())
       {
       this->Makefile->AddCacheDefinition
         (storeArgs, programArgs.c_str(),
@@ -127,7 +127,7 @@ bool cmGetFilenameComponentCommand
     }
   else
     {
-    if(programArgs.size() && storeArgs.size())
+    if(!programArgs.empty() && !storeArgs.empty())
       {
       this->Makefile->AddDefinition(storeArgs, programArgs.c_str());
       }

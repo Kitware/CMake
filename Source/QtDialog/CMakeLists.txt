@@ -35,6 +35,32 @@ if (Qt5Widgets_FOUND)
 
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 
+  # We need to install Cocoa platform plugin and add qt.conf for Qt5 on Mac.
+  # FIXME: This should be part of Qt5 CMake scripts, but unfortunatelly
+  # Qt5 Mac support is missing there.
+  if(APPLE)
+    macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var)
+      get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
+      if(EXISTS "${_qt_plugin_path}")
+        get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+        set(_qt_plugin_dest "${CMAKE_INSTALL_PREFIX}/PlugIns/${_qt_plugin_type}")
+        install(FILES "${_qt_plugin_path}"
+          DESTINATION "${_qt_plugin_dest}")
+        set(${_qt_plugins_var}
+          "${${_qt_plugins_var}};${_qt_plugin_dest}/${_qt_plugin_file}")
+      else()
+        message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+      endif()
+    endmacro()
+    install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS)
+    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+      "[Paths]\nPlugins = PlugIns\n")
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/qt.conf"
+      DESTINATION "${CMAKE_INSTALL_PREFIX}/Resources")
+  endif()
+
   if(WIN32 AND TARGET Qt5::Core)
     get_property(_Qt5_Core_LOCATION TARGET Qt5::Core PROPERTY LOCATION)
     get_filename_component(Qt_BIN_DIR "${_Qt5_Core_LOCATION}" PATH)
@@ -145,23 +171,21 @@ set(CMAKE_INSTALL_DESTINATION_ARGS
 
 install(TARGETS cmake-gui RUNTIME DESTINATION bin ${CMAKE_INSTALL_DESTINATION_ARGS})
 
-if(UNIX)
+if(UNIX AND NOT APPLE)
+  foreach (size IN ITEMS 32 128)
+    install(
+      FILES       "${CMAKE_CURRENT_SOURCE_DIR}/CMakeSetup${size}.png"
+      DESTINATION "share/icons/hicolor/${size}x${size}/apps"
+      RENAME      "CMakeSetup.png")
+  endforeach ()
+
   # install a desktop file so CMake appears in the application start menu
   # with an icon
   install(FILES CMake.desktop DESTINATION share/applications )
-  install(FILES CMakeSetup32.png DESTINATION share/pixmaps )
   install(FILES cmakecache.xml DESTINATION share/mime/packages )
 endif()
 
 if(APPLE)
-  set(CMAKE_POSTFLIGHT_SCRIPT
-    "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
-  set(CMAKE_POSTUPGRADE_SCRIPT
-    "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
-  configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postflight.sh.in"
-    "${CMake_BINARY_DIR}/Source/QtDialog/postflight.sh")
-  configure_file("${CMake_SOURCE_DIR}/Source/QtDialog/postupgrade.sh.in"
-    "${CMake_BINARY_DIR}/Source/QtDialog/postupgrade.sh")
   install(CODE "execute_process(COMMAND ln -s \"../MacOS/CMake\" cmake-gui
                 WORKING_DIRECTORY \$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/bin)")
 endif()
@@ -176,7 +200,7 @@ if(APPLE OR WIN32)
   install(CODE "
     include(\"${CMake_SOURCE_DIR}/Modules/BundleUtilities.cmake\")
     set(BU_CHMOD_BUNDLE_ITEMS ON)
-    fixup_bundle(\"${fixup_exe}\" \"\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
+    fixup_bundle(\"${fixup_exe}\" \"${QT_PLUGINS}\" \"${QT_LIBRARY_DIR};${QT_BINARY_DIR}\")
   ")
 endif()
 

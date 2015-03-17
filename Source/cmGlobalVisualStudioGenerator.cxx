@@ -23,7 +23,6 @@
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
 {
-  this->AdditionalPlatformDefinition = "";
 }
 
 //----------------------------------------------------------------------------
@@ -478,15 +477,6 @@ void cmGlobalVisualStudioGenerator::FindMakeProgram(cmMakefile* mf)
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalVisualStudioGenerator::AddPlatformDefinitions(cmMakefile* mf)
-{
-  if(!this->AdditionalPlatformDefinition.empty())
-    {
-    mf->AddDefinition(this->AdditionalPlatformDefinition, "TRUE");
-    }
-}
-
-//----------------------------------------------------------------------------
 std::string
 cmGlobalVisualStudioGenerator::GetUtilityDepend(cmTarget const* target)
 {
@@ -855,22 +845,14 @@ cmGlobalVisualStudioGenerator::TargetCompare
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 ::OrderedTargetDependSet(TargetDependSet const& targets)
 {
-  for(TargetDependSet::const_iterator ti =
-        targets.begin(); ti != targets.end(); ++ti)
-    {
-    this->insert(*ti);
-    }
+  this->insert(targets.begin(), targets.end());
 }
 
 //----------------------------------------------------------------------------
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 ::OrderedTargetDependSet(TargetSet const& targets)
 {
-  for(TargetSet::const_iterator ti = targets.begin();
-      ti != targets.end(); ++ti)
-    {
-    this->insert(*ti);
-    }
+  this->insert(targets.begin(), targets.end());
 }
 
 std::string cmGlobalVisualStudioGenerator::ExpandCFGIntDir(

@@ -60,6 +60,9 @@
 
 #if defined(_WIN32)
 # include <windows.h>
+# if defined(_MSC_VER) && _MSC_VER >= 1800
+#  define KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# endif
 # include <errno.h>
 # if defined(KWSYS_SYS_HAS_PSAPI)
 #  include <psapi.h>
@@ -87,15 +90,6 @@ typedef int siginfo_t;
 # if defined(KWSYS_SYS_HAS_IFADDRS_H)
 #  include <ifaddrs.h>
 #  define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
-# endif
-# if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
-#  include <execinfo.h>
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
-#    include <cxxabi.h>
-#  endif
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
-#    include <dlfcn.h>
-#  endif
 # endif
 #endif
 
@@ -126,16 +120,8 @@ typedef int siginfo_t;
 #  include <ifaddrs.h>
 #  define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
 # endif
-# if __ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
-#   include <execinfo.h>
-#   if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
-#     include <cxxabi.h>
-#   endif
-#   if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
-#     include <dlfcn.h>
-#   endif
-#  endif
+# if !(__ENVIRONMENT_MAC_OS_X_VERSION_MIN_REQUIRED__-0 >= 1050)
+#  undef KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE
 # endif
 #endif
 
@@ -148,15 +134,6 @@ typedef int siginfo_t;
 #  include <ifaddrs.h>
 #  if !defined(__LSB_VERSION__) /* LSB has no getifaddrs */
 #   define KWSYS_SYSTEMINFORMATION_IMPLEMENT_FQDN
-#  endif
-# endif
-# if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
-#  include <execinfo.h>
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
-#    include <cxxabi.h>
-#  endif
-#  if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
-#    include <dlfcn.h>
 #  endif
 # endif
 # if defined(KWSYS_CXX_HAS_RLIMIT64)
@@ -176,6 +153,19 @@ typedef struct rlimit ResourceLimitType;
 
 #ifdef __HAIKU__
 # include <OS.h>
+#endif
+
+#if defined(KWSYS_SYSTEMINFORMATION_HAS_BACKTRACE)
+# include <execinfo.h>
+# if defined(KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE)
+#  include <cxxabi.h>
+# endif
+# if defined(KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP)
+#  include <dlfcn.h>
+# endif
+#else
+# undef KWSYS_SYSTEMINFORMATION_HAS_CPP_DEMANGLE
+# undef KWSYS_SYSTEMINFORMATION_HAS_SYMBOL_LOOKUP
 #endif
 
 #include <memory.h>
@@ -453,7 +443,7 @@ public:
     };
 
 protected:
-  // Functions.
+  // For windows
   bool RetrieveCPUFeatures();
   bool RetrieveCPUIdentity();
   bool RetrieveCPUCacheDetails();
@@ -467,6 +457,7 @@ protected:
   bool RetrieveClassicalCPUIdentity();
   bool RetrieveExtendedCPUIdentity();
 
+  // Processor information
   Manufacturer  ChipManufacturer;
   CPUFeatures   Features;
   ID            ChipID;
@@ -474,11 +465,11 @@ protected:
   unsigned int  NumberOfLogicalCPU;
   unsigned int  NumberOfPhysicalCPU;
 
-  int CPUCount();
+  int CPUCount(); // For windows
   unsigned char LogicalCPUPerPhysicalCPU();
-  unsigned char GetAPICId();
+  unsigned char GetAPICId(); // For windows
   bool IsHyperThreadingSupported();
-  static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int);
+  static LongLong GetCyclesDifference(DELAY_FUNC, unsigned int); // For windows
 
   // For Linux and Cygwin, /proc/cpuinfo formats are slightly different
   bool RetreiveInformationFromCpuInfoFile();
@@ -3709,7 +3700,10 @@ void SystemInformationImplementation::SetStackTraceOnError(int enable)
     // install ours
     struct sigaction sa;
     sa.sa_sigaction=(SigAction)StacktraceSignalHandler;
-    sa.sa_flags=SA_SIGINFO|SA_RESTART|SA_RESETHAND;
+    sa.sa_flags=SA_SIGINFO|SA_RESETHAND;
+# ifdef SA_RESTART
+    sa.sa_flags|=SA_RESTART;
+# endif
     sigemptyset(&sa.sa_mask);
 
     sigaction(SIGABRT,&sa,0);
@@ -3760,9 +3754,9 @@ bool SystemInformationImplementation::QueryWindowsMemory()
   }
 #  define MEM_VAL(value) ull##value
 # endif
-  tv = ms.MEM_VAL(TotalVirtual);
+  tv = ms.MEM_VAL(TotalPageFile);
   tp = ms.MEM_VAL(TotalPhys);
-  av = ms.MEM_VAL(AvailVirtual);
+  av = ms.MEM_VAL(AvailPageFile);
   ap = ms.MEM_VAL(AvailPhys);
   this->TotalVirtualMemory = tv>>10>>10;
   this->TotalPhysicalMemory = tp>>10>>10;
@@ -3796,7 +3790,7 @@ bool SystemInformationImplementation::QueryLinuxMemory()
     return false;
     }
 
-  if( unameInfo.release!=0 && strlen(unameInfo.release)>=3 )
+  if( strlen(unameInfo.release)>=3 )
     {
     // release looks like "2.6.3-15mdk-i686-up-4GB"
     char majorChar=unameInfo.release[0];
@@ -3920,7 +3914,7 @@ bool SystemInformationImplementation::QueryCygwinMemory()
 
 bool SystemInformationImplementation::QueryAIXMemory()
 {
-#if defined(_AIX)
+#if defined(_AIX) && defined(_SC_AIX_REALMEM)
   long c = sysconf(_SC_AIX_REALMEM);
   if (c <= 0)
     {
@@ -5073,6 +5067,14 @@ bool SystemInformationImplementation::QueryOSInformation()
   // Try calling GetVersionEx using the OSVERSIONINFOEX structure.
   ZeroMemory (&osvi, sizeof (OSVERSIONINFOEXW));
   osvi.dwOSVersionInfoSize = sizeof (OSVERSIONINFOEXW);
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (push)
+# ifdef __INTEL_COMPILER
+#  pragma warning (disable:1478)
+# else
+#  pragma warning (disable:4996)
+# endif
+#endif
   bOsVersionInfoEx = GetVersionExW ((OSVERSIONINFOW*)&osvi);
   if (!bOsVersionInfoEx)
     {
@@ -5082,6 +5084,9 @@ bool SystemInformationImplementation::QueryOSInformation()
       return false;
       }
     }
+#ifdef KWSYS_WINDOWS_DEPRECATED_GetVersionEx
+# pragma warning (pop)
+#endif
 
   switch (osvi.dwPlatformId)
     {
@@ -5156,7 +5161,7 @@ bool SystemInformationImplementation::QueryOSInformation()
             }
           }
 
-        sprintf (operatingSystem, "%s (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
+        sprintf (operatingSystem, "%ls (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
         this->OSVersion = operatingSystem;
         }
       else
@@ -5205,7 +5210,7 @@ bool SystemInformationImplementation::QueryOSInformation()
       if (osvi.dwMajorVersion <= 4)
         {
         // NB: NT 4.0 and earlier.
-        sprintf (operatingSystem, "version %ld.%ld %s (Build %ld)",
+        sprintf (operatingSystem, "version %ld.%ld %ls (Build %ld)",
                  osvi.dwMajorVersion,
                  osvi.dwMinorVersion,
                  osvi.szCSDVersion,
@@ -5236,7 +5241,7 @@ bool SystemInformationImplementation::QueryOSInformation()
       else
         {
         // Windows 2000 and everything else.
-        sprintf (operatingSystem,"%s (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
+        sprintf (operatingSystem,"%ls (Build %ld)", osvi.szCSDVersion, osvi.dwBuildNumber & 0xFFFF);
         this->OSVersion = operatingSystem;
         }
       break;

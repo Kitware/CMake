@@ -20,6 +20,8 @@ cmXMLParser::cmXMLParser()
 {
   this->Parser = 0;
   this->ParseError = 0;
+  this->ReportCallback = 0;
+  this->ReportCallbackData = 0;
 }
 
 //----------------------------------------------------------------------------
@@ -52,7 +54,7 @@ int cmXMLParser::ParseFile(const char* file)
     return 0;
     }
 
-  cmOStringStream str;
+  std::ostringstream str;
   str << ifs.rdbuf();
   return this->Parse(str.str().c_str());
 }
@@ -233,6 +235,13 @@ void cmXMLParser::ReportXmlParseError()
 //----------------------------------------------------------------------------
 void cmXMLParser::ReportError(int line, int, const char* msg)
 {
-  std::cerr << "Error parsing XML in stream at line "
-            << line << ": " << msg << std::endl;
+  if(this->ReportCallback)
+    {
+    this->ReportCallback(line, msg, this->ReportCallbackData);
+    }
+  else
+    {
+    std::cerr << "Error parsing XML in stream at line "
+              << line << ": " << msg << std::endl;
+    }
 }

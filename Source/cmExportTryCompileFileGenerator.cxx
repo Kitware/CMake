@@ -57,10 +57,9 @@ std::string cmExportTryCompileFileGenerator::FindTargets(
     return std::string();
     }
 
-  cmListFileBacktrace lfbt;
-  cmGeneratorExpression ge(lfbt);
+  cmGeneratorExpression ge;
 
-  cmGeneratorExpressionDAGChecker dagChecker(lfbt,
+  cmGeneratorExpressionDAGChecker dagChecker(
                                       tgt->GetName(),
                                       propName, 0, 0);
 

@@ -21,12 +21,16 @@ int main (int argc, char *argv[])
     }
 
   double inputValue = atof(argv[1]);
+  double outputValue = 0;
 
+  if(inputValue >= 0)
+    {
 #ifdef USE_MYMATH
-  double outputValue = mysqrt(inputValue);
+    outputValue = mysqrt(inputValue);
 #else
-  double outputValue = sqrt(inputValue);
+    outputValue = sqrt(inputValue);
 #endif
+    }
 
   fprintf(stdout,"The square root of %g is %g\n",
           inputValue, outputValue);

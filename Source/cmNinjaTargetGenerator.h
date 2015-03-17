@@ -42,7 +42,7 @@ public:
 
   std::string GetTargetName() const;
 
-  bool needsDepFile(const std::string& lang);
+  bool NeedDepTypeMSVC(const std::string& lang) const;
 
 protected:
 
@@ -74,6 +74,10 @@ protected:
   bool GetFeatureAsBool(const std::string& feature);
   void AddFeatureFlags(std::string& flags, const std::string& lang);
 
+  std::string OrderDependsTargetForTarget();
+
+  std::string ComputeOrderDependsForTarget();
+
   /**
    * Compute the flags for compilation of object files for a given @a language.
    * @note Generally it is the value of the variable whose name is computed
@@ -85,7 +89,7 @@ protected:
   std::string ComputeDefines(cmSourceFile const* source,
                              const std::string& language);
 
-  std::string ConvertToNinjaPath(const char *path) const {
+  std::string ConvertToNinjaPath(const std::string& path) const {
     return this->GetLocalGenerator()->ConvertToNinjaPath(path);
   }
   cmLocalNinjaGenerator::map_to_ninja_path MapToNinjaPath() const {
@@ -110,8 +114,8 @@ protected:
   void WriteLanguageRules(const std::string& language);
   void WriteCompileRule(const std::string& language);
   void WriteObjectBuildStatements();
-  void WriteObjectBuildStatement(cmSourceFile const* source);
-  void WriteCustomCommandBuildStatement(cmCustomCommand *cc);
+  void WriteObjectBuildStatement(cmSourceFile const* source,
+                                 bool writeOrderDependsTargetForTarget);
 
   cmNinjaDeps GetObjects() const
   { return this->Objects; }
@@ -142,7 +146,7 @@ protected:
   cmOSXBundleGenerator* OSXBundleGenerator;
   std::set<std::string> MacContentFolders;
 
-  void addPoolNinjaVariable(const char* pool_property,
+  void addPoolNinjaVariable(const std::string& pool_property,
                             cmTarget* target,
                             cmNinjaVars& vars);
 

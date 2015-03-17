@@ -2,10 +2,6 @@
 #cmakedefine SIZEOF_CHAR      ${SIZEOF_CHAR}
 #cmakedefine SIZEOF_SHORT      ${SIZEOF_SHORT}
 
-/* Check for functions */
-#cmakedefine HAVE_PRINTF
-#cmakedefine HAVE_VSBLABLA
-
 /* Check for headers */
 #cmakedefine HAVE_SYS_PRCTL_H
 

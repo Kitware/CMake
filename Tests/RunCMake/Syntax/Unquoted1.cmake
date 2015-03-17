@@ -1,1 +1,1 @@
-message([] [=] [$ $(MV) -DSTR=" [=" [;])
+message([] [=] [$ $(MV) -DSTR=" [=" [;] ] [)

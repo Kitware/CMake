@@ -41,7 +41,6 @@ void cmGlobalVisualStudio6Generator
                  cmMakefile *mf,
                  bool optional)
 {
-  cmGlobalVisualStudioGenerator::AddPlatformDefinitions(mf);
   mf->AddDefinition("CMAKE_GENERATOR_RC", "rc");
   mf->AddDefinition("CMAKE_GENERATOR_NO_COMPILER_ENV", "1");
   this->GenerateConfigurations(mf);
@@ -121,7 +120,7 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
   const std::string& /*projectDir*/,
   const std::string& targetName,
   const std::string& config,
-  bool /*fast*/,
+  bool /*fast*/, bool /*verbose*/,
   std::vector<std::string> const& makeOptions
   )
 {

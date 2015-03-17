@@ -20,7 +20,8 @@
 #
 # ::
 #
-#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(<name> (DEFAULT_MSG|"Custom failure message") <var1>...<varN> )
+#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(<name>
+#       (DEFAULT_MSG|"Custom failure message") <var1>...<varN> )
 #
 # If the variables <var1> to <varN> are all valid, then
 # <UPPERCASED_NAME>_FOUND will be set to TRUE.  If DEFAULT_MSG is given
@@ -32,14 +33,13 @@
 #
 # ::
 #
-#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME [FOUND_VAR <resultVar>]
-#                                            [REQUIRED_VARS <var1>...<varN>]
-#                                            [VERSION_VAR   <versionvar>]
-#                                            [HANDLE_COMPONENTS]
-#                                            [CONFIG_MODE]
-#                                            [FAIL_MESSAGE "Custom failure message"] )
-#
-#
+#     FIND_PACKAGE_HANDLE_STANDARD_ARGS(NAME
+#       [FOUND_VAR <resultVar>]
+#       [REQUIRED_VARS <var1>...<varN>]
+#       [VERSION_VAR   <versionvar>]
+#       [HANDLE_COMPONENTS]
+#       [CONFIG_MODE]
+#       [FAIL_MESSAGE "Custom failure message"] )
 #
 # In this mode, the name of the result-variable can be set either to
 # either <UPPERCASED_NAME>_FOUND or <OriginalCase_Name>_FOUND using the
@@ -75,7 +75,8 @@
 #
 # ::
 #
-#     find_package_handle_standard_args(LibXml2  DEFAULT_MSG  LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR)
+#     find_package_handle_standard_args(LibXml2  DEFAULT_MSG
+#       LIBXML2_LIBRARY LIBXML2_INCLUDE_DIR)
 #
 #
 #
@@ -90,9 +91,10 @@
 #
 # ::
 #
-#     find_package_handle_standard_args(LibXslt FOUND_VAR LibXslt_FOUND
-#                                              REQUIRED_VARS LibXslt_LIBRARIES LibXslt_INCLUDE_DIRS
-#                                              VERSION_VAR LibXslt_VERSION_STRING)
+#     find_package_handle_standard_args(LibXslt
+#       FOUND_VAR LibXslt_FOUND
+#       REQUIRED_VARS LibXslt_LIBRARIES LibXslt_INCLUDE_DIRS
+#       VERSION_VAR LibXslt_VERSION_STRING)
 #
 # In this case, LibXslt is considered to be found if the variable(s)
 # listed after REQUIRED_VAR are all valid, i.e.  LibXslt_LIBRARIES and
@@ -201,7 +203,7 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
 
 # now that we collected all arguments, process them
 
-  if("${FPHSA_FAIL_MESSAGE}" STREQUAL "DEFAULT_MSG")
+  if("x${FPHSA_FAIL_MESSAGE}" STREQUAL "xDEFAULT_MSG")
     set(FPHSA_FAIL_MESSAGE "Could NOT find ${_NAME}")
   endif()
 
@@ -284,21 +286,50 @@ function(FIND_PACKAGE_HANDLE_STANDARD_ARGS _NAME _FIRST_ARG)
   # version handling:
   set(VERSION_MSG "")
   set(VERSION_OK TRUE)
-  set(VERSION ${${FPHSA_VERSION_VAR}} )
-  if (${_NAME}_FIND_VERSION)
+  set(VERSION ${${FPHSA_VERSION_VAR}})
 
-    if(VERSION)
+  # check with DEFINED here as the requested or found version may be "0"
+  if (DEFINED ${_NAME}_FIND_VERSION)
+    if(DEFINED ${FPHSA_VERSION_VAR})
 
       if(${_NAME}_FIND_VERSION_EXACT)       # exact version required
-        if (NOT "${${_NAME}_FIND_VERSION}" VERSION_EQUAL "${VERSION}")
-          set(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
-          set(VERSION_OK FALSE)
+        # count the dots in the version string
+        string(REGEX REPLACE "[^.]" "" _VERSION_DOTS "${VERSION}")
+        # add one dot because there is one dot more than there are components
+        string(LENGTH "${_VERSION_DOTS}." _VERSION_DOTS)
+        if (_VERSION_DOTS GREATER ${_NAME}_FIND_VERSION_COUNT)
+          # Because of the C++ implementation of find_package() ${_NAME}_FIND_VERSION_COUNT
+          # is at most 4 here. Therefore a simple lookup table is used.
+          if (${_NAME}_FIND_VERSION_COUNT EQUAL 1)
+            set(_VERSION_REGEX "[^.]*")
+          elseif (${_NAME}_FIND_VERSION_COUNT EQUAL 2)
+            set(_VERSION_REGEX "[^.]*\\.[^.]*")
+          elseif (${_NAME}_FIND_VERSION_COUNT EQUAL 3)
+            set(_VERSION_REGEX "[^.]*\\.[^.]*\\.[^.]*")
+          else ()
+            set(_VERSION_REGEX "[^.]*\\.[^.]*\\.[^.]*\\.[^.]*")
+          endif ()
+          string(REGEX REPLACE "^(${_VERSION_REGEX})\\..*" "\\1" _VERSION_HEAD "${VERSION}")
+          unset(_VERSION_REGEX)
+          if (NOT ${_NAME}_FIND_VERSION VERSION_EQUAL _VERSION_HEAD)
+            set(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
+            set(VERSION_OK FALSE)
+          else ()
+            set(VERSION_MSG "(found suitable exact version \"${VERSION}\")")
+          endif ()
+          unset(_VERSION_HEAD)
         else ()
-          set(VERSION_MSG "(found suitable exact version \"${VERSION}\")")
+          if (NOT ${_NAME}_FIND_VERSION VERSION_EQUAL VERSION)
+            set(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is exact version \"${${_NAME}_FIND_VERSION}\"")
+            set(VERSION_OK FALSE)
+          else ()
+            set(VERSION_MSG "(found suitable exact version \"${VERSION}\")")
+          endif ()
         endif ()
+        unset(_VERSION_DOTS)
 
       else()     # minimum version specified:
-        if ("${${_NAME}_FIND_VERSION}" VERSION_GREATER "${VERSION}")
+        if (${_NAME}_FIND_VERSION VERSION_GREATER VERSION)
           set(VERSION_MSG "Found unsuitable version \"${VERSION}\", but required is at least \"${${_NAME}_FIND_VERSION}\"")
           set(VERSION_OK FALSE)
         else ()

@@ -1,5 +1,10 @@
 include(ExternalData)
-ExternalData_Add_Test(Data
-  NAME Test
-  COMMAND ${CMAKE_COMMAND} -E echo DATA{MissingData.txt}
-  )
+
+set(output "${CMAKE_SOURCE_DIR}/MissingData.txt")
+ExternalData_Expand_Arguments(Data args DATA{MissingData.txt})
+if("x${args}" STREQUAL "x${output}")
+  message(STATUS "Missing data reference correctly transformed!")
+else()
+  message(FATAL_ERROR "Missing data reference transformed to:\n  ${args}\n"
+    "but we expected:\n  ${output}")
+endif()

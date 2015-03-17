@@ -42,7 +42,8 @@ public:
   enum Type
   {
     TypeTAR,
-    TypeZIP
+    TypeZIP,
+    Type7Zip
   };
 
   /** Construct with output stream to which to write archive.  */
@@ -73,6 +74,7 @@ public:
   // std::cout.
   void SetVerbose(bool v) { this->Verbose = v; }
 
+  void SetMTime(std::string const& t) { this->MTime = t; }
 private:
   bool Okay() const { return this->Error.empty(); }
   bool AddPath(const char* path, size_t skip, const char* prefix);
@@ -89,6 +91,7 @@ private:
   struct archive* Disk;
   bool Verbose;
   std::string Error;
+  std::string MTime;
 };
 
 #endif

@@ -32,6 +32,8 @@ public:
 
   void EmitDesktopFolder();
 
+  void EmitStartupFolder();
+
   size_t BeginInstallationPrefixDirectory(
       std::string const& programFilesFolderId,
       std::string const& installRootString);

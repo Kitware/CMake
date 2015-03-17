@@ -3,7 +3,7 @@
 cmake-commands(7)
 *****************
 
-.. only:: html or latex
+.. only:: html
 
    .. contents::
 
@@ -31,6 +31,7 @@ These commands may be used freely in CMake projects.
    /command/cmake_minimum_required
    /command/cmake_policy
    /command/configure_file
+   /command/continue
    /command/create_test_sourcelist
    /command/define_property
    /command/elseif
@@ -67,6 +68,7 @@ These commands may be used freely in CMake projects.
    /command/include
    /command/install
    /command/link_directories
+   /command/link_libraries
    /command/list
    /command/load_cache
    /command/load_command
@@ -91,6 +93,7 @@ These commands may be used freely in CMake projects.
    /command/source_group
    /command/string
    /command/target_compile_definitions
+   /command/target_compile_features
    /command/target_compile_options
    /command/target_include_directories
    /command/target_link_libraries
@@ -116,7 +119,6 @@ versions of CMake.  Do not use them in new code.
    /command/install_files
    /command/install_programs
    /command/install_targets
-   /command/link_libraries
    /command/make_directory
    /command/output_required_files
    /command/remove
@@ -126,6 +128,8 @@ versions of CMake.  Do not use them in new code.
    /command/utility_source
    /command/variable_requires
    /command/write_file
+
+.. _`CTest Commands`:
 
 CTest Commands
 ==============

@@ -10,7 +10,11 @@ if(NOT "${CMAKE_CURRENT_SOURCE_DIR}" MATCHES "^/")
 endif()
 set(ExternalData_URL_TEMPLATES
   "file://${slash}${CMAKE_CURRENT_SOURCE_DIR}/%(algo)/%(hash)"
+  "file://${slash}${CMAKE_CURRENT_SOURCE_DIR}/Alt/%(algo:MyAlgoMap1)/%(hash)"
+  "ExternalDataCustomScript://MyScript1/%(algo)/%(hash)"
   )
+set(ExternalData_URL_ALGO_MD5_MyAlgoMap1 MyAlgoMap1-md5)
+set(ExternalData_CUSTOM_SCRIPT_MyScript1 "${CMAKE_CURRENT_SOURCE_DIR}/MyScript1.cmake")
 set(ExternalData_BINARY_ROOT "${CMAKE_CURRENT_BINARY_DIR}/ExternalData")
 file(REMOVE_RECURSE ${ExternalData_BINARY_ROOT}) # clean test
 
@@ -23,6 +27,11 @@ ExternalData_Add_Test(Data1
   COMMAND ${CMAKE_COMMAND}
     -D Data=DATA{Data.dat}
     ${Data1CheckSpaces}
+    -D DataScript=DATA{DataScript.dat}
+    -D DataAlgoMapA=DATA{DataAlgoMapA.dat}
+    -D DataAlgoMapB=DATA{DataAlgoMapB.dat}
+    -D DataMissing=DATA{DataMissing.dat}
+    -D DataMissingWithAssociated=DATA{DataMissing.dat,Data.dat}
     -D SeriesA=DATA{SeriesA.dat,:}
     -D SeriesB=DATA{SeriesB.dat,:}
     -D SeriesC=DATA{SeriesC.dat,:}

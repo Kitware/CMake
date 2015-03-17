@@ -34,6 +34,7 @@ public:
     ni->CTest = this->CTest;
     ni->CTestScriptHandler = this->CTestScriptHandler;
     ni->CreateNewTag = this->CreateNewTag;
+    ni->Quiet = this->Quiet;
     return ni;
     }
 
@@ -53,6 +54,14 @@ public:
     }
 
   /**
+   * Should this invocation of ctest_start output non-error messages?
+   */
+  bool ShouldBeQuiet()
+    {
+    return this->Quiet;
+    }
+
+  /**
    * The name of the command as specified in CMakeList.txt.
    */
   virtual std::string GetName() const { return "ctest_start";}
@@ -62,6 +71,7 @@ public:
 private:
   bool InitialCheckout(std::ostream& ofs, std::string const& sourceDir);
   bool CreateNewTag;
+  bool Quiet;
 };
 
 

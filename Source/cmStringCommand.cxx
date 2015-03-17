@@ -20,6 +20,7 @@
 #include <time.h>
 
 #include <cmTimestamp.h>
+#include <cmUuid.h>
 
 //----------------------------------------------------------------------------
 bool cmStringCommand
@@ -105,6 +106,10 @@ bool cmStringCommand
     {
     return this->HandleGenexStripCommand(args);
     }
+  else if(subCommand == "UUID")
+    {
+    return this->HandleUuidCommand(args);
+    }
 
   std::string e = "does not recognize sub-command "+subCommand;
   this->SetError(e);
@@ -117,7 +122,7 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   if(args.size() != 3)
     {
-    cmOStringStream e;
+    std::ostringstream e;
     e << args[0] << " requires an output variable and an input string";
     this->SetError(e.str());
     return false;
@@ -132,7 +137,7 @@ bool cmStringCommand::HandleHashCommand(std::vector<std::string> const& args)
     }
   return false;
 #else
-  cmOStringStream e;
+  std::ostringstream e;
   e << args[0] << " not available during bootstrap";
   this->SetError(e.str().c_str());
   return false;
@@ -228,7 +233,7 @@ bool cmStringCommand::HandleConfigureCommand(
       }
     else
       {
-      cmOStringStream err;
+      std::ostringstream err;
       err << "Unrecognized argument \"" << args[i] << "\"";
       this->SetError(err.str());
       return false;
@@ -298,14 +303,7 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
   std::string regex = args[2];
   std::string outvar = args[3];
 
-  // Concatenate all the last arguments together.
-  std::string input = args[4];
-  for(unsigned int i=5; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
-
-  this->ClearMatches(this->Makefile);
+  this->Makefile->ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
@@ -316,11 +314,14 @@ bool cmStringCommand::RegexMatch(std::vector<std::string> const& args)
     return false;
     }
 
+  // Concatenate all the last arguments together.
+  std::string input = cmJoin(cmRange(args).advance(4), std::string());
+
   // Scan through the input for all matches.
   std::string output;
   if(re.find(input.c_str()))
     {
-    this->StoreMatches(this->Makefile, re);
+    this->Makefile->StoreMatches(re);
     std::string::size_type l = re.start();
     std::string::size_type r = re.end();
     if(r-l == 0)
@@ -347,14 +348,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
   std::string regex = args[2];
   std::string outvar = args[3];
 
-  // Concatenate all the last arguments together.
-  std::string input = args[4];
-  for(unsigned int i=5; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
-
-  this->ClearMatches(this->Makefile);
+  this->Makefile->ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
@@ -366,12 +360,15 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
     return false;
     }
 
+  // Concatenate all the last arguments together.
+  std::string input = cmJoin(cmRange(args).advance(4), std::string());
+
   // Scan through the input for all matches.
   std::string output;
   const char* p = input.c_str();
   while(re.find(p))
     {
-    this->StoreMatches(this->Makefile, re);
+    this->Makefile->StoreMatches(re);
     std::string::size_type l = re.start();
     std::string::size_type r = re.end();
     if(r-l == 0)
@@ -381,7 +378,7 @@ bool cmStringCommand::RegexMatchAll(std::vector<std::string> const& args)
       this->SetError(e);
       return false;
       }
-    if(output.length() > 0)
+    if(!output.empty())
       {
       output += ";";
       }
@@ -451,14 +448,7 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     l = r;
     }
 
-  // Concatenate all the last arguments together.
-  std::string input = args[5];
-  for(unsigned int i=6; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
-
-  this->ClearMatches(this->Makefile);
+  this->Makefile->ClearMatches();
   // Compile the regular expression.
   cmsys::RegularExpression re;
   if(!re.compile(regex.c_str()))
@@ -470,12 +460,15 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
     return false;
     }
 
+  // Concatenate all the last arguments together.
+  std::string input = cmJoin(cmRange(args).advance(5), std::string());
+
   // Scan through the input for all matches.
   std::string output;
   std::string::size_type base = 0;
   while(re.find(input.c_str()+base))
     {
-    this->StoreMatches(this->Makefile, re);
+    this->Makefile->StoreMatches(re);
     std::string::size_type l2 = re.start();
     std::string::size_type r = re.end();
 
@@ -536,38 +529,6 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
 }
 
 //----------------------------------------------------------------------------
-void cmStringCommand::ClearMatches(cmMakefile* mf)
-{
-  for (unsigned int i=0; i<10; i++)
-    {
-    char name[128];
-    sprintf(name, "CMAKE_MATCH_%d", i);
-    const char* s = mf->GetDefinition(name);
-    if(s && *s != 0)
-      {
-      mf->AddDefinition(name, "");
-      mf->MarkVariableAsUsed(name);
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmStringCommand::StoreMatches(cmMakefile* mf,cmsys::RegularExpression& re)
-{
-  for (unsigned int i=0; i<10; i++)
-    {
-    std::string m = re.match(i);
-    if(m.size() > 0)
-      {
-      char name[128];
-      sprintf(name, "CMAKE_MATCH_%d", i);
-      mf->AddDefinition(name, re.match(i).c_str());
-      mf->MarkVariableAsUsed(name);
-      }
-    }
-}
-
-//----------------------------------------------------------------------------
 bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
                                            args)
 {
@@ -618,7 +579,7 @@ bool cmStringCommand::HandleFindCommand(std::vector<std::string> const&
     }
   if(std::string::npos != pos)
     {
-    cmOStringStream s;
+    std::ostringstream s;
     s << pos;
     this->Makefile->AddDefinition(outvar, s.str().c_str());
     return true;
@@ -700,11 +661,7 @@ bool cmStringCommand::HandleReplaceCommand(std::vector<std::string> const&
   const std::string& replaceExpression = args[2];
   const std::string& variableName = args[3];
 
-  std::string input = args[4];
-  for(unsigned int i=5; i < args.size(); ++i)
-    {
-    input += args[i];
-    }
+  std::string input = cmJoin(cmRange(args).advance(4), std::string());
 
   cmsys::SystemTools::ReplaceString(input, matchExpression.c_str(),
                                     replaceExpression.c_str());
@@ -732,18 +689,16 @@ bool cmStringCommand::HandleSubstringCommand(std::vector<std::string> const&
   int intStringLength = static_cast<int>(stringLength);
   if ( begin < 0 || begin > intStringLength )
     {
-    cmOStringStream ostr;
+    std::ostringstream ostr;
     ostr << "begin index: " << begin << " is out of range 0 - "
          << stringLength;
     this->SetError(ostr.str());
     return false;
     }
-  int leftOverLength = intStringLength - begin;
-  if ( end < -1 || end > leftOverLength )
+  if ( end < -1 )
     {
-    cmOStringStream ostr;
-    ostr << "end index: " << end << " is out of range -1 - "
-         << leftOverLength;
+    std::ostringstream ostr;
+    ostr << "end index: " << end << " should be -1 or greater";
     this->SetError(ostr.str());
     return false;
     }
@@ -785,11 +740,7 @@ bool cmStringCommand
     }
 
   std::string const& variableName = args[1];
-  std::string value;
-  for(unsigned int i = 2; i < args.size(); ++i)
-    {
-    value += args[i];
-    }
+  std::string value = cmJoin(cmRange(args).advance(2), std::string());
 
   this->Makefile->AddDefinition(variableName, value.c_str());
   return true;
@@ -809,7 +760,7 @@ bool cmStringCommand
   const std::string& variableName = args[2];
 
   this->Makefile->AddDefinition(variableName,
-                      cmSystemTools::MakeCidentifier(input.c_str()).c_str());
+                      cmSystemTools::MakeCidentifier(input).c_str());
   return true;
 }
 
@@ -927,7 +878,7 @@ bool cmStringCommand
         }
       }
     }
-  if ( !alphabet.size() )
+  if (alphabet.empty())
     {
     alphabet = cmStringCommandDefaultAlphabet;
     }
@@ -1012,4 +963,115 @@ bool cmStringCommand
   this->Makefile->AddDefinition(outputVariable, result.c_str());
 
   return true;
+}
+
+bool cmStringCommand
+::HandleUuidCommand(std::vector<std::string> const& args)
+{
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  unsigned int argsIndex = 1;
+
+  if(args.size() < 2)
+    {
+    this->SetError("UUID sub-command requires an output variable.");
+    return false;
+    }
+
+  const std::string &outputVariable = args[argsIndex++];
+
+  std::string uuidNamespaceString;
+  std::string uuidName;
+  std::string uuidType;
+  bool uuidUpperCase = false;
+
+  while(args.size() > argsIndex)
+    {
+    if(args[argsIndex] == "NAMESPACE")
+      {
+      ++argsIndex;
+      if(argsIndex >= args.size())
+        {
+        this->SetError("UUID sub-command, NAMESPACE requires a value.");
+        return false;
+        }
+      uuidNamespaceString = args[argsIndex++];
+      }
+    else if(args[argsIndex] == "NAME")
+      {
+      ++argsIndex;
+      if(argsIndex >= args.size())
+        {
+        this->SetError("UUID sub-command, NAME requires a value.");
+        return false;
+        }
+      uuidName = args[argsIndex++];
+      }
+    else if(args[argsIndex] == "TYPE")
+      {
+      ++argsIndex;
+      if(argsIndex >= args.size())
+        {
+        this->SetError("UUID sub-command, TYPE requires a value.");
+        return false;
+        }
+      uuidType = args[argsIndex++];
+      }
+    else if(args[argsIndex] == "UPPER")
+      {
+      ++argsIndex;
+      uuidUpperCase = true;
+      }
+    else
+      {
+      std::string e = "UUID sub-command does not recognize option " +
+          args[argsIndex] + ".";
+      this->SetError(e);
+      return false;
+      }
+    }
+
+  std::string uuid;
+  cmUuid uuidGenerator;
+
+  std::vector<unsigned char> uuidNamespace;
+  if(!uuidGenerator.StringToBinary(uuidNamespaceString, uuidNamespace))
+    {
+    this->SetError("UUID sub-command, malformed NAMESPACE UUID.");
+    return false;
+    }
+
+  if(uuidType == "MD5")
+    {
+    uuid = uuidGenerator.FromMd5(uuidNamespace, uuidName);
+    }
+  else if(uuidType == "SHA1")
+    {
+    uuid = uuidGenerator.FromSha1(uuidNamespace, uuidName);
+    }
+  else
+    {
+    std::string e = "UUID sub-command, unknown TYPE '" + uuidType + "'.";
+    this->SetError(e);
+    return false;
+    }
+
+  if(uuid.empty())
+    {
+    this->SetError("UUID sub-command, generation failed.");
+    return false;
+    }
+
+  if(uuidUpperCase)
+    {
+    uuid = cmSystemTools::UpperCase(uuid);
+    }
+
+  this->Makefile->AddDefinition(outputVariable, uuid.c_str());
+  return true;
+#else
+  std::ostringstream e;
+  e << args[0] << " not available during bootstrap";
+  this->SetError(e.str().c_str());
+  return false;
+#endif
 }
