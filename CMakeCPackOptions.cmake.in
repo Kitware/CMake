@@ -109,4 +109,12 @@ if("${CPACK_GENERATOR}" STREQUAL "WIX")
   )
 
   set(CPACK_WIX_LIGHT_EXTRA_FLAGS "-dcl:high")
+
+  set(CPACK_WIX_UI_BANNER
+    "@CMake_SOURCE_DIR@/Utilities/Release/cpack_wix_ui_banner.jpg"
+  )
+
+  set(CPACK_WIX_UI_DIALOG
+    "@CMake_SOURCE_DIR@/Utilities/Release/cpack_wix_ui_dialog.jpg"
+  )
 endif()
