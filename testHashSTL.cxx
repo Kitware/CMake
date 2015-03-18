@@ -34,7 +34,7 @@
 template class kwsys::hash_map<const char*, int>;
 template class kwsys::hash_set<int>;
 
-bool test_hash_map()
+static bool test_hash_map()
 {
   typedef kwsys::hash_map<const char*, int> mtype;
   mtype m;
@@ -51,7 +51,7 @@ bool test_hash_map()
   return sum == 3;
 }
 
-bool test_hash_set()
+static bool test_hash_set()
 {
   typedef kwsys::hash_set<int> stype;
   stype s;
