@@ -1554,7 +1554,6 @@ class ArtifactPdbTag;
 
 class ArtifactPathTag;
 class ArtifactDirTag;
-class ArtifactNameTag;
 
 //----------------------------------------------------------------------------
 template<typename ArtifactT>
