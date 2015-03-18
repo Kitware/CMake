@@ -1041,21 +1041,21 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   //and knownDependencies so no matter if unix or windows paths they
   //should all match now.
 
-  std::vector<std::string> unkownExplicitDepends;
+  std::vector<std::string> unknownExplicitDepends;
   this->CombinedCustomCommandExplicitDependencies.erase("all");
 
   std::set_difference(this->CombinedCustomCommandExplicitDependencies.begin(),
                       this->CombinedCustomCommandExplicitDependencies.end(),
                       knownDependencies.begin(),
                       knownDependencies.end(),
-                      std::back_inserter(unkownExplicitDepends));
+                      std::back_inserter(unknownExplicitDepends));
 
 
   std::string const rootBuildDirectory =
       this->GetCMakeInstance()->GetHomeOutputDirectory();
   for (std::vector<std::string>::const_iterator
-       i = unkownExplicitDepends.begin();
-       i != unkownExplicitDepends.end();
+       i = unknownExplicitDepends.begin();
+       i != unknownExplicitDepends.end();
        ++i)
     {
     //verify the file is in the build directory
