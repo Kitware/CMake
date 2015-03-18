@@ -381,8 +381,6 @@ private:
   typedef std::map<std::string, cmTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
 
-  static cmLocalGenerator* LocalGenerator;
-
   static bool UsingMinGW;
 
 };
