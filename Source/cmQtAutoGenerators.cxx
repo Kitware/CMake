@@ -22,6 +22,8 @@
 # include "cmLocalVisualStudioGenerator.h"
 #endif
 
+#include <sys/stat.h>
+
 #include <cmsys/Terminal.h>
 #include <cmsys/ios/sstream>
 #include <cmsys/FStream.hxx>
@@ -582,6 +584,18 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
   makefile->ConfigureFile(inputFile.c_str(), outputFile.c_str(),
                           false, true, false);
 
+  // Ensure we have write permission in case .in was read-only.
+  mode_t perm = 0;
+#if defined(WIN32) && !defined(__CYGWIN__)
+  mode_t mode_write = S_IWRITE;
+#else
+  mode_t mode_write = S_IWUSR;
+#endif
+  cmSystemTools::GetPermissions(outputFile, perm);
+  if (!(perm & mode_write))
+    {
+    cmSystemTools::SetPermissions(outputFile, perm | mode_write);
+    }
   if (!configDefines.empty()
       || !configIncludes.empty()
       || !configUicOptions.empty())
