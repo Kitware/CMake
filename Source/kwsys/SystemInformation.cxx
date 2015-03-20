@@ -1234,6 +1234,7 @@ void StacktraceSignalHandler(
 
         case ILL_ILLTRP:
           oss << "illegal trap";
+          break;
 
         case ILL_PRVOPC:
           oss << "privileged opcode";
@@ -1823,6 +1824,7 @@ const char * SystemInformationImplementation::GetVendorID()
       return "Motorola";
     case HP:
       return "Hewlett-Packard";
+    case UnknownManufacturer:
     default:
       return "Unknown Manufacturer";
     }
@@ -3064,6 +3066,12 @@ bool SystemInformationImplementation::RetrieveClassicalCPUIdentity()
     case NSC:
       this->ChipID.ProcessorName = "Cx486SLC \\ DLC \\ Cx486S A-Step";
       break;
+
+    case Sun:
+    case IBM:
+    case Motorola:
+    case HP:
+    case UnknownManufacturer:
     default:
       this->ChipID.ProcessorName = "Unknown family"; // We cannot identify the processor.
       return false;
