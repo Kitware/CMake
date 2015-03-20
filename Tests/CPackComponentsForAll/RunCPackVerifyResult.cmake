@@ -132,12 +132,12 @@ if(CPackGen MATCHES "RPM")
   endif()
 
   set(CPACK_RPM_PACKAGE_SUMMARY "default summary")
-  set(CPACK_RPM_libraries_PACKAGE_SUMMARY "libraries summary")
-  set(CPACK_RPM_libraries_PACKAGE_DESCRIPTION "libraries description")
+  set(CPACK_RPM_headers_PACKAGE_SUMMARY "headers summary")
+  set(CPACK_RPM_headers_PACKAGE_DESCRIPTION "headers description")
   set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION
     "An extremely useful application that makes use of MyLib")
-  set(CPACK_COMPONENT_HEADERS_DESCRIPTION
-    "C/C\\+\\+ header files for use with MyLib")
+  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION
+    "Static libraries used to build programs with MyLib")
 
   # test package info
   if(${CPackComponentWay} STREQUAL "IgnoreGroup")
@@ -172,15 +172,15 @@ if(CPackGen MATCHES "RPM")
       set(whitespaces "[\\t\\n\\r ]*")
 
       if(check_file_libraries_match)
-        set(check_file_match_expected_summary ".*${CPACK_RPM_libraries_PACKAGE_SUMMARY}.*")
-        set(check_file_match_expected_description ".*${CPACK_RPM_libraries_PACKAGE_DESCRIPTION}.*")
+        set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
+        set(check_file_match_expected_description ".*${CPACK_COMPONENT_LIBRARIES_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
         set(check_file_match_expected_architecture "") # we don't explicitly set this value so it is different on each platform - ignore it
         set(spec_regex "*libraries*")
         set(check_content_list "^/usr/foo/bar\n/usr/foo/bar/lib.*\n/usr/foo/bar/lib.*/libmylib.a$")
       elseif(check_file_headers_match)
-        set(check_file_match_expected_summary ".*${CPACK_RPM_PACKAGE_SUMMARY}.*")
-        set(check_file_match_expected_description ".*${CPACK_COMPONENT_HEADERS_DESCRIPTION}.*")
+        set(check_file_match_expected_summary ".*${CPACK_RPM_headers_PACKAGE_SUMMARY}.*")
+        set(check_file_match_expected_description ".*${CPACK_RPM_headers_PACKAGE_DESCRIPTION}.*")
         set(check_file_match_expected_relocation_path "Relocations${whitespaces}:${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}${whitespaces}${CPACK_PACKAGING_INSTALL_PREFIX}/${CMAKE_INSTALL_INCLUDEDIR}")
         set(check_file_match_expected_architecture "noarch")
         set(spec_regex "*headers*")
