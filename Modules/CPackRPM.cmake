@@ -408,6 +408,16 @@
 #
 #  May be used to set per component CPACK_PACKAGING_INSTALL_PREFIX for
 #  relocatable RPM packages.
+#
+# .. variable:: CPACK_RPM_NO_INSTALL_PREFIX_RELOCATION
+#               CPACK_RPM_NO_<COMPONENT>_INSTALL_PREFIX_RELOCATION
+#
+#  * Mandatory : NO
+#  * Default   : CPACK_PACKAGING_INSTALL_PREFIX or CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX
+#                are treated as one of relocation paths
+#
+#  May be used to remove CPACK_PACKAGING_INSTALL_PREFIX and CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX
+#  from relocatable RPM prefix paths.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -437,8 +447,15 @@ function(cpack_rpm_prepare_relocation_paths)
 
   # set base path prefix
   if(EXISTS "${WDIR}/${PATH_PREFIX}")
-    set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}Prefix: ${PATH_PREFIX}\n")
-    list(APPEND RPM_USED_PACKAGE_PREFIXES "${PATH_PREFIX}")
+    if(NOT CPACK_RPM_NO_INSTALL_PREFIX_RELOCATION AND
+       NOT CPACK_RPM_NO_${CPACK_RPM_PACKAGE_COMPONENT}_INSTALL_PREFIX_RELOCATION)
+      set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}Prefix: ${PATH_PREFIX}\n")
+      list(APPEND RPM_USED_PACKAGE_PREFIXES "${PATH_PREFIX}")
+
+      if(CPACK_RPM_PACKAGE_DEBUG)
+        message("CPackRPM:Debug: removing '${PATH_PREFIX}' from relocation paths")
+      endif()
+    endif()
   endif()
 
   # set other path prefixes

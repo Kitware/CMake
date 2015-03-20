@@ -28,6 +28,10 @@ if(CPACK_GENERATOR MATCHES "RPM")
 
   # test package description override - headers rpm is generated in the middle
   set(CPACK_RPM_headers_PACKAGE_DESCRIPTION "headers description")
+
+  # test package do not use CPACK_PACKAGING_INSTALL_PREFIX
+  # as relocation path
+  set(CPACK_RPM_NO_libraries_INSTALL_PREFIX_RELOCATION true)
 endif()
 
 if(CPACK_GENERATOR MATCHES "DEB")
