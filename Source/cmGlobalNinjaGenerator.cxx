@@ -1069,7 +1069,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
       this->WritePhonyBuild(os,
                             "",
                             deps,
-                            deps);
+                            cmNinjaDeps());
       }
    }
 }
