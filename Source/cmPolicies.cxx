@@ -380,6 +380,11 @@ cmPolicies::cmPolicies()
     CMP0057, "CMP0057",
     "Disallow multiple MAIN_DEPENDENCY specifications for the same file.",
     3,3,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0058, "CMP0058",
+    "Ninja requires custom command byproducts to be explicit.",
+    3,3,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

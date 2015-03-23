@@ -368,6 +368,11 @@ private:
   /// The set of custom command outputs we have seen.
   std::set<std::string> CustomCommandOutputs;
 
+  /// Whether we are collecting known build outputs and needed
+  /// dependencies to determine unknown dependencies.
+  bool ComputingUnknownDependencies;
+  cmPolicies::PolicyStatus PolicyCMP0058;
+
   /// The combined explicit dependencies of custom build commands
   std::set<std::string> CombinedCustomCommandExplicitDependencies;
 
@@ -380,8 +385,6 @@ private:
 
   typedef std::map<std::string, cmTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
-
-  static cmLocalGenerator* LocalGenerator;
 
   static bool UsingMinGW;
 
