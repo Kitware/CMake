@@ -15,6 +15,7 @@
 #include <errno.h> // errno
 #include <stdio.h> // SEEK_SET
 #include <fcntl.h>
+#include <unistd.h>
 #include "cmSystemTools.h"
 
 cmFileLock::cmFileLock(): File(-1)
@@ -30,6 +31,9 @@ cmFileLockResult cmFileLock::Release()
   const int lockResult = this->LockFile(F_SETLK, F_UNLCK);
 
   this->Filename = "";
+
+  ::close(this->File);
+  this->File = -1;
 
   if (lockResult == 0)
     {
