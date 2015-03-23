@@ -172,6 +172,7 @@ if(BUILD_TESTING)
     ON)
   mark_as_advanced(CTEST_TEST_CPACK)
   set(CTEST_TEST_OSX_ARCH 0)
+  set(CMake_TEST_XCODE_VERSION 0)
   if(APPLE)
     execute_process(
       COMMAND sw_vers -productVersion
@@ -184,6 +185,17 @@ if(BUILD_TESTING)
       set(CTEST_TEST_CPACK OFF)
     else()
       set(CTEST_TEST_OSX_ARCH 1)
+    endif()
+    if(XCODE_VERSION)
+      set(CMake_TEST_XCODE_VERSION "${XCODE_VERSION}")
+    else()
+      execute_process(
+        COMMAND xcodebuild -version
+        OUTPUT_VARIABLE _version ERROR_VARIABLE _version
+        )
+      if(_version MATCHES "^Xcode ([0-9]+(\\.[0-9]+)*)")
+        set(CMake_TEST_XCODE_VERSION "${CMAKE_MATCH_1}")
+      endif()
     endif()
   endif()
 
@@ -1491,6 +1503,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       --build-options ${build_options}
         -DCMake_TEST_NESTED_MAKE_PROGRAM:FILEPATH=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
       )
+  endif()
+
+  if(CMake_TEST_XCODE_VERSION AND NOT CMake_TEST_XCODE_VERSION VERSION_LESS 6
+     AND OSX_VERSION MATCHES "^([0-9]+\\.[0-9]+)")
+    set(XCTest_BUILD_OPTIONS -DCMAKE_OSX_DEPLOYMENT_TARGET=${CMAKE_MATCH_1})
+    ADD_TEST_MACRO(XCTest ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION> -V)
   endif()
 
   add_test(linkorder1 ${CMAKE_CTEST_COMMAND}

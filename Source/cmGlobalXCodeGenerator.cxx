@@ -804,6 +804,10 @@ GetSourcecodeValueFromFileExtension(const std::string& _ext,
     {
     sourcecode = "compiled.mach-o.objfile";
     }
+  else if(ext == "xctest")
+    {
+    sourcecode = "wrapper.cfbundle";
+    }
   else if(ext == "xib")
     {
     keepLastKnownFileType = true;
@@ -2598,7 +2602,9 @@ const char* cmGlobalXCodeGenerator::GetTargetFileType(cmTarget& cmtarget)
     case cmTarget::STATIC_LIBRARY:
       return "archive.ar";
     case cmTarget::MODULE_LIBRARY:
-      if (cmtarget.IsCFBundleOnApple())
+      if (cmtarget.IsXCTestOnApple())
+        return "wrapper.cfbundle";
+      else if (cmtarget.IsCFBundleOnApple())
         return "wrapper.plug-in";
       else
         return ((this->XcodeVersion >= 22)?
@@ -2622,7 +2628,9 @@ const char* cmGlobalXCodeGenerator::GetTargetProductType(cmTarget& cmtarget)
     case cmTarget::STATIC_LIBRARY:
       return "com.apple.product-type.library.static";
     case cmTarget::MODULE_LIBRARY:
-      if (cmtarget.IsCFBundleOnApple())
+      if (cmtarget.IsXCTestOnApple())
+        return "com.apple.product-type.bundle.unit-test";
+      else if (cmtarget.IsCFBundleOnApple())
         return "com.apple.product-type.bundle";
       else
         return ((this->XcodeVersion >= 22)?
