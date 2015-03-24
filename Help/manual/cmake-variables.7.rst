@@ -25,6 +25,7 @@ Variables that Provide Information
    /variable/CMAKE_CFG_INTDIR
    /variable/CMAKE_COMMAND
    /variable/CMAKE_CROSSCOMPILING
+   /variable/CMAKE_CROSSCOMPILING_EMULATOR
    /variable/CMAKE_CTEST_COMMAND
    /variable/CMAKE_CURRENT_BINARY_DIR
    /variable/CMAKE_CURRENT_LIST_DIR

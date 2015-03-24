@@ -226,3 +226,7 @@ add_RunCMake_test(COMPILE_LANGUAGE-genex)
 if(CMake_TEST_FindMatlab)
   add_RunCMake_test(FindMatlab)
 endif()
+
+add_executable(pseudo_emulator pseudo_emulator.c)
+add_RunCMake_test(CrosscompilingEmulator
+ -DPSEUDO_EMULATOR=$<TARGET_FILE:pseudo_emulator>)
