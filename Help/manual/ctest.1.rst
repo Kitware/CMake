@@ -66,6 +66,12 @@ Options
  number of jobs.  This option can also be set by setting the
  environment variable ``CTEST_PARALLEL_LEVEL``.
 
+``--max-load <level>``
+ Set maximum allowed machine load.
+
+ This option tells ctest to only start tests that will not increase
+ the machine load above the given level.
+
 ``-Q,--quiet``
  Make ctest quiet.
 

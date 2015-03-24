@@ -15,6 +15,8 @@
 #include "cmCTest.h"
 #include "cmCTestScriptHandler.h"
 #include "cmSystemTools.h"
+#include "cmFileLock.h"
+#include "cmFileLockResult.h"
 #include <stdlib.h>
 #include <stack>
 #include <list>
@@ -267,16 +269,55 @@ void cmCTestMultiProcessHandler::StartNextTests()
   std::string testWithMinProcessors = "";
 
   cmsys::SystemInformation info;
+  const std::string lockFile = "/tmp/.cmake_maxload.lock"; // TODO: Filename
+  if (this->MaxLoad > 0)
+    {
+    if (!cmSystemTools::FileExists(lockFile))
+      {
+      FILE *file = cmsys::SystemTools::Fopen(lockFile, "w");
+      if (!file)
+        {
+        // TODO: ?
+        }
+      fclose(file);
+      }
+    }
+  cmFileLock maxLoadLock;
 
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
     size_t processors = GetProcessorsUsed(*test);
     const double systemLoad = info.GetLoadAverage();
-    const bool maxLoadOk = (this->MaxLoad > 0) ?
-      processors <= (this->MaxLoad - systemLoad) : true;
 
-    allTestsFailedMaxLoadCheck &= !maxLoadOk;
+    bool maxLoadOk;
+    if (this->MaxLoad > 0)
+      {
+      // First, try to get file lock..
+      if (!maxLoadLock.IsLocked(lockFile))
+        {
+        cmFileLockResult result = maxLoadLock.Lock(lockFile, 1);
+        if (result.IsOk())
+          {
+          maxLoadOk = processors <= (this->MaxLoad - systemLoad);
+          }
+        else
+          {
+          maxLoadOk = false;
+          }
+        }
+      else
+        {
+        maxLoadOk = false;
+        }
+
+      allTestsFailedMaxLoadCheck &= !maxLoadOk;
+      }
+    else
+      {
+      maxLoadOk = true;
+      }
+
     if (processors <= minProcessorsRequired)
       {
       minProcessorsRequired = processors;
@@ -285,34 +326,25 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
     if(maxLoadOk && processors <= numToStart && this->StartTest(*test))
       {
+      maxLoadLock.Release();
+
       if(this->StopTimePassed)
         {
         return;
         }
 
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** STARTED TEST : "
-        << GetName(*test)  << ",");
-      time_t currenttime = time(0);
-      struct tm* t = localtime(&currenttime);
-      char current_time[1024];
-      strftime(current_time, 1000, "%s", t);
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Time: "
-        << current_time << ",");
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Load: "
-        << systemLoad << ",");
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Max Allowed Load: "
-        << this->MaxLoad << ",");
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Test Processors: "
-        << processors);
-      cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
-
       numToStart -= processors;
       }
     else if(numToStart == 0)
       {
+      maxLoadLock.Release();
       return;
       }
-    }
+    else
+      {
+      maxLoadLock.Release();
+      }
+    }   // for
 
   if (allTestsFailedMaxLoadCheck)
     {
