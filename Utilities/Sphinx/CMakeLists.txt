@@ -159,7 +159,6 @@ if(SPHINX_HTML)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html
           DESTINATION ${CMAKE_DOC_DIR}
           PATTERN .buildinfo EXCLUDE
-          PATTERN objects.inv EXCLUDE
           )
 endif()
 
@@ -167,7 +166,6 @@ if(SPHINX_SINGLEHTML)
   install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/singlehtml
           DESTINATION ${CMAKE_DOC_DIR}
           PATTERN .buildinfo EXCLUDE
-          PATTERN objects.inv EXCLUDE
           )
 endif()
 
