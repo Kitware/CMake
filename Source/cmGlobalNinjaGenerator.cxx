@@ -576,6 +576,7 @@ bool cmGlobalNinjaGenerator::UsingMinGW = false;
 
 // Implemented by:
 //   cmGlobalUnixMakefileGenerator3
+//   cmGlobalGhsMultiGenerator
 //   cmGlobalVisualStudio10Generator
 //   cmGlobalVisualStudio6Generator
 //   cmGlobalVisualStudio7Generator
