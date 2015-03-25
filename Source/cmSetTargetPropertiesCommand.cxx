@@ -25,14 +25,12 @@ bool cmSetTargetPropertiesCommand
 
   // first collect up the list of files
   std::vector<std::string> propertyPairs;
-  bool doingFiles = true;
   int numFiles = 0;
   std::vector<std::string>::const_iterator j;
   for(j= args.begin(); j != args.end();++j)
     {
     if(*j == "PROPERTIES")
       {
-      doingFiles = false;
       // now loop through the rest of the arguments, new style
       ++j;
       if (std::distance(j, args.end()) % 2 != 0)
@@ -43,15 +41,9 @@ bool cmSetTargetPropertiesCommand
       propertyPairs.insert(propertyPairs.end(), j, args.end());
       break;
       }
-    else if (doingFiles)
-      {
-      numFiles++;
-      }
     else
       {
-      this->SetError("called with illegal arguments, maybe missing "
-                     "a PROPERTIES specifier?");
-      return false;
+      numFiles++;
       }
     }
   if(propertyPairs.empty())

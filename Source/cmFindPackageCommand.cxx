@@ -679,7 +679,6 @@ bool cmFindPackageCommand::HandlePackageMode()
     if(cmSystemTools::IsOff(def) || !fileFound)
       {
       fileFound = this->FindConfig();
-      def = this->Makefile->GetDefinition(this->Variable);
       }
 
     // Sanity check.
@@ -1598,7 +1597,6 @@ bool cmFindPackageCommand::CheckVersion(std::string const& config_file)
   if ((haveResult == false) && (this->Version.empty()))
     {
     result = true;
-    haveResult = true;
     }
 
   ConfigFileInfo configFileInfo;
