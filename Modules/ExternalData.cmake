@@ -685,7 +685,8 @@ macro(_ExternalData_arg_associated)
   # Find files named explicitly.
   foreach(file ${associated_files})
     _ExternalData_exact_regex(file_regex "${file}")
-    _ExternalData_arg_find_files("${reldir}${file}" "${reldir_regex}${file_regex}")
+    _ExternalData_arg_find_files(GLOB "${reldir}${file}"
+      "${reldir_regex}${file_regex}")
   endforeach()
 
   # Find files matching the given regular expressions.
@@ -695,13 +696,13 @@ macro(_ExternalData_arg_associated)
     set(all "${all}${sep}${reldir_regex}${regex}")
     set(sep "|")
   endforeach()
-  _ExternalData_arg_find_files("${reldir}" "${all}")
+  _ExternalData_arg_find_files(GLOB "${reldir}" "${all}")
 endmacro()
 
 macro(_ExternalData_arg_single)
   # Match only the named data by itself.
   _ExternalData_exact_regex(data_regex "${reldata}")
-  _ExternalData_arg_find_files("${reldata}" "${data_regex}")
+  _ExternalData_arg_find_files(GLOB "${reldata}" "${data_regex}")
 endmacro()
 
 macro(_ExternalData_arg_series)
@@ -756,12 +757,15 @@ macro(_ExternalData_arg_series)
   # Then match base, number, and extension.
   _ExternalData_exact_regex(series_base "${relbase}")
   _ExternalData_exact_regex(series_ext "${ext}")
-  _ExternalData_arg_find_files("${relbase}*${ext}"
+  _ExternalData_arg_find_files(GLOB "${relbase}*${ext}"
     "${series_base}${series_match}${series_ext}")
 endmacro()
 
-function(_ExternalData_arg_find_files pattern regex)
-  file(GLOB globbed RELATIVE "${top_src}" "${top_src}/${pattern}*")
+function(_ExternalData_arg_find_files glob pattern regex)
+  cmake_policy(PUSH)
+  cmake_policy(SET CMP0009 NEW)
+  file(${glob} globbed RELATIVE "${top_src}" "${top_src}/${pattern}*")
+  cmake_policy(POP)
   foreach(entry IN LISTS globbed)
     if("x${entry}" MATCHES "^x(.*)(\\.(${_ExternalData_REGEX_EXT}))$")
       set(relname "${CMAKE_MATCH_1}")
