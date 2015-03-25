@@ -244,7 +244,8 @@ associated file options.  For example, the argument
 ``DATA{MyDataDir/,REGEX:.*}`` will pass the full path to a ``MyDataDir``
 directory on the command line and ensure that the directory contains
 files corresponding to every file or content link in the ``MyDataDir``
-source directory.
+source directory.  In order to match associated files in subdirectories,
+specify a ``RECURSE:`` option, e.g. ``DATA{MyDataDir/,RECURSE:,REGEX:.*}``.
 
 Hash Algorithms
 ^^^^^^^^^^^^^^^
@@ -597,6 +598,7 @@ function(_ExternalData_arg target arg options var_file)
 
   # Process options.
   set(series_option "")
+  set(recurse_option "")
   set(associated_files "")
   set(associated_regex "")
   foreach(opt ${options})
@@ -606,6 +608,9 @@ function(_ExternalData_arg target arg options var_file)
     elseif(opt STREQUAL ":")
       # Activate series matching.
       set(series_option "${opt}")
+    elseif(opt STREQUAL "RECURSE:")
+      # Activate recursive matching in directories.
+      set(recurse_option "${opt}")
     elseif("x${opt}" MATCHES "^[^][:/*?]+$")
       # Specific associated file.
       list(APPEND associated_files "${opt}")
@@ -622,6 +627,9 @@ function(_ExternalData_arg target arg options var_file)
     if(associated_files OR associated_regex)
       message(FATAL_ERROR "Series option \"${series_option}\" not allowed with associated files.")
     endif()
+    if(recurse_option)
+      message(FATAL_ERROR "Recurse option \"${recurse_option}\" allowed only with directories.")
+    endif()
     # Load a whole file series.
     _ExternalData_arg_series()
   elseif(data_is_directory)
@@ -634,6 +642,9 @@ function(_ExternalData_arg target arg options var_file)
         "must list associated files.")
     endif()
   else()
+    if(recurse_option)
+      message(FATAL_ERROR "Recurse option \"${recurse_option}\" allowed only with directories.")
+    endif()
     # Load the named data file.
     _ExternalData_arg_single()
     if(associated_files OR associated_regex)
@@ -681,11 +692,17 @@ macro(_ExternalData_arg_associated)
     set(reldir "${reldir}/")
   endif()
   _ExternalData_exact_regex(reldir_regex "${reldir}")
+  if(recurse_option)
+    set(glob GLOB_RECURSE)
+    set(reldir_regex "${reldir_regex}(.+/)?")
+  else()
+    set(glob GLOB)
+  endif()
 
   # Find files named explicitly.
   foreach(file ${associated_files})
     _ExternalData_exact_regex(file_regex "${file}")
-    _ExternalData_arg_find_files(GLOB "${reldir}${file}"
+    _ExternalData_arg_find_files(${glob} "${reldir}${file}"
       "${reldir_regex}${file_regex}")
   endforeach()
 
@@ -696,7 +713,7 @@ macro(_ExternalData_arg_associated)
     set(all "${all}${sep}${reldir_regex}${regex}")
     set(sep "|")
   endforeach()
-  _ExternalData_arg_find_files(GLOB "${reldir}" "${all}")
+  _ExternalData_arg_find_files(${glob} "${reldir}" "${all}")
 endmacro()
 
 macro(_ExternalData_arg_single)
