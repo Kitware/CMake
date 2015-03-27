@@ -106,6 +106,13 @@
 #      CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME and
 #      CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS should be called.
 #
+#   CUDA_SOURCE_PROPERTY_FORMAT
+#   -- If this source file property is set, it can override the format specified
+#      to CUDA_WRAP_SRCS (OBJ, PTX, CUBIN, or FATBIN).  If an input source file
+#      is not a .cu file, setting this file will cause it to be treated as a .cu
+#      file. See documentation for set_source_files_properties on how to set
+#      this property.
+#
 #   CUDA_USE_STATIC_CUDA_RUNTIME (Default ON)
 #   -- When enabled the static version of the CUDA runtime library will be used
 #      in CUDA_LIBRARIES.  If the version of CUDA configured doesn't support
@@ -1294,12 +1301,16 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
   foreach(file ${ARGN})
     # Ignore any file marked as a HEADER_FILE_ONLY
     get_source_file_property(_is_header ${file} HEADER_FILE_ONLY)
-    if(${file} MATCHES "\\.cu$" AND NOT _is_header)
+    # Allow per source file overrides of the format.  Also allows compiling non-.cu files.
+    get_source_file_property(_cuda_source_format ${file} CUDA_SOURCE_PROPERTY_FORMAT)
+    if((${file} MATCHES "\\.cu$" OR _cuda_source_format) AND NOT _is_header)
 
-      # Allow per source file overrides of the format.
-      get_source_file_property(_cuda_source_format ${file} CUDA_SOURCE_PROPERTY_FORMAT)
       if(NOT _cuda_source_format)
         set(_cuda_source_format ${format})
+      endif()
+      # If file isn't a .cu file, we need to tell nvcc to treat it as such.
+      if(NOT ${file} MATCHES "\\.cu$")
+        list(APPEND nvcc_flags "-x=cu")
       endif()
 
       if( ${_cuda_source_format} MATCHES "OBJ")
@@ -1313,7 +1324,7 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
         elseif( ${_cuda_source_format} MATCHES "FATBIN")
           set( cuda_compile_to_external_module_type "fatbin" )
         else()
-          message( FATAL_ERROR "Invalid format flag passed to CUDA_WRAP_SRCS for file '${file}': '${_cuda_source_format}'.  Use OBJ, PTX, CUBIN or FATBIN.")
+          message( FATAL_ERROR "Invalid format flag passed to CUDA_WRAP_SRCS or set with CUDA_SOURCE_PROPERTY_FORMAT file property for file '${file}': '${_cuda_source_format}'.  Use OBJ, PTX, CUBIN or FATBIN.")
         endif()
       endif()
 
@@ -1472,10 +1483,10 @@ endmacro()
 
 function(_cuda_get_important_host_flags important_flags flag_string)
   if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    string(REGEX MATCHALL "/M[DT][d]?" flags ${flag_string})
+    string(REGEX MATCHALL "/M[DT][d]?" flags "${flag_string}")
     list(APPEND ${important_flags} ${flags})
   else()
-    string(REGEX MATCHALL "-fPIC" flags ${flag_string})
+    string(REGEX MATCHALL "-fPIC" flags "${flag_string}")
     list(APPEND ${important_flags} ${flags})
   endif()
   set(${important_flags} ${${important_flags}} PARENT_SCOPE)
@@ -1535,14 +1546,14 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
         list(APPEND config_specific_flags $<$<CONFIG:${config}>:${f}>)
       endforeach()
       set(important_host_flags)
-      _cuda_get_important_host_flags(important_host_flags ${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}})
+      _cuda_get_important_host_flags(important_host_flags "${CMAKE_${CUDA_C_OR_CXX}_FLAGS_${config_upper}}")
       foreach(f ${important_host_flags})
         list(APPEND flags $<$<CONFIG:${config}>:-Xcompiler> $<$<CONFIG:${config}>:${f}>)
       endforeach()
     endforeach()
     # Add CMAKE_${CUDA_C_OR_CXX}_FLAGS
     set(important_host_flags)
-    _cuda_get_important_host_flags(important_host_flags ${CMAKE_${CUDA_C_OR_CXX}_FLAGS})
+    _cuda_get_important_host_flags(important_host_flags "${CMAKE_${CUDA_C_OR_CXX}_FLAGS}")
     foreach(f ${important_host_flags})
       list(APPEND flags -Xcompiler ${f})
     endforeach()
