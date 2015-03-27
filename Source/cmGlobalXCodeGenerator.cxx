@@ -21,6 +21,7 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -3415,16 +3416,7 @@ bool cmGlobalXCodeGenerator
                                       this->Architectures);
     buildSettings->AddAttribute("SDKROOT",
                                 this->CreateString(sysroot));
-    std::string archString;
-    const char* sep = "";
-    for( std::vector<std::string>::iterator i =
-           this->Architectures.begin();
-         i != this->Architectures.end(); ++i)
-      {
-      archString += sep;
-      archString += *i;
-      sep = " ";
-      }
+    std::string const& archString = cmJoin(this->Architectures, " ");
     buildSettings->AddAttribute("ARCHS",
                                 this->CreateString(archString.c_str()));
     }
