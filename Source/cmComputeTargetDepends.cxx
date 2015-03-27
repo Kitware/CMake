@@ -418,9 +418,11 @@ void cmComputeTargetDepends::AddTargetDepend(int depender_index,
                                              cmTarget const* dependee,
                                              bool linking)
 {
-  if(dependee->IsImported())
+  if(dependee->IsImported() ||
+     dependee->GetType() == cmTarget::INTERFACE_LIBRARY)
     {
-    // Skip imported targets but follow their utility dependencies.
+    // Skip IMPORTED and INTERFACE targets but follow their utility
+    // dependencies.
     std::set<cmLinkItem> const& utils = dependee->GetUtilityItems();
     for(std::set<cmLinkItem>::const_iterator i = utils.begin();
         i != utils.end(); ++i)

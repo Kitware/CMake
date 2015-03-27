@@ -13,8 +13,8 @@ is one created by one of the :command:`add_executable`,
 :command:`add_library`, or :command:`add_custom_target` commands.
 
 Dependencies added to an :ref:`imported target <Imported Targets>`
-are followed transitively in its place since the target itself does
-not build.
+or an :ref:`interface library <Interface Libraries>` are followed
+transitively in its place since the target itself does not build.
 
 See the ``DEPENDS`` option of :command:`add_custom_target` and
 :command:`add_custom_command` commands for adding file-level
