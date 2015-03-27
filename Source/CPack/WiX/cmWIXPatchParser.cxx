@@ -132,8 +132,8 @@ void cmWIXPatchParser::ReportError(int line, int column, const char* msg)
 
 void cmWIXPatchParser::ReportValidationError(std::string const& message)
 {
-  ReportError(XML_GetCurrentLineNumber(Parser),
-    XML_GetCurrentColumnNumber(Parser),
+  ReportError(XML_GetCurrentLineNumber(static_cast<XML_Parser>(this->Parser)),
+    XML_GetCurrentColumnNumber(static_cast<XML_Parser>(this->Parser)),
     message.c_str());
 }
 
