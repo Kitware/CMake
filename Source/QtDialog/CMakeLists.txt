@@ -45,11 +45,11 @@ if (Qt5Widgets_FOUND)
         get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
         get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
         get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
-        set(_qt_plugin_dest "${CMAKE_INSTALL_PREFIX}/PlugIns/${_qt_plugin_type}")
+        set(_qt_plugin_dest "PlugIns/${_qt_plugin_type}")
         install(FILES "${_qt_plugin_path}"
           DESTINATION "${_qt_plugin_dest}")
         set(${_qt_plugins_var}
-          "${${_qt_plugins_var}};${_qt_plugin_dest}/${_qt_plugin_file}")
+          "${${_qt_plugins_var}};\$ENV{DESTDIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
       else()
         message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
       endif()
