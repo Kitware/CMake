@@ -36,7 +36,7 @@ if(WIN32 AND NOT UNIX AND NOT BORLAND AND NOT MINGW)
 endif()
 
 if(MFC_ATTEMPT_TRY_COMPILE)
-  if("MFC_HAVE_MFC" MATCHES "^MFC_HAVE_MFC$")
+  if(NOT DEFINED MFC_HAVE_MFC)
     set(CHECK_INCLUDE_FILE_VAR "afxwin.h")
     configure_file(${CMAKE_ROOT}/Modules/CheckIncludeFile.cxx.in
       ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/CheckIncludeFile.cxx)
