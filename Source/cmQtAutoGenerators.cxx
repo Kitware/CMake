@@ -374,7 +374,9 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 #endif
 
   std::vector<std::string> rcc_output;
-  if(makefile->GetLocalGenerator()->GetGlobalGenerator()->GetName() == "Ninja"
+  bool const isNinja =
+    makefile->GetLocalGenerator()->GetGlobalGenerator()->GetName() == "Ninja";
+  if(isNinja
 #if defined(_WIN32) && !defined(__CYGWIN__)
         || usePRE_BUILD
 #endif
@@ -444,7 +446,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 #endif
     {
     cmTarget* autogenTarget = 0;
-    if (!rcc_output.empty())
+    if (!rcc_output.empty() && !isNinja)
       {
       std::vector<std::string> no_byproducts;
       makefile->AddCustomCommandToOutput(rcc_output, no_byproducts,
@@ -464,7 +466,8 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
       {
       autogenTarget = makefile->AddUtilityCommand(
                                 autogenTargetName, true,
-                                workingDirectory.c_str(), depends,
+                                workingDirectory.c_str(),
+                                /*byproducts=*/rcc_output, depends,
                                 commandLines, false, autogenComment.c_str());
       }
 
