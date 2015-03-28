@@ -60,6 +60,7 @@ int cmListFileLexer_SetFileName(cmListFileLexer*, const char*,
                                 cmListFileLexer_BOM* bom);
 int cmListFileLexer_SetString(cmListFileLexer*, const char*);
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer*);
+cmListFileLexer_Token* cmListFileLexer_ScanString(cmListFileLexer*);
 long cmListFileLexer_GetCurrentLine(cmListFileLexer*);
 long cmListFileLexer_GetCurrentColumn(cmListFileLexer*);
 const char* cmListFileLexer_GetTypeAsString(cmListFileLexer*,

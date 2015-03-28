@@ -2628,6 +2628,16 @@ int cmListFileLexer_SetString(cmListFileLexer* lexer, const char* text)
 }
 
 /*--------------------------------------------------------------------------*/
+cmListFileLexer_Token* cmListFileLexer_ScanString(cmListFileLexer* lexer)
+{
+  if(cmListFileLexer_yylex(lexer->scanner, lexer))
+    {
+    return &lexer->token;
+    }
+  return 0;
+}
+
+/*--------------------------------------------------------------------------*/
 cmListFileLexer_Token* cmListFileLexer_Scan(cmListFileLexer* lexer)
 {
   if (!lexer->file) {
