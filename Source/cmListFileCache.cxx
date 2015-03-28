@@ -24,12 +24,15 @@ struct cmListFileParser
   cmListFileParser(cmListFile* lf, cmMakefile* mf, const char* filename);
   ~cmListFileParser();
   bool ParseFile();
+  bool DoParse();
+  bool ParseString(const char* content);
   bool ParseFunction(cmListFileLexer_Token* firstToken);
 
   void AddPartialFunction();
 
   bool AddArgument(cmListFileLexer_Token* token,
                    cmListFileArgument::Delimiter delim);
+  cmListFileLexer_Token* Scan();
   cmListFile* ListFile;
   cmMakefile* Makefile;
   const char* FileName;
@@ -59,6 +62,24 @@ cmListFileParser::~cmListFileParser()
   cmListFileLexer_Delete(this->Lexer);
 }
 
+cmListFileLexer_Token* cmListFileParser::Scan()
+{
+  if (this->IsString) {
+    return cmListFileLexer_ScanString(this->Lexer);
+  }
+  return cmListFileLexer_Scan(this->Lexer);
+}
+
+//----------------------------------------------------------------------------
+bool cmListFileParser::ParseString(const char* content)
+{
+  if (!cmListFileLexer_SetString(this->Lexer, content)) {
+    return false;
+  }
+  this->IsString = true;
+  return DoParse();
+}
+
 bool cmListFileParser::ParseFile()
 {
   // Open the file.
@@ -78,11 +99,15 @@ bool cmListFileParser::ParseFile()
     this->Makefile->IssueMessage(cmake::FATAL_ERROR, m.str());
     return false;
   }
+  return DoParse();
+}
 
+bool cmListFileParser::DoParse()
+{
   // Use a simple recursive-descent parser to process the token
   // stream.
   bool haveNewline = true;
-  while (cmListFileLexer_Token* token = cmListFileLexer_Scan(this->Lexer)) {
+  while (cmListFileLexer_Token* token = Scan()) {
     if (token->type == cmListFileLexer_Token_Space) {
     } else if (token->type == cmListFileLexer_Token_Newline) {
       haveNewline = true;
@@ -120,6 +145,24 @@ bool cmListFileParser::ParseFile()
   return true;
 }
 
+bool cmListFile::ParseString(const char* content, const char* filename,
+                             cmMakefile* mf)
+{
+  if (!cmSystemTools::FileExists(filename) ||
+      cmSystemTools::FileIsDirectory(filename)) {
+    return false;
+  }
+
+  bool parseError = false;
+
+  {
+    cmListFileParser parser(this, mf, filename);
+    parseError = !parser.ParseString(content);
+  }
+  return !parseError;
+}
+
+//----------------------------------------------------------------------------
 bool cmListFile::ParseFile(const char* filename, bool topLevel, cmMakefile* mf)
 {
   if (!cmSystemTools::FileExists(filename) ||
@@ -223,8 +266,7 @@ bool cmListFileParser::ParseFunction(cmListFileLexer_Token* firstToken)
 
   // Command name has already been parsed.  Read the left paren.
   cmListFileLexer_Token* token;
-  while ((token = cmListFileLexer_Scan(this->Lexer)) &&
-         token->type == cmListFileLexer_Token_Space) {
+  while ((token = Scan()) && token->type == cmListFileLexer_Token_Space) {
   }
   if (!token) {
     if (this->IsString) {
@@ -261,8 +303,8 @@ bool cmListFileParser::ParseFunction(cmListFileLexer_Token* firstToken)
   unsigned long lastLine;
   unsigned long parenDepth = 0;
   this->Separation = SeparationOkay;
-  while ((lastLine = cmListFileLexer_GetCurrentLine(this->Lexer),
-          token = cmListFileLexer_Scan(this->Lexer))) {
+  while (
+    (lastLine = cmListFileLexer_GetCurrentLine(this->Lexer), token = Scan())) {
     if (token->type == cmListFileLexer_Token_Space ||
         token->type == cmListFileLexer_Token_Newline) {
       this->Separation = SeparationOkay;
