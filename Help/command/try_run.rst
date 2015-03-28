@@ -73,7 +73,8 @@ When cross compiling, the executable compiled in the first step
 usually cannot be run on the build host.  The ``try_run`` command checks
 the :variable:`CMAKE_CROSSCOMPILING` variable to detect whether CMake is in
 cross-compiling mode.  If that is the case, it will still try to compile
-the executable, but it will not try to run the executable.  Instead it
+the executable, but it will not try to run the executable unless the
+:variable:`CMAKE_CROSSCOMPILING_EMULATOR` variable is set.  Instead it
 will create cache variables which must be filled by the user or by
 presetting them in some CMake script file to the values the executable
 would have produced if it had been run on its actual target platform.
