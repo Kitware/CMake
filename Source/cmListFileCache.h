@@ -56,18 +56,21 @@ struct cmListFileArgument
     : Value()
     , Delim(Unquoted)
     , Line(0)
+    , Column(0)
   {
   }
   cmListFileArgument(const cmListFileArgument& r)
     : Value(r.Value)
     , Delim(r.Delim)
     , Line(r.Line)
+    , Column(r.Column)
   {
   }
-  cmListFileArgument(const std::string& v, Delimiter d, long line)
+  cmListFileArgument(const std::string& v, Delimiter d, long line, long column)
     : Value(v)
     , Delim(d)
     , Line(line)
+    , Column(column)
   {
   }
   bool operator==(const cmListFileArgument& r) const
@@ -78,6 +81,7 @@ struct cmListFileArgument
   std::string Value;
   Delimiter Delim;
   long Line;
+  long Column;
 };
 
 class cmListFileContext
@@ -124,6 +128,12 @@ bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 struct cmListFileFunction : public cmCommandContext
 {
   std::vector<cmListFileArgument> Arguments;
+  long Column;
+  cmListFileFunction()
+    : cmCommandContext()
+    , Column(0)
+  {
+  }
 };
 
 // Represent a backtrace (call stack).  Provide value semantics
