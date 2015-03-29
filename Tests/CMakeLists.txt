@@ -991,6 +991,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
           ${build_generator_args}
           --build-project CPackComponentsForAll
           --build-options ${build_options}
+             -DCPACK_GENERATOR:STRING=${CPackGen}
              -DCPACK_BINARY_${CPackGen}:BOOL=ON
              ${CPackRun_CPackComponentWay}
              ${CPackComponentsForAll_BUILD_OPTIONS}
