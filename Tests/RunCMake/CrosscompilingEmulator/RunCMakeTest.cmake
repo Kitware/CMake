@@ -5,3 +5,4 @@ set(RunCMake_TEST_OPTIONS
 
 run_cmake(CrosscompilingEmulatorProperty)
 run_cmake(TryRun)
+run_cmake(AddTest)
