@@ -476,6 +476,9 @@ private:
   InstalledFilesMap InstalledFiles;
 
   void UpdateConversionPathTable();
+
+  // Print a list of valid generators to stderr.
+  void PrintGeneratorList();
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \
