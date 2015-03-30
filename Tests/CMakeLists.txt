@@ -862,6 +862,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set(CTEST_RUN_CPackComponents ${CTEST_TEST_CPACK})
   set(CTEST_package_X11_TEST ${CTEST_TEST_CPACK})
   set(CTEST_RUN_CPackComponentsForAll ${CTEST_TEST_CPACK})
+  set(CTEST_RUN_CPackComponentsPrefix ${CTEST_TEST_CPACK})
 
   # Do not try to build RPM
   if (NOT RPMBUILD_EXECUTABLE)
@@ -1033,6 +1034,33 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         -P ${CMake_SOURCE_DIR}/Tests/CPackTestAllGenerators/RunCPack.cmake
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackTestAllGenerators")
+  endif()
+
+  if(CTEST_RUN_CPackComponentsPrefix)
+    set(CPackComponents_BUILD_OPTIONS)
+    if(APPLE)
+      set(CPackComponents_BUILD_OPTIONS -DCPACK_BINARY_DRAGNDROP:BOOL=ON)
+    endif()
+    if(NOT NSIS_MAKENSIS_EXECUTABLE)
+      set(CPackComponents_BUILD_OPTIONS ${CPackComponents_BUILD_OPTIONS}
+        -DCPACK_BINARY_NSIS:BOOL=OFF)
+    endif()
+
+    add_test(CPackComponentsPrefix ${CMAKE_CTEST_COMMAND}
+      --build-and-test
+      "${CMake_SOURCE_DIR}/Tests/CPackComponentsPrefix"
+      "${CMake_BINARY_DIR}/Tests/CPackComponentsPrefix"
+      ${build_generator_args}
+      --build-project CPackComponentsPrefix
+      --build-two-config
+      --build-target package
+      --build-options ${build_options}
+        -DCPACK_BINARY_DEB:BOOL=${CPACK_BINARY_DEB}
+        -DCPACK_BINARY_RPM:BOOL=${CPACK_BINARY_RPM}
+        -DCPACK_BINARY_ZIP:BOOL=ON
+        ${CPackComponents_BUILD_OPTIONS}
+        )
+    list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsPrefix")
   endif()
 
   if(CTEST_package_X11_TEST)
