@@ -122,6 +122,14 @@ void cmMakefileTargetGenerator::CreateRuleFile()
     return;
     }
   this->LocalGenerator->WriteDisclaimer(*this->BuildFileStream);
+  if (this->GlobalGenerator->AllowDeleteOnError())
+    {
+    std::vector<std::string> no_depends;
+    std::vector<std::string> no_commands;
+    this->LocalGenerator->WriteMakeRule(
+      *this->BuildFileStream, "Delete rule output on recipe failure.",
+      ".DELETE_ON_ERROR", no_depends, no_commands, false);
+    }
   this->LocalGenerator->WriteSpecialTargetsTop(*this->BuildFileStream);
 }
 
