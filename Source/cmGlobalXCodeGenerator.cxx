@@ -21,6 +21,7 @@
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratorTarget.h"
 #include "cmGlobalGeneratorFactory.h"
+#include "cmAlgorithms.h"
 
 #include <cmsys/auto_ptr.hxx>
 
@@ -3380,53 +3381,33 @@ bool cmGlobalXCodeGenerator
       this->CreateObject(cmXCodeObject::ATTRIBUTE_GROUP);
   const char* osxArch =
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_ARCHITECTURES");
-  if(!osxArch || strlen(osxArch) == 0)
-    {
-    if(this->XcodeVersion >= 32)
-      {
-      osxArch = "$(ARCHS_STANDARD_32_64_BIT)";
-      }
-    else if(this->XcodeVersion == 31)
-      {
-      osxArch = "$(ARCHS_STANDARD_32_BIT)";
-      }
-    else if(this->XcodeVersion <= 30)
-      {
-#ifdef __ppc__
-      osxArch = "ppc";
-#endif
-#ifdef __i386
-      osxArch = "i386";
-#endif
-      }
-    buildSettings->AddAttribute("ONLY_ACTIVE_ARCH",
-                                this->CreateString("YES"));
-    }
-
   const char* sysroot =
       this->CurrentMakefile->GetDefinition("CMAKE_OSX_SYSROOT");
   const char* deploymentTarget =
     this->CurrentMakefile->GetDefinition("CMAKE_OSX_DEPLOYMENT_TARGET");
-  if(osxArch && sysroot)
+  std::string archs;
+  if(sysroot)
     {
-    // recompute this as it may have been changed since enable language
-    this->Architectures.clear();
-    cmSystemTools::ExpandListArgument(std::string(osxArch),
-                                      this->Architectures);
+    if(osxArch)
+      {
+      // recompute this as it may have been changed since enable language
+      this->Architectures.clear();
+      cmSystemTools::ExpandListArgument(std::string(osxArch),
+                                        this->Architectures);
+      archs = cmJoin(this->Architectures, " ");
+      }
     buildSettings->AddAttribute("SDKROOT",
                                 this->CreateString(sysroot));
-    std::string archString;
-    const char* sep = "";
-    for( std::vector<std::string>::iterator i =
-           this->Architectures.begin();
-         i != this->Architectures.end(); ++i)
-      {
-      archString += sep;
-      archString += *i;
-      sep = " ";
-      }
-    buildSettings->AddAttribute("ARCHS",
-                                this->CreateString(archString.c_str()));
+    }
+  if (archs.empty())
+    {
+    // Tell Xcode to use NATIVE_ARCH instead of ARCHS.
+    buildSettings->AddAttribute("ONLY_ACTIVE_ARCH", this->CreateString("YES"));
+    }
+  else
+    {
+    // Tell Xcode to use ARCHS (ONLY_ACTIVE_ARCH defaults to NO).
+    buildSettings->AddAttribute("ARCHS", this->CreateString(archs.c_str()));
     }
   if(deploymentTarget && *deploymentTarget)
     {
