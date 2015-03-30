@@ -138,18 +138,19 @@ public:
   std::vector<cmLocalGenerator*>& GetChildren() { return this->Children; }
 
 
-  void AddArchitectureFlags(std::string& flags, cmGeneratorTarget* target,
+  void AddArchitectureFlags(std::string& flags,
+                            cmGeneratorTarget const* target,
                             const std::string&lang, const std::string& config);
 
   void AddLanguageFlags(std::string& flags, const std::string& lang,
                         const std::string& config);
-  void AddCMP0018Flags(std::string &flags, cmTarget* target,
+  void AddCMP0018Flags(std::string &flags, cmTarget const* target,
                        std::string const& lang, const std::string& config);
-  void AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+  void AddVisibilityPresetFlags(std::string &flags, cmTarget const* target,
                                 const std::string& lang);
   void AddConfigVariableFlags(std::string& flags, const std::string& var,
                               const std::string& config);
-  void AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
+  void AddCompilerRequirementFlag(std::string &flags, cmTarget const* target,
                                   const std::string& lang);
   ///! Append flags to a string.
   virtual void AppendFlags(std::string& flags, const std::string& newFlags);

@@ -2004,7 +2004,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::AddArchitectureFlags(std::string& flags,
-                                            cmGeneratorTarget* target,
+                                            cmGeneratorTarget const* target,
                                             const std::string& lang,
                                             const std::string& config)
 {
@@ -2191,7 +2191,7 @@ void cmLocalGenerator::AddSharedFlags(std::string& flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator::
-AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
+AddCompilerRequirementFlag(std::string &flags, cmTarget const* target,
                            const std::string& lang)
 {
   if (lang.empty())
@@ -2313,7 +2313,8 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget* target,
     }
 }
 
-static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
+static void AddVisibilityCompileOption(std::string &flags,
+                                       cmTarget const* target,
                                        cmLocalGenerator *lg,
                                        const std::string& lang)
 {
@@ -2347,7 +2348,7 @@ static void AddVisibilityCompileOption(std::string &flags, cmTarget* target,
 }
 
 static void AddInlineVisibilityCompileOption(std::string &flags,
-                                       cmTarget* target,
+                                       cmTarget const* target,
                                        cmLocalGenerator *lg)
 {
   std::string compileOption
@@ -2368,7 +2369,7 @@ static void AddInlineVisibilityCompileOption(std::string &flags,
 
 //----------------------------------------------------------------------------
 void cmLocalGenerator
-::AddVisibilityPresetFlags(std::string &flags, cmTarget* target,
+::AddVisibilityPresetFlags(std::string &flags, cmTarget const* target,
                             const std::string& lang)
 {
   int targetType = target->GetType();
@@ -2394,7 +2395,8 @@ void cmLocalGenerator
 }
 
 //----------------------------------------------------------------------------
-void cmLocalGenerator::AddCMP0018Flags(std::string &flags, cmTarget* target,
+void cmLocalGenerator::AddCMP0018Flags(std::string &flags,
+                                       cmTarget const* target,
                                        std::string const& lang,
                                        const std::string& config)
 {
