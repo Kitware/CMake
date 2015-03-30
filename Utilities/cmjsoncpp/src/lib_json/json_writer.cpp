@@ -27,6 +27,20 @@
 # define isfinite finite
 #endif
 
+// AIX
+#if defined(_AIX)
+# if !defined(isfinite)
+#  define isfinite finite
+# endif
+#endif
+
+// HP-UX
+#if defined(__hpux)
+# if !defined(isfinite)
+#  define isfinite finite
+# endif
+#endif
+
 // Ancient glibc
 #if defined(__GLIBC__) && __GLIBC__ == 2 && __GLIBC_MINOR__ < 2
 # if !defined(isfinite)
