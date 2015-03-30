@@ -430,7 +430,7 @@ void cmCPackWIXGenerator::AddDefinition(cmWIXSourceWriter& source,
   tmp << name << "=\"" << value << '"';
 
   source.AddProcessingInstruction("define",
-    cmWIXSourceWriter::WindowsCodepageToUtf8(tmp.str()));
+    cmWIXSourceWriter::CMakeEncodingToUtf8(tmp.str()));
 }
 
 bool cmCPackWIXGenerator::CreateWiXSourceFiles()

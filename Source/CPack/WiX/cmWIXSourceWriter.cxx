@@ -10,6 +10,8 @@
   See the License for more information.
 ============================================================================*/
 
+#include "cmStandardIncludes.h"
+
 #include "cmWIXSourceWriter.h"
 
 #include <CPack/cmCPackGenerator.h>
@@ -118,7 +120,7 @@ void cmWIXSourceWriter::AddProcessingInstruction(
 void cmWIXSourceWriter::AddAttribute(
   std::string const& key, std::string const& value)
 {
-  std::string utf8 = WindowsCodepageToUtf8(value);
+  std::string utf8 = CMakeEncodingToUtf8(value);
 
   File << " " << key << "=\"" << EscapeAttributeValue(utf8) << '"';
 }
@@ -132,8 +134,11 @@ void cmWIXSourceWriter::AddAttributeUnlessEmpty(
     }
 }
 
-std::string cmWIXSourceWriter::WindowsCodepageToUtf8(std::string const& value)
+std::string cmWIXSourceWriter::CMakeEncodingToUtf8(std::string const& value)
 {
+#ifdef CMAKE_ENCODING_UTF8
+  return value;
+#else
   if(value.empty())
     {
     return std::string();
@@ -167,6 +172,7 @@ std::string cmWIXSourceWriter::WindowsCodepageToUtf8(std::string const& value)
     &utf8[0], static_cast<int>(utf8.size()), 0, 0);
 
   return std::string(&utf8[0], utf8.size());
+#endif
 }
 
 
