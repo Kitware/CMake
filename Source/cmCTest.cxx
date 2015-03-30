@@ -1343,16 +1343,21 @@ int cmCTest::RunTest(std::vector<const char*> argv,
       }
 
     *retVal = inst.Run(args, output);
-    *output += oss.str();
-    if ( log )
+    if(output)
+      {
+      *output += oss.str();
+      }
+    if ( log && output)
       {
       *log << *output;
       }
     cmSystemTools::ChangeDirectory(oldpath);
-
-    cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
-      "Internal cmCTest object used to run test." << std::endl
-      <<  *output << std::endl);
+    if(output)
+      {
+      cmCTestLog(this, HANDLER_VERBOSE_OUTPUT,
+                 "Internal cmCTest object used to run test." << std::endl
+                 <<  *output << std::endl);
+      }
 
     return cmsysProcess_State_Exited;
     }
@@ -1422,7 +1427,10 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     *retVal = cmsysProcess_GetExitException(cp);
     std::string outerr = "\n*** Exception executing: ";
     outerr += cmsysProcess_GetExceptionString(cp);
-    *output += outerr;
+    if(output)
+      {
+      *output += outerr;
+      }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr.c_str() << std::endl
       << std::flush);
     }
@@ -1430,7 +1438,10 @@ int cmCTest::RunTest(std::vector<const char*> argv,
     {
     std::string outerr = "\n*** ERROR executing: ";
     outerr += cmsysProcess_GetErrorString(cp);
-    *output += outerr;
+    if(output)
+      {
+      *output += outerr;
+      }
     cmCTestLog(this, HANDLER_VERBOSE_OUTPUT, outerr.c_str() << std::endl
       << std::flush);
     }

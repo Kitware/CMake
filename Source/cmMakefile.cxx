@@ -2208,7 +2208,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
   if(i==lastElement)
     {
     // group already exists, replace its regular expression
-    if ( regex )
+    if ( regex && sg)
       {
       // We only want to set the regular expression.  If there are already
       // source files in the group, we don't want to remove them.
@@ -2224,7 +2224,11 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
     sg = this->GetSourceGroup(currentName);
     i = 0; // last component found
     }
-
+  if(!sg)
+    {
+    cmSystemTools::Error("Could not create source group ");
+    return;
+    }
   // build the whole source group path
   const char* fullname = sg->GetFullName();
   cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();

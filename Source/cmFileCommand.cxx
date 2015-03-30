@@ -3422,6 +3422,7 @@ cmFileCommand::HandleUploadCommand(std::vector<std::string> const& args)
 
   // enable HTTP ERROR parsing
   ::CURLcode res = ::curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1);
+  check_curl_result(res, "UPLOAD cannot set fail on error flag: ");
 
   // enable uploading
   res = ::curl_easy_setopt(curl, CURLOPT_UPLOAD, 1);

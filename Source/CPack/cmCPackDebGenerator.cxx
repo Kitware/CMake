@@ -507,6 +507,11 @@ int cmCPackDebGenerator::createDeb()
       //int retVal = -1;
       res = cmSystemTools::RunSingleCommand(cmd.c_str(), &output,
           &retval, toplevel.c_str(), this->GeneratorVerbose, 0);
+      if ( !res || retval )
+        {
+        cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem running cmake -E md5sum "
+                      << cmd << std::endl);
+        }
       // debian md5sums entries are like this:
       // 014f3604694729f3bf19263bac599765  usr/bin/ccmake
       // thus strip the full path (with the trailing slash)
