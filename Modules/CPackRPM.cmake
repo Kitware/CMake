@@ -418,6 +418,41 @@
 #
 #  May be used to remove CPACK_PACKAGING_INSTALL_PREFIX and CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX
 #  from relocatable RPM prefix paths.
+#
+# Packaging of Symbolic Links
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# CPackRPM supports packaging of symbolic links::
+#
+#   execute_process(COMMAND ${CMAKE_COMMAND}
+#     -E create_symlink <relative_path_location> <symlink_name>)
+#   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/<symlink_name>
+#     DESTINATION <symlink_location> COMPONENT libraries)
+#
+# Symbolic links will be optimized (paths will be shortened if possible)
+# before being added to the package or if multiple relocation paths are
+# detected, a post install symlink relocation script will be generated.
+#
+# Symbolic links may point to locations that are not packaged by the same
+# package (either a different component or even not packaged at all) but
+# those locations will be treated as if they were a part of the package
+# while determining if symlink should be either created or present in a
+# post install script - depending on relocation paths.
+#
+# Currenty there are a few limitations though:
+#
+# * Only symbolic links with relative path can be packaged.
+#
+# * For component based packaging component interdependency is not checked
+#   when processing symbolic links. Symbolic links pointing to content of
+#   a different component are treated the same way as if pointing to location
+#   that will not be packaged.
+#
+# * Symbolic links pointing to a location through one or more intermediate
+#   symbolic links will not be handled differently - if the intermediate
+#   symbolic link(s) is also on a relocatable path, relocating it during
+#   package installation may cause initial symbolic link to point to an
+#   invalid location.
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.
@@ -501,6 +536,301 @@ function(cpack_rpm_prepare_relocation_paths)
 
   set(RPM_USED_PACKAGE_PREFIXES "${RPM_USED_PACKAGE_PREFIXES}" PARENT_SCOPE)
   set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}" PARENT_SCOPE)
+endfunction()
+
+function(cpack_rpm_symlink_get_relocation_prefixes LOCATION PACKAGE_PREFIXES RETURN_VARIABLE)
+  foreach(PKG_PREFIX IN LISTS PACKAGE_PREFIXES)
+    string(REGEX MATCH "^${PKG_PREFIX}/.*" FOUND_ "${LOCATION}")
+    if(FOUND_)
+      list(APPEND TMP_PREFIXES "${PKG_PREFIX}")
+    endif()
+  endforeach()
+
+  set(${RETURN_VARIABLE} "${TMP_PREFIXES}" PARENT_SCOPE)
+endfunction()
+
+function(cpack_rpm_symlink_create_relocation_script PACKAGE_PREFIXES)
+  list(LENGTH PACKAGE_PREFIXES LAST_INDEX)
+  set(SORTED_PACKAGE_PREFIXES "${PACKAGE_PREFIXES}")
+  list(SORT SORTED_PACKAGE_PREFIXES)
+  list(REVERSE SORTED_PACKAGE_PREFIXES)
+  math(EXPR LAST_INDEX ${LAST_INDEX}-1)
+
+  foreach(SYMLINK_INDEX RANGE ${LAST_INDEX})
+    list(GET SORTED_PACKAGE_PREFIXES ${SYMLINK_INDEX} SRC_PATH)
+    list(FIND PACKAGE_PREFIXES "${SRC_PATH}" SYMLINK_INDEX) # reverse magic
+    string(LENGTH "${SRC_PATH}" SRC_PATH_LEN)
+
+    set(PARTS_CNT 0)
+    set(SCRIPT_PART "if [ \"$RPM_INSTALL_PREFIX${SYMLINK_INDEX}\" != \"${SRC_PATH}\" ]; then\n")
+
+    # both paths relocated
+    foreach(POINT_INDEX RANGE ${LAST_INDEX})
+      list(GET SORTED_PACKAGE_PREFIXES ${POINT_INDEX} POINT_PATH)
+      list(FIND PACKAGE_PREFIXES "${POINT_PATH}" POINT_INDEX) # reverse magic
+      string(LENGTH "${POINT_PATH}" POINT_PATH_LEN)
+
+      if(_RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX})
+        if("${SYMLINK_INDEX}" EQUAL "${POINT_INDEX}")
+          set(INDENT "")
+        else()
+          set(SCRIPT_PART "${SCRIPT_PART}  if [ \"$RPM_INSTALL_PREFIX${POINT_INDEX}\" != \"${POINT_PATH}\" ]; then\n")
+          set(INDENT "  ")
+        endif()
+
+        foreach(RELOCATION_NO IN LISTS _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX})
+          math(EXPR PARTS_CNT ${PARTS_CNT}+1)
+
+          math(EXPR RELOCATION_INDEX ${RELOCATION_NO}-1)
+          list(GET _RPM_RELOCATION_SCRIPT_PAIRS ${RELOCATION_INDEX} RELOCATION_SCRIPT_PAIR)
+          string(FIND "${RELOCATION_SCRIPT_PAIR}" ":" SPLIT_INDEX)
+
+          math(EXPR SRC_PATH_END ${SPLIT_INDEX}-${SRC_PATH_LEN})
+          string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${SRC_PATH_LEN} ${SRC_PATH_END} SYMLINK_)
+
+          math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1+${POINT_PATH_LEN})
+          string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
+
+          set(SCRIPT_PART "${SCRIPT_PART}  ${INDENT}if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
+          set(SCRIPT_PART "${SCRIPT_PART}    ${INDENT}ln -s \"$RPM_INSTALL_PREFIX${POINT_INDEX}${POINT_}\" \"$RPM_INSTALL_PREFIX${SYMLINK_INDEX}${SYMLINK_}\"\n")
+          set(SCRIPT_PART "${SCRIPT_PART}    ${INDENT}CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n")
+          set(SCRIPT_PART "${SCRIPT_PART}  ${INDENT}fi\n")
+        endforeach()
+
+        if(NOT "${SYMLINK_INDEX}" EQUAL "${POINT_INDEX}")
+          set(SCRIPT_PART "${SCRIPT_PART}  fi\n")
+        endif()
+      endif()
+    endforeach()
+
+    # source path relocated
+    if(_RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_X)
+      foreach(RELOCATION_NO IN LISTS _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_X)
+        math(EXPR PARTS_CNT ${PARTS_CNT}+1)
+
+        math(EXPR RELOCATION_INDEX ${RELOCATION_NO}-1)
+        list(GET _RPM_RELOCATION_SCRIPT_PAIRS ${RELOCATION_INDEX} RELOCATION_SCRIPT_PAIR)
+        string(FIND "${RELOCATION_SCRIPT_PAIR}" ":" SPLIT_INDEX)
+
+        math(EXPR SRC_PATH_END ${SPLIT_INDEX}-${SRC_PATH_LEN})
+        string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${SRC_PATH_LEN} ${SRC_PATH_END} SYMLINK_)
+
+        math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1)
+        string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
+
+        set(SCRIPT_PART "${SCRIPT_PART}  if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
+        set(SCRIPT_PART "${SCRIPT_PART}    ln -s \"${POINT_}\" \"$RPM_INSTALL_PREFIX${SYMLINK_INDEX}${SYMLINK_}\"\n")
+        set(SCRIPT_PART "${SCRIPT_PART}    CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n")
+        set(SCRIPT_PART "${SCRIPT_PART}  fi\n")
+      endforeach()
+    endif()
+
+    if(PARTS_CNT)
+      set(SCRIPT "${SCRIPT_PART}")
+      set(SCRIPT "${SCRIPT}fi\n")
+    endif()
+  endforeach()
+
+  # point path relocated
+  foreach(POINT_INDEX RANGE ${LAST_INDEX})
+    list(GET SORTED_PACKAGE_PREFIXES ${POINT_INDEX} POINT_PATH)
+    list(FIND PACKAGE_PREFIXES "${POINT_PATH}" POINT_INDEX) # reverse magic
+    string(LENGTH "${POINT_PATH}" POINT_PATH_LEN)
+
+    if(_RPM_RELOCATION_SCRIPT_X_${POINT_INDEX})
+      set(SCRIPT "${SCRIPT}if [ \"$RPM_INSTALL_PREFIX${POINT_INDEX}\" != \"${POINT_PATH}\" ]; then\n")
+
+      foreach(RELOCATION_NO IN LISTS _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX})
+        math(EXPR RELOCATION_INDEX ${RELOCATION_NO}-1)
+        list(GET _RPM_RELOCATION_SCRIPT_PAIRS ${RELOCATION_INDEX} RELOCATION_SCRIPT_PAIR)
+        string(FIND "${RELOCATION_SCRIPT_PAIR}" ":" SPLIT_INDEX)
+
+        string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} 0 ${SPLIT_INDEX} SYMLINK_)
+
+        math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1+${POINT_PATH_LEN})
+        string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
+
+        set(SCRIPT "${SCRIPT}  if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
+        set(SCRIPT "${SCRIPT}    ln -s \"$RPM_INSTALL_PREFIX${POINT_INDEX}${POINT_}\" \"${SYMLINK_}\"\n")
+        set(SCRIPT "${SCRIPT}    CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}=true\n")
+        set(SCRIPT "${SCRIPT}  fi\n")
+      endforeach()
+
+      set(SCRIPT "${SCRIPT}fi\n")
+    endif()
+  endforeach()
+
+  # no path relocated
+  if(_RPM_RELOCATION_SCRIPT_X_X)
+    foreach(RELOCATION_NO IN LISTS _RPM_RELOCATION_SCRIPT_X_X)
+      math(EXPR RELOCATION_INDEX ${RELOCATION_NO}-1)
+      list(GET _RPM_RELOCATION_SCRIPT_PAIRS ${RELOCATION_INDEX} RELOCATION_SCRIPT_PAIR)
+      string(FIND "${RELOCATION_SCRIPT_PAIR}" ":" SPLIT_INDEX)
+
+      string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} 0 ${SPLIT_INDEX} SYMLINK_)
+
+      math(EXPR POINT_PATH_START ${SPLIT_INDEX}+1)
+      string(SUBSTRING ${RELOCATION_SCRIPT_PAIR} ${POINT_PATH_START} -1 POINT_)
+
+      set(SCRIPT "${SCRIPT}if [ -z \"$CPACK_RPM_RELOCATED_SYMLINK_${RELOCATION_INDEX}\" ]; then\n")
+      set(SCRIPT "${SCRIPT}  ln -s \"${POINT_}\" \"${SYMLINK_}\"\n")
+      set(SCRIPT "${SCRIPT}fi\n")
+    endforeach()
+  endif()
+
+  set(RPM_SYMLINK_POSTINSTALL "${SCRIPT}" PARENT_SCOPE)
+endfunction()
+
+function(cpack_rpm_symlink_add_for_relocation_script PACKAGE_PREFIXES SYMLINK SYMLINK_RELOCATION_PATHS POINT POINT_RELOCATION_PATHS)
+  list(LENGTH SYMLINK_RELOCATION_PATHS SYMLINK_PATHS_COUTN)
+  list(LENGTH POINT_RELOCATION_PATHS POINT_PATHS_COUNT)
+
+  list(APPEND _RPM_RELOCATION_SCRIPT_PAIRS "${SYMLINK}:${POINT}")
+  list(LENGTH _RPM_RELOCATION_SCRIPT_PAIRS PAIR_NO)
+
+  if(SYMLINK_PATHS_COUTN)
+    foreach(SYMLINK_RELOC_PATH IN LISTS SYMLINK_RELOCATION_PATHS)
+      list(FIND PACKAGE_PREFIXES "${SYMLINK_RELOC_PATH}" SYMLINK_INDEX)
+
+      # source path relocated
+      list(APPEND _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_X "${PAIR_NO}")
+      list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_X")
+
+      foreach(POINT_RELOC_PATH IN LISTS POINT_RELOCATION_PATHS)
+        list(FIND PACKAGE_PREFIXES "${POINT_RELOC_PATH}" POINT_INDEX)
+
+        # both paths relocated
+        list(APPEND _RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX} "${PAIR_NO}")
+        list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_${SYMLINK_INDEX}_${POINT_INDEX}")
+
+        # point path relocated
+        list(APPEND _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX} "${PAIR_NO}")
+        list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_X_${POINT_INDEX}")
+      endforeach()
+    endforeach()
+  elseif(POINT_PATHS_COUNT)
+    foreach(POINT_RELOC_PATH IN LISTS POINT_RELOCATION_PATHS)
+      list(FIND PACKAGE_PREFIXES "${POINT_RELOC_PATH}" POINT_INDEX)
+
+      # point path relocated
+      list(APPEND _RPM_RELOCATION_SCRIPT_X_${POINT_INDEX} "${PAIR_NO}")
+      list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_X_${POINT_INDEX}")
+    endforeach()
+  endif()
+
+  # no path relocated
+  list(APPEND _RPM_RELOCATION_SCRIPT_X_X "${PAIR_NO}")
+  list(APPEND RELOCATION_VARS "_RPM_RELOCATION_SCRIPT_X_X")
+
+  # place variables into parent scope
+  foreach(VAR IN LISTS RELOCATION_VARS)
+    set(${VAR} "${${VAR}}" PARENT_SCOPE)
+  endforeach()
+  set(_RPM_RELOCATION_SCRIPT_PAIRS "${_RPM_RELOCATION_SCRIPT_PAIRS}" PARENT_SCOPE)
+  set(REQUIRES_SYMLINK_RELOCATION_SCRIPT "true" PARENT_SCOPE)
+  set(DIRECTIVE "%ghost " PARENT_SCOPE)
+endfunction()
+
+function(cpack_rpm_prepare_install_files INSTALL_FILES_LIST WDIR PACKAGE_PREFIXES IS_RELOCATABLE)
+  # Prepend directories in ${CPACK_RPM_INSTALL_FILES} with %dir
+  # This is necessary to avoid duplicate files since rpmbuild does
+  # recursion on its own when encountering a pathname which is a directory
+  # which is not flagged as %dir
+  string(STRIP "${INSTALL_FILES_LIST}" INSTALL_FILES_LIST)
+  string(REPLACE "\n" ";" INSTALL_FILES_LIST
+                          "${INSTALL_FILES_LIST}")
+  string(REPLACE "\"" "" INSTALL_FILES_LIST
+                          "${INSTALL_FILES_LIST}")
+  string(LENGTH "${WDIR}" WDR_LEN_)
+
+  list(SORT INSTALL_FILES_LIST) # make file order consistent on all platforms
+
+  foreach(F IN LISTS INSTALL_FILES_LIST)
+    unset(DIRECTIVE)
+
+    if(IS_SYMLINK "${WDIR}/${F}")
+      if(IS_RELOCATABLE)
+        # check that symlink has relocatable format
+        get_filename_component(SYMLINK_LOCATION_ "${WDIR}/${F}" DIRECTORY)
+        execute_process(COMMAND ls -la "${WDIR}/${F}"
+                  WORKING_DIRECTORY "${WDIR}"
+                  OUTPUT_VARIABLE SYMLINK_POINT_
+                  OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+        string(FIND "${SYMLINK_POINT_}" "->" SYMLINK_POINT_INDEX_ REVERSE)
+        math(EXPR SYMLINK_POINT_INDEX_ ${SYMLINK_POINT_INDEX_}+3)
+        string(LENGTH "${SYMLINK_POINT_}" SYMLINK_POINT_LENGTH_)
+
+        # get destination path
+        string(SUBSTRING "${SYMLINK_POINT_}" ${SYMLINK_POINT_INDEX_} ${SYMLINK_POINT_LENGTH_} SYMLINK_POINT_)
+
+        # check if path is relative or absolute
+        string(SUBSTRING "${SYMLINK_POINT_}" 0 1 SYMLINK_IS_ABSOLUTE_)
+
+        if(${SYMLINK_IS_ABSOLUTE_} STREQUAL "/")
+          # prevent absolute paths from having /../ or /./ section inside of them
+          get_filename_component(SYMLINK_POINT_ "${SYMLINK_POINT_}" ABSOLUTE)
+        else()
+          # handle relative path
+          get_filename_component(SYMLINK_POINT_ "${SYMLINK_LOCATION_}/${SYMLINK_POINT_}" ABSOLUTE)
+        endif()
+
+        string(SUBSTRING "${SYMLINK_POINT_}" ${WDR_LEN_} -1 SYMLINK_POINT_WD_)
+
+        cpack_rpm_symlink_get_relocation_prefixes("${F}" "${PACKAGE_PREFIXES}" "SYMLINK_RELOCATIONS")
+        cpack_rpm_symlink_get_relocation_prefixes("${SYMLINK_POINT_WD_}" "${PACKAGE_PREFIXES}" "POINT_RELOCATIONS")
+
+        list(LENGTH SYMLINK_RELOCATIONS SYMLINK_RELOCATIONS_COUNT)
+        list(LENGTH POINT_RELOCATIONS POINT_RELOCATIONS_COUNT)
+
+        if(SYMLINK_RELOCATIONS_COUNT AND POINT_RELOCATIONS_COUNT)
+          # find matching
+          foreach(SYMLINK_RELOCATION_PREFIX IN LISTS SYMLINK_RELOCATIONS)
+            list(FIND POINT_RELOCATIONS "${SYMLINK_RELOCATION_PREFIX}" FOUND_INDEX)
+            if(NOT ${FOUND_INDEX} EQUAL -1)
+              break()
+            endif()
+          endforeach()
+
+          if(NOT ${FOUND_INDEX} EQUAL -1)
+            # symlinks have the same subpath
+            if(${SYMLINK_RELOCATIONS_COUNT} EQUAL 1 AND ${POINT_RELOCATIONS_COUNT} EQUAL 1)
+              # permanent symlink
+              get_filename_component(SYMLINK_LOCATION_ "${F}" DIRECTORY)
+              file(RELATIVE_PATH FINAL_PATH_ ${SYMLINK_LOCATION_} ${SYMLINK_POINT_WD_})
+              execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${FINAL_PATH_}" "${WDIR}/${F}")
+            else()
+              # relocation subpaths
+              cpack_rpm_symlink_add_for_relocation_script("${PACKAGE_PREFIXES}" "${F}" "${SYMLINK_RELOCATIONS}"
+                  "${SYMLINK_POINT_WD_}" "${POINT_RELOCATIONS}")
+            endif()
+          else()
+            # not on the same relocation path
+            cpack_rpm_symlink_add_for_relocation_script("${PACKAGE_PREFIXES}" "${F}" "${SYMLINK_RELOCATIONS}"
+                "${SYMLINK_POINT_WD_}" "${POINT_RELOCATIONS}")
+          endif()
+        elseif(POINT_RELOCATIONS_COUNT)
+          # point is relocatable
+          cpack_rpm_symlink_add_for_relocation_script("${PACKAGE_PREFIXES}" "${F}" "${SYMLINK_RELOCATIONS}"
+              "${SYMLINK_POINT_WD_}" "${POINT_RELOCATIONS}")
+        else()
+          # is not relocatable or points to non relocatable path - permanent symlink
+          execute_process(COMMAND "${CMAKE_COMMAND}" -E create_symlink "${SYMLINK_POINT_WD_}" "${WDIR}/${F}")
+        endif()
+      endif()
+    elseif(IS_DIRECTORY "${WDIR}/${F}")
+      set(DIRECTIVE "%dir ")
+    endif()
+
+    set(INSTALL_FILES "${INSTALL_FILES}${DIRECTIVE}\"${F}\"\n")
+  endforeach()
+
+  if(REQUIRES_SYMLINK_RELOCATION_SCRIPT)
+    cpack_rpm_symlink_create_relocation_script("${PACKAGE_PREFIXES}")
+  endif()
+
+  set(RPM_SYMLINK_POSTINSTALL "${RPM_SYMLINK_POSTINSTALL}" PARENT_SCOPE)
+  set(CPACK_RPM_INSTALL_FILES "${INSTALL_FILES}" PARENT_SCOPE)
 endfunction()
 
 if(CMAKE_BINARY_DIR)
@@ -963,9 +1293,10 @@ function(cpack_rpm_generate_package)
     # destinct parent paths of other relocation paths and remove the
     # final element (so the install-prefix dir itself is not omitted
     # from the RPM's content-list)
-    list(SORT RPM_USED_PACKAGE_PREFIXES)
+    set(SORTED_RPM_USED_PACKAGE_PREFIXES "${RPM_USED_PACKAGE_PREFIXES}")
+    list(SORT SORTED_RPM_USED_PACKAGE_PREFIXES)
     set(_DISTINCT_PATH "NOT_SET")
-    foreach(_RPM_RELOCATION_PREFIX ${RPM_USED_PACKAGE_PREFIXES})
+    foreach(_RPM_RELOCATION_PREFIX ${SORTED_RPM_USED_PACKAGE_PREFIXES})
       if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
         set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
 
@@ -1142,25 +1473,13 @@ function(cpack_rpm_generate_package)
     set(CPACK_RPM_ABSOLUTE_INSTALL_FILES "")
   endif()
 
-
-  # Prepend directories in ${CPACK_RPM_INSTALL_FILES} with %dir
-  # This is necessary to avoid duplicate files since rpmbuild do
-  # recursion on its own when encountering a pathname which is a directory
-  # which is not flagged as %dir
-  string(STRIP "${CPACK_RPM_INSTALL_FILES}" CPACK_RPM_INSTALL_FILES_LIST)
-  string(REPLACE "\n" ";" CPACK_RPM_INSTALL_FILES_LIST
-                          "${CPACK_RPM_INSTALL_FILES_LIST}")
-  string(REPLACE "\"" "" CPACK_RPM_INSTALL_FILES_LIST
-                          "${CPACK_RPM_INSTALL_FILES_LIST}")
-  set(CPACK_RPM_INSTALL_FILES "")
-  foreach(F IN LISTS CPACK_RPM_INSTALL_FILES_LIST)
-    if(IS_DIRECTORY "${WDIR}/${F}")
-      set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}%dir \"${F}\"\n")
-    else()
-      set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}\"${F}\"\n")
-    endif()
-  endforeach()
-  set(CPACK_RPM_INSTALL_FILES_LIST "")
+  # Prepare install files
+  cpack_rpm_prepare_install_files(
+      "${CPACK_RPM_INSTALL_FILES}"
+      "${WDIR}"
+      "${RPM_USED_PACKAGE_PREFIXES}"
+      "${CPACK_RPM_PACKAGE_RELOCATABLE}"
+    )
 
   # The name of the final spec file to be used by rpmbuild
   set(CPACK_RPM_BINARY_SPECFILE "${CPACK_RPM_ROOTDIR}/SPECS/${CPACK_RPM_PACKAGE_NAME}${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.spec")
@@ -1246,6 +1565,7 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
 %clean
 
 %post
+\@RPM_SYMLINK_POSTINSTALL\@
 \@CPACK_RPM_SPEC_POSTINSTALL\@
 
 %postun
