@@ -106,6 +106,11 @@
 #      CUDA_COMPUTE_SEPARABLE_COMPILATION_OBJECT_FILE_NAME and
 #      CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS should be called.
 #
+#   CUDA_USE_STATIC_CUDA_RUNTIME (Default ON)
+#   -- When enabled the static version of the CUDA runtime library will be used
+#      in CUDA_LIBRARIES.  If the version of CUDA configured doesn't support
+#      this option, then it will be silently disabled.
+#
 #   CUDA_VERBOSE_BUILD (Default OFF)
 #   -- Set to ON to see all the commands used when building the CUDA file.  When
 #      using a Makefile generator the value defaults to VERBOSE (run make
@@ -272,6 +277,8 @@
 #   CUDA_CUBLAS_LIBRARIES -- Device or emulation library for the Cuda BLAS
 #                            implementation (alterative to:
 #                            CUDA_ADD_CUBLAS_TO_TARGET macro).
+#   CUDA_cudart_static_LIBRARY -- Statically linkable cuda runtime library.
+#                                 Only available for CUDA version 5.5+
 #   CUDA_cupti_LIBRARY    -- CUDA Profiling Tools Interface library.
 #                            Only available for CUDA version 4.0+.
 #   CUDA_curand_LIBRARY   -- CUDA Random Number Generation library.
@@ -518,11 +525,12 @@ macro(cuda_unset_include_and_libraries)
     # This only existed in the 3.0 version of the CUDA toolkit
     unset(CUDA_CUDARTEMU_LIBRARY CACHE)
   endif()
-  unset(CUDA_cupti_LIBRARY CACHE)
+  unset(CUDA_cudart_static_LIBRARY CACHE)
   unset(CUDA_cublas_LIBRARY CACHE)
   unset(CUDA_cublasemu_LIBRARY CACHE)
   unset(CUDA_cufft_LIBRARY CACHE)
   unset(CUDA_cufftemu_LIBRARY CACHE)
+  unset(CUDA_cupti_LIBRARY CACHE)
   unset(CUDA_curand_LIBRARY CACHE)
   unset(CUDA_cusolver_LIBRARY CACHE)
   unset(CUDA_cusparse_LIBRARY CACHE)
@@ -532,6 +540,8 @@ macro(cuda_unset_include_and_libraries)
   unset(CUDA_npps_LIBRARY CACHE)
   unset(CUDA_nvcuvenc_LIBRARY CACHE)
   unset(CUDA_nvcuvid_LIBRARY CACHE)
+
+  unset(CUDA_USE_STATIC_CUDA_RUNTIME CACHE)
 endmacro()
 
 # Check to see if the CUDA_TOOLKIT_ROOT_DIR and CUDA_SDK_ROOT_DIR have changed,
@@ -539,8 +549,8 @@ endmacro()
 if(NOT "${CUDA_TOOLKIT_ROOT_DIR}" STREQUAL "${CUDA_TOOLKIT_ROOT_DIR_INTERNAL}")
   unset(CUDA_TOOLKIT_TARGET_DIR CACHE)
   unset(CUDA_NVCC_EXECUTABLE CACHE)
-  unset(CUDA_VERSION CACHE)
   cuda_unset_include_and_libraries()
+  unset(CUDA_VERSION CACHE)
 endif()
 
 if(NOT "${CUDA_TOOLKIT_TARGET_DIR}" STREQUAL "${CUDA_TOOLKIT_TARGET_DIR_INTERNAL}")
@@ -696,6 +706,53 @@ if(CUDA_VERSION VERSION_EQUAL "3.0")
     CUDA_CUDARTEMU_LIBRARY
     )
 endif()
+if(NOT CUDA_VERSION VERSION_LESS "5.5")
+  cuda_find_library_local_first(CUDA_cudart_static_LIBRARY cudart_static "static CUDA runtime library")
+  mark_as_advanced(CUDA_cudart_static_LIBRARY)
+endif()
+if(CUDA_cudart_static_LIBRARY)
+  # Set whether to use the static cuda runtime.
+  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" ON)
+else()
+  option(CUDA_USE_STATIC_CUDA_RUNTIME "Use the static version of the CUDA runtime library if available" OFF)
+endif()
+
+if(CUDA_USE_STATIC_CUDA_RUNTIME)
+  if(UNIX)
+    # Check for the dependent libraries.  Here we look for pthreads.
+    if (DEFINED CMAKE_THREAD_PREFER_PTHREAD)
+      set(_cuda_cmake_thread_prefer_pthread ${CMAKE_THREAD_PREFER_PTHREAD})
+    endif()
+    set(CMAKE_THREAD_PREFER_PTHREAD 1)
+
+    # Many of the FindXYZ CMake comes with makes use of try_compile with int main(){return 0;}
+    # as the source file.  Unfortunately this causes a warning with -Wstrict-prototypes and
+    # -Werror causes the try_compile to fail.  We will just temporarily disable other flags
+    # when doing the find_package command here.
+    set(_cuda_cmake_c_flags ${CMAKE_C_FLAGS})
+    set(CMAKE_C_FLAGS "-fPIC")
+    find_package(Threads REQUIRED)
+    set(CMAKE_C_FLAGS ${_cuda_cmake_c_flags})
+
+    if (DEFINED _cuda_cmake_thread_prefer_pthread)
+      set(CMAKE_THREAD_PREFER_PTHREAD ${_cuda_cmake_thread_prefer_pthread})
+      unset(_cuda_cmake_thread_prefer_pthread)
+    else()
+      unset(CMAKE_THREAD_PREFER_PTHREAD)
+    endif()
+    if (NOT APPLE)
+      # Here is librt that has things such as, clock_gettime, shm_open, and shm_unlink.
+      find_library(CUDA_rt_LIBRARY rt)
+      find_library(CUDA_dl_LIBRARY dl)
+      if (NOT CUDA_rt_LIBRARY)
+        message(WARNING "Expecting to find librt for libcudart_static, but didn't find it.")
+      endif()
+      if (NOT CUDA_dl_LIBRARY)
+        message(WARNING "Expecting to find libdl for libcudart_static, but didn't find it.")
+      endif()
+    endif()
+  endif()
+endif()
 
 # CUPTI library showed up in cuda toolkit 4.0
 if(NOT CUDA_VERSION VERSION_LESS "4.0")
@@ -703,12 +760,32 @@ if(NOT CUDA_VERSION VERSION_LESS "4.0")
   mark_as_advanced(CUDA_cupti_LIBRARY)
 endif()
 
+# Set the CUDA_LIBRARIES variable.  This is the set of stuff to link against if you are
+# using the CUDA runtime.  For the dynamic version of the runtime, most of the
+# dependencies are brough in, but for the static version there are additional libraries
+# and linker commands needed.
+# Initialize to empty
+set(CUDA_LIBRARIES)
+
 # If we are using emulation mode and we found the cudartemu library then use
 # that one instead of cudart.
 if(CUDA_BUILD_EMULATION AND CUDA_CUDARTEMU_LIBRARY)
-  set(CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
+  list(APPEND CUDA_LIBRARIES ${CUDA_CUDARTEMU_LIBRARY})
+elseif(CUDA_USE_STATIC_CUDA_RUNTIME AND CUDA_cudart_static_LIBRARY)
+  list(APPEND CUDA_LIBRARIES ${CUDA_cudart_static_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+  if (CUDA_rt_LIBRARY)
+    list(APPEND CUDA_LIBRARIES ${CUDA_rt_LIBRARY})
+  endif()
+  if (CUDA_dl_LIBRARY)
+    list(APPEND CUDA_LIBRARIES ${CUDA_dl_LIBRARY})
+  endif()
+  if(APPLE)
+    # We need to add the default path to the driver (libcuda.dylib) as an rpath, so that
+    # the static cuda runtime can find it at runtime.
+    list(APPEND CUDA_LIBRARIES -Wl,-rpath,/usr/local/cuda/lib)
+  endif()
 else()
-  set(CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
+  list(APPEND CUDA_LIBRARIES ${CUDA_CUDART_LIBRARY})
 endif()
 
 # 1.1 toolkit on linux doesn't appear to have a separate library on
