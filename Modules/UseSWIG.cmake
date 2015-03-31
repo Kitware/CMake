@@ -204,8 +204,7 @@ macro(SWIG_ADD_SOURCE_TO_MODULE name outfiles infile)
     ${swig_include_dirs}
     -o "${swig_generated_file_fullname}"
     "${swig_source_file_fullname}"
-    MAIN_DEPENDENCY "${swig_source_file_fullname}"
-    DEPENDS ${SWIG_MODULE_${name}_EXTRA_DEPS}
+    DEPENDS "${swig_source_file_fullname}" ${SWIG_MODULE_${name}_EXTRA_DEPS}
     COMMENT "Swig source")
   set_source_files_properties("${swig_generated_file_fullname}" ${swig_extra_generated_files}
     PROPERTIES GENERATED 1)
