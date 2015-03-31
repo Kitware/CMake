@@ -805,12 +805,14 @@ static int put_arobj(CF *cfp, struct stat *sb)
   if (lname > sizeof(hdr->ar_name) || strchr(name, ' '))
     (void)sprintf(ar_hb, HDR1, AR_EFMT1, (int)lname,
                   (long int)sb->st_mtime, (unsigned)uid, (unsigned)gid,
-                  sb->st_mode, (long long)sb->st_size + lname, ARFMAG);
+                  (unsigned)sb->st_mode, (long long)sb->st_size + lname,
+                  ARFMAG);
     else {
       lname = 0;
       (void)sprintf(ar_hb, HDR2, name,
                     (long int)sb->st_mtime, (unsigned)uid, (unsigned)gid,
-                    sb->st_mode, (long long)sb->st_size, ARFMAG);
+                    (unsigned)sb->st_mode, (long long)sb->st_size,
+                    ARFMAG);
       }
     off_t size = sb->st_size;
 
