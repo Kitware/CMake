@@ -58,6 +58,12 @@ public:
                       const std::string& config) const;
   void GetCertificates(std::vector<cmSourceFile const*>&,
                        const std::string& config) const;
+  void GetXamlSources(std::vector<cmSourceFile const*>&,
+                      const std::string& config) const;
+  void GetExpectedXamlHeaders(std::set<std::string>&,
+                              const std::string& config) const;
+  void GetExpectedXamlSources(std::set<std::string>&,
+                              const std::string& config) const;
 
   void ComputeObjectMapping();
 
@@ -132,6 +138,13 @@ public:
     mutable std::set<std::string> ExpectedResxHeaders;
     mutable std::vector<cmSourceFile const*> ResxSources;
   };
+
+  struct XamlData {
+    std::set<std::string> ExpectedXamlHeaders;
+    std::set<std::string> ExpectedXamlSources;
+    std::vector<cmSourceFile const*> XamlSources;
+  };
+
 private:
   friend class cmTargetTraceDependencies;
   struct SourceEntry { std::vector<cmSourceFile*> Depends; };
