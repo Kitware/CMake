@@ -438,10 +438,6 @@ public:
    */
   void AddExtraDirectory(const char* dir);
 
-
-  /**
-   * Add an auxiliary directory to the build.
-   */
   void MakeStartDirectoriesCurrent()
     {
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
