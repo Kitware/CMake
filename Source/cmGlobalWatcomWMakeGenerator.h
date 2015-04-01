@@ -45,6 +45,7 @@ public:
                               cmMakefile *, bool optional);
 
   virtual bool AllowNotParallel() const { return false; }
+  virtual bool AllowDeleteOnError() const { return false; }
 };
 
 #endif

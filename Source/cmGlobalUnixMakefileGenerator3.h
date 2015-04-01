@@ -128,6 +128,9 @@ public:
   /** Does the make tool tolerate .NOTPARALLEL? */
   virtual bool AllowNotParallel() const { return true; }
 
+  /** Does the make tool tolerate .DELETE_ON_ERROR? */
+  virtual bool AllowDeleteOnError() const { return true; }
+
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 protected:
   void WriteMainMakefile2();
