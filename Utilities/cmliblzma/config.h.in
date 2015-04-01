@@ -280,4 +280,10 @@ typedef uint64_t uintmax_t;
 
 /* Define to 1 if the system supports fast unaligned access to 16-bit and
    32-bit integers. */
-#define TUKLIB_FAST_UNALIGNED_ACCESS 1
+#if defined(__i386) || defined(__i386__) || defined(_M_IX86) \
+ || defined(__x86_64) || defined(__x86_64__) || defined(_M_X64) \
+ || defined(__amd64) || defined(__amd64__) \
+ || defined(__powerpc) || defined(__powerpc__) \
+ || defined(__ppc) || defined(__ppc__) || defined(__POWERPC__)
+# define TUKLIB_FAST_UNALIGNED_ACCESS 1
+#endif
