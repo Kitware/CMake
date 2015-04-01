@@ -385,6 +385,11 @@ cmPolicies::cmPolicies()
     CMP0058, "CMP0058",
     "Ninja requires custom command byproducts to be explicit.",
     3,3,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0059, "CMP0059",
+    "Do no treat DEFINITIONS as a built-in directory property.",
+    3,3,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()
