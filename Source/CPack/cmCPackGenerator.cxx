@@ -655,26 +655,19 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
       cmSystemTools::SetForceUnixPaths(globalGenerator->GetForceUnixPaths());
 
       // Does this generator require pre-install?
-      if ( globalGenerator->GetPreinstallTargetName() )
+      if (const char* preinstall = globalGenerator->GetPreinstallTargetName())
         {
-        globalGenerator->FindMakeProgram(this->MakefileMap);
-        std::string cmakeMakeProgram
-          = this->MakefileMap->GetSafeDefinition("CMAKE_MAKE_PROGRAM");
-        std::vector<std::string> buildCommand;
-        globalGenerator->GenerateBuildCommand(buildCommand, cmakeMakeProgram,
-            installProjectName, installDirectory,
-            globalGenerator->GetPreinstallTargetName(),
-            buildConfig, false, false);
-        std::string buildCommandStr =
-          cmSystemTools::PrintSingleCommand(buildCommand);
+        std::string buildCommand =
+          globalGenerator->GenerateCMakeBuildCommand(
+            preinstall, buildConfig, "", false);
         cmCPackLogger(cmCPackLog::LOG_DEBUG,
-          "- Install command: " << buildCommandStr << std::endl);
+          "- Install command: " << buildCommand << std::endl);
         cmCPackLogger(cmCPackLog::LOG_OUTPUT,
           "- Run preinstall target for: " << installProjectName << std::endl);
         std::string output;
         int retVal = 1;
         bool resB =
-          cmSystemTools::RunSingleCommand(buildCommand,
+          cmSystemTools::RunSingleCommand(buildCommand.c_str(),
                                           &output,
                                           &retVal,
                                           installDirectory.c_str(),
@@ -684,12 +677,12 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           std::string tmpFile = this->GetOption("CPACK_TOPLEVEL_DIRECTORY");
           tmpFile += "/PreinstallOutput.log";
           cmGeneratedFileStream ofs(tmpFile.c_str());
-          ofs << "# Run command: " << buildCommandStr << std::endl
+          ofs << "# Run command: " << buildCommand << std::endl
             << "# Directory: " << installDirectory << std::endl
             << "# Output:" << std::endl
             << output << std::endl;
           cmCPackLogger(cmCPackLog::LOG_ERROR,
-            "Problem running install command: " << buildCommandStr
+            "Problem running install command: " << buildCommand
             << std::endl
             << "Please check " << tmpFile << " for errors"
             << std::endl);
