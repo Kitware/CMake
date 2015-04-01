@@ -101,7 +101,6 @@ cmMakefile::cmMakefile(): Internal(new Internals)
 
   this->AddDefaultDefinitions();
   this->Initialize();
-  this->PreOrder = false;
   this->GeneratingBuildSystem = false;
 
   this->SuppressWatches = false;
@@ -144,7 +143,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->FunctionBlockers = mf.FunctionBlockers;
   this->MacrosList = mf.MacrosList;
   this->Properties = mf.Properties;
-  this->PreOrder = mf.PreOrder;
   this->WarnUnused = mf.WarnUnused;
   this->Initialize();
   this->CheckSystemVars = mf.CheckSystemVars;
@@ -1694,7 +1692,7 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
 }
 
 void cmMakefile::AddSubDirectory(const std::string& sub,
-                                 bool excludeFromAll, bool preorder)
+                                 bool excludeFromAll)
 {
   // the source path must be made full if it isn't already
   std::string srcPath = sub;
@@ -1716,13 +1714,13 @@ void cmMakefile::AddSubDirectory(const std::string& sub,
 
 
   this->AddSubDirectory(srcPath, binPath,
-                        excludeFromAll, preorder, false);
+                        excludeFromAll, false);
 }
 
 
 void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                  const std::string& binPath,
-                                 bool excludeFromAll, bool preorder,
+                                 bool excludeFromAll,
                                  bool immediate)
 {
   // Make sure the binary directory is unique.
@@ -1744,7 +1742,6 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     {
     lg2->GetMakefile()->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
-  lg2->GetMakefile()->SetPreOrder(preorder);
 
   if (immediate)
     {

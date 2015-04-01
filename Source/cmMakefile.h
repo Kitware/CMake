@@ -292,11 +292,10 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const std::string&, bool excludeFromAll=false,
-                       bool preorder = false);
+  void AddSubDirectory(const std::string&, bool excludeFromAll=false);
   void AddSubDirectory(const std::string& fullSrcDir,
                        const std::string& fullBinDir,
-                       bool excludeFromAll, bool preorder,
+                       bool excludeFromAll,
                        bool immediate);
 
   /**
@@ -864,10 +863,6 @@ public:
   ///! Initialize a makefile from its parent
   void InitializeFromParent();
 
-  ///! Set/Get the preorder flag
-  void SetPreOrder(bool p) { this->PreOrder = p; }
-  bool GetPreOrder() const { return this->PreOrder; }
-
   void AddInstallGenerator(cmInstallGenerator* g)
     { if(g) this->InstallGenerators.push_back(g); }
   std::vector<cmInstallGenerator*>& GetInstallGenerators()
@@ -1055,9 +1050,6 @@ private:
   mutable cmsys::RegularExpression cmNamedCurly;
 
   cmPropertyMap Properties;
-
-  // should this makefile be processed before or after processing the parent
-  bool PreOrder;
 
   // Unused variable flags
   bool WarnUnused;

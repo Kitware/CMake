@@ -22,7 +22,6 @@ bool cmSubdirCommand
     }
   bool res = true;
   bool excludeFromAll = false;
-  bool preorder = false;
 
   for(std::vector<std::string>::const_iterator i = args.begin();
       i != args.end(); ++i)
@@ -34,7 +33,7 @@ bool cmSubdirCommand
       }
     if(*i == "PREORDER")
       {
-      preorder = true;
+      // Ignored
       continue;
       }
 
@@ -48,7 +47,7 @@ bool cmSubdirCommand
         std::string(this->Makefile->GetCurrentOutputDirectory()) +
         "/" + i->c_str();
       this->Makefile->AddSubDirectory(srcPath, binPath,
-                                  excludeFromAll, preorder, false);
+                                  excludeFromAll, false);
       }
     // otherwise it is a full path
     else if ( cmSystemTools::FileIsDirectory(*i) )
@@ -59,7 +58,7 @@ bool cmSubdirCommand
         std::string(this->Makefile->GetCurrentOutputDirectory()) +
         "/" + cmSystemTools::GetFilenameName(*i);
       this->Makefile->AddSubDirectory(*i, binPath,
-                                  excludeFromAll, preorder, false);
+                                  excludeFromAll, false);
       }
     else
       {
