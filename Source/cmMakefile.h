@@ -616,12 +616,6 @@ public:
   cmSourceFile* GetOrCreateSource(const std::string& sourceName,
                                   bool generated = false);
 
-  /**
-   * Obtain a list of auxiliary source directories.
-   */
-  const std::vector<std::string>& GetAuxSourceDirectories() const
-    {return this->AuxSourceDirectories;}
-
   //@{
   /**
    * Return a list of extensions associated with source and header
