@@ -1051,8 +1051,6 @@ private:
 
   std::vector<std::string> MacrosList;
 
-  std::map<std::string, bool> SubDirectoryOrder;
-
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
   mutable cmsys::RegularExpression cmAtVarRegex;

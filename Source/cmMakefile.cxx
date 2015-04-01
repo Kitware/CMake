@@ -144,7 +144,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->LocalGenerator = mf.LocalGenerator;
   this->FunctionBlockers = mf.FunctionBlockers;
   this->MacrosList = mf.MacrosList;
-  this->SubDirectoryOrder = mf.SubDirectoryOrder;
   this->Properties = mf.Properties;
   this->PreOrder = mf.PreOrder;
   this->WarnUnused = mf.WarnUnused;
