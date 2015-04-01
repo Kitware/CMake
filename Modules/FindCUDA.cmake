@@ -1310,7 +1310,9 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
       endif()
       # If file isn't a .cu file, we need to tell nvcc to treat it as such.
       if(NOT ${file} MATCHES "\\.cu$")
-        list(APPEND nvcc_flags "-x=cu")
+        set(cuda_language_flag -x=cu)
+      else()
+        set(cuda_language_flag)
       endif()
 
       if( ${_cuda_source_format} MATCHES "OBJ")
