@@ -43,7 +43,14 @@ set the path with these commands:
  (setenv \"PATH\" (concat (getenv \"PATH\") \":/usr/local/cmake/bin\"))"
   :type 'file
   :group 'cmake)
-;;
+
+;; Keywords
+(defconst cmake-keywords-block-open '("IF" "MACRO" "FOREACH" "ELSE" "ELSEIF" "WHILE" "FUNCTION"))
+(defconst cmake-keywords-block-close '("ENDIF" "ENDFOREACH" "ENDMACRO" "ELSE" "ELSEIF" "ENDWHILE" "ENDFUNCTION"))
+(defconst cmake-keywords
+  (let ((kwds (append cmake-keywords-block-open cmake-keywords-block-close nil)))
+    (delete-dups kwds)))
+
 ;; Regular expressions used by line indentation function.
 ;;
 (defconst cmake-regex-blank "^[ \t]*$")
@@ -51,23 +58,25 @@ set the path with these commands:
 (defconst cmake-regex-paren-left "(")
 (defconst cmake-regex-paren-right ")")
 (defconst cmake-regex-argument-quoted
-  "\"\\([^\"\\\\]\\|\\\\\\(.\\|\n\\)\\)*\"")
+  (rx (syntax string-quote)
+      (* (and (or (not (any ?\" ?\\)) (and ?\\ anything))))
+      (syntax string-quote)))
 (defconst cmake-regex-argument-unquoted
-  "\\([^ \t\r\n()#\"\\\\]\\|\\\\.\\)\\([^ \t\r\n()#\\\\]\\|\\\\.\\)*")
-(defconst cmake-regex-token (concat "\\(" cmake-regex-comment
-                                    "\\|" cmake-regex-paren-left
-                                    "\\|" cmake-regex-paren-right
-                                    "\\|" cmake-regex-argument-unquoted
-                                    "\\|" cmake-regex-argument-quoted
-                                    "\\)"))
-(defconst cmake-regex-indented (concat "^\\("
-                                       cmake-regex-token
-                                       "\\|" "[ \t\r\n]"
-                                       "\\)*"))
+  (rx (or (not (any space "()#\"\\")) (and ?\\ anything))
+      (* (and (or (not (any space "()#\\")) (and ?\\ anything))))))
+(defconst cmake-regex-token
+  (rx-to-string `(group (or (regexp ,cmake-regex-comment)
+                            ?( ?)
+                            (regexp ,cmake-regex-argument-unquoted)
+                            (regexp ,cmake-regex-argument-quoted)))))
+(defconst cmake-regex-indented
+  (rx-to-string `(and bol (* (group (or (regexp ,cmake-regex-token) (any space)))))))
 (defconst cmake-regex-block-open
-  "^\\(if\\|macro\\|foreach\\|else\\|elseif\\|while\\|function\\)$")
+  (rx-to-string `(and bow (or ,@(append cmake-keywords-block-open
+                                        (mapcar 'downcase cmake-keywords-block-open))) eow)))
 (defconst cmake-regex-block-close
-  "^[ \t]*\\(endif\\|endforeach\\|endmacro\\|else\\|elseif\\|endwhile\\|endfunction\\)[ \t]*(")
+  (rx-to-string `(and bow (or ,@(append cmake-keywords-block-close
+                                        (mapcar 'downcase cmake-keywords-block-close))) eow)))
 
 ;------------------------------------------------------------------------------
 
@@ -182,18 +191,20 @@ the indentation.  Otherwise it retains the same position on the line"
 
 ;;
 ;; Helper functions for buffer
-;;
-(defun unscreamify-cmake-buffer ()
+;; 
+(defun cmake-unscreamify-buffer ()
   "Convert all CMake commands to lowercase in buffer."
   (interactive)
-  (goto-char (point-min))
-  (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
-    (replace-match
-     (concat
-      (match-string 1)
-      (downcase (match-string 2))
-      (match-string 3))
-     t))
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "^\\([ \t]*\\)\\(\\w+\\)\\([ \t]*(\\)" nil t)
+      (replace-match 
+       (concat 
+        (match-string 1) 
+        (downcase (match-string 2)) 
+        (match-string 3)) 
+       t))
+    )
   )
 
 ;------------------------------------------------------------------------------
@@ -202,18 +213,31 @@ the indentation.  Otherwise it retains the same position on the line"
 ;; Keyword highlighting regex-to-face map.
 ;;
 (defconst cmake-font-lock-keywords
-  (list '("^[ \t]*\\([[:word:]_]+\\)[ \t]*(" 1 font-lock-function-name-face))
-  "Highlighting expressions for CMAKE mode."
-  )
+  `((,(rx-to-string `(or ,@cmake-keywords
+                         ,@(mapcar #'downcase cmake-keywords)
+                         ))
+     . font-lock-keyword-face)
+    (,(rx bol (* blank) (group (+ (or word (syntax symbol)))) (* blank) ?\()
+     1 font-lock-function-name-face)
+    ("\\${?\\([[:alpha:]_][[:alnum:]_]*\\|[0-9]+\\|[$*_]\\)"
+     1 font-lock-variable-name-face t)
+    )
+  "Highlighting expressions for CMake mode.")
 
 ;------------------------------------------------------------------------------
 
-;;
-;; Syntax table for this mode.  Initialize to nil so that it is
-;; regenerated when the cmake-mode function is called.
-;;
-(defvar cmake-mode-syntax-table nil "Syntax table for cmake-mode.")
-(setq cmake-mode-syntax-table nil)
+;; Syntax table for this mode.
+(defvar cmake-mode-syntax-table nil
+  "Syntax table for CMake mode.")
+(or cmake-mode-syntax-table
+    (setq cmake-mode-syntax-table
+          (let ((table (make-syntax-table)))
+            (modify-syntax-entry ?\(  "()" table)
+            (modify-syntax-entry ?\)  ")(" table)
+            (modify-syntax-entry ?# "<" table)
+            (modify-syntax-entry ?\n ">" table)
+            (modify-syntax-entry ?$ "'" table)
+            table)))
 
 ;;
 ;; User hook entry point.
@@ -227,39 +251,23 @@ the indentation.  Otherwise it retains the same position on the line"
 
 ;------------------------------------------------------------------------------
 
-;;
-;; CMake mode startup function.
+;; For compatibility with Emacs < 24
+(defalias 'cmake--parent-mode
+  (if (fboundp 'prog-mode) 'prog-mode 'fundamental-mode))
+
+;;------------------------------------------------------------------------------
+;; Mode definition.
 ;;
 ;;;###autoload
-(defun cmake-mode ()
-  "Major mode for editing CMake listfiles."
-  (interactive)
-  (kill-all-local-variables)
-  (setq major-mode 'cmake-mode)
-  (setq mode-name "CMAKE")
-
-  ; Create the syntax table
-  (setq cmake-mode-syntax-table (make-syntax-table))
-  (set-syntax-table cmake-mode-syntax-table)
-  (modify-syntax-entry ?\(  "()" cmake-mode-syntax-table)
-  (modify-syntax-entry ?\)  ")(" cmake-mode-syntax-table)
-  (modify-syntax-entry ?# "<" cmake-mode-syntax-table)
-  (modify-syntax-entry ?\n ">" cmake-mode-syntax-table)
+(define-derived-mode cmake-mode cmake--parent-mode "CMake"
+  "Major mode for editing CMake source files."
 
   ; Setup font-lock mode.
-  (make-local-variable 'font-lock-defaults)
-  (setq font-lock-defaults '(cmake-font-lock-keywords))
-
+  (set (make-local-variable 'font-lock-defaults) '(cmake-font-lock-keywords))
   ; Setup indentation function.
-  (make-local-variable 'indent-line-function)
-  (setq indent-line-function 'cmake-indent)
-
+  (set (make-local-variable 'indent-line-function) 'cmake-indent)
   ; Setup comment syntax.
-  (make-local-variable 'comment-start)
-  (setq comment-start "#")
-
-  ; Run user hooks.
-  (run-hooks 'cmake-mode-hook))
+  (set (make-local-variable 'comment-start) "#"))
 
 ; Help mode starts here
 
