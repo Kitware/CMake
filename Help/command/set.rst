@@ -70,6 +70,15 @@ Furthermore, any normal variable binding in the current scope will
 be removed to expose the newly cached value to any immediately
 following evaluation.
 
+It is possible for the cache entry to exist prior to the call but
+have no type set if it was created on the :manual:`cmake(1)` command
+line by a user through the ``-D<var>=<value>`` option without
+specifying a type.  In this case the ``set`` command will add the
+type.  Furthermore, if the ``<type>`` is ``PATH`` or ``FILEPATH``
+and the ``<value>`` provided on the command line is a relative path,
+then the ``set`` command will treat the path as relative to the
+current working directory and convert it to an absolute path.
+
 Set Environment Variable
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
