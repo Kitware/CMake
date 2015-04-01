@@ -114,7 +114,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Internal->VarUsageStack.push(mf.Internal->VarUsageStack.top());
 
   this->Prefix = mf.Prefix;
-  this->AuxSourceDirectories = mf.AuxSourceDirectories;
   this->cmStartDirectory = mf.cmStartDirectory;
   this->StartOutputDirectory = mf.StartOutputDirectory;
   this->cmHomeDirectory = mf.cmHomeDirectory;
@@ -2255,11 +2254,6 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
 }
 
 #endif
-
-void cmMakefile::AddExtraDirectory(const char* dir)
-{
-  this->AuxSourceDirectories.push_back(dir);
-}
 
 static bool mightExpandVariablesCMP0019(const char* s)
 {

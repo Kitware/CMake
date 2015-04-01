@@ -433,11 +433,6 @@ public:
   bool HasCMP0054AlreadyBeenReported(
     cmListFileContext context) const;
 
-  /**
-   * Add an auxiliary directory to the build.
-   */
-  void AddExtraDirectory(const char* dir);
-
   void MakeStartDirectoriesCurrent()
     {
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
@@ -967,7 +962,6 @@ protected:
   void CheckForUnused(const char* reason, const std::string& name) const;
 
   std::string Prefix;
-  std::vector<std::string> AuxSourceDirectories; //
 
   std::string cmStartDirectory;
   std::string StartOutputDirectory;
