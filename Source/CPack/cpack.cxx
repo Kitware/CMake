@@ -203,6 +203,9 @@ int main (int argc, char const* const* argv)
   cmgg.SetCMakeInstance(&cminst);
   cmsys::auto_ptr<cmLocalGenerator> cmlg(cmgg.CreateLocalGenerator());
   cmMakefile* globalMF = cmlg->GetMakefile();
+#if defined(__CYGWIN__)
+  globalMF->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
+#endif
 
   bool cpackConfigFileSpecified = true;
   if ( cpackConfigFile.empty() )
