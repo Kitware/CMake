@@ -113,7 +113,6 @@ cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
   this->Internal->VarInitStack.push(mf.Internal->VarInitStack.top());
   this->Internal->VarUsageStack.push(mf.Internal->VarUsageStack.top());
 
-  this->Prefix = mf.Prefix;
   this->cmStartDirectory = mf.cmStartDirectory;
   this->StartOutputDirectory = mf.StartOutputDirectory;
   this->cmHomeDirectory = mf.cmHomeDirectory;
