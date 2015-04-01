@@ -288,8 +288,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
     size_t processors = GetProcessorsUsed(*test);
-    const double systemLoad = info.GetLoadAverage();
-
     bool maxLoadOk;
     if (this->MaxLoad > 0)
       {
@@ -299,6 +297,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
         cmFileLockResult result = maxLoadLock.Lock(lockFile, 1);
         if (result.IsOk())
           {
+          const double systemLoad = info.GetLoadAverage();
           maxLoadOk = processors <= (this->MaxLoad - systemLoad);
           }
         else
@@ -363,8 +362,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
       << testWithMinProcessors << " requries " << minProcessorsRequired);
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
 
-    // Wait before trying again...
-    cmCTestScriptHandler::SleepInSeconds(1);
+    // Wait between 1 and 60 seconds before trying again...
+    cmCTestScriptHandler::SleepInSeconds(rand() % 60 + 1);
     }
 }
 
