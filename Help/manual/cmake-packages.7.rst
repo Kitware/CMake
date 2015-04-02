@@ -385,11 +385,11 @@ generate config file packages:
 .. code-block:: cmake
 
   target_link_libraries(ClimbingStats INTERFACE
-    ${Boost_LIBRARIES};${OtherDep_LIBRARIES}>
-  )
+    ${Boost_LIBRARIES} ${OtherDep_LIBRARIES}
+    )
   target_include_directories(ClimbingStats INTERFACE
-    $<INSTALL_INTERFACE:${Boost_INCLUDE_DIRS};${OtherDep_INCLUDE_DIRS}>
-  )
+    "$<INSTALL_INTERFACE:${Boost_INCLUDE_DIRS};${OtherDep_INCLUDE_DIRS}>"
+    )
 
 Dependencies must provide their own :ref:`IMPORTED targets <Imported Targets>`
 which have their own :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` and
