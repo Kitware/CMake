@@ -375,7 +375,7 @@ to be incompatible.
 
 Note that it is not advisable to populate any properties which may contain
 paths, such as :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` and
-:prop_tgt:`INTERFACE_LINK_LIBRARIES`, with paths relevnt to dependencies.
+:prop_tgt:`INTERFACE_LINK_LIBRARIES`, with paths relevant to dependencies.
 That would hard-code into installed packages the include directory or library
 paths for dependencies **as found on the machine the package was made on**.
 
