@@ -122,7 +122,7 @@ bool cmAddSubDirectoryCommand::InitialPass
 
   // Add the subdirectory using the computed full paths.
   this->Makefile->AddSubDirectory(srcPath, binPath,
-                                  excludeFromAll, false, true);
+                                  excludeFromAll, true);
 
   return true;
 }

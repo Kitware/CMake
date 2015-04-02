@@ -292,11 +292,10 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const std::string&, bool excludeFromAll=false,
-                       bool preorder = false);
+  void AddSubDirectory(const std::string&, bool excludeFromAll=false);
   void AddSubDirectory(const std::string& fullSrcDir,
                        const std::string& fullBinDir,
-                       bool excludeFromAll, bool preorder,
+                       bool excludeFromAll,
                        bool immediate);
 
   /**
@@ -433,15 +432,6 @@ public:
   bool HasCMP0054AlreadyBeenReported(
     cmListFileContext context) const;
 
-  /**
-   * Add an auxiliary directory to the build.
-   */
-  void AddExtraDirectory(const char* dir);
-
-
-  /**
-   * Add an auxiliary directory to the build.
-   */
   void MakeStartDirectoriesCurrent()
     {
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
@@ -619,12 +609,6 @@ public:
    */
   cmSourceFile* GetOrCreateSource(const std::string& sourceName,
                                   bool generated = false);
-
-  /**
-   * Obtain a list of auxiliary source directories.
-   */
-  const std::vector<std::string>& GetAuxSourceDirectories() const
-    {return this->AuxSourceDirectories;}
 
   //@{
   /**
@@ -879,10 +863,6 @@ public:
   ///! Initialize a makefile from its parent
   void InitializeFromParent();
 
-  ///! Set/Get the preorder flag
-  void SetPreOrder(bool p) { this->PreOrder = p; }
-  bool GetPreOrder() const { return this->PreOrder; }
-
   void AddInstallGenerator(cmInstallGenerator* g)
     { if(g) this->InstallGenerators.push_back(g); }
   std::vector<cmInstallGenerator*>& GetInstallGenerators()
@@ -976,9 +956,6 @@ protected:
   // Check for a an unused variable
   void CheckForUnused(const char* reason, const std::string& name) const;
 
-  std::string Prefix;
-  std::vector<std::string> AuxSourceDirectories; //
-
   std::string cmStartDirectory;
   std::string StartOutputDirectory;
   std::string cmHomeDirectory;
@@ -1067,17 +1044,12 @@ private:
 
   std::vector<std::string> MacrosList;
 
-  std::map<std::string, bool> SubDirectoryOrder;
-
   mutable cmsys::RegularExpression cmDefineRegex;
   mutable cmsys::RegularExpression cmDefine01Regex;
   mutable cmsys::RegularExpression cmAtVarRegex;
   mutable cmsys::RegularExpression cmNamedCurly;
 
   cmPropertyMap Properties;
-
-  // should this makefile be processed before or after processing the parent
-  bool PreOrder;
 
   // Unused variable flags
   bool WarnUnused;
