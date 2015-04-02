@@ -143,6 +143,11 @@ use particular :prop_tgt:`COMPILE_OPTIONS` or
 the properties must be **requirements**, not merely recommendations or
 convenience.
 
+See the :ref:`Creating Relocatable Packages` section of the
+:manual:`cmake-packages(7)` manual for discussion of additional care
+that must be taken when specifying usage requirements while creating
+packages for redistribution.
+
 Target Properties
 -----------------
 
