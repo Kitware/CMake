@@ -55,5 +55,8 @@ installation prefix.  For example:
     $<INSTALL_INTERFACE:include/mylib>  # <prefix>/include/mylib
   )
 
+Creating Relocatable Packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. |INTERFACE_PROPERTY_LINK| replace:: :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES`
 .. include:: /include/INTERFACE_INCLUDE_DIRECTORIES_WARNING.txt
