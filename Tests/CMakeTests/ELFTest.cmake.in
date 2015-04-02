@@ -11,7 +11,7 @@ set(out "@CMAKE_CURRENT_BINARY_DIR@/ELF-Out")
 file(REMOVE_RECURSE "${out}")
 file(MAKE_DIRECTORY "${out}")
 foreach(f ${names})
-  file(COPY ${in}/${f} DESTINATION ${out})
+  file(COPY ${in}/${f} DESTINATION ${out} NO_SOURCE_PERMISSIONS)
   list(APPEND files "${out}/${f}")
 endforeach()
 
