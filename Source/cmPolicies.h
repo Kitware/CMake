@@ -116,6 +116,8 @@ public:
     CMP0057, ///< Disallow multiple MAIN_DEPENDENCY specifications
     /// for the same file.
     CMP0058, ///< Ninja requires custom command byproducts to be explicit
+    CMP0059, ///< Do not treat ``DEFINITIONS`` as a built-in directory
+    /// property.
 
     /** \brief Always the last entry.
      *

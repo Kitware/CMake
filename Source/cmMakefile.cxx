@@ -4209,8 +4209,19 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if (prop == "DEFINITIONS")
     {
-    output += this->DefineFlagsOrig;
-    return output.c_str();
+    switch(this->GetPolicyStatus(cmPolicies::CMP0059))
+      {
+      case cmPolicies::WARN:
+          this->IssueMessage(cmake::AUTHOR_WARNING, this->GetPolicies()->
+                             GetPolicyWarning(cmPolicies::CMP0059));
+      case cmPolicies::OLD:
+        output += this->DefineFlagsOrig;
+        return output.c_str();
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+        break;
+      }
     }
   else if (prop == "LINK_DIRECTORIES")
     {
