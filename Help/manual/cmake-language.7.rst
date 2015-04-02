@@ -485,6 +485,8 @@ The :command:`macro`/:command:`endmacro`, and
 :command:`function`/:command:`endfunction` commands delimit
 code blocks to be recorded for later invocation as commands.
 
+.. _`CMake Language Variables`:
+
 Variables
 =========
 
