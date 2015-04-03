@@ -17,5 +17,8 @@ with the syntax ``$<...>``.  See the :manual:`cmake-generator-expressions(7)`
 manual for available expressions.  See the :manual:`cmake-buildsystem(7)`
 manual for more on defining buildsystem properties.
 
+Creating Relocatable Packages
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 .. |INTERFACE_PROPERTY_LINK| replace:: ``INTERFACE_LINK_LIBRARIES``
 .. include:: /include/INTERFACE_LINK_LIBRARIES_WARNING.txt
