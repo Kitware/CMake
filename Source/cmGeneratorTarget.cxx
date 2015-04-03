@@ -56,6 +56,7 @@ struct ResxTag {};
 struct ModuleDefinitionFileTag {};
 struct AppManifestTag{};
 struct CertificatesTag{};
+struct XamlTag{};
 
 template<typename Tag, typename OtherTag>
 struct IsSameTag
@@ -97,6 +98,20 @@ struct DoAccept<true>
     std::string hFileName = resx.substr(0, resx.find_last_of(".")) + ".h";
     data.ExpectedResxHeaders.insert(hFileName);
     data.ResxSources.push_back(f);
+    }
+  static void Do(cmGeneratorTarget::XamlData& data, cmSourceFile* f)
+    {
+    // Build and save the name of the corresponding .h and .cpp file
+    // This relationship will be used later when building the project files.
+    // Both names would have been auto generated from Visual Studio
+    // where the user supplied the file name and Visual Studio
+    // appended the suffix.
+    std::string xaml = f->GetFullPath();
+    std::string hFileName = xaml + ".h";
+    std::string cppFileName = xaml + ".cpp";
+    data.ExpectedXamlHeaders.insert(hFileName);
+    data.ExpectedXamlSources.insert(cppFileName);
+    data.XamlSources.push_back(f);
     }
   static void Do(std::string& data, cmSourceFile* f)
     {
@@ -185,6 +200,10 @@ struct TagVisitor
     else if (ext == "pfx")
       {
       DoAccept<IsSameTag<Tag, CertificatesTag>::Result>::Do(this->Data, sf);
+      }
+    else if (ext == "xaml")
+      {
+      DoAccept<IsSameTag<Tag, XamlTag>::Result>::Do(this->Data, sf);
       }
     else if(this->Header.find(sf->GetFullPath().c_str()))
       {
@@ -435,6 +454,36 @@ cmGeneratorTarget
                   const std::string& config) const
 {
   IMPLEMENT_VISIT(Certificates);
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetExpectedXamlHeaders(std::set<std::string>& headers,
+                                          const std::string& config) const
+{
+  XamlData data;
+  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
+  headers = data.ExpectedXamlHeaders;
+}
+
+//----------------------------------------------------------------------------
+void
+cmGeneratorTarget::GetExpectedXamlSources(std::set<std::string>& srcs,
+                                          const std::string& config) const
+{
+  XamlData data;
+  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
+  srcs = data.ExpectedXamlSources;
+}
+
+//----------------------------------------------------------------------------
+void cmGeneratorTarget
+::GetXamlSources(std::vector<cmSourceFile const*>& srcs,
+                 const std::string& config) const
+{
+  XamlData data;
+  IMPLEMENT_VISIT_IMPL(Xaml, COMMA cmGeneratorTarget::XamlData)
+  srcs = data.XamlSources;
 }
 
 //----------------------------------------------------------------------------

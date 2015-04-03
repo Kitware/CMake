@@ -14,7 +14,7 @@ include(CheckCXXSourceCompiles)
 include(CheckIncludeFile)
 
 # Note: The designable form is assumed to have a .h extension as is default in Visual Studio.
-# Node: The designable form is assumed to have a .resx file with the same name and path (save extension) as is default in Visual Studio
+# Note: The designable form is assumed to have a .resx file with the same name and path (save extension) as is default in Visual Studio
 
 set(TARGET_H
   WindowsFormsResx/MyForm.h
