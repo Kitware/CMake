@@ -475,6 +475,10 @@ without installation.  Consumers of the build tree can simply ensure that the
 Creating Relocatable Packages
 -----------------------------
 
+A relocatable package must not reference absolute paths of files on
+the machine where the package is built that will not exist on the
+machines where the package may be installed.
+
 Packages created by :command:`install(EXPORT)` are designed to be relocatable,
 using paths relative to the location of the package itself.  When defining
 the interface of a target for ``EXPORT``, keep in mind that the include
@@ -509,34 +513,56 @@ This also applies to paths referencing external dependencies.
 It is not advisable to populate any properties which may contain
 paths, such as :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` and
 :prop_tgt:`INTERFACE_LINK_LIBRARIES`, with paths relevant to dependencies.
-That would hard-code into installed packages the include directory or library
-paths for dependencies **as found on the machine the package was made on**.
-
-That is, code like this is incorrect for targets which will be used to
-generate config file packages:
+For example, this code may not work well for a relocatable package:
 
 .. code-block:: cmake
 
   target_link_libraries(ClimbingStats INTERFACE
-    ${Boost_LIBRARIES} ${OtherDep_LIBRARIES}
+    ${Foo_LIBRARIES} ${Bar_LIBRARIES}
     )
   target_include_directories(ClimbingStats INTERFACE
-    "$<INSTALL_INTERFACE:${Boost_INCLUDE_DIRS};${OtherDep_INCLUDE_DIRS}>"
+    "$<INSTALL_INTERFACE:${Foo_INCLUDE_DIRS};${Bar_INCLUDE_DIRS}>"
     )
 
-Dependencies must provide their own :ref:`IMPORTED targets <Imported Targets>`
-which have their own :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` and
-:prop_tgt:`IMPORTED_LOCATION` populated appropriately.  Those
-:ref:`IMPORTED targets <Imported Targets>` may then be
-used with the :command:`target_link_libraries` command for ``ClimbingStats``.
+The referenced variables may contain the absolute paths to libraries
+and include directories **as found on the machine the package was made on**.
+This would create a package with hard-coded paths to dependencies and not
+suitable for relocation.
 
-That way, when a consumer uses the installed package, the
-consumer will run the appropriate :command:`find_package` command (via the
-find_dependency macro described below) to find
-the dependencies on their own machine and populate the
-:ref:`IMPORTED targets <Imported Targets>` with appropriate paths. Note that
-many modules currently shipped with CMake do not currently provide
-:ref:`IMPORTED targets <Imported Targets>`.
+Ideally such dependencies should be used through their own
+:ref:`IMPORTED targets <Imported Targets>` that have their own
+:prop_tgt:`IMPORTED_LOCATION` and usage requirement properties
+such as :prop_tgt:`INTERFACE_INCLUDE_DIRECTORIES` populated
+appropriately.  Those imported targets may then be used with
+the :command:`target_link_libraries` command for ``ClimbingStats``:
+
+.. code-block:: cmake
+
+  target_link_libraries(ClimbingStats INTERFACE Foo::Foo Bar::Bar)
+
+With this approach the package references its external dependencies
+only through the names of :ref:`IMPORTED targets <Imported Targets>`.
+When a consumer uses the installed package, the consumer will run the
+appropriate :command:`find_package` commands (via the ``find_dependency``
+macro described above) to find the dependencies and populate the
+imported targets with appropriate paths on their own machine.
+
+Unfortunately many :manual:`modules <cmake-modules(7)>` shipped with
+CMake do not yet provide :ref:`IMPORTED targets <Imported Targets>`
+because their development pre-dated this approach.  This may improve
+incrementally over time.  Workarounds to create relocatable packages
+using such modules include:
+
+* When building the package, specify each ``Foo_LIBRARY`` cache
+  entry as just a library name, e.g. ``-DFoo_LIBRARY=foo``.  This
+  tells the corresponding find module to populate the ``Foo_LIBRARIES``
+  with just ``foo`` to ask the linker to search for the library
+  instead of hard-coding a path.
+
+* Or, after installing the package content but before creating the
+  package installation binary for redistribution, manually replace
+  the absolute paths with placeholders for substitution by the
+  installation tool when the package is installed.
 
 .. _`Package Registry`:
 
