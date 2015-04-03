@@ -8,6 +8,9 @@
 //  You can do whatever you want with this file.
 //
 ///////////////////////////////////////////////////////////////////////////////
+#if defined(__IBMC__)
+# pragma options optimize=0
+#endif
 
 #include "lzma_encoder_private.h"
 #include "fastpos.h"
