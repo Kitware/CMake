@@ -383,7 +383,6 @@ protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
   cmPropertyMap Properties;
-  std::set<std::pair<std::string,cmProperty::ScopeType> > AccessedProperties;
 
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>
   PropertyDefinitions;

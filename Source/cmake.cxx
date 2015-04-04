@@ -188,7 +188,6 @@ void cmake::InitializeProperties()
 {
   this->Properties.clear();
   this->Properties.SetCMakeInstance(this);
-  this->AccessedProperties.clear();
   this->PropertyDefinitions.clear();
 
   // initialize properties
