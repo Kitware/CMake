@@ -84,7 +84,8 @@ bool cmCacheManager::LoadCache(cmMakefile* mf)
 
 bool cmCacheManager::LoadCache(const std::string& path)
 {
-  return this->LoadCache(path,true);
+  std::set<std::string> emptySet;
+  return this->LoadCache(path, true, emptySet, emptySet);
 }
 
 bool cmCacheManager::LoadCache(const std::string& path,
