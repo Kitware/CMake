@@ -345,7 +345,7 @@ Properties on Installed Files
 
 
 Deprecated Properties on Directories
-=====================================
+====================================
 
 .. toctree::
    :maxdepth: 1
