@@ -7,6 +7,8 @@ cmake-properties(7)
 
    .. contents::
 
+.. _`Global Properties`:
+
 Properties of Global Scope
 ==========================
 
@@ -41,6 +43,8 @@ Properties of Global Scope
    /prop_gbl/TARGET_SUPPORTS_SHARED_LIBS
    /prop_gbl/USE_FOLDERS
 
+.. _`Directory Properties`:
+
 Properties on Directories
 =========================
 
@@ -71,6 +75,8 @@ Properties on Directories
    /prop_dir/VARIABLES
    /prop_dir/VS_GLOBAL_SECTION_POST_section
    /prop_dir/VS_GLOBAL_SECTION_PRE_section
+
+.. _`Target Properties`:
 
 Properties on Targets
 =====================
@@ -245,6 +251,8 @@ Properties on Targets
    /prop_tgt/XCODE_ATTRIBUTE_an-attribute
    /prop_tgt/XCTEST
 
+.. _`Test Properties`:
+
 Properties on Tests
 ===================
 
@@ -268,6 +276,8 @@ Properties on Tests
    /prop_test/TIMEOUT
    /prop_test/WILL_FAIL
    /prop_test/WORKING_DIRECTORY
+
+.. _`Source File Properties`:
 
 Properties on Source Files
 ==========================
@@ -303,6 +313,8 @@ Properties on Source Files
    /prop_sf/XCODE_EXPLICIT_FILE_TYPE
    /prop_sf/XCODE_LAST_KNOWN_FILE_TYPE
 
+.. _`Cache Entry Properties`:
+
 Properties on Cache Entries
 ===========================
 
@@ -315,6 +327,8 @@ Properties on Cache Entries
    /prop_cache/STRINGS
    /prop_cache/TYPE
    /prop_cache/VALUE
+
+.. _`Installed File Properties`:
 
 Properties on Installed Files
 =============================
