@@ -43,7 +43,7 @@
  CMake may support multiple native build systems on certain
  platforms.  A generator is responsible for generating a particular
  build system.  Possible generator names are specified in the
- Generators section.
+ :manual:`cmake-generators(7)` manual.
 
 ``-T <toolset-name>``
  Specify toolset name if supported by generator.
