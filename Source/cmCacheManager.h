@@ -249,6 +249,7 @@ private:
   // Only cmake and cmMakefile should be able to add cache values
   // the commands should never use the cmCacheManager directly
   friend class cmMakefile; // allow access to add cache values
+  friend class cmState; // allow access to add cache values
   friend class cmake; // allow access to add cache values
   friend class cmMarkAsAdvancedCommand; // allow access to add cache values
 };

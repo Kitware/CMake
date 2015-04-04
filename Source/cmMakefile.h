@@ -766,6 +766,7 @@ public:
   void EnableLanguage(std::vector<std::string>const& languages, bool optional);
 
   cmCacheManager *GetCacheManager() const;
+  cmState *GetState() const;
 
   /**
    * Get the variable watch. This is used to determine when certain variables

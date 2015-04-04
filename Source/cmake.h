@@ -32,6 +32,7 @@ class cmDocumentationSection;
 class cmPolicies;
 class cmTarget;
 class cmGeneratedFileStream;
+class cmState;
 
 /** \brief Represents a cmake invocation.
  *
@@ -387,6 +388,9 @@ class cmake
 
   void UnwatchUnusedCli(const std::string& var);
   void WatchUnusedCli(const std::string& var);
+
+  cmState* GetState() const { return this->State; }
+
 protected:
   void RunCheckForUnusedVariables();
   void InitializeProperties();
@@ -474,6 +478,8 @@ private:
   std::string GraphVizFile;
   std::vector<std::string> DebugConfigs;
   InstalledFilesMap InstalledFiles;
+
+  cmState* State;
 
   void UpdateConversionPathTable();
 };

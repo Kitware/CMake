@@ -19,6 +19,7 @@
 #include "cmLocalGenerator.h"
 #include "cmCommands.h"
 #include "cmCacheManager.h"
+#include "cmState.h"
 #include "cmFunctionBlocker.h"
 #include "cmListFileCache.h"
 #include "cmCommandArgumentParserHelper.h"
@@ -3736,6 +3737,11 @@ void cmMakefile::GetListOfMacros(std::string& macros) const
 cmCacheManager *cmMakefile::GetCacheManager() const
 {
   return this->GetCMakeInstance()->GetCacheManager();
+}
+
+cmState *cmMakefile::GetState() const
+{
+  return this->GetCMakeInstance()->GetState();
 }
 
 void cmMakefile::DisplayStatus(const char* message, float s) const
