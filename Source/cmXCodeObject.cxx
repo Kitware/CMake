@@ -242,6 +242,7 @@ void cmXCodeObject::PrintString(std::ostream& os,std::string String)
   // considered special by the Xcode project file parser.
   bool needQuote =
     (String.empty() ||
+     String.find("//") != String.npos ||
      String.find_first_of(" <>.+-=@$[],") != String.npos);
   const char* quote = needQuote? "\"" : "";
 
