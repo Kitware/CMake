@@ -76,23 +76,10 @@ bool cmCacheManager::IsType(const char* s)
   return false;
 }
 
-bool cmCacheManager::LoadCache(cmMakefile* mf)
-{
-  return this->LoadCache(mf->GetHomeOutputDirectory());
-}
-
-
 bool cmCacheManager::LoadCache(const std::string& path)
 {
   std::set<std::string> emptySet;
   return this->LoadCache(path, true, emptySet, emptySet);
-}
-
-bool cmCacheManager::LoadCache(const std::string& path,
-                               bool internal)
-{
-  std::set<std::string> emptySet;
-  return this->LoadCache(path, internal, emptySet, emptySet);
 }
 
 static bool ParseEntryWithoutType(const std::string& entry,
@@ -418,12 +405,6 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os,
       }
     }
 }
-
-bool cmCacheManager::SaveCache(cmMakefile* mf)
-{
-  return this->SaveCache(mf->GetHomeOutputDirectory());
-}
-
 
 bool cmCacheManager::SaveCache(const std::string& path)
 {

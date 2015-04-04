@@ -105,17 +105,12 @@ public:
   static const char* TypeToString(CacheEntryType);
   static bool IsType(const char*);
 
-  ///! Load a cache for given makefile.  Loads from ouput home.
-  bool LoadCache(cmMakefile*);
   ///! Load a cache for given makefile.  Loads from path/CMakeCache.txt.
   bool LoadCache(const std::string& path);
-  bool LoadCache(const std::string& path, bool internal);
   bool LoadCache(const std::string& path, bool internal,
                  std::set<std::string>& excludes,
                  std::set<std::string>& includes);
 
-  ///! Save cache for given makefile.  Saves to ouput home CMakeCache.txt.
-  bool SaveCache(cmMakefile*) ;
   ///! Save cache for given makefile.  Saves to ouput path/CMakeCache.txt
   bool SaveCache(const std::string& path) ;
 
