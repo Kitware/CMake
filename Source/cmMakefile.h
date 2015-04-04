@@ -776,10 +776,6 @@ public:
   ///enabled.
   void EnableLanguage(std::vector<std::string>const& languages, bool optional);
 
-  /**
-   * Set/Get the name of the parent directories CMakeLists file
-   * given a current CMakeLists file name
-   */
   cmCacheManager *GetCacheManager() const;
 
   /**
