@@ -287,9 +287,6 @@ class cmake
                           cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const std::string& prop);
 
-  // Get the properties
-  cmPropertyMap &GetProperties() { return this->Properties; }
-
   ///! Get or create an cmInstalledFile instance and return a pointer to it
   cmInstalledFile *GetOrCreateInstalledFile(
     cmMakefile* mf, const std::string& name);
