@@ -1537,10 +1537,9 @@ void cmGlobalGenerator::CheckLocalGenerators()
   std::map<std::string, std::string> notFoundMap;
 //  std::set<std::string> notFoundMap;
   // after it is all done do a ConfigureFinalPass
-  cmCacheManager* manager = 0;
+  cmCacheManager* manager = this->GetCMakeInstance()->GetCacheManager();
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    manager = this->LocalGenerators[i]->GetMakefile()->GetCacheManager();
     this->LocalGenerators[i]->ConfigureFinalPass();
     cmTargets &targets =
       this->LocalGenerators[i]->GetMakefile()->GetTargets();
