@@ -639,7 +639,7 @@ int cmCursesMainForm::Configure(int noconfigure)
 
   // always save the current gui values to disk
   this->FillCacheManagerFromUI();
-  this->CMakeInstance->GetCacheManager()->SaveCache(
+  this->CMakeInstance->SaveCache(
     this->CMakeInstance->GetHomeOutputDirectory());
   this->LoadCache(0);
 

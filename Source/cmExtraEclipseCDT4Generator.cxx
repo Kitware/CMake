@@ -223,7 +223,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                            cacheEntryName.c_str(), cmCacheManager::STRING,
                            true);
-    mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+    mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
     }
   else if (envVarValue==0 && cacheValue!=0)
     {
@@ -244,7 +244,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
                              cacheEntryName.c_str(), cmCacheManager::STRING,
                              true);
-      mf->GetCacheManager()->SaveCache(mf->GetHomeOutputDirectory());
+      mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
       }
     }
 

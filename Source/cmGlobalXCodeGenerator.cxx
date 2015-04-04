@@ -3703,7 +3703,7 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
 
   // Since this call may have created new cache entries, save the cache:
   //
-  root->GetMakefile()->GetCacheManager()->SaveCache(
+  root->GetMakefile()->GetCMakeInstance()->SaveCache(
     root->GetMakefile()->GetHomeOutputDirectory());
 }
 

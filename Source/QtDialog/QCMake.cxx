@@ -96,7 +96,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     emit this->binaryDirChanged(this->BinaryDirectory);
     cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
     this->setGenerator(QString());
-    if(!this->CMakeInstance->GetCacheManager()->LoadCache(
+    if(!this->CMakeInstance->LoadCache(
       this->BinaryDirectory.toLocal8Bit().data()))
       {
       QDir testDir(this->BinaryDirectory);
@@ -270,7 +270,7 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
       }
     }
 
-  cachem->SaveCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->SaveCache(this->BinaryDirectory.toLocal8Bit().data());
 }
 
 QCMakePropertyList QCMake::properties() const
@@ -397,9 +397,9 @@ QStringList QCMake::availableGenerators() const
 void QCMake::deleteCache()
 {
   // delete cache
-  this->CMakeInstance->GetCacheManager()->DeleteCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->DeleteCache(this->BinaryDirectory.toLocal8Bit().data());
   // reload to make our cache empty
-  this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
   // emit no generator and no properties
   this->setGenerator(QString());
   QCMakePropertyList props = this->properties();
@@ -412,7 +412,7 @@ void QCMake::reloadCache()
   QCMakePropertyList props;
   emit this->propertiesChanged(props);
   // reload
-  this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
   // emit new cache properties
   props = this->properties();
   emit this->propertiesChanged(props);
