@@ -212,7 +212,7 @@ void cmake::CleanupCommandsAndMacros()
       delete j->second;
       }
     }
-  this->Commands.erase(this->Commands.begin(), this->Commands.end());
+  this->Commands.clear();
   std::vector<cmCommand*>::iterator it;
   for ( it = commands.begin(); it != commands.end();
     ++ it )
