@@ -184,11 +184,6 @@ unsigned int cmMakefile::GetCacheMinorVersion() const
   return this->GetCacheManager()->GetCacheMinorVersion();
 }
 
-bool cmMakefile::NeedCacheCompatibility(int major, int minor) const
-{
-  return this->GetCacheManager()->NeedCacheCompatibility(major, minor);
-}
-
 cmMakefile::~cmMakefile()
 {
   cmDeleteAll(this->InstallGenerators);

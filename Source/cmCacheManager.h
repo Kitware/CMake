@@ -144,7 +144,6 @@ public:
     { return this->CacheMajorVersion; }
   unsigned int GetCacheMinorVersion() const
     { return this->CacheMinorVersion; }
-  bool NeedCacheCompatibility(int major, int minor);
 
 protected:
   ///! Add an entry into the cache
