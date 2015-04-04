@@ -917,7 +917,7 @@ void cmake::SetDirectoriesFromFile(const char* arg)
     {
     cmCacheManager* cachem = this->GetCacheManager();
     cmCacheManager::CacheIterator it = cachem->NewIterator();
-    if(cachem->LoadCache(cachePath) &&
+    if(this->LoadCache(cachePath) &&
       it.Find("CMAKE_HOME_DIRECTORY"))
       {
       this->SetHomeOutputDirectory(cachePath);
@@ -1860,10 +1860,18 @@ void cmake::AddDefaultGenerators()
 #endif
 }
 
+bool cmake::ParseCacheEntry(const std::string& entry,
+                            std::string& var,
+                            std::string& value,
+                            cmCacheManager::CacheEntryType& type)
+{
+  return cmCacheManager::ParseEntry(entry, var, value, type);
+}
+
 int cmake::LoadCache()
 {
   // could we not read the cache
-  if (!this->CacheManager->LoadCache(this->GetHomeOutputDirectory()))
+  if (!this->LoadCache(this->GetHomeOutputDirectory()))
     {
     // if it does exist, but isn't readable then warn the user
     std::string cacheFile = this->GetHomeOutputDirectory();
@@ -1884,6 +1892,28 @@ int cmake::LoadCache()
     return -3;
     }
   return 0;
+}
+
+bool cmake::LoadCache(const std::string& path)
+{
+  return this->CacheManager->LoadCache(path);
+}
+
+bool cmake::LoadCache(const std::string& path, bool internal,
+                std::set<std::string>& excludes,
+                std::set<std::string>& includes)
+{
+  return this->CacheManager->LoadCache(path, internal, excludes, includes);
+}
+
+bool cmake::SaveCache(const std::string& path)
+{
+  return this->CacheManager->SaveCache(path);
+}
+
+bool cmake::DeleteCache(const std::string& path)
+{
+  return this->CacheManager->DeleteCache(path);
 }
 
 void cmake::SetProgressCallback(ProgressCallbackType f, void *cd)
@@ -2764,9 +2794,8 @@ int cmake::Build(const std::string& dir,
     }
   std::string cachePath = dir;
   cmSystemTools::ConvertToUnixSlashes(cachePath);
-  cmCacheManager* cachem = this->GetCacheManager();
-  cmCacheManager::CacheIterator it = cachem->NewIterator();
-  if(!cachem->LoadCache(cachePath))
+  cmCacheManager::CacheIterator it = this->GetCacheManager()->NewIterator();
+  if(!this->LoadCache(cachePath))
     {
     std::cerr << "Error: could not load cache\n";
     return 1;
