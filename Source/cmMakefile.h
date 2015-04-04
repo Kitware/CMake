@@ -981,9 +981,8 @@ protected:
   // directories.
   std::set<std::string> SystemIncludeDirectories;
 
-  std::vector<std::string> ListFiles; // list of command files loaded
-  std::vector<std::string> OutputFiles; // list of command files loaded
-
+  std::vector<std::string> ListFiles;
+  std::vector<std::string> OutputFiles;
 
   cmTarget::LinkLibraryVectorType LinkLibraries;
 
