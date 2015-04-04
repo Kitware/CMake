@@ -85,15 +85,10 @@ class cmListFileBacktrace: public std::vector<cmListFileContext>
 
 struct cmListFile
 {
-  cmListFile()
-    :ModifiedTime(0)
-    {
-    }
   bool ParseFile(const char* path,
                  bool topLevel,
                  cmMakefile *mf);
 
-  long int ModifiedTime;
   std::vector<cmListFileFunction> Functions;
 };
 

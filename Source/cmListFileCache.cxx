@@ -146,17 +146,11 @@ bool cmListFile::ParseFile(const char* filename,
     }
 
   bool parseError = false;
-  this->ModifiedTime = cmSystemTools::ModifiedTime(filename);
 
   {
   cmListFileParser parser(this, mf, filename);
   parseError = !parser.ParseFile();
   }
-
-  if(parseError)
-    {
-    this->ModifiedTime = 0;
-    }
 
   // do we need a cmake_policy(VERSION call?
   if(topLevel)
