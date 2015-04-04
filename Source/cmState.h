@@ -13,6 +13,7 @@
 #define cmState_h
 
 #include "cmStandardIncludes.h"
+#include "cmPropertyDefinitionMap.h"
 
 class cmake;
 
@@ -55,7 +56,25 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propertyName);
 
+  void Initialize();
+  // Define a property
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
+                      const char *ShortDescription,
+                      const char *FullDescription,
+                      bool chain = false);
+
+  // get property definition
+  cmPropertyDefinition *GetPropertyDefinition
+  (const std::string& name, cmProperty::ScopeType scope);
+
+  // Is a property defined?
+  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
+  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
+
+
 private:
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
+
   cmake* CMakeInstance;
 };
 

@@ -143,7 +143,7 @@ bool cmGetPropertyCommand
     // Lookup brief documentation.
     std::string output;
     if(cmPropertyDefinition* def =
-       this->Makefile->GetCMakeInstance()->
+       this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       output = def->GetShortDescription();
@@ -159,7 +159,7 @@ bool cmGetPropertyCommand
     // Lookup full documentation.
     std::string output;
     if(cmPropertyDefinition* def =
-       this->Makefile->GetCMakeInstance()->
+       this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       output = def->GetFullDescription();
@@ -173,7 +173,7 @@ bool cmGetPropertyCommand
   else if(this->InfoType == OutDefined)
     {
     // Lookup if the property is defined
-    if(this->Makefile->GetCMakeInstance()->
+    if(this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       this->Makefile->AddDefinition(this->Variable, "1");

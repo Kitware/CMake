@@ -4476,21 +4476,6 @@ void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
     }
 }
 
-
-// define properties
-void cmMakefile::DefineProperties(cmake *cm)
-{
-  cm->DefineProperty
-    ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
-     "", "", true);
-  cm->DefineProperty
-    ("RULE_LAUNCH_LINK", cmProperty::DIRECTORY,
-     "", "", true);
-  cm->DefineProperty
-    ("RULE_LAUNCH_CUSTOM", cmProperty::DIRECTORY,
-     "", "", true);
-}
-
 //----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddImportedTarget(const std::string& name,

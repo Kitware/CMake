@@ -12,6 +12,7 @@
 #include "cmPropertyMap.h"
 #include "cmSystemTools.h"
 #include "cmake.h"
+#include "cmState.h"
 
 cmProperty *cmPropertyMap::GetOrCreateProperty(const std::string& name)
 {
@@ -73,7 +74,8 @@ const char *cmPropertyMap
     // should we chain up?
     if (this->CMakeInstance)
       {
-      chain = this->CMakeInstance->IsPropertyChained(name,scope);
+      chain = this->CMakeInstance->GetState()->
+                    IsPropertyChained(name,scope);
       }
     return 0;
     }

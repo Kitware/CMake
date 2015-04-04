@@ -191,11 +191,8 @@ cmake::~cmake()
 void cmake::InitializeProperties()
 {
   this->Properties.clear();
-  this->PropertyDefinitions.clear();
 
-  // initialize properties
-  cmTarget::DefineProperties(this);
-  cmMakefile::DefineProperties(this);
+  this->State->Initialize();
 }
 
 void cmake::CleanupCommandsAndMacros()
@@ -2296,40 +2293,6 @@ void cmake::GenerateGraphViz(const char* fileName) const
   gvWriter->WriteGlobalFile(fileName);
 
 #endif
-}
-
-void cmake::DefineProperty(const std::string& name,
-                           cmProperty::ScopeType scope,
-                           const char *ShortDescription,
-                           const char *FullDescription,
-                           bool chained)
-{
-  this->PropertyDefinitions[scope].DefineProperty(name,scope,ShortDescription,
-                                                  FullDescription,
-                                                  chained);
-}
-
-cmPropertyDefinition *cmake
-::GetPropertyDefinition(const std::string& name,
-                        cmProperty::ScopeType scope)
-{
-  if (this->IsPropertyDefined(name,scope))
-    {
-    return &(this->PropertyDefinitions[scope][name]);
-    }
-  return 0;
-}
-
-bool cmake::IsPropertyDefined(const std::string& name,
-                              cmProperty::ScopeType scope)
-{
-  return this->PropertyDefinitions[scope].IsPropertyDefined(name);
-}
-
-bool cmake::IsPropertyChained(const std::string& name,
-                              cmProperty::ScopeType scope)
-{
-  return this->PropertyDefinitions[scope].IsPropertyChained(name);
 }
 
 void cmake::SetProperty(const std::string& prop, const char* value)

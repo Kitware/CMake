@@ -851,9 +851,6 @@ public:
   const std::vector<cmTestGenerator*>& GetTestGenerators() const
     { return this->TestGenerators; }
 
-  // Define the properties
-  static void DefineProperties(cmake *cm);
-
   // push and pop variable scopes
   void PushScope();
   void PopScope();

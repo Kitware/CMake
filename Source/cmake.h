@@ -15,7 +15,6 @@
 
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
-#include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
 #include "cmInstalledFile.h"
 #include "cmCacheManager.h"
@@ -323,20 +322,6 @@ class cmake
 
   void MarkCliAsUsed(const std::string& variable);
 
-  // Define a property
-  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char *ShortDescription,
-                      const char *FullDescription,
-                      bool chain = false);
-
-  // get property definition
-  cmPropertyDefinition *GetPropertyDefinition
-  (const std::string& name, cmProperty::ScopeType scope);
-
-  // Is a property defined?
-  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
-  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
-
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/
   std::vector<std::string> GetDebugConfigs();
@@ -372,9 +357,6 @@ protected:
   void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
   cmPropertyMap Properties;
-
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>
-  PropertyDefinitions;
 
   typedef
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();

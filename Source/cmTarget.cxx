@@ -264,20 +264,6 @@ cmTarget::cmTarget()
   this->LinkImplementationLanguageIsContextDependent = true;
 }
 
-//----------------------------------------------------------------------------
-void cmTarget::DefineProperties(cmake *cm)
-{
-  cm->DefineProperty
-    ("RULE_LAUNCH_COMPILE", cmProperty::TARGET,
-     "", "", true);
-  cm->DefineProperty
-    ("RULE_LAUNCH_LINK", cmProperty::TARGET,
-     "", "", true);
-  cm->DefineProperty
-    ("RULE_LAUNCH_CUSTOM", cmProperty::TARGET,
-     "", "", true);
-}
-
 void cmTarget::SetType(TargetType type, const std::string& name)
 {
   this->Name = name;

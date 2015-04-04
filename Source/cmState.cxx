@@ -178,3 +178,61 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
   this->CMakeInstance->GetCacheManager()
        ->GetCacheIterator(key.c_str()).SetProperty(propertyName, (void*)0);
 }
+
+void cmState::Initialize()
+{
+  this->PropertyDefinitions.clear();
+  this->DefineProperty
+    ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_LINK", cmProperty::DIRECTORY,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_CUSTOM", cmProperty::DIRECTORY,
+     "", "", true);
+
+  this->DefineProperty
+    ("RULE_LAUNCH_COMPILE", cmProperty::TARGET,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_LINK", cmProperty::TARGET,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_CUSTOM", cmProperty::TARGET,
+     "", "", true);
+}
+
+void cmState::DefineProperty(const std::string& name,
+                           cmProperty::ScopeType scope,
+                           const char *ShortDescription,
+                           const char *FullDescription,
+                           bool chained)
+{
+  this->PropertyDefinitions[scope].DefineProperty(name,scope,ShortDescription,
+                                                  FullDescription,
+                                                  chained);
+}
+
+cmPropertyDefinition *cmState
+::GetPropertyDefinition(const std::string& name,
+                        cmProperty::ScopeType scope)
+{
+  if (this->IsPropertyDefined(name,scope))
+    {
+    return &(this->PropertyDefinitions[scope][name]);
+    }
+  return 0;
+}
+
+bool cmState::IsPropertyDefined(const std::string& name,
+                              cmProperty::ScopeType scope)
+{
+  return this->PropertyDefinitions[scope].IsPropertyDefined(name);
+}
+
+bool cmState::IsPropertyChained(const std::string& name,
+                              cmProperty::ScopeType scope)
+{
+  return this->PropertyDefinitions[scope].IsPropertyChained(name);
+}
