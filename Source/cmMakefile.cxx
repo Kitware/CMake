@@ -1848,8 +1848,8 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
       }
 
     }
-  this->GetCacheManager()->AddCacheEntry(name, haveVal ? val.c_str() : 0, doc,
-                                         type);
+  this->GetCacheManager()->AddCacheEntry(name, haveVal ? val.c_str() : 0,
+                                         doc, type);
   // if there was a definition then remove it
   this->Internal->VarStack.top().Set(name, 0);
 }
@@ -2499,12 +2499,10 @@ std::vector<std::string> cmMakefile
         this->Internal->VarStack.top().ClosureKeys();
     res.insert(res.end(), definitions.begin(), definitions.end());
     }
-  cmCacheManager::CacheIterator cit =
-    this->GetCacheManager()->GetCacheIterator();
-  for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
-    {
-    res.push_back(cit.GetName());
-    }
+  std::vector<std::string> cacheKeys =
+      this->GetCacheManager()->GetCacheEntryKeys();
+  res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
+
   std::sort(res.begin(), res.end());
   return res;
 }
