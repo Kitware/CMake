@@ -344,7 +344,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         std::string cachedValue;
         if(this->WarnUnusedCli)
           {
-          if(const char *v = this->CacheManager->GetCacheValue(var))
+          if(const char *v = this->CacheManager
+                                 ->GetInitializedCacheValue(var))
             {
             haveValue = true;
             cachedValue = v;
@@ -357,7 +358,8 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         if(this->WarnUnusedCli)
           {
           if (!haveValue ||
-              cachedValue != this->CacheManager->GetCacheValue(var))
+              cachedValue != this->CacheManager
+                                 ->GetInitializedCacheValue(var))
             {
             this->WatchUnusedCli(var);
             }
@@ -1203,10 +1205,10 @@ int cmake::DoPreConfigureChecks()
     }
 
   // do a sanity check on some values
-  if(this->CacheManager->GetCacheValue("CMAKE_HOME_DIRECTORY"))
+  if(this->CacheManager->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY"))
     {
     std::string cacheStart =
-      this->CacheManager->GetCacheValue("CMAKE_HOME_DIRECTORY");
+      this->CacheManager->GetInitializedCacheValue("CMAKE_HOME_DIRECTORY");
     cacheStart += "/CMakeLists.txt";
     std::string currentStart = this->GetHomeDirectory();
     currentStart += "/CMakeLists.txt";
@@ -1355,9 +1357,9 @@ int cmake::ActualConfigure()
   if(!this->GlobalGenerator)
     {
     const char* genName =
-      this->CacheManager->GetCacheValue("CMAKE_GENERATOR");
+      this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR");
     const char* extraGenName =
-      this->CacheManager->GetCacheValue("CMAKE_EXTRA_GENERATOR");
+      this->CacheManager->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
     if(genName)
       {
       std::string fullName = cmExternalMakefileProjectGenerator::
@@ -1435,7 +1437,8 @@ int cmake::ActualConfigure()
       }
     }
 
-  const char* genName = this->CacheManager->GetCacheValue("CMAKE_GENERATOR");
+  const char* genName = this->CacheManager
+                            ->GetInitializedCacheValue("CMAKE_GENERATOR");
   if(genName)
     {
     if(!this->GlobalGenerator->MatchesGeneratorName(genName))
@@ -1451,7 +1454,7 @@ int cmake::ActualConfigure()
       return -2;
       }
     }
-  if(!this->CacheManager->GetCacheValue("CMAKE_GENERATOR"))
+  if(!this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR"))
     {
     this->CacheManager->AddCacheEntry("CMAKE_GENERATOR",
                                       this->GlobalGenerator->GetName().c_str(),
@@ -1464,7 +1467,7 @@ int cmake::ActualConfigure()
     }
 
   if(const char* platformName =
-     this->CacheManager->GetCacheValue("CMAKE_GENERATOR_PLATFORM"))
+     this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR_PLATFORM"))
     {
     if(this->GeneratorPlatform.empty())
       {
@@ -1492,7 +1495,7 @@ int cmake::ActualConfigure()
     }
 
   if(const char* tsName =
-     this->CacheManager->GetCacheValue("CMAKE_GENERATOR_TOOLSET"))
+     this->CacheManager->GetInitializedCacheValue("CMAKE_GENERATOR_TOOLSET"))
     {
     if(this->GeneratorToolset.empty())
       {
@@ -1546,16 +1549,18 @@ int cmake::ActualConfigure()
   // project requires compatibility with CMake 2.4.  We detect this
   // here by looking for the old CMAKE_BACKWARDS_COMPATIBILITY
   // variable created when CMP0001 is not set to NEW.
-  if(this->GetCacheManager()->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
+  if(this->GetCacheManager()
+         ->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
-    if(!this->CacheManager->GetCacheValue("LIBRARY_OUTPUT_PATH"))
+    if(!this->CacheManager->GetInitializedCacheValue("LIBRARY_OUTPUT_PATH"))
       {
       this->CacheManager->AddCacheEntry
         ("LIBRARY_OUTPUT_PATH", "",
          "Single output directory for building all libraries.",
          cmCacheManager::PATH);
       }
-    if(!this->CacheManager->GetCacheValue("EXECUTABLE_OUTPUT_PATH"))
+    if(!this->CacheManager
+            ->GetInitializedCacheValue("EXECUTABLE_OUTPUT_PATH"))
       {
       this->CacheManager->AddCacheEntry
         ("EXECUTABLE_OUTPUT_PATH", "",
@@ -1563,7 +1568,8 @@ int cmake::ActualConfigure()
          cmCacheManager::PATH);
       }
     }
-  if(!this->CacheManager->GetCacheValue("CMAKE_USE_RELATIVE_PATHS"))
+  if(!this->CacheManager
+          ->GetInitializedCacheValue("CMAKE_USE_RELATIVE_PATHS"))
     {
     this->CacheManager->AddCacheEntry
       ("CMAKE_USE_RELATIVE_PATHS", "OFF",
@@ -1578,9 +1584,9 @@ int cmake::ActualConfigure()
     }
 
   if(cmSystemTools::GetFatalErrorOccured() &&
-     (!this->CacheManager->GetCacheValue("CMAKE_MAKE_PROGRAM") ||
+     (!this->CacheManager->GetInitializedCacheValue("CMAKE_MAKE_PROGRAM") ||
       cmSystemTools::IsOff(this->CacheManager->
-                           GetCacheValue("CMAKE_MAKE_PROGRAM"))))
+                           GetInitializedCacheValue("CMAKE_MAKE_PROGRAM"))))
     {
     // We must have a bad generator selection.  Wipe the cache entry so the
     // user can select another.
@@ -1796,7 +1802,7 @@ void cmake::AddCacheEntry(const std::string& key, const char* value,
 
 const char* cmake::GetCacheDefinition(const std::string& name) const
 {
-  return this->CacheManager->GetCacheValue(name);
+  return this->CacheManager->GetInitializedCacheValue(name);
 }
 
 void cmake::AddDefaultCommands()
@@ -1956,7 +1962,8 @@ void cmake::UpdateConversionPathTable()
 {
   // Update the path conversion table with any specified file:
   const char* tablepath =
-    this->CacheManager->GetCacheValue("CMAKE_PATH_TRANSLATION_FILE");
+    this->CacheManager
+        ->GetInitializedCacheValue("CMAKE_PATH_TRANSLATION_FILE");
 
   if(tablepath)
     {
@@ -2190,7 +2197,7 @@ void cmake::TruncateOutputLog(const char* fname)
     {
     return;
     }
-  if ( !this->CacheManager->GetCacheValue("CMAKE_CACHEFILE_DIR") )
+  if ( !this->CacheManager->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR") )
     {
     cmSystemTools::RemoveFile(fullPath);
     return;
@@ -2469,7 +2476,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   // we have to find the module directory, so we can copy the files
   this->AddCMakePaths();
   std::string modulesPath =
-    this->CacheManager->GetCacheValue("CMAKE_ROOT");
+    this->CacheManager->GetInitializedCacheValue("CMAKE_ROOT");
   modulesPath += "/Modules";
   std::string inFile = modulesPath;
   inFile += "/SystemInformation.cmake";

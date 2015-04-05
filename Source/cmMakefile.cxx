@@ -2432,7 +2432,7 @@ bool cmMakefile::IsDefinitionSet(const std::string& name) const
   this->Internal->VarUsageStack.top().insert(name);
   if(!def)
     {
-    def = this->GetCacheManager()->GetCacheValue(name);
+    def = this->GetCacheManager()->GetInitializedCacheValue(name);
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   if(cmVariableWatch* vv = this->GetVariableWatch())
@@ -2457,7 +2457,7 @@ const char* cmMakefile::GetDefinition(const std::string& name) const
   const char* def = this->Internal->VarStack.top().Get(name);
   if(!def)
     {
-    def = this->GetCacheManager()->GetCacheValue(name);
+    def = this->GetCacheManager()->GetInitializedCacheValue(name);
     }
 #ifdef CMAKE_BUILD_WITH_CMAKE
   cmVariableWatch* vv = this->GetVariableWatch();
@@ -2835,7 +2835,8 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
               value = cmSystemTools::GetEnv(lookup.c_str());
               break;
             case CACHE:
-              value = this->GetCacheManager()->GetCacheValue(lookup);
+              value = this->GetCacheManager()
+                          ->GetInitializedCacheValue(lookup);
               break;
             }
           // Get the string we're meant to append to.
@@ -4903,7 +4904,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
      (status == cmPolicies::WARN || status == cmPolicies::OLD))
     {
     if(!(this->GetCacheManager()
-         ->GetCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
+         ->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY")))
       {
       // Set it to 2.4 because that is the last version where the
       // variable had meaning.
