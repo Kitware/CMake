@@ -137,7 +137,7 @@ public:
                          CacheEntryType& type);
 
   ///! Get a value from the cache given a key
-  const char* GetCacheValue(const std::string& key) const;
+  const char* GetInitializedCacheValue(const std::string& key) const;
 
   /** Get the version of CMake that wrote the cache.  */
   unsigned int GetCacheMajorVersion() const

@@ -179,7 +179,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
     return;
     }
   const char* cname = this->GetCMakeInstance()->
-    GetCacheManager()->GetCacheValue(langComp);
+    GetCacheManager()->GetInitializedCacheValue(langComp);
   std::string changeVars;
   if(cname && !optional)
     {
@@ -1641,7 +1641,7 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
   // and there is a good chance that the try compile stuff will
   // take the bulk of the time, so try and guess some progress
   // by getting closer and closer to 100 without actually getting there.
-  if (!this->CMakeInstance->GetCacheManager()->GetCacheValue
+  if (!this->CMakeInstance->GetCacheManager()->GetInitializedCacheValue
       ("CMAKE_NUMBER_OF_LOCAL_GENERATORS"))
     {
     // If CMAKE_NUMBER_OF_LOCAL_GENERATORS is not set
@@ -1839,7 +1839,7 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
   // update progress
   // estimate how many lg there will be
   const char *numGenC =
-    this->CMakeInstance->GetCacheManager()->GetCacheValue
+    this->CMakeInstance->GetCacheManager()->GetInitializedCacheValue
     ("CMAKE_NUMBER_OF_LOCAL_GENERATORS");
 
   if (!numGenC)

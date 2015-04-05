@@ -205,7 +205,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
-  const char* cacheValue = mf->GetCacheManager()->GetCacheValue(
+  const char* cacheValue = mf->GetCacheManager()->GetInitializedCacheValue(
                                                        cacheEntryName);
 
   // now we have both, decide which one to use
