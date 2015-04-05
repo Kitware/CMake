@@ -403,17 +403,18 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmsys::Glob::PatternToRegex(entryPattern, true, true).c_str());
       //go through all cache entries and collect the vars which will be removed
       std::vector<std::string> entriesToDelete;
-      cmCacheManager::CacheIterator it =
-                                    this->CacheManager->GetCacheIterator();
-      for ( it.Begin(); !it.IsAtEnd(); it.Next() )
+      std::vector<std::string> cacheKeys =
+          this->CacheManager->GetCacheEntryKeys();
+      for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
+            it != cacheKeys.end(); ++it)
         {
-        cmCacheManager::CacheEntryType t = it.GetType();
+        cmCacheManager::CacheEntryType t =
+            this->CacheManager->GetCacheEntryType(*it);
         if(t != cmCacheManager::STATIC)
           {
-          std::string entryName = it.GetName();
-          if (regex.find(entryName.c_str()))
+          if (regex.find(it->c_str()))
             {
-            entriesToDelete.push_back(entryName);
+            entriesToDelete.push_back(*it);
             }
           }
         }
@@ -917,16 +918,18 @@ void cmake::SetDirectoriesFromFile(const char* arg)
   // If there is a CMakeCache.txt file, use its settings.
   if(!cachePath.empty())
     {
-    cmCacheManager* cachem = this->GetCacheManager();
-    cmCacheManager::CacheIterator it = cachem->NewIterator();
-    if(this->LoadCache(cachePath) &&
-      it.Find("CMAKE_HOME_DIRECTORY"))
+    if(this->LoadCache(cachePath))
       {
-      this->SetHomeOutputDirectory(cachePath);
-      this->SetStartOutputDirectory(cachePath);
-      this->SetHomeDirectory(it.GetValue());
-      this->SetStartDirectory(it.GetValue());
-      return;
+      const char* existingValue =
+          this->CacheManager->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
+      if (existingValue)
+        {
+        this->SetHomeOutputDirectory(cachePath);
+        this->SetStartOutputDirectory(cachePath);
+        this->SetHomeDirectory(existingValue);
+        this->SetStartDirectory(existingValue);
+        return;
+        }
       }
     }
 
@@ -1575,11 +1578,11 @@ int cmake::ActualConfigure()
       ("CMAKE_USE_RELATIVE_PATHS", "OFF",
        "If true, cmake will use relative paths in makefiles and projects.",
        cmCacheManager::BOOL);
-    cmCacheManager::CacheIterator it =
-      this->CacheManager->GetCacheIterator("CMAKE_USE_RELATIVE_PATHS");
-    if ( !it.PropertyExists("ADVANCED") )
+    if (!this->CacheManager->GetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
+                                                   "ADVANCED"))
       {
-      it.SetProperty("ADVANCED", "1");
+      this->CacheManager->SetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
+                                                  "ADVANCED", "1");
       }
     }
 
@@ -2314,17 +2317,9 @@ const char *cmake::GetProperty(const std::string& prop,
   std::string output = "";
   if ( prop == "CACHE_VARIABLES" )
     {
-    cmCacheManager::CacheIterator cit =
-      this->GetCacheManager()->GetCacheIterator();
-    for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
-      {
-      if (!output.empty())
-        {
-        output += ";";
-        }
-      output += cit.GetName();
-      }
-    this->SetProperty("CACHE_VARIABLES", output.c_str());
+    std::vector<std::string> cacheKeys =
+        this->CacheManager->GetCacheEntryKeys();
+    this->SetProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
     }
   else if ( prop == "COMMANDS" )
     {
@@ -2686,9 +2681,9 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     if(t == cmake::AUTHOR_WARNING)
       {
       // Allow suppression of these warnings.
-      cmCacheManager::CacheIterator it = this->CacheManager
-        ->GetCacheIterator("CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
-      if(!it.IsAtEnd() && it.GetValueAsBool())
+      const char* suppress = this->CacheManager->GetCacheEntryValue(
+                                        "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
+      if(suppress && cmSystemTools::IsOn(suppress))
         {
         return;
         }
@@ -2801,37 +2796,42 @@ int cmake::Build(const std::string& dir,
     }
   std::string cachePath = dir;
   cmSystemTools::ConvertToUnixSlashes(cachePath);
-  cmCacheManager::CacheIterator it = this->GetCacheManager()->NewIterator();
   if(!this->LoadCache(cachePath))
     {
     std::cerr << "Error: could not load cache\n";
     return 1;
     }
-  if(!it.Find("CMAKE_GENERATOR"))
+  const char* cachedGenerator =
+      this->CacheManager->GetCacheEntryValue("CMAKE_GENERATOR");
+  if(!cachedGenerator)
     {
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
     return 1;
     }
   cmsys::auto_ptr<cmGlobalGenerator> gen(
-    this->CreateGlobalGenerator(it.GetValue()));
+    this->CreateGlobalGenerator(cachedGenerator));
   if(!gen.get())
     {
     std::cerr << "Error: could create CMAKE_GENERATOR \""
-              << it.GetValue() << "\"\n";
+              << cachedGenerator << "\"\n";
     return 1;
     }
   std::string output;
   std::string projName;
-  if(!it.Find("CMAKE_PROJECT_NAME"))
+  const char* cachedProjectName =
+      this->CacheManager->GetCacheEntryValue("CMAKE_PROJECT_NAME");
+  if(!cachedProjectName)
     {
     std::cerr << "Error: could not find CMAKE_PROJECT_NAME in Cache\n";
     return 1;
     }
-  projName = it.GetValue();
+  projName = cachedProjectName;
   bool verbose = false;
-  if(it.Find("CMAKE_VERBOSE_MAKEFILE"))
+  const char* cachedVerbose =
+      this->CacheManager->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE");
+  if(cachedVerbose)
     {
-    verbose = it.GetValueAsBool();
+    verbose = cmSystemTools::IsOn(cachedVerbose);
     }
   return gen->Build("", dir,
                     projName, target,

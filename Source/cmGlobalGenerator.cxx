@@ -1559,9 +1559,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
            cmSystemTools::IsNOTFOUND(lib->first.c_str()))
           {
           std::string varName = lib->first.substr(0, lib->first.size()-9);
-          cmCacheManager::CacheIterator it =
-            manager->GetCacheIterator(varName.c_str());
-          if(it.GetPropertyAsBool("ADVANCED"))
+          if(manager->GetCacheEntryPropertyAsBool(varName, "ADVANCED"))
             {
             varName += " (ADVANCED)";
             }
@@ -1592,9 +1590,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
             cmSystemTools::IsNOTFOUND(incDir->c_str()))
           {
           std::string varName = incDir->substr(0, incDir->size()-9);
-          cmCacheManager::CacheIterator it =
-            manager->GetCacheIterator(varName.c_str());
-          if(it.GetPropertyAsBool("ADVANCED"))
+          if(manager->GetCacheEntryPropertyAsBool(varName, "ADVANCED"))
             {
             varName += " (ADVANCED)";
             }
