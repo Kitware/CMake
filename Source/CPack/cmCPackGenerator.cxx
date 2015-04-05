@@ -1499,7 +1499,10 @@ bool cmCPackGenerator::SupportsComponentInstallation() const
 //----------------------------------------------------------------------
 bool cmCPackGenerator::WantsComponentInstallation() const
 {
-  return (!IsOn("CPACK_MONOLITHIC_INSTALL") & SupportsComponentInstallation());
+  return (!IsOn("CPACK_MONOLITHIC_INSTALL")
+        && SupportsComponentInstallation()
+        // check that package at least has components
+        && !(this->ComponentGroups.empty() || this->Components.empty()));
 }
 
 //----------------------------------------------------------------------
