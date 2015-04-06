@@ -2501,20 +2501,20 @@ const char* cmMakefile::GetSafeDefinition(const std::string& def) const
 std::vector<std::string> cmMakefile
 ::GetDefinitions(int cacheonly /* = 0 */) const
 {
-  std::set<std::string> definitions;
+  std::vector<std::string> res;
   if ( !cacheonly )
     {
-    definitions = this->Internal->VarStack.top().ClosureKeys();
+    std::set<std::string> definitions =
+        this->Internal->VarStack.top().ClosureKeys();
+    res.insert(res.end(), definitions.begin(), definitions.end());
     }
   cmCacheManager::CacheIterator cit =
     this->GetCacheManager()->GetCacheIterator();
   for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
     {
-    definitions.insert(cit.GetName());
+    res.push_back(cit.GetName());
     }
-
-  std::vector<std::string> res;
-  res.insert(res.end(), definitions.begin(), definitions.end());
+  std::sort(res.begin(), res.end());
   return res;
 }
 
