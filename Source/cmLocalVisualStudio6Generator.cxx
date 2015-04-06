@@ -14,7 +14,6 @@
 #include "cmMakefile.h"
 #include "cmSystemTools.h"
 #include "cmSourceFile.h"
-#include "cmCacheManager.h"
 #include "cmGeneratorTarget.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmake.h"
