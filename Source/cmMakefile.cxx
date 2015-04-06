@@ -174,16 +174,6 @@ void cmMakefile::Initialize()
   this->CheckCMP0000 = false;
 }
 
-unsigned int cmMakefile::GetCacheMajorVersion() const
-{
-  return this->GetCacheManager()->GetCacheMajorVersion();
-}
-
-unsigned int cmMakefile::GetCacheMinorVersion() const
-{
-  return this->GetCacheManager()->GetCacheMinorVersion();
-}
-
 cmMakefile::~cmMakefile()
 {
   cmDeleteAll(this->InstallGenerators);
