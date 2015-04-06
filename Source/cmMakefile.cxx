@@ -1810,16 +1810,17 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
 {
   bool haveVal = value ? true : false;
   std::string val = haveVal ? value : "";
-  cmCacheManager::CacheIterator it =
-    this->GetCacheManager()->GetCacheIterator(name.c_str());
-  if(!it.IsAtEnd() && (it.GetType() == cmCacheManager::UNINITIALIZED) &&
-     it.Initialized())
+  const char* existingValue =
+    this->GetCacheManager()->GetInitializedCacheValue(name);
+  if(existingValue
+      && (this->GetCacheManager()->GetCacheEntryType(name)
+                                            == cmCacheManager::UNINITIALIZED))
     {
     // if this is not a force, then use the value from the cache
     // if it is a force, then use the value being passed in
     if(!force)
       {
-      val = it.GetValue();
+      val = existingValue;
       haveVal = true;
       }
     if ( type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH )
@@ -1842,7 +1843,7 @@ void cmMakefile::AddCacheDefinition(const std::string& name, const char* value,
         }
 
       this->GetCacheManager()->AddCacheEntry(name, nvalue.c_str(), doc, type);
-      val = it.GetValue();
+      val = this->GetCacheManager()->GetInitializedCacheValue(name);
       haveVal = true;
       }
 
