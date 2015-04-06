@@ -80,3 +80,29 @@ run_cmake(D_nested_cache)
 set(RunCMake_TEST_OPTIONS
   "-DFOO:STRING=-DBAR:BOOL=BAZ")
 run_cmake(D_typed_nested_cache)
+
+function(run_cmake_depends)
+  set(RunCMake_TEST_SOURCE_DIR "${RunCMake_SOURCE_DIR}/cmake_depends")
+  set(RunCMake_TEST_BINARY_DIR "${RunCMake_BINARY_DIR}/cmake_depends-build")
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/DepTarget.dir/DependInfo.cmake" "
+set(CMAKE_DEPENDS_LANGUAGES \"C\")
+set(CMAKE_DEPENDS_CHECK_C
+  \"${RunCMake_TEST_SOURCE_DIR}/test.c\"
+  \"${RunCMake_TEST_BINARY_DIR}/CMakeFiles/DepTarget.dir/test.c.o\"
+  )
+")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CMakeFiles/CMakeDirectoryInformation.cmake" "
+set(CMAKE_RELATIVE_PATH_TOP_SOURCE \"${RunCMake_TEST_SOURCE_DIR}\")
+set(CMAKE_RELATIVE_PATH_TOP_BINARY \"${RunCMake_TEST_BINARY_DIR}\")
+")
+  run_cmake_command(cmake_depends ${CMAKE_COMMAND} -E cmake_depends
+    "Unix Makefiles"
+    ${RunCMake_TEST_SOURCE_DIR} ${RunCMake_TEST_SOURCE_DIR}
+    ${RunCMake_TEST_BINARY_DIR} ${RunCMake_TEST_BINARY_DIR}
+    ${RunCMake_TEST_BINARY_DIR}/CMakeFiles/DepTarget.dir/DependInfo.cmake
+    )
+endfunction()
+run_cmake_depends()
