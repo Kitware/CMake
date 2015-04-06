@@ -22,6 +22,7 @@ cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
     IsInTryCompile(false)
 {
+  this->Initialize();
 }
 
 cmState::~cmState()

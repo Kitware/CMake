@@ -136,8 +136,6 @@ cmake::cmake()
   this->Policies = new cmPolicies();
   this->State = new cmState(this);
 
-  this->InitializeProperties();
-
 #ifdef __APPLE__
   struct rlimit rlp;
   if(!getrlimit(RLIMIT_STACK, &rlp))
@@ -186,14 +184,9 @@ cmake::~cmake()
   delete this->FileComparison;
 }
 
-void cmake::InitializeProperties()
-{
-  this->State->Initialize();
-}
-
 void cmake::CleanupCommandsAndMacros()
 {
-  this->InitializeProperties();
+  this->State->Initialize();
   this->State->RemoveUserDefinedCommands();
 }
 
