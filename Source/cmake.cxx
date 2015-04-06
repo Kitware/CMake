@@ -188,7 +188,6 @@ void cmake::InitializeProperties()
 {
   this->Properties.clear();
   this->Properties.SetCMakeInstance(this);
-  this->AccessedProperties.clear();
   this->PropertyDefinitions.clear();
 
   // initialize properties
@@ -213,7 +212,7 @@ void cmake::CleanupCommandsAndMacros()
       delete j->second;
       }
     }
-  this->Commands.erase(this->Commands.begin(), this->Commands.end());
+  this->Commands.clear();
   std::vector<cmCommand*>::iterator it;
   for ( it = commands.begin(); it != commands.end();
     ++ it )
@@ -2274,8 +2273,6 @@ const char *cmake::GetProperty(const std::string& prop)
 const char *cmake::GetProperty(const std::string& prop,
                                cmProperty::ScopeType scope)
 {
-  bool chain = false;
-
   // watch for special properties
   std::string output = "";
   if ( prop == "CACHE_VARIABLES" )
@@ -2333,7 +2330,8 @@ const char *cmake::GetProperty(const std::string& prop,
     return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
     }
 #undef STRING_LIST_ELEMENT
-  return this->Properties.GetPropertyValue(prop, scope, chain);
+  bool dummy = false;
+  return this->Properties.GetPropertyValue(prop, scope, dummy);
 }
 
 bool cmake::GetPropertyAsBool(const std::string& prop)

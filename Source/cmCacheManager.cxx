@@ -76,22 +76,10 @@ bool cmCacheManager::IsType(const char* s)
   return false;
 }
 
-bool cmCacheManager::LoadCache(cmMakefile* mf)
-{
-  return this->LoadCache(mf->GetHomeOutputDirectory());
-}
-
-
 bool cmCacheManager::LoadCache(const std::string& path)
 {
-  return this->LoadCache(path,true);
-}
-
-bool cmCacheManager::LoadCache(const std::string& path,
-                               bool internal)
-{
   std::set<std::string> emptySet;
-  return this->LoadCache(path, internal, emptySet, emptySet);
+  return this->LoadCache(path, true, emptySet, emptySet);
 }
 
 static bool ParseEntryWithoutType(const std::string& entry,
@@ -417,12 +405,6 @@ void cmCacheManager::WritePropertyEntries(std::ostream& os,
       }
     }
 }
-
-bool cmCacheManager::SaveCache(cmMakefile* mf)
-{
-  return this->SaveCache(mf->GetHomeOutputDirectory());
-}
-
 
 bool cmCacheManager::SaveCache(const std::string& path)
 {
@@ -913,22 +895,4 @@ bool cmCacheManager::CacheIterator::PropertyExists(
     const std::string& prop) const
 {
   return this->GetProperty(prop)? true:false;
-}
-
-//----------------------------------------------------------------------------
-bool cmCacheManager::NeedCacheCompatibility(int major, int minor)
-{
-  // Compatibility is not needed if the cache version is zero because
-  // the cache was created or modified by the user.
-  if(this->CacheMajorVersion == 0)
-    {
-    return false;
-    }
-
-  // Compatibility is needed if the cache version is equal to or lower
-  // than the given version.
-  cmIML_INT_uint64_t actual_compat =
-    CMake_VERSION_ENCODE(this->CacheMajorVersion, this->CacheMinorVersion, 0);
-  return (actual_compat &&
-          actual_compat <= CMake_VERSION_ENCODE(major, minor, 0));
 }

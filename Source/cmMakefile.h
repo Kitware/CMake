@@ -78,9 +78,6 @@ public:
   bool VariableInitialized(const std::string& ) const;
   /* return true if a variable has been used */
   bool VariableUsed(const std::string& ) const;
-  /** Return whether compatibility features needed for a version of
-      the cache or lower should be enabled.  */
-  bool NeedCacheCompatibility(int major, int minor) const;
 
   /**
    * Construct an empty makefile.
@@ -776,10 +773,6 @@ public:
   ///enabled.
   void EnableLanguage(std::vector<std::string>const& languages, bool optional);
 
-  /**
-   * Set/Get the name of the parent directories CMakeLists file
-   * given a current CMakeLists file name
-   */
   cmCacheManager *GetCacheManager() const;
 
   /**
@@ -985,9 +978,8 @@ protected:
   // directories.
   std::set<std::string> SystemIncludeDirectories;
 
-  std::vector<std::string> ListFiles; // list of command files loaded
-  std::vector<std::string> OutputFiles; // list of command files loaded
-
+  std::vector<std::string> ListFiles;
+  std::vector<std::string> OutputFiles;
 
   cmTarget::LinkLibraryVectorType LinkLibraries;
 
