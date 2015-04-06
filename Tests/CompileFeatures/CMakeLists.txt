@@ -116,12 +116,6 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
       cxx_deleted_functions
       cxx_nonstatic_member_init
       )
-  else()
-    list(REMOVE_ITEM CXX_non_features
-      # The cxx_constexpr feature happens to work (for *this* testcase)
-      # with VS 2015, but they document only partial support.
-      cxx_constexpr
-      )
   endif()
 endif()
 
