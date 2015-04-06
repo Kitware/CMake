@@ -52,11 +52,13 @@ bool cmUtilitySourceCommand
     }
   else
     {
+    cmCacheManager *manager =
+        this->Makefile->GetCMakeInstance()->GetCacheManager();
     haveCacheValue = (cacheValue &&
      (strstr(cacheValue, "(IntDir)") == 0 ||
       (intDir && strcmp(intDir, "$(IntDir)") == 0)) &&
-     (this->Makefile->GetCacheMajorVersion() != 0 &&
-      this->Makefile->GetCacheMinorVersion() != 0 ));
+     (manager->GetCacheMajorVersion() != 0 &&
+      manager->GetCacheMinorVersion() != 0 ));
     }
 
   if(haveCacheValue)
