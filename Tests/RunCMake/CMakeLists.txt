@@ -204,6 +204,11 @@ add_RunCMake_test(install)
 add_RunCMake_test(CPackInstallProperties)
 add_RunCMake_test(ExternalProject)
 add_RunCMake_test(CTestCommandLine)
+# Only run this test on unix platforms that support
+# symbolic links
+if(UNIX)
+  add_RunCMake_test(CPackSymlinks)
+endif()
 
 set(IfacePaths_INCLUDE_DIRECTORIES_ARGS -DTEST_PROP=INCLUDE_DIRECTORIES)
 add_RunCMake_test(IfacePaths_INCLUDE_DIRECTORIES TEST_DIR IfacePaths)
