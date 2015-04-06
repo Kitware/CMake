@@ -264,12 +264,12 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
                                        comment.c_str(),
                                        cmCacheManager::STRING);
 
-    cmCacheManager* manager = this->Makefile->GetCacheManager();
+    cmState* state = this->Makefile->GetState();
     const char* existingValue
-                      = manager->GetCacheEntryValue(this->RunResultVariable);
+                        = state->GetCacheEntryValue(this->RunResultVariable);
     if (existingValue)
       {
-      manager->SetCacheEntryProperty(this->RunResultVariable, "ADVANCED", "1");
+      state->SetCacheEntryProperty(this->RunResultVariable, "ADVANCED", "1");
       }
 
     error = true;
@@ -291,13 +291,13 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
                                          "PLEASE_FILL_OUT-NOTFOUND",
                                          comment.c_str(),
                                          cmCacheManager::STRING);
-      cmCacheManager* manager = this->Makefile->GetCacheManager();
+      cmState* state = this->Makefile->GetState();
       const char* existing =
-          manager->GetCacheEntryValue(internalRunOutputName);
+          state->GetCacheEntryValue(internalRunOutputName);
       if (existing)
         {
-        manager->SetCacheEntryProperty(internalRunOutputName,
-                                       "ADVANCED", "1");
+        state->SetCacheEntryProperty(internalRunOutputName,
+                                      "ADVANCED", "1");
         }
 
       error = true;

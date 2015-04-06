@@ -348,22 +348,20 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         std::string cachedValue;
         if(this->WarnUnusedCli)
           {
-          if(const char *v = this->CacheManager
-                                 ->GetInitializedCacheValue(var))
+          if(const char *v = this->State->GetInitializedCacheValue(var))
             {
             haveValue = true;
             cachedValue = v;
             }
           }
 
-        this->CacheManager->AddCacheEntry(var, value.c_str(),
+        this->State->AddCacheEntry(var, value.c_str(),
           "No help, variable specified on the command line.", type);
 
         if(this->WarnUnusedCli)
           {
           if (!haveValue ||
-              cachedValue != this->CacheManager
-                                 ->GetInitializedCacheValue(var))
+              cachedValue != this->State->GetInitializedCacheValue(var))
             {
             this->WatchUnusedCli(var);
             }
@@ -407,13 +405,11 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
         cmsys::Glob::PatternToRegex(entryPattern, true, true).c_str());
       //go through all cache entries and collect the vars which will be removed
       std::vector<std::string> entriesToDelete;
-      std::vector<std::string> cacheKeys =
-          this->CacheManager->GetCacheEntryKeys();
+      std::vector<std::string> cacheKeys = this->State->GetCacheEntryKeys();
       for (std::vector<std::string>::const_iterator it = cacheKeys.begin();
             it != cacheKeys.end(); ++it)
         {
-        cmCacheManager::CacheEntryType t =
-            this->CacheManager->GetCacheEntryType(*it);
+        cmCacheManager::CacheEntryType t = this->State->GetCacheEntryType(*it);
         if(t != cmCacheManager::STATIC)
           {
           if (regex.find(it->c_str()))
@@ -429,7 +425,7 @@ bool cmake::SetCacheArgs(const std::vector<std::string>& args)
           currentEntry != entriesToDelete.end();
           ++currentEntry)
         {
-        this->CacheManager->RemoveCacheEntry(*currentEntry);
+        this->State->RemoveCacheEntry(*currentEntry);
         }
       }
     else if(arg.find("-C",0) == 0)
@@ -925,7 +921,7 @@ void cmake::SetDirectoriesFromFile(const char* arg)
     if(this->LoadCache(cachePath))
       {
       const char* existingValue =
-          this->CacheManager->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
+          this->State->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
       if (existingValue)
         {
         this->SetHomeOutputDirectory(cachePath);
@@ -1255,7 +1251,6 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     {
     return 0;
     }
-  cmCacheManager::CacheIterator ci = this->CacheManager->NewIterator();
   std::vector<SaveCacheEntry> saved;
   std::ostringstream warning;
   warning
@@ -1271,10 +1266,13 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     i++;
     save.value = *i;
     warning << *i << "\n";
-    if(ci.Find(save.key))
+    const char* existingValue =
+        this->CacheManager->GetCacheEntryValue(save.key);
+    if(existingValue)
       {
-      save.type = ci.GetType();
-      if(const char* help = ci.GetProperty("HELPSTRING"))
+      save.type = this->CacheManager->GetCacheEntryType(save.key);
+      if(const char* help =
+            this->CacheManager->GetCacheEntryProperty(save.key, "HELPSTRING"))
         {
         save.help = help;
         }
@@ -1556,49 +1554,51 @@ int cmake::ActualConfigure()
   // project requires compatibility with CMake 2.4.  We detect this
   // here by looking for the old CMAKE_BACKWARDS_COMPATIBILITY
   // variable created when CMP0001 is not set to NEW.
-  if(this->GetCacheManager()
+  if(this->State
          ->GetInitializedCacheValue("CMAKE_BACKWARDS_COMPATIBILITY"))
     {
-    if(!this->CacheManager->GetInitializedCacheValue("LIBRARY_OUTPUT_PATH"))
+    if(!this->State->GetInitializedCacheValue("LIBRARY_OUTPUT_PATH"))
       {
-      this->CacheManager->AddCacheEntry
+      this->State->AddCacheEntry
         ("LIBRARY_OUTPUT_PATH", "",
          "Single output directory for building all libraries.",
          cmCacheManager::PATH);
       }
-    if(!this->CacheManager
+    if(!this->State
             ->GetInitializedCacheValue("EXECUTABLE_OUTPUT_PATH"))
       {
-      this->CacheManager->AddCacheEntry
+      this->State->AddCacheEntry
         ("EXECUTABLE_OUTPUT_PATH", "",
          "Single output directory for building all executables.",
          cmCacheManager::PATH);
       }
     }
-  if(!this->CacheManager
+  if(!this->State
           ->GetInitializedCacheValue("CMAKE_USE_RELATIVE_PATHS"))
     {
-    this->CacheManager->AddCacheEntry
+    this->State->AddCacheEntry
       ("CMAKE_USE_RELATIVE_PATHS", "OFF",
        "If true, cmake will use relative paths in makefiles and projects.",
        cmCacheManager::BOOL);
-    if (!this->CacheManager->GetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
-                                                   "ADVANCED"))
+    if (!this->State->GetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
+                                                    "ADVANCED"))
       {
-      this->CacheManager->SetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
-                                                  "ADVANCED", "1");
+      this->State->SetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
+                                                 "ADVANCED", "1");
       }
     }
 
-  if(cmSystemTools::GetFatalErrorOccured() &&
-     (!this->CacheManager->GetInitializedCacheValue("CMAKE_MAKE_PROGRAM") ||
-      cmSystemTools::IsOff(this->CacheManager->
-                           GetInitializedCacheValue("CMAKE_MAKE_PROGRAM"))))
+  if(cmSystemTools::GetFatalErrorOccured())
     {
-    // We must have a bad generator selection.  Wipe the cache entry so the
-    // user can select another.
-    this->CacheManager->RemoveCacheEntry("CMAKE_GENERATOR");
-    this->CacheManager->RemoveCacheEntry("CMAKE_EXTRA_GENERATOR");
+    const char* makeProgram =
+        this->State->GetInitializedCacheValue("CMAKE_MAKE_PROGRAM");
+    if (!makeProgram || cmSystemTools::IsOff(makeProgram))
+      {
+      // We must have a bad generator selection.  Wipe the cache entry so the
+      // user can select another.
+      this->State->RemoveCacheEntry("CMAKE_GENERATOR");
+      this->State->RemoveCacheEntry("CMAKE_EXTRA_GENERATOR");
+      }
     }
 
   cmMakefile* mf=this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
@@ -2204,7 +2204,7 @@ void cmake::TruncateOutputLog(const char* fname)
     {
     return;
     }
-  if ( !this->CacheManager->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR") )
+  if (!this->State->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR"))
     {
     cmSystemTools::RemoveFile(fullPath);
     return;
@@ -2321,8 +2321,7 @@ const char *cmake::GetProperty(const std::string& prop,
   std::string output = "";
   if ( prop == "CACHE_VARIABLES" )
     {
-    std::vector<std::string> cacheKeys =
-        this->CacheManager->GetCacheEntryKeys();
+    std::vector<std::string> cacheKeys = this->State->GetCacheEntryKeys();
     this->SetProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
     }
   else if ( prop == "COMMANDS" )
@@ -2475,7 +2474,7 @@ int cmake::GetSystemInformation(std::vector<std::string>& args)
   // we have to find the module directory, so we can copy the files
   this->AddCMakePaths();
   std::string modulesPath =
-    this->CacheManager->GetInitializedCacheValue("CMAKE_ROOT");
+    this->State->GetInitializedCacheValue("CMAKE_ROOT");
   modulesPath += "/Modules";
   std::string inFile = modulesPath;
   inFile += "/SystemInformation.cmake";
@@ -2685,7 +2684,7 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     if(t == cmake::AUTHOR_WARNING)
       {
       // Allow suppression of these warnings.
-      const char* suppress = this->CacheManager->GetCacheEntryValue(
+      const char* suppress = this->State->GetCacheEntryValue(
                                         "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
       if(suppress && cmSystemTools::IsOn(suppress))
         {
@@ -2806,7 +2805,7 @@ int cmake::Build(const std::string& dir,
     return 1;
     }
   const char* cachedGenerator =
-      this->CacheManager->GetCacheEntryValue("CMAKE_GENERATOR");
+      this->State->GetCacheEntryValue("CMAKE_GENERATOR");
   if(!cachedGenerator)
     {
     std::cerr << "Error: could not find CMAKE_GENERATOR in Cache\n";
@@ -2823,7 +2822,7 @@ int cmake::Build(const std::string& dir,
   std::string output;
   std::string projName;
   const char* cachedProjectName =
-      this->CacheManager->GetCacheEntryValue("CMAKE_PROJECT_NAME");
+      this->State->GetCacheEntryValue("CMAKE_PROJECT_NAME");
   if(!cachedProjectName)
     {
     std::cerr << "Error: could not find CMAKE_PROJECT_NAME in Cache\n";
@@ -2832,7 +2831,7 @@ int cmake::Build(const std::string& dir,
   projName = cachedProjectName;
   bool verbose = false;
   const char* cachedVerbose =
-      this->CacheManager->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE");
+      this->State->GetCacheEntryValue("CMAKE_VERBOSE_MAKEFILE");
   if(cachedVerbose)
     {
     verbose = cmSystemTools::IsOn(cachedVerbose);

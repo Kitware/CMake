@@ -19,6 +19,7 @@
 #include "cmCursesDummyWidget.h"
 #include "../cmSystemTools.h"
 #include "../cmake.h"
+#include "../cmState.h"
 
 #include <assert.h>
 
@@ -50,9 +51,9 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
     }
 
   this->Entry = 0;
-  const char* value = cm->GetCacheManager()->GetCacheEntryValue(key);
+  const char* value = cm->GetState()->GetCacheEntryValue(key);
   assert(value);
-  switch (cm->GetCacheManager()->GetCacheEntryType(key))
+  switch (cm->GetState()->GetCacheEntryType(key))
     {
     case cmCacheManager::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
@@ -75,7 +76,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
       break;
     case cmCacheManager::STRING:
       {
-      const char* stringsProp = cm->GetCacheManager()
+      const char* stringsProp = cm->GetState()
                                   ->GetCacheEntryProperty(key, "STRINGS");
       if(stringsProp)
         {

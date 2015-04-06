@@ -12,6 +12,7 @@
 #include "cmFindBase.h"
 
 #include "cmAlgorithms.h"
+#include "cmState.h"
 
 cmFindBase::cmFindBase()
 {
@@ -366,8 +367,8 @@ bool cmFindBase::CheckForVariableInCache()
   if(const char* cacheValue =
      this->Makefile->GetDefinition(this->VariableName))
     {
-    cmCacheManager* manager = this->Makefile->GetCacheManager();
-    const char* cacheEntry = manager->GetCacheEntryValue(this->VariableName);
+    cmState* state = this->Makefile->GetState();
+    const char* cacheEntry = state->GetCacheEntryValue(this->VariableName);
     bool found = !cmSystemTools::IsNOTFOUND(cacheValue);
     bool cached = cacheEntry ? true : false;
     if(found)
@@ -376,7 +377,7 @@ bool cmFindBase::CheckForVariableInCache()
       // type we should add the type and docstring but keep the
       // original value.  Tell the subclass implementations to do
       // this.
-      if(cached && manager->GetCacheEntryType(this->VariableName)
+      if(cached && state->GetCacheEntryType(this->VariableName)
                                             == cmCacheManager::UNINITIALIZED)
         {
         this->AlreadyInCacheWithoutMetaInfo = true;
@@ -385,7 +386,7 @@ bool cmFindBase::CheckForVariableInCache()
       }
     else if(cached)
       {
-      const char* hs = manager->GetCacheEntryProperty(this->VariableName,
+      const char* hs = state->GetCacheEntryProperty(this->VariableName,
                                                      "HELPSTRING");
       this->VariableDocumentation = hs?hs:"(none)";
       }
