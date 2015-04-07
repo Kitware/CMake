@@ -12,7 +12,6 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include "cmCacheManager.h"
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -765,7 +764,6 @@ public:
   ///enabled.
   void EnableLanguage(std::vector<std::string>const& languages, bool optional);
 
-  cmCacheManager *GetCacheManager() const;
   cmState *GetState() const;
 
   /**

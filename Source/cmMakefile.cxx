@@ -3735,11 +3735,6 @@ void cmMakefile::GetListOfMacros(std::string& macros) const
   macros = cmJoin(this->MacrosList, ";");
 }
 
-cmCacheManager *cmMakefile::GetCacheManager() const
-{
-  return this->GetCMakeInstance()->GetCacheManager();
-}
-
 cmState *cmMakefile::GetState() const
 {
   return this->GetCMakeInstance()->GetState();
