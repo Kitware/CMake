@@ -46,7 +46,7 @@ bool cmOptionCommand
   const char* existingValue = state->GetCacheEntryValue(args[0]);
   if(existingValue)
     {
-    if (state->GetCacheEntryType(args[0]) != cmCacheManager::UNINITIALIZED)
+    if (state->GetCacheEntryType(args[0]) != cmState::UNINITIALIZED)
       {
       state->SetCacheEntryProperty(args[0], "HELPSTRING", args[1]);
       return true;
@@ -59,6 +59,6 @@ bool cmOptionCommand
     }
   bool init = cmSystemTools::IsOn(initialValue.c_str());
   this->Makefile->AddCacheDefinition(args[0], init? "ON":"OFF",
-                                     args[1].c_str(), cmCacheManager::BOOL);
+                                     args[1].c_str(), cmState::BOOL);
   return true;
 }

@@ -39,7 +39,7 @@ bool cmMarkAsAdvancedCommand
     cmState* state = this->Makefile->GetState();
     if (!state->GetCacheEntryValue(variable))
       {
-      state->AddCacheEntry(variable, 0, 0, cmCacheManager::UNINITIALIZED);
+      state->AddCacheEntry(variable, 0, 0, cmState::UNINITIALIZED);
       overwrite = true;
       }
     if (!state->GetCacheEntryValue(variable))

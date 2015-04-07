@@ -12,7 +12,7 @@
 #ifndef cmState_h
 #define cmState_h
 
-#include "cmCacheManager.h"
+#include "cmStandardIncludes.h"
 
 class cmake;
 
@@ -21,21 +21,21 @@ class cmState
 public:
   cmState(cmake* cm);
 
-  static cmCacheManager::CacheEntryType StringToCacheEntryType(const char*);
-  static const char* CacheEntryTypeToString(cmCacheManager::CacheEntryType);
+  enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
+                       UNINITIALIZED };
+  static CacheEntryType StringToCacheEntryType(const char*);
+  static const char* CacheEntryTypeToString(CacheEntryType);
   static bool IsCacheEntryType(std::string const& key);
 
   std::vector<std::string> GetCacheEntryKeys() const;
   const char* GetCacheEntryValue(std::string const& key) const;
   const char* GetInitializedCacheValue(std::string const& key) const;
-  cmCacheManager::CacheEntryType
-  GetCacheEntryType(std::string const& key) const;
+  CacheEntryType GetCacheEntryType(std::string const& key) const;
   void SetCacheEntryValue(std::string const& key, std::string const& value);
   void SetCacheValue(std::string const& key, std::string const& value);
 
   void AddCacheEntry(const std::string& key, const char* value,
-                     const char* helpString,
-                     cmCacheManager::CacheEntryType type);
+                     const char* helpString, CacheEntryType type);
   void RemoveCacheEntry(std::string const& key);
 
   void SetCacheEntryProperty(std::string const& key,

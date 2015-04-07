@@ -12,26 +12,59 @@
 #include "cmState.h"
 
 #include "cmake.h"
+#include "cmCacheManager.h"
 
 cmState::cmState(cmake* cm)
   : CMakeInstance(cm)
 {
 }
-cmCacheManager::CacheEntryType
-cmState::StringToCacheEntryType(const char* s)
-{
-  return cmCacheManager::StringToType(s);
-}
+
+const char* cmCacheEntryTypes[] =
+{ "BOOL",
+  "PATH",
+  "FILEPATH",
+  "STRING",
+  "INTERNAL",
+  "STATIC",
+  "UNINITIALIZED",
+  0
+};
 
 const char*
-cmState::CacheEntryTypeToString(cmCacheManager::CacheEntryType t)
+cmState::CacheEntryTypeToString(cmState::CacheEntryType type)
 {
-  return cmCacheManager::TypeToString(t);
+  if ( type > 6 )
+    {
+    return cmCacheEntryTypes[6];
+    }
+  return cmCacheEntryTypes[type];
+}
+
+cmState::CacheEntryType
+cmState::StringToCacheEntryType(const char* s)
+{
+  int i = 0;
+  while(cmCacheEntryTypes[i])
+    {
+    if(strcmp(s, cmCacheEntryTypes[i]) == 0)
+      {
+      return static_cast<cmState::CacheEntryType>(i);
+      }
+    ++i;
+    }
+  return STRING;
 }
 
 bool cmState::IsCacheEntryType(std::string const& key)
 {
-  return cmCacheManager::IsType(key.c_str());
+  for(int i=0; cmCacheEntryTypes[i]; ++i)
+    {
+    if(strcmp(key.c_str(), cmCacheEntryTypes[i]) == 0)
+      {
+      return true;
+      }
+    }
+  return false;
 }
 
 std::vector<std::string> cmState::GetCacheEntryKeys() const
@@ -64,7 +97,7 @@ cmState::GetInitializedCacheValue(std::string const& key) const
   return this->CMakeInstance->GetCacheManager()->GetInitializedCacheValue(key);
 }
 
-cmCacheManager::CacheEntryType
+cmState::CacheEntryType
 cmState::GetCacheEntryType(std::string const& key) const
 {
   cmCacheManager::CacheIterator it =
@@ -117,7 +150,7 @@ bool cmState::GetCacheEntryPropertyAsBool(std::string const& key,
 
 void cmState::AddCacheEntry(const std::string& key, const char* value,
                                     const char* helpString,
-                                    cmCacheManager::CacheEntryType type)
+                                    cmState::CacheEntryType type)
 {
   this->CMakeInstance->GetCacheManager()->AddCacheEntry(key, value,
                                                         helpString, type);

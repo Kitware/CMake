@@ -22,7 +22,7 @@ cmCursesStringWidget::cmCursesStringWidget(int width, int height,
   cmCursesWidget(width, height, left, top)
 {
   this->InEdit = false;
-  this->Type = cmCacheManager::STRING;
+  this->Type = cmState::STRING;
   set_field_fore(this->Field,  A_NORMAL);
   set_field_back(this->Field,  A_STANDOUT);
   field_opts_off(this->Field,  O_STATIC);

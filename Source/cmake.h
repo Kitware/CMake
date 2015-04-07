@@ -19,6 +19,7 @@
 #include "cmPropertyMap.h"
 #include "cmInstalledFile.h"
 #include "cmCacheManager.h"
+#include "cmState.h"
 
 class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
@@ -178,7 +179,7 @@ class cmake
   static bool ParseCacheEntry(const std::string& entry,
                          std::string& var,
                          std::string& value,
-                         cmCacheManager::CacheEntryType& type);
+                         cmState::CacheEntryType& type);
 
   int LoadCache();
   bool LoadCache(const std::string& path);

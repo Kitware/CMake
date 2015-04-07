@@ -19,7 +19,6 @@
 #include "cmake.h"
 #include "cmcmd.h"
 #include "cmState.h"
-#include "cmCacheManager.h"
 #include "cmListFileCache.h"
 #include "cmSourceFile.h"
 #include "cmGlobalGenerator.h"
@@ -330,15 +329,13 @@ int do_cmake(int ac, char const* const* av)
   if ( list_cached || list_all_cached )
     {
     std::cout << "-- Cache values" << std::endl;
-    std::vector<std::string> keys =
-        cm.GetState()->GetCacheEntryKeys();
+    std::vector<std::string> keys = cm.GetState()->GetCacheEntryKeys();
     for (std::vector<std::string>::const_iterator it = keys.begin();
         it != keys.end(); ++it)
       {
-      cmCacheManager::CacheEntryType t =
-          cm.GetState()->GetCacheEntryType(*it);
-      if ( t != cmCacheManager::INTERNAL && t != cmCacheManager::STATIC &&
-        t != cmCacheManager::UNINITIALIZED )
+      cmState::CacheEntryType t = cm.GetState()->GetCacheEntryType(*it);
+      if (t != cmState::INTERNAL && t != cmState::STATIC &&
+          t != cmState::UNINITIALIZED)
         {
         const char* advancedProp =
             cm.GetState()->GetCacheEntryProperty(*it, "ADVANCED");
@@ -351,7 +348,7 @@ int do_cmake(int ac, char const* const* av)
                                                    "HELPSTRING") << std::endl;
             }
           std::cout << *it << ":" <<
-            cmCacheManager::TypeToString(t)
+            cmState::CacheEntryTypeToString(t)
             << "=" << cm.GetState()->GetCacheEntryValue(*it)
             << std::endl;
           if ( list_help )

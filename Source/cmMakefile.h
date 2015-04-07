@@ -22,6 +22,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmake.h"
+#include "cmState.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -305,7 +306,7 @@ public:
   ///! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc,
-                          cmCacheManager::CacheEntryType type,
+                          cmState::CacheEntryType type,
                           bool force = false);
 
   /**

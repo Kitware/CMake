@@ -87,27 +87,27 @@ void CCONV cmAddCacheDefinition(void *arg, const char* name,
     {
     case CM_CACHE_BOOL:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::BOOL);
+                             cmState::BOOL);
       break;
     case CM_CACHE_PATH:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::PATH);
+                             cmState::PATH);
       break;
     case CM_CACHE_FILEPATH:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::FILEPATH);
+                             cmState::FILEPATH);
       break;
     case CM_CACHE_STRING:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::STRING);
+                             cmState::STRING);
       break;
     case CM_CACHE_INTERNAL:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::INTERNAL);
+                             cmState::INTERNAL);
       break;
     case CM_CACHE_STATIC:
       mf->AddCacheDefinition(name,value,doc,
-                             cmCacheManager::STATIC);
+                             cmState::STATIC);
       break;
     }
 }

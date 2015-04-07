@@ -39,7 +39,7 @@ bool cmBuildNameCommand
       this->Makefile->AddCacheDefinition(args[0],
                                      cv.c_str(),
                                      "Name of build.",
-                                     cmCacheManager::STRING);
+                                     cmState::STRING);
       }
     return true;
     }
@@ -74,7 +74,7 @@ bool cmBuildNameCommand
   this->Makefile->AddCacheDefinition(args[0],
                                  buildname.c_str(),
                                  "Name of build.",
-                                 cmCacheManager::STRING);
+                                 cmState::STRING);
   return true;
 }
 

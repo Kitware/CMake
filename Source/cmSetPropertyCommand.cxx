@@ -14,7 +14,6 @@
 #include "cmSetTestsPropertiesCommand.h"
 #include "cmSetSourceFilesPropertiesCommand.h"
 
-#include "cmCacheManager.h"
 
 //----------------------------------------------------------------------------
 cmSetPropertyCommand::cmSetPropertyCommand()
@@ -426,7 +425,7 @@ bool cmSetPropertyCommand::HandleCacheMode()
     }
   else if(this->PropertyName == "TYPE")
     {
-    if(!cmCacheManager::IsType(this->PropertyValue.c_str()))
+    if(!cmState::IsCacheEntryType(this->PropertyValue.c_str()))
       {
       std::ostringstream e;
       e << "given invalid CACHE entry TYPE \"" << this->PropertyValue << "\"";

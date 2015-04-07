@@ -15,6 +15,6 @@ cmCursesFilePathWidget::cmCursesFilePathWidget(int width, int height,
                                            int left, int top) :
   cmCursesPathWidget(width, height, left, top)
 {
-  this->Type = cmCacheManager::FILEPATH;
+  this->Type = cmState::FILEPATH;
 }
 

@@ -55,7 +55,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
   assert(value);
   switch (cm->GetState()->GetCacheEntryType(key))
     {
-    case cmCacheManager::BOOL:
+    case cmState::BOOL:
       this->Entry = new cmCursesBoolWidget(this->EntryWidth, 1, 1, 1);
       if (cmSystemTools::IsOn(value))
         {
@@ -66,15 +66,15 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         static_cast<cmCursesBoolWidget*>(this->Entry)->SetValueAsBool(false);
         }
       break;
-    case cmCacheManager::PATH:
+    case cmState::PATH:
       this->Entry = new cmCursesPathWidget(this->EntryWidth, 1, 1, 1);
       static_cast<cmCursesPathWidget*>(this->Entry)->SetString(value);
       break;
-    case cmCacheManager::FILEPATH:
+    case cmState::FILEPATH:
       this->Entry = new cmCursesFilePathWidget(this->EntryWidth, 1, 1, 1);
       static_cast<cmCursesFilePathWidget*>(this->Entry)->SetString(value);
       break;
-    case cmCacheManager::STRING:
+    case cmState::STRING:
       {
       const char* stringsProp = cm->GetState()
                                   ->GetCacheEntryProperty(key, "STRINGS");
@@ -99,7 +99,7 @@ cmCursesCacheEntryComposite::cmCursesCacheEntryComposite(
         }
       break;
       }
-    case cmCacheManager::UNINITIALIZED:
+    case cmState::UNINITIALIZED:
       cmSystemTools::Error("Found an undefined variable: ",
                            key.c_str());
       break;

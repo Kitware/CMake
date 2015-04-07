@@ -9,7 +9,6 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-#include "../cmCacheManager.h"
 #include "../cmSystemTools.h"
 #include "../cmVersion.h"
 #include "../cmake.h"
@@ -118,11 +117,11 @@ void cmCursesMainForm::InitializeUI()
   for(std::vector<std::string>::const_iterator it = cacheKeys.begin();
       it != cacheKeys.end(); ++it)
     {
-    cmCacheManager::CacheEntryType t = this->CMakeInstance->GetState()
+    cmState::CacheEntryType t = this->CMakeInstance->GetState()
         ->GetCacheEntryType(*it);
-    if (t != cmCacheManager::INTERNAL &&
-        t != cmCacheManager::STATIC &&
-        t != cmCacheManager::UNINITIALIZED)
+    if (t != cmState::INTERNAL &&
+        t != cmState::STATIC &&
+        t != cmState::UNINITIALIZED)
       {
       ++count;
       }
@@ -148,11 +147,11 @@ void cmCursesMainForm::InitializeUI()
         it != cacheKeys.end(); ++it)
       {
       std::string key = *it;
-      cmCacheManager::CacheEntryType t = this->CMakeInstance->GetState()
+      cmState::CacheEntryType t = this->CMakeInstance->GetState()
           ->GetCacheEntryType(*it);
-      if (t == cmCacheManager::INTERNAL ||
-          t == cmCacheManager::STATIC ||
-          t == cmCacheManager::UNINITIALIZED )
+      if (t == cmState::INTERNAL ||
+          t == cmState::STATIC ||
+          t == cmState::UNINITIALIZED )
         {
         continue;
         }
@@ -172,11 +171,11 @@ void cmCursesMainForm::InitializeUI()
         it != cacheKeys.end(); ++it)
       {
       std::string key = *it;
-      cmCacheManager::CacheEntryType t = this->CMakeInstance->GetState()
+      cmState::CacheEntryType t = this->CMakeInstance->GetState()
           ->GetCacheEntryType(*it);
-      if (t == cmCacheManager::INTERNAL ||
-          t == cmCacheManager::STATIC ||
-          t == cmCacheManager::UNINITIALIZED )
+      if (t == cmState::INTERNAL ||
+          t == cmState::STATIC ||
+          t == cmState::UNINITIALIZED )
         {
         continue;
         }
@@ -294,9 +293,9 @@ void cmCursesMainForm::Render(int left, int top, int width, int height)
     cmCursesWidget* cw = reinterpret_cast<cmCursesWidget*>
       (field_userptr(currentField));
     // If in edit mode, get out of it
-    if ( cw->GetType() == cmCacheManager::STRING ||
-         cw->GetType() == cmCacheManager::PATH   ||
-         cw->GetType() == cmCacheManager::FILEPATH )
+    if ( cw->GetType() == cmState::STRING ||
+         cw->GetType() == cmState::PATH   ||
+         cw->GetType() == cmState::FILEPATH )
       {
       cmCursesStringWidget* sw = static_cast<cmCursesStringWidget*>(cw);
       sw->SetInEdit(false);
@@ -823,7 +822,7 @@ void cmCursesMainForm::FillCacheManagerFromUI()
       std::string newValue = (*this->Entries)[i]->Entry->GetValue();
       std::string fixedOldValue;
       std::string fixedNewValue;
-      cmCacheManager::CacheEntryType t =
+      cmState::CacheEntryType t =
           this->CMakeInstance->GetState()
               ->GetCacheEntryType(cacheKey);
       this->FixValue(t, oldValue, fixedOldValue);
@@ -841,15 +840,15 @@ void cmCursesMainForm::FillCacheManagerFromUI()
     }
 }
 
-void cmCursesMainForm::FixValue(cmCacheManager::CacheEntryType type,
+void cmCursesMainForm::FixValue(cmState::CacheEntryType type,
                                 const std::string& in, std::string& out) const
 {
   out = in.substr(0,in.find_last_not_of(" ")+1);
-  if(type == cmCacheManager::PATH || type == cmCacheManager::FILEPATH)
+  if(type == cmState::PATH || type == cmState::FILEPATH)
     {
     cmSystemTools::ConvertToUnixSlashes(out);
     }
-  if(type == cmCacheManager::BOOL)
+  if(type == cmState::BOOL)
     {
     if(cmSystemTools::IsOff(out.c_str()))
       {

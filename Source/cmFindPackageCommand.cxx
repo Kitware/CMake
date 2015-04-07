@@ -947,7 +947,7 @@ bool cmFindPackageCommand::FindConfig()
   // We force the value since we do not get here if it was already set.
   this->Makefile->AddCacheDefinition(this->Variable,
                                      init.c_str(), help.c_str(),
-                                     cmCacheManager::PATH, true);
+                                     cmState::PATH, true);
   return found;
 }
 

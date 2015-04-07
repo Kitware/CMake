@@ -88,7 +88,7 @@ bool cmSiteNameCommand
     AddCacheDefinition(args[0],
                        siteName.c_str(),
                        "Name of the computer/site where compile is being run",
-                       cmCacheManager::STRING);
+                       cmState::STRING);
 
   return true;
 }

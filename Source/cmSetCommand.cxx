@@ -79,8 +79,8 @@ bool cmSetCommand
   bool cache = false; // optional
   bool force = false; // optional
   bool parentScope = false;
-  cmCacheManager::CacheEntryType type
-    = cmCacheManager::STRING; // required if cache
+  cmState::CacheEntryType type
+    = cmState::STRING; // required if cache
   const char* docstring = 0; // required if cache
 
   unsigned int ignoreLastArgs = 0;
@@ -131,7 +131,7 @@ bool cmSetCommand
   if(cache)
     {
     std::string::size_type cacheStart = args.size() - 3 - (force ? 1 : 0);
-    type = cmCacheManager::StringToType(args[cacheStart+1].c_str());
+    type = cmState::StringToCacheEntryType(args[cacheStart+1].c_str());
     docstring = args[cacheStart+2].c_str();
     }
 
@@ -139,13 +139,13 @@ bool cmSetCommand
   cmState* state = this->Makefile->GetState();
   const char* existingValue = state->GetCacheEntryValue(variable);
   if(existingValue &&
-      (state->GetCacheEntryType(variable) != cmCacheManager::UNINITIALIZED))
+      (state->GetCacheEntryType(variable) != cmState::UNINITIALIZED))
     {
     // if the set is trying to CACHE the value but the value
     // is already in the cache and the type is not internal
     // then leave now without setting any definitions in the cache
     // or the makefile
-    if(cache && type != cmCacheManager::INTERNAL && !force)
+    if(cache && type != cmState::INTERNAL && !force)
       {
       return true;
       }

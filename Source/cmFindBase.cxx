@@ -378,7 +378,7 @@ bool cmFindBase::CheckForVariableInCache()
       // original value.  Tell the subclass implementations to do
       // this.
       if(cached && state->GetCacheEntryType(this->VariableName)
-                                            == cmCacheManager::UNINITIALIZED)
+                                            == cmState::UNINITIALIZED)
         {
         this->AlreadyInCacheWithoutMetaInfo = true;
         }
