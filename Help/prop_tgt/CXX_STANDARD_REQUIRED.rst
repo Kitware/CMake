@@ -11,7 +11,7 @@ not available.  For compilers that have no notion of a standard level, such as
 MSVC, this has no effect.
 
 See the :manual:`cmake-compile-features(7)` manual for information on
-compile features.
+compile features and a list of supported compilers.
 
 This property is initialized by the value of
 the :variable:`CMAKE_CXX_STANDARD_REQUIRED` variable if it is set when a
