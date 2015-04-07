@@ -175,6 +175,10 @@ private:
   std::vector<std::string> OldUserFlagItems;
   bool OldLinkDirMode;
 
+  // CMP0060 warnings.
+  bool CMP0060Warn;
+  std::set<std::string> CMP0060WarnItems;
+
   // Runtime path computation.
   cmOrderDirectories* OrderRuntimeSearchPath;
   void AddLibraryRuntimeInfo(std::string const& fullPath,

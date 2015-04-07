@@ -118,6 +118,7 @@ public:
     CMP0058, ///< Ninja requires custom command byproducts to be explicit
     CMP0059, ///< Do not treat ``DEFINITIONS`` as a built-in directory
     /// property.
+    CMP0060, ///< Link libraries by full path even in implicit directories.
 
     /** \brief Always the last entry.
      *

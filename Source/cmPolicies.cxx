@@ -390,6 +390,11 @@ cmPolicies::cmPolicies()
     CMP0059, "CMP0059",
     "Do no treat DEFINITIONS as a built-in directory property.",
     3,3,0, cmPolicies::WARN);
+
+  this->DefinePolicy(
+    CMP0060, "CMP0060",
+    "Link libraries by full path even in implicit directories.",
+    3,3,0, cmPolicies::WARN);
 }
 
 cmPolicies::~cmPolicies()

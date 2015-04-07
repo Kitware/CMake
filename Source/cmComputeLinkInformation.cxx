@@ -411,6 +411,10 @@ cmComputeLinkInformation
     std::vector<std::string> const& dirs = this->Target->GetLinkDirectories();
     this->OldLinkDirMask.insert(dirs.begin(), dirs.end());
     }
+
+  this->CMP0060Warn =
+    this->Makefile->PolicyOptionalWarningEnabled(
+      "CMAKE_POLICY_WARNING_CMP0060");
 }
 
 //----------------------------------------------------------------------------
@@ -547,6 +551,22 @@ bool cmComputeLinkInformation::Compute()
 
   // Add implicit language runtime libraries and directories.
   this->AddImplicitLinkInfo();
+
+  if (!this->CMP0060WarnItems.empty())
+    {
+    std::ostringstream w;
+    w << (this->Makefile->GetCMakeInstance()->GetPolicies()
+          ->GetPolicyWarning(cmPolicies::CMP0060)) << "\n"
+      "Some library files are in directories implicitly searched by "
+      "the linker when invoked for " << this->LinkLanguage << ":\n"
+      " " << cmJoin(this->CMP0060WarnItems, "\n ") << "\n"
+      "For compatibility with older versions of CMake, the generated "
+      "link line will ask the linker to search for these by library "
+      "name."
+      ;
+    this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
+                                      this->Target->GetBacktrace());
+    }
 
   return true;
 }
@@ -1188,6 +1208,28 @@ bool cmComputeLinkInformation::CheckImplicitDirItem(std::string const& item)
   if(!this->ExtractAnyLibraryName.find(file))
     {
     return false;
+    }
+
+  // Check the policy for whether we should use the approach below.
+  switch (this->Target->GetPolicyStatusCMP0060())
+    {
+    case cmPolicies::WARN:
+      if (this->CMP0060Warn)
+        {
+        // Print the warning at most once for this item.
+        std::string const& wid = "CMP0060-WARNING-GIVEN-" + item;
+        if (!this->CMakeInstance->GetPropertyAsBool(wid))
+          {
+          this->CMakeInstance->SetProperty(wid, "1");
+          this->CMP0060WarnItems.insert(item);
+          }
+        }
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::NEW:
+      return false;
     }
 
   // Many system linkers support multiple architectures by
