@@ -592,6 +592,20 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 }
 
 //----------------------------------------------------------------------------
+
+static bool objectIdLessThan(cmXCodeObject* l, cmXCodeObject* r)
+{
+  return l->GetId() < r->GetId();
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::SortXCodeObjects()
+{
+  std::sort(this->XCodeObjects.begin(), this->XCodeObjects.end(),
+            objectIdLessThan);
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::ClearXCodeObjects()
 {
   this->TargetDoneSet.clear();
@@ -3713,6 +3727,8 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
                                           cmLocalGenerator* ,
                                           std::vector<cmLocalGenerator*>& )
 {
+  SortXCodeObjects();
+
   fout << "// !$*UTF8*$!\n";
   fout << "{\n";
   cmXCodeObject::Indent(1, fout);
