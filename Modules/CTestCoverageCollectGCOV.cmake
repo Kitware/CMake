@@ -198,6 +198,7 @@ ${label_files}
   execute_process(COMMAND
     ${CMAKE_COMMAND} -E tar ${tar_opts} ${GCOV_TARBALL}
     "--mtime=1970-01-01 0:0:0 UTC"
+    "--format=gnutar"
     --files-from=${coverage_dir}/coverage_file_list.txt
     WORKING_DIRECTORY ${binary_dir})
 endfunction()
