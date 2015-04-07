@@ -139,7 +139,11 @@ void cmXCodeObject::Print(std::ostream& out)
     else if(object->TypeValue == ATTRIBUTE_GROUP)
       {
       std::map<std::string, cmXCodeObject*>::iterator j;
-      out << i->first << " = {" << separator;
+      out << i->first << " = {";
+      if(separator == "\n")
+        {
+        out << separator;
+        }
       for(j = object->ObjectAttributes.begin(); j !=
             object->ObjectAttributes.end(); ++j)
         {
