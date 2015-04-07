@@ -81,7 +81,7 @@ void cmXCodeObject::Indent(int level, std::ostream& out)
 {
   while(level)
     {
-    out << "       ";
+    out << "\t";
     level--;
     }
 }
