@@ -3756,7 +3756,8 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
     cmXCodeObject::PrintList(this->XCodeObjects, fout);
     }
   cmXCodeObject::Indent(1, fout);
-  fout << "rootObject = " << this->RootObject->GetId() << ";\n";
+  fout << "rootObject = " << this->RootObject->GetId()
+       << " /* Project object */;\n";
   fout << "}\n";
 }
 
