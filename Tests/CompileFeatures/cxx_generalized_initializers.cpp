@@ -1,3 +1,6 @@
+#if defined(_MSC_VER) && _MSC_VER == 1800 && _MSC_FULL_VER < 180030723
+# error "VS 2013 safely supports this only with Update 3 or greater"
+#endif
 
 // Dummy implementation. Test only the compiler feature.
 namespace std {
@@ -7,8 +10,9 @@ namespace std {
   {
     const _E* __begin_;
     size_t    __size_;
-
-    initializer_list(const int*, long unsigned int) {}
+  public:
+    template <typename T1, typename T2>
+    initializer_list(T1, T2) {}
   };
 }
 

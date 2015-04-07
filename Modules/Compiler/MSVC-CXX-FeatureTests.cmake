@@ -16,12 +16,6 @@ set(_cmake_feature_test_cxx_decltype_auto "${MSVC_2015}")
 # says they will be available in the RTM.
 set(_cmake_feature_test_cxx_digit_separators "${MSVC_2015}")
 set(_cmake_feature_test_cxx_func_identifier "${MSVC_2015}")
-# http://blogs.msdn.com/b/vcblog/archive/2014/11/17/c-11-14-17-features-in-vs-2015-preview.aspx
-# Note 1. While previous version of VisualStudio said they supported these
-# they silently produced bad code, and are now marked as having partial
-# support in previous versions. The footnote says the support will be complete
-# in MSVC 2015, so support the feature for that version, assuming that is true.
-set(_cmake_feature_test_cxx_generalized_initializers "${MSVC_2015}")
 set(_cmake_feature_test_cxx_nonstatic_member_init "${MSVC_2015}")
 # Microsoft calls this 'rvalue references v3'
 set(_cmake_feature_test_cxx_defaulted_move_initializers "${MSVC_2015}")
@@ -43,6 +37,16 @@ set(_cmake_feature_test_cxx_reference_qualified_functions "${MSVC_2015}")
 # http://blogs.msdn.com/b/vcblog/archive/2014/11/17/c-11-14-17-features-in-vs-2015-preview.aspx
 # lists this as 'partial' in 2013
 set(_cmake_feature_test_cxx_deleted_functions "${MSVC_2015}")
+
+set(MSVC_2013_v30723 "_MSC_FULL_VER >= 180030723")
+# http://blogs.msdn.com/b/vcblog/archive/2014/11/17/c-11-14-17-features-in-vs-2015-preview.aspx
+# Note 1. While previous version of VisualStudio said they supported these
+# they silently produced bad code, and are now marked as having partial
+# support in previous versions. The footnote says the support will be complete
+# in MSVC 2015, so support the feature for that version, assuming that is true.
+# The blog post also says that VS 2013 Update 3 generates an error in cases
+# that previously produced bad code.
+set(_cmake_feature_test_cxx_generalized_initializers "${MSVC_2013_v30723}")
 
 set(MSVC_2013 "_MSC_VER >= 1800")
 set(_cmake_feature_test_cxx_alias_templates "${MSVC_2013}")
@@ -101,6 +105,7 @@ set(_cmake_feature_test_cxx_variadic_macros "${MSVC_2010}")
 # Unset all the variables that we don't need exposed.
 # _cmake_oldestSupported is required by WriteCompilerDetectionHeader
 set(MSVC_2015)
+set(MSVC_2013_v30723)
 set(MSVC_2013)
 set(MSVC_2012)
 set(MSVC_2010)
