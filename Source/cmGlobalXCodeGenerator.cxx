@@ -3386,7 +3386,7 @@ bool cmGlobalXCodeGenerator
     }
   configlist->AddAttribute("buildConfigurations", buildConfigurations);
 
-  std::string comment = "Build configuration list for PBXProject ";
+  std::string comment = "Build configuration list for PBXProject";
   comment += " \"";
   comment += this->CurrentProject;
   comment += "\"";
