@@ -15,7 +15,7 @@
 //----------------------------------------------------------------------
 cmCPackTGZGenerator::cmCPackTGZGenerator()
   :cmCPackArchiveGenerator(cmArchiveWrite::CompressGZip,
-                           cmArchiveWrite::TypeTAR)
+                           "paxr")
 {
 }
 

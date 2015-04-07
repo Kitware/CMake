@@ -395,7 +395,8 @@ public:
   static bool CreateTar(const char* outFileName,
                         const std::vector<std::string>& files,
                         cmTarCompression compressType, bool verbose,
-                        std::string const& mtime = std::string());
+                        std::string const& mtime = std::string(),
+                        std::string const& format = std::string());
   static bool ExtractTar(const char* inFileName, bool verbose);
   // This should be called first thing in main
   // it will keep child processes from inheriting the

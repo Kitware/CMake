@@ -27,10 +27,10 @@
 
 //----------------------------------------------------------------------
 cmCPackArchiveGenerator::cmCPackArchiveGenerator(cmArchiveWrite::Compress t,
-  cmArchiveWrite::Type at)
+  std::string const& format)
 {
   this->Compress = t;
-  this->Archive = at;
+  this->ArchiveFormat = format;
 }
 
 //----------------------------------------------------------------------
@@ -108,7 +108,7 @@ if (!GenerateHeader(&gf)) \
             << ">." << std::endl); \
     return 0; \
   } \
-cmArchiveWrite archive(gf,this->Compress, this->Archive); \
+cmArchiveWrite archive(gf,this->Compress, this->ArchiveFormat); \
 if (!archive) \
   { \
   cmCPackLogger(cmCPackLog::LOG_ERROR, "Problem to create archive < " \

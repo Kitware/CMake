@@ -215,6 +215,10 @@ Available commands are:
     names start in ``-``.
   ``--mtime=<date>``
     Specify modification time recorded in tarball entries.
+  ``--format=<format>``
+    Specify the format of the archive to be created.
+    Supported formats are: ``7zip``, ``gnutar``, ``pax``,
+    ``paxr`` (restricted pax, default), and ``zip``.
 
 ``time <command> [<args>...]``
   Run command and return elapsed time.
