@@ -51,14 +51,12 @@ void CCONV cmSetError(void *info, const char *err)
 unsigned int CCONV  cmGetCacheMajorVersion(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  cmCacheManager *manager = mf->GetCMakeInstance()->GetCacheManager();
-  return manager->GetCacheMajorVersion();
+  return mf->GetCacheMajorVersion();
 }
 unsigned int CCONV cmGetCacheMinorVersion(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  cmCacheManager *manager = mf->GetCMakeInstance()->GetCacheManager();
-  return manager->GetCacheMinorVersion();
+  return mf->GetCacheMinorVersion();
 }
 
 unsigned int CCONV cmGetMajorVersion(void *)

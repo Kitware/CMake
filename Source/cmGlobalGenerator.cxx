@@ -179,7 +179,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
     return;
     }
   const char* cname = this->GetCMakeInstance()->
-    GetCacheManager()->GetInitializedCacheValue(langComp);
+    GetCacheManager()->GetCacheValue(langComp);
   std::string changeVars;
   if(cname && !optional)
     {
@@ -1559,7 +1559,9 @@ void cmGlobalGenerator::CheckLocalGenerators()
            cmSystemTools::IsNOTFOUND(lib->first.c_str()))
           {
           std::string varName = lib->first.substr(0, lib->first.size()-9);
-          if(manager->GetCacheEntryPropertyAsBool(varName, "ADVANCED"))
+          cmCacheManager::CacheIterator it =
+            manager->GetCacheIterator(varName.c_str());
+          if(it.GetPropertyAsBool("ADVANCED"))
             {
             varName += " (ADVANCED)";
             }
@@ -1590,7 +1592,9 @@ void cmGlobalGenerator::CheckLocalGenerators()
             cmSystemTools::IsNOTFOUND(incDir->c_str()))
           {
           std::string varName = incDir->substr(0, incDir->size()-9);
-          if(manager->GetCacheEntryPropertyAsBool(varName, "ADVANCED"))
+          cmCacheManager::CacheIterator it =
+            manager->GetCacheIterator(varName.c_str());
+          if(it.GetPropertyAsBool("ADVANCED"))
             {
             varName += " (ADVANCED)";
             }
@@ -1637,7 +1641,7 @@ int cmGlobalGenerator::TryCompile(const std::string& srcdir,
   // and there is a good chance that the try compile stuff will
   // take the bulk of the time, so try and guess some progress
   // by getting closer and closer to 100 without actually getting there.
-  if (!this->CMakeInstance->GetCacheManager()->GetInitializedCacheValue
+  if (!this->CMakeInstance->GetCacheManager()->GetCacheValue
       ("CMAKE_NUMBER_OF_LOCAL_GENERATORS"))
     {
     // If CMAKE_NUMBER_OF_LOCAL_GENERATORS is not set
@@ -1835,7 +1839,7 @@ void cmGlobalGenerator::AddLocalGenerator(cmLocalGenerator *lg)
   // update progress
   // estimate how many lg there will be
   const char *numGenC =
-    this->CMakeInstance->GetCacheManager()->GetInitializedCacheValue
+    this->CMakeInstance->GetCacheManager()->GetCacheValue
     ("CMAKE_NUMBER_OF_LOCAL_GENERATORS");
 
   if (!numGenC)

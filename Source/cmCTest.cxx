@@ -2281,7 +2281,7 @@ bool cmCTest::AddVariableDefinition(const std::string &arg)
   std::string value;
   cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
 
-  if (cmake::ParseCacheEntry(arg, name, value, type))
+  if (cmCacheManager::ParseEntry(arg, name, value, type))
     {
     this->Definitions[name] = value;
     return true;

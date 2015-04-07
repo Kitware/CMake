@@ -391,10 +391,11 @@ bool cmGetPropertyCommand::HandleCacheMode()
     }
 
   const char* value = 0;
-  if(this->Makefile->GetCacheManager()->GetCacheEntryValue(this->Name))
+  cmCacheManager::CacheIterator it =
+    this->Makefile->GetCacheManager()->GetCacheIterator(this->Name.c_str());
+  if(!it.IsAtEnd())
     {
-    value = this->Makefile->GetCacheManager()
-                ->GetCacheEntryProperty(this->Name, this->PropertyName);
+    value = it.GetProperty(this->PropertyName);
     }
   this->StoreResult(value);
   return true;

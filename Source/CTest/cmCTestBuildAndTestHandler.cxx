@@ -18,6 +18,7 @@
 #include "cmGlobalGenerator.h"
 #include <cmsys/Process.h>
 #include "cmCTestTestHandler.h"
+#include "cmCacheManager.h"
 
 //----------------------------------------------------------------------
 cmCTestBuildAndTestHandler::cmCTestBuildAndTestHandler()
@@ -254,7 +255,7 @@ int cmCTestBuildAndTestHandler::RunCMakeAndTest(std::string* outstring)
     cm.SetGeneratorToolset(this->BuildGeneratorToolset);
 
     // Load the cache to make CMAKE_MAKE_PROGRAM available.
-    cm.LoadCache(this->BinaryDir);
+    cm.GetCacheManager()->LoadCache(this->BinaryDir);
     }
   else
     {

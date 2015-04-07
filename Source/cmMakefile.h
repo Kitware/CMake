@@ -62,6 +62,14 @@ class cmMakefile
   class Internals;
   cmsys::auto_ptr<Internals> Internal;
 public:
+  /**
+   * Return the major and minor version of the cmake that
+   * was used to write the currently loaded cache, note
+   * this method will not work before the cache is loaded.
+   */
+  unsigned int GetCacheMajorVersion() const;
+  unsigned int GetCacheMinorVersion() const;
+
   /* Check for unused variables in this scope */
   void CheckForUnusedVariables() const;
   /* Mark a variable as used */
