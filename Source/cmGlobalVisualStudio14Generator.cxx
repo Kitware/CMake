@@ -66,8 +66,11 @@ public:
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
     {
-    entry.Name = vs14generatorName;
-    entry.Brief = "Generates Visual Studio 14 (VS 2015) project files.";
+    entry.Name = std::string(vs14generatorName) + " [arch]";
+    entry.Brief =
+      "Generates Visual Studio 2015 project files.  "
+      "Optional [arch] can be \"Win64\" or \"ARM\"."
+      ;
     }
 
   virtual void GetGenerators(std::vector<std::string>& names) const

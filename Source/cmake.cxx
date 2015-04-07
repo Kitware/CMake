@@ -1817,23 +1817,23 @@ void cmake::AddDefaultGenerators()
 #if defined(_WIN32) && !defined(__CYGWIN__)
 # if !defined(CMAKE_BOOT_MINGW)
   this->Generators.push_back(
-    cmGlobalVisualStudio6Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio7Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio10Generator::NewFactory());
-  this->Generators.push_back(
-    cmGlobalVisualStudio11Generator::NewFactory());
+    cmGlobalVisualStudio14Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalVisualStudio12Generator::NewFactory());
   this->Generators.push_back(
-    cmGlobalVisualStudio14Generator::NewFactory());
+    cmGlobalVisualStudio11Generator::NewFactory());
   this->Generators.push_back(
-    cmGlobalVisualStudio71Generator::NewFactory());
+    cmGlobalVisualStudio10Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio9Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalVisualStudio8Generator::NewFactory());
   this->Generators.push_back(
-    cmGlobalVisualStudio9Generator::NewFactory());
+    cmGlobalVisualStudio71Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio7Generator::NewFactory());
+  this->Generators.push_back(
+    cmGlobalVisualStudio6Generator::NewFactory());
   this->Generators.push_back(
     cmGlobalBorlandMakefileGenerator::NewFactory());
   this->Generators.push_back(

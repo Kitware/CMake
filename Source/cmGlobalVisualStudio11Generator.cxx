@@ -78,8 +78,11 @@ public:
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const
     {
-    entry.Name = vs11generatorName;
-    entry.Brief = "Generates Visual Studio 11 (VS 2012) project files.";
+    entry.Name = std::string(vs11generatorName) + " [arch]";
+    entry.Brief =
+      "Generates Visual Studio 2012 project files.  "
+      "Optional [arch] can be \"Win64\" or \"ARM\"."
+      ;
     }
 
   virtual void GetGenerators(std::vector<std::string>& names) const
