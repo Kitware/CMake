@@ -328,31 +328,25 @@ int do_cmake(int ac, char const* const* av)
   int res = cm.Run(args, view_only);
   if ( list_cached || list_all_cached )
     {
+    cmCacheManager::CacheIterator it =
+      cm.GetCacheManager()->GetCacheIterator();
     std::cout << "-- Cache values" << std::endl;
-    std::vector<std::string> keys =
-        cm.GetCacheManager()->GetCacheEntryKeys();
-    for (std::vector<std::string>::const_iterator it = keys.begin();
-        it != keys.end(); ++it)
+    for ( it.Begin(); !it.IsAtEnd(); it.Next() )
       {
-      cmCacheManager::CacheEntryType t =
-          cm.GetCacheManager()->GetCacheEntryType(*it);
+      cmCacheManager::CacheEntryType t = it.GetType();
       if ( t != cmCacheManager::INTERNAL && t != cmCacheManager::STATIC &&
         t != cmCacheManager::UNINITIALIZED )
         {
-        const char* advancedProp =
-            cm.GetCacheManager()->GetCacheEntryProperty(*it, "ADVANCED");
-        if ( list_all_cached || !advancedProp)
+        bool advanced = it.PropertyExists("ADVANCED");
+        if ( list_all_cached || !advanced)
           {
           if ( list_help )
             {
-            std::cout << "// "
-                      << cm.GetCacheManager()->GetCacheEntryProperty(*it,
-                                                   "HELPSTRING") << std::endl;
+            std::cout << "// " << it.GetProperty("HELPSTRING") << std::endl;
             }
-          std::cout << *it << ":" <<
-            cmCacheManager::TypeToString(t)
-            << "=" << cm.GetCacheManager()->GetCacheEntryValue(*it)
-            << std::endl;
+          std::cout << it.GetName() << ":" <<
+            cmCacheManager::TypeToString(it.GetType())
+            << "=" << it.GetValue() << std::endl;
           if ( list_help )
             {
             std::cout << std::endl;

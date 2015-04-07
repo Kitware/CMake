@@ -42,16 +42,16 @@ bool cmOptionCommand
   std::string initialValue = "Off";
   // Now check and see if the value has been stored in the cache
   // already, if so use that value and don't look for the program
-  cmCacheManager* manager = this->Makefile->GetCacheManager();
-  const char* existingValue = manager->GetCacheEntryValue(args[0]);
-  if(existingValue)
+  cmCacheManager::CacheIterator it =
+    this->Makefile->GetCacheManager()->GetCacheIterator(args[0].c_str());
+  if(!it.IsAtEnd())
     {
-    if (manager->GetCacheEntryType(args[0]) != cmCacheManager::UNINITIALIZED)
+    if ( it.GetType() != cmCacheManager::UNINITIALIZED )
       {
-      manager->SetCacheEntryProperty(args[0], "HELPSTRING", args[1]);
+      it.SetProperty("HELPSTRING", args[1].c_str());
       return true;
       }
-    initialValue = existingValue;
+    initialValue = it.GetValue();
     }
   if(args.size() == 3)
     {

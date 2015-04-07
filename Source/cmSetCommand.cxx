@@ -136,10 +136,9 @@ bool cmSetCommand
     }
 
   // see if this is already in the cache
-  cmCacheManager* manager = this->Makefile->GetCacheManager();
-  const char* existingValue = manager->GetCacheEntryValue(variable);
-  if(existingValue &&
-      (manager->GetCacheEntryType(variable) != cmCacheManager::UNINITIALIZED))
+  cmCacheManager::CacheIterator it =
+    this->Makefile->GetCacheManager()->GetCacheIterator(variable);
+  if(!it.IsAtEnd() && (it.GetType() != cmCacheManager::UNINITIALIZED))
     {
     // if the set is trying to CACHE the value but the value
     // is already in the cache and the type is not internal

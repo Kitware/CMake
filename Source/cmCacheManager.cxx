@@ -283,16 +283,14 @@ bool cmCacheManager::LoadCache(const std::string& path,
     }
   this->CacheMajorVersion = 0;
   this->CacheMinorVersion = 0;
-  if(const char* cmajor =
-                  this->GetInitializedCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
+  if(const char* cmajor = this->GetCacheValue("CMAKE_CACHE_MAJOR_VERSION"))
     {
     unsigned int v=0;
     if(sscanf(cmajor, "%u", &v) == 1)
       {
       this->CacheMajorVersion = v;
       }
-    if(const char* cminor =
-                  this->GetInitializedCacheValue("CMAKE_CACHE_MINOR_VERSION"))
+    if(const char* cminor = this->GetCacheValue("CMAKE_CACHE_MINOR_VERSION"))
       {
       if(sscanf(cminor, "%u", &v) == 1)
         {
@@ -314,11 +312,10 @@ bool cmCacheManager::LoadCache(const std::string& path,
     }
   // check to make sure the cache directory has not
   // been moved
-  const char* oldDir = this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR");
-  if (internal && oldDir)
+  if ( internal && this->GetCacheValue("CMAKE_CACHEFILE_DIR") )
     {
     std::string currentcwd = path;
-    std::string oldcwd = oldDir;
+    std::string oldcwd = this->GetCacheValue("CMAKE_CACHEFILE_DIR");
     cmSystemTools::ConvertToUnixSlashes(currentcwd);
     currentcwd += "/CMakeCache.txt";
     oldcwd += "/CMakeCache.txt";
@@ -327,7 +324,7 @@ bool cmCacheManager::LoadCache(const std::string& path,
       std::string message =
         std::string("The current CMakeCache.txt directory ") +
         currentcwd + std::string(" is different than the directory ") +
-        std::string(this->GetInitializedCacheValue("CMAKE_CACHEFILE_DIR")) +
+        std::string(this->GetCacheValue("CMAKE_CACHEFILE_DIR")) +
         std::string(" where CMakeCache.txt was created. This may result "
                     "in binaries being created in the wrong place. If you "
                     "are not sure, reedit the CMakeCache.txt");
@@ -657,8 +654,7 @@ cmCacheManager::CacheIterator cmCacheManager::GetCacheIterator(
   return CacheIterator(*this, key);
 }
 
-const char*
-cmCacheManager::GetInitializedCacheValue(const std::string& key) const
+const char* cmCacheManager::GetCacheValue(const std::string& key) const
 {
   CacheEntryMap::const_iterator i = this->Cache.find(key);
   if(i != this->Cache.end() &&

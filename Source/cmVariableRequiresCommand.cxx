@@ -41,9 +41,9 @@ bool cmVariableRequiresCommand
       requirementsMet = false;
       notSet += args[i];
       notSet += "\n";
-      cmCacheManager* manager = this->Makefile->GetCacheManager();
-      if(manager->GetCacheEntryValue(args[i]) &&
-          manager->GetCacheEntryPropertyAsBool(args[i], "ADVANCED"))
+      cmCacheManager::CacheIterator it =
+        this->Makefile->GetCacheManager()->GetCacheIterator(args[i].c_str());
+      if(!it.IsAtEnd() && it.GetPropertyAsBool("ADVANCED"))
         {
         hasAdvanced = true;
         }

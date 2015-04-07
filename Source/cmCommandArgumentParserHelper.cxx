@@ -90,8 +90,7 @@ char* cmCommandArgumentParserHelper::ExpandSpecialVariable(const char* key,
     }
   if ( strcmp(key, "CACHE") == 0 )
     {
-    if(const char* c = this->Makefile->GetCacheManager()
-                           ->GetInitializedCacheValue(var))
+    if(const char* c = this->Makefile->GetCacheManager()->GetCacheValue(var))
       {
       if(this->EscapeQuotes)
         {
