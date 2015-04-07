@@ -91,13 +91,13 @@ void cmXCodeObject::Print(std::ostream& out)
 {
   std::string separator = "\n";
   int indentFactor = 1;
+  cmXCodeObject::Indent(2*indentFactor, out);
   if(this->Version > 15
      && (this->IsA == PBXFileReference || this->IsA == PBXBuildFile))
     {
     separator = " ";
     indentFactor = 0;
     }
-  cmXCodeObject::Indent(2*indentFactor, out);
   out << this->Id << " ";
   if(!(this->IsA == PBXGroup && this->Comment.size() == 0))
     {
