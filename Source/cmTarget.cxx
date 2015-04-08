@@ -442,6 +442,7 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   if(this->TargetTypeValue == cmTarget::EXECUTABLE)
     {
     this->SetPropertyDefault("ANDROID_GUI", 0);
+    this->SetPropertyDefault("CROSSCOMPILING_EMULATOR", 0);
     }
   if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY
       || this->TargetTypeValue == cmTarget::MODULE_LIBRARY)
