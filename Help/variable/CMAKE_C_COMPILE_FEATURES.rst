@@ -8,4 +8,4 @@ list is a subset of the features listed in the :prop_gbl:`CMAKE_C_KNOWN_FEATURES
 global property.
 
 See the :manual:`cmake-compile-features(7)` manual for information on
-compile features.
+compile features and a list of supported compilers.

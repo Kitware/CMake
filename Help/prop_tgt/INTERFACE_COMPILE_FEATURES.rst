@@ -9,4 +9,4 @@ INTERFACE_COMPILE_FEATURES
 .. include:: INTERFACE_BUILD_PROPERTY.txt
 
 See the :manual:`cmake-compile-features(7)` manual for information on compile
-features.
+features and a list of supported compilers.

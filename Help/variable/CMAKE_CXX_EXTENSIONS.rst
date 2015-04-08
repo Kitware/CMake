@@ -8,4 +8,4 @@ property on all targets.  See that target property for additional
 information.
 
 See the :manual:`cmake-compile-features(7)` manual for information on
-compile features.
+compile features and a list of supported compilers.
