@@ -211,4 +211,10 @@ ENDIF()
 
 ADD_LIBRARY(cmliblzma ${LZMA_SRCS})
 
+IF(CMAKE_C_COMPILER_ID STREQUAL "XL")
+  # Disable the XL compiler optimizer because it causes crashes
+  # and other bad behavior in liblzma code.
+  SET_PROPERTY(TARGET cmliblzma PROPERTY COMPILE_FLAGS "-qnooptimize")
+ENDIF()
+
 INSTALL(FILES COPYING DESTINATION ${CMAKE_DOC_DIR}/cmliblzma)
