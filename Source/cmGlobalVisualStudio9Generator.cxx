@@ -70,8 +70,11 @@ public:
   }
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
-    entry.Name = vs9generatorName;
-    entry.Brief = "Generates Visual Studio 9 2008 project files.";
+    entry.Name = std::string(vs9generatorName) + " [arch]";
+    entry.Brief =
+      "Generates Visual Studio 2008 project files.  "
+      "Optional [arch] can be \"Win64\" or \"IA64\"."
+      ;
   }
 
   virtual void GetGenerators(std::vector<std::string>& names) const {

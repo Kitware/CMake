@@ -204,7 +204,7 @@ void cmDocumentationFormatter
     if(!op->Name.empty())
       {
       os << "  " << op->Name;
-      this->TextIndent = "                                ";
+      this->TextIndent = "                                 ";
       int align = static_cast<int>(strlen(this->TextIndent))-4;
       for(int i = static_cast<int>(op->Name.size()); i < align; ++i)
         {
