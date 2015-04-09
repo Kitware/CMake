@@ -1261,6 +1261,19 @@ macro(CUDA_WRAP_SRCS cuda_target format generated_files)
     set(_cuda_nvcc_flags_config "${_cuda_nvcc_flags_config}\nset(CUDA_NVCC_FLAGS_${config_upper} ${CUDA_NVCC_FLAGS_${config_upper}} ;; ${CUDA_WRAP_OPTION_NVCC_FLAGS_${config_upper}})")
   endforeach()
 
+  # Process the C++11 flag.  If the host sets the flag, we need to add it to nvcc and
+  # remove it from the host. This is because -Xcompile -std=c++ will choke nvcc (it uses
+  # the C preprocessor).  In order to get this to work correctly, we need to use nvcc's
+  # specific c++11 flag.
+  if( "${_cuda_host_flags}" MATCHES "-std=c\\+\\+11")
+    # Add the c++11 flag to nvcc if it isn't already present.  Note that we only look at
+    # the main flag instead of the configuration specific flags.
+    if( NOT "${CUDA_NVCC_FLAGS}" MATCHES "-std;c\\+\\+11" )
+      list(APPEND nvcc_flags --std c++11)
+    endif()
+    string(REGEX REPLACE "[-]+std=c\\+\\+11" "" _cuda_host_flags "${_cuda_host_flags}")
+  endif()
+
   # Get the list of definitions from the directory property
   get_directory_property(CUDA_NVCC_DEFINITIONS COMPILE_DEFINITIONS)
   if(CUDA_NVCC_DEFINITIONS)
