@@ -65,7 +65,7 @@ public:
     void AppendProperty(const std::string& property, const char* value,
                         bool asString=false);
     void SetProperty(const std::string& property, bool value);
-    std::string GetValue() const { return this->GetEntry().Value; }
+    const char* GetValue() const { return this->GetEntry().Value.c_str(); }
     bool GetValueAsBool() const;
     void SetValue(const char*);
     CacheEntryType GetType() const { return this->GetEntry().Type; }
@@ -137,7 +137,82 @@ public:
                          CacheEntryType& type);
 
   ///! Get a value from the cache given a key
-  const char* GetCacheValue(const std::string& key) const;
+  const char* GetInitializedCacheValue(const std::string& key) const;
+
+  const char* GetCacheEntryValue(const std::string& key)
+  {
+    cmCacheManager::CacheIterator it = this->GetCacheIterator(key.c_str());
+    if (it.IsAtEnd())
+      {
+      return 0;
+      }
+    return it.GetValue();
+  }
+
+  const char* GetCacheEntryProperty(std::string const& key,
+                                    std::string const& propName)
+  {
+    return this->GetCacheIterator(key.c_str()).GetProperty(propName);
+  }
+
+  CacheEntryType GetCacheEntryType(std::string const& key)
+  {
+    return this->GetCacheIterator(key.c_str()).GetType();
+  }
+
+  bool GetCacheEntryPropertyAsBool(std::string const& key,
+                                   std::string const& propName)
+  {
+    return this->GetCacheIterator(key.c_str()).GetPropertyAsBool(propName);
+  }
+
+  void SetCacheEntryProperty(std::string const& key,
+                             std::string const& propName,
+                             std::string const& value)
+  {
+    this->GetCacheIterator(key.c_str()).SetProperty(propName, value.c_str());
+  }
+
+  void SetCacheEntryBoolProperty(std::string const& key,
+                                 std::string const& propName,
+                                 bool value)
+  {
+    this->GetCacheIterator(key.c_str()).SetProperty(propName, value);
+  }
+
+  void SetCacheEntryValue(std::string const& key,
+                          std::string const& value)
+  {
+    this->GetCacheIterator(key.c_str()).SetValue(value.c_str());
+  }
+
+  void RemoveCacheEntryProperty(std::string const& key,
+                                std::string const& propName)
+  {
+    this->GetCacheIterator(key.c_str()).SetProperty(propName, (void*)0);
+  }
+
+  void AppendCacheEntryProperty(std::string const& key,
+                                std::string const& propName,
+                                std::string const& value,
+                                bool asString = false)
+  {
+    this->GetCacheIterator(key.c_str()).AppendProperty(propName,
+                                                       value.c_str(),
+                                                       asString);
+  }
+
+  std::vector<std::string> GetCacheEntryKeys()
+  {
+    std::vector<std::string> definitions;
+    definitions.reserve(this->GetSize());
+    cmCacheManager::CacheIterator cit = this->GetCacheIterator();
+    for ( cit.Begin(); !cit.IsAtEnd(); cit.Next() )
+      {
+      definitions.push_back(cit.GetName());
+      }
+    return definitions;
+  }
 
   /** Get the version of CMake that wrote the cache.  */
   unsigned int GetCacheMajorVersion() const

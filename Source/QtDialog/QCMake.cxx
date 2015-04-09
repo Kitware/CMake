@@ -96,7 +96,7 @@ void QCMake::setBinaryDirectory(const QString& _dir)
     emit this->binaryDirChanged(this->BinaryDirectory);
     cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
     this->setGenerator(QString());
-    if(!this->CMakeInstance->GetCacheManager()->LoadCache(
+    if(!this->CMakeInstance->LoadCache(
       this->BinaryDirectory.toLocal8Bit().data()))
       {
       QDir testDir(this->BinaryDirectory);
@@ -110,16 +110,18 @@ void QCMake::setBinaryDirectory(const QString& _dir)
 
     QCMakePropertyList props = this->properties();
     emit this->propertiesChanged(props);
-    cmCacheManager::CacheIterator itm = cachem->NewIterator();
-    if ( itm.Find("CMAKE_HOME_DIRECTORY"))
+    const char* homeDir = cachem->GetCacheEntryValue("CMAKE_HOME_DIRECTORY");
+    if (homeDir)
       {
-      setSourceDirectory(QString::fromLocal8Bit(itm.GetValue().c_str()));
+      setSourceDirectory(QString::fromLocal8Bit(homeDir));
       }
-    if ( itm.Find("CMAKE_GENERATOR"))
+    const char* gen = cachem->GetCacheEntryValue("CMAKE_GENERATOR");
+    if (gen)
       {
-      const char* extraGen = cachem->GetCacheValue("CMAKE_EXTRA_GENERATOR");
+      const char* extraGen = cachem
+                        ->GetInitializedCacheValue("CMAKE_EXTRA_GENERATOR");
       std::string curGen = cmExternalMakefileProjectGenerator::
-        CreateFullGeneratorName(itm.GetValue(), extraGen? extraGen : "");
+        CreateFullGeneratorName(gen, extraGen? extraGen : "");
       this->setGenerator(QString::fromLocal8Bit(curGen.c_str()));
       }
     }
@@ -194,33 +196,35 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
 
   // set the value of properties
   cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
-  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
-      !i.IsAtEnd(); i.Next())
+  std::vector<std::string> cacheKeys = cachem->GetCacheEntryKeys();
+  for(std::vector<std::string>::const_iterator it = cacheKeys.begin();
+      it != cacheKeys.end(); ++it)
     {
-
-    if(i.GetType() == cmCacheManager::INTERNAL ||
-       i.GetType() == cmCacheManager::STATIC)
+    cmCacheManager::CacheEntryType t = cachem->GetCacheEntryType(*it);
+    if(t == cmCacheManager::INTERNAL ||
+       t == cmCacheManager::STATIC)
       {
       continue;
       }
 
     QCMakeProperty prop;
-    prop.Key = QString::fromLocal8Bit(i.GetName().c_str());
+    prop.Key = QString::fromLocal8Bit(it->c_str());
     int idx = props.indexOf(prop);
     if(idx == -1)
       {
-      toremove.append(QString::fromLocal8Bit(i.GetName().c_str()));
+      toremove.append(QString::fromLocal8Bit(it->c_str()));
       }
     else
       {
       prop = props[idx];
       if(prop.Value.type() == QVariant::Bool)
         {
-        i.SetValue(prop.Value.toBool() ? "ON" : "OFF");
+        cachem->SetCacheEntryValue(*it, prop.Value.toBool() ? "ON" : "OFF");
         }
       else
         {
-        i.SetValue(prop.Value.toString().toLocal8Bit().data());
+        cachem->SetCacheEntryValue(*it,
+                                   prop.Value.toString().toLocal8Bit().data());
         }
       props.removeAt(idx);
       }
@@ -270,7 +274,7 @@ void QCMake::setProperties(const QCMakePropertyList& newProps)
       }
     }
 
-  cachem->SaveCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->SaveCache(this->BinaryDirectory.toLocal8Bit().data());
 }
 
 QCMakePropertyList QCMake::properties() const
@@ -278,42 +282,47 @@ QCMakePropertyList QCMake::properties() const
   QCMakePropertyList ret;
 
   cmCacheManager *cachem = this->CMakeInstance->GetCacheManager();
-  for(cmCacheManager::CacheIterator i = cachem->NewIterator();
-      !i.IsAtEnd(); i.Next())
+  std::vector<std::string> cacheKeys = cachem->GetCacheEntryKeys();
+  for (std::vector<std::string>::const_iterator i = cacheKeys.begin();
+        i != cacheKeys.end(); ++i)
     {
-
-    if(i.GetType() == cmCacheManager::INTERNAL ||
-       i.GetType() == cmCacheManager::STATIC ||
-       i.GetType() == cmCacheManager::UNINITIALIZED)
+    cmCacheManager::CacheEntryType t = cachem->GetCacheEntryType(*i);
+    if(t == cmCacheManager::INTERNAL ||
+       t == cmCacheManager::STATIC ||
+       t == cmCacheManager::UNINITIALIZED)
       {
       continue;
       }
 
-    QCMakeProperty prop;
-    prop.Key = QString::fromLocal8Bit(i.GetName().c_str());
-    prop.Help = QString::fromLocal8Bit(i.GetProperty("HELPSTRING"));
-    prop.Value = QString::fromLocal8Bit(i.GetValue().c_str());
-    prop.Advanced = i.GetPropertyAsBool("ADVANCED");
+    const char* cachedValue = cachem->GetCacheEntryValue(*i);
 
-    if(i.GetType() == cmCacheManager::BOOL)
+    QCMakeProperty prop;
+    prop.Key = QString::fromLocal8Bit(i->c_str());
+    prop.Help = QString::fromLocal8Bit(
+                            cachem->GetCacheEntryProperty(*i, "HELPSTRING"));
+    prop.Value = QString::fromLocal8Bit(cachedValue);
+    prop.Advanced = cachem->GetCacheEntryPropertyAsBool(*i, "ADVANCED");
+    if(t == cmCacheManager::BOOL)
       {
       prop.Type = QCMakeProperty::BOOL;
-      prop.Value = cmSystemTools::IsOn(i.GetValue().c_str());
+      prop.Value = cmSystemTools::IsOn(cachedValue);
       }
-    else if(i.GetType() == cmCacheManager::PATH)
+    else if(t == cmCacheManager::PATH)
       {
       prop.Type = QCMakeProperty::PATH;
       }
-    else if(i.GetType() == cmCacheManager::FILEPATH)
+    else if(t == cmCacheManager::FILEPATH)
       {
       prop.Type = QCMakeProperty::FILEPATH;
       }
-    else if(i.GetType() == cmCacheManager::STRING)
+    else if(t == cmCacheManager::STRING)
       {
       prop.Type = QCMakeProperty::STRING;
-      if (i.PropertyExists("STRINGS"))
+      const char* stringsProperty =
+                                cachem->GetCacheEntryProperty(*i, "STRINGS");
+      if (stringsProperty)
         {
-        prop.Strings = QString::fromLocal8Bit(i.GetProperty("STRINGS")).split(";");
+        prop.Strings = QString::fromLocal8Bit(stringsProperty).split(";");
         }
       }
 
@@ -397,9 +406,9 @@ QStringList QCMake::availableGenerators() const
 void QCMake::deleteCache()
 {
   // delete cache
-  this->CMakeInstance->GetCacheManager()->DeleteCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->DeleteCache(this->BinaryDirectory.toLocal8Bit().data());
   // reload to make our cache empty
-  this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
   // emit no generator and no properties
   this->setGenerator(QString());
   QCMakePropertyList props = this->properties();
@@ -412,7 +421,7 @@ void QCMake::reloadCache()
   QCMakePropertyList props;
   emit this->propertiesChanged(props);
   // reload
-  this->CMakeInstance->GetCacheManager()->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
+  this->CMakeInstance->LoadCache(this->BinaryDirectory.toLocal8Bit().data());
   // emit new cache properties
   props = this->properties();
   emit this->propertiesChanged(props);

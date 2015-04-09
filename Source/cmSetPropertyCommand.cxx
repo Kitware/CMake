@@ -452,11 +452,11 @@ bool cmSetPropertyCommand::HandleCacheMode()
     // Get the source file.
     cmMakefile* mf = this->GetMakefile();
     cmake* cm = mf->GetCMakeInstance();
-    cmCacheManager::CacheIterator it =
-      cm->GetCacheManager()->GetCacheIterator(ni->c_str());
-    if(!it.IsAtEnd())
+    const char* existingValue
+                          = cm->GetCacheManager()->GetCacheEntryValue(*ni);
+    if(existingValue)
       {
-      if(!this->HandleCacheEntry(it))
+      if(!this->HandleCacheEntry(*ni))
         {
         return false;
         }
@@ -474,22 +474,25 @@ bool cmSetPropertyCommand::HandleCacheMode()
 }
 
 //----------------------------------------------------------------------------
-bool cmSetPropertyCommand::HandleCacheEntry(cmCacheManager::CacheIterator& it)
+bool cmSetPropertyCommand::HandleCacheEntry(std::string const& cacheKey)
 {
   // Set or append the property.
   const char* name = this->PropertyName.c_str();
   const char* value = this->PropertyValue.c_str();
+  cmCacheManager* manager = this->Makefile->GetCacheManager();
   if (this->Remove)
     {
-    value = 0;
+    manager->RemoveCacheEntryProperty(cacheKey, name);
+    return true;
     }
   if(this->AppendMode)
     {
-    it.AppendProperty(name, value, this->AppendAsString);
+    manager->AppendCacheEntryProperty(cacheKey, name, value,
+                                      this->AppendAsString);
     }
   else
     {
-    it.SetProperty(name, value);
+    manager->SetCacheEntryProperty(cacheKey, name, value);
     }
 
   return true;

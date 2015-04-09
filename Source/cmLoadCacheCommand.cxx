@@ -81,8 +81,8 @@ bool cmLoadCacheCommand
       {
       break;
       }
-    this->Makefile->GetCacheManager()->LoadCache(args[i], false,
-                                             excludes, includes);
+    this->Makefile->GetCMakeInstance()->LoadCache(args[i], false,
+                                                  excludes, includes);
     }
 
 
@@ -173,7 +173,7 @@ void cmLoadCacheCommand::CheckLine(const char* line)
   std::string var;
   std::string value;
   cmCacheManager::CacheEntryType type = cmCacheManager::UNINITIALIZED;
-  if(cmCacheManager::ParseEntry(line, var, value, type))
+  if(cmake::ParseCacheEntry(line, var, value, type))
     {
     // Found a real entry.  See if this one was requested.
     if(this->VariablesToRead.find(var) != this->VariablesToRead.end())

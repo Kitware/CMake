@@ -37,24 +37,19 @@ bool cmMarkAsAdvancedCommand
     {
     std::string variable = args[i];
     cmCacheManager* manager = this->Makefile->GetCacheManager();
-    cmCacheManager::CacheIterator it =
-      manager->GetCacheIterator(variable.c_str());
-    if ( it.IsAtEnd() )
+    if (!manager->GetCacheEntryValue(variable))
       {
-      this->Makefile->GetCacheManager()
-        ->AddCacheEntry(variable, 0, 0,
-          cmCacheManager::UNINITIALIZED);
+      manager->AddCacheEntry(variable, 0, 0, cmCacheManager::UNINITIALIZED);
       overwrite = true;
       }
-    it.Find(variable);
-    if ( it.IsAtEnd() )
+    if (!manager->GetCacheEntryValue(variable))
       {
       cmSystemTools::Error("This should never happen...");
       return false;
       }
-    if ( !it.PropertyExists("ADVANCED") || overwrite )
+    if (!manager->GetCacheEntryProperty(variable, "ADVANCED") || overwrite)
       {
-      it.SetProperty("ADVANCED", value);
+      manager->SetCacheEntryProperty(variable, "ADVANCED", value);
       }
     }
   return true;

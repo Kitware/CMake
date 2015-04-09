@@ -61,7 +61,7 @@ private:
   bool HandleTestMode();
   bool HandleTest(cmTest* test);
   bool HandleCacheMode();
-  bool HandleCacheEntry(cmCacheManager::CacheIterator&);
+  bool HandleCacheEntry(std::string const&);
   bool HandleInstallMode();
   bool HandleInstall(cmInstalledFile* file);
 };
