@@ -98,7 +98,7 @@ void cmXCodeObject::Print(std::ostream& out)
     separator = " ";
     indentFactor = 0;
     }
-  out << this->Id << " ";
+  out << this->Id;
   if(!(this->IsA == PBXGroup && this->Comment.size() == 0))
     {
     this->PrintComment(out);
@@ -129,7 +129,7 @@ void cmXCodeObject::Print(std::ostream& out)
       for(unsigned int k = 0; k < i->second->List.size(); k++)
         {
         cmXCodeObject::Indent(4*indentFactor, out);
-        out << i->second->List[k]->Id << " ";
+        out << i->second->List[k]->Id;
         i->second->List[k]->PrintComment(out);
         out << "," << separator;
         }
@@ -192,7 +192,6 @@ void cmXCodeObject::Print(std::ostream& out)
       out << " = " << object->Object->Id;
       if(object->Object->HasComment() && i->first != "remoteGlobalIDString")
         {
-        out << " ";
         object->Object->PrintComment(out);
         }
       out << ";" << separator;
