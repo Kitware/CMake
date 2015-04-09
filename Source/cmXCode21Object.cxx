@@ -31,6 +31,10 @@ void cmXCode21Object::PrintComment(std::ostream& out)
       cmSystemTools::ReplaceString(this->Comment, "\"", "");
       }
     }
+  if(this->Comment.empty())
+    {
+    return;
+    }
   out << " /* ";
   out << this->Comment;
   out << " */";

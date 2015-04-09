@@ -99,10 +99,7 @@ void cmXCodeObject::Print(std::ostream& out)
     indentFactor = 0;
     }
   out << this->Id;
-  if(!(this->IsA == PBXGroup && this->Comment.size() == 0))
-    {
-    this->PrintComment(out);
-    }
+  this->PrintComment(out);
   out << " = {";
   if(separator == "\n")
     {
