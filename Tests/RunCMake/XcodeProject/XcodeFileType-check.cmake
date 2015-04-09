@@ -1,6 +1,6 @@
 set(expect-default "explicitFileType = sourcecode")
-set(expect-explicit "explicitFileType = \"sourcecode.c.h\"")
-set(expect-lastKnown "lastKnownFileType = \"sourcecode.c.h\"")
+set(expect-explicit "explicitFileType = sourcecode.c.h")
+set(expect-lastKnown "lastKnownFileType = sourcecode.c.h")
 foreach(src default explicit lastKnown)
   file(STRINGS ${RunCMake_TEST_BINARY_DIR}/XcodeFileType.xcodeproj/project.pbxproj actual-${src}
        REGEX "PBXFileReference.*src-${src}")
