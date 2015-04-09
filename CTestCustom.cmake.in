@@ -53,6 +53,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "CMakeSetupManifest.xml.*manifest authoring warning.*Unrecognized Element"
   "cc-3968 CC: WARNING File.*" # "implicit" truncation by static_cast
   "ld: warning: directory not found for option .-(F|L)"
+  "ld: warning: ignoring file .*/libgcc.a, file was built for archive which is not the architecture being linked"
   "ld: warning: in .*/libgcc.a, file is not of required architecture"
   "warning.*This version of Mac OS X is unsupported"
   "clang.*: warning: argument unused during compilation: .-g"
