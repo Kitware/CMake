@@ -54,12 +54,18 @@ function(run_cmake test)
   if(RunCMake_MAKE_PROGRAM)
     list(APPEND RunCMake_TEST_OPTIONS "-DCMAKE_MAKE_PROGRAM=${RunCMake_MAKE_PROGRAM}")
   endif()
+  if(RunCMake_TEST_OUTPUT_MERGE)
+    set(actual_stderr_var actual_stdout)
+    set(actual_stderr "")
+  else()
+    set(actual_stderr_var actual_stderr)
+  endif()
   if(RunCMake_TEST_COMMAND)
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
       WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
       OUTPUT_VARIABLE actual_stdout
-      ERROR_VARIABLE actual_stderr
+      ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
       )
   else()
@@ -73,7 +79,7 @@ function(run_cmake test)
                 ${RunCMake_TEST_OPTIONS}
       WORKING_DIRECTORY "${RunCMake_TEST_BINARY_DIR}"
       OUTPUT_VARIABLE actual_stdout
-      ERROR_VARIABLE actual_stderr
+      ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
       )
   endif()

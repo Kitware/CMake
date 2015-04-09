@@ -605,6 +605,7 @@ have a .cmake file in this directory NOT show up in the modules
 documentation, simply leave out the ``Help/module/<module-name>.rst``
 file and the ``Help/manual/cmake-modules.7.rst`` toctree entry.
 
+.. _`Find Modules`:
 
 Find Modules
 ------------

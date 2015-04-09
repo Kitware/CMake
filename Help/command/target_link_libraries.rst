@@ -34,13 +34,19 @@ Each ``<item>`` may be:
   automatically be added in the build system to make sure the named
   library target is up-to-date before the ``<target>`` links.
 
+  If an imported library has the :prop_tgt:`IMPORTED_NO_SONAME`
+  target property set, CMake may ask the linker to search for
+  the library instead of using the full path
+  (e.g. ``/usr/lib/libfoo.so`` becomes ``-lfoo``).
+
 * **A full path to a library file**: The generated link line will
-  normally preserve the full path to the file.  However, there are
-  some cases where CMake must ask the linker to search for the library
-  (e.g. ``/usr/lib/libfoo.so`` becomes ``-lfoo``), such as when it
-  appears in a system library directory that the compiler front-end
-  may replace with an alternative.  Either way, the buildsystem will
+  normally preserve the full path to the file. The buildsystem will
   have a dependency to re-link ``<target>`` if the library file changes.
+
+  There are some cases where CMake may ask the linker to search for
+  the library (e.g. ``/usr/lib/libfoo.so`` becomes ``-lfoo``), such
+  as when a shared library is detected to have no ``SONAME`` field.
+  See policy :policy:`CMP0060` for discussion of another case.
 
   If the library file is in a Mac OSX framework, the ``Headers`` directory
   of the framework will also be processed as a
