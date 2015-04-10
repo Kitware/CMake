@@ -1,5 +1,22 @@
 include(RunCMake)
 
+run_cmake_command(NoArgs ${CMAKE_COMMAND})
+run_cmake_command(C-no-arg ${CMAKE_COMMAND} -C)
+run_cmake_command(C-no-file ${CMAKE_COMMAND} -C nosuchcachefile.txt)
+run_cmake_command(cache-no-file ${CMAKE_COMMAND} nosuchsubdir/CMakeCache.txt)
+run_cmake_command(lists-no-file ${CMAKE_COMMAND} nosuchsubdir/CMakeLists.txt)
+run_cmake_command(D-no-arg ${CMAKE_COMMAND} -D)
+run_cmake_command(U-no-arg ${CMAKE_COMMAND} -U)
+run_cmake_command(E-no-arg ${CMAKE_COMMAND} -E)
+run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
+run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
+run_cmake_command(E_touch_nocreate-no-arg ${CMAKE_COMMAND} -E touch_nocreate)
+
+run_cmake_command(G_no-arg ${CMAKE_COMMAND} -G)
+run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -G NoSuchGenerator)
+run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
+run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
+
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
 run_cmake_command(build-no-generator
@@ -24,6 +41,9 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
 endif()
 
 if(UNIX)
+  run_cmake_command(E_create_symlink-no-arg
+    ${CMAKE_COMMAND} -E create_symlink
+    )
   run_cmake_command(E_create_symlink-missing-dir
     ${CMAKE_COMMAND} -E create_symlink T missing-dir/L
     )
@@ -69,6 +89,26 @@ run_cmake(D_nested_cache)
 set(RunCMake_TEST_OPTIONS
   "-DFOO:STRING=-DBAR:BOOL=BAZ")
 run_cmake(D_typed_nested_cache)
+
+set(RunCMake_TEST_OPTIONS -Wno-dev)
+run_cmake(Wno-dev)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS -Wno-dev -Wdev)
+run_cmake(Wdev)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --debug-output)
+run_cmake(debug-output)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --trace)
+run_cmake(trace)
+unset(RunCMake_TEST_OPTIONS)
+
+set(RunCMake_TEST_OPTIONS --debug-trycompile)
+run_cmake(debug-trycompile)
+unset(RunCMake_TEST_OPTIONS)
 
 function(run_cmake_depends)
   set(RunCMake_TEST_SOURCE_DIR "${RunCMake_SOURCE_DIR}/cmake_depends")
