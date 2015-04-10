@@ -1215,15 +1215,22 @@ bool SystemTools::PathCygwinToWin32(const char *path, char *win32_path)
 
 bool SystemTools::Touch(const kwsys_stl::string& filename, bool create)
 {
-  if(create && !SystemTools::FileExists(filename))
+  if (!SystemTools::FileExists(filename))
     {
-    FILE* file = Fopen(filename, "a+b");
-    if(file)
+    if(create)
       {
-      fclose(file);
+      FILE* file = Fopen(filename, "a+b");
+      if(file)
+        {
+        fclose(file);
+        return true;
+        }
+      return false;
+      }
+    else
+      {
       return true;
       }
-    return false;
     }
 #if defined(_WIN32) && !defined(__CYGWIN__)
   HANDLE h = CreateFileW(
