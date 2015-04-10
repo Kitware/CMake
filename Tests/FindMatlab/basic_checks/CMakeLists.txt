@@ -24,7 +24,7 @@ matlab_add_mex(
 
 matlab_add_unit_test(
     NAME ${PROJECT_NAME}_matlabtest-1
-    TIMEOUT 30
+    TIMEOUT 90
     UNITTEST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/../cmake_matlab_unit_tests1.m
     ADDITIONAL_PATH $<TARGET_FILE_DIR:cmake_matlab_test_wrapper1>
     )
