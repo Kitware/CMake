@@ -42,6 +42,11 @@ list(APPEND _cmake_options "-DTEST_LINK_DEPENDS=${TEST_LINK_DEPENDS}")
 
 list(APPEND _cmake_options "-DCMAKE_FORCE_DEPFILES=1")
 
+if(NOT CMAKE_GENERATOR MATCHES "Visual Studio ([^6789]|[6789][0-9])")
+  set(TEST_MULTI3 1)
+  list(APPEND _cmake_options "-DTEST_MULTI3=1")
+endif()
+
 file(MAKE_DIRECTORY ${BuildDepends_BINARY_DIR}/Project)
 message("Creating Project/foo.cxx")
 write_file(${BuildDepends_BINARY_DIR}/Project/foo.cxx
@@ -66,6 +71,8 @@ set(link_depends_no_shared_check_txt ${BuildDepends_BINARY_DIR}/Project/link_dep
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external original\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi1-in.txt "multi1-in original\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi2-stamp.txt "multi2-stamp original\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi3-stamp.txt "multi3-stamp original\n")
 
 help_xcode_depends()
 
@@ -191,6 +198,34 @@ else()
     "multi1-out2-copy.txt is missing")
 endif()
 
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi2-real.txt)
+  if(${BuildDepends_BINARY_DIR}/Project/multi2-real.txt
+      IS_NEWER_THAN ${BuildDepends_BINARY_DIR}/Project/multi2-stamp.txt)
+    message(STATUS "multi2-real.txt is newer than multi2-stamp.txt")
+  else()
+    message(SEND_ERROR "Project did not initially build properly: "
+      "multi2-real.txt is not newer than multi2-stamp.txt")
+  endif()
+else()
+  message(SEND_ERROR "Project did not initially build properly: "
+    "multi2-real.txt is missing")
+endif()
+
+if(TEST_MULTI3)
+  if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi3-real.txt)
+    if(${BuildDepends_BINARY_DIR}/Project/multi3-real.txt
+        IS_NEWER_THAN ${BuildDepends_BINARY_DIR}/Project/multi3-stamp.txt)
+      message(STATUS "multi3-real.txt is newer than multi3-stamp.txt")
+    else()
+      message(SEND_ERROR "Project did not initially build properly: "
+        "multi3-real.txt is not newer than multi3-stamp.txt")
+    endif()
+  else()
+    message(SEND_ERROR "Project did not initially build properly: "
+      "multi3-real.txt is missing")
+  endif()
+endif()
+
 message("Waiting 3 seconds...")
 execute_process(COMMAND ${CMAKE_COMMAND} -E sleep 3)
 
@@ -217,6 +252,8 @@ endif()
 
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/external.in "external changed\n")
 file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi1-in.txt "multi1-in changed\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi2-stamp.txt "multi2-stamp changed\n")
+file(WRITE ${BuildDepends_BINARY_DIR}/Project/multi3-stamp.txt "multi3-stamp changed\n")
 
 help_xcode_depends()
 
@@ -346,4 +383,32 @@ if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi1-out2-copy.txt)
 else()
   message(SEND_ERROR "Project did not rebuild properly: "
     "multi1-out2-copy.txt is missing")
+endif()
+
+if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi2-real.txt)
+  if(${BuildDepends_BINARY_DIR}/Project/multi2-real.txt
+      IS_NEWER_THAN ${BuildDepends_BINARY_DIR}/Project/multi2-stamp.txt)
+    message(STATUS "multi2-real.txt is newer than multi2-stamp.txt")
+  else()
+    message(SEND_ERROR "Project did not rebuild properly: "
+      "multi2-real.txt is not newer than multi2-stamp.txt")
+  endif()
+else()
+  message(SEND_ERROR "Project did not rebuild properly: "
+    "multi2-real.txt is missing")
+endif()
+
+if(TEST_MULTI3)
+  if(EXISTS ${BuildDepends_BINARY_DIR}/Project/multi3-real.txt)
+    if(${BuildDepends_BINARY_DIR}/Project/multi3-real.txt
+        IS_NEWER_THAN ${BuildDepends_BINARY_DIR}/Project/multi3-stamp.txt)
+      message(STATUS "multi3-real.txt is newer than multi3-stamp.txt")
+    else()
+      message(SEND_ERROR "Project did not rebuild properly: "
+        "multi3-real.txt is not newer than multi3-stamp.txt")
+    endif()
+  else()
+    message(SEND_ERROR "Project did not rebuild properly: "
+      "multi3-real.txt is missing")
+  endif()
 endif()

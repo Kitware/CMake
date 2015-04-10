@@ -767,7 +767,7 @@ cmMakefileTargetGenerator
 
   // Write the rule.
   this->WriteMakeRule(*this->BuildFileStream, 0, outputs,
-                      depends, commands, false);
+                      depends, commands);
 
   bool do_preprocess_rules = lang_has_preprocessor &&
     this->LocalGenerator->GetCreatePreprocessedSourceRules();
@@ -989,18 +989,30 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
 }
 
 //----------------------------------------------------------------------------
-void cmMakefileTargetGenerator::WriteMakeRule(
+bool cmMakefileTargetGenerator::WriteMakeRule(
   std::ostream& os,
   const char* comment,
   const std::vector<std::string>& outputs,
   const std::vector<std::string>& depends,
   const std::vector<std::string>& commands,
-  bool symbolic,
   bool in_help)
 {
+  bool symbolic = false;
   if (outputs.size() == 0)
     {
-    return;
+    return symbolic;
+    }
+
+  // Check whether we need to bother checking for a symbolic output.
+  bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();
+
+  // Check whether the first output is marked as symbolic.
+  if(need_symbolic)
+    {
+    if(cmSourceFile* sf = this->Makefile->GetSource(outputs[0]))
+      {
+      symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+      }
     }
 
   // We always attach the actual commands to the first output.
@@ -1010,7 +1022,7 @@ void cmMakefileTargetGenerator::WriteMakeRule(
   // For single outputs, we are done.
   if (outputs.size() == 1)
     {
-    return;
+    return symbolic;
     }
 
   // For multiple outputs, make the extra ones depend on the first one.
@@ -1023,14 +1035,25 @@ void cmMakefileTargetGenerator::WriteMakeRule(
     std::string const out = this->Convert(*o, cmLocalGenerator::HOME_OUTPUT,
                                           cmLocalGenerator::SHELL);
     std::vector<std::string> output_commands;
-    if (!symbolic)
+
+    bool o_symbolic = false;
+    if(need_symbolic)
+      {
+      if(cmSourceFile* sf = this->Makefile->GetSource(*o))
+        {
+        o_symbolic = sf->GetPropertyAsBool("SYMBOLIC");
+        }
+      }
+    symbolic = symbolic && o_symbolic;
+
+    if (!o_symbolic)
       {
       output_commands.push_back("@$(CMAKE_COMMAND) -E touch_nocreate " + out);
       }
     this->LocalGenerator->WriteMakeRule(os, 0, *o, output_depends,
-                                        output_commands, symbolic, in_help);
+                                        output_commands, o_symbolic, in_help);
 
-    if (!symbolic)
+    if (!o_symbolic)
       {
       // At build time, remove the first output if this one does not exist
       // so that "make" will rerun the real commands that create this one.
@@ -1038,6 +1061,7 @@ void cmMakefileTargetGenerator::WriteMakeRule(
       this->MultipleOutputPairs.insert(p);
       }
     }
+  return symbolic;
 }
 
 //----------------------------------------------------------------------------
@@ -1289,30 +1313,16 @@ void cmMakefileTargetGenerator
   std::vector<std::string> depends;
   this->LocalGenerator->AppendCustomDepend(depends, ccg);
 
-  // Check whether we need to bother checking for a symbolic output.
-  bool need_symbolic = this->GlobalGenerator->GetNeedSymbolicMark();
-
   // Write the rule.
   const std::vector<std::string>& outputs = ccg.GetOutputs();
-  std::vector<std::string>::const_iterator o = outputs.begin();
-  {
-  bool symbolic = false;
-  if(need_symbolic)
-    {
-    if(cmSourceFile* sf = this->Makefile->GetSource(*o))
-      {
-      symbolic = sf->GetPropertyAsBool("SYMBOLIC");
-      }
-    }
-  this->WriteMakeRule(*this->BuildFileStream, 0, outputs,
-                      depends, commands, symbolic);
+  bool symbolic = this->WriteMakeRule(*this->BuildFileStream, 0,
+                                      outputs, depends, commands);
 
   // If the rule has changed make sure the output is rebuilt.
   if(!symbolic)
     {
     this->GlobalGenerator->AddRuleHash(ccg.GetOutputs(), content.str());
     }
-  }
 
   // Setup implicit dependency scanning.
   for(cmCustomCommand::ImplicitDependsList::const_iterator
