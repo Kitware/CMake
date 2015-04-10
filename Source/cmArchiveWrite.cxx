@@ -79,11 +79,12 @@ struct cmArchiveWrite::Callback
 };
 
 //----------------------------------------------------------------------------
-cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
-  Stream(os),
-  Archive(archive_write_new()),
-  Disk(archive_read_disk_new()),
-  Verbose(false)
+cmArchiveWrite::cmArchiveWrite(
+  std::ostream& os, Compress c, std::string const& format):
+    Stream(os),
+    Archive(archive_write_new()),
+    Disk(archive_read_disk_new()),
+    Verbose(false)
 {
   switch (c)
     {
@@ -141,35 +142,16 @@ cmArchiveWrite::cmArchiveWrite(std::ostream& os, Compress c, Type t):
     {
     this->Error = "archive_read_disk_set_standard_lookup: ";
     this->Error += cm_archive_error_string(this->Archive);
-    return;;
+    return;
     }
 #endif
-  switch (t)
+
+  if(archive_write_set_format_by_name(this->Archive, format.c_str())
+    != ARCHIVE_OK)
     {
-    case TypeZIP:
-      if(archive_write_set_format_zip(this->Archive) != ARCHIVE_OK)
-        {
-        this->Error = "archive_write_set_format_zip: ";
-        this->Error += cm_archive_error_string(this->Archive);
-        return;
-        }
-      break;
-    case TypeTAR:
-      if(archive_write_set_format_pax_restricted(this->Archive) != ARCHIVE_OK)
-        {
-        this->Error = "archive_write_set_format_pax_restricted: ";
-        this->Error += cm_archive_error_string(this->Archive);
-        return;
-        }
-      break;
-    case Type7Zip:
-      if(archive_write_set_format_7zip(this->Archive) != ARCHIVE_OK)
-        {
-        this->Error = "archive_write_set_format_7zip: ";
-        this->Error += cm_archive_error_string(this->Archive);
-        return;
-        }
-      break;
+    this->Error = "archive_write_set_format_by_name: ";
+    this->Error += cm_archive_error_string(this->Archive);
+    return;
     }
 
   // do not pad the last block!!
