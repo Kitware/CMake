@@ -75,6 +75,7 @@ set(CUDA_NVCC_FLAGS @CUDA_NVCC_FLAGS@ ;; @CUDA_WRAP_OPTION_NVCC_FLAGS@) # list
 set(nvcc_flags @nvcc_flags@) # list
 set(CUDA_NVCC_INCLUDE_ARGS "@CUDA_NVCC_INCLUDE_ARGS@") # list (needs to be in quotes to handle spaces properly).
 set(format_flag "@format_flag@") # string
+set(cuda_language_flag @cuda_language_flag@) # list
 
 if(build_cubin AND NOT generated_cubin_file)
   message(FATAL_ERROR "You must specify generated_cubin_file on the command line")
@@ -238,6 +239,7 @@ cuda_execute_process(
   "Generating ${generated_file}"
   COMMAND "${CUDA_NVCC_EXECUTABLE}"
   "${source_file}"
+  ${cuda_language_flag}
   ${format_flag} -o "${generated_file}"
   ${CCBIN}
   ${nvcc_flags}
