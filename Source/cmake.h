@@ -24,7 +24,6 @@ class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
-class cmCommand;
 class cmVariableWatch;
 class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
@@ -215,21 +214,6 @@ class cmake
    * Get the system information and write it to the file specified
    */
   int GetSystemInformation(std::vector<std::string>&);
-
-  /**
-   * Add a command to this cmake instance
-   */
-  void AddCommand(cmCommand* );
-  void RenameCommand(const std::string& oldName, const std::string& newName);
-  void RemoveUnscriptableCommands();
-
-  /**
-   * Get a command by its name
-   */
-  cmCommand *GetCommand(const std::string& name) const;
-
-  /** Check if a command exists. */
-  bool CommandExists(const std::string& name) const;
 
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&,

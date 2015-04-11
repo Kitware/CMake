@@ -199,32 +199,6 @@ void cmake::CleanupCommandsAndMacros()
   this->State->RemoveUserDefinedCommands();
 }
 
-bool cmake::CommandExists(const std::string& name) const
-{
-  return this->State->GetCommand(name) ? true : false;
-}
-
-cmCommand *cmake::GetCommand(const std::string& name) const
-{
-  return this->State->GetCommand(name);
-}
-
-void cmake::RenameCommand(const std::string& oldName,
-                          const std::string& newName)
-{
-  this->State->RenameCommand(oldName, newName);
-}
-
-void cmake::AddCommand(cmCommand* command)
-{
-  this->State->AddCommand(command);
-}
-
-void cmake::RemoveUnscriptableCommands()
-{
-  this->State->RemoveUnscriptableCommands();
-}
-
 // Parse the args
 bool cmake::SetCacheArgs(const std::vector<std::string>& args)
 {
