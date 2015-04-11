@@ -21,9 +21,23 @@ class cmCommand;
 
 class cmState
 {
+  typedef std::vector<std::string>::size_type PositionType;
+  friend class Snapshot;
 public:
   cmState(cmake* cm);
   ~cmState();
+
+  class Snapshot {
+  public:
+    Snapshot(cmState* state = 0, PositionType position = 0);
+
+  private:
+    friend class cmState;
+    cmState* State;
+    cmState::PositionType Position;
+  };
+
+  Snapshot CreateSnapshot(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };
@@ -106,6 +120,7 @@ private:
   std::map<std::string, cmCommand*> Commands;
   cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
+  std::vector<PositionType> ParentPositions;
   std::string SourceDirectory;
   std::string BinaryDirectory;
   bool IsInTryCompile;

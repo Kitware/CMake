@@ -22,6 +22,7 @@ cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
     IsInTryCompile(false)
 {
+  this->CreateSnapshot(Snapshot());
   this->Initialize();
 }
 
@@ -465,4 +466,18 @@ void cmState::SetBinaryDirectory(std::string const& binaryDirectory)
 const char* cmState::GetBinaryDirectory() const
 {
   return this->BinaryDirectory.c_str();
+}
+
+cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
+{
+  PositionType pos = this->ParentPositions.size();
+  this->ParentPositions.push_back(originSnapshot.Position);
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot::Snapshot(cmState* state, PositionType position)
+  : State(state),
+  Position(position)
+{
+
 }

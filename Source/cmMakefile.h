@@ -922,7 +922,7 @@ private:
   cmMakefile& operator=(const cmMakefile& mf);
   void Initialize();
 
-
+  cmState::Snapshot StateSnapshot;
 
   bool ReadListFileInternal(const char* filenametoread,
                             bool noPolicyScope,

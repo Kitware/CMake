@@ -54,7 +54,10 @@ public:
 
 // default is not to be building executables
 cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
-  : Internal(new Internals)
+  : Internal(new Internals),
+    LocalGenerator(localGenerator),
+    StateSnapshot(localGenerator->GetGlobalGenerator()
+                                ->GetCMakeInstance()->GetState())
 {
   const cmDefinitions& defs = cmDefinitions();
   const std::set<std::string> globalKeys = defs.LocalKeys();
@@ -62,6 +65,19 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->Internal->VarInitStack.push(globalKeys);
   this->Internal->VarUsageStack.push(globalKeys);
   this->Internal->IsSourceFileTryCompile = false;
+
+  if (this->LocalGenerator->GetParent())
+    {
+    cmMakefile* parentMf = this->LocalGenerator->GetParent()->GetMakefile();
+    this->StateSnapshot =
+        this->GetState()->CreateSnapshot(parentMf->StateSnapshot);
+    }
+  else
+    {
+    this->StateSnapshot =
+        this->GetState()->CreateSnapshot(this->StateSnapshot);
+    }
+
 
   // Initialize these first since AddDefaultDefinitions calls AddDefinition
   this->WarnUnused = false;
