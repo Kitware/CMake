@@ -222,8 +222,7 @@ void cmake::CleanupCommandsAndMacros()
 
 bool cmake::CommandExists(const std::string& name) const
 {
-  std::string sName = cmSystemTools::LowerCase(name);
-  return (this->Commands.find(sName) != this->Commands.end());
+  return this->GetCommand(name) ? true : false;
 }
 
 cmCommand *cmake::GetCommand(const std::string& name) const
