@@ -2283,24 +2283,12 @@ bool cmake::IsPropertyChained(const std::string& name,
 
 void cmake::SetProperty(const std::string& prop, const char* value)
 {
-  // Special hook to invalidate cached value.
-  if(prop == "DEBUG_CONFIGURATIONS")
-    {
-    this->DebugConfigs.clear();
-    }
-
   this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
 }
 
 void cmake::AppendProperty(const std::string& prop,
                            const char* value, bool asString)
 {
-  // Special hook to invalidate cached value.
-  if(prop == "DEBUG_CONFIGURATIONS")
-    {
-    this->DebugConfigs.clear();
-    }
-
   this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL, asString);
 }
 
@@ -2758,27 +2746,24 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> const& cmake::GetDebugConfigs()
+std::vector<std::string> cmake::GetDebugConfigs()
 {
-  // Compute on-demand.
-  if(this->DebugConfigs.empty())
+  std::vector<std::string> configs;
+  if(const char* config_list = this->GetProperty("DEBUG_CONFIGURATIONS"))
     {
-    if(const char* config_list = this->GetProperty("DEBUG_CONFIGURATIONS"))
-      {
-      // Expand the specified list and convert to upper-case.
-      cmSystemTools::ExpandListArgument(config_list, this->DebugConfigs);
-      std::transform(this->DebugConfigs.begin(),
-                     this->DebugConfigs.end(),
-                     this->DebugConfigs.begin(),
-                     cmSystemTools::UpperCase);
-      }
-    // If no configurations were specified, use a default list.
-    if(this->DebugConfigs.empty())
-      {
-      this->DebugConfigs.push_back("DEBUG");
-      }
+    // Expand the specified list and convert to upper-case.
+    cmSystemTools::ExpandListArgument(config_list, configs);
+    std::transform(configs.begin(),
+                   configs.end(),
+                   configs.begin(),
+                   cmSystemTools::UpperCase);
     }
-  return this->DebugConfigs;
+  // If no configurations were specified, use a default list.
+  if(configs.empty())
+    {
+    configs.push_back("DEBUG");
+    }
+  return configs;
 }
 
 

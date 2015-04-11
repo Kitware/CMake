@@ -359,7 +359,7 @@ class cmake
 
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/
-  std::vector<std::string> const& GetDebugConfigs();
+  std::vector<std::string> GetDebugConfigs();
 
   void SetCMakeEditCommand(std::string const& s)
     { this->CMakeEditCommand = s; }
@@ -469,7 +469,6 @@ private:
   bool DebugTryCompile;
   cmFileTimeComparison* FileComparison;
   std::string GraphVizFile;
-  std::vector<std::string> DebugConfigs;
   InstalledFilesMap InstalledFiles;
 
   void UpdateConversionPathTable();
