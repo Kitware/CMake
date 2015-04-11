@@ -249,9 +249,6 @@ class cmake
    */
   cmCommand *GetCommand(const std::string& name);
 
-  /** Get list of all commands */
-  RegisteredCommandsMap* GetCommands() { return &this->Commands; }
-
   /** Check if a command exists. */
   bool CommandExists(const std::string& name) const;
 

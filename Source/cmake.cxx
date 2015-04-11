@@ -290,9 +290,9 @@ void cmake::AddCommand(cmCommand* wg)
 void cmake::RemoveUnscriptableCommands()
 {
   std::vector<std::string> unscriptableCommands;
-  cmake::RegisteredCommandsMap* commands = this->GetCommands();
-  for (cmake::RegisteredCommandsMap::const_iterator pos = commands->begin();
-       pos != commands->end();
+  for (cmake::RegisteredCommandsMap::const_iterator
+       pos = this->Commands.begin();
+       pos != this->Commands.end();
        ++pos)
     {
     if (!pos->second->IsScriptable())
@@ -2323,8 +2323,8 @@ const char *cmake::GetProperty(const std::string& prop,
   else if ( prop == "COMMANDS" )
     {
     cmake::RegisteredCommandsMap::iterator cmds
-        = this->GetCommands()->begin();
-    for (unsigned int cc=0 ; cmds != this->GetCommands()->end(); ++ cmds )
+        = this->Commands.begin();
+    for (unsigned int cc=0 ; cmds != this->Commands.end(); ++ cmds )
       {
       if ( cc > 0 )
         {
