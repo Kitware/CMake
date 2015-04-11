@@ -244,12 +244,6 @@ void cmMakefile::Print() const
 #endif
 }
 
-bool cmMakefile::CommandExists(const char* name) const
-{
-  return this->GetCMakeInstance()->CommandExists(name);
-}
-
-
 //----------------------------------------------------------------------------
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
@@ -340,7 +334,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   static_cast<void>(stack_manager);
 
   // Lookup the command prototype.
-  if(cmCommand* proto = this->GetCMakeInstance()->GetCommand(name))
+  if(cmCommand* proto = this->GetState()->GetCommand(name))
     {
     // Clone the prototype.
     cmsys::auto_ptr<cmCommand> pcmd(proto->Clone());
@@ -716,11 +710,6 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         return;
       }
     }
-}
-
-void cmMakefile::AddCommand(cmCommand* wg)
-{
-  this->GetCMakeInstance()->AddCommand(wg);
 }
 
 // Set the make file

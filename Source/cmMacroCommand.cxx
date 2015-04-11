@@ -232,9 +232,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       f->Functions = this->Functions;
       mf.RecordPolicies(f->Policies);
       std::string newName = "_" + this->Args[0];
-      mf.GetCMakeInstance()->RenameCommand(this->Args[0],
-                                           newName);
-      mf.AddCommand(f);
+      mf.GetState()->RenameCommand(this->Args[0], newName);
+      mf.GetState()->AddCommand(f);
 
       // remove the function blocker now that the macro is defined
       mf.RemoveFunctionBlocker(this, lff);

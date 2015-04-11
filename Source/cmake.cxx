@@ -1758,7 +1758,7 @@ void cmake::AddDefaultCommands()
   for(std::vector<cmCommand*>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    this->AddCommand(*i);
+    this->State->AddCommand(*i);
     }
 }
 

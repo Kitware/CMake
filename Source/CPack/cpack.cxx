@@ -198,7 +198,7 @@ int main (int argc, char const* const* argv)
     "Read CPack config file: " << cpackConfigFile << std::endl);
 
   cmake cminst;
-  cminst.RemoveUnscriptableCommands();
+  cminst.GetState()->RemoveUnscriptableCommands();
   cmGlobalGenerator cmgg;
   cmgg.SetCMakeInstance(&cminst);
   cmsys::auto_ptr<cmLocalGenerator> cmlg(cmgg.CreateLocalGenerator());
