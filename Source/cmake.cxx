@@ -257,7 +257,7 @@ void cmake::RenameCommand(const std::string& oldName,
     delete pos->second;
     this->Commands.erase(pos);
     }
-  this->Commands.insert(RegisteredCommandsMap::value_type(sNewName, cmd));
+  this->Commands.insert(std::make_pair(sNewName, cmd));
   pos = this->Commands.find(sOldName);
   this->Commands.erase(pos);
 }
@@ -283,7 +283,7 @@ void cmake::AddCommand(cmCommand* wg)
     delete pos->second;
     this->Commands.erase(pos);
     }
-  this->Commands.insert( RegisteredCommandsMap::value_type(name, wg));
+  this->Commands.insert(std::make_pair(name, wg));
 }
 
 
