@@ -2343,14 +2343,9 @@ const char *cmake::GetProperty(const std::string& prop,
     }
   else if ( prop == "ENABLED_LANGUAGES" )
     {
-    std::string lang;
-    if(this->GlobalGenerator)
-      {
-      std::vector<std::string> enLangs;
-      this->GlobalGenerator->GetEnabledLanguages(enLangs);
-      lang = cmJoin(enLangs, ";");
-      }
-    this->SetProperty("ENABLED_LANGUAGES", lang.c_str());
+    std::string langs;
+    langs = cmJoin(this->State->GetEnabledLanguages(), ";");
+    this->SetProperty("ENABLED_LANGUAGES", langs.c_str());
     }
 #define STRING_LIST_ELEMENT(F) ";" #F
   if (prop == "CMAKE_C_KNOWN_FEATURES")
