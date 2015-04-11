@@ -179,7 +179,6 @@ cmake::~cmake()
     delete this->GlobalGenerator;
     this->GlobalGenerator = 0;
     }
-  cmDeleteAll(this->Commands);
   cmDeleteAll(this->Generators);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete this->VariableWatch;
@@ -197,94 +196,33 @@ void cmake::InitializeProperties()
 void cmake::CleanupCommandsAndMacros()
 {
   this->InitializeProperties();
-  for(RegisteredCommandsMap::iterator j = this->Commands.begin();
-      j != this->Commands.end(); )
-    {
-    if (j->second->IsA("cmMacroHelperCommand") ||
-        j->second->IsA("cmFunctionHelperCommand"))
-      {
-      delete j->second;
-      this->Commands.erase(j++);
-      }
-    else
-      {
-      ++j;
-      }
-    }
+  this->State->RemoveUserDefinedCommands();
 }
 
 bool cmake::CommandExists(const std::string& name) const
 {
-  return this->GetCommand(name) ? true : false;
+  return this->State->GetCommand(name) ? true : false;
 }
 
 cmCommand *cmake::GetCommand(const std::string& name) const
 {
-  cmCommand* command = 0;
-  std::string sName = cmSystemTools::LowerCase(name);
-  RegisteredCommandsMap::const_iterator pos = this->Commands.find(sName);
-  if (pos != this->Commands.end())
-    {
-    command = (*pos).second;
-    }
-  return command;
+  return this->State->GetCommand(name);
 }
 
 void cmake::RenameCommand(const std::string& oldName,
                           const std::string& newName)
 {
-  // if the command already exists, free the old one
-  std::string sOldName = cmSystemTools::LowerCase(oldName);
-  RegisteredCommandsMap::iterator pos = this->Commands.find(sOldName);
-  if ( pos == this->Commands.end() )
-    {
-    return;
-    }
-  std::string sNewName = cmSystemTools::LowerCase(newName);
-  cmCommand* cmd = pos->second;
-
-  pos = this->Commands.find(sNewName);
-  if (pos != this->Commands.end())
-    {
-    delete pos->second;
-    this->Commands.erase(pos);
-    }
-  this->Commands.insert(std::make_pair(sNewName, cmd));
-  pos = this->Commands.find(sOldName);
-  this->Commands.erase(pos);
+  this->State->RenameCommand(oldName, newName);
 }
 
 void cmake::AddCommand(cmCommand* command)
 {
-  std::string name = cmSystemTools::LowerCase(command->GetName());
-  // if the command already exists, free the old one
-  RegisteredCommandsMap::iterator pos = this->Commands.find(name);
-  if (pos != this->Commands.end())
-    {
-    delete pos->second;
-    this->Commands.erase(pos);
-    }
-  this->Commands.insert(std::make_pair(name, command));
+  this->State->AddCommand(command);
 }
-
 
 void cmake::RemoveUnscriptableCommands()
 {
-  std::vector<std::string> unscriptableCommands;
-  for (cmake::RegisteredCommandsMap::iterator
-       pos = this->Commands.begin();
-       pos != this->Commands.end(); )
-    {
-    if (!pos->second->IsScriptable())
-      {
-      delete pos->second;
-      this->Commands.erase(pos++);
-      }
-    else
-      {
-      ++pos;
-      }
-    }
+  this->State->RemoveUnscriptableCommands();
 }
 
 // Parse the args
@@ -2301,18 +2239,8 @@ const char *cmake::GetProperty(const std::string& prop,
     }
   else if ( prop == "COMMANDS" )
     {
-    cmake::RegisteredCommandsMap::iterator cmds
-        = this->Commands.begin();
-    for (unsigned int cc=0 ; cmds != this->Commands.end(); ++ cmds )
-      {
-      if ( cc > 0 )
-        {
-        output += ";";
-        }
-      output += cmds->first.c_str();
-      cc++;
-      }
-    this->SetProperty("COMMANDS",output.c_str());
+    std::vector<std::string> commands = this->State->GetCommandNames();
+    this->SetProperty("COMMANDS", cmJoin(commands, ";").c_str());
     }
   else if ( prop == "IN_TRY_COMPILE" )
     {

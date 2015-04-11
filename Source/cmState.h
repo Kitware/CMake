@@ -16,11 +16,13 @@
 #include "cmPropertyDefinitionMap.h"
 
 class cmake;
+class cmCommand;
 
 class cmState
 {
 public:
   cmState(cmake* cm);
+  ~cmState();
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };
@@ -79,9 +81,17 @@ public:
   bool GetIsInTryCompile() const;
   void SetIsInTryCompile(bool b);
 
+  cmCommand* GetCommand(std::string const& name) const;
+  void AddCommand(cmCommand* command);
+  void RemoveUnscriptableCommands();
+  void RenameCommand(std::string const& oldName, std::string const& newName);
+  void RemoveUserDefinedCommands();
+  std::vector<std::string> GetCommandNames() const;
+
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
+  std::map<std::string, cmCommand*> Commands;
   cmake* CMakeInstance;
   bool IsInTryCompile;
 };

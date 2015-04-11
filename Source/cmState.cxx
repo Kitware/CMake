@@ -13,11 +13,20 @@
 
 #include "cmake.h"
 #include "cmCacheManager.h"
+#include "cmCommand.h"
+#include "cmAlgorithms.h"
+
+#include <assert.h>
 
 cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
     IsInTryCompile(false)
 {
+}
+
+cmState::~cmState()
+{
+  cmDeleteAll(this->Commands);
 }
 
 const char* cmCacheEntryTypes[] =
@@ -273,4 +282,105 @@ bool cmState::GetIsInTryCompile() const
 void cmState::SetIsInTryCompile(bool b)
 {
   this->IsInTryCompile = b;
+}
+
+void cmState::RenameCommand(std::string const& oldName,
+                            std::string const& newName)
+{
+  // if the command already exists, free the old one
+  std::string sOldName = cmSystemTools::LowerCase(oldName);
+  std::string sNewName = cmSystemTools::LowerCase(newName);
+  std::map<std::string, cmCommand*>::iterator pos =
+      this->Commands.find(sOldName);
+  if ( pos == this->Commands.end() )
+    {
+    return;
+    }
+  cmCommand* cmd = pos->second;
+
+  pos = this->Commands.find(sNewName);
+  if (pos != this->Commands.end())
+    {
+    delete pos->second;
+    this->Commands.erase(pos);
+    }
+  this->Commands.insert(std::make_pair(sNewName, cmd));
+  pos = this->Commands.find(sOldName);
+  this->Commands.erase(pos);
+}
+
+void cmState::AddCommand(cmCommand* command)
+{
+  std::string name = cmSystemTools::LowerCase(command->GetName());
+  // if the command already exists, free the old one
+  std::map<std::string, cmCommand*>::iterator pos = this->Commands.find(name);
+  if (pos != this->Commands.end())
+    {
+    delete pos->second;
+    this->Commands.erase(pos);
+    }
+  this->Commands.insert(std::make_pair(name, command));
+}
+
+void cmState::RemoveUnscriptableCommands()
+{
+  std::vector<std::string> unscriptableCommands;
+  for (std::map<std::string, cmCommand*>::iterator
+       pos = this->Commands.begin();
+       pos != this->Commands.end(); )
+    {
+    if (!pos->second->IsScriptable())
+      {
+      delete pos->second;
+      this->Commands.erase(pos++);
+      }
+    else
+      {
+      ++pos;
+      }
+    }
+}
+
+cmCommand* cmState::GetCommand(std::string const& name) const
+{
+  cmCommand* command = 0;
+  std::string sName = cmSystemTools::LowerCase(name);
+  std::map<std::string, cmCommand*>::const_iterator pos =
+      this->Commands.find(sName);
+  if (pos != this->Commands.end())
+    {
+    command = (*pos).second;
+    }
+  return command;
+}
+
+std::vector<std::string> cmState::GetCommandNames() const
+{
+  std::vector<std::string> commandNames;
+  commandNames.reserve(this->Commands.size());
+  std::map<std::string, cmCommand*>::const_iterator cmds
+      = this->Commands.begin();
+  for ( ; cmds != this->Commands.end(); ++ cmds )
+    {
+    commandNames.push_back(cmds->first);
+    }
+  return commandNames;
+}
+
+void cmState::RemoveUserDefinedCommands()
+{
+  for(std::map<std::string, cmCommand*>::iterator j = this->Commands.begin();
+      j != this->Commands.end(); )
+    {
+    if (j->second->IsA("cmMacroHelperCommand") ||
+        j->second->IsA("cmFunctionHelperCommand"))
+      {
+      delete j->second;
+      this->Commands.erase(j++);
+      }
+    else
+      {
+      ++j;
+      }
+    }
 }

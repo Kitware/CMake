@@ -93,7 +93,6 @@ class cmake
      */
     FIND_PACKAGE_MODE
   };
-  typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
@@ -362,7 +361,6 @@ protected:
   typedef std::map<std::string,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
   typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
-  RegisteredCommandsMap Commands;
   RegisteredGeneratorsVector Generators;
   RegisteredExtraGeneratorsMap ExtraGenerators;
   void AddDefaultCommands();
