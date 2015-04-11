@@ -1530,11 +1530,7 @@ int cmake::ActualConfigure()
   if (!this->InTryCompile)
     {
     this->GlobalGenerator->ClearEnabledLanguages();
-    }
 
-  // Truncate log files
-  if (!this->InTryCompile)
-    {
     this->TruncateOutputLog("CMakeOutput.log");
     this->TruncateOutputLog("CMakeError.log");
     }
