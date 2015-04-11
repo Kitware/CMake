@@ -257,10 +257,8 @@ class cmake
                bool directoriesSetBefore = false);
 
   ///! Is this cmake running as a result of a TRY_COMPILE command
-  bool GetIsInTryCompile() { return this->InTryCompile; }
-
-  ///! Is this cmake running as a result of a TRY_COMPILE command
-  void SetIsInTryCompile(bool i) { this->InTryCompile = i; }
+  bool GetIsInTryCompile() const;
+  void SetIsInTryCompile(bool b);
 
   ///! Parse command line arguments that might set cache values
   bool SetCacheArgs(const std::vector<std::string>&);

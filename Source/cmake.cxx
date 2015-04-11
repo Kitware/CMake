@@ -1935,6 +1935,16 @@ void cmake::UpdateProgress(const char *msg, float prog)
     }
 }
 
+bool cmake::GetIsInTryCompile() const
+{
+  return this->InTryCompile;
+}
+
+void cmake::SetIsInTryCompile(bool b)
+{
+  this->InTryCompile = b;
+}
+
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
 {
   for(RegisteredGeneratorsVector::const_iterator i =
