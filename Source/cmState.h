@@ -14,6 +14,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmPropertyDefinitionMap.h"
+#include "cmPropertyMap.h"
 
 class cmake;
 class cmCommand;
@@ -88,10 +89,17 @@ public:
   void RemoveUserDefinedCommands();
   std::vector<std::string> GetCommandNames() const;
 
+  void SetGlobalProperty(const std::string& prop, const char *value);
+  void AppendGlobalProperty(const std::string& prop,
+                      const char *value,bool asString=false);
+  const char *GetGlobalProperty(const std::string& prop);
+  bool GetGlobalPropertyAsBool(const std::string& prop);
+
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, cmCommand*> Commands;
+  cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
   bool IsInTryCompile;
 };

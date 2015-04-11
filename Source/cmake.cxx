@@ -188,8 +188,6 @@ cmake::~cmake()
 
 void cmake::InitializeProperties()
 {
-  this->Properties.clear();
-
   this->State->Initialize();
 }
 
@@ -2187,52 +2185,18 @@ void cmake::GenerateGraphViz(const char* fileName) const
 
 void cmake::SetProperty(const std::string& prop, const char* value)
 {
-  this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
+  this->State->SetGlobalProperty(prop, value);
 }
 
 void cmake::AppendProperty(const std::string& prop,
                            const char* value, bool asString)
 {
-  this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL, asString);
+  this->State->AppendGlobalProperty(prop, value, asString);
 }
 
 const char *cmake::GetProperty(const std::string& prop)
 {
-  // watch for special properties
-  std::string output = "";
-  if ( prop == "CACHE_VARIABLES" )
-    {
-    std::vector<std::string> cacheKeys = this->State->GetCacheEntryKeys();
-    this->SetProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
-    }
-  else if ( prop == "COMMANDS" )
-    {
-    std::vector<std::string> commands = this->State->GetCommandNames();
-    this->SetProperty("COMMANDS", cmJoin(commands, ";").c_str());
-    }
-  else if ( prop == "IN_TRY_COMPILE" )
-    {
-    this->SetProperty("IN_TRY_COMPILE",
-                      this->State->GetIsInTryCompile() ? "1" : "0");
-    }
-  else if ( prop == "ENABLED_LANGUAGES" )
-    {
-    std::string langs;
-    langs = cmJoin(this->State->GetEnabledLanguages(), ";");
-    this->SetProperty("ENABLED_LANGUAGES", langs.c_str());
-    }
-#define STRING_LIST_ELEMENT(F) ";" #F
-  if (prop == "CMAKE_C_KNOWN_FEATURES")
-    {
-    return FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT) + 1;
-    }
-  if (prop == "CMAKE_CXX_KNOWN_FEATURES")
-    {
-    return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
-    }
-#undef STRING_LIST_ELEMENT
-  bool dummy = false;
-  return this->Properties.GetPropertyValue(prop, cmProperty::GLOBAL, dummy);
+  return this->State->GetGlobalProperty(prop);
 }
 
 bool cmake::GetPropertyAsBool(const std::string& prop)

@@ -15,7 +15,6 @@
 
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
-#include "cmPropertyMap.h"
 #include "cmInstalledFile.h"
 #include "cmCacheManager.h"
 #include "cmState.h"
@@ -336,7 +335,6 @@ protected:
   void RunCheckForUnusedVariables();
   void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
-  cmPropertyMap Properties;
 
   typedef
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();

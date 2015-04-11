@@ -191,6 +191,8 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
 
 void cmState::Initialize()
 {
+  this->GlobalProperties.clear();
+
   this->PropertyDefinitions.clear();
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -383,4 +385,61 @@ void cmState::RemoveUserDefinedCommands()
       ++j;
       }
     }
+}
+
+void cmState::SetGlobalProperty(const std::string& prop, const char* value)
+{
+  this->GlobalProperties.SetProperty(prop, value, cmProperty::GLOBAL);
+}
+
+void cmState::AppendGlobalProperty(const std::string& prop,
+                                   const char* value, bool asString)
+{
+  this->GlobalProperties.AppendProperty(prop, value,
+                                        cmProperty::GLOBAL, asString);
+}
+
+const char *cmState::GetGlobalProperty(const std::string& prop)
+{
+  // watch for special properties
+  std::string output = "";
+  if ( prop == "CACHE_VARIABLES" )
+    {
+    std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
+    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
+    }
+  else if ( prop == "COMMANDS" )
+    {
+    std::vector<std::string> commands = this->GetCommandNames();
+    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str());
+    }
+  else if ( prop == "IN_TRY_COMPILE" )
+    {
+    this->SetGlobalProperty("IN_TRY_COMPILE",
+                      this->IsInTryCompile ? "1" : "0");
+    }
+  else if ( prop == "ENABLED_LANGUAGES" )
+    {
+    std::string langs;
+    langs = cmJoin(this->EnabledLanguages, ";");
+    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str());
+    }
+#define STRING_LIST_ELEMENT(F) ";" #F
+  if (prop == "CMAKE_C_KNOWN_FEATURES")
+    {
+    return FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT) + 1;
+    }
+  if (prop == "CMAKE_CXX_KNOWN_FEATURES")
+    {
+    return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
+    }
+#undef STRING_LIST_ELEMENT
+  bool dummy = false;
+  return this->GlobalProperties.GetPropertyValue(prop, cmProperty::GLOBAL,
+                                                 dummy);
+}
+
+bool cmState::GetGlobalPropertyAsBool(const std::string& prop)
+{
+  return cmSystemTools::IsOn(this->GetGlobalProperty(prop));
 }
