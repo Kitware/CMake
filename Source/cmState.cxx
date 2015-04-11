@@ -236,3 +236,30 @@ bool cmState::IsPropertyChained(const std::string& name,
 {
   return this->PropertyDefinitions[scope].IsPropertyChained(name);
 }
+
+void cmState::SetLanguageEnabled(std::string const& l)
+{
+  std::vector<std::string>::iterator it =
+      std::lower_bound(this->EnabledLanguages.begin(),
+                       this->EnabledLanguages.end(), l);
+  if (it == this->EnabledLanguages.end() || *it != l)
+    {
+    this->EnabledLanguages.insert(it, l);
+    }
+}
+
+bool cmState::GetLanguageEnabled(std::string const& l) const
+{
+  return std::binary_search(this->EnabledLanguages.begin(),
+                            this->EnabledLanguages.end(), l);
+}
+
+std::vector<std::string> cmState::GetEnabledLanguages() const
+{
+  return this->EnabledLanguages;
+}
+
+void cmState::ClearEnabledLanguages()
+{
+  this->EnabledLanguages.clear();
+}

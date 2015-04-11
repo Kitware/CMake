@@ -71,10 +71,14 @@ public:
   bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
   bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
 
+  void SetLanguageEnabled(std::string const& l);
+  bool GetLanguageEnabled(std::string const& l) const;
+  std::vector<std::string> GetEnabledLanguages() const;
+  void ClearEnabledLanguages();
 
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
-
+  std::vector<std::string> EnabledLanguages;
   cmake* CMakeInstance;
 };
 

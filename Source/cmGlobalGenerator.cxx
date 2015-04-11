@@ -969,13 +969,7 @@ void cmGlobalGenerator::SetLanguageEnabled(const std::string& l,
 void cmGlobalGenerator::SetLanguageEnabledFlag(const std::string& l,
                                                cmMakefile* mf)
 {
-  std::vector<std::string>::iterator it =
-      std::lower_bound(this->LanguageEnabled.begin(),
-                       this->LanguageEnabled.end(), l);
-  if (it == this->LanguageEnabled.end() || *it != l)
-    {
-    this->LanguageEnabled.insert(it, l);
-    }
+  this->CMakeInstance->GetState()->SetLanguageEnabled(l);
 
   // Fill the language-to-extension map with the current variable
   // settings to make sure it is available for the try_compile()
@@ -1086,13 +1080,12 @@ bool cmGlobalGenerator::IgnoreFile(const char* ext) const
 
 bool cmGlobalGenerator::GetLanguageEnabled(const std::string& l) const
 {
-  return std::binary_search(this->LanguageEnabled.begin(),
-                            this->LanguageEnabled.end(), l);
+  return this->CMakeInstance->GetState()->GetLanguageEnabled(l);
 }
 
 void cmGlobalGenerator::ClearEnabledLanguages()
 {
-  this->LanguageEnabled.clear();
+  return this->CMakeInstance->GetState()->ClearEnabledLanguages();
 }
 
 void cmGlobalGenerator::Configure()
@@ -1966,7 +1959,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 void
 cmGlobalGenerator::GetEnabledLanguages(std::vector<std::string>& lang) const
 {
-  lang = this->LanguageEnabled;
+  lang = this->CMakeInstance->GetState()->GetEnabledLanguages();
 }
 
 int cmGlobalGenerator::GetLinkerPreference(const std::string& lang) const
