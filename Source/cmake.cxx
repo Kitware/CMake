@@ -228,14 +228,14 @@ bool cmake::CommandExists(const std::string& name) const
 
 cmCommand *cmake::GetCommand(const std::string& name) const
 {
-  cmCommand* rm = 0;
+  cmCommand* command = 0;
   std::string sName = cmSystemTools::LowerCase(name);
   RegisteredCommandsMap::const_iterator pos = this->Commands.find(sName);
   if (pos != this->Commands.end())
     {
-    rm = (*pos).second;
+    command = (*pos).second;
     }
-  return rm;
+  return command;
 }
 
 void cmake::RenameCommand(const std::string& oldName,
@@ -273,9 +273,9 @@ void cmake::RemoveCommand(const std::string& name)
     }
 }
 
-void cmake::AddCommand(cmCommand* wg)
+void cmake::AddCommand(cmCommand* command)
 {
-  std::string name = cmSystemTools::LowerCase(wg->GetName());
+  std::string name = cmSystemTools::LowerCase(command->GetName());
   // if the command already exists, free the old one
   RegisteredCommandsMap::iterator pos = this->Commands.find(name);
   if (pos != this->Commands.end())
@@ -283,7 +283,7 @@ void cmake::AddCommand(cmCommand* wg)
     delete pos->second;
     this->Commands.erase(pos);
     }
-  this->Commands.insert(std::make_pair(name, wg));
+  this->Commands.insert(std::make_pair(name, command));
 }
 
 
