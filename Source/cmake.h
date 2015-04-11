@@ -247,7 +247,7 @@ class cmake
   /**
    * Get a command by its name
    */
-  cmCommand *GetCommand(const std::string& name);
+  cmCommand *GetCommand(const std::string& name) const;
 
   /** Check if a command exists. */
   bool CommandExists(const std::string& name) const;

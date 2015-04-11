@@ -226,11 +226,11 @@ bool cmake::CommandExists(const std::string& name) const
   return (this->Commands.find(sName) != this->Commands.end());
 }
 
-cmCommand *cmake::GetCommand(const std::string& name)
+cmCommand *cmake::GetCommand(const std::string& name) const
 {
   cmCommand* rm = 0;
   std::string sName = cmSystemTools::LowerCase(name);
-  RegisteredCommandsMap::iterator pos = this->Commands.find(sName);
+  RegisteredCommandsMap::const_iterator pos = this->Commands.find(sName);
   if (pos != this->Commands.end())
     {
     rm = (*pos).second;
