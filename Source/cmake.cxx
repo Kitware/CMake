@@ -243,12 +243,12 @@ void cmake::RenameCommand(const std::string& oldName,
 {
   // if the command already exists, free the old one
   std::string sOldName = cmSystemTools::LowerCase(oldName);
-  std::string sNewName = cmSystemTools::LowerCase(newName);
   RegisteredCommandsMap::iterator pos = this->Commands.find(sOldName);
   if ( pos == this->Commands.end() )
     {
     return;
     }
+  std::string sNewName = cmSystemTools::LowerCase(newName);
   cmCommand* cmd = pos->second;
 
   pos = this->Commands.find(sNewName);
