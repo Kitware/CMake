@@ -151,7 +151,6 @@ cmake::cmake()
 #endif
 
   this->Verbose = false;
-  this->InTryCompile = false;
   this->CacheManager = new cmCacheManager(this);
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
@@ -1272,7 +1271,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
   this->SetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
-  if(this->GetIsInTryCompile())
+  if(this->State->GetIsInTryCompile())
     {
     return 0;
     }
@@ -1555,7 +1554,7 @@ int cmake::ActualConfigure()
   // reset any system configuration information, except for when we are
   // InTryCompile. With TryCompile the system info is taken from the parent's
   // info to save time
-  if (!this->InTryCompile)
+  if (!this->State->GetIsInTryCompile())
     {
     this->GlobalGenerator->ClearEnabledLanguages();
 
@@ -1958,7 +1957,7 @@ void cmake::SetProgressCallback(ProgressCallbackType f, void *cd)
 
 void cmake::UpdateProgress(const char *msg, float prog)
 {
-  if(this->ProgressCallback && !this->InTryCompile)
+  if(this->ProgressCallback && !this->State->GetIsInTryCompile())
     {
     (*this->ProgressCallback)(msg, prog, this->ProgressCallbackClientData);
     return;
@@ -1967,12 +1966,12 @@ void cmake::UpdateProgress(const char *msg, float prog)
 
 bool cmake::GetIsInTryCompile() const
 {
-  return this->InTryCompile;
+  return this->State->GetIsInTryCompile();
 }
 
 void cmake::SetIsInTryCompile(bool b)
 {
-  this->InTryCompile = b;
+  this->State->SetIsInTryCompile(b);
 }
 
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
@@ -2339,7 +2338,7 @@ const char *cmake::GetProperty(const std::string& prop,
   else if ( prop == "IN_TRY_COMPILE" )
     {
     this->SetProperty("IN_TRY_COMPILE",
-                      this->GetIsInTryCompile()? "1":"0");
+                      this->State->GetIsInTryCompile() ? "1" : "0");
     }
   else if ( prop == "ENABLED_LANGUAGES" )
     {

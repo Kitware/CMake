@@ -76,10 +76,14 @@ public:
   std::vector<std::string> GetEnabledLanguages() const;
   void ClearEnabledLanguages();
 
+  bool GetIsInTryCompile() const;
+  void SetIsInTryCompile(bool b);
+
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   cmake* CMakeInstance;
+  bool IsInTryCompile;
 };
 
 #endif

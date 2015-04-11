@@ -15,7 +15,8 @@
 #include "cmCacheManager.h"
 
 cmState::cmState(cmake* cm)
-  : CMakeInstance(cm)
+  : CMakeInstance(cm),
+    IsInTryCompile(false)
 {
 }
 
@@ -262,4 +263,14 @@ std::vector<std::string> cmState::GetEnabledLanguages() const
 void cmState::ClearEnabledLanguages()
 {
   this->EnabledLanguages.clear();
+}
+
+bool cmState::GetIsInTryCompile() const
+{
+  return this->IsInTryCompile;
+}
+
+void cmState::SetIsInTryCompile(bool b)
+{
+  this->IsInTryCompile = b;
 }
