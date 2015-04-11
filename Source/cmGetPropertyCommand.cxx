@@ -237,7 +237,8 @@ bool cmGetPropertyCommand::HandleGlobalMode()
 
   // Get the property.
   cmake* cm = this->Makefile->GetCMakeInstance();
-  return this->StoreResult(cm->GetProperty(this->PropertyName));
+  return this->StoreResult(cm->GetState()
+             ->GetGlobalProperty(this->PropertyName));
 }
 
 //----------------------------------------------------------------------------

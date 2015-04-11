@@ -4239,7 +4239,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
       return this->LocalGenerator->GetParent()->GetMakefile()->
         GetProperty(prop, scope);
       }
-    return this->GetCMakeInstance()->GetProperty(prop);
+    return this->GetState()->GetGlobalProperty(prop);
     }
 
   return retVal;
@@ -4585,7 +4585,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         this->LocalGenerator->GetGlobalGenerator()->GetCMakeInstance();
       if(isCustom && existing->GetType() == cmTarget::UTILITY &&
          this != existing->GetMakefile() &&
-         cm->GetPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
+         cm->GetState()
+           ->GetGlobalPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
         {
         return true;
         }

@@ -17,6 +17,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmCTest.h"
 #include "cmXMLParser.h"
+#include "cmState.h"
 
 #include <cmsys/Process.h>
 #include <cmsys/Base64.h>
@@ -1132,7 +1133,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmCTestScriptHandler* ch =
     static_cast<cmCTestScriptHandler*>(this->CTest->GetHandler("script"));
   cmake* cm =  ch->GetCMake();
-  const char* subproject = cm->GetProperty("SubProject");
+  const char* subproject = cm->GetState()->GetGlobalProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   str << "project="

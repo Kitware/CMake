@@ -54,8 +54,8 @@ bool cmFindLibraryCommand
       }
     }
 
-  if(this->Makefile->GetCMakeInstance()
-     ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
+  if(this->Makefile->GetState()
+         ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
     {
     // add special 64 bit paths if this is a 64 bit compile.
     if(this->Makefile->PlatformIs64Bit())
@@ -226,8 +226,8 @@ cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
 
   // Check whether to use OpenBSD-style library version comparisons.
   this->OpenBSD =
-    this->Makefile->GetCMakeInstance()
-    ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
+    this->Makefile->GetState()
+        ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 }
 
 //----------------------------------------------------------------------------

@@ -18,6 +18,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmSourceFile.h"
 #include "cmake.h"
+#include "cmState.h"
 
 #include <assert.h>
 
@@ -234,7 +235,8 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
 
-  const char* jobpools = this->GetCMakeInstance()->GetProperty("JOB_POOLS");
+  const char* jobpools = this->GetCMakeInstance()->GetState()
+                             ->GetGlobalProperty("JOB_POOLS");
   if (jobpools)
     {
     cmGlobalNinjaGenerator::WriteComment(os,

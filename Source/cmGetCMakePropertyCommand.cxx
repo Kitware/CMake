@@ -14,6 +14,7 @@
 #include "cmGlobalGenerator.h"
 #include "cmLocalGenerator.h"
 #include "cmake.h"
+#include "cmState.h"
 #include "cmAlgorithms.h"
 
 // cmGetCMakePropertyCommand
@@ -53,7 +54,8 @@ bool cmGetCMakePropertyCommand
   else
     {
     const char *prop =
-      this->Makefile->GetCMakeInstance()->GetProperty(args[1]);
+      this->Makefile->GetState()
+          ->GetGlobalProperty(args[1]);
     if (prop)
       {
       output = prop;

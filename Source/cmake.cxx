@@ -1152,7 +1152,8 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   std::vector<std::string> argsSplit;
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
-  this->SetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
+  this->State
+      ->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
   if(this->State->GetIsInTryCompile())
     {
     return 0;
@@ -1229,8 +1230,8 @@ int cmake::Configure()
       }
     }
   int ret = this->ActualConfigure();
-  const char* delCacheVars =
-    this->GetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+  const char* delCacheVars = this->State
+                    ->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
   if(delCacheVars && delCacheVars[0] != 0)
     {
     return this->HandleDeleteCacheVariables(delCacheVars);
@@ -1505,7 +1506,7 @@ int cmake::ActualConfigure()
 
   cmMakefile* mf=this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
   if (mf->IsOn("CTEST_USE_LAUNCHERS")
-              && !this->GetProperty("RULE_LAUNCH_COMPILE"))
+              && !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE"))
     {
     cmSystemTools::Error("CTEST_USE_LAUNCHERS is enabled, but the "
                         "RULE_LAUNCH_COMPILE global property is not defined.\n"
@@ -2194,7 +2195,7 @@ const char *cmake::GetProperty(const std::string& prop)
 
 bool cmake::GetPropertyAsBool(const std::string& prop)
 {
-  return cmSystemTools::IsOn(this->GetProperty(prop));
+  return this->State->GetGlobalPropertyAsBool(prop);
 }
 
 cmInstalledFile *cmake::GetOrCreateInstalledFile(
@@ -2590,7 +2591,8 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 std::vector<std::string> cmake::GetDebugConfigs()
 {
   std::vector<std::string> configs;
-  if(const char* config_list = this->GetProperty("DEBUG_CONFIGURATIONS"))
+  if(const char* config_list =
+                      this->State->GetGlobalProperty("DEBUG_CONFIGURATIONS"))
     {
     // Expand the specified list and convert to upper-case.
     cmSystemTools::ExpandListArgument(config_list, configs);

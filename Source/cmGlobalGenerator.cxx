@@ -200,7 +200,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
     if (cnameString != pathString)
       {
       const char* cvars =
-        this->GetCMakeInstance()->GetProperty(
+        this->GetCMakeInstance()->GetState()->GetGlobalProperty(
           "__CMAKE_DELETE_CACHE_CHANGE_VARS_");
       if(cvars)
         {
@@ -210,7 +210,7 @@ void cmGlobalGenerator::ResolveLanguageCompiler(const std::string &lang,
       changeVars += langComp;
       changeVars += ";";
       changeVars += cname;
-      this->GetCMakeInstance()->SetProperty(
+      this->GetCMakeInstance()->GetState()->SetGlobalProperty(
         "__CMAKE_DELETE_CACHE_CHANGE_VARS_",
         changeVars.c_str());
       }
@@ -1170,8 +1170,8 @@ void cmGlobalGenerator::AddCMP0042WarnTarget(const std::string& target)
 bool cmGlobalGenerator::CheckALLOW_DUPLICATE_CUSTOM_TARGETS() const
 {
   // If the property is not enabled then okay.
-  if(!this->CMakeInstance
-     ->GetPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
+  if(!this->CMakeInstance->GetState()
+     ->GetGlobalPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
     {
     return true;
     }
@@ -2391,8 +2391,8 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 //----------------------------------------------------------------------------
 const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
 {
-  const char* prop =
-    this->GetCMakeInstance()->GetProperty("PREDEFINED_TARGETS_FOLDER");
+  const char* prop = this->GetCMakeInstance()->GetState()
+                         ->GetGlobalProperty("PREDEFINED_TARGETS_FOLDER");
 
   if (prop)
     {
@@ -2405,7 +2405,8 @@ const char* cmGlobalGenerator::GetPredefinedTargetsFolder()
 //----------------------------------------------------------------------------
 bool cmGlobalGenerator::UseFolderProperty()
 {
-  const char* prop = this->GetCMakeInstance()->GetProperty("USE_FOLDERS");
+  const char* prop = this->GetCMakeInstance()->GetState()
+                         ->GetGlobalProperty("USE_FOLDERS");
 
   // If this property is defined, let the setter turn this on or off...
   //

@@ -16,6 +16,7 @@
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
 #include "cmSystemTools.h"
+#include "cmState.h"
 #include "cmAlgorithms.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
@@ -472,12 +473,12 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
       }
 
     // Set target folder
-    const char* autogenFolder = makefile->GetCMakeInstance()->GetProperty(
-                                                     "AUTOMOC_TARGETS_FOLDER");
+    const char* autogenFolder = makefile->GetState()
+                                ->GetGlobalProperty("AUTOMOC_TARGETS_FOLDER");
     if (!autogenFolder)
       {
-      autogenFolder = makefile->GetCMakeInstance()->GetProperty(
-                                                     "AUTOGEN_TARGETS_FOLDER");
+      autogenFolder = makefile->GetState()
+                                ->GetGlobalProperty("AUTOGEN_TARGETS_FOLDER");
       }
     if (autogenFolder && *autogenFolder)
       {
