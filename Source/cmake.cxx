@@ -843,11 +843,7 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     {
     this->SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
-    this->SetStartOutputDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory());
     this->SetHomeDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory());
-    this->SetStartDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     }
 
