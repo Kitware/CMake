@@ -281,7 +281,6 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const std::string&, bool excludeFromAll=false);
   void AddSubDirectory(const std::string& fullSrcDir,
                        const std::string& fullBinDir,
                        bool excludeFromAll,

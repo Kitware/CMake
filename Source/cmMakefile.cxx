@@ -1676,33 +1676,6 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
     }
 }
 
-void cmMakefile::AddSubDirectory(const std::string& sub,
-                                 bool excludeFromAll)
-{
-  // the source path must be made full if it isn't already
-  std::string srcPath = sub;
-  if (!cmSystemTools::FileIsFullPath(srcPath.c_str()))
-    {
-    srcPath = this->GetCurrentDirectory();
-    srcPath += "/";
-    srcPath += sub;
-    }
-
-  // binary path must be made full if it isn't already
-  std::string binPath = sub;
-  if (!cmSystemTools::FileIsFullPath(binPath.c_str()))
-    {
-    binPath = this->GetCurrentOutputDirectory();
-    binPath += "/";
-    binPath += sub;
-    }
-
-
-  this->AddSubDirectory(srcPath, binPath,
-                        excludeFromAll, false);
-}
-
-
 void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                  const std::string& binPath,
                                  bool excludeFromAll,
