@@ -3461,6 +3461,11 @@ cmMakefile::LexicalPushPop::~LexicalPushPop()
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
+const char* cmMakefile::GetHomeDirectory() const
+{
+  return this->cmHomeDirectory.c_str();
+}
+
 void cmMakefile::SetHomeDirectory(const std::string& dir)
 {
   this->cmHomeDirectory = dir;
@@ -3470,6 +3475,11 @@ void cmMakefile::SetHomeDirectory(const std::string& dir)
     {
     this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", this->GetHomeDirectory());
     }
+}
+
+const char* cmMakefile::GetHomeOutputDirectory() const
+{
+  return this->HomeOutputDirectory.c_str();
 }
 
 void cmMakefile::SetHomeOutputDirectory(const std::string& lib)
