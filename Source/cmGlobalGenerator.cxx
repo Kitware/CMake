@@ -1103,7 +1103,6 @@ void cmGlobalGenerator::Configure()
     (this->CMakeInstance->GetStartDirectory());
   lg->GetMakefile()->SetStartOutputDirectory
     (this->CMakeInstance->GetStartOutputDirectory());
-  lg->GetMakefile()->MakeStartDirectoriesCurrent();
 
   this->BinaryDirectories.insert(mf->GetStartOutputDirectory());
 

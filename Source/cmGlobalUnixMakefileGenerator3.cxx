@@ -587,7 +587,6 @@ void cmGlobalUnixMakefileGenerator3
         (this->CMakeInstance->GetStartDirectory());
       lg->GetMakefile()->SetStartOutputDirectory
         (this->CMakeInstance->GetStartOutputDirectory());
-      lg->GetMakefile()->MakeStartDirectoriesCurrent();
       }
 
     std::string tname = targetName;
