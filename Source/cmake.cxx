@@ -1804,11 +1804,11 @@ const char* cmake::GetCacheDefinition(const std::string& name) const
 
 void cmake::AddDefaultCommands()
 {
-  std::list<cmCommand*> commands;
+  std::vector<cmCommand*> commands;
   GetBootstrapCommands1(commands);
   GetBootstrapCommands2(commands);
   GetPredefinedCommands(commands);
-  for(std::list<cmCommand*>::iterator i = commands.begin();
+  for(std::vector<cmCommand*>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
     this->AddCommand(*i);

@@ -13,7 +13,7 @@
 
 @COMMAND_INCLUDES@
 
-void GetPredefinedCommands(std::list<cmCommand*>& commands)
+void GetPredefinedCommands(std::vector<cmCommand*>& commands)
 {
 @NEW_COMMANDS@
 }
