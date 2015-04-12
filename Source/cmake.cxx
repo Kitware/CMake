@@ -1112,10 +1112,42 @@ void cmake::SetHomeDirectory(const std::string& dir)
   cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
 }
 
+const char* cmake::GetHomeDirectory() const
+{
+  return this->cmHomeDirectory.c_str();
+}
+
 void cmake::SetHomeOutputDirectory(const std::string& dir)
 {
   this->HomeOutputDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
+}
+
+const char* cmake::GetHomeOutputDirectory() const
+{
+  return this->HomeOutputDirectory.c_str();
+}
+
+const char* cmake::GetStartDirectory() const
+{
+  return this->cmStartDirectory.c_str();
+}
+
+void cmake::SetStartDirectory(const std::string& dir)
+{
+  this->cmStartDirectory = dir;
+  cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
+}
+
+const char* cmake::GetStartOutputDirectory() const
+{
+  return this->StartOutputDirectory.c_str();
+}
+
+void cmake::SetStartOutputDirectory(const std::string& dir)
+{
+  this->StartOutputDirectory = dir;
+  cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
 }
 
 void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)

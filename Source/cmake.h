@@ -113,15 +113,9 @@ class cmake
    * and going up until it reaches the HomeDirectory.
    */
   void SetHomeDirectory(const std::string& dir);
-  const char* GetHomeDirectory() const
-    {
-    return this->cmHomeDirectory.c_str();
-    }
+  const char* GetHomeDirectory() const;
   void SetHomeOutputDirectory(const std::string& dir);
-  const char* GetHomeOutputDirectory() const
-    {
-    return this->HomeOutputDirectory.c_str();
-    }
+  const char* GetHomeOutputDirectory() const;
   //@}
 
   //@{
@@ -132,24 +126,10 @@ class cmake
    * recursing up the tree starting at the StartDirectory and going up until
    * it reaches the HomeDirectory.
    */
-  void SetStartDirectory(const std::string& dir)
-    {
-      this->cmStartDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
-    }
-  const char* GetStartDirectory() const
-    {
-      return this->cmStartDirectory.c_str();
-    }
-  void SetStartOutputDirectory(const std::string& dir)
-    {
-      this->StartOutputDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
-    }
-  const char* GetStartOutputDirectory() const
-    {
-      return this->StartOutputDirectory.c_str();
-    }
+  void SetStartDirectory(const std::string& dir);
+  const char* GetStartDirectory() const;
+  void SetStartOutputDirectory(const std::string& dir);
+  const char* GetStartOutputDirectory() const;
   //@}
 
   /**
