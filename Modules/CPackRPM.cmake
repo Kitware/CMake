@@ -538,6 +538,82 @@ function(cpack_rpm_prepare_relocation_paths)
   set(TMP_RPM_PREFIXES "${TMP_RPM_PREFIXES}" PARENT_SCOPE)
 endfunction()
 
+function(cpack_rpm_prepare_content_list)
+  # if we are creating a relocatable package, omit parent directories of
+  # CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
+  # which is passed to the find command that generates the content-list
+  if(CPACK_RPM_PACKAGE_RELOCATABLE)
+    # get a list of the elements in CPACK_RPM_PACKAGE_PREFIXES that are
+    # destinct parent paths of other relocation paths and remove the
+    # final element (so the install-prefix dir itself is not omitted
+    # from the RPM's content-list)
+    set(SORTED_RPM_USED_PACKAGE_PREFIXES "${RPM_USED_PACKAGE_PREFIXES}")
+    list(SORT SORTED_RPM_USED_PACKAGE_PREFIXES)
+    set(_DISTINCT_PATH "NOT_SET")
+    foreach(_RPM_RELOCATION_PREFIX ${SORTED_RPM_USED_PACKAGE_PREFIXES})
+      if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
+        set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
+
+        string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${_RPM_RELOCATION_PREFIX}")
+        list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
+        unset(_TMP_LIST)
+        # Now generate all of the parent dirs of the relocation path
+        foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
+          list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
+          string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
+          list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
+          if(_DUPLICATE_FOUND EQUAL -1)
+            set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
+            separate_arguments(_OMIT_DIR)
+            list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
+          endif()
+        endforeach()
+      endif()
+    endforeach()
+  endif()
+
+  if(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: Initial list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
+  endif()
+
+  if (NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include)
+    if (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
+      message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
+      list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST "${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION}")
+    endif()
+  endif()
+
+  if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+    if (CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST= ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST}")
+    endif()
+    foreach(_DIR ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
+      list(APPEND _RPM_DIRS_TO_OMIT "-o;-path;.${_DIR}")
+    endforeach()
+  endif()
+
+  if(CPACK_RPM_PACKAGE_DEBUG)
+    message("CPackRPM:Debug: Final list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
+  endif()
+
+  # Use files tree to construct files command (spec file)
+  # We should not forget to include symlinks (thus -o -type l)
+  # We should include directory as well (thus -type d)
+  #   but not the main local dir "." (thus -a -not -name ".")
+  # We must remove the './' due to the local search and escape the
+  # file name by enclosing it between double quotes (thus the sed)
+  # Then we must authorize any man pages extension (adding * at the end)
+  # because rpmbuild may automatically compress those files
+  execute_process(COMMAND find . -type f -o -type l -o (-type d -a -not ( -name "." ${_RPM_DIRS_TO_OMIT} ) )
+                  COMMAND sed s:.*/man.*/.*:&*:
+                  COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
+                  WORKING_DIRECTORY "${WDIR}"
+                  OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
+
+  set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}" PARENT_SCOPE)
+endfunction()
+
 function(cpack_rpm_symlink_get_relocation_prefixes LOCATION PACKAGE_PREFIXES RETURN_VARIABLE)
   foreach(PKG_PREFIX IN LISTS PACKAGE_PREFIXES)
     string(REGEX MATCH "^${PKG_PREFIX}/.*" FOUND_ "${LOCATION}")
@@ -1285,76 +1361,7 @@ function(cpack_rpm_generate_package)
   #string(REGEX REPLACE " " "\\\\ " CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
   set(CPACK_RPM_DIRECTORY "${CPACK_TOPLEVEL_DIRECTORY}")
 
-  # if we are creating a relocatable package, omit parent directories of
-  # CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
-  # which is passed to the find command that generates the content-list
-  if(CPACK_RPM_PACKAGE_RELOCATABLE)
-    # get a list of the elements in CPACK_RPM_PACKAGE_PREFIXES that are
-    # destinct parent paths of other relocation paths and remove the
-    # final element (so the install-prefix dir itself is not omitted
-    # from the RPM's content-list)
-    set(SORTED_RPM_USED_PACKAGE_PREFIXES "${RPM_USED_PACKAGE_PREFIXES}")
-    list(SORT SORTED_RPM_USED_PACKAGE_PREFIXES)
-    set(_DISTINCT_PATH "NOT_SET")
-    foreach(_RPM_RELOCATION_PREFIX ${SORTED_RPM_USED_PACKAGE_PREFIXES})
-      if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
-        set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
-
-        string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${_RPM_RELOCATION_PREFIX}")
-        list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
-        unset(_TMP_LIST)
-        # Now generate all of the parent dirs of the relocation path
-        foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
-          list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
-          string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
-          list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
-          if(_DUPLICATE_FOUND EQUAL -1)
-            set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
-            separate_arguments(_OMIT_DIR)
-            list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
-          endif()
-        endforeach()
-      endif()
-    endforeach()
-  endif()
-
-  if (CPACK_RPM_PACKAGE_DEBUG)
-     message("CPackRPM:Debug: Initial list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
-  endif()
-
-  if (NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
-    set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include)
-    if (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
-      message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
-      list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST "${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION}")
-    endif()
-  endif()
-
-  if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
-    if (CPACK_RPM_PACKAGE_DEBUG)
-     message("CPackRPM:Debug: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST= ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST}")
-   endif()
-    foreach(_DIR ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
-      list(APPEND _RPM_DIRS_TO_OMIT "-o;-path;.${_DIR}")
-    endforeach()
-  endif()
-  if (CPACK_RPM_PACKAGE_DEBUG)
-     message("CPackRPM:Debug: Final list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
-  endif()
-
-  # Use files tree to construct files command (spec file)
-  # We should not forget to include symlinks (thus -o -type l)
-  # We should include directory as well (thus -type d)
-  #   but not the main local dir "." (thus -a -not -name ".")
-  # We must remove the './' due to the local search and escape the
-  # file name by enclosing it between double quotes (thus the sed)
-  # Then we must authorize any man pages extension (adding * at the end)
-  # because rpmbuild may automatically compress those files
-  execute_process(COMMAND find . -type f -o -type l -o (-type d -a -not ( -name "." ${_RPM_DIRS_TO_OMIT} ) )
-                  COMMAND sed s:.*/man.*/.*:&*:
-                  COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
-                  WORKING_DIRECTORY "${WDIR}"
-                  OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
+  cpack_rpm_prepare_content_list()
 
   # In component case, put CPACK_ABSOLUTE_DESTINATION_FILES_<COMPONENT>
   #                   into CPACK_ABSOLUTE_DESTINATION_FILES_INTERNAL
