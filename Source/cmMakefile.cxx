@@ -1658,7 +1658,6 @@ void cmMakefile::InitializeFromParent()
 
 void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
 {
-  // copy our variables from the child makefile
   lg2->GetMakefile()->InitializeFromParent();
   lg2->GetMakefile()->MakeStartDirectoriesCurrent();
   if (this->GetCMakeInstance()->GetDebugOutput())
