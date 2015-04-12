@@ -16,7 +16,6 @@
 #include "cmCommands.h"
 #include "cmConditionEvaluator.cxx"
 #include "cmExpandedCommandArgument.cxx"
-#include "cmGeneratorExpressionEvaluationFile.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"

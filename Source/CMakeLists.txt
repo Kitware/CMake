@@ -219,6 +219,8 @@ set(SRCS
   cmExportSet.cxx
   cmExportSetMap.h
   cmExportSetMap.cxx
+  cmExternalMakefileProjectGenerator.cxx
+  cmExternalMakefileProjectGenerator.h
   cmExtraCodeBlocksGenerator.cxx
   cmExtraCodeBlocksGenerator.h
   cmExtraCodeLiteGenerator.cxx
@@ -244,6 +246,8 @@ set(SRCS
   cmGeneratorExpressionContext.h
   cmGeneratorExpressionDAGChecker.cxx
   cmGeneratorExpressionDAGChecker.h
+  cmGeneratorExpressionEvaluationFile.cxx
+  cmGeneratorExpressionEvaluationFile.h
   cmGeneratorExpressionEvaluator.cxx
   cmGeneratorExpressionEvaluator.h
   cmGeneratorExpressionLexer.cxx

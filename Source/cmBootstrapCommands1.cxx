@@ -42,7 +42,6 @@
 #include "cmEndWhileCommand.cxx"
 #include "cmExecProgramCommand.cxx"
 #include "cmExecuteProcessCommand.cxx"
-#include "cmExternalMakefileProjectGenerator.cxx"
 #include "cmFindBase.cxx"
 #include "cmFindCommon.cxx"
 #include "cmFileCommand.cxx"
