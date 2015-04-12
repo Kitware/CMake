@@ -299,6 +299,8 @@ set(SRCS
   cmMakefileUtilityTargetGenerator.cxx
   cmOSXBundleGenerator.cxx
   cmOSXBundleGenerator.h
+  cmOutputConverter.cxx
+  cmOutputConverter.h
   cmNewLineStyle.h
   cmNewLineStyle.cxx
   cmOrderDirectories.cxx
