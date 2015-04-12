@@ -197,26 +197,19 @@ void cmake::InitializeProperties()
 void cmake::CleanupCommandsAndMacros()
 {
   this->InitializeProperties();
-  std::vector<cmCommand*> commands;
   for(RegisteredCommandsMap::iterator j = this->Commands.begin();
-      j != this->Commands.end(); ++j)
+      j != this->Commands.end(); )
     {
-    if ( !j->second->IsA("cmMacroHelperCommand") &&
-         !j->second->IsA("cmFunctionHelperCommand"))
+    if (j->second->IsA("cmMacroHelperCommand") ||
+        j->second->IsA("cmFunctionHelperCommand"))
       {
-      commands.push_back(j->second);
+      delete j->second;
+      this->Commands.erase(j++);
       }
     else
       {
-      delete j->second;
+      ++j;
       }
-    }
-  this->Commands.clear();
-  std::vector<cmCommand*>::iterator it;
-  for ( it = commands.begin(); it != commands.end();
-    ++ it )
-    {
-    this->Commands[cmSystemTools::LowerCase((*it)->GetName())] = *it;
     }
 }
 
