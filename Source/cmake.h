@@ -117,7 +117,7 @@ class cmake
     {
     return this->cmHomeDirectory.c_str();
     }
-  void SetHomeOutputDirectory(const std::string& lib);
+  void SetHomeOutputDirectory(const std::string& dir);
   const char* GetHomeOutputDirectory() const
     {
     return this->HomeOutputDirectory.c_str();
@@ -141,9 +141,9 @@ class cmake
     {
       return this->cmStartDirectory.c_str();
     }
-  void SetStartOutputDirectory(const std::string& lib)
+  void SetStartOutputDirectory(const std::string& dir)
     {
-      this->StartOutputDirectory = lib;
+      this->StartOutputDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
     }
   const char* GetStartOutputDirectory() const

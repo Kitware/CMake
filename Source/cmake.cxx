@@ -1112,9 +1112,9 @@ void cmake::SetHomeDirectory(const std::string& dir)
   cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
 }
 
-void cmake::SetHomeOutputDirectory(const std::string& lib)
+void cmake::SetHomeOutputDirectory(const std::string& dir)
 {
-  this->HomeOutputDirectory = lib;
+  this->HomeOutputDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
 }
 
