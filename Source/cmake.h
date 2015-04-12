@@ -336,8 +336,6 @@ protected:
   cmPolicies *Policies;
   cmGlobalGenerator *GlobalGenerator;
   cmCacheManager *CacheManager;
-  std::string cmHomeDirectory;
-  std::string HomeOutputDirectory;
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
   std::string GeneratorPlatform;

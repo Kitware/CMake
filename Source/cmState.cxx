@@ -444,3 +444,25 @@ bool cmState::GetGlobalPropertyAsBool(const std::string& prop)
 {
   return cmSystemTools::IsOn(this->GetGlobalProperty(prop));
 }
+
+void cmState::SetSourceDirectory(std::string const& sourceDirectory)
+{
+  this->SourceDirectory = sourceDirectory;
+  cmSystemTools::ConvertToUnixSlashes(this->SourceDirectory);
+}
+
+const char* cmState::GetSourceDirectory() const
+{
+  return this->SourceDirectory.c_str();
+}
+
+void cmState::SetBinaryDirectory(std::string const& binaryDirectory)
+{
+  this->BinaryDirectory = binaryDirectory;
+  cmSystemTools::ConvertToUnixSlashes(this->BinaryDirectory);
+}
+
+const char* cmState::GetBinaryDirectory() const
+{
+  return this->BinaryDirectory.c_str();
+}

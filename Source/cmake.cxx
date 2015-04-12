@@ -978,24 +978,22 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 
 void cmake::SetHomeDirectory(const std::string& dir)
 {
-  this->cmHomeDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
+  this->State->SetSourceDirectory(dir);
 }
 
 const char* cmake::GetHomeDirectory() const
 {
-  return this->cmHomeDirectory.c_str();
+  return this->State->GetSourceDirectory();
 }
 
 void cmake::SetHomeOutputDirectory(const std::string& dir)
 {
-  this->HomeOutputDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
+  this->State->SetBinaryDirectory(dir);
 }
 
 const char* cmake::GetHomeOutputDirectory() const
 {
-  return this->HomeOutputDirectory.c_str();
+  return this->State->GetBinaryDirectory();
 }
 
 void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
