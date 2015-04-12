@@ -299,6 +299,7 @@ CMAKE_CXX_SOURCES="\
   cmMakefileLibraryTargetGenerator \
   cmMakefileTargetGenerator \
   cmMakefileUtilityTargetGenerator \
+  cmOutputConverter \
   cmOSXBundleGenerator \
   cmNewLineStyle \
   cmBootstrapCommands1 \
