@@ -741,6 +741,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
 
+  this->Properties.SetCMakeInstance(this->GetCMakeInstance());
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }

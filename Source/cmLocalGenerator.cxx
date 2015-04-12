@@ -252,7 +252,6 @@ void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
   this->Makefile->SetLocalGenerator(this);
 
   // setup the home directories
-  this->Makefile->GetProperties().SetCMakeInstance(gg->GetCMakeInstance());
   this->Makefile->SetHomeDirectory(
     gg->GetCMakeInstance()->GetHomeDirectory());
   this->Makefile->SetHomeOutputDirectory(
