@@ -1095,21 +1095,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       "${CMake_BINARY_DIR}/Tests/CMakeTestAllGenerators")
   endif()
 
-  if(NOT DEFINED CTEST_RUN_CMakeTestBadCommandLines)
-    set(CTEST_RUN_CMakeTestBadCommandLines ON)
-  endif()
-
-  if(CTEST_RUN_CMakeTestBadCommandLines)
-    add_test(CMakeTestBadCommandLines ${CMAKE_CMAKE_COMMAND}
-        -D dir=${CMake_BINARY_DIR}/Tests/CMakeTestBadCommandLines
-        -D gen=${CMAKE_GENERATOR}
-        -D CMake_SOURCE_DIR=${CMake_SOURCE_DIR}
-        -P ${CMake_SOURCE_DIR}/Tests/CMakeTestBadCommandLines/RunCMake.cmake
-      )
-    list(APPEND TEST_BUILD_DIRS
-      "${CMake_BINARY_DIR}/Tests/CMakeTestBadCommandLines")
-  endif()
-
   if(NOT DEFINED CTEST_RUN_CMakeTestMultipleConfigures)
     set(CTEST_RUN_CMakeTestMultipleConfigures ON)
   endif()
