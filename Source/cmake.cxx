@@ -261,17 +261,6 @@ void cmake::RenameCommand(const std::string& oldName,
   this->Commands.erase(pos);
 }
 
-void cmake::RemoveCommand(const std::string& name)
-{
-  std::string sName = cmSystemTools::LowerCase(name);
-  RegisteredCommandsMap::iterator pos = this->Commands.find(sName);
-  if ( pos != this->Commands.end() )
-    {
-    delete pos->second;
-    this->Commands.erase(pos);
-    }
-}
-
 void cmake::AddCommand(cmCommand* command)
 {
   std::string name = cmSystemTools::LowerCase(command->GetName());
@@ -289,22 +278,19 @@ void cmake::AddCommand(cmCommand* command)
 void cmake::RemoveUnscriptableCommands()
 {
   std::vector<std::string> unscriptableCommands;
-  for (cmake::RegisteredCommandsMap::const_iterator
+  for (cmake::RegisteredCommandsMap::iterator
        pos = this->Commands.begin();
-       pos != this->Commands.end();
-       ++pos)
+       pos != this->Commands.end(); )
     {
     if (!pos->second->IsScriptable())
       {
-      unscriptableCommands.push_back(pos->first);
+      delete pos->second;
+      this->Commands.erase(pos++);
       }
-    }
-
-  for(std::vector<std::string>::const_iterator it=unscriptableCommands.begin();
-      it != unscriptableCommands.end();
-      ++it)
-    {
-    this->RemoveCommand(*it);
+    else
+      {
+      ++pos;
+      }
     }
 }
 

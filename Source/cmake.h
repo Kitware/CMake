@@ -222,7 +222,6 @@ class cmake
    */
   void AddCommand(cmCommand* );
   void RenameCommand(const std::string& oldName, const std::string& newName);
-  void RemoveCommand(const std::string& name);
   void RemoveUnscriptableCommands();
 
   /**
