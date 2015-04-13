@@ -117,6 +117,7 @@ private:
   bool PrintHelpListProperties(std::ostream& os);
   bool PrintHelpListVariables(std::ostream& os);
   bool PrintHelpListPolicies(std::ostream& os);
+  bool PrintHelpListGenerators(std::ostream& os);
   bool PrintOldCustomModules(std::ostream& os);
 
   const char* GetNameString() const;
