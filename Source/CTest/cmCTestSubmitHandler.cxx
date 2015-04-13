@@ -1132,7 +1132,7 @@ int cmCTestSubmitHandler::HandleCDashUploadFile(std::string const& file,
   cmCTestScriptHandler* ch =
     static_cast<cmCTestScriptHandler*>(this->CTest->GetHandler("script"));
   cmake* cm =  ch->GetCMake();
-  const char* subproject = cm->GetProperty("SubProject", cmProperty::GLOBAL);
+  const char* subproject = cm->GetProperty("SubProject");
   // TODO: Encode values for a URL instead of trusting caller.
   std::ostringstream str;
   str << "project="

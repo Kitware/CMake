@@ -1558,12 +1558,12 @@ void cmCTest::AddSiteProperties(std::ostream& ostr)
     return;
     }
   // This code should go when cdash is changed to use labels only
-  const char* subproject = cm->GetProperty("SubProject", cmProperty::GLOBAL);
+  const char* subproject = cm->GetProperty("SubProject");
   if(subproject)
     {
     ostr << "<Subproject name=\"" << subproject << "\">\n";
     const char* labels =
-      ch->GetCMake()->GetProperty("SubProjectLabels", cmProperty::GLOBAL);
+      ch->GetCMake()->GetProperty("SubProjectLabels");
     if(labels)
       {
       ostr << "  <Labels>\n";
@@ -1581,7 +1581,7 @@ void cmCTest::AddSiteProperties(std::ostream& ostr)
     }
 
   // This code should stay when cdash only does label based sub-projects
-  const char* label = cm->GetProperty("Label", cmProperty::GLOBAL);
+  const char* label = cm->GetProperty("Label");
   if(label)
     {
     ostr << "<Labels>\n";

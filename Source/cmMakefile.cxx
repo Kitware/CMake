@@ -4239,7 +4239,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
       return this->LocalGenerator->GetParent()->GetMakefile()->
         GetProperty(prop, scope);
       }
-    return this->GetCMakeInstance()->GetProperty(prop,scope);
+    return this->GetCMakeInstance()->GetProperty(prop);
     }
 
   return retVal;

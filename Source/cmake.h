@@ -253,8 +253,6 @@ class cmake
   void AppendProperty(const std::string& prop,
                       const char *value,bool asString=false);
   const char *GetProperty(const std::string& prop);
-  const char *GetProperty(const std::string& prop,
-                          cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const std::string& prop);
 
   ///! Get or create an cmInstalledFile instance and return a pointer to it

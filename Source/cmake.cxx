@@ -1514,7 +1514,7 @@ int cmake::ActualConfigure()
 
   cmMakefile* mf=this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
   if (mf->IsOn("CTEST_USE_LAUNCHERS")
-              && !this->GetProperty("RULE_LAUNCH_COMPILE", cmProperty::GLOBAL))
+              && !this->GetProperty("RULE_LAUNCH_COMPILE"))
     {
     cmSystemTools::Error("CTEST_USE_LAUNCHERS is enabled, but the "
                         "RULE_LAUNCH_COMPILE global property is not defined.\n"
@@ -2198,12 +2198,6 @@ void cmake::AppendProperty(const std::string& prop,
 
 const char *cmake::GetProperty(const std::string& prop)
 {
-  return this->GetProperty(prop, cmProperty::GLOBAL);
-}
-
-const char *cmake::GetProperty(const std::string& prop,
-                               cmProperty::ScopeType scope)
-{
   // watch for special properties
   std::string output = "";
   if ( prop == "CACHE_VARIABLES" )
@@ -2238,7 +2232,7 @@ const char *cmake::GetProperty(const std::string& prop,
     }
 #undef STRING_LIST_ELEMENT
   bool dummy = false;
-  return this->Properties.GetPropertyValue(prop, scope, dummy);
+  return this->Properties.GetPropertyValue(prop, cmProperty::GLOBAL, dummy);
 }
 
 bool cmake::GetPropertyAsBool(const std::string& prop)

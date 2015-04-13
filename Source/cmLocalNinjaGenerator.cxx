@@ -234,8 +234,7 @@ void cmLocalNinjaGenerator::WritePools(std::ostream& os)
 {
   cmGlobalNinjaGenerator::WriteDivider(os);
 
-  const char* jobpools = this->GetCMakeInstance()
-                               ->GetProperty("JOB_POOLS", cmProperty::GLOBAL);
+  const char* jobpools = this->GetCMakeInstance()->GetProperty("JOB_POOLS");
   if (jobpools)
     {
     cmGlobalNinjaGenerator::WriteComment(os,
