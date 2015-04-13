@@ -159,6 +159,8 @@ set(SRCS
   cmCacheManager.cxx
   cmCacheManager.h
   "${CMAKE_CURRENT_BINARY_DIR}/cmCommands.cxx"
+  cmCLocaleEnvironmentScope.h
+  cmCLocaleEnvironmentScope.cxx
   cmCommands.h
   cmCommandArgumentLexer.cxx
   cmCommandArgumentParser.cxx

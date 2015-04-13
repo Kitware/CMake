@@ -21,6 +21,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmXMLParser.h"
 #include "cmXMLSafe.h"
+#include "cmCLocaleEnvironmentScope.h"
 
 #include "cmCTestVC.h"
 #include "cmCTestCVS.h"
@@ -64,46 +65,6 @@ static const char* cmCTestUpdateHandlerUpdateToString(int type)
     return cmCTestUpdateHandlerUpdateStrings[cmCTestUpdateHandler::e_UNKNOWN];
     }
   return cmCTestUpdateHandlerUpdateStrings[type];
-}
-
-class cmCTestUpdateHandlerLocale
-{
-public:
-  cmCTestUpdateHandlerLocale();
-  ~cmCTestUpdateHandlerLocale();
-private:
-  std::string saveLCAll;
-};
-
-cmCTestUpdateHandlerLocale::cmCTestUpdateHandlerLocale()
-{
-  const char* lcall = cmSystemTools::GetEnv("LC_ALL");
-  if(lcall)
-    {
-    saveLCAll = lcall;
-    }
-  // if LC_ALL is not set to C, then
-  // set it, so that svn/cvs info will be in english ascii
-  if(! (lcall && strcmp(lcall, "C") == 0))
-    {
-    cmSystemTools::PutEnv("LC_ALL=C");
-    }
-}
-
-cmCTestUpdateHandlerLocale::~cmCTestUpdateHandlerLocale()
-{
-  // restore the value of LC_ALL after running the version control
-  // commands
-  if(!saveLCAll.empty())
-    {
-    std::string put = "LC_ALL=";
-    put += saveLCAll;
-    cmSystemTools::PutEnv(put);
-    }
-  else
-    {
-    cmSystemTools::UnsetEnv("LC_ALL");
-    }
 }
 
 //----------------------------------------------------------------------
@@ -194,7 +155,7 @@ int cmCTestUpdateHandler::DetermineType(const char* cmd, const char* type)
 int cmCTestUpdateHandler::ProcessHandler()
 {
   // Make sure VCS tool messages are in English so we can parse them.
-  cmCTestUpdateHandlerLocale fixLocale;
+  cmCLocaleEnvironmentScope fixLocale;
   static_cast<void>(fixLocale);
 
   // Get source dir
