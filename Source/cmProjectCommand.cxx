@@ -30,11 +30,11 @@ bool cmProjectCommand
   this->Makefile->AddCacheDefinition
     (bindir,
      this->Makefile->GetCurrentOutputDirectory(),
-     "Value Computed by CMake", cmCacheManager::STATIC);
+     "Value Computed by CMake", cmState::STATIC);
   this->Makefile->AddCacheDefinition
     (srcdir,
      this->Makefile->GetCurrentDirectory(),
-     "Value Computed by CMake", cmCacheManager::STATIC);
+     "Value Computed by CMake", cmState::STATIC);
 
   bindir = "PROJECT_BINARY_DIR";
   srcdir = "PROJECT_SOURCE_DIR";
@@ -59,7 +59,7 @@ bool cmProjectCommand
     this->Makefile->AddCacheDefinition
       ("CMAKE_PROJECT_NAME",
        args[0].c_str(),
-       "Value Computed by CMake", cmCacheManager::STATIC);
+       "Value Computed by CMake", cmState::STATIC);
     }
 
   bool haveVersion = false;

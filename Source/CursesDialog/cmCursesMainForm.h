@@ -113,7 +113,7 @@ protected:
   // cache.
   void FillCacheManagerFromUI();
   // Fix formatting of values to a consistent form.
-  void FixValue(cmCacheManager::CacheEntryType type,
+  void FixValue(cmState::CacheEntryType type,
                 const std::string& in, std::string& out) const;
   // Re-post the existing fields. Used to toggle between
   // normal and advanced modes. Render() should be called

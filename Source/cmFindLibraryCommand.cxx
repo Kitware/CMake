@@ -10,7 +10,6 @@
   See the License for more information.
 ============================================================================*/
 #include "cmFindLibraryCommand.h"
-#include "cmCacheManager.h"
 #include <cmsys/Directory.hxx>
 #include <cmsys/stl/algorithm>
 
@@ -39,7 +38,7 @@ bool cmFindLibraryCommand
       {
       this->Makefile->AddCacheDefinition(this->VariableName, "",
                                          this->VariableDocumentation.c_str(),
-                                         cmCacheManager::FILEPATH);
+                                         cmState::FILEPATH);
       }
     return true;
     }
@@ -72,14 +71,14 @@ bool cmFindLibraryCommand
     this->Makefile->AddCacheDefinition(this->VariableName,
                                        library.c_str(),
                                        this->VariableDocumentation.c_str(),
-                                       cmCacheManager::FILEPATH);
+                                       cmState::FILEPATH);
     return true;
     }
   std::string notfound = this->VariableName + "-NOTFOUND";
   this->Makefile->AddCacheDefinition(this->VariableName,
                                      notfound.c_str(),
                                      this->VariableDocumentation.c_str(),
-                                     cmCacheManager::FILEPATH);
+                                     cmState::FILEPATH);
   return true;
 }
 

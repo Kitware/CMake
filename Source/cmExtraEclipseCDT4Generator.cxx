@@ -16,6 +16,7 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 #include "cmGeneratedFileStream.h"
+#include "cmState.h"
 #include "cmTarget.h"
 #include "cmSourceFile.h"
 
@@ -205,7 +206,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
 
   std::string cacheEntryName = "CMAKE_ECLIPSE_ENVVAR_";
   cacheEntryName += envVar;
-  const char* cacheValue = mf->GetCacheManager()->GetInitializedCacheValue(
+  const char* cacheValue = mf->GetState()->GetInitializedCacheValue(
                                                        cacheEntryName);
 
   // now we have both, decide which one to use
@@ -221,7 +222,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
     // in the cache
     valueToUse = envVarValue;
     mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
-                           cacheEntryName.c_str(), cmCacheManager::STRING,
+                           cacheEntryName.c_str(), cmState::STRING,
                            true);
     mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
     }
@@ -242,7 +243,7 @@ void cmExtraEclipseCDT4Generator::AddEnvVar(cmGeneratedFileStream& fout,
       {
       valueToUse = envVarValue;
       mf->AddCacheDefinition(cacheEntryName, valueToUse.c_str(),
-                             cacheEntryName.c_str(), cmCacheManager::STRING,
+                             cacheEntryName.c_str(), cmState::STRING,
                              true);
       mf->GetCMakeInstance()->SaveCache(mf->GetHomeOutputDirectory());
       }

@@ -21,7 +21,7 @@ cmCursesOptionsWidget::cmCursesOptionsWidget(int width, int height,
                                        int left, int top) :
   cmCursesWidget(width, height, left, top)
 {
-  this->Type = cmCacheManager::BOOL; // this is a bit of a hack
+  this->Type = cmState::BOOL; // this is a bit of a hack
   // there is no option type, and string type causes ccmake to cast
   // the widget into a string widget at some point.  BOOL is safe for
   // now.

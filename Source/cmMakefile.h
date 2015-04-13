@@ -12,7 +12,6 @@
 #ifndef cmMakefile_h
 #define cmMakefile_h
 
-#include "cmCacheManager.h"
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
 #include "cmPolicies.h"
@@ -23,6 +22,7 @@
 #include "cmGeneratorTarget.h"
 #include "cmExpandedCommandArgument.h"
 #include "cmake.h"
+#include "cmState.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #include "cmSourceGroup.h"
@@ -305,7 +305,7 @@ public:
   ///! Add a definition to this makefile and the global cmake cache.
   void AddCacheDefinition(const std::string& name, const char* value,
                           const char* doc,
-                          cmCacheManager::CacheEntryType type,
+                          cmState::CacheEntryType type,
                           bool force = false);
 
   /**
@@ -758,7 +758,7 @@ public:
   ///enabled.
   void EnableLanguage(std::vector<std::string>const& languages, bool optional);
 
-  cmCacheManager *GetCacheManager() const;
+  cmState *GetState() const;
 
   /**
    * Get the variable watch. This is used to determine when certain variables

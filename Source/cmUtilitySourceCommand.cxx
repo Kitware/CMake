@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmUtilitySourceCommand.h"
 
+#include "cmCacheManager.h"
+
 // cmUtilitySourceCommand
 bool cmUtilitySourceCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -118,14 +120,14 @@ bool cmUtilitySourceCommand
   this->Makefile->AddCacheDefinition(cacheEntry,
                                  utilityExecutable.c_str(),
                                  "Path to an internal program.",
-                                 cmCacheManager::FILEPATH);
+                                 cmState::FILEPATH);
   // add a value into the cache that maps from the
   // full path to the name of the project
   cmSystemTools::ConvertToUnixSlashes(utilityExecutable);
   this->Makefile->AddCacheDefinition(utilityExecutable,
                                  utilityName.c_str(),
                                  "Executable to project name.",
-                                 cmCacheManager::INTERNAL);
+                                 cmState::INTERNAL);
 
   return true;
 }
