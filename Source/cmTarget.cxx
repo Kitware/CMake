@@ -1157,7 +1157,7 @@ cmTarget::LinkLibraryType cmTarget::ComputeLinkType(
     }
 
   // Get the list of configurations considered to be DEBUG.
-  std::vector<std::string> const& debugConfigs =
+  std::vector<std::string> debugConfigs =
     this->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
   // Check if any entry in the list matches this configuration.
@@ -1216,7 +1216,7 @@ std::string cmTarget::GetDebugGeneratorExpressions(const std::string &value,
     }
 
   // Get the list of configurations considered to be DEBUG.
-  std::vector<std::string> const& debugConfigs =
+  std::vector<std::string> debugConfigs =
                       this->Makefile->GetCMakeInstance()->GetDebugConfigs();
 
   std::string configString = "$<CONFIG:" + debugConfigs[0] + ">";

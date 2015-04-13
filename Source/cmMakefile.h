@@ -281,7 +281,6 @@ public:
   /**
    * Add a subdirectory to the build.
    */
-  void AddSubDirectory(const std::string&, bool excludeFromAll=false);
   void AddSubDirectory(const std::string& fullSrcDir,
                        const std::string& fullBinDir,
                        bool excludeFromAll,
@@ -438,15 +437,9 @@ public:
    * and going up until it reaches the HomeDirectory.
    */
   void SetHomeDirectory(const std::string& dir);
-  const char* GetHomeDirectory() const
-    {
-      return this->cmHomeDirectory.c_str();
-    }
+  const char* GetHomeDirectory() const;
   void SetHomeOutputDirectory(const std::string& lib);
-  const char* GetHomeOutputDirectory() const
-    {
-      return this->HomeOutputDirectory.c_str();
-    }
+  const char* GetHomeOutputDirectory() const;
   //@}
 
   /**

@@ -16,7 +16,6 @@
 #include "cmCommands.h"
 #include "cmConditionEvaluator.cxx"
 #include "cmExpandedCommandArgument.cxx"
-#include "cmGeneratorExpressionEvaluationFile.cxx"
 #include "cmGetCMakePropertyCommand.cxx"
 #include "cmGetDirectoryPropertyCommand.cxx"
 #include "cmGetFilenameComponentCommand.cxx"
@@ -60,7 +59,7 @@
 #include "cmUnsetCommand.cxx"
 #include "cmWhileCommand.cxx"
 
-void GetBootstrapCommands2(std::list<cmCommand*>& commands)
+void GetBootstrapCommands2(std::vector<cmCommand*>& commands)
 {
   commands.push_back(new cmGetCMakePropertyCommand);
   commands.push_back(new cmGetDirectoryPropertyCommand);

@@ -741,6 +741,7 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
 
+  this->Properties.SetCMakeInstance(this->GetCMakeInstance());
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 }
@@ -1657,7 +1658,6 @@ void cmMakefile::InitializeFromParent()
 
 void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
 {
-  // copy our variables from the child makefile
   lg2->GetMakefile()->InitializeFromParent();
   lg2->GetMakefile()->MakeStartDirectoriesCurrent();
   if (this->GetCMakeInstance()->GetDebugOutput())
@@ -1675,33 +1675,6 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
     cmSystemTools::Message(msg.c_str());
     }
 }
-
-void cmMakefile::AddSubDirectory(const std::string& sub,
-                                 bool excludeFromAll)
-{
-  // the source path must be made full if it isn't already
-  std::string srcPath = sub;
-  if (!cmSystemTools::FileIsFullPath(srcPath.c_str()))
-    {
-    srcPath = this->GetCurrentDirectory();
-    srcPath += "/";
-    srcPath += sub;
-    }
-
-  // binary path must be made full if it isn't already
-  std::string binPath = sub;
-  if (!cmSystemTools::FileIsFullPath(binPath.c_str()))
-    {
-    binPath = this->GetCurrentOutputDirectory();
-    binPath += "/";
-    binPath += sub;
-    }
-
-
-  this->AddSubDirectory(srcPath, binPath,
-                        excludeFromAll, false);
-}
-
 
 void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                  const std::string& binPath,
@@ -3461,6 +3434,11 @@ cmMakefile::LexicalPushPop::~LexicalPushPop()
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
+const char* cmMakefile::GetHomeDirectory() const
+{
+  return this->cmHomeDirectory.c_str();
+}
+
 void cmMakefile::SetHomeDirectory(const std::string& dir)
 {
   this->cmHomeDirectory = dir;
@@ -3470,6 +3448,11 @@ void cmMakefile::SetHomeDirectory(const std::string& dir)
     {
     this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", this->GetHomeDirectory());
     }
+}
+
+const char* cmMakefile::GetHomeOutputDirectory() const
+{
+  return this->HomeOutputDirectory.c_str();
 }
 
 void cmMakefile::SetHomeOutputDirectory(const std::string& lib)

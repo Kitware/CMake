@@ -467,7 +467,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     }
 
   // Get the list of configurations considered to be DEBUG.
-  std::vector<std::string> const& debugConfigs =
+  std::vector<std::string> debugConfigs =
     this->Makefile->GetCMakeInstance()->GetDebugConfigs();
   std::string prop;
 

@@ -264,7 +264,8 @@ CMAKE_CXX_SOURCES="\
   cmExportTryCompileFileGenerator \
   cmExportSet \
   cmExportSetMap \
-  cmInstallDirectoryGenerator \
+  cmExternalMakefileProjectGenerator \
+  cmGeneratorExpressionEvaluationFile \
   cmGeneratedFileStream \
   cmGeneratorTarget \
   cmGeneratorExpressionContext \
@@ -275,6 +276,7 @@ CMAKE_CXX_SOURCES="\
   cmGeneratorExpressionParser \
   cmGeneratorExpression \
   cmGlobalGenerator \
+  cmInstallDirectoryGenerator \
   cmLocalGenerator \
   cmInstalledFile \
   cmInstallGenerator \

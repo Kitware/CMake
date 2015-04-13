@@ -113,15 +113,9 @@ class cmake
    * and going up until it reaches the HomeDirectory.
    */
   void SetHomeDirectory(const std::string& dir);
-  const char* GetHomeDirectory() const
-    {
-    return this->cmHomeDirectory.c_str();
-    }
-  void SetHomeOutputDirectory(const std::string& lib);
-  const char* GetHomeOutputDirectory() const
-    {
-    return this->HomeOutputDirectory.c_str();
-    }
+  const char* GetHomeDirectory() const;
+  void SetHomeOutputDirectory(const std::string& dir);
+  const char* GetHomeOutputDirectory() const;
   //@}
 
   //@{
@@ -132,24 +126,10 @@ class cmake
    * recursing up the tree starting at the StartDirectory and going up until
    * it reaches the HomeDirectory.
    */
-  void SetStartDirectory(const std::string& dir)
-    {
-      this->cmStartDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
-    }
-  const char* GetStartDirectory() const
-    {
-      return this->cmStartDirectory.c_str();
-    }
-  void SetStartOutputDirectory(const std::string& lib)
-    {
-      this->StartOutputDirectory = lib;
-      cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
-    }
-  const char* GetStartOutputDirectory() const
-    {
-      return this->StartOutputDirectory.c_str();
-    }
+  void SetStartDirectory(const std::string& dir);
+  const char* GetStartDirectory() const;
+  void SetStartOutputDirectory(const std::string& dir);
+  const char* GetStartOutputDirectory() const;
   //@}
 
   /**
@@ -247,10 +227,7 @@ class cmake
   /**
    * Get a command by its name
    */
-  cmCommand *GetCommand(const std::string& name);
-
-  /** Get list of all commands */
-  RegisteredCommandsMap* GetCommands() { return &this->Commands; }
+  cmCommand *GetCommand(const std::string& name) const;
 
   /** Check if a command exists. */
   bool CommandExists(const std::string& name) const;
@@ -260,10 +237,8 @@ class cmake
                bool directoriesSetBefore = false);
 
   ///! Is this cmake running as a result of a TRY_COMPILE command
-  bool GetIsInTryCompile() { return this->InTryCompile; }
-
-  ///! Is this cmake running as a result of a TRY_COMPILE command
-  void SetIsInTryCompile(bool i) { this->InTryCompile = i; }
+  bool GetIsInTryCompile() const;
+  void SetIsInTryCompile(bool b);
 
   ///! Parse command line arguments that might set cache values
   bool SetCacheArgs(const std::vector<std::string>&);
@@ -362,7 +337,7 @@ class cmake
 
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/
-  std::vector<std::string> const& GetDebugConfigs();
+  std::vector<std::string> GetDebugConfigs();
 
   void SetCMakeEditCommand(std::string const& s)
     { this->CMakeEditCommand = s; }
@@ -472,7 +447,6 @@ private:
   bool DebugTryCompile;
   cmFileTimeComparison* FileComparison;
   std::string GraphVizFile;
-  std::vector<std::string> DebugConfigs;
   InstalledFilesMap InstalledFiles;
 
   void UpdateConversionPathTable();
