@@ -1,7 +1,7 @@
 Ninja
 -----
 
-Generates build.ninja files (experimental).
+Generates build.ninja files.
 
 A build.ninja file is generated into the build tree.  Recent versions
 of the ninja program can build the project through the "all" target.
