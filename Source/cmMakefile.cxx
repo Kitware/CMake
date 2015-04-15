@@ -3408,9 +3408,9 @@ const char* cmMakefile::GetHomeOutputDirectory() const
   return this->HomeOutputDirectory.c_str();
 }
 
-void cmMakefile::SetHomeOutputDirectory(const std::string& lib)
+void cmMakefile::SetHomeOutputDirectory(const std::string& dir)
 {
-  this->HomeOutputDirectory = lib;
+  this->HomeOutputDirectory = dir;
   cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
   this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
   if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
