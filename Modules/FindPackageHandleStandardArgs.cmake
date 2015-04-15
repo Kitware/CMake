@@ -49,6 +49,10 @@ valid filepaths.
 
   ``REQUIRED_VARS <required-var>...``
     Specify the variables which are required for this package.
+    These may be named in the generated failure message asking the
+    user to set the missing variable values.  Therefore these should
+    typically be cache entries such as ``FOO_LIBRARY`` and not output
+    variables like ``FOO_LIBRARIES``.
 
   ``VERSION_VAR <version-var>``
     Specify the name of a variable that holds the version of the package
