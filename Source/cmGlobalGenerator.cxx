@@ -1098,13 +1098,13 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
-  cmMakefile* mf = lg->GetMakefile();
   lg->GetMakefile()->SetStartDirectory
-    (this->CMakeInstance->GetStartDirectory());
+    (this->CMakeInstance->GetHomeDirectory());
   lg->GetMakefile()->SetStartOutputDirectory
-    (this->CMakeInstance->GetStartOutputDirectory());
+    (this->CMakeInstance->GetHomeOutputDirectory());
 
-  this->BinaryDirectories.insert(mf->GetStartOutputDirectory());
+  this->BinaryDirectories.insert(
+      this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
   lg->Configure();
@@ -3069,7 +3069,7 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   std::vector<std::string> configs;
   std::string config = mf->GetConfigurations(configs, false);
 
-  std::string path = this->CMakeInstance->GetStartOutputDirectory();
+  std::string path = this->CMakeInstance->GetHomeOutputDirectory();
   path += "/CPackProperties.cmake";
 
   if(!cmSystemTools::FileExists(path.c_str()) && installedFiles.empty())
