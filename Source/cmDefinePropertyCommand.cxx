@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmDefinePropertyCommand.h"
 #include "cmake.h"
+#include "cmState.h"
 
 bool cmDefinePropertyCommand
 ::InitialPass(std::vector<std::string> const& args, cmExecutionStatus &)
@@ -127,7 +128,7 @@ bool cmDefinePropertyCommand
     }
 
   // Actually define the property.
-  this->Makefile->GetCMakeInstance()->DefineProperty
+  this->Makefile->GetState()->DefineProperty
     (this->PropertyName, scope,
      this->BriefDocs.c_str(), this->FullDocs.c_str(), inherited);
 

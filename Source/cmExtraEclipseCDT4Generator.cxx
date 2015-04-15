@@ -469,8 +469,8 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
     fout << "\t\t<nature>" << *nit << "</nature>\n";
     }
 
-  if (const char *extraNaturesProp = mf->GetCMakeInstance()->
-        GetProperty("ECLIPSE_EXTRA_NATURES", cmProperty::GLOBAL))
+  if (const char *extraNaturesProp = mf->GetState()
+        ->GetGlobalProperty("ECLIPSE_EXTRA_NATURES"))
     {
     std::vector<std::string> extraNatures;
     cmSystemTools::ExpandListArgument(extraNaturesProp, extraNatures);

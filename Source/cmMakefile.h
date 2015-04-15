@@ -746,14 +746,6 @@ public:
   bool ExecuteCommand(const cmListFileFunction& lff,
                       cmExecutionStatus &status);
 
-  /** Check if a command exists. */
-  bool CommandExists(const char* name) const;
-
-  /**
-   * Add a command to this cmake instance
-   */
-  void AddCommand(cmCommand* );
-
   ///! Enable support for named language, if nil then all languages are
   ///enabled.
   void EnableLanguage(std::vector<std::string>const& languages, bool optional);
@@ -850,9 +842,6 @@ public:
     { if(g) this->TestGenerators.push_back(g); }
   const std::vector<cmTestGenerator*>& GetTestGenerators() const
     { return this->TestGenerators; }
-
-  // Define the properties
-  static void DefineProperties(cmake *cm);
 
   // push and pop variable scopes
   void PushScope();

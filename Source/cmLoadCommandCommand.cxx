@@ -273,7 +273,7 @@ bool cmLoadCommandCommand
     // create a function blocker and set it up
     cmLoadedCommand *f = new cmLoadedCommand();
     (*initFunction)(&f->info);
-    this->Makefile->AddCommand(f);
+    this->Makefile->GetState()->AddCommand(f);
     return true;
     }
   this->SetError("Attempt to load command failed. "

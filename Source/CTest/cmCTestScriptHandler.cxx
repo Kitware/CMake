@@ -214,7 +214,7 @@ void cmCTestScriptHandler::AddCTestCommand(cmCTestCommand* command)
   cmCTestCommand* newCom = command;
   newCom->CTest = this->CTest;
   newCom->CTestScriptHandler = this;
-  this->CMake->AddCommand(newCom);
+  this->CMake->GetState()->AddCommand(newCom);
 }
 
 int cmCTestScriptHandler::ExecuteScript(const std::string& total_script_arg)
@@ -353,7 +353,7 @@ void cmCTestScriptHandler::CreateCMake()
 
   // remove all cmake commands which are not scriptable, since they can't be
   // used in ctest scripts
-  this->CMake->RemoveUnscriptableCommands();
+  this->CMake->GetState()->RemoveUnscriptableCommands();
 
   // add any ctest specific commands, probably should have common superclass
   // for ctest commands to clean this up. If a couple more commands are

@@ -489,9 +489,6 @@ public:
                        const char** imp,
                        std::string& suffix) const;
 
-  // Define the properties
-  static void DefineProperties(cmake *cm);
-
   /** Get the macro to define when building sources in this target.
       If no macro should be defined null is returned.  */
   const char* GetExportMacro() const;

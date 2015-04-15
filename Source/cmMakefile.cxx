@@ -244,12 +244,6 @@ void cmMakefile::Print() const
 #endif
 }
 
-bool cmMakefile::CommandExists(const char* name) const
-{
-  return this->GetCMakeInstance()->CommandExists(name);
-}
-
-
 //----------------------------------------------------------------------------
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
@@ -340,7 +334,7 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   static_cast<void>(stack_manager);
 
   // Lookup the command prototype.
-  if(cmCommand* proto = this->GetCMakeInstance()->GetCommand(name))
+  if(cmCommand* proto = this->GetState()->GetCommand(name))
     {
     // Clone the prototype.
     cmsys::auto_ptr<cmCommand> pcmd(proto->Clone());
@@ -716,11 +710,6 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         return;
       }
     }
-}
-
-void cmMakefile::AddCommand(cmCommand* wg)
-{
-  this->GetCMakeInstance()->AddCommand(wg);
 }
 
 // Set the make file
@@ -4250,7 +4239,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
       return this->LocalGenerator->GetParent()->GetMakefile()->
         GetProperty(prop, scope);
       }
-    return this->GetCMakeInstance()->GetProperty(prop,scope);
+    return this->GetState()->GetGlobalProperty(prop);
     }
 
   return retVal;
@@ -4476,21 +4465,6 @@ void cmMakefile::RaiseScope(const std::string& var, const char *varDef)
     }
 }
 
-
-// define properties
-void cmMakefile::DefineProperties(cmake *cm)
-{
-  cm->DefineProperty
-    ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
-     "", "", true);
-  cm->DefineProperty
-    ("RULE_LAUNCH_LINK", cmProperty::DIRECTORY,
-     "", "", true);
-  cm->DefineProperty
-    ("RULE_LAUNCH_CUSTOM", cmProperty::DIRECTORY,
-     "", "", true);
-}
-
 //----------------------------------------------------------------------------
 cmTarget*
 cmMakefile::AddImportedTarget(const std::string& name,
@@ -4611,7 +4585,8 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
         this->LocalGenerator->GetGlobalGenerator()->GetCMakeInstance();
       if(isCustom && existing->GetType() == cmTarget::UTILITY &&
          this != existing->GetMakefile() &&
-         cm->GetPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
+         cm->GetState()
+           ->GetGlobalPropertyAsBool("ALLOW_DUPLICATE_CUSTOM_TARGETS"))
         {
         return true;
         }

@@ -120,8 +120,8 @@ bool cmFindPackageCommand
 
   // Lookup whether lib64 paths should be used.
   if(this->Makefile->PlatformIs64Bit() &&
-     this->Makefile->GetCMakeInstance()
-     ->GetPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
+     this->Makefile->GetState()
+         ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_LIB64_PATHS"))
     {
     this->UseLib64Paths = true;
     }
@@ -1015,8 +1015,8 @@ bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
 void cmFindPackageCommand::AppendToFoundProperty(bool found)
 {
   std::vector<std::string> foundContents;
-  const char *foundProp =
-             this->Makefile->GetCMakeInstance()->GetProperty("PACKAGES_FOUND");
+  const char *foundProp = this->Makefile->GetState()
+                              ->GetGlobalProperty("PACKAGES_FOUND");
   if (foundProp && *foundProp)
     {
     std::string tmp = foundProp;
@@ -1032,7 +1032,8 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
 
   std::vector<std::string> notFoundContents;
   const char *notFoundProp =
-         this->Makefile->GetCMakeInstance()->GetProperty("PACKAGES_NOT_FOUND");
+         this->Makefile->GetState()
+             ->GetGlobalProperty("PACKAGES_NOT_FOUND");
   if (notFoundProp && *notFoundProp)
     {
     std::string tmp = notFoundProp;
@@ -1057,12 +1058,12 @@ void cmFindPackageCommand::AppendToFoundProperty(bool found)
 
 
   std::string tmp = cmJoin(foundContents, ";");
-  this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_FOUND",
-                                                  tmp.c_str());
+  this->Makefile->GetState()
+      ->SetGlobalProperty("PACKAGES_FOUND", tmp.c_str());
 
   tmp = cmJoin(notFoundContents, ";");
-  this->Makefile->GetCMakeInstance()->SetProperty("PACKAGES_NOT_FOUND",
-                                                  tmp.c_str());
+  this->Makefile->GetState()
+      ->SetGlobalProperty("PACKAGES_NOT_FOUND", tmp.c_str());
 }
 
 //----------------------------------------------------------------------------
@@ -1071,8 +1072,8 @@ void cmFindPackageCommand::AppendSuccessInformation()
   {
   std::string transitivePropName = "_CMAKE_";
   transitivePropName += this->Name + "_TRANSITIVE_DEPENDENCY";
-  this->Makefile->GetCMakeInstance()
-                ->SetProperty(transitivePropName, "False");
+  this->Makefile->GetState()
+                ->SetGlobalProperty(transitivePropName, "False");
   }
   std::string found = this->Name;
   found += "_FOUND";
@@ -1090,8 +1091,8 @@ void cmFindPackageCommand::AppendSuccessInformation()
   std::string quietInfoPropName = "_CMAKE_";
   quietInfoPropName += this->Name;
   quietInfoPropName += "_QUIET";
-  this->Makefile->GetCMakeInstance()->SetProperty(quietInfoPropName,
-                                               this->Quiet ? "TRUE" : "FALSE");
+  this->Makefile->GetState()
+      ->SetGlobalProperty(quietInfoPropName, this->Quiet ? "TRUE" : "FALSE");
 
   // set a global property to record the required version of this package
   std::string versionInfoPropName = "_CMAKE_";
@@ -1104,15 +1105,15 @@ void cmFindPackageCommand::AppendSuccessInformation()
     versionInfo += " ";
     versionInfo += this->Version;
     }
-  this->Makefile->GetCMakeInstance()->SetProperty(versionInfoPropName,
-                                                  versionInfo.c_str());
+  this->Makefile->GetState()
+      ->SetGlobalProperty(versionInfoPropName, versionInfo.c_str());
   if (this->Required)
     {
     std::string requiredInfoPropName = "_CMAKE_";
     requiredInfoPropName += this->Name;
     requiredInfoPropName += "_TYPE";
-    this->Makefile->GetCMakeInstance()->SetProperty(
-                                     requiredInfoPropName, "REQUIRED");
+    this->Makefile->GetState()
+        ->SetGlobalProperty(requiredInfoPropName, "REQUIRED");
     }
 
 

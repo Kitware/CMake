@@ -13,13 +13,17 @@
 #define cmState_h
 
 #include "cmStandardIncludes.h"
+#include "cmPropertyDefinitionMap.h"
+#include "cmPropertyMap.h"
 
 class cmake;
+class cmCommand;
 
 class cmState
 {
 public:
   cmState(cmake* cm);
+  ~cmState();
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };
@@ -55,8 +59,49 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propertyName);
 
+  void Initialize();
+  // Define a property
+  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
+                      const char *ShortDescription,
+                      const char *FullDescription,
+                      bool chain = false);
+
+  // get property definition
+  cmPropertyDefinition *GetPropertyDefinition
+  (const std::string& name, cmProperty::ScopeType scope);
+
+  // Is a property defined?
+  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
+  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
+
+  void SetLanguageEnabled(std::string const& l);
+  bool GetLanguageEnabled(std::string const& l) const;
+  std::vector<std::string> GetEnabledLanguages() const;
+  void ClearEnabledLanguages();
+
+  bool GetIsInTryCompile() const;
+  void SetIsInTryCompile(bool b);
+
+  cmCommand* GetCommand(std::string const& name) const;
+  void AddCommand(cmCommand* command);
+  void RemoveUnscriptableCommands();
+  void RenameCommand(std::string const& oldName, std::string const& newName);
+  void RemoveUserDefinedCommands();
+  std::vector<std::string> GetCommandNames() const;
+
+  void SetGlobalProperty(const std::string& prop, const char *value);
+  void AppendGlobalProperty(const std::string& prop,
+                      const char *value,bool asString=false);
+  const char *GetGlobalProperty(const std::string& prop);
+  bool GetGlobalPropertyAsBool(const std::string& prop);
+
 private:
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
+  std::vector<std::string> EnabledLanguages;
+  std::map<std::string, cmCommand*> Commands;
+  cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
+  bool IsInTryCompile;
 };
 
 #endif

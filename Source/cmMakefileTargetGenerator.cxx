@@ -20,6 +20,7 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
+#include "cmState.h"
 #include "cmComputeLinkInformation.h"
 #include "cmCustomCommandGenerator.h"
 #include "cmGeneratorExpression.h"
@@ -51,7 +52,8 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
   this->GeneratorTarget = this->GlobalGenerator->GetGeneratorTarget(target);
   cmake* cm = this->GlobalGenerator->GetCMakeInstance();
   this->NoRuleMessages = false;
-  if(const char* ruleStatus = cm->GetProperty("RULE_MESSAGES"))
+  if(const char* ruleStatus = cm->GetState()
+                                ->GetGlobalProperty("RULE_MESSAGES"))
     {
     this->NoRuleMessages = cmSystemTools::IsOff(ruleStatus);
     }

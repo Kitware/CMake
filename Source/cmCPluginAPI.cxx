@@ -164,7 +164,7 @@ int CCONV cmIsOn(void *arg, const char* name)
 int CCONV cmCommandExists(void *arg, const char* name)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return static_cast<int>(mf->CommandExists(name));
+  return static_cast<int>(mf->GetState()->GetCommand(name) ? 1 : 0);
 }
 
 void CCONV cmAddDefineFlag(void *arg, const char* definition)
@@ -867,7 +867,7 @@ void CCONV DefineSourceFileProperty (void *arg, const char *name,
   int chained)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  mf->GetCMakeInstance()->DefineProperty(name,cmProperty::SOURCE_FILE,
+  mf->GetState()->DefineProperty(name,cmProperty::SOURCE_FILE,
                                          briefDocs, longDocs,
                                          chained != 0);
 }

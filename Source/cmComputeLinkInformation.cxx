@@ -15,6 +15,7 @@
 #include "cmOrderDirectories.h"
 
 #include "cmGlobalGenerator.h"
+#include "cmState.h"
 #include "cmLocalGenerator.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
@@ -250,8 +251,8 @@ cmComputeLinkInformation
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // Check whether to recognize OpenBSD-style library versioned names.
-  this->OpenBSD = this->Makefile->GetCMakeInstance()
-    ->GetPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
+  this->OpenBSD = this->Makefile->GetState()
+            ->GetGlobalPropertyAsBool("FIND_LIBRARY_USE_OPENBSD_VERSIONING");
 
   // The configuration being linked.
   this->Config = config;
@@ -796,9 +797,8 @@ void cmComputeLinkInformation::AddSharedDepItem(std::string const& item,
 void cmComputeLinkInformation::ComputeLinkTypeInfo()
 {
   // Check whether archives may actually be shared libraries.
-  this->ArchivesMayBeShared =
-    this->CMakeInstance->GetPropertyAsBool(
-      "TARGET_ARCHIVES_MAY_BE_SHARED_LIBS");
+  this->ArchivesMayBeShared = this->CMakeInstance->GetState()
+              ->GetGlobalPropertyAsBool("TARGET_ARCHIVES_MAY_BE_SHARED_LIBS");
 
   // First assume we cannot do link type stuff.
   this->LinkTypeEnabled = false;
@@ -1527,9 +1527,10 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
       // Print the warning at most once for this item.
       std::string wid = "CMP0008-WARNING-GIVEN-";
       wid += item;
-      if(!this->CMakeInstance->GetPropertyAsBool(wid))
+      if(!this->CMakeInstance->GetState()
+              ->GetGlobalPropertyAsBool(wid))
         {
-        this->CMakeInstance->SetProperty(wid, "1");
+        this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1");
         std::ostringstream w;
         w << (this->Makefile->GetPolicies()
               ->GetPolicyWarning(cmPolicies::CMP0008)) << "\n"
@@ -1576,9 +1577,11 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
   switch(this->Target->GetPolicyStatusCMP0003())
     {
     case cmPolicies::WARN:
-      if(!this->CMakeInstance->GetPropertyAsBool("CMP0003-WARNING-GIVEN"))
+      if(!this->CMakeInstance->GetState()
+              ->GetGlobalPropertyAsBool("CMP0003-WARNING-GIVEN"))
         {
-        this->CMakeInstance->SetProperty("CMP0003-WARNING-GIVEN", "1");
+        this->CMakeInstance->GetState()
+            ->SetGlobalProperty("CMP0003-WARNING-GIVEN", "1");
         std::ostringstream w;
         this->PrintLinkPolicyDiagnosis(w);
         this->CMakeInstance->IssueMessage(cmake::AUTHOR_WARNING, w.str(),

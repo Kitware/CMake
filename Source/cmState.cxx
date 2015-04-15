@@ -13,10 +13,21 @@
 
 #include "cmake.h"
 #include "cmCacheManager.h"
+#include "cmCommand.h"
+#include "cmAlgorithms.h"
+
+#include <assert.h>
 
 cmState::cmState(cmake* cm)
-  : CMakeInstance(cm)
+  : CMakeInstance(cm),
+    IsInTryCompile(false)
 {
+  this->Initialize();
+}
+
+cmState::~cmState()
+{
+  cmDeleteAll(this->Commands);
 }
 
 const char* cmCacheEntryTypes[] =
@@ -177,4 +188,259 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
 {
   this->CMakeInstance->GetCacheManager()
        ->GetCacheIterator(key.c_str()).SetProperty(propertyName, (void*)0);
+}
+
+void cmState::Initialize()
+{
+  this->GlobalProperties.clear();
+
+  this->PropertyDefinitions.clear();
+  this->DefineProperty
+    ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_LINK", cmProperty::DIRECTORY,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_CUSTOM", cmProperty::DIRECTORY,
+     "", "", true);
+
+  this->DefineProperty
+    ("RULE_LAUNCH_COMPILE", cmProperty::TARGET,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_LINK", cmProperty::TARGET,
+     "", "", true);
+  this->DefineProperty
+    ("RULE_LAUNCH_CUSTOM", cmProperty::TARGET,
+     "", "", true);
+}
+
+void cmState::DefineProperty(const std::string& name,
+                           cmProperty::ScopeType scope,
+                           const char *ShortDescription,
+                           const char *FullDescription,
+                           bool chained)
+{
+  this->PropertyDefinitions[scope].DefineProperty(name,scope,ShortDescription,
+                                                  FullDescription,
+                                                  chained);
+}
+
+cmPropertyDefinition *cmState
+::GetPropertyDefinition(const std::string& name,
+                        cmProperty::ScopeType scope)
+{
+  if (this->IsPropertyDefined(name,scope))
+    {
+    return &(this->PropertyDefinitions[scope][name]);
+    }
+  return 0;
+}
+
+bool cmState::IsPropertyDefined(const std::string& name,
+                              cmProperty::ScopeType scope)
+{
+  return this->PropertyDefinitions[scope].IsPropertyDefined(name);
+}
+
+bool cmState::IsPropertyChained(const std::string& name,
+                              cmProperty::ScopeType scope)
+{
+  return this->PropertyDefinitions[scope].IsPropertyChained(name);
+}
+
+void cmState::SetLanguageEnabled(std::string const& l)
+{
+  std::vector<std::string>::iterator it =
+      std::lower_bound(this->EnabledLanguages.begin(),
+                       this->EnabledLanguages.end(), l);
+  if (it == this->EnabledLanguages.end() || *it != l)
+    {
+    this->EnabledLanguages.insert(it, l);
+    }
+}
+
+bool cmState::GetLanguageEnabled(std::string const& l) const
+{
+  return std::binary_search(this->EnabledLanguages.begin(),
+                            this->EnabledLanguages.end(), l);
+}
+
+std::vector<std::string> cmState::GetEnabledLanguages() const
+{
+  return this->EnabledLanguages;
+}
+
+void cmState::ClearEnabledLanguages()
+{
+  this->EnabledLanguages.clear();
+}
+
+bool cmState::GetIsInTryCompile() const
+{
+  return this->IsInTryCompile;
+}
+
+void cmState::SetIsInTryCompile(bool b)
+{
+  this->IsInTryCompile = b;
+}
+
+void cmState::RenameCommand(std::string const& oldName,
+                            std::string const& newName)
+{
+  // if the command already exists, free the old one
+  std::string sOldName = cmSystemTools::LowerCase(oldName);
+  std::string sNewName = cmSystemTools::LowerCase(newName);
+  std::map<std::string, cmCommand*>::iterator pos =
+      this->Commands.find(sOldName);
+  if ( pos == this->Commands.end() )
+    {
+    return;
+    }
+  cmCommand* cmd = pos->second;
+
+  pos = this->Commands.find(sNewName);
+  if (pos != this->Commands.end())
+    {
+    delete pos->second;
+    this->Commands.erase(pos);
+    }
+  this->Commands.insert(std::make_pair(sNewName, cmd));
+  pos = this->Commands.find(sOldName);
+  this->Commands.erase(pos);
+}
+
+void cmState::AddCommand(cmCommand* command)
+{
+  std::string name = cmSystemTools::LowerCase(command->GetName());
+  // if the command already exists, free the old one
+  std::map<std::string, cmCommand*>::iterator pos = this->Commands.find(name);
+  if (pos != this->Commands.end())
+    {
+    delete pos->second;
+    this->Commands.erase(pos);
+    }
+  this->Commands.insert(std::make_pair(name, command));
+}
+
+void cmState::RemoveUnscriptableCommands()
+{
+  std::vector<std::string> unscriptableCommands;
+  for (std::map<std::string, cmCommand*>::iterator
+       pos = this->Commands.begin();
+       pos != this->Commands.end(); )
+    {
+    if (!pos->second->IsScriptable())
+      {
+      delete pos->second;
+      this->Commands.erase(pos++);
+      }
+    else
+      {
+      ++pos;
+      }
+    }
+}
+
+cmCommand* cmState::GetCommand(std::string const& name) const
+{
+  cmCommand* command = 0;
+  std::string sName = cmSystemTools::LowerCase(name);
+  std::map<std::string, cmCommand*>::const_iterator pos =
+      this->Commands.find(sName);
+  if (pos != this->Commands.end())
+    {
+    command = (*pos).second;
+    }
+  return command;
+}
+
+std::vector<std::string> cmState::GetCommandNames() const
+{
+  std::vector<std::string> commandNames;
+  commandNames.reserve(this->Commands.size());
+  std::map<std::string, cmCommand*>::const_iterator cmds
+      = this->Commands.begin();
+  for ( ; cmds != this->Commands.end(); ++ cmds )
+    {
+    commandNames.push_back(cmds->first);
+    }
+  return commandNames;
+}
+
+void cmState::RemoveUserDefinedCommands()
+{
+  for(std::map<std::string, cmCommand*>::iterator j = this->Commands.begin();
+      j != this->Commands.end(); )
+    {
+    if (j->second->IsA("cmMacroHelperCommand") ||
+        j->second->IsA("cmFunctionHelperCommand"))
+      {
+      delete j->second;
+      this->Commands.erase(j++);
+      }
+    else
+      {
+      ++j;
+      }
+    }
+}
+
+void cmState::SetGlobalProperty(const std::string& prop, const char* value)
+{
+  this->GlobalProperties.SetProperty(prop, value, cmProperty::GLOBAL);
+}
+
+void cmState::AppendGlobalProperty(const std::string& prop,
+                                   const char* value, bool asString)
+{
+  this->GlobalProperties.AppendProperty(prop, value,
+                                        cmProperty::GLOBAL, asString);
+}
+
+const char *cmState::GetGlobalProperty(const std::string& prop)
+{
+  // watch for special properties
+  std::string output = "";
+  if ( prop == "CACHE_VARIABLES" )
+    {
+    std::vector<std::string> cacheKeys = this->GetCacheEntryKeys();
+    this->SetGlobalProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
+    }
+  else if ( prop == "COMMANDS" )
+    {
+    std::vector<std::string> commands = this->GetCommandNames();
+    this->SetGlobalProperty("COMMANDS", cmJoin(commands, ";").c_str());
+    }
+  else if ( prop == "IN_TRY_COMPILE" )
+    {
+    this->SetGlobalProperty("IN_TRY_COMPILE",
+                      this->IsInTryCompile ? "1" : "0");
+    }
+  else if ( prop == "ENABLED_LANGUAGES" )
+    {
+    std::string langs;
+    langs = cmJoin(this->EnabledLanguages, ";");
+    this->SetGlobalProperty("ENABLED_LANGUAGES", langs.c_str());
+    }
+#define STRING_LIST_ELEMENT(F) ";" #F
+  if (prop == "CMAKE_C_KNOWN_FEATURES")
+    {
+    return FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT) + 1;
+    }
+  if (prop == "CMAKE_CXX_KNOWN_FEATURES")
+    {
+    return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
+    }
+#undef STRING_LIST_ELEMENT
+  bool dummy = false;
+  return this->GlobalProperties.GetPropertyValue(prop, cmProperty::GLOBAL,
+                                                 dummy);
+}
+
+bool cmState::GetGlobalPropertyAsBool(const std::string& prop)
+{
+  return cmSystemTools::IsOn(this->GetGlobalProperty(prop));
 }

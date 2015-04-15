@@ -15,8 +15,6 @@
 
 #include "cmListFileCache.h"
 #include "cmSystemTools.h"
-#include "cmPropertyDefinitionMap.h"
-#include "cmPropertyMap.h"
 #include "cmInstalledFile.h"
 #include "cmCacheManager.h"
 #include "cmState.h"
@@ -25,7 +23,6 @@ class cmGlobalGeneratorFactory;
 class cmGlobalGenerator;
 class cmLocalGenerator;
 class cmMakefile;
-class cmCommand;
 class cmVariableWatch;
 class cmFileTimeComparison;
 class cmExternalMakefileProjectGenerator;
@@ -94,7 +91,6 @@ class cmake
      */
     FIND_PACKAGE_MODE
   };
-  typedef std::map<std::string, cmCommand*> RegisteredCommandsMap;
   typedef std::map<std::string, cmInstalledFile> InstalledFilesMap;
 
   /// Default constructor
@@ -218,22 +214,6 @@ class cmake
    */
   int GetSystemInformation(std::vector<std::string>&);
 
-  /**
-   * Add a command to this cmake instance
-   */
-  void AddCommand(cmCommand* );
-  void RenameCommand(const std::string& oldName, const std::string& newName);
-  void RemoveCommand(const std::string& name);
-  void RemoveUnscriptableCommands();
-
-  /**
-   * Get a command by its name
-   */
-  cmCommand *GetCommand(const std::string& name) const;
-
-  /** Check if a command exists. */
-  bool CommandExists(const std::string& name) const;
-
   ///! Parse command line arguments
   void SetArgs(const std::vector<std::string>&,
                bool directoriesSetBefore = false);
@@ -272,8 +252,6 @@ class cmake
   void AppendProperty(const std::string& prop,
                       const char *value,bool asString=false);
   const char *GetProperty(const std::string& prop);
-  const char *GetProperty(const std::string& prop,
-                          cmProperty::ScopeType scope);
   bool GetPropertyAsBool(const std::string& prop);
 
   ///! Get or create an cmInstalledFile instance and return a pointer to it
@@ -323,20 +301,6 @@ class cmake
 
   void MarkCliAsUsed(const std::string& variable);
 
-  // Define a property
-  void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
-                      const char *ShortDescription,
-                      const char *FullDescription,
-                      bool chain = false);
-
-  // get property definition
-  cmPropertyDefinition *GetPropertyDefinition
-  (const std::string& name, cmProperty::ScopeType scope);
-
-  // Is a property defined?
-  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
-  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
-
   /** Get the list of configurations (in upper case) considered to be
       debugging configurations.*/
   std::vector<std::string> GetDebugConfigs();
@@ -371,17 +335,12 @@ protected:
   void RunCheckForUnusedVariables();
   void InitializeProperties();
   int HandleDeleteCacheVariables(const std::string& var);
-  cmPropertyMap Properties;
-
-  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>
-  PropertyDefinitions;
 
   typedef
      cmExternalMakefileProjectGenerator* (*CreateExtraGeneratorFunctionType)();
   typedef std::map<std::string,
                 CreateExtraGeneratorFunctionType> RegisteredExtraGeneratorsMap;
   typedef std::vector<cmGlobalGeneratorFactory*> RegisteredGeneratorsVector;
-  RegisteredCommandsMap Commands;
   RegisteredGeneratorsVector Generators;
   RegisteredExtraGeneratorsMap ExtraGenerators;
   void AddDefaultCommands();

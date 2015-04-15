@@ -136,8 +136,6 @@ cmake::cmake()
   this->Policies = new cmPolicies();
   this->State = new cmState(this);
 
-  this->InitializeProperties();
-
 #ifdef __APPLE__
   struct rlimit rlp;
   if(!getrlimit(RLIMIT_STACK, &rlp))
@@ -151,7 +149,6 @@ cmake::cmake()
 #endif
 
   this->Verbose = false;
-  this->InTryCompile = false;
   this->CacheManager = new cmCacheManager(this);
   this->GlobalGenerator = 0;
   this->ProgressCallback = 0;
@@ -180,7 +177,6 @@ cmake::~cmake()
     delete this->GlobalGenerator;
     this->GlobalGenerator = 0;
     }
-  cmDeleteAll(this->Commands);
   cmDeleteAll(this->Generators);
 #ifdef CMAKE_BUILD_WITH_CMAKE
   delete this->VariableWatch;
@@ -188,128 +184,10 @@ cmake::~cmake()
   delete this->FileComparison;
 }
 
-void cmake::InitializeProperties()
-{
-  this->Properties.clear();
-  this->PropertyDefinitions.clear();
-
-  // initialize properties
-  cmTarget::DefineProperties(this);
-  cmMakefile::DefineProperties(this);
-}
-
 void cmake::CleanupCommandsAndMacros()
 {
-  this->InitializeProperties();
-  std::vector<cmCommand*> commands;
-  for(RegisteredCommandsMap::iterator j = this->Commands.begin();
-      j != this->Commands.end(); ++j)
-    {
-    if ( !j->second->IsA("cmMacroHelperCommand") &&
-         !j->second->IsA("cmFunctionHelperCommand"))
-      {
-      commands.push_back(j->second);
-      }
-    else
-      {
-      delete j->second;
-      }
-    }
-  this->Commands.clear();
-  std::vector<cmCommand*>::iterator it;
-  for ( it = commands.begin(); it != commands.end();
-    ++ it )
-    {
-    this->Commands[cmSystemTools::LowerCase((*it)->GetName())] = *it;
-    }
-}
-
-bool cmake::CommandExists(const std::string& name) const
-{
-  return this->GetCommand(name) ? true : false;
-}
-
-cmCommand *cmake::GetCommand(const std::string& name) const
-{
-  cmCommand* command = 0;
-  std::string sName = cmSystemTools::LowerCase(name);
-  RegisteredCommandsMap::const_iterator pos = this->Commands.find(sName);
-  if (pos != this->Commands.end())
-    {
-    command = (*pos).second;
-    }
-  return command;
-}
-
-void cmake::RenameCommand(const std::string& oldName,
-                          const std::string& newName)
-{
-  // if the command already exists, free the old one
-  std::string sOldName = cmSystemTools::LowerCase(oldName);
-  RegisteredCommandsMap::iterator pos = this->Commands.find(sOldName);
-  if ( pos == this->Commands.end() )
-    {
-    return;
-    }
-  std::string sNewName = cmSystemTools::LowerCase(newName);
-  cmCommand* cmd = pos->second;
-
-  pos = this->Commands.find(sNewName);
-  if (pos != this->Commands.end())
-    {
-    delete pos->second;
-    this->Commands.erase(pos);
-    }
-  this->Commands.insert(std::make_pair(sNewName, cmd));
-  pos = this->Commands.find(sOldName);
-  this->Commands.erase(pos);
-}
-
-void cmake::RemoveCommand(const std::string& name)
-{
-  std::string sName = cmSystemTools::LowerCase(name);
-  RegisteredCommandsMap::iterator pos = this->Commands.find(sName);
-  if ( pos != this->Commands.end() )
-    {
-    delete pos->second;
-    this->Commands.erase(pos);
-    }
-}
-
-void cmake::AddCommand(cmCommand* command)
-{
-  std::string name = cmSystemTools::LowerCase(command->GetName());
-  // if the command already exists, free the old one
-  RegisteredCommandsMap::iterator pos = this->Commands.find(name);
-  if (pos != this->Commands.end())
-    {
-    delete pos->second;
-    this->Commands.erase(pos);
-    }
-  this->Commands.insert(std::make_pair(name, command));
-}
-
-
-void cmake::RemoveUnscriptableCommands()
-{
-  std::vector<std::string> unscriptableCommands;
-  for (cmake::RegisteredCommandsMap::const_iterator
-       pos = this->Commands.begin();
-       pos != this->Commands.end();
-       ++pos)
-    {
-    if (!pos->second->IsScriptable())
-      {
-      unscriptableCommands.push_back(pos->first);
-      }
-    }
-
-  for(std::vector<std::string>::const_iterator it=unscriptableCommands.begin();
-      it != unscriptableCommands.end();
-      ++it)
-    {
-    this->RemoveCommand(*it);
-    }
+  this->State->Initialize();
+  this->State->RemoveUserDefinedCommands();
 }
 
 // Parse the args
@@ -1274,8 +1152,9 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
   std::vector<std::string> argsSplit;
   cmSystemTools::ExpandListArgument(std::string(var), argsSplit, true);
   // erase the property to avoid infinite recursion
-  this->SetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
-  if(this->GetIsInTryCompile())
+  this->State
+      ->SetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_", "");
+  if(this->State->GetIsInTryCompile())
     {
     return 0;
     }
@@ -1351,8 +1230,8 @@ int cmake::Configure()
       }
     }
   int ret = this->ActualConfigure();
-  const char* delCacheVars =
-    this->GetProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
+  const char* delCacheVars = this->State
+                    ->GetGlobalProperty("__CMAKE_DELETE_CACHE_CHANGE_VARS_");
   if(delCacheVars && delCacheVars[0] != 0)
     {
     return this->HandleDeleteCacheVariables(delCacheVars);
@@ -1558,7 +1437,7 @@ int cmake::ActualConfigure()
   // reset any system configuration information, except for when we are
   // InTryCompile. With TryCompile the system info is taken from the parent's
   // info to save time
-  if (!this->InTryCompile)
+  if (!this->State->GetIsInTryCompile())
     {
     this->GlobalGenerator->ClearEnabledLanguages();
 
@@ -1627,7 +1506,7 @@ int cmake::ActualConfigure()
 
   cmMakefile* mf=this->GlobalGenerator->GetLocalGenerators()[0]->GetMakefile();
   if (mf->IsOn("CTEST_USE_LAUNCHERS")
-              && !this->GetProperty("RULE_LAUNCH_COMPILE", cmProperty::GLOBAL))
+              && !this->State->GetGlobalProperty("RULE_LAUNCH_COMPILE"))
     {
     cmSystemTools::Error("CTEST_USE_LAUNCHERS is enabled, but the "
                         "RULE_LAUNCH_COMPILE global property is not defined.\n"
@@ -1845,7 +1724,7 @@ void cmake::AddDefaultCommands()
   for(std::vector<cmCommand*>::iterator i = commands.begin();
       i != commands.end(); ++i)
     {
-    this->AddCommand(*i);
+    this->State->AddCommand(*i);
     }
 }
 
@@ -1961,7 +1840,7 @@ void cmake::SetProgressCallback(ProgressCallbackType f, void *cd)
 
 void cmake::UpdateProgress(const char *msg, float prog)
 {
-  if(this->ProgressCallback && !this->InTryCompile)
+  if(this->ProgressCallback && !this->State->GetIsInTryCompile())
     {
     (*this->ProgressCallback)(msg, prog, this->ProgressCallbackClientData);
     return;
@@ -1970,12 +1849,12 @@ void cmake::UpdateProgress(const char *msg, float prog)
 
 bool cmake::GetIsInTryCompile() const
 {
-  return this->InTryCompile;
+  return this->State->GetIsInTryCompile();
 }
 
 void cmake::SetIsInTryCompile(bool b)
 {
-  this->InTryCompile = b;
+  this->State->SetIsInTryCompile(b);
 }
 
 void cmake::GetGeneratorDocumentation(std::vector<cmDocumentationEntry>& v)
@@ -2298,114 +2177,25 @@ void cmake::GenerateGraphViz(const char* fileName) const
 #endif
 }
 
-void cmake::DefineProperty(const std::string& name,
-                           cmProperty::ScopeType scope,
-                           const char *ShortDescription,
-                           const char *FullDescription,
-                           bool chained)
-{
-  this->PropertyDefinitions[scope].DefineProperty(name,scope,ShortDescription,
-                                                  FullDescription,
-                                                  chained);
-}
-
-cmPropertyDefinition *cmake
-::GetPropertyDefinition(const std::string& name,
-                        cmProperty::ScopeType scope)
-{
-  if (this->IsPropertyDefined(name,scope))
-    {
-    return &(this->PropertyDefinitions[scope][name]);
-    }
-  return 0;
-}
-
-bool cmake::IsPropertyDefined(const std::string& name,
-                              cmProperty::ScopeType scope)
-{
-  return this->PropertyDefinitions[scope].IsPropertyDefined(name);
-}
-
-bool cmake::IsPropertyChained(const std::string& name,
-                              cmProperty::ScopeType scope)
-{
-  return this->PropertyDefinitions[scope].IsPropertyChained(name);
-}
-
 void cmake::SetProperty(const std::string& prop, const char* value)
 {
-  this->Properties.SetProperty(prop, value, cmProperty::GLOBAL);
+  this->State->SetGlobalProperty(prop, value);
 }
 
 void cmake::AppendProperty(const std::string& prop,
                            const char* value, bool asString)
 {
-  this->Properties.AppendProperty(prop, value, cmProperty::GLOBAL, asString);
+  this->State->AppendGlobalProperty(prop, value, asString);
 }
 
 const char *cmake::GetProperty(const std::string& prop)
 {
-  return this->GetProperty(prop, cmProperty::GLOBAL);
-}
-
-const char *cmake::GetProperty(const std::string& prop,
-                               cmProperty::ScopeType scope)
-{
-  // watch for special properties
-  std::string output = "";
-  if ( prop == "CACHE_VARIABLES" )
-    {
-    std::vector<std::string> cacheKeys = this->State->GetCacheEntryKeys();
-    this->SetProperty("CACHE_VARIABLES", cmJoin(cacheKeys, ";").c_str());
-    }
-  else if ( prop == "COMMANDS" )
-    {
-    cmake::RegisteredCommandsMap::iterator cmds
-        = this->Commands.begin();
-    for (unsigned int cc=0 ; cmds != this->Commands.end(); ++ cmds )
-      {
-      if ( cc > 0 )
-        {
-        output += ";";
-        }
-      output += cmds->first.c_str();
-      cc++;
-      }
-    this->SetProperty("COMMANDS",output.c_str());
-    }
-  else if ( prop == "IN_TRY_COMPILE" )
-    {
-    this->SetProperty("IN_TRY_COMPILE",
-                      this->GetIsInTryCompile()? "1":"0");
-    }
-  else if ( prop == "ENABLED_LANGUAGES" )
-    {
-    std::string lang;
-    if(this->GlobalGenerator)
-      {
-      std::vector<std::string> enLangs;
-      this->GlobalGenerator->GetEnabledLanguages(enLangs);
-      lang = cmJoin(enLangs, ";");
-      }
-    this->SetProperty("ENABLED_LANGUAGES", lang.c_str());
-    }
-#define STRING_LIST_ELEMENT(F) ";" #F
-  if (prop == "CMAKE_C_KNOWN_FEATURES")
-    {
-    return FOR_EACH_C_FEATURE(STRING_LIST_ELEMENT) + 1;
-    }
-  if (prop == "CMAKE_CXX_KNOWN_FEATURES")
-    {
-    return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
-    }
-#undef STRING_LIST_ELEMENT
-  bool dummy = false;
-  return this->Properties.GetPropertyValue(prop, scope, dummy);
+  return this->State->GetGlobalProperty(prop);
 }
 
 bool cmake::GetPropertyAsBool(const std::string& prop)
 {
-  return cmSystemTools::IsOn(this->GetProperty(prop));
+  return this->State->GetGlobalPropertyAsBool(prop);
 }
 
 cmInstalledFile *cmake::GetOrCreateInstalledFile(
@@ -2801,7 +2591,8 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 std::vector<std::string> cmake::GetDebugConfigs()
 {
   std::vector<std::string> configs;
-  if(const char* config_list = this->GetProperty("DEBUG_CONFIGURATIONS"))
+  if(const char* config_list =
+                      this->State->GetGlobalProperty("DEBUG_CONFIGURATIONS"))
     {
     // Expand the specified list and convert to upper-case.
     cmSystemTools::ExpandListArgument(config_list, configs);

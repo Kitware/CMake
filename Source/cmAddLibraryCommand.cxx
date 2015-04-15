@@ -12,6 +12,7 @@
 #include "cmAddLibraryCommand.h"
 
 #include "cmake.h"
+#include "cmState.h"
 
 // cmLibraryCommand
 bool cmAddLibraryCommand
@@ -330,7 +331,7 @@ bool cmAddLibraryCommand
     yet its linker language. */
   if ((type == cmTarget::SHARED_LIBRARY ||
        type == cmTarget::MODULE_LIBRARY) &&
-       (this->Makefile->GetCMakeInstance()->GetPropertyAsBool(
+       (this->Makefile->GetState()->GetGlobalPropertyAsBool(
                                       "TARGET_SUPPORTS_SHARED_LIBS") == false))
     {
     std::ostringstream w;
