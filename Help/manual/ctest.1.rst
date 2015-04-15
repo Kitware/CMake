@@ -573,7 +573,7 @@ Configuration settings to specify the version control tool include:
   * :module:`CTest` module variable: ``GITCOMMAND``
 
 ``GITUpdateCustom``
-  Specify a semicolon-separated list of custom command lines to run
+  Specify a custom command line (as a semicolon-separated list) to run
   in the source tree (Git work tree) to update it instead of running
   the ``GITCommand``.
 
@@ -617,7 +617,7 @@ Configuration settings to specify the version control tool include:
   * :module:`CTest` module variable: ``CTEST_P4_OPTIONS``
 
 ``P4UpdateCustom``
-  Specify a semicolon-separated list of custom command lines to run
+  Specify a custom command line (as a semicolon-separated list) to run
   in the source tree (Perforce tree) to update it instead of running
   the ``P4Command``.
 
