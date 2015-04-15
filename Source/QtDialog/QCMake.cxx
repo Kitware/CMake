@@ -144,9 +144,7 @@ void QCMake::configure()
 #endif
 
   this->CMakeInstance->SetHomeDirectory(this->SourceDirectory.toLocal8Bit().data());
-  this->CMakeInstance->SetStartDirectory(this->SourceDirectory.toLocal8Bit().data());
   this->CMakeInstance->SetHomeOutputDirectory(this->BinaryDirectory.toLocal8Bit().data());
-  this->CMakeInstance->SetStartOutputDirectory(this->BinaryDirectory.toLocal8Bit().data());
   this->CMakeInstance->SetGlobalGenerator(
     this->CMakeInstance->CreateGlobalGenerator(this->Generator.toLocal8Bit().data()));
   this->CMakeInstance->SetGeneratorPlatform("");

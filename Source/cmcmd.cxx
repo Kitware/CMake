@@ -642,9 +642,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       homeOutDir = cmSystemTools::CollapseFullPath(homeOutDir);
       startOutDir = cmSystemTools::CollapseFullPath(startOutDir);
       cm.SetHomeDirectory(homeDir);
-      cm.SetStartDirectory(startDir);
       cm.SetHomeOutputDirectory(homeOutDir);
-      cm.SetStartOutputDirectory(startOutDir);
       if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen))
         {
         cm.SetGlobalGenerator(ggd);
