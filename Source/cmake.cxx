@@ -1189,7 +1189,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     }
 
   // remove the cache
-  this->CacheManager->DeleteCache(this->GetStartOutputDirectory());
+  this->CacheManager->DeleteCache(this->GetHomeOutputDirectory());
   // load the empty cache
   this->LoadCache();
   // restore the changed compilers
