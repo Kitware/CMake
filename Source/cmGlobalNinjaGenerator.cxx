@@ -507,7 +507,7 @@ void cmGlobalNinjaGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalNinjaGenerator::GetActualName();
-  entry.Brief = "Generates build.ninja files (experimental).";
+  entry.Brief = "Generates build.ninja files.";
 }
 
 // Implemented in all cmGlobaleGenerator sub-classes.
