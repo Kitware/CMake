@@ -31,9 +31,6 @@ public:
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
-  /** TODO: VS 14 user macro support. */
-  virtual std::string GetUserMacrosDirectory() { return ""; }
-
   virtual const char* GetToolsVersion() { return "14.0"; }
 protected:
   virtual const char* GetIDEVersion() { return "14.0"; }

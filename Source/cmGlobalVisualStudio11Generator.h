@@ -31,8 +31,6 @@ public:
   ///! create the correct local generator
   virtual cmLocalGenerator *CreateLocalGenerator();
 
-  /** TODO: VS 11 user macro support. */
-  virtual std::string GetUserMacrosDirectory() { return ""; }
 protected:
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
