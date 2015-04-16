@@ -185,6 +185,22 @@ void cmGlobalVisualStudio6Generator::Generate()
 
   // Now write out the DSW
   this->OutputDSWFile();
+
+  if (!this->CMakeInstance->GetIsInTryCompile())
+    {
+    const char* cmakeWarnVS6 =
+      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS6");
+    if (!cmakeWarnVS6 || !cmSystemTools::IsOff(cmakeWarnVS6))
+      {
+      this->CMakeInstance->IssueMessage(
+        cmake::WARNING,
+        "The \"Visual Studio 6\" generator is deprecated "
+        "and will be removed in a future version of CMake."
+        "\n"
+        "Add CMAKE_WARN_VS6=OFF to the cache to disable this warning."
+        );
+      }
+    }
 }
 
 // Write a DSW file to the stream
@@ -411,7 +427,7 @@ void cmGlobalVisualStudio6Generator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalVisualStudio6Generator::GetActualName();
-  entry.Brief = "Generates Visual Studio 6 project files.";
+  entry.Brief = "Deprecated. Generates Visual Studio 6 project files.";
 }
 
 //----------------------------------------------------------------------------

@@ -40,6 +40,13 @@ if(RunCMake_GENERATOR STREQUAL "Ninja")
   unset(RunCMake_TEST_NO_CLEAN)
 endif()
 
+if(RunCMake_GENERATOR STREQUAL "Visual Studio 6")
+  set(RunCMake_WARN_VS6 1)
+  run_cmake(DeprecateVS6-WARN-ON)
+  unset(RunCMake_WARN_VS6)
+  run_cmake(DeprecateVS6-WARN-OFF)
+endif()
+
 if(UNIX)
   run_cmake_command(E_create_symlink-no-arg
     ${CMAKE_COMMAND} -E create_symlink
