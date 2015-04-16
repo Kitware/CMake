@@ -16,7 +16,7 @@ else()
 endif()
 
 configure_file(res1.qrc.in res1.qrc @ONLY)
-configure_file(res1_input.txt.in res1_input.txt @ONLY)
+configure_file(res1/input.txt.in res1/input.txt @ONLY)
 
 add_executable(test_res1
   test_res1.cpp
