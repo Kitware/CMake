@@ -250,12 +250,6 @@ void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
   this->GlobalGenerator = gg;
   this->Makefile = new cmMakefile;
   this->Makefile->SetLocalGenerator(this);
-
-  // setup the home directories
-  this->Makefile->SetHomeDirectory(
-    gg->GetCMakeInstance()->GetHomeDirectory());
-  this->Makefile->SetHomeOutputDirectory(
-    gg->GetCMakeInstance()->GetHomeOutputDirectory());
 }
 
 void cmLocalGenerator::ConfigureFinalPass()

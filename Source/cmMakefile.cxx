@@ -696,6 +696,9 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->Properties.SetCMakeInstance(this->GetCMakeInstance());
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
+  this->SetHomeDirectory(this->GetCMakeInstance()->GetHomeDirectory());
+  this->SetHomeOutputDirectory(
+    this->GetCMakeInstance()->GetHomeOutputDirectory());
 }
 
 namespace
