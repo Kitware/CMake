@@ -375,11 +375,11 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
     lg->GetMakefile()->SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
-    lg->GetMakefile()->SetStartOutputDirectory
+    lg->GetMakefile()->SetCurrentBinaryDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetHomeDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
-    lg->GetMakefile()->SetStartDirectory
+    lg->GetMakefile()->SetCurrentSourceDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     if (this->GetWorkingMode() != NORMAL_MODE)
       {

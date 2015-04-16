@@ -348,8 +348,8 @@ void cmCTestScriptHandler::CreateCMake()
   // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
   // Also, some commands need Makefile->GetCurrentSourceDirectory().
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
-  this->Makefile->SetStartDirectory(cwd);
-  this->Makefile->SetStartOutputDirectory(cwd);
+  this->Makefile->SetCurrentSourceDirectory(cwd);
+  this->Makefile->SetCurrentBinaryDirectory(cwd);
 
   // remove all cmake commands which are not scriptable, since they can't be
   // used in ctest scripts

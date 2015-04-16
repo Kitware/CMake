@@ -455,7 +455,7 @@ public:
    * recursing up the tree starting at the StartDirectory and going up until
    * it reaches the HomeDirectory.
    */
-  void SetStartDirectory(const std::string& dir)
+  void SetCurrentSourceDirectory(const std::string& dir)
     {
       this->cmStartDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
@@ -464,7 +464,7 @@ public:
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
                           this->cmStartDirectory.c_str());
     }
-  void SetStartOutputDirectory(const std::string& dir)
+  void SetCurrentBinaryDirectory(const std::string& dir)
     {
       this->StartOutputDirectory = dir;
       cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);

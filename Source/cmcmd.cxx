@@ -647,8 +647,8 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         {
         cm.SetGlobalGenerator(ggd);
         cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-        lgd->GetMakefile()->SetStartDirectory(startDir);
-        lgd->GetMakefile()->SetStartOutputDirectory(startOutDir);
+        lgd->GetMakefile()->SetCurrentSourceDirectory(startDir);
+        lgd->GetMakefile()->SetCurrentBinaryDirectory(startOutDir);
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo.c_str(),
