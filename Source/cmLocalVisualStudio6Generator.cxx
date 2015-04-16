@@ -117,14 +117,14 @@ void cmLocalVisualStudio6Generator::Generate()
 void cmLocalVisualStudio6Generator::OutputDSPFile()
 {
   // If not an in source build, then create the output directory
-  if(strcmp(this->Makefile->GetStartOutputDirectory(),
+  if(strcmp(this->Makefile->GetCurrentBinaryDirectory(),
             this->Makefile->GetHomeDirectory()) != 0)
     {
     if(!cmSystemTools::MakeDirectory
-       (this->Makefile->GetStartOutputDirectory()))
+       (this->Makefile->GetCurrentBinaryDirectory()))
       {
       cmSystemTools::Error("Error creating directory ",
-                           this->Makefile->GetStartOutputDirectory());
+                           this->Makefile->GetCurrentBinaryDirectory());
       }
     }
 
@@ -169,7 +169,7 @@ void cmLocalVisualStudio6Generator::OutputDSPFile()
       std::string::size_type pos = l->first.rfind('/');
       if(pos != std::string::npos)
         {
-        std::string dir = this->Makefile->GetStartOutputDirectory();
+        std::string dir = this->Makefile->GetCurrentBinaryDirectory();
         dir += "/";
         dir += l->first.substr(0, pos);
         if(!cmSystemTools::MakeDirectory(dir.c_str()))
@@ -195,7 +195,7 @@ void cmLocalVisualStudio6Generator::CreateSingleDSP(const std::string& lname,
 
   // create the dsp.cmake file
   std::string fname;
-  fname = this->Makefile->GetStartOutputDirectory();
+  fname = this->Makefile->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".dsp";
@@ -223,7 +223,7 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
   commandLine.push_back(dsprule);
-  std::string makefileIn = this->Makefile->GetStartDirectory();
+  std::string makefileIn = this->Makefile->GetCurrentSourceDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   if(!cmSystemTools::FileExists(makefileIn.c_str()))
@@ -585,9 +585,9 @@ cmLocalVisualStudio6Generator
                         const cmCustomCommand& origCommand)
 {
   // Create a fake output that forces the rule to run.
-  char* output = new char[(strlen(this->Makefile->GetStartOutputDirectory()) +
-                           target.GetName().size() + 30)];
-  sprintf(output,"%s/%s_force_%i", this->Makefile->GetStartOutputDirectory(),
+  char* output = new char[(strlen(this->Makefile->GetCurrentBinaryDirectory())
+                           + target.GetName().size() + 30)];
+  sprintf(output,"%s/%s_force_%i", this->Makefile->GetCurrentBinaryDirectory(),
           target.GetName().c_str(), count);
   const char* comment = origCommand.GetComment();
   if(!comment && origCommand.GetOutputs().empty())

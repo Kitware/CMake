@@ -101,7 +101,7 @@ void cmLocalGenerator::Configure()
   static_cast<void>(clg);
 
   // make sure the CMakeFiles dir is there
-  std::string filesDir = this->Makefile->GetStartOutputDirectory();
+  std::string filesDir = this->Makefile->GetCurrentBinaryDirectory();
   filesDir += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(filesDir.c_str());
 
@@ -177,7 +177,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
 void cmLocalGenerator::ReadInputFile()
 {
   // Look for the CMakeLists.txt file.
-  std::string currentStart = this->Makefile->GetStartDirectory();
+  std::string currentStart = this->Makefile->GetCurrentSourceDirectory();
   currentStart += "/CMakeLists.txt";
   if(cmSystemTools::FileExists(currentStart.c_str(), true))
     {
@@ -194,7 +194,7 @@ void cmLocalGenerator::ReadInputFile()
   cmMakefile* mf = this->Parent->GetMakefile();
   std::ostringstream e;
   e << "The source directory\n"
-    << "  " << this->Makefile->GetStartDirectory() << "\n"
+    << "  " << this->Makefile->GetCurrentSourceDirectory() << "\n"
     << "does not contain a CMakeLists.txt file.";
   switch (mf->GetPolicyStatus(cmPolicies::CMP0014))
     {
@@ -230,7 +230,8 @@ void cmLocalGenerator::SetupPathConversions()
     cmSystemTools::CollapseFullPath(this->Makefile->GetHomeDirectory());
   cmSystemTools::SplitPath(outdir, this->HomeDirectoryComponents);
   outdir =
-    cmSystemTools::CollapseFullPath(this->Makefile->GetStartDirectory());
+    cmSystemTools::CollapseFullPath(
+                                this->Makefile->GetCurrentSourceDirectory());
   cmSystemTools::SplitPath(outdir, this->StartDirectoryComponents);
 
   outdir = cmSystemTools::CollapseFullPath
@@ -239,7 +240,7 @@ void cmLocalGenerator::SetupPathConversions()
                            this->HomeOutputDirectoryComponents);
 
   outdir = cmSystemTools::CollapseFullPath
-    (this->Makefile->GetStartOutputDirectory());
+    (this->Makefile->GetCurrentBinaryDirectory());
   cmSystemTools::SplitPath(outdir,
                            this->StartOutputDirectoryComponents);
 }
@@ -296,7 +297,7 @@ void cmLocalGenerator::GenerateTestFiles()
   const std::string& config =
     this->Makefile->GetConfigurations(configurationTypes, false);
 
-  std::string file = this->Makefile->GetStartOutputDirectory();
+  std::string file = this->Makefile->GetCurrentBinaryDirectory();
   file += "/";
   file += "CTestTestfile.cmake";
 
@@ -305,9 +306,9 @@ void cmLocalGenerator::GenerateTestFiles()
 
   fout << "# CMake generated Testfile for " << std::endl
        << "# Source directory: "
-       << this->Makefile->GetStartDirectory() << std::endl
+       << this->Makefile->GetCurrentSourceDirectory() << std::endl
        << "# Build directory: "
-       << this->Makefile->GetStartOutputDirectory() << std::endl
+       << this->Makefile->GetCurrentBinaryDirectory() << std::endl
        << "# " << std::endl
        << "# This file includes the relevant testing commands "
        << "required for " << std::endl
@@ -337,7 +338,7 @@ void cmLocalGenerator::GenerateTestFiles()
       // TODO: Use add_subdirectory instead?
       fout << "subdirs(";
       std::string outP =
-        this->Children[i]->GetMakefile()->GetStartOutputDirectory();
+        this->Children[i]->GetMakefile()->GetCurrentBinaryDirectory();
       fout << this->Convert(outP,START_OUTPUT);
       fout << ")" << std::endl;
       }
@@ -421,7 +422,7 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 
   // Create the install script file.
-  std::string file = this->Makefile->GetStartOutputDirectory();
+  std::string file = this->Makefile->GetCurrentBinaryDirectory();
   std::string homedir = this->Makefile->GetHomeOutputDirectory();
   std::string currdir = this->Makefile->GetCurrentBinaryDirectory();
   cmSystemTools::ConvertToUnixSlashes(file);
@@ -511,7 +512,7 @@ void cmLocalGenerator::GenerateInstallRules()
       {
       if(!(*ci)->GetMakefile()->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
         {
-        std::string odir = (*ci)->GetMakefile()->GetStartOutputDirectory();
+        std::string odir = (*ci)->GetMakefile()->GetCurrentBinaryDirectory();
         cmSystemTools::ConvertToUnixSlashes(odir);
         fout << "  include(\"" <<  odir
              << "/cmake_install.cmake\")" << std::endl;
@@ -647,7 +648,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     source.GetFullPath(),
     commandLines,
     comment.c_str(),
-    this->Makefile->GetStartOutputDirectory()
+    this->Makefile->GetCurrentBinaryDirectory()
     );
 }
 
@@ -744,7 +745,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
     "",
     commandLines,
     comment.c_str(),
-    this->Makefile->GetStartOutputDirectory()
+    this->Makefile->GetCurrentBinaryDirectory()
     );
   this->Makefile->GetSource(targetFullPath);
   target.Target->AddSource(targetFullPath);
@@ -1548,18 +1549,19 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   if(includeBinaryDir)
     {
     if(emitted.find(
-                this->Makefile->GetStartOutputDirectory()) == emitted.end())
+                this->Makefile->GetCurrentBinaryDirectory()) == emitted.end())
       {
-      dirs.push_back(this->Makefile->GetStartOutputDirectory());
-      emitted.insert(this->Makefile->GetStartOutputDirectory());
+      dirs.push_back(this->Makefile->GetCurrentBinaryDirectory());
+      emitted.insert(this->Makefile->GetCurrentBinaryDirectory());
       }
     }
   if(includeSourceDir)
     {
-    if(emitted.find(this->Makefile->GetStartDirectory()) == emitted.end())
+    if(emitted.find(
+                this->Makefile->GetCurrentSourceDirectory()) == emitted.end())
       {
-      dirs.push_back(this->Makefile->GetStartDirectory());
-      emitted.insert(this->Makefile->GetStartDirectory());
+      dirs.push_back(this->Makefile->GetCurrentSourceDirectory());
+      emitted.insert(this->Makefile->GetCurrentSourceDirectory());
       }
     }
 
@@ -2714,9 +2716,9 @@ const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
   switch (relroot)
     {
     case HOME:         return this->Makefile->GetHomeDirectory();
-    case START:        return this->Makefile->GetStartDirectory();
+    case START:        return this->Makefile->GetCurrentSourceDirectory();
     case HOME_OUTPUT:  return this->Makefile->GetHomeOutputDirectory();
-    case START_OUTPUT: return this->Makefile->GetStartOutputDirectory();
+    case START_OUTPUT: return this->Makefile->GetCurrentBinaryDirectory();
     default: break;
     }
   return 0;
@@ -2844,14 +2846,14 @@ std::string cmLocalGenerator::FindRelativePathTopSource()
     {
     std::string parentTop = parent->FindRelativePathTopSource();
     if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartDirectory(), parentTop))
+         this->Makefile->GetCurrentSourceDirectory(), parentTop))
       {
       return parentTop;
       }
     }
 
   // Otherwise this directory itself is the new top.
-  return this->Makefile->GetStartDirectory();
+  return this->Makefile->GetCurrentSourceDirectory();
 }
 
 //----------------------------------------------------------------------------
@@ -2864,14 +2866,14 @@ std::string cmLocalGenerator::FindRelativePathTopBinary()
     {
     std::string parentTop = parent->FindRelativePathTopBinary();
     if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetStartOutputDirectory(), parentTop))
+         this->Makefile->GetCurrentBinaryDirectory(), parentTop))
       {
       return parentTop;
       }
     }
 
   // Otherwise this directory itself is the new top.
-  return this->Makefile->GetStartOutputDirectory();
+  return this->Makefile->GetCurrentBinaryDirectory();
 }
 
 //----------------------------------------------------------------------------

@@ -124,7 +124,7 @@ void cmFLTKWrapUICommand::FinalPass()
       "FLTK_WRAP_UI was called with a target that was never created: ";
     msg += this->Target;
     msg +=".  The problem was found while processing the source directory: ";
-    msg += this->Makefile->GetStartDirectory();
+    msg += this->Makefile->GetCurrentSourceDirectory();
     msg += ".  This FLTK_WRAP_UI call will be ignored.";
     cmSystemTools::Message(msg.c_str(),"Warning");
     return;
@@ -156,7 +156,7 @@ void cmFLTKWrapUICommand::FinalPass()
       "for you as was done in CMake 2.0 and earlier. In the future this may "
       "become an error.";
     msg +="The problem was found while processing the source directory: ";
-    msg += this->Makefile->GetStartDirectory();
+    msg += this->Makefile->GetCurrentSourceDirectory();
     cmSystemTools::Message(msg.c_str(),"Warning");
     // first we add the rules for all the .fl to .h and .cxx files
     size_t lastHeadersClass = this->GeneratedSourcesClasses.size();

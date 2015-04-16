@@ -60,7 +60,7 @@ void cmLinkDirectoriesCommand::AddLinkDir(std::string const& dir)
       }
     if (convertToAbsolute)
       {
-      std::string tmp = this->Makefile->GetStartDirectory();
+      std::string tmp = this->Makefile->GetCurrentSourceDirectory();
       tmp += "/";
       tmp += unixPath;
       unixPath = tmp;

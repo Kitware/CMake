@@ -379,7 +379,7 @@ void cmGlobalVisualStudio7Generator
     return;
     }
   this->CurrentProject = root->GetMakefile()->GetProjectName();
-  std::string fname = root->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = root->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
   fname += ".sln";
@@ -485,7 +485,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
       if(vcprojName)
         {
         cmMakefile* tmf = target->GetMakefile();
-        std::string dir = tmf->GetStartOutputDirectory();
+        std::string dir = tmf->GetCurrentBinaryDirectory();
         dir = root->Convert(dir.c_str(),
                             cmLocalGenerator::START_OUTPUT);
         if(dir == ".")
@@ -561,7 +561,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
       target->GetProperty("GENERATOR_FILE_NAME");
     if (vcprojName)
       {
-      std::string dir = mf->GetStartDirectory();
+      std::string dir = mf->GetCurrentSourceDirectory();
       this->WriteProjectDepends(fout, vcprojName,
                                 dir.c_str(), *target);
       }
@@ -903,7 +903,7 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
 {
   std::string pname = target->GetName();
   pname += "_UTILITY";
-  std::string fname = target->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = target->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".vcproj";

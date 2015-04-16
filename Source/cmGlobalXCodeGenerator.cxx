@@ -453,7 +453,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
   cmTarget* allbuild = mf->FindTarget("ALL_BUILD");
 
   // Refer to the main build configuration file for easy editing.
-  std::string listfile = mf->GetStartDirectory();
+  std::string listfile = mf->GetCurrentSourceDirectory();
   listfile += "/";
   listfile += "CMakeLists.txt";
   allbuild->AddSourceCMP0049(listfile.c_str());
@@ -538,7 +538,7 @@ cmGlobalXCodeGenerator::AddExtraTargets(cmLocalGenerator* root,
         }
 
       // Refer to the build configuration file for easy editing.
-      listfile = lg->GetMakefile()->GetStartDirectory();
+      listfile = lg->GetMakefile()->GetCurrentSourceDirectory();
       listfile += "/";
       listfile += "CMakeLists.txt";
       target.AddSourceCMP0049(listfile.c_str());
@@ -564,7 +564,7 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
   std::vector<std::string>::iterator new_end =
     std::unique(lfiles.begin(), lfiles.end());
   lfiles.erase(new_end, lfiles.end());
-  this->CurrentReRunCMakeMakefile = mf->GetStartOutputDirectory();
+  this->CurrentReRunCMakeMakefile = mf->GetCurrentBinaryDirectory();
   this->CurrentReRunCMakeMakefile += "/CMakeScripts";
   cmSystemTools::MakeDirectory(this->CurrentReRunCMakeMakefile.c_str());
   this->CurrentReRunCMakeMakefile += "/ReRunCMake.make";
@@ -3696,7 +3696,7 @@ cmGlobalXCodeGenerator::OutputXCodeProject(cmLocalGenerator* root,
     {
     return;
     }
-  std::string xcodeDir = root->GetMakefile()->GetStartOutputDirectory();
+  std::string xcodeDir = root->GetMakefile()->GetCurrentBinaryDirectory();
   xcodeDir += "/";
   xcodeDir += root->GetMakefile()->GetProjectName();
   xcodeDir += ".xcode";

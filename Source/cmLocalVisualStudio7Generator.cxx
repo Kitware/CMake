@@ -151,7 +151,7 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
       cmCustomCommandLines force_commands;
       force_commands.push_back(force_command);
       std::string no_main_dependency = "";
-      std::string force = this->Makefile->GetStartOutputDirectory();
+      std::string force = this->Makefile->GetCurrentBinaryDirectory();
       force += cmake::GetCMakeFilesDirectory();
       force += "/";
       force += tgt.GetName();
@@ -173,14 +173,14 @@ void cmLocalVisualStudio7Generator::FixGlobalTargets()
 void cmLocalVisualStudio7Generator::WriteProjectFiles()
 {
   // If not an in source build, then create the output directory
-  if(strcmp(this->Makefile->GetStartOutputDirectory(),
+  if(strcmp(this->Makefile->GetCurrentBinaryDirectory(),
             this->Makefile->GetHomeDirectory()) != 0)
     {
     if(!cmSystemTools::MakeDirectory
-       (this->Makefile->GetStartOutputDirectory()))
+       (this->Makefile->GetCurrentBinaryDirectory()))
       {
       cmSystemTools::Error("Error creating directory ",
-                           this->Makefile->GetStartOutputDirectory());
+                           this->Makefile->GetCurrentBinaryDirectory());
       }
     }
 
@@ -209,7 +209,7 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 {
   // Touch a timestamp file used to determine when the project file is
   // out of date.
-  std::string stampName = this->Makefile->GetStartOutputDirectory();
+  std::string stampName = this->Makefile->GetCurrentBinaryDirectory();
   stampName += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(stampName.c_str());
   stampName += "/";
@@ -257,7 +257,7 @@ void cmLocalVisualStudio7Generator
   target.SetProperty("GENERATOR_FILE_NAME",lname.c_str());
   // create the dsp.cmake file
   std::string fname;
-  fname = this->Makefile->GetStartOutputDirectory();
+  fname = this->Makefile->GetCurrentBinaryDirectory();
   fname += "/";
   fname += lname;
   if(this->FortranProject)
@@ -294,7 +294,7 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
   commandLine.push_back(dsprule);
-  std::string makefileIn = this->Makefile->GetStartDirectory();
+  std::string makefileIn = this->Makefile->GetCurrentSourceDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
   makefileIn = cmSystemTools::CollapseFullPath(makefileIn.c_str());

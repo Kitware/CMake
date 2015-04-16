@@ -286,7 +286,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   else if(relink)
     {
-    outpath = this->Makefile->GetStartOutputDirectory();
+    outpath = this->Makefile->GetCurrentBinaryDirectory();
     outpath += cmake::GetCMakeFilesDirectory();
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
@@ -445,7 +445,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                                              *this->Target, "target");
     this->LocalGenerator->CreateCDCommand
       (commands1,
-       this->Makefile->GetStartOutputDirectory(),
+       this->Makefile->GetCurrentBinaryDirectory(),
        cmLocalGenerator::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();
@@ -726,7 +726,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     }
   this->LocalGenerator->CreateCDCommand
     (commands1,
-     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetCurrentBinaryDirectory(),
      cmLocalGenerator::HOME_OUTPUT);
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
@@ -743,7 +743,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
     symlink += targetOutPath;
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(commands1,
-                                  this->Makefile->GetStartOutputDirectory(),
+                                  this->Makefile->GetCurrentBinaryDirectory(),
                                   cmLocalGenerator::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();

@@ -225,7 +225,7 @@ cmGlobalVisualStudioGenerator
         }
       else
         {
-        topLevelSlnName = mf->GetStartOutputDirectory();
+        topLevelSlnName = mf->GetCurrentBinaryDirectory();
         topLevelSlnName += "/";
         topLevelSlnName += mf->GetProjectName();
         topLevelSlnName += ".sln";

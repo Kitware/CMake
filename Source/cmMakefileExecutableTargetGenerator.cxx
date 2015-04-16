@@ -108,7 +108,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
   std::string outpathImp;
   if(relink)
     {
-    outpath = this->Makefile->GetStartOutputDirectory();
+    outpath = this->Makefile->GetCurrentBinaryDirectory();
     outpath += cmake::GetCMakeFilesDirectory();
     outpath += "/CMakeRelink.dir";
     cmSystemTools::MakeDirectory(outpath.c_str());
@@ -419,7 +419,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     }
   this->LocalGenerator->CreateCDCommand
     (commands1,
-     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetCurrentBinaryDirectory(),
      cmLocalGenerator::HOME_OUTPUT);
   commands.insert(commands.end(), commands1.begin(), commands1.end());
   commands1.clear();
@@ -433,7 +433,7 @@ void cmMakefileExecutableTargetGenerator::WriteExecutableRule(bool relink)
     symlink += targetOutPath;
     commands1.push_back(symlink);
     this->LocalGenerator->CreateCDCommand(commands1,
-                                  this->Makefile->GetStartOutputDirectory(),
+                                  this->Makefile->GetCurrentBinaryDirectory(),
                                   cmLocalGenerator::HOME_OUTPUT);
     commands.insert(commands.end(), commands1.begin(), commands1.end());
     commands1.clear();

@@ -418,9 +418,9 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   // read in the list file to fill the cache
   cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
-  mf->SetStartOutputDirectory
+  mf->SetCurrentBinaryDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
-  mf->SetStartDirectory
+  mf->SetCurrentSourceDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
 
   mf->SetArgcArgv(args);

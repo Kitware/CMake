@@ -886,7 +886,7 @@ cmGlobalNinjaGenerator
   case cmTarget::OBJECT_LIBRARY:
   case cmTarget::UTILITY: {
     std::string path = ng->ConvertToNinjaPath(
-      target->GetMakefile()->GetStartOutputDirectory());
+      target->GetMakefile()->GetCurrentBinaryDirectory());
     if (path.empty() || path == ".")
       outputs.push_back(target->GetName());
     else {

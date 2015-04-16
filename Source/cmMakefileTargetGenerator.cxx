@@ -741,7 +741,7 @@ cmMakefileTargetGenerator
     this->LocalGenerator->ExpandRuleVariables(compileCommand, vars);
     std::string workingDirectory =
       this->LocalGenerator->Convert(
-        this->Makefile->GetStartOutputDirectory(), cmLocalGenerator::FULL);
+        this->Makefile->GetCurrentBinaryDirectory(), cmLocalGenerator::FULL);
     compileCommand.replace(compileCommand.find(langFlags),
                            langFlags.size(), this->GetFlags(lang));
     std::string langDefines = std::string("$(") + lang + "_DEFINES)";
@@ -761,7 +761,7 @@ cmMakefileTargetGenerator
   // Change the command working directory to the local build tree.
   this->LocalGenerator->CreateCDCommand
     (compileCommands,
-     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetCurrentBinaryDirectory(),
      cmLocalGenerator::HOME_OUTPUT);
   commands.insert(commands.end(),
                   compileCommands.begin(), compileCommands.end());
@@ -834,7 +834,7 @@ cmMakefileTargetGenerator
 
         this->LocalGenerator->CreateCDCommand
           (preprocessCommands,
-           this->Makefile->GetStartOutputDirectory(),
+           this->Makefile->GetCurrentBinaryDirectory(),
            cmLocalGenerator::HOME_OUTPUT);
         commands.insert(commands.end(),
                         preprocessCommands.begin(),
@@ -891,7 +891,7 @@ cmMakefileTargetGenerator
 
         this->LocalGenerator->CreateCDCommand
           (assemblyCommands,
-           this->Makefile->GetStartOutputDirectory(),
+           this->Makefile->GetCurrentBinaryDirectory(),
            cmLocalGenerator::HOME_OUTPUT);
         commands.insert(commands.end(),
                         assemblyCommands.begin(),
@@ -992,7 +992,7 @@ void cmMakefileTargetGenerator::WriteTargetCleanRules()
                                            *this->Target);
   this->LocalGenerator->CreateCDCommand
     (commands,
-     this->Makefile->GetStartOutputDirectory(),
+     this->Makefile->GetCurrentBinaryDirectory(),
      cmLocalGenerator::HOME_OUTPUT);
 
   // Write the rule.
@@ -1139,7 +1139,7 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
         {
         cmMakefile* mf = linkee->GetMakefile();
         cmLocalGenerator* lg = mf->GetLocalGenerator();
-        std::string di = mf->GetStartOutputDirectory();
+        std::string di = mf->GetCurrentBinaryDirectory();
         di += "/";
         di += lg->GetTargetDirectory(*linkee);
         di += "/DependInfo.cmake";
@@ -1199,13 +1199,13 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
          << this->Convert(this->Makefile->GetHomeDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
-         << this->Convert(this->Makefile->GetStartDirectory(),
+         << this->Convert(this->Makefile->GetCurrentSourceDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->Makefile->GetHomeOutputDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
-         << this->Convert(this->Makefile->GetStartOutputDirectory(),
+         << this->Convert(this->Makefile->GetCurrentBinaryDirectory(),
                           cmLocalGenerator::FULL, cmLocalGenerator::SHELL)
          << " "
          << this->Convert(this->InfoFileNameFull,

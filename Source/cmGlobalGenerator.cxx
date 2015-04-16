@@ -1098,9 +1098,9 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
-  lg->GetMakefile()->SetStartDirectory
+  lg->GetMakefile()->SetCurrentSourceDirectory
     (this->CMakeInstance->GetHomeDirectory());
-  lg->GetMakefile()->SetStartOutputDirectory
+  lg->GetMakefile()->SetCurrentBinaryDirectory
     (this->CMakeInstance->GetHomeOutputDirectory());
 
   this->BinaryDirectories.insert(
@@ -2046,7 +2046,7 @@ cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
   for(std::vector<cmLocalGenerator*>::const_iterator it =
       this->LocalGenerators.begin(); it != this->LocalGenerators.end(); ++it)
     {
-    std::string sd = (*it)->GetMakefile()->GetStartDirectory();
+    std::string sd = (*it)->GetMakefile()->GetCurrentSourceDirectory();
     if (sd == start_dir)
       {
       return *it;
@@ -2136,7 +2136,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   // CPack
-  std::string workingDir =  mf->GetStartOutputDirectory();
+  std::string workingDir =  mf->GetCurrentBinaryDirectory();
   cmCustomCommandLines cpackCommandLines;
   std::vector<std::string> depends;
   cmCustomCommandLine singleLine;
@@ -2147,7 +2147,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     singleLine.push_back(cmakeCfgIntDir);
     }
   singleLine.push_back("--config");
-  std::string configFile = mf->GetStartOutputDirectory();;
+  std::string configFile = mf->GetCurrentBinaryDirectory();;
   configFile += "/CPackConfig.cmake";
   std::string relConfigFile = "./CPackConfig.cmake";
   singleLine.push_back(relConfigFile);
@@ -2183,7 +2183,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     depends.erase(depends.begin(), depends.end());
     singleLine.push_back(cmSystemTools::GetCPackCommand());
     singleLine.push_back("--config");
-    configFile = mf->GetStartOutputDirectory();;
+    configFile = mf->GetCurrentBinaryDirectory();;
     configFile += "/CPackSourceConfig.cmake";
     relConfigFile = "./CPackSourceConfig.cmake";
     singleLine.push_back(relConfigFile);

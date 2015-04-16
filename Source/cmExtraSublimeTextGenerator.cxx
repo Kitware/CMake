@@ -79,7 +79,7 @@ void cmExtraSublimeTextGenerator::CreateProjectFile(
                                      const std::vector<cmLocalGenerator*>& lgs)
 {
   const cmMakefile* mf=lgs[0]->GetMakefile();
-  std::string outputDir=mf->GetStartOutputDirectory();
+  std::string outputDir=mf->GetCurrentBinaryDirectory();
   std::string projectName=mf->GetProjectName();
 
   const std::string filename =
@@ -174,7 +174,7 @@ void cmExtraSublimeTextGenerator::
           {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp(makefile->GetStartOutputDirectory(),
+          if (strcmp(makefile->GetCurrentBinaryDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
             this->AppendTarget(fout, ti->first, *lg, 0,

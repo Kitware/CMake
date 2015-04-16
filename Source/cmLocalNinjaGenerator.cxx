@@ -102,7 +102,7 @@ void cmLocalNinjaGenerator::Configure()
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
   this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetStartOutputDirectory(), HOME_OUTPUT);
+    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
   if(this->HomeRelativeOutputPath == ".")
     {
     this->HomeRelativeOutputPath = "";
@@ -407,7 +407,7 @@ void cmLocalNinjaGenerator::AppendCustomCommandLines(
   if (ccg.GetNumberOfCommands() > 0) {
     std::string wd = ccg.GetWorkingDirectory();
     if (wd.empty())
-      wd = this->GetMakefile()->GetStartOutputDirectory();
+      wd = this->GetMakefile()->GetCurrentBinaryDirectory();
 
     std::ostringstream cdCmd;
 #ifdef _WIN32

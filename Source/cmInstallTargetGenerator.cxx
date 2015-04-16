@@ -69,7 +69,7 @@ void cmInstallTargetGenerator::GenerateScriptForConfig(std::ostream& os,
   std::string fromDirConfig;
   if(this->Target->NeedRelinkBeforeInstall(config))
     {
-    fromDirConfig = this->Target->GetMakefile()->GetStartOutputDirectory();
+    fromDirConfig = this->Target->GetMakefile()->GetCurrentBinaryDirectory();
     fromDirConfig += cmake::GetCMakeFilesDirectory();
     fromDirConfig += "/CMakeRelink.dir/";
     }
