@@ -464,10 +464,6 @@ public:
       this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
                           this->cmStartDirectory.c_str());
     }
-  const char* GetStartDirectory() const
-    {
-      return this->cmStartDirectory.c_str();
-    }
   void SetStartOutputDirectory(const std::string& dir)
     {
       this->StartOutputDirectory = dir;
@@ -477,10 +473,6 @@ public:
       cmSystemTools::MakeDirectory(this->StartOutputDirectory.c_str());
       this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
                           this->StartOutputDirectory.c_str());
-    }
-  const char* GetStartOutputDirectory() const
-    {
-      return this->StartOutputDirectory.c_str();
     }
   //@}
 
