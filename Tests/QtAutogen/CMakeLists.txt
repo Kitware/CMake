@@ -2,6 +2,13 @@ cmake_minimum_required(VERSION 3.1)
 
 project(QtAutogen)
 
+# Tell find_package(Qt5) where to find Qt.
+if(QT_QMAKE_EXECUTABLE)
+  get_filename_component(Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
+  get_filename_component(Qt_PREFIX_DIR "${Qt_BIN_DIR}" PATH)
+  set(CMAKE_PREFIX_PATH ${Qt_PREFIX_DIR})
+endif()
+
 if (QT_TEST_VERSION STREQUAL 4)
   find_package(Qt4 REQUIRED)
 
@@ -124,6 +131,7 @@ try_compile(RCC_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
   autorcc_depends
   CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+              "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT RCC_DEPENDS)
