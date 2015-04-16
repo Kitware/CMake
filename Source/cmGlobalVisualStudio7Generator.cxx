@@ -351,6 +351,23 @@ void cmGlobalVisualStudio7Generator::Generate()
     {
     this->CallVisualStudioMacro(MacroReload);
     }
+
+  if (!this->CMakeInstance->GetIsInTryCompile() &&
+      this->GetName() == "Visual Studio 7")
+    {
+    const char* cmakeWarnVS70 =
+      this->CMakeInstance->GetState()->GetCacheEntryValue("CMAKE_WARN_VS70");
+    if (!cmakeWarnVS70 || !cmSystemTools::IsOff(cmakeWarnVS70))
+      {
+      this->CMakeInstance->IssueMessage(
+        cmake::WARNING,
+        "The \"Visual Studio 7\" generator is deprecated "
+        "and will be removed in a future version of CMake."
+        "\n"
+        "Add CMAKE_WARN_VS70=OFF to the cache to disable this warning."
+        );
+      }
+    }
 }
 
 void cmGlobalVisualStudio7Generator
@@ -983,7 +1000,7 @@ void cmGlobalVisualStudio7Generator
 ::GetDocumentation(cmDocumentationEntry& entry)
 {
   entry.Name = cmGlobalVisualStudio7Generator::GetActualName();
-  entry.Brief = "Generates Visual Studio .NET 2002 project files.";
+  entry.Brief = "Deprecated. Generates Visual Studio .NET 2002 project files.";
 }
 
 //----------------------------------------------------------------------------
