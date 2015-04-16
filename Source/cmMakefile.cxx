@@ -1543,6 +1543,11 @@ void cmMakefile::InitializeFromParent()
   // Initialize definitions with the closure of the parent scope.
   this->Internal->VarStack.top() = parent->Internal->VarStack.top().Closure();
 
+  this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
+                      this->cmStartDirectory.c_str());
+  this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
+                      this->StartOutputDirectory.c_str());
+
   const std::vector<cmValueWithOrigin>& parentIncludes =
                                         parent->GetIncludeDirectoriesEntries();
   this->IncludeDirectoriesEntries.insert(this->IncludeDirectoriesEntries.end(),
@@ -1611,7 +1616,6 @@ void cmMakefile::InitializeFromParent()
 void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
 {
   lg2->GetMakefile()->InitializeFromParent();
-  lg2->GetMakefile()->MakeStartDirectoriesCurrent();
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
     std::string msg="   Entering             ";

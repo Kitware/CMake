@@ -423,14 +423,6 @@ public:
   bool HasCMP0054AlreadyBeenReported(
     cmListFileContext context) const;
 
-  void MakeStartDirectoriesCurrent()
-    {
-      this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
-                          this->cmStartDirectory.c_str());
-      this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
-                          this->StartOutputDirectory.c_str());
-    }
-
   //@{
   /**
    * Set/Get the home directory (or output directory) in the project. The
