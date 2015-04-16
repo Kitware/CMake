@@ -94,7 +94,7 @@ bool cmAddSubDirectoryCommand::InitialPass
     // Remove the CurrentDirectory from the srcPath and replace it
     // with the CurrentOutputDirectory.
     const char* src = this->Makefile->GetCurrentSourceDirectory();
-    const char* bin = this->Makefile->GetCurrentOutputDirectory();
+    const char* bin = this->Makefile->GetCurrentBinaryDirectory();
     size_t srcLen = strlen(src);
     size_t binLen = strlen(bin);
     if(srcLen > 0 && src[srcLen-1] == '/')
@@ -113,7 +113,7 @@ bool cmAddSubDirectoryCommand::InitialPass
       }
     else
       {
-      binPath = this->Makefile->GetCurrentOutputDirectory();
+      binPath = this->Makefile->GetCurrentBinaryDirectory();
       binPath += "/";
       binPath += binArg;
       }

@@ -106,7 +106,7 @@ void cmSourceFileLocation::DirectoryUseBinary()
     {
     this->Directory =
       cmSystemTools::CollapseFullPath(
-        this->Directory, this->Makefile->GetCurrentOutputDirectory());
+        this->Directory, this->Makefile->GetCurrentBinaryDirectory());
     this->AmbiguousDirectory = false;
     }
 }
@@ -285,7 +285,7 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
         this->Directory, this->Makefile->GetCurrentSourceDirectory());
     std::string const& binDir =
       cmSystemTools::CollapseFullPath(
-        this->Directory, this->Makefile->GetCurrentOutputDirectory());
+        this->Directory, this->Makefile->GetCurrentBinaryDirectory());
     if(srcDir != loc.Directory &&
        binDir != loc.Directory)
       {
@@ -300,7 +300,7 @@ bool cmSourceFileLocation::Matches(cmSourceFileLocation const& loc)
         loc.Directory, loc.Makefile->GetCurrentSourceDirectory());
     std::string const& binDir =
       cmSystemTools::CollapseFullPath(
-        loc.Directory, loc.Makefile->GetCurrentOutputDirectory());
+        loc.Directory, loc.Makefile->GetCurrentBinaryDirectory());
     if(srcDir != this->Directory &&
        binDir != this->Directory)
       {

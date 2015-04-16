@@ -524,7 +524,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
   // this file doesn't seem to be used by C::B in custom makefile mode,
   // but we generate a unique file for each OBJECT library so in case
   // C::B uses it in some way, the targets don't interfere with each other.
-  std::string filename = mf->GetCurrentOutputDirectory();
+  std::string filename = mf->GetCurrentBinaryDirectory();
   filename += "/";
   filename += mf->GetLocalGenerator()->GetTargetDirectory(*target);
   filename += "/";

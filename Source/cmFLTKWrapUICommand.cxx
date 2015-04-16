@@ -32,7 +32,7 @@ bool cmFLTKWrapUICommand
   this->Target = args[0];  // Target that will use the generated files
 
   // get the list of GUI files from which .cxx and .h will be generated
-  std::string outputDirectory = this->Makefile->GetCurrentOutputDirectory();
+  std::string outputDirectory = this->Makefile->GetCurrentBinaryDirectory();
 
   {
   // Some of the generated files are *.h so the directory "GUI"

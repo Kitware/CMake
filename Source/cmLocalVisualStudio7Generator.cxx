@@ -286,7 +286,7 @@ void cmLocalVisualStudio7Generator
 //----------------------------------------------------------------------------
 cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
 {
-  std::string stampName = this->Makefile->GetCurrentOutputDirectory();
+  std::string stampName = this->Makefile->GetCurrentBinaryDirectory();
   stampName += "/";
   stampName += cmake::GetCMakeFilesDirectoryPostSlash();
   stampName += "generate.stamp";
@@ -1707,7 +1707,7 @@ cmLocalVisualStudio7Generator
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
   std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += this->Makefile->GetCurrentBinaryDirectory();
   dir_max += "/";
   dir_max += this->GetTargetDirectory(target);
   dir_max += "/";

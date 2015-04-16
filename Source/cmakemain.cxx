@@ -159,7 +159,7 @@ static void cmakemainProgressCallback(const char *m, float prog,
   else if ((mf) && (strstr(m, "Generating")==m))
     {
     dir = " ";
-    dir += mf->GetCurrentOutputDirectory();
+    dir += mf->GetCurrentBinaryDirectory();
     }
 
   if ((prog < 0) || (!dir.empty()))

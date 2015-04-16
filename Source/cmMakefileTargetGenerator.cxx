@@ -495,7 +495,7 @@ void cmMakefileTargetGenerator
   this->WriteObjectBuildFile(obj, lang, source, depends);
 
   // The object file should be checked for dependency integrity.
-  std::string objFullPath = this->Makefile->GetCurrentOutputDirectory();
+  std::string objFullPath = this->Makefile->GetCurrentBinaryDirectory();
   objFullPath += "/";
   objFullPath += obj;
   objFullPath =
@@ -1968,7 +1968,7 @@ const char* cmMakefileTargetGenerator::GetFortranModuleDirectory()
         {
         // Interpret relative to the current output directory.
         this->FortranModuleDirectory =
-          this->Makefile->GetCurrentOutputDirectory();
+          this->Makefile->GetCurrentBinaryDirectory();
         this->FortranModuleDirectory += "/";
         this->FortranModuleDirectory += target_mod_dir;
         }

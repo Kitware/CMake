@@ -146,7 +146,7 @@ const char* CCONV cmGetCurrentDirectory(void *arg)
 const char* CCONV cmGetCurrentOutputDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return mf->GetCurrentOutputDirectory();
+  return mf->GetCurrentBinaryDirectory();
 }
 const char* CCONV cmGetDefinition(void *arg,const char*def)
 {

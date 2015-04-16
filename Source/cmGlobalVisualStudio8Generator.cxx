@@ -281,7 +281,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   stampList += "generate.stamp.list";
   {
   std::string stampListFile =
-    generators[0]->GetMakefile()->GetCurrentOutputDirectory();
+    generators[0]->GetMakefile()->GetCurrentBinaryDirectory();
   stampListFile += "/";
   stampListFile += stampList;
   std::string stampFile;
@@ -289,7 +289,7 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   for(std::vector<cmLocalGenerator*>::const_iterator
         gi = generators.begin(); gi != generators.end(); ++gi)
     {
-    stampFile = (*gi)->GetMakefile()->GetCurrentOutputDirectory();
+    stampFile = (*gi)->GetMakefile()->GetCurrentBinaryDirectory();
     stampFile += "/";
     stampFile += cmake::GetCMakeFilesDirectoryPostSlash();
     stampFile += "generate.stamp";

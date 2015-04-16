@@ -205,7 +205,7 @@ GetLocalObjectFiles(std::map<std::string, LocalObjectInfo> &localObjectFiles)
                                     ->GetSafeDefinition("CMAKE_BUILD_TYPE"));
     // Compute full path to object file directory for this target.
     std::string dir;
-    dir += gt->Makefile->GetCurrentOutputDirectory();
+    dir += gt->Makefile->GetCurrentBinaryDirectory();
     dir += "/";
     dir += this->GetTargetDirectory(*gt->Target);
     dir += "/";
@@ -1236,7 +1236,7 @@ cmLocalUnixMakefileGenerator3
                      const std::vector<std::string>& files,
                      cmTarget& target, const char* filename)
 {
-  std::string cleanfile = this->Makefile->GetCurrentOutputDirectory();
+  std::string cleanfile = this->Makefile->GetCurrentBinaryDirectory();
   cleanfile += "/";
   cleanfile += this->GetTargetDirectory(target);
   cleanfile += "/cmake_clean";

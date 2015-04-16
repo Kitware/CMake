@@ -338,7 +338,7 @@ void cmGlobalVisualStudio10Generator::Generate()
       "  " << this->LongestSource.SourceFile->GetFullPath() << "\n"
       "This is because some Visual Studio tools would append the relative "
       "path to the end of the referencing directory path, as in:\n"
-      "  " << mf->GetCurrentOutputDirectory() << "/"
+      "  " << mf->GetCurrentBinaryDirectory() << "/"
       << this->LongestSource.SourceRel << "\n"
       "and then incorrectly complain that the file does not exist because "
       "the path length is too long for some internal buffer or API.  "
@@ -585,7 +585,7 @@ cmGlobalVisualStudio10Generator
 void cmGlobalVisualStudio10Generator::PathTooLong(
   cmTarget* target, cmSourceFile const* sf, std::string const& sfRel)
 {
-  size_t len = (strlen(target->GetMakefile()->GetCurrentOutputDirectory()) +
+  size_t len = (strlen(target->GetMakefile()->GetCurrentBinaryDirectory()) +
                 1 + sfRel.length());
   if(len > this->LongestSource.Length)
     {

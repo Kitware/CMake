@@ -927,7 +927,7 @@ cmVisualStudio10TargetGenerator::ConvertPath(std::string const& path,
 {
   return forceRelative
     ? cmSystemTools::RelativePath(
-      this->Makefile->GetCurrentOutputDirectory(), path.c_str())
+      this->Makefile->GetCurrentBinaryDirectory(), path.c_str())
     : this->LocalGenerator->Convert(path.c_str(),
                                     cmLocalGenerator::START_OUTPUT,
                                     cmLocalGenerator::UNCHANGED,
@@ -1430,7 +1430,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
     size_t const maxLen = 250;
     if(sf->GetCustomCommand() ||
-       ((strlen(this->Makefile->GetCurrentOutputDirectory()) + 1 +
+       ((strlen(this->Makefile->GetCurrentBinaryDirectory()) + 1 +
          sourceRel.length()) <= maxLen))
       {
       forceRelative = true;

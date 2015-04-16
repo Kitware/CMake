@@ -1033,7 +1033,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     cmMakefile* makefile=(*it)->GetMakefile();
-    std::string subdir = (*it)->Convert(makefile->GetCurrentOutputDirectory(),
+    std::string subdir = (*it)->Convert(makefile->GetCurrentBinaryDirectory(),
                            cmLocalGenerator::HOME_OUTPUT);
     if (subdir == ".")
       {
@@ -1094,7 +1094,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                              ti->first.c_str());
 
           std::string cleanArgs = "-E chdir \"";
-          cleanArgs += makefile->GetCurrentOutputDirectory();
+          cleanArgs += makefile->GetCurrentBinaryDirectory();
           cleanArgs += "\" \"";
           cleanArgs += cmake;
           cleanArgs += "\" -P \"";

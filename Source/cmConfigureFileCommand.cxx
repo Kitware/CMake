@@ -45,7 +45,7 @@ bool cmConfigureFileCommand
   const char* outFile = args[1].c_str();
   if(!cmSystemTools::FileIsFullPath(outFile))
     {
-    this->OutputFile = this->Makefile->GetCurrentOutputDirectory();
+    this->OutputFile = this->Makefile->GetCurrentBinaryDirectory();
     this->OutputFile += "/";
     }
   this->OutputFile += outFile;

@@ -645,7 +645,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   if (hex_conversion_enabled)
     {
     // TODO: should work without temp file, but just on a memory buffer
-    std::string binaryFileName = this->Makefile->GetCurrentOutputDirectory();
+    std::string binaryFileName = this->Makefile->GetCurrentBinaryDirectory();
     binaryFileName += cmake::GetCMakeFilesDirectory();
     binaryFileName += "/FileCommandStringsBinaryFile";
     if(cmHexFileConverter::TryConvert(fileName.c_str(),binaryFileName.c_str()))
@@ -1568,7 +1568,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         }
       else
         {
-        this->Destination = this->Makefile->GetCurrentOutputDirectory();
+        this->Destination = this->Makefile->GetCurrentBinaryDirectory();
         this->Destination += "/" + arg;
         }
       this->Doing = DoingNone;

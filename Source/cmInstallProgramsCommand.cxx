@@ -115,7 +115,7 @@ std::string cmInstallProgramsCommand
     }
 
   // This is a relative path.
-  std::string tb = this->Makefile->GetCurrentOutputDirectory();
+  std::string tb = this->Makefile->GetCurrentBinaryDirectory();
   tb += "/";
   tb += name;
   std::string ts = this->Makefile->GetCurrentSourceDirectory();

@@ -44,7 +44,7 @@ bool cmSubdirCommand
     if (cmSystemTools::FileIsDirectory(srcPath))
       {
       std::string binPath =
-        std::string(this->Makefile->GetCurrentOutputDirectory()) +
+        std::string(this->Makefile->GetCurrentBinaryDirectory()) +
         "/" + i->c_str();
       this->Makefile->AddSubDirectory(srcPath, binPath,
                                   excludeFromAll, false);
@@ -55,7 +55,7 @@ bool cmSubdirCommand
       // we must compute the binPath from the srcPath, we just take the last
       // element from the source path and use that
       std::string binPath =
-        std::string(this->Makefile->GetCurrentOutputDirectory()) +
+        std::string(this->Makefile->GetCurrentBinaryDirectory()) +
         "/" + cmSystemTools::GetFilenameName(*i);
       this->Makefile->AddSubDirectory(*i, binPath,
                                   excludeFromAll, false);

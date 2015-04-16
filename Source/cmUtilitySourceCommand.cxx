@@ -93,7 +93,7 @@ bool cmUtilitySourceCommand
   // The source exists.
   std::string cmakeCFGout =
     this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
-  std::string utilityDirectory = this->Makefile->GetCurrentOutputDirectory();
+  std::string utilityDirectory = this->Makefile->GetCurrentBinaryDirectory();
   std::string exePath;
   if (this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {

@@ -540,7 +540,7 @@ cmListFileBacktrace const& cmTarget::GetBacktrace() const
 //----------------------------------------------------------------------------
 std::string cmTarget::GetSupportDirectory() const
 {
-  std::string dir = this->Makefile->GetCurrentOutputDirectory();
+  std::string dir = this->Makefile->GetCurrentBinaryDirectory();
   dir += cmake::GetCMakeFilesDirectory();
   dir += "/";
   dir += this->Name;

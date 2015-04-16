@@ -1968,7 +1968,7 @@ cmLocalVisualStudio6Generator
   // files directory for any configuration.  This is used to construct
   // object file names that do not produce paths that are too long.
   std::string dir_max;
-  dir_max += this->Makefile->GetCurrentOutputDirectory();
+  dir_max += this->Makefile->GetCurrentBinaryDirectory();
   dir_max += "/";
   dir_max += config_max;
   dir_max += "/";

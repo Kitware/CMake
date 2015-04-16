@@ -423,7 +423,7 @@ void cmLocalGenerator::GenerateInstallRules()
   // Create the install script file.
   std::string file = this->Makefile->GetStartOutputDirectory();
   std::string homedir = this->Makefile->GetHomeOutputDirectory();
-  std::string currdir = this->Makefile->GetCurrentOutputDirectory();
+  std::string currdir = this->Makefile->GetCurrentBinaryDirectory();
   cmSystemTools::ConvertToUnixSlashes(file);
   cmSystemTools::ConvertToUnixSlashes(homedir);
   cmSystemTools::ConvertToUnixSlashes(currdir);
@@ -669,12 +669,12 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
        !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
       std::string dir_max;
-      dir_max += this->Makefile->GetCurrentOutputDirectory();
+      dir_max += this->Makefile->GetCurrentBinaryDirectory();
       dir_max += "/";
       std::string obj = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
       if(!obj.empty())
         {
-        std::string ofname = this->Makefile->GetCurrentOutputDirectory();
+        std::string ofname = this->Makefile->GetCurrentBinaryDirectory();
         ofname += "/";
         ofname += obj;
         objVector.push_back(ofname);

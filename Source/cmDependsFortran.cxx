@@ -237,7 +237,7 @@ bool cmDependsFortran::Finalize(std::ostream& makeDepends,
   else
     {
     mod_dir =
-      this->LocalGenerator->GetMakefile()->GetCurrentOutputDirectory();
+      this->LocalGenerator->GetMakefile()->GetCurrentBinaryDirectory();
     }
 
   // Actually write dependencies to the streams.
