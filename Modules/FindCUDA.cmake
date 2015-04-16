@@ -1585,10 +1585,12 @@ function(CUDA_LINK_SEPARABLE_COMPILATION_OBJECTS output_file cuda_target options
         COMMENT "Building NVCC intermediate link file ${output_file_relative_path}"
         )
     else()
+      get_filename_component(output_file_dir "${output_file}" DIRECTORY)
       add_custom_command(
         TARGET ${cuda_target}
         PRE_LINK
         COMMAND ${CMAKE_COMMAND} -E echo "Building NVCC intermediate link file ${output_file_relative_path}"
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${output_file_dir}"
         COMMAND ${CUDA_NVCC_EXECUTABLE} ${nvcc_flags} ${flags} -dlink ${object_files} -o "${output_file}"
         )
     endif()
