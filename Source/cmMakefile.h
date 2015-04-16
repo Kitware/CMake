@@ -447,43 +447,10 @@ public:
    */
   void SetArgcArgv(const std::vector<std::string>& args);
 
-  //@{
-  /**
-   * Set/Get the start directory (or output directory). The start directory
-   * is the directory of the CMakeLists.txt file that started the current
-   * round of processing. Remember that CMake processes CMakeLists files by
-   * recursing up the tree starting at the StartDirectory and going up until
-   * it reaches the HomeDirectory.
-   */
-  void SetCurrentSourceDirectory(const std::string& dir)
-    {
-      this->cmStartDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
-      this->cmStartDirectory =
-        cmSystemTools::CollapseFullPath(this->cmStartDirectory);
-      this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
-                          this->cmStartDirectory.c_str());
-    }
-  void SetCurrentBinaryDirectory(const std::string& dir)
-    {
-      this->StartOutputDirectory = dir;
-      cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
-      this->StartOutputDirectory =
-        cmSystemTools::CollapseFullPath(this->StartOutputDirectory);
-      cmSystemTools::MakeDirectory(this->StartOutputDirectory.c_str());
-      this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
-                          this->StartOutputDirectory.c_str());
-    }
-  //@}
-
-  const char* GetCurrentSourceDirectory() const
-    {
-      return this->cmStartDirectory.c_str();
-    }
-  const char* GetCurrentBinaryDirectory() const
-    {
-      return this->StartOutputDirectory.c_str();
-    }
+  void SetCurrentSourceDirectory(const std::string& dir);
+  const char* GetCurrentSourceDirectory() const;
+  void SetCurrentBinaryDirectory(const std::string& dir);
+  const char* GetCurrentBinaryDirectory() const;
 
   /* Get the current CMakeLists.txt file that is being processed.  This
    * is just used in order to be able to 'branch' from one file to a second

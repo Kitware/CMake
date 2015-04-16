@@ -1667,6 +1667,37 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
 }
 
+void cmMakefile::SetCurrentSourceDirectory(const std::string& dir)
+{
+  this->cmStartDirectory = dir;
+  cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
+  this->cmStartDirectory =
+    cmSystemTools::CollapseFullPath(this->cmStartDirectory);
+  this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
+                      this->cmStartDirectory.c_str());
+}
+
+const char* cmMakefile::GetCurrentSourceDirectory() const
+{
+  return this->cmStartDirectory.c_str();
+}
+
+void cmMakefile::SetCurrentBinaryDirectory(const std::string& dir)
+{
+  this->StartOutputDirectory = dir;
+  cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
+  this->StartOutputDirectory =
+    cmSystemTools::CollapseFullPath(this->StartOutputDirectory);
+  cmSystemTools::MakeDirectory(this->StartOutputDirectory.c_str());
+  this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
+                      this->StartOutputDirectory.c_str());
+}
+
+const char* cmMakefile::GetCurrentBinaryDirectory() const
+{
+  return this->StartOutputDirectory.c_str();
+}
+
 //----------------------------------------------------------------------------
 void cmMakefile::AddIncludeDirectories(const std::vector<std::string> &incs,
                                        bool before)
