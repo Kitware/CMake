@@ -81,7 +81,7 @@ void cmExtraQbsGenerator::AppendSubProject(cmGeneratedFileStream &fout,
     }
 
   const std::string &relativePath = cmSystemTools::RelativePath(
-      mk->GetHomeDirectory(), mk->GetCurrentDirectory());
+      mk->GetHomeDirectory(), mk->GetCurrentSourceDirectory());
   fout << "\tProject {\n"
        << "\t\tname:\"" << relativePath << "\"\n";
   this->AppendProduct(fout, lg);

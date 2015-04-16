@@ -97,7 +97,7 @@ bool cmGetFilenameComponentCommand
     // If the path given is relative evaluate it relative to the
     // current source directory.
     result = cmSystemTools::CollapseFullPath(
-      filename, this->Makefile->GetCurrentDirectory());
+      filename, this->Makefile->GetCurrentSourceDirectory());
     if(args[2] == "REALPATH")
       {
       // Resolve symlinks if possible

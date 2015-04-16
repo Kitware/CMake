@@ -39,7 +39,7 @@ bool cmSubdirCommand
 
     // if they specified a relative path then compute the full
     std::string srcPath =
-      std::string(this->Makefile->GetCurrentDirectory()) +
+      std::string(this->Makefile->GetCurrentSourceDirectory()) +
         "/" + i->c_str();
     if (cmSystemTools::FileIsDirectory(srcPath))
       {

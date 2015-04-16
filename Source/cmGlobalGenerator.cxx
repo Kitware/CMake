@@ -1567,7 +1567,8 @@ void cmGlobalGenerator::CheckLocalGenerators()
           text += "\n    linked by target \"";
           text += l->second.GetName();
           text += "\" in directory ";
-          text+=this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
+          text+=this->LocalGenerators[i]->GetMakefile()
+                    ->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }
@@ -1597,7 +1598,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
           std::string text = notFoundMap[varName];
           text += "\n   used as include directory in directory ";
           text += this->LocalGenerators[i]
-                      ->GetMakefile()->GetCurrentDirectory();
+                      ->GetMakefile()->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }

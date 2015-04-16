@@ -163,7 +163,7 @@ bool cmInstallCommand::HandleScriptMode(std::vector<std::string> const& args)
       std::string script = args[i];
       if(!cmSystemTools::FileIsFullPath(script.c_str()))
         {
-        script = this->Makefile->GetCurrentDirectory();
+        script = this->Makefile->GetCurrentSourceDirectory();
         script += "/";
         script += args[i];
         }
@@ -1093,7 +1093,7 @@ cmInstallCommand::HandleDirectoryMode(std::vector<std::string> const& args)
       std::string dir = args[i];
       if(!cmSystemTools::FileIsFullPath(dir.c_str()))
         {
-        dir = this->Makefile->GetCurrentDirectory();
+        dir = this->Makefile->GetCurrentSourceDirectory();
         dir += "/";
         dir += args[i];
         }
@@ -1376,7 +1376,7 @@ bool cmInstallCommand::MakeFilesFullPath(const char* modeName,
     std::string::size_type gpos = cmGeneratorExpression::Find(file);
     if(gpos != 0 && !cmSystemTools::FileIsFullPath(file.c_str()))
       {
-      file = this->Makefile->GetCurrentDirectory();
+      file = this->Makefile->GetCurrentSourceDirectory();
       file += "/";
       file += *fileIt;
       }

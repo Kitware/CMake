@@ -57,7 +57,7 @@ bool cmAddSubDirectoryCommand::InitialPass
     }
   else
     {
-    srcPath = this->Makefile->GetCurrentDirectory();
+    srcPath = this->Makefile->GetCurrentSourceDirectory();
     srcPath += "/";
     srcPath += srcArg;
     }
@@ -79,12 +79,12 @@ bool cmAddSubDirectoryCommand::InitialPass
     // not a subdirectory of the current directory then it is an
     // error.
     if(!cmSystemTools::IsSubDirectory(srcPath,
-                                      this->Makefile->GetCurrentDirectory()))
+          this->Makefile->GetCurrentSourceDirectory()))
       {
       std::ostringstream e;
       e << "not given a binary directory but the given source directory "
         << "\"" << srcPath << "\" is not a subdirectory of \""
-        << this->Makefile->GetCurrentDirectory() << "\".  "
+        << this->Makefile->GetCurrentSourceDirectory() << "\".  "
         << "When specifying an out-of-tree source a binary directory "
         << "must be explicitly specified.";
       this->SetError(e.str());
@@ -93,7 +93,7 @@ bool cmAddSubDirectoryCommand::InitialPass
 
     // Remove the CurrentDirectory from the srcPath and replace it
     // with the CurrentOutputDirectory.
-    const char* src = this->Makefile->GetCurrentDirectory();
+    const char* src = this->Makefile->GetCurrentSourceDirectory();
     const char* bin = this->Makefile->GetCurrentOutputDirectory();
     size_t srcLen = strlen(src);
     size_t binLen = strlen(bin);

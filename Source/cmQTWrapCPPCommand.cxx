@@ -66,7 +66,7 @@ bool cmQTWrapCPPCommand::InitialPass(std::vector<std::string> const& args,
           }
         else
           {
-          hname = this->Makefile->GetCurrentDirectory();
+          hname = this->Makefile->GetCurrentSourceDirectory();
           }
         hname += "/";
         hname += *j;

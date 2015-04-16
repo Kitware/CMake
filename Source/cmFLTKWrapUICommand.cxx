@@ -24,7 +24,7 @@ bool cmFLTKWrapUICommand
     }
 
   // what is the current source dir
-  std::string cdir = this->Makefile->GetCurrentDirectory();
+  std::string cdir = this->Makefile->GetCurrentSourceDirectory();
   const char* fluid_exe =
     this->Makefile->GetRequiredDefinition("FLTK_FLUID_EXECUTABLE");
 

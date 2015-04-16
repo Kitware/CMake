@@ -438,7 +438,8 @@ void cmLocalGenerator::GenerateInstallRules()
 
   // Write the header.
   fout << "# Install script for directory: "
-       << this->Makefile->GetCurrentDirectory() << std::endl << std::endl;
+       << this->Makefile->GetCurrentSourceDirectory()
+       << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
        << "if(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
        << "  set(CMAKE_INSTALL_PREFIX \"" << prefix << "\")" << std::endl
@@ -2159,7 +2160,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  dep = this->Makefile->GetCurrentDirectory();
+  dep = this->Makefile->GetCurrentSourceDirectory();
   dep += "/";
   dep += inName;
   return true;

@@ -227,7 +227,7 @@ bool cmFileCommand::HandleWriteCommand(std::vector<std::string> const& args,
   std::string fileName = *i;
   if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
     {
-    fileName = this->Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentSourceDirectory();
     fileName += "/" + *i;
     }
 
@@ -309,7 +309,7 @@ bool cmFileCommand::HandleReadCommand(std::vector<std::string> const& args)
   std::string fileName = fileNameArg.GetString();
   if ( !cmsys::SystemTools::FileIsFullPath(fileName.c_str()) )
     {
-    fileName = this->Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentSourceDirectory();
     fileName += "/" + fileNameArg.GetString();
     }
 
@@ -445,7 +445,7 @@ bool cmFileCommand::HandleStringsCommand(std::vector<std::string> const& args)
   std::string fileName = args[1];
   if(!cmsys::SystemTools::FileIsFullPath(fileName.c_str()))
     {
-    fileName = this->Makefile->GetCurrentDirectory();
+    fileName = this->Makefile->GetCurrentSourceDirectory();
     fileName += "/" + args[1];
     }
 
@@ -984,7 +984,7 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     cmsys::Glob::GlobMessages globMessages;
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
-      std::string expr = this->Makefile->GetCurrentDirectory();
+      std::string expr = this->Makefile->GetCurrentSourceDirectory();
       // Handle script mode
       if (!expr.empty())
         {
@@ -1091,7 +1091,7 @@ bool cmFileCommand::HandleMakeDirectoryCommand(
     const std::string* cdir = &(*i);
     if ( !cmsys::SystemTools::FileIsFullPath(i->c_str()) )
       {
-      expr = this->Makefile->GetCurrentDirectory();
+      expr = this->Makefile->GetCurrentSourceDirectory();
       expr += "/" + *i;
       cdir = &expr;
       }
@@ -1556,7 +1556,7 @@ bool cmFileCopier::CheckValue(std::string const& arg)
         }
       else
         {
-        std::string file = this->Makefile->GetCurrentDirectory();
+        std::string file = this->Makefile->GetCurrentSourceDirectory();
         file += "/" + arg;
         this->Files.push_back(file);
         }
@@ -2658,13 +2658,13 @@ bool cmFileCommand::HandleRename(std::vector<std::string> const& args)
   std::string oldname = args[1];
   if(!cmsys::SystemTools::FileIsFullPath(oldname.c_str()))
     {
-    oldname = this->Makefile->GetCurrentDirectory();
+    oldname = this->Makefile->GetCurrentSourceDirectory();
     oldname += "/" + args[1];
     }
   std::string newname = args[2];
   if(!cmsys::SystemTools::FileIsFullPath(newname.c_str()))
     {
-    newname = this->Makefile->GetCurrentDirectory();
+    newname = this->Makefile->GetCurrentSourceDirectory();
     newname += "/" + args[2];
     }
 
@@ -2698,7 +2698,7 @@ bool cmFileCommand::HandleRemove(std::vector<std::string> const& args,
     std::string fileName = *i;
     if(!cmsys::SystemTools::FileIsFullPath(fileName.c_str()))
       {
-      fileName = this->Makefile->GetCurrentDirectory();
+      fileName = this->Makefile->GetCurrentSourceDirectory();
       fileName += "/" + *i;
       }
 
@@ -3743,7 +3743,7 @@ bool cmFileCommand::HandleLockCommand(
 
   if (!cmsys::SystemTools::FileIsFullPath(path))
     {
-    path = this->Makefile->GetCurrentDirectory() + ("/" + path);
+    path = this->Makefile->GetCurrentSourceDirectory() + ("/" + path);
     }
 
   // Unify path (remove '//', '/../', ...)

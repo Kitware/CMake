@@ -154,7 +154,7 @@ static void cmakemainProgressCallback(const char *m, float prog,
   if ((mf) && (strstr(m, "Configuring")==m) && (prog<0))
     {
     dir = " ";
-    dir += mf->GetCurrentDirectory();
+    dir += mf->GetCurrentSourceDirectory();
     }
   else if ((mf) && (strstr(m, "Generating")==m))
     {

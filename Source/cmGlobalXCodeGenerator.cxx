@@ -407,7 +407,7 @@ void cmGlobalXCodeGenerator::SetGenerationRoot(cmLocalGenerator* root)
 {
   this->CurrentProject = root->GetMakefile()->GetProjectName();
   this->SetCurrentLocalGenerator(root);
-  cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentDirectory(),
+  cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentSourceDirectory(),
                            this->ProjectSourceDirectoryComponents);
   cmSystemTools::SplitPath(this->CurrentMakefile->GetCurrentOutputDirectory(),
                            this->ProjectOutputDirectoryComponents);
@@ -3342,7 +3342,7 @@ bool cmGlobalXCodeGenerator
   // Point Xcode at the top of the source tree.
   {
   std::string pdir =
-    this->RelativeToBinary(root->GetMakefile()->GetCurrentDirectory());
+    this->RelativeToBinary(root->GetMakefile()->GetCurrentSourceDirectory());
   this->RootObject->AddAttribute("projectDirPath",
                                  this->CreateString(pdir.c_str()));
   this->RootObject->AddAttribute("projectRoot", this->CreateString(""));

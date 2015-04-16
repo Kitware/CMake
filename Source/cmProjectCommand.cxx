@@ -33,7 +33,7 @@ bool cmProjectCommand
      "Value Computed by CMake", cmState::STATIC);
   this->Makefile->AddCacheDefinition
     (srcdir,
-     this->Makefile->GetCurrentDirectory(),
+     this->Makefile->GetCurrentSourceDirectory(),
      "Value Computed by CMake", cmState::STATIC);
 
   bindir = "PROJECT_BINARY_DIR";
@@ -42,7 +42,7 @@ bool cmProjectCommand
   this->Makefile->AddDefinition(bindir,
           this->Makefile->GetCurrentOutputDirectory());
   this->Makefile->AddDefinition(srcdir,
-          this->Makefile->GetCurrentDirectory());
+          this->Makefile->GetCurrentSourceDirectory());
 
   this->Makefile->AddDefinition("PROJECT_NAME", args[0].c_str());
 

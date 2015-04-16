@@ -73,7 +73,7 @@ bool cmQTWrapUICommand::InitialPass(std::vector<std::string> const& args,
           }
         else
           {
-          uiName = this->Makefile->GetCurrentDirectory();
+          uiName = this->Makefile->GetCurrentSourceDirectory();
           }
         uiName += "/";
         uiName += *j;

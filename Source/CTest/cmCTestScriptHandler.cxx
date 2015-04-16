@@ -346,7 +346,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
 
   // Set CMAKE_CURRENT_SOURCE_DIR and CMAKE_CURRENT_BINARY_DIR.
-  // Also, some commands need Makefile->GetCurrentDirectory().
+  // Also, some commands need Makefile->GetCurrentSourceDirectory().
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   this->Makefile->SetStartDirectory(cwd);
   this->Makefile->SetStartOutputDirectory(cwd);

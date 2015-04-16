@@ -255,7 +255,7 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
     std::string dir = this->Name;
     if(!cmSystemTools::FileIsFullPath(dir.c_str()))
       {
-      dir = this->Makefile->GetCurrentDirectory();
+      dir = this->Makefile->GetCurrentSourceDirectory();
       dir += "/";
       dir += this->Name;
       }

@@ -95,7 +95,7 @@ void cmInstallFilesCommand::FinalPass()
     {
     std::vector<std::string> files;
     std::string regex = this->FinalArgs[0];
-    cmSystemTools::Glob(this->Makefile->GetCurrentDirectory(),
+    cmSystemTools::Glob(this->Makefile->GetCurrentSourceDirectory(),
                         regex, files);
 
     std::vector<std::string>::iterator s = files.begin();
@@ -155,7 +155,7 @@ std::string cmInstallFilesCommand::FindInstallSource(const char* name) const
   std::string tb = this->Makefile->GetCurrentOutputDirectory();
   tb += "/";
   tb += name;
-  std::string ts = this->Makefile->GetCurrentDirectory();
+  std::string ts = this->Makefile->GetCurrentSourceDirectory();
   ts += "/";
   ts += name;
 

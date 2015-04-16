@@ -162,7 +162,7 @@ bool cmSourceFile::FindFullPath(std::string* error)
   const char* tryDirs[3] = {0, 0, 0};
   if(this->Location.DirectoryIsAmbiguous())
     {
-    tryDirs[0] = mf->GetCurrentDirectory();
+    tryDirs[0] = mf->GetCurrentSourceDirectory();
     tryDirs[1] = mf->GetCurrentOutputDirectory();
     }
   else
