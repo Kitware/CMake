@@ -147,7 +147,7 @@ set(timeformat "%Y%j%H%M%S")
 file(TIMESTAMP "${qrc_file1}" file1_before "${timeformat}")
 
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends/res1_input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/res1_input.txt")
 
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"

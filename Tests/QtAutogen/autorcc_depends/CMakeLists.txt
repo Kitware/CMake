@@ -15,9 +15,12 @@ else()
   set(QT_CORE_TARGET Qt5::Core)
 endif()
 
+configure_file(res1.qrc.in res1.qrc @ONLY)
+configure_file(res1_input.txt.in res1_input.txt @ONLY)
+
 add_executable(test_res1
   test_res1.cpp
-  res1.qrc
+  ${CMAKE_CURRENT_BINARY_DIR}/res1.qrc
 )
 target_link_libraries(test_res1 ${QT_CORE_TARGET})
 add_custom_command(TARGET test_res1 POST_BUILD COMMAND
