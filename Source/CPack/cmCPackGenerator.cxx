@@ -1501,8 +1501,8 @@ bool cmCPackGenerator::WantsComponentInstallation() const
 {
   return (!IsOn("CPACK_MONOLITHIC_INSTALL")
         && SupportsComponentInstallation()
-        // check that package at least has components
-        && !(this->ComponentGroups.empty() || this->Components.empty()));
+        // check that we have at least one group or component
+        && (!this->ComponentGroups.empty() || !this->Components.empty()));
 }
 
 //----------------------------------------------------------------------
