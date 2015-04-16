@@ -405,6 +405,11 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
 
 bool cmake::FindPackage(const std::vector<std::string>& args)
 {
+  this->SetHomeDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory());
+  this->SetHomeOutputDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory());
+
   // if a generator was not yet created, temporarily create one
   cmGlobalGenerator *gg = new cmGlobalGenerator;
   gg->SetCMakeInstance(this);
@@ -413,11 +418,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   // read in the list file to fill the cache
   cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
-  mf->SetHomeOutputDirectory
-    (cmSystemTools::GetCurrentWorkingDirectory());
   mf->SetStartOutputDirectory
-    (cmSystemTools::GetCurrentWorkingDirectory());
-  mf->SetHomeDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
   mf->SetStartDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
