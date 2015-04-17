@@ -1,4 +1,4 @@
-set(_cache_file "${RunCMake_TEST_BINARY_DIR}/tmp/FOO-cache.cmake")
+set(_cache_file "${RunCMake_TEST_BINARY_DIR}/tmp/FOO-cache-Debug.cmake")
 
 if(NOT EXISTS "${_cache_file}")
   set(RunCMake_TEST_FAILED "Initial cache not created")
