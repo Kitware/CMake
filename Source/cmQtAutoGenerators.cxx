@@ -202,6 +202,13 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
   std::string oline;
   while(std::getline(ostr, oline))
     {
+    // Strip CR characters rcc may have printed (possibly more than one!).
+    std::string::size_type cr = oline.find('\r');
+    if (cr != oline.npos)
+      {
+      oline = oline.substr(0, cr);
+      }
+
     if (oline.empty())
       {
       // The output of rcc --list contains many empty lines.

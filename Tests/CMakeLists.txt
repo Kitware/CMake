@@ -1186,10 +1186,13 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     set(run_autogen_test QtAutogen)
     set(run_autouic_test QtAutoUicInterface)
   endif()
+  if(NOT CMAKE_CONFIGURATION_TYPES)
+    set(QtAutogen_BUILD_OPTIONS -DCMAKE_BUILD_TYPE=$<CONFIGURATION>)
+  endif()
 
   find_package(Qt5Widgets QUIET NO_MODULE)
   if(Qt5Widgets_FOUND)
-    add_test(Qt5Autogen ${CMAKE_CTEST_COMMAND}
+    add_test(NAME Qt5Autogen COMMAND ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/QtAutogen"
       "${CMake_BINARY_DIR}/Tests/Qt5Autogen"
@@ -1199,6 +1202,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       --force-new-ctest-process
       --build-options ${build_options}
         -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=5
+        ${QtAutogen_BUILD_OPTIONS}
       --test-command ${run_autogen_test}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5Autogen")
@@ -1218,7 +1222,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt5AutoUicInterface")
   endif()
   if(QT4_WORKS AND QT_QTGUI_FOUND)
-    add_test(Qt4Autogen ${CMAKE_CTEST_COMMAND}
+    add_test(NAME Qt4Autogen COMMAND ${CMAKE_CTEST_COMMAND}
       --build-and-test
       "${CMake_SOURCE_DIR}/Tests/QtAutogen"
       "${CMake_BINARY_DIR}/Tests/Qt4Autogen"
@@ -1228,6 +1232,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
       --force-new-ctest-process
       --build-options ${build_options}
         -DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE} -DQT_TEST_VERSION=4
+        ${QtAutogen_BUILD_OPTIONS}
       --test-command ${run_autogen_test}
       )
     list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Qt4Autogen")

@@ -1,6 +1,13 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.1)
 
 project(QtAutogen)
+
+# Tell find_package(Qt5) where to find Qt.
+if(QT_QMAKE_EXECUTABLE)
+  get_filename_component(Qt_BIN_DIR "${QT_QMAKE_EXECUTABLE}" PATH)
+  get_filename_component(Qt_PREFIX_DIR "${Qt_BIN_DIR}" PATH)
+  set(CMAKE_PREFIX_PATH ${Qt_PREFIX_DIR})
+endif()
 
 if (QT_TEST_VERSION STREQUAL 4)
   find_package(Qt4 REQUIRED)
@@ -67,10 +74,9 @@ add_custom_command(
   DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/myotherinterface.h.in"
 )
 
-message("CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
-if (CMAKE_BUILD_TYPE MATCHES "[Dd][Ee][Bb][Uu][Gg]" AND NOT CMAKE_CONFIGURATION_TYPES)
+if (NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_GENERATOR STREQUAL Ninja)
   set(debug_srcs "$<$<CONFIG:Debug>:debug_class.cpp>" $<$<CONFIG:Debug>:debug_resource.qrc>)
-  add_definitions(-DTEST_DEBUG_CLASS)
+  set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS $<$<CONFIG:Debug>:TEST_DEBUG_CLASS>)
 endif()
 
 # The -no-protection option disables the generation of include guards.  Verify
@@ -125,6 +131,7 @@ try_compile(RCC_DEPENDS
   "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends"
   autorcc_depends
   CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+              "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
   OUTPUT_VARIABLE output
 )
 if (NOT RCC_DEPENDS)
@@ -140,7 +147,7 @@ set(timeformat "%Y%j%H%M%S")
 file(TIMESTAMP "${qrc_file1}" file1_before "${timeformat}")
 
 execute_process(COMMAND "${CMAKE_COMMAND}" -E sleep 1) # Ensure that the timestamp will change.
-execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_SOURCE_DIR}/autorcc_depends/res1_input.txt")
+execute_process(COMMAND "${CMAKE_COMMAND}" -E touch "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends/res1/input.txt")
 
 execute_process(COMMAND "${CMAKE_COMMAND}" --build .
   WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/autorcc_depends"
