@@ -570,10 +570,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       cmSystemTools::CollapseFullPath(external_in,
                                       this->cmStartDirectory.c_str());
     external = external_abs.c_str();
-    }
 
-  if(external_in)
-    {
     filenametoread= external;
     }
 
