@@ -542,7 +542,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
                               bool noPolicyScope,
                               bool requireProjectCommand)
 {
-  const char* external = 0;
   std::string external_abs;
 
   const char* filenametoread = filename_in;
@@ -569,9 +568,8 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     external_abs =
       cmSystemTools::CollapseFullPath(external_in,
                                       this->cmStartDirectory.c_str());
-    external = external_abs.c_str();
 
-    filenametoread= external;
+    filenametoread = external_abs.c_str();
     }
 
   std::string currentParentFile
