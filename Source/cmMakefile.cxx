@@ -572,7 +572,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   // Now read the input file
   const char *filenametoread= filename;
 
-  if( external)
+  if(external_in)
     {
     filenametoread= external;
     }
