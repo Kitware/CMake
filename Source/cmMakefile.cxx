@@ -522,12 +522,19 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
+bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
+{
+  return this->ReadListFile(listfile, 0, true,
+                            this->cmStartDirectory == this->cmHomeDirectory);
+}
+
 //----------------------------------------------------------------------------
 // Parse the given CMakeLists.txt file executing all commands
 //
 bool cmMakefile::ReadListFile(const char* filename_in,
                               const char *external_in,
-                              bool noPolicyScope)
+                              bool noPolicyScope,
+                              bool requireProjectCommand)
 {
   std::string currentParentFile
     = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
@@ -579,21 +586,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
                        cmSystemTools::GetFilenamePath(filenametoread).c_str());
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  // try to see if the list file is the top most
-  // list file for a project, and if it is, then it
-  // must have a project command.   If there is not
-  // one, then cmake will provide one via the
-  // cmListFileCache class.
-  bool requireProjectCommand = false;
-  if(!external && this->cmStartDirectory == this->cmHomeDirectory)
-    {
-    if(cmSystemTools::LowerCase(
-      cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
-      {
-      requireProjectCommand = true;
-      }
-    }
 
   // push the listfile onto the stack
   this->ListFileStack.push_back(filenametoread);

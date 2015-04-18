@@ -87,7 +87,10 @@ public:
    */
   bool ReadListFile(const char* listfile,
                     const char* external= 0,
-                    bool noPolicyScope = true);
+                    bool noPolicyScope = true,
+                    bool requireProjectCommand = false);
+
+  bool ProcessBuildsystemFile(const char* listfile);
 
   /**
    * Add a function blocker to this makefile

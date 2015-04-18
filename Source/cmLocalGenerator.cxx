@@ -181,7 +181,7 @@ void cmLocalGenerator::ReadInputFile()
   currentStart += "/CMakeLists.txt";
   if(cmSystemTools::FileExists(currentStart.c_str(), true))
     {
-    this->Makefile->ReadListFile(currentStart.c_str());
+    this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
     return;
     }
 
