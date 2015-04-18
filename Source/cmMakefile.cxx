@@ -573,10 +573,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   // keep track of the current file being read
   if (filename)
     {
-    if(this->cmCurrentListFile != filename)
-      {
-      this->cmCurrentListFile = filename;
-      }
+    this->cmCurrentListFile = filename;
     }
 
   // Now read the input file
