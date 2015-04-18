@@ -548,14 +548,11 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     filenametoread = filename_in;
     }
 
-  if (external_in)
+  if (external_in && filename_in)
     {
-    if (filename_in)
-      {
-      filenametoread =
-        cmSystemTools::CollapseFullPath(filename_in,
-                                        this->cmStartDirectory.c_str());
-      }
+    filenametoread =
+      cmSystemTools::CollapseFullPath(filename_in,
+                                      this->cmStartDirectory.c_str());
     }
 
   if (!filenametoread.empty())
