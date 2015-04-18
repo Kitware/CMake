@@ -550,10 +550,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 
   if (external_in)
     {
-    external_abs =
-      cmSystemTools::CollapseFullPath(external_in,
-                                      this->cmStartDirectory.c_str());
-    external = external_abs.c_str();
     if (filename_in)
       {
       filename_abs =
@@ -561,6 +557,10 @@ bool cmMakefile::ReadListFile(const char* filename_in,
                                         this->cmStartDirectory.c_str());
       filenametoread = filename_abs.c_str();
       }
+    external_abs =
+      cmSystemTools::CollapseFullPath(external_in,
+                                      this->cmStartDirectory.c_str());
+    external = external_abs.c_str();
     }
 
   // keep track of the current file being read
