@@ -524,12 +524,14 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
 
 bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 {
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
   return this->ReadListFile(listfile, 0, true,
                             this->cmStartDirectory == this->cmHomeDirectory);
 }
 
 bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
 {
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", this->GetCurrentListFile());
   return this->ReadListFile(this->GetCurrentListFile(), listfile,
                             noPolicyScope);
 }
@@ -572,7 +574,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   std::string currentFile
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
 
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
 
   bool res = this->ReadListFileInternal(filenametoread.c_str(),
