@@ -545,7 +545,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   const char* external = 0;
   std::string external_abs;
 
-  const char* filename = filename_in;
+  const char* filenametoread = filename_in;
   std::string filename_abs;
 
   if (external_in)
@@ -559,11 +559,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       filename_abs =
         cmSystemTools::CollapseFullPath(filename_in,
                                         this->cmStartDirectory.c_str());
-      filename = filename_abs.c_str();
+      filenametoread = filename_abs.c_str();
       }
     }
-
-  const char *filenametoread = filename;
 
   // keep track of the current file being read
   if (filenametoread)
