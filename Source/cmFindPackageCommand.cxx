@@ -999,8 +999,8 @@ bool cmFindPackageCommand::FindAppBundleConfig()
 //----------------------------------------------------------------------------
 bool cmFindPackageCommand::ReadListFile(const char* f, PolicyScopeRule psr)
 {
-  if(this->Makefile->ReadListFile(this->Makefile->GetCurrentListFile(), f,
-                                  !this->PolicyScope || psr == NoPolicyScope))
+  const bool noPolicyScope = !this->PolicyScope || psr == NoPolicyScope;
+  if(this->Makefile->ReadDependentFile(f, noPolicyScope))
     {
     return true;
     }

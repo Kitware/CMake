@@ -687,8 +687,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     {
     cmCTestOptionalLog(this, OUTPUT, "   Reading ctest configuration file: "
       << fname << std::endl, command->ShouldBeQuiet());
-    bool readit = mf->ReadListFile(mf->GetCurrentListFile(),
-      fname.c_str() );
+    bool readit = mf->ReadDependentFile(fname.c_str());
     if(!readit)
       {
       std::string m = "Could not find include file: ";

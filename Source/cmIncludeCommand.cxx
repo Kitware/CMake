@@ -131,8 +131,7 @@ bool cmIncludeCommand
     }
 
   bool readit =
-    this->Makefile->ReadListFile( this->Makefile->GetCurrentListFile(),
-                                  fname.c_str(), noPolicyScope);
+    this->Makefile->ReadDependentFile(fname.c_str(), noPolicyScope);
 
   // add the location of the included file if a result variable was given
   if (!resultVarName.empty())

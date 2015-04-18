@@ -528,6 +528,12 @@ bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
                             this->cmStartDirectory == this->cmHomeDirectory);
 }
 
+bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
+{
+  return this->ReadListFile(this->GetCurrentListFile(), listfile,
+                            noPolicyScope);
+}
+
 //----------------------------------------------------------------------------
 // Parse the given CMakeLists.txt file executing all commands
 //

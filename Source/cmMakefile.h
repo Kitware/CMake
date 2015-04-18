@@ -90,6 +90,8 @@ public:
                     bool noPolicyScope = true,
                     bool requireProjectCommand = false);
 
+  bool ReadDependentFile(const char* listfile, bool noPolicyScope = true);
+
   bool ProcessBuildsystemFile(const char* listfile);
 
   /**
