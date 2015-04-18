@@ -532,7 +532,11 @@ bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", this->GetCurrentListFile());
-  return this->ReadListFile(this->GetCurrentListFile(), listfile,
+  std::string filenametoread =
+    cmSystemTools::CollapseFullPath(listfile,
+                                    this->cmStartDirectory.c_str());
+  this->cmCurrentListFile = filenametoread;
+  return this->ReadListFile(0, filenametoread.c_str(),
                             noPolicyScope);
 }
 
@@ -548,13 +552,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   if (filename_in)
     {
     filenametoread = filename_in;
-    }
-
-  if (external_in && filename_in)
-    {
-    filenametoread =
-      cmSystemTools::CollapseFullPath(filename_in,
-                                      this->cmStartDirectory.c_str());
     }
 
   if (!filenametoread.empty())
