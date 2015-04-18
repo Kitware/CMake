@@ -557,6 +557,10 @@ bool cmMakefile::ReadListFile(const char* filename_in,
                                         this->cmStartDirectory.c_str());
       filenametoread = filename_abs.c_str();
       }
+    }
+
+  if (external_in)
+    {
     external_abs =
       cmSystemTools::CollapseFullPath(external_in,
                                       this->cmStartDirectory.c_str());
