@@ -991,6 +991,12 @@ protected:
 private:
   void Initialize();
 
+
+  bool ReadListFileInternal(const char* filename_in,
+                            const char* external_in,
+                            bool noPolicyScope,
+                            bool requireProjectCommand);
+
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
   bool EnforceUniqueDir(const std::string& srcPath,

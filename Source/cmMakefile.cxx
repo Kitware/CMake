@@ -542,6 +542,15 @@ bool cmMakefile::ReadListFile(const char* filename_in,
                               bool noPolicyScope,
                               bool requireProjectCommand)
 {
+  return this->ReadListFileInternal(filename_in, external_in,
+                                    noPolicyScope, requireProjectCommand);
+}
+
+bool cmMakefile::ReadListFileInternal(const char* filename_in,
+                                      const char* external_in,
+                                      bool noPolicyScope,
+                                      bool requireProjectCommand)
+{
   std::string currentParentFile
     = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
   std::string currentFile
