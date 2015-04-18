@@ -542,34 +542,32 @@ bool cmMakefile::ReadListFile(const char* filename_in,
                               bool noPolicyScope,
                               bool requireProjectCommand)
 {
-  std::string external_abs;
-
-  const char* filenametoread = filename_in;
-  std::string filename_abs;
+  std::string filenametoread;
+  if (filename_in)
+    {
+    filenametoread = filename_in;
+    }
 
   if (external_in)
     {
     if (filename_in)
       {
-      filename_abs =
+      filenametoread =
         cmSystemTools::CollapseFullPath(filename_in,
                                         this->cmStartDirectory.c_str());
-      filenametoread = filename_abs.c_str();
       }
     }
 
-  if (filenametoread)
+  if (!filenametoread.empty())
     {
     this->cmCurrentListFile = filenametoread;
     }
 
   if (external_in)
     {
-    external_abs =
+    filenametoread =
       cmSystemTools::CollapseFullPath(external_in,
                                       this->cmStartDirectory.c_str());
-
-    filenametoread = external_abs.c_str();
     }
 
   std::string currentParentFile
@@ -580,7 +578,7 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
 
-  bool res = this->ReadListFileInternal(filenametoread,
+  bool res = this->ReadListFileInternal(filenametoread.c_str(),
                                         noPolicyScope, requireProjectCommand);
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
