@@ -1163,7 +1163,7 @@ int cmCPackGenerator::Initialize(const std::string& name, cmMakefile* mf)
     this->GetOption("CPACK_PROJECT_CONFIG_FILE");
   if(config)
     {
-    mf->ReadListFile(config);
+    mf->ReadListFile(0, config);
     }
   int result = this->InitializeInternal();
   if (cmSystemTools::GetErrorOccuredFlag())
