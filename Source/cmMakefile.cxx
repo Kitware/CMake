@@ -542,41 +542,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
                               bool noPolicyScope,
                               bool requireProjectCommand)
 {
-  std::string currentParentFile
-      = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
-  std::string currentFile
-    = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
-
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-
-  bool res = this->ReadListFileInternal(filename_in, external_in,
-                                        noPolicyScope, requireProjectCommand);
-
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
-  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                      cmSystemTools::GetFilenamePath(currentFile).c_str());
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  this->ListFileStack.pop_back();
-
-  if (res)
-    {
-    // Check for unused variables
-    this->CheckForUnusedVariables();
-    }
-
-  return res;
-}
-
-bool cmMakefile::ReadListFileInternal(const char* filename_in,
-                                      const char* external_in,
-                                      bool noPolicyScope,
-                                      bool requireProjectCommand)
-{
   const char* external = 0;
   std::string external_abs;
 
@@ -612,6 +577,40 @@ bool cmMakefile::ReadListFileInternal(const char* filename_in,
     filenametoread= external;
     }
 
+  std::string currentParentFile
+      = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
+  std::string currentFile
+    = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
+
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
+
+  bool res = this->ReadListFileInternal(filenametoread,
+                                        noPolicyScope, requireProjectCommand);
+
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                      cmSystemTools::GetFilenamePath(currentFile).c_str());
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
+
+  this->ListFileStack.pop_back();
+
+  if (res)
+    {
+    // Check for unused variables
+    this->CheckForUnusedVariables();
+    }
+
+  return res;
+}
+
+bool cmMakefile::ReadListFileInternal(const char* filenametoread,
+                                      bool noPolicyScope,
+                                      bool requireProjectCommand)
+{
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->AddDefinition("CMAKE_CURRENT_LIST_DIR",

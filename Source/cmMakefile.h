@@ -992,8 +992,8 @@ private:
   void Initialize();
 
 
-  bool ReadListFileInternal(const char* filename_in,
-                            const char* external_in,
+
+  bool ReadListFileInternal(const char* filenametoread,
                             bool noPolicyScope,
                             bool requireProjectCommand);
 
