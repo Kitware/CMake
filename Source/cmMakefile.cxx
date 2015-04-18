@@ -526,7 +526,7 @@ bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
   this->cmCurrentListFile = listfile;
-  return this->ReadListFile(listfile, 0, true,
+  return this->ReadListFile(0, listfile, true,
                             this->cmStartDirectory == this->cmHomeDirectory);
 }
 
