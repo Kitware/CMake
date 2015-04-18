@@ -525,6 +525,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
 bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
+  this->cmCurrentListFile = listfile;
   return this->ReadListFile(listfile, 0, true,
                             this->cmStartDirectory == this->cmHomeDirectory);
 }
@@ -551,11 +552,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   if (filename_in)
     {
     filenametoread = filename_in;
-    }
-
-  if (!filenametoread.empty())
-    {
-    this->cmCurrentListFile = filenametoread;
     }
 
   if (external_in)
