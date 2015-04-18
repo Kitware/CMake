@@ -556,7 +556,15 @@ bool cmMakefile::ReadListFile(const char* listfile,
   std::string currentFile
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
 
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                       cmSystemTools::GetFilenamePath(filenametoread).c_str());
+
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
+
+  this->ListFileStack.push_back(filenametoread);
 
   bool res = this->ReadListFileInternal(filenametoread.c_str(),
                                         noPolicyScope, requireProjectCommand);
@@ -584,14 +592,6 @@ bool cmMakefile::ReadListFileInternal(const char* filenametoread,
                                       bool noPolicyScope,
                                       bool requireProjectCommand)
 {
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                       cmSystemTools::GetFilenamePath(filenametoread).c_str());
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  // push the listfile onto the stack
-  this->ListFileStack.push_back(filenametoread);
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand, this) )
     {
