@@ -559,18 +559,17 @@ bool cmMakefile::ReadListFile(const char* filename_in,
       }
     }
 
+  if (filenametoread)
+    {
+    this->cmCurrentListFile = filenametoread;
+    }
+
   if (external_in)
     {
     external_abs =
       cmSystemTools::CollapseFullPath(external_in,
                                       this->cmStartDirectory.c_str());
     external = external_abs.c_str();
-    }
-
-  // keep track of the current file being read
-  if (filenametoread)
-    {
-    this->cmCurrentListFile = filenametoread;
     }
 
   if(external_in)
