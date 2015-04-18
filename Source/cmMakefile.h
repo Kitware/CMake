@@ -87,7 +87,6 @@ public:
    */
   bool ReadListFile(const char* listfile,
                     const char* external= 0,
-                    std::string* fullPath= 0,
                     bool noPolicyScope = true);
 
   /**

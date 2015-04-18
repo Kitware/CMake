@@ -527,7 +527,6 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
 //
 bool cmMakefile::ReadListFile(const char* filename_in,
                               const char *external_in,
-                              std::string* fullPath,
                               bool noPolicyScope)
 {
   std::string currentParentFile
@@ -598,19 +597,11 @@ bool cmMakefile::ReadListFile(const char* filename_in,
 
   // push the listfile onto the stack
   this->ListFileStack.push_back(filenametoread);
-  if(fullPath!=0)
-    {
-    *fullPath=filenametoread;
-    }
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand, this) )
     {
     // pop the listfile off the stack
     this->ListFileStack.pop_back();
-    if(fullPath!=0)
-      {
-      *fullPath = "";
-      }
     this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
     this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
     this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
