@@ -1617,7 +1617,7 @@ void cmCTestTestHandler::GetListOfTests()
     return;
     }
 
-  if ( !mf->ReadListFile(0, testFilename) )
+  if ( !mf->ReadListFile(testFilename) )
     {
     return;
     }

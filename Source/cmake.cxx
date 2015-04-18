@@ -388,7 +388,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
 
       lg->GetMakefile()->SetArgcArgv(args);
       }
-    if (!lg->GetMakefile()->ReadListFile(0, path))
+    if (!lg->GetMakefile()->ReadListFile(path))
       {
       cmSystemTools::Error("Error processing file: ", path);
       }
@@ -424,7 +424,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   mf->SetArgcArgv(args);
 
   std::string systemFile = mf->GetModulesFile("CMakeFindPackageMode.cmake");
-  mf->ReadListFile(0, systemFile.c_str());
+  mf->ReadListFile(systemFile.c_str());
 
   std::string language = mf->GetSafeDefinition("LANGUAGE");
   std::string mode = mf->GetSafeDefinition("MODE");
@@ -1965,7 +1965,7 @@ int cmake::CheckBuildSystem()
   gg.SetCMakeInstance(&cm);
   cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
-  if(!mf->ReadListFile(0, this->CheckBuildSystemArgument.c_str()) ||
+  if(!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
     {
     if(verbose)

@@ -757,7 +757,7 @@ void cmCTestLaunch::LoadConfig()
   std::string fname = this->LogDir;
   fname += "CTestLaunchConfig.cmake";
   if(cmSystemTools::FileExists(fname.c_str()) &&
-     mf->ReadListFile(0, fname.c_str()))
+     mf->ReadListFile(fname.c_str()))
     {
     this->SourceDir = mf->GetSafeDefinition("CTEST_SOURCE_DIRECTORY");
     cmSystemTools::ConvertToUnixSlashes(this->SourceDir);

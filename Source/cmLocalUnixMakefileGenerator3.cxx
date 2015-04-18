@@ -1475,7 +1475,7 @@ bool cmLocalUnixMakefileGenerator3::UpdateDependencies(const char* tgtInfo,
                                                        bool color)
 {
   // read in the target info file
-  if(!this->Makefile->ReadListFile(0, tgtInfo) ||
+  if(!this->Makefile->ReadListFile(tgtInfo) ||
      cmSystemTools::GetErrorOccuredFlag())
     {
     cmSystemTools::Error("Target DependInfo.cmake file not found");
@@ -1592,7 +1592,7 @@ cmLocalUnixMakefileGenerator3
   std::string dirInfoFile = this->Makefile->GetStartOutputDirectory();
   dirInfoFile += cmake::GetCMakeFilesDirectory();
   dirInfoFile += "/CMakeDirectoryInformation.cmake";
-  if(mf->ReadListFile(0, dirInfoFile.c_str()) &&
+  if(mf->ReadListFile(dirInfoFile.c_str()) &&
      !cmSystemTools::GetErrorOccuredFlag())
     {
     haveDirectoryInfo = true;

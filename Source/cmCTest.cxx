@@ -2576,7 +2576,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
     bool erroroc = cmSystemTools::GetErrorOccuredFlag();
     cmSystemTools::ResetErrorOccuredFlag();
 
-    if ( !mf->ReadListFile(0, fname.c_str()) ||
+    if ( !mf->ReadListFile(fname.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag() )
       {
       cmCTestLog(this, ERROR_MESSAGE,
@@ -2606,7 +2606,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
       {
       cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
         << *fileIt << std::endl);
-      if ( !mf->ReadListFile(0, fileIt->c_str()) ||
+      if ( !mf->ReadListFile(fileIt->c_str()) ||
         cmSystemTools::GetErrorOccuredFlag() )
         {
         cmCTestLog(this, ERROR_MESSAGE,

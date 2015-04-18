@@ -86,7 +86,6 @@ public:
    * Read and parse a CMakeLists.txt file.
    */
   bool ReadListFile(const char* listfile,
-                    const char* external= 0,
                     bool noPolicyScope = true,
                     bool requireProjectCommand = false);
 

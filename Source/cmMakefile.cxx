@@ -526,7 +526,7 @@ bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
   this->cmCurrentListFile = listfile;
-  return this->ReadListFile(0, listfile, true,
+  return this->ReadListFile(listfile, true,
                             this->cmStartDirectory == this->cmHomeDirectory);
 }
 
@@ -536,30 +536,20 @@ bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
   this->cmCurrentListFile =
     cmSystemTools::CollapseFullPath(listfile,
                                     this->cmStartDirectory.c_str());
-  return this->ReadListFile(0, this->cmCurrentListFile.c_str(),
+  return this->ReadListFile(this->cmCurrentListFile.c_str(),
                             noPolicyScope);
 }
 
 //----------------------------------------------------------------------------
 // Parse the given CMakeLists.txt file executing all commands
 //
-bool cmMakefile::ReadListFile(const char* filename_in,
-                              const char *external_in,
+bool cmMakefile::ReadListFile(const char* listfile,
                               bool noPolicyScope,
                               bool requireProjectCommand)
 {
-  std::string filenametoread;
-  if (filename_in)
-    {
-    filenametoread = filename_in;
-    }
-
-  if (external_in)
-    {
-    filenametoread =
-      cmSystemTools::CollapseFullPath(external_in,
-                                      this->cmStartDirectory.c_str());
-    }
+  std::string filenametoread =
+    cmSystemTools::CollapseFullPath(listfile,
+                                    this->cmStartDirectory.c_str());
 
   std::string currentParentFile
       = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");

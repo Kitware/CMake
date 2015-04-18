@@ -433,7 +433,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
   ctest scripting easier. */
   std::string systemFile =
       this->Makefile->GetModulesFile("CTestScriptMode.cmake");
-  if (!this->Makefile->ReadListFile(0, systemFile.c_str()) ||
+  if (!this->Makefile->ReadListFile(systemFile.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag())
     {
     cmCTestLog(this->CTest, ERROR_MESSAGE, "Error in read:"
@@ -451,7 +451,7 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     }
 
   // finally read in the script
-  if (!this->Makefile->ReadListFile(0, script.c_str()) ||
+  if (!this->Makefile->ReadListFile(script.c_str()) ||
     cmSystemTools::GetErrorOccuredFlag())
     {
     // Reset the error flag so that it can run more than
