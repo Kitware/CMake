@@ -566,9 +566,9 @@ bool cmMakefile::ReadListFile(const char* filename_in,
   const char *filenametoread = filename;
 
   // keep track of the current file being read
-  if (filename)
+  if (filenametoread)
     {
-    this->cmCurrentListFile = filename;
+    this->cmCurrentListFile = filenametoread;
     }
 
   if(external_in)
