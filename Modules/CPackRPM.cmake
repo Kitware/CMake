@@ -419,6 +419,33 @@
 #  May be used to remove CPACK_PACKAGING_INSTALL_PREFIX and CPACK_RPM_<COMPONENT>_PACKAGE_PREFIX
 #  from relocatable RPM prefix paths.
 #
+# .. variable:: CPACK_RPM_ADDITIONAL_MAN_DIRS
+#
+#  * Mandatory : NO
+#  * Default   : -
+#
+#  May be used to set additional man dirs that could potentially be compressed
+#  by brp-compress RPM macro. Variable content must be a list of regular
+#  expressions that point to directories containing man files or to man files
+#  directly. Note that in order to compress man pages a path must also be
+#  present in brp-compress RPM script and that brp-compress script must be
+#  added to RPM configuration by the operating system.
+#
+#  Regular expressions that are added by default were taken from brp-compress
+#  RPM macro:
+#
+#  - /usr/man/man.*
+#  - /usr/man/.*/man.*
+#  - /usr/info.*
+#  - /usr/share/man/man.*
+#  - /usr/share/man/.*/man.*
+#  - /usr/share/info.*
+#  - /usr/kerberos/man.*
+#  - /usr/X11R6/man/man.*
+#  - /usr/lib/perl5/man/man.*
+#  - /usr/share/doc/.*/man/man.*
+#  - /usr/lib/.*/man/man.*
+#
 # Packaging of Symbolic Links
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
@@ -539,6 +566,14 @@ function(cpack_rpm_prepare_relocation_paths)
 endfunction()
 
 function(cpack_rpm_prepare_content_list)
+  # get files list
+  cmake_policy(PUSH)
+    cmake_policy(SET CMP0009 NEW)
+    file(GLOB_RECURSE CPACK_RPM_INSTALL_FILES LIST_DIRECTORIES true RELATIVE "${WDIR}" "${WDIR}/*")
+  cmake_policy(POP)
+  set(CPACK_RPM_INSTALL_FILES "/${CPACK_RPM_INSTALL_FILES}")
+  string(REPLACE ";" ";/" CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}")
+
   # if we are creating a relocatable package, omit parent directories of
   # CPACK_RPM_PACKAGE_PREFIX. This is achieved by building a "filter list"
   # which is passed to the find command that generates the content-list
@@ -547,26 +582,21 @@ function(cpack_rpm_prepare_content_list)
     # destinct parent paths of other relocation paths and remove the
     # final element (so the install-prefix dir itself is not omitted
     # from the RPM's content-list)
-    set(SORTED_RPM_USED_PACKAGE_PREFIXES "${RPM_USED_PACKAGE_PREFIXES}")
-    list(SORT SORTED_RPM_USED_PACKAGE_PREFIXES)
+    list(SORT RPM_USED_PACKAGE_PREFIXES)
     set(_DISTINCT_PATH "NOT_SET")
-    foreach(_RPM_RELOCATION_PREFIX ${SORTED_RPM_USED_PACKAGE_PREFIXES})
+    foreach(_RPM_RELOCATION_PREFIX ${RPM_USED_PACKAGE_PREFIXES})
       if(NOT "${_RPM_RELOCATION_PREFIX}" MATCHES "${_DISTINCT_PATH}/.*")
         set(_DISTINCT_PATH "${_RPM_RELOCATION_PREFIX}")
 
-        string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS ".${_RPM_RELOCATION_PREFIX}")
+        string(REPLACE "/" ";" _CPACK_RPM_PACKAGE_PREFIX_ELEMS " ${_RPM_RELOCATION_PREFIX}")
         list(REMOVE_AT _CPACK_RPM_PACKAGE_PREFIX_ELEMS -1)
         unset(_TMP_LIST)
         # Now generate all of the parent dirs of the relocation path
         foreach(_PREFIX_PATH_ELEM ${_CPACK_RPM_PACKAGE_PREFIX_ELEMS})
           list(APPEND _TMP_LIST "${_PREFIX_PATH_ELEM}")
           string(REPLACE ";" "/" _OMIT_DIR "${_TMP_LIST}")
-          list(FIND _RPM_DIRS_TO_OMIT "${_OMIT_DIR}" _DUPLICATE_FOUND)
-          if(_DUPLICATE_FOUND EQUAL -1)
-            set(_OMIT_DIR "-o -path ${_OMIT_DIR}")
-            separate_arguments(_OMIT_DIR)
-            list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
-          endif()
+          separate_arguments(_OMIT_DIR)
+          list(APPEND _RPM_DIRS_TO_OMIT ${_OMIT_DIR})
         endforeach()
       endif()
     endforeach()
@@ -576,40 +606,62 @@ function(cpack_rpm_prepare_content_list)
     message("CPackRPM:Debug: Initial list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
   endif()
 
-  if (NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
+  if(NOT DEFINED CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
     set(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST /etc /etc/init.d /usr /usr/share /usr/share/doc /usr/bin /usr/lib /usr/lib64 /usr/include)
-    if (CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
+    if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION)
       message("CPackRPM:Debug: Adding ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION} to builtin omit list.")
       list(APPEND CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST "${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST_ADDITION}")
     endif()
   endif()
 
   if(CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST)
-    if (CPACK_RPM_PACKAGE_DEBUG)
+    if(CPACK_RPM_PACKAGE_DEBUG)
       message("CPackRPM:Debug: CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST= ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST}")
     endif()
-    foreach(_DIR ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
-      list(APPEND _RPM_DIRS_TO_OMIT "-o;-path;.${_DIR}")
-    endforeach()
+    list(APPEND _RPM_DIRS_TO_OMIT ${CPACK_RPM_EXCLUDE_FROM_AUTO_FILELIST})
   endif()
 
   if(CPACK_RPM_PACKAGE_DEBUG)
     message("CPackRPM:Debug: Final list of path to OMIT in RPM: ${_RPM_DIRS_TO_OMIT}")
   endif()
 
-  # Use files tree to construct files command (spec file)
-  # We should not forget to include symlinks (thus -o -type l)
-  # We should include directory as well (thus -type d)
-  #   but not the main local dir "." (thus -a -not -name ".")
-  # We must remove the './' due to the local search and escape the
-  # file name by enclosing it between double quotes (thus the sed)
-  # Then we must authorize any man pages extension (adding * at the end)
-  # because rpmbuild may automatically compress those files
-  execute_process(COMMAND find . -type f -o -type l -o (-type d -a -not ( -name "." ${_RPM_DIRS_TO_OMIT} ) )
-                  COMMAND sed s:.*/man.*/.*:&*:
-                  COMMAND sed s/\\.\\\(.*\\\)/\"\\1\"/
-                  WORKING_DIRECTORY "${WDIR}"
-                  OUTPUT_VARIABLE CPACK_RPM_INSTALL_FILES)
+  list(REMOVE_ITEM CPACK_RPM_INSTALL_FILES ${_RPM_DIRS_TO_OMIT})
+
+  # add man paths that will be compressed
+  # (copied from /usr/lib/rpm/brp-compress - script that does the actual
+  # compressing)
+  list(APPEND MAN_LOCATIONS "/usr/man/man.*" "/usr/man/.*/man.*" "/usr/info.*"
+    "/usr/share/man/man.*" "/usr/share/man/.*/man.*" "/usr/share/info.*"
+    "/usr/kerberos/man.*" "/usr/X11R6/man/man.*" "/usr/lib/perl5/man/man.*"
+    "/usr/share/doc/.*/man/man.*" "/usr/lib/.*/man/man.*")
+
+  if(CPACK_RPM_ADDITIONAL_MAN_DIRS)
+    if(CPACK_RPM_PACKAGE_DEBUG)
+      message("CPackRPM:Debug: CPACK_RPM_ADDITIONAL_MAN_DIRS= ${CPACK_RPM_ADDITIONAL_MAN_DIRS}")
+    endif()
+    list(APPEND MAN_LOCATIONS ${CPACK_RPM_ADDITIONAL_MAN_DIRS})
+  endif()
+
+  foreach(PACK_LOCATION IN LISTS CPACK_RPM_INSTALL_FILES)
+    foreach(MAN_LOCATION IN LISTS MAN_LOCATIONS)
+      # man pages are files inside a certain location
+      if(PACK_LOCATION MATCHES "${MAN_LOCATION}/"
+        AND NOT IS_DIRECTORY "${WDIR}${PACK_LOCATION}"
+        AND NOT IS_SYMLINK "${WDIR}${PACK_LOCATION}")
+        list(FIND CPACK_RPM_INSTALL_FILES "${PACK_LOCATION}" INDEX)
+        # insert file location that covers compressed man pages
+        # even if using a wildcard causes duplicates as those are
+        # handled by RPM and we still keep the same file list
+        # in spec file - wildcard only represents file type (e.g. .gz)
+        list(INSERT CPACK_RPM_INSTALL_FILES ${INDEX} "${PACK_LOCATION}*")
+        # remove file location that doesn't cover compressed man pages
+        math(EXPR INDEX ${INDEX}+1)
+        list(REMOVE_AT CPACK_RPM_INSTALL_FILES ${INDEX})
+
+        break()
+      endif()
+    endforeach()
+  endforeach()
 
   set(CPACK_RPM_INSTALL_FILES "${CPACK_RPM_INSTALL_FILES}" PARENT_SCOPE)
 endfunction()

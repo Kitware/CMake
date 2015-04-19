@@ -233,7 +233,14 @@ if(CPackGen MATCHES "RPM")
 /usr/foo/bar/bin/@in@_@path@@with/@and
 /usr/foo/bar/bin/@in@_@path@@with/@and/@
 /usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@
-/usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@/mylibapp2$")
+/usr/foo/bar/bin/@in@_@path@@with/@and/@/@in_path@/mylibapp2
+/usr/foo/bar/share
+/usr/foo/bar/share/man
+/usr/foo/bar/share/man/mylib
+/usr/foo/bar/share/man/mylib/man3
+/usr/foo/bar/share/man/mylib/man3/mylib.1
+/usr/foo/bar/share/man/mylib/man3/mylib.1/mylib
+/usr/foo/bar/share/man/mylib/man3/mylib.1/mylib2$")
       else()
         message(FATAL_ERROR "error: unexpected rpm package '${check_file}'")
       endif()

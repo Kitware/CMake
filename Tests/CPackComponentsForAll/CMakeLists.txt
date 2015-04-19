@@ -50,6 +50,13 @@ install(FILES mylib.h
   COMPONENT headers)
 
 if("${CPACK_GENERATOR}" MATCHES "RPM")
+  ############## test man pages
+  install(FILES mylib
+    DESTINATION share/man/mylib/man3/mylib.1)
+  install(FILES mylib
+    DESTINATION share/man/mylib/man3/mylib.1 RENAME mylib2)
+
+  ############## test symlinks
   # Package symbolic links
   install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_one/depth_two/depth_three COMPONENT libraries)
   install(DIRECTORY DESTINATION ${CMAKE_INSTALL_LIBDIR}/inside_relocatable_two/depth_two/different_relocatable/bar COMPONENT libraries)
