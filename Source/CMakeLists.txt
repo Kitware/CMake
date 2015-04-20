@@ -480,6 +480,14 @@ if (WIN32)
       cmVisualStudioSlnParser.cxx
       cmVisualStudioWCEPlatformParser.h
       cmVisualStudioWCEPlatformParser.cxx
+      cmGlobalGhsMultiGenerator.cxx
+      cmGlobalGhsMultiGenerator.h
+      cmLocalGhsMultiGenerator.cxx
+      cmLocalGhsMultiGenerator.h
+      cmGhsMultiTargetGenerator.cxx
+      cmGhsMultiTargetGenerator.h
+      cmGhsMultiGpj.cxx
+      cmGhsMultiGpj.h
       )
   endif()
 endif ()
@@ -507,6 +515,7 @@ set(SRCS ${SRCS}
   cmNinjaUtilityTargetGenerator.cxx
   cmNinjaUtilityTargetGenerator.h
   )
+
 if(WIN32 AND NOT CYGWIN)
   set_source_files_properties(cmcldeps.cxx PROPERTIES COMPILE_DEFINITIONS _WIN32_WINNT=0x0501)
   add_executable(cmcldeps cmcldeps.cxx)

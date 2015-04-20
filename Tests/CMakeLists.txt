@@ -1967,6 +1967,23 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     endif()
   endif()
 
+  if (CMake_TEST_GreenHillsMULTI)
+    macro(add_test_GhsMulti name primaryTarget bspName)
+      add_test(NAME GhsMulti.${name} COMMAND ${CMAKE_CTEST_COMMAND}
+        --build-and-test
+        "${CMake_SOURCE_DIR}/Tests/GhsMulti"
+        "${CMake_BINARY_DIR}/Tests/GhsMulti/${name}"
+        --build-generator "Green Hills MULTI"
+        --build-project ReturnNum
+        --build-config $<CONFIGURATION>
+        --build-options -DGHS_PRIMARY_TARGET=${primaryTarget}
+        -DGHS_BSP_NAME=${bspName}
+        )
+    endmacro ()
+    add_test_GhsMulti("arm_integrity_simarm" "arm_integrity.tgt" "simarm")
+    add_test_GhsMulti("arm64_integrity_simarm" "arm64_integrity.tgt" "simarm")
+  endif ()
+
   if(tegra AND NOT "${CMake_SOURCE_DIR};${CMake_BINARY_DIR}" MATCHES " ")
     macro(add_test_VSNsightTegra name generator)
       add_test(NAME VSNsightTegra.${name} COMMAND ${CMAKE_CTEST_COMMAND}

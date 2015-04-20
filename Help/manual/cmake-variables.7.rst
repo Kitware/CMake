@@ -182,6 +182,7 @@ Variables that Describe the System
    /variable/CMAKE_SYSTEM_VERSION
    /variable/CYGWIN
    /variable/ENV
+   /variable/GHS-MULTI
    /variable/MINGW
    /variable/MSVC10
    /variable/MSVC11
@@ -307,6 +308,10 @@ Variables for Languages
    /variable/CMAKE_LANG_FLAGS_RELEASE
    /variable/CMAKE_LANG_FLAGS_RELWITHDEBINFO
    /variable/CMAKE_LANG_FLAGS
+   /variable/CMAKE_LANG_GHS_KERNEL_FLAGS_DEBUG
+   /variable/CMAKE_LANG_GHS_KERNEL_FLAGS_MINSIZEREL
+   /variable/CMAKE_LANG_GHS_KERNEL_FLAGS_RELEASE
+   /variable/CMAKE_LANG_GHS_KERNEL_FLAGS_RELWITHDEBINFO
    /variable/CMAKE_LANG_IGNORE_EXTENSIONS
    /variable/CMAKE_LANG_IMPLICIT_INCLUDE_DIRECTORIES
    /variable/CMAKE_LANG_IMPLICIT_LINK_DIRECTORIES
