@@ -170,6 +170,17 @@ static std::string getAutogenTargetDir(cmTarget const* target)
   return targetDir;
 }
 
+static std::string cmQtAutoGeneratorsStripCR(std::string const& line)
+{
+  // Strip CR characters rcc may have printed (possibly more than one!).
+  std::string::size_type cr = line.find('\r');
+  if (cr != line.npos)
+    {
+    return line.substr(0, cr);
+    }
+  return line;
+}
+
 std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
                                             cmTarget const* target,
                                             std::vector<std::string>& depends)
@@ -202,13 +213,7 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
   std::string oline;
   while(std::getline(ostr, oline))
     {
-    // Strip CR characters rcc may have printed (possibly more than one!).
-    std::string::size_type cr = oline.find('\r');
-    if (cr != oline.npos)
-      {
-      oline = oline.substr(0, cr);
-      }
-
+    oline = cmQtAutoGeneratorsStripCR(oline);
     if (oline.empty())
       {
       // The output of rcc --list contains many empty lines.
