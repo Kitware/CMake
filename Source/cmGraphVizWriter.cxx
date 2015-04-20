@@ -81,7 +81,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
       }
     }
 
-  if ( !mf->ReadListFile(0, inFileName) )
+  if ( !mf->ReadListFile(inFileName) )
     {
     cmSystemTools::Error("Problem opening GraphViz options file: ",
                          inFileName);

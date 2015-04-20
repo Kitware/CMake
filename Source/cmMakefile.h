@@ -86,9 +86,12 @@ public:
    * Read and parse a CMakeLists.txt file.
    */
   bool ReadListFile(const char* listfile,
-                    const char* external= 0,
-                    std::string* fullPath= 0,
-                    bool noPolicyScope = true);
+                    bool noPolicyScope = true,
+                    bool requireProjectCommand = false);
+
+  bool ReadDependentFile(const char* listfile, bool noPolicyScope = true);
+
+  bool ProcessBuildsystemFile(const char* listfile);
 
   /**
    * Add a function blocker to this makefile
@@ -986,6 +989,12 @@ protected:
 
 private:
   void Initialize();
+
+
+
+  bool ReadListFileInternal(const char* filenametoread,
+                            bool noPolicyScope,
+                            bool requireProjectCommand);
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 

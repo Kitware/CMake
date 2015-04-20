@@ -687,8 +687,7 @@ bool cmCTest::InitializeFromCommand(cmCTestStartCommand* command)
     {
     cmCTestOptionalLog(this, OUTPUT, "   Reading ctest configuration file: "
       << fname << std::endl, command->ShouldBeQuiet());
-    bool readit = mf->ReadListFile(mf->GetCurrentListFile(),
-      fname.c_str() );
+    bool readit = mf->ReadDependentFile(fname.c_str());
     if(!readit)
       {
       std::string m = "Could not find include file: ";
@@ -2577,7 +2576,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
     bool erroroc = cmSystemTools::GetErrorOccuredFlag();
     cmSystemTools::ResetErrorOccuredFlag();
 
-    if ( !mf->ReadListFile(0, fname.c_str()) ||
+    if ( !mf->ReadListFile(fname.c_str()) ||
       cmSystemTools::GetErrorOccuredFlag() )
       {
       cmCTestLog(this, ERROR_MESSAGE,
@@ -2607,7 +2606,7 @@ int cmCTest::ReadCustomConfigurationFileTree(const char* dir, cmMakefile* mf)
       {
       cmCTestLog(this, DEBUG, "* Read custom CTest configuration file: "
         << *fileIt << std::endl);
-      if ( !mf->ReadListFile(0, fileIt->c_str()) ||
+      if ( !mf->ReadListFile(fileIt->c_str()) ||
         cmSystemTools::GetErrorOccuredFlag() )
         {
         cmCTestLog(this, ERROR_MESSAGE,

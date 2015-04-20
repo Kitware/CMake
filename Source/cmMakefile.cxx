@@ -522,102 +522,79 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
+bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
+{
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
+  this->cmCurrentListFile = listfile;
+  return this->ReadListFile(listfile, true,
+                            this->cmStartDirectory == this->cmHomeDirectory);
+}
+
+bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
+{
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", this->GetCurrentListFile());
+  this->cmCurrentListFile =
+    cmSystemTools::CollapseFullPath(listfile,
+                                    this->cmStartDirectory.c_str());
+  return this->ReadListFile(this->cmCurrentListFile.c_str(),
+                            noPolicyScope);
+}
+
 //----------------------------------------------------------------------------
 // Parse the given CMakeLists.txt file executing all commands
 //
-bool cmMakefile::ReadListFile(const char* filename_in,
-                              const char *external_in,
-                              std::string* fullPath,
-                              bool noPolicyScope)
+bool cmMakefile::ReadListFile(const char* listfile,
+                              bool noPolicyScope,
+                              bool requireProjectCommand)
 {
+  std::string filenametoread =
+    cmSystemTools::CollapseFullPath(listfile,
+                                    this->cmStartDirectory.c_str());
+
   std::string currentParentFile
-    = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
+      = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
   std::string currentFile
     = this->GetSafeDefinition("CMAKE_CURRENT_LIST_FILE");
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename_in);
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
 
-  const char* external = 0;
-  std::string external_abs;
-
-  const char* filename = filename_in;
-  std::string filename_abs;
-
-  if (external_in)
-    {
-    external_abs =
-      cmSystemTools::CollapseFullPath(external_in,
-                                      this->cmStartDirectory.c_str());
-    external = external_abs.c_str();
-    if (filename_in)
-      {
-      filename_abs =
-        cmSystemTools::CollapseFullPath(filename_in,
-                                        this->cmStartDirectory.c_str());
-      filename = filename_abs.c_str();
-      }
-    }
-
-  // keep track of the current file being read
-  if (filename)
-    {
-    if(this->cmCurrentListFile != filename)
-      {
-      this->cmCurrentListFile = filename;
-      }
-    }
-
-  // Now read the input file
-  const char *filenametoread= filename;
-
-  if( external)
-    {
-    filenametoread= external;
-    }
-
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread);
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", filenametoread.c_str());
   this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
                        cmSystemTools::GetFilenamePath(filenametoread).c_str());
+
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  // try to see if the list file is the top most
-  // list file for a project, and if it is, then it
-  // must have a project command.   If there is not
-  // one, then cmake will provide one via the
-  // cmListFileCache class.
-  bool requireProjectCommand = false;
-  if(!external && this->cmStartDirectory == this->cmHomeDirectory)
+  this->ListFileStack.push_back(filenametoread);
+
+  bool res = this->ReadListFileInternal(filenametoread.c_str(),
+                                        noPolicyScope, requireProjectCommand);
+
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                      cmSystemTools::GetFilenamePath(currentFile).c_str());
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
+
+  this->ListFileStack.pop_back();
+
+  if (res)
     {
-    if(cmSystemTools::LowerCase(
-      cmSystemTools::GetFilenameName(filename)) == "cmakelists.txt")
-      {
-      requireProjectCommand = true;
-      }
+    // Check for unused variables
+    this->CheckForUnusedVariables();
     }
 
-  // push the listfile onto the stack
-  this->ListFileStack.push_back(filenametoread);
-  if(fullPath!=0)
-    {
-    *fullPath=filenametoread;
-    }
+  return res;
+}
+
+bool cmMakefile::ReadListFileInternal(const char* filenametoread,
+                                      bool noPolicyScope,
+                                      bool requireProjectCommand)
+{
   cmListFile cacheFile;
   if( !cacheFile.ParseFile(filenametoread, requireProjectCommand, this) )
     {
-    // pop the listfile off the stack
-    this->ListFileStack.pop_back();
-    if(fullPath!=0)
-      {
-      *fullPath = "";
-      }
-    this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
-    this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-    this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
-    this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-    this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                        cmSystemTools::GetFilenamePath(currentFile).c_str());
-    this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
     return false;
     }
   // add this list file to the list of dependencies
@@ -655,20 +632,6 @@ bool cmMakefile::ReadListFile(const char* filename_in,
     {
     this->EnforceDirectoryLevelRules();
     }
-
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                      cmSystemTools::GetFilenamePath(currentFile).c_str());
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  // pop the listfile off the stack
-  this->ListFileStack.pop_back();
-
-  // Check for unused variables
-  this->CheckForUnusedVariables();
 
   return true;
 }

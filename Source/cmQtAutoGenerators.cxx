@@ -1243,7 +1243,7 @@ bool cmQtAutoGenerators::ReadAutogenInfoFile(cmMakefile* makefile,
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutogenInfo.cmake";
 
-  if (!makefile->ReadListFile(0, filename.c_str()))
+  if (!makefile->ReadListFile(filename.c_str()))
     {
     cmSystemTools::Error("Error processing file: ", filename.c_str());
     return false;
@@ -1413,7 +1413,7 @@ bool cmQtAutoGenerators::ReadOldMocDefinitionsFile(cmMakefile* makefile,
   cmSystemTools::ConvertToUnixSlashes(filename);
   filename += "/AutomocOldMocDefinitions.cmake";
 
-  if (makefile->ReadListFile(0, filename.c_str()))
+  if (makefile->ReadListFile(filename.c_str()))
     {
     this->OldCompileSettingsStr =
                         makefile->GetSafeDefinition("AM_OLD_COMPILE_SETTINGS");

@@ -525,7 +525,7 @@ int cmCPackGenerator::InstallProjectViaInstallScript(
         tempInstallDirectory.c_str());
       this->SetOptionIfNotSet("CMAKE_CURRENT_SOURCE_DIR",
         tempInstallDirectory.c_str());
-      int res = this->MakefileMap->ReadListFile(0, installScript.c_str());
+      int res = this->MakefileMap->ReadListFile(installScript.c_str());
       if ( cmSystemTools::GetErrorOccuredFlag() || !res )
         {
         return 0;
@@ -888,7 +888,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
                               "1");
           }
         // do installation
-        int res = mf->ReadListFile(0, installFile.c_str());
+        int res = mf->ReadListFile(installFile.c_str());
         // forward definition of CMAKE_ABSOLUTE_DESTINATION_FILES
         // to CPack (may be used by generators like CPack RPM or DEB)
         // in order to transparently handle ABSOLUTE PATH
@@ -980,7 +980,7 @@ bool cmCPackGenerator::ReadListFile(const char* moduleName)
 {
   bool retval;
   std::string fullPath = this->MakefileMap->GetModulesFile(moduleName);
-  retval = this->MakefileMap->ReadListFile(0, fullPath.c_str());
+  retval = this->MakefileMap->ReadListFile(fullPath.c_str());
   // include FATAL_ERROR and ERROR in the return status
   retval = retval && (! cmSystemTools::GetErrorOccuredFlag());
   return retval;

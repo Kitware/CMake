@@ -244,7 +244,7 @@ int main (int argc, char const* const* argv)
     // paths, so FIND_XXX() commands can be used in scripts
     std::string systemFile =
       globalMF->GetModulesFile("CMakeDetermineSystem.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    if (!globalMF->ReadListFile(systemFile.c_str()))
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "Error reading CMakeDetermineSystem.cmake" << std::endl);
@@ -253,7 +253,7 @@ int main (int argc, char const* const* argv)
 
     systemFile =
       globalMF->GetModulesFile("CMakeSystemSpecificInformation.cmake");
-    if (!globalMF->ReadListFile(0, systemFile.c_str()))
+    if (!globalMF->ReadListFile(systemFile.c_str()))
       {
       cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
         "Error reading CMakeSystemSpecificInformation.cmake" << std::endl);
@@ -272,7 +272,7 @@ int main (int argc, char const* const* argv)
       cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
         "Read CPack configuration file: " << cpackConfigFile
         << std::endl);
-      if ( !globalMF->ReadListFile(0, cpackConfigFile.c_str()) )
+      if ( !globalMF->ReadListFile(cpackConfigFile.c_str()) )
         {
         cmCPack_Log(&log, cmCPackLog::LOG_ERROR,
           "Problem reading CPack config file: \""

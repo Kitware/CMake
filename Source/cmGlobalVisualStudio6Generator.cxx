@@ -60,7 +60,7 @@ void cmGlobalVisualStudio6Generator::GenerateConfigurations(cmMakefile* mf)
     fname += "/Templates";
     }
   fname += "/CMakeVisualStudio6Configurations.cmake";
-  if(!mf->ReadListFile(mf->GetCurrentListFile(), fname.c_str()))
+  if(!mf->ReadDependentFile(fname.c_str()))
     {
     cmSystemTools::Error("Cannot open ", fname.c_str(),
                          ".  Please copy this file from the main "
