@@ -188,7 +188,7 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
 
   std::string output;
   int retVal = 0;
-  bool result = cmSystemTools::RunSingleCommand(command, &output,
+  bool result = cmSystemTools::RunSingleCommand(command, &output, &output,
                                             &retVal, 0,
                                             cmSystemTools::OUTPUT_NONE);
   if (!result || retVal)
@@ -2196,7 +2196,8 @@ bool cmQtAutoGenerators::GenerateMoc(const std::string& sourceFile,
 
     std::string output;
     int retVal = 0;
-    bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
+    bool result = cmSystemTools::RunSingleCommand(command, &output, &output,
+                                                  &retVal);
     if (!result || retVal)
       {
       std::cerr << "AUTOGEN: error: process for " << mocFilePath <<" failed:\n"
@@ -2265,7 +2266,8 @@ bool cmQtAutoGenerators::GenerateUi(const std::string& realName,
       }
     std::string output;
     int retVal = 0;
-    bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
+    bool result = cmSystemTools::RunSingleCommand(command, &output, &output,
+                                                  &retVal);
     if (!result || retVal)
       {
       std::cerr << "AUTOUIC: error: process for " << ui_output_file <<
@@ -2355,7 +2357,8 @@ bool cmQtAutoGenerators::GenerateQrc()
         }
       std::string output;
       int retVal = 0;
-      bool result = cmSystemTools::RunSingleCommand(command, &output, &retVal);
+      bool result = cmSystemTools::RunSingleCommand(command, &output, &output,
+                                                    &retVal);
       if (!result || retVal)
         {
         std::cerr << "AUTORCC: error: process for " << rcc_output_file <<

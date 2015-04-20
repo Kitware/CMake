@@ -1233,7 +1233,7 @@ std::string cmGlobalNinjaGenerator::ninjaVersion() const
   std::string version;
   std::string command = ninjaCmd() + " --version";
   cmSystemTools::RunSingleCommand(command.c_str(),
-                                  &version, 0, 0,
+                                  &version, 0, 0, 0,
                                   cmSystemTools::OUTPUT_NONE);
 
   return version;

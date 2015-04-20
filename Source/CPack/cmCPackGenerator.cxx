@@ -290,7 +290,8 @@ int cmCPackGenerator::InstallProjectViaInstallCommands(
         << std::endl);
       std::string output;
       int retVal = 1;
-      bool resB = cmSystemTools::RunSingleCommand(it->c_str(), &output,
+      bool resB = cmSystemTools::RunSingleCommand(
+        it->c_str(), &output, &output,
         &retVal, 0, this->GeneratorVerbose, 0);
       if ( !resB || retVal )
         {
@@ -668,7 +669,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         int retVal = 1;
         bool resB =
           cmSystemTools::RunSingleCommand(buildCommand.c_str(),
-                                          &output,
+                                          &output, &output,
                                           &retVal,
                                           installDirectory.c_str(),
                                           this->GeneratorVerbose, 0);

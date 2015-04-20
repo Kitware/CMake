@@ -206,8 +206,9 @@ static int process( const std::string& srcfilename,
     }
   // run the command
   int exit_code = 0;
-  bool run = cmSystemTools::RunSingleCommand(command, &output, &exit_code,
-                                    dir.c_str(), cmSystemTools::OUTPUT_NONE);
+  bool run = cmSystemTools::RunSingleCommand(command, &output, &output,
+                                             &exit_code, dir.c_str(),
+                                             cmSystemTools::OUTPUT_NONE);
 
   // process the include directives and output everything else
   std::stringstream ss(output);

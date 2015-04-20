@@ -197,7 +197,7 @@ bool cmCPackDragNDropGenerator::RunCommand(std::ostringstream& command,
 
   bool result = cmSystemTools::RunSingleCommand(
     command.str().c_str(),
-    output,
+    output, output,
     &exit_code,
     0,
     this->GeneratorVerbose,

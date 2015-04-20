@@ -267,7 +267,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::vector<std::string> cmd(ai, ae);
       int retval;
       if(cmSystemTools::RunSingleCommand(
-           cmd, 0, &retval, NULL, cmSystemTools::OUTPUT_PASSTHROUGH))
+           cmd, 0, 0, &retval, NULL, cmSystemTools::OUTPUT_PASSTHROUGH))
         {
         return retval;
         }
@@ -398,7 +398,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       time(&time_start);
       clock_start = clock();
       int ret =0;
-      cmSystemTools::RunSingleCommand(command.c_str(), 0, &ret);
+      cmSystemTools::RunSingleCommand(command.c_str(), 0, 0, &ret);
 
       clock_finish = clock();
       time(&time_finish);
@@ -454,7 +454,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string command = cmWrap('"', cmRange(args).advance(3), '"', " ");
       int retval = 0;
       int timeout = 0;
-      if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, &retval,
+      if ( cmSystemTools::RunSingleCommand(command.c_str(), 0, 0, &retval,
              directory.c_str(), cmSystemTools::OUTPUT_NORMAL, timeout) )
         {
         return retval;
@@ -1350,7 +1350,7 @@ bool cmcmd::RunCommand(const char* comment,
   int retCode =0;
   // use rc command to create .res file
   cmSystemTools::RunSingleCommand(command,
-                                  &output,
+                                  &output, &output,
                                   &retCode, 0, cmSystemTools::OUTPUT_NONE);
   // always print the output of the command, unless
   // it is the dumb rc command banner, but if the command

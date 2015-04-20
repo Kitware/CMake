@@ -92,7 +92,8 @@ int cmCPackIFWGenerator::PackageFiles()
     cmCPackLogger(cmCPackLog::LOG_OUTPUT,
                   "- Generate repository" << std::endl);
     bool res = cmSystemTools::RunSingleCommand(
-      ifwCmd.c_str(), &output, &retVal, 0, this->GeneratorVerbose, 0);
+      ifwCmd.c_str(), &output, &output,
+      &retVal, 0, this->GeneratorVerbose, 0);
     if ( !res || retVal )
       {
       cmGeneratedFileStream ofs(ifwTmpFile.c_str());
@@ -176,7 +177,8 @@ int cmCPackIFWGenerator::PackageFiles()
   int retVal = 1;
   cmCPackLogger(cmCPackLog::LOG_OUTPUT, "- Generate package" << std::endl);
   bool res = cmSystemTools::RunSingleCommand(
-    ifwCmd.c_str(), &output, &retVal, 0, this->GeneratorVerbose, 0);
+    ifwCmd.c_str(), &output, &output,
+    &retVal, 0, this->GeneratorVerbose, 0);
   if ( !res || retVal )
     {
     cmGeneratedFileStream ofs(ifwTmpFile.c_str());

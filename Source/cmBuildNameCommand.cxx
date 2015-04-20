@@ -49,7 +49,7 @@ bool cmBuildNameCommand
   if(this->Makefile->GetDefinition("UNIX"))
     {
     buildname = "";
-    cmSystemTools::RunSingleCommand("uname -a", &buildname);
+    cmSystemTools::RunSingleCommand("uname -a", &buildname, &buildname);
     if(!buildname.empty())
       {
       std::string RegExp = "([^ ]*) [^ ]* ([^ ]*) ";
