@@ -592,6 +592,20 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
 }
 
 //----------------------------------------------------------------------------
+
+static bool objectIdLessThan(cmXCodeObject* l, cmXCodeObject* r)
+{
+  return l->GetId() < r->GetId();
+}
+
+//----------------------------------------------------------------------------
+void cmGlobalXCodeGenerator::SortXCodeObjects()
+{
+  std::sort(this->XCodeObjects.begin(), this->XCodeObjects.end(),
+            objectIdLessThan);
+}
+
+//----------------------------------------------------------------------------
 void cmGlobalXCodeGenerator::ClearXCodeObjects()
 {
   this->TargetDoneSet.clear();
@@ -3372,7 +3386,7 @@ bool cmGlobalXCodeGenerator
     }
   configlist->AddAttribute("buildConfigurations", buildConfigurations);
 
-  std::string comment = "Build configuration list for PBXProject ";
+  std::string comment = "Build configuration list for PBXProject";
   comment += " \"";
   comment += this->CurrentProject;
   comment += "\"";
@@ -3713,6 +3727,8 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
                                           cmLocalGenerator* ,
                                           std::vector<cmLocalGenerator*>& )
 {
+  SortXCodeObjects();
+
   fout << "// !$*UTF8*$!\n";
   fout << "{\n";
   cmXCodeObject::Indent(1, fout);
@@ -3740,7 +3756,8 @@ cmGlobalXCodeGenerator::WriteXCodePBXProj(std::ostream& fout,
     cmXCodeObject::PrintList(this->XCodeObjects, fout);
     }
   cmXCodeObject::Indent(1, fout);
-  fout << "rootObject = " << this->RootObject->GetId() << ";\n";
+  fout << "rootObject = " << this->RootObject->GetId()
+       << " /* Project object */;\n";
   fout << "}\n";
 }
 
