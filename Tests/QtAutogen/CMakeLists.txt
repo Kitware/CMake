@@ -63,7 +63,15 @@ add_library(codeeditorLib STATIC codeeditor.cpp)
 
 add_library(privateSlot OBJECT private_slot.cpp)
 
+configure_file(generated_resource.qrc.in generated_resource.qrc @ONLY)
+add_custom_command(
+  OUTPUT generated.txt
+  COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/generated.txt.in" "${CMAKE_CURRENT_BINARY_DIR}/generated.txt"
+  DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/generated.txt.in"
+  )
+
 add_custom_target(generate_moc_input
+  DEPENDS generated.txt
   COMMAND ${CMAKE_COMMAND} -E copy "${CMAKE_CURRENT_SOURCE_DIR}/myinterface.h.in" "${CMAKE_CURRENT_BINARY_DIR}"
   COMMAND ${CMAKE_COMMAND} -E rename "${CMAKE_CURRENT_BINARY_DIR}/myinterface.h.in" "${CMAKE_CURRENT_BINARY_DIR}/myinterface.h"
 )
@@ -89,6 +97,7 @@ add_executable(QtAutogen main.cpp calwidget.cpp second_widget.cpp foo.cpp blub.c
                multiplewidgets.cpp
                xyz.cpp yaf.cpp gadget.cpp $<TARGET_OBJECTS:privateSlot>
                test.qrc second_resource.qrc resourcetester.cpp generated.cpp ${debug_srcs}
+               ${CMAKE_CURRENT_BINARY_DIR}/generated_resource.qrc
 )
 set_property(TARGET QtAutogen APPEND PROPERTY AUTOGEN_TARGET_DEPENDS generate_moc_input "${CMAKE_CURRENT_BINARY_DIR}/myotherinterface.h")
 

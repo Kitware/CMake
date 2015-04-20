@@ -197,48 +197,56 @@ std::string cmQtAutoGenerators::ListQt5RccInputs(cmSourceFile* sf,
 
   command.push_back(absFile);
 
-  std::string output;
+  std::string rccStdOut;
+  std::string rccStdErr;
   int retVal = 0;
-  bool result = cmSystemTools::RunSingleCommand(command, &output, &output,
-                                            &retVal, 0,
-                                            cmSystemTools::OUTPUT_NONE);
+  bool result = cmSystemTools::RunSingleCommand(
+    command, &rccStdOut, &rccStdErr,
+    &retVal, 0, cmSystemTools::OUTPUT_NONE);
   if (!result || retVal)
     {
     std::cerr << "AUTOGEN: error: Rcc list process for " << sf->GetFullPath()
-              << " failed:\n" << output << std::endl;
+              << " failed:\n" << rccStdOut << "\n" << rccStdErr << std::endl;
     return std::string();
     }
 
-  std::istringstream ostr(output);
+  {
+  std::istringstream ostr(rccStdOut);
   std::string oline;
   while(std::getline(ostr, oline))
     {
     oline = cmQtAutoGeneratorsStripCR(oline);
-    if (oline.empty())
-      {
-      // The output of rcc --list contains many empty lines.
-      continue;
-      }
-    if (cmHasLiteralPrefix(oline, "RCC: Error in"))
-      {
-      static std::string searchString = "Cannot find file '";
-
-      std::string::size_type pos = oline.find(searchString);
-      if (pos == std::string::npos)
-        {
-        std::cerr << "AUTOGEN: error: Rcc lists unparsable output "
-                  << oline << std::endl;
-        return std::string();
-        }
-      pos += searchString.length();
-      std::string::size_type sz = oline.size() - pos - 1;
-      qrcEntries.push_back(oline.substr(pos, sz));
-      }
-    else
+    if(!oline.empty())
       {
       qrcEntries.push_back(oline);
       }
     }
+  }
+
+  {
+  std::istringstream estr(rccStdErr);
+  std::string eline;
+  while(std::getline(estr, eline))
+    {
+    eline = cmQtAutoGeneratorsStripCR(eline);
+    if (cmHasLiteralPrefix(eline, "RCC: Error in"))
+      {
+      static std::string searchString = "Cannot find file '";
+
+      std::string::size_type pos = eline.find(searchString);
+      if (pos == std::string::npos)
+        {
+        std::cerr << "AUTOGEN: error: Rcc lists unparsable output "
+                  << eline << std::endl;
+        return std::string();
+        }
+      pos += searchString.length();
+      std::string::size_type sz = eline.size() - pos - 1;
+      qrcEntries.push_back(eline.substr(pos, sz));
+      }
+    }
+  }
+
   depends.insert(depends.end(), qrcEntries.begin(), qrcEntries.end());
   return cmJoin(qrcEntries, "@list_sep@");
 }
