@@ -1163,7 +1163,7 @@ cmExtraEclipseCDT4Generator::GetEclipsePath(const std::string& path)
 #if defined(__CYGWIN__)
   std::string cmd = "cygpath -m " + path;
   std::string out;
-  if (!cmSystemTools::RunSingleCommand(cmd.c_str(), &out))
+  if (!cmSystemTools::RunSingleCommand(cmd.c_str(), &out, &out))
     {
     return path;
     }

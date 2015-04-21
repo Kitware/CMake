@@ -64,7 +64,8 @@ bool cmCPackWIXGenerator::RunWiXCommand(std::string const& command)
   std::string output;
 
   int returnValue = 0;
-  bool status = cmSystemTools::RunSingleCommand(command.c_str(), &output,
+  bool status = cmSystemTools::RunSingleCommand(
+    command.c_str(), &output, &output,
     &returnValue, 0, cmSystemTools::OUTPUT_NONE);
 
   cmsys::ofstream logFile(logFileName.c_str(), std::ios::app);

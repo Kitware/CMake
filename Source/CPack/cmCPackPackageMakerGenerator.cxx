@@ -378,9 +378,9 @@ int cmCPackPackageMakerGenerator::PackageFiles()
   bool res = false;
   while(numTries > 0)
     {
-    res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-                                          &retVal, 0, this->GeneratorVerbose,
-                                          0);
+    res = cmSystemTools::RunSingleCommand(
+      dmgCmd.str().c_str(), &output, &output,
+      &retVal, 0, this->GeneratorVerbose, 0);
     if ( res && !retVal )
       {
       numTries = -1;
@@ -657,8 +657,9 @@ bool cmCPackPackageMakerGenerator::RunPackageMaker(const char *command,
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Execute: " << command << std::endl);
   std::string output;
   int retVal = 1;
-  bool res = cmSystemTools::RunSingleCommand(command, &output, &retVal, 0,
-                                             this->GeneratorVerbose, 0);
+  bool res = cmSystemTools::RunSingleCommand(
+    command, &output, &output,
+    &retVal, 0, this->GeneratorVerbose, 0);
   cmCPackLogger(cmCPackLog::LOG_VERBOSE, "Done running package maker"
     << std::endl);
   if ( !res || retVal )

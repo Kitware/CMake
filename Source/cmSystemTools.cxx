@@ -659,7 +659,8 @@ std::vector<std::string> cmSystemTools::ParseArguments(const char* command)
 
 
 bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
-                                     std::string* output ,
+                                     std::string* captureStdOut,
+                                     std::string* captureStdErr,
                                      int* retVal , const char* dir ,
                                      OutputOption outputflag ,
                                      double timeout )
@@ -671,9 +672,13 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     argv.push_back(a->c_str());
     }
   argv.push_back(0);
-  if ( output )
+  if ( captureStdOut )
     {
-    *output = "";
+    *captureStdOut = "";
+    }
+  if (captureStdErr && captureStdErr != captureStdOut)
+    {
+    *captureStdErr = "";
     }
 
   cmsysProcess* cp = cmsysProcess_New();
@@ -693,15 +698,17 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
   cmsysProcess_SetTimeout(cp, timeout);
   cmsysProcess_Execute(cp);
 
-  std::vector<char> tempOutput;
+  std::vector<char> tempStdOut;
+  std::vector<char> tempStdErr;
   char* data;
   int length;
   int pipe;
-  if(outputflag != OUTPUT_PASSTHROUGH && (output || outputflag != OUTPUT_NONE))
+  if(outputflag != OUTPUT_PASSTHROUGH &&
+     (captureStdOut || captureStdErr || outputflag != OUTPUT_NONE))
     {
     while((pipe = cmsysProcess_WaitForData(cp, &data, &length, 0)) > 0)
       {
-      if(output || outputflag != OUTPUT_NONE)
+      if(captureStdOut || captureStdErr || outputflag != OUTPUT_NONE)
         {
         // Translate NULL characters in the output into valid text.
         // Visual Studio 7 puts these characters in the output of its
@@ -714,9 +721,21 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
             }
           }
         }
-      if ( output )
+      if(pipe == cmsysProcess_Pipe_STDOUT ||
+         (pipe == cmsysProcess_Pipe_STDERR &&
+          captureStdOut == captureStdErr))
         {
-        tempOutput.insert(tempOutput.end(), data, data+length);
+        if (captureStdOut)
+          {
+          tempStdOut.insert(tempStdOut.end(), data, data+length);
+          }
+        }
+      else if(pipe == cmsysProcess_Pipe_STDERR)
+        {
+        if (captureStdErr)
+          {
+          tempStdErr.insert(tempStdErr.end(), data, data+length);
+          }
         }
       if(outputflag != OUTPUT_NONE)
         {
@@ -740,9 +759,14 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
     }
 
   cmsysProcess_WaitForExit(cp, 0);
-  if ( output && tempOutput.begin() != tempOutput.end())
+  if ( captureStdOut && tempStdOut.begin() != tempStdOut.end())
     {
-    output->append(&*tempOutput.begin(), tempOutput.size());
+    captureStdOut->append(&*tempStdOut.begin(), tempStdOut.size());
+    }
+  if ( captureStdErr && captureStdErr != captureStdOut &&
+       tempStdErr.begin() != tempStdErr.end())
+    {
+    captureStdErr->append(&*tempStdErr.begin(), tempStdErr.size());
     }
 
   bool result = true;
@@ -767,9 +791,9 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
       {
       std::cerr << exception_str << std::endl;
       }
-    if ( output )
+    if ( captureStdErr )
       {
-      output->append(exception_str, strlen(exception_str));
+      captureStdErr->append(exception_str, strlen(exception_str));
       }
     result = false;
     }
@@ -780,9 +804,9 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
       {
       std::cerr << error_str << std::endl;
       }
-    if ( output )
+    if ( captureStdErr )
       {
-      output->append(error_str, strlen(error_str));
+      captureStdErr->append(error_str, strlen(error_str));
       }
     result = false;
     }
@@ -793,9 +817,9 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
       {
       std::cerr << error_str << std::endl;
       }
-    if ( output )
+    if ( captureStdErr )
       {
-      output->append(error_str, strlen(error_str));
+      captureStdErr->append(error_str, strlen(error_str));
       }
     result = false;
     }
@@ -806,7 +830,8 @@ bool cmSystemTools::RunSingleCommand(std::vector<std::string>const& command,
 
 bool cmSystemTools::RunSingleCommand(
   const char* command,
-  std::string* output,
+  std::string* captureStdOut,
+  std::string* captureStdErr,
   int *retVal,
   const char* dir,
   OutputOption outputflag,
@@ -823,8 +848,8 @@ bool cmSystemTools::RunSingleCommand(
     {
     return false;
     }
-  return cmSystemTools::RunSingleCommand(args, output,retVal,
-                                         dir, outputflag, timeout);
+  return cmSystemTools::RunSingleCommand(args, captureStdOut, captureStdErr,
+                                         retVal, dir, outputflag, timeout);
 }
 
 std::string

@@ -63,7 +63,7 @@ bool cmSiteNameCommand
     {
     std::string host;
     cmSystemTools::RunSingleCommand(hostname_cmd.c_str(),
-      &host, 0, 0, cmSystemTools::OUTPUT_NONE);
+      &host, 0, 0, 0, cmSystemTools::OUTPUT_NONE);
 
     // got the hostname
     if (!host.empty())

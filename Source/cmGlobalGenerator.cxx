@@ -1737,7 +1737,7 @@ int cmGlobalGenerator::Build(
     output += cmSystemTools::PrintSingleCommand(cleanCommand);
     output += "\n";
 
-    if (!cmSystemTools::RunSingleCommand(cleanCommand, outputPtr,
+    if (!cmSystemTools::RunSingleCommand(cleanCommand, outputPtr, outputPtr,
                                          &retVal, 0, outputflag, timeout))
       {
       cmSystemTools::SetRunCommandHideConsole(hideconsole);
@@ -1758,7 +1758,7 @@ int cmGlobalGenerator::Build(
   output += makeCommandStr;
   output += "\n";
 
-  if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr,
+  if (!cmSystemTools::RunSingleCommand(makeCommand, outputPtr, outputPtr,
                                        &retVal, 0, outputflag, timeout))
     {
     cmSystemTools::SetRunCommandHideConsole(hideconsole);

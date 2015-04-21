@@ -709,7 +709,8 @@ int cmCTestScriptHandler::CheckOutSourceDir()
     output = "";
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
       "Run cvs: " << this->CVSCheckOut << std::endl);
-    res = cmSystemTools::RunSingleCommand(this->CVSCheckOut.c_str(), &output,
+    res = cmSystemTools::RunSingleCommand(
+      this->CVSCheckOut.c_str(), &output, &output,
       &retVal, this->CTestRoot.c_str(), this->HandlerVerbose,
       0 /*this->TimeOut*/);
     if (!res || retVal != 0)
@@ -789,7 +790,8 @@ int cmCTestScriptHandler::PerformExtraUpdates()
       retVal = 0;
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run Update: "
         << fullCommand << std::endl);
-      res = cmSystemTools::RunSingleCommand(fullCommand.c_str(), &output,
+      res = cmSystemTools::RunSingleCommand(
+        fullCommand.c_str(), &output, &output,
         &retVal, cvsArgs[0].c_str(),
         this->HandlerVerbose, 0 /*this->TimeOut*/);
       if (!res || retVal != 0)
@@ -910,7 +912,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run cmake command: "
       << command << std::endl);
-    res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
+    res = cmSystemTools::RunSingleCommand(
+      command.c_str(), &output, &output,
       &retVal, this->BinaryDir.c_str(),
       this->HandlerVerbose, 0 /*this->TimeOut*/);
 
@@ -956,7 +959,8 @@ int cmCTestScriptHandler::RunConfigurationDashboard()
     retVal = 0;
     cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT, "Run ctest command: "
       << command << std::endl);
-    res = cmSystemTools::RunSingleCommand(command.c_str(), &output,
+    res = cmSystemTools::RunSingleCommand(
+      command.c_str(), &output, &output,
       &retVal, this->BinaryDir.c_str(), this->HandlerVerbose,
       0 /*this->TimeOut*/);
 

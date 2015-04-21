@@ -180,9 +180,9 @@ int cmCPackOSXX11Generator::PackageFiles()
   bool res = false;
   while(numTries > 0)
     {
-    res = cmSystemTools::RunSingleCommand(dmgCmd.str().c_str(), &output,
-                                          &retVal, 0,
-                                          this->GeneratorVerbose, 0);
+    res = cmSystemTools::RunSingleCommand(
+      dmgCmd.str().c_str(), &output, &output,
+      &retVal, 0, this->GeneratorVerbose, 0);
     if ( res && !retVal )
       {
       numTries = -1;
