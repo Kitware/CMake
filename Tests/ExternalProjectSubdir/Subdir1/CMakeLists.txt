@@ -1,0 +1,6 @@
+cmake_minimum_required(VERSION 3.2)
+project(Subdir1 NONE)
+
+if(NOT "${NORMAL_VAR}" STREQUAL "NORMAL_VALUE")
+  message(SEND_ERROR "NORMAL_VAR != 'NORMAL_VALUE'")
+endif()
