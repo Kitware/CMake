@@ -81,7 +81,7 @@ bool cmSourceGroupCommand
       std::string src = args[i];
       if(!cmSystemTools::FileIsFullPath(src.c_str()))
         {
-        src = this->Makefile->GetCurrentDirectory();
+        src = this->Makefile->GetCurrentSourceDirectory();
         src += "/";
         src += args[i];
         }

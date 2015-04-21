@@ -162,7 +162,7 @@ static std::string getAutogenTargetName(cmTarget const* target)
 static std::string getAutogenTargetDir(cmTarget const* target)
 {
   cmMakefile* makefile = target->GetMakefile();
-  std::string targetDir = makefile->GetCurrentOutputDirectory();
+  std::string targetDir = makefile->GetCurrentBinaryDirectory();
   targetDir += makefile->GetCMakeInstance()->GetCMakeFilesDirectory();
   targetDir += "/";
   targetDir += getAutogenTargetName(target);
@@ -291,7 +291,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
     std::string automocTargetName = getAutogenTargetName(target);
-    std::string mocCppFile = makefile->GetCurrentOutputDirectory();
+    std::string mocCppFile = makefile->GetCurrentBinaryDirectory();
     mocCppFile += "/";
     mocCppFile += automocTargetName;
     mocCppFile += ".cpp";
@@ -317,7 +317,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   commandLines.push_back(currentLine);
 
   std::string workingDirectory = cmSystemTools::CollapseFullPath(
-                                    "", makefile->GetCurrentOutputDirectory());
+                                    "", makefile->GetCurrentBinaryDirectory());
 
   std::vector<std::string> depends;
   if (const char *autogenDepends =
@@ -1199,9 +1199,9 @@ static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
 
   cmLocalGenerator* lg = gg->CreateLocalGenerator();
   lg->GetMakefile()->SetHomeOutputDirectory(targetDirectory);
-  lg->GetMakefile()->SetStartOutputDirectory(targetDirectory);
+  lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
   lg->GetMakefile()->SetHomeDirectory(targetDirectory);
-  lg->GetMakefile()->SetStartDirectory(targetDirectory);
+  lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
   gg->SetCurrentLocalGenerator(lg);
 
   return gg;

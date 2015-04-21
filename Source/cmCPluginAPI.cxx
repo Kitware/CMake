@@ -131,22 +131,22 @@ const char* CCONV cmGetHomeOutputDirectory(void *arg)
 const char* CCONV cmGetStartDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return mf->GetStartDirectory();
+  return mf->GetCurrentSourceDirectory();
 }
 const char* CCONV cmGetStartOutputDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return mf->GetStartOutputDirectory();
+  return mf->GetCurrentBinaryDirectory();
 }
 const char* CCONV cmGetCurrentDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return mf->GetCurrentDirectory();
+  return mf->GetCurrentSourceDirectory();
 }
 const char* CCONV cmGetCurrentOutputDirectory(void *arg)
 {
   cmMakefile *mf = static_cast<cmMakefile *>(arg);
-  return mf->GetCurrentOutputDirectory();
+  return mf->GetCurrentBinaryDirectory();
 }
 const char* CCONV cmGetDefinition(void *arg,const char*def)
 {

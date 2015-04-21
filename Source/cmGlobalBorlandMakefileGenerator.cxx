@@ -29,7 +29,7 @@ void cmGlobalBorlandMakefileGenerator
                  cmMakefile *mf,
                  bool optional)
 {
-  std::string outdir = this->CMakeInstance->GetStartOutputDirectory();
+  std::string outdir = this->CMakeInstance->GetHomeOutputDirectory();
   mf->AddDefinition("BORLAND", "1");
   mf->AddDefinition("CMAKE_GENERATOR_CC", "bcc32");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "bcc32");

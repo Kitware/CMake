@@ -663,7 +663,7 @@ bool cmFindPackageCommand::HandlePackageMode()
       if(!cmSystemTools::FileIsFullPath(dir.c_str()))
         {
         dir = "/" + dir;
-        dir = this->Makefile->GetCurrentDirectory() + dir;
+        dir = this->Makefile->GetCurrentSourceDirectory() + dir;
         }
       // The file location was cached.  Look for the correct file.
       std::string file;

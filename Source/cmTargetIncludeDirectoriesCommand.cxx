@@ -47,7 +47,8 @@ std::string cmTargetIncludeDirectoriesCommand
 {
   std::string dirs;
   std::string sep;
-  std::string prefix = this->Makefile->GetStartDirectory() + std::string("/");
+  std::string prefix =
+      this->Makefile->GetCurrentSourceDirectory() + std::string("/");
   for(std::vector<std::string>::const_iterator it = content.begin();
     it != content.end(); ++it)
     {

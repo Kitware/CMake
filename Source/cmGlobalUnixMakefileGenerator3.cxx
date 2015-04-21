@@ -113,7 +113,7 @@ cmGlobalUnixMakefileGenerator3
 
   // Compute full path to object file directory for this target.
   std::string dir;
-  dir += gt->Makefile->GetCurrentOutputDirectory();
+  dir += gt->Makefile->GetCurrentBinaryDirectory();
   dir += "/";
   dir += gt->LocalGenerator->GetTargetDirectory(*target);
   dir += "/";
@@ -158,7 +158,7 @@ void cmGlobalUnixMakefileGenerator3::Generate()
     {
     cmLocalUnixMakefileGenerator3 *lg =
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-    std::string markFileName = lg->GetMakefile()->GetStartOutputDirectory();
+    std::string markFileName = lg->GetMakefile()->GetCurrentBinaryDirectory();
     markFileName += "/";
     markFileName += cmake::GetCMakeFilesDirectory();
     markFileName += "/progress.marks";
@@ -390,7 +390,7 @@ void cmGlobalUnixMakefileGenerator3::WriteMainCMakefile()
     {
     lg =
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
-    tmpStr = lg->GetMakefile()->GetStartOutputDirectory();
+    tmpStr = lg->GetMakefile()->GetCurrentBinaryDirectory();
     tmpStr += cmake::GetCMakeFilesDirectory();
     tmpStr += "/CMakeDirectoryInformation.cmake";
     cmakefileStream << "  \"" <<
@@ -449,7 +449,7 @@ cmGlobalUnixMakefileGenerator3
                       bool check_relink)
 {
   // Get the relative path to the subdirectory from the top.
-  std::string makeTarget = lg->GetMakefile()->GetStartOutputDirectory();
+  std::string makeTarget = lg->GetMakefile()->GetCurrentBinaryDirectory();
   makeTarget += "/";
   makeTarget += pass;
 
@@ -494,7 +494,7 @@ cmGlobalUnixMakefileGenerator3
     {
     cmLocalUnixMakefileGenerator3* slg =
       static_cast<cmLocalUnixMakefileGenerator3*>(*sdi);
-    std::string subdir = slg->GetMakefile()->GetStartOutputDirectory();
+    std::string subdir = slg->GetMakefile()->GetCurrentBinaryDirectory();
     subdir += "/";
     subdir += pass;
     depends.push_back(subdir);
@@ -529,7 +529,7 @@ cmGlobalUnixMakefileGenerator3
     }
 
   // Begin the directory-level rules section.
-  std::string dir = lg->GetMakefile()->GetStartOutputDirectory();
+  std::string dir = lg->GetMakefile()->GetCurrentBinaryDirectory();
   dir = lg->Convert(dir, cmLocalGenerator::HOME_OUTPUT,
                     cmLocalGenerator::MAKERULE);
   lg->WriteDivider(ruleFileStream);
@@ -583,11 +583,10 @@ void cmGlobalUnixMakefileGenerator3
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
         (this->CreateLocalGenerator());
       // set the Start directories
-      lg->GetMakefile()->SetStartDirectory
-        (this->CMakeInstance->GetStartDirectory());
-      lg->GetMakefile()->SetStartOutputDirectory
-        (this->CMakeInstance->GetStartOutputDirectory());
-      lg->GetMakefile()->MakeStartDirectoriesCurrent();
+      lg->GetMakefile()->SetCurrentSourceDirectory
+        (this->CMakeInstance->GetHomeDirectory());
+      lg->GetMakefile()->SetCurrentBinaryDirectory
+        (this->CMakeInstance->GetHomeOutputDirectory());
       }
 
     std::string tname = targetName;

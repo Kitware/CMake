@@ -41,7 +41,7 @@ class cmState;
  * The basic process for a GUI is as follows:
  *
  * -# Create a cmake instance
- * -# Set the Home & Start directories, generator, and cmake command. this
+ * -# Set the Home directories, generator, and cmake command. this
  *    can be done using the Set methods or by using SetArgs and passing in
  *    command line arguments.
  * -# Load the cache by calling LoadCache (duh)
@@ -52,7 +52,7 @@ class cmState;
  * -# Let the user change values and go back to step 5
  * -# call Generate
 
- * If your GUI allows the user to change the start & home directories then
+ * If your GUI allows the user to change the home directories then
  * you must at a minimum redo steps 2 through 7.
  */
 
@@ -106,28 +106,12 @@ class cmake
   /**
    * Set/Get the home directory (or output directory) in the project. The
    * home directory is the top directory of the project. It is the
-   * path-to-source cmake was run with. Remember that CMake processes
-   * CMakeLists files by recursing up the tree starting at the StartDirectory
-   * and going up until it reaches the HomeDirectory.
+   * path-to-source cmake was run with.
    */
   void SetHomeDirectory(const std::string& dir);
   const char* GetHomeDirectory() const;
   void SetHomeOutputDirectory(const std::string& dir);
   const char* GetHomeOutputDirectory() const;
-  //@}
-
-  //@{
-  /**
-   * Set/Get the start directory (or output directory). The start directory
-   * is the directory of the CMakeLists.txt file that started the current
-   * round of processing. Remember that CMake processes CMakeLists files by
-   * recursing up the tree starting at the StartDirectory and going up until
-   * it reaches the HomeDirectory.
-   */
-  void SetStartDirectory(const std::string& dir);
-  const char* GetStartDirectory() const;
-  void SetStartOutputDirectory(const std::string& dir);
-  const char* GetStartOutputDirectory() const;
   //@}
 
   /**
@@ -354,8 +338,6 @@ protected:
   cmCacheManager *CacheManager;
   std::string cmHomeDirectory;
   std::string HomeOutputDirectory;
-  std::string cmStartDirectory;
-  std::string StartOutputDirectory;
   bool SuppressDevWarnings;
   bool DoSuppressDevWarnings;
   std::string GeneratorPlatform;

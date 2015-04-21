@@ -642,16 +642,13 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       homeOutDir = cmSystemTools::CollapseFullPath(homeOutDir);
       startOutDir = cmSystemTools::CollapseFullPath(startOutDir);
       cm.SetHomeDirectory(homeDir);
-      cm.SetStartDirectory(startDir);
       cm.SetHomeOutputDirectory(homeOutDir);
-      cm.SetStartOutputDirectory(startOutDir);
       if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen))
         {
         cm.SetGlobalGenerator(ggd);
         cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
-        lgd->GetMakefile()->SetStartDirectory(startDir);
-        lgd->GetMakefile()->SetStartOutputDirectory(startOutDir);
-        lgd->GetMakefile()->MakeStartDirectoriesCurrent();
+        lgd->GetMakefile()->SetCurrentSourceDirectory(startDir);
+        lgd->GetMakefile()->SetCurrentBinaryDirectory(startOutDir);
 
         // Actually scan dependencies.
         return lgd->UpdateDependencies(depInfo.c_str(),

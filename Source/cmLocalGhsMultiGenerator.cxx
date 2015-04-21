@@ -46,7 +46,7 @@ void cmLocalGhsMultiGenerator::Configure()
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
   this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetStartOutputDirectory(), HOME_OUTPUT);
+    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
   if (this->HomeRelativeOutputPath == ".")
     {
     this->HomeRelativeOutputPath = "";

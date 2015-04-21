@@ -41,7 +41,7 @@ void cmExtraQbsGenerator::CreateProjectFile(
         const std::vector<cmLocalGenerator *> &lgs)
 {
   const cmMakefile *mf = lgs[0]->GetMakefile();
-  std::string outputDir = mf->GetStartOutputDirectory();
+  std::string outputDir = mf->GetCurrentBinaryDirectory();
 
   const std::string filename = outputDir + "/" + name + ".qbs";
 
@@ -81,7 +81,7 @@ void cmExtraQbsGenerator::AppendSubProject(cmGeneratedFileStream &fout,
     }
 
   const std::string &relativePath = cmSystemTools::RelativePath(
-      mk->GetHomeDirectory(), mk->GetCurrentDirectory());
+      mk->GetHomeDirectory(), mk->GetCurrentSourceDirectory());
   fout << "\tProject {\n"
        << "\t\tname:\"" << relativePath << "\"\n";
   this->AppendProduct(fout, lg);

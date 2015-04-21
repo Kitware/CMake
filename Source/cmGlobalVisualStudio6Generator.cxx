@@ -239,7 +239,7 @@ void cmGlobalVisualStudio6Generator
     else
       {
       std::string dspname = GetVS6TargetName(target->GetName());
-      std::string dir = target->GetMakefile()->GetStartOutputDirectory();
+      std::string dir = target->GetMakefile()->GetCurrentBinaryDirectory();
       dir = root->Convert(dir.c_str(), cmLocalGenerator::START_OUTPUT);
       this->WriteProject(fout, dspname.c_str(), dir.c_str(), *target);
       }
@@ -257,7 +257,7 @@ void cmGlobalVisualStudio6Generator
     {
     return;
     }
-  std::string fname = root->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = root->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += root->GetMakefile()->GetProjectName();
   fname += ".dsw";
@@ -386,7 +386,7 @@ cmGlobalVisualStudio6Generator::WriteUtilityDepend(cmTarget const* target)
   std::string pname = target->GetName();
   pname += "_UTILITY";
   pname = GetVS6TargetName(pname.c_str());
-  std::string fname = target->GetMakefile()->GetStartOutputDirectory();
+  std::string fname = target->GetMakefile()->GetCurrentBinaryDirectory();
   fname += "/";
   fname += pname;
   fname += ".dsp";

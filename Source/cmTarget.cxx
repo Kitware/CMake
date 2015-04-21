@@ -540,7 +540,7 @@ cmListFileBacktrace const& cmTarget::GetBacktrace() const
 //----------------------------------------------------------------------------
 std::string cmTarget::GetSupportDirectory() const
 {
-  std::string dir = this->Makefile->GetCurrentOutputDirectory();
+  std::string dir = this->Makefile->GetCurrentBinaryDirectory();
   dir += cmake::GetCMakeFilesDirectory();
   dir += "/";
   dir += this->Name;
@@ -1918,8 +1918,8 @@ void cmTarget::AppendBuildInterfaceIncludes()
 
   if (this->Makefile->IsOn("CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE"))
     {
-    const char *binDir = this->Makefile->GetStartOutputDirectory();
-    const char *srcDir = this->Makefile->GetStartDirectory();
+    const char *binDir = this->Makefile->GetCurrentBinaryDirectory();
+    const char *srcDir = this->Makefile->GetCurrentSourceDirectory();
     const std::string dirs = std::string(binDir ? binDir : "")
                             + std::string(binDir ? ";" : "")
                             + std::string(srcDir ? srcDir : "");
@@ -4542,7 +4542,7 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
   // specified as a relative path.  Treat a relative path as
   // relative to the current output directory for this makefile.
   out = (cmSystemTools::CollapseFullPath
-         (out, this->Makefile->GetStartOutputDirectory()));
+         (out, this->Makefile->GetCurrentBinaryDirectory()));
 
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())
@@ -4608,7 +4608,7 @@ bool cmTarget::ComputePDBOutputDir(const std::string& kind,
   // specified as a relative path.  Treat a relative path as
   // relative to the current output directory for this makefile.
   out = (cmSystemTools::CollapseFullPath
-         (out, this->Makefile->GetStartOutputDirectory()));
+         (out, this->Makefile->GetCurrentBinaryDirectory()));
 
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())

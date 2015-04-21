@@ -149,7 +149,7 @@ void cmIncludeDirectoryCommand::NormalizeInclude(std::string &inc)
       {
       if(!StartsWithGeneratorExpression(inc))
         {
-        std::string tmp = this->Makefile->GetStartDirectory();
+        std::string tmp = this->Makefile->GetCurrentSourceDirectory();
         tmp += "/";
         tmp += inc;
         inc = tmp;

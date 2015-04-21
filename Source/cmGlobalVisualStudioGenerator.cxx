@@ -121,7 +121,7 @@ void cmGlobalVisualStudioGenerator::Generate()
 void cmGlobalVisualStudioGenerator
 ::ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const
 {
-  std::string dir = gt->Makefile->GetCurrentOutputDirectory();
+  std::string dir = gt->Makefile->GetCurrentBinaryDirectory();
   dir += "/";
   std::string tgtDir = gt->LocalGenerator->GetTargetDirectory(*gt->Target);
   if(!tgtDir.empty())
@@ -225,7 +225,7 @@ cmGlobalVisualStudioGenerator
         }
       else
         {
-        topLevelSlnName = mf->GetStartOutputDirectory();
+        topLevelSlnName = mf->GetCurrentBinaryDirectory();
         topLevelSlnName += "/";
         topLevelSlnName += mf->GetProjectName();
         topLevelSlnName += ".sln";

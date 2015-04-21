@@ -77,7 +77,7 @@ void cmExtraCodeBlocksGenerator::CreateProjectFile(
                                      const std::vector<cmLocalGenerator*>& lgs)
 {
   const cmMakefile* mf=lgs[0]->GetMakefile();
-  std::string outputDir=mf->GetStartOutputDirectory();
+  std::string outputDir=mf->GetCurrentBinaryDirectory();
   std::string projectName=mf->GetProjectName();
 
   std::string filename=outputDir+"/";
@@ -331,7 +331,7 @@ void cmExtraCodeBlocksGenerator
           {
           // Only add the global targets from CMAKE_BINARY_DIR,
           // not from the subdirs
-          if (strcmp(makefile->GetStartOutputDirectory(),
+          if (strcmp(makefile->GetCurrentBinaryDirectory(),
                      makefile->GetHomeOutputDirectory())==0)
             {
             this->AppendTarget(fout, ti->first, 0,
@@ -524,7 +524,7 @@ std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
   // this file doesn't seem to be used by C::B in custom makefile mode,
   // but we generate a unique file for each OBJECT library so in case
   // C::B uses it in some way, the targets don't interfere with each other.
-  std::string filename = mf->GetCurrentOutputDirectory();
+  std::string filename = mf->GetCurrentBinaryDirectory();
   filename += "/";
   filename += mf->GetLocalGenerator()->GetTargetDirectory(*target);
   filename += "/";
@@ -550,14 +550,14 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                               const cmMakefile* makefile,
                                               const char* compiler)
 {
-  std::string makefileName = makefile->GetStartOutputDirectory();
+  std::string makefileName = makefile->GetCurrentBinaryDirectory();
   makefileName += "/Makefile";
 
   fout<<"      <Target title=\"" << targetName << "\">\n";
   if (target!=0)
     {
     int cbTargetType = this->GetCBTargetType(target);
-    std::string workingDir = makefile->GetStartOutputDirectory();
+    std::string workingDir = makefile->GetCurrentBinaryDirectory();
     if ( target->GetType()==cmTarget::EXECUTABLE)
       {
       // Determine the directory where the executable target is created, and
@@ -653,7 +653,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
   else // e.g. all and the GLOBAL and UTILITY targets
     {
     fout<<"         <Option working_dir=\""
-                            << makefile->GetStartOutputDirectory() << "\" />\n"
+        << makefile->GetCurrentBinaryDirectory() << "\" />\n"
         <<"         <Option type=\"" << 4 << "\" />\n";
     }
 

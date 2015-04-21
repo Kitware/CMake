@@ -495,7 +495,7 @@ void cmExtraEclipseCDT4Generator::CreateProjectFile()
 
     std::string sourceLinkedResourceName = "[Source directory]";
     std::string linkSourceDirectory = this->GetEclipsePath(
-                                                      mf->GetStartDirectory());
+                                             mf->GetCurrentSourceDirectory());
     // .project dir can't be subdir of a linked resource dir
     if (!cmSystemTools::IsSubDirectory(this->HomeOutputDirectory,
                                          linkSourceDirectory))
@@ -633,7 +633,7 @@ void cmExtraEclipseCDT4Generator::CreateLinksToSubprojects(
        ++it)
     {
     std::string linkSourceDirectory = this->GetEclipsePath(
-                            it->second[0]->GetMakefile()->GetStartDirectory());
+                   it->second[0]->GetMakefile()->GetCurrentSourceDirectory());
     // a linked resource must not point to a parent directory of .project or
     // .project itself
     if ((baseDir != linkSourceDirectory) &&
@@ -1033,7 +1033,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
     {
     const cmTargets& targets = (*it)->GetMakefile()->GetTargets();
     cmMakefile* makefile=(*it)->GetMakefile();
-    std::string subdir = (*it)->Convert(makefile->GetCurrentOutputDirectory(),
+    std::string subdir = (*it)->Convert(makefile->GetCurrentBinaryDirectory(),
                            cmLocalGenerator::HOME_OUTPUT);
     if (subdir == ".")
       {
@@ -1094,7 +1094,7 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
                              ti->first.c_str());
 
           std::string cleanArgs = "-E chdir \"";
-          cleanArgs += makefile->GetCurrentOutputDirectory();
+          cleanArgs += makefile->GetCurrentBinaryDirectory();
           cleanArgs += "\" \"";
           cleanArgs += cmake;
           cleanArgs += "\" -P \"";

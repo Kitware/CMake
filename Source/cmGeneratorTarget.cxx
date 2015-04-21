@@ -1099,8 +1099,8 @@ bool cmStrictTargetComparison::operator()(cmTarget const* t1,
   int nameResult = strcmp(t1->GetName().c_str(), t2->GetName().c_str());
   if (nameResult == 0)
     {
-    return strcmp(t1->GetMakefile()->GetStartOutputDirectory(),
-                  t2->GetMakefile()->GetStartOutputDirectory()) < 0;
+    return strcmp(t1->GetMakefile()->GetCurrentBinaryDirectory(),
+                  t2->GetMakefile()->GetCurrentBinaryDirectory()) < 0;
     }
   return nameResult < 0;
 }

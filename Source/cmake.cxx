@@ -375,11 +375,11 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
     lg->GetMakefile()->SetHomeOutputDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
-    lg->GetMakefile()->SetStartOutputDirectory
+    lg->GetMakefile()->SetCurrentBinaryDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetHomeDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
-    lg->GetMakefile()->SetStartDirectory
+    lg->GetMakefile()->SetCurrentSourceDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     if (this->GetWorkingMode() != NORMAL_MODE)
       {
@@ -405,6 +405,11 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
 
 bool cmake::FindPackage(const std::vector<std::string>& args)
 {
+  this->SetHomeDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory());
+  this->SetHomeOutputDirectory
+    (cmSystemTools::GetCurrentWorkingDirectory());
+
   // if a generator was not yet created, temporarily create one
   cmGlobalGenerator *gg = new cmGlobalGenerator;
   gg->SetCMakeInstance(this);
@@ -413,13 +418,9 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   // read in the list file to fill the cache
   cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
-  mf->SetHomeOutputDirectory
+  mf->SetCurrentBinaryDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
-  mf->SetStartOutputDirectory
-    (cmSystemTools::GetCurrentWorkingDirectory());
-  mf->SetHomeDirectory
-    (cmSystemTools::GetCurrentWorkingDirectory());
-  mf->SetStartDirectory
+  mf->SetCurrentSourceDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
 
   mf->SetArgcArgv(args);
@@ -727,9 +728,6 @@ void cmake::SetArgs(const std::vector<std::string>& args,
     this->SetHomeDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     }
-
-  this->SetStartDirectory(this->GetHomeDirectory());
-  this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
 }
 
 //----------------------------------------------------------------------------
@@ -800,9 +798,7 @@ void cmake::SetDirectoriesFromFile(const char* arg)
       if (existingValue)
         {
         this->SetHomeOutputDirectory(cachePath);
-        this->SetStartOutputDirectory(cachePath);
         this->SetHomeDirectory(existingValue);
-        this->SetStartDirectory(existingValue);
         return;
         }
       }
@@ -812,14 +808,12 @@ void cmake::SetDirectoriesFromFile(const char* arg)
   if(!listPath.empty())
     {
     this->SetHomeDirectory(listPath);
-    this->SetStartDirectory(listPath);
 
     if(argIsFile)
       {
       // Source CMakeLists.txt file given.  It was probably dropped
       // onto the executable in a GUI.  Default to an in-source build.
       this->SetHomeOutputDirectory(listPath);
-      this->SetStartOutputDirectory(listPath);
       }
     else
       {
@@ -827,7 +821,6 @@ void cmake::SetDirectoriesFromFile(const char* arg)
       // directory as build tree.
       std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
       this->SetHomeOutputDirectory(cwd);
-      this->SetStartOutputDirectory(cwd);
       }
     return;
     }
@@ -838,9 +831,7 @@ void cmake::SetDirectoriesFromFile(const char* arg)
   std::string full = cmSystemTools::CollapseFullPath(arg);
   std::string cwd = cmSystemTools::GetCurrentWorkingDirectory();
   this->SetHomeDirectory(full);
-  this->SetStartDirectory(full);
   this->SetHomeOutputDirectory(cwd);
-  this->SetStartOutputDirectory(cwd);
 }
 
 // at the end of this CMAKE_ROOT and CMAKE_COMMAND should be added to the
@@ -1005,28 +996,6 @@ const char* cmake::GetHomeOutputDirectory() const
   return this->HomeOutputDirectory.c_str();
 }
 
-const char* cmake::GetStartDirectory() const
-{
-  return this->cmStartDirectory.c_str();
-}
-
-void cmake::SetStartDirectory(const std::string& dir)
-{
-  this->cmStartDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->cmStartDirectory);
-}
-
-const char* cmake::GetStartOutputDirectory() const
-{
-  return this->StartOutputDirectory.c_str();
-}
-
-void cmake::SetStartOutputDirectory(const std::string& dir)
-{
-  this->StartOutputDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->StartOutputDirectory);
-}
-
 void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
   if(!gg)
@@ -1087,7 +1056,7 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
 
 int cmake::DoPreConfigureChecks()
 {
-  // Make sure the Start directory contains a CMakeLists.txt file.
+  // Make sure the Source directory contains a CMakeLists.txt file.
   std::string srcList = this->GetHomeDirectory();
   srcList += "/CMakeLists.txt";
   if(!cmSystemTools::FileExists(srcList.c_str()))
@@ -1189,7 +1158,7 @@ int cmake::HandleDeleteCacheVariables(const std::string& var)
     }
 
   // remove the cache
-  this->CacheManager->DeleteCache(this->GetStartOutputDirectory());
+  this->CacheManager->DeleteCache(this->GetHomeOutputDirectory());
   // load the empty cache
   this->LoadCache();
   // restore the changed compilers
@@ -1261,7 +1230,7 @@ int cmake::ActualConfigure()
     this->CacheManager->AddCacheEntry
       ("CMAKE_HOME_DIRECTORY",
        this->GetHomeDirectory(),
-       "Start directory with the top level CMakeLists.txt file for this "
+       "Source directory with the top level CMakeLists.txt file for this "
        "project",
        cmState::INTERNAL);
     }
@@ -1631,12 +1600,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     return 0;
     }
 
-  // If we are doing global generate, we better set start and start
-  // output directory to the root of the project.
-  std::string oldstartdir = this->GetStartDirectory();
-  std::string oldstartoutputdir = this->GetStartOutputDirectory();
-  this->SetStartDirectory(this->GetHomeDirectory());
-  this->SetStartOutputDirectory(this->GetHomeOutputDirectory());
   int ret = this->Configure();
   if (ret || this->GetWorkingMode() != NORMAL_MODE)
     {
@@ -1666,8 +1629,6 @@ int cmake::Run(const std::vector<std::string>& args, bool noconfigure)
     {
     return ret;
     }
-  this->SetStartDirectory(oldstartdir);
-  this->SetStartOutputDirectory(oldstartoutputdir);
 
   return ret;
 }

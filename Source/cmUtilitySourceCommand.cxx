@@ -75,7 +75,7 @@ bool cmUtilitySourceCommand
   // The third argument specifies the relative directory of the source
   // of the utility.
   std::string relativeSource = *arg++;
-  std::string utilitySource = this->Makefile->GetCurrentDirectory();
+  std::string utilitySource = this->Makefile->GetCurrentSourceDirectory();
   utilitySource = utilitySource+"/"+relativeSource;
 
   // If the directory doesn't exist, the source has not been included.
@@ -93,7 +93,7 @@ bool cmUtilitySourceCommand
   // The source exists.
   std::string cmakeCFGout =
     this->Makefile->GetRequiredDefinition("CMAKE_CFG_INTDIR");
-  std::string utilityDirectory = this->Makefile->GetCurrentOutputDirectory();
+  std::string utilityDirectory = this->Makefile->GetCurrentBinaryDirectory();
   std::string exePath;
   if (this->Makefile->GetDefinition("EXECUTABLE_OUTPUT_PATH"))
     {

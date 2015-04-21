@@ -29,7 +29,7 @@ bool cmAuxSourceDirectoryCommand::InitialPass
   std::string tdir;
   if(!cmSystemTools::FileIsFullPath(templateDirectory.c_str()))
     {
-    tdir = this->Makefile->GetCurrentDirectory();
+    tdir = this->Makefile->GetCurrentSourceDirectory();
     tdir += "/";
     tdir += templateDirectory;
     }

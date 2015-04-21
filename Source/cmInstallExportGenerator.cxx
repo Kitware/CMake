@@ -59,7 +59,7 @@ void cmInstallExportGenerator::ComputeTempDir()
 {
   // Choose a temporary directory in which to generate the import
   // files to be installed.
-  this->TempDir = this->Makefile->GetCurrentOutputDirectory();
+  this->TempDir = this->Makefile->GetCurrentBinaryDirectory();
   this->TempDir += cmake::GetCMakeFilesDirectory();
   this->TempDir += "/Export";
   if(this->Destination.empty())

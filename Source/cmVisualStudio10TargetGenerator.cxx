@@ -194,7 +194,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->BuildFileStream = 0;
   this->IsMissingFiles = false;
   this->DefaultArtifactDir =
-    this->Makefile->GetStartOutputDirectory() + std::string("/") +
+    this->Makefile->GetCurrentBinaryDirectory() + std::string("/") +
     this->LocalGenerator->GetTargetDirectory(*this->Target);
 }
 
@@ -297,7 +297,7 @@ void cmVisualStudio10TargetGenerator::Generate()
       }
     }
   cmMakefile* mf = this->Target->GetMakefile();
-  std::string path =  mf->GetStartOutputDirectory();
+  std::string path =  mf->GetCurrentBinaryDirectory();
   path += "/";
   path += this->Name;
   path += ".vcxproj";
@@ -927,7 +927,7 @@ cmVisualStudio10TargetGenerator::ConvertPath(std::string const& path,
 {
   return forceRelative
     ? cmSystemTools::RelativePath(
-      this->Makefile->GetCurrentOutputDirectory(), path.c_str())
+      this->Makefile->GetCurrentBinaryDirectory(), path.c_str())
     : this->LocalGenerator->Convert(path.c_str(),
                                     cmLocalGenerator::START_OUTPUT,
                                     cmLocalGenerator::UNCHANGED,
@@ -969,7 +969,7 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
   this->AddMissingSourceGroups(groupsUsed, sourceGroups);
 
   // Write out group file
-  std::string path =  this->Makefile->GetStartOutputDirectory();
+  std::string path =  this->Makefile->GetCurrentBinaryDirectory();
   path += "/";
   path += this->Name;
   path += ".vcxproj.filters";
@@ -1430,7 +1430,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(
     std::string sourceRel = this->ConvertPath(sf->GetFullPath(), true);
     size_t const maxLen = 250;
     if(sf->GetCustomCommand() ||
-       ((strlen(this->Makefile->GetCurrentOutputDirectory()) + 1 +
+       ((strlen(this->Makefile->GetCurrentBinaryDirectory()) + 1 +
          sourceRel.length()) <= maxLen))
       {
       forceRelative = true;
@@ -2194,7 +2194,7 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
 {
   // Look through the sources for AndroidManifest.xml and use
   // its location as the root source directory.
-  std::string rootDir = this->Makefile->GetCurrentDirectory();
+  std::string rootDir = this->Makefile->GetCurrentSourceDirectory();
   {
   std::vector<cmSourceFile const*> extraSources;
   this->GeneratorTarget->GetExtraSources(extraSources, "");
@@ -2714,7 +2714,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
       }
     else
       {
-      path =  mf->GetStartOutputDirectory();
+      path =  mf->GetCurrentBinaryDirectory();
       path += "/";
       path += dt->GetName();
       path += ".vcxproj";
@@ -2978,7 +2978,7 @@ void cmVisualStudio10TargetGenerator::WriteMissingFilesWP80()
   // For WP80, the manifest needs to be in the same folder as the project
   // this can cause an overwrite problem if projects aren't organized in
   // folders
-  std::string manifestFile = this->Makefile->GetStartOutputDirectory() +
+  std::string manifestFile = this->Makefile->GetCurrentBinaryDirectory() +
                              std::string("/WMAppManifest.xml");
   std::string artifactDir =
     this->LocalGenerator->GetTargetDirectory(*this->Target);

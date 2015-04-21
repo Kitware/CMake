@@ -1098,14 +1098,13 @@ void cmGlobalGenerator::Configure()
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
-  cmMakefile* mf = lg->GetMakefile();
-  lg->GetMakefile()->SetStartDirectory
-    (this->CMakeInstance->GetStartDirectory());
-  lg->GetMakefile()->SetStartOutputDirectory
-    (this->CMakeInstance->GetStartOutputDirectory());
-  lg->GetMakefile()->MakeStartDirectoriesCurrent();
+  lg->GetMakefile()->SetCurrentSourceDirectory
+    (this->CMakeInstance->GetHomeDirectory());
+  lg->GetMakefile()->SetCurrentBinaryDirectory
+    (this->CMakeInstance->GetHomeOutputDirectory());
 
-  this->BinaryDirectories.insert(mf->GetStartOutputDirectory());
+  this->BinaryDirectories.insert(
+      this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
   lg->Configure();
@@ -1568,7 +1567,8 @@ void cmGlobalGenerator::CheckLocalGenerators()
           text += "\n    linked by target \"";
           text += l->second.GetName();
           text += "\" in directory ";
-          text+=this->LocalGenerators[i]->GetMakefile()->GetCurrentDirectory();
+          text+=this->LocalGenerators[i]->GetMakefile()
+                    ->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }
@@ -1598,7 +1598,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
           std::string text = notFoundMap[varName];
           text += "\n   used as include directory in directory ";
           text += this->LocalGenerators[i]
-                      ->GetMakefile()->GetCurrentDirectory();
+                      ->GetMakefile()->GetCurrentSourceDirectory();
           notFoundMap[varName] = text;
           }
         }
@@ -2046,7 +2046,7 @@ cmGlobalGenerator::FindLocalGenerator(const std::string& start_dir) const
   for(std::vector<cmLocalGenerator*>::const_iterator it =
       this->LocalGenerators.begin(); it != this->LocalGenerators.end(); ++it)
     {
-    std::string sd = (*it)->GetMakefile()->GetStartDirectory();
+    std::string sd = (*it)->GetMakefile()->GetCurrentSourceDirectory();
     if (sd == start_dir)
       {
       return *it;
@@ -2136,7 +2136,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
   const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   // CPack
-  std::string workingDir =  mf->GetStartOutputDirectory();
+  std::string workingDir =  mf->GetCurrentBinaryDirectory();
   cmCustomCommandLines cpackCommandLines;
   std::vector<std::string> depends;
   cmCustomCommandLine singleLine;
@@ -2147,7 +2147,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     singleLine.push_back(cmakeCfgIntDir);
     }
   singleLine.push_back("--config");
-  std::string configFile = mf->GetStartOutputDirectory();;
+  std::string configFile = mf->GetCurrentBinaryDirectory();;
   configFile += "/CPackConfig.cmake";
   std::string relConfigFile = "./CPackConfig.cmake";
   singleLine.push_back(relConfigFile);
@@ -2183,7 +2183,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
     depends.erase(depends.begin(), depends.end());
     singleLine.push_back(cmSystemTools::GetCPackCommand());
     singleLine.push_back("--config");
-    configFile = mf->GetStartOutputDirectory();;
+    configFile = mf->GetCurrentBinaryDirectory();;
     configFile += "/CPackSourceConfig.cmake";
     relConfigFile = "./CPackSourceConfig.cmake";
     singleLine.push_back(relConfigFile);
@@ -3070,7 +3070,7 @@ bool cmGlobalGenerator::GenerateCPackPropertiesFile()
   std::vector<std::string> configs;
   std::string config = mf->GetConfigurations(configs, false);
 
-  std::string path = this->CMakeInstance->GetStartOutputDirectory();
+  std::string path = this->CMakeInstance->GetHomeOutputDirectory();
   path += "/CPackProperties.cmake";
 
   if(!cmSystemTools::FileExists(path.c_str()) && installedFiles.empty())
