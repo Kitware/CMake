@@ -356,8 +356,8 @@ int main (int argc, char const* const* argv)
         ++it )
         {
         const char* gen = it->c_str();
-        cmMakefile newMF(*globalMF);
-        cmMakefile* mf = &newMF;
+        cmMakefile::ScopePushPop raii(globalMF);
+        cmMakefile* mf = globalMF;
         cmCPack_Log(&log, cmCPackLog::LOG_VERBOSE,
           "Specified generator: " << gen << std::endl);
         if ( parsed && !mf->GetDefinition("CPACK_PACKAGE_NAME") )

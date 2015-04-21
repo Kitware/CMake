@@ -106,52 +106,6 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->SuppressWatches = false;
 }
 
-cmMakefile::cmMakefile(const cmMakefile& mf): Internal(new Internals)
-{
-  this->Internal->VarStack.push(mf.Internal->VarStack.top().Closure());
-  this->Internal->VarInitStack.push(mf.Internal->VarInitStack.top());
-  this->Internal->VarUsageStack.push(mf.Internal->VarUsageStack.top());
-
-  this->cmStartDirectory = mf.cmStartDirectory;
-  this->StartOutputDirectory = mf.StartOutputDirectory;
-  this->cmHomeDirectory = mf.cmHomeDirectory;
-  this->HomeOutputDirectory = mf.HomeOutputDirectory;
-  this->cmCurrentListFile = mf.cmCurrentListFile;
-  this->ProjectName = mf.ProjectName;
-  this->Targets = mf.Targets;
-  this->SourceFiles = mf.SourceFiles;
-  this->Tests = mf.Tests;
-  this->LinkDirectories = mf.LinkDirectories;
-  this->SystemIncludeDirectories = mf.SystemIncludeDirectories;
-  this->ListFiles = mf.ListFiles;
-  this->OutputFiles = mf.OutputFiles;
-  this->LinkLibraries = mf.LinkLibraries;
-  this->InstallGenerators = mf.InstallGenerators;
-  this->TestGenerators = mf.TestGenerators;
-  this->IncludeFileRegularExpression = mf.IncludeFileRegularExpression;
-  this->ComplainFileRegularExpression = mf.ComplainFileRegularExpression;
-  this->SourceFileExtensions = mf.SourceFileExtensions;
-  this->HeaderFileExtensions = mf.HeaderFileExtensions;
-  this->DefineFlags = mf.DefineFlags;
-  this->DefineFlagsOrig = mf.DefineFlagsOrig;
-
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  this->SourceGroups = mf.SourceGroups;
-#endif
-
-  this->LocalGenerator = mf.LocalGenerator;
-  this->FunctionBlockers = mf.FunctionBlockers;
-  this->MacrosList = mf.MacrosList;
-  this->Properties = mf.Properties;
-  this->WarnUnused = mf.WarnUnused;
-  this->Initialize();
-  this->CheckSystemVars = mf.CheckSystemVars;
-  this->ListFileStack = mf.ListFileStack;
-  this->OutputToSource = mf.OutputToSource;
-
-  this->SuppressWatches = mf.SuppressWatches;
-}
-
 //----------------------------------------------------------------------------
 void cmMakefile::Initialize()
 {

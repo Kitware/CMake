@@ -75,7 +75,6 @@ public:
    * Construct an empty makefile.
    */
   cmMakefile();
-  cmMakefile(const cmMakefile& mf);
 
   /**
    * Destructor.
@@ -988,6 +987,8 @@ protected:
                          cmExecutionStatus &status);
 
 private:
+  cmMakefile(const cmMakefile& mf);
+  cmMakefile& operator=(const cmMakefile& mf);
   void Initialize();
 
 
