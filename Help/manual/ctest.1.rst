@@ -48,7 +48,9 @@ Options
  useful for debugging dashboard problems.
 
 ``--output-on-failure``
- Output anything outputted by the test program if the test should fail.  This option can also be enabled by setting the environment variable CTEST_OUTPUT_ON_FAILURE
+ Output anything outputted by the test program if the test should fail.
+ This option can also be enabled by setting the environment variable
+ ``CTEST_OUTPUT_ON_FAILURE``.
 
 ``-F``
  Enable failover.
@@ -62,7 +64,7 @@ Options
 
  This option tells ctest to run the tests in parallel using given
  number of jobs.  This option can also be set by setting the
- environment variable CTEST_PARALLEL_LEVEL.
+ environment variable ``CTEST_PARALLEL_LEVEL``.
 
 ``-Q,--quiet``
  Make ctest quiet.
