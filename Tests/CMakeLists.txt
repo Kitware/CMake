@@ -1326,6 +1326,18 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set_tests_properties(ExternalProject PROPERTIES
     TIMEOUT ${CMAKE_LONG_TEST_TIMEOUT})
 
+  add_test(NAME ExternalProjectSubdir
+    COMMAND ${CMAKE_CTEST_COMMAND} -C $<CONFIGURATION>
+    --build-and-test
+    "${CMake_SOURCE_DIR}/Tests/ExternalProjectSubdir"
+    "${CMake_BINARY_DIR}/Tests/ExternalProjectSubdir"
+    ${build_generator_args}
+    --build-project ExternalProjectSubdir
+    --force-new-ctest-process
+    --build-options ${build_options}
+    )
+  list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/ExternalProjectSubdir")
+
   add_test(ExternalProjectLocal ${CMAKE_CTEST_COMMAND}
     --build-and-test
     "${CMake_SOURCE_DIR}/Tests/ExternalProjectLocal"

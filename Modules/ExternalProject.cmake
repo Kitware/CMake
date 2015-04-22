@@ -106,6 +106,8 @@ Create custom targets to build projects in external trees
     :manual:`CMake Options <cmake(1)>`. Arguments in the form
     ``-Dvar:string=on`` are always passed to the command line, and
     therefore cannot be changed by the user.
+    Arguments may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
   ``CMAKE_CACHE_ARGS <arg>...``
     Initial cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
@@ -113,6 +115,8 @@ Create custom targets to build projects in external trees
     overcome command line length limits.
     These arguments are :command:`set` using the ``FORCE`` argument,
     and therefore cannot be changed by the user.
+    Arguments may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
   ``CMAKE_CACHE_DEFAULT_ARGS <arg>...``
     Initial default cache arguments, of the form ``-Dvar:string=on``.
     These arguments are written in a pre-load a script that populates
@@ -121,6 +125,8 @@ Create custom targets to build projects in external trees
     These arguments can be used as default value that will be set if no
     previous value is found in the cache, and that the user can change
     later.
+    Arguments may use
+    :manual:`generator expressions <cmake-generator-expressions(7)>`.
 
   Build step options are:
 
@@ -266,6 +272,9 @@ will be executed in order and aborted if any one fails.  For example::
 specifies to run ``make`` and then ``echo done`` during the build step.
 Whether the current working directory is preserved between commands is
 not defined.  Behavior of shell operators like ``&&`` is not defined.
+
+Arguments to ``<step>_COMMAND`` or ``COMMAND`` options may use
+:manual:`generator expressions <cmake-generator-expressions(7)>`.
 
 .. command:: ExternalProject_Get_Property
 
@@ -1126,10 +1135,7 @@ function(_ep_write_initial_cache target_name script_filename script_initial_cach
   # Replace location tags.
   _ep_replace_location_tags(${target_name} script_initial_cache)
   # Write out the initial cache file to the location specified.
-  if(NOT EXISTS "${script_filename}.in")
-    file(WRITE "${script_filename}.in" "\@script_initial_cache\@\n")
-  endif()
-  configure_file("${script_filename}.in" "${script_filename}")
+  file(GENERATE OUTPUT "${script_filename}" CONTENT "${script_initial_cache}")
 endfunction()
 
 
@@ -1302,14 +1308,14 @@ endif()
       endif()
     endforeach()
     set(code "${code}set(command \"${cmd}\")${code_execute_process}")
-    file(WRITE ${stamp_dir}/${name}-${step}-impl.cmake "${code}")
-    set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-impl.cmake)
+    file(GENERATE OUTPUT "${stamp_dir}/${name}-${step}-$<CONFIG>-impl.cmake" CONTENT "${code}")
+    set(command ${CMAKE_COMMAND} "-Dmake=\${make}" "-Dconfig=\${config}" -P ${stamp_dir}/${name}-${step}-$<CONFIG>-impl.cmake)
   endif()
 
   # Wrap the command in a script to log output to files.
-  set(script ${stamp_dir}/${name}-${step}.cmake)
+  set(script ${stamp_dir}/${name}-${step}-$<CONFIG>.cmake)
   set(logbase ${stamp_dir}/${name}-${step})
-  file(WRITE ${script} "
+  set(code "
 ${code_cygpath_make}
 set(command \"${command}\")
 execute_process(
@@ -1330,6 +1336,7 @@ else()
   message(STATUS \"\${msg}\")
 endif()
 ")
+  file(GENERATE OUTPUT "${script}" CONTENT "${code}")
   set(command ${CMAKE_COMMAND} ${make} ${config} -P ${script})
   set(${cmd_var} "${command}" PARENT_SCOPE)
 endfunction()
@@ -2054,7 +2061,7 @@ function(_ep_add_configure_command name)
     get_property(cmake_cache_default_args TARGET ${name} PROPERTY _EP_CMAKE_CACHE_DEFAULT_ARGS)
 
     if(cmake_cache_args OR cmake_cache_default_args)
-      set(_ep_cache_args_script "${tmp_dir}/${name}-cache.cmake")
+      set(_ep_cache_args_script "${tmp_dir}/${name}-cache-$<CONFIG>.cmake")
       if(cmake_cache_args)
         _ep_command_line_to_initial_cache(script_initial_cache_force "${cmake_cache_args}" 1)
       endif()
