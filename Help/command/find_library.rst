@@ -34,6 +34,12 @@ default will consider one name at a time and search every directory
 for it.  The NAMES_PER_DIR option tells this command to consider one
 directory at a time and search for all names in it.
 
+Each library name given to the ``NAMES`` option is first considered
+as a library file name and then considered with platform-specific
+prefixes (e.g. ``lib``) and suffixes (e.g. ``.so``).  Therefore one
+may specify library file names such as ``libfoo.a`` directly.
+This can be used to locate static libraries on UNIX-like systems.
+
 If the library found is a framework, then VAR will be set to the full
 path to the framework <fullPath>/A.framework.  When a full path to a
 framework is used as a library, CMake will use a -framework A, and a
