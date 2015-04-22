@@ -8,3 +8,7 @@ endif()
 if(NOT "${GENEX_VAR}" STREQUAL "GENEX_VALUE")
   message(SEND_ERROR "GENEX_VAR != 'GENEX_VALUE'")
 endif()
+
+if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/../PreSubdir1.txt")
+  message(SEND_ERROR "../PreSubdir1.txt not provided!")
+endif()
