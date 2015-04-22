@@ -13,6 +13,7 @@
 #define cmGeneratorExpressionEvaluationFile_h
 
 #include "cmStandardIncludes.h"
+#include <sys/types.h>
 #include <cmsys/auto_ptr.hxx>
 
 #include "cmGeneratorExpression.h"
