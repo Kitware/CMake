@@ -332,9 +332,9 @@ cmCTest::cmCTest()
   this->ComputedCompressMemCheckOutput = false;
   this->RepeatTests = 1; // default to run each test once
   this->RepeatUntilFail = false;
-  if(cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE"))
+  if(const char* outOnFail = cmSystemTools::GetEnv("CTEST_OUTPUT_ON_FAILURE"))
     {
-    this->OutputTestOutputOnTestFailure = true;
+    this->OutputTestOutputOnTestFailure = !cmSystemTools::IsOff(outOnFail);
     }
   this->InitStreams();
 
