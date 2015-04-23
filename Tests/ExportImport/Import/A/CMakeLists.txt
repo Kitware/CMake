@@ -255,6 +255,7 @@ add_subdirectory(excludedFromAll)
 
 add_executable(iface_test_bld iface_test.cpp)
 target_link_libraries(iface_test_bld bld_testSharedLibDepends)
+set_property(TARGET iface_test_bld PROPERTY NO_SYSTEM_FROM_IMPORTED 1)
 
 set_property(TARGET bld_testSharedLibRequired APPEND PROPERTY
     LINK_INTERFACE_LIBRARIES
