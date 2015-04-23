@@ -179,7 +179,7 @@ if(CMAKE_BINARY_DIR)
   # if a toolchain file is used, it needs to be included in the configured file,
   # so settings done there are also available if they don't go in the cache and in try_compile()
   set(INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED)
-  if(DEFINED CMAKE_TOOLCHAIN_FILE)
+  if(CMAKE_TOOLCHAIN_FILE)
     set(INCLUDE_CMAKE_TOOLCHAIN_FILE_IF_REQUIRED "include(\"${CMAKE_TOOLCHAIN_FILE}\")")
   endif()
 
