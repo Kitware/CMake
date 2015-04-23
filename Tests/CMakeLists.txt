@@ -1003,6 +1003,40 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
         list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/CPackComponentsForAll/build${CPackGen}-${CPackComponentWay}")
       endforeach()
     endforeach()
+
+    # debian specific
+    if(DPKG_EXECUTABLE)
+      unset(CPackRun_CPackDEBConfiguration_ALL_CONFIGS)
+      set(DEB_TEST_NAMES "CPackComponentsDEB")
+      set(DEB_CONFIGURATIONS_TO_TEST "components-lintian-dpkgdeb-checks")
+      set(CPackGen "DEB")
+      set(CPackRun_CPackGen "-DCPackGen=${CPackGen}")
+
+      foreach(CPackDEBConfiguration IN LISTS DEB_CONFIGURATIONS_TO_TEST)
+        set(CPackRun_CPackDEBConfiguration "-DCPackDEBConfiguration=${CPackDEBConfiguration}")
+        add_test(${DEB_TEST_NAMES}-${CPackDEBConfiguration}
+          ${CMAKE_CTEST_COMMAND} -C \${CTEST_CONFIGURATION_TYPE}
+          --build-and-test
+              "${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}"
+              "${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}"
+              ${build_generator_args}
+          --build-project CPackComponentsDEB
+          --build-options ${build_options}
+              -DCPACK_GENERATOR:STRING=${CPackGen}
+              -DCPACK_BINARY_${CPackGen}:BOOL=ON
+              ${CPackRun_CPackDEBConfiguration}
+              ${CPackRun_CPackDEBConfiguration_ALL_CONFIGS}
+          --graphviz=${DEB_TEST_NAMES}.dot
+          --test-command ${CMAKE_CMAKE_COMMAND}
+              "-D${DEB_TEST_NAMES}_SOURCE_DIR:PATH=${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}"
+              "-D${DEB_TEST_NAMES}_BINARY_DIR:PATH=${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}"
+              "${CPackRun_CPackGen}"
+              "${CPackRun_CPackDEBConfiguration}"
+              -P "${CMake_SOURCE_DIR}/Tests/${DEB_TEST_NAMES}/RunCPackVerifyResult-${CPackDEBConfiguration}.cmake")
+          list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/${DEB_TEST_NAMES}/build${CPackGen}-${CPackDEBConfiguration}")
+      endforeach()
+    endif()
+
   endif()
 
   # By default, turn this test off (because it takes a long time...)

@@ -20,6 +20,7 @@
 #include <cmsys/Glob.hxx>
 
 #include <limits.h> // USHRT_MAX
+#include <sys/stat.h>
 
 // NOTE:
 // A debian package .deb is simply an 'ar' archive. The only subtle difference
@@ -523,6 +524,11 @@ int cmCPackDebGenerator::createDeb()
     // each line contains a eol.
     // Do not end the md5sum file with yet another (invalid)
     }
+
+    // set md5sum file permissins to RW-R--R-- so that deb lintian doesn't warn
+    // about it
+    cmSystemTools::SetPermissions(md5filename.c_str(),
+        S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
 
     cmd = this->GetOption("GEN_CPACK_DEBIAN_FAKEROOT_EXECUTABLE");
     cmd += cmake_tar + "tar czf control.tar.gz ./control ./md5sums";
