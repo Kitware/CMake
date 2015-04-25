@@ -46,7 +46,7 @@
 class cmMakefile::Internals
 {
 public:
-  std::stack<cmDefinitions, std::list<cmDefinitions> > VarStack;
+  std::list<cmDefinitions> VarStack;
   std::stack<std::set<std::string> > VarInitStack;
   std::stack<std::set<std::string> > VarUsageStack;
   bool IsSourceFileTryCompile;
@@ -56,24 +56,24 @@ public:
     cmDefinitions* parent = 0;
     if (!this->VarStack.empty())
       {
-      parent = &this->VarStack.top();
+      parent = &this->VarStack.back();
       }
-    this->VarStack.push(cmDefinitions(parent));
+    this->VarStack.push_back(cmDefinitions(parent));
   }
 
   void InitializeDefinitions(cmMakefile* parent)
   {
-    this->VarStack.top() = parent->Internal->VarStack.top().MakeClosure();
+    this->VarStack.back() = parent->Internal->VarStack.back().MakeClosure();
   }
 
   const char* GetDefinition(std::string const& name)
   {
-    return this->VarStack.top().Get(name);
+    return this->VarStack.back().Get(name);
   }
 
   void SetDefinition(std::string const& name, std::string const& value)
   {
-    this->VarStack.top().Set(name, value.c_str());
+    this->VarStack.back().Set(name, value.c_str());
   }
 
   void RemoveDefinition(std::string const& name)
@@ -81,32 +81,32 @@ public:
     if (this->VarStack.size() > 1)
       {
       // In lower scopes we store keys, defined or not.
-      this->VarStack.top().Set(name, 0);
+      this->VarStack.back().Set(name, 0);
       }
     else
       {
-      this->VarStack.top().Erase(name);
+      this->VarStack.back().Erase(name);
       }
   }
 
   std::vector<std::string> LocalKeys() const
   {
-    return this->VarStack.top().LocalKeys();
+    return this->VarStack.back().LocalKeys();
   }
 
   std::vector<std::string> ClosureKeys() const
   {
-    return this->VarStack.top().ClosureKeys();
+    return this->VarStack.back().ClosureKeys();
   }
 
   void PopDefinitions()
   {
-    this->VarStack.pop();
+    this->VarStack.pop_back();
   }
 
   bool RaiseScope(std::string const& var, const char* varDef, cmMakefile* mf)
   {
-    cmDefinitions& cur = this->VarStack.top();
+    cmDefinitions& cur = this->VarStack.back();
     if(cmDefinitions* up = cur.GetParent())
       {
       // First localize the definition in the current scope.
