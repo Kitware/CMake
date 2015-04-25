@@ -38,7 +38,7 @@ public:
   const char* Get(const std::string& key);
 
   /** Set (or unset if null) a value associated with a key.  */
-  const char* Set(const std::string& key, const char* value);
+  void Set(const std::string& key, const char* value);
 
   /** Get the set of all local keys.  */
   std::set<std::string> LocalKeys() const;
