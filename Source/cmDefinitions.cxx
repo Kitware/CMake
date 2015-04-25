@@ -49,16 +49,7 @@ const char* cmDefinitions::Get(const std::string& key)
 void cmDefinitions::Set(const std::string& key, const char* value)
 {
   Def def(value);
-  if(this->Up || def.Exists)
-    {
-    // In lower scopes we store keys, defined or not.
-    this->Map[key] = def;
-    }
-  else
-    {
-    // In the top-most scope we need not store undefined keys.
-    this->Map.erase(key);
-    }
+  this->Map[key] = def;
 }
 
 void cmDefinitions::Erase(const std::string& key)
