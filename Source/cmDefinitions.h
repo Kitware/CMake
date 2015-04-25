@@ -30,9 +30,6 @@ public:
   /** Construct with the given parent scope.  */
   cmDefinitions(cmDefinitions* parent = 0);
 
-  /** Reset object as if newly constructed.  */
-  void Reset(cmDefinitions* parent = 0);
-
   /** Returns the parent scope, if any.  */
   cmDefinitions* GetParent() const { return this->Up; }
 

@@ -21,13 +21,6 @@ cmDefinitions::cmDefinitions(cmDefinitions* parent)
 }
 
 //----------------------------------------------------------------------------
-void cmDefinitions::Reset(cmDefinitions* parent)
-{
-  this->Up = parent;
-  this->Map.clear();
-}
-
-//----------------------------------------------------------------------------
 cmDefinitions::Def const&
 cmDefinitions::GetInternal(const std::string& key)
 {
