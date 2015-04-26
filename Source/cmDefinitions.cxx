@@ -39,9 +39,16 @@ cmDefinitions::GetInternal(const std::string& key)
 }
 
 //----------------------------------------------------------------------------
-cmDefinitions::Def const&
-cmDefinitions::SetInternal(const std::string& key, Def const& def)
+const char* cmDefinitions::Get(const std::string& key)
 {
+  Def const& def = this->GetInternal(key);
+  return def.Exists? def.c_str() : 0;
+}
+
+//----------------------------------------------------------------------------
+void cmDefinitions::Set(const std::string& key, const char* value)
+{
+  Def def(value);
   if(this->Up || def.Exists)
     {
     // In lower scopes we store keys, defined or not.
@@ -52,19 +59,6 @@ cmDefinitions::SetInternal(const std::string& key, Def const& def)
     // In the top-most scope we need not store undefined keys.
     this->Map.erase(key);
     }
-}
-
-//----------------------------------------------------------------------------
-const char* cmDefinitions::Get(const std::string& key)
-{
-  Def const& def = this->GetInternal(key);
-  return def.Exists? def.c_str() : 0;
-}
-
-//----------------------------------------------------------------------------
-void cmDefinitions::Set(const std::string& key, const char* value)
-{
-  this->SetInternal(key, Def(value));
 }
 
 //----------------------------------------------------------------------------

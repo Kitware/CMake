@@ -78,7 +78,6 @@ private:
 
   // Internal query and update methods.
   Def const& GetInternal(const std::string& key);
-  Def const& SetInternal(const std::string& key, Def const& def);
 
   // Implementation of Closure() method.
   struct ClosureTag {};
