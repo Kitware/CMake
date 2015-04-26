@@ -43,7 +43,7 @@ public:
   void Erase(const std::string& key);
 
   /** Get the set of all local keys.  */
-  std::set<std::string> LocalKeys() const;
+  std::vector<std::string> LocalKeys() const;
 
   /** Compute the closure of all defined keys with values.
       This flattens the scope.  The result has no parent.  */

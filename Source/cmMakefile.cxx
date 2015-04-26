@@ -89,7 +89,7 @@ public:
       }
   }
 
-  std::set<std::string> LocalKeys() const
+  std::vector<std::string> LocalKeys() const
   {
     return this->VarStack.top().LocalKeys();
   }
@@ -1901,8 +1901,8 @@ void cmMakefile::CheckForUnusedVariables() const
     {
     return;
     }
-  const std::set<std::string>& locals = this->Internal->LocalKeys();
-  std::set<std::string>::const_iterator it = locals.begin();
+  const std::vector<std::string>& locals = this->Internal->LocalKeys();
+  std::vector<std::string>::const_iterator it = locals.begin();
   for (; it != locals.end(); ++it)
     {
     this->CheckForUnused("out of scope", *it);
@@ -4431,10 +4431,10 @@ void cmMakefile::PopScope()
 
   std::set<std::string> init = this->Internal->VarInitStack.top();
   std::set<std::string> usage = this->Internal->VarUsageStack.top();
-  const std::set<std::string>& locals = this->Internal->LocalKeys();
+  const std::vector<std::string>& locals = this->Internal->LocalKeys();
   // Remove initialization and usage information for variables in the local
   // scope.
-  std::set<std::string>::const_iterator it = locals.begin();
+  std::vector<std::string>::const_iterator it = locals.begin();
   for (; it != locals.end(); ++it)
     {
     init.erase(*it);

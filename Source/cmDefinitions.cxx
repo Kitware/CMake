@@ -58,16 +58,17 @@ void cmDefinitions::Erase(const std::string& key)
 }
 
 //----------------------------------------------------------------------------
-std::set<std::string> cmDefinitions::LocalKeys() const
+std::vector<std::string> cmDefinitions::LocalKeys() const
 {
-  std::set<std::string> keys;
+  std::vector<std::string> keys;
+  keys.reserve(this->Map.size());
   // Consider local definitions.
   for(MapType::const_iterator mi = this->Map.begin();
       mi != this->Map.end(); ++mi)
     {
     if (mi->second.Exists)
       {
-      keys.insert(mi->first);
+      keys.push_back(mi->first);
       }
     }
   return keys;
