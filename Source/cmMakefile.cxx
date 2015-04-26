@@ -63,7 +63,15 @@ public:
 
   void InitializeDefinitions(cmMakefile* parent)
   {
-    this->VarStack.back() = parent->Internal->VarStack.back().MakeClosure();
+    std::list<cmDefinitions const*> defPtrs;
+    for (std::list<cmDefinitions>::iterator it =
+         parent->Internal->VarStack.begin();
+         it != parent->Internal->VarStack.end(); ++it)
+      {
+      defPtrs.push_back(&*it);
+      }
+    this->VarStack.back() = cmDefinitions::MakeClosure(defPtrs.begin(),
+                                                       defPtrs.end());
   }
 
   const char* GetDefinition(std::string const& name)

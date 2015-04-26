@@ -75,18 +75,13 @@ std::vector<std::string> cmDefinitions::LocalKeys() const
 }
 
 //----------------------------------------------------------------------------
-cmDefinitions cmDefinitions::MakeClosure() const
+cmDefinitions cmDefinitions::MakeClosure(
+    std::list<cmDefinitions const*>::iterator begin,
+    std::list<cmDefinitions const*>::iterator end)
 {
   std::set<std::string> undefined;
   cmDefinitions closure;
-  cmDefinitions const* defs = this;
-  std::list<cmDefinitions const*> ups;
-  while(defs)
-    {
-    ups.push_back(defs);
-    defs = defs->Up;
-    }
-  closure.MakeClosure(undefined, ups.begin(), ups.end());
+  closure.MakeClosure(undefined, begin, end);
   return closure;
 }
 

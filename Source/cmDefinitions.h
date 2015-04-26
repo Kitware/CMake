@@ -50,7 +50,9 @@ public:
   /** Compute the set of all defined keys.  */
   std::vector<std::string> ClosureKeys() const;
 
-  cmDefinitions MakeClosure() const;
+  static cmDefinitions MakeClosure(
+      std::list<cmDefinitions const*>::iterator begin,
+      std::list<cmDefinitions const*>::iterator end);
 
 private:
   // String with existence boolean.
