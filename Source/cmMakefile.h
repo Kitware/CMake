@@ -422,19 +422,8 @@ public:
   bool HasCMP0054AlreadyBeenReported(
     cmListFileContext context) const;
 
-  //@{
-  /**
-   * Set/Get the home directory (or output directory) in the project. The
-   * home directory is the top directory of the project. It is where
-   * CMakeSetup or configure was run. Remember that CMake processes
-   * CMakeLists files by recursing up the tree starting at the StartDirectory
-   * and going up until it reaches the HomeDirectory.
-   */
-  void SetHomeDirectory(const std::string& dir);
   const char* GetHomeDirectory() const;
-  void SetHomeOutputDirectory(const std::string& dir);
   const char* GetHomeOutputDirectory() const;
-  //@}
 
   /**
    * Set CMAKE_SCRIPT_MODE_FILE variable when running a -P script.

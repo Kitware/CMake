@@ -651,9 +651,23 @@ void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
   this->Properties.SetCMakeInstance(this->GetCMakeInstance());
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
-  this->SetHomeDirectory(this->GetCMakeInstance()->GetHomeDirectory());
-  this->SetHomeOutputDirectory(
-    this->GetCMakeInstance()->GetHomeOutputDirectory());
+
+  {
+  const char* dir = this->GetCMakeInstance()->GetHomeDirectory();
+  this->AddDefinition("CMAKE_SOURCE_DIR", dir);
+  if ( !this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR") )
+    {
+    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
+    }
+  }
+  {
+  const char* dir = this->GetCMakeInstance()->GetHomeOutputDirectory();
+  this->AddDefinition("CMAKE_BINARY_DIR", dir);
+  if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
+    {
+    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
+    }
+  }
 }
 
 namespace
@@ -3385,27 +3399,9 @@ const char* cmMakefile::GetHomeDirectory() const
   return this->GetCMakeInstance()->GetHomeDirectory();
 }
 
-void cmMakefile::SetHomeDirectory(const std::string& dir)
-{
-  this->AddDefinition("CMAKE_SOURCE_DIR", dir.c_str());
-  if ( !this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR") )
-    {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir.c_str());
-    }
-}
-
 const char* cmMakefile::GetHomeOutputDirectory() const
 {
   return this->GetCMakeInstance()->GetHomeOutputDirectory();
-}
-
-void cmMakefile::SetHomeOutputDirectory(const std::string& dir)
-{
-  this->AddDefinition("CMAKE_BINARY_DIR", dir.c_str());
-  if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
-    {
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir.c_str());
-    }
 }
 
 void cmMakefile::SetScriptModeFile(const char* scriptfile)
