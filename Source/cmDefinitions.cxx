@@ -29,13 +29,14 @@ cmDefinitions::GetInternal(const std::string& key)
     {
     return i->second;
     }
-  if(cmDefinitions* up = this->Up)
+  cmDefinitions* up = this->Up;
+  if(!up)
     {
-    // Query the parent scope and store the result locally.
-    Def def = up->GetInternal(key);
-    return this->Map.insert(MapType::value_type(key, def)).first->second;
+    return this->NoDef;
     }
-  return this->NoDef;
+  // Query the parent scope and store the result locally.
+  Def def = up->GetInternal(key);
+  return this->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
 //----------------------------------------------------------------------------
