@@ -131,22 +131,22 @@ std::set<std::string> cmDefinitions::ClosureKeys() const
 void cmDefinitions::ClosureKeys(std::set<std::string>& defined,
                                 std::set<std::string>& undefined) const
 {
-  // Consider local definitions.
-  for(MapType::const_iterator mi = this->Map.begin();
-      mi != this->Map.end(); ++mi)
-    {
-    // Use this key if it is not already set or unset.
-    if(defined.find(mi->first) == defined.end() &&
-       undefined.find(mi->first) == undefined.end())
-      {
-      std::set<std::string>& m = mi->second.Exists? defined : undefined;
-      m.insert(mi->first);
-      }
-    }
+  cmDefinitions const* up = this;
 
-  // Traverse parents.
-  if(cmDefinitions const* up = this->Up)
+  while (up)
     {
-    up->ClosureKeys(defined, undefined);
+    // Consider local definitions.
+    for(MapType::const_iterator mi = up->Map.begin();
+        mi != up->Map.end(); ++mi)
+      {
+      // Use this key if it is not already set or unset.
+      if(defined.find(mi->first) == defined.end() &&
+         undefined.find(mi->first) == undefined.end())
+        {
+        std::set<std::string>& m = mi->second.Exists? defined : undefined;
+        m.insert(mi->first);
+        }
+      }
+    up = up->Up;
     }
 }
