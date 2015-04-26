@@ -87,29 +87,27 @@ cmDefinitions cmDefinitions::MakeClosure() const
 void cmDefinitions::MakeClosure(std::set<std::string>& undefined,
                                 cmDefinitions const* defs)
 {
-  // Consider local definitions.
-  for(MapType::const_iterator mi = defs->Map.begin();
-      mi != defs->Map.end(); ++mi)
+  while(defs)
     {
-    // Use this key if it is not already set or unset.
-    if(this->Map.find(mi->first) == this->Map.end() &&
-       undefined.find(mi->first) == undefined.end())
+    // Consider local definitions.
+    for(MapType::const_iterator mi = defs->Map.begin();
+        mi != defs->Map.end(); ++mi)
       {
-      if(mi->second.Exists)
+      // Use this key if it is not already set or unset.
+      if(this->Map.find(mi->first) == this->Map.end() &&
+         undefined.find(mi->first) == undefined.end())
         {
-        this->Map.insert(*mi);
-        }
-      else
-        {
-        undefined.insert(mi->first);
+        if(mi->second.Exists)
+          {
+          this->Map.insert(*mi);
+          }
+        else
+          {
+          undefined.insert(mi->first);
+          }
         }
       }
-    }
-
-  // Traverse parents.
-  if(cmDefinitions const* up = defs->Up)
-    {
-    this->MakeClosure(undefined, up);
+    defs = defs->Up;
     }
 }
 
