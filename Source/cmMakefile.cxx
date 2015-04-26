@@ -121,7 +121,7 @@ public:
     if(cmDefinitions* up = cur.GetParent())
       {
       // First localize the definition in the current scope.
-      cur.Get(var);
+      this->GetDefinition(var);
 
       // Now update the definition in the parent scope.
       up->Set(var, varDef);
