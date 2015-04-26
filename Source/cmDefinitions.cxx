@@ -75,21 +75,16 @@ std::vector<std::string> cmDefinitions::LocalKeys() const
 }
 
 //----------------------------------------------------------------------------
-cmDefinitions cmDefinitions::Closure() const
-{
-  return cmDefinitions(ClosureTag(), this);
-}
-
-//----------------------------------------------------------------------------
-cmDefinitions::cmDefinitions(ClosureTag const&, cmDefinitions const* root):
-  Up(0)
+cmDefinitions cmDefinitions::MakeClosure() const
 {
   std::set<std::string> undefined;
-  this->ClosureImpl(undefined, root);
+  cmDefinitions closure;
+  closure.MakeClosure(undefined, this);
+  return closure;
 }
 
 //----------------------------------------------------------------------------
-void cmDefinitions::ClosureImpl(std::set<std::string>& undefined,
+void cmDefinitions::MakeClosure(std::set<std::string>& undefined,
                                 cmDefinitions const* defs)
 {
   // Consider local definitions.
@@ -114,7 +109,7 @@ void cmDefinitions::ClosureImpl(std::set<std::string>& undefined,
   // Traverse parents.
   if(cmDefinitions const* up = defs->Up)
     {
-    this->ClosureImpl(undefined, up);
+    this->MakeClosure(undefined, up);
     }
 }
 

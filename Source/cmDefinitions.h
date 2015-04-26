@@ -45,12 +45,10 @@ public:
   /** Get the set of all local keys.  */
   std::vector<std::string> LocalKeys() const;
 
-  /** Compute the closure of all defined keys with values.
-      This flattens the scope.  The result has no parent.  */
-  cmDefinitions Closure() const;
-
   /** Compute the set of all defined keys.  */
   std::vector<std::string> ClosureKeys() const;
+
+  cmDefinitions MakeClosure() const;
 
 private:
   // String with existence boolean.
@@ -81,10 +79,7 @@ private:
   // Internal query and update methods.
   Def const& GetInternal(const std::string& key);
 
-  // Implementation of Closure() method.
-  struct ClosureTag {};
-  cmDefinitions(ClosureTag const&, cmDefinitions const* root);
-  void ClosureImpl(std::set<std::string>& undefined,
+  void MakeClosure(std::set<std::string>& undefined,
                    cmDefinitions const* defs);
 };
 
