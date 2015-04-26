@@ -116,26 +116,19 @@ cmDefinitions::MakeClosure(std::set<std::string>& undefined,
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmDefinitions::ClosureKeys() const
+std::vector<std::string>
+cmDefinitions::ClosureKeys(std::set<std::string>& bound) const
 {
   std::vector<std::string> defined;
-  std::set<std::string> bound;
-
-  cmDefinitions const* up = this;
-
-  while (up)
+  defined.reserve(this->Map.size());
+  for(MapType::const_iterator mi = this->Map.begin();
+      mi != this->Map.end(); ++mi)
     {
-    // Consider local definitions.
-    for(MapType::const_iterator mi = up->Map.begin();
-        mi != up->Map.end(); ++mi)
+    // Use this key if it is not already set or unset.
+    if(bound.insert(mi->first).second && mi->second.Exists)
       {
-      // Use this key if it is not already set or unset.
-      if(bound.insert(mi->first).second && mi->second.Exists)
-        {
-        defined.push_back(mi->first);
-        }
+      defined.push_back(mi->first);
       }
-    up = up->Up;
     }
   return defined;
 }
