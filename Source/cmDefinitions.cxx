@@ -11,6 +11,8 @@
 ============================================================================*/
 #include "cmDefinitions.h"
 
+#include <list>
+
 //----------------------------------------------------------------------------
 cmDefinitions::Def cmDefinitions::NoDef;
 
@@ -87,11 +89,18 @@ cmDefinitions cmDefinitions::MakeClosure() const
 void cmDefinitions::MakeClosure(std::set<std::string>& undefined,
                                 cmDefinitions const* defs)
 {
+  std::list<cmDefinitions const*> ups;
   while(defs)
     {
+    ups.push_back(defs);
+    defs = defs->Up;
+    }
+  for (std::list<cmDefinitions const*>::const_iterator it = ups.begin();
+       it != ups.end(); ++it)
+    {
     // Consider local definitions.
-    for(MapType::const_iterator mi = defs->Map.begin();
-        mi != defs->Map.end(); ++mi)
+    for(MapType::const_iterator mi = (*it)->Map.begin();
+        mi != (*it)->Map.end(); ++mi)
       {
       // Use this key if it is not already set or unset.
       if(this->Map.find(mi->first) == this->Map.end() &&
@@ -107,7 +116,6 @@ void cmDefinitions::MakeClosure(std::set<std::string>& undefined,
           }
         }
       }
-    defs = defs->Up;
     }
 }
 
