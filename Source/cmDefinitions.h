@@ -17,6 +17,8 @@
 #include "cmsys/hash_map.hxx"
 #endif
 
+#include <list>
+
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.
  *
@@ -80,7 +82,8 @@ private:
   Def const& GetInternal(const std::string& key);
 
   void MakeClosure(std::set<std::string>& undefined,
-                   cmDefinitions const* defs);
+                   std::list<cmDefinitions const*>::iterator begin,
+                   std::list<cmDefinitions const*>::iterator end);
 };
 
 #endif

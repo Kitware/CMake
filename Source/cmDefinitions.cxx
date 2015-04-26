@@ -11,8 +11,6 @@
 ============================================================================*/
 #include "cmDefinitions.h"
 
-#include <list>
-
 //----------------------------------------------------------------------------
 cmDefinitions::Def cmDefinitions::NoDef;
 
@@ -81,22 +79,25 @@ cmDefinitions cmDefinitions::MakeClosure() const
 {
   std::set<std::string> undefined;
   cmDefinitions closure;
-  closure.MakeClosure(undefined, this);
-  return closure;
-}
-
-//----------------------------------------------------------------------------
-void cmDefinitions::MakeClosure(std::set<std::string>& undefined,
-                                cmDefinitions const* defs)
-{
+  cmDefinitions const* defs = this;
   std::list<cmDefinitions const*> ups;
   while(defs)
     {
     ups.push_back(defs);
     defs = defs->Up;
     }
-  for (std::list<cmDefinitions const*>::const_iterator it = ups.begin();
-       it != ups.end(); ++it)
+  closure.MakeClosure(undefined, ups.begin(), ups.end());
+  return closure;
+}
+
+//----------------------------------------------------------------------------
+void
+cmDefinitions::MakeClosure(std::set<std::string>& undefined,
+                           std::list<cmDefinitions const*>::iterator begin,
+                           std::list<cmDefinitions const*>::iterator end)
+{
+  for (std::list<cmDefinitions const*>::const_iterator it = begin;
+       it != end; ++it)
     {
     // Consider local definitions.
     for(MapType::const_iterator mi = (*it)->Map.begin();
