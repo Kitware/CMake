@@ -53,12 +53,7 @@ public:
 
   void PushDefinitions()
   {
-    cmDefinitions* parent = 0;
-    if (!this->VarStack.empty())
-      {
-      parent = &this->VarStack.back();
-      }
-    this->VarStack.push_back(cmDefinitions(parent));
+    this->VarStack.push_back(cmDefinitions());
   }
 
   void InitializeDefinitions(cmMakefile* parent)

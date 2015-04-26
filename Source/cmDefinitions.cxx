@@ -17,12 +17,6 @@
 cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
-cmDefinitions::cmDefinitions(cmDefinitions* parent)
-  : Up(parent)
-{
-}
-
-//----------------------------------------------------------------------------
 cmDefinitions::Def const& cmDefinitions::GetInternal(
   const std::string& key,
   std::list<cmDefinitions>::reverse_iterator rbegin,
