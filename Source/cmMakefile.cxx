@@ -181,11 +181,11 @@ void cmMakefile::Print() const
   std::cout << " this->StartOutputDirectory; " <<
     this->GetCurrentBinaryDirectory() << std::endl;
   std::cout << " this->HomeOutputDirectory; " <<
-    this->HomeOutputDirectory << std::endl;
+    this->GetHomeOutputDirectory() << std::endl;
   std::cout << " this->cmStartDirectory; " <<
     this->GetCurrentSourceDirectory() << std::endl;
   std::cout << " this->cmHomeDirectory; " <<
-    this->cmHomeDirectory << std::endl;
+    this->GetHomeDirectory() << std::endl;
   std::cout << " this->ProjectName; "
             <<  this->ProjectName << std::endl;
   this->PrintStringVector("this->LinkDirectories", this->LinkDirectories);
@@ -3382,34 +3382,29 @@ cmMakefile::LexicalPushPop::~LexicalPushPop()
 
 const char* cmMakefile::GetHomeDirectory() const
 {
-  return this->cmHomeDirectory.c_str();
+  return this->GetCMakeInstance()->GetHomeDirectory();
 }
 
 void cmMakefile::SetHomeDirectory(const std::string& dir)
 {
-  this->cmHomeDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
-  this->AddDefinition("CMAKE_SOURCE_DIR", this->GetHomeDirectory());
+  this->AddDefinition("CMAKE_SOURCE_DIR", dir.c_str());
   if ( !this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR") )
     {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", this->GetHomeDirectory());
+    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir.c_str());
     }
 }
 
 const char* cmMakefile::GetHomeOutputDirectory() const
 {
-  return this->HomeOutputDirectory.c_str();
+  return this->GetCMakeInstance()->GetHomeOutputDirectory();
 }
 
 void cmMakefile::SetHomeOutputDirectory(const std::string& dir)
 {
-  this->HomeOutputDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
-  this->AddDefinition("CMAKE_BINARY_DIR", this->GetHomeOutputDirectory());
+  this->AddDefinition("CMAKE_BINARY_DIR", dir.c_str());
   if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
     {
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
-                        this->GetHomeOutputDirectory());
+    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir.c_str());
     }
 }
 

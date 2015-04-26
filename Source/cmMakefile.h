@@ -878,8 +878,6 @@ protected:
 
   std::string cmStartDirectory;
   std::string StartOutputDirectory;
-  std::string cmHomeDirectory;
-  std::string HomeOutputDirectory;
   std::string cmCurrentListFile;
 
   std::string ProjectName;    // project name

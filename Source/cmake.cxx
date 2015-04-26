@@ -372,12 +372,12 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   // read in the list file to fill the cache
   if(path)
     {
+    std::string homeDir = this->GetHomeDirectory();
+    std::string homeOutputDir = this->GetHomeOutputDirectory();
+    this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+    this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
-    lg->GetMakefile()->SetHomeOutputDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetCurrentBinaryDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory());
-    lg->GetMakefile()->SetHomeDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetCurrentSourceDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
@@ -393,6 +393,8 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       {
       cmSystemTools::Error("Error processing file: ", path);
       }
+    this->SetHomeDirectory(homeDir);
+    this->SetHomeOutputDirectory(homeOutputDir);
     }
 
   // free generic one if generated
