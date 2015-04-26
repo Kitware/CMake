@@ -86,10 +86,6 @@ private:
   cmDefinitions(ClosureTag const&, cmDefinitions const* root);
   void ClosureImpl(std::set<std::string>& undefined,
                    cmDefinitions const* defs);
-
-  // Implementation of ClosureKeys() method.
-  void ClosureKeys(std::set<std::string>& defined,
-                   std::set<std::string>& undefined) const;
 };
 
 #endif
