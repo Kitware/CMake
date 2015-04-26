@@ -94,7 +94,7 @@ public:
     return this->VarStack.top().LocalKeys();
   }
 
-  std::set<std::string> ClosureKeys() const
+  std::vector<std::string> ClosureKeys() const
   {
     return this->VarStack.top().ClosureKeys();
   }
@@ -2514,8 +2514,7 @@ std::vector<std::string> cmMakefile
   std::vector<std::string> res;
   if ( !cacheonly )
     {
-    std::set<std::string> definitions = this->Internal->ClosureKeys();
-    res.insert(res.end(), definitions.begin(), definitions.end());
+    res = this->Internal->ClosureKeys();
     }
   std::vector<std::string> cacheKeys =
       this->GetState()->GetCacheEntryKeys();
