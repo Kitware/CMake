@@ -13,6 +13,7 @@
 #ifndef cmCPackIFWGenerator_h
 #define cmCPackIFWGenerator_h
 
+#include <cmGeneratedFileStream.h>
 #include <CPack/cmCPackGenerator.h>
 
 #include "cmCPackIFWPackage.h"
@@ -43,6 +44,21 @@ public:
    * Destruct IFW generator
    */
   virtual ~cmCPackIFWGenerator();
+
+  /**
+   * Compare \a version with QtIFW framework version
+   */
+  bool IsVersionLess(const char *version);
+
+  /**
+   * Compare \a version with QtIFW framework version
+   */
+  bool IsVersionGreater(const char *version);
+
+  /**
+   * Compare \a version with QtIFW framework version
+   */
+  bool IsVersionEqual(const char *version);
 
 protected: // cmCPackGenerator reimplementation
 
@@ -105,6 +121,8 @@ protected: // Methods
   cmCPackIFWPackage* GetGroupPackage(cmCPackComponentGroup *group) const;
   cmCPackIFWPackage* GetComponentPackage(cmCPackComponent *component) const;
 
+  void WriteGeneratedByToStrim(cmGeneratedFileStream& xout);
+
 protected: // Data
 
   friend class cmCPackIFWPackage;
@@ -126,6 +144,8 @@ protected: // Data
 private:
   std::string RepoGen;
   std::string BinCreator;
+  std::string FrameworkVersion;
+  std::string ExecutableSuffix;
 
   bool OnlineOnly;
   bool ResolveDuplicateNames;

@@ -2,7 +2,7 @@
 # CPackIFW
 # --------
 #
-# .. _QtIFW: http://qt-project.org/doc/qtinstallerframework/index.html
+# .. _QtIFW: http://doc.qt.io/qtinstallerframework/index.html
 #
 # This module looks for the location of the command line utilities supplied with
 # the Qt Installer Framework (QtIFW_).
@@ -33,18 +33,26 @@
 #
 # You can use the following variables to change behavior of CPack ``IFW`` generator.
 #
+# Debug
+# """"""
+#
+# .. variable:: CPACK_IFW_VERBOSE
+#
+#  Set to ``ON`` to enable addition debug output.
+#  By default is ``OFF``.
+#
 # Package
 # """""""
 #
 # .. variable:: CPACK_IFW_PACKAGE_TITLE
 #
 #  Name of the installer as displayed on the title bar.
-#  By default used :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
+#  By default used :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`.
 #
 # .. variable:: CPACK_IFW_PACKAGE_PUBLISHER
 #
 #  Publisher of the software (as shown in the Windows Control Panel).
-#  By default used :variable:`CPACK_PACKAGE_VENDOR`
+#  By default used :variable:`CPACK_PACKAGE_VENDOR`.
 #
 # .. variable:: CPACK_IFW_PRODUCT_URL
 #
@@ -62,6 +70,12 @@
 # .. variable:: CPACK_IFW_PACKAGE_LOGO
 #
 #  Filename for a logo is used as QWizard::LogoPixmap.
+#
+# .. variable:: CPACK_IFW_PACKAGE_START_MENU_DIRECTORY
+#
+#  Name of the default program group for the product in the Windows Start menu.
+#
+#  By default used :variable:`CPACK_IFW_PACKAGE_NAME`.
 #
 # .. variable:: CPACK_IFW_TARGET_DIRECTORY
 #
@@ -84,6 +98,35 @@
 #
 #  The root package name, which will be used if configuration group is not
 #  specified
+#
+# .. variable:: CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME
+#
+#  Filename of the generated maintenance tool.
+#  The platform-specific executable file extension is appended.
+#
+#  By default used QtIFW_ defaults (``maintenancetool``).
+#
+# .. variable:: CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_INI_FILE
+#
+#  Filename for the configuration of the generated maintenance tool.
+#
+#  By default used QtIFW_ defaults (``maintenancetool.ini``).
+#
+# .. variable:: CPACK_IFW_PACKAGE_ALLOW_NON_ASCII_CHARACTERS
+#
+#  Set to ``ON`` if the installation path can contain non-ASCII characters.
+#
+#  Is ``ON`` for QtIFW_ less 2.0 tools.
+#
+# .. variable:: CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH
+#
+#  Set to ``OFF`` if the installation path cannot contain space characters.
+#
+#  Is ``ON`` for QtIFW_ less 2.0 tools.
+#
+# .. variable:: CPACK_IFW_PACKAGE_CONTROL_SCRIPT
+#
+#  Filename for a custom installer control script.
 #
 # .. variable:: CPACK_IFW_REPOSITORIES_ALL
 #
@@ -112,6 +155,10 @@
 #
 # Tools
 # """"""""
+#
+# .. variable:: CPACK_IFW_FRAMEWORK_VERSION
+#
+#  The version of used QtIFW_ tools.
 #
 # .. variable:: CPACK_IFW_BINARYCREATOR_EXECUTABLE
 #
@@ -276,16 +323,16 @@
 # Qt Installer Framework Manual:
 #
 #  Index page
-#   http://qt-project.org/doc/qtinstallerframework/index.html
+#   http://doc.qt.io/qtinstallerframework/index.html
 #
 #  Component Scripting
-#   http://qt-project.org/doc/qtinstallerframework/scripting.html
+#   http://doc.qt.io/qtinstallerframework/scripting.html
 #
 #  Predefined Variables
-#   http://qt-project.org/doc/qtinstallerframework/scripting.html#predefined-variables
+#   http://doc.qt.io/qtinstallerframework/scripting.html#predefined-variables
 #
-# Download Qt Installer Framework for you platform from Qt Project site:
-#  http://download.qt-project.org/official_releases/qt-installer-framework/
+# Download Qt Installer Framework for you platform from Qt site:
+#  http://download.qt.io/official_releases/qt-installer-framework
 #
 
 #=============================================================================
@@ -324,8 +371,14 @@ else()
 endif()
 
 set(_CPACK_IFW_SUFFIXES
+# Common
   "bin"
-  "QtIFW-1.7.0/bin"
+# Second branch
+  "QtIFW2.3.0/bin"
+  "QtIFW2.2.0/bin"
+  "QtIFW2.1.0/bin"
+  "QtIFW2.0.0/bin"
+# First branch
   "QtIFW-1.6.0/bin"
   "QtIFW-1.5.0/bin"
   "QtIFW-1.4.0/bin"
@@ -351,12 +404,53 @@ find_program(CPACK_IFW_REPOGEN_EXECUTABLE
   )
 mark_as_advanced(CPACK_IFW_REPOGEN_EXECUTABLE)
 
+# Look for 'installerbase'
+
+find_program(CPACK_IFW_INSTALLERBASE_EXECUTABLE
+  NAMES installerbase
+  PATHS ${_CPACK_IFW_PATHS}
+  PATH_SUFFIXES ${_CPACK_IFW_SUFFIXES}
+  DOC "QtIFW installer executable base"
+  )
+mark_as_advanced(CPACK_IFW_INSTALLERBASE_EXECUTABLE)
+
+# Look for 'devtool' (appeared in the second branch)
+
+find_program(CPACK_IFW_DEVTOOL_EXECUTABLE
+  NAMES devtool
+  PATHS ${_CPACK_IFW_PATHS}
+  PATH_SUFFIXES ${_CPACK_IFW_SUFFIXES}
+  DOC "QtIFW devtool command line client"
+  )
+mark_as_advanced(CPACK_IFW_DEVTOOL_EXECUTABLE)
+
 #
 ## Next code is included only once
 #
 
 if(NOT CPackIFW_CMake_INCLUDED)
 set(CPackIFW_CMake_INCLUDED 1)
+
+#=============================================================================
+# Framework version
+#=============================================================================
+
+if(CPACK_IFW_INSTALLERBASE_EXECUTABLE AND CPACK_IFW_DEVTOOL_EXECUTABLE)
+  execute_process(COMMAND
+    "${CPACK_IFW_INSTALLERBASE_EXECUTABLE}" --framework-version
+    OUTPUT_VARIABLE CPACK_IFW_FRAMEWORK_VERSION)
+  if(CPACK_IFW_FRAMEWORK_VERSION)
+    string(REPLACE " " ""
+      CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_FRAMEWORK_VERSION}")
+    string(REPLACE "\t" ""
+      CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_FRAMEWORK_VERSION}")
+    string(REPLACE "\n" ""
+      CPACK_IFW_FRAMEWORK_VERSION "${CPACK_IFW_FRAMEWORK_VERSION}")
+    if(CPACK_IFW_VERBOSE)
+      message(STATUS "Found QtIFW ${CPACK_IFW_FRAMEWORK_VERSION} version")
+    endif()
+  endif()
+endif()
 
 #=============================================================================
 # Macro definition
@@ -513,5 +607,8 @@ macro(cpack_ifw_add_repository reponame)
   endif()
 
 endmacro()
+
+# Resolve package control script
+_cpack_ifw_resolve_script(CPACK_IFW_PACKAGE_CONTROL_SCRIPT)
 
 endif() # NOT CPackIFW_CMake_INCLUDED
