@@ -130,8 +130,20 @@ bool cmIncludeCommand
     gg->GenerateImportFile(fname_abs);
     }
 
+  std::string listFile =
+    cmSystemTools::CollapseFullPath(fname.c_str(),
+                                  this->Makefile->GetCurrentSourceDirectory());
+  if(optional && !cmSystemTools::FileExists(listFile.c_str()))
+    {
+    if (!resultVarName.empty())
+      {
+      this->Makefile->AddDefinition(resultVarName, "NOTFOUND");
+      }
+    return true;
+    }
+
   bool readit =
-    this->Makefile->ReadDependentFile(fname.c_str(), noPolicyScope);
+    this->Makefile->ReadDependentFile(listFile.c_str(), noPolicyScope);
 
   // add the location of the included file if a result variable was given
   if (!resultVarName.empty())
