@@ -53,7 +53,8 @@ public:
 };
 
 // default is not to be building executables
-cmMakefile::cmMakefile(): Internal(new Internals)
+cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
+  : Internal(new Internals)
 {
   const cmDefinitions& defs = cmDefinitions();
   const std::set<std::string> globalKeys = defs.LocalKeys();
@@ -97,7 +98,7 @@ cmMakefile::cmMakefile(): Internal(new Internals)
   this->HeaderFileExtensions.push_back( "txx" );
 
   this->DefineFlags = " ";
-  this->LocalGenerator = 0;
+  this->LocalGenerator = localGenerator;
 
   this->AddDefaultDefinitions();
   this->Initialize();
@@ -126,6 +127,39 @@ void cmMakefile::Initialize()
   // By default the check is not done.  It is enabled by
   // cmListFileCache in the top level if necessary.
   this->CheckCMP0000 = false;
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->AddSourceGroup("", "^.*$");
+  this->AddSourceGroup
+    ("Source Files",
+     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
+     "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
+  this->AddSourceGroup("Header Files", CM_HEADER_REGEX);
+  this->AddSourceGroup("CMake Rules", "\\.rule$");
+  this->AddSourceGroup("Resources", "\\.plist$");
+  this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
+#endif
+
+  this->Properties.SetCMakeInstance(this->GetCMakeInstance());
+  this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
+  this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
+
+  {
+  const char* dir = this->GetCMakeInstance()->GetHomeDirectory();
+  this->AddDefinition("CMAKE_SOURCE_DIR", dir);
+  if ( !this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR") )
+    {
+    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
+    }
+  }
+  {
+  const char* dir = this->GetCMakeInstance()->GetHomeOutputDirectory();
+  this->AddDefinition("CMAKE_BINARY_DIR", dir);
+  if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
+    {
+    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
+    }
+  }
 }
 
 cmMakefile::~cmMakefile()
@@ -628,46 +662,6 @@ void cmMakefile::EnforceDirectoryLevelRules() const
         return;
       }
     }
-}
-
-// Set the make file
-void cmMakefile::SetLocalGenerator(cmLocalGenerator* lg)
-{
-  this->LocalGenerator = lg;
-  // the source groups need to access the global generator
-  // so don't create them until the lg is set
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  this->AddSourceGroup("", "^.*$");
-  this->AddSourceGroup
-    ("Source Files",
-     "\\.(C|M|c|c\\+\\+|cc|cpp|cxx|f|f90|for|fpp"
-     "|ftn|m|mm|rc|def|r|odl|idl|hpj|bat)$");
-  this->AddSourceGroup("Header Files", CM_HEADER_REGEX);
-  this->AddSourceGroup("CMake Rules", "\\.rule$");
-  this->AddSourceGroup("Resources", "\\.plist$");
-  this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
-#endif
-
-  this->Properties.SetCMakeInstance(this->GetCMakeInstance());
-  this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
-  this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
-
-  {
-  const char* dir = this->GetCMakeInstance()->GetHomeDirectory();
-  this->AddDefinition("CMAKE_SOURCE_DIR", dir);
-  if ( !this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR") )
-    {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
-    }
-  }
-  {
-  const char* dir = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  this->AddDefinition("CMAKE_BINARY_DIR", dir);
-  if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
-    {
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
-    }
-  }
 }
 
 namespace

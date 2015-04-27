@@ -253,8 +253,7 @@ void cmLocalGenerator::SetupPathConversions()
 void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
 {
   this->GlobalGenerator = gg;
-  this->Makefile = new cmMakefile;
-  this->Makefile->SetLocalGenerator(this);
+  this->Makefile = new cmMakefile(this);
 }
 
 void cmLocalGenerator::ConfigureFinalPass()

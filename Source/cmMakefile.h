@@ -74,7 +74,7 @@ public:
   /**
    * Construct an empty makefile.
    */
-  cmMakefile();
+  cmMakefile(cmLocalGenerator* localGenerator);
 
   /**
    * Destructor.
@@ -137,13 +137,6 @@ public:
                  std::string& output);
 
   bool GetIsSourceFileTryCompile() const;
-
-  /**
-   * Specify the makefile generator. This is platform/compiler
-   * dependent, although the interface is through a generic
-   * superclass.
-   */
-  void SetLocalGenerator(cmLocalGenerator*);
 
   ///! Get the current makefile generator.
   cmLocalGenerator* GetLocalGenerator() const
