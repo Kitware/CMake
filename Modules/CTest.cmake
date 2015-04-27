@@ -40,21 +40,12 @@ While building a project for submission to CDash, CTest scans the
 build output for errors and warnings and reports them with surrounding
 context from the build log.  This generic approach works for all build
 tools, but does not give details about the command invocation that
-produced a given problem.  One may get more detailed reports by adding::
+produced a given problem.  One may get more detailed reports by setting
+the :variable:`CTEST_USE_LAUNCHERS` variable::
 
   set(CTEST_USE_LAUNCHERS 1)
 
-to the ``CTestConfig.cmake`` file.  When this option is enabled, the CTest
-module tells CMake's Makefile generators to invoke every command in
-the generated build system through a CTest launcher program.
-(Currently the ``CTEST_USE_LAUNCHERS`` option is ignored on non-Makefile
-generators.) During a manual build each launcher transparently runs
-the command it wraps.  During a CTest-driven build for submission to
-CDash each launcher reports detailed information when its command
-fails or warns.  (Setting ``CTEST_USE_LAUNCHERS`` in ``CTestConfig.cmake`` is
-convenient, but also adds the launcher overhead even for manual
-builds.  One may instead set it in a CTest dashboard script and add it
-to the CMake cache for the build tree.)
+in the ``CTestConfig.cmake`` file.
 #]=======================================================================]
 
 #=============================================================================
