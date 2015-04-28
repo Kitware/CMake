@@ -324,11 +324,6 @@ if(MSVC)
       # Multi-Byte Character Set versions of MFC are available as optional
       # addon since Visual Studio 12.  So for version 12 or higher, check
       # whether they are available and exclude them if they are not.
-      if("${v}" LESS 12 OR EXISTS "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll")
-        set(mbcs ON)
-      else()
-        set(mbcs OFF)
-      endif()
 
       if(CMAKE_INSTALL_DEBUG_LIBRARIES)
         set(MSVC${v}_MFC_DIR
@@ -337,7 +332,7 @@ if(MSVC)
           "${MSVC${v}_MFC_DIR}/mfc${v}0ud.dll"
           "${MSVC${v}_MFC_DIR}/mfcm${v}0ud.dll"
           )
-        if(mbcs)
+        if("${v}" LESS 12 OR EXISTS "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll")
           set(__install__libs ${__install__libs}
             "${MSVC${v}_MFC_DIR}/mfc${v}0d.dll"
             "${MSVC${v}_MFC_DIR}/mfcm${v}0d.dll"
@@ -351,7 +346,7 @@ if(MSVC)
           "${MSVC${v}_MFC_DIR}/mfc${v}0u.dll"
           "${MSVC${v}_MFC_DIR}/mfcm${v}0u.dll"
           )
-        if(mbcs)
+        if("${v}" LESS 12 OR EXISTS "${MSVC${v}_MFC_DIR}/mfc${v}0.dll")
           set(__install__libs ${__install__libs}
             "${MSVC${v}_MFC_DIR}/mfc${v}0.dll"
             "${MSVC${v}_MFC_DIR}/mfcm${v}0.dll"
