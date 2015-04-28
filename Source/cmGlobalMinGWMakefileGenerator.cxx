@@ -31,9 +31,11 @@ void cmGlobalMinGWMakefileGenerator
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalMinGWMakefileGenerator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalMinGWMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
+  cmLocalUnixMakefileGenerator3* lg =
+      new cmLocalUnixMakefileGenerator3(parent);
   lg->SetWindowsShell(true);
   lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);

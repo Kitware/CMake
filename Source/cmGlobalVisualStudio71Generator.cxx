@@ -25,10 +25,12 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
 
 //----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio71Generator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalVisualStudio71Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS71);
+    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS71,
+                                      parent);
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   lg->SetGlobalGenerator(this);
   return lg;

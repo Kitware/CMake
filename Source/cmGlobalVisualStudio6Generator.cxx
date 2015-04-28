@@ -170,9 +170,10 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio6Generator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalVisualStudio6Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalGenerator *lg = new cmLocalVisualStudio6Generator;
+  cmLocalGenerator *lg = new cmLocalVisualStudio6Generator(parent);
   lg->SetGlobalGenerator(this);
   return lg;
 }

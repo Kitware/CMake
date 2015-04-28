@@ -37,7 +37,7 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
 
   /**
    * Where does this version of Visual Studio look for macros for the

@@ -45,9 +45,11 @@ void cmGlobalJOMMakefileGenerator
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalJOMMakefileGenerator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalJOMMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
+  cmLocalUnixMakefileGenerator3* lg
+      = new cmLocalUnixMakefileGenerator3(parent);
   lg->SetDefineWindowsNULL(true);
   lg->SetWindowsShell(true);
   lg->SetMakeSilentFlag("/nologo");

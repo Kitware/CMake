@@ -33,7 +33,7 @@ class cmCustomCommandGenerator;
 class cmLocalGenerator
 {
 public:
-  cmLocalGenerator();
+  cmLocalGenerator(cmLocalGenerator* parent);
   virtual ~cmLocalGenerator();
 
   /**
@@ -131,7 +131,6 @@ public:
 
   ///! set/get the parent generator
   cmLocalGenerator* GetParent() const {return this->Parent;}
-  void SetParent(cmLocalGenerator* g) { this->Parent = g; g->AddChild(this); }
 
   ///! set/get the children
   void AddChild(cmLocalGenerator* g) { this->Children.push_back(g); }

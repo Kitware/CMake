@@ -46,7 +46,7 @@ public:
     );
 
   ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator();
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
 
   /**
    * Try to determine system information such as shared library

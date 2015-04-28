@@ -114,10 +114,12 @@ void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio9Generator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalVisualStudio9Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalVisualStudio7Generator *lg
-    = new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9);
+    = new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9,
+                                        parent);
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;

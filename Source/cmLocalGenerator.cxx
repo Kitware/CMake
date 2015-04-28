@@ -43,10 +43,14 @@
 #include <StorageDefs.h>
 #endif
 
-cmLocalGenerator::cmLocalGenerator()
+cmLocalGenerator::cmLocalGenerator(cmLocalGenerator* parent)
 {
   this->Makefile = 0; // moved to after set on global
-  this->Parent = 0;
+  this->Parent = parent;
+  if (parent)
+    {
+    parent->AddChild(this);
+    }
   this->WindowsShell = false;
   this->WindowsVSIDE = false;
   this->WatcomWMake = false;

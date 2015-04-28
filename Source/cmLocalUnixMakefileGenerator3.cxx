@@ -79,7 +79,9 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
 }
 
 //----------------------------------------------------------------------------
-cmLocalUnixMakefileGenerator3::cmLocalUnixMakefileGenerator3()
+cmLocalUnixMakefileGenerator3::
+cmLocalUnixMakefileGenerator3(cmLocalGenerator* parent)
+  : cmLocalGenerator(parent)
 {
   this->WindowsShell = false;
   this->IncludeDirective = "include";
