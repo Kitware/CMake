@@ -858,8 +858,6 @@ protected:
   // Check for a an unused variable
   void CheckForUnused(const char* reason, const std::string& name) const;
 
-  std::string cmStartDirectory;
-  std::string StartOutputDirectory;
   std::string cmCurrentListFile;
 
   std::string ProjectName;    // project name

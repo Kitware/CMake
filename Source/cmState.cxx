@@ -472,6 +472,8 @@ cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
 {
   PositionType pos = this->ParentPositions.size();
   this->ParentPositions.push_back(originSnapshot.Position);
+  this->Locations.resize(this->Locations.size() + 1);
+  this->OutputLocations.resize(this->OutputLocations.size() + 1);
   return cmState::Snapshot(this, pos);
 }
 
@@ -480,4 +482,35 @@ cmState::Snapshot::Snapshot(cmState* state, PositionType position)
   Position(position)
 {
 
+}
+
+const char* cmState::Snapshot::GetCurrentSourceDirectory() const
+{
+  return this->State->Locations[this->Position].c_str();
+}
+
+void cmState::Snapshot::SetCurrentSourceDirectory(std::string const& dir)
+{
+  assert(this->State->Locations.size() > this->Position);
+  this->State->Locations[this->Position] = dir;
+  cmSystemTools::ConvertToUnixSlashes(
+      this->State->Locations[this->Position]);
+  this->State->Locations[this->Position] =
+    cmSystemTools::CollapseFullPath(this->State->Locations[this->Position]);
+}
+
+const char* cmState::Snapshot::GetCurrentBinaryDirectory() const
+{
+  return this->State->OutputLocations[this->Position].c_str();
+}
+
+void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
+{
+  assert(this->State->OutputLocations.size() > this->Position);
+  this->State->OutputLocations[this->Position] = dir;
+  cmSystemTools::ConvertToUnixSlashes(
+      this->State->OutputLocations[this->Position]);
+  this->State->OutputLocations[this->Position] =
+    cmSystemTools::CollapseFullPath(
+        this->State->OutputLocations[this->Position]);
 }

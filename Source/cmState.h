@@ -31,6 +31,11 @@ public:
   public:
     Snapshot(cmState* state = 0, PositionType position = 0);
 
+    const char* GetCurrentSourceDirectory() const;
+    void SetCurrentSourceDirectory(std::string const& dir);
+    const char* GetCurrentBinaryDirectory() const;
+    void SetCurrentBinaryDirectory(std::string const& dir);
+
   private:
     friend class cmState;
     cmState* State;
@@ -120,6 +125,8 @@ private:
   std::map<std::string, cmCommand*> Commands;
   cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
+  std::vector<std::string> Locations;
+  std::vector<std::string> OutputLocations;
   std::vector<PositionType> ParentPositions;
   std::string SourceDirectory;
   std::string BinaryDirectory;
