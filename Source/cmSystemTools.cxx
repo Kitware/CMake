@@ -1486,15 +1486,8 @@ void cmSystemTools::EnableVSConsoleOutput()
 
 bool cmSystemTools::IsPathToFramework(const char* path)
 {
-  if(cmSystemTools::FileIsFullPath(path))
-    {
-    std::string libname = path;
-    if(libname.find(".framework") == libname.size()+1-sizeof(".framework"))
-      {
-      return true;
-      }
-    }
-  return false;
+  return (cmSystemTools::FileIsFullPath(path) &&
+          cmHasLiteralSuffix(path, ".framework"));
 }
 
 bool cmSystemTools::CreateTar(const char* outFileName,
