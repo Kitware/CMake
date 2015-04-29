@@ -1,4 +1,0 @@
-CMake Error at CMP0057-NEW.cmake:8 \(add_custom_command\):
-  "input.txt" can only be specified as a custom command MAIN_DEPENDENCY once.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)

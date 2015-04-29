@@ -1,21 +1,4 @@
 CMP0057
 -------
 
-Disallow multiple ``MAIN_DEPENDENCY`` specifications for the same file.
-
-CMake 3.3 and above no longer allow the same input file to be used
-as a ``MAIN_DEPENDENCY`` in more than one custom command.
-
-Listing the same input file more than once in this context has not been
-supported by earlier versions either and would lead to build time issues
-but was not diagnosed.
-
-The ``OLD`` behavior for this policy is to allow using the same input file
-in a ``MAIN_DEPENDENCY`` specfication more than once.
-The ``NEW`` behavior is to disallow using the same input file in a
-``MAIN_DEPENDENCY`` specification more than once.
-
-This policy was introduced in CMake version 3.3.
-CMake version |release| warns when the policy is not set and uses
-``OLD`` behavior.  Use the :command:`cmake_policy` command to set
-it to ``OLD`` or ``NEW`` explicitly.
+This policy is reserved for future use.

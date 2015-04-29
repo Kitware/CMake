@@ -113,8 +113,6 @@ public:
     /// or keywords when unquoted.
     CMP0055, ///< Strict checking for break() command.
     CMP0056, ///< Honor link flags in try_compile() source-file signature.
-    CMP0057, ///< Disallow multiple MAIN_DEPENDENCY specifications
-    /// for the same file.
     CMP0058, ///< Ninja requires custom command byproducts to be explicit
     CMP0059, ///< Do not treat ``DEFINITIONS`` as a built-in directory
     /// property.

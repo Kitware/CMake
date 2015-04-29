@@ -1,9 +1,0 @@
-CMake Warning \(dev\) at CMP0057-WARN.cmake:6 \(add_custom_command\):
-  Policy CMP0057 is not set: Disallow multiple MAIN_DEPENDENCY specifications
-  for the same file.  Run "cmake --help-policy CMP0057" for policy details.
-  Use the cmake_policy command to set the policy and suppress this warning.
-
-  "input.txt" can only be specified as a custom command MAIN_DEPENDENCY once.
-Call Stack \(most recent call first\):
-  CMakeLists.txt:3 \(include\)
-This warning is for project developers.  Use -Wno-dev to suppress it.
