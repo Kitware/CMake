@@ -134,6 +134,9 @@ Possible expressions are:
  Component-wise integer version number comparison (version format is
  ``major[.minor[.patch[.tweak]]]``).
 
+``if(<variable|string> IN_LIST <variable>)``
+ True if the given element is contained in the named list variable.
+
 ``if(DEFINED <variable>)``
  True if the given variable is defined.  It does not matter if the
  variable is true or false just if it has been set.  (Note macro

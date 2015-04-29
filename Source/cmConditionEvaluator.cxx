@@ -15,7 +15,8 @@
 cmConditionEvaluator::cmConditionEvaluator(cmMakefile& makefile):
   Makefile(makefile),
   Policy12Status(makefile.GetPolicyStatus(cmPolicies::CMP0012)),
-  Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054))
+  Policy54Status(makefile.GetPolicyStatus(cmPolicies::CMP0054)),
+  Policy57Status(makefile.GetPolicyStatus(cmPolicies::CMP0057))
 {
 
 }
@@ -674,6 +675,41 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
         this->HandleBinaryOp(
           (success==false || fileIsNewer==1 || fileIsNewer==0),
           reducible, arg, newArgs, argP1, argP2);
+        }
+
+      if (argP1 != newArgs.end() && argP2 != newArgs.end() &&
+          this->IsKeyword("IN_LIST", *argP1))
+        {
+        if(this->Policy57Status != cmPolicies::OLD &&
+          this->Policy57Status != cmPolicies::WARN)
+          {
+          bool result = false;
+
+          def = this->GetVariableOrString(*arg);
+          def2 = this->Makefile.GetDefinition(argP2->GetValue());
+
+          if(def2)
+            {
+            std::vector<std::string> list;
+            cmSystemTools::ExpandListArgument(def2, list, true);
+
+            result = std::find(list.begin(), list.end(), def) != list.end();
+            }
+
+          this->HandleBinaryOp(result,
+            reducible, arg, newArgs, argP1, argP2);
+          }
+          else if(this->Policy57Status == cmPolicies::WARN)
+            {
+            std::ostringstream e;
+            e << (this->Makefile.GetPolicies()->GetPolicyWarning(
+              cmPolicies::CMP0057)) << "\n";
+            e << "IN_LIST will be interpreted as an operator "
+              "when the policy is set to NEW.  "
+              "Since the policy is not set the OLD behavior will be used.";
+
+            this->Makefile.IssueMessage(cmake::AUTHOR_WARNING, e.str());
+            }
         }
 
       ++arg;

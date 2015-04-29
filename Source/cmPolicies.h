@@ -117,6 +117,7 @@ public:
     CMP0059, ///< Do not treat ``DEFINITIONS`` as a built-in directory
     /// property.
     CMP0060, ///< Link libraries by full path even in implicit directories.
+    CMP0057, ///< Support new IN_LIST if() operator.
 
     /** \brief Always the last entry.
      *
