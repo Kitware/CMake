@@ -1,7 +1,7 @@
 CMP0026
 -------
 
-Disallow use of the LOCATION target property.
+Disallow use of the LOCATION property for build targets.
 
 CMake 2.8.12 and lower allowed reading the LOCATION target
 property (and configuration-specific variants) to
