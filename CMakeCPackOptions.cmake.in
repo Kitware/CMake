@@ -38,6 +38,10 @@ if(CPACK_GENERATOR MATCHES "IFW")
   @_CPACK_IFW_PACKAGE_ICON@
   set(CPACK_IFW_PACKAGE_WINDOW_ICON
     "@CMake_SOURCE_DIR@/Source/QtDialog/CMakeSetup128.png")
+  set(CPACK_IFW_PACKAGE_CONTROL_SCRIPT
+    "@CMake_SOURCE_DIR@/Source/QtIFW/controlscript.qs")
+  # Uninstaller configuration
+  set(CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME "cmake-maintenance")
   # Package configuration group
   set(CPACK_IFW_PACKAGE_GROUP CMake)
   # Group configuration
