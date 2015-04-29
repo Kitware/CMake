@@ -70,7 +70,8 @@ public:
 
   const char* GetDefinition(std::string const& name)
   {
-    return this->VarStack.back().Get(name);
+    return this->VarStack.back().Get(name, this->VarStack.rbegin(),
+                                     this->VarStack.rend());
   }
 
   void SetDefinition(std::string const& name, std::string const& value)
