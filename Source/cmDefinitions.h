@@ -51,8 +51,8 @@ public:
   std::vector<std::string> ClosureKeys() const;
 
   static cmDefinitions MakeClosure(
-      std::list<cmDefinitions const*>::iterator begin,
-      std::list<cmDefinitions const*>::iterator end);
+      std::list<cmDefinitions>::const_reverse_iterator rbegin,
+      std::list<cmDefinitions>::const_reverse_iterator rend);
 
 private:
   // String with existence boolean.
@@ -84,8 +84,8 @@ private:
   Def const& GetInternal(const std::string& key);
 
   void MakeClosure(std::set<std::string>& undefined,
-                   std::list<cmDefinitions const*>::iterator begin,
-                   std::list<cmDefinitions const*>::iterator end);
+                   std::list<cmDefinitions>::const_reverse_iterator rbegin,
+                   std::list<cmDefinitions>::const_reverse_iterator rend);
 };
 
 #endif
