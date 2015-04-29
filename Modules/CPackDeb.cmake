@@ -15,9 +15,15 @@
 # the build system.
 #
 # CPackDeb has specific features which are controlled by the specifics
-# CPACK_DEBIAN_XXX variables.You'll find a detailed usage on the wiki:
-# http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29
+# :code:`CPACK_DEBIAN_XXX` variables.
 #
+# :code:`CPACK_DEBIAN_<COMPONENT>_XXXX` variables may be used in order to have
+# **component** specific values.  Note however that <COMPONENT> refers to the
+# **grouping name** written in upper case. It may be either a component name or
+# a component GROUP name.
+#
+# You'll find a detailed usage on the wiki:
+# http://www.cmake.org/Wiki/CMake:CPackPackageGenerators#DEB_.28UNIX_only.29 .
 # However as a handy reminder here comes the list of specific variables:
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_NAME
@@ -56,11 +62,15 @@
 #  The debian package maintainer
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DESCRIPTION
-#
-#  * Mandatory : YES
-#  * Default   : CPACK_PACKAGE_DESCRIPTION_SUMMARY
+#               CPACK_COMPONENT_<COMPONENT>_DESCRIPTION
 #
 #  The debian package description
+#
+#  * Mandatory : YES
+#  * Default   :
+#
+#    - :variable:`CPACK_DEBIAN_PACKAGE_DESCRIPTION` if set or
+#    - :variable:`CPACK_PACKAGE_DESCRIPTION_SUMMARY`
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_SECTION
 #
@@ -379,11 +389,26 @@ function(cpack_deb_prepare_package_vars)
   endif()
 
   # Description: (mandatory)
-  if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
-    if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
-      message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
+  if(NOT CPACK_DEB_PACKAGE_COMPONENT)
+    if(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION")
+      endif()
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
     endif()
-    set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+  else()
+    string(TOUPPER ${CPACK_DEB_PACKAGE_COMPONENT} _local_component_name)
+    set(component_description_var CPACK_COMPONENT_${_local_component_name}_DESCRIPTION)
+
+    # component description overrides package description
+    if(${component_description_var})
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${${component_description_var}})
+    elseif(NOT CPACK_DEBIAN_PACKAGE_DESCRIPTION)
+      if(NOT CPACK_PACKAGE_DESCRIPTION_SUMMARY)
+        message(FATAL_ERROR "CPackDeb: Debian package requires a summary for a package, set CPACK_PACKAGE_DESCRIPTION_SUMMARY or CPACK_DEBIAN_PACKAGE_DESCRIPTION or ${component_description_var}")
+      endif()
+      set(CPACK_DEBIAN_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+    endif()
   endif()
 
   # Section: (recommended)

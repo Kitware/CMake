@@ -1008,7 +1008,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     if(DPKG_EXECUTABLE)
       unset(CPackRun_CPackDEBConfiguration_ALL_CONFIGS)
       set(DEB_TEST_NAMES "CPackComponentsDEB")
-      set(DEB_CONFIGURATIONS_TO_TEST "components-lintian-dpkgdeb-checks")
+      set(DEB_CONFIGURATIONS_TO_TEST "components-lintian-dpkgdeb-checks"
+                                     "components-description1"
+                                     "components-description2")
       set(CPackGen "DEB")
       set(CPackRun_CPackGen "-DCPackGen=${CPackGen}")
 
