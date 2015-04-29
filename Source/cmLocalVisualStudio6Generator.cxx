@@ -23,8 +23,9 @@
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
 
-cmLocalVisualStudio6Generator::cmLocalVisualStudio6Generator():
-  cmLocalVisualStudioGenerator(VS6)
+cmLocalVisualStudio6Generator
+::cmLocalVisualStudio6Generator(cmLocalGenerator* parent):
+  cmLocalVisualStudioGenerator(VS6, parent)
 {
 }
 

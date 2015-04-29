@@ -34,7 +34,7 @@ class cmSourceFile;
 class cmLocalUnixMakefileGenerator3 : public cmLocalGenerator
 {
 public:
-  cmLocalUnixMakefileGenerator3();
+  cmLocalUnixMakefileGenerator3(cmLocalGenerator* parent);
   virtual ~cmLocalUnixMakefileGenerator3();
 
   /**

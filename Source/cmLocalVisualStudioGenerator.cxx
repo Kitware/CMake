@@ -18,7 +18,9 @@
 #include "windows.h"
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudioGenerator::cmLocalVisualStudioGenerator(VSVersion v)
+cmLocalVisualStudioGenerator
+::cmLocalVisualStudioGenerator(VSVersion v, cmLocalGenerator* parent)
+  : cmLocalGenerator(parent)
 {
   this->WindowsShell = true;
   this->WindowsVSIDE = true;

@@ -372,12 +372,12 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   // read in the list file to fill the cache
   if(path)
     {
+    std::string homeDir = this->GetHomeDirectory();
+    std::string homeOutputDir = this->GetHomeOutputDirectory();
+    this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
+    this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
-    lg->GetMakefile()->SetHomeOutputDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetCurrentBinaryDirectory
-      (cmSystemTools::GetCurrentWorkingDirectory());
-    lg->GetMakefile()->SetHomeDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetCurrentSourceDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
@@ -393,6 +393,8 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
       {
       cmSystemTools::Error("Error processing file: ", path);
       }
+    this->SetHomeDirectory(homeDir);
+    this->SetHomeOutputDirectory(homeOutputDir);
     }
 
   // free generic one if generated
@@ -976,24 +978,22 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 
 void cmake::SetHomeDirectory(const std::string& dir)
 {
-  this->cmHomeDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->cmHomeDirectory);
+  this->State->SetSourceDirectory(dir);
 }
 
 const char* cmake::GetHomeDirectory() const
 {
-  return this->cmHomeDirectory.c_str();
+  return this->State->GetSourceDirectory();
 }
 
 void cmake::SetHomeOutputDirectory(const std::string& dir)
 {
-  this->HomeOutputDirectory = dir;
-  cmSystemTools::ConvertToUnixSlashes(this->HomeOutputDirectory);
+  this->State->SetBinaryDirectory(dir);
 }
 
 const char* cmake::GetHomeOutputDirectory() const
 {
-  return this->HomeOutputDirectory.c_str();
+  return this->State->GetBinaryDirectory();
 }
 
 void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)

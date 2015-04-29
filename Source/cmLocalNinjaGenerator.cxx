@@ -22,8 +22,8 @@
 
 #include <assert.h>
 
-cmLocalNinjaGenerator::cmLocalNinjaGenerator()
-  : cmLocalGenerator()
+cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmLocalGenerator* parent)
+  : cmLocalGenerator(parent)
   , ConfigName("")
   , HomeRelativeOutputPath("")
 {

@@ -368,9 +368,10 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
 
 //----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalXCodeGenerator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalXCodeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalGenerator *lg = new cmLocalXCodeGenerator;
+  cmLocalGenerator *lg = new cmLocalXCodeGenerator(parent);
   lg->SetGlobalGenerator(this);
   return lg;
 }

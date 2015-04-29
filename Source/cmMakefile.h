@@ -74,7 +74,7 @@ public:
   /**
    * Construct an empty makefile.
    */
-  cmMakefile();
+  cmMakefile(cmLocalGenerator* localGenerator);
 
   /**
    * Destructor.
@@ -137,13 +137,6 @@ public:
                  std::string& output);
 
   bool GetIsSourceFileTryCompile() const;
-
-  /**
-   * Specify the makefile generator. This is platform/compiler
-   * dependent, although the interface is through a generic
-   * superclass.
-   */
-  void SetLocalGenerator(cmLocalGenerator*);
 
   ///! Get the current makefile generator.
   cmLocalGenerator* GetLocalGenerator() const
@@ -422,19 +415,8 @@ public:
   bool HasCMP0054AlreadyBeenReported(
     cmListFileContext context) const;
 
-  //@{
-  /**
-   * Set/Get the home directory (or output directory) in the project. The
-   * home directory is the top directory of the project. It is where
-   * CMakeSetup or configure was run. Remember that CMake processes
-   * CMakeLists files by recursing up the tree starting at the StartDirectory
-   * and going up until it reaches the HomeDirectory.
-   */
-  void SetHomeDirectory(const std::string& dir);
   const char* GetHomeDirectory() const;
-  void SetHomeOutputDirectory(const std::string& dir);
   const char* GetHomeOutputDirectory() const;
-  //@}
 
   /**
    * Set CMAKE_SCRIPT_MODE_FILE variable when running a -P script.
@@ -876,10 +858,6 @@ protected:
   // Check for a an unused variable
   void CheckForUnused(const char* reason, const std::string& name) const;
 
-  std::string cmStartDirectory;
-  std::string StartOutputDirectory;
-  std::string cmHomeDirectory;
-  std::string HomeOutputDirectory;
   std::string cmCurrentListFile;
 
   std::string ProjectName;    // project name
@@ -942,7 +920,7 @@ private:
   cmMakefile& operator=(const cmMakefile& mf);
   void Initialize();
 
-
+  cmState::Snapshot StateSnapshot;
 
   bool ReadListFileInternal(const char* filenametoread,
                             bool noPolicyScope,

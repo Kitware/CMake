@@ -41,9 +41,11 @@ void cmGlobalWatcomWMakeGenerator
 }
 
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalWatcomWMakeGenerator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalWatcomWMakeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalUnixMakefileGenerator3* lg = new cmLocalUnixMakefileGenerator3;
+  cmLocalUnixMakefileGenerator3* lg
+      = new cmLocalUnixMakefileGenerator3(parent);
   lg->SetDefineWindowsNULL(true);
 #ifdef _WIN32
   lg->SetWindowsShell(true);

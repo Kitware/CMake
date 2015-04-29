@@ -22,6 +22,7 @@ cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
     IsInTryCompile(false)
 {
+  this->CreateSnapshot(Snapshot());
   this->Initialize();
 }
 
@@ -443,4 +444,73 @@ const char *cmState::GetGlobalProperty(const std::string& prop)
 bool cmState::GetGlobalPropertyAsBool(const std::string& prop)
 {
   return cmSystemTools::IsOn(this->GetGlobalProperty(prop));
+}
+
+void cmState::SetSourceDirectory(std::string const& sourceDirectory)
+{
+  this->SourceDirectory = sourceDirectory;
+  cmSystemTools::ConvertToUnixSlashes(this->SourceDirectory);
+}
+
+const char* cmState::GetSourceDirectory() const
+{
+  return this->SourceDirectory.c_str();
+}
+
+void cmState::SetBinaryDirectory(std::string const& binaryDirectory)
+{
+  this->BinaryDirectory = binaryDirectory;
+  cmSystemTools::ConvertToUnixSlashes(this->BinaryDirectory);
+}
+
+const char* cmState::GetBinaryDirectory() const
+{
+  return this->BinaryDirectory.c_str();
+}
+
+cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
+{
+  PositionType pos = this->ParentPositions.size();
+  this->ParentPositions.push_back(originSnapshot.Position);
+  this->Locations.resize(this->Locations.size() + 1);
+  this->OutputLocations.resize(this->OutputLocations.size() + 1);
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot::Snapshot(cmState* state, PositionType position)
+  : State(state),
+  Position(position)
+{
+
+}
+
+const char* cmState::Snapshot::GetCurrentSourceDirectory() const
+{
+  return this->State->Locations[this->Position].c_str();
+}
+
+void cmState::Snapshot::SetCurrentSourceDirectory(std::string const& dir)
+{
+  assert(this->State->Locations.size() > this->Position);
+  this->State->Locations[this->Position] = dir;
+  cmSystemTools::ConvertToUnixSlashes(
+      this->State->Locations[this->Position]);
+  this->State->Locations[this->Position] =
+    cmSystemTools::CollapseFullPath(this->State->Locations[this->Position]);
+}
+
+const char* cmState::Snapshot::GetCurrentBinaryDirectory() const
+{
+  return this->State->OutputLocations[this->Position].c_str();
+}
+
+void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
+{
+  assert(this->State->OutputLocations.size() > this->Position);
+  this->State->OutputLocations[this->Position] = dir;
+  cmSystemTools::ConvertToUnixSlashes(
+      this->State->OutputLocations[this->Position]);
+  this->State->OutputLocations[this->Position] =
+    cmSystemTools::CollapseFullPath(
+        this->State->OutputLocations[this->Position]);
 }

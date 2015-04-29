@@ -16,7 +16,8 @@
 #include "cmGhsMultiTargetGenerator.h"
 #include "cmGeneratedFileStream.h"
 
-cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator()
+cmLocalGhsMultiGenerator::cmLocalGhsMultiGenerator(cmLocalGenerator* parent)
+  : cmLocalGenerator(parent)
 {
 }
 

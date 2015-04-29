@@ -61,8 +61,9 @@ class cmVS10XMLParser : public cmXMLParser
 
 
 //----------------------------------------------------------------------------
-cmLocalVisualStudio10Generator::cmLocalVisualStudio10Generator(VSVersion v):
-  cmLocalVisualStudio7Generator(v)
+cmLocalVisualStudio10Generator
+::cmLocalVisualStudio10Generator(VSVersion v, cmLocalGenerator* parent):
+  cmLocalVisualStudio7Generator(v, parent)
 {
 }
 

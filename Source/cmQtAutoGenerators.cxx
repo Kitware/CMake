@@ -1210,10 +1210,11 @@ static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
   cmGlobalGenerator* gg = new cmGlobalGenerator();
   gg->SetCMakeInstance(cm);
 
+  cm->SetHomeOutputDirectory(targetDirectory);
+  cm->SetHomeDirectory(targetDirectory);
+
   cmLocalGenerator* lg = gg->CreateLocalGenerator();
-  lg->GetMakefile()->SetHomeOutputDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
-  lg->GetMakefile()->SetHomeDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
   gg->SetCurrentLocalGenerator(lg);
 
@@ -1225,6 +1226,8 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
 {
   bool success = true;
   cmake cm;
+  cm.SetHomeOutputDirectory(targetDirectory);
+  cm.SetHomeDirectory(targetDirectory);
   cmGlobalGenerator* gg = CreateGlobalGenerator(&cm, targetDirectory);
   cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
 

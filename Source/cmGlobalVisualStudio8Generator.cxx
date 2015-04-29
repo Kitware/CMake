@@ -125,10 +125,12 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
 
 //----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *cmGlobalVisualStudio8Generator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalVisualStudio8Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS8);
+    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS8,
+                                      parent);
   lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   lg->SetGlobalGenerator(this);
   return lg;

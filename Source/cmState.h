@@ -21,9 +21,28 @@ class cmCommand;
 
 class cmState
 {
+  typedef std::vector<std::string>::size_type PositionType;
+  friend class Snapshot;
 public:
   cmState(cmake* cm);
   ~cmState();
+
+  class Snapshot {
+  public:
+    Snapshot(cmState* state = 0, PositionType position = 0);
+
+    const char* GetCurrentSourceDirectory() const;
+    void SetCurrentSourceDirectory(std::string const& dir);
+    const char* GetCurrentBinaryDirectory() const;
+    void SetCurrentBinaryDirectory(std::string const& dir);
+
+  private:
+    friend class cmState;
+    cmState* State;
+    cmState::PositionType Position;
+  };
+
+  Snapshot CreateSnapshot(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };
@@ -95,12 +114,22 @@ public:
   const char *GetGlobalProperty(const std::string& prop);
   bool GetGlobalPropertyAsBool(const std::string& prop);
 
+  const char* GetSourceDirectory() const;
+  void SetSourceDirectory(std::string const& sourceDirectory);
+  const char* GetBinaryDirectory() const;
+  void SetBinaryDirectory(std::string const& binaryDirectory);
+
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
   std::map<std::string, cmCommand*> Commands;
   cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
+  std::vector<std::string> Locations;
+  std::vector<std::string> OutputLocations;
+  std::vector<PositionType> ParentPositions;
+  std::string SourceDirectory;
+  std::string BinaryDirectory;
   bool IsInTryCompile;
 };
 

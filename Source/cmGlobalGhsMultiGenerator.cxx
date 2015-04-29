@@ -32,9 +32,10 @@ cmGlobalGhsMultiGenerator::~cmGlobalGhsMultiGenerator()
   cmDeleteAll(TargetFolderBuildStreams);
 }
 
-cmLocalGenerator *cmGlobalGhsMultiGenerator::CreateLocalGenerator()
+cmLocalGenerator *
+cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalGenerator *lg = new cmLocalGhsMultiGenerator;
+  cmLocalGenerator *lg = new cmLocalGhsMultiGenerator(parent);
   lg->SetGlobalGenerator(this);
   this->SetCurrentLocalGenerator(lg);
   return lg;
