@@ -22,20 +22,20 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
   std::list<cmDefinitions>::reverse_iterator rbegin,
   std::list<cmDefinitions>::reverse_iterator rend)
 {
-  assert(&*rbegin == this);
-  MapType::const_iterator i = this->Map.find(key);
-  if(i != this->Map.end())
+  assert(rbegin != rend);
+  MapType::const_iterator i = rbegin->Map.find(key);
+  if (i != rbegin->Map.end())
     {
     return i->second;
     }
-  ++rbegin;
-  if(rbegin == rend)
+  std::list<cmDefinitions>::reverse_iterator rit = rbegin;
+  ++rit;
+  if (rit == rend)
     {
     return cmDefinitions::NoDef;
     }
-  // Query the parent scope and store the result locally.
-  Def def = rbegin->GetInternal(key, rbegin, rend);
-  return this->Map.insert(MapType::value_type(key, def)).first->second;
+  Def const& def = cmDefinitions::GetInternal(key, rit, rend);
+  return rbegin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
 //----------------------------------------------------------------------------
@@ -43,7 +43,7 @@ const char* cmDefinitions::Get(const std::string& key,
     std::list<cmDefinitions>::reverse_iterator rbegin,
     std::list<cmDefinitions>::reverse_iterator rend)
 {
-  Def const& def = this->GetInternal(key, rbegin, rend);
+  Def const& def = cmDefinitions::GetInternal(key, rbegin, rend);
   return def.Exists? def.c_str() : 0;
 }
 
