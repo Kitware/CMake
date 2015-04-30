@@ -55,3 +55,10 @@ literal, direct call to the :command:`project` command; loading one
 through the :command:`include` command is not sufficient.  If no such
 call exists CMake will implicitly add one to the top that enables the
 default languages (``C`` and ``CXX``).
+
+.. note::
+  Call the :command:`cmake_minimum_required` command at the beginning
+  of the top-level ``CMakeLists.txt`` file even before calling the
+  ``project()`` command.  It is important to establish version and
+  policy settings before invoking other commands whose behavior they
+  may affect.  See also policy :policy:`CMP0000`.
