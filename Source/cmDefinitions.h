@@ -31,9 +31,9 @@ class cmDefinitions
 public:
   /** Get the value associated with a key; null if none.
       Store the result locally if it came from a parent.  */
-  const char* Get(const std::string& key,
-                  std::list<cmDefinitions>::reverse_iterator rbegin,
-                  std::list<cmDefinitions>::reverse_iterator rend);
+  static const char* Get(const std::string& key,
+                         std::list<cmDefinitions>::reverse_iterator rbegin,
+                         std::list<cmDefinitions>::reverse_iterator rend);
 
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
