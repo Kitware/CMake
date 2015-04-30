@@ -1666,17 +1666,17 @@ set (QT_QMAKE_EXECUTABLE "'"${cmake_bootstrap_qt_qmake}"'" CACHE FILEPATH "Locat
 fi
 if [ "x${cmake_sphinx_man}" != "x" ]; then
   echo '
-set (SPHINX_MAN "'"${cmake_sphinx_man}"'" CACHE FILEPATH "Build man pages with Sphinx" FORCE)
+set (SPHINX_MAN "'"${cmake_sphinx_man}"'" CACHE BOOL "Build man pages with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_html}" != "x" ]; then
   echo '
-set (SPHINX_HTML "'"${cmake_sphinx_html}"'" CACHE FILEPATH "Build html help with Sphinx" FORCE)
+set (SPHINX_HTML "'"${cmake_sphinx_html}"'" CACHE BOOL "Build html help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_qthelp}" != "x" ]; then
   echo '
-set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE FILEPATH "Build qch help with Sphinx" FORCE)
+set (SPHINX_QTHELP "'"${cmake_sphinx_qthelp}"'" CACHE BOOL "Build qch help with Sphinx" FORCE)
 ' >> "${cmake_bootstrap_dir}/InitialCacheFlags.cmake"
 fi
 if [ "x${cmake_sphinx_build}" != "x" ]; then
