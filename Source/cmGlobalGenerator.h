@@ -441,7 +441,6 @@ private:
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator
   std::map<std::string, bool> IgnoreExtensions;
-  std::vector<std::string> LanguageEnabled;
   std::set<std::string> LanguagesReady; // Ready for try_compile
   std::map<std::string, std::string> OutputExtensions;
   std::map<std::string, std::string> LanguageToOutputExtension;
