@@ -29,13 +29,14 @@ cmDefinitions::GetInternal(const std::string& key)
     {
     return i->second;
     }
-  if(cmDefinitions* up = this->Up)
+  cmDefinitions* up = this->Up;
+  if(!up)
     {
-    // Query the parent scope and store the result locally.
-    Def def = up->GetInternal(key);
-    return this->Map.insert(MapType::value_type(key, def)).first->second;
+    return this->NoDef;
     }
-  return this->NoDef;
+  // Query the parent scope and store the result locally.
+  Def def = up->GetInternal(key);
+  return this->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
 //----------------------------------------------------------------------------
@@ -49,107 +50,86 @@ const char* cmDefinitions::Get(const std::string& key)
 void cmDefinitions::Set(const std::string& key, const char* value)
 {
   Def def(value);
-  if(this->Up || def.Exists)
-    {
-    // In lower scopes we store keys, defined or not.
-    this->Map[key] = def;
-    }
-  else
-    {
-    // In the top-most scope we need not store undefined keys.
-    this->Map.erase(key);
-    }
+  this->Map[key] = def;
+}
+
+void cmDefinitions::Erase(const std::string& key)
+{
+  this->Map.erase(key);
 }
 
 //----------------------------------------------------------------------------
-std::set<std::string> cmDefinitions::LocalKeys() const
+std::vector<std::string> cmDefinitions::LocalKeys() const
 {
-  std::set<std::string> keys;
+  std::vector<std::string> keys;
+  keys.reserve(this->Map.size());
   // Consider local definitions.
   for(MapType::const_iterator mi = this->Map.begin();
       mi != this->Map.end(); ++mi)
     {
     if (mi->second.Exists)
       {
-      keys.insert(mi->first);
+      keys.push_back(mi->first);
       }
     }
   return keys;
 }
 
 //----------------------------------------------------------------------------
-cmDefinitions cmDefinitions::Closure() const
-{
-  return cmDefinitions(ClosureTag(), this);
-}
-
-//----------------------------------------------------------------------------
-cmDefinitions::cmDefinitions(ClosureTag const&, cmDefinitions const* root):
-  Up(0)
+cmDefinitions cmDefinitions::MakeClosure(
+    std::list<cmDefinitions>::const_reverse_iterator rbegin,
+    std::list<cmDefinitions>::const_reverse_iterator rend)
 {
   std::set<std::string> undefined;
-  this->ClosureImpl(undefined, root);
+  cmDefinitions closure;
+  closure.MakeClosure(undefined, rbegin, rend);
+  return closure;
 }
 
 //----------------------------------------------------------------------------
-void cmDefinitions::ClosureImpl(std::set<std::string>& undefined,
-                                cmDefinitions const* defs)
+void
+cmDefinitions::MakeClosure(std::set<std::string>& undefined,
+    std::list<cmDefinitions>::const_reverse_iterator rbegin,
+    std::list<cmDefinitions>::const_reverse_iterator rend)
 {
-  // Consider local definitions.
-  for(MapType::const_iterator mi = defs->Map.begin();
-      mi != defs->Map.end(); ++mi)
+  for (std::list<cmDefinitions>::const_reverse_iterator it = rbegin;
+       it != rend; ++it)
     {
-    // Use this key if it is not already set or unset.
-    if(this->Map.find(mi->first) == this->Map.end() &&
-       undefined.find(mi->first) == undefined.end())
+    // Consider local definitions.
+    for(MapType::const_iterator mi = it->Map.begin();
+        mi != it->Map.end(); ++mi)
       {
-      if(mi->second.Exists)
+      // Use this key if it is not already set or unset.
+      if(this->Map.find(mi->first) == this->Map.end() &&
+         undefined.find(mi->first) == undefined.end())
         {
-        this->Map.insert(*mi);
-        }
-      else
-        {
-        undefined.insert(mi->first);
+        if(mi->second.Exists)
+          {
+          this->Map.insert(*mi);
+          }
+        else
+          {
+          undefined.insert(mi->first);
+          }
         }
       }
     }
-
-  // Traverse parents.
-  if(cmDefinitions const* up = defs->Up)
-    {
-    this->ClosureImpl(undefined, up);
-    }
 }
 
 //----------------------------------------------------------------------------
-std::set<std::string> cmDefinitions::ClosureKeys() const
+std::vector<std::string>
+cmDefinitions::ClosureKeys(std::set<std::string>& bound) const
 {
-  std::set<std::string> defined;
-  std::set<std::string> undefined;
-  this->ClosureKeys(defined, undefined);
-  return defined;
-}
-
-//----------------------------------------------------------------------------
-void cmDefinitions::ClosureKeys(std::set<std::string>& defined,
-                                std::set<std::string>& undefined) const
-{
-  // Consider local definitions.
+  std::vector<std::string> defined;
+  defined.reserve(this->Map.size());
   for(MapType::const_iterator mi = this->Map.begin();
       mi != this->Map.end(); ++mi)
     {
     // Use this key if it is not already set or unset.
-    if(defined.find(mi->first) == defined.end() &&
-       undefined.find(mi->first) == undefined.end())
+    if(bound.insert(mi->first).second && mi->second.Exists)
       {
-      std::set<std::string>& m = mi->second.Exists? defined : undefined;
-      m.insert(mi->first);
+      defined.push_back(mi->first);
       }
     }
-
-  // Traverse parents.
-  if(cmDefinitions const* up = this->Up)
-    {
-    up->ClosureKeys(defined, undefined);
-    }
+  return defined;
 }

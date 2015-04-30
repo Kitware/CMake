@@ -17,6 +17,8 @@
 #include "cmsys/hash_map.hxx"
 #endif
 
+#include <list>
+
 /** \class cmDefinitions
  * \brief Store a scope of variable definitions for CMake language.
  *
@@ -40,15 +42,17 @@ public:
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
 
+  void Erase(const std::string& key);
+
   /** Get the set of all local keys.  */
-  std::set<std::string> LocalKeys() const;
+  std::vector<std::string> LocalKeys() const;
 
-  /** Compute the closure of all defined keys with values.
-      This flattens the scope.  The result has no parent.  */
-  cmDefinitions Closure() const;
+  std::vector<std::string>
+  ClosureKeys(std::set<std::string>& bound) const;
 
-  /** Compute the set of all defined keys.  */
-  std::set<std::string> ClosureKeys() const;
+  static cmDefinitions MakeClosure(
+      std::list<cmDefinitions>::const_reverse_iterator rbegin,
+      std::list<cmDefinitions>::const_reverse_iterator rend);
 
 private:
   // String with existence boolean.
@@ -79,15 +83,9 @@ private:
   // Internal query and update methods.
   Def const& GetInternal(const std::string& key);
 
-  // Implementation of Closure() method.
-  struct ClosureTag {};
-  cmDefinitions(ClosureTag const&, cmDefinitions const* root);
-  void ClosureImpl(std::set<std::string>& undefined,
-                   cmDefinitions const* defs);
-
-  // Implementation of ClosureKeys() method.
-  void ClosureKeys(std::set<std::string>& defined,
-                   std::set<std::string>& undefined) const;
+  void MakeClosure(std::set<std::string>& undefined,
+                   std::list<cmDefinitions>::const_reverse_iterator rbegin,
+                   std::list<cmDefinitions>::const_reverse_iterator rend);
 };
 
 #endif
