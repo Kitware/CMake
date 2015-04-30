@@ -135,3 +135,6 @@ function(run_cmake_command test)
   set(RunCMake_TEST_COMMAND "${ARGN}")
   run_cmake(${test})
 endfunction()
+
+# Protect RunCMake tests from calling environment.
+unset(ENV{MAKEFLAGS})
