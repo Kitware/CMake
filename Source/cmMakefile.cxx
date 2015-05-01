@@ -117,34 +117,38 @@ public:
 
   bool RaiseScope(std::string const& var, const char* varDef, cmMakefile* mf)
   {
-    cmDefinitions& cur = this->VarStack.back();
-    if(cmDefinitions* up = cur.GetParent())
-      {
-      // First localize the definition in the current scope.
-      cur.Get(var);
+    assert(this->VarStack.size() > 0);
 
-      // Now update the definition in the parent scope.
-      up->Set(var, varDef);
-      }
-    else if(cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent())
+    std::list<cmDefinitions>::reverse_iterator it = this->VarStack.rbegin();
+    ++it;
+    if(it == this->VarStack.rend())
       {
-      // Update the definition in the parent directory top scope.  This
-      // directory's scope was initialized by the closure of the parent
-      // scope, so we do not need to localize the definition first.
-      cmMakefile* parent = plg->GetMakefile();
-      if (varDef)
+      if(cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent())
         {
-        parent->AddDefinition(var, varDef);
+        // Update the definition in the parent directory top scope.  This
+        // directory's scope was initialized by the closure of the parent
+        // scope, so we do not need to localize the definition first.
+        cmMakefile* parent = plg->GetMakefile();
+        if (varDef)
+          {
+          parent->AddDefinition(var, varDef);
+          }
+        else
+          {
+          parent->RemoveDefinition(var);
+          }
+        return true;
         }
       else
         {
-        parent->RemoveDefinition(var);
+        return false;
         }
       }
-    else
-      {
-      return false;
-      }
+    // First localize the definition in the current scope.
+    this->GetDefinition(var);
+
+    // Now update the definition in the parent scope.
+    it->Set(var, varDef);
     return true;
   }
 };
