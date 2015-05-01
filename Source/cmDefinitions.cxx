@@ -31,7 +31,7 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
   ++rbegin;
   if(rbegin == rend)
     {
-    return this->NoDef;
+    return cmDefinitions::NoDef;
     }
   // Query the parent scope and store the result locally.
   Def def = rbegin->GetInternal(key, rbegin, rend);
