@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.9)
 project(VSExcludeFromDefaultBuild)
 
+# CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD will enable the INSTALL target to be part of the default build
+set(CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD 1)
+
 # First step is to clear all .exe files in output so that possible past
 # failures of this test do not prevent it from succeeding.
 add_custom_target(ClearExes ALL
@@ -13,6 +16,7 @@ add_custom_target(ClearExes ALL
 function(add_test_executable target)
   add_executable("${target}" ${ARGN})
   add_dependencies("${target}" ClearExes)
+  install(TARGETS "${target}" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>/install" OPTIONAL)
 endfunction()
 
 add_test_executable(DefaultBuilt main.c)

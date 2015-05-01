@@ -1031,6 +1031,24 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
   int type = target->GetType();
   if (type == cmTarget::GLOBAL_TARGET)
     {
+    // check if INSTALL target is part of default build
+    if(target->GetName() == "INSTALL")
+      {
+      // inspect CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD properties
+      for(std::vector<std::string>::iterator i = this->Configurations.begin();
+          i != this->Configurations.end(); ++i)
+        {
+        const char* propertyValue = target->GetMakefile()
+          ->GetDefinition("CMAKE_VS_INCLUDE_INSTALL_TO_DEFAULT_BUILD");
+        cmGeneratorExpression ge;
+        cmsys::auto_ptr<cmCompiledGeneratorExpression>
+          cge = ge.Parse(propertyValue);
+        if(cmSystemTools::IsOn(cge->Evaluate(target->GetMakefile(), *i)))
+          {
+          activeConfigs.insert(*i);
+          }
+        }
+      }
     return activeConfigs;
     }
   if(type == cmTarget::UTILITY && !this->IsDependedOn(projectTargets, target))
