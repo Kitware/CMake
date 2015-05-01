@@ -31,8 +31,11 @@ find_program(SPHINX_EXECUTABLE
   NAMES sphinx-build
   DOC "Sphinx Documentation Builder (sphinx-doc.org)"
   )
+set(SPHINX_FLAGS "" CACHE STRING "Flags to pass to sphinx-build")
+separate_arguments(sphinx_flags UNIX_COMMAND "${SPHINX_FLAGS}")
 
 mark_as_advanced(SPHINX_TEXT)
+mark_as_advanced(SPHINX_FLAGS)
 
 if(NOT SPHINX_MAN AND NOT SPHINX_HTML AND NOT SPHINX_SINGLEHTML AND NOT SPHINX_QTHELP AND NOT SPHINX_TEXT)
   return()
@@ -114,6 +117,7 @@ foreach(format ${doc_formats})
             -c ${CMAKE_CURRENT_BINARY_DIR}
             -d ${CMAKE_CURRENT_BINARY_DIR}/doctrees
             -b ${format}
+            ${sphinx_flags}
             ${CMake_SOURCE_DIR}/Help
             ${CMAKE_CURRENT_BINARY_DIR}/${format}
             > ${doc_format_log} # log stdout, pass stderr
