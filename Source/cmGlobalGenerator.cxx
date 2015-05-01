@@ -1897,7 +1897,9 @@ void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
                                           "make program",
                                           cmState::FILEPATH);
   // copy the enabled languages
-  this->LanguageEnabled = gen->LanguageEnabled;
+  this->GetCMakeInstance()->GetState()->SetEnabledLanguages(
+    gen->GetCMakeInstance()->GetState()->GetEnabledLanguages()
+    );
   this->LanguagesReady = gen->LanguagesReady;
   this->ExtensionToLanguage = gen->ExtensionToLanguage;
   this->IgnoreExtensions = gen->IgnoreExtensions;
