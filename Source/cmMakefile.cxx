@@ -230,18 +230,12 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   {
   const char* dir = this->GetCMakeInstance()->GetHomeDirectory();
   this->AddDefinition("CMAKE_SOURCE_DIR", dir);
-  if ( !this->GetDefinition("CMAKE_CURRENT_SOURCE_DIR") )
-    {
-    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
-    }
+  this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
   }
   {
   const char* dir = this->GetCMakeInstance()->GetHomeOutputDirectory();
   this->AddDefinition("CMAKE_BINARY_DIR", dir);
-  if ( !this->GetDefinition("CMAKE_CURRENT_BINARY_DIR") )
-    {
-    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
-    }
+  this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
   }
 }
 
