@@ -239,13 +239,6 @@ cmTargetInternals::~cmTargetInternals()
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
 {
-#define INITIALIZE_TARGET_POLICY_MEMBER(POLICY) \
-  this->PolicyStatus ## POLICY = cmPolicies::WARN;
-
-  CM_FOR_EACH_TARGET_POLICY(INITIALIZE_TARGET_POLICY_MEMBER)
-
-#undef INITIALIZE_TARGET_POLICY_MEMBER
-
   this->Makefile = 0;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   this->LinkLibrariesForVS6Analyzed = false;
@@ -440,20 +433,14 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 
   // Record current policies for later use.
-#define CAPTURE_TARGET_POLICY(POLICY) \
-  this->PolicyStatus ## POLICY = \
-    this->Makefile->GetPolicyStatus(cmPolicies::POLICY);
-
-  CM_FOR_EACH_TARGET_POLICY(CAPTURE_TARGET_POLICY)
-
-#undef CAPTURE_TARGET_POLICY
+  this->Makefile->RecordPolicies(this->PolicyMap);
 
   if (this->TargetTypeValue == INTERFACE_LIBRARY)
     {
     // This policy is checked in a few conditions. The properties relevant
     // to the policy are always ignored for INTERFACE_LIBRARY targets,
     // so ensure that the conditions don't lead to nonsense.
-    this->PolicyStatusCMP0022 = cmPolicies::NEW;
+    this->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
     }
 
   if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
