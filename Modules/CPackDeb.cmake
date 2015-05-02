@@ -103,16 +103,23 @@
 #  characters such as <>.
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_SHLIBDEPS
-#
-#  * Mandatory : NO
-#  * Default   : OFF
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS
 #
 #  May be set to ON in order to use dpkg-shlibdeps to generate
 #  better package dependency list.
-#  You may need set CMAKE_INSTALL_RPATH toi appropriate value
-#  if you use this feature, because if you don't dpkg-shlibdeps
-#  may fail to find your own shared libs.
-#  See http://www.cmake.org/Wiki/CMake_RPATH_handling.
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#    - :variable:`CPACK_DEBIAN_PACKAGE_SHLIBDEPS` if set or
+#    - OFF
+#
+#  .. note::
+#
+#    You may need set :variable:`CMAKE_INSTALL_RPATH` to an appropriate value
+#    if you use this feature, because if you don't :code:`dpkg-shlibdeps`
+#    may fail to find your own shared libs.
+#    See http://www.cmake.org/Wiki/CMake_RPATH_handling.
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DEBUG
 #
@@ -245,92 +252,135 @@ function(cpack_deb_prepare_package_vars)
     set(CPACK_DEBIAN_FAKEROOT_EXECUTABLE ${FAKEROOT_EXECUTABLE})
   endif()
 
+  set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_PATH}")
+
+  # per component automatic discover: some of the component might not have
+  # binaries.
+  if(CPACK_DEB_PACKAGE_COMPONENT)
+    string(TOUPPER "${CPACK_DEB_PACKAGE_COMPONENT}" _local_component_name)
+    set(_component_shlibdeps_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_SHLIBDEPS")
+
+    # if set, overrides the global configuration
+    if(DEFINED ${_component_shlibdeps_var})
+      set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS "${${_component_shlibdeps_var}}")
+      if(CPACK_DEBIAN_PACKAGE_DEBUG)
+        message("CPackDeb Debug: component '${CPACK_DEB_PACKAGE_COMPONENT}' dpkg-shlibdeps set to ${CPACK_DEBIAN_PACKAGE_SHLIBDEPS}")
+      endif()
+    endif()
+  endif()
+
   if(CPACK_DEBIAN_PACKAGE_SHLIBDEPS)
     # dpkg-shlibdeps is a Debian utility for generating dependency list
     find_program(SHLIBDEPS_EXECUTABLE dpkg-shlibdeps)
 
-    # Check version of the dpkg-shlibdeps tool using CPackRPM method
     if(SHLIBDEPS_EXECUTABLE)
+      # Check version of the dpkg-shlibdeps tool using CPackRPM method
       execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --version
         OUTPUT_VARIABLE _TMP_VERSION
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE)
       string(REGEX MATCH "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)"
         SHLIBDEPS_EXECUTABLE_VERSION
-        ${_TMP_VERSION})
+        "${_TMP_VERSION}")
       set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
+
       if(CPACK_DEBIAN_PACKAGE_DEBUG)
-        message( "CPackDeb Debug: dpkg-shlibdeps version is <${SHLIBDEPS_EXECUTABLE_VERSION}>")
+        message("CPackDeb Debug: dpkg-shlibdeps --version output is '${_TMP_VERSION}'")
+        message("CPackDeb Debug: dpkg-shlibdeps version is <${SHLIBDEPS_EXECUTABLE_VERSION}>")
       endif()
 
       # Generating binary list - Get type of all install files
-      execute_process(COMMAND find -type f
-        COMMAND xargs file
-        WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
-        OUTPUT_VARIABLE CPACK_DEB_INSTALL_FILES)
+      cmake_policy(PUSH)
+        # Tell file(GLOB_RECURSE) not to follow directory symlinks
+        # even if the project does not set this policy to NEW.
+        cmake_policy(SET CMP0009 NEW)
+        file(GLOB_RECURSE FILE_PATHS_ LIST_DIRECTORIES false RELATIVE "${WDIR}" "${WDIR}/*")
+      cmake_policy(POP)
 
-      # Convert to CMake list
-      string(REPLACE "\n" ";" CPACK_DEB_INSTALL_FILES ${CPACK_DEB_INSTALL_FILES})
+      # get file info so that we can determine if file is executable or not
+      unset(CPACK_DEB_INSTALL_FILES)
+      foreach(FILE_ IN LISTS FILE_PATHS_)
+        execute_process(COMMAND file "./${FILE_}"
+          WORKING_DIRECTORY "${WDIR}"
+          OUTPUT_VARIABLE INSTALL_FILE_)
+        list(APPEND CPACK_DEB_INSTALL_FILES "${INSTALL_FILE_}")
+      endforeach()
 
       # Only dynamically linked ELF files are included
       # Extract only file name infront of ":"
-      foreach ( _FILE ${CPACK_DEB_INSTALL_FILES})
-        if ( ${_FILE} MATCHES "ELF.*dynamically linked")
-           string(REGEX MATCH "(^.*):" _FILE_NAME ${_FILE})
-           list(APPEND CPACK_DEB_BINARY_FILES ${CMAKE_MATCH_1})
+      foreach(_FILE ${CPACK_DEB_INSTALL_FILES})
+        if( ${_FILE} MATCHES "ELF.*dynamically linked")
+           string(REGEX MATCH "(^.*):" _FILE_NAME "${_FILE}")
+           list(APPEND CPACK_DEB_BINARY_FILES "${CMAKE_MATCH_1}")
+           set(CONTAINS_EXECUTABLE_FILES_ TRUE)
         endif()
       endforeach()
 
-      message( "CPackDeb: - Generating dependency list")
+      if(CONTAINS_EXECUTABLE_FILES_)
+        message("CPackDeb: - Generating dependency list")
 
-      # Create blank control file for running dpkg-shlibdeps
-      # There might be some other way to invoke dpkg-shlibdeps without creating this file
-      # but standard debian package should not have anything that can collide with this file or directory
-      file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/debian)
-      file(WRITE ${CPACK_TEMPORARY_DIRECTORY}/debian/control "")
+        # Create blank control file for running dpkg-shlibdeps
+        # There might be some other way to invoke dpkg-shlibdeps without creating this file
+        # but standard debian package should not have anything that can collide with this file or directory
+        file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/debian)
+        file(WRITE ${CPACK_TEMPORARY_DIRECTORY}/debian/control "")
 
-      # Execute dpkg-shlibdeps
-      # --ignore-missing-info : allow dpkg-shlibdeps to run even if some libs do not belong to a package
-      # -O : print to STDOUT
-      execute_process(COMMAND ${SHLIBDEPS_EXECUTABLE} --ignore-missing-info -O ${CPACK_DEB_BINARY_FILES}
-        WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
-        OUTPUT_VARIABLE SHLIBDEPS_OUTPUT
-        RESULT_VARIABLE SHLIBDEPS_RESULT
-        ERROR_VARIABLE SHLIBDEPS_ERROR
-        OUTPUT_STRIP_TRAILING_WHITESPACE )
-      if(CPACK_DEBIAN_PACKAGE_DEBUG)
-        # dpkg-shlibdeps will throw some warnings if some input files are not binary
-        message( "CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")
+        # only set ignore-missing-info flag for dpkg-shlibdeps that have --version option
+        # (those are newer and also have --ignore-missing-info flag)
+        if(SHLIBDEPS_EXECUTABLE_VERSION)
+          set(IGNORE_MISSING_INFO_FLAG "--ignore-missing-info")
+        endif()
+
+        # Execute dpkg-shlibdeps
+        # --ignore-missing-info : allow dpkg-shlibdeps to run even if some libs do not belong to a package
+        # -O : print to STDOUT
+        execute_process(COMMAND ${SHLIBDEPS_EXECUTABLE} ${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}
+          WORKING_DIRECTORY "${CPACK_TEMPORARY_DIRECTORY}"
+          OUTPUT_VARIABLE SHLIBDEPS_OUTPUT
+          RESULT_VARIABLE SHLIBDEPS_RESULT
+          ERROR_VARIABLE SHLIBDEPS_ERROR
+          OUTPUT_STRIP_TRAILING_WHITESPACE )
+        if(CPACK_DEBIAN_PACKAGE_DEBUG)
+          # dpkg-shlibdeps will throw some warnings if some input files are not binary
+          message( "CPackDeb Debug: dpkg-shlibdeps warnings \n${SHLIBDEPS_ERROR}")
+        endif()
+        if(NOT SHLIBDEPS_RESULT EQUAL 0)
+          message (FATAL_ERROR "CPackDeb: dpkg-shlibdeps: '${SHLIBDEPS_ERROR}';\n"
+              "executed command: '${SHLIBDEPS_EXECUTABLE} ${IGNORE_MISSING_INFO_FLAG} -O ${CPACK_DEB_BINARY_FILES}';\n"
+              "found files: '${INSTALL_FILE_}';\n"
+              "files info: '${CPACK_DEB_INSTALL_FILES}';\n"
+              "binary files: '${CPACK_DEB_BINARY_FILES}'")
+        endif()
+
+        #Get rid of prefix generated by dpkg-shlibdeps
+        string(REGEX REPLACE "^.*Depends=" "" CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS "${SHLIBDEPS_OUTPUT}")
+
+        if(CPACK_DEBIAN_PACKAGE_DEBUG)
+          message( "CPackDeb Debug: Found dependency: ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
+        endif()
+
+        # Remove blank control file
+        # Might not be safe if package actual contain file or directory named debian
+        file(REMOVE_RECURSE "${CPACK_TEMPORARY_DIRECTORY}/debian")
+
+        # Append user depend if set
+        if(CPACK_DEBIAN_PACKAGE_DEPENDS)
+          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+        else()
+          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
+        endif()
+      else()
+        if(CPACK_DEBIAN_PACKAGE_DEBUG)
+          message( "CPackDeb Debug: Using only user-provided depends because package does not contain executable files that contain dynamically linked libraries.")
+        endif()
       endif()
-      if (NOT SHLIBDEPS_RESULT EQUAL 0)
-        message (FATAL_ERROR "CPackDeb: dpkg-shlibdeps: ${SHLIBDEPS_ERROR}")
-      endif ()
-
-      #Get rid of prefix generated by dpkg-shlibdeps
-      string (REGEX REPLACE "^.*Depends=" "" CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS ${SHLIBDEPS_OUTPUT})
-
-      if(CPACK_DEBIAN_PACKAGE_DEBUG)
-        message( "CPackDeb Debug: Found dependency: ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
-      endif()
-
-      # Remove blank control file
-      # Might not be safe if package actual contain file or directory named debian
-      file(REMOVE_RECURSE "${CPACK_TEMPORARY_DIRECTORY}/debian")
-
-      # Append user depend if set
-      if (CPACK_DEBIAN_PACKAGE_DEPENDS)
-        set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-      else ()
-        set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
-      endif ()
-
-    else ()
+    else()
       if(CPACK_DEBIAN_PACKAGE_DEBUG)
         message( "CPackDeb Debug: Using only user-provided depends because dpkg-shlibdeps is not found.")
       endif()
     endif()
 
-  else ()
+  else()
     if(CPACK_DEBIAN_PACKAGE_DEBUG)
       message( "CPackDeb Debug: Using only user-provided depends")
     endif()
@@ -451,8 +501,6 @@ function(cpack_deb_prepare_package_vars)
   else()
     set(CPACK_DEB_PACKAGE_COMPONENT_PART_NAME "")
   endif()
-
-  set(WDIR "${CPACK_TOPLEVEL_DIRECTORY}/${CPACK_PACKAGE_FILE_NAME}${CPACK_DEB_PACKAGE_COMPONENT_PART_PATH}")
 
   # Print out some debug information if we were asked for that
   if(CPACK_DEBIAN_PACKAGE_DEBUG)
