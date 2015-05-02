@@ -144,7 +144,7 @@ public:
 
 #define DECLARE_TARGET_POLICY(POLICY) \
   cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
-    { return this->PolicyStatus ## POLICY; }
+    { return this->PolicyMap.Get(cmPolicies::POLICY); }
 
   CM_FOR_EACH_TARGET_POLICY(DECLARE_TARGET_POLICY)
 
@@ -828,14 +828,7 @@ private:
   // The cmMakefile instance that owns this target.  This should
   // always be set.
   cmMakefile* Makefile;
-
-  // Policy status recorded when target was created.
-#define TARGET_POLICY_MEMBER(POLICY) \
-  cmPolicies::PolicyStatus PolicyStatus ## POLICY;
-
-  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_MEMBER)
-
-#undef TARGET_POLICY_MEMBER
+  cmPolicies::PolicyMap PolicyMap;
 
   // Internal representation details.
   friend class cmTargetInternals;
