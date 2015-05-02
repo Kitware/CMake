@@ -14,7 +14,6 @@
 
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
-#include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -372,11 +371,6 @@ public:
     bool ReportError;
   };
   friend class PolicyPushPop;
-
-  /**
-    * Get the Policies Instance
-    */
-  cmPolicies *GetPolicies() const;
 
   mutable std::set<cmListFileContext> CMP0054ReportedIds;
 

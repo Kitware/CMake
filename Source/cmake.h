@@ -222,9 +222,6 @@ class cmake
   ///! this is called by generators to update the progress
   void UpdateProgress(const char *msg, float prog);
 
-  ///!  get the cmake policies instance
-  cmPolicies *GetPolicies() {return this->Policies;}
-
   ///! Get the variable watch object
   cmVariableWatch* GetVariableWatch() { return this->VariableWatch; }
 
