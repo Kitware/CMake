@@ -21,7 +21,6 @@
 
 class cmComputeComponentGraph;
 class cmGlobalGenerator;
-class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
 class cmake;
@@ -60,7 +59,6 @@ private:
   // Context information.
   cmTarget const* Target;
   cmMakefile* Makefile;
-  cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator const* GlobalGenerator;
   cmake* CMakeInstance;
   bool DebugMode;
