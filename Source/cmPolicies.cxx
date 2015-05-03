@@ -79,41 +79,43 @@ static const char* idToVersion(cmPolicies::PolicyID id)
   return 0;
 }
 
+static bool isPolicyNewerThan(cmPolicies::PolicyID id,
+                       unsigned int majorV,
+                       unsigned int minorV,
+                       unsigned int patchV)
+{
+  switch(id)
+    {
+#define POLICY_CASE(ID, V_MAJOR, V_MINOR, V_PATCH) \
+    case cmPolicies::ID: \
+      return (majorV < V_MAJOR || \
+             (majorV == V_MAJOR && \
+              minorV + 1 < V_MINOR + 1) || \
+             (majorV == V_MAJOR && \
+              minorV == V_MINOR && \
+              patchV + 1 < V_PATCH + 1));
+  CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return false;
+    }
+  return false;
+}
+
 class cmPolicy
 {
 public:
   cmPolicy(cmPolicies::PolicyID iD,
             const char *shortDescription,
-            unsigned int majorVersionIntroduced,
-            unsigned int minorVersionIntroduced,
-            unsigned int patchVersionIntroduced,
             cmPolicies::PolicyStatus status)
   {
     this->ID = iD;
     this->ShortDescription = shortDescription;
-    this->MajorVersionIntroduced = majorVersionIntroduced;
-    this->MinorVersionIntroduced = minorVersionIntroduced;
-    this->PatchVersionIntroduced = patchVersionIntroduced;
     this->Status = status;
-  }
-
-  bool IsPolicyNewerThan(unsigned int majorV,
-                         unsigned int minorV,
-                         unsigned int patchV)
-  {
-    return (majorV < this->MajorVersionIntroduced ||
-        (majorV == this->MajorVersionIntroduced &&
-         minorV < this->MinorVersionIntroduced) ||
-        (majorV == this->MajorVersionIntroduced &&
-         minorV == this->MinorVersionIntroduced &&
-         patchV < this->PatchVersionIntroduced));
   }
 
   cmPolicies::PolicyID ID;
   std::string ShortDescription;
-  unsigned int MajorVersionIntroduced;
-  unsigned int MinorVersionIntroduced;
-  unsigned int PatchVersionIntroduced;
   cmPolicies::PolicyStatus Status;
 };
 
@@ -439,16 +441,13 @@ cmPolicies::~cmPolicies()
 void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               const char *,
                               const char *shortDescription,
-                              unsigned int majorVersionIntroduced,
-                              unsigned int minorVersionIntroduced,
-                              unsigned int patchVersionIntroduced,
+                              unsigned int,
+                              unsigned int,
+                              unsigned int,
                               cmPolicies::PolicyStatus status)
 {
   this->Policies[iD] = new cmPolicy(iD,
                                     shortDescription,
-                                    majorVersionIntroduced,
-                                    minorVersionIntroduced,
-                                    patchVersionIntroduced,
                                     status);
 }
 
@@ -547,7 +546,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   for(std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
                      = this->Policies.begin(); i != this->Policies.end(); ++i)
     {
-    if (i->second->IsPolicyNewerThan(majorVer,minorVer,patchVer))
+    if (isPolicyNewerThan(i->first, majorVer, minorVer, patchVer))
       {
       if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
         {
