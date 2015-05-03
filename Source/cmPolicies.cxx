@@ -20,12 +20,6 @@ public:
             unsigned int patchVersionIntroduced,
             cmPolicies::PolicyStatus status)
   {
-    if (!idString || !shortDescription)
-      {
-      cmSystemTools::Error("Attempt to define a policy without "
-        "all parameters being specified!");
-      return;
-      }
     this->ID = iD;
     this->IDString = idString;
     this->ShortDescription = shortDescription;
@@ -405,14 +399,6 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               unsigned int patchVersionIntroduced,
                               cmPolicies::PolicyStatus status)
 {
-  // a policy must be unique and can only be defined once
-  if (this->Policies.find(iD) != this->Policies.end())
-    {
-    cmSystemTools::Error("Attempt to redefine a CMake policy for policy "
-      "ID ", this->GetPolicyIDString(iD).c_str());
-    return;
-    }
-
   this->Policies[iD] = new cmPolicy(iD, idString,
                                     shortDescription,
                                     majorVersionIntroduced,
@@ -587,12 +573,6 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
-  if (pos == this->Policies.end())
-    {
-    cmSystemTools::Error(
-      "Request for warning text for undefined policy!");
-    return "Request for warning text for undefined policy!";
-    }
 
   std::ostringstream msg;
   msg <<
@@ -611,12 +591,6 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
   std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
     this->Policies.find(id);
-  if (pos == this->Policies.end())
-    {
-    cmSystemTools::Error(
-      "Request for error text for undefined policy!");
-    return "Request for error text for undefined policy!";
-    }
 
   std::ostringstream error;
   error <<
