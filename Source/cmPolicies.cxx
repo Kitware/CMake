@@ -124,15 +124,12 @@ const char* idToShortDescription(cmPolicies::PolicyID id)
 class cmPolicy
 {
 public:
-  cmPolicy(cmPolicies::PolicyID iD,
-            cmPolicies::PolicyStatus status)
+  cmPolicy(cmPolicies::PolicyID iD)
   {
     this->ID = iD;
-    this->Status = status;
   }
 
   cmPolicies::PolicyID ID;
-  cmPolicies::PolicyStatus Status;
 };
 
 cmPolicies::cmPolicies()
@@ -460,10 +457,9 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               unsigned int,
                               unsigned int,
                               unsigned int,
-                              cmPolicies::PolicyStatus status)
+                              cmPolicies::PolicyStatus)
 {
-  this->Policies[iD] = new cmPolicy(iD,
-                                    status);
+  this->Policies[iD] = new cmPolicy(iD);
 }
 
 //----------------------------------------------------------------------------
@@ -664,18 +660,9 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 
 ///! Get the default status for a policy
 cmPolicies::PolicyStatus
-cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
+cmPolicies::GetPolicyStatus(cmPolicies::PolicyID)
 {
-  // if the policy is not know then what?
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
-    this->Policies.find(id);
-  if (pos == this->Policies.end())
-    {
-    // TODO is this right?
-    return cmPolicies::WARN;
-    }
-
-  return pos->second->Status;
+  return cmPolicies::WARN;
 }
 
 //----------------------------------------------------------------------------
