@@ -409,6 +409,36 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
 }
 
 //----------------------------------------------------------------------------
+static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
+                             cmPolicies::PolicyStatus* defaultSetting)
+{
+  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
+  std::string defaultValue = mf->GetSafeDefinition(defaultVar);
+  if(defaultValue == "NEW")
+    {
+    *defaultSetting = cmPolicies::NEW;
+    }
+  else if(defaultValue == "OLD")
+    {
+    *defaultSetting = cmPolicies::OLD;
+    }
+  else if(defaultValue == "")
+    {
+    *defaultSetting = cmPolicies::WARN;
+    }
+  else
+    {
+    std::ostringstream e;
+    e << defaultVar << " has value \"" << defaultValue
+      << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
+    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+    return false;
+    }
+
+  return true;
+}
+
+//----------------------------------------------------------------------------
 bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
                                     const char *version)
 {
@@ -482,7 +512,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       else
         {
         cmPolicies::PolicyStatus status = cmPolicies::WARN;
-        if(!this->GetPolicyDefault(mf, i->second->IDString, &status) ||
+        if(!GetPolicyDefault(mf, i->second->IDString, &status) ||
            !mf->SetPolicy(i->second->ID, status))
           {
           return false;
@@ -504,36 +534,6 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     this->DiagnoseAncientPolicies(ancientPolicies,
                                   majorVer, minorVer, patchVer, mf);
     cmSystemTools::SetFatalErrorOccured();
-    return false;
-    }
-
-  return true;
-}
-
-//----------------------------------------------------------------------------
-bool cmPolicies::GetPolicyDefault(cmMakefile* mf, std::string const& policy,
-                                  cmPolicies::PolicyStatus* defaultSetting)
-{
-  std::string defaultVar = "CMAKE_POLICY_DEFAULT_" + policy;
-  std::string defaultValue = mf->GetSafeDefinition(defaultVar);
-  if(defaultValue == "NEW")
-    {
-    *defaultSetting = cmPolicies::NEW;
-    }
-  else if(defaultValue == "OLD")
-    {
-    *defaultSetting = cmPolicies::OLD;
-    }
-  else if(defaultValue == "")
-    {
-    *defaultSetting = cmPolicies::WARN;
-    }
-  else
-    {
-    std::ostringstream e;
-    e << defaultVar << " has value \"" << defaultValue
-      << "\" but must be \"OLD\", \"NEW\", or \"\" (empty).";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
     return false;
     }
 
