@@ -588,7 +588,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     {
     if (isPolicyNewerThan(i->first, majorVer, minorVer, patchVer))
       {
-      if(i->second->Status == cmPolicies::REQUIRED_ALWAYS)
+      if(this->GetPolicyStatus(i->first) == cmPolicies::REQUIRED_ALWAYS)
         {
         ancientPolicies.push_back(i->first);
         }
