@@ -467,6 +467,31 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
 }
 
 //----------------------------------------------------------------------------
+static void DiagnoseAncientPolicies(
+    std::vector<cmPolicies::PolicyID> const& ancient,
+    unsigned int majorVer,
+    unsigned int minorVer,
+    unsigned int patchVer,
+    cmMakefile* mf)
+{
+  std::ostringstream e;
+  e << "The project requests behavior compatible with CMake version \""
+    << majorVer << "." << minorVer << "." << patchVer
+    << "\", which requires the OLD behavior for some policies:\n";
+  for(std::vector<cmPolicies::PolicyID>::const_iterator
+        i = ancient.begin(); i != ancient.end(); ++i)
+    {
+    e << "  " << idToString(*i) << ": " << idToShortDescription(*i) << "\n";
+    }
+  e << "However, this version of CMake no longer supports the OLD "
+    << "behavior for these policies.  "
+    << "Please either update your CMakeLists.txt files to conform to "
+    << "the new behavior or use an older version of CMake that still "
+    << "supports the old behavior.";
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+}
+
+//----------------------------------------------------------------------------
 static bool GetPolicyDefault(cmMakefile* mf, std::string const& policy,
                              cmPolicies::PolicyStatus* defaultSetting)
 {
@@ -589,8 +614,8 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
   // Make sure the project does not use any ancient policies.
   if(!ancientPolicies.empty())
     {
-    this->DiagnoseAncientPolicies(ancientPolicies,
-                                  majorVer, minorVer, patchVer, mf);
+    DiagnoseAncientPolicies(ancientPolicies,
+                            majorVer, minorVer, patchVer, mf);
     cmSystemTools::SetFatalErrorOccured();
     return false;
     }
@@ -670,29 +695,4 @@ cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
     << "supports the old behavior.  "
     << "Run cmake --help-policy " << pid << " for more information.";
   return e.str();
-}
-
-//----------------------------------------------------------------------------
-void
-cmPolicies::DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
-                                    unsigned int majorVer,
-                                    unsigned int minorVer,
-                                    unsigned int patchVer,
-                                    cmMakefile* mf)
-{
-  std::ostringstream e;
-  e << "The project requests behavior compatible with CMake version \""
-    << majorVer << "." << minorVer << "." << patchVer
-    << "\", which requires the OLD behavior for some policies:\n";
-  for(std::vector<PolicyID>::const_iterator
-        i = ancient.begin(); i != ancient.end(); ++i)
-    {
-    e << "  " << idToString(*i) << ": " << idToShortDescription(*i) << "\n";
-    }
-  e << "However, this version of CMake no longer supports the OLD "
-    << "behavior for these policies.  "
-    << "Please either update your CMakeLists.txt files to conform to "
-    << "the new behavior or use an older version of CMake that still "
-    << "supports the old behavior.";
-  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
 }
