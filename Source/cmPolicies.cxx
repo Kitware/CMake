@@ -49,6 +49,10 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 #define CM_FOR_EACH_POLICY_ID_VERSION(POLICY) \
   CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_VERSION)
 
+#define CM_SELECT_ID_DOC(F, A1, A2, A3, A4, A5, A6) F(A1, A2)
+#define CM_FOR_EACH_POLICY_ID_DOC(POLICY) \
+  CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_DOC)
+
 static const char* idToString(cmPolicies::PolicyID id)
 {
   switch(id)
@@ -102,20 +106,32 @@ static bool isPolicyNewerThan(cmPolicies::PolicyID id,
   return false;
 }
 
+const char* idToShortDescription(cmPolicies::PolicyID id)
+{
+  switch(id)
+    {
+#define POLICY_CASE(ID, SHORT_DESCRIPTION) \
+    case cmPolicies::ID: \
+      return SHORT_DESCRIPTION;
+  CM_FOR_EACH_POLICY_ID_DOC(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return 0;
+    }
+  return 0;
+}
+
 class cmPolicy
 {
 public:
   cmPolicy(cmPolicies::PolicyID iD,
-            const char *shortDescription,
             cmPolicies::PolicyStatus status)
   {
     this->ID = iD;
-    this->ShortDescription = shortDescription;
     this->Status = status;
   }
 
   cmPolicies::PolicyID ID;
-  std::string ShortDescription;
   cmPolicies::PolicyStatus Status;
 };
 
@@ -440,14 +456,13 @@ cmPolicies::~cmPolicies()
 
 void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                               const char *,
-                              const char *shortDescription,
+                              const char *,
                               unsigned int,
                               unsigned int,
                               unsigned int,
                               cmPolicies::PolicyStatus status)
 {
   this->Policies[iD] = new cmPolicy(iD,
-                                    shortDescription,
                                     status);
 }
 
@@ -591,13 +606,10 @@ bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 ///! return a warning string for a given policy
 std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 {
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
-    this->Policies.find(id);
-
   std::ostringstream msg;
   msg <<
     "Policy " << idToString(id) << " is not set: "
-    "" << pos->second->ShortDescription << "  "
+    "" << idToShortDescription(id) << "  "
     "Run \"cmake --help-policy " << idToString(id) << "\" for "
     "policy details.  "
     "Use the cmake_policy command to set the policy "
@@ -609,13 +621,10 @@ std::string cmPolicies::GetPolicyWarning(cmPolicies::PolicyID id)
 ///! return an error string for when a required policy is unspecified
 std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 {
-  std::map<cmPolicies::PolicyID,cmPolicy *>::iterator pos =
-    this->Policies.find(id);
-
   std::ostringstream error;
   error <<
     "Policy " << idToString(id) << " is not set to NEW: "
-    "" << pos->second->ShortDescription << "  "
+    "" << idToShortDescription(id) << "  "
     "Run \"cmake --help-policy " << idToString(id) << "\" for "
     "policy details.  "
     "CMake now requires this policy to be set to NEW by the project.  "
@@ -678,8 +687,7 @@ cmPolicies::DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
   for(std::vector<PolicyID>::const_iterator
         i = ancient.begin(); i != ancient.end(); ++i)
     {
-    cmPolicy const* policy = this->Policies[*i];
-    e << "  " << idToString(*i) << ": " << policy->ShortDescription << "\n";
+    e << "  " << idToString(*i) << ": " << idToShortDescription(*i) << "\n";
     }
   e << "However, this version of CMake no longer supports the OLD "
     << "behavior for these policies.  "
