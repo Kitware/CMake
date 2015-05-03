@@ -3727,8 +3727,7 @@ cmState *cmMakefile::GetState() const
 
 void cmMakefile::DisplayStatus(const char* message, float s) const
 {
-  cmake* cm = this->GetLocalGenerator()->GetGlobalGenerator()
-                                                          ->GetCMakeInstance();
+  cmake* cm = this->GetCMakeInstance();
   if (cm->GetWorkingMode() == cmake::FIND_PACKAGE_MODE)
     {
     // don't output any STATUS message in FIND_PACKAGE_MODE, since they will
@@ -4570,8 +4569,7 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
 
       // The conflict is with a non-imported target.
       // Allow this if the user has requested support.
-      cmake* cm =
-        this->LocalGenerator->GetGlobalGenerator()->GetCMakeInstance();
+      cmake* cm = this->GetCMakeInstance();
       if(isCustom && existing->GetType() == cmTarget::UTILITY &&
          this != existing->GetMakefile() &&
          cm->GetState()
