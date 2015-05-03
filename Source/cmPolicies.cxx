@@ -80,23 +80,12 @@ public:
                          unsigned int minorV,
                          unsigned int patchV)
   {
-    if (majorV < this->MajorVersionIntroduced)
-      {
-      return true;
-      }
-    if (majorV > this->MajorVersionIntroduced)
-      {
-      return false;
-      }
-    if (minorV < this->MinorVersionIntroduced)
-      {
-      return true;
-      }
-    if (minorV > this->MinorVersionIntroduced)
-      {
-      return false;
-      }
-    return (patchV < this->PatchVersionIntroduced);
+    return (majorV < this->MajorVersionIntroduced ||
+        (majorV == this->MajorVersionIntroduced &&
+         minorV < this->MinorVersionIntroduced) ||
+        (majorV == this->MajorVersionIntroduced &&
+         minorV == this->MinorVersionIntroduced &&
+         patchV < this->PatchVersionIntroduced));
   }
 
   cmPolicies::PolicyID ID;
