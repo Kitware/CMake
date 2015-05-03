@@ -159,7 +159,6 @@ public:
   private:
   // might have to make these internal for VS6 not sure yet
   std::map<PolicyID,cmPolicy *> Policies;
-  std::map<std::string,PolicyID> PolicyStringMap;
 
   void DiagnoseAncientPolicies(std::vector<PolicyID> const& ancient,
                                unsigned int majorVer, unsigned int minorVer,

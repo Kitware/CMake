@@ -9,6 +9,42 @@
 #include <queue>
 #include <assert.h>
 
+static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
+{
+  assert(input);
+  if (strlen(input) != 7)
+    {
+    return false;
+    }
+  if (!cmHasLiteralPrefix(input, "CMP"))
+    {
+    return false;
+    }
+  if (cmHasLiteralSuffix(input, "0000"))
+    {
+    pid = cmPolicies::CMP0000;
+    return true;
+    }
+  for (int i = 3; i < 7; ++i)
+    {
+    if (!isdigit(*(input + i)))
+      {
+      return false;
+      }
+    }
+  long id;
+  if (!cmSystemTools::StringToLong(input + 3, &id))
+    {
+    return false;
+    }
+  if (id >= cmPolicies::CMPCOUNT)
+    {
+    return false;
+    }
+  pid = cmPolicies::PolicyID(id);
+  return true;
+}
+
 class cmPolicy
 {
 public:
@@ -405,7 +441,6 @@ void cmPolicies::DefinePolicy(cmPolicies::PolicyID iD,
                                     minorVersionIntroduced,
                                     patchVersionIntroduced,
                                     status);
-  this->PolicyStringMap[idString] = iD;
 }
 
 //----------------------------------------------------------------------------
@@ -542,18 +577,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
 
 bool cmPolicies::GetPolicyID(const char *id, cmPolicies::PolicyID &pid)
 {
-  if (!id || strlen(id) < 1)
-    {
-    return false;
-    }
-  std::map<std::string,cmPolicies::PolicyID>::iterator pos =
-    this->PolicyStringMap.find(id);
-  if (pos == this->PolicyStringMap.end())
-    {
-    return false;
-    }
-  pid = pos->second;
-  return true;
+  return stringToId(id, pid);
 }
 
 std::string cmPolicies::GetPolicyIDString(cmPolicies::PolicyID pid)
