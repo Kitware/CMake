@@ -153,26 +153,12 @@ public:
 cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   : Internal(new Internals),
     LocalGenerator(localGenerator),
-    StateSnapshot(localGenerator->GetGlobalGenerator()
-                                ->GetCMakeInstance()->GetState())
+    StateSnapshot(localGenerator->GetStateSnapshot())
 {
   this->Internal->PushDefinitions();
   this->Internal->VarInitStack.push(std::set<std::string>());
   this->Internal->VarUsageStack.push(std::set<std::string>());
   this->Internal->IsSourceFileTryCompile = false;
-
-  if (this->LocalGenerator->GetParent())
-    {
-    cmMakefile* parentMf = this->LocalGenerator->GetParent()->GetMakefile();
-    this->StateSnapshot =
-        this->GetState()->CreateSnapshot(parentMf->StateSnapshot);
-    }
-  else
-    {
-    this->StateSnapshot =
-        this->GetState()->CreateSnapshot(this->StateSnapshot);
-    }
-
 
   // Initialize these first since AddDefaultDefinitions calls AddDefinition
   this->WarnUnused = false;

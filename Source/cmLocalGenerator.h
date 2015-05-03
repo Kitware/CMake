@@ -13,6 +13,7 @@
 #define cmLocalGenerator_h
 
 #include "cmStandardIncludes.h"
+#include "cmState.h"
 
 class cmMakefile;
 class cmGlobalGenerator;
@@ -87,6 +88,9 @@ public:
     return this->GlobalGenerator; }
   const cmGlobalGenerator *GetGlobalGenerator() const {
     return this->GlobalGenerator; }
+
+  cmState* GetState() const;
+  cmState::Snapshot GetStateSnapshot() const;
 
   /**
    * Convert something to something else. This is a centralized conversion
@@ -442,6 +446,7 @@ protected:
   void ReadInputFile();
 
   cmMakefile *Makefile;
+  cmState::Snapshot StateSnapshot;
   cmGlobalGenerator *GlobalGenerator;
   std::vector<std::string> HomeDirectoryComponents;
   std::vector<std::string> StartDirectoryComponents;

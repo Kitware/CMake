@@ -51,6 +51,13 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   if (parent)
     {
     parent->AddChild(this);
+    this->StateSnapshot =
+        this->GetState()->CreateSnapshot(parent->StateSnapshot);
+    }
+  else
+    {
+    this->StateSnapshot =
+        this->GetState()->CreateSnapshot(cmState::Snapshot(this->GetState()));
     }
   this->Makefile = new cmMakefile(this);
 
@@ -571,6 +578,16 @@ void cmLocalGenerator::GenerateTargetManifest()
       target.GenerateTargetManifest(config);
       }
     }
+}
+
+cmState* cmLocalGenerator::GetState() const
+{
+  return this->GlobalGenerator->GetCMakeInstance()->GetState();
+}
+
+cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
+{
+  return this->StateSnapshot;
 }
 
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
