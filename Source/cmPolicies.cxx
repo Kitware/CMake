@@ -579,20 +579,20 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
 
   // now loop over all the policies and set them as appropriate
   std::vector<cmPolicies::PolicyID> ancientPolicies;
-  for(std::map<cmPolicies::PolicyID,cmPolicy *>::iterator i
-                     = this->Policies.begin(); i != this->Policies.end(); ++i)
+  for(PolicyID pid = cmPolicies::CMP0000;
+      pid != cmPolicies::CMPCOUNT; pid = PolicyID(pid+1))
     {
-    if (isPolicyNewerThan(i->first, majorVer, minorVer, patchVer))
+    if (isPolicyNewerThan(pid, majorVer, minorVer, patchVer))
       {
-      if(this->GetPolicyStatus(i->first) == cmPolicies::REQUIRED_ALWAYS)
+      if(this->GetPolicyStatus(pid) == cmPolicies::REQUIRED_ALWAYS)
         {
-        ancientPolicies.push_back(i->first);
+        ancientPolicies.push_back(pid);
         }
       else
         {
         cmPolicies::PolicyStatus status = cmPolicies::WARN;
-        if(!GetPolicyDefault(mf, idToString(i->first), &status) ||
-           !mf->SetPolicy(i->first, status))
+        if(!GetPolicyDefault(mf, idToString(pid), &status) ||
+           !mf->SetPolicy(pid, status))
           {
           return false;
           }
@@ -600,7 +600,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
       }
     else
       {
-      if (!mf->SetPolicy(i->first, cmPolicies::NEW))
+      if (!mf->SetPolicy(pid, cmPolicies::NEW))
         {
         return false;
         }
