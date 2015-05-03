@@ -3693,11 +3693,7 @@ bool cmMakefile::GetIsSourceFileTryCompile() const
 
 cmake *cmMakefile::GetCMakeInstance() const
 {
-  if ( this->LocalGenerator && this->LocalGenerator->GetGlobalGenerator() )
-    {
-    return this->LocalGenerator->GetGlobalGenerator()->GetCMakeInstance();
-    }
-  return 0;
+  return this->LocalGenerator->GetGlobalGenerator()->GetCMakeInstance();
 }
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
