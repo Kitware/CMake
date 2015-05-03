@@ -395,8 +395,7 @@ struct CompilerIdNode : public cmGeneratorExpressionNode
         case cmPolicies::WARN:
           {
           std::ostringstream e;
-          e << context->Makefile->GetPolicies()
-                      ->GetPolicyWarning(cmPolicies::CMP0044);
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0044);
           context->Makefile->GetCMakeInstance()
                  ->IssueMessage(cmake::AUTHOR_WARNING,
                                 e.str(), context->Backtrace);
@@ -1495,8 +1494,7 @@ static const struct TargetPolicyNode : public cmGeneratorExpressionNode
           {
           case cmPolicies::WARN:
             mf->IssueMessage(cmake::AUTHOR_WARNING,
-                             mf->GetPolicies()->
-                             GetPolicyWarning(policyForString(policy)));
+                        cmPolicies::GetPolicyWarning(policyForString(policy)));
           case cmPolicies::REQUIRED_IF_USED:
           case cmPolicies::REQUIRED_ALWAYS:
           case cmPolicies::OLD:

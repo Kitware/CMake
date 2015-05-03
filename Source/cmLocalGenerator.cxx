@@ -209,7 +209,7 @@ void cmLocalGenerator::ReadInputFile()
         << "to work accidentally and is being allowed for "
         << "compatibility."
         << "\n"
-        << mf->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0014);
+        << cmPolicies::GetPolicyWarning(cmPolicies::CMP0014);
       mf->IssueMessage(cmake::AUTHOR_WARNING, e.str());
     case cmPolicies::OLD:
       // OLD behavior does not warn.
@@ -217,7 +217,7 @@ void cmLocalGenerator::ReadInputFile()
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
       e << "\n"
-        << mf->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0014);
+        << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0014);
     case cmPolicies::NEW:
       // NEW behavior prints the error.
       mf->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -2458,8 +2458,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
             "shared libraries and will use the " << flagsVar << " variable "
             "instead.  This may cause errors if the original content of "
             << flagsVar << " was removed.\n"
-            << this->Makefile->GetPolicies()->GetPolicyWarning(
-                                                      cmPolicies::CMP0018);
+            << cmPolicies::GetPolicyWarning(cmPolicies::CMP0018);
 
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
           // fall through to OLD behaviour

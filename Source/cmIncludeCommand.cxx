@@ -104,8 +104,7 @@ bool cmIncludeCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0024))
       {
       case cmPolicies::WARN:
-        e << (this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0024)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0024) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;

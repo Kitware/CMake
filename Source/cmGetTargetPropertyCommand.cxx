@@ -56,8 +56,7 @@ bool cmGetTargetPropertyCommand
       {
       case cmPolicies::WARN:
         issueMessage = true;
-        e << this->Makefile->GetPolicies()
-                          ->GetPolicyWarning(cmPolicies::CMP0045) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0045) << "\n";
       case cmPolicies::OLD:
         break;
       case cmPolicies::REQUIRED_IF_USED:

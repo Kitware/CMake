@@ -121,8 +121,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
       // empty values
       list.clear();
       cmSystemTools::ExpandListArgument(listString, list);
-      std::string warn = this->Makefile->GetPolicies()->
-        GetPolicyWarning(cmPolicies::CMP0007);
+      std::string warn = cmPolicies::GetPolicyWarning(cmPolicies::CMP0007);
       warn += " List has value = [";
       warn += listString;
       warn += "].";
@@ -143,8 +142,7 @@ bool cmListCommand::GetList(std::vector<std::string>& list,
     case cmPolicies::REQUIRED_ALWAYS:
       this->Makefile->IssueMessage(
         cmake::FATAL_ERROR,
-        this->Makefile->GetPolicies()
-        ->GetRequiredPolicyError(cmPolicies::CMP0007)
+        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0007)
         );
       return false;
     }

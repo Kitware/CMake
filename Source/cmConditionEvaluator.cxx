@@ -118,8 +118,7 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
     if(!hasBeenReported)
       {
       std::ostringstream e;
-      e << (this->Makefile.GetPolicies()->GetPolicyWarning(
-        cmPolicies::CMP0054)) << "\n";
+      e << (cmPolicies::GetPolicyWarning(cmPolicies::CMP0054)) << "\n";
       e << "Quoted variables like \"" << argument.GetValue() <<
         "\" will no longer be dereferenced "
         "when the policy is set to NEW.  "
@@ -168,8 +167,7 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
     if(!hasBeenReported)
       {
       std::ostringstream e;
-      e << (this->Makefile.GetPolicies()->GetPolicyWarning(
-        cmPolicies::CMP0054)) << "\n";
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0054) << "\n";
       e << "Quoted keywords like \"" << argument.GetValue() <<
         "\" will no longer be interpreted as keywords "
         "when the policy is set to NEW.  "
@@ -280,10 +278,9 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
       {
       case cmPolicies::WARN:
         {
-        cmPolicies* policies = this->Makefile.GetPolicies();
         errorString = "An argument named \"" + newArg.GetValue()
           + "\" appears in a conditional statement.  "
-          + policies->GetPolicyWarning(cmPolicies::CMP0012);
+          + cmPolicies::GetPolicyWarning(cmPolicies::CMP0012);
         status = cmake::AUTHOR_WARNING;
         }
       case cmPolicies::OLD:
@@ -291,10 +288,9 @@ bool cmConditionEvaluator::GetBooleanValueWithAutoDereference(
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         {
-        cmPolicies* policies = this->Makefile.GetPolicies();
         errorString = "An argument named \"" + newArg.GetValue()
           + "\" appears in a conditional statement.  "
-          + policies->GetRequiredPolicyError(cmPolicies::CMP0012);
+          + cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0012);
         status = cmake::FATAL_ERROR;
         }
       case cmPolicies::NEW:
@@ -493,8 +489,7 @@ bool cmConditionEvaluator::HandleLevel1(cmArgumentList &newArgs,
         {
         cmPolicies::PolicyID pid;
         this->HandlePredicate(
-          this->Makefile.GetPolicies()->GetPolicyID(
-            argP1->c_str(), pid),
+          cmPolicies::GetPolicyID(argP1->c_str(), pid),
             reducible, arg, newArgs, argP1, argP2);
         }
       // does a target exist
@@ -702,8 +697,7 @@ bool cmConditionEvaluator::HandleLevel2(cmArgumentList &newArgs,
           else if(this->Policy57Status == cmPolicies::WARN)
             {
             std::ostringstream e;
-            e << (this->Makefile.GetPolicies()->GetPolicyWarning(
-              cmPolicies::CMP0057)) << "\n";
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0057) << "\n";
             e << "IN_LIST will be interpreted as an operator "
               "when the policy is set to NEW.  "
               "Since the policy is not set the OLD behavior will be used.";

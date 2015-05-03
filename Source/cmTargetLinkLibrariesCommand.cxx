@@ -58,16 +58,14 @@ bool cmTargetLinkLibrariesCommand
           e << "\n"
             << "CMake does not support this but it used to work accidentally "
             << "and is being allowed for compatibility."
-            << "\n" << this->Makefile->GetPolicies()->
-                                        GetPolicyWarning(cmPolicies::CMP0016);
+            << "\n" << cmPolicies::GetPolicyWarning(cmPolicies::CMP0016);
            break;
         case cmPolicies::OLD:          // OLD behavior does not warn.
           t = cmake::MESSAGE;
           break;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
-          e << "\n" << this->Makefile->GetPolicies()->
-                                  GetRequiredPolicyError(cmPolicies::CMP0016);
+          e << "\n" << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0016);
           break;
         case cmPolicies::NEW:  // NEW behavior prints the error.
           break;
@@ -108,8 +106,7 @@ bool cmTargetLinkLibrariesCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0039))
       {
       case cmPolicies::WARN:
-        e << this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0039) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0039) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;
@@ -379,8 +376,7 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0023))
       {
       case cmPolicies::WARN:
-        e << this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0023) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0023) << "\n";
         modal = "should";
       case cmPolicies::OLD:
         break;

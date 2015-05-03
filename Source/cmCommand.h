@@ -180,7 +180,7 @@ public:
       {
       case cmPolicies::WARN:
         this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-          this->Makefile->GetPolicies()->GetPolicyWarning(pol));
+          cmPolicies::GetPolicyWarning(pol));
       case cmPolicies::OLD:
         return false;
       case cmPolicies::REQUIRED_IF_USED:

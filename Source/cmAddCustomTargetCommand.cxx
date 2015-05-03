@@ -194,8 +194,7 @@ bool cmAddCustomTargetCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0037))
       {
       case cmPolicies::WARN:
-        e << (this->Makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
         issueMessage = true;
       case cmPolicies::OLD:
         break;

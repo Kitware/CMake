@@ -591,14 +591,13 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
 {
   // We check the setting of this policy again because the included
   // script might actually set this policy for its includer.
-  cmPolicies* policies = this->Makefile->GetPolicies();
   switch (this->Makefile->GetPolicyStatus(cmPolicies::CMP0011))
     {
     case cmPolicies::WARN:
       // Warn because the user did not set this policy.
       {
       std::ostringstream w;
-      w << policies->GetPolicyWarning(cmPolicies::CMP0011) << "\n"
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
         << "The included script\n  " << this->File << "\n"
         << "affects policy settings.  "
         << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
@@ -610,7 +609,7 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     case cmPolicies::REQUIRED_ALWAYS:
       {
       std::ostringstream e;
-      e << policies->GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
         << "The included script\n  " << this->File << "\n"
         << "affects policy settings, so it requires this policy to be set.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
@@ -879,8 +878,7 @@ cmMakefile::AddCustomCommandToTarget(const std::string& target,
     switch(this->GetPolicyStatus(cmPolicies::CMP0040))
       {
       case cmPolicies::WARN:
-        e << (this->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0040)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0040) << "\n";
         issueMessage = true;
       case cmPolicies::OLD:
         break;
@@ -1438,7 +1436,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       case cmPolicies::WARN:
         this->IssueMessage(
           cmake::AUTHOR_WARNING,
-          this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0005)
+          cmPolicies::GetPolicyWarning(cmPolicies::CMP0005)
           );
       case cmPolicies::OLD:
         // OLD behavior is to not escape the value.  We should not
@@ -1448,7 +1446,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
       case cmPolicies::REQUIRED_ALWAYS:
         this->IssueMessage(
           cmake::FATAL_ERROR,
-          this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0005)
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0005)
           );
         return false;
       case cmPolicies::NEW:
@@ -2335,7 +2333,7 @@ void cmMakefile::ExpandVariablesCMP0019()
   if(!w.str().empty())
     {
     std::ostringstream m;
-    m << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0019)
+    m << cmPolicies::GetPolicyWarning(cmPolicies::CMP0019)
       << "\n"
       << "The following variable evaluations were encountered:\n"
       << w.str();
@@ -2593,7 +2591,7 @@ const char *cmMakefile::ExpandVariablesInString(std::string& source,
   else if(compareResults && (newResult != source || newError != mtype))
     {
     std::string msg =
-      this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0053);
+      cmPolicies::GetPolicyWarning(cmPolicies::CMP0053);
     msg += "\n";
 
     std::string msg_input = original;
@@ -2745,9 +2743,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
       switch(this->GetPolicyStatus(cmPolicies::CMP0010))
         {
         case cmPolicies::WARN:
-          error << "\n"
-                << (this->GetPolicies()
-                    ->GetPolicyWarning(cmPolicies::CMP0010));
+          error << "\n" << cmPolicies::GetPolicyWarning(cmPolicies::CMP0010);
         case cmPolicies::OLD:
           // OLD behavior is to just warn and continue.
           mtype = cmake::AUTHOR_WARNING;
@@ -2755,8 +2751,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringOld(
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
           error << "\n"
-                << (this->GetPolicies()
-                    ->GetRequiredPolicyError(cmPolicies::CMP0010));
+                << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0010);
         case cmPolicies::NEW:
           // NEW behavior is to report the error.
           break;
@@ -3820,7 +3815,7 @@ std::string cmMakefile::GetModulesFile(const char* filename) const
             << moduleInCMakeModulePath
             << " (found via CMAKE_MODULE_PATH) which shadows "
             << moduleInCMakeRoot  << ". This may cause errors later on .\n"
-            << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0017);
+            << cmPolicies::GetPolicyWarning(cmPolicies::CMP0017);
 
           this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
            // break;  // fall through to OLD behaviour
@@ -4188,7 +4183,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     switch(this->GetPolicyStatus(cmPolicies::CMP0059))
       {
       case cmPolicies::WARN:
-          this->IssueMessage(cmake::AUTHOR_WARNING, this->GetPolicies()->
+          this->IssueMessage(cmake::AUTHOR_WARNING, cmPolicies::
                              GetPolicyWarning(cmPolicies::CMP0059));
       case cmPolicies::OLD:
         output += this->DefineFlagsOrig;
@@ -4558,14 +4553,14 @@ bool cmMakefile::EnforceUniqueName(std::string const& name, std::string& msg,
       switch (this->GetPolicyStatus(cmPolicies::CMP0002))
         {
         case cmPolicies::WARN:
-          this->IssueMessage(cmake::AUTHOR_WARNING, this->GetPolicies()->
+          this->IssueMessage(cmake::AUTHOR_WARNING, cmPolicies::
                              GetPolicyWarning(cmPolicies::CMP0002));
         case cmPolicies::OLD:
           return true;
         case cmPolicies::REQUIRED_IF_USED:
         case cmPolicies::REQUIRED_ALWAYS:
           this->IssueMessage(cmake::FATAL_ERROR,
-            this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0002)
+            cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0002)
             );
           return true;
         case cmPolicies::NEW:
@@ -4637,7 +4632,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
     {
     case cmPolicies::WARN:
       // Print the warning.
-      e << this->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0013)
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0013)
         << "\n"
         << "The binary directory\n"
         << "  " << binPath << "\n"
@@ -4654,7 +4649,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
       return true;
     case cmPolicies::REQUIRED_IF_USED:
     case cmPolicies::REQUIRED_ALWAYS:
-      e << this->GetPolicies()->GetRequiredPolicyError(cmPolicies::CMP0013)
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0013)
         << "\n";
     case cmPolicies::NEW:
       // NEW behavior prints the error.
@@ -4757,7 +4752,7 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
       {
       return cur;
       }
-    cmPolicies::PolicyStatus def = this->GetPolicies()->GetPolicyStatus(id);
+    cmPolicies::PolicyStatus def = cmPolicies::GetPolicyStatus(id);
     if(def == cmPolicies::REQUIRED_ALWAYS ||
        def == cmPolicies::REQUIRED_IF_USED)
       {
@@ -4792,7 +4787,7 @@ cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
     }
 
   // The policy is not set.  Use the default for this CMake version.
-  return this->GetPolicies()->GetPolicyStatus(id);
+  return cmPolicies::GetPolicyStatus(id);
 }
 
 //----------------------------------------------------------------------------
@@ -4815,7 +4810,7 @@ bool cmMakefile::SetPolicy(const char *id,
                            cmPolicies::PolicyStatus status)
 {
   cmPolicies::PolicyID pid;
-  if (!this->GetPolicies()->GetPolicyID(id, /* out */ pid))
+  if (!cmPolicies::GetPolicyID(id, /* out */ pid))
     {
     std::ostringstream e;
     e << "Policy \"" << id << "\" is not known to this version of CMake.";
@@ -4831,11 +4826,11 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
 {
   // A REQUIRED_ALWAYS policy may be set only to NEW.
   if(status != cmPolicies::NEW &&
-     this->GetPolicies()->GetPolicyStatus(id) ==
+     cmPolicies::GetPolicyStatus(id) ==
      cmPolicies::REQUIRED_ALWAYS)
     {
     std::string msg =
-      this->GetPolicies()->GetRequiredAlwaysPolicyError(id);
+      cmPolicies::GetRequiredAlwaysPolicyError(id);
     this->IssueMessage(cmake::FATAL_ERROR, msg);
     return false;
     }
@@ -4937,18 +4932,7 @@ void cmMakefile::PopPolicyBarrier(bool reportError)
 //----------------------------------------------------------------------------
 bool cmMakefile::SetPolicyVersion(const char *version)
 {
-  return this->GetCMakeInstance()->GetPolicies()->
-    ApplyPolicyVersion(this,version);
-}
-
-//----------------------------------------------------------------------------
-cmPolicies *cmMakefile::GetPolicies() const
-{
-  if (!this->GetCMakeInstance())
-  {
-    return 0;
-  }
-  return this->GetCMakeInstance()->GetPolicies();
+  return cmPolicies::ApplyPolicyVersion(this,version);
 }
 
 //----------------------------------------------------------------------------

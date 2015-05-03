@@ -111,7 +111,7 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
 
   // Lookup the policy number.
   cmPolicies::PolicyID pid;
-  if(!this->Makefile->GetPolicies()->GetPolicyID(id.c_str(), pid))
+  if(!cmPolicies::GetPolicyID(id.c_str(), pid))
     {
     std::ostringstream e;
     e << "GET given policy \"" << id << "\" which is not known to this "
@@ -141,7 +141,7 @@ bool cmCMakePolicyCommand::HandleGetMode(std::vector<std::string> const& args)
       // The policy is required to be set before anything needs it.
       {
       std::ostringstream e;
-      e << this->Makefile->GetPolicies()->GetRequiredPolicyError(pid)
+      e << cmPolicies::GetRequiredPolicyError(pid)
         << "\n"
         << "The call to cmake_policy(GET " << id << " ...) at which this "
         << "error appears requests the policy, and this version of CMake "

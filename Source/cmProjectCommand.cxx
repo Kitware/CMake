@@ -216,8 +216,7 @@ bool cmProjectCommand
     if(!vw.empty())
       {
       std::ostringstream w;
-      w << (this->Makefile->GetPolicies()
-            ->GetPolicyWarning(cmPolicies::CMP0048))
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0048)
         << "\nThe following variable(s) would be set to empty:" << vw;
       this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       }

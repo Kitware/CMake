@@ -334,8 +334,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
              "CMAKE_POLICY_WARNING_CMP0056"))
           {
           std::ostringstream w;
-          w << (this->Makefile->GetCMakeInstance()->GetPolicies()
-                ->GetPolicyWarning(cmPolicies::CMP0056)) << "\n"
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0056) << "\n"
             "For compatibility with older versions of CMake, try_compile "
             "is not honoring caller link flags (e.g. CMAKE_EXE_LINKER_FLAGS) "
             "in the test project."
@@ -349,8 +348,7 @@ int cmCoreTryCompile::TryCompileCode(std::vector<std::string> const& argv)
       case cmPolicies::REQUIRED_ALWAYS:
         this->Makefile->IssueMessage(
           cmake::FATAL_ERROR,
-          this->Makefile->GetCMakeInstance()->GetPolicies()
-          ->GetRequiredPolicyError(cmPolicies::CMP0056)
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0056)
           );
       case cmPolicies::NEW:
         // NEW behavior is to pass linker flags.

@@ -1404,7 +1404,7 @@ bool cmInstallCommand::CheckCMP0006(bool& failure)
       {
       this->Makefile->IssueMessage(
         cmake::AUTHOR_WARNING,
-        this->Makefile->GetPolicies()->GetPolicyWarning(cmPolicies::CMP0006)
+        cmPolicies::GetPolicyWarning(cmPolicies::CMP0006)
         );
       }
     case cmPolicies::OLD:
@@ -1418,8 +1418,7 @@ bool cmInstallCommand::CheckCMP0006(bool& failure)
       failure = true;
       this->Makefile->IssueMessage(
         cmake::FATAL_ERROR,
-        this->Makefile->GetPolicies()
-        ->GetRequiredPolicyError(cmPolicies::CMP0006)
+        cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0006)
         );
       break;
     }

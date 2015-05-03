@@ -257,8 +257,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
           {
           case cmPolicies::WARN:
             messageType = cmake::WARNING;
-            e << target->GetMakefile()->GetPolicies()
-                        ->GetPolicyWarning(cmPolicies::CMP0041) << "\n";
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0041) << "\n";
             break;
           case cmPolicies::OLD:
             continue;
@@ -306,8 +305,7 @@ static bool checkInterfaceDirs(const std::string &prepro,
             case cmPolicies::WARN:
               {
               std::ostringstream s;
-              s << target->GetMakefile()->GetPolicies()
-                        ->GetPolicyWarning(cmPolicies::CMP0052) << "\n";
+              s << cmPolicies::GetPolicyWarning(cmPolicies::CMP0052) << "\n";
               s << "Directory:\n    \"" << *li << "\"\nin "
                 "INTERFACE_INCLUDE_DIRECTORIES of target \""
                 << target->GetName() << "\" is a subdirectory of the install "
