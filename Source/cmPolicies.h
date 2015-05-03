@@ -254,7 +254,6 @@ public:
 
   ///! convert a string policy ID into a number
   bool GetPolicyID(const char *id, /* out */ cmPolicies::PolicyID &pid);
-  std::string GetPolicyIDString(cmPolicies::PolicyID pid);
 
   ///! Get the default status for a policy
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
