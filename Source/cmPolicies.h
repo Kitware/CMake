@@ -223,9 +223,6 @@ class cmPolicy;
 class cmPolicies
 {
 public:
-  cmPolicies();
-  ~cmPolicies();
-
   /// Status of a policy
   enum PolicyStatus {
     OLD, ///< Use old behavior
@@ -281,10 +278,6 @@ public:
 
   /** Represent a set of policy values.  */
   typedef std::map<PolicyID, PolicyStatus> PolicyMap;
-
-  private:
-  // might have to make these internal for VS6 not sure yet
-  std::map<PolicyID,cmPolicy *> Policies;
 };
 
 #endif
