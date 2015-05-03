@@ -53,7 +53,7 @@ bool cmGetDirectoryPropertyCommand
 
     // lookup the makefile from the directory name
     cmLocalGenerator *lg =
-      this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+      this->Makefile->GetGlobalGenerator()->
       FindLocalGenerator(sd);
     if (!lg)
       {

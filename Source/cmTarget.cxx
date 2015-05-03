@@ -511,7 +511,7 @@ void cmTarget::FinishConfigure()
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   // Do old-style link dependency analysis only for CM_USE_OLD_VS6.
-  if(this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->IsForVS6())
+  if(this->Makefile->GetGlobalGenerator()->IsForVS6())
     {
     this->AnalyzeLibDependenciesForVS6(*this->Makefile);
     }
@@ -847,8 +847,7 @@ cmTarget::GetConfigCommonSourceFiles(std::vector<cmSourceFile*>& files) const
       std::ostringstream e;
       e << "Target \"" << this->Name << "\" has source files which vary by "
         "configuration. This is not supported by the \""
-        << this->Makefile->GetLocalGenerator()
-                         ->GetGlobalGenerator()->GetName()
+        << this->Makefile->GetGlobalGenerator()->GetName()
         << "\" generator.\n"
           "Config \"" << firstConfig << "\":\n"
           "  " << firstConfigFiles << "\n"
@@ -1188,7 +1187,7 @@ void cmTarget::ClearDependencyInformation( cmMakefile& mf,
 //----------------------------------------------------------------------------
 bool cmTarget::NameResolvesToFramework(const std::string& libname) const
 {
-  return this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+  return this->Makefile->GetGlobalGenerator()->
     NameResolvesToFramework(libname);
 }
 
@@ -3329,7 +3328,7 @@ public:
   cmTargetSelectLinker(cmTarget const* target): Preference(0), Target(target)
     {
     this->Makefile = this->Target->GetMakefile();
-    this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+    this->GG = this->Makefile->GetGlobalGenerator();
     }
   void Consider(const std::string& lang)
     {
@@ -3764,7 +3763,7 @@ bool cmTarget::MacOSXRpathInstallNameDirDefault() const
 
   if(cmp0042 == cmPolicies::WARN)
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+    this->Makefile->GetGlobalGenerator()->
       AddCMP0042WarnTarget(this->GetName());
     }
 
@@ -4551,7 +4550,7 @@ bool cmTarget::ComputeOutputDir(const std::string& config,
       "CMAKE_XCODE_EFFECTIVE_PLATFORMS");
     std::string suffix =
       usesDefaultOutputDir && platforms ? "$(EFFECTIVE_PLATFORM_NAME)" : "";
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+    this->Makefile->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", conf, suffix, out);
     }
 
@@ -4613,7 +4612,7 @@ bool cmTarget::ComputePDBOutputDir(const std::string& kind,
   // The generator may add the configuration's subdirectory.
   if(!conf.empty())
     {
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator()->
+    this->Makefile->GetGlobalGenerator()->
       AppendDirectoryForConfig("/", conf, "", out);
     }
   return true;
@@ -5276,8 +5275,7 @@ void cmTarget::GetLanguages(std::set<std::string>& languages,
     }
   else
     {
-    cmGeneratorTarget* gt = this->Makefile->GetLocalGenerator()
-                                ->GetGlobalGenerator()
+    cmGeneratorTarget* gt = this->Makefile->GetGlobalGenerator()
                                 ->GetGeneratorTarget(this);
     gt->GetExternalObjects(externalObjects, config);
     for(std::vector<cmSourceFile const*>::const_iterator

@@ -103,8 +103,7 @@ void cmGeneratorExpressionEvaluationFile::CreateOutputFile(
                                               std::string const& config)
 {
   std::vector<std::string> enabledLanguages;
-  cmGlobalGenerator *gg
-                  = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  cmGlobalGenerator *gg = this->Makefile->GetGlobalGenerator();
   gg->GetEnabledLanguages(enabledLanguages);
 
   for(std::vector<std::string>::const_iterator le = enabledLanguages.begin();
@@ -168,8 +167,7 @@ void cmGeneratorExpressionEvaluationFile::Generate()
     }
 
   std::vector<std::string> enabledLanguages;
-  cmGlobalGenerator *gg
-                  = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  cmGlobalGenerator *gg = this->Makefile->GetGlobalGenerator();
   gg->GetEnabledLanguages(enabledLanguages);
 
   for(std::vector<std::string>::const_iterator le = enabledLanguages.begin();

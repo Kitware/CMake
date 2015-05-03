@@ -3568,8 +3568,7 @@ void cmFileCommand::AddEvaluationFile(const std::string &inputName,
   cmsys::auto_ptr<cmCompiledGeneratorExpression> conditionCge
                                               = conditionGe.Parse(condition);
 
-  this->Makefile->GetLocalGenerator()
-                ->GetGlobalGenerator()->AddEvaluationFile(inputName,
+  this->Makefile->GetGlobalGenerator()->AddEvaluationFile(inputName,
                                                           outputCge,
                                                           this->Makefile,
                                                           conditionCge,
@@ -3772,8 +3771,8 @@ bool cmFileCommand::HandleLockCommand(
   fclose(file);
 
   // Actual lock/unlock
-  cmFileLockPool& lockPool = this->Makefile->GetLocalGenerator()->
-      GetGlobalGenerator()->GetFileLockPool();
+  cmFileLockPool& lockPool = this->Makefile->GetGlobalGenerator()
+                                           ->GetFileLockPool();
 
   cmFileLockResult fileLockResult(cmFileLockResult::MakeOk());
   if (release)

@@ -105,9 +105,8 @@ bool cmBuildCommand
       "Ignoring PROJECT_NAME option because it has no effect.");
     }
 
-  std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateCMakeBuildCommand(target, configuration,
-                                                      "", true);
+  std::string makecommand = this->Makefile->GetGlobalGenerator()
+      ->GenerateCMakeBuildCommand(target, configuration, "", true);
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 
@@ -135,9 +134,8 @@ bool cmBuildCommand
     configType = cfg;
     }
 
-  std::string makecommand = this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->GenerateCMakeBuildCommand("", configType,
-                                                      "", true);
+  std::string makecommand = this->Makefile->GetGlobalGenerator()
+      ->GenerateCMakeBuildCommand("", configType, "", true);
 
   if(cacheValue)
     {

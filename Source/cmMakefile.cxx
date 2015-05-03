@@ -1014,7 +1014,7 @@ cmMakefile::AddCustomCommandToOutput(const std::vector<std::string>& outputs,
   // Generate a rule file if the main dependency is not available.
   if(!file)
     {
-    cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+    cmGlobalGenerator* gg = this->GetGlobalGenerator();
 
     // Construct a rule file associated with the first output produced.
     std::string outName = gg->GenerateRuleFile(outputs[0]);
@@ -1420,8 +1420,7 @@ bool cmMakefile::ParseDefineFlag(std::string const& def, bool remove)
 
   // VS6 IDE does not support definition values with spaces in
   // combination with '"', '$', or ';'.
-  if((this->LocalGenerator->GetGlobalGenerator()->GetName() ==
-             "Visual Studio 6") &&
+  if((this->GetGlobalGenerator()->GetName() == "Visual Studio 6") &&
      (def.find(" ") != def.npos && def.find_first_of("\"$;") != def.npos))
     {
     return false;
@@ -1505,8 +1504,7 @@ void cmMakefile::AddLinkLibraryForTarget(const std::string& target,
   cmTargets::iterator i = this->Targets.find(target);
   if ( i != this->Targets.end())
     {
-    cmTarget* tgt =
-      this->GetCMakeInstance()->GetGlobalGenerator()->FindTarget(lib);
+    cmTarget* tgt = this->GetGlobalGenerator()->FindTarget(lib);
     if(tgt)
       {
       // if it is not a static or shared library then you can not link to it
@@ -1698,10 +1696,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
 
   // create a new local generator and set its parent
-  cmLocalGenerator *lg2 =
-    this->LocalGenerator->GetGlobalGenerator()
+  cmLocalGenerator *lg2 = this->GetGlobalGenerator()
         ->CreateLocalGenerator(this->LocalGenerator);
-  this->LocalGenerator->GetGlobalGenerator()->AddLocalGenerator(lg2);
+  this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 
   // set the subdirs start dirs
   lg2->GetMakefile()->SetCurrentSourceDirectory(srcPath);
@@ -2017,7 +2014,7 @@ void cmMakefile::AddGlobalLinkInformation(const std::string& name,
 void cmMakefile::AddAlias(const std::string& lname, cmTarget *tgt)
 {
   this->AliasTargets[lname] = tgt;
-  this->LocalGenerator->GetGlobalGenerator()->AddAlias(lname, tgt);
+  this->GetGlobalGenerator()->AddAlias(lname, tgt);
 }
 
 cmTarget* cmMakefile::AddLibrary(const std::string& lname,
@@ -2074,7 +2071,7 @@ cmMakefile::AddNewTarget(cmTarget::TargetType type, const std::string& name)
   cmTarget& target = it->second;
   target.SetType(type, name);
   target.SetMakefile(this);
-  this->LocalGenerator->GetGlobalGenerator()->AddTarget(&it->second);
+  this->GetGlobalGenerator()->AddTarget(&it->second);
   return &it->second;
 }
 
@@ -2218,7 +2215,7 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
     }
   // build the whole source group path
   const char* fullname = sg->GetFullName();
-  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+  cmGlobalGenerator* gg = this->GetGlobalGenerator();
   if(strlen(fullname))
     {
     std::string guidName = "SG_Filter_";
@@ -3175,7 +3172,7 @@ std::string
 cmMakefile::GetConfigurations(std::vector<std::string>& configs,
                               bool single) const
 {
-  if(this->LocalGenerator->GetGlobalGenerator()->IsMultiConfig())
+  if(this->GetGlobalGenerator()->IsMultiConfig())
     {
     if(const char* configTypes =
        this->GetDefinition("CMAKE_CONFIGURATION_TYPES"))
@@ -3546,10 +3543,8 @@ void cmMakefile::EnableLanguage(std::vector<std::string> const &  lang,
                                bool optional)
 {
   this->AddDefinition("CMAKE_CFG_INTDIR",
-                      this->LocalGenerator->GetGlobalGenerator()
-                      ->GetCMakeCFGIntDir());
-  this->LocalGenerator->GetGlobalGenerator()->EnableLanguage(lang, this,
-                                                             optional);
+                      this->GetGlobalGenerator()->GetCMakeCFGIntDir());
+  this->GetGlobalGenerator()->EnableLanguage(lang, this, optional);
 }
 
 int cmMakefile::TryCompile(const std::string& srcdir,
@@ -3579,7 +3574,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
   cmake cm;
   cm.SetIsInTryCompile(true);
   cmGlobalGenerator *gg = cm.CreateGlobalGenerator
-    (this->LocalGenerator->GetGlobalGenerator()->GetName());
+    (this->GetGlobalGenerator()->GetName());
   if (!gg)
     {
     cmSystemTools::Error(
@@ -3640,8 +3635,7 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     cm.SetCacheArgs(*cmakeArgs);
     }
   // to save time we pass the EnableLanguage info directly
-  gg->EnableLanguagesFromGenerator
-    (this->LocalGenerator->GetGlobalGenerator(), this);
+  gg->EnableLanguagesFromGenerator(this->GetGlobalGenerator(), this);
   if(this->IsOn("CMAKE_SUPPRESS_DEVELOPER_WARNINGS"))
     {
     cm.AddCacheEntry("CMAKE_SUPPRESS_DEVELOPER_WARNINGS",
@@ -3673,13 +3667,12 @@ int cmMakefile::TryCompile(const std::string& srcdir,
     }
 
   // finally call the generator to actually build the resulting project
-  int ret =
-    this->LocalGenerator->GetGlobalGenerator()->TryCompile(srcdir,bindir,
-                                                           projectName,
-                                                           targetName,
-                                                           fast,
-                                                           output,
-                                                           this);
+  int ret = this->GetGlobalGenerator()->TryCompile(srcdir,bindir,
+                                                   projectName,
+                                                   targetName,
+                                                   fast,
+                                                   output,
+                                                   this);
 
   cmSystemTools::ChangeDirectory(cwd);
   this->Internal->IsSourceFileTryCompile = false;
@@ -4402,16 +4395,14 @@ void cmMakefile::PushScope()
   this->PushLoopBlockBarrier();
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  this->GetLocalGenerator()->GetGlobalGenerator()->
-    GetFileLockPool().PushFunctionScope();
+  this->GetGlobalGenerator()->GetFileLockPool().PushFunctionScope();
 #endif
 }
 
 void cmMakefile::PopScope()
 {
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-  this->GetLocalGenerator()->GetGlobalGenerator()->
-    GetFileLockPool().PopFunctionScope();
+  this->GetGlobalGenerator()->GetFileLockPool().PopFunctionScope();
 #endif
 
   this->PopLoopBlockBarrier();
@@ -4474,7 +4465,7 @@ cmMakefile::AddImportedTarget(const std::string& name,
   this->ImportedTargets[name] = target.get();
   if(global)
     {
-    this->LocalGenerator->GetGlobalGenerator()->AddTarget(target.get());
+    this->GetGlobalGenerator()->AddTarget(target.get());
     }
 
   // Transfer ownership to this cmMakefile object.
@@ -4502,8 +4493,7 @@ cmTarget* cmMakefile::FindTargetToUse(const std::string& name,
     }
 
   // Look for a target built in this project.
-  return this->LocalGenerator->GetGlobalGenerator()->FindTarget(name,
-                                                              excludeAliases);
+  return this->GetGlobalGenerator()->FindTarget(name, excludeAliases);
 }
 
 //----------------------------------------------------------------------------
@@ -4511,8 +4501,7 @@ bool cmMakefile::IsAlias(const std::string& name) const
 {
   if (this->AliasTargets.find(name) != this->AliasTargets.end())
     return true;
-  return this->GetLocalGenerator()->GetGlobalGenerator()->IsAlias(
-                                                              name);
+  return this->GetGlobalGenerator()->IsAlias(name);
 }
 
 //----------------------------------------------------------------------------
@@ -4521,7 +4510,7 @@ cmMakefile::FindGeneratorTargetToUse(const std::string& name) const
 {
   if (cmTarget *t = this->FindTargetToUse(name))
     {
-    return this->LocalGenerator->GetGlobalGenerator()->GetGeneratorTarget(t);
+    return this->GetGlobalGenerator()->GetGeneratorTarget(t);
     }
   return 0;
 }
@@ -4626,7 +4615,7 @@ bool cmMakefile::EnforceUniqueDir(const std::string& srcPath,
                                   const std::string& binPath) const
 {
   // Make sure the binary directory is unique.
-  cmGlobalGenerator* gg = this->LocalGenerator->GetGlobalGenerator();
+  cmGlobalGenerator* gg = this->GetGlobalGenerator();
   if(gg->BinaryDirectoryIsNew(binPath))
     {
     return true;

@@ -212,7 +212,7 @@ struct cmFindLibraryHelper
 cmFindLibraryHelper::cmFindLibraryHelper(cmMakefile* mf):
   Makefile(mf)
 {
-  this->GG = this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  this->GG = this->Makefile->GetGlobalGenerator();
 
   // Collect the list of library name prefixes/suffixes to try.
   const char* prefixes_list =

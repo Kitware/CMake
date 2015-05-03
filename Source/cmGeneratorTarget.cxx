@@ -132,8 +132,7 @@ struct TagVisitor
 
   TagVisitor(cmTarget *target, DataType& data)
     : Data(data), Target(target),
-    GlobalGenerator(target->GetMakefile()
-                          ->GetLocalGenerator()->GetGlobalGenerator()),
+    GlobalGenerator(target->GetMakefile()->GetGlobalGenerator()),
     Header(CM_HEADER_REGEX),
     IsObjLib(target->GetType() == cmTarget::OBJECT_LIBRARY)
   {
@@ -226,7 +225,7 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
 {
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
-  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
+  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
 }
 
 //----------------------------------------------------------------------------
@@ -648,8 +647,7 @@ cmTargetTraceDependencies
 {
   // Convenience.
   this->Makefile = this->Target->GetMakefile();
-  this->GlobalGenerator =
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
   this->CurrentEntry = 0;
 
   // Queue all the source files already specified for the target.
@@ -1025,8 +1023,7 @@ void cmGeneratorTarget::GenerateTargetManifest(
     return;
     }
   cmMakefile* mf = this->Target->GetMakefile();
-  cmLocalGenerator* lg = mf->GetLocalGenerator();
-  cmGlobalGenerator* gg = lg->GetGlobalGenerator();
+  cmGlobalGenerator* gg = mf->GetGlobalGenerator();
 
   // Get the names.
   std::string name;

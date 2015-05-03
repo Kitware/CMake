@@ -47,8 +47,7 @@ bool cmGetCMakePropertyCommand
   else if ( args[1] == "COMPONENTS" )
     {
     const std::set<std::string>* components
-      = this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
-        ->GetInstallComponents();
+      = this->Makefile->GetGlobalGenerator()->GetInstallComponents();
     output = cmJoin(*components, ";");
     }
   else
