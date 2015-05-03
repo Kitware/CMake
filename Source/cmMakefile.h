@@ -712,6 +712,7 @@ public:
    * Get the instance
    */
   cmake *GetCMakeInstance() const;
+  cmGlobalGenerator* GetGlobalGenerator() const;
 
   /**
    * Get all the source files this makefile knows about
