@@ -1,7 +1,6 @@
 #include "cmPolicies.h"
 #include "cmake.h"
 #include "cmMakefile.h"
-#include "cmSourceFile.h"
 #include "cmVersion.h"
 #include "cmVersionMacros.h"
 #include "cmAlgorithms.h"
