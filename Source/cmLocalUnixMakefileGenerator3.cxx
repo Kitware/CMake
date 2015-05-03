@@ -80,8 +80,8 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::
-cmLocalUnixMakefileGenerator3(cmLocalGenerator* parent)
-  : cmLocalGenerator(parent)
+cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
+  : cmLocalGenerator(gg, parent)
 {
   this->WindowsShell = false;
   this->IncludeDirective = "include";

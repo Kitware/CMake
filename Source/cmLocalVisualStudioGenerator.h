@@ -45,7 +45,8 @@ public:
     VS14 = 140
   };
 
-  cmLocalVisualStudioGenerator(VSVersion v, cmLocalGenerator* parent);
+  cmLocalVisualStudioGenerator(VSVersion v, cmGlobalGenerator* gg,
+                               cmLocalGenerator* parent);
   virtual ~cmLocalVisualStudioGenerator();
 
   /** Construct a script from the given list of command lines.  */

@@ -15,8 +15,9 @@
 #include "cmMakefile.h"
 
 //----------------------------------------------------------------------------
-cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmLocalGenerator* parent)
-  : cmLocalGenerator(parent)
+cmLocalXCodeGenerator::cmLocalXCodeGenerator(cmGlobalGenerator* gg,
+                                             cmLocalGenerator* parent)
+  : cmLocalGenerator(gg, parent)
 {
   // the global generator does this, so do not
   // put these flags into the language flags

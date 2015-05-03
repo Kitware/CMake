@@ -43,14 +43,17 @@
 #include <StorageDefs.h>
 #endif
 
-cmLocalGenerator::cmLocalGenerator(cmLocalGenerator* parent)
+cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
+                                   cmLocalGenerator* parent)
 {
-  this->Makefile = 0; // moved to after set on global
+  this->GlobalGenerator = gg;
   this->Parent = parent;
   if (parent)
     {
     parent->AddChild(this);
     }
+  this->Makefile = new cmMakefile(this);
+
   this->WindowsShell = false;
   this->WindowsVSIDE = false;
   this->WatcomWMake = false;
@@ -247,13 +250,6 @@ void cmLocalGenerator::SetupPathConversions()
     (this->Makefile->GetCurrentBinaryDirectory());
   cmSystemTools::SplitPath(outdir,
                            this->StartOutputDirectoryComponents);
-}
-
-
-void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
-{
-  this->GlobalGenerator = gg;
-  this->Makefile = new cmMakefile(this);
 }
 
 void cmLocalGenerator::ConfigureFinalPass()

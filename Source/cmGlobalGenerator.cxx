@@ -1877,9 +1877,7 @@ void cmGlobalGenerator::EnableInstallTarget()
 cmLocalGenerator *
 cmGlobalGenerator::CreateLocalGenerator(cmLocalGenerator *parent)
 {
-  cmLocalGenerator *lg = new cmLocalGenerator(parent);
-  lg->SetGlobalGenerator(this);
-  return lg;
+  return new cmLocalGenerator(this, parent);
 }
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen,

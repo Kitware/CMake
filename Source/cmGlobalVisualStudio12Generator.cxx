@@ -220,11 +220,8 @@ void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
 cmLocalGenerator *
 cmGlobalVisualStudio12Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalVisualStudio10Generator* lg =
-    new cmLocalVisualStudio10Generator(cmLocalVisualStudioGenerator::VS12,
-                                       parent);
-  lg->SetGlobalGenerator(this);
-  return lg;
+  return new cmLocalVisualStudio10Generator(
+    cmLocalVisualStudioGenerator::VS12, this, parent);
 }
 
 //----------------------------------------------------------------------------

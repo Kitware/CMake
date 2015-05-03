@@ -173,9 +173,7 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
 cmLocalGenerator *
 cmGlobalVisualStudio6Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalGenerator *lg = new cmLocalVisualStudio6Generator(parent);
-  lg->SetGlobalGenerator(this);
-  return lg;
+  return new cmLocalVisualStudio6Generator(this, parent);
 }
 
 

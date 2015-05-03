@@ -33,7 +33,7 @@ class cmCustomCommandGenerator;
 class cmLocalGenerator
 {
 public:
-  cmLocalGenerator(cmLocalGenerator* parent);
+  cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent);
   virtual ~cmLocalGenerator();
 
   /**
@@ -87,9 +87,6 @@ public:
     return this->GlobalGenerator; }
   const cmGlobalGenerator *GetGlobalGenerator() const {
     return this->GlobalGenerator; }
-
-  ///! Set the Global Generator, done on creation by the GlobalGenerator
-  void SetGlobalGenerator(cmGlobalGenerator *gg);
 
   /**
    * Convert something to something else. This is a centralized conversion
