@@ -255,15 +255,6 @@ public:
   ///! Get the default status for a policy
   cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
 
-  ///! Define a Policy for CMake
-  void DefinePolicy(cmPolicies::PolicyID id,
-                    const char *stringID,
-                    const char *shortDescription,
-                    unsigned int majorVersionIntroduced,
-                    unsigned int minorVersionIntroduced,
-                    unsigned int patchVersionIntroduced,
-                    cmPolicies::PolicyStatus status);
-
   ///! Set a policy level for this listfile
   bool ApplyPolicyVersion(cmMakefile *mf, const char *version);
 

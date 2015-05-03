@@ -121,16 +121,6 @@ const char* idToShortDescription(cmPolicies::PolicyID id)
   return 0;
 }
 
-void cmPolicies::DefinePolicy(cmPolicies::PolicyID,
-                              const char *,
-                              const char *,
-                              unsigned int,
-                              unsigned int,
-                              unsigned int,
-                              cmPolicies::PolicyStatus)
-{
-}
-
 //----------------------------------------------------------------------------
 static void DiagnoseAncientPolicies(
     std::vector<cmPolicies::PolicyID> const& ancient,
