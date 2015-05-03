@@ -41,7 +41,6 @@ public:
     REQUIRED_IF_USED,
     REQUIRED_ALWAYS ///< Issue an error unless user sets policy status to NEW.
   };
-  static const char* PolicyStatusNames[];
 
   /// Policy identifiers
   enum PolicyID

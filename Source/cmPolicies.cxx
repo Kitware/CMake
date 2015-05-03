@@ -9,10 +9,6 @@
 #include <queue>
 #include <assert.h>
 
-const char* cmPolicies::PolicyStatusNames[] = {
-  "OLD", "WARN", "NEW", "REQUIRED_IF_USED", "REQUIRED_ALWAYS"
-};
-
 class cmPolicy
 {
 public:
