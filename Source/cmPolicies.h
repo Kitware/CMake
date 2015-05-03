@@ -250,22 +250,22 @@ public:
   };
 
   ///! convert a string policy ID into a number
-  bool GetPolicyID(const char *id, /* out */ cmPolicies::PolicyID &pid);
+  static bool GetPolicyID(const char *id, /* out */ cmPolicies::PolicyID &pid);
 
   ///! Get the default status for a policy
-  cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
+  static cmPolicies::PolicyStatus GetPolicyStatus(cmPolicies::PolicyID id);
 
   ///! Set a policy level for this listfile
-  bool ApplyPolicyVersion(cmMakefile *mf, const char *version);
+  static bool ApplyPolicyVersion(cmMakefile *mf, const char *version);
 
   ///! return a warning string for a given policy
-  std::string GetPolicyWarning(cmPolicies::PolicyID id);
+  static std::string GetPolicyWarning(cmPolicies::PolicyID id);
 
   ///! return an error string for when a required policy is unspecified
-  std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
+  static std::string GetRequiredPolicyError(cmPolicies::PolicyID id);
 
   ///! return an error string for when a required policy is unspecified
-  std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
+  static std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
 
   /** Represent a set of policy values.  */
   typedef std::map<PolicyID, PolicyStatus> PolicyMap;

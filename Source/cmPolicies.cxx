@@ -243,7 +243,7 @@ bool cmPolicies::ApplyPolicyVersion(cmMakefile *mf,
     {
     if (isPolicyNewerThan(pid, majorVer, minorVer, patchVer))
       {
-      if(this->GetPolicyStatus(pid) == cmPolicies::REQUIRED_ALWAYS)
+      if(cmPolicies::GetPolicyStatus(pid) == cmPolicies::REQUIRED_ALWAYS)
         {
         ancientPolicies.push_back(pid);
         }
