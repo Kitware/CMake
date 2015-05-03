@@ -45,6 +45,10 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
   return true;
 }
 
+#define CM_SELECT_ID_VERSION(F, A1, A2, A3, A4, A5, A6) F(A1, A3, A4, A5)
+#define CM_FOR_EACH_POLICY_ID_VERSION(POLICY) \
+  CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_VERSION)
+
 static const char* idToString(cmPolicies::PolicyID id)
 {
   switch(id)
@@ -53,6 +57,21 @@ static const char* idToString(cmPolicies::PolicyID id)
     case cmPolicies::ID: \
       return #ID;
   CM_FOR_EACH_POLICY_ID(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return 0;
+    }
+  return 0;
+}
+
+static const char* idToVersion(cmPolicies::PolicyID id)
+{
+  switch(id)
+    {
+#define POLICY_CASE(ID, V_MAJOR, V_MINOR, V_PATCH) \
+    case cmPolicies::ID: \
+      return #V_MAJOR "." #V_MINOR "." #V_PATCH;
+  CM_FOR_EACH_POLICY_ID_VERSION(POLICY_CASE)
 #undef POLICY_CASE
     case cmPolicies::CMPCOUNT:
       return 0;
@@ -76,17 +95,6 @@ public:
     this->MinorVersionIntroduced = minorVersionIntroduced;
     this->PatchVersionIntroduced = patchVersionIntroduced;
     this->Status = status;
-  }
-
-  std::string GetVersionString()
-  {
-    std::ostringstream v;
-    v << this->MajorVersionIntroduced << "." << this->MinorVersionIntroduced;
-    if(this->PatchVersionIntroduced > 0)
-      {
-      v << "." << this->PatchVersionIntroduced;
-      }
-    return v.str();
   }
 
   bool IsPolicyNewerThan(unsigned int majorV,
@@ -615,7 +623,7 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
     "The policy may be set explicitly using the code\n"
     "  cmake_policy(SET " << idToString(id) << " NEW)\n"
     "or by upgrading all policies with the code\n"
-    "  cmake_policy(VERSION " << pos->second->GetVersionString() <<
+    "  cmake_policy(VERSION " << idToVersion(id) <<
     ") # or later\n"
     "Run \"cmake --help-command cmake_policy\" for more information.";
   return error.str();
@@ -646,7 +654,7 @@ cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
   e << "Policy " << pid << " may not be set to OLD behavior because this "
     << "version of CMake no longer supports it.  "
     << "The policy was introduced in "
-    << "CMake version " << this->Policies[id]->GetVersionString()
+    << "CMake version " << idToVersion(id)
     << ", and use of NEW behavior is now required."
     << "\n"
     << "Please either update your CMakeLists.txt files to conform to "
