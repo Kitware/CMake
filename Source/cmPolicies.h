@@ -14,7 +14,6 @@
 
 #include "cmCustomCommand.h"
 
-class cmake;
 class cmMakefile;
 class cmPolicy;
 
