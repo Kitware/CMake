@@ -216,9 +216,7 @@ void cmComputeTargetDepends::CollectTargetDepends(int depender_index)
   // deal with config-specific dependencies.
   {
   std::set<std::string> emitted;
-  cmGeneratorTarget* gt = depender->GetMakefile()->GetLocalGenerator()
-                                  ->GetGlobalGenerator()
-                                  ->GetGeneratorTarget(depender);
+  cmGeneratorTarget* gt = this->GlobalGenerator->GetGeneratorTarget(depender);
 
   std::vector<std::string> configs;
   depender->GetMakefile()->GetConfigurations(configs);
