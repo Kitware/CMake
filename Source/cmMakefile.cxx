@@ -569,7 +569,7 @@ cmMakefile::IncludeScope::~IncludeScope()
     // one we pushed above.  If the entry is empty, then the included
     // script did not set any policies that might affect the includer so
     // we do not need to enforce the policy.
-    if(this->CheckCMP0011 && this->Makefile->PolicyStack.back().empty())
+    if(this->CheckCMP0011 && this->Makefile->PolicyStack.back().IsEmpty())
       {
       this->CheckCMP0011 = false;
       }
@@ -4772,10 +4772,9 @@ cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
   for(PolicyStackType::const_reverse_iterator psi = this->PolicyStack.rbegin();
       psi != this->PolicyStack.rend(); ++psi)
     {
-    PolicyStackEntry::const_iterator pse = psi->find(id);
-    if(pse != psi->end())
+    if(psi->IsDefined(id))
       {
-      return pse->second;
+      return psi->Get(id);
       }
     }
 
@@ -4840,7 +4839,7 @@ bool cmMakefile::SetPolicy(cmPolicies::PolicyID id,
   for(PolicyStackType::reverse_iterator psi = this->PolicyStack.rbegin();
       previous_was_weak && psi != this->PolicyStack.rend(); ++psi)
     {
-    (*psi)[id] = status;
+    psi->Set(id, status);
     previous_was_weak = psi->Weak;
     }
 
@@ -4960,7 +4959,7 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
   for(PolicyID pid = cmPolicies::CMP0000;
       pid != cmPolicies::CMPCOUNT; pid = PolicyID(pid+1))
     {
-    pm[pid] = this->GetPolicyStatus(pid);
+    pm.Set(pid, this->GetPolicyStatus(pid));
     }
 }
 

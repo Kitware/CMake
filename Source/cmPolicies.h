@@ -268,7 +268,13 @@ public:
   static std::string GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id);
 
   /** Represent a set of policy values.  */
-  typedef std::map<PolicyID, PolicyStatus> PolicyMap;
+  struct PolicyMap : private std::map<PolicyID, PolicyStatus>
+  {
+    PolicyStatus Get(PolicyID id) const;
+    void Set(PolicyID id, PolicyStatus status);
+    bool IsDefined(PolicyID id) const;
+    bool IsEmpty() const;
+  };
 };
 
 #endif

@@ -342,3 +342,25 @@ cmPolicies::GetRequiredAlwaysPolicyError(cmPolicies::PolicyID id)
     << "Run cmake --help-policy " << pid << " for more information.";
   return e.str();
 }
+
+cmPolicies::PolicyStatus
+cmPolicies::PolicyMap::Get(cmPolicies::PolicyID id) const
+{
+  return this->find(id)->second;
+}
+
+void cmPolicies::PolicyMap::Set(cmPolicies::PolicyID id,
+                                cmPolicies::PolicyStatus status)
+{
+  (*this)[id] = status;
+}
+
+bool cmPolicies::PolicyMap::IsDefined(cmPolicies::PolicyID id) const
+{
+  return this->find(id) != this->end();
+}
+
+bool cmPolicies::PolicyMap::IsEmpty() const
+{
+  return this->empty();
+}
