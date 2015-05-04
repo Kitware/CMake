@@ -64,6 +64,8 @@ int main(int argc, char** argv)
     {
     // Construct and print requested documentation.
     cmake hcm;
+    hcm.SetHomeDirectory("");
+    hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
 
     std::vector<cmDocumentationEntry> generators;

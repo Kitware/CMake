@@ -1925,6 +1925,8 @@ int cmake::CheckBuildSystem()
   // Read the rerun check file and use it to decide whether to do the
   // global generate.
   cmake cm;
+  cm.SetHomeDirectory("");
+  cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
   cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
@@ -2580,6 +2582,9 @@ int cmake::Build(const std::string& dir,
                  const std::vector<std::string>& nativeOptions,
                  bool clean)
 {
+
+  this->SetHomeDirectory("");
+  this->SetHomeOutputDirectory("");
   if(!cmSystemTools::FileIsDirectory(dir))
     {
     std::cerr << "Error: " << dir << " is not a directory\n";

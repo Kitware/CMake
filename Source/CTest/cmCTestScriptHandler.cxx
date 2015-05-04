@@ -336,6 +336,8 @@ void cmCTestScriptHandler::CreateCMake()
     delete this->LocalGenerator;
     }
   this->CMake = new cmake;
+  this->CMake->SetHomeDirectory("");
+  this->CMake->SetHomeOutputDirectory("");
   this->CMake->AddCMakePaths();
   this->GlobalGenerator = new cmGlobalGenerator;
   this->GlobalGenerator->SetCMakeInstance(this->CMake);

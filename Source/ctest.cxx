@@ -160,6 +160,8 @@ int main (int argc, char const* const* argv)
     if(doc.CheckOptions(argc, argv))
       {
       cmake hcm;
+      hcm.SetHomeDirectory("");
+      hcm.SetHomeOutputDirectory("");
       hcm.AddCMakePaths();
 
       // Construct and print requested documentation.

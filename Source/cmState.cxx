@@ -458,6 +458,10 @@ void cmState::SetSourceDirectory(std::string const& sourceDirectory)
 {
   this->SourceDirectory = sourceDirectory;
   cmSystemTools::ConvertToUnixSlashes(this->SourceDirectory);
+
+  cmSystemTools::SplitPath(
+      cmSystemTools::CollapseFullPath(this->SourceDirectory),
+        this->SourceDirectoryComponents);
 }
 
 const char* cmState::GetSourceDirectory() const
@@ -465,15 +469,29 @@ const char* cmState::GetSourceDirectory() const
   return this->SourceDirectory.c_str();
 }
 
+std::vector<std::string> const& cmState::GetSourceDirectoryComponents() const
+{
+  return this->SourceDirectoryComponents;
+}
+
 void cmState::SetBinaryDirectory(std::string const& binaryDirectory)
 {
   this->BinaryDirectory = binaryDirectory;
   cmSystemTools::ConvertToUnixSlashes(this->BinaryDirectory);
+
+  cmSystemTools::SplitPath(
+      cmSystemTools::CollapseFullPath(this->BinaryDirectory),
+        this->BinaryDirectoryComponents);
 }
 
 const char* cmState::GetBinaryDirectory() const
 {
   return this->BinaryDirectory.c_str();
+}
+
+std::vector<std::string> const& cmState::GetBinaryDirectoryComponents() const
+{
+  return this->BinaryDirectoryComponents;
 }
 
 cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)

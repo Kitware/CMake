@@ -123,6 +123,9 @@ public:
   const char* GetBinaryDirectory() const;
   void SetBinaryDirectory(std::string const& binaryDirectory);
 
+  std::vector<std::string> const& GetSourceDirectoryComponents() const;
+  std::vector<std::string> const& GetBinaryDirectoryComponents() const;
+
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
@@ -132,6 +135,9 @@ private:
   std::vector<std::string> Locations;
   std::vector<std::string> OutputLocations;
   std::vector<PositionType> ParentPositions;
+
+  std::vector<std::string> SourceDirectoryComponents;
+  std::vector<std::string> BinaryDirectoryComponents;
   std::string SourceDirectory;
   std::string BinaryDirectory;
   bool IsInTryCompile;

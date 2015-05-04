@@ -214,6 +214,8 @@ int do_cmake(int ac, char const* const* av)
     {
     // Construct and print requested documentation.
     cmake hcm;
+    hcm.SetHomeDirectory("");
+    hcm.SetHomeOutputDirectory("");
     hcm.AddCMakePaths();
 
     // the command line args are processed here so that you can do
@@ -317,10 +319,14 @@ int do_cmake(int ac, char const* const* av)
   if (sysinfo)
     {
     cmake cm;
+    cm.SetHomeDirectory("");
+    cm.SetHomeOutputDirectory("");
     int ret = cm.GetSystemInformation(args);
     return ret;
     }
   cmake cm;
+  cm.SetHomeDirectory("");
+  cm.SetHomeOutputDirectory("");
   cmSystemTools::SetMessageCallback(cmakemainMessageCallback, (void *)&cm);
   cm.SetProgressCallback(cmakemainProgressCallback, (void *)&cm);
   cm.SetWorkingMode(workingMode);

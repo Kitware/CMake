@@ -711,6 +711,8 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
           }
 
         cmake cm;
+        cm.SetHomeDirectory("");
+        cm.SetHomeOutputDirectory("");
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
         cmGlobalGenerator gg;

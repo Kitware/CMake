@@ -458,9 +458,7 @@ protected:
   cmMakefile *Makefile;
   cmState::Snapshot StateSnapshot;
   cmGlobalGenerator *GlobalGenerator;
-  std::vector<std::string> HomeDirectoryComponents;
   std::vector<std::string> StartDirectoryComponents;
-  std::vector<std::string> HomeOutputDirectoryComponents;
   std::vector<std::string> StartOutputDirectoryComponents;
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
