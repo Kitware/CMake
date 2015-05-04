@@ -119,8 +119,7 @@ bool cmExportCommand
 
   std::vector<std::string> targets;
 
-  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
-                                        ->GetGlobalGenerator();
+  cmGlobalGenerator *gg = this->Makefile->GetGlobalGenerator();
 
   if(args[0] == "EXPORT")
     {

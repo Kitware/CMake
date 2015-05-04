@@ -768,8 +768,7 @@ static const struct CompileLanguageNode : public cmGeneratorExpressionNode
       }
 
     std::vector<std::string> enabledLanguages;
-    cmGlobalGenerator* gg
-        = context->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+    cmGlobalGenerator* gg = context->Makefile->GetGlobalGenerator();
     gg->GetEnabledLanguages(enabledLanguages);
     if (!parameters.empty() &&
           std::find(enabledLanguages.begin(), enabledLanguages.end(),

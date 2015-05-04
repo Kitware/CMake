@@ -396,7 +396,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 
   std::vector<std::string> rcc_output;
   bool const isNinja =
-    makefile->GetLocalGenerator()->GetGlobalGenerator()->GetName() == "Ninja";
+    makefile->GetGlobalGenerator()->GetName() == "Ninja";
   if(isNinja
 #if defined(_WIN32) && !defined(__CYGWIN__)
         || usePRE_BUILD
@@ -524,9 +524,8 @@ static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
   cmMakefile* makefile = target->GetMakefile();
   cmLocalGenerator* localGen = makefile->GetLocalGenerator();
   std::vector<std::string> includeDirs;
-  cmGeneratorTarget *gtgt = target->GetMakefile()->GetLocalGenerator()
-                                 ->GetGlobalGenerator()
-                                 ->GetGeneratorTarget(target);
+  cmGeneratorTarget *gtgt = localGen->GetGlobalGenerator()
+                                    ->GetGeneratorTarget(target);
   // Get the include dirs for this target, without stripping the implicit
   // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
   localGen->GetIncludeDirectories(includeDirs, gtgt, "CXX", config, false);

@@ -728,8 +728,7 @@ cmInstallTargetGenerator
           i != oldRuntimeDirs.end(); ++i)
         {
         std::string runpath =
-          mf->GetLocalGenerator()->
-          GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
+          mf->GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
 
         if(runpaths.find(runpath) == runpaths.end())
           {
@@ -745,8 +744,7 @@ cmInstallTargetGenerator
           i != newRuntimeDirs.end(); ++i)
         {
         std::string runpath =
-          mf->GetLocalGenerator()->
-          GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
+          mf->GetGlobalGenerator()->ExpandCFGIntDir(*i, config);
 
         if(runpaths.find(runpath) == runpaths.end())
           {

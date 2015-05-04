@@ -120,8 +120,7 @@ void cmSourceFileLocation::UpdateExtension(const std::string& name)
   if(!ext.empty()) { ext = ext.substr(1); }
 
   // The global generator checks extensions of enabled languages.
-  cmGlobalGenerator* gg =
-    this->Makefile->GetLocalGenerator()->GetGlobalGenerator();
+  cmGlobalGenerator* gg = this->Makefile->GetGlobalGenerator();
   cmMakefile const* mf = this->Makefile;
   const std::vector<std::string>& srcExts = mf->GetSourceExtensions();
   const std::vector<std::string>& hdrExts = mf->GetHeaderExtensions();

@@ -247,7 +247,7 @@ cmComputeLinkInformation
   this->Target = target;
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator = this->Makefile->GetLocalGenerator();
-  this->GlobalGenerator = this->LocalGenerator->GetGlobalGenerator();
+  this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
   // Check whether to recognize OpenBSD-style library versioned names.

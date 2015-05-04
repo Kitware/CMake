@@ -207,8 +207,7 @@ bool cmSetPropertyCommand::HandleDirectoryMode()
 
     // Lookup the generator.
     if(cmLocalGenerator* lg =
-       (this->Makefile->GetLocalGenerator()
-        ->GetGlobalGenerator()->FindLocalGenerator(dir)))
+       this->Makefile->GetGlobalGenerator()->FindLocalGenerator(dir))
       {
       // Use the makefile for the directory found.
       mf = lg->GetMakefile();

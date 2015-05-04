@@ -93,8 +93,7 @@ bool cmIncludeCommand
       cmSystemTools::CollapseFullPath(fname,
                                  this->Makefile->GetCurrentSourceDirectory());
 
-  cmGlobalGenerator *gg = this->Makefile->GetLocalGenerator()
-                                        ->GetGlobalGenerator();
+  cmGlobalGenerator *gg = this->Makefile->GetGlobalGenerator();
   if (gg->IsExportedTargetsFile(fname_abs))
     {
     const char *modal = 0;

@@ -22,14 +22,13 @@ bool cmInstallProgramsCommand
     }
 
   // Enable the install target.
-  this->Makefile->GetLocalGenerator()
-    ->GetGlobalGenerator()->EnableInstallTarget();
+  this->Makefile->GetGlobalGenerator()->EnableInstallTarget();
 
   this->Destination = args[0];
 
   this->FinalArgs.insert(this->FinalArgs.end(), args.begin() + 1, args.end());
 
-  this->Makefile->GetLocalGenerator()->GetGlobalGenerator()
+  this->Makefile->GetGlobalGenerator()
                        ->AddInstallComponent(this->Makefile->GetSafeDefinition(
                                       "CMAKE_INSTALL_DEFAULT_COMPONENT_NAME"));
 
