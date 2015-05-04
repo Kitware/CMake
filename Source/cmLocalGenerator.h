@@ -298,9 +298,6 @@ public:
                              bool forEcho = false,
                              bool useWatcomQuote = false);
 
-  /** Backwards-compatibility version of EscapeForShell.  */
-  std::string EscapeForShellOldStyle(const std::string& str);
-
   /** Escape the given string as an argument in a CMake script.  */
   static std::string EscapeForCMake(const std::string& str);
 
