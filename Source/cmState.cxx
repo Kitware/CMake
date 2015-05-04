@@ -522,3 +522,24 @@ void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
     cmSystemTools::CollapseFullPath(
         this->State->OutputLocations[this->Position]);
 }
+
+bool cmState::Snapshot::IsValid() const
+{
+  return this->State ? true : false;
+}
+
+cmState::Snapshot cmState::Snapshot::GetParent() const
+{
+  Snapshot snapshot;
+  if (!this->State)
+    {
+    return snapshot;
+    }
+  PositionType parentPos = this->State->ParentPositions[this->Position];
+  if (parentPos > 0)
+    {
+    snapshot = Snapshot(this->State, parentPos);
+    }
+
+  return snapshot;
+}

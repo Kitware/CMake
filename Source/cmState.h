@@ -36,6 +36,9 @@ public:
     const char* GetCurrentBinaryDirectory() const;
     void SetCurrentBinaryDirectory(std::string const& dir);
 
+    bool IsValid() const;
+    Snapshot GetParent() const;
+
   private:
     friend class cmState;
     cmState* State;
