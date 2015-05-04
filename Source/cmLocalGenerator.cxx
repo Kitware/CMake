@@ -2853,41 +2853,71 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::FindRelativePathTopSource()
 {
-  // Relative path conversion within a single tree managed by CMake is
-  // safe.  We can use our parent relative path top if and only if
-  // this is a subdirectory of that top.
-  if(cmLocalGenerator* parent = this->GetParent())
+  cmLocalGenerator* gen = this;
+  std::vector<cmLocalGenerator*> gens;
+  gens.push_back(gen);
+  while (true)
     {
-    std::string parentTop = parent->FindRelativePathTopSource();
-    if(cmSystemTools::IsSubDirectory(
-         this->StateSnapshot.GetCurrentSourceDirectory(), parentTop))
+    gen = gen->GetParent();
+    if (gen)
       {
-      return parentTop;
+      gens.push_back(gen);
+      }
+    else
+      {
+      break;
       }
     }
 
-  // Otherwise this directory itself is the new top.
-  return this->StateSnapshot.GetCurrentSourceDirectory();
+  std::string result = gens.front()->StateSnapshot.GetCurrentSourceDirectory();
+
+  for (std::vector<cmLocalGenerator*>::const_iterator it = gens.begin() + 1;
+       it != gens.end(); ++it)
+  {
+    std::string currentSource =
+        (*it)->StateSnapshot.GetCurrentSourceDirectory();
+    if(cmSystemTools::IsSubDirectory(result, currentSource))
+      {
+      result = currentSource;
+      }
+    }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::FindRelativePathTopBinary()
 {
-  // Relative path conversion within a single tree managed by CMake is
-  // safe.  We can use our parent relative path top if and only if
-  // this is a subdirectory of that top.
-  if(cmLocalGenerator* parent = this->GetParent())
+  cmLocalGenerator* gen = this;
+  std::vector<cmLocalGenerator*> gens;
+  gens.push_back(gen);
+  while (true)
     {
-    std::string parentTop = parent->FindRelativePathTopBinary();
-    if(cmSystemTools::IsSubDirectory(
-         this->StateSnapshot.GetCurrentBinaryDirectory(), parentTop))
+    gen = gen->GetParent();
+    if (gen)
       {
-      return parentTop;
+      gens.push_back(gen);
+      }
+    else
+      {
+      break;
       }
     }
 
-  // Otherwise this directory itself is the new top.
-  return this->StateSnapshot.GetCurrentBinaryDirectory();
+  std::string result = gens.front()->StateSnapshot.GetCurrentBinaryDirectory();
+
+  for (std::vector<cmLocalGenerator*>::const_iterator it = gens.begin() + 1;
+       it != gens.end(); ++it)
+  {
+    std::string currentBinary =
+        (*it)->StateSnapshot.GetCurrentBinaryDirectory();
+    if(cmSystemTools::IsSubDirectory(result, currentBinary))
+      {
+      result = currentBinary;
+      }
+    }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------
