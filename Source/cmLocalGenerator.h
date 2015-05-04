@@ -383,6 +383,11 @@ public:
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const* gt = 0);
 
+  bool IsWindowsShell() const;
+  bool IsWatcomWMake() const;
+  bool IsMinGWMake() const;
+  bool IsNMake() const;
+
 protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::string& linkLibraries,
@@ -457,17 +462,13 @@ protected:
   std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
-  bool WindowsShell;
-  bool WindowsVSIDE;
-  bool WatcomWMake;
-  bool MinGWMake;
-  bool NMake;
-  bool MSYSShell;
+
   bool LinkScriptShell;
   bool UseRelativePaths;
   bool IgnoreLibPrefix;
   bool Configured;
   bool EmitUniversalBinaryFlags;
+
   // Hack for ExpandRuleVariable until object-oriented version is
   // committed.
   std::string TargetImplib;

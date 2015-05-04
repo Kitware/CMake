@@ -23,8 +23,6 @@ cmLocalVisualStudioGenerator
                                cmLocalGenerator* parent)
   : cmLocalGenerator(gg, parent)
 {
-  this->WindowsShell = true;
-  this->WindowsVSIDE = true;
   this->Version = v;
 }
 

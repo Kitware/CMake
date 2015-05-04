@@ -28,9 +28,6 @@ cmLocalNinjaGenerator::cmLocalNinjaGenerator(cmGlobalGenerator* gg,
   , ConfigName("")
   , HomeRelativeOutputPath("")
 {
-#ifdef _WIN32
-  this->WindowsShell = true;
-#endif
   this->TargetImplib = "$TARGET_IMPLIB";
 }
 

@@ -21,6 +21,7 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
+  this->WindowsShell = true;
 }
 
 
@@ -43,7 +44,6 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
   cmLocalUnixMakefileGenerator3* lg =
       new cmLocalUnixMakefileGenerator3(this, parent);
   lg->SetIncludeDirective("!include");
-  lg->SetWindowsShell(true);
   lg->SetDefineWindowsNULL(true);
   lg->SetMakefileVariableSize(32);
   lg->SetPassMakeflags(true);

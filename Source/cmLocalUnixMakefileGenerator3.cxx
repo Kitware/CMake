@@ -83,7 +83,6 @@ cmLocalUnixMakefileGenerator3::
 cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
   : cmLocalGenerator(gg, parent)
 {
-  this->WindowsShell = false;
   this->IncludeDirective = "include";
   this->MakefileVariableSize = 0;
   this->IgnoreLibPrefix = false;
@@ -679,7 +678,7 @@ cmLocalUnixMakefileGenerator3
 
   // Write the list of commands.
   os << cmWrap("\t", commands, "", "\n") << "\n";
-  if(symbolic && !this->WatcomWMake)
+  if(symbolic && !this->IsWatcomWMake())
     {
     os << ".PHONY : " << cmMakeSafe(tgt) << "\n";
     }
@@ -696,7 +695,7 @@ std::string
 cmLocalUnixMakefileGenerator3
 ::ConvertShellCommand(std::string const& cmd, RelativeRoot root)
 {
-  if(this->WatcomWMake &&
+  if(this->IsWatcomWMake() &&
      cmSystemTools::FileIsFullPath(cmd.c_str()) &&
      cmd.find_first_of("( )") != cmd.npos)
     {
@@ -730,7 +729,7 @@ cmLocalUnixMakefileGenerator3
       << "NULL=nul\n"
       << "!ENDIF\n";
     }
-  if(this->WindowsShell)
+  if(this->IsWindowsShell())
     {
      makefileStream
        << "SHELL = cmd.exe\n"
@@ -798,7 +797,8 @@ cmLocalUnixMakefileGenerator3
     makefileStream, "Disable implicit rules so canonical targets will work.",
     ".SUFFIXES", no_depends, no_commands, false);
 
-  if(!this->NMake && !this->WatcomWMake && !this->BorlandMakeCurlyHack)
+  if(!this->IsNMake()
+      && !this->IsWatcomWMake() && !this->BorlandMakeCurlyHack)
     {
     // turn off RCS and SCCS automatic stuff from gmake
     makefileStream
@@ -810,7 +810,7 @@ cmLocalUnixMakefileGenerator3
   depends.push_back(".hpux_make_needs_suffix_list");
   this->WriteMakeRule(makefileStream, 0,
                       ".SUFFIXES", depends, no_commands, false);
-  if(this->WatcomWMake)
+  if(this->IsWatcomWMake())
     {
     // Switch on WMake feature, if an error or interrupt occurs during
     // makefile processing, the current target being made may be deleted
@@ -828,7 +828,7 @@ cmLocalUnixMakefileGenerator3
       << "VERBOSE = 1\n"
       << "\n";
     }
-  if(this->WatcomWMake)
+  if(this->IsWatcomWMake())
     {
     makefileStream <<
       "!ifndef VERBOSE\n"
@@ -962,7 +962,7 @@ cmLocalUnixMakefileGenerator3
 void cmLocalUnixMakefileGenerator3::AppendFlags(std::string& flags,
                                                 const std::string& newFlags)
 {
-  if(this->WatcomWMake && !newFlags.empty())
+  if(this->IsWatcomWMake() && !newFlags.empty())
     {
     std::string newf = newFlags;
     if(newf.find("\\\"") != newf.npos)
@@ -1112,7 +1112,7 @@ cmLocalUnixMakefileGenerator3
       //
       bool useCall = false;
 
-      if (this->WindowsShell)
+      if (this->IsWindowsShell())
         {
         std::string suffix;
         if (cmd.size() > 4)
@@ -1179,7 +1179,7 @@ cmLocalUnixMakefileGenerator3
           {
           cmd = "call " + cmd;
           }
-        else if (this->NMake && cmd[0]=='"')
+        else if (this->IsNMake() && cmd[0]=='"')
           {
           cmd = "echo >nul && " + cmd;
           }
@@ -2344,7 +2344,7 @@ void cmLocalUnixMakefileGenerator3
   // used by NMake and Borland make does not support "cd /d" so this
   // feature simply cannot work with them (Borland make does not even
   // support changing the drive letter with just "d:").
-  const char* cd_cmd = this->MinGWMake? "cd /d " : "cd ";
+  const char* cd_cmd = this->IsMinGWMake() ? "cd /d " : "cd ";
 
   if(!this->UnixCD)
     {

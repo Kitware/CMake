@@ -71,6 +71,13 @@ cmGlobalGenerator::cmGlobalGenerator()
   this->ExtraGenerator = 0;
   this->CurrentLocalGenerator = 0;
   this->TryCompileOuterMakefile = 0;
+
+  this->WindowsShell = false;
+  this->WindowsVSIDE = false;
+  this->WatcomWMake = false;
+  this->MinGWMake = false;
+  this->NMake = false;
+  this->MSYSShell = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
