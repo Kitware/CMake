@@ -66,7 +66,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->UseRelativePaths = false;
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
-  this->RelativePathsConfigured = false;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
 }
@@ -2779,97 +2778,6 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::FindRelativePathTopSource()
-{
-  cmState::Snapshot snapshot = this->StateSnapshot;
-  std::vector<cmState::Snapshot> snapshots;
-  snapshots.push_back(snapshot);
-  while (true)
-    {
-    snapshot = snapshot.GetParent();
-    if (snapshot.IsValid())
-      {
-      snapshots.push_back(snapshot);
-      }
-    else
-      {
-      break;
-      }
-    }
-
-  std::string result = snapshots.front().GetCurrentSourceDirectory();
-
-  for (std::vector<cmState::Snapshot>::const_iterator it =
-       snapshots.begin() + 1; it != snapshots.end(); ++it)
-  {
-    std::string currentSource = it->GetCurrentSourceDirectory();
-    if(cmSystemTools::IsSubDirectory(result, currentSource))
-      {
-      result = currentSource;
-      }
-    }
-
-  return result;
-}
-
-//----------------------------------------------------------------------------
-std::string cmLocalGenerator::FindRelativePathTopBinary()
-{
-  cmState::Snapshot snapshot = this->StateSnapshot;
-  std::vector<cmState::Snapshot> snapshots;
-  snapshots.push_back(snapshot);
-  while (true)
-    {
-    snapshot = snapshot.GetParent();
-    if (snapshot.IsValid())
-      {
-      snapshots.push_back(snapshot);
-      }
-    else
-      {
-      break;
-      }
-    }
-
-  std::string result = snapshots.front().GetCurrentBinaryDirectory();
-
-  for (std::vector<cmState::Snapshot>::const_iterator it =
-       snapshots.begin() + 1; it != snapshots.end(); ++it)
-  {
-    std::string currentBinary = it->GetCurrentBinaryDirectory();
-    if(cmSystemTools::IsSubDirectory(result, currentBinary))
-      {
-      result = currentBinary;
-      }
-    }
-
-  return result;
-}
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::ConfigureRelativePaths()
-{
-  // Relative path conversion inside the source tree is not used to
-  // construct relative paths passed to build tools so it is safe to
-  // even when the source is a network path.
-  std::string source = this->FindRelativePathTopSource();
-  this->RelativePathTopSource = source;
-
-  // The current working directory on Windows cannot be a network
-  // path.  Therefore relative paths cannot work when the binary tree
-  // is a network path.
-  std::string binary = this->FindRelativePathTopBinary();
-  if(binary.size() < 2 || binary.substr(0, 2) != "//")
-    {
-    this->RelativePathTopBinary = binary;
-    }
-  else
-    {
-    this->RelativePathTopBinary = "";
-    }
-}
-
-//----------------------------------------------------------------------------
 static bool cmLocalGeneratorNotAbove(const char* a, const char* b)
 {
   return (cmSystemTools::ComparePath(a, b) ||
@@ -2894,26 +2802,19 @@ cmLocalGenerator::ConvertToRelativePath(const std::vector<std::string>& local,
     return in_remote;
     }
 
-  // Make sure relative path conversion is configured.
-  if(!this->RelativePathsConfigured)
-    {
-    this->ConfigureRelativePaths();
-    this->RelativePathsConfigured = true;
-    }
-
   if(!force)
     {
     // Skip conversion if the path and local are not both in the source
     // or both in the binary tree.
     std::string local_path = cmSystemTools::JoinPath(local);
     if(!((cmLocalGeneratorNotAbove(local_path.c_str(),
-                                   this->RelativePathTopBinary.c_str()) &&
+              this->StateSnapshot.GetRelativePathTopBinary()) &&
           cmLocalGeneratorNotAbove(in_remote.c_str(),
-                                   this->RelativePathTopBinary.c_str())) ||
+              this->StateSnapshot.GetRelativePathTopBinary())) ||
          (cmLocalGeneratorNotAbove(local_path.c_str(),
-                                   this->RelativePathTopSource.c_str()) &&
+              this->StateSnapshot.GetRelativePathTopSource()) &&
           cmLocalGeneratorNotAbove(in_remote.c_str(),
-                                   this->RelativePathTopSource.c_str()))))
+              this->StateSnapshot.GetRelativePathTopSource()))))
       {
       return in_remote;
       }
