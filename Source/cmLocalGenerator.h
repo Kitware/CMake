@@ -449,9 +449,6 @@ protected:
 
   cmMakefile *Makefile;
   cmGlobalGenerator *GlobalGenerator;
-  // members used for relative path function ConvertToMakefilePath
-  std::string RelativePathToSourceDir;
-  std::string RelativePathToBinaryDir;
   std::vector<std::string> HomeDirectoryComponents;
   std::vector<std::string> StartDirectoryComponents;
   std::vector<std::string> HomeOutputDirectoryComponents;
@@ -466,7 +463,6 @@ protected:
   bool WatcomWMake;
   bool MinGWMake;
   bool NMake;
-  bool ForceUnixPath;
   bool MSYSShell;
   bool LinkScriptShell;
   bool UseRelativePaths;
