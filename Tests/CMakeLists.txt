@@ -46,7 +46,9 @@ configure_file(${CMake_SOURCE_DIR}/Tests/EnforceConfig.cmake.in
 # Testing
 if(BUILD_TESTING)
   set(CMake_TEST_DEVENV "")
-  if(CMAKE_GENERATOR MATCHES "Visual Studio [7-9] " AND
+  if(CMAKE_VS_DEVENV_COMMAND)
+    set(CMake_TEST_DEVENV "${CMAKE_VS_DEVENV_COMMAND}")
+  elseif(CMAKE_GENERATOR MATCHES "Visual Studio [7-9] " AND
       NOT CMAKE_MAKE_PROGRAM MATCHES "[mM][sS][bB][uU][iI][lL][dD]\\.[eE][xX][eE]")
     set(CMake_TEST_DEVENV "${CMAKE_MAKE_PROGRAM}")
   endif()
