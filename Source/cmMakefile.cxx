@@ -121,12 +121,6 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
 
   this->AddDefaultDefinitions();
 
-  this->Initialize();
-}
-
-//----------------------------------------------------------------------------
-void cmMakefile::Initialize()
-{
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");

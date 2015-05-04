@@ -918,7 +918,6 @@ protected:
 private:
   cmMakefile(const cmMakefile& mf);
   cmMakefile& operator=(const cmMakefile& mf);
-  void Initialize();
 
   cmState::Snapshot StateSnapshot;
 
