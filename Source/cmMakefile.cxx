@@ -53,12 +53,7 @@ public:
 
   void PushDefinitions()
   {
-    cmDefinitions* parent = 0;
-    if (!this->VarStack.empty())
-      {
-      parent = &this->VarStack.back();
-      }
-    this->VarStack.push_back(cmDefinitions(parent));
+    this->VarStack.push_back(cmDefinitions());
   }
 
   void InitializeDefinitions(cmMakefile* parent)
@@ -70,7 +65,8 @@ public:
 
   const char* GetDefinition(std::string const& name)
   {
-    return this->VarStack.back().Get(name);
+    return cmDefinitions::Get(name, this->VarStack.rbegin(),
+                                    this->VarStack.rend());
   }
 
   void SetDefinition(std::string const& name, std::string const& value)

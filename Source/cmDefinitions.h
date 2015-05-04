@@ -29,15 +29,11 @@
 class cmDefinitions
 {
 public:
-  /** Construct with the given parent scope.  */
-  cmDefinitions(cmDefinitions* parent = 0);
-
-  /** Returns the parent scope, if any.  */
-  cmDefinitions* GetParent() const { return this->Up; }
-
   /** Get the value associated with a key; null if none.
       Store the result locally if it came from a parent.  */
-  const char* Get(const std::string& key);
+  static const char* Get(const std::string& key,
+                         std::list<cmDefinitions>::reverse_iterator rbegin,
+                         std::list<cmDefinitions>::reverse_iterator rend);
 
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
@@ -69,9 +65,6 @@ private:
   };
   static Def NoDef;
 
-  // Parent scope, if any.
-  cmDefinitions* Up;
-
   // Local definitions, set or unset.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
   typedef cmsys::hash_map<std::string, Def> MapType;
@@ -80,9 +73,9 @@ private:
 #endif
   MapType Map;
 
-  // Internal query and update methods.
-  Def const& GetInternal(const std::string& key);
-
+  static Def const& GetInternal(const std::string& key,
+    std::list<cmDefinitions>::reverse_iterator rbegin,
+    std::list<cmDefinitions>::reverse_iterator rend);
   void MakeClosure(std::set<std::string>& undefined,
                    std::list<cmDefinitions>::const_reverse_iterator rbegin,
                    std::list<cmDefinitions>::const_reverse_iterator rend);

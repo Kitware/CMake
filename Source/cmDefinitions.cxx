@@ -11,38 +11,39 @@
 ============================================================================*/
 #include "cmDefinitions.h"
 
+#include <assert.h>
+
 //----------------------------------------------------------------------------
 cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
-cmDefinitions::cmDefinitions(cmDefinitions* parent)
-  : Up(parent)
+cmDefinitions::Def const& cmDefinitions::GetInternal(
+  const std::string& key,
+  std::list<cmDefinitions>::reverse_iterator rbegin,
+  std::list<cmDefinitions>::reverse_iterator rend)
 {
-}
-
-//----------------------------------------------------------------------------
-cmDefinitions::Def const&
-cmDefinitions::GetInternal(const std::string& key)
-{
-  MapType::const_iterator i = this->Map.find(key);
-  if(i != this->Map.end())
+  assert(rbegin != rend);
+  MapType::const_iterator i = rbegin->Map.find(key);
+  if (i != rbegin->Map.end())
     {
     return i->second;
     }
-  cmDefinitions* up = this->Up;
-  if(!up)
+  std::list<cmDefinitions>::reverse_iterator rit = rbegin;
+  ++rit;
+  if (rit == rend)
     {
-    return this->NoDef;
+    return cmDefinitions::NoDef;
     }
-  // Query the parent scope and store the result locally.
-  Def def = up->GetInternal(key);
-  return this->Map.insert(MapType::value_type(key, def)).first->second;
+  Def const& def = cmDefinitions::GetInternal(key, rit, rend);
+  return rbegin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
 //----------------------------------------------------------------------------
-const char* cmDefinitions::Get(const std::string& key)
+const char* cmDefinitions::Get(const std::string& key,
+    std::list<cmDefinitions>::reverse_iterator rbegin,
+    std::list<cmDefinitions>::reverse_iterator rend)
 {
-  Def const& def = this->GetInternal(key);
+  Def const& def = cmDefinitions::GetInternal(key, rbegin, rend);
   return def.Exists? def.c_str() : 0;
 }
 
