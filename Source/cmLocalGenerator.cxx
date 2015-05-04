@@ -67,7 +67,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
   this->RelativePathsConfigured = false;
-  this->PathConversionsSetup = false;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
 }
@@ -194,22 +193,6 @@ void cmLocalGenerator::ReadInputFile()
   currentStart += "/CMakeLists.txt";
   assert(cmSystemTools::FileExists(currentStart.c_str(), true));
   this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
-}
-
-void cmLocalGenerator::SetupPathConversions()
-{
-  // Setup the current output directory components for use by
-  // Convert
-  std::string outdir;
-
-  outdir = cmSystemTools::CollapseFullPath(
-      this->StateSnapshot.GetCurrentSourceDirectory());
-  cmSystemTools::SplitPath(outdir, this->StartDirectoryComponents);
-
-  outdir = cmSystemTools::CollapseFullPath
-    (this->StateSnapshot.GetCurrentBinaryDirectory());
-  cmSystemTools::SplitPath(outdir,
-                           this->StartOutputDirectoryComponents);
 }
 
 void cmLocalGenerator::ConfigureFinalPass()
@@ -2698,13 +2681,6 @@ std::string cmLocalGenerator::Convert(const std::string& source,
                                       OutputFormat output,
                                       bool optional)
 {
-  // Make sure the relative path conversion components are set.
-  if(!this->PathConversionsSetup)
-    {
-    this->SetupPathConversions();
-    this->PathConversionsSetup = true;
-    }
-
   // Convert the path to a relative path.
   std::string result = source;
 
@@ -2719,20 +2695,18 @@ std::string cmLocalGenerator::Convert(const std::string& source,
         break;
       case START:
         //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result = this->ConvertToRelativePath(this->StartDirectoryComponents,
-                                             result);
+        result = this->ConvertToRelativePath(
+            this->StateSnapshot.GetCurrentSourceDirectoryComponents(), result);
         break;
       case HOME_OUTPUT:
         //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result =
-          this->ConvertToRelativePath(
-              this->GetState()->GetBinaryDirectoryComponents(), result);
+        result = this->ConvertToRelativePath(
+            this->GetState()->GetBinaryDirectoryComponents(), result);
         break;
       case START_OUTPUT:
         //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result =
-          this->ConvertToRelativePath(this->StartOutputDirectoryComponents,
-                                      result);
+        result = this->ConvertToRelativePath(
+            this->StateSnapshot.GetCurrentBinaryDirectoryComponents(), result);
         break;
       case FULL:
         result = cmSystemTools::CollapseFullPath(result);

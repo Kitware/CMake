@@ -197,6 +197,8 @@ void cmState::Initialize()
   this->Locations.clear();
   this->OutputLocations.clear();
   this->ParentPositions.clear();
+  this->CurrentSourceDirectoryComponents.clear();
+  this->CurrentBinaryDirectoryComponents.clear();
 
   this->CreateSnapshot(Snapshot());
   this->DefineProperty
@@ -500,6 +502,10 @@ cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
   this->ParentPositions.push_back(originSnapshot.Position);
   this->Locations.resize(this->Locations.size() + 1);
   this->OutputLocations.resize(this->OutputLocations.size() + 1);
+  this->CurrentSourceDirectoryComponents.resize(
+      this->CurrentSourceDirectoryComponents.size() + 1);
+  this->CurrentBinaryDirectoryComponents.resize(
+      this->CurrentBinaryDirectoryComponents.size() + 1);
   return cmState::Snapshot(this, pos);
 }
 
@@ -523,6 +529,10 @@ void cmState::Snapshot::SetCurrentSourceDirectory(std::string const& dir)
       this->State->Locations[this->Position]);
   this->State->Locations[this->Position] =
     cmSystemTools::CollapseFullPath(this->State->Locations[this->Position]);
+
+  cmSystemTools::SplitPath(
+      this->State->Locations[this->Position],
+      this->State->CurrentSourceDirectoryComponents[this->Position]);
 }
 
 const char* cmState::Snapshot::GetCurrentBinaryDirectory() const
@@ -539,6 +549,22 @@ void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
   this->State->OutputLocations[this->Position] =
     cmSystemTools::CollapseFullPath(
         this->State->OutputLocations[this->Position]);
+
+  cmSystemTools::SplitPath(
+      this->State->OutputLocations[this->Position],
+      this->State->CurrentBinaryDirectoryComponents[this->Position]);
+}
+
+std::vector<std::string> const&
+cmState::Snapshot::GetCurrentSourceDirectoryComponents()
+{
+  return this->State->CurrentSourceDirectoryComponents[this->Position];
+}
+
+std::vector<std::string> const&
+cmState::Snapshot::GetCurrentBinaryDirectoryComponents()
+{
+  return this->State->CurrentBinaryDirectoryComponents[this->Position];
 }
 
 bool cmState::Snapshot::IsValid() const
