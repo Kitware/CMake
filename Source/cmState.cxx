@@ -22,7 +22,6 @@ cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
     IsInTryCompile(false)
 {
-  this->CreateSnapshot(Snapshot());
   this->Initialize();
 }
 
@@ -194,8 +193,12 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
 void cmState::Initialize()
 {
   this->GlobalProperties.clear();
-
   this->PropertyDefinitions.clear();
+  this->Locations.clear();
+  this->OutputLocations.clear();
+  this->ParentPositions.clear();
+
+  this->CreateSnapshot(Snapshot());
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
      "", "", true);
