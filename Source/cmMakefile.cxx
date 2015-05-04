@@ -83,6 +83,9 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->WarnUnused = false;
   this->CheckSystemVars = false;
 
+  this->GeneratingBuildSystem = false;
+  this->SuppressWatches = false;
+
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
   // Setup the default include complaint regular expression (match nothing).
@@ -117,10 +120,8 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->LocalGenerator = localGenerator;
 
   this->AddDefaultDefinitions();
-  this->Initialize();
-  this->GeneratingBuildSystem = false;
 
-  this->SuppressWatches = false;
+  this->Initialize();
 }
 
 //----------------------------------------------------------------------------
