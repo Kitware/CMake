@@ -2853,15 +2853,15 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::FindRelativePathTopSource()
 {
-  cmLocalGenerator* gen = this;
-  std::vector<cmLocalGenerator*> gens;
-  gens.push_back(gen);
+  cmState::Snapshot snapshot = this->StateSnapshot;
+  std::vector<cmState::Snapshot> snapshots;
+  snapshots.push_back(snapshot);
   while (true)
     {
-    gen = gen->GetParent();
-    if (gen)
+    snapshot = snapshot.GetParent();
+    if (snapshot.IsValid())
       {
-      gens.push_back(gen);
+      snapshots.push_back(snapshot);
       }
     else
       {
@@ -2869,13 +2869,12 @@ std::string cmLocalGenerator::FindRelativePathTopSource()
       }
     }
 
-  std::string result = gens.front()->StateSnapshot.GetCurrentSourceDirectory();
+  std::string result = snapshots.front().GetCurrentSourceDirectory();
 
-  for (std::vector<cmLocalGenerator*>::const_iterator it = gens.begin() + 1;
-       it != gens.end(); ++it)
+  for (std::vector<cmState::Snapshot>::const_iterator it =
+       snapshots.begin() + 1; it != snapshots.end(); ++it)
   {
-    std::string currentSource =
-        (*it)->StateSnapshot.GetCurrentSourceDirectory();
+    std::string currentSource = it->GetCurrentSourceDirectory();
     if(cmSystemTools::IsSubDirectory(result, currentSource))
       {
       result = currentSource;
@@ -2888,15 +2887,15 @@ std::string cmLocalGenerator::FindRelativePathTopSource()
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::FindRelativePathTopBinary()
 {
-  cmLocalGenerator* gen = this;
-  std::vector<cmLocalGenerator*> gens;
-  gens.push_back(gen);
+  cmState::Snapshot snapshot = this->StateSnapshot;
+  std::vector<cmState::Snapshot> snapshots;
+  snapshots.push_back(snapshot);
   while (true)
     {
-    gen = gen->GetParent();
-    if (gen)
+    snapshot = snapshot.GetParent();
+    if (snapshot.IsValid())
       {
-      gens.push_back(gen);
+      snapshots.push_back(snapshot);
       }
     else
       {
@@ -2904,13 +2903,12 @@ std::string cmLocalGenerator::FindRelativePathTopBinary()
       }
     }
 
-  std::string result = gens.front()->StateSnapshot.GetCurrentBinaryDirectory();
+  std::string result = snapshots.front().GetCurrentBinaryDirectory();
 
-  for (std::vector<cmLocalGenerator*>::const_iterator it = gens.begin() + 1;
-       it != gens.end(); ++it)
+  for (std::vector<cmState::Snapshot>::const_iterator it =
+       snapshots.begin() + 1; it != snapshots.end(); ++it)
   {
-    std::string currentBinary =
-        (*it)->StateSnapshot.GetCurrentBinaryDirectory();
+    std::string currentBinary = it->GetCurrentBinaryDirectory();
     if(cmSystemTools::IsSubDirectory(result, currentBinary))
       {
       result = currentBinary;
