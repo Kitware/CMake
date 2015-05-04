@@ -95,6 +95,7 @@ public:
    * Set to true if the make tool being used is MinGW Make.
    */
   void SetMinGWMake(bool v)  {this->MinGWMake = v;}
+  bool IsMinGWMake() const { return this->MinGWMake; }
 
   /**
    * Set to true if the make tool being used is NMake.
