@@ -234,6 +234,9 @@ struct kwsysProcess_s
   /* Whether to treat command lines as verbatim.  */
   int Verbatim;
 
+  /* Whether to merge stdout/stderr of the child.  */
+  int MergeOutput;
+
   /* Time at which the child started.  Negative for no timeout.  */
   kwsysProcessTime StartTime;
 
@@ -644,6 +647,7 @@ int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
   switch(optionId)
     {
     case kwsysProcess_Option_Detach: return cp->OptionDetach;
+    case kwsysProcess_Option_MergeOutput: return cp->MergeOutput;
     case kwsysProcess_Option_Verbatim: return cp->Verbatim;
     default: return 0;
     }
@@ -660,6 +664,7 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
   switch(optionId)
     {
     case kwsysProcess_Option_Detach: cp->OptionDetach = value; break;
+    case kwsysProcess_Option_MergeOutput: cp->MergeOutput = value; break;
     case kwsysProcess_Option_Verbatim: cp->Verbatim = value; break;
     default: break;
     }
@@ -997,7 +1002,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       nextStdIn = p[0];
       si.StdOut = p[1];
       }
-    si.StdErr = cp->PipeChildStd[2];
+    si.StdErr = cp->MergeOutput? cp->PipeChildStd[1] : cp->PipeChildStd[2];
 
     {
     int res = kwsysProcessCreate(cp, i, &si);
@@ -1011,7 +1016,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       {
       kwsysProcessCleanupDescriptor(&si.StdOut);
       }
-    if (si.StdErr != cp->PipeChildStd[2])
+    if (si.StdErr != cp->PipeChildStd[2] && !cp->MergeOutput)
       {
       kwsysProcessCleanupDescriptor(&si.StdErr);
       }
