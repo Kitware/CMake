@@ -94,6 +94,11 @@ typedef struct kwsysProcessCreateInformation_s
 {
   /* Windows child startup control data.  */
   STARTUPINFOW StartupInfo;
+
+  /* Original handles before making inherited duplicates.  */
+  HANDLE hStdInput;
+  HANDLE hStdOutput;
+  HANDLE hStdError;
 } kwsysProcessCreateInformation;
 
 
@@ -107,15 +112,12 @@ static void kwsysProcessPipeThreadWakePipe(kwsysProcess* cp,
                                            kwsysProcessPipeData* td);
 static int kwsysProcessInitialize(kwsysProcess* cp);
 static int kwsysProcessCreate(kwsysProcess* cp, int index,
-                              kwsysProcessCreateInformation* si,
-                              PHANDLE readEnd);
+                              kwsysProcessCreateInformation* si);
 static void kwsysProcessDestroy(kwsysProcess* cp, int event);
 static int kwsysProcessSetupOutputPipeFile(PHANDLE handle, const char* name);
-static int kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle);
-static int kwsysProcessSetupPipeNative(PHANDLE handle, HANDLE p[2],
-                                       int isWrite);
+static void kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle);
+static void kwsysProcessSetupPipeNative(HANDLE native, PHANDLE handle);
 static void kwsysProcessCleanupHandle(PHANDLE h);
-static void kwsysProcessCleanupHandleSafe(PHANDLE h, DWORD nStdHandle);
 static void kwsysProcessCleanup(kwsysProcess* cp, int error);
 static void kwsysProcessCleanErrorMessage(kwsysProcess* cp);
 static int kwsysProcessComputeCommandLength(kwsysProcess* cp,
@@ -306,6 +308,10 @@ struct kwsysProcess_s
   /* Real working directory of our own process.  */
   DWORD RealWorkingDirectoryLength;
   wchar_t* RealWorkingDirectory;
+
+  /* Own handles for the child's ends of the pipes in the parent process.
+     Used temporarily during process creation.  */
+  HANDLE PipeChildStd[3];
 };
 
 /*--------------------------------------------------------------------------*/
@@ -445,6 +451,10 @@ kwsysProcess* kwsysProcess_New(void)
       kwsysProcess_Delete(cp);
       return 0;
       }
+    }
+  for(i=0; i < 3; ++i)
+    {
+    cp->PipeChildStd[i] = INVALID_HANDLE_VALUE;
     }
 
   return cp;
@@ -875,9 +885,6 @@ void kwsysProcess_Execute(kwsysProcess* cp)
 {
   int i;
 
-  /* Child startup control data.  */
-  kwsysProcessCreateInformation si;
-
   /* Do not execute a second time.  */
   if(!cp || cp->State == kwsysProcess_State_Executing)
     {
@@ -914,6 +921,133 @@ void kwsysProcess_Execute(kwsysProcess* cp)
     SetCurrentDirectoryW(cp->WorkingDirectory);
     }
 
+
+  /* Setup the stdin pipe for the first process.  */
+  if(cp->PipeFileSTDIN)
+    {
+    /* Create a handle to read a file for stdin.  */
+    wchar_t* wstdin = kwsysEncoding_DupToWide(cp->PipeFileSTDIN);
+    cp->PipeChildStd[0] =
+      CreateFileW(wstdin, GENERIC_READ|GENERIC_WRITE,
+                  FILE_SHARE_READ|FILE_SHARE_WRITE,
+                  0, OPEN_EXISTING, 0, 0);
+    free(wstdin);
+    if(cp->PipeChildStd[0] == INVALID_HANDLE_VALUE)
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+  else if(cp->PipeSharedSTDIN)
+    {
+    /* Share this process's stdin with the child.  */
+    kwsysProcessSetupSharedPipe(STD_INPUT_HANDLE, &cp->PipeChildStd[0]);
+    }
+  else if(cp->PipeNativeSTDIN[0])
+    {
+    /* Use the provided native pipe.  */
+    kwsysProcessSetupPipeNative(cp->PipeNativeSTDIN[0], &cp->PipeChildStd[0]);
+    }
+  else
+    {
+    /* Explicitly give the child no stdin.  */
+    cp->PipeChildStd[0] = INVALID_HANDLE_VALUE;
+    }
+
+  /* Create the output pipe for the last process.
+     We always create this so the pipe thread can run even if we
+     do not end up giving the write end to the child below.  */
+  if(!CreatePipe(&cp->Pipe[KWSYSPE_PIPE_STDOUT].Read,
+                 &cp->Pipe[KWSYSPE_PIPE_STDOUT].Write, 0, 0))
+    {
+    kwsysProcessCleanup(cp, 1);
+    return;
+    }
+
+  if(cp->PipeFileSTDOUT)
+    {
+    /* Use a file for stdout.  */
+    if(!kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[1],
+                                        cp->PipeFileSTDOUT))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+  else if(cp->PipeSharedSTDOUT)
+    {
+    /* Use the parent stdout.  */
+    kwsysProcessSetupSharedPipe(STD_OUTPUT_HANDLE, &cp->PipeChildStd[1]);
+    }
+  else if(cp->PipeNativeSTDOUT[1])
+    {
+    /* Use the given handle for stdout.  */
+    kwsysProcessSetupPipeNative(cp->PipeNativeSTDOUT[1], &cp->PipeChildStd[1]);
+    }
+  else
+    {
+    /* Use our pipe for stdout.  Duplicate the handle since our waker
+       thread will use the original.  Do not make it inherited yet.  */
+    if(!DuplicateHandle(GetCurrentProcess(),
+                        cp->Pipe[KWSYSPE_PIPE_STDOUT].Write,
+                        GetCurrentProcess(), &cp->PipeChildStd[1],
+                        0, FALSE, DUPLICATE_SAME_ACCESS))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+
+  /* Create stderr pipe to be shared by all processes in the pipeline.
+     We always create this so the pipe thread can run even if we do not
+     end up giving the write end to the child below.  */
+  if(!CreatePipe(&cp->Pipe[KWSYSPE_PIPE_STDERR].Read,
+                 &cp->Pipe[KWSYSPE_PIPE_STDERR].Write, 0, 0))
+    {
+    kwsysProcessCleanup(cp, 1);
+    return;
+    }
+
+  if(cp->PipeFileSTDERR)
+    {
+    /* Use a file for stderr.  */
+    if(!kwsysProcessSetupOutputPipeFile(&cp->PipeChildStd[2],
+                                        cp->PipeFileSTDERR))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+  else if(cp->PipeSharedSTDERR)
+    {
+    /* Use the parent stderr.  */
+    kwsysProcessSetupSharedPipe(STD_ERROR_HANDLE, &cp->PipeChildStd[2]);
+    }
+  else if(cp->PipeNativeSTDERR[1])
+    {
+    /* Use the given handle for stderr.  */
+    kwsysProcessSetupPipeNative(cp->PipeNativeSTDERR[1], &cp->PipeChildStd[2]);
+    }
+  else
+    {
+    /* Use our pipe for stderr.  Duplicate the handle since our waker
+       thread will use the original.  Do not make it inherited yet.  */
+    if(!DuplicateHandle(GetCurrentProcess(),
+                        cp->Pipe[KWSYSPE_PIPE_STDERR].Write,
+                        GetCurrentProcess(), &cp->PipeChildStd[2],
+                        0, FALSE, DUPLICATE_SAME_ACCESS))
+      {
+      kwsysProcessCleanup(cp, 1);
+      return;
+      }
+    }
+
+  /* Create the pipeline of processes.  */
+  {
+  /* Child startup control data.  */
+  kwsysProcessCreateInformation si;
+  HANDLE nextStdInput = cp->PipeChildStd[0];
+
   /* Initialize startup info data.  */
   ZeroMemory(&si, sizeof(si));
   si.StartupInfo.cb = sizeof(si.StartupInfo);
@@ -926,105 +1060,72 @@ void kwsysProcess_Execute(kwsysProcess* cp)
   /* Connect the child's output pipes to the threads.  */
   si.StartupInfo.dwFlags |= STARTF_USESTDHANDLES;
 
-  /* Create stderr pipe to be shared by all processes in the pipeline.
-     Neither end is directly inherited.  */
-  if(!CreatePipe(&cp->Pipe[KWSYSPE_PIPE_STDERR].Read,
-                 &cp->Pipe[KWSYSPE_PIPE_STDERR].Write, 0, 0))
-    {
-    kwsysProcessCleanup(cp, 1);
-    return;
-    }
-
-  /* Create an inherited duplicate of the write end, but do not
-     close the non-inherited version.  We need to keep it open
-     to use in waking up the pipe threads.  */
-  if(!DuplicateHandle(GetCurrentProcess(), cp->Pipe[KWSYSPE_PIPE_STDERR].Write,
-                      GetCurrentProcess(), &si.StartupInfo.hStdError,
-                      0, TRUE, DUPLICATE_SAME_ACCESS))
-    {
-    kwsysProcessCleanup(cp, 1);
-    kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
-    return;
-    }
-
-  /* Replace the stderr pipe with a file if requested.  In this case
-     the pipe thread will still run but never report data.  */
-  if(cp->PipeFileSTDERR)
-    {
-    if(!kwsysProcessSetupOutputPipeFile(&si.StartupInfo.hStdError,
-                                        cp->PipeFileSTDERR))
-      {
-      kwsysProcessCleanup(cp, 1);
-      kwsysProcessCleanupHandle(&si.StartupInfo.hStdError);
-      return;
-      }
-    }
-
-  /* Replace the stderr pipe with the parent process's if requested.
-     In this case the pipe thread will still run but never report
-     data.  */
-  if(cp->PipeSharedSTDERR)
-    {
-    if(!kwsysProcessSetupSharedPipe(STD_ERROR_HANDLE,
-                                    &si.StartupInfo.hStdError))
-      {
-      kwsysProcessCleanup(cp, 1);
-      kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError,
-                                    STD_ERROR_HANDLE);
-      return;
-      }
-    }
-
-  /* Replace the stderr pipe with the native pipe provided if any.  In
-     this case the pipe thread will still run but never report
-     data.  */
-  if(cp->PipeNativeSTDERR[1])
-    {
-    if(!kwsysProcessSetupPipeNative(&si.StartupInfo.hStdError,
-                                    cp->PipeNativeSTDERR, 1))
-      {
-      kwsysProcessCleanup(cp, 1);
-      kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError,
-                                    STD_ERROR_HANDLE);
-      return;
-      }
-    }
-
-  /* Create the pipeline of processes.  */
-  {
-  HANDLE readEnd = 0;
   for(i=0; i < cp->NumberOfCommands; ++i)
     {
-    if(kwsysProcessCreate(cp, i, &si, &readEnd))
+    /* Setup the process's pipes.  */
+    si.hStdInput = nextStdInput;
+    if (i == cp->NumberOfCommands-1)
+      {
+      /* The last child gets the overall stdout.  */
+      nextStdInput = INVALID_HANDLE_VALUE;
+      si.hStdOutput = cp->PipeChildStd[1];
+      }
+    else
+      {
+      /* Create a pipe to sit between the children.  */
+      HANDLE p[2] = {INVALID_HANDLE_VALUE, INVALID_HANDLE_VALUE};
+      if (!CreatePipe(&p[0], &p[1], 0, 0))
+        {
+        if (nextStdInput != cp->PipeChildStd[0])
+          {
+          kwsysProcessCleanupHandle(&nextStdInput);
+          }
+        kwsysProcessCleanup(cp, 1);
+        return;
+        }
+      nextStdInput = p[0];
+      si.hStdOutput = p[1];
+      }
+    si.hStdError = cp->PipeChildStd[2];
+
+    {
+    int res = kwsysProcessCreate(cp, i, &si);
+
+    /* Close our copies of pipes used between children.  */
+    if (si.hStdInput != cp->PipeChildStd[0])
+      {
+      kwsysProcessCleanupHandle(&si.hStdInput);
+      }
+    if (si.hStdOutput != cp->PipeChildStd[1])
+      {
+      kwsysProcessCleanupHandle(&si.hStdOutput);
+      }
+    if (si.hStdError != cp->PipeChildStd[2])
+      {
+      kwsysProcessCleanupHandle(&si.hStdError);
+      }
+    if (res)
       {
       cp->ProcessEvents[i+1] = cp->ProcessInformation[i].hProcess;
       }
     else
       {
+      if (nextStdInput != cp->PipeChildStd[0])
+        {
+        kwsysProcessCleanupHandle(&nextStdInput);
+        }
       kwsysProcessCleanup(cp, 1);
-
-      /* Release resources that may have been allocated for this
-         process before an error occurred.  */
-      kwsysProcessCleanupHandle(&readEnd);
-      kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdInput,
-                                    STD_INPUT_HANDLE);
-      kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdOutput,
-                                    STD_OUTPUT_HANDLE);
-      kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError,
-                                    STD_ERROR_HANDLE);
       return;
       }
     }
-
-  /* Save a handle to the output pipe for the last process.  */
-  cp->Pipe[KWSYSPE_PIPE_STDOUT].Read = readEnd;
+    }
   }
 
-  /* Close the inherited handles to the stderr pipe shared by all
-     processes in the pipeline.  The stdout and stdin pipes are not
-     shared among all children and are therefore closed by
-     kwsysProcessCreate after each child is created.  */
-  kwsysProcessCleanupHandleSafe(&si.StartupInfo.hStdError, STD_ERROR_HANDLE);
+  /* The parent process does not need the child's pipe ends.  */
+  for (i=0; i < 3; ++i)
+    {
+    kwsysProcessCleanupHandle(&cp->PipeChildStd[i]);
+    }
 
   /* Restore the working directory.  */
   if(cp->RealWorkingDirectory)
@@ -1543,162 +1644,90 @@ int kwsysProcessInitialize(kwsysProcess* cp)
         }
       }
     }
+  {
+  int i;
+  for (i=0; i < 3; ++i)
+    {
+    cp->PipeChildStd[i] = INVALID_HANDLE_VALUE;
+    }
+  }
 
   return 1;
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcessCreate(kwsysProcess* cp, int index,
-                       kwsysProcessCreateInformation* si,
-                       PHANDLE readEnd)
+static int kwsysProcessCreateChildHandle(PHANDLE out, HANDLE in, int isStdIn)
 {
-  /* Setup the process's stdin.  */
-  if(*readEnd)
-    {
-    /* Create an inherited duplicate of the read end from the output
-       pipe of the previous process.  This also closes the
-       non-inherited version. */
-    if(!DuplicateHandle(GetCurrentProcess(), *readEnd,
-                        GetCurrentProcess(), readEnd,
-                        0, TRUE, (DUPLICATE_CLOSE_SOURCE |
-                                  DUPLICATE_SAME_ACCESS)))
-      {
-      return 0;
-      }
-    si->StartupInfo.hStdInput = *readEnd;
+  DWORD flags;
 
-    /* This function is done with this handle.  */
-    *readEnd = 0;
-    }
-  else if(cp->PipeFileSTDIN)
+  /* Check whether the handle is valid for this process.  */
+  if (in != INVALID_HANDLE_VALUE && GetHandleInformation(in, &flags))
     {
-    /* Create a handle to read a file for stdin.  */
-    wchar_t* wstdin = kwsysEncoding_DupToWide(cp->PipeFileSTDIN);
-    HANDLE fin = CreateFileW(wstdin, GENERIC_READ|GENERIC_WRITE,
-                            FILE_SHARE_READ|FILE_SHARE_WRITE,
-                            0, OPEN_EXISTING, 0, 0);
-    free(wstdin);
-    if(fin == INVALID_HANDLE_VALUE)
+    /* Use the handle as-is if it is already inherited.  */
+    if (flags & HANDLE_FLAG_INHERIT)
       {
-      return 0;
+      *out = in;
+      return 1;
       }
-    /* Create an inherited duplicate of the handle.  This also closes
-       the non-inherited version.  */
-    if(!DuplicateHandle(GetCurrentProcess(), fin,
-                        GetCurrentProcess(), &fin,
-                        0, TRUE, (DUPLICATE_CLOSE_SOURCE |
-                                  DUPLICATE_SAME_ACCESS)))
-      {
-      return 0;
-      }
-    si->StartupInfo.hStdInput = fin;
-    }
-  else if(cp->PipeSharedSTDIN)
-    {
-    /* Share this process's stdin with the child.  */
-    if(!kwsysProcessSetupSharedPipe(STD_INPUT_HANDLE,
-                                    &si->StartupInfo.hStdInput))
-      {
-      return 0;
-      }
-    }
-  else if(cp->PipeNativeSTDIN[0])
-    {
-    /* Use the provided native pipe.  */
-    if(!kwsysProcessSetupPipeNative(&si->StartupInfo.hStdInput,
-                                    cp->PipeNativeSTDIN, 0))
-      {
-      return 0;
-      }
+
+    /* Create an inherited copy of this handle.  */
+    return DuplicateHandle(GetCurrentProcess(), in,
+                           GetCurrentProcess(), out,
+                           0, TRUE, DUPLICATE_SAME_ACCESS);
     }
   else
     {
-    /* Explicitly give the child no stdin.  */
-    si->StartupInfo.hStdInput = INVALID_HANDLE_VALUE;
+    /* The given handle is not valid for this process.  Some child
+       processes may break if they do not have a valid standard handle,
+       so open NUL to give to the child.  */
+    SECURITY_ATTRIBUTES sa;
+    ZeroMemory(&sa, sizeof(sa));
+    sa.nLength = (DWORD)sizeof(sa);
+    sa.bInheritHandle = 1;
+    *out = CreateFileW(L"NUL",
+                       (isStdIn ? GENERIC_READ :
+                        (GENERIC_WRITE | FILE_READ_ATTRIBUTES)),
+                       FILE_SHARE_READ|FILE_SHARE_WRITE,
+                       &sa, OPEN_EXISTING, 0, 0);
+    return *out != INVALID_HANDLE_VALUE;
     }
 
-  /* Setup the process's stdout.  */
-  {
-  DWORD maybeClose = DUPLICATE_CLOSE_SOURCE;
-  HANDLE writeEnd;
+}
 
-  /* Create the output pipe for this process.  Neither end is directly
-     inherited.  */
-  if(!CreatePipe(readEnd, &writeEnd, 0, 0))
+/*--------------------------------------------------------------------------*/
+int kwsysProcessCreate(kwsysProcess* cp, int index,
+                       kwsysProcessCreateInformation* si)
+{
+  int res =
+
+    /* Create inherited copies the handles.  */
+    kwsysProcessCreateChildHandle(&si->StartupInfo.hStdInput,
+                                  si->hStdInput, 1) &&
+    kwsysProcessCreateChildHandle(&si->StartupInfo.hStdOutput,
+                                  si->hStdOutput, 0) &&
+    kwsysProcessCreateChildHandle(&si->StartupInfo.hStdError,
+                                  si->hStdError, 0) &&
+
+    /* Create the child in a suspended state so we can wait until all
+       children have been created before running any one.  */
+    CreateProcessW(0, cp->Commands[index], 0, 0, TRUE, CREATE_SUSPENDED, 0,
+                   0, &si->StartupInfo, &cp->ProcessInformation[index]);
+
+  /* Close the inherited copies of the handles. */
+  if (si->StartupInfo.hStdInput != si->hStdInput)
     {
-    return 0;
+    kwsysProcessCleanupHandle(&si->StartupInfo.hStdInput);
     }
-
-  /* Create an inherited duplicate of the write end.  Close the
-     non-inherited version unless this is the last process.  Save the
-     non-inherited write end of the last process.  */
-  if(index == cp->NumberOfCommands-1)
+  if (si->StartupInfo.hStdOutput != si->hStdOutput)
     {
-    cp->Pipe[KWSYSPE_PIPE_STDOUT].Write = writeEnd;
-    maybeClose = 0;
+    kwsysProcessCleanupHandle(&si->StartupInfo.hStdOutput);
     }
-  if(!DuplicateHandle(GetCurrentProcess(), writeEnd,
-                      GetCurrentProcess(), &writeEnd,
-                      0, TRUE, (maybeClose | DUPLICATE_SAME_ACCESS)))
+  if (si->StartupInfo.hStdError != si->hStdError)
     {
-    return 0;
-    }
-  si->StartupInfo.hStdOutput = writeEnd;
-  }
-
-  /* Replace the stdout pipe with a file if requested.  In this case
-     the pipe thread will still run but never report data.  */
-  if(index == cp->NumberOfCommands-1 && cp->PipeFileSTDOUT)
-    {
-    if(!kwsysProcessSetupOutputPipeFile(&si->StartupInfo.hStdOutput,
-                                        cp->PipeFileSTDOUT))
-      {
-      return 0;
-      }
+    kwsysProcessCleanupHandle(&si->StartupInfo.hStdError);
     }
 
-  /* Replace the stdout pipe of the last child with the parent
-     process's if requested.  In this case the pipe thread will still
-     run but never report data.  */
-  if(index == cp->NumberOfCommands-1 && cp->PipeSharedSTDOUT)
-    {
-    if(!kwsysProcessSetupSharedPipe(STD_OUTPUT_HANDLE,
-                                    &si->StartupInfo.hStdOutput))
-      {
-      return 0;
-      }
-    }
-
-  /* Replace the stdout pipe with the native pipe provided if any.  In
-     this case the pipe thread will still run but never report
-     data.  */
-  if(index == cp->NumberOfCommands-1 && cp->PipeNativeSTDOUT[1])
-    {
-    if(!kwsysProcessSetupPipeNative(&si->StartupInfo.hStdOutput,
-                                    cp->PipeNativeSTDOUT, 1))
-      {
-      return 0;
-      }
-    }
-
-  /* Create the child in a suspended state so we can wait until all
-     children have been created before running any one.  */
-  if(!CreateProcessW(0, cp->Commands[index], 0, 0, TRUE, CREATE_SUSPENDED, 0,
-                    0, &si->StartupInfo, &cp->ProcessInformation[index]))
-    {
-    return 0;
-    }
-
-  /* Successfully created this child process.  Close the current
-     process's copies of the inherited stdout and stdin handles.  The
-     stderr handle is shared among all children and is closed by
-     kwsysProcess_Execute after all children have been created.  */
-  kwsysProcessCleanupHandleSafe(&si->StartupInfo.hStdInput,
-                                STD_INPUT_HANDLE);
-  kwsysProcessCleanupHandleSafe(&si->StartupInfo.hStdOutput,
-                                STD_OUTPUT_HANDLE);
-
-  return 1;
+  return res;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1763,7 +1792,7 @@ int kwsysProcessSetupOutputPipeFile(PHANDLE phandle, const char* name)
     return 1;
     }
 
-  /* Close the existing inherited handle.  */
+  /* Close the existing handle.  */
   kwsysProcessCleanupHandle(phandle);
 
   /* Create a handle to write a file for the pipe.  */
@@ -1776,103 +1805,27 @@ int kwsysProcessSetupOutputPipeFile(PHANDLE phandle, const char* name)
     return 0;
     }
 
-  /* Create an inherited duplicate of the handle.  This also closes
-     the non-inherited version.  */
-  if(!DuplicateHandle(GetCurrentProcess(), fout,
-                      GetCurrentProcess(), &fout,
-                      0, TRUE, (DUPLICATE_CLOSE_SOURCE |
-                                DUPLICATE_SAME_ACCESS)))
-    {
-    return 0;
-    }
-
   /* Assign the replacement handle.  */
   *phandle = fout;
   return 1;
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle)
+void kwsysProcessSetupSharedPipe(DWORD nStdHandle, PHANDLE handle)
 {
-  /* Check whether the handle to be shared is already inherited.  */
-  DWORD flags;
-  int inherited = 0;
-  if(GetHandleInformation(GetStdHandle(nStdHandle), &flags) &&
-     (flags & HANDLE_FLAG_INHERIT))
-    {
-    inherited = 1;
-    }
-
-  /* Cleanup the previous handle.  */
+  /* Close the existing handle.  */
   kwsysProcessCleanupHandle(handle);
-
-  /* If the standard handle is not inherited then duplicate it to
-     create an inherited copy.  Do not close the original handle when
-     duplicating!  */
-  if(inherited)
-    {
-    *handle = GetStdHandle(nStdHandle);
-    return 1;
-    }
-  else if(DuplicateHandle(GetCurrentProcess(), GetStdHandle(nStdHandle),
-                          GetCurrentProcess(), handle,
-                          0, TRUE, DUPLICATE_SAME_ACCESS))
-    {
-    return 1;
-    }
-  else
-    {
-    /* The given standard handle is not valid for this process.  Some
-       child processes may break if they do not have a valid standard
-       pipe, so give the child an empty pipe.  For the stdin pipe we
-       want to close the write end and give the read end to the child.
-       For stdout and stderr we want to close the read end and give
-       the write end to the child.  */
-    int child_end = (nStdHandle == STD_INPUT_HANDLE)? 0:1;
-    int parent_end = (nStdHandle == STD_INPUT_HANDLE)? 1:0;
-    HANDLE emptyPipe[2];
-    if(!CreatePipe(&emptyPipe[0], &emptyPipe[1], 0, 0))
-      {
-      return 0;
-      }
-
-    /* Close the non-inherited end so the pipe will be broken
-       immediately.  */
-    CloseHandle(emptyPipe[parent_end]);
-
-    /* Create an inherited duplicate of the handle.  This also
-       closes the non-inherited version.  */
-    if(!DuplicateHandle(GetCurrentProcess(), emptyPipe[child_end],
-                        GetCurrentProcess(), &emptyPipe[child_end],
-                        0, TRUE, (DUPLICATE_CLOSE_SOURCE |
-                                  DUPLICATE_SAME_ACCESS)))
-      {
-      return 0;
-      }
-
-    /* Give the inherited handle to the child.  */
-    *handle = emptyPipe[child_end];
-    return 1;
-    }
+  /* Store the new standard handle.  */
+  *handle = GetStdHandle(nStdHandle);
 }
 
 /*--------------------------------------------------------------------------*/
-int kwsysProcessSetupPipeNative(PHANDLE handle, HANDLE p[2], int isWrite)
+void kwsysProcessSetupPipeNative(HANDLE native, PHANDLE handle)
 {
-  /* Close the existing inherited handle.  */
+  /* Close the existing handle.  */
   kwsysProcessCleanupHandle(handle);
-
-  /* Create an inherited duplicate of the handle.  This also closes
-     the non-inherited version.  */
-  if(!DuplicateHandle(GetCurrentProcess(), p[isWrite? 1:0],
-                      GetCurrentProcess(), handle,
-                      0, TRUE, (DUPLICATE_CLOSE_SOURCE |
-                                DUPLICATE_SAME_ACCESS)))
-    {
-    return 0;
-    }
-
-  return 1;
+  /* Store the new given handle.  */
+  *handle = native;
 }
 
 /*--------------------------------------------------------------------------*/
@@ -1880,23 +1833,13 @@ int kwsysProcessSetupPipeNative(PHANDLE handle, HANDLE p[2], int isWrite)
 /* Close the given handle if it is open.  Reset its value to 0.  */
 void kwsysProcessCleanupHandle(PHANDLE h)
 {
-  if(h && *h)
+  if(h && *h && *h != INVALID_HANDLE_VALUE &&
+     *h != GetStdHandle(STD_INPUT_HANDLE) &&
+     *h != GetStdHandle(STD_OUTPUT_HANDLE) &&
+     *h != GetStdHandle(STD_ERROR_HANDLE))
     {
     CloseHandle(*h);
-    *h = 0;
-    }
-}
-
-/*--------------------------------------------------------------------------*/
-
-/* Close the given handle if it is open and not a standard handle.
-   Reset its value to 0.  */
-void kwsysProcessCleanupHandleSafe(PHANDLE h, DWORD nStdHandle)
-{
-  if(h && *h && (*h != GetStdHandle(nStdHandle)))
-    {
-    CloseHandle(*h);
-    *h = 0;
+    *h = INVALID_HANDLE_VALUE;
     }
 }
 
@@ -1985,6 +1928,10 @@ void kwsysProcessCleanup(kwsysProcess* cp, int error)
     kwsysProcessCleanupHandle(&cp->Pipe[i].Write);
     kwsysProcessCleanupHandle(&cp->Pipe[i].Read);
     cp->Pipe[i].Closed = 0;
+    }
+  for(i=0; i < 3; ++i)
+    {
+    kwsysProcessCleanupHandle(&cp->PipeChildStd[i]);
     }
 }
 
