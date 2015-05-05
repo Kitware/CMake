@@ -1103,9 +1103,7 @@ void cmGlobalNinjaGenerator::WriteUnknownExplicitDependencies(std::ostream& os)
   if (!warnExplicitDepends.empty())
     {
     std::ostringstream w;
-    w <<
-      (this->GetCMakeInstance()->GetPolicies()->
-       GetPolicyWarning(cmPolicies::CMP0058)) << "\n"
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0058) << "\n"
       "This project specifies custom command DEPENDS on files "
       "in the build tree that are not specified as the OUTPUT or "
       "BYPRODUCTS of any add_custom_command or add_custom_target:\n"

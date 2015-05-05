@@ -380,8 +380,7 @@ bool cmAddCustomCommandCommand
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0050))
     {
     case cmPolicies::WARN:
-      e << (this->Makefile->GetPolicies()
-                ->GetPolicyWarning(cmPolicies::CMP0050)) << "\n";
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0050) << "\n";
       break;
     case cmPolicies::OLD:
       issueMessage = false;

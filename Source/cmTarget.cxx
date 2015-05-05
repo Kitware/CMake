@@ -973,8 +973,7 @@ std::string cmTarget::ProcessSourceItemCMP0049(const std::string& s)
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0049))
       {
       case cmPolicies::WARN:
-        e << (this->Makefile->GetPolicies()
-              ->GetPolicyWarning(cmPolicies::CMP0049)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0049) << "\n";
         break;
       case cmPolicies::OLD:
         noMessage = true;
@@ -2007,8 +2006,7 @@ static void processIncludeDirectories(cmTarget const* tgt,
           switch(tgt->GetPolicyStatusCMP0027())
             {
             case cmPolicies::WARN:
-              e << (mf->GetPolicies()
-                    ->GetPolicyWarning(cmPolicies::CMP0027)) << "\n";
+              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0027) << "\n";
             case cmPolicies::OLD:
               messageType = cmake::AUTHOR_WARNING;
               break;
@@ -2048,8 +2046,7 @@ static void processIncludeDirectories(cmTarget const* tgt,
             {
             case cmPolicies::WARN:
               {
-              e << (mf->GetPolicies()
-                    ->GetPolicyWarning(cmPolicies::CMP0021)) << "\n";
+              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0021) << "\n";
               messageType = cmake::AUTHOR_WARNING;
               }
               break;
@@ -2397,8 +2394,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
         case cmPolicies::WARN:
           {
           std::ostringstream e;
-          e << this->Makefile->GetCMakeInstance()->GetPolicies()
-                   ->GetPolicyWarning(cmPolicies::CMP0043);
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0043);
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
                                        e.str());
           }
@@ -2873,8 +2869,7 @@ bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
   switch (context->GetPolicyStatus(cmPolicies::CMP0026))
     {
     case cmPolicies::WARN:
-      e << (this->Makefile->GetPolicies()
-        ->GetPolicyWarning(cmPolicies::CMP0026)) << "\n";
+      e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0026) << "\n";
       modal = "should";
     case cmPolicies::OLD:
       break;
@@ -3137,8 +3132,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
             switch(context->GetPolicyStatus(cmPolicies::CMP0051))
               {
               case cmPolicies::WARN:
-                e << (this->Makefile->GetPolicies()
-                      ->GetPolicyWarning(cmPolicies::CMP0051)) << "\n";
+                e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0051) << "\n";
                 noMessage = false;
               case cmPolicies::OLD:
                 break;
@@ -3235,8 +3229,7 @@ public:
           {
           case cmPolicies::WARN:
             {
-            e << (this->Makefile->GetPolicies()
-                  ->GetPolicyWarning(cmPolicies::CMP0028)) << "\n";
+            e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0028) << "\n";
             messageType = cmake::AUTHOR_WARNING;
             }
             break;
@@ -5991,9 +5984,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
         && strcmp(newExplicitLibraries, explicitLibraries) != 0)
       {
       std::ostringstream w;
-      w <<
-        (thisTarget->Makefile->GetPolicies()
-         ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
+      w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
         "Target \"" << thisTarget->GetName() << "\" has an "
         "INTERFACE_LINK_LIBRARIES property which differs from its " <<
         linkIfaceProp << " properties."
@@ -6062,9 +6053,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
           { newLibraries = "(empty)"; }
 
         std::ostringstream w;
-        w <<
-          (thisTarget->Makefile->GetPolicies()
-           ->GetPolicyWarning(cmPolicies::CMP0022)) << "\n"
+        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0022) << "\n"
           "Target \"" << thisTarget->GetName() << "\" has an "
           "INTERFACE_LINK_LIBRARIES property.  "
           "This should be preferred as the source of the link interface "
@@ -6321,8 +6310,7 @@ cmTargetInternals::ComputeLinkImplementationLibraries(
             {
             case cmPolicies::WARN:
               {
-              e << (thisTarget->Makefile->GetPolicies()
-                    ->GetPolicyWarning(cmPolicies::CMP0038)) << "\n";
+              e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0038) << "\n";
               messageType = cmake::AUTHOR_WARNING;
               }
               break;
@@ -6459,8 +6447,7 @@ std::string cmTarget::CheckCMP0004(std::string const& item) const
       case cmPolicies::WARN:
         {
         std::ostringstream w;
-        w << (this->Makefile->GetPolicies()
-              ->GetPolicyWarning(cmPolicies::CMP0004)) << "\n"
+        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0004) << "\n"
           << "Target \"" << this->GetName() << "\" links to item \""
           << item << "\" which has leading or trailing whitespace.";
         cm->IssueMessage(cmake::AUTHOR_WARNING, w.str(),
@@ -6481,8 +6468,7 @@ std::string cmTarget::CheckCMP0004(std::string const& item) const
       case cmPolicies::REQUIRED_ALWAYS:
         {
         std::ostringstream e;
-        e << (this->Makefile->GetPolicies()
-              ->GetRequiredPolicyError(cmPolicies::CMP0004)) << "\n"
+        e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0004) << "\n"
           << "Target \"" << this->GetName() << "\" links to item \""
           << item << "\" which has leading or trailing whitespace.";
         cm->IssueMessage(cmake::FATAL_ERROR, e.str(), this->GetBacktrace());

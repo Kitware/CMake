@@ -1056,16 +1056,14 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
         if(g.GetFollowedSymlinkCount() != 0)
           {
           this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
-            this->Makefile->GetPolicies()->
-              GetPolicyWarning(cmPolicies::CMP0009));
+            cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
           }
         break;
       case cmPolicies::REQUIRED_IF_USED:
       case cmPolicies::REQUIRED_ALWAYS:
         this->SetError("policy CMP0009 error");
         this->Makefile->IssueMessage(cmake::FATAL_ERROR,
-          this->Makefile->GetPolicies()->
-            GetRequiredPolicyError(cmPolicies::CMP0009));
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0009));
         return false;
       }
     }

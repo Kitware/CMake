@@ -556,8 +556,7 @@ bool cmComputeLinkInformation::Compute()
   if (!this->CMP0060WarnItems.empty())
     {
     std::ostringstream w;
-    w << (this->Makefile->GetCMakeInstance()->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0060)) << "\n"
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0060) << "\n"
       "Some library files are in directories implicitly searched by "
       "the linker when invoked for " << this->LinkLanguage << ":\n"
       " " << cmJoin(this->CMP0060WarnItems, "\n ") << "\n"
@@ -1534,8 +1533,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
         {
         this->CMakeInstance->GetState()->SetGlobalProperty(wid, "1");
         std::ostringstream w;
-        w << (this->Makefile->GetPolicies()
-              ->GetPolicyWarning(cmPolicies::CMP0008)) << "\n"
+        w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0008) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
@@ -1553,8 +1551,7 @@ void cmComputeLinkInformation::HandleBadFullItem(std::string const& item,
     case cmPolicies::REQUIRED_ALWAYS:
       {
       std::ostringstream e;
-      e << (this->Makefile->GetPolicies()->
-            GetRequiredPolicyError(cmPolicies::CMP0008)) << "\n"
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0008) << "\n"
           << "Target \"" << this->Target->GetName() << "\" links to item\n"
           << "  " << item << "\n"
           << "which is a full-path but not a valid library file name.";
@@ -1600,8 +1597,7 @@ bool cmComputeLinkInformation::FinishLinkerSearchDirectories()
     case cmPolicies::REQUIRED_ALWAYS:
       {
       std::ostringstream e;
-      e << (this->Makefile->GetPolicies()->
-            GetRequiredPolicyError(cmPolicies::CMP0003)) << "\n";
+      e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0003) << "\n";
       this->PrintLinkPolicyDiagnosis(e);
       this->CMakeInstance->IssueMessage(cmake::FATAL_ERROR, e.str(),
                                         this->Target->GetBacktrace());

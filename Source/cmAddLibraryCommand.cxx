@@ -222,8 +222,7 @@ bool cmAddLibraryCommand
       case cmPolicies::WARN:
         if(type != cmTarget::INTERFACE_LIBRARY)
           {
-          e << (this->Makefile->GetPolicies()
-            ->GetPolicyWarning(cmPolicies::CMP0037)) << "\n";
+          e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0037) << "\n";
           issueMessage = true;
           }
       case cmPolicies::OLD:

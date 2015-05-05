@@ -826,7 +826,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
 
   if(strcmp(compilerId, "AppleClang") == 0)
     {
-    cmPolicies* policies = this->CMakeInstance->GetPolicies();
     switch(mf->GetPolicyStatus(cmPolicies::CMP0025))
       {
       case cmPolicies::WARN:
@@ -834,7 +833,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0025"))
           {
           std::ostringstream w;
-          w << policies->GetPolicyWarning(cmPolicies::CMP0025) << "\n"
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0025) << "\n"
             "Converting " << lang <<
             " compiler id \"AppleClang\" to \"Clang\" for compatibility."
             ;
@@ -848,7 +847,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
       case cmPolicies::REQUIRED_ALWAYS:
         mf->IssueMessage(
           cmake::FATAL_ERROR,
-          policies->GetRequiredPolicyError(cmPolicies::CMP0025)
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0025)
           );
       case cmPolicies::NEW:
         // NEW behavior is to keep AppleClang.
@@ -858,7 +857,6 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
 
   if(strcmp(compilerId, "QCC") == 0)
     {
-    cmPolicies* policies = this->CMakeInstance->GetPolicies();
     switch(mf->GetPolicyStatus(cmPolicies::CMP0047))
       {
       case cmPolicies::WARN:
@@ -866,7 +864,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
            mf->PolicyOptionalWarningEnabled("CMAKE_POLICY_WARNING_CMP0047"))
           {
           std::ostringstream w;
-          w << policies->GetPolicyWarning(cmPolicies::CMP0047) << "\n"
+          w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0047) << "\n"
             "Converting " << lang <<
             " compiler id \"QCC\" to \"GNU\" for compatibility."
             ;
@@ -888,7 +886,7 @@ void cmGlobalGenerator::CheckCompilerIdCompatibility(cmMakefile* mf,
       case cmPolicies::REQUIRED_ALWAYS:
         mf->IssueMessage(
           cmake::FATAL_ERROR,
-          policies->GetRequiredPolicyError(cmPolicies::CMP0047)
+          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0047)
           );
       case cmPolicies::NEW:
         // NEW behavior is to keep QCC.
@@ -1327,9 +1325,7 @@ void cmGlobalGenerator::Generate()
   if(!this->CMP0042WarnTargets.empty())
     {
     std::ostringstream w;
-    w <<
-      (this->GetCMakeInstance()->GetPolicies()->
-       GetPolicyWarning(cmPolicies::CMP0042)) << "\n";
+    w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0042) << "\n";
     w << "MACOSX_RPATH is not specified for"
          " the following targets:\n";
     for(std::set<std::string>::iterator

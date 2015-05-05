@@ -23,8 +23,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const &args,
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0055))
       {
       case cmPolicies::WARN:
-        e << (this->Makefile->GetPolicies()
-                  ->GetPolicyWarning(cmPolicies::CMP0055)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0055) << "\n";
         break;
       case cmPolicies::OLD:
         issueMessage = false;
@@ -58,8 +57,7 @@ bool cmBreakCommand::InitialPass(std::vector<std::string> const &args,
     switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0055))
       {
       case cmPolicies::WARN:
-        e << (this->Makefile->GetPolicies()
-                  ->GetPolicyWarning(cmPolicies::CMP0055)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0055) << "\n";
         break;
       case cmPolicies::OLD:
         issueMessage = false;

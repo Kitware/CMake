@@ -359,15 +359,13 @@ void cmComputeTargetDepends::AddTargetDepend(
   if(!dependee && !linking &&
     (depender->GetType() != cmTarget::GLOBAL_TARGET))
     {
-    cmMakefile *makefile = depender->GetMakefile();
     cmake::MessageType messageType = cmake::AUTHOR_WARNING;
     bool issueMessage = false;
     std::ostringstream e;
     switch(depender->GetPolicyStatusCMP0046())
       {
       case cmPolicies::WARN:
-        e << (makefile->GetPolicies()
-          ->GetPolicyWarning(cmPolicies::CMP0046)) << "\n";
+        e << cmPolicies::GetPolicyWarning(cmPolicies::CMP0046) << "\n";
         issueMessage = true;
       case cmPolicies::OLD:
         break;
