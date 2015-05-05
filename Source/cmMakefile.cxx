@@ -178,6 +178,9 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->WarnUnused = false;
   this->CheckSystemVars = false;
 
+  this->GeneratingBuildSystem = false;
+  this->SuppressWatches = false;
+
   // Setup the default include file regular expression (match everything).
   this->IncludeFileRegularExpression = "^.*$";
   // Setup the default include complaint regular expression (match nothing).
@@ -212,15 +215,7 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->LocalGenerator = localGenerator;
 
   this->AddDefaultDefinitions();
-  this->Initialize();
-  this->GeneratingBuildSystem = false;
 
-  this->SuppressWatches = false;
-}
-
-//----------------------------------------------------------------------------
-void cmMakefile::Initialize()
-{
   this->cmDefineRegex.compile("#cmakedefine[ \t]+([A-Za-z_0-9]*)");
   this->cmDefine01Regex.compile("#cmakedefine01[ \t]+([A-Za-z_0-9]*)");
   this->cmAtVarRegex.compile("(@[A-Za-z_0-9/.+-]+@)");
