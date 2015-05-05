@@ -185,8 +185,12 @@ if(MSVC)
     if(NOT CMAKE_INSTALL_DEBUG_LIBRARIES_ONLY)
       set(__install__libs
         "${MSVC${v}_CRT_DIR}/msvcp${v}0.dll"
-        "${MSVC${v}_CRT_DIR}/msvcr${v}0.dll"
         )
+      if(NOT v VERSION_LESS 14)
+        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/vcruntime${v}0.dll")
+      else()
+        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/msvcr${v}0.dll")
+      endif()
     else()
       set(__install__libs)
     endif()
@@ -196,8 +200,12 @@ if(MSVC)
         "${MSVC${v}_REDIST_DIR}/Debug_NonRedist/${CMAKE_MSVC_ARCH}/Microsoft.VC${v}0.DebugCRT")
       set(__install__libs ${__install__libs}
         "${MSVC${v}_CRT_DIR}/msvcp${v}0d.dll"
-        "${MSVC${v}_CRT_DIR}/msvcr${v}0d.dll"
         )
+      if(NOT v VERSION_LESS 14)
+        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/vcruntime${v}0d.dll")
+      else()
+        list(APPEND __install__libs "${MSVC${v}_CRT_DIR}/msvcr${v}0d.dll")
+      endif()
     endif()
   endmacro()
 
