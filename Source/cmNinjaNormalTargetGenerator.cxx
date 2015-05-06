@@ -202,7 +202,12 @@ cmNinjaNormalTargetGenerator
         responseFlag += rspfile;
 
         // build response file content
-        rspcontent = "$in_newline $LINK_PATH $LINK_LIBRARIES";
+        if (this->GetGlobalGenerator()->IsGCCOnWindows()) {
+          rspcontent = "$in";
+        } else {
+          rspcontent = "$in_newline";
+        }
+        rspcontent += " $LINK_PATH $LINK_LIBRARIES";
         vars.Objects = responseFlag.c_str();
         vars.LinkLibraries = "";
     }
