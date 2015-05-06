@@ -4,8 +4,6 @@
 #include <iostream>
 #include <QFileDialog>
 #include "ui_MacInstallDialog.h"
-#include <Security/Authorization.h>
-#include <Security/AuthorizationTags.h>
 
 class QMacInstallDialog::QMacInstallDialogInternals : public Ui::Dialog
 {
