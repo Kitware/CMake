@@ -155,7 +155,7 @@ public:
                            const cmNinjaDeps& targets,
                            const std::string& comment = "");
 
-  bool IsMinGW() const { return this->UsingMinGW; }
+  bool IsGCCOnWindows() const { return UsingGCCOnWindows; }
 
 public:
   /// Default constructor.
@@ -360,7 +360,7 @@ private:
   /// The set of dependencies to add to the "all" target.
   cmNinjaDeps AllDependencies;
 
-  bool UsingMinGW;
+  bool UsingGCCOnWindows;
 
   /// The set of custom commands we have seen.
   std::set<cmCustomCommand const*> CustomCommands;

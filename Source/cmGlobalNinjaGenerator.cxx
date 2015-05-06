@@ -96,7 +96,7 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string &path)
 {
   std::string result = path;
 #ifdef _WIN32
-  if (this->IsMinGW())
+  if (this->IsGCCOnWindows())
     cmSystemTools::ReplaceString(result, "\\", "/");
   else
     cmSystemTools::ReplaceString(result, "/", "\\");
@@ -484,7 +484,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   , CompileCommandsStream(0)
   , Rules()
   , AllDependencies()
-  , UsingMinGW(false)
+  , UsingGCCOnWindows(false)
   , ComputingUnknownDependencies(false)
   , PolicyCMP0058(cmPolicies::WARN)
 {
@@ -565,9 +565,13 @@ void cmGlobalNinjaGenerator
     this->ResolveLanguageCompiler(*l, mf, optional);
     }
 #ifdef _WIN32
-  if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
+  if (mf->IsOn("CMAKE_COMPILER_IS_MINGW") ||
+      strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "GNU") == 0 ||
+      strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "GNU") == 0 ||
+      strcmp(mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID"), "GNU") == 0 ||
+      strcmp(mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID"), "GNU") == 0)
     {
-    this->UsingMinGW = true;
+    this->UsingGCCOnWindows = true;
     }
 #endif
 }
