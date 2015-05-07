@@ -59,6 +59,12 @@ public:
       type(msg.type),
       content(msg.content)
     {}
+    Message& operator=(Message const& msg)
+      {
+      this->type = msg.type;
+      this->content = msg.content;
+      return *this;
+      }
   };
 
   typedef kwsys_stl::vector<Message> GlobMessages;
