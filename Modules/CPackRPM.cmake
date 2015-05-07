@@ -1686,7 +1686,7 @@ mv \"\@CPACK_TOPLEVEL_DIRECTORY\@/tmpBBroot\" $RPM_BUILD_ROOT
       message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.err")
       message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
       message("CPackRPM:Debug:    - ${CPACK_TOPLEVEL_DIRECTORY}/rpmbuild${CPACK_RPM_PACKAGE_COMPONENT_PART_NAME}.out")
-      message("CPackRPM:Debug: *** ${RPMBUILDERR} ***")
+      message("CPackRPM:Debug: *** ${RPMBUILDOUT} ***")
     endif()
   else()
     if(ALIEN_EXECUTABLE)
