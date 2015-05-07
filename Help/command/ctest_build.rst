@@ -12,7 +12,8 @@ Builds the given build directory and stores results in Build.xml.  If no
 ``BUILD`` is given, the :variable:`CTEST_BINARY_DIRECTORY` variable is used.
 
 The ``TARGET`` variable can be used to specify a build target.  If none is
-specified, the "all" target will be built.
+specified, the default target ("ALL_BUILD" for Visual Studio generators and
+"all" in others) will be built.
 
 The ``RETURN_VALUE`` option specifies a variable in which to store the
 return value of the native build tool.  The ``NUMBER_ERRORS`` and
