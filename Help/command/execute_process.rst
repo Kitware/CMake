@@ -57,7 +57,8 @@ OUTPUT_VARIABLE, ERROR_VARIABLE
 INPUT_FILE, OUTPUT_FILE, ERROR_FILE
  The file named will be attached to the standard input of the first
  process, standard output of the last process, or standard error of
- all processes, respectively.
+ all processes, respectively.  If the same file is named for both
+ output and error then it will be used for both.
 
 OUTPUT_QUIET, ERROR_QUIET
  The standard output or standard error results will be quietly ignored.
