@@ -26,3 +26,16 @@ function(run_repeat_until_fail_tests)
     )
 endfunction()
 run_repeat_until_fail_tests()
+
+function(run_BadCTestTestfile)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BadCTestTestfile)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+subdirs()
+")
+
+  run_cmake_command(BadCTestTestfile ${CMAKE_CTEST_COMMAND})
+endfunction()
+run_BadCTestTestfile()
