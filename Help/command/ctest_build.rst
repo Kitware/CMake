@@ -29,7 +29,8 @@ that would have been printed to the console otherwise.  The summary
 of warnings / errors, as well as the output from the native build tool
 is unaffected by this option.
 
-If set, the contents of the variable ``CTEST_BUILD_FLAGS`` are passed as
-additional arguments to the underlying build command. This can, e.g., be used
-to trigger a parallel build using the ``-j`` option of make. See
-:module:`ProcessorCount` for an example.
+If set, the contents of the variable ``CTEST_BUILD_COMMAND`` is used to build
+the project. In addition, if set, the contents of the variable
+``CTEST_BUILD_FLAGS`` are passed as additional arguments to the underlying
+build command. This can, e.g., be used to trigger a parallel build using the
+``-j`` option of make. See :module:`ProcessorCount` for an example.
