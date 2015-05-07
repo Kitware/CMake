@@ -555,7 +555,6 @@ void cmGlobalNinjaGenerator
   if (makefile->IsOn("CMAKE_COMPILER_IS_MINGW"))
     {
     UsingMinGW = true;
-    this->EnableMinGWLanguage(makefile);
     }
   if (std::find(langs.begin(), langs.end(), "Fortran") != langs.end())
     {
