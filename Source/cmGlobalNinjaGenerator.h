@@ -63,7 +63,7 @@ public:
 
   static std::string EncodeIdent(const std::string &ident, std::ostream &vars);
   static std::string EncodeLiteral(const std::string &lit);
-  static std::string EncodePath(const std::string &path);
+  std::string EncodePath(const std::string &path);
   static std::string EncodeDepfileSpace(const std::string &path);
 
   /**
@@ -155,9 +155,7 @@ public:
                            const cmNinjaDeps& targets,
                            const std::string& comment = "");
 
-
-  static bool IsMinGW() { return UsingMinGW; }
-
+  bool IsMinGW() const { return this->UsingMinGW; }
 
 public:
   /// Default constructor.
@@ -362,6 +360,8 @@ private:
   /// The set of dependencies to add to the "all" target.
   cmNinjaDeps AllDependencies;
 
+  bool UsingMinGW;
+
   /// The set of custom commands we have seen.
   std::set<cmCustomCommand const*> CustomCommands;
 
@@ -385,9 +385,6 @@ private:
 
   typedef std::map<std::string, cmTarget*> TargetAliasMap;
   TargetAliasMap TargetAliases;
-
-  static bool UsingMinGW;
-
 };
 
 #endif // ! cmGlobalNinjaGenerator_h

@@ -175,7 +175,7 @@ cmNinjaTargetGenerator::ComputeFlagsForObject(cmSourceFile const* source,
                                         // needed by cmcldeps
                                             false,
                                             this->GetConfigName());
-    if(cmGlobalNinjaGenerator::IsMinGW())
+    if (this->GetGlobalGenerator()->IsMinGW())
       cmSystemTools::ReplaceString(includeFlags, "\\", "/");
 
     this->LocalGenerator->AppendFlags(languageFlags, includeFlags);
