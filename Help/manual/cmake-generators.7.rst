@@ -73,7 +73,6 @@ Visual Studio Generators
 .. toctree::
    :maxdepth: 1
 
-   /generator/Green Hills MULTI
    /generator/Visual Studio 6
    /generator/Visual Studio 7
    /generator/Visual Studio 7 .NET 2003
@@ -84,12 +83,13 @@ Visual Studio Generators
    /generator/Visual Studio 12 2013
    /generator/Visual Studio 14 2015
 
-Xcode Generator
-^^^^^^^^^^^^^^^
+Other Generators
+^^^^^^^^^^^^^^^^
 
 .. toctree::
    :maxdepth: 1
 
+   /generator/Green Hills MULTI
    /generator/Xcode
 
 Extra Generators
