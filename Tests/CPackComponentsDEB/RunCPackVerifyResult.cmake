@@ -58,6 +58,7 @@ function(run_cpack output_expected_file CPack_output_parent CPack_error_parent)
     message(FATAL_ERROR "error: CPack execution went wrong!, CPack_output=${CPack_output}, CPack_error=${CPack_error}")
   else ()
     message(STATUS "CPack_output=${CPack_output}")
+    message(STATUS "CPack_error=${CPack_error}")
   endif()
 
 
