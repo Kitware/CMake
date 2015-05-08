@@ -106,7 +106,8 @@ bool cmBuildCommand
     }
 
   std::string makecommand = this->Makefile->GetGlobalGenerator()
-      ->GenerateCMakeBuildCommand(target, configuration, "", true);
+    ->GenerateCMakeBuildCommand(target, configuration, "",
+                                this->Makefile->IgnoreErrorsCMP0061());
 
   this->Makefile->AddDefinition(variable, makecommand.c_str());
 
@@ -135,7 +136,8 @@ bool cmBuildCommand
     }
 
   std::string makecommand = this->Makefile->GetGlobalGenerator()
-      ->GenerateCMakeBuildCommand("", configType, "", true);
+    ->GenerateCMakeBuildCommand("", configType, "",
+                                this->Makefile->IgnoreErrorsCMP0061());
 
   if(cacheValue)
     {
