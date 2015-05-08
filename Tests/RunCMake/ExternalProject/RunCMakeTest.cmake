@@ -1,5 +1,8 @@
 include(RunCMake)
 
+run_cmake(NoOptions)
+run_cmake(SourceEmpty)
+run_cmake(SourceMissing)
 run_cmake(CMAKE_CACHE_ARGS)
 run_cmake(CMAKE_CACHE_DEFAULT_ARGS)
 run_cmake(CMAKE_CACHE_mix)
