@@ -565,7 +565,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     vars["TARGET_PDB"] = base + suffix + dbg_suffix;
     }
 
-  if (mf->IsOn("CMAKE_COMPILER_IS_MINGW"))
+  if (this->GetGlobalGenerator()->IsGCCOnWindows())
     {
     const std::string objPath = GetTarget()->GetSupportDirectory();
     vars["OBJECT_DIR"] = ConvertToNinjaPath(objPath);
