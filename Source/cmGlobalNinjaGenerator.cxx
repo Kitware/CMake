@@ -96,7 +96,7 @@ std::string cmGlobalNinjaGenerator::EncodePath(const std::string &path)
 {
   std::string result = path;
 #ifdef _WIN32
-  if(UsingMinGW)
+  if (this->IsGCCOnWindows())
     cmSystemTools::ReplaceString(result, "\\", "/");
   else
     cmSystemTools::ReplaceString(result, "/", "\\");
@@ -484,6 +484,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   , CompileCommandsStream(0)
   , Rules()
   , AllDependencies()
+  , UsingGCCOnWindows(false)
   , ComputingUnknownDependencies(false)
   , PolicyCMP0058(cmPolicies::WARN)
 {
@@ -544,24 +545,16 @@ void cmGlobalNinjaGenerator::Generate()
   this->CloseBuildFileStream();
 }
 
-// Implemented in all cmGlobaleGenerator sub-classes.
-// Used in:
-//   Source/cmMakefile.cxx:
 void cmGlobalNinjaGenerator
 ::EnableLanguage(std::vector<std::string>const& langs,
-                 cmMakefile* makefile,
+                 cmMakefile* mf,
                  bool optional)
 {
-  if (makefile->IsOn("CMAKE_COMPILER_IS_MINGW"))
-    {
-    UsingMinGW = true;
-    this->EnableMinGWLanguage(makefile);
-    }
   if (std::find(langs.begin(), langs.end(), "Fortran") != langs.end())
     {
     cmSystemTools::Error("The Ninja generator does not support Fortran yet.");
     }
-  this->cmGlobalGenerator::EnableLanguage(langs, makefile, optional);
+  this->cmGlobalGenerator::EnableLanguage(langs, mf, optional);
   for(std::vector<std::string>::const_iterator l = langs.begin();
       l != langs.end(); ++l)
     {
@@ -569,11 +562,19 @@ void cmGlobalNinjaGenerator
       {
       continue;
       }
-    this->ResolveLanguageCompiler(*l, makefile, optional);
+    this->ResolveLanguageCompiler(*l, mf, optional);
     }
+#ifdef _WIN32
+  if (mf->IsOn("CMAKE_COMPILER_IS_MINGW") ||
+      strcmp(mf->GetSafeDefinition("CMAKE_C_COMPILER_ID"), "GNU") == 0 ||
+      strcmp(mf->GetSafeDefinition("CMAKE_CXX_COMPILER_ID"), "GNU") == 0 ||
+      strcmp(mf->GetSafeDefinition("CMAKE_C_SIMULATE_ID"), "GNU") == 0 ||
+      strcmp(mf->GetSafeDefinition("CMAKE_CXX_SIMULATE_ID"), "GNU") == 0)
+    {
+    this->UsingGCCOnWindows = true;
+    }
+#endif
 }
-
-bool cmGlobalNinjaGenerator::UsingMinGW = false;
 
 // Implemented by:
 //   cmGlobalUnixMakefileGenerator3

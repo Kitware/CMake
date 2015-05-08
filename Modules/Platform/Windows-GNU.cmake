@@ -138,6 +138,10 @@ macro(__windows_compiler_gnu lang)
     endforeach()
   endif()
 
+  if(NOT CMAKE_RC_COMPILER_INIT)
+    set(CMAKE_RC_COMPILER_INIT windres)
+  endif()
+
   enable_language(RC)
 endmacro()
 
