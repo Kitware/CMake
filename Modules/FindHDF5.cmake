@@ -51,6 +51,7 @@
 #                               bindings.
 #   HDF5_LIBRARIES - Required libraries for all requested bindings
 #   HDF5_FOUND - true if HDF5 was found on the system
+#   HDF5_VERSION - HDF5 Version in format Major.Minor.Release
 #   HDF5_LIBRARY_DIRS - the full set of library directories
 #   HDF5_IS_PARALLEL - Whether or not HDF5 was found with parallel IO support
 #   HDF5_C_COMPILER_EXECUTABLE - the path to the HDF5 C wrapper compiler
@@ -60,6 +61,7 @@
 
 #=============================================================================
 # Copyright 2009 Kitware, Inc.
+#           2015 Axel Huebl, Helmholtz-Zentrum Dresden - Rossendorf
 #
 # Distributed under the OSI-approved BSD License (the "License");
 # see accompanying file Copyright.txt for details.
@@ -340,6 +342,11 @@ if( NOT HDF5_FOUND )
             file( STRINGS "${_dir}/H5pubconf.h"
                 HDF5_HAVE_PARALLEL_DEFINE
                 REGEX "HAVE_PARALLEL 1" )
+            file( STRINGS "${_dir}/H5pubconf.h"
+                HDF5_VERSION_DEFINE
+                REGEX "#define H5_VERSION" )
+            string(REGEX MATCH "([0-9]+)\\.([0-9]+)\\.([0-9]+)"
+                HDF5_VERSION ${HDF5_VERSION_DEFINE})
             if( HDF5_HAVE_PARALLEL_DEFINE )
                 set( HDF5_IS_PARALLEL TRUE )
             endif()
@@ -357,8 +364,8 @@ if( NOT HDF5_FOUND )
 
 endif()
 
-find_package_handle_standard_args( HDF5 DEFAULT_MSG
-    HDF5_LIBRARIES
-    HDF5_INCLUDE_DIRS
+find_package_handle_standard_args( HDF5
+    REQUIRED_VARS HDF5_LIBRARIES HDF5_INCLUDE_DIRS
+    VERSION_VAR   HDF5_VERSION
 )
 
