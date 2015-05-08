@@ -112,6 +112,22 @@ if(BUILD_TESTING)
     set(RPMBUILD_EXECUTABLE "RPMBUILD_EXECUTABLE-NOTFOUND")
   endif()
 
+  if(RPMBUILD_EXECUTABLE)
+    set(CPACK_BINARY_RPM ON)
+  else()
+    set(CPACK_BINARY_RPM OFF)
+  endif()
+
+  # Look for rpmbuild to use for tests.
+  # The tool does not work with spaces in the path.
+  find_program(DPKG_EXECUTABLE NAMES dpkg)
+
+  if(DPKG_EXECUTABLE)
+    set(CPACK_BINARY_DEB ON)
+  else()
+    set(CPACK_BINARY_DEB OFF)
+  endif()
+
   #---------------------------------------------------------------------------
   # Add tests below here.
 
@@ -865,11 +881,6 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   set(CTEST_RUN_CPackComponentsForAll ${CTEST_TEST_CPACK})
   set(CTEST_RUN_CPackComponentsPrefix ${CTEST_TEST_CPACK})
 
-  # Do not try to build RPM
-  if (NOT RPMBUILD_EXECUTABLE)
-    set(CPACK_BINARY_RPM OFF)
-  endif()
-
   find_program(NSIS_MAKENSIS_EXECUTABLE NAMES makensis
     PATHS [HKEY_LOCAL_MACHINE\\SOFTWARE\\NSIS]
     DOC "makensis program location"
@@ -948,13 +959,12 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
   if(CTEST_RUN_CPackComponentsForAll)
     # Check whether if rpmbuild command is found
     # before adding RPM tests
-    if(RPMBUILD_EXECUTABLE)
+    if(CPACK_BINARY_RPM)
       list(APPEND ACTIVE_CPACK_GENERATORS RPM)
     endif()
     # Check whether if dpkg command is found
     # before adding DEB tests
-    find_program(DPKG_EXECUTABLE NAMES dpkg)
-    if(DPKG_EXECUTABLE)
+    if(CPACK_BINARY_DEB)
       list(APPEND ACTIVE_CPACK_GENERATORS DEB)
     endif()
 
@@ -962,17 +972,9 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     # now contains the list of 'active generators'
     set(CPackComponentsForAll_BUILD_OPTIONS)
     # set up list of CPack generators
-    list(APPEND GENLST "ZIP")
+    list(APPEND ACTIVE_CPACK_GENERATORS "ZIP")
     if(APPLE)
-      list(APPEND GENLST "DragNDrop")
-    endif()
-    list(FIND ACTIVE_CPACK_GENERATORS "RPM" RPM_ACTIVE)
-    if (NOT ${RPM_ACTIVE} EQUAL -1)
-      list(APPEND GENLST "RPM")
-    endif()
-    list(FIND ACTIVE_CPACK_GENERATORS "DEB" DEB_ACTIVE)
-    if (NOT ${DEB_ACTIVE} EQUAL -1)
-      list(APPEND GENLST "DEB")
+      list(APPEND ACTIVE_CPACK_GENERATORS "DragNDrop")
     endif()
 
     # set up list of component packaging ways
@@ -980,7 +982,7 @@ ${CMake_BINARY_DIR}/bin/cmake -DDIR=dev -P ${CMake_SOURCE_DIR}/Utilities/Release
     list(APPEND CWAYLST "OnePackPerGroup")
     list(APPEND CWAYLST "IgnoreGroup")
     list(APPEND CWAYLST "AllInOne")
-    foreach(CPackGen ${GENLST})
+    foreach(CPackGen IN LISTS ACTIVE_CPACK_GENERATORS)
       set(CPackRun_CPackGen  "-DCPackGen=${CPackGen}")
       foreach(CPackComponentWay ${CWAYLST})
         set(CPackRun_CPackComponentWay "-DCPackComponentWay=${CPackComponentWay}")
