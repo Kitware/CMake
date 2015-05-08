@@ -226,6 +226,9 @@ struct kwsysProcess_s
   /* Whether to treat command lines as verbatim.  */
   int Verbatim;
 
+  /* Whether to merge stdout/stderr of the child.  */
+  int MergeOutput;
+
   /* Mutex to protect the shared index used by threads to report data.  */
   HANDLE SharedIndexMutex;
 
@@ -806,6 +809,7 @@ int kwsysProcess_GetOption(kwsysProcess* cp, int optionId)
     {
     case kwsysProcess_Option_Detach: return cp->OptionDetach;
     case kwsysProcess_Option_HideWindow: return cp->HideWindow;
+    case kwsysProcess_Option_MergeOutput: return cp->MergeOutput;
     case kwsysProcess_Option_Verbatim: return cp->Verbatim;
     default: return 0;
     }
@@ -823,6 +827,7 @@ void kwsysProcess_SetOption(kwsysProcess* cp, int optionId, int value)
     {
     case kwsysProcess_Option_Detach: cp->OptionDetach = value; break;
     case kwsysProcess_Option_HideWindow: cp->HideWindow = value; break;
+    case kwsysProcess_Option_MergeOutput: cp->MergeOutput = value; break;
     case kwsysProcess_Option_Verbatim: cp->Verbatim = value; break;
     default: break;
     }
@@ -1086,7 +1091,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       nextStdInput = p[0];
       si.hStdOutput = p[1];
       }
-    si.hStdError = cp->PipeChildStd[2];
+    si.hStdError = cp->MergeOutput? cp->PipeChildStd[1] : cp->PipeChildStd[2];
 
     {
     int res = kwsysProcessCreate(cp, i, &si);
@@ -1100,7 +1105,7 @@ void kwsysProcess_Execute(kwsysProcess* cp)
       {
       kwsysProcessCleanupHandle(&si.hStdOutput);
       }
-    if (si.hStdError != cp->PipeChildStd[2])
+    if (si.hStdError != cp->PipeChildStd[2] && !cp->MergeOutput)
       {
       kwsysProcessCleanupHandle(&si.hStdError);
       }
