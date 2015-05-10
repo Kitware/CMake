@@ -129,7 +129,7 @@ bool cmBuildCommand
 
   std::string configType = "Release";
   const char* cfg = getenv("CMAKE_CONFIG_TYPE");
-  if ( cfg )
+  if ( cfg && *cfg )
     {
     configType = cfg;
     }
