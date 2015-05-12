@@ -137,7 +137,7 @@ if(Java_JAVA_EXECUTABLE)
       elseif(var MATCHES "java full version \"kaffe-([0-9]+\\.[0-9]+\\.[0-9_]+)\"")
         # Kaffe style
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
-      elseif(var MATCHES "openjdk version \"([0-9]+\\.[0-9]+\\.[0-9_]+)\"")
+      elseif(var MATCHES "openjdk version \"([0-9]+\\.[0-9]+\\.[0-9_]+.*)\"")
         # OpenJDK ver 1.7.x on OpenBSD
         set(Java_VERSION_STRING "${CMAKE_MATCH_1}")
       else()
