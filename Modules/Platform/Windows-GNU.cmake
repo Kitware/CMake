@@ -138,7 +138,7 @@ macro(__windows_compiler_gnu lang)
     endforeach()
   endif()
 
-  if(NOT CMAKE_RC_COMPILER_INIT)
+  if(NOT CMAKE_RC_COMPILER_INIT AND NOT CMAKE_GENERATOR_RC)
     set(CMAKE_RC_COMPILER_INIT windres)
   endif()
 
