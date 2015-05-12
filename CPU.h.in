@@ -76,7 +76,15 @@
 #elif defined(__m68k__) || defined(M68000)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
 
-/* MIPS */
+/* MIPSel (MIPS little endian) */
+#elif defined(__MIPSEL__) || defined(__MIPSEL) || defined(_MIPSEL)
+# define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_LITTLE
+
+/* MIPSeb (MIPS big endian) */
+#elif defined(__MIPSEB__) || defined(__MIPSEB) || defined(_MIPSEB)
+# define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
+
+/* MIPS (fallback, big endian) */
 #elif defined(__mips) || defined(__mips__) || defined(__MIPS__)
 # define @KWSYS_NAMESPACE@_CPU_ENDIAN_ID @KWSYS_NAMESPACE@_CPU_ENDIAN_ID_BIG
 
