@@ -1866,7 +1866,18 @@ function(_ep_add_download_command name)
   else()
     _ep_is_dir_empty("${source_dir}" empty)
     if(${empty})
-      message(SEND_ERROR "error: no download info for '${name}' -- please specify existing/non-empty SOURCE_DIR or one of URL, CVS_REPOSITORY and CVS_MODULE, SVN_REPOSITORY, GIT_REPOSITORY, HG_REPOSITORY or DOWNLOAD_COMMAND")
+      message(SEND_ERROR
+        "No download info given for '${name}' and its source directory:\n"
+        " ${source_dir}\n"
+        "is not an existing non-empty directory.  Please specify one of:\n"
+        " * SOURCE_DIR with an existing non-empty directory\n"
+        " * URL\n"
+        " * GIT_REPOSITORY\n"
+        " * HG_REPOSITORY\n"
+        " * CVS_REPOSITORY and CVS_MODULE\n"
+        " * SVN_REVISION\n"
+        " * DOWNLOAD_COMMAND"
+        )
     endif()
   endif()
 
