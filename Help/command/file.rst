@@ -313,8 +313,12 @@ preserves input file timestamps, and optimizes out a file if it exists
 at the destination with the same timestamp.  Copying preserves input
 permissions unless explicit permissions or ``NO_SOURCE_PERMISSIONS``
 are given (default is ``USE_SOURCE_PERMISSIONS``).
+
 See the :command:`install(DIRECTORY)` command for documentation of
-permissions, ``PATTERN``, ``REGEX``, and ``EXCLUDE`` options.
+permissions, ``FILES_MATCHING``, ``PATTERN``, ``REGEX``, and
+``EXCLUDE`` options.  Copying directories preserves the structure
+of their content even if options are used to select a subset of
+files.
 
 The ``INSTALL`` signature differs slightly from ``COPY``: it prints
 status messages (subject to the :variable:`CMAKE_INSTALL_MESSAGE` variable),
