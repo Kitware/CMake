@@ -4942,6 +4942,26 @@ void cmMakefile::RecordPolicies(cmPolicies::PolicyMap& pm)
     }
 }
 
+//----------------------------------------------------------------------------
+bool cmMakefile::IgnoreErrorsCMP0061() const
+{
+  bool ignoreErrors = true;
+  switch (this->GetPolicyStatus(cmPolicies::CMP0061))
+    {
+    case cmPolicies::WARN:
+      // No warning for this policy!
+    case cmPolicies::OLD:
+      break;
+    case cmPolicies::REQUIRED_IF_USED:
+    case cmPolicies::REQUIRED_ALWAYS:
+    case cmPolicies::NEW:
+      ignoreErrors = false;
+      break;
+    }
+  return ignoreErrors;
+}
+
+//----------------------------------------------------------------------------
 #define FEATURE_STRING(F) , #F
 static const char * const C_FEATURES[] = {
   0

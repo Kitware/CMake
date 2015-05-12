@@ -415,6 +415,8 @@ public:
   bool HasCMP0054AlreadyBeenReported(
     cmListFileContext context) const;
 
+  bool IgnoreErrorsCMP0061() const;
+
   const char* GetHomeDirectory() const;
   const char* GetHomeOutputDirectory() const;
 

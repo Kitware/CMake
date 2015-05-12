@@ -19,7 +19,8 @@ Sets the given ``<variable>`` to a command-line string of the form::
 where ``<cmake>`` is the location of the :manual:`cmake(1)` command-line
 tool, and ``<config>`` and ``<target>`` are the values provided to the
 ``CONFIGURATION`` and ``TARGET`` options, if any.  The trailing ``-- -i``
-option is added for Makefile generators.
+option is added for :ref:`Makefile Generators` if policy :policy:`CMP0061`
+is not set to ``NEW``.
 
 When invoked, this ``cmake --build`` command line will launch the
 underlying build system tool.
@@ -32,7 +33,7 @@ This second signature is deprecated, but still available for backwards
 compatibility.  Use the first signature instead.
 
 It sets the given ``<cachevariable>`` to a command-line string as
-above but without the ``--config`` or ``--target`` options.
+above but without the ``--target`` option.
 The ``<makecommand>`` is ignored but should be the full path to
 msdev, devenv, nmake, make or one of the end user build tools
 for legacy invocations.
