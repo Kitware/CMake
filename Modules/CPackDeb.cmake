@@ -48,11 +48,31 @@
 #  The debian package architecture
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_DEPENDS
-#
-#  * Mandatory : NO
-#  * Default   : -
+#               CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS
 #
 #  May be used to set deb dependencies.
+#
+#  * Mandatory : NO
+#  * Default   :
+#
+#    - An empty string for non-component based installations
+#    - :variable:`CPACK_DEBIAN_PACKAGE_DEPENDS` for component-based
+#      installations.
+#
+#  .. note::
+#
+#    If :variable:`CPACK_DEBIAN_PACKAGE_SHLIBDEPS` or
+#    more specifically :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_SHLIBDEPS`
+#    is set for this component, the discovered dependencies will be appended
+#    to :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS` intead of
+#    :variable:`CPACK_DEBIAN_PACKAGE_DEPENDS`. If
+#    :variable:`CPACK_DEBIAN_<COMPONENT>_PACKAGE_DEPENDS` is an empty string,
+#    only the automatically discovered dependencies will be set for this
+#    component.
+#
+#  Example::
+#
+#    set(CPACK_DEBIAN_PACKAGE_DEPENDS "libc6 (>= 2.3.1-6), libc6 (< 2.4)")
 #
 # .. variable:: CPACK_DEBIAN_PACKAGE_MAINTAINER
 #
@@ -356,33 +376,24 @@ function(cpack_deb_prepare_package_vars)
         string(REGEX REPLACE "^.*Depends=" "" CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS "${SHLIBDEPS_OUTPUT}")
 
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
-          message( "CPackDeb Debug: Found dependency: ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
+          message("CPackDeb Debug: Found dependency: ${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS} from output ${SHLIBDEPS_OUTPUT}")
         endif()
 
         # Remove blank control file
         # Might not be safe if package actual contain file or directory named debian
         file(REMOVE_RECURSE "${CPACK_TEMPORARY_DIRECTORY}/debian")
-
-        # Append user depend if set
-        if(CPACK_DEBIAN_PACKAGE_DEPENDS)
-          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
-        else()
-          set(CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
-        endif()
       else()
         if(CPACK_DEBIAN_PACKAGE_DEBUG)
-          message( "CPackDeb Debug: Using only user-provided depends because package does not contain executable files that contain dynamically linked libraries.")
+          message(AUTHOR_WARNING "CPackDeb Debug: Using only user-provided depends because package does not contain executable files that link to shared libraries.")
         endif()
       endif()
     else()
-      if(CPACK_DEBIAN_PACKAGE_DEBUG)
-        message( "CPackDeb Debug: Using only user-provided depends because dpkg-shlibdeps is not found.")
-      endif()
+      message("CPackDeb: Using only user-provided dependencies because dpkg-shlibdeps is not found.")
     endif()
 
   else()
     if(CPACK_DEBIAN_PACKAGE_DEBUG)
-      message( "CPackDeb Debug: Using only user-provided depends")
+      message("CPackDeb Debug: Using only user-provided dependencies")
     endif()
   endif()
 
@@ -426,6 +437,33 @@ function(cpack_deb_prepare_package_vars)
   # Depends:
   # You should set: DEBIAN_PACKAGE_DEPENDS
   # TODO: automate 'objdump -p | grep NEEDED'
+
+  # if per-component dependency, overrides the global CPACK_DEBIAN_PACKAGE_DEPENDS
+  # automatic dependency discovery will be performed afterwards.
+  if(CPACK_DEB_PACKAGE_COMPONENT)
+    string(TOUPPER "${CPACK_DEB_PACKAGE_COMPONENT}" _local_component_name)
+    set(_component_depends_var "CPACK_DEBIAN_${_local_component_name}_PACKAGE_DEPENDS")
+
+    # if set, overrides the global dependency
+    if(DEFINED ${_component_depends_var})
+      set(CPACK_DEBIAN_PACKAGE_DEPENDS "${${_component_depends_var}}")
+      if(CPACK_DEBIAN_PACKAGE_DEBUG)
+        message("CPackDeb Debug: component '${_local_component_name}' dependencies set to '${CPACK_DEBIAN_PACKAGE_DEPENDS}'")
+      endif()
+    endif()
+  endif()
+
+  # at this point, the CPACK_DEBIAN_PACKAGE_DEPENDS is properly set
+  # to the minimal dependency of the package
+  # Append automatically discovered dependencies .
+  if(NOT "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}" STREQUAL "")
+    if (CPACK_DEBIAN_PACKAGE_DEPENDS)
+      set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}, ${CPACK_DEBIAN_PACKAGE_DEPENDS}")
+    else ()
+      set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_AUTO_DEPENDS}")
+    endif ()
+  endif()
+
   if(NOT CPACK_DEBIAN_PACKAGE_DEPENDS)
     message(STATUS "CPACK_DEBIAN_PACKAGE_DEPENDS not set, the package will have no dependencies.")
   endif()
