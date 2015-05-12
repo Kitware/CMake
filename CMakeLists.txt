@@ -41,7 +41,12 @@ if(NOT DEFINED CMAKE_C_STANDARD AND NOT CMake_NO_C_STANDARD)
   set(CMAKE_C_STANDARD 11)
 endif()
 if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx14_cstdio.cmake)
+  if(NOT CMake_CXX14_CSTDIO_BROKEN)
+    set(CMAKE_CXX_STANDARD 14)
+  else()
+    set(CMAKE_CXX_STANDARD 11)
+  endif()
 endif()
 
 # option to set the internal encoding of CMake to UTF-8
