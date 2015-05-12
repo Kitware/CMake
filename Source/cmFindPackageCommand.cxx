@@ -42,7 +42,6 @@ cmFindPackageCommand::cmFindPackageCommand()
   this->Required = false;
   this->NoUserRegistry = false;
   this->NoSystemRegistry = false;
-  this->NoBuilds = false;
   this->UseConfigFiles = true;
   this->UseFindModules = true;
   this->DebugMode = false;
@@ -246,7 +245,7 @@ bool cmFindPackageCommand
       }
     else if(args[i] == "NO_CMAKE_BUILDS_PATH")
       {
-      this->NoBuilds = true;
+      // Ignore legacy option.
       configArgs.insert(i);
       doing = DoingNone;
       }
@@ -1142,10 +1141,6 @@ void cmFindPackageCommand::ComputePrefixes()
       {
       this->FillPrefixesUserRegistry();
       }
-    if(!this->NoBuilds)
-      {
-      this->FillPrefixesBuilds();
-      }
     if(!this->NoCMakeSystemPath)
       {
       this->FillPrefixesCMakeSystemVariable();
@@ -1434,29 +1429,6 @@ bool cmFindPackageCommand::CheckPackageRegistryEntry(const std::string& fname,
     // directory.  Assume the stream content was created by a future
     // version of CMake that uses a different format, and leave it.
     return true;
-    }
-}
-
-//----------------------------------------------------------------------------
-void cmFindPackageCommand::FillPrefixesBuilds()
-{
-  cmSearchPath &paths = this->LabeledPaths[PathLabel::Builds];
-
-  // It is likely that CMake will have recently built the project.
-  for(int i=0; i <= 10; ++i)
-    {
-    std::ostringstream r;
-    r <<
-      "[HKEY_CURRENT_USER\\Software\\Kitware\\CMakeSetup\\"
-      "Settings\\StartPath;WhereBuild" << i << "]";
-    std::string f = r.str();
-    cmSystemTools::ExpandRegistryValues(f);
-    cmSystemTools::ConvertToUnixSlashes(f);
-    if(cmSystemTools::FileIsFullPath(f.c_str()) &&
-       cmSystemTools::FileIsDirectory(f))
-      {
-      paths.AddPath(f);
-      }
     }
 }
 

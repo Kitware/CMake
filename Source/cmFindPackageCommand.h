@@ -89,7 +89,6 @@ private:
   void FillPrefixesSystemEnvironment();
   void FillPrefixesUserRegistry();
   void FillPrefixesSystemRegistry();
-  void FillPrefixesBuilds();
   void FillPrefixesCMakeSystemVariable();
   void FillPrefixesUserGuess();
   void FillPrefixesUserHints();
@@ -138,7 +137,6 @@ private:
   bool UseFindModules;
   bool NoUserRegistry;
   bool NoSystemRegistry;
-  bool NoBuilds;
   bool DebugMode;
   bool UseLib64Paths;
   bool PolicyScope;
