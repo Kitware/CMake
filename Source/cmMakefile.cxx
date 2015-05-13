@@ -4117,11 +4117,12 @@ const char *cmMakefile::GetProperty(const std::string& prop,
   output = "";
   if (prop == "PARENT_DIRECTORY")
     {
-    if(cmLocalGenerator* plg = this->LocalGenerator->GetParent())
+    cmState::Snapshot parent = this->StateSnapshot.GetParent();
+    if(parent.IsValid())
       {
-      output = plg->GetMakefile()->GetCurrentSourceDirectory();
+      return parent.GetCurrentSourceDirectory();
       }
-    return output.c_str();
+    return "";
     }
   else if (prop == "INCLUDE_REGULAR_EXPRESSION" )
     {
