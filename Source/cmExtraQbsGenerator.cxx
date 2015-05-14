@@ -182,7 +182,9 @@ void cmExtraQbsGenerator::AppendSources(cmGeneratedFileStream &fout,
   std::vector<cmSourceFile *> genSources;
   std::vector<cmSourceFile *>::const_iterator itr = sources.begin();
   fout << "\t\t\tfiles: [\n"
-       << "\t\t\t\t\"" << t.GetMakefile()->GetCurrentListFile() << "\",\n";
+       << "\t\t\t\t\""
+       << t.GetMakefile()->GetDefinition("CMAKE_CURRENT_LIST_FILE")
+       << "\",\n";
   for (; itr != sources.end(); ++itr)
     {
     if (!(*itr)->GetPropertyAsBool("GENERATED"))

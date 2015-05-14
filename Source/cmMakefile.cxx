@@ -609,7 +609,8 @@ bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 
 bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
 {
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", this->GetCurrentListFile());
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE",
+                      this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
   this->cmCurrentListFile =
     cmSystemTools::CollapseFullPath(listfile,
                                     this->GetCurrentSourceDirectory());
