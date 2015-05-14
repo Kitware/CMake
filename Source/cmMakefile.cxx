@@ -610,12 +610,14 @@ bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
                       this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
-  return this->ReadListFile(listfile, noPolicyScope);
+  return this->ReadListFile(listfile, noPolicyScope, false);
 }
 
-//----------------------------------------------------------------------------
-// Parse the given CMakeLists.txt file executing all commands
-//
+bool cmMakefile::ReadListFile(const char* listfile)
+{
+  return this->ReadListFile(listfile, true, false);
+}
+
 bool cmMakefile::ReadListFile(const char* listfile,
                               bool noPolicyScope,
                               bool requireProjectCommand)
