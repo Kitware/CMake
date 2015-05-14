@@ -77,6 +77,11 @@ cmLocalGenerator::~cmLocalGenerator()
   delete this->Makefile;
 }
 
+bool cmLocalGenerator::IsRootMakefile() const
+{
+  return !this->GetParent();
+}
+
 //----------------------------------------------------------------------------
 class cmLocalGeneratorCurrent
 {

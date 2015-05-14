@@ -37,6 +37,9 @@ public:
   cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent);
   virtual ~cmLocalGenerator();
 
+  /// @return whether we are processing the top CMakeLists.txt file.
+  bool IsRootMakefile() const;
+
   /**
    * Generate the makefile for this directory.
    */

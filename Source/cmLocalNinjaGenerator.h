@@ -59,9 +59,6 @@ public:
   std::string const& GetConfigName() const
   { return this->ConfigName; }
 
-  /// @return whether we are processing the top CMakeLists.txt file.
-  bool isRootMakefile() const;
-
   /// @returns the relative path between the HomeOutputDirectory and this
   /// local generators StartOutputDirectory.
   std::string GetHomeRelativeOutputPath() const
