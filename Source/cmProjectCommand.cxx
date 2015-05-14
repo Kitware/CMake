@@ -53,7 +53,7 @@ bool cmProjectCommand
   // CMAKE_PROJECT_NAME will match PROJECT_NAME, and cmake --build
   // will work.
   if(!this->Makefile->GetDefinition("CMAKE_PROJECT_NAME")
-     || (this->Makefile->GetLocalGenerator()->GetParent() == 0) )
+     || (this->Makefile->GetLocalGenerator()->IsRootMakefile()))
     {
     this->Makefile->AddDefinition("CMAKE_PROJECT_NAME", args[0].c_str());
     this->Makefile->AddCacheDefinition
