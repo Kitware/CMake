@@ -198,10 +198,7 @@ void cmLocalGenerator::ReadInputFile()
     return;
     }
 
-  if(!this->Parent)
-    {
-    return;
-    }
+  assert(this->Parent);
 
   // The file is missing.  Check policy CMP0014.
   cmMakefile* mf = this->Parent->GetMakefile();
