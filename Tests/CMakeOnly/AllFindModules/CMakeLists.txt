@@ -86,8 +86,8 @@ foreach(VTEST ALSA ARMADILLO BZIP2 CUPS CURL EXPAT FREETYPE GETTEXT GIT HG
     check_version_string(${VTEST} ${VTEST}_VERSION_STRING)
 endforeach()
 
-foreach(VTEST BISON Boost CUDA DOXYGEN FLEX GIF GTK2 LibArchive OPENSCENEGRAPH
-        RUBY SWIG)
+foreach(VTEST BISON Boost CUDA DOXYGEN FLEX GIF GTK2
+        HDF5 LibArchive OPENSCENEGRAPH RUBY SWIG)
     check_version_string(${VTEST} ${VTEST}_VERSION)
 endforeach()
 
