@@ -16,8 +16,13 @@ string(REPLACE "\\" "\\\\" HOME "${HOME}")
 # (i.e. - is it an "in source" build?)
 #
 set(in_source_build 0)
+set(build_under_source 0)
 
-if(CMake_SOURCE_DIR STREQUAL "${CMake_BINARY_DIR}")
+string(FIND "${CMake_BINARY_DIR}" "${CMake_SOURCE_DIR}/" pos)
+if(pos EQUAL 0)
+  message("build dir is *inside* source dir")
+  set(build_under_source 1)
+elseif(CMake_SOURCE_DIR STREQUAL "${CMake_BINARY_DIR}")
   message("build dir *is* source dir")
   set(in_source_build 1)
 else()
@@ -39,8 +44,13 @@ message("bin_len='${bin_len}'")
 message("substr_len='${substr_len}'")
 message("bin_dir='${bin_dir}'")
 message("in_source_build='${in_source_build}'")
+message("build_under_source='${build_under_source}'")
 message("")
 
+if(build_under_source)
+  message(STATUS "Skipping rest of test because build tree is under source tree")
+  return()
+endif()
 
 # If this does not appear to be a git checkout, just pass the test here
 # and now. (Do not let the test fail if it is run in a tree *exported* from a
