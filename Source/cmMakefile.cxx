@@ -1642,11 +1642,46 @@ void cmMakefile::InitializeFromParent()
 void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
 {
   lg2->GetMakefile()->InitializeFromParent();
+  std::string currentStart = lg2->GetMakefile()->GetCurrentSourceDirectory();
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
     std::string msg="   Entering             ";
-    msg += lg2->GetMakefile()->GetCurrentSourceDirectory();
+    msg += currentStart;
     cmSystemTools::Message(msg.c_str());
+    }
+
+  currentStart += "/CMakeLists.txt";
+  if(!cmSystemTools::FileExists(currentStart.c_str(), true))
+    {
+    // The file is missing.  Check policy CMP0014.
+    std::ostringstream e;
+    e << "The source directory\n"
+      << "  " << currentStart << "\n"
+      << "does not contain a CMakeLists.txt file.";
+    switch (this->GetPolicyStatus(cmPolicies::CMP0014))
+      {
+      case cmPolicies::WARN:
+        // Print the warning.
+        e << "\n"
+          << "CMake does not support this case but it used "
+          << "to work accidentally and is being allowed for "
+          << "compatibility."
+          << "\n"
+          << cmPolicies::GetPolicyWarning(cmPolicies::CMP0014);
+        this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+      case cmPolicies::OLD:
+        // OLD behavior does not warn.
+        break;
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
+        e << "\n"
+          << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0014);
+      case cmPolicies::NEW:
+        // NEW behavior prints the error.
+        this->IssueMessage(cmake::FATAL_ERROR, e.str());
+      }
+    lg2->SetConfiguredCMP0014(true);
+    return;
     }
   // finally configure the subdir
   lg2->Configure();
