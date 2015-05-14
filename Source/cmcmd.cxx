@@ -211,6 +211,88 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 0;
       }
 
+    // run include what you use command and then run the compile
+    // command. This is an internal undocumented option and should
+    // only be used by CMake itself when running iwyu.
+    else if (args[1] == "__run_iwyu")
+      {
+      if (args.size() < 3)
+        {
+        std::cerr << "__run_iwyu Usage: -E __run_iwyu [--iwyu=/path/iwyu]"
+          " -- compile command\n";
+        return 1;
+        }
+      bool doing_options = true;
+      std::vector<std::string> orig_cmd;
+      std::string iwyu;
+      for (std::string::size_type cc = 2; cc < args.size(); cc ++)
+        {
+        std::string const& arg = args[cc];
+        if (arg == "--")
+          {
+          doing_options = false;
+          }
+        else if (doing_options && cmHasLiteralPrefix(arg, "--iwyu="))
+          {
+          iwyu = arg.substr(7);
+          }
+        else if (doing_options)
+          {
+          std::cerr << "__run_iwyu given unknown argument: " << arg << "\n";
+          return 1;
+          }
+        else
+          {
+          orig_cmd.push_back(arg);
+          }
+        }
+      if (iwyu.empty())
+        {
+        std::cerr << "__run_iwyu missing --iwyu=\n";
+        return 1;
+        }
+      if (orig_cmd.empty())
+        {
+        std::cerr << "__run_iwyu missing compile command after --\n";
+        return 1;
+        }
+
+      // Construct the iwyu command line by taking what was given
+      // and adding all the arguments we give to the compiler.
+      std::vector<std::string> iwyu_cmd;
+      cmSystemTools::ExpandListArgument(iwyu, iwyu_cmd, true);
+      iwyu_cmd.insert(iwyu_cmd.end(), orig_cmd.begin()+1, orig_cmd.end());
+
+      // Run the iwyu command line.  Capture its stderr and hide its stdout.
+      int ret = 0;
+      std::string stdErr;
+      if(!cmSystemTools::RunSingleCommand(iwyu_cmd, 0, &stdErr, &ret,
+                                          0, cmSystemTools::OUTPUT_NONE))
+        {
+        std::cerr << "Error running '" << iwyu_cmd[0] << "': "
+                  << stdErr << "\n";
+        return 1;
+        }
+
+      // Warn if iwyu reported anything.
+      if(stdErr.find("should remove these lines:") != stdErr.npos
+         || stdErr.find("should add these lines:") != stdErr.npos)
+        {
+        std::cerr << "Warning: include-what-you-use reported diagnostics:\n"
+                  << stdErr << "\n";
+        }
+
+      // Now run the real compiler command and return its result value.
+      if(!cmSystemTools::RunSingleCommand(orig_cmd, 0, &stdErr, &ret, 0,
+                                          cmSystemTools::OUTPUT_PASSTHROUGH))
+        {
+        std::cerr << "Error running '" << orig_cmd[0] << "': "
+                  << stdErr << "\n";
+        return 1;
+        }
+      return ret;
+      }
+
     // Echo string
     else if (args[1] == "echo" )
       {

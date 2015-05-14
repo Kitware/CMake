@@ -12,6 +12,11 @@ run_cmake_command(E_echo_append ${CMAKE_COMMAND} -E echo_append)
 run_cmake_command(E_rename-no-arg ${CMAKE_COMMAND} -E rename)
 run_cmake_command(E_touch_nocreate-no-arg ${CMAKE_COMMAND} -E touch_nocreate)
 
+run_cmake_command(E___run_iwyu-no-iwyu ${CMAKE_COMMAND} -E __run_iwyu -- command-does-not-exist)
+run_cmake_command(E___run_iwyu-bad-iwyu ${CMAKE_COMMAND} -E __run_iwyu --iwyu=iwyu-does-not-exist -- command-does-not-exist)
+run_cmake_command(E___run_iwyu-no--- ${CMAKE_COMMAND} -E __run_iwyu --iwyu=iwyu-does-not-exist command-does-not-exist)
+run_cmake_command(E___run_iwyu-no-cc ${CMAKE_COMMAND} -E __run_iwyu --iwyu=iwyu-does-not-exist --)
+
 run_cmake_command(G_no-arg ${CMAKE_COMMAND} -G)
 run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
