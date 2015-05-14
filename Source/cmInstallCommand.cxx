@@ -848,13 +848,15 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     return false;
     }
 
+  const std::vector<std::string>& filesVector = files.GetVector();
+
   // Check if there is something to do.
-  if(files.GetVector().empty())
+  if(filesVector.empty())
     {
     return true;
     }
 
-  if(!ica.GetRename().empty() && files.GetVector().size() > 1)
+  if(!ica.GetRename().empty() && filesVector.size() > 1)
     {
     // The rename option works only with one file.
     std::ostringstream e;
@@ -864,7 +866,7 @@ bool cmInstallCommand::HandleFilesMode(std::vector<std::string> const& args)
     }
 
   std::vector<std::string> absFiles;
-  if (!this->MakeFilesFullPath(args[0].c_str(), files.GetVector(), absFiles))
+  if (!this->MakeFilesFullPath(args[0].c_str(), filesVector, absFiles))
     {
     return false;
     }
