@@ -198,7 +198,6 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->HeaderFileExtensions.push_back( "txx" );
 
   this->DefineFlags = " ";
-  this->LocalGenerator = localGenerator;
 
   this->AddDefaultDefinitions();
 
