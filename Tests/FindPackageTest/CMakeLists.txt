@@ -1,6 +1,9 @@
 cmake_minimum_required (VERSION 2.6)
 project(FindPackageTest)
 
+# Protect tests from running inside the default install prefix.
+set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_BINARY_DIR}/NotDefaultPrefix")
+
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Look for a package which uses FindPackageHandleStandardArgs.cmake with the
