@@ -418,14 +418,6 @@ public:
   void SetCurrentBinaryDirectory(const std::string& dir);
   const char* GetCurrentBinaryDirectory() const;
 
-  /* Get the current CMakeLists.txt file that is being processed.  This
-   * is just used in order to be able to 'branch' from one file to a second
-   * transparently */
-  const char* GetCurrentListFile() const
-    {
-      return this->cmCurrentListFile.c_str();
-    }
-
   //@}
 
   /**
@@ -844,8 +836,6 @@ protected:
 
   // Check for a an unused variable
   void CheckForUnused(const char* reason, const std::string& name) const;
-
-  std::string cmCurrentListFile;
 
   std::string ProjectName;    // project name
 
