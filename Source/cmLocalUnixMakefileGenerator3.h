@@ -34,7 +34,8 @@ class cmSourceFile;
 class cmLocalUnixMakefileGenerator3 : public cmLocalGenerator
 {
 public:
-  cmLocalUnixMakefileGenerator3(cmLocalGenerator* parent);
+  cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg,
+                                cmLocalGenerator* parent);
   virtual ~cmLocalUnixMakefileGenerator3();
 
   /**
@@ -78,36 +79,6 @@ public:
    */
   void SetMakeSilentFlag(const std::string& s) { this->MakeSilentFlag = s; }
   std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
-
-  /**
-   * Set to true if the shell being used is the windows shell.
-   * This controls if statements in the makefile and the SHELL variable.
-   * The default is false.
-   */
-  void SetWindowsShell(bool v)  {this->WindowsShell = v;}
-
-  /**
-   * Set to true if the make tool being used is Watcom WMake.
-   */
-  void SetWatcomWMake(bool v)  {this->WatcomWMake = v;}
-
-  /**
-   * Set to true if the make tool being used is MinGW Make.
-   */
-  void SetMinGWMake(bool v)  {this->MinGWMake = v;}
-  bool IsMinGWMake() const { return this->MinGWMake; }
-
-  /**
-   * Set to true if the make tool being used is NMake.
-   */
-  void SetNMake(bool v)  {this->NMake = v;}
-
-  /**
-   * Set to true if the shell being used is the MSYS shell.
-   * This controls if statements in the makefile and the SHELL variable.
-   * The default is false.
-   */
-  void SetMSYSShell(bool v)  {this->MSYSShell = v;}
 
   /**
    * If set to true, then NULL is set to nil for non Windows_NT.

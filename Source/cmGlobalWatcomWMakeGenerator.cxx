@@ -22,6 +22,10 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->ToolSupportsColor = true;
   this->NeedSymbolicMark = true;
   this->EmptyRuleHackCommand = "@cd .";
+#ifdef _WIN32
+  this->WindowsShell = true;
+#endif
+  this->WatcomWMake = true;
 }
 
 void cmGlobalWatcomWMakeGenerator
@@ -45,14 +49,9 @@ cmLocalGenerator *
 cmGlobalWatcomWMakeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalUnixMakefileGenerator3* lg
-      = new cmLocalUnixMakefileGenerator3(parent);
+      = new cmLocalUnixMakefileGenerator3(this, parent);
   lg->SetDefineWindowsNULL(true);
-#ifdef _WIN32
-  lg->SetWindowsShell(true);
-#endif
-  lg->SetWatcomWMake(true);
   lg->SetMakeSilentFlag("-h");
-  lg->SetGlobalGenerator(this);
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);
   lg->SetUnixCD(false);

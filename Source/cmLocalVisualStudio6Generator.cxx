@@ -24,8 +24,9 @@
 #include <cmsys/FStream.hxx>
 
 cmLocalVisualStudio6Generator
-::cmLocalVisualStudio6Generator(cmLocalGenerator* parent):
-  cmLocalVisualStudioGenerator(VS6, parent)
+::cmLocalVisualStudio6Generator(cmGlobalGenerator* gg,
+                                cmLocalGenerator* parent):
+  cmLocalVisualStudioGenerator(VS6, gg, parent)
 {
 }
 

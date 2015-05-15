@@ -13,6 +13,7 @@
 #define cmLocalGenerator_h
 
 #include "cmStandardIncludes.h"
+#include "cmState.h"
 
 class cmMakefile;
 class cmGlobalGenerator;
@@ -33,8 +34,11 @@ class cmCustomCommandGenerator;
 class cmLocalGenerator
 {
 public:
-  cmLocalGenerator(cmLocalGenerator* parent);
+  cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent);
   virtual ~cmLocalGenerator();
+
+  /// @return whether we are processing the top CMakeLists.txt file.
+  bool IsRootMakefile() const;
 
   /**
    * Generate the makefile for this directory.
@@ -88,8 +92,8 @@ public:
   const cmGlobalGenerator *GetGlobalGenerator() const {
     return this->GlobalGenerator; }
 
-  ///! Set the Global Generator, done on creation by the GlobalGenerator
-  void SetGlobalGenerator(cmGlobalGenerator *gg);
+  cmState* GetState() const;
+  cmState::Snapshot GetStateSnapshot() const;
 
   /**
    * Convert something to something else. This is a centralized conversion
@@ -298,9 +302,6 @@ public:
                              bool forEcho = false,
                              bool useWatcomQuote = false);
 
-  /** Backwards-compatibility version of EscapeForShell.  */
-  std::string EscapeForShellOldStyle(const std::string& str);
-
   /** Escape the given string as an argument in a CMake script.  */
   static std::string EscapeForCMake(const std::string& str);
 
@@ -385,6 +386,13 @@ public:
                         std::map<cmSourceFile const*, std::string>& mapping,
                         cmGeneratorTarget const* gt = 0);
 
+  bool IsWindowsShell() const;
+  bool IsWatcomWMake() const;
+  bool IsMinGWMake() const;
+  bool IsNMake() const;
+
+  void SetConfiguredCMP0014(bool configured);
+
 protected:
   ///! put all the libraries for a target on into the given stream
   virtual void OutputLinkLibraries(std::string& linkLibraries,
@@ -448,10 +456,8 @@ protected:
   void ReadInputFile();
 
   cmMakefile *Makefile;
+  cmState::Snapshot StateSnapshot;
   cmGlobalGenerator *GlobalGenerator;
-  // members used for relative path function ConvertToMakefilePath
-  std::string RelativePathToSourceDir;
-  std::string RelativePathToBinaryDir;
   std::vector<std::string> HomeDirectoryComponents;
   std::vector<std::string> StartDirectoryComponents;
   std::vector<std::string> HomeOutputDirectoryComponents;
@@ -461,18 +467,13 @@ protected:
   std::map<std::string, std::string> UniqueObjectNamesMap;
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
-  bool WindowsShell;
-  bool WindowsVSIDE;
-  bool WatcomWMake;
-  bool MinGWMake;
-  bool NMake;
-  bool ForceUnixPath;
-  bool MSYSShell;
+
   bool LinkScriptShell;
   bool UseRelativePaths;
   bool IgnoreLibPrefix;
   bool Configured;
   bool EmitUniversalBinaryFlags;
+
   // Hack for ExpandRuleVariable until object-oriented version is
   // committed.
   std::string TargetImplib;

@@ -24,7 +24,7 @@ class cmLocalXCodeGenerator : public cmLocalGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalXCodeGenerator(cmLocalGenerator* parent);
+  cmLocalXCodeGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent);
 
   virtual ~cmLocalXCodeGenerator();
   virtual std::string GetTargetDirectory(cmTarget const& target) const;

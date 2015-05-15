@@ -488,6 +488,9 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   , ComputingUnknownDependencies(false)
   , PolicyCMP0058(cmPolicies::WARN)
 {
+#ifdef _WIN32
+  this->WindowsShell = true;
+#endif
   // // Ninja is not ported to non-Unix OS yet.
   // this->ForceUnixPaths = true;
   this->FindMakeProgramFile = "CMakeNinjaFindMake.cmake";
@@ -500,9 +503,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
 cmLocalGenerator*
 cmGlobalNinjaGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalGenerator* lg = new cmLocalNinjaGenerator(parent);
-  lg->SetGlobalGenerator(this);
-  return lg;
+  return new cmLocalNinjaGenerator(this, parent);
 }
 
 void cmGlobalNinjaGenerator

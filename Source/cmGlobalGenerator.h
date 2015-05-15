@@ -354,6 +354,13 @@ public:
   cmFileLockPool& GetFileLockPool() { return FileLockPool; }
 #endif
 
+  bool WindowsShell;
+  bool WindowsVSIDE;
+  bool WatcomWMake;
+  bool MinGWMake;
+  bool NMake;
+  bool MSYSShell;
+
 protected:
   virtual void Generate();
 

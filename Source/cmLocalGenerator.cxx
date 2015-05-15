@@ -43,20 +43,24 @@
 #include <StorageDefs.h>
 #endif
 
-cmLocalGenerator::cmLocalGenerator(cmLocalGenerator* parent)
+cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
+                                   cmLocalGenerator* parent)
 {
-  this->Makefile = 0; // moved to after set on global
+  this->GlobalGenerator = gg;
   this->Parent = parent;
   if (parent)
     {
     parent->AddChild(this);
+    this->StateSnapshot =
+        this->GetState()->CreateSnapshot(parent->StateSnapshot);
     }
-  this->WindowsShell = false;
-  this->WindowsVSIDE = false;
-  this->WatcomWMake = false;
-  this->MinGWMake = false;
-  this->NMake = false;
-  this->MSYSShell = false;
+  else
+    {
+    this->StateSnapshot =
+        this->GetState()->CreateSnapshot(cmState::Snapshot(this->GetState()));
+    }
+  this->Makefile = new cmMakefile(this);
+
   this->LinkScriptShell = false;
   this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
@@ -71,6 +75,11 @@ cmLocalGenerator::cmLocalGenerator(cmLocalGenerator* parent)
 cmLocalGenerator::~cmLocalGenerator()
 {
   delete this->Makefile;
+}
+
+bool cmLocalGenerator::IsRootMakefile() const
+{
+  return !this->GetParent();
 }
 
 //----------------------------------------------------------------------------
@@ -105,7 +114,7 @@ void cmLocalGenerator::Configure()
   static_cast<void>(clg);
 
   // make sure the CMakeFiles dir is there
-  std::string filesDir = this->Makefile->GetCurrentBinaryDirectory();
+  std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
   filesDir += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(filesDir.c_str());
 
@@ -181,48 +190,10 @@ void cmLocalGenerator::ComputeObjectMaxPath()
 void cmLocalGenerator::ReadInputFile()
 {
   // Look for the CMakeLists.txt file.
-  std::string currentStart = this->Makefile->GetCurrentSourceDirectory();
+  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
   currentStart += "/CMakeLists.txt";
-  if(cmSystemTools::FileExists(currentStart.c_str(), true))
-    {
-    this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
-    return;
-    }
-
-  if(!this->Parent)
-    {
-    return;
-    }
-
-  // The file is missing.  Check policy CMP0014.
-  cmMakefile* mf = this->Parent->GetMakefile();
-  std::ostringstream e;
-  e << "The source directory\n"
-    << "  " << this->Makefile->GetCurrentSourceDirectory() << "\n"
-    << "does not contain a CMakeLists.txt file.";
-  switch (mf->GetPolicyStatus(cmPolicies::CMP0014))
-    {
-    case cmPolicies::WARN:
-      // Print the warning.
-      e << "\n"
-        << "CMake does not support this case but it used "
-        << "to work accidentally and is being allowed for "
-        << "compatibility."
-        << "\n"
-        << cmPolicies::GetPolicyWarning(cmPolicies::CMP0014);
-      mf->IssueMessage(cmake::AUTHOR_WARNING, e.str());
-    case cmPolicies::OLD:
-      // OLD behavior does not warn.
-      return;
-    case cmPolicies::REQUIRED_IF_USED:
-    case cmPolicies::REQUIRED_ALWAYS:
-      e << "\n"
-        << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0014);
-    case cmPolicies::NEW:
-      // NEW behavior prints the error.
-      mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-      break;
-    }
+  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
+  this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
 }
 
 void cmLocalGenerator::SetupPathConversions()
@@ -231,29 +202,21 @@ void cmLocalGenerator::SetupPathConversions()
   // Convert
   std::string outdir;
   outdir =
-    cmSystemTools::CollapseFullPath(this->Makefile->GetHomeDirectory());
+    cmSystemTools::CollapseFullPath(this->GetState()->GetSourceDirectory());
   cmSystemTools::SplitPath(outdir, this->HomeDirectoryComponents);
-  outdir =
-    cmSystemTools::CollapseFullPath(
-                                this->Makefile->GetCurrentSourceDirectory());
+  outdir = cmSystemTools::CollapseFullPath(
+      this->StateSnapshot.GetCurrentSourceDirectory());
   cmSystemTools::SplitPath(outdir, this->StartDirectoryComponents);
 
   outdir = cmSystemTools::CollapseFullPath
-    (this->Makefile->GetHomeOutputDirectory());
+    (this->GetState()->GetBinaryDirectory());
   cmSystemTools::SplitPath(outdir,
                            this->HomeOutputDirectoryComponents);
 
   outdir = cmSystemTools::CollapseFullPath
-    (this->Makefile->GetCurrentBinaryDirectory());
+    (this->StateSnapshot.GetCurrentBinaryDirectory());
   cmSystemTools::SplitPath(outdir,
                            this->StartOutputDirectoryComponents);
-}
-
-
-void cmLocalGenerator::SetGlobalGenerator(cmGlobalGenerator *gg)
-{
-  this->GlobalGenerator = gg;
-  this->Makefile = new cmMakefile(this);
 }
 
 void cmLocalGenerator::ConfigureFinalPass()
@@ -300,7 +263,7 @@ void cmLocalGenerator::GenerateTestFiles()
   const std::string& config =
     this->Makefile->GetConfigurations(configurationTypes, false);
 
-  std::string file = this->Makefile->GetCurrentBinaryDirectory();
+  std::string file = this->StateSnapshot.GetCurrentBinaryDirectory();
   file += "/";
   file += "CTestTestfile.cmake";
 
@@ -309,9 +272,9 @@ void cmLocalGenerator::GenerateTestFiles()
 
   fout << "# CMake generated Testfile for " << std::endl
        << "# Source directory: "
-       << this->Makefile->GetCurrentSourceDirectory() << std::endl
+       << this->StateSnapshot.GetCurrentSourceDirectory() << std::endl
        << "# Build directory: "
-       << this->Makefile->GetCurrentBinaryDirectory() << std::endl
+       << this->StateSnapshot.GetCurrentBinaryDirectory() << std::endl
        << "# " << std::endl
        << "# This file includes the relevant testing commands "
        << "required for " << std::endl
@@ -425,9 +388,9 @@ void cmLocalGenerator::GenerateInstallRules()
     }
 
   // Create the install script file.
-  std::string file = this->Makefile->GetCurrentBinaryDirectory();
-  std::string homedir = this->Makefile->GetHomeOutputDirectory();
-  std::string currdir = this->Makefile->GetCurrentBinaryDirectory();
+  std::string file = this->StateSnapshot.GetCurrentBinaryDirectory();
+  std::string homedir = this->GetState()->GetBinaryDirectory();
+  std::string currdir = this->StateSnapshot.GetCurrentBinaryDirectory();
   cmSystemTools::ConvertToUnixSlashes(file);
   cmSystemTools::ConvertToUnixSlashes(homedir);
   cmSystemTools::ConvertToUnixSlashes(currdir);
@@ -442,7 +405,7 @@ void cmLocalGenerator::GenerateInstallRules()
 
   // Write the header.
   fout << "# Install script for directory: "
-       << this->Makefile->GetCurrentSourceDirectory()
+       << this->StateSnapshot.GetCurrentSourceDirectory()
        << std::endl << std::endl;
   fout << "# Set the install prefix" << std::endl
        << "if(NOT DEFINED CMAKE_INSTALL_PREFIX)" << std::endl
@@ -577,6 +540,16 @@ void cmLocalGenerator::GenerateTargetManifest()
     }
 }
 
+cmState* cmLocalGenerator::GetState() const
+{
+  return this->GlobalGenerator->GetCMakeInstance()->GetState();
+}
+
+cmState::Snapshot cmLocalGenerator::GetStateSnapshot() const
+{
+  return this->StateSnapshot;
+}
+
 void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
                                                     const std::string& lang,
                                                     cmSourceFile& source,
@@ -651,7 +624,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
     source.GetFullPath(),
     commandLines,
     comment.c_str(),
-    this->Makefile->GetCurrentBinaryDirectory()
+    this->StateSnapshot.GetCurrentBinaryDirectory()
     );
 }
 
@@ -673,12 +646,12 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
        !sf->GetPropertyAsBool("EXTERNAL_OBJECT"))
       {
       std::string dir_max;
-      dir_max += this->Makefile->GetCurrentBinaryDirectory();
+      dir_max += this->StateSnapshot.GetCurrentBinaryDirectory();
       dir_max += "/";
       std::string obj = this->GetObjectFileNameWithoutTarget(*sf, dir_max);
       if(!obj.empty())
         {
-        std::string ofname = this->Makefile->GetCurrentBinaryDirectory();
+        std::string ofname = this->StateSnapshot.GetCurrentBinaryDirectory();
         ofname += "/";
         ofname += obj;
         objVector.push_back(ofname);
@@ -748,7 +721,7 @@ void cmLocalGenerator::AddBuildTargetRule(const std::string& llang,
     "",
     commandLines,
     comment.c_str(),
-    this->Makefile->GetCurrentBinaryDirectory()
+    this->StateSnapshot.GetCurrentBinaryDirectory()
     );
   this->Makefile->GetSource(targetFullPath);
   target.Target->AddSource(targetFullPath);
@@ -1242,7 +1215,7 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const std::string& remote,
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
   // space.
-  if(this->WindowsShell && result.find(' ') != result.npos &&
+  if(this->GlobalGenerator->WindowsShell && result.find(' ') != result.npos &&
      cmSystemTools::FileExists(remote.c_str()))
     {
     std::string tmp;
@@ -1552,19 +1525,19 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   if(includeBinaryDir)
     {
     if(emitted.find(
-                this->Makefile->GetCurrentBinaryDirectory()) == emitted.end())
+        this->StateSnapshot.GetCurrentBinaryDirectory()) == emitted.end())
       {
-      dirs.push_back(this->Makefile->GetCurrentBinaryDirectory());
-      emitted.insert(this->Makefile->GetCurrentBinaryDirectory());
+      dirs.push_back(this->StateSnapshot.GetCurrentBinaryDirectory());
+      emitted.insert(this->StateSnapshot.GetCurrentBinaryDirectory());
       }
     }
   if(includeSourceDir)
     {
     if(emitted.find(
-                this->Makefile->GetCurrentSourceDirectory()) == emitted.end())
+        this->StateSnapshot.GetCurrentSourceDirectory()) == emitted.end())
       {
-      dirs.push_back(this->Makefile->GetCurrentSourceDirectory());
-      emitted.insert(this->Makefile->GetCurrentSourceDirectory());
+      dirs.push_back(this->StateSnapshot.GetCurrentSourceDirectory());
+      emitted.insert(this->StateSnapshot.GetCurrentSourceDirectory());
       }
     }
 
@@ -1606,8 +1579,8 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
   // it is requested by the project.
   if(this->Makefile->IsOn("CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE"))
     {
-    const char* topSourceDir = this->Makefile->GetHomeDirectory();
-    const char* topBinaryDir = this->Makefile->GetHomeOutputDirectory();
+    const char* topSourceDir = this->GetState()->GetSourceDirectory();
+    const char* topBinaryDir = this->GetState()->GetBinaryDirectory();
     for(std::vector<std::string>::const_iterator i = includes.begin();
         i != includes.end(); ++i)
       {
@@ -2165,7 +2138,7 @@ bool cmLocalGenerator::GetRealDependency(const std::string& inName,
 
   // Treat the name as relative to the source directory in which it
   // was given.
-  dep = this->Makefile->GetCurrentSourceDirectory();
+  dep = this->StateSnapshot.GetCurrentSourceDirectory();
   dep += "/";
   dep += inName;
   return true;
@@ -2614,7 +2587,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
     {
     // Append the definition with proper escaping.
     std::string def = dflag;
-    if(this->WatcomWMake)
+    if(this->GlobalGenerator->WatcomWMake)
       {
       // The Watcom compiler does its own command line parsing instead
       // of using the windows shell rules.  Definitions are one of
@@ -2717,10 +2690,10 @@ const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
 {
   switch (relroot)
     {
-    case HOME:         return this->Makefile->GetHomeDirectory();
-    case START:        return this->Makefile->GetCurrentSourceDirectory();
-    case HOME_OUTPUT:  return this->Makefile->GetHomeOutputDirectory();
-    case START_OUTPUT: return this->Makefile->GetCurrentBinaryDirectory();
+    case HOME:         return this->GetState()->GetSourceDirectory();
+    case START:        return this->StateSnapshot.GetCurrentSourceDirectory();
+    case HOME_OUTPUT:  return this->GetState()->GetBinaryDirectory();
+    case START_OUTPUT: return this->StateSnapshot.GetCurrentBinaryDirectory();
     default: break;
     }
   return 0;
@@ -2793,7 +2766,7 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
         // For the MSYS shell convert drive letters to posix paths, so
     // that c:/some/path becomes /c/some/path.  This is needed to
     // avoid problems with the shell path translation.
-    if(this->MSYSShell && !this->LinkScriptShell)
+    if(this->GlobalGenerator->MSYSShell && !this->LinkScriptShell)
       {
       if(result.size() > 2 && result[1] == ':')
         {
@@ -2801,7 +2774,7 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
         result[0] = '/';
         }
       }
-    if(this->WindowsShell)
+    if(this->GlobalGenerator->WindowsShell)
       {
       std::replace(result.begin(), result.end(), '/', '\\');
       }
@@ -2841,41 +2814,69 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::FindRelativePathTopSource()
 {
-  // Relative path conversion within a single tree managed by CMake is
-  // safe.  We can use our parent relative path top if and only if
-  // this is a subdirectory of that top.
-  if(cmLocalGenerator* parent = this->GetParent())
+  cmState::Snapshot snapshot = this->StateSnapshot;
+  std::vector<cmState::Snapshot> snapshots;
+  snapshots.push_back(snapshot);
+  while (true)
     {
-    std::string parentTop = parent->FindRelativePathTopSource();
-    if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetCurrentSourceDirectory(), parentTop))
+    snapshot = snapshot.GetParent();
+    if (snapshot.IsValid())
       {
-      return parentTop;
+      snapshots.push_back(snapshot);
+      }
+    else
+      {
+      break;
       }
     }
 
-  // Otherwise this directory itself is the new top.
-  return this->Makefile->GetCurrentSourceDirectory();
+  std::string result = snapshots.front().GetCurrentSourceDirectory();
+
+  for (std::vector<cmState::Snapshot>::const_iterator it =
+       snapshots.begin() + 1; it != snapshots.end(); ++it)
+  {
+    std::string currentSource = it->GetCurrentSourceDirectory();
+    if(cmSystemTools::IsSubDirectory(result, currentSource))
+      {
+      result = currentSource;
+      }
+    }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::FindRelativePathTopBinary()
 {
-  // Relative path conversion within a single tree managed by CMake is
-  // safe.  We can use our parent relative path top if and only if
-  // this is a subdirectory of that top.
-  if(cmLocalGenerator* parent = this->GetParent())
+  cmState::Snapshot snapshot = this->StateSnapshot;
+  std::vector<cmState::Snapshot> snapshots;
+  snapshots.push_back(snapshot);
+  while (true)
     {
-    std::string parentTop = parent->FindRelativePathTopBinary();
-    if(cmSystemTools::IsSubDirectory(
-         this->Makefile->GetCurrentBinaryDirectory(), parentTop))
+    snapshot = snapshot.GetParent();
+    if (snapshot.IsValid())
       {
-      return parentTop;
+      snapshots.push_back(snapshot);
+      }
+    else
+      {
+      break;
       }
     }
 
-  // Otherwise this directory itself is the new top.
-  return this->Makefile->GetCurrentBinaryDirectory();
+  std::string result = snapshots.front().GetCurrentBinaryDirectory();
+
+  for (std::vector<cmState::Snapshot>::const_iterator it =
+       snapshots.begin() + 1; it != snapshots.end(); ++it)
+  {
+    std::string currentBinary = it->GetCurrentBinaryDirectory();
+    if(cmSystemTools::IsSubDirectory(result, currentBinary))
+      {
+      result = currentBinary;
+      }
+    }
+
+  return result;
 }
 
 //----------------------------------------------------------------------------
@@ -3284,6 +3285,31 @@ void cmLocalGenerator::ComputeObjectFilenames(
 
 }
 
+bool cmLocalGenerator::IsWindowsShell() const
+{
+  return this->GlobalGenerator->WindowsShell;
+}
+
+bool cmLocalGenerator::IsWatcomWMake() const
+{
+  return this->GlobalGenerator->WatcomWMake;
+}
+
+bool cmLocalGenerator::IsMinGWMake() const
+{
+  return this->GlobalGenerator->MinGWMake;
+}
+
+bool cmLocalGenerator::IsNMake() const
+{
+  return this->GlobalGenerator->NMake;
+}
+
+void cmLocalGenerator::SetConfiguredCMP0014(bool configured)
+{
+  this->Configured = configured;
+}
+
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator
@@ -3392,35 +3418,6 @@ cmLocalGenerator
 }
 
 //----------------------------------------------------------------------------
-std::string cmLocalGenerator::EscapeForShellOldStyle(const std::string& str)
-{
-  std::string result;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  // if there are spaces
-  std::string temp = str;
-  if (temp.find(" ") != std::string::npos &&
-      temp.find("\"")==std::string::npos)
-    {
-    result = "\"";
-    result += str;
-    result += "\"";
-    return result;
-    }
-  return str;
-#else
-  for(const char* ch = str.c_str(); *ch != '\0'; ++ch)
-    {
-    if(*ch == ' ')
-      {
-      result += '\\';
-      }
-    result += *ch;
-    }
-  return result;
-#endif
-}
-
-//----------------------------------------------------------------------------
 static bool cmLocalGeneratorIsShellOperator(const std::string& str)
 {
   static std::set<std::string> shellOperators;
@@ -3456,7 +3453,7 @@ std::string cmLocalGenerator::EscapeForShell(const std::string& str,
 
   // Compute the flags for the target shell environment.
   int flags = 0;
-  if(this->WindowsVSIDE)
+  if(this->GlobalGenerator->WindowsVSIDE)
     {
     flags |= cmsysSystem_Shell_Flag_VSIDE;
     }
@@ -3476,27 +3473,27 @@ std::string cmLocalGenerator::EscapeForShell(const std::string& str,
     {
     flags |= cmsysSystem_Shell_Flag_WatcomQuote;
     }
-  if(this->WatcomWMake)
+  if(this->GlobalGenerator->WatcomWMake)
     {
     flags |= cmsysSystem_Shell_Flag_WatcomWMake;
     }
-  if(this->MinGWMake)
+  if(this->GlobalGenerator->MinGWMake)
     {
     flags |= cmsysSystem_Shell_Flag_MinGWMake;
     }
-  if(this->NMake)
+  if(this->GlobalGenerator->NMake)
     {
     flags |= cmsysSystem_Shell_Flag_NMake;
     }
 
   // Compute the buffer size needed.
-  int size = (this->WindowsShell ?
+  int size = (this->GlobalGenerator->WindowsShell ?
               cmsysSystem_Shell_GetArgumentSizeForWindows(str.c_str(), flags) :
               cmsysSystem_Shell_GetArgumentSizeForUnix(str.c_str(), flags));
 
   // Compute the shell argument itself.
   std::vector<char> arg(size);
-  if(this->WindowsShell)
+  if(this->GlobalGenerator->WindowsShell)
     {
     cmsysSystem_Shell_GetArgumentForWindows(str.c_str(), &arg[0], flags);
     }

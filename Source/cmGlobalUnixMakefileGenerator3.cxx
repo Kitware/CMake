@@ -56,9 +56,7 @@ void cmGlobalUnixMakefileGenerator3
 cmLocalGenerator *
 cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  cmLocalGenerator* lg = new cmLocalUnixMakefileGenerator3(parent);
-  lg->SetGlobalGenerator(this);
-  return lg;
+  return new cmLocalUnixMakefileGenerator3(this, parent);
 }
 
 //----------------------------------------------------------------------------
@@ -524,7 +522,7 @@ cmGlobalUnixMakefileGenerator3
                        cmLocalUnixMakefileGenerator3* lg)
 {
   // Only subdirectories need these rules.
-  if(!lg->GetParent())
+  if(lg->IsRootMakefile())
     {
     return;
     }
@@ -1029,7 +1027,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     // for the passed in makefile or if this is the top Makefile wripte out
     // the targets
-    if (lg2 == lg || !lg->GetParent())
+    if (lg2 == lg || lg->IsRootMakefile())
       {
       // for each target Generate the rule files for each target.
       cmTargets& targets = lg2->GetMakefile()->GetTargets();

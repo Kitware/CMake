@@ -29,7 +29,8 @@ class cmLocalVisualStudio6Generator : public cmLocalVisualStudioGenerator
 {
 public:
   ///! Set cache only and recurse to false by default.
-  cmLocalVisualStudio6Generator(cmLocalGenerator* parent);
+  cmLocalVisualStudio6Generator(cmGlobalGenerator* gg,
+                                cmLocalGenerator* parent);
 
   virtual ~cmLocalVisualStudio6Generator();
 
