@@ -1126,8 +1126,8 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
         pi != this->MultipleOutputPairs.end(); ++pi)
       {
       *this->InfoFileStream
-        << "  " << cmLocalGenerator::EscapeForCMake(pi->first)
-        << " "  << cmLocalGenerator::EscapeForCMake(pi->second)
+        << "  " << cmOutputConverter::EscapeForCMake(pi->first)
+        << " "  << cmOutputConverter::EscapeForCMake(pi->second)
         << "\n";
       }
     *this->InfoFileStream << "  )\n\n";

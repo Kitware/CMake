@@ -550,9 +550,9 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
   std::string autogenTargetName = getAutogenTargetName(target);
 
   makefile->AddDefinition("_moc_target_name",
-          cmLocalGenerator::EscapeForCMake(autogenTargetName).c_str());
+          cmOutputConverter::EscapeForCMake(autogenTargetName).c_str());
   makefile->AddDefinition("_origin_target_name",
-          cmLocalGenerator::EscapeForCMake(target->GetName()).c_str());
+          cmOutputConverter::EscapeForCMake(target->GetName()).c_str());
 
   std::string targetDir = getAutogenTargetDir(target);
 
@@ -582,7 +582,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
     this->SetupSourceFiles(target);
     }
   makefile->AddDefinition("_cpp_files",
-          cmLocalGenerator::EscapeForCMake(this->Sources).c_str());
+          cmOutputConverter::EscapeForCMake(this->Sources).c_str());
   if (target->GetPropertyAsBool("AUTOMOC"))
     {
     this->SetupAutoMocTarget(target, autogenTargetName,
@@ -764,11 +764,11 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
   const char* tmp = target->GetProperty("AUTOMOC_MOC_OPTIONS");
   std::string _moc_options = (tmp!=0 ? tmp : "");
   makefile->AddDefinition("_moc_options",
-          cmLocalGenerator::EscapeForCMake(_moc_options).c_str());
+          cmOutputConverter::EscapeForCMake(_moc_options).c_str());
   makefile->AddDefinition("_skip_moc",
-          cmLocalGenerator::EscapeForCMake(this->SkipMoc).c_str());
+          cmOutputConverter::EscapeForCMake(this->SkipMoc).c_str());
   makefile->AddDefinition("_moc_headers",
-          cmLocalGenerator::EscapeForCMake(this->Headers).c_str());
+          cmOutputConverter::EscapeForCMake(this->Headers).c_str());
   bool relaxedMode = makefile->IsOn("CMAKE_AUTOMOC_RELAXED_MODE");
   makefile->AddDefinition("_moc_relaxed_mode", relaxedMode ? "TRUE" : "FALSE");
 
@@ -780,9 +780,9 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
                                       _moc_incs, _moc_compile_defs);
 
   makefile->AddDefinition("_moc_incs",
-          cmLocalGenerator::EscapeForCMake(_moc_incs).c_str());
+          cmOutputConverter::EscapeForCMake(_moc_incs).c_str());
   makefile->AddDefinition("_moc_compile_defs",
-          cmLocalGenerator::EscapeForCMake(_moc_compile_defs).c_str());
+          cmOutputConverter::EscapeForCMake(_moc_compile_defs).c_str());
 
   for (std::vector<std::string>::const_iterator li = configs.begin();
        li != configs.end(); ++li)
@@ -795,7 +795,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
     if (config_moc_incs != _moc_incs)
       {
       configIncludes[*li] =
-                    cmLocalGenerator::EscapeForCMake(config_moc_incs);
+                    cmOutputConverter::EscapeForCMake(config_moc_incs);
       if(_moc_incs.empty())
         {
         _moc_incs = config_moc_incs;
@@ -804,7 +804,7 @@ void cmQtAutoGenerators::SetupAutoMocTarget(cmTarget const* target,
     if (config_moc_compile_defs != _moc_compile_defs)
       {
       configDefines[*li] =
-            cmLocalGenerator::EscapeForCMake(config_moc_compile_defs);
+            cmOutputConverter::EscapeForCMake(config_moc_compile_defs);
       if(_moc_compile_defs.empty())
         {
         _moc_compile_defs = config_moc_compile_defs;
@@ -906,7 +906,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
   skipped.insert(skipVec.begin(), skipVec.end());
 
   makefile->AddDefinition("_skip_uic",
-          cmLocalGenerator::EscapeForCMake(this->SkipUic).c_str());
+          cmOutputConverter::EscapeForCMake(this->SkipUic).c_str());
 
   std::vector<cmSourceFile*> uiFilesWithOptions
                                         = makefile->GetQtUiFilesWithOptions();
@@ -920,7 +920,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
 
   if (!_uic_opts.empty())
     {
-    _uic_opts = cmLocalGenerator::EscapeForCMake(_uic_opts);
+    _uic_opts = cmOutputConverter::EscapeForCMake(_uic_opts);
     makefile->AddDefinition("_uic_target_options", _uic_opts.c_str());
     }
   for (std::vector<std::string>::const_iterator li = configs.begin();
@@ -931,7 +931,7 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
     if (config_uic_opts != _uic_opts)
       {
       configUicOptions[*li] =
-                    cmLocalGenerator::EscapeForCMake(config_uic_opts);
+                    cmOutputConverter::EscapeForCMake(config_uic_opts);
       if(_uic_opts.empty())
         {
         _uic_opts = config_uic_opts;
@@ -966,9 +966,9 @@ void cmQtAutoGenerators::SetupAutoUicTarget(cmTarget const* target,
     }
 
   makefile->AddDefinition("_qt_uic_options_files",
-              cmLocalGenerator::EscapeForCMake(uiFileFiles).c_str());
+              cmOutputConverter::EscapeForCMake(uiFileFiles).c_str());
   makefile->AddDefinition("_qt_uic_options_options",
-            cmLocalGenerator::EscapeForCMake(uiFileOptions).c_str());
+            cmOutputConverter::EscapeForCMake(uiFileOptions).c_str());
 
   std::string targetName = target->GetName();
   if (strcmp(qtVersion, "5") == 0)
@@ -1141,15 +1141,15 @@ void cmQtAutoGenerators::SetupAutoRccTarget(cmTarget const* target)
       }
     }
   makefile->AddDefinition("_qt_rcc_inputs_" + target->GetName(),
-                      cmLocalGenerator::EscapeForCMake(qrcInputs).c_str());
+                      cmOutputConverter::EscapeForCMake(qrcInputs).c_str());
 
   makefile->AddDefinition("_rcc_files",
-          cmLocalGenerator::EscapeForCMake(_rcc_files).c_str());
+          cmOutputConverter::EscapeForCMake(_rcc_files).c_str());
 
   makefile->AddDefinition("_qt_rcc_options_files",
-              cmLocalGenerator::EscapeForCMake(rccFileFiles).c_str());
+              cmOutputConverter::EscapeForCMake(rccFileFiles).c_str());
   makefile->AddDefinition("_qt_rcc_options_options",
-            cmLocalGenerator::EscapeForCMake(rccFileOptions).c_str());
+            cmOutputConverter::EscapeForCMake(rccFileOptions).c_str());
 
   makefile->AddDefinition("_qt_rcc_executable",
                           this->GetRccExecutable(target).c_str());
@@ -1434,7 +1434,7 @@ cmQtAutoGenerators::WriteOldMocDefinitionsFile(
   outfile.open(filename.c_str(),
                std::ios::trunc);
   outfile << "set(AM_OLD_COMPILE_SETTINGS "
-              << cmLocalGenerator::EscapeForCMake(
+              << cmOutputConverter::EscapeForCMake(
                  this->CurrentCompileSettingsStr) << ")\n";
 
   outfile.close();
