@@ -27,7 +27,7 @@ static std::string cmIfCommandError(
       i != args.end(); ++i)
     {
     err += " ";
-    err += cmLocalGenerator::EscapeForCMake(i->GetValue());
+    err += cmOutputConverter::EscapeForCMake(i->GetValue());
     }
   err += "\n";
   return err;

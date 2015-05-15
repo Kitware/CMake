@@ -1254,7 +1254,7 @@ cmLocalUnixMakefileGenerator3
         f != files.end(); ++f)
       {
       std::string fc = this->Convert(*f,START_OUTPUT,UNCHANGED);
-      fout << "  " << cmLocalGenerator::EscapeForCMake(fc) << "\n";
+      fout << "  " << cmOutputConverter::EscapeForCMake(fc) << "\n";
       }
     fout << ")\n";
     }
@@ -2052,7 +2052,7 @@ void cmLocalUnixMakefileGenerator3
           di != defines.end(); ++di)
         {
         cmakefileStream
-          << "  " << cmLocalGenerator::EscapeForCMake(*di) << "\n";
+          << "  " << cmOutputConverter::EscapeForCMake(*di) << "\n";
         }
       cmakefileStream
         << "  )\n";
@@ -2106,7 +2106,7 @@ void cmLocalUnixMakefileGenerator3
         tri != transformRules.end(); ++tri)
       {
       cmakefileStream << "  "
-          << cmLocalGenerator::EscapeForCMake(*tri) << "\n";
+          << cmOutputConverter::EscapeForCMake(*tri) << "\n";
       }
     cmakefileStream
       << "  )\n";
