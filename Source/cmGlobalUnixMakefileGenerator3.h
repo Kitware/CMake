@@ -136,6 +136,7 @@ public:
   std::string IncludeDirective;
   bool DefineWindowsNULL;
   bool PassMakeflags;
+  bool UnixCD;
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();

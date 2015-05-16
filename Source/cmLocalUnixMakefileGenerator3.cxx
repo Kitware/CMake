@@ -85,7 +85,6 @@ cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
 {
   this->MakefileVariableSize = 0;
   this->IgnoreLibPrefix = false;
-  this->UnixCD = true;
   this->ColorMakefile = false;
   this->SkipPreprocessedSourceRules = false;
   this->SkipAssemblySourceRules = false;
@@ -2347,7 +2346,9 @@ void cmLocalUnixMakefileGenerator3
   // support changing the drive letter with just "d:").
   const char* cd_cmd = this->IsMinGWMake() ? "cd /d " : "cd ";
 
-  if(!this->UnixCD)
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  if(!gg->UnixCD)
     {
     // On Windows we must perform each step separately and then change
     // back because the shell keeps the working directory between

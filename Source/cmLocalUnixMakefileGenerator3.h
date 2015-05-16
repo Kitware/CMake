@@ -73,12 +73,6 @@ public:
   std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
 
   /**
-   * If set to true, cd dir && command is used to
-   * run commands in a different directory.
-   */
-  void SetUnixCD(bool v)  {this->UnixCD = v;}
-
-  /**
    * Set max makefile variable size, default is 0 which means unlimited.
    */
   void SetMakefileVariableSize(int s) { this->MakefileVariableSize = s; }
@@ -282,7 +276,6 @@ private:
   int MakefileVariableSize;
   std::string MakeSilentFlag;
   std::string ConfigurationName;
-  bool UnixCD;
   bool MakeCommandEscapeTargetTwice;
   bool BorlandMakeCurlyHack;
   //==========================================================================

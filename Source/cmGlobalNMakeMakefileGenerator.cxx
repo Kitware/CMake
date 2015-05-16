@@ -23,6 +23,7 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
   this->NMake = true;
   this->DefineWindowsNULL = true;
   this->PassMakeflags = true;
+  this->UnixCD = false;
 }
 
 void cmGlobalNMakeMakefileGenerator
@@ -56,7 +57,6 @@ cmGlobalNMakeMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
       new cmLocalUnixMakefileGenerator3(this, parent);
   lg->SetMakeSilentFlag("/nologo");
   lg->SetIgnoreLibPrefix(true);
-  lg->SetUnixCD(false);
   return lg;
 }
 
