@@ -44,8 +44,8 @@ public:
   /** Get the set of all local keys.  */
   std::vector<std::string> LocalKeys() const;
 
-  std::vector<std::string>
-  ClosureKeys(std::set<std::string>& bound) const;
+  static std::vector<std::string> ClosureKeys(StackConstIter begin,
+                                              StackConstIter end);
 
   static cmDefinitions MakeClosure(StackConstIter begin, StackConstIter end);
 

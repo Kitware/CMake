@@ -105,18 +105,24 @@ cmDefinitions cmDefinitions::MakeClosure(StackConstIter begin,
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmDefinitions::ClosureKeys(std::set<std::string>& bound) const
+cmDefinitions::ClosureKeys(StackConstIter begin, StackConstIter end)
 {
+  std::set<std::string> bound;
   std::vector<std::string> defined;
-  defined.reserve(this->Map.size());
-  for(MapType::const_iterator mi = this->Map.begin();
-      mi != this->Map.end(); ++mi)
+
+  for (StackConstIter it = begin; it != end; ++it)
     {
-    // Use this key if it is not already set or unset.
-    if(bound.insert(mi->first).second && mi->second.Exists)
+    defined.reserve(defined.size() + it->Map.size());
+    for(MapType::const_iterator mi = it->Map.begin();
+        mi != it->Map.end(); ++mi)
       {
-      defined.push_back(mi->first);
+      // Use this key if it is not already set or unset.
+      if(bound.insert(mi->first).second && mi->second.Exists)
+        {
+        defined.push_back(mi->first);
+        }
       }
     }
+
   return defined;
 }

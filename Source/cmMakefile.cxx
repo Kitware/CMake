@@ -94,16 +94,8 @@ public:
 
   std::vector<std::string> ClosureKeys() const
   {
-    std::vector<std::string> closureKeys;
-    std::set<std::string> bound;
-    for (std::list<cmDefinitions>::const_reverse_iterator it =
-         this->VarStack.rbegin(); it != this->VarStack.rend(); ++it)
-      {
-      std::vector<std::string> const& localKeys = it->ClosureKeys(bound);
-      closureKeys.insert(closureKeys.end(),
-                         localKeys.begin(), localKeys.end());
-      }
-    return closureKeys;
+    return cmDefinitions::ClosureKeys(this->VarStack.rbegin(),
+                                      this->VarStack.rend());
   }
 
   void PopDefinitions()
