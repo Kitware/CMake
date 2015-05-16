@@ -105,9 +105,8 @@ public:
 
   bool RaiseScope(std::string const& var, const char* varDef, cmMakefile* mf)
   {
-    assert(this->VarStack.size() > 0);
-
     std::list<cmDefinitions>::reverse_iterator it = this->VarStack.rbegin();
+    assert(it != this->VarStack.rend());
     ++it;
     if(it == this->VarStack.rend())
       {
