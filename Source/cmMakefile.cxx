@@ -253,59 +253,6 @@ cmMakefile::~cmMakefile()
   }
 }
 
-void cmMakefile::PrintStringVector(const char* s,
-                                   const std::vector<std::string>& v) const
-{
-  std::cout << s << ": ( \n" << cmWrap('"', v, '"', " ") << ")\n";
-}
-
-void cmMakefile
-::PrintStringVector(const char* s,
-                    const std::vector<std::pair<std::string, bool> >& v) const
-{
-  std::cout << s << ": ( \n";
-  for(std::vector<std::pair<std::string, bool> >::const_iterator i
-        = v.begin(); i != v.end(); ++i)
-    {
-    std::cout << i->first << " " << i->second;
-    }
-  std::cout << " )\n";
-}
-
-
-// call print on all the classes in the makefile
-void cmMakefile::Print() const
-{
-  // print the class lists
-  std::cout << "classes:\n";
-
-  std::cout << " this->Targets: ";
-  for (cmTargets::iterator l = this->Targets.begin();
-       l != this->Targets.end(); l++)
-    {
-    std::cout << l->first << std::endl;
-    }
-
-  std::cout << " this->StartOutputDirectory; " <<
-    this->GetCurrentBinaryDirectory() << std::endl;
-  std::cout << " this->HomeOutputDirectory; " <<
-    this->GetHomeOutputDirectory() << std::endl;
-  std::cout << " this->cmStartDirectory; " <<
-    this->GetCurrentSourceDirectory() << std::endl;
-  std::cout << " this->cmHomeDirectory; " <<
-    this->GetHomeDirectory() << std::endl;
-  std::cout << " this->ProjectName; "
-            <<  this->ProjectName << std::endl;
-  this->PrintStringVector("this->LinkDirectories", this->LinkDirectories);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-  for( std::vector<cmSourceGroup>::const_iterator i =
-         this->SourceGroups.begin(); i != this->SourceGroups.end(); ++i)
-    {
-    std::cout << "Source Group: " << i->GetName() << std::endl;
-    }
-#endif
-}
-
 //----------------------------------------------------------------------------
 void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const

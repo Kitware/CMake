@@ -157,11 +157,6 @@ public:
    */
   void FinalPass();
 
-  /**
-   * Print the object state to std::cout.
-   */
-  void Print() const;
-
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(const std::string& target,
                                 const std::vector<std::string>& byproducts,
@@ -912,10 +907,6 @@ private:
 
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array
-  void PrintStringVector(const char* s, const
-                         std::vector<std::pair<std::string, bool> >& v) const;
-  void PrintStringVector(const char* s,
-                         const std::vector<std::string>& v) const;
 
   void AddDefaultDefinitions();
   typedef std::vector<cmFunctionBlocker*> FunctionBlockersType;
