@@ -83,7 +83,6 @@ cmLocalUnixMakefileGenerator3::
 cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
   : cmLocalGenerator(gg, parent)
 {
-  this->IncludeDirective = "include";
   this->MakefileVariableSize = 0;
   this->IgnoreLibPrefix = false;
   this->PassMakeflags = false;

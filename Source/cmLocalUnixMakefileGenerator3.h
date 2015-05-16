@@ -94,13 +94,6 @@ public:
   void SetUnixCD(bool v)  {this->UnixCD = v;}
 
   /**
-   * Set the string used to include one makefile into another default
-   * is include.
-   */
-  void SetIncludeDirective(const std::string& s)
-    { this->IncludeDirective = s; }
-
-  /**
    * Set max makefile variable size, default is 0 which means unlimited.
    */
   void SetMakefileVariableSize(int s) { this->MakefileVariableSize = s; }
@@ -302,7 +295,6 @@ private:
   //==========================================================================
   // Configuration settings.
   int MakefileVariableSize;
-  std::string IncludeDirective;
   std::string MakeSilentFlag;
   std::string ConfigurationName;
   bool DefineWindowsNULL;

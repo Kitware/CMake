@@ -33,6 +33,8 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->UseLinkScript = true;
 #endif
   this->CommandDatabase = NULL;
+
+  this->IncludeDirective = "include";
 }
 
 void cmGlobalUnixMakefileGenerator3

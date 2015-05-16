@@ -26,6 +26,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->WindowsShell = true;
 #endif
   this->WatcomWMake = true;
+  this->IncludeDirective = "!include";
 }
 
 void cmGlobalWatcomWMakeGenerator
@@ -55,7 +56,6 @@ cmGlobalWatcomWMakeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);
   lg->SetUnixCD(false);
-  lg->SetIncludeDirective("!include");
   return lg;
 }
 

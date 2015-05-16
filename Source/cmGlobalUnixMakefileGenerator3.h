@@ -132,6 +132,8 @@ public:
   virtual bool AllowDeleteOnError() const { return true; }
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+
+  std::string IncludeDirective;
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
