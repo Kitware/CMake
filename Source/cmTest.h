@@ -40,11 +40,6 @@ public:
     return this->Command;
     }
 
-  /**
-   * Print the structure to std::cout.
-   */
-  void Print() const;
-
   ///! Set/Get a property of this source file
   void SetProperty(const std::string& prop, const char *value);
   void AppendProperty(const std::string& prop,
