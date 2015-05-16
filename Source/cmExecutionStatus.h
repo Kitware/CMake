@@ -12,19 +12,17 @@
 #ifndef cmExecutionStatus_h
 #define cmExecutionStatus_h
 
-#include "cmObject.h"
+#include "cmStandardIncludes.h"
 
 /** \class cmExecutionStatus
  * \brief Superclass for all command status classes
  *
  * when a command is involked it may set values on a command status instance
  */
-class cmExecutionStatus : public cmObject
+class cmExecutionStatus
 {
 public:
-  cmTypeMacro(cmExecutionStatus, cmObject);
-
-  cmExecutionStatus() { this->Clear();}
+  cmExecutionStatus() { this->Clear(); }
 
   void SetReturnInvoked(bool val)
   { this->ReturnInvoked = val; }
