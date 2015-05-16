@@ -36,9 +36,6 @@ public:
   /** Get the documentation entry for this generator.  */
   static void GetDocumentation(cmDocumentationEntry& entry);
 
-  ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
-
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.

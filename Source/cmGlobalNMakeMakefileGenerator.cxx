@@ -50,15 +50,6 @@ void cmGlobalNMakeMakefileGenerator
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
 }
 
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalNMakeMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalUnixMakefileGenerator3* lg =
-      new cmLocalUnixMakefileGenerator3(this, parent);
-  return lg;
-}
-
 //----------------------------------------------------------------------------
 void cmGlobalNMakeMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)
