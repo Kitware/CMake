@@ -18,32 +18,29 @@ cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const& cmDefinitions::GetInternal(
-  const std::string& key,
-  std::list<cmDefinitions>::reverse_iterator rbegin,
-  std::list<cmDefinitions>::reverse_iterator rend)
+  const std::string& key, StackIter begin, StackIter end)
 {
-  assert(rbegin != rend);
-  MapType::const_iterator i = rbegin->Map.find(key);
-  if (i != rbegin->Map.end())
+  assert(begin != end);
+  MapType::const_iterator i = begin->Map.find(key);
+  if (i != begin->Map.end())
     {
     return i->second;
     }
-  std::list<cmDefinitions>::reverse_iterator rit = rbegin;
-  ++rit;
-  if (rit == rend)
+  StackIter it = begin;
+  ++it;
+  if (it == end)
     {
     return cmDefinitions::NoDef;
     }
-  Def const& def = cmDefinitions::GetInternal(key, rit, rend);
-  return rbegin->Map.insert(MapType::value_type(key, def)).first->second;
+  Def const& def = cmDefinitions::GetInternal(key, it, end);
+  return begin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
 //----------------------------------------------------------------------------
 const char* cmDefinitions::Get(const std::string& key,
-    std::list<cmDefinitions>::reverse_iterator rbegin,
-    std::list<cmDefinitions>::reverse_iterator rend)
+    StackIter begin, StackIter end)
 {
-  Def const& def = cmDefinitions::GetInternal(key, rbegin, rend);
+  Def const& def = cmDefinitions::GetInternal(key, begin, end);
   return def.Exists? def.c_str() : 0;
 }
 
@@ -77,14 +74,12 @@ std::vector<std::string> cmDefinitions::LocalKeys() const
 }
 
 //----------------------------------------------------------------------------
-cmDefinitions cmDefinitions::MakeClosure(
-    std::list<cmDefinitions>::const_reverse_iterator rbegin,
-    std::list<cmDefinitions>::const_reverse_iterator rend)
+cmDefinitions cmDefinitions::MakeClosure(StackConstIter begin,
+                                         StackConstIter end)
 {
   cmDefinitions closure;
   std::set<std::string> undefined;
-  for (std::list<cmDefinitions>::const_reverse_iterator it = rbegin;
-       it != rend; ++it)
+  for (StackConstIter it = begin; it != end; ++it)
     {
     // Consider local definitions.
     for(MapType::const_iterator mi = it->Map.begin();
