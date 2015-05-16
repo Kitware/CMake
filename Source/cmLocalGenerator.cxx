@@ -62,7 +62,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->Makefile = new cmMakefile(this);
 
   this->LinkScriptShell = false;
-  this->IgnoreLibPrefix = false;
   this->UseRelativePaths = false;
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;

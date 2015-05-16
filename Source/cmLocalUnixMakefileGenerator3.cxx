@@ -84,7 +84,6 @@ cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
   : cmLocalGenerator(gg, parent)
 {
   this->MakefileVariableSize = 0;
-  this->IgnoreLibPrefix = false;
   this->ColorMakefile = false;
   this->SkipPreprocessedSourceRules = false;
   this->SkipAssemblySourceRules = false;

@@ -78,12 +78,6 @@ public:
   void SetMakefileVariableSize(int s) { this->MakefileVariableSize = s; }
 
   /**
-   * If ignore lib prefix is true, then do not strip lib from the name
-   * of a library.
-   */
-  void SetIgnoreLibPrefix(bool s) { this->IgnoreLibPrefix = s; }
-
-  /**
    * Set whether passing a make target on a command line requires an
    * extra level of escapes.
    */
