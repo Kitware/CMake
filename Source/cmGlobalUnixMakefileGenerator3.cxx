@@ -36,6 +36,7 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
 
   this->IncludeDirective = "include";
   this->DefineWindowsNULL = false;
+  this->PassMakeflags = false;
 }
 
 void cmGlobalUnixMakefileGenerator3

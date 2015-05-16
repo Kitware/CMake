@@ -67,14 +67,6 @@ public:
   void WriteMakeVariables(std::ostream& makefileStream);
 
   /**
-   * If true, then explicitly pass MAKEFLAGS on the make all target for makes
-   * that do not use environment variables.
-   *
-   */
-  void SetPassMakeflags(bool s){this->PassMakeflags = s;}
-  bool GetPassMakeflags() { return this->PassMakeflags; }
-
-  /**
    * Set the flag used to keep the make program silent.
    */
   void SetMakeSilentFlag(const std::string& s) { this->MakeSilentFlag = s; }
@@ -291,7 +283,6 @@ private:
   std::string MakeSilentFlag;
   std::string ConfigurationName;
   bool UnixCD;
-  bool PassMakeflags;
   bool MakeCommandEscapeTargetTwice;
   bool BorlandMakeCurlyHack;
   //==========================================================================

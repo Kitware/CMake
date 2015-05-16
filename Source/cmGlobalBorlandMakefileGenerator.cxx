@@ -24,6 +24,7 @@ cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
   this->WindowsShell = true;
   this->IncludeDirective = "!include";
   this->DefineWindowsNULL = true;
+  this->PassMakeflags = true;
 }
 
 
@@ -46,7 +47,6 @@ cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
   cmLocalUnixMakefileGenerator3* lg =
       new cmLocalUnixMakefileGenerator3(this, parent);
   lg->SetMakefileVariableSize(32);
-  lg->SetPassMakeflags(true);
   lg->SetUnixCD(false);
   lg->SetMakeCommandEscapeTargetTwice(true);
   lg->SetBorlandMakeCurlyHack(true);

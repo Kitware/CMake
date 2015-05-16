@@ -85,7 +85,6 @@ cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
 {
   this->MakefileVariableSize = 0;
   this->IgnoreLibPrefix = false;
-  this->PassMakeflags = false;
   this->UnixCD = true;
   this->ColorMakefile = false;
   this->SkipPreprocessedSourceRules = false;
@@ -2154,7 +2153,9 @@ cmLocalUnixMakefileGenerator3
   // sub-invoked makes via an environment variable.  However, some
   // makes do not support that, so you have to pass the flags
   // explicitly.
-  if(this->GetPassMakeflags())
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  if(gg->PassMakeflags)
     {
     cmd += "-$(MAKEFLAGS) ";
     }
