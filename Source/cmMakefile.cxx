@@ -4362,7 +4362,7 @@ void cmMakefile::AddCMakeDependFilesFromUser()
     }
 }
 
-std::string cmMakefile::GetListFileStack() const
+std::string cmMakefile::FormatListFileStack() const
 {
   std::ostringstream tmp;
   size_t depth = this->ListFileStack.size();

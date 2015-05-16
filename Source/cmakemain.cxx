@@ -130,7 +130,7 @@ static std::string cmakemainGetStack(void *clientdata)
   cmMakefile* mf=cmakemainGetMakefile(clientdata);
   if (mf)
     {
-    msg = mf->GetListFileStack();
+    msg = mf->FormatListFileStack();
     if (!msg.empty())
       {
       msg = "\n   Called from: " + msg;

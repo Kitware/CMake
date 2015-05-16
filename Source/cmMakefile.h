@@ -575,7 +575,7 @@ public:
     { this->ListFiles.push_back(file);}
   void AddCMakeDependFilesFromUser();
 
-  std::string GetListFileStack() const;
+  std::string FormatListFileStack() const;
 
   /**
    * Get the current context backtrace.
