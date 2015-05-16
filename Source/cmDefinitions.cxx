@@ -81,18 +81,8 @@ cmDefinitions cmDefinitions::MakeClosure(
     std::list<cmDefinitions>::const_reverse_iterator rbegin,
     std::list<cmDefinitions>::const_reverse_iterator rend)
 {
-  std::set<std::string> undefined;
   cmDefinitions closure;
-  closure.MakeClosure(undefined, rbegin, rend);
-  return closure;
-}
-
-//----------------------------------------------------------------------------
-void
-cmDefinitions::MakeClosure(std::set<std::string>& undefined,
-    std::list<cmDefinitions>::const_reverse_iterator rbegin,
-    std::list<cmDefinitions>::const_reverse_iterator rend)
-{
+  std::set<std::string> undefined;
   for (std::list<cmDefinitions>::const_reverse_iterator it = rbegin;
        it != rend; ++it)
     {
@@ -101,12 +91,12 @@ cmDefinitions::MakeClosure(std::set<std::string>& undefined,
         mi != it->Map.end(); ++mi)
       {
       // Use this key if it is not already set or unset.
-      if(this->Map.find(mi->first) == this->Map.end() &&
+      if(closure.Map.find(mi->first) == closure.Map.end() &&
          undefined.find(mi->first) == undefined.end())
         {
         if(mi->second.Exists)
           {
-          this->Map.insert(*mi);
+          closure.Map.insert(*mi);
           }
         else
           {
@@ -115,6 +105,7 @@ cmDefinitions::MakeClosure(std::set<std::string>& undefined,
         }
       }
     }
+  return closure;
 }
 
 //----------------------------------------------------------------------------

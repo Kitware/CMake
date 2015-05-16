@@ -76,9 +76,6 @@ private:
   static Def const& GetInternal(const std::string& key,
     std::list<cmDefinitions>::reverse_iterator rbegin,
     std::list<cmDefinitions>::reverse_iterator rend);
-  void MakeClosure(std::set<std::string>& undefined,
-                   std::list<cmDefinitions>::const_reverse_iterator rbegin,
-                   std::list<cmDefinitions>::const_reverse_iterator rend);
 };
 
 #endif
