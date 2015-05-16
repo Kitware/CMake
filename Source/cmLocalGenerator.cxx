@@ -365,9 +365,8 @@ void cmLocalGenerator::GenerateInstallRules()
   // Create the install script file.
   std::string file = this->StateSnapshot.GetCurrentBinaryDirectory();
   std::string homedir = this->GetState()->GetBinaryDirectory();
-  std::string currdir = this->StateSnapshot.GetCurrentBinaryDirectory();
   int toplevel_install = 0;
-  if ( currdir == homedir )
+  if (file == homedir)
     {
     toplevel_install = 1;
     }
