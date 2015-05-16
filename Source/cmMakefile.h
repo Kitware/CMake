@@ -31,7 +31,11 @@
 #include <cmsys/auto_ptr.hxx>
 #include <cmsys/RegularExpression.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-# include <cmsys/hash_map.hxx>
+# ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#  include <unordered_map>
+# else
+#  include <cmsys/hash_map.hxx>
+# endif
 #endif
 
 #include <stack>
@@ -868,7 +872,11 @@ protected:
   // libraries, classes, and executables
   mutable cmTargets Targets;
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
+#else
   typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
+#endif
 #else
   typedef std::map<std::string, cmTarget*> TargetMap;
 #endif
@@ -1041,7 +1049,11 @@ private:
 
   // A map for fast output to input look up.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+  typedef std::unordered_map<std::string, cmSourceFile*> OutputToSourceMap;
+#else
   typedef cmsys::hash_map<std::string, cmSourceFile*> OutputToSourceMap;
+#endif
 #else
   typedef std::map<std::string, cmSourceFile*> OutputToSourceMap;
 #endif

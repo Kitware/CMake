@@ -24,7 +24,11 @@
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmFileLockPool.h"
-# include <cmsys/hash_map.hxx>
+# ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#  include <unordered_map>
+# else
+#  include <cmsys/hash_map.hxx>
+# endif
 #endif
 
 class cmake;
@@ -429,7 +433,11 @@ protected:
 
   // All targets in the entire project.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+  typedef std::unordered_map<std::string, cmTarget*> TargetMap;
+#else
   typedef cmsys::hash_map<std::string, cmTarget*> TargetMap;
+#endif
 #else
   typedef std::map<std::string,cmTarget *> TargetMap;
 #endif

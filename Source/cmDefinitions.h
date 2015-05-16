@@ -14,7 +14,11 @@
 
 #include "cmStandardIncludes.h"
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#include <unordered_map>
+#else
 #include "cmsys/hash_map.hxx"
+#endif
 #endif
 
 #include <list>
@@ -65,9 +69,12 @@ private:
   };
   static Def NoDef;
 
-  // Local definitions, set or unset.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+  typedef std::unordered_map<std::string, Def> MapType;
+#else
   typedef cmsys::hash_map<std::string, Def> MapType;
+#endif
 #else
   typedef std::map<std::string, Def> MapType;
 #endif
