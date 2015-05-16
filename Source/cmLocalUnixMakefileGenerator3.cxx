@@ -2140,10 +2140,12 @@ cmLocalUnixMakefileGenerator3
   cmd += this->Convert(makefile,NONE,SHELL);
   cmd += " ";
 
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   // Pass down verbosity level.
-  if(!this->GetMakeSilentFlag().empty())
+  if(!gg->MakeSilentFlag.empty())
     {
-    cmd += this->GetMakeSilentFlag();
+    cmd += gg->MakeSilentFlag;
     cmd += " ";
     }
 
@@ -2151,8 +2153,6 @@ cmLocalUnixMakefileGenerator3
   // sub-invoked makes via an environment variable.  However, some
   // makes do not support that, so you have to pass the flags
   // explicitly.
-  cmGlobalUnixMakefileGenerator3* gg =
-    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   if(gg->PassMakeflags)
     {
     cmd += "-$(MAKEFLAGS) ";

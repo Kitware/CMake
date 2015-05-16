@@ -353,6 +353,7 @@ public:
   cmFileLockPool& GetFileLockPool() { return FileLockPool; }
 #endif
 
+  std::string MakeSilentFlag;
   bool WindowsShell;
   bool WindowsVSIDE;
   bool WatcomWMake;

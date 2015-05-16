@@ -24,6 +24,7 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
   this->DefineWindowsNULL = true;
   this->PassMakeflags = true;
   this->UnixCD = false;
+  this->MakeSilentFlag = "/nologo";
 }
 
 void cmGlobalNMakeMakefileGenerator
@@ -55,7 +56,6 @@ cmGlobalNMakeMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalUnixMakefileGenerator3* lg =
       new cmLocalUnixMakefileGenerator3(this, parent);
-  lg->SetMakeSilentFlag("/nologo");
   return lg;
 }
 

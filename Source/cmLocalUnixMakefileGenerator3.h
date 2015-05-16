@@ -67,12 +67,6 @@ public:
   void WriteMakeVariables(std::ostream& makefileStream);
 
   /**
-   * Set the flag used to keep the make program silent.
-   */
-  void SetMakeSilentFlag(const std::string& s) { this->MakeSilentFlag = s; }
-  std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
-
-  /**
    * Set max makefile variable size, default is 0 which means unlimited.
    */
   void SetMakefileVariableSize(int s) { this->MakefileVariableSize = s; }
@@ -268,7 +262,6 @@ private:
   //==========================================================================
   // Configuration settings.
   int MakefileVariableSize;
-  std::string MakeSilentFlag;
   std::string ConfigurationName;
   bool MakeCommandEscapeTargetTwice;
   bool BorlandMakeCurlyHack;

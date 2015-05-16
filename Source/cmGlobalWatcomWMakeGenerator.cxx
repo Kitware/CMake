@@ -29,6 +29,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->IncludeDirective = "!include";
   this->DefineWindowsNULL = true;
   this->UnixCD = false;
+  this->MakeSilentFlag = "-h";
 }
 
 void cmGlobalWatcomWMakeGenerator
@@ -53,7 +54,6 @@ cmGlobalWatcomWMakeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalUnixMakefileGenerator3* lg
       = new cmLocalUnixMakefileGenerator3(this, parent);
-  lg->SetMakeSilentFlag("-h");
   return lg;
 }
 
