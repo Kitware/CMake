@@ -752,7 +752,7 @@ void cmCTestLaunch::LoadConfig()
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   std::string fname = this->LogDir;
   fname += "CTestLaunchConfig.cmake";

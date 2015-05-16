@@ -52,8 +52,7 @@ public:
   cmGlobalGenerator();
   virtual ~cmGlobalGenerator();
 
-  ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
+  cmLocalGenerator* MakeLocalGenerator(cmLocalGenerator* parent = 0);
 
   ///! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
@@ -442,6 +441,9 @@ protected:
   virtual bool UseFolderProperty();
 
 private:
+  ///! Create a local generator appropriate to this Global Generator
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent);
+
   cmMakefile* TryCompileOuterMakefile;
   float FirstTimeProgress;
   // If you add a new map here, make sure it is copied

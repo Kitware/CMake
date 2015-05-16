@@ -580,7 +580,7 @@ void cmGlobalUnixMakefileGenerator3
     else
       {
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (this->CreateLocalGenerator());
+        (this->MakeLocalGenerator());
       // set the Start directories
       lg->GetMakefile()->SetCurrentSourceDirectory
         (this->CMakeInstance->GetHomeDirectory());
