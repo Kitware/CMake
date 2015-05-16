@@ -99,7 +99,6 @@ public:
    */
   void SetIncludeDirective(const std::string& s)
     { this->IncludeDirective = s; }
-  const std::string& GetIncludeDirective() { return this->IncludeDirective; }
 
   /**
    * Set max makefile variable size, default is 0 which means unlimited.
