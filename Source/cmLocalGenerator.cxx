@@ -366,9 +366,6 @@ void cmLocalGenerator::GenerateInstallRules()
   std::string file = this->StateSnapshot.GetCurrentBinaryDirectory();
   std::string homedir = this->GetState()->GetBinaryDirectory();
   std::string currdir = this->StateSnapshot.GetCurrentBinaryDirectory();
-  cmSystemTools::ConvertToUnixSlashes(file);
-  cmSystemTools::ConvertToUnixSlashes(homedir);
-  cmSystemTools::ConvertToUnixSlashes(currdir);
   int toplevel_install = 0;
   if ( currdir == homedir )
     {
