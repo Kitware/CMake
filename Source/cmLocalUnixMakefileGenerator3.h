@@ -81,13 +81,6 @@ public:
   std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
 
   /**
-   * If set to true, then NULL is set to nil for non Windows_NT.
-   * This uses make syntax used by nmake and borland.
-   * The default is false.
-   */
-  void SetDefineWindowsNULL(bool v)  {this->DefineWindowsNULL = v;}
-
-  /**
    * If set to true, cd dir && command is used to
    * run commands in a different directory.
    */
@@ -297,7 +290,6 @@ private:
   int MakefileVariableSize;
   std::string MakeSilentFlag;
   std::string ConfigurationName;
-  bool DefineWindowsNULL;
   bool UnixCD;
   bool PassMakeflags;
   bool MakeCommandEscapeTargetTwice;

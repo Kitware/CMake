@@ -21,6 +21,7 @@ cmGlobalJOMMakefileGenerator::cmGlobalJOMMakefileGenerator()
   this->UseLinkScript = false;
   this->WindowsShell = true;
   this->NMake = true;
+  this->DefineWindowsNULL = true;
 }
 
 void cmGlobalJOMMakefileGenerator
@@ -52,7 +53,6 @@ cmGlobalJOMMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalUnixMakefileGenerator3* lg
       = new cmLocalUnixMakefileGenerator3(this, parent);
-  lg->SetDefineWindowsNULL(true);
   lg->SetMakeSilentFlag("/nologo");
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(true);

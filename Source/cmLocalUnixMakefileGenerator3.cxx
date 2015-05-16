@@ -86,7 +86,6 @@ cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
   this->MakefileVariableSize = 0;
   this->IgnoreLibPrefix = false;
   this->PassMakeflags = false;
-  this->DefineWindowsNULL = false;
   this->UnixCD = true;
   this->ColorMakefile = false;
   this->SkipPreprocessedSourceRules = false;
@@ -719,7 +718,9 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# Set environment variables for the build.\n"
     << "\n";
-  if(this->DefineWindowsNULL)
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  if(gg->DefineWindowsNULL)
     {
     makefileStream
       << "!IF \"$(OS)\" == \"Windows_NT\"\n"

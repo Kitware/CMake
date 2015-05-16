@@ -27,6 +27,7 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
 #endif
   this->WatcomWMake = true;
   this->IncludeDirective = "!include";
+  this->DefineWindowsNULL = true;
 }
 
 void cmGlobalWatcomWMakeGenerator
@@ -51,7 +52,6 @@ cmGlobalWatcomWMakeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalUnixMakefileGenerator3* lg
       = new cmLocalUnixMakefileGenerator3(this, parent);
-  lg->SetDefineWindowsNULL(true);
   lg->SetMakeSilentFlag("-h");
   lg->SetIgnoreLibPrefix(true);
   lg->SetPassMakeflags(false);

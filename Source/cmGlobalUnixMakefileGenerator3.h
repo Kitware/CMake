@@ -134,6 +134,7 @@ public:
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
 
   std::string IncludeDirective;
+  bool DefineWindowsNULL;
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();
