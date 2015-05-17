@@ -59,7 +59,6 @@ cmLocalVisualStudio7Generator
                                 cmLocalGenerator* parent):
   cmLocalVisualStudioGenerator(v, gg, parent)
 {
-  this->ExtraFlagTable = 0;
   this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
 }
 
@@ -773,7 +772,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
     }
   Options targetOptions(this, t,
                         table,
-                        this->ExtraFlagTable);
+                        gg->ExtraFlagTable);
   targetOptions.FixExceptionHandlingDefault();
   std::string asmLocation = configName + "/";
   targetOptions.AddFlag("AssemblerListingLocation", asmLocation.c_str());
@@ -1842,7 +1841,7 @@ bool cmLocalVisualStudio7Generator
               table = cmLocalVisualStudio7GeneratorFortranFlagTable;
               }
             Options fileOptions(this, tool, table,
-                                this->ExtraFlagTable);
+                                gg->ExtraFlagTable);
             fileOptions.Parse(fc.CompileFlags.c_str());
             fileOptions.AddDefines(fc.CompileDefs.c_str());
             fileOptions.AddDefines(fc.CompileDefsConfig.c_str());

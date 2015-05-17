@@ -120,7 +120,6 @@ cmGlobalVisualStudio9Generator::CreateLocalGenerator(cmLocalGenerator* parent)
   cmLocalVisualStudio7Generator *lg
     = new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9,
                                         this, parent);
-  lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
   return lg;
 }
 

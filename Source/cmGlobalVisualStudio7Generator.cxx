@@ -18,6 +18,32 @@
 #include "cmake.h"
 #include <cmsys/Encoding.hxx>
 
+//----------------------------------------------------------------------------
+static cmVS7FlagTable cmVS7ExtraFlagTable[] =
+{
+  // Precompiled header and related options.  Note that the
+  // UsePrecompiledHeader entries are marked as "Continue" so that the
+  // corresponding PrecompiledHeaderThrough entry can be found.
+  {"UsePrecompiledHeader", "YX", "Automatically Generate", "2",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "YX", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "3",
+   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
+  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
+   cmVS7FlagTable::UserValueRequired},
+  {"WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "true", 0},
+
+  // Exception handling mode.  If no entries match, it will be FALSE.
+  {"ExceptionHandling", "GX", "enable c++ exceptions", "true", 0},
+  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "true", 0},
+  // The EHa option does not have an IDE setting.  Let it go to false,
+  // and have EHa passed on the command line by leaving out the table
+  // entry.
+
+  {0,0,0,0,0}
+};
+
 cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
   const std::string& platformName)
 {
@@ -33,6 +59,7 @@ cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
     {
     this->DefaultPlatformName = platformName;
     }
+  this->ExtraFlagTable = cmVS7ExtraFlagTable;
 }
 
 cmGlobalVisualStudio7Generator::~cmGlobalVisualStudio7Generator()
@@ -256,7 +283,6 @@ cmGlobalVisualStudio7Generator::CreateLocalGenerator(cmLocalGenerator* parent)
   cmLocalVisualStudio7Generator *lg =
     new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS7,
                                       this, parent);
-  lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
   return lg;
 }
 
@@ -1084,36 +1110,6 @@ cmGlobalVisualStudio7Generator
       }
     }
   return false;
-}
-
-//----------------------------------------------------------------------------
-static cmVS7FlagTable cmVS7ExtraFlagTable[] =
-{
-  // Precompiled header and related options.  Note that the
-  // UsePrecompiledHeader entries are marked as "Continue" so that the
-  // corresponding PrecompiledHeaderThrough entry can be found.
-  {"UsePrecompiledHeader", "YX", "Automatically Generate", "2",
-   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"PrecompiledHeaderThrough", "YX", "Precompiled Header Name", "",
-   cmVS7FlagTable::UserValueRequired},
-  {"UsePrecompiledHeader", "Yu", "Use Precompiled Header", "3",
-   cmVS7FlagTable::UserValueIgnored | cmVS7FlagTable::Continue},
-  {"PrecompiledHeaderThrough", "Yu", "Precompiled Header Name", "",
-   cmVS7FlagTable::UserValueRequired},
-  {"WholeProgramOptimization", "LTCG", "WholeProgramOptimization", "true", 0},
-
-  // Exception handling mode.  If no entries match, it will be FALSE.
-  {"ExceptionHandling", "GX", "enable c++ exceptions", "true", 0},
-  {"ExceptionHandling", "EHsc", "enable c++ exceptions", "true", 0},
-  // The EHa option does not have an IDE setting.  Let it go to false,
-  // and have EHa passed on the command line by leaving out the table
-  // entry.
-
-  {0,0,0,0,0}
-};
-cmIDEFlagTable const* cmGlobalVisualStudio7Generator::GetExtraFlagTableVS7()
-{
-  return cmVS7ExtraFlagTable;
 }
 
 std::string cmGlobalVisualStudio7Generator::Encoding()

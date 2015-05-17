@@ -54,8 +54,6 @@ public:
    */
   void SetBuildType(BuildType,const std::string& name);
 
-  void SetExtraFlagTable(cmVS7FlagTable const* table)
-    { this->ExtraFlagTable = table; }
   virtual std::string GetTargetDirectory(cmTarget const&) const;
   cmSourceFile* CreateVCProjBuildRule();
   void WriteStampFiles();
@@ -119,7 +117,6 @@ private:
   class EventWriter;
   friend class EventWriter;
 
-  cmVS7FlagTable const* ExtraFlagTable;
   std::string ModuleDefinitionFile;
   bool FortranProject;
   bool WindowsCEProject;
