@@ -21,9 +21,10 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
   const std::string& key, StackIter begin, StackIter end, bool raise)
 {
   assert(begin != end);
-  MapType::const_iterator i = begin->Map.find(key);
+  MapType::iterator i = begin->Map.find(key);
   if (i != begin->Map.end())
     {
+    i->second.Used = true;
     return i->second;
     }
   StackIter it = begin;
@@ -76,7 +77,7 @@ void cmDefinitions::Set(const std::string& key, const char* value)
 }
 
 //----------------------------------------------------------------------------
-std::vector<std::string> cmDefinitions::LocalKeys() const
+std::vector<std::string> cmDefinitions::UnusedKeys() const
 {
   std::vector<std::string> keys;
   keys.reserve(this->Map.size());
@@ -84,7 +85,7 @@ std::vector<std::string> cmDefinitions::LocalKeys() const
   for(MapType::const_iterator mi = this->Map.begin();
       mi != this->Map.end(); ++mi)
     {
-    if (mi->second.Exists)
+    if (!mi->second.Used)
       {
       keys.push_back(mi->first);
       }

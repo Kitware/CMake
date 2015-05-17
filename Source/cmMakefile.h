@@ -69,8 +69,6 @@ public:
   void MarkVariableAsUsed(const std::string& var);
   /* return true if a variable has been initialized */
   bool VariableInitialized(const std::string& ) const;
-  /* return true if a variable has been used */
-  bool VariableUsed(const std::string& ) const;
 
   /**
    * Construct an empty makefile.

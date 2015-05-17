@@ -46,8 +46,7 @@ public:
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
 
-  /** Get the set of all local keys.  */
-  std::vector<std::string> LocalKeys() const;
+  std::vector<std::string> UnusedKeys() const;
 
   static std::vector<std::string> ClosureKeys(StackConstIter begin,
                                               StackConstIter end);
@@ -61,11 +60,16 @@ private:
   private:
     typedef std::string std_string;
   public:
-    Def(): std_string(), Exists(false) {}
-    Def(const char* v): std_string(v?v:""), Exists(v?true:false) {}
-    Def(const std_string& v): std_string(v), Exists(true) {}
-    Def(Def const& d): std_string(d), Exists(d.Exists) {}
+    Def(): std_string(), Exists(false), Used(false) {}
+    Def(const char* v)
+      : std_string(v ? v : ""),
+        Exists(v ? true : false),
+        Used(false)
+    {}
+    Def(const std_string& v): std_string(v), Exists(true), Used(false) {}
+    Def(Def const& d): std_string(d), Exists(d.Exists), Used(d.Used) {}
     bool Exists;
+    bool Used;
   };
   static Def NoDef;
 
