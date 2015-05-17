@@ -130,7 +130,7 @@ public:
       return true;
       }
     // First localize the definition in the current scope.
-    this->GetDefinition(var);
+    cmDefinitions::Raise(var, this->VarStack.rbegin(), this->VarStack.rend());
 
     // Now update the definition in the parent scope.
     it->Set(var, varDef);

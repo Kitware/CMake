@@ -35,10 +35,10 @@ class cmDefinitions
   typedef std::list<cmDefinitions>::reverse_iterator StackIter;
   typedef std::list<cmDefinitions>::const_reverse_iterator StackConstIter;
 public:
-  /** Get the value associated with a key; null if none.
-      Store the result locally if it came from a parent.  */
   static const char* Get(const std::string& key,
                          StackIter begin, StackIter end);
+
+  static void Raise(const std::string& key, StackIter begin, StackIter end);
 
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
@@ -80,7 +80,7 @@ private:
   MapType Map;
 
   static Def const& GetInternal(const std::string& key,
-    StackIter begin, StackIter end);
+    StackIter begin, StackIter end, bool raise);
 };
 
 #endif

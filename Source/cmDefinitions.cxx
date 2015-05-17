@@ -18,7 +18,7 @@ cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const& cmDefinitions::GetInternal(
-  const std::string& key, StackIter begin, StackIter end)
+  const std::string& key, StackIter begin, StackIter end, bool raise)
 {
   assert(begin != end);
   MapType::const_iterator i = begin->Map.find(key);
@@ -32,7 +32,11 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
     {
     return cmDefinitions::NoDef;
     }
-  Def const& def = cmDefinitions::GetInternal(key, it, end);
+  Def const& def = cmDefinitions::GetInternal(key, it, end, raise);
+  if (!raise)
+    {
+    return def;
+    }
   return begin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
@@ -40,8 +44,14 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
 const char* cmDefinitions::Get(const std::string& key,
     StackIter begin, StackIter end)
 {
-  Def const& def = cmDefinitions::GetInternal(key, begin, end);
+  Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
   return def.Exists? def.c_str() : 0;
+}
+
+void cmDefinitions::Raise(const std::string& key,
+                          StackIter begin, StackIter end)
+{
+  cmDefinitions::GetInternal(key, begin, end, true);
 }
 
 //----------------------------------------------------------------------------
