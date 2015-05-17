@@ -25,16 +25,6 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
 }
 
 //----------------------------------------------------------------------------
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalVisualStudio71Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(this, parent);
-  return lg;
-}
-
-//----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio71Generator::GetUserMacrosDirectory()
 {
   // Macros not supported on Visual Studio 7.1 and earlier because

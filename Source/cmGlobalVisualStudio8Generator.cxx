@@ -126,16 +126,6 @@ std::string cmGlobalVisualStudio8Generator::FindDevEnvCommand()
 }
 
 //----------------------------------------------------------------------------
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalVisualStudio8Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(this, parent);
-  return lg;
-}
-
-//----------------------------------------------------------------------------
 void cmGlobalVisualStudio8Generator
 ::EnableLanguage(std::vector<std::string>const &  lang,
                  cmMakefile *mf, bool optional)

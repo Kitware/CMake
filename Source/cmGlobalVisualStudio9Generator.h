@@ -28,9 +28,6 @@ public:
     const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
-  ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
-
   /**
    * Try to determine system information such as shared library
    * extension, pthreads, byte order etc.

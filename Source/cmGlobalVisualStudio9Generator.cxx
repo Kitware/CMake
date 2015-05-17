@@ -114,15 +114,6 @@ void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
   fout << "# Visual Studio 2008\n";
 }
 
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalVisualStudio9Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalVisualStudio7Generator *lg
-    = new cmLocalVisualStudio7Generator(this, parent);
-  return lg;
-}
-
 //----------------------------------------------------------------------------
 std::string cmGlobalVisualStudio9Generator::GetUserMacrosDirectory()
 {

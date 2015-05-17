@@ -238,13 +238,6 @@ void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 }
 
 //----------------------------------------------------------------------------
-cmLocalGenerator *
-cmGlobalVisualStudio11Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  return new cmLocalVisualStudio10Generator(this, parent);
-}
-
-//----------------------------------------------------------------------------
 bool cmGlobalVisualStudio11Generator::UseFolderProperty()
 {
   // Intentionally skip over the parent class implementation and call the

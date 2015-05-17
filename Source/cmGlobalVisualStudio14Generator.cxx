@@ -127,10 +127,3 @@ void cmGlobalVisualStudio14Generator::WriteSLNHeader(std::ostream& fout)
     fout << "# Visual Studio 14\n";
     }
 }
-
-//----------------------------------------------------------------------------
-cmLocalGenerator *
-cmGlobalVisualStudio14Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  return new cmLocalVisualStudio10Generator(this, parent);
-}

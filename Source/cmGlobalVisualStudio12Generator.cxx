@@ -218,13 +218,6 @@ void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
 }
 
 //----------------------------------------------------------------------------
-cmLocalGenerator *
-cmGlobalVisualStudio12Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  return new cmLocalVisualStudio10Generator(this, parent);
-}
-
-//----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudio12Generator::IsWindowsDesktopToolsetInstalled() const
 {
