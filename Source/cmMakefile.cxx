@@ -126,10 +126,7 @@ public:
           }
         return true;
         }
-      else
-        {
-        return false;
-        }
+      return false;
       }
     // First localize the definition in the current scope.
     this->GetDefinition(var);
