@@ -65,8 +65,6 @@ class cmMakefile
   class Internals;
   cmsys::auto_ptr<Internals> Internal;
 public:
-  /* Check for unused variables in this scope */
-  void CheckForUnusedVariables() const;
   /* Mark a variable as used */
   void MarkVariableAsUsed(const std::string& var);
   /* return true if a variable has been initialized */
@@ -1041,6 +1039,8 @@ private:
                              const std::string& feature) const;
   bool HaveCxxStandardAvailable(cmTarget const* target,
                                const std::string& feature) const;
+
+  void CheckForUnusedVariables() const;
 
   mutable bool SuppressWatches;
 };
