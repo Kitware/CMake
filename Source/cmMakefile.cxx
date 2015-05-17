@@ -110,23 +110,24 @@ public:
     ++it;
     if(it == this->VarStack.rend())
       {
-      if(cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent())
+      cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent();
+      if(!plg)
         {
-        // Update the definition in the parent directory top scope.  This
-        // directory's scope was initialized by the closure of the parent
-        // scope, so we do not need to localize the definition first.
-        cmMakefile* parent = plg->GetMakefile();
-        if (varDef)
-          {
-          parent->AddDefinition(var, varDef);
-          }
-        else
-          {
-          parent->RemoveDefinition(var);
-          }
-        return true;
+        return false;
         }
-      return false;
+      // Update the definition in the parent directory top scope.  This
+      // directory's scope was initialized by the closure of the parent
+      // scope, so we do not need to localize the definition first.
+      cmMakefile* parent = plg->GetMakefile();
+      if (varDef)
+        {
+        parent->AddDefinition(var, varDef);
+        }
+      else
+        {
+        parent->RemoveDefinition(var);
+        }
+      return true;
       }
     // First localize the definition in the current scope.
     this->GetDefinition(var);
