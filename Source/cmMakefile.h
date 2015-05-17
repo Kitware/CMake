@@ -823,7 +823,7 @@ protected:
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
 
   // Check for a an unused variable
-  void CheckForUnused(const char* reason, const std::string& name) const;
+  void LogUnused(const char* reason, const std::string& name) const;
 
   std::string ProjectName;    // project name
 
