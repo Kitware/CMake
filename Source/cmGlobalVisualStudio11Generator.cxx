@@ -117,6 +117,7 @@ cmGlobalVisualStudio11Generator::cmGlobalVisualStudio11Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\11.0\\Setup\\VC;"
     "ProductDir", vc11Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v110";
+  this->Version = VS11;
 }
 
 //----------------------------------------------------------------------------
@@ -240,8 +241,7 @@ void cmGlobalVisualStudio11Generator::WriteSLNHeader(std::ostream& fout)
 cmLocalGenerator *
 cmGlobalVisualStudio11Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  return new cmLocalVisualStudio10Generator(
-    cmLocalVisualStudioGenerator::VS11, this, parent);
+  return new cmLocalVisualStudio10Generator(this, parent);
 }
 
 //----------------------------------------------------------------------------

@@ -47,13 +47,13 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetClFlagTable() const
 {
   if(this->MSTools)
     {
-    cmLocalVisualStudioGenerator::VSVersion
+    cmGlobalVisualStudioGenerator::VSVersion
       v = this->LocalGenerator->GetVersion();
-    if(v >= cmLocalVisualStudioGenerator::VS14)
+    if(v >= cmGlobalVisualStudioGenerator::VS14)
       { return cmVS14CLFlagTable; }
-    else if(v >= cmLocalVisualStudioGenerator::VS12)
+    else if(v >= cmGlobalVisualStudioGenerator::VS12)
       { return cmVS12CLFlagTable; }
-    else if(v == cmLocalVisualStudioGenerator::VS11)
+    else if(v == cmGlobalVisualStudioGenerator::VS11)
       { return cmVS11CLFlagTable; }
     else
       { return cmVS10CLFlagTable; }
@@ -65,13 +65,13 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetRcFlagTable() const
 {
   if(this->MSTools)
     {
-    cmLocalVisualStudioGenerator::VSVersion
+    cmGlobalVisualStudioGenerator::VSVersion
       v = this->LocalGenerator->GetVersion();
-    if(v >= cmLocalVisualStudioGenerator::VS14)
+    if(v >= cmGlobalVisualStudioGenerator::VS14)
       { return cmVS14RCFlagTable; }
-    else if(v >= cmLocalVisualStudioGenerator::VS12)
+    else if(v >= cmGlobalVisualStudioGenerator::VS12)
       { return cmVS12RCFlagTable; }
-    else if(v == cmLocalVisualStudioGenerator::VS11)
+    else if(v == cmGlobalVisualStudioGenerator::VS11)
       { return cmVS11RCFlagTable; }
     else
       { return cmVS10RCFlagTable; }
@@ -83,13 +83,13 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLibFlagTable() const
 {
   if(this->MSTools)
     {
-    cmLocalVisualStudioGenerator::VSVersion
+    cmGlobalVisualStudioGenerator::VSVersion
       v = this->LocalGenerator->GetVersion();
-    if(v >= cmLocalVisualStudioGenerator::VS14)
+    if(v >= cmGlobalVisualStudioGenerator::VS14)
       { return cmVS14LibFlagTable; }
-    else if(v >= cmLocalVisualStudioGenerator::VS12)
+    else if(v >= cmGlobalVisualStudioGenerator::VS12)
       { return cmVS12LibFlagTable; }
-    else if(v == cmLocalVisualStudioGenerator::VS11)
+    else if(v == cmGlobalVisualStudioGenerator::VS11)
       { return cmVS11LibFlagTable; }
     else
       { return cmVS10LibFlagTable; }
@@ -101,13 +101,13 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetLinkFlagTable() const
 {
   if(this->MSTools)
     {
-    cmLocalVisualStudioGenerator::VSVersion
+    cmGlobalVisualStudioGenerator::VSVersion
       v = this->LocalGenerator->GetVersion();
-    if(v >= cmLocalVisualStudioGenerator::VS14)
+    if(v >= cmGlobalVisualStudioGenerator::VS14)
       { return cmVS14LinkFlagTable; }
-    else if(v >= cmLocalVisualStudioGenerator::VS12)
+    else if(v >= cmGlobalVisualStudioGenerator::VS12)
       { return cmVS12LinkFlagTable; }
-    else if(v == cmLocalVisualStudioGenerator::VS11)
+    else if(v == cmGlobalVisualStudioGenerator::VS11)
       { return cmVS11LinkFlagTable; }
     else
       { return cmVS10LinkFlagTable; }
@@ -119,13 +119,13 @@ cmIDEFlagTable const* cmVisualStudio10TargetGenerator::GetMasmFlagTable() const
 {
   if(this->MSTools)
     {
-    cmLocalVisualStudioGenerator::VSVersion
+    cmGlobalVisualStudioGenerator::VSVersion
       v = this->LocalGenerator->GetVersion();
-    if(v >= cmLocalVisualStudioGenerator::VS14)
+    if(v >= cmGlobalVisualStudioGenerator::VS14)
       { return cmVS14MASMFlagTable; }
-    else if(v >= cmLocalVisualStudioGenerator::VS12)
+    else if(v >= cmGlobalVisualStudioGenerator::VS12)
       { return cmVS12MASMFlagTable; }
-    else if(v == cmLocalVisualStudioGenerator::VS11)
+    else if(v == cmGlobalVisualStudioGenerator::VS11)
       { return cmVS11MASMFlagTable; }
     else
       { return cmVS10MASMFlagTable; }
@@ -911,7 +911,8 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
       sep = ";";
       }
     (*this->BuildFileStream ) << "</Outputs>\n";
-    if(this->LocalGenerator->GetVersion() > cmLocalVisualStudioGenerator::VS10)
+    if(this->LocalGenerator->GetVersion()
+                                        > cmGlobalVisualStudioGenerator::VS10)
       {
       // VS >= 11 let us turn off linking of custom command outputs.
       this->WritePlatformConfigTag("LinkObjects", i->c_str(), 3);
@@ -1416,7 +1417,7 @@ void cmVisualStudio10TargetGenerator::WriteSource(
   // conversion uses full paths when possible to allow deeper trees.
   bool forceRelative = false;
   std::string sourceFile = this->ConvertPath(sf->GetFullPath(), false);
-  if(this->LocalGenerator->GetVersion() == cmLocalVisualStudioGenerator::VS10
+  if(this->LocalGenerator->GetVersion() == cmGlobalVisualStudioGenerator::VS10
      && cmSystemTools::FileIsFullPath(sourceFile.c_str()))
     {
     // Normal path conversion resulted in a full path.  VS 10 (but not 11)
@@ -1544,7 +1545,7 @@ void cmVisualStudio10TargetGenerator::WriteAllSources()
       ++si;
       }
     }
-  if(this->LocalGenerator->GetVersion() > cmLocalVisualStudioGenerator::VS10)
+  if(this->LocalGenerator->GetVersion() > cmGlobalVisualStudioGenerator::VS10)
     {
     // For VS >= 11 we use LinkObjects to avoid linking custom command
     // outputs.  Use Object for all external objects, generated or not.

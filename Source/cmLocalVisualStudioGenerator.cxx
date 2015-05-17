@@ -19,16 +19,24 @@
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator
-::cmLocalVisualStudioGenerator(VSVersion v, cmGlobalGenerator* gg,
+::cmLocalVisualStudioGenerator(cmGlobalGenerator* gg,
                                cmLocalGenerator* parent)
   : cmLocalGenerator(gg, parent)
 {
-  this->Version = v;
 }
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudioGenerator::~cmLocalVisualStudioGenerator()
 {
+}
+
+//----------------------------------------------------------------------------
+cmGlobalVisualStudioGenerator::VSVersion
+cmLocalVisualStudioGenerator::GetVersion() const
+{
+  cmGlobalVisualStudioGenerator* gg =
+    static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
+  return gg->GetVersion();
 }
 
 //----------------------------------------------------------------------------

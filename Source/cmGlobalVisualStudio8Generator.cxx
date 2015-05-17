@@ -102,6 +102,7 @@ cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;
   this->ExtraFlagTable = this->GetExtraFlagTableVS8();
+  this->Version = VS8;
 }
 
 //----------------------------------------------------------------------------
@@ -130,8 +131,7 @@ cmLocalGenerator *
 cmGlobalVisualStudio8Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS8,
-                                      this, parent);
+    new cmLocalVisualStudio7Generator(this, parent);
   return lg;
 }
 

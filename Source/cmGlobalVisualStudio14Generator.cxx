@@ -97,6 +97,7 @@ cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\14.0\\Setup\\VC;"
     "ProductDir", vc14Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v140";
+  this->Version = VS14;
 }
 
 //----------------------------------------------------------------------------
@@ -131,6 +132,5 @@ void cmGlobalVisualStudio14Generator::WriteSLNHeader(std::ostream& fout)
 cmLocalGenerator *
 cmGlobalVisualStudio14Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  return new cmLocalVisualStudio10Generator(
-    cmLocalVisualStudioGenerator::VS14, this, parent);
+  return new cmLocalVisualStudio10Generator(this, parent);
 }

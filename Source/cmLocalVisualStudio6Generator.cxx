@@ -26,7 +26,7 @@
 cmLocalVisualStudio6Generator
 ::cmLocalVisualStudio6Generator(cmGlobalGenerator* gg,
                                 cmLocalGenerator* parent):
-  cmLocalVisualStudioGenerator(VS6, gg, parent)
+  cmLocalVisualStudioGenerator(gg, parent)
 {
 }
 

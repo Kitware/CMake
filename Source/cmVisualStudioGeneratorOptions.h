@@ -73,7 +73,7 @@ public:
   void SetConfiguration(const char* config);
 private:
   cmLocalVisualStudioGenerator* LocalGenerator;
-  cmLocalVisualStudioGenerator::VSVersion Version;
+  cmGlobalVisualStudioGenerator::VSVersion Version;
 
   std::string Configuration;
   Tool CurrentTool;

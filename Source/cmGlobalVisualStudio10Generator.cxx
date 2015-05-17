@@ -105,6 +105,7 @@ cmGlobalVisualStudio10Generator::cmGlobalVisualStudio10Generator(
   this->SystemIsWindowsPhone = false;
   this->SystemIsWindowsStore = false;
   this->MSBuildCommandInitialized = false;
+  this->Version = VS10;
 }
 
 //----------------------------------------------------------------------------
@@ -311,8 +312,7 @@ void cmGlobalVisualStudio10Generator::WriteSLNHeader(std::ostream& fout)
 cmLocalGenerator *
 cmGlobalVisualStudio10Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
-  return new cmLocalVisualStudio10Generator(
-    cmLocalVisualStudioGenerator::VS10, this, parent);
+  return new cmLocalVisualStudio10Generator(this, parent);
 }
 
 //----------------------------------------------------------------------------

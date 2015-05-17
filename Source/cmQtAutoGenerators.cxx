@@ -20,7 +20,7 @@
 #include "cmAlgorithms.h"
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
-# include "cmLocalVisualStudioGenerator.h"
+# include "cmGlobalVisualStudioGenerator.h"
 #endif
 
 #include <sys/stat.h>
@@ -372,13 +372,13 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
   if(gg->GetName().find("Visual Studio") != std::string::npos)
     {
-    cmLocalVisualStudioGenerator* vslg =
-      static_cast<cmLocalVisualStudioGenerator*>(localGen);
+    cmGlobalVisualStudioGenerator* vsgg =
+      static_cast<cmGlobalVisualStudioGenerator*>(gg);
     // Under VS >= 7 use a PRE_BUILD event instead of a separate target to
     // reduce the number of targets loaded into the IDE.
     // This also works around a VS 11 bug that may skip updating the target:
     //  https://connect.microsoft.com/VisualStudio/feedback/details/769495
-    usePRE_BUILD = vslg->GetVersion() >= cmLocalVisualStudioGenerator::VS7;
+    usePRE_BUILD = vsgg->GetVersion() >= cmGlobalVisualStudioGenerator::VS7;
     if(usePRE_BUILD)
       {
       for (std::vector<std::string>::iterator it = depends.begin();

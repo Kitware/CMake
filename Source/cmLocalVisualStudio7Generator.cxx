@@ -55,9 +55,9 @@ static void cmConvertToWindowsSlash(std::string& s)
 
 //----------------------------------------------------------------------------
 cmLocalVisualStudio7Generator
-::cmLocalVisualStudio7Generator(VSVersion v, cmGlobalGenerator* gg,
+::cmLocalVisualStudio7Generator(cmGlobalGenerator* gg,
                                 cmLocalGenerator* parent):
-  cmLocalVisualStudioGenerator(v, gg, parent)
+  cmLocalVisualStudioGenerator(gg, parent)
 {
   this->Internal = new cmLocalVisualStudio7GeneratorInternals(this);
 }
@@ -240,18 +240,17 @@ void cmLocalVisualStudio7Generator::WriteStampFiles()
 void cmLocalVisualStudio7Generator
 ::CreateSingleVCProj(const std::string& lname, cmTarget &target)
 {
-  this->FortranProject =
-    static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
-    ->TargetIsFortranOnly(target);
-  this->WindowsCEProject =
-    static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator)
-    ->TargetsWindowsCE();
+  cmGlobalVisualStudioGenerator* gg
+      = static_cast<cmGlobalVisualStudioGenerator*>(this->GlobalGenerator);
+  this->FortranProject = gg->TargetIsFortranOnly(target);
+  this->WindowsCEProject = gg->TargetsWindowsCE();
 
   // Intel Fortran for VS10 uses VS9 format ".vfproj" files.
-  VSVersion realVersion = this->Version;
-  if(this->FortranProject && this->Version >= VS10)
+  cmGlobalVisualStudioGenerator::VSVersion realVersion = gg->GetVersion();
+  if(this->FortranProject
+      && gg->GetVersion() >= cmGlobalVisualStudioGenerator::VS10)
     {
-    this->Version = VS9;
+    gg->SetVersion(cmGlobalVisualStudioGenerator::VS9);
     }
 
   // add to the list of projects
@@ -281,7 +280,7 @@ void cmLocalVisualStudio7Generator
     this->GlobalGenerator->FileReplacedDuringGenerate(fname);
     }
 
-  this->Version = realVersion;
+  gg->SetVersion(realVersion);
 }
 
 //----------------------------------------------------------------------------
@@ -994,7 +993,7 @@ void cmLocalVisualStudio7Generator::WriteConfiguration(std::ostream& fout,
   // end of <Tool Name=VCMIDLTool
 
   // Check if we need the FAT32 workaround.
-  if(targetBuilds && this->Version >= VS8)
+  if(targetBuilds && this->GetVersion() >= cmGlobalVisualStudioGenerator::VS8)
     {
     // Check the filesystem type where the target will be written.
     if(cmLVS6G_IsFAT(target.GetDirectory(configName).c_str()))
@@ -1129,7 +1128,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     fout << "\t\t\t<Tool\n"
          << "\t\t\t\tName=\"" << tool << "\"\n";
 
-    if(this->GetVersion() < VS8 || this->FortranProject)
+    if(this->GetVersion() < cmGlobalVisualStudioGenerator::VS8
+        || this->FortranProject)
       {
       std::ostringstream libdeps;
       this->Internal->OutputObjects(libdeps, &target);
@@ -1189,7 +1189,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // libraries which may be set by the user to something bad.
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
          << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-    if(this->GetVersion() < VS8 || this->FortranProject)
+    if(this->GetVersion() < cmGlobalVisualStudioGenerator::VS8
+        || this->FortranProject)
       {
       this->Internal->OutputObjects(fout, &target, " ");
       }
@@ -1217,7 +1218,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     if(this->WindowsCEProject)
       {
-      if(this->GetVersion() < VS9)
+      if(this->GetVersion() < cmGlobalVisualStudioGenerator::VS9)
         {
         fout << "\t\t\t\tSubSystem=\"9\"\n";
         }
@@ -1287,7 +1288,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
     // libraries which may be set by the user to something bad.
     fout << "\t\t\t\tAdditionalDependencies=\"$(NOINHERIT) "
          << this->Makefile->GetSafeDefinition(standardLibsVar.c_str());
-    if(this->GetVersion() < VS8 || this->FortranProject)
+    if(this->GetVersion() < cmGlobalVisualStudioGenerator::VS8
+        || this->FortranProject)
       {
       this->Internal->OutputObjects(fout, &target, " ");
       }
@@ -1315,7 +1317,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       }
     if ( this->WindowsCEProject )
       {
-      if(this->GetVersion() < VS9)
+      if(this->GetVersion() < cmGlobalVisualStudioGenerator::VS9)
         {
         fout << "\t\t\t\tSubSystem=\"9\"\n";
         }
@@ -1516,7 +1518,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
     this->WriteGroup(&sg, target, fout, libName, configs);
     }
 
-  if(this->GetVersion() >= VS8 && !this->FortranProject)
+  if(this->GetVersion() >= cmGlobalVisualStudioGenerator::VS8
+      && !this->FortranProject)
     {
     // VS >= 8 support per-config source locations so we
     // list object library content as external objects.
@@ -2148,13 +2151,13 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
        << gg->Encoding() << "\"?>\n"
        << "<VisualStudioProject\n"
        << "\tProjectType=\"Visual C++\"\n";
-  if(this->Version == VS71)
+  if(gg->GetVersion() == cmGlobalVisualStudioGenerator::VS71)
     {
     fout << "\tVersion=\"7.10\"\n";
     }
   else
     {
-    fout <<  "\tVersion=\"" << (this->Version/10) << ".00\"\n";
+    fout <<  "\tVersion=\"" << (gg->GetVersion()/10) << ".00\"\n";
     }
   const char* projLabel = target.GetProperty("PROJECT_LABEL");
   if(!projLabel)
@@ -2167,7 +2170,7 @@ cmLocalVisualStudio7Generator::WriteProjectStart(std::ostream& fout,
     keyword = "Win32Proj";
     }
   fout << "\tName=\"" << projLabel << "\"\n";
-  if(this->Version >= VS8)
+  if(gg->GetVersion() >= cmGlobalVisualStudioGenerator::VS8)
     {
     fout << "\tProjectGUID=\"{" << gg->GetGUID(libName.c_str()) << "}\"\n";
     }

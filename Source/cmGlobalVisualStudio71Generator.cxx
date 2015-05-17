@@ -21,6 +21,7 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
   : cmGlobalVisualStudio7Generator(platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
+  this->Version = VS71;
 }
 
 //----------------------------------------------------------------------------
@@ -29,8 +30,7 @@ cmLocalGenerator *
 cmGlobalVisualStudio71Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS71,
-                                      this, parent);
+    new cmLocalVisualStudio7Generator(this, parent);
   return lg;
 }
 

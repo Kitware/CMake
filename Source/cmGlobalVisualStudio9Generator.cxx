@@ -104,6 +104,7 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
   const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio8Generator(name, platformName)
 {
+  this->Version = VS9;
 }
 
 //----------------------------------------------------------------------------
@@ -118,8 +119,7 @@ cmLocalGenerator *
 cmGlobalVisualStudio9Generator::CreateLocalGenerator(cmLocalGenerator* parent)
 {
   cmLocalVisualStudio7Generator *lg
-    = new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9,
-                                        this, parent);
+    = new cmLocalVisualStudio7Generator(this, parent);
   return lg;
 }
 
