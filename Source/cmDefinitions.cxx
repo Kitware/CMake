@@ -61,11 +61,6 @@ void cmDefinitions::Set(const std::string& key, const char* value)
   this->Map[key] = def;
 }
 
-void cmDefinitions::Erase(const std::string& key)
-{
-  this->Map.erase(key);
-}
-
 //----------------------------------------------------------------------------
 std::vector<std::string> cmDefinitions::LocalKeys() const
 {

@@ -43,8 +43,6 @@ public:
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
 
-  void Erase(const std::string& key);
-
   /** Get the set of all local keys.  */
   std::vector<std::string> LocalKeys() const;
 
