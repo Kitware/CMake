@@ -54,6 +54,20 @@ void cmDefinitions::Raise(const std::string& key,
   cmDefinitions::GetInternal(key, begin, end, true);
 }
 
+bool cmDefinitions::HasKey(const std::string& key,
+                           StackConstIter begin, StackConstIter end)
+{
+  for (StackConstIter it = begin; it != end; ++it)
+    {
+    MapType::const_iterator i = it->Map.find(key);
+    if (i != it->Map.end())
+      {
+      return true;
+      }
+    }
+  return false;
+}
+
 //----------------------------------------------------------------------------
 void cmDefinitions::Set(const std::string& key, const char* value)
 {

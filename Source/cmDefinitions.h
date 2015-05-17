@@ -40,6 +40,9 @@ public:
 
   static void Raise(const std::string& key, StackIter begin, StackIter end);
 
+  static bool HasKey(const std::string& key,
+                     StackConstIter begin, StackConstIter end);
+
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
 
