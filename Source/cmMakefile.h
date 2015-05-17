@@ -35,7 +35,6 @@
 #endif
 
 #include <stack>
-#include <deque>
 
 class cmFunctionBlocker;
 class cmCommand;
@@ -963,7 +962,7 @@ private:
   bool CheckSystemVars;
 
   // stack of list files being read
-  std::deque<std::string> ListFileStack;
+  std::vector<std::string> ListFileStack;
 
   // stack of commands being invoked.
   struct CallStackEntry
@@ -971,7 +970,7 @@ private:
     cmListFileContext const* Context;
     cmExecutionStatus* Status;
   };
-  typedef std::deque<CallStackEntry> CallStackType;
+  typedef std::vector<CallStackEntry> CallStackType;
   CallStackType CallStack;
   friend class cmMakefileCall;
 

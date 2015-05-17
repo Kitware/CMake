@@ -4371,7 +4371,7 @@ std::string cmMakefile::GetListFileStack() const
   size_t depth = this->ListFileStack.size();
   if (depth > 0)
     {
-    std::deque<std::string>::const_iterator it = this->ListFileStack.end();
+    std::vector<std::string>::const_iterator it = this->ListFileStack.end();
     do
       {
       if (depth != this->ListFileStack.size())
