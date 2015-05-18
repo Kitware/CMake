@@ -65,8 +65,6 @@ cmGlobalMinGWMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
   cmLocalUnixMakefileGenerator3* lg =
       new cmLocalUnixMakefileGenerator3(this, parent);
   lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(false);
-  lg->SetUnixCD(true);
   return lg;
 }
 
