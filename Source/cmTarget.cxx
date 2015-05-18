@@ -1239,8 +1239,8 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
       ret = false;
       }
     }
-  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  this->TLLCommands.push_back(std::make_pair(signature, lfbt));
+  cmListFileContext lfc = this->Makefile->GetExecutionContext();
+  this->TLLCommands.push_back(std::make_pair(signature, lfc));
   return ret;
 }
 
@@ -1248,8 +1248,8 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
 void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
                                      TLLSignature sig) const
 {
-  std::vector<cmListFileBacktrace> sigs;
-  typedef std::vector<std::pair<TLLSignature, cmListFileBacktrace> > Container;
+  std::vector<cmListFileContext> sigs;
+  typedef std::vector<std::pair<TLLSignature, cmListFileContext> > Container;
   for(Container::const_iterator it = this->TLLCommands.begin();
       it != this->TLLCommands.end(); ++it)
     {
@@ -1258,6 +1258,7 @@ void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
       sigs.push_back(it->second);
       }
     }
+  cmLocalGenerator* lg = this->GetMakefile()->GetLocalGenerator();
   if (!sigs.empty())
     {
     const char *sigString
@@ -1265,20 +1266,16 @@ void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
     UNORDERED_SET<std::string> emitted;
-    for(std::vector<cmListFileBacktrace>::iterator it = sigs.begin();
+    for(std::vector<cmListFileContext>::iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
-      it->MakeRelative();
-      cmListFileBacktrace::const_iterator i = it->begin();
-      if(i != it->end())
+      cmListFileContext lfc = *it;
+      lfc.FilePath = lg->Convert(lfc.FilePath, cmLocalGenerator::HOME);
+      std::ostringstream line;
+      line << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
+      if (emitted.insert(line.str()).second)
         {
-        cmListFileContext const& lfc = *i;
-        std::ostringstream line;
-        line << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
-        if (emitted.insert(line.str()).second)
-          {
-          s << line.str();
-          }
+        s << line.str();
         }
       }
     }
