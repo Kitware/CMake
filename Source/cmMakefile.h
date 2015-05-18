@@ -411,8 +411,7 @@ public:
    * Determine if the given context, name pair has already been reported
    * in context of CMP0054.
    */
-  bool HasCMP0054AlreadyBeenReported(
-    cmListFileContext context) const;
+  bool HasCMP0054AlreadyBeenReported() const;
 
   bool IgnoreErrorsCMP0061() const;
 
