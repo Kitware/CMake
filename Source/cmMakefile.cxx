@@ -358,7 +358,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       lfc.FilePath = this->ListFileStack.back();
       }
     lfc.Line = 0;
-    backtrace.push_back(lfc);
+    backtrace.Append(lfc);
     }
 
   // Issue the message.
@@ -372,7 +372,7 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
   for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
       i != this->CallStack.rend(); ++i)
     {
-    backtrace.push_back(*i->Context);
+    backtrace.Append(*i->Context);
     }
   return backtrace;
 }
@@ -1944,7 +1944,7 @@ void cmMakefile::CheckForUnused(const char* reason,
     if (!this->CallStack.empty())
       {
       cmListFileContext file = this->GetExecutionContext();
-      bt.push_back(file);
+      bt.Append(file);
       path = file.FilePath;
       }
     else
@@ -1954,7 +1954,7 @@ void cmMakefile::CheckForUnused(const char* reason,
       cmListFileContext lfc;
       lfc.FilePath = path;
       lfc.Line = 0;
-      bt.push_back(lfc);
+      bt.Append(lfc);
       }
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path,
@@ -2884,7 +2884,7 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                 cmListFileContext lfc;
                 lfc.FilePath = filename;
                 lfc.Line = line;
-                bt.push_back(lfc);
+                bt.Append(lfc);
                 msg << "uninitialized variable \'" << lookup << "\'";
                 this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
                                                        msg.str(), bt);

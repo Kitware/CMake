@@ -143,7 +143,7 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
         cmListFileContext lfc;
         lfc.FilePath = this->FileName;
         lfc.Line = this->FileLine;
-        bt.push_back(lfc);
+        bt.Append(lfc);
         msg << "uninitialized variable \'" << var << "\'";
         this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
                                                         msg.str(), bt);
