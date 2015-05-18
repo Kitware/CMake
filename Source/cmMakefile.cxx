@@ -4945,15 +4945,7 @@ bool cmMakefile::HasCMP0054AlreadyBeenReported() const
 {
   cmCMP0054Id id(this->GetExecutionContext());
 
-  bool alreadyReported =
-    this->CMP0054ReportedIds.find(id) != this->CMP0054ReportedIds.end();
-
-  if(!alreadyReported)
-    {
-    this->CMP0054ReportedIds.insert(id);
-    }
-
-  return alreadyReported;
+  return !this->CMP0054ReportedIds.insert(id).second;
 }
 
 //----------------------------------------------------------------------------
