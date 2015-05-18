@@ -1251,27 +1251,17 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
 void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
                                      TLLSignature sig) const
 {
-  std::vector<cmListFileContext> sigs;
+  const char *sigString = (sig == cmTarget::KeywordTLLSignature ? "keyword"
+                                                                : "plain");
+  s << "The uses of the " << sigString << " signature are here:\n";
   typedef std::vector<std::pair<TLLSignature, cmListFileContext> > Container;
+  cmLocalGenerator* lg = this->GetMakefile()->GetLocalGenerator();
   for(Container::const_iterator it = this->TLLCommands.begin();
       it != this->TLLCommands.end(); ++it)
     {
     if (it->first == sig)
       {
-      sigs.push_back(it->second);
-      }
-    }
-  cmLocalGenerator* lg = this->GetMakefile()->GetLocalGenerator();
-  if (!sigs.empty())
-    {
-    const char *sigString
-                        = (sig == cmTarget::KeywordTLLSignature ? "keyword"
-                                                                : "plain");
-    s << "The uses of the " << sigString << " signature are here:\n";
-    for(std::vector<cmListFileContext>::iterator it = sigs.begin();
-        it != sigs.end(); ++it)
-      {
-      cmListFileContext lfc = *it;
+      cmListFileContext lfc = it->second;
       lfc.FilePath = lg->Convert(lfc.FilePath, cmLocalGenerator::HOME);
       s << " * " << lfc << std::endl;
       }
