@@ -1279,7 +1279,6 @@ void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
           {
           s << line.str();
           }
-        ++i;
         }
       }
     }
