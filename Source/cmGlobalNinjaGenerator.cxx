@@ -21,6 +21,7 @@
 
 #include <algorithm>
 #include <assert.h>
+#include <ctype.h>
 
 const char* cmGlobalNinjaGenerator::NINJA_BUILD_FILE = "build.ninja";
 const char* cmGlobalNinjaGenerator::NINJA_RULES_FILE = "rules.ninja";
@@ -55,6 +56,28 @@ void cmGlobalNinjaGenerator::WriteComment(std::ostream& os,
     lpos = rpos + 1;
     }
   os << "# " << replace.substr(lpos) << "\n\n";
+}
+
+std::string cmGlobalNinjaGenerator::EncodeRuleName(std::string const& name)
+{
+  // Ninja rule names must match "[a-zA-Z0-9_.-]+".  Use ".xx" to encode
+  // "." and all invalid characters as hexadecimal.
+  std::string encoded;
+  for (std::string::const_iterator i = name.begin();
+       i != name.end(); ++i)
+    {
+    if (isalnum(*i) || *i == '_' || *i == '-')
+      {
+      encoded += *i;
+      }
+    else
+      {
+      char buf[16];
+      sprintf(buf, ".%02x", static_cast<unsigned int>(*i));
+      encoded += buf;
+      }
+    }
+  return encoded;
 }
 
 static bool IsIdentChar(char c)
@@ -120,7 +143,8 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
                                         const cmNinjaDeps& orderOnlyDeps,
                                         const cmNinjaVars& variables,
                                         const std::string& rspfile,
-                                        int cmdLineLimit)
+                                        int cmdLineLimit,
+                                        bool* usedResponseFile)
 {
   // Make sure there is a rule.
   if(rule.empty())
@@ -205,6 +229,7 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
   std::string buildstr = build;
   std::string assignments = variable_assignments.str();
   const std::string& args = arguments;
+  bool useResponseFile = false;
   if (cmdLineLimit > 0
       && args.size() + buildstr.size() + assignments.size()
                                                     > (size_t) cmdLineLimit) {
@@ -213,7 +238,12 @@ void cmGlobalNinjaGenerator::WriteBuild(std::ostream& os,
     cmGlobalNinjaGenerator::WriteVariable(variable_assignments,
                                           "RSP_FILE", rspfile, "", 1);
     assignments += variable_assignments.str();
+    useResponseFile = true;
   }
+  if (usedResponseFile)
+    {
+    *usedResponseFile = useResponseFile;
+    }
 
   os << buildstr << args << assignments;
 }

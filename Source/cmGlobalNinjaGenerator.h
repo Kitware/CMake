@@ -61,6 +61,7 @@ public:
   /// Write a divider in the given output stream @a os.
   static void WriteDivider(std::ostream& os);
 
+  static std::string EncodeRuleName(std::string const& name);
   static std::string EncodeIdent(const std::string &ident, std::ostream &vars);
   static std::string EncodeLiteral(const std::string &lit);
   std::string EncodePath(const std::string &path);
@@ -87,7 +88,8 @@ public:
                   const cmNinjaDeps& orderOnlyDeps,
                   const cmNinjaVars& variables,
                   const std::string& rspfile = std::string(),
-                  int cmdLineLimit = -1);
+                  int cmdLineLimit = -1,
+                  bool* usedResponseFile = 0);
 
   /**
    * Helper to write a build statement with the special 'phony' rule.

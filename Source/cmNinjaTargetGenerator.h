@@ -67,8 +67,7 @@ protected:
 
   std::string const& GetConfigName() const;
 
-  std::string LanguageCompilerRule(const std::string& lang) const
-  { return lang + "_COMPILER"; }
+  std::string LanguageCompilerRule(const std::string& lang) const;
 
   const char* GetFeature(const std::string& feature);
   bool GetFeatureAsBool(const std::string& feature);

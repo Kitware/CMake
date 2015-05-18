@@ -94,8 +94,6 @@ void cmNinjaNormalTargetGenerator::Generate()
     }
   else
     {
-    this->WriteLinkRule(false); // write rule without rspfile support
-    this->WriteLinkRule(true);  // write rule with rspfile support
     this->WriteLinkStatement();
     }
 }
@@ -160,7 +158,9 @@ cmNinjaNormalTargetGenerator
   return this->TargetLinkLanguage
     + "_"
     + cmTarget::GetTargetTypeName(this->GetTarget()->GetType())
-    + "_LINKER";
+    + "_LINKER__"
+    + cmGlobalNinjaGenerator::EncodeRuleName(this->GetTarget()->GetName())
+    ;
 }
 
 void
@@ -169,8 +169,6 @@ cmNinjaNormalTargetGenerator
 {
   cmTarget::TargetType targetType = this->GetTarget()->GetType();
   std::string ruleName = this->LanguageLinkerRule();
-  if (useResponseFile)
-    ruleName += "_RSP_FILE";
 
   // Select whether to use a response file for objects.
   std::string rspfile;
@@ -661,6 +659,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     }
 
   // Write the build statement for this target.
+  bool usedResponseFile = false;
   globalGen.WriteBuild(this->GetBuildFileStream(),
                         comment.str(),
                         this->LanguageLinkerRule(),
@@ -670,7 +669,9 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                         orderOnlyDeps,
                         vars,
                         rspfile,
-                        commandLineLengthLimit);
+                        commandLineLengthLimit,
+                        &usedResponseFile);
+  this->WriteLinkRule(usedResponseFile);
 
   if (targetOutput != targetOutputReal && !target.IsFrameworkOnApple())
     {
