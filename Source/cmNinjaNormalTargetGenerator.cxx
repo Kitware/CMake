@@ -525,8 +525,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
         {
         vars["INSTALLNAME_DIR"] = localGen.Convert(install_dir,
                                                    cmLocalGenerator::NONE,
-                                                   cmLocalGenerator::SHELL,
-                                                   false);
+                                                   cmLocalGenerator::SHELL);
         }
       }
     }

@@ -1838,7 +1838,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         fdi != fwDirs.end(); ++fdi)
       {
       frameworkPath += fwSearchFlag;
-      frameworkPath += this->Convert(*fdi, NONE, shellFormat, false);
+      frameworkPath += this->Convert(*fdi, NONE, shellFormat);
       frameworkPath += " ";
       }
     }
@@ -1892,7 +1892,7 @@ void cmLocalGenerator::OutputLinkLibraries(std::string& linkLibraries,
         ri != runtimeDirs.end(); ++ri)
       {
       rpath += cli.GetRuntimeFlag();
-      rpath += this->Convert(*ri, NONE, shellFormat, false);
+      rpath += this->Convert(*ri, NONE, shellFormat);
       rpath += " ";
       }
     fout << rpath;
