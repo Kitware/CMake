@@ -386,26 +386,7 @@ public:
     */
   cmPolicies *GetPolicies() const;
 
-  struct cmCMP0054Id
-  {
-    cmCMP0054Id(cmListFileContext const& context):
-        Context(context)
-    {
-
-    }
-
-    bool operator< (cmCMP0054Id const& id) const
-    {
-      if(this->Context.FilePath != id.Context.FilePath)
-        return this->Context.FilePath < id.Context.FilePath;
-
-      return this->Context.Line < id.Context.Line;
-    }
-
-    cmListFileContext Context;
-  };
-
-  mutable std::set<cmCMP0054Id> CMP0054ReportedIds;
+  mutable std::set<cmListFileContext> CMP0054ReportedIds;
 
   /**
    * Determine if the given context, name pair has already been reported

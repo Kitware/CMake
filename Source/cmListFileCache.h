@@ -62,6 +62,7 @@ struct cmListFileContext
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
+bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
 
 struct cmListFileFunction: public cmListFileContext
 {

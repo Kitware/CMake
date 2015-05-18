@@ -4943,9 +4943,7 @@ bool cmMakefile::SetPolicyVersion(const char *version)
 //----------------------------------------------------------------------------
 bool cmMakefile::HasCMP0054AlreadyBeenReported() const
 {
-  cmCMP0054Id id(this->GetExecutionContext());
-
-  return !this->CMP0054ReportedIds.insert(id).second;
+  return !this->CMP0054ReportedIds.insert(this->GetExecutionContext()).second;
 }
 
 //----------------------------------------------------------------------------

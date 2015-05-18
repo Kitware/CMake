@@ -431,3 +431,11 @@ std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
     }
   return os;
 }
+
+bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs)
+{
+  if(lhs.FilePath != rhs.FilePath)
+    return lhs.FilePath < rhs.FilePath;
+
+  return lhs.Line < rhs.Line;
+}
