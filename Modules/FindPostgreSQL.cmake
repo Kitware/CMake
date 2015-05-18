@@ -170,7 +170,7 @@ if (PostgreSQL_INCLUDE_DIR)
 endif()
 
 # Did we find anything?
-include(FindPackageHandleStandardArgs)
+include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PostgreSQL
                                   REQUIRED_VARS PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR
                                   VERSION_VAR PostgreSQL_VERSION_STRING)
