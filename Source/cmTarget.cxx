@@ -1273,7 +1273,7 @@ void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
       {
       cmListFileContext lfc = *it;
       lfc.FilePath = lg->Convert(lfc.FilePath, cmLocalGenerator::HOME);
-      s << " * " << (lfc.Line ? "" : " in ") << lfc << std::endl;
+      s << " * " << lfc << std::endl;
       }
     }
 }
