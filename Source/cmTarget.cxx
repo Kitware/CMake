@@ -1240,7 +1240,10 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
       }
     }
   cmListFileContext lfc = this->Makefile->GetExecutionContext();
-  this->TLLCommands.push_back(std::make_pair(signature, lfc));
+  if (this->TLLCommands.empty() || this->TLLCommands.back().second != lfc)
+    {
+    this->TLLCommands.push_back(std::make_pair(signature, lfc));
+    }
   return ret;
 }
 
@@ -1265,18 +1268,12 @@ void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
                         = (sig == cmTarget::KeywordTLLSignature ? "keyword"
                                                                 : "plain");
     s << "The uses of the " << sigString << " signature are here:\n";
-    UNORDERED_SET<std::string> emitted;
     for(std::vector<cmListFileContext>::iterator it = sigs.begin();
         it != sigs.end(); ++it)
       {
       cmListFileContext lfc = *it;
       lfc.FilePath = lg->Convert(lfc.FilePath, cmLocalGenerator::HOME);
-      std::ostringstream line;
-      line << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
-      if (emitted.insert(line.str()).second)
-        {
-        s << line.str();
-        }
+      s << " * " << (lfc.Line ? "" : " in ") << lfc << std::endl;
       }
     }
 }
