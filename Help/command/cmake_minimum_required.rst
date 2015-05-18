@@ -35,3 +35,7 @@ with an error instead of just a warning.
   :command:`project` command.  It is important to establish version
   and policy settings before invoking other commands whose behavior
   they may affect.  See also policy :policy:`CMP0000`.
+
+  Calling ``cmake_minimum_required()`` inside a :command:`function`
+  limits some effects to the function scope when invoked.  Such calls
+  should not be made with the intention of having global effects.
