@@ -440,3 +440,13 @@ bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs)
     }
   return lhs.FilePath < rhs.FilePath;
 }
+
+bool operator==(const cmListFileContext& lhs, const cmListFileContext& rhs)
+{
+  return lhs.Line == rhs.Line && lhs.FilePath == rhs.FilePath;
+}
+
+bool operator!=(const cmListFileContext& lhs, const cmListFileContext& rhs)
+{
+  return !(lhs == rhs);
+}
