@@ -51,6 +51,25 @@ bool cmCPackIFWInstaller::IsOn(const std::string &op) const
 }
 
 //----------------------------------------------------------------------------
+bool cmCPackIFWInstaller::IsVersionLess(const char *version)
+{
+  return Generator ? Generator->IsVersionLess(version) : false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWInstaller::IsVersionGreater(const char *version)
+{
+  return Generator ? Generator->IsVersionGreater(version) : false;
+}
+
+//----------------------------------------------------------------------------
+bool cmCPackIFWInstaller::IsVersionEqual(const char *version)
+{
+  return Generator ? Generator->IsVersionEqual(version) : false;
+}
+
+
+//----------------------------------------------------------------------------
 void cmCPackIFWInstaller::ConfigureFromOptions()
 {
   // Name;
@@ -151,6 +170,17 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
       }
     }
 
+  // Start menu
+  if (const char* optIFW_START_MENU_DIR =
+      this->GetOption("CPACK_IFW_PACKAGE_START_MENU_DIRECTORY"))
+    {
+    StartMenuDir = optIFW_START_MENU_DIR;
+    }
+  else
+    {
+    StartMenuDir = Name;
+    }
+
   // Default target directory for installation
   if (const char* optIFW_TARGET_DIRECTORY =
       GetOption("CPACK_IFW_TARGET_DIRECTORY"))
@@ -177,7 +207,7 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
   // Repositories
   Repositories.clear();
   RepositoryStruct Repo;
-  if (const char *site = this->GetOption("CPACK_DOWNLOAD_SITE"))
+  if(const char *site = this->GetOption("CPACK_DOWNLOAD_SITE"))
     {
     Repo.Url = site;
     Repositories.push_back(Repo);
@@ -245,6 +275,53 @@ void cmCPackIFWInstaller::ConfigureFromOptions()
           }
       }
     }
+
+  // Maintenance tool
+  if(const char* optIFW_MAINTENANCE_TOOL =
+      this->GetOption("CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_NAME"))
+    {
+    MaintenanceToolName = optIFW_MAINTENANCE_TOOL;
+    }
+
+  // Maintenance tool ini file
+  if(const char* optIFW_MAINTENANCE_TOOL_INI =
+      this->GetOption("CPACK_IFW_PACKAGE_MAINTENANCE_TOOL_INI_FILE"))
+    {
+    MaintenanceToolIniFile = optIFW_MAINTENANCE_TOOL_INI;
+    }
+
+  // Allow non-ASCII characters
+  if(this->GetOption("CPACK_IFW_PACKAGE_ALLOW_NON_ASCII_CHARACTERS"))
+    {
+    if(IsOn("CPACK_IFW_PACKAGE_ALLOW_NON_ASCII_CHARACTERS"))
+      {
+      AllowNonAsciiCharacters = "true";
+      }
+    else
+      {
+      AllowNonAsciiCharacters = "false";
+      }
+    }
+
+  // Space in path
+  if(this->GetOption("CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH"))
+    {
+    if(IsOn("CPACK_IFW_PACKAGE_ALLOW_SPACE_IN_PATH"))
+      {
+      AllowSpaceInPath = "true";
+      }
+    else
+      {
+      AllowSpaceInPath = "false";
+      }
+    }
+
+  // Control script
+  if(const char* optIFW_CONTROL_SCRIPT =
+      this->GetOption("CPACK_IFW_PACKAGE_CONTROL_SCRIPT"))
+    {
+    ControlScript = optIFW_CONTROL_SCRIPT;
+    }
 }
 
 //----------------------------------------------------------------------------
@@ -259,7 +336,10 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
   // Output stream
   cmGeneratedFileStream xout((Directory + "/config/config.xml").data());
 
-  xout << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+  xout << "<?xml version=\"1.0\"?>" << std::endl;
+
+  WriteGeneratedByToStrim(xout);
+
   xout << "<Installer>" << std::endl;
 
   xout << "    <Name>" << cmXMLSafe(Name).str() << "</Name>" << std::endl;
@@ -313,11 +393,20 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     xout << "    <Logo>" << name << "</Logo>" << std::endl;
     }
 
+  // Start menu
+  if(!IsVersionLess("2.0"))
+    {
+    xout << "    <StartMenuDir>" << StartMenuDir
+         << "</StartMenuDir>" << std::endl;
+    }
+
+  // Target dir
   if(!TargetDir.empty())
     {
     xout << "    <TargetDir>" << TargetDir << "</TargetDir>" << std::endl;
     }
 
+  // Admin target dir
   if(!AdminTargetDir.empty())
     {
     xout << "    <AdminTargetDir>" << AdminTargetDir
@@ -364,11 +453,52 @@ void cmCPackIFWInstaller::GenerateInstallerFile()
     xout << "    </RemoteRepositories>" << std::endl;
     }
 
-  // CPack IFW default policy
-  xout << "    <!-- CPack IFW default policy -->" << std::endl;
-  xout << "    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>"
-       << std::endl;
-  xout << "    <AllowSpaceInPath>true</AllowSpaceInPath>" << std::endl;
+  // Maintenance tool
+  if(!IsVersionLess("2.0") && !MaintenanceToolName.empty())
+    {
+    xout << "    <MaintenanceToolName>" << MaintenanceToolName
+         << "</MaintenanceToolName>" << std::endl;
+    }
+
+  // Maintenance tool ini file
+  if(!IsVersionLess("2.0") && !MaintenanceToolIniFile.empty())
+    {
+    xout << "    <MaintenanceToolIniFile>" << MaintenanceToolIniFile
+         << "</MaintenanceToolIniFile>" << std::endl;
+    }
+
+  // Different allows
+  if(IsVersionLess("2.0"))
+    {
+    // CPack IFW default policy
+    xout << "    <!-- CPack IFW default policy for QtIFW less 2.0 -->"
+         << std::endl;
+    xout << "    <AllowNonAsciiCharacters>true</AllowNonAsciiCharacters>"
+         << std::endl;
+    xout << "    <AllowSpaceInPath>true</AllowSpaceInPath>" << std::endl;
+    }
+  else
+    {
+      if(!AllowNonAsciiCharacters.empty())
+        {
+        xout << "    <AllowNonAsciiCharacters>" << AllowNonAsciiCharacters
+             << "</AllowNonAsciiCharacters>" << std::endl;
+        }
+      if(!AllowSpaceInPath.empty())
+        {
+        xout << "    <AllowAllowSpaceInPath>" << AllowSpaceInPath
+             << "</AllowSpaceInPath>" << std::endl;
+        }
+    }
+
+  // Control script (copy to config dir)
+  if(!IsVersionLess("2.0") && !ControlScript.empty())
+    {
+    std::string name = cmSystemTools::GetFilenameName(ControlScript);
+    std::string path = Directory + "/config/" + name;
+    cmsys::SystemTools::CopyFileIfDifferent(ControlScript.data(), path.data());
+    xout << "    <ControlScript>" << name << "</ControlScript>" << std::endl;
+    }
 
   xout << "</Installer>" << std::endl;
 }
@@ -402,5 +532,10 @@ void cmCPackIFWInstaller::GeneratePackageFiles()
     {
     cmCPackIFWPackage* package = pit->second;
     package->GeneratePackageFile();
-    }
+  }
+}
+
+void cmCPackIFWInstaller::WriteGeneratedByToStrim(cmGeneratedFileStream &xout)
+{
+  if(Generator) Generator->WriteGeneratedByToStrim(xout);
 }

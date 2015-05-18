@@ -18,7 +18,7 @@ Component.prototype.createOperations = function()
                                installer.value("StartMenuDir") + "/CMake Web Site.lnk");
 
         component.addOperation("CreateShortcut",
-                               installer.value("TargetDir") + "/uninstall.exe",
-                               installer.value("StartMenuDir") + "/Uninstall.lnk");
+                               installer.value("TargetDir") + "/cmake-maintenance.exe",
+                               installer.value("StartMenuDir") + "/CMake Maintenance Tool.lnk");
     }
 }
