@@ -378,6 +378,12 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
 }
 
 //----------------------------------------------------------------------------
+cmListFileContext cmMakefile::GetExecutionContext() const
+{
+  return *this->CallStack.back().Context;
+}
+
+//----------------------------------------------------------------------------
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   std::ostringstream msg;
@@ -1937,9 +1943,9 @@ void cmMakefile::CheckForUnused(const char* reason,
     cmListFileBacktrace bt(this->GetLocalGenerator());
     if (!this->CallStack.empty())
       {
-      const cmListFileContext* file = this->CallStack.back().Context;
-      bt.push_back(*file);
-      path = file->FilePath.c_str();
+      cmListFileContext file = this->GetExecutionContext();
+      bt.push_back(file);
+      path = file.FilePath;
       }
     else
       {
@@ -3410,7 +3416,7 @@ void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
   if(!this->CallStack.empty())
     {
     // Record the context in which the blocker is created.
-    fb->SetStartingContext(*(this->CallStack.back().Context));
+    fb->SetStartingContext(this->GetExecutionContext());
     }
 
   this->FunctionBlockers.push_back(fb);

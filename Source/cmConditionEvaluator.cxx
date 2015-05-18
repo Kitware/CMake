@@ -113,7 +113,7 @@ const char* cmConditionEvaluator::GetDefinitionIfUnquoted(
   if(def && argument.WasQuoted() && this->Policy54Status == cmPolicies::WARN)
     {
     bool hasBeenReported = this->Makefile.HasCMP0054AlreadyBeenReported(
-      this->Makefile.GetBacktrace()[0]);
+      this->Makefile.GetExecutionContext());
 
     if(!hasBeenReported)
       {
@@ -162,7 +162,7 @@ bool cmConditionEvaluator::IsKeyword(std::string const& keyword,
     this->Policy54Status == cmPolicies::WARN)
     {
     bool hasBeenReported = this->Makefile.HasCMP0054AlreadyBeenReported(
-      this->Makefile.GetBacktrace()[0]);
+      this->Makefile.GetExecutionContext());
 
     if(!hasBeenReported)
       {
