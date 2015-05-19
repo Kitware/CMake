@@ -1218,16 +1218,14 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
   gg->SetCurrentLocalGenerator(lg);
 
-  cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
-
-  this->ReadAutogenInfoFile(makefile, targetDirectory, config);
-  this->ReadOldMocDefinitionsFile(makefile, targetDirectory);
+  this->ReadAutogenInfoFile(lg->GetMakefile(), targetDirectory, config);
+  this->ReadOldMocDefinitionsFile(lg->GetMakefile(), targetDirectory);
 
   this->Init();
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
-    success = this->RunAutogen(makefile);
+    success = this->RunAutogen(lg->GetMakefile());
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
@@ -1235,7 +1233,6 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   delete gg->GetCurrentLocalGenerator();
   delete gg;
   gg = NULL;
-  makefile = NULL;
   return success;
 }
 
