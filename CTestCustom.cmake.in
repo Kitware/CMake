@@ -37,6 +37,7 @@ set(CTEST_CUSTOM_WARNING_EXCEPTION
   "LINK : warning LNK4089: all references to.*SHELL32.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*USER32.dll.*discarded by /OPT:REF"
   "LINK : warning LNK4089: all references to.*ole32.dll.*discarded by /OPT:REF"
+  "Warning.*: .*/Utilities/KWIML/test/test_INT_format.h.* # Redundant preprocessing concatenation"
   "Warning: library was too large for page size.*"
   "Warning: public.*_archive_.*in module.*archive_*clashes with prior module.*archive_.*"
   "Warning: public.*BZ2_bz.*in module.*bzlib.*clashes with prior module.*bzlib.*"
