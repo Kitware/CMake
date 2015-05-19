@@ -62,13 +62,16 @@ struct cmListFileContext
 };
 
 std::ostream& operator<<(std::ostream&, cmListFileContext const&);
+bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs);
+bool operator==(cmListFileContext const& lhs, cmListFileContext const& rhs);
+bool operator!=(cmListFileContext const& lhs, cmListFileContext const& rhs);
 
 struct cmListFileFunction: public cmListFileContext
 {
   std::vector<cmListFileArgument> Arguments;
 };
 
-class cmListFileBacktrace: public std::vector<cmListFileContext>
+class cmListFileBacktrace: private std::vector<cmListFileContext>
 {
   public:
     cmListFileBacktrace(cmLocalGenerator* localGen)
@@ -77,7 +80,12 @@ class cmListFileBacktrace: public std::vector<cmListFileContext>
     {
     }
 
+    void Append(cmListFileContext const& context);
+
     void MakeRelative();
+
+    void PrintTitle(std::ostream& out);
+    void PrintCallStack(std::ostream& out);
   private:
     cmLocalGenerator* LocalGenerator;
     bool Relative;

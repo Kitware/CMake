@@ -400,6 +400,11 @@ bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
     }
 }
 
+void cmListFileBacktrace::Append(cmListFileContext const& context)
+{
+  this->push_back(context);
+}
+
 //----------------------------------------------------------------------------
 void cmListFileBacktrace::MakeRelative()
 {
@@ -416,6 +421,31 @@ void cmListFileBacktrace::MakeRelative()
   this->Relative = true;
 }
 
+void cmListFileBacktrace::PrintTitle(std::ostream& out)
+{
+  if (this->empty())
+    {
+    return;
+    }
+  out << (this->front().Line ? " at " : " in ") << this->front();
+}
+
+void cmListFileBacktrace::PrintCallStack(std::ostream& out)
+{
+  if (size() <= 1)
+    {
+    return;
+    }
+
+  const_iterator i = this->begin() + 1;
+  out << "Call Stack (most recent call first):\n";
+  while(i != this->end())
+    {
+    cmListFileContext const& lfc = *i;
+    out << "  " << lfc << "\n";
+    ++i;
+    }
+}
 
 //----------------------------------------------------------------------------
 std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
@@ -430,4 +460,23 @@ std::ostream& operator<<(std::ostream& os, cmListFileContext const& lfc)
       }
     }
   return os;
+}
+
+bool operator<(const cmListFileContext& lhs, const cmListFileContext& rhs)
+{
+  if(lhs.Line != rhs.Line)
+    {
+    return lhs.Line < rhs.Line;
+    }
+  return lhs.FilePath < rhs.FilePath;
+}
+
+bool operator==(const cmListFileContext& lhs, const cmListFileContext& rhs)
+{
+  return lhs.Line == rhs.Line && lhs.FilePath == rhs.FilePath;
+}
+
+bool operator!=(const cmListFileContext& lhs, const cmListFileContext& rhs)
+{
+  return !(lhs == rhs);
 }

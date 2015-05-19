@@ -1239,8 +1239,11 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
       ret = false;
       }
     }
-  cmListFileBacktrace lfbt = this->Makefile->GetBacktrace();
-  this->TLLCommands.push_back(std::make_pair(signature, lfbt));
+  cmListFileContext lfc = this->Makefile->GetExecutionContext();
+  if (this->TLLCommands.empty() || this->TLLCommands.back().second != lfc)
+    {
+    this->TLLCommands.push_back(std::make_pair(signature, lfc));
+    }
   return ret;
 }
 
@@ -1248,39 +1251,19 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
 void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
                                      TLLSignature sig) const
 {
-  std::vector<cmListFileBacktrace> sigs;
-  typedef std::vector<std::pair<TLLSignature, cmListFileBacktrace> > Container;
+  const char *sigString = (sig == cmTarget::KeywordTLLSignature ? "keyword"
+                                                                : "plain");
+  s << "The uses of the " << sigString << " signature are here:\n";
+  typedef std::vector<std::pair<TLLSignature, cmListFileContext> > Container;
+  cmLocalGenerator* lg = this->GetMakefile()->GetLocalGenerator();
   for(Container::const_iterator it = this->TLLCommands.begin();
       it != this->TLLCommands.end(); ++it)
     {
     if (it->first == sig)
       {
-      sigs.push_back(it->second);
-      }
-    }
-  if (!sigs.empty())
-    {
-    const char *sigString
-                        = (sig == cmTarget::KeywordTLLSignature ? "keyword"
-                                                                : "plain");
-    s << "The uses of the " << sigString << " signature are here:\n";
-    UNORDERED_SET<std::string> emitted;
-    for(std::vector<cmListFileBacktrace>::iterator it = sigs.begin();
-        it != sigs.end(); ++it)
-      {
-      it->MakeRelative();
-      cmListFileBacktrace::const_iterator i = it->begin();
-      if(i != it->end())
-        {
-        cmListFileContext const& lfc = *i;
-        std::ostringstream line;
-        line << " * " << (lfc.Line? "": " in ") << lfc << std::endl;
-        if (emitted.insert(line.str()).second)
-          {
-          s << line.str();
-          }
-        ++i;
-        }
+      cmListFileContext lfc = it->second;
+      lfc.FilePath = lg->Convert(lfc.FilePath, cmLocalGenerator::HOME);
+      s << " * " << lfc << std::endl;
       }
     }
 }

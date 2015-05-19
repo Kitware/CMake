@@ -641,7 +641,7 @@ private:
   // directories.
   std::set<std::string> SystemIncludeDirectories;
 
-  std::vector<std::pair<TLLSignature, cmListFileBacktrace> > TLLCommands;
+  std::vector<std::pair<TLLSignature, cmListFileContext> > TLLCommands;
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   /**
