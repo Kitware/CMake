@@ -76,7 +76,7 @@ cmLocalGenerator::~cmLocalGenerator()
 
 bool cmLocalGenerator::IsRootMakefile() const
 {
-  return !this->GetParent();
+  return !this->StateSnapshot.GetParent().IsValid();
 }
 
 //----------------------------------------------------------------------------
