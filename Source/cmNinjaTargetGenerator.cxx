@@ -97,6 +97,13 @@ std::string const& cmNinjaTargetGenerator::GetConfigName() const
   return this->LocalGenerator->GetConfigName();
 }
 
+std::string cmNinjaTargetGenerator::LanguageCompilerRule(
+  const std::string& lang) const
+{
+  return lang + "_COMPILER__" +
+    cmGlobalNinjaGenerator::EncodeRuleName(this->Target->GetName());
+}
+
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
 const char* cmNinjaTargetGenerator::GetFeature(const std::string& feature)
 {
