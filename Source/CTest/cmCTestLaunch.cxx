@@ -750,6 +750,8 @@ int cmCTestLaunch::Main(int argc, const char* const argv[])
 void cmCTestLaunch::LoadConfig()
 {
   cmake cm;
+  cm.SetHomeDirectory("");
+  cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
   cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());

@@ -440,11 +440,6 @@ protected:
                                               std::string const& dir_max);
   void ComputeObjectMaxPath();
 
-  void ConfigureRelativePaths();
-  std::string FindRelativePathTopSource();
-  std::string FindRelativePathTopBinary();
-  void SetupPathConversions();
-
   virtual std::string ConvertToLinkReference(std::string const& lib,
                                              OutputFormat format = SHELL);
 
@@ -458,10 +453,6 @@ protected:
   cmMakefile *Makefile;
   cmState::Snapshot StateSnapshot;
   cmGlobalGenerator *GlobalGenerator;
-  std::vector<std::string> HomeDirectoryComponents;
-  std::vector<std::string> StartDirectoryComponents;
-  std::vector<std::string> HomeOutputDirectoryComponents;
-  std::vector<std::string> StartOutputDirectoryComponents;
   cmLocalGenerator* Parent;
   std::vector<cmLocalGenerator*> Children;
   std::map<std::string, std::string> UniqueObjectNamesMap;
@@ -476,16 +467,6 @@ protected:
   // Hack for ExpandRuleVariable until object-oriented version is
   // committed.
   std::string TargetImplib;
-
-  // The top-most directories for relative path conversion.  Both the
-  // source and destination location of a relative path conversion
-  // must be underneath one of these directories (both under source or
-  // both under binary) in order for the relative path to be evaluated
-  // safely by the build tools.
-  std::string RelativePathTopSource;
-  std::string RelativePathTopBinary;
-  bool RelativePathsConfigured;
-  bool PathConversionsSetup;
 
   cmIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;

@@ -36,8 +36,20 @@ public:
     const char* GetCurrentBinaryDirectory() const;
     void SetCurrentBinaryDirectory(std::string const& dir);
 
+    std::vector<std::string> const& GetCurrentSourceDirectoryComponents();
+    std::vector<std::string> const& GetCurrentBinaryDirectoryComponents();
+
+    const char* GetRelativePathTopSource() const;
+    const char* GetRelativePathTopBinary() const;
+    void SetRelativePathTopSource(const char* dir);
+    void SetRelativePathTopBinary(const char* dir);
+
     bool IsValid() const;
     Snapshot GetParent() const;
+
+  private:
+    void ComputeRelativePathTopSource();
+    void ComputeRelativePathTopBinary();
 
   private:
     friend class cmState;
@@ -123,6 +135,9 @@ public:
   const char* GetBinaryDirectory() const;
   void SetBinaryDirectory(std::string const& binaryDirectory);
 
+  std::vector<std::string> const& GetSourceDirectoryComponents() const;
+  std::vector<std::string> const& GetBinaryDirectoryComponents() const;
+
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
@@ -132,6 +147,19 @@ private:
   std::vector<std::string> Locations;
   std::vector<std::string> OutputLocations;
   std::vector<PositionType> ParentPositions;
+
+  std::vector<std::vector<std::string> > CurrentSourceDirectoryComponents;
+  std::vector<std::vector<std::string> > CurrentBinaryDirectoryComponents;
+  // The top-most directories for relative path conversion.  Both the
+  // source and destination location of a relative path conversion
+  // must be underneath one of these directories (both under source or
+  // both under binary) in order for the relative path to be evaluated
+  // safely by the build tools.
+  std::vector<std::string> RelativePathTopSource;
+  std::vector<std::string> RelativePathTopBinary;
+
+  std::vector<std::string> SourceDirectoryComponents;
+  std::vector<std::string> BinaryDirectoryComponents;
   std::string SourceDirectory;
   std::string BinaryDirectory;
   bool IsInTryCompile;
