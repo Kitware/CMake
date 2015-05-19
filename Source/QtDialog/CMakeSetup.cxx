@@ -15,7 +15,6 @@
 #include <QTranslator>
 #include <QLocale>
 #include <QTextCodec>
-#include "QMacInstallDialog.h"
 #include "CMakeSetupDialog.h"
 #include "cmDocumentation.h"
 #include "cmake.h"
