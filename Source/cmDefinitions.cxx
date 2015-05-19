@@ -18,32 +18,29 @@ cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const& cmDefinitions::GetInternal(
-  const std::string& key,
-  std::list<cmDefinitions>::reverse_iterator rbegin,
-  std::list<cmDefinitions>::reverse_iterator rend)
+  const std::string& key, StackIter begin, StackIter end)
 {
-  assert(rbegin != rend);
-  MapType::const_iterator i = rbegin->Map.find(key);
-  if (i != rbegin->Map.end())
+  assert(begin != end);
+  MapType::const_iterator i = begin->Map.find(key);
+  if (i != begin->Map.end())
     {
     return i->second;
     }
-  std::list<cmDefinitions>::reverse_iterator rit = rbegin;
-  ++rit;
-  if (rit == rend)
+  StackIter it = begin;
+  ++it;
+  if (it == end)
     {
     return cmDefinitions::NoDef;
     }
-  Def const& def = cmDefinitions::GetInternal(key, rit, rend);
-  return rbegin->Map.insert(MapType::value_type(key, def)).first->second;
+  Def const& def = cmDefinitions::GetInternal(key, it, end);
+  return begin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
 //----------------------------------------------------------------------------
 const char* cmDefinitions::Get(const std::string& key,
-    std::list<cmDefinitions>::reverse_iterator rbegin,
-    std::list<cmDefinitions>::reverse_iterator rend)
+    StackIter begin, StackIter end)
 {
-  Def const& def = cmDefinitions::GetInternal(key, rbegin, rend);
+  Def const& def = cmDefinitions::GetInternal(key, begin, end);
   return def.Exists? def.c_str() : 0;
 }
 
@@ -77,36 +74,24 @@ std::vector<std::string> cmDefinitions::LocalKeys() const
 }
 
 //----------------------------------------------------------------------------
-cmDefinitions cmDefinitions::MakeClosure(
-    std::list<cmDefinitions>::const_reverse_iterator rbegin,
-    std::list<cmDefinitions>::const_reverse_iterator rend)
+cmDefinitions cmDefinitions::MakeClosure(StackConstIter begin,
+                                         StackConstIter end)
 {
-  std::set<std::string> undefined;
   cmDefinitions closure;
-  closure.MakeClosure(undefined, rbegin, rend);
-  return closure;
-}
-
-//----------------------------------------------------------------------------
-void
-cmDefinitions::MakeClosure(std::set<std::string>& undefined,
-    std::list<cmDefinitions>::const_reverse_iterator rbegin,
-    std::list<cmDefinitions>::const_reverse_iterator rend)
-{
-  for (std::list<cmDefinitions>::const_reverse_iterator it = rbegin;
-       it != rend; ++it)
+  std::set<std::string> undefined;
+  for (StackConstIter it = begin; it != end; ++it)
     {
     // Consider local definitions.
     for(MapType::const_iterator mi = it->Map.begin();
         mi != it->Map.end(); ++mi)
       {
       // Use this key if it is not already set or unset.
-      if(this->Map.find(mi->first) == this->Map.end() &&
+      if(closure.Map.find(mi->first) == closure.Map.end() &&
          undefined.find(mi->first) == undefined.end())
         {
         if(mi->second.Exists)
           {
-          this->Map.insert(*mi);
+          closure.Map.insert(*mi);
           }
         else
           {
@@ -115,22 +100,29 @@ cmDefinitions::MakeClosure(std::set<std::string>& undefined,
         }
       }
     }
+  return closure;
 }
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmDefinitions::ClosureKeys(std::set<std::string>& bound) const
+cmDefinitions::ClosureKeys(StackConstIter begin, StackConstIter end)
 {
+  std::set<std::string> bound;
   std::vector<std::string> defined;
-  defined.reserve(this->Map.size());
-  for(MapType::const_iterator mi = this->Map.begin();
-      mi != this->Map.end(); ++mi)
+
+  for (StackConstIter it = begin; it != end; ++it)
     {
-    // Use this key if it is not already set or unset.
-    if(bound.insert(mi->first).second && mi->second.Exists)
+    defined.reserve(defined.size() + it->Map.size());
+    for(MapType::const_iterator mi = it->Map.begin();
+        mi != it->Map.end(); ++mi)
       {
-      defined.push_back(mi->first);
+      // Use this key if it is not already set or unset.
+      if(bound.insert(mi->first).second && mi->second.Exists)
+        {
+        defined.push_back(mi->first);
+        }
       }
     }
+
   return defined;
 }

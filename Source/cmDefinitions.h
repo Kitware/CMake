@@ -28,12 +28,13 @@
  */
 class cmDefinitions
 {
+  typedef std::list<cmDefinitions>::reverse_iterator StackIter;
+  typedef std::list<cmDefinitions>::const_reverse_iterator StackConstIter;
 public:
   /** Get the value associated with a key; null if none.
       Store the result locally if it came from a parent.  */
   static const char* Get(const std::string& key,
-                         std::list<cmDefinitions>::reverse_iterator rbegin,
-                         std::list<cmDefinitions>::reverse_iterator rend);
+                         StackIter begin, StackIter end);
 
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
@@ -43,12 +44,10 @@ public:
   /** Get the set of all local keys.  */
   std::vector<std::string> LocalKeys() const;
 
-  std::vector<std::string>
-  ClosureKeys(std::set<std::string>& bound) const;
+  static std::vector<std::string> ClosureKeys(StackConstIter begin,
+                                              StackConstIter end);
 
-  static cmDefinitions MakeClosure(
-      std::list<cmDefinitions>::const_reverse_iterator rbegin,
-      std::list<cmDefinitions>::const_reverse_iterator rend);
+  static cmDefinitions MakeClosure(StackConstIter begin, StackConstIter end);
 
 private:
   // String with existence boolean.
@@ -74,11 +73,7 @@ private:
   MapType Map;
 
   static Def const& GetInternal(const std::string& key,
-    std::list<cmDefinitions>::reverse_iterator rbegin,
-    std::list<cmDefinitions>::reverse_iterator rend);
-  void MakeClosure(std::set<std::string>& undefined,
-                   std::list<cmDefinitions>::const_reverse_iterator rbegin,
-                   std::list<cmDefinitions>::const_reverse_iterator rend);
+    StackIter begin, StackIter end);
 };
 
 #endif
