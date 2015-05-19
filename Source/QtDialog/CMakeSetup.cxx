@@ -20,6 +20,7 @@
 #include "cmDocumentation.h"
 #include "cmake.h"
 #include "cmVersion.h"
+#include "cmAlgorithms.h"
 #include <cmsys/CommandLineArguments.hxx>
 #include <cmsys/SystemTools.hxx>
 #include <cmsys/Encoding.hxx>
@@ -47,6 +48,10 @@ static const char * cmDocumentationOptions[][2] =
 {
   {0,0}
 };
+
+#if defined(Q_OS_MAC)
+static int cmOSXInstall(std::string dir);
+#endif
 
 int main(int argc, char** argv)
 {
@@ -76,6 +81,17 @@ int main(int argc, char** argv)
 
     return (doc.PrintRequestedDocumentation(std::cout)? 0:1);
     }
+
+#if defined(Q_OS_MAC)
+  if (argc2 == 2 && strcmp(argv2[1], "--install") == 0)
+    {
+    return cmOSXInstall("/usr/bin");
+    }
+  if (argc2 == 2 && cmHasLiteralPrefix(argv2[1], "--install="))
+    {
+    return cmOSXInstall(argv2[1]+10);
+    }
+#endif
 
   QApplication app(argc, argv);
 
@@ -177,3 +193,54 @@ int main(int argc, char** argv)
   return app.exec();
 }
 
+#if defined(Q_OS_MAC)
+# include <errno.h>
+# include <string.h>
+# include <sys/stat.h>
+# include <unistd.h>
+static bool cmOSXInstall(std::string const& dir, std::string const& tool)
+{
+  if (tool.empty())
+    {
+    return true;
+    }
+  std::string link = dir + cmSystemTools::GetFilenameName(tool);
+  struct stat st;
+  if (lstat(link.c_str(), &st) == 0 && S_ISLNK(st.st_mode))
+    {
+    char buf[4096];
+    ssize_t s = readlink(link.c_str(), buf, sizeof(buf)-1);
+    if (s >= 0 && std::string(buf, s) == tool)
+      {
+      std::cerr << "Exists: '" << link << "' -> '" << tool << "'\n";
+      return true;
+      }
+    }
+  if (symlink(tool.c_str(), link.c_str()) == 0)
+    {
+    std::cerr << "Linked: '" << link << "' -> '" << tool << "'\n";
+    return true;
+    }
+  else
+    {
+    int err = errno;
+    std::cerr << "Failed: '" << link << "' -> '" << tool << "': "
+              << strerror(err) << "\n";
+    return false;
+    }
+}
+static int cmOSXInstall(std::string dir)
+{
+  if (!cmHasLiteralSuffix(dir, "/"))
+    {
+    dir += "/";
+    }
+  return (
+    cmOSXInstall(dir, cmSystemTools::GetCMakeCommand()) &&
+    cmOSXInstall(dir, cmSystemTools::GetCTestCommand()) &&
+    cmOSXInstall(dir, cmSystemTools::GetCPackCommand()) &&
+    cmOSXInstall(dir, cmSystemTools::GetCMakeGUICommand()) &&
+    cmOSXInstall(dir, cmSystemTools::GetCMakeCursesCommand())
+    ) ? 0 : 1;
+}
+#endif
