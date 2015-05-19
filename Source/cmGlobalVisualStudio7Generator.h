@@ -111,6 +111,8 @@ public:
   // Encoding for Visual Studio files
   virtual std::string Encoding();
 
+  cmIDEFlagTable const* ExtraFlagTable;
+
 protected:
   virtual void Generate();
   virtual const char* GetIDEVersion() { return "7.0"; }
@@ -120,7 +122,6 @@ protected:
 
   static const char* ExternalProjectType(const char* location);
 
-  static cmIDEFlagTable const* GetExtraFlagTableVS7();
   virtual void OutputSLNFile(cmLocalGenerator* root,
                              std::vector<cmLocalGenerator*>& generators);
   virtual void WriteSLNFile(std::ostream& fout, cmLocalGenerator* root,

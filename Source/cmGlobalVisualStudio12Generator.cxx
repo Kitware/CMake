@@ -97,6 +97,7 @@ cmGlobalVisualStudio12Generator::cmGlobalVisualStudio12Generator(
     "HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\VCExpress\\12.0\\Setup\\VC;"
     "ProductDir", vc12Express, cmSystemTools::KeyWOW64_32);
   this->DefaultPlatformToolset = "v120";
+  this->Version = VS12;
 }
 
 //----------------------------------------------------------------------------
@@ -214,14 +215,6 @@ void cmGlobalVisualStudio12Generator::WriteSLNHeader(std::ostream& fout)
     {
     fout << "# Visual Studio 2013\n";
     }
-}
-
-//----------------------------------------------------------------------------
-cmLocalGenerator *
-cmGlobalVisualStudio12Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  return new cmLocalVisualStudio10Generator(
-    cmLocalVisualStudioGenerator::VS12, this, parent);
 }
 
 //----------------------------------------------------------------------------

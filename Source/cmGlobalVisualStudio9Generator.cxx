@@ -104,6 +104,7 @@ cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
   const std::string& name, const std::string& platformName)
   : cmGlobalVisualStudio8Generator(name, platformName)
 {
+  this->Version = VS9;
 }
 
 //----------------------------------------------------------------------------
@@ -111,17 +112,6 @@ void cmGlobalVisualStudio9Generator::WriteSLNHeader(std::ostream& fout)
 {
   fout << "Microsoft Visual Studio Solution File, Format Version 10.00\n";
   fout << "# Visual Studio 2008\n";
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalVisualStudio9Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalVisualStudio7Generator *lg
-    = new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS9,
-                                        this, parent);
-  lg->SetExtraFlagTable(this->GetExtraFlagTableVS8());
-  return lg;
 }
 
 //----------------------------------------------------------------------------

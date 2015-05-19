@@ -96,14 +96,14 @@ void cmVisualStudioGeneratorOptions::FixExceptionHandlingDefault()
   // remove the flag we need to override the IDE default of on.
   switch (this->Version)
     {
-    case cmLocalVisualStudioGenerator::VS7:
-    case cmLocalVisualStudioGenerator::VS71:
+    case cmGlobalVisualStudioGenerator::VS7:
+    case cmGlobalVisualStudioGenerator::VS71:
       this->FlagMap["ExceptionHandling"] = "FALSE";
       break;
-    case cmLocalVisualStudioGenerator::VS10:
-    case cmLocalVisualStudioGenerator::VS11:
-    case cmLocalVisualStudioGenerator::VS12:
-    case cmLocalVisualStudioGenerator::VS14:
+    case cmGlobalVisualStudioGenerator::VS10:
+    case cmGlobalVisualStudioGenerator::VS11:
+    case cmGlobalVisualStudioGenerator::VS12:
+    case cmGlobalVisualStudioGenerator::VS14:
       // by default VS puts <ExceptionHandling></ExceptionHandling> empty
       // for a project, to make our projects look the same put a new line
       // and space over for the closing </ExceptionHandling> as the default
@@ -132,7 +132,7 @@ void cmVisualStudioGeneratorOptions::SetVerboseMakefile(bool verbose)
      this->FlagMap.find("SuppressStartupBanner") == this->FlagMap.end())
     {
     this->FlagMap["SuppressStartupBanner"] =
-      this->Version < cmLocalVisualStudioGenerator::VS10 ? "FALSE" : "";
+      this->Version < cmGlobalVisualStudioGenerator::VS10 ? "FALSE" : "";
     }
 }
 
@@ -270,7 +270,7 @@ cmVisualStudioGeneratorOptions
     {
     return;
     }
-  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+  if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
     {
     // if there are configuration specific flags, then
     // use the configuration specific tag for PreprocessorDefinitions
@@ -298,7 +298,7 @@ cmVisualStudioGeneratorOptions
     {
     // Escape the definition for the compiler.
     std::string define;
-    if(this->Version < cmLocalVisualStudioGenerator::VS10)
+    if(this->Version < cmGlobalVisualStudioGenerator::VS10)
       {
       define =
         this->LocalGenerator->EscapeForShell(di->c_str(), true);
@@ -308,7 +308,7 @@ cmVisualStudioGeneratorOptions
       define = *di;
       }
     // Escape this flag for the IDE.
-    if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+    if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
       {
       define = cmVisualStudio10GeneratorOptionsEscapeForXML(define);
 
@@ -325,7 +325,7 @@ cmVisualStudioGeneratorOptions
     fout << sep << define;
     sep = ";";
     }
-  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+  if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
     {
     fout <<  ";%(PreprocessorDefinitions)</PreprocessorDefinitions>" << suffix;
     }
@@ -340,7 +340,7 @@ void
 cmVisualStudioGeneratorOptions
 ::OutputFlagMap(std::ostream& fout, const char* indent)
 {
-  if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+  if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
     {
     for(std::map<std::string, FlagValue>::iterator m = this->FlagMap.begin();
         m != this->FlagMap.end(); ++m)
@@ -395,7 +395,7 @@ cmVisualStudioGeneratorOptions
 {
   if(!this->FlagString.empty())
     {
-    if(this->Version >= cmLocalVisualStudioGenerator::VS10)
+    if(this->Version >= cmGlobalVisualStudioGenerator::VS10)
       {
       fout << prefix;
       if(this->Configuration.size())

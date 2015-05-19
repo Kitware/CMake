@@ -28,9 +28,6 @@ public:
 
   virtual void WriteSLNHeader(std::ostream& fout);
 
-  ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
-
   virtual const char* GetToolsVersion() { return "14.0"; }
 protected:
   virtual const char* GetIDEVersion() { return "14.0"; }

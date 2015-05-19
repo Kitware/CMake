@@ -21,18 +21,7 @@ cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
   : cmGlobalVisualStudio7Generator(platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
-}
-
-//----------------------------------------------------------------------------
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalVisualStudio71Generator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(cmLocalVisualStudioGenerator::VS71,
-                                      this, parent);
-  lg->SetExtraFlagTable(this->GetExtraFlagTableVS7());
-  return lg;
+  this->Version = VS71;
 }
 
 //----------------------------------------------------------------------------

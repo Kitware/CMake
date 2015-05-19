@@ -28,9 +28,6 @@ public:
 
   virtual void WriteSLNHeader(std::ostream& fout);
 
-  ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
-
 protected:
   virtual bool InitializeWindowsPhone(cmMakefile* mf);
   virtual bool InitializeWindowsStore(cmMakefile* mf);
