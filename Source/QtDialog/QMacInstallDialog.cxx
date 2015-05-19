@@ -32,6 +32,7 @@ QMacInstallDialog::~QMacInstallDialog()
 
 void QMacInstallDialog::DoInstall()
 {
+  std::string cmd;
   QDir installDir(this->Internals->InstallPrefix->text());
   QString installTo = installDir.path();
   if(!cmSystemTools::FileExists(installTo.toLocal8Bit().data()))
@@ -52,6 +53,7 @@ void QMacInstallDialog::DoInstall()
   QDir cmExecDir(QApplication::applicationDirPath());
   cmExecDir.cd("../bin");
   QFileInfoList list = cmExecDir.entryInfoList();
+  cmd.append("osascript -e 'do shell script \"ln -sfh ");
   for (int i = 0; i < list.size(); ++i)
     {
     QFileInfo fileInfo = list.at(i);
@@ -61,46 +63,13 @@ void QMacInstallDialog::DoInstall()
       continue;
       }
     QString file = fileInfo.absoluteFilePath();
-    QString newName = installTo;
-    newName += "/";
-    newName += filename;
-    // Remove the old files
-    if(cmSystemTools::FileExists(newName.toLocal8Bit().data()))
-      {
-      std::cout << "rm [" << newName.toLocal8Bit().data() << "]\n";
-      if(!cmSystemTools::RemoveFile(newName.toLocal8Bit().data()))
-        {
-        QString message = tr("Failed to remove file "
-                             "installation may be incomplete: ");
-        message += newName;
-        QString title = tr("Error Removing file");
-        QMessageBox::StandardButton btn =
-          QMessageBox::critical(this, title, message,
-                                QMessageBox::Ok|QMessageBox::Abort);
-        if(btn == QMessageBox::Abort)
-          {
-          return;
-          }
-        }
-      }
-    std::cout << "ln -s [" << file.toLocal8Bit().data() << "] [";
-    std::cout << newName.toLocal8Bit().data() << "]\n";
-    if(!cmSystemTools::CreateSymlink(file.toLocal8Bit().data(),
-                                     newName.toLocal8Bit().data()))
-      {
-      QString message = tr("Failed create symlink "
-                           "installation may be incomplete: ");
-      message += newName;
-      QString title = tr("Error Creating Symlink");
-      QMessageBox::StandardButton btn =
-        QMessageBox::critical(this, title, message,
-                              QMessageBox::Ok|QMessageBox::Abort);
-      if(btn == QMessageBox::Abort)
-        {
-        return;
-        }
-      }
+    cmd.append("\\\"").append(file.toLocal8Bit().data()).append("\\\" ");
     }
+    cmd.append("\\\"").append(installTo.toLocal8Bit().data()).append("\\\" ");
+    cmd.append("\" with administrator privileges'");
+    std::cout << cmd << "\n";
+    system(cmd.c_str());
+
   this->done(0);
 }
 
