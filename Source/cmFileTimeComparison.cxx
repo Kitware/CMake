@@ -13,7 +13,11 @@
 
 // Use a hash table to avoid duplicate file time checks from disk.
 #if defined(CMAKE_BUILD_WITH_CMAKE)
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#include <unordered_map>
+#else
 # include <cmsys/hash_map.hxx>
+#endif
 #endif
 
 #include <cmsys/Encoding.hxx>
@@ -47,9 +51,17 @@ private:
       {
       return h(s.c_str());
       }
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+    std::hash<const char*> h;
+#else
     cmsys::hash<const char*> h;
+#endif
     };
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+  typedef std::unordered_map<std::string,
+#else
   typedef cmsys::hash_map<std::string,
+#endif
                           cmFileTimeComparison_Type, HashString> FileStatsMap;
   FileStatsMap Files;
 #endif

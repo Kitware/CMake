@@ -3,4 +3,4 @@ CMake Error:
 
     \$<TARGET_PROPERTY:TargetPropertyGeneratorExpressions,COMPILE_DEFINITIONS>
 
-  Self reference on target "TargetPropertyGeneratorExpressions".$
+  Self reference on target "TargetPropertyGeneratorExpressions".

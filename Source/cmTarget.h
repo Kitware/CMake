@@ -19,7 +19,11 @@
 
 #include <cmsys/auto_ptr.hxx>
 #if defined(CMAKE_BUILD_WITH_CMAKE)
-#include <cmsys/hash_map.hxx>
+# ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+#  include <unordered_map>
+# else
+#  include <cmsys/hash_map.hxx>
+# endif
 #endif
 
 #define CM_FOR_EACH_TARGET_POLICY(F) \
@@ -849,7 +853,11 @@ private:
 };
 
 #ifdef CMAKE_BUILD_WITH_CMAKE
-typedef cmsys::hash_map<std::string,cmTarget> cmTargets;
+#ifdef CMake_HAVE_CXX11_UNORDERED_MAP
+typedef std::unordered_map<std::string, cmTarget> cmTargets;
+#else
+typedef cmsys::hash_map<std::string, cmTarget> cmTargets;
+#endif
 #else
 typedef std::map<std::string,cmTarget> cmTargets;
 #endif

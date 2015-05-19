@@ -1373,10 +1373,18 @@ void cmGlobalGenerator::CreateQtAutoGeneratorsTargets(AutogensType &autogens)
     {
     cmTargets& targets =
       this->LocalGenerators[i]->GetMakefile()->GetTargets();
+    std::vector<std::string> targetNames;
+    targetNames.reserve(targets.size());
     for(cmTargets::iterator ti = targets.begin();
         ti != targets.end(); ++ti)
       {
-      cmTarget& target = ti->second;
+      targetNames.push_back(ti->second.GetName());
+      }
+    for(std::vector<std::string>::iterator ti = targetNames.begin();
+        ti != targetNames.end(); ++ti)
+      {
+      cmTarget& target = *this->LocalGenerators[i]
+                              ->GetMakefile()->FindTarget(*ti, true);
       if(target.GetType() == cmTarget::EXECUTABLE ||
          target.GetType() == cmTarget::STATIC_LIBRARY ||
          target.GetType() == cmTarget::SHARED_LIBRARY ||

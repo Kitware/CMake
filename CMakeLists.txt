@@ -48,6 +48,7 @@ if(NOT DEFINED CMAKE_CXX_STANDARD AND NOT CMake_NO_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 11)
   endif()
 endif()
+include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx11_unordered_map.cmake)
 
 # option to set the internal encoding of CMake to UTF-8
 option(CMAKE_ENCODING_UTF8 "Use UTF-8 encoding internally." ON)
