@@ -1203,20 +1203,6 @@ std::string cmQtAutoGenerators::GetRccExecutable(cmTarget const* target)
   return std::string();
 }
 
-static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
-                                            const std::string& targetDirectory)
-{
-  cmGlobalGenerator* gg = new cmGlobalGenerator();
-  gg->SetCMakeInstance(cm);
-
-  cmLocalGenerator* lg = gg->MakeLocalGenerator();
-  lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
-  lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
-  gg->SetCurrentLocalGenerator(lg);
-
-  return gg;
-}
-
 bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
                              const std::string& config)
 {
@@ -1224,7 +1210,14 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cmake cm;
   cm.SetHomeOutputDirectory(targetDirectory);
   cm.SetHomeDirectory(targetDirectory);
-  cmGlobalGenerator* gg = CreateGlobalGenerator(&cm, targetDirectory);
+  cmGlobalGenerator* gg = new cmGlobalGenerator();
+  gg->SetCMakeInstance(&cm);
+
+  cmLocalGenerator* lg = gg->MakeLocalGenerator();
+  lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
+  lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
+  gg->SetCurrentLocalGenerator(lg);
+
   cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
 
   this->ReadAutogenInfoFile(makefile, targetDirectory, config);
