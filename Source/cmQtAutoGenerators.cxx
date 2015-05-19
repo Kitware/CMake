@@ -1209,9 +1209,6 @@ static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
   cmGlobalGenerator* gg = new cmGlobalGenerator();
   gg->SetCMakeInstance(cm);
 
-  cm->SetHomeOutputDirectory(targetDirectory);
-  cm->SetHomeDirectory(targetDirectory);
-
   cmLocalGenerator* lg = gg->MakeLocalGenerator();
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
