@@ -1210,13 +1210,13 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cmake cm;
   cm.SetHomeOutputDirectory(targetDirectory);
   cm.SetHomeDirectory(targetDirectory);
-  cmGlobalGenerator* gg = new cmGlobalGenerator();
-  gg->SetCMakeInstance(&cm);
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
 
-  cmLocalGenerator* lg = gg->MakeLocalGenerator();
+  cmLocalGenerator* lg = gg.MakeLocalGenerator();
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
-  gg->SetCurrentLocalGenerator(lg);
+  gg.SetCurrentLocalGenerator(lg);
 
   this->ReadAutogenInfoFile(lg->GetMakefile(), targetDirectory, config);
   this->ReadOldMocDefinitionsFile(lg->GetMakefile(), targetDirectory);
@@ -1231,8 +1231,6 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   this->WriteOldMocDefinitionsFile(targetDirectory);
 
   delete lg;
-  delete gg;
-  gg = NULL;
   return success;
 }
 
