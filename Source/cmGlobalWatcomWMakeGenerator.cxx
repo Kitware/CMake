@@ -26,6 +26,10 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
   this->WindowsShell = true;
 #endif
   this->WatcomWMake = true;
+  this->IncludeDirective = "!include";
+  this->DefineWindowsNULL = true;
+  this->UnixCD = false;
+  this->MakeSilentFlag = "-h";
 }
 
 void cmGlobalWatcomWMakeGenerator
@@ -42,21 +46,6 @@ void cmGlobalWatcomWMakeGenerator
   mf->AddDefinition("CMAKE_GENERATOR_CC", "wcl386");
   mf->AddDefinition("CMAKE_GENERATOR_CXX", "wcl386");
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalWatcomWMakeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalUnixMakefileGenerator3* lg
-      = new cmLocalUnixMakefileGenerator3(this, parent);
-  lg->SetDefineWindowsNULL(true);
-  lg->SetMakeSilentFlag("-h");
-  lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(false);
-  lg->SetUnixCD(false);
-  lg->SetIncludeDirective("!include");
-  return lg;
 }
 
 //----------------------------------------------------------------------------

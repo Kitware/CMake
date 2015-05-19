@@ -21,6 +21,10 @@ cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
   this->UseLinkScript = false;
   this->WindowsShell = true;
   this->NMake = true;
+  this->DefineWindowsNULL = true;
+  this->PassMakeflags = true;
+  this->UnixCD = false;
+  this->MakeSilentFlag = "/nologo";
 }
 
 void cmGlobalNMakeMakefileGenerator
@@ -44,20 +48,6 @@ void cmGlobalNMakeMakefileGenerator
     }
 
   this->cmGlobalUnixMakefileGenerator3::EnableLanguage(l, mf, optional);
-}
-
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalNMakeMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalUnixMakefileGenerator3* lg =
-      new cmLocalUnixMakefileGenerator3(this, parent);
-  lg->SetDefineWindowsNULL(true);
-  lg->SetMakeSilentFlag("/nologo");
-  lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(true);
-  lg->SetUnixCD(false);
-  return lg;
 }
 
 //----------------------------------------------------------------------------

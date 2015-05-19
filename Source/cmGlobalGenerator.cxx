@@ -1099,7 +1099,7 @@ void cmGlobalGenerator::Configure()
   this->ClearGeneratorMembers();
 
   // start with this directory
-  cmLocalGenerator *lg = this->CreateLocalGenerator();
+  cmLocalGenerator *lg = this->MakeLocalGenerator();
   this->LocalGenerators.push_back(lg);
 
   // set the Start directories
@@ -1879,6 +1879,12 @@ void cmGlobalGenerator::AddInstallComponent(const char* component)
 void cmGlobalGenerator::EnableInstallTarget()
 {
   this->InstallTargetEnabled = true;
+}
+
+cmLocalGenerator *
+cmGlobalGenerator::MakeLocalGenerator(cmLocalGenerator *parent)
+{
+  return this->CreateLocalGenerator(parent);
 }
 
 cmLocalGenerator *

@@ -83,12 +83,7 @@ cmLocalUnixMakefileGenerator3::
 cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
   : cmLocalGenerator(gg, parent)
 {
-  this->IncludeDirective = "include";
   this->MakefileVariableSize = 0;
-  this->IgnoreLibPrefix = false;
-  this->PassMakeflags = false;
-  this->DefineWindowsNULL = false;
-  this->UnixCD = true;
   this->ColorMakefile = false;
   this->SkipPreprocessedSourceRules = false;
   this->SkipAssemblySourceRules = false;
@@ -720,7 +715,9 @@ cmLocalUnixMakefileGenerator3
   makefileStream
     << "# Set environment variables for the build.\n"
     << "\n";
-  if(this->DefineWindowsNULL)
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  if(gg->DefineWindowsNULL)
     {
     makefileStream
       << "!IF \"$(OS)\" == \"Windows_NT\"\n"
@@ -2143,10 +2140,12 @@ cmLocalUnixMakefileGenerator3
   cmd += this->Convert(makefile,NONE,SHELL);
   cmd += " ";
 
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
   // Pass down verbosity level.
-  if(!this->GetMakeSilentFlag().empty())
+  if(!gg->MakeSilentFlag.empty())
     {
-    cmd += this->GetMakeSilentFlag();
+    cmd += gg->MakeSilentFlag;
     cmd += " ";
     }
 
@@ -2154,7 +2153,7 @@ cmLocalUnixMakefileGenerator3
   // sub-invoked makes via an environment variable.  However, some
   // makes do not support that, so you have to pass the flags
   // explicitly.
-  if(this->GetPassMakeflags())
+  if(gg->PassMakeflags)
     {
     cmd += "-$(MAKEFLAGS) ";
     }
@@ -2346,7 +2345,9 @@ void cmLocalUnixMakefileGenerator3
   // support changing the drive letter with just "d:").
   const char* cd_cmd = this->IsMinGWMake() ? "cd /d " : "cd ";
 
-  if(!this->UnixCD)
+  cmGlobalUnixMakefileGenerator3* gg =
+    static_cast<cmGlobalUnixMakefileGenerator3*>(this->GlobalGenerator);
+  if(!gg->UnixCD)
     {
     // On Windows we must perform each step separately and then change
     // back because the shell keeps the working directory between

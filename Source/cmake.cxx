@@ -376,7 +376,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     std::string homeOutputDir = this->GetHomeOutputDirectory();
     this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
-    cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+    cmsys::auto_ptr<cmLocalGenerator> lg(gg->MakeLocalGenerator());
     lg->GetMakefile()->SetCurrentBinaryDirectory
       (cmSystemTools::GetCurrentWorkingDirectory());
     lg->GetMakefile()->SetCurrentSourceDirectory
@@ -418,7 +418,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   this->SetGlobalGenerator(gg);
 
   // read in the list file to fill the cache
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg->MakeLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   mf->SetCurrentBinaryDirectory
     (cmSystemTools::GetCurrentWorkingDirectory());
@@ -1927,7 +1927,7 @@ int cmake::CheckBuildSystem()
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   if(!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||
      cmSystemTools::GetErrorOccuredFlag())
@@ -1957,7 +1957,7 @@ int cmake::CheckBuildSystem()
       ggd(this->CreateGlobalGenerator(genName));
     if(ggd.get())
       {
-      cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->CreateLocalGenerator());
+      cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->MakeLocalGenerator());
       lgd->ClearDependencies(mf, verbose);
       }
     }

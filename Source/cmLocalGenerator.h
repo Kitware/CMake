@@ -470,7 +470,6 @@ protected:
 
   bool LinkScriptShell;
   bool UseRelativePaths;
-  bool IgnoreLibPrefix;
   bool Configured;
   bool EmitUniversalBinaryFlags;
 

@@ -67,50 +67,9 @@ public:
   void WriteMakeVariables(std::ostream& makefileStream);
 
   /**
-   * If true, then explicitly pass MAKEFLAGS on the make all target for makes
-   * that do not use environment variables.
-   *
-   */
-  void SetPassMakeflags(bool s){this->PassMakeflags = s;}
-  bool GetPassMakeflags() { return this->PassMakeflags; }
-
-  /**
-   * Set the flag used to keep the make program silent.
-   */
-  void SetMakeSilentFlag(const std::string& s) { this->MakeSilentFlag = s; }
-  std::string &GetMakeSilentFlag() { return this->MakeSilentFlag; }
-
-  /**
-   * If set to true, then NULL is set to nil for non Windows_NT.
-   * This uses make syntax used by nmake and borland.
-   * The default is false.
-   */
-  void SetDefineWindowsNULL(bool v)  {this->DefineWindowsNULL = v;}
-
-  /**
-   * If set to true, cd dir && command is used to
-   * run commands in a different directory.
-   */
-  void SetUnixCD(bool v)  {this->UnixCD = v;}
-
-  /**
-   * Set the string used to include one makefile into another default
-   * is include.
-   */
-  void SetIncludeDirective(const std::string& s)
-    { this->IncludeDirective = s; }
-  const std::string& GetIncludeDirective() { return this->IncludeDirective; }
-
-  /**
    * Set max makefile variable size, default is 0 which means unlimited.
    */
   void SetMakefileVariableSize(int s) { this->MakefileVariableSize = s; }
-
-  /**
-   * If ignore lib prefix is true, then do not strip lib from the name
-   * of a library.
-   */
-  void SetIgnoreLibPrefix(bool s) { this->IgnoreLibPrefix = s; }
 
   /**
    * Set whether passing a make target on a command line requires an
@@ -303,12 +262,7 @@ private:
   //==========================================================================
   // Configuration settings.
   int MakefileVariableSize;
-  std::string IncludeDirective;
-  std::string MakeSilentFlag;
   std::string ConfigurationName;
-  bool DefineWindowsNULL;
-  bool UnixCD;
-  bool PassMakeflags;
   bool MakeCommandEscapeTargetTwice;
   bool BorlandMakeCurlyHack;
   //==========================================================================

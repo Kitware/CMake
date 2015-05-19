@@ -33,6 +33,11 @@ cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
   this->UseLinkScript = true;
 #endif
   this->CommandDatabase = NULL;
+
+  this->IncludeDirective = "include";
+  this->DefineWindowsNULL = false;
+  this->PassMakeflags = false;
+  this->UnixCD = true;
 }
 
 void cmGlobalUnixMakefileGenerator3
@@ -580,7 +585,7 @@ void cmGlobalUnixMakefileGenerator3
     else
       {
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (this->CreateLocalGenerator());
+        (this->MakeLocalGenerator());
       // set the Start directories
       lg->GetMakefile()->SetCurrentSourceDirectory
         (this->CMakeInstance->GetHomeDirectory());

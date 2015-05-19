@@ -67,7 +67,7 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   cmake cm;
   cmGlobalGenerator ggi;
   ggi.SetCMakeInstance(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(ggi.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(ggi.MakeLocalGenerator());
   cmMakefile *mf = lg->GetMakefile();
 
   const char* inFileName = settingsFileName;

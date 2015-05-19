@@ -1212,7 +1212,7 @@ static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
   cm->SetHomeOutputDirectory(targetDirectory);
   cm->SetHomeDirectory(targetDirectory);
 
-  cmLocalGenerator* lg = gg->CreateLocalGenerator();
+  cmLocalGenerator* lg = gg->MakeLocalGenerator();
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
   gg->SetCurrentLocalGenerator(lg);

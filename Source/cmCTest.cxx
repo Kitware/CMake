@@ -512,7 +512,7 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
   cmake cm;
   cmGlobalGenerator gg;
   gg.SetCMakeInstance(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.CreateLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
   cmMakefile *mf = lg->GetMakefile();
   if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), mf) )
     {

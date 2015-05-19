@@ -132,6 +132,11 @@ public:
   virtual bool AllowDeleteOnError() const { return true; }
 
   virtual void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+
+  std::string IncludeDirective;
+  bool DefineWindowsNULL;
+  bool PassMakeflags;
+  bool UnixCD;
 protected:
   void WriteMainMakefile2();
   void WriteMainCMakefile();

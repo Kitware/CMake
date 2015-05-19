@@ -93,18 +93,6 @@ void cmGlobalMSYSMakefileGenerator
     }
 }
 
-///! Create a local generator appropriate to this Global Generator
-cmLocalGenerator *
-cmGlobalMSYSMakefileGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
-{
-  cmLocalUnixMakefileGenerator3* lg =
-      new cmLocalUnixMakefileGenerator3(this, parent);
-  lg->SetIgnoreLibPrefix(true);
-  lg->SetPassMakeflags(false);
-  lg->SetUnixCD(true);
-  return lg;
-}
-
 //----------------------------------------------------------------------------
 void cmGlobalMSYSMakefileGenerator
 ::GetDocumentation(cmDocumentationEntry& entry)

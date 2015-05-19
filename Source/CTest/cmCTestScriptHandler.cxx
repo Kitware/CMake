@@ -340,7 +340,7 @@ void cmCTestScriptHandler::CreateCMake()
   this->GlobalGenerator = new cmGlobalGenerator;
   this->GlobalGenerator->SetCMakeInstance(this->CMake);
 
-  this->LocalGenerator = this->GlobalGenerator->CreateLocalGenerator();
+  this->LocalGenerator = this->GlobalGenerator->MakeLocalGenerator();
   this->Makefile = this->LocalGenerator->GetMakefile();
 
   this->CMake->SetProgressCallback(ctestScriptProgressCallback, this->CTest);
