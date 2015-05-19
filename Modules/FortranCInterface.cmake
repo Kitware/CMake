@@ -144,9 +144,8 @@ if(FortranCInterface_SOURCE_DIR)
   return()
 endif()
 
-# Use CMake 2.8.0 behavior for this module regardless of including context.
 cmake_policy(PUSH)
-cmake_policy(VERSION 2.8.0)
+cmake_policy(SET CMP0007 NEW)
 
 #-----------------------------------------------------------------------------
 # Verify that C and Fortran are available.
