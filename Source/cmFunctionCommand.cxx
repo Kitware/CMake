@@ -94,8 +94,8 @@ bool cmFunctionHelperCommand::InvokeInitialPass
     }
 
   // we push a scope on the makefile
-  cmMakefile::LexicalPushPop lexScope(this->Makefile);
   cmMakefile::ScopePushPop varScope(this->Makefile);
+  cmMakefile::LexicalPushPop lexScope(this->Makefile);
   static_cast<void>(varScope);
 
   // Push a weak policy scope which restores the policies recorded at
