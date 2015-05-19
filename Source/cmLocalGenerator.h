@@ -447,9 +447,6 @@ protected:
       definition.  Issues a warning.  */
   virtual bool CheckDefinition(std::string const& define) const;
 
-  /** Read the input CMakeLists.txt file.  */
-  void ReadInputFile();
-
   cmMakefile *Makefile;
   cmState::Snapshot StateSnapshot;
   cmGlobalGenerator *GlobalGenerator;

@@ -115,8 +115,10 @@ void cmLocalGenerator::Configure()
   filesDir += cmake::GetCMakeFilesDirectory();
   cmSystemTools::MakeDirectory(filesDir.c_str());
 
-  // find & read the list file
-  this->ReadInputFile();
+  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
+  currentStart += "/CMakeLists.txt";
+  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
+  this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
 
   // at the end of the ReadListFile handle any old style subdirs
   // first get all the subdirectories
@@ -181,16 +183,6 @@ void cmLocalGenerator::ComputeObjectMaxPath()
       }
     }
   this->ObjectMaxPathViolations.clear();
-}
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::ReadInputFile()
-{
-  // Look for the CMakeLists.txt file.
-  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
-  currentStart += "/CMakeLists.txt";
-  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
-  this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
 }
 
 void cmLocalGenerator::ConfigureFinalPass()
