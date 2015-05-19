@@ -91,16 +91,6 @@ int main(int argc, char** argv)
     QApplication::removeLibraryPath(p);
     }
 
-  // if arg for install
-  for(int i =0; i < argc2; i++)
-    {
-    if(strcmp(argv2[i], "--mac-install") == 0)
-      {
-      QMacInstallDialog setupdialog(0);
-      setupdialog.exec();
-      return 0;
-      }
-    }
   // tell the cmake library where cmake is
   QDir cmExecDir(QApplication::applicationDirPath());
 #if defined(Q_OS_MAC)
