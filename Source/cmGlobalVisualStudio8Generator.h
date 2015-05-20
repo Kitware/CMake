@@ -81,9 +81,11 @@ protected:
 
   static cmIDEFlagTable const* GetExtraFlagTableVS8();
   virtual void WriteSLNHeader(std::ostream& fout);
-  virtual void WriteSolutionConfigurations(std::ostream& fout);
+  virtual void WriteSolutionConfigurations(
+    std::ostream& fout, std::vector<std::string> const& configs);
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+    std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual bool ComputeTargetDepends();

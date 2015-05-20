@@ -375,11 +375,12 @@ void cmGlobalVisualStudio8Generator::Generate()
 //----------------------------------------------------------------------------
 void
 cmGlobalVisualStudio8Generator
-::WriteSolutionConfigurations(std::ostream& fout)
+::WriteSolutionConfigurations(std::ostream& fout,
+                              std::vector<std::string> const& configs)
 {
   fout << "\tGlobalSection(SolutionConfigurationPlatforms) = preSolution\n";
-  for(std::vector<std::string>::iterator i = this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
+  for(std::vector<std::string>::const_iterator i = configs.begin();
+      i != configs.end(); ++i)
     {
     fout << "\t\t" << *i << "|" << this->GetPlatformName()
          << " = "  << *i << "|" << this->GetPlatformName() << "\n";
@@ -392,12 +393,13 @@ void
 cmGlobalVisualStudio8Generator
 ::WriteProjectConfigurations(
   std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+  std::vector<std::string> const& configs,
   const std::set<std::string>& configsPartOfDefaultBuild,
   std::string const& platformMapping)
 {
   std::string guid = this->GetGUID(name);
-  for(std::vector<std::string>::iterator i = this->Configurations.begin();
-      i != this->Configurations.end(); ++i)
+  for(std::vector<std::string>::const_iterator i = configs.begin();
+      i != configs.end(); ++i)
     {
     fout << "\t\t{" << guid << "}." << *i
          << "|" << this->GetPlatformName() << ".ActiveCfg = " << *i << "|"

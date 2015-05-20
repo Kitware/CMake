@@ -137,6 +137,7 @@ private:
   OptionsMap MasmOptions;
   OptionsMap LinkOptions;
   std::string PathToVcxproj;
+  std::vector<std::string> Configurations;
   cmTarget* Target;
   cmGeneratorTarget* GeneratorTarget;
   cmMakefile* Makefile;

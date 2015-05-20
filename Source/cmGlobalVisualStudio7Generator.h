@@ -78,11 +78,6 @@ public:
    */
   virtual void OutputSLNFile();
 
-  /**
-   * Get the list of configurations
-   */
-  std::vector<std::string> *GetConfigurations();
-
   ///! Create a GUID or get an existing one.
   void CreateGUID(const std::string& name);
   std::string GetGUID(const std::string& name);
@@ -134,6 +129,7 @@ protected:
                            cmTarget const&t);
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+    std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual void WriteSLNGlobalSections(std::ostream& fout,
@@ -151,9 +147,8 @@ protected:
     OrderedTargetDependSet const& projectTargets);
   virtual void WriteTargetConfigurations(
     std::ostream& fout,
+    std::vector<std::string> const& configs,
     OrderedTargetDependSet const& projectTargets);
-
-  void GenerateConfigurations(cmMakefile* mf);
 
   virtual void WriteExternalProject(std::ostream& fout,
                                     const std::string& name,
@@ -165,11 +160,11 @@ protected:
   std::string ConvertToSolutionPath(const char* path);
 
   std::set<std::string>
-    IsPartOfDefaultBuild(OrderedTargetDependSet const& projectTargets,
+    IsPartOfDefaultBuild(std::vector<std::string> const& configs,
+                         OrderedTargetDependSet const& projectTargets,
                          cmTarget const* target);
   bool IsDependedOn(OrderedTargetDependSet const& projectTargets,
                     cmTarget const* target);
-  std::vector<std::string> Configurations;
   std::map<std::string, std::string> GUIDMap;
 
   virtual void WriteFolders(std::ostream& fout);

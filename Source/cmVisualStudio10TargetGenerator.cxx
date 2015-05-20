@@ -173,6 +173,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->Target = target;
   this->GeneratorTarget = gg->GetGeneratorTarget(target);
   this->Makefile = target->GetMakefile();
+  this->Makefile->GetConfigurations(this->Configurations);
   this->LocalGenerator =
     (cmLocalVisualStudio7Generator*)
     this->Makefile->GetLocalGenerator();
@@ -525,10 +526,9 @@ void cmVisualStudio10TargetGenerator::WriteEmbeddedResourceGroup()
       std::string hFileName = obj.substr(0, obj.find_last_of(".")) + ".h";
       (*this->BuildFileStream) << hFileName << "</DependentUpon>\n";
 
-      std::vector<std::string> const * configs =
-        this->GlobalGenerator->GetConfigurations();
-      for(std::vector<std::string>::const_iterator i = configs->begin();
-          i != configs->end(); ++i)
+      for(std::vector<std::string>::const_iterator
+            i = this->Configurations.begin();
+          i != this->Configurations.end(); ++i)
         {
         this->WritePlatformConfigTag("LogicalName", i->c_str(), 3);
         if(this->Target->GetProperty("VS_GLOBAL_ROOTNAMESPACE"))
@@ -629,11 +629,9 @@ void cmVisualStudio10TargetGenerator::WriteWinRTReferences()
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 {
   this->WriteString("<ItemGroup Label=\"ProjectConfigurations\">\n", 1);
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
-  for(std::vector<std::string>::iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     this->WriteString("<ProjectConfiguration Include=\"", 2);
     (*this->BuildFileStream ) <<  *i << "|" << this->Platform << "\">\n";
@@ -649,11 +647,9 @@ void cmVisualStudio10TargetGenerator::WriteProjectConfigurations()
 
 void cmVisualStudio10TargetGenerator::WriteProjectConfigurationValues()
 {
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
-  for(std::vector<std::string>::iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     this->WritePlatformConfigTag("PropertyGroup",
                                  i->c_str(),
@@ -864,14 +860,12 @@ cmVisualStudio10TargetGenerator::WriteCustomRule(cmSourceFile const* source,
       }
     }
   cmLocalVisualStudio7Generator* lg = this->LocalGenerator;
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
 
   this->WriteSource("CustomBuild", source, ">\n");
 
-  for(std::vector<std::string>::iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     cmCustomCommandGenerator ccg(command, *i, this->Makefile);
     std::string comment = lg->ConstructComment(ccg);
@@ -1340,8 +1334,6 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
 
     if(!deployContent.empty())
       {
-      std::vector<std::string> const* configs =
-        this->GlobalGenerator->GetConfigurations();
       cmGeneratorExpression ge;
       cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
         ge.Parse(deployContent);
@@ -1353,13 +1345,14 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
                                  << "\\%(FileName)%(Extension)";
         this->WriteString("</Link>\n", 0);
         }
-      for(size_t i = 0; i != configs->size(); ++i)
+      for(size_t i = 0; i != this->Configurations.size(); ++i)
         {
-        if(0 == strcmp(cge->Evaluate(this->Makefile, (*configs)[i]), "1"))
+        if(0 == strcmp(cge->Evaluate(this->Makefile,
+                                     this->Configurations[i]), "1"))
           {
           this->WriteString("<DeploymentContent Condition=\""
                             "'$(Configuration)|$(Platform)'=='", 3);
-          (*this->BuildFileStream) << (*configs)[i] << "|"
+          (*this->BuildFileStream) << this->Configurations[i] << "|"
                                    << this->Platform << "'\">true";
           this->WriteString("</DeploymentContent>\n", 0);
           }
@@ -1367,7 +1360,7 @@ void cmVisualStudio10TargetGenerator::WriteExtraSource(cmSourceFile const* sf)
           {
           this->WriteString("<ExcludedFromBuild Condition=\""
                             "'$(Configuration)|$(Platform)'=='", 3);
-          (*this->BuildFileStream) << (*configs)[i] << "|"
+          (*this->BuildFileStream) << this->Configurations[i] << "|"
                                    << this->Platform << "'\">true";
           this->WriteString("</ExcludedFromBuild>\n", 0);
           }
@@ -1655,11 +1648,9 @@ bool cmVisualStudio10TargetGenerator::OutputSourceSpecificFlags(
     (*this->BuildFileStream )
       << "$(IntDir)/" << objectName << "</ObjectFileName>\n";
     }
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
-  for( std::vector<std::string>::iterator config = configs->begin();
-       config != configs->end(); ++config)
+  for(std::vector<std::string>::const_iterator
+        config = this->Configurations.begin();
+      config != this->Configurations.end(); ++config)
     {
     std::string configUpper = cmSystemTools::UpperCase(*config);
     std::string configDefines = defines;
@@ -1737,11 +1728,9 @@ void cmVisualStudio10TargetGenerator::WritePathAndIncrementalLinkOptions()
   this->WriteString("<PropertyGroup>\n", 2);
   this->WriteString("<_ProjectFileVersion>10.0.20506.1"
                     "</_ProjectFileVersion>\n", 3);
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
-  for(std::vector<std::string>::iterator config = configs->begin();
-      config != configs->end(); ++config)
+  for(std::vector<std::string>::const_iterator
+        config = this->Configurations.begin();
+      config != this->Configurations.end(); ++config)
     {
     if(ttype >= cmTarget::UTILITY)
       {
@@ -1855,10 +1844,9 @@ OutputLinkIncremental(std::string const& configName)
 //----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeClOptions()
 {
-  std::vector<std::string> const* configs =
-    this->GlobalGenerator->GetConfigurations();
-  for(std::vector<std::string>::const_iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     if(!this->ComputeClOptions(*i))
       {
@@ -2026,10 +2014,9 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
 //----------------------------------------------------------------------------
 bool cmVisualStudio10TargetGenerator::ComputeRcOptions()
 {
-  std::vector<std::string> const* configs =
-    this->GlobalGenerator->GetConfigurations();
-  for(std::vector<std::string>::const_iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     if(!this->ComputeRcOptions(*i))
       {
@@ -2092,10 +2079,9 @@ bool cmVisualStudio10TargetGenerator::ComputeMasmOptions()
     {
     return true;
     }
-  std::vector<std::string> const* configs =
-    this->GlobalGenerator->GetConfigurations();
-  for(std::vector<std::string>::const_iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     if(!this->ComputeMasmOptions(*i))
       {
@@ -2239,10 +2225,9 @@ bool cmVisualStudio10TargetGenerator::ComputeLinkOptions()
      this->Target->GetType() == cmTarget::SHARED_LIBRARY ||
      this->Target->GetType() == cmTarget::MODULE_LIBRARY)
     {
-    std::vector<std::string> const* configs =
-      this->GlobalGenerator->GetConfigurations();
-    for(std::vector<std::string>::const_iterator i = configs->begin();
-        i != configs->end(); ++i)
+    for(std::vector<std::string>::const_iterator
+          i = this->Configurations.begin();
+        i != this->Configurations.end(); ++i)
       {
       if(!this->ComputeLinkOptions(*i))
         {
@@ -2591,11 +2576,9 @@ WriteMidlOptions(std::string const& /*config*/,
 
 void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
 {
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
-  for(std::vector<std::string>::iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator
+        i = this->Configurations.begin();
+      i != this->Configurations.end(); ++i)
     {
     std::vector<std::string> includes;
     this->LocalGenerator->GetIncludeDirectories(includes,
