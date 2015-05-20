@@ -492,3 +492,38 @@ message(STATUS "do_cvs_tests='${do_cvs_tests}'")
 message(STATUS "do_svn_tests='${do_svn_tests}'")
 message(STATUS "do_git_tests='${do_git_tests}' GIT_EXECUTABLE='${GIT_EXECUTABLE}'")
 message(STATUS "do_hg_tests='${do_hg_tests}'   HG_EXECUTABLE='${HG_EXECUTABLE}'")
+
+
+# Test if log works when the first arguments of *_COMMAND is "COMMAND".
+set(proj ExternalProject-no-log)
+set(download_cmd "")
+set(patch_cmd "")
+set(update_cmd "")
+set(configure_cmd "")
+set(build_cmd "")
+set(install_cmd "")
+
+ExternalProject_Add(${proj}
+  DOWNLOAD_COMMAND "${download_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "download"
+  PATCH_COMMAND "${patch_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "patch"
+  UPDATE_COMMAND "${update_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "update"
+  CONFIGURE_COMMAND "${configure_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "configure"
+  BUILD_COMMAND "${build_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "build"
+  INSTALL_COMMAND "${install_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "install"
+  )
+
+set(proj ExternalProject-log)
+ExternalProject_Add(${proj}
+  DOWNLOAD_COMMAND "${download_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "download"
+  PATCH_COMMAND "${patch_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "patch"
+  UPDATE_COMMAND "${update_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "update"
+  CONFIGURE_COMMAND "${configure_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "configure"
+  BUILD_COMMAND "${build_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "build"
+  INSTALL_COMMAND "${install_cmd}" COMMAND "${CMAKE_COMMAND}" -E echo "install"
+  LOG_DOWNLOAD 1
+  LOG_PATCH 1
+  LOG_UPDATE 1
+  LOG_CONFIGURE 1
+  LOG_BUILD 1
+  LOG_INSTALL 1
+  )
