@@ -27,6 +27,9 @@
  command in the project sets the type to ``PATH`` or ``FILEPATH``
  then the ``<value>`` will be converted to an absolute path.
 
+ This option may also be given as a single argument:
+ ``-D<var>:<type>=<value>`` or ``-D<var>=<value>``.
+
 ``-U <globbing_expr>``
  Remove matching entries from CMake cache.
 

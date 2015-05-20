@@ -403,7 +403,7 @@ private:
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \
   {"-C <initial-cache>", "Pre-load a script to populate the cache."}, \
-  {"-D <var>:<type>=<value>", "Create a cmake cache entry."}, \
+  {"-D <var>[:<type>]=<value>", "Create a cmake cache entry."}, \
   {"-U <globbing_expr>", "Remove matching entries from CMake cache."}, \
   {"-G <generator-name>", "Specify a build system generator."},\
   {"-T <toolset-name>", "Specify toolset name if supported by generator."}, \
