@@ -221,10 +221,8 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
 {
   std::string dspname = GetVS6TargetName(tgt.GetName());
   dspname += ".dsp.cmake";
-  const char* dsprule =
-    this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
-  commandLine.push_back(dsprule);
+  commandLine.push_back(cmSystemTools::GetCMakeCommand());
   std::string makefileIn = this->Makefile->GetCurrentSourceDirectory();
   makefileIn += "/";
   makefileIn += "CMakeLists.txt";
@@ -817,7 +815,7 @@ cmLocalVisualStudio6Generator::MaybeCreateOutputDir(cmTarget& target,
 
   // Add a pre-link event to create the directory.
   cmCustomCommandLine command;
-  command.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  command.push_back(cmSystemTools::GetCMakeCommand());
   command.push_back("-E");
   command.push_back("make_directory");
   command.push_back(outDir);

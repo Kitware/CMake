@@ -320,7 +320,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   std::string targetDir = getAutogenTargetDir(target);
 
   cmCustomCommandLine currentLine;
-  currentLine.push_back(makefile->GetSafeDefinition("CMAKE_COMMAND"));
+  currentLine.push_back(cmSystemTools::GetCMakeCommand());
   currentLine.push_back("-E");
   currentLine.push_back("cmake_autogen");
   currentLine.push_back(targetDir);

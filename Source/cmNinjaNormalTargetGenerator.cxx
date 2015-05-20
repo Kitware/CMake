@@ -282,8 +282,7 @@ cmNinjaNormalTargetGenerator
     !this->GetTarget()->IsFrameworkOnApple()) {
     std::string cmakeCommand =
       this->GetLocalGenerator()->ConvertToOutputFormat(
-        this->GetMakefile()->GetRequiredDefinition("CMAKE_COMMAND"),
-        cmLocalGenerator::SHELL);
+        cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
     if (targetType == cmTarget::EXECUTABLE)
       this->GetGlobalGenerator()->AddRule("CMAKE_SYMLINK_EXECUTABLE",
                                           cmakeCommand +
@@ -337,8 +336,7 @@ cmNinjaNormalTargetGenerator
       {
       std::string cmakeCommand =
         this->GetLocalGenerator()->ConvertToOutputFormat(
-          mf->GetRequiredDefinition("CMAKE_COMMAND"),
-          cmLocalGenerator::SHELL);
+          cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
       linkCmds.push_back(cmakeCommand + " -E remove $TARGET_FILE");
       }
       // TODO: Use ARCHIVE_APPEND for archives over a certain size.

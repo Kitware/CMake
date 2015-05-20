@@ -744,18 +744,16 @@ cmLocalUnixMakefileGenerator3
 #endif
     }
 
-  std::string cmakecommand =
-      this->Makefile->GetRequiredDefinition("CMAKE_COMMAND");
   makefileStream
     << "# The CMake executable.\n"
     << "CMAKE_COMMAND = "
-    << this->ConvertShellCommand(cmakecommand, FULL)
+    << this->ConvertShellCommand(cmSystemTools::GetCMakeCommand(), FULL)
     << "\n"
     << "\n";
   makefileStream
     << "# The command to remove a file.\n"
     << "RM = "
-    << this->ConvertShellCommand(cmakecommand, FULL)
+    << this->ConvertShellCommand(cmSystemTools::GetCMakeCommand(), FULL)
     << " -E remove -f\n"
     << "\n";
   makefileStream
