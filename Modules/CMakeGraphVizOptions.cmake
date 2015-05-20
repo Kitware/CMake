@@ -107,6 +107,22 @@
 #
 #  * Mandatory : NO
 #  * Default   : TRUE
+#
+# .. variable:: GRAPHVIZ_NODE_FILTER
+#
+#  A list of regular replace expressions for chnging the name of nodes.
+#  This can be used to strip the path from external library names,
+#  or normalize the name of different files from the same library to one common name.
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
+# .. variable:: GRAPHVIZ_NODE_GROUP
+#
+#  Set this to TRUE to group all nodes with the same name into one common node.
+#
+#  * Mandatory : NO
+#  * Default   : FALSE
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

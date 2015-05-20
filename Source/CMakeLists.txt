@@ -45,6 +45,8 @@ endif()
 
 set(EXECUTABLE_OUTPUT_PATH ${CMake_BIN_DIR})
 
+add_definitions(-std=c++11)
+
 # ensure Unicode friendly APIs are used on Windows
 if(WIN32)
   add_definitions(-DUNICODE -D_UNICODE)
