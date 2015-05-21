@@ -122,7 +122,6 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   __set_bool_if_set(this->GenerateForExternals, "GRAPHVIZ_EXTERNAL_LIBS");
   __set_bool_if_set(this->GeneratePerTarget, "GRAPHVIZ_GENERATE_PER_TARGET");
   __set_bool_if_set(this->GenerateDependers, "GRAPHVIZ_GENERATE_DEPENDERS");
-  __set_bool_if_set(this->GenerateGrouped, "GRAPHVIZ_NODE_GROUP");
 
   std::string ignoreTargetsRegexes;
   __set_if_set(ignoreTargetsRegexes, "GRAPHVIZ_IGNORE_TARGETS");
@@ -367,9 +366,15 @@ void cmGraphVizWriter::WriteConnections(const std::string& targetName,
        llit != ll->end();
        ++ llit )
     {
-    const char* libName = llit->first.c_str();
+    std::string libName = llit->first.c_str();
     std::map<std::string, std::string>::const_iterator libNameIt =
                                           this->TargetNamesNodes.find(libName);
+
+    if(libNameIt == this->TargetNamesNodes.end())
+      {
+      libName = this->MangleNodeName(libName);
+      libNameIt = this->TargetNamesNodes.find(libName);
+      }
 
     // can happen e.g. if GRAPHVIZ_TARGET_IGNORE_REGEX is used
     if(libNameIt == this->TargetNamesNodes.end())
@@ -618,10 +623,13 @@ bool cmGraphVizWriter::IgnoreThisTarget(const std::string& name)
 }
 
 
-std::string cmGraphVizWriter::MangleNodeName(std::string name)
+std::string cmGraphVizWriter::MangleNodeName(std::string name) const
 {
   for(const auto& replacer : this->GraphNodeNameFilters)
-    name = std::regex_replace(name, replacer.first, replacer.second);
+    if(std::regex_search(name, replacer.first))
+      {
+      name = std::regex_replace(name, replacer.first, replacer.second); 
+      }
 
   return name;
 }

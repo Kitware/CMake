@@ -62,7 +62,7 @@ protected:
   void WriteFooter(cmGeneratedFileStream& str) const;
 
   bool IgnoreThisTarget(const std::string& name);
-  std::string MangleNodeName(std::string name);
+  std::string MangleNodeName(std::string name) const;
 
   bool GenerateForTargetType(cmTarget::TargetType targetType) const;
 
@@ -78,7 +78,6 @@ protected:
   bool GenerateForExternals;
   bool GeneratePerTarget;
   bool GenerateDependers;
-  bool GenerateGrouped;
 
   std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
   typedef std::pair<std::regex, std::string> RegularReplace;
