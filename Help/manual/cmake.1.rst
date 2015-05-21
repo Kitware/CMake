@@ -9,7 +9,7 @@ Synopsis
 .. parsed-literal::
 
  cmake [<options>] (<path-to-source> | <path-to-existing-build>)
- cmake [(-D<var>=<value>)...] -P <cmake-script-file>
+ cmake [(-D <var>=<value>)...] -P <cmake-script-file>
  cmake --build <dir> [<options>] [-- <build-tool-options>...]
  cmake -E <command> [<options>...]
  cmake --find-package <options>...
