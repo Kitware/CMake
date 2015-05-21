@@ -1008,7 +1008,6 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
   const std::string make = mf->GetRequiredDefinition("CMAKE_MAKE_PROGRAM");
   const std::string makeArgs = mf->GetSafeDefinition(
                                                "CMAKE_ECLIPSE_MAKE_ARGUMENTS");
-  const std::string cmake = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   cmGlobalGenerator* generator
     = const_cast<cmGlobalGenerator*>(this->GlobalGenerator);
@@ -1096,11 +1095,12 @@ void cmExtraEclipseCDT4Generator::CreateCProjectFile() const
           std::string cleanArgs = "-E chdir \"";
           cleanArgs += makefile->GetCurrentBinaryDirectory();
           cleanArgs += "\" \"";
-          cleanArgs += cmake;
+          cleanArgs += cmSystemTools::GetCMakeCommand();
           cleanArgs += "\" -P \"";
           cleanArgs += (*it)->GetTargetDirectory(ti->second);
           cleanArgs += "/cmake_clean.cmake\"";
-          this->AppendTarget(fout, "Clean", cmake, cleanArgs, virtDir, "", "");
+          this->AppendTarget(fout, "Clean", cmSystemTools::GetCMakeCommand(),
+                             cleanArgs, virtDir, "", "");
           }
          }
          break;

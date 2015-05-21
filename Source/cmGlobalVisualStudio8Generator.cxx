@@ -252,7 +252,6 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
     return false;
     }
 
-  std::string cmake_command = mf->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLines noCommandLines;
   cmTarget* tgt =
     mf->AddUtilityCommand(CMAKE_CHECK_BUILD_SYSTEM_TARGET, false,
@@ -310,9 +309,8 @@ bool cmGlobalVisualStudio8Generator::AddCheckTarget()
   // Create a rule to re-run CMake.
   std::string stampName = cmake::GetCMakeFilesDirectoryPostSlash();
   stampName += "generate.stamp";
-  const char* dsprule = mf->GetRequiredDefinition("CMAKE_COMMAND");
   cmCustomCommandLine commandLine;
-  commandLine.push_back(dsprule);
+  commandLine.push_back(cmSystemTools::GetCMakeCommand());
   std::string argH = "-H";
   argH += lg->Convert(mf->GetHomeDirectory(),
                       cmLocalGenerator::START_OUTPUT,

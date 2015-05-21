@@ -2151,7 +2151,6 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
 {
   cmMakefile* mf = this->LocalGenerators[0]->GetMakefile();
   const char* cmakeCfgIntDir = this->GetCMakeCFGIntDir();
-  const char* cmakeCommand = mf->GetRequiredDefinition("CMAKE_COMMAND");
 
   // CPack
   std::string workingDir =  mf->GetCurrentBinaryDirectory();
@@ -2266,7 +2265,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
       }
     else
       {
-      singleLine.push_back(cmakeCommand);
+      singleLine.push_back(cmSystemTools::GetCMakeCommand());
       singleLine.push_back("-E");
       singleLine.push_back("echo");
       singleLine.push_back("No interactive CMake dialog available.");
@@ -2287,7 +2286,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
                             cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());
     depends.erase(depends.begin(), depends.end());
-    singleLine.push_back(cmakeCommand);
+    singleLine.push_back(cmSystemTools::GetCMakeCommand());
     singleLine.push_back("-H$(CMAKE_SOURCE_DIR)");
     singleLine.push_back("-B$(CMAKE_BINARY_DIR)");
     cpackCommandLines.push_back(singleLine);
@@ -2329,7 +2328,7 @@ void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
           ostr.str().c_str(),
           &cpackCommandLines, depends, 0, /*uses_terminal*/false);
       }
-    std::string cmd = cmakeCommand;
+    std::string cmd = cmSystemTools::GetCMakeCommand();
     cpackCommandLines.erase(cpackCommandLines.begin(),
       cpackCommandLines.end());
     singleLine.erase(singleLine.begin(), singleLine.end());

@@ -582,8 +582,8 @@ void cmGlobalXCodeGenerator::CreateReRunCMakeFile(
     {
     makefileStream << "\\\n" << this->ConvertToRelativeForMake(i->c_str());
     }
-  std::string cmake = mf->GetRequiredDefinition("CMAKE_COMMAND");
-  makefileStream << "\n\t" << this->ConvertToRelativeForMake(cmake.c_str())
+  makefileStream << "\n\t" <<
+    this->ConvertToRelativeForMake(cmSystemTools::GetCMakeCommand().c_str())
                  << " -H" << this->ConvertToRelativeForMake(
                    mf->GetHomeDirectory())
                  << " -B" << this->ConvertToRelativeForMake(
@@ -1447,7 +1447,7 @@ void cmGlobalXCodeGenerator::CreateCustomCommands(cmXCodeObject* buildPhases,
     {
     cmCustomCommandLines cmd;
     cmd.resize(1);
-    cmd[0].push_back(this->CurrentMakefile->GetDefinition("CMAKE_COMMAND"));
+    cmd[0].push_back(cmSystemTools::GetCMakeCommand());
     cmd[0].push_back("-E");
     cmd[0].push_back("cmake_symlink_library");
     std::string str_file = "$<TARGET_FILE:";

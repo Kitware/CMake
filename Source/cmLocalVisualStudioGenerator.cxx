@@ -99,7 +99,7 @@ cmLocalVisualStudioGenerator::MaybeCreateImplibDir(cmTarget& target,
 
   // Add a pre-build event to create the directory.
   cmCustomCommandLine command;
-  command.push_back(this->Makefile->GetRequiredDefinition("CMAKE_COMMAND"));
+  command.push_back(cmSystemTools::GetCMakeCommand());
   command.push_back("-E");
   command.push_back("make_directory");
   command.push_back(impDir);

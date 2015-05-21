@@ -283,8 +283,6 @@ int cmCPackDebGenerator::PackageFiles()
 
 int cmCPackDebGenerator::createDeb()
 {
-  const char* cmakeExecutable = this->GetOption("CMAKE_COMMAND");
-
   // debian-binary file
   std::string dbfilename;
     dbfilename += this->GetOption("GEN_WDIR");
@@ -420,15 +418,15 @@ int cmCPackDebGenerator::createDeb()
   } else if(!strcmp(debian_compression_type, "bzip2")) {
       compression_suffix = ".bz2";
       compression_modifier = "j";
-      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
   } else if(!strcmp(debian_compression_type, "gzip")) {
       compression_suffix = ".gz";
       compression_modifier = "z";
-      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
   } else if(!strcmp(debian_compression_type, "none")) {
       compression_suffix = "";
       compression_modifier = "";
-      cmake_tar += "\"" + std::string(cmakeExecutable) + "\" -E ";
+      cmake_tar += "\"" + cmSystemTools::GetCMakeCommand() + "\" -E ";
   } else {
       cmCPackLogger(cmCPackLog::LOG_ERROR,
                     "Error unrecognized compression type: "
@@ -501,7 +499,7 @@ int cmCPackDebGenerator::createDeb()
             fileIt != packageFiles.end(); ++ fileIt )
       {
       cmd = "\"";
-      cmd += cmakeExecutable;
+      cmd += cmSystemTools::GetCMakeCommand();
       cmd += "\" -E md5sum \"";
       cmd += *fileIt;
       cmd += "\"";

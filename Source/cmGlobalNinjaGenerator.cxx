@@ -330,12 +330,10 @@ void
 cmGlobalNinjaGenerator::AddMacOSXContentRule()
 {
   cmLocalGenerator *lg = this->LocalGenerators[0];
-  cmMakefile* mfRoot = lg->GetMakefile();
 
   std::ostringstream cmd;
-  cmd << lg->ConvertToOutputFormat(
-           mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
-           cmLocalGenerator::SHELL)
+  cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
+                                   cmLocalGenerator::SHELL)
       << " -E copy $in $out";
 
   this->AddRule("COPY_OSX_CONTENT",
@@ -1185,9 +1183,8 @@ void cmGlobalNinjaGenerator::WriteTargetRebuildManifest(std::ostream& os)
   cmMakefile* mfRoot = lg->GetMakefile();
 
   std::ostringstream cmd;
-  cmd << lg->ConvertToOutputFormat(
-           mfRoot->GetRequiredDefinition("CMAKE_COMMAND"),
-           cmLocalGenerator::SHELL)
+  cmd << lg->ConvertToOutputFormat(cmSystemTools::GetCMakeCommand(),
+                                   cmLocalGenerator::SHELL)
       << " -H"
       << lg->ConvertToOutputFormat(mfRoot->GetHomeDirectory(),
                                    cmLocalGenerator::SHELL)
