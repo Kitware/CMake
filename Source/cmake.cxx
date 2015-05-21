@@ -2477,6 +2477,14 @@ bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
   return true;
 }
 
+void printMessageText(std::ostream& msg, std::string const& text)
+{
+   msg << ":\n";
+   cmDocumentationFormatter formatter;
+   formatter.SetIndent("  ");
+   formatter.PrintFormatted(msg, text.c_str());
+}
+
 //----------------------------------------------------------------------------
 void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
                          cmListFileBacktrace const& bt)
@@ -2493,13 +2501,7 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   // Add the immediate context.
   backtrace.PrintTitle(msg);
 
-  // Add the message text.
-  {
-  msg << ":\n";
-  cmDocumentationFormatter formatter;
-  formatter.SetIndent("  ");
-  formatter.PrintFormatted(msg, text.c_str());
-  }
+  printMessageText(msg, text);
 
   // Add the rest of the context.
   backtrace.PrintCallStack(msg);
