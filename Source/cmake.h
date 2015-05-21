@@ -303,6 +303,9 @@ class cmake
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
         cmListFileBacktrace const& backtrace = cmListFileBacktrace(NULL));
+  void IssueMessage(cmake::MessageType t, std::string const& text,
+        cmListFileContext const& lfc);
+
   ///! run the --build option
   int Build(const std::string& dir,
             const std::string& target,

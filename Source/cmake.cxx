@@ -2553,6 +2553,24 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 }
 
 //----------------------------------------------------------------------------
+void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
+                         cmListFileContext const& lfc)
+{
+  std::ostringstream msg;
+  if (!this->PrintMessagePreamble(t, msg))
+    {
+    return;
+    }
+
+  // Add the immediate context.
+  msg << (lfc.Line ? " at " : " in ") << lfc;
+
+  printMessageText(msg, text);
+
+  displayMessage(t, msg);
+}
+
+//----------------------------------------------------------------------------
 std::vector<std::string> cmake::GetDebugConfigs()
 {
   std::vector<std::string> configs;

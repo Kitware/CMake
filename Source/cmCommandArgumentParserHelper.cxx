@@ -14,6 +14,7 @@
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmState.h"
+#include "cmLocalGenerator.h"
 
 #include "cmCommandArgumentLexer.h"
 
@@ -139,14 +140,14 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
                                      this->Makefile->GetHomeOutputDirectory()))
         {
         std::ostringstream msg;
-        cmListFileBacktrace bt(this->Makefile->GetLocalGenerator());
         cmListFileContext lfc;
-        lfc.FilePath = this->FileName;
+        lfc.FilePath = this->Makefile->GetLocalGenerator()
+            ->Convert(this->FileName, cmLocalGenerator::HOME);
+
         lfc.Line = this->FileLine;
-        bt.Append(lfc);
         msg << "uninitialized variable \'" << var << "\'";
         this->Makefile->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                        msg.str(), bt);
+                                                        msg.str(), lfc);
         }
       }
     return 0;
