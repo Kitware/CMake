@@ -18,12 +18,13 @@ cmDefinitions::Def cmDefinitions::NoDef;
 
 //----------------------------------------------------------------------------
 cmDefinitions::Def const& cmDefinitions::GetInternal(
-  const std::string& key, StackIter begin, StackIter end)
+  const std::string& key, StackIter begin, StackIter end, bool raise)
 {
   assert(begin != end);
-  MapType::const_iterator i = begin->Map.find(key);
+  MapType::iterator i = begin->Map.find(key);
   if (i != begin->Map.end())
     {
+    i->second.Used = true;
     return i->second;
     }
   StackIter it = begin;
@@ -32,7 +33,11 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
     {
     return cmDefinitions::NoDef;
     }
-  Def const& def = cmDefinitions::GetInternal(key, it, end);
+  Def const& def = cmDefinitions::GetInternal(key, it, end, raise);
+  if (!raise)
+    {
+    return def;
+    }
   return begin->Map.insert(MapType::value_type(key, def)).first->second;
 }
 
@@ -40,8 +45,28 @@ cmDefinitions::Def const& cmDefinitions::GetInternal(
 const char* cmDefinitions::Get(const std::string& key,
     StackIter begin, StackIter end)
 {
-  Def const& def = cmDefinitions::GetInternal(key, begin, end);
+  Def const& def = cmDefinitions::GetInternal(key, begin, end, false);
   return def.Exists? def.c_str() : 0;
+}
+
+void cmDefinitions::Raise(const std::string& key,
+                          StackIter begin, StackIter end)
+{
+  cmDefinitions::GetInternal(key, begin, end, true);
+}
+
+bool cmDefinitions::HasKey(const std::string& key,
+                           StackConstIter begin, StackConstIter end)
+{
+  for (StackConstIter it = begin; it != end; ++it)
+    {
+    MapType::const_iterator i = it->Map.find(key);
+    if (i != it->Map.end())
+      {
+      return true;
+      }
+    }
+  return false;
 }
 
 //----------------------------------------------------------------------------
@@ -51,13 +76,8 @@ void cmDefinitions::Set(const std::string& key, const char* value)
   this->Map[key] = def;
 }
 
-void cmDefinitions::Erase(const std::string& key)
-{
-  this->Map.erase(key);
-}
-
 //----------------------------------------------------------------------------
-std::vector<std::string> cmDefinitions::LocalKeys() const
+std::vector<std::string> cmDefinitions::UnusedKeys() const
 {
   std::vector<std::string> keys;
   keys.reserve(this->Map.size());
@@ -65,7 +85,7 @@ std::vector<std::string> cmDefinitions::LocalKeys() const
   for(MapType::const_iterator mi = this->Map.begin();
       mi != this->Map.end(); ++mi)
     {
-    if (mi->second.Exists)
+    if (!mi->second.Used)
       {
       keys.push_back(mi->first);
       }

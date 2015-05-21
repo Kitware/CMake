@@ -35,18 +35,18 @@ class cmDefinitions
   typedef std::list<cmDefinitions>::reverse_iterator StackIter;
   typedef std::list<cmDefinitions>::const_reverse_iterator StackConstIter;
 public:
-  /** Get the value associated with a key; null if none.
-      Store the result locally if it came from a parent.  */
   static const char* Get(const std::string& key,
                          StackIter begin, StackIter end);
+
+  static void Raise(const std::string& key, StackIter begin, StackIter end);
+
+  static bool HasKey(const std::string& key,
+                     StackConstIter begin, StackConstIter end);
 
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
 
-  void Erase(const std::string& key);
-
-  /** Get the set of all local keys.  */
-  std::vector<std::string> LocalKeys() const;
+  std::vector<std::string> UnusedKeys() const;
 
   static std::vector<std::string> ClosureKeys(StackConstIter begin,
                                               StackConstIter end);
@@ -60,11 +60,16 @@ private:
   private:
     typedef std::string std_string;
   public:
-    Def(): std_string(), Exists(false) {}
-    Def(const char* v): std_string(v?v:""), Exists(v?true:false) {}
-    Def(const std_string& v): std_string(v), Exists(true) {}
-    Def(Def const& d): std_string(d), Exists(d.Exists) {}
+    Def(): std_string(), Exists(false), Used(false) {}
+    Def(const char* v)
+      : std_string(v ? v : ""),
+        Exists(v ? true : false),
+        Used(false)
+    {}
+    Def(const std_string& v): std_string(v), Exists(true), Used(false) {}
+    Def(Def const& d): std_string(d), Exists(d.Exists), Used(d.Used) {}
     bool Exists;
+    bool Used;
   };
   static Def NoDef;
 
@@ -80,7 +85,7 @@ private:
   MapType Map;
 
   static Def const& GetInternal(const std::string& key,
-    StackIter begin, StackIter end);
+    StackIter begin, StackIter end, bool raise);
 };
 
 #endif

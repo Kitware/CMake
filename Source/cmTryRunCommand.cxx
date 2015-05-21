@@ -375,7 +375,7 @@ void cmTryRunCommand::DoNotRunExecutable(const std::string& runArgs,
       comment += "Run arguments : ";
       comment += runArgs;
       comment += "\n";
-      comment += "   Called from: " + this->Makefile->GetListFileStack();
+      comment += "   Called from: " + this->Makefile->FormatListFileStack();
       cmsys::SystemTools::ReplaceString(comment, "\n", "\n# ");
       file << comment << "\n\n";
 

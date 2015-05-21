@@ -65,14 +65,10 @@ class cmMakefile
   class Internals;
   cmsys::auto_ptr<Internals> Internal;
 public:
-  /* Check for unused variables in this scope */
-  void CheckForUnusedVariables() const;
   /* Mark a variable as used */
   void MarkVariableAsUsed(const std::string& var);
   /* return true if a variable has been initialized */
   bool VariableInitialized(const std::string& ) const;
-  /* return true if a variable has been used */
-  bool VariableUsed(const std::string& ) const;
 
   /**
    * Construct an empty makefile.
@@ -84,12 +80,7 @@ public:
    */
   ~cmMakefile();
 
-  /**
-   * Read and parse a CMakeLists.txt file.
-   */
-  bool ReadListFile(const char* listfile,
-                    bool noPolicyScope = true,
-                    bool requireProjectCommand = false);
+  bool ReadListFile(const char* listfile);
 
   bool ReadDependentFile(const char* listfile, bool noPolicyScope = true);
 
@@ -161,11 +152,6 @@ public:
    * run the final pass on all commands.
    */
   void FinalPass();
-
-  /**
-   * Print the object state to std::cout.
-   */
-  void Print() const;
 
   /** Add a custom command to the build.  */
   void AddCustomCommandToTarget(const std::string& target,
@@ -418,14 +404,6 @@ public:
   void SetCurrentBinaryDirectory(const std::string& dir);
   const char* GetCurrentBinaryDirectory() const;
 
-  /* Get the current CMakeLists.txt file that is being processed.  This
-   * is just used in order to be able to 'branch' from one file to a second
-   * transparently */
-  const char* GetCurrentListFile() const
-    {
-      return this->cmCurrentListFile.c_str();
-    }
-
   //@}
 
   /**
@@ -588,7 +566,7 @@ public:
     { this->ListFiles.push_back(file);}
   void AddCMakeDependFilesFromUser();
 
-  std::string GetListFileStack() const;
+  std::string FormatListFileStack() const;
 
   /**
    * Get the current context backtrace.
@@ -843,9 +821,7 @@ protected:
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
 
   // Check for a an unused variable
-  void CheckForUnused(const char* reason, const std::string& name) const;
-
-  std::string cmCurrentListFile;
+  void LogUnused(const char* reason, const std::string& name) const;
 
   std::string ProjectName;    // project name
 
@@ -912,6 +888,10 @@ private:
 
   cmState::Snapshot StateSnapshot;
 
+  bool ReadListFile(const char* listfile,
+                    bool noPolicyScope,
+                    bool requireProjectCommand);
+
   bool ReadListFileInternal(const char* filenametoread,
                             bool noPolicyScope,
                             bool requireProjectCommand);
@@ -923,10 +903,6 @@ private:
 
   friend class cmMakeDepend;    // make depend needs direct access
                                 // to the Sources array
-  void PrintStringVector(const char* s, const
-                         std::vector<std::pair<std::string, bool> >& v) const;
-  void PrintStringVector(const char* s,
-                         const std::vector<std::string>& v) const;
 
   void AddDefaultDefinitions();
   typedef std::vector<cmFunctionBlocker*> FunctionBlockersType;
@@ -1061,6 +1037,8 @@ private:
                              const std::string& feature) const;
   bool HaveCxxStandardAvailable(cmTarget const* target,
                                const std::string& feature) const;
+
+  void CheckForUnusedVariables() const;
 
   mutable bool SuppressWatches;
 };
