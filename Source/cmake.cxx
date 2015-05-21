@@ -2444,16 +2444,13 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   backtrace.MakeRelative();
 
   std::ostringstream msg;
-  bool isError = false;
   // Construct the message header.
   if(t == cmake::FATAL_ERROR)
     {
-    isError = true;
     msg << "CMake Error";
     }
   else if(t == cmake::INTERNAL_ERROR)
     {
-    isError = true;
     msg << "CMake Internal Error (please report a bug)";
     }
   else if(t == cmake::LOG)
@@ -2463,7 +2460,6 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   else if(t == cmake::DEPRECATION_ERROR)
     {
     msg << "CMake Deprecation Error";
-    isError = true;
     }
   else if (t == cmake::DEPRECATION_WARNING)
     {
@@ -2526,7 +2522,9 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 #endif
 
   // Output the message.
-  if(isError)
+  if(t == cmake::FATAL_ERROR
+     || t == cmake::INTERNAL_ERROR
+     || t == cmake::DEPRECATION_ERROR)
     {
     cmSystemTools::SetErrorOccured();
     cmSystemTools::Message(msg.str().c_str(), "Error");
