@@ -1203,23 +1203,6 @@ std::string cmQtAutoGenerators::GetRccExecutable(cmTarget const* target)
   return std::string();
 }
 
-static cmGlobalGenerator* CreateGlobalGenerator(cmake* cm,
-                                            const std::string& targetDirectory)
-{
-  cmGlobalGenerator* gg = new cmGlobalGenerator();
-  gg->SetCMakeInstance(cm);
-
-  cm->SetHomeOutputDirectory(targetDirectory);
-  cm->SetHomeDirectory(targetDirectory);
-
-  cmLocalGenerator* lg = gg->MakeLocalGenerator();
-  lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
-  lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
-  gg->SetCurrentLocalGenerator(lg);
-
-  return gg;
-}
-
 bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
                              const std::string& config)
 {
@@ -1227,25 +1210,27 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cmake cm;
   cm.SetHomeOutputDirectory(targetDirectory);
   cm.SetHomeDirectory(targetDirectory);
-  cmGlobalGenerator* gg = CreateGlobalGenerator(&cm, targetDirectory);
-  cmMakefile* makefile = gg->GetCurrentLocalGenerator()->GetMakefile();
+  cmGlobalGenerator gg;
+  gg.SetCMakeInstance(&cm);
 
-  this->ReadAutogenInfoFile(makefile, targetDirectory, config);
-  this->ReadOldMocDefinitionsFile(makefile, targetDirectory);
+  cmLocalGenerator* lg = gg.MakeLocalGenerator();
+  lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
+  lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
+  gg.SetCurrentLocalGenerator(lg);
+
+  this->ReadAutogenInfoFile(lg->GetMakefile(), targetDirectory, config);
+  this->ReadOldMocDefinitionsFile(lg->GetMakefile(), targetDirectory);
 
   this->Init();
 
   if (this->QtMajorVersion == "4" || this->QtMajorVersion == "5")
     {
-    success = this->RunAutogen(makefile);
+    success = this->RunAutogen(lg->GetMakefile());
     }
 
   this->WriteOldMocDefinitionsFile(targetDirectory);
 
-  delete gg->GetCurrentLocalGenerator();
-  delete gg;
-  gg = NULL;
-  makefile = NULL;
+  delete lg;
   return success;
 }
 
