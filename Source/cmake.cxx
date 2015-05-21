@@ -2436,14 +2436,8 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
-//----------------------------------------------------------------------------
-void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& bt)
+bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
 {
-  cmListFileBacktrace backtrace = bt;
-  backtrace.MakeRelative();
-
-  std::ostringstream msg;
   // Construct the message header.
   if(t == cmake::FATAL_ERROR)
     {
@@ -2475,10 +2469,25 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
                                         "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
       if(suppress && cmSystemTools::IsOn(suppress))
         {
-        return;
+        return false;
         }
       msg << " (dev)";
       }
+    }
+  return true;
+}
+
+//----------------------------------------------------------------------------
+void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
+                         cmListFileBacktrace const& bt)
+{
+  cmListFileBacktrace backtrace = bt;
+  backtrace.MakeRelative();
+
+  std::ostringstream msg;
+  if (!this->PrintMessagePreamble(t, msg))
+    {
+    return;
     }
 
   // Add the immediate context.

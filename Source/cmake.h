@@ -399,6 +399,8 @@ private:
 
   // Print a list of valid generators to stderr.
   void PrintGeneratorList();
+
+  bool PrintMessagePreamble(cmake::MessageType t, std::ostream& msg);
 };
 
 #define CMAKE_STANDARD_OPTIONS_TABLE \
