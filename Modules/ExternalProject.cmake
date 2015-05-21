@@ -1282,7 +1282,7 @@ endif()
 
   # Wrap multiple 'COMMAND' lines up into a second-level wrapper
   # script so all output can be sent to one log file.
-  if(command MATCHES ";COMMAND;")
+  if(command MATCHES "(^|;)COMMAND;")
     set(code_execute_process "
 ${code_cygpath_make}
 execute_process(COMMAND \${command} RESULT_VARIABLE result)
@@ -1299,7 +1299,9 @@ endif()
     set(sep "")
     foreach(arg IN LISTS command)
       if("x${arg}" STREQUAL "xCOMMAND")
-        set(code "${code}set(command \"${cmd}\")${code_execute_process}")
+        if(NOT "x${cmd}" STREQUAL "x")
+          set(code "${code}set(command \"${cmd}\")${code_execute_process}")
+        endif()
         set(cmd "")
         set(sep "")
       else()
