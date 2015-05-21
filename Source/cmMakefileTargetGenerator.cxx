@@ -768,6 +768,20 @@ cmMakefileTargetGenerator
     this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
 
+  // Maybe insert an include-what-you-use runner.
+  if (!compileCommands.empty() && (lang == "C" || lang == "CXX"))
+    {
+    std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
+    const char *iwyu = this->Target->GetProperty(iwyu_prop);
+    if (iwyu && *iwyu)
+      {
+      std::string run_iwyu = "$(CMAKE_COMMAND) -E __run_iwyu --iwyu=";
+      run_iwyu += this->LocalGenerator->EscapeForShell(iwyu);
+      run_iwyu += " -- ";
+      compileCommands.front().insert(0, run_iwyu);
+      }
+    }
+
   // Change the command working directory to the local build tree.
   this->LocalGenerator->CreateCDCommand
     (compileCommands,

@@ -458,6 +458,23 @@ cmNinjaTargetGenerator
   std::vector<std::string> compileCmds;
   cmSystemTools::ExpandListArgument(compileCmd, compileCmds);
 
+  // Maybe insert an include-what-you-use runner.
+  if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
+    {
+    std::string const iwyu_prop = lang + "_INCLUDE_WHAT_YOU_USE";
+    const char *iwyu = this->Target->GetProperty(iwyu_prop);
+    if (iwyu && *iwyu)
+      {
+      std::string run_iwyu =
+        this->GetLocalGenerator()->ConvertToOutputFormat(
+          cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+      run_iwyu += " -E __run_iwyu --iwyu=";
+      run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
+      run_iwyu += " -- ";
+      compileCmds.front().insert(0, run_iwyu);
+      }
+    }
+
   if (!compileCmds.empty())
     {
     compileCmds.front().insert(0, cldeps);

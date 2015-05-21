@@ -241,3 +241,8 @@ if(CMAKE_OSX_ARCHITECTURES AND XCODE AND NOT "${XCODE_VERSION}" MATCHES "^[^12]"
     PRE_BUILD COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CFG_INTDIR}"
     )
 endif()
+
+if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
+  add_executable(pseudo_iwyu pseudo_iwyu.c)
+  add_RunCMake_test(IncludeWhatYouUse -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>)
+endif()
