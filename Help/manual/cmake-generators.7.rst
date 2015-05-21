@@ -110,4 +110,3 @@ The following extra generators are known to CMake.
    /generator/KDevelop3
    /generator/Kate
    /generator/Sublime Text 2
-   /generator/Qbs

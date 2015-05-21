@@ -589,21 +589,7 @@ if(BUILD_TESTING)
          --test-command Simple)
       list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_KDevelop3Generator")
     endif ()
-    # check for the Qbs generator
-    if ("${cmakeOutput}" MATCHES Qbs)
-      add_test(Simple_QbsGenerator ${CMAKE_CTEST_COMMAND}
-         --build-and-test
-         "${CMake_SOURCE_DIR}/Tests/Simple"
-         "${CMake_BINARY_DIR}/Tests/Simple_QbsGenerator"
-         --build-two-config
-         --build-generator "Qbs - Unix Makefiles"
-         --build-generator-platform "${CMAKE_GENERATOR_PLATFORM}"
-         --build-generator-toolset "${CMAKE_GENERATOR_TOOLSET}"
-         --build-project Simple
-         --build-options ${build_options}
-         --test-command Simple)
-      list(APPEND TEST_BUILD_DIRS "${CMake_BINARY_DIR}/Tests/Simple_QbsGenerator")
-    endif ()
+
   endif()
 
   # test for correct sub-project generation
