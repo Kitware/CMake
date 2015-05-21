@@ -2485,26 +2485,8 @@ void printMessageText(std::ostream& msg, std::string const& text)
    formatter.PrintFormatted(msg, text.c_str());
 }
 
-//----------------------------------------------------------------------------
-void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& bt)
+void displayMessage(cmake::MessageType t, std::ostringstream& msg)
 {
-  cmListFileBacktrace backtrace = bt;
-  backtrace.MakeRelative();
-
-  std::ostringstream msg;
-  if (!this->PrintMessagePreamble(t, msg))
-    {
-    return;
-    }
-
-  // Add the immediate context.
-  backtrace.PrintTitle(msg);
-
-  printMessageText(msg, text);
-
-  // Add the rest of the context.
-  backtrace.PrintCallStack(msg);
 
   // Add a note about warning suppression.
   if(t == cmake::AUTHOR_WARNING)
@@ -2544,6 +2526,30 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     {
     cmSystemTools::Message(msg.str().c_str(), "Warning");
     }
+}
+
+//----------------------------------------------------------------------------
+void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
+                         cmListFileBacktrace const& bt)
+{
+  cmListFileBacktrace backtrace = bt;
+  backtrace.MakeRelative();
+
+  std::ostringstream msg;
+  if (!this->PrintMessagePreamble(t, msg))
+    {
+    return;
+    }
+
+  // Add the immediate context.
+  backtrace.PrintTitle(msg);
+
+  printMessageText(msg, text);
+
+  // Add the rest of the context.
+  backtrace.PrintCallStack(msg);
+
+  displayMessage(t, msg);
 }
 
 //----------------------------------------------------------------------------
