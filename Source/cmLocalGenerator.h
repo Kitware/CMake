@@ -395,7 +395,7 @@ public:
 
 protected:
   ///! put all the libraries for a target on into the given stream
-  virtual void OutputLinkLibraries(std::string& linkLibraries,
+  void OutputLinkLibraries(std::string& linkLibraries,
                                    std::string& frameworkPath,
                                    std::string& linkPath,
                                    cmGeneratorTarget &,
@@ -446,9 +446,6 @@ protected:
   /** Check whether the native build system supports the given
       definition.  Issues a warning.  */
   virtual bool CheckDefinition(std::string const& define) const;
-
-  /** Read the input CMakeLists.txt file.  */
-  void ReadInputFile();
 
   cmMakefile *Makefile;
   cmState::Snapshot StateSnapshot;

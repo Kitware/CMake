@@ -626,7 +626,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
       install_name_dir =
         this->LocalGenerator->Convert(install_name_dir,
                                       cmLocalGenerator::NONE,
-                                      cmLocalGenerator::SHELL, false);
+                                      cmLocalGenerator::SHELL);
       vars.TargetInstallNameDir = install_name_dir.c_str();
       }
     }
