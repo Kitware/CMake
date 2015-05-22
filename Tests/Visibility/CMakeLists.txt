@@ -1,6 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-
-project(VisibilityInlinesHidden)
+cmake_minimum_required(VERSION 3.2)
+project(Visibility)
 
 add_library(inlines_hidden SHARED foo.cpp bar.c)
 set_property(TARGET inlines_hidden PROPERTY VISIBILITY_INLINES_HIDDEN ON)
