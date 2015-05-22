@@ -15,6 +15,7 @@
 #include "cmStandardIncludes.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
+#include "cmLinkedTree.h"
 
 class cmake;
 class cmCommand;
@@ -22,7 +23,7 @@ class cmCommand;
 class cmState
 {
   struct SnapshotDataType;
-  typedef std::vector<std::string>::size_type PositionType;
+  typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
 public:
   cmState(cmake* cm);
@@ -35,7 +36,7 @@ public:
 
   class Snapshot {
   public:
-    Snapshot(cmState* state = 0, PositionType position = 0);
+    Snapshot(cmState* state = 0, PositionType position = PositionType());
 
     const char* GetCurrentSourceDirectory() const;
     void SetCurrentSourceDirectory(std::string const& dir);
@@ -166,9 +167,9 @@ private:
   cmake* CMakeInstance;
 
   struct BuildsystemDirectoryStateType;
-  std::vector<BuildsystemDirectoryStateType> BuildsystemDirectory;
+  cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
 
-  std::vector<SnapshotDataType> SnapshotData;
+  cmLinkedTree<SnapshotDataType> SnapshotData;
 
   std::vector<std::string> SourceDirectoryComponents;
   std::vector<std::string> BinaryDirectoryComponents;
