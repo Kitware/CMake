@@ -2248,7 +2248,8 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget const* target,
 static void AddVisibilityCompileOption(std::string &flags,
                                        cmTarget const* target,
                                        cmLocalGenerator *lg,
-                                       const std::string& lang)
+                                       const std::string& lang,
+                                       std::string* warnCMP0063)
 {
   std::string l(lang);
   std::string compileOption = "CMAKE_" + l + "_COMPILE_OPTIONS_VISIBILITY";
@@ -2262,6 +2263,11 @@ static void AddVisibilityCompileOption(std::string &flags,
   const char *prop = target->GetProperty(flagDefine);
   if (!prop)
     {
+    return;
+    }
+  if (warnCMP0063)
+    {
+    *warnCMP0063 += "  " + flagDefine + "\n";
     return;
     }
   if (strcmp(prop, "hidden") != 0
@@ -2281,7 +2287,8 @@ static void AddVisibilityCompileOption(std::string &flags,
 
 static void AddInlineVisibilityCompileOption(std::string &flags,
                                        cmTarget const* target,
-                                       cmLocalGenerator *lg)
+                                       cmLocalGenerator *lg,
+                                       std::string* warnCMP0063)
 {
   std::string compileOption
                 = "CMAKE_CXX_COMPILE_OPTIONS_VISIBILITY_INLINES_HIDDEN";
@@ -2296,6 +2303,11 @@ static void AddInlineVisibilityCompileOption(std::string &flags,
     {
     return;
     }
+  if (warnCMP0063)
+    {
+    *warnCMP0063 += "  VISIBILITY_INLINES_HIDDEN\n";
+    return;
+    }
   lg->AppendFlags(flags, opt);
 }
 
@@ -2304,25 +2316,49 @@ void cmLocalGenerator
 ::AddVisibilityPresetFlags(std::string &flags, cmTarget const* target,
                             const std::string& lang)
 {
-  int targetType = target->GetType();
-  bool suitableTarget = ((targetType == cmTarget::SHARED_LIBRARY)
-                      || (targetType == cmTarget::MODULE_LIBRARY)
-                      || (target->IsExecutableWithExports()));
-
-  if (!suitableTarget)
-    {
-    return;
-    }
-
   if (lang.empty())
     {
     return;
     }
-  AddVisibilityCompileOption(flags, target, this, lang);
+
+  std::string warnCMP0063;
+  std::string *pWarnCMP0063 = 0;
+  if (target->GetType() != cmTarget::SHARED_LIBRARY &&
+      target->GetType() != cmTarget::MODULE_LIBRARY &&
+      !target->IsExecutableWithExports())
+    {
+    switch (target->GetPolicyStatusCMP0063())
+      {
+      case cmPolicies::OLD:
+        return;
+      case cmPolicies::WARN:
+        pWarnCMP0063 = &warnCMP0063;
+        break;
+      default:
+        break;
+      }
+    }
+
+  AddVisibilityCompileOption(flags, target, this, lang, pWarnCMP0063);
 
   if(lang == "CXX")
     {
-    AddInlineVisibilityCompileOption(flags, target, this);
+    AddInlineVisibilityCompileOption(flags, target, this, pWarnCMP0063);
+    }
+
+  if (!warnCMP0063.empty() &&
+      this->WarnCMP0063.insert(target).second)
+    {
+    std::ostringstream w;
+    w <<
+      cmPolicies::GetPolicyWarning(cmPolicies::CMP0063) << "\n"
+      "Target \"" << target->GetName() << "\" of "
+      "type \"" << cmTarget::GetTargetTypeName(target->GetType()) << "\" "
+      "has the following visibility properties set for " << lang << ":\n" <<
+      warnCMP0063 <<
+      "For compatibility CMake is not honoring them for this target.";
+    target->GetMakefile()->GetCMakeInstance()
+      ->IssueMessage(cmake::AUTHOR_WARNING, w.str(), target->GetBacktrace());
     }
 }
 

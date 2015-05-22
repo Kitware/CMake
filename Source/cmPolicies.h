@@ -214,6 +214,9 @@ class cmPolicy;
     3, 3, 0, cmPolicies::WARN) \
   SELECT(POLICY, CMP0062, \
     "Disallow install() of export() result.", \
+    3, 3, 0, cmPolicies::WARN) \
+  SELECT(POLICY, CMP0063, \
+    "Honor visibility properties for all target types.", \
     3, 3, 0, cmPolicies::WARN)
 
 #define CM_SELECT_ID(F, A1, A2, A3, A4, A5, A6) F(A1)

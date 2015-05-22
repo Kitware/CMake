@@ -120,3 +120,4 @@ All Policies
    /policy/CMP0060
    /policy/CMP0061
    /policy/CMP0062
+   /policy/CMP0063

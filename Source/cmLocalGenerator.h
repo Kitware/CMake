@@ -456,6 +456,8 @@ protected:
   std::string::size_type ObjectPathMax;
   std::set<std::string> ObjectMaxPathViolations;
 
+  std::set<cmTarget const*> WarnCMP0063;
+
   bool LinkScriptShell;
   bool UseRelativePaths;
   bool Configured;
