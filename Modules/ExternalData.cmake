@@ -117,6 +117,13 @@ calling any of the functions provided by this module.
   data fetch rule created for the content link will use the staged
   object if it cannot be found using any URL template.
 
+.. variable:: ExternalData_NO_SYMLINKS
+
+  The real data files named by expanded ``DATA{}`` references may be made
+  available under ``ExternalData_BINARY_ROOT`` using symbolic links on
+  some platforms.  The ``ExternalData_NO_SYMLINKS`` variable may be set
+  to disable use of symbolic links and enable use of copies instead.
+
 .. variable:: ExternalData_OBJECT_STORES
 
   The ``ExternalData_OBJECT_STORES`` variable may be set to a list of local
@@ -842,7 +849,7 @@ function(_ExternalData_link_or_copy src dst)
   file(MAKE_DIRECTORY "${dst_dir}")
   _ExternalData_random(random)
   set(tmp "${dst}.tmp${random}")
-  if(UNIX)
+  if(UNIX AND NOT ExternalData_NO_SYMLINKS)
     # Create a symbolic link.
     set(tgt "${src}")
     if(relative_top)
