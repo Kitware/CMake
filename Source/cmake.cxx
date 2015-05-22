@@ -2432,24 +2432,15 @@ static bool cmakeCheckStampList(const char* stampList)
   return true;
 }
 
-//----------------------------------------------------------------------------
-void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
-                         cmListFileBacktrace const& bt)
+bool cmake::PrintMessagePreamble(cmake::MessageType t, std::ostream& msg)
 {
-  cmListFileBacktrace backtrace = bt;
-  backtrace.MakeRelative();
-
-  std::ostringstream msg;
-  bool isError = false;
   // Construct the message header.
   if(t == cmake::FATAL_ERROR)
     {
-    isError = true;
     msg << "CMake Error";
     }
   else if(t == cmake::INTERNAL_ERROR)
     {
-    isError = true;
     msg << "CMake Internal Error (please report a bug)";
     }
   else if(t == cmake::LOG)
@@ -2459,7 +2450,6 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
   else if(t == cmake::DEPRECATION_ERROR)
     {
     msg << "CMake Deprecation Error";
-    isError = true;
     }
   else if (t == cmake::DEPRECATION_WARNING)
     {
@@ -2475,25 +2465,24 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
                                         "CMAKE_SUPPRESS_DEVELOPER_WARNINGS");
       if(suppress && cmSystemTools::IsOn(suppress))
         {
-        return;
+        return false;
         }
       msg << " (dev)";
       }
     }
+  return true;
+}
 
-  // Add the immediate context.
-  backtrace.PrintTitle(msg);
+void printMessageText(std::ostream& msg, std::string const& text)
+{
+   msg << ":\n";
+   cmDocumentationFormatter formatter;
+   formatter.SetIndent("  ");
+   formatter.PrintFormatted(msg, text.c_str());
+}
 
-  // Add the message text.
-  {
-  msg << ":\n";
-  cmDocumentationFormatter formatter;
-  formatter.SetIndent("  ");
-  formatter.PrintFormatted(msg, text.c_str());
-  }
-
-  // Add the rest of the context.
-  backtrace.PrintCallStack(msg);
+void displayMessage(cmake::MessageType t, std::ostringstream& msg)
+{
 
   // Add a note about warning suppression.
   if(t == cmake::AUTHOR_WARNING)
@@ -2522,7 +2511,9 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
 #endif
 
   // Output the message.
-  if(isError)
+  if(t == cmake::FATAL_ERROR
+     || t == cmake::INTERNAL_ERROR
+     || t == cmake::DEPRECATION_ERROR)
     {
     cmSystemTools::SetErrorOccured();
     cmSystemTools::Message(msg.str().c_str(), "Error");
@@ -2531,6 +2522,48 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
     {
     cmSystemTools::Message(msg.str().c_str(), "Warning");
     }
+}
+
+//----------------------------------------------------------------------------
+void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
+                         cmListFileBacktrace const& bt)
+{
+  cmListFileBacktrace backtrace = bt;
+  backtrace.MakeRelative();
+
+  std::ostringstream msg;
+  if (!this->PrintMessagePreamble(t, msg))
+    {
+    return;
+    }
+
+  // Add the immediate context.
+  backtrace.PrintTitle(msg);
+
+  printMessageText(msg, text);
+
+  // Add the rest of the context.
+  backtrace.PrintCallStack(msg);
+
+  displayMessage(t, msg);
+}
+
+//----------------------------------------------------------------------------
+void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
+                         cmListFileContext const& lfc)
+{
+  std::ostringstream msg;
+  if (!this->PrintMessagePreamble(t, msg))
+    {
+    return;
+    }
+
+  // Add the immediate context.
+  msg << (lfc.Line ? " at " : " in ") << lfc;
+
+  printMessageText(msg, text);
+
+  displayMessage(t, msg);
 }
 
 //----------------------------------------------------------------------------

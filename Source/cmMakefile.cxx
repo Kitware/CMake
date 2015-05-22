@@ -249,19 +249,13 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
   // Collect context information.
-  cmLocalGenerator* localGen = this->GetLocalGenerator();
-  if(this->CallStack.empty() && this->GetCMakeInstance()->GetIsInTryCompile())
-    {
-    localGen = 0;
-    }
-  cmListFileBacktrace backtrace(localGen);
   if(!this->CallStack.empty())
     {
     if((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR))
       {
       this->CallStack.back().Status->SetNestedError(true);
       }
-    backtrace = this->GetBacktrace();
+    this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
     }
   else
     {
@@ -278,12 +272,15 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       // command.  Add whatever context information we have.
       lfc.FilePath = this->ListFileStack.back();
       }
+    if(!this->CallStack.empty()
+       || !this->GetCMakeInstance()->GetIsInTryCompile())
+      {
+      lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
+                                                   cmLocalGenerator::HOME);
+      }
     lfc.Line = 0;
-    backtrace.Append(lfc);
+    this->GetCMakeInstance()->IssueMessage(t, text, lfc);
     }
-
-  // Issue the message.
-  this->GetCMakeInstance()->IssueMessage(t, text, backtrace);
 }
 
 //----------------------------------------------------------------------------
@@ -1837,22 +1834,22 @@ void cmMakefile::LogUnused(const char* reason,
   if (this->WarnUnused)
     {
     std::string path;
-    cmListFileBacktrace bt(this->GetLocalGenerator());
+    cmListFileContext lfc;
     if (!this->CallStack.empty())
       {
-      cmListFileContext file = this->GetExecutionContext();
-      bt.Append(file);
-      path = file.FilePath;
+      lfc = this->GetExecutionContext();
+      path = lfc.FilePath;
       }
     else
       {
       path = this->GetCurrentSourceDirectory();
       path += "/CMakeLists.txt";
-      cmListFileContext lfc;
       lfc.FilePath = path;
       lfc.Line = 0;
-      bt.Append(lfc);
       }
+    lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
+                                                 cmLocalGenerator::HOME);
+
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path,
                                       this->GetHomeDirectory()) ||
@@ -1865,7 +1862,7 @@ void cmMakefile::LogUnused(const char* reason,
       msg << "unused variable (" << reason << ") \'" << name << "\'";
       this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
                                              msg.str(),
-                                             bt);
+                                             lfc);
       }
     }
 }
@@ -2769,14 +2766,13 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                                              this->GetHomeOutputDirectory()))
                 {
                 std::ostringstream msg;
-                cmListFileBacktrace bt(this->GetLocalGenerator());
                 cmListFileContext lfc;
-                lfc.FilePath = filename;
+                lfc.FilePath = this->LocalGenerator
+                    ->Convert(filename, cmLocalGenerator::HOME);
                 lfc.Line = line;
-                bt.Append(lfc);
                 msg << "uninitialized variable \'" << lookup << "\'";
                 this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,
-                                                       msg.str(), bt);
+                                                       msg.str(), lfc);
                 }
               }
             }
