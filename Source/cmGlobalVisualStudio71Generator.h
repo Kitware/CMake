@@ -54,7 +54,8 @@ protected:
   virtual void WriteSLNFile(std::ostream& fout,
                             cmLocalGenerator* root,
                             std::vector<cmLocalGenerator*>& generators);
-  virtual void WriteSolutionConfigurations(std::ostream& fout);
+  virtual void WriteSolutionConfigurations(
+    std::ostream& fout, std::vector<std::string> const& configs);
   virtual void WriteProject(std::ostream& fout,
                             const std::string& name, const char* path,
                             cmTarget const& t);
@@ -63,6 +64,7 @@ protected:
                            cmTarget const& t);
   virtual void WriteProjectConfigurations(
     std::ostream& fout, const std::string& name, cmTarget::TargetType type,
+    std::vector<std::string> const& configs,
     const std::set<std::string>& configsPartOfDefaultBuild,
     const std::string& platformMapping = "");
   virtual void WriteExternalProject(std::ostream& fout,

@@ -339,17 +339,14 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
     }
 }
 
-void cmLocalVisualStudio7Generator::WriteConfigurations(std::ostream& fout,
-                                                   const std::string& libName,
-                                                   cmTarget &target)
+void cmLocalVisualStudio7Generator::WriteConfigurations(
+  std::ostream& fout, std::vector<std::string> const& configs,
+  const std::string& libName, cmTarget &target
+  )
 {
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
-
   fout << "\t<Configurations>\n";
-  for( std::vector<std::string>::iterator i = configs->begin();
-       i != configs->end(); ++i)
+  for (std::vector<std::string>::const_iterator i = configs.begin();
+       i != configs.end(); ++i)
     {
     this->WriteConfiguration(fout, i->c_str(), libName, target);
     }
@@ -1468,10 +1465,8 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
                                                     const std::string& libName,
                                                     cmTarget &target)
 {
-  // get the configurations
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
+  std::vector<std::string> configs;
+  this->Makefile->GetConfigurations(configs);
 
   // We may be modifying the source groups temporarily, so make a copy.
   std::vector<cmSourceGroup> sourceGroups = this->Makefile->GetSourceGroups();
@@ -1504,7 +1499,7 @@ void cmLocalVisualStudio7Generator::WriteVCProjFile(std::ostream& fout,
   // open the project
   this->WriteProjectStart(fout, libName, target, sourceGroups);
   // write the configuration information
-  this->WriteConfigurations(fout, libName, target);
+  this->WriteConfigurations(fout, configs, libName, target);
 
   fout << "\t<Files>\n";
 
@@ -1561,7 +1556,7 @@ public:
   cmLocalVisualStudio7GeneratorFCInfo(cmLocalVisualStudio7Generator* lg,
                                       cmTarget& target,
                                       cmSourceFile const& sf,
-                                      std::vector<std::string>* configs);
+                                      std::vector<std::string> const& configs);
   std::map<std::string, cmLVS7GFileConfig> FileConfigMap;
 };
 
@@ -1569,7 +1564,7 @@ cmLocalVisualStudio7GeneratorFCInfo
 ::cmLocalVisualStudio7GeneratorFCInfo(cmLocalVisualStudio7Generator* lg,
                                       cmTarget& target,
                                       cmSourceFile const& sf,
-                                      std::vector<std::string>* configs)
+                                      std::vector<std::string> const& configs)
 {
   cmGeneratorTarget* gt =
     lg->GetGlobalGenerator()->GetGeneratorTarget(&target);
@@ -1580,8 +1575,8 @@ cmLocalVisualStudio7GeneratorFCInfo
     }
 
   // Compute per-source, per-config information.
-  for(std::vector<std::string>::iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::const_iterator i = configs.begin();
+      i != configs.end(); ++i)
     {
     std::string configUpper = cmSystemTools::UpperCase(*i);
     cmLVS7GFileConfig fc;
@@ -1691,13 +1686,13 @@ std::string
 cmLocalVisualStudio7Generator
 ::ComputeLongestObjectDirectory(cmTarget& target) const
 {
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
+  std::vector<std::string> configs;
+  target.GetMakefile()->GetConfigurations(configs);
+
   // Compute the maximum length configuration name.
   std::string config_max;
-  for(std::vector<std::string>::iterator i = configs->begin();
-      i != configs->end(); ++i)
+  for(std::vector<std::string>::iterator i = configs.begin();
+      i != configs.end(); ++i)
     {
     if(i->size() > config_max.size())
       {
@@ -1721,7 +1716,7 @@ cmLocalVisualStudio7Generator
 bool cmLocalVisualStudio7Generator
 ::WriteGroup(const cmSourceGroup *sg, cmTarget& target,
              std::ostream &fout, const std::string& libName,
-             std::vector<std::string> *configs)
+             std::vector<std::string> const& configs)
 {
   cmGlobalVisualStudio7Generator* gg =
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
@@ -1771,7 +1766,8 @@ bool cmLocalVisualStudio7Generator
       fout << "\t\t\t\tRelativePath=\"" << d << "\">\n";
       if(cmCustomCommand const* command = (*sf)->GetCustomCommand())
         {
-        this->WriteCustomRule(fout, source.c_str(), *command, fcinfo);
+        this->WriteCustomRule(fout, configs, source.c_str(),
+                              *command, fcinfo);
         }
       else if(!fcinfo.FileConfigMap.empty())
         {
@@ -1887,6 +1883,7 @@ bool cmLocalVisualStudio7Generator
 
 void cmLocalVisualStudio7Generator::
 WriteCustomRule(std::ostream& fout,
+                std::vector<std::string> const& configs,
                 const char* source,
                 const cmCustomCommand& command,
                 FCInfo& fcinfo)
@@ -1895,10 +1892,6 @@ WriteCustomRule(std::ostream& fout,
     static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
 
   // Write the rule for each configuration.
-  std::vector<std::string>::iterator i;
-  std::vector<std::string> *configs =
-    static_cast<cmGlobalVisualStudio7Generator *>
-    (this->GlobalGenerator)->GetConfigurations();
   const char* compileTool = "VCCLCompilerTool";
   if(this->FortranProject)
     {
@@ -1909,7 +1902,8 @@ WriteCustomRule(std::ostream& fout,
     {
     customTool = "VFCustomBuildTool";
     }
-  for(i = configs->begin(); i != configs->end(); ++i)
+  for (std::vector<std::string>::const_iterator i = configs.begin();
+       i != configs.end(); ++i)
     {
     cmCustomCommandGenerator ccg(command, *i, this->Makefile);
     cmLVS7GFileConfig const& fc = fcinfo.FileConfigMap[*i];

@@ -77,6 +77,7 @@ private:
   void WriteVCProjFile(std::ostream& fout, const std::string& libName,
                        cmTarget &tgt);
   void WriteConfigurations(std::ostream& fout,
+                           std::vector<std::string> const& configs,
                            const std::string& libName, cmTarget &tgt);
   void WriteConfiguration(std::ostream& fout,
                           const std::string& configName,
@@ -101,6 +102,7 @@ private:
   void WriteVCProjEndGroup(std::ostream& fout);
 
   void WriteCustomRule(std::ostream& fout,
+                       std::vector<std::string> const& configs,
                        const char* source,
                        const cmCustomCommand& command,
                        FCInfo& fcinfo);
@@ -109,7 +111,7 @@ private:
   bool WriteGroup(const cmSourceGroup *sg,
                   cmTarget& target, std::ostream &fout,
                   const std::string& libName,
-                  std::vector<std::string> *configs);
+                  std::vector<std::string> const& configs);
 
   friend class cmLocalVisualStudio7GeneratorFCInfo;
   friend class cmLocalVisualStudio7GeneratorInternals;
