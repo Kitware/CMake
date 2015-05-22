@@ -88,8 +88,6 @@
 # include "cmGlobalKdevelopGenerator.h"
 #endif
 
-#include "cmExtraQbsGenerator.h"
-
 #ifdef CMAKE_USE_ECLIPSE
 # include "cmExtraEclipseCDT4Generator.h"
 #endif
@@ -902,8 +900,6 @@ void cmake::AddDefaultExtraGenerators()
                           &cmExtraSublimeTextGenerator::New);
   this->AddExtraGenerator(cmExtraKateGenerator::GetActualName(),
                           &cmExtraKateGenerator::New);
-  this->AddExtraGenerator(cmExtraQbsGenerator::GetActualName(),
-                          &cmExtraQbsGenerator::New);
 
 #ifdef CMAKE_USE_ECLIPSE
   this->AddExtraGenerator(cmExtraEclipseCDT4Generator::GetActualName(),
