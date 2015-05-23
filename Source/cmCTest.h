@@ -274,11 +274,9 @@ public:
   static std::string SafeBuildIdField(const std::string& value);
 
   //! Start CTest XML output file
-  void StartXML(std::ostream& ostr, bool append);
   void StartXML(cmXMLWriter& xml, bool append);
 
   //! End CTest XML output file
-  void EndXML(std::ostream& ostr);
   void EndXML(cmXMLWriter& xml);
 
   //! Run command specialized for make and configure. Returns process status
@@ -423,7 +421,6 @@ public:
   /** Direct process output to given streams.  */
   void SetStreams(std::ostream* out, std::ostream* err)
     { this->StreamOut = out; this->StreamErr = err; }
-  void AddSiteProperties(std::ostream& );
   void AddSiteProperties(cmXMLWriter& xml);
   bool GetLabelSummary() { return this->LabelSummary;}
 
