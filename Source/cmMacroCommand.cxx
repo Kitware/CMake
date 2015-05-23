@@ -139,10 +139,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
            this->Functions[c].Arguments.begin();
          k != this->Functions[c].Arguments.end(); ++k)
       {
-      // Set the FilePath on the arguments to match the function since it is
-      // not stored and the original values may be freed
-      k->FilePath = this->FilePath.c_str();
-
       cmListFileArgument arg;
       arg.Value = k->Value;
       if(k->Delim != cmListFileArgument::Bracket)
@@ -173,7 +169,6 @@ bool cmMacroHelperCommand::InvokeInitialPass
           }
         }
       arg.Delim = k->Delim;
-      arg.FilePath = k->FilePath;
       arg.Line = k->Line;
       newLFF.Arguments.push_back(arg);
       }

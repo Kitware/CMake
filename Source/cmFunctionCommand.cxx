@@ -176,17 +176,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
 
-      // Set the FilePath on the arguments to match the function since it is
-      // not stored and the original values may be freed
-      for (unsigned int i = 0; i < f->Functions.size(); ++i)
-        {
-        for (unsigned int j = 0; j < f->Functions[i].Arguments.size(); ++j)
-          {
-          f->Functions[i].Arguments[j].FilePath =
-            f->Functions[i].FilePath.c_str();
-          }
-        }
-
       std::string newName = "_" + this->Args[0];
       mf.GetState()->RenameCommand(this->Args[0], newName);
       mf.GetState()->AddCommand(f);
