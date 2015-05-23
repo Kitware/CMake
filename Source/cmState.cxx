@@ -22,6 +22,24 @@ struct cmState::SnapshotDataType
 {
   cmState::PositionType DirectoryParent;
   cmState::SnapshotType SnapshotType;
+  std::vector<cmState::BuildsystemDirectoryStateType>::size_type
+                                                  BuildSystemDirectoryPosition;
+};
+
+struct cmState::BuildsystemDirectoryStateType
+{
+  std::string Location;
+  std::string OutputLocation;
+
+  std::vector<std::string> CurrentSourceDirectoryComponents;
+  std::vector<std::string> CurrentBinaryDirectoryComponents;
+  // The top-most directories for relative path conversion.  Both the
+  // source and destination location of a relative path conversion
+  // must be underneath one of these directories (both under source or
+  // both under binary) in order for the relative path to be evaluated
+  // safely by the build tools.
+  std::string RelativePathTopSource;
+  std::string RelativePathTopBinary;
 };
 
 cmState::cmState(cmake* cm)
@@ -206,29 +224,13 @@ void cmState::Reset()
   this->GlobalProperties.clear();
   this->PropertyDefinitions.clear();
 
-  assert(this->Locations.size() > 0);
-  assert(this->OutputLocations.size() > 0);
+  assert(this->BuildsystemDirectory.size() > 0);
   assert(this->SnapshotData.size() > 0);
-  assert(this->CurrentSourceDirectoryComponents.size() > 0);
-  assert(this->CurrentBinaryDirectoryComponents.size() > 0);
-  assert(this->RelativePathTopSource.size() > 0);
-  assert(this->RelativePathTopBinary.size() > 0);
 
-  this->Locations.erase(this->Locations.begin() + 1, this->Locations.end());
-  this->OutputLocations.erase(this->OutputLocations.begin() + 1,
-                              this->OutputLocations.end());
+  this->BuildsystemDirectory.erase(this->BuildsystemDirectory.begin() + 1,
+                              this->BuildsystemDirectory.end());
   this->SnapshotData.erase(this->SnapshotData.begin() + 1,
                            this->SnapshotData.end());
-  this->CurrentSourceDirectoryComponents.erase(
-        this->CurrentSourceDirectoryComponents.begin() + 1,
-        this->CurrentSourceDirectoryComponents.end());
-  this->CurrentBinaryDirectoryComponents.erase(
-        this->CurrentBinaryDirectoryComponents.begin() + 1,
-        this->CurrentBinaryDirectoryComponents.end());
-  this->RelativePathTopSource.erase(this->RelativePathTopSource.begin() + 1,
-                                    this->RelativePathTopSource.end());
-  this->RelativePathTopBinary.erase(this->RelativePathTopBinary.begin() + 1,
-                                    this->RelativePathTopBinary.end());
 
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -618,7 +620,9 @@ void cmState::Snapshot::ComputeRelativePathTopSource()
       result = currentSource;
       }
     }
-  this->State->RelativePathTopSource[this->Position] = result;
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  this->State->BuildsystemDirectory[pos].RelativePathTopSource = result;
 }
 
 void cmState::Snapshot::ComputeRelativePathTopBinary()
@@ -652,16 +656,18 @@ void cmState::Snapshot::ComputeRelativePathTopBinary()
       }
     }
 
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
   // The current working directory on Windows cannot be a network
   // path.  Therefore relative paths cannot work when the binary tree
   // is a network path.
   if(result.size() < 2 || result.substr(0, 2) != "//")
     {
-    this->State->RelativePathTopBinary[this->Position] = result;
+    this->State->BuildsystemDirectory[pos].RelativePathTopBinary = result;
     }
   else
     {
-    this->State->RelativePathTopBinary[this->Position] = "";
+    this->State->BuildsystemDirectory[pos].RelativePathTopBinary = "";
     }
 }
 
@@ -672,12 +678,8 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
   SnapshotDataType& snp = this->SnapshotData.back();
   snp.DirectoryParent = 0;
   snp.SnapshotType = BuildsystemDirectoryType;
-  this->Locations.resize(1);
-  this->OutputLocations.resize(1);
-  this->CurrentSourceDirectoryComponents.resize(1);
-  this->CurrentBinaryDirectoryComponents.resize(1);
-  this->RelativePathTopSource.resize(1);
-  this->RelativePathTopBinary.resize(1);
+  snp.BuildSystemDirectoryPosition = 0;
+  this->BuildsystemDirectory.resize(1);
   return cmState::Snapshot(this, pos);
 }
 
@@ -690,14 +692,8 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
   SnapshotDataType& snp = this->SnapshotData.back();
   snp.DirectoryParent = originSnapshot.Position;
   snp.SnapshotType = BuildsystemDirectoryType;
-  this->Locations.resize(this->Locations.size() + 1);
-  this->OutputLocations.resize(this->OutputLocations.size() + 1);
-  this->CurrentSourceDirectoryComponents.resize(
-      this->CurrentSourceDirectoryComponents.size() + 1);
-  this->CurrentBinaryDirectoryComponents.resize(
-      this->CurrentBinaryDirectoryComponents.size() + 1);
-  this->RelativePathTopSource.resize(this->RelativePathTopSource.size() + 1);
-  this->RelativePathTopBinary.resize(this->RelativePathTopBinary.size() + 1);
+  snp.BuildSystemDirectoryPosition = this->BuildsystemDirectory.size();
+  this->BuildsystemDirectory.resize(this->BuildsystemDirectory.size() + 1);
   return cmState::Snapshot(this, pos);
 }
 
@@ -710,76 +706,95 @@ cmState::Snapshot::Snapshot(cmState* state, PositionType position)
 
 const char* cmState::Snapshot::GetCurrentSourceDirectory() const
 {
-  return this->State->Locations[this->Position].c_str();
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  return this->State->BuildsystemDirectory[pos].Location.c_str();
 }
 
 void cmState::Snapshot::SetCurrentSourceDirectory(std::string const& dir)
 {
   assert(this->State);
-  assert(this->State->Locations.size() > this->Position);
-  this->State->Locations[this->Position] = dir;
-  cmSystemTools::ConvertToUnixSlashes(
-      this->State->Locations[this->Position]);
-  this->State->Locations[this->Position] =
-    cmSystemTools::CollapseFullPath(this->State->Locations[this->Position]);
+  assert(this->State->SnapshotData.size() > this->Position);
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  std::string& loc = this->State->BuildsystemDirectory[pos].Location;
+  loc = dir;
+  cmSystemTools::ConvertToUnixSlashes(loc);
+  loc = cmSystemTools::CollapseFullPath(loc);
 
   cmSystemTools::SplitPath(
-      this->State->Locations[this->Position],
-      this->State->CurrentSourceDirectoryComponents[this->Position]);
+      loc,
+      this->State->BuildsystemDirectory[pos].CurrentSourceDirectoryComponents);
   this->ComputeRelativePathTopSource();
 }
 
 const char* cmState::Snapshot::GetCurrentBinaryDirectory() const
 {
-  return this->State->OutputLocations[this->Position].c_str();
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  return this->State->BuildsystemDirectory[pos].OutputLocation.c_str();
 }
 
 void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
 {
-  assert(this->State->OutputLocations.size() > this->Position);
-  this->State->OutputLocations[this->Position] = dir;
-  cmSystemTools::ConvertToUnixSlashes(
-      this->State->OutputLocations[this->Position]);
-  this->State->OutputLocations[this->Position] =
-    cmSystemTools::CollapseFullPath(
-        this->State->OutputLocations[this->Position]);
+  assert(this->State->SnapshotData.size() > this->Position);
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  std::string& loc = this->State->BuildsystemDirectory[pos].OutputLocation;
+  loc = dir;
+  cmSystemTools::ConvertToUnixSlashes(loc);
+  loc = cmSystemTools::CollapseFullPath(loc);
 
   cmSystemTools::SplitPath(
-      this->State->OutputLocations[this->Position],
-      this->State->CurrentBinaryDirectoryComponents[this->Position]);
+      loc,
+      this->State->BuildsystemDirectory[pos].CurrentBinaryDirectoryComponents);
   this->ComputeRelativePathTopBinary();
 }
 
 std::vector<std::string> const&
 cmState::Snapshot::GetCurrentSourceDirectoryComponents()
 {
-  return this->State->CurrentSourceDirectoryComponents[this->Position];
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  return this->State
+      ->BuildsystemDirectory[pos].CurrentSourceDirectoryComponents;
 }
 
 std::vector<std::string> const&
 cmState::Snapshot::GetCurrentBinaryDirectoryComponents()
 {
-  return this->State->CurrentBinaryDirectoryComponents[this->Position];
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  return this->State
+      ->BuildsystemDirectory[pos].CurrentBinaryDirectoryComponents;
 }
 
 const char* cmState::Snapshot::GetRelativePathTopSource() const
 {
-  return this->State->RelativePathTopSource[this->Position].c_str();
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  return this->State->BuildsystemDirectory[pos].RelativePathTopSource.c_str();
 }
 
 const char* cmState::Snapshot::GetRelativePathTopBinary() const
 {
-  return this->State->RelativePathTopBinary[this->Position].c_str();
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  return this->State->BuildsystemDirectory[pos].RelativePathTopBinary.c_str();
 }
 
 void cmState::Snapshot::SetRelativePathTopSource(const char* dir)
 {
-  this->State->RelativePathTopSource[this->Position] = dir;
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  this->State->BuildsystemDirectory[pos].RelativePathTopSource = dir;
 }
 
 void cmState::Snapshot::SetRelativePathTopBinary(const char* dir)
 {
-  this->State->RelativePathTopBinary[this->Position] = dir;
+  PositionType pos =
+      this->State->SnapshotData[this->Position].BuildSystemDirectoryPosition;
+  this->State->BuildsystemDirectory[pos].RelativePathTopBinary = dir;
 }
 
 bool cmState::Snapshot::IsValid() const

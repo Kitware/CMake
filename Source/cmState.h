@@ -164,19 +164,11 @@ private:
   std::map<std::string, cmCommand*> Commands;
   cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
-  std::vector<std::string> Locations;
-  std::vector<std::string> OutputLocations;
-  std::vector<SnapshotDataType> SnapshotData;
 
-  std::vector<std::vector<std::string> > CurrentSourceDirectoryComponents;
-  std::vector<std::vector<std::string> > CurrentBinaryDirectoryComponents;
-  // The top-most directories for relative path conversion.  Both the
-  // source and destination location of a relative path conversion
-  // must be underneath one of these directories (both under source or
-  // both under binary) in order for the relative path to be evaluated
-  // safely by the build tools.
-  std::vector<std::string> RelativePathTopSource;
-  std::vector<std::string> RelativePathTopBinary;
+  struct BuildsystemDirectoryStateType;
+  std::vector<BuildsystemDirectoryStateType> BuildsystemDirectory;
+
+  std::vector<SnapshotDataType> SnapshotData;
 
   std::vector<std::string> SourceDirectoryComponents;
   std::vector<std::string> BinaryDirectoryComponents;
