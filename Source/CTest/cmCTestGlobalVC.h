@@ -30,7 +30,7 @@ public:
 
 protected:
   // Implement cmCTestVC internal API.
-  virtual bool WriteXMLUpdates(std::ostream& xml);
+  virtual bool WriteXMLUpdates(cmXMLWriter& xml);
 
   /** Represent a vcs-reported action for one path in a revision.  */
   struct Change
@@ -62,8 +62,8 @@ protected:
   virtual void LoadModifications() = 0;
   virtual void LoadRevisions() = 0;
 
-  virtual void WriteXMLGlobal(std::ostream& xml);
-  void WriteXMLDirectory(std::ostream& xml, std::string const& path,
+  virtual void WriteXMLGlobal(cmXMLWriter& xml);
+  void WriteXMLDirectory(cmXMLWriter& xml, std::string const& path,
                          Directory const& dir);
 };
 

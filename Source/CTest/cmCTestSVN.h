@@ -84,7 +84,7 @@ private:
   void DoRevisionSVN(Revision const& revision,
                      std::vector<Change> const& changes);
 
-  void WriteXMLGlobal(std::ostream& xml);
+  void WriteXMLGlobal(cmXMLWriter& xml);
 
   // Parsing helper classes.
   class InfoParser;

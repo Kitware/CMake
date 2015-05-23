@@ -14,7 +14,7 @@
 #include "cmCTest.h"
 #include "cmSystemTools.h"
 #include "cmXMLParser.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 
 #include <cmsys/RegularExpression.hxx>
 
@@ -535,11 +535,11 @@ void cmCTestSVN::LoadModifications()
 }
 
 //----------------------------------------------------------------------------
-void cmCTestSVN::WriteXMLGlobal(std::ostream& xml)
+void cmCTestSVN::WriteXMLGlobal(cmXMLWriter& xml)
 {
   this->cmCTestGlobalVC::WriteXMLGlobal(xml);
 
-  xml << "\t<SVNPath>" << this->RootInfo->Base << "</SVNPath>\n";
+  xml.Element("SVNPath", this->RootInfo->Base);
 }
 
 //----------------------------------------------------------------------------

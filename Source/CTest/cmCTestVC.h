@@ -15,6 +15,7 @@
 #include "cmProcessTools.h"
 
 class cmCTest;
+class cmXMLWriter;
 
 /** \class cmCTestVC
  * \brief Base class for version control system handlers
@@ -51,7 +52,7 @@ public:
     { return this->UpdateCommandLine; }
 
   /** Write Update.xml entries for the updates found.  */
-  bool WriteXML(std::ostream& xml);
+  bool WriteXML(cmXMLWriter& xml);
 
   /** Enumerate non-trivial working tree states during update.  */
   enum PathStatus { PathUpdated, PathModified, PathConflicting };
@@ -65,7 +66,7 @@ protected:
   virtual void NoteOldRevision();
   virtual bool UpdateImpl();
   virtual void NoteNewRevision();
-  virtual bool WriteXMLUpdates(std::ostream& xml);
+  virtual bool WriteXMLUpdates(cmXMLWriter& xml);
 
 #if defined(__SUNPRO_CC) && __SUNPRO_CC <= 0x510
 public: // Sun CC 5.1 needs help to allow cmCTestSVN::Revision to see this
@@ -110,7 +111,7 @@ protected:
                         OutputParser* out, OutputParser* err = 0);
 
   /** Write xml element for one file.  */
-  void WriteXMLEntry(std::ostream& xml, std::string const& path,
+  void WriteXMLEntry(cmXMLWriter& xml, std::string const& path,
                      std::string const& name, std::string const& full,
                      File const& f);
 
