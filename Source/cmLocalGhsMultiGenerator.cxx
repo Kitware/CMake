@@ -37,21 +37,3 @@ void cmLocalGhsMultiGenerator::Generate()
       }
     }
 }
-
-// Implemented in:
-//   cmLocalGenerator.
-// Used in:
-//   Source/cmMakefile.cxx
-//   Source/cmGlobalGenerator.cxx
-void cmLocalGhsMultiGenerator::Configure()
-{
-  // Compute the path to use when referencing the current output
-  // directory from the top output directory.
-  this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
-  if (this->HomeRelativeOutputPath == ".")
-    {
-    this->HomeRelativeOutputPath = "";
-    }
-  this->cmLocalGenerator::Configure();
-}

@@ -29,20 +29,11 @@ public:
 
   virtual ~cmLocalGhsMultiGenerator();
 
-  /// @returns the relative path between the HomeOutputDirectory and this
-  /// local generators StartOutputDirectory.
-  std::string GetHomeRelativeOutputPath() const
-  {
-    return this->HomeRelativeOutputPath;
-  }
-
   /**
    * Generate the makefile for this directory.
    */
   virtual void Generate();
 
-  /// Overloaded methods. @see cmLocalGenerator::Configure()
-  virtual void Configure();
   const char *GetBuildFileName() { return this->BuildFileName.c_str(); }
 
 protected:
@@ -50,7 +41,6 @@ protected:
 
 private:
   std::string BuildFileName;
-  std::string HomeRelativeOutputPath;
 };
 
 #endif
