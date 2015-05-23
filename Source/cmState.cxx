@@ -590,7 +590,7 @@ void cmState::Snapshot::ComputeRelativePathTopSource()
   snapshots.push_back(snapshot);
   while (true)
     {
-    snapshot = snapshot.GetParent();
+    snapshot = snapshot.GetBuildsystemDirectoryParent();
     if (snapshot.IsValid())
       {
       snapshots.push_back(snapshot);
@@ -622,7 +622,7 @@ void cmState::Snapshot::ComputeRelativePathTopBinary()
   snapshots.push_back(snapshot);
   while (true)
     {
-    snapshot = snapshot.GetParent();
+    snapshot = snapshot.GetBuildsystemDirectoryParent();
     if (snapshot.IsValid())
       {
       snapshots.push_back(snapshot);
@@ -775,7 +775,7 @@ bool cmState::Snapshot::IsValid() const
   return this->State ? true : false;
 }
 
-cmState::Snapshot cmState::Snapshot::GetParent() const
+cmState::Snapshot cmState::Snapshot::GetBuildsystemDirectoryParent() const
 {
   Snapshot snapshot;
   if (!this->State || this->Position == 0)

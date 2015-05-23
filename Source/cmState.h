@@ -45,7 +45,7 @@ public:
     void SetRelativePathTopBinary(const char* dir);
 
     bool IsValid() const;
-    Snapshot GetParent() const;
+    Snapshot GetBuildsystemDirectoryParent() const;
 
   private:
     void ComputeRelativePathTopSource();

@@ -4038,7 +4038,8 @@ const char *cmMakefile::GetProperty(const std::string& prop,
   output = "";
   if (prop == "PARENT_DIRECTORY")
     {
-    cmState::Snapshot parent = this->StateSnapshot.GetParent();
+    cmState::Snapshot parent =
+        this->StateSnapshot.GetBuildsystemDirectoryParent();
     if(parent.IsValid())
       {
       return parent.GetCurrentSourceDirectory();
