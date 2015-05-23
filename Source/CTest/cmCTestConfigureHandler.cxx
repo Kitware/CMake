@@ -95,11 +95,6 @@ int cmCTestConfigureHandler::ProcessHandler()
          << std::endl
          << "\t<StartConfigureTime>" << start_time_time
          << "</StartConfigureTime>\n";
-
-      if ( res == cmsysProcess_State_Exited && retVal )
-        {
-        os << retVal;
-        }
       os << "<ConfigureCommand>" << cCommand << "</ConfigureCommand>"
         << std::endl;
       cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
