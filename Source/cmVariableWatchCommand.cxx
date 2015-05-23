@@ -68,11 +68,8 @@ static void cmVariableWatchCommandVariableAccessed(
     cmExecutionStatus status;
     if(!makefile->ExecuteCommand(newLFF,status))
       {
-      arg.FilePath =  "Unknown";
-      arg.Line = 0;
       std::ostringstream error;
-      error << "Error in cmake code at\n"
-        << arg.FilePath << ":" << arg.Line << ":\n"
+      error << "Error in cmake code at\nUnknown:0:\n"
         << "A command failed during the invocation of callback \""
         << data->Command << "\".";
       cmSystemTools::Error(error.str().c_str());
