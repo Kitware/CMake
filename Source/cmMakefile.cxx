@@ -519,8 +519,10 @@ bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
   std::string curSrc = this->GetCurrentSourceDirectory();
-  return this->ReadListFile(listfile, true,
-                            curSrc == this->GetHomeDirectory());
+  bool result = this->ReadListFile(listfile, true,
+                                   curSrc == this->GetHomeDirectory());
+  this->EnforceDirectoryLevelRules();
+  return result;
 }
 
 bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
@@ -618,13 +620,6 @@ bool cmMakefile::ReadListFileInternal(const char* filenametoread,
       }
     }
   }
-
-  // If this is the directory-level CMakeLists.txt file then perform
-  // some extra checks.
-  if(this->ListFileStack.size() == 1)
-    {
-    this->EnforceDirectoryLevelRules();
-    }
 
   return true;
 }
