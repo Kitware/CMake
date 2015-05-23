@@ -2519,7 +2519,6 @@ void cmake::IssueMessage(cmake::MessageType t, std::string const& text,
                          cmListFileBacktrace const& bt)
 {
   cmListFileBacktrace backtrace = bt;
-  backtrace.MakeRelative();
 
   std::ostringstream msg;
   if (!this->PrintMessagePreamble(t, msg))

@@ -405,29 +405,17 @@ void cmListFileBacktrace::Append(cmListFileContext const& context)
   this->push_back(context);
 }
 
-//----------------------------------------------------------------------------
-void cmListFileBacktrace::MakeRelative()
-{
-  if (this->Relative)
-    {
-    return;
-    }
-  for (cmListFileBacktrace::iterator i = this->begin();
-       i != this->end(); ++i)
-    {
-    i->FilePath = this->LocalGenerator->Convert(i->FilePath,
-                                                cmLocalGenerator::HOME);
-    }
-  this->Relative = true;
-}
-
 void cmListFileBacktrace::PrintTitle(std::ostream& out)
 {
   if (this->empty())
     {
     return;
     }
-  out << (this->front().Line ? " at " : " in ") << this->front();
+
+  cmListFileContext lfc = this->front();
+  lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
+                                               cmLocalGenerator::HOME);
+  out << (lfc.Line ? " at " : " in ") << lfc;
 }
 
 void cmListFileBacktrace::PrintCallStack(std::ostream& out)
@@ -441,7 +429,9 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out)
   out << "Call Stack (most recent call first):\n";
   while(i != this->end())
     {
-    cmListFileContext const& lfc = *i;
+    cmListFileContext lfc = *i;
+    lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
+                                                 cmLocalGenerator::HOME);
     out << "  " << lfc << "\n";
     ++i;
     }
