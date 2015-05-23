@@ -18,6 +18,12 @@
 
 #include <assert.h>
 
+struct cmState::SnapshotDataType
+{
+  cmState::PositionType DirectoryParent;
+  cmState::SnapshotType SnapshotType;
+};
+
 cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
     IsInTryCompile(false),
@@ -202,7 +208,7 @@ void cmState::Reset()
 
   assert(this->Locations.size() > 0);
   assert(this->OutputLocations.size() > 0);
-  assert(this->ParentPositions.size() > 0);
+  assert(this->SnapshotData.size() > 0);
   assert(this->CurrentSourceDirectoryComponents.size() > 0);
   assert(this->CurrentBinaryDirectoryComponents.size() > 0);
   assert(this->RelativePathTopSource.size() > 0);
@@ -211,8 +217,8 @@ void cmState::Reset()
   this->Locations.erase(this->Locations.begin() + 1, this->Locations.end());
   this->OutputLocations.erase(this->OutputLocations.begin() + 1,
                               this->OutputLocations.end());
-  this->ParentPositions.erase(this->ParentPositions.begin() + 1,
-                              this->ParentPositions.end());
+  this->SnapshotData.erase(this->SnapshotData.begin() + 1,
+                           this->SnapshotData.end());
   this->CurrentSourceDirectoryComponents.erase(
         this->CurrentSourceDirectoryComponents.begin() + 1,
         this->CurrentSourceDirectoryComponents.end());
@@ -662,7 +668,10 @@ void cmState::Snapshot::ComputeRelativePathTopBinary()
 cmState::Snapshot cmState::CreateBaseSnapshot()
 {
   PositionType pos = 0;
-  this->ParentPositions.push_back(pos);
+  this->SnapshotData.resize(1);
+  SnapshotDataType& snp = this->SnapshotData.back();
+  snp.DirectoryParent = 0;
+  snp.SnapshotType = BuildsystemDirectoryType;
   this->Locations.resize(1);
   this->OutputLocations.resize(1);
   this->CurrentSourceDirectoryComponents.resize(1);
@@ -676,8 +685,11 @@ cmState::Snapshot
 cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
 {
   assert(originSnapshot.IsValid());
-  PositionType pos = this->ParentPositions.size();
-  this->ParentPositions.push_back(originSnapshot.Position);
+  PositionType pos = this->SnapshotData.size();
+  this->SnapshotData.resize(this->SnapshotData.size() + 1);
+  SnapshotDataType& snp = this->SnapshotData.back();
+  snp.DirectoryParent = originSnapshot.Position;
+  snp.SnapshotType = BuildsystemDirectoryType;
   this->Locations.resize(this->Locations.size() + 1);
   this->OutputLocations.resize(this->OutputLocations.size() + 1);
   this->CurrentSourceDirectoryComponents.resize(
@@ -782,7 +794,8 @@ cmState::Snapshot cmState::Snapshot::GetBuildsystemDirectoryParent() const
     {
     return snapshot;
     }
-  PositionType parentPos = this->State->ParentPositions[this->Position];
+  PositionType parentPos =
+      this->State->SnapshotData[this->Position].DirectoryParent;
   snapshot = Snapshot(this->State, parentPos);
 
   return snapshot;

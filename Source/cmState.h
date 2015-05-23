@@ -21,11 +21,17 @@ class cmCommand;
 
 class cmState
 {
+  struct SnapshotDataType;
   typedef std::vector<std::string>::size_type PositionType;
   friend class Snapshot;
 public:
   cmState(cmake* cm);
   ~cmState();
+
+  enum SnapshotType
+  {
+    BuildsystemDirectoryType
+  };
 
   class Snapshot {
   public:
@@ -160,7 +166,7 @@ private:
   cmake* CMakeInstance;
   std::vector<std::string> Locations;
   std::vector<std::string> OutputLocations;
-  std::vector<PositionType> ParentPositions;
+  std::vector<SnapshotDataType> SnapshotData;
 
   std::vector<std::vector<std::string> > CurrentSourceDirectoryComponents;
   std::vector<std::vector<std::string> > CurrentBinaryDirectoryComponents;
