@@ -260,18 +260,10 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
   else
     {
     cmListFileContext lfc;
-    if(this->ListFileStack.empty())
-      {
-      // We are not processing the project.  Add the directory-level context.
-      lfc.FilePath = this->GetCurrentSourceDirectory();
-      lfc.FilePath += "/CMakeLists.txt";
-      }
-    else
-      {
-      // We are processing the project but are not currently executing a
-      // command.  Add whatever context information we have.
-      lfc.FilePath = this->ListFileStack.back();
-      }
+    // We are not currently executing a command.  Add whatever context
+    // information we have.
+    lfc.FilePath = this->ListFileStack.back();
+
     if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
       lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
@@ -535,12 +527,16 @@ bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
                       this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
-  return this->ReadListFile(listfile, noPolicyScope, false);
+  bool result = this->ReadListFile(listfile, noPolicyScope, false);
+  this->ListFileStack.pop_back();
+  return result;
 }
 
 bool cmMakefile::ReadListFile(const char* listfile)
 {
-  return this->ReadListFile(listfile, true, false);
+  bool result = this->ReadListFile(listfile, true, false);
+  this->ListFileStack.pop_back();
+  return result;
 }
 
 bool cmMakefile::ReadListFile(const char* listfile,
@@ -576,8 +572,6 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  this->ListFileStack.pop_back();
 
   if (res)
     {
