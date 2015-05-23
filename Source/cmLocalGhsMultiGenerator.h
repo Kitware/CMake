@@ -34,13 +34,8 @@ public:
    */
   virtual void Generate();
 
-  const char *GetBuildFileName() { return this->BuildFileName.c_str(); }
-
 protected:
   virtual bool CustomCommandUseLocal() const { return true; }
-
-private:
-  std::string BuildFileName;
 };
 
 #endif
