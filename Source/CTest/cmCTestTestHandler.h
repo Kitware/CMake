@@ -128,7 +128,7 @@ public:
     bool        CompressOutput;
     std::string CompletionStatus;
     std::string Output;
-    std::string RegressionImages;
+    std::string DartString;
     int         TestCount;
     cmCTestTestProperties* Properties;
   };
@@ -270,7 +270,7 @@ private:
   cmsys::RegularExpression IncludeTestsRegularExpression;
   cmsys::RegularExpression ExcludeTestsRegularExpression;
 
-  std::string GenerateRegressionImages(const std::string& xml);
+  void GenerateRegressionImages(std::ostream& ostr, const std::string& xml);
   cmsys::RegularExpression DartStuff1;
   void CheckLabelFilter(cmCTestTestProperties& it);
   void CheckLabelFilterExclude(cmCTestTestProperties& it);

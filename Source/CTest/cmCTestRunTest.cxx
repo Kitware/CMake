@@ -607,7 +607,7 @@ void cmCTestRunTest::DartProcessing()
     {
     if (this->TestHandler->DartStuff.find(this->ProcessOutput.c_str()))
       {
-      std::string dartString = this->TestHandler->DartStuff.match(1);
+      this->TestResult.DartString = this->TestHandler->DartStuff.match(1);
       // keep searching and replacing until none are left
       while (this->TestHandler->DartStuff1.find(this->ProcessOutput.c_str()))
         {
@@ -615,8 +615,6 @@ void cmCTestRunTest::DartProcessing()
         cmSystemTools::ReplaceString(this->ProcessOutput,
                          this->TestHandler->DartStuff1.match(1).c_str(), "");
         }
-      this->TestResult.RegressionImages
-        = this->TestHandler->GenerateRegressionImages(dartString);
       }
     }
 }
