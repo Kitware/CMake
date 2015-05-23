@@ -28,6 +28,7 @@
 #include "cmCTestStartCommand.h"
 #include "cmAlgorithms.h"
 #include "cmState.h"
+#include "cmXMLWriter.h"
 
 #include "cmCTestBuildHandler.h"
 #include "cmCTestBuildAndTestHandler.h"
@@ -1548,6 +1549,67 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
 }
 
 //----------------------------------------------------------------------
+void cmCTest::StartXML(cmXMLWriter& xml, bool append)
+{
+  if(this->CurrentTag.empty())
+    {
+    cmCTestLog(this, ERROR_MESSAGE,
+               "Current Tag empty, this may mean"
+               " NightlStartTime was not set correctly." << std::endl);
+    cmSystemTools::SetFatalErrorOccured();
+    }
+
+  // find out about the system
+  cmsys::SystemInformation info;
+  info.RunCPUCheck();
+  info.RunOSCheck();
+  info.RunMemoryCheck();
+
+  std::string buildname = cmCTest::SafeBuildIdField(
+    this->GetCTestConfiguration("BuildName"));
+  std::string stamp = cmCTest::SafeBuildIdField(
+    this->CurrentTag + "-" + this->GetTestModelString());
+  std::string site = cmCTest::SafeBuildIdField(
+    this->GetCTestConfiguration("Site"));
+
+  xml.StartDocument();
+  xml.StartElement("Site");
+  xml.Attribute("BuildName", buildname);
+  xml.BreakAttributes();
+  xml.Attribute("BuildStamp", stamp);
+  xml.Attribute("Name", site);
+  xml.Attribute("Generator",
+                     std::string("ctest-") + cmVersion::GetCMakeVersion());
+  if(append)
+    {
+    xml.Attribute("Append", "true");
+    }
+  xml.Attribute("CompilerName", this->GetCTestConfiguration("Compiler"));
+#ifdef _COMPILER_VERSION
+  xml.Attribute("CompilerVersion", _COMPILER_VERSION);
+#endif
+  xml.Attribute("OSName", info.GetOSName());
+  xml.Attribute("Hostname", info.GetHostname());
+  xml.Attribute("OSRelease", info.GetOSRelease());
+  xml.Attribute("OSVersion", info.GetOSVersion());
+  xml.Attribute("OSPlatform", info.GetOSPlatform());
+  xml.Attribute("Is64Bits", info.Is64Bits());
+  xml.Attribute("VendorString", info.GetVendorString());
+  xml.Attribute("VendorID", info.GetVendorID());
+  xml.Attribute("FamilyID", info.GetFamilyID());
+  xml.Attribute("ModelID", info.GetModelID());
+  xml.Attribute("ProcessorCacheSize", info.GetProcessorCacheSize());
+  xml.Attribute("NumberOfLogicalCPU", info.GetNumberOfLogicalCPU());
+  xml.Attribute("NumberOfPhysicalCPU", info.GetNumberOfPhysicalCPU());
+  xml.Attribute("TotalVirtualMemory", info.GetTotalVirtualMemory());
+  xml.Attribute("TotalPhysicalMemory", info.GetTotalPhysicalMemory());
+  xml.Attribute("LogicalProcessorsPerPhysical",
+                     info.GetLogicalProcessorsPerPhysical());
+  xml.Attribute("ProcessorClockFrequency", info.GetProcessorClockFrequency());
+  this->AddSiteProperties(xml);
+}
+
+//----------------------------------------------------------------------
 void cmCTest::AddSiteProperties(std::ostream& ostr)
 {
   cmCTestScriptHandler* ch =
@@ -1594,11 +1656,66 @@ void cmCTest::AddSiteProperties(std::ostream& ostr)
     }
 }
 
+//----------------------------------------------------------------------
+void cmCTest::AddSiteProperties(cmXMLWriter& xml)
+{
+  cmCTestScriptHandler* ch =
+    static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
+  cmake* cm =  ch->GetCMake();
+  // if no CMake then this is the old style script and props like
+  // this will not work anyway.
+  if(!cm)
+    {
+    return;
+    }
+  // This code should go when cdash is changed to use labels only
+  const char* subproject = cm->GetState()
+                             ->GetGlobalProperty("SubProject");
+  if(subproject)
+    {
+    xml.StartElement("Subproject");
+    xml.Attribute("name", subproject);
+    const char* labels =
+      ch->GetCMake()->GetState()
+                    ->GetGlobalProperty("SubProjectLabels");
+    if(labels)
+      {
+      xml.StartElement("Labels");
+      std::string l = labels;
+      std::vector<std::string> args;
+      cmSystemTools::ExpandListArgument(l, args);
+      for(std::vector<std::string>::iterator i = args.begin();
+          i != args.end(); ++i)
+        {
+        xml.Element("Label", *i);
+        }
+      xml.EndElement();
+      }
+    xml.EndElement();
+    }
+
+  // This code should stay when cdash only does label based sub-projects
+  const char* label = cm->GetState()->GetGlobalProperty("Label");
+  if(label)
+    {
+    xml.StartElement("Labels");
+    xml.Element("Label", label);
+    xml.EndElement();
+    }
+}
+
 
 //----------------------------------------------------------------------
 void cmCTest::EndXML(std::ostream& ostr)
 {
   ostr << "</Site>" << std::endl;
+}
+
+//----------------------------------------------------------------------
+void cmCTest::EndXML(cmXMLWriter& xml)
+{
+  xml.EndElement(); // Site
+  xml.EndDocument();
 }
 
 //----------------------------------------------------------------------
