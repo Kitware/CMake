@@ -27,13 +27,11 @@ cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator() {}
 void cmLocalGhsMultiGenerator::Generate()
 {
   cmGeneratorTargetsType tgts = this->GetMakefile()->GetGeneratorTargets();
-  if (!tgts.empty())
+
+  for (cmGeneratorTargetsType::iterator l = tgts.begin(); l != tgts.end();
+       ++l)
     {
-    for (cmGeneratorTargetsType::iterator l = tgts.begin(); l != tgts.end();
-         ++l)
-      {
-      cmGhsMultiTargetGenerator tg(l->second->Target);
-      tg.Generate();
-      }
+    cmGhsMultiTargetGenerator tg(l->second->Target);
+    tg.Generate();
     }
 }
