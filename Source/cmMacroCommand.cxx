@@ -251,7 +251,8 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endmacro"))
     {
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
+    mf.ExpandArguments(lff.Arguments, expandedArguments,
+                       this->GetStartingContext().FilePath.c_str());
     // if the endmacro has arguments make sure they
     // match the arguments of the macro
     if ((expandedArguments.empty() ||

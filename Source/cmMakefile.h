@@ -662,10 +662,12 @@ public:
    * variable replacement and list expansion.
    */
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
-                       std::vector<std::string>& outArgs) const;
+                       std::vector<std::string>& outArgs,
+                       const char* filename = 0) const;
 
   bool ExpandArguments(std::vector<cmListFileArgument> const& inArgs,
-                       std::vector<cmExpandedCommandArgument>& outArgs) const;
+                       std::vector<cmExpandedCommandArgument>& outArgs,
+                       const char* filename = 0) const;
 
   /**
    * Get the instance
@@ -839,6 +841,8 @@ public:
   cmState::Snapshot GetStateSnapshot() const;
 
   const char* GetDefineFlagsCMP0059() const;
+
+  std::string GetExecutionFilePath() const;
 
 protected:
   // add link libraries and directories to the target
