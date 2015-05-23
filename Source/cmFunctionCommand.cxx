@@ -43,6 +43,7 @@ public:
     newC->Args = this->Args;
     newC->Functions = this->Functions;
     newC->Policies = this->Policies;
+    newC->FilePath = this->FilePath;
     return newC;
   }
 
@@ -71,6 +72,7 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
+  std::string FilePath;
 };
 
 bool cmFunctionHelperCommand::InvokeInitialPass
@@ -171,6 +173,7 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       cmFunctionHelperCommand *f = new cmFunctionHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
+      f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
 
       // Set the FilePath on the arguments to match the function since it is
