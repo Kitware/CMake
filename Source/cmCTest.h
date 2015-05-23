@@ -557,7 +557,7 @@ private:
   bool UpdateCTestConfiguration();
 
   //! Create note from files.
-  int GenerateCTestNotesOutput(std::ostream& os,
+  int GenerateCTestNotesOutput(cmXMLWriter& xml,
     const VectorOfStrings& files);
 
   //! Check if the argument is the one specified

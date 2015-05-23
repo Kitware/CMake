@@ -1719,54 +1719,56 @@ void cmCTest::EndXML(cmXMLWriter& xml)
 }
 
 //----------------------------------------------------------------------
-int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
+int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
   const cmCTest::VectorOfStrings& files)
 {
   std::string buildname = cmCTest::SafeBuildIdField(
     this->GetCTestConfiguration("BuildName"));
   cmCTest::VectorOfStrings::const_iterator it;
-  os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-     << "<?xml-stylesheet type=\"text/xsl\" "
+  xml.StartDocument();
+  xml.ProcessingInstruction("xml-stylesheet", "type=\"text/xsl\" "
     "href=\"Dart/Source/Server/XSL/Build.xsl "
-    "<file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
-     << "<Site BuildName=\"" << buildname
-     << "\" BuildStamp=\""
-     << this->CurrentTag << "-" << this->GetTestModelString() << "\" Name=\""
-     << this->GetCTestConfiguration("Site") << "\" Generator=\"ctest"
-     << cmVersion::GetCMakeVersion()
-     << "\">\n";
-  this->AddSiteProperties(os);
-  os << "<Notes>" << std::endl;
+    "<file:///Dart/Source/Server/XSL/Build.xsl> \"");
+  xml.StartElement("Site");
+  xml.Attribute("BuildName", buildname);
+  xml.Attribute("BuildStamp", this->CurrentTag+"-"+this->GetTestModelString());
+  xml.Attribute("Name", this->GetCTestConfiguration("Site"));
+  xml.Attribute("Generator",std::string("ctest")+cmVersion::GetCMakeVersion());
+  this->AddSiteProperties(xml);
+  xml.StartElement("Notes");
 
   for ( it = files.begin(); it != files.end(); it ++ )
     {
     cmCTestLog(this, OUTPUT, "\tAdd file: " << *it << std::endl);
     std::string note_time = this->CurrentTime();
-    os << "<Note Name=\"" << cmXMLSafe(*it) << "\">\n"
-      << "<Time>" << cmSystemTools::GetTime() << "</Time>\n"
-      << "<DateTime>" << note_time << "</DateTime>\n"
-      << "<Text>" << std::endl;
+    xml.StartElement("Note");
+    xml.Attribute("Name", *it);
+    xml.Element("Time", cmSystemTools::GetTime());
+    xml.Element("DateTime", note_time);
+    xml.StartElement("Text");
     cmsys::ifstream ifs(it->c_str());
     if ( ifs )
       {
       std::string line;
       while ( cmSystemTools::GetLineFromStream(ifs, line) )
         {
-        os << cmXMLSafe(line) << std::endl;
+        xml.Content(line);
+        xml.Content("\n");
         }
       ifs.close();
       }
     else
       {
-      os << "Problem reading file: " << *it << std::endl;
+      xml.Content("Problem reading file: " + *it + "\n");
       cmCTestLog(this, ERROR_MESSAGE, "Problem reading file: " << *it
         << " while creating notes" << std::endl);
       }
-    os << "</Text>\n"
-      << "</Note>" << std::endl;
+    xml.EndElement(); // Text
+    xml.EndElement(); // Note
     }
-  os << "</Notes>\n"
-    << "</Site>" << std::endl;
+  xml.EndElement(); // Notes
+  xml.EndElement(); // Site
+  xml.EndDocument();
   return 1;
 }
 
@@ -1779,8 +1781,8 @@ int cmCTest::GenerateNotesFile(const VectorOfStrings &files)
     cmCTestLog(this, ERROR_MESSAGE, "Cannot open notes file" << std::endl);
     return 1;
     }
-
-  this->GenerateCTestNotesOutput(ofs, files);
+  cmXMLWriter xml(ofs);
+  this->GenerateCTestNotesOutput(xml, files);
   return 0;
 }
 
