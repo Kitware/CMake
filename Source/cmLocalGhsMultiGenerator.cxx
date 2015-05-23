@@ -31,6 +31,11 @@ void cmLocalGhsMultiGenerator::Generate()
   for (cmGeneratorTargetsType::iterator l = tgts.begin(); l != tgts.end();
        ++l)
     {
+    if (l->second->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+        || l->second->Target->IsImported())
+      {
+      continue;
+      }
     cmGhsMultiTargetGenerator tg(l->second->Target);
     tg.Generate();
     }
