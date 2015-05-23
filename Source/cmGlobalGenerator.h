@@ -121,7 +121,7 @@ public:
    * Try running cmake and building a file. This is used for dynamically
    * loaded commands, not as part of the usual build process.
    */
-  virtual int TryCompile(const std::string& srcdir, const std::string& bindir,
+  int TryCompile(const std::string& srcdir, const std::string& bindir,
                          const std::string& projectName,
                          const std::string& targetName,
                          bool fast, std::string& output, cmMakefile* mf);
@@ -371,7 +371,7 @@ protected:
   typedef std::vector<cmLocalGenerator*> GeneratorVector;
   // for a project collect all its targets by following depend
   // information, and also collect all the targets
-  virtual void GetTargetSets(TargetDependSet& projectTargets,
+  void GetTargetSets(TargetDependSet& projectTargets,
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
   bool IsRootOnlyTarget(cmTarget* target) const;
@@ -446,7 +446,7 @@ protected:
   TargetMap ImportedTargets;
   std::vector<cmGeneratorExpressionEvaluationFile*> EvaluationFiles;
 
-  virtual const char* GetPredefinedTargetsFolder();
+  const char* GetPredefinedTargetsFolder();
   virtual bool UseFolderProperty();
 
 private:
