@@ -672,7 +672,8 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
   return cmState::Snapshot(this, pos);
 }
 
-cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
+cmState::Snapshot
+cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
 {
   assert(originSnapshot.IsValid());
   PositionType pos = this->ParentPositions.size();

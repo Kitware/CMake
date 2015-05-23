@@ -58,7 +58,7 @@ public:
   };
 
   Snapshot CreateBaseSnapshot();
-  Snapshot CreateSnapshot(Snapshot originSnapshot);
+  Snapshot CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };
