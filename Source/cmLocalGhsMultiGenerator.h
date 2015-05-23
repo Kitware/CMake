@@ -33,9 +33,6 @@ public:
    * Generate the makefile for this directory.
    */
   virtual void Generate();
-
-protected:
-  virtual bool CustomCommandUseLocal() const { return true; }
 };
 
 #endif
