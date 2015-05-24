@@ -25,7 +25,7 @@ class cmTarget;
 class cmGlobalVisualStudio6Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio6Generator();
+  cmGlobalVisualStudio6Generator(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalVisualStudio6Generator>(); }

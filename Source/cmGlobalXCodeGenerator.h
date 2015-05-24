@@ -29,7 +29,7 @@ class cmSourceGroup;
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
-  cmGlobalXCodeGenerator(std::string const& version);
+  cmGlobalXCodeGenerator(cmake* cm, std::string const& version);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.

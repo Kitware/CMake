@@ -13,7 +13,8 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
-cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
+cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
   this->ForceUnixPaths = false;

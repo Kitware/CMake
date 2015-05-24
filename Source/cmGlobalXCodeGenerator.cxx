@@ -117,8 +117,8 @@ public:
 class cmGlobalXCodeGenerator::Factory : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                              const std::string& name) const;
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const;
 
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {
     cmGlobalXCodeGenerator::GetDocumentation(entry); }
@@ -128,7 +128,9 @@ public:
 };
 
 //----------------------------------------------------------------------------
-cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(std::string const& version)
+cmGlobalXCodeGenerator::cmGlobalXCodeGenerator(cmake* cm,
+                                               std::string const& version)
+  : cmGlobalGenerator(cm)
 {
   this->VersionString = version;
 
@@ -154,7 +156,7 @@ cmGlobalGeneratorFactory* cmGlobalXCodeGenerator::NewFactory()
 
 //----------------------------------------------------------------------------
 cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
-::CreateGlobalGenerator(const std::string& name) const
+::CreateGlobalGenerator(const std::string& name, cmake* cm) const
 {
   if (name != GetActualName())
     return 0;
@@ -187,7 +189,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
       ("/Developer/Applications/Xcode.app/Contents/version.plist");
     }
   cmsys::auto_ptr<cmGlobalXCodeGenerator>
-    gg(new cmGlobalXCodeGenerator(parser.Version));
+    gg(new cmGlobalXCodeGenerator(cm, parser.Version));
   if (gg->XcodeVersion == 20)
     {
     cmSystemTools::Message("Xcode 2.0 not really supported by cmake, "
@@ -198,7 +200,7 @@ cmGlobalGenerator* cmGlobalXCodeGenerator::Factory
 #else
   std::cerr << "CMake should be built with cmake to use Xcode, "
     "default to Xcode 1.5\n";
-  return new cmGlobalXCodeGenerator;
+  return new cmGlobalXCodeGenerator(cm);
 #endif
 }
 

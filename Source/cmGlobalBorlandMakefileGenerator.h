@@ -22,7 +22,7 @@
 class cmGlobalBorlandMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
-  cmGlobalBorlandMakefileGenerator();
+  cmGlobalBorlandMakefileGenerator(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalBorlandMakefileGenerator>(); }

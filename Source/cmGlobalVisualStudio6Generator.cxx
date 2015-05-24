@@ -31,7 +31,8 @@ std::string GetVS6TargetName(const std::string& targetName)
   return name;
 }
 
-cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
+cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator(cmake* cm)
+  : cmGlobalVisualStudioGenerator(cm)
 {
   this->MSDevCommandInitialized = false;
   this->Version = VS6;

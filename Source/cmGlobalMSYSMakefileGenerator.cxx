@@ -15,7 +15,8 @@
 #include "cmake.h"
 #include <cmsys/FStream.hxx>
 
-cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
+cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeMSYSFindMake.cmake";
   this->ForceUnixPaths = true;

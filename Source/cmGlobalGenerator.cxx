@@ -48,7 +48,8 @@
 
 #include <assert.h>
 
-cmGlobalGenerator::cmGlobalGenerator()
+cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
+  : CMakeInstance(cm)
 {
   // By default the .SYMBOLIC dependency is not needed on symbolic rules.
   this->NeedSymbolicMark = false;
@@ -2139,12 +2140,6 @@ inline std::string removeQuotes(const std::string& s)
     return s.substr(1, s.size()-2);
     }
   return s;
-}
-
-void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
-{
-  // Store a pointer to the cmake object instance.
-  this->CMakeInstance = cm;
 }
 
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)

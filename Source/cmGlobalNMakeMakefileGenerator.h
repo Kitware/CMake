@@ -22,7 +22,7 @@
 class cmGlobalNMakeMakefileGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
-  cmGlobalNMakeMakefileGenerator();
+  cmGlobalNMakeMakefileGenerator(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalNMakeMakefileGenerator>(); }

@@ -53,7 +53,7 @@ class cmGlobalGenerator
 {
 public:
   ///! Free any memory allocated with the GlobalGenerator
-  cmGlobalGenerator();
+  cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
   cmLocalGenerator* MakeLocalGenerator(cmLocalGenerator* parent = 0);
@@ -157,9 +157,6 @@ public:
                                         const std::string& config,
                                         const std::string& native,
                                         bool ignoreErrors);
-
-  ///! Set the CMake instance
-  void SetCMakeInstance(cmake *cm);
 
   ///! Get the CMake instance
   cmake *GetCMakeInstance() const { return this->CMakeInstance; }

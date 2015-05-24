@@ -44,8 +44,9 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] =
   {0,0,0,0,0}
 };
 
-cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
+cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(cmake *cm,
   const std::string& platformName)
+  : cmGlobalVisualStudioGenerator(cm)
 {
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;

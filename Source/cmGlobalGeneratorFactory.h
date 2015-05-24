@@ -15,6 +15,7 @@
 
 #include "cmStandardIncludes.h"
 
+class cmake;
 class cmGlobalGenerator;
 struct cmDocumentationEntry;
 
@@ -30,7 +31,7 @@ public:
 
   /** Create a GlobalGenerator */
   virtual cmGlobalGenerator* CreateGlobalGenerator(
-      const std::string& n) const = 0;
+      const std::string& n, cmake* cm) const = 0;
 
   /** Get the documentation entry for this factory */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const = 0;
@@ -44,10 +45,10 @@ class cmGlobalGeneratorSimpleFactory : public cmGlobalGeneratorFactory
 {
 public:
   /** Create a GlobalGenerator */
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                              const std::string& name) const {
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const {
     if (name != T::GetActualName()) return 0;
-    return new T; }
+    return new T(cm); }
 
   /** Get the documentation entry for this factory */
   virtual void GetDocumentation(cmDocumentationEntry& entry) const {

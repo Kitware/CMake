@@ -24,8 +24,8 @@ class cmGlobalVisualStudio8Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                              const std::string& name) const {
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const {
     if(strncmp(name.c_str(), vs8generatorName,
                sizeof(vs8generatorName) - 1) != 0)
       {
@@ -35,8 +35,7 @@ public:
     const char* p = name.c_str() + sizeof(vs8generatorName) - 1;
     if(p[0] == '\0')
       {
-      return new cmGlobalVisualStudio8Generator(
-        name, "");
+      return new cmGlobalVisualStudio8Generator(cm, name, "");
       }
 
     if(p[0] != ' ')
@@ -48,8 +47,7 @@ public:
 
     if(!strcmp(p, "Win64"))
       {
-      return new cmGlobalVisualStudio8Generator(
-        name, "x64");
+      return new cmGlobalVisualStudio8Generator(cm, name, "x64");
       }
 
     cmVisualStudioWCEPlatformParser parser(p);
@@ -59,8 +57,8 @@ public:
       return 0;
       }
 
-    cmGlobalVisualStudio8Generator* ret = new cmGlobalVisualStudio8Generator(
-      name, p);
+    cmGlobalVisualStudio8Generator* ret =
+        new cmGlobalVisualStudio8Generator(cm, name, p);
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -95,9 +93,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio8Generator::NewFactory()
 }
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(
+cmGlobalVisualStudio8Generator::cmGlobalVisualStudio8Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio71Generator(platformName)
+  : cmGlobalVisualStudio71Generator(cm, platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfigurationPlatforms";
   this->Name = name;

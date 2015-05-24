@@ -21,7 +21,8 @@
 #include <cmsys/Encoding.hxx>
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator()
+cmGlobalVisualStudioGenerator::cmGlobalVisualStudioGenerator(cmake* cm)
+  : cmGlobalGenerator(cm)
 {
   this->WindowsShell = true;
   this->WindowsVSIDE = true;

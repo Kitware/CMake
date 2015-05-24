@@ -14,7 +14,8 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
+cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->EmptyRuleHackDepends = "NUL";
   this->FindMakeProgramFile = "CMakeBorlandFindMake.cmake";

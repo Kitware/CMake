@@ -23,7 +23,7 @@
 class cmGlobalVisualStudio8Generator : public cmGlobalVisualStudio71Generator
 {
 public:
-  cmGlobalVisualStudio8Generator(const std::string& name,
+  cmGlobalVisualStudio8Generator(cmake* cm, const std::string& name,
     const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 

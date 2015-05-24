@@ -13,7 +13,8 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
-cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator()
+cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeFindWMake.cmake";
 #ifdef _WIN32

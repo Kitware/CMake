@@ -54,7 +54,7 @@ class cmLocalUnixMakefileGenerator3;
 class cmGlobalUnixMakefileGenerator3 : public cmGlobalGenerator
 {
 public:
-  cmGlobalUnixMakefileGenerator3();
+  cmGlobalUnixMakefileGenerator3(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalUnixMakefileGenerator3>(); }

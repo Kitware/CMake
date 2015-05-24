@@ -20,7 +20,7 @@ class cmGlobalVisualStudio12Generator:
   public cmGlobalVisualStudio11Generator
 {
 public:
-  cmGlobalVisualStudio12Generator(const std::string& name,
+  cmGlobalVisualStudio12Generator(cmake* cm, const std::string& name,
     const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 

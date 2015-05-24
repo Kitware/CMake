@@ -24,7 +24,7 @@ public:
   /// The default name of GHS MULTI's build file. Typically: monolith.gpj.
   static const char *FILE_EXTENSION;
 
-  cmGlobalGhsMultiGenerator();
+  cmGlobalGhsMultiGenerator(cmake* cm);
   ~cmGlobalGhsMultiGenerator();
 
   static cmGlobalGeneratorFactory *NewFactory()

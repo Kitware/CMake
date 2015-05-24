@@ -21,8 +21,8 @@
 const char *cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 const char *cmGlobalGhsMultiGenerator::DEFAULT_MAKE_PROGRAM = "gbuild";
 
-cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator()
-  : OSDirRelative(false)
+cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator(cmake* cm)
+  : cmGlobalGenerator(cm), OSDirRelative(false)
 {
   this->GhsBuildCommandInitialized = false;
 }

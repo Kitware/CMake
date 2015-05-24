@@ -160,8 +160,7 @@ public:
   bool IsGCCOnWindows() const { return UsingGCCOnWindows; }
 
 public:
-  /// Default constructor.
-  cmGlobalNinjaGenerator();
+  cmGlobalNinjaGenerator(cmake* cm);
 
   /// Convenience method for creating an instance of this class.
   static cmGlobalGeneratorFactory* NewFactory() {

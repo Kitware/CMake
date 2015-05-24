@@ -26,7 +26,8 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator(const std::string& platformName = "");
+  cmGlobalVisualStudio7Generator(cmake* cm,
+                                 const std::string& platformName = "");
   ~cmGlobalVisualStudio7Generator();
 
   static cmGlobalGeneratorFactory* NewFactory() {
