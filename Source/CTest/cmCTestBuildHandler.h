@@ -22,6 +22,7 @@
 #include <deque>
 
 class cmMakefile;
+class cmXMLWriter;
 
 /** \class cmCTestBuildHandler
  * \brief A class that handles ctest -S invocations
@@ -86,11 +87,10 @@ private:
   };
 
   // generate the XML output
-  void GenerateXMLHeader(std::ostream& os);
-  void GenerateXMLLaunched(std::ostream& os);
-  void GenerateXMLLogScraped(std::ostream& os);
-  void GenerateXMLFooter(std::ostream& os, double elapsed_build_time);
-  void GenerateXMLLaunchedFragment(std::ostream& os, const char* fname);
+  void GenerateXMLHeader(cmXMLWriter& xml);
+  void GenerateXMLLaunched(cmXMLWriter& xml);
+  void GenerateXMLLogScraped(cmXMLWriter& xml);
+  void GenerateXMLFooter(cmXMLWriter& xml, double elapsed_build_time);
   bool IsLaunchedErrorFile(const char* fname);
   bool IsLaunchedWarningFile(const char* fname);
 
