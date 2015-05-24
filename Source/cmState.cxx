@@ -661,6 +661,10 @@ void cmState::Snapshot::ComputeRelativePathTopBinary()
 
 cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
 {
+  if (!originSnapshot.IsValid())
+    {
+    originSnapshot.State = this;
+    }
   PositionType pos = this->ParentPositions.size();
   this->ParentPositions.push_back(originSnapshot.Position);
   this->Locations.resize(this->Locations.size() + 1);

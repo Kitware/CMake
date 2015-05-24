@@ -21,6 +21,7 @@
 #include "cmExportSetMap.h" // For cmExportSetMap
 #include "cmGeneratorTarget.h"
 #include "cmGeneratorExpression.h"
+#include "cmState.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmFileLockPool.h"
@@ -56,7 +57,9 @@ public:
   cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
-  cmLocalGenerator* MakeLocalGenerator(cmLocalGenerator* parent = 0);
+  cmLocalGenerator* MakeLocalGenerator(
+      cmState::Snapshot snapshot = cmState::Snapshot(),
+      cmLocalGenerator* parent = 0);
 
   ///! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
@@ -441,7 +444,8 @@ protected:
 
 private:
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   cmMakefile* TryCompileOuterMakefile;
   float FirstTimeProgress;

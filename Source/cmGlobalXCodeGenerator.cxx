@@ -371,9 +371,10 @@ cmGlobalXCodeGenerator::GenerateBuildCommand(
 //----------------------------------------------------------------------------
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *
-cmGlobalXCodeGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalXCodeGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                             cmState::Snapshot snapshot)
 {
-  return new cmLocalXCodeGenerator(this, parent);
+  return new cmLocalXCodeGenerator(this, parent, snapshot);
 }
 
 //----------------------------------------------------------------------------

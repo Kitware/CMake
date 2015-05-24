@@ -1625,9 +1625,12 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     return;
     }
 
+  cmState::Snapshot newSnapshot = this->GetState()
+      ->CreateSnapshot(this->StateSnapshot);
+
   // create a new local generator and set its parent
   cmLocalGenerator *lg2 = this->GetGlobalGenerator()
-        ->MakeLocalGenerator(this->LocalGenerator);
+        ->MakeLocalGenerator(newSnapshot, this->LocalGenerator);
   this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 
   // set the subdirs start dirs

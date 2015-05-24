@@ -33,9 +33,10 @@ cmGlobalGhsMultiGenerator::~cmGlobalGhsMultiGenerator()
 }
 
 cmLocalGenerator *
-cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                cmState::Snapshot snapshot)
 {
-  return new cmLocalGhsMultiGenerator(this, parent);
+  return new cmLocalGhsMultiGenerator(this, parent, snapshot);
 }
 
 void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry &entry)

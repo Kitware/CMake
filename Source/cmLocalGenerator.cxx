@@ -44,19 +44,16 @@
 #endif
 
 cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
-                                   cmLocalGenerator* parent)
+                                   cmLocalGenerator* parent,
+                                   cmState::Snapshot snapshot)
+  : StateSnapshot(snapshot)
 {
+  assert(snapshot.IsValid());
   this->GlobalGenerator = gg;
   this->Parent = parent;
   if (parent)
     {
     parent->AddChild(this);
-    this->StateSnapshot =
-        this->GetState()->CreateSnapshot(parent->StateSnapshot);
-    }
-  else
-    {
-    this->StateSnapshot = gg->GetCMakeInstance()->GetCurrentSnapshot();
     }
 
   this->Makefile = new cmMakefile(this);

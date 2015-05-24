@@ -1884,15 +1884,22 @@ void cmGlobalGenerator::EnableInstallTarget()
 }
 
 cmLocalGenerator *
-cmGlobalGenerator::MakeLocalGenerator(cmLocalGenerator *parent)
+cmGlobalGenerator::MakeLocalGenerator(cmState::Snapshot snapshot,
+                                      cmLocalGenerator *parent)
 {
-  return this->CreateLocalGenerator(parent);
+  if (!snapshot.IsValid())
+    {
+    snapshot = this->CMakeInstance->GetCurrentSnapshot();
+    }
+
+  return this->CreateLocalGenerator(parent, snapshot);
 }
 
-cmLocalGenerator *
-cmGlobalGenerator::CreateLocalGenerator(cmLocalGenerator *parent)
+cmLocalGenerator*
+cmGlobalGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                        cmState::Snapshot snapshot)
 {
-  return new cmLocalGenerator(this, parent);
+  return new cmLocalGenerator(this, parent, snapshot);
 }
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen,

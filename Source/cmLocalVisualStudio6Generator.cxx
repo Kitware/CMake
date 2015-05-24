@@ -25,8 +25,9 @@
 
 cmLocalVisualStudio6Generator
 ::cmLocalVisualStudio6Generator(cmGlobalGenerator* gg,
-                                cmLocalGenerator* parent):
-  cmLocalVisualStudioGenerator(gg, parent)
+                                cmLocalGenerator* parent,
+                                cmState::Snapshot snapshot):
+  cmLocalVisualStudioGenerator(gg, parent, snapshot)
 {
 }
 

@@ -529,9 +529,10 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
 // Virtual public methods.
 
 cmLocalGenerator*
-cmGlobalNinjaGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalNinjaGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                             cmState::Snapshot snapshot)
 {
-  return new cmLocalNinjaGenerator(this, parent);
+  return new cmLocalNinjaGenerator(this, parent, snapshot);
 }
 
 void cmGlobalNinjaGenerator

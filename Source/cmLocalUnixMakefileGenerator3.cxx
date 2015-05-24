@@ -80,8 +80,9 @@ static std::string cmSplitExtension(std::string const& in, std::string& base)
 
 //----------------------------------------------------------------------------
 cmLocalUnixMakefileGenerator3::
-cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent)
-  : cmLocalGenerator(gg, parent)
+cmLocalUnixMakefileGenerator3(cmGlobalGenerator* gg, cmLocalGenerator* parent,
+                              cmState::Snapshot snapshot)
+  : cmLocalGenerator(gg, parent, snapshot)
 {
   this->MakefileVariableSize = 0;
   this->ColorMakefile = false;

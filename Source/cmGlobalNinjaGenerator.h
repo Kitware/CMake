@@ -170,7 +170,8 @@ public:
   virtual ~cmGlobalNinjaGenerator() { }
 
   /// Overloaded methods. @see cmGlobalGenerator::CreateLocalGenerator()
-  virtual cmLocalGenerator* CreateLocalGenerator(cmLocalGenerator* parent = 0);
+  virtual cmLocalGenerator* CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   /// Overloaded methods. @see cmGlobalGenerator::GetName().
   virtual std::string GetName() const {
