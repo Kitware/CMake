@@ -44,8 +44,6 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       std::vector<std::string>::const_iterator j = this->Args.begin();
       ++j;
 
-      std::string tmps;
-      cmListFileArgument arg;
       for( ; j != this->Args.end(); ++j)
         {
         // set the variable to the loop value
