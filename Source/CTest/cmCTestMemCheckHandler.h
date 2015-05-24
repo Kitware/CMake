@@ -21,6 +21,7 @@
 #include <string>
 
 class cmMakefile;
+class cmXMLWriter;
 
 /** \class cmCTestMemCheckHandler
  * \brief A class that handles ctest -S invocations
@@ -119,7 +120,7 @@ private:
   /**
    * Generate the Dart compatible output
    */
-  void GenerateDartOutput(std::ostream& os);
+  void GenerateDartOutput(cmXMLWriter& xml);
 
   std::vector<std::string> CustomPreMemCheck;
   std::vector<std::string> CustomPostMemCheck;
