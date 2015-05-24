@@ -20,8 +20,8 @@ cmGlobalJOMMakefileGenerator::cmGlobalJOMMakefileGenerator(cmake* cm)
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
-  this->WindowsShell = true;
-  this->NMake = true;
+  cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetNMake(true);
   this->DefineWindowsNULL = true;
   this->PassMakeflags = true;
   this->UnixCD = false;

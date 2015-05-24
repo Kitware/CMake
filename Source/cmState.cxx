@@ -20,7 +20,13 @@
 
 cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
-    IsInTryCompile(false)
+    IsInTryCompile(false),
+    WindowsShell(false),
+    WindowsVSIDE(false),
+    WatcomWMake(false),
+    MinGWMake(false),
+    NMake(false),
+    MSYSShell(false)
 {
 }
 
@@ -501,6 +507,66 @@ void cmState::SetBinaryDirectory(std::string const& binaryDirectory)
   cmSystemTools::SplitPath(
       cmSystemTools::CollapseFullPath(this->BinaryDirectory),
         this->BinaryDirectoryComponents);
+}
+
+void cmState::SetWindowsShell(bool windowsShell)
+{
+  this->WindowsShell = windowsShell;
+}
+
+bool cmState::UseWindowsShell() const
+{
+  return this->WindowsShell;
+}
+
+void cmState::SetWindowsVSIDE(bool windowsVSIDE)
+{
+  this->WindowsVSIDE = windowsVSIDE;
+}
+
+bool cmState::UseWindowsVSIDE() const
+{
+  return this->WindowsVSIDE;
+}
+
+void cmState::SetWatcomWMake(bool watcomWMake)
+{
+  this->WatcomWMake = watcomWMake;
+}
+
+bool cmState::UseWatcomWMake() const
+{
+  return this->WatcomWMake;
+}
+
+void cmState::SetMinGWMake(bool minGWMake)
+{
+  this->MinGWMake = minGWMake;
+}
+
+bool cmState::UseMinGWMake() const
+{
+  return this->MinGWMake;
+}
+
+void cmState::SetNMake(bool nMake)
+{
+  this->NMake = nMake;
+}
+
+bool cmState::UseNMake() const
+{
+  return this->NMake;
+}
+
+void cmState::SetMSYSShell(bool mSYSShell)
+{
+  this->MSYSShell = mSYSShell;
+}
+
+bool cmState::UseMSYSShell() const
+{
+  return this->MSYSShell;
 }
 
 const char* cmState::GetBinaryDirectory() const

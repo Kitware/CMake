@@ -20,8 +20,8 @@ cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator(cmake* cm)
   this->ForceUnixPaths = true;
   this->ToolSupportsColor = true;
   this->UseLinkScript = true;
-  this->WindowsShell = true;
-  this->MinGWMake = true;
+  cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetMinGWMake(true);
 }
 
 void cmGlobalMinGWMakefileGenerator

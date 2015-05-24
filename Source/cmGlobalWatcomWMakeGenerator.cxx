@@ -24,9 +24,9 @@ cmGlobalWatcomWMakeGenerator::cmGlobalWatcomWMakeGenerator(cmake* cm)
   this->NeedSymbolicMark = true;
   this->EmptyRuleHackCommand = "@cd .";
 #ifdef _WIN32
-  this->WindowsShell = true;
+  cm->GetState()->SetWindowsShell(true);
 #endif
-  this->WatcomWMake = true;
+  cm->GetState()->SetWatcomWMake(true);
   this->IncludeDirective = "!include";
   this->DefineWindowsNULL = true;
   this->UnixCD = false;

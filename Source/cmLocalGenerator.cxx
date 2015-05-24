@@ -1179,7 +1179,7 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const std::string& remote,
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
   // space.
-  if(this->GlobalGenerator->WindowsShell && result.find(' ') != result.npos &&
+  if(this->GetState()->UseWindowsShell() && result.find(' ') != result.npos &&
      cmSystemTools::FileExists(remote.c_str()))
     {
     std::string tmp;
@@ -2551,7 +2551,7 @@ void cmLocalGenerator::JoinDefines(const std::set<std::string>& defines,
     {
     // Append the definition with proper escaping.
     std::string def = dflag;
-    if(this->GlobalGenerator->WatcomWMake)
+    if(this->GetState()->UseWatcomWMake())
       {
       // The Watcom compiler does its own command line parsing instead
       // of using the windows shell rules.  Definitions are one of
@@ -2721,7 +2721,7 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
         // For the MSYS shell convert drive letters to posix paths, so
     // that c:/some/path becomes /c/some/path.  This is needed to
     // avoid problems with the shell path translation.
-    if(this->GlobalGenerator->MSYSShell && !this->LinkScriptShell)
+    if(this->GetState()->UseMSYSShell() && !this->LinkScriptShell)
       {
       if(result.size() > 2 && result[1] == ':')
         {
@@ -2729,7 +2729,7 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
         result[0] = '/';
         }
       }
-    if(this->GlobalGenerator->WindowsShell)
+    if(this->GetState()->UseWindowsShell())
       {
       std::replace(result.begin(), result.end(), '/', '\\');
       }
@@ -3144,22 +3144,22 @@ void cmLocalGenerator::ComputeObjectFilenames(
 
 bool cmLocalGenerator::IsWindowsShell() const
 {
-  return this->GlobalGenerator->WindowsShell;
+  return this->GetState()->UseWindowsShell();
 }
 
 bool cmLocalGenerator::IsWatcomWMake() const
 {
-  return this->GlobalGenerator->WatcomWMake;
+  return this->GetState()->UseWatcomWMake();
 }
 
 bool cmLocalGenerator::IsMinGWMake() const
 {
-  return this->GlobalGenerator->MinGWMake;
+  return this->GetState()->UseMinGWMake();
 }
 
 bool cmLocalGenerator::IsNMake() const
 {
-  return this->GlobalGenerator->NMake;
+  return this->GetState()->UseNMake();
 }
 
 void cmLocalGenerator::SetConfiguredCMP0014(bool configured)
@@ -3310,7 +3310,7 @@ std::string cmLocalGenerator::EscapeForShell(const std::string& str,
 
   // Compute the flags for the target shell environment.
   int flags = 0;
-  if(this->GlobalGenerator->WindowsVSIDE)
+  if(this->GetState()->UseWindowsVSIDE())
     {
     flags |= cmsysSystem_Shell_Flag_VSIDE;
     }
@@ -3330,27 +3330,27 @@ std::string cmLocalGenerator::EscapeForShell(const std::string& str,
     {
     flags |= cmsysSystem_Shell_Flag_WatcomQuote;
     }
-  if(this->GlobalGenerator->WatcomWMake)
+  if(this->GetState()->UseWatcomWMake())
     {
     flags |= cmsysSystem_Shell_Flag_WatcomWMake;
     }
-  if(this->GlobalGenerator->MinGWMake)
+  if(this->GetState()->UseMinGWMake())
     {
     flags |= cmsysSystem_Shell_Flag_MinGWMake;
     }
-  if(this->GlobalGenerator->NMake)
+  if(this->GetState()->UseNMake())
     {
     flags |= cmsysSystem_Shell_Flag_NMake;
     }
 
   // Compute the buffer size needed.
-  int size = (this->GlobalGenerator->WindowsShell ?
+  int size = (this->GetState()->UseWindowsShell() ?
               cmsysSystem_Shell_GetArgumentSizeForWindows(str.c_str(), flags) :
               cmsysSystem_Shell_GetArgumentSizeForUnix(str.c_str(), flags));
 
   // Compute the shell argument itself.
   std::vector<char> arg(size);
-  if(this->GlobalGenerator->WindowsShell)
+  if(this->GetState()->UseWindowsShell())
     {
     cmsysSystem_Shell_GetArgumentForWindows(str.c_str(), &arg[0], flags);
     }

@@ -355,13 +355,6 @@ public:
 #endif
 
   std::string MakeSilentFlag;
-  bool WindowsShell;
-  bool WindowsVSIDE;
-  bool WatcomWMake;
-  bool MinGWMake;
-  bool NMake;
-  bool MSYSShell;
-
 protected:
   virtual void Generate();
 
