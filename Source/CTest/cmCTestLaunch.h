@@ -15,6 +15,8 @@
 #include "cmStandardIncludes.h"
 #include <cmsys/RegularExpression.hxx>
 
+class cmXMLWriter;
+
 /** \class cmCTestLaunch
  * \brief Launcher for make rules to report results for ctest
  *
@@ -92,11 +94,11 @@ private:
 
   // Methods to generate the xml fragment.
   void WriteXML();
-  void WriteXMLAction(std::ostream& fxml);
-  void WriteXMLCommand(std::ostream& fxml);
-  void WriteXMLResult(std::ostream& fxml);
-  void WriteXMLLabels(std::ostream& fxml);
-  void DumpFileToXML(std::ostream& fxml, std::string const& fname);
+  void WriteXMLAction(cmXMLWriter& xml);
+  void WriteXMLCommand(cmXMLWriter& xml);
+  void WriteXMLResult(cmXMLWriter& xml);
+  void WriteXMLLabels(cmXMLWriter& xml);
+  void DumpFileToXML(cmXMLWriter& xml, std::string const& fname);
 
   // Configuration
   void LoadConfig();
