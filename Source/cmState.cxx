@@ -22,7 +22,6 @@ cmState::cmState(cmake* cm)
   : CMakeInstance(cm),
     IsInTryCompile(false)
 {
-  this->Initialize();
 }
 
 cmState::~cmState()
@@ -190,19 +189,35 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
        ->GetCacheIterator(key.c_str()).SetProperty(propertyName, (void*)0);
 }
 
-void cmState::Initialize()
+void cmState::Reset()
 {
   this->GlobalProperties.clear();
   this->PropertyDefinitions.clear();
-  this->Locations.clear();
-  this->OutputLocations.clear();
-  this->ParentPositions.clear();
-  this->CurrentSourceDirectoryComponents.clear();
-  this->CurrentBinaryDirectoryComponents.clear();
-  this->RelativePathTopSource.clear();
-  this->RelativePathTopBinary.clear();
 
-  this->CreateSnapshot(Snapshot());
+  assert(this->Locations.size() > 0);
+  assert(this->OutputLocations.size() > 0);
+  assert(this->ParentPositions.size() > 0);
+  assert(this->CurrentSourceDirectoryComponents.size() > 0);
+  assert(this->CurrentBinaryDirectoryComponents.size() > 0);
+  assert(this->RelativePathTopSource.size() > 0);
+  assert(this->RelativePathTopBinary.size() > 0);
+
+  this->Locations.erase(this->Locations.begin() + 1, this->Locations.end());
+  this->OutputLocations.erase(this->OutputLocations.begin() + 1,
+                              this->OutputLocations.end());
+  this->ParentPositions.erase(this->ParentPositions.begin() + 1,
+                              this->ParentPositions.end());
+  this->CurrentSourceDirectoryComponents.erase(
+        this->CurrentSourceDirectoryComponents.begin() + 1,
+        this->CurrentSourceDirectoryComponents.end());
+  this->CurrentBinaryDirectoryComponents.erase(
+        this->CurrentBinaryDirectoryComponents.begin() + 1,
+        this->CurrentBinaryDirectoryComponents.end());
+  this->RelativePathTopSource.erase(this->RelativePathTopSource.begin() + 1,
+                                    this->RelativePathTopSource.end());
+  this->RelativePathTopBinary.erase(this->RelativePathTopBinary.begin() + 1,
+                                    this->RelativePathTopBinary.end());
+
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
      "", "", true);
@@ -607,6 +622,7 @@ const char* cmState::Snapshot::GetCurrentSourceDirectory() const
 
 void cmState::Snapshot::SetCurrentSourceDirectory(std::string const& dir)
 {
+  assert(this->State);
   assert(this->State->Locations.size() > this->Position);
   this->State->Locations[this->Position] = dir;
   cmSystemTools::ConvertToUnixSlashes(
@@ -681,15 +697,12 @@ bool cmState::Snapshot::IsValid() const
 cmState::Snapshot cmState::Snapshot::GetParent() const
 {
   Snapshot snapshot;
-  if (!this->State)
+  if (!this->State || this->Position == 0)
     {
     return snapshot;
     }
   PositionType parentPos = this->State->ParentPositions[this->Position];
-  if (parentPos > 0)
-    {
-    snapshot = Snapshot(this->State, parentPos);
-    }
+  snapshot = Snapshot(this->State, parentPos);
 
   return snapshot;
 }

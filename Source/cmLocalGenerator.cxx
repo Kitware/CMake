@@ -56,9 +56,9 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
     }
   else
     {
-    this->StateSnapshot =
-        this->GetState()->CreateSnapshot(cmState::Snapshot(this->GetState()));
+    this->StateSnapshot = gg->GetCMakeInstance()->GetCurrentSnapshot();
     }
+
   this->Makefile = new cmMakefile(this);
 
   this->LinkScriptShell = false;
@@ -84,11 +84,14 @@ class cmLocalGeneratorCurrent
 {
   cmGlobalGenerator* GG;
   cmLocalGenerator* LG;
+  cmState::Snapshot Snapshot;
 public:
   cmLocalGeneratorCurrent(cmLocalGenerator* lg)
     {
     this->GG = lg->GetGlobalGenerator();
     this->LG = this->GG->GetCurrentLocalGenerator();
+    this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(lg->GetStateSnapshot());
     this->GG->SetCurrentLocalGenerator(lg);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PushFileScope();
@@ -100,6 +103,7 @@ public:
     this->GG->GetFileLockPool().PopFileScope();
 #endif
     this->GG->SetCurrentLocalGenerator(this->LG);
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
     }
 };
 
