@@ -20,6 +20,7 @@
 #include <cmsys/RegularExpression.hxx>
 
 class cmGeneratedFileStream;
+class cmXMLWriter;
 class cmCTestCoverageHandlerContainer
 {
 public:
@@ -64,6 +65,9 @@ private:
   void CleanCoverageLogFiles(std::ostream& log);
   bool StartCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
   void EndCoverageLogFile(cmGeneratedFileStream& ostr, int logFileCount);
+
+  void StartCoverageLogXML(cmXMLWriter& xml);
+  void EndCoverageLogXML(cmXMLWriter& xml);
 
   //! Handle coverage using GCC's GCov
   int HandleGCovCoverage(cmCTestCoverageHandlerContainer* cont);
@@ -146,7 +150,7 @@ private:
   // Label reading and writing methods.
   void LoadLabels();
   void LoadLabels(const char* dir);
-  void WriteXMLLabels(std::ostream& os, std::string const& source);
+  void WriteXMLLabels(cmXMLWriter& xml, std::string const& source);
 
   // Label-based filtering.
   std::set<int> LabelFilter;
