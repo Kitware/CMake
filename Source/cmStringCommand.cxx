@@ -11,6 +11,7 @@
 ============================================================================*/
 #include "cmStringCommand.h"
 #include "cmCryptoHash.h"
+#include "cmRegexTools.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/SystemTools.hxx>
@@ -396,132 +397,15 @@ bool cmStringCommand::RegexReplace(std::vector<std::string> const& args)
 {
   //"STRING(REGEX REPLACE <regular_expression> <replace_expression>
   // <output variable> <input> [<input>...])\n"
-  std::string regex = args[2];
-  std::string replace = args[3];
-  std::string outvar = args[4];
-
-  // Pull apart the replace expression to find the escaped [0-9] values.
-  std::vector<RegexReplacement> replacement;
-  std::string::size_type l = 0;
-  while(l < replace.length())
-    {
-    std::string::size_type r = replace.find("\\", l);
-    if(r == std::string::npos)
-      {
-      r = replace.length();
-      replacement.push_back(replace.substr(l, r-l));
-      }
-    else
-      {
-      if(r-l > 0)
-        {
-        replacement.push_back(replace.substr(l, r-l));
-        }
-      if(r == (replace.length()-1))
-        {
-        this->SetError("sub-command REGEX, mode REPLACE: "
-                       "replace-expression ends in a backslash.");
-        return false;
-        }
-      if((replace[r+1] >= '0') && (replace[r+1] <= '9'))
-        {
-        replacement.push_back(replace[r+1]-'0');
-        }
-      else if(replace[r+1] == 'n')
-        {
-        replacement.push_back("\n");
-        }
-      else if(replace[r+1] == '\\')
-        {
-        replacement.push_back("\\");
-        }
-      else
-        {
-        std::string e = "sub-command REGEX, mode REPLACE: Unknown escape \"";
-        e += replace.substr(r, 2);
-        e += "\" in replace-expression.";
-        this->SetError(e);
-        return false;
-        }
-      r += 2;
-      }
-    l = r;
-    }
+  const std::string regex = args[2];
+  const std::string replace = args[3];
+  const std::string outvar = args[4];
+  // Concatenate all the last arguments together.
+  const std::string input = cmJoin(cmRange(args).advance(5), std::string());
 
   this->Makefile->ClearMatches();
-  // Compile the regular expression.
-  cmsys::RegularExpression re;
-  if(!re.compile(regex.c_str()))
-    {
-    std::string e =
-      "sub-command REGEX, mode REPLACE failed to compile regex \""+
-      regex+"\".";
-    this->SetError(e);
-    return false;
-    }
-
-  // Concatenate all the last arguments together.
-  std::string input = cmJoin(cmRange(args).advance(5), std::string());
-
-  // Scan through the input for all matches.
-  std::string output;
-  std::string::size_type base = 0;
-  while(re.find(input.c_str()+base))
-    {
-    this->Makefile->StoreMatches(re);
-    std::string::size_type l2 = re.start();
-    std::string::size_type r = re.end();
-
-    // Concatenate the part of the input that was not matched.
-    output += input.substr(base, l2);
-
-    // Make sure the match had some text.
-    if(r-l2 == 0)
-      {
-      std::string e = "sub-command REGEX, mode REPLACE regex \""+
-        regex+"\" matched an empty string.";
-      this->SetError(e);
-      return false;
-      }
-
-    // Concatenate the replacement for the match.
-    for(unsigned int i=0; i < replacement.size(); ++i)
-      {
-      if(replacement[i].number < 0)
-        {
-        // This is just a plain-text part of the replacement.
-        output += replacement[i].value;
-        }
-      else
-        {
-        // Replace with part of the match.
-        int n = replacement[i].number;
-        std::string::size_type start = re.start(n);
-        std::string::size_type end = re.end(n);
-        std::string::size_type len = input.length()-base;
-        if((start != std::string::npos) && (end != std::string::npos) &&
-           (start <= len) && (end <= len))
-          {
-          output += input.substr(base+start, end-start);
-          }
-        else
-          {
-          std::string e =
-            "sub-command REGEX, mode REPLACE: replace expression \""+
-            replace+"\" contains an out-of-range escape for regex \""+
-            regex+"\".";
-          this->SetError(e);
-          return false;
-          }
-        }
-      }
-
-    // Move past the match.
-    base += r;
-    }
-
-  // Concatenate the text after the last match.
-  output += input.substr(base, input.length()-base);
+  // Call the implementation that was factored out
+  const std::string output = ::RegexReplace(input, regex, replace);
 
   // Store the output in the provided variable.
   this->Makefile->AddDefinition(outvar, output.c_str());

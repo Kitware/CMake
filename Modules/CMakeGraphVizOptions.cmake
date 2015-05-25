@@ -116,7 +116,7 @@
 #  or normalize the name of different files from the same library to one common name.
 #  The following is an example of an expression pair to strip the path and group by
 #  library name such as "boost" or "sigc" : 
-#  "([A-Z]:)?/([^/]+/)*lib([A-Za-z]+).*\\.(lib|so|dll)" "$3"
+#  "([A-Z]:)?/([^/]+/)*lib([A-Za-z]+).*\\.(lib|so|dll)" "\\3"
 #
 #  * Mandatory : NO
 #  * Default   : 

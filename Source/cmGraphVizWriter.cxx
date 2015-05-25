@@ -14,6 +14,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmRegexTools.h"
 
 
 
@@ -164,18 +165,8 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
       {
       const std::string currentRegexString(*itvIt);
       const std::string currentReplaceString(*++itvIt);
-      try
-        {
-        std::regex currentRegex(currentRegexString, std::regex::extended);
-        this->GraphNodeNameFilters.push_back(
-            std::make_pair(currentRegex, currentReplaceString));
-        }
-      catch(std::regex_error& e)
-        {
-        std::cerr << "Could not compile bad regex \"" << currentRegexString
-                  << "\"" << std::endl
-                  << e.what() << std::endl;
-        }
+      this->GraphNodeNameFilters.push_back(
+            std::make_pair(currentRegexString, currentReplaceString));
 
       if(itvIt == nodeNameFilterRegExVector.end())
          break;
@@ -625,11 +616,10 @@ bool cmGraphVizWriter::IgnoreThisTarget(const std::string& name)
 
 std::string cmGraphVizWriter::MangleNodeName(std::string name) const
 {
-  for(const auto& replacer : this->GraphNodeNameFilters)
-    if(std::regex_search(name, replacer.first))
-      {
-      name = std::regex_replace(name, replacer.first, replacer.second); 
-      }
+  for(std::vector<RegularReplace>::const_iterator it = this->GraphNodeNameFilters.begin();
+      it != this->GraphNodeNameFilters.end();
+      ++it)
+    name = RegexReplace(name, it->first, it->second); 
 
   return name;
 }

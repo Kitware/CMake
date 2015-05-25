@@ -76,16 +76,6 @@ protected:
   bool HandleGenexStripCommand(std::vector<std::string> const& args);
   bool HandleUuidCommand(std::vector<std::string> const& args);
 
-  class RegexReplacement
-  {
-  public:
-    RegexReplacement(const char* s): number(-1), value(s) {}
-    RegexReplacement(const std::string& s): number(-1), value(s) {}
-    RegexReplacement(int n): number(n), value() {}
-    RegexReplacement() {}
-    int number;
-    std::string value;
-  };
 };
 
 

@@ -16,7 +16,6 @@
 #include "cmGeneratedFileStream.h"
 #include "cmTarget.h"
 #include <cmsys/RegularExpression.hxx>
-#include <regex>
 
 
 /** This class implements writing files for graphviz (dot) for graphs
@@ -80,7 +79,7 @@ protected:
   bool GenerateDependers;
 
   std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
-  typedef std::pair<std::regex, std::string> RegularReplace;
+  typedef std::pair<std::string, std::string> RegularReplace;
   std::vector<RegularReplace> GraphNodeNameFilters;
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
