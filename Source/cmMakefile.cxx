@@ -272,8 +272,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
       // command.  Add whatever context information we have.
       lfc.FilePath = this->ListFileStack.back();
       }
-    if(!this->CallStack.empty()
-       || !this->GetCMakeInstance()->GetIsInTryCompile())
+    if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
       lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
                                                    cmLocalGenerator::HOME);
