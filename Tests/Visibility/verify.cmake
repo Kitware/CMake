@@ -8,7 +8,7 @@ if(NOT "${RESULT}" STREQUAL "0")
   message(FATAL_ERROR "nm failed [${RESULT}] [${OUTPUT}] [${ERROR}]")
 endif()
 
-if(${OUTPUT} MATCHES "Foo[^\\n]*bar")
+if(${OUTPUT} MATCHES "(Foo[^\\n]*bar|hidden_function)")
   message(FATAL_ERROR
-    "Found Foo::bar() which should have been hidden [${OUTPUT}]")
+    "Found ${CMAKE_MATCH_1} which should have been hidden [${OUTPUT}]")
 endif()

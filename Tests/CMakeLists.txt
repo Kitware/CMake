@@ -484,16 +484,16 @@ if(BUILD_TESTING)
   endif()
 
   if(run_inlines_hidden_test)
-    add_test(VisibilityInlinesHidden ${CMAKE_CTEST_COMMAND}
+    add_test(Visibility ${CMAKE_CTEST_COMMAND}
       --build-and-test
-      "${CMake_SOURCE_DIR}/Tests/VisibilityInlinesHidden"
-      "${CMake_BINARY_DIR}/Tests/VisibilityInlinesHidden"
+      "${CMake_SOURCE_DIR}/Tests/Visibility"
+      "${CMake_BINARY_DIR}/Tests/Visibility"
       ${build_generator_args}
-      --build-project VisibilityInlinesHidden
+      --build-project Visibility
       --build-options ${build_options}
     )
     list(APPEND TEST_BUILD_DIRS
-      "${CMake_BINARY_DIR}/Tests/VisibilityInlinesHidden"
+      "${CMake_BINARY_DIR}/Tests/Visibility"
     )
   endif()
 

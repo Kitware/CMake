@@ -39,7 +39,8 @@
   F(CMP0042) \
   F(CMP0046) \
   F(CMP0052) \
-  F(CMP0060)
+  F(CMP0060) \
+  F(CMP0063)
 
 class cmake;
 class cmMakefile;
