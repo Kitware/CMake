@@ -761,13 +761,6 @@ cmMakefileTargetGenerator
       source.GetFullPath(), workingDirectory, compileCommand);
     }
 
-  // Expand placeholders in the commands.
-  for(std::vector<std::string>::iterator i = compileCommands.begin();
-      i != compileCommands.end(); ++i)
-    {
-    this->LocalGenerator->ExpandRuleVariables(*i, vars);
-    }
-
   // Maybe insert an include-what-you-use runner.
   if (!compileCommands.empty() && (lang == "C" || lang == "CXX"))
     {
@@ -780,6 +773,13 @@ cmMakefileTargetGenerator
       run_iwyu += " -- ";
       compileCommands.front().insert(0, run_iwyu);
       }
+    }
+
+  // Expand placeholders in the commands.
+  for(std::vector<std::string>::iterator i = compileCommands.begin();
+      i != compileCommands.end(); ++i)
+    {
+    this->LocalGenerator->ExpandRuleVariables(*i, vars);
     }
 
   // Change the command working directory to the local build tree.

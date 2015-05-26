@@ -16,3 +16,7 @@ endfunction()
 
 run_iwyu(C)
 run_iwyu(CXX)
+if (NOT RunCMake_GENERATOR STREQUAL "Watcom WMake")
+  run_iwyu(C-launch)
+  run_iwyu(CXX-launch)
+endif()
