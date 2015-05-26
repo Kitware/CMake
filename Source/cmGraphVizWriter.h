@@ -61,6 +61,7 @@ protected:
   void WriteFooter(cmGeneratedFileStream& str) const;
 
   bool IgnoreThisTarget(const std::string& name);
+  std::string MangleNodeName(std::string name) const;
 
   bool GenerateForTargetType(cmTarget::TargetType targetType) const;
 
@@ -78,6 +79,8 @@ protected:
   bool GenerateDependers;
 
   std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
+  typedef std::pair<std::string, std::string> RegularReplace;
+  std::vector<RegularReplace> GraphNodeNameFilters;
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
 

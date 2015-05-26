@@ -107,6 +107,20 @@
 #
 #  * Mandatory : NO
 #  * Default   : TRUE
+#
+# .. variable:: GRAPHVIZ_NODE_FILTER
+#
+#  A list of regular replace expressions for chnging the name of external library nodes.
+#  They are organized in pairs of regex and replace expression.
+#  This can be used to strip the path from external library names,
+#  or normalize the name of different files from the same library to one common name.
+#  The following is an example of an expression pair to strip the path and group by
+#  library name such as "boost" or "sigc" : 
+#  "([A-Z]:)?/([^/]+/)*lib([A-Za-z]+).*\\.(lib|so|dll)" "\\3"
+#
+#  * Mandatory : NO
+#  * Default   : 
+#
 
 #=============================================================================
 # Copyright 2007-2009 Kitware, Inc.

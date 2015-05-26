@@ -14,6 +14,7 @@
 #include "cmLocalGenerator.h"
 #include "cmGlobalGenerator.h"
 #include "cmGeneratedFileStream.h"
+#include "cmRegexTools.h"
 
 
 
@@ -145,6 +146,30 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
                   << "\"" << std::endl;
         }
       this->TargetsToIgnoreRegex.push_back(currentRegex);
+      }
+    }
+
+  std::string nodeNameFilterRegexes;
+  __set_if_set(nodeNameFilterRegexes, "GRAPHVIZ_NODE_FILTER");
+
+  this->GraphNodeNameFilters.clear();
+  if (!nodeNameFilterRegexes.empty())
+    {
+    std::vector<std::string> nodeNameFilterRegExVector;
+    cmSystemTools::ExpandListArgument(nodeNameFilterRegexes,
+                                      nodeNameFilterRegExVector);
+    for(std::vector<std::string>::const_iterator
+        itvIt = nodeNameFilterRegExVector.begin();
+        itvIt != nodeNameFilterRegExVector.end();
+        ++ itvIt )
+      {
+      const std::string currentRegexString(*itvIt);
+      const std::string currentReplaceString(*++itvIt);
+      this->GraphNodeNameFilters.push_back(
+            std::make_pair(currentRegexString, currentReplaceString));
+
+      if(itvIt == nodeNameFilterRegExVector.end())
+         break;
       }
     }
 
@@ -332,9 +357,15 @@ void cmGraphVizWriter::WriteConnections(const std::string& targetName,
        llit != ll->end();
        ++ llit )
     {
-    const char* libName = llit->first.c_str();
+    std::string libName = llit->first.c_str();
     std::map<std::string, std::string>::const_iterator libNameIt =
                                           this->TargetNamesNodes.find(libName);
+
+    if(libNameIt == this->TargetNamesNodes.end())
+      {
+      libName = this->MangleNodeName(libName);
+      libNameIt = this->TargetNamesNodes.find(libName);
+      }
 
     // can happen e.g. if GRAPHVIZ_TARGET_IGNORE_REGEX is used
     if(libNameIt == this->TargetNamesNodes.end())
@@ -542,14 +573,16 @@ int cmGraphVizWriter::CollectAllExternalLibs(int cnt)
           continue;
           }
 
+        const std::string libNameMangled = this->MangleNodeName(libName);
+
         std::map<std::string, const cmTarget*>::const_iterator tarIt =
-                                                this->TargetPtrs.find(libName);
+                                                this->TargetPtrs.find(libNameMangled);
         if ( tarIt == this->TargetPtrs.end() )
           {
           std::ostringstream ostr;
           ostr << this->GraphNodePrefix << cnt++;
-          this->TargetNamesNodes[libName] = ostr.str();
-          this->TargetPtrs[libName] = NULL;
+          this->TargetNamesNodes[libNameMangled] = ostr.str();
+          this->TargetPtrs[libNameMangled] = NULL;
           // str << "    \"" << ostr.c_str() << "\" [ label=\"" << libName
           // <<  "\" shape=\"ellipse\"];" << std::endl;
           }
@@ -578,6 +611,17 @@ bool cmGraphVizWriter::IgnoreThisTarget(const std::string& name)
     }
 
   return false;
+}
+
+
+std::string cmGraphVizWriter::MangleNodeName(std::string name) const
+{
+  for(std::vector<RegularReplace>::const_iterator it = this->GraphNodeNameFilters.begin();
+      it != this->GraphNodeNameFilters.end();
+      ++it)
+    name = RegexReplace(name, it->first, it->second); 
+
+  return name;
 }
 
 
