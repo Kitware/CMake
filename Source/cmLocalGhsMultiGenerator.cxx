@@ -27,31 +27,16 @@ cmLocalGhsMultiGenerator::~cmLocalGhsMultiGenerator() {}
 void cmLocalGhsMultiGenerator::Generate()
 {
   cmGeneratorTargetsType tgts = this->GetMakefile()->GetGeneratorTargets();
-  if (!tgts.empty())
-    {
-    for (cmGeneratorTargetsType::iterator l = tgts.begin(); l != tgts.end();
-         ++l)
-      {
-      cmGhsMultiTargetGenerator tg(l->second->Target);
-      tg.Generate();
-      }
-    }
-}
 
-// Implemented in:
-//   cmLocalGenerator.
-// Used in:
-//   Source/cmMakefile.cxx
-//   Source/cmGlobalGenerator.cxx
-void cmLocalGhsMultiGenerator::Configure()
-{
-  // Compute the path to use when referencing the current output
-  // directory from the top output directory.
-  this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
-  if (this->HomeRelativeOutputPath == ".")
+  for (cmGeneratorTargetsType::iterator l = tgts.begin(); l != tgts.end();
+       ++l)
     {
-    this->HomeRelativeOutputPath = "";
+    if (l->second->Target->GetType() == cmTarget::INTERFACE_LIBRARY
+        || l->second->Target->IsImported())
+      {
+      continue;
+      }
+    cmGhsMultiTargetGenerator tg(l->second->Target);
+    tg.Generate();
     }
-  this->cmLocalGenerator::Configure();
 }
