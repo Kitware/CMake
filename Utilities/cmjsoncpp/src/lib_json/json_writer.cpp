@@ -37,7 +37,12 @@
 // HP-UX
 #if defined(__hpux)
 # if !defined(isfinite)
-#  define isfinite finite
+#  if defined(__ia64) && !defined(finite)
+#   define isfinite(x) ((sizeof(x) == sizeof(float) ? \
+                        _Isfinitef(x) : _Isfinite(x)))
+#  else
+#   define isfinite finite
+#  endif
 # endif
 #endif
 
