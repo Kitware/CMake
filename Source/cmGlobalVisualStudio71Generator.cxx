@@ -16,9 +16,9 @@
 #include "cmake.h"
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(
+cmGlobalVisualStudio71Generator::cmGlobalVisualStudio71Generator(cmake* cm,
   const std::string& platformName)
-  : cmGlobalVisualStudio7Generator(platformName)
+  : cmGlobalVisualStudio7Generator(cm, platformName)
 {
   this->ProjectConfigurationSectionName = "ProjectConfiguration";
   this->Version = VS71;

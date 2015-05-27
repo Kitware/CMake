@@ -22,8 +22,8 @@ class cmGlobalVisualStudio9Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                              const std::string& name) const {
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const {
     if(strncmp(name.c_str(), vs9generatorName,
                sizeof(vs9generatorName) - 1) != 0)
       {
@@ -33,8 +33,7 @@ public:
     const char* p = name.c_str() + sizeof(vs9generatorName) - 1;
     if(p[0] == '\0')
       {
-      return new cmGlobalVisualStudio9Generator(
-        name, "");
+      return new cmGlobalVisualStudio9Generator(cm, name, "");
       }
 
     if(p[0] != ' ')
@@ -46,14 +45,12 @@ public:
 
     if(!strcmp(p, "IA64"))
       {
-      return new cmGlobalVisualStudio9Generator(
-        name, "Itanium");
+      return new cmGlobalVisualStudio9Generator(cm, name, "Itanium");
       }
 
     if(!strcmp(p, "Win64"))
       {
-      return new cmGlobalVisualStudio9Generator(
-        name, "x64");
+      return new cmGlobalVisualStudio9Generator(cm, name, "x64");
       }
 
     cmVisualStudioWCEPlatformParser parser(p);
@@ -63,8 +60,8 @@ public:
       return 0;
       }
 
-    cmGlobalVisualStudio9Generator* ret = new cmGlobalVisualStudio9Generator(
-      name, p);
+    cmGlobalVisualStudio9Generator* ret =
+        new cmGlobalVisualStudio9Generator(cm, name, p);
     ret->WindowsCEVersion = parser.GetOSVersion();
     return ret;
   }
@@ -100,9 +97,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio9Generator::NewFactory()
 }
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(
+cmGlobalVisualStudio9Generator::cmGlobalVisualStudio9Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio8Generator(name, platformName)
+  : cmGlobalVisualStudio8Generator(cm, name, platformName)
 {
   this->Version = VS9;
 }

@@ -24,7 +24,7 @@ class cmGlobalVisualStudio10Generator :
   public cmGlobalVisualStudio8Generator
 {
 public:
-  cmGlobalVisualStudio10Generator(const std::string& name,
+  cmGlobalVisualStudio10Generator(cmake* cm, const std::string& name,
     const std::string& platformName);
   static cmGlobalGeneratorFactory* NewFactory();
 
@@ -46,7 +46,8 @@ public:
     );
 
   ///! create the correct local generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   /**
    * Try to determine system information such as shared library

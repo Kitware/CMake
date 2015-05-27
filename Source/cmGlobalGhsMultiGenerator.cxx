@@ -21,8 +21,8 @@
 const char *cmGlobalGhsMultiGenerator::FILE_EXTENSION = ".gpj";
 const char *cmGlobalGhsMultiGenerator::DEFAULT_MAKE_PROGRAM = "gbuild";
 
-cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator()
-  : OSDirRelative(false)
+cmGlobalGhsMultiGenerator::cmGlobalGhsMultiGenerator(cmake* cm)
+  : cmGlobalGenerator(cm), OSDirRelative(false)
 {
   this->GhsBuildCommandInitialized = false;
 }
@@ -33,9 +33,10 @@ cmGlobalGhsMultiGenerator::~cmGlobalGhsMultiGenerator()
 }
 
 cmLocalGenerator *
-cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalGhsMultiGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                cmState::Snapshot snapshot)
 {
-  return new cmLocalGhsMultiGenerator(this, parent);
+  return new cmLocalGhsMultiGenerator(this, parent, snapshot);
 }
 
 void cmGlobalGhsMultiGenerator::GetDocumentation(cmDocumentationEntry &entry)

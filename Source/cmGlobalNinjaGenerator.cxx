@@ -504,8 +504,8 @@ void cmGlobalNinjaGenerator::WriteDefault(std::ostream& os,
 }
 
 
-cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
-  : cmGlobalGenerator()
+cmGlobalNinjaGenerator::cmGlobalNinjaGenerator(cmake* cm)
+  : cmGlobalGenerator(cm)
   , BuildFileStream(0)
   , RulesFileStream(0)
   , CompileCommandsStream(0)
@@ -516,7 +516,7 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
   , PolicyCMP0058(cmPolicies::WARN)
 {
 #ifdef _WIN32
-  this->WindowsShell = true;
+  cm->GetState()->SetWindowsShell(true);
 #endif
   // // Ninja is not ported to non-Unix OS yet.
   // this->ForceUnixPaths = true;
@@ -528,9 +528,10 @@ cmGlobalNinjaGenerator::cmGlobalNinjaGenerator()
 // Virtual public methods.
 
 cmLocalGenerator*
-cmGlobalNinjaGenerator::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalNinjaGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                             cmState::Snapshot snapshot)
 {
-  return new cmLocalNinjaGenerator(this, parent);
+  return new cmLocalNinjaGenerator(this, parent, snapshot);
 }
 
 void cmGlobalNinjaGenerator

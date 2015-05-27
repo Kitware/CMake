@@ -44,8 +44,9 @@ static cmVS7FlagTable cmVS7ExtraFlagTable[] =
   {0,0,0,0,0}
 };
 
-cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(
+cmGlobalVisualStudio7Generator::cmGlobalVisualStudio7Generator(cmake *cm,
   const std::string& platformName)
+  : cmGlobalVisualStudioGenerator(cm)
 {
   this->IntelProjectVersion = 0;
   this->DevEnvCommandInitialized = false;
@@ -278,10 +279,11 @@ void cmGlobalVisualStudio7Generator::GenerateBuildCommand(
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *
-cmGlobalVisualStudio7Generator::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalVisualStudio7Generator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                   cmState::Snapshot snapshot)
 {
   cmLocalVisualStudio7Generator *lg =
-    new cmLocalVisualStudio7Generator(this, parent);
+    new cmLocalVisualStudio7Generator(this, parent, snapshot);
   return lg;
 }
 

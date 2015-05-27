@@ -26,7 +26,8 @@ struct cmIDEFlagTable;
 class cmGlobalVisualStudio7Generator : public cmGlobalVisualStudioGenerator
 {
 public:
-  cmGlobalVisualStudio7Generator(const std::string& platformName = "");
+  cmGlobalVisualStudio7Generator(cmake* cm,
+                                 const std::string& platformName = "");
   ~cmGlobalVisualStudio7Generator();
 
   static cmGlobalGeneratorFactory* NewFactory() {
@@ -42,7 +43,8 @@ public:
   std::string const& GetPlatformName() const;
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   virtual bool SetSystemName(std::string const& s, cmMakefile* mf);
 

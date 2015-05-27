@@ -14,14 +14,15 @@
 #include "cmMakefile.h"
 #include "cmake.h"
 
-cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator()
+cmGlobalBorlandMakefileGenerator::cmGlobalBorlandMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->EmptyRuleHackDepends = "NUL";
   this->FindMakeProgramFile = "CMakeBorlandFindMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
-  this->WindowsShell = true;
+  cm->GetState()->SetWindowsShell(true);
   this->IncludeDirective = "!include";
   this->DefineWindowsNULL = true;
   this->PassMakeflags = true;
@@ -43,10 +44,10 @@ void cmGlobalBorlandMakefileGenerator
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *cmGlobalBorlandMakefileGenerator::CreateLocalGenerator(
-    cmLocalGenerator* parent)
+    cmLocalGenerator* parent, cmState::Snapshot snapshot)
 {
   cmLocalUnixMakefileGenerator3* lg =
-      new cmLocalUnixMakefileGenerator3(this, parent);
+      new cmLocalUnixMakefileGenerator3(this, parent, snapshot);
   lg->SetMakefileVariableSize(32);
   lg->SetMakeCommandEscapeTargetTwice(true);
   lg->SetBorlandMakeCurlyHack(true);

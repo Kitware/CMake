@@ -34,7 +34,8 @@ class cmCustomCommandGenerator;
 class cmLocalGenerator
 {
 public:
-  cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent);
+  cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,
+                   cmState::Snapshot snapshot);
   virtual ~cmLocalGenerator();
 
   /// @return whether we are processing the top CMakeLists.txt file.

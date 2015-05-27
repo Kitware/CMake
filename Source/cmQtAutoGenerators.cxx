@@ -1210,8 +1210,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cmake cm;
   cm.SetHomeOutputDirectory(targetDirectory);
   cm.SetHomeDirectory(targetDirectory);
-  cmGlobalGenerator gg;
-  gg.SetCMakeInstance(&cm);
+  cmGlobalGenerator gg(&cm);
 
   cmLocalGenerator* lg = gg.MakeLocalGenerator();
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);

@@ -13,14 +13,15 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
-cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator()
+cmGlobalMinGWMakefileGenerator::cmGlobalMinGWMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeMinGWFindMake.cmake";
   this->ForceUnixPaths = true;
   this->ToolSupportsColor = true;
   this->UseLinkScript = true;
-  this->WindowsShell = true;
-  this->MinGWMake = true;
+  cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetMinGWMake(true);
 }
 
 void cmGlobalMinGWMakefileGenerator

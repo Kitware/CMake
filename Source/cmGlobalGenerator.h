@@ -21,6 +21,7 @@
 #include "cmExportSetMap.h" // For cmExportSetMap
 #include "cmGeneratorTarget.h"
 #include "cmGeneratorExpression.h"
+#include "cmState.h"
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 # include "cmFileLockPool.h"
@@ -53,10 +54,12 @@ class cmGlobalGenerator
 {
 public:
   ///! Free any memory allocated with the GlobalGenerator
-  cmGlobalGenerator();
+  cmGlobalGenerator(cmake* cm);
   virtual ~cmGlobalGenerator();
 
-  cmLocalGenerator* MakeLocalGenerator(cmLocalGenerator* parent = 0);
+  cmLocalGenerator* MakeLocalGenerator(
+      cmState::Snapshot snapshot = cmState::Snapshot(),
+      cmLocalGenerator* parent = 0);
 
   ///! Get the name for this generator
   virtual std::string GetName() const { return "Generic"; }
@@ -157,9 +160,6 @@ public:
                                         const std::string& config,
                                         const std::string& native,
                                         bool ignoreErrors);
-
-  ///! Set the CMake instance
-  void SetCMakeInstance(cmake *cm);
 
   ///! Get the CMake instance
   cmake *GetCMakeInstance() const { return this->CMakeInstance; }
@@ -358,13 +358,6 @@ public:
 #endif
 
   std::string MakeSilentFlag;
-  bool WindowsShell;
-  bool WindowsVSIDE;
-  bool WatcomWMake;
-  bool MinGWMake;
-  bool NMake;
-  bool MSYSShell;
-
 protected:
   virtual void Generate();
 
@@ -451,7 +444,8 @@ protected:
 
 private:
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   cmMakefile* TryCompileOuterMakefile;
   float FirstTimeProgress;

@@ -29,7 +29,7 @@ class cmSourceGroup;
 class cmGlobalXCodeGenerator : public cmGlobalGenerator
 {
 public:
-  cmGlobalXCodeGenerator(std::string const& version);
+  cmGlobalXCodeGenerator(cmake* cm, std::string const& version);
   static cmGlobalGeneratorFactory* NewFactory();
 
   ///! Get the name for the generator.
@@ -41,7 +41,8 @@ public:
   static void GetDocumentation(cmDocumentationEntry& entry);
 
   ///! Create a local generator appropriate to this Global Generator
-  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent = 0);
+  virtual cmLocalGenerator *CreateLocalGenerator(cmLocalGenerator* parent,
+                                                 cmState::Snapshot snapshot);
 
   /**
    * Try to determine system information such as shared library

@@ -31,7 +31,8 @@ std::string GetVS6TargetName(const std::string& targetName)
   return name;
 }
 
-cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator()
+cmGlobalVisualStudio6Generator::cmGlobalVisualStudio6Generator(cmake* cm)
+  : cmGlobalVisualStudioGenerator(cm)
 {
   this->MSDevCommandInitialized = false;
   this->Version = VS6;
@@ -172,9 +173,10 @@ cmGlobalVisualStudio6Generator::GenerateBuildCommand(
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *
-cmGlobalVisualStudio6Generator::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalVisualStudio6Generator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                   cmState::Snapshot snapshot)
 {
-  return new cmLocalVisualStudio6Generator(this, parent);
+  return new cmLocalVisualStudio6Generator(this, parent, snapshot);
 }
 
 

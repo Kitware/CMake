@@ -37,8 +37,8 @@ class cmGlobalVisualStudio14Generator::Factory
   : public cmGlobalGeneratorFactory
 {
 public:
-  virtual cmGlobalGenerator* CreateGlobalGenerator(
-                                                const std::string& name) const
+  virtual cmGlobalGenerator*
+  CreateGlobalGenerator(const std::string& name, cmake* cm) const
     {
     std::string genName;
     const char* p = cmVS14GenName(name, genName);
@@ -46,20 +46,17 @@ public:
       { return 0; }
     if(!*p)
       {
-      return new cmGlobalVisualStudio14Generator(
-        genName, "");
+      return new cmGlobalVisualStudio14Generator(cm, genName, "");
       }
     if(*p++ != ' ')
       { return 0; }
     if(strcmp(p, "Win64") == 0)
       {
-      return new cmGlobalVisualStudio14Generator(
-        genName, "x64");
+      return new cmGlobalVisualStudio14Generator(cm, genName, "x64");
       }
     if(strcmp(p, "ARM") == 0)
       {
-      return new cmGlobalVisualStudio14Generator(
-        genName, "ARM");
+      return new cmGlobalVisualStudio14Generator(cm, genName, "ARM");
       }
     return 0;
     }
@@ -88,9 +85,9 @@ cmGlobalGeneratorFactory* cmGlobalVisualStudio14Generator::NewFactory()
 }
 
 //----------------------------------------------------------------------------
-cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(
+cmGlobalVisualStudio14Generator::cmGlobalVisualStudio14Generator(cmake* cm,
   const std::string& name, const std::string& platformName)
-  : cmGlobalVisualStudio12Generator(name, platformName)
+  : cmGlobalVisualStudio12Generator(cm, name, platformName)
 {
   std::string vc14Express;
   this->ExpressEdition = cmSystemTools::ReadRegistryValue(

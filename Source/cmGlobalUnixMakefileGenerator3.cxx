@@ -20,7 +20,8 @@
 #include "cmGeneratorTarget.h"
 #include "cmAlgorithms.h"
 
-cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3()
+cmGlobalUnixMakefileGenerator3::cmGlobalUnixMakefileGenerator3(cmake* cm)
+  : cmGlobalGenerator(cm)
 {
   // This type of makefile always requires unix style paths
   this->ForceUnixPaths = true;
@@ -59,9 +60,10 @@ void cmGlobalUnixMakefileGenerator3
 
 ///! Create a local generator appropriate to this Global Generator
 cmLocalGenerator *
-cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(cmLocalGenerator* parent)
+cmGlobalUnixMakefileGenerator3::CreateLocalGenerator(cmLocalGenerator* parent,
+                                                   cmState::Snapshot snapshot)
 {
-  return new cmLocalUnixMakefileGenerator3(this, parent);
+  return new cmLocalUnixMakefileGenerator3(this, parent, snapshot);
 }
 
 //----------------------------------------------------------------------------

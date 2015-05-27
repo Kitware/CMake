@@ -134,6 +134,7 @@ cmake::cmake()
 
   this->Policies = new cmPolicies();
   this->State = new cmState(this);
+  this->CurrentSnapshot = this->State->CreateSnapshot(cmState::Snapshot());
 
 #ifdef __APPLE__
   struct rlimit rlp;
@@ -185,7 +186,7 @@ cmake::~cmake()
 
 void cmake::CleanupCommandsAndMacros()
 {
-  this->State->Initialize();
+  this->State->Reset();
   this->State->RemoveUserDefinedCommands();
 }
 
@@ -362,8 +363,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   // if a generator was not specified use a generic one
   if (!gg)
     {
-    gg = new cmGlobalGenerator;
-    gg->SetCMakeInstance(this);
+    gg = new cmGlobalGenerator(this);
     created = true;
     }
 
@@ -411,8 +411,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     (cmSystemTools::GetCurrentWorkingDirectory());
 
   // if a generator was not yet created, temporarily create one
-  cmGlobalGenerator *gg = new cmGlobalGenerator;
-  gg->SetCMakeInstance(this);
+  cmGlobalGenerator *gg = new cmGlobalGenerator(this);
   this->SetGlobalGenerator(gg);
 
   // read in the list file to fill the cache
@@ -951,7 +950,7 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
   for (RegisteredGeneratorsVector::const_iterator i =
     this->Generators.begin(); i != this->Generators.end(); ++i)
     {
-    generator = (*i)->CreateGlobalGenerator(name);
+    generator = (*i)->CreateGlobalGenerator(name, this);
     if (generator)
       {
       break;
@@ -960,7 +959,6 @@ cmGlobalGenerator* cmake::CreateGlobalGenerator(const std::string& gname)
 
   if (generator)
     {
-    generator->SetCMakeInstance(this);
     generator->SetExternalMakefileProjectGenerator(extraGenerator);
     }
   else
@@ -1045,8 +1043,6 @@ void cmake::SetGlobalGenerator(cmGlobalGenerator *gg)
     {
     this->CCEnvironment = "";
     }
-  // set the cmake instance just to be sure
-  gg->SetCMakeInstance(this);
 }
 
 int cmake::DoPreConfigureChecks()
@@ -1299,12 +1295,12 @@ int cmake::ActualConfigure()
         = this->CreateGlobalGenerator(installedCompiler.c_str());
       if(!gen)
         {
-        gen = new cmGlobalNMakeMakefileGenerator;
+        gen = new cmGlobalNMakeMakefileGenerator(this);
         }
       this->SetGlobalGenerator(gen);
       std::cout << "-- Building for: " << gen->GetName() << "\n";
 #else
-      this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator3);
+      this->SetGlobalGenerator(new cmGlobalUnixMakefileGenerator3(this));
 #endif
       }
     if(!this->GlobalGenerator)
@@ -1917,8 +1913,7 @@ int cmake::CheckBuildSystem()
   cmake cm;
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
-  cmGlobalGenerator gg;
-  gg.SetCMakeInstance(&cm);
+  cmGlobalGenerator gg(&cm);
   cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
   cmMakefile* mf = lg->GetMakefile();
   if(!mf->ReadListFile(this->CheckBuildSystemArgument.c_str()) ||

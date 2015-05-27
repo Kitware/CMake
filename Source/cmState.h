@@ -93,7 +93,7 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propertyName);
 
-  void Initialize();
+  void Reset();
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
@@ -138,6 +138,19 @@ public:
   std::vector<std::string> const& GetSourceDirectoryComponents() const;
   std::vector<std::string> const& GetBinaryDirectoryComponents() const;
 
+  void SetWindowsShell(bool windowsShell);
+  bool UseWindowsShell() const;
+  void SetWindowsVSIDE(bool windowsVSIDE);
+  bool UseWindowsVSIDE() const;
+  void SetWatcomWMake(bool watcomWMake);
+  bool UseWatcomWMake() const;
+  void SetMinGWMake(bool minGWMake);
+  bool UseMinGWMake() const;
+  void SetNMake(bool nMake);
+  bool UseNMake() const;
+  void SetMSYSShell(bool mSYSShell);
+  bool UseMSYSShell() const;
+
 private:
   std::map<cmProperty::ScopeType, cmPropertyDefinitionMap> PropertyDefinitions;
   std::vector<std::string> EnabledLanguages;
@@ -163,6 +176,12 @@ private:
   std::string SourceDirectory;
   std::string BinaryDirectory;
   bool IsInTryCompile;
+  bool WindowsShell;
+  bool WindowsVSIDE;
+  bool WatcomWMake;
+  bool MinGWMake;
+  bool NMake;
+  bool MSYSShell;
 };
 
 #endif

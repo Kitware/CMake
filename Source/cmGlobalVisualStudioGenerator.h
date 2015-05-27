@@ -38,7 +38,7 @@ public:
     VS14 = 140
   };
 
-  cmGlobalVisualStudioGenerator();
+  cmGlobalVisualStudioGenerator(cmake* cm);
   virtual ~cmGlobalVisualStudioGenerator();
 
   VSVersion GetVersion() const;

@@ -31,7 +31,8 @@ class cmake;
 class cmLocalNinjaGenerator : public cmLocalGenerator
 {
 public:
-  cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent);
+  cmLocalNinjaGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,
+                        cmState::Snapshot snapshot);
 
   virtual ~cmLocalNinjaGenerator();
 

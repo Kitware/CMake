@@ -13,14 +13,15 @@
 #include "cmLocalUnixMakefileGenerator3.h"
 #include "cmMakefile.h"
 
-cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator()
+cmGlobalNMakeMakefileGenerator::cmGlobalNMakeMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeNMakeFindMake.cmake";
   this->ForceUnixPaths = false;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
-  this->WindowsShell = true;
-  this->NMake = true;
+  cm->GetState()->SetWindowsShell(true);
+  cm->GetState()->SetNMake(true);
   this->DefineWindowsNULL = true;
   this->PassMakeflags = true;
   this->UnixCD = false;

@@ -22,7 +22,7 @@
 class cmGlobalWatcomWMakeGenerator : public cmGlobalUnixMakefileGenerator3
 {
 public:
-  cmGlobalWatcomWMakeGenerator();
+  cmGlobalWatcomWMakeGenerator(cmake* cm);
   static cmGlobalGeneratorFactory* NewFactory() {
     return new cmGlobalGeneratorSimpleFactory
       <cmGlobalWatcomWMakeGenerator>(); }

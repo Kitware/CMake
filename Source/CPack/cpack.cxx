@@ -201,8 +201,7 @@ int main (int argc, char const* const* argv)
   cminst.SetHomeDirectory("");
   cminst.SetHomeOutputDirectory("");
   cminst.GetState()->RemoveUnscriptableCommands();
-  cmGlobalGenerator cmgg;
-  cmgg.SetCMakeInstance(&cminst);
+  cmGlobalGenerator cmgg(&cminst);
   cmsys::auto_ptr<cmLocalGenerator> cmlg(cmgg.MakeLocalGenerator());
   cmMakefile* globalMF = cmlg->GetMakefile();
 #if defined(__CYGWIN__)

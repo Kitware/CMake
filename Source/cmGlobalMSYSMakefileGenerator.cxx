@@ -15,13 +15,14 @@
 #include "cmake.h"
 #include <cmsys/FStream.hxx>
 
-cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator()
+cmGlobalMSYSMakefileGenerator::cmGlobalMSYSMakefileGenerator(cmake* cm)
+  : cmGlobalUnixMakefileGenerator3(cm)
 {
   this->FindMakeProgramFile = "CMakeMSYSFindMake.cmake";
   this->ForceUnixPaths = true;
   this->ToolSupportsColor = true;
   this->UseLinkScript = false;
-  this->MSYSShell = true;
+  cm->GetState()->SetMSYSShell(true);
 }
 
 std::string

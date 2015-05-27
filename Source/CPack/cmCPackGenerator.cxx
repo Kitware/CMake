@@ -715,8 +715,7 @@ int cmCPackGenerator::InstallProjectViaInstallCMakeProjects(
         cm.SetHomeOutputDirectory("");
         cm.AddCMakePaths();
         cm.SetProgressCallback(cmCPackGeneratorProgress, this);
-        cmGlobalGenerator gg;
-        gg.SetCMakeInstance(&cm);
+        cmGlobalGenerator gg(&cm);
         cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
         cmMakefile *mf = lg->GetMakefile();
         std::string realInstallDirectory = tempInstallDirectory;

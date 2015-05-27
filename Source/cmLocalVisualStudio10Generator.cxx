@@ -63,8 +63,9 @@ class cmVS10XMLParser : public cmXMLParser
 //----------------------------------------------------------------------------
 cmLocalVisualStudio10Generator
 ::cmLocalVisualStudio10Generator(cmGlobalGenerator* gg,
-                                 cmLocalGenerator* parent):
-  cmLocalVisualStudio7Generator(gg, parent)
+                                 cmLocalGenerator* parent,
+                                 cmState::Snapshot snapshot):
+  cmLocalVisualStudio7Generator(gg, parent, snapshot)
 {
 }
 

@@ -48,7 +48,8 @@
 
 #include <assert.h>
 
-cmGlobalGenerator::cmGlobalGenerator()
+cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
+  : CMakeInstance(cm)
 {
   // By default the .SYMBOLIC dependency is not needed on symbolic rules.
   this->NeedSymbolicMark = false;
@@ -71,13 +72,6 @@ cmGlobalGenerator::cmGlobalGenerator()
   this->ExtraGenerator = 0;
   this->CurrentLocalGenerator = 0;
   this->TryCompileOuterMakefile = 0;
-
-  this->WindowsShell = false;
-  this->WindowsVSIDE = false;
-  this->WatcomWMake = false;
-  this->MinGWMake = false;
-  this->NMake = false;
-  this->MSYSShell = false;
 }
 
 cmGlobalGenerator::~cmGlobalGenerator()
@@ -1890,15 +1884,22 @@ void cmGlobalGenerator::EnableInstallTarget()
 }
 
 cmLocalGenerator *
-cmGlobalGenerator::MakeLocalGenerator(cmLocalGenerator *parent)
+cmGlobalGenerator::MakeLocalGenerator(cmState::Snapshot snapshot,
+                                      cmLocalGenerator *parent)
 {
-  return this->CreateLocalGenerator(parent);
+  if (!snapshot.IsValid())
+    {
+    snapshot = this->CMakeInstance->GetCurrentSnapshot();
+    }
+
+  return this->CreateLocalGenerator(parent, snapshot);
 }
 
-cmLocalGenerator *
-cmGlobalGenerator::CreateLocalGenerator(cmLocalGenerator *parent)
+cmLocalGenerator*
+cmGlobalGenerator::CreateLocalGenerator(cmLocalGenerator* parent,
+                                        cmState::Snapshot snapshot)
 {
-  return new cmLocalGenerator(this, parent);
+  return new cmLocalGenerator(this, parent, snapshot);
 }
 
 void cmGlobalGenerator::EnableLanguagesFromGenerator(cmGlobalGenerator *gen,
@@ -2139,12 +2140,6 @@ inline std::string removeQuotes(const std::string& s)
     return s.substr(1, s.size()-2);
     }
   return s;
-}
-
-void cmGlobalGenerator::SetCMakeInstance(cmake* cm)
-{
-  // Store a pointer to the cmake object instance.
-  this->CMakeInstance = cm;
 }
 
 void cmGlobalGenerator::CreateDefaultGlobalTargets(cmTargets* targets)
