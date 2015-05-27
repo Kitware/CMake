@@ -30,7 +30,6 @@ class cmDocumentationSection;
 class cmPolicies;
 class cmTarget;
 class cmGeneratedFileStream;
-class cmState;
 
 /** \brief Represents a cmake invocation.
  *
