@@ -1185,7 +1185,7 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
           << "</Value></NamedMeasurement>"
           << std::endl;
         }
-      os << result->RegressionImages;
+      this->GenerateRegressionImages(os, result->DartString);
       os << "\t\t\t<NamedMeasurement type=\"numeric/double\" "
         << "name=\"Execution Time\"><Value>"
         << result->ExecutionTime
@@ -1827,8 +1827,8 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
 // Just for convenience
 #define SPACE_REGEX "[ \t\r\n]"
 //----------------------------------------------------------------------
-std::string cmCTestTestHandler::GenerateRegressionImages(
-  const std::string& xml)
+void cmCTestTestHandler::GenerateRegressionImages(
+  std::ostream& ostr, const std::string& xml)
 {
   cmsys::RegularExpression twoattributes(
     "<DartMeasurement"
@@ -1863,7 +1863,6 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
     SPACE_REGEX "*(name|type|encoding|compression)=\"([^\"]*)\""
     SPACE_REGEX "*>([^<]*)</DartMeasurementFile>");
 
-  std::ostringstream ostr;
   bool done = false;
   std::string cxml = xml;
   while ( ! done )
@@ -2025,7 +2024,6 @@ std::string cmCTestTestHandler::GenerateRegressionImages(
       done = true;
       }
     }
-  return ostr.str();
 }
 
 //----------------------------------------------------------------------
