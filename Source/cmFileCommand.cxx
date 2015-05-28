@@ -3290,17 +3290,6 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   if(!chunkDebug.empty())
     {
     chunkDebug.push_back(0);
-    if(CURLE_OPERATION_TIMEOUTED == res)
-      {
-      std::string output = &*chunkDebug.begin();
-
-      if(!verboseLog.empty())
-        {
-        this->Makefile->AddDefinition(verboseLog,
-                                      &*chunkDebug.begin());
-        }
-      }
-
     this->Makefile->AddDefinition(verboseLog,
                                   &*chunkDebug.begin());
     }
