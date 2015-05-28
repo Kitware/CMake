@@ -156,6 +156,24 @@ static bool CheckFileOperations()
     res = false;
     }
 
+  kwsys_stl::string const testFileMissing(testNewDir + "/testMissingFile.txt");
+  if (!kwsys::SystemTools::RemoveFile(testFileMissing))
+    {
+    std::string const& msg = kwsys::SystemTools::GetLastSystemError();
+    kwsys_ios::cerr <<
+      "RemoveFile(\"" << testFileMissing << "\") failed: " << msg << "\n";
+    res = false;
+    }
+
+  kwsys_stl::string const testFileMissingDir(testNewDir + "/missing/file.txt");
+  if (!kwsys::SystemTools::RemoveFile(testFileMissingDir))
+    {
+    std::string const& msg = kwsys::SystemTools::GetLastSystemError();
+    kwsys_ios::cerr <<
+      "RemoveFile(\"" << testFileMissingDir << "\") failed: " << msg << "\n";
+    res = false;
+    }
+
   kwsys::SystemTools::Touch(testNewFile.c_str(), true);
   if (!kwsys::SystemTools::RemoveADirectory(testNewDir))
     {

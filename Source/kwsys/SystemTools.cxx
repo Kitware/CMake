@@ -2674,27 +2674,43 @@ kwsys_stl::string SystemTools::GetLastSystemError()
 bool SystemTools::RemoveFile(const kwsys_stl::string& source)
 {
 #ifdef _WIN32
-  mode_t mode;
-  if ( !SystemTools::GetPermissions(source, mode) )
+  kwsys_stl::wstring const& ws =
+    SystemTools::ConvertToWindowsExtendedPath(source);
+  if (DeleteFileW(ws.c_str()))
+    {
+    return true;
+    }
+  DWORD err = GetLastError();
+  if (err == ERROR_FILE_NOT_FOUND ||
+      err == ERROR_PATH_NOT_FOUND)
+    {
+    return true;
+    }
+  if (err != ERROR_ACCESS_DENIED)
     {
     return false;
     }
-  /* Win32 unlink is stupid --- it fails if the file is read-only  */
-  SystemTools::SetPermissions(source, S_IWRITE);
-#endif
-#ifdef _WIN32
-  bool res =
-    _wunlink(SystemTools::ConvertToWindowsExtendedPath(source).c_str()) == 0;
-#else
-  bool res = unlink(source.c_str()) != 0 ? false : true;
-#endif
-#ifdef _WIN32
-  if ( !res )
+  /* The file may be read-only.  Try adding write permission.  */
+  mode_t mode;
+  if (!SystemTools::GetPermissions(source, mode) ||
+      !SystemTools::SetPermissions(source, S_IWRITE))
     {
-    SystemTools::SetPermissions(source, mode);
+    SetLastError(err);
+    return false;
     }
+  if (DeleteFileW(ws.c_str()) ||
+      GetLastError() == ERROR_FILE_NOT_FOUND ||
+      GetLastError() == ERROR_PATH_NOT_FOUND)
+    {
+    return true;
+    }
+  /* Try to restore the original permissions.  */
+  SystemTools::SetPermissions(source, mode);
+  SetLastError(err);
+  return false;
+#else
+  return unlink(source.c_str()) == 0 || errno == ENOENT;
 #endif
-  return res;
 }
 
 bool SystemTools::RemoveADirectory(const kwsys_stl::string& source)
