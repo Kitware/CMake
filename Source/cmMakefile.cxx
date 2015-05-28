@@ -287,6 +287,20 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
 }
 
 //----------------------------------------------------------------------------
+cmListFileBacktrace
+cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
+{
+  cmListFileBacktrace backtrace(this->GetLocalGenerator());
+  backtrace.Append(lfc);
+  for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
+      i != this->CallStack.rend(); ++i)
+    {
+    backtrace.Append(*i->Context);
+    }
+  return backtrace;
+}
+
+//----------------------------------------------------------------------------
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
   return *this->CallStack.back().Context;
