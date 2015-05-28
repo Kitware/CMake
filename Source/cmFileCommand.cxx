@@ -3287,7 +3287,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       }
     }
 
-  if(!chunkDebug.empty())
+  if (!logVar.empty())
     {
     chunkDebug.push_back(0);
     this->Makefile->AddDefinition(logVar, &*chunkDebug.begin());
