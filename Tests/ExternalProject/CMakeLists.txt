@@ -364,6 +364,66 @@ if(do_git_tests)
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
+  # Unzip/untar the git repository in our source folder so that other
+  # projects below may use it to test git args of ExternalProject_Add
+  #
+  set(proj SetupLocalGITRepositoryWithSubmodules)
+  ExternalProject_Add(${proj}
+    SOURCE_DIR ${CMAKE_CURRENT_BINARY_DIR}/LocalRepositories/GIT-with-submodules
+    URL ${CMAKE_CURRENT_SOURCE_DIR}/gitrepo-sub.tgz
+    BUILD_COMMAND ""
+    CONFIGURE_COMMAND "${GIT_EXECUTABLE}" --version
+    INSTALL_COMMAND ""
+  )
+  set_property(TARGET ${proj}
+    PROPERTY FOLDER "SetupRepos/Local/Deeply/Nested/For/Testing")
+
+  set(local_git_repo "../../LocalRepositories/GIT-with-submodules")
+
+  set(proj TS1-GIT-no-GIT_SUBMODULES)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+               -DWITH_m1:BOOL=ON
+               -DWITH_m2:BOOL=ON
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+            "SetupLocalGITRepositoryWithSubmodules"
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  set(proj TS1-GIT-empty-GIT_SUBMODULES)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_SUBMODULES ""
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+               -DWITH_m1:BOOL=ON
+               -DWITH_m2:BOOL=ON
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+            "SetupLocalGITRepositoryWithSubmodules"
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
+  set(proj TS1-GIT-some-GIT_SUBMODULES)
+  ExternalProject_Add(${proj}
+    GIT_REPOSITORY "${local_git_repo}"
+    GIT_SUBMODULES "m/m1"
+    CMAKE_GENERATOR "${CMAKE_GENERATOR}"
+    CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
+               -DWITH_m1:BOOL=ON
+               -DWITH_m2:BOOL=OFF
+    BUILD_COMMAND ""
+    INSTALL_COMMAND ""
+    DEPENDS "SetupLocalGITRepository"
+            "SetupLocalGITRepositoryWithSubmodules"
+  )
+  set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
+
 endif()
 
 set(do_hg_tests 0)
