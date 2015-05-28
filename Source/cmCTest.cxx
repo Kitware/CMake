@@ -28,6 +28,7 @@
 #include "cmCTestStartCommand.h"
 #include "cmAlgorithms.h"
 #include "cmState.h"
+#include "cmXMLWriter.h"
 
 #include "cmCTestBuildHandler.h"
 #include "cmCTestBuildAndTestHandler.h"
@@ -1489,7 +1490,7 @@ std::string cmCTest::SafeBuildIdField(const std::string& value)
 }
 
 //----------------------------------------------------------------------
-void cmCTest::StartXML(std::ostream& ostr, bool append)
+void cmCTest::StartXML(cmXMLWriter& xml, bool append)
 {
   if(this->CurrentTag.empty())
     {
@@ -1512,42 +1513,45 @@ void cmCTest::StartXML(std::ostream& ostr, bool append)
   std::string site = cmCTest::SafeBuildIdField(
     this->GetCTestConfiguration("Site"));
 
-  ostr << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-       << "<Site BuildName=\"" << buildname << "\"\n"
-       << "\tBuildStamp=\"" << stamp << "\"\n"
-       << "\tName=\"" << site << "\"\n"
-       << "\tGenerator=\"ctest-" << cmVersion::GetCMakeVersion() << "\"\n"
-       << (append? "\tAppend=\"true\"\n":"")
-       << "\tCompilerName=\"" << this->GetCTestConfiguration("Compiler")
-       << "\"\n"
+  xml.StartDocument();
+  xml.StartElement("Site");
+  xml.Attribute("BuildName", buildname);
+  xml.BreakAttributes();
+  xml.Attribute("BuildStamp", stamp);
+  xml.Attribute("Name", site);
+  xml.Attribute("Generator",
+                     std::string("ctest-") + cmVersion::GetCMakeVersion());
+  if(append)
+    {
+    xml.Attribute("Append", "true");
+    }
+  xml.Attribute("CompilerName", this->GetCTestConfiguration("Compiler"));
 #ifdef _COMPILER_VERSION
-       << "\tCompilerVersion=\"_COMPILER_VERSION\"\n"
+  xml.Attribute("CompilerVersion", _COMPILER_VERSION);
 #endif
-       << "\tOSName=\"" << info.GetOSName() << "\"\n"
-       << "\tHostname=\"" << info.GetHostname() << "\"\n"
-       << "\tOSRelease=\"" << info.GetOSRelease() << "\"\n"
-       << "\tOSVersion=\"" << info.GetOSVersion() << "\"\n"
-       << "\tOSPlatform=\"" << info.GetOSPlatform() << "\"\n"
-       << "\tIs64Bits=\"" << info.Is64Bits() << "\"\n"
-       << "\tVendorString=\"" << info.GetVendorString() << "\"\n"
-       << "\tVendorID=\"" << info.GetVendorID() << "\"\n"
-       << "\tFamilyID=\"" << info.GetFamilyID() << "\"\n"
-       << "\tModelID=\"" << info.GetModelID() << "\"\n"
-       << "\tProcessorCacheSize=\"" << info.GetProcessorCacheSize() << "\"\n"
-       << "\tNumberOfLogicalCPU=\"" << info.GetNumberOfLogicalCPU() << "\"\n"
-       << "\tNumberOfPhysicalCPU=\""<< info.GetNumberOfPhysicalCPU() << "\"\n"
-       << "\tTotalVirtualMemory=\"" << info.GetTotalVirtualMemory() << "\"\n"
-       << "\tTotalPhysicalMemory=\""<< info.GetTotalPhysicalMemory() << "\"\n"
-       << "\tLogicalProcessorsPerPhysical=\""
-       << info.GetLogicalProcessorsPerPhysical() << "\"\n"
-       << "\tProcessorClockFrequency=\""
-       << info.GetProcessorClockFrequency() << "\"\n"
-       << ">" << std::endl;
-  this->AddSiteProperties(ostr);
+  xml.Attribute("OSName", info.GetOSName());
+  xml.Attribute("Hostname", info.GetHostname());
+  xml.Attribute("OSRelease", info.GetOSRelease());
+  xml.Attribute("OSVersion", info.GetOSVersion());
+  xml.Attribute("OSPlatform", info.GetOSPlatform());
+  xml.Attribute("Is64Bits", info.Is64Bits());
+  xml.Attribute("VendorString", info.GetVendorString());
+  xml.Attribute("VendorID", info.GetVendorID());
+  xml.Attribute("FamilyID", info.GetFamilyID());
+  xml.Attribute("ModelID", info.GetModelID());
+  xml.Attribute("ProcessorCacheSize", info.GetProcessorCacheSize());
+  xml.Attribute("NumberOfLogicalCPU", info.GetNumberOfLogicalCPU());
+  xml.Attribute("NumberOfPhysicalCPU", info.GetNumberOfPhysicalCPU());
+  xml.Attribute("TotalVirtualMemory", info.GetTotalVirtualMemory());
+  xml.Attribute("TotalPhysicalMemory", info.GetTotalPhysicalMemory());
+  xml.Attribute("LogicalProcessorsPerPhysical",
+                     info.GetLogicalProcessorsPerPhysical());
+  xml.Attribute("ProcessorClockFrequency", info.GetProcessorClockFrequency());
+  this->AddSiteProperties(xml);
 }
 
 //----------------------------------------------------------------------
-void cmCTest::AddSiteProperties(std::ostream& ostr)
+void cmCTest::AddSiteProperties(cmXMLWriter& xml)
 {
   cmCTestScriptHandler* ch =
     static_cast<cmCTestScriptHandler*>(this->GetHandler("script"));
@@ -1563,92 +1567,95 @@ void cmCTest::AddSiteProperties(std::ostream& ostr)
                              ->GetGlobalProperty("SubProject");
   if(subproject)
     {
-    ostr << "<Subproject name=\"" << subproject << "\">\n";
+    xml.StartElement("Subproject");
+    xml.Attribute("name", subproject);
     const char* labels =
       ch->GetCMake()->GetState()
                     ->GetGlobalProperty("SubProjectLabels");
     if(labels)
       {
-      ostr << "  <Labels>\n";
+      xml.StartElement("Labels");
       std::string l = labels;
       std::vector<std::string> args;
       cmSystemTools::ExpandListArgument(l, args);
       for(std::vector<std::string>::iterator i = args.begin();
           i != args.end(); ++i)
         {
-        ostr << "    <Label>" << *i << "</Label>\n";
+        xml.Element("Label", *i);
         }
-      ostr << "  </Labels>\n";
+      xml.EndElement();
       }
-    ostr << "</Subproject>\n";
+    xml.EndElement();
     }
 
   // This code should stay when cdash only does label based sub-projects
   const char* label = cm->GetState()->GetGlobalProperty("Label");
   if(label)
     {
-    ostr << "<Labels>\n";
-    ostr << "  <Label>" << label << "</Label>\n";
-    ostr << "</Labels>\n";
+    xml.StartElement("Labels");
+    xml.Element("Label", label);
+    xml.EndElement();
     }
 }
 
-
 //----------------------------------------------------------------------
-void cmCTest::EndXML(std::ostream& ostr)
+void cmCTest::EndXML(cmXMLWriter& xml)
 {
-  ostr << "</Site>" << std::endl;
+  xml.EndElement(); // Site
+  xml.EndDocument();
 }
 
 //----------------------------------------------------------------------
-int cmCTest::GenerateCTestNotesOutput(std::ostream& os,
+int cmCTest::GenerateCTestNotesOutput(cmXMLWriter& xml,
   const cmCTest::VectorOfStrings& files)
 {
   std::string buildname = cmCTest::SafeBuildIdField(
     this->GetCTestConfiguration("BuildName"));
   cmCTest::VectorOfStrings::const_iterator it;
-  os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-     << "<?xml-stylesheet type=\"text/xsl\" "
+  xml.StartDocument();
+  xml.ProcessingInstruction("xml-stylesheet", "type=\"text/xsl\" "
     "href=\"Dart/Source/Server/XSL/Build.xsl "
-    "<file:///Dart/Source/Server/XSL/Build.xsl> \"?>\n"
-     << "<Site BuildName=\"" << buildname
-     << "\" BuildStamp=\""
-     << this->CurrentTag << "-" << this->GetTestModelString() << "\" Name=\""
-     << this->GetCTestConfiguration("Site") << "\" Generator=\"ctest"
-     << cmVersion::GetCMakeVersion()
-     << "\">\n";
-  this->AddSiteProperties(os);
-  os << "<Notes>" << std::endl;
+    "<file:///Dart/Source/Server/XSL/Build.xsl> \"");
+  xml.StartElement("Site");
+  xml.Attribute("BuildName", buildname);
+  xml.Attribute("BuildStamp", this->CurrentTag+"-"+this->GetTestModelString());
+  xml.Attribute("Name", this->GetCTestConfiguration("Site"));
+  xml.Attribute("Generator",std::string("ctest")+cmVersion::GetCMakeVersion());
+  this->AddSiteProperties(xml);
+  xml.StartElement("Notes");
 
   for ( it = files.begin(); it != files.end(); it ++ )
     {
     cmCTestLog(this, OUTPUT, "\tAdd file: " << *it << std::endl);
     std::string note_time = this->CurrentTime();
-    os << "<Note Name=\"" << cmXMLSafe(*it) << "\">\n"
-      << "<Time>" << cmSystemTools::GetTime() << "</Time>\n"
-      << "<DateTime>" << note_time << "</DateTime>\n"
-      << "<Text>" << std::endl;
+    xml.StartElement("Note");
+    xml.Attribute("Name", *it);
+    xml.Element("Time", cmSystemTools::GetTime());
+    xml.Element("DateTime", note_time);
+    xml.StartElement("Text");
     cmsys::ifstream ifs(it->c_str());
     if ( ifs )
       {
       std::string line;
       while ( cmSystemTools::GetLineFromStream(ifs, line) )
         {
-        os << cmXMLSafe(line) << std::endl;
+        xml.Content(line);
+        xml.Content("\n");
         }
       ifs.close();
       }
     else
       {
-      os << "Problem reading file: " << *it << std::endl;
+      xml.Content("Problem reading file: " + *it + "\n");
       cmCTestLog(this, ERROR_MESSAGE, "Problem reading file: " << *it
         << " while creating notes" << std::endl);
       }
-    os << "</Text>\n"
-      << "</Note>" << std::endl;
+    xml.EndElement(); // Text
+    xml.EndElement(); // Note
     }
-  os << "</Notes>\n"
-    << "</Site>" << std::endl;
+  xml.EndElement(); // Notes
+  xml.EndElement(); // Site
+  xml.EndDocument();
   return 1;
 }
 
@@ -1661,8 +1668,8 @@ int cmCTest::GenerateNotesFile(const VectorOfStrings &files)
     cmCTestLog(this, ERROR_MESSAGE, "Cannot open notes file" << std::endl);
     return 1;
     }
-
-  this->GenerateCTestNotesOutput(ofs, files);
+  cmXMLWriter xml(ofs);
+  this->GenerateCTestNotesOutput(xml, files);
   return 0;
 }
 

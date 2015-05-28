@@ -15,7 +15,7 @@
 #include "cmCTest.h"
 #include "cmGeneratedFileStream.h"
 #include "cmake.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 #include <cmsys/Process.h>
 
 
@@ -89,28 +89,22 @@ int cmCTestConfigureHandler::ProcessHandler()
 
     if ( os )
       {
-      this->CTest->StartXML(os, this->AppendXML);
-      os << "<Configure>\n"
-         << "\t<StartDateTime>" << start_time << "</StartDateTime>"
-         << std::endl
-         << "\t<StartConfigureTime>" << start_time_time
-         << "</StartConfigureTime>\n";
-      os << "<ConfigureCommand>" << cCommand << "</ConfigureCommand>"
-        << std::endl;
+      cmXMLWriter xml(os);
+      this->CTest->StartXML(xml, this->AppendXML);
+      xml.StartElement("Configure");
+      xml.Element("StartDateTime", start_time);
+      xml.Element("StartConfigureTime", start_time_time);
+      xml.Element("ConfigureCommand", cCommand);
       cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
-      os << "<Log>" << cmXMLSafe(output) << "</Log>" << std::endl;
-      std::string end_time = this->CTest->CurrentTime();
-      os << "\t<ConfigureStatus>" << retVal << "</ConfigureStatus>\n"
-         << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
-         << "\t<EndConfigureTime>" <<
-        static_cast<unsigned int>(cmSystemTools::GetTime())
-         << "</EndConfigureTime>\n"
-         << "<ElapsedMinutes>"
-         << static_cast<int>(
-           (cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
-         << "</ElapsedMinutes>"
-         << "</Configure>" << std::endl;
-      this->CTest->EndXML(os);
+      xml.Element("Log", output);
+      xml.Element("ConfigureStatus", retVal);
+      xml.Element("EndDateTime", this->CTest->CurrentTime());
+      xml.Element("EndConfigureTime",
+        static_cast<unsigned int>(cmSystemTools::GetTime()));
+      xml.Element("ElapsedMinutes", static_cast<int>(
+        (cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0);
+      xml.EndElement(); // Configure
+      this->CTest->EndXML(xml);
       }
     }
   else

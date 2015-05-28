@@ -13,7 +13,7 @@
 
 #include "cmCTest.h"
 #include "cmSystemTools.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 
 #include <cmsys/RegularExpression.hxx>
 #include <cmsys/FStream.hxx>
@@ -266,13 +266,13 @@ void cmCTestCVS::LoadRevisions(std::string const& file,
 }
 
 //----------------------------------------------------------------------------
-void cmCTestCVS::WriteXMLDirectory(std::ostream& xml,
+void cmCTestCVS::WriteXMLDirectory(cmXMLWriter& xml,
                                    std::string const& path,
                                    Directory const& dir)
 {
   const char* slash = path.empty()? "":"/";
-  xml << "\t<Directory>\n"
-      << "\t\t<Name>" << cmXMLSafe(path) << "</Name>\n";
+  xml.StartElement("Directory");
+  xml.Element("Name", path);
 
   // Lookup the branch checked out in the working tree.
   std::string branchFlag = this->ComputeBranchFlag(path);
@@ -298,11 +298,11 @@ void cmCTestCVS::WriteXMLDirectory(std::ostream& xml,
     File f(fi->second, &revisions[0], &revisions[1]);
     this->WriteXMLEntry(xml, path, fi->first, full, f);
     }
-  xml << "\t</Directory>\n";
+  xml.EndElement(); // Directory
 }
 
 //----------------------------------------------------------------------------
-bool cmCTestCVS::WriteXMLUpdates(std::ostream& xml)
+bool cmCTestCVS::WriteXMLUpdates(cmXMLWriter& xml)
 {
   cmCTestLog(this->CTest, HANDLER_OUTPUT,
              "   Gathering version information (one . per updated file):\n"

@@ -27,7 +27,7 @@
 #include "cmLocalGenerator.h"
 #include "cmCommand.h"
 #include "cmSystemTools.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 #include "cm_utf8.h"
 
 #include <stdlib.h>
@@ -633,7 +633,8 @@ int cmCTestTestHandler::ProcessHandler()
       this->LogFile = 0;
       return 1;
       }
-    this->GenerateDartOutput(xmlfile);
+    cmXMLWriter xml(xmlfile);
+    this->GenerateDartOutput(xml);
     }
 
   if ( ! this->PostProcessHandler() )
@@ -1142,54 +1143,53 @@ void cmCTestTestHandler::GenerateTestCommand(std::vector<std::string>&, int)
 }
 
 //----------------------------------------------------------------------
-void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
+void cmCTestTestHandler::GenerateDartOutput(cmXMLWriter& xml)
 {
   if ( !this->CTest->GetProduceXML() )
     {
     return;
     }
 
-  this->CTest->StartXML(os, this->AppendXML);
-  os << "<Testing>\n"
-    << "\t<StartDateTime>" << this->StartTest << "</StartDateTime>\n"
-    << "\t<StartTestTime>" << this->StartTestTime << "</StartTestTime>\n"
-    << "\t<TestList>\n";
+  this->CTest->StartXML(xml, this->AppendXML);
+  xml.StartElement("Testing");
+  xml.Element("StartDateTime", this->StartTest);
+  xml.Element("StartTestTime", this->StartTestTime);
+  xml.StartElement("TestList");
   cmCTestTestHandler::TestResultsVector::size_type cc;
   for ( cc = 0; cc < this->TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &this->TestResults[cc];
     std::string testPath = result->Path + "/" + result->Name;
-    os << "\t\t<Test>" << cmXMLSafe(
-      this->CTest->GetShortPathToFile(testPath.c_str()))
-      << "</Test>" << std::endl;
+    xml.Element("Test", this->CTest->GetShortPathToFile(testPath.c_str()));
     }
-  os << "\t</TestList>\n";
+  xml.EndElement(); // TestList
   for ( cc = 0; cc < this->TestResults.size(); cc ++ )
     {
     cmCTestTestResult *result = &this->TestResults[cc];
-    this->WriteTestResultHeader(os, result);
-    os << "\t\t<Results>" << std::endl;
+    this->WriteTestResultHeader(xml, result);
+    xml.StartElement("Results");
     if ( result->Status != cmCTestTestHandler::NOT_RUN )
       {
       if ( result->Status != cmCTestTestHandler::COMPLETED ||
         result->ReturnValue )
         {
-        os << "\t\t\t<NamedMeasurement type=\"text/string\" "
-          "name=\"Exit Code\"><Value>"
-          << cmXMLSafe(this->GetTestStatus(result->Status))
-          << "</Value>"
-          "</NamedMeasurement>\n"
-          << "\t\t\t<NamedMeasurement type=\"text/string\" "
-          "name=\"Exit Value\"><Value>"
-          << result->ReturnValue
-          << "</Value></NamedMeasurement>"
-          << std::endl;
+        xml.StartElement("NamedMeasurement");
+        xml.Attribute("type", "text/string");
+        xml.Attribute("name", "Exit Code");
+        xml.Element("Value", this->GetTestStatus(result->Status));
+        xml.EndElement(); // NamedMeasurement
+        xml.StartElement("NamedMeasurement");
+        xml.Attribute("type", "text/string");
+        xml.Attribute("name", "Exit Value");
+        xml.Element("Value", result->ReturnValue);
+        xml.EndElement(); // NamedMeasurement
         }
-      this->GenerateRegressionImages(os, result->DartString);
-      os << "\t\t\t<NamedMeasurement type=\"numeric/double\" "
-        << "name=\"Execution Time\"><Value>"
-        << result->ExecutionTime
-        << "</Value></NamedMeasurement>\n";
+      this->GenerateRegressionImages(xml, result->DartString);
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute("type", "numeric/double");
+      xml.Attribute("name", "Execution Time");
+      xml.Element("Value", result->ExecutionTime);
+      xml.EndElement(); // NamedMeasurement
       if(!result->Reason.empty())
         {
         const char* reasonType = "Pass Reason";
@@ -1198,109 +1198,103 @@ void cmCTestTestHandler::GenerateDartOutput(std::ostream& os)
           {
           reasonType = "Fail Reason";
           }
-        os << "\t\t\t<NamedMeasurement type=\"text/string\" "
-           << "name=\"" << reasonType << "\"><Value>"
-           << cmXMLSafe(result->Reason)
-           << "</Value></NamedMeasurement>\n";
+        xml.StartElement("NamedMeasurement");
+        xml.Attribute("type", "text/string");
+        xml.Attribute("name", reasonType);
+        xml.Element("Value", result->Reason);
+        xml.EndElement(); // NamedMeasurement
         }
-      os
-        << "\t\t\t<NamedMeasurement type=\"text/string\" "
-        << "name=\"Completion Status\"><Value>"
-        << cmXMLSafe(result->CompletionStatus)
-        << "</Value></NamedMeasurement>\n";
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute("type", "text/string");
+      xml.Attribute("name", "Completion Status");
+      xml.Element("Value", result->CompletionStatus);
+      xml.EndElement(); // NamedMeasurement
       }
-    os
-      << "\t\t\t<NamedMeasurement type=\"text/string\" "
-      << "name=\"Command Line\"><Value>"
-      << cmXMLSafe(result->FullCommandLine)
-      << "</Value></NamedMeasurement>\n";
+    xml.StartElement("NamedMeasurement");
+    xml.Attribute("type", "text/string");
+    xml.Attribute("name", "Command Line");
+    xml.Element("Value", result->FullCommandLine);
+    xml.EndElement(); // NamedMeasurement
     std::map<std::string,std::string>::iterator measureIt;
     for ( measureIt = result->Properties->Measurements.begin();
       measureIt != result->Properties->Measurements.end();
       ++ measureIt )
       {
-      os
-        << "\t\t\t<NamedMeasurement type=\"text/string\" "
-        << "name=\"" << measureIt->first << "\"><Value>"
-        << cmXMLSafe(measureIt->second)
-        << "</Value></NamedMeasurement>\n";
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute("type", "text/string");
+      xml.Attribute("name", measureIt->first);
+      xml.Element("Value", measureIt->second);
+      xml.EndElement(); // NamedMeasurement
       }
-    os
-      << "\t\t\t<Measurement>\n"
-      << "\t\t\t\t<Value"
-      << (result->CompressOutput ?
-      " encoding=\"base64\" compression=\"gzip\">"
-      : ">");
-    os << cmXMLSafe(result->Output);
-    os
-      << "</Value>\n"
-      << "\t\t\t</Measurement>\n"
-      << "\t\t</Results>\n";
+    xml.StartElement("Measurement");
+    xml.StartElement("Value");
+    if (result->CompressOutput)
+      {
+      xml.Attribute("encoding", "base64");
+      xml.Attribute("compression", "gzip");
+      }
+    xml.Content(result->Output);
+    xml.EndElement(); // Value
+    xml.EndElement(); // Measurement
+    xml.EndElement(); // Results
 
-    this->AttachFiles(os, result);
-    this->WriteTestResultFooter(os, result);
+    this->AttachFiles(xml, result);
+    this->WriteTestResultFooter(xml, result);
     }
 
-  os << "\t<EndDateTime>" << this->EndTest << "</EndDateTime>\n"
-     << "\t<EndTestTime>" << this->EndTestTime << "</EndTestTime>\n"
-     << "<ElapsedMinutes>"
-     << static_cast<int>(this->ElapsedTestingTime/6)/10.0
-     << "</ElapsedMinutes>"
-    << "</Testing>" << std::endl;
-  this->CTest->EndXML(os);
+  xml.Element("EndDateTime", this->EndTest);
+  xml.Element("EndTestTime", this->EndTestTime);
+  xml.Element("ElapsedMinutes",
+    static_cast<int>(this->ElapsedTestingTime/6)/10.0);
+  xml.EndElement(); // Testing
+  this->CTest->EndXML(xml);
 }
 
 //----------------------------------------------------------------------------
-void cmCTestTestHandler::WriteTestResultHeader(std::ostream& os,
+void cmCTestTestHandler::WriteTestResultHeader(cmXMLWriter& xml,
                                                cmCTestTestResult* result)
 {
-  os << "\t<Test Status=\"";
+  xml.StartElement("Test");
   if ( result->Status == cmCTestTestHandler::COMPLETED )
     {
-    os << "passed";
+    xml.Attribute("Status", "passed");
     }
   else if ( result->Status == cmCTestTestHandler::NOT_RUN )
     {
-    os << "notrun";
+    xml.Attribute("Status", "notrun");
     }
   else
     {
-    os << "failed";
+    xml.Attribute("Status", "failed");
     }
   std::string testPath = result->Path + "/" + result->Name;
-  os << "\">\n"
-     << "\t\t<Name>" << cmXMLSafe(result->Name) << "</Name>\n"
-     << "\t\t<Path>" << cmXMLSafe(
-       this->CTest->GetShortPathToFile(result->Path.c_str())) << "</Path>\n"
-     << "\t\t<FullName>" << cmXMLSafe(
-       this->CTest->GetShortPathToFile(testPath.c_str())) << "</FullName>\n"
-     << "\t\t<FullCommandLine>"
-     << cmXMLSafe(result->FullCommandLine)
-     << "</FullCommandLine>\n";
+  xml.Element("Name", result->Name);
+  xml.Element("Path", this->CTest->GetShortPathToFile(result->Path.c_str()));
+  xml.Element("FullName", this->CTest->GetShortPathToFile(testPath.c_str()));
+  xml.Element("FullCommandLine", result->FullCommandLine);
 }
 
 //----------------------------------------------------------------------------
-void cmCTestTestHandler::WriteTestResultFooter(std::ostream& os,
+void cmCTestTestHandler::WriteTestResultFooter(cmXMLWriter& xml,
                                                cmCTestTestResult* result)
 {
   if(!result->Properties->Labels.empty())
     {
-    os << "\t\t<Labels>\n";
+    xml.StartElement("Labels");
     std::vector<std::string> const& labels = result->Properties->Labels;
     for(std::vector<std::string>::const_iterator li = labels.begin();
         li != labels.end(); ++li)
       {
-      os << "\t\t\t<Label>" << cmXMLSafe(*li) << "</Label>\n";
+      xml.Element("Label", *li);
       }
-    os << "\t\t</Labels>\n";
+    xml.EndElement(); // Labels
     }
 
-  os
-    << "\t</Test>" << std::endl;
+  xml.EndElement(); // Test
 }
 
 //----------------------------------------------------------------------
-void cmCTestTestHandler::AttachFiles(std::ostream& os,
+void cmCTestTestHandler::AttachFiles(cmXMLWriter& xml,
                                      cmCTestTestResult* result)
 {
   if(result->Status != cmCTestTestHandler::COMPLETED
@@ -1317,11 +1311,14 @@ void cmCTestTestHandler::AttachFiles(std::ostream& os,
     {
     const std::string &base64 = this->CTest->Base64GzipEncodeFile(*file);
     std::string fname = cmSystemTools::GetFilenameName(*file);
-    os << "\t\t<NamedMeasurement name=\"Attached File\" encoding=\"base64\" "
-      "compression=\"tar/gzip\" filename=\"" << fname << "\" type=\"file\">"
-      "\n\t\t\t<Value>\n\t\t\t"
-      << base64
-      << "\n\t\t\t</Value>\n\t\t</NamedMeasurement>\n";
+    xml.StartElement("NamedMeasurement");
+    xml.Attribute("name", "Attached File");
+    xml.Attribute("encoding", "base64");
+    xml.Attribute("compression", "tar/gzip");
+    xml.Attribute("filename", fname);
+    xml.Attribute("type", "file");
+    xml.Element("Value", base64);
+    xml.EndElement(); // NamedMeasurement
     }
 }
 
@@ -1828,7 +1825,7 @@ void cmCTestTestHandler::ExpandTestsToRunInformationForRerunFailed()
 #define SPACE_REGEX "[ \t\r\n]"
 //----------------------------------------------------------------------
 void cmCTestTestHandler::GenerateRegressionImages(
-  std::ostream& ostr, const std::string& xml)
+  cmXMLWriter& xml, const std::string& dart)
 {
   cmsys::RegularExpression twoattributes(
     "<DartMeasurement"
@@ -1864,69 +1861,61 @@ void cmCTestTestHandler::GenerateRegressionImages(
     SPACE_REGEX "*>([^<]*)</DartMeasurementFile>");
 
   bool done = false;
-  std::string cxml = xml;
+  std::string cxml = dart;
   while ( ! done )
     {
     if ( twoattributes.find(cxml) )
       {
-      ostr
-        << "\t\t\t<NamedMeasurement"
-        << " " << twoattributes.match(1) << "=\""
-        << twoattributes.match(2) << "\""
-        << " " << twoattributes.match(3) << "=\""
-        << twoattributes.match(4) << "\""
-        << "><Value>" << twoattributes.match(5)
-        << "</Value></NamedMeasurement>"
-        << std::endl;
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute(twoattributes.match(1).c_str(),
+                    twoattributes.match(2));
+      xml.Attribute(twoattributes.match(3).c_str(),
+                    twoattributes.match(4));
+      xml.Element("Value", twoattributes.match(5));
+      xml.EndElement();
       cxml.erase(twoattributes.start(),
         twoattributes.end() - twoattributes.start());
       }
     else if ( threeattributes.find(cxml) )
       {
-      ostr
-        << "\t\t\t<NamedMeasurement"
-        << " " << threeattributes.match(1) << "=\""
-        << threeattributes.match(2) << "\""
-        << " " << threeattributes.match(3) << "=\""
-        << threeattributes.match(4) << "\""
-        << " " << threeattributes.match(5) << "=\""
-        << threeattributes.match(6) << "\""
-        << "><Value>" << threeattributes.match(7)
-        << "</Value></NamedMeasurement>"
-        << std::endl;
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute(threeattributes.match(1).c_str(),
+                    threeattributes.match(2));
+      xml.Attribute(threeattributes.match(3).c_str(),
+                    threeattributes.match(4));
+      xml.Attribute(threeattributes.match(5).c_str(),
+                    threeattributes.match(6));
+      xml.Element("Value", twoattributes.match(7));
+      xml.EndElement();
       cxml.erase(threeattributes.start(),
         threeattributes.end() - threeattributes.start());
       }
     else if ( fourattributes.find(cxml) )
       {
-      ostr
-        << "\t\t\t<NamedMeasurement"
-        << " " << fourattributes.match(1) << "=\""
-        << fourattributes.match(2) << "\""
-        << " " << fourattributes.match(3) << "=\""
-        << fourattributes.match(4) << "\""
-        << " " << fourattributes.match(5) << "=\""
-        << fourattributes.match(6) << "\""
-        << " " << fourattributes.match(7) << "=\""
-        << fourattributes.match(8) << "\""
-        << "><Value>" << fourattributes.match(9)
-        << "</Value></NamedMeasurement>"
-        << std::endl;
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute(fourattributes.match(1).c_str(),
+                    fourattributes.match(2));
+      xml.Attribute(fourattributes.match(3).c_str(),
+                    fourattributes.match(4));
+      xml.Attribute(fourattributes.match(5).c_str(),
+                    fourattributes.match(6));
+      xml.Attribute(fourattributes.match(7).c_str(),
+                    fourattributes.match(8));
+      xml.Element("Value", twoattributes.match(9));
+      xml.EndElement();
       cxml.erase(fourattributes.start(),
         fourattributes.end() - fourattributes.start());
       }
     else if ( cdatastart.find(cxml) && cdataend.find(cxml) )
       {
-      ostr
-        << "\t\t\t<NamedMeasurement"
-        << " " << cdatastart.match(1) << "=\""
-        << cdatastart.match(2) << "\""
-        << " " << cdatastart.match(3) << "=\""
-        << cdatastart.match(4) << "\""
-        << "><Value><![CDATA["
-        << cxml.substr(cdatastart.end(), cdataend.start() - cdatastart.end())
-        << "]]></Value></NamedMeasurement>"
-        << std::endl;
+      xml.StartElement("NamedMeasurement");
+      xml.Attribute(cdatastart.match(1).c_str(), cdatastart.match(2));
+      xml.Attribute(cdatastart.match(3).c_str(), cdatastart.match(4));
+      xml.StartElement("Value");
+      xml.CData(
+          cxml.substr(cdatastart.end(), cdataend.start() - cdatastart.end()));
+      xml.EndElement(); // Value
+      xml.EndElement(); // NamedMeasurement
       cxml.erase(cdatastart.start(),
         cdataend.end() - cdatastart.start());
       }
@@ -1952,13 +1941,12 @@ void cmCTestTestHandler::GenerateRegressionImages(
             v2 = "text/string";
             }
 
-          ostr
-            << "\t\t\t<NamedMeasurement"
-            << " " << k1 << "=\"" << v1 << "\""
-            << " " << k2 << "=\"" << v2 << "\""
-            << " encoding=\"none\""
-            << "><Value>Image " << filename
-            << " is empty</Value></NamedMeasurement>";
+          xml.StartElement("NamedMeasurement");
+          xml.Attribute(k1.c_str(), v1);
+          xml.Attribute(k2.c_str(), v2);
+          xml.Attribute("encoding", "none");
+          xml.Element("Value", "Image " + filename + " is empty");
+          xml.EndElement();
           }
         else
           {
@@ -1976,14 +1964,13 @@ void cmCTestTestHandler::GenerateRegressionImages(
           size_t rlen
             = cmsysBase64_Encode(file_buffer, len, encoded_buffer, 1);
 
-          ostr
-            << "\t\t\t<NamedMeasurement"
-            << " " << measurementfile.match(1) << "=\""
-            << measurementfile.match(2) << "\""
-            << " " << measurementfile.match(3) << "=\""
-            << measurementfile.match(4) << "\""
-            << " encoding=\"base64\""
-            << ">" << std::endl << "\t\t\t\t<Value>";
+          xml.StartElement("NamedMeasurement");
+          xml.Attribute(measurementfile.match(1).c_str(),
+                        measurementfile.match(2));
+          xml.Attribute(measurementfile.match(3).c_str(),
+                        measurementfile.match(4));
+          xml.Attribute("encoding", "base64");
+          std::stringstream ostr;
           for (size_t cc = 0; cc < rlen; cc ++ )
             {
             ostr << encoded_buffer[cc];
@@ -1992,9 +1979,8 @@ void cmCTestTestHandler::GenerateRegressionImages(
               ostr << std::endl;
               }
             }
-          ostr
-            << "</Value>" << std::endl << "\t\t\t</NamedMeasurement>"
-            << std::endl;
+          xml.Element("Value", ostr.str());
+          xml.EndElement(); // NamedMeasurement
           delete [] file_buffer;
           delete [] encoded_buffer;
           }
@@ -2006,13 +1992,11 @@ void cmCTestTestHandler::GenerateRegressionImages(
           {
           idx = 2;
           }
-        ostr
-          << "\t\t\t<NamedMeasurement"
-          << " name=\"" << measurementfile.match(idx) << "\""
-          << " text=\"text/string\""
-          << "><Value>File " << filename
-          << " not found</Value></NamedMeasurement>"
-          << std::endl;
+        xml.StartElement("NamedMeasurement");
+        xml.Attribute("name", measurementfile.match(idx));
+        xml.Attribute("text", "text/string");
+        xml.Element("Value", "File " + filename + " not found");
+        xml.EndElement();
         cmCTestOptionalLog(this->CTest, HANDLER_OUTPUT, "File \"" << filename
           << "\" not found." << std::endl, this->Quiet);
         }

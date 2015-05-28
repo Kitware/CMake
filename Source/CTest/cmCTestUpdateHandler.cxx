@@ -20,7 +20,7 @@
 #include "cmVersion.h"
 #include "cmGeneratedFileStream.h"
 #include "cmXMLParser.h"
-#include "cmXMLSafe.h"
+#include "cmXMLWriter.h"
 #include "cmCLocaleEnvironmentScope.h"
 
 #include "cmCTestVC.h"
@@ -224,24 +224,24 @@ int cmCTestUpdateHandler::ProcessHandler()
   bool updated = vc->Update();
   std::string buildname = cmCTest::SafeBuildIdField(
     this->CTest->GetCTestConfiguration("BuildName"));
-  os << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-    << "<Update mode=\"Client\" Generator=\"ctest-"
-    << cmVersion::GetCMakeVersion() << "\">\n"
-    << "\t<Site>" << this->CTest->GetCTestConfiguration("Site") << "</Site>\n"
-    << "\t<BuildName>" << buildname
-    << "</BuildName>\n"
-    << "\t<BuildStamp>" << this->CTest->GetCurrentTag() << "-"
-    << this->CTest->GetTestModelString() << "</BuildStamp>" << std::endl;
-  os << "\t<StartDateTime>" << start_time << "</StartDateTime>\n"
-    << "\t<StartTime>" << start_time_time << "</StartTime>\n"
-    << "\t<UpdateCommand>"
-     << cmXMLSafe(vc->GetUpdateCommandLine()).Quotes(false)
-    << "</UpdateCommand>\n"
-    << "\t<UpdateType>" << cmXMLSafe(
-      cmCTestUpdateHandlerUpdateToString(this->UpdateType))
-    << "</UpdateType>\n";
 
-  vc->WriteXML(os);
+  cmXMLWriter xml(os);
+  xml.StartDocument();
+  xml.StartElement("Update");
+  xml.Attribute("mode", "Client");
+  xml.Attribute("Generator",
+    std::string("ctest-") + cmVersion::GetCMakeVersion());
+  xml.Element("Site", this->CTest->GetCTestConfiguration("Site"));
+  xml.Element("BuildName", buildname);
+  xml.Element("BuildStamp", this->CTest->GetCurrentTag() + "-" +
+    this->CTest->GetTestModelString());
+  xml.Element("StartDateTime", start_time);
+  xml.Element("StartTime", start_time_time);
+  xml.Element("UpdateCommand", vc->GetUpdateCommandLine());
+  xml.Element("UpdateType",
+    cmCTestUpdateHandlerUpdateToString(this->UpdateType));
+
+  vc->WriteXML(xml);
 
   int localModifications = 0;
   int numUpdated = vc->GetPathCount(cmCTestVC::PathUpdated);
@@ -265,29 +265,30 @@ int cmCTestUpdateHandler::ProcessHandler()
 
   cmCTestOptionalLog(this->CTest, DEBUG, "End" << std::endl, this->Quiet);
   std::string end_time = this->CTest->CurrentTime();
-  os << "\t<EndDateTime>" << end_time << "</EndDateTime>\n"
-     << "\t<EndTime>" << static_cast<unsigned int>(cmSystemTools::GetTime())
-     << "</EndTime>\n"
-    << "<ElapsedMinutes>" <<
-    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0
-    << "</ElapsedMinutes>\n"
-    << "\t<UpdateReturnStatus>";
+  xml.Element("EndDateTime", end_time);
+  xml.Element("EndTime", static_cast<unsigned int>(cmSystemTools::GetTime()));
+  xml.Element("ElapsedMinutes",
+    static_cast<int>((cmSystemTools::GetTime() - elapsed_time_start)/6)/10.0);
+
+  xml.StartElement("UpdateReturnStatus");
   if(localModifications)
     {
-    os << "Update error: There are modified or conflicting files in the "
-      "repository";
+    xml.Content("Update error: "
+      "There are modified or conflicting files in the repository");
     cmCTestLog(this->CTest, ERROR_MESSAGE,
       "   There are modified or conflicting files in the repository"
       << std::endl);
     }
   if(!updated)
     {
-    os << "Update command failed:\n" << vc->GetUpdateCommandLine();
+    xml.Content("Update command failed:\n");
+    xml.Content(vc->GetUpdateCommandLine());
     cmCTestLog(this->CTest, ERROR_MESSAGE, "   Update command failed: "
                << vc->GetUpdateCommandLine() << "\n");
     }
-  os << "</UpdateReturnStatus>" << std::endl;
-  os << "</Update>" << std::endl;
+  xml.EndElement(); // UpdateReturnStatus
+  xml.EndElement(); // Update
+  xml.EndDocument();
   return numUpdated;
 }
 

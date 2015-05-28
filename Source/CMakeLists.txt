@@ -347,6 +347,8 @@ set(SRCS
   cmXMLParser.h
   cmXMLSafe.cxx
   cmXMLSafe.h
+  cmXMLWriter.cxx
+  cmXMLWriter.h
   cmake.cxx
   cmake.h
 
