@@ -547,7 +547,7 @@ public:
    * Get the current context backtrace.
    */
   cmListFileBacktrace GetBacktrace() const;
-  cmListFileBacktrace GetBacktrace(cmListFileContext const& lfc) const;
+  cmListFileBacktrace GetBacktrace(cmCommandContext const& lfc) const;
   cmListFileContext GetExecutionContext() const;
 
   /**

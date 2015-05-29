@@ -115,10 +115,7 @@ IsFunctionBlocked(const cmListFileFunction& lff,
               {
               std::string err = cmIfCommandError(expandedArguments);
               err += errorString;
-              cmListFileContext lfc =
-                  cmListFileContext::FromCommandContext(
-                    this->Functions[c], this->GetStartingContext().FilePath);
-              cmListFileBacktrace bt = mf.GetBacktrace(lfc);
+              cmListFileBacktrace bt = mf.GetBacktrace(this->Functions[c]);
               mf.GetCMakeInstance()->IssueMessage(messType, err, bt);
               if (messType == cmake::FATAL_ERROR)
                 {

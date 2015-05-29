@@ -86,19 +86,19 @@ struct cmListFileFunction: public cmCommandContext
   std::vector<cmListFileArgument> Arguments;
 };
 
-class cmListFileBacktrace: private std::vector<cmListFileContext>
+class cmListFileBacktrace
 {
   public:
-    cmListFileBacktrace(cmState::Snapshot snapshot = cmState::Snapshot())
-      : Snapshot(snapshot)
+    cmListFileBacktrace(cmState::Snapshot snapshot = cmState::Snapshot(),
+                        cmCommandContext const& cc = cmCommandContext())
+      : Context(cc), Snapshot(snapshot)
     {
     }
-
-    void Append(cmListFileContext const& context);
 
     void PrintTitle(std::ostream& out);
     void PrintCallStack(std::ostream& out);
   private:
+    cmCommandContext Context;
     cmState::Snapshot Snapshot;
 };
 
