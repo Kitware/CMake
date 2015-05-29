@@ -275,43 +275,21 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
-  cmListFileBacktrace backtrace(this->StateSnapshot);
-  cmState::Snapshot snp = this->StateSnapshot;
-  for(std::vector<cmCommandContext const*>::const_reverse_iterator
-      i = this->ContextStack.rbegin();
-      i != this->ContextStack.rend();
-      ++i, snp = snp.GetCallStackParent())
+  cmListFileBacktrace backtrace;
+  if (!this->ContextStack.empty())
     {
-    assert(snp.IsValid());
-    cmListFileContext frame =
-        cmListFileContext::FromCommandContext(*(*i),
-                                              snp.GetExecutionListFile());
-    backtrace.Append(frame);
+    backtrace = cmListFileBacktrace(this->StateSnapshot,
+                                    *this->ContextStack.back());
     }
   return backtrace;
 }
 
 //----------------------------------------------------------------------------
 cmListFileBacktrace
-cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
+cmMakefile::GetBacktrace(cmCommandContext const& cc) const
 {
-  cmListFileBacktrace backtrace(this->StateSnapshot);
-  backtrace.Append(lfc);
   cmState::Snapshot snp = this->StateSnapshot;
-  assert(snp.GetExecutionListFile() == lfc.FilePath);
-  snp = snp.GetCallStackParent();
-  for(std::vector<cmCommandContext const*>::const_reverse_iterator
-      i = this->ContextStack.rbegin();
-      i != this->ContextStack.rend();
-      ++i, snp = snp.GetCallStackParent())
-    {
-    assert(snp.IsValid());
-    cmListFileContext frame =
-        cmListFileContext::FromCommandContext(*(*i),
-                                              snp.GetExecutionListFile());
-    backtrace.Append(frame);
-    }
-  return backtrace;
+  return cmListFileBacktrace(snp, cc);
 }
 
 //----------------------------------------------------------------------------
