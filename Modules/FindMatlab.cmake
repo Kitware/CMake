@@ -918,7 +918,7 @@ function(matlab_add_mex )
       PROPERTIES
         CXX_VISIBILITY_PRESET "hidden"
         C_VISIBILITY_PRESET "hidden"
-        VISIBILITY_INLINES_HIDDEN "hidden"
+        VISIBILITY_INLINES_HIDDEN ON
     )
 
     #  get_target_property(
