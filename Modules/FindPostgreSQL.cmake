@@ -13,6 +13,7 @@
 #
 #   PostgreSQL_LIBRARIES - the PostgreSQL libraries needed for linking
 #   PostgreSQL_INCLUDE_DIRS - the directories of the PostgreSQL headers
+#   PostgreSQL_LIBRARY_DIRS  - the link directories for PostgreSQL libraries
 #   PostgreSQL_VERSION_STRING - the version of PostgreSQL found (since CMake 2.8.8)
 
 #=============================================================================
