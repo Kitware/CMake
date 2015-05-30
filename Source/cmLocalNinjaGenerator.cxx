@@ -41,6 +41,15 @@ cmLocalNinjaGenerator::~cmLocalNinjaGenerator()
 
 void cmLocalNinjaGenerator::Generate()
 {
+  // Compute the path to use when referencing the current output
+  // directory from the top output directory.
+  this->HomeRelativeOutputPath =
+    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
+  if(this->HomeRelativeOutputPath == ".")
+    {
+    this->HomeRelativeOutputPath = "";
+    }
+
   this->SetConfigName();
 
   this->WriteProcessedMakefile(this->GetBuildFileStream());
@@ -89,25 +98,6 @@ void cmLocalNinjaGenerator::Generate()
     }
 
   this->WriteCustomCommandBuildStatements();
-}
-
-// Implemented in:
-//   cmLocalUnixMakefileGenerator3.
-// Used in:
-//   Source/cmMakefile.cxx
-//   Source/cmGlobalGenerator.cxx
-void cmLocalNinjaGenerator::Configure()
-{
-  // Compute the path to use when referencing the current output
-  // directory from the top output directory.
-  this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
-  if(this->HomeRelativeOutputPath == ".")
-    {
-    this->HomeRelativeOutputPath = "";
-    }
-  this->cmLocalGenerator::Configure();
-
 }
 
 // TODO: Picked up from cmLocalUnixMakefileGenerator3.  Refactor it.
