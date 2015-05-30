@@ -133,10 +133,10 @@ set (PostgreSQL_LIBRARY_TO_FIND pq)
 set (PostgreSQL_LIB_PREFIX "")
 if ( WIN32 )
   set (PostgreSQL_LIB_PREFIX ${PostgreSQL_LIB_PREFIX} "lib")
-  set ( PostgreSQL_LIBRARY_TO_FIND ${PostgreSQL_LIB_PREFIX}${PostgreSQL_LIBRARY_TO_FIND})
+  set (PostgreSQL_LIBRARY_TO_FIND ${PostgreSQL_LIB_PREFIX}${PostgreSQL_LIBRARY_TO_FIND})
 endif()
 
-find_library( PostgreSQL_LIBRARY
+find_library(PostgreSQL_LIBRARY
  NAMES ${PostgreSQL_LIBRARY_TO_FIND}
  PATHS
    ${PostgreSQL_ROOT_DIRECTORIES}
@@ -169,7 +169,7 @@ include(${CMAKE_CURRENT_LIST_DIR}/FindPackageHandleStandardArgs.cmake)
 find_package_handle_standard_args(PostgreSQL
                                   REQUIRED_VARS PostgreSQL_LIBRARY PostgreSQL_INCLUDE_DIR PostgreSQL_TYPE_INCLUDE_DIR
                                   VERSION_VAR PostgreSQL_VERSION_STRING)
-set( PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
+set(PostgreSQL_FOUND  ${POSTGRESQL_FOUND})
 
 # Now try to get the include and library path.
 if(PostgreSQL_FOUND)
