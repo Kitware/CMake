@@ -383,8 +383,6 @@ public:
   bool IsMinGWMake() const;
   bool IsNMake() const;
 
-  void SetConfiguredCMP0014(bool configured);
-
 protected:
   ///! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(std::string& linkLibraries,
@@ -451,7 +449,6 @@ protected:
   std::set<cmTarget const*> WarnCMP0063;
 
   bool LinkScriptShell;
-  bool Configured;
   bool EmitUniversalBinaryFlags;
 
   // Hack for ExpandRuleVariable until object-oriented version is
