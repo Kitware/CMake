@@ -1223,6 +1223,7 @@ void cmGlobalGenerator::Generate()
   this->CreateDefaultGlobalTargets(&globalTargets);
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
+    this->LocalGenerators[i]->ComputeObjectMaxPath();
     cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
     cmTargets* targets = &(mf->GetTargets());
     cmTargets::iterator tit;
