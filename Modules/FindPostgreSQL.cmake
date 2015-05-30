@@ -143,6 +143,8 @@ find_library(PostgreSQL_LIBRARY
    ${PostgreSQL_ROOT_DIRECTORIES}
  PATH_SUFFIXES
    lib
+ # Help the user find it if we cannot.
+ DOC "The ${PostgreSQL_LIBRARY_DIR_MESSAGE}"
 )
 get_filename_component(PostgreSQL_LIBRARY_DIR ${PostgreSQL_LIBRARY} PATH)
 
