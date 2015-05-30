@@ -78,16 +78,17 @@ bool cmLocalGenerator::IsRootMakefile() const
 class cmLocalGeneratorCurrent
 {
   cmGlobalGenerator* GG;
-  cmLocalGenerator* LG;
+  cmMakefile* MF;
   cmState::Snapshot Snapshot;
 public:
-  cmLocalGeneratorCurrent(cmLocalGenerator* lg)
+  cmLocalGeneratorCurrent(cmMakefile* mf)
     {
-    this->GG = lg->GetGlobalGenerator();
-    this->LG = this->GG->GetCurrentLocalGenerator();
+    this->GG = mf->GetGlobalGenerator();
+    this->MF = this->GG->GetCurrentMakefile();
     this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(lg->GetStateSnapshot());
-    this->GG->SetCurrentLocalGenerator(lg);
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
+          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
+    this->GG->SetCurrentMakefile(mf);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PushFileScope();
 #endif
@@ -97,7 +98,7 @@ public:
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PopFileScope();
 #endif
-    this->GG->SetCurrentLocalGenerator(this->LG);
+    this->GG->SetCurrentMakefile(this->MF);
     this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
     }
 };
@@ -106,7 +107,7 @@ public:
 void cmLocalGenerator::Configure()
 {
   // Manage the global generator's current local generator.
-  cmLocalGeneratorCurrent clg(this);
+  cmLocalGeneratorCurrent clg(this->GetMakefile());
   static_cast<void>(clg);
 
   // make sure the CMakeFiles dir is there
