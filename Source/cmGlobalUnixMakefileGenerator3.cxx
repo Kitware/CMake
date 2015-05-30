@@ -585,8 +585,9 @@ void cmGlobalUnixMakefileGenerator3
       }
     else
       {
+      cmState::Snapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
       lg = static_cast<cmLocalUnixMakefileGenerator3 *>
-        (this->MakeLocalGenerator());
+        (this->MakeLocalGenerator(snapshot));
       // set the Start directories
       lg->GetMakefile()->SetCurrentSourceDirectory
         (this->CMakeInstance->GetHomeDirectory());

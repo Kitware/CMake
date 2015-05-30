@@ -1128,7 +1128,8 @@ void cmGlobalGenerator::Configure()
   this->ClearGeneratorMembers();
 
   // start with this directory
-  cmLocalGenerator *lg = this->MakeLocalGenerator();
+  cmLocalGenerator *lg = this->MakeLocalGenerator(
+        this->GetCMakeInstance()->GetCurrentSnapshot());
   this->Makefiles.push_back(lg->GetMakefile());
   this->LocalGenerators.push_back(lg);
 
@@ -1988,11 +1989,6 @@ void cmGlobalGenerator::EnableInstallTarget()
 cmLocalGenerator *
 cmGlobalGenerator::MakeLocalGenerator(cmState::Snapshot snapshot)
 {
-  if (!snapshot.IsValid())
-    {
-    snapshot = this->CMakeInstance->GetCurrentSnapshot();
-    }
-
   return this->CreateLocalGenerator(snapshot);
 }
 

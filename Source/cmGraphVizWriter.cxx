@@ -68,7 +68,8 @@ void cmGraphVizWriter::ReadSettings(const char* settingsFileName,
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator ggi(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(ggi.MakeLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(
+        ggi.MakeLocalGenerator(cm.GetCurrentSnapshot()));
   cmMakefile *mf = lg->GetMakefile();
 
   const char* inFileName = settingsFileName;
