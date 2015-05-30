@@ -98,7 +98,7 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 }
 
 //----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator3::Configure()
+void cmLocalUnixMakefileGenerator3::Generate()
 {
   // Compute the path to use when referencing the current output
   // directory from the top output directory.
@@ -112,12 +112,7 @@ void cmLocalUnixMakefileGenerator3::Configure()
     {
     this->HomeRelativeOutputPath += "/";
     }
-  this->cmLocalGenerator::Configure();
-}
 
-//----------------------------------------------------------------------------
-void cmLocalUnixMakefileGenerator3::Generate()
-{
   // Store the configuration name that will be generated.
   if(const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
     {
