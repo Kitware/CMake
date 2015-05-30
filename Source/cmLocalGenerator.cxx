@@ -75,68 +75,6 @@ bool cmLocalGenerator::IsRootMakefile() const
 }
 
 //----------------------------------------------------------------------------
-class cmLocalGeneratorCurrent
-{
-  cmGlobalGenerator* GG;
-  cmMakefile* MF;
-  cmState::Snapshot Snapshot;
-public:
-  cmLocalGeneratorCurrent(cmMakefile* mf)
-    {
-    this->GG = mf->GetGlobalGenerator();
-    this->MF = this->GG->GetCurrentMakefile();
-    this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
-          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
-    this->GG->SetCurrentMakefile(mf);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PushFileScope();
-#endif
-    }
-  ~cmLocalGeneratorCurrent()
-    {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PopFileScope();
-#endif
-    this->GG->SetCurrentMakefile(this->MF);
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
-    }
-};
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::Configure()
-{
-  // Manage the global generator's current local generator.
-  cmLocalGeneratorCurrent clg(this->GetMakefile());
-  static_cast<void>(clg);
-
-  // make sure the CMakeFiles dir is there
-  std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
-  filesDir += cmake::GetCMakeFilesDirectory();
-  cmSystemTools::MakeDirectory(filesDir.c_str());
-
-  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
-  currentStart += "/CMakeLists.txt";
-  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
-  this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
-
-   // at the end handle any old style subdirs
-  std::vector<cmLocalGenerator *> subdirs =
-      this->GetMakefile()->GetUnConfiguredDirectories();
-
-  // for each subdir recurse
-  std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
-  for (; sdi != subdirs.end(); ++sdi)
-    {
-    this->Makefile->ConfigureSubDirectory(*sdi);
-    }
-
-  this->Makefile->AddCMakeDependFilesFromUser();
-
-  this->Makefile->SetConfigured();
-}
-
-//----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeObjectMaxPath()
 {
   // Choose a maximum object file name length.

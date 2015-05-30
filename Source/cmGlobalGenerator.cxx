@@ -1106,7 +1106,7 @@ void cmGlobalGenerator::Configure()
       this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
-  lg->Configure();
+  lg->GetMakefile()->Configure();
 
   // update the cache entry for the number of local generators, this is used
   // for progress
