@@ -659,12 +659,22 @@ void cmState::Snapshot::ComputeRelativePathTopBinary()
     }
 }
 
+cmState::Snapshot cmState::CreateBaseSnapshot()
+{
+  PositionType pos = 0;
+  this->ParentPositions.push_back(pos);
+  this->Locations.resize(1);
+  this->OutputLocations.resize(1);
+  this->CurrentSourceDirectoryComponents.resize(1);
+  this->CurrentBinaryDirectoryComponents.resize(1);
+  this->RelativePathTopSource.resize(1);
+  this->RelativePathTopBinary.resize(1);
+  return cmState::Snapshot(this, pos);
+}
+
 cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
 {
-  if (!originSnapshot.IsValid())
-    {
-    originSnapshot.State = this;
-    }
+  assert(originSnapshot.IsValid());
   PositionType pos = this->ParentPositions.size();
   this->ParentPositions.push_back(originSnapshot.Position);
   this->Locations.resize(this->Locations.size() + 1);

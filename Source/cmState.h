@@ -57,6 +57,7 @@ public:
     cmState::PositionType Position;
   };
 
+  Snapshot CreateBaseSnapshot();
   Snapshot CreateSnapshot(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
