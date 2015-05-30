@@ -168,11 +168,13 @@ public:
   const std::vector<cmLocalGenerator *>& GetLocalGenerators() const {
     return this->LocalGenerators;}
 
-  cmLocalGenerator* GetCurrentLocalGenerator()
-                                          {return this->CurrentLocalGenerator;}
+  cmMakefile* GetCurrentMakefile() const
+  {
+    return this->CurrentMakefile;
+  }
 
-  void SetCurrentLocalGenerator(cmLocalGenerator* lg)
-                                            {this->CurrentLocalGenerator = lg;}
+  void SetCurrentMakefile(cmMakefile* mf)
+  {this->CurrentMakefile = mf;}
 
   void AddLocalGenerator(cmLocalGenerator *lg);
 
@@ -406,7 +408,7 @@ protected:
   std::string ConfiguredFilesPath;
   cmake *CMakeInstance;
   std::vector<cmLocalGenerator *> LocalGenerators;
-  cmLocalGenerator* CurrentLocalGenerator;
+  cmMakefile* CurrentMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
   std::map<cmLocalGenerator*, std::set<cmTarget const*> >
