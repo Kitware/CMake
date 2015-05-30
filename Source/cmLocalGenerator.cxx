@@ -59,7 +59,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->Makefile = new cmMakefile(this);
 
   this->LinkScriptShell = false;
-  this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
@@ -128,7 +127,7 @@ void cmLocalGenerator::Configure()
   std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
   for (; sdi != subdirs.end(); ++sdi)
     {
-    if (!(*sdi)->Configured)
+    if (!(*sdi)->GetMakefile()->IsConfigured())
       {
       this->Makefile->ConfigureSubDirectory(*sdi);
       }
@@ -138,7 +137,7 @@ void cmLocalGenerator::Configure()
 
   this->ComputeObjectMaxPath();
 
-  this->Configured = true;
+  this->Makefile->SetConfigured();
 }
 
 //----------------------------------------------------------------------------
@@ -3179,11 +3178,6 @@ bool cmLocalGenerator::IsNMake() const
   return this->GetState()->UseNMake();
 }
 
-void cmLocalGenerator::SetConfiguredCMP0014(bool configured)
-{
-  this->Configured = configured;
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator
@@ -3465,7 +3459,7 @@ cmIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
         }
       }
     this->BackwardsCompatibility = CMake_VERSION_ENCODE(major, minor, patch);
-    this->BackwardsCompatibilityFinal = this->Configured;
+    this->BackwardsCompatibilityFinal = this->Makefile->IsConfigured();
     }
 
   return this->BackwardsCompatibility;
