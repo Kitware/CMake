@@ -4,9 +4,6 @@
 #
 # Find the PostgreSQL installation.
 #
-# In Windows, we make the assumption that, if the PostgreSQL files are
-# installed, the default directory will be C:\Program Files\PostgreSQL.
-#
 # This module defines
 #
 # ::
@@ -87,16 +84,24 @@ set(PostgreSQL_KNOWN_VERSIONS ${PostgreSQL_ADDITIONAL_VERSIONS}
     "9.4" "9.3" "9.2" "9.1" "9.0" "8.4" "8.3" "8.2" "8.1" "8.0")
 
 # Define additional search paths for root directories.
-if ( WIN32 )
-  foreach (suffix ${PostgreSQL_KNOWN_VERSIONS} )
-    set(PostgreSQL_ADDITIONAL_SEARCH_PATHS ${PostgreSQL_ADDITIONAL_SEARCH_PATHS} "C:/Program Files/PostgreSQL/${suffix}" )
-  endforeach()
-endif()
 set( PostgreSQL_ROOT_DIRECTORIES
    ENV PostgreSQL_ROOT
    ${PostgreSQL_ROOT}
-   ${PostgreSQL_ADDITIONAL_SEARCH_PATHS}
 )
+foreach(suffix ${PostgreSQL_KNOWN_VERSIONS})
+  if(WIN32)
+    list(APPEND PostgreSQL_LIBRARY_ADDITIONAL_SEARCH_SUFFIXES
+        "PostgreSQL/${suffix}/lib")
+    list(APPEND PostgreSQL_INCLUDE_ADDITIONAL_SEARCH_SUFFIXES
+        "PostgreSQL/${suffix}/include")
+    list(APPEND PostgreSQL_TYPE_ADDITIONAL_SEARCH_SUFFIXES
+        "PostgreSQL/${suffix}/include/server")
+  endif()
+  if(UNIX)
+    list(APPEND PostgreSQL_TYPE_ADDITIONAL_SEARCH_SUFFIXES
+        "postgresql/${suffix}/server")
+  endif()
+endforeach()
 
 #
 # Look for an installation.
@@ -110,6 +115,7 @@ find_path(PostgreSQL_INCLUDE_DIR
     pgsql
     postgresql
     include
+    ${PostgreSQL_INCLUDE_ADDITIONAL_SEARCH_SUFFIXES}
   # Help the user find it if we cannot.
   DOC "The ${PostgreSQL_INCLUDE_DIR_MESSAGE}"
 )
@@ -124,6 +130,7 @@ find_path(PostgreSQL_TYPE_INCLUDE_DIR
     pgsql/server
     postgresql/server
     include/server
+    ${PostgreSQL_TYPE_ADDITIONAL_SEARCH_SUFFIXES}
   # Help the user find it if we cannot.
   DOC "The ${PostgreSQL_INCLUDE_DIR_MESSAGE}"
 )
@@ -143,6 +150,7 @@ find_library(PostgreSQL_LIBRARY
    ${PostgreSQL_ROOT_DIRECTORIES}
  PATH_SUFFIXES
    lib
+   ${PostgreSQL_LIBRARY_ADDITIONAL_SEARCH_SUFFIXES}
  # Help the user find it if we cannot.
  DOC "The ${PostgreSQL_LIBRARY_DIR_MESSAGE}"
 )
