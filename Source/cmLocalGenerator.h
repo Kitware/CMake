@@ -383,6 +383,7 @@ public:
   bool IsMinGWMake() const;
   bool IsNMake() const;
 
+  void ComputeObjectMaxPath();
 protected:
   ///! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(std::string& linkLibraries,
@@ -428,7 +429,6 @@ protected:
 
   std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
-  void ComputeObjectMaxPath();
 
   virtual std::string ConvertToLinkReference(std::string const& lib,
                                              OutputFormat format = SHELL);
