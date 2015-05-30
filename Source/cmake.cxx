@@ -377,10 +377,9 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
     this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     this->SetHomeOutputDirectory(cmSystemTools::GetCurrentWorkingDirectory());
     cmState::Snapshot snapshot = this->GetCurrentSnapshot();
-    cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
-    mf->SetCurrentBinaryDirectory
+    snapshot.GetDirectory().SetCurrentBinary
       (cmSystemTools::GetCurrentWorkingDirectory());
-    mf->SetCurrentSourceDirectory
+    snapshot.GetDirectory().SetCurrentSource
       (cmSystemTools::GetCurrentWorkingDirectory());
     if (this->GetWorkingMode() != NORMAL_MODE)
       {
@@ -418,13 +417,13 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
   this->SetGlobalGenerator(gg);
 
   cmState::Snapshot snapshot = this->GetCurrentSnapshot();
+  snapshot.GetDirectory().SetCurrentBinary
+    (cmSystemTools::GetCurrentWorkingDirectory());
+  snapshot.GetDirectory().SetCurrentSource
+    (cmSystemTools::GetCurrentWorkingDirectory());
   // read in the list file to fill the cache
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(gg, snapshot));
   cmsys::auto_ptr<cmLocalGenerator> lg(gg->CreateLocalGenerator(mf.get()));
-  mf->SetCurrentBinaryDirectory
-    (cmSystemTools::GetCurrentWorkingDirectory());
-  mf->SetCurrentSourceDirectory
-    (cmSystemTools::GetCurrentWorkingDirectory());
 
   mf->SetArgcArgv(args);
 

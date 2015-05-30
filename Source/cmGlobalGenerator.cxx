@@ -1108,15 +1108,15 @@ void cmGlobalGenerator::Configure()
   this->FirstTimeProgress = 0.0f;
   this->ClearGeneratorMembers();
 
-  cmMakefile* dirMf =
-      new cmMakefile(this, this->GetCMakeInstance()->GetCurrentSnapshot());
-  this->Makefiles.push_back(dirMf);
+  cmState::Snapshot snapshot = this->CMakeInstance->GetCurrentSnapshot();
 
-  // set the Start directories
-  dirMf->SetCurrentSourceDirectory
+  snapshot.GetDirectory().SetCurrentSource
     (this->CMakeInstance->GetHomeDirectory());
-  dirMf->SetCurrentBinaryDirectory
+  snapshot.GetDirectory().SetCurrentBinary
     (this->CMakeInstance->GetHomeOutputDirectory());
+
+  cmMakefile* dirMf = new cmMakefile(this, snapshot);
+  this->Makefiles.push_back(dirMf);
 
   this->BinaryDirectories.insert(
       this->CMakeInstance->GetHomeOutputDirectory());

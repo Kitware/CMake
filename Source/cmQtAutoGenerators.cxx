@@ -178,9 +178,10 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cmGlobalGenerator gg(&cm);
 
   cmState::Snapshot snapshot = cm.GetCurrentSnapshot();
+  snapshot.GetDirectory().SetCurrentBinary(targetDirectory);
+  snapshot.GetDirectory().SetCurrentSource(targetDirectory);
+
   cmsys::auto_ptr<cmMakefile> mf(new cmMakefile(&gg, snapshot));
-  mf->SetCurrentBinaryDirectory(targetDirectory);
-  mf->SetCurrentSourceDirectory(targetDirectory);
   gg.SetCurrentMakefile(mf.get());
 
   this->ReadAutogenInfoFile(mf.get(), targetDirectory, config);
