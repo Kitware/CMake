@@ -13,6 +13,9 @@
 #define cmDefinitions_h
 
 #include "cmStandardIncludes.h"
+
+#include "cmLinkedTree.h"
+
 #if defined(CMAKE_BUILD_WITH_CMAKE)
 #ifdef CMake_HAVE_CXX11_UNORDERED_MAP
 #include <unordered_map>
@@ -32,26 +35,26 @@
  */
 class cmDefinitions
 {
-  typedef std::list<cmDefinitions>::reverse_iterator StackIter;
-  typedef std::list<cmDefinitions>::const_reverse_iterator StackConstIter;
+  typedef cmLinkedTree<cmDefinitions>::iterator StackIter;
 public:
   static const char* Get(const std::string& key,
                          StackIter begin, StackIter end);
 
-  static void Raise(const std::string& key, StackIter begin, StackIter end);
+  static void Raise(const std::string& key,
+                    StackIter begin, StackIter end);
 
   static bool HasKey(const std::string& key,
-                     StackConstIter begin, StackConstIter end);
+                     StackIter begin, StackIter end);
 
   /** Set (or unset if null) a value associated with a key.  */
   void Set(const std::string& key, const char* value);
 
   std::vector<std::string> UnusedKeys() const;
 
-  static std::vector<std::string> ClosureKeys(StackConstIter begin,
-                                              StackConstIter end);
+  static std::vector<std::string> ClosureKeys(StackIter begin,
+                                              StackIter end);
 
-  static cmDefinitions MakeClosure(StackConstIter begin, StackConstIter end);
+  static cmDefinitions MakeClosure(StackIter begin, StackIter end);
 
 private:
   // String with existence boolean.
