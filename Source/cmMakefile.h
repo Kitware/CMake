@@ -262,6 +262,11 @@ public:
       this->LinkDirectories = vec;
     }
 
+  std::vector<cmLocalGenerator*> GetUnConfiguredDirectories() const
+  {
+    return this->UnConfiguredDirectories;
+  }
+
   /**
    * Add a subdirectory to the build.
    */
@@ -919,6 +924,8 @@ private:
   mutable cmsys::RegularExpression cmDefine01Regex;
   mutable cmsys::RegularExpression cmAtVarRegex;
   mutable cmsys::RegularExpression cmNamedCurly;
+
+  std::vector<cmLocalGenerator*> UnConfiguredDirectories;
 
   cmPropertyMap Properties;
 
