@@ -135,8 +135,6 @@ void cmLocalGenerator::Configure()
 
   this->Makefile->AddCMakeDependFilesFromUser();
 
-  this->ComputeObjectMaxPath();
-
   this->Makefile->SetConfigured();
 }
 
