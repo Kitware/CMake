@@ -66,7 +66,7 @@ public:
 class cmLinkImplItem: public cmLinkItem
 {
 public:
-  cmLinkImplItem(): cmLinkItem(), Backtrace(0), FromGenex(false) {}
+  cmLinkImplItem(): cmLinkItem(), Backtrace(), FromGenex(false) {}
   cmLinkImplItem(std::string const& n,
                  cmTarget const* t,
                  cmListFileBacktrace const& bt,

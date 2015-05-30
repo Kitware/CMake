@@ -301,7 +301,7 @@ class cmake
 
   /** Display a message to the user.  */
   void IssueMessage(cmake::MessageType t, std::string const& text,
-        cmListFileBacktrace const& backtrace = cmListFileBacktrace(NULL));
+        cmListFileBacktrace const& backtrace = cmListFileBacktrace());
   void IssueMessage(cmake::MessageType t, std::string const& text,
         cmListFileContext const& lfc);
 
