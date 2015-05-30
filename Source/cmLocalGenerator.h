@@ -50,7 +50,7 @@ public:
    * Process the CMakeLists files for this directory to fill in the
    * Makefile ivar
    */
-  virtual void Configure();
+  void Configure();
 
   /**
    * Calls TraceVSDependencies() on all targets of this generator.
