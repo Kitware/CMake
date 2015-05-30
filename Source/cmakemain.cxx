@@ -113,12 +113,7 @@ static cmMakefile* cmakemainGetMakefile(void *clientdata)
     cmGlobalGenerator* gg=cm->GetGlobalGenerator();
     if (gg)
       {
-      cmLocalGenerator* lg=gg->GetCurrentLocalGenerator();
-      if (lg)
-        {
-        cmMakefile* mf = lg->GetMakefile();
-        return mf;
-        }
+      return gg->GetCurrentMakefile();
       }
     }
   return 0;
