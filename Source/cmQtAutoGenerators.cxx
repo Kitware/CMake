@@ -1217,7 +1217,8 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cm.SetHomeDirectory(targetDirectory);
   cmGlobalGenerator gg(&cm);
 
-  cmLocalGenerator* lg = gg.MakeLocalGenerator();
+  cmState::Snapshot snapshot = cm.GetCurrentSnapshot();
+  cmLocalGenerator* lg = gg.MakeLocalGenerator(snapshot);
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
   gg.SetCurrentMakefile(lg->GetMakefile());

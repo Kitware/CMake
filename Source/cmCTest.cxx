@@ -520,7 +520,8 @@ int cmCTest::Initialize(const char* binary_dir, cmCTestStartCommand* command)
   cm.SetHomeDirectory("");
   cm.SetHomeOutputDirectory("");
   cmGlobalGenerator gg(&cm);
-  cmsys::auto_ptr<cmLocalGenerator> lg(gg.MakeLocalGenerator());
+  cmsys::auto_ptr<cmLocalGenerator> lg(
+        gg.MakeLocalGenerator(cm.GetCurrentSnapshot()));
   cmMakefile *mf = lg->GetMakefile();
   if ( !this->ReadCustomConfigurationFileTree(this->BinaryDir.c_str(), mf) )
     {

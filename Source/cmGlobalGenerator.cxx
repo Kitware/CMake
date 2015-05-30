@@ -1988,11 +1988,6 @@ void cmGlobalGenerator::EnableInstallTarget()
 cmLocalGenerator *
 cmGlobalGenerator::MakeLocalGenerator(cmState::Snapshot snapshot)
 {
-  if (!snapshot.IsValid())
-    {
-    snapshot = this->CMakeInstance->GetCurrentSnapshot();
-    }
-
   return this->CreateLocalGenerator(snapshot);
 }
 

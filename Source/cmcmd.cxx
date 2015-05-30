@@ -768,7 +768,9 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       if(cmGlobalGenerator* ggd = cm.CreateGlobalGenerator(gen))
         {
         cm.SetGlobalGenerator(ggd);
-        cmsys::auto_ptr<cmLocalGenerator> lgd(ggd->MakeLocalGenerator());
+        cmState::Snapshot snapshot = cm.GetCurrentSnapshot();
+        cmsys::auto_ptr<cmLocalGenerator> lgd(
+              ggd->MakeLocalGenerator(snapshot));
         lgd->GetMakefile()->SetCurrentSourceDirectory(startDir);
         lgd->GetMakefile()->SetCurrentBinaryDirectory(startOutDir);
 
