@@ -120,15 +120,34 @@ cmMakefile::cmMakefile(cmGlobalGenerator* globalGenerator,
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
 
+  this->AddDefinition("CMAKE_SOURCE_DIR",
+                      this->GetCMakeInstance()->GetHomeDirectory());
+  this->AddDefinition("CMAKE_BINARY_DIR",
+                      this->GetCMakeInstance()->GetHomeOutputDirectory());
   {
-  const char* dir = this->GetCMakeInstance()->GetHomeDirectory();
-  this->AddDefinition("CMAKE_SOURCE_DIR", dir);
-  this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
+  const char* dir = this->StateSnapshot.GetDirectory().GetCurrentSource();
+  if (dir)
+    {
+    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR", dir);
+    }
+  else
+    {
+    this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
+                        this->GetCMakeInstance()->GetHomeDirectory());
+    }
   }
   {
-  const char* dir = this->GetCMakeInstance()->GetHomeOutputDirectory();
-  this->AddDefinition("CMAKE_BINARY_DIR", dir);
-  this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
+  const char* dir = this->StateSnapshot.GetDirectory().GetCurrentBinary();
+  if (dir)
+    {
+    cmSystemTools::MakeDirectory(dir);
+    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR", dir);
+    }
+  else
+    {
+    this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
+                        this->GetCMakeInstance()->GetHomeOutputDirectory());
+    }
   }
 }
 
@@ -1472,11 +1491,6 @@ void cmMakefile::AddLinkLibrary(const std::string& lib)
 
 void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
-  this->AddDefinition("CMAKE_CURRENT_SOURCE_DIR",
-                      this->GetCurrentSourceDirectory());
-  this->AddDefinition("CMAKE_CURRENT_BINARY_DIR",
-                      this->GetCurrentBinaryDirectory());
-
   this->SystemIncludeDirectories = parent->SystemIncludeDirectories;
 
   // define flags
@@ -1747,14 +1761,13 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
                                            this->ContextStack.back()->Name,
                                            this->ContextStack.back()->Line);
 
+  newSnapshot.InitializeFromParent();
+
+  newSnapshot.GetDirectory().SetCurrentSource(srcPath);
+  newSnapshot.GetDirectory().SetCurrentBinary(binPath);
+
   cmMakefile* subMf = new cmMakefile(this->GlobalGenerator, newSnapshot);
   this->GetGlobalGenerator()->AddMakefile(subMf);
-
-  // set the subdirs start dirs
-  subMf->SetCurrentSourceDirectory(srcPath);
-  subMf->SetCurrentBinaryDirectory(binPath);
-
-  subMf->StateSnapshot.InitializeFromParent();
 
   if(excludeFromAll)
     {
