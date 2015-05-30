@@ -1604,17 +1604,17 @@ void cmMakefile::Configure()
   std::vector<cmLocalGenerator*>::iterator sdi = subdirs.begin();
   for (; sdi != subdirs.end(); ++sdi)
     {
-    this->ConfigureSubDirectory(*sdi);
+    this->ConfigureSubDirectory((*sdi)->GetMakefile());
     }
 
   this->AddCMakeDependFilesFromUser();
   this->SetConfigured();
 }
 
-void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
+void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
 {
-  lg2->GetMakefile()->InitializeFromParent();
-  std::string currentStart = lg2->GetMakefile()->GetCurrentSourceDirectory();
+  mf->InitializeFromParent();
+  std::string currentStart = mf->GetCurrentSourceDirectory();
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
     std::string msg="   Entering             ";
@@ -1652,11 +1652,11 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
         // NEW behavior prints the error.
         this->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
-    lg2->GetMakefile()->SetConfigured();
+    mf->SetConfigured();
     return;
     }
   // finally configure the subdir
-  lg2->GetMakefile()->Configure();
+  mf->Configure();
 
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
@@ -1695,7 +1695,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
 
   if (immediate)
     {
-    this->ConfigureSubDirectory(lg2);
+    this->ConfigureSubDirectory(lg2->GetMakefile());
     }
   else
     {

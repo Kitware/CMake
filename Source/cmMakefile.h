@@ -275,7 +275,7 @@ public:
   /**
    * Configure a subdirectory
    */
-  void ConfigureSubDirectory(cmLocalGenerator *);
+  void ConfigureSubDirectory(cmMakefile* mf);
 
   /**
    * Add an include directory to the build.
