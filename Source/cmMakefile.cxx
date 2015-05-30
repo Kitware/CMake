@@ -47,70 +47,73 @@
 class cmMakefile::Internals
 {
 public:
-  std::list<cmDefinitions> VarStack;
+  cmLinkedTree<cmDefinitions> VarTree;
+  cmLinkedTree<cmDefinitions>::iterator VarTreeIter;
   bool IsSourceFileTryCompile;
 
   void PushDefinitions()
   {
-    this->VarStack.push_back(cmDefinitions());
+    assert(this->VarTreeIter.IsValid());
+    this->VarTreeIter = this->VarTree.Extend(this->VarTreeIter);
   }
 
   void InitializeVarScope()
   {
+    this->VarTreeIter = this->VarTree.Root();
     this->PushDefinitions();
   }
 
   void InitializeDefinitions(cmMakefile* parent)
   {
-    this->VarStack.back() =
-        cmDefinitions::MakeClosure(parent->Internal->VarStack.rbegin(),
-                                   parent->Internal->VarStack.rend());
+    *this->VarTreeIter =
+        cmDefinitions::MakeClosure(parent->Internal->VarTreeIter,
+                                   parent->Internal->VarTree.Root());
   }
 
   const char* GetDefinition(std::string const& name)
   {
-    return cmDefinitions::Get(name, this->VarStack.rbegin(),
-                                    this->VarStack.rend());
+    assert(this->VarTreeIter != this->VarTree.Root());
+    return cmDefinitions::Get(name,
+                              this->VarTreeIter, this->VarTree.Root());
   }
 
   bool IsInitialized(std::string const& name)
   {
-    return cmDefinitions::HasKey(name, this->VarStack.rbegin(),
-                                 this->VarStack.rend());
+    return cmDefinitions::HasKey(name,
+                                 this->VarTreeIter, this->VarTree.Root());
   }
 
   void SetDefinition(std::string const& name, std::string const& value)
   {
-    this->VarStack.back().Set(name, value.c_str());
+    this->VarTreeIter->Set(name, value.c_str());
   }
 
   void RemoveDefinition(std::string const& name)
   {
-    this->VarStack.back().Set(name, 0);
+    this->VarTreeIter->Set(name, 0);
   }
 
   std::vector<std::string> UnusedKeys() const
   {
-    return this->VarStack.back().UnusedKeys();
+    return this->VarTreeIter->UnusedKeys();
   }
 
   std::vector<std::string> ClosureKeys() const
   {
-    return cmDefinitions::ClosureKeys(this->VarStack.rbegin(),
-                                      this->VarStack.rend());
+    return cmDefinitions::ClosureKeys(this->VarTreeIter, this->VarTree.Root());
   }
 
   void PopDefinitions()
   {
-    this->VarStack.pop_back();
+    ++this->VarTreeIter;
   }
 
   bool RaiseScope(std::string const& var, const char* varDef, cmMakefile* mf)
   {
-    std::list<cmDefinitions>::reverse_iterator it = this->VarStack.rbegin();
-    assert(it != this->VarStack.rend());
+    cmLinkedTree<cmDefinitions>::iterator it = this->VarTreeIter;
+    assert(it != this->VarTree.Root());
     ++it;
-    if(it == this->VarStack.rend())
+    if(it == this->VarTree.Root())
       {
       cmLocalGenerator* plg = mf->LocalGenerator->GetParent();
       if(!plg)
@@ -132,7 +135,7 @@ public:
       return true;
       }
     // First localize the definition in the current scope.
-    cmDefinitions::Raise(var, this->VarStack.rbegin(), this->VarStack.rend());
+    cmDefinitions::Raise(var, this->VarTreeIter, this->VarTree.Root());
 
     // Now update the definition in the parent scope.
     it->Set(var, varDef);

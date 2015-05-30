@@ -56,9 +56,9 @@ void cmDefinitions::Raise(const std::string& key,
 }
 
 bool cmDefinitions::HasKey(const std::string& key,
-                           StackConstIter begin, StackConstIter end)
+                           StackIter begin, StackIter end)
 {
-  for (StackConstIter it = begin; it != end; ++it)
+  for (StackIter it = begin; it != end; ++it)
     {
     MapType::const_iterator i = it->Map.find(key);
     if (i != it->Map.end())
@@ -94,12 +94,12 @@ std::vector<std::string> cmDefinitions::UnusedKeys() const
 }
 
 //----------------------------------------------------------------------------
-cmDefinitions cmDefinitions::MakeClosure(StackConstIter begin,
-                                         StackConstIter end)
+cmDefinitions cmDefinitions::MakeClosure(StackIter begin,
+                                         StackIter end)
 {
   cmDefinitions closure;
   std::set<std::string> undefined;
-  for (StackConstIter it = begin; it != end; ++it)
+  for (StackIter it = begin; it != end; ++it)
     {
     // Consider local definitions.
     for(MapType::const_iterator mi = it->Map.begin();
@@ -125,12 +125,12 @@ cmDefinitions cmDefinitions::MakeClosure(StackConstIter begin,
 
 //----------------------------------------------------------------------------
 std::vector<std::string>
-cmDefinitions::ClosureKeys(StackConstIter begin, StackConstIter end)
+cmDefinitions::ClosureKeys(StackIter begin, StackIter end)
 {
   std::set<std::string> bound;
   std::vector<std::string> defined;
 
-  for (StackConstIter it = begin; it != end; ++it)
+  for (StackIter it = begin; it != end; ++it)
     {
     defined.reserve(defined.size() + it->Map.size());
     for(MapType::const_iterator mi = it->Map.begin();
