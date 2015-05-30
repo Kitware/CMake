@@ -146,7 +146,7 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
-  this->GeneratingBuildSystem = false;
+  this->Configured = false;
   this->SuppressWatches = false;
 
   // Setup the default include file regular expression (match everything).
@@ -1594,7 +1594,7 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
         // NEW behavior prints the error.
         this->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
-    lg2->SetConfiguredCMP0014(true);
+    lg2->GetMakefile()->SetConfigured();
     return;
     }
   // finally configure the subdir

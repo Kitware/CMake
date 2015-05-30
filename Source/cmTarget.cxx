@@ -764,7 +764,7 @@ void cmTarget::GetSourceFiles(std::vector<std::string> &files,
                                  "SOURCES")
                         != debugProperties.end();
 
-  if (this->Makefile->IsGeneratingBuildSystem())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugSourcesDone = true;
     }
@@ -2106,7 +2106,7 @@ cmTarget::GetIncludeDirectories(const std::string& config,
                                  "INCLUDE_DIRECTORIES")
                         != debugProperties.end();
 
-  if (this->Makefile->IsGeneratingBuildSystem())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugIncludesDone = true;
     }
@@ -2277,7 +2277,7 @@ void cmTarget::GetCompileOptions(std::vector<std::string> &result,
                                  "COMPILE_OPTIONS")
                         != debugProperties.end();
 
-  if (this->Makefile->IsGeneratingBuildSystem())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugCompileOptionsDone = true;
     }
@@ -2348,7 +2348,7 @@ void cmTarget::GetCompileDefinitions(std::vector<std::string> &list,
                                 "COMPILE_DEFINITIONS")
                         != debugProperties.end();
 
-  if (this->Makefile->IsGeneratingBuildSystem())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugCompileDefinitionsDone = true;
     }
@@ -2449,7 +2449,7 @@ void cmTarget::GetCompileFeatures(std::vector<std::string> &result,
                                  "COMPILE_FEATURES")
                         != debugProperties.end();
 
-  if (this->Makefile->IsGeneratingBuildSystem())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugCompileFeaturesDone = true;
     }
@@ -4857,7 +4857,7 @@ cmTarget::ReportPropertyOrigin(const std::string &p,
                                  p)
                         != debugProperties.end();
 
-  if (this->Makefile->IsGeneratingBuildSystem())
+  if (this->Makefile->IsConfigured())
     {
     this->DebugCompatiblePropertiesDone[p] = true;
     }

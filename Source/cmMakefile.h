@@ -781,8 +781,8 @@ public:
     return this->CompileDefinitionsEntries;
   }
 
-  bool IsGeneratingBuildSystem() const { return this->GeneratingBuildSystem; }
-  void SetGeneratingBuildSystem(){ this->GeneratingBuildSystem = true; }
+  bool IsConfigured() const { return this->Configured; }
+  void SetConfigured(){ this->Configured = true; }
 
   void AddQtUiFileWithOptions(cmSourceFile *sf);
   std::vector<cmSourceFile*> GetQtUiFilesWithOptions() const;
@@ -994,7 +994,7 @@ private:
                                   long line,
                                   bool removeEmpty,
                                   bool replaceAt) const;
-  bool GeneratingBuildSystem;
+  bool Configured;
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
    * backward-compatibility. It implements a linear search and support
