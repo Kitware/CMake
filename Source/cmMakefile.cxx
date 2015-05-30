@@ -1553,6 +1553,64 @@ void cmMakefile::InitializeFromParent()
   this->ImportedTargets = parent->ImportedTargets;
 }
 
+//----------------------------------------------------------------------------
+class cmMakefileCurrent
+{
+  cmGlobalGenerator* GG;
+  cmMakefile* MF;
+  cmState::Snapshot Snapshot;
+public:
+  cmMakefileCurrent(cmMakefile* mf)
+    {
+    this->GG = mf->GetGlobalGenerator();
+    this->MF = this->GG->GetCurrentMakefile();
+    this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
+          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
+    this->GG->SetCurrentMakefile(mf);
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PushFileScope();
+#endif
+    }
+  ~cmMakefileCurrent()
+    {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PopFileScope();
+#endif
+    this->GG->SetCurrentMakefile(this->MF);
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
+    }
+};
+
+//----------------------------------------------------------------------------
+void cmMakefile::Configure()
+{
+  cmMakefileCurrent cmf(this);
+
+  // make sure the CMakeFiles dir is there
+  std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
+  filesDir += cmake::GetCMakeFilesDirectory();
+  cmSystemTools::MakeDirectory(filesDir.c_str());
+
+  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
+  currentStart += "/CMakeLists.txt";
+  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
+  this->ProcessBuildsystemFile(currentStart.c_str());
+
+   // at the end handle any old style subdirs
+  std::vector<cmLocalGenerator*> subdirs = this->UnConfiguredDirectories;
+
+  // for each subdir recurse
+  std::vector<cmLocalGenerator*>::iterator sdi = subdirs.begin();
+  for (; sdi != subdirs.end(); ++sdi)
+    {
+    this->ConfigureSubDirectory(*sdi);
+    }
+
+  this->AddCMakeDependFilesFromUser();
+  this->SetConfigured();
+}
+
 void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
 {
   lg2->GetMakefile()->InitializeFromParent();
@@ -1598,15 +1656,7 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
     return;
     }
   // finally configure the subdir
-  lg2->Configure();
-
-  // at the end handle any old style subdirs
-  for (std::vector<cmLocalGenerator *>::iterator sdi =
-       this->UnConfiguredDirectories.begin();
-       sdi != this->UnConfiguredDirectories.end(); ++sdi)
-    {
-    this->ConfigureSubDirectory(*sdi);
-    }
+  lg2->GetMakefile()->Configure();
 
   if (this->GetCMakeInstance()->GetDebugOutput())
     {

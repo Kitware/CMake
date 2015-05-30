@@ -47,12 +47,6 @@ public:
   virtual void Generate() {}
 
   /**
-   * Process the CMakeLists files for this directory to fill in the
-   * Makefile ivar
-   */
-  void Configure();
-
-  /**
    * Calls TraceVSDependencies() on all targets of this generator.
    */
   void TraceDependencies();

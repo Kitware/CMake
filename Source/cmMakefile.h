@@ -262,11 +262,6 @@ public:
       this->LinkDirectories = vec;
     }
 
-  std::vector<cmLocalGenerator*> GetUnConfiguredDirectories() const
-  {
-    return this->UnConfiguredDirectories;
-  }
-
   /**
    * Add a subdirectory to the build.
    */
@@ -274,6 +269,8 @@ public:
                        const std::string& fullBinDir,
                        bool excludeFromAll,
                        bool immediate);
+
+  void Configure();
 
   /**
    * Configure a subdirectory
