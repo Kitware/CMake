@@ -119,18 +119,15 @@ void cmLocalGenerator::Configure()
   assert(cmSystemTools::FileExists(currentStart.c_str(), true));
   this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
 
-  // at the end of the ReadListFile handle any old style subdirs
-  // first get all the subdirectories
-  std::vector<cmLocalGenerator *> subdirs = this->GetChildren();
+   // at the end handle any old style subdirs
+  std::vector<cmLocalGenerator *> subdirs =
+      this->GetMakefile()->GetUnConfiguredDirectories();
 
   // for each subdir recurse
   std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
   for (; sdi != subdirs.end(); ++sdi)
     {
-    if (!(*sdi)->GetMakefile()->IsConfigured())
-      {
-      this->Makefile->ConfigureSubDirectory(*sdi);
-      }
+    this->Makefile->ConfigureSubDirectory(*sdi);
     }
 
   this->Makefile->AddCMakeDependFilesFromUser();

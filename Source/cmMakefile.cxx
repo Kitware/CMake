@@ -1599,6 +1599,15 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
     }
   // finally configure the subdir
   lg2->Configure();
+
+  // at the end handle any old style subdirs
+  for (std::vector<cmLocalGenerator *>::iterator sdi =
+       this->UnConfiguredDirectories.begin();
+       sdi != this->UnConfiguredDirectories.end(); ++sdi)
+    {
+    this->ConfigureSubDirectory(*sdi);
+    }
+
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
     std::string msg="   Returning to         ";
@@ -1637,6 +1646,10 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
   if (immediate)
     {
     this->ConfigureSubDirectory(lg2);
+    }
+  else
+    {
+    this->UnConfiguredDirectories.push_back(lg2);
     }
 }
 
