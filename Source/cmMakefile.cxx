@@ -1562,6 +1562,26 @@ void cmMakefile::InitializeFromParent()
   this->ImportedTargets = parent->ImportedTargets;
 }
 
+void cmMakefile::PushFunctionScope(const cmPolicies::PolicyMap& pm)
+{
+  this->PushScope();
+
+  this->PushFunctionBlockerBarrier();
+
+  this->PushPolicy(true, pm);
+  this->PushPolicyBarrier();
+}
+
+void cmMakefile::PopFunctionScope(bool reportError)
+{
+  this->PopPolicyBarrier(reportError);
+  this->PopPolicy();
+
+  this->PopFunctionBlockerBarrier(reportError);
+
+  this->PopScope();
+}
+
 //----------------------------------------------------------------------------
 class cmMakefileCurrent
 {
@@ -5417,4 +5437,17 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
     target->SetProperty("C_STANDARD", "90");
     }
   return true;
+}
+
+
+cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
+                                             cmPolicies::PolicyMap const& pm)
+  : Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushFunctionScope(pm);
+}
+
+cmMakefile::FunctionPushPop::~FunctionPushPop()
+{
+  this->Makefile->PopFunctionScope(this->ReportError);
 }
