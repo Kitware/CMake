@@ -1564,7 +1564,13 @@ void cmMakefile::InitializeFromParent()
 
 void cmMakefile::PushFunctionScope(const cmPolicies::PolicyMap& pm)
 {
-  this->PushScope();
+  this->Internal->PushDefinitions();
+
+  this->PushLoopBlockBarrier();
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetGlobalGenerator()->GetFileLockPool().PushFunctionScope();
+#endif
 
   this->PushFunctionBlockerBarrier();
 
@@ -1579,7 +1585,15 @@ void cmMakefile::PopFunctionScope(bool reportError)
 
   this->PopFunctionBlockerBarrier(reportError);
 
-  this->PopScope();
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetGlobalGenerator()->GetFileLockPool().PopFunctionScope();
+#endif
+
+  this->PopLoopBlockBarrier();
+
+  this->CheckForUnusedVariables();
+
+  this->Internal->PopDefinitions();
 }
 
 void cmMakefile::PushMacroScope(const cmPolicies::PolicyMap& pm)
