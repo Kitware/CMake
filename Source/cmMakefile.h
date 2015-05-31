@@ -1084,15 +1084,8 @@ class cmMakefileCall
 public:
   cmMakefileCall(cmMakefile* mf,
                  cmListFileContext const& lfc,
-                 cmExecutionStatus& status): Makefile(mf)
-    {
-    cmMakefile::CallStackEntry entry = {&lfc, &status};
-    this->Makefile->CallStack.push_back(entry);
-    }
-  ~cmMakefileCall()
-    {
-    this->Makefile->CallStack.pop_back();
-    }
+                 cmExecutionStatus& status);
+  ~cmMakefileCall();
 private:
   cmMakefile* Makefile;
 };
