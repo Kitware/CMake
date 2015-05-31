@@ -45,73 +45,92 @@
 class cmMakefile::Internals
 {
 public:
+  struct VarScope
+  {
+    cmLinkedTree<cmDefinitions>::iterator Vars;
+    cmLinkedTree<cmDefinitions>::iterator Parent;
+  };
+
   cmLinkedTree<cmDefinitions> VarTree;
-  cmLinkedTree<cmDefinitions>::iterator VarTreeIter;
+  cmLinkedTree<VarScope> VarScopes;
+  cmLinkedTree<VarScope>::iterator VarScopeIter;
   bool IsSourceFileTryCompile;
 
   void PushDefinitions()
   {
-    assert(this->VarTreeIter.IsValid());
-    this->VarTreeIter = this->VarTree.Extend(this->VarTreeIter);
+    assert(this->VarScopeIter.IsValid());
+    assert(this->VarScopeIter->Vars.IsValid());
+    cmLinkedTree<cmDefinitions>::iterator origin =
+        this->VarScopeIter->Vars;
+    cmLinkedTree<cmDefinitions>::iterator parentScope =
+        this->VarTree.Extend(origin);
+    this->VarScopeIter->Vars = parentScope;
+    this->VarScopeIter = this->VarScopes.Extend(this->VarScopeIter);
+    this->VarScopeIter->Parent = parentScope;
+    this->VarScopeIter->Vars = this->VarTree.Extend(origin);
   }
 
-  void InitializeVarStack()
+  void InitializeVarScope()
   {
-    this->VarTreeIter = this->VarTree.Root();
-    this->PushDefinitions();
+    assert(!this->VarScopeIter.IsValid());
+    this->VarScopeIter = this->VarScopes.Extend(this->VarScopes.Root());
+    this->VarScopeIter->Vars = this->VarTree.Extend(this->VarTree.Root());
+    this->VarScopeIter->Parent = this->VarTree.Root();
   }
 
   void InitializeDefinitions(cmMakefile* parent)
   {
-    *this->VarTreeIter =
-        cmDefinitions::MakeClosure(parent->Internal->VarTreeIter,
+    assert(this->VarScopeIter.IsValid());
+    assert(this->VarScopeIter->Vars.IsValid());
+    *this->VarScopeIter->Vars =
+        cmDefinitions::MakeClosure(parent->Internal->VarScopeIter->Vars,
                                    parent->Internal->VarTree.Root());
   }
 
   const char* GetDefinition(std::string const& name)
   {
-    assert(this->VarTreeIter != this->VarTree.Root());
+    assert(this->VarScopeIter.IsValid());
+    assert(this->VarScopeIter->Vars.IsValid());
     return cmDefinitions::Get(name,
-                              this->VarTreeIter, this->VarTree.Root());
+                              this->VarScopeIter->Vars, this->VarTree.Root());
   }
 
   bool IsInitialized(std::string const& name)
   {
     return cmDefinitions::HasKey(name,
-                                 this->VarTreeIter, this->VarTree.Root());
+                              this->VarScopeIter->Vars, this->VarTree.Root());
   }
 
   void SetDefinition(std::string const& name, std::string const& value)
   {
-    this->VarTreeIter->Set(name, value.c_str());
+    this->VarScopeIter->Vars->Set(name, value.c_str());
   }
 
   void RemoveDefinition(std::string const& name)
   {
-    this->VarTreeIter->Set(name, 0);
+    this->VarScopeIter->Vars->Set(name, 0);
   }
 
   std::vector<std::string> UnusedKeys() const
   {
-    return this->VarTreeIter->UnusedKeys();
+    return this->VarScopeIter->Vars->UnusedKeys();
   }
 
   std::vector<std::string> ClosureKeys() const
   {
-    return cmDefinitions::ClosureKeys(this->VarTreeIter, this->VarTree.Root());
+    return cmDefinitions::ClosureKeys(this->VarScopeIter->Vars,
+                                      this->VarTree.Root());
   }
 
   void PopDefinitions()
   {
-    ++this->VarTreeIter;
+    ++this->VarScopeIter;
   }
 
   bool RaiseScope(std::string const& var, const char* varDef, cmMakefile* mf)
   {
-    cmLinkedTree<cmDefinitions>::iterator it = this->VarTreeIter;
-    assert(it != this->VarTree.Root());
-    ++it;
-    if(it == this->VarTree.Root())
+    assert(this->VarScopeIter->Vars != this->VarTree.Root());
+    if(this->VarScopeIter->Parent == this->VarTree.Root())
       {
       cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent();
       if(!plg)
@@ -133,10 +152,10 @@ public:
       return true;
       }
     // First localize the definition in the current scope.
-    cmDefinitions::Raise(var, this->VarTreeIter, this->VarTree.Root());
+    cmDefinitions::Raise(var, this->VarScopeIter->Vars, this->VarTree.Root());
 
     // Now update the definition in the parent scope.
-    it->Set(var, varDef);
+    this->VarScopeIter->Parent->Set(var, varDef);
     return true;
   }
 };
@@ -147,7 +166,7 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
     LocalGenerator(localGenerator),
     StateSnapshot(localGenerator->GetStateSnapshot())
 {
-  this->Internal->InitializeVarStack();
+  this->Internal->InitializeVarScope();
   this->Internal->IsSourceFileTryCompile = false;
 
   // Initialize these first since AddDefaultDefinitions calls AddDefinition
