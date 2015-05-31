@@ -5494,3 +5494,15 @@ cmMakefile::MacroPushPop::~MacroPushPop()
 {
   this->Makefile->PopMacroScope(this->ReportError);
 }
+
+cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmListFileContext& lfc,
+                               cmExecutionStatus& status): Makefile(mf)
+{
+  cmMakefile::CallStackEntry entry = {&lfc, &status};
+  this->Makefile->CallStack.push_back(entry);
+}
+
+cmMakefileCall::~cmMakefileCall()
+{
+  this->Makefile->CallStack.pop_back();
+}
