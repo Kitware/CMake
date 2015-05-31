@@ -247,11 +247,11 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
                               std::string const& text) const
 {
   // Collect context information.
-  if(!this->CallStack.empty())
+  if(!this->ExecutionStatusStack.empty())
     {
     if((t == cmake::FATAL_ERROR) || (t == cmake::INTERNAL_ERROR))
       {
-      this->CallStack.back().Status->SetNestedError(true);
+      this->ExecutionStatusStack.back()->SetNestedError(true);
       }
     this->GetCMakeInstance()->IssueMessage(t, text, this->GetBacktrace());
     }
@@ -276,10 +276,11 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
   cmListFileBacktrace backtrace(this->StateSnapshot);
-  for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
-      i != this->CallStack.rend(); ++i)
+  for(std::vector<cmListFileContext const*>::const_reverse_iterator
+      i = this->ContextStack.rbegin();
+      i != this->ContextStack.rend(); ++i)
     {
-    backtrace.Append(*i->Context);
+    backtrace.Append(*(*i));
     }
   return backtrace;
 }
@@ -290,10 +291,11 @@ cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
 {
   cmListFileBacktrace backtrace(this->StateSnapshot);
   backtrace.Append(lfc);
-  for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
-      i != this->CallStack.rend(); ++i)
+  for(std::vector<cmListFileContext const*>::const_reverse_iterator
+      i = this->ContextStack.rbegin();
+      i != this->ContextStack.rend(); ++i)
     {
-    backtrace.Append(*i->Context);
+    backtrace.Append(*(*i));
     }
   return backtrace;
 }
@@ -301,7 +303,7 @@ cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
 //----------------------------------------------------------------------------
 cmListFileContext cmMakefile::GetExecutionContext() const
 {
-  return *this->CallStack.back().Context;
+  return *this->ContextStack.back();
 }
 
 //----------------------------------------------------------------------------
@@ -1996,7 +1998,7 @@ void cmMakefile::LogUnused(const char* reason,
     {
     std::string path;
     cmListFileContext lfc;
-    if (!this->CallStack.empty())
+    if (!this->ExecutionStatusStack.empty())
       {
       lfc = this->GetExecutionContext();
       path = lfc.FilePath;
@@ -3360,11 +3362,11 @@ bool cmMakefile::IsLoopBlock() const
 
 std::string cmMakefile::GetExecutionFilePath() const
 {
-  if (this->CallStack.empty())
+  if (this->ContextStack.empty())
     {
     return std::string();
     }
-  return this->CallStack.back().Context->FilePath;
+  return this->ContextStack.back()->FilePath;
 }
 
 //----------------------------------------------------------------------------
@@ -3455,7 +3457,7 @@ bool cmMakefile::ExpandArguments(
 //----------------------------------------------------------------------------
 void cmMakefile::AddFunctionBlocker(cmFunctionBlocker* fb)
 {
-  if(!this->CallStack.empty())
+  if(!this->ExecutionStatusStack.empty())
     {
     // Record the context in which the blocker is created.
     fb->SetStartingContext(this->GetExecutionContext());
@@ -5503,11 +5505,12 @@ cmMakefile::MacroPushPop::~MacroPushPop()
 cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmListFileContext& lfc,
                                cmExecutionStatus& status): Makefile(mf)
 {
-  cmMakefile::CallStackEntry entry = {&lfc, &status};
-  this->Makefile->CallStack.push_back(entry);
+  this->Makefile->ContextStack.push_back(&lfc);
+  this->Makefile->ExecutionStatusStack.push_back(&status);
 }
 
 cmMakefileCall::~cmMakefileCall()
 {
-  this->Makefile->CallStack.pop_back();
+  this->Makefile->ExecutionStatusStack.pop_back();
+  this->Makefile->ContextStack.pop_back();
 }

@@ -935,14 +935,8 @@ private:
   // stack of list files being read
   std::vector<std::string> ListFileStack;
 
-  // stack of commands being invoked.
-  struct CallStackEntry
-  {
-    cmListFileContext const* Context;
-    cmExecutionStatus* Status;
-  };
-  typedef std::vector<CallStackEntry> CallStackType;
-  CallStackType CallStack;
+  std::vector<cmListFileContext const*> ContextStack;
+  std::vector<cmExecutionStatus*> ExecutionStatusStack;
   friend class cmMakefileCall;
 
   std::vector<cmTarget*> ImportedTargetsOwned;
