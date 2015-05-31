@@ -74,6 +74,8 @@
 find_program(BISON_EXECUTABLE NAMES bison win_bison DOC "path to the bison executable")
 mark_as_advanced(BISON_EXECUTABLE)
 
+include(CMakeParseArguments)
+
 if(BISON_EXECUTABLE)
   # the bison commands should be executed with the C locale, otherwise
   # the message (which are parsed) may be translated
@@ -142,44 +144,30 @@ if(BISON_EXECUTABLE)
     set(BISON_TARGET_output_header "")
     set(BISON_TARGET_cmdopt "")
     set(BISON_TARGET_outputs "${BisonOutput}")
-    if(NOT ${ARGC} EQUAL 3 AND NOT ${ARGC} EQUAL 5 AND NOT ${ARGC} EQUAL 7)
+
+    # Parsing parameters
+    set(BISON_TARGET_PARAM_OPTIONS)
+    set(BISON_TARGET_PARAM_ONE_VALUE_KEYWORDS VERBOSE COMPILE_FLAGS DEFINES_FILE)
+    set(BISON_TARGET_PARAM_MULTI_VALUE_KEYWORDS)
+    cmake_parse_arguments(
+        BISON_TARGET_ARG
+        "${BISON_TARGET_PARAM_OPTIONS}"
+        "${BISON_TARGET_PARAM_ONE_VALUE_KEYWORDS}"
+        "${BISON_TARGET_PARAM_MULTI_VALUE_KEYWORDS}"
+        ${ARGN}
+    )
+
+    if("${BISON_TARGET_ARG_UNPARSED_ARGUMENTS}" STRGREATER "")
       message(SEND_ERROR "Usage")
     else()
-      # Parsing parameters
-      if(${ARGC} GREATER 5 OR ${ARGC} EQUAL 5)
-        if("${ARGV3}" STREQUAL "VERBOSE")
-          BISON_TARGET_option_verbose(${Name} ${BisonOutput} "${ARGV4}")
-        endif()
-        if("${ARGV3}" STREQUAL "COMPILE_FLAGS")
-          BISON_TARGET_option_extraopts("${ARGV4}")
-        endif()
-        if("${ARGV3}" STREQUAL "DEFINES")
-          BISON_TARGET_option_defines("${ARGV4}")
-        endif()
+      if("${BISON_TARGET_ARG_VERBOSE}" STRGREATER "")
+        BISON_TARGET_option_verbose(${Name} ${BisonOutput} "${BISON_TARGET_ARG_VERBOSE}")
       endif()
-
-      if(${ARGC} GREATER 7 OR ${ARGC} EQUAL 7)
-        if("${ARGV5}" STREQUAL "VERBOSE")
-          BISON_TARGET_option_verbose(${Name} ${BisonOutput} "${ARGV6}")
-        endif()
-        if("${ARGV5}" STREQUAL "COMPILE_FLAGS")
-          BISON_TARGET_option_extraopts("${ARGV6}")
-        endif()
-        if("${ARGV5}" STREQUAL "DEFINES")
-          BISON_TARGET_option_defines("${ARGV6}")
-        endif()
+      if("${BISON_TARGET_ARG_COMPILE_FLAGS}" STRGREATER "")
+        BISON_TARGET_option_extraopts("${BISON_TARGET_ARG_COMPILE_FLAGS}")
       endif()
-
-      if(${ARGC} EQUAL 9)
-        if("${ARGV7}" STREQUAL "VERBOSE")
-          BISON_TARGET_option_verbose(${Name} ${BisonOutput} "${ARGV8}")
-        endif()
-        if("${ARGV7}" STREQUAL "COMPILE_FLAGS")
-          BISON_TARGET_option_extraopts("${ARGV8}")
-        endif()
-        if("${ARGV7}" STREQUAL "DEFINES")
-          BISON_TARGET_option_defines("${ARGV8}")
-        endif()
+      if("${BISON_TARGET_ARG_DEFINES_FILE}" STRGREATER "")
+        BISON_TARGET_option_defines("${BISON_TARGET_ARG_DEFINES_FILE}")
       endif()
 
       if(${BISON_TARGET_output_header} STREQUAL "")
