@@ -23,8 +23,11 @@ struct cmState::SnapshotDataType
   cmState::PositionType CallStackParent;
   cmState::PositionType DirectoryParent;
   cmState::SnapshotType SnapshotType;
+  cmLinkedTree<std::string>::iterator ExecutionListFile;
   cmLinkedTree<cmState::BuildsystemDirectoryStateType>::iterator
                                                           BuildSystemDirectory;
+  std::string EntryPointCommand;
+  long EntryPointLine;
 };
 
 struct cmState::BuildsystemDirectoryStateType
@@ -227,6 +230,7 @@ cmState::Snapshot cmState::Reset()
 
   this->BuildsystemDirectory.Truncate();
   PositionType pos = this->SnapshotData.Truncate();
+  this->ExecutionListFiles.Truncate();
 
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -683,61 +687,98 @@ cmState::Snapshot cmState::CreateBaseSnapshot()
   pos->SnapshotType = BuildsystemDirectoryType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(this->BuildsystemDirectory.Root());
+  pos->ExecutionListFile =
+      this->ExecutionListFiles.Extend(this->ExecutionListFiles.Root());
   return cmState::Snapshot(this, pos);
 }
 
 cmState::Snapshot
-cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
+cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot,
+                                    std::string const& entryPointCommand,
+                                    long entryPointLine)
 {
   assert(originSnapshot.IsValid());
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position);
   pos->CallStackParent = originSnapshot.Position;
+  pos->EntryPointLine = entryPointLine;
+  pos->EntryPointCommand = entryPointCommand;
   pos->DirectoryParent = originSnapshot.Position;
   pos->SnapshotType = BuildsystemDirectoryType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(
         originSnapshot.Position->BuildSystemDirectory);
+  pos->ExecutionListFile =
+      this->ExecutionListFiles.Extend(
+        originSnapshot.Position->ExecutionListFile);
   return cmState::Snapshot(this, pos);
 }
 
 cmState::Snapshot
-cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot)
+cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot,
+                                    std::string const& entryPointCommand,
+                                    long entryPointLine,
+                                    std::string const& fileName)
 {
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
   pos->CallStackParent = originSnapshot.Position;
+  pos->EntryPointLine = entryPointLine;
+  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = FunctionCallType;
+  pos->ExecutionListFile = this->ExecutionListFiles.Extend(
+        originSnapshot.Position->ExecutionListFile, fileName);
   return cmState::Snapshot(this, pos);
 }
 
 
 cmState::Snapshot
-cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot)
+cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot,
+                                    std::string const& entryPointCommand,
+                                    long entryPointLine,
+                                    std::string const& fileName)
 {
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
   pos->CallStackParent = originSnapshot.Position;
+  pos->EntryPointLine = entryPointLine;
+  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = MacroCallType;
+  pos->ExecutionListFile = this->ExecutionListFiles.Extend(
+        originSnapshot.Position->ExecutionListFile, fileName);
   return cmState::Snapshot(this, pos);
 }
 
 cmState::Snapshot
-cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot)
+cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot,
+                                 const std::string& entryPointCommand,
+                                 long entryPointLine,
+                                 const std::string& fileName)
 {
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
   pos->CallStackParent = originSnapshot.Position;
+  pos->EntryPointLine = entryPointLine;
+  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = CallStackType;
+  pos->ExecutionListFile = this->ExecutionListFiles.Extend(
+        originSnapshot.Position->ExecutionListFile, fileName);
   return cmState::Snapshot(this, pos);
 }
 
 cmState::Snapshot
-cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot)
+cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot,
+                                      const std::string& entryPointCommand,
+                                      long entryPointLine,
+                                      const std::string& fileName)
 {
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
                                                *originSnapshot.Position);
   pos->CallStackParent = originSnapshot.Position;
+  pos->EntryPointLine = entryPointLine;
+  pos->EntryPointCommand = entryPointCommand;
   pos->SnapshotType = InlineListFileType;
+  pos->ExecutionListFile = this->ExecutionListFiles.Extend(
+        originSnapshot.Position->ExecutionListFile, fileName);
   return cmState::Snapshot(this, pos);
 }
 
@@ -797,6 +838,11 @@ void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
   this->ComputeRelativePathTopBinary();
 }
 
+void cmState::Snapshot::SetListFile(const std::string& listfile)
+{
+  *this->Position->ExecutionListFile = listfile;
+}
+
 std::vector<std::string> const&
 cmState::Snapshot::GetCurrentSourceDirectoryComponents() const
 {
@@ -829,6 +875,21 @@ void cmState::Snapshot::SetRelativePathTopSource(const char* dir)
 void cmState::Snapshot::SetRelativePathTopBinary(const char* dir)
 {
   this->Position->BuildSystemDirectory->RelativePathTopBinary = dir;
+}
+
+std::string cmState::Snapshot::GetExecutionListFile() const
+{
+  return *this->Position->ExecutionListFile;
+}
+
+std::string cmState::Snapshot::GetEntryPointCommand() const
+{
+  return this->Position->EntryPointCommand;
+}
+
+long cmState::Snapshot::GetEntryPointLine() const
+{
+  return this->Position->EntryPointLine;
 }
 
 bool cmState::Snapshot::IsValid() const

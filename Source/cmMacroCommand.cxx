@@ -97,6 +97,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
     }
 
   cmMakefile::MacroPushPop macroScope(this->Makefile,
+                                      this->FilePath,
                                       this->Policies);
 
   // set the value of argc

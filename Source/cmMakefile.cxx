@@ -465,8 +465,11 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   this->Makefile->PushFunctionBlockerBarrier();
 
   this->Makefile->StateSnapshot =
-        this->Makefile->GetState()->CreateCallStackSnapshot(
-            this->Makefile->StateSnapshot);
+      this->Makefile->GetState()->CreateCallStackSnapshot(
+        this->Makefile->StateSnapshot,
+        this->Makefile->ContextStack.back()->Name,
+        this->Makefile->ContextStack.back()->Line,
+        filenametoread);
 }
 
 //----------------------------------------------------------------------------
@@ -576,9 +579,16 @@ public:
     this->Makefile->ListFileStack.push_back(filenametoread);
     this->Makefile->PushPolicyBarrier();
 
+    long line = 0;
+    std::string name;
+    if (!this->Makefile->ContextStack.empty())
+      {
+      line = this->Makefile->ContextStack.back()->Line;
+      name = this->Makefile->ContextStack.back()->Name;
+      }
     this->Makefile->StateSnapshot =
         this->Makefile->GetState()->CreateInlineListFileSnapshot(
-          this->Makefile->StateSnapshot);
+          this->Makefile->StateSnapshot, name, line, filenametoread);
     assert(this->Makefile->StateSnapshot.IsValid());
     this->Makefile->PushFunctionBlockerBarrier();
   }
@@ -1590,11 +1600,14 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
   this->ImportedTargets = parent->ImportedTargets;
 }
 
-void cmMakefile::PushFunctionScope(const cmPolicies::PolicyMap& pm)
+void cmMakefile::PushFunctionScope(std::string const& fileName,
+                                   const cmPolicies::PolicyMap& pm)
 {
   this->StateSnapshot =
       this->GetState()->CreateFunctionCallSnapshot(
-        this->StateSnapshot);
+        this->StateSnapshot,
+        this->ContextStack.back()->Name, this->ContextStack.back()->Line,
+        fileName);
   assert(this->StateSnapshot.IsValid());
 
   this->Internal->PushDefinitions();
@@ -1632,11 +1645,14 @@ void cmMakefile::PopFunctionScope(bool reportError)
   this->Internal->PopDefinitions();
 }
 
-void cmMakefile::PushMacroScope(const cmPolicies::PolicyMap& pm)
+void cmMakefile::PushMacroScope(std::string const& fileName,
+                                const cmPolicies::PolicyMap& pm)
 {
   this->StateSnapshot =
       this->GetState()->CreateMacroCallSnapshot(
-        this->StateSnapshot);
+        this->StateSnapshot,
+        this->ContextStack.back()->Name, this->ContextStack.back()->Line,
+        fileName);
   assert(this->StateSnapshot.IsValid());
 
   this->PushFunctionBlockerBarrier();
@@ -1670,6 +1686,7 @@ public:
     std::string currentStart =
         this->Makefile->StateSnapshot.GetCurrentSourceDirectory();
     currentStart += "/CMakeLists.txt";
+    this->Makefile->StateSnapshot.SetListFile(currentStart);
     this->Makefile->ListFileStack.push_back(currentStart);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
@@ -1813,7 +1830,9 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
 
   cmState::Snapshot newSnapshot = this->GetState()
-      ->CreateBuildsystemDirectorySnapshot(this->StateSnapshot);
+      ->CreateBuildsystemDirectorySnapshot(this->StateSnapshot,
+                                           this->ContextStack.back()->Name,
+                                           this->ContextStack.back()->Line);
 
   // create a new local generator and set its parent
   cmLocalGenerator *lg2 = this->GetGlobalGenerator()
@@ -5511,10 +5530,11 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
 
 
 cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
+                                             const std::string& fileName,
                                              cmPolicies::PolicyMap const& pm)
   : Makefile(mf), ReportError(true)
 {
-  this->Makefile->PushFunctionScope(pm);
+  this->Makefile->PushFunctionScope(fileName, pm);
 }
 
 cmMakefile::FunctionPushPop::~FunctionPushPop()
@@ -5524,10 +5544,11 @@ cmMakefile::FunctionPushPop::~FunctionPushPop()
 
 
 cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
+                                       const std::string& fileName,
                                        const cmPolicies::PolicyMap& pm)
   : Makefile(mf), ReportError(true)
 {
-  this->Makefile->PushMacroScope(pm);
+  this->Makefile->PushMacroScope(fileName, pm);
 }
 
 cmMakefile::MacroPushPop::~MacroPushPop()
