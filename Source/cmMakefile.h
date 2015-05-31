@@ -759,8 +759,23 @@ public:
     bool ReportError;
   };
 
+  class MacroPushPop
+  {
+  public:
+    MacroPushPop(cmMakefile* mf,
+                    cmPolicies::PolicyMap const& pm);
+    ~MacroPushPop();
+
+    void Quiet() { this->ReportError = false; }
+  private:
+    cmMakefile* Makefile;
+    bool ReportError;
+  };
+
   void PushFunctionScope(cmPolicies::PolicyMap const& pm);
   void PopFunctionScope(bool reportError);
+  void PushMacroScope(cmPolicies::PolicyMap const& pm);
+  void PopMacroScope(bool reportError);
   void PushScope();
   void PopScope();
   void RaiseScope(const std::string& var, const char *value);

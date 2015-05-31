@@ -1582,6 +1582,22 @@ void cmMakefile::PopFunctionScope(bool reportError)
   this->PopScope();
 }
 
+void cmMakefile::PushMacroScope(const cmPolicies::PolicyMap& pm)
+{
+  this->PushFunctionBlockerBarrier();
+
+  this->PushPolicy(true, pm);
+  this->PushPolicyBarrier();
+}
+
+void cmMakefile::PopMacroScope(bool reportError)
+{
+  this->PopPolicyBarrier(reportError);
+  this->PopPolicy();
+
+  this->PopFunctionBlockerBarrier(reportError);
+}
+
 //----------------------------------------------------------------------------
 class cmMakefileCurrent
 {
@@ -5450,4 +5466,17 @@ cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
 cmMakefile::FunctionPushPop::~FunctionPushPop()
 {
   this->Makefile->PopFunctionScope(this->ReportError);
+}
+
+
+cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
+                                       const cmPolicies::PolicyMap& pm)
+  : Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushMacroScope(pm);
+}
+
+cmMakefile::MacroPushPop::~MacroPushPop()
+{
+  this->Makefile->PopMacroScope(this->ReportError);
 }
