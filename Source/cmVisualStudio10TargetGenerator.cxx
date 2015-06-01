@@ -923,10 +923,7 @@ cmVisualStudio10TargetGenerator::ConvertPath(std::string const& path,
   return forceRelative
     ? cmSystemTools::RelativePath(
       this->Makefile->GetCurrentBinaryDirectory(), path.c_str())
-    : this->LocalGenerator->Convert(path.c_str(),
-                                    cmLocalGenerator::START_OUTPUT,
-                                    cmLocalGenerator::UNCHANGED,
-                                    /* optional = */ true);
+    : path.c_str();
 }
 
 void cmVisualStudio10TargetGenerator::ConvertToWindowsSlash(std::string& s)

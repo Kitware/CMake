@@ -235,13 +235,10 @@ void cmLocalVisualStudio6Generator::AddDSPBuildRule(cmTarget& tgt)
   comment += makefileIn;
   std::string args;
   args = "-H";
-  args += this->Convert(this->Makefile->GetHomeDirectory(),
-                        START_OUTPUT, UNCHANGED, true);
+  args += this->Makefile->GetHomeDirectory();
   commandLine.push_back(args);
   args = "-B";
-  args +=
-    this->Convert(this->Makefile->GetHomeOutputDirectory(),
-                  START_OUTPUT, UNCHANGED, true);
+  args += this->Makefile->GetHomeOutputDirectory();
   commandLine.push_back(args);
 
   std::vector<std::string> const& listFiles = this->Makefile->GetListFiles();

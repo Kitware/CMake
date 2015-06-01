@@ -614,13 +614,7 @@ cmMakefileTargetGenerator
     }
 
   // Get the output paths for source and object files.
-  std::string sourceFile = source.GetFullPath();
-  if(this->LocalGenerator->UseRelativePaths)
-    {
-    sourceFile = this->Convert(sourceFile,
-                               cmLocalGenerator::START_OUTPUT);
-    }
-  sourceFile = this->Convert(sourceFile,
+  std::string sourceFile = this->Convert(source.GetFullPath(),
                              cmLocalGenerator::NONE,
                              cmLocalGenerator::SHELL);
 
@@ -1595,9 +1589,8 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
       if(emitted.insert(*i).second)
         {
         flags += fwSearchFlag;
-        flags += this->Convert(*i,
-                               cmLocalGenerator::START_OUTPUT,
-                               cmLocalGenerator::SHELL, true);
+        flags += this->LocalGenerator
+                     ->ConvertToOutputFormat(*i, cmLocalGenerator::SHELL);
         flags += " ";
         }
       }
