@@ -2798,13 +2798,36 @@ namespace {
 
 
   static size_t
-  cmFileCommandCurlDebugCallback(CURL *, curl_infotype, char *chPtr,
+  cmFileCommandCurlDebugCallback(CURL *, curl_infotype type, char *chPtr,
                                  size_t size, void *data)
     {
     cmFileCommandVectorOfChar *vec
       = static_cast<cmFileCommandVectorOfChar*>(data);
-    vec->insert(vec->end(), chPtr, chPtr + size);
-    return size;
+    switch(type)
+      {
+      case CURLINFO_TEXT:
+      case CURLINFO_HEADER_IN:
+      case CURLINFO_HEADER_OUT:
+        vec->insert(vec->end(), chPtr, chPtr + size);
+        break;
+      case CURLINFO_DATA_IN:
+      case CURLINFO_DATA_OUT:
+      case CURLINFO_SSL_DATA_IN:
+      case CURLINFO_SSL_DATA_OUT:
+        {
+        char buf[128];
+        int n = sprintf(buf, "[%" cmIML_INT_PRIu64 " bytes data]\n",
+                        static_cast<cmIML_INT_uint64_t>(size));
+        if (n > 0)
+          {
+          vec->insert(vec->end(), buf, buf + n);
+          }
+        }
+        break;
+      default:
+        break;
+      }
+    return 0;
     }
 
 
@@ -2963,7 +2986,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
 
   long timeout = 0;
   long inactivity_timeout = 0;
-  std::string verboseLog;
+  std::string logVar;
   std::string statusVar;
   bool tls_verify = this->Makefile->IsOn("CMAKE_TLS_VERIFY");
   const char* cainfo = this->Makefile->GetDefinition("CMAKE_TLS_CAINFO");
@@ -3008,7 +3031,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
         this->SetError("DOWNLOAD missing VAR for LOG.");
         return false;
         }
-      verboseLog = *i;
+      logVar = *i;
       }
     else if(*i == "STATUS")
       {
@@ -3200,7 +3223,7 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
   res = ::curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
   check_curl_result(res, "DOWNLOAD cannot set follow-redirect option: ");
 
-  if(!verboseLog.empty())
+  if(!logVar.empty())
     {
     res = ::curl_easy_setopt(curl, CURLOPT_VERBOSE, 1);
     check_curl_result(res, "DOWNLOAD cannot set verbose: ");
@@ -3287,22 +3310,10 @@ cmFileCommand::HandleDownloadCommand(std::vector<std::string> const& args)
       }
     }
 
-  if(!chunkDebug.empty())
+  if (!logVar.empty())
     {
     chunkDebug.push_back(0);
-    if(CURLE_OPERATION_TIMEOUTED == res)
-      {
-      std::string output = &*chunkDebug.begin();
-
-      if(!verboseLog.empty())
-        {
-        this->Makefile->AddDefinition(verboseLog,
-                                      &*chunkDebug.begin());
-        }
-      }
-
-    this->Makefile->AddDefinition(verboseLog,
-                                  &*chunkDebug.begin());
+    this->Makefile->AddDefinition(logVar, &*chunkDebug.begin());
     }
 
   return true;
