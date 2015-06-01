@@ -126,13 +126,6 @@ public:
     */
   const char* GetRelativeRootPath(RelativeRoot relroot);
 
-  /**
-   * Convert the given path to an output path.  The
-   * remote path must use forward slashes and not already be escaped
-   * or quoted.
-   */
-  std::string ConvertToOptionallyRelativeOutputPath(const std::string& remote);
-
   ///! set/get the parent generator
   cmLocalGenerator* GetParent() const {return this->Parent;}
 
