@@ -115,8 +115,7 @@ public:
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output);
   std::string Convert(const std::string& remote, RelativeRoot local,
-                      OutputFormat output = UNCHANGED,
-                      bool optional = false);
+                      OutputFormat output = UNCHANGED);
   std::string Convert(RelativeRoot remote, const std::string& local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
