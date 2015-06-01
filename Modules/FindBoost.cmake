@@ -879,8 +879,10 @@ endif()
 #  Begin finding boost libraries
 # ------------------------------------------------------------------------
 
+set(_Boost_VARS_LIB "")
 foreach(c DEBUG RELEASE)
   set(_Boost_VARS_LIB_${c} BOOST_LIBRARYDIR Boost_LIBRARY_DIR_${c})
+  list(APPEND _Boost_VARS_LIB ${_Boost_VARS_LIB_${c}})
   _Boost_CHANGE_DETECT(_Boost_CHANGE_LIBDIR_${c} ${_Boost_VARS_DIR} ${_Boost_VARS_LIB_${c}} Boost_INCLUDE_DIR)
   # Clear Boost_LIBRARY_DIR_${c} if it did not change but other input affecting the
   # location did.  We will find a new one based on the new inputs.
