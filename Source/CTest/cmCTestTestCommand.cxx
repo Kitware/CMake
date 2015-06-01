@@ -49,6 +49,17 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
       }
     }
   this->CTest->SetTimeOut(timeout);
+
+  if(const char* ctestMaxLoad =
+     this->Makefile->GetDefinition("CTEST_MAX_LOAD"))
+    {
+    int maxLoad = atoi(ctestMaxLoad);
+    if (maxLoad > 0)
+      {
+      this->CTest->SetMaxLoad(maxLoad);
+      }
+    }
+
   cmCTestGenericHandler* handler = this->InitializeActualHandler();
   if ( this->Values[ctt_START] || this->Values[ctt_END] ||
     this->Values[ctt_STRIDE] )

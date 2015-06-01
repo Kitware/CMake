@@ -826,6 +826,7 @@ bool cmCTest::UpdateCTestConfiguration()
     cmSystemTools::ChangeDirectory(this->BinaryDir);
     }
   this->TimeOut = atoi(this->GetCTestConfiguration("TimeOut").c_str());
+  this->SetMaxLoad(atoi(this->GetCTestConfiguration("MaxLoad").c_str()));
   if ( this->ProduceXML )
     {
     this->CompressXMLFiles = cmSystemTools::IsOn(
