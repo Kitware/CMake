@@ -1087,7 +1087,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   if(!this->ModuleDefinitionFile.empty())
     {
     std::string defFile =
-      this->ConvertToOptionallyRelativeOutputPath(this->ModuleDefinitionFile);
+      this->ConvertToOutputFormat(this->ModuleDefinitionFile, SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
     }
   switch(target.GetType())
@@ -2234,7 +2234,7 @@ std::string cmLocalVisualStudio7Generator::EscapeForXML(const std::string& s)
 std::string cmLocalVisualStudio7Generator
 ::ConvertToXMLOutputPath(const char* path)
 {
-  std::string ret = this->ConvertToOptionallyRelativeOutputPath(path);
+  std::string ret = this->ConvertToOutputFormat(path, SHELL);
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -2245,7 +2245,7 @@ std::string cmLocalVisualStudio7Generator
 std::string cmLocalVisualStudio7Generator
 ::ConvertToXMLOutputPathSingle(const char* path)
 {
-  std::string ret = this->ConvertToOptionallyRelativeOutputPath(path);
+  std::string ret = this->ConvertToOutputFormat(path, SHELL);
   cmSystemTools::ReplaceString(ret, "\"", "");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
