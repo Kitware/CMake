@@ -49,6 +49,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->RunningCount = 0;
   this->StopTimePassed = false;
   this->HasCycles = false;
+  this->SerialTestRunning = false;
 }
 
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
@@ -182,6 +183,11 @@ void cmCTestMultiProcessHandler::LockResources(int index)
   this->LockedResources.insert(
       this->Properties[index]->LockedResources.begin(),
       this->Properties[index]->LockedResources.end());
+
+  if (this->Properties[index]->RunSerial)
+    {
+    this->SerialTestRunning = true;
+    }
 }
 
 //---------------------------------------------------------
@@ -208,11 +214,9 @@ inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
   size_t processors =
     static_cast<int>(this->Properties[test]->Processors);
-  //If this is set to run serially, it must run alone.
-  //Also, if processors setting is set higher than the -j
+  //If processors setting is set higher than the -j
   //setting, we default to using all of the process slots.
-  if(this->Properties[test]->RunSerial
-     || processors > this->ParallelLevel)
+  if (processors > this->ParallelLevel)
     {
     processors = this->ParallelLevel;
     }
@@ -264,7 +268,14 @@ void cmCTestMultiProcessHandler::StartNextTests()
     return;
     }
 
-  bool allTestsFailedMaxLoadCheck = true;
+  // Don't start any new tests if one with the RUN_SERIAL property
+  // is already running.
+  if (this->SerialTestRunning)
+    {
+    return;
+    }
+
+  bool allTestsFailedTestLoadCheck = false;
   size_t minProcessorsRequired = this->ParallelLevel;
   std::string testWithMinProcessors = "";
 
@@ -272,6 +283,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
   const std::string lockFile = "/tmp/.cmake_maxload.lock"; // TODO: Filename
   if (this->MaxLoad > 0)
     {
+    allTestsFailedTestLoadCheck = true;
+
     if (!cmSystemTools::FileExists(lockFile))
       {
       FILE *file = cmsys::SystemTools::Fopen(lockFile, "w");
@@ -287,6 +300,18 @@ void cmCTestMultiProcessHandler::StartNextTests()
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
+    // Take a nap if we're currently performing a RUN_SERIAL test.
+    if (this->SerialTestRunning)
+      {
+      allTestsFailedMaxLoadCheck = true;
+      break;
+      }
+    // We can only start a RUN_SERIAL test if no other tests are also running.
+    if (this->Properties[*test]->RunSerial && this->RunningCount > 0)
+      {
+      continue;
+      }
+
     size_t processors = GetProcessorsUsed(*test);
     bool maxLoadOk;
     if (this->MaxLoad > 0)
@@ -298,7 +323,18 @@ void cmCTestMultiProcessHandler::StartNextTests()
         if (result.IsOk())
           {
           const double systemLoad = info.GetLoadAverage();
+
+          // Don't start more tests than your max load can support.
+          if (numToStart > (this->MaxLoad - systemLoad))
+            {
+            numToStart = this->MaxLoad - systemLoad;
+            }
+
           maxLoadOk = processors <= (this->MaxLoad - systemLoad);
+          if (maxLoadOk)
+            {
+            cmCTestLog(this->CTest, HANDLER_OUTPUT, "OK to run " << GetName(*test) << ", it requires " << processors << " procs & system load is: " << info.GetLoadAverage() << std::endl);
+            }
           }
         else
           {
@@ -354,13 +390,23 @@ void cmCTestMultiProcessHandler::StartNextTests()
     strftime(current_time, 1000, "%s", t);
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Time: "
       << current_time << ",");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Load: "
-      << info.GetLoadAverage() << ",");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Max Allowed Load: "
-      << this->MaxLoad << ",");
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "Smallest test "
-      << testWithMinProcessors << " requries " << minProcessorsRequired);
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
+
+    if (this->SerialTestRunning)
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT,
+        "Waiting for RUN_SERIAL test to finish." << std::endl);
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
+      }
+    else
+      {
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Load: "
+        << info.GetLoadAverage() << ",");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Max Allowed Load: "
+        << this->MaxLoad << ",");
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "Smallest test "
+        << testWithMinProcessors << " requires " << minProcessorsRequired);
+      cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
+      }
 
     // Wait between 1 and 60 seconds before trying again...
     cmCTestScriptHandler::SleepInSeconds(rand() % 60 + 1);
@@ -418,6 +464,11 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->WriteCheckpoint(test);
     this->UnlockResources(test);
     this->RunningCount -= GetProcessorsUsed(test);
+    if (this->Properties[test]->RunSerial)
+      {
+      this->SerialTestRunning = false;
+      }
+
     delete p;
     }
   return true;
