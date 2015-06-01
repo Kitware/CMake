@@ -121,6 +121,7 @@ protected:
   cmCTest* CTest;
   bool HasCycles;
   bool Quiet;
+  bool SerialTestRunning;
 };
 
 #endif
