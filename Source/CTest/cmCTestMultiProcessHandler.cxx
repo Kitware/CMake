@@ -44,6 +44,7 @@ cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
   this->RunningCount = 0;
   this->StopTimePassed = false;
   this->HasCycles = false;
+  this->SerialTestRunning = false;
 }
 
 cmCTestMultiProcessHandler::~cmCTestMultiProcessHandler()
@@ -172,6 +173,11 @@ void cmCTestMultiProcessHandler::LockResources(int index)
   this->LockedResources.insert(
       this->Properties[index]->LockedResources.begin(),
       this->Properties[index]->LockedResources.end());
+
+  if (this->Properties[index]->RunSerial)
+    {
+    this->SerialTestRunning = true;
+    }
 }
 
 //---------------------------------------------------------
@@ -198,11 +204,9 @@ inline size_t cmCTestMultiProcessHandler::GetProcessorsUsed(int test)
 {
   size_t processors =
     static_cast<int>(this->Properties[test]->Processors);
-  //If this is set to run serially, it must run alone.
-  //Also, if processors setting is set higher than the -j
+  //If processors setting is set higher than the -j
   //setting, we default to using all of the process slots.
-  if(this->Properties[test]->RunSerial
-     || processors > this->ParallelLevel)
+  if (processors > this->ParallelLevel)
     {
     processors = this->ParallelLevel;
     }
@@ -248,9 +252,27 @@ void cmCTestMultiProcessHandler::StartNextTests()
     return;
     }
 
+  // Don't start any new tests if one with the RUN_SERIAL property
+  // is already running.
+  if (this->SerialTestRunning)
+    {
+    return;
+    }
+
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
     {
+    // Take a nap if we're currently performing a RUN_SERIAL test.
+    if (this->SerialTestRunning)
+      {
+      break;
+      }
+    // We can only start a RUN_SERIAL test if no other tests are also running.
+    if (this->Properties[*test]->RunSerial && this->RunningCount > 0)
+      {
+      continue;
+      }
+
     size_t processors = GetProcessorsUsed(*test);
 
     if(processors <= numToStart && this->StartTest(*test))
@@ -319,6 +341,11 @@ bool cmCTestMultiProcessHandler::CheckOutput()
     this->WriteCheckpoint(test);
     this->UnlockResources(test);
     this->RunningCount -= GetProcessorsUsed(test);
+    if (this->Properties[test]->RunSerial)
+      {
+      this->SerialTestRunning = false;
+      }
+
     delete p;
     }
   return true;
