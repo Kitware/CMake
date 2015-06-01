@@ -1589,9 +1589,8 @@ std::string cmMakefileTargetGenerator::GetFrameworkFlags(std::string const& l)
       if(emitted.insert(*i).second)
         {
         flags += fwSearchFlag;
-        flags += this->Convert(*i,
-                               cmLocalGenerator::START_OUTPUT,
-                               cmLocalGenerator::SHELL, true);
+        flags += this->LocalGenerator
+                     ->ConvertToOutputFormat(*i, cmLocalGenerator::SHELL);
         flags += " ";
         }
       }
