@@ -17,7 +17,6 @@
 
 # Usage: cmake
 #   -Dtest_timeout=180
-#   -Dworking_directory="."
 #   -Doutput_directory=
 #   -Dadditional_paths=""
 #   -Dno_unittest_framework=""

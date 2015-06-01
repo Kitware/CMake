@@ -134,7 +134,8 @@
 #   returns the suffix to be used for the mex files
 #   (platform/architecture dependant)
 # :command:`matlab_get_version_from_matlab_run`
-#   returns the version of Matlab, given the full directory of the Matlab program.
+#   returns the version of Matlab, given the full directory of the Matlab
+#   program.
 #
 #
 # Known issues
@@ -918,7 +919,7 @@ function(matlab_add_mex )
       PROPERTIES
         CXX_VISIBILITY_PRESET "hidden"
         C_VISIBILITY_PRESET "hidden"
-        VISIBILITY_INLINES_HIDDEN "hidden"
+        VISIBILITY_INLINES_HIDDEN ON
     )
 
     #  get_target_property(
@@ -1064,7 +1065,7 @@ if(Matlab_ROOT_DIR)
     endif()
   else()
     # NOTFOUND indicates the code below to search for the version automatically
-    if(NOT DEFINED Matlab_VERSION_STRING_INTERNAL)
+    if("${Matlab_VERSION_STRING_INTERNAL}" STREQUAL "")
       list(APPEND _matlab_possible_roots "NOTFOUND" ${Matlab_ROOT_DIR}) # empty version
     else()
       list(APPEND _matlab_possible_roots ${Matlab_VERSION_STRING_INTERNAL} ${Matlab_ROOT_DIR}) # cached version
