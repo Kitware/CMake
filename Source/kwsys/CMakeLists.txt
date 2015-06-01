@@ -88,6 +88,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6.3 FATAL_ERROR)
 IF(POLICY CMP0025)
   CMAKE_POLICY(SET CMP0025 NEW)
 ENDIF()
+IF(POLICY CMP0056)
+  CMAKE_POLICY(SET CMP0056 NEW)
+ENDIF()
 
 #-----------------------------------------------------------------------------
 # If a namespace is not specified, use "kwsys" and enable testing.
