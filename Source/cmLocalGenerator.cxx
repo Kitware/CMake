@@ -59,7 +59,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->Makefile = new cmMakefile(this);
 
   this->LinkScriptShell = false;
-  this->UseRelativePaths = false;
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
@@ -136,10 +135,6 @@ void cmLocalGenerator::Configure()
     }
 
   this->Makefile->AddCMakeDependFilesFromUser();
-
-  // Check whether relative paths should be used for optionally
-  // relative paths.
-  this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
 
   this->ComputeObjectMaxPath();
 
@@ -2705,7 +2700,7 @@ std::string cmLocalGenerator::Convert(const std::string& source,
   // Convert the path to a relative path.
   std::string result = source;
 
-  if (!optional || this->UseRelativePaths)
+  if (!optional)
     {
     switch (relative)
       {
@@ -2786,7 +2781,7 @@ std::string cmLocalGenerator::Convert(RelativeRoot remote,
   // The relative root must have a path (i.e. not FULL or NONE)
   assert(remotePath != 0);
 
-  if(!local.empty() && (!optional || this->UseRelativePaths))
+  if(!local.empty() && !optional)
     {
     std::vector<std::string> components;
     cmSystemTools::SplitPath(local, components);

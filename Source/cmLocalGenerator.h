@@ -127,8 +127,7 @@ public:
   const char* GetRelativeRootPath(RelativeRoot relroot);
 
   /**
-   * Convert the given path to an output path that is optionally
-   * relative based on the cache option CMAKE_USE_RELATIVE_PATHS.  The
+   * Convert the given path to an output path.  The
    * remote path must use forward slashes and not already be escaped
    * or quoted.
    */
@@ -460,7 +459,6 @@ protected:
   std::set<cmTarget const*> WarnCMP0063;
 
   bool LinkScriptShell;
-  bool UseRelativePaths;
   bool Configured;
   bool EmitUniversalBinaryFlags;
 

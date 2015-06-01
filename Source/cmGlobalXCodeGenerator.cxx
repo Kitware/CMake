@@ -3804,33 +3804,13 @@ void cmGlobalXCodeGenerator::GetDocumentation(cmDocumentationEntry& entry)
 //----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::ConvertToRelativeForMake(const char* p)
 {
-  if ( !this->CurrentMakefile->IsOn("CMAKE_USE_RELATIVE_PATHS") )
-    {
-    return cmSystemTools::ConvertToOutputPath(p);
-    }
-  else
-    {
-    std::string ret =
-      this->CurrentLocalGenerator->
-        ConvertToRelativePath(this->CurrentOutputDirectoryComponents, p);
-    return cmSystemTools::ConvertToOutputPath(ret.c_str());
-    }
+  return cmSystemTools::ConvertToOutputPath(p);
 }
 
 //----------------------------------------------------------------------------
 std::string cmGlobalXCodeGenerator::ConvertToRelativeForXCode(const char* p)
 {
-  if ( !this->CurrentMakefile->IsOn("CMAKE_USE_RELATIVE_PATHS") )
-    {
-    return cmSystemTools::ConvertToOutputPath(p);
-    }
-  else
-    {
-    std::string ret =
-      this->CurrentLocalGenerator->
-        ConvertToRelativePath(this->ProjectOutputDirectoryComponents, p);
-    return cmSystemTools::ConvertToOutputPath(ret.c_str());
-    }
+  return cmSystemTools::ConvertToOutputPath(p);
 }
 
 //----------------------------------------------------------------------------
