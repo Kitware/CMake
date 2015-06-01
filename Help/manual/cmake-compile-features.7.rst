@@ -278,7 +278,7 @@ properties:
   add_library(foo INTERFACE)
   set(with_variadics ${CMAKE_CURRENT_SOURCE_DIR}/with_variadics)
   set(no_variadics ${CMAKE_CURRENT_SOURCE_DIR}/no_variadics)
-  target_link_libraries(foo
+  target_include_directories(foo
     INTERFACE
       "$<$<COMPILE_FEATURES:cxx_variadic_templates>:${with_variadics}>"
       "$<$<NOT:$<COMPILE_FEATURES:cxx_variadic_templates>>:${no_variadics}>"
