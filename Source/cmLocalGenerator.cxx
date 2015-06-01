@@ -2670,14 +2670,6 @@ cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
 }
 
 //----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(
-                                                    const std::string& remote)
-{
-  return this->Convert(remote, START_OUTPUT, SHELL, true);
-}
-
-//----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
 {
   switch (relroot)
