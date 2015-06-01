@@ -614,13 +614,7 @@ cmMakefileTargetGenerator
     }
 
   // Get the output paths for source and object files.
-  std::string sourceFile = source.GetFullPath();
-  if(this->LocalGenerator->UseRelativePaths)
-    {
-    sourceFile = this->Convert(sourceFile,
-                               cmLocalGenerator::START_OUTPUT);
-    }
-  sourceFile = this->Convert(sourceFile,
+  std::string sourceFile = this->Convert(source.GetFullPath(),
                              cmLocalGenerator::NONE,
                              cmLocalGenerator::SHELL);
 
