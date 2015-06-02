@@ -922,7 +922,7 @@ private:
   mutable cmsys::RegularExpression cmAtVarRegex;
   mutable cmsys::RegularExpression cmNamedCurly;
 
-  std::vector<cmLocalGenerator*> UnConfiguredDirectories;
+  std::vector<cmMakefile*> UnConfiguredDirectories;
 
   cmPropertyMap Properties;
 
