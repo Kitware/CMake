@@ -80,9 +80,8 @@ public:
    */
   virtual void OutputSLNFile();
 
-  ///! Create a GUID or get an existing one.
-  void CreateGUID(const std::string& name);
-  std::string GetGUID(const std::string& name);
+  ///! Lookup a stored GUID or compute one deterministically.
+  std::string GetGUID(std::string const& name);
 
   /** Append the subdirectory for the given configuration.  */
   virtual void AppendDirectoryForConfig(const std::string& prefix,

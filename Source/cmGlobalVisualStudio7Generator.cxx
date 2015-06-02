@@ -513,8 +513,6 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
 
             cumulativePath = cumulativePath + "/" + *iter;
             }
-
-          this->CreateGUID(cumulativePath.c_str());
           }
 
         if (!cumulativePath.empty())
@@ -899,7 +897,6 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
   fname += ".vcproj";
   cmGeneratedFileStream fout(fname.c_str());
   fout.SetCopyIfDifferent(true);
-  this->CreateGUID(pname.c_str());
   std::string guid = this->GetGUID(pname.c_str());
 
   fout <<
@@ -943,41 +940,28 @@ cmGlobalVisualStudio7Generator::WriteUtilityDepend(cmTarget const* target)
   return pname;
 }
 
-std::string cmGlobalVisualStudio7Generator::GetGUID(const std::string& name)
+//----------------------------------------------------------------------------
+std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
 {
-  std::string guidStoreName = name;
-  guidStoreName += "_GUID_CMAKE";
-  const char* storedGUID =
-    this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str());
-  if(storedGUID)
+  std::string const& guidStoreName = name + "_GUID_CMAKE";
+  if (const char* storedGUID =
+      this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str()))
     {
     return std::string(storedGUID);
     }
-  cmSystemTools::Error("Unknown Target referenced : ",
-                       name.c_str());
-  return "";
-}
-
-
-void cmGlobalVisualStudio7Generator::CreateGUID(const std::string& name)
-{
-  std::string guidStoreName = name;
-  guidStoreName += "_GUID_CMAKE";
-  if(this->CMakeInstance->GetCacheDefinition(guidStoreName.c_str()))
-    {
-    return;
-    }
-  std::string ret;
-  UUID uid;
-  unsigned short *uidstr;
-  UuidCreate(&uid);
-  UuidToStringW(&uid,&uidstr);
-  ret = cmsys::Encoding::ToNarrow(reinterpret_cast<wchar_t*>(uidstr));
-  RpcStringFreeW(&uidstr);
-  ret = cmSystemTools::UpperCase(ret);
-  this->CMakeInstance->AddCacheEntry(guidStoreName.c_str(),
-                                     ret.c_str(), "Stored GUID",
-                                     cmState::INTERNAL);
+  // Compute a GUID that is deterministic but unique to the build tree.
+  std::string input = this->CMakeInstance->GetState()->GetBinaryDirectory();
+  input += "|";
+  input += name;
+  std::string md5 = cmSystemTools::ComputeStringMD5(input);
+  assert(md5.length() == 32);
+  std::string const& guid =
+    (md5.substr( 0,8)+"-"+
+     md5.substr( 8,4)+"-"+
+     md5.substr(12,4)+"-"+
+     md5.substr(16,4)+"-"+
+     md5.substr(20,12));
+  return cmSystemTools::UpperCase(guid);
 }
 
 //----------------------------------------------------------------------------
