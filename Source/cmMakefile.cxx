@@ -1687,7 +1687,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
 
   cmState::Snapshot newSnapshot = this->GetState()
-      ->CreateSnapshot(this->StateSnapshot);
+      ->CreateBuildsystemDirectorySnapshot(this->StateSnapshot);
 
   // create a new local generator and set its parent
   cmLocalGenerator *lg2 = this->GetGlobalGenerator()
@@ -4097,7 +4097,8 @@ const char *cmMakefile::GetProperty(const std::string& prop,
   output = "";
   if (prop == "PARENT_DIRECTORY")
     {
-    cmState::Snapshot parent = this->StateSnapshot.GetParent();
+    cmState::Snapshot parent =
+        this->StateSnapshot.GetBuildsystemDirectoryParent();
     if(parent.IsValid())
       {
       return parent.GetCurrentSourceDirectory();

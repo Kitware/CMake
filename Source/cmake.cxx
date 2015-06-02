@@ -134,7 +134,7 @@ cmake::cmake()
 
   this->Policies = new cmPolicies();
   this->State = new cmState(this);
-  this->CurrentSnapshot = this->State->CreateSnapshot(cmState::Snapshot());
+  this->CurrentSnapshot = this->State->CreateBaseSnapshot();
 
 #ifdef __APPLE__
   struct rlimit rlp;
