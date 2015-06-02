@@ -96,10 +96,6 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
       this->ReadAndStoreExternalGUID(
         l->second.GetName().c_str(), path);
       }
-    else
-      {
-      gg->CreateGUID(l->first.c_str());
-      }
     }
 
 
@@ -2312,12 +2308,9 @@ void cmLocalVisualStudio7Generator::ReadAndStoreExternalGUID(
 {
   cmVS7XMLParser parser;
   parser.ParseFile(path);
-  // if we can not find a GUID then create one
+  // if we can not find a GUID then we will generate one later
   if(parser.GUID.size() == 0)
     {
-    cmGlobalVisualStudio7Generator* gg =
-      static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
-    gg->CreateGUID(name);
     return;
     }
   std::string guidStoreName = name;

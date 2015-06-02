@@ -178,7 +178,6 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
     (cmLocalVisualStudio7Generator*)
     this->Makefile->GetLocalGenerator();
   this->Name = this->Target->GetName();
-  this->GlobalGenerator->CreateGUID(this->Name.c_str());
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
   this->NsightTegra = gg->IsNsightTegra();
@@ -1084,7 +1083,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
       (*this->BuildFileStream) << name << "\">\n";
       std::string guidName = "SG_Filter_";
       guidName += name;
-      this->GlobalGenerator->CreateGUID(guidName.c_str());
       this->WriteString("<UniqueIdentifier>", 3);
       std::string guid
         = this->GlobalGenerator->GetGUID(guidName.c_str());
@@ -1099,7 +1097,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     {
     this->WriteString("<Filter Include=\"Object Libraries\">\n", 2);
     std::string guidName = "SG_Filter_Object Libraries";
-    this->GlobalGenerator->CreateGUID(guidName.c_str());
     this->WriteString("<UniqueIdentifier>", 3);
     std::string guid =
       this->GlobalGenerator->GetGUID(guidName.c_str());
@@ -1112,7 +1109,6 @@ void cmVisualStudio10TargetGenerator::WriteGroups()
     {
     this->WriteString("<Filter Include=\"Resource Files\">\n", 2);
     std::string guidName = "SG_Filter_Resource Files";
-    this->GlobalGenerator->CreateGUID(guidName.c_str());
     this->WriteString("<UniqueIdentifier>", 3);
     std::string guid =
       this->GlobalGenerator->GetGUID(guidName.c_str());
