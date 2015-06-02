@@ -87,18 +87,16 @@ bool cmGlobalGenerator::SetGeneratorPlatform(std::string const& p,
     {
     return true;
     }
-  else
-    {
-    std::ostringstream e;
-    e <<
-      "Generator\n"
-      "  " << this->GetName() << "\n"
-      "does not support platform specification, but platform\n"
-      "  " << p << "\n"
-      "was specified.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
-    }
+
+  std::ostringstream e;
+  e <<
+    "Generator\n"
+    "  " << this->GetName() << "\n"
+    "does not support platform specification, but platform\n"
+    "  " << p << "\n"
+    "was specified.";
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  return false;
 }
 
 bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
@@ -108,18 +106,15 @@ bool cmGlobalGenerator::SetGeneratorToolset(std::string const& ts,
     {
     return true;
     }
-  else
-    {
-    std::ostringstream e;
-    e <<
-      "Generator\n"
-      "  " << this->GetName() << "\n"
-      "does not support toolset specification, but toolset\n"
-      "  " << ts << "\n"
-      "was specified.";
-    mf->IssueMessage(cmake::FATAL_ERROR, e.str());
-    return false;
-    }
+  std::ostringstream e;
+  e <<
+    "Generator\n"
+    "  " << this->GetName() << "\n"
+    "does not support toolset specification, but toolset\n"
+    "  " << ts << "\n"
+    "was specified.";
+  mf->IssueMessage(cmake::FATAL_ERROR, e.str());
+  return false;
 }
 
 std::string cmGlobalGenerator::SelectMakeProgram(

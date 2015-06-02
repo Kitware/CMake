@@ -94,13 +94,13 @@ class cmTargetInternals
 {
 public:
   cmTargetInternals()
-    : Backtrace(NULL)
+    : Backtrace()
     {
     this->PolicyWarnedCMP0022 = false;
     this->UtilityItemsDone = false;
     }
   cmTargetInternals(cmTargetInternals const&)
-    : Backtrace(NULL)
+    : Backtrace()
     {
     this->PolicyWarnedCMP0022 = false;
     this->UtilityItemsDone = false;

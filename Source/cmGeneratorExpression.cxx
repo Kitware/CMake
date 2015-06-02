@@ -34,7 +34,7 @@ cmGeneratorExpression::Parse(std::string const& input)
 {
   return cmsys::auto_ptr<cmCompiledGeneratorExpression>(
     new cmCompiledGeneratorExpression(
-      this->Backtrace ? *this->Backtrace : cmListFileBacktrace(NULL),
+      this->Backtrace ? *this->Backtrace : cmListFileBacktrace(),
       input));
 }
 

@@ -74,21 +74,17 @@ struct cmListFileFunction: public cmListFileContext
 class cmListFileBacktrace: private std::vector<cmListFileContext>
 {
   public:
-    cmListFileBacktrace(cmLocalGenerator* localGen)
+    cmListFileBacktrace(cmLocalGenerator* localGen = 0)
       : LocalGenerator(localGen)
-      , Relative(localGen ? false : true)
     {
     }
 
     void Append(cmListFileContext const& context);
 
-    void MakeRelative();
-
     void PrintTitle(std::ostream& out);
     void PrintCallStack(std::ostream& out);
   private:
     cmLocalGenerator* LocalGenerator;
-    bool Relative;
 };
 
 struct cmListFile
