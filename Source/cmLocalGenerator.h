@@ -47,12 +47,6 @@ public:
   virtual void Generate() {}
 
   /**
-   * Process the CMakeLists files for this directory to fill in the
-   * Makefile ivar
-   */
-  virtual void Configure();
-
-  /**
    * Calls TraceVSDependencies() on all targets of this generator.
    */
   void TraceDependencies();
@@ -383,8 +377,7 @@ public:
   bool IsMinGWMake() const;
   bool IsNMake() const;
 
-  void SetConfiguredCMP0014(bool configured);
-
+  void ComputeObjectMaxPath();
 protected:
   ///! put all the libraries for a target on into the given stream
   void OutputLinkLibraries(std::string& linkLibraries,
@@ -430,7 +423,6 @@ protected:
 
   std::string& CreateSafeUniqueObjectFileName(const std::string& sin,
                                               std::string const& dir_max);
-  void ComputeObjectMaxPath();
 
   virtual std::string ConvertToLinkReference(std::string const& lib,
                                              OutputFormat format = SHELL);
@@ -451,7 +443,6 @@ protected:
   std::set<cmTarget const*> WarnCMP0063;
 
   bool LinkScriptShell;
-  bool Configured;
   bool EmitUniversalBinaryFlags;
 
   // Hack for ExpandRuleVariable until object-oriented version is

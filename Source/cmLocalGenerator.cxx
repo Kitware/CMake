@@ -59,7 +59,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->Makefile = new cmMakefile(this);
 
   this->LinkScriptShell = false;
-  this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
   this->BackwardsCompatibilityFinal = false;
@@ -73,72 +72,6 @@ cmLocalGenerator::~cmLocalGenerator()
 bool cmLocalGenerator::IsRootMakefile() const
 {
   return !this->StateSnapshot.GetParent().IsValid();
-}
-
-//----------------------------------------------------------------------------
-class cmLocalGeneratorCurrent
-{
-  cmGlobalGenerator* GG;
-  cmLocalGenerator* LG;
-  cmState::Snapshot Snapshot;
-public:
-  cmLocalGeneratorCurrent(cmLocalGenerator* lg)
-    {
-    this->GG = lg->GetGlobalGenerator();
-    this->LG = this->GG->GetCurrentLocalGenerator();
-    this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(lg->GetStateSnapshot());
-    this->GG->SetCurrentLocalGenerator(lg);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PushFileScope();
-#endif
-    }
-  ~cmLocalGeneratorCurrent()
-    {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PopFileScope();
-#endif
-    this->GG->SetCurrentLocalGenerator(this->LG);
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
-    }
-};
-
-//----------------------------------------------------------------------------
-void cmLocalGenerator::Configure()
-{
-  // Manage the global generator's current local generator.
-  cmLocalGeneratorCurrent clg(this);
-  static_cast<void>(clg);
-
-  // make sure the CMakeFiles dir is there
-  std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
-  filesDir += cmake::GetCMakeFilesDirectory();
-  cmSystemTools::MakeDirectory(filesDir.c_str());
-
-  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
-  currentStart += "/CMakeLists.txt";
-  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
-  this->Makefile->ProcessBuildsystemFile(currentStart.c_str());
-
-  // at the end of the ReadListFile handle any old style subdirs
-  // first get all the subdirectories
-  std::vector<cmLocalGenerator *> subdirs = this->GetChildren();
-
-  // for each subdir recurse
-  std::vector<cmLocalGenerator *>::iterator sdi = subdirs.begin();
-  for (; sdi != subdirs.end(); ++sdi)
-    {
-    if (!(*sdi)->Configured)
-      {
-      this->Makefile->ConfigureSubDirectory(*sdi);
-      }
-    }
-
-  this->Makefile->AddCMakeDependFilesFromUser();
-
-  this->ComputeObjectMaxPath();
-
-  this->Configured = true;
 }
 
 //----------------------------------------------------------------------------
@@ -3179,11 +3112,6 @@ bool cmLocalGenerator::IsNMake() const
   return this->GetState()->UseNMake();
 }
 
-void cmLocalGenerator::SetConfiguredCMP0014(bool configured)
-{
-  this->Configured = configured;
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmLocalGenerator
@@ -3465,7 +3393,7 @@ cmIML_INT_uint64_t cmLocalGenerator::GetBackwardsCompatibility()
         }
       }
     this->BackwardsCompatibility = CMake_VERSION_ENCODE(major, minor, patch);
-    this->BackwardsCompatibilityFinal = this->Configured;
+    this->BackwardsCompatibilityFinal = this->Makefile->IsConfigured();
     }
 
   return this->BackwardsCompatibility;

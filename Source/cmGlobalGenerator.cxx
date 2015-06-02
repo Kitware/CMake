@@ -70,7 +70,7 @@ cmGlobalGenerator::cmGlobalGenerator(cmake* cm)
   this->TryCompileTimeout = 0;
 
   this->ExtraGenerator = 0;
-  this->CurrentLocalGenerator = 0;
+  this->CurrentMakefile = 0;
   this->TryCompileOuterMakefile = 0;
 }
 
@@ -1106,7 +1106,7 @@ void cmGlobalGenerator::Configure()
       this->CMakeInstance->GetHomeOutputDirectory());
 
   // now do it
-  lg->Configure();
+  lg->GetMakefile()->Configure();
 
   // update the cache entry for the number of local generators, this is used
   // for progress
@@ -1223,6 +1223,7 @@ void cmGlobalGenerator::Generate()
   this->CreateDefaultGlobalTargets(&globalTargets);
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
+    this->LocalGenerators[i]->ComputeObjectMaxPath();
     cmMakefile* mf = this->LocalGenerators[i]->GetMakefile();
     cmTargets* targets = &(mf->GetTargets());
     cmTargets::iterator tit;
@@ -1280,8 +1281,7 @@ void cmGlobalGenerator::Generate()
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    this->LocalGenerators[i]->GetMakefile()->SetGeneratingBuildSystem();
-    this->SetCurrentLocalGenerator(this->LocalGenerators[i]);
+    this->SetCurrentMakefile(this->LocalGenerators[i]->GetMakefile());
     this->LocalGenerators[i]->Generate();
     if(!this->LocalGenerators[i]->GetMakefile()->IsOn(
       "CMAKE_SKIP_INSTALL_RULES"))
@@ -1293,7 +1293,7 @@ void cmGlobalGenerator::Generate()
       (static_cast<float>(i)+1.0f)/
        static_cast<float>(this->LocalGenerators.size()));
     }
-  this->SetCurrentLocalGenerator(0);
+  this->SetCurrentMakefile(0);
 
   if(!this->GenerateCPackPropertiesFile())
     {

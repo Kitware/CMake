@@ -146,7 +146,7 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->WarnUnused = this->GetCMakeInstance()->GetWarnUnused();
   this->CheckSystemVars = this->GetCMakeInstance()->GetCheckSystemVars();
 
-  this->GeneratingBuildSystem = false;
+  this->Configured = false;
   this->SuppressWatches = false;
 
   // Setup the default include file regular expression (match everything).
@@ -1553,10 +1553,68 @@ void cmMakefile::InitializeFromParent()
   this->ImportedTargets = parent->ImportedTargets;
 }
 
-void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
+//----------------------------------------------------------------------------
+class cmMakefileCurrent
 {
-  lg2->GetMakefile()->InitializeFromParent();
-  std::string currentStart = lg2->GetMakefile()->GetCurrentSourceDirectory();
+  cmGlobalGenerator* GG;
+  cmMakefile* MF;
+  cmState::Snapshot Snapshot;
+public:
+  cmMakefileCurrent(cmMakefile* mf)
+    {
+    this->GG = mf->GetGlobalGenerator();
+    this->MF = this->GG->GetCurrentMakefile();
+    this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
+          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
+    this->GG->SetCurrentMakefile(mf);
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PushFileScope();
+#endif
+    }
+  ~cmMakefileCurrent()
+    {
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PopFileScope();
+#endif
+    this->GG->SetCurrentMakefile(this->MF);
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
+    }
+};
+
+//----------------------------------------------------------------------------
+void cmMakefile::Configure()
+{
+  cmMakefileCurrent cmf(this);
+
+  // make sure the CMakeFiles dir is there
+  std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
+  filesDir += cmake::GetCMakeFilesDirectory();
+  cmSystemTools::MakeDirectory(filesDir.c_str());
+
+  std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
+  currentStart += "/CMakeLists.txt";
+  assert(cmSystemTools::FileExists(currentStart.c_str(), true));
+  this->ProcessBuildsystemFile(currentStart.c_str());
+
+   // at the end handle any old style subdirs
+  std::vector<cmMakefile*> subdirs = this->UnConfiguredDirectories;
+
+  // for each subdir recurse
+  std::vector<cmMakefile*>::iterator sdi = subdirs.begin();
+  for (; sdi != subdirs.end(); ++sdi)
+    {
+    this->ConfigureSubDirectory(*sdi);
+    }
+
+  this->AddCMakeDependFilesFromUser();
+  this->SetConfigured();
+}
+
+void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
+{
+  mf->InitializeFromParent();
+  std::string currentStart = mf->GetCurrentSourceDirectory();
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
     std::string msg="   Entering             ";
@@ -1594,11 +1652,12 @@ void cmMakefile::ConfigureSubDirectory(cmLocalGenerator *lg2)
         // NEW behavior prints the error.
         this->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
-    lg2->SetConfiguredCMP0014(true);
+    mf->SetConfigured();
     return;
     }
   // finally configure the subdir
-  lg2->Configure();
+  mf->Configure();
+
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
     std::string msg="   Returning to         ";
@@ -1626,17 +1685,23 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
         ->MakeLocalGenerator(newSnapshot, this->LocalGenerator);
   this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 
+  cmMakefile* subMf = lg2->GetMakefile();
+
   // set the subdirs start dirs
-  lg2->GetMakefile()->SetCurrentSourceDirectory(srcPath);
-  lg2->GetMakefile()->SetCurrentBinaryDirectory(binPath);
+  subMf->SetCurrentSourceDirectory(srcPath);
+  subMf->SetCurrentBinaryDirectory(binPath);
   if(excludeFromAll)
     {
-    lg2->GetMakefile()->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    subMf->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
 
   if (immediate)
     {
-    this->ConfigureSubDirectory(lg2);
+    this->ConfigureSubDirectory(subMf);
+    }
+  else
+    {
+    this->UnConfiguredDirectories.push_back(subMf);
     }
 }
 
