@@ -1598,13 +1598,13 @@ void cmMakefile::Configure()
   this->ProcessBuildsystemFile(currentStart.c_str());
 
    // at the end handle any old style subdirs
-  std::vector<cmLocalGenerator*> subdirs = this->UnConfiguredDirectories;
+  std::vector<cmMakefile*> subdirs = this->UnConfiguredDirectories;
 
   // for each subdir recurse
-  std::vector<cmLocalGenerator*>::iterator sdi = subdirs.begin();
+  std::vector<cmMakefile*>::iterator sdi = subdirs.begin();
   for (; sdi != subdirs.end(); ++sdi)
     {
-    this->ConfigureSubDirectory((*sdi)->GetMakefile());
+    this->ConfigureSubDirectory(*sdi);
     }
 
   this->AddCMakeDependFilesFromUser();
@@ -1699,7 +1699,7 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
     }
   else
     {
-    this->UnConfiguredDirectories.push_back(lg2);
+    this->UnConfiguredDirectories.push_back(lg2->GetMakefile());
     }
 }
 
