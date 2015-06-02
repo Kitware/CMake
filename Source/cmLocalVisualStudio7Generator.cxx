@@ -301,13 +301,10 @@ cmSourceFile* cmLocalVisualStudio7Generator::CreateVCProjBuildRule()
   comment += makefileIn;
   std::string args;
   args = "-H";
-  args += this->Convert(this->Makefile->GetHomeDirectory(),
-                        START_OUTPUT, UNCHANGED, true);
+  args += this->Makefile->GetHomeDirectory();
   commandLine.push_back(args);
   args = "-B";
-  args +=
-    this->Convert(this->Makefile->GetHomeOutputDirectory(),
-                  START_OUTPUT, UNCHANGED, true);
+  args += this->Makefile->GetHomeOutputDirectory();
   commandLine.push_back(args);
   commandLine.push_back("--check-stamp-file");
   std::string stampFilename = this->Convert(stampName.c_str(), FULL,
@@ -1083,7 +1080,7 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
   if(!this->ModuleDefinitionFile.empty())
     {
     std::string defFile =
-      this->ConvertToOptionallyRelativeOutputPath(this->ModuleDefinitionFile);
+      this->ConvertToOutputFormat(this->ModuleDefinitionFile, SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
     }
   switch(target.GetType())
@@ -2230,7 +2227,7 @@ std::string cmLocalVisualStudio7Generator::EscapeForXML(const std::string& s)
 std::string cmLocalVisualStudio7Generator
 ::ConvertToXMLOutputPath(const char* path)
 {
-  std::string ret = this->ConvertToOptionallyRelativeOutputPath(path);
+  std::string ret = this->ConvertToOutputFormat(path, SHELL);
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "\"", "&quot;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");
@@ -2241,7 +2238,7 @@ std::string cmLocalVisualStudio7Generator
 std::string cmLocalVisualStudio7Generator
 ::ConvertToXMLOutputPathSingle(const char* path)
 {
-  std::string ret = this->ConvertToOptionallyRelativeOutputPath(path);
+  std::string ret = this->ConvertToOutputFormat(path, SHELL);
   cmSystemTools::ReplaceString(ret, "\"", "");
   cmSystemTools::ReplaceString(ret, "&", "&amp;");
   cmSystemTools::ReplaceString(ret, "<", "&lt;");

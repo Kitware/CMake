@@ -115,8 +115,7 @@ public:
   std::string ConvertToOutputFormat(const std::string& source,
                                     OutputFormat output);
   std::string Convert(const std::string& remote, RelativeRoot local,
-                      OutputFormat output = UNCHANGED,
-                      bool optional = false);
+                      OutputFormat output = UNCHANGED);
   std::string Convert(RelativeRoot remote, const std::string& local,
                       OutputFormat output = UNCHANGED,
                       bool optional = false);
@@ -125,14 +124,6 @@ public:
     * Get path for the specified relative root.
     */
   const char* GetRelativeRootPath(RelativeRoot relroot);
-
-  /**
-   * Convert the given path to an output path that is optionally
-   * relative based on the cache option CMAKE_USE_RELATIVE_PATHS.  The
-   * remote path must use forward slashes and not already be escaped
-   * or quoted.
-   */
-  std::string ConvertToOptionallyRelativeOutputPath(const std::string& remote);
 
   ///! set/get the parent generator
   cmLocalGenerator* GetParent() const {return this->Parent;}
@@ -460,7 +451,6 @@ protected:
   std::set<cmTarget const*> WarnCMP0063;
 
   bool LinkScriptShell;
-  bool UseRelativePaths;
   bool Configured;
   bool EmitUniversalBinaryFlags;
 

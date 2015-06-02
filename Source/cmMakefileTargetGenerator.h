@@ -273,10 +273,9 @@ protected:
   std::string Convert(const std::string& source,
                       cmLocalGenerator::RelativeRoot relative,
                       cmLocalGenerator::OutputFormat output =
-                      cmLocalGenerator::UNCHANGED,
-                      bool optional = false)
+                      cmLocalGenerator::UNCHANGED)
   {
-    return this->LocalGenerator->Convert(source, relative, output, optional);
+    return this->LocalGenerator->Convert(source, relative, output);
   }
 
 };
