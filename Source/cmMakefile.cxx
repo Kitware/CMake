@@ -1685,21 +1685,23 @@ void cmMakefile::AddSubDirectory(const std::string& srcPath,
         ->MakeLocalGenerator(newSnapshot, this->LocalGenerator);
   this->GetGlobalGenerator()->AddLocalGenerator(lg2);
 
+  cmMakefile* subMf = lg2->GetMakefile();
+
   // set the subdirs start dirs
-  lg2->GetMakefile()->SetCurrentSourceDirectory(srcPath);
-  lg2->GetMakefile()->SetCurrentBinaryDirectory(binPath);
+  subMf->SetCurrentSourceDirectory(srcPath);
+  subMf->SetCurrentBinaryDirectory(binPath);
   if(excludeFromAll)
     {
-    lg2->GetMakefile()->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
+    subMf->SetProperty("EXCLUDE_FROM_ALL", "TRUE");
     }
 
   if (immediate)
     {
-    this->ConfigureSubDirectory(lg2->GetMakefile());
+    this->ConfigureSubDirectory(subMf);
     }
   else
     {
-    this->UnConfiguredDirectories.push_back(lg2->GetMakefile());
+    this->UnConfiguredDirectories.push_back(subMf);
     }
 }
 
