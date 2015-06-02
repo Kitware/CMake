@@ -2116,7 +2116,6 @@ void cmMakefile::AddSourceGroup(const std::vector<std::string>& name,
     return;
     }
   // build the whole source group path
-  cmGlobalGenerator* gg = this->GetGlobalGenerator();
   for(++i; i<=lastElement; ++i)
     {
     sg->AddChild(cmSourceGroup(name[i].c_str(), 0, sg->GetFullName()));
