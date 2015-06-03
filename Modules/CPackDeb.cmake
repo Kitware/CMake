@@ -352,10 +352,11 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_VARIABLE _TMP_VERSION
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-      string(REGEX MATCH "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)"
-        SHLIBDEPS_EXECUTABLE_VERSION
-        "${_TMP_VERSION}")
-      set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
+      if(_TMP_VERSION MATCHES "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)")
+        set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
+      else()
+        set(SHLIBDEPS_EXECUTABLE_VERSION "")
+      endif()
 
       if(CPACK_DEBIAN_PACKAGE_DEBUG)
         message("CPackDeb Debug: dpkg-shlibdeps --version output is '${_TMP_VERSION}'")
