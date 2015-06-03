@@ -1191,6 +1191,8 @@ cmLocalGenerator::ConvertToOutputForExisting(const std::string& remote,
                                              RelativeRoot local,
                                              OutputFormat format)
 {
+  static_cast<void>(local);
+
   // Perform standard conversion.
   std::string result = this->ConvertToOutputFormat(remote, format);
 
