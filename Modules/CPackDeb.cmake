@@ -399,9 +399,12 @@ function(cpack_deb_prepare_package_vars)
         file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/debian)
         file(WRITE ${CPACK_TEMPORARY_DIRECTORY}/debian/control "")
 
-        # only set ignore-missing-info flag for dpkg-shlibdeps that have --version option
-        # (those are newer and also have --ignore-missing-info flag)
-        if(SHLIBDEPS_EXECUTABLE_VERSION)
+        # Add --ignore-missing-info if the tool supports it
+        execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
+          OUTPUT_VARIABLE _TMP_HELP
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(_TMP_HELP MATCHES "--ignore-missing-info")
           set(IGNORE_MISSING_INFO_FLAG "--ignore-missing-info")
         endif()
 
