@@ -1313,8 +1313,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
           {
           includeFlags << fwSearchFlag;
           }
-        includeFlags << this->Convert(frameworkDir, START_OUTPUT,
-                                      shellFormat)
+        includeFlags << this->ConvertToOutputFormat(frameworkDir, shellFormat)
           << " ";
         }
       continue;
