@@ -1124,9 +1124,8 @@ cmLocalGenerator::ConvertToOutputForExisting(const std::string& remote,
                                              RelativeRoot local,
                                              OutputFormat format)
 {
-  (void)local;
   // Perform standard conversion.
-  std::string result = this->Convert(remote, local, format);
+  std::string result = this->ConvertToOutputFormat(remote, format);
 
   // Consider short-path.
   return this->ConvertToOutputForExistingCommon(remote, result, format);
