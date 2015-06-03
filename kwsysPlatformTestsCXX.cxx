@@ -452,6 +452,19 @@ int main()
 }
 #endif
 
+#ifdef TEST_KWSYS_CXX_HAS_GETLOADAVG
+// Match feature definitions from SystemInformation.cxx
+#if (defined(__GNUC__) || defined(__PGI)) && !defined(_GNU_SOURCE)
+# define _GNU_SOURCE
+#endif
+#include <stdlib.h>
+int main()
+{
+  double loadavg[3] = { 0.0, 0.0, 0.0 };
+  return getloadavg(loadavg, 3);
+}
+#endif
+
 #ifdef TEST_KWSYS_CXX_HAS_RLIMIT64
 # if defined(KWSYS_HAS_LFS)
 #  define _LARGEFILE_SOURCE
