@@ -352,10 +352,11 @@ function(cpack_deb_prepare_package_vars)
         OUTPUT_VARIABLE _TMP_VERSION
         ERROR_QUIET
         OUTPUT_STRIP_TRAILING_WHITESPACE)
-      string(REGEX MATCH "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)"
-        SHLIBDEPS_EXECUTABLE_VERSION
-        "${_TMP_VERSION}")
-      set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
+      if(_TMP_VERSION MATCHES "dpkg-shlibdeps version ([0-9]+\\.[0-9]+\\.[0-9]+)")
+        set(SHLIBDEPS_EXECUTABLE_VERSION "${CMAKE_MATCH_1}")
+      else()
+        set(SHLIBDEPS_EXECUTABLE_VERSION "")
+      endif()
 
       if(CPACK_DEBIAN_PACKAGE_DEBUG)
         message("CPackDeb Debug: dpkg-shlibdeps --version output is '${_TMP_VERSION}'")
@@ -398,9 +399,12 @@ function(cpack_deb_prepare_package_vars)
         file(MAKE_DIRECTORY ${CPACK_TEMPORARY_DIRECTORY}/debian)
         file(WRITE ${CPACK_TEMPORARY_DIRECTORY}/debian/control "")
 
-        # only set ignore-missing-info flag for dpkg-shlibdeps that have --version option
-        # (those are newer and also have --ignore-missing-info flag)
-        if(SHLIBDEPS_EXECUTABLE_VERSION)
+        # Add --ignore-missing-info if the tool supports it
+        execute_process(COMMAND env LC_ALL=C ${SHLIBDEPS_EXECUTABLE} --help
+          OUTPUT_VARIABLE _TMP_HELP
+          ERROR_QUIET
+          OUTPUT_STRIP_TRAILING_WHITESPACE)
+        if(_TMP_HELP MATCHES "--ignore-missing-info")
           set(IGNORE_MISSING_INFO_FLAG "--ignore-missing-info")
         endif()
 
