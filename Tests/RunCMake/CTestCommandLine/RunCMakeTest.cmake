@@ -39,3 +39,16 @@ subdirs()
   run_cmake_command(BadCTestTestfile ${CMAKE_CTEST_COMMAND})
 endfunction()
 run_BadCTestTestfile()
+
+function(run_MergeOutput)
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/MergeOutput)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
+add_test(MergeOutput \"${CMAKE_COMMAND}\" -P \"${RunCMake_SOURCE_DIR}/MergeOutput.cmake\")
+")
+
+  run_cmake_command(MergeOutput ${CMAKE_CTEST_COMMAND} -V)
+endfunction()
+run_MergeOutput()
