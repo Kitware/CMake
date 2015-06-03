@@ -82,8 +82,6 @@ void cmLocalVisualStudio7Generator::AddHelperCommands()
   // Now create GUIDs for targets
   cmTargets &tgts = this->Makefile->GetTargets();
 
-  cmGlobalVisualStudio7Generator* gg =
-    static_cast<cmGlobalVisualStudio7Generator *>(this->GlobalGenerator);
   for(cmTargets::iterator l = tgts.begin(); l != tgts.end(); l++)
     {
     if(l->second.GetType() == cmTarget::INTERFACE_LIBRARY)
