@@ -958,8 +958,8 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
   cmUuid uuidGenerator;
 
   std::vector<unsigned char> uuidNamespace;
-  assert(uuidGenerator.StringToBinary(
-    "ee30c4be-5192-4fb0-b335-722a2dffe760", uuidNamespace));
+  uuidGenerator.StringToBinary(
+    "ee30c4be-5192-4fb0-b335-722a2dffe760", uuidNamespace);
 
   std::string guid = uuidGenerator.FromMd5(uuidNamespace, input);
 
