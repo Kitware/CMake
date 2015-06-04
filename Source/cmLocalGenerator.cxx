@@ -2622,28 +2622,23 @@ std::string cmLocalGenerator::Convert(const std::string& source,
                                       RelativeRoot relative,
                                       OutputFormat output)
 {
-  // Convert the path to a relative path.
   std::string result = source;
 
   switch (relative)
     {
     case HOME:
-      //result = cmSystemTools::CollapseFullPath(result.c_str());
       result = this->ConvertToRelativePath(
           this->GetState()->GetSourceDirectoryComponents(), result);
       break;
     case START:
-      //result = cmSystemTools::CollapseFullPath(result.c_str());
       result = this->ConvertToRelativePath(
           this->StateSnapshot.GetCurrentSourceDirectoryComponents(), result);
       break;
     case HOME_OUTPUT:
-      //result = cmSystemTools::CollapseFullPath(result.c_str());
       result = this->ConvertToRelativePath(
           this->GetState()->GetBinaryDirectoryComponents(), result);
       break;
     case START_OUTPUT:
-      //result = cmSystemTools::CollapseFullPath(result.c_str());
       result = this->ConvertToRelativePath(
           this->StateSnapshot.GetCurrentBinaryDirectoryComponents(), result);
       break;
