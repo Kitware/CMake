@@ -4657,6 +4657,11 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
   this->MarkVariableAsUsed(nMatchesVariable);
 }
 
+cmState::Snapshot cmMakefile::GetStateSnapshot() const
+{
+  return this->StateSnapshot;
+}
+
 //----------------------------------------------------------------------------
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
