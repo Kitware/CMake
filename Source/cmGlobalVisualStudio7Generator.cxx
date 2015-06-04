@@ -15,6 +15,7 @@
 #include "cmGeneratedFileStream.h"
 #include "cmLocalVisualStudio7Generator.h"
 #include "cmMakefile.h"
+#include "cmUuid.h"
 #include "cmake.h"
 #include <cmsys/Encoding.hxx>
 
@@ -953,14 +954,15 @@ std::string cmGlobalVisualStudio7Generator::GetGUID(std::string const& name)
   std::string input = this->CMakeInstance->GetState()->GetBinaryDirectory();
   input += "|";
   input += name;
-  std::string md5 = cmSystemTools::ComputeStringMD5(input);
-  assert(md5.length() == 32);
-  std::string const& guid =
-    (md5.substr( 0,8)+"-"+
-     md5.substr( 8,4)+"-"+
-     md5.substr(12,4)+"-"+
-     md5.substr(16,4)+"-"+
-     md5.substr(20,12));
+
+  cmUuid uuidGenerator;
+
+  std::vector<unsigned char> uuidNamespace;
+  uuidGenerator.StringToBinary(
+    "ee30c4be-5192-4fb0-b335-722a2dffe760", uuidNamespace);
+
+  std::string guid = uuidGenerator.FromMd5(uuidNamespace, input);
+
   return cmSystemTools::UpperCase(guid);
 }
 
