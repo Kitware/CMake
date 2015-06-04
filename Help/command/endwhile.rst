@@ -7,4 +7,4 @@ Ends a list of commands in a while block.
 
   endwhile(expression)
 
-See the while command.
+See the :command:`while` command.

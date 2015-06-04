@@ -1,10 +1,10 @@
 endforeach
 ----------
 
-Ends a list of commands in a FOREACH block.
+Ends a list of commands in a foreach block.
 
 ::
 
   endforeach(expression)
 
-See the FOREACH command.
+See the :command:`foreach` command.

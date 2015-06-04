@@ -12,11 +12,11 @@ Specify the source tree of a third-party utility.
 
 When a third-party utility's source is included in the distribution,
 this command specifies its location and name.  The cache entry will
-not be set unless the path_to_source and all listed files exist.  It
+not be set unless the ``path_to_source`` and all listed files exist.  It
 is assumed that the source tree of the utility will have been built
 before it is needed.
 
-When cross compiling CMake will print a warning if a utility_source()
+When cross compiling CMake will print a warning if a ``utility_source()``
 command is executed, because in many cases it is used to build an
 executable which is executed later on.  This doesn't work when cross
 compiling, since the executable can run only on their target platform.

@@ -25,7 +25,7 @@ When version 2.4 or lower is given the command implicitly invokes
 
 which enables compatibility features for CMake 2.4 and lower.
 
-The FATAL_ERROR option is accepted but ignored by CMake 2.6 and
+The ``FATAL_ERROR`` option is accepted but ignored by CMake 2.6 and
 higher.  It should be specified so CMake versions 2.4 and lower fail
 with an error instead of just a warning.
 
