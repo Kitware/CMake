@@ -9,5 +9,5 @@ run this tool and pass the compiler and its arguments to the tool. Some
 example tools are distcc and ccache.
 
 This property is initialized by the value of
-the :variable:`CMAKE_<LANG>_COMPILER_LAUNCER` variable if it is set
+the :variable:`CMAKE_<LANG>_COMPILER_LAUNCHER` variable if it is set
 when a target is created.
