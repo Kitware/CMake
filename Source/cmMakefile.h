@@ -850,6 +850,8 @@ public:
   void ClearMatches();
   void StoreMatches(cmsys::RegularExpression& re);
 
+  cmState::Snapshot GetStateSnapshot() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
