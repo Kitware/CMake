@@ -1,5 +1,5 @@
 compiler-launcher
---------------
+-----------------
 
 * The :ref:`Makefile Generators` and the :generator:`Ninja` generator
   learned to add compiler launcher tools like distcc and ccache along with the
