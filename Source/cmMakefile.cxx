@@ -306,6 +306,15 @@ cmListFileContext cmMakefile::GetExecutionContext() const
   return *this->CallStack.back().Context;
 }
 
+std::string cmMakefile::GetExecutionFilePath() const
+{
+  if (this->CallStack.empty())
+    {
+    return std::string();
+    }
+  return this->CallStack.back().Context->FilePath;
+}
+
 //----------------------------------------------------------------------------
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
@@ -1560,6 +1569,56 @@ void cmMakefile::InitializeFromParent()
 
   // Imported targets.
   this->ImportedTargets = parent->ImportedTargets;
+}
+
+void cmMakefile::PushFunctionScope(const cmPolicies::PolicyMap& pm)
+{
+  this->Internal->PushDefinitions();
+
+  this->PushLoopBlockBarrier();
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetGlobalGenerator()->GetFileLockPool().PushFunctionScope();
+#endif
+
+  this->PushFunctionBlockerBarrier();
+
+  this->PushPolicy(true, pm);
+  this->PushPolicyBarrier();
+}
+
+void cmMakefile::PopFunctionScope(bool reportError)
+{
+  this->PopPolicyBarrier(reportError);
+  this->PopPolicy();
+
+  this->PopFunctionBlockerBarrier(reportError);
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetGlobalGenerator()->GetFileLockPool().PopFunctionScope();
+#endif
+
+  this->PopLoopBlockBarrier();
+
+  this->CheckForUnusedVariables();
+
+  this->Internal->PopDefinitions();
+}
+
+void cmMakefile::PushMacroScope(const cmPolicies::PolicyMap& pm)
+{
+  this->PushFunctionBlockerBarrier();
+
+  this->PushPolicy(true, pm);
+  this->PushPolicyBarrier();
+}
+
+void cmMakefile::PopMacroScope(bool reportError)
+{
+  this->PopPolicyBarrier(reportError);
+  this->PopPolicy();
+
+  this->PopFunctionBlockerBarrier(reportError);
 }
 
 //----------------------------------------------------------------------------
@@ -5417,4 +5476,42 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
     target->SetProperty("C_STANDARD", "90");
     }
   return true;
+}
+
+
+cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
+                                             cmPolicies::PolicyMap const& pm)
+  : Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushFunctionScope(pm);
+}
+
+cmMakefile::FunctionPushPop::~FunctionPushPop()
+{
+  this->Makefile->PopFunctionScope(this->ReportError);
+}
+
+
+cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
+                                       const cmPolicies::PolicyMap& pm)
+  : Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushMacroScope(pm);
+}
+
+cmMakefile::MacroPushPop::~MacroPushPop()
+{
+  this->Makefile->PopMacroScope(this->ReportError);
+}
+
+cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmListFileContext& lfc,
+                               cmExecutionStatus& status): Makefile(mf)
+{
+  cmMakefile::CallStackEntry entry = {&lfc, &status};
+  this->Makefile->CallStack.push_back(entry);
+}
+
+cmMakefileCall::~cmMakefileCall()
+{
+  this->Makefile->CallStack.pop_back();
 }

@@ -576,6 +576,8 @@ public:
   cmListFileBacktrace GetBacktrace() const;
   cmListFileBacktrace GetBacktrace(cmListFileContext const& lfc) const;
   cmListFileContext GetExecutionContext() const;
+  std::string GetExecutionFilePath() const;
+
 
   /**
    * Get the vector of  files created by this makefile
@@ -746,7 +748,36 @@ public:
   const std::vector<cmTestGenerator*>& GetTestGenerators() const
     { return this->TestGenerators; }
 
-  // push and pop variable scopes
+  class FunctionPushPop
+  {
+  public:
+    FunctionPushPop(cmMakefile* mf,
+                    cmPolicies::PolicyMap const& pm);
+    ~FunctionPushPop();
+
+    void Quiet() { this->ReportError = false; }
+  private:
+    cmMakefile* Makefile;
+    bool ReportError;
+  };
+
+  class MacroPushPop
+  {
+  public:
+    MacroPushPop(cmMakefile* mf,
+                    cmPolicies::PolicyMap const& pm);
+    ~MacroPushPop();
+
+    void Quiet() { this->ReportError = false; }
+  private:
+    cmMakefile* Makefile;
+    bool ReportError;
+  };
+
+  void PushFunctionScope(cmPolicies::PolicyMap const& pm);
+  void PopFunctionScope(bool reportError);
+  void PushMacroScope(cmPolicies::PolicyMap const& pm);
+  void PopMacroScope(bool reportError);
   void PushScope();
   void PopScope();
   void RaiseScope(const std::string& var, const char *value);
@@ -1055,15 +1086,8 @@ class cmMakefileCall
 public:
   cmMakefileCall(cmMakefile* mf,
                  cmListFileContext const& lfc,
-                 cmExecutionStatus& status): Makefile(mf)
-    {
-    cmMakefile::CallStackEntry entry = {&lfc, &status};
-    this->Makefile->CallStack.push_back(entry);
-    }
-  ~cmMakefileCall()
-    {
-    this->Makefile->CallStack.pop_back();
-    }
+                 cmExecutionStatus& status);
+  ~cmMakefileCall();
 private:
   cmMakefile* Makefile;
 };
