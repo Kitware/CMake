@@ -13,13 +13,13 @@
 
 #include "cmMakefile.h"
 #include "cmCustomCommand.h"
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmGeneratorExpression.h"
 
 //----------------------------------------------------------------------------
 cmCustomCommandGenerator::cmCustomCommandGenerator(
   cmCustomCommand const& cc, const std::string& config, cmMakefile* mf):
-  CC(cc), Config(config), Makefile(mf), LG(mf->GetLocalGenerator()),
+  CC(cc), Config(config), Makefile(mf),
   OldStyle(cc.GetEscapeOldStyle()), MakeVars(cc.GetEscapeAllowMakeVars()),
   GE(new cmGeneratorExpression(&cc.GetBacktrace())), DependsDone(false)
 {
@@ -96,7 +96,8 @@ cmCustomCommandGenerator
       }
     else
       {
-      cmd += this->LG->EscapeForShell(arg, this->MakeVars);
+      cmOutputConverter converter(this->Makefile->GetStateSnapshot());
+      cmd += converter.EscapeForShell(arg, this->MakeVars);
       }
     }
 }
