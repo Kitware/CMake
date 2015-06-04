@@ -81,6 +81,11 @@ typedef int siginfo_t;
 # include <errno.h> // extern int errno;
 #endif
 
+#if defined (__CYGWIN__) && !defined(_WIN32)
+# include <windows.h>
+# undef _WIN32
+#endif
+
 #ifdef __FreeBSD__
 # include <sys/sysctl.h>
 # include <fenv.h>
@@ -365,6 +370,8 @@ public:
         const char *hostLimitEnvVarName,
         const char *procLimitEnvVarName);
   LongLong GetProcMemoryUsed();
+
+  double GetLoadAverage();
 
   // enable/disable stack trace signal handler.
   static
@@ -818,6 +825,11 @@ SystemInformation::GetProcMemoryAvailable(
 SystemInformation::LongLong SystemInformation::GetProcMemoryUsed()
 {
   return this->Implementation->GetProcMemoryUsed();
+}
+
+double SystemInformation::GetLoadAverage()
+{
+  return this->Implementation->GetLoadAverage();
 }
 
 SystemInformation::LongLong SystemInformation::GetProcessId()
@@ -1489,6 +1501,60 @@ void SymbolProperties::Initialize(void *address)
 #endif
 }
 #endif // don't define this class if we're not using it
+
+// --------------------------------------------------------------------------
+#if defined(_WIN32) || defined(__CYGWIN__)
+# define KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes
+#endif
+#if defined(_MSC_VER) && _MSC_VER < 1310
+# undef KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes
+#endif
+#if defined(KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes)
+double calculateCPULoad(unsigned __int64 idleTicks,
+                        unsigned __int64 totalTicks)
+{
+  static double previousLoad = -0.0;
+  static unsigned __int64 previousIdleTicks = 0;
+  static unsigned __int64 previousTotalTicks = 0;
+
+  unsigned __int64 const idleTicksSinceLastTime =
+    idleTicks - previousIdleTicks;
+  unsigned __int64 const totalTicksSinceLastTime =
+    totalTicks - previousTotalTicks;
+
+  double load;
+  if (previousTotalTicks == 0 || totalTicksSinceLastTime == 0)
+    {
+    // No new information.  Use previous result.
+    load = previousLoad;
+    }
+  else
+    {
+    // Calculate load since last time.
+    load = 1.0 - double(idleTicksSinceLastTime) / totalTicksSinceLastTime;
+
+    // Smooth if possible.
+    if (previousLoad > 0)
+      {
+      load = 0.25 * load + 0.75 * previousLoad;
+      }
+    }
+
+  previousLoad = load;
+  previousIdleTicks = idleTicks;
+  previousTotalTicks = totalTicks;
+
+  return load;
+}
+
+unsigned __int64 fileTimeToUInt64(FILETIME const& ft)
+{
+  LARGE_INTEGER out;
+  out.HighPart = ft.dwHighDateTime;
+  out.LowPart = ft.dwLowDateTime;
+  return out.QuadPart;
+}
+#endif
 
 } // anonymous namespace
 
@@ -3609,6 +3675,38 @@ SystemInformationImplementation::GetProcMemoryUsed()
   return memUsed;
 #else
   return 0;
+#endif
+}
+
+double SystemInformationImplementation::GetLoadAverage()
+{
+#if defined(KWSYS_CXX_HAS_GETLOADAVG)
+  double loadavg[3] = { 0.0, 0.0, 0.0 };
+  if (getloadavg(loadavg, 3) > 0)
+    {
+    return loadavg[0];
+    }
+  return -0.0;
+#elif defined(KWSYS_SYSTEMINFORMATION_USE_GetSystemTimes)
+  // Old windows.h headers do not provide GetSystemTimes.
+  typedef BOOL (WINAPI *GetSystemTimesType)(LPFILETIME, LPFILETIME,
+                                            LPFILETIME);
+  static GetSystemTimesType pGetSystemTimes =
+    (GetSystemTimesType)GetProcAddress(GetModuleHandleW(L"kernel32"),
+                                       "GetSystemTimes");
+  FILETIME idleTime, kernelTime, userTime;
+  if (pGetSystemTimes && pGetSystemTimes(&idleTime, &kernelTime, &userTime))
+    {
+    unsigned __int64 const idleTicks =
+      fileTimeToUInt64(idleTime);
+    unsigned __int64 const totalTicks =
+      fileTimeToUInt64(kernelTime) + fileTimeToUInt64(userTime);
+    return calculateCPULoad(idleTicks, totalTicks) * GetNumberOfPhysicalCPU();
+    }
+  return -0.0;
+#else
+  // Not implemented on this platform.
+  return -0.0;
 #endif
 }
 

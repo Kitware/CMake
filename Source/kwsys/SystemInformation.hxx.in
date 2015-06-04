@@ -130,6 +130,10 @@ public:
   // Get system RAM used by this process id in units of KiB.
   LongLong GetProcMemoryUsed();
 
+  // Return the load average of the machine or -0.0 if it cannot
+  // be determined.
+  double GetLoadAverage();
+
   // enable/disable stack trace signal handler. In order to
   // produce an informative stack trace the application should
   // be dynamically linked and compiled with debug symbols.
