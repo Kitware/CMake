@@ -107,10 +107,9 @@ void cmLocalVisualStudio10Generator
   cmVS10XMLParser parser;
   parser.ParseFile(path);
 
-  // if we can not find a GUID then create one
+  // if we can not find a GUID then we will generate one later
   if(parser.GUID.empty())
     {
-    this->GlobalGenerator->CreateGUID(name);
     return;
     }
 

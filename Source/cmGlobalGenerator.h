@@ -310,8 +310,6 @@ public:
     {
     return this->BinaryDirectories.insert(dir).second;
     }
-  /** Supported systems creates a GUID for the given name */
-  virtual void CreateGUID(const std::string&) {}
 
   /** Return true if the generated build tree may contain multiple builds.
       i.e. "Can I build Debug and Release in the same tree?" */

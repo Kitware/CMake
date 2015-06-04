@@ -185,7 +185,6 @@ void cmGlobalVisualStudio8Generator
 void cmGlobalVisualStudio8Generator::Configure()
 {
   this->cmGlobalVisualStudio7Generator::Configure();
-  this->CreateGUID(CMAKE_CHECK_BUILD_SYSTEM_TARGET);
 }
 
 //----------------------------------------------------------------------------
