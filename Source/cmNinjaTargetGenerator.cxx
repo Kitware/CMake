@@ -475,6 +475,26 @@ cmNinjaTargetGenerator
       }
     }
 
+    // Maybe insert a compiler launcher like ccache or distcc
+  if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
+    {
+    std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
+    const char *clauncher = this->Target->GetProperty(clauncher_prop);
+    if (clauncher && *clauncher)
+      {
+      // handle the case where launcher has its own arguments inside
+      // the variable handling spaces in the path, etc.
+      std::string cmd, args;
+      cmSystemTools::SplitProgramFromArgs(clauncher,
+                                          cmd, args);
+      std::string run_launcher =
+        this->LocalGenerator->EscapeForShell(cmd);
+      run_launcher += args;
+      run_launcher += " ";
+      compileCmds.front().insert(0, run_launcher);
+      }
+    }
+
   if (!compileCmds.empty())
     {
     compileCmds.front().insert(0, cldeps);
