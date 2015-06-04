@@ -787,3 +787,8 @@ cmState::Snapshot cmState::Snapshot::GetBuildsystemDirectoryParent() const
 
   return snapshot;
 }
+
+cmState* cmState::Snapshot::GetState() const
+{
+  return this->State;
+}
