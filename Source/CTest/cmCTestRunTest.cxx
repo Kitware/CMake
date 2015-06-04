@@ -57,8 +57,7 @@ bool cmCTestRunTest::CheckOutput()
       // Process has terminated and all output read.
       return false;
       }
-    else if(p == cmsysProcess_Pipe_STDOUT ||
-            p == cmsysProcess_Pipe_STDERR)
+    else if(p == cmsysProcess_Pipe_STDOUT)
       {
       // Store this line of output.
       cmCTestLog(this->CTest, HANDLER_VERBOSE_OUTPUT,
