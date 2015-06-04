@@ -294,7 +294,7 @@ cmCTest::cmCTest()
   this->LabelSummary           = true;
   this->ParallelLevel          = 1;
   this->ParallelLevelSetInCli  = false;
-  this->MaxLoad                = 0;
+  this->TestLoad               = 0;
   this->SubmitIndex            = 0;
   this->Failover               = false;
   this->BatchJobs              = false;
@@ -394,9 +394,9 @@ void cmCTest::SetParallelLevel(int level)
   this->ParallelLevel = level < 1 ? 1 : level;
 }
 
-void cmCTest::SetMaxLoad(int max)
+void cmCTest::SetTestLoad(int max)
 {
-  this->MaxLoad = max < 1 ? 0 : max;
+  this->TestLoad = max < 1 ? 0 : max;
 }
 
 //----------------------------------------------------------------------------
@@ -826,7 +826,7 @@ bool cmCTest::UpdateCTestConfiguration()
     cmSystemTools::ChangeDirectory(this->BinaryDir);
     }
   this->TimeOut = atoi(this->GetCTestConfiguration("TimeOut").c_str());
-  this->SetMaxLoad(atoi(this->GetCTestConfiguration("MaxLoad").c_str()));
+  this->SetTestLoad(atoi(this->GetCTestConfiguration("TestLoad").c_str()));
   if ( this->ProduceXML )
     {
     this->CompressXMLFiles = cmSystemTools::IsOn(
@@ -2058,11 +2058,11 @@ bool cmCTest::HandleCommandLineArguments(size_t &i,
       }
     }
 
-  if(this->CheckArgument(arg, "--max-load") && i < args.size() - 1)
+  if(this->CheckArgument(arg, "--test-load") && i < args.size() - 1)
     {
     i++;
     int max = atoi(args[i].c_str());
-    this->SetMaxLoad(max);
+    this->SetTestLoad(max);
     }
 
   if(this->CheckArgument(arg, "--no-compress-output"))

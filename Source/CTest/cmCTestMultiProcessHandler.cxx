@@ -44,7 +44,7 @@ private:
 cmCTestMultiProcessHandler::cmCTestMultiProcessHandler()
 {
   this->ParallelLevel = 1;
-  this->MaxLoad = 0;
+  this->TestLoad = 0;
   this->Completed = 0;
   this->RunningCount = 0;
   this->StopTimePassed = false;
@@ -89,9 +89,9 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
   this->ParallelLevel = level < 1 ? 1 : level;
 }
 
-void cmCTestMultiProcessHandler::SetMaxLoad(size_t max)
+void cmCTestMultiProcessHandler::SetTestLoad(size_t load)
 {
-  this->MaxLoad = max < 1 ? 0 : max;
+  this->TestLoad = load < 1 ? 0 : load;
 }
 
 //---------------------------------------------------------
@@ -280,8 +280,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
   std::string testWithMinProcessors = "";
 
   cmsys::SystemInformation info;
-  const std::string lockFile = "/tmp/.cmake_maxload.lock"; // TODO: Filename
-  if (this->MaxLoad > 0)
+  const std::string lockFile = "/tmp/.cmake_testload.lock"; // TODO: Filename
+  if (this->TestLoad > 0)
     {
     allTestsFailedTestLoadCheck = true;
 
@@ -295,7 +295,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
       fclose(file);
       }
     }
-  cmFileLock maxLoadLock;
+  cmFileLock testLoadLock;
 
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
@@ -303,7 +303,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
     // Take a nap if we're currently performing a RUN_SERIAL test.
     if (this->SerialTestRunning)
       {
-      allTestsFailedMaxLoadCheck = true;
+      allTestsFailedTestLoadCheck = true;
       break;
       }
     // We can only start a RUN_SERIAL test if no other tests are also running.
@@ -313,44 +313,44 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
 
     size_t processors = GetProcessorsUsed(*test);
-    bool maxLoadOk;
-    if (this->MaxLoad > 0)
+    bool testLoadOk;
+    if (this->TestLoad > 0)
       {
       // First, try to get file lock..
-      if (!maxLoadLock.IsLocked(lockFile))
+      if (!testLoadLock.IsLocked(lockFile))
         {
-        cmFileLockResult result = maxLoadLock.Lock(lockFile, 1);
+        cmFileLockResult result = testLoadLock.Lock(lockFile, 1);
         if (result.IsOk())
           {
           const double systemLoad = info.GetLoadAverage();
 
           // Don't start more tests than your max load can support.
-          if (numToStart > (this->MaxLoad - systemLoad))
+          if (numToStart > (this->TestLoad - systemLoad))
             {
-            numToStart = this->MaxLoad - systemLoad;
+            numToStart = this->TestLoad - systemLoad;
             }
 
-          maxLoadOk = processors <= (this->MaxLoad - systemLoad);
-          if (maxLoadOk)
+          testLoadOk = processors <= (this->TestLoad - systemLoad);
+          if (testLoadOk)
             {
             cmCTestLog(this->CTest, HANDLER_OUTPUT, "OK to run " << GetName(*test) << ", it requires " << processors << " procs & system load is: " << info.GetLoadAverage() << std::endl);
             }
           }
         else
           {
-          maxLoadOk = false;
+          testLoadOk = false;
           }
         }
       else
         {
-        maxLoadOk = false;
+        testLoadOk = false;
         }
 
-      allTestsFailedMaxLoadCheck &= !maxLoadOk;
+      allTestsFailedTestLoadCheck &= !testLoadOk;
       }
     else
       {
-      maxLoadOk = true;
+      testLoadOk = true;
       }
 
     if (processors <= minProcessorsRequired)
@@ -359,9 +359,9 @@ void cmCTestMultiProcessHandler::StartNextTests()
       testWithMinProcessors = GetName(*test);
       }
 
-    if(maxLoadOk && processors <= numToStart && this->StartTest(*test))
+    if(testLoadOk && processors <= numToStart && this->StartTest(*test))
       {
-      maxLoadLock.Release();
+      testLoadLock.Release();
 
       if(this->StopTimePassed)
         {
@@ -372,16 +372,16 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
     else if(numToStart == 0)
       {
-      maxLoadLock.Release();
+      testLoadLock.Release();
       return;
       }
     else
       {
-      maxLoadLock.Release();
+      testLoadLock.Release();
       }
     }   // for
 
-  if (allTestsFailedMaxLoadCheck)
+  if (allTestsFailedTestLoadCheck)
     {
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** WAITING,");
     time_t currenttime = time(0);
@@ -402,7 +402,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Load: "
         << info.GetLoadAverage() << ",");
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "Max Allowed Load: "
-        << this->MaxLoad << ",");
+        << this->TestLoad << ",");
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "Smallest test "
         << testWithMinProcessors << " requires " << minProcessorsRequired);
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);

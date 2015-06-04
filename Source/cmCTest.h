@@ -161,8 +161,8 @@ public:
   int GetParallelLevel() { return this->ParallelLevel; }
   void SetParallelLevel(int);
 
-  int GetMaxLoad() { return this->MaxLoad; }
-  void SetMaxLoad(int);
+  int GetTestLoad() { return this->TestLoad; }
+  void SetTestLoad(int);
 
   /**
    * Check if CTest file exists
@@ -502,7 +502,7 @@ private:
   int                     ParallelLevel;
   bool                    ParallelLevelSetInCli;
 
-  int                     MaxLoad;
+  int                     TestLoad;
 
   int                     CompatibilityMode;
 
