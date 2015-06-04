@@ -786,6 +786,15 @@ IF(KWSYS_USE_SystemInformation)
     SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
       COMPILE_DEFINITIONS KWSYS_BUILD_SHARED=1)
   ENDIF()
+
+  IF(UNIX AND NOT CYGWIN)
+    KWSYS_PLATFORM_CXX_TEST(KWSYS_CXX_HAS_GETLOADAVG
+      "Checking whether CXX compiler has getloadavg" DIRECT)
+    IF(KWSYS_CXX_HAS_GETLOADAVG)
+      SET_PROPERTY(SOURCE SystemInformation.cxx APPEND PROPERTY
+        COMPILE_DEFINITIONS KWSYS_CXX_HAS_GETLOADAVG=1)
+    ENDIF()
+  ENDIF()
 ENDIF()
 
 #-----------------------------------------------------------------------------

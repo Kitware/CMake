@@ -87,6 +87,7 @@ int testSystemInformation(int, char*[])
   printMethod3(info, GetProcMemoryAvailable("KWSHL","KWSPL"), "KiB");
   printMethod3(info, GetHostMemoryUsed(), "KiB");
   printMethod3(info, GetProcMemoryUsed(), "KiB");
+  printMethod(info, GetLoadAverage);
 
   for (long int i = 0; i <= 31; i++)
     {
