@@ -4770,21 +4770,19 @@ cmMakefile::GetPolicyStatus(cmPolicies::PolicyID id) const
 cmPolicies::PolicyStatus
 cmMakefile::GetPolicyStatusInternal(cmPolicies::PolicyID id) const
 {
-  // Is the policy set in our stack?
-  for(PolicyStackType::const_reverse_iterator psi = this->PolicyStack.rbegin();
-      psi != this->PolicyStack.rend(); ++psi)
+  cmLocalGenerator* lg = this->LocalGenerator;
+  while(lg)
     {
-    if(psi->IsDefined(id))
+    cmMakefile* mf = lg->GetMakefile();
+    for(PolicyStackType::const_reverse_iterator psi =
+        mf->PolicyStack.rbegin(); psi != mf->PolicyStack.rend(); ++psi)
       {
-      return psi->Get(id);
+      if(psi->IsDefined(id))
+        {
+        return psi->Get(id);
+        }
       }
-    }
-
-  // If we have a parent directory, recurse up to it.
-  if(this->LocalGenerator->GetParent())
-    {
-    cmMakefile* parent = this->LocalGenerator->GetParent()->GetMakefile();
-    return parent->GetPolicyStatusInternal(id);
+    lg = lg->GetParent();
     }
 
   // The policy is not set.  Use the default for this CMake version.
