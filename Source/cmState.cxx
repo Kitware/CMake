@@ -590,7 +590,7 @@ void cmState::Snapshot::ComputeRelativePathTopSource()
   snapshots.push_back(snapshot);
   while (true)
     {
-    snapshot = snapshot.GetParent();
+    snapshot = snapshot.GetBuildsystemDirectoryParent();
     if (snapshot.IsValid())
       {
       snapshots.push_back(snapshot);
@@ -622,7 +622,7 @@ void cmState::Snapshot::ComputeRelativePathTopBinary()
   snapshots.push_back(snapshot);
   while (true)
     {
-    snapshot = snapshot.GetParent();
+    snapshot = snapshot.GetBuildsystemDirectoryParent();
     if (snapshot.IsValid())
       {
       snapshots.push_back(snapshot);
@@ -659,12 +659,23 @@ void cmState::Snapshot::ComputeRelativePathTopBinary()
     }
 }
 
-cmState::Snapshot cmState::CreateSnapshot(Snapshot originSnapshot)
+cmState::Snapshot cmState::CreateBaseSnapshot()
 {
-  if (!originSnapshot.IsValid())
-    {
-    originSnapshot.State = this;
-    }
+  PositionType pos = 0;
+  this->ParentPositions.push_back(pos);
+  this->Locations.resize(1);
+  this->OutputLocations.resize(1);
+  this->CurrentSourceDirectoryComponents.resize(1);
+  this->CurrentBinaryDirectoryComponents.resize(1);
+  this->RelativePathTopSource.resize(1);
+  this->RelativePathTopBinary.resize(1);
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot
+cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
+{
+  assert(originSnapshot.IsValid());
   PositionType pos = this->ParentPositions.size();
   this->ParentPositions.push_back(originSnapshot.Position);
   this->Locations.resize(this->Locations.size() + 1);
@@ -764,7 +775,7 @@ bool cmState::Snapshot::IsValid() const
   return this->State ? true : false;
 }
 
-cmState::Snapshot cmState::Snapshot::GetParent() const
+cmState::Snapshot cmState::Snapshot::GetBuildsystemDirectoryParent() const
 {
   Snapshot snapshot;
   if (!this->State || this->Position == 0)

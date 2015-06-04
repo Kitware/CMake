@@ -73,7 +73,7 @@ cmLocalGenerator::~cmLocalGenerator()
 
 bool cmLocalGenerator::IsRootMakefile() const
 {
-  return !this->StateSnapshot.GetParent().IsValid();
+  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
 //----------------------------------------------------------------------------

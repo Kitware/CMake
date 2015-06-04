@@ -45,7 +45,7 @@ public:
     void SetRelativePathTopBinary(const char* dir);
 
     bool IsValid() const;
-    Snapshot GetParent() const;
+    Snapshot GetBuildsystemDirectoryParent() const;
 
   private:
     void ComputeRelativePathTopSource();
@@ -57,7 +57,8 @@ public:
     cmState::PositionType Position;
   };
 
-  Snapshot CreateSnapshot(Snapshot originSnapshot);
+  Snapshot CreateBaseSnapshot();
+  Snapshot CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };
