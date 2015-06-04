@@ -412,9 +412,9 @@ void cmListFileBacktrace::PrintTitle(std::ostream& out)
     return;
     }
 
+  cmOutputConverter converter(this->Snapshot);
   cmListFileContext lfc = this->front();
-  lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                               cmLocalGenerator::HOME);
+  lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
   out << (lfc.Line ? " at " : " in ") << lfc;
 }
 
@@ -425,13 +425,13 @@ void cmListFileBacktrace::PrintCallStack(std::ostream& out)
     return;
     }
 
+  cmOutputConverter converter(this->Snapshot);
   const_iterator i = this->begin() + 1;
   out << "Call Stack (most recent call first):\n";
   while(i != this->end())
     {
     cmListFileContext lfc = *i;
-    lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                                 cmLocalGenerator::HOME);
+    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
     out << "  " << lfc << "\n";
     ++i;
     }
