@@ -59,7 +59,6 @@ cmLocalGenerator::cmLocalGenerator(cmGlobalGenerator* gg,
   this->Makefile = new cmMakefile(this);
 
   this->LinkScriptShell = false;
-  this->UseRelativePaths = false;
   this->Configured = false;
   this->EmitUniversalBinaryFlags = true;
   this->BackwardsCompatibility = 0;
@@ -136,10 +135,6 @@ void cmLocalGenerator::Configure()
     }
 
   this->Makefile->AddCMakeDependFilesFromUser();
-
-  // Check whether relative paths should be used for optionally
-  // relative paths.
-  this->UseRelativePaths = this->Makefile->IsOn("CMAKE_USE_RELATIVE_PATHS");
 
   this->ComputeObjectMaxPath();
 
@@ -522,7 +517,7 @@ void cmLocalGenerator::AddCustomCommandToCreateObject(const char* ofname,
   objectDir = this->Convert(objectDir,START_OUTPUT,SHELL);
   std::string objectFile = this->Convert(ofname,START_OUTPUT,SHELL);
   std::string sourceFile =
-    this->Convert(source.GetFullPath(),START_OUTPUT,SHELL,true);
+      this->ConvertToOutputFormat(source.GetFullPath(), SHELL);
   std::string varString = "CMAKE_";
   varString += lang;
   varString += "_COMPILE_OBJECT";
@@ -1182,7 +1177,7 @@ cmLocalGenerator::ConvertToOutputForExistingCommon(const std::string& remote,
     std::string tmp;
     if(cmSystemTools::GetShortPath(remote, tmp))
       {
-      return this->Convert(tmp, NONE, format, true);
+      return this->ConvertToOutputFormat(tmp, format);
       }
     }
 
@@ -1196,8 +1191,10 @@ cmLocalGenerator::ConvertToOutputForExisting(const std::string& remote,
                                              RelativeRoot local,
                                              OutputFormat format)
 {
+  static_cast<void>(local);
+
   // Perform standard conversion.
-  std::string result = this->Convert(remote, local, format, true);
+  std::string result = this->ConvertToOutputFormat(remote, format);
 
   // Consider short-path.
   return this->ConvertToOutputForExistingCommon(remote, result, format);
@@ -1316,8 +1313,7 @@ std::string cmLocalGenerator::GetIncludeFlags(
           {
           includeFlags << fwSearchFlag;
           }
-        includeFlags << this->Convert(frameworkDir, START_OUTPUT,
-                                      shellFormat, true)
+        includeFlags << this->ConvertToOutputFormat(frameworkDir, shellFormat)
           << " ";
         }
       continue;
@@ -2675,14 +2671,6 @@ cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
 }
 
 //----------------------------------------------------------------------------
-std::string
-cmLocalGenerator::ConvertToOptionallyRelativeOutputPath(
-                                                    const std::string& remote)
-{
-  return this->Convert(remote, START_OUTPUT, SHELL, true);
-}
-
-//----------------------------------------------------------------------------
 const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
 {
   switch (relroot)
@@ -2699,42 +2687,39 @@ const char* cmLocalGenerator::GetRelativeRootPath(RelativeRoot relroot)
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::Convert(const std::string& source,
                                       RelativeRoot relative,
-                                      OutputFormat output,
-                                      bool optional)
+                                      OutputFormat output)
 {
   // Convert the path to a relative path.
   std::string result = source;
 
-  if (!optional || this->UseRelativePaths)
+  switch (relative)
     {
-    switch (relative)
-      {
-      case HOME:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result = this->ConvertToRelativePath(
-            this->GetState()->GetSourceDirectoryComponents(), result);
-        break;
-      case START:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result = this->ConvertToRelativePath(
-            this->StateSnapshot.GetCurrentSourceDirectoryComponents(), result);
-        break;
-      case HOME_OUTPUT:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result = this->ConvertToRelativePath(
-            this->GetState()->GetBinaryDirectoryComponents(), result);
-        break;
-      case START_OUTPUT:
-        //result = cmSystemTools::CollapseFullPath(result.c_str());
-        result = this->ConvertToRelativePath(
-            this->StateSnapshot.GetCurrentBinaryDirectoryComponents(), result);
-        break;
-      case FULL:
-        result = cmSystemTools::CollapseFullPath(result);
-        break;
-      case NONE:
-        break;
-      }
+    case HOME:
+      //result = cmSystemTools::CollapseFullPath(result.c_str());
+      result = this->ConvertToRelativePath(
+          this->GetState()->GetSourceDirectoryComponents(), result);
+      break;
+    case START:
+      //result = cmSystemTools::CollapseFullPath(result.c_str());
+      result = this->ConvertToRelativePath(
+          this->StateSnapshot.GetCurrentSourceDirectoryComponents(), result);
+      break;
+    case HOME_OUTPUT:
+      //result = cmSystemTools::CollapseFullPath(result.c_str());
+      result = this->ConvertToRelativePath(
+          this->GetState()->GetBinaryDirectoryComponents(), result);
+      break;
+    case START_OUTPUT:
+      //result = cmSystemTools::CollapseFullPath(result.c_str());
+      result = this->ConvertToRelativePath(
+          this->StateSnapshot.GetCurrentBinaryDirectoryComponents(), result);
+      break;
+    case FULL:
+      result = cmSystemTools::CollapseFullPath(result);
+      break;
+    case NONE:
+      break;
+
     }
   return this->ConvertToOutputFormat(result, output);
 }
@@ -2778,15 +2763,14 @@ std::string cmLocalGenerator::ConvertToOutputFormat(const std::string& source,
 //----------------------------------------------------------------------------
 std::string cmLocalGenerator::Convert(RelativeRoot remote,
                                       const std::string& local,
-                                      OutputFormat output,
-                                      bool optional)
+                                      OutputFormat output, bool optional)
 {
   const char* remotePath = this->GetRelativeRootPath(remote);
 
   // The relative root must have a path (i.e. not FULL or NONE)
   assert(remotePath != 0);
 
-  if(!local.empty() && (!optional || this->UseRelativePaths))
+  if(!local.empty() && !optional)
     {
     std::vector<std::string> components;
     cmSystemTools::SplitPath(local, components);

@@ -1437,20 +1437,6 @@ int cmake::ActualConfigure()
          cmState::PATH);
       }
     }
-  if(!this->State
-          ->GetInitializedCacheValue("CMAKE_USE_RELATIVE_PATHS"))
-    {
-    this->State->AddCacheEntry
-      ("CMAKE_USE_RELATIVE_PATHS", "OFF",
-       "If true, cmake will use relative paths in makefiles and projects.",
-       cmState::BOOL);
-    if (!this->State->GetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
-                                                    "ADVANCED"))
-      {
-      this->State->SetCacheEntryProperty("CMAKE_USE_RELATIVE_PATHS",
-                                                 "ADVANCED", "1");
-      }
-    }
 
   if(cmSystemTools::GetFatalErrorOccured())
     {
