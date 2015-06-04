@@ -18,7 +18,6 @@
 
 class cmake;
 class cmGlobalGenerator;
-class cmLocalGenerator;
 class cmMakefile;
 class cmTarget;
 class cmOrderDirectories;
@@ -75,7 +74,6 @@ private:
   // Context information.
   cmTarget const* Target;
   cmMakefile* Makefile;
-  cmLocalGenerator* LocalGenerator;
   cmGlobalGenerator* GlobalGenerator;
   cmake* CMakeInstance;
 
