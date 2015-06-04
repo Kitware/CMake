@@ -40,12 +40,6 @@ public:
   virtual ~cmLocalUnixMakefileGenerator3();
 
   /**
-   * Process the CMakeLists files for this directory to fill in the
-   * Makefile ivar
-   */
-  virtual void Configure();
-
-  /**
    * Generate the makefile for this directory.
    */
   virtual void Generate();

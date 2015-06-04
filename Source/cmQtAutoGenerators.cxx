@@ -1215,7 +1215,7 @@ bool cmQtAutoGenerators::Run(const std::string& targetDirectory,
   cmLocalGenerator* lg = gg.MakeLocalGenerator();
   lg->GetMakefile()->SetCurrentBinaryDirectory(targetDirectory);
   lg->GetMakefile()->SetCurrentSourceDirectory(targetDirectory);
-  gg.SetCurrentLocalGenerator(lg);
+  gg.SetCurrentMakefile(lg->GetMakefile());
 
   this->ReadAutogenInfoFile(lg->GetMakefile(), targetDirectory, config);
   this->ReadOldMocDefinitionsFile(lg->GetMakefile(), targetDirectory);
