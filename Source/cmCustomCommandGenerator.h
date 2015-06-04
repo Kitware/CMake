@@ -16,7 +16,6 @@
 
 class cmCustomCommand;
 class cmMakefile;
-class cmLocalGenerator;
 class cmGeneratorExpression;
 
 class cmCustomCommandGenerator
@@ -24,7 +23,6 @@ class cmCustomCommandGenerator
   cmCustomCommand const& CC;
   std::string Config;
   cmMakefile* Makefile;
-  cmLocalGenerator* LG;
   bool OldStyle;
   bool MakeVars;
   cmGeneratorExpression* GE;
