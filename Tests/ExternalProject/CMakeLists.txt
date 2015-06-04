@@ -380,13 +380,13 @@ if(do_git_tests)
 
   set(local_git_repo "../../LocalRepositories/GIT-with-submodules")
 
-  set(proj TutorialStep1-GIT-with-no-GIT_SUBMODULES)
+  set(proj TS1-GIT-no-GIT_SUBMODULES)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY "${local_git_repo}"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-               -DWITH_submodule1:BOOL=ON
-               -DWITH_submodule2:BOOL=ON
+               -DWITH_m1:BOOL=ON
+               -DWITH_m2:BOOL=ON
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
@@ -394,14 +394,14 @@ if(do_git_tests)
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
-  set(proj TutorialStep1-GIT-with-empty-GIT_SUBMODULES)
+  set(proj TS1-GIT-empty-GIT_SUBMODULES)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY "${local_git_repo}"
     GIT_SUBMODULES ""
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-               -DWITH_submodule1:BOOL=ON
-               -DWITH_submodule2:BOOL=ON
+               -DWITH_m1:BOOL=ON
+               -DWITH_m2:BOOL=ON
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
@@ -409,14 +409,14 @@ if(do_git_tests)
   )
   set_property(TARGET ${proj} PROPERTY FOLDER "GIT")
 
-  set(proj TutorialStep1-GIT-with-some-GIT_SUBMODULES)
+  set(proj TS1-GIT-some-GIT_SUBMODULES)
   ExternalProject_Add(${proj}
     GIT_REPOSITORY "${local_git_repo}"
-    GIT_SUBMODULES "submodules/submodule1"
+    GIT_SUBMODULES "m/m1"
     CMAKE_GENERATOR "${CMAKE_GENERATOR}"
     CMAKE_ARGS -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
-               -DWITH_submodule1:BOOL=ON
-               -DWITH_submodule2:BOOL=OFF
+               -DWITH_m1:BOOL=ON
+               -DWITH_m2:BOOL=OFF
     BUILD_COMMAND ""
     INSTALL_COMMAND ""
     DEPENDS "SetupLocalGITRepository"
