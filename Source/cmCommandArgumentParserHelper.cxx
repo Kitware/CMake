@@ -14,7 +14,7 @@
 #include "cmSystemTools.h"
 #include "cmMakefile.h"
 #include "cmState.h"
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 
 #include "cmCommandArgumentLexer.h"
 
@@ -141,8 +141,9 @@ char* cmCommandArgumentParserHelper::ExpandVariable(const char* var)
         {
         std::ostringstream msg;
         cmListFileContext lfc;
-        lfc.FilePath = this->Makefile->GetLocalGenerator()
-            ->Convert(this->FileName, cmLocalGenerator::HOME);
+        cmOutputConverter converter(this->Makefile->GetStateSnapshot());
+        lfc.FilePath = converter.Convert(this->FileName,
+                                         cmOutputConverter::HOME);
 
         lfc.Line = this->FileLine;
         msg << "uninitialized variable \'" << var << "\'";
