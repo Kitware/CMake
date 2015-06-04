@@ -775,6 +775,25 @@ cmMakefileTargetGenerator
       }
     }
 
+  // Maybe insert a compiler launcher like ccache or distcc
+  if (!compileCommands.empty() && (lang == "C" || lang == "CXX"))
+    {
+    std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
+    const char *clauncher = this->Target->GetProperty(clauncher_prop);
+    if (clauncher && *clauncher)
+      {
+      std::vector<std::string> launcher_cmd;
+      cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
+      for (std::vector<std::string>::iterator i = launcher_cmd.begin(),
+             e = launcher_cmd.end(); i != e; ++i)
+        {
+        *i = this->LocalGenerator->EscapeForShell(*i);
+        }
+      std::string const& run_launcher = cmJoin(launcher_cmd, " ") + " ";
+      compileCommands.front().insert(0, run_launcher);
+      }
+    }
+
   // Expand placeholders in the commands.
   for(std::vector<std::string>::iterator i = compileCommands.begin();
       i != compileCommands.end(); ++i)
