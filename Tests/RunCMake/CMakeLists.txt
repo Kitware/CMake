@@ -226,7 +226,6 @@ add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
 
 # CPack related tests
 if(RPMBUILD_EXECUTABLE)
-  add_RunCMake_test(CPackRPM)
   list(APPEND CPACK_TEST_GENERATORS "RPM")
 endif()
 
