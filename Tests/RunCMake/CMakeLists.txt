@@ -239,10 +239,6 @@ add_RunCMake_test(IfacePaths_INCLUDE_DIRECTORIES TEST_DIR IfacePaths)
 set(IfacePaths_SOURCES_ARGS -DTEST_PROP=SOURCES)
 add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
 
-if(RPMBUILD_EXECUTABLE)
-  add_RunCMake_test(CPackRPM)
-endif()
-
 add_RunCMake_test(COMPILE_LANGUAGE-genex)
 
 # Matlab module related tests
