@@ -26,6 +26,24 @@ macro(add_RunCMake_test test)
     )
 endmacro()
 
+function(add_RunCMake_test_group test types)
+  set(Test_Dir ${test})
+
+  foreach(type IN LISTS types)
+    add_test(NAME RunCMake.${test}_${type} COMMAND ${CMAKE_CMAKE_COMMAND}
+      -DTEST_TYPE=${type}
+      -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+      -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
+      -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+      -DRunCMake_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+      -DRunCMake_MAKE_PROGRAM=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
+      -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${Test_Dir}
+      -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${type}/${test}
+      -P "${CMAKE_CURRENT_SOURCE_DIR}/${Test_Dir}/RunCMakeTest.cmake"
+      )
+  endforeach()
+endfunction()
+
 if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 3)
   set(GeneratorToolset_ARGS -DXCODE_BELOW_3=1)
 endif()
@@ -206,9 +224,18 @@ add_RunCMake_test(IfacePaths_INCLUDE_DIRECTORIES TEST_DIR IfacePaths)
 set(IfacePaths_SOURCES_ARGS -DTEST_PROP=SOURCES)
 add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
 
+# CPack related tests
 if(RPMBUILD_EXECUTABLE)
   add_RunCMake_test(CPackRPM)
+  list(APPEND CPACK_TEST_GENERATORS "RPM")
 endif()
+
+if(DPKG_EXECUTABLE)
+  list(APPEND CPACK_TEST_GENERATORS "DEB")
+endif()
+
+add_RunCMake_test_group(CPack "${CPACK_TEST_GENERATORS}")
+# end of CPack related tests
 
 add_RunCMake_test(COMPILE_LANGUAGE-genex)
 
