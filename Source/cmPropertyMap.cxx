@@ -40,7 +40,7 @@ void cmPropertyMap::SetProperty(const std::string& name, const char *value,
   (void)scope;
 
   cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Set(name,value);
+  prop->Set(value);
 }
 
 void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
@@ -54,7 +54,7 @@ void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
   (void)scope;
 
   cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Append(name,value,asString);
+  prop->Append(value,asString);
 }
 
 const char *cmPropertyMap
