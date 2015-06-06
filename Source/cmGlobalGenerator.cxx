@@ -1465,7 +1465,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
       ti != targets.end(); ++ti)
     {
     cmTarget* t = &ti->second;
-    cmGeneratorTarget* gt = new cmGeneratorTarget(t);
+    cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
     this->ComputeTargetObjectDirectory(gt);
     this->GeneratorTargets[t] = gt;
     generatorTargets[t] = gt;
@@ -1475,7 +1475,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
         j = mf->GetOwnedImportedTargets().begin();
       j != mf->GetOwnedImportedTargets().end(); ++j)
     {
-    cmGeneratorTarget* gt = new cmGeneratorTarget(*j);
+    cmGeneratorTarget* gt = new cmGeneratorTarget(*j, lg);
     this->GeneratorTargets[*j] = gt;
     generatorTargets[*j] = gt;
     }
