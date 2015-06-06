@@ -482,9 +482,7 @@ const char *cmState::GetGlobalProperty(const std::string& prop)
     return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
     }
 #undef STRING_LIST_ELEMENT
-  bool dummy = false;
-  return this->GlobalProperties.GetPropertyValue(prop, cmProperty::GLOBAL,
-                                                 dummy);
+  return this->GlobalProperties.GetPropertyValue(prop);
 }
 
 bool cmState::GetGlobalPropertyAsBool(const std::string& prop)

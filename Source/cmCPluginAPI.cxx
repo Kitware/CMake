@@ -526,11 +526,9 @@ void * CCONV cmCreateSourceFile(void)
   return (void*)new cmCPluginAPISourceFile;
 }
 
-void * CCONV cmCreateNewSourceFile(void *arg)
+void * CCONV cmCreateNewSourceFile(void *)
 {
-  cmMakefile *mf = static_cast<cmMakefile *>(arg);
   cmCPluginAPISourceFile *sf = new cmCPluginAPISourceFile;
-  sf->Properties.SetCMakeInstance(mf->GetCMakeInstance());
   return (void*)sf;
 }
 
@@ -630,11 +628,7 @@ const char * CCONV  cmSourceFileGetProperty(void *arg,const char *prop)
       {
       return sf->FullPath.c_str();
       }
-    bool chain = false;
-    // Ignore chain because old code will not expect it and it is a
-    // pain to implement here anyway.
-    return sf->Properties.GetPropertyValue(prop, cmProperty::SOURCE_FILE,
-                                           chain);
+    return sf->Properties.GetPropertyValue(prop);
     }
 }
 

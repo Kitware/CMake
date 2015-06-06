@@ -57,22 +57,13 @@ void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
 }
 
 const char *cmPropertyMap
-::GetPropertyValue(const std::string& name,
-                   cmProperty::ScopeType scope,
-                   bool &chain) const
+::GetPropertyValue(const std::string& name) const
 {
-  chain = false;
   assert(!name.empty());
 
   cmPropertyMap::const_iterator it = this->find(name);
   if (it == this->end())
     {
-    // should we chain up?
-    if (this->CMakeInstance)
-      {
-      chain = this->CMakeInstance->GetState()->
-                    IsPropertyChained(name,scope);
-      }
     return 0;
     }
   return it->second.GetValue();

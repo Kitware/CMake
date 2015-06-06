@@ -85,8 +85,10 @@ bool cmSetTestsPropertiesCommand
     unsigned int k;
     for (k = 0; k < propertyPairs.size(); k = k + 2)
       {
-      test->SetProperty(propertyPairs[k],
-                        propertyPairs[k+1].c_str());
+      if (!propertyPairs[k].empty())
+        {
+        test->SetProperty(propertyPairs[k], propertyPairs[k+1].c_str());
+        }
       }
     }
   else

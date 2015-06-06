@@ -26,16 +26,7 @@ public:
   void AppendProperty(const std::string& name, const char* value,
                       bool asString=false);
 
-  const char *GetPropertyValue(const std::string& name,
-                               cmProperty::ScopeType scope,
-                               bool &chain) const;
-
-  void SetCMakeInstance(cmake *cm) { this->CMakeInstance = cm; }
-
-  cmPropertyMap() { this->CMakeInstance = 0;}
-
-private:
-  cmake *CMakeInstance;
+  const char *GetPropertyValue(const std::string& name) const;
 };
 
 #endif
