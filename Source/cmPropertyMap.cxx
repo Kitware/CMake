@@ -14,6 +14,8 @@
 #include "cmake.h"
 #include "cmState.h"
 
+#include <assert.h>
+
 cmProperty *cmPropertyMap::GetOrCreateProperty(const std::string& name)
 {
   cmPropertyMap::iterator it = this->find(name);
@@ -60,10 +62,7 @@ const char *cmPropertyMap
                    bool &chain) const
 {
   chain = false;
-  if (name.empty())
-    {
-    return 0;
-    }
+  assert(!name.empty());
 
   cmPropertyMap::const_iterator it = this->find(name);
   if (it == this->end())

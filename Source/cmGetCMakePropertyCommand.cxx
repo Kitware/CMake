@@ -52,9 +52,11 @@ bool cmGetCMakePropertyCommand
     }
   else
     {
-    const char *prop =
-      this->Makefile->GetState()
-          ->GetGlobalProperty(args[1]);
+    const char *prop = 0;
+    if (!args[1].empty())
+      {
+      prop = this->Makefile->GetState()->GetGlobalProperty(args[1]);
+      }
     if (prop)
       {
       output = prop;
