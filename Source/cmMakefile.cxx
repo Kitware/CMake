@@ -306,15 +306,6 @@ cmListFileContext cmMakefile::GetExecutionContext() const
   return *this->CallStack.back().Context;
 }
 
-std::string cmMakefile::GetExecutionFilePath() const
-{
-  if (this->CallStack.empty())
-    {
-    return std::string();
-    }
-  return this->CallStack.back().Context->FilePath;
-}
-
 //----------------------------------------------------------------------------
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {

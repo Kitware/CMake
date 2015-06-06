@@ -570,8 +570,6 @@ public:
   cmListFileBacktrace GetBacktrace() const;
   cmListFileBacktrace GetBacktrace(cmListFileContext const& lfc) const;
   cmListFileContext GetExecutionContext() const;
-  std::string GetExecutionFilePath() const;
-
 
   /**
    * Get the vector of  files created by this makefile
