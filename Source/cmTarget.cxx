@@ -5925,8 +5925,8 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
   std::string linkIfaceProp;
-  if(thisTarget->PolicyStatusCMP0022 != cmPolicies::OLD &&
-     thisTarget->PolicyStatusCMP0022 != cmPolicies::WARN)
+  if(thisTarget->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
+     thisTarget->GetPolicyStatusCMP0022() != cmPolicies::WARN)
     {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
@@ -5952,7 +5952,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
     }
 
   if(explicitLibraries &&
-     thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN &&
+     thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
      !this->PolicyWarnedCMP0022)
     {
     // Compare the explicitly set old link interface properties to the
@@ -5996,8 +5996,8 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
                                 iface.Libraries,
                                 iface.HadHeadSensitiveCondition);
     }
-  else if (thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN
-        || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
+  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     // If CMP0022 is NEW then the plain tll signature sets the
     // INTERFACE_LINK_LIBRARIES, so if we get here then the project
     // cleared the property explicitly and we should not fall back
@@ -6008,7 +6008,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
       thisTarget->GetLinkImplementationLibrariesInternal(config, headTarget);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
-    if(thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN &&
+    if(thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
        !this->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
       // Compare the link implementation fallback link interface to the
@@ -6100,8 +6100,8 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
         }
       }
     }
-  else if (thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN
-        || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
+  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
     // The link implementation is the default link interface.
     cmTarget::LinkImplementationLibraries const*
@@ -6421,7 +6421,7 @@ std::string cmTarget::CheckCMP0004(std::string const& item) const
   if(lib != item)
     {
     cmake* cm = this->Makefile->GetCMakeInstance();
-    switch(this->PolicyStatusCMP0004)
+    switch(this->GetPolicyStatusCMP0004())
       {
       case cmPolicies::WARN:
         {
