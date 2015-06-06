@@ -32,7 +32,7 @@
 
 cmNinjaNormalTargetGenerator::
 cmNinjaNormalTargetGenerator(cmGeneratorTarget* target)
-  : cmNinjaTargetGenerator(target->Target)
+  : cmNinjaTargetGenerator(target)
   , TargetNameOut()
   , TargetNameSO()
   , TargetNameReal()
