@@ -1494,10 +1494,8 @@ void cmMakefile::AddLinkDirectory(const std::string& dir)
     }
 }
 
-void cmMakefile::InitializeFromParent()
+void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
-  cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
-
   // Initialize definitions with the closure of the parent scope.
   this->Internal->InitializeDefinitions(parent);
 
@@ -1681,7 +1679,7 @@ void cmMakefile::Configure()
 
 void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
 {
-  mf->InitializeFromParent();
+  mf->InitializeFromParent(this);
   std::string currentStart = mf->GetCurrentSourceDirectory();
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
