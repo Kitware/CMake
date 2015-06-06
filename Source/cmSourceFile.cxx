@@ -22,7 +22,6 @@ cmSourceFile::cmSourceFile(cmMakefile* mf, const std::string& name):
   Location(mf, name)
 {
   this->CustomCommand = 0;
-  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
   this->FindFullPathFailed = false;
   this->IsUiFile = (".ui" ==
           cmSystemTools::GetFilenameLastExtension(this->Location.GetName()));
@@ -299,7 +298,7 @@ bool cmSourceFile::Matches(cmSourceFileLocation const& loc)
 //----------------------------------------------------------------------------
 void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 {
-  this->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
+  this->Properties.SetProperty(prop, value);
 
   if (this->IsUiFile)
     {
@@ -315,8 +314,7 @@ void cmSourceFile::SetProperty(const std::string& prop, const char* value)
 void cmSourceFile::AppendProperty(const std::string& prop, const char* value,
                                   bool asString)
 {
-  this->Properties.AppendProperty(prop, value, cmProperty::SOURCE_FILE,
-                                  asString);
+  this->Properties.AppendProperty(prop, value, asString);
 }
 
 //----------------------------------------------------------------------------
@@ -362,13 +360,16 @@ const char* cmSourceFile::GetProperty(const std::string& prop) const
       }
     }
 
-  bool chain = false;
-  const char *retVal =
-    this->Properties.GetPropertyValue(prop, cmProperty::SOURCE_FILE, chain);
-  if (chain)
+  const char *retVal = this->Properties.GetPropertyValue(prop);
+  if (!retVal)
     {
     cmMakefile const* mf = this->Location.GetMakefile();
-    return mf->GetProperty(prop,cmProperty::SOURCE_FILE);
+    const bool chain = mf->GetState()->
+                      IsPropertyChained(prop, cmProperty::SOURCE_FILE);
+    if (chain)
+      {
+      return mf->GetProperty(prop, chain);
+      }
     }
 
   return retVal;

@@ -2438,7 +2438,6 @@ cmTarget cmGlobalGenerator::CreateGlobalTarget(
 {
   // Package
   cmTarget target;
-  target.GetProperties().SetCMakeInstance(this->CMakeInstance);
   target.SetType(cmTarget::GLOBAL_TARGET, name);
   target.SetProperty("EXCLUDE_FROM_ALL","TRUE");
 

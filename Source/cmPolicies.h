@@ -244,6 +244,7 @@ public:
     REQUIRED_IF_USED,
     REQUIRED_ALWAYS ///< Issue an error unless user sets policy status to NEW.
   };
+#define POLICY_STATUS_COUNT 5
 
   /// Policy identifiers
   enum PolicyID
@@ -281,18 +282,13 @@ public:
   /** Represent a set of policy values.  */
   struct PolicyMap
   {
-    PolicyMap();
     PolicyStatus Get(PolicyID id) const;
     void Set(PolicyID id, PolicyStatus status);
     bool IsDefined(PolicyID id) const;
     bool IsEmpty() const;
 
   private:
-    std::bitset<cmPolicies::CMPCOUNT> UNDEFINED;
-    std::bitset<cmPolicies::CMPCOUNT> OLD;
-    std::bitset<cmPolicies::CMPCOUNT> NEW;
-    std::bitset<cmPolicies::CMPCOUNT> REQUIRED_IF_USED;
-    std::bitset<cmPolicies::CMPCOUNT> REQUIRED_ALWAYS;
+    std::bitset<cmPolicies::CMPCOUNT * POLICY_STATUS_COUNT> Status;
   };
 };
 

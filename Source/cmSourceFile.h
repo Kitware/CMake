@@ -107,8 +107,9 @@ private:
   std::string Extension;
   std::string Language;
   std::string FullPath;
-  bool FindFullPathFailed;
   std::string ObjectLibrary;
+  std::vector<std::string> Depends;
+  bool FindFullPathFailed;
   bool IsUiFile;
 
   bool FindFullPath(std::string* error);
@@ -116,7 +117,6 @@ private:
   void CheckExtension();
   void CheckLanguage(std::string const& ext);
 
-  std::vector<std::string> Depends;
 
   static const std::string propLANGUAGE;
 };
