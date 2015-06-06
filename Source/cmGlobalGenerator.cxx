@@ -1456,9 +1456,10 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets(cmMakefile *mf)
+void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
 {
   cmGeneratorTargetsType generatorTargets;
+  cmMakefile* mf = lg->GetMakefile();
   cmTargets& targets = mf->GetTargets();
   for(cmTargets::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
@@ -1487,7 +1488,7 @@ void cmGlobalGenerator::CreateGeneratorTargets()
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    this->CreateGeneratorTargets(this->LocalGenerators[i]->GetMakefile());
+    this->CreateGeneratorTargets(this->LocalGenerators[i]);
     }
 }
 
