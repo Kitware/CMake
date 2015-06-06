@@ -21,7 +21,6 @@ cmTest::cmTest(cmMakefile* mf)
 {
   this->Makefile = mf;
   this->OldStyle = true;
-  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
 }
 
 //----------------------------------------------------------------------------
@@ -50,12 +49,15 @@ void cmTest::SetCommand(std::vector<std::string> const& command)
 //----------------------------------------------------------------------------
 const char *cmTest::GetProperty(const std::string& prop) const
 {
-  bool chain = false;
-  const char *retVal =
-    this->Properties.GetPropertyValue(prop, cmProperty::TEST, chain);
-  if (chain)
+  const char *retVal = this->Properties.GetPropertyValue(prop);
+  if (!retVal)
     {
-    return this->Makefile->GetProperty(prop,cmProperty::TEST);
+    const bool chain = this->Makefile->GetState()->
+          IsPropertyChained(prop, cmProperty::TEST);
+    if (chain)
+      {
+      return this->Makefile->GetProperty(prop, chain);
+      }
     }
   return retVal;
 }

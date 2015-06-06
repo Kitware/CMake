@@ -286,9 +286,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
   // Set our makefile.
   this->Makefile = mf;
 
-  // set the cmake instance of the properties
-  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
-
   // Check whether this is a DLL platform.
   this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
                        this->Makefile->IsOn("CYGWIN") ||
@@ -3167,12 +3164,15 @@ const char *cmTarget::GetProperty(const std::string& prop,
       }
     }
 
-  bool chain = false;
-  const char *retVal =
-    this->Properties.GetPropertyValue(prop, cmProperty::TARGET, chain);
-  if (chain)
+  const char *retVal = this->Properties.GetPropertyValue(prop);
+  if (!retVal)
     {
-    return this->Makefile->GetProperty(prop, cmProperty::TARGET);
+    const bool chain = this->GetMakefile()->GetState()->
+                      IsPropertyChained(prop, cmProperty::TARGET);
+    if (chain)
+      {
+      return this->Makefile->GetProperty(prop, chain);
+      }
     }
   return retVal;
 }
