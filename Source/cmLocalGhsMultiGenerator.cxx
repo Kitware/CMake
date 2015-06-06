@@ -37,7 +37,7 @@ void cmLocalGhsMultiGenerator::Generate()
       {
       continue;
       }
-    cmGhsMultiTargetGenerator tg(l->second->Target);
+    cmGhsMultiTargetGenerator tg(l->second);
     tg.Generate();
     }
 }
