@@ -483,7 +483,7 @@ private:
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
   friend class cmake;
-  void CreateGeneratorTargets(cmMakefile* mf);
+  void CreateGeneratorTargets(cmLocalGenerator* lg);
   void CreateGeneratorTargets();
 
   void ClearGeneratorMembers();
