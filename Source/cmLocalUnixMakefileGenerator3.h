@@ -254,25 +254,9 @@ private:
 
   ImplicitDependTargetMap ImplicitDepends;
 
-  //==========================================================================
-  // Configuration settings.
-  int MakefileVariableSize;
   std::string ConfigurationName;
-  bool MakeCommandEscapeTargetTwice;
-  bool BorlandMakeCurlyHack;
-  //==========================================================================
 
   std::string HomeRelativeOutputPath;
-
-  /* Copy the setting of CMAKE_COLOR_MAKEFILE from the makefile at the
-     beginning of generation to avoid many duplicate lookups.  */
-  bool ColorMakefile;
-
-  /* Copy the setting of CMAKE_SKIP_PREPROCESSED_SOURCE_RULES and
-     CMAKE_SKIP_ASSEMBLY_SOURCE_RULES at the beginning of generation to
-     avoid many duplicate lookups.  */
-  bool SkipPreprocessedSourceRules;
-  bool SkipAssemblySourceRules;
 
   struct LocalObjectEntry
   {
@@ -302,6 +286,13 @@ private:
   /* does the work for each target */
   std::map<std::string, std::string> MakeVariableMap;
   std::map<std::string, std::string> ShortMakeVariableMap;
+
+  int MakefileVariableSize;
+  bool MakeCommandEscapeTargetTwice;
+  bool BorlandMakeCurlyHack;
+  bool ColorMakefile;
+  bool SkipPreprocessedSourceRules;
+  bool SkipAssemblySourceRules;
 };
 
 #endif
