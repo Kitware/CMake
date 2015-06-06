@@ -228,6 +228,11 @@ cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
   this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
 }
 
+cmLocalGenerator* cmGeneratorTarget::GetLocalGenerator() const
+{
+  return this->LocalGenerator;
+}
+
 //----------------------------------------------------------------------------
 int cmGeneratorTarget::GetType() const
 {
