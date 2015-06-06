@@ -1772,7 +1772,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     }
   else
     {
-    this->Properties.SetProperty(prop, value, cmProperty::TARGET);
+    this->Properties.SetProperty(prop, value);
     this->MaybeInvalidatePropertyCache(prop);
     }
 }
@@ -1857,7 +1857,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else
     {
-    this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
+    this->Properties.AppendProperty(prop, value, asString);
     this->MaybeInvalidatePropertyCache(prop);
     }
 }
@@ -2938,8 +2938,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
       // CMake time.
-      this->Properties.SetProperty(propLOCATION, this->GetLocationForBuild(),
-                                   cmProperty::TARGET);
+      this->Properties.SetProperty(propLOCATION, this->GetLocationForBuild());
       }
 
     // Support "LOCATION_<CONFIG>".
@@ -2950,9 +2949,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         return 0;
         }
       const char* configName = prop.c_str() + 9;
-      this->Properties.SetProperty(prop,
-                                   this->GetLocation(configName),
-                                   cmProperty::TARGET);
+      this->Properties.SetProperty(prop, this->GetLocation(configName));
       }
     // Support "<CONFIG>_LOCATION".
     else if(cmHasLiteralSuffix(prop, "_LOCATION"))
@@ -2964,9 +2961,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
           {
           return 0;
           }
-        this->Properties.SetProperty(prop,
-                                     this->GetLocation(configName),
-                                     cmProperty::TARGET);
+        this->Properties.SetProperty(prop, this->GetLocation(configName));
         }
       }
     }
@@ -3168,8 +3163,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
             }
           }
         }
-      this->Properties.SetProperty("SOURCES", ss.str().c_str(),
-                                   cmProperty::TARGET);
+      this->Properties.SetProperty("SOURCES", ss.str().c_str());
       }
     }
 

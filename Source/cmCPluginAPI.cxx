@@ -662,7 +662,7 @@ void CCONV cmSourceFileSetProperty(void *arg,const char *prop,
   else if(prop)
     {
     if(!value) { value = "NOTFOUND"; }
-    sf->Properties.SetProperty(prop, value, cmProperty::SOURCE_FILE);
+    sf->Properties.SetProperty(prop, value);
     }
 }
 
@@ -801,8 +801,7 @@ void CCONV cmSourceFileSetName2(void *arg, const char* name, const char* dir,
   // Implement the old SetName method code here.
   if(headerFileOnly)
     {
-    sf->Properties.SetProperty("HEADER_FILE_ONLY", "1",
-                               cmProperty::SOURCE_FILE);
+    sf->Properties.SetProperty("HEADER_FILE_ONLY", "1");
     }
   sf->SourceName = name;
   std::string fname = sf->SourceName;

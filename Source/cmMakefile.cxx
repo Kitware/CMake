@@ -4089,7 +4089,7 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
       }
     }
 
-  this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
+  this->Properties.SetProperty(prop, value);
 }
 
 void cmMakefile::AppendProperty(const std::string& prop,
@@ -4129,7 +4129,7 @@ void cmMakefile::AppendProperty(const std::string& prop,
     return;
     }
 
-  this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
+  this->Properties.AppendProperty(prop, value, asString);
 }
 
 const char *cmMakefile::GetProperty(const std::string& prop) const
