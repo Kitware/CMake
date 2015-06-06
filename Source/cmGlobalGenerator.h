@@ -292,7 +292,8 @@ public:
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
-  TargetDependSet const& GetTargetDirectDepends(cmTarget const& target);
+  TargetDependSet const& GetTargetDirectDepends(
+      const cmGeneratorTarget* target);
 
   /** Get per-target generator information.  */
   cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
@@ -368,7 +369,7 @@ protected:
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
   bool IsRootOnlyTarget(cmTarget* target) const;
-  void AddTargetDepends(cmTarget const* target,
+  void AddTargetDepends(const cmGeneratorTarget* target,
                         TargetDependSet& projectTargets);
   void SetLanguageEnabledFlag(const std::string& l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const std::string& l, cmMakefile* mf);
@@ -477,7 +478,7 @@ private:
   std::vector<std::string> FilesReplacedDuringGenerate;
 
   // Store computed inter-target dependencies.
-  typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
+  typedef std::map<cmGeneratorTarget const*, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 
   // Per-target generator information.
