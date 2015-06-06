@@ -116,6 +116,7 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
       }
     }
 }
+
 std::string
 cmExportTryCompileFileGenerator::InstallNameDir(cmTarget* target,
                                                 const std::string& config)
