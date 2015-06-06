@@ -368,8 +368,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
-  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
-  cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
+  cmGlobalGenerator* gg = makefile->GetGlobalGenerator();
   if(gg->GetName().find("Visual Studio") != std::string::npos)
     {
     cmGlobalVisualStudioGenerator* vsgg =
