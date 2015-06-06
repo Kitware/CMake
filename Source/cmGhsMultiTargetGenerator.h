@@ -27,7 +27,7 @@ class cmCustomCommand;
 class cmGhsMultiTargetGenerator
 {
 public:
-  cmGhsMultiTargetGenerator(cmTarget *target);
+  cmGhsMultiTargetGenerator(cmGeneratorTarget* target);
 
   virtual ~cmGhsMultiTargetGenerator();
 

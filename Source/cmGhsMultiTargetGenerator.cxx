@@ -21,23 +21,23 @@
 
 std::string const cmGhsMultiTargetGenerator::DDOption("-dynamic");
 
-cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmTarget *target)
-  : Target(target)
+cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget *target)
+  : Target(target->Target)
   , LocalGenerator(static_cast<cmLocalGhsMultiGenerator *>(
-                     target->GetMakefile()->GetLocalGenerator()))
-  , Makefile(target->GetMakefile())
-  , TargetGroup(DetermineIfTargetGroup(target))
+                     target->GetLocalGenerator()))
+  , Makefile(target->Target->GetMakefile())
+  , TargetGroup(DetermineIfTargetGroup(target->Target))
   , DynamicDownload(false)
 {
-  this->RelBuildFilePath = this->GetRelBuildFilePath(target);
+  this->RelBuildFilePath = this->GetRelBuildFilePath(target->Target);
 
   this->RelOutputFileName =
     this->RelBuildFilePath + this->Target->GetName() + ".a";
 
   this->RelBuildFileName = this->RelBuildFilePath;
-  this->RelBuildFileName += this->GetBuildFileName(target);
+  this->RelBuildFileName += this->GetBuildFileName(target->Target);
 
-  std::string absPathToRoot = this->GetAbsPathToRoot(target);
+  std::string absPathToRoot = this->GetAbsPathToRoot(target->Target);
   absPathToRoot = this->AddSlashIfNeededToPath(absPathToRoot);
   this->AbsBuildFilePath = absPathToRoot + this->RelBuildFilePath;
   this->AbsBuildFileName = absPathToRoot + this->RelBuildFileName;
