@@ -99,8 +99,6 @@ cmExportTryCompileFileGenerator::PopulateProperties(cmTarget const* target,
         || i->first.find("IMPORTED_LINK_DEPENDENT_LIBRARIES") == 0
         || i->first.find("INTERFACE_LINK_LIBRARIES") == 0)
       {
-      const std::string libs = i->second.GetValue();
-
       std::string evalResult = this->FindTargets(i->first,
                                                  target, emitted);
 
