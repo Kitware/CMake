@@ -2036,9 +2036,9 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
           clg = clg->GetParent())
         {
         // This local generator includes the target.
-        std::set<cmTarget const*>& targetSet =
+        std::set<cmGeneratorTarget const*>& targetSet =
           this->LocalGeneratorToTargetMap[clg];
-        targetSet.insert(&target);
+        targetSet.insert(gt);
 
         // Add dependencies of the included target.  An excluded
         // target may still be included if it is a dependency of a
@@ -2047,8 +2047,7 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
         for(TargetDependSet::const_iterator ti = tgtdeps.begin();
             ti != tgtdeps.end(); ++ti)
           {
-          cmGeneratorTarget const* ttt = *ti;
-          targetSet.insert(ttt->Target);
+          targetSet.insert(*ti);
           }
         }
       }

@@ -830,7 +830,7 @@ cmGlobalUnixMakefileGenerator3
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       //
-      std::set<cmTarget const*> emitted;
+      std::set<cmGeneratorTarget const*> emitted;
       progCmd << " "
               << this->CountProgressMarksInTarget(gtarget, emitted);
       commands.push_back(progCmd.str());
@@ -909,10 +909,10 @@ cmGlobalUnixMakefileGenerator3
 size_t
 cmGlobalUnixMakefileGenerator3
 ::CountProgressMarksInTarget(cmGeneratorTarget const* target,
-                             std::set<cmTarget const*>& emitted)
+                             std::set<cmGeneratorTarget const*>& emitted)
 {
   size_t count = 0;
-  if(emitted.insert(target->Target).second)
+  if(emitted.insert(target).second)
     {
     count = this->ProgressMap[target->Target].Marks.size();
     TargetDependSet const& depends = this->GetTargetDirectDepends(target);
@@ -935,14 +935,13 @@ cmGlobalUnixMakefileGenerator3
 ::CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg)
 {
   size_t count = 0;
-  std::set<cmTarget const*> emitted;
-  std::set<cmTarget const*> const& targets
+  std::set<cmGeneratorTarget const*> emitted;
+  std::set<cmGeneratorTarget const*> const& targets
                                         = this->LocalGeneratorToTargetMap[lg];
-  for(std::set<cmTarget const*>::const_iterator t = targets.begin();
+  for(std::set<cmGeneratorTarget const*>::const_iterator t = targets.begin();
       t != targets.end(); ++t)
     {
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(*t);
-    count += this->CountProgressMarksInTarget(gt, emitted);
+    count += this->CountProgressMarksInTarget(*t, emitted);
     }
   return count;
 }

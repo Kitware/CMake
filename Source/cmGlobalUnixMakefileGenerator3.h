@@ -199,7 +199,7 @@ protected:
   ProgressMapType ProgressMap;
 
   size_t CountProgressMarksInTarget(cmGeneratorTarget const* target,
-                                    std::set<cmTarget const*>& emitted);
+                                 std::set<cmGeneratorTarget const*>& emitted);
   size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
 
   cmGeneratedFileStream *CommandDatabase;
