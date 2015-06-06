@@ -23,10 +23,6 @@ cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
 {
 }
 
-cmOutputConverter::~cmOutputConverter()
-{
-}
-
 //----------------------------------------------------------------------------
 std::string
 cmOutputConverter::ConvertToOutputForExistingCommon(const std::string& remote,
