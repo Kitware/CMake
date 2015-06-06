@@ -728,7 +728,7 @@ public:
   cmPropertyMap &GetProperties() { return this->Properties; }
 
   ///! Initialize a makefile from its parent
-  void InitializeFromParent();
+  void InitializeFromParent(cmMakefile* parent);
 
   void AddInstallGenerator(cmInstallGenerator* g)
     { if(g) this->InstallGenerators.push_back(g); }
