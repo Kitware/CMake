@@ -84,7 +84,11 @@ bool cmGetDirectoryPropertyCommand
     return true;
     }
 
-  const char *prop = dir->GetProperty(*i);
+  const char *prop = 0;
+  if (!i->empty())
+    {
+    prop = dir->GetProperty(*i);
+    }
   if (prop)
     {
     this->Makefile->AddDefinition(variable, prop);
