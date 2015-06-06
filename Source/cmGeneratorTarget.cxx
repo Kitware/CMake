@@ -370,7 +370,7 @@ const char* cmGeneratorTarget::GetFeature(const std::string& feature,
     {
     return value;
     }
-  return this->Makefile->GetFeature(feature, config);
+  return this->LocalGenerator->GetFeature(feature, config);
 }
 
 //----------------------------------------------------------------------------

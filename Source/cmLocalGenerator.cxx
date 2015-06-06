@@ -2573,6 +2573,33 @@ void cmLocalGenerator::AppendFeatureOptions(
 }
 
 //----------------------------------------------------------------------------
+const char* cmLocalGenerator::GetFeature(const std::string& feature,
+                                         const std::string& config)
+{
+  // TODO: Define accumulation policy for features (prepend, append, replace).
+  // Currently we always replace.
+  if(!config.empty())
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->Makefile->GetProperty(featureConfig))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->Makefile->GetProperty(feature))
+    {
+    return value;
+    }
+  if(cmLocalGenerator* parent = this->GetParent())
+    {
+    return parent->GetFeature(feature, config);
+    }
+  return 0;
+}
+
+//----------------------------------------------------------------------------
 std::string
 cmLocalGenerator::ConstructComment(cmCustomCommandGenerator const& ccg,
                                    const char* default_comment)
