@@ -348,19 +348,19 @@ cmPolicies::PolicyMap::Get(cmPolicies::PolicyID id) const
 {
   PolicyStatus status = cmPolicies::WARN;
 
-  if (this->OLD[id])
+  if (this->Status[(POLICY_STATUS_COUNT * id) + OLD])
     {
     status = cmPolicies::OLD;
     }
-  else if (this->NEW[id])
+  else if (this->Status[(POLICY_STATUS_COUNT * id) + NEW])
     {
     status = cmPolicies::NEW;
     }
-  else if (this->REQUIRED_ALWAYS[id])
+  else if (this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS])
     {
     status = cmPolicies::REQUIRED_ALWAYS;
     }
-  else if (this->REQUIRED_IF_USED[id])
+  else if (this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED])
     {
     status = cmPolicies::REQUIRED_IF_USED;
     }
@@ -370,21 +370,23 @@ cmPolicies::PolicyMap::Get(cmPolicies::PolicyID id) const
 void cmPolicies::PolicyMap::Set(cmPolicies::PolicyID id,
                                 cmPolicies::PolicyStatus status)
 {
-  this->OLD[id] = (status == cmPolicies::OLD);
-  this->WARN[id] = (status == cmPolicies::WARN);
-  this->NEW[id] = (status == cmPolicies::NEW);
-  this->REQUIRED_ALWAYS[id] = (status == cmPolicies::REQUIRED_ALWAYS);
-  this->REQUIRED_IF_USED[id] = (status == cmPolicies::REQUIRED_IF_USED);
+  this->Status[(POLICY_STATUS_COUNT * id) + OLD] = (status == OLD);
+  this->Status[(POLICY_STATUS_COUNT * id) + WARN] = (status == WARN);
+  this->Status[(POLICY_STATUS_COUNT * id) + NEW] = (status == NEW);
+  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS] = (status == REQUIRED_ALWAYS);
+  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED] = (status == REQUIRED_IF_USED);
 }
 
 bool cmPolicies::PolicyMap::IsDefined(cmPolicies::PolicyID id) const
 {
-  return this->OLD[id] || this->WARN[id] || this->NEW[id]
-      || this->REQUIRED_ALWAYS[id] || this->REQUIRED_IF_USED[id];
+  return this->Status[(POLICY_STATUS_COUNT * id) + OLD]
+      || this->Status[(POLICY_STATUS_COUNT * id) + WARN]
+      || this->Status[(POLICY_STATUS_COUNT * id) + NEW]
+      || this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS]
+      || this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED];
 }
 
 bool cmPolicies::PolicyMap::IsEmpty() const
 {
-  return this->OLD.none() && this->WARN.none() && this->NEW.none()
-      && this->REQUIRED_ALWAYS.none() && this->REQUIRED_IF_USED.none();
+  return this->Status.none();
 }

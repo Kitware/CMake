@@ -244,6 +244,7 @@ public:
     REQUIRED_IF_USED,
     REQUIRED_ALWAYS ///< Issue an error unless user sets policy status to NEW.
   };
+#define POLICY_STATUS_COUNT 5
 
   /// Policy identifiers
   enum PolicyID
@@ -287,11 +288,7 @@ public:
     bool IsEmpty() const;
 
   private:
-    std::bitset<cmPolicies::CMPCOUNT> OLD;
-    std::bitset<cmPolicies::CMPCOUNT> WARN;
-    std::bitset<cmPolicies::CMPCOUNT> NEW;
-    std::bitset<cmPolicies::CMPCOUNT> REQUIRED_IF_USED;
-    std::bitset<cmPolicies::CMPCOUNT> REQUIRED_ALWAYS;
+    std::bitset<cmPolicies::CMPCOUNT * POLICY_STATUS_COUNT> Status;
   };
 };
 
