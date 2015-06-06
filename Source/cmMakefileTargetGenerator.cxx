@@ -1154,8 +1154,10 @@ void cmMakefileTargetGenerator::WriteTargetDependRules()
                 && linkee->GetType() != cmTarget::INTERFACE_LIBRARY
                 && emitted.insert(linkee).second)
         {
+        cmGeneratorTarget* gt =
+            this->GlobalGenerator->GetGeneratorTarget(linkee);
+        cmLocalGenerator* lg = gt->GetLocalGenerator();
         cmMakefile* mf = linkee->GetMakefile();
-        cmLocalGenerator* lg = mf->GetLocalGenerator();
         std::string di = mf->GetCurrentBinaryDirectory();
         di += "/";
         di += lg->GetTargetDirectory(*linkee);
