@@ -718,9 +718,6 @@ public:
   const char *GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config);
-
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; }
 

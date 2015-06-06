@@ -2800,34 +2800,6 @@ void cmTarget::GetTargetVersion(bool soversion,
 }
 
 //----------------------------------------------------------------------------
-const char* cmTarget::GetFeature(const std::string& feature,
-                                 const std::string& config) const
-{
-  if(!config.empty())
-    {
-    std::string featureConfig = feature;
-    featureConfig += "_";
-    featureConfig += cmSystemTools::UpperCase(config);
-    if(const char* value = this->GetProperty(featureConfig))
-      {
-      return value;
-      }
-    }
-  if(const char* value = this->GetProperty(feature))
-    {
-    return value;
-    }
-  return this->Makefile->GetFeature(feature, config);
-}
-
-//----------------------------------------------------------------------------
-bool cmTarget::GetFeatureAsBool(const std::string& feature,
-                                const std::string& config) const
-{
-  return cmSystemTools::IsOn(this->GetFeature(feature, config));
-}
-
-//----------------------------------------------------------------------------
 bool cmTarget::HandleLocationPropertyPolicy(cmMakefile* context) const
 {
   if (this->IsImported())
