@@ -142,8 +142,7 @@ bool cmGetPropertyCommand
     {
     // Lookup brief documentation.
     std::string output;
-    if(cmPropertyDefinition* def =
-       this->Makefile->GetState()->
+    if(cmPropertyDefinition const* def = this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       output = def->GetShortDescription();
@@ -158,8 +157,7 @@ bool cmGetPropertyCommand
     {
     // Lookup full documentation.
     std::string output;
-    if(cmPropertyDefinition* def =
-       this->Makefile->GetState()->
+    if(cmPropertyDefinition const* def = this->Makefile->GetState()->
        GetPropertyDefinition(this->PropertyName, scope))
       {
       output = def->GetFullDescription();

@@ -256,27 +256,41 @@ void cmState::DefineProperty(const std::string& name,
                                                   chained);
 }
 
-cmPropertyDefinition *cmState
+cmPropertyDefinition const* cmState
 ::GetPropertyDefinition(const std::string& name,
-                        cmProperty::ScopeType scope)
+                        cmProperty::ScopeType scope) const
 {
   if (this->IsPropertyDefined(name,scope))
     {
-    return &(this->PropertyDefinitions[scope][name]);
+    cmPropertyDefinitionMap const& defs =
+        this->PropertyDefinitions.find(scope)->second;
+    return &defs.find(name)->second;
     }
   return 0;
 }
 
 bool cmState::IsPropertyDefined(const std::string& name,
-                              cmProperty::ScopeType scope)
+                                cmProperty::ScopeType scope) const
 {
-  return this->PropertyDefinitions[scope].IsPropertyDefined(name);
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::const_iterator it
+      = this->PropertyDefinitions.find(scope);
+  if (it == this->PropertyDefinitions.end())
+    {
+    return false;
+    }
+  return it->second.IsPropertyDefined(name);
 }
 
 bool cmState::IsPropertyChained(const std::string& name,
-                              cmProperty::ScopeType scope)
+                                cmProperty::ScopeType scope) const
 {
-  return this->PropertyDefinitions[scope].IsPropertyChained(name);
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::const_iterator it
+      = this->PropertyDefinitions.find(scope);
+  if (it == this->PropertyDefinitions.end())
+    {
+    return false;
+    }
+  return it->second.IsPropertyChained(name);
 }
 
 void cmState::SetLanguageEnabled(std::string const& l)

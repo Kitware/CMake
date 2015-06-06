@@ -102,12 +102,14 @@ public:
                       bool chain = false);
 
   // get property definition
-  cmPropertyDefinition *GetPropertyDefinition
-  (const std::string& name, cmProperty::ScopeType scope);
+  cmPropertyDefinition const* GetPropertyDefinition
+  (const std::string& name, cmProperty::ScopeType scope) const;
 
   // Is a property defined?
-  bool IsPropertyDefined(const std::string& name, cmProperty::ScopeType scope);
-  bool IsPropertyChained(const std::string& name, cmProperty::ScopeType scope);
+  bool IsPropertyDefined(const std::string& name,
+                         cmProperty::ScopeType scope) const;
+  bool IsPropertyChained(const std::string& name,
+                         cmProperty::ScopeType scope) const;
 
   void SetLanguageEnabled(std::string const& l);
   bool GetLanguageEnabled(std::string const& l) const;
