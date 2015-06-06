@@ -22,8 +22,6 @@ class cmOutputConverter
 public:
   cmOutputConverter(cmState::Snapshot snapshot);
 
-  virtual ~cmOutputConverter();
-
   /**
    * Convert something to something else. This is a centralized conversion
    * routine used by the generators to handle relative paths and the like.
