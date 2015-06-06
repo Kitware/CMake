@@ -147,9 +147,6 @@ public:
   void AddImplicitDepends(cmTarget const& tgt, const std::string& lang,
                           const char* obj, const char* src);
 
-  void AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                                 cmTarget& target);
-
   // write the target rules for the local Makefile into the stream
   void WriteLocalAllRules(std::ostream& ruleFileStream);
 
