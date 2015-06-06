@@ -69,12 +69,12 @@ bool cmTest::GetPropertyAsBool(const std::string& prop) const
 //----------------------------------------------------------------------------
 void cmTest::SetProperty(const std::string& prop, const char* value)
 {
-  this->Properties.SetProperty(prop, value, cmProperty::TEST);
+  this->Properties.SetProperty(prop, value);
 }
 
 //----------------------------------------------------------------------------
 void cmTest::AppendProperty(const std::string& prop,
                             const char* value, bool asString)
 {
-  this->Properties.AppendProperty(prop, value, cmProperty::TEST, asString);
+  this->Properties.AppendProperty(prop, value, asString);
 }

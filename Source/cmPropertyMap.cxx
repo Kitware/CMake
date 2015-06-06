@@ -29,29 +29,26 @@ cmProperty *cmPropertyMap::GetOrCreateProperty(const std::string& name)
   return prop;
 }
 
-void cmPropertyMap::SetProperty(const std::string& name, const char *value,
-                                cmProperty::ScopeType scope)
+void cmPropertyMap::SetProperty(const std::string& name, const char *value)
 {
   if(!value)
     {
     this->erase(name);
     return;
     }
-  (void)scope;
 
   cmProperty *prop = this->GetOrCreateProperty(name);
   prop->Set(value);
 }
 
 void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
-                                   cmProperty::ScopeType scope, bool asString)
+                                   bool asString)
 {
   // Skip if nothing to append.
   if(!value || !*value)
     {
     return;
     }
-  (void)scope;
 
   cmProperty *prop = this->GetOrCreateProperty(name);
   prop->Append(value,asString);

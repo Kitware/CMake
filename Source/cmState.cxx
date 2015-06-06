@@ -438,14 +438,13 @@ void cmState::RemoveUserDefinedCommands()
 
 void cmState::SetGlobalProperty(const std::string& prop, const char* value)
 {
-  this->GlobalProperties.SetProperty(prop, value, cmProperty::GLOBAL);
+  this->GlobalProperties.SetProperty(prop, value);
 }
 
 void cmState::AppendGlobalProperty(const std::string& prop,
                                    const char* value, bool asString)
 {
-  this->GlobalProperties.AppendProperty(prop, value,
-                                        cmProperty::GLOBAL, asString);
+  this->GlobalProperties.AppendProperty(prop, value, asString);
 }
 
 const char *cmState::GetGlobalProperty(const std::string& prop)

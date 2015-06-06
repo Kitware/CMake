@@ -763,7 +763,7 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
     }
   else
     {
-    this->Properties.SetProperty(prop, value, cmProperty::CACHE);
+    this->Properties.SetProperty(prop, value);
     }
 }
 
@@ -789,7 +789,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
     }
   else
     {
-    this->Properties.AppendProperty(prop, value, cmProperty::CACHE, asString);
+    this->Properties.AppendProperty(prop, value, asString);
     }
 }
 
