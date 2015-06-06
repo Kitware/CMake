@@ -1608,6 +1608,11 @@ void cmMakefile::PopMacroScope(bool reportError)
   this->PopFunctionBlockerBarrier(reportError);
 }
 
+bool cmMakefile::IsRootMakefile() const
+{
+  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
+}
+
 //----------------------------------------------------------------------------
 class cmMakefileCurrent
 {

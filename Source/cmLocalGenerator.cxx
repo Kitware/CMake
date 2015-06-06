@@ -68,11 +68,6 @@ cmLocalGenerator::~cmLocalGenerator()
   delete this->Makefile;
 }
 
-bool cmLocalGenerator::IsRootMakefile() const
-{
-  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
-}
-
 //----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeObjectMaxPath()
 {
