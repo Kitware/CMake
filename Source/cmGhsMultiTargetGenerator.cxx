@@ -21,11 +21,11 @@
 
 std::string const cmGhsMultiTargetGenerator::DDOption("-dynamic");
 
-cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmTarget *target)
-  : Target(target)
+cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget *target)
+  : Target(target->Target)
   , LocalGenerator(static_cast<cmLocalGhsMultiGenerator *>(
-                     target->GetMakefile()->GetLocalGenerator()))
-  , Makefile(target->GetMakefile())
+                     target->GetLocalGenerator()))
+  , Makefile(target->Target->GetMakefile())
   , TargetGroup(DetermineIfTargetGroup(target))
   , DynamicDownload(false)
 {
