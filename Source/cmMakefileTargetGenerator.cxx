@@ -32,7 +32,7 @@
 
 #include <ctype.h>
 
-cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
+cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmGeneratorTarget* target)
   : OSXBundleGenerator(0)
   , MacOSXContentGenerator(0)
 {
@@ -41,16 +41,15 @@ cmMakefileTargetGenerator::cmMakefileTargetGenerator(cmTarget* target)
   this->FlagFileStream = 0;
   this->CustomCommandDriver = OnBuild;
   this->FortranModuleDirectoryComputed = false;
-  this->Target = target;
+  this->Target = target->Target;
   this->Makefile = this->Target->GetMakefile();
   this->LocalGenerator =
-    static_cast<cmLocalUnixMakefileGenerator3*>(
-      this->Makefile->GetLocalGenerator());
+    static_cast<cmLocalUnixMakefileGenerator3*>(target->GetLocalGenerator());
   this->ConfigName = this->LocalGenerator->ConfigurationName.c_str();
   this->GlobalGenerator =
     static_cast<cmGlobalUnixMakefileGenerator3*>(
       this->LocalGenerator->GetGlobalGenerator());
-  this->GeneratorTarget = this->GlobalGenerator->GetGeneratorTarget(target);
+  this->GeneratorTarget = target;
   cmake* cm = this->GlobalGenerator->GetCMakeInstance();
   this->NoRuleMessages = false;
   if(const char* ruleStatus = cm->GetState()

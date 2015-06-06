@@ -22,7 +22,7 @@
 //----------------------------------------------------------------------------
 cmMakefileExecutableTargetGenerator
 ::cmMakefileExecutableTargetGenerator(cmGeneratorTarget* target):
-  cmMakefileTargetGenerator(target->Target)
+  cmMakefileTargetGenerator(target)
 {
   this->CustomCommandDriver = OnDepends;
   this->Target->GetExecutableNames(
