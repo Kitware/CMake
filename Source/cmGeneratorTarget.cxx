@@ -220,11 +220,12 @@ struct TagVisitor
 };
 
 //----------------------------------------------------------------------------
-cmGeneratorTarget::cmGeneratorTarget(cmTarget* t): Target(t),
+cmGeneratorTarget::cmGeneratorTarget(cmTarget* t, cmLocalGenerator* lg)
+  : Target(t),
   SourceFileFlagsConstructed(false)
 {
   this->Makefile = this->Target->GetMakefile();
-  this->LocalGenerator = this->Makefile->GetLocalGenerator();
+  this->LocalGenerator = lg;
   this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
 }
 
