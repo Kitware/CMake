@@ -521,10 +521,10 @@ static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
                                                 std::string &defs)
 {
   cmMakefile* makefile = target->GetMakefile();
-  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
+  cmGlobalGenerator* globalGen = makefile->GetGlobalGenerator();
   std::vector<std::string> includeDirs;
-  cmGeneratorTarget *gtgt = localGen->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
+  cmGeneratorTarget *gtgt = globalGen->GetGeneratorTarget(target);
+  cmLocalGenerator *localGen = gtgt->GetLocalGenerator();
   // Get the include dirs for this target, without stripping the implicit
   // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
   localGen->GetIncludeDirectories(includeDirs, gtgt, "CXX", config, false);
