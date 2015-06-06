@@ -406,7 +406,7 @@ protected:
   cmMakefile* CurrentMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
-  std::map<cmLocalGenerator*, std::set<cmTarget const*> >
+  std::map<cmLocalGenerator*, std::set<cmGeneratorTarget const*> >
                                                     LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
