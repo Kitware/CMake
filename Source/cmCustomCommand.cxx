@@ -26,46 +26,6 @@ cmCustomCommand::cmCustomCommand()
 }
 
 //----------------------------------------------------------------------------
-cmCustomCommand::cmCustomCommand(const cmCustomCommand& r):
-  Outputs(r.Outputs),
-  Byproducts(r.Byproducts),
-  Depends(r.Depends),
-  CommandLines(r.CommandLines),
-  Backtrace(r.Backtrace),
-  Comment(r.Comment),
-  WorkingDirectory(r.WorkingDirectory),
-  HaveComment(r.HaveComment),
-  EscapeAllowMakeVars(r.EscapeAllowMakeVars),
-  EscapeOldStyle(r.EscapeOldStyle),
-  UsesTerminal(r.UsesTerminal)
-{
-}
-
-//----------------------------------------------------------------------------
-cmCustomCommand& cmCustomCommand::operator=(cmCustomCommand const& r)
-{
-  if(this == &r)
-    {
-    return *this;
-    }
-
-  this->Outputs = r.Outputs;
-  this->Byproducts= r.Byproducts;
-  this->Depends = r.Depends;
-  this->CommandLines = r.CommandLines;
-  this->HaveComment = r.HaveComment;
-  this->Comment = r.Comment;
-  this->WorkingDirectory = r.WorkingDirectory;
-  this->EscapeAllowMakeVars = r.EscapeAllowMakeVars;
-  this->EscapeOldStyle = r.EscapeOldStyle;
-  this->ImplicitDepends = r.ImplicitDepends;
-  this->Backtrace = r.Backtrace;
-  this->UsesTerminal = r.UsesTerminal;
-
-  return *this;
-}
-
-//----------------------------------------------------------------------------
 cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
                                  const std::vector<std::string>& outputs,
                                  const std::vector<std::string>& byproducts,
@@ -88,11 +48,6 @@ cmCustomCommand::cmCustomCommand(cmMakefile const* mf,
     {
     this->Backtrace = mf->GetBacktrace();
     }
-}
-
-//----------------------------------------------------------------------------
-cmCustomCommand::~cmCustomCommand()
-{
 }
 
 //----------------------------------------------------------------------------

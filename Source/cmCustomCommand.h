@@ -26,8 +26,6 @@ class cmCustomCommand
 public:
   /** Default and copy constructors for STL containers.  */
   cmCustomCommand();
-  cmCustomCommand(const cmCustomCommand& r);
-  cmCustomCommand& operator=(cmCustomCommand const& r);
 
   /** Main constructor specifies all information for the command.  */
   cmCustomCommand(cmMakefile const* mf,
@@ -37,8 +35,6 @@ public:
                   const cmCustomCommandLines& commandLines,
                   const char* comment,
                   const char* workingDirectory);
-
-  ~cmCustomCommand();
 
   /** Get the output file produced by the command.  */
   const std::vector<std::string>& GetOutputs() const;
