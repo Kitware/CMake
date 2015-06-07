@@ -61,14 +61,7 @@ private:
   cmMakefile* Makefile;
   cmGlobalGenerator const* GlobalGenerator;
   cmake* CMakeInstance;
-  bool DebugMode;
-
-  // Configuration information.
-  bool HasConfig;
   std::string Config;
-  cmTarget::LinkLibraryType LinkType;
-
-  // Output information.
   EntryVector FinalLinkEntries;
 
   typedef cmTarget::LinkLibraryVectorType LinkLibraryVectorType;
@@ -131,7 +124,7 @@ private:
   void OrderLinkEntires();
   std::vector<char> ComponentVisited;
   std::vector<int> ComponentOrder;
-  int ComponentOrderId;
+
   struct PendingComponent
   {
     // The real component id.  Needed because the map is indexed by
@@ -158,11 +151,14 @@ private:
 
   // Record of the original link line.
   std::vector<int> OriginalEntries;
-
-  // Compatibility help.
-  bool OldLinkDirMode;
-  void CheckWrongConfigItem(cmLinkItem const& item);
   std::set<cmTarget const*> OldWrongConfigItems;
+  void CheckWrongConfigItem(cmLinkItem const& item);
+
+  int ComponentOrderId;
+  cmTarget::LinkLibraryType LinkType;
+  bool HasConfig;
+  bool DebugMode;
+  bool OldLinkDirMode;
 };
 
 #endif
