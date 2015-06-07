@@ -14,7 +14,6 @@
 
 #include "cmInstallGenerator.h"
 #include "cmTarget.h"
-#include "cmGeneratorTarget.h"
 
 /** \class cmInstallTargetGenerator
  * \brief Generate target installation rules.
@@ -100,11 +99,10 @@ protected:
                      const std::string& toDestDirPath);
 
   cmTarget* Target;
-  bool ImportLibrary;
   std::string FilePermissions;
-  bool Optional;
   NamelinkModeType NamelinkMode;
-  cmGeneratorTarget* GeneratorTarget;
+  bool ImportLibrary;
+  bool Optional;
 };
 
 #endif

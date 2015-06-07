@@ -43,9 +43,9 @@ protected:
 
   cmMakefile* Makefile;
   std::vector<std::string> Files;
-  bool Programs;
   std::string FilePermissions;
   std::string Rename;
+  bool Programs;
   bool Optional;
 };
 

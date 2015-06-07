@@ -44,8 +44,6 @@ private:
   cmTarget const* Target;
   std::string Purpose;
 
-  bool Computed;
-
   std::vector<std::string> OrderedDirectories;
 
   std::vector<cmOrderDirectoriesConstraint*> ConstraintEntries;
@@ -68,8 +66,9 @@ private:
   void OrderDirectories();
   void VisitDirectory(unsigned int i);
   void DiagnoseCycle();
-  bool CycleDiagnosed;
   int WalkId;
+  bool CycleDiagnosed;
+  bool Computed;
 
   // Adjacency-list representation of runtime path ordering graph.
   // This maps from directory to those that must come *before* it.

@@ -29,7 +29,9 @@ cmInstallTargetGenerator
                            MessageLevel message,
                            bool optional):
   cmInstallGenerator(dest, configurations, component, message), Target(&t),
-  ImportLibrary(implib), FilePermissions(file_permissions), Optional(optional)
+  FilePermissions(file_permissions),
+  ImportLibrary(implib),
+  Optional(optional)
 {
   this->ActionsPerConfig = true;
   this->NamelinkMode = NamelinkModeNone;
