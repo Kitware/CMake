@@ -4163,14 +4163,14 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     output = cmJoin(this->ListFileStack, ";");
     return output.c_str();
     }
-  else if (prop == "VARIABLES" || prop == "CACHE_VARIABLES")
+  else if ( prop == "CACHE_VARIABLES" )
     {
-    int cacheonly = 0;
-    if ( prop == "CACHE_VARIABLES" )
-      {
-      cacheonly = 1;
-      }
-    output = cmJoin(this->GetDefinitions(cacheonly), ";");
+    output = cmJoin(this->GetState()->GetCacheEntryKeys(), ";");
+    return output.c_str();
+    }
+  else if (prop == "VARIABLES")
+    {
+    output = cmJoin(this->GetDefinitions(), ";");
     return output.c_str();
     }
   else if (prop == "MACROS")
