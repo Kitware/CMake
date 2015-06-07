@@ -511,7 +511,7 @@ public:
    * cacheonly is specified and is greater than 0, then only cache
    * variables will be listed.
    */
-  std::vector<std::string> GetDefinitions(int cacheonly=0) const;
+  std::vector<std::string> GetDefinitions() const;
 
   /**
    * Test a boolean variable to see if it is true or false.
