@@ -51,12 +51,12 @@ public:
     /** Configure logging of lines as they are extracted.  */
     void SetLog(std::ostream* log, const char* prefix);
   protected:
-    char Separator;
-    bool IgnoreCR;
     std::ostream* Log;
     const char* Prefix;
-    char LineEnd;
     std::string Line;
+    char Separator;
+    char LineEnd;
+    bool IgnoreCR;
     virtual bool ProcessChunk(const char* data, int length);
 
     /** Implement in a subclass to process one line of input.  It
