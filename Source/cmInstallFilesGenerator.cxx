@@ -28,9 +28,11 @@ cmInstallFilesGenerator
                           bool optional):
   cmInstallGenerator(dest, configurations, component, message),
   Makefile(mf),
-  Files(files), Programs(programs),
+  Files(files),
   FilePermissions(file_permissions),
-  Rename(rename), Optional(optional)
+  Rename(rename),
+  Programs(programs),
+  Optional(optional)
 {
   // We need per-config actions if any files have generator expressions.
   for(std::vector<std::string>::const_iterator i = files.begin();
