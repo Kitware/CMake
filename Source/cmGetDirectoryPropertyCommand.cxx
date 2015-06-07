@@ -86,6 +86,23 @@ bool cmGetDirectoryPropertyCommand
   const char *prop = 0;
   if (!i->empty())
     {
+    if (*i == "DEFINITIONS")
+      {
+      switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0059))
+        {
+        case cmPolicies::WARN:
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+        case cmPolicies::OLD:
+          this->StoreResult(variable,
+                                   this->Makefile->GetDefineFlagsCMP0059());
+        return true;
+        case cmPolicies::NEW:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+          break;
+        }
+      }
     prop = dir->GetProperty(*i);
     }
   this->StoreResult(variable, prop);
