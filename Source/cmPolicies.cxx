@@ -373,8 +373,10 @@ void cmPolicies::PolicyMap::Set(cmPolicies::PolicyID id,
   this->Status[(POLICY_STATUS_COUNT * id) + OLD] = (status == OLD);
   this->Status[(POLICY_STATUS_COUNT * id) + WARN] = (status == WARN);
   this->Status[(POLICY_STATUS_COUNT * id) + NEW] = (status == NEW);
-  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS] = (status == REQUIRED_ALWAYS);
-  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED] = (status == REQUIRED_IF_USED);
+  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_ALWAYS] =
+      (status == REQUIRED_ALWAYS);
+  this->Status[(POLICY_STATUS_COUNT * id) + REQUIRED_IF_USED] =
+      (status == REQUIRED_IF_USED);
 }
 
 bool cmPolicies::PolicyMap::IsDefined(cmPolicies::PolicyID id) const
