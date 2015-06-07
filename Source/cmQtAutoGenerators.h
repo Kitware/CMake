@@ -105,7 +105,6 @@ private:
   std::string SkipMoc;
   std::string SkipUic;
   std::string Headers;
-  bool IncludeProjectDirsBefore;
   std::string Srcdir;
   std::string Builddir;
   std::string MocExecutable;
@@ -131,6 +130,7 @@ private:
   std::map<std::string, std::string> RccOptions;
   std::map<std::string, std::vector<std::string> > RccInputs;
 
+  bool IncludeProjectDirsBefore;
   bool Verbose;
   bool ColorOutput;
   bool RunMocFailed;
@@ -138,7 +138,6 @@ private:
   bool RunRccFailed;
   bool GenerateAll;
   bool RelaxedMode;
-
 };
 
 #endif
