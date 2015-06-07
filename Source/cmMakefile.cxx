@@ -2495,18 +2495,11 @@ const char* cmMakefile::GetSafeDefinition(const std::string& def) const
   return ret;
 }
 
-std::vector<std::string> cmMakefile
-::GetDefinitions(int cacheonly /* = 0 */) const
+std::vector<std::string> cmMakefile::GetDefinitions() const
 {
-  std::vector<std::string> res;
-  if ( !cacheonly )
-    {
-    res = this->Internal->ClosureKeys();
-    }
-  std::vector<std::string> cacheKeys =
-      this->GetState()->GetCacheEntryKeys();
+  std::vector<std::string> res = this->Internal->ClosureKeys();
+  std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
   res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
-
   std::sort(res.begin(), res.end());
   return res;
 }
@@ -4163,14 +4156,18 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     output = cmJoin(this->ListFileStack, ";");
     return output.c_str();
     }
-  else if (prop == "VARIABLES" || prop == "CACHE_VARIABLES")
+  else if ( prop == "CACHE_VARIABLES" )
     {
-    int cacheonly = 0;
-    if ( prop == "CACHE_VARIABLES" )
-      {
-      cacheonly = 1;
-      }
-    output = cmJoin(this->GetDefinitions(cacheonly), ";");
+    std::vector<std::string> result = this->Internal->ClosureKeys();
+    std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
+    result.insert(result.end(), cacheKeys.begin(), cacheKeys.end());
+    std::sort(result.begin(), result.end());
+    output = cmJoin(result, ";");
+    return output.c_str();
+    }
+  else if (prop == "VARIABLES")
+    {
+    output = cmJoin(this->GetDefinitions(), ";");
     return output.c_str();
     }
   else if (prop == "MACROS")
