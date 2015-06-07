@@ -93,13 +93,13 @@ private:
   std::vector<std::string> Byproducts;
   std::vector<std::string> Depends;
   cmCustomCommandLines CommandLines;
-  bool HaveComment;
-  std::string Comment;
-  std::string WorkingDirectory;
-  bool EscapeAllowMakeVars;
-  bool EscapeOldStyle;
   cmListFileBacktrace Backtrace;
   ImplicitDependsList ImplicitDepends;
+  std::string Comment;
+  std::string WorkingDirectory;
+  bool HaveComment;
+  bool EscapeAllowMakeVars;
+  bool EscapeOldStyle;
   bool UsesTerminal;
 };
 
