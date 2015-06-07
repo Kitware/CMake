@@ -4158,11 +4158,7 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     }
   else if ( prop == "CACHE_VARIABLES" )
     {
-    std::vector<std::string> result = this->Internal->ClosureKeys();
-    std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
-    result.insert(result.end(), cacheKeys.begin(), cacheKeys.end());
-    std::sort(result.begin(), result.end());
-    output = cmJoin(result, ";");
+    output = cmJoin(this->GetState()->GetCacheEntryKeys(), ";");
     return output.c_str();
     }
   else if (prop == "VARIABLES")
