@@ -2497,18 +2497,11 @@ const char* cmMakefile::GetSafeDefinition(const std::string& def) const
   return ret;
 }
 
-std::vector<std::string> cmMakefile
-::GetDefinitions(int cacheonly /* = 0 */) const
+std::vector<std::string> cmMakefile::GetDefinitions() const
 {
-  std::vector<std::string> res;
-  if ( !cacheonly )
-    {
-    res = this->Internal->ClosureKeys();
-    }
-  std::vector<std::string> cacheKeys =
-      this->GetState()->GetCacheEntryKeys();
+  std::vector<std::string> res = this->Internal->ClosureKeys();
+  std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
   res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
-
   std::sort(res.begin(), res.end());
   return res;
 }
