@@ -14,8 +14,6 @@
 
 #include "cmProperty.h"
 
-class cmake;
-
 class cmPropertyMap : public std::map<std::string,cmProperty>
 {
 public:
