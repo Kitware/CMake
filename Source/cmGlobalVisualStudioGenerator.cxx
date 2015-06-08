@@ -307,7 +307,7 @@ void cmGlobalVisualStudioGenerator::FillLinkClosure(cmTarget const* target,
       {
       if(di->IsLink())
         {
-        this->FillLinkClosure(di->Target, linked);
+        this->FillLinkClosure((*di)->Target, linked);
         }
       }
     }
@@ -322,8 +322,7 @@ cmGlobalVisualStudioGenerator::GetTargetLinkClosure(cmTarget* target)
     {
     TargetSetMap::value_type entry(target, TargetSet());
     i = this->TargetLinkClosure.insert(entry).first;
-    cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
-    this->FillLinkClosure(gt, i->second);
+    this->FillLinkClosure(target, i->second);
     }
   return i->second;
 }
@@ -348,7 +347,7 @@ void cmGlobalVisualStudioGenerator::FollowLinkDepends(
       {
       if(di->IsLink())
         {
-        this->FollowLinkDepends(di->Target, linked);
+        this->FollowLinkDepends((*di)->Target->Target, linked);
         }
       }
     }

@@ -100,6 +100,7 @@ private:
                                   const std::string &language);
 
   cmTarget *Target;
+  cmGeneratorTarget GeneratorTarget;
   cmLocalGhsMultiGenerator *LocalGenerator;
   cmMakefile *Makefile;
   std::string AbsBuildFilePath;
