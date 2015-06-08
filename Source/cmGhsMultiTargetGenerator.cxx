@@ -26,7 +26,7 @@ cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget *target)
   , LocalGenerator(static_cast<cmLocalGhsMultiGenerator *>(
                      target->GetLocalGenerator()))
   , Makefile(target->Target->GetMakefile())
-  , TargetGroup(DetermineIfTargetGroup(target))
+  , TargetGroup(DetermineIfTargetGroup(target->Target))
   , DynamicDownload(false)
 {
   this->RelBuildFilePath = this->GetRelBuildFilePath(target);
