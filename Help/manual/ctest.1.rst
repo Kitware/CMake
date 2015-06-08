@@ -67,10 +67,8 @@ Options
  environment variable ``CTEST_PARALLEL_LEVEL``.
 
 ``--test-load <level>``
- Limit machine load during parallel testing.
-
- This option tells ctest not to start new tests if doing so would be
- likely to raise the machine load above the given level.
+ Limit CPU load during parallel testing.
+ See :variable:`CTEST_TEST_LOAD` for more details.
 
 ``-Q,--quiet``
  Make ctest quiet.
