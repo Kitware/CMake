@@ -23,21 +23,22 @@ std::string const cmGhsMultiTargetGenerator::DDOption("-dynamic");
 
 cmGhsMultiTargetGenerator::cmGhsMultiTargetGenerator(cmGeneratorTarget *target)
   : Target(target->Target)
+  , GeneratorTarget(target)
   , LocalGenerator(static_cast<cmLocalGhsMultiGenerator *>(
                      target->GetLocalGenerator()))
   , Makefile(target->Target->GetMakefile())
   , TargetGroup(DetermineIfTargetGroup(target->Target))
   , DynamicDownload(false)
 {
-  this->RelBuildFilePath = this->GetRelBuildFilePath(target);
+  this->RelBuildFilePath = this->GetRelBuildFilePath(target->Target);
 
   this->RelOutputFileName =
     this->RelBuildFilePath + this->Target->GetName() + ".a";
 
   this->RelBuildFileName = this->RelBuildFilePath;
-  this->RelBuildFileName += this->GetBuildFileName(target);
+  this->RelBuildFileName += this->GetBuildFileName(target->Target);
 
-  std::string absPathToRoot = this->GetAbsPathToRoot(target);
+  std::string absPathToRoot = this->GetAbsPathToRoot(target->Target);
   absPathToRoot = this->AddSlashIfNeededToPath(absPathToRoot);
   this->AbsBuildFilePath = absPathToRoot + this->RelBuildFilePath;
   this->AbsBuildFileName = absPathToRoot + this->RelBuildFileName;
@@ -354,11 +355,11 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
 {
   // library directories
   cmTargetDependSet tds =
-    this->GetGlobalGenerator()->GetTargetDirectDepends(*this->Target);
+    this->GetGlobalGenerator()->GetTargetDirectDepends(this->GeneratorTarget);
   for (cmTargetDependSet::iterator tdsI = tds.begin(); tdsI != tds.end();
        ++tdsI)
     {
-    const cmTarget *tg(*tdsI);
+    const cmTarget *tg = (*tdsI)->Target;
     *this->GetFolderBuildStreams() << "    -L\"" << GetAbsBuildFilePath(tg)
                                    << "\"" << std::endl;
     }
@@ -373,7 +374,8 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
     cmTarget *tg(GetGlobalGenerator()->FindTarget(libName));
     if (NULL != tg)
       {
-      cmGhsMultiTargetGenerator gmtg(tg);
+      cmGeneratorTarget* gt = GetGlobalGenerator()->GetGeneratorTarget(tg);
+      cmGhsMultiTargetGenerator gmtg(gt);
       libName = tg->GetName() + ".a";
       }
     *this->GetFolderBuildStreams() << "    -l\"" << libName << "\""
