@@ -228,9 +228,9 @@ installation directory.  Those marked with (U) are intended for
 installations on UNIX platforms where the prefix is shared by multiple
 packages.  This is merely a convention, so all (W) and (U) directories
 are still searched on all platforms.  Directories marked with (A) are
-intended for installations on Apple platforms.  The cmake variables
-``CMAKE_FIND_FRAMEWORK`` and ``CMAKE_FIND_APPBUNDLE``
-determine the order of preference as specified below.
+intended for installations on Apple platforms.  The
+:variable:`CMAKE_FIND_FRAMEWORK` and :variable:`CMAKE_FIND_APPBUNDLE`
+variables determine the order of preference.
 
 The set of installation prefixes is constructed using the following
 steps.  If ``NO_DEFAULT_PATH`` is specified all ``NO_*`` options are
@@ -295,7 +295,6 @@ enabled.
 .. |CMAKE_FIND_ROOT_PATH_MODE_XXX| replace::
    :variable:`CMAKE_FIND_ROOT_PATH_MODE_PACKAGE`
 
-.. include:: FIND_XXX_MAC.txt
 .. include:: FIND_XXX_ROOT.txt
 .. include:: FIND_XXX_ORDER.txt
 
