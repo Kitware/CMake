@@ -176,7 +176,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->Makefile->GetConfigurations(this->Configurations);
   this->LocalGenerator =
     (cmLocalVisualStudio7Generator*)
-    this->GeneratorTarget->GetLocalGenerator();
+    this->Makefile->GetLocalGenerator();
   this->Name = this->Target->GetName();
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();
@@ -2660,7 +2660,7 @@ void cmVisualStudio10TargetGenerator::WriteEvent(
 void cmVisualStudio10TargetGenerator::WriteProjectReferences()
 {
   cmGlobalGenerator::TargetDependSet const& unordered
-    = this->GlobalGenerator->GetTargetDirectDepends(this->GeneratorTarget);
+    = this->GlobalGenerator->GetTargetDirectDepends(*this->Target);
   typedef cmGlobalVisualStudioGenerator::OrderedTargetDependSet
     OrderedTargetDependSet;
   OrderedTargetDependSet depends(unordered);
@@ -2668,7 +2668,7 @@ void cmVisualStudio10TargetGenerator::WriteProjectReferences()
   for( OrderedTargetDependSet::const_iterator i = depends.begin();
        i != depends.end(); ++i)
     {
-    cmTarget const* dt = (*i)->Target;
+    cmTarget const* dt = *i;
     if(dt->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;

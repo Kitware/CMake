@@ -482,7 +482,7 @@ bool cmake::FindPackage(const std::vector<std::string>& args)
     std::string linkPath;
     std::string flags;
     std::string linkFlags;
-    gg->CreateGeneratorTargets(lg.get());
+    gg->CreateGeneratorTargets(mf);
     cmGeneratorTarget *gtgt = gg->GetGeneratorTarget(tgt);
     lg->GetTargetFlags(linkLibs, frameworkPath, linkPath, flags, linkFlags,
                        gtgt, false);

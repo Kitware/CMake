@@ -48,8 +48,7 @@ private:
 
   void CreateNewProjectFile(const std::vector<cmLocalGenerator*>& lgs,
                                 const std::string& filename);
-  std::string CreateDummyTargetFile(cmLocalGenerator* lg,
-                                    cmTarget* target) const;
+  std::string CreateDummyTargetFile(cmMakefile* mf, cmTarget* target) const;
 
   std::string GetCBCompilerId(const cmMakefile* mf);
   int GetCBTargetType(cmTarget* target);
@@ -59,7 +58,7 @@ private:
                     const std::string& targetName,
                     cmTarget* target,
                     const char* make,
-                    const cmLocalGenerator* lg,
+                    const cmMakefile* makefile,
                     const char* compiler);
 
 };

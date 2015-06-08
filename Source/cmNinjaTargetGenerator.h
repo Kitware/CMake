@@ -33,7 +33,7 @@ public:
   static cmNinjaTargetGenerator* New(cmGeneratorTarget* target);
 
   /// Build a NinjaTargetGenerator.
-  cmNinjaTargetGenerator(cmGeneratorTarget* target);
+  cmNinjaTargetGenerator(cmTarget* target);
 
   /// Destructor.
   virtual ~cmNinjaTargetGenerator();

@@ -402,7 +402,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetConfigurations(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget const* target = (*tt)->Target;
+    cmTarget const* target = *tt;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -442,7 +442,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetsToSolution(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget const* target = (*tt)->Target;
+    cmTarget const* target = *tt;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -534,7 +534,7 @@ void cmGlobalVisualStudio7Generator::WriteTargetDepends(
   for(OrderedTargetDependSet::const_iterator tt =
         projectTargets.begin(); tt != projectTargets.end(); ++tt)
     {
-    cmTarget const* target = (*tt)->Target;
+    cmTarget const* target = *tt;
     if(target->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
@@ -1045,12 +1045,12 @@ cmGlobalVisualStudio7Generator
 ::IsDependedOn(OrderedTargetDependSet const& projectTargets,
                cmTarget const* targetIn)
 {
-  cmGeneratorTarget* gtIn = this->GetGeneratorTarget(targetIn);
   for (OrderedTargetDependSet::const_iterator l = projectTargets.begin();
        l != projectTargets.end(); ++l)
     {
-    TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(*l);
-    if(tgtdeps.count(gtIn))
+    cmTarget const& target = **l;
+    TargetDependSet const& tgtdeps = this->GetTargetDirectDepends(target);
+    if(tgtdeps.count(targetIn))
       {
       return true;
       }

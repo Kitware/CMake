@@ -292,8 +292,7 @@ public:
 
   // what targets does the specified target depend on directly
   // via a target_link_libraries or add_dependencies
-  TargetDependSet const& GetTargetDirectDepends(
-      const cmGeneratorTarget* target);
+  TargetDependSet const& GetTargetDirectDepends(cmTarget const& target);
 
   /** Get per-target generator information.  */
   cmGeneratorTarget* GetGeneratorTarget(cmTarget const*) const;
@@ -369,7 +368,7 @@ protected:
                              TargetDependSet& originalTargets,
                              cmLocalGenerator* root, GeneratorVector const&);
   bool IsRootOnlyTarget(cmTarget* target) const;
-  void AddTargetDepends(const cmGeneratorTarget* target,
+  void AddTargetDepends(cmTarget const* target,
                         TargetDependSet& projectTargets);
   void SetLanguageEnabledFlag(const std::string& l, cmMakefile* mf);
   void SetLanguageEnabledMaps(const std::string& l, cmMakefile* mf);
@@ -391,7 +390,7 @@ protected:
   void FillProjectMap();
   void CheckLocalGenerators();
   bool IsExcluded(cmLocalGenerator* root, cmLocalGenerator* gen) const;
-  bool IsExcluded(cmLocalGenerator* root, cmGeneratorTarget* target) const;
+  bool IsExcluded(cmLocalGenerator* root, cmTarget const& target) const;
   void FillLocalGeneratorToTargetMap();
   void CreateDefaultGlobalTargets(cmTargets* targets);
   cmTarget CreateGlobalTarget(const std::string& name, const char* message,
@@ -406,7 +405,7 @@ protected:
   cmMakefile* CurrentMakefile;
   // map from project name to vector of local generators in that project
   std::map<std::string, std::vector<cmLocalGenerator*> > ProjectMap;
-  std::map<cmLocalGenerator*, std::set<cmGeneratorTarget const*> >
+  std::map<cmLocalGenerator*, std::set<cmTarget const*> >
                                                     LocalGeneratorToTargetMap;
 
   // Set of named installation components requested by the project.
@@ -478,13 +477,13 @@ private:
   std::vector<std::string> FilesReplacedDuringGenerate;
 
   // Store computed inter-target dependencies.
-  typedef std::map<cmGeneratorTarget const*, TargetDependSet> TargetDependMap;
+  typedef std::map<cmTarget const*, TargetDependSet> TargetDependMap;
   TargetDependMap TargetDependencies;
 
   // Per-target generator information.
   cmGeneratorTargetsType GeneratorTargets;
   friend class cmake;
-  void CreateGeneratorTargets(cmLocalGenerator* lg);
+  void CreateGeneratorTargets(cmMakefile* mf);
   void CreateGeneratorTargets();
 
   void ClearGeneratorMembers();

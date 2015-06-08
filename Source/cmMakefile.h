@@ -79,9 +79,6 @@ public:
    */
   ~cmMakefile();
 
-  /// @return whether we are processing the top CMakeLists.txt file.
-  bool IsRootMakefile() const;
-
   bool ReadListFile(const char* listfile);
 
   bool ReadDependentFile(const char* listfile, bool noPolicyScope = true);
@@ -133,6 +130,10 @@ public:
                  std::string& output);
 
   bool GetIsSourceFileTryCompile() const;
+
+  ///! Get the current makefile generator.
+  cmLocalGenerator* GetLocalGenerator() const
+    { return this->LocalGenerator;}
 
   /**
    * Help enforce global target name uniqueness.
