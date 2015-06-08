@@ -421,6 +421,10 @@ int cmCTestScriptHandler::ReadInScript(const std::string& total_script_arg)
     this->Makefile->AddDefinition("CTEST_SCRIPT_ARG", script_arg.c_str());
     }
 
+#if defined(__CYGWIN__)
+  this->Makefile->AddDefinition("CMAKE_LEGACY_CYGWIN_WIN32", "0");
+#endif
+
   // always add a function blocker to update the elapsed time
   cmCTestScriptFunctionBlocker *f = new cmCTestScriptFunctionBlocker();
   f->CTestScriptHandler = this;
