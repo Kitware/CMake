@@ -89,12 +89,18 @@ bool cmGetDirectoryPropertyCommand
     {
     prop = dir->GetProperty(*i);
     }
+  this->StoreResult(variable, prop);
+  return true;
+}
+
+void cmGetDirectoryPropertyCommand::StoreResult(std::string const& variable,
+                                                const char* prop)
+{
   if (prop)
     {
     this->Makefile->AddDefinition(variable, prop);
-    return true;
+    return;
     }
   this->Makefile->AddDefinition(variable, "");
-  return true;
 }
 
