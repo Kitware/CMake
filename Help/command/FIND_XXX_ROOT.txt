@@ -16,8 +16,14 @@ search there too.  By default at first the directories listed in
 directory is searched, and then the non-rooted directories will be
 searched.  The default behavior can be adjusted by setting
 |CMAKE_FIND_ROOT_PATH_MODE_XXX|.  This behavior can be manually
-overridden on a per-call basis.  By using CMAKE_FIND_ROOT_PATH_BOTH
-the search order will be as described above.  If
-NO_CMAKE_FIND_ROOT_PATH is used then :variable:`CMAKE_FIND_ROOT_PATH` will not be
-used.  If ONLY_CMAKE_FIND_ROOT_PATH is used then only the re-rooted
-directories and directories below :variable:`CMAKE_STAGING_PREFIX` will be searched.
+overridden on a per-call basis using options:
+
+``CMAKE_FIND_ROOT_PATH_BOTH``
+  Search in the order described above.
+
+``NO_CMAKE_FIND_ROOT_PATH``
+  Do not use the :variable:`CMAKE_FIND_ROOT_PATH` variable.
+
+``ONLY_CMAKE_FIND_ROOT_PATH``
+  Search only the re-rooted directories and directories below
+  :variable:`CMAKE_STAGING_PREFIX`.
