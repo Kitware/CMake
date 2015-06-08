@@ -280,7 +280,7 @@ Other Changes
     * :policy:`CMP0010`
     * :policy:`CMP0011`
 
-  are now deprecated.  In the next release of CMake, it will not be possible
+  are now deprecated.  In a future release of CMake, it will not be possible
   to set them to ``OLD``.  See also :manual:`cmake-policies(7)`
 
 * The :generator:`Ninja` generator now requires that calls to the
