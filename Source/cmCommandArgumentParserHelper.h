@@ -80,8 +80,6 @@ private:
   std::string::size_type InputBufferPos;
   std::string InputBuffer;
   std::vector<char> OutputBuffer;
-  int CurrentLine;
-  int Verbose;
 
   void Print(const char* place, const char* str);
   void SafePrintMissing(const char* str, int line, int cnt);
@@ -94,12 +92,14 @@ private:
   std::vector<char*> Variables;
   const cmMakefile* Makefile;
   std::string Result;
+  std::string ErrorString;
   const char* FileName;
+  long FileLine;
+  int CurrentLine;
+  int Verbose;
   bool WarnUninitialized;
   bool CheckSystemVars;
-  long FileLine;
   bool EscapeQuotes;
-  std::string ErrorString;
   bool NoEscapeMode;
   bool ReplaceAtSyntax;
   bool RemoveEmpty;

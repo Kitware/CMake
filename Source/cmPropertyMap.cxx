@@ -14,6 +14,8 @@
 #include "cmake.h"
 #include "cmState.h"
 
+#include <assert.h>
+
 cmProperty *cmPropertyMap::GetOrCreateProperty(const std::string& name)
 {
   cmPropertyMap::iterator it = this->find(name);
@@ -29,54 +31,39 @@ cmProperty *cmPropertyMap::GetOrCreateProperty(const std::string& name)
   return prop;
 }
 
-void cmPropertyMap::SetProperty(const std::string& name, const char *value,
-                                cmProperty::ScopeType scope)
+void cmPropertyMap::SetProperty(const std::string& name, const char *value)
 {
   if(!value)
     {
     this->erase(name);
     return;
     }
-  (void)scope;
 
   cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Set(name,value);
+  prop->Set(value);
 }
 
 void cmPropertyMap::AppendProperty(const std::string& name, const char* value,
-                                   cmProperty::ScopeType scope, bool asString)
+                                   bool asString)
 {
   // Skip if nothing to append.
   if(!value || !*value)
     {
     return;
     }
-  (void)scope;
 
   cmProperty *prop = this->GetOrCreateProperty(name);
-  prop->Append(name,value,asString);
+  prop->Append(value,asString);
 }
 
 const char *cmPropertyMap
-::GetPropertyValue(const std::string& name,
-                   cmProperty::ScopeType scope,
-                   bool &chain) const
+::GetPropertyValue(const std::string& name) const
 {
-  chain = false;
-  if (name.empty())
-    {
-    return 0;
-    }
+  assert(!name.empty());
 
   cmPropertyMap::const_iterator it = this->find(name);
   if (it == this->end())
     {
-    // should we chain up?
-    if (this->CMakeInstance)
-      {
-      chain = this->CMakeInstance->GetState()->
-                    IsPropertyChained(name,scope);
-      }
     return 0;
     }
   return it->second.GetValue();

@@ -161,7 +161,6 @@ bool cmCacheManager::LoadCache(const std::string& path,
     // Format is key:type=value
     std::string helpString;
     CacheEntry e;
-    e.Properties.SetCMakeInstance(this->CMakeInstance);
     cmSystemTools::GetLineFromStream(fin, buffer);
     realbuffer = buffer.c_str();
     while(*realbuffer != '0' &&
@@ -323,7 +322,6 @@ bool cmCacheManager::ReadPropertyEntry(std::string const& entryKey,
         {
         // Create an entry and store the property.
         CacheEntry& ne = this->Cache[key];
-        ne.Properties.SetCMakeInstance(this->CMakeInstance);
         ne.Type = cmState::UNINITIALIZED;
         ne.SetProperty(*p, e.Value.c_str());
         }
@@ -645,7 +643,6 @@ void cmCacheManager::AddCacheEntry(const std::string& key,
                                    cmState::CacheEntryType type)
 {
   CacheEntry& e = this->Cache[key];
-  e.Properties.SetCMakeInstance(this->CMakeInstance);
   if ( value )
     {
     e.Value = value;
@@ -744,9 +741,7 @@ cmCacheManager::CacheEntry::GetProperty(const std::string& prop) const
     {
     return this->Value.c_str();
     }
-  bool c = false;
-  return
-    this->Properties.GetPropertyValue(prop, cmProperty::CACHE, c);
+  return this->Properties.GetPropertyValue(prop);
 }
 
 //----------------------------------------------------------------------------
@@ -763,7 +758,7 @@ void cmCacheManager::CacheEntry::SetProperty(const std::string& prop,
     }
   else
     {
-    this->Properties.SetProperty(prop, value, cmProperty::CACHE);
+    this->Properties.SetProperty(prop, value);
     }
 }
 
@@ -789,7 +784,7 @@ void cmCacheManager::CacheEntry::AppendProperty(const std::string& prop,
     }
   else
     {
-    this->Properties.AppendProperty(prop, value, cmProperty::CACHE, asString);
+    this->Properties.AppendProperty(prop, value, asString);
     }
 }
 

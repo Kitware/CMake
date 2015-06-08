@@ -38,7 +38,11 @@ bool cmGetSourceFilePropertyCommand
       this->Makefile->AddDefinition(var, sf->GetLanguage().c_str());
       return true;
       }
-    const char *prop = sf->GetPropertyForUser(args[2]);
+    const char *prop = 0;
+    if (!args[2].empty())
+      {
+      prop = sf->GetPropertyForUser(args[2]);
+      }
     if (prop)
       {
       this->Makefile->AddDefinition(var, prop);

@@ -213,8 +213,6 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
   this->AddSourceGroup("Object Files", "\\.(lo|o|obj)$");
 #endif
 
-  this->Properties.SetCMakeInstance(this->GetCMakeInstance());
-
   {
   const char* dir = this->GetCMakeInstance()->GetHomeDirectory();
   this->AddDefinition("CMAKE_SOURCE_DIR", dir);
@@ -4082,7 +4080,7 @@ void cmMakefile::SetProperty(const std::string& prop, const char* value)
       }
     }
 
-  this->Properties.SetProperty(prop,value,cmProperty::DIRECTORY);
+  this->Properties.SetProperty(prop, value);
 }
 
 void cmMakefile::AppendProperty(const std::string& prop,
@@ -4122,16 +4120,18 @@ void cmMakefile::AppendProperty(const std::string& prop,
     return;
     }
 
-  this->Properties.AppendProperty(prop,value,cmProperty::DIRECTORY,asString);
+  this->Properties.AppendProperty(prop, value, asString);
 }
 
 const char *cmMakefile::GetProperty(const std::string& prop) const
 {
-  return this->GetProperty(prop, cmProperty::DIRECTORY);
+  const bool chain = this->GetState()->
+                  IsPropertyChained(prop, cmProperty::DIRECTORY);
+  return this->GetProperty(prop, chain);
 }
 
 const char *cmMakefile::GetProperty(const std::string& prop,
-                                    cmProperty::ScopeType scope) const
+                                    bool chain) const
 {
   // watch for specific properties
   static std::string output;
@@ -4235,15 +4235,13 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     return output.c_str();
     }
 
-  bool chain = false;
-  const char *retVal =
-    this->Properties.GetPropertyValue(prop, scope, chain);
-  if (chain)
+  const char *retVal = this->Properties.GetPropertyValue(prop);
+  if (!retVal && chain)
     {
     if(this->LocalGenerator->GetParent())
       {
       return this->LocalGenerator->GetParent()->GetMakefile()->
-        GetProperty(prop, scope);
+        GetProperty(prop, chain);
       }
     return this->GetState()->GetGlobalProperty(prop);
     }

@@ -21,7 +21,6 @@ cmTest::cmTest(cmMakefile* mf)
 {
   this->Makefile = mf;
   this->OldStyle = true;
-  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
 }
 
 //----------------------------------------------------------------------------
@@ -50,12 +49,15 @@ void cmTest::SetCommand(std::vector<std::string> const& command)
 //----------------------------------------------------------------------------
 const char *cmTest::GetProperty(const std::string& prop) const
 {
-  bool chain = false;
-  const char *retVal =
-    this->Properties.GetPropertyValue(prop, cmProperty::TEST, chain);
-  if (chain)
+  const char *retVal = this->Properties.GetPropertyValue(prop);
+  if (!retVal)
     {
-    return this->Makefile->GetProperty(prop,cmProperty::TEST);
+    const bool chain = this->Makefile->GetState()->
+          IsPropertyChained(prop, cmProperty::TEST);
+    if (chain)
+      {
+      return this->Makefile->GetProperty(prop, chain);
+      }
     }
   return retVal;
 }
@@ -69,12 +71,12 @@ bool cmTest::GetPropertyAsBool(const std::string& prop) const
 //----------------------------------------------------------------------------
 void cmTest::SetProperty(const std::string& prop, const char* value)
 {
-  this->Properties.SetProperty(prop, value, cmProperty::TEST);
+  this->Properties.SetProperty(prop, value);
 }
 
 //----------------------------------------------------------------------------
 void cmTest::AppendProperty(const std::string& prop,
                             const char* value, bool asString)
 {
-  this->Properties.AppendProperty(prop, value, cmProperty::TEST, asString);
+  this->Properties.AppendProperty(prop, value, asString);
 }

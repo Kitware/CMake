@@ -239,13 +239,6 @@ cmTargetInternals::~cmTargetInternals()
 //----------------------------------------------------------------------------
 cmTarget::cmTarget()
 {
-#define INITIALIZE_TARGET_POLICY_MEMBER(POLICY) \
-  this->PolicyStatus ## POLICY = cmPolicies::WARN;
-
-  CM_FOR_EACH_TARGET_POLICY(INITIALIZE_TARGET_POLICY_MEMBER)
-
-#undef INITIALIZE_TARGET_POLICY_MEMBER
-
   this->Makefile = 0;
 #if defined(_WIN32) && !defined(__CYGWIN__)
   this->LinkLibrariesForVS6Analyzed = false;
@@ -285,9 +278,6 @@ void cmTarget::SetMakefile(cmMakefile* mf)
 {
   // Set our makefile.
   this->Makefile = mf;
-
-  // set the cmake instance of the properties
-  this->Properties.SetCMakeInstance(mf->GetCMakeInstance());
 
   // Check whether this is a DLL platform.
   this->DLLPlatform = (this->Makefile->IsOn("WIN32") ||
@@ -443,20 +433,14 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     }
 
   // Record current policies for later use.
-#define CAPTURE_TARGET_POLICY(POLICY) \
-  this->PolicyStatus ## POLICY = \
-    this->Makefile->GetPolicyStatus(cmPolicies::POLICY);
-
-  CM_FOR_EACH_TARGET_POLICY(CAPTURE_TARGET_POLICY)
-
-#undef CAPTURE_TARGET_POLICY
+  this->Makefile->RecordPolicies(this->PolicyMap);
 
   if (this->TargetTypeValue == INTERFACE_LIBRARY)
     {
     // This policy is checked in a few conditions. The properties relevant
     // to the policy are always ignored for INTERFACE_LIBRARY targets,
     // so ensure that the conditions don't lead to nonsense.
-    this->PolicyStatusCMP0022 = cmPolicies::NEW;
+    this->PolicyMap.Set(cmPolicies::CMP0022, cmPolicies::NEW);
     }
 
   if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
@@ -1772,7 +1756,7 @@ void cmTarget::SetProperty(const std::string& prop, const char* value)
     }
   else
     {
-    this->Properties.SetProperty(prop, value, cmProperty::TARGET);
+    this->Properties.SetProperty(prop, value);
     this->MaybeInvalidatePropertyCache(prop);
     }
 }
@@ -1857,7 +1841,7 @@ void cmTarget::AppendProperty(const std::string& prop, const char* value,
     }
   else
     {
-    this->Properties.AppendProperty(prop, value, cmProperty::TARGET, asString);
+    this->Properties.AppendProperty(prop, value, asString);
     this->MaybeInvalidatePropertyCache(prop);
     }
 }
@@ -2910,8 +2894,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
       // cannot take into account the per-configuration name of the
       // target because the configuration type may not be known at
       // CMake time.
-      this->Properties.SetProperty(propLOCATION, this->GetLocationForBuild(),
-                                   cmProperty::TARGET);
+      this->Properties.SetProperty(propLOCATION, this->GetLocationForBuild());
       }
 
     // Support "LOCATION_<CONFIG>".
@@ -2922,9 +2905,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
         return 0;
         }
       const char* configName = prop.c_str() + 9;
-      this->Properties.SetProperty(prop,
-                                   this->GetLocation(configName),
-                                   cmProperty::TARGET);
+      this->Properties.SetProperty(prop, this->GetLocation(configName));
       }
     // Support "<CONFIG>_LOCATION".
     else if(cmHasLiteralSuffix(prop, "_LOCATION"))
@@ -2936,9 +2917,7 @@ const char *cmTarget::GetProperty(const std::string& prop,
           {
           return 0;
           }
-        this->Properties.SetProperty(prop,
-                                     this->GetLocation(configName),
-                                     cmProperty::TARGET);
+        this->Properties.SetProperty(prop, this->GetLocation(configName));
         }
       }
     }
@@ -3140,17 +3119,19 @@ const char *cmTarget::GetProperty(const std::string& prop,
             }
           }
         }
-      this->Properties.SetProperty("SOURCES", ss.str().c_str(),
-                                   cmProperty::TARGET);
+      this->Properties.SetProperty("SOURCES", ss.str().c_str());
       }
     }
 
-  bool chain = false;
-  const char *retVal =
-    this->Properties.GetPropertyValue(prop, cmProperty::TARGET, chain);
-  if (chain)
+  const char *retVal = this->Properties.GetPropertyValue(prop);
+  if (!retVal)
     {
-    return this->Makefile->GetProperty(prop, cmProperty::TARGET);
+    const bool chain = this->GetMakefile()->GetState()->
+                      IsPropertyChained(prop, cmProperty::TARGET);
+    if (chain)
+      {
+      return this->Makefile->GetProperty(prop, chain);
+      }
     }
   return retVal;
 }
@@ -5903,8 +5884,8 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
   // libraries and executables that export symbols.
   const char* explicitLibraries = 0;
   std::string linkIfaceProp;
-  if(thisTarget->PolicyStatusCMP0022 != cmPolicies::OLD &&
-     thisTarget->PolicyStatusCMP0022 != cmPolicies::WARN)
+  if(thisTarget->GetPolicyStatusCMP0022() != cmPolicies::OLD &&
+     thisTarget->GetPolicyStatusCMP0022() != cmPolicies::WARN)
     {
     // CMP0022 NEW behavior is to use INTERFACE_LINK_LIBRARIES.
     linkIfaceProp = "INTERFACE_LINK_LIBRARIES";
@@ -5930,7 +5911,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
     }
 
   if(explicitLibraries &&
-     thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN &&
+     thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
      !this->PolicyWarnedCMP0022)
     {
     // Compare the explicitly set old link interface properties to the
@@ -5974,8 +5955,8 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
                                 iface.Libraries,
                                 iface.HadHeadSensitiveCondition);
     }
-  else if (thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN
-        || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
+  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     // If CMP0022 is NEW then the plain tll signature sets the
     // INTERFACE_LINK_LIBRARIES, so if we get here then the project
     // cleared the property explicitly and we should not fall back
@@ -5986,7 +5967,7 @@ cmTargetInternals::ComputeLinkInterfaceLibraries(
       thisTarget->GetLinkImplementationLibrariesInternal(config, headTarget);
     iface.Libraries.insert(iface.Libraries.end(),
                            impl->Libraries.begin(), impl->Libraries.end());
-    if(thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN &&
+    if(thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN &&
        !this->PolicyWarnedCMP0022 && !usage_requirements_only)
       {
       // Compare the link implementation fallback link interface to the
@@ -6078,8 +6059,8 @@ void cmTargetInternals::ComputeLinkInterface(cmTarget const* thisTarget,
         }
       }
     }
-  else if (thisTarget->PolicyStatusCMP0022 == cmPolicies::WARN
-        || thisTarget->PolicyStatusCMP0022 == cmPolicies::OLD)
+  else if (thisTarget->GetPolicyStatusCMP0022() == cmPolicies::WARN
+        || thisTarget->GetPolicyStatusCMP0022() == cmPolicies::OLD)
     {
     // The link implementation is the default link interface.
     cmTarget::LinkImplementationLibraries const*
@@ -6399,7 +6380,7 @@ std::string cmTarget::CheckCMP0004(std::string const& item) const
   if(lib != item)
     {
     cmake* cm = this->Makefile->GetCMakeInstance();
-    switch(this->PolicyStatusCMP0004)
+    switch(this->GetPolicyStatusCMP0004())
       {
       case cmPolicies::WARN:
         {

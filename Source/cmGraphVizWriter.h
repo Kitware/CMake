@@ -69,14 +69,6 @@ protected:
   std::string GraphHeader;
   std::string GraphNodePrefix;
 
-  bool GenerateForExecutables;
-  bool GenerateForStaticLibs;
-  bool GenerateForSharedLibs;
-  bool GenerateForModuleLibs;
-  bool GenerateForExternals;
-  bool GeneratePerTarget;
-  bool GenerateDependers;
-
   std::vector<cmsys::RegularExpression> TargetsToIgnoreRegex;
 
   const std::vector<cmLocalGenerator*>& LocalGenerators;
@@ -85,6 +77,13 @@ protected:
   // maps from the actual target names to node names in dot:
   std::map<std::string, std::string> TargetNamesNodes;
 
+  bool GenerateForExecutables;
+  bool GenerateForStaticLibs;
+  bool GenerateForSharedLibs;
+  bool GenerateForModuleLibs;
+  bool GenerateForExternals;
+  bool GeneratePerTarget;
+  bool GenerateDependers;
   bool HaveTargetsAndLibs;
 };
 

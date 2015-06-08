@@ -144,7 +144,7 @@ public:
 
 #define DECLARE_TARGET_POLICY(POLICY) \
   cmPolicies::PolicyStatus GetPolicyStatus ## POLICY () const \
-    { return this->PolicyStatus ## POLICY; }
+    { return this->PolicyMap.Get(cmPolicies::POLICY); }
 
   CM_FOR_EACH_TARGET_POLICY(DECLARE_TARGET_POLICY)
 
@@ -637,12 +637,6 @@ public:
 private:
   bool HandleLocationPropertyPolicy(cmMakefile* context) const;
 
-  // The set of include directories that are marked as system include
-  // directories.
-  std::set<std::string> SystemIncludeDirectories;
-
-  std::vector<std::pair<TLLSignature, cmListFileContext> > TLLCommands;
-
 #if defined(_WIN32) && !defined(__CYGWIN__)
   /**
    * A list of direct dependencies. Use in conjunction with DependencyMap.
@@ -737,40 +731,48 @@ private:
   void GetSourceFiles(std::vector<std::string> &files,
                       const std::string& config) const;
 private:
-  std::string Name;
-  std::vector<cmCustomCommand> PreBuildCommands;
-  std::vector<cmCustomCommand> PreLinkCommands;
-  std::vector<cmCustomCommand> PostBuildCommands;
-  TargetType TargetTypeValue;
-  LinkLibraryVectorType PrevLinkedLibraries;
-#if defined(_WIN32) && !defined(__CYGWIN__)
-  LinkLibraryVectorType LinkLibrariesForVS6;
-  bool LinkLibrariesForVS6Analyzed;
-#endif
-  std::vector<std::string> LinkDirectories;
+  mutable cmPropertyMap Properties;
+  std::set<std::string> SystemIncludeDirectories;
   std::set<std::string> LinkDirectoriesEmmitted;
-  bool HaveInstallRule;
+  std::set<std::string> Utilities;
+  mutable std::set<std::string> LinkImplicitNullProperties;
+  std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
+  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
+  mutable std::map<std::string, std::string> MaxLanguageStandards;
+  cmPolicies::PolicyMap PolicyMap;
+  std::string Name;
   std::string InstallPath;
   std::string RuntimeInstallPath;
   mutable std::string ExportMacro;
-  std::set<std::string> Utilities;
-  std::map<std::string, cmListFileBacktrace> UtilityBacktraces;
-  bool RecordDependencies;
-  mutable cmPropertyMap Properties;
+  std::vector<std::string> LinkDirectories;
+  std::vector<cmCustomCommand> PreBuildCommands;
+  std::vector<cmCustomCommand> PreLinkCommands;
+  std::vector<cmCustomCommand> PostBuildCommands;
+  std::vector<std::pair<TLLSignature, cmListFileContext> > TLLCommands;
+  LinkLibraryVectorType PrevLinkedLibraries;
   LinkLibraryVectorType OriginalLinkLibraries;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  LinkLibraryVectorType LinkLibrariesForVS6;
+#endif
+  cmMakefile* Makefile;
+  cmTargetInternalPointer Internal;
+  TargetType TargetTypeValue;
+  bool HaveInstallRule;
+  bool RecordDependencies;
   bool DLLPlatform;
   bool IsAndroid;
   bool IsApple;
   bool IsImportedTarget;
+  bool BuildInterfaceIncludesAppended;
   mutable bool DebugIncludesDone;
-  mutable std::map<std::string, bool> DebugCompatiblePropertiesDone;
   mutable bool DebugCompileOptionsDone;
   mutable bool DebugCompileDefinitionsDone;
   mutable bool DebugSourcesDone;
   mutable bool DebugCompileFeaturesDone;
-  mutable std::set<std::string> LinkImplicitNullProperties;
-  mutable std::map<std::string, std::string> MaxLanguageStandards;
-  bool BuildInterfaceIncludesAppended;
+  mutable bool LinkImplementationLanguageIsContextDependent;
+#if defined(_WIN32) && !defined(__CYGWIN__)
+  bool LinkLibrariesForVS6Analyzed;
+#endif
 
   // Cache target output paths for each configuration.
   struct OutputInfo;
@@ -820,23 +822,10 @@ private:
 
   void ProcessSourceExpression(std::string const& expr);
 
-  // The cmMakefile instance that owns this target.  This should
-  // always be set.
-  cmMakefile* Makefile;
-
-  // Policy status recorded when target was created.
-#define TARGET_POLICY_MEMBER(POLICY) \
-  cmPolicies::PolicyStatus PolicyStatus ## POLICY;
-
-  CM_FOR_EACH_TARGET_POLICY(TARGET_POLICY_MEMBER)
-
-#undef TARGET_POLICY_MEMBER
-
   // Internal representation details.
   friend class cmTargetInternals;
   friend class cmGeneratorTarget;
   friend class cmTargetTraceDependencies;
-  cmTargetInternalPointer Internal;
 
   void ComputeVersionedName(std::string& vName,
                             std::string const& prefix,
@@ -844,8 +833,6 @@ private:
                             std::string const& suffix,
                             std::string const& name,
                             const char* version) const;
-
-  mutable bool LinkImplementationLanguageIsContextDependent;
 };
 
 #ifdef CMAKE_BUILD_WITH_CMAKE

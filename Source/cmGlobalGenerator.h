@@ -398,10 +398,6 @@ protected:
     std::vector<std::string> depends, const char* workingDir,
     bool uses_terminal);
 
-  bool NeedSymbolicMark;
-  bool UseLinkScript;
-  bool ForceUnixPaths;
-  bool ToolSupportsColor;
   std::string FindMakeProgramFile;
   std::string ConfiguredFilesPath;
   cmake *CMakeInstance;
@@ -414,7 +410,6 @@ protected:
 
   // Set of named installation components requested by the project.
   std::set<std::string> InstallComponents;
-  bool InstallTargetEnabled;
   // Sets of named target exports
   cmExportSetMap ExportSets;
   std::map<std::string, cmExportBuildFileGenerator*> BuildExportSets;
@@ -448,7 +443,6 @@ private:
                                                  cmState::Snapshot snapshot);
 
   cmMakefile* TryCompileOuterMakefile;
-  float FirstTimeProgress;
   // If you add a new map here, make sure it is copied
   // in EnableLanguagesFromGenerator
   std::map<std::string, bool> IgnoreExtensions;
@@ -521,6 +515,14 @@ private:
   // Pool of file locks
   cmFileLockPool FileLockPool;
 #endif
+
+protected:
+  float FirstTimeProgress;
+  bool NeedSymbolicMark;
+  bool UseLinkScript;
+  bool ForceUnixPaths;
+  bool ToolSupportsColor;
+  bool InstallTargetEnabled;
 };
 
 #endif

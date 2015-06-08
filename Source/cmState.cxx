@@ -259,27 +259,41 @@ void cmState::DefineProperty(const std::string& name,
                                                   chained);
 }
 
-cmPropertyDefinition *cmState
+cmPropertyDefinition const* cmState
 ::GetPropertyDefinition(const std::string& name,
-                        cmProperty::ScopeType scope)
+                        cmProperty::ScopeType scope) const
 {
   if (this->IsPropertyDefined(name,scope))
     {
-    return &(this->PropertyDefinitions[scope][name]);
+    cmPropertyDefinitionMap const& defs =
+        this->PropertyDefinitions.find(scope)->second;
+    return &defs.find(name)->second;
     }
   return 0;
 }
 
 bool cmState::IsPropertyDefined(const std::string& name,
-                              cmProperty::ScopeType scope)
+                                cmProperty::ScopeType scope) const
 {
-  return this->PropertyDefinitions[scope].IsPropertyDefined(name);
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::const_iterator it
+      = this->PropertyDefinitions.find(scope);
+  if (it == this->PropertyDefinitions.end())
+    {
+    return false;
+    }
+  return it->second.IsPropertyDefined(name);
 }
 
 bool cmState::IsPropertyChained(const std::string& name,
-                              cmProperty::ScopeType scope)
+                                cmProperty::ScopeType scope) const
 {
-  return this->PropertyDefinitions[scope].IsPropertyChained(name);
+  std::map<cmProperty::ScopeType, cmPropertyDefinitionMap>::const_iterator it
+      = this->PropertyDefinitions.find(scope);
+  if (it == this->PropertyDefinitions.end())
+    {
+    return false;
+    }
+  return it->second.IsPropertyChained(name);
 }
 
 void cmState::SetLanguageEnabled(std::string const& l)
@@ -427,14 +441,13 @@ void cmState::RemoveUserDefinedCommands()
 
 void cmState::SetGlobalProperty(const std::string& prop, const char* value)
 {
-  this->GlobalProperties.SetProperty(prop, value, cmProperty::GLOBAL);
+  this->GlobalProperties.SetProperty(prop, value);
 }
 
 void cmState::AppendGlobalProperty(const std::string& prop,
                                    const char* value, bool asString)
 {
-  this->GlobalProperties.AppendProperty(prop, value,
-                                        cmProperty::GLOBAL, asString);
+  this->GlobalProperties.AppendProperty(prop, value, asString);
 }
 
 const char *cmState::GetGlobalProperty(const std::string& prop)
@@ -472,9 +485,7 @@ const char *cmState::GetGlobalProperty(const std::string& prop)
     return FOR_EACH_CXX_FEATURE(STRING_LIST_ELEMENT) + 1;
     }
 #undef STRING_LIST_ELEMENT
-  bool dummy = false;
-  return this->GlobalProperties.GetPropertyValue(prop, cmProperty::GLOBAL,
-                                                 dummy);
+  return this->GlobalProperties.GetPropertyValue(prop);
 }
 
 bool cmState::GetGlobalPropertyAsBool(const std::string& prop)

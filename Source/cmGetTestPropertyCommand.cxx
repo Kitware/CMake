@@ -29,7 +29,11 @@ bool cmGetTestPropertyCommand
   cmTest *test = this->Makefile->GetTest(testName);
   if (test)
     {
-    const char *prop = test->GetProperty(args[1]);
+    const char *prop = 0;
+    if (!args[1].empty())
+      {
+      prop = test->GetProperty(args[1]);
+      }
     if (prop)
       {
       this->Makefile->AddDefinition(var, prop);

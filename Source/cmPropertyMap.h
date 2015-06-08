@@ -14,29 +14,17 @@
 
 #include "cmProperty.h"
 
-class cmake;
-
 class cmPropertyMap : public std::map<std::string,cmProperty>
 {
 public:
   cmProperty *GetOrCreateProperty(const std::string& name);
 
-  void SetProperty(const std::string& name, const char *value,
-                   cmProperty::ScopeType scope);
+  void SetProperty(const std::string& name, const char *value);
 
   void AppendProperty(const std::string& name, const char* value,
-                      cmProperty::ScopeType scope, bool asString=false);
+                      bool asString=false);
 
-  const char *GetPropertyValue(const std::string& name,
-                               cmProperty::ScopeType scope,
-                               bool &chain) const;
-
-  void SetCMakeInstance(cmake *cm) { this->CMakeInstance = cm; }
-
-  cmPropertyMap() { this->CMakeInstance = 0;}
-
-private:
-  cmake *CMakeInstance;
+  const char *GetPropertyValue(const std::string& name) const;
 };
 
 #endif

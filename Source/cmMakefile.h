@@ -372,8 +372,6 @@ public:
   };
   friend class PolicyPushPop;
 
-  mutable std::set<cmListFileContext> CMP0054ReportedIds;
-
   /**
    * Determine if the given context, name pair has already been reported
    * in context of CMP0054.
@@ -717,8 +715,7 @@ public:
   void AppendProperty(const std::string& prop, const char *value,
                       bool asString=false);
   const char *GetProperty(const std::string& prop) const;
-  const char *GetProperty(const std::string& prop,
-                          cmProperty::ScopeType scope) const;
+  const char *GetProperty(const std::string& prop, bool chain) const;
   bool GetPropertyAsBool(const std::string& prop) const;
 
   // Get the properties
@@ -848,6 +845,8 @@ protected:
   // Check for a an unused variable
   void LogUnused(const char* reason, const std::string& name) const;
 
+  mutable std::set<cmListFileContext> CMP0054ReportedIds;
+
   std::string ProjectName;    // project name
 
   // libraries, classes, and executables
@@ -949,10 +948,6 @@ private:
 
   cmPropertyMap Properties;
 
-  // Unused variable flags
-  bool WarnUnused;
-  bool CheckSystemVars;
-
   // stack of list files being read
   std::vector<std::string> ListFileStack;
 
@@ -994,8 +989,6 @@ private:
   cmPolicies::PolicyStatus
   GetPolicyStatusInternal(cmPolicies::PolicyID id) const;
 
-  bool CheckCMP0000;
-
   // Enforce rules about CMakeLists.txt files.
   void EnforceDirectoryLevelRules() const;
 
@@ -1021,7 +1014,6 @@ private:
                                   long line,
                                   bool removeEmpty,
                                   bool replaceAt) const;
-  bool Configured;
   /**
    * Old version of GetSourceFileWithOutput(const std::string&) kept for
    * backward-compatibility. It implements a linear search and support
@@ -1067,6 +1059,11 @@ private:
 
   void CheckForUnusedVariables() const;
 
+  // Unused variable flags
+  bool WarnUnused;
+  bool CheckSystemVars;
+  bool CheckCMP0000;
+  bool Configured;
   mutable bool SuppressWatches;
 };
 

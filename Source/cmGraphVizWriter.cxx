@@ -48,6 +48,7 @@ cmGraphVizWriter::cmGraphVizWriter(const std::vector<cmLocalGenerator*>&
 ,GraphName("GG")
 ,GraphHeader("node [\n  fontsize = \"12\"\n];")
 ,GraphNodePrefix("node")
+,LocalGenerators(localGenerators)
 ,GenerateForExecutables(true)
 ,GenerateForStaticLibs(true)
 ,GenerateForSharedLibs(true)
@@ -55,7 +56,6 @@ cmGraphVizWriter::cmGraphVizWriter(const std::vector<cmLocalGenerator*>&
 ,GenerateForExternals(true)
 ,GeneratePerTarget(true)
 ,GenerateDependers(true)
-,LocalGenerators(localGenerators)
 ,HaveTargetsAndLibs(false)
 {
 }
