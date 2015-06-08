@@ -847,7 +847,7 @@ cmGlobalVisualStudioGenerator::TargetIsFortranOnly(cmTarget const& target)
 //----------------------------------------------------------------------------
 bool
 cmGlobalVisualStudioGenerator::TargetCompare
-::operator()(cmTarget const* l, cmTarget const* r) const
+::operator()(cmGeneratorTarget const* l, cmGeneratorTarget const* r) const
 {
   // Make sure ALL_BUILD is first so it is the default active project.
   if(r->GetName() == "ALL_BUILD")
