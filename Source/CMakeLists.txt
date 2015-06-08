@@ -281,6 +281,7 @@ set(SRCS
   cmInstallTargetGenerator.cxx
   cmInstallDirectoryGenerator.h
   cmInstallDirectoryGenerator.cxx
+  cmLinkedTree.h
   cmListFileCache.cxx
   cmListFileCache.h
   cmListFileLexer.c

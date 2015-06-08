@@ -15,21 +15,28 @@
 #include "cmStandardIncludes.h"
 #include "cmPropertyDefinitionMap.h"
 #include "cmPropertyMap.h"
+#include "cmLinkedTree.h"
 
 class cmake;
 class cmCommand;
 
 class cmState
 {
-  typedef std::vector<std::string>::size_type PositionType;
+  struct SnapshotDataType;
+  typedef cmLinkedTree<SnapshotDataType>::iterator PositionType;
   friend class Snapshot;
 public:
   cmState(cmake* cm);
   ~cmState();
 
+  enum SnapshotType
+  {
+    BuildsystemDirectoryType
+  };
+
   class Snapshot {
   public:
-    Snapshot(cmState* state = 0, PositionType position = 0);
+    Snapshot(cmState* state = 0, PositionType position = PositionType());
 
     const char* GetCurrentSourceDirectory() const;
     void SetCurrentSourceDirectory(std::string const& dir);
@@ -158,19 +165,11 @@ private:
   std::map<std::string, cmCommand*> Commands;
   cmPropertyMap GlobalProperties;
   cmake* CMakeInstance;
-  std::vector<std::string> Locations;
-  std::vector<std::string> OutputLocations;
-  std::vector<PositionType> ParentPositions;
 
-  std::vector<std::vector<std::string> > CurrentSourceDirectoryComponents;
-  std::vector<std::vector<std::string> > CurrentBinaryDirectoryComponents;
-  // The top-most directories for relative path conversion.  Both the
-  // source and destination location of a relative path conversion
-  // must be underneath one of these directories (both under source or
-  // both under binary) in order for the relative path to be evaluated
-  // safely by the build tools.
-  std::vector<std::string> RelativePathTopSource;
-  std::vector<std::string> RelativePathTopBinary;
+  struct BuildsystemDirectoryStateType;
+  cmLinkedTree<BuildsystemDirectoryStateType> BuildsystemDirectory;
+
+  cmLinkedTree<SnapshotDataType> SnapshotData;
 
   std::vector<std::string> SourceDirectoryComponents;
   std::vector<std::string> BinaryDirectoryComponents;
