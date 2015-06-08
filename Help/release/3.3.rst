@@ -265,26 +265,6 @@ Deprecated and Removed Features
 Other Changes
 =============
 
-* Policies
-
-    * :policy:`CMP0000`
-    * :policy:`CMP0001`
-    * :policy:`CMP0002`
-    * :policy:`CMP0003`
-    * :policy:`CMP0004`
-    * :policy:`CMP0005`
-    * :policy:`CMP0006`
-    * :policy:`CMP0007`
-    * :policy:`CMP0008`
-    * :policy:`CMP0009`
-    * :policy:`CMP0010`
-    * :policy:`CMP0011`
-
-  are now deprecated.  In the next release of CMake, they will be required
-  to be set to ``NEW`` by either the :command:`cmake_policy` command or the
-  :command:`cmake_minimum_required` command.  See
-  also :manual:`cmake-policies(7)`
-
 * The :generator:`Ninja` generator now requires that calls to the
   :command:`add_custom_command` and :command:`add_custom_target`
   commands use the ``BYPRODUCTS`` option to explicitly specify any
