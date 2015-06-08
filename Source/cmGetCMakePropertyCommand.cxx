@@ -32,8 +32,7 @@ bool cmGetCMakePropertyCommand
 
   if ( args[1] == "VARIABLES" )
     {
-    int cacheonly = 0;
-    std::vector<std::string> vars = this->Makefile->GetDefinitions(cacheonly);
+    std::vector<std::string> vars = this->Makefile->GetDefinitions();
     if (!vars.empty())
       {
       output = cmJoin(vars, ";");

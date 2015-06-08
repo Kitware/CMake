@@ -1485,10 +1485,8 @@ void cmMakefile::AddLinkDirectory(const std::string& dir)
     }
 }
 
-void cmMakefile::InitializeFromParent()
+void cmMakefile::InitializeFromParent(cmMakefile* parent)
 {
-  cmMakefile *parent = this->LocalGenerator->GetParent()->GetMakefile();
-
   // Initialize definitions with the closure of the parent scope.
   this->Internal->InitializeDefinitions(parent);
 
@@ -1562,6 +1560,56 @@ void cmMakefile::InitializeFromParent()
   this->ImportedTargets = parent->ImportedTargets;
 }
 
+void cmMakefile::PushFunctionScope(const cmPolicies::PolicyMap& pm)
+{
+  this->Internal->PushDefinitions();
+
+  this->PushLoopBlockBarrier();
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetGlobalGenerator()->GetFileLockPool().PushFunctionScope();
+#endif
+
+  this->PushFunctionBlockerBarrier();
+
+  this->PushPolicy(true, pm);
+  this->PushPolicyBarrier();
+}
+
+void cmMakefile::PopFunctionScope(bool reportError)
+{
+  this->PopPolicyBarrier(reportError);
+  this->PopPolicy();
+
+  this->PopFunctionBlockerBarrier(reportError);
+
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+  this->GetGlobalGenerator()->GetFileLockPool().PopFunctionScope();
+#endif
+
+  this->PopLoopBlockBarrier();
+
+  this->CheckForUnusedVariables();
+
+  this->Internal->PopDefinitions();
+}
+
+void cmMakefile::PushMacroScope(const cmPolicies::PolicyMap& pm)
+{
+  this->PushFunctionBlockerBarrier();
+
+  this->PushPolicy(true, pm);
+  this->PushPolicyBarrier();
+}
+
+void cmMakefile::PopMacroScope(bool reportError)
+{
+  this->PopPolicyBarrier(reportError);
+  this->PopPolicy();
+
+  this->PopFunctionBlockerBarrier(reportError);
+}
+
 //----------------------------------------------------------------------------
 class cmMakefileCurrent
 {
@@ -1622,7 +1670,7 @@ void cmMakefile::Configure()
 
 void cmMakefile::ConfigureSubDirectory(cmMakefile *mf)
 {
-  mf->InitializeFromParent();
+  mf->InitializeFromParent(this);
   std::string currentStart = mf->GetCurrentSourceDirectory();
   if (this->GetCMakeInstance()->GetDebugOutput())
     {
@@ -2449,18 +2497,11 @@ const char* cmMakefile::GetSafeDefinition(const std::string& def) const
   return ret;
 }
 
-std::vector<std::string> cmMakefile
-::GetDefinitions(int cacheonly /* = 0 */) const
+std::vector<std::string> cmMakefile::GetDefinitions() const
 {
-  std::vector<std::string> res;
-  if ( !cacheonly )
-    {
-    res = this->Internal->ClosureKeys();
-    }
-  std::vector<std::string> cacheKeys =
-      this->GetState()->GetCacheEntryKeys();
+  std::vector<std::string> res = this->Internal->ClosureKeys();
+  std::vector<std::string> cacheKeys = this->GetState()->GetCacheEntryKeys();
   res.insert(res.end(), cacheKeys.begin(), cacheKeys.end());
-
   std::sort(res.begin(), res.end());
   return res;
 }
@@ -4115,14 +4156,14 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     output = cmJoin(this->ListFileStack, ";");
     return output.c_str();
     }
-  else if (prop == "VARIABLES" || prop == "CACHE_VARIABLES")
+  else if ( prop == "CACHE_VARIABLES" )
     {
-    int cacheonly = 0;
-    if ( prop == "CACHE_VARIABLES" )
-      {
-      cacheonly = 1;
-      }
-    output = cmJoin(this->GetDefinitions(cacheonly), ";");
+    output = cmJoin(this->GetState()->GetCacheEntryKeys(), ";");
+    return output.c_str();
+    }
+  else if (prop == "VARIABLES")
+    {
+    output = cmJoin(this->GetDefinitions(), ";");
     return output.c_str();
     }
   else if (prop == "MACROS")
@@ -5395,4 +5436,42 @@ AddRequiredTargetCFeature(cmTarget *target, const std::string& feature) const
     target->SetProperty("C_STANDARD", "90");
     }
   return true;
+}
+
+
+cmMakefile::FunctionPushPop::FunctionPushPop(cmMakefile* mf,
+                                             cmPolicies::PolicyMap const& pm)
+  : Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushFunctionScope(pm);
+}
+
+cmMakefile::FunctionPushPop::~FunctionPushPop()
+{
+  this->Makefile->PopFunctionScope(this->ReportError);
+}
+
+
+cmMakefile::MacroPushPop::MacroPushPop(cmMakefile* mf,
+                                       const cmPolicies::PolicyMap& pm)
+  : Makefile(mf), ReportError(true)
+{
+  this->Makefile->PushMacroScope(pm);
+}
+
+cmMakefile::MacroPushPop::~MacroPushPop()
+{
+  this->Makefile->PopMacroScope(this->ReportError);
+}
+
+cmMakefileCall::cmMakefileCall(cmMakefile* mf, const cmListFileContext& lfc,
+                               cmExecutionStatus& status): Makefile(mf)
+{
+  cmMakefile::CallStackEntry entry = {&lfc, &status};
+  this->Makefile->CallStack.push_back(entry);
+}
+
+cmMakefileCall::~cmMakefileCall()
+{
+  this->Makefile->CallStack.pop_back();
 }

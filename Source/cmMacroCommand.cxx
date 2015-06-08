@@ -96,12 +96,8 @@ bool cmMacroHelperCommand::InvokeInitialPass
     return false;
     }
 
-  // Enforce matching logical blocks inside the macro.
-  cmMakefile::LexicalPushPop lexScope(this->Makefile);
-
-  // Push a weak policy scope which restores the policies recorded at
-  // macro creation.
-  cmMakefile::PolicyPushPop polScope(this->Makefile, true, this->Policies);
+  cmMakefile::MacroPushPop macroScope(this->Makefile,
+                                      this->Policies);
 
   // set the value of argc
   std::ostringstream argcDefStream;
@@ -191,8 +187,7 @@ bool cmMacroHelperCommand::InvokeInitialPass
       {
       // The error message should have already included the call stack
       // so we do not need to report an error here.
-      lexScope.Quiet();
-      polScope.Quiet();
+      macroScope.Quiet();
       inStatus.SetNestedError(true);
       return false;
       }

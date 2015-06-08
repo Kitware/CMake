@@ -14,7 +14,6 @@
 
 #include "cmExecutionStatus.h"
 #include "cmListFileCache.h"
-#include "cmPolicies.h"
 #include "cmPropertyMap.h"
 #include "cmSystemTools.h"
 #include "cmTarget.h"
@@ -373,11 +372,6 @@ public:
   };
   friend class PolicyPushPop;
 
-  /**
-    * Get the Policies Instance
-    */
-  cmPolicies *GetPolicies() const;
-
   mutable std::set<cmListFileContext> CMP0054ReportedIds;
 
   /**
@@ -517,7 +511,7 @@ public:
    * cacheonly is specified and is greater than 0, then only cache
    * variables will be listed.
    */
-  std::vector<std::string> GetDefinitions(int cacheonly=0) const;
+  std::vector<std::string> GetDefinitions() const;
 
   /**
    * Test a boolean variable to see if it is true or false.
@@ -731,7 +725,7 @@ public:
   cmPropertyMap &GetProperties() { return this->Properties; }
 
   ///! Initialize a makefile from its parent
-  void InitializeFromParent();
+  void InitializeFromParent(cmMakefile* parent);
 
   void AddInstallGenerator(cmInstallGenerator* g)
     { if(g) this->InstallGenerators.push_back(g); }
@@ -743,7 +737,36 @@ public:
   const std::vector<cmTestGenerator*>& GetTestGenerators() const
     { return this->TestGenerators; }
 
-  // push and pop variable scopes
+  class FunctionPushPop
+  {
+  public:
+    FunctionPushPop(cmMakefile* mf,
+                    cmPolicies::PolicyMap const& pm);
+    ~FunctionPushPop();
+
+    void Quiet() { this->ReportError = false; }
+  private:
+    cmMakefile* Makefile;
+    bool ReportError;
+  };
+
+  class MacroPushPop
+  {
+  public:
+    MacroPushPop(cmMakefile* mf,
+                    cmPolicies::PolicyMap const& pm);
+    ~MacroPushPop();
+
+    void Quiet() { this->ReportError = false; }
+  private:
+    cmMakefile* Makefile;
+    bool ReportError;
+  };
+
+  void PushFunctionScope(cmPolicies::PolicyMap const& pm);
+  void PopFunctionScope(bool reportError);
+  void PushMacroScope(cmPolicies::PolicyMap const& pm);
+  void PopMacroScope(bool reportError);
   void PushScope();
   void PopScope();
   void RaiseScope(const std::string& var, const char *value);
@@ -1054,15 +1077,8 @@ class cmMakefileCall
 public:
   cmMakefileCall(cmMakefile* mf,
                  cmListFileContext const& lfc,
-                 cmExecutionStatus& status): Makefile(mf)
-    {
-    cmMakefile::CallStackEntry entry = {&lfc, &status};
-    this->Makefile->CallStack.push_back(entry);
-    }
-  ~cmMakefileCall()
-    {
-    this->Makefile->CallStack.pop_back();
-    }
+                 cmExecutionStatus& status);
+  ~cmMakefileCall();
 private:
   cmMakefile* Makefile;
 };
