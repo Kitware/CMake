@@ -445,6 +445,7 @@ void CMakeSetupDialog::doInstallForCommandLine()
   l->addWidget(lab);
   lab->setText(msg);
   lab->setWordWrap(false);
+  lab->setTextInteractionFlags(Qt::TextSelectableByMouse);
   QDialogButtonBox* btns = new QDialogButtonBox(QDialogButtonBox::Ok,
                                                 Qt::Horizontal, &dialog);
   QObject::connect(btns, SIGNAL(accepted()), &dialog, SLOT(accept()));
