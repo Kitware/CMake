@@ -21,7 +21,7 @@
 //----------------------------------------------------------------------------
 cmMakefileUtilityTargetGenerator
 ::cmMakefileUtilityTargetGenerator(cmGeneratorTarget* target):
-  cmMakefileTargetGenerator(target)
+  cmMakefileTargetGenerator(target->Target)
 {
   this->CustomCommandDriver = OnUtility;
   this->OSXBundleGenerator = new cmOSXBundleGenerator(target,

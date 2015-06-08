@@ -27,7 +27,7 @@ class cmCustomCommand;
 class cmGhsMultiTargetGenerator
 {
 public:
-  cmGhsMultiTargetGenerator(cmGeneratorTarget* target);
+  cmGhsMultiTargetGenerator(cmTarget *target);
 
   virtual ~cmGhsMultiTargetGenerator();
 
@@ -100,7 +100,6 @@ private:
                                   const std::string &language);
 
   cmTarget *Target;
-  cmGeneratorTarget* GeneratorTarget;
   cmLocalGhsMultiGenerator *LocalGenerator;
   cmMakefile *Makefile;
   std::string AbsBuildFilePath;

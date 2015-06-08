@@ -153,7 +153,7 @@ protected:
                             cmLocalUnixMakefileGenerator3* lg);
 
   void AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                                 cmGeneratorTarget* target);
+                                 cmTarget& target);
 
   // does this generator need a requires step for any of its targets
   bool NeedRequiresStep(cmTarget const&);
@@ -198,8 +198,8 @@ protected:
                    cmStrictTargetComparison> ProgressMapType;
   ProgressMapType ProgressMap;
 
-  size_t CountProgressMarksInTarget(cmGeneratorTarget const* target,
-                                 std::set<cmGeneratorTarget const*>& emitted);
+  size_t CountProgressMarksInTarget(cmTarget const* target,
+                                    std::set<cmTarget const*>& emitted);
   size_t CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg);
 
   cmGeneratedFileStream *CommandDatabase;

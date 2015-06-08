@@ -132,7 +132,7 @@ public:
     assert(this->VarScopeIter->Vars != this->VarTree.Root());
     if(this->VarScopeIter->Parent == this->VarTree.Root())
       {
-      cmLocalGenerator* plg = mf->LocalGenerator->GetParent();
+      cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent();
       if(!plg)
         {
         return false;
@@ -1633,11 +1633,6 @@ void cmMakefile::PopMacroScope(bool reportError)
   this->PopPolicy();
 
   this->PopFunctionBlockerBarrier(reportError);
-}
-
-bool cmMakefile::IsRootMakefile() const
-{
-  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
 //----------------------------------------------------------------------------

@@ -34,7 +34,7 @@ class cmMakefileTargetGenerator
 {
 public:
   // constructor to set the ivars
-  cmMakefileTargetGenerator(cmGeneratorTarget* target);
+  cmMakefileTargetGenerator(cmTarget* target);
   virtual ~cmMakefileTargetGenerator();
 
   // construct using this factory call
