@@ -22,7 +22,7 @@ cmOSXBundleGenerator(cmGeneratorTarget* target,
                      const std::string& configName)
  : GT(target)
  , Makefile(target->Target->GetMakefile())
- , LocalGenerator(Makefile->GetLocalGenerator())
+ , LocalGenerator(target->GetLocalGenerator())
  , ConfigName(configName)
  , MacContentFolders(0)
 {
