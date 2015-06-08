@@ -276,6 +276,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
     }
 
   bool allTestsFailedTestLoadCheck = false;
+  bool testingThisFeature = false;
   size_t minProcessorsRequired = this->ParallelLevel;
   std::string testWithMinProcessors = "";
 
@@ -296,6 +297,8 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
     }
   cmFileLock testLoadLock;
+
+  double systemLoad = 0.0;
 
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
@@ -322,7 +325,19 @@ void cmCTestMultiProcessHandler::StartNextTests()
         cmFileLockResult result = testLoadLock.Lock(lockFile, 1);
         if (result.IsOk())
           {
-          const double systemLoad = info.GetLoadAverage();
+          // Check for a fake load average value used in testing.
+          const char* fake_load_value =
+            getenv("__FAKE_LOAD_AVERAGE_FOR_CTEST_TESTING");
+          if (fake_load_value)
+            {
+            testingThisFeature = true;
+            systemLoad = atoi(fake_load_value);
+            }
+          // If it's not set, look up the true load average.
+          else
+            {
+            systemLoad = info.GetLoadAverage();
+            }
 
           // Don't start more tests than your max load can support.
           if (numToStart > (this->TestLoad - systemLoad))
@@ -333,7 +348,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
           testLoadOk = processors <= (this->TestLoad - systemLoad);
           if (testLoadOk)
             {
-            cmCTestLog(this->CTest, HANDLER_OUTPUT, "OK to run " << GetName(*test) << ", it requires " << processors << " procs & system load is: " << info.GetLoadAverage() << std::endl);
+            cmCTestLog(this->CTest, DEBUG, "OK to run " << GetName(*test) << ", it requires " << processors << " procs & system load is: " << systemLoad << std::endl);
             }
           }
         else
@@ -383,13 +398,13 @@ void cmCTestMultiProcessHandler::StartNextTests()
 
   if (allTestsFailedTestLoadCheck)
     {
-    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** WAITING,");
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "***** WAITING, ");
     time_t currenttime = time(0);
     struct tm* t = localtime(&currenttime);
     char current_time[1024];
     strftime(current_time, 1000, "%s", t);
     cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Time: "
-      << current_time << ",");
+      << current_time << ", ");
 
     if (this->SerialTestRunning)
       {
@@ -400,16 +415,25 @@ void cmCTestMultiProcessHandler::StartNextTests()
     else
       {
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "System Load: "
-        << info.GetLoadAverage() << ",");
+        << systemLoad << ", ");
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "Max Allowed Load: "
-        << this->TestLoad << ",");
+        << this->TestLoad << ", ");
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "Smallest test "
         << testWithMinProcessors << " requires " << minProcessorsRequired);
       cmCTestLog(this->CTest, HANDLER_OUTPUT, "*****" << std::endl);
       }
 
-    // Wait between 1 and 60 seconds before trying again...
-    cmCTestScriptHandler::SleepInSeconds(rand() % 60 + 1);
+    if (testingThisFeature)
+      {
+      // Break out of the infinite loop of waiting for our fake load
+      // to come down.
+      this->StopTimePassed = true;
+      }
+    else
+      {
+      // Wait between 1 and 5 seconds before trying again...
+      cmCTestScriptHandler::SleepInSeconds(rand() % 5 + 1);
+      }
     }
 }
 
