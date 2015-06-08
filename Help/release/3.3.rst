@@ -271,6 +271,10 @@ Deprecated and Removed Features
 Other Changes
 =============
 
+* Policy :policy:`CMP0011` is deprecated.  In the next release of CMake,
+  it will not be possible to set it to ``OLD``.  See
+  also :manual:`cmake-policies(7)`
+
 * The :generator:`Ninja` generator now requires that calls to the
   :command:`add_custom_command` and :command:`add_custom_target`
   commands use the ``BYPRODUCTS`` option to explicitly specify any
