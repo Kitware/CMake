@@ -39,6 +39,11 @@ Options include:
 ``NAMES``
   Specify one or more possible names for the |SEARCH_XXX|.
 
+  When using this to specify names with and without a version
+  suffix, we recommend specifying the unversioned name first
+  so that locally-built packages can be found before those
+  provided by distributions.
+
 ``HINTS``, ``PATHS``
   Specify directories to search in addition to the default locations.
   The ``ENV var`` sub-option reads paths from a system environment
