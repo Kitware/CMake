@@ -353,6 +353,34 @@ void cmGeneratorTarget::ComputeObjectMapping()
 }
 
 //----------------------------------------------------------------------------
+const char* cmGeneratorTarget::GetFeature(const std::string& feature,
+                                          const std::string& config) const
+{
+  if(!config.empty())
+    {
+    std::string featureConfig = feature;
+    featureConfig += "_";
+    featureConfig += cmSystemTools::UpperCase(config);
+    if(const char* value = this->Target->GetProperty(featureConfig))
+      {
+      return value;
+      }
+    }
+  if(const char* value = this->Target->GetProperty(feature))
+    {
+    return value;
+    }
+  return this->LocalGenerator->GetFeature(feature, config);
+}
+
+//----------------------------------------------------------------------------
+bool cmGeneratorTarget::GetFeatureAsBool(const std::string& feature,
+                                         const std::string& config) const
+{
+  return cmSystemTools::IsOn(this->GetFeature(feature, config));
+}
+
+//----------------------------------------------------------------------------
 const std::string& cmGeneratorTarget::GetObjectName(cmSourceFile const* file)
 {
   this->ComputeObjectMapping();
@@ -983,7 +1011,7 @@ cmGeneratorTarget::GetCreateRuleVariable(std::string const& lang,
     case cmTarget::STATIC_LIBRARY:
       {
       std::string var = "CMAKE_" + lang + "_CREATE_STATIC_LIBRARY";
-      if(this->Target->GetFeatureAsBool(
+      if(this->GetFeatureAsBool(
            "INTERPROCEDURAL_OPTIMIZATION", config))
         {
         std::string varIPO = var + "_IPO";

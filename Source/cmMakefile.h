@@ -727,9 +727,6 @@ public:
                           cmProperty::ScopeType scope) const;
   bool GetPropertyAsBool(const std::string& prop) const;
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config);
-
   // Get the properties
   cmPropertyMap &GetProperties() { return this->Properties; }
 

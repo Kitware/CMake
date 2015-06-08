@@ -1025,12 +1025,13 @@ cmGlobalVisualStudio7Generator::IsPartOfDefaultBuild(
     {
     return activeConfigs;
     }
+  cmGeneratorTarget* gt = this->GetGeneratorTarget(target);
   // inspect EXCLUDE_FROM_DEFAULT_BUILD[_<CONFIG>] properties
   for(std::vector<std::string>::const_iterator i = configs.begin();
       i != configs.end(); ++i)
     {
     const char* propertyValue =
-      target->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i->c_str());
+      gt->GetFeature("EXCLUDE_FROM_DEFAULT_BUILD", i->c_str());
     if(cmSystemTools::IsOff(propertyValue))
       {
       activeConfigs.insert(*i);

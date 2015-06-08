@@ -107,13 +107,14 @@ std::string cmNinjaTargetGenerator::LanguageCompilerRule(
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
 const char* cmNinjaTargetGenerator::GetFeature(const std::string& feature)
 {
-  return this->Target->GetFeature(feature, this->GetConfigName());
+  return this->GeneratorTarget->GetFeature(feature, this->GetConfigName());
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.
 bool cmNinjaTargetGenerator::GetFeatureAsBool(const std::string& feature)
 {
-  return this->Target->GetFeatureAsBool(feature, this->GetConfigName());
+  return this->GeneratorTarget->GetFeatureAsBool(feature,
+                                                 this->GetConfigName());
 }
 
 // TODO: Picked up from cmMakefileTargetGenerator.  Refactor it.

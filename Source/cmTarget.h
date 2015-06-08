@@ -260,11 +260,6 @@ public:
   bool GetPropertyAsBool(const std::string& prop) const;
   void CheckProperty(const std::string& prop, cmMakefile* context) const;
 
-  const char* GetFeature(const std::string& feature,
-                         const std::string& config) const;
-  bool GetFeatureAsBool(const std::string& feature,
-                        const std::string& config) const;
-
   bool IsImported() const {return this->IsImportedTarget;}
 
   void GetObjectLibrariesCMP0026(std::vector<cmTarget*>& objlibs) const;
