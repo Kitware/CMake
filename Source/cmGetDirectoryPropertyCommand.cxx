@@ -26,7 +26,6 @@ bool cmGetDirectoryPropertyCommand
   std::vector<std::string>::const_iterator i = args.begin();
   std::string variable = *i;
   ++i;
-  std::string output = "";
 
   // get the directory argument if there is one
   cmMakefile *dir = this->Makefile;
@@ -79,7 +78,7 @@ bool cmGetDirectoryPropertyCommand
                      "providing the name of the variable to get.");
       return false;
       }
-    output = dir->GetSafeDefinition(*i);
+    std::string output = dir->GetSafeDefinition(*i);
     this->Makefile->AddDefinition(variable, output.c_str());
     return true;
     }
