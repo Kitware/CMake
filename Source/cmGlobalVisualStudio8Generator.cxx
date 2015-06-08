@@ -441,7 +441,8 @@ bool cmGlobalVisualStudio8Generator::ComputeTargetDepends()
 void cmGlobalVisualStudio8Generator::WriteProjectDepends(
   std::ostream& fout, const std::string&, const char*, cmTarget const& t)
 {
-  TargetDependSet const& unordered = this->GetTargetDirectDepends(t);
+  cmGeneratorTarget* gt = this->GetGeneratorTarget(&t);
+  TargetDependSet const& unordered = this->GetTargetDirectDepends(gt);
   OrderedTargetDependSet depends(unordered);
   for(OrderedTargetDependSet::const_iterator i = depends.begin();
       i != depends.end(); ++i)
