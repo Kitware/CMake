@@ -54,6 +54,8 @@ public:
     bool IsValid() const;
     Snapshot GetBuildsystemDirectoryParent() const;
 
+    cmState* GetState() const;
+
   private:
     void ComputeRelativePathTopSource();
     void ComputeRelativePathTopBinary();

@@ -14,6 +14,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmState.h"
+#include "cmOutputConverter.h"
 
 class cmMakefile;
 class cmGlobalGenerator;
@@ -31,7 +32,7 @@ class cmCustomCommandGenerator;
  * platforms. This class should never be constructed directly. A
  * GlobalGenerator will create it and invoke the appropriate commands on it.
  */
-class cmLocalGenerator
+class cmLocalGenerator : public cmOutputConverter
 {
 public:
   cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,
@@ -89,35 +90,6 @@ public:
 
   cmState* GetState() const;
   cmState::Snapshot GetStateSnapshot() const;
-
-  /**
-   * Convert something to something else. This is a centralized conversion
-   * routine used by the generators to handle relative paths and the like.
-   * The flags determine what is actually done.
-   *
-   * relative: treat the argument as a directory and convert it to make it
-   * relative or full or unchanged. If relative (HOME, START etc) then that
-   * specifies what it should be relative to.
-   *
-   * output: make the result suitable for output to a...
-   *
-   * optional: should any relative path operation be controlled by the rel
-   * path setting
-   */
-  enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
-  enum OutputFormat { UNCHANGED, MAKERULE, SHELL, WATCOMQUOTE, RESPONSE };
-  std::string ConvertToOutputFormat(const std::string& source,
-                                    OutputFormat output);
-  std::string Convert(const std::string& remote, RelativeRoot local,
-                      OutputFormat output = UNCHANGED);
-  std::string Convert(RelativeRoot remote, const std::string& local,
-                      OutputFormat output = UNCHANGED,
-                      bool optional = false);
-
-  /**
-    * Get path for the specified relative root.
-    */
-  const char* GetRelativeRootPath(RelativeRoot relroot);
 
   ///! set/get the parent generator
   cmLocalGenerator* GetParent() const {return this->Parent;}
@@ -194,17 +166,6 @@ public:
   bool GetRealDependency(const std::string& name, const std::string& config,
                          std::string& dep);
 
-  ///! for existing files convert to output path and short path if spaces
-  std::string ConvertToOutputForExisting(const std::string& remote,
-                                         RelativeRoot local = START_OUTPUT,
-                                         OutputFormat format = SHELL);
-
-  /** For existing path identified by RelativeRoot convert to output
-      path and short path if spaces.  */
-  std::string ConvertToOutputForExisting(RelativeRoot remote,
-                                         const std::string& local = "",
-                                         OutputFormat format = SHELL);
-
   virtual std::string ConvertToIncludeReference(std::string const& path,
                                                 OutputFormat format = SHELL,
                                                 bool forceFullPaths = false);
@@ -275,40 +236,6 @@ public:
     const char* DependencyFile;
     const char* FilterPrefix;
   };
-
-  /** Set whether to treat conversions to SHELL as a link script shell.  */
-  void SetLinkScriptShell(bool b) { this->LinkScriptShell = b; }
-
-  /** Escape the given string to be used as a command line argument in
-      the native build system shell.  Optionally allow the build
-      system to replace make variable references.  Optionally adjust
-      escapes for the special case of passing to the native echo
-      command.  */
-  std::string EscapeForShell(const std::string& str, bool makeVars = false,
-                             bool forEcho = false,
-                             bool useWatcomQuote = false);
-
-  /** Escape the given string as an argument in a CMake script.  */
-  static std::string EscapeForCMake(const std::string& str);
-
-  enum FortranFormat
-    {
-    FortranFormatNone,
-    FortranFormatFixed,
-    FortranFormatFree
-    };
-  FortranFormat GetFortranFormat(const char* value);
-
-  /**
-   * Convert the given remote path to a relative path with respect to
-   * the given local path.  The local path must be given in component
-   * form (see SystemTools::SplitPath) without a trailing slash.  The
-   * remote path must use forward slashes and not already be escaped
-   * or quoted.
-   */
-  std::string ConvertToRelativePath(const std::vector<std::string>& local,
-                                    const std::string& remote,
-                                    bool force=false);
 
   /**
    * Get the relative path from the generator output directory to a
@@ -442,7 +369,6 @@ protected:
 
   std::set<cmTarget const*> WarnCMP0063;
 
-  bool LinkScriptShell;
   bool EmitUniversalBinaryFlags;
 
   // Hack for ExpandRuleVariable until object-oriented version is
@@ -452,10 +378,6 @@ protected:
   cmIML_INT_uint64_t BackwardsCompatibility;
   bool BackwardsCompatibilityFinal;
 private:
-  std::string ConvertToOutputForExistingCommon(const std::string& remote,
-                                               std::string const& result,
-                                               OutputFormat format);
-
   void AddSharedFlags(std::string& flags, const std::string& lang,
                       bool shared);
   bool GetShouldUseOldFlags(bool shared, const std::string &lang) const;

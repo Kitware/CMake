@@ -16,7 +16,7 @@
 
 #include "cmGlobalGenerator.h"
 #include "cmState.h"
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmMakefile.h"
 #include "cmTarget.h"
 #include "cmake.h"
@@ -246,7 +246,6 @@ cmComputeLinkInformation
   // Store context information.
   this->Target = target;
   this->Makefile = this->Target->GetMakefile();
-  this->LocalGenerator = this->Makefile->GetLocalGenerator();
   this->GlobalGenerator = this->Makefile->GetGlobalGenerator();
   this->CMakeInstance = this->GlobalGenerator->GetCMakeInstance();
 
@@ -1395,7 +1394,8 @@ void cmComputeLinkInformation::AddFrameworkItem(std::string const& item)
 
   // Add the item using the -framework option.
   this->Items.push_back(Item("-framework", false));
-  fw = this->LocalGenerator->EscapeForShell(fw);
+  cmOutputConverter converter(this->Makefile->GetStateSnapshot());
+  fw = converter.EscapeForShell(fw);
   this->Items.push_back(Item(fw, false));
 }
 

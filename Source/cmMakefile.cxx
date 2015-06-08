@@ -277,7 +277,7 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 //----------------------------------------------------------------------------
 cmListFileBacktrace cmMakefile::GetBacktrace() const
 {
-  cmListFileBacktrace backtrace(this->GetLocalGenerator());
+  cmListFileBacktrace backtrace(this->StateSnapshot);
   for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
       i != this->CallStack.rend(); ++i)
     {
@@ -290,7 +290,7 @@ cmListFileBacktrace cmMakefile::GetBacktrace() const
 cmListFileBacktrace
 cmMakefile::GetBacktrace(cmListFileContext const& lfc) const
 {
-  cmListFileBacktrace backtrace(this->GetLocalGenerator());
+  cmListFileBacktrace backtrace(this->StateSnapshot);
   backtrace.Append(lfc);
   for(CallStackType::const_reverse_iterator i = this->CallStack.rbegin();
       i != this->CallStack.rend(); ++i)
@@ -4655,6 +4655,11 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
   char nMatches[] = {highest, '\0'};
   this->AddDefinition(nMatchesVariable, nMatches);
   this->MarkVariableAsUsed(nMatchesVariable);
+}
+
+cmState::Snapshot cmMakefile::GetStateSnapshot() const
+{
+  return this->StateSnapshot;
 }
 
 //----------------------------------------------------------------------------

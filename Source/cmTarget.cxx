@@ -13,7 +13,7 @@
 #include "cmake.h"
 #include "cmMakefile.h"
 #include "cmSourceFile.h"
-#include "cmLocalGenerator.h"
+#include "cmOutputConverter.h"
 #include "cmGlobalGenerator.h"
 #include "cmComputeLinkInformation.h"
 #include "cmListFileCache.h"
@@ -1257,14 +1257,14 @@ void cmTarget::GetTllSignatureTraces(std::ostringstream &s,
                                                                 : "plain");
   s << "The uses of the " << sigString << " signature are here:\n";
   typedef std::vector<std::pair<TLLSignature, cmListFileContext> > Container;
-  cmLocalGenerator* lg = this->GetMakefile()->GetLocalGenerator();
+  cmOutputConverter converter(this->GetMakefile()->GetStateSnapshot());
   for(Container::const_iterator it = this->TLLCommands.begin();
       it != this->TLLCommands.end(); ++it)
     {
     if (it->first == sig)
       {
       cmListFileContext lfc = it->second;
-      lfc.FilePath = lg->Convert(lfc.FilePath, cmLocalGenerator::HOME);
+      lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
       s << " * " << lfc << std::endl;
       }
     }
