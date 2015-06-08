@@ -872,7 +872,13 @@ cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 cmGlobalVisualStudioGenerator::OrderedTargetDependSet
 ::OrderedTargetDependSet(TargetSet const& targets)
 {
-  this->insert(targets.begin(), targets.end());
+  for (TargetSet::const_iterator it = targets.begin();
+       it != targets.end(); ++it)
+    {
+    cmGeneratorTarget* gt =
+        (*it)->GetGlobalGenerator()->GetGeneratorTarget(*it);
+    this->insert(gt);
+    }
 }
 
 std::string cmGlobalVisualStudioGenerator::ExpandCFGIntDir(
