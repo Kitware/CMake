@@ -347,7 +347,7 @@ void cmGlobalVisualStudioGenerator::FollowLinkDepends(
       {
       if(di->IsLink())
         {
-        this->FollowLinkDepends((*di)->Target->Target, linked);
+        this->FollowLinkDepends((*di)->Target, linked);
         }
       }
     }
