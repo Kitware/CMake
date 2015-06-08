@@ -10,6 +10,6 @@ runs a ctest -S script
 
 Runs a script or scripts much like if it was run from ctest -S.  If no
 argument is provided then the current script is run using the current
-settings of the variables.  If NEW_PROCESS is specified then each
-script will be run in a separate process.If RETURN_VALUE is specified
-the return value of the last script run will be put into var.
+settings of the variables.  If ``NEW_PROCESS`` is specified then each
+script will be run in a separate process.If ``RETURN_VALUE`` is specified
+the return value of the last script run will be put into ``var``.

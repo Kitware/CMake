@@ -7,7 +7,7 @@ Display a message to the user.
 
   message([<mode>] "message to display" ...)
 
-The optional <mode> keyword determines the type of message:
+The optional ``<mode>`` keyword determines the type of message:
 
 ::
 

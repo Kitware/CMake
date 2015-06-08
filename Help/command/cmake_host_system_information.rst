@@ -8,10 +8,10 @@ Query host system specific information.
   cmake_host_system_information(RESULT <variable> QUERY <key> ...)
 
 Queries system information of the host system on which cmake runs.
-One or more <key> can be provided to select the information to be
-queried.  The list of queried values is stored in <variable>.
+One or more ``<key>`` can be provided to select the information to be
+queried.  The list of queried values is stored in ``<variable>``.
 
-<key> can be one of the following values:
+``<key>`` can be one of the following values:
 
 ::
 

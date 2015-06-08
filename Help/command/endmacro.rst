@@ -7,4 +7,4 @@ Ends a list of commands in a macro block.
 
   endmacro(expression)
 
-See the macro command.
+See the :command:`macro` command.
