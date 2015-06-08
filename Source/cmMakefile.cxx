@@ -53,6 +53,11 @@ public:
     this->VarStack.push_back(cmDefinitions());
   }
 
+  void InitializeVarStack()
+  {
+    this->PushDefinitions();
+  }
+
   void InitializeDefinitions(cmMakefile* parent)
   {
     this->VarStack.back() =
@@ -139,7 +144,7 @@ cmMakefile::cmMakefile(cmLocalGenerator* localGenerator)
     LocalGenerator(localGenerator),
     StateSnapshot(localGenerator->GetStateSnapshot())
 {
-  this->Internal->PushDefinitions();
+  this->Internal->InitializeVarStack();
   this->Internal->IsSourceFileTryCompile = false;
 
   // Initialize these first since AddDefaultDefinitions calls AddDefinition
