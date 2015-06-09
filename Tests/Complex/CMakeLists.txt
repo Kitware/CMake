@@ -1,7 +1,7 @@
 #
 # A more complex test case
 #
-cmake_minimum_required(VERSION 2.4)
+cmake_minimum_required(VERSION 3.2)
 project (Complex)
 
 # Try setting a new policy.  The IF test is for coverage.
@@ -21,6 +21,7 @@ foreach(p
     CMP0032
     CMP0033
     CMP0034
+    CMP0035
     CMP0043
     CMP0050
     )
