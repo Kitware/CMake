@@ -56,18 +56,19 @@ cmNinjaTargetGenerator::New(cmGeneratorTarget* target)
     }
 }
 
-cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmGeneratorTarget* target)
+cmNinjaTargetGenerator::cmNinjaTargetGenerator(cmTarget* target)
   :
     MacOSXContentGenerator(0),
     OSXBundleGenerator(0),
     MacContentFolders(),
-    Target(target->Target),
-    Makefile(target->Makefile),
+    Target(target),
+    Makefile(target->GetMakefile()),
     LocalGenerator(
-      static_cast<cmLocalNinjaGenerator*>(target->GetLocalGenerator())),
+      static_cast<cmLocalNinjaGenerator*>(Makefile->GetLocalGenerator())),
     Objects()
 {
-  this->GeneratorTarget = target;
+  this->GeneratorTarget =
+    this->GetGlobalGenerator()->GetGeneratorTarget(target);
   MacOSXContentGenerator = new MacOSXContentGeneratorType(this);
 }
 

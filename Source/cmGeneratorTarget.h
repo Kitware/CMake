@@ -24,9 +24,7 @@ class cmTarget;
 class cmGeneratorTarget
 {
 public:
-  cmGeneratorTarget(cmTarget*, cmLocalGenerator* lg);
-
-  cmLocalGenerator* GetLocalGenerator() const;
+  cmGeneratorTarget(cmTarget*);
 
   int GetType() const;
   std::string GetName() const;

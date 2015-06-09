@@ -79,9 +79,6 @@ public:
    */
   ~cmMakefile();
 
-  /// @return whether we are processing the top CMakeLists.txt file.
-  bool IsRootMakefile() const;
-
   bool ReadListFile(const char* listfile);
 
   bool ReadDependentFile(const char* listfile, bool noPolicyScope = true);

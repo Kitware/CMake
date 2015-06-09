@@ -21,7 +21,7 @@
 
 cmNinjaUtilityTargetGenerator::cmNinjaUtilityTargetGenerator(
     cmGeneratorTarget *target)
-  : cmNinjaTargetGenerator(target) {}
+  : cmNinjaTargetGenerator(target->Target) {}
 
 cmNinjaUtilityTargetGenerator::~cmNinjaUtilityTargetGenerator() {}
 
