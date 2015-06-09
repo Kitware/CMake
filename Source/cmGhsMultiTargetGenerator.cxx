@@ -373,7 +373,6 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
     cmTarget *tg(GetGlobalGenerator()->FindTarget(libName));
     if (NULL != tg)
       {
-      cmGhsMultiTargetGenerator gmtg(tg);
       libName = tg->GetName() + ".a";
       }
     *this->GetFolderBuildStreams() << "    -l\"" << libName << "\""
