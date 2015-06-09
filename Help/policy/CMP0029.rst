@@ -8,3 +8,5 @@ but was kept in CMake for compatibility for a long time.
 
 .. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
+
+.. include:: DEPRECATED.txt

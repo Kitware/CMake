@@ -26,3 +26,5 @@ by default when this policy is not set and simply uses OLD behavior.
 See documentation of the
 :variable:`CMAKE_POLICY_WARNING_CMP0047 <CMAKE_POLICY_WARNING_CMP<NNNN>>`
 variable to control the warning.
+
+.. include:: DEPRECATED.txt

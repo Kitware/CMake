@@ -28,3 +28,5 @@ a warning.  An included file may set CMP0000 explicitly to affect how
 this policy is enforced for the main CMakeLists.txt file.
 
 This policy was introduced in CMake version 2.6.0.
+
+.. include:: DEPRECATED.txt
