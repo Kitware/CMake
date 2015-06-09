@@ -82,7 +82,7 @@ cmake_policy(PUSH)
   set(CMAKE_POLICY_DEFAULT_CMP0055 OLD) # honored
   set(CMAKE_POLICY_DEFAULT_CMP0056 NEW) # honored
   set(CMAKE_POLICY_DEFAULT_CMP0057 "")  # noop
-  cmake_policy(VERSION 3.2)
+  cmake_policy(VERSION 3.1)
   cmake_policy(GET CMP0054 cmp)
   check(CMP0054 "NEW" "${cmp}")
   cmake_policy(GET CMP0055 cmp)
