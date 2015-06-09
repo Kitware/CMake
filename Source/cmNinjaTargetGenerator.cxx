@@ -483,14 +483,16 @@ cmNinjaTargetGenerator
     const char *clauncher = this->Target->GetProperty(clauncher_prop);
     if (clauncher && *clauncher)
       {
-      // handle the case where launcher has its own arguments inside
-      // the variable handling spaces in the path, etc.
-      std::string cmd, args;
-      cmSystemTools::SplitProgramFromArgs(clauncher,
-                                          cmd, args);
+      std::vector<std::string> launcher_cmd;
+      cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
       std::string run_launcher =
-        this->LocalGenerator->EscapeForShell(cmd);
-      run_launcher += args;
+        this->LocalGenerator->EscapeForShell(launcher_cmd[0]);
+      // now put any arguments in if they exist
+      for(size_t i =1; i < launcher_cmd.size(); ++i)
+        {
+        run_launcher += " ";
+        run_launcher += launcher_cmd[i];
+        }
       run_launcher += " ";
       compileCmds.front().insert(0, run_launcher);
       }
@@ -507,7 +509,6 @@ cmNinjaTargetGenerator
 
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
-
 
   // Write the rule for compiling file of the given language.
   std::ostringstream comment;

@@ -1,9 +1,9 @@
 <LANG>_COMPILER_LAUNCHER
----------------------------
+------------------------
 
 This property is implemented only when ``<LANG>`` is ``C`` or ``CXX``.
 
-Specify a string containing a command line for a compiler launching tool.
+Specify a :ref:`;-list containing a command line for a compiler launching tool.
 The :ref:`Makefile Generators` and the :generator:`Ninja` generator will
 run this tool and pass the compiler and its arguments to the tool. Some
 example tools are distcc and ccache.
