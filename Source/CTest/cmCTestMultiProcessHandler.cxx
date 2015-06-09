@@ -431,8 +431,9 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
     else
       {
-      // Wait between 1 and 5 seconds before trying again...
-      cmCTestScriptHandler::SleepInSeconds(rand() % 5 + 1);
+      // Wait between 1 and 5 seconds before trying again.
+      cmCTestScriptHandler::SleepInSeconds(
+        cmSystemTools::RandomSeed() % 5 + 1);
       }
     }
 }
