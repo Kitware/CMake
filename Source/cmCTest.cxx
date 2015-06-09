@@ -294,6 +294,7 @@ cmCTest::cmCTest()
   this->LabelSummary           = true;
   this->ParallelLevel          = 1;
   this->ParallelLevelSetInCli  = false;
+  this->TestLoad               = 0;
   this->SubmitIndex            = 0;
   this->Failover               = false;
   this->BatchJobs              = false;
@@ -391,6 +392,11 @@ cmCTest::~cmCTest()
 void cmCTest::SetParallelLevel(int level)
 {
   this->ParallelLevel = level < 1 ? 1 : level;
+}
+
+void cmCTest::SetTestLoad(long load)
+{
+  this->TestLoad = load < 0 ? 0 : load;
 }
 
 //----------------------------------------------------------------------------
@@ -820,6 +826,20 @@ bool cmCTest::UpdateCTestConfiguration()
     cmSystemTools::ChangeDirectory(this->BinaryDir);
     }
   this->TimeOut = atoi(this->GetCTestConfiguration("TimeOut").c_str());
+  std::string const& testLoad = this->GetCTestConfiguration("TestLoad");
+  if (!testLoad.empty())
+    {
+    long load;
+    if (cmSystemTools::StringToLong(testLoad.c_str(), &load))
+      {
+      this->SetTestLoad(load);
+      }
+    else
+      {
+      cmCTestLog(this, WARNING, "Invalid value for 'Test Load' : "
+          << testLoad << std::endl);
+      }
+    }
   if ( this->ProduceXML )
     {
     this->CompressXMLFiles = cmSystemTools::IsOn(
@@ -2048,6 +2068,21 @@ bool cmCTest::HandleCommandLineArguments(size_t &i,
     if(repeat > 1)
       {
       this->RepeatUntilFail = true;
+      }
+    }
+
+  if(this->CheckArgument(arg, "--test-load") && i < args.size() - 1)
+    {
+    i++;
+    long load;
+    if (cmSystemTools::StringToLong(args[i].c_str(), &load))
+      {
+      this->SetTestLoad(load);
+      }
+    else
+      {
+      cmCTestLog(this, WARNING,
+                 "Invalid value for 'Test Load' : " << args[i] << std::endl);
       }
     }
 

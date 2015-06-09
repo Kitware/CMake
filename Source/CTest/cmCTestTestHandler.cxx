@@ -1062,6 +1062,14 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string> &passed,
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
   parallel->SetTestHandler(this);
   parallel->SetQuiet(this->Quiet);
+  if(this->TestLoad > 0)
+    {
+    parallel->SetTestLoad(this->TestLoad);
+    }
+  else
+    {
+    parallel->SetTestLoad(this->CTest->GetTestLoad());
+    }
 
   *this->LogFile << "Start testing: "
     << this->CTest->CurrentTime() << std::endl

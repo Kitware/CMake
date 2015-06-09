@@ -23,6 +23,7 @@ cmCTestGenericHandler::cmCTestGenericHandler()
   this->SubmitIndex = 0;
   this->AppendXML = false;
   this->Quiet = false;
+  this->TestLoad = 0;
 }
 
 //----------------------------------------------------------------------
@@ -70,6 +71,7 @@ void cmCTestGenericHandler::SetPersistentOption(const std::string& op,
 void cmCTestGenericHandler::Initialize()
 {
   this->AppendXML = false;
+  this->TestLoad = 0;
   this->Options.clear();
   t_StringToString::iterator it;
   for ( it = this->PersistentOptions.begin();

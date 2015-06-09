@@ -14,6 +14,7 @@ Perform the :ref:`CTest MemCheck Step` as a :ref:`Dashboard Client`.
                  [EXCLUDE_LABEL <label-exclude-regex>]
                  [INCLUDE_LABEL <label-include-regex>]
                  [PARALLEL_LEVEL <level>]
+                 [TEST_LOAD <threshold>]
                  [SCHEDULE_RANDOM <ON|OFF>]
                  [STOP_TIME <time-of-day>]
                  [RETURN_VALUE <result-var>]
