@@ -15,7 +15,7 @@ All commands between foreach and the matching endforeach are recorded
 without being invoked.  Once the endforeach is evaluated, the recorded
 list of commands is invoked once for each argument listed in the
 original foreach command.  Before each iteration of the loop
-"${loop_var}" will be set as a variable with the current value in the
+``${loop_var}`` will be set as a variable with the current value in the
 list.
 
 ::
@@ -40,8 +40,8 @@ three types of this iteration:
   foreach(loop_var IN [LISTS [list1 [...]]]
                       [ITEMS [item1 [...]]])
 
-Iterates over a precise list of items.  The LISTS option names
+Iterates over a precise list of items.  The ``LISTS`` option names
 list-valued variables to be traversed, including empty elements (an
 empty string is a zero-length list).  (Note macro
-arguments are not variables.)  The ITEMS option ends argument
+arguments are not variables.)  The ``ITEMS`` option ends argument
 parsing and includes all arguments following it in the iteration.

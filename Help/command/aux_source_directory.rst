@@ -8,7 +8,7 @@ Find all source files in a directory.
   aux_source_directory(<dir> <variable>)
 
 Collects the names of all the source files in the specified directory
-and stores the list in the <variable> provided.  This command is
+and stores the list in the ``<variable>`` provided.  This command is
 intended to be used by projects that use explicit template
 instantiation.  Template instantiation files can be stored in a
 "Templates" subdirectory and collected automatically using this

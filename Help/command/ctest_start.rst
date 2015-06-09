@@ -14,7 +14,7 @@ after the binary directory is initialized.  If the 'source' and
 If the track is
 specified, the submissions will go to the specified track.  If APPEND
 is used, the existing TAG is used rather than creating a new one based
-on the current time stamp.  If QUIET is used, CTest will suppress any
+on the current time stamp.  If ``QUIET`` is used, CTest will suppress any
 non-error messages that it otherwise would have printed to the console.
 
 If the :variable:`CTEST_CHECKOUT_COMMAND` variable

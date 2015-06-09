@@ -1,7 +1,7 @@
 make_directory
 --------------
 
-Deprecated. Use the file(MAKE_DIRECTORY ) command instead.
+Deprecated. Use the :command:`file(MAKE_DIRECTORY)` command instead.
 
 ::
 

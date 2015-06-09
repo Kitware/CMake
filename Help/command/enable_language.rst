@@ -18,5 +18,5 @@ targets using the named language directly for compiling sources or
 indirectly through link dependencies.  It is simplest to enable all
 needed languages in the top-level directory of a project.
 
-The OPTIONAL keyword is a placeholder for future implementation and
+The ``OPTIONAL`` keyword is a placeholder for future implementation and
 does not currently work.
