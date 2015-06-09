@@ -68,11 +68,6 @@ cmLocalGenerator::~cmLocalGenerator()
   delete this->Makefile;
 }
 
-bool cmLocalGenerator::IsRootMakefile() const
-{
-  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
-}
-
 //----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeObjectMaxPath()
 {
@@ -1335,7 +1330,7 @@ void cmLocalGenerator::GetIncludeDirectories(std::vector<std::string>& dirs,
                                              const std::string& lang,
                                              const std::string& config,
                                              bool stripImplicitInclDirs
-                                            )
+                                            ) const
 {
   // Need to decide whether to automatically include the source and
   // binary directories at the beginning of the include path.

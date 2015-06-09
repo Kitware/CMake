@@ -529,7 +529,7 @@ cmGlobalUnixMakefileGenerator3
                        cmLocalUnixMakefileGenerator3* lg)
 {
   // Only subdirectories need these rules.
-  if(lg->IsRootMakefile())
+  if(lg->GetMakefile()->IsRootMakefile())
     {
     return;
     }
@@ -809,7 +809,7 @@ cmGlobalUnixMakefileGenerator3
                         localName, depends, commands, true);
 
       // add the all/all dependency
-      if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
+      if(!this->IsExcluded(this->LocalGenerators[0], gtarget))
         {
         depends.clear();
         depends.push_back(localName);
@@ -877,7 +877,7 @@ cmGlobalUnixMakefileGenerator3
                           "Pre-install relink rule for target.",
                           localName, depends, commands, true);
 
-        if(!this->IsExcluded(this->LocalGenerators[0], *gtarget->Target))
+        if(!this->IsExcluded(this->LocalGenerators[0], gtarget))
           {
           depends.clear();
           depends.push_back(localName);
@@ -1034,7 +1034,7 @@ void cmGlobalUnixMakefileGenerator3::WriteHelpRule
       static_cast<cmLocalUnixMakefileGenerator3 *>(this->LocalGenerators[i]);
     // for the passed in makefile or if this is the top Makefile wripte out
     // the targets
-    if (lg2 == lg || lg->IsRootMakefile())
+    if (lg2 == lg || lg->GetMakefile()->IsRootMakefile())
       {
       // for each target Generate the rule files for each target.
       cmTargets& targets = lg2->GetMakefile()->GetTargets();

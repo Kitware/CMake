@@ -368,8 +368,7 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
 
 #if defined(_WIN32) && !defined(__CYGWIN__)
   bool usePRE_BUILD = false;
-  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
-  cmGlobalGenerator* gg = localGen->GetGlobalGenerator();
+  cmGlobalGenerator* gg = makefile->GetGlobalGenerator();
   if(gg->GetName().find("Visual Studio") != std::string::npos)
     {
     cmGlobalVisualStudioGenerator* vsgg =
@@ -522,10 +521,10 @@ static void GetCompileDefinitionsAndDirectories(cmTarget const* target,
                                                 std::string &defs)
 {
   cmMakefile* makefile = target->GetMakefile();
-  cmLocalGenerator* localGen = makefile->GetLocalGenerator();
+  cmGlobalGenerator* globalGen = makefile->GetGlobalGenerator();
   std::vector<std::string> includeDirs;
-  cmGeneratorTarget *gtgt = localGen->GetGlobalGenerator()
-                                    ->GetGeneratorTarget(target);
+  cmGeneratorTarget *gtgt = globalGen->GetGeneratorTarget(target);
+  cmLocalGenerator *localGen = gtgt->GetLocalGenerator();
   // Get the include dirs for this target, without stripping the implicit
   // include dirs off, see http://public.kitware.com/Bug/view.php?id=13667
   localGen->GetIncludeDirectories(includeDirs, gtgt, "CXX", config, false);

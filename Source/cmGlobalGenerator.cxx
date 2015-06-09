@@ -1451,15 +1451,16 @@ void cmGlobalGenerator::FinalizeTargetCompileInfo()
 }
 
 //----------------------------------------------------------------------------
-void cmGlobalGenerator::CreateGeneratorTargets(cmMakefile *mf)
+void cmGlobalGenerator::CreateGeneratorTargets(cmLocalGenerator *lg)
 {
   cmGeneratorTargetsType generatorTargets;
+  cmMakefile* mf = lg->GetMakefile();
   cmTargets& targets = mf->GetTargets();
   for(cmTargets::iterator ti = targets.begin();
       ti != targets.end(); ++ti)
     {
     cmTarget* t = &ti->second;
-    cmGeneratorTarget* gt = new cmGeneratorTarget(t);
+    cmGeneratorTarget* gt = new cmGeneratorTarget(t, lg);
     this->ComputeTargetObjectDirectory(gt);
     this->GeneratorTargets[t] = gt;
     generatorTargets[t] = gt;
@@ -1469,7 +1470,7 @@ void cmGlobalGenerator::CreateGeneratorTargets(cmMakefile *mf)
         j = mf->GetOwnedImportedTargets().begin();
       j != mf->GetOwnedImportedTargets().end(); ++j)
     {
-    cmGeneratorTarget* gt = new cmGeneratorTarget(*j);
+    cmGeneratorTarget* gt = new cmGeneratorTarget(*j, lg);
     this->GeneratorTargets[*j] = gt;
     generatorTargets[*j] = gt;
     }
@@ -1482,7 +1483,7 @@ void cmGlobalGenerator::CreateGeneratorTargets()
   // Construct per-target generator information.
   for(unsigned int i=0; i < this->LocalGenerators.size(); ++i)
     {
-    this->CreateGeneratorTargets(this->LocalGenerators[i]->GetMakefile());
+    this->CreateGeneratorTargets(this->LocalGenerators[i]);
     }
 }
 
@@ -1954,10 +1955,10 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
 }
 
 bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
-                                   cmTarget const& target) const
+                                   cmGeneratorTarget* target) const
 {
-  if(target.GetType() == cmTarget::INTERFACE_LIBRARY
-      || target.GetPropertyAsBool("EXCLUDE_FROM_ALL"))
+  if(target->GetType() == cmTarget::INTERFACE_LIBRARY
+      || target->Target->GetPropertyAsBool("EXCLUDE_FROM_ALL"))
     {
     // This target is excluded from its directory.
     return true;
@@ -1966,7 +1967,7 @@ bool cmGlobalGenerator::IsExcluded(cmLocalGenerator* root,
     {
     // This target is included in its directory.  Check whether the
     // directory is excluded.
-    return this->IsExcluded(root, target.GetMakefile()->GetLocalGenerator());
+    return this->IsExcluded(root, target->GetLocalGenerator());
     }
 }
 
@@ -2027,9 +2028,11 @@ void cmGlobalGenerator::FillLocalGeneratorToTargetMap()
       {
       cmTarget const& target = t->second;
 
+      cmGeneratorTarget* gt = this->GetGeneratorTarget(&target);
+
       // Consider the directory containing the target and all its
       // parents until something excludes the target.
-      for(cmLocalGenerator* clg = lg; clg && !this->IsExcluded(clg, target);
+      for(cmLocalGenerator* clg = lg; clg && !this->IsExcluded(clg, gt);
           clg = clg->GetParent())
         {
         // This local generator includes the target.
