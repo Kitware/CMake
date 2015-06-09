@@ -233,7 +233,6 @@ bool cmProjectCommand
   const char* include = this->Makefile->GetDefinition(extraInclude);
   if(include)
     {
-    std::string fullFilePath;
     bool readit =
       this->Makefile->ReadDependentFile(include);
     if(!readit && !cmSystemTools::GetFatalErrorOccured())

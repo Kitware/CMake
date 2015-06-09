@@ -52,11 +52,6 @@ public:
   virtual void AddHelperCommands() {}
 
   /**
-   * Perform any final calculations prior to generation
-   */
-  void ConfigureFinalPass();
-
-  /**
    * Generate the install rules files in this directory.
    */
   void GenerateInstallRules();

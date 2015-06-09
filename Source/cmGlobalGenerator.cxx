@@ -1541,7 +1541,7 @@ void cmGlobalGenerator::CheckLocalGenerators()
   cmState* state = this->GetCMakeInstance()->GetState();
   for (unsigned int i = 0; i < this->LocalGenerators.size(); ++i)
     {
-    this->LocalGenerators[i]->ConfigureFinalPass();
+    this->LocalGenerators[i]->GetMakefile()->ConfigureFinalPass();
     cmTargets &targets =
       this->LocalGenerators[i]->GetMakefile()->GetTargets();
     for (cmTargets::iterator l = targets.begin();
