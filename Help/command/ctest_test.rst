@@ -14,7 +14,6 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [EXCLUDE_LABEL <label-exclude-regex>]
              [INCLUDE_LABEL <label-include-regex>]
              [PARALLEL_LEVEL <level>]
-             [TEST_LOAD <threshold>]
              [SCHEDULE_RANDOM <ON|OFF>]
              [STOP_TIME <time-of-day>]
              [RETURN_VALUE <result-var>]
@@ -42,7 +41,7 @@ The options are:
   Specify the end of a range of test numbers.
 
 ``STRIDE <stride-number>``
-  Specify the stride by which to step across a range of test numbers.
+  Specify the stride by which to step acorss a range of test numbers.
 
 ``EXCLUDE <exclude-regex>``
   Specify a regular expression matching test names to exclude.
@@ -61,10 +60,6 @@ The options are:
 ``PARALLEL_LEVEL <level>``
   Specify a positive number representing the number of tests to
   be run in parallel.
-
-``TEST_LOAD <threshold>``
-  Specify a CPU load threshold that CTest should attempt to
-  not cross.  See :variable:`CTEST_TEST_LOAD` for more details.
 
 ``SCHEDULE_RANDOM <ON|OFF>``
   Launch tests in a random order.  This may be useful for detecting

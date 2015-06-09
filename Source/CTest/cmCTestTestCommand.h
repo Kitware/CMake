@@ -60,7 +60,6 @@ protected:
     ctt_PARALLEL_LEVEL,
     ctt_SCHEDULE_RANDOM,
     ctt_STOP_TIME,
-    ctt_TEST_LOAD,
     ctt_LAST
   };
 };

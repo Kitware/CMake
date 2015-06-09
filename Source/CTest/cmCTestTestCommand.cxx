@@ -26,7 +26,6 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_PARALLEL_LEVEL] = "PARALLEL_LEVEL";
   this->Arguments[ctt_SCHEDULE_RANDOM] = "SCHEDULE_RANDOM";
   this->Arguments[ctt_STOP_TIME] = "STOP_TIME";
-  this->Arguments[ctt_TEST_LOAD] = "TEST_LOAD";
   this->Arguments[ctt_LAST] = 0;
   this->Last = ctt_LAST;
 }
@@ -50,17 +49,6 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
       }
     }
   this->CTest->SetTimeOut(timeout);
-
-  if(const char* ctestTestLoad =
-     this->Makefile->GetDefinition("CTEST_TEST_LOAD"))
-    {
-    int testLoad = atoi(ctestTestLoad);
-    if (testLoad > 0)
-      {
-      this->CTest->SetTestLoad(testLoad);
-      }
-    }
-
   cmCTestGenericHandler* handler = this->InitializeActualHandler();
   if ( this->Values[ctt_START] || this->Values[ctt_END] ||
     this->Values[ctt_STRIDE] )
@@ -114,14 +102,6 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   if(this->Values[ctt_STOP_TIME])
     {
     this->CTest->SetStopTime(this->Values[ctt_STOP_TIME]);
-    }
-  if(this->Values[ctt_TEST_LOAD])
-    {
-    int testLoad = atoi(this->Values[ctt_TEST_LOAD]);
-    if (testLoad > 0)
-      {
-      this->CTest->SetTestLoad(testLoad);
-      }
     }
   handler->SetQuiet(this->Quiet);
   return handler;
