@@ -176,7 +176,7 @@ cmVisualStudio10TargetGenerator(cmTarget* target,
   this->Makefile->GetConfigurations(this->Configurations);
   this->LocalGenerator =
     (cmLocalVisualStudio7Generator*)
-    this->GeneratorTarget->GetLocalGenerator();
+    this->Makefile->GetLocalGenerator();
   this->Name = this->Target->GetName();
   this->GUID = this->GlobalGenerator->GetGUID(this->Name.c_str());
   this->Platform = gg->GetPlatformName();

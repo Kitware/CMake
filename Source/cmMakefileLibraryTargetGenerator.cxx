@@ -22,7 +22,7 @@
 //----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
 ::cmMakefileLibraryTargetGenerator(cmGeneratorTarget* target):
-  cmMakefileTargetGenerator(target)
+  cmMakefileTargetGenerator(target->Target)
 {
   this->CustomCommandDriver = OnDepends;
   if (this->Target->GetType() != cmTarget::INTERFACE_LIBRARY)

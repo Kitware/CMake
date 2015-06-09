@@ -313,7 +313,7 @@ void cmExtraCodeBlocksGenerator
         "      "<<virtualFolders<<"\n"
         "      <Build>\n";
 
-  this->AppendTarget(fout, "all", 0, make.c_str(), lgs[0], compiler.c_str());
+  this->AppendTarget(fout, "all", 0, make.c_str(), mf, compiler.c_str());
 
   // add all executable and library targets and some of the GLOBAL
   // and UTILITY targets
@@ -335,7 +335,7 @@ void cmExtraCodeBlocksGenerator
                      makefile->GetHomeOutputDirectory())==0)
             {
             this->AppendTarget(fout, ti->first, 0,
-                               make.c_str(), *lg, compiler.c_str());
+                               make.c_str(), makefile, compiler.c_str());
             }
           }
           break;
@@ -351,7 +351,7 @@ void cmExtraCodeBlocksGenerator
             }
 
           this->AppendTarget(fout, ti->first, 0,
-                                 make.c_str(), *lg, compiler.c_str());
+                                 make.c_str(), makefile, compiler.c_str());
           break;
         case cmTarget::EXECUTABLE:
         case cmTarget::STATIC_LIBRARY:
@@ -360,11 +360,11 @@ void cmExtraCodeBlocksGenerator
         case cmTarget::OBJECT_LIBRARY:
           {
           this->AppendTarget(fout, ti->first, &ti->second,
-                             make.c_str(), *lg, compiler.c_str());
+                             make.c_str(), makefile, compiler.c_str());
           std::string fastTarget = ti->first;
           fastTarget += "/fast";
           this->AppendTarget(fout, fastTarget, &ti->second,
-                             make.c_str(), *lg, compiler.c_str());
+                             make.c_str(), makefile, compiler.c_str());
           }
           break;
         default:
@@ -519,16 +519,14 @@ void cmExtraCodeBlocksGenerator
 
 // Write a dummy file for OBJECT libraries, so C::B can reference some file
 std::string cmExtraCodeBlocksGenerator::CreateDummyTargetFile(
-                                        cmLocalGenerator* lg,
-                                        cmTarget* target) const
+                                        cmMakefile* mf, cmTarget* target) const
 {
-  cmMakefile *mf = lg->GetMakefile();
   // this file doesn't seem to be used by C::B in custom makefile mode,
   // but we generate a unique file for each OBJECT library so in case
   // C::B uses it in some way, the targets don't interfere with each other.
   std::string filename = mf->GetCurrentBinaryDirectory();
   filename += "/";
-  filename += lg->GetTargetDirectory(*target);
+  filename += mf->GetLocalGenerator()->GetTargetDirectory(*target);
   filename += "/";
   filename += target->GetName();
   filename += ".objlib";
@@ -549,10 +547,9 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
                                               const std::string& targetName,
                                               cmTarget* target,
                                               const char* make,
-                                              const cmLocalGenerator* lg,
+                                              const cmMakefile* makefile,
                                               const char* compiler)
 {
-  cmMakefile const* makefile = lg->GetMakefile();
   std::string makefileName = makefile->GetCurrentBinaryDirectory();
   makefileName += "/Makefile";
 
@@ -586,7 +583,7 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     std::string location;
     if ( target->GetType()==cmTarget::OBJECT_LIBRARY)
       {
-      location = this->CreateDummyTargetFile(const_cast<cmLocalGenerator*>(lg),
+      location = this->CreateDummyTargetFile(const_cast<cmMakefile*>(makefile),
                                              target);
       }
     else
@@ -621,7 +618,8 @@ void cmExtraCodeBlocksGenerator::AppendTarget(cmGeneratedFileStream& fout,
     std::set<std::string> uniqIncludeDirs;
 
     std::vector<std::string> includes;
-    lg->GetIncludeDirectories(includes, gtgt, "C", buildType);
+    target->GetMakefile()->GetLocalGenerator()->
+      GetIncludeDirectories(includes, gtgt, "C", buildType);
 
     uniqIncludeDirs.insert(includes.begin(), includes.end());
 
