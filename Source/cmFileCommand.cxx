@@ -906,13 +906,13 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     {
     switch(status)
       {
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         g.RecurseThroughSymlinksOff();
         break;
       case cmPolicies::OLD:
       case cmPolicies::WARN:
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
         g.RecurseThroughSymlinksOn();
         break;
       }
@@ -1044,6 +1044,8 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
     {
     switch (status)
       {
+      case cmPolicies::REQUIRED_IF_USED:
+      case cmPolicies::REQUIRED_ALWAYS:
       case cmPolicies::NEW:
         // Correct behavior, yay!
         break;
@@ -1059,12 +1061,6 @@ bool cmFileCommand::HandleGlobCommand(std::vector<std::string> const& args,
             cmPolicies::GetPolicyWarning(cmPolicies::CMP0009));
           }
         break;
-      case cmPolicies::REQUIRED_IF_USED:
-      case cmPolicies::REQUIRED_ALWAYS:
-        this->SetError("policy CMP0009 error");
-        this->Makefile->IssueMessage(cmake::FATAL_ERROR,
-          cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0009));
-        return false;
       }
     }
 
