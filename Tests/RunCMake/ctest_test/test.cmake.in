@@ -8,6 +8,7 @@ set(CTEST_CMAKE_GENERATOR               "@RunCMake_GENERATOR@")
 set(CTEST_CMAKE_GENERATOR_PLATFORM      "@RunCMake_GENERATOR_PLATFORM@")
 set(CTEST_CMAKE_GENERATOR_TOOLSET       "@RunCMake_GENERATOR_TOOLSET@")
 set(CTEST_BUILD_CONFIGURATION           "$ENV{CMAKE_CONFIG_TYPE}")
+set(CTEST_TEST_LOAD                     "@CASE_CTEST_TEST_LOAD@")
 
 set(ctest_test_args "@CASE_CTEST_TEST_ARGS@")
 ctest_start(Experimental)
