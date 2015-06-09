@@ -53,6 +53,10 @@ static bool stringToId(const char* input, cmPolicies::PolicyID& pid)
 #define CM_FOR_EACH_POLICY_ID_DOC(POLICY) \
   CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_DOC)
 
+#define CM_SELECT_ID_STATUS(F, A1, A2, A3, A4, A5, A6) F(A1, A6)
+#define CM_FOR_EACH_POLICY_ID_STATUS(POLICY) \
+  CM_FOR_EACH_POLICY_TABLE(POLICY, CM_SELECT_ID_STATUS)
+
 static const char* idToString(cmPolicies::PolicyID id)
 {
   switch(id)
@@ -319,8 +323,18 @@ std::string cmPolicies::GetRequiredPolicyError(cmPolicies::PolicyID id)
 
 ///! Get the default status for a policy
 cmPolicies::PolicyStatus
-cmPolicies::GetPolicyStatus(cmPolicies::PolicyID)
+cmPolicies::GetPolicyStatus(cmPolicies::PolicyID id)
 {
+  switch(id)
+    {
+#define POLICY_CASE(ID, STATUS) \
+    case cmPolicies::ID: \
+      return STATUS;
+  CM_FOR_EACH_POLICY_ID_STATUS(POLICY_CASE)
+#undef POLICY_CASE
+    case cmPolicies::CMPCOUNT:
+      return cmPolicies::WARN;
+    }
   return cmPolicies::WARN;
 }
 
