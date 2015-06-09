@@ -347,9 +347,6 @@ if(BUILD_TESTING)
   ADD_TEST_MACRO(CrossCompile CrossCompile)
   set_tests_properties(CrossCompile PROPERTIES
     PASS_REGULAR_EXPRESSION "TRY_RUN.. invoked in cross-compiling mode")
-  if("${CMAKE_GENERATOR}" MATCHES "Make")
-    ADD_TEST_MACRO(Policy0002 Policy0002)
-  endif()
   if(CTEST_TEST_OSX_ARCH)
     ADD_TEST_MACRO(Architecture Architecture)
     set_tests_properties(Architecture PROPERTIES
