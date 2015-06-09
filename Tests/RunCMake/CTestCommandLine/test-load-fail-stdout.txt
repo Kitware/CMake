@@ -1,2 +1,0 @@
-^Test project .*/Tests/RunCMake/CTestCommandLine/TestLoad
-\*\*\*\*\* WAITING, System Time: [0-9]+, System Load: 5, Max Allowed Load: 2, Smallest test TestLoad2 requires 1\*\*\*\*\*

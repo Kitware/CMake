@@ -52,31 +52,3 @@ add_test(MergeOutput \"${CMAKE_COMMAND}\" -P \"${RunCMake_SOURCE_DIR}/MergeOutpu
   run_cmake_command(MergeOutput ${CMAKE_CTEST_COMMAND} -V)
 endfunction()
 run_MergeOutput()
-
-
-function(run_TestLoad name load)
-  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/TestLoad)
-  set(RunCMake_TEST_NO_CLEAN 1)
-  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
-  file(WRITE "${RunCMake_TEST_BINARY_DIR}/CTestTestfile.cmake" "
-  add_test(TestLoad1 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
-  add_test(TestLoad2 \"${CMAKE_COMMAND}\" -E echo \"test of --test-load\")
-")
-  run_cmake_command(${name} ${CMAKE_CTEST_COMMAND} -j2 --test-load ${load} --test-timeout 5)
-endfunction()
-
-# Tests for the --test-load feature of ctest
-#
-# Spoof a load average value to make these tests more reliable.
-set(ENV{__FAKE_LOAD_AVERAGE_FOR_CTEST_TESTING} 5)
-
-# Verify that new tests are not started when the load average exceeds
-# our threshold.
-run_TestLoad(test-load-fail 2)
-
-# Verify that new tests are started when the load average falls below
-# our threshold.
-run_TestLoad(test-load-pass 10)
-
-unset(ENV{__FAKE_LOAD_AVERAGE_FOR_CTEST_TESTING})

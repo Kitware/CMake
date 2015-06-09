@@ -98,7 +98,6 @@ static const char * cmDocumentationOptions[][2] =
 
   {"--test-command", "The test to run with the --build-and-test option."},
   {"--test-timeout", "The time limit in seconds, internal use only."},
-  {"--test-load", "CPU load threshold for starting new parallel tests."},
   {"--tomorrow-tag", "Nightly or experimental starts with next day tag."},
   {"--ctest-config", "The configuration file used to initialize CTest state "
    "when submitting dashboards."},

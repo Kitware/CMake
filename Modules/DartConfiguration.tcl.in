@@ -95,10 +95,6 @@ SlurmRunCommand: @SLURM_SRUN_COMMAND@
 # Currently set to 25 minutes
 TimeOut: @DART_TESTING_TIMEOUT@
 
-# During parallel testing CTest will not start a new test if doing
-# so would cause the system load to exceed this value.
-TestLoad: @CMAKE_TEST_LOAD@
-
 UseLaunchers: @CTEST_USE_LAUNCHERS@
 CurlOptions: @CTEST_CURL_OPTIONS@
 # warning, if you add new options here that have to do with submit,
