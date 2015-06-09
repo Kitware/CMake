@@ -40,8 +40,9 @@ public:
   virtual std::string GetName() const { return "get_directory_property";}
 
   cmTypeMacro(cmGetDirectoryPropertyCommand, cmCommand);
+
+private:
+  void StoreResult(const std::string& variable, const char* prop);
 };
-
-
 
 #endif

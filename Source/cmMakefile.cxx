@@ -4171,22 +4171,6 @@ const char *cmMakefile::GetProperty(const std::string& prop,
     this->GetListOfMacros(output);
     return output.c_str();
     }
-  else if (prop == "DEFINITIONS")
-    {
-    switch(this->GetPolicyStatus(cmPolicies::CMP0059))
-      {
-      case cmPolicies::WARN:
-          this->IssueMessage(cmake::AUTHOR_WARNING, cmPolicies::
-                             GetPolicyWarning(cmPolicies::CMP0059));
-      case cmPolicies::OLD:
-        output += this->DefineFlagsOrig;
-        return output.c_str();
-      case cmPolicies::NEW:
-      case cmPolicies::REQUIRED_ALWAYS:
-      case cmPolicies::REQUIRED_IF_USED:
-        break;
-      }
-    }
   else if (prop == "LINK_DIRECTORIES")
     {
     output = cmJoin(this->GetLinkDirectories(), ";");
@@ -4672,6 +4656,11 @@ void cmMakefile::StoreMatches(cmsys::RegularExpression& re)
 cmState::Snapshot cmMakefile::GetStateSnapshot() const
 {
   return this->StateSnapshot;
+}
+
+const char* cmMakefile::GetDefineFlagsCMP0059() const
+{
+  return this->DefineFlagsOrig.c_str();
 }
 
 //----------------------------------------------------------------------------

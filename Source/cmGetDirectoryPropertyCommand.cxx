@@ -26,7 +26,6 @@ bool cmGetDirectoryPropertyCommand
   std::vector<std::string>::const_iterator i = args.begin();
   std::string variable = *i;
   ++i;
-  std::string output = "";
 
   // get the directory argument if there is one
   cmMakefile *dir = this->Makefile;
@@ -79,7 +78,7 @@ bool cmGetDirectoryPropertyCommand
                      "providing the name of the variable to get.");
       return false;
       }
-    output = dir->GetSafeDefinition(*i);
+    std::string output = dir->GetSafeDefinition(*i);
     this->Makefile->AddDefinition(variable, output.c_str());
     return true;
     }
@@ -87,14 +86,37 @@ bool cmGetDirectoryPropertyCommand
   const char *prop = 0;
   if (!i->empty())
     {
+    if (*i == "DEFINITIONS")
+      {
+      switch(this->Makefile->GetPolicyStatus(cmPolicies::CMP0059))
+        {
+        case cmPolicies::WARN:
+          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING,
+                           cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+        case cmPolicies::OLD:
+          this->StoreResult(variable,
+                                   this->Makefile->GetDefineFlagsCMP0059());
+        return true;
+        case cmPolicies::NEW:
+        case cmPolicies::REQUIRED_ALWAYS:
+        case cmPolicies::REQUIRED_IF_USED:
+          break;
+        }
+      }
     prop = dir->GetProperty(*i);
     }
+  this->StoreResult(variable, prop);
+  return true;
+}
+
+void cmGetDirectoryPropertyCommand::StoreResult(std::string const& variable,
+                                                const char* prop)
+{
   if (prop)
     {
     this->Makefile->AddDefinition(variable, prop);
-    return true;
+    return;
     }
   this->Makefile->AddDefinition(variable, "");
-  return true;
 }
 

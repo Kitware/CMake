@@ -279,6 +279,22 @@ bool cmGetPropertyCommand::HandleDirectoryMode()
       }
     }
 
+  if (this->PropertyName == "DEFINITIONS")
+    {
+    switch(mf->GetPolicyStatus(cmPolicies::CMP0059))
+      {
+      case cmPolicies::WARN:
+        mf->IssueMessage(cmake::AUTHOR_WARNING,
+                         cmPolicies::GetPolicyWarning(cmPolicies::CMP0059));
+      case cmPolicies::OLD:
+        return this->StoreResult(mf->GetDefineFlagsCMP0059());
+      case cmPolicies::NEW:
+      case cmPolicies::REQUIRED_ALWAYS:
+      case cmPolicies::REQUIRED_IF_USED:
+        break;
+      }
+    }
+
   // Get the property.
   return this->StoreResult(mf->GetProperty(this->PropertyName));
 }
