@@ -1,5 +1,6 @@
 cmake_policy(SET CMP0007 NEW)
 
+include("${config_file}")
 include("${src_dir}/${GENERATOR_TYPE}/Helpers.cmake")
 
 # check that expected generated files exist and contain expected content

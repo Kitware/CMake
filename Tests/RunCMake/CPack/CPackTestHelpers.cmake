@@ -69,6 +69,7 @@ function(run_cpack_test TEST_NAME types build)
         -DGENERATOR_TYPE=${TEST_TYPE}
         "-Dsrc_dir=${RunCMake_SOURCE_DIR}"
         "-Dbin_dir=${RunCMake_TEST_BINARY_DIR}"
+        "-Dconfig_file=${config_file}"
         -P "${RunCMake_SOURCE_DIR}/VerifyResult.cmake"
       )
   endif()

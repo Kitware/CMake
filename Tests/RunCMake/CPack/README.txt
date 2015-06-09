@@ -10,7 +10,7 @@ CPack test root directory: 'Tests/RunCMake/CPack'.
 All phases are executed separately for each generator that is bound to a test.
 Tests for each generator are subtests of test 'RunCMake.CPack_<generator_name>'.
 
-Each test must also be added to 'RunCMakeTest.cmake' script located in Cpack
+Each test must also be added to 'RunCMakeTest.cmake' script located in CPack
 test root directory.
 Line that adds a test is:
 run_cpack_test(<test_name> "<generator_name>")
@@ -58,18 +58,18 @@ CMake script '<generator_name>/<test_name>-ExpectedFiles.cmake' is required by
 this step and must contain
 - EXPECTED_FILES_COUNT variable that contains the number of expected files that
   will be generated (0 or more)
-- EXPECTED_FILE_<file_number_starting_with_1> that contains globbing expression
-  that uniquelly defines expected file name (will be used to find expected file)
+- EXPECTED_FILE_<file_number_starting_with_1> that contains globing expression
+  that uniquely defines expected file name (will be used to find expected file)
   and should be present once for each expected file
 - EXPECTED_FILE_CONTENT_<file_number_starting_with_1> that contains regular
   expression of files that should be present in generated file and should be
   present once for each expected file
 
-Optional verification phase is generator speciffic and is optionaly executed.
+Optional verification phase is generator specific and is optionaly executed.
 This phase is executed if '<generator_name>/<test_name>-VerifyResult.cmake'
 script exists.
 In case that the script doesn't exist VerifyResult.cmake script automatically
-prints out standard outpu and standard error from CPack execution phase that
+prints out standard output and standard error from CPack execution phase that
 is compared with '<generator_name>/<test_name>-stdout.txt' regular expression
 and '<generator_name>/<test_name>-stderr.txt' regular expresson respectively.
 
@@ -86,6 +86,14 @@ To add a new generator we must
     listed
   + RESULT_VAR that will tell the function which variable in parent scope should
     contain the result (list of files inside package file)
+- add 'Prerequirements.cmake' script to generator directory. In this script a
+  function named 'get_test_prerequirements' must exist. This function should
+  set a variable in parent scope (name of the variable is the first parameter)
+  that tells if prerequirements for test execution are met (certain programs,
+  OS specifics, ...) and create a config file (name of the variable which
+  contains file name and path is provided with the second parameter) that
+  should contain 'set' commands for variables that will later be used in tests
+  (e.g. location of dpkg program for DEB packages)
 - add tests the same way as described above
 - add generator to 'add_RunCMake_test_group' function call that is located in
   RunCMake CMakeLists.txt file
