@@ -1,3 +1,5 @@
+cmake_policy(SET CMP0011 NEW)
+
 include(RunCMake)
 include("${RunCMake_SOURCE_DIR}/CPackTestHelpers.cmake")
 
