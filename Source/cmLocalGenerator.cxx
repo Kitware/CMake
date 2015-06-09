@@ -113,11 +113,6 @@ void cmLocalGenerator::ComputeObjectMaxPath()
   this->ObjectMaxPathViolations.clear();
 }
 
-void cmLocalGenerator::ConfigureFinalPass()
-{
-  this->Makefile->ConfigureFinalPass();
-}
-
 void cmLocalGenerator::TraceDependencies()
 {
   std::vector<std::string> configs;
