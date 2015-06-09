@@ -22,40 +22,40 @@ class cmPolicy;
 #define CM_FOR_EACH_POLICY_TABLE(POLICY, SELECT) \
   SELECT(POLICY, CMP0000, \
     "A minimum required CMake version must be specified.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0001, \
     "CMAKE_BACKWARDS_COMPATIBILITY should no longer be used.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0002, \
   "Logical target names must be globally unique.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0003, \
     "Libraries linked via full path no longer produce linker search paths.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0004, \
     "Libraries linked may not have leading or trailing whitespace.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0005, \
     "Preprocessor definition values are now escaped automatically.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0006, \
     "Installing MACOSX_BUNDLE targets requires a BUNDLE DESTINATION.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0007, \
     "list command no longer ignores empty elements.", \
-    2, 6, 0, cmPolicies::WARN) \
+    2, 6, 0, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0008, \
     "Libraries linked by full-path must have a valid library file name.", \
-    2, 6, 1, cmPolicies::WARN) \
+    2, 6, 1, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0009, \
     "FILE GLOB_RECURSE calls should not follow symlinks by default.", \
-    2, 6, 2, cmPolicies::WARN) \
+    2, 6, 2, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0010, \
     "Bad variable reference syntax is an error.", \
-    2, 6, 3, cmPolicies::WARN) \
+    2, 6, 3, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0011, \
     "Included scripts do automatic cmake_policy PUSH and POP.", \
-    2, 6, 3, cmPolicies::WARN) \
+    2, 6, 3, cmPolicies::REQUIRED_IF_USED) \
   SELECT(POLICY, CMP0012, \
     "if() recognizes numbers and boolean constants.", \
     2, 8, 0, cmPolicies::WARN) \
