@@ -14,6 +14,7 @@ Perform the :ref:`CTest Test Step` as a :ref:`Dashboard Client`.
              [EXCLUDE_LABEL <label-exclude-regex>]
              [INCLUDE_LABEL <label-include-regex>]
              [PARALLEL_LEVEL <level>]
+             [TEST_LOAD <threshold>]
              [SCHEDULE_RANDOM <ON|OFF>]
              [STOP_TIME <time-of-day>]
              [RETURN_VALUE <result-var>]
@@ -60,6 +61,13 @@ The options are:
 ``PARALLEL_LEVEL <level>``
   Specify a positive number representing the number of tests to
   be run in parallel.
+
+``TEST_LOAD <threshold>``
+  While running tests in parallel, try not to start tests when they
+  may cause the CPU load to pass above a given threshold.  If not
+  specified the :variable:`CTEST_TEST_LOAD` variable will be checked,
+  and then the ``--test-load`` command-line argument to :manual:`ctest(1)`.
+  See also the ``TestLoad`` setting in the :ref:`CTest Test Step`.
 
 ``SCHEDULE_RANDOM <ON|OFF>``
   Launch tests in a random order.  This may be useful for detecting

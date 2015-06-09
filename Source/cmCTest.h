@@ -161,6 +161,9 @@ public:
   int GetParallelLevel() { return this->ParallelLevel; }
   void SetParallelLevel(int);
 
+  unsigned long GetTestLoad() { return this->TestLoad; }
+  void SetTestLoad(unsigned long);
+
   /**
    * Check if CTest file exists
    */
@@ -498,6 +501,8 @@ private:
 
   int                     ParallelLevel;
   bool                    ParallelLevelSetInCli;
+
+  unsigned long           TestLoad;
 
   int                     CompatibilityMode;
 
