@@ -106,3 +106,5 @@ out-of-source build trees if the policy is not set and then uses
 the policy to ``OLD`` or ``NEW`` explicitly.  The policy setting
 must be in scope at the end of the top-level ``CMakeLists.txt``
 file of the project and has global effect.
+
+.. include:: DEPRECATED.txt
