@@ -173,6 +173,9 @@ if(BUILD_TESTING)
   set(DART_TESTING_TIMEOUT 1500 CACHE STRING
     "Maximum time allowed before CTest will kill the test.")
 
+  set(CTEST_MAX_LOAD 0 CACHE STRING
+    "Maximum system load that CTest should not exceed during parallel testing.  Specify 0 for no maximum.")
+
   set(CTEST_SUBMIT_RETRY_DELAY 5 CACHE STRING
     "How long to wait between timed-out CTest submissions.")
   set(CTEST_SUBMIT_RETRY_COUNT 3 CACHE STRING

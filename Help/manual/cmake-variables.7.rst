@@ -156,6 +156,7 @@ Variables that Change Behavior
    /variable/CMAKE_SYSTEM_LIBRARY_PATH
    /variable/CMAKE_SYSTEM_PREFIX_PATH
    /variable/CMAKE_SYSTEM_PROGRAM_PATH
+   /variable/CMAKE_TEST_LOAD
    /variable/CMAKE_USER_MAKE_RULES_OVERRIDE
    /variable/CMAKE_WARN_DEPRECATED
    /variable/CMAKE_WARN_ON_ABSOLUTE_INSTALL_DESTINATION
@@ -386,6 +387,7 @@ Variables for CTest
    /variable/CTEST_SVN_COMMAND
    /variable/CTEST_SVN_OPTIONS
    /variable/CTEST_SVN_UPDATE_OPTIONS
+   /variable/CTEST_TEST_LOAD
    /variable/CTEST_TEST_TIMEOUT
    /variable/CTEST_TRIGGER_SITE
    /variable/CTEST_UPDATE_COMMAND

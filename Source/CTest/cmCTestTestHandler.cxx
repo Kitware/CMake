@@ -1060,6 +1060,7 @@ void cmCTestTestHandler::ProcessDirectory(std::vector<std::string> &passed,
     new cmCTestBatchTestHandler : new cmCTestMultiProcessHandler;
   parallel->SetCTest(this->CTest);
   parallel->SetParallelLevel(this->CTest->GetParallelLevel());
+  parallel->SetTestLoad(this->CTest->GetTestLoad());
   parallel->SetTestHandler(this);
   parallel->SetQuiet(this->Quiet);
 

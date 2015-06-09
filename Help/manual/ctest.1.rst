@@ -66,6 +66,10 @@ Options
  number of jobs.  This option can also be set by setting the
  environment variable ``CTEST_PARALLEL_LEVEL``.
 
+``--test-load <level>``
+ Limit CPU load during parallel testing.
+ See :variable:`CTEST_TEST_LOAD` for more details.
+
 ``-Q,--quiet``
  Make ctest quiet.
 
