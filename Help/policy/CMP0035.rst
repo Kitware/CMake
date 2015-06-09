@@ -8,3 +8,5 @@ logic.  It has long been replaced by the :command:`if` command.
 
 .. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
+
+.. include:: DEPRECATED.txt

@@ -9,3 +9,5 @@ generate other files.  This approach has long been replaced by
 
 .. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
+
+.. include:: DEPRECATED.txt
