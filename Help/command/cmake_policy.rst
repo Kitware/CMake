@@ -53,6 +53,8 @@ policy warning by setting the policy state to ``OLD``.  Alternatively
 one may fix the project to work with the new behavior and set the
 policy state to ``NEW``.
 
+.. include:: ../policy/DEPRECATED.txt
+
 Checking Policy Settings
 ^^^^^^^^^^^^^^^^^^^^^^^^
 

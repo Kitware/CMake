@@ -12,3 +12,5 @@ The functionality has been superseded by the :command:`export` and
 
 .. |disallowed_version| replace:: 3.0
 .. include:: DISALLOWED_COMMAND.txt
+
+.. include:: DEPRECATED.txt

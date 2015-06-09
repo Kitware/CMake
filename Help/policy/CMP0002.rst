@@ -24,3 +24,5 @@ property ALLOW_DUPLICATE_CUSTOM_TARGETS with a Makefiles generator).
 This policy was introduced in CMake version 2.6.0.  CMake version
 |release| warns when the policy is not set and uses OLD behavior.  Use
 the cmake_policy command to set it to OLD or NEW explicitly.
+
+.. include:: DEPRECATED.txt
