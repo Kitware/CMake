@@ -28,9 +28,9 @@ endmacro()
 
 function(add_RunCMake_test_group test types)
   # create directory for common content
-  set(BASE_TEST_BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/${test}")
-  file(REMOVE_RECURSE "${BASE_TEST_BINARY_DIR}")
-  file(MAKE_DIRECTORY "${BASE_TEST_BINARY_DIR}")
+  set(TEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/${test}/conf")
+  file(REMOVE_RECURSE "${TEST_CONFIG_DIR}")
+  file(MAKE_DIRECTORY "${TEST_CONFIG_DIR}")
 
   foreach(type IN LISTS types)
     # generate prerequirements config file in cmake as ctest doesn't have as
@@ -39,7 +39,7 @@ function(add_RunCMake_test_group test types)
     unset(${test}_${type}_FOUND_PREREQUIREMENTS)
     include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
     get_test_prerequirements("${test}_${type}_FOUND_PREREQUIREMENTS"
-        "${BASE_TEST_BINARY_DIR}/${type}_config.cmake")
+        "${TEST_CONFIG_DIR}/${type}_config.cmake")
 
     # only add the test if prerequirements are met
     if(${test}_${type}_FOUND_PREREQUIREMENTS)
@@ -52,7 +52,7 @@ function(add_RunCMake_test_group test types)
         -DRunCMake_MAKE_PROGRAM=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
         -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test}
         -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${type}/${test}
-        -Dconfig_file=${BASE_TEST_BINARY_DIR}/${type}_config.cmake
+        -Dconfig_file=${TEST_CONFIG_DIR}/${type}_config.cmake
         -P "${CMAKE_CURRENT_SOURCE_DIR}/${test}/RunCMakeTest.cmake"
         )
     endif()
