@@ -1,7 +1,12 @@
-cmake_policy(SET CMP0007 NEW)
+cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
 
 include("${config_file}")
 include("${src_dir}/${GENERATOR_TYPE}/Helpers.cmake")
+
+file(READ "${bin_dir}/test_output.txt" output)
+file(READ "${bin_dir}/test_error.txt" error)
+
+set(output_error_message "\nCPack output: '${output}'\nCPack error: '${error}'")
 
 # check that expected generated files exist and contain expected content
 include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-ExpectedFiles.cmake")
@@ -22,13 +27,15 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
       if(NOT expected_content_list)
         message(FATAL_ERROR
           "Unexpected file content for file No. '${file_no_}'!"
-          " Content: '${PACKAGE_CONTENT}'")
+          " Content: '${PACKAGE_CONTENT}'"
+          "${output_error_message}")
       endif()
     else()
       message(FATAL_ERROR
         "Found more than one file for file No. '${file_no_}'!"
         " Found files count '${foundFilesCount_}'."
-        " Files: '${foundFile_}'")
+        " Files: '${foundFile_}'"
+        "${output_error_message}")
     endif()
   endforeach()
 
@@ -43,7 +50,8 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
 
   if(NOT foundFilesCount_ EQUAL allFoundFilesCount_)
     message(FATAL_ERROR
-        "Found more files than expected! Found files: '${allFoundFiles_}'")
+        "Found more files than expected! Found files: '${allFoundFiles_}'"
+        "${output_error_message}")
   endif()
 
   # sanity check that we didn't accidentaly list wrong files with our regular
@@ -54,7 +62,8 @@ if(NOT EXPECTED_FILES_COUNT EQUAL 0)
     if(found_ EQUAL -1)
       message(FATAL_ERROR
           "Expected files don't match found files! Found files:"
-          " '${allFoundFiles_}'")
+          " '${allFoundFiles_}'"
+          "${output_error_message}")
     endif()
   endforeach()
 else()
@@ -63,13 +72,11 @@ else()
     file(GLOB checkMissingFiles_ RELATIVE "${bin_dir}" "${missing_file_glob_}")
 
     if(checkMissingFiles_)
-      message(FATAL_ERROR "Unexpected files found: '${checkMissingFiles_}'")
+      message(FATAL_ERROR "Unexpected files found: '${checkMissingFiles_}'"
+          "${output_error_message}")
     endif()
   endforeach()
 endif()
-
-file(READ "${bin_dir}/test_output.txt" output)
-file(READ "${bin_dir}/test_error.txt" error)
 
 # handle additional result verifications
 if(EXISTS "${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-VerifyResult.cmake")
