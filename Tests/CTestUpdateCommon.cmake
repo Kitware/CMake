@@ -182,6 +182,14 @@ endfunction()
 #-----------------------------------------------------------------------------
 # Function to write the dashboard test script.
 function(create_dashboard_script bin_dir custom_text)
+  if (NOT ctest_update_check)
+    set(ctest_update_check [[
+if(ret LESS 0)
+  message(FATAL_ERROR "ctest_update failed with ${ret}")
+endif()
+]])
+  endif()
+
   # Write the dashboard script.
   file(WRITE ${TOP}/${bin_dir}.cmake
     "# CTest Dashboard Script
@@ -193,8 +201,8 @@ set(CTEST_BINARY_DIRECTORY \${CTEST_DASHBOARD_ROOT}/${bin_dir})
 ${custom_text}
 # Start a dashboard and run the update step
 ctest_start(Experimental)
-ctest_update(SOURCE \${CTEST_SOURCE_DIRECTORY} ${ctest_update_args})
-")
+ctest_update(SOURCE \${CTEST_SOURCE_DIRECTORY} RETURN_VALUE ret ${ctest_update_args})
+${ctest_update_check}")
 endfunction()
 
 #-----------------------------------------------------------------------------
