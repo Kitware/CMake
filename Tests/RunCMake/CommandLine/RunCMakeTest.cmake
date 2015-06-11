@@ -22,6 +22,8 @@ run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
 
+run_cmake_command(build-no-dir
+  ${CMAKE_COMMAND} --build)
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
 run_cmake_command(build-no-generator
