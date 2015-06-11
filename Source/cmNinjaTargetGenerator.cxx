@@ -22,6 +22,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <algorithm>
 
@@ -475,7 +476,7 @@ cmNinjaTargetGenerator
       }
     }
 
-    // Maybe insert a compiler launcher like ccache or distcc
+  // Maybe insert a compiler launcher like ccache or distcc
   if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
     {
     std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
@@ -484,15 +485,12 @@ cmNinjaTargetGenerator
       {
       std::vector<std::string> launcher_cmd;
       cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
-      std::string run_launcher =
-        this->LocalGenerator->EscapeForShell(launcher_cmd[0]);
-      // now put any arguments in if they exist
-      for(size_t i =1; i < launcher_cmd.size(); ++i)
+      for (std::vector<std::string>::iterator i = launcher_cmd.begin(),
+             e = launcher_cmd.end(); i != e; ++i)
         {
-        run_launcher += " ";
-        run_launcher += launcher_cmd[i];
+        *i = this->LocalGenerator->EscapeForShell(*i);
         }
-      run_launcher += " ";
+      std::string const& run_launcher = cmJoin(launcher_cmd, " ") + " ";
       compileCmds.front().insert(0, run_launcher);
       }
     }
@@ -508,6 +506,7 @@ cmNinjaTargetGenerator
 
   std::string cmdLine =
     this->GetLocalGenerator()->BuildCommandLine(compileCmds);
+
 
   // Write the rule for compiling file of the given language.
   std::ostringstream comment;
