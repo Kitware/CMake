@@ -158,6 +158,8 @@ foreach(cmd Remove_Item Reverse Remove_Duplicates Sort Remove_At)
   set(${cmd}-Nonexistent-List-STDERR ".*CMake Error at (${CTEST_ESCAPED_CMAKE_CURRENT_SOURCE_DIR}/)?List-${cmd}-Nonexistent-List.cmake:2 \\(list\\):.*sub-command ${Cmd} requires list to be present.*")
 endforeach()
 
+set(Get-CMP0007-Warn-RESULT 0)
+set(Get-CMP0007-Warn-STDERR ".*CMake Warning \\(dev\\) at (${CTEST_ESCAPED_CMAKE_CURRENT_SOURCE_DIR}/)?List-Get-CMP0007-Warn.cmake:3 \\(list\\):.*Policy CMP0007 is not set:.*")
 
 check_cmake_test(List
   No-Arguments
@@ -174,4 +176,15 @@ check_cmake_test(List
   Sort-Nonexistent-List
   Remove_At-Nonexistent-List
   Remove_At-Invalid-Index
+  Get-CMP0007-Warn
 )
+
+set(thelist "" NEW OLD)
+
+foreach (_pol ${thelist})
+    cmake_policy(SET CMP0007 ${_pol})
+    list(GET thelist 1 thevalue)
+    if (NOT thevalue STREQUAL _pol)
+        message(SEND_ERROR "returned element '${thevalue}', but expected '${_pol}'")
+    endif()
+endforeach (_pol)
