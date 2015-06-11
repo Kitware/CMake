@@ -5,8 +5,10 @@ include("${src_dir}/${GENERATOR_TYPE}/Helpers.cmake")
 
 file(READ "${bin_dir}/test_output.txt" output)
 file(READ "${bin_dir}/test_error.txt" error)
+file(READ "${config_file}" config_file_content)
 
-set(output_error_message "\nCPack output: '${output}'\nCPack error: '${error}'")
+set(output_error_message
+    "\nCPack output: '${output}'\nCPack error: '${error}';\nconfig file: '${config_file_content}'")
 
 # check that expected generated files exist and contain expected content
 include("${src_dir}/${GENERATOR_TYPE}/${RunCMake_TEST}-ExpectedFiles.cmake")
