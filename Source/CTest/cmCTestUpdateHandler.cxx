@@ -283,13 +283,13 @@ int cmCTestUpdateHandler::ProcessHandler()
     {
     xml.Content("Update command failed:\n");
     xml.Content(vc->GetUpdateCommandLine());
-    cmCTestLog(this->CTest, ERROR_MESSAGE, "   Update command failed: "
+    cmCTestLog(this->CTest, HANDLER_OUTPUT, "   Update command failed: "
                << vc->GetUpdateCommandLine() << "\n");
     }
   xml.EndElement(); // UpdateReturnStatus
   xml.EndElement(); // Update
   xml.EndDocument();
-  return numUpdated;
+  return updated? numUpdated : -1;
 }
 
 //----------------------------------------------------------------------

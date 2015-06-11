@@ -258,6 +258,24 @@ function(check_no_update bin_dir)
   endif()
 endfunction()
 
+#-----------------------------------------------------------------------------
+# Function to find the Update.xml file and make sure
+# it only has the UpdateReturnStatus failure message and no updates.
+function(check_fail_update bin_dir)
+  set(PATTERN ${TOP}/${bin_dir}/Testing/*/Update.xml)
+  file(GLOB UPDATE_XML_FILE RELATIVE ${TOP} ${PATTERN})
+  string(REGEX REPLACE "//Update.xml$" "/Update.xml"
+    UPDATE_XML_FILE "${UPDATE_XML_FILE}")
+  message(" found ${UPDATE_XML_FILE}")
+  file(STRINGS ${TOP}/${UPDATE_XML_FILE} UPDATE_XML_STATUS
+    REGEX "^\t<UpdateReturnStatus>[^<\n]+"
+    )
+  if(UPDATE_XML_STATUS MATCHES "Update command failed")
+    message(" correctly found 'Update command failed'")
+  else()
+    message(FATAL_ERROR " missing 'Update command failed'")
+  endif()
+endfunction()
 
 #-----------------------------------------------------------------------------
 # Function to run the dashboard through a script
@@ -271,6 +289,8 @@ function(run_dashboard_script bin_dir)
   list(APPEND UPDATE_MAYBE Updated{subdir} Updated{CTestConfig.cmake})
   if(NO_UPDATE)
     check_no_update(${bin_dir})
+  elseif(FAIL_UPDATE)
+    check_fail_update(${bin_dir})
   else()
     check_updates(${bin_dir}
       Updated{foo.txt}
