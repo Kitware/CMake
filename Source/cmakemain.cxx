@@ -420,7 +420,7 @@ static int do_build(int ac, char const* const* av)
       switch (doing)
         {
         case DoingDir:
-          dir = av[i];
+          dir = cmSystemTools::CollapseFullPath(av[i]);
           doing = DoingNone;
           break;
         case DoingTarget:
