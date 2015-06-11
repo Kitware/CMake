@@ -193,7 +193,7 @@ set(CTEST_BINARY_DIRECTORY \${CTEST_DASHBOARD_ROOT}/${bin_dir})
 ${custom_text}
 # Start a dashboard and run the update step
 ctest_start(Experimental)
-ctest_update(SOURCE \${CTEST_SOURCE_DIRECTORY})
+ctest_update(SOURCE \${CTEST_SOURCE_DIRECTORY} ${ctest_update_args})
 ")
 endfunction()
 
