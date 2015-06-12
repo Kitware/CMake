@@ -838,6 +838,14 @@ int main()
 #endif
 #endif // defined(_WIN32) && !defined(__CYGWIN__)
 
+  if(strcmp(CMAKE_MINIMUM_REQUIRED_VERSION, "2.4") == 0)
+    {
+    cmPassed("CMAKE_MINIMUM_REQUIRED_VERSION is set to 2.4");
+    }
+  else
+    {
+    cmFailed("CMAKE_MINIMUM_REQUIRED_VERSION is not set to the expected 2.4");
+    }
 
   // ----------------------------------------------------------------------
   // Test REMOVE command
