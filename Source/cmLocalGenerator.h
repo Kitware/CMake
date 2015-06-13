@@ -14,6 +14,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmState.h"
+#include "cmake.h"
 #include "cmOutputConverter.h"
 
 class cmMakefile;
@@ -303,6 +304,9 @@ public:
   bool IsWatcomWMake() const;
   bool IsMinGWMake() const;
   bool IsNMake() const;
+
+  void IssueMessage(cmake::MessageType t, std::string const& text) const;
+
 
   void ComputeObjectMaxPath();
 protected:
