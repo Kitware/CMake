@@ -155,6 +155,12 @@ public:
     return iterator(this, 1);
   }
 
+  void Clear()
+  {
+    this->UpPositions.clear();
+    this->Data.clear();
+  }
+
 private:
   T& GetReference(PositionType pos)
   {
