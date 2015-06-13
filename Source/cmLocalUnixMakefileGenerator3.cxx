@@ -1840,7 +1840,6 @@ void cmLocalUnixMakefileGenerator3
   std::vector<std::string> commands;
 
   // Write the all rule.
-  std::string dir;
   std::string recursiveTarget = this->Makefile->GetCurrentBinaryDirectory();
   recursiveTarget += "/all";
 
