@@ -105,7 +105,7 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propertyName);
 
-  void Reset();
+  Snapshot Reset();
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
