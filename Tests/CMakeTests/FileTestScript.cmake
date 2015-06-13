@@ -73,7 +73,7 @@ elseif(testname STREQUAL glob_recurse_relative_no_expression) # fail
   file(GLOB_RECURSE v RELATIVE dddd)
 
 elseif(testname STREQUAL glob_non_full_path) # pass
-  file(GLOB_RECURSE v FOLLOW_SYMLINKS ffff*.*)
+  file(GLOB_RECURSE v ffff*.*)
   message("v='${v}'")
 
 elseif(testname STREQUAL make_directory_non_full_path) # pass

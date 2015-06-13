@@ -1,4 +1,3 @@
-cmake_minimum_required (VERSION 3.3)
 project( LinkLine )
 
 # Makes sure that the library order as specified by the user are
