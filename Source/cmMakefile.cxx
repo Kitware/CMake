@@ -308,7 +308,7 @@ cmListFileContext cmMakefile::GetExecutionContext() const
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   std::ostringstream msg;
-  msg << lff.FilePath << "(" << lff.Line << "):  ";
+  msg << this->GetExecutionFilePath() << "(" << lff.Line << "):  ";
   msg << lff.Name << "(";
   for(std::vector<cmListFileArgument>::const_iterator i =
         lff.Arguments.begin(); i != lff.Arguments.end(); ++i)
