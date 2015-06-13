@@ -1,5 +1,4 @@
 # a simple test case
-cmake_minimum_required (VERSION 3.3)
 project (Simple)
 
 add_executable (Simple simple.cxx)
