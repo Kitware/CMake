@@ -47,6 +47,8 @@ public:
    */
   virtual void Generate() {}
 
+  virtual void ComputeHomeRelativeOutputPath() {}
+
   /**
    * Calls TraceVSDependencies() on all targets of this generator.
    */

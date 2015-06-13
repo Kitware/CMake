@@ -100,19 +100,6 @@ cmLocalUnixMakefileGenerator3::~cmLocalUnixMakefileGenerator3()
 //----------------------------------------------------------------------------
 void cmLocalUnixMakefileGenerator3::Generate()
 {
-  // Compute the path to use when referencing the current output
-  // directory from the top output directory.
-  this->HomeRelativeOutputPath =
-    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
-  if(this->HomeRelativeOutputPath == ".")
-    {
-    this->HomeRelativeOutputPath = "";
-    }
-  if(!this->HomeRelativeOutputPath.empty())
-    {
-    this->HomeRelativeOutputPath += "/";
-    }
-
   // Store the configuration name that will be generated.
   if(const char* config = this->Makefile->GetDefinition("CMAKE_BUILD_TYPE"))
     {
@@ -162,6 +149,22 @@ void cmLocalUnixMakefileGenerator3::Generate()
 
   // Write the cmake file with information for this directory.
   this->WriteDirectoryInformationFile();
+}
+
+void cmLocalUnixMakefileGenerator3::ComputeHomeRelativeOutputPath()
+{
+  // Compute the path to use when referencing the current output
+  // directory from the top output directory.
+  this->HomeRelativeOutputPath =
+    this->Convert(this->Makefile->GetCurrentBinaryDirectory(), HOME_OUTPUT);
+  if(this->HomeRelativeOutputPath == ".")
+    {
+    this->HomeRelativeOutputPath = "";
+    }
+  if(!this->HomeRelativeOutputPath.empty())
+    {
+    this->HomeRelativeOutputPath += "/";
+    }
 }
 
 //----------------------------------------------------------------------------
