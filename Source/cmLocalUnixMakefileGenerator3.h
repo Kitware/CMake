@@ -39,6 +39,8 @@ public:
                                 cmState::Snapshot snapshot);
   virtual ~cmLocalUnixMakefileGenerator3();
 
+  virtual void ComputeHomeRelativeOutputPath();
+
   /**
    * Generate the makefile for this directory.
    */
