@@ -741,14 +741,14 @@ void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
 }
 
 std::vector<std::string> const&
-cmState::Snapshot::GetCurrentSourceDirectoryComponents()
+cmState::Snapshot::GetCurrentSourceDirectoryComponents() const
 {
   return this->Position->BuildSystemDirectory
       ->CurrentSourceDirectoryComponents;
 }
 
 std::vector<std::string> const&
-cmState::Snapshot::GetCurrentBinaryDirectoryComponents()
+cmState::Snapshot::GetCurrentBinaryDirectoryComponents() const
 {
   return this->Position->BuildSystemDirectory
       ->CurrentBinaryDirectoryComponents;
