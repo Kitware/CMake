@@ -468,17 +468,31 @@ set(CUDA_NVCC_FLAGS "" CACHE STRING "Semi-colon delimit multiple arguments.")
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
   set(CUDA_HOST_COMPILER "$(VCInstallDir)bin" CACHE FILEPATH "Host side compiler used by NVCC")
 else()
-  # Using cc which is symlink to clang may let NVCC think it is GCC and issue
-  # unhandled -dumpspecs option to clang. Also in case neither
-  # CMAKE_C_COMPILER is defined (project does not use C language) nor
-  # CUDA_HOST_COMPILER is specified manually we should skip -ccbin and let
-  # nvcc use its own default C compiler.
-  if(DEFINED CMAKE_C_COMPILER AND NOT DEFINED CUDA_HOST_COMPILER)
-    get_filename_component(c_compiler_realpath "${CMAKE_C_COMPILER}" REALPATH)
+  if(APPLE
+      AND "${CMAKE_C_COMPILER_ID}" MATCHES "Clang"
+      AND "${CMAKE_C_COMPILER}" MATCHES "/cc$")
+    # Using cc which is symlink to clang may let NVCC think it is GCC and issue
+    # unhandled -dumpspecs option to clang. Also in case neither
+    # CMAKE_C_COMPILER is defined (project does not use C language) nor
+    # CUDA_HOST_COMPILER is specified manually we should skip -ccbin and let
+    # nvcc use its own default C compiler.
+    # Only care about this on APPLE with clang to avoid
+    # following symlinks to things like ccache
+    if(DEFINED CMAKE_C_COMPILER AND NOT DEFINED CUDA_HOST_COMPILER)
+      get_filename_component(c_compiler_realpath "${CMAKE_C_COMPILER}" REALPATH)
+      # if the real path does not end up being clang then
+      # go back to using CMAKE_C_COMPILER
+      if(NOT "${c_compiler_realpath}" MATCHES "/clang$")
+        set(c_compiler_realpath "${CMAKE_C_COMPILER}")
+      endif()
+    else()
+      set(c_compiler_realpath "")
+    endif()
+    set(CUDA_HOST_COMPILER "${c_compiler_realpath}" CACHE FILEPATH "Host side compiler used by NVCC")
   else()
-    set(c_compiler_realpath "")
+    set(CUDA_HOST_COMPILER "${CMAKE_C_COMPILER}"
+      CACHE FILEPATH "Host side compiler used by NVCC")
   endif()
-  set(CUDA_HOST_COMPILER "${c_compiler_realpath}" CACHE FILEPATH "Host side compiler used by NVCC")
 endif()
 
 # Propagate the host flags to the host compiler via -Xcompiler
