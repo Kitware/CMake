@@ -1273,6 +1273,11 @@ void cmGlobalGenerator::Generate()
   // it builds by default.
   this->FillLocalGeneratorToTargetMap();
 
+  for (i = 0; i < this->LocalGenerators.size(); ++i)
+    {
+    this->LocalGenerators[i]->ComputeHomeRelativeOutputPath();
+    }
+
   // Generate project files
   for (i = 0; i < this->LocalGenerators.size(); ++i)
     {
