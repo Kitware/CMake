@@ -609,7 +609,7 @@ void cmQtAutoGenerators::SetupAutoGenerateTarget(cmTarget const* target)
 
   // Ensure we have write permission in case .in was read-only.
   mode_t perm = 0;
-#if defined(WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
   mode_t mode_write = S_IWRITE;
 #else
   mode_t mode_write = S_IWUSR;
