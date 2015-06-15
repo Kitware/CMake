@@ -22,6 +22,7 @@
 #include "cmComputeLinkInformation.h"
 #include "cmSourceFile.h"
 #include "cmCustomCommandGenerator.h"
+#include "cmAlgorithms.h"
 
 #include <algorithm>
 
@@ -473,6 +474,25 @@ cmNinjaTargetGenerator
       run_iwyu += this->GetLocalGenerator()->EscapeForShell(iwyu);
       run_iwyu += " -- ";
       compileCmds.front().insert(0, run_iwyu);
+      }
+    }
+
+  // Maybe insert a compiler launcher like ccache or distcc
+  if (!compileCmds.empty() && (lang == "C" || lang == "CXX"))
+    {
+    std::string const clauncher_prop = lang + "_COMPILER_LAUNCHER";
+    const char *clauncher = this->Target->GetProperty(clauncher_prop);
+    if (clauncher && *clauncher)
+      {
+      std::vector<std::string> launcher_cmd;
+      cmSystemTools::ExpandListArgument(clauncher, launcher_cmd, true);
+      for (std::vector<std::string>::iterator i = launcher_cmd.begin(),
+             e = launcher_cmd.end(); i != e; ++i)
+        {
+        *i = this->LocalGenerator->EscapeForShell(*i);
+        }
+      std::string const& run_launcher = cmJoin(launcher_cmd, " ") + " ";
+      compileCmds.front().insert(0, run_launcher);
       }
     }
 
