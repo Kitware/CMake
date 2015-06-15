@@ -334,31 +334,22 @@ set(CTEST_UPDATE_VERSION_ONLY TRUE)
 # Run the dashboard script with CTest.
 set(NO_UPDATE 1)
 run_dashboard_script(dash-binary-no-update)
+unset(NO_UPDATE)
 
 rewind_source(dash-source)
 
 #-----------------------------------------------------------------------------
 # Test ctest_update(QUIET)
-set(NO_UPDATE 0)
 message("Running CTest Dashboard Script (update quietly)...")
 
+set(ctest_update_args QUIET)
 create_dashboard_script(dash-binary-quiet
   "# git command configuration
 set(CTEST_GIT_COMMAND \"${GIT}\")
 set(CTEST_GIT_UPDATE_OPTIONS)
 set(CTEST_GIT_UPDATE_CUSTOM \${CTEST_GIT_COMMAND} pull origin master)
 ")
-
-# We need to modify the created dashboard script to include our "QUIET"
-# option.
-set(filename "${TOP}/dash-binary-quiet.cmake")
-file(READ "${filename}" contents)
-string(REPLACE
-  [=[ctest_update(SOURCE ${CTEST_SOURCE_DIRECTORY})]=]
-  [=[ctest_update(SOURCE ${CTEST_SOURCE_DIRECTORY} QUIET)]=]
-  contents
-  "${contents}")
-file(WRITE "${filename}" "${contents}")
+unset(ctest_update_args)
 
 # Run the dashboard script with CTest.
 run_dashboard_script(dash-binary-quiet)
@@ -367,3 +358,23 @@ run_dashboard_script(dash-binary-quiet)
 if("${OUTPUT}" MATCHES "Updating the repository")
   message(FATAL_ERROR "Found 'Updating the repository' in quiet output")
 endif()
+
+#-----------------------------------------------------------------------------
+# Test ctest_update(RETURN_VALUE) on failure
+message("Running CTest Dashboard Script (fail to update)...")
+
+set(ctest_update_check [[
+
+if(NOT ret LESS 0)
+  message(FATAL_ERROR "ctest_update incorrectly succeeded with ${ret}")
+endif()
+]])
+create_dashboard_script(dash-binary-fail
+  "set(CTEST_GIT_COMMAND \"update-command-does-not-exist\")
+")
+unset(ctest_update_check)
+
+# Run the dashboard script with CTest.
+set(FAIL_UPDATE 1)
+run_dashboard_script(dash-binary-fail)
+unset(FAIL_UPDATE)
