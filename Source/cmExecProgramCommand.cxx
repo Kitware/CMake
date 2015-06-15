@@ -156,7 +156,7 @@ bool cmExecProgramCommand::RunCommand(const char* command,
     verbose = false;
     }
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
   // if the command does not start with a quote, then
   // try to find the program, and if the program can not be
   // found use system to run the command as it must be a built in
@@ -219,7 +219,7 @@ bool cmExecProgramCommand::RunCommand(const char* command,
     return false;
     }
 
-#if defined(WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
   if(dir)
     {
     cmsysProcess_SetWorkingDirectory(cp, dir);
@@ -305,7 +305,7 @@ bool cmExecProgramCommand::RunCommand(const char* command,
     }
   if(!msg.empty())
     {
-#if defined(WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
     // Old Windows process execution printed this info.
     msg += "\n\nfor command: ";
     msg += command;
