@@ -4408,7 +4408,7 @@ bool SystemTools::FileIsFullPath(const char* in_name, size_t len)
 
 bool SystemTools::GetShortPath(const kwsys_stl::string& path, kwsys_stl::string& shortPath)
 {
-#if defined(WIN32) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(__CYGWIN__)
   const int size = int(path.size()) +1; // size of return
   char *tempPath = new char[size];  // create a buffer
   DWORD ret;
