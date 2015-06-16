@@ -130,7 +130,7 @@ export RESULTING_HTML_TARZ_ARCHIVE_FILE="$DOXTEMP/$PROJECT_NAME-html.tar.gz"
 
 if test "x@VTK_SOURCE_DIR@" != "x" ; then
   if test "x$PERL_PROG" != "xNOTFOUND" ; then
-    $PERL_PROG "$PATH_TO_VTK_DOX_SCRIPTS/doc_contributors.pl" \
+    "$PERL_PROG" "$PATH_TO_VTK_DOX_SCRIPTS/doc_contributors.pl" \
         --authors  "$SOURCE_DIR/Utilities/Doxygen/authors.txt" \
         --cachedir "$DOXTEMP/cache" \
         --class_group '^(cm[A-Z0-9][A-Za-z0-9]+)\.(?:c|cpp|cxx|h|fl)$' \
@@ -158,7 +158,7 @@ if test "x@VTK_SOURCE_DIR@" != "x" ; then
   fi
 
   if test "x$GNUPLOT_PROG" != "xNOTFOUND" ; then
-    $GNUPLOT_PROG "$DOXTEMP/contrib/history.plt"
+    "$GNUPLOT_PROG" "$DOXTEMP/contrib/history.plt"
   fi
 fi
 
@@ -168,7 +168,7 @@ fi
 if test "x$DOXYGEN_PROG" != "xNOTFOUND" ; then
 
     if test "x$RM_PROG" != "xNOTFOUND" ; then
-        $RM_PROG -fr "$OUTPUT_DIRECTORY"
+        "$RM_PROG" -fr "$OUTPUT_DIRECTORY"
     fi
 
     "$DOXYGEN_PROG" "$DOXYFILE"
@@ -182,7 +182,7 @@ fi
 
 if test "x@VTK_SOURCE_DIR@" != "x" ; then
   if test "x$PERL_PROG" != "xNOTFOUND" ; then
-    $PERL_PROG "$PATH_TO_VTK_DOX_SCRIPTS/doc_rmpath.pl" \
+    "$PERL_PROG" "$PATH_TO_VTK_DOX_SCRIPTS/doc_rmpath.pl" \
         --verbose \
         --to "$INTERMEDIATE_DOX_DIR" \
         --html "$OUTPUT_DIRECTORY/html"
@@ -198,7 +198,7 @@ if test "x$COMPILE_HTML_HELP" == "xON" ; then
         if test "x$HHC_PROG" != "xNOTFOUND" ; then
             "$HHC_PROG" index.hhp
             if test "x$MV_PROG" != "xNOTFOUND" ; then
-                $MV_PROG -f index.chm "$RESULTING_HTML_HELP_FILE"
+                "$MV_PROG" -f index.chm "$RESULTING_HTML_HELP_FILE"
             fi
        fi
    fi
@@ -212,15 +212,15 @@ if test "x$CREATE_HTML_TARZ_ARCHIVE" == "xON" ; then
         cd "$OUTPUT_DIRECTORY"
         if test "x$TAR_PROG" != "xNOTFOUND" ; then
             if test "x$RM_PROG" != "xNOTFOUND" ; then
-                $RM_PROG -f html.tar
+                "$RM_PROG" -f html.tar
             fi
-            $TAR_PROG -cf html.tar html
+            "$TAR_PROG" -cf html.tar html
             if test "x$GZIP_PROG" != "xNOTFOUND" ; then
                 if test "x$RM_PROG" != "xNOTFOUND" ; then
-                    $RM_PROG -f html.tar.gz
+                    "$RM_PROG" -f html.tar.gz
                 fi
-                $GZIP_PROG html.tar
-                $MV_PROG -f html.tar.gz "$RESULTING_HTML_TARZ_ARCHIVE_FILE"
+                "$GZIP_PROG" html.tar
+                "$MV_PROG" -f html.tar.gz "$RESULTING_HTML_TARZ_ARCHIVE_FILE"
             fi
        fi
    fi
@@ -230,18 +230,18 @@ fi
 # Clean-up.
 
 if test "x$RM_PROG" != "xNOTFOUND" ; then
-    $RM_PROG -fr "$INTERMEDIATE_DOX_DIR"
+    "$RM_PROG" -fr "$INTERMEDIATE_DOX_DIR"
 
     if test "x$DOWNLOAD_VTK_TAGFILE" == "xON" ; then
         if test "x$VTK_TAGFILE" != "x" ; then
-            $RM_PROG -f "$VTK_TAGFILE_DEST_DIR/$VTK_TAGFILE"
+            "$RM_PROG" -f "$VTK_TAGFILE_DEST_DIR/$VTK_TAGFILE"
         fi
     fi
 
     if test "x$COMPILE_HTML_HELP" == "xON" ; then
         if test "x$RESULTING_HTML_HELP_FILE" != "x" ; then
             if test "x$ALLOW_ERASE_OUTPUT_DIRECTORY" == "xON" ; then
-                $RM_PROG -fr "$OUTPUT_DIRECTORY"
+                "$RM_PROG" -fr "$OUTPUT_DIRECTORY"
             fi
         fi
     fi
