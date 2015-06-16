@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.2.3)
 
-project(GNUInstallDirsTest)
+project(GNUInstallDirsTest LANGUAGES NONE)
 
+# ATTENTION Predefine CMAKE_SIZEOF_VOID_P, so `GNUInstallDirs` would be happy...
+# The value itself doesn't matter, cuz contents of `LIBDIR' is not asserted,
+# cuz may vari depending on distribution.
+set(CMAKE_SIZEOF_VOID_P 8)
 # Set prefix explicitly to the root of the filesystem
 set(CMAKE_INSTALL_PREFIX "/opt/${PROJECT_NAME}")
 include(GNUInstallDirs)
@@ -23,53 +27,55 @@ set(
     DOCDIR
   )
 
-set(
-    SHORT_DIR_LIST
-    bin
-    sbin
-    libexec
-    etc
-    com
-    var
-    include
-    share
-    share
-    share/info
-    share/locale
-    share/man
-    share/doc/${PROJECT_NAME}
-  )
+#BEGIN Expected values
+set(expected_short_BINDIR "bin")
+set(expected_long_BINDIR "/opt/${PROJECT_NAME}/bin")
 
-set(
-    LONG_DIR_LIST
-    /opt/${PROJECT_NAME}/bin
-    /opt/${PROJECT_NAME}/sbin
-    /opt/${PROJECT_NAME}/libexec
-    /etc/opt/${PROJECT_NAME}
-    /opt/${PROJECT_NAME}/com
-    /var/opt/${PROJECT_NAME}
-    /opt/${PROJECT_NAME}/include
-    /opt/${PROJECT_NAME}/share
-    /opt/${PROJECT_NAME}/share
-    /opt/${PROJECT_NAME}/share/info
-    /opt/${PROJECT_NAME}/share/locale
-    /opt/${PROJECT_NAME}/share/man
-    /opt/${PROJECT_NAME}/share/doc/GNUInstallDirsTest
-  )
+set(expected_short_SBINDIR "sbin")
+set(expected_long_SBINDIR "/opt/${PROJECT_NAME}/sbin")
+
+set(expected_short_LIBEXECDIR "libexec")
+set(expected_long_LIBEXECDIR "/opt/${PROJECT_NAME}/libexec")
+
+set(expected_short_SYSCONFDIR "etc")
+set(expected_long_SYSCONFDIR "/etc/opt/${PROJECT_NAME}")
+
+set(expected_short_SHAREDSTATEDIR "com")
+set(expected_long_SHAREDSTATEDIR "/opt/${PROJECT_NAME}/com")
+
+set(expected_short_LOCALSTATEDIR "var")
+set(expected_long_LOCALSTATEDIR "/var/opt/${PROJECT_NAME}")
+
+set(expected_short_INCLUDEDIR "include")
+set(expected_long_INCLUDEDIR "/opt/${PROJECT_NAME}/include")
+
+set(expected_short_DATAROOTDIR "share")
+set(expected_long_DATAROOTDIR "/opt/${PROJECT_NAME}/share")
+
+set(expected_short_DATADIR "share")
+set(expected_long_DATADIR "/opt/${PROJECT_NAME}/share")
+
+set(expected_short_INFODIR "share/info")
+set(expected_long_INFODIR "/opt/${PROJECT_NAME}/share/info")
+
+set(expected_short_LOCALEDIR "share/locale")
+set(expected_long_LOCALEDIR "/opt/${PROJECT_NAME}/share/locale")
+
+set(expected_short_MANDIR "share/man")
+set(expected_long_MANDIR "/opt/${PROJECT_NAME}/share/man")
+
+set(expected_short_DOCDIR "share/doc/${PROJECT_NAME}")
+set(expected_long_DOCDIR "/opt/${PROJECT_NAME}/share/doc/${PROJECT_NAME}")
+#END Expected values
 
 foreach(dir ${VAR_LIST})
-    list(FIND VAR_LIST ${dir} dir_pos)
-
-    list(GET SHORT_DIR_LIST ${dir_pos} short_dir)
-    list(GET LONG_DIR_LIST ${dir_pos} long_dir)
-
     # Checking short (relative) dir
-    if(NOT CMAKE_INSTALL_${dir} STREQUAL short_dir)
-        message(SEND_ERROR "'${CMAKE_INSTALL_${dir}}' != '${short_dir}'")
+    if(NOT "${CMAKE_INSTALL_${dir}}" STREQUAL "${expected_short_${dir}}")
+        message(SEND_ERROR "'${CMAKE_INSTALL_${dir}}' != '${expected_short_${dir}}'")
     endif()
 
     # Checking long (absolute) dir
-    if(NOT CMAKE_INSTALL_FULL_${dir} STREQUAL long_dir)
-        message(SEND_ERROR "'${CMAKE_INSTALL_FULL_${dir}}' != '${long_dir}'")
+    if(NOT "${CMAKE_INSTALL_FULL_${dir}}" STREQUAL "${expected_long_${dir}}")
+        message(SEND_ERROR "'${CMAKE_INSTALL_FULL_${dir}}' != '${expected_long_${dir}}'")
     endif()
 endforeach()
