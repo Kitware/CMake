@@ -22,12 +22,29 @@ run_cmake_command(G_bad-arg ${CMAKE_COMMAND} -G NoSuchGenerator)
 run_cmake_command(P_no-arg ${CMAKE_COMMAND} -P)
 run_cmake_command(P_no-file ${CMAKE_COMMAND} -P nosuchscriptfile.cmake)
 
+run_cmake_command(build-no-dir
+  ${CMAKE_COMMAND} --build)
 run_cmake_command(build-no-cache
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR})
 run_cmake_command(build-no-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-no-generator)
+run_cmake_command(build-bad-dir
+  ${CMAKE_COMMAND} --build dir-does-not-exist)
 run_cmake_command(build-bad-generator
   ${CMAKE_COMMAND} --build ${RunCMake_SOURCE_DIR}/cache-bad-generator)
+
+function(run_BuildDir)
+  # Use a single build tree for a few tests without cleaning.
+  set(RunCMake_TEST_BINARY_DIR ${RunCMake_BINARY_DIR}/BuildDir-build)
+  set(RunCMake_TEST_NO_CLEAN 1)
+  file(REMOVE_RECURSE "${RunCMake_TEST_BINARY_DIR}")
+  file(MAKE_DIRECTORY "${RunCMake_TEST_BINARY_DIR}")
+
+  run_cmake(BuildDir)
+  run_cmake_command(BuildDir--build ${CMAKE_COMMAND} -E chdir ..
+    ${CMAKE_COMMAND} --build BuildDir-build --target CustomTarget)
+endfunction()
+run_BuildDir()
 
 if(RunCMake_GENERATOR STREQUAL "Ninja")
   # Use a single build tree for a few tests without cleaning.
