@@ -55,8 +55,27 @@
 # CMAKE_INSTALL_FULL_<dir> value contains an absolute path constructed
 # from the corresponding destination by prepending (if necessary) the
 # value of CMAKE_INSTALL_PREFIX.
+#
+# However, there are few install prefixes are handled in a special way.
+# According to GNU coding style:
+#
+# > When building the complete GNU system, the prefix will be empty and ``/usr`` will be a symbolic link to ``/``.
+#
+# I.e. if someone wants to install a package to ``/`` (like RPM/DEB/etc packages do),
+# directories that are not a part of ``/usr/`` will stay at the root of the filesystem
+# (e.g. ``SYSCONFDIR`` and/or ``LOCALSTATEDIR``).
+#
+# The second part of the problem: there are few people who know about this GNU feature,
+# so specifying ``-DCMAKE_INSTALL_PREFIX=/usr`` will act the same way.
+#
+# Another case is when the user wants to install his package to ``/opt/pkg``. According to
+# Filesystem Hierarchy Standard (https://refspecs.linuxfoundation.org/FHS_3.0/fhs/index.html),
+# ``SYSCONFDIR`` should be ``/etc/opt/pkg`` and ``LOCALSTATEDIR`` is ``/var/opt/pkg``.
+#
+
 
 #=============================================================================
+# Copyright 2015 Alex Turbov <i.zaufi@gmail.com>
 # Copyright 2011 Nikita Krupen'ko <krnekit@gmail.com>
 # Copyright 2011 Kitware, Inc.
 #
@@ -274,8 +293,33 @@ foreach(dir
     MANDIR
     DOCDIR
     )
-  if(NOT IS_ABSOLUTE ${CMAKE_INSTALL_${dir}})
-    set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
+  if(NOT IS_ABSOLUTE "${CMAKE_INSTALL_${dir}}")
+    # Handle special cases:
+    # - CMAKE_INSTALL_PREFIX == /
+    # - CMAKE_INSTALL_PREFIX == /usr
+    if("${CMAKE_INSTALL_PREFIX}" STREQUAL "/")
+        if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
+            set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}")
+        else()
+            set(CMAKE_INSTALL_${dir} "usr/${CMAKE_INSTALL_${dir}}")
+            set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}")
+        endif()
+    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/usr/?$")
+        if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
+            set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}")
+        else()
+            set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
+        endif()
+    # - CMAKE_INSTALL_PREFIX == /opt
+    elseif("${CMAKE_INSTALL_PREFIX}" MATCHES "^/opt/.*")
+        if("${dir}" STREQUAL "SYSCONFDIR" OR "${dir}" STREQUAL "LOCALSTATEDIR")
+            set(CMAKE_INSTALL_FULL_${dir} "/${CMAKE_INSTALL_${dir}}${CMAKE_INSTALL_PREFIX}")
+        else()
+            set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
+        endif()
+    else()
+        set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_${dir}}")
+    endif()
   else()
     set(CMAKE_INSTALL_FULL_${dir} "${CMAKE_INSTALL_${dir}}")
   endif()

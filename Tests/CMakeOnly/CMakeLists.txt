@@ -36,6 +36,11 @@ add_CMakeOnly_test(TargetScope)
 add_CMakeOnly_test(find_library)
 add_CMakeOnly_test(find_path)
 
+add_CMakeOnly_test(GNUInstallDirs2Root)
+add_CMakeOnly_test(GNUInstallDirs2usr)
+add_CMakeOnly_test(GNUInstallDirs2opt)
+add_CMakeOnly_test(GNUInstallDirs2Other)
+
 add_test(CMakeOnly.ProjectInclude ${CMAKE_CMAKE_COMMAND}
   -DTEST=ProjectInclude
   -DCMAKE_ARGS=-DCMAKE_PROJECT_ProjectInclude_INCLUDE=${CMAKE_CURRENT_SOURCE_DIR}/ProjectInclude/include.cmake
