@@ -26,6 +26,39 @@ macro(add_RunCMake_test test)
     )
 endmacro()
 
+function(add_RunCMake_test_group test types)
+  # create directory for common content
+  set(TEST_CONFIG_DIR "${CMAKE_CURRENT_BINARY_DIR}/${test}/conf")
+  file(REMOVE_RECURSE "${TEST_CONFIG_DIR}")
+  file(MAKE_DIRECTORY "${TEST_CONFIG_DIR}")
+
+  foreach(type IN LISTS types)
+    # generate prerequirements config file in cmake as ctest doesn't have as
+    # much system information so it is easier to set programs and environment
+    # values here
+    unset(${test}_${type}_FOUND_PREREQUIREMENTS)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/${test}/${type}/Prerequirements.cmake")
+    get_test_prerequirements("${test}_${type}_FOUND_PREREQUIREMENTS"
+        "${TEST_CONFIG_DIR}/${type}_config.cmake")
+
+    # only add the test if prerequirements are met
+    if(${test}_${type}_FOUND_PREREQUIREMENTS)
+      add_test(NAME RunCMake.${test}_${type} COMMAND ${CMAKE_CMAKE_COMMAND}
+        -DTEST_TYPE=${type}
+        -DCMAKE_MODULE_PATH=${CMAKE_CURRENT_SOURCE_DIR}
+        -DRunCMake_GENERATOR=${CMAKE_GENERATOR}
+        -DRunCMake_GENERATOR_PLATFORM=${CMAKE_GENERATOR_PLATFORM}
+        -DRunCMake_GENERATOR_TOOLSET=${CMAKE_GENERATOR_TOOLSET}
+        -DRunCMake_MAKE_PROGRAM=${CMake_TEST_EXPLICIT_MAKE_PROGRAM}
+        -DRunCMake_SOURCE_DIR=${CMAKE_CURRENT_SOURCE_DIR}/${test}
+        -DRunCMake_BINARY_DIR=${CMAKE_CURRENT_BINARY_DIR}/${type}/${test}
+        -Dconfig_file=${TEST_CONFIG_DIR}/${type}_config.cmake
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/${test}/RunCMakeTest.cmake"
+        )
+    endif()
+  endforeach()
+endfunction()
+
 if(XCODE_VERSION AND "${XCODE_VERSION}" VERSION_LESS 3)
   set(GeneratorToolset_ARGS -DXCODE_BELOW_3=1)
 endif()
@@ -206,10 +239,6 @@ add_RunCMake_test(IfacePaths_INCLUDE_DIRECTORIES TEST_DIR IfacePaths)
 set(IfacePaths_SOURCES_ARGS -DTEST_PROP=SOURCES)
 add_RunCMake_test(IfacePaths_SOURCES TEST_DIR IfacePaths)
 
-if(RPMBUILD_EXECUTABLE)
-  add_RunCMake_test(CPackRPM)
-endif()
-
 add_RunCMake_test(COMPILE_LANGUAGE-genex)
 
 # Matlab module related tests
@@ -234,3 +263,5 @@ if("${CMAKE_GENERATOR}" MATCHES "Make|Ninja")
   add_RunCMake_test(IncludeWhatYouUse -DPSEUDO_IWYU=$<TARGET_FILE:pseudo_iwyu>)
   add_RunCMake_test(CompilerLauncher)
 endif()
+
+add_RunCMake_test_group(CPack "DEB;RPM")
