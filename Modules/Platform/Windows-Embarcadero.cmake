@@ -74,6 +74,12 @@ set (CMAKE_MODULE_LINKER_FLAGS_INIT ${CMAKE_SHARED_LINKER_FLAGS_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_DEBUG_INIT ${CMAKE_SHARED_LINKER_FLAGS_DEBUG_INIT})
 set (CMAKE_MODULE_LINKER_FLAGS_RELWITHDEBINFO_INIT ${CMAKE_SHARED_LINKER_FLAGS_RELWITHDEBINFO_INIT})
 
+# The Borland link tool does not support multiple concurrent
+# invocations within a single working directory.
+if(NOT DEFINED CMAKE_JOB_POOL_LINK)
+  set(CMAKE_JOB_POOL_LINK BCC32LinkPool)
+  set_property(GLOBAL APPEND PROPERTY JOB_POOLS BCC32LinkPool=1)
+endif()
 
 macro(__embarcadero_language lang)
   set(CMAKE_${lang}_COMPILE_OPTIONS_DLL "${_tD}") # Note: This variable is a ';' separated list
