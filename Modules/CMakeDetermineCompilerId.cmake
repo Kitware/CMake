@@ -34,7 +34,9 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   # Try building with no extra flags and then try each set
   # of helper flags.  Stop when the compiler is identified.
-  foreach(flags "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
+  foreach(flags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}
+                ""
+                ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
     if(NOT CMAKE_${lang}_COMPILER_ID)
       CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
       foreach(file ${COMPILER_${lang}_PRODUCED_FILES})

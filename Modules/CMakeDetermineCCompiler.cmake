@@ -80,6 +80,7 @@ else()
   # Each entry in this list is a set of extra flags to try
   # adding to the compile line to see if it helps produce
   # a valid identification file.
+  set(CMAKE_C_COMPILER_ID_TEST_FLAGS_FIRST)
   set(CMAKE_C_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
     "-c"
