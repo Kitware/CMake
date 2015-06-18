@@ -34,12 +34,19 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
 
   # Try building with no extra flags and then try each set
   # of helper flags.  Stop when the compiler is identified.
-  foreach(flags "" ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
-    if(NOT CMAKE_${lang}_COMPILER_ID)
-      CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
-      foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
-        CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
-      endforeach()
+  foreach(flags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}
+                ""
+                ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
+    CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
+    CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR("${lang}" "${COMPILER_${lang}_PRODUCED_OUTPUT}")
+    if(CMAKE_${lang}_COMPILER_ID)
+      break()
+    endif()
+    foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
+      CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
+    endforeach()
+    if(CMAKE_${lang}_COMPILER_ID)
+      break()
     endif()
   endforeach()
 
@@ -355,6 +362,7 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
 
     # No output files should be inspected.
     set(COMPILER_${lang}_PRODUCED_FILES)
+    set(COMPILER_${lang}_PRODUCED_OUTPUT)
   else()
     # Compilation succeeded.
     file(APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
@@ -395,10 +403,24 @@ ${CMAKE_${lang}_COMPILER_ID_OUTPUT}
         "${src}\" did not produce an executable in \""
         "${CMAKE_${lang}_COMPILER_ID_DIR}\".\n\n")
     endif()
+
+    set(COMPILER_${lang}_PRODUCED_OUTPUT "${CMAKE_${lang}_COMPILER_ID_OUTPUT}")
   endif()
 
   # Return the files produced by the compilation.
   set(COMPILER_${lang}_PRODUCED_FILES "${COMPILER_${lang}_PRODUCED_FILES}" PARENT_SCOPE)
+  set(COMPILER_${lang}_PRODUCED_OUTPUT "${COMPILER_${lang}_PRODUCED_OUTPUT}" PARENT_SCOPE)
+endfunction()
+
+#-----------------------------------------------------------------------------
+# Function to extract the compiler id from compiler output.
+function(CMAKE_DETERMINE_COMPILER_ID_MATCH_VENDOR lang output)
+  foreach(vendor ${CMAKE_${lang}_COMPILER_ID_MATCH_VENDORS})
+    if(output MATCHES "${CMAKE_${lang}_COMPILER_ID_MATCH_VENDOR_REGEX_${vendor}}")
+      set(CMAKE_${lang}_COMPILER_ID "${vendor}")
+    endif()
+  endforeach()
+  set(CMAKE_${lang}_COMPILER_ID "${CMAKE_${lang}_COMPILER_ID}" PARENT_SCOPE)
 endfunction()
 
 #-----------------------------------------------------------------------------
