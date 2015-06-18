@@ -1,3 +1,9 @@
+set(CMAKE_SIZEOF_VOID_P 8)
+set(CMAKE_LIBRARY_ARCHITECTURE "arch")
+if(CMAKE_SYSTEM_NAME STREQUAL "OpenBSD")
+  set(CMAKE_SYSTEM_NAME "OpenBSD-Fake")
+endif()
+include(GNUInstallDirs)
 set(dirs
   BINDIR
   DATADIR
