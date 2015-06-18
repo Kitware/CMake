@@ -37,11 +37,12 @@ function(CMAKE_DETERMINE_COMPILER_ID lang flagvar src)
   foreach(flags ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS_FIRST}
                 ""
                 ${CMAKE_${lang}_COMPILER_ID_TEST_FLAGS})
-    if(NOT CMAKE_${lang}_COMPILER_ID)
-      CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
-      foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
-        CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
-      endforeach()
+    CMAKE_DETERMINE_COMPILER_ID_BUILD("${lang}" "${flags}" "${src}")
+    foreach(file ${COMPILER_${lang}_PRODUCED_FILES})
+      CMAKE_DETERMINE_COMPILER_ID_CHECK("${lang}" "${CMAKE_${lang}_COMPILER_ID_DIR}/${file}" "${src}")
+    endforeach()
+    if(CMAKE_${lang}_COMPILER_ID)
+      break()
     endif()
   endforeach()
 
