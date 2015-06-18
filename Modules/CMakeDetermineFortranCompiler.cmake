@@ -98,7 +98,10 @@ else()
   # Each entry in this list is a set of extra flags to try
   # adding to the compile line to see if it helps produce
   # a valid identification executable.
-  set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS_FIRST)
+  set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS_FIRST
+    # Get verbose output to help distinguish compilers.
+    "-v"
+    )
   set(CMAKE_Fortran_COMPILER_ID_TEST_FLAGS
     # Try compiling to an object file only.
     "-c"
@@ -111,6 +114,10 @@ endif()
 # Build a small source file to identify the compiler.
 if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(CMAKE_Fortran_COMPILER_ID_RUN 1)
+
+  # Table of per-vendor compiler output regular expressions.
+  list(APPEND CMAKE_Fortran_COMPILER_ID_MATCH_VENDORS CCur)
+  set(CMAKE_Fortran_COMPILER_ID_MATCH_VENDOR_REGEX_CCur "Concurrent Fortran [0-9]+ Compiler")
 
   # Table of per-vendor compiler id flags with expected output.
   list(APPEND CMAKE_Fortran_COMPILER_ID_VENDORS Compaq)
