@@ -1,0 +1,7 @@
+project(autoexport)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${autoexport_BINARY_DIR}/bin)
+add_subdirectory(sub)
+add_library(autoexport SHARED hello.cxx world.cxx foo.c)
+add_executable(say say.cxx)
+target_link_libraries(say autoexport autoexport2)
