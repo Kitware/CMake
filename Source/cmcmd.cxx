@@ -34,6 +34,10 @@
 #include <time.h>
 
 #include <stdlib.h> // required for atoi
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+// defined in binexplib.cxx
+void DumpFile(const char* filename, FILE *fout);
+#endif
 
 void CMakeCommandUsage(const char* program)
 {
@@ -211,6 +215,38 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       return 0;
       }
 
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
+    else if(args[1] == "__create_def")
+      {
+      if(args.size() < 4)
+        {
+        std::cerr <<
+          "__create_def Usage: -E __create_def outfile.def objlistfile\n";
+        return 1;
+        }
+      FILE* fout = cmsys::SystemTools::Fopen(args[2].c_str(), "w+");
+      if(!fout)
+        {
+        std::cerr << "could not open output .def file: " << args[2].c_str()
+                  << "\n";
+        return 1;
+        }
+      cmsys::ifstream fin(args[3].c_str(),
+                          std::ios::in | std::ios::binary);
+      if(!fin)
+        {
+        std::cerr << "could not open object list file: " << args[3].c_str()
+                  << "\n";
+        return 1;
+        }
+      std::string objfile;
+      while(cmSystemTools::GetLineFromStream(fin, objfile))
+        {
+        DumpFile(objfile.c_str(), fout);
+        }
+      return 0;
+      }
+#endif
     // run include what you use command and then run the compile
     // command. This is an internal undocumented option and should
     // only be used by CMake itself when running iwyu.

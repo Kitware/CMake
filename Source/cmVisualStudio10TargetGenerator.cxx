@@ -2466,6 +2466,17 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
                            "%(IgnoreSpecificDefaultLibraries)");
     }
 
+  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
+    {
+    std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
+    const char *autodef = this->Target->GetProperty(autodef_prop);
+    if (autodef && *autodef)
+      {
+      linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)/exportall.def");
+      }
+    }
+
   this->LinkOptions[config] = pOptions.release();
   return true;
 }
@@ -2613,8 +2624,27 @@ void cmVisualStudio10TargetGenerator::WriteItemDefinitionGroups()
 void
 cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
 {
-  this->WriteEvent("PreLinkEvent",
-                   this->Target->GetPreLinkCommands(), configName);
+  bool addedPrelink = false;
+  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
+    {
+    std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
+    const char *autodef = this->Target->GetProperty(autodef_prop);
+    if (autodef && *autodef)
+      {
+      addedPrelink = true;
+      std::vector<cmCustomCommand> commands =
+        this->Target->GetPreLinkCommands();
+      this->GlobalGenerator->AddSymbolExportCommand(
+        this->GeneratorTarget, commands, configName);
+      this->WriteEvent("PreLinkEvent", commands, configName);
+      }
+    }
+  if (!addedPrelink)
+    {
+    this->WriteEvent("PreLinkEvent",
+                     this->Target->GetPreLinkCommands(), configName);
+    }
   this->WriteEvent("PreBuildEvent",
                    this->Target->GetPreBuildCommands(), configName);
   this->WriteEvent("PostBuildEvent",
