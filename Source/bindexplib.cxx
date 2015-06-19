@@ -73,10 +73,12 @@
 
 static char sccsid[] = "@(#) winDumpExts.c 1.2 95/10/03 15:27:34";
 
+#include <cmsys/Encoding.hxx>
 #include <windows.h>
 #include <stdio.h>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 /*
 *  The names of the first group of possible symbol table storage classes
@@ -188,7 +190,7 @@ HaveExportedObjects(PIMAGE_FILE_HEADER pImageFileHeader,
 void
 DumpExternalsObjects(PIMAGE_SYMBOL pSymbolTable,
                      PIMAGE_SECTION_HEADER pSectionHeaders,
-                     FILE *fout, unsigned cSymbols)
+                     FILE *fout, DWORD_PTR cSymbols)
 {
    unsigned i;
    PSTR stringTable;
@@ -314,14 +316,15 @@ DumpObjFile(PIMAGE_FILE_HEADER pImageFileHeader, FILE *fout)
 *----------------------------------------------------------------------
 */
 void
-DumpFile(LPSTR filename, FILE *fout)
+DumpFile(const char* filename, FILE *fout)
 {
    HANDLE hFile;
    HANDLE hFileMapping;
    LPVOID lpFileBase;
    PIMAGE_DOS_HEADER dosHeader;
 
-   hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+   hFile = CreateFileW(cmsys::Encoding::ToWide(filename).c_str(),
+                       GENERIC_READ, FILE_SHARE_READ, NULL,
       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
    if (hFile == INVALID_HANDLE_VALUE) {
