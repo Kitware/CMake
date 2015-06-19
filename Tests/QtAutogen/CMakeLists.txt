@@ -167,3 +167,26 @@ file(TIMESTAMP "${qrc_file1}" file1_step1 "${timeformat}")
 if (NOT file1_step1 GREATER file1_before)
   message(SEND_ERROR "file1 (${qrc_file1}) should have changed in the first step!")
 endif()
+
+#-----------------------------------------------------------------------------
+try_compile(MOC_RERUN
+  "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
+  "${CMAKE_CURRENT_SOURCE_DIR}/automoc_rerun"
+  automoc_rerun
+  CMAKE_FLAGS "-DQT_QMAKE_EXECUTABLE:FILEPATH=${QT_QMAKE_EXECUTABLE}" "-DQT_TEST_VERSION=${QT_TEST_VERSION}"
+              "-DCMAKE_PREFIX_PATH=${Qt_PREFIX_DIR}"
+  OUTPUT_VARIABLE output
+)
+if (NOT MOC_RERUN)
+  message(SEND_ERROR "Initial build of automoc_rerun failed. Output: ${output}")
+endif()
+
+configure_file(automoc_rerun/test1.h.in2 automoc_rerun/test1.h COPYONLY)
+
+execute_process(COMMAND "${CMAKE_COMMAND}" --build .
+  WORKING_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/automoc_rerun"
+  RESULT_VARIABLE automoc_rerun_result
+  )
+if (automoc_rerun_result)
+  message(SEND_ERROR "Second build of automoc_rerun failed.")
+endif()

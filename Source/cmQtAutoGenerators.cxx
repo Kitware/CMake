@@ -394,14 +394,9 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
     }
 #endif
 
+  // Ninja needs to know the rcc outputs are byproducts.
   std::vector<std::string> rcc_output;
-  bool const isNinja =
-    makefile->GetGlobalGenerator()->GetName() == "Ninja";
-  if(isNinja
-#if defined(_WIN32) && !defined(__CYGWIN__)
-        || usePRE_BUILD
-#endif
-        )
+  if (makefile->GetGlobalGenerator()->GetName() == "Ninja")
     {
     std::vector<cmSourceFile*> srcFiles;
     target->GetConfigCommonSourceFiles(srcFiles);
@@ -439,9 +434,6 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
               {
               this->ListQt4RccInputs(sf, depends);
               }
-#if defined(_WIN32) && !defined(__CYGWIN__)
-            usePRE_BUILD = false;
-#endif
             }
           }
         }
@@ -466,31 +458,11 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
   else
 #endif
     {
-    cmTarget* autogenTarget = 0;
-    if (!rcc_output.empty() && !isNinja)
-      {
-      std::vector<std::string> no_byproducts;
-      makefile->AddCustomCommandToOutput(rcc_output, no_byproducts,
-                                         depends, "",
-                                         commandLines, 0,
-                                         workingDirectory.c_str(),
-                                         false, false);
-
-      cmCustomCommandLines no_commands;
-      autogenTarget = makefile->AddUtilityCommand(
-                          autogenTargetName, true,
-                          workingDirectory.c_str(), rcc_output,
-                          no_commands, false, autogenComment.c_str());
-
-      }
-    else
-      {
-      autogenTarget = makefile->AddUtilityCommand(
+    cmTarget* autogenTarget = makefile->AddUtilityCommand(
                                 autogenTargetName, true,
                                 workingDirectory.c_str(),
                                 /*byproducts=*/rcc_output, depends,
                                 commandLines, false, autogenComment.c_str());
-      }
 
     // Set target folder
     const char* autogenFolder = makefile->GetState()
