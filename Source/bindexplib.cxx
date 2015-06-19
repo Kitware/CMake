@@ -1,3 +1,21 @@
+/*============================================================================
+  CMake - Cross Platform Makefile Generator
+  Copyright 2000-2015 Kitware, Inc.
+
+  Distributed under the OSI-approved BSD License (the "License");
+  see accompanying file Copyright.txt for details.
+
+  This software is distributed WITHOUT ANY WARRANTY; without even the
+  implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the License for more information.
+============================================================================*/
+/*-------------------------------------------------------------------------
+  Portions of this source have been derived from the 'bindexplib' tool
+  provided by the CERN ROOT Data Analysis Framework project (root.cern.ch).
+  Permission has been granted by Pere Mato <pere.mato@cern.ch> to distribute
+  this derived work under the CMake license.
+-------------------------------------------------------------------------*/
+
 /*
 *----------------------------------------------------------------------
 * Program:  dumpexts.exe
