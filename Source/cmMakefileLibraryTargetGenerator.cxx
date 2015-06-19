@@ -18,6 +18,7 @@
 #include "cmSourceFile.h"
 #include "cmTarget.h"
 #include "cmake.h"
+#include "cmAlgorithms.h"
 
 //----------------------------------------------------------------------------
 cmMakefileLibraryTargetGenerator
@@ -562,6 +563,58 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
   this->CreateObjectLists(useLinkScript, useArchiveRules,
                           useResponseFileForObjects, buildObjs, depends,
                           useWatcomQuote);
+
+  // maybe create .def file from list of objects
+  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
+    {
+    if(this->Target->GetPropertyAsBool("WINDOWS_EXPORT_ALL_SYMBOLS"))
+      {
+      std::string name_of_def_file =
+        this->Target->GetSupportDirectory();
+      name_of_def_file += std::string("/") +
+        this->Target->GetName();
+      name_of_def_file += ".def";
+      std::string cmd = cmSystemTools::GetCMakeCommand();
+      cmd = this->Convert(cmd, cmLocalGenerator::NONE,
+                          cmLocalGenerator::SHELL);
+      cmd += " -E __create_def ";
+      cmd += this->Convert(name_of_def_file,
+                           cmLocalGenerator::START_OUTPUT,
+                           cmLocalGenerator::SHELL);
+      cmd += " ";
+      std::string objlist_file = name_of_def_file;
+      objlist_file += ".objs";
+      cmd += this->Convert(objlist_file,
+                           cmLocalGenerator::START_OUTPUT,
+                           cmLocalGenerator::SHELL);
+      real_link_commands.push_back(cmd);
+      // create a list of obj files for the -E __create_def to read
+      cmGeneratedFileStream fout(objlist_file.c_str());
+      for(std::vector<std::string>::const_iterator i = this->Objects.begin();
+          i != this->Objects.end(); ++i)
+        {
+        if(cmHasLiteralSuffix(*i, ".obj"))
+          {
+          fout << *i << "\n";
+          }
+        }
+      for(std::vector<std::string>::const_iterator i =
+        this->ExternalObjects.begin();
+          i != this->ExternalObjects.end(); ++i)
+        {
+        fout << *i << "\n";
+        }
+      // now add the def file link flag
+      linkFlags += " ";
+      linkFlags +=
+        this->Makefile->GetSafeDefinition("CMAKE_LINK_DEF_FILE_FLAG");
+      linkFlags += this->Convert(name_of_def_file,
+                                 cmLocalGenerator::START_OUTPUT,
+                                 cmLocalGenerator::SHELL);
+      linkFlags += " ";
+      }
+    }
 
   cmLocalGenerator::RuleVariables vars;
   vars.TargetPDB = targetOutPathPDB.c_str();

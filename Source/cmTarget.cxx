@@ -429,6 +429,11 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->SetProperty("POSITION_INDEPENDENT_CODE", "True");
     }
+  if(this->TargetTypeValue == cmTarget::SHARED_LIBRARY)
+    {
+    this->SetPropertyDefault("WINDOWS_EXPORT_ALL_SYMBOLS", 0);
+    }
+
   if (this->GetType() != INTERFACE_LIBRARY && this->GetType() != UTILITY)
     {
     this->SetPropertyDefault("POSITION_INDEPENDENT_CODE", 0);

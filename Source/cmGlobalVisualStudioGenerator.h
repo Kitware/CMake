@@ -102,6 +102,10 @@ public:
                                       const std::string& config) const;
 
   void ComputeTargetObjectDirectory(cmGeneratorTarget* gt) const;
+
+  void AddSymbolExportCommand(
+    cmGeneratorTarget*, std::vector<cmCustomCommand>& commands,
+    std::string const& configName);
 protected:
   virtual void Generate();
 
