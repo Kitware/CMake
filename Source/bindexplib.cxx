@@ -198,7 +198,16 @@ DumpExternalsObjects(PIMAGE_SYMBOL pSymbolTable,
                symbol = stringTable + pSymbolTable->N.Name.Long;
             }
 
+            // clear out any leading spaces
             while (isspace(symbol[0])) symbol.erase(0,1);
+            // if it starts with _ and has an @ then it is a __cdecl
+            // so remove the @ stuff for the export
+            if(symbol[0] == '_') {
+               std::string::size_type posAt = symbol.find('@');
+               if (posAt != std::string::npos) {
+                  symbol.erase(posAt);
+               }
+            }
             if (symbol[0] == '_') symbol.erase(0,1);
             if (fImportFlag) {
                fImportFlag = 0;
@@ -210,9 +219,13 @@ DumpExternalsObjects(PIMAGE_SYMBOL pSymbolTable,
             */
             const char *scalarPrefix = "??_G";
             const char *vectorPrefix = "??_E";
+            // original code had a check for
+            // symbol.find("real@") == std::string::npos)
+            // but if this disallows memmber functions with the name real
+            // if scalarPrefix and vectorPrefix are not found then print
+            // the symbol
             if (symbol.compare(0, 4, scalarPrefix) &&
-               symbol.compare(0, 4, vectorPrefix) &&
-               symbol.find("real@") == std::string::npos)
+                symbol.compare(0, 4, vectorPrefix) )
             {
                SectChar =
                 pSectionHeaders[pSymbolTable->SectionNumber-1].Characteristics;
@@ -224,7 +237,7 @@ DumpExternalsObjects(PIMAGE_SYMBOL pSymbolTable,
                        !(SectChar & IMAGE_SCN_MEM_READ)) {
                      fprintf(fout, "\t%s\n", symbol.c_str());
                   } else {
-                     //                    printf(" strange symbol: %s \n",s);
+                     // printf(" strange symbol: %s \n",symbol.c_str());
                   }
                }
             }
