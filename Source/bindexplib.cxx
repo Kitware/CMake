@@ -71,10 +71,12 @@
 *----------------------------------------------------------------------
 */
 
+#include <cmsys/Encoding.hxx>
 #include <windows.h>
 #include <stdio.h>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 /*
 + * Utility func, strstr with size
@@ -89,7 +91,7 @@ const char* StrNStr(const char* start, const char* find, size_t &size) {
    }
    len = strlen(find);
 
-   while (hint = (const char*) memchr(start, find[0], size-len+1)) {
+   while ((hint = (const char*) memchr(start, find[0], size-len+1))) {
       size -= (hint - start);
       if (!strncmp(hint, find, len))
          return hint;
@@ -169,7 +171,7 @@ HaveExportedObjects(PIMAGE_FILE_HEADER pImageFileHeader,
 void
 DumpExternalsObjects(PIMAGE_SYMBOL pSymbolTable,
                      PIMAGE_SECTION_HEADER pSectionHeaders,
-                     FILE *fout, unsigned cSymbols)
+                     FILE *fout, DWORD_PTR cSymbols)
 {
    unsigned i;
    PSTR stringTable;
@@ -295,14 +297,15 @@ DumpObjFile(PIMAGE_FILE_HEADER pImageFileHeader, FILE *fout)
 *----------------------------------------------------------------------
 */
 void
-DumpFile(LPSTR filename, FILE *fout)
+DumpFile(const char* filename, FILE *fout)
 {
    HANDLE hFile;
    HANDLE hFileMapping;
    LPVOID lpFileBase;
    PIMAGE_DOS_HEADER dosHeader;
 
-   hFile = CreateFile(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+   hFile = CreateFileW(cmsys::Encoding::ToWide(filename).c_str(),
+                       GENERIC_READ, FILE_SHARE_READ, NULL,
       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
    if (hFile == INVALID_HANDLE_VALUE) {
