@@ -437,7 +437,6 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut,
                                              target.GetDirectory(cfgName));
     }
-
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   const cmTarget::TargetType targetType = target.GetType();
@@ -486,6 +485,24 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                           linkPath,
                           &genTarget,
                           useWatcomQuote);
+  if(this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
+     && target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
+    const char *autodef = target.GetProperty(autodef_prop);
+    if (autodef && *autodef)
+      {
+      std::string dllname = targetOutput;
+      std::string name_of_def_file
+        = target.GetSupportDirectory();
+      name_of_def_file += "/" + target.GetName();
+      name_of_def_file += ".def ";
+      vars["LINK_FLAGS"] += " /DEF:";
+      vars["LINK_FLAGS"] += this->GetLocalGenerator()
+        ->ConvertToOutputFormat(name_of_def_file.c_str(),
+                                cmLocalGenerator::SHELL);
+      }
+    }
 
   this->addPoolNinjaVariable("JOB_POOL_LINK", &target, vars);
 
@@ -599,7 +616,44 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                      std::back_inserter(byproducts), MapToNinjaPath());
       }
     }
-
+  // check for windows_auto_dll_export property here
+  // create .def file from list of objects
+  if(this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
+     && target.GetType() == cmTarget::SHARED_LIBRARY)
+    {
+    std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
+    const char *autodef = target.GetProperty(autodef_prop);
+    if (autodef && *autodef)
+      {
+      std::string cmakeCommand =
+      this->GetLocalGenerator()->ConvertToOutputFormat(
+        cmSystemTools::GetCMakeCommand(), cmLocalGenerator::SHELL);
+      std::string dllname = targetOutput;
+      std::string name_of_def_file
+        = target.GetSupportDirectory();
+      name_of_def_file += "/" + target.GetName();
+      name_of_def_file += ".def";
+      std::string cmd = cmakeCommand;
+      cmd += " -E __create_def ";
+      cmd += this->GetLocalGenerator()
+        ->ConvertToOutputFormat(name_of_def_file.c_str(),
+                                cmLocalGenerator::SHELL);
+      cmd += " ";
+      cmNinjaDeps objs = this->GetObjects();
+      std::string obj_list_file = name_of_def_file;
+      obj_list_file += ".objs";
+      cmd += this->GetLocalGenerator()
+        ->ConvertToOutputFormat(obj_list_file.c_str(),
+                                cmLocalGenerator::SHELL);
+      preLinkCmdLines.push_back(cmd);
+      // create a list of obj files for the -E __create_def to read
+      std::ofstream fout(obj_list_file.c_str());
+      for(cmNinjaDeps::iterator i=objs.begin(); i != objs.end(); ++i)
+        {
+        fout << *i << "\n";
+        }
+      }
+    }
   // If we have any PRE_LINK commands, we need to go back to HOME_OUTPUT for
   // the link commands.
   if (!preLinkCmdLines.empty())
