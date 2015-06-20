@@ -632,7 +632,7 @@ may be enabled, with an equivalent effect to:
 
 .. code-block:: cmake
 
-  set_property(TARGET tgt APPEND PROPERTY
+  set_property(TARGET tgt APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}>
   )
 
