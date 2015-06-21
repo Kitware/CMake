@@ -40,9 +40,6 @@ public:
                    cmState::Snapshot snapshot);
   virtual ~cmLocalGenerator();
 
-  /// @return whether we are processing the top CMakeLists.txt file.
-  bool IsRootMakefile() const;
-
   /**
    * Generate the makefile for this directory.
    */
@@ -186,7 +183,7 @@ public:
                              cmGeneratorTarget* target,
                              const std::string& lang = "C",
                              const std::string& config = "",
-                             bool stripImplicitInclDirs = true);
+                             bool stripImplicitInclDirs = true) const;
   void AddCompileOptions(std::string& flags, cmTarget* target,
                          const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,

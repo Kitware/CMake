@@ -105,7 +105,7 @@ public:
     ++it;
     if(it == this->VarStack.rend())
       {
-      cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent();
+      cmLocalGenerator* plg = mf->LocalGenerator->GetParent();
       if(!plg)
         {
         return false;
@@ -1618,6 +1618,11 @@ void cmMakefile::PopMacroScope(bool reportError)
   this->PopPolicy();
 
   this->PopFunctionBlockerBarrier(reportError);
+}
+
+bool cmMakefile::IsRootMakefile() const
+{
+  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
 //----------------------------------------------------------------------------

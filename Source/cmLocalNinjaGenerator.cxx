@@ -58,7 +58,7 @@ void cmLocalNinjaGenerator::Generate()
 #endif
 
   // We do that only once for the top CMakeLists.txt file.
-  if(this->IsRootMakefile())
+  if(this->Makefile->IsRootMakefile())
     {
     this->WriteBuildFileTop();
 
@@ -298,7 +298,7 @@ void cmLocalNinjaGenerator::WriteProcessedMakefile(std::ostream& os)
     << "# Write statements declared in CMakeLists.txt:" << std::endl
     << "# "
     << this->Makefile->GetDefinition("CMAKE_CURRENT_LIST_FILE") << std::endl;
-  if(this->IsRootMakefile())
+  if(this->Makefile->IsRootMakefile())
     os << "# Which is the root file." << std::endl;
   cmGlobalNinjaGenerator::WriteDivider(os);
   os << std::endl;
