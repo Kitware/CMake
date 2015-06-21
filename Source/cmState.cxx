@@ -219,13 +219,13 @@ void cmState::RemoveCacheEntryProperty(std::string const& key,
        ->GetCacheIterator(key.c_str()).SetProperty(propertyName, (void*)0);
 }
 
-void cmState::Reset()
+cmState::Snapshot cmState::Reset()
 {
   this->GlobalProperties.clear();
   this->PropertyDefinitions.clear();
 
   this->BuildsystemDirectory.Truncate();
-  this->SnapshotData.Truncate();
+  PositionType pos = this->SnapshotData.Truncate();
 
   this->DefineProperty
     ("RULE_LAUNCH_COMPILE", cmProperty::DIRECTORY,
@@ -246,6 +246,8 @@ void cmState::Reset()
   this->DefineProperty
     ("RULE_LAUNCH_CUSTOM", cmProperty::TARGET,
      "", "", true);
+
+  return Snapshot(this, pos);
 }
 
 void cmState::DefineProperty(const std::string& name,
@@ -741,14 +743,14 @@ void cmState::Snapshot::SetCurrentBinaryDirectory(std::string const& dir)
 }
 
 std::vector<std::string> const&
-cmState::Snapshot::GetCurrentSourceDirectoryComponents()
+cmState::Snapshot::GetCurrentSourceDirectoryComponents() const
 {
   return this->Position->BuildSystemDirectory
       ->CurrentSourceDirectoryComponents;
 }
 
 std::vector<std::string> const&
-cmState::Snapshot::GetCurrentBinaryDirectoryComponents()
+cmState::Snapshot::GetCurrentBinaryDirectoryComponents() const
 {
   return this->Position->BuildSystemDirectory
       ->CurrentBinaryDirectoryComponents;

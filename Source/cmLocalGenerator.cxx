@@ -73,6 +73,22 @@ bool cmLocalGenerator::IsRootMakefile() const
   return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
+void cmLocalGenerator::IssueMessage(cmake::MessageType t,
+                                    std::string const& text) const
+{
+  cmListFileContext lfc;
+  lfc.FilePath = this->StateSnapshot.GetCurrentSourceDirectory();
+  lfc.FilePath += "/CMakeLists.txt";
+
+  if(!this->GlobalGenerator->GetCMakeInstance()->GetIsInTryCompile())
+    {
+    cmOutputConverter converter(this->StateSnapshot);
+    lfc.FilePath = converter.Convert(lfc.FilePath, cmLocalGenerator::HOME);
+    }
+  lfc.Line = 0;
+  this->GlobalGenerator->GetCMakeInstance()->IssueMessage(t, text, lfc);
+}
+
 //----------------------------------------------------------------------------
 void cmLocalGenerator::ComputeObjectMaxPath()
 {
@@ -98,7 +114,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
         w << "CMAKE_OBJECT_PATH_MAX is set to " << pmax
           << ", which is less than the minimum of 128.  "
           << "The value will be ignored.";
-        this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+        this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
         }
       }
     else
@@ -107,7 +123,7 @@ void cmLocalGenerator::ComputeObjectMaxPath()
       w << "CMAKE_OBJECT_PATH_MAX is set to \"" << plen
         << "\", which fails to parse as a positive integer.  "
         << "The value will be ignored.";
-      this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, w.str());
+      this->IssueMessage(cmake::AUTHOR_WARNING, w.str());
       }
     }
   this->ObjectMaxPathViolations.clear();
@@ -1317,7 +1333,7 @@ void cmLocalGenerator::AddCompileOptions(
         "higher \"" << it->first << "_STANDARD\" \"" << standard << "\".  "
         "This is not permitted. The COMPILE_FEATURES may not both depend on "
         "and be depended on by the link implementation." << std::endl;
-      this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
       return;
       }
     }
@@ -2041,7 +2057,7 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget const* target,
            "dialect \"" << lang << standardProp << "\" "
         << (ext ? "(with compiler extensions)" : "") << ", but CMake "
            "does not know the compile flags to use to enable it.";
-      this->GetMakefile()->IssueMessage(cmake::FATAL_ERROR, e.str());
+      this->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
     else
       {
@@ -2085,7 +2101,7 @@ AddCompilerRequirementFlag(std::string &flags, cmTarget const* target,
     std::string e =
       "CMAKE_" + lang + "_STANDARD_DEFAULT is set to invalid value '" +
       std::string(defaultStd) + "'";
-    this->Makefile->IssueMessage(cmake::INTERNAL_ERROR, e);
+    this->IssueMessage(cmake::INTERNAL_ERROR, e);
     return;
     }
 
@@ -2301,7 +2317,7 @@ bool cmLocalGenerator::GetShouldUseOldFlags(bool shared,
             << flagsVar << " was removed.\n"
             << cmPolicies::GetPolicyWarning(cmPolicies::CMP0018);
 
-          this->Makefile->IssueMessage(cmake::AUTHOR_WARNING, e.str());
+          this->IssueMessage(cmake::AUTHOR_WARNING, e.str());
           // fall through to OLD behaviour
         }
         case cmPolicies::OLD:
@@ -2813,7 +2829,7 @@ cmLocalGenerator
           << "  " << ssin << "\n"
           << "cannot be safely placed under this directory.  "
           << "The build may not work correctly.";
-        this->Makefile->IssueMessage(cmake::WARNING, m.str());
+        this->IssueMessage(cmake::WARNING, m.str());
         }
       }
 #else

@@ -27,7 +27,7 @@ cmOutputConverter::cmOutputConverter(cmState::Snapshot snapshot)
 std::string
 cmOutputConverter::ConvertToOutputForExistingCommon(const std::string& remote,
                                                     std::string const& result,
-                                                    OutputFormat format)
+                                                    OutputFormat format) const
 {
   // If this is a windows shell, the result has a space, and the path
   // already exists, we can use a short-path to reference it without a
@@ -50,7 +50,7 @@ cmOutputConverter::ConvertToOutputForExistingCommon(const std::string& remote,
 std::string
 cmOutputConverter::ConvertToOutputForExisting(const std::string& remote,
                                               RelativeRoot local,
-                                              OutputFormat format)
+                                              OutputFormat format) const
 {
   static_cast<void>(local);
 
@@ -65,7 +65,7 @@ cmOutputConverter::ConvertToOutputForExisting(const std::string& remote,
 std::string
 cmOutputConverter::ConvertToOutputForExisting(RelativeRoot remote,
                                               const std::string& local,
-                                              OutputFormat format)
+                                              OutputFormat format) const
 {
   // Perform standard conversion.
   std::string result = this->Convert(remote, local, format, true);
@@ -76,7 +76,7 @@ cmOutputConverter::ConvertToOutputForExisting(RelativeRoot remote,
 }
 
 //----------------------------------------------------------------------------
-const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot)
+const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot) const
 {
   switch (relroot)
     {
@@ -91,7 +91,7 @@ const char* cmOutputConverter::GetRelativeRootPath(RelativeRoot relroot)
 
 std::string cmOutputConverter::Convert(const std::string& source,
                                        RelativeRoot relative,
-                                       OutputFormat output)
+                                       OutputFormat output) const
 {
   // Convert the path to a relative path.
   std::string result = source;
@@ -125,7 +125,7 @@ std::string cmOutputConverter::Convert(const std::string& source,
 
 //----------------------------------------------------------------------------
 std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
-                                                     OutputFormat output)
+                                                     OutputFormat output) const
 {
   std::string result = source;
   // Convert it to an output path.
@@ -163,7 +163,7 @@ std::string cmOutputConverter::ConvertToOutputFormat(const std::string& source,
 std::string cmOutputConverter::Convert(RelativeRoot remote,
                                       const std::string& local,
                                       OutputFormat output,
-                                      bool optional)
+                                      bool optional) const
 {
   const char* remotePath = this->GetRelativeRootPath(remote);
 
@@ -192,7 +192,7 @@ static bool cmOutputConverterNotAbove(const char* a, const char* b)
 std::string
 cmOutputConverter::ConvertToRelativePath(const std::vector<std::string>& local,
                                         const std::string& in_remote,
-                                        bool force)
+                                        bool force) const
 {
   // The path should never be quoted.
   assert(in_remote[0] != '\"');
@@ -318,7 +318,7 @@ static bool cmOutputConverterIsShellOperator(const std::string& str)
 std::string cmOutputConverter::EscapeForShell(const std::string& str,
                                              bool makeVars,
                                              bool forEcho,
-                                             bool useWatcomQuote)
+                                             bool useWatcomQuote) const
 {
   // Do not escape shell operators.
   if(cmOutputConverterIsShellOperator(str))

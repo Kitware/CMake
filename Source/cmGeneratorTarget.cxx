@@ -705,7 +705,8 @@ cmTargetTraceDependencies
           e << "Evaluation output file\n  \"" << sf->GetFullPath()
             << "\"\ndepends on the sources of a target it is used in.  This "
               "is a dependency loop and is not allowed.";
-          this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
+          this->GeneratorTarget
+              ->LocalGenerator->IssueMessage(cmake::FATAL_ERROR, e.str());
           return;
           }
         if(emitted.insert(sf).second && this->SourcesQueued.insert(sf).second)
