@@ -601,7 +601,7 @@ bool cmMakefile::ReadListFile(const char* listfile,
   return res;
 }
 
-bool cmMakefile::ReadListFileInternal(cmListFile const& cacheFile,
+void cmMakefile::ReadListFileInternal(cmListFile const& cacheFile,
                                       const char* filenametoread,
                                       bool noPolicyScope)
 {
@@ -633,8 +633,6 @@ bool cmMakefile::ReadListFileInternal(cmListFile const& cacheFile,
       }
     }
   }
-
-  return true;
 }
 
 //----------------------------------------------------------------------------
