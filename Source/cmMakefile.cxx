@@ -463,11 +463,19 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   this->Makefile->PushPolicyBarrier();
   this->Makefile->ListFileStack.push_back(filenametoread);
   this->Makefile->PushFunctionBlockerBarrier();
+
+  this->Makefile->StateSnapshot =
+        this->Makefile->GetState()->CreateCallStackSnapshot(
+            this->Makefile->StateSnapshot);
 }
 
 //----------------------------------------------------------------------------
 cmMakefile::IncludeScope::~IncludeScope()
 {
+  this->Makefile->StateSnapshot =
+      this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
+  assert(this->Makefile->StateSnapshot.IsValid());
+
   this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
   // Enforce matching policy scopes inside the included file.
   this->Makefile->PopPolicyBarrier(this->ReportError);
@@ -567,11 +575,20 @@ public:
   {
     this->Makefile->ListFileStack.push_back(filenametoread);
     this->Makefile->PushPolicyBarrier();
+
+    this->Makefile->StateSnapshot =
+        this->Makefile->GetState()->CreateInlineListFileSnapshot(
+          this->Makefile->StateSnapshot);
+    assert(this->Makefile->StateSnapshot.IsValid());
     this->Makefile->PushFunctionBlockerBarrier();
   }
 
   ~ListFileScope()
   {
+    this->Makefile->StateSnapshot =
+        this->Makefile->GetState()->Pop(this->Makefile->StateSnapshot);
+    assert(this->Makefile->StateSnapshot.IsValid());
+
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
     this->Makefile->ListFileStack.pop_back();
@@ -1575,6 +1592,11 @@ void cmMakefile::InitializeFromParent(cmMakefile* parent)
 
 void cmMakefile::PushFunctionScope(const cmPolicies::PolicyMap& pm)
 {
+  this->StateSnapshot =
+      this->GetState()->CreateFunctionCallSnapshot(
+        this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
+
   this->Internal->PushDefinitions();
 
   this->PushLoopBlockBarrier();
@@ -1594,6 +1616,9 @@ void cmMakefile::PopFunctionScope(bool reportError)
   this->PopPolicyBarrier(reportError);
   this->PopPolicy();
 
+  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
+
   this->PopFunctionBlockerBarrier(reportError);
 
 #if defined(CMAKE_BUILD_WITH_CMAKE)
@@ -1609,6 +1634,11 @@ void cmMakefile::PopFunctionScope(bool reportError)
 
 void cmMakefile::PushMacroScope(const cmPolicies::PolicyMap& pm)
 {
+  this->StateSnapshot =
+      this->GetState()->CreateMacroCallSnapshot(
+        this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
+
   this->PushFunctionBlockerBarrier();
 
   this->PushPolicy(true, pm);
@@ -1619,6 +1649,9 @@ void cmMakefile::PopMacroScope(bool reportError)
 {
   this->PopPolicyBarrier(reportError);
   this->PopPolicy();
+
+  this->StateSnapshot = this->GetState()->Pop(this->StateSnapshot);
+  assert(this->StateSnapshot.IsValid());
 
   this->PopFunctionBlockerBarrier(reportError);
 }

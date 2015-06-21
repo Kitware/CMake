@@ -31,7 +31,11 @@ public:
 
   enum SnapshotType
   {
-    BuildsystemDirectoryType
+    BuildsystemDirectoryType,
+    FunctionCallType,
+    MacroCallType,
+    CallStackType,
+    InlineListFileType
   };
 
   class Snapshot {
@@ -69,7 +73,13 @@ public:
   };
 
   Snapshot CreateBaseSnapshot();
-  Snapshot CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot);
+  Snapshot
+  CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot);
+  Snapshot CreateFunctionCallSnapshot(Snapshot originSnapshot);
+  Snapshot CreateMacroCallSnapshot(Snapshot originSnapshot);
+  Snapshot CreateCallStackSnapshot(Snapshot originSnapshot);
+  Snapshot CreateInlineListFileSnapshot(Snapshot originSnapshot);
+  Snapshot Pop(Snapshot originSnapshot);
 
   enum CacheEntryType{ BOOL=0, PATH, FILEPATH, STRING, INTERNAL,STATIC,
                        UNINITIALIZED };

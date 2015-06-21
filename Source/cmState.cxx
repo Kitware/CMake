@@ -20,6 +20,7 @@
 
 struct cmState::SnapshotDataType
 {
+  cmState::PositionType CallStackParent;
   cmState::PositionType DirectoryParent;
   cmState::SnapshotType SnapshotType;
   cmLinkedTree<cmState::BuildsystemDirectoryStateType>::iterator
@@ -690,12 +691,66 @@ cmState::CreateBuildsystemDirectorySnapshot(Snapshot originSnapshot)
 {
   assert(originSnapshot.IsValid());
   PositionType pos = this->SnapshotData.Extend(originSnapshot.Position);
+  pos->CallStackParent = originSnapshot.Position;
   pos->DirectoryParent = originSnapshot.Position;
   pos->SnapshotType = BuildsystemDirectoryType;
   pos->BuildSystemDirectory =
       this->BuildsystemDirectory.Extend(
         originSnapshot.Position->BuildSystemDirectory);
   return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot
+cmState::CreateFunctionCallSnapshot(cmState::Snapshot originSnapshot)
+{
+  PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
+                                               *originSnapshot.Position);
+  pos->CallStackParent = originSnapshot.Position;
+  pos->SnapshotType = FunctionCallType;
+  return cmState::Snapshot(this, pos);
+}
+
+
+cmState::Snapshot
+cmState::CreateMacroCallSnapshot(cmState::Snapshot originSnapshot)
+{
+  PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
+                                               *originSnapshot.Position);
+  pos->CallStackParent = originSnapshot.Position;
+  pos->SnapshotType = MacroCallType;
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot
+cmState::CreateCallStackSnapshot(cmState::Snapshot originSnapshot)
+{
+  PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
+                                               *originSnapshot.Position);
+  pos->CallStackParent = originSnapshot.Position;
+  pos->SnapshotType = CallStackType;
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot
+cmState::CreateInlineListFileSnapshot(cmState::Snapshot originSnapshot)
+{
+  PositionType pos = this->SnapshotData.Extend(originSnapshot.Position,
+                                               *originSnapshot.Position);
+  pos->CallStackParent = originSnapshot.Position;
+  pos->SnapshotType = InlineListFileType;
+  return cmState::Snapshot(this, pos);
+}
+
+cmState::Snapshot cmState::Pop(cmState::Snapshot originSnapshot)
+{
+  PositionType pos = originSnapshot.Position;
+  PositionType prevPos = pos;
+  ++prevPos;
+  if (prevPos == this->SnapshotData.Root())
+    {
+    return Snapshot(this, prevPos);
+    }
+  return Snapshot(this, originSnapshot.Position->CallStackParent);
 }
 
 cmState::Snapshot::Snapshot(cmState* state, PositionType position)
