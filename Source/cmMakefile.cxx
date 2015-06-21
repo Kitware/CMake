@@ -409,12 +409,12 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 class cmMakefile::IncludeScope
 {
 public:
-  IncludeScope(cmMakefile* mf, const char* fname, bool noPolicyScope);
+  IncludeScope(cmMakefile* mf, std::string const& filenametoread,
+               bool noPolicyScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
 private:
   cmMakefile* Makefile;
-  const char* File;
   bool NoPolicyScope;
   bool CheckCMP0011;
   bool ReportError;
@@ -422,9 +422,10 @@ private:
 };
 
 //----------------------------------------------------------------------------
-cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf, const char* fname,
+cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
+                                       std::string const& filenametoread,
                                        bool noPolicyScope):
-  Makefile(mf), File(fname), NoPolicyScope(noPolicyScope),
+  Makefile(mf), NoPolicyScope(noPolicyScope),
   CheckCMP0011(false), ReportError(true)
 {
   if(!this->NoPolicyScope)
@@ -458,6 +459,7 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf, const char* fname,
 
   // The included file cannot pop our policy scope.
   this->Makefile->PushPolicyBarrier();
+  this->Makefile->ListFileStack.push_back(filenametoread);
 }
 
 //----------------------------------------------------------------------------
@@ -487,6 +489,7 @@ cmMakefile::IncludeScope::~IncludeScope()
       this->EnforceCMP0011();
       }
     }
+  this->Makefile->ListFileStack.pop_back();
 }
 
 //----------------------------------------------------------------------------
@@ -501,7 +504,8 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       {
       std::ostringstream w;
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
-        << "The included script\n  " << this->File << "\n"
+        << "The included script\n  "
+        << this->Makefile->ListFileStack.back() << "\n"
         << "affects policy settings.  "
         << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
         << "so the effects are applied to the including context.";
@@ -513,7 +517,8 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       {
       std::ostringstream e;
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
-        << "The included script\n  " << this->File << "\n"
+        << "The included script\n  "
+        << this->Makefile->ListFileStack.back() << "\n"
         << "affects policy settings, so it requires this policy to be set.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
@@ -527,39 +532,76 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
-bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
+bool cmMakefile::ProcessBuildsystemFile(const char* filename)
 {
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
   std::string curSrc = this->GetCurrentSourceDirectory();
-  bool result = this->ReadListFile(listfile, true,
-                                   curSrc == this->GetHomeDirectory());
+
+  this->ListFileStack.push_back(filename);
+
+  cmListFile listFile;
+  if (!listFile.ParseFile(filename, curSrc == this->GetHomeDirectory(), this))
+    {
+    return false;
+    }
+
+  this->PushPolicyBarrier();
+  this->ReadListFile(listFile, filename);
+  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
   this->EnforceDirectoryLevelRules();
-  return result;
+  return true;
 }
 
-bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
+bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
                       this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
-  bool result = this->ReadListFile(listfile, noPolicyScope, false);
-  this->ListFileStack.pop_back();
-  return result;
+  std::string filenametoread =
+    cmSystemTools::CollapseFullPath(filename,
+                                    this->GetCurrentSourceDirectory());
+
+  IncludeScope incScope(this, filenametoread, noPolicyScope);
+
+  cmListFile listFile;
+  if (!listFile.ParseFile(filenametoread.c_str(), false, this))
+    {
+    incScope.Quiet();
+    return false;
+    }
+  this->ReadListFile(listFile, filenametoread);
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    incScope.Quiet();
+    }
+  return true;
 }
 
-bool cmMakefile::ReadListFile(const char* listfile)
-{
-  bool result = this->ReadListFile(listfile, true, false);
-  this->ListFileStack.pop_back();
-  return result;
-}
-
-bool cmMakefile::ReadListFile(const char* listfile,
-                              bool noPolicyScope,
-                              bool requireProjectCommand)
+bool cmMakefile::ReadListFile(const char* filename)
 {
   std::string filenametoread =
-    cmSystemTools::CollapseFullPath(listfile,
+    cmSystemTools::CollapseFullPath(filename,
                                     this->GetCurrentSourceDirectory());
+
+  this->ListFileStack.push_back(filenametoread);
+
+  cmListFile listFile;
+  if (!listFile.ParseFile(filenametoread.c_str(), false, this))
+    {
+    return false;
+    }
+
+  this->PushPolicyBarrier();
+  this->ReadListFile(listFile, filenametoread);
+  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
+  this->ListFileStack.pop_back();
+  return true;
+}
+
+void cmMakefile::ReadListFile(cmListFile const& listFile,
+                              std::string const& filenametoread)
+{
+  // add this list file to the list of dependencies
+  this->ListFiles.push_back(filenametoread);
 
   std::string currentParentFile
       = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
@@ -574,55 +616,19 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  this->ListFileStack.push_back(filenametoread);
-
-  bool res = this->ReadListFileInternal(filenametoread.c_str(),
-                                        noPolicyScope, requireProjectCommand);
-
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
-  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                      cmSystemTools::GetFilenamePath(currentFile).c_str());
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  if (res)
-    {
-    this->CheckForUnusedVariables();
-    }
-
-  return res;
-}
-
-bool cmMakefile::ReadListFileInternal(const char* filenametoread,
-                                      bool noPolicyScope,
-                                      bool requireProjectCommand)
-{
-  cmListFile cacheFile;
-  if( !cacheFile.ParseFile(filenametoread, requireProjectCommand, this) )
-    {
-    return false;
-    }
-  // add this list file to the list of dependencies
-  this->ListFiles.push_back( filenametoread);
-
   // Enforce balanced blocks (if/endif, function/endfunction, etc.).
-  {
   LexicalPushPop lexScope(this);
-  IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   // Run the parsed commands.
-  const size_t numberFunctions = cacheFile.Functions.size();
+  const size_t numberFunctions = listFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
     cmExecutionStatus status;
-    this->ExecuteCommand(cacheFile.Functions[i],status);
+    this->ExecuteCommand(listFile.Functions[i],status);
     if(cmSystemTools::GetFatalErrorOccured())
       {
       // Exit early due to error.
       lexScope.Quiet();
-      incScope.Quiet();
       break;
       }
     if(status.GetReturnInvoked())
@@ -631,9 +637,15 @@ bool cmMakefile::ReadListFileInternal(const char* filenametoread,
       break;
       }
     }
-  }
+  this->CheckForUnusedVariables();
 
-  return true;
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                      cmSystemTools::GetFilenamePath(currentFile).c_str());
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 }
 
 //----------------------------------------------------------------------------

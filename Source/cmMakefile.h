@@ -79,11 +79,11 @@ public:
    */
   ~cmMakefile();
 
-  bool ReadListFile(const char* listfile);
+  bool ReadListFile(const char* filename);
 
-  bool ReadDependentFile(const char* listfile, bool noPolicyScope = true);
+  bool ReadDependentFile(const char* filename, bool noPolicyScope = true);
 
-  bool ProcessBuildsystemFile(const char* listfile);
+  bool ProcessBuildsystemFile(const char* filename);
 
   /**
    * Add a function blocker to this makefile
@@ -914,13 +914,8 @@ private:
 
   cmState::Snapshot StateSnapshot;
 
-  bool ReadListFile(const char* listfile,
-                    bool noPolicyScope,
-                    bool requireProjectCommand);
-
-  bool ReadListFileInternal(const char* filenametoread,
-                            bool noPolicyScope,
-                            bool requireProjectCommand);
+  void ReadListFile(cmListFile const& listFile,
+                    const std::string& filenametoread);
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
