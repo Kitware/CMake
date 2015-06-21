@@ -586,6 +586,8 @@ bool cmMakefile::ReadListFile(const char* listfile,
 
     this->ReadListFileInternal(listFile, filenametoread.c_str(),
                                noPolicyScope);
+
+    this->CheckForUnusedVariables();
     }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
@@ -595,11 +597,6 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  if (res)
-    {
-    this->CheckForUnusedVariables();
-    }
 
   return res;
 }
