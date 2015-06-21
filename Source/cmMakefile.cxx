@@ -529,24 +529,24 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
-bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
+bool cmMakefile::ProcessBuildsystemFile(const char* filename)
 {
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
   std::string curSrc = this->GetCurrentSourceDirectory();
   this->PushPolicyBarrier();
-  bool result = this->ReadListFile(listfile,
+  bool result = this->ReadListFile(filename,
                                    curSrc == this->GetHomeDirectory());
   this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
   this->EnforceDirectoryLevelRules();
   return result;
 }
 
-bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
+bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
                       this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
   IncludeScope incScope(this, noPolicyScope);
-  bool result = this->ReadListFile(listfile, false);
+  bool result = this->ReadListFile(filename, false);
   if(cmSystemTools::GetFatalErrorOccured())
     {
     incScope.Quiet();
@@ -554,20 +554,20 @@ bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
   return result;
 }
 
-bool cmMakefile::ReadListFile(const char* listfile)
+bool cmMakefile::ReadListFile(const char* filename)
 {
   this->PushPolicyBarrier();
-  bool result = this->ReadListFile(listfile, false);
+  bool result = this->ReadListFile(filename, false);
   this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
   this->ListFileStack.pop_back();
   return result;
 }
 
-bool cmMakefile::ReadListFile(const char* listfile,
+bool cmMakefile::ReadListFile(const char* filename,
                               bool requireProjectCommand)
 {
   std::string filenametoread =
-    cmSystemTools::CollapseFullPath(listfile,
+    cmSystemTools::CollapseFullPath(filename,
                                     this->GetCurrentSourceDirectory());
 
   this->ListFileStack.push_back(filenametoread);
