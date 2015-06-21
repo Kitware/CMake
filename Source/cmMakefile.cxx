@@ -533,39 +533,6 @@ bool cmMakefile::ProcessBuildsystemFile(const char* filename)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
   std::string curSrc = this->GetCurrentSourceDirectory();
-  this->PushPolicyBarrier();
-  bool result = this->ReadListFile(filename,
-                                   curSrc == this->GetHomeDirectory());
-  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
-  this->EnforceDirectoryLevelRules();
-  return result;
-}
-
-bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
-{
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE",
-                      this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
-  IncludeScope incScope(this, noPolicyScope);
-  bool result = this->ReadListFile(filename, false);
-  if(cmSystemTools::GetFatalErrorOccured())
-    {
-    incScope.Quiet();
-    }
-  return result;
-}
-
-bool cmMakefile::ReadListFile(const char* filename)
-{
-  this->PushPolicyBarrier();
-  bool result = this->ReadListFile(filename, false);
-  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
-  this->ListFileStack.pop_back();
-  return result;
-}
-
-bool cmMakefile::ReadListFile(const char* filename,
-                              bool requireProjectCommand)
-{
   std::string filenametoread =
     cmSystemTools::CollapseFullPath(filename,
                                     this->GetCurrentSourceDirectory());
@@ -574,11 +541,66 @@ bool cmMakefile::ReadListFile(const char* filename,
 
   cmListFile listFile;
   if (!listFile.ParseFile(filenametoread.c_str(),
-                          requireProjectCommand, this))
+                          curSrc == this->GetHomeDirectory(), this))
     {
     return false;
     }
 
+  this->PushPolicyBarrier();
+  this->ReadListFile(listFile, filenametoread);
+  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
+  this->EnforceDirectoryLevelRules();
+  return true;
+}
+
+bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
+{
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE",
+                      this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
+  std::string filenametoread =
+    cmSystemTools::CollapseFullPath(filename,
+                                    this->GetCurrentSourceDirectory());
+
+  this->ListFileStack.push_back(filenametoread);
+
+  cmListFile listFile;
+  if (!listFile.ParseFile(filenametoread.c_str(), false, this))
+    {
+    return false;
+    }
+  IncludeScope incScope(this, noPolicyScope);
+  this->ReadListFile(listFile, filenametoread);
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    incScope.Quiet();
+    }
+  return true;
+}
+
+bool cmMakefile::ReadListFile(const char* filename)
+{
+  std::string filenametoread =
+    cmSystemTools::CollapseFullPath(filename,
+                                    this->GetCurrentSourceDirectory());
+
+  this->ListFileStack.push_back(filenametoread);
+
+  cmListFile listFile;
+  if (!listFile.ParseFile(filenametoread.c_str(), false, this))
+    {
+    return false;
+    }
+
+  this->PushPolicyBarrier();
+  this->ReadListFile(listFile, filenametoread);
+  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
+  this->ListFileStack.pop_back();
+  return true;
+}
+
+void cmMakefile::ReadListFile(cmListFile const& listFile,
+                              std::string const& filenametoread)
+{
   // add this list file to the list of dependencies
   this->ListFiles.push_back(filenametoread);
 
@@ -625,8 +647,6 @@ bool cmMakefile::ReadListFile(const char* filename,
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  return true;
 }
 
 //----------------------------------------------------------------------------

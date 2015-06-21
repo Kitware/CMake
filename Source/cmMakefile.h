@@ -914,8 +914,8 @@ private:
 
   cmState::Snapshot StateSnapshot;
 
-  bool ReadListFile(const char* filename,
-                    bool requireProjectCommand);
+  void ReadListFile(cmListFile const& listFile,
+                    const std::string& filenametoread);
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
