@@ -405,6 +405,26 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   return result;
 }
 
+bool cmMakefile::ProcessBuildsystemFile(const char* filename)
+{
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
+  std::string curSrc = this->GetCurrentSourceDirectory();
+
+  this->ListFileStack.push_back(filename);
+
+  cmListFile listFile;
+  if (!listFile.ParseFile(filename, curSrc == this->GetHomeDirectory(), this))
+    {
+    return false;
+    }
+
+  this->PushPolicyBarrier();
+  this->ReadListFile(listFile, filename);
+  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
+  this->EnforceDirectoryLevelRules();
+  return true;
+}
+
 //----------------------------------------------------------------------------
 class cmMakefile::IncludeScope
 {
@@ -530,26 +550,6 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       // the policy is now set for later scripts, we do not warn.
       break;
     }
-}
-
-bool cmMakefile::ProcessBuildsystemFile(const char* filename)
-{
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
-  std::string curSrc = this->GetCurrentSourceDirectory();
-
-  this->ListFileStack.push_back(filename);
-
-  cmListFile listFile;
-  if (!listFile.ParseFile(filename, curSrc == this->GetHomeDirectory(), this))
-    {
-    return false;
-    }
-
-  this->PushPolicyBarrier();
-  this->ReadListFile(listFile, filename);
-  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
-  this->EnforceDirectoryLevelRules();
-  return true;
 }
 
 bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
