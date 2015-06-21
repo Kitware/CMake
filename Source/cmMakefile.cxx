@@ -536,21 +536,17 @@ bool cmMakefile::ProcessBuildsystemFile(const char* filename)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
   std::string curSrc = this->GetCurrentSourceDirectory();
-  std::string filenametoread =
-    cmSystemTools::CollapseFullPath(filename,
-                                    this->GetCurrentSourceDirectory());
 
-  this->ListFileStack.push_back(filenametoread);
+  this->ListFileStack.push_back(filename);
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filenametoread.c_str(),
-                          curSrc == this->GetHomeDirectory(), this))
+  if (!listFile.ParseFile(filename, curSrc == this->GetHomeDirectory(), this))
     {
     return false;
     }
 
   this->PushPolicyBarrier();
-  this->ReadListFile(listFile, filenametoread);
+  this->ReadListFile(listFile, filename);
   this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
   this->EnforceDirectoryLevelRules();
   return true;
