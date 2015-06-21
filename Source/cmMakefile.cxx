@@ -408,9 +408,10 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 class cmMakefile::BuildsystemFileScope
 {
 public:
-  BuildsystemFileScope(cmMakefile* mf)
+  BuildsystemFileScope(cmMakefile* mf, std::string const& filename)
     : Makefile(mf), ReportError(true)
   {
+    this->Makefile->ListFileStack.push_back(filename);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
   }
@@ -432,14 +433,13 @@ bool cmMakefile::ProcessBuildsystemFile(const char* filename)
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
   std::string curSrc = this->GetCurrentSourceDirectory();
 
-  this->ListFileStack.push_back(filename);
+  BuildsystemFileScope scope(this, filename);
 
   cmListFile listFile;
   if (!listFile.ParseFile(filename, curSrc == this->GetHomeDirectory(), this))
     {
     return false;
     }
-  BuildsystemFileScope scope(this);
   this->ReadListFile(listFile, filename);
   if(cmSystemTools::GetFatalErrorOccured())
     {
@@ -604,9 +604,10 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
 class cmMakefile::ListFileScope
 {
 public:
-  ListFileScope(cmMakefile* mf)
+  ListFileScope(cmMakefile* mf, std::string const& filenametoread)
     : Makefile(mf), ReportError(true)
   {
+    this->Makefile->ListFileStack.push_back(filenametoread);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
   }
@@ -630,7 +631,7 @@ bool cmMakefile::ReadListFile(const char* filename)
     cmSystemTools::CollapseFullPath(filename,
                                     this->GetCurrentSourceDirectory());
 
-  this->ListFileStack.push_back(filenametoread);
+  ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
@@ -638,7 +639,6 @@ bool cmMakefile::ReadListFile(const char* filename)
     return false;
     }
 
-  ListFileScope scope(this);
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
     {
