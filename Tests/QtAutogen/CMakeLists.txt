@@ -34,8 +34,8 @@ else()
   include_directories(${Qt5Widgets_INCLUDE_DIRS})
   set(QT_LIBRARIES Qt5::Widgets)
 
-  if(Qt5_POSITION_INDEPENDENT_CODE)
-    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+  if(Qt5_POSITION_INDEPENDENT_CODE AND CMAKE_CXX_COMPILE_OPTIONS_PIC)
+    add_definitions(${CMAKE_CXX_COMPILE_OPTIONS_PIC})
   endif()
 
   macro(qtx_wrap_cpp)
