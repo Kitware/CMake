@@ -605,8 +605,8 @@ void cmMakefile::ReadListFileInternal(cmListFile const& listFile,
                                       bool noPolicyScope)
 {
   // Enforce balanced blocks (if/endif, function/endfunction, etc.).
-  LexicalPushPop lexScope(this);
   IncludeScope incScope(this, filenametoread, noPolicyScope);
+  LexicalPushPop lexScope(this);
 
   // Run the parsed commands.
   const size_t numberFunctions = listFile.Functions.size();
