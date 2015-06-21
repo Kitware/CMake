@@ -561,14 +561,15 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
     cmSystemTools::CollapseFullPath(filename,
                                     this->GetCurrentSourceDirectory());
 
+  IncludeScope incScope(this, noPolicyScope);
   this->ListFileStack.push_back(filenametoread);
 
   cmListFile listFile;
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
+    incScope.Quiet();
     return false;
     }
-  IncludeScope incScope(this, noPolicyScope);
   this->ReadListFile(listFile, filenametoread);
   if(cmSystemTools::GetFatalErrorOccured())
     {
