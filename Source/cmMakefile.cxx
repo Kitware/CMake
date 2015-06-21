@@ -595,22 +595,6 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  this->ReadListFileInternal(listFile);
-  this->CheckForUnusedVariables();
-
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
-  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
-  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
-                      cmSystemTools::GetFilenamePath(currentFile).c_str());
-  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
-  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  return true;
-}
-
-void cmMakefile::ReadListFileInternal(cmListFile const& listFile)
-{
   // Enforce balanced blocks (if/endif, function/endfunction, etc.).
   LexicalPushPop lexScope(this);
 
@@ -632,6 +616,17 @@ void cmMakefile::ReadListFileInternal(cmListFile const& listFile)
       break;
       }
     }
+  this->CheckForUnusedVariables();
+
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
+  this->AddDefinition("CMAKE_CURRENT_LIST_DIR",
+                      cmSystemTools::GetFilenamePath(currentFile).c_str());
+  this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
+  this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
+
+  return true;
 }
 
 //----------------------------------------------------------------------------

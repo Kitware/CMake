@@ -917,8 +917,6 @@ private:
   bool ReadListFile(const char* listfile,
                     bool requireProjectCommand);
 
-  void ReadListFileInternal(cmListFile const& listFile);
-
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
   bool EnforceUniqueDir(const std::string& srcPath,
