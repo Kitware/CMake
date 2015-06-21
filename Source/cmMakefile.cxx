@@ -645,6 +645,8 @@ bool cmMakefile::ReadListFile(const char* filename)
 void cmMakefile::ReadListFile(cmListFile const& listFile,
                               std::string const& filenametoread)
 {
+  LexicalPushPop lexScope(this);
+
   // add this list file to the list of dependencies
   this->ListFiles.push_back(filenametoread);
 
@@ -660,9 +662,6 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
   this->MarkVariableAsUsed("CMAKE_PARENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
-
-  // Enforce balanced blocks (if/endif, function/endfunction, etc.).
-  LexicalPushPop lexScope(this);
 
   // Run the parsed commands.
   const size_t numberFunctions = listFile.Functions.size();
