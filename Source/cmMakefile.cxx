@@ -532,8 +532,10 @@ bool cmMakefile::ProcessBuildsystemFile(const char* listfile)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", listfile);
   std::string curSrc = this->GetCurrentSourceDirectory();
-  bool result = this->ReadListFile(listfile, true,
+  this->PushPolicyBarrier();
+  bool result = this->ReadListFile(listfile,
                                    curSrc == this->GetHomeDirectory());
+  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
   this->EnforceDirectoryLevelRules();
   return result;
 }
@@ -542,24 +544,31 @@ bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
                       this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
-  bool result = this->ReadListFile(listfile, noPolicyScope, false);
+  bool result = false;
+  {
+  IncludeScope incScope(this, noPolicyScope);
+  result = this->ReadListFile(listfile, false);
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    incScope.Quiet();
+    }
+  }
   this->ListFileStack.pop_back();
   return result;
 }
 
 bool cmMakefile::ReadListFile(const char* listfile)
 {
-  bool result = this->ReadListFile(listfile, true, false);
+  this->PushPolicyBarrier();
+  bool result = this->ReadListFile(listfile, false);
+  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
   this->ListFileStack.pop_back();
   return result;
 }
 
 bool cmMakefile::ReadListFile(const char* listfile,
-                              bool noPolicyScope,
                               bool requireProjectCommand)
 {
-  IncludeScope incScope(this, noPolicyScope);
-
   std::string filenametoread =
     cmSystemTools::CollapseFullPath(listfile,
                                     this->GetCurrentSourceDirectory());
@@ -590,10 +599,6 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
   this->ReadListFileInternal(listFile);
-  if(cmSystemTools::GetFatalErrorOccured())
-    {
-    incScope.Quiet();
-    }
   this->CheckForUnusedVariables();
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
