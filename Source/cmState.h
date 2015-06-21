@@ -21,6 +21,8 @@
 
 class cmake;
 class cmCommand;
+class cmDefinitions;
+class cmListFileBacktrace;
 
 class cmState
 {
@@ -51,6 +53,14 @@ public:
   public:
     Snapshot(cmState* state = 0);
     Snapshot(cmState* state, PositionType position);
+
+    const char* GetDefinition(std::string const& name) const;
+    bool IsInitialized(std::string const& name) const;
+    void SetDefinition(std::string const& name, std::string const& value);
+    void RemoveDefinition(std::string const& name);
+    std::vector<std::string> UnusedKeys() const;
+    std::vector<std::string> ClosureKeys() const;
+    bool RaiseScope(std::string const& var, const char* varDef);
 
     void SetListFile(std::string const& listfile);
 
@@ -273,6 +283,7 @@ private:
 
   cmLinkedTree<PolicyStackEntry> PolicyStack;
   cmLinkedTree<SnapshotDataType> SnapshotData;
+  cmLinkedTree<cmDefinitions> VarTree;
 
   std::vector<std::string> SourceDirectoryComponents;
   std::vector<std::string> BinaryDirectoryComponents;
