@@ -43,6 +43,7 @@ public:
     newC->Args = this->Args;
     newC->Functions = this->Functions;
     newC->Policies = this->Policies;
+    newC->FilePath = this->FilePath;
     return newC;
   }
 
@@ -71,6 +72,7 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
   cmPolicies::PolicyMap Policies;
+  std::string FilePath;
 };
 
 bool cmFunctionHelperCommand::InvokeInitialPass
@@ -171,18 +173,8 @@ IsFunctionBlocked(const cmListFileFunction& lff, cmMakefile &mf,
       cmFunctionHelperCommand *f = new cmFunctionHelperCommand();
       f->Args = this->Args;
       f->Functions = this->Functions;
+      f->FilePath = this->GetStartingContext().FilePath;
       mf.RecordPolicies(f->Policies);
-
-      // Set the FilePath on the arguments to match the function since it is
-      // not stored and the original values may be freed
-      for (unsigned int i = 0; i < f->Functions.size(); ++i)
-        {
-        for (unsigned int j = 0; j < f->Functions[i].Arguments.size(); ++j)
-          {
-          f->Functions[i].Arguments[j].FilePath =
-            f->Functions[i].FilePath.c_str();
-          }
-        }
 
       std::string newName = "_" + this->Args[0];
       mf.GetState()->RenameCommand(this->Args[0], newName);
@@ -212,7 +204,8 @@ ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf)
   if(!cmSystemTools::Strucmp(lff.Name.c_str(),"endfunction"))
     {
     std::vector<std::string> expandedArguments;
-    mf.ExpandArguments(lff.Arguments, expandedArguments);
+    mf.ExpandArguments(lff.Arguments, expandedArguments,
+                       this->GetStartingContext().FilePath.c_str());
     // if the endfunction has arguments then make sure
     // they match the ones in the opening function command
     if ((expandedArguments.empty() ||

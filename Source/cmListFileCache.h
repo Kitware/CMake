@@ -33,12 +33,11 @@ struct cmListFileArgument
     Quoted,
     Bracket
     };
-  cmListFileArgument(): Value(), Delim(Unquoted), FilePath(0), Line(0) {}
-  cmListFileArgument(const cmListFileArgument& r):
-    Value(r.Value), Delim(r.Delim), FilePath(r.FilePath), Line(r.Line) {}
-  cmListFileArgument(const std::string& v, Delimiter d, const char* file,
-                     long line): Value(v), Delim(d),
-                                 FilePath(file), Line(line) {}
+  cmListFileArgument(): Value(), Delim(Unquoted), Line(0) {}
+  cmListFileArgument(const cmListFileArgument& r)
+    : Value(r.Value), Delim(r.Delim), Line(r.Line) {}
+  cmListFileArgument(const std::string& v, Delimiter d, long line)
+    : Value(v), Delim(d), Line(line) {}
   bool operator == (const cmListFileArgument& r) const
     {
     return (this->Value == r.Value) && (this->Delim == r.Delim);
@@ -49,7 +48,6 @@ struct cmListFileArgument
     }
   std::string Value;
   Delimiter Delim;
-  const char* FilePath;
   long Line;
 };
 

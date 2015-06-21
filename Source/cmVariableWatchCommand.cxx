@@ -49,21 +49,21 @@ static void cmVariableWatchCommandVariableAccessed(
     newLFF.Arguments.clear();
     newLFF.Arguments.push_back(
       cmListFileArgument(variable, cmListFileArgument::Quoted,
-                         "unknown", 9999));
+                         9999));
     newLFF.Arguments.push_back(
       cmListFileArgument(accessString, cmListFileArgument::Quoted,
-                         "unknown", 9999));
+                         9999));
     newLFF.Arguments.push_back(
       cmListFileArgument(newValue?newValue:"", cmListFileArgument::Quoted,
-                         "unknown", 9999));
+                         9999));
     newLFF.Arguments.push_back(
       cmListFileArgument(currentListFile, cmListFileArgument::Quoted,
-                         "unknown", 9999));
+                         9999));
     newLFF.Arguments.push_back(
       cmListFileArgument(stack, cmListFileArgument::Quoted,
-                         "unknown", 9999));
+                         9999));
     newLFF.Name = data->Command;
-    newLFF.FilePath = "Some weird path";
+    newLFF.FilePath = "unknown";
     newLFF.Line = 9999;
     cmExecutionStatus status;
     if(!makefile->ExecuteCommand(newLFF,status))
