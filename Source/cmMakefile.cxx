@@ -486,6 +486,7 @@ cmMakefile::IncludeScope::~IncludeScope()
       this->EnforceCMP0011();
       }
     }
+  this->Makefile->ListFileStack.pop_back();
 }
 
 //----------------------------------------------------------------------------
@@ -544,16 +545,12 @@ bool cmMakefile::ReadDependentFile(const char* listfile, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
                       this->GetDefinition("CMAKE_CURRENT_LIST_FILE"));
-  bool result = false;
-  {
   IncludeScope incScope(this, noPolicyScope);
-  result = this->ReadListFile(listfile, false);
+  bool result = this->ReadListFile(listfile, false);
   if(cmSystemTools::GetFatalErrorOccured())
     {
     incScope.Quiet();
     }
-  }
-  this->ListFileStack.pop_back();
   return result;
 }
 
