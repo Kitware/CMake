@@ -1658,10 +1658,13 @@ public:
 class cmMakefile::BuildsystemFileScope
 {
 public:
-  BuildsystemFileScope(cmMakefile* mf, std::string const& filename)
+  BuildsystemFileScope(cmMakefile* mf)
     : Makefile(mf), ReportError(true)
   {
-    this->Makefile->ListFileStack.push_back(filename);
+    std::string currentStart =
+        this->Makefile->StateSnapshot.GetCurrentSourceDirectory();
+    currentStart += "/CMakeLists.txt";
+    this->Makefile->ListFileStack.push_back(currentStart);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
   }
@@ -1694,7 +1697,7 @@ void cmMakefile::Configure()
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
   {
-  BuildsystemFileScope scope(this, currentStart);
+  BuildsystemFileScope scope(this);
   cmListFile listFile;
   if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
     {
