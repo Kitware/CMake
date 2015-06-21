@@ -431,12 +431,11 @@ private:
 bool cmMakefile::ProcessBuildsystemFile(const char* filename)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
-  std::string curSrc = this->GetCurrentSourceDirectory();
 
   BuildsystemFileScope scope(this, filename);
 
   cmListFile listFile;
-  if (!listFile.ParseFile(filename, curSrc == this->GetHomeDirectory(), this))
+  if (!listFile.ParseFile(filename, this->IsRootMakefile(), this))
     {
     return false;
     }
