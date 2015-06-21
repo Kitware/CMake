@@ -576,12 +576,12 @@ bool cmMakefile::ReadListFile(const char* listfile,
 
   this->ListFileStack.push_back(filenametoread);
 
-  cmListFile cacheFile;
-  bool res = cacheFile.ParseFile(filenametoread.c_str(),
-                                 requireProjectCommand, this);
+  cmListFile listFile;
+  bool res = listFile.ParseFile(filenametoread.c_str(),
+                                requireProjectCommand, this);
   if (res)
     {
-    this->ReadListFileInternal(cacheFile, filenametoread.c_str(),
+    this->ReadListFileInternal(listFile, filenametoread.c_str(),
                                noPolicyScope);
     }
 
@@ -601,7 +601,7 @@ bool cmMakefile::ReadListFile(const char* listfile,
   return res;
 }
 
-void cmMakefile::ReadListFileInternal(cmListFile const& cacheFile,
+void cmMakefile::ReadListFileInternal(cmListFile const& listFile,
                                       const char* filenametoread,
                                       bool noPolicyScope)
 {
@@ -614,11 +614,11 @@ void cmMakefile::ReadListFileInternal(cmListFile const& cacheFile,
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   // Run the parsed commands.
-  const size_t numberFunctions = cacheFile.Functions.size();
+  const size_t numberFunctions = listFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
     {
     cmExecutionStatus status;
-    this->ExecuteCommand(cacheFile.Functions[i],status);
+    this->ExecuteCommand(listFile.Functions[i],status);
     if(cmSystemTools::GetFatalErrorOccured())
       {
       // Exit early due to error.
