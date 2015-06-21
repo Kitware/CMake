@@ -558,6 +558,8 @@ bool cmMakefile::ReadListFile(const char* listfile,
                               bool noPolicyScope,
                               bool requireProjectCommand)
 {
+  IncludeScope incScope(this, noPolicyScope);
+
   std::string filenametoread =
     cmSystemTools::CollapseFullPath(listfile,
                                     this->GetCurrentSourceDirectory());
@@ -587,7 +589,6 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  IncludeScope incScope(this, noPolicyScope);
   this->ReadListFileInternal(listFile);
   if(cmSystemTools::GetFatalErrorOccured())
     {
