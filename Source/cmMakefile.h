@@ -968,6 +968,10 @@ private:
   friend class cmCMakePolicyCommand;
   class IncludeScope;
   friend class IncludeScope;
+  class ListFileScope;
+  friend class ListFileScope;
+  class BuildsystemFileScope;
+  friend class BuildsystemFileScope;
 
   // stack of policy settings
   struct PolicyStackEntry: public cmPolicies::PolicyMap

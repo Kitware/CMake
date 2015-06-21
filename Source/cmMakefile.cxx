@@ -405,6 +405,26 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   return result;
 }
 
+class cmMakefile::BuildsystemFileScope
+{
+public:
+  BuildsystemFileScope(cmMakefile* mf)
+    : Makefile(mf), ReportError(true)
+  {
+    this->Makefile->PushPolicyBarrier();
+  }
+
+  ~BuildsystemFileScope()
+  {
+    this->Makefile->PopPolicyBarrier(this->ReportError);
+  }
+
+  void Quiet() { this->ReportError = false; }
+private:
+  cmMakefile* Makefile;
+  bool ReportError;
+};
+
 bool cmMakefile::ProcessBuildsystemFile(const char* filename)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
@@ -417,10 +437,12 @@ bool cmMakefile::ProcessBuildsystemFile(const char* filename)
     {
     return false;
     }
-
-  this->PushPolicyBarrier();
+  BuildsystemFileScope scope(this);
   this->ReadListFile(listFile, filename);
-  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    scope.Quiet();
+    }
   this->EnforceDirectoryLevelRules();
   return true;
 }
@@ -576,6 +598,27 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   return true;
 }
 
+class cmMakefile::ListFileScope
+{
+public:
+  ListFileScope(cmMakefile* mf)
+    : Makefile(mf), ReportError(true)
+  {
+    this->Makefile->PushPolicyBarrier();
+  }
+
+  ~ListFileScope()
+  {
+    this->Makefile->PopPolicyBarrier(this->ReportError);
+    this->Makefile->ListFileStack.pop_back();
+  }
+
+  void Quiet() { this->ReportError = false; }
+private:
+  cmMakefile* Makefile;
+  bool ReportError;
+};
+
 bool cmMakefile::ReadListFile(const char* filename)
 {
   std::string filenametoread =
@@ -590,10 +633,12 @@ bool cmMakefile::ReadListFile(const char* filename)
     return false;
     }
 
-  this->PushPolicyBarrier();
+  ListFileScope scope(this);
   this->ReadListFile(listFile, filenametoread);
-  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
-  this->ListFileStack.pop_back();
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    scope.Quiet();
+    }
   return true;
 }
 
