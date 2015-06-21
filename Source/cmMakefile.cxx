@@ -405,48 +405,6 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
   return result;
 }
 
-class cmMakefile::BuildsystemFileScope
-{
-public:
-  BuildsystemFileScope(cmMakefile* mf, std::string const& filename)
-    : Makefile(mf), ReportError(true)
-  {
-    this->Makefile->ListFileStack.push_back(filename);
-    this->Makefile->PushPolicyBarrier();
-    this->Makefile->PushFunctionBlockerBarrier();
-  }
-
-  ~BuildsystemFileScope()
-  {
-    this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
-    this->Makefile->PopPolicyBarrier(this->ReportError);
-  }
-
-  void Quiet() { this->ReportError = false; }
-private:
-  cmMakefile* Makefile;
-  bool ReportError;
-};
-
-bool cmMakefile::ProcessBuildsystemFile(const char* filename)
-{
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
-
-  BuildsystemFileScope scope(this, filename);
-
-  cmListFile listFile;
-  if (!listFile.ParseFile(filename, this->IsRootMakefile(), this))
-    {
-    return false;
-    }
-  this->ReadListFile(listFile, filename);
-  if(cmSystemTools::GetFatalErrorOccured())
-    {
-    scope.Quiet();
-    }
-  return true;
-}
-
 //----------------------------------------------------------------------------
 class cmMakefile::IncludeScope
 {
@@ -1697,6 +1655,29 @@ public:
     }
 };
 
+class cmMakefile::BuildsystemFileScope
+{
+public:
+  BuildsystemFileScope(cmMakefile* mf, std::string const& filename)
+    : Makefile(mf), ReportError(true)
+  {
+    this->Makefile->ListFileStack.push_back(filename);
+    this->Makefile->PushPolicyBarrier();
+    this->Makefile->PushFunctionBlockerBarrier();
+  }
+
+  ~BuildsystemFileScope()
+  {
+    this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
+    this->Makefile->PopPolicyBarrier(this->ReportError);
+  }
+
+  void Quiet() { this->ReportError = false; }
+private:
+  cmMakefile* Makefile;
+  bool ReportError;
+};
+
 //----------------------------------------------------------------------------
 void cmMakefile::Configure()
 {
@@ -1710,7 +1691,22 @@ void cmMakefile::Configure()
   std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
   currentStart += "/CMakeLists.txt";
   assert(cmSystemTools::FileExists(currentStart.c_str(), true));
-  this->ProcessBuildsystemFile(currentStart.c_str());
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
+
+  {
+  BuildsystemFileScope scope(this, currentStart);
+  cmListFile listFile;
+  if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
+    {
+    this->SetConfigured();
+    return;
+    }
+  this->ReadListFile(listFile, currentStart);
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    scope.Quiet();
+    }
+  }
 
    // at the end handle any old style subdirs
   std::vector<cmMakefile*> subdirs = this->UnConfiguredDirectories;
