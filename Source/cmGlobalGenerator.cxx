@@ -1106,6 +1106,7 @@ void cmGlobalGenerator::Configure()
 
   // now do it
   lg->GetMakefile()->Configure();
+  lg->GetMakefile()->EnforceDirectoryLevelRules();
 
   // update the cache entry for the number of local generators, this is used
   // for progress

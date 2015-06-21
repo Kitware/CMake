@@ -445,7 +445,6 @@ bool cmMakefile::ProcessBuildsystemFile(const char* filename)
     {
     scope.Quiet();
     }
-  this->EnforceDirectoryLevelRules();
   return true;
 }
 

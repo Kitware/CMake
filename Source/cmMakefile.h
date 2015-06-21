@@ -825,6 +825,8 @@ public:
 
   std::string GetExecutionFilePath() const;
 
+  void EnforceDirectoryLevelRules() const;
+
 protected:
   // add link libraries and directories to the target
   void AddGlobalLinkInformation(const std::string& name, cmTarget& target);
@@ -974,9 +976,6 @@ private:
   std::vector<PolicyStackType::size_type> PolicyBarriers;
   cmPolicies::PolicyStatus
   GetPolicyStatusInternal(cmPolicies::PolicyID id) const;
-
-  // Enforce rules about CMakeLists.txt files.
-  void EnforceDirectoryLevelRules() const;
 
   // CMP0053 == old
   cmake::MessageType ExpandVariablesInStringOld(
