@@ -586,7 +586,12 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  this->ReadListFileInternal(listFile, filenametoread.c_str(), noPolicyScope);
+  IncludeScope incScope(this, filenametoread.c_str(), noPolicyScope);
+  this->ReadListFileInternal(listFile);
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    incScope.Quiet();
+    }
   this->CheckForUnusedVariables();
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
@@ -600,12 +605,9 @@ bool cmMakefile::ReadListFile(const char* listfile,
   return true;
 }
 
-void cmMakefile::ReadListFileInternal(cmListFile const& listFile,
-                                      const char* filenametoread,
-                                      bool noPolicyScope)
+void cmMakefile::ReadListFileInternal(cmListFile const& listFile)
 {
   // Enforce balanced blocks (if/endif, function/endfunction, etc.).
-  IncludeScope incScope(this, filenametoread, noPolicyScope);
   LexicalPushPop lexScope(this);
 
   // Run the parsed commands.
@@ -618,7 +620,6 @@ void cmMakefile::ReadListFileInternal(cmListFile const& listFile,
       {
       // Exit early due to error.
       lexScope.Quiet();
-      incScope.Quiet();
       break;
       }
     if(status.GetReturnInvoked())

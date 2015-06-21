@@ -918,9 +918,7 @@ private:
                     bool noPolicyScope,
                     bool requireProjectCommand);
 
-  void ReadListFileInternal(cmListFile const& listFile,
-                            const char* filenametoread,
-                            bool noPolicyScope);
+  void ReadListFileInternal(cmListFile const& listFile);
 
   bool ParseDefineFlag(std::string const& definition, bool remove);
 
