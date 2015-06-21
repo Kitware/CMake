@@ -581,6 +581,9 @@ bool cmMakefile::ReadListFile(const char* listfile,
                                 requireProjectCommand, this);
   if (res)
     {
+    // add this list file to the list of dependencies
+    this->ListFiles.push_back(filenametoread);
+
     this->ReadListFileInternal(listFile, filenametoread.c_str(),
                                noPolicyScope);
     }
@@ -605,11 +608,7 @@ void cmMakefile::ReadListFileInternal(cmListFile const& listFile,
                                       const char* filenametoread,
                                       bool noPolicyScope)
 {
-  // add this list file to the list of dependencies
-  this->ListFiles.push_back( filenametoread);
-
   // Enforce balanced blocks (if/endif, function/endfunction, etc.).
-  {
   LexicalPushPop lexScope(this);
   IncludeScope incScope(this, filenametoread, noPolicyScope);
 
@@ -632,7 +631,6 @@ void cmMakefile::ReadListFileInternal(cmListFile const& listFile,
       break;
       }
     }
-  }
 }
 
 //----------------------------------------------------------------------------
