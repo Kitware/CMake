@@ -161,6 +161,17 @@ public:
     this->Data.clear();
   }
 
+  size_t Size() const
+  {
+    return this->UpPositions.size();
+  }
+
+  void Reserve(size_t amount)
+  {
+    this->UpPositions.reserve(amount);
+    this->Data.reserve(amount);
+  }
+
 private:
   T& GetReference(PositionType pos)
   {
