@@ -355,11 +355,11 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
 {
   // library directories
   cmTargetDependSet tds =
-    this->GetGlobalGenerator()->GetTargetDirectDepends(this->GeneratorTarget);
+    this->GetGlobalGenerator()->GetTargetDirectDepends(*this->Target);
   for (cmTargetDependSet::iterator tdsI = tds.begin(); tdsI != tds.end();
        ++tdsI)
     {
-    const cmTarget *tg = (*tdsI)->Target;
+    const cmTarget *tg(*tdsI);
     *this->GetFolderBuildStreams() << "    -L\"" << GetAbsBuildFilePath(tg)
                                    << "\"" << std::endl;
     }
@@ -374,8 +374,6 @@ void cmGhsMultiTargetGenerator::WriteTargetLinkLibraries()
     cmTarget *tg(GetGlobalGenerator()->FindTarget(libName));
     if (NULL != tg)
       {
-      cmGeneratorTarget* gt = GetGlobalGenerator()->GetGeneratorTarget(tg);
-      cmGhsMultiTargetGenerator gmtg(gt);
       libName = tg->GetName() + ".a";
       }
     *this->GetFolderBuildStreams() << "    -l\"" << libName << "\""
