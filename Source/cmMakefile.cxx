@@ -564,13 +564,14 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->ListFileStack.push_back(filenametoread);
 
   cmListFile listFile;
-  bool res = listFile.ParseFile(filenametoread.c_str(),
-                                requireProjectCommand, this);
-  if (res)
+  if (!listFile.ParseFile(filenametoread.c_str(),
+                          requireProjectCommand, this))
     {
-    // add this list file to the list of dependencies
-    this->ListFiles.push_back(filenametoread);
+    return false;
     }
+
+  // add this list file to the list of dependencies
+  this->ListFiles.push_back(filenametoread);
 
   std::string currentParentFile
       = this->GetSafeDefinition("CMAKE_PARENT_LIST_FILE");
@@ -585,13 +586,8 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  if (res)
-    {
-    this->ReadListFileInternal(listFile, filenametoread.c_str(),
-                               noPolicyScope);
-
-    this->CheckForUnusedVariables();
-    }
+  this->ReadListFileInternal(listFile, filenametoread.c_str(), noPolicyScope);
+  this->CheckForUnusedVariables();
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
@@ -601,7 +597,7 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  return res;
+  return true;
 }
 
 void cmMakefile::ReadListFileInternal(cmListFile const& listFile,
