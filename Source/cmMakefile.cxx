@@ -409,12 +409,11 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 class cmMakefile::IncludeScope
 {
 public:
-  IncludeScope(cmMakefile* mf, const char* fname, bool noPolicyScope);
+  IncludeScope(cmMakefile* mf, bool noPolicyScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
 private:
   cmMakefile* Makefile;
-  const char* File;
   bool NoPolicyScope;
   bool CheckCMP0011;
   bool ReportError;
@@ -422,9 +421,9 @@ private:
 };
 
 //----------------------------------------------------------------------------
-cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf, const char* fname,
+cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
                                        bool noPolicyScope):
-  Makefile(mf), File(fname), NoPolicyScope(noPolicyScope),
+  Makefile(mf), NoPolicyScope(noPolicyScope),
   CheckCMP0011(false), ReportError(true)
 {
   if(!this->NoPolicyScope)
@@ -501,7 +500,8 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       {
       std::ostringstream w;
       w << cmPolicies::GetPolicyWarning(cmPolicies::CMP0011) << "\n"
-        << "The included script\n  " << this->File << "\n"
+        << "The included script\n  "
+        << this->Makefile->ListFileStack.back() << "\n"
         << "affects policy settings.  "
         << "CMake is implying the NO_POLICY_SCOPE option for compatibility, "
         << "so the effects are applied to the including context.";
@@ -513,7 +513,8 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
       {
       std::ostringstream e;
       e << cmPolicies::GetRequiredPolicyError(cmPolicies::CMP0011) << "\n"
-        << "The included script\n  " << this->File << "\n"
+        << "The included script\n  "
+        << this->Makefile->ListFileStack.back() << "\n"
         << "affects policy settings, so it requires this policy to be set.";
       this->Makefile->IssueMessage(cmake::FATAL_ERROR, e.str());
       }
@@ -586,7 +587,7 @@ bool cmMakefile::ReadListFile(const char* listfile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  IncludeScope incScope(this, filenametoread.c_str(), noPolicyScope);
+  IncludeScope incScope(this, noPolicyScope);
   this->ReadListFileInternal(listFile);
   if(cmSystemTools::GetFatalErrorOccured())
     {
