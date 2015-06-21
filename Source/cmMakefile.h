@@ -100,19 +100,6 @@ public:
   cmsys::auto_ptr<cmFunctionBlocker>
   RemoveFunctionBlocker(cmFunctionBlocker* fb, const cmListFileFunction& lff);
 
-  /** Push/pop a lexical (function blocker) barrier automatically.  */
-  class LexicalPushPop
-  {
-  public:
-    LexicalPushPop(cmMakefile* mf);
-    ~LexicalPushPop();
-    void Quiet() { this->ReportError = false; }
-  private:
-    cmMakefile* Makefile;
-    bool ReportError;
-  };
-  friend class LexicalPushPop;
-
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.

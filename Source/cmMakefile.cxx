@@ -412,10 +412,12 @@ public:
     : Makefile(mf), ReportError(true)
   {
     this->Makefile->PushPolicyBarrier();
+    this->Makefile->PushFunctionBlockerBarrier();
   }
 
   ~BuildsystemFileScope()
   {
+    this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
   }
 
@@ -502,11 +504,13 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   // The included file cannot pop our policy scope.
   this->Makefile->PushPolicyBarrier();
   this->Makefile->ListFileStack.push_back(filenametoread);
+  this->Makefile->PushFunctionBlockerBarrier();
 }
 
 //----------------------------------------------------------------------------
 cmMakefile::IncludeScope::~IncludeScope()
 {
+  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
   // Enforce matching policy scopes inside the included file.
   this->Makefile->PopPolicyBarrier(this->ReportError);
 
@@ -605,10 +609,12 @@ public:
     : Makefile(mf), ReportError(true)
   {
     this->Makefile->PushPolicyBarrier();
+    this->Makefile->PushFunctionBlockerBarrier();
   }
 
   ~ListFileScope()
   {
+    this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
     this->Makefile->ListFileStack.pop_back();
   }
@@ -645,8 +651,6 @@ bool cmMakefile::ReadListFile(const char* filename)
 void cmMakefile::ReadListFile(cmListFile const& listFile,
                               std::string const& filenametoread)
 {
-  LexicalPushPop lexScope(this);
-
   // add this list file to the list of dependencies
   this->ListFiles.push_back(filenametoread);
 
@@ -671,8 +675,6 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
     this->ExecuteCommand(listFile.Functions[i],status);
     if(cmSystemTools::GetFatalErrorOccured())
       {
-      // Exit early due to error.
-      lexScope.Quiet();
       break;
       }
     if(status.GetReturnInvoked())
@@ -3519,19 +3521,6 @@ cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
     }
 
   return cmsys::auto_ptr<cmFunctionBlocker>();
-}
-
-//----------------------------------------------------------------------------
-cmMakefile::LexicalPushPop::LexicalPushPop(cmMakefile* mf):
-  Makefile(mf), ReportError(true)
-{
-  this->Makefile->PushFunctionBlockerBarrier();
-}
-
-//----------------------------------------------------------------------------
-cmMakefile::LexicalPushPop::~LexicalPushPop()
-{
-  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
 const char* cmMakefile::GetHomeDirectory() const
