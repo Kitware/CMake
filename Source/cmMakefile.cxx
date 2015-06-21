@@ -576,8 +576,14 @@ bool cmMakefile::ReadListFile(const char* listfile,
 
   this->ListFileStack.push_back(filenametoread);
 
-  bool res = this->ReadListFileInternal(filenametoread.c_str(),
-                                        noPolicyScope, requireProjectCommand);
+  cmListFile cacheFile;
+  bool res = cacheFile.ParseFile(filenametoread.c_str(),
+                                 requireProjectCommand, this);
+  if (res)
+    {
+    this->ReadListFileInternal(cacheFile, filenametoread.c_str(),
+                               noPolicyScope);
+    }
 
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentParentFile.c_str());
   this->AddDefinition("CMAKE_CURRENT_LIST_FILE", currentFile.c_str());
@@ -595,15 +601,10 @@ bool cmMakefile::ReadListFile(const char* listfile,
   return res;
 }
 
-bool cmMakefile::ReadListFileInternal(const char* filenametoread,
-                                      bool noPolicyScope,
-                                      bool requireProjectCommand)
+bool cmMakefile::ReadListFileInternal(cmListFile const& cacheFile,
+                                      const char* filenametoread,
+                                      bool noPolicyScope)
 {
-  cmListFile cacheFile;
-  if( !cacheFile.ParseFile(filenametoread, requireProjectCommand, this) )
-    {
-    return false;
-    }
   // add this list file to the list of dependencies
   this->ListFiles.push_back( filenametoread);
 
