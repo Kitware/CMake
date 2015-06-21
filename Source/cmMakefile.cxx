@@ -409,7 +409,8 @@ bool cmMakefile::ExecuteCommand(const cmListFileFunction& lff,
 class cmMakefile::IncludeScope
 {
 public:
-  IncludeScope(cmMakefile* mf, bool noPolicyScope);
+  IncludeScope(cmMakefile* mf, std::string const& filenametoread,
+               bool noPolicyScope);
   ~IncludeScope();
   void Quiet() { this->ReportError = false; }
 private:
@@ -422,6 +423,7 @@ private:
 
 //----------------------------------------------------------------------------
 cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
+                                       std::string const& filenametoread,
                                        bool noPolicyScope):
   Makefile(mf), NoPolicyScope(noPolicyScope),
   CheckCMP0011(false), ReportError(true)
@@ -457,6 +459,7 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
 
   // The included file cannot pop our policy scope.
   this->Makefile->PushPolicyBarrier();
+  this->Makefile->ListFileStack.push_back(filenametoread);
 }
 
 //----------------------------------------------------------------------------
@@ -561,8 +564,7 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
     cmSystemTools::CollapseFullPath(filename,
                                     this->GetCurrentSourceDirectory());
 
-  IncludeScope incScope(this, noPolicyScope);
-  this->ListFileStack.push_back(filenametoread);
+  IncludeScope incScope(this, filenametoread, noPolicyScope);
 
   cmListFile listFile;
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
