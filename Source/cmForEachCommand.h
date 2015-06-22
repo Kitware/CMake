@@ -19,8 +19,8 @@
 class cmForEachFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmForEachFunctionBlocker() {this->Depth = 0;}
-  virtual ~cmForEachFunctionBlocker() {}
+  cmForEachFunctionBlocker(cmMakefile* mf);
+  ~cmForEachFunctionBlocker();
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf,
                                  cmExecutionStatus &);
@@ -29,6 +29,7 @@ public:
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
 private:
+  cmMakefile* Makefile;
   int Depth;
 };
 
