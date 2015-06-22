@@ -25,7 +25,6 @@ public:
                                  cmMakefile &mf,
                                  cmExecutionStatus &);
   virtual bool ShouldRemove(const cmListFileFunction& lff, cmMakefile &mf);
-  virtual bool IsLoop() const { return true; }
 
   std::vector<std::string> Args;
   std::vector<cmListFileFunction> Functions;
