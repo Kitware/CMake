@@ -308,7 +308,7 @@ cmListFileContext cmMakefile::GetExecutionContext() const
 void cmMakefile::PrintCommandTrace(const cmListFileFunction& lff) const
 {
   std::ostringstream msg;
-  msg << lff.FilePath << "(" << lff.Line << "):  ";
+  msg << this->GetExecutionFilePath() << "(" << lff.Line << "):  ";
   msg << lff.Name << "(";
   for(std::vector<cmListFileArgument>::const_iterator i =
         lff.Arguments.begin(); i != lff.Arguments.end(); ++i)
@@ -3313,11 +3313,25 @@ bool cmMakefile::IsLoopBlock() const
   return !this->LoopBlockCounter.empty() && this->LoopBlockCounter.top() > 0;
 }
 
+std::string cmMakefile::GetExecutionFilePath() const
+{
+  if (this->CallStack.empty())
+    {
+    return std::string();
+    }
+  return this->CallStack.back().Context->FilePath;
+}
+
 //----------------------------------------------------------------------------
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
-  std::vector<std::string>& outArgs) const
+  std::vector<std::string>& outArgs, const char* filename) const
 {
+  std::string efp = this->GetExecutionFilePath();
+  if (!filename)
+    {
+    filename = efp.c_str();
+    }
   std::vector<cmListFileArgument>::const_iterator i;
   std::string value;
   outArgs.reserve(inArgs.size());
@@ -3332,8 +3346,7 @@ bool cmMakefile::ExpandArguments(
     // Expand the variables in the argument.
     value = i->Value;
     this->ExpandVariablesInString(value, false, false, false,
-                                  i->FilePath, i->Line,
-                                  false, false);
+                                  filename, i->Line, false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.
@@ -3352,8 +3365,13 @@ bool cmMakefile::ExpandArguments(
 //----------------------------------------------------------------------------
 bool cmMakefile::ExpandArguments(
   std::vector<cmListFileArgument> const& inArgs,
-  std::vector<cmExpandedCommandArgument>& outArgs) const
+  std::vector<cmExpandedCommandArgument>& outArgs, const char* filename) const
 {
+  std::string efp = this->GetExecutionFilePath();
+  if (!filename)
+    {
+    filename = efp.c_str();
+    }
   std::vector<cmListFileArgument>::const_iterator i;
   std::string value;
   outArgs.reserve(inArgs.size());
@@ -3368,8 +3386,7 @@ bool cmMakefile::ExpandArguments(
     // Expand the variables in the argument.
     value = i->Value;
     this->ExpandVariablesInString(value, false, false, false,
-                                  i->FilePath, i->Line,
-                                  false, false);
+                                  filename, i->Line, false, false);
 
     // If the argument is quoted, it should be one argument.
     // Otherwise, it may be a list of arguments.

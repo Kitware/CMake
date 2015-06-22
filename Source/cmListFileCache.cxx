@@ -234,8 +234,7 @@ bool cmListFile::ParseFile(const char* filename,
       {
       cmListFileFunction project;
       project.Name = "PROJECT";
-      cmListFileArgument prj("Project", cmListFileArgument::Unquoted,
-                             filename, 0);
+      cmListFileArgument prj("Project", cmListFileArgument::Unquoted, 0);
       project.Arguments.push_back(prj);
       this->Functions.insert(this->Functions.begin(),project);
       }
@@ -375,7 +374,7 @@ bool cmListFileParser::ParseFunction(const char* name, long line)
 bool cmListFileParser::AddArgument(cmListFileLexer_Token* token,
                                    cmListFileArgument::Delimiter delim)
 {
-  cmListFileArgument a(token->text, delim, this->FileName, token->line);
+  cmListFileArgument a(token->text, delim, token->line);
   this->Function.Arguments.push_back(a);
   if(this->Separation == SeparationOkay)
     {
