@@ -3163,7 +3163,6 @@ void cmMakefile::PopFunctionBlockerBarrier(bool reportError)
     this->FunctionBlockerBarriers.back();
   while(this->FunctionBlockers.size() > barrier)
     {
-    cmMakefile::LoopBlockPop loopBlockPop(this);
     cmsys::auto_ptr<cmFunctionBlocker> fb(this->FunctionBlockers.back());
     this->FunctionBlockers.pop_back();
     if(reportError)

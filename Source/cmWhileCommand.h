@@ -19,8 +19,8 @@
 class cmWhileFunctionBlocker : public cmFunctionBlocker
 {
 public:
-  cmWhileFunctionBlocker() {this->Depth=0;}
-  virtual ~cmWhileFunctionBlocker() {}
+  cmWhileFunctionBlocker(cmMakefile* mf);
+  ~cmWhileFunctionBlocker();
   virtual bool IsFunctionBlocked(const cmListFileFunction& lff,
                                  cmMakefile &mf,
                                  cmExecutionStatus &);
@@ -29,6 +29,7 @@ public:
   std::vector<cmListFileArgument> Args;
   std::vector<cmListFileFunction> Functions;
 private:
+  cmMakefile* Makefile;
   int Depth;
 };
 
