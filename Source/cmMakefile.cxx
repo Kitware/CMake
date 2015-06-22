@@ -105,7 +105,7 @@ public:
     ++it;
     if(it == this->VarStack.rend())
       {
-      cmLocalGenerator* plg = mf->GetLocalGenerator()->GetParent();
+      cmLocalGenerator* plg = mf->LocalGenerator->GetParent();
       if(!plg)
         {
         return false;
@@ -264,8 +264,8 @@ void cmMakefile::IssueMessage(cmake::MessageType t,
 
     if(!this->GetCMakeInstance()->GetIsInTryCompile())
       {
-      lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                                   cmLocalGenerator::HOME);
+      cmOutputConverter converter(this->StateSnapshot);
+      lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
       }
     lfc.Line = 0;
     this->GetCMakeInstance()->IssueMessage(t, text, lfc);
@@ -1620,6 +1620,11 @@ void cmMakefile::PopMacroScope(bool reportError)
   this->PopFunctionBlockerBarrier(reportError);
 }
 
+bool cmMakefile::IsRootMakefile() const
+{
+  return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
+}
+
 //----------------------------------------------------------------------------
 class cmMakefileCurrent
 {
@@ -1975,8 +1980,8 @@ void cmMakefile::LogUnused(const char* reason,
       lfc.FilePath = path;
       lfc.Line = 0;
       }
-    lfc.FilePath = this->LocalGenerator->Convert(lfc.FilePath,
-                                                 cmLocalGenerator::HOME);
+    cmOutputConverter converter(this->StateSnapshot);
+    lfc.FilePath = converter.Convert(lfc.FilePath, cmOutputConverter::HOME);
 
     if (this->CheckSystemVars ||
         cmSystemTools::IsSubDirectory(path,
@@ -2873,8 +2878,9 @@ cmake::MessageType cmMakefile::ExpandVariablesInStringNew(
                 {
                 std::ostringstream msg;
                 cmListFileContext lfc;
-                lfc.FilePath = this->LocalGenerator
-                    ->Convert(filename, cmLocalGenerator::HOME);
+                cmOutputConverter converter(this->StateSnapshot);
+                lfc.FilePath =
+                    converter.Convert(filename, cmOutputConverter::HOME);
                 lfc.Line = line;
                 msg << "uninitialized variable \'" << lookup << "\'";
                 this->GetCMakeInstance()->IssueMessage(cmake::AUTHOR_WARNING,

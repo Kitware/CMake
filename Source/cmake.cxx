@@ -186,7 +186,7 @@ cmake::~cmake()
 
 void cmake::CleanupCommandsAndMacros()
 {
-  this->State->Reset();
+  this->CurrentSnapshot = this->State->Reset();
   this->State->RemoveUserDefinedCommands();
 }
 
@@ -370,6 +370,7 @@ void cmake::ReadListFile(const std::vector<std::string>& args,
   // read in the list file to fill the cache
   if(path)
     {
+    this->CurrentSnapshot = this->State->Reset();
     std::string homeDir = this->GetHomeDirectory();
     std::string homeOutputDir = this->GetHomeOutputDirectory();
     this->SetHomeDirectory(cmSystemTools::GetCurrentWorkingDirectory());

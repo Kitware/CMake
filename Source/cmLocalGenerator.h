@@ -14,6 +14,7 @@
 
 #include "cmStandardIncludes.h"
 #include "cmState.h"
+#include "cmake.h"
 #include "cmOutputConverter.h"
 
 class cmMakefile;
@@ -38,9 +39,6 @@ public:
   cmLocalGenerator(cmGlobalGenerator* gg, cmLocalGenerator* parent,
                    cmState::Snapshot snapshot);
   virtual ~cmLocalGenerator();
-
-  /// @return whether we are processing the top CMakeLists.txt file.
-  bool IsRootMakefile() const;
 
   /**
    * Generate the makefile for this directory.
@@ -185,7 +183,7 @@ public:
                              cmGeneratorTarget* target,
                              const std::string& lang = "C",
                              const std::string& config = "",
-                             bool stripImplicitInclDirs = true);
+                             bool stripImplicitInclDirs = true) const;
   void AddCompileOptions(std::string& flags, cmTarget* target,
                          const std::string& lang, const std::string& config);
   void AddCompileDefinitions(std::set<std::string>& defines,
@@ -303,6 +301,9 @@ public:
   bool IsWatcomWMake() const;
   bool IsMinGWMake() const;
   bool IsNMake() const;
+
+  void IssueMessage(cmake::MessageType t, std::string const& text) const;
+
 
   void ComputeObjectMaxPath();
 protected:

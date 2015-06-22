@@ -39,35 +39,35 @@ public:
   enum RelativeRoot { NONE, FULL, HOME, START, HOME_OUTPUT, START_OUTPUT };
   enum OutputFormat { UNCHANGED, MAKERULE, SHELL, WATCOMQUOTE, RESPONSE };
   std::string ConvertToOutputFormat(const std::string& source,
-                                    OutputFormat output);
+                                    OutputFormat output) const;
   std::string Convert(const std::string& remote, RelativeRoot local,
-                      OutputFormat output = UNCHANGED);
+                      OutputFormat output = UNCHANGED) const;
   std::string Convert(RelativeRoot remote, const std::string& local,
                       OutputFormat output = UNCHANGED,
-                      bool optional = false);
+                      bool optional = false) const;
 
   /**
     * Get path for the specified relative root.
     */
-  const char* GetRelativeRootPath(RelativeRoot relroot);
+  const char* GetRelativeRootPath(RelativeRoot relroot) const;
 
   ///! for existing files convert to output path and short path if spaces
   std::string ConvertToOutputForExisting(const std::string& remote,
                                          RelativeRoot local = START_OUTPUT,
-                                         OutputFormat format = SHELL);
+                                         OutputFormat format = SHELL) const;
 
   /** For existing path identified by RelativeRoot convert to output
       path and short path if spaces.  */
   std::string ConvertToOutputForExisting(RelativeRoot remote,
                                          const std::string& local = "",
-                                         OutputFormat format = SHELL);
+                                         OutputFormat format = SHELL) const;
 
   void SetLinkScriptShell(bool linkScriptShell);
 
   std::string EscapeForShell(const std::string& str,
                                     bool makeVars = false,
                                     bool forEcho = false,
-                                    bool useWatcomQuote = false);
+                                    bool useWatcomQuote = false) const;
 
   static std::string EscapeForCMake(const std::string& str);
 
@@ -88,14 +88,14 @@ public:
    */
   std::string ConvertToRelativePath(const std::vector<std::string>& local,
                                     const std::string& in_remote,
-                                    bool force = false);
+                                    bool force = false) const;
 
 private:
   cmState* GetState() const;
 
   std::string ConvertToOutputForExistingCommon(const std::string& remote,
                                                std::string const& result,
-                                               OutputFormat format);
+                                               OutputFormat format) const;
 
 private:
   cmState::Snapshot StateSnapshot;

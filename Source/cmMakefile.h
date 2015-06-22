@@ -90,6 +90,9 @@ public:
    */
   void AddFunctionBlocker(cmFunctionBlocker* fb);
 
+  /// @return whether we are processing the top CMakeLists.txt file.
+  bool IsRootMakefile() const;
+
   /**
    * Remove the function blocker whose scope ends with the given command.
    * This returns ownership of the function blocker object.

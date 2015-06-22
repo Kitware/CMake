@@ -43,8 +43,10 @@ public:
     const char* GetCurrentBinaryDirectory() const;
     void SetCurrentBinaryDirectory(std::string const& dir);
 
-    std::vector<std::string> const& GetCurrentSourceDirectoryComponents();
-    std::vector<std::string> const& GetCurrentBinaryDirectoryComponents();
+    std::vector<std::string> const&
+    GetCurrentSourceDirectoryComponents() const;
+    std::vector<std::string> const&
+    GetCurrentBinaryDirectoryComponents() const;
 
     const char* GetRelativePathTopSource() const;
     const char* GetRelativePathTopBinary() const;
@@ -103,7 +105,7 @@ public:
   void RemoveCacheEntryProperty(std::string const& key,
                                 std::string const& propertyName);
 
-  void Reset();
+  Snapshot Reset();
   // Define a property
   void DefineProperty(const std::string& name, cmProperty::ScopeType scope,
                       const char *ShortDescription,
