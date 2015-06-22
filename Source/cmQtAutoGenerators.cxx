@@ -393,9 +393,14 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
     }
 #endif
 
-  // Ninja needs to know the rcc outputs are byproducts.
   std::vector<std::string> rcc_output;
-  if (makefile->GetGlobalGenerator()->GetName() == "Ninja")
+  bool const isNinja =
+    makefile->GetGlobalGenerator()->GetName() == "Ninja";
+  if(isNinja
+#if defined(_WIN32) && !defined(__CYGWIN__)
+        || usePRE_BUILD
+#endif
+        )
     {
     std::vector<cmSourceFile*> srcFiles;
     target->GetConfigCommonSourceFiles(srcFiles);
@@ -433,6 +438,12 @@ bool cmQtAutoGenerators::InitializeAutogenTarget(cmTarget* target)
               {
               this->ListQt4RccInputs(sf, depends);
               }
+#if defined(_WIN32) && !defined(__CYGWIN__)
+            // Cannot use PRE_BUILD because the resource files themselves
+            // may not be sources within the target so VS may not know the
+            // target needs to re-build at all.
+            usePRE_BUILD = false;
+#endif
             }
           }
         }
