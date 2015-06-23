@@ -144,6 +144,7 @@
 # ========================== =================================== =================
 # ``c_restrict``              ``<PREFIX>_RESTRICT``               ``restrict``
 # ``cxx_constexpr``           ``<PREFIX>_CONSTEXPR``              ``constexpr``
+# ``cxx_relaxed_constexpr``   ``<PREFIX>_RELAXED_CONSTEXPR``      ``constexpr``
 # ``cxx_deleted_functions``   ``<PREFIX>_DELETED_FUNCTION``       ``= delete``
 # ``cxx_extern_templates``    ``<PREFIX>_EXTERN_TEMPLATE``        ``extern``
 # ``cxx_final``               ``<PREFIX>_FINAL``                  ``final``
@@ -486,6 +487,16 @@ function(write_compiler_detection_header
       endif()
       if (feature STREQUAL cxx_constexpr)
         set(def_value "${prefix_arg}_CONSTEXPR")
+        set(file_content "${file_content}
+#  if ${def_name}
+#    define ${def_value} constexpr
+#  else
+#    define ${def_value}
+#  endif
+\n")
+      endif()
+      if (feature STREQUAL cxx_relaxed_constexpr)
+        set(def_value "${prefix_arg}_RELAXED_CONSTEXPR")
         set(file_content "${file_content}
 #  if ${def_name}
 #    define ${def_value} constexpr
