@@ -99,3 +99,14 @@ add_executable(interfacetest_exp interfacetest.cpp)
 target_link_libraries(interfacetest_exp exp::sharediface)
 
 do_try_compile(exp)
+
+foreach(ns exp bld)
+  get_property(defs TARGET ${ns}::cmakeonly PROPERTY INTERFACE_COMPILE_DEFINITIONS)
+  if(NOT defs STREQUAL [[DEF="\"\$\B"]])
+    message(SEND_ERROR
+      "${ns}::cmakeonly property INTERFACE_COMPILE_DEFINITIONS is:\n"
+      " ${defs}\n"
+      "not\n"
+      " " [[DEF="\"\$\B"]] "\n")
+  endif()
+endforeach()
