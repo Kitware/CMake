@@ -23,10 +23,23 @@
 #include "cmVersion.h"
 #include "cmComputeLinkInformation.h"
 #include "cmAlgorithms.h"
+#include "cmOutputConverter.h"
 
 #include <cmsys/auto_ptr.hxx>
 #include <cmsys/FStream.hxx>
 #include <assert.h>
+
+//----------------------------------------------------------------------------
+static std::string cmExportFileGeneratorEscape(std::string const& str)
+{
+  // Escape a property value for writing into a .cmake file.
+  std::string result = cmOutputConverter::EscapeForCMake(str);
+  // Un-escape our import prefix variable reference as a special case.
+  cmSystemTools::ReplaceString(result,
+                               "\\${_IMPORT_PREFIX}",
+                               "${_IMPORT_PREFIX}");
+  return result;
+}
 
 //----------------------------------------------------------------------------
 cmExportFileGenerator::cmExportFileGenerator()
@@ -608,7 +621,8 @@ void cmExportFileGenerator::GenerateInterfaceProperties(cmTarget const* target,
     for(ImportPropertyMap::const_iterator pi = properties.begin();
         pi != properties.end(); ++pi)
       {
-      os << "  " << pi->first << " \"" << pi->second << "\"\n";
+      os << "  " << pi->first << " "
+         << cmExportFileGeneratorEscape(pi->second) << "\n";
       }
     os << ")\n\n";
     }
@@ -1112,7 +1126,8 @@ cmExportFileGenerator
   for(ImportPropertyMap::const_iterator pi = properties.begin();
       pi != properties.end(); ++pi)
     {
-    os << "  " << pi->first << " \"" << pi->second << "\"\n";
+    os << "  " << pi->first << " "
+       << cmExportFileGeneratorEscape(pi->second) << "\n";
     }
   os << "  )\n"
      << "\n";
@@ -1223,7 +1238,7 @@ cmExportFileGenerator
     ImportPropertyMap::const_iterator pi = properties.find(*li);
     if (pi != properties.end())
       {
-      os << "\"" << pi->second << "\" ";
+      os << cmExportFileGeneratorEscape(pi->second) << " ";
       }
     }
 
