@@ -1231,7 +1231,8 @@ static std::string targetNameGenex(const std::string& lib)
 }
 
 //----------------------------------------------------------------------------
-bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
+bool cmTarget::PushTLLCommandTrace(TLLSignature signature,
+                                   cmListFileContext const& lfc)
 {
   bool ret = true;
   if (!this->TLLCommands.empty())
@@ -1241,7 +1242,6 @@ bool cmTarget::PushTLLCommandTrace(TLLSignature signature)
       ret = false;
       }
     }
-  cmListFileContext lfc = this->Makefile->GetExecutionContext();
   if (this->TLLCommands.empty() || this->TLLCommands.back().second != lfc)
     {
     this->TLLCommands.push_back(std::make_pair(signature, lfc));

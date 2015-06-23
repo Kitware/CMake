@@ -207,7 +207,8 @@ public:
     KeywordTLLSignature,
     PlainTLLSignature
   };
-  bool PushTLLCommandTrace(TLLSignature signature);
+  bool PushTLLCommandTrace(TLLSignature signature,
+                           cmListFileContext const& lfc);
   void GetTllSignatureTraces(std::ostringstream &s, TLLSignature sig) const;
 
   void MergeLinkLibraries( cmMakefile& mf, const std::string& selfname,
