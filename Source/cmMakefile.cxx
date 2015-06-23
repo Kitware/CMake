@@ -591,7 +591,6 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   cmListFile listFile;
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
-    incScope.Quiet();
     return false;
     }
   this->ReadListFile(listFile, filenametoread);
