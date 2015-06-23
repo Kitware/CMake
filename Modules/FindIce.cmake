@@ -28,6 +28,7 @@
 #   Ice_SLICE2FREEZE_EXECUTABLE - path to slice2freeze executable
 #   Ice_SLICE2HTML_EXECUTABLE - path to slice2html executable
 #   Ice_SLICE2JAVA_EXECUTABLE - path to slice2java executable
+#   Ice_SLICE2JS_EXECUTABLE - path to slice2js executable
 #   Ice_SLICE2PHP_EXECUTABLE - path to slice2php executable
 #   Ice_SLICE2PY_EXECUTABLE - path to slice2py executable
 #   Ice_SLICE2RB_EXECUTABLE - path to slice2rb executable
@@ -94,6 +95,8 @@ function(_Ice_FIND)
   # Released versions of Ice, including generic short forms
   set(ice_versions
       3
+      3.6
+      3.6.0
       3.5
       3.5.1
       3.5.0
@@ -205,6 +208,7 @@ function(_Ice_FIND)
       slice2freeze
       slice2html
       slice2java
+      slice2js
       slice2php
       slice2py
       slice2rb)
@@ -379,6 +383,7 @@ if(Ice_DEBUG)
   message(STATUS "slice2freeze executable: ${Ice_SLICE2FREEZE_EXECUTABLE}")
   message(STATUS "slice2html executable: ${Ice_SLICE2HTML_EXECUTABLE}")
   message(STATUS "slice2java executable: ${Ice_SLICE2JAVA_EXECUTABLE}")
+  message(STATUS "slice2js executable: ${Ice_SLICE2JS_EXECUTABLE}")
   message(STATUS "slice2php executable: ${Ice_SLICE2PHP_EXECUTABLE}")
   message(STATUS "slice2py executable: ${Ice_SLICE2PY_EXECUTABLE}")
   message(STATUS "slice2rb executable: ${Ice_SLICE2RB_EXECUTABLE}")
