@@ -89,6 +89,8 @@ public:
   void SetAppendXML(bool b) { this->AppendXML = b; }
   void SetQuiet(bool b) { this->Quiet = b; }
   bool GetQuiet() { return this->Quiet; }
+  void SetTestLoad(long load) { this->TestLoad = load; }
+  long GetTestLoad() const { return this->TestLoad;  }
 
 protected:
   bool StartResultingXML(cmCTest::Part part,
@@ -97,6 +99,7 @@ protected:
 
   bool AppendXML;
   bool Quiet;
+  long TestLoad;
   cmSystemTools::OutputOption HandlerVerbose;
   cmCTest *CTest;
   t_StringToString Options;
