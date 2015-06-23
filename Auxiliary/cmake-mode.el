@@ -259,7 +259,9 @@ the indentation.  Otherwise it retains the same position on the line"
   (setq comment-start "#")
 
   ; Run user hooks.
-  (run-hooks 'cmake-mode-hook))
+  (if (boundp 'prog-mode-hook)
+      (run-hooks 'prog-mode-hook 'cmake-mode-hook)
+    (run-hooks 'cmake-mode-hook)))
 
 ; Help mode starts here
 
