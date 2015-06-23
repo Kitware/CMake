@@ -113,15 +113,6 @@ public:
   };
   friend class LexicalPushPop;
 
-  class LoopBlockPop
-  {
-  public:
-    LoopBlockPop(cmMakefile* mf) { this->Makefile = mf; }
-    ~LoopBlockPop() { this->Makefile->PopLoopBlock(); }
-  private:
-    cmMakefile* Makefile;
-  };
-
   /**
    * Try running cmake and building a file. This is used for dynalically
    * loaded commands, not as part of the usual build process.
