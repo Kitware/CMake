@@ -425,7 +425,7 @@ void CMakeSetupDialog::doInstallForCommandLine()
     "\n"
     " PATH=\"%1\":\"$PATH\"\n"
     "\n"
-    "Or, to install symlinks to '/usr/bin', run:\n"
+    "Or, to install symlinks to '/usr/local/bin', run:\n"
     "\n"
     " sudo \"%2\" --install\n"
     "\n"
