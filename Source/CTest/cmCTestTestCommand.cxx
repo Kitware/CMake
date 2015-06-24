@@ -108,12 +108,12 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
   // Test load is determined by: TEST_LOAD argument,
   // or CTEST_TEST_LOAD script variable, or ctest --test-load
   // command line argument... in that order.
-  long testLoad;
+  unsigned long testLoad;
   const char* ctestTestLoad
     = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
   if(this->Values[ctt_TEST_LOAD] && *this->Values[ctt_TEST_LOAD])
     {
-    if (!cmSystemTools::StringToLong(this->Values[ctt_TEST_LOAD], &testLoad))
+    if (!cmSystemTools::StringToULong(this->Values[ctt_TEST_LOAD], &testLoad))
       {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING, "Invalid value for 'TEST_LOAD' : "
@@ -122,7 +122,7 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     }
   else if(ctestTestLoad && *ctestTestLoad)
     {
-    if (!cmSystemTools::StringToLong(ctestTestLoad, &testLoad))
+    if (!cmSystemTools::StringToULong(ctestTestLoad, &testLoad))
       {
       testLoad = 0;
       cmCTestLog(this->CTest, WARNING,

@@ -394,9 +394,9 @@ void cmCTest::SetParallelLevel(int level)
   this->ParallelLevel = level < 1 ? 1 : level;
 }
 
-void cmCTest::SetTestLoad(long load)
+void cmCTest::SetTestLoad(unsigned long load)
 {
-  this->TestLoad = load < 0 ? 0 : load;
+  this->TestLoad = load;
 }
 
 //----------------------------------------------------------------------------
@@ -829,8 +829,8 @@ bool cmCTest::UpdateCTestConfiguration()
   std::string const& testLoad = this->GetCTestConfiguration("TestLoad");
   if (!testLoad.empty())
     {
-    long load;
-    if (cmSystemTools::StringToLong(testLoad.c_str(), &load))
+    unsigned long load;
+    if (cmSystemTools::StringToULong(testLoad.c_str(), &load))
       {
       this->SetTestLoad(load);
       }
@@ -2074,8 +2074,8 @@ bool cmCTest::HandleCommandLineArguments(size_t &i,
   if(this->CheckArgument(arg, "--test-load") && i < args.size() - 1)
     {
     i++;
-    long load;
-    if (cmSystemTools::StringToLong(args[i].c_str(), &load))
+    unsigned long load;
+    if (cmSystemTools::StringToULong(args[i].c_str(), &load))
       {
       this->SetTestLoad(load);
       }
