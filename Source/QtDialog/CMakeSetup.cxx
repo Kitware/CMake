@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 #if defined(Q_OS_MAC)
   if (argc2 == 2 && strcmp(argv2[1], "--install") == 0)
     {
-    return cmOSXInstall("/usr/bin");
+    return cmOSXInstall("/usr/local/bin");
     }
   if (argc2 == 2 && cmHasLiteralPrefix(argv2[1], "--install="))
     {
