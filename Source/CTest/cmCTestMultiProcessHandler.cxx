@@ -19,6 +19,7 @@
 #include <stack>
 #include <list>
 #include <float.h>
+#include <math.h>
 #include <cmsys/FStream.hxx>
 #include <cmsys/SystemInformation.hxx>
 
@@ -87,9 +88,9 @@ void cmCTestMultiProcessHandler::SetParallelLevel(size_t level)
   this->ParallelLevel = level < 1 ? 1 : level;
 }
 
-void cmCTestMultiProcessHandler::SetTestLoad(long load)
+void cmCTestMultiProcessHandler::SetTestLoad(unsigned long load)
 {
-  this->TestLoad = load < 0 ? 0 : load;
+  this->TestLoad = load;
 }
 
 //---------------------------------------------------------
@@ -278,12 +279,39 @@ void cmCTestMultiProcessHandler::StartNextTests()
   std::string testWithMinProcessors = "";
 
   cmsys::SystemInformation info;
+
+  unsigned long systemLoad = 0;
+  size_t spareLoad = 0;
   if (this->TestLoad > 0)
     {
+    // Activate possible wait.
     allTestsFailedTestLoadCheck = true;
-    }
 
-  double systemLoad = 0.0;
+    // Check for a fake load average value used in testing.
+    if (const char* fake_load_value =
+        cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING"))
+      {
+      usedFakeLoadForTesting = true;
+      if (!cmSystemTools::StringToULong(fake_load_value, &systemLoad))
+        {
+        cmSystemTools::Error("Failed to parse fake load value: ",
+                             fake_load_value);
+        }
+      }
+    // If it's not set, look up the true load average.
+    else
+      {
+      systemLoad = static_cast<unsigned long>(ceil(info.GetLoadAverage()));
+      }
+    spareLoad = (this->TestLoad > systemLoad ?
+                 this->TestLoad - systemLoad : 0);
+
+    // Don't start more tests than the spare load can support.
+    if (numToStart > spareLoad)
+      {
+      numToStart = spareLoad;
+      }
+    }
 
   TestList copy = this->SortedTests;
   for(TestList::iterator test = copy.begin(); test != copy.end(); ++test)
@@ -291,7 +319,6 @@ void cmCTestMultiProcessHandler::StartNextTests()
     // Take a nap if we're currently performing a RUN_SERIAL test.
     if (this->SerialTestRunning)
       {
-      allTestsFailedTestLoadCheck = true;
       break;
       }
     // We can only start a RUN_SERIAL test if no other tests are also running.
@@ -301,30 +328,10 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
 
     size_t processors = GetProcessorsUsed(*test);
-    bool testLoadOk;
+    bool testLoadOk = true;
     if (this->TestLoad > 0)
       {
-      // Check for a fake load average value used in testing.
-      if (const char* fake_load_value =
-          cmSystemTools::GetEnv("__CTEST_FAKE_LOAD_AVERAGE_FOR_TESTING"))
-        {
-        usedFakeLoadForTesting = true;
-        systemLoad = atoi(fake_load_value);
-        }
-      // If it's not set, look up the true load average.
-      else
-        {
-        systemLoad = info.GetLoadAverage();
-        }
-
-      // Don't start more tests than your max load can support.
-      if (numToStart > (this->TestLoad - systemLoad))
-        {
-        numToStart = this->TestLoad - systemLoad;
-        }
-
-      testLoadOk = processors <= (this->TestLoad - systemLoad);
-      if (testLoadOk)
+      if (processors <= spareLoad)
         {
         cmCTestLog(this->CTest, DEBUG,
                     "OK to run " << GetName(*test) <<
@@ -333,10 +340,10 @@ void cmCTestMultiProcessHandler::StartNextTests()
                     systemLoad << std::endl);
         allTestsFailedTestLoadCheck = false;
         }
-      }
-    else
-      {
-      testLoadOk = true;
+      else
+        {
+        testLoadOk = false;
+        }
       }
 
     if (processors <= minProcessorsRequired)
@@ -356,7 +363,7 @@ void cmCTestMultiProcessHandler::StartNextTests()
       }
     else if(numToStart == 0)
       {
-      return;
+      break;
       }
     }
 

@@ -37,7 +37,7 @@ public:
   void SetTests(TestMap& tests, PropertiesMap& properties);
   // Set the max number of tests that can be run at the same time.
   void SetParallelLevel(size_t);
-  void SetTestLoad(long load);
+  void SetTestLoad(unsigned long load);
   virtual void RunTests();
   void PrintTestList();
   void PrintLabels();
@@ -118,7 +118,7 @@ protected:
   std::set<std::string> LockedResources;
   std::vector<cmCTestTestHandler::cmCTestTestResult>* TestResults;
   size_t ParallelLevel; // max number of process that can be run at once
-  long TestLoad;
+  unsigned long TestLoad;
   std::set<cmCTestRunTest*> RunningTests;  // current running tests
   cmCTestTestHandler * TestHandler;
   cmCTest* CTest;
