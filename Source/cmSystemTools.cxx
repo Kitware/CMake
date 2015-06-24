@@ -2955,3 +2955,12 @@ bool cmSystemTools::StringToLong(const char* str, long* value)
   *value = strtol(str, &endp, 10);
   return (*endp == '\0') && (endp != str) && (errno == 0);
 }
+
+//----------------------------------------------------------------------------
+bool cmSystemTools::StringToULong(const char* str, unsigned long* value)
+{
+  errno = 0;
+  char *endp;
+  *value = strtoul(str, &endp, 10);
+  return (*endp == '\0') && (endp != str) && (errno == 0);
+}
