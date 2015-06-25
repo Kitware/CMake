@@ -34,6 +34,10 @@
 #include <time.h>
 
 #include <stdlib.h> // required for atoi
+#ifdef _WIN32
+// defined in binexplib.cxx
+void DumpFile(const char* filename, FILE *fout);
+#endif
 
 void CMakeCommandUsage(const char* program)
 {
@@ -213,9 +217,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
 #ifdef _WIN32
     else if(args[1] == "__create_def")
       {
-      // defined in binexplib.cxx
-      void
-        DumpFile(const char* filename, FILE *fout);
       if(args.size() < 4)
         {
         std::cerr <<
@@ -240,7 +241,6 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
       std::string objfile;
       while(cmSystemTools::GetLineFromStream(fin, objfile))
         {
-        // needed fort for bzip2 c code with WINAPI calls
         DumpFile(objfile.c_str(), fout);
         }
       return 0;
