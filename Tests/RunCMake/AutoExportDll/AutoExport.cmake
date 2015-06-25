@@ -1,0 +1,5 @@
+project(autoexport)
+set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+add_library(autoexport SHARED hello.cxx world.cxx foo.c)
+add_executable(say say.cxx)
+target_link_libraries(say autoexport)

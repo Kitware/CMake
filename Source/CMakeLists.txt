@@ -430,6 +430,7 @@ if (WIN32)
   set(SRCS ${SRCS}
     cmCallVisualStudioMacro.cxx
     cmCallVisualStudioMacro.h
+    bindexplib.cxx
     )
 
   if(NOT UNIX)
