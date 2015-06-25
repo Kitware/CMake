@@ -41,7 +41,7 @@ The options are:
   Specify the end of a range of test numbers.
 
 ``STRIDE <stride-number>``
-  Specify the stride by which to step acorss a range of test numbers.
+  Specify the stride by which to step across a range of test numbers.
 
 ``EXCLUDE <exclude-regex>``
   Specify a regular expression matching test names to exclude.
