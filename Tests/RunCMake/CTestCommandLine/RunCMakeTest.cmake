@@ -1,5 +1,5 @@
 include(RunCMake)
-set(RunCMake_TEST_TIMEOUT 10)
+set(RunCMake_TEST_TIMEOUT 30)
 
 unset(ENV{CTEST_PARALLEL_LEVEL})
 unset(ENV{CTEST_OUTPUT_ON_FAILURE})

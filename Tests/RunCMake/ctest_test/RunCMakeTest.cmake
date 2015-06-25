@@ -1,5 +1,5 @@
 include(RunCTest)
-set(RunCMake_TEST_TIMEOUT 10)
+set(RunCMake_TEST_TIMEOUT 30)
 
 set(CASE_CTEST_TEST_ARGS "")
 set(CASE_CTEST_TEST_LOAD "")
