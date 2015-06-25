@@ -186,7 +186,7 @@ HaveExportedObjects(PIMAGE_FILE_HEADER pImageFileHeader,
 void
 DumpExternalsObjects(PIMAGE_SYMBOL pSymbolTable,
                      PIMAGE_SECTION_HEADER pSectionHeaders,
-                     FILE *fout, unsigned cSymbols)
+                     FILE *fout, DWORD_PTR cSymbols)
 {
    unsigned i;
    PSTR stringTable;
