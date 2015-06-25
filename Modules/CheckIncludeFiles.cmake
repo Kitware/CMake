@@ -2,29 +2,34 @@
 # CheckIncludeFiles
 # -----------------
 #
-# Check if the files can be included
+# Provides a macro to check if a list of one or more header files can
+# be included together in ``C``.
 #
+# .. command:: CHECK_INCLUDE_FILES
 #
+#   ::
 #
-# CHECK_INCLUDE_FILES(INCLUDE VARIABLE)
+#     CHECK_INCLUDE_FILES("<includes>" <variable>)
 #
-# ::
-#
-#   INCLUDE  - list of files to include
-#   VARIABLE - variable to return result
-#              Will be created as an internal cache variable.
-#
-#
+#   Check if the given ``<includes>`` list may be included together
+#   in a ``C`` source file and store the result in an internal cache
+#   entry named ``<variable>``.  Specify the ``<includes>`` argument
+#   as a :ref:`;-list <CMake Language Lists>` of header file names.
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
 #
-# ::
+# ``CMAKE_REQUIRED_FLAGS``
+#   string of compile command line flags
+# ``CMAKE_REQUIRED_DEFINITIONS``
+#   list of macros to define (-DFOO=bar)
+# ``CMAKE_REQUIRED_INCLUDES``
+#   list of include directories
+# ``CMAKE_REQUIRED_QUIET``
+#   execute quietly without messages
 #
-#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#   CMAKE_REQUIRED_INCLUDES = list of include directories
-#   CMAKE_REQUIRED_QUIET = execute quietly without messages
+# See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFileCXX`
+# to check for a single header file in ``C`` or ``CXX`` languages.
 
 #=============================================================================
 # Copyright 2003-2012 Kitware, Inc.
