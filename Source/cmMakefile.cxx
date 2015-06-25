@@ -1630,13 +1630,13 @@ bool cmMakefile::IsRootMakefile() const
 class cmMakefileCurrent
 {
   cmGlobalGenerator* GG;
-  cmMakefile* MF;
+  cmMakefile* CurrentMakefile;
   cmState::Snapshot Snapshot;
 public:
   cmMakefileCurrent(cmMakefile* mf)
     {
     this->GG = mf->GetGlobalGenerator();
-    this->MF = this->GG->GetCurrentMakefile();
+    this->CurrentMakefile = this->GG->GetCurrentMakefile();
     this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
     this->GG->GetCMakeInstance()->SetCurrentSnapshot(
           this->GG->GetCMakeInstance()->GetCurrentSnapshot());
@@ -1650,7 +1650,7 @@ public:
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PopFileScope();
 #endif
-    this->GG->SetCurrentMakefile(this->MF);
+    this->GG->SetCurrentMakefile(this->CurrentMakefile);
     this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
     }
 };
