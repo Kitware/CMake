@@ -1685,6 +1685,7 @@ private:
 void cmMakefile::Configure()
 {
   cmMakefileCurrent cmf(this);
+  BuildsystemFileScope scope(this);
 
   // make sure the CMakeFiles dir is there
   std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
@@ -1696,8 +1697,6 @@ void cmMakefile::Configure()
   assert(cmSystemTools::FileExists(currentStart.c_str(), true));
   this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
 
-  {
-  BuildsystemFileScope scope(this);
   cmListFile listFile;
   if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
     {
@@ -1709,7 +1708,6 @@ void cmMakefile::Configure()
     {
     scope.Quiet();
     }
-  }
 
    // at the end handle any old style subdirs
   std::vector<cmMakefile*> subdirs = this->UnConfiguredDirectories;
