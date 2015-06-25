@@ -2,34 +2,33 @@
 # CheckIncludeFileCXX
 # -------------------
 #
-# Check if the include file exists.
+# Provides a macro to check if a header file can be included in ``CXX``.
 #
-# ::
+# .. command:: CHECK_INCLUDE_FILE_CXX
 #
-#   CHECK_INCLUDE_FILE_CXX(INCLUDE VARIABLE)
+#   ::
 #
+#     CHECK_INCLUDE_FILE_CXX(<include> <variable> [<flags>])
 #
-#
-# ::
-#
-#   INCLUDE  - name of include file
-#   VARIABLE - variable to return result
-#              Will be created as an internal cache variable.
-#
-#
-#
-# An optional third argument is the CFlags to add to the compile line or
-# you can use CMAKE_REQUIRED_FLAGS.
+#   Check if the given ``<include>`` file may be included in a ``CXX``
+#   source file and store the result in an internal cache entry named
+#   ``<variable>``.  The optional third argument may be used to add
+#   compilation flags to the check (or use ``CMAKE_REQUIRED_FLAGS`` below).
 #
 # The following variables may be set before calling this macro to modify
 # the way the check is run:
 #
-# ::
+# ``CMAKE_REQUIRED_FLAGS``
+#   string of compile command line flags
+# ``CMAKE_REQUIRED_DEFINITIONS``
+#   list of macros to define (-DFOO=bar)
+# ``CMAKE_REQUIRED_INCLUDES``
+#   list of include directories
+# ``CMAKE_REQUIRED_QUIET``
+#   execute quietly without messages
 #
-#   CMAKE_REQUIRED_FLAGS = string of compile command line flags
-#   CMAKE_REQUIRED_DEFINITIONS = list of macros to define (-DFOO=bar)
-#   CMAKE_REQUIRED_INCLUDES = list of include directories
-#   CMAKE_REQUIRED_QUIET = execute quietly without messages
+# See modules :module:`CheckIncludeFile` and :module:`CheckIncludeFiles`
+# to check for one or more ``C`` headers.
 
 #=============================================================================
 # Copyright 2002-2009 Kitware, Inc.
