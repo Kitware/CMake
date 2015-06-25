@@ -324,12 +324,22 @@ void cmVisualStudio10TargetGenerator::Generate()
   if(this->NsightTegra)
     {
     this->WriteString("<PropertyGroup Label=\"NsightTegraProject\">\n", 1);
-    if(this->NsightTegraVersion[0] >= 2)
+    const int nsightTegraMajorVersion = this->NsightTegraVersion[0];
+    const int nsightTegraMinorVersion = this->NsightTegraVersion[1];
+    if (nsightTegraMajorVersion >= 2)
       {
-      // Nsight Tegra 2.0 uses project revision 9.
-      this->WriteString("<NsightTegraProjectRevisionNumber>"
-                        "9"
-                        "</NsightTegraProjectRevisionNumber>\n", 2);
+      this->WriteString("<NsightTegraProjectRevisionNumber>", 2);
+      if (nsightTegraMajorVersion > 3 ||
+          (nsightTegraMajorVersion == 3 && nsightTegraMinorVersion >= 1))
+        {
+        (*this->BuildFileStream) << "11";
+        }
+      else
+        {
+        // Nsight Tegra 2.0 uses project revision 9.
+        (*this->BuildFileStream) << "9";
+        }
+      (*this->BuildFileStream) << "</NsightTegraProjectRevisionNumber>\n";
       // Tell newer versions to upgrade silently when loading.
       this->WriteString("<NsightTegraUpgradeOnceWithoutPrompt>"
                         "true"
@@ -786,6 +796,20 @@ void cmVisualStudio10TargetGenerator
     this->WriteString("<AndroidTargetAPI>", 2);
     (*this->BuildFileStream ) <<
       "android-" << cmVS10EscapeXML(api) << "</AndroidTargetAPI>\n";
+    }
+
+  if(const char* cpuArch = this->Target->GetProperty("ANDROID_ARCH"))
+    {
+    this->WriteString("<AndroidArch>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(cpuArch) <<
+      "</AndroidArch>\n";
+    }
+
+  if(const char* stlType = this->Target->GetProperty("ANDROID_STL_TYPE"))
+    {
+    this->WriteString("<AndroidStlType>", 2);
+    (*this->BuildFileStream) << cmVS10EscapeXML(stlType) <<
+      "</AndroidStlType>\n";
     }
 }
 
@@ -1978,6 +2002,17 @@ void cmVisualStudio10TargetGenerator::WriteClOptions(
   clOptions.OutputPreprocessorDefinitions(*this->BuildFileStream, "      ",
                                           "\n", "CXX");
 
+  if(this->NsightTegra)
+    {
+    if(const char* processMax =
+        this->Target->GetProperty("ANDROID_PROCESS_MAX"))
+      {
+      this->WriteString("<ProcessMax>", 3);
+      *this->BuildFileStream << cmVS10EscapeXML(processMax) <<
+        "</ProcessMax>\n";
+      }
+    }
+
   if(this->MSTools)
     {
     this->WriteString("<ObjectFileName>$(IntDir)</ObjectFileName>\n", 3);
@@ -2170,7 +2205,7 @@ cmVisualStudio10TargetGenerator::WriteLibOptions(std::string const& config)
 
 //----------------------------------------------------------------------------
 void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
-  std::string const&)
+  std::string const& configName)
 {
   // Look through the sources for AndroidManifest.xml and use
   // its location as the root source directory.
@@ -2200,6 +2235,92 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
     cmVS10EscapeXML(antBuildPath) << "</AntBuildPath>\n";
   }
 
+  if (this->Target->GetPropertyAsBool("ANDROID_SKIP_ANT_STEP"))
+    {
+    this->WriteString("<SkipAntStep>true</SkipAntStep>\n", 3);
+    }
+
+  if (this->Target->GetPropertyAsBool("ANDROID_PROGUARD"))
+    {
+    this->WriteString("<EnableProGuard>true</EnableProGuard>\n", 3);
+    }
+
+  if (const char* proGuardConfigLocation =
+      this->Target->GetProperty("ANDROID_PROGUARD_CONFIG_PATH"))
+    {
+    this->WriteString("<ProGuardConfigLocation>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(proGuardConfigLocation) <<
+      "</ProGuardConfigLocation>\n";
+    }
+
+  if (const char* securePropertiesLocation =
+      this->Target->GetProperty("ANDROID_SECURE_PROPS_PATH"))
+    {
+    this->WriteString("<SecurePropertiesLocation>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(securePropertiesLocation) <<
+      "</SecurePropertiesLocation>\n";
+    }
+
+  if (const char* nativeLibDirectoriesExpression =
+      this->Target->GetProperty("ANDROID_NATIVE_LIB_DIRECTORIES"))
+    {
+    cmGeneratorExpression ge;
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+        ge.Parse(nativeLibDirectoriesExpression);
+    std::string nativeLibDirs = cge->Evaluate(this->Makefile, configName);
+    this->WriteString("<NativeLibDirectories>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(nativeLibDirs) <<
+      "</NativeLibDirectories>\n";
+    }
+
+  if (const char* nativeLibDependenciesExpression =
+      this->Target->GetProperty("ANDROID_NATIVE_LIB_DEPENDENCIES"))
+    {
+    cmGeneratorExpression ge;
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+        ge.Parse(nativeLibDependenciesExpression);
+    std::string nativeLibDeps = cge->Evaluate(this->Makefile, configName);
+    this->WriteString("<NativeLibDependencies>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(nativeLibDeps) <<
+      "</NativeLibDependencies>\n";
+    }
+
+  if (const char* javaSourceDir =
+      this->Target->GetProperty("ANDROID_JAVA_SOURCE_DIR"))
+    {
+    this->WriteString("<JavaSourceDir>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(javaSourceDir) <<
+      "</JavaSourceDir>\n";
+    }
+
+  if (const char* jarDirectoriesExpression =
+      this->Target->GetProperty("ANDROID_JAR_DIRECTORIES"))
+    {
+    cmGeneratorExpression ge;
+    cmsys::auto_ptr<cmCompiledGeneratorExpression> cge =
+      ge.Parse(jarDirectoriesExpression);
+    std::string jarDirectories = cge->Evaluate(this->Makefile, configName);
+    this->WriteString("<JarDirectories>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(jarDirectories) <<
+      "</JarDirectories>\n";
+    }
+
+  if (const char* jarDeps =
+      this->Target->GetProperty("ANDROID_JAR_DEPENDENCIES"))
+    {
+    this->WriteString("<JarDependencies>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(jarDeps) <<
+      "</JarDependencies>\n";
+    }
+
+  if (const char* assetsDirectories =
+      this->Target->GetProperty("ANDROID_ASSETS_DIRECTORIES"))
+    {
+    this->WriteString("<AssetsDirectories>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(assetsDirectories) <<
+      "</AssetsDirectories>\n";
+    }
+
   {
   std::string manifest_xml = rootDir + "/AndroidManifest.xml";
   this->ConvertToWindowsSlash(manifest_xml);
@@ -2207,6 +2328,14 @@ void cmVisualStudio10TargetGenerator::WriteAntBuildOptions(
   (*this->BuildFileStream) <<
     cmVS10EscapeXML(manifest_xml) << "</AndroidManifestLocation>\n";
   }
+
+  if (const char* antAdditionalOptions =
+      this->Target->GetProperty("ANDROID_ANT_ADDITIONAL_OPTIONS"))
+    {
+    this->WriteString("<AdditionalOptions>", 3);
+    (*this->BuildFileStream) << cmVS10EscapeXML(antAdditionalOptions) <<
+      " %(AdditionalOptions)</AdditionalOptions>\n";
+    }
 
   this->WriteString("</AntBuild>\n", 2);
 }

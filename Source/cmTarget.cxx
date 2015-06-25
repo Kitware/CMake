@@ -297,6 +297,20 @@ void cmTarget::SetMakefile(cmMakefile* mf)
     {
     this->SetPropertyDefault("ANDROID_API", 0);
     this->SetPropertyDefault("ANDROID_API_MIN", 0);
+    this->SetPropertyDefault("ANDROID_ARCH", 0);
+    this->SetPropertyDefault("ANDROID_STL_TYPE", 0);
+    this->SetPropertyDefault("ANDROID_SKIP_ANT_STEP", 0);
+    this->SetPropertyDefault("ANDROID_PROCESS_MAX", 0);
+    this->SetPropertyDefault("ANDROID_PROGUARD", 0);
+    this->SetPropertyDefault("ANDROID_PROGUARD_CONFIG_PATH", 0);
+    this->SetPropertyDefault("ANDROID_SECURE_PROPS_PATH", 0);
+    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DIRECTORIES", 0);
+    this->SetPropertyDefault("ANDROID_NATIVE_LIB_DEPENDENCIES", 0);
+    this->SetPropertyDefault("ANDROID_JAVA_SOURCE_DIR", 0);
+    this->SetPropertyDefault("ANDROID_JAR_DIRECTORIES", 0);
+    this->SetPropertyDefault("ANDROID_JAR_DEPENDENCIES", 0);
+    this->SetPropertyDefault("ANDROID_ASSETS_DIRECTORIES", 0);
+    this->SetPropertyDefault("ANDROID_ANT_ADDITIONAL_OPTIONS", 0);
     this->SetPropertyDefault("INSTALL_NAME_DIR", 0);
     this->SetPropertyDefault("INSTALL_RPATH", "");
     this->SetPropertyDefault("INSTALL_RPATH_USE_LINK_PATH", "OFF");
