@@ -217,7 +217,7 @@ Id flags: ${testflags}
       set(id_subsystem 1)
     endif()
     set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
-    get_filename_component(id_src "${src}" NAME)
+    set(id_src "${src}")
     configure_file(${CMAKE_ROOT}/Modules/CompilerId/VS-${v}.${ext}.in
       ${id_dir}/CompilerId${lang}.${ext} @ONLY)
     if(CMAKE_VS_MSBUILD_COMMAND AND NOT lang STREQUAL "Fortran")
@@ -256,7 +256,7 @@ Id flags: ${testflags}
     set(id_lang "${lang}")
     set(id_type ${CMAKE_${lang}_COMPILER_XCODE_TYPE})
     set(id_dir ${CMAKE_${lang}_COMPILER_ID_DIR})
-    get_filename_component(id_src "${src}" NAME)
+    set(id_src "${src}")
     if(CMAKE_XCODE_PLATFORM_TOOLSET)
       set(id_toolset "GCC_VERSION = ${CMAKE_XCODE_PLATFORM_TOOLSET};")
     else()
