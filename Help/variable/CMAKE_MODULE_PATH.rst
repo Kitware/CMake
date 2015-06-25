@@ -1,8 +1,7 @@
 CMAKE_MODULE_PATH
 -----------------
 
-List of directories to search for CMake modules.
-
-Commands like include() and find_package() search for files in
-directories listed by this variable before checking the default
-modules that come with CMake.
+:ref:`;-list <CMake Language Lists>` of directories specifying a search path
+for CMake modules to be loaded by the the :command:`include` or
+:command:`find_package` commands before checking the default modules that come
+with CMake.  By default it is empty, it is intended to be set by the project.
