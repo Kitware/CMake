@@ -368,7 +368,8 @@ cmTargetLinkLibrariesCommand::HandleLibrary(const std::string& lib,
       || this->CurrentProcessingState == ProcessingKeywordPublicInterface
       || this->CurrentProcessingState == ProcessingKeywordLinkInterface)
         ? cmTarget::KeywordTLLSignature : cmTarget::PlainTLLSignature;
-  if (!this->Target->PushTLLCommandTrace(sig))
+  if (!this->Target->PushTLLCommandTrace(
+        sig, this->Makefile->GetExecutionContext()))
     {
     std::ostringstream e;
     const char *modal = 0;
