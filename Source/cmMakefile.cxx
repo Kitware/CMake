@@ -1626,35 +1626,6 @@ bool cmMakefile::IsRootMakefile() const
   return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
-//----------------------------------------------------------------------------
-class cmMakefileCurrent
-{
-  cmGlobalGenerator* GG;
-  cmMakefile* CurrentMakefile;
-  cmState::Snapshot Snapshot;
-public:
-  cmMakefileCurrent(cmMakefile* mf)
-    {
-    this->GG = mf->GetGlobalGenerator();
-    this->CurrentMakefile = this->GG->GetCurrentMakefile();
-    this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
-          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
-    this->GG->SetCurrentMakefile(mf);
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PushFileScope();
-#endif
-    }
-  ~cmMakefileCurrent()
-    {
-#if defined(CMAKE_BUILD_WITH_CMAKE)
-    this->GG->GetFileLockPool().PopFileScope();
-#endif
-    this->GG->SetCurrentMakefile(this->CurrentMakefile);
-    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
-    }
-};
-
 class cmMakefile::BuildsystemFileScope
 {
 public:
@@ -1667,24 +1638,41 @@ public:
     this->Makefile->ListFileStack.push_back(currentStart);
     this->Makefile->PushPolicyBarrier();
     this->Makefile->PushFunctionBlockerBarrier();
+
+    this->GG = mf->GetGlobalGenerator();
+    this->CurrentMakefile = this->GG->GetCurrentMakefile();
+    this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(
+          this->GG->GetCMakeInstance()->GetCurrentSnapshot());
+    this->GG->SetCurrentMakefile(mf);
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PushFileScope();
+#endif
   }
 
   ~BuildsystemFileScope()
   {
     this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
     this->Makefile->PopPolicyBarrier(this->ReportError);
+#if defined(CMAKE_BUILD_WITH_CMAKE)
+    this->GG->GetFileLockPool().PopFileScope();
+#endif
+    this->GG->SetCurrentMakefile(this->CurrentMakefile);
+    this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
   }
 
   void Quiet() { this->ReportError = false; }
 private:
   cmMakefile* Makefile;
+  cmGlobalGenerator* GG;
+  cmMakefile* CurrentMakefile;
+  cmState::Snapshot Snapshot;
   bool ReportError;
 };
 
 //----------------------------------------------------------------------------
 void cmMakefile::Configure()
 {
-  cmMakefileCurrent cmf(this);
   BuildsystemFileScope scope(this);
 
   // make sure the CMakeFiles dir is there
