@@ -917,7 +917,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   std::string objs_file = gt->Target->GetName();
   objs_file += ".dir/" + configName;
   cmSystemTools::MakeDirectory(objs_file.c_str());
-  objs_file += "/exportall.def.objs";
+  objs_file += "/objects.txt";
   cmdl.push_back(objs_file);
   std::ofstream fout(objs_file.c_str());
   if(!fout)
