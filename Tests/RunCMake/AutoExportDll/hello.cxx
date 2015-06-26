@@ -9,5 +9,5 @@ void hello()
 {
   std::cout << "hello";
 }
-void Hello::operator delete[](void* ptr) {};
-void Hello::operator delete(void* ptr) {};
+void Hello::operator delete[](void*) {};
+void Hello::operator delete(void*) {};

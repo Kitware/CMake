@@ -1,4 +1,4 @@
-#include <iostream>
+#include <stdio.h>
 #include "hello.h"
 #ifdef _MSC_VER
 #include "windows.h"
@@ -26,10 +26,12 @@ int main()
   Hello h;
   h.real();
   hello();
-  std::cout << " ";
+  printf(" ");
   world();
-  std::cout << "\n" << foo() << "\n";
-  std::cout << "\n" << bar() << "\n";
-  std::cout << "\n";
+  printf("\n");
+  foo();
+  printf("\n");
+  bar();
+  printf("\n");
   return 0;
 }
