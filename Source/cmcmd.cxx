@@ -34,7 +34,7 @@
 #include <time.h>
 
 #include <stdlib.h> // required for atoi
-#ifdef _WIN32
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
 // defined in binexplib.cxx
 void DumpFile(const char* filename, FILE *fout);
 #endif
@@ -214,7 +214,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       return 0;
       }
-#ifdef _WIN32
+#if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
     else if(args[1] == "__create_def")
       {
       if(args.size() < 4)
@@ -223,7 +223,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
           "__create_def Usage: -E __create_def outfile.def objlistfile\n";
         return 1;
         }
-      FILE* fout = fopen(args[2].c_str(), "w+");
+      FILE* fout = cmsys::SystemTools::Fopen(args[2].c_str(), "w+");
       if(!fout)
         {
         std::cerr << "could not open output .def file: " << args[2].c_str()

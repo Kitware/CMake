@@ -70,6 +70,7 @@
 
 static char sccsid[] = "@(#) winDumpExts.c 1.2 95/10/03 15:27:34";
 
+#include <cmsys/Encoding.hxx>
 #include <windows.h>
 #include <stdio.h>
 #include <string>
@@ -353,7 +354,8 @@ DumpFile(const char* filename, FILE *fout)
    LPVOID lpFileBase;
    PIMAGE_DOS_HEADER dosHeader;
 
-   hFile = CreateFileA(filename, GENERIC_READ, FILE_SHARE_READ, NULL,
+   hFile = CreateFileW(cmsys::Encoding::ToWide(filename).c_str(),
+                       GENERIC_READ, FILE_SHARE_READ, NULL,
       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
    if (hFile == INVALID_HANDLE_VALUE)
