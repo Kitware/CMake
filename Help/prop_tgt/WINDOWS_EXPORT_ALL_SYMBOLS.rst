@@ -1,14 +1,17 @@
 WINDOWS_EXPORT_ALL_SYMBOLS
 --------------------------
 
-This property is implemented only when the compiler supports it.
+This property is implemented only for MS-compatible tools on Windows.
 
-This property will automatically create a .def file with all global
-symbols found in the input .obj files for a dll on Windows. The def
-file will be passed to the linker causing all symbols to be exported
-from the dll. For any global data __declspec(dllimport) must still be
-used when compiling against the code in the dll. All other function
-symbols will be automatically exported and imported by callers.
+Enable this boolean property to automatically create a module definition
+(``.def``) file with all global symbols found in the input ``.obj`` files
+for a ``SHARED`` library on Windows.  The module definition file will be
+passed to the linker causing all symbols to be exported from the ``.dll``.
+For global *data* symbols, ``__declspec(dllimport)`` must still be used when
+compiling against the code in the ``.dll``.  All other function symbols will
+be automatically exported and imported by callers.  This simplifies porting
+projects to Windows by reducing the need for explicit ``dllexport`` markup,
+even in ``C++`` classes.
 
 This property is initialized by the value of
 the :variable:`CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS` variable if it is set

@@ -214,6 +214,7 @@ int cmcmd::ExecuteCMakeCommand(std::vector<std::string>& args)
         }
       return 0;
       }
+
 #if defined(_WIN32) && defined(CMAKE_BUILD_WITH_CMAKE)
     else if(args[1] == "__create_def")
       {

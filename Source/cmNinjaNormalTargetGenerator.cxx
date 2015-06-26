@@ -437,6 +437,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
     this->OSXBundleGenerator->CreateCFBundle(this->TargetNameOut,
                                              target.GetDirectory(cfgName));
     }
+
   // Write comments.
   cmGlobalNinjaGenerator::WriteDivider(this->GetBuildFileStream());
   const cmTarget::TargetType targetType = target.GetType();
@@ -616,10 +617,10 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                      std::back_inserter(byproducts), MapToNinjaPath());
       }
     }
-  // check for windows_auto_dll_export property here
-  // create .def file from list of objects
-  if(this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
-     && target.GetType() == cmTarget::SHARED_LIBRARY)
+
+  // maybe create .def file from list of objects
+  if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+      this->GetMakefile()->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
     const char *autodef = target.GetProperty(autodef_prop);
