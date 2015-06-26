@@ -46,7 +46,10 @@ else()
   include_directories(${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
+add_library(ResourceLib STATIC lib.cpp lib.rc)
+
 add_executable(VSResource main.cpp test.rc)
+target_link_libraries(VSResource ResourceLib)
 
 set_property(TARGET VSResource
   PROPERTY VS_GLOBAL_CMakeTestVsGlobalVariable "test val")
