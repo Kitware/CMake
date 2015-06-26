@@ -2473,7 +2473,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     const char *autodef = this->Target->GetProperty(autodef_prop);
     if (autodef && *autodef)
       {
-      linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)/exportall.def");
+      linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)exportall.def");
       }
     }
 

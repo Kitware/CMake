@@ -17,7 +17,7 @@ if("${RunCMake_GENERATOR}" MATCHES "Visual Studio|Xcode")
 endif()
 # build AutoExport
 run_cmake_command(AutoExportBuild ${CMAKE_COMMAND} --build
-  ${RunCMake_TEST_BINARY_DIR} --config Debug)
+  ${RunCMake_TEST_BINARY_DIR} --config Debug --clean-first)
 # run the executable that uses symbols from the dll
 if(WIN32)
   set(EXE_EXT ".exe")
