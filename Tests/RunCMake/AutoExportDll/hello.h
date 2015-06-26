@@ -13,6 +13,6 @@ class Hello
 public:
   static winexport int Data;
   void real();
-  static void operator delete[](void* ptr);
-  static void operator delete(void* ptr);
+  static void operator delete[](void*);
+  static void operator delete(void*);
 };
