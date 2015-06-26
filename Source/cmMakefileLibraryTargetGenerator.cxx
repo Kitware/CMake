@@ -563,10 +563,9 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                           useResponseFileForObjects, buildObjs, depends,
                           useWatcomQuote);
 
-  // check for windows_auto_dll_export property here
-  // create .def file from list of objects
-  if(this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
-     && this->Target->GetType() == cmTarget::SHARED_LIBRARY)
+  // maybe create .def file from list of objects
+  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
     const char *autodef = this->Target->GetProperty(autodef_prop);

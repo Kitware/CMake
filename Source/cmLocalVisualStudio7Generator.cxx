@@ -1081,8 +1081,8 @@ void cmLocalVisualStudio7Generator::OutputBuildTool(std::ostream& fout,
       this->ConvertToOutputFormat(this->ModuleDefinitionFile, SHELL);
     linkOptions.AddFlag("ModuleDefinitionFile", defFile.c_str());
     }
-  if(this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
-     &&target.GetType() == cmTarget::SHARED_LIBRARY)
+  if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
     const char *autodef = target.GetProperty(autodef_prop);
@@ -2026,8 +2026,8 @@ void cmLocalVisualStudio7Generator
   tool = this->FortranProject? "VFPreLinkEventTool":"VCPreLinkEventTool";
   event.Start(tool);
   bool addedPrelink = false;
-  if(this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
-     && target.GetType() == cmTarget::SHARED_LIBRARY)
+  if (target.GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
     const char *autodef = target.GetProperty(autodef_prop);
@@ -2045,7 +2045,7 @@ void cmLocalVisualStudio7Generator
       event.Write(commands);
       }
     }
-  if(!addedPrelink)
+  if (!addedPrelink)
     {
     event.Write(target.GetPreLinkCommands());
     }

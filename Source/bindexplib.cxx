@@ -1,6 +1,6 @@
 /*============================================================================
   CMake - Cross Platform Makefile Generator
-  Copyright 2000-2009 Kitware, Inc., Insight Software Consortium
+  Copyright 2000-2015 Kitware, Inc.
 
   Distributed under the OSI-approved BSD License (the "License");
   see accompanying file Copyright.txt for details.
@@ -9,9 +9,12 @@
   implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
   See the License for more information.
 ============================================================================*/
-
-/* permission to use BSD license from Pere Mato pere.mato@cern.ch
-  Header of original code from http://root.cern.ch follows: */
+/*-------------------------------------------------------------------------
+  Portions of this source have been derived from the 'bindexplib' tool
+  provided by the CERN ROOT Data Analysis Framework project (root.cern.ch).
+  Permission has been granted by Pere Mato <pere.mato@cern.ch> to distribute
+  this derived work under the CMake license.
+-------------------------------------------------------------------------*/
 
 /*
 *----------------------------------------------------------------------
@@ -143,8 +146,8 @@ HaveExportedObjects(PIMAGE_FILE_HEADER pImageFileHeader,
     i = 0;
     foundExports = 0;
     pDirectivesSectionHeader = 0;
-    for(i = 0; i < pImageFileHeader->NumberOfSections
-          && !pDirectivesSectionHeader; i++)
+    for(i = 0; (i < pImageFileHeader->NumberOfSections &&
+                !pDirectivesSectionHeader); i++)
        if (!strncmp((const char*)&pSectionHeaders[i].Name[0], ".drectve",8))
           pDirectivesSectionHeader = &pSectionHeaders[i];
    if (!pDirectivesSectionHeader) return 0;
@@ -200,107 +203,88 @@ DumpExternalsObjects(PIMAGE_SYMBOL pSymbolTable,
    */
    stringTable = (PSTR)&pSymbolTable[cSymbols];
 
-   for ( i=0; i < cSymbols; i++ )
-     {
-     if (pSymbolTable->SectionNumber > 0 &&
-         ( pSymbolTable->Type == 0x20 || pSymbolTable->Type == 0x0))
-       {
-       if (pSymbolTable->StorageClass == IMAGE_SYM_CLASS_EXTERNAL)
-         {
-         /*
-          *    The name of the Function entry points
-          */
-         if (pSymbolTable->N.Name.Short != 0)
-           {
-           symbol = "";
-           symbol.insert(0, (const char *)pSymbolTable->N.ShortName, 8);
-           }
-         else
-           {
-           symbol = stringTable + pSymbolTable->N.Name.Long;
-           }
-         // clear out any leading spaces
-         while (isspace(symbol[0])) symbol.erase(0,1);
-         // if it starts with _ and has an @ then it is a __cdecl
-         // so remove the @ stuff for the export
-         if(symbol[0] == '_')
-           {
-           std::string::size_type posAt = symbol.find('@');
-           if (posAt != std::string::npos)
-             {
-             symbol.erase(posAt);
-             }
-           }
-         if (symbol[0] == '_') symbol.erase(0,1);
-         if (fImportFlag)
-           {
-           fImportFlag = 0;
-           fprintf(fout,"EXPORTS \n");
-           }
-         /*
-           Check whether it is "Scalar deleting destructor" and
-           "Vector deleting destructor"
-         */
-         const char *scalarPrefix = "??_G";
-         const char *vectorPrefix = "??_E";
-         // original code had a check for
-         // symbol.find("real@") == std::string::npos)
-         // but if this disallows memmber functions with the name real
-         // if scalarPrefix and vectorPrefix are not found then print
-         //the symbol
-         if (symbol.compare(0, 4, scalarPrefix) &&
-             symbol.compare(0, 4, vectorPrefix) )
-           {
-           SectChar =
-             pSectionHeaders[pSymbolTable->SectionNumber-1].Characteristics;
-           if (!pSymbolTable->Type  && (SectChar & IMAGE_SCN_MEM_WRITE))
-             {
-             // Read only (i.e. constants) must be excluded
-             fprintf(fout, "\t%s \t DATA\n", symbol.c_str());
-             }
-           else
-             {
-             if ( pSymbolTable->Type  || !(SectChar & IMAGE_SCN_MEM_READ))
-               {
-               fprintf(fout, "\t%s\n", symbol.c_str());
+   for ( i=0; i < cSymbols; i++ ) {
+      if (pSymbolTable->SectionNumber > 0 &&
+          ( pSymbolTable->Type == 0x20 || pSymbolTable->Type == 0x0)) {
+         if (pSymbolTable->StorageClass == IMAGE_SYM_CLASS_EXTERNAL) {
+            /*
+            *    The name of the Function entry points
+            */
+            if (pSymbolTable->N.Name.Short != 0) {
+               symbol = "";
+               symbol.insert(0, (const char *)pSymbolTable->N.ShortName, 8);
+            } else {
+               symbol = stringTable + pSymbolTable->N.Name.Long;
+            }
+
+            // clear out any leading spaces
+            while (isspace(symbol[0])) symbol.erase(0,1);
+            // if it starts with _ and has an @ then it is a __cdecl
+            // so remove the @ stuff for the export
+            if(symbol[0] == '_') {
+               std::string::size_type posAt = symbol.find('@');
+               if (posAt != std::string::npos) {
+                  symbol.erase(posAt);
                }
-             else
-               {
-               //printf(" strange symbol: %s \n",symbol.c_str());
+            }
+            if (symbol[0] == '_') symbol.erase(0,1);
+            if (fImportFlag) {
+               fImportFlag = 0;
+               fprintf(fout,"EXPORTS \n");
+            }
+            /*
+            Check whether it is "Scalar deleting destructor" and
+            "Vector deleting destructor"
+            */
+            const char *scalarPrefix = "??_G";
+            const char *vectorPrefix = "??_E";
+            // original code had a check for
+            // symbol.find("real@") == std::string::npos)
+            // but if this disallows memmber functions with the name real
+            // if scalarPrefix and vectorPrefix are not found then print
+            // the symbol
+            if (symbol.compare(0, 4, scalarPrefix) &&
+                symbol.compare(0, 4, vectorPrefix) )
+            {
+               SectChar =
+                pSectionHeaders[pSymbolTable->SectionNumber-1].Characteristics;
+               if (!pSymbolTable->Type  && (SectChar & IMAGE_SCN_MEM_WRITE)) {
+                  // Read only (i.e. constants) must be excluded
+                  fprintf(fout, "\t%s \t DATA\n", symbol.c_str());
+               } else {
+                  if ( pSymbolTable->Type  ||
+                       !(SectChar & IMAGE_SCN_MEM_READ)) {
+                     fprintf(fout, "\t%s\n", symbol.c_str());
+                  } else {
+                     // printf(" strange symbol: %s \n",symbol.c_str());
+                  }
                }
-             }
-           } // not vector or scalar destructor
+            }
          }
       }
-      else if (pSymbolTable->SectionNumber
-               == IMAGE_SYM_UNDEFINED && !pSymbolTable->Type && 0)
-        {
-        /*
+      else if (pSymbolTable->SectionNumber == IMAGE_SYM_UNDEFINED &&
+               !pSymbolTable->Type && 0) {
+         /*
          *    The IMPORT global variable entry points
          */
-        if (pSymbolTable->StorageClass == IMAGE_SYM_CLASS_EXTERNAL)
-          {
-          symbol = stringTable + pSymbolTable->N.Name.Long;
-          while (isspace(symbol[0]))  symbol.erase(0,1);
-          if (symbol[0] == '_')
-            {
-            symbol.erase(0,1);
+         if (pSymbolTable->StorageClass == IMAGE_SYM_CLASS_EXTERNAL) {
+            symbol = stringTable + pSymbolTable->N.Name.Long;
+            while (isspace(symbol[0]))  symbol.erase(0,1);
+            if (symbol[0] == '_') symbol.erase(0,1);
+            if (!fImportFlag) {
+               fImportFlag = 1;
+               fprintf(fout,"IMPORTS \n");
             }
-          if (!fImportFlag)
-            {
-            fImportFlag = 1;
-            fprintf(fout,"IMPORTS \n");
-            }
-          fprintf(fout, "\t%s DATA \n", symbol.c_str()+1);
-          }
-        }
+            fprintf(fout, "\t%s DATA \n", symbol.c_str()+1);
+         }
+      }
 
-     /*
+      /*
       * Take into account any aux symbols
       */
-     i += pSymbolTable->NumberOfAuxSymbols;
-     pSymbolTable += pSymbolTable->NumberOfAuxSymbols;
-     pSymbolTable++;
+      i += pSymbolTable->NumberOfAuxSymbols;
+      pSymbolTable += pSymbolTable->NumberOfAuxSymbols;
+      pSymbolTable++;
    }
 }
 
@@ -332,10 +316,8 @@ DumpObjFile(PIMAGE_FILE_HEADER pImageFileHeader, FILE *fout)
    int haveExports = HaveExportedObjects(pImageFileHeader,
                                          PCOFFSectionHeaders, fout);
    if (!haveExports)
-     {
-     DumpExternalsObjects(PCOFFSymbolTable, PCOFFSectionHeaders,
-                          fout, COFFSymbolCount);
-     }
+       DumpExternalsObjects(PCOFFSymbolTable, PCOFFSectionHeaders,
+                            fout, COFFSymbolCount);
 }
 
 /*
@@ -358,11 +340,10 @@ DumpFile(const char* filename, FILE *fout)
                        GENERIC_READ, FILE_SHARE_READ, NULL,
       OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 
-   if (hFile == INVALID_HANDLE_VALUE)
-     {
-     fprintf(stderr, "Couldn't open file [%s] with CreateFile()\n", filename);
-     return;
-     }
+   if (hFile == INVALID_HANDLE_VALUE) {
+      fprintf(stderr, "Couldn't open file [%s] with CreateFile()\n", filename);
+      return;
+   }
 
    hFileMapping = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
    if (hFileMapping == 0) {
@@ -380,17 +361,16 @@ DumpFile(const char* filename, FILE *fout)
    }
 
    dosHeader = (PIMAGE_DOS_HEADER)lpFileBase;
-   if (dosHeader->e_magic == IMAGE_DOS_SIGNATURE)
-     {
-     fprintf(stderr, "File is an executable.  I don't dump those.\n");
-     return;
-     }
+   if (dosHeader->e_magic == IMAGE_DOS_SIGNATURE) {
+      fprintf(stderr, "File is an executable.  I don't dump those.\n");
+      return;
+   }
    /* Does it look like a i386 COFF OBJ file??? */
    else if (
-     ((dosHeader->e_magic == IMAGE_FILE_MACHINE_I386)
-      || (dosHeader->e_magic == IMAGE_FILE_MACHINE_AMD64))
-     && (dosHeader->e_sp == 0)
-     ) {
+           ((dosHeader->e_magic == IMAGE_FILE_MACHINE_I386) ||
+            (dosHeader->e_magic == IMAGE_FILE_MACHINE_AMD64))
+           && (dosHeader->e_sp == 0)
+           ) {
       /*
       * The two tests above aren't what they look like.  They're
       * really checking for IMAGE_FILE_HEADER.Machine == i386 (0x14C)

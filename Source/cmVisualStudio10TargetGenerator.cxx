@@ -2465,8 +2465,9 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
     linkOptions.AppendFlag("IgnoreSpecificDefaultLibraries",
                            "%(IgnoreSpecificDefaultLibraries)");
     }
-  if(this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
-     && this->Target->GetType() == cmTarget::SHARED_LIBRARY)
+
+  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
     const char *autodef = this->Target->GetProperty(autodef_prop);
@@ -2475,6 +2476,7 @@ cmVisualStudio10TargetGenerator::ComputeLinkOptions(std::string const& config)
       linkOptions.AddFlag("ModuleDefinitionFile", "$(IntDir)/exportall.def");
       }
     }
+
   this->LinkOptions[config] = pOptions.release();
   return true;
 }
@@ -2623,8 +2625,8 @@ void
 cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
 {
   bool addedPrelink = false;
-  if(this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS")
-     && this->Target->GetType() == cmTarget::SHARED_LIBRARY)
+  if (this->Target->GetType() == cmTarget::SHARED_LIBRARY &&
+      this->Makefile->IsOn("CMAKE_SUPPORT_WINDOWS_EXPORT_ALL_SYMBOLS"))
     {
     std::string const autodef_prop = "WINDOWS_EXPORT_ALL_SYMBOLS";
     const char *autodef = this->Target->GetProperty(autodef_prop);
@@ -2638,7 +2640,7 @@ cmVisualStudio10TargetGenerator::WriteEvents(std::string const& configName)
       this->WriteEvent("PreLinkEvent", commands, configName);
       }
     }
-  if(!addedPrelink)
+  if (!addedPrelink)
     {
     this->WriteEvent("PreLinkEvent",
                      this->Target->GetPreLinkCommands(), configName);
