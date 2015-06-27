@@ -23,4 +23,4 @@ if(WIN32)
   set(EXE_EXT ".exe")
 endif()
 run_cmake_command(AutoExportRun
-  ${RunCMake_BINARY_DIR}/AutoExport-build/${INTDIR}say${EXE_EXT})
+  ${RunCMake_BINARY_DIR}/AutoExport-build/bin/${INTDIR}say${EXE_EXT})

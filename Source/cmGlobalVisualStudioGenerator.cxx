@@ -893,7 +893,8 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   std::string const& configName)
 {
   std::vector<std::string> outputs;
-  std::string deffile = "$(IntDir)/exportall.def";
+  std::string deffile = gt->ObjectDirectory;
+  deffile += "/exportall.def";
   outputs.push_back(deffile);
   std::vector<std::string> empty;
   std::vector<cmSourceFile const*> objectSources;
@@ -914,8 +915,11 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   cmdl.push_back("-E");
   cmdl.push_back("__create_def");
   cmdl.push_back(deffile);
-  std::string objs_file = gt->Target->GetName();
-  objs_file += ".dir/" + configName;
+  std::string obj_dir_expanded = obj_dir;
+  cmSystemTools::ReplaceString(obj_dir_expanded,
+                               this->GetCMakeCFGIntDir(),
+                               configName.c_str());
+  std::string objs_file = obj_dir_expanded;
   cmSystemTools::MakeDirectory(objs_file.c_str());
   objs_file += "/objects.txt";
   cmdl.push_back(objs_file);
