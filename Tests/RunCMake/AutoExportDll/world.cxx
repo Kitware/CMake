@@ -1,6 +1,6 @@
-#include <iostream>
+#include "stdio.h"
 
 void world()
 {
-  std::cout << "world";
+  printf("world");
 }
