@@ -1,4 +1,4 @@
-#include <iostream>
+#include <stdio.h>
 #include "hello.h"
 int Hello::Data = 0;
 void Hello::real()
@@ -7,7 +7,7 @@ void Hello::real()
 }
 void hello()
 {
-  std::cout << "hello";
+  printf("hello");
 }
 void Hello::operator delete[](void*) {};
 void Hello::operator delete(void*) {};
