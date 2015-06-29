@@ -13,6 +13,7 @@
 #include "cmGlobalVisualStudioGenerator.h"
 
 #include "cmCallVisualStudioMacro.h"
+#include "cmGeneratedFileStream.h"
 #include "cmGeneratorTarget.h"
 #include "cmLocalVisualStudioGenerator.h"
 #include "cmMakefile.h"
@@ -923,7 +924,7 @@ void cmGlobalVisualStudioGenerator::AddSymbolExportCommand(
   cmSystemTools::MakeDirectory(objs_file.c_str());
   objs_file += "/objects.txt";
   cmdl.push_back(objs_file);
-  std::ofstream fout(objs_file.c_str());
+  cmGeneratedFileStream fout(objs_file.c_str());
   if(!fout)
     {
     cmSystemTools::Error("could not open ", objs_file.c_str());

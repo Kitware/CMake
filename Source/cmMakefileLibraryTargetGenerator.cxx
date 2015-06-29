@@ -591,7 +591,7 @@ void cmMakefileLibraryTargetGenerator::WriteLibraryRules
                            cmLocalGenerator::SHELL);
       real_link_commands.push_back(cmd);
       // create a list of obj files for the -E __create_def to read
-      std::ofstream fout(objlist_file.c_str());
+      cmGeneratedFileStream fout(objlist_file.c_str());
       for(std::vector<std::string>::const_iterator i = this->Objects.begin();
           i != this->Objects.end(); ++i)
         {
