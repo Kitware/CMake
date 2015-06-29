@@ -1,6 +1,8 @@
 #include <windows.h>
 #include <stdio.h>
 
+extern int lib();
+
 struct x
 {
   const char *txt;
@@ -76,5 +78,5 @@ int main(int argc, char** argv)
       }
     }
 
-  return ret;
+  return ret + lib();
 }
