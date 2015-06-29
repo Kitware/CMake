@@ -55,7 +55,7 @@
 # returning an exit code can be used as well (0 indicating a success).
 #
 # Module Input Variables
-# ----------------------
+# ^^^^^^^^^^^^^^^^^^^^^^
 #
 # Users or projects may set the following variables to configure the module
 # behaviour:
@@ -69,10 +69,10 @@
 #   versions.
 #
 # Variables defined by the module
-# -------------------------------
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Result variables
-# ^^^^^^^^^^^^^^^^
+# """"""""""""""""
 #
 # ``Matlab_FOUND``
 #   ``TRUE`` if the Matlab installation is found, ``FALSE``
@@ -100,7 +100,7 @@
 #   Available only if the component ``MEX_COMPILER`` is asked
 #
 # Cached variables
-# ^^^^^^^^^^^^^^^^
+# """"""""""""""""
 #
 # ``Matlab_MEX_EXTENSION``
 #   the extension of the mex files for the current platform (given by Matlab).
@@ -109,7 +109,7 @@
 #   is changed by the user, the result variables are recomputed.
 #
 # Provided macros
-# ---------------
+# ^^^^^^^^^^^^^^^
 #
 # :command:`matlab_get_version_from_release_name`
 #   returns the version from the release name
@@ -117,7 +117,7 @@
 #   returns the release name from the Matlab version
 #
 # Provided functions
-# ------------------
+# ^^^^^^^^^^^^^^^^^^
 #
 # :command:`matlab_add_mex`
 #   adds a target compiling a MEX file.
@@ -139,7 +139,7 @@
 #
 #
 # Known issues
-# ------------
+# ^^^^^^^^^^^^
 #
 # **Symbol clash in a MEX target**
 #   By default, every symbols inside a MEX
@@ -166,7 +166,7 @@
 #
 #
 # Reference
-# --------------
+# ^^^^^^^^^
 #
 # .. variable:: Matlab_ROOT_DIR
 #
