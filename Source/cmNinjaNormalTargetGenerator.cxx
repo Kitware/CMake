@@ -648,7 +648,7 @@ void cmNinjaNormalTargetGenerator::WriteLinkStatement()
                                 cmLocalGenerator::SHELL);
       preLinkCmdLines.push_back(cmd);
       // create a list of obj files for the -E __create_def to read
-      std::ofstream fout(obj_list_file.c_str());
+      cmGeneratedFileStream fout(obj_list_file.c_str());
       for(cmNinjaDeps::iterator i=objs.begin(); i != objs.end(); ++i)
         {
         fout << *i << "\n";
