@@ -3,5 +3,3 @@
 Call Stack \(most recent call first\):
   DetermineFail.cmake:[0-9]+ \(enable_language\)
   CMakeLists.txt:[0-9]+ \(include\)
-+
-CMake Error: CMAKE_Fail_COMPILER not set, after EnableLanguage$
