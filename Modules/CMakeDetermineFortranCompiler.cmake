@@ -127,6 +127,14 @@ if(NOT CMAKE_Fortran_COMPILER_ID_RUN)
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_FLAGS_NAG "-V")
   set(CMAKE_Fortran_COMPILER_ID_VENDOR_REGEX_NAG "NAG Fortran Compiler")
 
+  # Match the link line from xcodebuild output of the form
+  #  Ld ...
+  #      ...
+  #      /path/to/cc ...CompilerIdFortran/...
+  # to extract the compiler front-end for the language.
+  set(CMAKE_Fortran_COMPILER_ID_TOOL_MATCH_REGEX "\nLd[^\n]*(\n[ \t]+[^\n]*)*\n[ \t]+([^ \t\r\n]+)[^\r\n]*-o[^\r\n]*CompilerIdFortran/(\\./)?(CompilerIdFortran.xctest/)?CompilerIdFortran[ \t\n\\\"]")
+  set(CMAKE_Fortran_COMPILER_ID_TOOL_MATCH_INDEX 2)
+
   set(_version_info "")
   foreach(m MAJOR MINOR PATCH TWEAK)
     set(_COMP "_${m}")
