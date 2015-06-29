@@ -71,31 +71,12 @@
 *----------------------------------------------------------------------
 */
 
-static char sccsid[] = "@(#) winDumpExts.c 1.2 95/10/03 15:27:34";
-
 #include <cmsys/Encoding.hxx>
 #include <windows.h>
 #include <stdio.h>
 #include <string>
 #include <fstream>
 #include <iostream>
-
-/*
-*  The names of the first group of possible symbol table storage classes
-*/
-char * SzStorageClass1[] = {
-   "NULL","AUTOMATIC","EXTERNAL","STATIC","REGISTER","EXTERNAL_DEF","LABEL",
-   "UNDEFINED_LABEL","MEMBER_OF_STRUCT","ARGUMENT","STRUCT_TAG",
-   "MEMBER_OF_UNION","UNION_TAG","TYPE_DEFINITION","UNDEFINED_STATIC",
-   "ENUM_TAG","MEMBER_OF_ENUM","REGISTER_PARAM","BIT_FIELD"
-};
-
-/*
-* The names of the second group of possible symbol table storage classes
-*/
-char * SzStorageClass2[] = {
-   "BLOCK","FUNCTION","END_OF_STRUCT","FILE","SECTION","WEAK_EXTERNAL"
-};
 
 /*
 + * Utility func, strstr with size
@@ -110,7 +91,7 @@ const char* StrNStr(const char* start, const char* find, size_t &size) {
    }
    len = strlen(find);
 
-   while (hint = (const char*) memchr(start, find[0], size-len+1)) {
+   while ((hint = (const char*) memchr(start, find[0], size-len+1))) {
       size -= (hint - start);
       if (!strncmp(hint, find, len))
          return hint;
@@ -131,7 +112,7 @@ const char* StrNStr(const char* start, const char* find, size_t &size) {
  */
 int
 HaveExportedObjects(PIMAGE_FILE_HEADER pImageFileHeader,
-                    PIMAGE_SECTION_HEADER pSectionHeaders, FILE *fout)
+                    PIMAGE_SECTION_HEADER pSectionHeaders)
 {
     static int fImportFlag = 0;  /*  The status is nor defined yet */
     WORD i;
@@ -314,7 +295,7 @@ DumpObjFile(PIMAGE_FILE_HEADER pImageFileHeader, FILE *fout)
 
 
    int haveExports = HaveExportedObjects(pImageFileHeader,
-                                         PCOFFSectionHeaders, fout);
+                                         PCOFFSectionHeaders);
    if (!haveExports)
        DumpExternalsObjects(PCOFFSymbolTable, PCOFFSectionHeaders,
                             fout, COFFSymbolCount);
