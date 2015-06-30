@@ -460,11 +460,13 @@ cmMakefile::IncludeScope::IncludeScope(cmMakefile* mf,
   // The included file cannot pop our policy scope.
   this->Makefile->PushPolicyBarrier();
   this->Makefile->ListFileStack.push_back(filenametoread);
+  this->Makefile->PushFunctionBlockerBarrier();
 }
 
 //----------------------------------------------------------------------------
 cmMakefile::IncludeScope::~IncludeScope()
 {
+  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
   // Enforce matching policy scopes inside the included file.
   this->Makefile->PopPolicyBarrier(this->ReportError);
 
@@ -532,26 +534,6 @@ void cmMakefile::IncludeScope::EnforceCMP0011()
     }
 }
 
-bool cmMakefile::ProcessBuildsystemFile(const char* filename)
-{
-  this->AddDefinition("CMAKE_PARENT_LIST_FILE", filename);
-  std::string curSrc = this->GetCurrentSourceDirectory();
-
-  this->ListFileStack.push_back(filename);
-
-  cmListFile listFile;
-  if (!listFile.ParseFile(filename, curSrc == this->GetHomeDirectory(), this))
-    {
-    return false;
-    }
-
-  this->PushPolicyBarrier();
-  this->ReadListFile(listFile, filename);
-  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
-  this->EnforceDirectoryLevelRules();
-  return true;
-}
-
 bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
 {
   this->AddDefinition("CMAKE_PARENT_LIST_FILE",
@@ -565,7 +547,6 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   cmListFile listFile;
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
     {
-    incScope.Quiet();
     return false;
     }
   this->ReadListFile(listFile, filenametoread);
@@ -576,13 +557,37 @@ bool cmMakefile::ReadDependentFile(const char* filename, bool noPolicyScope)
   return true;
 }
 
+class cmMakefile::ListFileScope
+{
+public:
+  ListFileScope(cmMakefile* mf, std::string const& filenametoread)
+    : Makefile(mf), ReportError(true)
+  {
+    this->Makefile->ListFileStack.push_back(filenametoread);
+    this->Makefile->PushPolicyBarrier();
+    this->Makefile->PushFunctionBlockerBarrier();
+  }
+
+  ~ListFileScope()
+  {
+    this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
+    this->Makefile->PopPolicyBarrier(this->ReportError);
+    this->Makefile->ListFileStack.pop_back();
+  }
+
+  void Quiet() { this->ReportError = false; }
+private:
+  cmMakefile* Makefile;
+  bool ReportError;
+};
+
 bool cmMakefile::ReadListFile(const char* filename)
 {
   std::string filenametoread =
     cmSystemTools::CollapseFullPath(filename,
                                     this->GetCurrentSourceDirectory());
 
-  this->ListFileStack.push_back(filenametoread);
+  ListFileScope scope(this, filenametoread);
 
   cmListFile listFile;
   if (!listFile.ParseFile(filenametoread.c_str(), false, this))
@@ -590,10 +595,11 @@ bool cmMakefile::ReadListFile(const char* filename)
     return false;
     }
 
-  this->PushPolicyBarrier();
   this->ReadListFile(listFile, filenametoread);
-  this->PopPolicyBarrier(!cmSystemTools::GetFatalErrorOccured());
-  this->ListFileStack.pop_back();
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    scope.Quiet();
+    }
   return true;
 }
 
@@ -616,9 +622,6 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_FILE");
   this->MarkVariableAsUsed("CMAKE_CURRENT_LIST_DIR");
 
-  // Enforce balanced blocks (if/endif, function/endfunction, etc.).
-  LexicalPushPop lexScope(this);
-
   // Run the parsed commands.
   const size_t numberFunctions = listFile.Functions.size();
   for(size_t i =0; i < numberFunctions; ++i)
@@ -627,8 +630,6 @@ void cmMakefile::ReadListFile(cmListFile const& listFile,
     this->ExecuteCommand(listFile.Functions[i],status);
     if(cmSystemTools::GetFatalErrorOccured())
       {
-      // Exit early due to error.
-      lexScope.Quiet();
       break;
       }
     if(status.GetReturnInvoked())
@@ -1625,17 +1626,21 @@ bool cmMakefile::IsRootMakefile() const
   return !this->StateSnapshot.GetBuildsystemDirectoryParent().IsValid();
 }
 
-//----------------------------------------------------------------------------
-class cmMakefileCurrent
+class cmMakefile::BuildsystemFileScope
 {
-  cmGlobalGenerator* GG;
-  cmMakefile* MF;
-  cmState::Snapshot Snapshot;
 public:
-  cmMakefileCurrent(cmMakefile* mf)
-    {
+  BuildsystemFileScope(cmMakefile* mf)
+    : Makefile(mf), ReportError(true)
+  {
+    std::string currentStart =
+        this->Makefile->StateSnapshot.GetCurrentSourceDirectory();
+    currentStart += "/CMakeLists.txt";
+    this->Makefile->ListFileStack.push_back(currentStart);
+    this->Makefile->PushPolicyBarrier();
+    this->Makefile->PushFunctionBlockerBarrier();
+
     this->GG = mf->GetGlobalGenerator();
-    this->MF = this->GG->GetCurrentMakefile();
+    this->CurrentMakefile = this->GG->GetCurrentMakefile();
     this->Snapshot = this->GG->GetCMakeInstance()->GetCurrentSnapshot();
     this->GG->GetCMakeInstance()->SetCurrentSnapshot(
           this->GG->GetCMakeInstance()->GetCurrentSnapshot());
@@ -1643,21 +1648,32 @@ public:
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PushFileScope();
 #endif
-    }
-  ~cmMakefileCurrent()
-    {
+  }
+
+  ~BuildsystemFileScope()
+  {
+    this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
+    this->Makefile->PopPolicyBarrier(this->ReportError);
 #if defined(CMAKE_BUILD_WITH_CMAKE)
     this->GG->GetFileLockPool().PopFileScope();
 #endif
-    this->GG->SetCurrentMakefile(this->MF);
+    this->GG->SetCurrentMakefile(this->CurrentMakefile);
     this->GG->GetCMakeInstance()->SetCurrentSnapshot(this->Snapshot);
-    }
+  }
+
+  void Quiet() { this->ReportError = false; }
+private:
+  cmMakefile* Makefile;
+  cmGlobalGenerator* GG;
+  cmMakefile* CurrentMakefile;
+  cmState::Snapshot Snapshot;
+  bool ReportError;
 };
 
 //----------------------------------------------------------------------------
 void cmMakefile::Configure()
 {
-  cmMakefileCurrent cmf(this);
+  BuildsystemFileScope scope(this);
 
   // make sure the CMakeFiles dir is there
   std::string filesDir = this->StateSnapshot.GetCurrentBinaryDirectory();
@@ -1667,7 +1683,19 @@ void cmMakefile::Configure()
   std::string currentStart = this->StateSnapshot.GetCurrentSourceDirectory();
   currentStart += "/CMakeLists.txt";
   assert(cmSystemTools::FileExists(currentStart.c_str(), true));
-  this->ProcessBuildsystemFile(currentStart.c_str());
+  this->AddDefinition("CMAKE_PARENT_LIST_FILE", currentStart.c_str());
+
+  cmListFile listFile;
+  if (!listFile.ParseFile(currentStart.c_str(), this->IsRootMakefile(), this))
+    {
+    this->SetConfigured();
+    return;
+    }
+  this->ReadListFile(listFile, currentStart);
+  if(cmSystemTools::GetFatalErrorOccured())
+    {
+    scope.Quiet();
+    }
 
    // at the end handle any old style subdirs
   std::vector<cmMakefile*> subdirs = this->UnConfiguredDirectories;
@@ -3475,19 +3503,6 @@ cmMakefile::RemoveFunctionBlocker(cmFunctionBlocker* fb,
     }
 
   return cmsys::auto_ptr<cmFunctionBlocker>();
-}
-
-//----------------------------------------------------------------------------
-cmMakefile::LexicalPushPop::LexicalPushPop(cmMakefile* mf):
-  Makefile(mf), ReportError(true)
-{
-  this->Makefile->PushFunctionBlockerBarrier();
-}
-
-//----------------------------------------------------------------------------
-cmMakefile::LexicalPushPop::~LexicalPushPop()
-{
-  this->Makefile->PopFunctionBlockerBarrier(this->ReportError);
 }
 
 const char* cmMakefile::GetHomeDirectory() const
