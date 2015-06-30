@@ -91,7 +91,8 @@ public:
   class TargetSet: public std::set<cmTarget const*> {};
   struct TargetCompare
   {
-    bool operator()(cmTarget const* l, cmTarget const* r) const;
+    bool operator()(cmGeneratorTarget const* l,
+                    cmGeneratorTarget const* r) const;
   };
   class OrderedTargetDependSet;
 

@@ -804,7 +804,7 @@ cmGlobalUnixMakefileGenerator3
       lg->AppendEcho(commands, "Built target " + name,
         cmLocalUnixMakefileGenerator3::EchoNormal, &progress);
 
-      this->AppendGlobalTargetDepends(depends,*gtarget->Target);
+      this->AppendGlobalTargetDepends(depends, gtarget);
       lg->WriteMakeRule(ruleFileStream, "All Build rule for target.",
                         localName, depends, commands, true);
 
@@ -830,9 +830,9 @@ cmGlobalUnixMakefileGenerator3
                               cmLocalGenerator::FULL,
                               cmLocalGenerator::SHELL);
       //
-      std::set<cmTarget const*> emitted;
+      std::set<cmGeneratorTarget const*> emitted;
       progCmd << " "
-              << this->CountProgressMarksInTarget(gtarget->Target, emitted);
+              << this->CountProgressMarksInTarget(gtarget, emitted);
       commands.push_back(progCmd.str());
       }
       std::string tmp = cmake::GetCMakeFilesDirectoryPostSlash();
@@ -908,14 +908,14 @@ cmGlobalUnixMakefileGenerator3
 //----------------------------------------------------------------------------
 size_t
 cmGlobalUnixMakefileGenerator3
-::CountProgressMarksInTarget(cmTarget const* target,
-                             std::set<cmTarget const*>& emitted)
+::CountProgressMarksInTarget(cmGeneratorTarget const* target,
+                             std::set<cmGeneratorTarget const*>& emitted)
 {
   size_t count = 0;
   if(emitted.insert(target).second)
     {
-    count = this->ProgressMap[target].Marks.size();
-    TargetDependSet const& depends = this->GetTargetDirectDepends(*target);
+    count = this->ProgressMap[target->Target].Marks.size();
+    TargetDependSet const& depends = this->GetTargetDirectDepends(target);
     for(TargetDependSet::const_iterator di = depends.begin();
         di != depends.end(); ++di)
       {
@@ -935,10 +935,10 @@ cmGlobalUnixMakefileGenerator3
 ::CountProgressMarksInAll(cmLocalUnixMakefileGenerator3* lg)
 {
   size_t count = 0;
-  std::set<cmTarget const*> emitted;
-  std::set<cmTarget const*> const& targets
+  std::set<cmGeneratorTarget const*> emitted;
+  std::set<cmGeneratorTarget const*> const& targets
                                         = this->LocalGeneratorToTargetMap[lg];
-  for(std::set<cmTarget const*>::const_iterator t = targets.begin();
+  for(std::set<cmGeneratorTarget const*>::const_iterator t = targets.begin();
       t != targets.end(); ++t)
     {
     count += this->CountProgressMarksInTarget(*t, emitted);
@@ -987,22 +987,21 @@ cmGlobalUnixMakefileGenerator3::TargetProgress
 void
 cmGlobalUnixMakefileGenerator3
 ::AppendGlobalTargetDepends(std::vector<std::string>& depends,
-                            cmTarget& target)
+                            cmGeneratorTarget* target)
 {
   TargetDependSet const& depends_set = this->GetTargetDirectDepends(target);
   for(TargetDependSet::const_iterator i = depends_set.begin();
       i != depends_set.end(); ++i)
     {
     // Create the target-level dependency.
-    cmTarget const* dep = *i;
+    cmGeneratorTarget const* dep = *i;
     if (dep->GetType() == cmTarget::INTERFACE_LIBRARY)
       {
       continue;
       }
     cmLocalUnixMakefileGenerator3* lg3 =
-      static_cast<cmLocalUnixMakefileGenerator3*>
-      (dep->GetMakefile()->GetLocalGenerator());
-    std::string tgtName = lg3->GetRelativeTargetDirectory(*dep);
+      static_cast<cmLocalUnixMakefileGenerator3*>(dep->GetLocalGenerator());
+    std::string tgtName = lg3->GetRelativeTargetDirectory(*(*dep).Target);
     tgtName += "/all";
     depends.push_back(tgtName);
     }
