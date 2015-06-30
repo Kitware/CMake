@@ -564,6 +564,10 @@ cmGlobalGenerator::EnableLanguage(std::vector<std::string>const& languages,
         cmSystemTools::Error("Could not find cmake module file: ",
                              determineCompiler.c_str());
         }
+      if (cmSystemTools::GetFatalErrorOccured())
+        {
+        return;
+        }
       needTestLanguage[lang] = true;
       // Some generators like visual studio should not use the env variables
       // So the global generator can specify that in this variable
