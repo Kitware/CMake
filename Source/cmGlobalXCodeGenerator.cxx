@@ -2895,10 +2895,11 @@ void cmGlobalXCodeGenerator
     }
 
   // Add dependencies on other CMake targets.
-  TargetDependSet const& deps = this->GetTargetDirectDepends(*cmtarget);
+  cmGeneratorTarget* gt = this->GetGeneratorTarget(cmtarget);
+  TargetDependSet const& deps = this->GetTargetDirectDepends(gt);
   for(TargetDependSet::const_iterator i = deps.begin(); i != deps.end(); ++i)
     {
-    if(cmXCodeObject* dptarget = this->FindXCodeTarget(*i))
+    if(cmXCodeObject* dptarget = this->FindXCodeTarget((*i)->Target))
       {
       this->AddDependTarget(target, dptarget);
       }
