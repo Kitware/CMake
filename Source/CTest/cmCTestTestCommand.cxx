@@ -26,6 +26,7 @@ cmCTestTestCommand::cmCTestTestCommand()
   this->Arguments[ctt_PARALLEL_LEVEL] = "PARALLEL_LEVEL";
   this->Arguments[ctt_SCHEDULE_RANDOM] = "SCHEDULE_RANDOM";
   this->Arguments[ctt_STOP_TIME] = "STOP_TIME";
+  this->Arguments[ctt_TEST_LOAD] = "TEST_LOAD";
   this->Arguments[ctt_LAST] = 0;
   this->Last = ctt_LAST;
 }
@@ -103,6 +104,38 @@ cmCTestGenericHandler* cmCTestTestCommand::InitializeHandler()
     {
     this->CTest->SetStopTime(this->Values[ctt_STOP_TIME]);
     }
+
+  // Test load is determined by: TEST_LOAD argument,
+  // or CTEST_TEST_LOAD script variable, or ctest --test-load
+  // command line argument... in that order.
+  unsigned long testLoad;
+  const char* ctestTestLoad
+    = this->Makefile->GetDefinition("CTEST_TEST_LOAD");
+  if(this->Values[ctt_TEST_LOAD] && *this->Values[ctt_TEST_LOAD])
+    {
+    if (!cmSystemTools::StringToULong(this->Values[ctt_TEST_LOAD], &testLoad))
+      {
+      testLoad = 0;
+      cmCTestLog(this->CTest, WARNING, "Invalid value for 'TEST_LOAD' : "
+          << this->Values[ctt_TEST_LOAD] << std::endl);
+      }
+    }
+  else if(ctestTestLoad && *ctestTestLoad)
+    {
+    if (!cmSystemTools::StringToULong(ctestTestLoad, &testLoad))
+      {
+      testLoad = 0;
+      cmCTestLog(this->CTest, WARNING,
+        "Invalid value for 'CTEST_TEST_LOAD' : " <<
+        ctestTestLoad << std::endl);
+      }
+    }
+  else
+    {
+    testLoad = this->CTest->GetTestLoad();
+    }
+  handler->SetTestLoad(testLoad);
+
   handler->SetQuiet(this->Quiet);
   return handler;
 }

@@ -66,6 +66,11 @@ function(run_cmake test)
   else()
     set(actual_stderr_var actual_stderr)
   endif()
+  if(DEFINED RunCMake_TEST_TIMEOUT)
+    set(maybe_timeout TIMEOUT ${RunCMake_TEST_TIMEOUT})
+  else()
+    set(maybe_timeout "")
+  endif()
   if(RunCMake_TEST_COMMAND)
     execute_process(
       COMMAND ${RunCMake_TEST_COMMAND}
@@ -73,6 +78,7 @@ function(run_cmake test)
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
+      ${maybe_timeout}
       )
   else()
     execute_process(
@@ -87,6 +93,7 @@ function(run_cmake test)
       OUTPUT_VARIABLE actual_stdout
       ERROR_VARIABLE ${actual_stderr_var}
       RESULT_VARIABLE actual_result
+      ${maybe_timeout}
       )
   endif()
   set(msg "")

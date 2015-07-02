@@ -469,6 +469,7 @@ public:
 
   /** Convert string to long. Expected that the whole string is an integer */
   static bool StringToLong(const char* str, long* value);
+  static bool StringToULong(const char* str, unsigned long* value);
 
 #ifdef _WIN32
   struct WindowsFileRetry
