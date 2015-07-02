@@ -82,7 +82,7 @@ If you have found a bug:
 
 1. If you have a patch, please read the `CONTRIBUTING.rst`_ document.
 
-2. Otherwise, please join the the `CMake Users List`_ and ask about
+2. Otherwise, please join the `CMake Users List`_ and ask about
    the expected and observed behaviors to determine if it is really
    a bug.
 
